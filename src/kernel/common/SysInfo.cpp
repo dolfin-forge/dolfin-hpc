@@ -1,33 +1,87 @@
-#include "utils.h"
-#include <dolfin/Display.h>
-#include "SysInfo.h"
+#include <stdio.h>
+#include <sys/utsname.h>
+#include <stdlib.h>
+#include <time.h>
+#include <iostream>
+#include <dolfin/utils.h>
+#include <dolfin/constants.h>
+#include <dolfin/sysinfo.h>
+
+using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-SysInfo::SysInfo()
+void dolfin::sysinfo()
 {
-  Update();
-}
-//-----------------------------------------------------------------------------
-SysInfo::~SysInfo()
-{
+  char string[DOLFIN_WORDLENGTH];
 
-}
-//-----------------------------------------------------------------------------
-void SysInfo::Update()
-{
-  env_get_user(user);
-  env_get_time(time);
-  env_get_host(host);
-  env_get_mach(mach);
-  env_get_name(name);
-  env_get_vers(vers);
+  cout << "- System info:" << endl;
   
-  display->Message(10,"SysInfo: Reading system info:");
-  display->Message(10,"  user    = %s",user);
-  display->Message(10,"  time    = %s",time);
-  display->Message(10,"  host    = %s",host);
-  display->Message(10,"  machine = %s",mach);
-  display->Message(10,"  sysname = %s",name);
-  display->Message(10,"  version = %s",vers);
+  sysinfo_user(string);
+  cout << "- User:    " << string << endl;
+  
+  sysinfo_date(string);
+  cout << "- Date:    " << string << endl;
+  
+  sysinfo_host(string);
+  cout << "- Host:    " << string << endl;
+  
+  sysinfo_mach(string);
+  cout << "- Machine: " << string << endl;
+  
+  sysinfo_name(string);
+  cout << "- System:  " << string << endl;
+  
+  sysinfo_vers(string);
+  cout << "- Version: " << string << endl;
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_user(char* string)
+{
+  sprintf(string,"%s",getenv("USER"));
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_date(char* string)
+{
+  time_t t;
+  time(&t);
+
+  sprintf(string,"%s",ctime(&t));
+  remove_newline(string);
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_host(char* string)
+{
+  struct utsname buf;
+  if ( uname(&buf) == 0 )
+	 sprintf(string,"%s",buf.nodename);
+  else
+	 sprintf(string,"<unknown>");
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_mach(char* string)
+{
+  struct utsname buf;
+  if ( uname(&buf) == 0 )
+	 sprintf(string,"%s",buf.machine);
+  else
+	 sprintf(string,"<unknown>");
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_name(char* string)
+{
+  struct utsname buf;
+  if ( uname(&buf) == 0 )
+	 sprintf(string,"%s",buf.sysname);
+  else
+	 sprintf(string,"<unknown>");
+}
+//-----------------------------------------------------------------------------
+void dolfin::sysinfo_vers(char* string)
+{
+  struct utsname buf;
+  if ( uname(&buf) == 0 )
+	 sprintf(string,"%s",buf.release);
+  else
+	 sprintf(string,"<unknown>");
 }
 //-----------------------------------------------------------------------------

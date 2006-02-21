@@ -2,8 +2,8 @@
 // For further information, go to http://www/fenics.org/ffc/.
 // Licensed under the GNU GPL Version 2.
 
-#ifndef __P1TET_H
-#define __P1TET_H
+#ifndef __P2TRI_H
+#define __P2TRI_H
 
 #include <dolfin/Mesh.h>
 #include <dolfin/Cell.h>
@@ -16,18 +16,18 @@
 namespace dolfin
 {
   
-  class P1tet : public dolfin::FiniteElement
+  class P2tri : public dolfin::FiniteElement
   {
   public:
   
-    P1tet() : dolfin::FiniteElement(), tensordims(0), subelements(0)
+    P2tri() : dolfin::FiniteElement(), tensordims(0), subelements(0)
     {
       // Element is scalar, don't need to initialize tensordims
   
       // Element is simple, don't need to initialize subelements
     }
   
-    ~P1tet()
+    ~P2tri()
     {
       if ( tensordims ) delete [] tensordims;
       if ( subelements )
@@ -40,12 +40,12 @@ namespace dolfin
   
     inline unsigned int spacedim() const
     {
-      return 4;
+      return 6;
     }
   
     inline unsigned int shapedim() const
     {
-      return 3;
+      return 2;
     }
   
     inline unsigned int tensordim(unsigned int i) const
@@ -69,19 +69,26 @@ namespace dolfin
       nodes[0] = cell.vertexID(0);
       nodes[1] = cell.vertexID(1);
       nodes[2] = cell.vertexID(2);
-      nodes[3] = cell.vertexID(3);
+      int offset = mesh.numVertices();
+      nodes[3] = offset + cell.edgeID(0);
+      nodes[4] = offset + cell.edgeID(1);
+      nodes[5] = offset + cell.edgeID(2);
     }
   
     void pointmap(Point points[], unsigned int components[], const AffineMap& map) const
     {
-      points[0] = map(0.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00);
-      points[1] = map(1.000000000000000e+00, 0.000000000000000e+00, 0.000000000000000e+00);
-      points[2] = map(0.000000000000000e+00, 1.000000000000000e+00, 0.000000000000000e+00);
-      points[3] = map(0.000000000000000e+00, 0.000000000000000e+00, 1.000000000000000e+00);
+      points[0] = map(0.000000000000000e+00, 0.000000000000000e+00);
+      points[1] = map(1.000000000000000e+00, 0.000000000000000e+00);
+      points[2] = map(0.000000000000000e+00, 1.000000000000000e+00);
+      points[3] = map(5.000000000000000e-01, 5.000000000000000e-01);
+      points[4] = map(0.000000000000000e+00, 5.000000000000000e-01);
+      points[5] = map(5.000000000000000e-01, 0.000000000000000e+00);
       components[0] = 0;
       components[1] = 0;
       components[2] = 0;
       components[3] = 0;
+      components[4] = 0;
+      components[5] = 0;
     }
   
     void vertexeval(real values[], unsigned int vertex, const real x[], const Mesh& mesh) const
@@ -102,7 +109,7 @@ namespace dolfin
   
     FiniteElementSpec spec() const
     {
-      FiniteElementSpec s("Lagrange", "tetrahedron", 1);
+      FiniteElementSpec s("Lagrange", "triangle", 2);
       return s;
     }
     

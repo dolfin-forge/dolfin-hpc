@@ -1,84 +1,44 @@
-// Copyright (C) 2003 Johan Jansson.
+// Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Anders Logg, 2003-2007.
-//
-// First added:  2003-09-03
-// Last changed: 2007-04-24
+// First added:  2007-08-20
+// Last changed: 2007-08-20
 
-#ifndef __ARRAY_H
-#define __ARRAY_H
-
-#include <iostream>
-
+#ifndef __MINIMAL_ARRAY_H
+#define __MINIMAL_ARRAY_H
 
 #include <dolfin/constants.h>
-#include <vector>
 
 namespace dolfin
 {
 
-  /// Array is a container that provides O(1) access time to elements
-  /// and O(1) memory overhead.  
-  ///
-  /// It is a wrapper for std::vector, so see the STL manual for further
-  /// details: http://www.sgi.com/tech/stl/
-  
-  template <class T>
-  class Array : public std::vector<T>
+  /// The array class is a minimal wrapper for a real-valued array
+  /// that knows its own size. It is not yet another array class;
+  /// it is only intended to be used to pass data through the SWIG
+  /// generated interface. Note that users of this class are always
+  /// responsible for allocating and deallocating data.
+
+  class array
   {
   public:
 
-    /// Create empty array
-    Array() : std::vector<T>() {}
+    /// Constructor
+    array(uint size, real* data) : size(size), data(data) {}
+
+    /// Destructor
+    array() {}
+
+    /// Member access
+    real& operator[] (uint i) { return data[i]; }
+
+    /// Member access (const)
+    const real& operator[] (uint i) const { return data[i]; }
+
+    /// Size of the array
+    uint size;
     
-    /// Create array of given size
-    Array(uint n) : std::vector<T>(n) {}
-
-    /// Create array containing two elements
-    Array(const T& t0, const T& t1)
-    {
-      push_back(t0);
-      push_back(t1);
-    }
-
-    /// Create array containing three elements
-    Array(const T& t0, const T& t1, const T& t2)
-    {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
-    }
-
-    /// Create array containing four elements
-    Array(const T& t0, const T& t1, const T& t2, const T& t3)
-    {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
-      push_back(t3);
-    }
-
-    /// Create array containing five elements
-    Array(const T& t0, const T& t1, const T& t2, const T& t3, const T& t4)
-    {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
-      push_back(t3);
-      push_back(t4);
-    }
-
-    /// Copy constructor
-    Array(const Array<T>& x) : std::vector<T>(x) {}
-
-    /// Assign to all elements in the array
-    const Array& operator=(const T& t)
-    {
-      for (uint i = 0; i < std::vector<T>::size(); i++)
-      (*this)[i] = t;
-      return *this;
-    }
+    /// Array data
+    real* data;
 
   };
 

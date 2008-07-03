@@ -19,19 +19,23 @@
 #include "PETScFactory.h"
 #include <dolfin/main/MPI.h>
 
+#include <dolfin/common/Array.h>
+
+#include <set>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector():
     Variable("x", "a sparse vector"),
-    x(0), is_view(false)
+    x(0), is_view(false), is_ghosted(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(uint N):
     Variable("x", "a sparse vector"), 
-    x(0), is_view(false)
+    x(0), is_view(false), is_ghosted(false)
 {
   // Create PETSc vector
   init(N);
@@ -39,14 +43,14 @@ PETScVector::PETScVector(uint N):
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(Vec x):
     Variable("x", "a vector"),
-    x(x), is_view(true)
+    x(x), is_view(true), is_ghosted(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(const PETScVector& v):
     Variable("x", "a vector"),
-    x(0), is_view(false)
+    x(0), is_view(false), is_ghosted(false)
 {
   *this = v;
 }
@@ -80,15 +84,16 @@ void PETScVector::init(uint N)
   // Create vector
   if (MPI::numProcesses() > 1)
   {
-    dolfin_debug("PETScVector::init(N) - VecCreateMPI");
+    //    dolfin_debug("PETScVector::init(N) - VecCreateMPI");
     VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x);
   }
-  else
+  else {
     VecCreate(PETSC_COMM_SELF, &x);
 
-  VecSetSizes(x, PETSC_DECIDE, N);
-  VecSetFromOptions(x);
+    VecSetSizes(x, PETSC_DECIDE, N);
+    VecSetFromOptions(x);
 
+  }
   // Set all entries to zero
   PetscScalar a = 0.0;
   VecSet(x, a);
@@ -145,14 +150,61 @@ void PETScVector::add(real* values)
 void PETScVector::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
-  VecGetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block);
+
+  if( is_ghosted ) {
+    int  low, high;
+    VecGetOwnershipRange(x, &low, &high);
+
+    Vec xl;
+    VecGhostGetLocalForm(x, &xl);
+
+    int *tmp = new int[m];
+    for(uint i = 0; i < m; i++)
+      if( (int) rows[i] < high && (int) rows[i] >= low) 
+	tmp[i] = rows[i] - low;
+      else  {
+	std::map<const int, int>::const_iterator it = mapping.find(rows[i]);    
+	tmp[i] = it->second;
+      }
+    
+    VecGetValues(xl, static_cast<int>(m), tmp, block);
+    VecGhostRestoreLocalForm(x, &xl);
+    
+    delete[] tmp;
+    
+  }
+  else
+    VecGetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block);
+
 }
 //-----------------------------------------------------------------------------
 void PETScVector::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  VecSetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
-               INSERT_VALUES);
+  if( is_ghosted ) {
+    int  low, high;
+    VecGetOwnershipRange(x, &low, &high);
+
+    Vec xl;
+    VecGhostGetLocalForm(x, &xl);
+
+    int *tmp = new int[m];
+    for(uint i = 0; i < m; i++)
+      if( (int) rows[i] < high && (int) rows[i] >= low) 
+	tmp[i] = rows[i] - low;
+      else  {
+	std::map<const int, int>::const_iterator it = mapping.find(rows[i]);    
+	tmp[i] = it->second;
+      }
+    
+    VecSetValues(xl, static_cast<int>(m), tmp, block, INSERT_VALUES);
+    VecGhostRestoreLocalForm(x, &xl);
+    
+    delete[] tmp;
+  }
+  else
+    VecSetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
+		 INSERT_VALUES);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(const real* block, uint m, const uint* rows)
@@ -164,8 +216,14 @@ void PETScVector::add(const real* block, uint m, const uint* rows)
 //-----------------------------------------------------------------------------
 void PETScVector::apply()
 {
+
   VecAssemblyBegin(x);
   VecAssemblyEnd(x);
+
+  if( is_ghosted ) {
+    VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD);
+  }
 }
 //-----------------------------------------------------------------------------
 void PETScVector::zero()
@@ -206,7 +264,6 @@ const PETScVector& PETScVector::operator= (real a)
   VecSet(x, a);
   return *this; 
 }
-
 //-----------------------------------------------------------------------------
 const PETScVector& PETScVector::operator+= (const GenericVector& x)
 {
@@ -315,6 +372,52 @@ Vec PETScVector::vec() const
   return x;
 }
 //-----------------------------------------------------------------------------
+void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
+  
+  if( is_view )
+    error("Shut her down Scotty, she's sucking mud again!");
+  
+  int local_size, size, low, high;
+  VecGetSize(x, &size);
+  VecGetLocalSize(x, &local_size);
+  VecGetOwnershipRange(x, &low, &high);
+
+
+  int *rows = new int[ local_size ];
+  real *values = new real[ local_size ]; 
+  for(int i = 0; i < local_size; i++)   {
+    rows[i] = low + i;
+    mapping[ low + i ] = i;
+  }
+
+  VecGetValues(x, local_size, rows, values);    
+  VecDestroy(x);
+  
+
+  ghost_indices.clear();
+  int num_ghost = local_size;
+  std::set<uint>::iterator sit;
+  for(sit = indices.begin(); sit != indices.end(); ++sit) 
+    if( *sit < (uint) low || *sit >= (uint) high ) {
+      ghost_indices.push_back((int) *sit);
+      mapping[ (int) *sit ] = num_ghost++;
+    }
+       
+  //  std::sort(ghost_indices.begin(), ghost_indices.end());
+
+  VecCreateGhost(PETSC_COMM_WORLD, local_size, size, (int) ghost_indices.size(),
+		 (const int *) &ghost_indices[0], &x);       
+
+  VecSetValues(x, local_size, rows, values, INSERT_VALUES);
+  apply();
+
+  delete[] rows;
+  delete[] values;
+
+  is_ghosted = true;
+  message("PETScVector now ghosted, HORRAY!");
+}
+//-----------------------------------------------------------------------------
 LinearAlgebraFactory& PETScVector::factory() const
 {
   return PETScFactory::instance();
@@ -326,5 +429,6 @@ LogStream& dolfin::operator<< (LogStream& stream, const PETScVector& x)
   return stream;
 }
 //-----------------------------------------------------------------------------
+
 
 #endif

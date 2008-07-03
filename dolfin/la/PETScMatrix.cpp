@@ -82,7 +82,7 @@ void PETScMatrix::init(uint M, uint N)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 50, PETSC_NULL, 50, PETSC_NULL, &A);
+    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
   }
   else
   {
@@ -108,7 +108,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 50, PETSC_NULL, 50, PETSC_NULL, &A);
+    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
     //MatSetFromOptions(A);
     //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
     //MatZeroEntries(A);
@@ -141,6 +141,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 {
+  /*
   if (dolfin::MPI::numProcesses() > 1)
   {
     uint p = dolfin::MPI::processNumber();
@@ -155,12 +156,13 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
   }
   else
   {
+*/
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint* nzrow = new uint[spattern.size(0)];  
     spattern.numNonZeroPerRow(nzrow);
     init(spattern.size(0), spattern.size(1), nzrow);
     delete [] nzrow;
-  }
+    //  }
 }
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
@@ -207,6 +209,19 @@ void PETScMatrix::add(const real* block,
                       uint n, const uint* cols)
 {
   dolfin_assert(A);
+  /*
+  message("inserting %d x %d block at (%d, %d, %d, %d)  on rank %d %g %g %g %g %g %g %g %g",
+	  m,n, rows[0], cols[0], rows[1], cols[1], MPI::processNumber(),
+	  block[0],
+	  block[1],
+	  block[2],
+	  block[3],
+	  block[4],
+	  block[5],
+	  block[6],
+	  block[7],
+	  block[8]);
+  */
   MatSetValues(A,
                static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
                static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),

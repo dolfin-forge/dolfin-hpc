@@ -27,6 +27,9 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   else
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
 
+  if(dolfin::MPI::numProcesses() > 1)
+    return;
+
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
     return;

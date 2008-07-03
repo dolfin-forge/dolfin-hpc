@@ -53,7 +53,7 @@ void ConstantFunction::interpolate(real* coefficients,
                                    const ufc::finite_element& finite_element) const
 {
   dolfin_assert(coefficients);
-
+  
   // Compute size of value (number of entries in tensor value)
   size = 1;
   for (uint i = 0; i < finite_element.value_rank(); i++)

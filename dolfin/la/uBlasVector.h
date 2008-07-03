@@ -17,6 +17,8 @@
 #include "ublas.h"
 #include "GenericVector.h"
 
+#include <set>
+
 namespace dolfin
 {
 
@@ -69,6 +71,9 @@ namespace dolfin
 
     /// Initialize vector of size N
     virtual void init(uint N);
+
+    void init_ghosted(uint n, std::set<uint>& indices) 
+    {warning("not implemented uBlas"); }
 
     /// Return size of vector
     uint size() const

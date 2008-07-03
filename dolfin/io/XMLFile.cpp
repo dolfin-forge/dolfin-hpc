@@ -5,9 +5,10 @@
 // Modified by Garth N. Wells 2006.
 // Modified by Ola Skavhaug 2006.
 // Modified by Magnus Vikstrom 2007.
+// Modified by Niclas Jansson 2008.
 //
 // First added:  2002-12-03
-// Last changed: 2008-04-22
+// Last changed: 2008-06-25
 
 #include <stdarg.h>
 
@@ -26,11 +27,13 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterList.h>
+#include <dolfin/main/MPI.h>
 
 #include "XMLObject.h"
 #include "XMLVector.h"
 #include "XMLMatrix.h"
 #include "XMLMesh.h"
+#include "PXMLMesh.h"
 #include "XMLMeshFunction.h"
 #include "XMLDofMap.h"
 #include "XMLFunction.h"
@@ -83,7 +86,11 @@ void XMLFile::operator>>(Mesh& mesh)
 
   if ( xmlObject )
     delete xmlObject;
-  xmlObject = new XMLMesh(mesh);
+  
+  if(MPI::numProcesses() > 1)
+    xmlObject = new PXMLMesh(mesh);
+  else
+    xmlObject = new XMLMesh(mesh);
   parseFile();
 }
 //-----------------------------------------------------------------------------

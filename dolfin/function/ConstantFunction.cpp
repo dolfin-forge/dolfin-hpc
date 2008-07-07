@@ -63,13 +63,13 @@ ConstantFunction::ConstantFunction(Mesh& mesh, uint rank, const uint* _shape, co
   }
 }
 //-----------------------------------------------------------------------------
-dolfin::uint ConstantFunction::dim(uint i) const
+ConstantFunction::~ConstantFunction()
 {
   delete [] shape;
   delete [] values;
 }
 //-----------------------------------------------------------------------------
-void ConstantFunction::interpolate(real* values) const
+dolfin::uint ConstantFunction::rank() const
 {
   return value_rank;
 }

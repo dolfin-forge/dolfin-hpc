@@ -47,6 +47,12 @@ namespace dolfin
     /// Update current pair of cells for macro element
     void update(Cell& cell0, Cell& cell1);
 
+    /// Update current pair of cells for macro element, global numbering
+    void update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
+
+    /// Reset current pair of cells for macro element
+    void reset(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
+
     // Array of finite elements for primary arguments
     ufc::finite_element** finite_elements;
 

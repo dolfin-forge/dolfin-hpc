@@ -65,9 +65,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
  
   MPI_Status status;
   Array<uint> send_buff;
-  int gh_count = static_cast<int>(mesh.distdata().num_ghost());
   uint src,dest;
-  uint recv_size = gh_count;
+  uint recv_size = mesh.distdata().num_ghost(); 
   int recv_count, recv_size_gh, send_size;  
   
   for(uint i = 0; i < pe_size; i++) {
@@ -129,7 +128,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   ghosted_edge = false;
   uint num_ghosts = 0;
   
-  std::map<EdgeKey, uint> edge_map, edge_id, owns_edge;  
+  std::map<EdgeKey, uint> edge_map, edge_id;  
 
   Array<uint> send_buff, send_buff_id;
   std::map<uint,uint> send_mapping;
@@ -149,7 +148,6 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	send_buff.push_back( edge_vert[0]);
 	send_buff.push_back( edge_vert[1]);
 	send_buff_id.push_back(edge_id[key]);
-	owns_edge[key] = true;
 	send_mapping[num++] = e->index();
     }    
   }
@@ -194,7 +192,6 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	  if( recv_buff_id[i>>1] < edge_id[key] ||
 	      recv_buff_id[i>>1] == edge_id[key] && status.MPI_SOURCE < rank){
 	    edge_id.erase(key);
-	    owns_edge[key] = false;
 	    ghosted_edge.set( edge_map[key], true);
 	    num_ghosts++;
 	  }
@@ -248,7 +245,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	key = edge_key(mesh.distdata().get_local(recv_buff[i], 0),
 		       mesh.distdata().get_local(recv_buff[i+1], 0));
 
-	if(owns_edge[key] && owns_edge.count(key) == 1) {
+	if(edge_id.count(key)){
 	  global_buff.push_back(i>>1);
 	  global_buff.push_back( new_global[ edge_map[key] ] );	  	  
 	}
@@ -285,7 +282,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
       MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
     return;  
 
-  std::map<FaceKey, uint> face_map, face_id, owns_face;
+  std::map<FaceKey, uint> face_map, face_id;
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
 
@@ -319,7 +316,6 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
     if(face_map.count(face_key) == 0) {
       face_map[face_key] = f.index();
       face_id[face_key] = (uint) rand() +  rank;
-      owns_face[face_key] = true;
       send_mapping[num++] = f.index();
       send_buff_id.push_back(face_id[face_key]);
     }
@@ -379,7 +375,6 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 	if( recv_buff_id[ii] < face_id[face_key] ||
 	    recv_buff_id[ii] == face_id[face_key] && status.MPI_SOURCE < rank){
 	  face_id.erase(face_key);
-	  owns_face[face_key] = false;
 	  ghosted_face.set( face_map[face_key], true);
 	  num_ghosts++;
 	}
@@ -441,7 +436,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
       if(num_ok < 3)
 	continue;
       
-      if(owns_face[face_key] && owns_face.count(face_key) == 1) {
+      if(face_id.count(face_key)){
 	global_buff.push_back(ii);
 	global_buff.push_back( new_global[ face_map[face_key] ] );	  	  
       }
@@ -498,11 +493,8 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   
   mesh.distdata().set_global_numCells(num_glb);
   
-
   delete[]  num_cells;
   
-
-
   // Use new numbering
   mesh.distdata().local_cell_indices = new_local;
   mesh.distdata().global_cell_indices = new_global;

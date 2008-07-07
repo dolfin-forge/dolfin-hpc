@@ -185,7 +185,6 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
         
     send_buff.push_back(oldmesh.distdata().get_global(shared_edge[i], 0));
     send_buff.push_back(oldmesh.distdata().get_global(shared_edge[i+1], 0));
-    //    send_buff.push_back(shared_edge[i+2]);
     send_buff_id.push_back(edge_id[key]);
   }
 
@@ -280,8 +279,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     global_buff.clear();
   }
   
-  uint tmp =  newmesh.numVertices() - newmesh.distdata().num_ghost();
   // MPI aliasing 
+  uint tmp =  newmesh.numVertices() - newmesh.distdata().num_ghost();
   uint num_glb;  
   MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   

@@ -3,9 +3,10 @@
 //
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Martin Sandve Alnes 2008
+// Modified by Niclas Jansson 2008
 //
 // First added:  2004
-// Last changed: 2008-04-29
+// Last changed: 2008-07-03
 
 // FIXME: Insert dolfin_assert() where appropriate
 
@@ -84,8 +85,9 @@ void PETScVector::init(uint N)
   // Create vector
   if (MPI::numProcesses() > 1)
   {
-    //    dolfin_debug("PETScVector::init(N) - VecCreateMPI");
+    // dolfin_debug("PETScVector::init(N) - VecCreateMPI");
     VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x);
+    VecSetOption(x, VEC_IGNORE_NEGATIVE_INDICES);
   }
   else {
     VecCreate(PETSC_COMM_SELF, &x);
@@ -151,11 +153,10 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
 
-  if( is_ghosted ) {
+  if( is_ghosted ) {    
     int  low, high;
-    VecGetOwnershipRange(x, &low, &high);
-
     Vec xl;
+    VecGetOwnershipRange(x, &low, &high);
     VecGhostGetLocalForm(x, &xl);
 
     int *tmp = new int[m];
@@ -170,8 +171,7 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
     VecGetValues(xl, static_cast<int>(m), tmp, block);
     VecGhostRestoreLocalForm(x, &xl);
     
-    delete[] tmp;
-    
+    delete[] tmp;   
   }
   else
     VecGetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block);
@@ -181,30 +181,23 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
 void PETScVector::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  if( is_ghosted ) {
+  
+  if( MPI::numProcesses() > 1) {
     int  low, high;
     VecGetOwnershipRange(x, &low, &high);
 
-    Vec xl;
-    VecGhostGetLocalForm(x, &xl);
-
     int *tmp = new int[m];
     for(uint i = 0; i < m; i++)
-      if( (int) rows[i] < high && (int) rows[i] >= low) 
-	tmp[i] = rows[i] - low;
-      else  {
-	std::map<const int, int>::const_iterator it = mapping.find(rows[i]);    
-	tmp[i] = it->second;
-      }
-    
-    VecSetValues(xl, static_cast<int>(m), tmp, block, INSERT_VALUES);
-    VecGhostRestoreLocalForm(x, &xl);
-    
+      if( (int) rows[i] > high && (int) rows[i] < low) 
+	tmp[i] = -1;
+      else
+	tmp[i] = rows[i];
     delete[] tmp;
   }
-  else
-    VecSetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
-		 INSERT_VALUES);
+
+  
+  VecSetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
+	       INSERT_VALUES);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(const real* block, uint m, const uint* rows)
@@ -382,7 +375,6 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
   VecGetLocalSize(x, &local_size);
   VecGetOwnershipRange(x, &low, &high);
 
-
   int *rows = new int[ local_size ];
   real *values = new real[ local_size ]; 
   for(int i = 0; i < local_size; i++)   {
@@ -393,7 +385,6 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
   VecGetValues(x, local_size, rows, values);    
   VecDestroy(x);
   
-
   ghost_indices.clear();
   int num_ghost = local_size;
   std::set<uint>::iterator sit;
@@ -403,11 +394,9 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
       mapping[ (int) *sit ] = num_ghost++;
     }
        
-  //  std::sort(ghost_indices.begin(), ghost_indices.end());
 
   VecCreateGhost(PETSC_COMM_WORLD, local_size, size, (int) ghost_indices.size(),
 		 (const int *) &ghost_indices[0], &x);       
-
   VecSetValues(x, local_size, rows, values, INSERT_VALUES);
   apply();
 

@@ -269,11 +269,12 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   Array<real> coords;
   Array<uint> cl, shared_buffer;
   Array<bool> cm; 
-  uint num_cells, num_vertices, target_proc, glb_index;
+  uint num_cells, num_vertices, target_proc, glb_index, offset;
 
   int recv_size,recv_size_cell,send_size;
   int recv_count,recv_count_vertices,recv_count_cells;
 
+  // Process mesh entities according to distribution
   uint vi =0;
   // Distribution defined per vertex
   if(distribution.dim() == 0) {
@@ -358,6 +359,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   else
     error("Distribution defined on unkown mesh entity");
 
+  // Exchange the processed entities
   recv_count = 0;
   for(uint i=0; i<pe_size; i++){
     send_size = send_list_vertices[i].size();
@@ -422,7 +424,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   delete[] recv_buff_map;
   delete[] recv_buff;
 
-  // Process new and old cells if distribution are defined per cells
+  // Process new and old cells if distribution is defined on cells
   if(distribution.dim() == mesh.topology().dim()) {
 
     // Add old cells
@@ -469,8 +471,9 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	cell_n++;
       }      
     }
-
     delete[] recv_buff_cell;        
+
+    // Exchange ghosted entities
     Array<real> send_buff;
     Array<uint> send_buff_indices, recv_source;
     send_size = shared_buffer.size();
@@ -479,7 +482,6 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
     double *rp = &recv_buff[0];
     recv_buff_map = new uint[send_size];
     uint *rmp = &recv_buff_map[0];        
-    uint offset;   
     MPI_Allreduce(&send_size, &recv_count, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
     uint *shared = new uint[recv_count];
     for(uint i=1; i<pe_size; i++){
@@ -548,6 +550,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   num_vertices = coords.size() / gdim ;
   num_cells = cl.size() / ndims;
 
+  // Construct new mesh and add all buffered entities
   Mesh new_mesh;
   MeshEditor editor;
   editor.open(new_mesh, mesh.type().cellType(),
@@ -578,13 +581,12 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       editor.addCell(ci++,cl[i],cl[i+1],cl[i+2],cl[i+3]); break;
     }
   }
-  
   cl.clear();
   editor.close();
+
+  // Overwrite old mesh with new, and invalidate numbering
   new_mesh._distdata = distdata;
   mesh = new_mesh;
-
-  // Invalidate numbering
   mesh.distdata().invalid_numbering();
 
   // Mark new cells for refinement
@@ -595,29 +597,6 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       cell_marker->set( i , cm[i] );
     cm.clear();
   }
-
-#ifdef DISTDEBUG
-  //Sanity check
-  if(distribution.dim() == mesh.topology().dim()) {
-    MPI_Barrier(MPI_COMM_WORLD);
-    MeshFunction<bool> used;
-    used.init(mesh, 0);
-    used = false;    
-	  
-    for(CellIterator c(mesh); !c.end(); ++c)
-      for(VertexIterator v(*c); !v.end(); ++v)
-	used.set(*v, true);
-    
-    for(VertexIterator v(mesh); !v.end(); ++v)
-      if(used.get(*v) == false){
-	used.disp();
-	error("Mesh vertex data corrupt (cell belonging)");
-      }
-    
-    MPI_Barrier(MPI_COMM_WORLD);
-    message("***** MESH PASSED SANITY CHECK *****");
-  }
-#endif
 
 }
 //-----------------------------------------------------------------------------

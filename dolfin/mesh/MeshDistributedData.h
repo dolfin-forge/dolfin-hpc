@@ -29,7 +29,6 @@ namespace dolfin
     
     void clear();
     void set_map(uint local_index, uint global_index, uint dim);
-    void set_map(Vertex& v, uint global_index);
     
     void set_shared(uint local_index);
     void set_ghost(uint local_index);

@@ -5,9 +5,10 @@
 // Modified by Andy R. Terrel 2005.
 // Modified by Ola Skavhaug 2007.
 // Modified by Magnus Vikstrøm 2007-2008.
+// Modified by Niclas Jansson 2008
 //
 // First added:  2004
-// Last changed: 2008-05-15
+// Last changed: 2008-07-03
 
 #ifdef HAS_PETSC
 
@@ -136,12 +137,19 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
+
   MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+
+
+  //  MatSetOption(A, MAT_COLUMNS_SORTED);
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+  MatZeroEntries(A);
+
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 {
-  /*
+
   if (dolfin::MPI::numProcesses() > 1)
   {
     uint p = dolfin::MPI::processNumber();
@@ -156,13 +164,13 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
   }
   else
   {
-*/
+
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint* nzrow = new uint[spattern.size(0)];  
     spattern.numNonZeroPerRow(nzrow);
     init(spattern.size(0), spattern.size(1), nzrow);
     delete [] nzrow;
-    //  }
+  }
 }
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
@@ -209,19 +217,6 @@ void PETScMatrix::add(const real* block,
                       uint n, const uint* cols)
 {
   dolfin_assert(A);
-  /*
-  message("inserting %d x %d block at (%d, %d, %d, %d)  on rank %d %g %g %g %g %g %g %g %g",
-	  m,n, rows[0], cols[0], rows[1], cols[1], MPI::processNumber(),
-	  block[0],
-	  block[1],
-	  block[2],
-	  block[3],
-	  block[4],
-	  block[5],
-	  block[6],
-	  block[7],
-	  block[8]);
-  */
   MatSetValues(A,
                static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
                static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),

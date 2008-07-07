@@ -362,11 +362,12 @@ void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
     Cell cell(_mesh, cell_number);
     UFCCell ufc_cell(cell);
     ufc_cell.update(cell);
-    ufc_cell.update(cell, _mesh.distdata());    
+
 
     // Interpolate function on cell
     g.interpolate(data.w, ufc_cell, *data.finite_element, cell, facet_number);
 
+    ufc_cell.update(cell, _mesh.distdata());    
 
     // Tabulate dofs on cell
     data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
@@ -381,7 +382,7 @@ void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
        cout << "Cell:  " << facet.entities(facet.dim() + 1)[0] << endl;
        cout << "Facet: " << local_facet << endl;
     */
-    
+
     // Pick values for facet
     for (uint i = 0; i < data.dof_map->num_facet_dofs(); i++)
     {
@@ -393,7 +394,7 @@ void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
 
     p++;
 
-    ufc_cell.reset(cell, _mesh.distdata());
+    ufc_cell.reset(cell, _mesh.distdata());    
   }
 }
 //-----------------------------------------------------------------------------
@@ -434,6 +435,8 @@ void DirichletBC::computeBCGeometric(std::map<uint, real>& boundary_values,
         // Interpolate function on cell
         g.interpolate(data.w, ufc_cell, *data.finite_element, *c);
         
+	ufc_cell.update(*c, _mesh.distdata());    
+
         // Tabulate dofs on cell, and their coordinates
         data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
         data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
@@ -450,6 +453,7 @@ void DirichletBC::computeBCGeometric(std::map<uint, real>& boundary_values,
           const real value = data.w[i];
           boundary_values[dof] = value;
         }
+	ufc_cell.reset(*c, _mesh.distdata());          
       }
     }
   }
@@ -468,6 +472,7 @@ void DirichletBC::computeBCPointwise(std::map<uint, real>& boundary_values,
     UFCCell ufc_cell(*cell);
     g.interpolate(data.w, ufc_cell, *data.finite_element, *cell);
     
+    ufc_cell.update(*cell, _mesh.distdata());    
     // Tabulate dofs on cell, and their coordinates
     data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
     data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
@@ -484,7 +489,7 @@ void DirichletBC::computeBCPointwise(std::map<uint, real>& boundary_values,
       const real value = data.w[i];
       boundary_values[dof] = value;
     }
-
+    ufc_cell.reset(*cell, _mesh.distdata());    
     p++;
   }
 }

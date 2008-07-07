@@ -4,7 +4,7 @@
 // Modified by Niclas Jansson, 2008.
 //
 // First added:  2006-06-08
-// Last changed: 2007-05-24
+// Last changed: 2008-07-07
 
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
@@ -138,10 +138,9 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
     part = dolfin::MPI::processNumber();
     mesh.distribute(part);
     mesh.renumber();
-    message("%d", mesh.distdata().global_numVertices());
 
-    uint tmp =  mesh.numVertices() - mesh.distdata().num_ghost();
     // MPI aliasing 
+    uint tmp =  mesh.numVertices() - mesh.distdata().num_ghost();
     uint num_glb;  
     MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
     

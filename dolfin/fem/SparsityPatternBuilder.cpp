@@ -22,13 +22,10 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 				   Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
 {
   // Initialise sparsity pattern
-  if( dof_map_set.parallel() )
+  if( dof_map_set.parallel() || dolfin::MPI::numProcesses() > 1)
     sparsity_pattern.pinit(ufc.form.rank(), ufc.global_dimensions);
   else
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
-
-  if(dolfin::MPI::numProcesses() > 1)
-    return;
 
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
@@ -41,16 +38,19 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     {
       // Update to current cell
       ufc.update(*cell);
+      ufc.update(*cell, mesh.distdata());
   
       // Tabulate dofs for each dimension
       for (uint i = 0; i < ufc.form.rank(); ++i)
         dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
  
       // Fill sparsity pattern.
-      if( dof_map_set.parallel() )
+      if( dof_map_set.parallel() || dolfin::MPI::numProcesses() > 1)
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
       else
         sparsity_pattern.insert(ufc.local_dimensions, ufc.dofs);
+
+      ufc.reset(*cell, mesh.distdata());
     }
   }
 
@@ -77,6 +77,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 
       // Update to current pair of cells
       ufc.update(cell0, cell1);
+      ufc.update(cell0, cell1, mesh.distdata());
 
       // Tabulate dofs for each dimension on macro element
       for (uint i = 0; i < ufc.form.rank(); ++i)
@@ -88,6 +89,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 
       // Fill sparsity pattern.
       sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
+      ufc.reset(cell0, cell1, mesh.distdata());
     }
   }
   

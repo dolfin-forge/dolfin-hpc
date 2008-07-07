@@ -90,12 +90,6 @@ void MeshDistributedData::clear()
 
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::set_map(Vertex& v, uint global_index)
-{
-  message("Experimental set_map: local %d, global %d", v.index(), global_index);
-  set_map(v.index(), global_index, 0);
-}
-//-----------------------------------------------------------------------------
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
 {
 

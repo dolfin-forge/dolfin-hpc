@@ -74,7 +74,8 @@ namespace dolfin
     /// Display sparsity pattern
     void disp() const;
 
-    void apply() { /* Do nothing */ }
+    void apply();
+    //    void apply() { /* Do nothing */ message("num off processor %d num on %d", num_off, num_on); }
 
     /// Return array with row range for process_number
     void processRange(uint process_number, uint local_range[]);
@@ -103,6 +104,8 @@ namespace dolfin
     //range -array of size + 1 where size is numProcesses + 1. 
     //range[rank], range[rank+1] is the range for processor
     uint* range;
+
+    std::vector<int> off_processor;
   };
 }
 #endif

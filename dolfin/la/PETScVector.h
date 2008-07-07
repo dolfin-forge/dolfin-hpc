@@ -22,6 +22,10 @@
 #include "PETScObject.h"
 #include "GenericVector.h"
 
+#include <dolfin/common/Array.h>
+#include <set>
+#include <map>
+
 namespace dolfin
 {
 
@@ -70,6 +74,8 @@ namespace dolfin
 
     /// Initialize vector of size N
     virtual void init(uint N);
+
+    virtual void init_ghosted(uint n, std::set<uint>& indices);
 
     /// Return size of vector
     virtual uint size() const;
@@ -144,9 +150,16 @@ namespace dolfin
 
     // PETSc Vec pointer
     Vec x;
-    
+       
     // True if we don't own the vector x points to
     bool is_view;
+
+    bool is_ghosted;
+
+    Array<int> ghost_indices;
+    
+    std::map<const int, int> mapping;
+
 
   };
 

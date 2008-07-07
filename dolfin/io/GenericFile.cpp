@@ -9,7 +9,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include "GenericFile.h"
-
+#include <dolfin/main/MPI.h>
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -168,10 +168,14 @@ void GenericFile::read()
 //-----------------------------------------------------------------------------
 void GenericFile::write()
 {
+
   if ( !opened_write ) {
-    // Clear file
-    FILE* fp = fopen(filename.c_str(), "w");
-    fclose(fp);
+    //FIXME: temporary fix, only rank == 0 is allowed to clear the file
+    if(MPI::processNumber() == 0) {
+      // Clear file
+      FILE* fp = fopen(filename.c_str(), "w");
+      fclose(fp);
+    }
   }
   
   opened_write = true;

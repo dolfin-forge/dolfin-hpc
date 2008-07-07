@@ -25,6 +25,7 @@
 #include "MPIMeshCommunicator.h"
 #include "MeshData.h"
 #include "Mesh.h"
+#include "MeshRenumber.h"
 
 using namespace dolfin;
 
@@ -46,6 +47,15 @@ Mesh::Mesh(std::string filename)
 {
   File file(filename);
   file >> *this;
+  
+  if( MPI::numProcesses() > 1 ) {
+    MeshFunction<uint> partitions;
+    partition(partitions);
+    distribute(partitions);
+    
+    renumber();
+
+  }
 }
 //-----------------------------------------------------------------------------
 Mesh::~Mesh()
@@ -59,6 +69,7 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 
   _topology = mesh._topology;
   _geometry = mesh._geometry;
+  _distdata = mesh._distdata;
   
   if (mesh._cell_type)
     _cell_type = CellType::create(mesh._cell_type->cellType());
@@ -199,7 +210,13 @@ void Mesh::smooth()
 //-----------------------------------------------------------------------------
 void Mesh::partition(MeshFunction<uint>& partitions)
 {
-  partition(partitions, MPI::numProcesses());
+  //  partition(partitions, MPI::numProcesses());
+  MeshPartition::partition(*this, partitions);
+}
+//-----------------------------------------------------------------------------
+void Mesh::partition(MeshFunction<uint>& partitions,MeshFunction<uint>& weight)
+{
+  MeshPartition::partition(*this, partitions, weight);
 }
 //-----------------------------------------------------------------------------
 void Mesh::partition(MeshFunction<uint>& partitions, uint num_partitions)
@@ -212,6 +229,29 @@ void Mesh::partition(MeshFunction<uint>& partitions, uint num_partitions)
 
   // Broadcast mesh according to parallel policy
   if (MPI::broadcast()) { MPIMeshCommunicator::broadcast(partitions); }
+}
+//-----------------------------------------------------------------------------
+void Mesh::partition_geom(MeshFunction<uint>& partitions)
+{
+  MeshPartition::partition_geom(*this, partitions);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshFunction<uint>& distribution)
+{
+  MPIMeshCommunicator::distribute(*this, distribution);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshFunction<uint>& distribution, 
+		      MeshFunction<bool>& cell_markers,
+		      MeshFunction<bool>& new_cell_markers)
+{
+  MPIMeshCommunicator::distribute(*this, distribution, 
+				  cell_markers, new_cell_markers);
+}
+//-----------------------------------------------------------------------------
+void Mesh::renumber()
+{
+  MeshRenumber::renumber(*this);
 }
 //-----------------------------------------------------------------------------
 void Mesh::disp() const

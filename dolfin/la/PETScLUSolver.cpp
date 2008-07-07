@@ -13,6 +13,8 @@
 #include "PETScKrylovMatrix.h"
 #include "PETScLUSolver.h"
 
+#include <dolfin/main/MPI.h>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -20,13 +22,18 @@ PETScLUSolver::PETScLUSolver()
   : ksp(0), B(0), idxm(0), idxn(0)
 {
   // Set up solver environment to use only preconditioner
-  KSPCreate(PETSC_COMM_SELF, &ksp);
+  if(MPI::numProcesses() > 1)
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+  else
+    KSPCreate(PETSC_COMM_SELF, &ksp);
+
   //KSPSetType(ksp, KSPPREONLY);
   
   // Set preconditioner to LU factorization
   PC pc;
   KSPGetPC(ksp, &pc);
-  PCSetType(pc, PCLU);
+  //  PCSetType(pc, PCLU);
+  PCSetType(pc, PCBJACOBI);
 
   // Allow matrices with zero diagonals to be solved
   PCFactorSetShiftNonzero(pc, PETSC_DECIDE);

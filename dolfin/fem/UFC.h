@@ -17,6 +17,7 @@ namespace dolfin
   class Mesh;
   class Cell;
   class DofMapSet;
+  class MeshDistributedData;
 
   /// This class is a simple data structure that holds data used
   /// during assembly of a given UFC form. Data is created for each
@@ -37,8 +38,20 @@ namespace dolfin
     /// Update current cell
     void update(Cell& cell);
 
+    /// Update current cell
+    void update(Cell& cell, MeshDistributedData& distdata);
+
+    /// Reset current cell
+    void reset(Cell& cell, MeshDistributedData& distdata);
+
     /// Update current pair of cells for macro element
     void update(Cell& cell0, Cell& cell1);
+
+    /// Update current pair of cells for macro element, global numbering
+    void update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
+
+    /// Reset current pair of cells for macro element
+    void reset(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
 
     // Array of finite elements for primary arguments
     ufc::finite_element** finite_elements;

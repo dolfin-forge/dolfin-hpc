@@ -141,6 +141,8 @@ namespace dolfin
     /// Evaluate scalar function at given point (overload for scalar user-defined function)
     virtual real eval(const real* x) const;
 
+    void sync_ghosts();
+
     /// Friends
     friend class XMLFile;
     friend class LinearPDE;

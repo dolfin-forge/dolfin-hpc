@@ -18,6 +18,7 @@
 #include "MeshTopology.h"
 #include "MeshGeometry.h"
 #include "CellType.h"
+#include "MeshDistributedData.h"
 
 namespace dolfin
 {
@@ -113,6 +114,12 @@ namespace dolfin
     /// Return mesh geometry (const version)
     inline const MeshGeometry& geometry() const { return _geometry; }
 
+    /// Return mesh distribution data
+    inline MeshDistributedData& distdata() { return _distdata; }
+
+    /// Return mesh distribution data (const version)
+    const inline MeshDistributedData& distdata() const { return _distdata; }
+
     /// Return mesh data
     MeshData& data();
 
@@ -164,6 +171,23 @@ namespace dolfin
     /// Partition mesh into num_partitions partitions
     void partition(MeshFunction<uint>& partitions, uint num_partitions);
 
+    /// Partition mesh into num_partitions = numProc with weights on vertices
+    void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
+
+    /// Partition mesh into num_partitions = numProc
+    void partition_geom(MeshFunction<uint>& partitions);
+    
+    // Distribute a mesh according to a mesh function
+    void distribute(MeshFunction<uint>& distribution);
+
+    // Distribute a mesh according to a mesh function and transfer marked cells
+    void distribute(MeshFunction<uint>& distribution, 
+                    MeshFunction<bool>& cell_markers,
+                    MeshFunction<bool>& new_cell_markers);
+
+    // Renumber mesh global numbering
+    void renumber();
+
     /// Display mesh data
     void disp() const;
     
@@ -195,6 +219,9 @@ namespace dolfin
 
     /// Return true iff topology is ordered according to the UFC numbering
     bool _ordered;
+
+    /// Distribued Mesh data
+    MeshDistributedData _distdata;
 
   };
 

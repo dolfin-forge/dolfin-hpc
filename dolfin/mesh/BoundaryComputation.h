@@ -27,7 +27,14 @@ namespace dolfin
     /// Compute the boundary of a given mesh
     static void computeBoundary(Mesh& mesh, BoundaryMesh& boundary);
 
+    /// Compute the boundary of a given mesh
+    static void computeLocalBoundary(Mesh& mesh, BoundaryMesh& boundary);
+
   private:
+    
+    /// Boundary computation for both cases
+    static void computeBoundaryCommon(Mesh& mesh, BoundaryMesh& boundary,
+				      bool local_boundary);
 
     /// Reorder vertices so facet is right-oriented w.r.t. facet normal
     static void reorder(Array<uint>& vertices, Facet& facet);

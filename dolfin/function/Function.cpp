@@ -203,6 +203,7 @@ SubFunction Function::operator[] (uint i)
 //-----------------------------------------------------------------------------
 const Function& Function::operator= (Function& f)
 {
+
   // FIXME: Handle other assignments
   if (f._type != discrete)
     error("Can only handle assignment from discrete functions (for now).");
@@ -261,6 +262,12 @@ void Function::interpolate(real* coefficients,
   // Make cell and facet unavailable
   _cell = 0;
   _facet = -1;
+}
+//-----------------------------------------------------------------------------
+void Function::sync_ghosts()
+{
+  if(f)
+    f->sync_ghosts();
 }
 //-----------------------------------------------------------------------------
 void Function::eval(real* values, const real* x) const

@@ -1,6 +1,8 @@
 // Copyright (C) 2005-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2008.
+//
 // First added:  2005
 // Last changed: 2008-04-22
 
@@ -13,6 +15,8 @@
 #include "PETScKrylovMatrix.h"
 #include "PETScLUSolver.h"
 
+#include <dolfin/main/MPI.h>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -20,7 +24,11 @@ PETScLUSolver::PETScLUSolver()
   : ksp(0), B(0), idxm(0), idxn(0)
 {
   // Set up solver environment to use only preconditioner
-  KSPCreate(PETSC_COMM_SELF, &ksp);
+  if(MPI::numProcesses() > 1)
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+  else
+    KSPCreate(PETSC_COMM_SELF, &ksp);
+
   //KSPSetType(ksp, KSPPREONLY);
   
   // Set preconditioner to LU factorization
@@ -48,16 +56,33 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 {
   MatType mat_type;
   MatGetType(A.mat(), &mat_type);
+ 
 
+  std::string _mat_type = mat_type;
+    
   // Convert to UMFPACK matrix if matrix type is MATSEQAIJ and UMFPACK is available.
   #if PETSC_HAVE_UMFPACK
-    std::string _mat_type = mat_type;
     if(_mat_type == MATSEQAIJ)
     {
       Mat Atemp = A.mat();
       MatConvert(A.mat(), MATUMFPACK, MAT_REUSE_MATRIX, &Atemp);
     }
   #endif
+    
+  // FIXME: Maybe SUPERLU_DIST should be an option here?
+  // Convert to MUMPS matrix if matrix type is MATMPIAIJ and MUMPS is available.
+  #if PETSC_HAVE_MUMPS    
+    if(_mat_type == MATMPIAIJ) {
+      Mat Atemp = A.mat();
+      MatConvert(A.mat(), MATAIJMUMPS, MAT_REUSE_MATRIX, &Atemp);    
+    }
+  #endif
+    
+    // Make sure MATMPIAIJ matrices has been converted
+    _mat_type = mat_type;    
+    if( MPI::numProcesses() > 1 && _mat_type == MATMPIAIJ)
+      error("No support for symbolic LU on matrix type mpiaij."
+	    " For performance, installation of MUMPS is recomended.");
 
   // Get parameters
   const bool report = get("LU report");

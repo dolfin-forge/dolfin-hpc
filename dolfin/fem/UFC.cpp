@@ -8,6 +8,7 @@
 #include "DofMapSet.h"
 #include "DofMap.h"
 #include "UFC.h"
+#include <dolfin/mesh/MeshDistributedData.h>
 
 using namespace dolfin;
 
@@ -189,6 +190,22 @@ void UFC::update(Cell& cell)
   // FIXME: Update coefficients
 }
 //-----------------------------------------------------------------------------
+void UFC::update(Cell& cell, MeshDistributedData& distdata)
+{
+  // Update UFC cell
+  this->cell.update(cell, distdata);
+
+  // FIXME: Update coefficients
+}
+//-----------------------------------------------------------------------------
+void UFC::reset(Cell& cell, MeshDistributedData& distdata)
+{
+  // Update UFC cell
+  this->cell.reset(cell, distdata);
+
+  // FIXME: Update coefficients
+}
+//-----------------------------------------------------------------------------
 void UFC::update(Cell& cell0, Cell& cell1)
 {
   // Update UFC cells
@@ -198,3 +215,28 @@ void UFC::update(Cell& cell0, Cell& cell1)
   // FIXME: Update coefficients
 }
 //-----------------------------------------------------------------------------
+void UFC::update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata)
+{
+  // Update UFC cells
+  this->cell0.update(cell0);
+  this->cell1.update(cell1);
+
+  // Update UFC cells to global numbering
+  this->cell0.update(cell0, distdata);
+  this->cell1.update(cell1, distdata);
+
+  // FIXME: Update coefficients
+}
+//-----------------------------------------------------------------------------
+void UFC::reset(Cell& cell0, Cell& cell1, MeshDistributedData& distdata)
+{
+  // Update UFC cells to local numbering
+  this->cell0.reset(cell0, distdata);
+  this->cell1.reset(cell1, distdata);
+
+  // FIXME: Update coefficients
+}
+//-----------------------------------------------------------------------------
+
+
+

@@ -3,6 +3,7 @@
 //
 // Modified by Magnus Vikstrom, 2008.
 // Modified by Anders Logg, 2008.
+// Modified by Niclas Jansson, 2008.
 //
 // First added:  2007-03-13
 // Last changed: 2008-05-15
@@ -12,6 +13,7 @@
 #include <dolfin/main/MPI.h>
 //#include <dolfin/PETScObject.h>
 #include <iostream>
+#include <mpi.h>
 
 using namespace dolfin;
 
@@ -50,7 +52,7 @@ void SparsityPattern::init(uint rank, const uint* dims)
 {
   dolfin_assert(rank <= 2);
   dim[0] = dim[1] = 0;
-  for (uint i = 0; i < rank; ++i)
+  for (uint i = 0; i < rank; ++i) 
     dim[i] = dims[i];
   sparsity_pattern.clear();
   sparsity_pattern.resize(dim[0]);
@@ -66,7 +68,7 @@ void SparsityPattern::pinit(uint rank, const uint* dims)
   sparsity_pattern.resize(dim[0]);
   o_sparsity_pattern.clear();
   o_sparsity_pattern.resize(dim[0]);
-  initRange();
+  initRange(); 
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::insert(uint m, const uint* rows, uint n, const uint* cols)
@@ -84,8 +86,16 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
   {
     const uint global_row = rows[0][i];
     // If not in a row "owned" by this processor
-    if(global_row < range[process] || global_row >= range[process+1])
+    if(global_row < range[process] || global_row >= range[process+1]) {
+
+      off_processor.push_back(global_row);
+      off_processor.push_back(num_rows[1]);
+      for (uint j = 0; j < num_rows[1]; j++)
+	off_processor.push_back(rows[1][j]);
+
       continue;
+    }
+
     for (unsigned int j = 0; j<num_rows[1];++j)
     {
       const uint global_col = rows[1][j];
@@ -188,5 +198,51 @@ void SparsityPattern::initRange()
 
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
+}
+//-----------------------------------------------------------------------------
+void SparsityPattern::apply()
+{
+  if (MPI::numProcesses() == 1) 
+    return;
+
+  int rank = MPI::processNumber();
+  int pe_size = MPI::numProcesses();
+
+  MPI_Status status;
+  int maxoff, recv_count, global_row, src, dest;
+
+  int numoff  = off_processor.size();  
+  MPI_Allreduce(&numoff, &maxoff, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);  
+  int *recv_buff = new int[maxoff];
+
+  for(int j = 1 ; j < pe_size; j++){
+    
+    src = (rank - j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;    
+    
+    MPI_Sendrecv(&off_processor[0], numoff, MPI_INT, dest, 1,
+		 recv_buff, maxoff, MPI_INT, src, 1, MPI_COMM_WORLD, &status);
+    MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+
+    for(int i = 0; i < recv_count; ) {
+
+      global_row = recv_buff[i];
+
+      if( global_row >= (int) range[rank] && global_row < (int) range[rank+1]) {
+	for(int k = 0; k < recv_buff[i+1]; k++) {
+	  if(recv_buff[k+i+2] < (int) range[rank] || 
+	     recv_buff[k+i+2] >= (int) range[rank+1])
+	    o_sparsity_pattern[global_row].insert(recv_buff[k+i+2]);
+	  else
+	    sparsity_pattern[global_row].insert(recv_buff[k+i+2]);
+	}
+	
+      }
+	i += 2 + recv_buff[i+1];	
+    }
+
+  }
+
+  delete[] recv_buff;  
 }
 //-----------------------------------------------------------------------------

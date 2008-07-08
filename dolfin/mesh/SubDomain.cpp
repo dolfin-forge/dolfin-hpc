@@ -72,17 +72,18 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       else
 	on_boundary = entity->numEntities(D) == 1;
 
+
+
     bool all_vertices_inside = true;
     // Dimension of facet > 0, check incident vertices
     if (entity->dim() > 0)
     {
-      /*
+
       if(MPI::numProcesses() > 1){
 	Facet f(mesh, entity->index());
 	if(!facetmap.globalFacet(f))
 	  on_boundary = false; 
       }
-*/
 
       for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
       {

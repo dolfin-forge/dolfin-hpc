@@ -300,6 +300,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   uint num = 0;
   FaceKey face_key;
   srand((uint)time(0));
+
   for(CellIterator bf(local_boundary); !bf.end(); ++bf){
     Face f(mesh, cell_map->get(*bf));
     face_key.clear();
@@ -352,11 +353,10 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 
     uint ii = 0;
     for(uint i = 0; i < (uint) recv_count ; ii++, i += inc){    
-      // Check if I have the vertices     
       face_key.clear();
-
       uint num_ok = 0;
       for(uint k = 0; k < inc; k += 2){
+      // Check if I have the vertices     
 	if(mesh.distdata().have_global(recv_buff[i+k]) &&
 	   mesh.distdata().have_global(recv_buff[i+k+1])) {
 	  // Generate edge key

@@ -104,7 +104,6 @@ void GlobalFacetMap::findGlobal3D()
     }    
   }
 
-
   int sh_count = send_buff.size();
   int res_size = sh_count/dim;
   int recv_size,recv_count;
@@ -121,7 +120,6 @@ void GlobalFacetMap::findGlobal3D()
   uint src, dest;
   uint num_own = 0;
 
-  //  std::map<uint, uint> leftovers;
   for(uint j=1; j<pe_size; j++){
     
     src = (rank - j + pe_size) % pe_size;
@@ -180,12 +178,6 @@ bool GlobalFacetMap::globalFacet(Facet& facet)
 {
 
   const uint index = facet.index();
-  //  const uint dim = _mesh.topology().dim();
-
-  // Temporary fix for 3D 
-  //  if( dim == 3) 
-  //    return (facet.numEntities(_mesh.topology().dim()) == 1);    
-
 
   // If the facet is in the map, it may be a local facet
   if(global_facet.count(index) > 0)

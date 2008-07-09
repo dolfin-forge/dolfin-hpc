@@ -189,13 +189,15 @@ void Assembler::assembleCells(GenericTensor& A,
 
     // Update to current cell
     ufc.update(*cell);
-    ufc.update(*cell, mesh.distdata());    
+
+
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], *cell);
 
-
+    // Update to global numbering
+    ufc.update(*cell, mesh.distdata());    
 
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++){
@@ -260,13 +262,13 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
       
     // Update to current cell
     ufc.update(mesh_cell);
-    ufc.update(mesh_cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], mesh_cell, local_facet);
 
-
+    // Update to global numbering
+    ufc.update(mesh_cell, mesh.distdata());
 
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
@@ -334,9 +336,6 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     // Update to current pair of cells
     ufc.update(cell0, cell1);
 
-    // Update to global numbering // FIXME 
-    ufc.update(cell0, cell1, mesh.distdata());    
-
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
     {
@@ -345,7 +344,8 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       coefficients[i]->interpolate(ufc.macro_w[i] + offset, ufc.cell1, *ufc.coefficient_elements[i], cell1, facet1);
     }
 
-
+    // Update to global numbering // FIXME 
+    ufc.update(cell0, cell1, mesh.distdata());    
 
     // Tabulate dofs for each dimension on macro element
     for (uint i = 0; i < ufc.form.rank(); i++)

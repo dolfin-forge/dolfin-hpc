@@ -18,6 +18,8 @@
 #include "UFCFunction.h"
 #include "Function.h"
 
+#include <dolfin/fem/UFCCell.h>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -257,7 +259,14 @@ void Function::interpolate(real* coefficients,
   _facet = facet;
 
   // Interpolate function
-  f->interpolate(coefficients, ufc_cell, finite_element);
+  if( _type == discrete) {
+    UFCCell ufc_cell_glb(cell);
+    ufc_cell_glb.update(cell, f->mesh.distdata());
+    f->interpolate(coefficients, ufc_cell_glb, finite_element);
+    ufc_cell_glb.reset(cell, f->mesh.distdata());
+  }
+  else
+    f->interpolate(coefficients, ufc_cell, finite_element);
 
   // Make cell and facet unavailable
   _cell = 0;
@@ -274,7 +283,7 @@ void Function::eval(real* values, const real* x) const
 {
   if (!f)
     error("Function contains no data.");
-  
+
   // Try scalar version for user-defined function if not overloaded.
   // Otherwise, call eval() function in implementation. Note that we
   // must check if we have a user-defined function or we will go into
@@ -292,7 +301,7 @@ dolfin::real Function::eval(const real* x) const
   // overloaded. Otherwise, raise an exception. Note that we must
   // check that we *don't* have a user-defined function or we will go
   // into a loop between Function and UserFunction...
-
+  
   if (_type != user)
   {
     real values[1] = {0.0};

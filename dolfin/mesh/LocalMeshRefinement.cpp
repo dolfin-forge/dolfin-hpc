@@ -32,7 +32,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
 						    bool refine_boundary, 
 						    real tf, real tb, real ts)
 {
-  message("Refining simplicial mesh by edge bisection.");
+  begin("Refining simplicial mesh by edge bisection.");
 
   // Start Loadbalanacer
   if(MPI::numProcesses() > 1) {
@@ -42,12 +42,13 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     // Generate edge - vertex connectivity if not generated
     mesh.init(1, 0);
     
-    
+    begin("Load balancing");
     // Tune loadbalancer using machine specific parameters if available
     if( tf > 0.0 && tb > 0.0 && ts > 0.0)
       LoadBalancer::balance(mesh, cell_marker, tf, tb, ts);
     else
       LoadBalancer::balance(mesh, cell_marker);
+    end();
   }
 
   // Get size of old mesh
@@ -368,7 +369,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     
     mesh.distdata().set_global_numVertices(num_glb);
   }
-
+  end();
 }
 //-----------------------------------------------------------------------------
 void LocalMeshRefinement::bisectEdgeOfSimplexCell(Cell& cell, 

@@ -181,21 +181,6 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
 void PETScVector::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  
-  if( MPI::numProcesses() > 1) {
-    int  low, high;
-    VecGetOwnershipRange(x, &low, &high);
-
-    int *tmp = new int[m];
-    for(uint i = 0; i < m; i++)
-      if( (int) rows[i] > high && (int) rows[i] < low) 
-	tmp[i] = -1;
-      else
-	tmp[i] = rows[i];
-    delete[] tmp;
-  }
-
-  
   VecSetValues(x, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
 	       INSERT_VALUES);
 }
@@ -338,28 +323,29 @@ real PETScVector::norm(VectorNormType type) const
 real PETScVector::min() const
 {
   real value = 0.0;
-  /*
-  VecMin(x, &value);
-  */
-  dolfin::cout << "FIXME: PETScVector::min() isn't implemented." << dolfin::endl;
+
+  VecMin(x, PETSC_NULL, &value);
+
   return value;
 }
 //-----------------------------------------------------------------------------
 real PETScVector::max() const
 {
   real value = 0.0;
-  /*
-  VecMax(x, &value);
-  */
-  dolfin::cout << "FIXME: PETScVector::max() isn't implemented." << dolfin::endl;
+
+  VecMax(x, PETSC_NULL, &value);
+
   return value;
 }
 //-----------------------------------------------------------------------------
 void PETScVector::disp(uint precision) const
 {
-  VecView(x, PETSC_VIEWER_STDOUT_SELF);
+  if(MPI::numProcesses() > 1)
+    VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+  else
+    VecView(x, PETSC_VIEWER_STDOUT_SELF);
 }
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------  
 Vec PETScVector::vec() const
 {
   return x;

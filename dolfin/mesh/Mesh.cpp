@@ -52,9 +52,7 @@ Mesh::Mesh(std::string filename)
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);
-    
     renumber();
-
   }
 }
 //-----------------------------------------------------------------------------

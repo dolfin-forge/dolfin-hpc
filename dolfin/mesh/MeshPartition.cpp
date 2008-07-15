@@ -17,7 +17,7 @@
 #include "Vertex.h"
 #include "Cell.h"
 
-#include <dolfin/main/MPI.h>
+//#include <dolfin/main/MPI.h>
 #include <parmetis.h>
 #include <mpi.h>
 

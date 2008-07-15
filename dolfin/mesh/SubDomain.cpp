@@ -63,6 +63,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
   // Compute sub domain markers
   for (MeshEntityIterator entity(mesh, dim); !entity.end(); ++entity)
   {
+    on_boundary = false;
     // Check if entity is on the boundary if entity is a facet
     if (dim == D - 1) 
       if (MPI::numProcesses() > 1) {
@@ -71,13 +72,14 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       }
       else
 	on_boundary = entity->numEntities(D) == 1;
-
+    
+    
 
 
     bool all_vertices_inside = true;
     // Dimension of facet > 0, check incident vertices
     if (entity->dim() > 0)
-    {
+      {
 
       if(MPI::numProcesses() > 1){
 	Facet f(mesh, entity->index());

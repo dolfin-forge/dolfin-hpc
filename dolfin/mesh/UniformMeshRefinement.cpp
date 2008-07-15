@@ -131,20 +131,16 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
   mesh = refined_mesh;
 
   if(MPI::numProcesses() >1) {
-    mesh.distdata().invalid_numbering();
+
+    mesh.distdata().invalid_numbering();    
+    mesh.distdata().invalid_ownership();
+
     // FIXME, fix map_new_vertices such that all datastructures are working
     MeshFunction<dolfin::uint> part;
     part.init(mesh, mesh.topology().dim());
     part = dolfin::MPI::processNumber();
     mesh.distribute(part);
     mesh.renumber();
-
-    // MPI aliasing 
-    uint tmp =  mesh.numVertices() - mesh.distdata().num_ghost();
-    uint num_glb;  
-    MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
-    mesh.distdata().set_global_numVertices(num_glb);
   }
 
 }

@@ -557,6 +557,9 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	      mesh.topology().dim(), mesh.geometry().dim());
 
   distdata.set_global_numVertices(mesh.distdata().global_numVertices());
+  distdata.set_global_numEdges(mesh.distdata().global_numEdges());
+  distdata.set_global_numFaces(mesh.distdata().global_numFaces());
+  distdata.set_global_numCells(mesh.distdata().global_numCells());
 
   editor.initVertices(num_vertices);
   editor.initCells(num_cells);
@@ -588,6 +591,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   new_mesh._distdata = distdata;
   mesh = new_mesh;
   mesh.distdata().invalid_numbering();
+  mesh.distdata().invalid_ownership();
 
   // Mark new cells for refinement
   if( cell_marker ) {

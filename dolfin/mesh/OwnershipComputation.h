@@ -1,31 +1,24 @@
 // Copyright (C) 2008 Niclas Jansson. 
 // Licensed under the GNU LGPL Version 2.1. 
 
-
-
-#ifndef __MESH_RENUMBER_H
-#define __MESH_RENUMBER_H
+#ifndef __OWNERSHIP_COMPUTATION_H
+#define __OWNERSHIP_COMPUTATION_H
 
 #include <set>
 
 namespace dolfin
 {
-  class Mesh;  
-  class MeshRenumber
+  class Mesh;
+  class BoundaryMesh;
+  class OwnershipComputation
   {
   public:
+    static void generate_ownership(Mesh& mesh);
 
-    static void renumber(Mesh& mesh);
+  private:    
+    static void init_edge_ownership(Mesh& mesh, BoundaryMesh& local_boundary);
 
-    static void renumber_vertices(Mesh& mesh);
-    
-    static void renumber_edges(Mesh& mesh);
-    
-    static void renumber_faces(Mesh& mesh);
-    
-    static void renumber_cells(Mesh& mesh);
-    
-  private:
+    static void init_face_ownership(Mesh& mesh, BoundaryMesh& local_boundary);
 
     // An edge contains a pair of vertices
     typedef std::pair<uint, uint> EdgeKey;
@@ -35,10 +28,7 @@ namespace dolfin
 
     // Construct a key from edge vertices
     static EdgeKey edge_key(uint id1, uint id2);
-    
-
   };
-
 }
 
 #endif

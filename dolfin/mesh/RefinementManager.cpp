@@ -94,7 +94,7 @@ void RefinementManager::init(Mesh& mesh)
   boundary_edge.init(mesh, 1);
   boundary_edge = false;
 
-  // Check if facets are facets and not edges
+  // Check if facets are faces and not edges
   if(mesh.topology().dim() > 1) {
     for(CellIterator bf(local_boundary); !bf.end(); ++bf){
       Facet f(mesh, cell_map->get(*bf));
@@ -149,6 +149,9 @@ void RefinementManager::add_new_vertex(uint* edge,uint vertex,
 {
   // Invalidate global numbering
   mesh.distdata().invalid_numbering();
+  
+  // Invalidate mesh entity ownership
+  mesh.distdata().invalid_ownership();
 
   // Store edge key in shared list
   if(shared) {
@@ -180,7 +183,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
   for(uint i = 0; i < shared_edge.size(); i +=3) {
 
     key = edge_key(shared_edge[i], shared_edge[i+1]);
-    edge_id[key] = (uint)rand();
+    edge_id[key] = (uint)rand() + rank;
     owns_edge[key] = true;
         
     send_buff.push_back(oldmesh.distdata().get_global(shared_edge[i], 0));

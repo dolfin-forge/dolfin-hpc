@@ -349,13 +349,12 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
       
       // Tabulate dofs
       dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
-      
+
       for(uint j = 0; j <   finite_element->space_dimension(); j++)
 	indices.insert(scratch->dofs[j]);
       
-      ufc_cell.reset(*cell, mesh.distdata());
+      ufc_cell.reset(*cell, mesh.distdata());      
     }
-    
     x.init_ghosted(indices.size(), indices);
   }
 

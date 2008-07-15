@@ -204,6 +204,7 @@ void Assembler::assembleCells(GenericTensor& A,
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
     }
 
+
     // Tabulate cell tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell);
 
@@ -211,6 +212,7 @@ void Assembler::assembleCells(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
     
     p++;
+
     ufc.reset(*cell, mesh.distdata());
   }
 }
@@ -274,14 +276,17 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     for (uint i = 0; i < ufc.form.rank(); i++)
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, mesh_cell.index());
 
+
+
     // Tabulate exterior facet tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell, local_facet);
     
+
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
     p++;  
-    
+
     ufc.reset(mesh_cell, mesh.distdata());
   }
 }
@@ -291,11 +296,11 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
                                        const DofMapSet& dof_map_set,
                                        UFC& ufc,
                                        const MeshFunction<uint>* domains) const
-{
+{  
   // Skip assembly if there are no interior facet integrals
   if (ufc.form.num_interior_facet_integrals() == 0)
     return;
-  
+
   // Interior facet integral
   ufc::interior_facet_integral* integral = ufc.interior_facet_integrals[0];
 
@@ -424,6 +429,7 @@ void Assembler::check(const ufc::form& form,
 void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set, UFC& ufc,
                                  bool reset_tensor) const
 {
+
   if (reset_tensor)
   {
     GenericSparsityPattern* sparsity_pattern = A.factory().createPattern(); 
@@ -433,6 +439,7 @@ void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
   }
   else
     A.zero();
+
 }
 //-----------------------------------------------------------------------------
 std::string Assembler::progressMessage(uint rank, std::string integral_type) const

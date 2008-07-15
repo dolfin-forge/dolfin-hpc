@@ -30,7 +30,7 @@ void GlobalFacetMap::init()
   _mesh.init(_mesh.topology().dim() - 1, _mesh.topology().dim());
   
   // Iterate over all Facets connected to the shared vertices
-  for(MeshSharedIterator sv(_mesh.distdata()); !sv.end(); ++sv) {
+  for(MeshSharedIterator sv(_mesh.distdata(), 0); !sv.end(); ++sv) {
     Vertex v(_mesh, sv.index());
     for(FacetIterator f(v); !f.end(); ++f) {
       if (f->numEntities(_mesh.topology().dim()) == 1) {
@@ -42,14 +42,16 @@ void GlobalFacetMap::init()
   }
 
   const uint dim = _mesh.topology().dim();
-
-  if(dim == 2)
-    findGlobal2D();
-  else if(dim == 3)
-    findGlobal3D();
-  else
-    error("Couldnt handle local to global map with facet of dim %d", dim);
-
+  
+  switch(dim)
+    {
+    case 2:
+      findGlobal2D(); break;
+    case 3:
+      findGlobal3D(); break;
+    default:
+      error("Couldnt handle local to global map with facet of dim %d", dim);
+    }
 }
 //-----------------------------------------------------------------------------
 void GlobalFacetMap::findGlobal2D()
@@ -179,8 +181,8 @@ bool GlobalFacetMap::globalFacet(Facet& facet)
 
   const uint index = facet.index();
 
-  // If the facet is in the map, it may be a local facet
-  if(global_facet.count(index) > 0)
+  // If the facet is in the map, it might be a local facet
+  if(global_facet.count(index) > 0 && MPI::numProcesses() > 1)
     return global_facet[index];
   else
     return (facet.numEntities(_mesh.topology().dim()) == 1);

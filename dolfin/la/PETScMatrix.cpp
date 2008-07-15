@@ -141,7 +141,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 
 
-  //  MatSetOption(A, MAT_COLUMNS_SORTED);
+  //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
   MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
   MatZeroEntries(A);
 

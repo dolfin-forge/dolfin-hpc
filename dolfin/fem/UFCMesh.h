@@ -60,7 +60,9 @@ namespace dolfin
 	    num_entities[2] = mesh.distdata().global_numFaces();
 	  else
 	    num_entities[2] = mesh.distdata().global_numCells();
-	else
+	else if( d == 3 && MPI::numProcesses() > 1)
+	    num_entities[3] = mesh.distdata().global_numCells();
+	else 
 	  num_entities[d] = mesh.size(d);
     }
 

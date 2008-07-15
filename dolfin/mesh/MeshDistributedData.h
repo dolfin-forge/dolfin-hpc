@@ -26,15 +26,15 @@ namespace dolfin
     ~MeshDistributedData();
 
     const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
-    
+    //FIXME remove dim = 0
     void clear();
     void set_map(uint local_index, uint global_index, uint dim);
     
-    void set_shared(uint local_index);
-    void set_ghost(uint local_index);
+    void set_shared(uint local_index, uint dim = 0);
+    void set_ghost(uint local_index, uint dim = 0);
 
-    void set_shared(Vertex& v);
-    void set_ghost(Vertex& v);
+    void set_shared(MeshEntity& m);
+    void set_ghost(MeshEntity& m);
     
     uint get_global(uint i, uint dim);
     uint get_global(MeshEntity& e);
@@ -45,8 +45,8 @@ namespace dolfin
     uint get_cell_global(uint i);
     uint get_cell_local(uint i);
 
-    void set_ghost_owner(uint i, uint rank);
-    void set_ghost_owner(Vertex& v, uint rank);
+    void set_ghost_owner(uint i, uint rank, uint dim = 0);
+    void set_ghost_owner(MeshEntity& m, uint rank);
 
     inline void set_global_numVertices(uint num_global) 
     { _num_global_vertex = num_global; }
@@ -59,26 +59,43 @@ namespace dolfin
 
     inline void set_global_numCells(uint num_global) 
     { _num_global_cell = num_global; }
+
+    inline void invalid_numbering()
+    {
+      _valid_vertex_numbering = _valid_cell_numbering = false;
+      _valid_edge_numbering = _valid_face_numbering = false; 
+
+    }
+
+    inline void invalid_ownership()
+    { 
+      _valid_edge_numbering = _valid_face_numbering = false; 
+    }
+
+    uint get_owner(uint local_index, uint dim = 0);
+    uint get_owner(MeshEntity& m);
+
+    inline bool have_global(uint i, uint dim = 0) 
+    {return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);}
     
-    void invalid_numbering();
-
-    uint get_owner(uint local_index);
-    uint get_owner(Vertex& v);
-
-    inline bool have_global(uint i) 
-    {return (MPI::numProcesses() > 1 ? (local_vertex_indices.count(i) > 0) : true);}
+    inline bool have_local(uint i, uint dim = 0) 
+    {return (MPI::numProcesses() > 1 ? (global_indices[dim].count(i) > 0) : true);}
     
-    inline bool have_local(uint i) 
-    {return (MPI::numProcesses() > 1 ? (global_vertex_indices.count(i) > 0) : true);}
+    inline bool is_shared(uint i, uint dim = 0 )
+    {return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);}
+
+    inline bool is_ghost(uint i, uint dim = 0)
+    {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : true);}
+
+    inline uint num_shared(uint dim = 0) {return shared[dim].size(); }
+    inline uint num_ghost(uint dim = 0) {return ghost[dim].size(); }
+
+    /*
+    inline uint num_shared(uint i = 0) { return _num_shared[i]; }
+    inline uint num_ghost(uint i = 0) { return _num_ghost[i]; }
+    */
     
-    inline bool is_shared(uint i)
-    {return (MPI::numProcesses() > 1 ? (shared_vertices.count(i) > 0) : true);}
-
-    inline bool is_ghost(uint i)
-    {return (MPI::numProcesses() > 1 ? (ghost_vertices.count(i) > 0) : true);}
-
-    inline uint num_shared() { return _num_shared; }
-    inline uint num_ghost() { return _num_ghost; }
+    
 
     inline uint global_numVertices() { return _num_global_vertex; }
     
@@ -87,74 +104,71 @@ namespace dolfin
     inline uint global_numFaces() { return _num_global_face; }
 
     inline uint global_numCells() { return _num_global_cell; }
-    
+
     inline uint max_index() { return _max_global_index; }
 
 
   private:
     
     uint _size, _cell_size,_max_global_index;
-    uint _num_shared, _num_ghost;
     uint _num_global_vertex, _num_global_edge;
     uint _num_global_face, _num_global_cell;
-
+    //    uint _num_shared[3], _num_ghost[3];
 
     bool _valid_vertex_numbering, _valid_cell_numbering,
       _valid_edge_numbering, _valid_face_numbering;
 
-    std::map<uint, uint> global_vertex_indices;
-    std::map<uint, uint> local_vertex_indices;
+    bool _valid_edge_ownership, _valid_face_ownership;
+      
+      
 
-    std::map<uint, uint> global_edge_indices;
-    std::map<uint, uint> local_edge_indices;
+    std::map<uint, uint> global_indices[4];
+    std::map<uint, uint> local_indices[4];
 
-    std::map<uint, uint> global_face_indices;
-    std::map<uint, uint> local_face_indices;
-
-    std::map<uint, uint> global_cell_indices;
-    std::map<uint, uint> local_cell_indices;
-  
-    std::map<uint, uint> ghost_owner;
+    std::map<uint, uint> ghost_owner[3];
     
-    std::set<uint> shared_vertices;
-    std::set<uint> ghost_vertices;
+    std::set<uint> shared[3];
+    std::set<uint> ghost[3];
 
     friend class MeshGhostIterator;
     friend class MeshSharedIterator;
     friend class MeshRenumber;
+    friend class OwnershipComputation;
 
    };
   
   class MeshGhostIterator 
   {
   public:
-  MeshGhostIterator(MeshDistributedData& distdata) : _distdata(distdata) 
-    { _iter = _distdata.ghost_vertices.begin();}
+  MeshGhostIterator(MeshDistributedData& distdata, uint i) : _distdata(distdata) 
+    { _iter = _distdata.ghost[i].begin(); _dim = i;}
     
     ~MeshGhostIterator() {}
     MeshGhostIterator& operator++() { ++_iter; return *this;}
     inline uint index() const { return *_iter; }
-    inline uint owner() { return _distdata.get_owner(*_iter); }   
-    inline bool end() const { return _iter == _distdata.ghost_vertices.end();}
+    inline uint owner() { return _distdata.get_owner(*_iter, _dim); }   
+    inline bool end() const { return _iter == _distdata.ghost[_dim].end();}
   private:
     MeshDistributedData& _distdata;
     std::set<uint>::iterator _iter;
+    uint _dim;
   };
 
   class MeshSharedIterator 
   {
   public:
-  MeshSharedIterator(MeshDistributedData& distdata) : _distdata(distdata) 
-    { _iter = _distdata.shared_vertices.begin(); }
+  MeshSharedIterator(MeshDistributedData& distdata, uint i) : _distdata(distdata) 
+    { _iter = _distdata.shared[i].begin(); _dim = i;}
       
     ~MeshSharedIterator() {}
     MeshSharedIterator& operator++() { ++_iter; return *this;}
     inline uint index() const { return *_iter; }
-    inline bool end() const { return _iter == _distdata.shared_vertices.end();}
+    inline bool end() const { return _iter == _distdata.shared[_dim].end();}
    
   private:
     MeshDistributedData& _distdata;
     std::set<uint>::iterator _iter;
+    uint _dim;
   };
   
 }

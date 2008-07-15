@@ -15,6 +15,7 @@
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
+#include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Face.h>

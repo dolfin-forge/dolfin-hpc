@@ -195,7 +195,7 @@ void SparsityPattern::initRange()
   uint num_procs = dolfin::MPI::numProcesses();
   range = new uint[num_procs+1];
   range[0] = 0;
-
+  
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
 }

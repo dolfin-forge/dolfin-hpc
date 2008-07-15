@@ -241,6 +241,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
         cell_vertices[cv++] = v->index(); 
       editor.addCell(current_cell++, cell_vertices);
     }
+
   }
   
   // Reset forbidden edges 
@@ -360,14 +361,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     part.init(mesh, mesh.topology().dim());
     part = dolfin::MPI::processNumber();
     mesh.distribute(part);
-    mesh.distdata().invalid_numbering();
     mesh.renumber();
-     uint tmp =  mesh.numVertices() - mesh.distdata().num_ghost();
-    // MPI aliasing 
-    uint num_glb;  
-    MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
-    mesh.distdata().set_global_numVertices(num_glb);
   }
   end();
 }

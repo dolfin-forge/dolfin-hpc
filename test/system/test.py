@@ -38,8 +38,8 @@ pydemos.remove('./../../demo/pde/lift-drag/python')
 pydemos.remove('./../../demo/ode/aliev-panfilov/python')
 
 # Push slow demos to the end
-pyslow = ['./../../demo/ode/lorenz/python']
-cppslow = ['./../../demo/nls/cahn-hilliard/cpp']
+pyslow = []
+cppslow = []
 for s in pyslow:
     pydemos.remove(s) 
     pydemos.append(s)
@@ -47,7 +47,10 @@ for s in cppslow:
     cppdemos.remove(s) 
     cppdemos.append(s)
 
-# Demos that need command line arguments are treated seperately
+# Remove overly slow demos
+cppdemos.remove('./../../demo/nls/cahn-hilliard/cpp')
+
+# Demos that need command line arguments are treated separately
 pydemos.remove('./../../demo/quadrature/python')
 cppdemos.remove('./../../demo/quadrature/cpp')
 cppdemos.remove('./../../demo/ode/method-weights/cpp')
@@ -56,7 +59,16 @@ cppdemos.remove('./../../demo/ode/stiff/cpp')
 failed = []
 timing = []
 
+# Check if we should run only Python tests, use for quick testing
+if len(sys.argv) == 2 and sys.argv[1] == "--only-python":
+    only_python = True
+else:
+    only_python = False
+
 # Run C++ demos
+if only_python:
+    print "Skipping C++ demos"
+    cppdemos = []
 for demo in cppdemos:
     print "----------------------------------------------------------------------"
     print "Running C++ demo %s" % demo

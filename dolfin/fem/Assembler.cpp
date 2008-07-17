@@ -1,12 +1,12 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Garth N. Wells, 2007
+// Modified by Garth N. Wells, 2007, 2008
 // Modified by Ola Skavhaug, 2007
 // Modified by Niclas Jansson, 2008
 //
 // First added:  2007-01-17
-// Last changed: 2008-07-03
+// Last changed: 2008-07-09
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
@@ -200,10 +200,8 @@ void Assembler::assembleCells(GenericTensor& A,
     ufc.update(*cell, mesh.distdata());    
 
     // Tabulate dofs for each dimension
-    for (uint i = 0; i < ufc.form.rank(); i++){
+    for (uint i = 0; i < ufc.form.rank(); i++)
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
-    }
-
 
     // Tabulate cell tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell);
@@ -215,6 +213,9 @@ void Assembler::assembleCells(GenericTensor& A,
 
     ufc.reset(*cell, mesh.distdata());
   }
+
+  //t = toc() - t;
+  //printf("assembly loop (s): %.3e\n", t);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,
@@ -296,7 +297,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
                                        const DofMapSet& dof_map_set,
                                        UFC& ufc,
                                        const MeshFunction<uint>* domains) const
-{  
+{
   // Skip assembly if there are no interior facet integrals
   if (ufc.form.num_interior_facet_integrals() == 0)
     return;
@@ -372,8 +373,8 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   }
 }
 //-----------------------------------------------------------------------------
-void Assembler::check(const ufc::form& form,
-                      const Array<Function*>& coefficients,
+void Assembler::check(const ufc::form& form, 
+                      const Array<Function*>& coefficients, 
                       const Mesh& mesh) const
 {
   // Check that we get the correct number of coefficients
@@ -395,14 +396,16 @@ void Assembler::check(const ufc::form& form,
       uint r = coefficients[i]->rank();
       uint fe_r = fe->value_rank();
       if(fe_r != r)
-        warning("Invalid value rank of Function %d, got %d but expecting %d.", i, r, fe_r);
+        warning("Invalid value rank of Function %d, got %d but expecting %d. \
+You may need to provide the rank of a user defined Function.", i, r, fe_r);
       
       for(uint j=0; j<r; ++j)
       {
         uint dim = coefficients[i]->dim(j);
         uint fe_dim = fe->value_dimension(j);
         if(dim != fe_dim)
-          warning("Invalid value dimension %d of Function %d, got %d but expecting %d.", j, i, dim, fe_dim);
+          warning("Invalid value dimension %d of Function %d, got %d but expecting %d. \
+You may need to provide the dimension of a user defined Function.", j, i, dim, fe_dim);
       }
     }
     catch(std::exception & e)
@@ -426,10 +429,9 @@ void Assembler::check(const ufc::form& form,
   }
 }
 //-----------------------------------------------------------------------------
-void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set, UFC& ufc,
-                                 bool reset_tensor) const
+void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set, 
+                                 UFC& ufc, bool reset_tensor) const
 {
-
   if (reset_tensor)
   {
     GenericSparsityPattern* sparsity_pattern = A.factory().createPattern(); 
@@ -468,16 +470,16 @@ std::string Assembler::progressMessage(uint rank, std::string integral_type) con
   return s.str();
 }
 //-----------------------------------------------------------------------------
-void Assembler::assemble_system(
-                         GenericTensor& A, const ufc::form& A_form, 
-                         const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
-                         GenericTensor& b, const ufc::form& b_form, 
-                         const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
-                         DirichletBC& bc, 
-                         const MeshFunction<uint>* cell_domains,
-                         const MeshFunction<uint>* exterior_facet_domains,
-                         const MeshFunction<uint>* interior_facet_domains,
-                         bool reset_tensors)
+void Assembler::assemble_system(GenericTensor& A, const ufc::form& A_form, 
+                                const Array<Function*>& A_coefficients, 
+                                const DofMapSet& A_dof_map_set,
+                                GenericTensor& b, const ufc::form& b_form, 
+                                const Array<Function*>& b_coefficients, 
+                                const DofMapSet& b_dof_map_set, DirichletBC& bc, 
+                                const MeshFunction<uint>* cell_domains,
+                                const MeshFunction<uint>* exterior_facet_domains,
+                                const MeshFunction<uint>* interior_facet_domains,
+                                bool reset_tensors)
 {
   // Note the importance of treating empty mesh functions as null pointers
   // for the PyDOLFIN interface.
@@ -518,18 +520,13 @@ void Assembler::assemble_system(
   // Finalise BC (need to finalize twice for each tensor) 
   A.apply();
   b.apply();
-
 }
 //-----------------------------------------------------------------------------
-void Assembler::applyTraces(
-    GenericTensor& globalA, 
-    GenericTensor& globalb, 
-    DirichletBC& bc,
-    const DofMapSet& A_dof_map_set,
-    const DofMapSet& b_dof_map_set,
-    const ufc::form& A_form, 
-    const ufc::form& b_form, 
-    const MeshFunction<uint>* domains) 
+void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb, 
+                            DirichletBC& bc, const DofMapSet& A_dof_map_set,
+                            const DofMapSet& b_dof_map_set,
+                            const ufc::form& A_form, const ufc::form& b_form, 
+                            const MeshFunction<uint>* domains) 
 {
   // FIXME check that A and b have proper rank 
   // Create data structure for local assembly data
@@ -539,7 +536,8 @@ void Assembler::applyTraces(
 //  uint M = A_dof_map_set[0].global_dimension();  
   uint* indicators = new uint[N];
   real* x = new real[N];
-  for (uint i = 0; i < N; i++) {
+  for (uint i = 0; i < N; i++) 
+  {
     indicators[i] = 0; 
     x[i] = 0.0; 
   }
@@ -624,14 +622,16 @@ void Assembler::applyTraces(
 
 
     // for each dof, check if it is associated with Dirichlet condition   
-    for (uint i=0; i<n; i++) {  
+    for (uint i=0; i<n; i++) 
+    {  
       uint ii = A_ufc.dofs[1][i]; 
-      if (indicators[ii]) {  
+      if (indicators[ii]) 
+      {  
         b[i] = x[ii]; 
-        for (uint k=0; k<n; k++) {
+        for (uint k=0; k<n; k++) 
           A[k+i*n] = 0.0; 
-        }
-        for (uint j=0; j<m; j++) {
+        for (uint j=0; j<m; j++) 
+        {
           b[j] -= A[i+j*n]*x[ii]; 
           A[i+j*n] = 0.0; 
         }
@@ -654,8 +654,6 @@ void Assembler::applyTraces(
     }
     std::cout <<"-------------------"<<std::endl; 
     */ 
-
-
 
     // PETSc needs this
     globalA.apply(PETSC_HACK);

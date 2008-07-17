@@ -77,6 +77,9 @@ namespace dolfin
     /// Update vector
     inline void sync_ghosts() { x->apply(); }
 
+    /// Return signature
+    std::string signature() const;
+
     /// Return vector
     GenericVector& vector() const;
 

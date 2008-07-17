@@ -100,10 +100,13 @@ namespace dolfin
     virtual uint rank() const;
 
     /// Return the dimension of the value space for axis i
-    virtual uint dim(unsigned int i) const;
+    virtual uint dim(uint i) const;
     
     /// Return the mesh
     Mesh& mesh() const;
+
+    /// Return the signature of a DiscreteFunction
+    std::string signature() const;
 
     /// Return the vector associated with a DiscreteFunction
     GenericVector& vector() const;

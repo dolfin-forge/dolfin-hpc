@@ -351,7 +351,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 	  edge[0] = oldmesh.distdata().get_global(edge_v[0], 0);
 	  edge[1] = oldmesh.distdata().get_global(edge_v[1], 0);
 	  key = edge_key(edge[0], edge[1]);
-	  edge_vote[longest_edge.index()] += (uint) rand();
+	  edge_vote[longest_edge.index()] += (uint) rand() + rank; 
 
 	  send_buff.push_back(edge[0]);
 	  send_buff.push_back(edge[1]);

@@ -6,6 +6,8 @@
 #ifndef __MESH_RENUMBER_H
 #define __MESH_RENUMBER_H
 
+#include "Face.h"
+#include <dolfin/common/Array.h>
 #include <set>
 
 namespace dolfin
@@ -35,7 +37,11 @@ namespace dolfin
 
     // Construct a key from edge vertices
     static EdgeKey edge_key(uint id1, uint id2);
-    
+
+    // Construct a key from face vertices
+    static FaceKey face_key(Face& f);
+
+    static void send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f);
 
   };
 

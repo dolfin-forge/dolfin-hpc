@@ -112,9 +112,7 @@ void MeshDistributedData::set_shared(MeshEntity& m)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_shared(uint local_index, uint dim)
 {
-  if( shared[dim].count(local_index) == 0) 
-    shared[dim].insert(local_index);
-
+  shared[dim].insert(local_index);
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost(MeshEntity& m)
@@ -124,11 +122,8 @@ void MeshDistributedData::set_ghost(MeshEntity& m)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost(uint local_index, uint dim)
 {
-
-  if(ghost[dim].count(local_index) == 0) {
-    ghost[dim].insert(local_index);
-    set_shared(local_index, dim);
-  }
+  ghost[dim].insert(local_index);
+  set_shared(local_index, dim);
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost_owner(MeshEntity& m, uint rank)
@@ -170,9 +165,9 @@ dolfin::uint MeshDistributedData::get_local(MeshEntity& e)
   return local_indices[dim][i];
 }
 //-----------------------------------------------------------------------------
-dolfin::uint MeshDistributedData::get_owner(MeshEntity& m) 
+dolfin::uint MeshDistributedData::get_owner(MeshEntity& e) 
 {
-  return get_owner(m.index(), m.dim());
+  return get_owner(e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_owner(uint local_index, uint dim) 

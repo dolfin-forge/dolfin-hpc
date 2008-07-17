@@ -16,6 +16,7 @@
 #include "PETScMatrix.h"
 #include "PETScVector.h"
 #include "PETScKrylovMatrix.h"
+#include <dolfin/main/MPI.h>
 
 using namespace dolfin;
 
@@ -172,7 +173,10 @@ void PETScKrylovSolver::init(uint M, uint N)
     KSPDestroy(ksp);
 
   // Set up solver environment
-  KSPCreate(PETSC_COMM_SELF, &ksp);
+  if(MPI::numProcesses() > 1)
+    KSPCreate(PETSC_COMM_WORLD, &ksp);
+  else
+    KSPCreate(PETSC_COMM_SELF, &ksp);
   KSPSetFromOptions(ksp);  
   //KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
 

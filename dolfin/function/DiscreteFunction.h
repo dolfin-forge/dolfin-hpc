@@ -74,6 +74,9 @@ namespace dolfin
     /// Evaluate function at given point
     void eval(real* values, const real* x) const;
 
+    /// Update vector
+    inline void sync_ghosts() { x->apply(); }
+
     /// Return signature
     std::string signature() const;
 

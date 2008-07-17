@@ -3,6 +3,7 @@
 //
 // Modified by Garth N. Wells, 2007, 2008
 // Modified by Ola Skavhaug, 2007
+// Modified by Niclas Jansson, 2008
 //
 // First added:  2007-01-17
 // Last changed: 2008-07-09
@@ -26,7 +27,8 @@
 #include "Assembler.h"
 #include "SparsityPatternBuilder.h"
 #include "DofMapSet.h"
-
+#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
 
 using namespace dolfin;
@@ -129,7 +131,11 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 {
   // Note the importance of treating empty mesh functions as null pointers
   // for the PyDOLFIN interface.
-  
+
+  // Update all ghost points
+  for (uint i = 0; i < coefficients.size(); i++)
+    coefficients[i]->sync_ghosts();
+
   // Check arguments
   check(form, coefficients, mesh);
 
@@ -184,10 +190,15 @@ void Assembler::assembleCells(GenericTensor& A,
     // Update to current cell
     ufc.update(*cell);
 
+
+
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], *cell);
-    
+
+    // Update to global numbering
+    ufc.update(*cell, mesh.distdata());    
+
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
@@ -199,6 +210,8 @@ void Assembler::assembleCells(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
     
     p++;
+
+    ufc.reset(*cell, mesh.distdata());
   }
 
   //t = toc() - t;
@@ -221,6 +234,9 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   // Create boundary mesh
   BoundaryMesh boundary(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
+  // FIXME MeshEntityIterator, empty BoundaryMesh
+  if(boundary.numCells()  == 0) return;
+
   dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
@@ -254,17 +270,25 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], mesh_cell, local_facet);
 
+    // Update to global numbering
+    ufc.update(mesh_cell, mesh.distdata());
+
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, mesh_cell.index());
 
+
+
     // Tabulate exterior facet tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell, local_facet);
     
+
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
     p++;  
+
+    ufc.reset(mesh_cell, mesh.distdata());
   }
 }
 //-----------------------------------------------------------------------------
@@ -277,7 +301,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   // Skip assembly if there are no interior facet integrals
   if (ufc.form.num_interior_facet_integrals() == 0)
     return;
-  
+
   // Interior facet integral
   ufc::interior_facet_integral* integral = ufc.interior_facet_integrals[0];
 
@@ -317,7 +341,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 
     // Update to current pair of cells
     ufc.update(cell0, cell1);
-    
+
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
     {
@@ -325,6 +349,9 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       coefficients[i]->interpolate(ufc.macro_w[i], ufc.cell0, *ufc.coefficient_elements[i], cell0, facet0);
       coefficients[i]->interpolate(ufc.macro_w[i] + offset, ufc.cell1, *ufc.coefficient_elements[i], cell1, facet1);
     }
+
+    // Update to global numbering // FIXME 
+    ufc.update(cell0, cell1, mesh.distdata());    
 
     // Tabulate dofs for each dimension on macro element
     for (uint i = 0; i < ufc.form.rank(); i++)
@@ -340,6 +367,8 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
 
+    // Reset cells to local numbering
+    ufc.reset(cell0, cell1, mesh.distdata());
     p++;
   }
 }
@@ -412,12 +441,13 @@ void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
   }
   else
     A.zero();
+
 }
 //-----------------------------------------------------------------------------
 std::string Assembler::progressMessage(uint rank, std::string integral_type) const
 {
   std::stringstream s;
-  s << "Assembling ";
+  s << "Assembling (rank " << MPI::processNumber()<< " ) ";
   
   switch (rank)
   {

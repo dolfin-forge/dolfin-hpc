@@ -5,9 +5,10 @@
 // Modified by Andy R. Terrel 2005.
 // Modified by Ola Skavhaug 2007.
 // Modified by Magnus Vikstrøm 2007-2008.
+// Modified by Niclas Jansson 2008
 //
 // First added:  2004
-// Last changed: 2008-05-15
+// Last changed: 2008-07-03
 
 #ifdef HAS_PETSC
 
@@ -82,7 +83,7 @@ void PETScMatrix::init(uint M, uint N)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 50, PETSC_NULL, 50, PETSC_NULL, &A);
+    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
   }
   else
   {
@@ -108,7 +109,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 50, PETSC_NULL, 50, PETSC_NULL, &A);
+    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
     //MatSetFromOptions(A);
     //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
     //MatZeroEntries(A);
@@ -136,11 +137,19 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
+
   MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+
+
+  //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+  MatZeroEntries(A);
+
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 {
+
   if (dolfin::MPI::numProcesses() > 1)
   {
     uint p = dolfin::MPI::processNumber();
@@ -155,6 +164,7 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
   }
   else
   {
+
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint* nzrow = new uint[spattern.size(0)];  
     spattern.numNonZeroPerRow(nzrow);

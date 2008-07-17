@@ -45,6 +45,8 @@ namespace dolfin
     /// Evaluate function at given point
     virtual void eval(real* values, const real* x) const = 0;
 
+    virtual void sync_ghosts() = 0;
+
     /// The mesh
     Mesh& mesh;
 

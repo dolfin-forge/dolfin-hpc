@@ -3,6 +3,7 @@
 //
 // Modified by Kristian B. Oelgaard, 2007.
 // Modified by Martin Sandve Alnes, 2008.
+// Modified by Niclas Jansson, 2008.
 //
 // First added:  2006-02-09
 // Last changed: 2008-07-01
@@ -14,6 +15,7 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/fem/UFC.h>
 #include "Function.h"
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -37,6 +39,13 @@ namespace dolfin
       real hmin = c->diameter();
       for (; !c.end(); ++c)
         hmin = std::min(hmin, c->diameter());
+      
+      // Compute the global minimum
+      if(MPI::numProcesses() > 1) {
+	real hmin_tmp = hmin;
+	MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+      }
+	
       return hmin;
     }
 
@@ -47,6 +56,13 @@ namespace dolfin
       real hmax = c->diameter();
       for (; !c.end(); ++c)
         hmax = std::max(hmax, c->diameter());
+
+      // Compute the global maximum
+      if(MPI::numProcesses() > 1) {
+	real hmax_tmp = hmax;
+	MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+      }
+
       return hmax;
     }
     

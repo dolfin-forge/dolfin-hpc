@@ -3,9 +3,10 @@
 //
 // Modified by Johan Jansson 2006.
 // Modified by Ola Skavhaug 2006.
+// Modified by Niclas Jansson 2008.
 //
 // First added:  2006-06-21
-// Last changed: 2008-05-28
+// Last changed: 2008-06-30
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
@@ -19,11 +20,25 @@
 #include "MeshData.h"
 #include "BoundaryMesh.h"
 #include "BoundaryComputation.h"
+#include "GlobalFacetMap.h"
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
+{
+  computeBoundaryCommon(mesh, boundary, false);
+}
+//-----------------------------------------------------------------------------
+void BoundaryComputation::computeLocalBoundary(Mesh& mesh, 
+					       BoundaryMesh& boundary)
+{
+  computeBoundaryCommon(mesh, boundary, true);
+}
+//-----------------------------------------------------------------------------
+void BoundaryComputation::computeBoundaryCommon(Mesh& mesh, 
+						BoundaryMesh& boundary,
+						bool local_boundary)
 {
   // We iterate over all facets in the mesh and check if they are on
   // the boundary. A facet is on the boundary if it is connected to
@@ -45,22 +60,30 @@ void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
   Array<uint> boundary_vertices(num_vertices);
   boundary_vertices = num_vertices;
 
+  //FIXME rename
+  GlobalFacetMap facetmap(mesh);
+  facetmap.init();
+
   // Count boundary vertices and facets, and assign vertex indices
   uint num_boundary_vertices = 0;
   uint num_boundary_cells = 0;
   for (FacetIterator f(mesh); !f.end(); ++f)
   {
     // Boundary facets are connected to exactly one cell
-    if (f->numEntities(D) == 1)
-    {
+    //    if (f->numEntities(D) == 1)
+    //      {
+
+    if(facetmap.globalFacet(*f) || 
+       local_boundary && f->numEntities(D) == 1 ) {
+
       // Count boundary vertices and assign indices
       for (VertexIterator v(*f); !v.end(); ++v)
-      {
-	const uint vertex_index = v->index();
-	if (boundary_vertices[vertex_index] == num_vertices)
-	  boundary_vertices[vertex_index] = num_boundary_vertices++;
-      }
-
+	{
+	  const uint vertex_index = v->index();
+	  if (boundary_vertices[vertex_index] == num_vertices)
+	    boundary_vertices[vertex_index] = num_boundary_vertices++;
+	} 
+      
       // Count boundary cells (facets of the mesh)
       num_boundary_cells++;
     }
@@ -70,6 +93,12 @@ void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
   editor.initVertices(num_boundary_vertices);
   editor.initCells(num_boundary_cells);
 
+  // Return if no boundary where found
+  if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1) {
+    editor.close(); 
+    return;
+  }
+  
   // Initialize mapping from vertices in boundary to vertices in mesh
   MeshFunction<uint>* vertex_map = 0;
   if (num_boundary_vertices > 0)
@@ -109,8 +138,11 @@ void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
   for (FacetIterator f(mesh); !f.end(); ++f)
   {
     // Boundary facets are connected to exactly one cell
-    if (f->numEntities(D) == 1)
-    {
+    //    if (f->numEntities(D) == 1)
+    //        {
+    if(facetmap.globalFacet(*f) || 
+       local_boundary && f->numEntities(D) == 1) {
+
       // Compute new vertex numbers for cell
       uint* vertices = f->entities(0);
       for (uint i = 0; i < cell.size(); i++)

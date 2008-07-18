@@ -24,6 +24,8 @@
 #include "SubFunction.h"
 #include "DiscreteFunction.h"
 
+#include <set>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -107,6 +109,8 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function)
   sub_function.f->x->get(values, n, get_rows);
   x->set(values, n, set_rows);
   x->apply();
+
+
   delete [] values;
   delete [] get_rows;
   delete [] set_rows;
@@ -210,18 +214,24 @@ void DiscreteFunction::interpolate(real* values) const
   const uint num_cell_vertices = mesh.type().numVertices(mesh.topology().dim());
   real* vertex_values = new real[scratch->size*num_cell_vertices];
 
+  // Make sure vectors ghost values are updated)
+  x->apply();
+
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values
   for (; !cell.end(); ++cell)
   {
     // Update to current cell
     ufc_cell.update(*cell);
+    ufc_cell.update(*cell, mesh.distdata());
 
     // Tabulate dofs
     dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
-    
+
     // Pick values from global vector
     x->get(scratch->coefficients, dof_map->local_dimension(), scratch->dofs);
+
+    ufc_cell.reset(*cell, mesh.distdata());
 
     // Interpolate values at the vertices
     finite_element->interpolate_vertex_values(vertex_values, scratch->coefficients, ufc_cell);
@@ -230,6 +240,7 @@ void DiscreteFunction::interpolate(real* values) const
     for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
       for (uint i = 0; i < scratch->size; ++i)
         values[i*mesh.numVertices() + vertex->index()] = vertex_values[vertex.pos()*scratch->size + i];
+
   }
 
   // Delete local data
@@ -244,7 +255,6 @@ void DiscreteFunction::interpolate(real* coefficients,
   dolfin_assert(this->finite_element);
   dolfin_assert(this->dof_map);
   dolfin_assert(scratch);
-
   // FIXME: Better test here, compare against the local element
 
   // Check dimension
@@ -261,7 +271,6 @@ void DiscreteFunction::interpolate(real* coefficients,
 void DiscreteFunction::eval(real* values, const real* x) const
 {
   dolfin_assert(scratch);
-
   // Initialize intersection detector if not done before
   if (!intersection_detector)
     intersection_detector = new IntersectionDetector(mesh);
@@ -279,9 +288,17 @@ void DiscreteFunction::eval(real* values, const real* x) const
     error("Unable to evaluate function at given point (not inside domain).");
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);
-  
+   // Reset local numbering
+  ufc_cell.reset(cell, mesh.distdata());
+
+  // Change to global numbering
+  ufc_cell.update(cell, mesh.distdata());
+
   // Get expansion coefficients on cell
   this->interpolate(scratch->coefficients, ufc_cell, *finite_element);
+
+  // Reset local numbering
+  ufc_cell.reset(cell, mesh.distdata());
 
   // Compute linear combination
   for (uint j = 0; j < scratch->size; j++)
@@ -328,6 +345,29 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
   // Initialize scratch space
   if (!scratch)
     scratch = new Scratch(*finite_element);
+
+  if( dolfin::MPI::numProcesses() > 1) {
+    std::set<uint> indices;
+    CellIterator cell(mesh);
+    UFCCell ufc_cell(*cell);
+    for (; !cell.end(); ++cell) {
+      // Update to current cell
+      ufc_cell.update(*cell);
+      ufc_cell.update(*cell, mesh.distdata());
+      
+      // Tabulate dofs
+      dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
+
+      for(uint j = 0; j <   finite_element->space_dimension(); j++)
+	indices.insert(scratch->dofs[j]);
+      
+      ufc_cell.reset(*cell, mesh.distdata());      
+    }
+    x.init_ghosted(indices.size(), indices);
+  }
+
+
+  
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)

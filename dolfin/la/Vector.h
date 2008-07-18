@@ -16,6 +16,8 @@
 #include "DefaultFactory.h"
 #include "GenericVector.h"
 
+#include <set>
+
 namespace dolfin
 {
 
@@ -66,6 +68,9 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N) 
     { vector->init(N); }
+
+    virtual void init_ghosted(uint n, std::set<uint>& indices) 
+    { vector->init_ghosted(n, indices); }
 
     /// Return size of vector
     virtual uint size() const

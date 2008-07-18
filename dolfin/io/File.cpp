@@ -5,18 +5,21 @@
 // Modified by Haiko Etzel 2005.
 // Modified by Magnus Vikstrom 2007.
 // Modified by Nuno Lopes 2008
+// Modified by Niclas Jansson, 2008.
 //
 // First added:  2002-11-12
 // Last changed: 2008-07-16
 
 #include <string>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/main/MPI.h>
 #include "File.h"
 #include "GenericFile.h"
 #include "XMLFile.h"
 #include "MatlabFile.h"
 #include "OctaveFile.h"
 #include "PythonFile.h"
+#include "PVTKFile.h"
 #include "VTKFile.h"
 #include "RAWFile.h"
 #include "XYZFile.h"
@@ -40,7 +43,10 @@ File::File(const std::string& filename)
   else if ( filename.rfind(".py") != filename.npos )
     file = new PythonFile(filename);
   else if ( filename.rfind(".pvd") != filename.npos )
-    file = new VTKFile(filename);
+    if(MPI::numProcesses() > 1) 
+      file = new PVTKFile(filename);
+    else
+      file = new VTKFile(filename);
   else if ( filename.rfind(".raw") != filename.npos )
     file = new RAWFile(filename);
   else if ( filename.rfind(".xyz") != filename.npos )
@@ -65,7 +71,10 @@ File::File(const std::string& filename, Type type)
     file = new OctaveFile(filename);
     break;
   case vtk:
-    file = new VTKFile(filename);
+    if(MPI::numProcesses() > 1) 
+      file = new PVTKFile(filename);
+    else
+      file = new VTKFile(filename);
     break;
   case python:
     file = new PythonFile(filename);

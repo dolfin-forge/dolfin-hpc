@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by: Magnus Vikstrøm, 2007.
+// Modified by: Niclas Jansson, 2008.
 //
 // First added:  2007-05-30
-// Last changed: 2007-12-02
+// Last changed: 2008-01-14
 
 #ifndef __MPI_MESH_COMMUNICATOR_H
 #define __MPI_MESH_COMMUNICATOR_H
@@ -39,6 +40,18 @@ namespace dolfin
     /// Receive mesh function
     static void receive(MeshFunction<unsigned int>& mesh_function);
 
+    /// Distribute mesh according to a mesh function
+    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution);
+    
+    /// Distribute mesh according to mesh function and preserve cell markers
+    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution, 
+			   MeshFunction<bool>& old_cell_marker,
+			   MeshFunction<bool>& cell_marker);
+    
+  private:
+    static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution, 
+				 MeshFunction<bool>* old_cell_marker,
+				 MeshFunction<bool>* cell_marker);
   };
 }
 

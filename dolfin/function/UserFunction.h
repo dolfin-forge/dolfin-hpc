@@ -49,6 +49,9 @@ namespace dolfin
                   const real* coordinates,
                   const ufc::cell& cell) const;
 
+    void sync_ghosts() 
+    {return;}
+
   private:
 
     // Pointer to Function with overloaded evaluation operator

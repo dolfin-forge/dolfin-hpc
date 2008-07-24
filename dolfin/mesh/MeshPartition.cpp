@@ -123,7 +123,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   // default options
   int options[3] = {1, 0, 15};
 
-  
+
   ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag,&numflag,
                            &ncon,&ncnodes,&size, tpwgts, &ubvec,
                            options, &edgecut, part,&comm);
@@ -140,10 +140,6 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   partitions = size;
   for(CellIterator cell(mesh); !cell.end(); ++cell)
     partitions.set(*cell, (uint) part[ cell->index() ]);
-
-  for(uint i = 0; i < partitions.size(); i++)
-    if(partitions.get(i) > (uint) (size -1))
-      error("Corrupt partition function");
 
 }
 //-----------------------------------------------------------------------------

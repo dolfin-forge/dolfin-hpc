@@ -70,6 +70,7 @@ namespace dolfin
     inline void invalid_ownership()
     { 
       _valid_edge_numbering = _valid_face_numbering = false; 
+      flush_edges(); flush_faces();
     }
 
     uint get_owner(uint local_index, uint dim = 0);
@@ -88,14 +89,8 @@ namespace dolfin
     {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : true);}
 
     inline uint num_shared(uint dim = 0) {return shared[dim].size(); }
-    inline uint num_ghost(uint dim = 0) {return ghost[dim].size(); }
 
-    /*
-    inline uint num_shared(uint i = 0) { return _num_shared[i]; }
-    inline uint num_ghost(uint i = 0) { return _num_ghost[i]; }
-    */
-    
-    
+    inline uint num_ghost(uint dim = 0) {return ghost[dim].size(); }
 
     inline uint global_numVertices() { return _num_global_vertex; }
     
@@ -106,22 +101,24 @@ namespace dolfin
     inline uint global_numCells() { return _num_global_cell; }
 
     inline uint max_index() { return _max_global_index; }
+    
+    inline void flush_edges() 
+    { shared[1].clear(); ghost[1].clear(); ghost_owner[1].clear();}
 
+    inline void flush_faces() 
+    { shared[2].clear(); ghost[2].clear(); ghost_owner[2].clear();}
 
   private:
     
-    uint _size, _cell_size,_max_global_index;
+    uint _max_global_index;
     uint _num_global_vertex, _num_global_edge;
     uint _num_global_face, _num_global_cell;
-    //    uint _num_shared[3], _num_ghost[3];
 
     bool _valid_vertex_numbering, _valid_cell_numbering,
       _valid_edge_numbering, _valid_face_numbering;
 
     bool _valid_edge_ownership, _valid_face_ownership;
       
-      
-
     std::map<uint, uint> global_indices[4];
     std::map<uint, uint> local_indices[4];
 

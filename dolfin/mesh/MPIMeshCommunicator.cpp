@@ -601,7 +601,6 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       cell_marker->set( i , cm[i] );
     cm.clear();
   }
-
 }
 //-----------------------------------------------------------------------------
 

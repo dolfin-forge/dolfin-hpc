@@ -35,6 +35,9 @@ namespace dolfin
     /// Initialize boundary mesh (incl. facets between processors)
     void init_local(Mesh& mesh);
 
+    /// Initialize interior boundary mesh (facets between processors)
+    void init_interior(Mesh& mesh);
+
   };
 
 }

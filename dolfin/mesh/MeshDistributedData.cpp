@@ -14,8 +14,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-MeshDistributedData::MeshDistributedData() : _size(0), _cell_size(0),
-					     _max_global_index(0),
+MeshDistributedData::MeshDistributedData() : _max_global_index(0),
 					     _valid_vertex_numbering(false),
 					     _valid_cell_numbering(false),
 					     _valid_edge_numbering(false),
@@ -36,8 +35,7 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 {
   clear();
 
-  _size = distributed_data._size;
-  _cell_size = distributed_data._cell_size;
+  _max_global_index = distributed_data._max_global_index;
 
   _valid_vertex_numbering = distributed_data._valid_vertex_numbering;
   _valid_cell_numbering = distributed_data._valid_cell_numbering;
@@ -48,8 +46,6 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _valid_face_ownership = distributed_data._valid_face_ownership;
 
 
-  _max_global_index = distributed_data._max_global_index;
-  
   for(uint i = 0 ; i < 4; i++) {
     global_indices[i] = distributed_data.global_indices[i];
     local_indices[i] = distributed_data.local_indices[i];
@@ -72,7 +68,7 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 //-----------------------------------------------------------------------------
 void MeshDistributedData::clear()
 {
-  _size = _cell_size = _max_global_index = 0;
+  _max_global_index = 0;
 
   for(uint i = 0; i < 3; i++) {
     shared[i].clear(); 
@@ -96,11 +92,8 @@ void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
 {
 
   if( dim == 0) 
-    if(global_indices[0].count(local_index) == 0) {
-      _size++;
-      _max_global_index = std::max(_max_global_index, global_index);
-    }    
-  
+    _max_global_index = std::max(_max_global_index, global_index);
+
   global_indices[dim][ local_index ] = global_index;
   local_indices[dim][ global_index ] = local_index;
 }

@@ -37,9 +37,9 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   
   w_avg = (real) w_sum / (real) MPI::numProcesses();
   
-  const real  threashold = 1.04;
+  const real  threshold = 1.04;
   real imbalance = (real) w_max  / (real) w_avg  ;
-  if( threashold > imbalance ) {
+  if( threshold > imbalance ) {
     message("Load imbalance %0.2f percent, below threshold.",
 	    (imbalance - 1.0) * 100);
     return;
@@ -47,11 +47,11 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   else
     message("Repartitioning %0.2f percent load imbalance.",
 	    (imbalance - 1.0) * 100);
-  
+
   // Repartition mesh
   MeshFunction<uint> partitions;
   mesh.partition(partitions, weight);
-  
+
   // Calculate process reassignment
   uint max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);

@@ -40,4 +40,9 @@ void BoundaryMesh::init_local(Mesh& mesh)
   BoundaryComputation::computeLocalBoundary(mesh, *this);
 }
 //-----------------------------------------------------------------------------
+void BoundaryMesh::init_interior(Mesh& mesh)
+{
+  BoundaryComputation::computeInteriorBoundary(mesh, *this);
+}
+//-----------------------------------------------------------------------------
 

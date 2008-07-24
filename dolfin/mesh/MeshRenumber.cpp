@@ -37,13 +37,13 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   if(mesh.distdata()._valid_vertex_numbering || MPI::numProcesses() == 1)
     return;
-  
+
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint* num_vert = new uint[ pe_size ];
 
   // Number of own vertices
-  num_vert[ rank ] = mesh.distdata()._size - mesh.distdata().num_ghost();
+  num_vert[ rank ] = mesh.numVertices()- mesh.distdata().num_ghost(0);
   MPI_Allgather(&num_vert[ rank ], 1, MPI_UNSIGNED,
 		num_vert, 1, MPI_UNSIGNED, MPI_COMM_WORLD);  
 
@@ -52,8 +52,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
     offset += num_vert[i-1];
 
   std::map<uint,uint> new_local,new_global;  
-  for(uint i = 0; i< mesh.distdata()._size; i++){
-    if(!mesh.distdata().is_ghost(i)){
+  for(uint i = 0; i< mesh.numVertices(); i++){
+    if(!mesh.distdata().is_ghost(i, 0)){
       new_global[i] = offset++;
       new_local [ new_global[i] ] = i;
     }
@@ -117,8 +117,12 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_edges(Mesh& mesh)
 {
+
   if( mesh.distdata()._valid_edge_numbering || MPI::numProcesses() == 1)
     return;  
+
+  // Flush shared/ghosted edges
+  mesh.distdata().flush_edges();
 
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
@@ -129,7 +133,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   std::map<uint,uint> send_mapping;
   std::set<uint> used_edge;
 
-  srand((uint)time(0));
+  srand((uint)time(0) + rank);
   for(MeshSharedIterator sv(mesh.distdata(), 0); !sv.end(); ++sv){
     Vertex v(mesh, sv.index());
     for(EdgeIterator e(v); !e.end(); ++e) {
@@ -137,7 +141,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	const uint *edge_v = e->entities(0);
 	key = edge_key(edge_v[0], edge_v[1]);
 	edge_map[key] = e->index();
-	edge_id[key] = (uint) rand() + rank;
+	edge_id[key] = (uint) rand();
 	send_buff.push_back( mesh.distdata().get_global(edge_v[0], 0) );
 	send_buff.push_back( mesh.distdata().get_global(edge_v[1], 0) );
 	send_buff_id.push_back(edge_id[key]);
@@ -148,7 +152,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   }
 
 
-
+  uint num_ghost = 0;
   // Assign ownership of shared edges
   MPI_Status status;
   uint src,dest;
@@ -189,27 +193,30 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	      recv_buff_id[i>>1] == edge_id[key] && status.MPI_SOURCE < rank){
 	    edge_id.erase(key);
 	    mesh.distdata().set_ghost( edge_map[key], 1);
+	    num_ghost++;
 	  }
 	}
       }
     }
   }
   
+  dolfin_assert(num_ghost == mesh.distdata().num_ghost(1));
+
   // Number of own edges
   uint* num_edges= new uint[ pe_size ];
   num_edges[ rank ] = mesh.numEdges() - mesh.distdata().num_ghost(1);
   MPI_Allgather(&num_edges[ rank ], 1, MPI_UNSIGNED, num_edges, 1,
 		MPI_UNSIGNED, MPI_COMM_WORLD);
   
+  uint offset = 0;
+  for(int i = 1; i < rank+1; i++)
+    offset += num_edges[i-1];
+
   uint num_glb;  
   MPI_Allreduce(&num_edges[ rank ], &num_glb, 1,
 		MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   
   mesh.distdata().set_global_numEdges(num_glb);
-
-  uint offset = 0;
-  for(int i = 1; i < rank+1; i++)
-    offset += num_edges[i-1];
 
   send_buff.clear();
   send_buff.reserve(mesh.distdata().num_ghost(1));
@@ -289,15 +296,20 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_faces(Mesh& mesh)
 {
+
   if( mesh.distdata()._valid_face_numbering || 
       MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
     return;  
+
+
+  mesh.distdata().flush_faces();
 
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
 
   BoundaryMesh local_boundary;
-  local_boundary.init_local(mesh);
+  local_boundary.init_interior(mesh);
+  //local_boundary.init_local(mesh);
   MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
  
   Array<uint> send_buff, send_buff_id;
@@ -307,19 +319,19 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   std::set<uint> used_face;
    
 
-  srand((uint)time(0));
+  srand((uint)time(0) +  rank);
 
   for(CellIterator bf(local_boundary); !bf.end(); ++bf){
     Face f(mesh, cell_map->get(*bf));
     send_buffer_face(send_buff, mesh, f);
     facekey = face_key(f);
     face_map[facekey] = f.index();
-    face_id[facekey] = (uint) rand() + (uint) rank;
+    face_id[facekey] = (uint) rand();
     send_buff_id.push_back(face_id[facekey]);
     mesh.distdata().set_shared(f);
   }
 
-
+  uint num_ghost = 0 ;
   Face f(mesh, 0);
   uint inc = 2 * f.numEntities(0);
 
@@ -370,14 +382,20 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 	
       // Check if I have the corresponding edge
       if(face_id.count(facekey)) {
+	dolfin_assert(face_id.count(facekey));
 	if( recv_buff_id[ii] < face_id[facekey] ||
 	    recv_buff_id[ii] == face_id[facekey] && status.MPI_SOURCE < rank){
 	  face_id.erase(facekey);
 	  mesh.distdata().set_ghost( face_map[facekey], 2);
+	  num_ghost++;
 	}
       }
     }
   }
+
+
+  dolfin_assert( num_ghost == mesh.distdata().num_ghost(2));
+
 
   // Number of own faces
   uint* num_faces= new uint[ pe_size ];
@@ -385,17 +403,16 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   MPI_Allgather(&num_faces[ rank ], 1, MPI_UNSIGNED, num_faces, 1,
 		MPI_UNSIGNED, MPI_COMM_WORLD);
   
+  uint offset = 0;
+  for(int i = 1; i < rank+1; i++)
+    offset += num_faces[i-1];
+
   uint num_glb;  
   MPI_Allreduce(&num_faces[ rank ], &num_glb, 1,
 		MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   
   mesh.distdata().set_global_numFaces(num_glb);  
-  
-
-  uint offset = 0;
-  for(int i = 1; i < rank+1; i++)
-    offset += num_faces[i-1];
-  
+ 
   send_buff.clear();
   send_buff.reserve(mesh.distdata().num_ghost(2));
 
@@ -476,8 +493,10 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_cells(Mesh& mesh)
 {
+  /*
   if( mesh.distdata()._valid_cell_numbering || MPI::numProcesses() == 1)
     return;
+  */
 
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();

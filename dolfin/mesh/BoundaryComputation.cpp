@@ -27,18 +27,25 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
 {
-  computeBoundaryCommon(mesh, boundary, false);
+  computeBoundaryCommon(mesh, boundary, false, false);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeLocalBoundary(Mesh& mesh, 
 					       BoundaryMesh& boundary)
 {
-  computeBoundaryCommon(mesh, boundary, true);
+  computeBoundaryCommon(mesh, boundary, true, false);
+}
+//-----------------------------------------------------------------------------
+void BoundaryComputation::computeInteriorBoundary(Mesh& mesh, 
+						  BoundaryMesh& boundary)
+{
+  computeBoundaryCommon(mesh, boundary, false, true);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeBoundaryCommon(Mesh& mesh, 
 						BoundaryMesh& boundary,
-						bool local_boundary)
+						bool local_boundary,
+						bool interior_boundary)
 {
   // We iterate over all facets in the mesh and check if they are on
   // the boundary. A facet is on the boundary if it is connected to
@@ -73,8 +80,10 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     //    if (f->numEntities(D) == 1)
     //      {
 
-    if(facetmap.globalFacet(*f) || 
-       local_boundary && f->numEntities(D) == 1 ) {
+    if((!interior_boundary && facetmap.globalFacet(*f)) || 
+       (local_boundary && f->numEntities(D) == 1) ||
+       (f->numEntities(D) == 1 && 
+	interior_boundary && !facetmap.globalFacet(*f))) {
 
       // Count boundary vertices and assign indices
       for (VertexIterator v(*f); !v.end(); ++v)
@@ -140,8 +149,10 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     // Boundary facets are connected to exactly one cell
     //    if (f->numEntities(D) == 1)
     //        {
-    if(facetmap.globalFacet(*f) || 
-       local_boundary && f->numEntities(D) == 1) {
+    if((!interior_boundary && facetmap.globalFacet(*f)) ||
+       (local_boundary && f->numEntities(D) == 1) ||
+       (f->numEntities(D) == 1 && 
+	interior_boundary && !facetmap.globalFacet(*f))) {
 
       // Compute new vertex numbers for cell
       uint* vertices = f->entities(0);

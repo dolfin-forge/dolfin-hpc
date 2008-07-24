@@ -4,7 +4,7 @@
 // Modified by Niclas Jansson, 2008.
 //
 // First added:  2007-04-24
-// Last changed: 2007-07-04
+// Last changed: 2007-07-21
 
 #include <dolfin/log/log.h>
 #include "MeshEntityIterator.h"
@@ -13,6 +13,7 @@
 #include "GlobalFacetMap.h"
 #include <dolfin/main/MPI.h>
 #include "Facet.h"
+#include "mpi.h"
 
 using namespace dolfin;
 
@@ -66,15 +67,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     on_boundary = false;
     // Check if entity is on the boundary if entity is a facet
     if (dim == D - 1) 
-      if (MPI::numProcesses() > 1) {
-	Facet f(mesh, entity->index());
-	on_boundary = facetmap.globalFacet(f);
-      }
-      else
-	on_boundary = entity->numEntities(D) == 1;
-    
-    
-
+      on_boundary = entity->numEntities(D) == 1;
 
     bool all_vertices_inside = true;
     // Dimension of facet > 0, check incident vertices
@@ -111,6 +104,49 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     // Mark entity with all vertices inside
     if (all_vertices_inside)
       sub_domains(*entity) = sub_domain;
+  }
+
+  if(MPI::numProcesses() > 1) {
+    if(dim == 0) {
+      uint pe_size = MPI::numProcesses();
+      uint rank = MPI::processNumber();
+      
+      Array<uint> *ghost_buff = new Array<uint>[pe_size];
+      for(MeshGhostIterator iter(mesh.distdata(), 0); !iter.end(); ++iter)
+	if(sub_domains.get(iter.index()) == sub_domain)
+	  ghost_buff[iter.owner()].push_back(mesh.distdata().get_global(iter.index(),0));
+      
+      int recv_size,recv_count, send_size;
+      for(uint i=0; i<pe_size; i++){
+	send_size = ghost_buff[i].size();
+	MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+      }
+      uint *recv_buff = new uint[ recv_size];
+      
+      MPI_Status status;
+      uint src,dest;
+      
+      for(uint j=1; j<pe_size; j++){
+	
+	src = (rank - j + pe_size) % pe_size;
+	dest = (rank + j) % pe_size;    
+	
+	MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(), MPI_UNSIGNED,
+		     dest, 1, recv_buff, recv_size, MPI_UNSIGNED, src, 1,
+		     MPI_COMM_WORLD, &status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);      
+	
+	for(int i = 0; i < recv_count; i++) 
+	  sub_domains.set(mesh.distdata().get_local(recv_buff[i], 0), sub_domain);
+	
+      }
+      delete[] recv_buff;
+      
+      for(uint i = 0; i < pe_size; i++)
+	ghost_buff[i].clear();
+      delete[] ghost_buff;
+      
+    }
   }
 }
 //-----------------------------------------------------------------------------

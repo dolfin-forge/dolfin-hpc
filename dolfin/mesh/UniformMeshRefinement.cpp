@@ -129,19 +129,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-
-  if(MPI::numProcesses() >1) {
-
-    mesh.distdata().invalid_numbering();    
-    mesh.distdata().invalid_ownership();
-
-    // FIXME, fix map_new_vertices such that all datastructures are working
-    MeshFunction<dolfin::uint> part;
-    part.init(mesh, mesh.topology().dim());
-    part = dolfin::MPI::processNumber();
-    mesh.distribute(part);
-    mesh.renumber();
-  }
+  mesh.renumber();
 
 }
 //-----------------------------------------------------------------------------

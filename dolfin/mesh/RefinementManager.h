@@ -2,14 +2,11 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-01-21
-// Last changed: 2008-03-12
+// Last changed: 2008-07-23
 
 #ifndef __REFINEMENT_MANAGER_H
 #define __REFINEMENT_MANAGER_H
 
-#include "Cell.h"
-#include "Edge.h"
-//#include "Mesh.h"
 #include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
 #include "MeshFunction.h"
@@ -19,6 +16,9 @@
 
 namespace dolfin
 {
+  class Mesh;
+  class Cell;
+  class Edge;
   class RefinementManager
   {
   public:
@@ -40,7 +40,6 @@ namespace dolfin
     void mark_localboundary(Mesh& oldmesh,
 			    MeshFunction<bool>& cell_marker,
 			    uint& num_new_vertices,
-			    uint& num_propagated,
 			    uint& num_new_cells);
 
     // Propagate refinement to other processes
@@ -74,6 +73,7 @@ namespace dolfin
     { dolfin_assert(cell_refedge.count(cell.index())); 
       return cell_refedge[cell.index()]; }
 
+
   private:
     typedef std::pair<uint, uint> EdgeKey;
     
@@ -94,8 +94,7 @@ namespace dolfin
 
     MeshFunction<bool> boundary_edge;
 
-    // Cells which have a propagation to it shouldnt be added as 
-    // old an cell
+    // Cells which have a propagation to it shouldnt be added as an old cell
     MeshFunction<bool> cell_forbidden; 
 
     // Edges which have recvied a propagation and are marked as forbidden

@@ -276,12 +276,13 @@ void Function::interpolate(real* coefficients,
   // Interpolate function
   if( _type == discrete) {
     UFCCell ufc_cell_glb(cell);
+    ufc_cell_glb.update(cell); // Could this be removed???
     ufc_cell_glb.update(cell, f->mesh.distdata());
-    f->interpolate(coefficients, ufc_cell_glb, finite_element);
+    f->interpolate(coefficients, ufc_cell_glb, finite_element, cell);
     ufc_cell_glb.reset(cell, f->mesh.distdata());
   }
   else
-    f->interpolate(coefficients, ufc_cell, finite_element);
+    f->interpolate(coefficients, ufc_cell, finite_element, cell);
 
   // Make cell and facet unavailable
   _cell = 0;

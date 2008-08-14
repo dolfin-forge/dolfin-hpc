@@ -40,16 +40,15 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
-  uint* num_vert = new uint[ pe_size ];
 
   // Number of own vertices
-  num_vert[ rank ] = mesh.numVertices()- mesh.distdata().num_ghost(0);
-  MPI_Allgather(&num_vert[ rank ], 1, MPI_UNSIGNED,
-		num_vert, 1, MPI_UNSIGNED, MPI_COMM_WORLD);  
-
   uint offset = 0;
-  for(uint i = 1; i < rank+1; i++)
-    offset += num_vert[i-1];
+  uint num_vert = mesh.numVertices() - mesh.distdata().num_ghost(0);
+  MPI_Exscan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+
+  uint num_glb;  
+  MPI_Allreduce(&num_vert, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  mesh.distdata().set_global_numVertices(num_glb);
 
   std::map<uint,uint> new_local,new_global;  
   for(uint i = 0; i< mesh.numVertices(); i++){
@@ -66,7 +65,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   MPI_Status status;
   Array<uint> send_buff;
   uint src,dest;
-  uint recv_size = mesh.distdata().num_ghost(); 
+  uint recv_size = mesh.distdata().num_ghost(0); 
   int recv_count, recv_size_gh, send_size;  
   
   for(uint i = 0; i < pe_size; i++) {
@@ -112,7 +111,6 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   for(uint i = 0; i < pe_size; i++)
     ghost_buff[i].clear();
   delete[] ghost_buff;
-  delete[] num_vert;    
 }
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_edges(Mesh& mesh)
@@ -180,8 +178,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     
     for(uint i =0; i < (uint) recv_count ; i += 2){
       // Check if I have the vertices
-      if(mesh.distdata().have_global(recv_buff[i]) &&
-	 mesh.distdata().have_global(recv_buff[i+1])) {
+      if(mesh.distdata().have_global(recv_buff[i], 0) &&
+	 mesh.distdata().have_global(recv_buff[i+1], 0)) {
 
 	// Generate edge key
 	key = edge_key(mesh.distdata().get_local(recv_buff[i], 0),
@@ -203,23 +201,17 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   dolfin_assert(num_ghost == mesh.distdata().num_ghost(1));
 
   // Number of own edges
-  uint* num_edges= new uint[ pe_size ];
-  num_edges[ rank ] = mesh.numEdges() - mesh.distdata().num_ghost(1);
-  MPI_Allgather(&num_edges[ rank ], 1, MPI_UNSIGNED, num_edges, 1,
-		MPI_UNSIGNED, MPI_COMM_WORLD);
-  
   uint offset = 0;
-  for(int i = 1; i < rank+1; i++)
-    offset += num_edges[i-1];
+  uint num_edges = mesh.numEdges() - mesh.distdata().num_ghost(1);
+  MPI_Exscan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 
   uint num_glb;  
-  MPI_Allreduce(&num_edges[ rank ], &num_glb, 1,
-		MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_edges, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   
   mesh.distdata().set_global_numEdges(num_glb);
 
   send_buff.clear();
-  send_buff.reserve(mesh.distdata().num_ghost(1));
+  //  send_buff.reserve(mesh.distdata().num_ghost(1));
 
   uint num = 0;
   std::map<uint,uint> new_local,new_global;  
@@ -253,8 +245,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     
     for(int i =0; i < recv_count ; i += 2){
       // Check if I have the vertices
-      if(mesh.distdata().have_global(recv_buff[i]) &&
-	 mesh.distdata().have_global(recv_buff[i+1])) {
+      if(mesh.distdata().have_global(recv_buff[i], 0) &&
+	 mesh.distdata().have_global(recv_buff[i+1], 0)) {
 	
 	// Generate edge key
 	key = edge_key(mesh.distdata().get_local(recv_buff[i], 0),
@@ -288,7 +280,6 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   mesh.distdata().global_indices[1] = new_global;
   mesh.distdata()._valid_edge_numbering =  true;
  
-  delete[] num_edges;
   delete[] recv_buff;
   delete[] recv_buff_id;
 
@@ -300,7 +291,6 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   if( mesh.distdata()._valid_face_numbering || 
       MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
     return;  
-
 
   mesh.distdata().flush_faces();
 
@@ -367,8 +357,8 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
       uint num_ok = 0;
       for(uint k = 0; k < inc; k += 2){
 	// Check if I have the vertices     
-	if(mesh.distdata().have_global(recv_buff[i+k]) &&
-	   mesh.distdata().have_global(recv_buff[i+k+1])) {
+	if(mesh.distdata().have_global(recv_buff[i+k], 0) &&
+	   mesh.distdata().have_global(recv_buff[i+k+1], 0)) {
 	  // Generate edge key
 	  key = edge_key(mesh.distdata().get_local(recv_buff[i+k], 0),
 			 mesh.distdata().get_local(recv_buff[i+k+1], 0));
@@ -398,23 +388,17 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 
 
   // Number of own faces
-  uint* num_faces= new uint[ pe_size ];
-  num_faces[ rank ] = mesh.numFaces() - mesh.distdata().num_ghost(2);
-  MPI_Allgather(&num_faces[ rank ], 1, MPI_UNSIGNED, num_faces, 1,
-		MPI_UNSIGNED, MPI_COMM_WORLD);
-  
   uint offset = 0;
-  for(int i = 1; i < rank+1; i++)
-    offset += num_faces[i-1];
+  uint num_faces = mesh.numFaces() - mesh.distdata().num_ghost(2);
+  MPI_Exscan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 
   uint num_glb;  
-  MPI_Allreduce(&num_faces[ rank ], &num_glb, 1,
-		MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_faces, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   
   mesh.distdata().set_global_numFaces(num_glb);  
  
   send_buff.clear();
-  send_buff.reserve(mesh.distdata().num_ghost(2));
+  //  send_buff.reserve(mesh.distdata().num_ghost(2));
 
   uint num = 0;
   std::map<uint,uint> new_local,new_global;  
@@ -448,8 +432,8 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
       facekey.clear();
       uint num_ok = 0;
       for(uint k = 0; k < inc ; k += 2){
-	if(mesh.distdata().have_global(recv_buff[i+k]) &&
-	   mesh.distdata().have_global(recv_buff[i+k+1])) {
+	if(mesh.distdata().have_global(recv_buff[i+k], 0) &&
+	   mesh.distdata().have_global(recv_buff[i+k+1], 0)) {
 	  // Generate edge key
 	  key = edge_key(mesh.distdata().get_local(recv_buff[i+k], 0),
 			 mesh.distdata().get_local(recv_buff[i+k+1], 0));
@@ -487,29 +471,19 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   mesh.distdata().global_indices[2] = new_global;
   mesh.distdata()._valid_face_numbering =  true;
 
-  delete[]  num_faces;
+  delete[] recv_buff;
+  delete[] recv_buff_id;
 
 }
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_cells(Mesh& mesh)
 {
-  /*
   if( mesh.distdata()._valid_cell_numbering || MPI::numProcesses() == 1)
     return;
-  */
 
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
-  uint* num_cells = new uint[ pe_size ];
-  
-  // Number of own cells
-  num_cells[ rank ] = mesh.numCells();
-  MPI_Allgather(&num_cells[ rank ], 1, MPI_UNSIGNED, num_cells, 1,
-		MPI_UNSIGNED, MPI_COMM_WORLD);
-  
   uint offset = 0;
-  for(uint i = 1; i < rank+1; i++)
-    offset += num_cells[i-1];
+  uint num_cells = mesh.numCells();
+  MPI_Exscan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 
   std::map<uint,uint> new_local,new_global;  
   for(uint i = 0; i< mesh.numCells(); i++){
@@ -517,10 +491,8 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
     new_local [ new_global[i] ] = i;
   }
 
-
   uint num_glb;  
-  MPI_Allreduce(&num_cells[ rank ], &num_glb, 1,
-		MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_cells, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
   
   mesh.distdata().set_global_numCells(num_glb);
   
@@ -528,8 +500,6 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mesh.distdata().local_indices[3] = new_local;
   mesh.distdata().global_indices[3] = new_global;  
   mesh.distdata()._valid_cell_numbering = true;
-
-  delete[]  num_cells;
  
 }
 //-----------------------------------------------------------------------------

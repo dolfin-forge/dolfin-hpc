@@ -8,6 +8,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Cell.h>
 #include "ConstantFunction.h"
 
 using namespace dolfin;
@@ -117,7 +118,8 @@ void ConstantFunction::interpolate(real* _values) const
 //-----------------------------------------------------------------------------
 void ConstantFunction::interpolate(real* coefficients,
                                    const ufc::cell& cell,
-                                   const ufc::finite_element& finite_element) const
+                                   const ufc::finite_element& finite_element,
+                                   const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
   

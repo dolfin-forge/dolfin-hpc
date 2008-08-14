@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-01-21
-// Last changed: 2008-07-24
+// Last changed: 2008-08-12
 
 #include "Cell.h"
 #include "Edge.h"
@@ -15,13 +15,11 @@
 #include "MeshData.h"
 #include "BoundaryMesh.h"
 
-
 #include <cstdlib> 
 #include <time.h> 
 #include <map>
 #include <set>
 #include <mpi.h>
-
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
@@ -46,8 +44,6 @@ void RefinementManager::init(Mesh& mesh)
   uint pe_size = MPI::numProcesses();
   if(pe_size == 1)
     return;
-  uint rank = MPI::processNumber();
-
 
   uint max_index = std::max(mesh.distdata().global_numVertices(),
 			    mesh.distdata().max_index());
@@ -57,19 +53,13 @@ void RefinementManager::init(Mesh& mesh)
 
   // Find out maximum global index assigned
   uint glb_max;
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, 
-		MPI_MAX, MPI_COMM_WORLD);
-
-  // Gather number of new vertices for each processor
-  uint *num_new = new uint[pe_size];
-  num_new[rank] = num_new_vertices;
-  MPI_Allgather(&num_new[rank], 1, MPI_UNSIGNED,
-  		num_new, 1, MPI_UNSIGNED, MPI_COMM_WORLD);
+  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
   
-  // Assign a safe range for each processor
-  _start_offset = glb_max;
-  for(uint i=0; i < rank; i++)
-    _start_offset += num_new[i];
+  // Assign a safe range for each processor  
+  _start_offset = 0;
+  MPI_Exscan(&num_new_vertices, &_start_offset, 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  _start_offset += glb_max;
 
   // Generate cell - edge connectivity if not generated
   mesh.init(mesh.topology().dim(), 1);
@@ -94,52 +84,27 @@ void RefinementManager::init(Mesh& mesh)
   boundary_edge.init(mesh, 1);
   boundary_edge = false;
 
-  // Check if facets are faces and not edges
-  if(mesh.topology().dim() > 1) { //FIXME ( > 2) ?
-    for(CellIterator bf(local_boundary); !bf.end(); ++bf){
-      Facet f(mesh, cell_map->get(*bf));
+  for(CellIterator bf(local_boundary); !bf.end(); ++bf){
+    Facet f(mesh, cell_map->get(*bf));
+    
+    for(CellIterator c(f); !c.end(); ++c) {
+      boundary_set.insert(c->index());
       
-      for(CellIterator c(f); !c.end(); ++c) {
-      	boundary_set.insert(c->index());
-	
-	for(EdgeIterator e(*c); !e.end(); ++e) {
-	  const uint *edge_v = e->entities(0);
-	  if(mesh.distdata().is_shared(edge_v[0]) &&
-	     mesh.distdata().is_shared(edge_v[1])) {
-	    EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
-				   mesh.distdata().get_global(edge_v[1], 0));
-	    refined_edge[key] = false;
-	    edge_cell_map[key] = e->index();          	
-	    boundary_edge.set(*e, true);               
-	  }
+      for(EdgeIterator e(*c); !e.end(); ++e) {
+	const uint *edge_v = e->entities(0);
+	if(mesh.distdata().is_shared(edge_v[0], 0) &&
+	   mesh.distdata().is_shared(edge_v[1], 0)) {
+	  EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
+				 mesh.distdata().get_global(edge_v[1], 0));
+	  refined_edge[key] = false;
+	  edge_cell_map[key] = e->index();          	
+	  boundary_edge.set(*e, true);               
 	}
       }
     }
   }
-  else {
-    error("här");
-    for(EdgeIterator be(local_boundary); !be.end(); ++be) {
-      Edge e(mesh, cell_map->get(be->index()));
-      const uint *edge_v = e.entities(0);
-      if(mesh.distdata().is_shared(edge_v[0]) &&
-	 mesh.distdata().is_shared(edge_v[1])) {
-	uint edge_vert[2];
-	edge_vert[0] = mesh.distdata().get_global(edge_v[0], 0);
-	edge_vert[1] = mesh.distdata().get_global(edge_v[1], 0);
-	EdgeKey key = edge_key(edge_vert[0], edge_vert[1]);
-	refined_edge[key] = false;
-	edge_cell_map[key] = e.index();          	
-	boundary_edge.set(e, true);               
-      }
-      
-      for(CellIterator bc(e); !bc.end(); ++bc) 
-	boundary_set.insert(bc->index());
-    }
-  }
-  
-  _refm_init = true;
 
-  delete[] num_new;
+  _refm_init = true;
 
 }
 //-----------------------------------------------------------------------------
@@ -152,7 +117,7 @@ void RefinementManager::add_new_vertex(uint* edge, uint vertex,
   // Invalidate mesh entity ownership
   mesh.distdata().invalid_ownership();
 
-  // StoAre edge key in shared list
+  // Store edge key in shared list
   if(shared) {
     EdgeKey key = edge_key(edge[0], edge[1]);  
     new_global[key] = _start_offset;
@@ -219,8 +184,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     
     for(uint i =0; i < (uint) recv_count ; i += 2){
       // Check if I have the vertices
-      if(oldmesh.distdata().have_global(recv_buff[i]) &&
-	 oldmesh.distdata().have_global(recv_buff[i+1])) {
+      if(oldmesh.distdata().have_global(recv_buff[i], 0) &&
+	 oldmesh.distdata().have_global(recv_buff[i+1], 0)) {
 
 	// Generate edge key
 	key = edge_key(oldmesh.distdata().get_local(recv_buff[i], 0),
@@ -254,8 +219,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(uint i =0; i < (uint) recv_count ; i += 2){      
-      if(oldmesh.distdata().have_global(recv_buff[i]) &&
-	 oldmesh.distdata().have_global(recv_buff[i+1])) {
+      if(oldmesh.distdata().have_global(recv_buff[i], 0) &&
+	 oldmesh.distdata().have_global(recv_buff[i+1], 0)) {
 	
 	key = edge_key(oldmesh.distdata().get_local(recv_buff[i], 0),
 		       oldmesh.distdata().get_local(recv_buff[i+1], 0));
@@ -263,7 +228,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
 	if(owns_edge[key]) {
 	  global_buff.push_back(i);
 	  global_buff.push_back( new_global[key] ); 
-	  newmesh.distdata().set_shared(new_vertex[key]);
+	  newmesh.distdata().set_shared(new_vertex[key], 0);
 	}
       }
     }
@@ -276,8 +241,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     for(uint i = 0 ; i < (uint) recv_count; i += 2){
       index = shared_edge[(recv_buff[i]>>1) * 3 + 2];
       newmesh.distdata().set_map(index, recv_buff[i+1], 0);
-      newmesh.distdata().set_ghost(index);
-      newmesh.distdata().set_ghost_owner(index ,status.MPI_SOURCE);
+      newmesh.distdata().set_ghost(index, 0);
+      newmesh.distdata().set_ghost_owner(index ,status.MPI_SOURCE, 0);
       num_unass--;
     }
     global_buff.clear();
@@ -302,7 +267,6 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   
   if(!_refm_init)
     error("RefinementManager not initialized");
-
 
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();

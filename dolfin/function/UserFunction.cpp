@@ -10,6 +10,7 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 #include "Function.h"
 #include "UserFunction.h"
 
@@ -67,7 +68,8 @@ void UserFunction::interpolate(real* values) const
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate(real* coefficients,
                                const ufc::cell& cell,
-                               const ufc::finite_element& finite_element) const
+                               const ufc::finite_element& finite_element,
+                               const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
 

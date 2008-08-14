@@ -78,6 +78,9 @@ namespace dolfin
     /// Tabulate the local-to-global mapping of dofs on a cell
     void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
 
+    /// Tabulate the local-to-global mapping of dofs on a cell
+    void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_index) const;
+
     /// Tabulate local-local facet dofs
     void tabulate_facet_dofs(uint* dofs, uint local_facet) const
     { ufc_dof_map->tabulate_facet_dofs(dofs, local_facet); }
@@ -85,26 +88,29 @@ namespace dolfin
     // FIXME: Can this function eventually be removed?
     /// Tabulate the local-to-global mapping of dofs on a ufc cell
     void tabulate_dofs(uint* dofs, const ufc::cell& cell) const 
-      { ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, cell); }
+    { ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, cell); }
 
     void tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const
-      { ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell); }
+    { ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell); }
 
     /// Extract sub dof map
     DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
 
     /// Return mesh associated with map
     Mesh& mesh() const
-      { return dolfin_mesh; }
+    { return dolfin_mesh; }
 
     /// Build parallel dof map
-    void build(UFC& ufc);
+    void build(UFC& ufc, uint i);
 
     /// Return renumbering (used for testing)
-    std::map<uint, uint> getMap() const;
+    std::map<uint, uint> getMap(); // const;
 
     /// Display mapping
     void disp() const;
+
+    inline bool renumbered() 
+    { return (dof_map > 0); }
 
   private:
 

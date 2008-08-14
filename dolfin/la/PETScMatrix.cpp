@@ -143,6 +143,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
   MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+  MatSetFromOptions(A);
   MatZeroEntries(A);
 
 }

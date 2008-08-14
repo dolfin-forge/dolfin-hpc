@@ -4,6 +4,7 @@
 // Modified by Garth N. Wells, 2007.
 // Modified by Dag Lindbo, 2008.
 // Modified by Kristen Kaasbjerg, 2008.
+// Modified by Niclas Jansson, 2008.
 //
 // First added:  2007-04-02
 // Last changed: 2008-04-30
@@ -226,7 +227,9 @@ void DiscreteFunction::interpolate(real* values) const
     ufc_cell.update(*cell, mesh.distdata());
 
     // Tabulate dofs
-    dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
+    //    dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
+
+    dof_map->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
 
     // Pick values from global vector
     x->get(scratch->coefficients, dof_map->local_dimension(), scratch->dofs);
@@ -249,7 +252,8 @@ void DiscreteFunction::interpolate(real* values) const
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(real* coefficients,
                                    const ufc::cell& cell,
-                                   const ufc::finite_element& finite_element) const
+                                   const ufc::finite_element& finite_element,
+                                   const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
   dolfin_assert(this->finite_element);
@@ -262,7 +266,7 @@ void DiscreteFunction::interpolate(real* coefficients,
     error("Finite element does not match for interpolation of discrete function.");
 
   // Tabulate dofs
-  dof_map->tabulate_dofs(scratch->dofs, cell);
+  dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
   
   // Pick values from global vector
   x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
@@ -289,13 +293,13 @@ void DiscreteFunction::eval(real* values, const real* x) const
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);
    // Reset local numbering
-  ufc_cell.reset(cell, mesh.distdata());
-
+  //ufc_cell.reset(cell, mesh.distdata());
+  ufc_cell.update(cell);
   // Change to global numbering
   ufc_cell.update(cell, mesh.distdata());
 
   // Get expansion coefficients on cell
-  this->interpolate(scratch->coefficients, ufc_cell, *finite_element);
+  this->interpolate(scratch->coefficients, ufc_cell, *finite_element, cell);
 
   // Reset local numbering
   ufc_cell.reset(cell, mesh.distdata());
@@ -346,28 +350,46 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
   if (!scratch)
     scratch = new Scratch(*finite_element);
 
-  if( dolfin::MPI::numProcesses() > 1) {
-    std::set<uint> indices;
-    CellIterator cell(mesh);
-    UFCCell ufc_cell(*cell);
-    for (; !cell.end(); ++cell) {
-      // Update to current cell
-      ufc_cell.update(*cell);
-      ufc_cell.update(*cell, mesh.distdata());
-      
-      // Tabulate dofs
-      dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
 
-      for(uint j = 0; j <   finite_element->space_dimension(); j++)
-	indices.insert(scratch->dofs[j]);
-      
-      ufc_cell.reset(*cell, mesh.distdata());      
-    }
-    x.init_ghosted(indices.size(), indices);
+  if( MPI::numProcesses() > 1) 
+    init_ghosts();
+  
+  renumberd = false;
+
+}
+//-----------------------------------------------------------------------------
+void DiscreteFunction::init_ghosts()
+{
+  std::set<uint> indices;
+  CellIterator cell(mesh);
+  UFCCell ufc_cell(*cell);
+  for (; !cell.end(); ++cell) {
+    // Update to current cell
+    ufc_cell.update(*cell);
+    ufc_cell.update(*cell, mesh.distdata());
+    
+    // Tabulate dofs
+    dof_map->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
+    
+    for(uint j = 0; j <   finite_element->space_dimension(); j++)
+      indices.insert(scratch->dofs[j]);
+    
+    ufc_cell.reset(*cell, mesh.distdata());      
+  }
+  std::map<uint, uint> map = dof_map->getMap();
+  x->init_ghosted(indices.size(), indices, map);
+}
+//-----------------------------------------------------------------------------
+void DiscreteFunction::sync_ghosts()
+{ 
+  message("Syncing ghosts");
+  if(dof_map->renumbered() && !renumberd) {
+    message("Rebuilding ghost pattern");
+    init_ghosts();
+    renumberd = true ;
   }
 
-
-  
+  x->apply(); 
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)
@@ -406,3 +428,4 @@ DiscreteFunction::Scratch::~Scratch()
     delete [] values;
 }
 //-----------------------------------------------------------------------------
+

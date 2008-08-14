@@ -30,7 +30,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
-
+#include <mpi.h>
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -132,10 +132,6 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   // Note the importance of treating empty mesh functions as null pointers
   // for the PyDOLFIN interface.
 
-  // Update all ghost points
-  for (uint i = 0; i < coefficients.size(); i++)
-    coefficients[i]->sync_ghosts();
-
   // Check arguments
   check(form, coefficients, mesh);
 
@@ -144,6 +140,10 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 
   // Initialize global tensor
   initGlobalTensor(A, dof_map_set, ufc, reset_tensor);
+
+  // Update all ghost points
+  for (uint i = 0; i < coefficients.size(); i++)
+    coefficients[i]->sync_ghosts();
 
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
@@ -189,8 +189,6 @@ void Assembler::assembleCells(GenericTensor& A,
 
     // Update to current cell
     ufc.update(*cell);
-
-
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -432,8 +430,15 @@ You may need to provide the dimension of a user defined Function.", j, i, dim, f
 void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set, 
                                  UFC& ufc, bool reset_tensor) const
 {
+
   if (reset_tensor)
-  {
+  {      
+
+    if(MPI::numProcesses() > 1)
+      dof_map_set.build(ufc);
+
+
+    MPI_Barrier(MPI_COMM_WORLD);
     GenericSparsityPattern* sparsity_pattern = A.factory().createPattern(); 
     SparsityPatternBuilder::build(*sparsity_pattern, mesh, ufc, dof_map_set);
     A.init(*sparsity_pattern);

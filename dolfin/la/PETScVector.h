@@ -75,7 +75,8 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N);
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices);
+    virtual void init_ghosted(uint n, std::set<uint>& indices,
+			      std::map<uint, uint>& map);
 
     /// Return size of vector
     virtual uint size() const;
@@ -154,9 +155,10 @@ namespace dolfin
     // True if we don't own the vector x points to
     bool is_view;
 
+    // True if the vector has ghost points
     bool is_ghosted;
 
-    Array<int> ghost_indices;
+    //    Array<int> ghost_indices;
     
     std::map<const int, int> mapping;
 

@@ -572,7 +572,7 @@ void PXMLMesh::closeMesh()
       editor.addVertex(v,vertex->point());
       new_mesh.distdata().set_map(v, _mesh.distdata().get_global(*vertex), 0);
       if(ghost_vertex[vertex->index()])
-	new_mesh.distdata().set_shared(v);
+	new_mesh.distdata().set_shared(v, 0);
       v++;
     }
   }
@@ -582,8 +582,8 @@ void PXMLMesh::closeMesh()
   for(uint i=0;i<shared;i++){
     new_mesh.distdata().set_map(v, shared_indices[i], 0);
     if(shared_orphans[i] < pe_size) { // Why...ugly hack to set ghost owner
-      new_mesh.distdata().set_ghost(v);
-      new_mesh.distdata().set_ghost_owner(v, shared_orphans[i]);
+      new_mesh.distdata().set_ghost(v, 0);
+      new_mesh.distdata().set_ghost_owner(v, shared_orphans[i], 0);
     }
     switch(gdim)
       {
@@ -635,6 +635,7 @@ void PXMLMesh::closeMesh()
   delete[] shared_indices;
   delete[] shared_coords;
   delete[] shared_orphans;
+  delete[] shvert;
 
 }
 //-----------------------------------------------------------------------------

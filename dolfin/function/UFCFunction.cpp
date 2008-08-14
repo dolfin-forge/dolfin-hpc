@@ -76,7 +76,8 @@ void UFCFunction::interpolate(real* values) const
 //-----------------------------------------------------------------------------
 void UFCFunction::interpolate(real* coefficients,
                               const ufc::cell& cell,
-                              const ufc::finite_element& finite_element) const
+                              const ufc::finite_element& finite_element,
+                              const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
   

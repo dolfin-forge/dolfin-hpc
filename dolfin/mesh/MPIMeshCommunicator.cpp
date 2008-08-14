@@ -280,7 +280,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   if(distribution.dim() == 0) {
     for (VertexIterator v(mesh); !v.end(); ++v){
       glb_index = mesh.distdata().get_global(*v); 
-      if(!mesh.distdata().is_ghost(v->index())){
+      if(!mesh.distdata().is_ghost(v->index(), 0)){
 	if(distribution.get(*v) != rank) {
 	  target_proc = distribution.get(*v);
 	  send_list_mappings[target_proc].push_back(glb_index);	  
@@ -315,7 +315,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	  send_list_cells[target_proc].push_back(glb_index);
 
 	  // Buffer all cell vertices that belong to another processor
-  	  if(!mesh.distdata().is_ghost(v->index()) && !vertex_used.get(*v)){
+  	  if(!mesh.distdata().is_ghost(v->index(), 0) && !vertex_used.get(*v)){
 	    send_list_mappings[target_proc].push_back(glb_index);	   
 	    send_list_vertices[target_proc].push_back(v->point().x());
 	    send_list_vertices[target_proc].push_back(v->point().y());
@@ -325,7 +325,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	  }
 	}
 
-	// Transfer Cell marker  (need for mesh refinement)
+	// Transfer Cell marker  (mesh refinement)
 	if( cell_marker )
 	  if( old_cell_marker->get(*c) )
 	    send_list_cells[target_proc].push_back(1);
@@ -336,7 +336,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	for(VertexIterator v(*c); !v.end(); ++v) {
 	  if(!vertex_used.get(*v)) {
 	    glb_index = mesh.distdata().get_global(*v); 
-	    if(!mesh.distdata().is_ghost(v->index())){	  
+	    if(!mesh.distdata().is_ghost(v->index(), 0)){	  
 	      coords.push_back(v->point().x());
 	      coords.push_back(v->point().y());
 	      if(gdim > 2)
@@ -401,7 +401,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 
     buff_map = 0;
     for(int i=0; i < recv_size; i +=gdim){
-      if(!distdata.have_global( recv_buff_map[buff_map] )) {
+      if(!distdata.have_global( recv_buff_map[buff_map], 0)) {
 	distdata.set_map(vi++, recv_buff_map[buff_map], 0);
 	coords.push_back(recv_buff[i]);
 	coords.push_back(recv_buff[i+1]);
@@ -432,12 +432,12 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       if(distribution.get(*c) == rank) {
 	for(VertexIterator v(*c); !v.end(); ++v){
 	  glb_index = mesh.distdata().get_global(*v);	  
-	  if(!distdata.have_global(glb_index)){
+	  if(!distdata.have_global(glb_index, 0)){
 	    cl.push_back(vi);
 	    for(uint j=0;j<gdim;j++)
 	      coords.push_back(0.0);
 	    distdata.set_map(vi, glb_index, 0);
-	    distdata.set_ghost(vi++);
+	    distdata.set_ghost(vi++, 0);
 	    shared_buffer.push_back(glb_index);
 	  }
 	  else 
@@ -458,20 +458,19 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	cell_n = 0;
       }
       else {
-	if(distdata.have_global(recv_buff_cell[i]))
+	if(distdata.have_global(recv_buff_cell[i], 0))
 	  cl.push_back(distdata.get_local(recv_buff_cell[i], 0));
 	else{
 	  cl.push_back(vi);
 	  for(uint j=0;j<gdim;j++)
 	    coords.push_back(0.0);
 	  distdata.set_map(vi, recv_buff_cell[i], 0);
-	  distdata.set_ghost(vi++);
+	  distdata.set_ghost(vi++, 0);
 	  shared_buffer.push_back(recv_buff_cell[i]);
 	}
 	cell_n++;
       }      
     }
-    delete[] recv_buff_cell;        
 
     // Exchange ghosted entities
     Array<real> send_buff;
@@ -495,15 +494,15 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_size);
       
       for(int j=0; j<recv_size; j++)
-	if(distdata.have_global(shared[j]) &&
-	   !distdata.is_ghost(distdata.get_local(shared[j], 0))){
+	if(distdata.have_global(shared[j], 0) &&
+	   !distdata.is_ghost(distdata.get_local(shared[j], 0), 0)){
 	  offset = distdata.get_local(shared[j], 0) * gdim;
 	  send_buff.push_back(coords[offset]);
 	  send_buff.push_back(coords[offset + 1]);
 	  if(gdim >2)
 	    send_buff.push_back(coords[offset + 2]);
 	  send_buff_indices.push_back(shared[j]);
-	  distdata.set_shared(distdata.get_local(shared[j], 0));
+	  distdata.set_shared(distdata.get_local(shared[j], 0), 0);
 	}
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
@@ -538,14 +537,17 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	coords[offset+2] = recv_buff[j+2];
       j += gdim;
       distdata.set_ghost_owner( distdata.get_local(recv_buff_map[i], 0), 
-				recv_source[i]);
+				recv_source[i], 0);
     }
     shared_buffer.clear();
     recv_source.clear();
     delete[] recv_buff_map;
     delete[] recv_buff;
+    delete[] shared;
       
   }
+  delete[] recv_buff_cell;        
+
 
   num_vertices = coords.size() / gdim ;
   num_cells = cl.size() / ndims;

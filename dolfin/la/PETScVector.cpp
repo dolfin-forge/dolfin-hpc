@@ -23,6 +23,7 @@
 #include <dolfin/common/Array.h>
 
 #include <set>
+#include <map>
 
 using namespace dolfin;
 
@@ -85,9 +86,7 @@ void PETScVector::init(uint N)
   // Create vector
   if (MPI::numProcesses() > 1)
   {
-    // dolfin_debug("PETScVector::init(N) - VecCreateMPI");
     VecCreateMPI(PETSC_COMM_WORLD, PETSC_DECIDE, N, &x);
-    VecSetOption(x, VEC_IGNORE_NEGATIVE_INDICES);
   }
   else {
     VecCreate(PETSC_COMM_SELF, &x);
@@ -351,15 +350,18 @@ Vec PETScVector::vec() const
   return x;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
+void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
+			       std::map<uint, uint>& map){
   
-  if( is_view )
-    error("Shut her down Scotty, she's sucking mud again!");
-  
+  if( is_ghosted )
+    apply();
+
   int local_size, size, low, high;
   VecGetSize(x, &size);
   VecGetLocalSize(x, &local_size);
   VecGetOwnershipRange(x, &low, &high);
+
+  mapping.clear();
 
   int *rows = new int[ local_size ];
   real *values = new real[ local_size ]; 
@@ -369,28 +371,35 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices){
   }
 
   VecGetValues(x, local_size, rows, values);    
+
+  if( is_ghosted ) {
+    dolfin_assert(map.size() > 0);
+    for(int i = 0; i < local_size; i++)  {
+      dolfin_assert(map.count(low + i) > 0);
+      rows[i] = map[low + i];
+    }
+  }
+
   VecDestroy(x);
   
-  ghost_indices.clear();
+  Array<int> ghost_indices;
   int num_ghost = local_size;
   std::set<uint>::iterator sit;
-  for(sit = indices.begin(); sit != indices.end(); ++sit) 
+  for(sit = indices.begin(); sit != indices.end(); ++sit) {
     if( *sit < (uint) low || *sit >= (uint) high ) {
       ghost_indices.push_back((int) *sit);
       mapping[ (int) *sit ] = num_ghost++;
     }
-       
+  }
 
   VecCreateGhost(PETSC_COMM_WORLD, local_size, size, (int) ghost_indices.size(),
 		 (const int *) &ghost_indices[0], &x);       
   VecSetValues(x, local_size, rows, values, INSERT_VALUES);
-  apply();
-
   delete[] rows;
   delete[] values;
 
   is_ghosted = true;
-  message("PETScVector now ghosted, HORRAY!");
+  apply();
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& PETScVector::factory() const

@@ -72,13 +72,13 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
     for (VertexIterator v(mesh); !v.end(); ++v) {
       refined_mesh.distdata().set_map(vertex, mesh.distdata().get_global(*v), 0);
       
-      if( mesh.distdata().is_ghost(v->index()) ) {
-	refined_mesh.distdata().set_ghost(vertex);
+      if( mesh.distdata().is_ghost(v->index(), 0) ) {
+	refined_mesh.distdata().set_ghost(vertex, 0);
 	refined_mesh.distdata().set_ghost_owner(vertex,
-						mesh.distdata().get_owner(*v));
+						mesh.distdata().get_owner(*v), 0);
       }
-      else if(mesh.distdata().is_shared(v->index()))
-	refined_mesh.distdata().set_shared(vertex);
+      else if(mesh.distdata().is_shared(v->index(), 0))
+	refined_mesh.distdata().set_shared(vertex, 0);
 
       editor.addVertex(vertex++, v->point());
     }

@@ -141,6 +141,8 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   for(CellIterator cell(mesh); !cell.end(); ++cell)
     partitions.set(*cell, (uint) part[ cell->index() ]);
 
+  delete[] part;
+
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)

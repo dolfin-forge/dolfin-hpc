@@ -166,7 +166,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
 
   // Modify RHS vector (b[i] = value)
   b.set(values, boundary_values.size(), dofs);
-  
+   
   // Modify linear system (A_ii = 1)
   A.ident(boundary_values.size(), dofs);
 
@@ -373,8 +373,8 @@ void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
     ufc_cell.update(cell, _mesh.distdata());    
 
     // Tabulate dofs on cell
-    data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
-
+    //data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
+    data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell, cell.index());
 
     // Tabulate which dofs are on the facet
     data.dof_map->tabulate_facet_dofs(data.facet_dofs, facet_number);

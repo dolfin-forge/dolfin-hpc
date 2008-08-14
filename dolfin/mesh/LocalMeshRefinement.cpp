@@ -212,12 +212,13 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
       refined_mesh.distdata().set_map(current_vertex, 
 				      mesh.distdata().get_global(*v), 0);
       
-      if(mesh.distdata().is_ghost(v->index())) {
-	refined_mesh.distdata().set_ghost(current_vertex);
-	refined_mesh.distdata().set_ghost_owner(current_vertex, mesh.distdata().get_owner(v->index()));
+      if(mesh.distdata().is_ghost(v->index(), 0)) {
+	refined_mesh.distdata().set_ghost(current_vertex, 0);
+	refined_mesh.distdata().set_ghost_owner(current_vertex, 
+						mesh.distdata().get_owner(*v), 0);
       }
-      else if(mesh.distdata().is_shared(v->index()))
-	refined_mesh.distdata().set_shared(current_vertex);
+      else if(mesh.distdata().is_shared(v->index(), 0))
+	refined_mesh.distdata().set_shared(current_vertex, 0);
     }
 
     editor.addVertex(current_vertex++, v->point());

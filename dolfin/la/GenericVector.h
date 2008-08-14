@@ -17,6 +17,7 @@
 #include "GenericTensor.h"
 
 #include <set>
+#include <map>
 
 namespace dolfin
 {
@@ -73,7 +74,8 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N) = 0;
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices) = 0;
+    virtual void init_ghosted(uint n, std::set<uint>& indices, 
+			      std::map<uint, uint>& map) = 0;
 
     /// Return size of vector
     virtual uint size() const = 0;

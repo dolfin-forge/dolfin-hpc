@@ -82,7 +82,7 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
     _mat_type = mat_type;    
     if( MPI::numProcesses() > 1 && _mat_type == MATMPIAIJ)
       error("No support for symbolic LU on matrix type mpiaij."
-	    " For performance, installation of MUMPS is recomended.");
+	    "Installation of MUMPS is recomended.");
 
   // Get parameters
   const bool report = get("LU report");

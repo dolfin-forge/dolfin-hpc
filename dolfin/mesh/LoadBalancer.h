@@ -46,6 +46,7 @@ namespace dolfin
 				   real tf, real tb, real ts);
 
     static void radixsort_matrix(uint* res, uint* Matrix, uint m, bool desc);
+
     static void pradixsort_matrix(uint* res, uint* Matrix, uint m);
   };
 }

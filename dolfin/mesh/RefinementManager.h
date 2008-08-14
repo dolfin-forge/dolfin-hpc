@@ -68,7 +68,6 @@ namespace dolfin
     inline bool forbidden_edge(Edge& edge)
     { return (MPI::numProcesses() > 1 ? edge_forbidden.get(edge) : false);}
 
-
     inline uint edge_refined(Cell& cell)
     { dolfin_assert(cell_refedge.count(cell.index())); 
       return cell_refedge[cell.index()]; }
@@ -85,7 +84,6 @@ namespace dolfin
 
     std::map< EdgeKey, uint> new_global;
     std::map< EdgeKey, uint> new_vertex;
-
     
     std::map<EdgeKey, uint> edge_cell_map;
     std::map<EdgeKey, bool> refined_edge;

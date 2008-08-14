@@ -17,6 +17,7 @@
 #include "GenericVector.h"
 
 #include <set>
+#include <map>
 
 namespace dolfin
 {
@@ -69,8 +70,9 @@ namespace dolfin
     virtual void init(uint N) 
     { vector->init(N); }
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices) 
-    { vector->init_ghosted(n, indices); }
+    virtual void init_ghosted(uint n, std::set<uint>& indices, 
+			      std::map<uint, uint>& map)
+    { vector->init_ghosted(n, indices, map); }
 
     /// Return size of vector
     virtual uint size() const

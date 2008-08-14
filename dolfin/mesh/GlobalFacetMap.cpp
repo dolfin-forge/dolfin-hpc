@@ -64,7 +64,7 @@ void GlobalFacetMap::findGlobal2D()
     uint num_shared = 0;
 
     for (VertexIterator v(f); !v.end(); ++v) 
-      if( _mesh.distdata().is_shared(v->index()) )
+      if( _mesh.distdata().is_shared(v->index(), 0) )
 	num_shared++;  
     
     if ( f.numEntities(_mesh.topology().dim()) == 1 && 
@@ -91,7 +91,7 @@ void GlobalFacetMap::findGlobal3D()
     uint num_shared = 0;
     
     for (VertexIterator v(f); !v.end(); ++v) 
-      if( _mesh.distdata().is_shared(v->index()) )
+      if( _mesh.distdata().is_shared(v->index(), 0) )
 	num_shared++;  
     
     if ( f.numEntities(_mesh.topology().dim()) == 1 && 
@@ -135,7 +135,7 @@ void GlobalFacetMap::findGlobal3D()
     for(int i = 0; i < recv_count; i += dim){
       uint vi = 0;
       for(uint k = 0; k < dim; k++) 
-	if(! _mesh.distdata().have_global(recv_buff[i+k])) 
+	if(! _mesh.distdata().have_global(recv_buff[i+k], 0)) 
       	  vi++;
       if(vi) {
 	shared_buff.push_back(0);
@@ -174,6 +174,7 @@ void GlobalFacetMap::findGlobal3D()
   }
 
   delete[] recv_buff;
+  delete[] res_buff;
 }
 //-----------------------------------------------------------------------------
 bool GlobalFacetMap::globalFacet(Facet& facet)

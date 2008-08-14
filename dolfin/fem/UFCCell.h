@@ -117,13 +117,15 @@ namespace dolfin
       const uint* vertices = cell.entities(0);
       for (uint i = 0; i < num_vertices; i++)
         coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+
+      global_numbering = false;
     }
 
     // Update cell entities to global
     inline void update(Cell& cell, MeshDistributedData& distdata)
     {
 
-      if( dolfin::MPI::numProcesses() == 1 )
+      if( MPI::numProcesses() == 1 )
 	return;
 
       for (uint d = 0; d < topological_dimension; d++)
@@ -131,12 +133,14 @@ namespace dolfin
 	  entity_indices[d][i] = distdata.get_global(entity_indices[d][i], d);
       entity_indices[topological_dimension][0] = distdata.get_cell_global(cell.index());
 
+      global_numbering = true;
+
     }
 
     // Reset cell entities to local
     inline void reset(Cell& cell, MeshDistributedData& distdata) 
-    {
-      if( dolfin::MPI::numProcesses() == 1 )
+    {            
+      if( MPI::numProcesses() == 1 || !global_numbering)
 	return;
       
       for (uint d = 0; d < topological_dimension; d++)
@@ -145,12 +149,16 @@ namespace dolfin
       entity_indices[topological_dimension][0] = 
 	distdata.get_cell_local(entity_indices[topological_dimension][0]);
 
+      global_numbering = false;
+
     }
 
   private:
     
     // Number of cell vertices
     uint num_vertices;
+
+    bool global_numbering;
 
   };
 

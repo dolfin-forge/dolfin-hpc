@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-// FIXME set ghost owners for edge and faces
+
 
 #include "MeshRenumber.h"
 #include "MeshDistributedData.h"

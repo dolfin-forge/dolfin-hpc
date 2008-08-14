@@ -55,7 +55,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   // Metis assumes vertices numbered from process 0 
   MeshRenumber::renumber_vertices(mesh);
 
-  float ubvec = 1.05; /* magic magic */  
+  float ubvec = 1.05; 
   int numflag = 0;    // C-style numbering
   int edgecut = 0;    
   int wgtflag, ncon;
@@ -118,7 +118,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
 
   float *tpwgts = new float[size];
   for(i=0; i<size; i++)
-    tpwgts[i] =  1.0/(float)(size); /* magic things happens */
+    tpwgts[i] =  1.0/(float)(size); 
 
   // default options
   int options[3] = {1, 0, 15};
@@ -176,7 +176,7 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   idxtype *part = new idxtype[mesh.numVertices()];
   int gdim =  static_cast<int>( mesh.geometry().dim() );
   float *xdy = new float[gdim * mesh.numVertices()];
-  // FIXME cast (double *) -> (float *)
+
   i = 0;
   for(VertexIterator vertex(mesh); !vertex.end(); ++vertex) {
     xdy[i] = static_cast<float>(vertex->point().x());

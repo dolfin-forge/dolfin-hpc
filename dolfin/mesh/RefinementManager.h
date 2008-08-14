@@ -92,10 +92,8 @@ namespace dolfin
 
     MeshFunction<bool> boundary_edge;
 
-    // Cells which have a propagation to it shouldnt be added as an old cell
     MeshFunction<bool> cell_forbidden; 
 
-    // Edges which have recvied a propagation and are marked as forbidden
     MeshFunction<bool> edge_forbidden;
     
     uint _start_offset;

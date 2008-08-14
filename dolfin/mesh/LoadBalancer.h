@@ -23,7 +23,7 @@ namespace dolfin
 
     // Balance mesh according to marked cells, tune loadbalancer
     // with machine specific parameters
-    // tb    Time to perform one flop  in seconds
+    // tb    Time to perform one flop in seconds
     // tb    Time to transmit one byte in seconds
     // ts    Startup time in seconds (Interconnect latency)
     static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,

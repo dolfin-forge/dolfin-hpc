@@ -333,7 +333,6 @@ void DofMap::build(UFC& ufc, uint jj)
 
   map.clear();
 
-  // Cell to unkown row entries and which dof mapping 
   std::map<uint, Array<std::pair<uint, uint> > > cell_dof;
 
   send_buff.clear();

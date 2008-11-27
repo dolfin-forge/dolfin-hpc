@@ -13,6 +13,10 @@
 #include "uBlasFactory.h"
 #include "GenericTensor.h"
 
+#ifdef HAS_MPI
+#include <mpi.h>
+#endif
+
 namespace dolfin
 {
 
@@ -69,7 +73,11 @@ namespace dolfin
 
     /// Finalize assembly of tensor
     void apply(FinalizeType finaltype=FINALIZE)
-    {}
+    { 
+      real tmp = value; 
+      MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    }
+
 
     /// Display tensor
     void disp(uint precision=2) const

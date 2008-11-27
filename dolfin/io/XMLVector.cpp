@@ -9,6 +9,10 @@
 #include <dolfin/la/Vector.h>
 #include "XMLVector.h"
 
+#ifdef HAS_MPI
+#include <mpi.h>
+#endif
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -66,7 +70,12 @@ void XMLVector::endElement(const xmlChar *name)
 void XMLVector::startVector(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse size of vector
+#ifdef HAS_MPI
+  uint tmp_size = parseUnsignedInt(name, attrs, "size");
+  MPI_Allreduce(&tmp_size, &size, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
   size = parseUnsignedInt(name, attrs, "size");
+#endif
   
   // Initialize vector
   if (values)

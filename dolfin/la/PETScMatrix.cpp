@@ -24,6 +24,8 @@
 #include "PETScFactory.h"
 #include <dolfin/main/MPI.h>
 
+#define BLOCK_SIZE 1
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -116,7 +118,17 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
   }
   else
   {
+    //    MatCreateSeqBAIJ(MPI_Comm comm,PetscInt bs,PetscInt m,PetscInt n,PetscInt nz,const PetscInt nnz[],Mat *A);
+
+#ifdef BLOCKED
+
+    MatCreateSeqBAIJ(PETSC_COMM_SELF, BLOCK_SIZE, (int) M, (int) N, PETSC_NULL, (int *) nz, &A);
+    MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+    MatSetFromOptions(A);
+    MatZeroEntries(A);
+    //    MatCreateSeqBAIJ(PETSC_COMM_SELF, 1, (int) M, (int) N, 5, PETSC_NULL, &A);
     // Create PETSc sequential matrix with a guess for number of non-zeroes (50 in thise case)
+#else
     MatCreate(PETSC_COMM_SELF, &A);
     MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
     setType();
@@ -124,6 +136,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     MatSetFromOptions(A);
     MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*)nz);
     MatZeroEntries(A);
+#endif
   }
 }
 //-----------------------------------------------------------------------------
@@ -176,9 +189,11 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
 {
+  //  error("nej");
   PETScMatrix* mcopy = new PETScMatrix();
 
-  MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
+  MatCopy(A, (mcopy->A),DIFFERENT_NONZERO_PATTERN);
+  //  MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
 
   return mcopy;
 }
@@ -207,10 +222,28 @@ void PETScMatrix::set(const real* block,
                       uint n, const uint* cols)
 {
   dolfin_assert(A);
+
+
+
+#ifdef BLOCKED
+
+  
+  MatSetValuesBlocked(A,
+		      static_cast<int>(m) / BLOCK_SIZE,
+		      reinterpret_cast<int*>(const_cast<uint*>(rows)),
+		      static_cast<int>(n) / BLOCK_SIZE,
+		      reinterpret_cast<int*>(const_cast<uint*>(cols)),
+		      block, INSERT_VALUES);
+
+    
+#else
+  
   MatSetValues(A,
                static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
                static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
                block, INSERT_VALUES);
+#endif
+
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::add(const real* block,
@@ -218,10 +251,27 @@ void PETScMatrix::add(const real* block,
                       uint n, const uint* cols)
 {
   dolfin_assert(A);
+  //MatSetValuesBlocked(Mat mat,
+  //PetscInt m,const PetscInt idxm[],PetscInt n,const PetscInt idxn[],const PetscScalar v[],InsertMode addv)
+
+#ifdef BLOCKED
+
+  
+  MatSetValuesBlocked(A,
+		      static_cast<int>(m) / BLOCK_SIZE,
+		      reinterpret_cast<int*>(const_cast<uint*>(rows)),
+		      static_cast<int>(n) / BLOCK_SIZE,
+		      reinterpret_cast<int*>(const_cast<uint*>(cols)),
+		      block, ADD_VALUES);
+
+    
+#else
+  
   MatSetValues(A,
                static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
                static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
                block, ADD_VALUES);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::getrow(uint row,
@@ -231,13 +281,66 @@ void PETScMatrix::getrow(uint row,
   const int *cols = 0;
   const double *vals = 0;
   int ncols = 0;
-  MatGetRow(A, row, &ncols, &cols, &vals);
-  
-  // Assign values to Arrays
-  columns.assign(cols, cols+ncols);
-  values.assign(vals, vals+ncols);
 
-  MatRestoreRow(A, row, &ncols, &cols, &vals);
+  int m, n;
+  MatGetOwnershipRange(A, &m, &n);
+    
+  // Two different cases, local and non local rows.
+  if( row >= (uint) m && row < (uint) n) {
+  //  if(MPI::numProcesses() == 1) {
+    MatGetRow(A, row, &ncols, &cols, &vals);
+    
+    // Assign values to Arrays
+    columns.assign(cols, cols+ncols);
+    values.assign(vals, vals+ncols);
+    
+    MatRestoreRow(A, row, &ncols, &cols, &vals);
+
+  }
+  else {
+
+    IS irow, icol;
+
+    Array<int> cc;
+    for(uint i = 0; i < size(0); i++)
+      cc.push_back(i);
+    
+    //    int rrow = static_cast<int>(row);
+    const int rrow = { (int) row };
+    //    dolfin_debug("pre is create");
+    ISCreateGeneral(MPI_COMM_SELF, 1, &rrow, &irow);
+    //    dolfin_debug("post is create");
+    ISCreateGeneral(MPI_COMM_SELF, cc.size(), &cc[0], &icol);
+
+    int ir_size, ic_size;
+    ISGetSize(irow, &ir_size);
+    ISGetSize(icol, &ic_size);
+    
+    //    message("IS size irow: %d icol: %d:", ir_size, ic_size);
+      
+    Mat *A_sub[1];
+    
+    //    dolfin_debug("Pre GetSubMatrix");
+    //    dolfin_debug("Pre GetSubMatrix");
+    MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, A_sub);
+
+
+    Mat A_sub_1 = *A_sub[0];
+
+    MatGetRow(A_sub_1, 0, &ncols, &cols, &vals);
+    
+    // Assign values to Arrays
+    columns.assign(cols, cols+ncols);
+    values.assign(vals, vals+ncols);
+    //    message("%d %d", columns.size(), values.size());
+    dolfin_assert(columns.size() > 0);
+    dolfin_assert(values.size() > 0);
+    MatRestoreRow(A_sub_1, 0, &ncols, &cols, &vals);
+    MatDestroyMatrices(1, A_sub);
+
+    //    dolfin_debug("Post GetSubMatrix");
+  } 
+
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::setrow(uint row,
@@ -335,6 +438,7 @@ void PETScMatrix::apply(FinalizeType finaltype)
     MatAssemblyBegin(A, MAT_FLUSH_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FLUSH_ASSEMBLY);
   }
+
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::zero()
@@ -358,14 +462,16 @@ const PETScMatrix& PETScMatrix::operator/= (real a)
 //-----------------------------------------------------------------------------
 const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
 {
-  error("Not implemented.");
+  //  (*this).down_cast<PETScMatrix>() =  A.down_cast<PETScMatrix>();
+  MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
   return *this;
 }
 //-----------------------------------------------------------------------------
 const PETScMatrix& PETScMatrix::operator= (const PETScMatrix& A)
 {
-  error("Not implemented.");
-  return *this; 
+
+  MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
+  return *this;
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::Type PETScMatrix::type() const
@@ -378,8 +484,16 @@ void PETScMatrix::disp(uint precision) const
   // FIXME: Maybe this could be an option?
   if(MPI::numProcesses() > 1)
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
-  else
+  else {
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);   
+#ifdef BLOCKED
+    PetscObjectSetName((PetscObject) A, " Ab");
+#else
+    PetscObjectSetName((PetscObject) A, " Anb");
+#endif
     MatView(A, PETSC_VIEWER_STDOUT_SELF);
+  }
+
 
 /*
   const uint M = size(0);

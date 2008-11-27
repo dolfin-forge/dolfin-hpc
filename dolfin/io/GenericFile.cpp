@@ -169,10 +169,17 @@ void GenericFile::read()
 void GenericFile::write()
 {
 
+
   if ( !opened_write ) {
     //FIXME: temporary fix, only rank == 0 is allowed to clear the file
-    if(MPI::processNumber() == 0) {
-      // Clear file
+    if(type == "VTK" ) {
+      if(MPI::processNumber() == 0) {
+	// Clear file
+	FILE* fp = fopen(filename.c_str(), "w");
+	fclose(fp);
+      }
+    }
+    else {
       FILE* fp = fopen(filename.c_str(), "w");
       fclose(fp);
     }

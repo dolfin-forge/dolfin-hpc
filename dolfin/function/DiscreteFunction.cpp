@@ -378,12 +378,13 @@ void DiscreteFunction::init_ghosts()
   }
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
+
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
 { 
   message("Syncing ghosts");
-  if(dof_map->renumbered() && !renumberd) {
+  if(dof_map->renumbered() && !renumberd && MPI::numProcesses() > 1) {
     message("Rebuilding ghost pattern");
     init_ghosts();
     renumberd = true ;

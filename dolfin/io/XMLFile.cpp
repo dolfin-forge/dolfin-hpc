@@ -43,6 +43,10 @@
 #include "XMLGraph.h"
 #include "XMLFile.h"
 
+#ifdef HAS_MPI
+#include <mpi.h>
+#endif
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -213,20 +217,21 @@ void XMLFile::operator>>(Graph& graph)
 //-----------------------------------------------------------------------------
 void XMLFile::operator<<(GenericVector& x)
 {
+
   // Open file
   FILE* fp = openFile();
 
   // Get vector values
-  real* values = new real[x.size()];
+  real* values = new real[x.local_size()];
   x.get(values);
-  
+
   // Write vector in XML format
-  fprintf(fp, "  <vector size=\"%u\"> \n", x.size() );
-  for (unsigned int i = 0; i < x.size(); i++) 
+  fprintf(fp, "  <vector size=\"%u\"> \n", x.local_size() );
+  for (unsigned int i = 0; i < x.local_size(); i++) 
   {
     fprintf(fp, "    <entry row=\"%u\" value=\"%.15g\"/>\n", i, values[i]);
-    if ( i == (x.size() - 1))
-      fprintf(fp, "  </vector>\n");
+	if ( i == (x.local_size() - 1))
+	  fprintf(fp, "  </vector>\n");
   }
   
   // Delete vector values
@@ -237,6 +242,7 @@ void XMLFile::operator<<(GenericVector& x)
   
 //  message(1, "Saved vector %s (%s) to file %s in DOLFIN XML format.", x.name().c_str(), x.label().c_str(), filename.c_str());
   message(1, "Saved vector  to file %s in DOLFIN XML format.", filename.c_str());
+
 }
 //-----------------------------------------------------------------------------
 void XMLFile::operator<<(GenericMatrix& A)
@@ -588,6 +594,7 @@ void XMLFile::operator<<(Graph& graph)
 //-----------------------------------------------------------------------------
 FILE* XMLFile::openFile()
 {
+
   // Open file
   FILE *fp = fopen(filename.c_str(), "r+");
 

@@ -79,6 +79,9 @@ namespace dolfin
 
     /// Return size of vector
     virtual uint size() const;
+    
+    /// Dummy 
+    virtual uint local_size() const;
 
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows) const;

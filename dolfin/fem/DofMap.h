@@ -1,3 +1,4 @@
+
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 
@@ -54,7 +55,7 @@ namespace dolfin
         return ufc_dof_map->signature(); 
       else
       {
-        error("DofMap has been re-ordered. Cannot return signature string.");
+	//        error("DofMap has been re-ordered. Cannot return signature string.");
         return ufc_dof_map->signature(); 
       }  
     }

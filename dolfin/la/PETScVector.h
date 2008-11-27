@@ -81,6 +81,9 @@ namespace dolfin
     /// Return size of vector
     virtual uint size() const;
 
+    /// Return local size of vector
+    virtual uint local_size() const;
+
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows) const;
 
@@ -146,6 +149,8 @@ namespace dolfin
     const PETScVector& operator= (const PETScVector& x);
 
     friend class PETScMatrix;
+
+    inline bool ghosted() { return is_ghosted;}
 
   private:
 

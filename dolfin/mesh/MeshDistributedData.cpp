@@ -165,6 +165,8 @@ dolfin::uint MeshDistributedData::get_owner(MeshEntity& e)
 //-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_owner(uint local_index, uint dim) 
 { 
+  if(MPI::numProcesses() == 1)
+    return 0;
   dolfin_assert( ghost_owner[dim].count(local_index) );
   return ghost_owner[dim][local_index];
 }

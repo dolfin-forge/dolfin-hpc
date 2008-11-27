@@ -86,7 +86,7 @@ namespace dolfin
     {return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);}
 
     inline bool is_ghost(uint i, uint dim)
-    {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : true);}
+    {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : false);}
 
     inline uint num_shared(uint dim) {return shared[dim].size(); }
 

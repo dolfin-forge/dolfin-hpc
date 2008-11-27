@@ -67,6 +67,11 @@ dolfin::uint uBlasVector::size() const
   return x.size();
 }
 //-----------------------------------------------------------------------------
+dolfin::uint uBlasVector::local_size() const
+{
+  return size();
+}
+//-----------------------------------------------------------------------------
 uBlasVector* uBlasVector::copy() const
 {
   return new uBlasVector(*this);

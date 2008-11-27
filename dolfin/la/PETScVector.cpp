@@ -108,9 +108,19 @@ PETScVector* PETScVector::copy() const
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* values) const
 {
+
+  real* data = 0;
+  VecGetArray(x, &data);
+  dolfin_assert(data);
+
+  for (uint i = 0; i < local_size(); i++)
+    values[i] = data[i];
+  VecRestoreArray(x, &data); 
+
   dolfin_assert(x);
-  
-  int m = static_cast<int>(size());
+
+  /*
+  int m = static_cast<int>(local_size());
   int* rows = new int[m];
   for (int i = 0; i < m; i++)
     rows[i] = i;
@@ -118,10 +128,22 @@ void PETScVector::get(real* values) const
   VecGetValues(x, m, rows, values);
 
   delete [] rows;
+  */
 }
 //-----------------------------------------------------------------------------
 void PETScVector::set(real* values)
 {
+  real* data = 0;
+  VecGetArray(x, &data);
+  dolfin_assert(data);
+  
+  for (uint i = 0; i < local_size(); i++)
+    data[i] = values[i];
+  VecRestoreArray(x, &data); 
+
+  dolfin_assert(x);
+
+  /*
   dolfin_assert(x);
   
   int m = static_cast<int>(size());
@@ -132,6 +154,7 @@ void PETScVector::set(real* values)
   VecSetValues(x, m, rows, values, INSERT_VALUES);
 
   delete [] rows;
+  */
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(real* values)
@@ -215,6 +238,15 @@ dolfin::uint PETScVector::size() const
   int n = 0;
   if (x)
     VecGetSize(x, &n);
+  
+  return static_cast<uint>(n);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint PETScVector::local_size() const
+{
+  int n = 0;
+  if (x) 
+    VecGetLocalSize(x, &n);
   
   return static_cast<uint>(n);
 }
@@ -352,7 +384,7 @@ Vec PETScVector::vec() const
 //-----------------------------------------------------------------------------
 void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
 			       std::map<uint, uint>& map){
-  
+ 
   if( is_ghosted )
     apply();
 

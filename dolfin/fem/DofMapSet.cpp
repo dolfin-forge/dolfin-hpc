@@ -56,6 +56,7 @@ DofMapSet::~DofMapSet()
     // Delete DOLFIN dof map
     delete it->second.second;
   }
+
 }
 //-----------------------------------------------------------------------------
 void DofMapSet::update(const Form& form, Mesh& mesh)

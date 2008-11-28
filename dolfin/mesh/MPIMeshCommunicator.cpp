@@ -326,11 +326,12 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	}
 
 	// Transfer Cell marker  (mesh refinement)
-	if( cell_marker )
-	  if( old_cell_marker->get(*c) )
+	if( cell_marker ) {
+	  if( old_cell_marker->get(*c) ) 
 	    send_list_cells[target_proc].push_back(1);
-	  else
+	  else 
 	    send_list_cells[target_proc].push_back(0);
+	}
       }
       else {
 	for(VertexIterator v(*c); !v.end(); ++v) {

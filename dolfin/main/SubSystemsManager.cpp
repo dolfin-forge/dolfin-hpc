@@ -52,7 +52,9 @@ void SubSystemsManager::initMPI()
   if( MPIinitialized() )
     return;
 
-  MPI_Init(0, 0);
+  int argc;
+  char **argv;
+  MPI_Init(&argc, &argv);
 #else
   // Do nothing
 #endif

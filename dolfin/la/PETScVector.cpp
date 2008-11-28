@@ -407,7 +407,7 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
   if( is_ghosted ) {
     dolfin_assert(map.size() > 0);
     for(int i = 0; i < local_size; i++)  {
-      dolfin_assert(map.count(low + i) > 0);
+      // dolfin_assert(map.count(low + i) > 0);
       rows[i] = map[low + i];
     }
   }

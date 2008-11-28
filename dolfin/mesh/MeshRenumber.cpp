@@ -188,7 +188,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 	// Check if I have the corresponding edge
 	if(edge_id.count(key)) {
 	  if( recv_buff_id[i>>1] < edge_id[key] ||
-	      recv_buff_id[i>>1] == edge_id[key] && status.MPI_SOURCE < rank){
+	      (recv_buff_id[i>>1] == edge_id[key] && status.MPI_SOURCE < rank)){
 	    edge_id.erase(key);
 	    mesh.distdata().set_ghost( edge_map[key], 1);
 	    num_ghost++;
@@ -374,7 +374,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
       if(face_id.count(facekey)) {
 	dolfin_assert(face_id.count(facekey));
 	if( recv_buff_id[ii] < face_id[facekey] ||
-	    recv_buff_id[ii] == face_id[facekey] && status.MPI_SOURCE < rank){
+	    (recv_buff_id[ii] == face_id[facekey] && status.MPI_SOURCE < rank)){
 	  face_id.erase(facekey);
 	  mesh.distdata().set_ghost( face_map[facekey], 2);
 	  num_ghost++;

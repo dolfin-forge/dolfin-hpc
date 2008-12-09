@@ -52,6 +52,8 @@ namespace dolfin
     /// Finalize sparsity pattern (needed by most parallel la backends)
     virtual void apply() = 0;
 
+    virtual void initRange(uint num_local) = 0;
+
   };
 
 }

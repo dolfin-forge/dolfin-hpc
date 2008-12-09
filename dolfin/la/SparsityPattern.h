@@ -82,7 +82,8 @@ namespace dolfin
 
     /// Return number of local rows for process_number
     uint numLocalRows(uint process_number) const;
-
+    
+    void initRange(uint num_local);
 
   private:
 

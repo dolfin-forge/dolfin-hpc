@@ -107,12 +107,14 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
         sparsity_pattern[rows[0][i]].insert(rows[1][j]);
     }
   }
+
 }
 //-----------------------------------------------------------------------------
 dolfin::uint SparsityPattern::size(uint n) const
 {
   dolfin_assert(n < 2);
   return dim[n]; 
+  //  return (range[MPI::processNumber() + 1] - range[MPI::processNumber()]);
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
@@ -198,6 +200,37 @@ void SparsityPattern::initRange()
   
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
+}
+//-----------------------------------------------------------------------------
+void SparsityPattern::initRange(uint num_local)
+{
+
+  if(range)
+    delete[] range;
+
+  uint num_procs = dolfin::MPI::numProcesses();
+  range = new uint[num_procs+1];
+  range[0] = 0;
+
+  uint *local= new uint[num_procs];
+  local[dolfin::MPI::processNumber()] = num_local;
+  
+  MPI_Allgather(&local[MPI::processNumber()],1,MPI_UNSIGNED, 
+		local, 1, MPI_UNSIGNED, MPI_COMM_WORLD);
+
+  for(uint p=0; p<num_procs; ++p)
+    range[p+1] = range[p] + local[p];
+
+  for(uint p=0; p<num_procs+1; ++p)
+    cout<< range[p] << " ";
+  cout<< endl;
+
+  for(uint p = 0; p < num_procs; ++p)
+    cout<< local[p] << " ";
+  cout<<endl;
+
+  
+  delete[] local;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::apply()

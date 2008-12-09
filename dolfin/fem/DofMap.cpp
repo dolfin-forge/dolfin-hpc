@@ -8,6 +8,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Vertex.h>
 #include "UFCCell.h"
 #include "DofMap.h"
 #include "SubSystem.h"
@@ -229,8 +230,8 @@ void DofMap::build(UFC& ufc, uint jj)
 {
 
   if( dof_map ) 
-    delete[] dof_map;
-    //    return;
+    //delete[] dof_map;
+  return;
 
   if(MPI::numProcesses() == 1) {
      uint *dofs =  new uint[local_dimension()];
@@ -302,21 +303,129 @@ void DofMap::build(UFC& ufc, uint jj)
   }
   else {
     uint local_dim = local_dimension();
+    uint *dofs =  new uint[local_dimension()];
+
+    uint pe_size = MPI::numProcesses();
+    uint rank = MPI::processNumber();
+
+
+    if (ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numVertices()) {
+      message("Optimizing DofMap for P1 elements, HORRAY!");
+      dolfin_mesh.renumber();
+      dof_map = new uint*[dolfin_mesh.numCells()];      
+
+      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
+	dof_map[c->index()] = new uint[local_dim];    
+	uint i = 0;
+	for(VertexIterator v(*c); !v.end(); ++v)
+	  dof_map[c->index()][i++] = dolfin_mesh.distdata().get_global(*v);
+      }
+      
+      delete[] dofs;
+    }
+    else if(ufc_dof_map->global_dimension() == 
+       ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numVertices()) {
+      message("Optimizing for DofMap vector valued P1 elements, HORRAY!");      
+
+      // Make sure the mesh are lineary numbered
+      dolfin_mesh.renumber();
+      
+      uint gdim = ufc_dof_map->geometric_dimension();
+      uint num_local = dolfin_mesh.numVertices() - dolfin_mesh.distdata().num_ghost(0);
+      
+      uint num_dofs = 3 * num_local;
+      uint offset = 0;
+
+      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      
+      std::map<uint,uint> v_offset;
+
+      for(VertexIterator v(dolfin_mesh); !v.end(); ++v) {
+	if(!dolfin_mesh.distdata().is_ghost(v->index(), 0)) {
+	  v_offset[dolfin_mesh.distdata().get_global(*v)] = offset; 
+	  offset += 3;
+	}
+      }
+
+      Array<uint> *ghost_buff = new Array<uint>[pe_size];
+      for(MeshGhostIterator iter(dolfin_mesh.distdata(), 0); !iter.end(); ++iter)
+	ghost_buff[iter.owner()].push_back(dolfin_mesh.distdata().get_global(iter.index(), 0)); 
+
+	
+	
+      MPI_Status status;
+      Array<uint> send_buff;
+      uint src,dest;
+      uint recv_size = dolfin_mesh.distdata().num_ghost(0); 
+      int recv_count, recv_size_gh, send_size;  
+      
+      for(uint i = 0; i < pe_size; i++) {
+	send_size = ghost_buff[i].size();
+	MPI_Reduce(&send_size, &recv_size_gh, 1, 
+		   MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+      }
+      
+      uint *recv_ghost = new uint[ recv_size_gh];
+      uint *recv_buff = new uint[ recv_size ];
+      
+      for(uint j=1; j < pe_size; j++){
+	src = (rank - j + pe_size) % pe_size;
+	dest = (rank + j) % pe_size;
+	
+	MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
+		     MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh, 
+		     MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+	
+	for(int k=0; k < recv_count; k++)
+	  send_buff.push_back(v_offset[recv_ghost[k]]);
+	
+	MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
+		     recv_buff, recv_size , MPI_UNSIGNED, dest, 2, 
+		     MPI_COMM_WORLD,&status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+
+	for(int j=0; j < recv_count; j++)
+	  v_offset[ghost_buff[dest][j]] = recv_buff[j];
+
+	send_buff.clear();
+      }
+
+      delete[] recv_ghost;
+      delete[] recv_buff;
+
+      dof_map = new uint*[dolfin_mesh.numCells()];      
+
+      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {	
+	
+	dof_map[c->index()] = new uint[local_dim];    
+
+	uint j = 0;
+	for(uint i = 0; i < gdim; i++) {
+	  for(VertexIterator v(*c); !v.end(); ++v) {
+	    dof_map[c->index()][j++] = v_offset[dolfin_mesh.distdata().get_global(*v)] + i;
+	  }
+	}
+
+      }
+
+      delete[] dofs;
+    }
+    else {
+
     
     BoundaryMesh local_boundary;
     local_boundary.init_interior(dolfin_mesh);
 
     dolfin_assert(local_boundary.size(0) > 0);
     
-    uint pe_size = MPI::numProcesses();
-    uint rank = MPI::processNumber();
+
     MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
     
     Array<uint> send_buff, send_buff_id;
     std::set<uint> shared_dofs, forbidden_dof;
     std::map<uint, uint> dof_vote;
     
-    uint *dofs =  new uint[local_dimension()];
     
     for(CellIterator bc(local_boundary); !bc.end(); ++bc) {
       Facet f(dolfin_mesh, cell_map->get(*bc));
@@ -491,7 +600,7 @@ void DofMap::build(UFC& ufc, uint jj)
     
     delete[] dofs;
   }
-  
+  }  
 }
 //-----------------------------------------------------------------------------
 std::map<dolfin::uint, dolfin::uint> DofMap::getMap() //FIXME: const

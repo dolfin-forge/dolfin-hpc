@@ -21,6 +21,8 @@
 #include "PETScObject.h"
 #include "GenericMatrix.h"
 
+#include <set>
+
 namespace dolfin
 {
 
@@ -140,6 +142,8 @@ namespace dolfin
     /// Assignment operator
     const PETScMatrix& operator= (const PETScMatrix& A);
 
+    void getrows_offproc(std::set<uint> rows);
+
   private:
 
     // Initialize M x N matrix with a given number of nonzeros per row
@@ -165,6 +169,9 @@ namespace dolfin
 
     // PETSc matrix type
     Type _type;
+
+    Mat A_sub;
+    bool sub;
 
   };
 

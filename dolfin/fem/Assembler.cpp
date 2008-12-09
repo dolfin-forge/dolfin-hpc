@@ -433,19 +433,19 @@ void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
 
   if (reset_tensor)
   {      
+
     /*
     if(MPI::numProcesses() > 1)
       dof_map_set.build(ufc);
     */
-
+    
 #ifdef BLOCKED
     dof_map_set.build(ufc);
 #endif 
-
     GenericSparsityPattern* sparsity_pattern = A.factory().createPattern(); 
     SparsityPatternBuilder::build(*sparsity_pattern, mesh, ufc, dof_map_set);
     A.init(*sparsity_pattern);
-    delete sparsity_pattern;
+    delete sparsity_pattern;    
   }
   else
     A.zero();

@@ -27,9 +27,20 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   else
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
 
+  for(uint i = 0; i < ufc.form.rank(); i++)
+    cout<< ufc.global_dimensions[i] << " ";
+  cout<<endl;
+
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
     return;
+
+  /*
+  if(ufc.global_dimensions[0] == 3*mesh.distdata().global_numVertices())
+    sparsity_pattern.initRange(3*(mesh.numVertices() - mesh.distdata().num_ghost(0)));
+  else if(ufc.global_dimensions[0] == mesh.distdata().global_numVertices())
+  sparsity_pattern.initRange(mesh.numVertices() - mesh.distdata().num_ghost(0));
+  */
 
   // Build sparsity pattern for cell integrals
   if (ufc.form.num_cell_integrals() != 0)

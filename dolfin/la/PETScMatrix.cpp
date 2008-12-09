@@ -31,7 +31,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const Type type):
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), _type(type)
+    A(0), is_view(false), _type(type), sub(false)
 {
   // Check type
   checkType();
@@ -67,6 +67,8 @@ PETScMatrix::~PETScMatrix()
 {
   if (A && !is_view)
     MatDestroy(A);
+
+  // FIXME destroy sub
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N)
@@ -150,8 +152,9 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
-
   MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //  MatCreateMPIAIJ(PETSC_COMM_WORLD, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //MatCreateMPIAIJ(PETSC_COMM_WORLD, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
@@ -169,10 +172,12 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     uint p = dolfin::MPI::processNumber();
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint local_size = spattern.numLocalRows(p);
+    message("local size %d", local_size);
     uint* d_nzrow = new uint[local_size];
     uint* o_nzrow = new uint[local_size];
     spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);
     init(spattern.size(0), spattern.size(1), d_nzrow, o_nzrow);
+    //init(local_size, local_size, d_nzrow, o_nzrow);
     delete [] d_nzrow;
     delete [] o_nzrow;
   }
@@ -287,7 +292,7 @@ void PETScMatrix::getrow(uint row,
     
   // Two different cases, local and non local rows.
   if( row >= (uint) m && row < (uint) n) {
-  //  if(MPI::numProcesses() == 1) {
+
     MatGetRow(A, row, &ncols, &cols, &vals);
     
     // Assign values to Arrays
@@ -298,6 +303,18 @@ void PETScMatrix::getrow(uint row,
 
   }
   else {
+
+    dolfin_debug("get sub");
+    dolfin_debug("pre get");
+
+
+    MatGetRow(A_sub, row, &ncols, &cols, &vals);
+    dolfin_debug("post get");
+    columns.assign(cols, cols+ncols);
+    values.assign(vals, vals+ncols);
+    MatRestoreRow(A_sub, row, &ncols, &cols, &vals);
+    dolfin_debug("post get sub");    
+    /*
 
     IS irow, icol;
 
@@ -339,8 +356,55 @@ void PETScMatrix::getrow(uint row,
     MatDestroyMatrices(1, A_sub);
 
     //    dolfin_debug("Post GetSubMatrix");
+    */
   } 
 
+}
+//-----------------------------------------------------------------------------
+void PETScMatrix::getrows_offproc(std::set<uint> rows)
+{
+
+  dolfin_debug("entering getrows");
+  std::vector<int> _rows;
+  int *_cols = new int[size(0)];
+
+  int m, n;
+  MatGetOwnershipRange(A, &m, &n);
+
+  std::set<uint>::iterator it;
+  for(it = rows.begin(); it != rows.end(); it++) {
+    _rows.push_back(*it);
+  }
+  
+
+  for(uint j = 0; j < size(0); j++) {
+    _cols[j] = j;
+    //  _rows.push_back(j);
+  }
+
+  
+  IS irow, icol;
+  ISCreateGeneral(PETSC_COMM_SELF, _rows.size(), &_rows[0], &irow);
+  ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
+
+  Mat *_A_sub[1];
+  MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, _A_sub);
+
+  A_sub = *_A_sub[0];
+  
+  int M = 0;
+  int N = 0;
+  MatGetSize(A_sub, &M, &N);  
+
+  message("%d %d %d %d", M, N, size(0), size(1));
+
+
+
+
+  sub = true;
+  delete[] _cols;
+  dolfin_debug("leaving getrows");
+  
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::setrow(uint row,

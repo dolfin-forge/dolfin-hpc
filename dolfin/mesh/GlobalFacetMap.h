@@ -29,7 +29,7 @@ namespace dolfin
 
     // Map of processor global facets, 
     // stores only the facets with shared vertices
-    std::map<uint, bool> global_facet;
+    _map<uint, bool> global_facet;
     Mesh& _mesh;
   };
 }

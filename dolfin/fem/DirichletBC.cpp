@@ -25,6 +25,7 @@
 #include "SubSystem.h"
 #include "DirichletBC.h"
 
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -133,7 +134,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
     error("Incorrect dimension of matrix for application of boundary conditions. Did you assemble it on a different mesh?");
 
   // A map to hold the mapping from boundary dofs to boundary values
-  std::map<uint, real> boundary_values;
+  _map<uint, real> boundary_values;
 
   // Create local data for application of boundary conditions
   BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
@@ -144,7 +145,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   // Copy boundary value data to arrays
   uint* dofs = new uint[boundary_values.size()];
   real* values = new real[boundary_values.size()];
-  std::map<uint, real>::const_iterator boundary_value;
+  _map<uint, real>::const_iterator boundary_value;
   uint i = 0;
   for (boundary_value = boundary_values.begin(); boundary_value != boundary_values.end(); ++boundary_value)
   {
@@ -194,7 +195,7 @@ void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map, const ufc::form&
     error("Incorrect dimension of matrix for application of boundary conditions. Did you assemble it on a different mesh?");
 
   // A map to hold the mapping from boundary dofs to boundary values
-  std::map<uint, real> boundary_values;
+  _map<uint, real> boundary_values;
 
   // Create local data for application of boundary conditions
   BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
@@ -204,7 +205,7 @@ void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map, const ufc::form&
 
   // Copy boundary value data to arrays
   uint* dofs = new uint[boundary_values.size()];
-  std::map<uint, real>::const_iterator boundary_value;
+  _map<uint, real>::const_iterator boundary_value;
   uint i = 0;
   for (boundary_value = boundary_values.begin(); boundary_value != boundary_values.end(); ++boundary_value)
     dofs[i++] = boundary_value->first;
@@ -323,7 +324,7 @@ void DirichletBC::initFromMesh(uint sub_domain)
   }
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::computeBC(std::map<uint, real>& boundary_values,
+void DirichletBC::computeBC(_map<uint, real>& boundary_values,
                             BoundaryCondition::LocalData& data)
 {
   // Choose strategy
@@ -343,7 +344,7 @@ void DirichletBC::computeBC(std::map<uint, real>& boundary_values,
   }
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
+void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
                                        BoundaryCondition::LocalData& data)
 {
   // Special case
@@ -401,7 +402,7 @@ void DirichletBC::computeBCTopological(std::map<uint, real>& boundary_values,
   }
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::computeBCGeometric(std::map<uint, real>& boundary_values,
+void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
                                      BoundaryCondition::LocalData& data)
 {
   // Special case
@@ -474,7 +475,7 @@ void DirichletBC::computeBCGeometric(std::map<uint, real>& boundary_values,
   }
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::computeBCPointwise(std::map<uint, real>& boundary_values,
+void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
                                      BoundaryCondition::LocalData& data)
 {
   dolfin_assert(user_sub_domain);
@@ -577,7 +578,7 @@ void DirichletBC::setSubSystem(SubSystem sub_system)
 void DirichletBC::getBC(uint n, uint* indicators, double* values, const DofMap& dof_map, const ufc::form& form)
 {
   // A map to hold the mapping from boundary dofs to boundary values
-  std::map<uint, real> boundary_values;
+  _map<uint, real> boundary_values;
 
   // Create local data for application of boundary conditions
   BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
@@ -589,7 +590,7 @@ void DirichletBC::getBC(uint n, uint* indicators, double* values, const DofMap& 
     error("The n should be the same as dof_map.global_dimension()");  
   }
 
-  std::map<uint, real>::const_iterator boundary_value;
+  _map<uint, real>::const_iterator boundary_value;
   uint i = 0;
   for (boundary_value = boundary_values.begin(); boundary_value != boundary_values.end(); ++boundary_value)
   {

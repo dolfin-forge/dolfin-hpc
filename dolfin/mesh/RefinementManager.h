@@ -77,7 +77,7 @@ namespace dolfin
     typedef std::pair<uint, uint> EdgeKey;
     
     // Set of boundary cell index
-    std::set<uint> boundary_set;
+    _set<uint> boundary_set;
 
     // Construct a key from edge vertices
     EdgeKey edge_key(uint id1, uint id2);
@@ -88,7 +88,7 @@ namespace dolfin
     std::map<EdgeKey, uint> edge_cell_map;
     std::map<EdgeKey, bool> refined_edge;
 
-    std::map<uint, uint> cell_refedge;
+    _map<uint, uint> cell_refedge;
 
     MeshFunction<bool> boundary_edge;
 

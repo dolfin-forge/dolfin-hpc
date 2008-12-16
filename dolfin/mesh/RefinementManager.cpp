@@ -277,9 +277,9 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   EdgeKey key;
   // Set of cell indices with longest edge
   std::map<EdgeKey, uint> num_ref, removed, edge_id;
-  std::set<uint> cell_forbidden_edges;
+  _set<uint> cell_forbidden_edges;
   std::set<EdgeKey> forbidden_propagation;
-  std::map<uint, uint> edge_vote;
+  _map<uint, uint> edge_vote;
 
   num_new_cells = 0;
   num_new_vertices = 0;
@@ -287,7 +287,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   uint index = 0;
 
   // Process cells between processors
-  std::set<uint>::iterator bc;
+  _set<uint>::iterator bc;
 
   // Reset forbidden edges and cells
   edge_forbidden = false;

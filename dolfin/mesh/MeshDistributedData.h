@@ -10,14 +10,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/log.h>
 
-#ifdef __GNUG__
-#include <ext/hash_map>
-#include <ext/hash_set>
-#else
-#include <map>
-#include <set>
-#endif
-
 namespace dolfin
 {
   class Vertex;
@@ -125,23 +117,14 @@ namespace dolfin
 
     bool _valid_edge_ownership, _valid_face_ownership;
       
-#ifdef __GNUG__
-    __gnu_cxx::hash_map<uint, uint> global_indices[4];
-    __gnu_cxx::hash_map<uint, uint> local_indices[4];
+    _map<uint, uint> global_indices[4];
+    _map<uint, uint> local_indices[4];
 
-    __gnu_cxx::hash_map<uint, uint> ghost_owner[3];
+    _map<uint, uint> ghost_owner[3];
 
-    __gnu_cxx::hash_set<uint> shared[3];
-    __gnu_cxx::hash_set<uint> ghost[3];
-#else
-    std::map<uint, uint> global_indices[4];
-    std::map<uint, uint> local_indices[4];
+    _set<uint> shared[3];
+    _set<uint> ghost[3];
 
-    std::map<uint, uint> ghost_owner[3];
-
-    std::set<uint> shared[3];
-    std::set<uint> ghost[3];
-#endif
 
     friend class MeshGhostIterator;
     friend class MeshSharedIterator;
@@ -164,11 +147,7 @@ namespace dolfin
 
   private:
     MeshDistributedData& _distdata;
-#ifdef __GNUG__
-    __gnu_cxx::hash_set<uint>::iterator _iter;
-#else
-    std::set<uint>::iterator _iter;
-#endif
+    _set<uint>::iterator _iter;
     uint _dim;
   };
 
@@ -185,11 +164,7 @@ namespace dolfin
    
   private:
     MeshDistributedData& _distdata;
-#ifdef __GNUG__
-    __gnu_cxx::hash_set<uint>::iterator _iter;
-#else
-    std::set<uint>::iterator _iter;
-#endif
+    _set<uint>::iterator _iter;
     uint _dim;
   };
   

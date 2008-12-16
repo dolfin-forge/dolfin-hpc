@@ -163,19 +163,19 @@ namespace dolfin
     void initFromMesh(uint sub_domain);
     
     // Compute dofs and values for application of boundary conditions
-    void computeBC(std::map<uint, real>& boundary_values,
+    void computeBC(_map<uint, real>& boundary_values,
                    BoundaryCondition::LocalData& data);
     
     // Compute boundary values for facet (topological approach)
-    void computeBCTopological(std::map<uint, real>& boundary_values,
+    void computeBCTopological(_map<uint, real>& boundary_values,
                               BoundaryCondition::LocalData& data);
     
     // Compute boundary values for facet (geometrical approach)
-    void computeBCGeometric(std::map<uint, real>& boundary_values,
+    void computeBCGeometric(_map<uint, real>& boundary_values,
                             BoundaryCondition::LocalData& data);
     
     // Compute boundary values for facet (pointwise approach)
-    void computeBCPointwise(std::map<uint, real>& boundary_values,
+    void computeBCPointwise(_map<uint, real>& boundary_values,
                             BoundaryCondition::LocalData& data);
     
     // Check if the point is in the same plane as the given facet

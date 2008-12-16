@@ -10,6 +10,12 @@
 #define __DOLFIN_TYPES_H
 
 #include <complex>
+#ifdef __GNUG__
+#include <ext/hash_map>
+#include <ext/hash_set>
+#else
+#include <map>
+#endif
 
 namespace dolfin
 {
@@ -23,6 +29,13 @@ namespace dolfin
   // Complex numbers
   typedef std::complex<double> complex;
 
+#ifdef __GNUG__
+#define _map __gnu_cxx::hash_map 
+#define _set __gnu_cxx::hash_set
+#else
+#define _map std::map 
+#define _set std::set
+#endif
 }
 
 #endif

@@ -56,7 +56,7 @@ void GlobalFacetMap::init()
 //-----------------------------------------------------------------------------
 void GlobalFacetMap::findGlobal2D()
 {
-  std::map<uint,bool>::iterator iter;
+  _map<uint,bool>::iterator iter;
   
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter){
 
@@ -79,9 +79,9 @@ void GlobalFacetMap::findGlobal3D()
 
   Array<uint> send_buff;
   const uint dim = _mesh.topology().dim();
-  std::map<uint,bool>::iterator iter;
-  std::map<uint, uint>::iterator  uiter;
-  std::map<uint, uint> unassigned;
+  _map<uint,bool>::iterator iter;
+  _map<uint, uint>::iterator  uiter;
+  _map<uint, uint> unassigned;
   
   uint num_un = 0;
 

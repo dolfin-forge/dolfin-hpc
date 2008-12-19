@@ -33,7 +33,8 @@ using namespace dolfin;
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form, uint i)
   : GenericFunction(mesh),
     x(&x), finite_element(0), dof_map(0),
-    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0)
+    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0),
+    _indices(0), data_cache(0)
 {
   // Update dof maps
   form.updateDofMaps(mesh);
@@ -47,7 +48,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, DofMap& dof_map
                                    const ufc::form& form, uint i)
   : GenericFunction(mesh),
     x(&x), finite_element(0), dof_map(&dof_map),
-    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0)
+    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0),
+    _indices(0), data_cache(0)
 {
   init(mesh, x, form, i);
 }
@@ -57,7 +59,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
                                    std::string dof_map_signature)
   : GenericFunction(mesh),
     x(&x), finite_element(0), dof_map(0),
-    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0)
+    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0),
+    _indices(0), data_cache(0)
 {
   // Create finite element
   finite_element = ElementLibrary::create_finite_element(finite_element_signature);
@@ -84,7 +87,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function)
   : GenericFunction(sub_function.f->mesh),
     x(0), finite_element(0), dof_map(0),
-    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0)
+    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0),
+    _indices(0), data_cache(0)
 {
   // Create sub system
   SubSystem sub_system(sub_function.i);
@@ -126,7 +130,8 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function)
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f)
   : GenericFunction(f.mesh),
-    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0)
+    local_vector(0), local_dof_map(0), intersection_detector(0), scratch(0),
+    _indices(0), data_cache(0)
 {
   // FIXME: Why don't we just copy the finite_element?
   // Create finite element
@@ -166,6 +171,12 @@ DiscreteFunction::~DiscreteFunction()
 
   if (scratch)
     delete scratch;
+
+  if(_indices)
+    delete[] _indices;
+  
+  if(data_cache)
+    delete[] data_cache;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::rank() const
@@ -269,7 +280,14 @@ void DiscreteFunction::interpolate(real* coefficients,
   dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
   
   // Pick values from global vector
-  x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
+  if(MPI::numProcesses() > 1) {
+    for(uint i = 0; i < dof_map->local_dimension(); i++) {
+      _map<uint, uint>::const_iterator it = cache_mapping.find(scratch->dofs[i]);
+      coefficients[i] = data_cache[it->second];
+    }
+  }
+  else 
+    x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::eval(real* values, const real* x) const
@@ -378,19 +396,36 @@ void DiscreteFunction::init_ghosts()
   }
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
-
+  
+  _indices = new uint[indices.size()];
+  data_cache = new real[indices.size()];
+  
+  uint i = 0;
+  std::set<uint>::iterator it;
+  for(it = indices.begin(); it != indices.end(); it++) {
+    _indices[i] = *it;
+    cache_mapping[*it] = i++;
+  }
+  
+  _cache_size = indices.size();
+ 
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
 { 
+
+  if(MPI::numProcesses() == 1)
+    return;
+
   message("Syncing ghosts");
   if(dof_map->renumbered() && !renumberd && MPI::numProcesses() > 1) {
     message("Rebuilding ghost pattern");
     init_ghosts();
     renumberd = true ;
   }
-
+  
   x->apply(); 
+  x->get(data_cache, _cache_size, _indices);
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)

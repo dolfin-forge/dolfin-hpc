@@ -9,7 +9,6 @@
 #ifndef __SPARSITY_PATTERN_H
 #define __SPARSITY_PATTERN_H
 
-#include <set>
 #include <vector>
 
 #include "GenericSparsityPattern.h"
@@ -68,7 +67,7 @@ namespace dolfin
     uint numNonZero() const;
 
     /// Return underlying sparsity pattern
-    const std::vector< std::set<int> >& pattern() const 
+    const std::vector< _set<int> >& pattern() const 
     { return sparsity_pattern; };
 
     /// Display sparsity pattern
@@ -85,6 +84,10 @@ namespace dolfin
     
     void initRange(uint num_local);
 
+    inline void set_blocked() { blocked = true;}
+    
+    inline bool is_blocked() {return blocked;}
+
   private:
 
     /// Initialize range
@@ -93,11 +96,11 @@ namespace dolfin
     /// Sparsity pattern represented as an vector of sets. Each set corresponds
     /// to a row, and the set contains the column positions of nonzero entries 
     /// When run in parallel this vector contains diagonal non-zeroes
-    std::vector< std::set<int> > sparsity_pattern;
+    std::vector< _set<int> > sparsity_pattern;
 
     /// Sparsity pattern for off diagonal represented as vector of sets. Each
     /// set corresponds to a row, and the set contains the column positions of nonzero entries 
-    std::vector< std::set<int> > o_sparsity_pattern;
+    std::vector< _set<int> > o_sparsity_pattern;
 
     // Dimensions
     uint dim[2];
@@ -107,6 +110,8 @@ namespace dolfin
     uint* range;
 
     std::vector<int> off_processor;
+
+    bool blocked;
   };
 }
 #endif

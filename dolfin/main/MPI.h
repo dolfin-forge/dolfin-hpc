@@ -30,6 +30,22 @@ namespace dolfin
     /// Determine whether we should receive (based on current parallel policy)
     static bool receive();
 
+    /// Start MPI timer
+    static void startTimer();
+    
+    /// Start MPI timer with external counter;
+    static void startTimer(dolfin::real& stime);
+
+    /// Stop MPI timer
+    static real stopTimer();
+
+    /// Stop MPI timer
+    static real stopTimer(dolfin::real& stime);
+
+  private:
+    static dolfin::real start_time;
+
+
   };
 }
 

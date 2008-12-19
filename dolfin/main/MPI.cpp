@@ -51,6 +51,31 @@ bool dolfin::MPI::receive()
   return numProcesses() > 1 && processNumber() > 0;
 }
 //-----------------------------------------------------------------------------
+void dolfin::MPI::startTimer()
+{
+  MPI_Barrier(MPI_COMM_WORLD);
+  start_time = MPI_Wtime();
+}
+//-----------------------------------------------------------------------------
+dolfin::real dolfin::MPI::stopTimer()
+{
+  MPI_Barrier(MPI_COMM_WORLD);
+  return (MPI_Wtime() - start_time);
+}
+//-----------------------------------------------------------------------------
+void dolfin::MPI::startTimer(real& stime)
+{
+  MPI_Barrier(MPI_COMM_WORLD);
+  stime = MPI_Wtime();
+}
+//-----------------------------------------------------------------------------
+dolfin::real dolfin::MPI::stopTimer(real& stime)
+{
+  MPI_Barrier(MPI_COMM_WORLD);
+  return (MPI_Wtime() - stime);
+}
+//-----------------------------------------------------------------------------
+dolfin::real dolfin::MPI::start_time = 0.0;
 
 #else
 

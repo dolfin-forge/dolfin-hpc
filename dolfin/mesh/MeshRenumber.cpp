@@ -54,6 +54,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().set_global_numVertices(num_glb);
   
   _map<uint,uint> new_local,new_global;  
+  new_local.resize(mesh.numVertices());
+  new_global.resize(mesh.numVertices());
   for(uint i = 0; i< mesh.numVertices(); i++){
     if(!mesh.distdata().is_ghost(i, 0)){
       new_global[i] = offset++;
@@ -218,6 +220,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;  
+  new_local.resize(mesh.numEdges());
+  new_global.resize(mesh.numEdges());
   for(uint i = 0; i< mesh.numEdges(); i++){
     if( !mesh.distdata().is_ghost(i, 1) ) { 
       new_global[i] = offset++;
@@ -404,6 +408,8 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;  
+  new_local.resize(mesh.numFaces());
+  new_global.resize(mesh.numFaces());
   for(uint i = 0; i< mesh.numFaces(); i++){
     if( !mesh.distdata().is_ghost(i, 2) ){
       new_global[i] = offset++;
@@ -488,6 +494,8 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   MPI_Exscan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
 
   _map<uint,uint> new_local,new_global;  
+  new_local.resize(mesh.numCells());
+  new_global.resize(mesh.numCells());
   for(uint i = 0; i< mesh.numCells(); i++){
     new_global[i] = offset++;
     new_local [ new_global[i] ] = i;

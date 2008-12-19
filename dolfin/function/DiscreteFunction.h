@@ -144,6 +144,12 @@ namespace dolfin
     // Renumbred dof_map;
     bool renumberd;
 
+    uint _cache_size;
+    uint *_indices;
+    real *data_cache;
+    _map<uint, uint> cache_mapping;
+
+
   };
 
 }

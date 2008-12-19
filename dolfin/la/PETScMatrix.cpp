@@ -364,6 +364,9 @@ void PETScMatrix::getrow(uint row,
 void PETScMatrix::getrows_offproc(std::set<uint> rows)
 {
 
+  if(MPI::numProcesses() == 1)
+    return;
+
   dolfin_debug("entering getrows");
   std::vector<int> _rows;
   int *_cols = new int[size(0)];
@@ -372,15 +375,12 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   MatGetOwnershipRange(A, &m, &n);
 
   std::set<uint>::iterator it;
-  for(it = rows.begin(); it != rows.end(); it++) {
-    _rows.push_back(*it);
-  }
-  
 
-  for(uint j = 0; j < size(0); j++) {
+  for(it = rows.begin(); it != rows.end(); it++)
+    _rows.push_back(*it);
+ 
+  for(uint j = 0; j < size(0); j++)
     _cols[j] = j;
-    //  _rows.push_back(j);
-  }
 
   
   IS irow, icol;

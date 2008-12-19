@@ -18,7 +18,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern(uint M, uint N) : range(0)
+SparsityPattern::SparsityPattern(uint M, uint N) : range(0), blocked(false)
 {
   uint dims[2];
   dims[0] = M;
@@ -26,7 +26,7 @@ SparsityPattern::SparsityPattern(uint M, uint N) : range(0)
   init(2, dims);
 }
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern(uint M) : range(0)
+SparsityPattern::SparsityPattern(uint M) : range(0), blocked(false)
 {
   uint dims[2];
   dims[0] = M;
@@ -34,7 +34,7 @@ SparsityPattern::SparsityPattern(uint M) : range(0)
   init(1, dims);
 }
 //-----------------------------------------------------------------------------
-  SparsityPattern::SparsityPattern() : range(0)
+SparsityPattern::SparsityPattern() : range(0)
 {
   dim[0] = 0;
   dim[1] = 0;
@@ -126,7 +126,7 @@ void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
     error("Sparsity pattern has not been computed.");
 
   // Compute number of nonzeros per row
-  std::vector< std::set<int> >::const_iterator set;
+  std::vector< _set<int> >::const_iterator set;
   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
     nzrow[set-sparsity_pattern.begin()] = set->size();
 }
@@ -158,7 +158,7 @@ dolfin::uint SparsityPattern::numNonZero() const
 
   // Compute total number of nonzeros per row
   uint nz = 0;
-  std::vector< std::set<int> >::const_iterator set;
+  std::vector< _set<int> >::const_iterator set;
   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
     nz += set->size();
   return nz;
@@ -169,8 +169,8 @@ void SparsityPattern::disp() const
   if ( dim[1] == 0 )
     warning("Only matrix sparsity patterns can be displayed.");
 
-  std::vector< std::set<int> >::const_iterator set;
-  std::set<int>::const_iterator element;
+  std::vector< _set<int> >::const_iterator set;
+  _set<int>::const_iterator element;
   
   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
   {

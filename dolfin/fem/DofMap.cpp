@@ -333,7 +333,7 @@ void DofMap::build(UFC& ufc, uint jj)
       uint gdim = ufc_dof_map->geometric_dimension();
       uint num_local = dolfin_mesh.numVertices() - dolfin_mesh.distdata().num_ghost(0);
       
-      uint num_dofs = 3 * num_local;
+      uint num_dofs = gdim * num_local;
       uint offset = 0;
 
       MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
@@ -343,7 +343,7 @@ void DofMap::build(UFC& ufc, uint jj)
       for(VertexIterator v(dolfin_mesh); !v.end(); ++v) {
 	if(!dolfin_mesh.distdata().is_ghost(v->index(), 0)) {
 	  v_offset[dolfin_mesh.distdata().get_global(*v)] = offset; 
-	  offset += 3;
+	  offset += gdim;
 	}
       }
 
@@ -514,7 +514,7 @@ void DofMap::build(UFC& ufc, uint jj)
     
     map.clear();
     
-    std::map<uint, Array<std::pair<uint, uint> > > cell_dof;
+    _map<uint, Array<std::pair<uint, uint> > > cell_dof;
   
     send_buff.clear();
     send_buff_id.clear();
@@ -589,7 +589,7 @@ void DofMap::build(UFC& ufc, uint jj)
     delete[] recv_buff;
 
 
-    std::map< uint, Array<std::pair<uint, uint> >  >::iterator cit;
+    _map< uint, Array<std::pair<uint, uint> >  >::iterator cit;
     std::vector< std::pair<uint, uint> >::iterator rit;
     for(cit = cell_dof.begin(); cit != cell_dof.end(); ++cit) 
       for(rit = cit->second.begin(); rit != cit->second.end(); ++rit)

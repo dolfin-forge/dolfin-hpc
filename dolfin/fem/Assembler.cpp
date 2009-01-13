@@ -188,14 +188,11 @@ void Assembler::assembleCells(GenericTensor& A,
     }
 
     // Update to current cell
-    ufc.update(*cell);
+    ufc.update(*cell, mesh.distdata());    
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], *cell);
-
-    // Update to global numbering
-    ufc.update(*cell, mesh.distdata());    
 
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
@@ -209,7 +206,6 @@ void Assembler::assembleCells(GenericTensor& A,
     
     p++;
 
-    ufc.reset(*cell, mesh.distdata());
   }
 
   //t = toc() - t;
@@ -262,14 +258,11 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     const uint local_facet = mesh_cell.index(mesh_facet);
       
     // Update to current cell
-    ufc.update(mesh_cell);
+    ufc.update(mesh_cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], mesh_cell, local_facet);
-
-    // Update to global numbering
-    ufc.update(mesh_cell, mesh.distdata());
 
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
@@ -286,7 +279,6 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
 
     p++;  
 
-    ufc.reset(mesh_cell, mesh.distdata());
   }
 }
 //-----------------------------------------------------------------------------
@@ -338,7 +330,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     uint facet1 = cell1.index(*facet);
 
     // Update to current pair of cells
-    ufc.update(cell0, cell1);
+    ufc.update(cell0, cell1, mesh.distdata());    
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -347,9 +339,6 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       coefficients[i]->interpolate(ufc.macro_w[i], ufc.cell0, *ufc.coefficient_elements[i], cell0, facet0);
       coefficients[i]->interpolate(ufc.macro_w[i] + offset, ufc.cell1, *ufc.coefficient_elements[i], cell1, facet1);
     }
-
-    // Update to global numbering // FIXME 
-    ufc.update(cell0, cell1, mesh.distdata());    
 
     // Tabulate dofs for each dimension on macro element
     for (uint i = 0; i < ufc.form.rank(); i++)
@@ -365,8 +354,6 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
 
-    // Reset cells to local numbering
-    ufc.reset(cell0, cell1, mesh.distdata());
     p++;
   }
 }
@@ -577,8 +564,8 @@ void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
     Cell mesh_cell(mesh, mesh_facet.entities(mesh.topology().dim())[0]);
 
     // Update to current cell
-    A_ufc.update(mesh_cell);
-    b_ufc.update(mesh_cell);
+    A_ufc.update(mesh_cell, mesh.distdata());
+    b_ufc.update(mesh_cell, mesh.distdata());
 
     // Tabulate dofs for each dimension 
     A_dof_map_set[0].tabulate_dofs(A_ufc.dofs[0], A_ufc.cell, mesh_cell.index());

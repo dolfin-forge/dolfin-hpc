@@ -234,7 +234,6 @@ void DiscreteFunction::interpolate(real* values) const
   for (; !cell.end(); ++cell)
   {
     // Update to current cell
-    ufc_cell.update(*cell);
     ufc_cell.update(*cell, mesh.distdata());
 
     // Tabulate dofs
@@ -245,7 +244,6 @@ void DiscreteFunction::interpolate(real* values) const
     // Pick values from global vector
     x->get(scratch->coefficients, dof_map->local_dimension(), scratch->dofs);
 
-    ufc_cell.reset(*cell, mesh.distdata());
 
     // Interpolate values at the vertices
     finite_element->interpolate_vertex_values(vertex_values, scratch->coefficients, ufc_cell);
@@ -310,17 +308,13 @@ void DiscreteFunction::eval(real* values, const real* x) const
     error("Unable to evaluate function at given point (not inside domain).");
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);
-   // Reset local numbering
-  //ufc_cell.reset(cell, mesh.distdata());
-  ufc_cell.update(cell);
+  
   // Change to global numbering
   ufc_cell.update(cell, mesh.distdata());
 
   // Get expansion coefficients on cell
   this->interpolate(scratch->coefficients, ufc_cell, *finite_element, cell);
 
-  // Reset local numbering
-  ufc_cell.reset(cell, mesh.distdata());
 
   // Compute linear combination
   for (uint j = 0; j < scratch->size; j++)
@@ -383,7 +377,6 @@ void DiscreteFunction::init_ghosts()
   UFCCell ufc_cell(*cell);
   for (; !cell.end(); ++cell) {
     // Update to current cell
-    ufc_cell.update(*cell);
     ufc_cell.update(*cell, mesh.distdata());
     
     // Tabulate dofs
@@ -392,7 +385,6 @@ void DiscreteFunction::init_ghosts()
     for(uint j = 0; j <   finite_element->space_dimension(); j++)
       indices.insert(scratch->dofs[j]);
     
-    ufc_cell.reset(*cell, mesh.distdata());      
   }
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);

@@ -365,13 +365,13 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
     // Create cell
     Cell cell(_mesh, cell_number);
     UFCCell ufc_cell(cell);
-    ufc_cell.update(cell);
 
+    ufc_cell.update(cell, _mesh.distdata());    
 
     // Interpolate function on cell
     g.interpolate(data.w, ufc_cell, *data.finite_element, cell, facet_number);
 
-    ufc_cell.update(cell, _mesh.distdata());    
+
 
     // Tabulate dofs on cell
     //data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
@@ -398,7 +398,6 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
 
     p++;
 
-    ufc_cell.reset(cell, _mesh.distdata());        
   }
 }
 //-----------------------------------------------------------------------------
@@ -441,7 +440,6 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
         // Tabulate coordinates of dofs on cell
         data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
 
-	ufc_cell.reset(*c, _mesh.distdata());          
         // Loop over all dofs on cell
         for (uint i = 0; i < data.dof_map->local_dimension(); ++i)
         {
@@ -451,23 +449,19 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
           
           if(!interpolated)
           {
-	    ufc_cell.update(*c, _mesh.distdata());                  
+
             // Tabulate dofs on cell
             data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
-	    ufc_cell.reset(*c, _mesh.distdata());          
 
             // Interpolate function on cell
             g.interpolate(data.w, ufc_cell, *data.finite_element, *c);
           }
           
-	  ufc_cell.update(*c, _mesh.distdata());                  
-
 
           // Set boundary value
           const uint dof = data.offset + data.cell_dofs[i];
           const real value = data.w[i];
           boundary_values[dof] = value;
-	  ufc_cell.reset(*c, _mesh.distdata());          
         }
 	
       }
@@ -513,7 +507,7 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
       const real value = data.w[i];
       boundary_values[dof] = value;
     }
-    ufc_cell.reset(*cell, _mesh.distdata());    
+
     p++;
   }
 }

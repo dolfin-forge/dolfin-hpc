@@ -44,6 +44,8 @@ namespace dolfin
 
   private:
     static dolfin::real start_time;
+    static int this_process, num_processes;
+    static bool _this_process, _num_processes;
 
 
   };

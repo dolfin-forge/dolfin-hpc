@@ -187,7 +187,8 @@ real OutflowFacet::eval(const real* x) const
     {
       // Copy cell, cannot call interpolate with const cell()
       Cell cell0(cell());
-      ufc->update(cell0);
+      error("Specialfunction not implemented in parallel");
+      //      ufc->update(cell0, mesh.distdata());
 
       // Interpolate coefficients on cell and current facet
       for (dolfin::uint i = 0; i < form.coefficients().size(); i++)

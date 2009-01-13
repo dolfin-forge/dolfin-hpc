@@ -68,6 +68,12 @@ PETScMatrix::~PETScMatrix()
   if (A && !is_view)
     MatDestroy(A);
 
+  if(sub) {
+    MatDestroy(AA_sub[0]);
+    delete[] AA_sub;
+  }
+
+
   // FIXME destroy sub
 }
 //-----------------------------------------------------------------------------
@@ -304,60 +310,23 @@ void PETScMatrix::getrow(uint row,
   }
   else {
 
-    dolfin_debug("get sub");
-    dolfin_debug("pre get");
 
+    std::map<const int, int>::const_iterator it = mapping.find(row);    
+    MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
 
-    MatGetRow(A_sub, row, &ncols, &cols, &vals);
-    dolfin_debug("post get");
     columns.assign(cols, cols+ncols);
     values.assign(vals, vals+ncols);
-    MatRestoreRow(A_sub, row, &ncols, &cols, &vals);
-    dolfin_debug("post get sub");    
-    /*
-
-    IS irow, icol;
-
-    Array<int> cc;
-    for(uint i = 0; i < size(0); i++)
-      cc.push_back(i);
-    
-    //    int rrow = static_cast<int>(row);
-    const int rrow = { (int) row };
-    //    dolfin_debug("pre is create");
-    ISCreateGeneral(MPI_COMM_SELF, 1, &rrow, &irow);
-    //    dolfin_debug("post is create");
-    ISCreateGeneral(MPI_COMM_SELF, cc.size(), &cc[0], &icol);
-
-    int ir_size, ic_size;
-    ISGetSize(irow, &ir_size);
-    ISGetSize(icol, &ic_size);
-    
-    //    message("IS size irow: %d icol: %d:", ir_size, ic_size);
-      
-    Mat *A_sub[1];
-    
-    //    dolfin_debug("Pre GetSubMatrix");
-    //    dolfin_debug("Pre GetSubMatrix");
-    MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, A_sub);
+    MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
 
 
-    Mat A_sub_1 = *A_sub[0];
+    for(uint i = 0; i < values.size(); i++) {
+      if (row == cols[i] && values[i] < 1e-10)
+	error("Zero diag");
+    }
 
-    MatGetRow(A_sub_1, 0, &ncols, &cols, &vals);
-    
-    // Assign values to Arrays
-    columns.assign(cols, cols+ncols);
-    values.assign(vals, vals+ncols);
-    //    message("%d %d", columns.size(), values.size());
-    dolfin_assert(columns.size() > 0);
-    dolfin_assert(values.size() > 0);
-    MatRestoreRow(A_sub_1, 0, &ncols, &cols, &vals);
-    MatDestroyMatrices(1, A_sub);
-
-    //    dolfin_debug("Post GetSubMatrix");
-    */
   } 
+
+
 
 }
 //-----------------------------------------------------------------------------
@@ -367,43 +336,36 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   if(MPI::numProcesses() == 1)
     return;
 
-  dolfin_debug("entering getrows");
-  std::vector<int> _rows;
   int *_cols = new int[size(0)];
+  int *_rows = new int[rows.size()];
 
   int m, n;
   MatGetOwnershipRange(A, &m, &n);
 
   std::set<uint>::iterator it;
 
-  for(it = rows.begin(); it != rows.end(); it++)
-    _rows.push_back(*it);
+  uint i = 0;
+  for(it = rows.begin(); it != rows.end(); it++) {
+    if( !(*it >= (uint) m && *it < (uint) n)) {
+      _rows[i] = *it;
+      mapping[*it] = i++;
+    }
+  }
  
   for(uint j = 0; j < size(0); j++)
     _cols[j] = j;
 
   
   IS irow, icol;
-  ISCreateGeneral(PETSC_COMM_SELF, _rows.size(), &_rows[0], &irow);
+  ISCreateGeneral(PETSC_COMM_SELF, i, _rows, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
 
-  Mat *_A_sub[1];
-  MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, _A_sub);
-
-  A_sub = *_A_sub[0];
-  
-  int M = 0;
-  int N = 0;
-  MatGetSize(A_sub, &M, &N);  
-
-  message("%d %d %d %d", M, N, size(0), size(1));
-
-
-
+  AA_sub = new Mat[1];
+  MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
 
   sub = true;
   delete[] _cols;
-  dolfin_debug("leaving getrows");
+  delete[] _rows;
   
 }
 //-----------------------------------------------------------------------------
@@ -528,6 +490,7 @@ const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
 {
   //  (*this).down_cast<PETScMatrix>() =  A.down_cast<PETScMatrix>();
   MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
+  //  MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -535,7 +498,13 @@ const PETScMatrix& PETScMatrix::operator= (const PETScMatrix& A)
 {
 
   MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
+  //MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
   return *this;
+}
+//-----------------------------------------------------------------------------
+void PETScMatrix::dup(GenericMatrix& A) 
+{
+  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_DO_NOT_COPY_VALUES, &this->A);
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::Type PETScMatrix::type() const

@@ -197,7 +197,7 @@ void pAssembler::assembleCells(GenericTensor& A,
     }
 
     // Update to current cell
-    ufc.update(*cell);
+    ufc.update(*cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -264,7 +264,7 @@ void pAssembler::assembleExteriorFacets(GenericTensor& A,
     const uint local_facet = mesh_cell.index(mesh_facet);
       
     // Update to current cell
-    ufc.update(mesh_cell);
+    ufc.update(mesh_cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -332,7 +332,7 @@ void pAssembler::assembleInteriorFacets(GenericTensor& A,
     uint facet1 = cell1.index(*facet);
 
     // Update to current pair of cells
-    ufc.update(cell0, cell1);
+    ufc.update(cell0, cell1, mesh.distdata());
     
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)

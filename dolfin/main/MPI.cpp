@@ -21,20 +21,22 @@
 #ifdef HAS_MPI
 dolfin::uint dolfin::MPI::processNumber()
 {
-  SubSystemsManager::initMPI();
-
-  int this_process;
-  MPI_Comm_rank(MPI_COMM_WORLD, &this_process);
+  if(!_this_process) {
+    SubSystemsManager::initMPI();
+    MPI_Comm_rank(MPI_COMM_WORLD, &this_process);
+    _this_process = true;
+  }
 
   return static_cast<uint>(this_process);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::numProcesses()
 {
-  SubSystemsManager::initMPI();
-
-  int num_processes;
-  MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+  if(!_num_processes) {
+    SubSystemsManager::initMPI();
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+    _num_processes = true;
+  }
 
   return static_cast<uint>(num_processes);
 }
@@ -76,7 +78,9 @@ dolfin::real dolfin::MPI::stopTimer(real& stime)
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::start_time = 0.0;
-
+bool dolfin::MPI::_this_process = false;
+bool dolfin::MPI::_num_processes = false;
+int dolfin::MPI::this_process, dolfin::MPI::num_processes;
 #else
 
 //-----------------------------------------------------------------------------
@@ -84,7 +88,7 @@ dolfin::uint dolfin::MPI::processNumber()
 {
   return 0;
 }
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------o
 dolfin::uint dolfin::MPI::numProcesses()
 {
   return 1;

@@ -70,8 +70,12 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       on_boundary = entity->numEntities(D) == 1;
     else if ( dim == 0)
       for( FacetIterator fi(*entity); !fi.end(); ++fi) {
+	/*
 	if( fi->numEntities(D) == 1 ||
-	    (MPI::numProcesses() > 1 && facetmap.globalFacet(*fi)))
+	    (MPI::numProcesses() > 1 && facetmap.globalFacet(*fi) &&
+	     fi->numEntities(D) == 1))
+	*/
+	if(fi->numEntities(D) &&  facetmap.globalFacet(*fi))
 	  on_boundary = true;
       }
     

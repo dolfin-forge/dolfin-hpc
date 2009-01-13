@@ -182,7 +182,7 @@ void DofMap::init()
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell);
+      ufc_cell.update(*cell, dolfin_mesh.distdata());
       ufc_dof_map->init_cell(ufc_mesh, ufc_cell);
     }
     ufc_dof_map->init_cell_finalize();
@@ -244,7 +244,7 @@ void DofMap::build(UFC& ufc, uint jj)
      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
        
        dof_map[c->index()] = new uint[local_dimension()];    
-       ufc.update(*c);
+       ufc.update(*c, dolfin_mesh.distdata());
             
        for(uint j = 0; j < ufc.form.rank(); j++) {
 	 ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
@@ -431,7 +431,6 @@ void DofMap::build(UFC& ufc, uint jj)
       Facet f(dolfin_mesh, cell_map->get(*bc));
       
       for(CellIterator c(f); !c.end(); ++c) {
-	ufc.update(*c);
 	ufc.update(*c, dolfin_mesh.distdata());    
 	
 	for(uint j =0 ; j < ufc.form.rank(); j++) {
@@ -449,7 +448,6 @@ void DofMap::build(UFC& ufc, uint jj)
 	    }
 	  }
 	}
-	ufc.reset(*c, dolfin_mesh.distdata());     
       }
     }
     
@@ -489,7 +487,6 @@ void DofMap::build(UFC& ufc, uint jj)
     
     for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
       
-      ufc.update(*c);
       ufc.update(*c, dolfin_mesh.distdata());
       
       for(uint j = 0; j < ufc.form.rank(); j++) {
@@ -503,8 +500,6 @@ void DofMap::build(UFC& ufc, uint jj)
 	  shared_dofs.insert( dof );
 	}
       }
-      
-      ufc.reset(*c, dolfin_mesh.distdata());
     } 
     
     // Initialize range for each processor
@@ -525,7 +520,6 @@ void DofMap::build(UFC& ufc, uint jj)
       
       dof_map[c->index()] = new uint[local_dim];    
       
-      ufc.update(*c);
       ufc.update(*c, dolfin_mesh.distdata());
       
       for(uint j = 0; j < ufc.form.rank(); j++) {
@@ -552,9 +546,7 @@ void DofMap::build(UFC& ufc, uint jj)
 	    }
 	  }     
 	}    
-      }
-      
-      ufc.reset(*c, dolfin_mesh.distdata());
+      }    
     }
     delete[] recv_buff_id;
     delete[] recv_buff;
@@ -718,7 +710,7 @@ void DofMap::disp() const
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell);
+      ufc_cell.update(*cell, dolfin_mesh.distdata());
  
       ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
  
@@ -751,7 +743,7 @@ void DofMap::disp() const
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell);
+      ufc_cell.update(*cell, dolfin_mesh.distdata());
 
       ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell);
 

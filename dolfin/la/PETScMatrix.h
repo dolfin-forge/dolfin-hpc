@@ -110,6 +110,9 @@ namespace dolfin
     /// Set given rows to identity matrix
     virtual void ident(uint m, const uint* rows);
 
+    /// Duplicate matrix
+    void dup(GenericMatrix& A); 
+
     // Matrix-vector product, y = Ax
     virtual void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
 
@@ -172,6 +175,9 @@ namespace dolfin
 
     Mat A_sub;
     bool sub;
+    
+    Mat *AA_sub;
+    std::map<const int, int> mapping;
 
   };
 

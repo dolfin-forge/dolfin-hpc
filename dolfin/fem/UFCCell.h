@@ -70,13 +70,26 @@ namespace dolfin
 
       // Set geometric dimension
       geometric_dimension = cell.mesh().geometry().dim();
-
+      
       // Set entity indices
       entity_indices = new uint*[topological_dimension + 1];
-      entity_indices[topological_dimension] = new uint[1];
-      for (uint d = 0; d < topological_dimension; d++)
-        entity_indices[d] = cell.entities(d);
-      entity_indices[topological_dimension][0] = cell.index();
+      entity_indices[topological_dimension] = new uint[1]; 
+      entity_indices[topological_dimension][0] = cell.index();	
+     
+      // Two different cases
+      if(MPI::numProcesses() == 1) {	
+	// Single process, pointer to mesh topological data
+	for (uint d = 0; d < topological_dimension; d++)
+	  entity_indices[d] = cell.entities(d);
+      }
+      else {
+	// Parallel case, store topological data in object
+	for (uint d = 0; d < topological_dimension; d++) {
+	  entity_indices[d] = new uint[cell.numEntities(d)];
+	  for (uint i = 0; i < cell.numEntities(d); i++)
+	    entity_indices[d][i] = (cell.entities(d))[i];
+	}
+      }
 
       /// Set vertex coordinates
       uint* vertices = cell.entities(0);
@@ -105,60 +118,32 @@ namespace dolfin
     }
 
     // Update cell entities and coordinates
-    inline void update(Cell& cell)
+    inline void update(Cell& cell, MeshDistributedData& distdata)
     {
 
       // Set entity indices
-      for (uint d = 0; d < topological_dimension; d++)
-        entity_indices[d] = cell.entities(d);
-      entity_indices[topological_dimension][0] = cell.index();
-
+      if( MPI::numProcesses() == 1 ) {
+	for (uint d = 0; d < topological_dimension; d++)
+	  entity_indices[d] = cell.entities(d);
+	entity_indices[topological_dimension][0] = cell.index();
+      }
+      else {
+	for (uint d = 0; d < topological_dimension; d++)
+	  for(uint i = 0; i < cell.numEntities(d); i++)
+	    entity_indices[d][i] = distdata.get_global( (cell.entities(d))[i], d);
+	entity_indices[topological_dimension][0] = distdata.get_cell_global(cell.index());
+      }
+      
       /// Set vertex coordinates
       const uint* vertices = cell.entities(0);
       for (uint i = 0; i < num_vertices; i++)
         coordinates[i] = cell.mesh().geometry().x(vertices[i]);
-
-      global_numbering = false;
-    }
-
-    // Update cell entities to global
-    inline void update(Cell& cell, MeshDistributedData& distdata)
-    {
-
-      if( MPI::numProcesses() == 1 )
-	return;
-
-      for (uint d = 0; d < topological_dimension; d++)
-	for(uint i = 0; i < cell.numEntities(d); i++)
-	  entity_indices[d][i] = distdata.get_global(entity_indices[d][i], d);
-      entity_indices[topological_dimension][0] = distdata.get_cell_global(cell.index());
-
-      global_numbering = true;
-
-    }
-
-    // Reset cell entities to local
-    inline void reset(Cell& cell, MeshDistributedData& distdata) 
-    {            
-      if( MPI::numProcesses() == 1 || !global_numbering)
-	return;
-      
-      for (uint d = 0; d < topological_dimension; d++)
-	for(uint i = 0; i < cell.numEntities(d); i++)
-	  entity_indices[d][i] = distdata.get_local(entity_indices[d][i], d);
-      entity_indices[topological_dimension][0] = 
-	distdata.get_cell_local(entity_indices[topological_dimension][0]);
-
-      global_numbering = false;
-
     }
 
   private:
     
     // Number of cell vertices
     uint num_vertices;
-
-    bool global_numbering;
 
   };
 

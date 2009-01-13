@@ -313,15 +313,10 @@ void PETScMatrix::getrow(uint row,
 
     std::map<const int, int>::const_iterator it = mapping.find(row);    
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
-
     columns.assign(cols, cols+ncols);
     values.assign(vals, vals+ncols);
     MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
 
-
-    for(uint i = 0; i < values.size(); i++) {
-      if (row == cols[i] && values[i] < 1e-10)
-	error("Zero diag");
     }
 
   } 

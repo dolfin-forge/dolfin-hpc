@@ -310,7 +310,6 @@ void DofMap::build(UFC& ufc, uint jj)
 
 
     if (ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numVertices()) {
-      message("Optimizing DofMap for P1 elements, HORRAY!");
       dolfin_mesh.renumber();
       dof_map = new uint*[dolfin_mesh.numCells()];      
 
@@ -325,9 +324,8 @@ void DofMap::build(UFC& ufc, uint jj)
     }
     else if(ufc_dof_map->global_dimension() == 
        ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numVertices()) {
-      message("Optimizing for DofMap vector valued P1 elements, HORRAY!");      
 
-      // Make sure the mesh are lineary numbered
+      // Make sure the mesh is lineary numbered
       dolfin_mesh.renumber();
       
       uint gdim = ufc_dof_map->geometric_dimension();

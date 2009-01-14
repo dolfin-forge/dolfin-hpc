@@ -409,9 +409,7 @@ void DiscreteFunction::sync_ghosts()
   if(MPI::numProcesses() == 1)
     return;
 
-  message("Syncing ghosts");
   if(dof_map->renumbered() && !renumberd && MPI::numProcesses() > 1) {
-    message("Rebuilding ghost pattern");
     init_ghosts();
     renumberd = true ;
   }

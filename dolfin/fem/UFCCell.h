@@ -103,8 +103,15 @@ namespace dolfin
     {
       if ( entity_indices )
       {
-        delete [] entity_indices[topological_dimension];
-        delete [] entity_indices;
+	if(MPI::numProcesses() > 1) {
+	  for (uint i = 0; i < (topological_dimension + 1); i++)
+	    delete [] entity_indices[i];
+	  delete[] entity_indices;
+	}
+	else {
+	  delete [] entity_indices[topological_dimension];
+	  delete [] entity_indices;
+	}
       }
       entity_indices = 0;
 

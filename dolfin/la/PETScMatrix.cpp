@@ -309,6 +309,8 @@ void PETScMatrix::getrow(uint row,
 
   }
   else {
+    if(!sub)
+      error("No ghosted Processor rows");
 
     std::map<const int, int>::const_iterator it = mapping.find(row);    
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
@@ -350,8 +352,12 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   ISCreateGeneral(PETSC_COMM_SELF, i, _rows, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
 
-  AA_sub = new Mat[1];
-  MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
+  if(!sub) {
+    AA_sub = new Mat[1];
+    MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);    
+  }
+  else
+    MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);    
 
   sub = true;
   delete[] _cols;

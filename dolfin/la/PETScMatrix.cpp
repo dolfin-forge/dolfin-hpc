@@ -200,7 +200,7 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
 {
-  //  error("nej");
+  error("nej");
   PETScMatrix* mcopy = new PETScMatrix();
 
   MatCopy(A, (mcopy->A),DIFFERENT_NONZERO_PATTERN);
@@ -336,6 +336,8 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   std::set<uint>::iterator it;
 
+  mapping.clear();
+
   uint i = 0;
   for(it = rows.begin(); it != rows.end(); it++) {
     if( !(*it >= (uint) m && *it < (uint) n)) {
@@ -360,6 +362,10 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);    
 
   sub = true;
+  
+  ISDestroy(irow);
+  ISDestroy(icol);
+
   delete[] _cols;
   delete[] _rows;
   

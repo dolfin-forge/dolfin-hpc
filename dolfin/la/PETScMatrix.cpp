@@ -70,7 +70,7 @@ PETScMatrix::~PETScMatrix()
 
   if(sub) {
     MatDestroy(AA_sub[0]);
-    delete[] AA_sub;
+    //    delete[] AA_sub;
   }
 
 
@@ -178,7 +178,6 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     uint p = dolfin::MPI::processNumber();
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint local_size = spattern.numLocalRows(p);
-    message("local size %d", local_size);
     uint* d_nzrow = new uint[local_size];
     uint* o_nzrow = new uint[local_size];
     spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);

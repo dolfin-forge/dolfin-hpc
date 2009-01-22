@@ -129,6 +129,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
+  mesh.distdata().invalid_numbering();
   mesh.renumber();
 
 }

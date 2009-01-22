@@ -10,6 +10,7 @@
 #define __SPARSITY_PATTERN_H
 
 #include <vector>
+#include <set>
 
 #include "GenericSparsityPattern.h"
 #include <dolfin/log/dolfin_log.h>
@@ -68,7 +69,8 @@ namespace dolfin
 
     /// Return underlying sparsity pattern
     const std::vector< _set<int> >& pattern() const 
-    { return sparsity_pattern; };
+    { std::vector< _set<int> > tmp;
+	return tmp;};//return sparsity_pattern; };
 
     /// Display sparsity pattern
     void disp() const;
@@ -96,11 +98,11 @@ namespace dolfin
     /// Sparsity pattern represented as an vector of sets. Each set corresponds
     /// to a row, and the set contains the column positions of nonzero entries 
     /// When run in parallel this vector contains diagonal non-zeroes
-    std::vector< _set<int> > sparsity_pattern;
+    std::map<const uint,  std::set<int> > sparsity_pattern;
 
     /// Sparsity pattern for off diagonal represented as vector of sets. Each
     /// set corresponds to a row, and the set contains the column positions of nonzero entries 
-    std::vector< _set<int> > o_sparsity_pattern;
+    std::map<const uint,  std::set<int> > o_sparsity_pattern;
 
     // Dimensions
     uint dim[2];

@@ -229,9 +229,14 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
 void DofMap::build(UFC& ufc, uint jj)
 {
 
-  if( dof_map ) 
-    //delete[] dof_map;
-  return;
+  if( dof_map ) {
+    for(uint i = 0; i < dolfin_mesh.numCells(); i++)
+      delete[] dof_map[i];
+    delete [] dof_map;
+  }
+
+  // delete[] dof_map;
+  //    return;
 
   if(MPI::numProcesses() == 1) {
      uint *dofs =  new uint[local_dimension()];
@@ -408,188 +413,192 @@ void DofMap::build(UFC& ufc, uint jj)
       }
 
       delete[] dofs;
+
+      for(uint i =0; i < pe_size; i++)
+	ghost_buff[i].clear();
+      delete[] ghost_buff;
     }
     else {
 
     
-    BoundaryMesh local_boundary;
-    local_boundary.init_interior(dolfin_mesh);
-
-    dolfin_assert(local_boundary.size(0) > 0);
-    
-
-    MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
-    
-    Array<uint> send_buff, send_buff_id;
-    std::set<uint> shared_dofs, forbidden_dof;
-    std::map<uint, uint> dof_vote;
-    
-    
-    for(CellIterator bc(local_boundary); !bc.end(); ++bc) {
-      Facet f(dolfin_mesh, cell_map->get(*bc));
+      BoundaryMesh local_boundary;
+      local_boundary.init_interior(dolfin_mesh);
       
-      for(CellIterator c(f); !c.end(); ++c) {
-	ufc.update(*c, dolfin_mesh.distdata());    
+      dolfin_assert(local_boundary.size(0) > 0);
+      
+      
+      MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
+      
+      Array<uint> send_buff, send_buff_id;
+      std::set<uint> shared_dofs, forbidden_dof;
+      std::map<uint, uint> dof_vote;
+      
+    
+      for(CellIterator bc(local_boundary); !bc.end(); ++bc) {
+	Facet f(dolfin_mesh, cell_map->get(*bc));
 	
-	for(uint j =0 ; j < ufc.form.rank(); j++) {
+	for(CellIterator c(f); !c.end(); ++c) {
+	  ufc.update(*c, dolfin_mesh.distdata());    
+	  
+	  for(uint j =0 ; j < ufc.form.rank(); j++) {
+	    ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	    for(uint i = 0; i < local_dim; i++) {
+	      const uint dof = dofs[i];
+	      
+	      if( shared_dofs.count(dof) == 0 ) {
+		forbidden_dof.insert( dof );
+		shared_dofs.insert( dof );
+		dolfin_assert(dof_vote.count(dof) == 0);
+		dof_vote[ dof ] = rank;
+		send_buff.push_back( dof );	
+		send_buff_id.push_back( dof_vote[dof] );
+	      }
+	    }
+	  }
+	}
+      }
+    
+      MPI_Status status;
+      int recv_count;
+      uint src, dest, num_glb, num_sdof;
+      num_sdof = send_buff.size();
+      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      
+      uint *recv_buff = new uint[num_glb];
+      uint *recv_buff_id = new uint[num_glb];
+      
+      for(int k = 1 ; k < (int) pe_size; k++){
+	
+	src = (rank - k + pe_size) % pe_size;
+	dest = (rank + k) % pe_size;    
+	
+	MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
+		     recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
+		     MPI_COMM_WORLD, &status);
+	
+	MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
+		     recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
+		     MPI_COMM_WORLD, &status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
+	
+	for(int i = 0; i < recv_count; i++) {
+	  if( shared_dofs.count(recv_buff[i]) > 0) {
+	    dolfin_assert( dof_vote.count(recv_buff[i]) );
+	    if( recv_buff_id[i] < dof_vote[recv_buff[i]] ||
+		(recv_buff_id[i] == dof_vote[recv_buff[i]] &&
+		 status.MPI_SOURCE < (int) rank)) 
+	      shared_dofs.erase(recv_buff[i]);
+	  }
+	}
+      }
+      
+      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
+	
+	ufc.update(*c, dolfin_mesh.distdata());
+	
+	for(uint j = 0; j < ufc.form.rank(); j++) {
+	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	  for(uint i = 0; i < local_dim; i++) {  
+	    const uint dof = dofs[i];
+	  
+	    if(forbidden_dof.count(dof)) 
+	      continue;
+	    
+	    shared_dofs.insert( dof );
+	  }
+	}
+      } 
+      
+      // Initialize range for each processor
+      uint offset = 0;
+      uint range = shared_dofs.size();
+      MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+    
+      map.clear();
+      
+      _map<uint, Array<std::pair<uint, uint> > > cell_dof;
+  
+      send_buff.clear();
+      send_buff_id.clear();
+      
+      dof_map = new uint*[dolfin_mesh.numCells()];
+      
+      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
+	
+	dof_map[c->index()] = new uint[local_dim];    
+      
+	ufc.update(*c, dolfin_mesh.distdata());
+	
+	for(uint j = 0; j < ufc.form.rank(); j++) {
 	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
 	  for(uint i = 0; i < local_dim; i++) {
 	    const uint dof = dofs[i];
+	    dof_map[c->index()][i] = 1;        
+	    if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
+	      std::pair<uint, uint> row_dof(i, dof);
+	      cell_dof[c->index()].push_back(row_dof);
+	      continue;
+	  }
 	    
-	    if( shared_dofs.count(dof) == 0 ) {
-	      forbidden_dof.insert( dof );
-	      shared_dofs.insert( dof );
-	      dolfin_assert(dof_vote.count(dof) == 0);
-	      dof_vote[ dof ] = rank;
-	      send_buff.push_back( dof );	
-	      send_buff_id.push_back( dof_vote[dof] );
+	    std::map<uint, uint>::iterator it = map.find(dof);
+	    if (it != map.end()) {
+	      dof_map[c->index()][i] = it->second;
 	    }
-	  }
-	}
-      }
-    }
-    
-    MPI_Status status;
-    int recv_count;
-    uint src, dest, num_glb, num_sdof;
-    num_sdof = send_buff.size();
-    MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
-    uint *recv_buff = new uint[num_glb];
-    uint *recv_buff_id = new uint[num_glb];
-    
-    for(int k = 1 ; k < (int) pe_size; k++){
-      
-      src = (rank - k + pe_size) % pe_size;
-      dest = (rank + k) % pe_size;    
-      
-      MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
-		   recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
-		   MPI_COMM_WORLD, &status);
-      
-      MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
-		   recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
-		   MPI_COMM_WORLD, &status);
-      MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
-      
-      for(int i = 0; i < recv_count; i++) {
-	if( shared_dofs.count(recv_buff[i]) > 0) {
-	  dolfin_assert( dof_vote.count(recv_buff[i]) );
-	  if( recv_buff_id[i] < dof_vote[recv_buff[i]] ||
-	      (recv_buff_id[i] == dof_vote[recv_buff[i]] &&
-	       status.MPI_SOURCE < (int) rank)) 
-	    shared_dofs.erase(recv_buff[i]);
-	}
-      }
-    }
-    
-    for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
-      
-      ufc.update(*c, dolfin_mesh.distdata());
-      
-      for(uint j = 0; j < ufc.form.rank(); j++) {
-	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	for(uint i = 0; i < local_dim; i++) {  
-	  const uint dof = dofs[i];
-	  
-	  if(forbidden_dof.count(dof)) 
-	    continue;
-	  
-	  shared_dofs.insert( dof );
-	}
-      }
-    } 
-    
-    // Initialize range for each processor
-    uint offset = 0;
-    uint range = shared_dofs.size();
-    MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
-    map.clear();
-    
-    _map<uint, Array<std::pair<uint, uint> > > cell_dof;
-  
-    send_buff.clear();
-    send_buff_id.clear();
-
-    dof_map = new uint*[dolfin_mesh.numCells()];
-    
-    for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
-      
-      dof_map[c->index()] = new uint[local_dim];    
-      
-      ufc.update(*c, dolfin_mesh.distdata());
-      
-      for(uint j = 0; j < ufc.form.rank(); j++) {
-	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	for(uint i = 0; i < local_dim; i++) {
-	  const uint dof = dofs[i];
-	  dof_map[c->index()][i] = 1;        
-	  if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
-	    std::pair<uint, uint> row_dof(i, dof);
-	    cell_dof[c->index()].push_back(row_dof);
-	    continue;
-	  }
-	  
-	  std::map<uint, uint>::iterator it = map.find(dof);
-	  if (it != map.end()) {
-	    dof_map[c->index()][i] = it->second;
-	  }
-	  else {
-	    dof_map[c->index()][i] = offset; 
-	    map[dof] = offset++;
-	    if( shared_dofs.count(dof) ) {
-	      send_buff.push_back( dof );
-	      send_buff_id.push_back( map[dof] );
-	    }
-	  }     
+	    else {
+	      dof_map[c->index()][i] = offset; 
+	      map[dof] = offset++;
+	      if( shared_dofs.count(dof) ) {
+		send_buff.push_back( dof );
+		send_buff_id.push_back( map[dof] );
+	      }
+	    }     
+	  }    
 	}    
-      }    
-    }
-    delete[] recv_buff_id;
-    delete[] recv_buff;
-    
-    num_sdof = send_buff.size();
-    MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
-    recv_buff = new uint[num_glb];
-    recv_buff_id = new uint[num_glb];
-    
-    for(int j = 1 ; j < (int) pe_size; j++){
-      
-      src = (rank - j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;    
-      
-      MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
-		   recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
-		   MPI_COMM_WORLD, &status);
-      
-      MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
-		   recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
-		   MPI_COMM_WORLD, &status);
-      MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
-      
-      for(int i = 0; i < recv_count; i++)  {
-	dolfin_assert( !map.count(recv_buff[i]) );
-	map[ recv_buff[i] ] = recv_buff_id[i];
       }
+      delete[] recv_buff_id;
+      delete[] recv_buff;
       
+      num_sdof = send_buff.size();
+      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      
+      recv_buff = new uint[num_glb];
+      recv_buff_id = new uint[num_glb];
+      
+      for(int j = 1 ; j < (int) pe_size; j++){
+	
+	src = (rank - j + pe_size) % pe_size;
+	dest = (rank + j) % pe_size;    
+	
+	MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
+		     recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
+		     MPI_COMM_WORLD, &status);
+	
+	MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
+		     recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
+		   MPI_COMM_WORLD, &status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
+	
+	for(int i = 0; i < recv_count; i++)  {
+	  dolfin_assert( !map.count(recv_buff[i]) );
+	  map[ recv_buff[i] ] = recv_buff_id[i];
+	}
+	
     }
-    delete[] recv_buff_id;
-    delete[] recv_buff;
-
-
-    _map< uint, Array<std::pair<uint, uint> >  >::iterator cit;
-    std::vector< std::pair<uint, uint> >::iterator rit;
-    for(cit = cell_dof.begin(); cit != cell_dof.end(); ++cit) 
-      for(rit = cit->second.begin(); rit != cit->second.end(); ++rit)
-	dof_map[cit->first][rit->first] = map[rit->second];
+      delete[] recv_buff_id;
+      delete[] recv_buff;
+      
+      
+      _map< uint, Array<std::pair<uint, uint> >  >::iterator cit;
+      std::vector< std::pair<uint, uint> >::iterator rit;
+      for(cit = cell_dof.begin(); cit != cell_dof.end(); ++cit) 
+	for(rit = cit->second.begin(); rit != cit->second.end(); ++rit)
+	  dof_map[cit->first][rit->first] = map[rit->second];
+      
+      
+      dolfin_assert( map.size()  == global_dimension());
     
-    
-    dolfin_assert( map.size()  == global_dimension());
-    
-    delete[] dofs;
-  }
+      delete[] dofs;
+    }
   }  
 }
 //-----------------------------------------------------------------------------

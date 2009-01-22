@@ -389,6 +389,13 @@ void DiscreteFunction::init_ghosts()
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
   
+  if(_indices )
+    delete[] _indices;  
+  if(data_cache)
+    delete[] data_cache;
+  
+  cache_mapping.clear();
+ 
   _indices = new uint[indices.size()];
   data_cache = new real[indices.size()];
   
@@ -400,7 +407,7 @@ void DiscreteFunction::init_ghosts()
   }
   
   _cache_size = indices.size();
- 
+
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
@@ -415,7 +422,8 @@ void DiscreteFunction::sync_ghosts()
   }
   
   x->apply(); 
-  x->get(data_cache, _cache_size, _indices);
+  if(_indices)
+    x->get(data_cache, _cache_size, _indices);
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)

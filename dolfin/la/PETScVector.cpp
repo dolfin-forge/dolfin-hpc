@@ -186,7 +186,9 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
       if( (int) rows[i] < high && (int) rows[i] >= low) 
 	tmp[i] = rows[i] - low;
       else  {
+	dolfin_assert(mapping.size() > 0);
 	std::map<const int, int>::const_iterator it = mapping.find(rows[i]);    
+	dolfin_assert(mapping.count(rows[i]) > 0);
 	tmp[i] = it->second;
       }
     
@@ -403,9 +405,9 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
   }
 
   VecGetValues(x, local_size, rows, values);    
-
-  if( is_ghosted ) {
-    dolfin_assert(map.size() > 0);
+  
+  if( is_ghosted && map.size() > 0) {
+    //    dolfin_assert(map.size() > 0);
     for(int i = 0; i < local_size; i++)  {
       // dolfin_assert(map.count(low + i) > 0);
       rows[i] = map[low + i];

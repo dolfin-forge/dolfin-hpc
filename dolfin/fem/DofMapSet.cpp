@@ -160,9 +160,8 @@ void DofMapSet::update(const ufc::form& form, Mesh& mesh,
 //-----------------------------------------------------------------------------
 void DofMapSet::build(UFC& ufc) const
 {
-  for (uint i=0; i<dof_map_set.size(); i++)  {
+  for (uint i=0; i<dof_map_set.size(); i++)  
     dof_map_set[i]->build(ufc, i);
-  }
 }
 //-----------------------------------------------------------------------------
 dolfin::uint DofMapSet::size() const

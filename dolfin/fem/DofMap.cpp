@@ -235,6 +235,7 @@ void DofMap::build(UFC& ufc, uint jj)
     delete [] dof_map;
   }
 
+  map.clear();
   // delete[] dof_map;
   //    return;
 
@@ -306,7 +307,7 @@ void DofMap::build(UFC& ufc, uint jj)
 	 //   }
      delete[] dofs;
   }
-  else {
+  else { 
     uint local_dim = local_dimension();
     uint *dofs =  new uint[local_dimension()];
 
@@ -315,7 +316,10 @@ void DofMap::build(UFC& ufc, uint jj)
 
 
     if (ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numVertices()) {
+
+      // Make sure the mesh is lineary numbered
       dolfin_mesh.renumber();
+
       dof_map = new uint*[dolfin_mesh.numCells()];      
 
       for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
@@ -341,7 +345,7 @@ void DofMap::build(UFC& ufc, uint jj)
 
       MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
       
-      std::map<uint,uint> v_offset;
+      _map<uint,uint> v_offset;
 
       for(VertexIterator v(dolfin_mesh); !v.end(); ++v) {
 	if(!dolfin_mesh.distdata().is_ghost(v->index(), 0)) {
@@ -353,9 +357,7 @@ void DofMap::build(UFC& ufc, uint jj)
       Array<uint> *ghost_buff = new Array<uint>[pe_size];
       for(MeshGhostIterator iter(dolfin_mesh.distdata(), 0); !iter.end(); ++iter)
 	ghost_buff[iter.owner()].push_back(dolfin_mesh.distdata().get_global(iter.index(), 0)); 
-
-	
-	
+		
       MPI_Status status;
       Array<uint> send_buff;
       uint src,dest;
@@ -425,8 +427,7 @@ void DofMap::build(UFC& ufc, uint jj)
       local_boundary.init_interior(dolfin_mesh);
       
       dolfin_assert(local_boundary.size(0) > 0);
-      
-      
+            
       MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
       
       Array<uint> send_buff, send_buff_id;
@@ -440,24 +441,24 @@ void DofMap::build(UFC& ufc, uint jj)
 	for(CellIterator c(f); !c.end(); ++c) {
 	  ufc.update(*c, dolfin_mesh.distdata());    
 	  
-	  for(uint j =0 ; j < ufc.form.rank(); j++) {
-	    ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	    for(uint i = 0; i < local_dim; i++) {
-	      const uint dof = dofs[i];
-	      
-	      if( shared_dofs.count(dof) == 0 ) {
-		forbidden_dof.insert( dof );
-		shared_dofs.insert( dof );
-		dolfin_assert(dof_vote.count(dof) == 0);
-		dof_vote[ dof ] = rank;
-		send_buff.push_back( dof );	
-		send_buff_id.push_back( dof_vote[dof] );
-	      }
+	  //	  for(uint j =0 ; j < ufc.form.rank(); j++) {
+	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	  for(uint i = 0; i < local_dim; i++) {
+	    const uint dof = dofs[i];
+	    
+	    if( shared_dofs.count(dof) == 0 ) {
+	      forbidden_dof.insert( dof );
+	      shared_dofs.insert( dof );
+	      dolfin_assert(dof_vote.count(dof) == 0);
+	      dof_vote[ dof ] = rank;
+	      send_buff.push_back( dof );	
+	      send_buff_id.push_back( dof_vote[dof] );
 	    }
 	  }
+	  //	  }
 	}
       }
-    
+      
       MPI_Status status;
       int recv_count;
       uint src, dest, num_glb, num_sdof;
@@ -496,17 +497,17 @@ void DofMap::build(UFC& ufc, uint jj)
 	
 	ufc.update(*c, dolfin_mesh.distdata());
 	
-	for(uint j = 0; j < ufc.form.rank(); j++) {
-	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	  for(uint i = 0; i < local_dim; i++) {  
-	    const uint dof = dofs[i];
+	//	for(uint j = 0; j < ufc.form.rank(); j++) {
+	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	for(uint i = 0; i < local_dim; i++) {  
+	  const uint dof = dofs[i];
 	  
-	    if(forbidden_dof.count(dof)) 
-	      continue;
-	    
-	    shared_dofs.insert( dof );
-	  }
+	  if(forbidden_dof.count(dof)) 
+	    continue;
+	  
+	  shared_dofs.insert( dof );
 	}
+	//      }
       } 
       
       // Initialize range for each processor
@@ -529,32 +530,32 @@ void DofMap::build(UFC& ufc, uint jj)
       
 	ufc.update(*c, dolfin_mesh.distdata());
 	
-	for(uint j = 0; j < ufc.form.rank(); j++) {
-	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	  for(uint i = 0; i < local_dim; i++) {
-	    const uint dof = dofs[i];
-	    dof_map[c->index()][i] = 1;        
-	    if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
-	      std::pair<uint, uint> row_dof(i, dof);
-	      cell_dof[c->index()].push_back(row_dof);
-	      continue;
+	//	for(uint j = 0; j < ufc.form.rank(); j++) {
+	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	for(uint i = 0; i < local_dim; i++) {
+	  const uint dof = dofs[i];
+	  dof_map[c->index()][i] = 1;        
+	  if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
+	    std::pair<uint, uint> row_dof(i, dof);
+	    cell_dof[c->index()].push_back(row_dof);
+	    continue;
 	  }
-	    
-	    std::map<uint, uint>::iterator it = map.find(dof);
-	    if (it != map.end()) {
-	      dof_map[c->index()][i] = it->second;
+	  
+	  std::map<uint, uint>::iterator it = map.find(dof);
+	  if (it != map.end()) {
+	    dof_map[c->index()][i] = it->second;
+	  }
+	  else {
+	    dof_map[c->index()][i] = offset; 
+	    map[dof] = offset++;
+	    if( shared_dofs.count(dof) ) {
+	      send_buff.push_back( dof );
+	      send_buff_id.push_back( map[dof] );
 	    }
-	    else {
-	      dof_map[c->index()][i] = offset; 
-	      map[dof] = offset++;
-	      if( shared_dofs.count(dof) ) {
-		send_buff.push_back( dof );
-		send_buff_id.push_back( map[dof] );
-	      }
-	    }     
-	  }    
+	  }     
 	}    
-      }
+      }    
+      //    }
       delete[] recv_buff_id;
       delete[] recv_buff;
       
@@ -580,10 +581,11 @@ void DofMap::build(UFC& ufc, uint jj)
 	
 	for(int i = 0; i < recv_count; i++)  {
 	  dolfin_assert( !map.count(recv_buff[i]) );
-	  map[ recv_buff[i] ] = recv_buff_id[i];
+	  if(shared_dofs.find(recv_buff[i]) != shared_dofs.end())
+	    map[ recv_buff[i] ] = recv_buff_id[i];
 	}
 	
-    }
+      }
       delete[] recv_buff_id;
       delete[] recv_buff;
       
@@ -594,9 +596,6 @@ void DofMap::build(UFC& ufc, uint jj)
 	for(rit = cit->second.begin(); rit != cit->second.end(); ++rit)
 	  dof_map[cit->first][rit->first] = map[rit->second];
       
-      
-      dolfin_assert( map.size()  == global_dimension());
-    
       delete[] dofs;
     }
   }  

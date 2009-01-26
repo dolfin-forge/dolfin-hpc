@@ -23,6 +23,7 @@
 #include <hash_set>
 #else
 #include <map>
+#include <set>
 #endif
 
 namespace dolfin
@@ -47,7 +48,7 @@ namespace dolfin
 #endif
 #elif __sgi
 #define _map std::hash_map
-#define _set std::set
+#define _set std::hash_set
 #else
 #define _map std::map 
 #define _set std::set

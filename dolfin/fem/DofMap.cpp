@@ -343,7 +343,12 @@ void DofMap::build(UFC& ufc, uint jj)
       uint num_dofs = gdim * num_local;
       uint offset = 0;
 
+#if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else 
+      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      offset -= num_dofs;
+#endif
       
       _map<uint,uint> v_offset;
 
@@ -441,21 +446,21 @@ void DofMap::build(UFC& ufc, uint jj)
 	for(CellIterator c(f); !c.end(); ++c) {
 	  ufc.update(*c, dolfin_mesh.distdata());    
 	  
-	  //	  for(uint j =0 ; j < ufc.form.rank(); j++) {
-	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	  for(uint i = 0; i < local_dim; i++) {
-	    const uint dof = dofs[i];
-	    
-	    if( shared_dofs.count(dof) == 0 ) {
+	  for(uint j =0 ; j < ufc.form.rank(); j++) {
+	    ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	    for(uint i = 0; i < local_dim; i++) {
+	      const uint dof = dofs[i];
+	      
+	      if( shared_dofs.count(dof) == 0 ) {
 	      forbidden_dof.insert( dof );
 	      shared_dofs.insert( dof );
 	      dolfin_assert(dof_vote.count(dof) == 0);
 	      dof_vote[ dof ] = rank;
 	      send_buff.push_back( dof );	
 	      send_buff_id.push_back( dof_vote[dof] );
+	      }
 	    }
 	  }
-	  //	  }
 	}
       }
       
@@ -497,24 +502,29 @@ void DofMap::build(UFC& ufc, uint jj)
 	
 	ufc.update(*c, dolfin_mesh.distdata());
 	
-	//	for(uint j = 0; j < ufc.form.rank(); j++) {
-	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	for(uint i = 0; i < local_dim; i++) {  
-	  const uint dof = dofs[i];
-	  
+	for(uint j = 0; j < ufc.form.rank(); j++) {
+	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	  for(uint i = 0; i < local_dim; i++) {  
+	    const uint dof = dofs[i];
+	    
 	  if(forbidden_dof.count(dof)) 
 	    continue;
 	  
 	  shared_dofs.insert( dof );
+	  }
 	}
-	//      }
       } 
       
       // Initialize range for each processor
       uint offset = 0;
       uint range = shared_dofs.size();
+
+#if ( MPI_VERSION > 1 )
       MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    
+#else 
+      MPI_Scan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      offset -= range;
+#endif    
       map.clear();
       
       _map<uint, Array<std::pair<uint, uint> > > cell_dof;
@@ -530,32 +540,32 @@ void DofMap::build(UFC& ufc, uint jj)
       
 	ufc.update(*c, dolfin_mesh.distdata());
 	
-	//	for(uint j = 0; j < ufc.form.rank(); j++) {
-	ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
-	for(uint i = 0; i < local_dim; i++) {
-	  const uint dof = dofs[i];
-	  dof_map[c->index()][i] = 1;        
-	  if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
-	    std::pair<uint, uint> row_dof(i, dof);
-	    cell_dof[c->index()].push_back(row_dof);
+	for(uint j = 0; j < ufc.form.rank(); j++) {
+	  ufc_dof_map->tabulate_dofs(dofs, ufc.mesh, ufc.cell);      
+	  for(uint i = 0; i < local_dim; i++) {
+	    const uint dof = dofs[i];
+	    dof_map[c->index()][i] = 1;        
+	    if(forbidden_dof.count(dof) && (shared_dofs.count(dof) == 0)) {
+	      std::pair<uint, uint> row_dof(i, dof);
+	      cell_dof[c->index()].push_back(row_dof);
 	    continue;
-	  }
-	  
-	  std::map<uint, uint>::iterator it = map.find(dof);
-	  if (it != map.end()) {
-	    dof_map[c->index()][i] = it->second;
-	  }
-	  else {
-	    dof_map[c->index()][i] = offset; 
-	    map[dof] = offset++;
-	    if( shared_dofs.count(dof) ) {
-	      send_buff.push_back( dof );
-	      send_buff_id.push_back( map[dof] );
 	    }
-	  }     
+	    
+	    std::map<uint, uint>::iterator it = map.find(dof);
+	    if (it != map.end()) {
+	      dof_map[c->index()][i] = it->second;
+	    }
+	    else {
+	      dof_map[c->index()][i] = offset; 
+	      map[dof] = offset++;
+	      if( shared_dofs.count(dof) ) {
+		send_buff.push_back( dof );
+		send_buff_id.push_back( map[dof] );
+	      }
+	    }     
+	  }    
 	}    
-      }    
-      //    }
+      }
       delete[] recv_buff_id;
       delete[] recv_buff;
       

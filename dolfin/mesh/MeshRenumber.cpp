@@ -47,7 +47,13 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   // Number of own vertices
   uint offset = 0;
   uint num_vert = mesh.numVertices() - mesh.distdata().num_ghost(0);
+
+#if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
+  MPI_Scan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  offset -= num_vert;
+#endif
 
   uint num_glb;  
   MPI_Allreduce(&num_vert, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
@@ -208,7 +214,13 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   // Number of own edges
   uint offset = 0;
   uint num_edges = mesh.numEdges() - mesh.distdata().num_ghost(1);
+
+#if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
+  MPI_Scan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  offset -= num_edges;
+#endif
 
   uint num_glb;  
   MPI_Allreduce(&num_edges, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
@@ -396,7 +408,13 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   // Number of own faces
   uint offset = 0;
   uint num_faces = mesh.numFaces() - mesh.distdata().num_ghost(2);
+
+#if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
+  MPI_Scan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  offset -= num_faces;
+#endif
 
   uint num_glb;  
   MPI_Allreduce(&num_faces, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
@@ -491,7 +509,13 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
 
   uint offset = 0;
   uint num_cells = mesh.numCells();
+
+#if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
+  MPI_Scan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  offset -= num_cells;
+#endif
 
   _map<uint,uint> new_local,new_global;  
   new_local.resize(mesh.numCells());

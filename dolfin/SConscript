@@ -46,6 +46,8 @@ if not env["enableUmfpack"]:
     disabled_packages.append("umfpack")
 if not env["enableTrilinos"]:
     disabled_packages.append("trilinos")
+if not env["enableParmetis"]:
+    disabled_packages.append("parmetis")
 
 # Find modules in the project and dependencies:
 # only modules and configuredPackages will be used in this code:

@@ -57,8 +57,14 @@ void RefinementManager::init(Mesh& mesh)
   
   // Assign a safe range for each processor  
   _start_offset = 0;
+#if ( MPI_VERSION > 1)
   MPI_Exscan(&num_new_vertices, &_start_offset, 1, 
 	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else
+  MPI_Scan(&num_new_vertices, &_start_offset, 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  _start_offset -= num_new_vertices;
+#endif
   _start_offset += glb_max;
 
   // Generate cell - edge connectivity if not generated

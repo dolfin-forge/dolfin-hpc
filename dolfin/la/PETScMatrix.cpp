@@ -68,11 +68,8 @@ PETScMatrix::~PETScMatrix()
   if (A && !is_view)
     MatDestroy(A);
 
-  if(sub) {
-    MatDestroy(AA_sub[0]);
-    //    delete[] AA_sub;
-  }
-
+  if(sub)
+    MatDestroy(AA_sub[0]); 
 
   // FIXME destroy sub
 }
@@ -182,7 +179,6 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     uint* o_nzrow = new uint[local_size];
     spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);
     init(spattern.size(0), spattern.size(1), d_nzrow, o_nzrow);
-    //init(local_size, local_size, d_nzrow, o_nzrow);
     delete [] d_nzrow;
     delete [] o_nzrow;
   }
@@ -353,10 +349,8 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   ISCreateGeneral(PETSC_COMM_SELF, i, _rows, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
 
-  if(!sub) {
-    AA_sub = new Mat[1];
+  if(!sub)
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);    
-  }
   else
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);    
 

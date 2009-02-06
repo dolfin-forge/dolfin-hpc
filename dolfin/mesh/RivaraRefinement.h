@@ -36,9 +36,12 @@ namespace dolfin
     DVertex();
 
     int id;
+    int glb_id;
 
     std::list<DCell *> cells;
     Point p;
+
+    bool on_boundary;
   };
     
   class DCell
@@ -58,8 +61,10 @@ namespace dolfin
   {
   public:
     DMesh();
+    ~DMesh();
 
     void addVertex(DVertex* v);
+    
     void addCell(DCell* c,
 		 std::vector<DVertex*> vs, int parent_id);
     void removeCell(DCell* c);
@@ -69,18 +74,46 @@ namespace dolfin
     void number();
 
     void bisect(DCell* dcell, DVertex* hangv,
-		DVertex* hv0, DVertex* hv1);
+		DVertex* hv0, DVertex* hv1, bool prop = false);
 
     void bisectMarked(std::vector<bool> marked_ids);
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
+    void propagate_naive(std::vector<uint>& propagated, bool empty);
+    void propagate_hypercube(std::vector<uint>& propagated);
 
     std::list<DVertex *> vertices;
     std::list<DCell *> cells;
 
     CellType* cell_type;
     uint d;
+
+    // Start offset foro new global id
+    uint _start_offset;
+
+    // Propagation buffer
+    std::vector<int> propagate;
+    _set<uint> glb_ids;
+
+    typedef std::pair<int, int> EdgeKey;
+
+    std::map<EdgeKey, DCell*> bc_dcs;
+    std::map<uint, DVertex*> bc_dvs;
+    std::set<EdgeKey> ref_edge;
+
+    // Construct a edge id from given vertices
+    inline EdgeKey edge_key(int id1, int id2) {
+      if(id2 < id1){
+	EdgeKey key(id2,id1);    
+	return key;
+      }
+      else {
+	EdgeKey key(id1,id2);    
+	return key;
+      }      
+    };
+
   };
 
 

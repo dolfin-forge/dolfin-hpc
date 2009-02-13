@@ -42,6 +42,10 @@ namespace dolfin
     Point p;
 
     bool on_boundary;
+    bool shared;
+    bool ghosted;
+
+    uint owner;
   };
     
   class DCell
@@ -63,6 +67,8 @@ namespace dolfin
     DMesh();
     ~DMesh();
 
+    typedef std::pair<int, int> EdgeKey;
+
     void addVertex(DVertex* v);
     
     void addCell(DCell* c,
@@ -74,13 +80,14 @@ namespace dolfin
     void number();
 
     void bisect(DCell* dcell, DVertex* hangv,
-		DVertex* hv0, DVertex* hv1, bool prop = false);
+		DVertex* hv0, DVertex* hv1, 
+		std::set<DCell* > & deleted_keys);
 
     void bisectMarked(std::vector<bool> marked_ids);
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
-    void propagate_naive(std::vector<uint>& propagated, bool empty);
+    void propagate_naive(std::vector<uint>& propagated, bool& empty);
     void propagate_hypercube(std::vector<uint>& propagated);
 
     std::list<DVertex *> vertices;
@@ -96,14 +103,14 @@ namespace dolfin
     std::vector<int> propagate;
     _set<uint> glb_ids;
 
-    typedef std::pair<int, int> EdgeKey;
-
-    std::map<EdgeKey, DCell*> bc_dcs;
+    std::map<EdgeKey, std::set<DCell* > > bc_dcs;
     std::map<uint, DVertex*> bc_dvs;
-    std::set<EdgeKey> ref_edge;
+    std::map<EdgeKey, DVertex*> ref_edge;
 
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {
+      if(id2 == id1)
+	error("Kaos");
       if(id2 < id1){
 	EdgeKey key(id2,id1);    
 	return key;

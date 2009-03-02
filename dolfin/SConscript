@@ -187,8 +187,12 @@ for modName, mod in modules.items():
         modEnv.Append(LINKFLAGS=linkOpts)
         if env["PLATFORM"] == "darwin":
             modEnv.Append(FRAMEWORKS=frameworks)
-        shlib = modEnv.SharedLibrary(target=os.path.join(mod.path, modName), source=\
-                [os.path.join(mod.path, s) for s in mod.libSources])
+        if env["enableStatic"]:
+            shlib = modEnv.Library(target=os.path.join(mod.path, modName), source=\
+                                       [os.path.join(mod.path, s) for s in mod.libSources])
+        else:
+            shlib = modEnv.SharedLibrary(target=os.path.join(mod.path, modName), source=\
+                                             [os.path.join(mod.path, s) for s in mod.libSources])
         # The builder returns a node list
         ret["shlibs"].append(shlib[0])
 

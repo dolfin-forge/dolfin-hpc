@@ -60,8 +60,6 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().set_global_numVertices(num_glb);
   
   _map<uint,uint> new_local,new_global;  
-  new_local.resize(mesh.numVertices());
-  new_global.resize(mesh.numVertices());
   for(uint i = 0; i< mesh.numVertices(); i++){
     if(!mesh.distdata().is_ghost(i, 0)){
       new_global[i] = offset++;
@@ -116,7 +114,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().local_indices[0] = new_local;
   mesh.distdata().global_indices[0] = new_global;  
   mesh.distdata()._valid_vertex_numbering = true;
-  
+  mesh.distdata().finialize(0);
+
   delete[] recv_buff;
   delete[] recv_ghost;
   for(uint i = 0; i < pe_size; i++)
@@ -232,8 +231,6 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;  
-  new_local.resize(mesh.numEdges());
-  new_global.resize(mesh.numEdges());
   for(uint i = 0; i< mesh.numEdges(); i++){
     if( !mesh.distdata().is_ghost(i, 1) ) { 
       new_global[i] = offset++;
@@ -426,8 +423,6 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;  
-  new_local.resize(mesh.numFaces());
-  new_global.resize(mesh.numFaces());
   for(uint i = 0; i< mesh.numFaces(); i++){
     if( !mesh.distdata().is_ghost(i, 2) ){
       new_global[i] = offset++;
@@ -518,8 +513,6 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
 #endif
 
   _map<uint,uint> new_local,new_global;  
-  new_local.resize(mesh.numCells());
-  new_global.resize(mesh.numCells());
   for(uint i = 0; i< mesh.numCells(); i++){
     new_global[i] = offset++;
     new_local [ new_global[i] ] = i;
@@ -534,6 +527,7 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mesh.distdata().local_indices[3] = new_local;
   mesh.distdata().global_indices[3] = new_global;  
   mesh.distdata()._valid_cell_numbering = true;
+  mesh.distdata().finialize(3);
  
 }
 //-----------------------------------------------------------------------------

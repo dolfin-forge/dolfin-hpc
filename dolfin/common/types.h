@@ -11,13 +11,16 @@
 
 #include <complex>
 #ifdef __GNUG__
-#if (__GNUG__ > 3 && __GNUC_MINOR__ > 3) //FIXME
+#if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__) 
 #include <unordered_map>
 #include <unordered_set>
 #else
 #include <ext/hash_map>
 #include <ext/hash_set>
 #endif
+#elif (__IBMCPP__ && __IBMCPP_TR1__) 
+#include <unordered_map>
+#include <unordered_set>
 #elif __sgi
 #include <hash_map>
 #include <hash_set>
@@ -39,13 +42,16 @@ namespace dolfin
   typedef std::complex<double> complex;
 
 #ifdef __GNUG__
-#if (__GNUG__ > 3 && __GNUC_MINOR__ > 3)
+#if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__)
 #define _map std::unordered_map
 #define _set std::unordered_set
 #else
 #define _map __gnu_cxx::hash_map 
 #define _set __gnu_cxx::hash_set
 #endif
+#elif (__IBMCPP__ && __IBMCPP_TR1__) 
+#define _map std::tr1::unordered_map
+#define _set std::tr1::unordered_set
 #elif __sgi
 #define _map std::hash_map
 #define _set std::hash_set

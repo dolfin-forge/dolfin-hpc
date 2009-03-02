@@ -69,8 +69,7 @@ namespace dolfin
 
     /// Return underlying sparsity pattern
     const std::vector< _set<int> >& pattern() const 
-    { std::vector< _set<int> > tmp;
-	return tmp;};//return sparsity_pattern; };
+    { return tmp;};
 
     /// Display sparsity pattern
     void disp() const;
@@ -114,6 +113,9 @@ namespace dolfin
     std::vector<int> off_processor;
 
     bool blocked;
+
+    // Dummy return value
+    std::vector< _set<int> > tmp;
   };
 }
 #endif

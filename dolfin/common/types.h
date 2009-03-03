@@ -14,9 +14,12 @@
 #if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__) 
 #include <unordered_map>
 #include <unordered_set>
-#else
+#elif ENABLE_GCC_EXT
 #include <ext/hash_map>
 #include <ext/hash_set>
+#else
+#include <map>
+#include <set>
 #endif
 #elif (__IBMCPP__ && __IBMCPP_TR1__) 
 #include <unordered_map>
@@ -45,9 +48,12 @@ namespace dolfin
 #if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__)
 #define _map std::unordered_map
 #define _set std::unordered_set
-#else
+#elif ENABLE_GCC_EXT
 #define _map __gnu_cxx::hash_map 
 #define _set __gnu_cxx::hash_set
+#else
+#define _map std::map
+#define _set std::set
 #endif
 #elif (__IBMCPP__ && __IBMCPP_TR1__) 
 #define _map std::tr1::unordered_map

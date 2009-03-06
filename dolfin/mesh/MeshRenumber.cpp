@@ -114,7 +114,6 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().local_indices[0] = new_local;
   mesh.distdata().global_indices[0] = new_global;  
   mesh.distdata()._valid_vertex_numbering = true;
-  mesh.distdata().finialize(0);
 
   delete[] recv_buff;
   delete[] recv_ghost;
@@ -527,7 +526,6 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mesh.distdata().local_indices[3] = new_local;
   mesh.distdata().global_indices[3] = new_global;  
   mesh.distdata()._valid_cell_numbering = true;
-  mesh.distdata().finialize(3);
  
 }
 //-----------------------------------------------------------------------------

@@ -6,14 +6,17 @@
 // Modified by Niclas Jansson, 2009.
 //
 // First added:  2007-03-13
-// Last changed: 2009-01-22
+// Last changed: 2009-03-03
 
 #include <dolfin/log/dolfin_log.h>
 #include "SparsityPattern.h"
 #include <dolfin/main/MPI.h>
 //#include <dolfin/PETScObject.h>
 #include <iostream>
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -231,11 +234,14 @@ void SparsityPattern::initRange(uint num_local)
   range = new uint[num_procs+1];
   range[0] = 0;
 
+
   uint *local= new uint[num_procs];
   local[dolfin::MPI::processNumber()] = num_local;
-  
+
+#ifdef HAS_MPI  
   MPI_Allgather(&local[MPI::processNumber()],1,MPI_UNSIGNED, 
 		local, 1, MPI_UNSIGNED, MPI_COMM_WORLD);
+#endif
 
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + local[p];
@@ -249,7 +255,10 @@ void SparsityPattern::initRange(uint num_local)
   cout<<endl;
 
   
+#ifdef HAS_MPI
   delete[] local;
+#endif
+
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::apply()
@@ -257,6 +266,7 @@ void SparsityPattern::apply()
   if (MPI::numProcesses() == 1) 
     return;
 
+#ifdef HAS_MPI
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
 
@@ -296,5 +306,6 @@ void SparsityPattern::apply()
   }
 
   delete[] recv_buff;  
+#endif
 }
 //-----------------------------------------------------------------------------

@@ -24,7 +24,9 @@
 #include "LoadBalancer.h"
 #include "RefinementManager.h"
 
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -70,7 +72,11 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
   const CellType& cell_type = mesh.type();
 
   // Create a new refinement manager
+#ifdef HAS_MPI
   RefinementManager refman(mesh); 
+#else
+  RefinementManager refman;    
+#endif
   Array<uint> shared_edge;
   
   // Init new vertices and cells

@@ -13,7 +13,10 @@
 #include "GlobalFacetMap.h"
 #include <dolfin/main/MPI.h>
 #include "Facet.h"
-#include "mpi.h"
+
+#ifdef HAS_MPI
+#include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -116,6 +119,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       sub_domains(*entity) = sub_domain;
   }
 
+#ifdef HAS_MPI
   if(MPI::numProcesses() > 1) {
     if(dim == 0) {
       uint pe_size = MPI::numProcesses();
@@ -158,5 +162,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       
     }
   }
+#endif
+
 }
 //-----------------------------------------------------------------------------

@@ -74,8 +74,10 @@ namespace dolfin
     /// Finalize assembly of tensor
     void apply(FinalizeType finaltype=FINALIZE)
     { 
+#ifdef HAS_MPI
       real tmp = value; 
       MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#endif
     }
 
 

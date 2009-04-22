@@ -13,7 +13,10 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include "PXMLMesh.h"
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -28,6 +31,7 @@ PXMLMesh::~PXMLMesh()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+#ifdef HAS_MPI
 void PXMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
 {
   switch ( state )
@@ -639,3 +643,22 @@ void PXMLMesh::closeMesh()
 
 }
 //-----------------------------------------------------------------------------
+#else
+void PXMLMesh::startElement(const xmlChar* name, const xmlChar** attrs)
+{
+}
+//-----------------------------------------------------------------------------
+void PXMLMesh::endElement(const xmlChar* name)
+{
+}
+//-----------------------------------------------------------------------------
+void PXMLMesh::open(std::string filename)
+{
+}
+//-----------------------------------------------------------------------------
+bool PXMLMesh::close()
+{
+  return false;
+}
+//-----------------------------------------------------------------------------
+#endif

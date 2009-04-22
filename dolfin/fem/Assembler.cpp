@@ -30,7 +30,11 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------

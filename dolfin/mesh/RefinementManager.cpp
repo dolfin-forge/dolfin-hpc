@@ -19,7 +19,10 @@
 #include <time.h> 
 #include <map>
 #include <set>
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
@@ -38,6 +41,8 @@ RefinementManager::~RefinementManager()
 {
 
 }
+//-----------------------------------------------------------------------------
+#ifdef HAS_MPI
 //-----------------------------------------------------------------------------
 void RefinementManager::init(Mesh& mesh)
 {
@@ -539,6 +544,13 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
   delete[] recv_buff;
 }
+//-----------------------------------------------------------------------------
+#else
+void RefinementManager::init(Mesh& mesh)
+{
+}
+//-----------------------------------------------------------------------------
+#endif
 //-----------------------------------------------------------------------------
 std::pair<dolfin::uint, dolfin::uint> RefinementManager::edge_key(uint id1,
 								  uint id2)

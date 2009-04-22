@@ -135,7 +135,8 @@ namespace dolfin
 	entity_indices[topological_dimension][0] = cell.index();
       }
       else {
-	for (uint d = 0; d < topological_dimension; d++)
+	//	for (uint d = 0; d < topological_dimension; d++)
+	uint d = 0;
 	  for(uint i = 0; i < cell.numEntities(d); i++)
 	    entity_indices[d][i] = distdata.get_global( (cell.entities(d))[i], d);
 	entity_indices[topological_dimension][0] = distdata.get_cell_global(cell.index());

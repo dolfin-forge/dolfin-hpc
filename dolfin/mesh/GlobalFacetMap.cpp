@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-02-25
-// Last changed: 2008-02-25
+// Last changed: 2009-03-03
 
 #include "Mesh.h"
 #include "Facet.h"
@@ -10,7 +10,10 @@
 #include "GlobalFacetMap.h"
 #include <dolfin/main/MPI.h>
 
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 
 using namespace dolfin;
@@ -23,6 +26,7 @@ GlobalFacetMap::~GlobalFacetMap()
 {
 }
 //-----------------------------------------------------------------------------
+#ifdef HAS_MPI
 void GlobalFacetMap::init()
 {
 
@@ -177,6 +181,20 @@ void GlobalFacetMap::findGlobal3D()
   delete[] res_buff;
 }
 //-----------------------------------------------------------------------------
+#else
+void GlobalFacetMap::init()
+{
+}
+//-----------------------------------------------------------------------------
+void GlobalFacetMap::findGlobal2D()
+{
+}
+//-----------------------------------------------------------------------------
+void GlobalFacetMap::findGlobal3D()
+{
+}
+//-----------------------------------------------------------------------------
+#endif
 bool GlobalFacetMap::globalFacet(Facet& facet)
 {
 

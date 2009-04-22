@@ -14,7 +14,10 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
 #include "SpecialFunctions.h"
+
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -36,11 +39,13 @@ real MeshSize::min() const
   for (; !c.end(); ++c)
     hmin = std::min(hmin, c->diameter());
 
+#ifdef HAS_MPI
   // Compute the global minimum
   if(MPI::numProcesses() > 1) {
     real hmin_tmp = hmin;
     MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
   }
+#endif
 
   return hmin;
 }
@@ -52,11 +57,13 @@ real MeshSize::max() const
   for (; !c.end(); ++c)
     hmax = std::max(hmax, c->diameter());
   
+#ifdef HAS_MPI
   // Compute the global maximum
   if(MPI::numProcesses() > 1) {
     real hmax_tmp = hmax;
     MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
   }
+#endif
 
   return hmax;
 }

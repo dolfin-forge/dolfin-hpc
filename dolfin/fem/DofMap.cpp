@@ -23,7 +23,9 @@
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/GlobalFacetMap.h>
 
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------

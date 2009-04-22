@@ -338,7 +338,7 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 
     for(uint j = m; j > 0 ; j--) {
       uint glb_index = map[ ((Matrix[tmp[j-1]]) >> (8 * i)) & 0xff ]--;
-      uint target = floor(glb_index / pe_size);
+      uint target = floor( (double) glb_index / (double) pe_size);
       if(target != rank) {
 	sendbuff[target].push_back(glb_index);
 	sendbuff[target].push_back(tmp[j-1]);	

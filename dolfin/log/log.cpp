@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <signal.h>
+#include <sstream>
 #include <dolfin/common/types.h>
 #include <dolfin/common/constants.h>
 #include "LogManager.h"
@@ -31,37 +32,37 @@ static char buffer[DOLFIN_LINELENGTH];
 void dolfin::message(std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.message(buffer);
+  LogManager::logger.message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::message(int debug_level, std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.message(buffer, debug_level);
+  LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
 void dolfin::warning(std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.warning(buffer);
+  LogManager::logger.warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::error(std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.error(buffer);
+  LogManager::logger.error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::begin(std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.begin(buffer);
+  LogManager::logger.begin(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::begin(int debug_level, std::string msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.begin(buffer, debug_level);
+  LogManager::logger.begin(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
 void dolfin::end()

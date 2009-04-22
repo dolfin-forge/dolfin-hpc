@@ -12,6 +12,7 @@
 #define __FILE_H
 
 #include <string>
+#include <sstream>
 
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>

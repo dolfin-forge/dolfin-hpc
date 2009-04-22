@@ -202,7 +202,10 @@ cxx = os.environ.get("CXX", env.Detect(cxx_compilers))
 
 # Set MPI compiler and add neccessary MPI flags if enableMpi is True:
 if env["enableMpi"]:
-  mpi_cxx_compilers = ["mpic++", "mpicxx", "mpiCC"]
+  mpi_cxx_compilers = ["mpic++", "mpicxx", "mpiCC", "mpixlcxx"]
+  if env["PLATFORM"] == "irix":	 
+    mpi_cxx_compilers += ["CC"] 
+
   mpi_cxx = os.environ.get("CXX", env.Detect(mpi_cxx_compilers))
   # Several cases for mpi_cxx depending on CXX from os.environ:
   # CXX=                           - not OK

@@ -1,8 +1,10 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson 2009.
+//
 // First added:  2008-01-07
-// Last changed: 
+// Last changed: 2009-04-22
 
 #ifndef __SUB_SYSTEMS_MANAGER_H
 #define __SUB_SYSTEMS_MANAGER_H
@@ -26,6 +28,12 @@ namespace dolfin
     /// Initialize PETSc with command-line arguments
     static void initPETSc(int argc, char* argv[], bool cmd_line_args = true);
 
+    /// Finalize MPI
+    static void finalizeMPI();
+
+    /// Finalize PETSc
+    static void finalizePETSc();
+
   private:
 
     // Constructor
@@ -36,12 +44,6 @@ namespace dolfin
 
     // Destructor
     ~SubSystemsManager();
-
-    /// Finalize MPI
-    static void finalizeMPI();
-
-    /// Finalize PETSc
-    static void finalizePETSc();
 
     // Check if MPI has been initialised (returns true if MPI has been 
     //   initialised, even if it is later finalised) 

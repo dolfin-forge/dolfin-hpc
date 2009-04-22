@@ -22,6 +22,7 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/GlobalFacetMap.h>
+#include <string.h>
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -310,6 +311,7 @@ void DofMap::build(UFC& ufc, uint jj)
      delete[] dofs;
   }
   else { 
+#ifdef HAS_MPI
     uint local_dim = local_dimension();
     uint *dofs =  new uint[local_dimension()];
 
@@ -610,7 +612,8 @@ void DofMap::build(UFC& ufc, uint jj)
       
       delete[] dofs;
     }
-  }  
+#endif
+  }
 }
 //-----------------------------------------------------------------------------
 std::map<dolfin::uint, dolfin::uint> DofMap::getMap() //FIXME: const

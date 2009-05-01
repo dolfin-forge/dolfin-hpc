@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2008-07-17
+// Last changed: 2009-05-01
 
 
 #include "LoadBalancer.h"
@@ -13,9 +13,12 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
 
+#ifdef HAS_MPI
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
+#ifdef HAS_MPI
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker)
 {  
@@ -381,5 +384,20 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 
 }
 //-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker)
+{  
+  warning("Load balancing only implemented for MPI");
+}
+//-----------------------------------------------------------------------------
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
+			   real tf, real tb, real ts)
+{  
+  warning("Load balancing only implemented for MPI");
+}
+//-----------------------------------------------------------------------------
+#endif
+
 
 

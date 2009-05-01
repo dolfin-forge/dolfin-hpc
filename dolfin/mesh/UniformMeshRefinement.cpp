@@ -21,7 +21,6 @@
 #include "RefinementManager.h"
 #include "MeshFunction.h"
 #include <dolfin/main/MPI.h>
-#include <mpi.h>
 
 using namespace dolfin;
 

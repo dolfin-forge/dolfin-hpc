@@ -9,7 +9,6 @@
 #include "Face.h"
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/log.h>
-#include <mpi.h>
 
 using namespace dolfin;
 

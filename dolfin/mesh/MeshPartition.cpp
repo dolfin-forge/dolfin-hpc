@@ -2,10 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson, 2008.
+// Modified by Niclas Jansson, 2008-2009.
 //
 // First added:  2007-04-03
-// Last changed: 2008-02-11
+// Last changed: 2009-05-01
 
 #include <dolfin/graph/Graph.h>
 #include <dolfin/graph/GraphPartition.h>
@@ -17,8 +17,10 @@
 #include "Vertex.h"
 #include "Cell.h"
 
+#ifdef HAS_MPI
 #include <parmetis.h>
 #include <mpi.h>
+#endif
 
 using namespace dolfin;
 
@@ -46,6 +48,8 @@ void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
 {
   partitionCommonMetis(mesh, partitions, &weight);
 }
+//-----------------------------------------------------------------------------
+#ifdef HAS_MPI
 //-----------------------------------------------------------------------------
 void MeshPartition::partitionCommonMetis(Mesh& mesh, 
 					 MeshFunction<uint>& partitions,
@@ -198,3 +202,19 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   delete[] vtxdist;
 }
 //-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
+void MeshPartition::partitionCommonMetis(Mesh& mesh, 
+					 MeshFunction<uint>& partitions,
+					 MeshFunction<uint>* weight)
+{
+  error("ParMetis needs MPI");
+}
+//-----------------------------------------------------------------------------
+void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
+{
+  error("ParMetis needs MPI");
+}
+//-----------------------------------------------------------------------------
+#endif
+

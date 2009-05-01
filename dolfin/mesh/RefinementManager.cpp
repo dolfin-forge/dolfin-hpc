@@ -550,6 +550,23 @@ void RefinementManager::init(Mesh& mesh)
 {
 }
 //-----------------------------------------------------------------------------
+void RefinementManager::mark_localboundary(Mesh& oldmesh, 
+					  MeshFunction<bool>& cell_marker,
+					  uint& num_new_vertices,
+					  uint& num_new_cells)
+{
+}
+//-----------------------------------------------------------------------------
+void RefinementManager::map_new_vertices(Array<uint> shared_edge,
+					 Mesh& oldmesh, Mesh& newmesh)
+{
+}
+//-----------------------------------------------------------------------------
+void RefinementManager::add_new_vertex(uint* edge,uint vertex, 
+				       Mesh& mesh, bool shared)
+{
+}
+//-----------------------------------------------------------------------------
 #endif
 //-----------------------------------------------------------------------------
 std::pair<dolfin::uint, dolfin::uint> RefinementManager::edge_key(uint id1,

@@ -17,12 +17,13 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
 
-#include <mpi.h>
 #include <cstdlib> 
 #include <ctime> 
-
 #include <map>
 
+#ifdef HAS_MPI
+#include <mpi.>
+#endif
 
 
 using namespace dolfin;
@@ -35,6 +36,8 @@ void MeshRenumber::renumber(Mesh& mesh)
   renumber_faces(mesh);
   renumber_cells(mesh);
 }       		    
+//-----------------------------------------------------------------------------
+#ifdef HAS_MPI
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_vertices(Mesh& mesh)
 {
@@ -592,5 +595,24 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
     }          
 }
 //-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
+void MeshRenumber::renumber_vertices(Mesh& mesh)
+{
+}
+//-----------------------------------------------------------------------------
+void MeshRenumber::renumber_edges(Mesh& mesh)
+{
+}
+//-----------------------------------------------------------------------------
+void MeshRenumber::renumber_faces(Mesh& mesh)
+{
+}
+//-----------------------------------------------------------------------------
+void MeshRenumber::renumber_cells(Mesh& mesh)
+{
+}
+//-----------------------------------------------------------------------------
+#endif
 
 

@@ -37,22 +37,26 @@ namespace dolfin
   /// the output destination to "silent" means no messages will be printed.
 
   /// Print message
+  void message(char *msg, ...);
   void message(std::string msg, ...);
 
   /// Print message
+  void message(int debug_level, char *msg, ...);
   void message(int debug_level, std::string msg, ...);
   
   /// Print warning
+  void warning(char *msg, ...);
   void warning(std::string msg, ...);
 
   /// Print error message and throw an exception
+  void error(char *msg, ...);
   void error(std::string msg, ...);
 
   /// Begin task (increase indentation level)
-  void begin(std::string msg, ...);
+  void begin(char *msg, ...);
 
   /// Begin task (increase indentation level)
-  void begin(int debug_level, std::string msg, ...);
+  void begin(int debug_level, char *msg, ...);
 
   /// End task (decrease indentation level)
   void end();
@@ -64,10 +68,10 @@ namespace dolfin
   const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& timings();
 
   // Helper function for dolfin_debug macro
-  void __debug(std::string file, unsigned long line, std::string function, std::string format, ...);
+  void __debug(std::string file, unsigned long line, std::string function, char *format, ...);
 
   // Helper function for dolfin_assert macro
-  void __dolfin_assert(std::string file, unsigned long line, std::string function, std::string format, ...);
+  void __dolfin_assert(std::string file, unsigned long line, std::string function, char *format, ...);
 
 }
 

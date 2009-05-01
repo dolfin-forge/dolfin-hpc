@@ -163,7 +163,7 @@ void cGqMethod::computeBasis()
 void cGqMethod::computeWeights()
 {
   uBlasDenseMatrix A(q, q);
-  ublas_dense_matrix& _A = A.mat();
+  ublas_dense_matrix& AA = A.mat();
   
   // Compute matrix coefficients
   for (unsigned int i = 0; i < nn; i++)
@@ -177,7 +177,7 @@ void cGqMethod::computeWeights()
 	      real x = qpoints[k];
 	      integral += qweights[k] * trial->ddx(j + 1, x) * test->eval(i, x);
       }
-      _A(i, j) = integral;
+      AA(i, j) = integral;
     }
   }
 

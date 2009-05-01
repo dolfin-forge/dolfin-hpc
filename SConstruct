@@ -225,6 +225,9 @@ if env["enableMpi"]:
     # Found MPI, so set HAS_MPI and IGNORE_CXX_SEEK (mpich2 bug)
     env.Append(CXXFLAGS=" -DHAS_MPI=1 -DMPICH_IGNORE_CXX_SEEK")
     env["CXX"] = mpi_cxx
+    # If we are on an irix system, add mpi libraries to linkflags
+    if env["PLATFORM"] == "irix":	 
+      env.Append(LINKFLAGS=" -lmpi++ -lmpi")
 else:
   env["CXX"] = cxx
 

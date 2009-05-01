@@ -89,8 +89,14 @@ bool TimeSlabSolver::solve(uint attempt)
     }
 
     // Check divergence
-    // FIXME: implement better check and make this a parameter
+    // FIXME: implement better check and make this a parameter    
+    // FIXME: remove ifdef checks for isnormal (needed on irix and solaris),
+    //        broken for both gcc and mipspro compilers
+#if (__sgi || sgi || sun) 
+    if ( (iter > 0 && d2 > 1000.0 * d1) )
+#else
     if ( (iter > 0 && d2 > 1000.0 * d1) || !std::isnormal(d2) )
+#endif
     {
       warning("Time slab system seems to be diverging.");
       return false;

@@ -1,6 +1,8 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2009.
+//
 
 #include "RivaraRefinement.h"
 
@@ -18,6 +20,7 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <unistd.h>
 
 #include <mpi.h>
 

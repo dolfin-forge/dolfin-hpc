@@ -94,27 +94,27 @@ dolfin::uint uBlasLUSolver::factorize(const uBlasMatrix<ublas_sparse_matrix>& A)
 {
 // Symbolic and numeric part of UMFPACK solve procedure
 
-  const ublas_sparse_matrix& _A = A.mat(); 
+  const ublas_sparse_matrix& AA = A.mat(); 
 
   // Check dimensions and get number of non-zeroes
   const uint M  = A.size(0);
   const uint N  = A.size(1);
-  const uint nz = _A.nnz();
+  const uint nz = AA.nnz();
 
   dolfin_assert(M == N);
   dolfin_assert(nz >= N); 
 
   // Make sure matrix assembly is complete
-  (const_cast< ublas_sparse_matrix& >(_A)).complete_index1_data(); 
+  (const_cast< ublas_sparse_matrix& >(AA)).complete_index1_data(); 
 
   message("LU-factorizing linear system of size %d x %d (UMFPACK).", M, M);
 
   double* dnull = (double *) NULL;
   long int* inull = (long int *) NULL;
   void *Symbolic;
-  const std::size_t* Ap = &(_A.index1_data() [0]);
-  const std::size_t* Ai = &(_A.index2_data() [0]);
-  const double* Ax = &(_A.value_data() [0]);
+  const std::size_t* Ap = &(AA.index1_data() [0]);
+  const std::size_t* Ai = &(AA.index2_data() [0]);
+  const double* Ax = &(AA.value_data() [0]);
 
   if(has_factorized_matrix)
   {
@@ -231,8 +231,8 @@ void uBlasLUSolver::solve(const uBlasKrylovMatrix& A, uBlasVector& x,
 
   // Get underlying uBLAS vectors
   ublas_vector& _ej = ej->vec(); 
-  ublas_vector& _Aj = Aj->vec(); 
-  ublas_dense_matrix& _AA = AA->mat(); 
+  ublas_vector& AAj = Aj->vec(); 
+  ublas_dense_matrix& AAA = AA->mat(); 
 
   // Reset unit vector
   _ej *= 0.0;
@@ -246,7 +246,7 @@ void uBlasLUSolver::solve(const uBlasKrylovMatrix& A, uBlasVector& x,
     A.mult(*ej, *Aj);
     
     // Set column of A
-    column(_AA, j) = _Aj;
+    column(AAA, j) = AAj;
     
     (_ej)(j) = 0.0;
   }

@@ -45,7 +45,7 @@ void GaussianQuadrature::computeWeights()
   }
 
   uBlasDenseMatrix A(n, n);
-  ublas_dense_matrix& _A = A.mat();
+  ublas_dense_matrix& AA = A.mat();
   uBlasVector x(n), b(n);
   ublas_vector& _x = x.vec();
   ublas_vector& _b = b.vec();
@@ -55,7 +55,7 @@ void GaussianQuadrature::computeWeights()
   {
     Legendre p(i);
     for (unsigned int j = 0; j < n; j++)
-      _A(i, j) = p(points[j]);
+      AA(i, j) = p(points[j]);
     _b[i] = 0.0;
   }
   _b[0] = 2.0;

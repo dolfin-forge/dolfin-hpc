@@ -22,7 +22,7 @@
 #include <map>
 
 #ifdef HAS_MPI
-#include <mpi.>
+#include <mpi.h>
 #endif
 
 

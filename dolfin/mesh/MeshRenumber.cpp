@@ -25,7 +25,6 @@
 #include <mpi.h>
 #endif
 
-
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -117,6 +116,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().local_indices[0] = new_local;
   mesh.distdata().global_indices[0] = new_global;  
   mesh.distdata()._valid_vertex_numbering = true;
+  mesh.distdata().finalize(0);
 
   delete[] recv_buff;
   delete[] recv_ghost;
@@ -529,6 +529,7 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mesh.distdata().local_indices[3] = new_local;
   mesh.distdata().global_indices[3] = new_global;  
   mesh.distdata()._valid_cell_numbering = true;
+  mesh.distdata().finalize(3);
  
 }
 //-----------------------------------------------------------------------------
@@ -595,7 +596,7 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
     }          
 }
 //-----------------------------------------------------------------------------
-#else
+#else 
 //-----------------------------------------------------------------------------
 void MeshRenumber::renumber_vertices(Mesh& mesh)
 {
@@ -614,5 +615,3 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
 }
 //-----------------------------------------------------------------------------
 #endif
-
-

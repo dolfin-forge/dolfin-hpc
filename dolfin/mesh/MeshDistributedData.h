@@ -26,6 +26,8 @@ namespace dolfin
     const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
 
     void clear();
+    void finalize(uint dim);
+
     void set_map(uint local_index, uint global_index, uint dim);
     
     void set_shared(uint local_index, uint dim);
@@ -62,6 +64,7 @@ namespace dolfin
     {
       _valid_vertex_numbering = _valid_cell_numbering = false;
       _valid_edge_numbering = _valid_face_numbering = false; 
+      finalized = false;
 
     }
 
@@ -69,6 +72,7 @@ namespace dolfin
     { 
       _valid_edge_numbering = _valid_face_numbering = false; 
       flush_edges(); flush_faces();
+      finalized = false;
     }
 
     uint get_owner(uint local_index, uint dim);
@@ -125,6 +129,9 @@ namespace dolfin
     _set<uint> shared[3];
     _set<uint> ghost[3];
 
+    bool finalized;
+    uint *_global_indices;
+    uint *_global_cell_indices;
 
     friend class MeshGhostIterator;
     friend class MeshSharedIterator;

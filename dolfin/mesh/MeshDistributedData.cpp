@@ -19,7 +19,10 @@ MeshDistributedData::MeshDistributedData() : _max_global_index(0),
 					     _valid_edge_numbering(false),
 					     _valid_face_numbering(false),
 					     _valid_edge_ownership(false),
-					     _valid_face_ownership(false)
+					     _valid_face_ownership(false),
+					     finalized(false),
+					     _global_indices(0),
+					     _global_cell_indices(0)
 					    					     
 {
 
@@ -61,7 +64,17 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _num_global_face = distributed_data._num_global_face;
   _num_global_cell = distributed_data._num_global_cell;
 
+  finalized =  distributed_data.finalized;
+  if ( finalized ) {
+    _global_indices = new uint[global_indices[0].size()];
+    memcpy(_global_indices, distributed_data._global_indices, 
+	   global_indices[0].size() * sizeof(uint));
 
+    _global_cell_indices = new uint[global_indices[3].size()];
+    memcpy(_global_cell_indices, distributed_data._global_cell_indices, 
+	   global_indices[3].size() * sizeof(uint));
+  }
+    
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -85,6 +98,45 @@ void MeshDistributedData::clear()
 
   _valid_edge_ownership = _valid_face_ownership = false;
 
+  if( _global_indices )
+    delete[] _global_indices;
+  _global_indices = 0;
+
+  if( _global_cell_indices )
+    delete[] _global_cell_indices;
+  _global_cell_indices = 0;
+
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::finalize(uint dim)
+{
+
+  _map<uint, uint>::iterator it;
+
+  switch(dim)
+  {
+  case 0:
+    if(_global_indices)
+      delete[] _global_indices;    
+    _global_indices = new uint[global_indices[0].size()];
+
+    for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it) 
+      _global_indices[it->first] = it->second;
+    break;
+  case 3:
+    if(_global_cell_indices)
+      delete[] _global_cell_indices;
+    
+    _global_cell_indices = new uint[global_indices[dim].size()];
+    for(it = global_indices[dim].begin(); it != global_indices[dim].end(); ++it)
+      _global_cell_indices[it->first] = it->second;
+    break;
+  default:
+    warning("Not implemented yet!");
+    break;
+  }
+  
+  finalized = true;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
@@ -139,7 +191,11 @@ dolfin::uint MeshDistributedData::get_global(uint i, uint dim)
     return i;
 
   dolfin_assert( global_indices[dim].count(i) );
-  return global_indices[dim][i];
+  if( dim == 0 && finalized) {
+    return _global_indices[i];
+  }
+  else
+    return global_indices[dim][i];
 
 }
 //-----------------------------------------------------------------------------
@@ -175,7 +231,10 @@ dolfin::uint MeshDistributedData::get_cell_global(uint i)
   if(MPI::numProcesses() == 1) 
     return i;
   dolfin_assert( global_indices[3].count(i) );
-  return global_indices[3][i];
+  if ( finalized )
+    return _global_cell_indices[i];
+  else
+    return global_indices[3][i];
 
 }
 //-----------------------------------------------------------------------------

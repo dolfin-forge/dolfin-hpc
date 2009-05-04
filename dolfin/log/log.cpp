@@ -7,7 +7,7 @@
 // Modified by Niclas Jansson, 2009.
 //
 // First added:  2003-03-13
-// Last changed: 2009-05-01
+// Last changed: 2009-05-04
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -23,74 +23,51 @@ using namespace dolfin;
 // Buffers
 static char buffer[DOLFIN_LINELENGTH];
 
+#ifdef __sgi
 #define read(buffer, msg) \
   va_list aptr; \
   va_start(aptr, msg); \
   vsnprintf(buffer, DOLFIN_LINELENGTH, msg, aptr); \
   va_end(aptr);
-
-#define read_str(buffer, msg) \
+#else
+#define read(buffer, msg) \
   va_list aptr; \
   va_start(aptr, msg); \
   vsnprintf(buffer, DOLFIN_LINELENGTH, msg.c_str(), aptr);	\
   va_end(aptr);
-
+#endif
 //-----------------------------------------------------------------------------
-void dolfin::message(char *msg, ...)
+void dolfin::message(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::message(int debug_level, char *msg, ...)
+void dolfin::message(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
-void dolfin::message(std::string msg, ...)
-{
-  read_str(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer));
-}
-//-----------------------------------------------------------------------------
-void dolfin::message(int debug_level, std::string msg, ...)
-{
-  read_str(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
-}
-//-----------------------------------------------------------------------------
-void dolfin::warning(char *msg, ...)
+void dolfin::warning(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::warning(std::string msg, ...)
-{
-  read_str(buffer, msg);
-  LogManager::logger.warning(static_cast<std::string>(buffer));
-}
-//-----------------------------------------------------------------------------
-void dolfin::error(char *msg, ...)
+void dolfin::error(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::error(std::string msg, ...)
-{
-  read_str(buffer, msg);
-  LogManager::logger.error(static_cast<std::string>(buffer));
-}
-//-----------------------------------------------------------------------------
-void dolfin::begin(char *msg, ...)
+void dolfin::begin(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.begin(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::begin(int debug_level, char *msg, ...)
+void dolfin::begin(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger.begin(static_cast<std::string>(buffer), debug_level);
@@ -112,7 +89,7 @@ const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& dolfin::tim
 }
 //-----------------------------------------------------------------------------
 void dolfin::__debug(std::string file, unsigned long line,
-                     std::string function, char *format, ...)
+                     std::string function, _msg format, ...)
 {
   read(buffer, format);
   std::ostringstream ost;
@@ -122,7 +99,7 @@ void dolfin::__debug(std::string file, unsigned long line,
 }
 //-----------------------------------------------------------------------------
 void dolfin::__dolfin_assert(std::string file, unsigned long line,
-                      std::string function, char *format, ...)
+                      std::string function, _msg format, ...)
 {
   read(buffer, format);
   std::ostringstream ost;

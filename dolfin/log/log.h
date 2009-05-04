@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Ola Skavhaug, 2007.
+// Modified by Niclas Jansson, 2009.
 // 
 // First added:  2003-03-13
-// Last changed: 2008-06-17
+// Last changed: 2009-05-04
 
 #ifndef __LOG_H
 #define __LOG_H
@@ -36,27 +37,30 @@ namespace dolfin
   /// where destination is one of "terminal" (default) or "silent". Setting
   /// the output destination to "silent" means no messages will be printed.
 
-  /// Print message
-  void message(char *msg, ...);
-  void message(std::string msg, ...);
+
+#ifdef __sgi
+#define _msg char*
+#else
+#define _msg std::string
+#endif
 
   /// Print message
-  void message(int debug_level, char *msg, ...);
-  void message(int debug_level, std::string msg, ...);
+  void message(_msg msg, ...);
+
+  /// Print message
+  void message(int debug_level, _msg msg, ...);
   
   /// Print warning
-  void warning(char *msg, ...);
-  void warning(std::string msg, ...);
+  void warning(_msg msg, ...);
 
   /// Print error message and throw an exception
-  void error(char *msg, ...);
-  void error(std::string msg, ...);
+  void error(_msg msg, ...);
 
   /// Begin task (increase indentation level)
-  void begin(char *msg, ...);
+  void begin(_msg msg, ...);
 
   /// Begin task (increase indentation level)
-  void begin(int debug_level, char *msg, ...);
+  void begin(int debug_level,_msg msg, ...);
 
   /// End task (decrease indentation level)
   void end();
@@ -68,10 +72,10 @@ namespace dolfin
   const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& timings();
 
   // Helper function for dolfin_debug macro
-  void __debug(std::string file, unsigned long line, std::string function, char *format, ...);
+  void __debug(std::string file, unsigned long line, std::string function, _msg format, ...);
 
   // Helper function for dolfin_assert macro
-  void __dolfin_assert(std::string file, unsigned long line, std::string function, char *format, ...);
+  void __dolfin_assert(std::string file, unsigned long line, std::string function, _msg format, ...);
 
 }
 

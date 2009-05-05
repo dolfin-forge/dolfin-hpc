@@ -197,7 +197,6 @@ dolfin::uint MeshDistributedData::get_global(uint i, uint dim)
   }
   else
     return global_indices[dim][i];
-
 }
 //-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_local(MeshEntity& e)

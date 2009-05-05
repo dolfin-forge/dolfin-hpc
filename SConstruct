@@ -71,6 +71,7 @@ options = [
     BoolOption("enableStatic", "Build static library", 0),
     BoolOption("enableGnuExtensions", "Enable GNU extensions", 0),
     BoolOption("enableGnuExperimental", "Enable experimental GNU features", 0),
+    BoolOption("enableOptimizeP1", "Compile with optimization for P1 elements", 0),
     # Enable or disable external packages.
     # These will also be listed in scons.cfg files, but if they are 
     # disabled here, that will override scons.cfg. Remark that unless the
@@ -158,7 +159,7 @@ if env["enableDebug"]:
 if not env["enableDebugUblas"]:
   env.Append(CXXFLAGS=" -DNDEBUG")
 
-# if Optimization is requested, use -O3
+# if Optimization is requested, use -O3 
 if env["enableOptimize"]:
   env.Append(CXXFLAGS=" -O3")
 else:
@@ -176,6 +177,16 @@ if env["enableGnuExtensions"]:
 # If experimental features of GCC is requested, use -std=c++0x
 if env["enableGnuExperimental"]:
   env.Append(CXXFLAGS=" -std=c++0x")
+
+# if P1 Optimization is reqested, disable all other element types
+if env["enableOptimizeP1"]:
+  env.Append(CXXFLAGS=" -DENABLE_P1_OPTIMIZATIONS")
+  msg = """---------------------------------------------------------
+                        WARNING
+
+          DOLFIN will be tuned for P1 elements!        
+---------------------------------------------------------"""
+  print msg
 
 # Not sure we need this - but lets leave it for completeness sake - if people
 # use if for PyCC, and know that dolfin use the same system, they will expect

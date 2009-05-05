@@ -31,8 +31,10 @@ using namespace dolfin;
 void MeshRenumber::renumber(Mesh& mesh)
 {
   renumber_vertices(mesh);
+#ifndef ENABLE_P1_OPTIMIZATIONS
   renumber_edges(mesh);
   renumber_faces(mesh);
+#endif
   renumber_cells(mesh);
 }       		    
 //-----------------------------------------------------------------------------
@@ -116,7 +118,9 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   mesh.distdata().local_indices[0] = new_local;
   mesh.distdata().global_indices[0] = new_global;  
   mesh.distdata()._valid_vertex_numbering = true;
+#if ENABLE_P1_OPTIMIZATIONS
   mesh.distdata().finalize(0);
+#endif
 
   delete[] recv_buff;
   delete[] recv_ghost;
@@ -529,8 +533,9 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mesh.distdata().local_indices[3] = new_local;
   mesh.distdata().global_indices[3] = new_global;  
   mesh.distdata()._valid_cell_numbering = true;
+#if ENABLE_P1_OPTIMIZATIONS
   mesh.distdata().finalize(3);
- 
+#endif
 }
 //-----------------------------------------------------------------------------
 std::pair<dolfin::uint, dolfin::uint> MeshRenumber::edge_key(uint id1,uint id2)

@@ -55,6 +55,22 @@ void dolfin::message(int debug_level, _msg msg, ...)
   LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
+#if __sgi
+//-----------------------------------------------------------------------------
+void dolfin::message(_std::string msg, ...)
+{
+  read_str(buffer, msg);
+  LogManager::logger.message(static_cast<std::string>(buffer));
+}
+//-----------------------------------------------------------------------------
+void dolfin::message(int debug_level, std::string msg, ...)
+{
+  read_str(buffer, msg);
+  LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
+}
+//-----------------------------------------------------------------------------
+#endif
+//-----------------------------------------------------------------------------
 void dolfin::warning(std::string msg, ...)
 {
   read_str(buffer, msg);

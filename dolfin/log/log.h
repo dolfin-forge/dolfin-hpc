@@ -49,7 +49,14 @@ namespace dolfin
 
   /// Print message
   void message(int debug_level, _msg msg, ...);
-  
+
+#if __sgi
+  /// Print message
+  void message(std::string msg, ...);
+
+  /// Print message
+  void message(int debug_level, std::string msg, ...);
+#endif
   /// Print warning
   void warning(std::string msg, ...);
 

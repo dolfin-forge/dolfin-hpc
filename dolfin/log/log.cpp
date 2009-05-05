@@ -57,7 +57,7 @@ void dolfin::message(int debug_level, _msg msg, ...)
 //-----------------------------------------------------------------------------
 #if __sgi
 //-----------------------------------------------------------------------------
-void dolfin::message(_std::string msg, ...)
+void dolfin::message(std::string msg, ...)
 {
   read_str(buffer, msg);
   LogManager::logger.message(static_cast<std::string>(buffer));

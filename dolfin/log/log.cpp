@@ -29,6 +29,12 @@ static char buffer[DOLFIN_LINELENGTH];
   va_start(aptr, msg); \
   vsnprintf(buffer, DOLFIN_LINELENGTH, msg, aptr); \
   va_end(aptr);
+
+#define read_str(buffer, msg) \
+  va_list aptr; \
+  va_start(aptr, msg); \
+  vsnprintf(buffer, DOLFIN_LINELENGTH, msg.c_str(), aptr);	\
+  va_end(aptr);
 #else
 #define read(buffer, msg) \
   va_list aptr; \
@@ -49,15 +55,15 @@ void dolfin::message(int debug_level, _msg msg, ...)
   LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
-void dolfin::warning(_msg msg, ...)
+void dolfin::warning(std::string msg, ...)
 {
-  read(buffer, msg);
+  read_str(buffer, msg);
   LogManager::logger.warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::error(_msg msg, ...)
+void dolfin::error(std::string msg, ...)
 {
-  read(buffer, msg);
+  read_str(buffer, msg);
   LogManager::logger.error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------

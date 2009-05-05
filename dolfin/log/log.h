@@ -51,10 +51,10 @@ namespace dolfin
   void message(int debug_level, _msg msg, ...);
   
   /// Print warning
-  void warning(_msg msg, ...);
+  void warning(std::string msg, ...);
 
   /// Print error message and throw an exception
-  void error(_msg msg, ...);
+  void error(std::string msg, ...);
 
   /// Begin task (increase indentation level)
   void begin(_msg msg, ...);

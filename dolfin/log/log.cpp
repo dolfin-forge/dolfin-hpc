@@ -73,13 +73,21 @@ void dolfin::message(int debug_level, std::string msg, ...)
 //-----------------------------------------------------------------------------
 void dolfin::warning(std::string msg, ...)
 {
+#ifndef __sgi
+  read(buffer, msg);
+#else
   read_str(buffer, msg);
+#endif
   LogManager::logger.warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::error(std::string msg, ...)
 {
+#ifndef __sgi
+  read(buffer, msg);
+#else
   read_str(buffer, msg);
+#endif
   LogManager::logger.error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------

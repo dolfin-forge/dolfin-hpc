@@ -8,13 +8,15 @@
 #include <list>
 #include <vector>
 
-#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Edge.h>
 
 namespace dolfin
 {
+
+  class Cell;
+  class Edge;
+  class Mesh;
+
   class RivaraRefinement
   {
   public:
@@ -22,7 +24,10 @@ namespace dolfin
     /// Refine simplicial mesh locally by recursive edge bisection 
     static void refine(Mesh& mesh, 
 		       MeshFunction<bool>& cell_marker,
-		       MeshFunction<uint>& cell_map);
+		       MeshFunction<uint>& cell_map,
+		       real tf = 0.0, 
+		       real tb = 0.0, 
+		       real ts = 0.0);
   };
 
   class DVertex;
@@ -79,9 +84,7 @@ namespace dolfin
     void exp(Mesh& mesh, std::vector<int>& new2old_arr);
     void number();
 
-    void bisect(DCell* dcell, DVertex* hangv,
-		DVertex* hv0, DVertex* hv1, 
-		std::set<DCell* > & deleted_keys);
+    void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
 
     void bisectMarked(std::vector<bool> marked_ids);
 
@@ -90,8 +93,14 @@ namespace dolfin
     void propagate_naive(std::vector<uint>& propagated, bool& empty);
     void propagate_hypercube(std::vector<uint>& propagated);
 
+    /*
     std::list<DVertex *> vertices;
+    */
+    std::set<DVertex *> vertices;
     std::list<DCell *> cells;
+
+
+
 
     CellType* cell_type;
     uint d;
@@ -109,6 +118,7 @@ namespace dolfin
 
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {
+      dolfin_assert( id2 != id1);
       if(id2 == id1)
 	error("Kaos");
       if(id2 < id1){

@@ -11,7 +11,7 @@
 #include "Edge.h"
 #include "Vertex.h"
 #include <dolfin/common/Array.h>
-#include <dolfin/main/MPI.h>
+//#include <dolfin/main/MPI.h>
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -20,13 +20,14 @@
 using namespace dolfin;
 #ifdef HAS_MPI
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker)
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			   Type type)
 {  
-  balance(mesh, cell_marker, 0.0, 0.0, 0.0);
+  balance(mesh, cell_marker, 0.0, 0.0, 0.0, type);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			   real tf, real tb, real ts)
+			   real tf, real tb, real ts, Type type)
 {  
   // Construct weight function 
   MeshFunction<uint> weight;

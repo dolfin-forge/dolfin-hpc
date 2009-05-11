@@ -3,13 +3,12 @@
 //
 //
 // First added:  2008-03-03
-// Last changed: 2008-07-17
+// Last changed: 2009-05-04
 
 #ifndef __LOAD_BALANCER_H
 #define __LOAD_BALANCER_H
 
 #include "MeshFunction.h"
-#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -17,9 +16,12 @@ namespace dolfin
   {
   public:
 
+    enum Type { Default, Rivara};
+
     // Balance mesh according to marked cells, 
     // new_cell_marker marks cells in cell_marker for new mesh
-    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker);
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			Type type = Default);
 
     // Balance mesh according to marked cells, tune loadbalancer
     // with machine specific parameters
@@ -27,7 +29,7 @@ namespace dolfin
     // tb    Time to transmit one byte in seconds
     // ts    Startup time in seconds (Interconnect latency)
     static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			real tf, real tb, real ts);
+			real tf, real tb, real ts, Type type = Default);
 
   private:
 

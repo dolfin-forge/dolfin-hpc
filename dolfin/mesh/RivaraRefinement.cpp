@@ -49,8 +49,9 @@ void RivaraRefinement::refine(Mesh& mesh,
     end();
   }
   mesh.renumber();
+
   int d = mesh.topology().dim();
-  
+
   // Dynamic mesh test
   DMesh dmesh;
   dmesh.imp(mesh);
@@ -69,7 +70,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   }
   
   dmesh.bisectMarked(dmarked);
-  
+
   // Remove deleted cells from global list
   for(std::list<DCell* >::iterator it = dmesh.cells.begin();
       it != dmesh.cells.end(); )
@@ -107,6 +108,16 @@ DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0),
 //-----------------------------------------------------------------------------
 DCell::DCell() : id(0), parent_id(0), vertices(0), deleted(false)
 {
+}
+//-----------------------------------------------------------------------------
+bool DCell::has_edge(DVertex *v1, DVertex *v2)
+{
+  uint found = 0;
+  for(std::vector<DVertex*>::iterator it = vertices.begin();
+      it != vertices.end(); ++it)
+    if(*it == v1 || *it == v2)
+      found++;
+  return (found == 2);
 }
 //-----------------------------------------------------------------------------
 //DMesh::DMesh() : vertices(0), cells(0)
@@ -180,15 +191,16 @@ void DMesh::imp(Mesh& mesh)
   // Assign a safe range for each processor
   _start_offset = 0;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&num_new, &_start_offset, 1,
-	       MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-#else
-    MPI_Scan(&num_new, &_start_offset, 1,
+  MPI_Exscan(&num_new, &_start_offset, 1,
 	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
-    _start_offset -= num_new;
+#else
+  MPI_Scan(&num_new, &_start_offset, 1,
+	   MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  _start_offset -= num_new;
 #endif
-    _start_offset += glb_max;
-
+  _start_offset += glb_max;
+  
+  uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
   {
     DVertex* dv = new DVertex;    
@@ -202,13 +214,12 @@ void DMesh::imp(Mesh& mesh)
       dv->owner = mesh.distdata().get_owner(*vi);    
 
     glb_ids.insert(dv->glb_id);    
-    if(dv->on_boundary) {
-    
+    if(dv->on_boundary)     
       bc_dvs[dv->glb_id] = dv;
-    }
     
     vertices.insert(dv);
     vertexvec.push_back(dv);
+    counter++;
   }
 
   for (CellIterator ci(mesh); !ci.end(); ++ci)
@@ -239,7 +250,6 @@ void DMesh::imp(Mesh& mesh)
 	{
 	  EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
 				 mesh.distdata().get_global(edge_v[1], 0));
-	  bc_dcs[key].insert(dc);
 	}
       }
     }
@@ -331,7 +341,7 @@ void DMesh::number()
 //-----------------------------------------------------------------------------
 void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 {
-  //cout << "Refining cell: " << dcell->id << endl;
+
 
   bool closing = false;
 
@@ -353,13 +363,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
 	if(fabs(l - lmax) < DOLFIN_EPS)
 	{
-	  int ptsum = ((int)v0) + ((int)v1);
+	  int ptsum = ((long)v0) + ((long)v1);
 	  if(ptsum > ptmax)
 	  {
 	    ii = i;
 	    jj = j;
 	    lmax = l;
-	    ptmax = ((int)v0 + (int)v1);
+	    ptmax = ((long)v0 + (long)v1);
 	  }
 	}
 	else if(l >= lmax)
@@ -367,15 +377,18 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
  	  ii = i;
  	  jj = j;
  	  lmax = l;
-	  ptmax = ((int)dcell->vertices[i]) + ((int)dcell->vertices[j]);
+	  ptmax = ((long)dcell->vertices[i]) + ((long)dcell->vertices[j]);
  	}
        }
      }
   }
 
+  dolfin_assert(dcell->vertices.size() > 0);
+  dolfin_assert(dcell->vertices.size() > 0);
+  dolfin_assert(dcell->vertices.size() > ii);
+  dolfin_assert(dcell->vertices.size() > jj);
   DVertex* v0 = dcell->vertices[ii];
   DVertex* v1 = dcell->vertices[jj];
-
   DVertex* mv = 0;
 
   // Check if no hanging vertices remain, otherwise create hanging
@@ -401,11 +414,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv = new DVertex;
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
-    //    addVertex(mv);
-    //    vertices.push_back(mv);
-    vertices.insert(mv);
-    mv->glb_id = _start_offset++;
-    glb_ids.insert(mv->glb_id);
+    addVertex(mv);
 
     // Add hanging node on shared edges to propagation buffer
     if( v0->on_boundary && v1->on_boundary) 
@@ -413,9 +422,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 	propagate.push_back(mv->glb_id);
 	propagate.push_back(v0->glb_id);
 	propagate.push_back(v1->glb_id);
+	propagate.push_back(MPI::processNumber());
 	bc_dvs[mv->glb_id] = mv;		
 	mv->on_boundary = true;
 	mv->shared = true;
+	mv->owner = MPI::processNumber();
     }
     
     closing = false;
@@ -448,61 +459,14 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
   addCell(c0, vs0, dcell->parent_id);
   addCell(c1, vs1, dcell->parent_id);
-
   if( v0->on_boundary && v1->on_boundary) 
-  {    
-    std::set<DCell*> tmp;
-    std::set<DCell*>::iterator it;
-
-    dolfin_assert(v0->glb_id != v1->glb_id);
+  {
     EdgeKey key = edge_key(v0->glb_id, v1->glb_id);
-    tmp = bc_dcs[key];
-    //    for(it = bc_dcs[key].begin(); it != bc_dcs[key].end(); ++it) {
-    for(it = tmp.begin(); it != tmp.end(); ++it) {
-      if( *it != dcell ) {
-	bc_dcs[edge_key(v0->glb_id, mv->glb_id)].insert(*it);
-	bc_dcs[edge_key(v1->glb_id, mv->glb_id)].insert(*it);
-      }
-    }
-    bc_dcs[key].clear();
-    bc_dcs.erase(key);
-    bc_dcs[edge_key(v0->glb_id, mv->glb_id)].insert(c0);
-    bc_dcs[edge_key(v1->glb_id, mv->glb_id)].insert(c1);
     ref_edge[key] = mv;
   } 
 
-  for(uint i = 0; i < vs0.size(); i++)
-    for(uint j = 0; j < vs0.size(); j++)
-      if ( i != j) {
-	if(vs0[i]->on_boundary && vs0[j]->on_boundary) {
-	  EdgeKey key = edge_key(vs0[i]->glb_id, vs0[j]->glb_id);
-	  if(bc_dcs[key].find(dcell) != bc_dcs[key].end()) 
-	    bc_dcs[key].erase(dcell);	  
-	  bc_dcs[key].insert(c0);	 
-	  if( vs0[i] == mv || vs0[j] == mv)
-	    bc_dcs[key].insert(c1);
-	}
-      }
-
-  
-  for(uint i = 0; i < vs1.size(); i++)
-    for(uint j = 0; j < vs1.size(); j++)
-      if ( i != j) {
-	if(vs1[i]->on_boundary && vs1[j]->on_boundary) {
-	  EdgeKey key = edge_key(vs1[i]->glb_id, vs1[j]->glb_id);
-	  if(bc_dcs[key].find(dcell) != bc_dcs[key].end() )
-	    bc_dcs[key].erase(dcell);
-	  bc_dcs[key].insert(c1);
-	  if( vs1[i] == mv || vs1[j] == mv)
-	    bc_dcs[key].insert(c0);
-	}
-      }
-  
-  if( v0->on_boundary && v1->on_boundary) 
-    bc_dcs[edge_key(v0->glb_id, v1->glb_id)].erase(dcell);
-
   removeCell(dcell);
-  
+
   // Continue refinement
   if(!closing)
   {
@@ -526,10 +490,10 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
   for(std::list<DCell* >::iterator it = v1->cells.begin();
       it != v1->cells.end(); ++it)
-  {
+  {// dolfin_assert((*it)); dolfin_assert(!(*it)->deleted); 
     DCell* c = *it;
 
-    if(c != dcell)
+    if(c != dcell && !c->deleted)
     {
       int matches = 0;
       for(uint i = 0; i < c->vertices.size(); i++)
@@ -574,12 +538,14 @@ void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
 //-----------------------------------------------------------------------------
 void DMesh::removeCell(DCell* c)
 {
+  /*
   for(uint i = 0; i < c->vertices.size(); ++i)
   {
     DVertex* v = c->vertices[i];
     v->cells.remove(c);
-  }  
-  //cells.remove(c);
+  } 
+*/ 
+  //  cells.remove(c);
   c->deleted = true;
   //  delete c;
 }
@@ -612,7 +578,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
   uint pre_num_cells = cells.size();
   std::vector<uint> propagated;
   bool empty = false;
-  
+  MPI_Barrier(MPI_COMM_WORLD);
   while(!empty) { 
     
     if(MPI::processNumber() == 0 && propagate.size() > 0)
@@ -627,19 +593,17 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       fflush(stdout);
     }
     uint cc = 0;
-
+    dolfin_assert(propagated.size() % 4 == 0);
     for(uint i = 0; i < propagated.size();  i += 4) {
 
       if(ref_edge.find(edge_key(propagated[i+1], propagated[i+2])) != ref_edge.end()) {
 	DVertex *mv = ref_edge[edge_key(propagated[i+1], propagated[i+2])];
 	
-	if ( propagated[i+3] < MPI::processNumber() ||
-	     (mv->ghosted && (mv->owner > propagated[i+3]))) {
-	
-	  EdgeKey key1 = edge_key(propagated[i+1], mv->glb_id);
-	  EdgeKey key2 = edge_key(propagated[i+2], mv->glb_id);
-	  std::set<DCell*>::iterator it;	  
-	  
+	//	if ( propagated[i+3] < MPI::processNumber() ||
+	//	     (mv->ghosted && (mv->owner > propagated[i+3]))) {
+	//	if( mv->shared && mv->owner > propagated[i+3]) {
+	if( mv->owner >= propagated[i+3]) {
+		  
 	  bc_dvs.erase(mv->glb_id);
 	  glb_ids.erase(mv->glb_id);	  
 	  mv->glb_id = propagated[i];
@@ -649,36 +613,9 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  mv->shared = true;
 	  mv->owner = propagated[i+3];
 
-
-	  EdgeKey key = edge_key(propagated[i+1], mv->glb_id);
-	  for(it = bc_dcs[key1].begin(); it != bc_dcs[key1].end(); ++it) 
-	    bc_dcs[key].insert(*it);
-	  bc_dcs[key1].clear();
-	  	  bc_dcs.erase(key1);
-
-	  key = edge_key(propagated[i+2], mv->glb_id);
-	  for(it = bc_dcs[key2].begin(); it != bc_dcs[key2].end(); ++it)	    
-	    bc_dcs[key].insert(*it);
-	  bc_dcs[key2].clear();
-	  bc_dcs.erase(key2);
-	}	
+	}
 	continue;
       }
-
-      if( bc_dcs.find(edge_key(propagated[i+1], propagated[i+2])) == bc_dcs.end())
-      	continue;      
-
-      DVertex *mv = new DVertex;
-      mv->glb_id = propagated[i];
-      mv->p = (bc_dvs[propagated[i+1]]->p + bc_dvs[propagated[i+2]]->p) / 2.0;
-      mv->on_boundary = true;
-      mv->ghosted = true;
-      mv->shared = true;
-      mv->owner = propagated[i+3];
-      glb_ids.insert(mv->glb_id);
-      bc_dvs[mv->glb_id] = mv;
-      vertices.insert(mv);
-      ref_edge[edge_key(propagated[i+1], propagated[i+2])] = mv;
 
       if(MPI::processNumber() == 0) {
 	switch(cc)
@@ -698,45 +635,55 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       }
       cc = (cc + 1)%4;
       
-      dolfin_assert( propagated[i+1] != propagated[i+2]);
+      DVertex* mv = 0;
 
-      EdgeKey key = edge_key(propagated[i+1], propagated[i+2]);
-      std::set<DCell*> tmp;
-      std::set<DCell*>::iterator it;
-      //      while ( bc_dcs.find(key) != bc_dcs.end()) {
-      while ( bc_dcs[key].size() ) {	 
-	tmp = bc_dcs[key];
-	for(it = tmp.begin(); it != tmp.end(); ++it) {	  
-	  dolfin_assert( bc_dcs.find(key) != bc_dcs.end() );
-	  bisect(*it, mv, bc_dvs[propagated[i+1]], bc_dvs[propagated[i+2]]);	  	  	  	  
+      dolfin_assert(bc_dvs.find(propagated[i+1]) != bc_dvs.end());
+      dolfin_assert(bc_dvs.find(propagated[i+2]) != bc_dvs.end());
+      DVertex* v1 = bc_dvs[propagated[i+1]];
+      DVertex* v2 = bc_dvs[propagated[i+2]];
+
+      for(std::list<DCell* >::iterator it = v1->cells.begin();
+	  it != v1->cells.end(); ++it)       
+      {
+	if(!(*it)->deleted) {
+	  if((*it)->has_edge(v1, v2))  {
+	    dolfin_assert((*it)->vertices.size() > 0);
+	    if(mv == 0) 
+	    {
+	      mv = new DVertex;
+	      mv->glb_id = propagated[i];
+	      mv->p = (bc_dvs[propagated[i+1]]->p + bc_dvs[propagated[i+2]]->p) / 2.0;
+	      mv->on_boundary = true;
+	      mv->ghosted = true;
+	      mv->shared = true;
+	      mv->owner = propagated[i+3];
+	      glb_ids.insert(mv->glb_id);
+	      bc_dvs[mv->glb_id] = mv;
+	      vertices.insert(mv);
+	      ref_edge[edge_key(propagated[i+1], propagated[i+2])] = mv;
+	    }
+	    fflush(stdout);
+	    dolfin_assert((*it) > 0);
+	    bisect((*it), mv, v1, v2);
+	  }
 	}
       }
-      //      bc_dcs.erase(key);
-	//    }	
-	//      }
-	//	if(bc_dcs[key].size() == 0) {
-	//	  bc_dcs.erase(key);
-	///	}
-	//      }
-	
-	
-      //	bc_dcs.erase(key);      
-      }
+    }
     
     if(MPI::processNumber() == 0 && propagated.size() > 0)
       putchar('\n');
 
-    if(MPI::processNumber() == 0)
+    if(MPI::processNumber() == 0){
+      message("Done");
       end();    
+    }
 
     uint num_prop = propagate.size();
-    uint num_gprop =0;
+    uint num_gprop = 0;
     MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
     empty = (num_gprop == 0);
   }
-  
-  
-  
+    
   MPI_Barrier(MPI_COMM_WORLD);
   message("Propagated refinements: %d", (cells.size() - pre_num_cells) / 2);
 }
@@ -775,14 +722,14 @@ void DMesh::propagate_naive(std::vector<uint>& propagated, bool& empty)
     if (recv_count > 0)
       empty = false;
     
-    for (int k = 0; k < recv_count; k += 3) 
+    for (int k = 0; k < recv_count; k += 4) 
     {
       if( glb_ids.find(recv_buff[k+1]) != glb_ids.end() &&
 	  glb_ids.find(recv_buff[k+2]) != glb_ids.end())
       {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 4; i++)
 	  propagated.push_back(recv_buff[k+i]);
-	propagated.push_back(status.MPI_SOURCE);
+	//	propagated.push_back(status.MPI_SOURCE);
       }
     }
   }

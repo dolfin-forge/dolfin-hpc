@@ -11,7 +11,7 @@
 #include "Edge.h"
 #include "Vertex.h"
 #include <dolfin/common/Array.h>
-//#include <dolfin/main/MPI.h>
+#include <dolfin/main/MPI.h>
 
 #ifdef HAS_MPI
 #include <mpi.h>

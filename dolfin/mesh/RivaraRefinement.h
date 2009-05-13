@@ -57,6 +57,7 @@ namespace dolfin
   {
   public:
     DCell();
+    bool has_edge(DVertex* v1, DVertex* v2);
 
     int id;
     int parent_id;
@@ -100,8 +101,6 @@ namespace dolfin
     std::list<DCell *> cells;
 
 
-
-
     CellType* cell_type;
     uint d;
 
@@ -112,7 +111,6 @@ namespace dolfin
     std::vector<int> propagate;
     _set<uint> glb_ids;
 
-    std::map<EdgeKey, std::set<DCell* > > bc_dcs;
     std::map<uint, DVertex*> bc_dvs;
     std::map<EdgeKey, DVertex*> ref_edge;
 

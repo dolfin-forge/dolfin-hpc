@@ -1,6 +1,8 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2009.
+//
 
 #ifndef __RIVARAREFINEMENT_H
 #define __RIVARAREFINEMENT_H
@@ -50,7 +52,7 @@ namespace dolfin
     bool shared;
     bool ghosted;
 
-    uint owner;
+    int owner;
   };
     
   class DCell

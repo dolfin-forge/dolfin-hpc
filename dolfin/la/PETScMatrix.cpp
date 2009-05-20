@@ -195,11 +195,10 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
 {
-  error("nej");
-  PETScMatrix* mcopy = new PETScMatrix();
 
-  MatCopy(A, (mcopy->A),DIFFERENT_NONZERO_PATTERN);
-  //  MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
+  PETScMatrix* mcopy = new PETScMatrix();
+  
+  MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
 
   return mcopy;
 }

@@ -5,13 +5,14 @@
 // Last changed: 2009-05-01
 
 
-#include "LoadBalancer.h"
+
 #include "MeshFunction.h"
 #include "Cell.h"
 #include "Edge.h"
 #include "Vertex.h"
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
+#include "LoadBalancer.h"
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -387,13 +388,14 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker)
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			   Type type)
 {  
   warning("Load balancing only implemented for MPI");
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			   real tf, real tb, real ts)
+			   real tf, real tb, real ts, Type type)
 {  
   warning("Load balancing only implemented for MPI");
 }

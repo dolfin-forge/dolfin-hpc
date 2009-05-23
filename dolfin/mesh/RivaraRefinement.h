@@ -77,6 +77,13 @@ namespace dolfin
 
     typedef std::pair<int, int> EdgeKey;
 
+    typedef struct __edge__ {
+      uint mv;
+      uint v1; 
+      uint v2;
+      uint owner;
+    } prop_edge;
+
     void addVertex(DVertex* v);
     
     void addCell(DCell* c,
@@ -95,13 +102,11 @@ namespace dolfin
 
     void propagate_naive(std::vector<uint>& propagated, bool& empty);
     void propagate_hypercube(std::vector<uint>& propagated);
+    
+    void populate(std::vector<uint>& type1, _map<int, int>& global_mapping);
 
-    /*
-    std::list<DVertex *> vertices;
-    */
     std::set<DVertex *> vertices;
     std::list<DCell *> cells;
-
 
     CellType* cell_type;
     uint d;
@@ -116,13 +121,7 @@ namespace dolfin
     std::map<uint, DVertex*> bc_dvs;
     std::map<EdgeKey, DVertex*> ref_edge;
 
-    typedef struct prop_edge {
-      uint mv;
-      uint v1; 
-      uint v2;
-      uint owner;
-    } prop_edge;
-
+    std::list<prop_edge> type2, type3;
 
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {

@@ -571,186 +571,159 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
   _map<int, int> global_mapping; 
   uint pre_num_cells = cells.size();
-  std::vector<uint> propagated;
+  std::vector<uint> type1;
   bool empty = false;
   MPI_Barrier(MPI_COMM_WORLD);
   while(!empty) { 
     
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
-    for(uint i = 0; i <propagate.size(); i += 4)  
-    {
-      if (global_mapping.find(propagate[i]) != global_mapping.end())
-	propagate[i] = global_mapping[propagate[i]];
-      if (global_mapping.find(propagate[i+1]) != global_mapping.end())
-	propagate[i+1] = global_mapping[propagate[i+1]];
-      if (global_mapping.find(propagate[i+2]) != global_mapping.end())
-	propagate[i+2] = global_mapping[propagate[i+2]];
-    }
-    propagated.clear();    
-    propagate_naive( propagated, empty);
-    //global_mapping.clear();
+
+    type1.clear();    
+    propagate_naive( type1, empty);
     propagate.clear();
+    populate(type1, global_mapping);
     MPI_Barrier(MPI_COMM_WORLD);
-    if(MPI::processNumber() == 0 && propagated.size() > 0) {
+    if(MPI::processNumber() == 0 && type1.size() > 0) {
       printf("Bisecting...");
       fflush(stdout);
     }
     uint cc = 0;
-    dolfin_assert(propagated.size() % 4 == 0);
+    dolfin_assert(type1.size() % 4 == 0);
 
-    for(uint i = 0; i < propagated.size();  i += 4) {
-
-      DVertex* mv = 0;
-
-      if(global_mapping.find(propagated[i]) != global_mapping.end()) 
-	propagated[i] = global_mapping[propagated[i]];
-      if(global_mapping.find(propagated[i+1]) != global_mapping.end())
-	propagated[i+1] = global_mapping[propagated[i+1]];
-      if(global_mapping.find(propagated[i+2]) != global_mapping.end())
-	propagated[i+2] = global_mapping[propagated[i+2]];
-
-      if(ref_edge.find(edge_key(propagated[i+1], propagated[i+2])) != ref_edge.end()) {
-	mv = ref_edge[edge_key(propagated[i+1], propagated[i+2])];
-	if(!mv->shared)
-	  error("corrupt mesh");
-	//	if ( propagated[i+3] < MPI::processNumber() ||
-	//	     (mv->ghosted && (mv->owner > propagated[i+3]))) {
-	if( mv->shared && (mv->owner > (int) propagated[i+3])) {
-	//	if( mv->owner > (int) propagated[i+3]) {
-          EdgeKey key1 = edge_key(propagated[i+1], mv->glb_id);
-          EdgeKey key2 = edge_key(propagated[i+2], mv->glb_id);
-
-	  bc_dvs.erase(mv->glb_id);
-	  glb_ids.erase(mv->glb_id);	  
-	  global_mapping[mv->glb_id] = propagated[i];
-	  mv->glb_id = propagated[i];
-	  glb_ids.insert(mv->glb_id);
-	  bc_dvs[propagated[i]] = mv;
-	  mv->ghosted = true;	
-	  mv->shared = true;
-	  mv->owner = propagated[i+3];
-
-	  if(ref_edge.find(key1) != ref_edge.end()) { 
-	    ref_edge[edge_key(propagated[i+1], mv->glb_id)] = ref_edge[key1];
-	    ref_edge.erase(key1);
-	  }
-	  if(ref_edge.find(key2) != ref_edge.end()) {
-	    ref_edge[edge_key(propagated[i+2], mv->glb_id)] = ref_edge[key2];
-	    ref_edge.erase(key2);
-	  }
-	  
-	} 
-	//	continue;
-      }
-
-      bool left = (bc_dvs.find(propagated[i+1]) != bc_dvs.end());
-      bool right = (bc_dvs.find(propagated[i+2]) != bc_dvs.end());
-      if( !left || !right ) {
-	if(!left && !right)
-	  continue;
-	if(!left) 
-	  if(global_mapping.find(propagated[i+1]) != global_mapping.end())
-	    message("hej l");
-
-	if(!right) 
-	  if(global_mapping.find(propagated[i+2]) != global_mapping.end())
-	    message("hej r");
-
-	message("missing node %d %d  (%d, %d) on rank %d", 
-		(bc_dvs.find(propagated[i+1]) == bc_dvs.end()),	
-		(bc_dvs.find(propagated[i+2]) == bc_dvs.end()),
-		propagated[i+1], propagated[i+2],
-		MPI::processNumber());
-	continue;
-      }
-
-      if(MPI::processNumber() == 0) {
-	switch(cc)
-	{
-	case 0:
-	  putchar('-'); break;
-	case 1:
-	  putchar('\\'); break;
-	case 2:
-	  putchar('|'); break;
-	case 3:
-	  putchar('/'); break;	  
-	}
-	fflush(stdout);
-	usleep(100000);
-	putchar('\b');
-      }
-      cc = (cc + 1)%4;
-      
-
-
-      dolfin_assert(bc_dvs.find(propagated[i+1]) != bc_dvs.end());
-      dolfin_assert(bc_dvs.find(propagated[i+2]) != bc_dvs.end());
-      DVertex* v1 = bc_dvs[propagated[i+1]];
-      DVertex* v2 = bc_dvs[propagated[i+2]];
-
-      for(std::list<DCell* >::iterator it = v1->cells.begin();
-	  it != v1->cells.end(); ++it)       
-      {
-	if(!(*it)->deleted) {
-	  if((*it)->has_edge(v1, v2))  {
-	    dolfin_assert((*it)->vertices.size() > 0);
-	    if(mv == 0) 
-	    {
-	      mv = new DVertex;
-	      if( MPI::processNumber() < propagated[i+3]) 
-	      {
-		mv->glb_id = _start_offset++;
-		mv->shared = true;
-		mv->owner = MPI::processNumber();
-		global_mapping[propagated[i]] = mv->glb_id;
-		propagate.push_back(mv->glb_id);
-		propagate.push_back(propagated[i+1]);
-		propagate.push_back(propagated[i+2]);
-		propagate.push_back(MPI::processNumber());
-	      }
-	      else 
-	      {
-		mv->glb_id = propagated[i];
-		mv->ghosted = true;
-		mv->shared = true;
-		mv->owner = propagated[i+3];
-	      }
-
-	      mv->p = (bc_dvs[propagated[i+1]]->p + bc_dvs[propagated[i+2]]->p) / 2.0;
-	      mv->on_boundary = true;
-	      glb_ids.insert(mv->glb_id);
-	      bc_dvs[mv->glb_id] = mv;
-	      vertices.insert(mv);
-	      ref_edge[edge_key(propagated[i+1], propagated[i+2])] = mv;
+    while(type1.size()) {
+      for(uint i = 0; i < type1.size();  i += 4) {
+	
+	DVertex* mv = 0;
+	
+	if(ref_edge.find(edge_key(type1[i+1], type1[i+2])) != ref_edge.end()) {
+	  mv = ref_edge[edge_key(type1[i+1], type1[i+2])];
+	  if(!mv->shared)
+	    error("corrupt mesh");
+	  //	if ( type1[i+3] < MPI::processNumber() ||
+	  //	     (mv->ghosted && (mv->owner > type1[i+3]))) {
+	  //  if( mv->shared && (mv->owner > (int) type1[i+3])) {
+	  if( mv->owner > (int) type1[i+3]) {
+	    EdgeKey key1 = edge_key(type1[i+1], mv->glb_id);
+	    EdgeKey key2 = edge_key(type1[i+2], mv->glb_id);
+	    
+	    bc_dvs.erase(mv->glb_id);
+	    glb_ids.erase(mv->glb_id);	  
+	    global_mapping[mv->glb_id] = type1[i];
+	    mv->glb_id = type1[i];
+	    glb_ids.insert(mv->glb_id);
+	    bc_dvs[type1[i]] = mv;
+	    mv->ghosted = true;	
+	    mv->shared = true;
+	    mv->owner = type1[i+3];
+	    
+	    if(ref_edge.find(key1) != ref_edge.end()) { 
+	      ref_edge[edge_key(type1[i+1], mv->glb_id)] = ref_edge[key1];
+	      ref_edge.erase(key1);
 	    }
-	    dolfin_assert((*it) > 0);
-	    bisect((*it), mv, v1, v2);
+	    if(ref_edge.find(key2) != ref_edge.end()) {
+	      ref_edge[edge_key(type1[i+2], mv->glb_id)] = ref_edge[key2];
+	      ref_edge.erase(key2);
+	    }
+	  } 
+	  continue;
+	}
+
+	if(MPI::processNumber() == 0) {
+	  switch(cc)
+	  {
+	  case 0:
+	    putchar('-'); break;
+	  case 1:
+	    putchar('\\'); break;
+	  case 2:
+	    putchar('|'); break;
+	  case 3:
+	    putchar('/'); break;	  
+	  }
+	  fflush(stdout);
+	  usleep(100000);
+	  putchar('\b');
+	}
+	cc = (cc + 1)%4;
+	
+	dolfin_assert(bc_dvs.find(type1[i+1]) != bc_dvs.end());
+	dolfin_assert(bc_dvs.find(type1[i+2]) != bc_dvs.end());
+	DVertex* v1 = bc_dvs[type1[i+1]];
+	DVertex* v2 = bc_dvs[type1[i+2]];
+	
+	for(std::list<DCell* >::iterator it = v1->cells.begin();
+	    it != v1->cells.end(); ++it)       
+	{
+	  if(!(*it)->deleted) {
+	    if((*it)->has_edge(v1, v2))  {
+	      dolfin_assert((*it)->vertices.size() > 0);
+	      if(mv == 0) 
+	      {
+		mv = new DVertex;
+		if( MPI::processNumber() < type1[i+3]) 
+		{
+		  mv->glb_id = _start_offset++;
+		  mv->shared = true;
+		  mv->ghosted = false;
+		  mv->owner = MPI::processNumber();		  
+		  global_mapping[type1[i]] = mv->glb_id;
+		  propagate.push_back(mv->glb_id);
+		  propagate.push_back(type1[i+1]);
+		  propagate.push_back(type1[i+2]);
+		  propagate.push_back(MPI::processNumber());
+		}
+		else 
+		{
+		  mv->glb_id = type1[i];
+		  mv->ghosted = true;
+		  mv->shared = true;
+		  mv->owner = type1[i+3];
+		}
+		
+		mv->p = (bc_dvs[type1[i+1]]->p + bc_dvs[type1[i+2]]->p) / 2.0;
+		mv->on_boundary = true;
+		glb_ids.insert(mv->glb_id);
+		bc_dvs[mv->glb_id] = mv;
+		vertices.insert(mv);
+		ref_edge[edge_key(type1[i+1], type1[i+2])] = mv;
+	      }
+	      dolfin_assert((*it) > 0);
+	      bisect((*it), mv, v1, v2);
+	    }
 	  }
 	}
       }
-    }
-  
-      if(MPI::processNumber() == 0 && propagated.size() > 0)
-      putchar('\n');
 
+      message("Populating type1 buffer... type1.size:%d type2.size:%d type3.size:%d", 
+	      type1.size(), type2.size(), type3.size());
+      type1.clear();
+      populate(type1, global_mapping);
+      message("Populated... type1.size:%d type2.size:%d type3.size:%d", 
+	      type1.size(), type2.size(), type3.size());
+    }
+    //    type2.clear();
+    //    type3.clear();
+    
+    if(MPI::processNumber() == 0 && type1.size() > 0)
+      putchar('\n');
+    
     if(MPI::processNumber() == 0){
       message("Done");
       end();    
     }
-
+    
     uint num_prop = propagate.size();
     uint num_gprop = 0;
     MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
     empty = (num_gprop == 0);
   }
-    
+  
   MPI_Barrier(MPI_COMM_WORLD);
   message("Propagated refinements: %d", (cells.size() - pre_num_cells) / 2);
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<uint>& propagated, bool& empty)
+void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
 {
 
   empty = true;
@@ -765,19 +738,12 @@ void DMesh::propagate_naive(std::vector<uint>& propagated, bool& empty)
   int src,dest;
   int pe_size = MPI::numProcesses();
   int rank = MPI::processNumber();
-  std::vector<uint> type1, type2, type3;
 
   for (int j = 1; j < pe_size; j++) 
   {
     src = (rank -j + pe_size) % pe_size;
     dest = (rank + j) % pe_size;
     
-    /*
-    MPI_Sendrecv(&propagate[0], propagate.size(), MPI_UNSIGNED, dest, 1,
-		 recv_buff, max_prop, MPI_UNSIGNED, src, 1,
-		 MPI_COMM_WORLD, &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);    
-    */
     MPI_Sendrecv(&propagate[0], propagate.size(), MPI_INTEGER, dest, 1,
 		 recv_buff, max_prop, MPI_INTEGER, src, 1,
 		 MPI_COMM_WORLD, &status);
@@ -793,28 +759,102 @@ void DMesh::propagate_naive(std::vector<uint>& propagated, bool& empty)
       if(left && right)
 	for (int i = 0; i < 4; i++)
 	  type1.push_back(recv_buff[k+i]);
-      else if( left || right)
-	for (int i = 0; i < 4; i++)
-	  type2.push_back(recv_buff[k+i]);
       else
-	for (int i = 0; i < 4; i++)
-	  type3.push_back(recv_buff[k+i]);
+      {
+
+	prop_edge node;
+	node.mv = recv_buff[k];
+	node.v1 = recv_buff[k+1];
+	node.v2 = recv_buff[k+2];
+	node.owner = recv_buff[k+3];
+
+	if(!left || !right)
+	  type2.push_back(node);
+	else
+	  type3.push_back(node);
+      }
     }
   }
-
-  std::vector<uint>::iterator it;
-  for(it = type1.begin(); it != type1.end(); ++it) 
-    propagated.push_back(*it);
-  for(it = type2.begin(); it != type2.end(); ++it)
-    propagated.push_back(*it);
-  for(it = type3.begin(); it != type3.end(); ++it)
-    propagated.push_back(*it);
   delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<uint>& propagated)
+void DMesh::propagate_hypercube(std::vector<uint>& type1)
 {
   // Implement hypercube exchange
   error("Not implemented");
+}
+//-----------------------------------------------------------------------------
+void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
+{
+
+  // FIXME remove!
+  std::list<prop_edge> tmp; 
+
+  for(std::list<prop_edge>::iterator it = type2.begin(); 
+      it != type2.end(); ++it) 
+  {
+
+    if(global_mapping.find((*it).v1) != global_mapping.end())
+      (*it).v1 = global_mapping[(*it).v1];
+    if(global_mapping.find((*it).v2) != global_mapping.end())
+      (*it).v2 = global_mapping[(*it).v2];
+    if(global_mapping.find((*it).v1) != global_mapping.end()) {
+      (*it).mv = global_mapping[(*it).mv];
+      dolfin_assert(bc_dvs.find(*it) != bc_dvs.end());
+      DVertex *mv = bc_dvs[(*it).mv];
+      (*it).owner = mv->owner;
+    }
+
+    bool left = glb_ids.find((*it).v1) != glb_ids.end();
+    bool right = glb_ids.find((*it).v2) != glb_ids.end();
+    
+    if(left && right) 
+    {
+      type1.push_back((*it).mv);
+      type1.push_back((*it).v1);
+      type1.push_back((*it).v2);
+      type1.push_back((*it).owner);
+    }
+    else 
+      tmp.push_back(*it);
+  }
+
+  // FIXME find a safe way to remove iterators instead
+  type2 = tmp;
+  tmp.clear();
+
+  for(std::list<prop_edge>::iterator it = type3.begin(); 
+      it != type3.end(); ++it) 
+  {
+
+    if(global_mapping.find((*it).v1) != global_mapping.end())
+      (*it).v1 = global_mapping[(*it).v1];
+    if(global_mapping.find((*it).v2) != global_mapping.end())
+      (*it).v2 = global_mapping[(*it).v2];
+    if(global_mapping.find((*it).v1) != global_mapping.end()) {
+      (*it).mv = global_mapping[(*it).mv];
+      dolfin_assert(bc_dvs.find(*it) != bc_dvs.end());
+      DVertex *mv = bc_dvs[(*it).mv];
+      (*it).owner = mv->owner;
+    }
+
+    bool left = glb_ids.find((*it).v1) != glb_ids.end();
+    bool right = glb_ids.find((*it).v2) != glb_ids.end();
+    
+    if(left && right) 
+    {
+      type1.push_back((*it).mv);
+      type1.push_back((*it).v1);
+      type1.push_back((*it).v2);
+      type1.push_back((*it).owner);
+    }   
+    else if(!left || !right) 
+      type2.push_back(*it);
+    else
+      tmp.push_back(*it);
+  }
+  
+  type3 = tmp;
+  tmp.clear();
 }
 //-----------------------------------------------------------------------------

@@ -22,7 +22,7 @@
 #include "BoundaryMesh.h"
 #include "RivaraRefinement.h"
 #include "LoadBalancer.h"
-
+#include <unistd.h>
 
 
 #ifdef HAS_MPI
@@ -37,7 +37,7 @@ void RivaraRefinement::refine(Mesh& mesh,
 			      real tf, real tb, real ts)
 {
   message("Refining simplicial mesh by recursive Rivara bisection.");
-  /*
+
   // Start Loadbalancer
   if(MPI::numProcesses() > 1) {
     begin("Load balancing");
@@ -49,7 +49,7 @@ void RivaraRefinement::refine(Mesh& mesh,
     end();
   }
   mesh.renumber();
-*/
+
   int d = mesh.topology().dim();
 
   // Dynamic mesh test
@@ -82,7 +82,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       it = dmesh.cells.erase(it);
     else
       it++;
-  }  
+  } 
   
   std::vector<int> new2old_cell_arr;
   
@@ -181,7 +181,7 @@ void DMesh::imp(Mesh& mesh)
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
-  num_new *= 10;
+  //  num_new *= 2;
   // Find maximum global index assigned
   uint max_index = std::max(mesh.distdata().global_numVertices(),
 			    mesh.distdata().max_index());
@@ -284,7 +284,7 @@ void DMesh::exp(Mesh& mesh, std::vector<int>& new2old_cell)
       newmesh.distdata().set_ghost(current_vertex, 0);
       newmesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
     }
-    if(dv->shared)
+    else if(dv->shared)
       newmesh.distdata().set_shared(current_vertex, 0);
     newmesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
 
@@ -582,14 +582,14 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     {
       if (global_mapping.find(propagate[i]) != global_mapping.end())
 	propagate[i] = global_mapping[propagate[i]];
-      if (global_mapping.find(propagate[i]) != global_mapping.end())
+      if (global_mapping.find(propagate[i+1]) != global_mapping.end())
 	propagate[i+1] = global_mapping[propagate[i+1]];
-      if (global_mapping.find(propagate[i]) != global_mapping.end())
+      if (global_mapping.find(propagate[i+2]) != global_mapping.end())
 	propagate[i+2] = global_mapping[propagate[i+2]];
     }
     propagated.clear();    
     propagate_naive( propagated, empty);
-    global_mapping.clear();
+    //global_mapping.clear();
     propagate.clear();
     MPI_Barrier(MPI_COMM_WORLD);
     if(MPI::processNumber() == 0 && propagated.size() > 0) {
@@ -601,14 +601,23 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
     for(uint i = 0; i < propagated.size();  i += 4) {
 
+      DVertex* mv = 0;
+
+      if(global_mapping.find(propagated[i]) != global_mapping.end()) 
+	propagated[i] = global_mapping[propagated[i]];
+      if(global_mapping.find(propagated[i+1]) != global_mapping.end())
+	propagated[i+1] = global_mapping[propagated[i+1]];
+      if(global_mapping.find(propagated[i+2]) != global_mapping.end())
+	propagated[i+2] = global_mapping[propagated[i+2]];
+
       if(ref_edge.find(edge_key(propagated[i+1], propagated[i+2])) != ref_edge.end()) {
-	DVertex *mv = ref_edge[edge_key(propagated[i+1], propagated[i+2])];
-	
+	mv = ref_edge[edge_key(propagated[i+1], propagated[i+2])];
+	if(!mv->shared)
+	  error("corrupt mesh");
 	//	if ( propagated[i+3] < MPI::processNumber() ||
 	//	     (mv->ghosted && (mv->owner > propagated[i+3]))) {
 	if( mv->shared && (mv->owner > (int) propagated[i+3])) {
-	//	if( mv->owner > propagated[i+3]) {
-		  
+	//	if( mv->owner > (int) propagated[i+3]) {
           EdgeKey key1 = edge_key(propagated[i+1], mv->glb_id);
           EdgeKey key2 = edge_key(propagated[i+2], mv->glb_id);
 
@@ -630,19 +639,29 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    ref_edge[edge_key(propagated[i+2], mv->glb_id)] = ref_edge[key2];
 	    ref_edge.erase(key2);
 	  }
-	}	
+	  
+	} 
 	//	continue;
       }
 
-      if(global_mapping.find(propagated[i]) != global_mapping.end())
-	propagated[i] = global_mapping[propagated[i]];
-      if(global_mapping.find(propagated[i+1]) != global_mapping.end())
-	propagated[i+1] = global_mapping[propagated[i+1]];
-      if(global_mapping.find(propagated[i+2]) != global_mapping.end())
-	propagated[i+2] = global_mapping[propagated[i+2]];
+      bool left = (bc_dvs.find(propagated[i+1]) != bc_dvs.end());
+      bool right = (bc_dvs.find(propagated[i+2]) != bc_dvs.end());
+      if( !left || !right ) {
+	if(!left && !right)
+	  continue;
+	if(!left) 
+	  if(global_mapping.find(propagated[i+1]) != global_mapping.end())
+	    message("hej l");
 
-      if (bc_dvs.find(propagated[i+1]) == bc_dvs.end() ||
-	  bc_dvs.find(propagated[i+2]) == bc_dvs.end()) {
+	if(!right) 
+	  if(global_mapping.find(propagated[i+2]) != global_mapping.end())
+	    message("hej r");
+
+	message("missing node %d %d  (%d, %d) on rank %d", 
+		(bc_dvs.find(propagated[i+1]) == bc_dvs.end()),	
+		(bc_dvs.find(propagated[i+2]) == bc_dvs.end()),
+		propagated[i+1], propagated[i+2],
+		MPI::processNumber());
 	continue;
       }
 
@@ -664,7 +683,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       }
       cc = (cc + 1)%4;
       
-      DVertex* mv = 0;
+
 
       dolfin_assert(bc_dvs.find(propagated[i+1]) != bc_dvs.end());
       dolfin_assert(bc_dvs.find(propagated[i+2]) != bc_dvs.end());
@@ -680,12 +699,27 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    if(mv == 0) 
 	    {
 	      mv = new DVertex;
-	      mv->glb_id = propagated[i];
+	      if( MPI::processNumber() < propagated[i+3]) 
+	      {
+		mv->glb_id = _start_offset++;
+		mv->shared = true;
+		mv->owner = MPI::processNumber();
+		global_mapping[propagated[i]] = mv->glb_id;
+		propagate.push_back(mv->glb_id);
+		propagate.push_back(propagated[i+1]);
+		propagate.push_back(propagated[i+2]);
+		propagate.push_back(MPI::processNumber());
+	      }
+	      else 
+	      {
+		mv->glb_id = propagated[i];
+		mv->ghosted = true;
+		mv->shared = true;
+		mv->owner = propagated[i+3];
+	      }
+
 	      mv->p = (bc_dvs[propagated[i+1]]->p + bc_dvs[propagated[i+2]]->p) / 2.0;
 	      mv->on_boundary = true;
-	      mv->ghosted = true;
-	      mv->shared = true;
-	      mv->owner = propagated[i+3];
 	      glb_ids.insert(mv->glb_id);
 	      bc_dvs[mv->glb_id] = mv;
 	      vertices.insert(mv);
@@ -753,25 +787,23 @@ void DMesh::propagate_naive(std::vector<uint>& propagated, bool& empty)
     
     for (int k = 0; k < recv_count; k += 4) 
     {
-      if( glb_ids.find(recv_buff[k+1]) != glb_ids.end() &&
-      	  glb_ids.find(recv_buff[k+2]) != glb_ids.end())
+      bool left = glb_ids.find(recv_buff[k+1]) != glb_ids.end();
+      bool right = glb_ids.find(recv_buff[k+2]) != glb_ids.end();
+
+      if(left && right)
 	for (int i = 0; i < 4; i++)
 	  type1.push_back(recv_buff[k+i]);
-      else if( glb_ids.find(recv_buff[k+1]) != glb_ids.end() &&
-	       glb_ids.find(recv_buff[k+2]) != glb_ids.end())
+      else if( left || right)
 	for (int i = 0; i < 4; i++)
 	  type2.push_back(recv_buff[k+i]);
       else
 	for (int i = 0; i < 4; i++)
 	  type3.push_back(recv_buff[k+i]);
-	  //	  propagated.push_back(recv_buff[k+i]);
-	//	propagated.push_back(status.MPI_SOURCE);
-	//      }
     }
   }
 
   std::vector<uint>::iterator it;
-  for(it = type1.begin(); it != type1.end(); ++it)
+  for(it = type1.begin(); it != type1.end(); ++it) 
     propagated.push_back(*it);
   for(it = type2.begin(); it != type2.end(); ++it)
     propagated.push_back(*it);

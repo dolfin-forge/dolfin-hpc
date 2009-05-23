@@ -116,6 +116,14 @@ namespace dolfin
     std::map<uint, DVertex*> bc_dvs;
     std::map<EdgeKey, DVertex*> ref_edge;
 
+    typedef struct prop_edge {
+      uint mv;
+      uint v1; 
+      uint v2;
+      uint owner;
+    } prop_edge;
+
+
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {
       dolfin_assert( id2 != id1);

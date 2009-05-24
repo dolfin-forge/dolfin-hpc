@@ -3,7 +3,7 @@
 //
 //
 // First added:  2008-03-03
-// Last changed: 2009-05-04
+// Last changed: 2009-05-24
 
 #ifndef __LOAD_BALANCER_H
 #define __LOAD_BALANCER_H
@@ -16,7 +16,7 @@ namespace dolfin
   {
   public:
 
-    enum Type { Default, Rivara};
+    enum Type { Default, LEPP};
 
     // Balance mesh according to marked cells, 
     // new_cell_marker marks cells in cell_marker for new mesh
@@ -36,7 +36,10 @@ namespace dolfin
     static void weight_function(Mesh& mesh, 
 				MeshFunction<bool>& cell_marker,
 				MeshFunction<uint>& weight,
-				uint* w_sum);
+				uint* w_sum, Type type);
+
+    static void weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
+			    MeshFunction<uint>& weight, uint depth);
 
     static void process_reassignment(MeshFunction<uint>& partitions,
 				     uint* max_sendrecv);

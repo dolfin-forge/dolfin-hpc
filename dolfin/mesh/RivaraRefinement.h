@@ -102,9 +102,13 @@ namespace dolfin
 
     void propagate_naive(std::vector<uint>& propagated, bool& empty,
 			 _map<int, int>& global_mapping);
-    void propagate_hypercube(std::vector<uint>& propagated);
+
+    void propagate_hypercube(std::vector<uint>& propagated, bool& empty,
+			     _map<int, int>& global_mapping);
     
     void populate(std::vector<uint>& type1, _map<int, int>& global_mapping);
+    
+    void remap(std::vector<uint>& updated, _map<int, int>& global_mapping);
 
     std::set<DVertex *> vertices;
     std::list<DCell *> cells;

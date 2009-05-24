@@ -2,9 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2009-05-01
-
-
+// Last changed: 2009-05-24
 
 #include "MeshFunction.h"
 #include "Cell.h"
@@ -34,7 +32,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   MeshFunction<uint> weight;
   uint w_local, w_sum, w_max;
   real w_avg;
-  weight_function(mesh, cell_marker, weight, &w_local);
+  weight_function(mesh, cell_marker, weight, &w_local, type);
   
   // Preliminary evalution of load imbalance
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
@@ -77,7 +75,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
    * REMOVE
    * Debug, calculate load imbalance after repartitioning
    */
-  weight_function(mesh, cell_marker, weight, &w_local);
+  weight_function(mesh, cell_marker, weight, &w_local, type);
   
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
@@ -92,44 +90,64 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 void LoadBalancer::weight_function(Mesh& mesh, 
 				   MeshFunction<bool>& cell_marker,
 				   MeshFunction<uint>& weight,
-				   uint* w_sum)
+				   uint* w_sum, Type type)
 {
   // Calculated weights for the dual graph with a simulated mesh refinement
 
   weight.init(mesh, mesh.topology().dim()); 
-  MeshFunction<bool> used_cell(mesh, mesh.topology().dim());
-  MeshFunction<bool> used_edge(mesh, 1);
-  used_cell = false;
-  used_edge = false;
   real max, l;
   uint index = 0;
   weight = 1;
   //  *w_sum = mesh.numCells();
-  for(CellIterator c(mesh); !c.end(); ++c) {
-    if( cell_marker.get(*c) && !used_cell.get(*c)) {
-      max = 0.0;
-      for(EdgeIterator e(*c); !e.end(); ++e) {
-	if(!used_edge.get(*e)){
+  if( type == Default) {
+
+    MeshFunction<bool> used_cell(mesh, mesh.topology().dim());
+    MeshFunction<bool> used_edge(mesh, 1);
+    used_cell = false;
+    used_edge = false;
+
+    for(CellIterator c(mesh); !c.end(); ++c) {
+      if( cell_marker.get(*c) && !used_cell.get(*c)) {
+	max = 0.0;
+	for(EdgeIterator e(*c); !e.end(); ++e) {
+	  if(!used_edge.get(*e)){
+	    l = e->length();
+	    if(max < l) {
+	      max = l;
+	      index = e->index();	    
+	    }
+	  }
+	}
+	if(max == 0.0)
+	  continue; 
+	Edge le(mesh, index);
+	for(CellIterator nc(le); !nc.end(); ++nc) {
+	  if(!used_cell.get(*nc)) {
+	    //	  *w_sum++;
+	    weight.set(*nc, weight.get(*nc) + 1);
+	    used_cell.set(*nc, true);
+	    for(EdgeIterator e(*nc); !e.end(); ++e)
+	      used_edge.set(*e, true);
+	  }
+	}
+      }
+    }
+  }
+  else if(type == LEPP) { 
+    for(CellIterator c(mesh); !c.end(); ++c) 
+      if(cell_marker.get(*c)) {
+	max = 0.0;
+	for(EdgeIterator e(*c); !e.end(); ++e) {
 	  l = e->length();
 	  if(max < l) {
 	    max = l;
 	    index = e->index();	    
 	  }
 	}
+	Edge le(mesh, index);  
+	for(CellIterator oc(le); !oc.end(); ++oc)
+	  weight_lepp(mesh, *oc, le, weight, 0);
       }
-      if(max == 0.0)
-	continue; 
-      Edge le(mesh, index);
-      for(CellIterator nc(le); !nc.end(); ++nc) {
-	if(!used_cell.get(*nc)) {
-	  //	  *w_sum++;
-	  weight.set(*nc, weight.get(*nc) + 1);
-	  used_cell.set(*nc, true);
-	  for(EdgeIterator e(*nc); !e.end(); ++e)
-	    used_edge.set(*e, true);
-	}
-      }
-    }
   }
 
   *w_sum = 0;
@@ -137,6 +155,32 @@ void LoadBalancer::weight_function(Mesh& mesh,
     *w_sum += weight.get(*c);
   
 
+}
+//-----------------------------------------------------------------------------
+void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
+			       MeshFunction<uint>& weight, uint depth)
+{
+  weight.set(c.index(), weight.get(c.index()) + 1);
+  real l;
+  real max = 0.0;
+  uint index = 0;
+  for(EdgeIterator e(c); !e.end(); ++e) {
+    l = e->length();
+    if(max < l) {
+      max = l;
+      index = e->index();	    
+    }
+  }
+
+  Edge le(mesh, index);  
+
+  if(le.index() == ce.index() || depth > 1)
+    return;
+  
+  depth++;
+
+  for(CellIterator nc(le); !nc.end(); ++nc)
+    weight_lepp(mesh, *nc, le, weight, depth);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,

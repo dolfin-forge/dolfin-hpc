@@ -43,9 +43,9 @@ void RivaraRefinement::refine(Mesh& mesh,
     begin("Load balancing");
     //    Tune loadbalancer using machine specific parameters, if available
     if( tf > 0.0 && tb > 0.0 && ts > 0.0)
-      LoadBalancer::balance(mesh, cell_marker, tf, tb, ts);
+      LoadBalancer::balance(mesh, cell_marker, tf, tb, ts, LoadBalancer::LEPP);
     else
-      LoadBalancer::balance(mesh, cell_marker,LoadBalancer::Rivara);
+      LoadBalancer::balance(mesh, cell_marker,LoadBalancer::LEPP);
     end();
   }
   mesh.renumber();
@@ -571,19 +571,19 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
   _map<int, int> global_mapping; 
   uint pre_num_cells = cells.size();
-  std::vector<uint> type1;
+  std::vector<uint> type1, updated;
   bool empty = false;
-  MPI_Barrier(MPI_COMM_WORLD);
   while(!empty) { 
     
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
 
     type1.clear();    
-    propagate_naive( type1, empty, global_mapping);
+    //propagate_naive( type1, empty, global_mapping);
+    propagate_hypercube( type1, empty, global_mapping);
+    if( empty ) break; 
     propagate.clear();
     populate(type1, global_mapping);
-    MPI_Barrier(MPI_COMM_WORLD);
     if(MPI::processNumber() == 0 && type1.size() > 0) {
       printf("Bisecting...");
       fflush(stdout);
@@ -692,6 +692,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	}
       }
 
+      remap(updated, global_mapping);
       message("Populating type1 buffer... type1.size:%d type2.size:%d type3.size:%d", 
 	      type1.size(), type2.size(), type3.size());
       type1.clear();
@@ -710,10 +711,12 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       end();    
     }
     
+    /*
     uint num_prop = propagate.size();
     uint num_gprop = 0;
     MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
     empty = (num_gprop == 0);
+    */
   }
   
   MPI_Barrier(MPI_COMM_WORLD);
@@ -780,10 +783,75 @@ void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty,
   delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<uint>& type1)
+void DMesh::propagate_hypercube(std::vector<uint>& type1, bool& empty,
+				_map<int, int>& global_mapping)
 {
-  // Implement hypercube exchange
-  error("Not implemented");
+ 
+  // Allocate receive buffer
+  int num_prop = propagate.size();
+  int total_prop, recv_count;
+  MPI_Allreduce(&num_prop, &total_prop, 1,
+		MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD);
+
+  int *recv_buff = new int[total_prop];
+  int *state = new int[total_prop];
+  int *sp = &state[0];
+  uint state_size = 0;
+  
+  memcpy(sp, &propagate[0], propagate.size() * sizeof(int));
+  state_size = propagate.size();
+  sp += state_size;
+  
+  MPI_Status status;
+  uint rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  uint dest;
+  uint D = 1;
+  for(uint j = 0; j < log2(pe_size) ; j++)
+  {
+    dest = rank^(D<<j);
+
+    MPI_Sendrecv(state, state_size, MPI_INTEGER, dest, 1, 
+		 recv_buff, total_prop, MPI_INTEGER, dest, 1,
+		 MPI_COMM_WORLD, &status);
+    MPI_Get_count(&status, MPI_INTEGER, &recv_count);
+    
+    memcpy(sp, recv_buff, recv_count*sizeof(int));
+    sp += recv_count;
+    state_size += recv_count;
+    dolfin_assert(recv_count%4 == 0);
+    for (int k = 0; k < recv_count; k += 4) 
+    {
+      for(uint l = 0; l < 3; l++)
+	if(global_mapping.find(recv_buff[l+k]) != global_mapping.end())
+	  recv_buff[l+k] = global_mapping[recv_buff[l+k]];
+
+      bool left = glb_ids.find(recv_buff[k+1]) != glb_ids.end();
+      bool right = glb_ids.find(recv_buff[k+2]) != glb_ids.end();
+
+      if(left && right)
+	for (int i = 0; i < 4; i++)
+	  type1.push_back(recv_buff[k+i]);
+      else
+      {
+	prop_edge node;
+	node.mv = recv_buff[k];
+	node.v1 = recv_buff[k+1];
+	node.v2 = recv_buff[k+2];
+	node.owner = recv_buff[k+3];
+	
+	if(!left || !right)
+	  type2.push_back(node);
+	else
+	  type3.push_back(node);
+      }
+    }
+  }
+
+  empty = (state_size == 0);
+
+  delete[] recv_buff;
+  delete[] state;
 }
 //-----------------------------------------------------------------------------
 void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
@@ -858,5 +926,10 @@ void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
   
   type3 = tmp;
   tmp.clear();
+}
+//-----------------------------------------------------------------------------
+void DMesh::remap(std::vector<uint>& updated, _map<int, int>& global_mapping)
+{
+  
 }
 //-----------------------------------------------------------------------------

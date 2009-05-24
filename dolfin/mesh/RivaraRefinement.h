@@ -100,7 +100,8 @@ namespace dolfin
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
-    void propagate_naive(std::vector<uint>& propagated, bool& empty);
+    void propagate_naive(std::vector<uint>& propagated, bool& empty,
+			 _map<int, int>& global_mapping);
     void propagate_hypercube(std::vector<uint>& propagated);
     
     void populate(std::vector<uint>& type1, _map<int, int>& global_mapping);

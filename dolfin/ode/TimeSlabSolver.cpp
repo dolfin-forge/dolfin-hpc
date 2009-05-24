@@ -92,7 +92,7 @@ bool TimeSlabSolver::solve(uint attempt)
     // FIXME: implement better check and make this a parameter    
     // FIXME: remove ifdef checks for isnormal (needed on irix and solaris),
     //        broken for both gcc and mipspro compilers
-#if (__sgi || sgi || sun) 
+#if (__sgi || sgi || sun || __sun) 
     if ( (iter > 0 && d2 > 1000.0 * d1) )
 #else
     if ( (iter > 0 && d2 > 1000.0 * d1) || !std::isnormal(d2) )

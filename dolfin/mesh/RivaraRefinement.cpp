@@ -158,7 +158,7 @@ void DMesh::imp(Mesh& mesh)
   on_boundary = false;
   MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
   boundary_cell = false;
- // Generate facet - cell connectivity if not generated
+  // Generate facet - cell connectivity if not generated
   mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
   for (CellIterator bf(boundary); !bf.end(); ++bf) 
   {
@@ -181,7 +181,7 @@ void DMesh::imp(Mesh& mesh)
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
-  //  num_new *= 2;
+  num_new *= 2;
   // Find maximum global index assigned
   uint max_index = std::max(mesh.distdata().global_numVertices(),
 			    mesh.distdata().max_index());
@@ -358,13 +358,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       {
 	DVertex* v0 = dcell->vertices[i];
 	DVertex* v1 = dcell->vertices[j];
-
+	
 	real l = 0.0;
 	if( v0->glb_id > v1->glb_id)
 	  l = v0->p.distance(v1->p); 
 	else
 	  l = v1->p.distance(v0->p); 
-
+	
 	if(fabs(l - lmax) < DOLFIN_EPS)
 	{
 	  int ptsum = (v0->glb_id) + (v1->glb_id);
@@ -382,12 +382,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
  	  jj = j;
  	  lmax = l;
 	  ptmax = (v0->glb_id + v1->glb_id);
-	  //	  ptmax = ((long)dcell->vertices[i]) + ((long)dcell->vertices[j]);
- 	}
-       }
-     }
+	}
+      }
+    }
   }
-
+  
   dolfin_assert(dcell->vertices.size() > 0);
   dolfin_assert(dcell->vertices.size() > 0);
   dolfin_assert(dcell->vertices.size() > ii);
@@ -416,6 +415,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
   else
   {
+    dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
     mv = new DVertex;
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
@@ -580,7 +580,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       begin("Propagate refinement...");
 
     type1.clear();    
-    propagate_naive( type1, empty);
+    propagate_naive( type1, empty, global_mapping);
     propagate.clear();
     populate(type1, global_mapping);
     MPI_Barrier(MPI_COMM_WORLD);
@@ -600,9 +600,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  mv = ref_edge[edge_key(type1[i+1], type1[i+2])];
 	  if(!mv->shared)
 	    error("corrupt mesh");
-	  //	if ( type1[i+3] < MPI::processNumber() ||
-	  //	     (mv->ghosted && (mv->owner > type1[i+3]))) {
-	  //  if( mv->shared && (mv->owner > (int) type1[i+3])) {
 	  if( mv->owner > (int) type1[i+3]) {
 	    EdgeKey key1 = edge_key(type1[i+1], mv->glb_id);
 	    EdgeKey key2 = edge_key(type1[i+2], mv->glb_id);
@@ -723,7 +720,8 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
   message("Propagated refinements: %d", (cells.size() - pre_num_cells) / 2);
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
+void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty,
+			    _map<int, int>& global_mapping)
 {
 
   empty = true;
@@ -753,6 +751,10 @@ void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
     
     for (int k = 0; k < recv_count; k += 4) 
     {
+      for(uint l = 0; l < 3; l++)
+	if(global_mapping.find(recv_buff[l+k]) != global_mapping.end())
+	  recv_buff[l+k] = global_mapping[recv_buff[l+k]];
+
       bool left = glb_ids.find(recv_buff[k+1]) != glb_ids.end();
       bool right = glb_ids.find(recv_buff[k+2]) != glb_ids.end();
 
@@ -800,7 +802,7 @@ void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
       (*it).v2 = global_mapping[(*it).v2];
     if(global_mapping.find((*it).v1) != global_mapping.end()) {
       (*it).mv = global_mapping[(*it).mv];
-      dolfin_assert(bc_dvs.find(*it) != bc_dvs.end());
+      dolfin_assert(bc_dvs.find((*it).mv) != bc_dvs.end());
       DVertex *mv = bc_dvs[(*it).mv];
       (*it).owner = mv->owner;
     }
@@ -833,7 +835,7 @@ void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
       (*it).v2 = global_mapping[(*it).v2];
     if(global_mapping.find((*it).v1) != global_mapping.end()) {
       (*it).mv = global_mapping[(*it).mv];
-      dolfin_assert(bc_dvs.find(*it) != bc_dvs.end());
+      dolfin_assert(bc_dvs.find((*it).mv) != bc_dvs.end());
       DVertex *mv = bc_dvs[(*it).mv];
       (*it).owner = mv->owner;
     }

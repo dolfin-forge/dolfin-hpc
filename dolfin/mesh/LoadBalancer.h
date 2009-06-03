@@ -18,6 +18,9 @@ namespace dolfin
 
     enum Type { Default, LEPP};
 
+    // Balanace mesh according to predefined weight function
+    static void balance(Mesh& mesh, MeshFunction<uint>& weight);
+
     // Balance mesh according to marked cells, 
     // new_cell_marker marks cells in cell_marker for new mesh
     static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 

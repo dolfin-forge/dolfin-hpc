@@ -19,6 +19,24 @@
 using namespace dolfin;
 #ifdef HAS_MPI
 //-----------------------------------------------------------------------------
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight)
+{
+  begin("Load balancing");
+    
+  // Repartition mesh
+  MeshFunction<uint> partitions;
+  mesh.partition(partitions, weight);
+  
+  // Calculate process reassignment
+  uint max_sendrecv;
+  process_reassignment(partitions, &max_sendrecv);
+
+  // Distribute mesh according to new partition function
+  mesh.distribute(partitions);
+
+  end();
+}
+//-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
 			   Type type)
 {  
@@ -433,6 +451,11 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 }
 //-----------------------------------------------------------------------------
 #else
+//-----------------------------------------------------------------------------
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight)
+{
+  warning("Load balancing only implemented for MPI");
+}
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
 			   Type type)

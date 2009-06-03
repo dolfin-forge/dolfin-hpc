@@ -138,7 +138,9 @@ error("This function needs to be updated to the new format.");
   Vector ubar2(ode.size());
   ubar2 = 0.0;
 
+#ifndef NO_PROGRESS_BAR
   Progress p("Computing averages", 2*samples);
+#endif
 
   // Compute average values on first half of the averaging interval
   for (unsigned int j = 0; j < samples; j++)
@@ -168,8 +170,9 @@ error("This function needs to be updated to the new format.");
 	umax(i) = std::max(umax(i), uu);
       }
     }
-    
+#ifndef NO_PROGRESS_BAR    
     ++p;
+#endif
   }
     
   // Compute average values on second half of the averaging interval

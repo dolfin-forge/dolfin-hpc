@@ -72,6 +72,7 @@ options = [
     BoolOption("enableGnuExtensions", "Enable GNU extensions", 0),
     BoolOption("enableGnuExperimental", "Enable experimental GNU features", 0),
     BoolOption("enableOptimizeP1", "Compile with optimization for P1 elements", 0),
+    BoolOption("disableProgressBar", "Compile without progress bar", 0),
     # Enable or disable external packages.
     # These will also be listed in scons.cfg files, but if they are 
     # disabled here, that will override scons.cfg. Remark that unless the
@@ -187,6 +188,9 @@ if env["enableOptimizeP1"]:
           DOLFIN will be tuned for P1 elements!        
 ---------------------------------------------------------"""
   print msg
+
+if env["disableProgressBar"]:
+  env.Append(CXXFLAGS=" -DNO_PROGRESS_BAR")
 
 # Not sure we need this - but lets leave it for completeness sake - if people
 # use if for PyCC, and know that dolfin use the same system, they will expect

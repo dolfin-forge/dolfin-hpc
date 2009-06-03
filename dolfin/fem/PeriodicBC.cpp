@@ -102,7 +102,9 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
   UFCMesh ufc_mesh(mesh);
   
   // Iterate over the facets of the mesh
+#ifndef NO_PROGRESS_BAR
   Progress p("Applying periodic boundary conditions", mesh.size(D - 1));
+#endif
   for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Get cell to which facet belongs (there may be two, but pick first)
@@ -205,8 +207,9 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
         }
       }
     }
-
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
   }
 
   // Insert 1 at (dof0, dof1)

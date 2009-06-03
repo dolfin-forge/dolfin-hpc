@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
   File file("temperature.pvd");
 
   // Time-stepping
+#ifndef NO_PROGRESS_BAR
   Progress p("Time-stepping");
+#endif
   while ( t < T )
   {
     // Assemble vector and apply boundary conditions
@@ -76,7 +78,9 @@ int main(int argc, char *argv[])
     file << u1;
 
     // Move to next interval
+#ifndef NO_PROGRESS_BAR
     p = t / T;
+#endif
     t += k;
     u0 = u1;
   }

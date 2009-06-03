@@ -178,7 +178,9 @@ void Assembler::assembleCells(GenericTensor& A,
   ufc::cell_integral* integral = ufc.cell_integrals[0];
 
   // Assemble over cells
+#ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(A.rank(), "cells"), mesh.numCells());
+#endif
   for (CellIterator cell(mesh); !cell.end(); ++cell)
   {
     // Get integral for sub domain (if any)
@@ -208,7 +210,9 @@ void Assembler::assembleCells(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
     
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
 
   }
 
@@ -238,7 +242,9 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
+#ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(A.rank(), "exterior facets"), boundary.numCells());
+#endif
   for (CellIterator boundary_cell(boundary); !boundary_cell.end(); ++boundary_cell)
   {
     // Get mesh facet corresponding to boundary cell
@@ -281,7 +287,9 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
+#ifndef NO_PROGRESS_BAR
     p++;  
+#endif
 
   }
 }
@@ -305,13 +313,17 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   mesh.order();
   
   // Assemble over interior facets (the facets of the mesh)
+#ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(A.rank(), "interior facets"), mesh.numFacets());
+#endif
   for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Check if we have an interior facet
     if ( facet->numEntities(mesh.topology().dim()) != 2 )
     {
+#ifndef NO_PROGRESS_BAR
       p++;
+#endif
       continue;
     }
 
@@ -358,7 +370,9 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
 
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
   }
 }
 //-----------------------------------------------------------------------------
@@ -554,7 +568,9 @@ void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
   // fetch pointers to element matrix and vector  
   BoundaryMesh boundary(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
+#ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(globalA.rank(), "exterior facets"), boundary.numCells());
+#endif
   for (CellIterator boundary_cell(boundary); !boundary_cell.end(); ++boundary_cell)
   {
     // Get mesh facet corresponding to boundary cell

@@ -355,7 +355,9 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
   }
 
   // Iterate over facets
+#ifndef NO_PROGRESS_BAR
   Progress p("Computing Dirichlet boundary values, topological search", facets.size());
+#endif
   for (uint f = 0; f < facets.size(); f++)
   {
     // Get cell number and local facet number
@@ -396,7 +398,9 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
       //cout << "Setting BC value: i = " << i << ", dof = " << dof << ", value = " << value << endl;
     }
 
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
 
   }
 }
@@ -416,7 +420,9 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
   _mesh.init(_mesh.topology().dim() - 1);
 
   // Iterate over facets
+#ifndef NO_PROGRESS_BAR
   Progress p("Computing Dirichlet boundary values, geometric search", facets.size());
+#endif
   for (uint f = 0; f < facets.size(); f++)
   {
     // Get cell number and local facet number
@@ -475,7 +481,9 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
   dolfin_assert(user_sub_domain);
 
   // Iterate over cells
+#ifndef NO_PROGRESS_BAR
   Progress p("Computing Dirichlet boundary values, pointwise search", _mesh.numCells());
+#endif
   for (CellIterator cell(_mesh); !cell.end(); ++cell)
   {
     UFCCell ufc_cell(*cell);
@@ -508,7 +516,9 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
       boundary_values[dof] = value;
     }
 
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
   }
 }
 //-----------------------------------------------------------------------------

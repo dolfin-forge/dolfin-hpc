@@ -173,7 +173,9 @@ namespace dolfin{
       ufc::cell_integral* integral = ufc.cell_integrals[0];
 
       // Assemble over cells
+#ifndef NO_PROGRESS_BAR
       Progress p("Assembling over cells", mesh.numCells());
+#endif
       
       //const uint *cells = mesh.cells();
       //uint i;
@@ -211,8 +213,9 @@ namespace dolfin{
 
 	  // Add entries to global tensor
 	  A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
-    
+#ifndef NO_PROGRESS_BAR   
 	  p++;
+#endif
 	}
     }
 
@@ -237,7 +240,9 @@ namespace dolfin{
       dolfin_assert(cell_map);
 
       // Assemble over exterior facets (the cells of the boundary)
+#ifndef NO_PROGRESS_BAR
       Progress p("Assembling over exterior facets", boundary.numCells());
+#endif
       for (CellIterator boundary_cell(boundary); !boundary_cell.end(); 
 	   ++boundary_cell)
 	{
@@ -281,8 +286,9 @@ namespace dolfin{
     
 	  // Add entries to global tensor
 	  A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
-
+#ifndef NO_PROGRESS_BAR
 	  p++;  
+#endif
 	}
     }
 
@@ -307,13 +313,17 @@ namespace dolfin{
       mesh.order();
   
       // Assemble over interior facets (the facets of the mesh)
+#ifndef NO_PROGRESS_BAR
       Progress p("Assembling over interior facets", mesh.numFacets());
+#endif
       for (FacetIterator facet(mesh); !facet.end(); ++facet)
 	{
 	  // Check if we have an interior facet
 	  if ( facet->numEntities(mesh.topology().dim()) != 2 )
 	    {
+#ifndef NO_PROGRESS_BAR
 	      p++;
+#endif
 	      continue;
 	    }
 
@@ -366,8 +376,9 @@ namespace dolfin{
 
 	  // Add entries to global tensor
 	  A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
-
+#ifndef NO_PROGRESS_BAR
 	  p++;
+#endif
 	}
     }
 

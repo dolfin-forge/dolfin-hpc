@@ -175,7 +175,9 @@ void pAssembler::assembleCells(GenericTensor& A,
 
   // Assemble over cells
   message("Assembling over %d cells.", mesh.numCells());
+#ifndef NO_PROGRESS_BAR
   Progress p("Assembling over cells", mesh.numCells());
+#endif
   
   real t = toc();
   printf("pAssembler: start\n");
@@ -213,7 +215,9 @@ void pAssembler::assembleCells(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
   }
 
   t = toc() - t;
@@ -241,7 +245,9 @@ void pAssembler::assembleExteriorFacets(GenericTensor& A,
   
   // Assemble over exterior facets (the cells of the boundary)
   message("Assembling over %d exterior facets.", boundary.numCells());
+#ifndef NO_PROGRESS_BAR
   Progress p("Assembling over exterior facets", boundary.numCells());
+#endif
   for (CellIterator boundary_cell(boundary); !boundary_cell.end(); ++boundary_cell)
   {
     // Get mesh facet corresponding to boundary cell
@@ -280,7 +286,9 @@ void pAssembler::assembleExteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
+#ifndef NO_PROGRESS_BAR
     p++;  
+#endif
   }
 }
 //-----------------------------------------------------------------------------
@@ -304,13 +312,17 @@ void pAssembler::assembleInteriorFacets(GenericTensor& A,
   
   // Assemble over interior facets (the facets of the mesh)
   message("Assembling over %d interior facets.", mesh.numFacets());
+#ifndef NO_PROGRESS_BAR
   Progress p("Assembling over interior facets", mesh.numFacets());
+#endif
   for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Check if we have an interior facet
     if ( facet->numEntities(mesh.topology().dim()) != 2 )
     {
+#ifndef NO_PROGRESS_BAR
       p++;
+#endif
       continue;
     }
 
@@ -356,7 +368,9 @@ void pAssembler::assembleInteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
 
+#ifndef NO_PROGRESS_BAR
     p++;
+#endif
   }
 }
 //-----------------------------------------------------------------------------

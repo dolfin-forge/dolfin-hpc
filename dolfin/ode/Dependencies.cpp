@@ -137,7 +137,9 @@ void Dependencies::detect(ODE& ode)
     u[i] = rand();
   
   // Check dependencies for all components
+#ifndef NO_PROGRESS_BAR
   Progress p("Computing sparsity", N);
+#endif
   uint sum = 0;
   for (uint i = 0; i < N; i++)
   {
@@ -160,7 +162,9 @@ void Dependencies::detect(ODE& ode)
 	set(i, j);
     
     // Update progress
+#ifndef NO_PROGRESS_BAR
     p = i;
+#endif
   }
 
   message("Automatically detected %d dependencies.", sum);

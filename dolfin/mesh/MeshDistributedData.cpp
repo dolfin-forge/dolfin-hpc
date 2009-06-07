@@ -123,6 +123,7 @@ void MeshDistributedData::finalize(uint dim)
 
     for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it) 
       _global_indices[it->first] = it->second;
+    global_indices[0].clear();
     break;
   case 3:
     if(_global_cell_indices)
@@ -131,6 +132,7 @@ void MeshDistributedData::finalize(uint dim)
     _global_cell_indices = new uint[global_indices[dim].size()];
     for(it = global_indices[dim].begin(); it != global_indices[dim].end(); ++it)
       _global_cell_indices[it->first] = it->second;
+    global_indices[3].clear();
     break;
   default:
     warning("Not implemented yet!");

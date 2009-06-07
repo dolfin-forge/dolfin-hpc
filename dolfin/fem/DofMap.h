@@ -143,7 +143,7 @@ namespace dolfin
     MeshFunction<uint>* partitions;
 
     // Provide easy access to map for testing
-    std::map<uint, uint> map;
+    _map<uint, uint> map;
 
   };
 

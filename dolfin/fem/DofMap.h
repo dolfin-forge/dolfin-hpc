@@ -111,7 +111,7 @@ namespace dolfin
     void disp() const;
 
     inline bool renumbered() 
-    { return (dof_map > 0); }
+    { return (dof_map > 0 || _type_ > -1 || v_map > 0); }
 
   private:
 
@@ -143,8 +143,12 @@ namespace dolfin
     MeshFunction<uint>* partitions;
 
     // Provide easy access to map for testing
-    _map<uint, uint> map;
+    std::map<uint, uint> map;
 
+    uint _type_;
+    uint _offset_;
+
+    uint *v_map;
   };
 
 }

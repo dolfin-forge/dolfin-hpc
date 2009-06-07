@@ -33,8 +33,10 @@ using namespace dolfin;
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(0), 
                ufc_dof_map(&dof_map), ufc_dof_map_local(false), 
                dolfin_mesh(mesh), num_cells(mesh.numCells()), 
-               partitions(0)
+               partitions(0), _type_(-1), v_map(0)
 {
+
+
   // Assume responsibilty for ufc_dof_map
   if(dof_map_local) 
     ufc_dof_map_local = ufc_dof_map;
@@ -44,7 +46,7 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions,
                bool dof_map_local) : dof_map(0), ufc_dof_map(&dof_map), 
                ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()), 
-               partitions(&partitions)
+	       partitions(&partitions),  _type_(-1), v_map(0)
 {
   // Assume responsibilty for ufc_dof_map
   if(dof_map_local) 
@@ -54,7 +56,8 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions
 //-----------------------------------------------------------------------------
 DofMap::DofMap(const std::string signature, Mesh& mesh) 
   : dof_map(0), ufc_dof_map(0), ufc_dof_map_local(false),
-    dolfin_mesh(mesh), num_cells(mesh.numCells()), partitions(0)
+    dolfin_mesh(mesh), num_cells(mesh.numCells()), partitions(0), 
+    _type_(-1), v_map(0)
 {
   // Create ufc dof map from signature
   ufc_dof_map = ElementLibrary::create_dof_map(signature);
@@ -71,7 +74,7 @@ DofMap::DofMap(const std::string signature, Mesh& mesh,
                MeshFunction<uint>& partitions) 
   : dof_map(0), ufc_dof_map(0), 
     ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()),
-    partitions(&partitions)
+    partitions(&partitions), _type_(-1), v_map(0)
 {
   // Create ufc dof map from signature
   ufc_dof_map = ElementLibrary::create_dof_map(signature);
@@ -95,6 +98,9 @@ DofMap::~DofMap()
 
   if (ufc_dof_map_local)
     delete ufc_dof_map_local;
+
+  if(v_map)
+    delete[] v_map;
 }
 //-----------------------------------------------------------------------------
 DofMap* DofMap::extractDofMap(const Array<uint>& sub_system, uint& offset) const
@@ -199,7 +205,42 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
   // Either lookup pretabulated values (if build() has been called)
   // or ask the ufc::dof_map to tabulate the values
 
-  if (dof_map)
+  if(_type_ == 0)
+  {
+    Cell c(dolfin_mesh, cell_index);
+    for (uint i = 0; i < local_dimension(); i++)
+      dofs[i] = dolfin_mesh.distdata().get_global(c.entities(0)[i], 0);
+  }
+  else if(_type_ == 1)
+  {
+    Cell c(dolfin_mesh, cell_index);
+    *dofs = dolfin_mesh.distdata().get_cell_global(c.index());
+  }
+  else if(_type_ == 2 && v_map)
+  {
+    Cell c(dolfin_mesh, cell_index);
+    uint gdim = ufc_dof_map->geometric_dimension();
+    uint num_entities = c.numEntities(0);
+    dolfin_assert(gdim * num_entities == local_dimension());
+    for (uint k = 0; k < gdim; k++)
+      for (uint i = 0;  i < num_entities; i++)
+	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+  }
+  else if(_type_ == 3)
+  {
+    ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+    /*
+    Cell c(dolfin_mesh, cell_index);
+    uint gdim = ufc_dof_map->geometric_dimension();
+    dolfin_assert(local_dimension() == gdim);
+    //    for(uint i = 0; i < gdim; i++)
+      //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + i * dolfin_mesh.distdata().global_numCells();
+    dofs[0] = c.index() + _offset_;
+    dofs[1] = dofs[0] + (dolfin_mesh.numCells()  + c.index());
+    dofs[2] = dofs[1] + dolfin_mesh.numCells() + c.index();
+    */
+  }
+  else if (dof_map)
   {
     /*
     for (uint i = 0; i < local_dimension(); i++)
@@ -216,19 +257,55 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
 {
   // Either lookup pretabulated values (if build() has been called)
   // or ask the ufc::dof_map to tabulate the values
-  if (dof_map)
+  if(_type_ == 0)
   {
-    /*
+    Cell c(dolfin_mesh, cell_index);
     for (uint i = 0; i < local_dimension(); i++)
-      dofs[i] = dof_map[cell_index][i];
+      dofs[i] = dolfin_mesh.distdata().get_global(c.entities(0)[i], 0);
+  }
+  else if(_type_ == 1)
+  {
+    Cell c(dolfin_mesh, cell_index);
+    *dofs = dolfin_mesh.distdata().get_cell_global(c.index());
+  }
+  else if(_type_ == 2 && v_map)
+  {
+    Cell c(dolfin_mesh, cell_index);
+    uint gdim = ufc_dof_map->geometric_dimension();
+    uint num_entities = c.numEntities(0);
+    dolfin_assert(gdim * num_entities == local_dimension());
+    for (uint k = 0; k < gdim; k++)
+      for (uint i = 0;  i < num_entities; i++)
+	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+  }
+  else if(_type_ == 3)
+  {
+    ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+    /*
+    Cell c(dolfin_mesh, cell_index);
+    uint gdim = ufc_dof_map->geometric_dimension();
+    dolfin_assert(local_dimension() == gdim);
+    dofs[0] = c.index() + _offset_;
+    dofs[1] = dofs[0] + dolfin_mesh.numCells() + c.index();
+    dofs[2] = dofs[1] + dolfin_mesh.numCells() + c.index();
     */
+    //    for(uint i = 0; i < gdim; i++)
+    //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + i * dolfin_mesh.distdata().global_numCells();
+      //      dofs[i] = (c.index() + i * dolfin_mesh.numCells()) + _offset_;
+      //      dofs[i] = c.index() + i * dolfin_mesh.numCells() + _offset_;
+
+    //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + 
+    //	i * dolfin_mesh.numCells() + _offset_;
+  }
+  else if (dof_map)
+  {
     memcpy(dofs, dof_map[cell_index], sizeof(uint)*local_dimension());
     //memcpy(dofs, dof_map[cell_index], sizeof(uint)*local_dimension()); // FIXME: Maybe memcpy() can be used to speed this up? Test this!
   }
   else
     ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
-} 
-//-----------------------------------------------------------------------------
+
+}//-----------------------------------------------------------------------------
 void DofMap::build(UFC& ufc, uint jj)
 {
 
@@ -320,19 +397,13 @@ void DofMap::build(UFC& ufc, uint jj)
 
 
     if (ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numVertices()) {
-
-      // Make sure the mesh is lineary numbered
+      dolfin_mesh.renumber();      
+      _type_ = 0;
+      delete[] dofs;
+    }
+    else if(ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numCells()) {
       dolfin_mesh.renumber();
-
-      dof_map = new uint*[dolfin_mesh.numCells()];      
-
-      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
-	dof_map[c->index()] = new uint[local_dim];    
-	uint i = 0;
-	for(VertexIterator v(*c); !v.end(); ++v)
-	  dof_map[c->index()][i++] = dolfin_mesh.distdata().get_global(*v);
-      }
-      
+      _type_ = 1;      
       delete[] dofs;
     }
     else if(ufc_dof_map->global_dimension() == 
@@ -353,20 +424,19 @@ void DofMap::build(UFC& ufc, uint jj)
       MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
       offset -= num_dofs;
 #endif
-      
-      _map<uint,uint> v_offset;
+      _map<uint, uint> v_offset;
 
       for(VertexIterator v(dolfin_mesh); !v.end(); ++v) {
-	if(!dolfin_mesh.distdata().is_ghost(v->index(), 0)) {
-	  v_offset[dolfin_mesh.distdata().get_global(*v)] = offset; 
-	  offset += gdim;
-	}
+        if(!dolfin_mesh.distdata().is_ghost(v->index(), 0)) {
+          v_offset[dolfin_mesh.distdata().get_global(*v)] = offset; 
+          offset += gdim;
+        }
       }
 
       Array<uint> *ghost_buff = new Array<uint>[pe_size];
       for(MeshGhostIterator iter(dolfin_mesh.distdata(), 0); !iter.end(); ++iter)
-	ghost_buff[iter.owner()].push_back(dolfin_mesh.distdata().get_global(iter.index(), 0)); 
-		
+        ghost_buff[iter.owner()].push_back(dolfin_mesh.distdata().get_global(iter.index(), 0)); 
+                
       MPI_Status status;
       Array<uint> send_buff;
       uint src,dest;
@@ -374,60 +444,90 @@ void DofMap::build(UFC& ufc, uint jj)
       int recv_count, recv_size_gh, send_size;  
       
       for(uint i = 0; i < pe_size; i++) {
-	send_size = ghost_buff[i].size();
-	MPI_Reduce(&send_size, &recv_size_gh, 1, 
-		   MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+        send_size = ghost_buff[i].size();
+        MPI_Reduce(&send_size, &recv_size_gh, 1, 
+                   MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
       }
       
       uint *recv_ghost = new uint[ recv_size_gh];
       uint *recv_buff = new uint[ recv_size ];
       
       for(uint j=1; j < pe_size; j++){
-	src = (rank - j + pe_size) % pe_size;
-	dest = (rank + j) % pe_size;
-	
-	MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
-		     MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh, 
-		     MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
-	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
-	
-	for(int k=0; k < recv_count; k++)
-	  send_buff.push_back(v_offset[recv_ghost[k]]);
-	
-	MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
-		     recv_buff, recv_size , MPI_UNSIGNED, dest, 2, 
-		     MPI_COMM_WORLD,&status);
-	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+        src = (rank - j + pe_size) % pe_size;
+        dest = (rank + j) % pe_size;
+        
+        MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
+                     MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh, 
+                     MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
+        MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+        
+        for(int k=0; k < recv_count; k++)
+          send_buff.push_back(v_offset[recv_ghost[k]]);
+        
+        MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
+                     recv_buff, recv_size , MPI_UNSIGNED, dest, 2, 
+                     MPI_COMM_WORLD,&status);
+        MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
-	for(int j=0; j < recv_count; j++)
-	  v_offset[ghost_buff[dest][j]] = recv_buff[j];
+        for(int j=0; j < recv_count; j++)
+          v_offset[ghost_buff[dest][j]] = recv_buff[j];
 
-	send_buff.clear();
+        send_buff.clear();
       }
 
       delete[] recv_ghost;
       delete[] recv_buff;
 
+      /*
       dof_map = new uint*[dolfin_mesh.numCells()];      
-
-      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {	
+      
+      for(CellIterator c(dolfin_mesh); !c.end(); ++c) { 
 	
-	dof_map[c->index()] = new uint[local_dim];    
-
-	uint j = 0;
-	for(uint i = 0; i < gdim; i++) {
-	  for(VertexIterator v(*c); !v.end(); ++v) {
-	    dof_map[c->index()][j++] = v_offset[dolfin_mesh.distdata().get_global(*v)] + i;
-	  }
-	}
-
+        dof_map[c->index()] = new uint[local_dim];    
+	
+        uint j = 0;
+        for(uint i = 0; i < gdim; i++) {
+          for(VertexIterator v(*c); !v.end(); ++v) {
+            dof_map[c->index()][j++] = v_offset[dolfin_mesh.distdata().get_global(*v)] + i;
+          }
+        }	
       }
+      */
 
+      if( v_map )
+	delete[] v_map;
+
+      v_map = new uint[dolfin_mesh.numVertices()];
+      for(VertexIterator v(dolfin_mesh); !v.end(); ++v)
+	v_map[v->index()] = v_offset[dolfin_mesh.distdata().get_global(v->index(), 0)];
+      
+      _type_ = 2;
+      v_offset.clear();
+      
       delete[] dofs;
 
       for(uint i =0; i < pe_size; i++)
-	ghost_buff[i].clear();
+        ghost_buff[i].clear();
       delete[] ghost_buff;
+      
+    }
+    else if(ufc_dof_map->global_dimension() == 
+       ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numCells()) {
+      dolfin_mesh.renumber();
+      uint gdim = ufc_dof_map->geometric_dimension();
+      uint num_dofs =  gdim * dolfin_mesh.numCells();      
+      uint offset = 0;
+
+#if ( MPI_VERSION > 1 )
+      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+#else 
+      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      offset -= num_dofs;
+#endif
+      _offset_ = offset;
+      _type_ = 3;
+
+      delete[] dofs;      
     }
     else {
 
@@ -611,6 +711,7 @@ void DofMap::build(UFC& ufc, uint jj)
 	  dof_map[cit->first][rit->first] = map[rit->second];
       
       delete[] dofs;
+      map.clear();
     }
 #endif
   }

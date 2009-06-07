@@ -193,12 +193,13 @@ dolfin::uint MeshDistributedData::get_global(uint i, uint dim)
   if(MPI::numProcesses() == 1) 
     return i;
 
-  dolfin_assert( global_indices[dim].count(i) );
   if( dim == 0 && finalized) {
     return _global_indices[i];
   }
-  else
+  else {
+    dolfin_assert( global_indices[dim].count(i) );  
     return global_indices[dim][i];
+  }
 }
 //-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_local(MeshEntity& e)
@@ -232,11 +233,13 @@ dolfin::uint MeshDistributedData::get_cell_global(uint i)
 {
   if(MPI::numProcesses() == 1) 
     return i;
-  dolfin_assert( global_indices[3].count(i) );
+
   if ( finalized )
     return _global_cell_indices[i];
-  else
+  else {
+    dolfin_assert( global_indices[3].count(i) );
     return global_indices[3][i];
+  }
 
 }
 //-----------------------------------------------------------------------------

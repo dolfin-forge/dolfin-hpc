@@ -178,7 +178,10 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     uint* d_nzrow = new uint[local_size];
     uint* o_nzrow = new uint[local_size];
     spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);
-    init(spattern.size(0), spattern.size(1), d_nzrow, o_nzrow);
+    uint spattern_size_0 = spattern.size(0);
+    uint spattern_size_1 = spattern.size(1);
+    const_cast<SparsityPattern&>(spattern).clear();
+    init(spattern_size_0, spattern_size_1, d_nzrow, o_nzrow);
     delete [] d_nzrow;
     delete [] o_nzrow;
   }

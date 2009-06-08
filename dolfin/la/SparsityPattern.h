@@ -88,6 +88,8 @@ namespace dolfin
     inline void set_blocked() { blocked = true;}
     
     inline bool is_blocked() {return blocked;}
+    
+    inline void clear() { sparsity_pattern.clear(); o_sparsity_pattern.clear();};
 
   private:
 

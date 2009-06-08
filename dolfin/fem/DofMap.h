@@ -145,7 +145,7 @@ namespace dolfin
     // Provide easy access to map for testing
     std::map<uint, uint> map;
 
-    uint _type_;
+    int _type_;
     uint _offset_;
 
     uint *v_map;

@@ -213,8 +213,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
   }
   else if(_type_ == 1)
   {
-    Cell c(dolfin_mesh, cell_index);
-    *dofs = dolfin_mesh.distdata().get_cell_global(c.index());
+    *dofs = dolfin_mesh.distdata().get_cell_global(cell_index);
   }
   else if(_type_ == 2 && v_map)
   {
@@ -228,17 +227,10 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
   }
   else if(_type_ == 3)
   {
-    ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
-    /*
-    Cell c(dolfin_mesh, cell_index);
     uint gdim = ufc_dof_map->geometric_dimension();
     dolfin_assert(local_dimension() == gdim);
-    //    for(uint i = 0; i < gdim; i++)
-      //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + i * dolfin_mesh.distdata().global_numCells();
-    dofs[0] = c.index() + _offset_;
-    dofs[1] = dofs[0] + (dolfin_mesh.numCells()  + c.index());
-    dofs[2] = dofs[1] + dolfin_mesh.numCells() + c.index();
-    */
+    for(uint i = 0; i < gdim; i++)
+      dofs[i] = (cell_index + i * dolfin_mesh.numCells()) + _offset_;
   }
   else if (dof_map)
   {
@@ -265,37 +257,23 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
   }
   else if(_type_ == 1)
   {
-    Cell c(dolfin_mesh, cell_index);
-    *dofs = dolfin_mesh.distdata().get_cell_global(c.index());
+    *dofs = dolfin_mesh.distdata().get_cell_global(cell_index);
   }
   else if(_type_ == 2 && v_map)
   {
     Cell c(dolfin_mesh, cell_index);
     uint gdim = ufc_dof_map->geometric_dimension();
     uint num_entities = c.numEntities(0);
-    dolfin_assert(gdim * num_entities == local_dimension());
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
 	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
   }
   else if(_type_ == 3)
   {
-    ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
-    /*
-    Cell c(dolfin_mesh, cell_index);
     uint gdim = ufc_dof_map->geometric_dimension();
-    dolfin_assert(local_dimension() == gdim);
-    dofs[0] = c.index() + _offset_;
-    dofs[1] = dofs[0] + dolfin_mesh.numCells() + c.index();
-    dofs[2] = dofs[1] + dolfin_mesh.numCells() + c.index();
-    */
-    //    for(uint i = 0; i < gdim; i++)
-    //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + i * dolfin_mesh.distdata().global_numCells();
-      //      dofs[i] = (c.index() + i * dolfin_mesh.numCells()) + _offset_;
-      //      dofs[i] = c.index() + i * dolfin_mesh.numCells() + _offset_;
+    for(uint i = 0; i < gdim; i++)
+      dofs[i] = (cell_index + i * dolfin_mesh.numCells()) + _offset_;
 
-    //      dofs[i] = dolfin_mesh.distdata().get_cell_global(c.index()) + 
-    //	i * dolfin_mesh.numCells() + _offset_;
   }
   else if (dof_map)
   {
@@ -531,7 +509,7 @@ void DofMap::build(UFC& ufc, uint jj)
     }
     else {
 
-    
+      error("epic failure");
       BoundaryMesh local_boundary;
       local_boundary.init_interior(dolfin_mesh);
       

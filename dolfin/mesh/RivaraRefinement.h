@@ -132,7 +132,7 @@ namespace dolfin
     inline EdgeKey edge_key(int id1, int id2) {
       dolfin_assert( id2 != id1);
       if(id2 == id1)
-	error("Kaos");
+	error("Kaos id2 == id1");
       if(id2 < id1){
 	EdgeKey key(id2,id1);    
 	return key;

@@ -579,20 +579,30 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       begin("Propagate refinement...");
 
     type1.clear();    
+    global_mapping.clear();
     //propagate_naive( type1, empty, global_mapping);
     propagate_hypercube( type1, empty, global_mapping);
     if( empty ) break; 
     propagate.clear();
-    populate(type1, global_mapping);
+    // populate(type1, global_mapping);
     if(MPI::processNumber() == 0 && type1.size() > 0) {
       printf("Bisecting...");
       fflush(stdout);
     }
     uint cc = 0;
     dolfin_assert(type1.size() % 4 == 0);
-
     while(type1.size()) {
+      remap(updated, global_mapping);   
+      populate(type1, global_mapping);
+
       for(uint i = 0; i < type1.size();  i += 4) {
+	if(global_mapping.find(type1[i]) != global_mapping.end())
+	  type1[i] = global_mapping[type1[i]];
+	if(global_mapping.find(type1[i+1]) != global_mapping.end())
+	  type1[i+1] = global_mapping[type1[i+1]];
+	if(global_mapping.find(type1[i+2]) != global_mapping.end())
+	  type1[i+2] = global_mapping[type1[i+2]];
+	
 	
 	DVertex* mv = 0;
 	
@@ -669,6 +679,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 		  propagate.push_back(type1[i+1]);
 		  propagate.push_back(type1[i+2]);
 		  propagate.push_back(MPI::processNumber());
+
 		}
 		else 
 		{
@@ -691,17 +702,11 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  }
 	}
       }
-
-      remap(updated, global_mapping);
-      message("Populating type1 buffer... type1.size:%d type2.size:%d type3.size:%d", 
-	      type1.size(), type2.size(), type3.size());
       type1.clear();
       populate(type1, global_mapping);
-      message("Populated... type1.size:%d type2.size:%d type3.size:%d", 
-	      type1.size(), type2.size(), type3.size());
     }
-    //    type2.clear();
-    //    type3.clear();
+    type2.clear();
+    type3.clear();
     
     if(MPI::processNumber() == 0 && type1.size() > 0)
       putchar('\n');
@@ -928,8 +933,76 @@ void DMesh::populate(std::vector<uint>& type1, _map<int, int>& global_mapping)
   tmp.clear();
 }
 //-----------------------------------------------------------------------------
-void DMesh::remap(std::vector<uint>& updated, _map<int, int>& global_mapping)
+void DMesh::remap(std::vector<uint>& type1, _map<int, int>& global_mapping)
 {
+
+  // Allocate receive buffer
+  int num_type1 = type1.size();
+  int max_type1, recv_count;
+  return;
+  MPI_Allreduce(&num_type1, &max_type1, 1,
+		MPI_INTEGER, MPI_MAX, MPI_COMM_WORLD);  
+
+  int *recv_buff = new int[max_type1];
+
+  MPI_Status status;
+  int src,dest;
+  int pe_size = MPI::numProcesses();
+  int rank = MPI::processNumber();
+  for (int j = 1; j < pe_size; j++) 
+  {
+    src = (rank -j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;
+    
+    MPI_Sendrecv(&type1[0], type1.size(), MPI_INTEGER, dest, 1,
+		 recv_buff, max_type1, MPI_INTEGER, src, 1,
+		 MPI_COMM_WORLD, &status);
+    MPI_Get_count(&status, MPI_INTEGER, &recv_count);    
+    
+
+    for (int k = 0; k < recv_count; k += 4) 
+    {
+
+      if(glb_ids.find(recv_buff[k]) != glb_ids.end() && 
+	 recv_buff[k+1] < (int) MPI::processNumber()) {
+	dolfin_assert(bc_dvs.find(recv_buff[k]) != bc_dvs.end());
+
+	bool left = glb_ids.find(recv_buff[k+1]) != glb_ids.end();
+	bool right = glb_ids.find(recv_buff[k+2]) != glb_ids.end();
+	if( left && right ) 
+	  if(ref_edge.find(edge_key(recv_buff[k+1], recv_buff[k+2])) != ref_edge.end())
+	    if (recv_buff[k+3] < (int) MPI::processNumber() || 
+		(recv_buff[k+3] == (int) MPI::processNumber() && 
+		 status.MPI_SOURCE < (int) MPI::processNumber())) {
+	      //	      dolfin_assert(bc_dvs.find(recv_buff[k]) != bc_dvs.end());
+	      //	      DVertex *mv = bc_dvs[recv_buff[k]];
+	      DVertex *mv = ref_edge[edge_key(recv_buff[k+1], recv_buff[k+2])];
+	      global_mapping[mv->glb_id] = recv_buff[k];
+	      EdgeKey key1 = edge_key(recv_buff[k+1], mv->glb_id);
+	      EdgeKey key2 = edge_key(recv_buff[k+2], mv->glb_id);	  
+	      bc_dvs.erase(mv->glb_id);
+	      glb_ids.erase(mv->glb_id);	  
+	      global_mapping[mv->glb_id] = recv_buff[k];
+	      mv->glb_id = recv_buff[k];
+	      glb_ids.insert(mv->glb_id);
+	      bc_dvs[recv_buff[k]] = mv;
+	      mv->ghosted = true;	
+	      mv->shared = true;
+	      mv->owner = recv_buff[k+3];
+	      
+	      if(ref_edge.find(key1) != ref_edge.end()) { 
+		ref_edge[edge_key(recv_buff[k+1], mv->glb_id)] = ref_edge[key1];
+		ref_edge.erase(key1);
+	      }
+	      if(ref_edge.find(key2) != ref_edge.end()) {
+		ref_edge[edge_key(recv_buff[k+2], mv->glb_id)] = ref_edge[key2];
+		ref_edge.erase(key2);
+	      }
+	    }
+      }
+    }
+  }
   
+  delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------

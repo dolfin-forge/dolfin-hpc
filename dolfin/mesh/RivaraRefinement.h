@@ -67,6 +67,8 @@ namespace dolfin
     std::vector<DVertex *> vertices;
 
     bool deleted;
+    
+    int nref;
   };
       
   class DMesh
@@ -75,7 +77,7 @@ namespace dolfin
     DMesh();
     ~DMesh();
 
-    typedef std::pair<int, int> EdgeKey;
+    typedef std::pair<int, int> EdgeKey;    
 
     typedef struct __edge__ {
       uint mv;
@@ -83,6 +85,8 @@ namespace dolfin
       uint v2;
       uint owner;
     } prop_edge;
+
+    typedef std::pair<uint, prop_edge> Propagation;
 
     void addVertex(DVertex* v);
     
@@ -103,10 +107,11 @@ namespace dolfin
     void propagate_naive(std::vector<uint>& propagated, bool& empty,
 			 _map<int, int>& global_mapping);
 
-    void propagate_hypercube(std::vector<uint>& propagated, bool& empty,
+    void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty,
 			     _map<int, int>& global_mapping);
     
-    void populate(std::vector<uint>& type1, _map<int, int>& global_mapping);
+    void populate(std::vector<Propagation>& propagated,
+		  _map<int, int>& global_mapping);
     
     void remap(std::vector<uint>& updated, _map<int, int>& global_mapping);
 
@@ -120,13 +125,23 @@ namespace dolfin
     uint _start_offset;
 
     // Propagation buffer
-    std::vector<int> propagate;
+    std::vector<Propagation> propagate, type2, type3;
+    //std::vector<int> propagate;
     _set<uint> glb_ids;
 
     std::map<uint, DVertex*> bc_dvs;
     std::map<EdgeKey, DVertex*> ref_edge;
 
-    std::list<prop_edge> type2, type3;
+    // Comparison operator for index/value pairs
+    struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
+						   std::pair<uint, prop_edge>, bool>
+    {
+      bool operator()(std::pair<uint, prop_edge> x, std::pair<uint, prop_edge> y)
+      {
+	return x.first < y.first;
+      }
+    };
+
 
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {

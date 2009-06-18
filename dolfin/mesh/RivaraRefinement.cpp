@@ -208,7 +208,6 @@ void DMesh::imp(Mesh& mesh)
     if (dv->ghosted)
       dv->owner = mesh.distdata().get_owner(*vi);    
 
-    glb_ids.insert(dv->glb_id);    
     if(dv->on_boundary)     
       bc_dvs[dv->glb_id] = dv;
     
@@ -513,7 +512,6 @@ void DMesh::addVertex(DVertex* v)
   vertices.insert(v);
   if(v->glb_id < 0)
     v->glb_id = _start_offset++;
-  glb_ids.insert(v->glb_id);
 }
 //-----------------------------------------------------------------------------
 void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
@@ -568,8 +566,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     }
   }
 
-  uint pre_num_cells = cells.size();
-
   std::vector<Propagation> propagated;
   bool empty = false;
   less_pair comp;
@@ -606,9 +602,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  EdgeKey key2 = edge_key(it->second.v2, mv->glb_id);
 	  
 	  bc_dvs.erase(mv->glb_id);
-	  glb_ids.erase(mv->glb_id);	  
 	  mv->glb_id = it->second.mv;
-	  glb_ids.insert(mv->glb_id);
 	  bc_dvs[it->second.mv] = mv;
 	  mv->ghosted = true;	
 	  mv->shared = true;
@@ -622,6 +616,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    ref_edge[edge_key(it->second.v2, mv->glb_id)] = ref_edge[key2];
 	    ref_edge.erase(key2);
 	  }
+	  
 	}
 	else 
 	{
@@ -641,7 +636,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  */
 
 	  //	  if(it->second.owner > MPI::processNumber())
-	  //	    mv->ghosted = false;
+	    //	    mv->ghosted = false;
 
 	  ref_edge[edge_key(it->second.v1, it->second.mv)] = ref_edge[edge_key(it->second.v1, mv->glb_id)];	  
 	  ref_edge[edge_key(it->second.v2, it->second.mv)] = ref_edge[edge_key(it->second.v2, mv->glb_id)];
@@ -698,8 +693,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 		node.v1 = it->second.v1;
 		node.v2 = it->second.v2;
 		node.owner = mv->owner;
-		//		(*ic)->nref++;
-		//std::pair<uint, prop_edge> prop((*ic)->nref, node);
 		std::pair<uint, prop_edge> prop(0, node);
 		propagate.push_back(prop);
 	      }
@@ -713,7 +706,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	      
 	      mv->p = (bc_dvs[it->second.v1]->p + bc_dvs[it->second.v2]->p) / 2.0;
 	      mv->on_boundary = true;
-	      glb_ids.insert(mv->glb_id);
 	      bc_dvs[mv->glb_id] = mv;
 	      vertices.insert(mv);
 	      ref_edge[edge_key(it->second.v1, it->second.v2)] = mv;
@@ -728,10 +720,8 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     if(MPI::processNumber() == 0 && propagated.size() > 0)
       putchar('\n');
     
-    if(MPI::processNumber() == 0){
-      message("Done");
+    if(MPI::processNumber() == 0)
       end();    
-    }
     
     /*
     uint num_prop = propagate.size();
@@ -739,10 +729,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
     empty = (num_gprop == 0);
     */
-  }
-  
-  MPI_Barrier(MPI_COMM_WORLD);
-  message("Propagated refinements: %d", (cells.size() - pre_num_cells) / 2);
+  }  
 }
 //-----------------------------------------------------------------------------
 void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
@@ -850,11 +837,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
     dolfin_assert(recv_count%5 == 0);
     for(int k = 0; k < recv_count; k += 5) 
     {   
-      /*
-      for(uint l = 1; l < 4; l++)
-	if(global_mapping.find(recv_buff[l+k]) != global_mapping.end())
-	  recv_buff[l+k] = global_mapping[recv_buff[l+k]];
-      */
+
       prop_edge node;
       node.mv = recv_buff[k+1];
       node.v1 = recv_buff[k+2];

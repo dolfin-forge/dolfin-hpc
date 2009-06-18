@@ -107,26 +107,20 @@ namespace dolfin
 
     void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
     
-    void populate(std::vector<Propagation>& propagated,
-		  _map<int, int>& global_mapping);
-    
-    void remap(std::vector<uint>& updated, _map<int, int>& global_mapping);
-
     std::set<DVertex *> vertices;
     std::list<DCell *> cells;
 
     CellType* cell_type;
     uint d;
 
-    // Start offset foro new global id
+    // Start offset for new global id
     uint _start_offset, _max;
 
     // Propagation buffer
     std::vector<Propagation> propagate, type2, type3;
-    //std::vector<int> propagate;
-    _set<uint> glb_ids;
 
-    std::map<uint, DVertex*> bc_dvs;
+    // Map between global number of boundary vertex to vertex
+    _map<uint, DVertex*> bc_dvs;
     std::map<EdgeKey, DVertex*> ref_edge;
 
     // Comparison operator for index/value pairs

@@ -509,7 +509,6 @@ void DofMap::build(UFC& ufc, uint jj)
     }
     else {
 
-      error("epic failure");
       BoundaryMesh local_boundary;
       local_boundary.init_interior(dolfin_mesh);
       

@@ -26,7 +26,6 @@ namespace dolfin
     /// Refine simplicial mesh locally by recursive edge bisection 
     static void refine(Mesh& mesh, 
 		       MeshFunction<bool>& cell_marker,
-		       MeshFunction<uint>& cell_map,
 		       real tf = 0.0, 
 		       real tb = 0.0, 
 		       real ts = 0.0);
@@ -95,7 +94,7 @@ namespace dolfin
     void removeCell(DCell* c);
 
     void imp(Mesh& mesh);
-    void exp(Mesh& mesh, std::vector<int>& new2old_arr);
+    void exp(Mesh& mesh);
     void number();
 
     void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
@@ -104,11 +103,9 @@ namespace dolfin
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
-    void propagate_naive(std::vector<uint>& propagated, bool& empty,
-			 _map<int, int>& global_mapping);
+    void propagate_naive(std::vector<uint>& propagated, bool& empty);
 
-    void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty,
-			     _map<int, int>& global_mapping);
+    void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
     
     void populate(std::vector<Propagation>& propagated,
 		  _map<int, int>& global_mapping);
@@ -122,7 +119,7 @@ namespace dolfin
     uint d;
 
     // Start offset foro new global id
-    uint _start_offset;
+    uint _start_offset, _max;
 
     // Propagation buffer
     std::vector<Propagation> propagate, type2, type3;

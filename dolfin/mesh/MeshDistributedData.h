@@ -133,6 +133,9 @@ namespace dolfin
     uint *_global_indices;
     uint *_global_cell_indices;
 
+    uint _global_indices_size;
+    uint _global_cell_indices_size;
+
     friend class MeshGhostIterator;
     friend class MeshSharedIterator;
     friend class MeshRenumber;

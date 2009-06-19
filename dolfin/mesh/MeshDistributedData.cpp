@@ -66,15 +66,20 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _num_global_cell = distributed_data._num_global_cell;
 
   finalized =  distributed_data.finalized;
+
+  _global_indices_size = distributed_data._global_indices_size;
+  _global_cell_indices_size = distributed_data._global_cell_indices_size;
+
   if ( finalized ) {
-    _global_indices = new uint[global_indices[0].size()];
+    _global_indices = new uint[_global_indices_size];
     memcpy(_global_indices, distributed_data._global_indices, 
 	   global_indices[0].size() * sizeof(uint));
 
-    _global_cell_indices = new uint[global_indices[3].size()];
+    _global_cell_indices = new uint[_global_cell_indices_size];
     memcpy(_global_cell_indices, distributed_data._global_cell_indices, 
 	   global_indices[3].size() * sizeof(uint));
   }
+
     
   return *this;
 }
@@ -123,6 +128,7 @@ void MeshDistributedData::finalize(uint dim)
 
     for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it) 
       _global_indices[it->first] = it->second;
+    _global_indices_size = global_indices[0].size();
     global_indices[0].clear();
     break;
   case 3:
@@ -132,6 +138,7 @@ void MeshDistributedData::finalize(uint dim)
     _global_cell_indices = new uint[global_indices[dim].size()];
     for(it = global_indices[dim].begin(); it != global_indices[dim].end(); ++it)
       _global_cell_indices[it->first] = it->second;
+    _global_cell_indices_size = global_indices[3].size();
     global_indices[3].clear();
     break;
   default:

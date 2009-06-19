@@ -24,6 +24,7 @@
 #include "LoadBalancer.h"
 #include <unistd.h>
 #include <algorithm>
+#include <cmath> 
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -46,9 +47,7 @@ void RivaraRefinement::refine(Mesh& mesh,
     else
       LoadBalancer::balance(mesh, cell_marker,LoadBalancer::LEPP);
     end();
-
   }
-  mesh.renumber();
 
   //  int d = mesh.topology().dim();
 
@@ -174,7 +173,7 @@ void DMesh::imp(Mesh& mesh)
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
-  num_new *= 2;
+  num_new *= 10;
   // Find maximum global index assigned
   uint max_index = std::max(mesh.distdata().global_numVertices(),
 			    mesh.distdata().max_index());
@@ -406,7 +405,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
   else
   {
-    //dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
+    dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
     mv = new DVertex;
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
@@ -428,8 +427,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->shared = true;
       mv->ghosted = false;
       mv->owner = MPI::processNumber();
-      //      mv->glb_id = v0->glb_id + _max * v1->glb_id + _max;
-      //    dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
+      dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
     
@@ -577,10 +575,12 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
     std::sort(propagate.begin(), propagate.end(), comp);
 
+    propagated.clear();
     //propagate_naive( type1, empty, global_mapping);
     propagate_hypercube(propagated, empty);
 
     if( empty && propagated.size() == 0) break;     
+    
     propagate.clear();
 
     if(MPI::processNumber() == 0 && propagated.size() > 0) {
@@ -638,8 +638,10 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	  //	  if(it->second.owner > MPI::processNumber())
 	    //	    mv->ghosted = false;
 
-	  ref_edge[edge_key(it->second.v1, it->second.mv)] = ref_edge[edge_key(it->second.v1, mv->glb_id)];	  
-	  ref_edge[edge_key(it->second.v2, it->second.mv)] = ref_edge[edge_key(it->second.v2, mv->glb_id)];
+	  ref_edge[edge_key(it->second.v1, it->second.mv)] = 
+	    ref_edge[edge_key(it->second.v1, mv->glb_id)];	  
+	  ref_edge[edge_key(it->second.v2, it->second.mv)] = 
+	    ref_edge[edge_key(it->second.v2, mv->glb_id)];
 	  bc_dvs[it->second.mv] = mv; 
 	}
        	continue;
@@ -681,10 +683,11 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    if(mv == 0) 
 	    {
 	      mv = new DVertex;
+	      mv->glb_id = it->second.mv;
+	      vertices.insert(mv);	      
 
 	      if( MPI::processNumber() < it->second.owner)
 	      {
-		addVertex(mv);
 		mv->shared = true;
 		mv->ghosted = false;
 		mv->owner = MPI::processNumber();		  
@@ -704,11 +707,10 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 		mv->owner = it->second.owner;
 	      }
 	      
-	      mv->p = (bc_dvs[it->second.v1]->p + bc_dvs[it->second.v2]->p) / 2.0;
+	      mv->p = (v1->p + v2->p) / 2.0;
 	      mv->on_boundary = true;
 	      bc_dvs[mv->glb_id] = mv;
-	      vertices.insert(mv);
-	      ref_edge[edge_key(it->second.v1, it->second.v2)] = mv;
+	      ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
 	    }
 	    dolfin_assert((*ic) > 0);
 	    bisect((*ic), mv, v1, v2);
@@ -825,7 +827,15 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   uint pe_size = MPI::numProcesses();
   uint dest;
   uint D = 1;
+#ifdef __sgi
+  uint _log2, x;
+  x = pe_size;
+  _log2 = 0;
+  while(x > 1){ _log2++; x>>=1;}
+  for(uint j = 0; j < _log2; j++)
+#else
   for(uint j = 0; j < log2(pe_size) ; j++)
+#endif
   {
     dest = rank^(D<<j);
 

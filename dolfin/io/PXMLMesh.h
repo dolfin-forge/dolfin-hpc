@@ -64,9 +64,9 @@ namespace dolfin
     uint *local_vertices,*shared_vertices;
     uint numLocalVertices, numLocalCells;
 
-    std::map<uint,bool> own_vertex, used_vertex;
+    _map<uint,bool> own_vertex, used_vertex;
     Array<uint> cell_buffer;
-    std::map<uint,bool> shared_buffer;
+    _map<uint,bool> shared_buffer;
 
     
   };

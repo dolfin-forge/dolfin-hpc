@@ -479,7 +479,7 @@ void PXMLMesh::closeMesh()
       send_buff.push_back(i);
     }
    
-  std::map<uint,bool> assigned_orphan, ghost_vertex;
+  _map<uint,bool> assigned_orphan, ghost_vertex;
   for(uint i=0;i<_mesh.numVertices();i++){
     if(!used_vertex[i]){
       orphan++;
@@ -502,7 +502,7 @@ void PXMLMesh::closeMesh()
   MPI_Allreduce(&num_shared, &max_nsh, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM); 
   uint *shvert = new uint[max_nsh];
   uint src,dest;
-  std::map<uint, uint> owner_map;
+  _map<uint, uint> owner_map;
   // Exchange ghost points
   for(uint j = 1; j < pe_size ; j++){
 

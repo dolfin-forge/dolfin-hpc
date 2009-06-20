@@ -15,6 +15,7 @@
 #include "MeshConnectivity.h"
 #include "MeshEditor.h"
 #include "MeshFunction.h"
+#include "MeshRenumber.h"
 #include "Vertex.h"
 #include "Facet.h"
 #include "Edge.h"
@@ -138,18 +139,18 @@ void DMesh::imp(Mesh& mesh)
   vertices.clear();
   cells.clear();
 
+  MeshRenumber::renumber_vertices(mesh);
+
   std::vector<DVertex *> vertexvec;
 
   BoundaryMesh boundary;
   boundary.init_interior(mesh);
-  File bc_m("boundary.pvd");
-  bc_m << boundary;
-  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
-  
+  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
   MeshFunction<bool> on_boundary(mesh, 0);
   on_boundary = false;
   MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
   boundary_cell = false;
+
   // Generate facet - cell connectivity if not generated
   mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
   for (CellIterator bf(boundary); !bf.end(); ++bf) 
@@ -175,8 +176,14 @@ void DMesh::imp(Mesh& mesh)
   uint num_new = mesh.size(1);
   num_new *= 10;
   // Find maximum global index assigned
+  /*
   uint max_index = std::max(mesh.distdata().global_numVertices(),
 			    mesh.distdata().max_index());
+  */
+  // Since the mesh is linear numbered, the maximum global index assigned is
+  // the number of vertices in the mesh
+  uint max_index = mesh.distdata().global_numVertices();
+  
   uint glb_max;
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
   

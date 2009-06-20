@@ -240,7 +240,7 @@ void SparsityPattern::initRange(uint num_local)
 
 #ifdef HAS_MPI  
   MPI_Allgather(&local[MPI::processNumber()],1,MPI_UNSIGNED, 
-		local, 1, MPI_UNSIGNED, MPI_COMM_WORLD);
+		local, 1, MPI_UNSIGNED, MPI::DOLFIN_COMM);
 #endif
 
   for(uint p=0; p<num_procs; ++p)
@@ -274,7 +274,7 @@ void SparsityPattern::apply()
   int maxoff, recv_count, global_row, src, dest;
 
   int numoff  = off_processor.size();  
-  MPI_Allreduce(&numoff, &maxoff, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);  
+  MPI_Allreduce(&numoff, &maxoff, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);  
   int *recv_buff = new int[maxoff];
 
   for(int j = 1 ; j < pe_size; j++){
@@ -283,7 +283,7 @@ void SparsityPattern::apply()
     dest = (rank + j) % pe_size;    
     
     MPI_Sendrecv(&off_processor[0], numoff, MPI_INT, dest, 1,
-		 recv_buff, maxoff, MPI_INT, src, 1, MPI_COMM_WORLD, &status);
+		 recv_buff, maxoff, MPI_INT, src, 1, MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
     for(int i = 0; i < recv_count; ) {

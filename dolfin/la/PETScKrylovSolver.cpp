@@ -174,7 +174,7 @@ void PETScKrylovSolver::init(uint M, uint N)
 
   // Set up solver environment
   if(MPI::numProcesses() > 1)
-    KSPCreate(PETSC_COMM_WORLD, &ksp);
+    KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else
     KSPCreate(PETSC_COMM_SELF, &ksp);
   KSPSetFromOptions(ksp);  

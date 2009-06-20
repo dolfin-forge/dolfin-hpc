@@ -58,16 +58,16 @@ void RefinementManager::init(Mesh& mesh)
 
   // Find out maximum global index assigned
   uint glb_max;
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   
   // Assign a safe range for each processor  
   _start_offset = 0;
 #if ( MPI_VERSION > 1)
   MPI_Exscan(&num_new_vertices, &_start_offset, 1, 
-	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
   MPI_Scan(&num_new_vertices, &_start_offset, 1, 
-	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   _start_offset -= num_new_vertices;
 #endif
   _start_offset += glb_max;
@@ -174,9 +174,9 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
   uint src,dest;
   int max_un, num_un, max_id, num_id, recv_count;
   num_un = send_buff.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   num_id = send_buff_id.size();
-  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[max_un];
   uint *recv_buff_id = new uint[max_id];
   for(int j = 1 ; j < pe_size; j++){
@@ -186,11 +186,11 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     
     MPI_Sendrecv(&send_buff_id[0], num_id, MPI_UNSIGNED, dest, 1, 
 		 recv_buff_id, max_id, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
 
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(uint i =0; i < (uint) recv_count ; i += 2){
@@ -226,7 +226,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(uint i =0; i < (uint) recv_count ; i += 2){      
@@ -246,7 +246,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
     
     MPI_Sendrecv(&global_buff[0], global_buff.size(), MPI_UNSIGNED, src, 2,
 		 recv_buff, max_un, MPI_UNSIGNED, dest, 2,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(uint i = 0 ; i < (uint) recv_count; i += 2){
@@ -262,7 +262,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge,
   // MPI aliasing 
   uint tmp =  newmesh.numVertices() - newmesh.distdata().num_ghost(0);
   uint num_glb;  
-  MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   newmesh.distdata().set_global_numVertices(num_glb);
 
@@ -343,7 +343,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   uint src,dest;
   int max_un, num_un, recv_count;
   num_un = send_buff.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[max_un];
   Array<uint> forbidden;
   
@@ -354,7 +354,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
     
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);  
     
     for(int i = 0; i < recv_count; i +=3) {
@@ -415,7 +415,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
   Array<uint> terminated;
   num_un = send_buff.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   delete[] recv_buff;
   recv_buff = new uint[max_un];
 
@@ -426,7 +426,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);  
 
     for(int i = 0; i < recv_count; i +=2) {
@@ -458,7 +458,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
     }
     MPI_Sendrecv(&forbidden[0], forbidden.size(), MPI_UNSIGNED, src, 2, 
 		 recv_buff, max_un, MPI_UNSIGNED, dest, 2, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);  
     
     for(int i = 0; i < recv_count; i +=2) {
@@ -481,7 +481,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   }
 
   num_un = terminated.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   delete[] recv_buff;
   recv_buff = new uint[max_un];
   
@@ -492,7 +492,7 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     MPI_Sendrecv(&terminated[0], terminated.size(), MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);  
 
     for(int i = 0; i < recv_count; i +=2) {

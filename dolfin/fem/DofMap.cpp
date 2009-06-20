@@ -397,9 +397,9 @@ void DofMap::build(UFC& ufc, uint jj)
       uint offset = 0;
 
 #if ( MPI_VERSION > 1 )
-      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else 
-      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       offset -= num_dofs;
 #endif
       _map<uint, uint> v_offset;
@@ -424,7 +424,7 @@ void DofMap::build(UFC& ufc, uint jj)
       for(uint i = 0; i < pe_size; i++) {
         send_size = ghost_buff[i].size();
         MPI_Reduce(&send_size, &recv_size_gh, 1, 
-                   MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+                   MPI_INT, MPI_SUM, i, MPI::DOLFIN_COMM);
       }
       
       uint *recv_ghost = new uint[ recv_size_gh];
@@ -436,7 +436,7 @@ void DofMap::build(UFC& ufc, uint jj)
         
         MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
                      MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh, 
-                     MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
+                     MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
         
         for(int k=0; k < recv_count; k++)
@@ -444,7 +444,7 @@ void DofMap::build(UFC& ufc, uint jj)
         
         MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
                      recv_buff, recv_size , MPI_UNSIGNED, dest, 2, 
-                     MPI_COMM_WORLD,&status);
+                     MPI::DOLFIN_COMM,&status);
         MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
         for(int j=0; j < recv_count; j++)
@@ -497,9 +497,9 @@ void DofMap::build(UFC& ufc, uint jj)
       uint offset = 0;
 
 #if ( MPI_VERSION > 1 )
-      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Exscan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else 
-      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Scan(&num_dofs, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       offset -= num_dofs;
 #endif
       _offset_ = offset;
@@ -549,7 +549,7 @@ void DofMap::build(UFC& ufc, uint jj)
       int recv_count;
       uint src, dest, num_glb, num_sdof;
       num_sdof = send_buff.size();
-      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       
       uint *recv_buff = new uint[num_glb];
       uint *recv_buff_id = new uint[num_glb];
@@ -561,11 +561,11 @@ void DofMap::build(UFC& ufc, uint jj)
 	
 	MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
 		     recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
-		     MPI_COMM_WORLD, &status);
+		     MPI::DOLFIN_COMM, &status);
 	
 	MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
 		     recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
-		     MPI_COMM_WORLD, &status);
+		     MPI::DOLFIN_COMM, &status);
 	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
 	
 	for(int i = 0; i < recv_count; i++) {
@@ -601,9 +601,9 @@ void DofMap::build(UFC& ufc, uint jj)
       uint range = shared_dofs.size();
 
 #if ( MPI_VERSION > 1 )
-      MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else 
-      MPI_Scan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Scan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       offset -= range;
 #endif    
       map.clear();
@@ -651,7 +651,7 @@ void DofMap::build(UFC& ufc, uint jj)
       delete[] recv_buff;
       
       num_sdof = send_buff.size();
-      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(&num_sdof, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       
       recv_buff = new uint[num_glb];
       recv_buff_id = new uint[num_glb];
@@ -663,11 +663,11 @@ void DofMap::build(UFC& ufc, uint jj)
 	
 	MPI_Sendrecv(&send_buff_id[0], num_sdof , MPI_UNSIGNED, dest, 1, 
 		     recv_buff_id, num_glb , MPI_UNSIGNED, src, 1, 
-		     MPI_COMM_WORLD, &status);
+		     MPI::DOLFIN_COMM, &status);
 	
 	MPI_Sendrecv(&send_buff[0], num_sdof , MPI_UNSIGNED, dest, 1, 
 		     recv_buff, num_glb , MPI_UNSIGNED, src, 1, 
-		   MPI_COMM_WORLD, &status);
+		   MPI::DOLFIN_COMM, &status);
 	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
 	
 	for(int i = 0; i < recv_count; i++)  {

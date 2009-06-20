@@ -185,21 +185,21 @@ void DMesh::imp(Mesh& mesh)
   uint max_index = mesh.distdata().global_numVertices();
   
   uint glb_max;
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   
   // Assign a safe range for each processor
   _start_offset = 0;
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_new, &_start_offset, 1,
-	     MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
   MPI_Scan(&num_new, &_start_offset, 1,
-	   MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+	   MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   _start_offset -= num_new;
 #endif
   _start_offset += glb_max;
 
-  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
@@ -284,9 +284,7 @@ void DMesh::exp(Mesh& mesh)
     }
     else if(dv->shared)
       newmesh.distdata().set_shared(current_vertex, 0);
-    newmesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
-
-      
+    newmesh.distdata().set_map(current_vertex++, dv->glb_id, 0);   
   }
 
   Array<uint> cell_vertices(cell_type->numEntities(0));
@@ -573,14 +571,11 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
   std::vector<Propagation> propagated;
   bool empty = false;
-  less_pair comp;
 
   while(!empty) { 
     
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
-
-    std::sort(propagate.begin(), propagate.end(), comp);
 
     propagated.clear();
     //propagate_naive( type1, empty, global_mapping);
@@ -594,7 +589,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       printf("Bisecting...");
       fflush(stdout);
     }
-
     uint cc = 0;
     for(std::vector<Propagation>::iterator it = propagated.begin(); 
 	it != propagated.end(); ++it) {
@@ -623,7 +617,6 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    ref_edge[edge_key(it->second.v2, mv->glb_id)] = ref_edge[key2];
 	    ref_edge.erase(key2);
 	  }
-	  
 	}
 	else 
 	{
@@ -656,7 +649,16 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       
       if(bc_dvs.find(it->second.v1) == bc_dvs.end() ||
       	 bc_dvs.find(it->second.v2) == bc_dvs.end())
+      {
+	/*
+	if(it->second.life)
+	{
+	  it->second.life--;
+	  propagated.push_back(*it);
+	}
+	*/
 	continue;
+      }
 
       if(MPI::processNumber() == 0) {
 	switch(cc)
@@ -735,7 +737,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     /*
     uint num_prop = propagate.size();
     uint num_gprop = 0;
-    MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
     empty = (num_gprop == 0);
     */
   }  
@@ -749,7 +751,7 @@ void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
   /*
   int num_prop = propagate.size();
   int max_prop, recv_count;
-  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX, MPI::DOLFIN_COMM);
 
   int *recv_buff = new int[max_prop];
 
@@ -765,7 +767,7 @@ void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
 
     MPI_Sendrecv(&propagate[0], propagate.size(), MPI_INTEGER, dest, 1,
 		 recv_buff, max_prop, MPI_INTEGER, src, 1,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);    
 
     if (recv_count > 0)
@@ -811,7 +813,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   int num_prop = propagate.size() * 5;
   int total_prop, recv_count;
   MPI_Allreduce(&num_prop, &total_prop, 1,
-		MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD);
+		MPI_INTEGER, MPI_SUM, MPI::DOLFIN_COMM);
 
   int *recv_buff = new int[total_prop];
   int *state = new int[total_prop];
@@ -848,7 +850,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
 
     MPI_Sendrecv(state, state_size, MPI_INTEGER, dest, 1, 
 		 recv_buff, total_prop, MPI_INTEGER, dest, 1,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);
     
     dolfin_assert(recv_count%5 == 0);
@@ -860,7 +862,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
       node.v1 = recv_buff[k+2];
       node.v2 = recv_buff[k+3];
       node.owner = recv_buff[k+4];
-      
+      node.life = 1;
       Propagation prop(recv_buff[k], node);
       propagated.push_back(prop);
     }

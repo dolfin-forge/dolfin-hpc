@@ -5,7 +5,7 @@
 // Modified by Niclas Jansson, 2008-2009.
 //
 // First added:  2007-04-03
-// Last changed: 2009-05-01
+// Last changed: 2009-06-20
 
 #include <dolfin/graph/Graph.h>
 #include <dolfin/graph/GraphPartition.h>
@@ -74,19 +74,19 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
 
   // Get information about the PE
   int size, rank;  
-  MPI_Comm_size(MPI_COMM_WORLD,&size);
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
+  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
 
 
   idxtype *elmdist = new idxtype[size + 1];
   int ncells = mesh.numCells();
   elmdist[rank] = ncells;
   MPI_Allgather(&elmdist[rank], 1, MPI_INT, elmdist, 
-		1, MPI_INT, MPI_COMM_WORLD);
+		1, MPI_INT, MPI::DOLFIN_COMM);
 
   idxtype *elmwgt = NULL;
   if( weight ) {
@@ -153,12 +153,12 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 {
   // Duplicate MPI communicator
   MPI_Comm comm; 
-  MPI_Comm_dup(MPI_COMM_WORLD, &comm);
+  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
 
   int size, rank;
   // Get information about the PE
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
+  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
   
   // Gather number of locally stored vertices for each processor
   idxtype *vtxdist = new idxtype[size+1];  
@@ -166,7 +166,7 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 
 
   MPI_Allgather(&vtxdist[rank], 1, MPI_INT, vtxdist, 1, 
-		MPI_INT, MPI_COMM_WORLD);
+		MPI_INT, MPI::DOLFIN_COMM);
 
   int i,tmp;
   int sum = vtxdist[0];  

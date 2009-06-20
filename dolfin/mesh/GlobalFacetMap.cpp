@@ -114,7 +114,7 @@ void GlobalFacetMap::findGlobal3D()
   int res_size = sh_count/dim;
   int recv_size,recv_count;
 
-  MPI_Allreduce(&sh_count, &recv_size, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&sh_count, &recv_size, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[ recv_size ];
   uint *res_buff = new uint[ res_size ];
 
@@ -133,7 +133,7 @@ void GlobalFacetMap::findGlobal3D()
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, dest, 1,
 		 recv_buff, recv_size, MPI_UNSIGNED, src, 1,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
 
     for(int i = 0; i < recv_count; i += dim){
@@ -170,7 +170,7 @@ void GlobalFacetMap::findGlobal3D()
 
     MPI_Sendrecv(&shared_buff[0], shared_buff.size(), MPI_UNSIGNED, src, 2,
 		 res_buff, res_size, MPI_UNSIGNED, dest, 2,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     for(int i = 0; i<res_size; i++) 
       if(res_buff[i] == 1)
 	global_facet[unassigned[i]] = false;

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2009-05-24
+// Last changed: 2009-06-20
 
 #include "MeshFunction.h"
 #include "Cell.h"
@@ -53,8 +53,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   weight_function(mesh, cell_marker, weight, &w_local, type);
   
   // Preliminary evalution of load imbalance
-  MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+  MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   w_avg = (real) w_sum / (real) MPI::numProcesses();
   
@@ -95,8 +95,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
    */
   weight_function(mesh, cell_marker, weight, &w_local, type);
   
-  MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+  MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   w_avg = (real) w_sum / (real) MPI::numProcesses();
   real new_imbalance = (real)w_max  / (real)w_avg  ;
@@ -220,15 +220,15 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
   uint m = pe_size * pe_size ;
   uint *SiM = new uint[m]; // FIXME, this should only be needon on rank == 0
   //  MPI_Gather(sim_row, pe_size, MPI_UNSIGNED, 
-  //	     SiM, pe_size, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+  //	     SiM, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM);
 
   MPI_Allgather(sim_row, pe_size, MPI_UNSIGNED,
-		SiM, pe_size, MPI_UNSIGNED, MPI_COMM_WORLD);
+		SiM, pe_size, MPI_UNSIGNED, MPI::DOLFIN_COMM);
 
   uint *sorted = new uint[m];
   pradixsort_matrix(&sorted_indices[0],&SiM[0], pe_size);
   MPI_Gather(sorted_indices, pe_size, MPI_UNSIGNED, 
-	     sorted, pe_size, MPI_UNSIGNED, 0 , MPI_COMM_WORLD);
+	     sorted, pe_size, MPI_UNSIGNED, 0 , MPI::DOLFIN_COMM);
 
 
   uint *map  = new uint[pe_size];
@@ -265,7 +265,7 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
     delete[] unassigned_y;
   }
 
-  MPI_Bcast(map, pe_size, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
+  MPI_Bcast(map, pe_size, MPI_UNSIGNED, 0, MPI::DOLFIN_COMM);
 
   
   // Reassign processors
@@ -304,14 +304,14 @@ bool LoadBalancer::computational_gain(Mesh& mesh,
 
   uint w_new;
   for(uint i = 0; i < pe_size; i++)
-    MPI_Reduce(&tmp_w[i], &w_new, 1, MPI_UNSIGNED, MPI_SUM, i, MPI_COMM_WORLD);
+    MPI_Reduce(&tmp_w[i], &w_new, 1, MPI_UNSIGNED, MPI_SUM, i, MPI::DOLFIN_COMM);
 
   uint w_oldmax, w_newmax;
-  MPI_Allreduce(&w_old, &w_oldmax, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
-  MPI_Allreduce(&w_new, &w_newmax, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&w_old, &w_oldmax, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+  MPI_Allreduce(&w_new, &w_newmax, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
   uint tmp = max_sendrecv; // No MPI aliasing on BG/L
-  MPI_Allreduce(&tmp, &max_sendrecv, 1, MPI_UNSIGNED, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&tmp, &max_sendrecv, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   message("**** %d - %d = %d  w_nmax / w_omax = %f maxsr = %d ****", w_oldmax, w_newmax, w_oldmax - w_newmax, (real) w_newmax/ (real) w_oldmax, max_sendrecv);
 
   real ndims =  (real) mesh.type().numVertices(mesh.topology().dim());
@@ -392,12 +392,12 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
       count[ ((Matrix[tmp[j]]) >> (8 * i)) & 0xff ]++;
     
 
-    MPI_Allreduce(count, glb_count, 256, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+    MPI_Allreduce(count, glb_count, 256, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
     offset = 0;
     for(uint j = 0; j < 256; j++) {
       MPI_Scan(&count[j], &glb_scan, 1, MPI_UNSIGNED, 
-		 MPI_SUM, MPI_COMM_WORLD);
+		 MPI_SUM, MPI::DOLFIN_COMM);
       map[j] = glb_scan + offset;
       offset += glb_count[j];      
     }
@@ -425,7 +425,7 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 
       MPI_Sendrecv(&sendbuff[dest][0], sendbuff[dest].size(), MPI_UNSIGNED,
 		   dest, 0, recvbuff, 2*pe_size, MPI_UNSIGNED, src,
-		   0, MPI_COMM_WORLD, &status);
+		   0, MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_size);
       for(int k = 0; k < recv_size; k +=2){
 	index[recvbuff[k]%pe_size]  = recvbuff[k+1];

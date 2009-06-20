@@ -53,14 +53,14 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   uint num_vert = mesh.numVertices() - mesh.distdata().num_ghost(0);
 
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Exscan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-  MPI_Scan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Scan(&num_vert, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   offset -= num_vert;
 #endif
 
   uint num_glb;  
-  MPI_Allreduce(&num_vert, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_vert, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   mesh.distdata().set_global_numVertices(num_glb);
   
   _map<uint,uint> new_local,new_global;  
@@ -84,7 +84,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   for(uint i = 0; i < pe_size; i++) {
     send_size = ghost_buff[i].size();
     MPI_Reduce(&send_size, &recv_size_gh, 1, 
-	       MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+	       MPI_INT, MPI_SUM, i, MPI::DOLFIN_COMM);
   }
 
   uint *recv_ghost = new uint[ recv_size_gh];
@@ -96,7 +96,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
     MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
 		 MPI_UNSIGNED, dest, 1, recv_ghost, recv_size_gh, 
-		 MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
+		 MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
     for(int k=0; k < recv_count; k++)
@@ -104,7 +104,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
 		 recv_buff, recv_size , MPI_UNSIGNED, dest, 2, 
-		 MPI_COMM_WORLD,&status);
+		 MPI::DOLFIN_COMM,&status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
     
     for(int j=0; j < recv_count; j++){
@@ -172,9 +172,9 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   uint src,dest;
   int max_un, num_un, max_id, num_id, recv_count;
   num_un = send_buff.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   num_id = send_buff_id.size();
-  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[max_un];
   uint *recv_buff_id = new uint[max_id];
 
@@ -185,11 +185,11 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     
     MPI_Sendrecv(&send_buff_id[0], num_id, MPI_UNSIGNED, dest, 1, 
 		 recv_buff_id, max_id, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
 
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(uint i =0; i < (uint) recv_count ; i += 2){
@@ -221,14 +221,14 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   uint num_edges = mesh.numEdges() - mesh.distdata().num_ghost(1);
 
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Exscan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-  MPI_Scan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Scan(&num_edges, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   offset -= num_edges;
 #endif
 
   uint num_glb;  
-  MPI_Allreduce(&num_edges, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_edges, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   mesh.distdata().set_global_numEdges(num_glb);
 
@@ -262,7 +262,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(int i =0; i < recv_count ; i += 2){
@@ -284,7 +284,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     
     MPI_Sendrecv(&global_buff[0], global_buff.size(), MPI_UNSIGNED, src, 2,
 		 recv_buff, max_un, MPI_UNSIGNED, dest, 2,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
 
     for(int i = 0 ; i < recv_count; i += 2){
@@ -351,9 +351,9 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   uint src,dest;
   int max_un, num_un, max_id, num_id, recv_count, recv_count_id;
   num_un = send_buff.size();
-  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_un, &max_un, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   num_id = send_buff_id.size();
-  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_id, &max_id, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[max_un];
   uint *recv_buff_id = new uint[max_id];
   EdgeKey key;
@@ -364,12 +364,12 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
     
     MPI_Sendrecv(&send_buff_id[0], num_id, MPI_UNSIGNED, dest, 1, 
 		 recv_buff_id, max_id, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count_id);  
 
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
 
     uint ii = 0;
@@ -413,14 +413,14 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   uint num_faces = mesh.numFaces() - mesh.distdata().num_ghost(2);
 
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Exscan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-  MPI_Scan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Scan(&num_faces, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   offset -= num_faces;
 #endif
 
   uint num_glb;  
-  MPI_Allreduce(&num_faces, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_faces, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   mesh.distdata().set_global_numFaces(num_glb);  
  
@@ -451,7 +451,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
     
     MPI_Sendrecv(&send_buff[0], num_un, MPI_UNSIGNED, dest, 1, 
 		 recv_buff, max_un, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     uint ii = 0;
     for(uint i = 0; i < (uint) recv_count ; ii++, i += inc){    
@@ -482,7 +482,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
     
     MPI_Sendrecv(&global_buff[0], global_buff.size(), MPI_UNSIGNED, src, 2,
 		 recv_buff, max_un, MPI_UNSIGNED, dest, 2,
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);  
     
     for(int i = 0 ; i < recv_count; i += 2){
@@ -512,9 +512,9 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   uint num_cells = mesh.numCells();
 
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Exscan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-  MPI_Scan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Scan(&num_cells, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   offset -= num_cells;
 #endif
 
@@ -525,7 +525,7 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   }
 
   uint num_glb;  
-  MPI_Allreduce(&num_cells, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&num_cells, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   
   mesh.distdata().set_global_numCells(num_glb);
   

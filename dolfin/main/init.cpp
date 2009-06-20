@@ -9,6 +9,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include "SubSystemsManager.h"
+#include "MPI.h"
 #include "init.h"
 
 //-----------------------------------------------------------------------------
@@ -18,6 +19,10 @@ void dolfin::dolfin_init(int argc, char* argv[])
   
 #ifdef HAS_PETSC
   SubSystemsManager::initPETSc(argc, argv);
+#endif
+
+#ifdef HAS_MPI
+  MPI::initComm();
 #endif
 }
 //-----------------------------------------------------------------------------

@@ -9,6 +9,12 @@
 #ifndef __MPI_helper_H
 #define __MPI_helper_H
 
+#ifdef HAS_MPI
+#include <mpi.h>
+#endif 
+
+#include <dolfin/common/types.h>
+
 namespace dolfin
 {
   /// This class provides utility functions for easy access of the number of 
@@ -42,12 +48,18 @@ namespace dolfin
     /// Stop MPI timer
     static real stopTimer(dolfin::real& stime);
 
+    /// Setup DOLFIN_COMM MPI communicator
+    static void initComm();
+
+    //#ifdef HAS_MPI
+    static MPI_Comm DOLFIN_COMM;
+    //#endif
+
   private:
     static dolfin::real start_time;
     static int this_process, num_processes;
     static bool _this_process, _num_processes;
-
-
+    static bool _dolfin_comm;
   };
 }
 

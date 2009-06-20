@@ -83,6 +83,7 @@ namespace dolfin
       uint v1; 
       uint v2;
       uint owner;
+      uint life;
     } prop_edge;
 
     typedef std::pair<uint, prop_edge> Propagation;

@@ -23,7 +23,8 @@ dolfin::uint dolfin::MPI::processNumber()
 {
   if(!_this_process) {
     SubSystemsManager::initMPI();
-    MPI_Comm_rank(MPI_COMM_WORLD, &this_process);
+    initComm();
+    MPI_Comm_rank(MPI::DOLFIN_COMM, &this_process);
     _this_process = true;
   }
 
@@ -34,7 +35,8 @@ dolfin::uint dolfin::MPI::numProcesses()
 {
   if(!_num_processes) {
     SubSystemsManager::initMPI();
-    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+    initComm();
+    MPI_Comm_size(MPI::DOLFIN_COMM, &num_processes);
     _num_processes = true;
   }
 
@@ -55,32 +57,43 @@ bool dolfin::MPI::receive()
 //-----------------------------------------------------------------------------
 void dolfin::MPI::startTimer()
 {
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(MPI::DOLFIN_COMM);
   start_time = MPI_Wtime();
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::stopTimer()
 {
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - start_time);
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::startTimer(real& stime)
 {
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(MPI::DOLFIN_COMM);
   stime = MPI_Wtime();
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::stopTimer(real& stime)
 {
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - stime);
+}
+//-----------------------------------------------------------------------------
+void dolfin::MPI::initComm()
+{
+  if(_dolfin_comm) 
+    return;
+  
+  MPI_Comm_dup(MPI_COMM_WORLD, &DOLFIN_COMM);
+  _dolfin_comm = true;
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::start_time = 0.0;
 bool dolfin::MPI::_this_process = false;
 bool dolfin::MPI::_num_processes = false;
+bool dolfin::MPI::_dolfin_comm = false;
 int dolfin::MPI::this_process, dolfin::MPI::num_processes;
+MPI_Comm dolfin::MPI::DOLFIN_COMM;
 #else
 
 //-----------------------------------------------------------------------------

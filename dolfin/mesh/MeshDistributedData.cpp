@@ -129,6 +129,7 @@ void MeshDistributedData::finalize(uint dim)
     for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it) 
       _global_indices[it->first] = it->second;
     _global_indices_size = global_indices[0].size();
+    _max_global_index = _global_indices_size;
     global_indices[0].clear();
     break;
   case 3:

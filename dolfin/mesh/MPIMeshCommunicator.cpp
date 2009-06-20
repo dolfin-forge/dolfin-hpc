@@ -354,7 +354,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
     for(uint i=0; i<pe_size; i++){
       send_size = send_list_cells[i].size();
       MPI_Reduce(&send_size, &recv_count_cells, 1, MPI_INT, 
-		 MPI_SUM, i, MPI_COMM_WORLD);
+		 MPI_SUM, i, MPI::DOLFIN_COMM);
     }
   }
   else
@@ -364,7 +364,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   recv_count = 0;
   for(uint i=0; i<pe_size; i++){
     send_size = send_list_vertices[i].size();
-    MPI_Reduce(&send_size, &recv_count, 1, MPI_INT,MPI_MAX, i, MPI_COMM_WORLD);
+    MPI_Reduce(&send_size, &recv_count, 1, MPI_INT,MPI_MAX, i, MPI::DOLFIN_COMM);
   }
   recv_count_vertices = recv_count / gdim;
   num_vertices = recv_count;
@@ -385,17 +385,17 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 
     MPI_Sendrecv(&send_list_vertices[dest][0], send_list_vertices[dest].size(),
 		 MPI_DOUBLE, dest, 0, recv_buff, recv_count, MPI_DOUBLE, src, 
-		 0,MPI_COMM_WORLD, &status);
+		 0,MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_DOUBLE,&recv_size);
 
 
     MPI_Sendrecv(&send_list_mappings[dest][0], send_list_mappings[dest].size(),
 		 MPI_UNSIGNED, dest, 1, recv_buff_map, recv_count_vertices, 
-		 MPI_UNSIGNED, src, 1, MPI_COMM_WORLD, &status);
+		 MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
 
     MPI_Sendrecv(&send_list_cells[dest][0], send_list_cells[dest].size(), 
 		 MPI_UNSIGNED, dest, 2, rcp, recv_count_cells, MPI_UNSIGNED,
-		 src, 2, MPI_COMM_WORLD, &status);
+		 src, 2, MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_size_cell);
     rcp += recv_size_cell;
     recv_count_cells -= recv_size_cell;
@@ -482,7 +482,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
     double *rp = &recv_buff[0];
     recv_buff_map = new uint[send_size];
     uint *rmp = &recv_buff_map[0];        
-    MPI_Allreduce(&send_size, &recv_count, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD);
+    MPI_Allreduce(&send_size, &recv_count, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
     uint *shared = new uint[recv_count];
     for(uint i=1; i<pe_size; i++){
 
@@ -490,7 +490,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
       dest = (rank + i) % pe_size;
 
       MPI_Sendrecv(&shared_buffer[0], shared_buffer.size(), MPI_UNSIGNED, dest,
-		   1, shared, recv_count, MPI_UNSIGNED, src ,1, MPI_COMM_WORLD,
+		   1, shared, recv_count, MPI_UNSIGNED, src ,1, MPI::DOLFIN_COMM,
 		   &status);
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_size);
       
@@ -508,7 +508,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
 		   rp, recv_count_vertices, MPI_DOUBLE, dest, 2, 
-		   MPI_COMM_WORLD, &status);
+		   MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status,MPI_DOUBLE,&recv_size);
 
       rp += recv_size;
@@ -516,7 +516,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 
       MPI_Sendrecv(&send_buff_indices[0], send_buff_indices.size(), 
 		   MPI_UNSIGNED, src, 3, rmp, send_size, MPI_UNSIGNED, 
-		   dest, 3, MPI_COMM_WORLD, &status);
+		   dest, 3, MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_size);  
       
       rmp += recv_size;

@@ -133,7 +133,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       int recv_size,recv_count, send_size;
       for(uint i=0; i<pe_size; i++){
 	send_size = ghost_buff[i].size();
-	MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i, MPI_COMM_WORLD);
+	MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i, MPI::DOLFIN_COMM);
       }
       uint *recv_buff = new uint[ recv_size];
       
@@ -147,7 +147,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
 	
 	MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(), MPI_UNSIGNED,
 		     dest, 1, recv_buff, recv_size, MPI_UNSIGNED, src, 1,
-		     MPI_COMM_WORLD, &status);
+		     MPI::DOLFIN_COMM, &status);
 	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);      
 	
 	for(int i = 0; i < recv_count; i++) 

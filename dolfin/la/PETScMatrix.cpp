@@ -90,7 +90,8 @@ void PETScMatrix::init(uint M, uint N)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
   }
   else
   {
@@ -116,7 +117,8 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-    MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
     //MatSetFromOptions(A);
     //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
     //MatZeroEntries(A);
@@ -155,9 +157,10 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
-  MatCreateMPIAIJ(PETSC_COMM_WORLD, PETSC_DECIDE, PETSC_DECIDE, M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
-  //  MatCreateMPIAIJ(PETSC_COMM_WORLD, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
-  //MatCreateMPIAIJ(PETSC_COMM_WORLD, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
+  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //  MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //MatCreateMPIAIJ(MPI::DOLFIN_COMM, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
@@ -322,7 +325,7 @@ void PETScMatrix::getrow(uint row,
 void PETScMatrix::getrows_offproc(std::set<uint> rows)
 {
 
-  if(MPI::numProcesses() == 1)
+  if(dolfin::MPI::numProcesses() == 1)
     return;
 
   int *_cols = new int[size(0)];

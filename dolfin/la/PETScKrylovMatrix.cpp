@@ -10,6 +10,7 @@
 
 #include <iostream>
 
+#include <dolfin/main/MPI.h>
 #include <dolfin/log/dolfin_log.h>
 #include "PETScVector.h"
 #include "PETScKrylovMatrix.h"
@@ -76,7 +77,7 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
     }
   }
   
-  MatCreateShell(PETSC_COMM_WORLD, m, n, M, N, (void*) this, &A);
+  MatCreateShell(MPI::DOLFIN_COMM, m, n, M, N, (void*) this, &A);
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
 //-----------------------------------------------------------------------------
@@ -98,7 +99,7 @@ void PETScKrylovMatrix::init(int M, int N)
 	MatDestroy(A);
     }
 
-  MatCreateShell(PETSC_COMM_WORLD, M, N, M, N, (void*) this, &A);
+  MatCreateShell(MPI::DOLFIN_COMM, M, N, M, N, (void*) this, &A);
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
 //-----------------------------------------------------------------------------

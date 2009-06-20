@@ -499,7 +499,7 @@ void PXMLMesh::closeMesh()
   uint *shpi = &shared_indices[0];
   uint *shared_orphans = new uint[num_shared];
   uint *shpo = &shared_orphans[0];
-  MPI_Allreduce(&num_shared, &max_nsh, 1, MPI_INT,MPI_MAX, MPI_COMM_WORLD); 
+  MPI_Allreduce(&num_shared, &max_nsh, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM); 
   uint *shvert = new uint[max_nsh];
   uint src,dest;
   std::map<uint, uint> owner_map;
@@ -511,7 +511,7 @@ void PXMLMesh::closeMesh()
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, dest, 1,
 		 shvert, max_nsh, MPI_UNSIGNED, src, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);
 
     for(int k=0; k<num_recv; k++)
@@ -540,13 +540,13 @@ void PXMLMesh::closeMesh()
 
     MPI_Sendrecv(&send_buff_indices[0], send_buff_indices.size(), MPI_UNSIGNED,
 		 src, 1, shpi, num_shared, MPI_UNSIGNED, dest, 1, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);	
     num_shared -=num_recv;
     shpi += num_recv;
 
     MPI_Sendrecv(&send_buff_coords[0], send_buff_coords.size(), MPI_DOUBLE,
-		 src, 2, shp, num_coords, MPI_DOUBLE, dest, 2, MPI_COMM_WORLD,
+		 src, 2, shp, num_coords, MPI_DOUBLE, dest, 2, MPI::DOLFIN_COMM,
 		 &status);
     MPI_Get_count(&status,MPI_DOUBLE,&num_recv);
     num_coords -=num_recv;
@@ -554,7 +554,7 @@ void PXMLMesh::closeMesh()
 
     MPI_Sendrecv(&send_buff_orphan[0], send_buff_orphan.size(), MPI_UNSIGNED,
 		 src, 3, shpo, num_orphan, MPI_UNSIGNED, dest, 3, 
-		 MPI_COMM_WORLD, &status);
+		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);
     num_orphan -= num_recv;
     shpo += num_recv;    

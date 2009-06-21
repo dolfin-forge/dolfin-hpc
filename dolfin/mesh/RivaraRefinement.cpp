@@ -41,6 +41,7 @@ void RivaraRefinement::refine(Mesh& mesh,
 
   // Start Loadbalancer
   if(MPI::numProcesses() > 1) {
+    /*
     begin("Load balancing");
     // Tune loadbalancer using machine specific parameters, if available
     if( tf > 0.0 && tb > 0.0 && ts > 0.0)
@@ -48,6 +49,7 @@ void RivaraRefinement::refine(Mesh& mesh,
     else
       LoadBalancer::balance(mesh, cell_marker,LoadBalancer::LEPP);
     end();
+    */
   }
 
   //  int d = mesh.topology().dim();
@@ -55,7 +57,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   // Dynamic mesh test
   DMesh dmesh;
   dmesh.imp(mesh);
-  
+
   std::vector<bool> dmarked(mesh.numCells());
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
@@ -68,6 +70,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       dmarked[ci->index()] = false;
     }
   }
+  dolfin_debug("Done marking");
   
   dmesh.bisectMarked(dmarked);
 
@@ -84,7 +87,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       it++;
   } 
   
-  
+  dolfin_debug("Done bisecting mesh");
   Mesh omesh;
   
   dmesh.exp(omesh);
@@ -424,6 +427,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       node.v1 = v0->glb_id;
       node.v2 = v1->glb_id;
       node.owner = MPI::processNumber();
+      node.life = 1;
       std::pair<uint, prop_edge> _prop_( dcell->nref, node);
       propagate.push_back( _prop_ );
       dcell->nref++;
@@ -568,6 +572,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       bisect(c, 0, 0, 0);
     }
   }
+  dolfin_debug("Done local bisection");
 
   std::vector<Propagation> propagated;
   bool empty = false;
@@ -577,10 +582,11 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
 
-    propagated.clear();
+    //    propagated.clear();
     //propagate_naive( type1, empty, global_mapping);
     propagate_hypercube(propagated, empty);
-
+    dolfin_debug("Done hypercube exchange");
+    
     if( empty && propagated.size() == 0) break;     
     
     propagate.clear();
@@ -592,6 +598,8 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     uint cc = 0;
     for(std::vector<Propagation>::iterator it = propagated.begin(); 
 	it != propagated.end(); ++it) {
+
+      if(!it->second.life) continue;
 
       DVertex* mv = 0;
       
@@ -644,21 +652,18 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 	    ref_edge[edge_key(it->second.v2, mv->glb_id)];
 	  bc_dvs[it->second.mv] = mv; 
 	}
+
+	it->second.life--;
+
        	continue;
       }
       
+
       if(bc_dvs.find(it->second.v1) == bc_dvs.end() ||
       	 bc_dvs.find(it->second.v2) == bc_dvs.end())
-      {
-	/*
-	if(it->second.life)
-	{
-	  it->second.life--;
-	  propagated.push_back(*it);
-	}
-	*/
 	continue;
-      }
+
+      it->second.life--;
 
       if(MPI::processNumber() == 0) {
 	switch(cc)
@@ -705,6 +710,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 		node.v1 = it->second.v1;
 		node.v2 = it->second.v2;
 		node.owner = mv->owner;
+		node.life = 1;
 		std::pair<uint, prop_edge> prop(0, node);
 		propagate.push_back(prop);
 	      }

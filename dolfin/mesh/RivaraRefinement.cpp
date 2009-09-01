@@ -183,12 +183,14 @@ void DMesh::imp(Mesh& mesh)
   // the number of vertices in the mesh
   uint max_index = mesh.distdata().global_numVertices();
   
-  //  uint glb_max;
+  //uint glb_max;
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
-  MPI_Allreduce(&_salt, &num_new, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  //  MPI_Allreduce(&_salt, &num_new, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  _salt = ( _salt + 10) / max_index;
+  //  _salt = ( _salt + 10) / max_index;
+  Cell c(mesh, 0);
+  _salt = c.numEntities(1) * mesh.distdata().global_numCells();
 
   // Assign a safe range for each processor
   _start_offset = 0;
@@ -419,12 +421,12 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv = new DVertex;
     addVertex(mv);
     if( v0->glb_id < v1->glb_id )
-      mv->glb_id = (((v0->glb_id * _SALT_) + (v1->glb_id))) + glb_max;
-      //  mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
+      //      mv->glb_id = (((v0->glb_id * _SALT_) + (v1->glb_id))) + glb_max;
+      mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
 
     else
-      mv->glb_id = (((v1->glb_id * _SALT_) + (v0->glb_id))) + glb_max;
-      //      mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
+      //mv->glb_id = (((v1->glb_id * _SALT_) + (v0->glb_id))) + glb_max;
+      mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
 
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0; 
 
@@ -583,6 +585,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 
   std::vector<Propagation> propagated;
   std::list<Propagation> leftovers;
+
   bool empty = false;
 
   while(!empty) { 

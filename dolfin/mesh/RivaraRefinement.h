@@ -7,6 +7,8 @@
 #ifndef __RIVARAREFINEMENT_H
 #define __RIVARAREFINEMENT_H
 
+#define _SALT_ 852893
+
 #include <list>
 #include <vector>
 
@@ -83,7 +85,6 @@ namespace dolfin
       uint v1; 
       uint v2;
       uint owner;
-      uint life;
     } prop_edge;
 
     typedef std::pair<uint, prop_edge> Propagation;
@@ -113,6 +114,8 @@ namespace dolfin
 
     CellType* cell_type;
     uint d;
+    uint glb_max;
+    uint _salt;
 
     // Start offset for new global id
     uint _start_offset, _max;

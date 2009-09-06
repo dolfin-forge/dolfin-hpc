@@ -86,6 +86,7 @@ options = [
     BoolOption("enableUmfpack", "Compile with support for UMFPACK", "yes"),
     BoolOption("enableTrilinos", "Compile with support for Trilinos", "yes"),
     BoolOption("enableParmetis", "Compile with support for ParMETIS", "yes"),
+    BoolOption("enableZlib", "Compile with support for zlib", "yes"),
     BoolOption("enablePydolfin", "Compile the python wrappers of Dolfin", "yes"),
     # some of the above may need extra options (like petscDir), should we
     # try to get that from pkg-config?
@@ -99,6 +100,7 @@ options = [
     PathOption("withTrilinosDir", "Specify path to Trilinos", None),
     PathOption("withParmetisDir", "Specify path to ParMETIS", None),
     PathOption("withBoostDir", "Specify path to Boost", None),
+    PathOption("withZlibDir", "Specify path to zlib", None),
     #
     # a few more options originally from PyCC:
     #BoolOption("autoFetch", "Automatically fetch datafiles from (password protected) SSH repository", 0),

@@ -141,7 +141,6 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
     *entry++ = p.x();     
     *entry++ = p.y();     
     *entry++ = p.z();        
-    //      fprintf(fp," %f %f %f \n", p.x(), p.y(), p.z());
   }
   
   // Create encoded stream
@@ -161,8 +160,6 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   {
     for (VertexIterator v(*c); !v.end(); ++v)
       *c_entry++ = v->index();
-      //      fprintf(fp," %8u ",v->index());
-    //    fprintf(fp," \n");
   }  
   
   // Create encoded stream
@@ -175,17 +172,7 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
   std::vector<boost::uint32_t>::iterator cc_entry = c_data.begin(); 
   for (uint offsets = 1; offsets <= mesh.numCells(); offsets++)
-  {
     *cc_entry++ = offsets*mesh.type().numEntities(0);
-    /*
-    if (mesh.type().cellType() == CellType::tetrahedron )
-      fprintf(fp, " %8u \n",  offsets*4);
-    if (mesh.type().cellType() == CellType::triangle )
-      fprintf(fp, " %8u \n", offsets*3);
-    if (mesh.type().cellType() == CellType::interval )
-      fprintf(fp, " %8u \n",  offsets*2);
-    */
-  }
 
   std::stringstream base64_cc_stream;
   encode_stream(base64_cc_stream, c_data);
@@ -199,17 +186,12 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   std::vector<boost::uint8_t>::iterator t_entry = t_data.begin();
   for (uint types = 1; types <= mesh.numCells(); types++)
   {
-    
     if (mesh.type().cellType() == CellType::tetrahedron )
       *t_entry++ = boost::uint8_t(10);
-      //      fprintf(fp, " 10 \n");
     if (mesh.type().cellType() == CellType::triangle )
       *t_entry++ = boost::uint8_t(5);
-      //      fprintf(fp, " 5 \n");
     if (mesh.type().cellType() == CellType::interval )
       *t_entry++ = boost::uint8_t(3);
-      //      fprintf(fp, " 3 \n");
-
   }
 
   // Create encoded stream
@@ -280,21 +262,7 @@ void PVTKFile::ResultsWrite(Function& u) const
       *entry++ = values[ vertex->index() ];
       *entry++ = values[ vertex->index() + mesh.numVertices()];
       *entry++ = values[ vertex->index() + 2*mesh.numVertices()];
-    }
-    
-    /*
-    if ( rank == 0 ) 
-      fprintf(fp," %e ", values[ vertex->index() ] );
-    else if ( u.dim(0) == 2 ) 
-      fprintf(fp," %e %e  0.0", values[ vertex->index() ], 
-                                values[ vertex->index() + mesh.numVertices() ] );
-    else  
-      fprintf(fp," %e %e  %e", values[ vertex->index() ], 
-                               values[ vertex->index() +   mesh.numVertices() ], 
-                               values[ vertex->index() + 2*mesh.numVertices() ] );
-
-    fprintf(fp,"\n");
-    */
+    }    
   }	 
  
   // Create encoded stream
@@ -444,9 +412,14 @@ void PVTKFile::VTKHeaderOpen(Mesh& mesh) const
   error("Unable to determine the endianness of the machine for VTK binary output.");
 #endif
   
+  std::string compressor = "";
+#ifdef HAS_ZLIB
+  compressor = "compressor=\"vtkZLibDataCompressor\"";
+#endif
+
   // Write headers
-  fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s >\n",
-	  endianness.c_str());
+  fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s %s>\n",
+	  endianness.c_str(), compressor.c_str());
   fprintf(fp, "<UnstructuredGrid>  \n");
   fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">  \n",
 	  mesh.numVertices(), mesh.numCells());

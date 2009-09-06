@@ -3,10 +3,13 @@
 //
 // Modified by Anders Logg 2005-2006.
 // Modified by Kristian Oelgaard 2006.
-// Modified by Niclas Jansson 2008.
+// Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2007806-26
+// Last changed: 2009-09-06
+
+#include <boost/cstdint.hpp>
+#include <boost/detail/endian.hpp>
 
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
@@ -14,6 +17,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
+#include "Encoder.h"
 #include "PVTKFile.h"
 
 
@@ -127,51 +131,92 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
 
   // Write vertex positions
   fprintf(fp, "<Points>  \n");
-  fprintf(fp, "<DataArray  type=\"Float64\"  NumberOfComponents=\"3\"  format=\"ascii\">  \n");
+  fprintf(fp, "<DataArray  type=\"Float32\"  NumberOfComponents=\"3\"  format=\"binary\"> \n");
+  std::vector<float> data;
+  data.resize(3*mesh.numVertices());
+  std::vector<float>::iterator entry = data.begin();
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
     Point p = v->point();
-    fprintf(fp," %f %f %f \n", p.x(), p.y(), p.z());
+    *entry++ = p.x();     
+    *entry++ = p.y();     
+    *entry++ = p.z();        
+    //      fprintf(fp," %f %f %f \n", p.x(), p.y(), p.z());
   }
+  
+  // Create encoded stream
+  std::stringstream base64_stream;
+  encode_stream(base64_stream, data);
+  fprintf(fp, "%s\n", base64_stream.str().c_str());
   fprintf(fp, "</DataArray>  \n");
   fprintf(fp, "</Points>  \n");
   
   // Write cell connectivity
   fprintf(fp, "<Cells>  \n");
-  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"ascii\">  \n");
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\"> \n");
+  std::vector<boost::uint32_t> c_data;
+  c_data.resize(mesh.numCells() * mesh.type().numEntities(0));
+  std::vector<boost::uint32_t>::iterator c_entry = c_data.begin(); 
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     for (VertexIterator v(*c); !v.end(); ++v)
-      fprintf(fp," %8u ",v->index());
-    fprintf(fp," \n");
+      *c_entry++ = v->index();
+      //      fprintf(fp," %8u ",v->index());
+    //    fprintf(fp," \n");
   }  
-  fprintf(fp, "</DataArray> \n");
+  
+  // Create encoded stream
+  std::stringstream base64_c_stream;
+  encode_stream(base64_c_stream, c_data);
+  fprintf(fp, base64_c_stream.str().c_str());
+  fprintf(fp, "\n</DataArray> \n");
 
   // Write offset into connectivity array for the end of each cell
-  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"ascii\">  \n");
+  fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
+  std::vector<boost::uint32_t>::iterator cc_entry = c_data.begin(); 
   for (uint offsets = 1; offsets <= mesh.numCells(); offsets++)
   {
+    *cc_entry++ = offsets*mesh.type().numEntities(0);
+    /*
     if (mesh.type().cellType() == CellType::tetrahedron )
       fprintf(fp, " %8u \n",  offsets*4);
     if (mesh.type().cellType() == CellType::triangle )
       fprintf(fp, " %8u \n", offsets*3);
     if (mesh.type().cellType() == CellType::interval )
       fprintf(fp, " %8u \n",  offsets*2);
+    */
   }
-  fprintf(fp, "</DataArray> \n");
+
+  std::stringstream base64_cc_stream;
+  encode_stream(base64_cc_stream, c_data);
+  fprintf(fp, base64_cc_stream.str().c_str());
+  fprintf(fp, "\n</DataArray> \n");
   
   //Write cell type
-  fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"ascii\">  \n");
+  fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">  \n");
+  std::vector<boost::uint8_t> t_data;
+  t_data.resize(mesh.numCells());
+  std::vector<boost::uint8_t>::iterator t_entry = t_data.begin();
   for (uint types = 1; types <= mesh.numCells(); types++)
   {
+    
     if (mesh.type().cellType() == CellType::tetrahedron )
-      fprintf(fp, " 10 \n");
+      *t_entry++ = boost::uint8_t(10);
+      //      fprintf(fp, " 10 \n");
     if (mesh.type().cellType() == CellType::triangle )
-      fprintf(fp, " 5 \n");
+      *t_entry++ = boost::uint8_t(5);
+      //      fprintf(fp, " 5 \n");
     if (mesh.type().cellType() == CellType::interval )
-      fprintf(fp, " 3 \n");
+      *t_entry++ = boost::uint8_t(3);
+      //      fprintf(fp, " 3 \n");
+
   }
-  fprintf(fp, "</DataArray> \n");
+
+  // Create encoded stream
+  std::stringstream base64_t_stream;
+  encode_stream(base64_t_stream, t_data);
+  fprintf(fp, base64_t_stream.str().c_str());
+  fprintf(fp, "\n</DataArray> \n");
   fprintf(fp, "</Cells> \n"); 
   
   // Close file
@@ -205,19 +250,39 @@ void PVTKFile::ResultsWrite(Function& u) const
   if ( rank == 0 )
   {
     fprintf(fp, "<PointData  Scalars=\"U\"> \n");
-    fprintf(fp, "<DataArray  type=\"Float64\"  Name=\"U\"  format=\"ascii\">	 \n");
+    fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">	 ");
   }
   else
   {
     fprintf(fp, "<PointData  Vectors=\"U\"> \n");
-    fprintf(fp, "<DataArray  type=\"Float64\"  Name=\"U\"  NumberOfComponents=\"3\" format=\"ascii\">	 \n");	
+    fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  NumberOfComponents=\"3\" format=\"binary\">	 ");	
   }
 
   if ( dim > 3 )
     warning("Cannot handle VTK file with number of components > 3. Writing first three components only");
 	
+  std::vector<float> data;
+  data.resize(size);
+  std::vector<float>::iterator entry = data.begin();
+
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {    
+    if ( rank == 0 )
+      *entry++ = values[ vertex->index() ] ;
+    else if ( u.dim(0) == 2 ) 
+    {
+      *entry++ = values[ vertex->index() ];
+      *entry++ = values[ vertex->index() + mesh.numVertices()];
+      *entry++ = 0.0;
+    }
+    else
+    {
+      *entry++ = values[ vertex->index() ];
+      *entry++ = values[ vertex->index() + mesh.numVertices()];
+      *entry++ = values[ vertex->index() + 2*mesh.numVertices()];
+    }
+    
+    /*
     if ( rank == 0 ) 
       fprintf(fp," %e ", values[ vertex->index() ] );
     else if ( u.dim(0) == 2 ) 
@@ -229,8 +294,15 @@ void PVTKFile::ResultsWrite(Function& u) const
                                values[ vertex->index() + 2*mesh.numVertices() ] );
 
     fprintf(fp,"\n");
+    */
   }	 
-  fprintf(fp, "</DataArray> \n");
+ 
+  // Create encoded stream
+  std::stringstream base64_stream;
+  encode_stream(base64_stream, data);
+  fprintf(fp, base64_stream.str().c_str());
+  
+  fprintf(fp, "\n</DataArray> \n");
   fprintf(fp, "</PointData> \n");
   
   // Close file
@@ -289,13 +361,13 @@ void PVTKFile::pvtuFileWrite()
   pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
   
   pvtuFile << "<PCellData>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"ascii\"/>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Int32\"  Name=\"offsets\"  format=\"ascii\"/>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\"  format=\"ascii\"/>"  << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\" />" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />"  << std::endl;
   pvtuFile<<"</PCellData>" << std::endl;
   
   pvtuFile << "<PPoints>" <<std::endl;
-  pvtuFile << "<PDataArray  type=\"Float64\"  NumberOfComponents=\"3\"  format=\"ascii\"/>" << std::endl;
+  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />" << std::endl;
   pvtuFile << "</PPoints>" << std::endl;
 
   std::string fname;
@@ -324,24 +396,24 @@ void PVTKFile::pvtuFileWrite_func(Function& u)
   
   if(u.rank() == 0) {
     pvtuFile << "<PPointData Scalars=\"U\">" << std::endl;    
-    pvtuFile << "<PDataArray  type=\"Float64\"  Name=\"U\"  format=\"ascii\"/>" << std::endl;
+    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
   }
   else {
     pvtuFile << "<PPointData Vectors=\"U\">" << std::endl;    
-    pvtuFile << "<PDataArray  type=\"Float64\"  Name=\"U\"  NumberOfComponents=\"3\" format=\"ascii\"/>" << std::endl;
+    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\"  NumberOfComponents=\"3\" />" << std::endl;
     }
   
   pvtuFile << "</PPointData>" << std::endl;
 
 
   pvtuFile << "<PCellData>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"ascii\"/>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Int32\"  Name=\"offsets\"  format=\"ascii\"/>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\"  format=\"ascii\"/>"  << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />"  << std::endl;
   pvtuFile<<"</PCellData>" << std::endl;
   
   pvtuFile << "<PPoints>" <<std::endl;
-  pvtuFile << "<PDataArray  type=\"Float64\"  NumberOfComponents=\"3\"  format=\"ascii\"/>" << std::endl;
+  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />" << std::endl;
   pvtuFile << "</PPoints>" << std::endl;
 
   std::string fname;
@@ -362,8 +434,19 @@ void PVTKFile::VTKHeaderOpen(Mesh& mesh) const
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
   
+    // Figure out endianness of machine
+  std::string endianness = "";
+#if defined BOOST_LITTLE_ENDIAN
+  endianness = "byte_order=\"LittleEndian\"";
+#elif defined BOOST_BIG_ENDIAN
+  endianness = "byte_order=\"BigEndian\"";;
+#else
+  error("Unable to determine the endianness of the machine for VTK binary output.");
+#endif
+  
   // Write headers
-  fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\"   >\n");
+  fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s >\n",
+	  endianness.c_str());
   fprintf(fp, "<UnstructuredGrid>  \n");
   fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">  \n",
 	  mesh.numVertices(), mesh.numCells());
@@ -450,7 +533,7 @@ void PVTKFile::MeshFunctionWrite(T& meshfunction)
   std::ofstream fp(vtu_filename.c_str(), std::ios_base::app);
 
   fp << "<CellData  Scalars=\"U\">" << std::endl;
-  fp << "<DataArray  type=\"Float64\"  Name=\"U\"  format=\"ascii\">" << std::endl;
+  fp << "<DataArray  type=\"Float32\"  Name=\"U\"  />" << std::endl;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
     fp << meshfunction.get( cell->index() )  << std::endl;
   fp << "</DataArray>" << std::endl;
@@ -471,4 +554,50 @@ void PVTKFile::MeshFunctionWrite(T& meshfunction)
        << ") to file " << filename << " in VTK format." << endl;
 }    
 //-----------------------------------------------------------------------------
+template<typename T>
+void PVTKFile::encode_stream(std::stringstream& stream, 
+                            const std::vector<T>& data) const
+{
 
+#ifdef HAS_ZLIB
+  encode_inline_compressed_base64(stream, data);
+#else
+  warning("zlib must be configured to enable compressed VTK output. Using uncompressed base64 encoding instead.");
+  encode_inline_base64(stream, data);
+#endif
+  
+}
+//----------------------------------------------------------------------------
+template<typename T>
+void PVTKFile::encode_inline_base64(std::stringstream& stream, 
+                                   const std::vector<T>& data) const
+{
+  const boost::uint32_t size = data.size()*sizeof(T);
+  Encoder::encode_base64(&size, 1, stream);
+  Encoder::encode_base64(data, stream);
+}
+//----------------------------------------------------------------------------
+#ifdef HAS_ZLIB
+template<typename T>
+void PVTKFile::encode_inline_compressed_base64(std::stringstream& stream, 
+                                              const std::vector<T>& data) const
+{
+  boost::uint32_t header[4];
+  header[0] = 1;
+  header[1] = data.size()*sizeof(T);
+  header[2] = 0;
+
+  // Compress data
+  std::pair<boost::shared_array<unsigned char>, dolfin::uint> compressed_data = Encoder::compress_data(data);
+
+  // Length of compressed data
+  header[3] = compressed_data.second;
+
+  // Encode header
+  Encoder::encode_base64(&header[0], 4, stream);
+
+  // Encode data
+  Encoder::encode_base64(compressed_data.first.get(), compressed_data.second, stream);
+}
+#endif
+//----------------------------------------------------------------------------

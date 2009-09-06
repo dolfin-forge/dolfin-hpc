@@ -2,15 +2,17 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg 2006.
-// Modified by Niclas Jansson 2008.
+// Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2008-06-26
+// Last changed: 2009-09-06
 
 #ifndef __PVTK_FILE_H
 #define __PVTK_FILE_H
 
 #include <fstream>
+#include <string>
+#include <vector>
 #include "GenericFile.h"
 
 namespace dolfin
@@ -30,7 +32,20 @@ namespace dolfin
     void operator<< (Function& u);
     
     void write();
+
+    // Compute base64 encoded stream for VTK
+    template<typename T>
+    void encode_stream(std::stringstream& stream, const std::vector<T>& data) const;
+
   private:
+
+    // Compute base64 encoded stream for VTK
+    template<typename T>
+    void encode_inline_base64(std::stringstream& stream, const std::vector<T>& data) const;
+
+    // Compute compressed base64 encoded stream for VTK
+    template<typename T>
+    void encode_inline_compressed_base64(std::stringstream& stream, const std::vector<T>& data) const;
 
     void MeshWrite(Mesh& mesh) const;
     void ResultsWrite(Function& u) const;

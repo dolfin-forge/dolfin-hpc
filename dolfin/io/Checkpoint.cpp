@@ -14,6 +14,10 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
+void Checkpoint::Checkpoint()
+{
+}
+//-----------------------------------------------------------------------------
 void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
 {
 

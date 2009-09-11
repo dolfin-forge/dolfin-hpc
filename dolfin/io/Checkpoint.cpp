@@ -14,8 +14,13 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
-void Checkpoint::Checkpoint()
+Checkpoint::Checkpoint() : state(OPEN)
 {
+}
+//-----------------------------------------------------------------------------
+Checkpoint::~Checkpoint()
+{
+  in.close();
 }
 //-----------------------------------------------------------------------------
 void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
@@ -85,20 +90,29 @@ void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
   out.close();
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::restart(std::string fname, Mesh& mesh, 
-			 std::vector<Function *> func)
-{ 
-  
-  
+void Checkpoint::restart(std::string fname)
+{
+
+  if (state != OPEN)
+    error("Shut her down, Scotty, she's sucking mud again!");
+
   std::ostringstream _fname;
   if( MPI::numProcesses() > 1) 
     _fname << fname << "_" << MPI::processNumber() << ".chkp";
   else
     _fname << fname << ".chkp";
+  
+  in.open(_fname.str().c_str(), std::ifstream::binary);
 
-  std::ifstream in(_fname.str().c_str(), std::ifstream::binary);
-
-
+  state = MESH;
+      
+}
+//-----------------------------------------------------------------------------
+void Checkpoint::load(Mesh& mesh)
+{ 
+  if (state != MESH)
+    error("Shut her down, Scotty, she's sucking mud again!");
+  
   CellType::Type type;
   uint tdim, gdim, num_vertices, num_cells, num_entities;
   in.read((char *)&type, sizeof(CellType::Type));
@@ -111,11 +125,9 @@ void Checkpoint::restart(std::string fname, Mesh& mesh,
   real *coords = new real[gdim * num_vertices];
   in.read((char *)coords, (gdim * num_vertices) * sizeof(real));
 
-
   MeshEditor editor;
   editor.open(mesh,type, tdim, gdim);
   editor.initVertices(num_vertices);
-
 
   uint vi = 0;
   for(uint i = 0 ; i < gdim * num_vertices; i += gdim)
@@ -182,7 +194,13 @@ void Checkpoint::restart(std::string fname, Mesh& mesh,
   }
   
   
-  in.close();
-  
+
+  state = FUNC;
+}
+//-----------------------------------------------------------------------------
+void Checkpoint::load(std::vector<Function *> func)
+{
+  if (state != FUNC)
+    error("Shut her down, Scotty, she's sucking mud again!");
 }
 //-----------------------------------------------------------------------------

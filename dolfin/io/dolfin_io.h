@@ -3,6 +3,7 @@
 
 // DOLFIN io interface
 
+#include <dolfin/io/Checkpoint.h>
 #include <dolfin/io/File.h>
 
 #endif

@@ -24,20 +24,32 @@ namespace dolfin
     ~Checkpoint();
     
 
-    void write(real t, Mesh& mesh, std::vector<Function *> func);
-
+    void write(real t, Mesh& mesh, std::vector<Function *> func);    
     void restart(std::string fname);
 
     void load(Mesh& mesh);
     void load(std::vector<Function *> func);
 
-  private:
+    inline bool restart() {return state == RESTART;};
+    inline dolfin::real restart_time()
+    { if(state != RESTART) 
+	error("Shut her down, Scotty, she's sucking mud again!");
+      return _t;
+    };
 
-    enum CheckpointState {OPEN, MESH, FUNC};
+  private:
+    
+    void write_mesh(Mesh& mesh, std::ofstream& out);
+    void write_func(std::vector<Function *> func, std::ofstream& out);
+
+    enum CheckpointState {CHECKPOINT, RESTART};
+    enum RestartState {OPEN, MESH, FUNC};
 
     CheckpointState state;
+    RestartState restart_state;
     
     std::ifstream in;
+    real _t;
   };
 }
 #endif

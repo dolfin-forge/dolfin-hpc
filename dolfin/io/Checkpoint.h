@@ -37,6 +37,8 @@ namespace dolfin
       return _t;
     };
 
+    inline void reset() { state = CHECKPOINT; restart_state = OPEN;};
+
   private:
     
     void write(Mesh& mesh, std::ofstream& out);

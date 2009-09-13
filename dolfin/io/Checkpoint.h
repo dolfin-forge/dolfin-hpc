@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2009-09-08
+// Last changed: 2009-09-13
 
 #ifndef __CHECKPOINT_H
 #define __CHECKPOINT_H
@@ -39,8 +39,8 @@ namespace dolfin
 
   private:
     
-    void write_mesh(Mesh& mesh, std::ofstream& out);
-    void write_func(std::vector<Function *> func, std::ofstream& out);
+    void write(Mesh& mesh, std::ofstream& out);
+    void write(std::vector<Function *> func, std::ofstream& out);
 
     enum CheckpointState {CHECKPOINT, RESTART};
     enum RestartState {OPEN, MESH, FUNC};

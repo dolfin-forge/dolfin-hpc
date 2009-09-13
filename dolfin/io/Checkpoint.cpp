@@ -20,7 +20,6 @@ Checkpoint::Checkpoint() : state(CHECKPOINT), restart_state(OPEN)
 //-----------------------------------------------------------------------------
 Checkpoint::~Checkpoint()
 {
-  in.close();
 }
 //-----------------------------------------------------------------------------
 void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
@@ -36,9 +35,9 @@ void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
   std::ofstream out(fname.str().c_str(), std::ofstream::binary);
 
   out.write((char *) &t, sizeof(real));
-  write_mesh(mesh, out);
 
-  write_func(func, out);
+  write(mesh, out);
+  write(func, out);
 
   out.close();
 
@@ -175,9 +174,10 @@ void Checkpoint::load(std::vector<Function *> func)
     delete[] values;
   }
 
+  in.close();
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write_mesh(Mesh& mesh, std::ofstream& out)
+void Checkpoint::write(Mesh& mesh, std::ofstream& out)
 {
 
   uint num_coords = mesh.numVertices() * mesh.geometry().dim();
@@ -233,7 +233,7 @@ void Checkpoint::write_mesh(Mesh& mesh, std::ofstream& out)
 
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write_func(std::vector<Function *> func, std::ofstream& out)
+void Checkpoint::write(std::vector<Function *> func, std::ofstream& out)
 {
   std::vector<Function *>::iterator it;
 

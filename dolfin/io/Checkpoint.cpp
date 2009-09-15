@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2009-09-13
+// Last changed: 2009-09-14
 
 #include <fstream>
 #include <dolfin/mesh/Mesh.h>
@@ -22,7 +22,8 @@ Checkpoint::~Checkpoint()
 {
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
+void Checkpoint::write(uint id, real t,
+		       Mesh& mesh, std::vector<Function *> func)
 {
 
   message("Writing checkpoint at time %g", t);
@@ -34,6 +35,7 @@ void Checkpoint::write(real t, Mesh& mesh, std::vector<Function *> func)
 
   std::ofstream out(fname.str().c_str(), std::ofstream::binary);
 
+  out.write((char *) &id, sizeof(uint));
   out.write((char *) &t, sizeof(real));
 
   write(mesh, out);
@@ -58,8 +60,9 @@ void Checkpoint::restart(std::string fname)
     _fname << fname << ".chkp";
   
   in.open(_fname.str().c_str(), std::ifstream::binary);
+  in.read((char *) &_id, sizeof(uint));
   in.read((char *) &_t, sizeof(real));
-  message("Restarting from time %g", _t);
+  message("Restarting from time %g checkpoint id %d", _t, _id);
   state = RESTART;
   restart_state = MESH;
       
@@ -146,8 +149,7 @@ void Checkpoint::load(Mesh& mesh)
     in.read((char *)shared, num_shared * sizeof(uint));
     for(uint i = 0; i < num_shared; i++)
       mesh.distdata().set_shared(shared[i], 0);
-    delete[] shared;
-
+    delete[] shared;    
   }
   
   
@@ -245,7 +247,6 @@ void Checkpoint::write(std::vector<Function *> func, std::ofstream& out)
     max_size = std::max(max_size, (*it)->vector().local_size());
   }
   
-  message("Max local_size: %d", max_size);
   real *values = new real[max_size];
   for (it = func.begin(); it != func.end(); ++it)
   {

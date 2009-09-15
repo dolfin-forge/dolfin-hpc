@@ -165,8 +165,8 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   // Create encoded stream
   std::stringstream base64_c_stream;
   encode_stream(base64_c_stream, c_data);
-  fprintf(fp, base64_c_stream.str().c_str());
-  fprintf(fp, "\n</DataArray> \n");
+  fprintf(fp, "%s\n", base64_c_stream.str().c_str());
+  fprintf(fp, "</DataArray> \n");
 
   // Write offset into connectivity array for the end of each cell
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
@@ -176,8 +176,8 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
 
   std::stringstream base64_cc_stream;
   encode_stream(base64_cc_stream, c_data);
-  fprintf(fp, base64_cc_stream.str().c_str());
-  fprintf(fp, "\n</DataArray> \n");
+  fprintf(fp, "%s\n",  base64_cc_stream.str().c_str());
+  fprintf(fp, "</DataArray> \n");
   
   //Write cell type
   fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">  \n");
@@ -197,8 +197,8 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   // Create encoded stream
   std::stringstream base64_t_stream;
   encode_stream(base64_t_stream, t_data);
-  fprintf(fp, base64_t_stream.str().c_str());
-  fprintf(fp, "\n</DataArray> \n");
+  fprintf(fp, "%s\n", base64_t_stream.str().c_str());
+  fprintf(fp, "</DataArray> \n");
   fprintf(fp, "</Cells> \n"); 
   
   // Close file
@@ -268,9 +268,9 @@ void PVTKFile::ResultsWrite(Function& u) const
   // Create encoded stream
   std::stringstream base64_stream;
   encode_stream(base64_stream, data);
-  fprintf(fp, base64_stream.str().c_str());
+  fprintf(fp, "%s\n", base64_stream.str().c_str());
   
-  fprintf(fp, "\n</DataArray> \n");
+  fprintf(fp, "</DataArray> \n");
   fprintf(fp, "</PointData> \n");
   
   // Close file
@@ -452,7 +452,7 @@ void PVTKFile::vtuNameUpdate(const int counter)
   extension.assign(filename, filename.find("."), filename.size());
   
   fileid << counter;
-   newfilename << filestart << fileid.str() << "_" << MPI::processNumber() <<".vtu";
+  newfilename << filestart << fileid.str() << "_" << MPI::processNumber() <<".vtu";
   vtu_filename = newfilename.str();
   
   // Make sure file is empty

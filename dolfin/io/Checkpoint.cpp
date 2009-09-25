@@ -4,6 +4,7 @@
 // First added:  2009-09-09
 // Last changed: 2009-09-14
 
+#include <sstream>
 #include <fstream>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>

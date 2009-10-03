@@ -71,13 +71,16 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _global_cell_indices_size = distributed_data._global_cell_indices_size;
 
   if ( finalized ) {
+    dolfin_assert(_global_indices_size > 0);
+    dolfin_assert(_global_cell_indices_size > 0);
+
     _global_indices = new uint[_global_indices_size];
     memcpy(_global_indices, distributed_data._global_indices, 
-	   global_indices[0].size() * sizeof(uint));
+	   _global_indices_size * sizeof(uint));
 
     _global_cell_indices = new uint[_global_cell_indices_size];
     memcpy(_global_cell_indices, distributed_data._global_cell_indices, 
-	   global_indices[3].size() * sizeof(uint));
+	   _global_cell_indices_size * sizeof(uint));
   }
 
     

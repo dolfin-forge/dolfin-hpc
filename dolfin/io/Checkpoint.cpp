@@ -153,7 +153,8 @@ void Checkpoint::load(Mesh& mesh)
     delete[] shared;    
   }
   
-  
+  mesh.distdata().invalid_numbering();
+  mesh.renumber();
 
   restart_state = FUNC;
 }

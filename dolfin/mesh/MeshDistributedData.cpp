@@ -115,6 +115,8 @@ void MeshDistributedData::clear()
     delete[] _global_cell_indices;
   _global_cell_indices = 0;
 
+  finalized = false;
+
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::finalize(uint dim)

@@ -65,7 +65,6 @@ namespace dolfin
       _valid_vertex_numbering = _valid_cell_numbering = false;
       _valid_edge_numbering = _valid_face_numbering = false; 
       finalized = false;
-
     }
 
     inline void invalid_ownership()

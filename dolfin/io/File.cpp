@@ -5,10 +5,10 @@
 // Modified by Haiko Etzel 2005.
 // Modified by Magnus Vikstrom 2007.
 // Modified by Nuno Lopes 2008
-// Modified by Niclas Jansson, 2008.
+// Modified by Niclas Jansson, 2008-2009.
 //
 // First added:  2002-11-12
-// Last changed: 2008-07-16
+// Last changed: 2009-10-04
 
 #include <string>
 #include <dolfin/log/dolfin_log.h>
@@ -16,6 +16,7 @@
 #include "File.h"
 #include "GenericFile.h"
 #include "XMLFile.h"
+#include "BinaryFile.h"
 #include "MatlabFile.h"
 #include "OctaveFile.h"
 #include "PythonFile.h"
@@ -38,6 +39,8 @@ File::File(const std::string& filename)
     file = new XMLFile(filename);
   else if ( filename.rfind(".xml.gz") != filename.npos )
     file = new XMLFile(filename);
+  else if ( filename.rfind(".bin") != filename.npos)
+    file = new BinaryFile(filename);
   else if ( filename.rfind(".m") != filename.npos )
     file = new OctaveFile(filename);
   else if ( filename.rfind(".py") != filename.npos )

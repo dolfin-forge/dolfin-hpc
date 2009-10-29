@@ -64,6 +64,7 @@ void Checkpoint::restart(std::string fname)
   in.read((char *) &_id, sizeof(uint));
   in.read((char *) &_t, sizeof(real));
   message("Restarting from time %g checkpoint id %d", _t, _id);
+
   state = RESTART;
   restart_state = MESH;
       
@@ -86,8 +87,9 @@ void Checkpoint::load(Mesh& mesh)
   real *coords = new real[gdim * num_vertices];
   in.read((char *)coords, (gdim * num_vertices) * sizeof(real));
 
-  MeshEditor editor;
-  editor.open(mesh,type, tdim, gdim);
+  Mesh _mesh;
+  MeshEditor editor;  
+  editor.open(_mesh,type, tdim, gdim);
   editor.initVertices(num_vertices);
 
   uint vi = 0;
@@ -125,10 +127,10 @@ void Checkpoint::load(Mesh& mesh)
 
   if (MPI::numProcesses() > 1) 
   {
-    uint *mapping = new uint[mesh.numVertices()];
-    in.read((char *)mapping, mesh.numVertices() * sizeof(uint));
-    for (VertexIterator v(mesh); !v.end(); ++v)
-      mesh.distdata().set_map(v->index(), mapping[v->index()], 0);
+    uint *mapping = new uint[_mesh.numVertices()];
+    in.read((char *)mapping, _mesh.numVertices() * sizeof(uint));
+    for (VertexIterator v(_mesh); !v.end(); ++v)
+      _mesh.distdata().set_map(v->index(), mapping[v->index()], 0);
     delete[] mapping;
 
     uint num_ghost;
@@ -137,8 +139,8 @@ void Checkpoint::load(Mesh& mesh)
     in.read((char *)ghosts, 2*num_ghost * sizeof(uint));
     for (uint i = 0; i < 2 * num_ghost; i += 2)
     {
-      mesh.distdata().set_ghost(ghosts[i], 0);
-      mesh.distdata().set_ghost_owner(ghosts[i], ghosts[i+1], 0);
+      _mesh.distdata().set_ghost(ghosts[i], 0);
+      _mesh.distdata().set_ghost_owner(ghosts[i], ghosts[i+1], 0);
     }
     delete[] ghosts;
 
@@ -149,12 +151,11 @@ void Checkpoint::load(Mesh& mesh)
     uint *shared = new uint[num_shared];
     in.read((char *)shared, num_shared * sizeof(uint));
     for(uint i = 0; i < num_shared; i++)
-      mesh.distdata().set_shared(shared[i], 0);
+      _mesh.distdata().set_shared(shared[i], 0);
     delete[] shared;    
   }
   
-  mesh.distdata().invalid_numbering();
-  mesh.renumber();
+  mesh = _mesh;
 
   restart_state = FUNC;
 }

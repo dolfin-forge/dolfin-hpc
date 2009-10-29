@@ -146,7 +146,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
     partitions.set(*cell, (uint) part[ cell->index() ]);
 
   delete[] part;
-
+  MPI_Comm_free(&comm);
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
@@ -200,6 +200,7 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   delete[] xdy;
   delete[] part;
   delete[] vtxdist;
+  MPI_Comm_free(&comm);
 }
 //-----------------------------------------------------------------------------
 #else

@@ -192,7 +192,7 @@ void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
 
   Edge le(mesh, index);  
 
-  if(le.index() == ce.index() || depth > 1)
+  if(le.index() == ce.index() || depth > 2)
     return;
   
   weight.set(c.index(), weight.get(c.index()) + 1);

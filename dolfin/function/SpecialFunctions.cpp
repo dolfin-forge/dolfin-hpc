@@ -14,10 +14,8 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
 #include "SpecialFunctions.h"
+#include <dolfin/main/MPI.h>
 
-#ifdef HAS_MPI
-#include <mpi.h>
-#endif
 
 using namespace dolfin;
 

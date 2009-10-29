@@ -4,6 +4,7 @@
 // First added:  2002-12-06
 // Last changed: 2006-05-23
 
+#include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/Vector.h>

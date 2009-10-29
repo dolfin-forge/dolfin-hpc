@@ -121,7 +121,7 @@ namespace dolfin
     uint _start_offset, _max;
 
     // Propagation buffer
-    std::vector<Propagation> propagate, type2, type3;
+    std::vector<Propagation> propagate;
 
     // Map between global number of boundary vertex to vertex
     _map<uint, DVertex*> bc_dvs;

@@ -7,15 +7,12 @@
 // First added:  2007-11-30
 // Last changed: 2008-01-07
 
+#include "MPI.h"
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include "MPI.h"
 #include "SubSystemsManager.h"
 
-#ifdef HAS_MPI
-  #include <mpi.h>
-#endif
 
 //-----------------------------------------------------------------------------
 #ifdef HAS_MPI
@@ -89,10 +86,10 @@ void dolfin::MPI::initComm()
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::start_time = 0.0;
+int dolfin::MPI::this_process, dolfin::MPI::num_processes;
 bool dolfin::MPI::_this_process = false;
 bool dolfin::MPI::_num_processes = false;
 bool dolfin::MPI::_dolfin_comm = false;
-int dolfin::MPI::this_process, dolfin::MPI::num_processes;
 MPI_Comm dolfin::MPI::DOLFIN_COMM;
 #else
 

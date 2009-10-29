@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/la/Vector.h>
 #include "BinaryFile.h"

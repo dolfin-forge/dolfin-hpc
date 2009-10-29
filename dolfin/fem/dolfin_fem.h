@@ -12,6 +12,5 @@
 #include <dolfin/fem/PeriodicBC.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/Assembler.h>
-#include <dolfin/fem/pAssembler.h>
 
 #endif

@@ -6,7 +6,7 @@
 // Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2009-09-06
+// Last changed: 2009-10-29
 
 #include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
@@ -316,7 +316,7 @@ void PVTKFile::pvdFileWrite(uint num)
 
 }
 //----------------------------------------------------------------------------
-void PVTKFile::pvtuFileWrite()
+void PVTKFile::pvtuFileWrite(bool mesh_function)
 {
   std::fstream pvtuFile;
 
@@ -326,8 +326,7 @@ void PVTKFile::pvtuFileWrite()
   // Write header
   pvtuFile << "<?xml version=\"1.0\"?> " << std::endl;
   pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">" << std::endl;
-  pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
-  
+  pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;  
   pvtuFile << "<PCellData>" << std::endl;
   pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\" />" << std::endl;
   pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
@@ -337,6 +336,13 @@ void PVTKFile::pvtuFileWrite()
   pvtuFile << "<PPoints>" <<std::endl;
   pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />" << std::endl;
   pvtuFile << "</PPoints>" << std::endl;
+
+  if (mesh_function)
+  {
+    pvtuFile << "<PCellData Scalars=\"U\">" << std::endl;
+    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
+    pvtuFile<<"</PCellData>" << std::endl;
+  }
 
   std::string fname;
   // Remove rank from vtu filename ( <rank>.vtu)
@@ -489,7 +495,12 @@ void PVTKFile::MeshFunctionWrite(T& meshfunction)
 
   // Write pvd file
   if(MPI::processNumber() == 0) 
+  {
+    pvtuNameUpdate(counter);    
     pvdFileWrite(counter);
+    pvtuFileWrite(true);
+    
+  }
 
   Mesh& mesh = meshfunction.mesh(); 
 
@@ -502,19 +513,29 @@ void PVTKFile::MeshFunctionWrite(T& meshfunction)
   // Write mesh
   MeshWrite(mesh);
   
-  // Open file
-  std::ofstream fp(vtu_filename.c_str(), std::ios_base::app);
+  std::vector<float> data;
+  data.resize(mesh.numCells());
+  std::vector<float>::iterator entry = data.begin();
 
-  fp << "<CellData  Scalars=\"U\">" << std::endl;
-  fp << "<DataArray  type=\"Float32\"  Name=\"U\"  />" << std::endl;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
-    fp << meshfunction.get( cell->index() )  << std::endl;
-  fp << "</DataArray>" << std::endl;
-  fp << "</CellData>" << std::endl;
+    *entry++ = static_cast<float>(meshfunction.get(cell->index()));
+
+  // Open file
+  FILE *fp = fopen(vtu_filename.c_str(), "a");
+  fprintf(fp,"<CellData  Scalars=\"U\">\n" );
+  fprintf(fp,"<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
+
+  // Create encoded stream
+  std::stringstream base64_stream;
+  encode_stream(base64_stream, data);
+  fprintf(fp, "%s\n", base64_stream.str().c_str());
+  
+  fprintf(fp,"</DataArray>\n");
+  fprintf(fp,"</CellData>\n");
   
   // Close file
-  fp.close();
-
+  fclose(fp);
+  
   // Close headers
   VTKHeaderClose();
 

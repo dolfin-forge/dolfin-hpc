@@ -5,7 +5,7 @@
 // Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2009-09-06
+// Last changed: 2009-10-29
 
 #ifndef __PVTK_FILE_H
 #define __PVTK_FILE_H
@@ -50,7 +50,7 @@ namespace dolfin
     void MeshWrite(Mesh& mesh) const;
     void ResultsWrite(Function& u) const;
     void pvdFileWrite(uint u);
-    void pvtuFileWrite();
+    void pvtuFileWrite(bool mesh_function = false);
     void pvtuFileWrite_func(Function& u);
     void VTKHeaderOpen(Mesh& mesh) const;
     void VTKHeaderClose() const;

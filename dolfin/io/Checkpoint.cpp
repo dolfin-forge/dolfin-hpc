@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2009-09-14
+// Last changed: 2009-10-29
 
 #include <sstream>
 #include <fstream>
@@ -156,6 +156,8 @@ void Checkpoint::load(Mesh& mesh)
   }
   
   mesh = _mesh;
+  mesh.distdata().invalid_numbering();
+  mesh.renumber();
 
   restart_state = FUNC;
 }

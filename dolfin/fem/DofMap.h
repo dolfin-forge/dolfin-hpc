@@ -62,7 +62,7 @@ namespace dolfin
     
     /// Return the dimension of the global finite element function space
     unsigned int global_dimension() const
-      { return ufc_dof_map->global_dimension(); }
+    { return ufc_dof_map->global_dimension(); }
 
     /// Return the dimension of the local finite element function space
     unsigned int local_dimension() const
@@ -102,7 +102,7 @@ namespace dolfin
     { return dolfin_mesh; }
 
     /// Build parallel dof map
-    void build(UFC& ufc, uint i);
+    void build();
 
     /// Return renumbering (used for testing)
     std::map<uint, uint> getMap(); // const;
@@ -113,6 +113,7 @@ namespace dolfin
     inline bool renumbered() 
     { return (dof_map > 0 || _type_ > -1 || v_map > 0); }
 
+
   private:
 
     /// Initialise DofMap
@@ -122,7 +123,7 @@ namespace dolfin
     ufc::dof_map* extractDofMap(const ufc::dof_map& dof_map, uint& offset, const Array<uint>& sub_system) const;
 
     // Parallel dof map
-    uint** dof_map;
+    uint* dof_map;
 
     // UFC dof map
     ufc::dof_map* ufc_dof_map;
@@ -147,6 +148,7 @@ namespace dolfin
 
     int _type_;
     uint _offset_;
+    uint _local_size;
 
     uint *v_map;
   };

@@ -7,7 +7,7 @@
 #ifndef __PARAMETER_LIST_H
 #define __PARAMETER_LIST_H
 
-#include <map>
+#include <dolfin/common/types.h>
 #include "Parameter.h"
 
 namespace dolfin
@@ -44,14 +44,14 @@ namespace dolfin
   private:
 
     // Parameters stored as an STL map
-    std::map<const std::string, Parameter> parameters;
+    _map<std::string, Parameter> parameters;
 
     // Typedef of iterators for convenience
-    typedef std::map<const std::string, Parameter>::iterator iterator;
-    typedef std::map<const std::string, Parameter>::const_iterator const_iterator;
+    typedef _map<std::string, Parameter>::iterator iterator;
+    typedef _map<std::string, Parameter>::const_iterator const_iterator;
     
     // Typedef of pair for convenience
-    typedef std::pair<const std::string, Parameter> pair;
+    typedef std::pair<std::string, Parameter> pair;
     
   };
   

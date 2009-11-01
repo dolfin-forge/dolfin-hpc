@@ -23,6 +23,7 @@ namespace dolfin
   public:
     
     PVTKFile(const std::string filename);
+    PVTKFile(const std::string filename, real& t);
     ~PVTKFile();
     
     void operator<< (Mesh& mesh);
@@ -68,6 +69,10 @@ namespace dolfin
 
     // pvtu filename
     std::string pvtu_filename;
+
+    // Current time
+    real* _t;
+    
   };
   
 }

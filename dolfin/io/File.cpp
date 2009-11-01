@@ -8,7 +8,7 @@
 // Modified by Niclas Jansson, 2008-2009.
 //
 // First added:  2002-11-12
-// Last changed: 2009-10-04
+// Last changed: 2009-11-01
 
 #include <string>
 #include <dolfin/log/dolfin_log.h>
@@ -85,6 +85,24 @@ File::File(const std::string& filename, Type type)
   default:
     file = 0;
     error("Unknown file type for \"%s\".", filename.c_str());
+  }
+}
+//-----------------------------------------------------------------------------
+File::File(const std::string& filename, real& t)
+{
+
+  if ( filename.rfind(".pvd") != filename.npos )
+    if(MPI::numProcesses() > 1) 
+      file = new PVTKFile(filename, t);
+    else
+    {
+      warning("Compressing and time information only available in parallel");
+      file = new VTKFile(filename);
+    }
+  else
+  {
+    file = 0;
+    error("Unknown file type for time dependent \"%s\".", filename.c_str());
   }
 }
 //-----------------------------------------------------------------------------

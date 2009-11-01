@@ -4,9 +4,10 @@
 // Modified by Garth N. Wells, 2005, 2006.
 // Modified by Magnus Vikstrom 2007
 // Modified by Nuno Lopes 2008
+// Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2002-11-12
-// Last changed: 2008-06-17
+// Last changed: 2009-11-01
 
 #ifndef __FILE_H
 #define __FILE_H
@@ -47,6 +48,9 @@ namespace dolfin
 
     /// Create a file with given name and type (format)
     File(const std::string& filename, Type type);
+
+    /// Create a filw with given name, at time t
+    File(const std::string& filename, real& t);
 
     /// Destructor
     ~File();

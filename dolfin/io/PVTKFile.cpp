@@ -6,7 +6,7 @@
 // Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2009-10-29
+// Last changed: 2009-11-01
 
 #include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
@@ -24,7 +24,13 @@
 using namespace dolfin;
 
 //----------------------------------------------------------------------------
-PVTKFile::PVTKFile(const std::string filename) : GenericFile(filename)
+PVTKFile::PVTKFile(const std::string filename) : GenericFile(filename), _t(0)
+{
+  type = "VTK";
+}
+//----------------------------------------------------------------------------
+PVTKFile::PVTKFile(const std::string filename, real& t) : 
+  GenericFile(filename), _t(&t)
 {
   type = "VTK";
 }
@@ -304,7 +310,10 @@ void PVTKFile::pvdFileWrite(uint num)
   fname.assign(pvtu_filename, filename.find_last_of("/") + 1, pvtu_filename.size()); 
   
   // Data file name 
-  pvdFile << "<DataSet timestep=\"" << num << "\" part=\"0\"" << " file=\"" <<  fname <<  "\"/>" << std::endl; 
+  if(_t)
+    pvdFile << "<DataSet timestep=\"" << *_t << "\" part=\"0\"" << " file=\"" <<  fname <<  "\"/>" << std::endl; 
+  else
+    pvdFile << "<DataSet timestep=\"" << num << "\" part=\"0\"" << " file=\"" <<  fname <<  "\"/>" << std::endl; 
   mark = pvdFile.tellp();
   
   // Close headers

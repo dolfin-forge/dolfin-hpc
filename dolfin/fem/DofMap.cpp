@@ -5,7 +5,7 @@
 // Modified by Niclas Jansson, 2009
 
 // First added:  2007-03-01
-// Last changed: 2009-10-31
+// Last changed: 2009-11-01
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Cell.h>
@@ -244,13 +244,8 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
   }
   else if (dof_map)
   {
-    /*
-    for (uint i = 0; i < local_dimension(); i++)
-      dofs[i] = dof_map[cell_index][i];    
-    */
     uint offset = local_dimension() * cell_index;
     memcpy(dofs, &dof_map[offset], sizeof(uint)*local_dimension());
-    //memcpy(dofs, dof_map[cell_index], sizeof(uint)*local_dimension()); // FIXME: Maybe memcpy() can be used to speed this up? Test this!
   }
   else
     ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
@@ -290,7 +285,6 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
   {
     uint offset = local_dimension() * cell_index;
     memcpy(dofs, &dof_map[offset], sizeof(uint)*local_dimension());
-    //memcpy(dofs, dof_map[cell_index], sizeof(uint)*local_dimension()); // FIXME: Maybe memcpy() can be used to speed this up? Test this!
   }
   else
     ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
@@ -303,8 +297,7 @@ void DofMap::build()
     delete [] dof_map;
 
   map.clear();
-  // delete[] dof_map;
-  //    return;
+
 
   if(MPI::numProcesses() == 1) {
     /*
@@ -510,8 +503,10 @@ void DofMap::build()
 
       uint n = local_dimension(); 
       dof_map = new uint[n * dolfin_mesh.numCells()];
+      uint *facet_dofs = new uint[num_facet_dofs()];
+
       Cell c_tmp(dolfin_mesh, 1);
-      UFCCell ufc_cell(c_tmp);
+      UFCCell ufc_cell(c_tmp);      
                                                                                       
       // Initialize random number generator differently on each process             
       srand((uint)time(0) + MPI::processNumber());   
@@ -519,23 +514,26 @@ void DofMap::build()
       // Decide ownership of shared dofs                                            
       for (CellIterator bc(interior_boundary); !bc.end(); ++bc)                     
       {                                                                             
-	Facet f(dolfin_mesh, cell_map->get(*bc));                                          
-	for (CellIterator c(f); !c.end(); ++c)                                      
-	{                                                                           
-	  ufc_cell.update(*c, dolfin_mesh.distdata());                                  
-	  ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);                        
-	  for (uint i = 0; i < n; i++)                                              
-	  {                                                                         
-	    // Assign an ownership vote for each "shared" dof                       
-	    if (shared_dofs.find(dofs[i]) == shared_dofs.end())                     
-	    {                                                                       
-	      shared_dofs.insert(dofs[i]);                                          
-	      dof_vote[dofs[i]] = (uint) rand();                                    
-	      send_buffer.push_back(dofs[i]);                                       
-	      send_buffer.push_back(dof_vote[dofs[i]]);                             
-	    }                                                                       
-	  }                                                                         
-	}                                                                           
+	Facet f(dolfin_mesh, cell_map->get(*bc));
+	Cell c(dolfin_mesh, f.entities(dolfin_mesh.topology().dim())[0]);
+
+	uint local_facet = c.index(f);                                          
+
+	ufc_cell.update(c, dolfin_mesh.distdata());                                  
+	ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, ufc_cell);                        
+	ufc_dof_map->tabulate_facet_dofs(facet_dofs, local_facet);
+
+	for (uint i = 0; i < num_facet_dofs(); i++)    
+	{                                                                         
+	  // Assign an ownership vote for each "shared" dof                       
+	  if (shared_dofs.find(dofs[i]) == shared_dofs.end())                     
+	  {                                                                       
+	    shared_dofs.insert(dofs[i]);                                          
+	    dof_vote[dofs[i]] = (uint) rand() + (uint) MPI::processNumber();
+	    send_buffer.push_back(dofs[i]);                                       
+	    send_buffer.push_back(dof_vote[dofs[i]]);                             
+	  }                                                                       
+	}                                                                         
       }  
 
       // Decide ownership of "shared" dofs                                          

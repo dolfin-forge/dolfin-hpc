@@ -157,9 +157,9 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
-  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
-		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
-  //  MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		  //		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
   //MatCreateMPIAIJ(MPI::DOLFIN_COMM, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
 

@@ -4,13 +4,8 @@
 
 #include <fstream>
 #include <dolfin/common/types.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/la/Vector.h>
 #include "BinaryFile.h"
-
-#ifdef HAS_MPI
-#include <mpi.h>
-#endif
 
 using namespace dolfin;
 
@@ -30,19 +25,12 @@ void BinaryFile::operator>>(GenericVector& x)
 
   std::ifstream fp(filename.c_str(), std::ifstream::binary);
 
-  uint local_size, size;
-  fp.read((char *)&local_size, sizeof(uint));
+  uint size;
+  fp.read((char *)&size, sizeof(uint));
   
-#ifdef HAS_MPI
-  MPI_Allreduce(&local_size, &size, 1, 
-		MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-#else
-  local_size = size;
-#endif
-  
-  real *values = new real[local_size];  
+  real *values = new real[size];  
 
-  fp.read((char *)values, local_size * sizeof(real));
+  fp.read((char *)values, size * sizeof(real));
   fp.close();
 
   x.init(size);

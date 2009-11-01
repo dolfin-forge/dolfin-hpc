@@ -5,14 +5,9 @@
 // Last changed: 2006-05-23
 
 #include <dolfin/common/types.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/Vector.h>
 #include "XMLVector.h"
-
-#ifdef HAS_MPI
-#include <mpi.h>
-#endif
 
 using namespace dolfin;
 
@@ -71,21 +66,12 @@ void XMLVector::endElement(const xmlChar *name)
 void XMLVector::startVector(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse size of vector
-#ifdef HAS_MPI
-  uint local_size = parseUnsignedInt(name, attrs, "size");
-  MPI_Allreduce(&local_size, &size, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-#else
   size = parseUnsignedInt(name, attrs, "size");
-#endif
   
   // Initialize vector
   if (values)
     delete [] values;
-#ifdef HAS_MPI
-  values = new real[local_size];
-#else
   values = new real[size];
-#endif
 }
 //-----------------------------------------------------------------------------
 void XMLVector::endVector()

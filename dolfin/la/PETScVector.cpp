@@ -72,9 +72,9 @@ void PETScVector::init(uint N)
   //
   // Otherwise do nothing
   
-  if (x && this->size() == N)
+  if (x && this->size() == N || this->local_size() == N)
   {
-    VecZeroEntries(x);
+    //    VecZeroEntries(x);
     return;      
   }
   else
@@ -86,7 +86,8 @@ void PETScVector::init(uint N)
   // Create vector
   if (MPI::numProcesses() > 1)
   {
-    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
+    //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
+    VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x);
   }
   else {
     VecCreate(PETSC_COMM_SELF, &x);
@@ -263,7 +264,7 @@ const PETScVector& PETScVector::operator= (const PETScVector& v)
 {
   dolfin_assert(v.x);
 
-  init(v.size());
+  init(v.local_size());
   VecCopy(v.x, x);
 
   return *this; 

@@ -116,8 +116,11 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
 dolfin::uint SparsityPattern::size(uint n) const
 {
   dolfin_assert(n < 2);
-  return dim[n]; 
-  //  return (range[MPI::processNumber() + 1] - range[MPI::processNumber()]);
+  if(MPI::numProcesses() > 1)
+    return (range[MPI::processNumber() + 1] - range[MPI::processNumber()]);
+  else
+    return dim[n]; 
+
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
@@ -222,6 +225,9 @@ void SparsityPattern::initRange()
   
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
+  for(uint p=0; p<num_procs+1; ++p)
+    cout<< range[p] << " ";
+  cout<< endl;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::initRange(uint num_local)

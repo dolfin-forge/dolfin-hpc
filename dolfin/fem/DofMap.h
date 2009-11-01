@@ -113,6 +113,9 @@ namespace dolfin
     inline bool renumbered() 
     { return (dof_map > 0 || _type_ > -1 || v_map > 0); }
 
+    inline uint local_size()
+    { return _local_size;}
+
 
   private:
 

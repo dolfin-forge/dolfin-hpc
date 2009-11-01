@@ -35,7 +35,7 @@ using namespace dolfin;
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(0), 
                ufc_dof_map(&dof_map), ufc_dof_map_local(false), 
                dolfin_mesh(mesh), num_cells(mesh.numCells()), 
-               partitions(0), _type_(-1), v_map(0)
+               partitions(0), _type_(-1), _local_size(0), v_map(0)
 {
 
 
@@ -51,7 +51,7 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions,
                bool dof_map_local) : dof_map(0), ufc_dof_map(&dof_map), 
                ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()), 
-               partitions(&partitions),  _type_(-1), v_map(0)
+               partitions(&partitions),  _type_(-1), _local_size(0), v_map(0)
 {
   // Assume responsibilty for ufc_dof_map
   if(dof_map_local) 
@@ -65,7 +65,7 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions
 DofMap::DofMap(const std::string signature, Mesh& mesh) 
   : dof_map(0), ufc_dof_map(0), ufc_dof_map_local(false),
     dolfin_mesh(mesh), num_cells(mesh.numCells()), partitions(0), 
-    _type_(-1), v_map(0)
+    _type_(-1), _local_size(0), v_map(0)
 {
   // Create ufc dof map from signature
   ufc_dof_map = ElementLibrary::create_dof_map(signature);
@@ -85,7 +85,7 @@ DofMap::DofMap(const std::string signature, Mesh& mesh,
                MeshFunction<uint>& partitions) 
   : dof_map(0), ufc_dof_map(0), 
     ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()),
-    partitions(&partitions), _type_(-1), v_map(0)
+    partitions(&partitions), _type_(-1), _local_size(0), v_map(0)
 {
   // Create ufc dof map from signature
   ufc_dof_map = ElementLibrary::create_dof_map(signature);
@@ -387,11 +387,11 @@ void DofMap::build()
 
     if (ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numVertices()) {
       _type_ = 0;
-      delete[] dofs;
+      _local_size = dolfin_mesh.numVertices() - dolfin_mesh.distdata().num_ghost(0);
     }
     else if(ufc_dof_map->global_dimension() == dolfin_mesh.distdata().global_numCells()) {
       _type_ = 1;      
-      delete[] dofs;
+      _local_size = dolfin_mesh.numCells();
     }
     else if(ufc_dof_map->global_dimension() == 
        ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numVertices()) {
@@ -472,7 +472,7 @@ void DofMap::build()
       _type_ = 2;
       v_offset.clear();
       
-      delete[] dofs;
+      _local_size = gdim * num_local;
 
       for(uint i =0; i < pe_size; i++)
         ghost_buff[i].clear();
@@ -494,8 +494,7 @@ void DofMap::build()
 #endif
       _offset_ = offset;
       _type_ = 3;
-
-      delete[] dofs;      
+      _local_size =  gdim * dolfin_mesh.numCells();      
     }
     else {
 
@@ -594,6 +593,7 @@ void DofMap::build()
       
       // Compute offset for owned and non shared dofs                               
       uint range = owned_dofs.size();                                               
+      _local_size = range;
       uint offset = 0;
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
@@ -646,10 +646,9 @@ void DofMap::build()
 	}                                                                           
       }                                                                             
       delete[] recv_buffer;                                                         
-      delete[] dofs;   
-
       map.clear();
     }
+    delete[] dofs;   
 #endif
   }
 }

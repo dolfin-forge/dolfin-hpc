@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2009-10-29
+// Last changed: 2009-11-01
 
 #include <sstream>
 #include <fstream>

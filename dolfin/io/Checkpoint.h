@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2009-09-14
+// Last changed: 2009-11-01
 
 #ifndef __CHECKPOINT_H
 #define __CHECKPOINT_H
@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 
@@ -24,11 +25,15 @@ namespace dolfin
     ~Checkpoint();
     
 
-    void write(uint id, real t, Mesh& mesh, std::vector<Function *> func);    
+    void write(uint id, real t, Mesh& mesh,
+	       std::vector<Function *> func,
+	       std::vector<Vector *> vec);
+
     void restart(std::string fname);
 
     void load(Mesh& mesh);
     void load(std::vector<Function *> func);
+    void load(std::vector<Vector *> vec);
 
     inline bool restart() {return state == RESTART;};
 
@@ -51,9 +56,10 @@ namespace dolfin
     
     void write(Mesh& mesh, std::ofstream& out);
     void write(std::vector<Function *> func, std::ofstream& out);
+    void write(std::vector<Vector *> vec, std::ofstream& out);
 
     enum CheckpointState {CHECKPOINT, RESTART};
-    enum RestartState {OPEN, MESH, FUNC};
+    enum RestartState {OPEN, MESH, FUNC, VEC};
 
     CheckpointState state;
     RestartState restart_state;

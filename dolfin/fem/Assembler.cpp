@@ -3,10 +3,10 @@
 //
 // Modified by Garth N. Wells, 2007, 2008
 // Modified by Ola Skavhaug, 2007
-// Modified by Niclas Jansson, 2008
+// Modified by Niclas Jansson, 2008-2009.
 //
 // First added:  2007-01-17
-// Last changed: 2008-07-09
+// Last changed: 2009-11-01
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
@@ -137,7 +137,8 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   // for the PyDOLFIN interface.
 
   // Check arguments
-  check(form, coefficients, mesh);
+  if(reset_tensor)
+    check(form, coefficients, mesh);
 
   // Create data structure for local assembly data
   UFC ufc(form, mesh, dof_map_set);

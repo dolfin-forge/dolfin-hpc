@@ -166,7 +166,6 @@ void SparsityPattern::numNonZeroPerRow(uint process_number, uint d_nzrow[], uint
     //    d_nzrow[i] = sparsity_pattern[i+offset].size();
     //    o_nzrow[i] = o_sparsity_pattern[i+offset].size();
   }
-  cout<<endl;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint SparsityPattern::numNonZero() const
@@ -225,9 +224,6 @@ void SparsityPattern::initRange()
   
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
-  for(uint p=0; p<num_procs+1; ++p)
-    cout<< range[p] << " ";
-  cout<< endl;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::initRange(uint num_local)
@@ -251,15 +247,6 @@ void SparsityPattern::initRange(uint num_local)
 
   for(uint p=0; p<num_procs; ++p)
     range[p+1] = range[p] + local[p];
-
-  for(uint p=0; p<num_procs+1; ++p)
-    cout<< range[p] << " ";
-  cout<< endl;
-
-  for(uint p = 0; p < num_procs; ++p)
-    cout<< local[p] << " ";
-  cout<<endl;
-
   
 #ifdef HAS_MPI
   delete[] local;

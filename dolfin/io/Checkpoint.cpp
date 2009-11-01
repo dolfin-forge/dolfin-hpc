@@ -6,6 +6,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
@@ -24,7 +25,9 @@ Checkpoint::~Checkpoint()
 }
 //-----------------------------------------------------------------------------
 void Checkpoint::write(uint id, real t,
-		       Mesh& mesh, std::vector<Function *> func)
+		       Mesh& mesh, 
+		       std::vector<Function *> func,
+		       std::vector<Vector *> vec)
 {
 
   message("Writing checkpoint at time %g", t);
@@ -41,6 +44,7 @@ void Checkpoint::write(uint id, real t,
 
   write(mesh, out);
   write(func, out);
+  write(vec, out);
 
   out.close();
 
@@ -181,6 +185,26 @@ void Checkpoint::load(std::vector<Function *> func)
     delete[] values;
   }
 
+  restart_state = VEC;
+}
+//-----------------------------------------------------------------------------
+void Checkpoint::load(std::vector<Vector *> vec)
+{
+  if (restart_state != VEC)
+    error("Shut her down, Scotty, she's sucking mud again!");
+  
+  std::vector<Vector *>::iterator it;
+  uint local_size;
+  for (it = vec.begin(); it != vec.end(); ++it)
+  {
+    in.read((char *)&local_size, sizeof(uint));
+    real *values = new real[local_size];
+    in.read((char *)values, local_size * sizeof(real));    
+    (*it)->set(values);
+    (*it)->apply();
+    delete[] values;
+  }
+  
   in.close();
 }
 //-----------------------------------------------------------------------------
@@ -259,6 +283,26 @@ void Checkpoint::write(std::vector<Function *> func, std::ofstream& out)
     (*it)->vector().get(values);
     out.write((char *)&local_size, sizeof(uint));
     out.write((char *)values, (*it)->vector().local_size() * sizeof(real));
+  }
+  delete[] values;
+  
+}
+//-----------------------------------------------------------------------------
+void Checkpoint::write(std::vector<Vector *> vec, std::ofstream& out)
+{
+  std::vector<Vector *>::iterator it;
+
+  uint max_size = 0;
+  for (it = vec.begin(); it != vec.end(); ++it)
+    max_size = std::max(max_size, (*it)->local_size());
+  
+  real *values = new real[max_size];
+  for (it = vec.begin(); it != vec.end(); ++it)
+  {
+    uint local_size = (*it)->local_size();
+    (*it)->get(values);
+    out.write((char *)&local_size, sizeof(uint));
+    out.write((char *)values, (*it)->local_size() * sizeof(real));
   }
   delete[] values;
   

@@ -97,6 +97,9 @@ namespace dolfin
 
     /// Add block of values
     virtual void add(const real* block, uint m, const uint* rows, uint n, const uint* cols);
+    
+    /// Return norm of matrix
+    virtual real norm(std::string norm_type = "frobenius") const;
 
     /// Get non-zero values of given row
     virtual void getrow(uint row, Array<uint>& columns, Array<real>& values) const;

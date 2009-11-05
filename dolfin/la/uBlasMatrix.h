@@ -103,6 +103,9 @@ namespace dolfin
     /// Add block of values
     virtual void add(const real* block, uint m, const uint* rows, uint n, const uint* cols);
 
+    /// Return norm of matrix
+    virtual double norm(std::string norm_type = "frobenius") const;
+
     /// Get non-zero values of given row
     virtual void getrow(uint row, Array<uint>& columns, Array<real>& values) const;
 
@@ -218,6 +221,22 @@ namespace dolfin
   {
     dolfin_assert( dim < 2 );
     return (dim == 0 ? A.Mat::size1() : A.Mat::size2());  
+  }
+  //---------------------------------------------------------------------------
+  template <class Mat>
+  real uBlasMatrix<Mat>::norm(std::string norm_type) const
+  {
+    if (norm_type == "l1")
+      return norm_1(A);
+    else if (norm_type == "linf")
+      return norm_inf(A);
+    else if (norm_type == "frobenius")
+      return norm_frobenius(A);
+    else
+    {
+      error("Unknown norm type in uBLASMatrix.");
+            return 0.0;
+    }
   }
   //---------------------------------------------------------------------------
   template <class Mat>

@@ -72,7 +72,7 @@ void PETScVector::init(uint N)
   //
   // Otherwise do nothing
   
-  if (x && this->size() == N || this->local_size() == N)
+  if ((x && this->size() == N ) || (this->local_size() == N))
   {
     //    VecZeroEntries(x);
     return;      

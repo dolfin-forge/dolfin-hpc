@@ -285,6 +285,23 @@ void PETScMatrix::add(const real* block,
 #endif
 }
 //-----------------------------------------------------------------------------
+real PETScMatrix::norm(std::string norm_type) const
+{
+  real norm;
+  if (norm_type == "l1")
+    MatNorm(A, NORM_1, &norm);
+  else if (norm_type == "linf")
+    MatNorm(A, NORM_INFINITY, &norm);
+  else if (norm_type == "frobenius")
+    MatNorm(A, NORM_FROBENIUS, &norm);
+  else
+  {
+    error("Unknown norm type in uPETScMatrix.");
+    return 0.0;
+  }
+  return norm;
+}
+//-----------------------------------------------------------------------------
 void PETScMatrix::getrow(uint row,
                          Array<uint>& columns,
                          Array<real>& values) const

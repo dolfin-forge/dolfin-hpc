@@ -356,10 +356,12 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
 
   // Initialize vector
   if (x.size() != dof_map->global_dimension())
+  {
     if(MPI::numProcesses() > 1)
       x.init(dof_map->local_size());      
     else
       x.init(dof_map->global_dimension());
+  }
 
   // Initialize scratch space
   if (!scratch)

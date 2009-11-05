@@ -9,7 +9,6 @@
 #include "PETScFactory.h"
 #include "EpetraFactory.h"
 #include "DefaultFactory.h"
-#include "AssemblyFactory.h"
 
 using namespace dolfin;
 
@@ -54,10 +53,6 @@ LinearAlgebraFactory& DefaultFactory::factory() const
 #ifdef HAS_TRILINOS
     return EpetraFactory::instance();
 #endif
-  }
-  else if (backend == "Assembly")
-  { 
-    return AssemblyFactory::instance();
   }
 
   // Fallback

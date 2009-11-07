@@ -12,10 +12,7 @@
 
 #include "uBlasFactory.h"
 #include "GenericTensor.h"
-
-#ifdef HAS_MPI
-#include <mpi.h>
-#endif
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -76,7 +73,7 @@ namespace dolfin
     { 
 #ifdef HAS_MPI
       real tmp = value; 
-      MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+      MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI::DOLFIN_COMM);
 #endif
     }
 

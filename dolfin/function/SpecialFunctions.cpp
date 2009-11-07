@@ -41,7 +41,7 @@ real MeshSize::min() const
   // Compute the global minimum
   if(MPI::numProcesses() > 1) {
     real hmin_tmp = hmin;
-    MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+    MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
   }
 #endif
 
@@ -59,7 +59,7 @@ real MeshSize::max() const
   // Compute the global maximum
   if(MPI::numProcesses() > 1) {
     real hmax_tmp = hmax;
-    MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
   }
 #endif
 

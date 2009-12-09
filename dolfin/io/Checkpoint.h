@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2009-11-01
+// Last changed: 2009-12-09
 
 #ifndef __CHECKPOINT_H
 #define __CHECKPOINT_H
@@ -25,7 +25,8 @@ namespace dolfin
     ~Checkpoint();
     
 
-    void write(uint id, real t, Mesh& mesh,
+    void write(std::string fname,
+	       uint id, real t, Mesh& mesh,
 	       std::vector<Function *> func,
 	       std::vector<Vector *> vec);
 

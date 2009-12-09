@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2009-11-01
+// Last changed: 2009-12-09
 
 #include <sstream>
 #include <fstream>
@@ -24,20 +24,19 @@ Checkpoint::~Checkpoint()
 {
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write(uint id, real t,
-		       Mesh& mesh, 
+void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh, 
 		       std::vector<Function *> func,
 		       std::vector<Vector *> vec)
 {
 
   message("Writing checkpoint at time %g", t);
-  std::ostringstream fname;
-  fname << "checkpoint";
+  std::ostringstream _fname;
   if( MPI::numProcesses() > 1) 
-    fname << "_" <<  MPI::processNumber();
-  fname << ".chkp";
+    _fname << fname << "_" <<  MPI::processNumber() << ".chkp";
+  else
+    _fname << fname << ".chkp";
 
-  std::ofstream out(fname.str().c_str(), std::ofstream::binary);
+  std::ofstream out(_fname.str().c_str(), std::ofstream::binary);
 
   out.write((char *) &id, sizeof(uint));
   out.write((char *) &t, sizeof(real));

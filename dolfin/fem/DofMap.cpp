@@ -645,8 +645,10 @@ void DofMap::build()
       }                                                                             
       delete[] recv_buffer;                                                         
       map.clear();
+      delete[] facet_dofs;
     }
     delete[] dofs;   
+
 #endif
   }
 }

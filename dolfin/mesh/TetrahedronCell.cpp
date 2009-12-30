@@ -178,7 +178,13 @@ void TetrahedronCell::orderEntities(Cell& cell) const
           uint* edge_vertices = topology(1, 0)(cell_edges[k]);
 
           // Check if the jth vertex of facet i is non-incident on edge k
+#if (sun || __sun)
+	  int n1 = 0;
+	  std::count(edge_vertices, edge_vertices+2, facet_vertices[j], n1);
+          if (!n1)
+#else
           if (!std::count(edge_vertices, edge_vertices+2, facet_vertices[j]))
+#endif
           {
             // Swap facet numbers
             uint tmp = cell_edges[m];
@@ -222,8 +228,16 @@ void TetrahedronCell::orderEntities(Cell& cell) const
           uint* edge_vertices = topology(1, 0)(cell_edges[k]);
 
           // Check if the ith and jth vertex of the cell are non-incident on edge k
+#if (sun || __sun)
+	  int n1 = 0;
+	  int n2 = 0;
+	  std::count(edge_vertices, edge_vertices+2, cell_vertices[i], n1);
+	  std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
+	  if (!n1 && !n2 )
+#else
           if (!std::count(edge_vertices, edge_vertices+2, cell_vertices[i]) && \
               !std::count(edge_vertices, edge_vertices+2, cell_vertices[j]) )
+#endif
           {
             // Swap edge numbers
             uint tmp = cell_edges[m];
@@ -255,7 +269,13 @@ void TetrahedronCell::orderEntities(Cell& cell) const
         uint* facet_vertices = topology(2, 0)(cell_facets[j]);
 
         // Check if the ith vertex of the cell is non-incident on facet j
+#if (sun || __sun)
+	int n1 = 0;
+	std::count(facet_vertices, facet_vertices+3, cell_vertices[i], n1);
+	if (!n1)
+#else
         if (!std::count(facet_vertices, facet_vertices+3, cell_vertices[i]))
+#endif
         {
           // Swap facet numbers
           uint tmp = cell_facets[i];

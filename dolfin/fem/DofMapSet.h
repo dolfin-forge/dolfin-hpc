@@ -80,7 +80,7 @@ namespace dolfin
     void check(const ufc::form& form, Mesh& mesh);
 
     // Cached precomputed dof maps
-#if (sun || __sun)
+#if sun 
     std::map<std::string, std::pair<ufc::dof_map*, DofMap*> > dof_map_cache;
 #else
     std::map<const std::string, std::pair<ufc::dof_map*, DofMap*> > dof_map_cache;
@@ -90,7 +90,7 @@ namespace dolfin
     std::vector<DofMap*> dof_map_set;
 
     // Iterator for map
-#if (sun || __sun)
+#if sun 
     typedef std::map<std::string, std::pair<ufc::dof_map*, DofMap*> >::iterator map_iterator;
 #else
     typedef std::map<const std::string, std::pair<ufc::dof_map*, DofMap*> >::iterator map_iterator;

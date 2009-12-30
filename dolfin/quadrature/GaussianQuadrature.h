@@ -4,6 +4,8 @@
 // First added:  2003-06-03
 // Last changed: 2006-10-23
 
+#ifndef NO_UBLAS 
+
 #ifndef __GAUSSIAN_QUADRATURE_H
 #define __GAUSSIAN_QUADRATURE_H
 
@@ -44,5 +46,7 @@ namespace dolfin {
   };
   
 }
+
+#endif
 
 #endif

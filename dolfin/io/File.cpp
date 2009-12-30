@@ -41,10 +41,12 @@ File::File(const std::string& filename)
     file = new XMLFile(filename);
   else if ( filename.rfind(".bin") != filename.npos)
     file = new BinaryFile(filename);
+#ifndef NO_UBLAS
   else if ( filename.rfind(".m") != filename.npos )
     file = new OctaveFile(filename);
   else if ( filename.rfind(".py") != filename.npos )
     file = new PythonFile(filename);
+#endif
   else if ( filename.rfind(".pvd") != filename.npos )
     if(MPI::numProcesses() > 1) 
       file = new PVTKFile(filename);
@@ -67,21 +69,25 @@ File::File(const std::string& filename, Type type)
   case xml:
     file = new XMLFile(filename);
     break;
+#ifndef NO_UBLAS
   case matlab:
     file = new MatlabFile(filename);
     break;
   case octave:
     file = new OctaveFile(filename);
     break;
+#endif
   case vtk:
     if(MPI::numProcesses() > 1) 
       file = new PVTKFile(filename);
     else
       file = new VTKFile(filename);
     break;
+#ifndef NO_UBLAS
   case python:
     file = new PythonFile(filename);
     break;
+#endif
   default:
     file = 0;
     error("Unknown file type for \"%s\".", filename.c_str());

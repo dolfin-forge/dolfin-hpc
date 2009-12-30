@@ -4,6 +4,8 @@
 // First added:  2003-06-03
 // Last changed: 2006-10-23
 
+#ifndef NO_UBLAS 
+
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
@@ -89,3 +91,5 @@ void LobattoQuadrature::computePoints()
     points[n/2] = 0.0;
 }
 //----------------------------------------------------------------------------
+
+#endif

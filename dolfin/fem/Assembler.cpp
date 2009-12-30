@@ -8,6 +8,7 @@
 // First added:  2007-01-17
 // Last changed: 2009-11-01
 
+#include <memory>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/Timer.h>

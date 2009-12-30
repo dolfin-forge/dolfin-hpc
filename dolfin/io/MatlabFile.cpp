@@ -8,6 +8,8 @@
 // First added:  2003-02-17
 // Last changed: 2008-04-23
 
+#ifndef NO_UBLAS
+
 #include <stdio.h>
 
 #include <dolfin/log/dolfin_log.h>
@@ -65,3 +67,4 @@ void MatlabFile::operator<<(GenericMatrix& A)
 }
 //-----------------------------------------------------------------------------
 
+#endif

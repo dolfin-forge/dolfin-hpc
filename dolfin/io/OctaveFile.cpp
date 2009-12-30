@@ -7,6 +7,8 @@
 // First added:  2003-02-26
 // Last changed: 2006-05-31
 
+#ifndef NO_UBLAS
+
 // FIXME: Use streams rather than stdio
 #include <stdio.h>
 
@@ -65,3 +67,6 @@ void OctaveFile::operator<<(GenericMatrix& A)
   message(1, "Saved matrix to file %s in Octave format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
+#endif
+
+

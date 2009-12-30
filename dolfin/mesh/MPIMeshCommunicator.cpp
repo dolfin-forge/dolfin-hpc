@@ -105,7 +105,7 @@ void MPIMeshCommunicator::broadcast(const Mesh& mesh)
   //dolfin_debug1("Sending facet_type %d", facet_type);
   MPI_Bcast(&facet_type, 1, MPI_INT, this_process, MPI_COMM_WORLD);
 
-  dolfin_debug1("Finished mesh broadcast on process %d", this_process);
+  //  dolfin_debug1("Finished mesh broadcast on process %d", this_process);
 }
 //-----------------------------------------------------------------------------
 void MPIMeshCommunicator::receive(Mesh& mesh)
@@ -189,12 +189,12 @@ void MPIMeshCommunicator::receive(Mesh& mesh)
   mesh._cell_type = CellType::create(CellType::Type(cell_type));
   mesh._cell_type->facet_type = CellType::Type(facet_type);
   
-  dolfin_debug1("Finished mesh receive on process %d", this_process);
+  //dolfin_debug1("Finished mesh receive on process %d", this_process);
 }
 //-----------------------------------------------------------------------------
 void MPIMeshCommunicator::broadcast(const MeshFunction<unsigned int>& mesh_function)
 {
-  dolfin_debug("MPIMeshCommunicator::broadcast");
+  //  dolfin_debug("MPIMeshCommunicator::broadcast");
   int process_int;
   MPI_Comm_rank(MPI_COMM_WORLD, &process_int);
   //unsigned int this_process = process_int;
@@ -213,7 +213,7 @@ void MPIMeshCommunicator::broadcast(const MeshFunction<unsigned int>& mesh_funct
 //-----------------------------------------------------------------------------
 void MPIMeshCommunicator::receive(MeshFunction<unsigned int>& mesh_function)
 {
-  dolfin_debug("MPIMeshCommunicator::receive");
+  //  dolfin_debug("MPIMeshCommunicator::receive");
   int process_int;
   MPI_Comm_rank(MPI_COMM_WORLD, &process_int);
   //unsigned int this_process = process_int;

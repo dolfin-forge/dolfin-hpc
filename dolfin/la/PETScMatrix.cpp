@@ -319,7 +319,8 @@ void PETScMatrix::getrow(uint row,
     MatGetRow(A, row, &ncols, &cols, &vals);
     
     // Assign values to Arrays
-    columns.assign(cols, cols+ncols);
+    columns.assign(reinterpret_cast<uint *>(const_cast<int*>(cols)),
+		   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
     values.assign(vals, vals+ncols);
     
     MatRestoreRow(A, row, &ncols, &cols, &vals);
@@ -328,9 +329,14 @@ void PETScMatrix::getrow(uint row,
   else {
     if(!sub)
       error("No ghosted Processor rows");
+#if (sun | __sun)
+    std::map<int, int>::const_iterator it = mapping.find(row);    
+#else
     std::map<const int, int>::const_iterator it = mapping.find(row);    
+#endif
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
-    columns.assign(cols, cols+ncols);
+    columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)), 
+		   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
     values.assign(vals, vals+ncols);
     MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
   }

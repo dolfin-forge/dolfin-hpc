@@ -132,7 +132,11 @@ void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
     error("Sparsity pattern has not been computed.");
 
   // Compute number of nonzeros per row
+#if (sun || __sun)
+  std::map<uint, std::set<int> >::const_iterator set;
+#else
   std::map<const uint, std::set<int> >::const_iterator set;
+#endif
   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
     nzrow[set->first - sparsity_pattern.begin()->first ] = set->second.size();
 
@@ -145,7 +149,11 @@ void SparsityPattern::numNonZeroPerRow(uint process_number, uint d_nzrow[], uint
 
   if ( sparsity_pattern.size() == 0 )
     error("Sparsity pattern has not been computed.");
+#if (sun || __sun)
+  std::map<uint, std::set<int> >::const_iterator it;
+#else
   std::map<const uint, std::set<int> >::const_iterator it;
+#endif
   // Compute number of nonzeros per row diagonal and off-diagonal
   uint offset = range[process_number];
   for(uint i=0; i+offset<range[process_number+1]; ++i)
@@ -178,7 +186,11 @@ dolfin::uint SparsityPattern::numNonZero() const
 
   // Compute total number of nonzeros per row
   uint nz = 0;
-  std::map<const uint,  std::set<int> >::const_iterator set;
+#if (sun || __sun)
+  std::map<uint,  std::set<int> >::const_iterator set;
+#else
+  std::map<const uint,  std::set<int> >::const_iterator set
+#endif
   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
     nz += set->second.size();
   return nz;

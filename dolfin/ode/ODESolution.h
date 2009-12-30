@@ -4,6 +4,7 @@
 // First added:  2008-06-11
 // Last changed: 2008-06-11
 
+#ifndef NO_UBLAS
 
 #ifndef __ODESOLUTION_H
 #define __ODESOLUTION_H
@@ -64,5 +65,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

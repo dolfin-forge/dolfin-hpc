@@ -8,6 +8,8 @@
 // First added:  2006-04-04
 // Last changed: 2008-04-29
 
+#ifndef NO_UBLAS
+
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -237,3 +239,5 @@ LinearAlgebraFactory& uBlasVector::factory() const
   return uBlasFactory<>::instance();
 }
 //-----------------------------------------------------------------------------
+
+#endif

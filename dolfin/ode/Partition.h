@@ -4,6 +4,8 @@
 // First added:  2004
 // Last changed: 2005
 
+#ifndef NO_UBLAS
+
 #ifndef __PARTITION_H
 #define __PARTITION_H
 
@@ -75,5 +77,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

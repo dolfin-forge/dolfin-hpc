@@ -4,6 +4,8 @@
 // First added:  2008-06-11
 // Last changed: 2008-06-17
 
+#ifndef NO_UBLAS
+
 #include "ODESolution.h"
 #include "Sample.h"
 #include "ODE.h"
@@ -150,3 +152,5 @@ void ODESolution::printVector(const uBlasVector& u) {
   }
   printf("\n");
 }
+
+#endif

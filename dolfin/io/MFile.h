@@ -4,6 +4,8 @@
 // First added:  2003-07-15
 // Last changed: 2008-03-29
 
+#ifndef NO_UBLAS
+
 #ifndef __M_FILE_H
 #define __M_FILE_H
 
@@ -33,5 +35,7 @@ namespace dolfin
   };
   
 }
+
+#endif
 
 #endif

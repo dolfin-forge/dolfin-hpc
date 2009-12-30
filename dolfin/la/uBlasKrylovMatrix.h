@@ -4,6 +4,8 @@
 // First added:  2006-06-30
 // Last changed: 2006-07-03
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_KRYLOV_MATRIX_H
 #define __UBLAS_KRYLOV_MATRIX_H
 
@@ -42,5 +44,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

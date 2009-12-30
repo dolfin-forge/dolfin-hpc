@@ -4,6 +4,8 @@
 // First added:  2005-01-29
 // Last changed: 2006-04-21
 
+#ifndef NO_UBLAS
+
 #ifndef __MULTI_ADAPTIVITY_H
 #define __MULTI_ADAPTIVITY_H
 
@@ -67,5 +69,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

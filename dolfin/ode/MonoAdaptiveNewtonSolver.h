@@ -4,6 +4,8 @@
 // First added:  2005-01-28
 // Last changed: 2006-08-08
 
+#ifndef NO_UBLAS
+
 #ifndef __MONO_ADAPTIVE_NEWTON_SOLVER_H
 #define __MONO_ADAPTIVE_NEWTON_SOLVER_H
 
@@ -82,5 +84,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

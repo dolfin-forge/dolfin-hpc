@@ -4,6 +4,8 @@
 // First added:  2004
 // Last changed: 2008-12-11
 
+#ifndef NO_UBLAS
+
 #include <algorithm>
 #include <cmath>
 
@@ -127,3 +129,5 @@ bool Partition::Less::operator()(uint index) const
   return adaptivity.timestep(index) >= K;
 }
 //-----------------------------------------------------------------------------
+
+#endif

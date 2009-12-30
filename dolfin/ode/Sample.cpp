@@ -4,6 +4,8 @@
 // First added:  2003-11-20
 // Last changed: 2005
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include "TimeSlab.h"
 #include "Sample.h"
@@ -49,3 +51,5 @@ real Sample::r(unsigned int index)
   return timeslab.rsample(index, time);
 }
 //-----------------------------------------------------------------------------
+
+#endif

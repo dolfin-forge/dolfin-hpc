@@ -4,6 +4,8 @@
 // First added:  2005-01-29
 // Last changed: 2008-02-11
 
+#ifndef NO_UBLAS
+
 #include <cmath>
 #include <dolfin/parameter/parameters.h>
 #include "ODE.h"
@@ -80,3 +82,5 @@ void MonoAdaptivity::update(real k0, real r, const Method& method, real t,
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

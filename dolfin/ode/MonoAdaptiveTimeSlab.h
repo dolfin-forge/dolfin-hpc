@@ -4,6 +4,8 @@
 // First added:  2005-01-28
 // Last changed: 2008-06-11
 
+#ifndef NO_UBLAS
+
 #ifndef __MONO_ADAPTIVE_TIME_SLAB_H
 #define __MONO_ADAPTIVE_TIME_SLAB_H
 
@@ -91,5 +93,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

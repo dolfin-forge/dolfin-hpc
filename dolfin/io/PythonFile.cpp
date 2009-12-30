@@ -8,6 +8,8 @@
 // Last changed: 2008-04-08
 // 
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>
@@ -118,3 +120,5 @@ void PythonFile::operator<<(Sample& sample)
 
 }
 //-----------------------------------------------------------------------------
+
+#endif

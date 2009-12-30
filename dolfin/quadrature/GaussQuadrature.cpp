@@ -4,6 +4,8 @@
 // First added:  2003-06-03
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <stdio.h>
 #include <cmath>
 #include <dolfin/common/constants.h>
@@ -75,3 +77,5 @@ void GaussQuadrature::computePoints()
     points[n/2] = 0.0;
 }
 //-----------------------------------------------------------------------------
+
+#endif

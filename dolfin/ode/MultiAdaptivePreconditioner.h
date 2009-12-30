@@ -4,6 +4,8 @@
 // First added:  2005-01-27
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #ifndef __MULTI_ADAPTIVE_PRECONDITIONER_H
 #define __MULTI_ADAPTIVE_PRECONDITIONER_H
 
@@ -44,5 +46,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

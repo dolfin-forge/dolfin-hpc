@@ -4,6 +4,8 @@
 // First added:  2005-01-28
 // Last changed: 2006-08-21
 
+#ifndef NO_UBLAS
+
 #include <dolfin/math/dolfin_math.h>
 #include "ODE.h"
 #include "Method.h"
@@ -118,3 +120,5 @@ void MonoAdaptiveJacobian::mult(const uBlasVector& x, uBlasVector& y) const
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

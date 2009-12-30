@@ -4,6 +4,8 @@
 // First added:  2006-07-07
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #include "uBlasVector.h"
 #include "uBlasSparseMatrix.h"
 #include "uBlasKrylovMatrix.h"
@@ -40,3 +42,5 @@ void uBlasKrylovMatrix::disp(const int precision) const
 }
 //-----------------------------------------------------------------------------
 */
+
+#endif

@@ -4,6 +4,8 @@
 // First added:  2005-01-06
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
@@ -222,3 +224,5 @@ void Dependencies::makeSparse()
     _sparse = true;
 }
 //-----------------------------------------------------------------------------
+
+#endif

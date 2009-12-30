@@ -4,6 +4,8 @@
 // First added:  2005-01-05
 // Last changed: 2005-11-11
 
+#ifndef NO_UBLAS
+
 #ifndef __TIME_SLAB_SOLVER_H
 #define __TIME_SLAB_SOLVER_H
 
@@ -85,5 +87,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

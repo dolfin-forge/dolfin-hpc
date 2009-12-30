@@ -4,6 +4,8 @@
 // First added:  2005-01-06
 // Last changed: 2006-07-05
 
+#ifndef NO_UBLAS
+
 #ifndef __DEPENDENCIES_H
 #define __DEPENDENCIES_H
 
@@ -86,5 +88,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

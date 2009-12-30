@@ -4,6 +4,8 @@
 // First added:  2005
 // Last changed: 2006-08-21
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include "Homotopy.h"
 #include "HomotopyODE.h"
@@ -165,3 +167,5 @@ void HomotopyODE::monitor(const complex z[], real t)
   message("Homotopy: F = %e G = %e H = %e", Fnorm, Gnorm, Hnorm);
 }
 //-----------------------------------------------------------------------------
+
+#endif

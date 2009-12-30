@@ -4,6 +4,8 @@
 // First added:  2005-01-27
 // Last changed: 2008-02-11
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
 #include "Alloc.h"
@@ -206,3 +208,5 @@ dolfin::uint MultiAdaptiveFixedPointSolver::size() const
   return ts.nj;
 }
 //-----------------------------------------------------------------------------
+
+#endif

@@ -6,6 +6,8 @@
 // First added:  2003
 // Last changed: 2008-06-18
 
+#ifndef NO_UBLAS
+
 #include <cmath>
 #include <string>
 #include <dolfin/log/dolfin_log.h>
@@ -240,3 +242,5 @@ void TimeStepper::saveAdaptiveSamples()
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

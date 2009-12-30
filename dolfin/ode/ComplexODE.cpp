@@ -4,6 +4,8 @@
 // First added:  2005-02-02
 // Last changed: 2006-08-21
 
+#ifndef NO_UBLAS
+
 #include <dolfin/common/Array.h>
 #include "ComplexODE.h"
 
@@ -218,3 +220,5 @@ bool ComplexODE::update(const uBlasVector& u, real t, bool end)
   return update(zvalues, t, end);
 }
 //-----------------------------------------------------------------------------
+
+#endif

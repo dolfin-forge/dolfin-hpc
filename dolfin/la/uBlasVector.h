@@ -9,6 +9,8 @@
 // First added:  2006-03-04
 // Last changed: 2008-07-04
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_VECTOR_H
 #define __UBLAS_VECTOR_H
 
@@ -170,5 +172,7 @@ namespace dolfin
   LogStream& operator<< (LogStream& stream, const uBlasVector& x);
  
 }
+
+#endif
 
 #endif

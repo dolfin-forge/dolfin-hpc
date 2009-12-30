@@ -4,6 +4,8 @@
 // First added:  2005-05-02
 // Last changed: 2008-02-11
 
+#ifndef NO_UBLAS
+
 #include <stdio.h>
 #include <string>
 #include <dolfin/parameter/parameters.h>
@@ -117,3 +119,5 @@ void TimeSlab::copy(const uBlasVector& x, uint xoffset, uBlasVector& y, uint yof
     y[yoffset + i] = x[xoffset + i];
 }
 //-----------------------------------------------------------------------------
+
+#endif

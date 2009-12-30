@@ -4,6 +4,8 @@
 // First added:  2003-10-21
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/la/uBlasVector.h>
@@ -222,3 +224,5 @@ void ODE::solve()
   ODESolver::solve(*this);
 }
 //-----------------------------------------------------------------------------
+
+#endif

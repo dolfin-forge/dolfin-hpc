@@ -4,6 +4,8 @@
 // First added:  2006-05-29
 // Last changed: 
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_DENSE_MATRIX_H
 #define __UBLAS_DENSE_MATRIX_H
 
@@ -15,5 +17,7 @@ namespace dolfin
   typedef uBlasMatrix<ublas_dense_matrix> uBlasDenseMatrix;
 
 }
+
+#endif
 
 #endif

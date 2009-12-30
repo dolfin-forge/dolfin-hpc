@@ -104,7 +104,7 @@ namespace dolfin
     inline LinearAlgebraFactory& factory() const 
     {
 #ifndef NO_UBLAS
-      return uBlasFActory<>::instance();
+      return uBlasFactory<>::instance();
 #else
       return PETScFactory::instance();
 #endif

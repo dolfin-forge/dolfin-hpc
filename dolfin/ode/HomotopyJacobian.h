@@ -4,6 +4,8 @@
 // First added:  2005
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #ifndef __HOMOTOPY_JACOBIAN_H
 #define __HOMOTOPY_JACOBIAN_H
 
@@ -47,5 +49,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

@@ -4,6 +4,8 @@
 // First added:  2005-05-02
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/dolfin_math.h>
@@ -206,3 +208,5 @@ void cGqMethod::computeWeights()
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

@@ -4,6 +4,8 @@
 // First added:  2005-01-28
 // Last changed: 2008-04-08
 
+#ifndef NO_UBLAS
+
 #include "ODE.h"
 #include "Method.h"
 #include "TimeSlab.h"
@@ -65,3 +67,5 @@ const uBlasDenseMatrix& TimeSlabJacobian::matrix() const
   return A;
 }
 //-----------------------------------------------------------------------------
+
+#endif

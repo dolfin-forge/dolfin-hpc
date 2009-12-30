@@ -4,6 +4,8 @@
 // First added:  2003-11-20
 // Last changed: 2005
 
+#ifndef NO_UBLAS
+
 #ifndef __SAMPLE_H
 #define __SAMPLE_H
 
@@ -51,5 +53,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

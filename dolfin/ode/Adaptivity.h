@@ -4,6 +4,8 @@
 // First added:  2005-11-04
 // Last changed: 2005-11-04
 
+#ifndef NO_UBLAS
+
 #ifndef __ADAPTIVITY_H
 #define __ADAPTIVITY_H
 
@@ -76,5 +78,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

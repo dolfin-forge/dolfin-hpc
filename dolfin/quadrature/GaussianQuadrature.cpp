@@ -4,6 +4,8 @@
 // First added:  2003-06-03
 // Last changed: 2007-07-18
 
+#ifndef NO_UBLAS
+
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
@@ -102,3 +104,5 @@ bool GaussianQuadrature::check(unsigned int q) const
   return false;
 }
 //-----------------------------------------------------------------------------
+
+#endif

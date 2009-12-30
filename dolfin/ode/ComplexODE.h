@@ -4,6 +4,8 @@
 // First added:  2005-02-02
 // Last changed: 2006-08-21
 
+#ifndef NO_UBLAS
+
 #ifndef __COMPLEX_ODE_H
 #define __COMPLEX_ODE_H
 
@@ -107,5 +109,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

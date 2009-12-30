@@ -4,6 +4,8 @@
 // First added:  2005-05-02
 // Last changed: 2008-06-11
 
+#ifndef NO_UBLAS
+
 #ifndef __TIME_SLAB_H
 #define __TIME_SLAB_H
 
@@ -106,5 +108,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

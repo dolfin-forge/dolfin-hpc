@@ -4,6 +4,8 @@
 // First added:  2005-01-27
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #include <dolfin/la/uBlasVector.h>
 #include "Method.h"
 #include "MultiAdaptiveTimeSlab.h"
@@ -45,3 +47,5 @@ void MultiAdaptivePreconditioner::solve(uBlasVector& x,
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

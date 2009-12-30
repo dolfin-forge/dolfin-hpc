@@ -6,6 +6,8 @@
 // First added:  2005
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <stdio.h>
 #include <limits>
 #include <dolfin/common/constants.h>
@@ -375,3 +377,5 @@ void Homotopy::feval(uBlasVector& F, ComplexODE& ode)
   ode.f(x, 0.0, F);
 }
 //-----------------------------------------------------------------------------
+
+#endif

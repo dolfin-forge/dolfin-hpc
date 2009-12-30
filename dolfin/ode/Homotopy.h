@@ -4,6 +4,8 @@
 // First added:  2005
 // Last changed: 2006-08-22
 
+#ifndef NO_UBLAS
+
 #ifndef __HOMOTOPY_H
 #define __HOMOTOPY_H
 
@@ -110,5 +112,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

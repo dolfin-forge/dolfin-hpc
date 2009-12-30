@@ -6,6 +6,8 @@
 // First added:  2007-12-06
 // Last changed: 2008-05-18
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_FACTORY_H
 #define __UBLAS_FACTORY_H
 
@@ -56,5 +58,7 @@ namespace dolfin
 // Initialise static data
 template<class Mat> dolfin::uBlasFactory<Mat> dolfin::uBlasFactory<Mat>::factory;
 
+
+#endif
 
 #endif

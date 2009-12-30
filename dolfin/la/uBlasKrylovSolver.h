@@ -6,6 +6,8 @@
 // First added:  2006-05-31
 // Last changed: 2008-05-15
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_KRYLOV_SOLVER_H
 #define __UBLAS_KRYLOV_SOLVER_H
 
@@ -425,5 +427,7 @@ namespace dolfin
 
 
 }
+
+#endif
 
 #endif

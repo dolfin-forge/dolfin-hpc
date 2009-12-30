@@ -6,6 +6,8 @@
 // First added:  2006-06-23
 // Last changed: 2006-07-04
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_ILU_PRECONDITIONER_H
 #define __UBLAS_ILU_PRECONDITIONER_H
 
@@ -53,5 +55,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

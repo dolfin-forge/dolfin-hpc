@@ -7,6 +7,8 @@
 // First added:  2006-05-31
 // Last changed: 2008-05-07
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_LU_SOLVER_H
 #define __UBLAS_LU_SOLVER_H
 
@@ -126,5 +128,7 @@ namespace dolfin
   //-----------------------------------------------------------------------------
 
 }
+
+#endif
 
 #endif

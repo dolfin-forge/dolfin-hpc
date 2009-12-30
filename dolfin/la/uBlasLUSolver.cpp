@@ -7,6 +7,8 @@
 // First added:  2006-06-01
 // Last changed: 2008-05-07
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/timing.h>
 #include "uBlasLUSolver.h"
@@ -305,3 +307,4 @@ void uBlasLUSolver::check_status(long int status, std::string function) const
 
 
 
+#endif

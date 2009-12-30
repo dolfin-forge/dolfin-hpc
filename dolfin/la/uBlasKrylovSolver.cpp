@@ -6,6 +6,8 @@
 // First added:  2006-05-31
 // Last changed: 2008-05-15
 
+#ifndef NO_UBLAS
+
 #include "uBlasILUPreconditioner.h"
 #include "uBlasDummyPreconditioner.h"
 #include "uBlasKrylovSolver.h"
@@ -101,3 +103,5 @@ void uBlasKrylovSolver::readParameters()
   parameters_read = true;
 }
 //-----------------------------------------------------------------------------
+
+#endif

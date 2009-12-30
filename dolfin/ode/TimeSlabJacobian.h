@@ -4,6 +4,8 @@
 // First added:  2005-01-28
 // Last changed: 2008-04-08
 
+#ifndef NO_UBLAS
+
 #ifndef __TIME_SLAB_JACOBIAN_H
 #define __TIME_SLAB_JACOBIAN_H
 
@@ -65,5 +67,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

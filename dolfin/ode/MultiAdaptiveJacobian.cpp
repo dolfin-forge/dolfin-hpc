@@ -4,6 +4,8 @@
 // First added:  2005-01-27
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/la/uBlasVector.h>
@@ -462,3 +464,5 @@ void MultiAdaptiveJacobian::dGmult(const uBlasVector& x, uBlasVector& y) const
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

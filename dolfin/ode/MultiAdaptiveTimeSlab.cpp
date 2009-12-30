@@ -6,6 +6,8 @@
 // First added:  2005-01-27
 // Last changed: 2008-06-11
 
+#ifndef NO_UBLAS
+
 #include <string>
 #include <algorithm>
 #include <dolfin/common/constants.h>
@@ -1054,3 +1056,5 @@ TimeSlabSolver* MultiAdaptiveTimeSlab::chooseSolver()
   return 0;
 }
 //------------------------------------------------------------------------
+
+#endif

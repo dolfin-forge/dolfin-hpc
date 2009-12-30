@@ -4,6 +4,8 @@
 // First added:  2003-07-15
 // Last changed: 2005
 
+#ifndef NO_UBLAS
+
 #ifndef __PYTHON_FILE_H
 #define __PYTHON_FILE_H
 
@@ -36,5 +38,7 @@ namespace dolfin
   };
   
 }
+
+#endif
 
 #endif

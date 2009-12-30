@@ -4,6 +4,8 @@
 // First added:  2005-11-04
 // Last changed: 2008-02-11
 
+#ifndef NO_UBLAS
+
 #include <dolfin/parameter/parameters.h>
 #include "Adaptivity.h"
 
@@ -75,3 +77,5 @@ real Adaptivity::kmax() const
   return _kmax;
 }
 //-----------------------------------------------------------------------------
+
+#endif

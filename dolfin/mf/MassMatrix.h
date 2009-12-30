@@ -10,7 +10,9 @@
 #include <dolfin/common/types.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/PETScMatrix.h>
+#ifndef NO_UBLAS
 #include <dolfin/la/uBlasSparseMatrix.h>
+#endif
 #include "MatrixFactory.h"
 
 namespace dolfin
@@ -51,7 +53,7 @@ namespace dolfin
   };
 
 #endif
-
+#ifndef NO_UBLAS
   /// This class represents the standard mass matrix on a given mesh,
   /// represented as a sparse DOLFIN uBlas matrix.
 
@@ -66,7 +68,7 @@ namespace dolfin
     }
 
   };
-
+#endif
 }
 
 #endif

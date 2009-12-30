@@ -4,6 +4,8 @@
 // First added:  2005-01-05
 // Last changed: 2008-06-11
 
+#ifndef NO_UBLAS
+
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/parameter/parameters.h>
@@ -137,3 +139,5 @@ void TimeSlabSolver::chooseTolerance()
   cout << "Using discrete tolerance tol = " << tol << "." << endl;
 }
 //-----------------------------------------------------------------------------
+
+#endif

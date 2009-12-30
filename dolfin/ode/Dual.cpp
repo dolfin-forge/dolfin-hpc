@@ -6,6 +6,8 @@
 // First added:  2003-11-28
 // Last changed: 2008-06-18
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/dolfin_math.h>
 #include "Dual.h"
@@ -76,3 +78,5 @@ real Dual::time(real t) const
   return endtime() - t;
 }
 //-----------------------------------------------------------------------------
+
+#endif

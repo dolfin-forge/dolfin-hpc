@@ -4,6 +4,8 @@
 // First added:  2005-05-02
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #ifndef __DGQ_METHOD_H
 #define __DGQ_METHOD_H
 
@@ -57,5 +59,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

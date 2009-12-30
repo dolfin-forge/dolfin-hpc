@@ -6,6 +6,8 @@
 // First added:  2003-11-28
 // Last changed: 2008-06-18
 
+#ifndef NO_UBLAS
+
 #ifndef __DUAL_H
 #define __DUAL_H
 
@@ -63,3 +65,4 @@ namespace dolfin {
 
 #endif
 
+#endif

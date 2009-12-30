@@ -6,6 +6,8 @@
 // First added:  2003
 // Last changed: 2008-06-18
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
 #include "ODE.h"
@@ -78,3 +80,5 @@ void ODESolver::solveDual(ODE& ode, ODESolution& u)
 //------------------------------------------------------------------------
 
 
+
+#endif

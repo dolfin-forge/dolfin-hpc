@@ -7,6 +7,8 @@
 // First added:  2003
 // Last changed: 2008-06-18
 
+#ifndef NO_UBLAS
+
 #ifndef __TIME_STEPPER_H
 #define __TIME_STEPPER_H
 
@@ -117,5 +119,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

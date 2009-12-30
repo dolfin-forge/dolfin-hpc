@@ -4,6 +4,8 @@
 // First added:  2005
 // Last changed: 2006-07-07
 
+#ifndef NO_UBLAS
+
 #include <dolfin/log/dolfin_log.h>
 #include "ComplexODE.h"
 #include "HomotopyJacobian.h"
@@ -34,3 +36,4 @@ void HomotopyJacobian::mult(const uBlasVector& x, uBlasVector& y) const
 }
 //-----------------------------------------------------------------------------
 
+#endif

@@ -4,6 +4,8 @@
 // First added:  2005-01-27
 // Last changed: 2006-08-08
 
+#ifndef NO_UBLAS
+
 #ifndef __UPDATED_MULTI_ADAPTIVE_JACOBIAN_H
 #define __UPDATED_MULTI_ADAPTIVE_JACOBIAN_H
 
@@ -54,5 +56,7 @@ namespace dolfin
   };
 
 }
+
+#endif
 
 #endif

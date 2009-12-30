@@ -10,6 +10,8 @@
 // First added:  2006-07-05
 // Last changed: 2008-05-18
 
+#ifndef NO_UBLAS
+
 #ifndef __UBLAS_MATRIX_H
 #define __UBLAS_MATRIX_H
 
@@ -464,5 +466,7 @@ namespace dolfin
   //-----------------------------------------------------------------------------
 
 }
+
+#endif
 
 #endif

@@ -99,11 +99,20 @@ namespace dolfin
     /// Sparsity pattern represented as an vector of sets. Each set corresponds
     /// to a row, and the set contains the column positions of nonzero entries 
     /// When run in parallel this vector contains diagonal non-zeroes
+#if (sun || __sun)
+    std::map<uint,  std::set<int> > sparsity_pattern;
+#else
     std::map<const uint,  std::set<int> > sparsity_pattern;
+#endif
 
     /// Sparsity pattern for off diagonal represented as vector of sets. Each
     /// set corresponds to a row, and the set contains the column positions of nonzero entries 
+#if (sun || __sun)
+    std::map<uint,  std::set<int> > o_sparsity_pattern;
+#else
     std::map<const uint,  std::set<int> > o_sparsity_pattern;
+#endif
+
 
     // Dimensions
     uint dim[2];

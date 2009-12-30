@@ -16,13 +16,16 @@
 #include <dolfin/common/Timer.h>
 #include "GenericMatrix.h"
 #include "GenericVector.h"
-#include "uBlasLUSolver.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasDenseMatrix.h"
 #include "PETScLUSolver.h"
 #include "PETScMatrix.h"
 #include "EpetraLUSolver.h"
 #include "EpetraMatrix.h"
+
+#ifndef NO_UBLAS
+#include "uBlasLUSolver.h"
+#include "uBlasSparseMatrix.h"
+#include "uBlasDenseMatrix.h"
+#endif
 
 namespace dolfin
 {
@@ -46,7 +49,7 @@ namespace dolfin
     uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
     {
       Timer timer("LU solver");
-
+#ifndef NO_UBLAS
       if (A.has_type<uBlasSparseMatrix>()) 
       {
         if (!ublas_solver)
@@ -66,7 +69,7 @@ namespace dolfin
         }
         return ublas_solver->solve(A.down_cast<uBlasDenseMatrix >(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
       }
-
+#endif
 #ifdef HAS_PETSC
       if (A.has_type<PETScMatrix>()) 
       {
@@ -96,6 +99,7 @@ namespace dolfin
 
     uint factorize(const GenericMatrix& A)
     {
+#ifndef NO_UBLAS
       if (A.has_type<uBlasSparseMatrix>()) 
       {
         if (!ublas_solver)
@@ -108,13 +112,15 @@ namespace dolfin
 
       if (A.has_type<uBlasDenseMatrix>())
         error("Will only factorize sparse matrices");
-
+#endif
       error("No matrix factorization for given backend.");
       return 0;
+
     }
     
     uint factorized_solve(GenericVector& x, const GenericVector& b)
     {
+#ifndef NO_UBLAS
       if (b.has_type<uBlasVector>()) 
       {
         if (!ublas_solver)
@@ -126,14 +132,18 @@ namespace dolfin
       }
 
       error("No factorized LU solver for given backend.");
+#endif
       return 0;
     }
 
   private:
 
+#ifndef NO_UBLAS
     // uBLAS solver
     uBlasLUSolver* ublas_solver;
-
+#else
+    int* ublas_solver;
+#endif
     // PETSc Solver
 #ifdef HAS_PETSC
     PETScLUSolver* petsc_solver;

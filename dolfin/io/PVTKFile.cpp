@@ -591,7 +591,7 @@ void PVTKFile::encode_inline_compressed_base64(std::stringstream& stream,
   header[2] = 0;
 
   // Compress data
-  std::pair<boost::shared_array<unsigned char>, dolfin::uint> compressed_data = Encoder::compress_data(data);
+  std::pair<boost::shared_array<unsigned char>, unsigned long> compressed_data = Encoder::compress_data(data);
 
   // Length of compressed data
   header[3] = compressed_data.second;

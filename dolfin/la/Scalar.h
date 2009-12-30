@@ -10,9 +10,15 @@
 #ifndef __SCALAR_H
 #define __SCALAR_H
 
-#include "uBlasFactory.h"
+
 #include "GenericTensor.h"
 #include <dolfin/main/MPI.h>
+
+#ifndef NO_UBLAS
+#include "uBlasFactory.h"
+#else
+#include "PETScFactory.h"
+#endif
 
 namespace dolfin
 {
@@ -96,7 +102,13 @@ namespace dolfin
 
     /// Return a factory for the default linear algebra backend
     inline LinearAlgebraFactory& factory() const 
-    { return dolfin::uBlasFactory<>::instance(); }
+    {
+#ifndef NO_UBLAS
+      return uBlasFActory<>::instance();
+#else
+      return PETScFactory::instance();
+#endif
+    }
 
     /// Get value
     real getval() const

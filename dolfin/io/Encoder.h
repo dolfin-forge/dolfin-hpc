@@ -49,7 +49,7 @@ namespace dolfin
 
 #ifdef HAS_ZLIB
     template<typename T>
-    static std::pair<boost::shared_array<unsigned char>, dolfin::uint> compress_data(const std::vector<T>& data)
+    static std::pair<boost::shared_array<unsigned char>, unsigned long> compress_data(const std::vector<T>& data)
     {
       // Compute length of uncompressed data
       const unsigned long uncompressed_size = data.size()*sizeof(T);

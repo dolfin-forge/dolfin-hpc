@@ -328,13 +328,11 @@ void PETScMatrix::getrow(uint row,
   else {
     if(!sub)
       error("No ghosted Processor rows");
-
     std::map<const int, int>::const_iterator it = mapping.find(row);    
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
     columns.assign(cols, cols+ncols);
     values.assign(vals, vals+ncols);
     MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
-    
   }
   
 } 

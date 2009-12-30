@@ -14,16 +14,19 @@
 #include <dolfin/common/Timer.h>
 #include "GenericMatrix.h"
 #include "GenericVector.h"
-#include "uBlasKrylovSolver.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasDenseMatrix.h"
-#include "uBlasVector.h"
 #include "PETScMatrix.h"
 #include "PETScVector.h"
 #include "PETScKrylovSolver.h"
 #include "EpetraKrylovSolver.h"
 #include "SolverType.h"
 #include "PreconditionerType.h"
+
+#ifndef NO_UBLAS
+#include "uBlasKrylovSolver.h"
+#include "uBlasSparseMatrix.h"
+#include "uBlasDenseMatrix.h"
+#include "uBlasVector.h"
+#endif
 
 namespace dolfin
 {
@@ -51,7 +54,7 @@ namespace dolfin
     uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
     { 
       Timer timer("Krylov solver");
-
+#ifndef NO_UBLAS
       if (A.has_type<uBlasSparseMatrix>())
       {
         if (!ublas_solver)
@@ -71,7 +74,7 @@ namespace dolfin
         }
         return ublas_solver->solve(A.down_cast<uBlasDenseMatrix>(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
       }
-
+#endif
 #ifdef HAS_PETSC
       if (A.has_type<PETScMatrix>())
       {
@@ -107,8 +110,12 @@ namespace dolfin
     // Preconditioner type
     PreconditionerType pc_type;
     
+#ifndef NO_UBLAS
     // uBLAS solver
     uBlasKrylovSolver* ublas_solver;
+#else
+    int* ublas_solver;
+#endif
 
     // PETSc solver
 #ifdef HAS_PETSC

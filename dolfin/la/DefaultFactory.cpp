@@ -5,10 +5,14 @@
 // Last changed: 2008-05-19
 
 #include <dolfin/parameter/parameters.h>
-#include "uBlasFactory.h"
 #include "PETScFactory.h"
 #include "EpetraFactory.h"
 #include "DefaultFactory.h"
+
+#ifndef NO_UBLAS
+#include "uBlasFactory.h"
+#endif
+
 
 using namespace dolfin;
 
@@ -30,19 +34,25 @@ GenericSparsityPattern * DefaultFactory::createPattern() const
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& DefaultFactory::factory() const
 {
+#ifndef NO_UBLAS
   // Fallback
   std::string default_backend = "uBLAS";
   typedef uBlasFactory<> DefaultFactory;
+#endif
 
   // Get backend from parameter system
   std::string backend = dolfin_get("linear algebra backend");
 
+#ifndef NO_UBLAS
   // Choose backend
   if (backend == "uBLAS")
   {
     return uBlasFactory<>::instance();
   }
   else if (backend == "PETSc")
+#else
+  if (backend == "PETSc")
+#endif
   {
 #ifdef HAS_PETSC
     return PETScFactory::instance();
@@ -55,8 +65,10 @@ LinearAlgebraFactory& DefaultFactory::factory() const
 #endif
   }
 
+#ifndef NO_UBLAS 
   // Fallback
   message("Linear algebra backend \"" + backend + "\" not available, using " + default_backend + ".");
   return DefaultFactory::instance();
+#endif
 }
 //-----------------------------------------------------------------------------

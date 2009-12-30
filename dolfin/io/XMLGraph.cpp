@@ -125,14 +125,12 @@ void XMLGraph::readGraph(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLGraph::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
-  dolfin_debug("readVertices()");
   uint num_vertices = parseUnsignedInt(name, attrs, "size");
   editor.initVertices(num_vertices);
 }
 //-----------------------------------------------------------------------------
 void XMLGraph::readEdges(const xmlChar *name, const xmlChar **attrs)
 {
-  dolfin_debug("readEdges()");
   uint num_edges = parseUnsignedInt(name, attrs, "size");
   editor.initEdges(num_edges);
 }

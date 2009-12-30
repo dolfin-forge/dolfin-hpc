@@ -29,11 +29,13 @@
 #include <dolfin/la/PETScKrylovSolver.h>
 #include <dolfin/la/PETScLUSolver.h>
 #include <dolfin/la/SLEPcEigenvalueSolver.h>
+#ifndef NO_UBLAS
 #include <dolfin/la/uBlasDenseMatrix.h>
 #include <dolfin/la/uBlasKrylovSolver.h>
 #include <dolfin/la/uBlasLUSolver.h>
 #include <dolfin/la/uBlasPreconditioner.h>
 #include <dolfin/la/uBlasILUPreconditioner.h>
+#endif
 #include <dolfin/la/Vector.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Scalar.h>

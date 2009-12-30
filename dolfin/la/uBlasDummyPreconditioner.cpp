@@ -4,6 +4,7 @@
 // First added:  2006-07-04
 // Last changed: 2006-07-04
 
+#ifndef NO_UBLAS
 #include "uBlasVector.h"
 #include "uBlasDummyPreconditioner.h"
 
@@ -25,3 +26,4 @@ void uBlasDummyPreconditioner::solve(uBlasVector& x, const uBlasVector& b) const
   x.vec().assign(b.vec());
 }
 //-----------------------------------------------------------------------------
+#endif

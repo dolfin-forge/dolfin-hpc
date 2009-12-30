@@ -6,6 +6,8 @@
 // First added:  2006-06-23
 // Last changed: 2008-04-22
 
+#ifndef NO_UBLAS
+
 #include <dolfin/common/constants.h>
 #include "uBlasVector.h"
 #include "uBlasSparseMatrix.h"
@@ -169,3 +171,4 @@ void uBlasILUPreconditioner::init(const uBlasMatrix<ublas_sparse_matrix>& A)
   } // k
 }
 //-----------------------------------------------------------------------------
+#endif

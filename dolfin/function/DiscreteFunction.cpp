@@ -4,10 +4,10 @@
 // Modified by Garth N. Wells, 2007.
 // Modified by Dag Lindbo, 2008.
 // Modified by Kristen Kaasbjerg, 2008.
-// Modified by Niclas Jansson, 2008.
+// Modified by Niclas Jansson, 2008-2010.
 //
 // First added:  2007-04-02
-// Last changed: 2008-04-30
+// Last changed: 2010-01-03
 
 #include <cstring>
 
@@ -278,6 +278,7 @@ void DiscreteFunction::interpolate(real* coefficients,
   dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
   
   // Pick values from global vector
+#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
   if(MPI::numProcesses() > 1) {
     for(uint i = 0; i < dof_map->local_dimension(); i++) {
       _map<uint, uint>::const_iterator it = cache_mapping.find(scratch->dofs[i]);
@@ -285,6 +286,7 @@ void DiscreteFunction::interpolate(real* coefficients,
     }
   }
   else 
+#endif
     x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
 }
 //-----------------------------------------------------------------------------
@@ -394,6 +396,7 @@ void DiscreteFunction::init_ghosts()
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
   
+#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
   if(_indices )
     delete[] _indices;  
   if(data_cache)
@@ -412,7 +415,7 @@ void DiscreteFunction::init_ghosts()
   }
   
   _cache_size = indices.size();
-
+#endif
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
@@ -427,8 +430,10 @@ void DiscreteFunction::sync_ghosts()
   }
   
   x->apply(); 
+#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
   if(_indices)
     x->get(data_cache, _cache_size, _indices);
+#endif
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)

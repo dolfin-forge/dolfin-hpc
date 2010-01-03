@@ -22,7 +22,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 				   Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
 {
   // Initialise sparsity pattern
-  if( dof_map_set.parallel() || dolfin::MPI::numProcesses() > 1)
+  if( dolfin::MPI::numProcesses() > 1)
     sparsity_pattern.pinit(ufc.form.rank(), ufc.global_dimensions);
   else
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
@@ -47,7 +47,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
         dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
  
       // Fill sparsity pattern.
-      if( dof_map_set.parallel() || dolfin::MPI::numProcesses() > 1)
+      if( dolfin::MPI::numProcesses() > 1)
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
       else
         sparsity_pattern.insert(ufc.local_dimensions, ufc.dofs);

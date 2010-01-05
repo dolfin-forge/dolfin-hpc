@@ -4,12 +4,13 @@
 // Modified by Niclas Jansson, 2009-2010.
 //
 
-#ifndef __RIVARAREFINEMENT_H
-#define __RIVARAREFINEMENT_H
+#ifndef __RIVARA_REFINEMENT_H
+#define __RIVARA_REFINEMENT_H
 
 #include <list>
 #include <vector>
 
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/MeshFunction.h>
 
 namespace dolfin
@@ -103,7 +104,16 @@ namespace dolfin
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
-    void propagate_naive(std::vector<uint>& propagated, bool& empty);
+    inline void propagate_refinement(std::vector<Propagation>& propagated,
+				     bool& empty)
+    {
+      if(MPI::numProcesses() & ( MPI::numProcesses() - 1))
+	propagate_naive(propagated, empty); 
+      else
+	propagate_hypercube(propagated, empty); 
+    }
+
+    void propagate_naive(std::vector<Propagation>& propagated, bool& empty);
 
     void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
     

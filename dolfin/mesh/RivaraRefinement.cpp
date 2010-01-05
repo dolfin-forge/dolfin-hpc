@@ -51,9 +51,6 @@ void RivaraRefinement::refine(Mesh& mesh,
     end();
   }
 
-  //  int d = mesh.topology().dim();
-
-  // Dynamic mesh test
   DMesh dmesh;
   dmesh.imp(mesh);
   
@@ -85,13 +82,13 @@ void RivaraRefinement::refine(Mesh& mesh,
       it++;
   } 
   
-  
-  Mesh omesh;
-  
+  Mesh omesh;    
   dmesh.exp(omesh);
   
   mesh = omesh;
-
+  mesh.distdata().invalid_numbering();
+  mesh.distdata().invalid_ownership();
+  mesh.renumber();
 }
 //-----------------------------------------------------------------------------
 DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0), 
@@ -242,16 +239,11 @@ void DMesh::exp(Mesh& mesh)
 {
   number();
 
-  mesh.clear();
-  mesh.distdata().clear();
-
   MeshEditor editor;
-  Mesh newmesh;
-  editor.open(newmesh, cell_type->cellType(), d, d);
+  editor.open(mesh, cell_type->cellType(), d, d);
   
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
-
 
   // Add old vertices
   uint current_vertex = 0;
@@ -261,14 +253,12 @@ void DMesh::exp(Mesh& mesh)
     DVertex* dv = *it;
     editor.addVertex(current_vertex, dv->p);
     if(dv->ghosted) {
-      newmesh.distdata().set_ghost(current_vertex, 0);
-      newmesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      mesh.distdata().set_ghost(current_vertex, 0);
+      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
     }
     else if(dv->shared)
-      newmesh.distdata().set_shared(current_vertex, 0);
-    newmesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
-
-      
+      mesh.distdata().set_shared(current_vertex, 0);
+    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);      
   }
 
   Array<uint> cell_vertices(cell_type->numEntities(0));
@@ -289,10 +279,6 @@ void DMesh::exp(Mesh& mesh)
   }
   editor.close();
 
-  mesh = newmesh;
-  mesh.distdata().invalid_numbering();
-  mesh.distdata().invalid_ownership();
-  mesh.renumber();
 }
 //-----------------------------------------------------------------------------
 void DMesh::number()
@@ -557,8 +543,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
 
-    //propagate_naive( type1, empty, global_mapping);
-    propagate_hypercube(propagated, empty);
+    propagate_refinement(propagated, empty);
 
     if( empty && propagated.size() == 0) break;         
     propagate.clear();
@@ -652,75 +637,75 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     if(MPI::processNumber() == 0)
       end();    
     
-    /*
-    uint num_prop = propagate.size();
-    uint num_gprop = 0;
-    MPI_Allreduce(&num_prop, &num_gprop, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    empty = (num_gprop == 0);
-    */
   }  
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<uint>& type1, bool& empty)
+void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
 {
-
-  empty = true;
   // Allocate receive buffer
-  /*
-  int num_prop = propagate.size();
+  int num_prop = propagate.size() * 5;
   int max_prop, recv_count;
   MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX, MPI::DOLFIN_COMM);
 
   int *recv_buff = new int[max_prop];
+  int *send_buff = new int[num_prop];
+  int *sp = &send_buff[0];
+  
+  for(std::vector<Propagation>::iterator it = propagate.begin();
+      it != propagate.end(); ++it) 
+  {
+    *(sp++) = it->first;
+    *(sp++) = it->second.mv;
+    *(sp++) = it->second.v1;
+    *(sp++) = it->second.v2;
+    *(sp++) = it->second.owner;
+  }
 
   MPI_Status status;
-  int src,dest;
-  int pe_size = MPI::numProcesses();
-  int rank = MPI::processNumber();
+  uint rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  uint dest, src;
 
+  empty = true;
   for (int j = 1; j < pe_size; j++) 
   {
     src = (rank -j + pe_size) % pe_size;
     dest = (rank + j) % pe_size;
 
-    MPI_Sendrecv(&propagate[0], propagate.size(), MPI_INTEGER, dest, 1,
+    MPI_Sendrecv(&send_buff[0], num_prop, MPI_INTEGER, dest, 1,
 		 recv_buff, max_prop, MPI_INTEGER, src, 1,
 		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);    
 
     if (recv_count > 0)
       empty = false;
-    
-    for (int k = 0; k < recv_count; k += 4) 
-    {
-      for(uint l = 0; l < 3; l++)
-	if(global_mapping.find(recv_buff[l+k]) != global_mapping.end())
-	  recv_buff[l+k] = global_mapping[recv_buff[l+k]];
 
-      bool left = glb_ids.find(recv_buff[k+1]) != glb_ids.end();
-      bool right = glb_ids.find(recv_buff[k+2]) != glb_ids.end();
+    dolfin_assert(recv_count%5 == 0);
+    for(int k = 0; k < recv_count; k += 5) 
+    {   
 
-      if(left && right)
-	for (int i = 0; i < 4; i++)
-	  type1.push_back(recv_buff[k+i]);
-      else
-      {
-
-	prop_edge node;
-	node.mv = recv_buff[k];
-	node.v1 = recv_buff[k+1];
-	node.v2 = recv_buff[k+2];
-	node.owner = recv_buff[k+3];
-
-	if(!left || !right)
-	  type2.push_back(node);
-	else
-	  type3.push_back(node);
-      }
+      prop_edge node;
+      node.mv = recv_buff[k+1];
+      node.v1 = recv_buff[k+2];
+      node.v2 = recv_buff[k+3];
+      node.owner = recv_buff[k+4];
+      
+      Propagation prop(recv_buff[k], node);
+      propagated.push_back(prop);
     }
+
   }
+
+  less_pair comp;
+  std::sort(propagated.begin(), propagated.end(), comp);
+  
+  short prop, gprop;
+  prop = (empty == false);
+  MPI_Allreduce(&prop, &gprop, 1, MPI_SHORT, MPI_SUM, MPI::DOLFIN_COMM);
+  empty = (gprop == 0);
+  
+  delete[] send_buff;
   delete[] recv_buff;
-  */
 }
 //-----------------------------------------------------------------------------
 void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, 

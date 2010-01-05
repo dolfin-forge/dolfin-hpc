@@ -1,10 +1,10 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009.
+// Modified by Niclas Jansson, 2009-2010.
 //
 
-#include "RivaraRefinement.h"
+
 #include <dolfin/main/MPI.h>
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
@@ -22,8 +22,9 @@
 #include "Edge.h"
 #include "Cell.h"
 #include "BoundaryMesh.h"
-#include "RivaraRefinement.h"
 #include "LoadBalancer.h"
+#include "RivaraRefinement.h"
+
 #include <algorithm>
 #include <cmath> 
 
@@ -146,8 +147,6 @@ void DMesh::imp(Mesh& mesh)
   BoundaryMesh boundary;
   boundary.init_interior(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
-  MeshFunction<bool> on_boundary(mesh, 0);
-  on_boundary = false;
   MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
   boundary_cell = false;
 
@@ -157,38 +156,17 @@ void DMesh::imp(Mesh& mesh)
   {
     Facet f(mesh, cell_map->get(*bf));    
     for (CellIterator c(f); !c.end(); ++c) 
-    {
       boundary_cell.set(*c, true);	  
-      for(EdgeIterator e(*c); !e.end(); ++e) 
-      {
-	const uint *edge_v = e->entities(0);
-	if(mesh.distdata().is_shared(edge_v[0], 0) ||
-	   mesh.distdata().is_shared(edge_v[1], 0)) 
-	{
-	  on_boundary.set(edge_v[0], true);
-	  on_boundary.set(edge_v[1], true);
-	}
-      }
-    }     
   }
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
-  // Find maximum global index assigned
-  /*
-  uint max_index = std::max(mesh.distdata().global_numVertices(),
-			    mesh.distdata().max_index());
-  */
+
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  uint max_index = mesh.distdata().global_numVertices();
-  
-  //uint glb_max;
+  uint max_index = mesh.distdata().global_numVertices();  
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
-  //  MPI_Allreduce(&_salt, &num_new, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-
-  //  _salt = ( _salt + 10) / max_index;
   Cell c(mesh, 0);
   _salt = c.numEntities(1) * mesh.distdata().global_numCells();
 
@@ -213,7 +191,6 @@ void DMesh::imp(Mesh& mesh)
     dv->p = vi->point();
     dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
     dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
-    //dv->on_boundary = on_boundary.get(vi->index());
     dv->shared = mesh.distdata().is_shared(vi->index(), 0);
     dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
     if (dv->ghosted)
@@ -300,8 +277,6 @@ void DMesh::exp(Mesh& mesh)
       it != cells.end(); ++it)
   {
     DCell* dc = *it;
-    if(dc->deleted)
-      error("Deleted");
 
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
@@ -389,10 +364,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     }
   }
   
-  dolfin_assert(dcell->vertices.size() > 0);
-  dolfin_assert(dcell->vertices.size() > 0);
-  dolfin_assert(dcell->vertices.size() > ii);
-  dolfin_assert(dcell->vertices.size() > jj);
   DVertex* v0 = dcell->vertices[ii];
   DVertex* v1 = dcell->vertices[jj];
   DVertex* mv = 0;
@@ -412,22 +383,16 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       bc_dvs[mv->glb_id] = mv;		      
       dolfin_assert(v0->glb_id != v1->glb_id);
       dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
-      //      ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
   }
   else
   {
-    //    dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
     mv = new DVertex;
     addVertex(mv);
     if( v0->glb_id < v1->glb_id )
-      //      mv->glb_id = (((v0->glb_id * _SALT_) + (v1->glb_id))) + glb_max;
       mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
-
     else
-      //mv->glb_id = (((v1->glb_id * _SALT_) + (v0->glb_id))) + glb_max;
       mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
-
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0; 
 
     // Add hanging node on shared edges to propagation buffer
@@ -446,7 +411,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->shared = true;
       mv->ghosted = false;
       mv->owner = MPI::processNumber();
-      //      dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) == ref_edge.end());
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
     
@@ -499,7 +463,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
   for(std::list<DCell* >::iterator it = v1->cells.begin();
       it != v1->cells.end(); ++it)
-  {// dolfin_assert((*it)); dolfin_assert(!(*it)->deleted); 
+  {
     DCell* c = *it;
 
     if(c != dcell && !c->deleted)

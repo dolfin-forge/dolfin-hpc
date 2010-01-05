@@ -1,13 +1,11 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009.
+// Modified by Niclas Jansson, 2009-2010.
 //
 
 #ifndef __RIVARAREFINEMENT_H
 #define __RIVARAREFINEMENT_H
-
-#define _SALT_ 852893
 
 #include <list>
 #include <vector>
@@ -125,7 +123,7 @@ namespace dolfin
 
     // Map between global number of boundary vertex to vertex
     _map<uint, DVertex*> bc_dvs;
-    std::map<EdgeKey, DVertex*> ref_edge;
+    _map<EdgeKey, DVertex*> ref_edge;
 
     // Comparison operator for index/value pairs
     struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
@@ -141,8 +139,6 @@ namespace dolfin
     // Construct a edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) {
       dolfin_assert( id2 != id1);
-      if(id2 == id1)
-	error("Kaos id2 == id1");
       if(id2 < id1){
 	EdgeKey key(id2,id1);    
 	return key;

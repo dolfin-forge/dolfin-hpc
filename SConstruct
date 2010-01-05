@@ -71,6 +71,8 @@ options = [
     BoolOption("enableStatic", "Build static library", 0),
     BoolOption("enableGnuExtensions", "Enable GNU extensions", 0),
     BoolOption("enableGnuExperimental", "Enable experimental GNU features", 0),
+    BoolOption("enableBoostTR1", "Enable boost tr1 headers", 0),
+    BoolOption("enableFunctionCache", "Enable local data cache in functions", 0),
     BoolOption("enableOptimizeP1", "Compile with optimization for P1 elements", 0),
     BoolOption("disableuBlas", "Compile without support for uBlas", 0),
     BoolOption("disableProgressBar", "Compile without progress bar", 0),
@@ -153,7 +155,12 @@ if env.GetOption("clean"):
     # FIXME: should we also remove the file scons/options.cache?
     
 # Default CXX and FORTRAN flags
-env["CXXFLAGS"] = "-Wall -pipe -ansi" # -Werror"
+# FIXME: here we assume sunos implies sunstudio CC
+if not (env["PLATFORM"] == "sunos"): 
+  env["CXXFLAGS"] = "-Wall -pipe -ansi" # -Werror"
+else:
+  env["CXXFLAGS"]= " "
+
 #env["SHFORTRANFLAGS"] = "-Wall -pipe -fPIC"
 
 # If Debug is enabled, add -g:
@@ -182,6 +189,14 @@ if env["enableGnuExtensions"]:
 if env["enableGnuExperimental"]:
   env.Append(CXXFLAGS=" -std=c++0x")
 
+# Set ENABLE_BOOST_TR1 if tr1 features of boost is requested
+if env["enableBoostTR1"]:
+  env.Append(CXXFLAGS=" -DENABLE_BOOST_TR1")
+
+# Enable function cache if requested
+if env["enableFunctionCache"]:
+  env.Append(CXXFLAGS=" -DENABLE_FUNCTION_CACHE")
+
 # if P1 Optimization is reqested, disable all other element types
 if env["enableOptimizeP1"]:
   env.Append(CXXFLAGS=" -DENABLE_P1_OPTIMIZATIONS")
@@ -197,6 +212,13 @@ if env["disableProgressBar"]:
 
 if env["disableuBlas"]:
   env.Append(CXXFLAGS=" -DNO_UBLAS")
+  msg = """---------------------------------------------------------
+                        WARNING
+
+      Without uBLAS, parts of DOLFIN are disabled!
+---------------------------------------------------------"""
+
+  print msg 
 
 # Not sure we need this - but lets leave it for completeness sake - if people
 # use if for PyCC, and know that dolfin use the same system, they will expect

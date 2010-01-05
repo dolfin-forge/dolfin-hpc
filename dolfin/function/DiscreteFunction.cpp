@@ -278,7 +278,7 @@ void DiscreteFunction::interpolate(real* coefficients,
   dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
   
   // Pick values from global vector
-#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
+#ifdef ENABLE_FUNCTION_CACHE
   if(MPI::numProcesses() > 1) {
     for(uint i = 0; i < dof_map->local_dimension(); i++) {
       _map<uint, uint>::const_iterator it = cache_mapping.find(scratch->dofs[i]);
@@ -396,7 +396,7 @@ void DiscreteFunction::init_ghosts()
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
   
-#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
+#ifdef ENABLE_FUNCTION_CACHE
   if(_indices )
     delete[] _indices;  
   if(data_cache)
@@ -430,7 +430,7 @@ void DiscreteFunction::sync_ghosts()
   }
   
   x->apply(); 
-#ifdef ENABLE_EXPERIMENTAL_FUNCACHE
+#ifdef ENABLE_FUNCTION_CACHE
   if(_indices)
     x->get(data_cache, _cache_size, _indices);
 #endif

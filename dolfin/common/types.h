@@ -27,6 +27,9 @@
 #elif __sgi
 #include <hash_map>
 #include <hash_set>
+#elif ENABLE_BOOST_TR1
+#include <tr1/unordered_map.hpp>
+#include <tr1/unordered_set.hpp>
 #else
 #include <map>
 #include <set>
@@ -61,6 +64,9 @@ namespace dolfin
 #elif __sgi
 #define _map std::hash_map
 #define _set std::hash_set
+#elif ENABLE_BOOST_TR1
+#define _map std::tr1::unordered_map
+#define _set std::tr1::unordered_set
 #else
 #define _map std::map 
 #define _set std::set

@@ -191,7 +191,12 @@ if env["enableGnuExperimental"]:
 
 # Set ENABLE_BOOST_TR1 if tr1 features of boost is requested
 if env["enableBoostTR1"]:
-  env.Append(CXXFLAGS=" -DENABLE_BOOST_TR1")
+  if env["PLATFORM"] == "sunos":
+    env.Append(CXXFLAGS=" -DENABLE_BOOST_TR1 -D_RWSTD_ALLOCATOR")
+  else:
+    env.Append(CXXFLAGS=" -DENABLE_BOOST_TR1")
+
+
 
 # Enable function cache if requested
 if env["enableFunctionCache"]:

@@ -10,6 +10,8 @@
 #include <dolfin/common/types.h>
 #include "Parameter.h"
 
+
+
 namespace dolfin
 {
   
@@ -43,12 +45,24 @@ namespace dolfin
     
   private:
 
+#ifndef ENABLE_BOOST_TR1
     // Parameters stored as an STL map
     _map<std::string, Parameter> parameters;
 
     // Typedef of iterators for convenience
     typedef _map<std::string, Parameter>::iterator iterator;
     typedef _map<std::string, Parameter>::const_iterator const_iterator;
+
+#else
+
+    // Parameters stored as an STL map
+    std::map<std::string, Parameter> parameters;
+
+    // Typedef of iterators for convenience
+    typedef std::map<std::string, Parameter>::iterator iterator;
+    typedef std::map<std::string, Parameter>::const_iterator const_iterator;
+
+#endif
     
     // Typedef of pair for convenience
     typedef std::pair<std::string, Parameter> pair;

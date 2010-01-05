@@ -5,10 +5,10 @@
 // Modified by Andy R. Terrel 2005.
 // Modified by Ola Skavhaug 2007.
 // Modified by Magnus Vikstrøm 2007-2008.
-// Modified by Niclas Jansson 2008
+// Modified by Niclas Jansson 2008-2010.
 //
 // First added:  2004
-// Last changed: 2008-07-03
+// Last changed: 2010-01-03
 
 #ifdef HAS_PETSC
 
@@ -24,14 +24,12 @@
 #include "PETScFactory.h"
 #include <dolfin/main/MPI.h>
 
-#define BLOCK_SIZE 1
-
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const Type type):
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), _type(type), sub(false)
+    A(0), is_view(false), _type(type), sub(false), block_size(0)
 {
   // Check type
   checkType();
@@ -39,7 +37,7 @@ PETScMatrix::PETScMatrix(const Type type):
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(Mat A):
     Variable("A", "a sparse matrix"),
-    A(A), is_view(true), _type(default_matrix)
+    A(A), is_view(true), _type(default_matrix), block_size(0)
 {
   // FIXME: get PETSc matrix type and set
   _type = default_matrix;
@@ -47,7 +45,7 @@ PETScMatrix::PETScMatrix(Mat A):
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(uint M, uint N, Type type):
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), _type(type)
+    A(0), is_view(false), _type(type), block_size(0)
 {
   // Check type
   checkType();
@@ -58,7 +56,7 @@ PETScMatrix::PETScMatrix(uint M, uint N, Type type):
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A):
   Variable("A", "PETSc matrix"),
-  A(0), is_view(false), _type(A._type)
+  A(0), is_view(false), _type(A._type), block_size(0)
 {
   *this = A;
 }
@@ -126,24 +124,28 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
   else
   {
     //    MatCreateSeqBAIJ(MPI_Comm comm,PetscInt bs,PetscInt m,PetscInt n,PetscInt nz,const PetscInt nnz[],Mat *A);
+    
 
-#ifdef BLOCKED
-
-    MatCreateSeqBAIJ(PETSC_COMM_SELF, BLOCK_SIZE, (int) M, (int) N, PETSC_NULL, (int *) nz, &A);
-    MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
-    MatSetFromOptions(A);
-    MatZeroEntries(A);
-    //    MatCreateSeqBAIJ(PETSC_COMM_SELF, 1, (int) M, (int) N, 5, PETSC_NULL, &A);
-    // Create PETSc sequential matrix with a guess for number of non-zeroes (50 in thise case)
-#else
-    MatCreate(PETSC_COMM_SELF, &A);
-    MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
-    setType();
-    MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
-    MatSetFromOptions(A);
-    MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*)nz);
-    MatZeroEntries(A);
-#endif
+    if ( block_size ) 
+    {      
+      MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size, (int) M, (int) N, 1, PETSC_NULL, &A);
+      MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+      MatSetOption(A, MAT_USE_HASH_TABLE);
+      MatSetFromOptions(A);
+      MatZeroEntries(A);
+      //    MatCreateSeqBAIJ(PETSC_COMM_SELF, 1, (int) M, (int) N, 5, PETSC_NULL, &A);
+      // Create PETSc sequential matrix with a guess for number of non-zeroes (50 in thise case)
+    }
+    else 
+    {
+      MatCreate(PETSC_COMM_SELF, &A);
+      MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
+      setType();
+      MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+      MatSetFromOptions(A);
+      MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*)nz);
+      MatZeroEntries(A);
+      } 
   }
 }
 //-----------------------------------------------------------------------------
@@ -236,24 +238,21 @@ void PETScMatrix::set(const real* block,
 
 
 
-#ifdef BLOCKED
-
-  
-  MatSetValuesBlocked(A,
-		      static_cast<int>(m) / BLOCK_SIZE,
-		      reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		      static_cast<int>(n) / BLOCK_SIZE,
-		      reinterpret_cast<int*>(const_cast<uint*>(cols)),
-		      block, INSERT_VALUES);
-
+  if (block_size) 
     
-#else
-  
-  MatSetValues(A,
-               static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
-               block, INSERT_VALUES);
-#endif
+    MatSetValuesBlocked(A,
+			static_cast<int>(m) / block_size,
+			reinterpret_cast<int*>(const_cast<uint*>(rows)),
+			static_cast<int>(n) / block_size,
+			reinterpret_cast<int*>(const_cast<uint*>(cols)),
+			block, INSERT_VALUES);
+
+  else 
+
+    MatSetValues(A,
+		 static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
+		 static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
+		 block, INSERT_VALUES);
 
 }
 //-----------------------------------------------------------------------------
@@ -262,27 +261,21 @@ void PETScMatrix::add(const real* block,
                       uint n, const uint* cols)
 {
   dolfin_assert(A);
-  //MatSetValuesBlocked(Mat mat,
-  //PetscInt m,const PetscInt idxm[],PetscInt n,const PetscInt idxn[],const PetscScalar v[],InsertMode addv)
 
-#ifdef BLOCKED
-
+  if ( block_size )  
+    MatSetValuesBlocked(A,
+			static_cast<int>(m) / block_size,
+			reinterpret_cast<int*>(const_cast<uint*>(rows)),
+			static_cast<int>(n) / block_size,
+			reinterpret_cast<int*>(const_cast<uint*>(cols)),
+			block, ADD_VALUES);
   
-  MatSetValuesBlocked(A,
-		      static_cast<int>(m) / BLOCK_SIZE,
-		      reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		      static_cast<int>(n) / BLOCK_SIZE,
-		      reinterpret_cast<int*>(const_cast<uint*>(cols)),
-		      block, ADD_VALUES);
-
-    
-#else
+  else
   
-  MatSetValues(A,
-               static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
-               block, ADD_VALUES);
-#endif
+    MatSetValues(A,
+		 static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
+		 static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
+		 block, ADD_VALUES);
 }
 //-----------------------------------------------------------------------------
 real PETScMatrix::norm(std::string norm_type) const
@@ -510,22 +503,23 @@ const PETScMatrix& PETScMatrix::operator/= (real a)
 const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
 {
   //  (*this).down_cast<PETScMatrix>() =  A.down_cast<PETScMatrix>();
-  MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
-  //  MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
+  //MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
+  MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
   return *this;
 }
 //-----------------------------------------------------------------------------
 const PETScMatrix& PETScMatrix::operator= (const PETScMatrix& A)
 {
 
-  MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
-  //MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
+  //MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
+  MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
   return *this;
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::dup(GenericMatrix& A) 
 {
-  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_DO_NOT_COPY_VALUES, &this->A);
+  //  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_DO_NOT_COPY_VALUES, &this->A);
+  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_COPY_VALUES, &this->A);
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::Type PETScMatrix::type() const

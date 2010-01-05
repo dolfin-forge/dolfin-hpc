@@ -180,7 +180,10 @@ namespace dolfin
     bool sub;
     
     Mat *AA_sub;
-#if (sun || __sun)
+
+    int block_size;
+
+#if sun
     std::map<int, int> mapping;
 #else
     std::map<const int, int> mapping;

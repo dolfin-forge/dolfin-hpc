@@ -7,9 +7,11 @@
 #ifndef __RIVARA_REFINEMENT_H
 #define __RIVARA_REFINEMENT_H
 
+
 #include <list>
 #include <vector>
 
+#include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/MeshFunction.h>
 
@@ -133,7 +135,11 @@ namespace dolfin
 
     // Map between global number of boundary vertex to vertex
     _map<uint, DVertex*> bc_dvs;
+#ifdef __GNUG__ 
+    std::map<EdgeKey, DVertex*> ref_edge;
+#else
     _map<EdgeKey, DVertex*> ref_edge;
+#endif
 
     // Comparison operator for index/value pairs
     struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,

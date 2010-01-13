@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Garth N. Wells, 2008.
+// Modified by Niclas Jansson, 2009-2010.
 //
 // First added:  2007-11-30
-// Last changed: 2008-01-07
+// Last changed: 2010-01-13
 
 #ifndef __MPI_helper_H
 #define __MPI_helper_H
@@ -19,7 +20,9 @@ namespace dolfin
 {
   /// This class provides utility functions for easy access of the number of 
   /// processes and current process number.
-  
+
+  class Mesh;
+
   class MPI
   {
   public:
@@ -50,6 +53,9 @@ namespace dolfin
 
     /// Setup DOLFIN_COMM MPI communicator
     static void initComm();
+
+    /// Reorder MPI communicator
+    static void reorderComm(Mesh& mesh);
 
     //#ifdef HAS_MPI
     static MPI_Comm DOLFIN_COMM;

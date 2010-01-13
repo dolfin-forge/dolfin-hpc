@@ -242,6 +242,20 @@ dolfin::uint MeshDistributedData::get_owner(uint local_index, uint dim)
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
+void MeshDistributedData::remap_owner(int* mapping) 
+{
+
+  for (uint i = 0;  i < 3; i++)
+  {
+    for (MeshGhostIterator it(*this, i); !it.end(); ++it)
+      set_ghost_owner(it.index(), mapping[it.owner()], i);
+#ifdef ENABLE_P1_OPTIMIZATIONS    
+    break;
+#endif
+  }
+  
+}
+//-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_cell_global(uint i)
 {
   if(MPI::numProcesses() == 1) 

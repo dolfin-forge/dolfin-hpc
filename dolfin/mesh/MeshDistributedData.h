@@ -7,8 +7,8 @@
 #define __MESH_DISTRIBUTED_DATA_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/log/log.h>
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -76,6 +76,7 @@ namespace dolfin
 
     uint get_owner(uint local_index, uint dim);
     uint get_owner(MeshEntity& m);
+    void remap_owner(int* mapping);
 
     inline bool have_global(uint i, uint dim) 
     {return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);}
@@ -138,7 +139,6 @@ namespace dolfin
     friend class MeshGhostIterator;
     friend class MeshSharedIterator;
     friend class MeshRenumber;
-    friend class OwnershipComputation;
 
    };
   

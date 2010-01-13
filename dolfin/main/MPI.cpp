@@ -166,7 +166,16 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   int *process_map = new int[nnodes];
   process_map[old_rank] = this_process;
   MPI_Allgather(&process_map[old_rank], 1, MPI_INT,process_map , 1, MPI_INT, TMP_COMM);
-  mesh.distdata().remap_owner(process_map);
+  
+  for (int i = 0; i < nnodes; i++)
+  {
+    if (process_map[i] != i)
+    {
+      message("Communicator changed, rebuilding mesh structure");
+      mesh.distdata().remap_owner(process_map);
+      break;
+    }
+  }
   delete[] process_map;
 
   MPI_Comm_free(&TMP_COMM);

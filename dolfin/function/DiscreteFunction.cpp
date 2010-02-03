@@ -227,7 +227,7 @@ void DiscreteFunction::interpolate(real* values) const
   real* vertex_values = new real[scratch->size*num_cell_vertices];
 
   // Make sure vectors ghost values are updated)
-  //  x->apply();
+  x->apply();
 
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values

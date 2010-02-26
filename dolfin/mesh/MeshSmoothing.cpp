@@ -1,8 +1,10 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2010.
+//
 // First added:  2008-07-16
-// Last changed: 2008-07-16
+// Last changed: 2010-02-26
 
 #include <dolfin/common/constants.h>
 #include "Mesh.h"
@@ -33,13 +35,25 @@ void MeshSmoothing::smooth(Mesh& mesh)
   for (VertexIterator v(boundary); !v.end(); ++v)
     on_boundary.set((*vertex_map)(*v), true);
 
+  /* 
+     FIXME: new algorithm
+     1) Iterate over shared vertices
+        - Compute neighbors and center off mass, localy
+	- Exchange neighbors and center off mass
+	- Compute new vertex coordinate on owner
+        - Exchange new coordinates
+     2) Iterate over all shared vertices
+        - Skip shared entities
+  */
+
   // Iterate over all vertices
   const uint d = mesh.geometry().dim();
   Array<real> xx(d);
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    // Skip vertices on the boundary
-    if (on_boundary(*v))
+    // Skip vertices on the boundary 
+    // FIXME: we also skip shared entities
+    if (on_boundary(*v) || mesh.distdata().is_shared(v->index(), 0))
       continue;
     
     // Get coordinates of vertex

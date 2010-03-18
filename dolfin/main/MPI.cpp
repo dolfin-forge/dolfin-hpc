@@ -90,7 +90,7 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
 
   message("Reordering MPI Comm");
 
-  uint nnodes = numProcesses();
+  int nnodes = (int) numProcesses();
   int *index = new int[nnodes];
   short *neigh = new short[nnodes];
 
@@ -113,7 +113,7 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   }
 
   int degree = 0;   
-  for (uint i = 0; i < nnodes; i++)
+  for (int i = 0; i < nnodes; i++)
     degree += neigh[i];
   dolfin_assert(degree < (nnodes - 1));
   int offset;
@@ -123,8 +123,8 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   MPI_Allreduce(&degree, &nedges, 1, MPI_INT, MPI_SUM, DOLFIN_COMM);
   int *edges = new int[nedges];
 
-  uint j = (processNumber() > 0 ? index[processNumber() - 1] : 0);
-  for(uint i = 0; i < nnodes; i++)
+  int j = (int) (processNumber() > 0 ? index[processNumber() - 1] : 0);
+  for(int i = 0; i < nnodes; i++)
   {
     if (neigh[i])
       edges[j++] = i ;

@@ -3,15 +3,14 @@
 //
 // Modified by Garth N. Wells, 2007, 2008
 // Modified by Ola Skavhaug, 2007
-// Modified by Niclas Jansson, 2008-2009.
+// Modified by Niclas Jansson, 2008-2010.
 //
 // First added:  2007-01-17
-// Last changed: 2009-11-01
+// Last changed: 2010-03-18
 
 #include <memory>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/common/Timer.h>
 #include <dolfin/la/GenericTensor.h>
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/SparsityPattern.h>
@@ -39,14 +38,15 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-Assembler::Assembler(Mesh& mesh) : mesh(mesh)
+Assembler::Assembler(Mesh& mesh) : mesh(mesh), boundary(0)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 Assembler::~Assembler()
 {
-  // Do nothing
+  if (boundary)
+    delete boundary;
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
@@ -154,6 +154,10 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
 
+  // Initialize boundary mesh
+  if (ufc.form.num_exterior_facet_integrals()  && !boundary)
+    boundary = new BoundaryMesh(mesh);
+
   // Assemble over exterior facets 
   assembleExteriorFacets(A, coefficients, dof_map_set, ufc, exterior_facet_domains);
 
@@ -170,7 +174,6 @@ void Assembler::assembleCells(GenericTensor& A,
                               UFC& ufc,
                               const MeshFunction<uint>* domains) const
 {
-  Timer timer("Assembly over cells");
 
   // Skip assembly if there are no cell integrals
   if (ufc.form.num_cell_integrals() == 0)
@@ -218,8 +221,6 @@ void Assembler::assembleCells(GenericTensor& A,
 
   }
 
-  //t = toc() - t;
-  //printf("assembly loop (s): %.3e\n", t);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,
@@ -235,19 +236,17 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   // Exterior facet integral
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
-  // Create boundary mesh
-  BoundaryMesh boundary(mesh);
-  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
+  MeshFunction<uint>* cell_map = boundary->data().meshFunction("cell map");
   // FIXME MeshEntityIterator, empty BoundaryMesh
-  if(boundary.numCells()  == 0) return;
+  if(boundary->numCells()  == 0) return;
 
   dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
 #ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(A.rank(), "exterior facets"), boundary.numCells());
+  Progress p(progressMessage(A.rank(), "exterior facets"), boundary->numCells());
 #endif
-  for (CellIterator boundary_cell(boundary); !boundary_cell.end(); ++boundary_cell)
+  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
   {
     // Get mesh facet corresponding to boundary cell
     Facet mesh_facet(mesh, (*cell_map)(*boundary_cell));
@@ -280,12 +279,9 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     for (uint i = 0; i < ufc.form.rank(); i++)
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, mesh_cell.index());
 
-
-
     // Tabulate exterior facet tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell, local_facet);
     
-
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 

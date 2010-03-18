@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Garth N. Wells, 2007
+// Modified by Niclas Jansson, 2010
 //
 // First added:  2007-01-17
-// Last changed: 2008-04-08
+// Last changed: 2010-03-18
 
 #ifndef __ASSEMBLER_H
 #define __ASSEMBLER_H
@@ -25,6 +26,7 @@ namespace dolfin
   class Mesh;
   class SubDomain;
   class UFC;
+  class BoundaryMesh;
 
   /// This class provides automated assembly of linear systems, or
   /// more generally, assembly of a sparse tensor from a given
@@ -135,6 +137,9 @@ namespace dolfin
 
     // The mesh
     Mesh& mesh;
+
+    // Boundary mesh
+    BoundaryMesh *boundary;
 
   };
 

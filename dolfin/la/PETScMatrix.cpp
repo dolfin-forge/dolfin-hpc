@@ -88,8 +88,10 @@ void PETScMatrix::init(uint M, uint N)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
+#ifdef HAS_MPI
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#endif
   }
   else
   {
@@ -115,8 +117,10 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
+#ifdef HAS_MPI
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#endif
     //MatSetFromOptions(A);
     //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
     //MatZeroEntries(A);
@@ -161,7 +165,9 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 
   //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		  //		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+#ifdef HAS_MPI
   MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+#endif
   //MatCreateMPIAIJ(MPI::DOLFIN_COMM, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
 

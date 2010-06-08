@@ -162,13 +162,16 @@ void DMesh::imp(Mesh& mesh)
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
   uint max_index = mesh.distdata().global_numVertices();  
+#ifdef HAS_MPI
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
 
   Cell c(mesh, 0);
   _salt = c.numEntities(1) * mesh.distdata().global_numCells();
 
   // Assign a safe range for each processor
   _start_offset = 0;
+#ifdef HAS_MPI
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_new, &_start_offset, 1,
 	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
@@ -180,7 +183,8 @@ void DMesh::imp(Mesh& mesh)
   _start_offset += glb_max;
 
   MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-  
+  #endif
+
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
   {
@@ -640,6 +644,8 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
   }  
 }
 //-----------------------------------------------------------------------------
+#ifdef HAS_MPI
+//-----------------------------------------------------------------------------
 void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
 {
   // Allocate receive buffer
@@ -783,3 +789,16 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   delete[] state;
 }
 //-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
+void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty) 
+{
+  error("Rivara needs MPI");
+}
+//-----------------------------------------------------------------------------
+void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, bool& empty)
+{
+  error("Rivara needs MPI");
+}
+//-----------------------------------------------------------------------------
+#endif

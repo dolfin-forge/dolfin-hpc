@@ -77,7 +77,11 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
     }
   }
   
+#ifdef HAS_MPI
   MatCreateShell(MPI::DOLFIN_COMM, m, n, M, N, (void*) this, &A);
+#else
+  MatCreateShell(PETSC_COMM_SELF, m, n, M, N, (void*) this, &A);
+#endif
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
 //-----------------------------------------------------------------------------
@@ -99,7 +103,11 @@ void PETScKrylovMatrix::init(int M, int N)
 	MatDestroy(A);
     }
 
+#ifdef HAS_MPI
   MatCreateShell(MPI::DOLFIN_COMM, M, N, M, N, (void*) this, &A);
+#else
+  MatCreateShell(PETSC_COMM_SELF, M, N, M, N, (void*) this, &A);
+#endif
   MatShellSetOperation(A, MATOP_MULT, (void (*)()) usermult);
 }
 //-----------------------------------------------------------------------------

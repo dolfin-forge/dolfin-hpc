@@ -5,7 +5,7 @@
 // Modified by Niclas Jansson, 2009-2010.
 //
 // First added:  2007-11-30
-// Last changed: 2010-01-13
+// Last changed: 2010-06-08
 
 #ifndef __MPI_helper_H
 #define __MPI_helper_H
@@ -57,9 +57,11 @@ namespace dolfin
     /// Reorder MPI communicator
     static void reorderComm(Mesh& mesh);
 
-    //#ifdef HAS_MPI
+#ifdef HAS_MPI
     static MPI_Comm DOLFIN_COMM;
-    //#endif
+#else
+    static int DOLFIN_COMM;
+#endif
 
   private:
     static dolfin::real start_time;

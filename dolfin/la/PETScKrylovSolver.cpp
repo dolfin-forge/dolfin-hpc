@@ -173,10 +173,13 @@ void PETScKrylovSolver::init(uint M, uint N)
     KSPDestroy(ksp);
 
   // Set up solver environment
+#ifdef HAS_MPI
   if(MPI::numProcesses() > 1)
     KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else
+#else
     KSPCreate(PETSC_COMM_SELF, &ksp);
+#endif
   KSPSetFromOptions(ksp);  
   //KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
 

@@ -87,7 +87,9 @@ void PETScVector::init(uint N)
   if (MPI::numProcesses() > 1)
   {
     //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
+#ifdef HAS_MPI
     VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x);
+#endif
   }
   else {
     VecCreate(PETSC_COMM_SELF, &x);
@@ -431,8 +433,10 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
     }
   }
 
+#ifdef HAS_MPI
   VecCreateGhost(MPI::DOLFIN_COMM, local_size, size, (int) ghost_indices.size(),
 		 (const int *) &ghost_indices[0], &x);       
+#endif
   VecSetValues(x, local_size, rows, values, INSERT_VALUES);
   delete[] rows;
   delete[] values;

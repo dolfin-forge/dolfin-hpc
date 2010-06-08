@@ -28,6 +28,7 @@ PETScLUSolver::PETScLUSolver()
   if(MPI::numProcesses() > 1)
     KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else
+    KSPCreate(PETSC_COMM_SELF, &ksp);
 #else
     KSPCreate(PETSC_COMM_SELF, &ksp);
 #endif

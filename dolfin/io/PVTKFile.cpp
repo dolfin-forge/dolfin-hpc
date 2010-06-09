@@ -90,6 +90,21 @@ void PVTKFile::operator<<(MeshFunction<double>& meshfunction)
 //----------------------------------------------------------------------------
 void PVTKFile::operator<<(Function& u)
 {
+  std::pair<Function*, std::string> f(&u, "P");
+  std::vector<std::pair<Function*, std::string> > tmp;
+  tmp.push_back(f);
+  write_dataset(tmp);
+}
+//----------------------------------------------------------------------------
+void PVTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
+{
+  write_dataset(f);
+}
+//----------------------------------------------------------------------------
+void PVTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
+{ 
+  dolfin_assert(data.size() > 0);
+    
   // Update vtu file name and clear file
   vtuNameUpdate(counter);
 
@@ -105,10 +120,10 @@ void PVTKFile::operator<<(Function& u)
     pvdFileWrite(counter);
 
     // Write pvtu file
-    pvtuFileWrite_func(u);
+    pvtuFileWrite_func(f);
   }
     
-  Mesh& mesh = u.mesh(); 
+  Mesh& mesh = f[0].first->mesh(); 
 
   // Write headers
   VTKHeaderOpen(mesh);
@@ -117,17 +132,17 @@ void PVTKFile::operator<<(Function& u)
   MeshWrite(mesh);
   
   // Write results
-  ResultsWrite(u);
+  ResultsWrite(f);
   
   // Close headers
   VTKHeaderClose();
   
   // Increase the number of times we have saved the function
   counter++;
-  
+  /*
   cout << "Saved function " << u.name() << " (" << u.label()
        << ") to file " << filename << " in VTK format." << endl;
-
+  */
 }
 //----------------------------------------------------------------------------
 void PVTKFile::MeshWrite(Mesh& mesh) const
@@ -211,78 +226,88 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::ResultsWrite(Function& u) const
+void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string>> f) const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
   
-  Mesh& mesh = u.mesh();
+  // Assume same mesh for all data arrays
+  Mesh& mesh = f[0].first->mesh();
 
-  const uint rank = u.rank();
-  if(rank > 1)
-    error("Only scalar and vectors functions can be saved in VTK format.");
-
-  // Get number of components
-  const uint dim = u.dim(0);
-
+  fprintf(fp, "<PointData> \n");  
+  for (std::vector<std::pair<Function*, std::string>>::iterator it = f.begin();
+       it != f.end(); it++) 
+  {
+    Function* u = it->first;
+    std::string& name = it->second;
+    const uint rank = u->rank();
+    if(rank > 1)
+      error("Only scalar and vectors functions can be saved in VTK format.");
+    
+    // Get number of components
+    const uint dim = u->dim(0);
+    
   // Allocate memory for function values at vertices
-  uint size = mesh.numVertices();
-  for (uint i = 0; i < u.rank(); i++)
-    size *= u.dim(i);
-  real* values = new real[size];
-
-  // Get function values at vertices
-  u.interpolate(values);
-
-  // Write function data at mesh vertices
-  if ( rank == 0 )
-  {
-    fprintf(fp, "<PointData  Scalars=\"U\"> \n");
-    fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">	 ");
-  }
-  else
-  {
-    fprintf(fp, "<PointData  Vectors=\"U\"> \n");
-    fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  NumberOfComponents=\"3\" format=\"binary\">	 ");	
-  }
-
-  if ( dim > 3 )
-    warning("Cannot handle VTK file with number of components > 3. Writing first three components only");
-	
-  std::vector<float> data;
-  data.resize(size);
-  std::vector<float>::iterator entry = data.begin();
-
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
-  {    
+    uint size = mesh.numVertices();
+    for (uint i = 0; i < u->rank(); i++)
+      size *= u->dim(i);
+    real* values = new real[size];
+    
+    // Get function values at vertices
+    u->interpolate(values);
+    
+    // Write function data at mesh vertices
     if ( rank == 0 )
-      *entry++ = values[ vertex->index() ] ;
-    else if ( u.dim(0) == 2 ) 
     {
-      *entry++ = values[ vertex->index() ];
-      *entry++ = values[ vertex->index() + mesh.numVertices()];
-      *entry++ = 0.0;
+      //      fprintf(fp, "<PointData  Scalars=\"%s\"> \n", name.c_str());
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">	 ", name.c_str());
     }
     else
     {
-      *entry++ = values[ vertex->index() ];
-      *entry++ = values[ vertex->index() + mesh.numVertices()];
-      *entry++ = values[ vertex->index() + 2*mesh.numVertices()];
-    }    
-  }	 
- 
-  // Create encoded stream
-  std::stringstream base64_stream;
-  encode_stream(base64_stream, data);
-  fprintf(fp, "%s\n", base64_stream.str().c_str());
-  
-  fprintf(fp, "</DataArray> \n");
+      //      fprintf(fp, "<PointData  Vectors=\"%s\"> \n", name.c_str());
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">	 ",
+	      name.c_str());	
+    }
+    
+    if ( dim > 3 )
+      warning("Cannot handle VTK file with number of components > 3. Writing first three components only");
+    
+    std::vector<float> data;
+    data.resize(size);
+    std::vector<float>::iterator entry = data.begin();
+    
+    for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+    {    
+      if ( rank == 0 )
+	*entry++ = values[ vertex->index() ] ;
+      else if ( u->dim(0) == 2 ) 
+      {
+	*entry++ = values[ vertex->index() ];
+	*entry++ = values[ vertex->index() + mesh.numVertices()];
+	*entry++ = 0.0;
+      }
+      else
+      {
+	*entry++ = values[ vertex->index() ];
+	*entry++ = values[ vertex->index() + mesh.numVertices()];
+	*entry++ = values[ vertex->index() + 2*mesh.numVertices()];
+      }    
+    }	 
+    
+    // Create encoded stream
+    std::stringstream base64_stream;
+    encode_stream(base64_stream, data);
+    fprintf(fp, "%s\n", base64_stream.str().c_str());
+    
+    fprintf(fp, "</DataArray> \n");
+
+    delete [] values;
+  }
   fprintf(fp, "</PointData> \n");
   
   // Close file
   fclose(fp);
-
-  delete [] values;
+ 
 }
 //----------------------------------------------------------------------------
 void PVTKFile::pvdFileWrite(uint num)
@@ -365,7 +390,7 @@ void PVTKFile::pvtuFileWrite(bool mesh_function)
   pvtuFile.close();
     
 }//----------------------------------------------------------------------------
-void PVTKFile::pvtuFileWrite_func(Function& u)
+void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string>> f)
 {
   std::fstream pvtuFile;
 
@@ -377,17 +402,24 @@ void PVTKFile::pvtuFileWrite_func(Function& u)
   pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">" << std::endl;
   pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
   
-  if(u.rank() == 0) {
-    pvtuFile << "<PPointData Scalars=\"U\">" << std::endl;    
-    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
-  }
-  else {
-    pvtuFile << "<PPointData Vectors=\"U\">" << std::endl;    
-    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\"  NumberOfComponents=\"3\" />" << std::endl;
+  pvtuFile << "<PPointData>" << std::endl;    
+  for (std::vector<std::pair<Function*, std::string>>::iterator it = f.begin();
+       it != f.end(); it++) 
+  {
+    Function* u = it->first;
+    std::string& name = it->second;
+    
+    if(u->rank() == 0) {
+      //      pvtuFile << "<PPointData Scalars=\"" << name << "\">" << std::endl;    
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />" << std::endl;
     }
-  
+    else {
+      //      pvtuFile << "<PPointData Vectors=\"" << name << "\">" << std::endl;    
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"3\" />" << std::endl;
+    }
+  }    
   pvtuFile << "</PPointData>" << std::endl;
-
+    
 
   pvtuFile << "<PCellData>" << std::endl;
   pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />" << std::endl;

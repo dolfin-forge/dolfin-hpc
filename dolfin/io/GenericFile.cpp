@@ -161,6 +161,11 @@ void GenericFile::operator<<(Graph& graph)
   write_not_impl("Graph");
 }
 //-----------------------------------------------------------------------------
+void GenericFile::operator<< (std::vector<std::pair<Function*, std::string> >& f)
+{
+  write_not_impl("Function");
+}
+//-----------------------------------------------------------------------------
 void GenericFile::read()
 {
   opened_read = true;

@@ -8,6 +8,7 @@
 #define __GENERIC_FILE_H
 
 #include <string>
+#include <vector>
 
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>
@@ -64,6 +65,7 @@ namespace dolfin
     virtual void operator<< (ParameterList& parameters);
     virtual void operator<< (BLASFormData& blas);
     virtual void operator<< (Graph& graph);
+    virtual void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
     void read();
     void write();

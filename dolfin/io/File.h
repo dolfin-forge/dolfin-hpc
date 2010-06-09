@@ -4,16 +4,17 @@
 // Modified by Garth N. Wells, 2005, 2006.
 // Modified by Magnus Vikstrom 2007
 // Modified by Nuno Lopes 2008
-// Modified by Niclas Jansson 2008-2009.
+// Modified by Niclas Jansson 2008-2010.
 //
 // First added:  2002-11-12
-// Last changed: 2009-11-01
+// Last changed: 2010-06-09
 
 #ifndef __FILE_H
 #define __FILE_H
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>
@@ -124,6 +125,9 @@ namespace dolfin
 	 
     /// Write graph to file
     void operator<< (Graph& graph);
+
+    /// Write a collection of funtion to file
+    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
   private:
     

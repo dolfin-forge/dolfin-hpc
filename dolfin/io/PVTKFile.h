@@ -2,10 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg 2006.
-// Modified by Niclas Jansson 2008-2009.
+// Modified by Niclas Jansson 2008-2010.
 //
 // First added:  2005-07-05
-// Last changed: 2009-10-29
+// Last changed: 2010-06-09
 
 #ifndef __PVTK_FILE_H
 #define __PVTK_FILE_H
@@ -31,6 +31,7 @@ namespace dolfin
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
     void operator<< (Function& u);
+    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
     void write();
 
@@ -39,6 +40,8 @@ namespace dolfin
     void encode_stream(std::stringstream& stream, const std::vector<T>& data) const;
 
   private:
+
+    void write_dataset(std::vector<std::pair<Function*, std::string> >& f);
 
     // Compute base64 encoded stream for VTK
     template<typename T>
@@ -49,10 +52,10 @@ namespace dolfin
     void encode_inline_compressed_base64(std::stringstream& stream, const std::vector<T>& data) const;
 
     void MeshWrite(Mesh& mesh) const;
-    void ResultsWrite(Function& u) const;
+    void ResultsWrite(std::vector<std::pair<Function*, std::string>> f) const;
     void pvdFileWrite(uint u);
     void pvtuFileWrite(bool mesh_function = false);
-    void pvtuFileWrite_func(Function& u);
+    void pvtuFileWrite_func(std::vector<std::pair<Function*, std::string>> f);
     void VTKHeaderOpen(Mesh& mesh) const;
     void VTKHeaderClose() const;
     void vtuNameUpdate(const int counter);

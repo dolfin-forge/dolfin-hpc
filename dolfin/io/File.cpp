@@ -5,10 +5,10 @@
 // Modified by Haiko Etzel 2005.
 // Modified by Magnus Vikstrom 2007.
 // Modified by Nuno Lopes 2008
-// Modified by Niclas Jansson, 2008-2009.
+// Modified by Niclas Jansson, 2008-2010.
 //
 // First added:  2002-11-12
-// Last changed: 2009-11-01
+// Last changed: 2010-06-09
 
 #include <string>
 #include <dolfin/log/dolfin_log.h>
@@ -299,5 +299,12 @@ void File::operator<<(Graph& graph)
   file->write();
   
   *file << graph;
+}
+//-----------------------------------------------------------------------------
+void File::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
+{
+  file->write();
+
+  *file << f;
 }
 //-----------------------------------------------------------------------------

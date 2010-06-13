@@ -52,10 +52,10 @@ namespace dolfin
     void encode_inline_compressed_base64(std::stringstream& stream, const std::vector<T>& data) const;
 
     void MeshWrite(Mesh& mesh) const;
-    void ResultsWrite(std::vector<std::pair<Function*, std::string>> f) const;
+    void ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const;
     void pvdFileWrite(uint u);
     void pvtuFileWrite(bool mesh_function = false);
-    void pvtuFileWrite_func(std::vector<std::pair<Function*, std::string>> f);
+    void pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f);
     void VTKHeaderOpen(Mesh& mesh) const;
     void VTKHeaderClose() const;
     void vtuNameUpdate(const int counter);

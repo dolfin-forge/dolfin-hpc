@@ -226,7 +226,7 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string>> f) const
+void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
@@ -235,7 +235,7 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string>> f) co
   Mesh& mesh = f[0].first->mesh();
 
   fprintf(fp, "<PointData> \n");  
-  for (std::vector<std::pair<Function*, std::string>>::iterator it = f.begin();
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
        it != f.end(); it++) 
   {
     Function* u = it->first;
@@ -390,7 +390,7 @@ void PVTKFile::pvtuFileWrite(bool mesh_function)
   pvtuFile.close();
     
 }//----------------------------------------------------------------------------
-void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string>> f)
+void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f)
 {
   std::fstream pvtuFile;
 
@@ -403,7 +403,7 @@ void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string>>
   pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
   
   pvtuFile << "<PPointData>" << std::endl;    
-  for (std::vector<std::pair<Function*, std::string>>::iterator it = f.begin();
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
        it != f.end(); it++) 
   {
     Function* u = it->first;

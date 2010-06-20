@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2009-12-09
+// Last changed: 2010-06-20
 
 #include <sstream>
 #include <fstream>
@@ -16,7 +16,7 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
-Checkpoint::Checkpoint() : state(CHECKPOINT), restart_state(OPEN)
+Checkpoint::Checkpoint() : state(CHECKPOINT), restart_state(OPEN), n(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -29,12 +29,12 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
 		       std::vector<Vector *> vec)
 {
 
-  message("Writing checkpoint at time %g", t);
+  message("Writing checkpoint (%s%d) at time %g", fname.c_str(), n%2, t);
   std::ostringstream _fname;
   if( MPI::numProcesses() > 1) 
-    _fname << fname << "_" <<  MPI::processNumber() << ".chkp";
+    _fname << fname << (n++)%2 << "_" <<  MPI::processNumber() << ".chkp";
   else
-    _fname << fname << ".chkp";
+    _fname << fname << (n++)%2 << ".chkp";
 
   std::ofstream out(_fname.str().c_str(), std::ofstream::binary);
 

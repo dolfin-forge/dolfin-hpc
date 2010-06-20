@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2009-12-09
+// Last changed: 2010-06-20
 
 #ifndef __CHECKPOINT_H
 #define __CHECKPOINT_H
@@ -67,6 +67,7 @@ namespace dolfin
     
     std::ifstream in;
     
+    uint n;
     uint _id;
     real _t;
   };

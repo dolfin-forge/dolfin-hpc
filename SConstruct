@@ -175,7 +175,7 @@ if env["enableOptimize"]:
   env.Append(CXXFLAGS=" -O3")
 else:
   # FIXME: why are we optimizing when enableOptimize is False?
-  env.Append(CXXFLAGS=" -O2")
+  env.Append(CXXFLAGS=" -O")
 
 # Set ENABLE_PROJECTION_LIBRARY if enabled
 if env["enableProjectionLibrary"]:

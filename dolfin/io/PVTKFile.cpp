@@ -90,7 +90,7 @@ void PVTKFile::operator<<(MeshFunction<double>& meshfunction)
 //----------------------------------------------------------------------------
 void PVTKFile::operator<<(Function& u)
 {
-  std::pair<Function*, std::string> f(&u, "P");
+  std::pair<Function*, std::string> f(&u, "U");
   std::vector<std::pair<Function*, std::string> > tmp;
   tmp.push_back(f);
   write_dataset(tmp);

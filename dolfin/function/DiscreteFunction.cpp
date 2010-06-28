@@ -7,7 +7,7 @@
 // Modified by Niclas Jansson, 2008-2010.
 //
 // First added:  2007-04-02
-// Last changed: 2010-01-03
+// Last changed: 2010-06-16
 
 #include <cstring>
 
@@ -25,6 +25,7 @@
 #include "SubFunction.h"
 #include "DiscreteFunction.h"
 
+#include <limits>
 #include <set>
 
 using namespace dolfin;
@@ -307,7 +308,14 @@ void DiscreteFunction::eval(real* values, const real* x) const
   Array<uint> cells;
   intersection_detector->overlap(p, cells);
   if (cells.size() < 1)
-    error("Unable to evaluate function at given point (not inside domain).");
+    if (MPI::numProcesses() > 1)
+    {
+      values[0] = std::numeric_limits<real>::infinity(); 
+      return;
+    }
+    else
+      error("Unable to evaluate function at given point (not inside domain).");
+  
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);
   

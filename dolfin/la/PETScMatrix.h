@@ -119,6 +119,8 @@ namespace dolfin
     // Matrix-vector product, y = Ax
     virtual void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
 
+
+
     /// Multiply matrix by given number
     virtual const PETScMatrix& operator*= (real a);
 
@@ -147,6 +149,9 @@ namespace dolfin
 
     /// Assignment operator
     const PETScMatrix& operator= (const PETScMatrix& A);
+
+    /// Matrix axpy, Y = a X+ Y
+    const PETScMatrix& operator+= (const PETScMatrix& A);
 
     void getrows_offproc(std::set<uint> rows);
 

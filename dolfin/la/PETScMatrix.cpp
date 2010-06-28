@@ -492,6 +492,13 @@ void PETScMatrix::zero()
   MatZeroEntries(A);
 }
 //-----------------------------------------------------------------------------
+const PETScMatrix& PETScMatrix::operator+= (const PETScMatrix& A)
+{
+  dolfin_assert(A);
+  MatAXPY(this->A, 1.0, A.A, SAME_NONZERO_PATTERN);
+  return *this;
+}
+//-----------------------------------------------------------------------------
 const PETScMatrix& PETScMatrix::operator*= (real a)
 {
   dolfin_assert(A);

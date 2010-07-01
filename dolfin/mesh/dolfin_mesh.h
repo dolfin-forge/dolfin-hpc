@@ -33,5 +33,6 @@
 #include <dolfin/mesh/Rectangle.h>
 #include <dolfin/mesh/UnitSphere.h>
 #include <dolfin/mesh/IntersectionDetector.h>
+#include <dolfin/mesh/RivaraRefinement.h>
 
 #endif

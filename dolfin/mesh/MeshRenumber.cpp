@@ -20,6 +20,8 @@
 #include <cstdlib> 
 #include <ctime> 
 #include <map>
+#include <set>
+#include <utility>
 
 #ifdef HAS_MPI
 #include <mpi.h>

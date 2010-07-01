@@ -113,7 +113,6 @@ void MPIMeshCommunicator::receive(Mesh& mesh)
   mesh.clear();
   int process_int;
   MPI_Comm_rank(MPI_COMM_WORLD, &process_int);
-  unsigned int this_process = process_int;
 
   // Define custom MPI datatype?
   //MPI_Datatype mpi_mesh;

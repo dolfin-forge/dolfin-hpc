@@ -494,7 +494,7 @@ void PETScMatrix::zero()
 //-----------------------------------------------------------------------------
 const PETScMatrix& PETScMatrix::operator+= (const PETScMatrix& A)
 {
-  dolfin_assert(A);
+  dolfin_assert(this->A);
   MatAXPY(this->A, 1.0, A.A, SAME_NONZERO_PATTERN);
   return *this;
 }

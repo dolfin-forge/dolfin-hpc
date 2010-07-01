@@ -308,6 +308,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
   Array<uint> cells;
   intersection_detector->overlap(p, cells);
   if (cells.size() < 1)
+  {
     if (MPI::numProcesses() > 1)
     {
       values[0] = std::numeric_limits<real>::infinity(); 
@@ -315,6 +316,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
     }
     else
       error("Unable to evaluate function at given point (not inside domain).");
+  }
   
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);

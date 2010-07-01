@@ -103,7 +103,7 @@ void PVTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f)
 //----------------------------------------------------------------------------
 void PVTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
 { 
-  dolfin_assert(data.size() > 0);
+  dolfin_assert(f.size() > 0);
     
   // Update vtu file name and clear file
   vtuNameUpdate(counter);

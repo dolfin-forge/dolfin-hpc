@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2009-06-20
+// Last changed: 2010-07-02
 
 #include "MeshFunction.h"
 #include "Cell.h"
@@ -10,6 +10,7 @@
 #include "Vertex.h"
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/parameter/parameters.h>
 #include "LoadBalancer.h"
 
 #ifdef HAS_MPI
@@ -89,20 +90,18 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   for(CellIterator c(mesh); !c.end(); ++c)
     cell_marker.set(*c, new_cell_marker.get(*c));
 
-  /*
-   * REMOVE
-   * Debug, calculate load imbalance after repartitioning
-   */
-  weight_function(mesh, cell_marker, weight, &w_local, type);
-  
-  MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-  MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  
-  w_avg = (real) w_sum / (real) MPI::numProcesses();
-  real new_imbalance = (real)w_max  / (real)w_avg  ;
-  message("%0.2f percent load imbalance after repartitioning.", 
-	  (new_imbalance - 1.0) * 100);
-
+  if (dolfin_get("Load balancer report"))
+  {
+    weight_function(mesh, cell_marker, weight, &w_local, type);
+    
+    MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    
+    w_avg = (real) w_sum / (real) MPI::numProcesses();
+    real new_imbalance = (real)w_max  / (real)w_avg  ;
+    message("%0.2f percent load imbalance after repartitioning.", 
+	    (new_imbalance - 1.0) * 100);
+  }
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::weight_function(Mesh& mesh, 

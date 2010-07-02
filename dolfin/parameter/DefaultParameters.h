@@ -1,7 +1,7 @@
 // Default values for the DOLFIN parameter system.
 //
 // First added:  2005-12-19
-// Last changed: 2008-05-31
+// Last changed: 2010-07-02
 
 //--- Linear algebra ---
 #ifdef HAS_PETSC
@@ -114,3 +114,6 @@ add("PDE linear solver", "direct");
 
 //--- Mesh partitioning ---
 add("report edge cut", false);
+
+//--- Load balancing ---
+add("Load balancer report", false);

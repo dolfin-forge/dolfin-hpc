@@ -7,6 +7,7 @@
 #include <dolfin/parameter/parameters.h>
 #include "PETScFactory.h"
 #include "EpetraFactory.h"
+#include "JANPACKFactory.h"
 #include "DefaultFactory.h"
 
 #ifndef NO_UBLAS
@@ -62,6 +63,12 @@ LinearAlgebraFactory& DefaultFactory::factory() const
   {
 #ifdef HAS_TRILINOS
     return EpetraFactory::instance();
+#endif
+  }
+  else if (backend == "JANPACK")
+  {
+#ifdef HAS_JANPACK
+    return JANPACKFactory::instance();
 #endif
   }
 

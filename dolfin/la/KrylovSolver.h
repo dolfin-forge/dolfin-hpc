@@ -16,8 +16,11 @@
 #include "GenericVector.h"
 #include "PETScMatrix.h"
 #include "PETScVector.h"
+#include "JANPACKMat.h"
+#include "JANPACKVec.h"
 #include "PETScKrylovSolver.h"
 #include "EpetraKrylovSolver.h"
+#include "JANPACKKrylovSolver.h"
 #include "SolverType.h"
 #include "PreconditionerType.h"
 
@@ -40,7 +43,8 @@ namespace dolfin
     
     /// Create Krylov solver
     KrylovSolver(SolverType solver_type=default_solver, PreconditionerType pc_type=default_pc)
-      : solver_type(solver_type), pc_type(pc_type), ublas_solver(0), petsc_solver(0), epetra_solver(0) {}
+      : solver_type(solver_type), pc_type(pc_type), ublas_solver(0), petsc_solver(0), 
+      epetra_solver(0), janpack_solver(0) {}
     
     /// Destructor
     ~KrylovSolver()
@@ -48,6 +52,7 @@ namespace dolfin
       delete ublas_solver; 
       delete petsc_solver; 
       delete epetra_solver; 
+      delete janpack_solver;
     }
     
     /// Solve linear system Ax = b
@@ -97,7 +102,17 @@ namespace dolfin
         return epetra_solver->solve(A.down_cast<EpetraMatrix >(), x.down_cast<EpetraVector>(), b.down_cast<EpetraVector>());
       }
 #endif
-
+#ifdef HAS_JANPACK
+      if (A.has_type<JANPACKMat>())
+      {
+	if (!janpack_solver)
+	{
+	  janpack_solver = new JANPACKKrylovSolver(solver_type, pc_type);
+	  janpack_solver->set("parent", *this);
+	}
+	return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
+      }
+#endif      
       error("No default LU solver for given backend");
       return 0;
     }
@@ -123,10 +138,15 @@ namespace dolfin
 #else
     int* petsc_solver;
 #endif
- #ifdef HAS_TRILINOS
+#ifdef HAS_TRILINOS
     EpetraKrylovSolver* epetra_solver;
 #else
     int* epetra_solver;
+#endif
+#ifdef HAS_JANPACK
+    JANPACKKrylovSolver* janpack_solver;
+#else
+    int* janpack_solver;
 #endif
   };
 }

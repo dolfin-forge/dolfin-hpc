@@ -101,7 +101,7 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK Mat_crs pointer;
-    Mat_crs *mat() const;
+    Mat_crs*mat() const;
       
 
     /// Assignment operator

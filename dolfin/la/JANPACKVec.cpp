@@ -112,24 +112,23 @@ void JANPACKVec::add(real* values)
 void JANPACKVec::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
-  for(uint i = 0; i < m ; i++)
-    block[i] = x->x[rows[i]];
+  vec_get_block(x, const_cast<double*>(block), 
+		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  for(uint i = 0; i < m ; i++)
-    x->x[rows[i]] = block[i];
-  //  error("Not implemented.");
+  vec_set_block(x, const_cast<double*>(block), 
+		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::add(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
 
-  for(uint i = 0; i < m ; i++)
-    x->x[rows[i]] += block[i];
+  vec_add_block(x, const_cast<double*>(block),
+		reinterpret_cast<int*>(const_cast<uint*>(rows)), m);
   
   //  error("Not implemented.");
 }
@@ -272,7 +271,7 @@ Vec_ *JANPACKVec::vec() const
 void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
 			       std::map<uint, uint>& map)
 {
-  error("Not implemented.");
+  //  error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKVec::factory() const

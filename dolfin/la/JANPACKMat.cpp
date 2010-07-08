@@ -83,8 +83,8 @@ JANPACKMat* JANPACKMat::copy() const
 dolfin::uint JANPACKMat::size(uint dim) const
 {
   dolfin_assert(A); 
-  int M = A->m;
-  int N = A->n;
+  int M = A->M;
+  int N = A->N;
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
@@ -105,7 +105,7 @@ void JANPACKMat::set(const real* block,
 		       uint n, const uint* cols)
 {
   dolfin_assert(A); 
-  error("Not implemented.");
+  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,

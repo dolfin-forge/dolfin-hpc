@@ -30,6 +30,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
+#include <omp.h>
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -152,6 +153,7 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
     coefficients[i]->sync_ghosts();
 
   // Assemble over cells
+#pragma omp parallel
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
 
   // Initialize boundary mesh
@@ -186,41 +188,44 @@ void Assembler::assembleCells(GenericTensor& A,
 #ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(A.rank(), "cells"), mesh.numCells());
 #endif
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  //  for (CellIterator cell(mesh); !cell.end(); ++cell)
+#pragma omp for 
+  for (uint i = 0; i < mesh.numCells(); i++)
   {
+    Cell cell(mesh, i);
+
     // Get integral for sub domain (if any)
     if (domains && domains->size() > 0)
     {
-      const uint domain = (*domains)(*cell);
+      const uint domain = (*domains)(cell);
       if (domain < ufc.form.num_cell_integrals())
-        integral = ufc.cell_integrals[domain];
+	integral = ufc.cell_integrals[domain];
       else
-        continue;
+	continue;
     }
-
+    
     // Update to current cell
-    ufc.update(*cell, mesh.distdata());    
-
+    ufc.update(cell, mesh.distdata());    
+    
     // Interpolate coefficients on cell
-    for (uint i = 0; i < coefficients.size(); i++)
-      coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], *cell);
-
+    for (uint i = 0; i < coefficients.size(); i++) 
+      coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], cell);
+    
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
-      dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
-
+      dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell.index());
+    
     // Tabulate cell tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell);
-
+    
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
-    
+
 #ifndef NO_PROGRESS_BAR
     p++;
 #endif
-
   }
-
+  
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,

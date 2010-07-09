@@ -12,6 +12,7 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/la/GenericSparsityPattern.h>
+#include <dolfin/parameter/parameters.h>
 #include "SparsityPatternBuilder.h"
 #include "UFC.h"
 
@@ -32,6 +33,11 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
+    return;
+
+  // JANPACK doesn't need any sparsity pattern information
+  std::string la_backend = dolfin_get("linear algebra backend");
+  if(la_backend == "JANPACK")
     return;
 
   // Build sparsity pattern for cell integrals

@@ -136,6 +136,7 @@ void JANPACKMat::zero()
 //-----------------------------------------------------------------------------
 void JANPACKMat::apply(FinalizeType finaltype)
 {
+  finalize_mat_crs(A);
   //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------

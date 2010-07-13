@@ -265,8 +265,7 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) c
     else
     {
       //      fprintf(fp, "<PointData  Vectors=\"%s\"> \n", name.c_str());
-      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">	 ",
-	      name.c_str());	
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">	 ", name.c_str(), dim);	
     }
     
     if ( dim > 3 )
@@ -284,7 +283,6 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) c
       {
 	*entry++ = values[ vertex->index() ];
 	*entry++ = values[ vertex->index() + mesh.numVertices()];
-	*entry++ = 0.0;
       }
       else
       {
@@ -293,12 +291,12 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) c
 	*entry++ = values[ vertex->index() + 2*mesh.numVertices()];
       }    
     }	 
-    
+
     // Create encoded stream
     std::stringstream base64_stream;
     encode_stream(base64_stream, data);
     fprintf(fp, "%s\n", base64_stream.str().c_str());
-    
+
     fprintf(fp, "</DataArray> \n");
 
     delete [] values;
@@ -307,7 +305,7 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) c
   
   // Close file
   fclose(fp);
- 
+
 }
 //----------------------------------------------------------------------------
 void PVTKFile::pvdFileWrite(uint num)
@@ -408,14 +406,17 @@ void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> 
   {
     Function* u = it->first;
     std::string& name = it->second;
-    
+
     if(u->rank() == 0) {
       //      pvtuFile << "<PPointData Scalars=\"" << name << "\">" << std::endl;    
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />" << std::endl;
     }
     else {
+      // Get number of components
+      const uint dim = u->dim(0);
+    
       //      pvtuFile << "<PPointData Vectors=\"" << name << "\">" << std::endl;    
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"3\" />" << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"" << dim << "\" />" << std::endl;
     }
   }    
   pvtuFile << "</PPointData>" << std::endl;

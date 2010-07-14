@@ -4,6 +4,7 @@
 
 #ifdef HAS_JANPACK
 
+#include <bicgstab.h>
 #include <cg.h>
 
 #include "JANPACKMat.h"
@@ -31,9 +32,10 @@ uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPAC
   // Reinitialize solution vector if necessary
   x.init(M);
 
-  int num_iterations = cg_crs(A.mat(), x.vec(), b.vec());
+  //  int num_iterations = cg_crs(A.mat(), x.vec(), b.vec());
+  int num_iterations = bicgstab_crs(A.mat(), x.vec(), b.vec());
   message("Krylov solver converged in %d iterations.", num_iterations);
-  return 50;
+  return num_iterations;
 }
 //-----------------------------------------------------------------------------
 

@@ -153,7 +153,7 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
     coefficients[i]->sync_ghosts();
 
   // Assemble over cells
-#pragma omp parallel
+  //#pragma omp parallel
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
 
   // Initialize boundary mesh

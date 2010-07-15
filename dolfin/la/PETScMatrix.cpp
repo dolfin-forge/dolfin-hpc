@@ -99,7 +99,11 @@ void PETScMatrix::init(uint M, uint N)
     MatCreateSeqAIJ(PETSC_COMM_SELF, M, N, 50, PETSC_NULL, &A);
 
     setType();
+#if PETSC_VERSION_MAJOR > 2
+    MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#else
     MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+#endif
     MatSetFromOptions(A);
   }
 }
@@ -133,8 +137,13 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     if ( block_size ) 
     {      
       MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size, (int) M, (int) N, 1, PETSC_NULL, &A);
+#if PETSC_VERSION_MAJOR > 2
+      MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+      MatSetOption(A, MAT_USE_HASH_TABLE, PETSC_TRUE);
+#else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
       MatSetOption(A, MAT_USE_HASH_TABLE);
+#endif
       MatSetFromOptions(A);
       MatZeroEntries(A);
       //    MatCreateSeqBAIJ(PETSC_COMM_SELF, 1, (int) M, (int) N, 5, PETSC_NULL, &A);
@@ -145,7 +154,11 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
       MatCreate(PETSC_COMM_SELF, &A);
       MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
       setType();
+#if PETSC_VERSION_MAJOR > 2
+      MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+#endif
       MatSetFromOptions(A);
       MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*)nz);
       MatZeroEntries(A);
@@ -172,7 +185,11 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
+#if PETSC_VERSION_MAJOR > 2
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#else
   MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+#endif
   MatSetFromOptions(A);
   MatZeroEntries(A);
 
@@ -653,6 +670,16 @@ MatType PETScMatrix::getPETScType() const
       return MATMPIAIJ;
     else
       return MATSEQAIJ;
+#if PETSC_VERSION_MAJOR > 2 
+  case spooles:
+      return MAT_SOLVER_SPOOLES;
+  case superlu:
+      return MAT_SOLVER_SUPERLU;
+  case umfpack:
+      return MAT_SOLVER_UMFPACK;
+  default:
+    return "default";
+#else
   case spooles:
       return MATSEQAIJSPOOLES;
   case superlu:
@@ -661,6 +688,7 @@ MatType PETScMatrix::getPETScType() const
       return MATUMFPACK;
   default:
     return "default";
+#endif
   }
 }
 //-----------------------------------------------------------------------------

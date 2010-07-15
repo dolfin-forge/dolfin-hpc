@@ -204,6 +204,9 @@ void PETScKrylovSolver::readParameters()
   // Set monitor
   if ( get("Krylov monitor convergence") )
   {
+#if(PETSC_VERSION_MAJOR > 2)
+    KSPMonitorSet(ksp, KSPMonitorTrueResidualNorm, 0, 0);
+#else    
     //FIXME: Decide on supported version of PETSc
 #if(PETSC_VERSION_SUBMINOR > 2)
     //KSPMonitorSet(ksp, monitor, 0, 0);
@@ -211,6 +214,7 @@ void PETScKrylovSolver::readParameters()
 #else
     //KSPSetMonitor(ksp, monitor, 0, 0);
     KSPSetMonitor(ksp, KSPMonitorTrueResidualNorm, 0, 0);
+#endif
 #endif
   }
 
@@ -297,14 +301,21 @@ void PETScKrylovSolver::writeReport(int num_iterations)
   if ( !report )
     return;
     
-  // Get name of solver
+#if PETSC_VERSION_MAJOR >2 
+  const KSPType ksp_type;
+  const PCType pc_type;
+#else
   KSPType ksp_type;
+  PCType pc_type;
+#endif
+
+
+  // Get name of solver
   KSPGetType(ksp, &ksp_type);
 
   // Get name of preconditioner
   PC pc;
   KSPGetPC(ksp, &pc);
-  PCType pc_type;
   PCGetType(pc, &pc_type);
 
   // Report number of iterations and solver type

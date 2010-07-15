@@ -2,7 +2,6 @@
 import os,sys
 import string
 import os.path
-import commands
 
 from commonPkgConfigUtils import *
 
@@ -11,16 +10,25 @@ def getPetscVariables(variables=('includes','libs','compiler','linker'), sconsEn
     variables = (variables,)
   filename = "petsc_makefile"
   arch = get_architecture()
+  # Check location of PETSc settings files
+  petsc_path_variables = []
+  if os.path.exists(getPetscDir(sconsEnv=sconsEnv)+"/bmake"):
+      petsc_path_variables = ["bmake/common/", "bmake/", ""]
+  elif os.path.exists(getPetscDir(sconsEnv=sconsEnv)+"/conf/"): 
+      petsc_path_variables = ["conf/", "", "/include"]
+  else:
+      raise UnableToFindPackageException("PETSc")
   # Create a makefile to read basic things from PETSc
   petsc_makefile_str="""
 # Retrive various flags from PETSc settings.
 
 PETSC_DIR=%s
+PETSC_ARCH=%s
 
-include ${PETSC_DIR}/bmake/common/variables
+include ${PETSC_DIR}/%svariables
 
 get_petsc_include:
-	-@echo  -I${PETSC_DIR}/bmake/${PETSC_ARCH} -I${PETSC_DIR}/include ${MPI_INCLUDE}
+	-@echo -I${PETSC_DIR}/%s${PETSC_ARCH}%s -I${PETSC_DIR}/include ${MPI_INCLUDE}
 
 get_petsc_libs:
 	-@echo   ${C_SH_LIB_PATH} -L${PETSC_LIB_DIR} ${PETSC_LIB_BASIC}
@@ -30,7 +38,8 @@ get_petsc_cc:
 
 get_petsc_ld:
 	-@echo ${PCC_LINKER}
-""" % getPetscDir(sconsEnv=sconsEnv)
+""" % (getPetscDir(sconsEnv=sconsEnv), getPetscArch(sconsEnv=sconsEnv), \
+       petsc_path_variables[0], petsc_path_variables[1], petsc_path_variables[2])
   petsc_make_file = open(filename, "w")
   petsc_make_file.write(petsc_makefile_str)
   petsc_make_file.close()
@@ -38,7 +47,7 @@ get_petsc_ld:
   petsc_includes = None
   if 'includes' in variables: 
     cmdstr = "make -s -f %s get_petsc_include" % filename
-    runFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+    runFailed, cmdoutput = getstatusoutput(cmdstr)
     if runFailed:
       os.unlink(filename)
       msg = "Unable to read PETSc includes through make."
@@ -48,7 +57,7 @@ get_petsc_ld:
   petsc_libs = None
   if 'libs' in variables:
     cmdstr = "make -s -f %s get_petsc_libs" % filename
-    runFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+    runFailed, cmdoutput = getstatusoutput(cmdstr)
     if runFailed:
       os.unlink(filename)
       msg = "Unable to read PETSc libs through make."
@@ -58,7 +67,7 @@ get_petsc_ld:
   petsc_cc = None
   if 'compiler' in variables:
     cmdstr = "make -s -f %s get_petsc_cc" % filename
-    runFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+    runFailed, cmdoutput = getstatusoutput(cmdstr)
     if runFailed:
       os.unlink(filename)
       msg = "Unable to figure out correct PETSc compiler."
@@ -72,7 +81,7 @@ get_petsc_ld:
   petsc_ld = None
   if 'linker' in variables:
     cmdstr = "make -s -f %s get_petsc_ld" % filename
-    runFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+    runFailed, cmdoutput = getstatusoutput(cmdstr)
     if runFailed:
       os.unlink(filename)
       msg = "Unable to figure out correct PETSc linker"
@@ -94,8 +103,24 @@ get_petsc_ld:
 def getPetscDir(sconsEnv=None):
     petsc_dir = getPackageDir("petsc", sconsEnv=sconsEnv, default=None)
     if not petsc_dir:
+        petsc_locations = ["/usr/lib/petscdir/3.0.0", "/usr/lib/petscdir/2.3.3"]
+        for petsc_location in petsc_locations:
+            if os.access(petsc_location, os.F_OK) == True:
+                return petsc_location
         raise UnableToFindPackageException("PETSc")
     return petsc_dir
+
+def getPetscArch(sconsEnv=None):
+    if sconsEnv is not None and sconsEnv.get("withPetscArch", None):
+        return sconsEnv["withPetscArch"]
+    elif os.environ.has_key('PETSC_ARCH'):
+        return os.environ["PETSC_ARCH"]
+    elif os.path.exists(getPetscDir(sconsEnv=sconsEnv)+"/linux-gnu-c-opt"):
+        return "linux-gnu-c-opt"
+    elif os.path.exists(getPetscDir(sconsEnv=sconsEnv)+"/lib/linux-gnu-c-opt"):
+        return "linux-gnu-c-opt"
+    else:
+        return ""
 
 def pkgVersion(compiler=None, linker=None, cflags=None, libs=None, sconsEnv=None):
   cpp_test_version_str = r"""
@@ -129,18 +154,19 @@ int main() {
     libs = pkgLibs(sconsEnv=sconsEnv)
 
   cmdstr = "%s %s -c petsc_config_test_version.cpp" % (compiler, cflags)
-  compileFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+  compileFailed, cmdoutput = getstatusoutput(cmdstr)
   if compileFailed:
     remove_cppfile("petsc_config_test_version.cpp")
     raise UnableToCompileException("PETSc", cmd=cmdstr,
                                    program=cpp_test_version_str, errormsg=cmdoutput)
-  cmdstr = "%s %s petsc_config_test_version.o" % (linker, libs)
-  linkFailed, cmdoutput = commands.getstatusoutput(cmdstr)
+  cmdstr = "%s -o a.out %s petsc_config_test_version.o" % (linker, libs)
+  linkFailed, cmdoutput = getstatusoutput(cmdstr)
   if linkFailed:
     remove_cppfile("petsc_config_test_version.cpp", ofile=True)
     raise UnableToLinkException("PETSc", cmd=cmdstr,
                                 program=cpp_test_version_str, errormsg=cmdoutput)
-  runFailed, cmdoutput = commands.getstatusoutput("./a.out")
+  cmdstr = os.path.join(os.getcwd(), "a.out")
+  runFailed, cmdoutput = getstatusoutput(cmdstr)
   if runFailed:
     remove_cppfile("petsc_config_test_version.cpp", ofile=True, execfile=True)
     raise UnableToRunException("PETSc", errormsg=cmdoutput)

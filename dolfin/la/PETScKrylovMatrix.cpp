@@ -161,7 +161,12 @@ void PETScKrylovMatrix::disp(bool sparse, int precision) const
 //-----------------------------------------------------------------------------
 LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
 {
+
+#if PETSC_VERSION_MAJOR > 2
+  const MatType type = 0;
+#else
   MatType type = 0;
+#endif
   MatGetType(A.mat(), &type);
   int m = A.size(0);
   int n = A.size(1);
@@ -169,6 +174,7 @@ LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
 	 << m << " x " << n << " ]";
 
   return stream;
+
 }
 //-----------------------------------------------------------------------------
 

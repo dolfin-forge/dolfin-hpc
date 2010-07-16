@@ -83,7 +83,11 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
   #if PETSC_HAVE_MUMPS    
     if(_mat_type == MATMPIAIJ) {
       Mat Atemp = A.mat();
-      MatConvert(A.mat(), MATAIJMUMPS, MAT_REUSE_MATRIX, &Atemp);    
+#if PETSC_VERSION_MAJOR > 2
+      MatConvert(A.mat(), MAT_SOLVER_MUMPS, MAT_REUSE_MATRIX, &Atemp);
+#else
+      MatConvert(A.mat(), MATAIJMUMPS, MAT_REUSE_MATRIX, &Atemp);
+#endif
     }
   #endif
     

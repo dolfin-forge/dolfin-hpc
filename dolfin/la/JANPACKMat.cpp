@@ -51,10 +51,8 @@ void JANPACKMat::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   //  if (A) delete A;
-
-  //  message("Calling init %d %d", M, N);
   A = &_A;
-  init_mat_crs(A,M,N,50);
+  init_mat_crs(A, M, N);
   // Not yet implemented
   //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
@@ -85,6 +83,7 @@ dolfin::uint JANPACKMat::size(uint dim) const
   dolfin_assert(A); 
   int M = A->M;
   int N = A->N;
+  message("A has %d non-zero entries", A->entries);
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
@@ -105,7 +104,11 @@ void JANPACKMat::set(const real* block,
 		       uint n, const uint* cols)
 {
   dolfin_assert(A); 
-  error("Not implemented (set).");
+  const real *bp = &block[0];
+  for(uint i = 0 ; i < m; i++)
+    for(uint j = 0; j < n; j++)
+      mat_set_crs(A, rows[i], cols[j], *(bp++));
+  //  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,
@@ -173,7 +176,11 @@ void JANPACKMat::mult(const GenericVector& x_, GenericVector& Ax_, bool transpos
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
 {
   dolfin_assert(A); 
-  error("Not implemented.");
+  for (uint i = 0; i < A->rs[row].top; i++)
+  {
+    columns.push_back(A->rs[row].A[i].i);
+    values.push_back(A->rs[row].A[i].v);
+  }
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)
@@ -205,6 +212,15 @@ const JANPACKMat& JANPACKMat::operator/= (real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-
-
+const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
+{
+  mat_copy_crs(A.down_cast<JANPACKMat>().A, this->A);
+  return *this;
+}
+//-----------------------------------------------------------------------------
+void JANPACKMat::dup(GenericMatrix& A) 
+{
+  mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
+}
+//-----------------------------------------------------------------------------
 #endif

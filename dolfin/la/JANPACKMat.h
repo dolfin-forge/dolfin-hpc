@@ -80,6 +80,9 @@ namespace dolfin
     /// Set given rows to identity matrix
     virtual void ident(uint m, const uint* rows);
 
+    /// Duplicate matrix
+    void dup(GenericMatrix& A); 
+
     // Matrix-vector product, y = Ax
     virtual void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
 
@@ -90,8 +93,7 @@ namespace dolfin
     virtual const JANPACKMat& operator/= (real a);
 
     /// Assignment operator
-    virtual const GenericMatrix& operator= (const GenericMatrix& x)
-    { error("Not implemented."); return *this; }
+    virtual const GenericMatrix& operator= (const GenericMatrix& x);
 
     //--- Special functions ---
 

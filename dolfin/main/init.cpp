@@ -17,13 +17,18 @@ void dolfin::dolfin_init(int argc, char* argv[])
 {
   message("Initializing DOLFIN version %s.", DOLFIN_VERSION);
   
-#ifdef HAS_PETSC
-  SubSystemsManager::initPETSc(argc, argv);
-#endif
-
 #ifdef HAS_MPI
+  SubSystemsManager::initMPI(argc, argv);
   MPI::initComm();
 #endif
+
+#ifndef HAS_JANPACK
+#ifdef HAS_PETSC 
+  SubSystemsManager::initPETSc(argc, argv);
+#endif
+#endif
+
+
 }
 //-----------------------------------------------------------------------------
 void dolfin::dolfin_finalize()

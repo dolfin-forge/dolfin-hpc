@@ -43,15 +43,18 @@ SubSystemsManager::~SubSystemsManager()
 {  
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initMPI()
+void SubSystemsManager::initMPI(int argc, char* argv[])
 {
 #ifdef HAS_MPI
   if( MPIinitialized() )
     return;
 
-  int argc;
-  char **argv;
+#ifdef HAS_JANPACK
+  int provided;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+#else
   MPI_Init(&argc, &argv);
+#endif
 #else
   // Do nothing
 #endif

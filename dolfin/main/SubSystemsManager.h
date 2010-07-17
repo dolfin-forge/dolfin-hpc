@@ -20,7 +20,7 @@ namespace dolfin
   public:
 
     /// Initialise MPI
-    static void initMPI();
+    static void initMPI(int argc = 0, char* argv[] = 0);
 
     /// Initialize PETSc without command-line arguments
     static void initPETSc();

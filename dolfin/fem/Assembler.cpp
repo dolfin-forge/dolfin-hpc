@@ -30,7 +30,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
-#include <omp.h>
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -53,6 +52,7 @@ Assembler::~Assembler()
 void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 {
   form.updateDofMaps(mesh);
+#pragma omp parallel
   assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
@@ -146,14 +146,16 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   UFC ufc(form, mesh, dof_map_set);
 
   // Initialize global tensor
+#pragma omp master
   initGlobalTensor(A, dof_map_set, ufc, reset_tensor);
+#pragma omp barrier
 
   // Update all ghost points
   for (uint i = 0; i < coefficients.size(); i++)
     coefficients[i]->sync_ghosts();
 
+
   // Assemble over cells
-  //#pragma omp parallel 
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
 
   // Initialize boundary mesh

@@ -242,8 +242,7 @@ void JANPACKVec::axpy(real a, const GenericVector& y)
 //-----------------------------------------------------------------------------
 real JANPACKVec::norm(VectorNormType type) const
 {
-  error("Not implemented.");
-  return 0.0;
+  return vec_nrm2(x);
 }
 //-----------------------------------------------------------------------------
 real JANPACKVec::min() const

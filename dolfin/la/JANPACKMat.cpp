@@ -8,7 +8,10 @@
 #include <dolfin/common/Array.h>
 #include "JANPACKFactory.h"
 #include "JANPACKMat.h"
+#include "JANPACKVec.h"
 #include "GenericSparsityPattern.h"
+
+#include <gemv.h>
 
 #ifdef HAS_JANPACK
 
@@ -119,7 +122,7 @@ void JANPACKMat::add(const real* block,
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
-      mat_add_crs(A, rows[i], cols[j], *(bp++));
+      mat_add_crs(&_A, rows[i], cols[j], *(bp++));
   
   //error("Not implemented. (add)");
 }
@@ -167,10 +170,17 @@ void JANPACKMat::zero(uint m, const uint* rows)
   error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::mult(const GenericVector& x_, GenericVector& Ax_, bool transposed) const
+void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed) const
 {
   dolfin_assert(A); 
-  error("Not implemented.");
+  const JANPACKVec& xx = x.down_cast<JANPACKVec>();  
+  JANPACKVec& yy = y.down_cast<JANPACKVec>();
+  if (transposed)
+    yy.init(size(1));
+  else
+    yy.init(size(0));
+  
+  gemv_crs(A, xx.vec(), yy.vec());  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
@@ -220,7 +230,7 @@ const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
 //-----------------------------------------------------------------------------
 void JANPACKMat::dup(GenericMatrix& A) 
 {
-  mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
+  //  mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
 }
 //-----------------------------------------------------------------------------
 #endif

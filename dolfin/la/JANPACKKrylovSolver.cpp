@@ -14,7 +14,9 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, PreconditionerType pc)
+JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, 
+					 PreconditionerType pc) :
+  method(method)
 {
 }
 //-----------------------------------------------------------------------------
@@ -32,8 +34,17 @@ uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPAC
   // Reinitialize solution vector if necessary
   x.init(M);
 
-  //int num_iterations = cg_crs(A.mat(), x.vec(), b.vec());
-  int num_iterations = bicgstab_crs(A.mat(), x.vec(), b.vec());
+  int num_iterations;
+  switch (method)
+  {
+  case bicgstab:
+    num_iterations = bicgstab_crs(A.mat(), x.vec(), b.vec()); break;
+  case cg:
+    num_iterations = cg_crs(A.mat(), x.vec(), b.vec()); break;
+  default:
+    error("Krylov solver not supported by JANPACK");
+  }  
+    
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;
 }

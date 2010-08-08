@@ -28,8 +28,10 @@ namespace dolfin
     uint solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b); 
     
   private:
+
     /// Krylov method
     SolverType method;
+
   };
 }
 

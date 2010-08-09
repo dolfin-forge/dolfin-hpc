@@ -27,6 +27,7 @@
 
 #include <algorithm>
 #include <cmath> 
+#include <cstring>
 
 #ifdef HAS_MPI
 #include <mpi.h>
@@ -50,6 +51,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
     end();
   }
+  mesh.renumber();
 
   DMesh dmesh;
   dmesh.imp(mesh);
@@ -69,6 +71,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   
   dmesh.bisectMarked(dmarked);
 
+
   // Remove deleted cells from global list
   for(std::list<DCell* >::iterator it = dmesh.cells.begin();
       it != dmesh.cells.end(); )
@@ -80,15 +83,12 @@ void RivaraRefinement::refine(Mesh& mesh,
       it = dmesh.cells.erase(it);
     else
       it++;
-  } 
+  }
   
   Mesh omesh;    
   dmesh.exp(omesh);
   
   mesh = omesh;
-  mesh.distdata().invalid_numbering();
-  mesh.distdata().invalid_ownership();
-  mesh.renumber();
 }
 //-----------------------------------------------------------------------------
 DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0), 
@@ -118,6 +118,7 @@ DMesh::DMesh() :  cells(0)
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
+  
   // Delete allocated DVertices
   for(std::set<DVertex* >::iterator it = vertices.begin();
       it != vertices.end(); ++it)
@@ -127,6 +128,7 @@ DMesh::~DMesh()
   for(std::list<DCell* >::iterator it = cells.begin();
        it != cells.end(); ++it)
      delete *it;
+  
 }
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)
@@ -137,7 +139,7 @@ void DMesh::imp(Mesh& mesh)
   vertices.clear();
   cells.clear();
 
-  MeshRenumber::renumber_vertices(mesh);
+  //MeshRenumber::renumber_vertices(mesh);
 
   std::vector<DVertex *> vertexvec;
 
@@ -167,7 +169,7 @@ void DMesh::imp(Mesh& mesh)
 #endif
 
   Cell c(mesh, 0);
-  _salt = c.numEntities(1) * mesh.distdata().global_numCells();
+  _salt = c.numEntities(0) * mesh.distdata().global_numCells();
 
   // Assign a safe range for each processor
   _start_offset = 0;
@@ -282,7 +284,9 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-
+  mesh.distdata().invalid_numbering();
+  mesh.distdata().invalid_ownership();
+  mesh.renumber();
 }
 //-----------------------------------------------------------------------------
 void DMesh::number()

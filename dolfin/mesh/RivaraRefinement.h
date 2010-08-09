@@ -135,7 +135,7 @@ namespace dolfin
 
     // Map between global number of boundary vertex to vertex
     _map<uint, DVertex*> bc_dvs;
-#if (__GNUG__ || __sgi)
+#if (__GNUG__ || __sgi )
     std::map<EdgeKey, DVertex*> ref_edge;
 #else
     _map<EdgeKey, DVertex*> ref_edge;

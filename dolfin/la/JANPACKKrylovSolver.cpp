@@ -32,7 +32,7 @@ uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPAC
   message("Solving linear system of size %d x %d (Krylov solver).", M, N);
 
   // Reinitialize solution vector if necessary
-  x.init(M);
+  x.init(b.local_size());
 
   int num_iterations;
   switch (method)

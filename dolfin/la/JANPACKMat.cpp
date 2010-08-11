@@ -86,7 +86,6 @@ dolfin::uint JANPACKMat::size(uint dim) const
   dolfin_assert(A); 
   int M = A->M;
   int N = A->N;
-  message("A has %d non-zero entries", A->entries);
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------

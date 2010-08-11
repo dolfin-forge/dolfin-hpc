@@ -74,6 +74,7 @@ void JANPACKVec::init(uint N)
   // Create vector
   init_vec(&_x, N);
   x = &_x;
+  zero();
 }
 //-----------------------------------------------------------------------------
 JANPACKVec* JANPACKVec::copy() const
@@ -135,7 +136,10 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 //-----------------------------------------------------------------------------
 void JANPACKVec::apply(FinalizeType finaltype)
 {
-  
+
+  finalize_vec(x);
+  if (is_ghosted)
+    vec_update_ghosts(x);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::zero()
@@ -173,9 +177,8 @@ const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
   dolfin_assert(v.x);
 
   init(v.local_size());
-  //  vec_copy(x, v.x);
+  //vec_copy(x, v.x);
   vec_copy(v.x, x);
-
   return *this; 
 }
 //-----------------------------------------------------------------------------
@@ -183,6 +186,7 @@ const JANPACKVec& JANPACKVec::operator= (real a)
 {
   dolfin_assert(x);
   // VecSet(x, a);
+  error("Not implemented");
   return *this; 
 }
 //-----------------------------------------------------------------------------
@@ -270,7 +274,27 @@ Vec_ *JANPACKVec::vec() const
 void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
 			       std::map<uint, uint>& map)
 {
-  //  error("Not implemented.");
+ 
+  if ( is_ghosted )
+    apply();
+  
+  int low, high;
+
+  low = x->range[0];
+  high = x->range[1];
+
+  Array<int> ghost_indices;
+  std::set<uint>::iterator sit;
+  for(sit = indices.begin(); sit != indices.end(); ++sit) {
+    if( *sit < (uint) low || *sit >= (uint) high ) {
+      ghost_indices.push_back((int) *sit);
+    }
+  }
+
+  init_vec_ghosts(x, &ghost_indices[0], ghost_indices.size());
+  
+  is_ghosted = true;
+  apply();
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKVec::factory() const

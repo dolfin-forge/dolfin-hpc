@@ -147,13 +147,16 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 
   // Initialize global tensor
 #pragma omp master
-  initGlobalTensor(A, dof_map_set, ufc, reset_tensor);
+  {
+    initGlobalTensor(A, dof_map_set, ufc, reset_tensor);
+    
+    
+    // Update all ghost points
+    for (uint i = 0; i < coefficients.size(); i++)
+      coefficients[i]->sync_ghosts();
+  }
+#pragma omp flush
 #pragma omp barrier
-
-  // Update all ghost points
-  for (uint i = 0; i < coefficients.size(); i++)
-    coefficients[i]->sync_ghosts();
-
 
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
@@ -169,7 +172,9 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   assembleInteriorFacets(A, coefficients, dof_map_set, ufc, interior_facet_domains);
 
   // Finalise assembly of global tensor
+#pragma omp master
   A.apply();
+#pragma omp barrier
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleCells(GenericTensor& A,

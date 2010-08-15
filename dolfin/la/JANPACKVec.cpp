@@ -74,7 +74,6 @@ void JANPACKVec::init(uint N)
   // Create vector
   init_vec(&_x, N);
   x = &_x;
-  zero();
 }
 //-----------------------------------------------------------------------------
 JANPACKVec* JANPACKVec::copy() const

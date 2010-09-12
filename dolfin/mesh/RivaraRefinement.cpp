@@ -749,7 +749,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   uint pe_size = MPI::numProcesses();
   uint dest;
   uint D = 1;
-#ifdef __sgi
+#if  (__sgi || __FreeBSD__)
   uint _log2, x;
   x = pe_size;
   _log2 = 0;

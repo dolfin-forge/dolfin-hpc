@@ -11,9 +11,9 @@
 #include "JANPACKVec.h"
 #include "GenericSparsityPattern.h"
 
-#include <gemv.h>
-
 #ifdef HAS_JANPACK
+
+#include <gemv.h>
 
 using namespace dolfin;
 

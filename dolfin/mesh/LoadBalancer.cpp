@@ -2,8 +2,9 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2010-07-02
+// Last changed: 2010-09-12
 
+#include "MeshData.h"
 #include "MeshFunction.h"
 #include "Cell.h"
 #include "Edge.h"
@@ -84,12 +85,22 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
       return;
 
   // Distribute mesh according to new partition function
-  MeshFunction<bool> new_cell_marker;
-  mesh.distribute(partitions, cell_marker, new_cell_marker);
-  cell_marker.init(mesh, mesh.topology().dim());  
-  for(CellIterator c(mesh); !c.end(); ++c)
-    cell_marker.set(*c, new_cell_marker.get(*c));
-
+  if (dolfin_get("Load balancer redistribute"))
+  {
+    MeshFunction<bool> new_cell_marker;
+    mesh.distribute(partitions, cell_marker, new_cell_marker);
+    cell_marker.init(mesh, mesh.topology().dim());  
+    for(CellIterator c(mesh); !c.end(); ++c)
+      cell_marker.set(*c, new_cell_marker.get(*c));
+  }
+  else 
+  {
+    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+    part->init(mesh, mesh.topology().dim());
+    for(CellIterator c(mesh); !c.end(); ++c)
+      part->set(*c, partitions.get(*c));
+  }
+  
   if (dolfin_get("Load balancer report"))
   {
     weight_function(mesh, cell_marker, weight, &w_local, type);

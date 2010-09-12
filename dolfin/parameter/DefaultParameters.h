@@ -117,3 +117,4 @@ add("report edge cut", false);
 
 //--- Load balancing ---
 add("Load balancer report", false);
+add("Load balancer redistribute", true);

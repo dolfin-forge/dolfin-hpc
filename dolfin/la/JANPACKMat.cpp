@@ -11,9 +11,11 @@
 #include "JANPACKVec.h"
 #include "GenericSparsityPattern.h"
 
+
 #ifdef HAS_JANPACK
 
-#include <gemv.h>
+#include <spmv.h>
+
 
 using namespace dolfin;
 
@@ -106,6 +108,7 @@ void JANPACKMat::set(const real* block,
 		       uint n, const uint* cols)
 {
   dolfin_assert(A); 
+
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
@@ -118,11 +121,19 @@ void JANPACKMat::add(const real* block,
 		       uint n, const uint* cols)
 {
   dolfin_assert(A); 
+
+
+  mat_add_block_crs(&_A, 
+		    m, const_cast<uint*>(rows),
+		    n, const_cast<uint*>(cols), 
+		    const_cast<real*>(block));
+
+  /*
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
       mat_add_crs(&_A, rows[i], cols[j], *(bp++));
-  
+*/
   //error("Not implemented. (add)");
 }
 //-----------------------------------------------------------------------------
@@ -179,7 +190,7 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   else
     yy.init(size(0));
   
-  gemv_crs(A, xx.vec(), yy.vec());  
+  spmv_crs(A, xx.vec(), yy.vec());  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const

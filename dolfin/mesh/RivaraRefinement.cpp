@@ -37,12 +37,12 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void RivaraRefinement::refine(Mesh& mesh, 
 			      MeshFunction<bool>& cell_marker,
-			      real tf, real tb, real ts)
+			      real tf, real tb, real ts, bool balance)
 {
   message("Refining simplicial mesh by recursive Rivara bisection.");
 
   // Start Loadbalancer
-  if(MPI::numProcesses() > 1) {
+  if(MPI::numProcesses() > 1 && balance) {
     begin("Load balancing");
     // Tune loadbalancer using machine specific parameters, if available
     if( tf > 0.0 && tb > 0.0 && ts > 0.0)

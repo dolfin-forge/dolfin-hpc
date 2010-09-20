@@ -4,7 +4,7 @@
 // Modified by Niclas Jansson, 2008.
 //
 // First added:  2006-11-01
-// Last changed: 2008-07-23
+// Last changed: 2010-09-13
 
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
@@ -34,7 +34,8 @@ using namespace dolfin;
 void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh, 
                                                     MeshFunction<bool>& cell_marker, 
 						    bool refine_boundary, 
-						    real tf, real tb, real ts)
+						    real tf, real tb, real ts,
+						    bool balance)
 {
   begin("Refining simplicial mesh by edge bisection.");
 
@@ -46,13 +47,16 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     // Generate edge - vertex connectivity if not generated
     mesh.init(1, 0);
     
-    begin("Load balancing");
-    // Tune loadbalancer using machine specific parameters, if available
-    if( tf > 0.0 && tb > 0.0 && ts > 0.0)
-      LoadBalancer::balance(mesh, cell_marker, tf, tb, ts);
-    else
-      LoadBalancer::balance(mesh, cell_marker);
-    end();
+    if (balance) 
+    {
+      begin("Load balancing");
+      // Tune loadbalancer using machine specific parameters, if available
+      if( tf > 0.0 && tb > 0.0 && ts > 0.0)
+	LoadBalancer::balance(mesh, cell_marker, tf, tb, ts);
+      else
+	LoadBalancer::balance(mesh, cell_marker);
+      end();
+    }
   }
 
   // Get size of old mesh

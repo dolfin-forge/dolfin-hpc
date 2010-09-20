@@ -28,7 +28,8 @@ namespace dolfin
                                           bool refine_boundary = true,
 					  real tf = 0.0, 
 					  real tb = 0.0, 
-					  real ts = 0.0);
+					  real ts = 0.0,
+					  bool balance = true);
   private: 
 
     /// Bisect edge of simplex cell

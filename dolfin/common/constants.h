@@ -9,7 +9,7 @@
 #ifndef __DOLFIN_CONSTANTS_H
 #define __DOLFIN_CONSTANTS_H
 
-#define DOLFIN_VERSION       "0.8.0-hpc"
+#define DOLFIN_VERSION       "0.8.1-hpc"
 #define DOLFIN_EPS           3.0e-16
 #define DOLFIN_SQRT_EPS      1.0e-8
 #define DOLFIN_PI            3.141592653589793238462

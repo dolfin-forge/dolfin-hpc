@@ -34,6 +34,10 @@ fi
 # Checks for libraries.
 AM_PATH_XML2( ,libxml2_found=yes, libxml2_found=no)
 LIBS="$XML_LIBS $LIBS"
+
+AX_CHECK_ZLIB
+AX_BOOST_BASE([1.38],,AC_MSG_ERROR([suitable Boost not found]))
+
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 

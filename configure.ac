@@ -17,7 +17,7 @@ AX_OPENMP
 
 # Checks for libraries.
 AM_PATH_XML2( ,libxml2_found=yes, libxml2_found=no)
-
+LIBS="$XML_LIBS $LIBS"
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 

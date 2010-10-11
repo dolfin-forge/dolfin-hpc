@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I@top_srcdir@
 noinst_LIBRARIES = libdolfin_graph.a
 libdolfin_graph_a_SOURCES = \
 			DirectedClique.cpp\

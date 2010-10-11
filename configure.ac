@@ -42,8 +42,6 @@ AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
-AX_CXX_HAVE_EXT_HASH_MAP
-AX_CXX_HAVE_EXT_HASH_SET
 
 
 # Checks for typedefs, structures, and compiler characteristics.

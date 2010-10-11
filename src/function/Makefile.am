@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I@top_srcdir@
 noinst_LIBRARIES = libdolfin_function.a
 libdolfin_function_a_SOURCES = \
 				ConstantFunction.cpp\

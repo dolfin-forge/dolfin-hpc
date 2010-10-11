@@ -1,4 +1,4 @@
-AM_CPPFLAGS = $(XML_CPPFLAGS)
+AM_CPPFLAGS = $(XML_CPPFLAGS) -I@top_srcdir@
 noinst_LIBRARIES = libdolfin_io.a
 libdolfin_io_a_SOURCES = \
 			base64.cpp\

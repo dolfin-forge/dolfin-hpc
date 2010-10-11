@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I@top_srcdir@
 noinst_LIBRARIES = libdolfin_fem.a
 libdolfin_fem_a_SOURCES = \
 			assemble.cpp\

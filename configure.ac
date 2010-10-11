@@ -36,10 +36,15 @@ AM_PATH_XML2( ,libxml2_found=yes, libxml2_found=no)
 LIBS="$XML_LIBS $LIBS"
 
 AX_CHECK_ZLIB
-AX_BOOST_BASE([1.38],,AC_MSG_ERROR([suitable Boost not found]))
+AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
+AX_CXX_HEADER_TR1_UNORDERED_MAP
+AX_CXX_HEADER_TR1_UNORDERED_SET
+AX_CXX_HAVE_EXT_HASH_MAP
+AX_CXX_HAVE_EXT_HASH_SET
+
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -55,7 +60,7 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memset pow sqrt])
 
 
-#AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_HEADERS([src/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/common/Makefile\
 			  src/elements/Makefile\

@@ -1,9 +1,12 @@
 
 AC_PREREQ(2.59)
 AC_INIT([dolfin],[0.8.1-hpc])
+AC_DEFINE_UNQUOTED(DOLFIN_VERSION,${PACKAGE_VERSION})
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
 AM_MAINTAINER_MODE
 AC_LANG(C++)
+
+
 
 # Feature options.
 AC_ARG_ENABLE(mpi,
@@ -39,7 +42,7 @@ AX_CHECK_ZLIB
 AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
 
 # Checks for header files.
-AC_CHECK_HEADERS([float.h stdlib.h string.h])
+AC_CHECK_HEADERS([ufc.h float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
 
@@ -58,7 +61,8 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memset pow sqrt])
 
 
-AC_CONFIG_HEADERS([src/dolfin_config.h])
+AC_CONFIG_SRCDIR(src/dolfin.h)
+AC_CONFIG_HEADERS([src/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/common/Makefile\
 			  src/elements/Makefile\

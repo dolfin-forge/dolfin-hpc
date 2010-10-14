@@ -1,3 +1,3 @@
 AM_CPPFLAGS = -I@top_srcdir@
-lib_LIBRARIES = libdolfin_common.a
-libdolfin_common_a_SOURCES = TimeDependent.cpp timing.cpp Variable.cpp
+noinst_LTLIBRARIES = libdolfin_common.la
+libdolfin_common_la_SOURCES = TimeDependent.cpp timing.cpp Variable.cpp

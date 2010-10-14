@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@
-noinst_LIBRARIES = libdolfin_graph.a
-libdolfin_graph_a_SOURCES = \
+noinst_LTLIBRARIES = libdolfin_graph.la
+libdolfin_graph_la_SOURCES = \
 			DirectedClique.cpp\
 			Graph.cpp\
 			GraphEditor.cpp\

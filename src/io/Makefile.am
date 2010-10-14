@@ -1,6 +1,6 @@
 AM_CPPFLAGS = $(XML_CPPFLAGS) -I@top_srcdir@
-noinst_LIBRARIES = libdolfin_io.a
-libdolfin_io_a_SOURCES = \
+noinst_LTLIBRARIES = libdolfin_io.la
+libdolfin_io_la_SOURCES = \
 			base64.cpp\
 			BinaryFile.cpp\
 			Checkpoint.cpp\

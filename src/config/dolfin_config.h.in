@@ -6,6 +6,9 @@
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H
 
@@ -71,14 +74,15 @@
 /* Define if tr1/unordered_set is present. */
 #undef HAVE_TR1_UNORDERED_SET
 
-/* Define to 1 if you have the <ufc.h> header file. */
-#undef HAVE_UFC_H
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

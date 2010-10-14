@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@
-noinst_LIBRARIES = libdolfin_function.a
-libdolfin_function_a_SOURCES = \
+noinst_LTLIBRARIES = libdolfin_function.la
+libdolfin_function_la_SOURCES = \
 				ConstantFunction.cpp\
 				DiscreteFunction.cpp\
 				Function.cpp\

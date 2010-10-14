@@ -1,12 +1,12 @@
 
 AC_PREREQ(2.59)
 AC_INIT([dolfin],[0.8.1-hpc])
-AC_DEFINE_UNQUOTED(DOLFIN_VERSION,${PACKAGE_VERSION},[Version of DOLFIN])
+AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
 AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
 AM_MAINTAINER_MODE
 AC_LANG(C++)
 AC_CONFIG_MACRO_DIR([m4])
-
+LT_INIT([disable-shared])
 # Feature options.
 AC_ARG_ENABLE(mpi,
               AC_HELP_STRING([--enable-mpi],
@@ -19,7 +19,6 @@ AC_ARG_ENABLE(openmp,
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 
 if test "x${enable_mpi}" = xyes; then
    AX_MPI	
@@ -73,7 +72,17 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/function/Makefile\
 			  src/graph/Makefile\
 			  src/io/Makefile\
-			  src/la/Makefile])
+			  src/la/Makefile\
+			  src/log/Makefile\
+			  src/main/Makefile\
+			  src/math/Makefile\
+			  src/mesh/Makefile\
+			  src/mf/Makefile\
+			  src/nls/Makefile\
+			  src/ode/Makefile\
+			  src/parameter/Makefile\
+			  src/pde/Makefile\
+			  src/quadrature/Makefile])
 
 AC_OUTPUT
 

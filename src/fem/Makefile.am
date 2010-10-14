@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@
-noinst_LIBRARIES = libdolfin_fem.a
-libdolfin_fem_a_SOURCES = \
+noinst_LTLIBRARIES = libdolfin_fem.la
+libdolfin_fem_la_SOURCES = \
 			assemble.cpp\
 			Assembler.cpp\
 			BoundaryCondition.cpp\

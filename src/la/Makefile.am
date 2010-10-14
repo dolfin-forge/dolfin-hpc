@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@
-noinst_LIBRARIES = libdolfin_la.a
-libdolfin_la_a_SOURCES = \
+noinst_LTLIBRARIES = libdolfin_la.la
+libdolfin_la_la_SOURCES = \
 			DefaultFactory.cpp\
 			EpetraFactory.cpp\
 			EpetraKrylovSolver.cpp\

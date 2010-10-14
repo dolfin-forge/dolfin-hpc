@@ -6,6 +6,8 @@
 //
 // This file provides values for common constants.
 
+#include <dolfin/config/dolfin_config.h>
+
 #ifndef __DOLFIN_CONSTANTS_H
 #define __DOLFIN_CONSTANTS_H
 

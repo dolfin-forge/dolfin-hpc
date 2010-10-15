@@ -1,7 +1,14 @@
-/* src/config/dolfin_config.h.in.  Generated from configure.ac by autoheader.  */
+#ifndef __DOLFIN_CONFIG_H
+#define __DOLFIN_CONFIG_H
 
 /* Version of DOLFIN */
 #undef DOLFIN_VERSION
+
+/* Compile with local data cache in functions */
+#undef ENABLE_FUNCTION_CACHE
+
+/* Compile with optimization for P1 elements */
+#undef ENABLE_P1_OPTIMIZATIONS
 
 /* define if the Boost library is available */
 #undef HAVE_BOOST
@@ -36,6 +43,12 @@
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
+
+/* Define if you have the ParMETIS library. */
+#undef HAVE_PARMETIS
+
+/* Have PETSc la-backend */
+#undef HAVE_PETSC
 
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
@@ -84,23 +97,12 @@
    */
 #undef LT_OBJDIR
 
-/* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+/* Compile without progress bar */
+#undef NO_PROGRESS_BAR
 
-/* Define to the full name of this package. */
-#undef PACKAGE_NAME
+/* Compile without support for uBlas */
+#undef NO_UBLAS
 
-/* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
-
-/* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
-
-/* Define to the home page for this package. */
-#undef PACKAGE_URL
-
-/* Define to the version of this package. */
-#undef PACKAGE_VERSION
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
@@ -137,3 +139,5 @@
 /* Define to the type of an unsigned integer type of width exactly 8 bits if
    such a type exists and the standard includes do not define it. */
 #undef uint8_t
+
+#endif

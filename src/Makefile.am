@@ -216,7 +216,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				math/Legendre.h\
 				math/basic.h\
 				math/dolfin_math.h\
-				config.moved/dolfin_config.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
 				la/EpetraMatrix.h\

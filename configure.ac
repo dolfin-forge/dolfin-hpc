@@ -9,6 +9,7 @@ AC_CONFIG_MACRO_DIR([m4])
 LT_INIT([disable-shared])
 PACKAGE_REQUIRES=""
 AC_SUBST(PACKAGE_REQUIRES)
+AM_SILENT_RULES
 
 # Feature options.
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],

@@ -36,13 +36,13 @@ AC_ARG_ENABLE(openmp,
 
 # Optional packages
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
-		 [with_gts=${enableval}],[with_gts=no])
+		 [with_gts=${withval}],[with_gts=no])
 
 AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], [Compile with support for JANPACK]),
-		     [with_janpack=${enableval}],[with_janpack=no])
+		     [with_janpack=${withval}],[with_janpack=no])
 
 AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], [Compile with support for PETSc linear algebra]),
-		     [with_petsc=${enableval}],[with_petsc=no])
+		     [with_petsc=${withval}],[with_petsc=no])
 
 
 if test "x${enable_function_cache}" = xyes; then

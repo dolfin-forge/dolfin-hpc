@@ -34,6 +34,11 @@ AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
 	      [Compile with support for OpenMP]),[enable_openmp=${enableval}], [enable_openmp=no])
 
+AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
+			 [Compile with support for Boost TR1 headers]),
+			 [enable_boosttr1=yes],[enable_boostr1=no])
+
+
 # Optional packages
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
 		 [with_gts=${withval}],[with_gts=no])
@@ -49,7 +54,7 @@ if test "x${enable_function_cache}" = xyes; then
    AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], [Compile with local data cache in functions])
 fi
 
-if test "x${enable_optimize-p1}" = xyes; then
+if test "x${enable_optimize_p1}" = xyes; then
    AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], [Compile with optimization for P1 elements])
 fi
 
@@ -59,6 +64,10 @@ fi
 
 if test "x${enable_progressbar}" != xyes; then
    AC_DEFINE(NO_PROGRESS_BAR, [1], [Compile without progress bar])
+fi
+
+if test "x${enable_boosttr1}" = xyes; then
+   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])	
 fi
 
 
@@ -79,14 +88,14 @@ if test "x${enable_openmp}" != xno; then
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 fi
 
+AX_COMPILER_VENDOR
+
+
 # Checks for libraries.
 AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
 LIBS="$XML_LIBS $LIBS"
 
 AX_CHECK_ZLIB
-
-AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 
 if test "x${with_gts}" != xno; then
    PKG_CHECK_MODULES([gts], [gts])
@@ -122,6 +131,15 @@ AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
 PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
+
+AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+
+if test "x${enable_boosttr1}" = xyes; then
+   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
+      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
+   fi
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL

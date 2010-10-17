@@ -10,6 +10,9 @@
 /* Compile with optimization for P1 elements */
 #undef ENABLE_P1_OPTIMIZATIONS
 
+/* Compile with support for Boost TR1 headers */
+#undef ENABLE_BOOST_TR1
+
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 

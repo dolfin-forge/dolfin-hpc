@@ -2,14 +2,15 @@
 AC_PREREQ(2.59)
 AC_INIT([dolfin],[0.8.1-hpc])
 AC_DEFINE_UNQUOTED(DOLFIN_VERSION,["${PACKAGE_VERSION}"],[Version of DOLFIN])
-AM_INIT_AUTOMAKE($PACKAGE_NAME, $PACKAGE_VERSION, no-define)
+AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 AC_LANG(C++)
 AC_CONFIG_MACRO_DIR([m4])
 LT_INIT([disable-shared])
 PACKAGE_REQUIRES=""
 AC_SUBST(PACKAGE_REQUIRES)
-AM_SILENT_RULES
+
+
 
 # Feature options.
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
@@ -33,11 +34,15 @@ AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
 	      [Compile with support for OpenMP]),[enable_openmp=${enableval}], [enable_openmp=no])
 
-AC_ARG_ENABLE(janpack, AC_HELP_STRING([--enable-janpack], [Compile with support for JANPACK]),
-		     [enable_janpack=${enableval}],[enable_janpack=no])
+# Optional packages
+AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
+		 [with_gts=${enableval}],[with_gts=no])
 
-AC_ARG_ENABLE(petsc, AC_HELP_STRING([--enable-petsc], [Compile with support for PETSc linear algebra]),
-		     [enable_petsc=${enableval}],[enable_petsc=no])
+AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], [Compile with support for JANPACK]),
+		     [with_janpack=${enableval}],[with_janpack=no])
+
+AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], [Compile with support for PETSc linear algebra]),
+		     [with_petsc=${enableval}],[with_petsc=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
@@ -63,13 +68,13 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
-if test "x${enable_mpi}" = xyes; then
+if test "x${enable_mpi}" != xno; then
    AX_MPI	
    CXX="$MPICXX"
    LIBS="$MPILIBS $LIBS"   
 fi
 
-if test "x${enable_openmp}" = xyes; then
+if test "x${enable_openmp}" != xno; then
    AX_OPENMP
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 fi
@@ -83,7 +88,15 @@ AX_CHECK_ZLIB
 AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 
-if test "x${enable_petsc}" = xyes; then
+if test "x${with_gts}" != xno; then
+   PKG_CHECK_MODULES([gts], [gts])
+   CPPFLAGS="$CPPFLAGS $gts_CFLAGS"
+   LIBS="$LIBS $gts_LIBS"
+   AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
+   AC_SUBST(HAVE_GTS)
+fi
+
+if test "x${with_petsc}" != xno; then
    PKG_CHECK_MODULES([PETSC],[petsc >= 2.3.3])
    CPPFLAGS="$CPPFLAGS $PETSC_CFLAGS"
    LIBS="$LIBS $PETSC_LIBS"
@@ -91,11 +104,11 @@ if test "x${enable_petsc}" = xyes; then
    AC_SUBST(HAVE_PETSC)
 fi
 
-if test "x${enable_janpack}" = xyes; then
+if test "x${with_janpack}" != xno; then
    AX_JANPACK
 fi
 
-if test "x${enable_mpi}" = xyes; then
+if test "x${enable_mpi}" != xno; then
    AX_PARMETIS
    LIBS="$PARMETIS_LIBS $LIBS"
 fi
@@ -164,8 +177,9 @@ Package features:
   MPI: ${enable_mpi}
   OpenMP: ${enable_openmp}
   uBlas: ${enable_ublas}
-  PETSc: ${enable_petsc}
-  JANPACK: ${enable_janpack}
+  PETSc: ${with_petsc}
+  JANPACK: ${with_janpack}
+  GTS: ${with_gts}
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}

@@ -50,6 +50,9 @@
 /* Have PETSc la-backend */
 #undef HAVE_PETSC
 
+/* Have GTS library */
+#undef HAVE_GTS
+
 /* Define to 1 if you have the `pow' function. */
 #undef HAVE_POW
 

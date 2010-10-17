@@ -18,43 +18,47 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
 #include "Encoder.h"
-#include "PVTKFile.h"
+#include "VTKFile.h"
 
 
 using namespace dolfin;
 
 //----------------------------------------------------------------------------
-PVTKFile::PVTKFile(const std::string filename) : GenericFile(filename), _t(0)
+VTKFile::VTKFile(const std::string filename) : GenericFile(filename), _t(0)
 {
   type = "VTK";
 }
 //----------------------------------------------------------------------------
-PVTKFile::PVTKFile(const std::string filename, real& t) : 
+VTKFile::VTKFile(const std::string filename, real& t) : 
   GenericFile(filename), _t(&t)
 {
   type = "VTK";
 }
 //----------------------------------------------------------------------------
-PVTKFile::~PVTKFile()
+VTKFile::~VTKFile()
 {
   // Do nothing
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(Mesh& mesh)
+void VTKFile::operator<<(Mesh& mesh)
 {
   // Update vtu file name and clear file
   vtuNameUpdate(counter);
 
   // Only the root updates the pvd file
   if(MPI::processNumber() == 0) {    
-    // Update pvtu file name and clear file
+    
+    if (MPI::numProcesses() > 1) 
+    {
+      // Update pvtu file name and clear file
+      pvtuNameUpdate(counter);
+      
+      // Write pvtu file
+      pvtuFileWrite();
+    }
 
-    pvtuNameUpdate(counter);
     // Write pvd file
     pvdFileWrite(counter);
-    
-    // Write pvtu file
-    pvtuFileWrite();
   }
 
   // Write headers
@@ -73,22 +77,22 @@ void PVTKFile::operator<<(Mesh& mesh)
           mesh.name().c_str(), mesh.label().c_str(), filename.c_str());
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(MeshFunction<int>& meshfunction)
+void VTKFile::operator<<(MeshFunction<int>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void VTKFile::operator<<(MeshFunction<unsigned int>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(MeshFunction<double>& meshfunction)
+void VTKFile::operator<<(MeshFunction<double>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(Function& u)
+void VTKFile::operator<<(Function& u)
 {
   std::pair<Function*, std::string> f(&u, "U");
   std::vector<std::pair<Function*, std::string> > tmp;
@@ -96,12 +100,12 @@ void PVTKFile::operator<<(Function& u)
   write_dataset(tmp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
+void VTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
 {
   write_dataset(f);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
+void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
 { 
   dolfin_assert(f.size() > 0);
     
@@ -113,14 +117,17 @@ void PVTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   // Only the root updates the pvd file
   if(MPI::processNumber() == 0) {
     
-    // Update pvtu file name and clear file
-    pvtuNameUpdate(counter);
+    if(MPI::numProcesses() > 1) 
+    {
+      // Update pvtu file name and clear file
+      pvtuNameUpdate(counter);
+      
+      // Write pvtu file
+      pvtuFileWrite_func(f);
+    }
 
     // Write pvd file
     pvdFileWrite(counter);
-
-    // Write pvtu file
-    pvtuFileWrite_func(f);
   }
     
   Mesh& mesh = f[0].first->mesh(); 
@@ -145,7 +152,7 @@ void PVTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   */
 }
 //----------------------------------------------------------------------------
-void PVTKFile::MeshWrite(Mesh& mesh) const
+void VTKFile::MeshWrite(Mesh& mesh) const
 {
   // Open file
   FILE* fp = fopen(vtu_filename.c_str(), "a");
@@ -226,7 +233,7 @@ void PVTKFile::MeshWrite(Mesh& mesh) const
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const
+void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
@@ -308,7 +315,7 @@ void PVTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) c
 
 }
 //----------------------------------------------------------------------------
-void PVTKFile::pvdFileWrite(uint num)
+void VTKFile::pvdFileWrite(uint num)
 {
   std::fstream pvdFile;
 
@@ -330,7 +337,10 @@ void PVTKFile::pvdFileWrite(uint num)
   }
   // Remove directory path from name for pvd file
   std::string fname;
-  fname.assign(pvtu_filename, filename.find_last_of("/") + 1, pvtu_filename.size()); 
+  if(MPI::numProcesses() > 1)
+    fname.assign(pvtu_filename, filename.find_last_of("/") + 1, pvtu_filename.size()); 
+  else
+    fname.assign(vtu_filename, filename.find_last_of("/") + 1, vtu_filename.size()); 
   
   // Data file name 
   if(_t)
@@ -348,7 +358,7 @@ void PVTKFile::pvdFileWrite(uint num)
 
 }
 //----------------------------------------------------------------------------
-void PVTKFile::pvtuFileWrite(bool mesh_function)
+void VTKFile::pvtuFileWrite(bool mesh_function)
 {
   std::fstream pvtuFile;
 
@@ -388,7 +398,7 @@ void PVTKFile::pvtuFileWrite(bool mesh_function)
   pvtuFile.close();
     
 }//----------------------------------------------------------------------------
-void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f)
+void VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f)
 {
   std::fstream pvtuFile;
 
@@ -445,7 +455,7 @@ void PVTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> 
     
 }
 //----------------------------------------------------------------------------
-void PVTKFile::VTKHeaderOpen(Mesh& mesh) const
+void VTKFile::VTKHeaderOpen(Mesh& mesh) const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
@@ -476,7 +486,7 @@ void PVTKFile::VTKHeaderOpen(Mesh& mesh) const
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::VTKHeaderClose() const
+void VTKFile::VTKHeaderClose() const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
@@ -488,7 +498,7 @@ void PVTKFile::VTKHeaderClose() const
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::vtuNameUpdate(const int counter) 
+void VTKFile::vtuNameUpdate(const int counter) 
 {
   std::string filestart, extension;
   std::ostringstream fileid, newfilename;
@@ -508,7 +518,7 @@ void PVTKFile::vtuNameUpdate(const int counter)
   fclose(fp);
 }
 //----------------------------------------------------------------------------
-void PVTKFile::pvtuNameUpdate(const int counter)
+void VTKFile::pvtuNameUpdate(const int counter)
 {
   std::string filestart, extension;
   std::ostringstream fileid, newfilename;
@@ -530,7 +540,7 @@ void PVTKFile::pvtuNameUpdate(const int counter)
 }
 //----------------------------------------------------------------------------
 template<class T>
-void PVTKFile::MeshFunctionWrite(T& meshfunction) 
+void VTKFile::MeshFunctionWrite(T& meshfunction) 
 {
   // Update vtu file name and clear file
   vtuNameUpdate(counter);
@@ -591,7 +601,7 @@ void PVTKFile::MeshFunctionWrite(T& meshfunction)
 }    
 //-----------------------------------------------------------------------------
 template<typename T>
-void PVTKFile::encode_stream(std::stringstream& stream, 
+void VTKFile::encode_stream(std::stringstream& stream, 
                             const std::vector<T>& data) const
 {
 
@@ -605,7 +615,7 @@ void PVTKFile::encode_stream(std::stringstream& stream,
 }
 //----------------------------------------------------------------------------
 template<typename T>
-void PVTKFile::encode_inline_base64(std::stringstream& stream, 
+void VTKFile::encode_inline_base64(std::stringstream& stream, 
                                    const std::vector<T>& data) const
 {
   const boost::uint32_t size = data.size()*sizeof(T);
@@ -615,7 +625,7 @@ void PVTKFile::encode_inline_base64(std::stringstream& stream,
 //----------------------------------------------------------------------------
 #ifdef HAVE_LIBZ
 template<typename T>
-void PVTKFile::encode_inline_compressed_base64(std::stringstream& stream, 
+void VTKFile::encode_inline_compressed_base64(std::stringstream& stream, 
                                               const std::vector<T>& data) const
 {
   boost::uint32_t header[4];

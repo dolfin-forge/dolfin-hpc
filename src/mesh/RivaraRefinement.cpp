@@ -4,7 +4,7 @@
 // Modified by Niclas Jansson, 2009-2010.
 //
 
-
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
@@ -51,7 +51,8 @@ void RivaraRefinement::refine(Mesh& mesh,
       LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
     end();
   }
-  mesh.renumber();
+
+  if (MPI::numProcesses() > 1) mesh.renumber();
 
   DMesh dmesh;
   dmesh.imp(mesh);
@@ -163,13 +164,14 @@ void DMesh::imp(Mesh& mesh)
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  uint max_index = mesh.distdata().global_numVertices();  
+  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
 #ifdef HAVE_MPI
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
 
   Cell c(mesh, 0);
-  _salt = c.numEntities(0) * mesh.distdata().global_numCells();
+  _salt = c.numEntities(0) * 
+    (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
 
   // Assign a safe range for each processor
   _start_offset = 0;
@@ -185,7 +187,7 @@ void DMesh::imp(Mesh& mesh)
   _start_offset += glb_max;
 
   MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-  #endif
+#endif
 
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
@@ -284,9 +286,13 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-  mesh.distdata().invalid_numbering();
-  mesh.distdata().invalid_ownership();
-  mesh.renumber();
+
+  if (MPI::numProcesses() > 1) 
+  {
+    mesh.distdata().invalid_numbering();
+    mesh.distdata().invalid_ownership();
+    mesh.renumber();
+  }
 }
 //-----------------------------------------------------------------------------
 void DMesh::number()

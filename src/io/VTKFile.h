@@ -18,13 +18,13 @@
 namespace dolfin
 {
 
-  class PVTKFile : public GenericFile
+  class VTKFile : public GenericFile
   {
   public:
     
-    PVTKFile(const std::string filename);
-    PVTKFile(const std::string filename, real& t);
-    ~PVTKFile();
+    VTKFile(const std::string filename);
+    VTKFile(const std::string filename, real& t);
+    ~VTKFile();
     
     void operator<< (Mesh& mesh);
     void operator<< (MeshFunction<int>& meshfunction);

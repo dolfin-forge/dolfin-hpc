@@ -8,11 +8,38 @@
 #
 
 AC_DEFUN([AX_PARMETIS],[
+	libsubdirs="lib64 lib lib64"
+	AC_LANG(C++)
+	AC_ARG_WITH([parmetis],
+	AS_HELP_STRING([--with-parmetis=DIR],
+	[Directory for parmetis]),
+	[	   
+	if test -d "$withval"; then
+		ac_parmetis_path="$withval";
+		PARMETIS_LDFLAGS="-L$ac_parmetis_path/$libsubdir"
+		PARMETIS_CPPFLAGS="-I$ac_parmetis_path/include"
+	fi
+	],)
+
+	if test -d "$ac_parmetis_path"; then
+	   CPPFLAGS_SAVED="$CPPFLAGS"
+	   LDFLAGS_SAVED="$LDFLAGS"
+	   CPPFLAGS="$PARMETIS_CPPFLAGS"
+	   LDFLAGS="$PARMETIS_LDFLAGS"
+	   export CPPFLAGS
+	   export LDFLAGS
+	fi
+			
 	AC_CHECK_HEADER([parmetis.h],[have_parmetis_h=yes],[have_parmetis_h=no])
 	AC_CHECK_LIB(parmetis, ParMETIS_V3_PartMeshKway,[have_parmetis=yes;PARMETIS_LIBS="-lparmetis -lmetis"],[have_parmetis=no],[-lmetis])
 	AC_SUBST(PARMETIS_LIBS)
 	if test x"${have_parmetis}" = xyes; then
 	   AC_DEFINE(HAVE_PARMETIS,1,[Define if you have the ParMETIS library.])
+	else
+		if test -d "$ac_parmetis_path"; then	
+		   CPPFLAGS="$CPPFLAGS_SAVED"
+		   LDFLAGS="$LDFLAGS_SAVED"
+		fi
 	fi
 ])
 

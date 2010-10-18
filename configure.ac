@@ -97,7 +97,7 @@ LIBS="$XML_LIBS $LIBS"
 
 AX_ZLIB
 
-if test "x$HAVE_LIBZ"; then
+if test "${ZLIB_LIBS}"; then
    enable_zlib="yes"
 else
    enable_zlib="no"

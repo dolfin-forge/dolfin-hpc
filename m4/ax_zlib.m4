@@ -8,6 +8,7 @@
 #
 
 AC_DEFUN([AX_ZLIB],[
+	AC_LANG(C++)
 	AC_ARG_WITH([zlib],
 	AS_HELP_STRING([--with-zlib=DIR],
 	[Directory for zlib]),
@@ -32,14 +33,19 @@ AC_DEFUN([AX_ZLIB],[
 	if test -d "$ac_zlib_path"; then
 	   CPPFLAGS_SAVED="$CPPFLAGS"
 	   LDFLAGS_SAVED="$LDFLAGS"
-	   CPPFLAGS="$ZLIB_CPPFLAGS"
-	   LDFLAGS="$ZLIB_LDFLAGS"
+	   CPPFLAGS="$ZLIB_CPPFLAGS $CPPFLAGS"
+	   LDFLAGS="$ZLIB_LDFLAGS $LDFLAGS"
 	   export CPPFLAGS
 	   export LDFLAGS
 	fi
+
+	if test -d "$ac_zlib_libdir"; then	   
+	    LDFLAGS="$ZLIB_LDFLAGS $LDFLAGS"
+	fi
+
 			
 	AC_CHECK_HEADER([zlib.h],[have_zlib_h=yes],[have_zlib_h=no])
-	AC_CHECK_LIB(z, inflateEnd,[have_zlib=yes;ZLIB_LIBS="-lzlib"],[have_zlib=no],[-lmetis])
+	AC_CHECK_LIB(z, inflateEnd,[have_zlib=yes;ZLIB_LIBS="-lz"],[have_zlib=no],)
 	AC_SUBST(ZLIB_LIBS)
 	if test x"${have_zlib}" = xyes; then
 	   AC_DEFINE(HAVE_LIBZ,1,[Define if you have the Zlib library.])

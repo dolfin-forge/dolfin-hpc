@@ -8,6 +8,7 @@
 #
 
 AC_DEFUN([AX_PARMETIS],[
+	AC_LANG(C++)
 	AC_ARG_WITH([parmetis],
 	AS_HELP_STRING([--with-parmetis=DIR],
 	[Directory for parmetis]),
@@ -32,12 +33,17 @@ AC_DEFUN([AX_PARMETIS],[
 	if test -d "$ac_parmetis_path"; then
 	   CPPFLAGS_SAVED="$CPPFLAGS"
 	   LDFLAGS_SAVED="$LDFLAGS"
-	   CPPFLAGS="$PARMETIS_CPPFLAGS"
-	   LDFLAGS="$PARMETIS_LDFLAGS"
+	   CPPFLAGS="$PARMETIS_CPPFLAGS $CPPFLAGS"
+	   LDFLAGS="$PARMETIS_LDFLAGS $LDFLAGS"
 	   export CPPFLAGS
 	   export LDFLAGS
 	fi
-			
+		
+
+	if test -d "$ac_parmetis_libdir"; then	   
+	    LDFLAGS="$ZLIB_LDFLAGS $LDFLAGS"
+	fi
+	
 	AC_CHECK_HEADER([parmetis.h],[have_parmetis_h=yes],[have_parmetis_h=no])
 	AC_CHECK_LIB(parmetis, ParMETIS_V3_PartMeshKway,[have_parmetis=yes;PARMETIS_LIBS="-lparmetis -lmetis"],[have_parmetis=no],[-lmetis])
 	AC_SUBST(PARMETIS_LIBS)

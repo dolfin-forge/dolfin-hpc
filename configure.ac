@@ -97,6 +97,12 @@ LIBS="$XML_LIBS $LIBS"
 
 AX_ZLIB
 
+if test "x$HAVE_LIBZ"; then
+   enable_zlib="yes"
+else
+   enable_zlib="no"
+fi
+
 if test "x${with_gts}" != xno; then
    PKG_CHECK_MODULES([gts], [gts])
    CPPFLAGS="$CPPFLAGS $gts_CFLAGS"
@@ -201,6 +207,7 @@ Package features:
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
+  Compressed VTK: ${enable_zlib}
 
 
 ---------------------------------------------------------

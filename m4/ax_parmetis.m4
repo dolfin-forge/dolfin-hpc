@@ -8,7 +8,6 @@
 #
 
 AC_DEFUN([AX_PARMETIS],[
-	AC_LANG(C++)
 	AC_ARG_WITH([parmetis],
 	AS_HELP_STRING([--with-parmetis=DIR],
 	[Directory for parmetis]),

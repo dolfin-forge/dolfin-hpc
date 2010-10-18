@@ -95,7 +95,7 @@ AX_COMPILER_VENDOR
 AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
 LIBS="$XML_LIBS $LIBS"
 
-AX_CHECK_ZLIB
+AX_ZLIB
 
 if test "x${with_gts}" != xno; then
    PKG_CHECK_MODULES([gts], [gts])

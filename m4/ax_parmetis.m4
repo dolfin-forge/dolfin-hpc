@@ -8,7 +8,6 @@
 #
 
 AC_DEFUN([AX_PARMETIS],[
-	libsubdirs="lib64 lib lib64"
 	AC_LANG(C++)
 	AC_ARG_WITH([parmetis],
 	AS_HELP_STRING([--with-parmetis=DIR],
@@ -16,8 +15,18 @@ AC_DEFUN([AX_PARMETIS],[
 	[	   
 	if test -d "$withval"; then
 		ac_parmetis_path="$withval";
-		PARMETIS_LDFLAGS="-L$ac_parmetis_path/$libsubdir"
+		PARMETIS_LDFLAGS="-L$ac_parmetis_path/lib"  
 		PARMETIS_CPPFLAGS="-I$ac_parmetis_path/include"
+	fi
+	],)
+
+	AC_ARG_WITH([parmetis-libdir],
+	AS_HELP_STRING([--with-parmetis-libdir=LIBDIR],
+	[Directory for parmetis library]),
+	[
+	if test -d "$withval"; then
+	   ac_parmetis_libdir="$withval"
+	   PARMETIS_LDFLAGS="-L$ac_parmetis_libdir"  	   
 	fi
 	],)
 

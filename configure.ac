@@ -103,20 +103,15 @@ else
    enable_zlib="no"
 fi
 
-if test "x${with_gts}" != xno; then
+if test "x${with_gts}" = xyes; then
    PKG_CHECK_MODULES([gts], [gts])
    CPPFLAGS="$CPPFLAGS $gts_CFLAGS"
    LIBS="$LIBS $gts_LIBS"
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
-   AC_SUBST(HAVE_GTS)
 fi
 
 if test "x${with_petsc}" != xno; then
-   PKG_CHECK_MODULES([PETSC],[petsc >= 2.3.3])
-   CPPFLAGS="$CPPFLAGS $PETSC_CFLAGS"
-   LIBS="$LIBS $PETSC_LIBS"
-   AC_DEFINE(HAVE_PETSC,[1],[Have PETSc la-backend])
-   AC_SUBST(HAVE_PETSC)
+    AX_PETSC
 fi
 
 if test "x${with_janpack}" != xno; then

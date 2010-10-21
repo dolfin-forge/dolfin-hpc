@@ -16,7 +16,7 @@ fi
 echo "Running autoconf"
 autoconf
 echo "Running automake"
-automake 
+automake -a
 
 echo "Deleting autom4te.cache directory"
 rm -r autom4te.cache

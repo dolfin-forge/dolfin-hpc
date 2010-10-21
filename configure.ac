@@ -106,7 +106,11 @@ fi
 
 if test "x${enable_mpi}" != xno; then
    AX_PARMETIS
-   LIBS="$PARMETIS_LIBS $LIBS"
+   if test "${PARMETIS_LIBS}"; then
+      LIBS="$PARMETIS_LIBS $LIBS"
+   else
+      AC_MSG_ERROR([Required library ParMetis not found])
+   fi
 fi
 
 if test "x${with_gts}" = xyes; then

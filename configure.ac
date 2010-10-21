@@ -103,6 +103,12 @@ else
    enable_zlib="no"
 fi
 
+
+if test "x${enable_mpi}" != xno; then
+   AX_PARMETIS
+   LIBS="$PARMETIS_LIBS $LIBS"
+fi
+
 if test "x${with_gts}" = xyes; then
    PKG_CHECK_MODULES([gts], [gts])
    CPPFLAGS="$CPPFLAGS $gts_CFLAGS"
@@ -117,13 +123,6 @@ fi
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
 fi
-
-if test "x${enable_mpi}" != xno; then
-   AX_PARMETIS
-   LIBS="$PARMETIS_LIBS $LIBS"
-fi
-
-
 
 
 # Checks for header files.

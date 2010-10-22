@@ -31,17 +31,13 @@ AC_DEFUN([AX_PETSC],[
 	      ac_petsc_arch=`grep PETSC_ARCH  $ac_petsc_dir/bmake/petscconf | sed 's/PETSC_ARCH=/''/'`
 	      ac_petsc_libdir="$ac_petsc_dir/lib/$ac_petsc_arch"	      	      
 	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include"
-	      export PETSC_CPPFLAGS
-	      AC_SUBST(PETSC_CPPFLAGS)
 	      PETSC_LDFLAGS="-L$ac_petsc_libdir -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
-	      export PETSC_LDFLAGS
-	      AC_SUBST(PETSC_LDFLAGS)
 	      
 	      have_petsc="yes"
 	   elif test -d "$ac_petsc_dir/conf"; then
 	     ac_petsc_libdir="$ac_petsc_dir/lib"
 	     PETSC_PKG_LIBS=`grep PACKAGES_LIBS $ac_petsc_dir/conf/petscvariables | sed 's/PACKAGES_LIBS =/''/'`
-	      PETSC_CPPFLAGS="-I$ac_petsc_dir/include"
+	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include"
 	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
 
 	     have_petsc="yes"

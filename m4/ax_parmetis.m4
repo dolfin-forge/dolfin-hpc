@@ -40,7 +40,7 @@ AC_DEFUN([AX_PARMETIS],[
 		
 
 	if test -d "$ac_parmetis_libdir"; then	   
-	    LDFLAGS="$ZLIB_LDFLAGS $LDFLAGS"
+	    LDFLAGS="$PARMETIS_LDFLAGS $LDFLAGS"
 	fi
 	
 	AC_CHECK_HEADER([parmetis.h],[have_parmetis_h=yes],[have_parmetis_h=no])

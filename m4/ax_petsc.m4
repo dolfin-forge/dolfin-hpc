@@ -9,7 +9,6 @@
 
 AC_DEFUN([AX_PETSC],[
 	AC_MSG_CHECKING(for PETSc)
-	AC_LANG(C++)
 	AC_ARG_WITH([petsc-dir],
 	AS_HELP_STRING([--with-petsc-dir=DIR],
 	[Directory for petsc]),

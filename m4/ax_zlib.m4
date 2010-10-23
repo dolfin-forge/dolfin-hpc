@@ -8,7 +8,6 @@
 #
 
 AC_DEFUN([AX_ZLIB],[
-	AC_LANG(C++)
 	AC_ARG_WITH([zlib],
 	AS_HELP_STRING([--with-zlib=DIR],
 	[Directory for zlib]),

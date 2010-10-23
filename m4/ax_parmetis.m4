@@ -25,7 +25,6 @@ AC_DEFUN([AX_PARMETIS],[
 	[
 	if test -d "$withval"; then
 	   ac_parmetis_libdir="$withval"
-	   PARMETIS_LDFLAGS="-L$ac_parmetis_libdir"  	   
 	fi
 	],)
 
@@ -40,6 +39,7 @@ AC_DEFUN([AX_PARMETIS],[
 		
 
 	if test -d "$ac_parmetis_libdir"; then	   
+	    PARMETIS_LDFLAGS="-L$ac_parmetis_libdir"  	   
 	    LDFLAGS="$PARMETIS_LDFLAGS $LDFLAGS"
 	fi
 	

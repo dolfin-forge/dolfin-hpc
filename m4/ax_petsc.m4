@@ -29,14 +29,16 @@ AC_DEFUN([AX_PETSC],[
 	   if test -d "$ac_petsc_dir/bmake"; then
 	      ac_petsc_arch=`grep PETSC_ARCH  $ac_petsc_dir/bmake/petscconf | sed 's/PETSC_ARCH=/''/'`
 	      ac_petsc_libdir="$ac_petsc_dir/lib/$ac_petsc_arch"	      	      
-	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include"
+	      PETSC_MPI_INC=`grep 'MPI_INCLUDE ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/MPI_INCLUDE =/''/'`
+	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include $PETSC_MPI_INC"
 	      PETSC_LDFLAGS="-L$ac_petsc_libdir -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
 	      
 	      have_petsc="yes"
 	   elif test -d "$ac_petsc_dir/conf"; then
 	     ac_petsc_libdir="$ac_petsc_dir/lib"
 	     PETSC_PKG_LIBS=`grep PACKAGES_LIBS $ac_petsc_dir/conf/petscvariables | sed 's/PACKAGES_LIBS =/''/'`
-	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include"
+	     PETSC_MPI_INC=`grep 'MPI_INCLUDE =' $ac_petsc_dir/conf/petscvariables | sed 's/MPI_INCLUDE =/''/'`
+	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include $PETSC_MPI_INC"
 	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
 
 	     have_petsc="yes"
@@ -56,4 +58,8 @@ AC_DEFUN([AX_PETSC],[
 	fi
 ])
 
+
+
+
+-I/NOBACKUP/njansson/petsc-2.3.3-p13/bmake/linux-gnu-cxx-opt -I/NOBACKUP/njansson/petsc-2.3.3-p13/include -I/usr/include -I/NOBACKUP/njansson/fenics/include -I/NOBACKUP/njansson/fenics/lib -I.
 

@@ -91,6 +91,22 @@ fi
 
 AX_COMPILER_VENDOR
 
+# Checks for header files.
+AC_CHECK_HEADERS([float.h stdlib.h string.h])
+AX_CXX_HEADER_TR1_UNORDERED_MAP
+AX_CXX_HEADER_TR1_UNORDERED_SET
+PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
+CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
+
+AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+
+if test "x${enable_boosttr1}" = xyes; then
+   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
+      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
+   fi
+fi
+
 
 # Checks for libraries.
 AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
@@ -129,23 +145,6 @@ if test "x${with_janpack}" != xno; then
    AX_JANPACK
 fi
 
-
-# Checks for header files.
-AC_CHECK_HEADERS([float.h stdlib.h string.h])
-AX_CXX_HEADER_TR1_UNORDERED_MAP
-AX_CXX_HEADER_TR1_UNORDERED_SET
-PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
-CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
-
-AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-
-if test "x${enable_boosttr1}" = xyes; then
-   if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
-      CXXFLAGS="-D_RWSTD_ALLOCATOR $CXXFLAGS"
-   fi
-fi
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
@@ -155,8 +154,6 @@ AC_TYPE_UINT8_T
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor memset pow sqrt])
 
 

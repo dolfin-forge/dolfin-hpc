@@ -77,6 +77,7 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
+PKG_PROG_PKG_CONFIG
 if test "x${enable_mpi}" != xno; then
    AX_MPI	
    CXX="$MPICXX"

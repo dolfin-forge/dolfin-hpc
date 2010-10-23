@@ -49,7 +49,7 @@ AC_DEFUN([AX_PETSC],[
 	if test x"${have_petsc}" = xyes; then
 	   AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
 	   CPPFLAGS="$CPPFLAGS $PETSC_CPPFLAGS"
-	   LDFLAGS="$LD_FLAGS $PETSC_LDFLAGS"
+	   LDFLAGS="$LDFLAGS $PETSC_LDFLAGS"
 	   AC_MSG_RESULT(yes)
 	else
 	   CPPFLAGS="$CPPFLAGS_SAVED"

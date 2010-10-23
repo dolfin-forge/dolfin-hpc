@@ -29,7 +29,7 @@ AC_DEFUN([AX_ZLIB],[
 	],)
 
 	if test -d "$ac_zlib_libdir"; then	   
-	   ZLIB_LDFLAGS="-L$ac_zlib_libdir"  	   
+	   ZLIB_LDFLAGS="-L$ac_zlib_libdir"  	   	   
 	fi
 
 	if test -d "$ac_zlib_path"; then

@@ -25,9 +25,12 @@ AC_DEFUN([AX_ZLIB],[
 	[
 	if test -d "$withval"; then
 	   ac_zlib_libdir="$withval"
-	   ZLIB_LDFLAGS="-L$ac_zlib_libdir"  	   
 	fi
 	],)
+
+	if test -d "$ac_zlib_libdir"; then	   
+	   ZLIB_LDFLAGS="-L$ac_zlib_libdir"  	   
+	fi
 
 	if test -d "$ac_zlib_path"; then
 	   CPPFLAGS_SAVED="$CPPFLAGS"
@@ -38,11 +41,6 @@ AC_DEFUN([AX_ZLIB],[
 	   export LDFLAGS
 	fi
 
-	if test -d "$ac_zlib_libdir"; then	   
-	    LDFLAGS="$ZLIB_LDFLAGS $LDFLAGS"
-	fi
-
-			
 	AC_CHECK_HEADER([zlib.h],[have_zlib_h=yes],[have_zlib_h=no])
 	AC_CHECK_LIB(z, inflateEnd,[have_zlib=yes;ZLIB_LIBS="-lz"],[have_zlib=no],)
 	AC_SUBST(ZLIB_LIBS)

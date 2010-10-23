@@ -28,6 +28,10 @@ AC_DEFUN([AX_PARMETIS],[
 	fi
 	],)
 
+	if test -d "$ac_parmetis_libdir"; then	   
+	    PARMETIS_LDFLAGS="-L$ac_parmetis_libdir"  	   
+        fi
+
 	if test -d "$ac_parmetis_path"; then
 	   CPPFLAGS_SAVED="$CPPFLAGS"
 	   LDFLAGS_SAVED="$LDFLAGS"
@@ -36,13 +40,7 @@ AC_DEFUN([AX_PARMETIS],[
 	   export CPPFLAGS
 	   export LDFLAGS
 	fi
-		
-
-	if test -d "$ac_parmetis_libdir"; then	   
-	    PARMETIS_LDFLAGS="-L$ac_parmetis_libdir"  	   
-	    LDFLAGS="$PARMETIS_LDFLAGS $LDFLAGS"
-	fi
-	
+			
 	AC_CHECK_HEADER([parmetis.h],[have_parmetis_h=yes],[have_parmetis_h=no])
 	AC_CHECK_LIB(parmetis, ParMETIS_V3_PartMeshKway,[have_parmetis=yes;PARMETIS_LIBS="-lparmetis -lmetis"],[have_parmetis=no],[-lmetis])
 	AC_SUBST(PARMETIS_LIBS)

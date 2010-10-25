@@ -29,9 +29,10 @@ AC_DEFUN([AX_PETSC],[
 	   if test -d "$ac_petsc_dir/bmake"; then
 	      ac_petsc_arch=`grep PETSC_ARCH  $ac_petsc_dir/bmake/petscconf | sed 's/PETSC_ARCH=/''/'`
 	      ac_petsc_libdir="$ac_petsc_dir/lib/$ac_petsc_arch"	      	      
+	      CC_LINKER_SLFLAGS=`grep 'CC_LINKER_SLFLAG ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/CC_LINKER_SLFLAG =/''/'`
 	      PETSC_MPI_INC=`grep 'MPI_INCLUDE ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/MPI_INCLUDE =/''/'`
 	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include $PETSC_MPI_INC"
-	      PETSC_LDFLAGS="-L$ac_petsc_libdir -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
+	      PETSC_LDFLAGS="$CC_LINKER_SLFLAGS$ac_petsc_libdir -L$ac_petsc_libdir -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
 	      
 	      have_petsc="yes"
 	   elif test -d "$ac_petsc_dir/conf"; then

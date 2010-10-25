@@ -7,7 +7,7 @@
 #ifndef __MASS_MATRIX_H
 #define __MASS_MATRIX_H
 
-#include <dolfin/config/dolfin_log.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/PETScMatrix.h>

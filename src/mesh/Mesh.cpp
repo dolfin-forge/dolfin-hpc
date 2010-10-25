@@ -136,10 +136,11 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
-void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary)
+void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
+		  bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-                                                 refine_boundary);
+                                                 refine_boundary, load_balance);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen()
@@ -173,7 +174,6 @@ void Mesh::smooth()
 //-----------------------------------------------------------------------------
 void Mesh::partition(MeshFunction<uint>& partitions)
 {
-  //  partition(partitions, MPI::numProcesses());
   MeshPartition::partition(*this, partitions);
 }
 //-----------------------------------------------------------------------------

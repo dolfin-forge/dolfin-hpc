@@ -12,17 +12,9 @@
 #include <dolfin/config/dolfin_config.h>
 
 #include <complex>
-#ifdef __GNUG__
-#if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__) 
-#include <unordered_map>
-#include <unordered_set>
-#elif ENABLE_GCC_EXT
-#include <ext/hash_map>
-#include <ext/hash_set>
-#else
-#include <map>
-#include <set>
-#endif
+#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
 #elif (__IBMCPP__ && __IBMCPP_TR1__) 
 #include <unordered_map>
 #include <unordered_set>
@@ -49,17 +41,9 @@ namespace dolfin
   // Complex numbers
   typedef std::complex<double> complex;
 
-#ifdef __GNUG__
-#if (__GNUG__ > 3 && __GXX_EXPERIMENTAL_CXX0X__)
-#define _map std::unordered_map
-#define _set std::unordered_set
-#elif ENABLE_GCC_EXT
-#define _map __gnu_cxx::hash_map 
-#define _set __gnu_cxx::hash_set
-#else
-#define _map std::map
-#define _set std::set
-#endif
+#if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
+#define _map std::tr1::unordered_map
+#define _set std::tr1::unordered_set
 #elif (__IBMCPP__ && __IBMCPP_TR1__) 
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set

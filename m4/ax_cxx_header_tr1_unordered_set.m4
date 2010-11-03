@@ -33,6 +33,6 @@ AC_DEFUN([AX_CXX_HEADER_TR1_UNORDERED_SET], [
   AC_LANG_RESTORE
   ])
   if test "$ax_cv_cxx_tr1_unordered_set" = yes; then
-    AC_DEFINE(HAVE_TR1_UNORDERED_SET,,[Define if tr1/unordered_set is present. ])
+    AC_DEFINE(HAVE_TR1_UNORDERED_SET,[1],[Define if tr1/unordered_set is present. ])
   fi
 ])

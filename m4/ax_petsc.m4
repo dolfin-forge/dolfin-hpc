@@ -67,5 +67,4 @@ AC_DEFUN([AX_PETSC],[
 
 
 
--I/NOBACKUP/njansson/petsc-2.3.3-p13/bmake/linux-gnu-cxx-opt -I/NOBACKUP/njansson/petsc-2.3.3-p13/include -I/usr/include -I/NOBACKUP/njansson/fenics/include -I/NOBACKUP/njansson/fenics/lib -I.
 

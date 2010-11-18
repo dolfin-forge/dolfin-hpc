@@ -6,8 +6,8 @@
 
 #ifdef HAVE_JANPACK
 
-#include <bicgstab.h>
-#include <cg.h>
+#include <janpack/bicgstab.h>
+#include <janpack/cg.h>
 
 #include "JANPACKMat.h"
 #include "JANPACKVec.h"
@@ -22,7 +22,7 @@ JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method,
 {
 }
 //-----------------------------------------------------------------------------
-uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
+dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
 {
   // Check dimensions
   uint M = A.size(0);

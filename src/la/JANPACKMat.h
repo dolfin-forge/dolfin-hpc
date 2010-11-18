@@ -9,7 +9,7 @@
 
 #ifdef HAVE_JANPACK
 
-#include <mat.h>
+#include <janpack/mat.h>
 #include <dolfin/common/Variable.h>
 #include "GenericMatrix.h"
 

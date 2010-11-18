@@ -9,7 +9,7 @@
 
 #ifdef HAVE_JANPACK
 
-#include <vec.h>
+#include <janpack/vec.h>
 
 #include <dolfin/log/LogStream.h>
 #include <dolfin/common/Variable.h>

@@ -49,6 +49,9 @@
 /* Have PETSc la-backend */
 #undef HAVE_PETSC
 
+/* Have JANPACK la-backend */
+#undef HAVE_JANPACK
+
 /* Have GTS library */
 #undef HAVE_GTS
 

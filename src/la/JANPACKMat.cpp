@@ -15,8 +15,7 @@
 
 #ifdef HAVE_JANPACK
 
-#include <spmv.h>
-
+#include <janpack/spmv.h>
 
 using namespace dolfin;
 

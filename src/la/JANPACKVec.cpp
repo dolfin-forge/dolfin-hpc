@@ -76,6 +76,7 @@ void JANPACKVec::init(uint N)
   // Create vector
   init_vec(&_x, N);
   x = &_x;
+  vec_zero(x);
 }
 //-----------------------------------------------------------------------------
 JANPACKVec* JANPACKVec::copy() const
@@ -179,7 +180,7 @@ const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
 
   init(v.local_size());
   //vec_copy(x, v.x);
-  vec_copy(v.x, x);
+  vec_copy(v.x, x);  
   return *this; 
 }
 //-----------------------------------------------------------------------------

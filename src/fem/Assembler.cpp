@@ -62,21 +62,26 @@ void Assembler::assemble(GenericTensor& A, Form& form,
 {
   // Extract cell domains
   MeshFunction<uint>* cell_domains = 0;
-  if (form.form().num_cell_integrals() > 0)
-  {
-    cell_domains = new MeshFunction<uint>(mesh, mesh.topology().dim());
-    (*cell_domains) = 1;
-    sub_domain.mark(*cell_domains, 0);
-  }
 
   // Extract facet domains
   MeshFunction<uint>* facet_domains = 0;
-  if (form.form().num_exterior_facet_integrals() > 0 ||
-      form.form().num_interior_facet_integrals() > 0)
+
+#pragma omp master
   {
-    facet_domains = new MeshFunction<uint>(mesh, mesh.topology().dim() - 1);
-    (*facet_domains) = 1;
-    sub_domain.mark(*facet_domains, 0);
+    if (form.form().num_cell_integrals() > 0)
+    {
+      cell_domains = new MeshFunction<uint>(mesh, mesh.topology().dim());
+      (*cell_domains) = 1;
+      sub_domain.mark(*cell_domains, 0);
+    }
+    
+    if (form.form().num_exterior_facet_integrals() > 0 ||
+	form.form().num_interior_facet_integrals() > 0)
+    {
+      facet_domains = new MeshFunction<uint>(mesh, mesh.topology().dim() - 1);
+      (*facet_domains) = 1;
+      sub_domain.mark(*facet_domains, 0);
+    }
   }
 
   // Assemble
@@ -85,10 +90,13 @@ void Assembler::assemble(GenericTensor& A, Form& form,
            cell_domains, facet_domains, facet_domains, reset_tensor);
 
   // Delete domains
-  if (cell_domains)
-    delete cell_domains;
-  if (facet_domains)
-    delete facet_domains;
+#pragma omp master
+  {
+    if (cell_domains)
+      delete cell_domains;
+    if (facet_domains)
+      delete facet_domains;
+  }
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form,
@@ -139,9 +147,13 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   // Note the imprtance of treating empty mesh functions as null pointers
   // for the PyDOLFIN interface.
 
+
   // Check arguments
-  if(reset_tensor)
-    check(form, coefficients, mesh);
+#pragma omp master
+  {
+    if(reset_tensor)
+      check(form, coefficients, mesh);
+  }
 
   // Create data structure for local assembly data
   UFC ufc(form, mesh, dof_map_set);

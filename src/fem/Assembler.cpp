@@ -162,9 +162,14 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
 
+#pragma omp master
+  {
   // Initialize boundary mesh
   if (ufc.form.num_exterior_facet_integrals()  && !boundary)
     boundary = new BoundaryMesh(mesh);
+  }
+#pragma omp flush
+#pragma omp barrier
 
   // Assemble over exterior facets 
   assembleExteriorFacets(A, coefficients, dof_map_set, ufc, exterior_facet_domains);
@@ -259,10 +264,15 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
 #ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(A.rank(), "exterior facets"), boundary->numCells());
 #endif
-  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
+  //  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
+#pragma omp for
+  for (uint i = 0; i < boundary->numCells(); i++)
   {
+
+    //    Cell boundary_cell(*boundary, i);
+
     // Get mesh facet corresponding to boundary cell
-    Facet mesh_facet(mesh, (*cell_map)(*boundary_cell));
+    Facet mesh_facet(mesh, (*cell_map).get(i));
 
     // Get integral for sub domain (if any)
     if (domains && domains->size() > 0)

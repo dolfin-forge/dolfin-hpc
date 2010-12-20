@@ -124,8 +124,8 @@ namespace dolfin
 
     //--- Special JANPACK functions ---
 
-    /// Return JANPACK Vec_ pointer
-    Vec_ *vec() const;
+    /// Return JANPACK jp_vec_t pointer
+    jp_vec_t *vec() const;
 
     /// Assignment operator
     const JANPACKVec& operator= (const JANPACKVec& x);
@@ -136,8 +136,8 @@ namespace dolfin
   private:
 
     // JANPACK vector pointer
-    Vec_ *x;
-    Vec_ _x;
+    jp_vec_t *x;
+    jp_vec_t _x;
        
     // True if we don't own the vector x points to
     bool is_view;

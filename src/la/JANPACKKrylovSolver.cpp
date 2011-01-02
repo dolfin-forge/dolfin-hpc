@@ -6,8 +6,7 @@
 
 #ifdef HAVE_JANPACK
 
-#include <janpack/bicgstab.h>
-#include <janpack/cg.h>
+#include <janpack/krylov_solver.h>
 
 #include "JANPACKMat.h"
 #include "JANPACKVec.h"
@@ -37,19 +36,24 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
   x.init(b.local_size());
 
   int num_iterations;
-  switch (method)
-  {
-  case bicgstab:
-    num_iterations = bicgstab_crs(A.mat(), x.vec(), b.vec()); break;
-  case cg:
-    num_iterations = cg_crs(A.mat(), x.vec(), b.vec()); break;
-  default:
-    error("Krylov solver not supported by JANPACK");
-  }  
-    
+  num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), getType(method));
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;
 }
 //-----------------------------------------------------------------------------
+jp_solver_t JANPACKKrylovSolver::getType(SolverType method) const
+{
 
+  switch (method)
+  {
+  case bicgstab:
+    return JP_BICGSTAB;
+  case cg:
+    return JP_CG;
+  default:
+    warning("Requested Krylov method unknown. Using BICGSTAB.");
+    return JP_BICGSTAB;
+  }
+}
+//-----------------------------------------------------------------------------
 #endif

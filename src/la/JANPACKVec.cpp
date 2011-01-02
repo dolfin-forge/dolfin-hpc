@@ -45,7 +45,7 @@ JANPACKVec::JANPACKVec(const JANPACKVec& v):
 JANPACKVec::~JANPACKVec()
 {
   if (x && !is_view)
-    vec_free(x);
+    jp_vec_free(x);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::init(uint N)
@@ -60,23 +60,23 @@ void JANPACKVec::init(uint N)
   
   if ((x && this->size() == N ) || (this->local_size() == N))
   {
-    vec_zero(x);
+    jp_vec_zero(x);
     return;      
   }
   else
   {
     if (x && !is_view) 
     {
-      vec_free(x);
+      jp_vec_free(x);
       x = 0;
     }
     
   }
   
   // Create vector
-  init_vec(&_x, N);
+  jp_vec_init(&_x, N);
   x = &_x;
-  vec_zero(x);
+  jp_vec_zero(x);
 }
 //-----------------------------------------------------------------------------
 JANPACKVec* JANPACKVec::copy() const
@@ -115,14 +115,14 @@ void JANPACKVec::add(real* values)
 void JANPACKVec::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
-  vec_get_block(x, const_cast<double*>(block), 
+  jp_vec_get_block(x, const_cast<double*>(block), 
 		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  vec_set_block(x, const_cast<double*>(block), 
+  jp_vec_set_block(x, const_cast<double*>(block), 
 		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
 
-  vec_add_block(x, const_cast<double*>(block),
+  jp_vec_add_block(x, const_cast<double*>(block),
 		reinterpret_cast<int*>(const_cast<uint*>(rows)), m);
   
   //  error("Not implemented.");
@@ -139,15 +139,15 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 void JANPACKVec::apply(FinalizeType finaltype)
 {
 
-  finalize_vec(x);
+  jp_vec_finalize(x);
   if (is_ghosted)
-    vec_update_ghosts(x);
+    jp_vec_update_ghosts(x);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::zero()
 {
   dolfin_assert(x);
-  vec_zero(x);
+  jp_vec_zero(x);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint JANPACKVec::size() const
@@ -179,8 +179,8 @@ const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
   dolfin_assert(v.x);
 
   init(v.local_size());
-  //vec_copy(x, v.x);
-  vec_copy(v.x, x);  
+  //jp_vec_copy(x, v.x);
+  jp_vec_copy(v.x, x);  
   return *this; 
 }
 //-----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ const JANPACKVec& JANPACKVec::operator-= (const GenericVector& x)
 const JANPACKVec& JANPACKVec::operator*= (const real a)
 {
   dolfin_assert(x);
-  vec_scal(a, x);
+  jp_vec_scal(a, x);
   
   return *this;
 }
@@ -218,7 +218,7 @@ const JANPACKVec& JANPACKVec::operator/= (const real a)
   dolfin_assert(a != 0.0);
   
   const real b = 1.0 / a;
-  vec_scal(b, x);
+  jp_vec_scal(b, x);
   
   return *this;
 }
@@ -231,7 +231,7 @@ real JANPACKVec::inner(const GenericVector& y) const
   dolfin_assert(v.x);
 
   real a;
-  a = vec_dot(x, v.x);
+  a = jp_vec_dot(x, v.x);
 
   return a;
 }
@@ -243,12 +243,12 @@ void JANPACKVec::axpy(real a, const GenericVector& y)
   const JANPACKVec& v = y.down_cast<JANPACKVec>();
   dolfin_assert(v.x);
 
-  vec_axpy(a, v.x, x);
+  jp_vec_axpy(a, v.x, x);
 }
 //-----------------------------------------------------------------------------
 real JANPACKVec::norm(VectorNormType type) const
 {
-  return vec_nrm2(x);
+  return jp_vec_nrm2(x);
 }
 //-----------------------------------------------------------------------------
 real JANPACKVec::min() const
@@ -265,10 +265,10 @@ real JANPACKVec::max() const
 //-----------------------------------------------------------------------------
 void JANPACKVec::disp(uint precision) const
 {
-  vec_print(x);
+  jp_vec_print(x);
 }
-//-----------------------------------------------------------------------------  
-Vec_ *JANPACKVec::vec() const
+//-----------------------------------------------------------------------------
+jp_vec_t *JANPACKVec::vec() const
 {
   return x;
 }
@@ -293,7 +293,7 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
     }
   }
 
-  init_vec_ghosts(x, &ghost_indices[0], ghost_indices.size());
+  jp_vec_init_ghosts(x, &ghost_indices[0], ghost_indices.size());
   
   is_ghosted = true;
   apply();

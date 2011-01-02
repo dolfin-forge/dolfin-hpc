@@ -47,7 +47,7 @@ JANPACKMat::~JANPACKMat()
 {
   // Free memory of matrix
   if(A)
-    mat_free_crs(A);  
+    jp_mat_free(A);
 
   //  if (!is_view) delete A;
 }
@@ -57,7 +57,8 @@ void JANPACKMat::init(uint M, uint N)
   // Free previously allocated memory if necessary
   //  if (A) delete A;
   A = &_A;
-  init_mat_crs(A, M, N);
+  jp_mat_init(A, M, N);
+
   // Not yet implemented
   //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
@@ -112,7 +113,8 @@ void JANPACKMat::set(const real* block,
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
-      mat_set_crs(A, rows[i], cols[j], *(bp++));
+      jp_mat_set(A, rows[i], cols[j], *(bp++));
+
   //  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
@@ -123,10 +125,10 @@ void JANPACKMat::add(const real* block,
   dolfin_assert(A); 
 
 
-  mat_add_block_crs(&_A, 
-		    m, const_cast<uint*>(rows),
-		    n, const_cast<uint*>(cols), 
-		    const_cast<real*>(block));
+  jp_mat_add_block(&_A, 
+	       m, const_cast<uint*>(rows),
+	       n, const_cast<uint*>(cols), 
+	       const_cast<real*>(block));
 
   /*
   const real *bp = &block[0];
@@ -146,13 +148,13 @@ real JANPACKMat::norm(std::string norm_type) const
 void JANPACKMat::zero()
 {
   dolfin_assert(A); 
-  mat_zero_crs(A);
+  jp_mat_zero(A);
   //  error("Not implemented. (zero)");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::apply(FinalizeType finaltype)
 {
-  finalize_mat_crs(A);
+  jp_mat_finalize(A);
   //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------
@@ -167,8 +169,8 @@ void JANPACKMat::ident(uint m, const uint* rows)
   dolfin_assert(A); 
 
   for(uint i = 0; i < m; i ++) {
-    mat_zero_row_crs(A, rows[i]);
-    mat_insert_crs(A, rows[i], rows[i], 1.0);
+    jp_mat_zero_row(A, rows[i]);
+    jp_mat_insert(A, rows[i], rows[i], 1.0);
   }
 
   //  error("Not implemented.");
@@ -190,7 +192,7 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   else
     yy.init(size(0));
   
-  spmv_crs(A, xx.vec(), yy.vec());  
+  jp_spmv(A, xx.vec(), yy.vec());  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
@@ -213,7 +215,7 @@ LinearAlgebraFactory& JANPACKMat::factory() const
   return JANPACKFactory::instance();
 }
 //-----------------------------------------------------------------------------
-Mat_crs *JANPACKMat::mat() const
+jp_mat_t *JANPACKMat::mat() const
 {
   return A;
 }
@@ -234,7 +236,7 @@ const JANPACKMat& JANPACKMat::operator/= (real a)
 //-----------------------------------------------------------------------------
 const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
 {
-  mat_copy_crs(A.down_cast<JANPACKMat>().A, this->A);
+  jp_mat_copy(A.down_cast<JANPACKMat>().A, this->A);
   return *this;
 }
 //-----------------------------------------------------------------------------

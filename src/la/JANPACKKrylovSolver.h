@@ -39,6 +39,9 @@ namespace dolfin
     /// Get JANPACK krylov method id
     int getType(SolverType method) const;
 
+    /// DOLFIN PETScPreconditioner
+    PreconditionerType pc_janpack;
+
   };
 }
 

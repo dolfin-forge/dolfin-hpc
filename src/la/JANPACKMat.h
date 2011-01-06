@@ -118,7 +118,7 @@ namespace dolfin
     jp_mat_t* A;
 
 
-    jp_mat_t _A;
+    jp_mat_t AA;
     
     // True if we don't own the matrix A points to
     bool is_view;

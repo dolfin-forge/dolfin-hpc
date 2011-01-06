@@ -56,7 +56,7 @@ void JANPACKMat::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   //  if (A) delete A;
-  A = &_A;
+  A = &AA;
   jp_mat_init(A, M, N);
 
   // Not yet implemented
@@ -125,7 +125,7 @@ void JANPACKMat::add(const real* block,
   dolfin_assert(A); 
 
 
-  jp_mat_add_block(&_A, 
+  jp_mat_add_block(&AA, 
 	       m, const_cast<uint*>(rows),
 	       n, const_cast<uint*>(cols), 
 	       const_cast<real*>(block));
@@ -134,7 +134,7 @@ void JANPACKMat::add(const real* block,
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
-      mat_add_crs(&_A, rows[i], cols[j], *(bp++));
+      mat_add_crs(&AA, rows[i], cols[j], *(bp++));
 */
   //error("Not implemented. (add)");
 }

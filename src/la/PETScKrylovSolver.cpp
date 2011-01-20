@@ -235,7 +235,7 @@ void PETScKrylovSolver::readParameters()
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
     PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
-    PCFactorSetShiftAmount(pc, get("shift_nonzero"));
+    PCFactorSetShiftAmount(pc, get("Krylov shift nonzero"));
 #else    
     PCFactorSetShiftNonzero(pc, get("Krylov shift nonzero"));
 #endif

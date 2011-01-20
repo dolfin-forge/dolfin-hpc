@@ -143,7 +143,12 @@ if test "x${with_gts}" = xyes; then
 fi
 
 if test "x${with_petsc}" != xno; then
-    AX_PETSC
+   # This assumes a modern CRAY, for example XT or XE series systems
+   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+      AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
+   else
+      AX_PETSC
+   fi
 fi
 
 if test "x${with_janpack}" != xno; then

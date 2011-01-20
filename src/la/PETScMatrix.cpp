@@ -102,7 +102,11 @@ void PETScMatrix::init(uint M, uint N)
 
     setType();
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+    MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+#else
     MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#endif
 #else
     MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif
@@ -140,7 +144,11 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     {      
       MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size, (int) M, (int) N, 1, PETSC_NULL, &A);
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+      MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+#else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#endif
       MatSetOption(A, MAT_USE_HASH_TABLE, PETSC_TRUE);
 #else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
@@ -157,7 +165,11 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
       MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
       setType();
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+      MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+#else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#endif
 #else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif
@@ -188,7 +200,11 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
 #if PETSC_VERSION_MAJOR > 2
-  MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+    MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+#else
+    MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+#endif
 #else
   MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif

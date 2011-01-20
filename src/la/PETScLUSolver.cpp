@@ -43,10 +43,16 @@ PETScLUSolver::PETScLUSolver()
   PCSetType(pc, PCLU);
 
   // Allow matrices with zero diagonals to be solved
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
+  PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
+  PCFactorSetShiftAmount(pc, PETSC_DECIDE);
+#else    
   PCFactorSetShiftNonzero(pc, PETSC_DECIDE);
+
 
   // Do LU factorization in-place (saves memory)
   PCASMSetUseInPlace(pc);
+#endif
 }
 //-----------------------------------------------------------------------------
 PETScLUSolver::~PETScLUSolver()

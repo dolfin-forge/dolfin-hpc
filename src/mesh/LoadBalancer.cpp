@@ -4,6 +4,7 @@
 // First added:  2008-03-03
 // Last changed: 2011-01-18
 
+#include <cstring>
 #include "MeshData.h"
 #include "MeshFunction.h"
 #include "Cell.h"

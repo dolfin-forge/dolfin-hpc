@@ -71,13 +71,13 @@ if test "x${enable_boosttr1}" = xyes; then
 fi
 
 
-
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
+AX_COMPILER_VENDOR
 if test "x${enable_mpi}" != xno; then
    AX_MPI	
    CXX="$MPICXX"
@@ -87,9 +87,13 @@ fi
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+else
+   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+      CXXFLAGS="$CXXFLAGS -h noomp"
+   fi
 fi
 
-AX_COMPILER_VENDOR
+
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])

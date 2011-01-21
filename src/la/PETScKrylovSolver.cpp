@@ -184,7 +184,7 @@ void PETScKrylovSolver::init(uint M, uint N)
     KSPCreate(PETSC_COMM_SELF, &ksp);
 #endif
   KSPSetFromOptions(ksp);  
-  //KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
+  KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
 
   // Set solver
   setSolver();

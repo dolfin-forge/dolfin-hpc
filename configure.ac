@@ -89,7 +89,7 @@ if test "x${enable_openmp}" != xno; then
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
 else
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      CXXFLAGS="$CXXFLAGS -h noomp"
+      CXXFLAGS="-hnoomp $CXXFLAGS" 
    fi
 fi
 
@@ -153,6 +153,12 @@ fi
 
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
+fi
+
+
+# Temporary workaround for CRAY CE 7.3.1 and libxml2
+if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+   CXXFLAGS="-hgnu $CXXFLAGS"
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.

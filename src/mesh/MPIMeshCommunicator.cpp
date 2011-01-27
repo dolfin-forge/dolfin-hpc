@@ -422,26 +422,6 @@ MPIMeshCommunicator::~MPIMeshCommunicator()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::broadcast(const Mesh& mesh) 
-{ 
-  error("Cannot broadcast meshes without MPI.");
-}
-//-----------------------------------------------------------------------------
-void MPIMeshCommunicator::receive(Mesh& mesh) 
-{ 
-  error("Cannot receive meshes without MPI.");
-}
-//-----------------------------------------------------------------------------
-void MPIMeshCommunicator::broadcast(const MeshFunction<unsigned int>& mesh_function) 
-{ 
-  error("Cannot broadcast mesh functions without MPI.");
-}
-//-----------------------------------------------------------------------------
-void MPIMeshCommunicator::receive(MeshFunction<unsigned int>& mesh_function) 
-{ 
-  error("Cannot receive mesh functions without MPI.");
-}
-//-----------------------------------------------------------------------------
 void MPIMeshCommunicator::distribute(Mesh& mesh,
 				     MeshFunction<uint>& distribution)
 {

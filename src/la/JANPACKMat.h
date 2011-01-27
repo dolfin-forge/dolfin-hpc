@@ -105,8 +105,7 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK jp_mat_t pointer;
-    jp_mat_t*mat() const;
-      
+    jp_mat_t *mat() const;
 
     /// Assignment operator
     const JANPACKMat& operator= (const JANPACKMat& x)
@@ -117,8 +116,7 @@ namespace dolfin
     // JANPACK Matrix pointer
     jp_mat_t* A;
 
-
-    jp_mat_t _A;
+    jp_mat_t AA;
     
     // True if we don't own the matrix A points to
     bool is_view;

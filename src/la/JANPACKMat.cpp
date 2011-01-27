@@ -15,6 +15,10 @@
 
 #ifdef HAVE_JANPACK
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <janpack/spmv.h>
 
 using namespace dolfin;
@@ -30,7 +34,7 @@ JANPACKMat::JANPACKMat():
 JANPACKMat::JANPACKMat(uint M, uint N):
     Variable("A", "JANPACK matrix"),
     A(0), is_view(false)
-{
+ {
   // TODO: call JANPACK_Init or something?
   // Create JANPACK matrix
   init(M, N);
@@ -47,7 +51,7 @@ JANPACKMat::~JANPACKMat()
 {
   // Free memory of matrix
   if(A)
-    jp_mat_free(A);
+    jp_mat_free(A);  
 
   //  if (!is_view) delete A;
 }
@@ -56,6 +60,7 @@ void JANPACKMat::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   //  if (A) delete A;
+
   A = &AA;
   jp_mat_init(A, M, N);
 
@@ -125,6 +130,7 @@ void JANPACKMat::add(const real* block,
   dolfin_assert(A); 
 
 
+
   jp_mat_add_block(&AA, 
 	       m, const_cast<uint*>(rows),
 	       n, const_cast<uint*>(cols), 
@@ -134,7 +140,11 @@ void JANPACKMat::add(const real* block,
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
+<<<<<<< HEAD
       mat_add_crs(&AA, rows[i], cols[j], *(bp++));
+=======
+      jp_mat_add(&_A, rows[i], cols[j], *(bp++));
+>>>>>>> master
 */
   //error("Not implemented. (add)");
 }
@@ -154,7 +164,9 @@ void JANPACKMat::zero()
 //-----------------------------------------------------------------------------
 void JANPACKMat::apply(FinalizeType finaltype)
 {
+
   jp_mat_finalize(A);
+
   //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------
@@ -242,7 +254,8 @@ const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
 //-----------------------------------------------------------------------------
 void JANPACKMat::dup(GenericMatrix& A) 
 {
-  //  mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
+  error("Not implemented.");
+  //  jp_mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
 }
 //-----------------------------------------------------------------------------
 #endif

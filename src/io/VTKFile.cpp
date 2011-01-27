@@ -6,7 +6,7 @@
 // Modified by Niclas Jansson 2008-2009.
 //
 // First added:  2005-07-05
-// Last changed: 2009-11-01
+// Last changed: 2011-01-20
 
 #include <boost/cstdint.hpp>
 #include <boost/detail/endian.hpp>
@@ -634,7 +634,7 @@ void VTKFile::encode_inline_compressed_base64(std::stringstream& stream,
   header[2] = 0;
 
   // Compress data
-  std::pair<boost::shared_array<unsigned char>, unsigned long> compressed_data = Encoder::compress_data(data);
+  std::pair<unsigned char*, unsigned long> compressed_data = Encoder::compress_data(data);
 
   // Length of compressed data
   header[3] = compressed_data.second;
@@ -643,7 +643,10 @@ void VTKFile::encode_inline_compressed_base64(std::stringstream& stream,
   Encoder::encode_base64(&header[0], 4, stream);
 
   // Encode data
-  Encoder::encode_base64(compressed_data.first.get(), compressed_data.second, stream);
+  Encoder::encode_base64(compressed_data.first, compressed_data.second, stream);
+
+  // Free compress data
+  delete[] compressed_data.first;
 }
 #endif
 //----------------------------------------------------------------------------

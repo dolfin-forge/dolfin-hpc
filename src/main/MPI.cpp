@@ -13,6 +13,7 @@
 #include <dolfin/log/dolfin_log.h>
 #include "SubSystemsManager.h"
 #include "MPI.h"
+#include <cstring>
 
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI

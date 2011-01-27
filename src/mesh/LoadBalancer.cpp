@@ -2,8 +2,9 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-03-03
-// Last changed: 2010-09-12
+// Last changed: 2011-01-18
 
+#include <cstring>
 #include "MeshData.h"
 #include "MeshFunction.h"
 #include "Cell.h"
@@ -66,6 +67,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   if( threshold > imbalance ) {
     message("Load imbalance %0.2f percent, below threshold.",
 	    (imbalance - 1.0) * 100);
+   
+    if (!dolfin_get("Load balancer redistribute"))
+    {
+      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+      part->init(mesh, mesh.topology().dim());      
+      *part = MPI::processNumber();
+    }
+
     return;
   }
   else

@@ -36,7 +36,7 @@ AC_DEFUN([AX_PETSC],[
 	      MPI_LIB=`grep 'MPI_LIB ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/MPI_LIB =/''/'`
 	      BLASLAPACK_LIB=`grep 'BLASLAPACK_LIB ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/BLASLAPACK_LIB =/''/'`
 	      PETSC_MPI_INC=`grep 'MPI_INCLUDE ='  $ac_petsc_dir/bmake/$ac_petsc_arch/petscconf | sed 's/MPI_INCLUDE =/''/'`
-	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include $PETSC_MPI_INC"
+	      PETSC_CPPFLAGS="-I$ac_petsc_dir/bmake/$ac_petsc_arch -I$ac_petsc_dir/include/ $PETSC_MPI_INC"
 	      PETSC_LDFLAGS="$CC_LINKER_SLFLAGS$ac_petsc_libdir -L$ac_petsc_libdir -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc  $X11_LIB $HYPRE_LIB $UMFPACK_LIB $MPI_LIB $BLASLAPACK_LIB -lm"
 	      
 	      have_petsc="yes"
@@ -44,7 +44,7 @@ AC_DEFUN([AX_PETSC],[
 	     ac_petsc_libdir="$ac_petsc_dir/lib"
 	     PETSC_PKG_LIBS=`grep PACKAGES_LIBS $ac_petsc_dir/conf/petscvariables | sed 's/PACKAGES_LIBS =/''/'`
 	     PETSC_MPI_INC=`grep 'MPI_INCLUDE =' $ac_petsc_dir/conf/petscvariables | sed 's/MPI_INCLUDE =/''/'`
-	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include $PETSC_MPI_INC"
+	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include/ $PETSC_MPI_INC"
 	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS -lpetscts -lpetscsnes -lpetscksp -lpetscdm -lpetscmat -lpetscvec -lpetsc"
 
 	     have_petsc="yes"

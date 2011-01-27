@@ -106,7 +106,6 @@ namespace dolfin
 
     /// Return JANPACK jp_mat_t pointer;
     jp_mat_t *mat() const;
-      
 
     /// Assignment operator
     const JANPACKMat& operator= (const JANPACKMat& x)
@@ -116,7 +115,6 @@ namespace dolfin
 
     // JANPACK Matrix pointer
     jp_mat_t* A;
-
 
     jp_mat_t AA;
     

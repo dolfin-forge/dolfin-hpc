@@ -232,7 +232,13 @@ void PETScKrylovSolver::readParameters()
   {
     PC pc;
     KSPGetPC(ksp, &pc);
+
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
+    PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
+    PCFactorSetShiftAmount(pc, get("shift_nonzero"));
+#else    
     PCFactorSetShiftNonzero(pc, get("Krylov shift nonzero"));
+#endif
   }
 
   // Remember that we have read parameters

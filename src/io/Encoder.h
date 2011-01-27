@@ -1,8 +1,10 @@
 // Copyright (C) 2009 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson 2011.
+//
 // First added:  2009-08-11
-// Last changed: 2009-08-12
+// Last changed: 2011-01-20
 
 #ifndef __ENCODER_H
 #define __ENCODER_H
@@ -20,7 +22,6 @@ extern "C"
 #include <sstream>
 #include <vector>
 #include <utility>
-#include <boost/shared_array.hpp>
 #include "base64.h"
 
 #include <dolfin/common/types.h>
@@ -51,7 +52,7 @@ namespace dolfin
 
 #ifdef HAVE_LIBZ
     template<typename T>
-    static std::pair<boost::shared_array<unsigned char>, unsigned long> compress_data(const std::vector<T>& data)
+    static std::pair<unsigned char *, unsigned long> compress_data(const std::vector<T>& data)
     {
       // Compute length of uncompressed data
       const unsigned long uncompressed_size = data.size()*sizeof(T);
@@ -60,10 +61,10 @@ namespace dolfin
       unsigned long compressed_size = (uncompressed_size + (((uncompressed_size)/1000)+1)+12);;
 
       // Allocate space for compressed data
-      boost::shared_array<unsigned char> compressed_data(new unsigned char[compressed_size]);
+      unsigned char *compressed_data = new unsigned char[compressed_size];
 
       // Compress data
-      if(compress((Bytef*) compressed_data.get(), &compressed_size, (const Bytef*) &data[0], uncompressed_size) != Z_OK)
+      if(compress((Bytef*) compressed_data, &compressed_size, (const Bytef*) &data[0], uncompressed_size) != Z_OK)
         error("Zlib error while compressing data.");
 
       // Make pair and return

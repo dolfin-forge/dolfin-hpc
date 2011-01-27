@@ -45,7 +45,9 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
 
   int num_iterations;
   num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), 
-				    (jp_solver_t) getType(method), pc_type);
+				    (jp_solver_t) getType(method), pc_type,
+				    get("Krylov maximum iterations"),
+				    get("Krylov relative tolerance"));
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;
 }

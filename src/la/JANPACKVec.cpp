@@ -14,6 +14,7 @@
 
 #include <dolfin/common/Array.h>
 
+#include <cstring>
 #include <set>
 #include <map>
 

@@ -8,9 +8,9 @@
 // First added:  2005-07-05
 // Last changed: 2011-01-20
 
-#include <boost/cstdint.hpp>
-#include <boost/detail/endian.hpp>
+//#include <boost/detail/endian.hpp>
 
+#include <stdint.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
@@ -181,9 +181,9 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Write cell connectivity
   fprintf(fp, "<Cells>  \n");
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\"> \n");
-  std::vector<boost::uint32_t> c_data;
+  std::vector<uint32_t> c_data;
   c_data.resize(mesh.numCells() * mesh.type().numEntities(0));
-  std::vector<boost::uint32_t>::iterator c_entry = c_data.begin(); 
+  std::vector<uint32_t>::iterator c_entry = c_data.begin(); 
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     for (VertexIterator v(*c); !v.end(); ++v)
@@ -198,7 +198,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   // Write offset into connectivity array for the end of each cell
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
-  std::vector<boost::uint32_t>::iterator cc_entry = c_data.begin(); 
+  std::vector<uint32_t>::iterator cc_entry = c_data.begin(); 
   for (uint offsets = 1; offsets <= mesh.numCells(); offsets++)
     *cc_entry++ = offsets*mesh.type().numEntities(0);
 
@@ -209,17 +209,17 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   
   //Write cell type
   fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">  \n");
-  std::vector<boost::uint8_t> t_data;
+  std::vector<uint8_t> t_data;
   t_data.resize(mesh.numCells());
-  std::vector<boost::uint8_t>::iterator t_entry = t_data.begin();
+  std::vector<uint8_t>::iterator t_entry = t_data.begin();
   for (uint types = 1; types <= mesh.numCells(); types++)
   {
     if (mesh.type().cellType() == CellType::tetrahedron )
-      *t_entry++ = boost::uint8_t(10);
+      *t_entry++ = uint8_t(10);
     if (mesh.type().cellType() == CellType::triangle )
-      *t_entry++ = boost::uint8_t(5);
+      *t_entry++ = uint8_t(5);
     if (mesh.type().cellType() == CellType::interval )
-      *t_entry++ = boost::uint8_t(3);
+      *t_entry++ = uint8_t(3);
   }
 
   // Create encoded stream
@@ -462,12 +462,10 @@ void VTKFile::VTKHeaderOpen(Mesh& mesh) const
   
     // Figure out endianness of machine
   std::string endianness = "";
-#if defined BOOST_LITTLE_ENDIAN
-  endianness = "byte_order=\"LittleEndian\"";
-#elif defined BOOST_BIG_ENDIAN
+#if defined HAVE_BIG_ENDIAN
   endianness = "byte_order=\"BigEndian\"";;
 #else
-  error("Unable to determine the endianness of the machine for VTK binary output.");
+  endianness = "byte_order=\"LittleEndian\"";
 #endif
   
   std::string compressor = "";
@@ -618,7 +616,7 @@ template<typename T>
 void VTKFile::encode_inline_base64(std::stringstream& stream, 
                                    const std::vector<T>& data) const
 {
-  const boost::uint32_t size = data.size()*sizeof(T);
+  const uint32_t size = data.size()*sizeof(T);
   Encoder::encode_base64(&size, 1, stream);
   Encoder::encode_base64(data, stream);
 }
@@ -628,7 +626,7 @@ template<typename T>
 void VTKFile::encode_inline_compressed_base64(std::stringstream& stream, 
                                               const std::vector<T>& data) const
 {
-  boost::uint32_t header[4];
+  uint32_t header[4];
   header[0] = 1;
   header[1] = data.size()*sizeof(T);
   header[2] = 0;

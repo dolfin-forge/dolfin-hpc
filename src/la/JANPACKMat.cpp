@@ -60,8 +60,10 @@ void JANPACKMat::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   //  if (A) delete A;
-  A = &_A;
+
+  A = &AA;
   jp_mat_init(A, M, N);
+
   // Not yet implemented
   //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
@@ -117,6 +119,7 @@ void JANPACKMat::set(const real* block,
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
       jp_mat_set(A, rows[i], cols[j], *(bp++));
+
   //  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
@@ -127,16 +130,21 @@ void JANPACKMat::add(const real* block,
   dolfin_assert(A); 
 
 
-  jp_mat_add_block(&_A, 
-		    m, const_cast<uint*>(rows),
-		    n, const_cast<uint*>(cols), 
-		    const_cast<real*>(block));
+
+  jp_mat_add_block(&AA, 
+	       m, const_cast<uint*>(rows),
+	       n, const_cast<uint*>(cols), 
+	       const_cast<real*>(block));
 
   /*
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++)
+<<<<<<< HEAD
+      mat_add_crs(&AA, rows[i], cols[j], *(bp++));
+=======
       jp_mat_add(&_A, rows[i], cols[j], *(bp++));
+>>>>>>> master
 */
   //error("Not implemented. (add)");
 }
@@ -157,12 +165,8 @@ void JANPACKMat::zero()
 void JANPACKMat::apply(FinalizeType finaltype)
 {
 
-#ifdef _OPENMP
-  ;
-  //  jp_mat_finalize(A, omp_get_thread_num());
-#else
   jp_mat_finalize(A);
-#endif
+
   //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------

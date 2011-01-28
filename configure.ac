@@ -60,6 +60,8 @@ fi
 
 if test "x${enable_ublas}" != xyes; then
    AC_DEFINE(NO_UBLAS, [1], [Compile without support for uBlas])
+else
+   need_boost=yes	
 fi
 
 if test "x${enable_progressbar}" != xyes; then
@@ -67,7 +69,8 @@ if test "x${enable_progressbar}" != xyes; then
 fi
 
 if test "x${enable_boosttr1}" = xyes; then
-   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])	
+   AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
+   need_boost=yes	
 fi
 
 
@@ -102,8 +105,11 @@ AX_CXX_HEADER_TR1_UNORDERED_SET
 PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 
-AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
-CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+
+if test "x${need_boost}" = xyes; then
+   AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
+   CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+fi
 
 if test "x${enable_boosttr1}" = xyes; then
    if test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
@@ -162,10 +168,16 @@ if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_C_BIGENDIAN
 AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT8_T
+
+if test "x${ac_cv_c_bigendian}" != xno; then
+   AC_DEFINE(HAVE_BIG_ENDIAN, 1, [Big endian byte order.])
+fi
+
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE

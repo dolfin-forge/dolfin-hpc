@@ -13,6 +13,8 @@
 #include "SolverType.h"
 #include "PreconditionerType.h"
 
+#include <janpack/krylov_solver.h>
+
 namespace dolfin 
 {
   /// Forward declarations
@@ -33,6 +35,12 @@ namespace dolfin
 
     /// Krylov method
     SolverType method;
+
+    /// Get JANPACK krylov method id
+    int getType(SolverType method) const;
+
+    /// DOLFIN PETScPreconditioner
+    PreconditionerType pc_janpack;
 
   };
 }

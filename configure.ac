@@ -161,12 +161,6 @@ if test "x${with_janpack}" != xno; then
    AX_JANPACK
 fi
 
-
-# Temporary workaround for CRAY CE 7.3.1 and libxml2
-if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-   CXXFLAGS="-hgnu $CXXFLAGS"
-fi
-
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE

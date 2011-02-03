@@ -107,6 +107,7 @@ add("Krylov GMRES restart", 30);
 add("Krylov shift nonzero", 0.0);
 add("Krylov report", true);
 add("Krylov monitor convergence", false);
+add("Krylov keep PC", false);
 
 //--- Parameter for direct (LU) solver ---
 add("LU report", true);

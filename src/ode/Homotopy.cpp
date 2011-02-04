@@ -16,10 +16,10 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/parameter/parameters.h>
-#include "ComplexODE.h"
-#include "HomotopyJacobian.h"
-#include "HomotopyODE.h"
-#include "Homotopy.h"
+#include <dolfin/ode/ComplexODE.h>
+#include <dolfin/ode/HomotopyJacobian.h>
+#include <dolfin/ode/HomotopyODE.h>
+#include <dolfin/ode/Homotopy.h>
 
 using namespace dolfin;
 

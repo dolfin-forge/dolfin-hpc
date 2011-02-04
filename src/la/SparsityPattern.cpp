@@ -10,7 +10,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
-#include "SparsityPattern.h"
+#include <dolfin/la/SparsityPattern.h>
 #include <dolfin/main/MPI.h>
 //#include <dolfin/PETScObject.h>
 #include <iostream>

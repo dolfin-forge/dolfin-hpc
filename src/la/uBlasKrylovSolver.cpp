@@ -10,9 +10,9 @@
 
 #ifndef NO_UBLAS
 
-#include "uBlasILUPreconditioner.h"
-#include "uBlasDummyPreconditioner.h"
-#include "uBlasKrylovSolver.h"
+#include <dolfin/la/uBlasILUPreconditioner.h>
+#include <dolfin/la/uBlasDummyPreconditioner.h>
+#include <dolfin/la/uBlasKrylovSolver.h>
 
 using namespace dolfin;
 

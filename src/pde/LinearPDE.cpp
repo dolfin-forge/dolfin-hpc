@@ -13,7 +13,7 @@
 #include <dolfin/la/KrylovSolver.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/function/DiscreteFunction.h>
-#include "LinearPDE.h"
+#include <dolfin/pde/LinearPDE.h>
 #include <dolfin/io/dolfin_io.h>
 #include <dolfin/fem/Form.h>
 

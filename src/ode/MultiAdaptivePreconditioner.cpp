@@ -9,9 +9,9 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/la/uBlasVector.h>
-#include "Method.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "MultiAdaptivePreconditioner.h"
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptivePreconditioner.h>
 
 using namespace dolfin;
 

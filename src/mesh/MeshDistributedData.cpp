@@ -3,11 +3,11 @@
 //
 
 #include <dolfin/config/dolfin_config.h>
-#include "MeshDistributedData.h"
-#include "MeshEntity.h"
-#include "Vertex.h"
-#include "Edge.h"
-#include "Face.h"
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Face.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/log.h>
 #include <string.h>

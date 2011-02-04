@@ -12,11 +12,11 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "TimeStepper.h"
-#include "ODESolver.h"
-#include "ODESolution.h"
-#include "Dual.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/TimeStepper.h>
+#include <dolfin/ode/ODESolver.h>
+#include <dolfin/ode/ODESolution.h>
+#include <dolfin/ode/Dual.h>
 
 using namespace dolfin;
 

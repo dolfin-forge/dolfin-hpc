@@ -11,8 +11,8 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/log/dolfin_log.h>
-#include "SubSystemsManager.h"
-#include "MPI.h"
+#include <dolfin/main/SubSystemsManager.h>
+#include <dolfin/main/MPI.h>
 #include <cstring>
 
 //-----------------------------------------------------------------------------

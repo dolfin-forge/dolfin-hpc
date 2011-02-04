@@ -11,8 +11,8 @@
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/parameter/parameters.h>
-#include "TimeSlab.h"
-#include "TimeSlabSolver.h"
+#include <dolfin/ode/TimeSlab.h>
+#include <dolfin/ode/TimeSlabSolver.h>
 
 using namespace dolfin;
 

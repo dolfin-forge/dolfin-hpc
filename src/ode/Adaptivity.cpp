@@ -9,7 +9,7 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/parameter/parameters.h>
-#include "Adaptivity.h"
+#include <dolfin/ode/Adaptivity.h>
 
 using namespace dolfin;
 

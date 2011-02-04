@@ -7,10 +7,10 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
-#include "JANPACKFactory.h"
-#include "JANPACKMat.h"
-#include "JANPACKVec.h"
-#include "GenericSparsityPattern.h"
+#include <dolfin/la/JANPACKFactory.h>
+#include <dolfin/la/JANPACKMat.h>
+#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/GenericSparsityPattern.h>
 
 
 #ifdef HAVE_JANPACK

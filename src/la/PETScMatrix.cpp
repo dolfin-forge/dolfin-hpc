@@ -19,11 +19,11 @@
 #include <iomanip>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
-#include "PETScVector.h"
-#include "PETScMatrix.h"
-#include "GenericSparsityPattern.h"
-#include "SparsityPattern.h"
-#include "PETScFactory.h"
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/GenericSparsityPattern.h>
+#include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/PETScFactory.h>
 #include <dolfin/main/MPI.h>
 
 using namespace dolfin;

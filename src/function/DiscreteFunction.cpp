@@ -23,8 +23,8 @@
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/elements/ElementLibrary.h>
-#include "SubFunction.h"
-#include "DiscreteFunction.h"
+#include <dolfin/function/SubFunction.h>
+#include <dolfin/function/DiscreteFunction.h>
 
 #include <limits>
 #include <set>

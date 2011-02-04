@@ -10,10 +10,10 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
-#include "Alloc.h"
-#include "Method.h"
-#include "MonoAdaptiveTimeSlab.h"
-#include "MonoAdaptiveFixedPointSolver.h"
+#include <dolfin/ode/Alloc.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MonoAdaptiveTimeSlab.h>
+#include <dolfin/ode/MonoAdaptiveFixedPointSolver.h>
 
 using namespace dolfin;
 

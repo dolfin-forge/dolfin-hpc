@@ -14,16 +14,16 @@
 #include <string>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
-#include "File.h"
-#include "GenericFile.h"
-#include "XMLFile.h"
-#include "BinaryFile.h"
-#include "MatlabFile.h"
-#include "OctaveFile.h"
-#include "PythonFile.h"
-#include "VTKFile.h"
-#include "RAWFile.h"
-#include "XYZFile.h"
+#include <dolfin/io/File.h>
+#include <dolfin/io/GenericFile.h>
+#include <dolfin/io/XMLFile.h>
+#include <dolfin/io/BinaryFile.h>
+#include <dolfin/io/MatlabFile.h>
+#include <dolfin/io/OctaveFile.h>
+#include <dolfin/io/PythonFile.h>
+#include <dolfin/io/VTKFile.h>
+#include <dolfin/io/RAWFile.h>
+#include <dolfin/io/XYZFile.h>
 
 using namespace dolfin;
 

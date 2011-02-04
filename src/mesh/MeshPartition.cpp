@@ -10,13 +10,13 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/graph/Graph.h>
 #include <dolfin/graph/GraphPartition.h>
-#include "MeshPartition.h"
-#include "MeshFunction.h"
-#include "MeshRenumber.h"
+#include <dolfin/mesh/MeshPartition.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
-#include "Vertex.h"
-#include "Cell.h"
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>

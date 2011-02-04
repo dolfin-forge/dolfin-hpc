@@ -11,8 +11,8 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/la/uBlasVector.h>
-#include "ODESolver.h"
-#include "ODE.h"
+#include <dolfin/ode/ODESolver.h>
+#include <dolfin/ode/ODE.h>
 
 using namespace dolfin;
 

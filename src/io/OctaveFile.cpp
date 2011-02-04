@@ -18,8 +18,8 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>
-#include "MatlabFile.h"
-#include "OctaveFile.h"
+#include <dolfin/io/MatlabFile.h>
+#include <dolfin/io/OctaveFile.h>
 
 using namespace dolfin;
 

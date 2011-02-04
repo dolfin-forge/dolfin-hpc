@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <string>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "cGqMethod.h"
-#include "dGqMethod.h"
-#include "TimeSlab.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/cGqMethod.h>
+#include <dolfin/ode/dGqMethod.h>
+#include <dolfin/ode/TimeSlab.h>
 
 using namespace dolfin;
 

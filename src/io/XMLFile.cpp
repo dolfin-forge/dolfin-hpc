@@ -29,19 +29,19 @@
 #include <dolfin/parameter/ParameterList.h>
 #include <dolfin/main/MPI.h>
 
-#include "XMLObject.h"
-#include "XMLVector.h"
-#include "XMLMatrix.h"
-#include "XMLMesh.h"
-#include "PXMLMesh.h"
-#include "XMLMeshFunction.h"
-#include "XMLDofMap.h"
-#include "XMLFunction.h"
-#include "XMLFiniteElement.h"
-#include "XMLParameterList.h"
-#include "XMLBLASFormData.h"
-#include "XMLGraph.h"
-#include "XMLFile.h"
+#include <dolfin/io/XMLObject.h>
+#include <dolfin/io/XMLVector.h>
+#include <dolfin/io/XMLMatrix.h>
+#include <dolfin/io/XMLMesh.h>
+#include <dolfin/io/PXMLMesh.h>
+#include <dolfin/io/XMLMeshFunction.h>
+#include <dolfin/io/XMLDofMap.h>
+#include <dolfin/io/XMLFunction.h>
+#include <dolfin/io/XMLFiniteElement.h>
+#include <dolfin/io/XMLParameterList.h>
+#include <dolfin/io/XMLBLASFormData.h>
+#include <dolfin/io/XMLGraph.h>
+#include <dolfin/io/XMLFile.h>
 
 using namespace dolfin;
 

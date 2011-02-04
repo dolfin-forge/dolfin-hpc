@@ -12,10 +12,10 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
-#include "PETScMatrix.h"
-#include "PETScVector.h"
-#include "PETScKrylovMatrix.h"
-#include "PETScLUSolver.h"
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/PETScKrylovMatrix.h>
+#include <dolfin/la/PETScLUSolver.h>
 
 #include <dolfin/main/MPI.h>
 

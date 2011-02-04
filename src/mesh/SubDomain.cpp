@@ -8,12 +8,12 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
-#include "MeshEntityIterator.h"
-#include "Vertex.h"
-#include "SubDomain.h"
-#include "GlobalFacetMap.h"
+#include <dolfin/mesh/MeshEntityIterator.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/SubDomain.h>
+#include <dolfin/mesh/GlobalFacetMap.h>
 #include <dolfin/main/MPI.h>
-#include "Facet.h"
+#include <dolfin/mesh/Facet.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>

@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@
+AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_la.la
 libdolfin_la_la_SOURCES = \
 			DefaultFactory.cpp\

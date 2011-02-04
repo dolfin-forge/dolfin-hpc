@@ -11,12 +11,12 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
-#include "Mesh.h"
-#include "Facet.h"
-#include "Vertex.h"
-#include "Cell.h"
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 
-#include "GTSInterface.h"
+#include <dolfin/mesh/GTSInterface.h>
 
 #ifdef HAVE_GTS
 #include <gts.h>

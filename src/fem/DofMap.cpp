@@ -11,12 +11,12 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Vertex.h>
-#include "UFCCell.h"
-#include "DofMap.h"
-#include "SubSystem.h"
+#include <dolfin/fem/UFCCell.h>
+#include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/SubSystem.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/elements/ElementLibrary.h>
-#include "UFC.h"
+#include <dolfin/fem/UFC.h>
 #include <dolfin/main/MPI.h>
 
 #include <dolfin/mesh/BoundaryMesh.h>

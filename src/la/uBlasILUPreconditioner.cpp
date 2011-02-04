@@ -11,9 +11,9 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/common/constants.h>
-#include "uBlasVector.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasILUPreconditioner.h"
+#include <dolfin/la/uBlasVector.h>
+#include <dolfin/la/uBlasSparseMatrix.h>
+#include <dolfin/la/uBlasILUPreconditioner.h>
 
 using namespace dolfin;
 

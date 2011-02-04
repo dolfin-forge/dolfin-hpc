@@ -13,7 +13,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/Legendre.h>
-#include "GaussQuadrature.h"
+#include <dolfin/quadrature/GaussQuadrature.h>
 
 using namespace dolfin;
 

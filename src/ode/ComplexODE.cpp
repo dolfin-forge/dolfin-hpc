@@ -9,7 +9,7 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/common/Array.h>
-#include "ComplexODE.h"
+#include <dolfin/ode/ComplexODE.h>
 
 using namespace dolfin;
 

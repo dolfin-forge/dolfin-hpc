@@ -11,11 +11,11 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/la/uBlasVector.h>
-#include "ODE.h"
-#include "Method.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "MultiAdaptiveNewtonSolver.h"
-#include "UpdatedMultiAdaptiveJacobian.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptiveNewtonSolver.h>
+#include <dolfin/ode/UpdatedMultiAdaptiveJacobian.h>
 
 using namespace dolfin;
 

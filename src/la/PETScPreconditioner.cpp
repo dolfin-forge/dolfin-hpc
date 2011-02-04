@@ -13,8 +13,8 @@
 
 #include <private/pcimpl.h>
 
-#include "PETScPreconditioner.h"
-#include "PETScVector.h"
+#include <dolfin/la/PETScPreconditioner.h>
+#include <dolfin/la/PETScVector.h>
 
 using namespace dolfin;
 

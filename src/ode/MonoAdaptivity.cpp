@@ -10,9 +10,9 @@
 
 #include <cmath>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "Method.h"
-#include "MonoAdaptivity.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MonoAdaptivity.h>
 
 using namespace dolfin;
 

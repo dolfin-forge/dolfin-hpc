@@ -14,7 +14,7 @@
 #include <dolfin/la/uBlasVector.h>
 #include <dolfin/la/uBlasDenseMatrix.h>
 #include <dolfin/math/Legendre.h>
-#include "GaussianQuadrature.h"
+#include <dolfin/quadrature/GaussianQuadrature.h>
 
 using namespace dolfin;
 

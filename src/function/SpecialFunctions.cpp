@@ -13,7 +13,7 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
-#include "SpecialFunctions.h"
+#include <dolfin/function/SpecialFunctions.h>
 #include <dolfin/main/MPI.h>
 
 

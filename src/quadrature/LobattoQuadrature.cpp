@@ -12,7 +12,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/Legendre.h>
-#include "LobattoQuadrature.h"
+#include <dolfin/quadrature/LobattoQuadrature.h>
 
 using namespace dolfin;
 

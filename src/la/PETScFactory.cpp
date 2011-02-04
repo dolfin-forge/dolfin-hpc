@@ -8,10 +8,10 @@
 
 #ifdef HAVE_PETSC
 
-#include "SparsityPattern.h"
-#include "PETScMatrix.h"
-#include "PETScVector.h"
-#include "PETScFactory.h"
+#include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/PETScFactory.h>
 
 using namespace dolfin;
 

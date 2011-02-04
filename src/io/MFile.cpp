@@ -18,7 +18,7 @@
 #include <dolfin/ode/Sample.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-#include "MFile.h"
+#include <dolfin/io/MFile.h>
 
 using namespace dolfin;
 

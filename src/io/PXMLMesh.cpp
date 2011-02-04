@@ -13,7 +13,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
-#include "PXMLMesh.h"
+#include <dolfin/io/PXMLMesh.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>

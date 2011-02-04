@@ -9,8 +9,8 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/log/dolfin_log.h>
-#include "Homotopy.h"
-#include "HomotopyODE.h"
+#include <dolfin/ode/Homotopy.h>
+#include <dolfin/ode/HomotopyODE.h>
 
 using namespace dolfin;
 

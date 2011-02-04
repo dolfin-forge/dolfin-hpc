@@ -10,22 +10,22 @@
 #include <sstream>
 
 #include <dolfin/io/File.h>
-#include "ALE.h"
-#include "UniformMeshRefinement.h"
-#include "LocalMeshRefinement.h"
-#include "LocalMeshCoarsening.h"
-#include "TopologyComputation.h"
-#include "MeshSmoothing.h"
-#include "MeshOrdering.h"
-#include "MeshFunction.h"
-#include "MeshPartition.h"
-#include "BoundaryMesh.h"
-#include "Cell.h"
-#include "Vertex.h"
-#include "MPIMeshCommunicator.h"
-#include "MeshData.h"
-#include "Mesh.h"
-#include "MeshRenumber.h"
+#include <dolfin/mesh/ALE.h>
+#include <dolfin/mesh/UniformMeshRefinement.h>
+#include <dolfin/mesh/LocalMeshRefinement.h>
+#include <dolfin/mesh/LocalMeshCoarsening.h>
+#include <dolfin/mesh/TopologyComputation.h>
+#include <dolfin/mesh/MeshSmoothing.h>
+#include <dolfin/mesh/MeshOrdering.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshPartition.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/MPIMeshCommunicator.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshRenumber.h>
 
 using namespace dolfin;
 

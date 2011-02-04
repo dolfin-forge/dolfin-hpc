@@ -9,21 +9,21 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
-#include "Mesh.h"
-#include "MeshTopology.h"
-#include "MeshGeometry.h"
-#include "MeshConnectivity.h"
-#include "MeshEditor.h"
-#include "MeshFunction.h"
-#include "Vertex.h"
-#include "Edge.h"
-#include "Cell.h"
-#include "BoundaryMesh.h"
-#include "LocalMeshRefinement.h"
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/MeshConnectivity.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/LocalMeshRefinement.h>
 
 #include <dolfin/main/MPI.h>
-#include "LoadBalancer.h"
-#include "RefinementManager.h"
+#include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/RefinementManager.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>

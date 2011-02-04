@@ -5,16 +5,16 @@
 // Last changed: 2011-01-18
 
 #include <cstring>
-#include "MeshData.h"
-#include "MeshFunction.h"
-#include "Cell.h"
-#include "Edge.h"
-#include "Vertex.h"
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
-#include "LoadBalancer.h"
+#include <dolfin/mesh/LoadBalancer.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>

@@ -19,12 +19,12 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <boost/numeric/ublas/vector.hpp>
-#include "uBlasVector.h"
-#include "uBlasFactory.h"
-#include "LinearAlgebraFactory.h"
+#include <dolfin/la/uBlasVector.h>
+#include <dolfin/la/uBlasFactory.h>
+#include <dolfin/la/LinearAlgebraFactory.h>
 
 #ifdef HAVE_PETSC
-#include "PETScVector.h"
+#include <dolfin/la/PETScVector.h>
 #endif
 
 using namespace dolfin;

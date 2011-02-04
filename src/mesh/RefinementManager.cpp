@@ -6,16 +6,16 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#include "Cell.h"
-#include "Edge.h"
-#include "Facet.h"
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Facet.h>
 
-#include "RefinementManager.h"
+#include <dolfin/mesh/RefinementManager.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/common/types.h>
-#include "MeshFunction.h"
-#include "MeshData.h"
-#include "BoundaryMesh.h"
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/BoundaryMesh.h>
 
 #include <cstdlib> 
 #include <time.h> 

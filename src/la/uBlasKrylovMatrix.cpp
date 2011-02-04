@@ -8,9 +8,9 @@
 
 #ifndef NO_UBLAS
 
-#include "uBlasVector.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasKrylovMatrix.h"
+#include <dolfin/la/uBlasVector.h>
+#include <dolfin/la/uBlasSparseMatrix.h>
+#include <dolfin/la/uBlasKrylovMatrix.h>
 
 using namespace dolfin;
 

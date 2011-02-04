@@ -7,8 +7,8 @@
 // First added:  2005-12-02
 // Last changed: 2008-06-20
 
-#include "MeshEditor.h"
-#include "UnitSphere.h"
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/UnitSphere.h>
 #include <dolfin/main/MPI.h>
 
 using namespace dolfin;

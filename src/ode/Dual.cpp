@@ -12,7 +12,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/dolfin_math.h>
-#include "Dual.h"
+#include <dolfin/ode/Dual.h>
 
 using namespace dolfin;
 

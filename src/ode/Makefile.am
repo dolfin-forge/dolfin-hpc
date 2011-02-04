@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@
+AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_ode.la
 libdolfin_ode_la_SOURCES = \
 			Adaptivity.cpp\

@@ -15,12 +15,12 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "Dependencies.h"
-#include "Method.h"
-#include "MultiAdaptiveFixedPointSolver.h"
-#include "MultiAdaptiveNewtonSolver.h"
-#include "MultiAdaptiveTimeSlab.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Dependencies.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveFixedPointSolver.h>
+#include <dolfin/ode/MultiAdaptiveNewtonSolver.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
 
 using namespace dolfin;
 

@@ -17,8 +17,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
-#include "Encoder.h"
-#include "VTKFile.h"
+#include <dolfin/io/Encoder.h>
+#include <dolfin/io/VTKFile.h>
 
 
 using namespace dolfin;

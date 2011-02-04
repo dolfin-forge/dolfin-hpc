@@ -9,8 +9,8 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/log/dolfin_log.h>
-#include "TimeSlab.h"
-#include "Sample.h"
+#include <dolfin/ode/TimeSlab.h>
+#include <dolfin/ode/Sample.h>
 
 using namespace dolfin;
 

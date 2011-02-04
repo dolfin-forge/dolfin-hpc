@@ -7,10 +7,10 @@
 // First added:  2005-12-02
 // Last changed: 2008-06-19
 
-#include "MeshEditor.h"
-#include "Rectangle.h"
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/Rectangle.h>
 #include <dolfin/main/MPI.h>
-#include "MPIMeshCommunicator.h"
+#include <dolfin/mesh/MPIMeshCommunicator.h>
 
 using namespace dolfin;
 

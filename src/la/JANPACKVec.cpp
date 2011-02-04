@@ -8,8 +8,8 @@
 
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
-#include "JANPACKVec.h"
-#include "JANPACKFactory.h"
+#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/JANPACKFactory.h>
 #include <dolfin/main/MPI.h>
 
 #include <dolfin/common/Array.h>

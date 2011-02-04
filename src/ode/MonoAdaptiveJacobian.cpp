@@ -9,10 +9,10 @@
 #ifndef NO_UBLAS
 
 #include <dolfin/math/dolfin_math.h>
-#include "ODE.h"
-#include "Method.h"
-#include "MonoAdaptiveTimeSlab.h"
-#include "MonoAdaptiveJacobian.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MonoAdaptiveTimeSlab.h>
+#include <dolfin/ode/MonoAdaptiveJacobian.h>
 #include <dolfin/common/timing.h>
 
 using namespace dolfin;

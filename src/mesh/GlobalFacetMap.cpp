@@ -4,10 +4,10 @@
 // First added:  2008-02-25
 // Last changed: 2009-03-03
 
-#include "Mesh.h"
-#include "Facet.h"
-#include "Vertex.h"
-#include "GlobalFacetMap.h"
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/GlobalFacetMap.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
 

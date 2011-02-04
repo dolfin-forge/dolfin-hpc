@@ -10,11 +10,11 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
-#include "Alloc.h"
-#include "ODE.h"
-#include "Method.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "MultiAdaptiveFixedPointSolver.h"
+#include <dolfin/ode/Alloc.h>
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptiveFixedPointSolver.h>
 
 using namespace dolfin;
 

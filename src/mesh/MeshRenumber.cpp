@@ -5,15 +5,15 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#include "MeshRenumber.h"
-#include "MeshDistributedData.h"
-#include "MeshFunction.h"
-#include "BoundaryMesh.h"
-#include "MeshData.h"
-#include "Edge.h"
-#include "Cell.h"
-#include "Face.h"
-#include "Vertex.h"
+#include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Face.h>
+#include <dolfin/mesh/Vertex.h>
 
 #include <dolfin/common/Array.h>
 #include <dolfin/main/MPI.h>

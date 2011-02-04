@@ -13,13 +13,13 @@
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/la/uBlasSparseMatrix.h>
-#include "Alloc.h"
-#include "ODE.h"
-#include "Method.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "MultiAdaptiveJacobian.h"
-#include "UpdatedMultiAdaptiveJacobian.h"
-#include "MultiAdaptiveNewtonSolver.h"
+#include <dolfin/ode/Alloc.h>
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptiveJacobian.h>
+#include <dolfin/ode/UpdatedMultiAdaptiveJacobian.h>
+#include <dolfin/ode/MultiAdaptiveNewtonSolver.h>
 
 using namespace dolfin;
 

@@ -12,11 +12,11 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "Method.h"
-#include "MonoAdaptiveFixedPointSolver.h"
-#include "MonoAdaptiveNewtonSolver.h"
-#include "MonoAdaptiveTimeSlab.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MonoAdaptiveFixedPointSolver.h>
+#include <dolfin/ode/MonoAdaptiveNewtonSolver.h>
+#include <dolfin/ode/MonoAdaptiveTimeSlab.h>
 
 using namespace dolfin;
 

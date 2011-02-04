@@ -18,7 +18,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/ode/Sample.h>
-#include "PythonFile.h"
+#include <dolfin/io/PythonFile.h>
 
 using namespace dolfin;
 

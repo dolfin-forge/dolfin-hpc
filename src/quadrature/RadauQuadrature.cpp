@@ -11,7 +11,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/Legendre.h>
-#include "RadauQuadrature.h"
+#include <dolfin/quadrature/RadauQuadrature.h>
 
 using namespace dolfin;
 

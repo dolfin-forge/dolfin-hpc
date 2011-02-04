@@ -16,7 +16,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/GenericMatrix.h>
-#include "MatlabFile.h"
+#include <dolfin/io/MatlabFile.h>
 #include <dolfin/common/Array.h>
 
 using namespace dolfin;

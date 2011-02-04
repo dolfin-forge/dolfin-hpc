@@ -3,7 +3,7 @@
 //
 
 #include <dolfin/config/dolfin_config.h>
-#include "JANPACKFactory.h"
+#include <dolfin/la/JANPACKFactory.h>
 
 #ifdef HAVE_JANPACK
 

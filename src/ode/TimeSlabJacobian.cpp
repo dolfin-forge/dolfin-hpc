@@ -8,10 +8,10 @@
 
 #ifndef NO_UBLAS
 
-#include "ODE.h"
-#include "Method.h"
-#include "TimeSlab.h"
-#include "TimeSlabJacobian.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/TimeSlab.h>
+#include <dolfin/ode/TimeSlabJacobian.h>
 
 using namespace dolfin;
 

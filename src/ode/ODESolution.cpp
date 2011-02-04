@@ -8,9 +8,9 @@
 
 #ifndef NO_UBLAS
 
-#include "ODESolution.h"
-#include "Sample.h"
-#include "ODE.h"
+#include <dolfin/ode/ODESolution.h>
+#include <dolfin/ode/Sample.h>
+#include <dolfin/ode/ODE.h>
 
 using namespace dolfin;
 

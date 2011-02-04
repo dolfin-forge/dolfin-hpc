@@ -16,11 +16,11 @@
 #include <dolfin/la/uBlasLUSolver.h>
 #include <dolfin/la/KrylovSolver.h>
 #include <dolfin/la/LUSolver.h>
-#include "Alloc.h"
-#include "ODE.h"
-#include "Method.h"
-#include "MonoAdaptiveTimeSlab.h"
-#include "MonoAdaptiveNewtonSolver.h"
+#include <dolfin/ode/Alloc.h>
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MonoAdaptiveTimeSlab.h>
+#include <dolfin/ode/MonoAdaptiveNewtonSolver.h>
 #include <dolfin/common/timing.h>
 
 using namespace dolfin;

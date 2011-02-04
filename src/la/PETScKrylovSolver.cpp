@@ -14,10 +14,10 @@
 #include <private/pcimpl.h>
 
 #include <dolfin/log/dolfin_log.h>
-#include "PETScKrylovSolver.h"
-#include "PETScMatrix.h"
-#include "PETScVector.h"
-#include "PETScKrylovMatrix.h"
+#include <dolfin/la/PETScKrylovSolver.h>
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/PETScKrylovMatrix.h>
 #include <dolfin/main/MPI.h>
 
 using namespace dolfin;

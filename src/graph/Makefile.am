@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@
+AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_graph.la
 libdolfin_graph_la_SOURCES = \
 			DirectedClique.cpp\

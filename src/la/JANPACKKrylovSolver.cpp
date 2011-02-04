@@ -8,9 +8,9 @@
 
 #include <janpack/krylov_solver.h>
 
-#include "JANPACKMat.h"
-#include "JANPACKVec.h"
-#include "JANPACKKrylovSolver.h"
+#include <dolfin/la/JANPACKMat.h>
+#include <dolfin/la/JANPACKVec.h>
+#include <dolfin/la/JANPACKKrylovSolver.h>
 
 using namespace dolfin;
 

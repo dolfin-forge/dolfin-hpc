@@ -15,7 +15,7 @@
 #include <dolfin/quadrature/LobattoQuadrature.h>
 #include <dolfin/la/uBlasVector.h>
 #include <dolfin/la/uBlasDenseMatrix.h>
-#include "cGqMethod.h"
+#include <dolfin/ode/cGqMethod.h>
 
 using namespace dolfin;
 

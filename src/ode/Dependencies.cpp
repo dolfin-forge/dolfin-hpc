@@ -14,8 +14,8 @@
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/la/uBlasVector.h>
-#include "ODE.h"
-#include "Dependencies.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Dependencies.h>
 
 using namespace dolfin;
 

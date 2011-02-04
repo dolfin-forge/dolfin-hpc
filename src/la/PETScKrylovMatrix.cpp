@@ -14,8 +14,8 @@
 
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/dolfin_log.h>
-#include "PETScVector.h"
-#include "PETScKrylovMatrix.h"
+#include <dolfin/la/PETScVector.h>
+#include <dolfin/la/PETScKrylovMatrix.h>
 
 using namespace dolfin;
 

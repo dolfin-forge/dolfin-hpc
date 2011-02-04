@@ -16,12 +16,12 @@
 #include <dolfin/common/timing.h>
 #include <dolfin/common/constants.h>
 #include <dolfin/parameter/parameters.h>
-#include "ODE.h"
-#include "ReducedModel.h"
-#include "Sample.h"
-#include "MonoAdaptiveTimeSlab.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "TimeStepper.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/ReducedModel.h>
+#include <dolfin/ode/Sample.h>
+#include <dolfin/ode/MonoAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/TimeStepper.h>
 
 using namespace dolfin;
 

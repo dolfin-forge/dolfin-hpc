@@ -178,8 +178,7 @@ AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([floor memset pow sqrt])
 
 
-AC_CONFIG_SRCDIR(src/dolfin.h)
-AC_CONFIG_HEADERS([src/config/dolfin_config.h])
+AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/common/Makefile\
 			  src/elements/Makefile\
@@ -198,7 +197,9 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
 			  src/quadrature/Makefile\
-			  src/dolfin.pc])
+			  src/dolfin.pc
+			  include/Makefile
+			  include/dolfin/Makefile])
 
 AC_OUTPUT
 

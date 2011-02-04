@@ -11,12 +11,12 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
-#include "Mesh.h"
-#include "MeshFunction.h"
-#include "MPIMeshCommunicator.h"
-#include "MeshEditor.h"
-#include "Vertex.h"
-#include "Cell.h"
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MPIMeshCommunicator.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 #include <map>
 
 

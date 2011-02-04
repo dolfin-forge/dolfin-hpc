@@ -11,10 +11,10 @@
 #include <cmath>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/common/Array.h>
-#include "ODE.h"
-#include "Method.h"
-#include "MultiAdaptiveTimeSlab.h"
-#include "MultiAdaptivity.h"
+#include <dolfin/ode/ODE.h>
+#include <dolfin/ode/Method.h>
+#include <dolfin/ode/MultiAdaptiveTimeSlab.h>
+#include <dolfin/ode/MultiAdaptivity.h>
 
 using namespace dolfin;
 

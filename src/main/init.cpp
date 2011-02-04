@@ -8,9 +8,9 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
-#include "SubSystemsManager.h"
-#include "MPI.h"
-#include "init.h"
+#include <dolfin/main/SubSystemsManager.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/main/init.h>
 
 //-----------------------------------------------------------------------------
 void dolfin::dolfin_init(int argc, char* argv[])

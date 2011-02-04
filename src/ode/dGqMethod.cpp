@@ -15,7 +15,7 @@
 #include <dolfin/quadrature/RadauQuadrature.h>
 #include <dolfin/la/uBlasVector.h>
 #include <dolfin/la/uBlasDenseMatrix.h>
-#include "dGqMethod.h"
+#include <dolfin/ode/dGqMethod.h>
 
 using namespace dolfin;
 

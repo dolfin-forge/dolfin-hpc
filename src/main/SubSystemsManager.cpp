@@ -9,7 +9,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
-#include "SubSystemsManager.h"
+#include <dolfin/main/SubSystemsManager.h>
 
 #ifdef HAVE_PETSC
 #include <petsc.h>

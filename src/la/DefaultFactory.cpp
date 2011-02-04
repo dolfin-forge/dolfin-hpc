@@ -6,13 +6,13 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/parameter/parameters.h>
-#include "PETScFactory.h"
-#include "EpetraFactory.h"
-#include "JANPACKFactory.h"
-#include "DefaultFactory.h"
+#include <dolfin/la/PETScFactory.h>
+#include <dolfin/la/EpetraFactory.h>
+#include <dolfin/la/JANPACKFactory.h>
+#include <dolfin/la/DefaultFactory.h>
 
 #ifndef NO_UBLAS
-#include "uBlasFactory.h"
+#include <dolfin/la/uBlasFactory.h>
 #endif
 
 

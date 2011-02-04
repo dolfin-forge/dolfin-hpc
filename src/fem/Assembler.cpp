@@ -23,11 +23,11 @@
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/function/Function.h>
-#include "Form.h"
-#include "UFC.h"
-#include "Assembler.h"
-#include "SparsityPatternBuilder.h"
-#include "DofMapSet.h"
+#include <dolfin/fem/Form.h>
+#include <dolfin/fem/UFC.h>
+#include <dolfin/fem/Assembler.h>
+#include <dolfin/fem/SparsityPatternBuilder.h>
+#include <dolfin/fem/DofMapSet.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>

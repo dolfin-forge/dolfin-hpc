@@ -13,11 +13,11 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/timing.h>
-#include "uBlasLUSolver.h"
-#include "uBlasKrylovSolver.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasKrylovMatrix.h"
-#include "uBlasVector.h"
+#include <dolfin/la/uBlasLUSolver.h>
+#include <dolfin/la/uBlasKrylovSolver.h>
+#include <dolfin/la/uBlasSparseMatrix.h>
+#include <dolfin/la/uBlasKrylovMatrix.h>
+#include <dolfin/la/uBlasVector.h>
 
 extern "C" 
 {

@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 #ifndef NO_UBLAS
-#include "uBlasVector.h"
-#include "uBlasDummyPreconditioner.h"
+#include <dolfin/la/uBlasVector.h>
+#include <dolfin/la/uBlasDummyPreconditioner.h>
 
 using namespace dolfin;
 

@@ -21,6 +21,7 @@ namespace dolfin
     
     // Input
     void operator>> (GenericVector& x);
+    void operator>> (Mesh& mesh);
     
     // Output
     void operator<< (GenericVector& x);

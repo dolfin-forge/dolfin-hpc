@@ -9,6 +9,8 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
 
 using namespace dolfin;
 
@@ -135,6 +137,32 @@ void BinaryFile::operator>>(Mesh& mesh)
   delete[] cell_data;
   editor.close();
   fp.close();
+  
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(Mesh& mesh)
+{
+  std::ofstream fp(filename.c_str(), std::ofstream::binary);
+
+  // Write Header
+  int dim = mesh.geometry().dim();
+  fp.write((char *)&dim, sizeof(int));
+
+  int type = 0;
+  CellType::Type cell_type = mesh.type().cellType();
+  if (CellType::type2string(cell_type).c_str() == "tetrahedron")
+    type = 1;
+  fp.write((char *)&type, sizeof(int));
+
+  // Write vertices 
+  for (VertexIterator v(mesh); !v.end(); ++v)
+    fp.write((char *)v->x(), dim * sizeof(double));
+
+  // Write cells
+  for (CellIterator c(mesh); !c.end(); ++c)
+    fp.write((char *)c->entities(0), 4 * sizeof(int));
+  
+
   
 }
 //----------------------------------------------------------------------------

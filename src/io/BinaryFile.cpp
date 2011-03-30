@@ -2,12 +2,13 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-02-22
+// Last changed: 2011-03-30
 
 #include <fstream>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/io/BinaryFile.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -58,7 +59,7 @@ void BinaryFile::operator<<(GenericVector& x)
 
   delete[] values;     
 
-  message(1, "Saved vector  to file %s in binary format.", filename.c_str());  
+  message(1, "Saved vector to file %s in binary format.", filename.c_str());  
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(Mesh& mesh)
@@ -154,16 +155,24 @@ void BinaryFile::operator<<(Mesh& mesh)
     type = 1;
   fp.write((char *)&type, sizeof(int));
 
+
+  int size = mesh.numVertices();
+  fp.write((char *)&size, sizeof(int));  
+
   // Write vertices 
   for (VertexIterator v(mesh); !v.end(); ++v)
-    fp.write((char *)v->x(), dim * sizeof(double));
+    fp.write((char *)v->x(), dim * sizeof(real));
+
+  size = mesh.numCells();
+  fp.write((char *) &size, sizeof(int));
 
   // Write cells
   for (CellIterator c(mesh); !c.end(); ++c)
-    fp.write((char *)c->entities(0), 4 * sizeof(int));
+    fp.write((char *)c->entities(0), (3 + type) * sizeof(int));
   
-
   
+  fp.close();
+  message(1, "Saved mesh to file %s in binary format.", filename.c_str());    
 }
 //----------------------------------------------------------------------------
 

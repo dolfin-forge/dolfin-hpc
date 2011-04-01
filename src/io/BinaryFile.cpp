@@ -183,11 +183,37 @@ void BinaryFile::operator>>(Mesh& mesh)
 		     vertex_buffer, vertex_data, MPI_DOUBLE, MPI_STATUS_IGNORE);
               
     
+    //    partition_vertices(dim, local_vertices, vertex_buffer);
 
 
+    delete[] vertex_buffer;
+    int num_cells;
+    MPI_File_read_at(fh, 3*sizeof(int) + dim * num_vertices * sizeof(double),
+		     &num_cells, 1, MPI_INT, MPI_STATUS_IGNORE);
+    
+    L = floor( (real) num_cells / (real) pe_size);
+    R = num_cells % pe_size;
+    uint local_cells = (num_cells + pe_size - pe_rank - 1 ) / pe_size;    
 
+    offset = 0;
+    uint cell_data = (3 + type) * local_cells;
+#if ( MPI_VERSION > 1 )
+    MPI_Exscan(&cell_data, &offset, 1, 
+	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+    MPI_Scan(&cell_data, &offset, 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    offset -= cell_data;
+#endif
+
+    int *cell_buffer = new int[cell_data];
+    MPI_File_read_at(fh, 4 * sizeof(int) + offset * sizeof(int),
+		     cell_buffer, cell_data, MPI_INT, MPI_STATUS_IGNORE);
+
+    delete[] cell_buffer;
+    
     MPI_File_close(&fh);
-
+    message("MPI I/O: Done reading file");
   }
 }  
 //----------------------------------------------------------------------------
@@ -314,6 +340,53 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   message(1, "Saved mesh to file %s in binary format.", filename.c_str());    
 }
+//----------------------------------------------------------------------------
+#ifdef HAVE_MPI
+void BinaryFile::partition_vertices(int dim, int local_vertices, 
+				    real *vertices)
+{
+  // Duplicate MPI communicator
+  MPI_Comm comm; 
+  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
+
+  int pe_size = MPI::numProcesses();
+  int pe_rank = MPI::processNumber();
+  
+  // Gather number of locally stored vertices for each processor
+  idxtype *vtxdist = new idxtype[pe_size+1];  
+  vtxdist[pe_rank] = (idxtype) local_vertices;
+
+  MPI_Allgather(&vtxdist[pe_rank], 1, MPI_INT, vtxdist, 1, 
+		MPI_INT, MPI::DOLFIN_COMM);
+
+  int i,tmp;
+  int sum = vtxdist[0];  
+  vtxdist[0] = 0;
+  for(i=1;i<pe_size+1;i++){    
+    tmp = vtxdist[i];
+    vtxdist[i] = sum;
+    sum = tmp + sum;
+  }
+
+  idxtype *part = new idxtype[local_vertices];
+  float *xdy = new float[dim * local_vertices];
+  float *xdyp = &xdy[0];
+
+  for (i = 0; i < (dim * local_vertices); i +=dim) 
+  {
+    *(xdyp++) = vertices[i];
+    *(xdyp++) = vertices[i+1];
+    if (dim == 3)
+      *(xdyp++) = vertices[i+2];
+  }
+  
+  ParMETIS_V3_PartGeom(vtxdist, &dim, xdy, part, &comm);
+
+  
+
+  MPI_Comm_free(&comm);
+}
+#endif
 //----------------------------------------------------------------------------
 
 

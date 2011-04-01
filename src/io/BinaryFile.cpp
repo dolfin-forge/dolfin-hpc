@@ -15,6 +15,7 @@
 
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <parmetis.h>
 #endif
 
 using namespace dolfin;
@@ -68,82 +69,127 @@ void BinaryFile::operator<<(GenericVector& x)
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(Mesh& mesh)
 {
-
-  std::ifstream fp(filename.c_str(), std::ifstream::binary);
-
-  int celltype, gdim;
-  fp.read((char *)&gdim, sizeof(int));  
-  fp.read((char *)&celltype, sizeof(int));  
-
-  std::string type;
-  if (celltype == 0)
-    type = "triangle";
-  else if(celltype == 1)
-    type = "tetrahedron";
-  else
-    error("Unknown Cell type");
-      
-  // Create cell type to get topological dimension
-  CellType* cell_type = CellType::create(type);
-  uint tdim = cell_type->dim();
-  delete cell_type;
-
-  // Open mesh for editing
-  MeshEditor editor;
-  editor.open(mesh, CellType::string2type(type), tdim, gdim);
-
-  // Read vertex data
-  int n_vertices;
-  fp.read((char *)&n_vertices, sizeof(int));  
-  editor.initVertices(n_vertices);
-
-  real *vertex_data = new real[n_vertices * gdim];
-  fp.read((char *)vertex_data, n_vertices * gdim * sizeof(double));
-  
-  int v = 0; 
-  for (int i = 0; i < n_vertices * gdim; v++, i += gdim) 
-  {
-    switch(gdim)
+ 
+  if (MPI::numProcesses() == 1) 
+  {    
+    std::ifstream fp(filename.c_str(), std::ifstream::binary);
+    
+    int celltype, gdim;
+    fp.read((char *)&gdim, sizeof(int));  
+    fp.read((char *)&celltype, sizeof(int));  
+    
+    std::string type;
+    if (celltype == 0)
+      type = "triangle";
+    else if(celltype == 1)
+      type = "tetrahedron";
+    else
+      error("Unknown Cell type");
+    
+    // Create cell type to get topological dimension
+    CellType* cell_type = CellType::create(type);
+    uint tdim = cell_type->dim();
+    delete cell_type;
+    
+    // Open mesh for editing
+    MeshEditor editor;
+    editor.open(mesh, CellType::string2type(type), tdim, gdim);
+    
+    // Read vertex data
+    int n_vertices;
+    fp.read((char *)&n_vertices, sizeof(int));  
+    editor.initVertices(n_vertices);
+    
+    real *vertex_data = new real[n_vertices * gdim];
+    fp.read((char *)vertex_data, n_vertices * gdim * sizeof(double));
+    
+    int v = 0; 
+    for (int i = 0; i < n_vertices * gdim; v++, i += gdim) 
     {
-    case 2:
-      editor.addVertex(v, vertex_data[i], vertex_data[i+1]); 
-      break;
-    case 3:
-      editor.addVertex(v, vertex_data[i], 
-		       vertex_data[i+1], vertex_data[i+2]);
-      break;
-    default:
-      error("Dimension of mesh must be 1, 2 or 3.");      
-    }
-  }  
-  delete[] vertex_data;
-
-  // Read cell data
-  int n_cells;
-  fp.read((char *)&n_cells, sizeof(int));  
-  editor.initCells(n_cells);
-  int *cell_data = new int[n_cells * (3 + celltype)];
-  fp.read((char *)cell_data, n_cells * (3 + celltype) * sizeof(int));
-  
-  int c = 0;
-  for (int i = 0; i < n_cells * (3 + celltype); c++, i+= (3 + celltype)) 
-  {
-    switch(celltype)
+      switch(gdim)
+      {
+      case 2:
+	editor.addVertex(v, vertex_data[i], vertex_data[i+1]); 
+	break;
+      case 3:
+	editor.addVertex(v, vertex_data[i], 
+			 vertex_data[i+1], vertex_data[i+2]);
+	break;
+      default:
+	error("Dimension of mesh must be 1, 2 or 3.");      
+      }
+    }  
+    delete[] vertex_data;
+    
+    // Read cell data
+    int n_cells;
+    fp.read((char *)&n_cells, sizeof(int));  
+    editor.initCells(n_cells);
+    int *cell_data = new int[n_cells * (3 + celltype)];
+    fp.read((char *)cell_data, n_cells * (3 + celltype) * sizeof(int));
+    
+    int c = 0;
+    for (int i = 0; i < n_cells * (3 + celltype); c++, i+= (3 + celltype)) 
     {
-    case 0:
-      editor.addCell(c, cell_data[i], cell_data[i+1], cell_data[i+2]);
-      break;
-    case 1:
-      editor.addCell(c, cell_data[i], cell_data[i+1], 
-		     cell_data[i+2], cell_data[i+3]);
-      break;
+      switch(celltype)
+      {
+      case 0:
+	editor.addCell(c, cell_data[i], cell_data[i+1], cell_data[i+2]);
+	break;
+      case 1:
+	editor.addCell(c, cell_data[i], cell_data[i+1], 
+		       cell_data[i+2], cell_data[i+3]);
+	break;
+      }
     }
+    delete[] cell_data;
+    editor.close();
+    fp.close();
+    
   }
-  delete[] cell_data;
-  editor.close();
-  fp.close();
-  
-}
+  else
+  {
+    MPI_File fh;
+    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);    
+
+
+    int dim, type, num_vertices;
+    MPI_File_read_all(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_read_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_read_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
+
+    uint pe_size = MPI::numProcesses();
+    uint pe_rank = MPI::processNumber();
+    
+    uint L = floor( (real) num_vertices / (real) pe_size);
+    uint R = num_vertices % pe_size;
+    uint local_vertices = (num_vertices + pe_size - pe_rank -1 ) / pe_size;
+
+
+    uint offset = 0;
+    uint vertex_data = dim * local_vertices;
+#if ( MPI_VERSION > 1 )
+    MPI_Exscan(&vertex_data, &offset, 1, 
+	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+    MPI_Scan(&vertex_data, &offset, 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    offset -= vertex_data;
+#endif
+
+    real *vertex_buffer = new real[vertex_data];
+    MPI_File_read_at(fh, 3*sizeof(int) + offset * sizeof(double),
+		     vertex_buffer, vertex_data, MPI_DOUBLE, MPI_STATUS_IGNORE);
+              
+    
+
+
+
+    MPI_File_close(&fh);
+
+  }
+}  
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
@@ -183,24 +229,21 @@ void BinaryFile::operator<<(Mesh& mesh)
   }
   else 
   {
-    mesh.renumber();
 
     MPI_File fh;
 
     /* FIXME:
      * Add MPI_Info data 
+     * Split and cleanup implementation
      */
     
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		  MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
     // Write Header
-    if (MPI::processNumber() == 0) 
-    {
-      MPI_File_write(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
-      MPI_File_write(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
-      MPI_File_write(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
-    }
+    MPI_File_write_all(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
 
     // Write vertices
     uint offset = 0;
@@ -234,10 +277,9 @@ void BinaryFile::operator<<(Mesh& mesh)
     delete[] vertex_buffer;
 
     // Write Cells
-    if (MPI::processNumber() == 0)
-      MPI_File_write_at(fh, 3*sizeof(int) + 
-			(dim * num_vertices) * sizeof(double),
-			&num_cells, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_write_at_all(fh, 3*sizeof(int) + 
+			  (dim * num_vertices) * sizeof(double),
+			  &num_cells, 1, MPI_INT, MPI_STATUS_IGNORE);
 
 
     offset = 0;
@@ -273,4 +315,5 @@ void BinaryFile::operator<<(Mesh& mesh)
   message(1, "Saved mesh to file %s in binary format.", filename.c_str());    
 }
 //----------------------------------------------------------------------------
+
 

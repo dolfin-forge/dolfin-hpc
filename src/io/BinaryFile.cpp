@@ -206,10 +206,14 @@ void BinaryFile::operator>>(Mesh& mesh)
 		     MPI_INT, MPI_STATUS_IGNORE);
 
     message("Pre parse cells");
+
+
+    _set<uint> ghosted_entities;
+
     // Parse cells
     std::vector<atomic_cell> cells;
     std::vector<uint> *non_local_cells = new std::vector<uint>[pe_size];
-    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];
+    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];    
     atomic_cell cell;
     for (int i = 0; i < cell_data; i+= (3 + type)) 
     {
@@ -223,15 +227,21 @@ void BinaryFile::operator>>(Mesh& mesh)
       {
        	cells.push_back(cell);
 	
-	if(vertex_owner(L, R, cell.v2) != pe_rank)
-	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);
+	if(vertex_owner(L, R, cell.v2) != pe_rank) {
+	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);     
+	  ghosted_entities.insert(cell.v2);
+	}
 
-	if(vertex_owner(L, R, cell.v3) != pe_rank)
+	if(vertex_owner(L, R, cell.v3) != pe_rank) {
 	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+	  ghosted_entities.insert(cell.v3);
+	}
 
 	if (type == 1)
-	  if(vertex_owner(L, R, cell.v4) != pe_rank)
+	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
 	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);
+	    ghosted_entities.insert(cell.v4);
+	  }
       }
       else
       {
@@ -242,7 +252,6 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
 
     }
-
 
     message("Pre communication");
     /*
@@ -283,17 +292,62 @@ void BinaryFile::operator>>(Mesh& mesh)
 	
 	cells.push_back(cell);
 
-	if(vertex_owner(L, R, cell.v2) != pe_rank)
+	if(vertex_owner(L, R, cell.v2) != pe_rank) {
 	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);
+	  ghosted_entities.insert(cell.v2);
+	}
 	
-	if(vertex_owner(L, R, cell.v3) != pe_rank)
+	if(vertex_owner(L, R, cell.v3) != pe_rank) {
 	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+	  ghosted_entities.insert(cell.v3);
+	}
 	
 	if (type == 1)
-	  if(vertex_owner(L, R, cell.v4) != pe_rank)
+	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
 	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);       	
+	    ghosted_entities.insert(cell.v4);
+	  }
       }      
     }
+
+    // Number of vertices in mesh, local + ghosts
+    uint num_local_vertices = local_vertices + ghosted_entities.size();
+
+    std::string celltype;
+    if (type == 0)
+      celltype = "triangle";
+    else if(type == 1)
+      celltype = "tetrahedron";
+    else
+      error("Unknown Cell type");
+    
+    // Create cell type to get topological dimension
+    CellType* cell_type = CellType::create(celltype);
+    uint tdim = cell_type->dim();
+    delete cell_type;
+    
+    // Open mesh for editing
+    MeshEditor editor;
+    editor.open(mesh, CellType::string2type(celltype), tdim, dim);
+    editor.initVertices(num_local_vertices);
+    editor.initCells(cells.size());
+
+
+    /* Add local indices
+     * Use start_index for global number
+     *
+     * Exchange ghost vertices
+     * Use ghosts to know global number
+     *
+     * Add cells, remember to map global->local
+     */
+
+    
+
+    editor.close();
+    
+
+    
 
     delete[] cell_buffer;
     

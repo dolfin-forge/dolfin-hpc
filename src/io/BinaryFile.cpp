@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-01
+// Last changed: 2011-04-02
 
 #include <fstream>
 #include <dolfin/common/types.h>
@@ -13,9 +13,10 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 
+
+
 #ifdef HAVE_MPI
 #include <mpi.h>
-#include <parmetis.h>
 #endif
 
 using namespace dolfin;
@@ -158,7 +159,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_File_read_all(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
     MPI_File_read_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
     MPI_File_read_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
-
+    message("dim: %d type: %d num_vertice: %d", dim, type, num_vertices);
     uint pe_size = MPI::numProcesses();
     uint pe_rank = MPI::processNumber();
     
@@ -166,7 +167,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint R = num_vertices % pe_size;
     uint local_vertices = (num_vertices + pe_size - pe_rank -1 ) / pe_size;
 
-
+    
     uint offset = 0;
     uint vertex_data = dim * local_vertices;
 #if ( MPI_VERSION > 1 )
@@ -182,17 +183,10 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_File_read_at(fh, 3*sizeof(int) + offset * sizeof(double),
 		     vertex_buffer, vertex_data, MPI_DOUBLE, MPI_STATUS_IGNORE);
               
-    
-    //    partition_vertices(dim, local_vertices, vertex_buffer);
-
-
-    delete[] vertex_buffer;
     int num_cells;
     MPI_File_read_at(fh, 3*sizeof(int) + dim * num_vertices * sizeof(double),
 		     &num_cells, 1, MPI_INT, MPI_STATUS_IGNORE);
-    
-    L = floor( (real) num_cells / (real) pe_size);
-    R = num_cells % pe_size;
+    message("Numcells: %d", num_cells);
     uint local_cells = (num_cells + pe_size - pe_rank - 1 ) / pe_size;    
 
     offset = 0;
@@ -207,10 +201,107 @@ void BinaryFile::operator>>(Mesh& mesh)
 #endif
 
     int *cell_buffer = new int[cell_data];
-    MPI_File_read_at(fh, 4 * sizeof(int) + offset * sizeof(int),
-		     cell_buffer, cell_data, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_read_at(fh, 4 * sizeof(int) + dim * num_vertices * sizeof(double) 
+		     + offset * sizeof(int), cell_buffer, cell_data, 
+		     MPI_INT, MPI_STATUS_IGNORE);
+
+    message("Pre parse cells");
+    // Parse cells
+    std::vector<atomic_cell> cells;
+    std::vector<uint> *non_local_cells = new std::vector<uint>[pe_size];
+    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];
+    atomic_cell cell;
+    for (int i = 0; i < cell_data; i+= (3 + type)) 
+    {
+      cell.v1 = cell_buffer[i];
+      cell.v2 = cell_buffer[i+1];
+      cell.v3 = cell_buffer[i+2];
+      if (type == 1)       
+	cell.v4 = cell_buffer[i+3];      
+
+      if (vertex_owner(L, R, cell_buffer[i]) == pe_rank)
+      {
+       	cells.push_back(cell);
+	
+	if(vertex_owner(L, R, cell.v2) != pe_rank)
+	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);
+
+	if(vertex_owner(L, R, cell.v3) != pe_rank)
+	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+
+	if (type == 1)
+	  if(vertex_owner(L, R, cell.v4) != pe_rank)
+	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);
+      }
+      else
+      {
+	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v1);
+	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v2);
+	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v3);
+	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v4);
+      }
+
+    }
+
+
+    message("Pre communication");
+    /*
+     * FIXME
+     * Reduce communication in this section
+     */
+    uint local_max = 0;
+    for (int i = 0; i < pe_size; i++) 
+      local_max = std::max(local_max, (uint) non_local_cells[i].size());
+      
+    uint buff_size = 0;
+    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+
+
+    uint *recv_buffer = new uint[buff_size];    
+
+    // Exchange data
+    MPI_Status status;
+    int num_recv, src, dest;
+    for (int i = 1; i < pe_size; i++) 
+    {
+      src = (pe_rank - i + pe_size) % pe_size;
+      dest = (pe_rank + i) % pe_size;
+      
+      MPI_Sendrecv(&non_local_cells[dest][0], non_local_cells[dest].size(), 
+		   MPI_UNSIGNED, dest, 1, recv_buffer, buff_size, 
+		   MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+       
+      // Add received cells
+      for (int j = 0; j < num_recv; j += (3 + type)) 
+      {
+	cell.v1 = recv_buffer[j];
+	cell.v2 = recv_buffer[j+1];
+	cell.v3 = recv_buffer[j+2];
+	if (type == 1)
+	  cell.v4 = recv_buffer[j+3];
+	
+	cells.push_back(cell);
+
+	if(vertex_owner(L, R, cell.v2) != pe_rank)
+	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);
+	
+	if(vertex_owner(L, R, cell.v3) != pe_rank)
+	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+	
+	if (type == 1)
+	  if(vertex_owner(L, R, cell.v4) != pe_rank)
+	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);       	
+      }      
+    }
 
     delete[] cell_buffer;
+    
+
+
+    delete[] recv_buffer;
+    delete[] vertex_buffer;
+
     
     MPI_File_close(&fh);
     message("MPI I/O: Done reading file");
@@ -340,53 +431,6 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   message(1, "Saved mesh to file %s in binary format.", filename.c_str());    
 }
-//----------------------------------------------------------------------------
-#ifdef HAVE_MPI
-void BinaryFile::partition_vertices(int dim, int local_vertices, 
-				    real *vertices)
-{
-  // Duplicate MPI communicator
-  MPI_Comm comm; 
-  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
-
-  int pe_size = MPI::numProcesses();
-  int pe_rank = MPI::processNumber();
-  
-  // Gather number of locally stored vertices for each processor
-  idxtype *vtxdist = new idxtype[pe_size+1];  
-  vtxdist[pe_rank] = (idxtype) local_vertices;
-
-  MPI_Allgather(&vtxdist[pe_rank], 1, MPI_INT, vtxdist, 1, 
-		MPI_INT, MPI::DOLFIN_COMM);
-
-  int i,tmp;
-  int sum = vtxdist[0];  
-  vtxdist[0] = 0;
-  for(i=1;i<pe_size+1;i++){    
-    tmp = vtxdist[i];
-    vtxdist[i] = sum;
-    sum = tmp + sum;
-  }
-
-  idxtype *part = new idxtype[local_vertices];
-  float *xdy = new float[dim * local_vertices];
-  float *xdyp = &xdy[0];
-
-  for (i = 0; i < (dim * local_vertices); i +=dim) 
-  {
-    *(xdyp++) = vertices[i];
-    *(xdyp++) = vertices[i+1];
-    if (dim == 3)
-      *(xdyp++) = vertices[i+2];
-  }
-  
-  ParMETIS_V3_PartGeom(vtxdist, &dim, xdy, part, &comm);
-
-  
-
-  MPI_Comm_free(&comm);
-}
-#endif
 //----------------------------------------------------------------------------
 
 

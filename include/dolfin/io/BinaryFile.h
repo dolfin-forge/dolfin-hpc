@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-01
+// Last changed: 2011-04-02
 
 
 #ifndef __BINARY_FILE_H
@@ -32,10 +32,18 @@ namespace dolfin
 
   private:
     
-#ifdef HAVE_MPI
-    void partition_vertices(int dim, int local_vertices, real *vertices);
-#endif
-    
+    typedef struct __apa__{
+      uint v1; 
+      uint v2;
+      uint v3;
+      uint v4;
+    } atomic_cell;
+
+    inline int vertex_owner(uint L, uint R, uint i ) 
+    {
+      return (int) fmax( floor( (double) i / (double) (L + 1) ),
+			 floor( (double) ((double) i - (double) R) / (double)  L));
+    };
   };
 }
 #endif

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-02
+// Last changed: 2011-04-16
 
 #include <fstream>
 #include <dolfin/common/types.h>
@@ -12,10 +12,10 @@
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/dolfin.h>
 
 
-
-#ifdef HAVE_MPI
+#ifdef ENABLE_MPIIO
 #include <mpi.h>
 #endif
 
@@ -35,15 +35,34 @@ BinaryFile::~BinaryFile()
 void BinaryFile::operator>>(GenericVector& x)
 {
 
-  std::ifstream fp(filename.c_str(), std::ifstream::binary);
-
   uint size;
+
+#ifdef ENABLE_MPIIO
+  uint offset[2];
+  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  MPI_File fh;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		MPI_MODE_RDONLY , MPI_INFO_NULL, &fh);
+  MPI_File_read_at(fh, pe_rank * 2 * sizeof(uint), &offset[0], 2, 
+  		   MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  size = offset[1];
+
+#else
+  std::ifstream fp(filename.c_str(), std::ifstream::binary);
   fp.read((char *)&size, sizeof(uint));
-  
+#endif 
+
   real *values = new real[size];  
 
+#ifdef ENABLE_MPIIO
+  MPI_File_read_at(fh, pe_size * 2 * sizeof(uint) + offset[0] * sizeof(real),
+		   values, offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+  MPI_File_close(&fh);
+#else
   fp.read((char *)values, size * sizeof(real));
   fp.close();
+#endif
 
   x.init(size);
   x.set(values);
@@ -52,16 +71,46 @@ void BinaryFile::operator>>(GenericVector& x)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(GenericVector& x)
 {
-  
-  std::ofstream fp(filename.c_str(), std::ofstream::binary);
-
-  real *values = new real[x.local_size()];
   uint size = x.local_size();
+  real *values = new real[size];
+
+#ifdef ENABLE_MPIIO
+  uint offset[2] = {0,0};
+#if ( MPI_VERSION > 1 )
+    MPI_Exscan(&size, &offset[0], 1, 
+	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+    MPI_Scan(&size, &offset[0], 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    offset[0] -= size;
+
+#endif
+    offset[1] = size;
+#endif
+
   x.get(values);
 
+#ifdef ENABLE_MPIIO  
+  uint pe_rank = MPI::processNumber();  
+  uint pe_size = MPI::numProcesses();
+
+  MPI_File fh;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+
+  MPI_File_write_at(fh, pe_rank * 2 *sizeof(uint), 
+		    &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  
+  MPI_File_write_at(fh, pe_size * 2 * sizeof(uint) + offset[0] * sizeof(real),
+		    values, offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+
+  MPI_File_close(&fh);
+#else
+  std::ofstream fp(filename.c_str(), std::ofstream::binary);
   fp.write((char *)&size, sizeof(uint));
   fp.write((char *)values, x.local_size() * sizeof(real));
   fp.close();
+#endif
 
   delete[] values;     
 

@@ -49,6 +49,9 @@
 /* Define if you have the MPI library. */
 #undef HAVE_MPI
 
+/* Compile with support for MPI I/O */
+#undef ENABLE_MPIIO
+
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
 

@@ -30,6 +30,10 @@ AC_ARG_ENABLE(mpi,
               AC_HELP_STRING([--enable-mpi],
 	      [Compile with support for MPI]),[enable_mpi=${enableval}], [enable_mpi=no])
 
+AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
+		     [Compile with support for MPI I/O]),
+		     [enable_mpiio=yes],[enable_mpiio=no])
+
 AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
 	      [Compile with support for OpenMP]),[enable_openmp=${enableval}], [enable_openmp=no])
@@ -37,6 +41,9 @@ AC_ARG_ENABLE(openmp,
 AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 			 [Compile with support for Boost TR1 headers]),
 			 [enable_boosttr1=yes],[enable_boostr1=no])
+
+
+
 
 
 # Optional packages
@@ -85,7 +92,13 @@ if test "x${enable_mpi}" != xno; then
    AX_MPI	
    CXX="$MPICXX"
    LIBS="$MPILIBS $LIBS"   
+
+   if test "x${enable_mpiio}" != xno; then
+      AC_DEFINE(ENABLE_MPIIO, 1, [Compile with support for MPI I/O])
+   fi
 fi
+
+
 
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
@@ -216,7 +229,8 @@ Libs: ${LD} ${LDFLAGS} ${LIBS}
 
 Package features:
 
-  MPI: ${enable_mpi}
+  MPI: ${enable_mpi} 
+  MPI I/O: ${enable_mpiio}
   OpenMP: ${enable_openmp}
   uBlas: ${enable_ublas}
   PETSc: ${with_petsc}

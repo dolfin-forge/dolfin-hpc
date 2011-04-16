@@ -15,6 +15,10 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 
+#ifdef ENABLE_MPIIo
+#include <mpi.h>
+#endif
+
 namespace dolfin
 {  
   class Checkpoint 
@@ -55,9 +59,17 @@ namespace dolfin
 
   private:
     
-    void write(Mesh& mesh, std::ofstream& out);
-    void write(std::vector<Function *> func, std::ofstream& out);
-    void write(std::vector<Vector *> vec, std::ofstream& out);
+#ifdef ENABLE_MPIIO
+    typedef MPI_File chkp_outstream;
+#else
+    typedef std::ofstream chkp_outstream;
+#endif
+    
+
+    void write(Mesh& mesh, chkp_outstream& out);
+    void write(std::vector<Function *> func, chkp_outstream& out);
+    void write(std::vector<Vector *> vec, chkp_outstream& out);
+
 
     enum CheckpointState {CHECKPOINT, RESTART};
     enum RestartState {OPEN, MESH, FUNC, VEC};
@@ -65,11 +77,18 @@ namespace dolfin
     CheckpointState state;
     RestartState restart_state;
     
+#ifdef ENABLE_MPIIO
+    //    MPI_File in;
+    MPI_Offset byte_offset;
     std::ifstream in;
+#else
+    std::ifstream in;
+#endif
     
     uint n;
     uint _id;
     real _t;
+
   };
 }
 #endif

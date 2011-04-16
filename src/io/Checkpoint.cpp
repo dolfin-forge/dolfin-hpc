@@ -13,6 +13,10 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/io/Checkpoint.h>
 
+#ifdef ENABLE_MPIIO
+#include <mpi.h>
+#endif
+
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
@@ -31,6 +35,7 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
 
   message("Writing checkpoint (%s%d) at time %g", fname.c_str(), n%2, t);
   std::ostringstream _fname;
+#ifndef ENABLE_MPIIO
   if( MPI::numProcesses() > 1) 
     _fname << fname << (n++)%2 << "_" <<  MPI::processNumber() << ".chkp";
   else
@@ -41,11 +46,31 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   out.write((char *) &id, sizeof(uint));
   out.write((char *) &t, sizeof(real));
 
+#else
+  _fname << fname << (n++)%2 << ".chkp";
+    
+  MPI_File out;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) _fname.str().c_str(),
+		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &out);
+  
+  byte_offset = 0;
+  MPI_File_write_all(out, &id, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI_File_write_all(out, &t, 1, MPI_DOUBLE, MPI_STATUS_IGNORE);
+
+  byte_offset += sizeof(uint);
+  byte_offset += sizeof(real);
+#endif
+
   write(mesh, out);
   write(func, out);
   write(vec, out);
-
+  
+#ifdef ENABLE_MPIIO
+  MPI_File_close(&out);
+#else
   out.close();
+#endif
+
 
   state = RESTART;
 
@@ -207,7 +232,7 @@ void Checkpoint::load(std::vector<Vector *> vec)
   in.close();
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write(Mesh& mesh, std::ofstream& out)
+void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 {
 
   uint num_coords = mesh.numVertices() * mesh.geometry().dim();
@@ -219,6 +244,8 @@ void Checkpoint::write(Mesh& mesh, std::ofstream& out)
   uint num_vertices = mesh.numVertices();
   uint num_cells = mesh.numCells();
   
+#ifdef ENABLE_MPIIO
+#else
   out.write((char *)&type, sizeof(CellType::Type));
   out.write((char *)&tdim, sizeof(uint));
   out.write((char *)&gdim, sizeof(uint));
@@ -227,18 +254,26 @@ void Checkpoint::write(Mesh& mesh, std::ofstream& out)
   out.write((char *)&num_entities, sizeof(uint));
   out.write((char *)mesh.coordinates(), num_coords * sizeof(real));
   out.write((char *)mesh.cells(), num_centities * sizeof(uint));
+#endif
 
   if (MPI::numProcesses() > 1) 
   {
     uint *mapping = new uint[mesh.numVertices()];
     for (VertexIterator v(mesh); !v.end(); ++v)
       mapping[v->index()] = mesh.distdata().get_global(*v);
+    
+#ifdef ENABLE_MPIIO
+#else
     out.write((char *)mapping, mesh.numVertices() * sizeof(uint));
+#endif
     delete[] mapping;
 
 
     uint num_ghost = mesh.distdata().num_ghost(0);
+#ifdef ENABLE_MPIIO
+#else
     out.write((char *)&num_ghost, sizeof(uint));
+#endif
     uint *ghosts = new uint[2 * num_ghost];
     uint *gp = &ghosts[0];
     for (MeshGhostIterator g(mesh.distdata(), 0); !g.end(); ++g)
@@ -246,24 +281,33 @@ void Checkpoint::write(Mesh& mesh, std::ofstream& out)
       *gp++ = g.index();
       *gp++ = g.owner();
     }
+#ifdef ENABLE_MPIIO
+#else
     out.write((char *)ghosts, 2 * num_ghost * sizeof(uint));
+#endif
     delete[] ghosts;
 
     uint num_shared = mesh.distdata().num_shared(0);
+#ifdef ENABLE_MPIIO
+#else
     out.write((char *)&num_shared, sizeof(uint));
+#endif
 
     uint *shared = new uint[num_shared];
     uint *sp = &shared[0];
     for (MeshSharedIterator s(mesh.distdata(), 0); !s.end(); ++s)
       *sp++ = s.index();
+#ifdef ENABLE_MPIIO
+#else
     out.write((char *)shared, mesh.distdata().num_shared(0) * sizeof(uint));
+#endif
     delete[] shared;
 
   }
 
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write(std::vector<Function *> func, std::ofstream& out)
+void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
 {
   std::vector<Function *>::iterator it;
 
@@ -276,18 +320,40 @@ void Checkpoint::write(std::vector<Function *> func, std::ofstream& out)
   }
   
   real *values = new real[max_size];
+#ifdef ENABLE_MPIIO
+  uint vector_offset[2];
+  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::processNumber();
+  MPI_Offset tmp_offset;  
+#endif
+
   for (it = func.begin(); it != func.end(); ++it)
   {
     uint local_size = (*it)->vector().local_size();
     (*it)->vector().get(values);
+
+#ifdef ENABLE_MPIIO
+    vector_offset[0] = (*it)->vector().offset();
+    vector_offset[1] = (*it)->vector().local_size();
+    
+    tmp_offset = byte_offset + pe_rank * 2 * sizeof(uint);
+    MPI_File_write_at_all(out, tmp_offset, &vector_offset[0], 2, 
+			  MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    tmp_offset = byte_offset + pe_size * 2 * sizeof(uint) + vector_offset[0] * sizeof(real);
+
+    MPI_File_write_at_all(out, tmp_offset, values, vector_offset[1],
+			  MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += pe_size * 2 * sizeof(uint) + (*it)->vector().size() * sizeof(real);
+#else
     out.write((char *)&local_size, sizeof(uint));
     out.write((char *)values, (*it)->vector().local_size() * sizeof(real));
+#endif
   }
   delete[] values;
   
 }
 //-----------------------------------------------------------------------------
-void Checkpoint::write(std::vector<Vector *> vec, std::ofstream& out)
+void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
 {
   std::vector<Vector *>::iterator it;
 
@@ -296,14 +362,37 @@ void Checkpoint::write(std::vector<Vector *> vec, std::ofstream& out)
     max_size = std::max(max_size, (*it)->local_size());
   
   real *values = new real[max_size];
+#ifdef ENABLE_MPIIO
+  uint vector_offset[2];
+  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::processNumber();
+  MPI_Offset tmp_offset;  
+#endif
   for (it = vec.begin(); it != vec.end(); ++it)
   {
-    uint local_size = (*it)->local_size();
+
     (*it)->get(values);
+
+#ifdef ENABLE_MPIIO
+    vector_offset[0] = (*it)->offset();
+    vector_offset[1] = (*it)->local_size();
+    
+    tmp_offset = byte_offset + pe_rank * 2 * sizeof(uint);
+    MPI_File_write_at_all(out, tmp_offset, &vector_offset[0], 2, 
+			  MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    tmp_offset = byte_offset + pe_size * 2 * sizeof(uint) + vector_offset[0] * sizeof(real);
+
+    MPI_File_write_at_all(out, tmp_offset, values, vector_offset[1],
+			  MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += pe_size * 2 * sizeof(uint) + (*it)->size() * sizeof(real);
+#else
+    uint local_size = (*it)->local_size();
     out.write((char *)&local_size, sizeof(uint));
     out.write((char *)values, (*it)->local_size() * sizeof(real));
+#endif
   }
   delete[] values;
   
 }
 //-----------------------------------------------------------------------------
+

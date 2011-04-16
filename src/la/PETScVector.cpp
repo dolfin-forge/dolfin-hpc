@@ -262,6 +262,15 @@ dolfin::uint PETScVector::local_size() const
   return static_cast<uint>(n);
 }
 //-----------------------------------------------------------------------------
+dolfin::uint PETScVector::offset() const
+{
+  int low, high;
+  if(x)
+    VecGetOwnershipRange(x, &low, &high);
+
+  return static_cast<uint>(low);
+}
+//-----------------------------------------------------------------------------
 const GenericVector& PETScVector::operator= (const GenericVector& v)
 {
   *this = v.down_cast<PETScVector>();

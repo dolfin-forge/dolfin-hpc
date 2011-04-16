@@ -85,6 +85,9 @@ namespace dolfin
 
     /// Return local size of vector
     virtual uint local_size() const;
+    
+    /// Return rank's offset into vector
+    virtual uint offset() const;
 
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows) const;

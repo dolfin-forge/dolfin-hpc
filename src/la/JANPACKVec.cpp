@@ -169,6 +169,15 @@ dolfin::uint JANPACKVec::local_size() const
   return static_cast<uint>(n);
 }
 //-----------------------------------------------------------------------------
+dolfin::uint JANPACKVec::offset() const
+{
+  int n = 0;
+  if (x) 
+    n = x->range[0];
+
+  return static_cast<uint>(n);
+}
+//-----------------------------------------------------------------------------
 const GenericVector& JANPACKVec::operator= (const GenericVector& v)
 {
   *this = v.down_cast<JANPACKVec>();

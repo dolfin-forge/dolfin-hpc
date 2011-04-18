@@ -32,7 +32,8 @@ namespace dolfin
     void write(std::string fname,
 	       uint id, real t, Mesh& mesh,
 	       std::vector<Function *> func,
-	       std::vector<Vector *> vec);
+	       std::vector<Vector *> vec,
+	       bool static_mesh = false);
 
     void restart(std::string fname);
 
@@ -66,9 +67,13 @@ namespace dolfin
 #endif
     
 
+    void hdr_init(Mesh& mesh, bool static_mesh);
+
     void write(Mesh& mesh, chkp_outstream& out);
     void write(std::vector<Function *> func, chkp_outstream& out);
     void write(std::vector<Vector *> vec, chkp_outstream& out);
+
+
 
 
     enum CheckpointState {CHECKPOINT, RESTART};
@@ -78,16 +83,46 @@ namespace dolfin
     RestartState restart_state;
     
 #ifdef ENABLE_MPIIO
-    //    MPI_File in;
+    MPI_File in;
     MPI_Offset byte_offset;
-    std::ifstream in;
 #else
     std::ifstream in;
 #endif
     
+
+    typedef struct {
+      CellType::Type type;
+      uint tdim;
+      uint gdim;
+      uint num_vertices;
+      uint num_cells;
+      uint num_entities;
+      uint num_centities;
+      uint num_coords;
+      uint num_ghosts;
+      uint num_shared;
+#ifdef ENABLE_MPIIO
+      uint offsets[5];
+      uint disp[5];
+#endif
+      /*
+      uint coord_offset;
+      uint cells_offset;
+      uint mapping_offset;
+      uint ghosts_offset;
+      uint shared_offset;
+      */
+    } chkp_mesh_hdr;
+
+
+    chkp_mesh_hdr hdr;
+
+
     uint n;
     uint _id;
     real _t;
+    bool hdr_initialized;
+    bool disp_initialized;
 
   };
 }

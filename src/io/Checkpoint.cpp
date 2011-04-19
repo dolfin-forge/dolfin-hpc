@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2010-06-20
+// Last changed: 2011-04-19
 
 #include <cstring>
 #include <sstream>
@@ -35,7 +35,6 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
 
   if(!hdr_initialized || !static_mesh)
   {    
-    
     hdr.num_coords = mesh.numVertices() * mesh.geometry().dim();
     hdr.num_entities = mesh.type().numEntities(0);
     hdr.num_centities = mesh.numCells() * hdr.num_entities;
@@ -72,7 +71,6 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
     
     if (!disp_initialized || !static_mesh) 
     {
-      
       memset(&hdr.disp[0], 0, 5 * sizeof(uint));
       MPI_Allreduce(&local_data[0], &hdr.disp[0], 5, MPI_UNSIGNED,
 		    MPI_SUM, MPI::DOLFIN_COMM);
@@ -178,11 +176,10 @@ void Checkpoint::load(Mesh& mesh)
 #ifdef ENABLE_MPIIO
   uint pe_size = MPI::numProcesses();
   uint pe_rank = MPI::processNumber();
-  message("preload");
+
   MPI_File_read_at_all(in, byte_offset + pe_rank * sizeof(chkp_mesh_hdr),
 		       &hdr, sizeof(chkp_mesh_hdr), MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset += pe_size * sizeof(chkp_mesh_hdr);
-  message("mesh loaded");
 #else
   in.read((char *)&hdr, sizeof(chkp_mesh_hdr));
 #endif  
@@ -293,7 +290,6 @@ void Checkpoint::load(std::vector<Function *> func)
   if (restart_state != FUNC)
     error("Shut her down, Scotty, she's sucking mud again!");
 
-
   std::vector<Function *>::iterator it;
   uint local_size;
   uint pe_rank = MPI::processNumber();
@@ -304,7 +300,7 @@ void Checkpoint::load(std::vector<Function *> func)
   {
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in, byte_offset + pe_rank * 3 * sizeof(uint),
-			 &vector_offset[3], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+			 &vector_offset[0], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
     byte_offset += pe_size * 3 * sizeof(uint);
     local_size = vector_offset[1];   
 #else
@@ -313,13 +309,15 @@ void Checkpoint::load(std::vector<Function *> func)
     real *values = new real[local_size];
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in, byte_offset + vector_offset[0] * sizeof(real),
-			 &values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += vector_offset[3] * sizeof(double);
+			 values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += vector_offset[2] * sizeof(real);
 #else
     in.read((char *)values, local_size * sizeof(real));    
 #endif
+
     (*it)->vector().set(values);
     (*it)->vector().apply();
+
     delete[] values;
   }
 
@@ -340,9 +338,8 @@ void Checkpoint::load(std::vector<Vector *> vec)
   {
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in, byte_offset + pe_rank * 3 * sizeof(uint),
-			 &vector_offset[3], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+			 &vector_offset[0], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
     byte_offset += pe_size * 3 * sizeof(uint);
-    
     local_size = vector_offset[1];
 #else
     in.read((char *)&local_size, sizeof(uint));
@@ -350,10 +347,10 @@ void Checkpoint::load(std::vector<Vector *> vec)
     real *values = new real[local_size];
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in, byte_offset + vector_offset[0] * sizeof(real),
-			 &values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+			 values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
     byte_offset += vector_offset[3] * sizeof(double);
 #else
-    in.read((char *)values, local_size * sizeof(real));    
+    in.read((char *)values, local_size * sizeof(real));
 #endif
     (*it)->set(values);
     (*it)->apply();
@@ -361,6 +358,7 @@ void Checkpoint::load(std::vector<Vector *> vec)
   }
   
 #ifdef ENABLE_MPIIO
+  MPI_File_close(&in);
 #else
   in.close();
 #endif
@@ -455,7 +453,6 @@ void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
   uint vector_offset[3];
   uint pe_size = MPI::numProcesses();
   uint pe_rank = MPI::processNumber();
-  MPI_Offset tmp_offset;  
 #endif
 
   for (it = func.begin(); it != func.end(); ++it)
@@ -468,14 +465,13 @@ void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
     vector_offset[1] = (*it)->vector().local_size();
     vector_offset[2] = (*it)->vector().size();
     
-    tmp_offset = byte_offset + pe_rank * 3 * sizeof(uint);
-    MPI_File_write_at_all(out, tmp_offset, &vector_offset[0], 3, 
-			  MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    tmp_offset = byte_offset + pe_size * 3 * sizeof(uint) + vector_offset[0] * sizeof(real);
+    MPI_File_write_at_all(out, byte_offset + pe_rank * 3 * sizeof(uint),
+			  &vector_offset[0], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset += pe_size * 3 * sizeof(uint);
 
-    MPI_File_write_at_all(out, tmp_offset, values, vector_offset[1],
-			  MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += pe_size * 3 * sizeof(uint) + (*it)->vector().size() * sizeof(real);
+    MPI_File_write_at_all(out, byte_offset + vector_offset[0] * sizeof(real),
+			  values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += (*it)->vector().size() * sizeof(real);
 #else
     out.write((char *)&local_size, sizeof(uint));
     out.write((char *)values, (*it)->vector().local_size() * sizeof(real));
@@ -498,7 +494,6 @@ void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
   uint vector_offset[3];
   uint pe_size = MPI::numProcesses();
   uint pe_rank = MPI::processNumber();
-  MPI_Offset tmp_offset;  
 #endif
   for (it = vec.begin(); it != vec.end(); ++it)
   {
@@ -510,14 +505,13 @@ void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
     vector_offset[1] = (*it)->local_size();
     vector_offset[2] = (*it)->size();
     
-    tmp_offset = byte_offset + pe_rank * 3 * sizeof(uint);
-    MPI_File_write_at_all(out, tmp_offset, &vector_offset[0], 3, 
-			  MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    tmp_offset = byte_offset + pe_size * 3 * sizeof(uint) + vector_offset[0] * sizeof(real);
+    MPI_File_write_at_all(out, byte_offset + pe_rank * 3 * sizeof(uint), 
+			  &vector_offset[0], 3, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset += pe_size * 3 * sizeof(uint);
 
-    MPI_File_write_at_all(out, tmp_offset, values, vector_offset[1],
-			  MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += pe_size * 3 * sizeof(uint) + (*it)->size() * sizeof(real);
+    MPI_File_write_at_all(out, byte_offset + vector_offset[0] * sizeof(real),
+			  values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += vector_offset[2] * sizeof(real);
 #else
     uint local_size = (*it)->local_size();
     out.write((char *)&local_size, sizeof(uint));

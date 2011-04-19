@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2010-06-20
+// Last changed: 2011-04-19
 
 #ifndef __CHECKPOINT_H
 #define __CHECKPOINT_H
@@ -66,15 +66,10 @@ namespace dolfin
     typedef std::ofstream chkp_outstream;
 #endif
     
-
     void hdr_init(Mesh& mesh, bool static_mesh);
-
     void write(Mesh& mesh, chkp_outstream& out);
     void write(std::vector<Function *> func, chkp_outstream& out);
     void write(std::vector<Vector *> vec, chkp_outstream& out);
-
-
-
 
     enum CheckpointState {CHECKPOINT, RESTART};
     enum RestartState {OPEN, MESH, FUNC, VEC};
@@ -89,7 +84,6 @@ namespace dolfin
     std::ifstream in;
 #endif
     
-
     typedef struct {
       CellType::Type type;
       uint tdim;
@@ -105,25 +99,15 @@ namespace dolfin
       uint offsets[5];
       uint disp[5];
 #endif
-      /*
-      uint coord_offset;
-      uint cells_offset;
-      uint mapping_offset;
-      uint ghosts_offset;
-      uint shared_offset;
-      */
     } chkp_mesh_hdr;
 
-
     chkp_mesh_hdr hdr;
-
 
     uint n;
     uint _id;
     real _t;
     bool hdr_initialized;
     bool disp_initialized;
-
   };
 }
 #endif

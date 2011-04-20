@@ -25,6 +25,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/parameter/parameters.h>
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterList.h>
 #include <dolfin/main/MPI.h>
@@ -87,7 +88,7 @@ void XMLFile::operator>>(Mesh& mesh)
   if ( xmlObject )
     delete xmlObject;
   
-  if(MPI::numProcesses() > 1)
+  if(MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
     xmlObject = new PXMLMesh(mesh);
   else
     xmlObject = new XMLMesh(mesh);

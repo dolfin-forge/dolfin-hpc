@@ -26,6 +26,7 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/parameter/parameters.h>
 
 using namespace dolfin;
 
@@ -48,7 +49,7 @@ Mesh::Mesh(std::string filename)
   File file(filename);
   file >> *this;
   
-  if( MPI::numProcesses() > 1 ) {
+  if( MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial")) {
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);

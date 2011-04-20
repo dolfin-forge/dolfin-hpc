@@ -117,6 +117,7 @@ add("PDE linear solver", "direct");
 
 //--- Mesh partitioning ---
 add("report edge cut", false);
+add("Mesh read in serial", false);
 
 //--- Load balancing ---
 add("Load balancer report", false);

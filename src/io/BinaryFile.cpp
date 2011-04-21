@@ -119,7 +119,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     int celltype, gdim;
     fp.read((char *)&gdim, sizeof(int));  
     fp.read((char *)&celltype, sizeof(int));  
-    
+
     std::string type;
     if (celltype == 0)
       type = "triangle";
@@ -127,6 +127,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       type = "tetrahedron";
     else
       error("Unknown Cell type");
+
     
     // Create cell type to get topological dimension
     CellType* cell_type = CellType::create(type);
@@ -410,9 +411,9 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   int type = 0;
   CellType::Type cell_type = mesh.type().cellType();
-  if (CellType::type2string(cell_type).c_str() == "tetrahedron")
+  if (CellType::type2string(cell_type) == "tetrahedron")
     type = 1;
-      
+
   int num_vertices = (MPI::numProcesses() > 1 ? 
 		      mesh.distdata().global_numVertices() : 
 		      mesh.numVertices());

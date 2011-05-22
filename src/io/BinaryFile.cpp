@@ -2,8 +2,9 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-16
+// Last changed: 2011-05-22
 
+#include <algorithm>
 #include <fstream>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
@@ -210,20 +211,21 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint local_vertices = (num_vertices + pe_size - pe_rank -1 ) / pe_size;
 
     
-    uint offset = 0;
-    uint vertex_data = dim * local_vertices;
+    uint offset[2] = {0,0};
+    uint vertex_data[2] = {local_vertices, dim * local_vertices};
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vertex_data, &offset, 1, 
+    MPI_Exscan(&vertex_data[0], &offset[0], 2, 
 	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_data, &offset, 1, 
+    MPI_Scan(&vertex_data[0], &offset[0], 2, 
 	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= vertex_data;
+    offset[0] -= vertex_data[0];
+    offset[1] -= vertex_data[1];
 #endif
 
-    real *vertex_buffer = new real[vertex_data];
-    MPI_File_read_at_all(fh, 3*sizeof(int) + offset * sizeof(double),
-		     vertex_buffer, vertex_data, MPI_DOUBLE, MPI_STATUS_IGNORE);
+    real *vertex_buffer = new real[vertex_data[1]];
+    MPI_File_read_at_all(fh, 3*sizeof(int) + offset[1] * sizeof(double),
+		     vertex_buffer, vertex_data[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
               
     int num_cells;
     MPI_File_read_at_all(fh, 3*sizeof(int) + dim * num_vertices * sizeof(double),
@@ -231,20 +233,20 @@ void BinaryFile::operator>>(Mesh& mesh)
     message("Numcells: %d", num_cells);
     uint local_cells = (num_cells + pe_size - pe_rank - 1 ) / pe_size;    
 
-    offset = 0;
+    offset[1] = 0;
     uint cell_data = (3 + type) * local_cells;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&cell_data, &offset, 1, 
+    MPI_Exscan(&cell_data, &offset[1], 1, 
 	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&cell_data, &offset, 1, 
+    MPI_Scan(&cell_data, &offset[1], 1, 
 	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= cell_data;
+    offset[1] -= cell_data;
 #endif
 
     int *cell_buffer = new int[cell_data];
     MPI_File_read_at_all(fh, 4 * sizeof(int) + dim * num_vertices * sizeof(double) 
-		     + offset * sizeof(int), cell_buffer, cell_data, 
+		     + offset[1] * sizeof(int), cell_buffer, cell_data, 
 		     MPI_INT, MPI_STATUS_IGNORE);
 
     message("Pre parse cells");
@@ -255,10 +257,16 @@ void BinaryFile::operator>>(Mesh& mesh)
     // Parse cells
     std::vector<atomic_cell> cells;
     std::vector<uint> *non_local_cells = new std::vector<uint>[pe_size];
-    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];    
+    _set<uint> *ghosts = new _set<uint>[pe_size];    
+    std::set<uint> used_vertices;
+
     atomic_cell cell;
     for (int i = 0; i < cell_data; i+= (3 + type)) 
     {
+      message("(rank %d) Cell: %d %d %d owner: %d", pe_rank, cell_buffer[i],
+	      cell_buffer[i+1],cell_buffer[i+2],
+	      vertex_owner(L, R, cell_buffer[i]));
+      
       cell.v1 = cell_buffer[i];
       cell.v2 = cell_buffer[i+1];
       cell.v3 = cell_buffer[i+2];
@@ -267,30 +275,38 @@ void BinaryFile::operator>>(Mesh& mesh)
 
       if (vertex_owner(L, R, cell_buffer[i]) == pe_rank)
       {
+	used_vertices.insert(cell.v1);
        	cells.push_back(cell);
 	
 	if(vertex_owner(L, R, cell.v2) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);     
+	  ghosts[vertex_owner(L, R, cell.v2)].insert(cell.v2);     
 	  ghosted_entities.insert(cell.v2);
 	}
+	else
+	  used_vertices.insert(cell.v2);
 
 	if(vertex_owner(L, R, cell.v3) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+	  ghosts[vertex_owner(L, R, cell.v3)].insert(cell.v3);
 	  ghosted_entities.insert(cell.v3);
 	}
+	else
+	  used_vertices.insert(cell.v3);
 
 	if (type == 1)
 	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
-	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);
+	    ghosts[vertex_owner(L, R, cell.v4)].insert(cell.v4);
 	    ghosted_entities.insert(cell.v4);
 	  }
+	  else
+	    used_vertices.insert(cell.v4);
       }
       else
       {
 	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v1);
 	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v2);
 	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v3);
-	non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v4);
+	if (type == 1)
+	  non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v4);
       }
 
     }
@@ -332,28 +348,36 @@ void BinaryFile::operator>>(Mesh& mesh)
 	if (type == 1)
 	  cell.v4 = recv_buffer[j+3];
 	
+	used_vertices.insert(cell.v1);
 	cells.push_back(cell);
 
 	if(vertex_owner(L, R, cell.v2) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v2)].push_back(cell.v2);
+	  ghosts[vertex_owner(L, R, cell.v2)].insert(cell.v2);
 	  ghosted_entities.insert(cell.v2);
 	}
+	else
+	  used_vertices.insert(cell.v2);
 	
 	if(vertex_owner(L, R, cell.v3) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v3)].push_back(cell.v3);
+	  ghosts[vertex_owner(L, R, cell.v3)].insert(cell.v3);
 	  ghosted_entities.insert(cell.v3);
 	}
+	else
+	  used_vertices.insert(cell.v3);
 	
 	if (type == 1)
 	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
-	    ghosts[vertex_owner(L, R, cell.v4)].push_back(cell.v4);       	
+	    ghosts[vertex_owner(L, R, cell.v4)].insert(cell.v4);       	
 	    ghosted_entities.insert(cell.v4);
 	  }
+	  else
+	    used_vertices.insert(cell.v4);
       }      
     }
 
-    // Number of vertices in mesh, local + ghosts
-    uint num_local_vertices = local_vertices + ghosted_entities.size();
+    // Number of vertices in mesh, used + ghosts
+    uint num_local_vertices = used_vertices.size() + ghosted_entities.size();    
+
 
     std::string celltype;
     if (type == 0)
@@ -368,12 +392,23 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint tdim = cell_type->dim();
     delete cell_type;
     
+
+    std::set<uint> all_vertices, orphaned_vertices;
+    for(uint i = 0; i < local_vertices; i++) 
+      all_vertices.insert(offset[0] + i);
+    set_difference(all_vertices.begin(), all_vertices.end(),
+		   used_vertices.begin(), used_vertices.end(),
+    	   orphaned_vertices.begin());
+    
+
     // Open mesh for editing
     MeshEditor editor;
     editor.open(mesh, CellType::string2type(celltype), tdim, dim);
     editor.initVertices(num_local_vertices);
     editor.initCells(cells.size());
-
+    
+    MeshDistributedData distdata;
+    message("Local indicies: %d local cells: %d cells size: %d used vertices: %d start_index: %d orphaned_vertices: %d", local_vertices, local_cells, cells.size(), used_vertices.size(), offset[0], orphaned_vertices.size());
 
     /* Add local indices
      * Use start_index for global number
@@ -384,7 +419,35 @@ void BinaryFile::operator>>(Mesh& mesh)
      * Add cells, remember to map global->local
      */
 
+
     
+    uint local_vertex_index = 0;
+    uint v_index;
+    for(std::set<uint>::iterator it = used_vertices.begin();
+	it != used_vertices.end(); local_vertex_index++, it++) 
+    {
+      v_index = *it - offset[0];
+
+      distdata.set_map(v_index, *it, 0);
+      
+      switch(dim)
+      {
+      case 2:
+	editor.addVertex(local_vertex_index,
+			 vertex_buffer[(dim * v_index)],
+			 vertex_buffer[(dim * v_index) + 1]);
+	break;
+      case 3:
+	editor.addVertex(local_vertex_index,
+			 vertex_buffer[(dim * v_index)],
+			 vertex_buffer[(dim * v_index) + 1],
+			 vertex_buffer[(dim * v_index) + 2]);
+	break;
+      }	
+    }
+    
+
+
 
     editor.close();
     

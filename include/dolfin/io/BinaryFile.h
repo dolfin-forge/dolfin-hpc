@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-02
+// Last changed: 2011-04-21
 
 
 #ifndef __BINARY_FILE_H
@@ -32,7 +32,7 @@ namespace dolfin
 
   private:
     
-    typedef struct __apa__{
+    typedef struct {
       uint v1; 
       uint v2;
       uint v3;
@@ -41,8 +41,9 @@ namespace dolfin
 
     inline int vertex_owner(uint L, uint R, uint i ) 
     {
-      return (int) fmax( floor( (double) i / (double) (L + 1) ),
-			 floor( (double) ((double) i - (double) R) / (double)  L));
+      return (int) std::max( floor( (double) i / (double) (L + 1) ),
+			     floor( (double) ((double) i - (double) R) / 
+				    (double)  L));
     };
   };
 }

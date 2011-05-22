@@ -92,6 +92,9 @@ if test "x${enable_mpi}" != xno; then
    AX_MPI	
    CXX="$MPICXX"
    LIBS="$MPILIBS $LIBS"   
+   if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
+      LIBS="$LIBS -lmpi++"
+   fi   
 
    if test "x${enable_mpiio}" != xno; then
       AC_DEFINE(ENABLE_MPIIO, 1, [Compile with support for MPI I/O])

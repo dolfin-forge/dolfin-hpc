@@ -56,6 +56,9 @@ AC_DEFUN([AX_PETSC],[
 	   AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
 	   CPPFLAGS="$CPPFLAGS $PETSC_CPPFLAGS"
 	   LDFLAGS="$LDFLAGS $PETSC_LDFLAGS"
+	   if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then	
+	      LDFLAGS="$LDFLAGS -lfpe"
+	   fi
 	   AC_MSG_RESULT(yes)
 	else
 	   CPPFLAGS="$CPPFLAGS_SAVED"

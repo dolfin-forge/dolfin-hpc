@@ -15,7 +15,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
 
-#ifdef ENABLE_MPIIo
+#ifdef ENABLE_MPIIO
 #include <mpi.h>
 #endif
 

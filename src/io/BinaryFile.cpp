@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-05-22
+// Last changed: 2011-05-23
 
 #include <algorithm>
 #include <fstream>
@@ -202,7 +202,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_File_read_all(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
     MPI_File_read_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
     MPI_File_read_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
-    message("dim: %d type: %d num_vertice: %d", dim, type, num_vertices);
+
     uint pe_size = MPI::numProcesses();
     uint pe_rank = MPI::processNumber();
     
@@ -230,7 +230,6 @@ void BinaryFile::operator>>(Mesh& mesh)
     int num_cells;
     MPI_File_read_at_all(fh, 3*sizeof(int) + dim * num_vertices * sizeof(double),
 		     &num_cells, 1, MPI_INT, MPI_STATUS_IGNORE);
-    message("Numcells: %d", num_cells);
     uint local_cells = (num_cells + pe_size - pe_rank - 1 ) / pe_size;    
 
     offset[1] = 0;
@@ -249,24 +248,18 @@ void BinaryFile::operator>>(Mesh& mesh)
 		     + offset[1] * sizeof(int), cell_buffer, cell_data, 
 		     MPI_INT, MPI_STATUS_IGNORE);
 
-    message("Pre parse cells");
-
 
     _set<uint> ghosted_entities;
 
     // Parse cells
     std::vector<atomic_cell> cells;
     std::vector<uint> *non_local_cells = new std::vector<uint>[pe_size];
-    _set<uint> *ghosts = new _set<uint>[pe_size];    
     std::set<uint> used_vertices;
 
     atomic_cell cell;
     for (int i = 0; i < cell_data; i+= (3 + type)) 
     {
-      message("(rank %d) Cell: %d %d %d owner: %d", pe_rank, cell_buffer[i],
-	      cell_buffer[i+1],cell_buffer[i+2],
-	      vertex_owner(L, R, cell_buffer[i]));
-      
+
       cell.v1 = cell_buffer[i];
       cell.v2 = cell_buffer[i+1];
       cell.v3 = cell_buffer[i+2];
@@ -278,25 +271,19 @@ void BinaryFile::operator>>(Mesh& mesh)
 	used_vertices.insert(cell.v1);
        	cells.push_back(cell);
 	
-	if(vertex_owner(L, R, cell.v2) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v2)].insert(cell.v2);     
+	if(vertex_owner(L, R, cell.v2) != pe_rank)
 	  ghosted_entities.insert(cell.v2);
-	}
 	else
 	  used_vertices.insert(cell.v2);
 
-	if(vertex_owner(L, R, cell.v3) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v3)].insert(cell.v3);
+	if(vertex_owner(L, R, cell.v3) != pe_rank)
 	  ghosted_entities.insert(cell.v3);
-	}
 	else
 	  used_vertices.insert(cell.v3);
 
 	if (type == 1)
-	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
-	    ghosts[vertex_owner(L, R, cell.v4)].insert(cell.v4);
+	  if(vertex_owner(L, R, cell.v4) != pe_rank) 
 	    ghosted_entities.insert(cell.v4);
-	  }
 	  else
 	    used_vertices.insert(cell.v4);
       }
@@ -311,7 +298,6 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     }
 
-    message("Pre communication");
     /*
      * FIXME
      * Reduce communication in this section
@@ -351,25 +337,19 @@ void BinaryFile::operator>>(Mesh& mesh)
 	used_vertices.insert(cell.v1);
 	cells.push_back(cell);
 
-	if(vertex_owner(L, R, cell.v2) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v2)].insert(cell.v2);
+	if(vertex_owner(L, R, cell.v2) != pe_rank) 
 	  ghosted_entities.insert(cell.v2);
-	}
 	else
 	  used_vertices.insert(cell.v2);
 	
-	if(vertex_owner(L, R, cell.v3) != pe_rank) {
-	  ghosts[vertex_owner(L, R, cell.v3)].insert(cell.v3);
+	if(vertex_owner(L, R, cell.v3) != pe_rank) 
 	  ghosted_entities.insert(cell.v3);
-	}
 	else
 	  used_vertices.insert(cell.v3);
 	
 	if (type == 1)
-	  if(vertex_owner(L, R, cell.v4) != pe_rank) {
-	    ghosts[vertex_owner(L, R, cell.v4)].insert(cell.v4);       	
+	  if(vertex_owner(L, R, cell.v4) != pe_rank) 
 	    ghosted_entities.insert(cell.v4);
-	  }
 	  else
 	    used_vertices.insert(cell.v4);
       }      
@@ -393,22 +373,23 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete cell_type;
     
 
+
     std::set<uint> all_vertices, orphaned_vertices;
     for(uint i = 0; i < local_vertices; i++) 
       all_vertices.insert(offset[0] + i);
-    set_difference(all_vertices.begin(), all_vertices.end(),
-		   used_vertices.begin(), used_vertices.end(),
-    	   orphaned_vertices.begin());
-    
+    std::set_difference(all_vertices.begin(), all_vertices.end(),
+			used_vertices.begin(), used_vertices.end(),
+			std::inserter(orphaned_vertices, orphaned_vertices.end()));
 
     // Open mesh for editing
     MeshEditor editor;
     editor.open(mesh, CellType::string2type(celltype), tdim, dim);
+    num_local_vertices = all_vertices.size() + ghosted_entities.size();
     editor.initVertices(num_local_vertices);
     editor.initCells(cells.size());
     
+
     MeshDistributedData distdata;
-    message("Local indicies: %d local cells: %d cells size: %d used vertices: %d start_index: %d orphaned_vertices: %d", local_vertices, local_cells, cells.size(), used_vertices.size(), offset[0], orphaned_vertices.size());
 
     /* Add local indices
      * Use start_index for global number
@@ -418,18 +399,16 @@ void BinaryFile::operator>>(Mesh& mesh)
      *
      * Add cells, remember to map global->local
      */
-
-
-    
+   
     uint local_vertex_index = 0;
-    uint v_index;
+    uint v_index; 
     for(std::set<uint>::iterator it = used_vertices.begin();
 	it != used_vertices.end(); local_vertex_index++, it++) 
     {
       v_index = *it - offset[0];
 
-      distdata.set_map(v_index, *it, 0);
-      
+      distdata.set_map(local_vertex_index, *it, 0);
+            
       switch(dim)
       {
       case 2:
@@ -446,13 +425,118 @@ void BinaryFile::operator>>(Mesh& mesh)
       }	
     }
     
+    _map<uint, uint> new_owner;
+    // Exchange ghost points
+    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];    
+    for(_set<uint>::iterator it = ghosted_entities.begin(); 
+	it != ghosted_entities.end(); it++) 
+      ghosts[vertex_owner(L, R, *it)].push_back(*it);       	
+    
+    local_max = 0;
+    for (int i = 0; i < pe_size; i++) 
+      local_max = std::max(local_max, (uint) ghosts[i].size());
 
+    buff_size = 0;
+    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+ 
+    delete[] recv_buffer;
+    recv_buffer = new uint[buff_size]; 
+    
+    uint *send_new_owner = new uint[buff_size];
+    uint *recv_new_owner = new uint[buff_size];
+
+    real *send_buffer_coords = new real[buff_size * dim];
+    real *recv_buffer_coords = new real[buff_size * dim];
+
+    for (int i = 1; i < pe_size; i++) 
+    {
+      src = (pe_rank - i + pe_size) % pe_size;
+      dest = (pe_rank + i) % pe_size;
+      
+      MPI_Sendrecv(&ghosts[dest][0], ghosts[dest].size(), 
+		   MPI_UNSIGNED, dest, 1, recv_buffer, buff_size, 
+		   MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+
+      /*
+       * Check if orphaned
+       * Send back global number and orphaned info 
+       */
+
+      real *sp = &send_buffer_coords[0];
+      uint *np = &send_new_owner[0];
+      for (int k = 0; k < num_recv; k++) 
+      {
+	
+	v_index = recv_buffer[k] - offset[0];   
+	
+	if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end()) {
+	  if (new_owner.find(recv_buffer[k]) == new_owner.end())
+	    new_owner[recv_buffer[k]] = src;
+	  *(np++) = new_owner[recv_buffer[k]];
+	}
+	else {
+	  *(np++) = pe_rank;
+	}
+
+	for (uint l = 0; l < dim; l++)
+	  *(sp++)= vertex_buffer[(dim * v_index) + l];
+      }
+      MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1, 
+		   recv_new_owner, buff_size, MPI_UNSIGNED, dest, 1,
+		   MPI::DOLFIN_COMM, &status);
+
+      MPI_Sendrecv(send_buffer_coords, (num_recv * dim), MPI_DOUBLE, src, 1, 
+		   recv_buffer_coords, (buff_size * dim), MPI_DOUBLE, dest, 1,
+		   MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
+      
+      int g_i = 0;
+      for (int k = 0; k < num_recv; local_vertex_index++, g_i++, k += dim) 
+      {
+	distdata.set_map(local_vertex_index, ghosts[dest][g_i], 0);
+
+	if (recv_new_owner[g_i] != pe_rank) {
+	  distdata.set_ghost(local_vertex_index, 0);
+	  distdata.set_ghost_owner(local_vertex_index, recv_new_owner[g_i], 0);	  
+	}
+
+	switch(dim)
+	{
+	case 2:
+	editor.addVertex(local_vertex_index,
+			 recv_buffer_coords[k], recv_buffer_coords[k+1]);
+	break;
+	case 3:
+	editor.addVertex(local_vertex_index,
+			 recv_buffer_coords[k], recv_buffer_coords[k+1], recv_buffer_coords[k+2]);
+	break;
+	}
+	
+      }      
+    }
+
+    uint local_cell_index = 0;
+    for(std::vector<atomic_cell>::iterator it =  cells.begin();
+	it != cells.end(); local_cell_index++, it++) 
+    {
+       switch(type)
+      {
+      case 0:
+	editor.addCell(local_cell_index, distdata.get_local(it->v1, 0), 
+		       distdata.get_local(it->v2, 0), distdata.get_local(it->v3, 0));
+	break;
+      case 1:
+	editor.addCell(local_cell_index, distdata.get_local(it->v1, 0), distdata.get_local(it->v2, 0),
+		       distdata.get_local(it->v3, 0), distdata.get_local(it->v4, 0));
+	break;
+      }
+    }
 
 
     editor.close();
-    
+    mesh.distdata() = distdata;
 
-    
 
     delete[] cell_buffer;
     
@@ -460,10 +544,13 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     delete[] recv_buffer;
     delete[] vertex_buffer;
-
+    delete[] recv_buffer_coords;
+    delete[] send_buffer_coords;
+    delete[] recv_new_owner;
+    delete[] send_new_owner;
     
     MPI_File_close(&fh);
-    message("MPI I/O: Done reading file");
+
   }
 }  
 //----------------------------------------------------------------------------

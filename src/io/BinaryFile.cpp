@@ -539,9 +539,6 @@ void BinaryFile::operator>>(Mesh& mesh)
 
 
     delete[] cell_buffer;
-    
-
-
     delete[] recv_buffer;
     delete[] vertex_buffer;
     delete[] recv_buffer_coords;
@@ -549,6 +546,14 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete[] recv_new_owner;
     delete[] send_new_owner;
     
+    for (uint i = 0; i < pe_size; i++) 
+    {
+      non_local_cells[i].clear();
+      ghosts[i].clear();
+    }
+    delete[] non_local_cells;
+    delete[] ghosts;
+
     MPI_File_close(&fh);
 
   }

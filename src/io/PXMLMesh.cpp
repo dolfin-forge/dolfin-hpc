@@ -14,6 +14,7 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/io/PXMLMesh.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -24,7 +25,12 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 PXMLMesh::PXMLMesh(Mesh& mesh) : XMLObject(), _mesh(mesh), state(OUTSIDE), f(0), a(0)
 {
-  // Do nothing
+  if(dolfin::MPI::processNumber() == 0)
+    dolfin_set("output destination","terminal");
+
+  warning("Reading DOLFIN xml meshes in parallel is depricated. "
+	  "For better I/O performance, consider converting to flat binary");
+  dolfin_set("output destination","silent");
 }
 //-----------------------------------------------------------------------------
 PXMLMesh::~PXMLMesh()

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-05-23
+// Last changed: 2011-06-08
 
 #include <algorithm>
 #include <fstream>
@@ -42,12 +42,27 @@ void BinaryFile::operator>>(GenericVector& x)
   uint offset[2];
   uint pe_rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
+  
   MPI_File fh;
+  MPI_Offset byte_offset;
+  BinaryFileHeader hdr;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		MPI_MODE_RDONLY , MPI_INFO_NULL, &fh);
-  MPI_File_read_at_all(fh, pe_rank * 2 * sizeof(uint), &offset[0], 2, 
-  		   MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader) , 
+		    MPI_BYTE, MPI_STATUS_IGNORE);
+#if (WORDS_BIGENDIAN)
+  if (!hdr.bendian || hdr.pe_size != pe_size)
+    error("Shut her down, Scotty, she's sucking mud again!");
+#else
+  if (hdr.bendian || hdr.pe_size != pe_size)
+    error("Shut her down, Scotty, she's sucking mud again!");
+#endif
+
+  byte_offset = sizeof(BinaryFileHeader);
+  MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
+		       &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
   size = offset[1];
+  byte_offset += pe_size * 2 * sizeof(uint);
 
 #else
   std::ifstream fp(filename.c_str(), std::ifstream::binary);
@@ -57,7 +72,7 @@ void BinaryFile::operator>>(GenericVector& x)
   real *values = new real[size];  
 
 #ifdef ENABLE_MPIIO
-  MPI_File_read_at_all(fh, pe_size * 2 * sizeof(uint) + offset[0] * sizeof(real),
+  MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real),
 		   values, offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
   MPI_File_close(&fh);
 #else
@@ -84,17 +99,27 @@ void BinaryFile::operator<<(GenericVector& x)
   x.get(values);
 
 #ifdef ENABLE_MPIIO  
+  BinaryFileHeader hdr;
   uint pe_rank = MPI::processNumber();  
-  uint pe_size = MPI::numProcesses();
+  hdr.pe_size = MPI::numProcesses();
+#if WORDS_BIGENDIAN
+  hdr.bendian = 1;
+#else
+  hdr.bendian = 0;
+#endif
 
   MPI_File fh;
+  MPI_Offset byte_offset;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
-  MPI_File_write_at_all(fh, pe_rank * 2 *sizeof(uint), 
+  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 
+		     MPI_BYTE, MPI_STATUS_IGNORE);
+  byte_offset = sizeof(BinaryFileHeader);
+  MPI_File_write_at_all(fh, byte_offset + pe_rank * 2 *sizeof(uint), 
 		    &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-  
-  MPI_File_write_at_all(fh, pe_size * 2*sizeof(uint) + offset[0]*sizeof(real),
+  byte_offset += hdr.pe_size * 2 * sizeof(uint);
+  MPI_File_write_at_all(fh, byte_offset + offset[0]*sizeof(real),
 		    values, offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
 
   MPI_File_close(&fh);

@@ -2,12 +2,13 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-04-21
+// Last changed: 2011-06-08
 
 
 #ifndef __BINARY_FILE_H
 #define __BINARY_FILE_H
 
+#include <stdint.h>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
 #include "GenericFile.h"
@@ -32,6 +33,15 @@ namespace dolfin
 
   private:
     
+#ifdef ENABLE_MPIIO
+    typedef struct {
+      uint8_t bendian; 
+      uint32_t pe_size;
+
+    } BinaryFileHeader;
+#endif      
+
+
     typedef struct {
       uint v1; 
       uint v2;

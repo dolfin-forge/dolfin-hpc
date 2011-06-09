@@ -35,9 +35,8 @@ namespace dolfin
     
 #ifdef ENABLE_MPIIO
     typedef struct {
-      uint8_t bendian; 
+      uint32_t bendian; 
       uint32_t pe_size;
-
     } BinaryFileHeader;
 #endif      
 
@@ -54,6 +53,18 @@ namespace dolfin
       return (int) std::max( floor( (double) i / (double) (L + 1) ),
 			     floor( (double) ((double) i - (double) R) / 
 				    (double)  L));
+    };
+
+    inline void hdr_check(BinaryFileHeader hdr, uint pe_size, bool check_pe_size)
+    {     
+#ifdef HAVE_BIG_ENDIAN
+      if (!hdr.bendian || (check_pe_size && hdr.pe_size != pe_size))
+	error("Shut her down, Scotty, she's sucking mud again!");
+#else
+      message("hdr.bendian: %d hdr.pe_size: %d sizeof(hdr): %d", hdr.bendian, hdr.pe_size, sizeof(BinaryFileHeader));
+      if (hdr.bendian || (check_pe_size && hdr.pe_size != pe_size))
+	error("Shut her down, Scotty, she's sucking mud again!");
+#endif
     };
   };
 }

@@ -48,15 +48,10 @@ void BinaryFile::operator>>(GenericVector& x)
   BinaryFileHeader hdr;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		MPI_MODE_RDONLY , MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader) , 
+  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), 
 		    MPI_BYTE, MPI_STATUS_IGNORE);
-#if (WORDS_BIGENDIAN)
-  if (!hdr.bendian || hdr.pe_size != pe_size)
-    error("Shut her down, Scotty, she's sucking mud again!");
-#else
-  if (hdr.bendian || hdr.pe_size != pe_size)
-    error("Shut her down, Scotty, she's sucking mud again!");
-#endif
+  
+  hdr_check(hdr, pe_size, true);
 
   byte_offset = sizeof(BinaryFileHeader);
   MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
@@ -102,7 +97,7 @@ void BinaryFile::operator<<(GenericVector& x)
   BinaryFileHeader hdr;
   uint pe_rank = MPI::processNumber();  
   hdr.pe_size = MPI::numProcesses();
-#if WORDS_BIGENDIAN
+#ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
 #else
   hdr.bendian = 0;

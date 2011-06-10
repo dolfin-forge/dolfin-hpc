@@ -1,43 +1,35 @@
-Requirements
-------------
 
-DOLFIN uses a SCons-based build system. You will there need SCons to build
-and install DOLFIN. SCons is available as a package for most operating systems.
-Alternatively, it can be found at www.scons.org.
+DOLFIN HPC
+----------
 
-DOLFIN depends on various packages. Details of the dependencies can found at 
+Background:
 
-  http://www.fenics.org/wiki/Installing_DOLFIN
-
-
-Simple build and install
---------------------------
-
-In the directory containing the DOLFIN source code, type
-
-  scons enableDemos=yes
-
-This will configure and build DOLFIN and the demo programs. To install the 
-library, type
-
-  scons install prefix=PREFIX
-
-which will install DOLFIN files in PREFIX. Depending on where DOLFIN has been
-installed, it may be necessary to set various environment variables. A helper 
-file 'dolfin.conf' is generated to do this for bash shell users. Type
-
-  source ./dolfin.conf
-
-to set the necessary variables. It should now be possible to run the demo 
-programs. To install locally (within the DOLFIN tree), type
-
-  ./scons.local
+DOLFIN HPC is a special branch of DOLFIN optimized for distributed
+memory architectures. Based on DOLFIN 0.8.0, the HPC branch is
+parallelized using a hybrid MPI/OpenMP approach with parallel local
+mesh refinement, dynamic load balancing and parallel I/O (MPI
+I/O). The implementation is portable and has been verified to work on
+several different architectures such as SGI Origin systems, IBM
+BlueGene/L and Cray XT6-XE6 systems.
 
 
-Customised builds
------------------
+The package dependencies of DOLFIN HPC are:
 
-Various options for building DOLFIN are printed to the screen by typing
+    * ufc 1.1
+    * ffc 0.5.1
+    * ParMETIS
+    * Supported LA-backend (currently PETSc or JANPACK)
 
-  scons -h
+Installation:
+
+DOLFIN HPC uses autotools. To build and install the package, follow
+these steps:
+
+1. ./configure
+2. make 
+3. make install
+
+DOLFIN HPC can be build with various options, issue ./configure --help
+to list all of them.
+
 

@@ -15,14 +15,10 @@
 #include "GenericTensor.h"
 #include <dolfin/main/MPI.h>
 
-#ifndef NO_UBLAS
-#include "uBlasFactory.h"
-#else
 #ifdef HAVE_PETSC
 #include "PETScFactory.h"
 #else
 #include "JANPACKFactory.h"
-#endif
 #endif
 
 namespace dolfin
@@ -108,14 +104,11 @@ namespace dolfin
     /// Return a factory for the default linear algebra backend
     inline LinearAlgebraFactory& factory() const 
     {
-#ifndef NO_UBLAS
-      return uBlasFactory<>::instance();
-#else
+
 #ifdef HAVE_PETSC
       return PETScFactory::instance();
 #else
       return JANPACKFactory::instance();
-#endif
 #endif
     }
 

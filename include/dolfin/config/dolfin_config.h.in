@@ -98,9 +98,6 @@
 /* Compile without progress bar */
 #undef NO_PROGRESS_BAR
 
-/* Compile without support for uBlas */
-#undef NO_UBLAS
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 

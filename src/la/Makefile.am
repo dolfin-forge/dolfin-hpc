@@ -24,11 +24,5 @@ libdolfin_la_la_SOURCES = \
 			SLEPcEigenvalueSolver.cpp\
 			SingularSolver.cpp\
 			SparsityPattern.cpp\
-			solve.cpp\
-			uBlasDummyPreconditioner.cpp\
-			uBlasILUPreconditioner.cpp\
-			uBlasKrylovMatrix.cpp\
-			uBlasKrylovSolver.cpp\
-			uBlasLUSolver.cpp\
-			uBlasVector.cpp
+			solve.cpp
 

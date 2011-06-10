@@ -3,9 +3,10 @@
 //
 // Modified by Ola Skavhaug, 2008.
 // Modified by Anders Logg, 2008.
+// Modified by Niclas Jansson, 2010-2011.
 //
 // First added:  2007-07-03
-// Last changed: 2008-06-13
+// Last changed: 2011-06-10
 
 #ifndef __KRYLOV_SOLVER_H
 #define __KRYLOV_SOLVER_H
@@ -25,13 +26,6 @@
 #include "SolverType.h"
 #include "PreconditionerType.h"
 
-#ifndef NO_UBLAS
-#include "uBlasKrylovSolver.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasDenseMatrix.h"
-#include "uBlasVector.h"
-#endif
-
 namespace dolfin
 {
 
@@ -44,13 +38,12 @@ namespace dolfin
     
     /// Create Krylov solver
     KrylovSolver(SolverType solver_type=default_solver, PreconditionerType pc_type=default_pc)
-      : solver_type(solver_type), pc_type(pc_type), ublas_solver(0), petsc_solver(0), 
-      epetra_solver(0), janpack_solver(0) {}
+      : solver_type(solver_type), pc_type(pc_type), petsc_solver(0), epetra_solver(0), 
+      janpack_solver(0) {}
     
     /// Destructor
     ~KrylovSolver()
     {
-      delete ublas_solver; 
       delete petsc_solver; 
       delete epetra_solver; 
       delete janpack_solver;
@@ -60,27 +53,7 @@ namespace dolfin
     uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
     { 
       Timer timer("Krylov solver");
-#ifndef NO_UBLAS
-      if (A.has_type<uBlasSparseMatrix>())
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasKrylovSolver(solver_type, pc_type);
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->solve(A.down_cast<uBlasSparseMatrix>(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
-      }
 
-      if (A.has_type<uBlasDenseMatrix>())
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasKrylovSolver(solver_type, pc_type);
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->solve(A.down_cast<uBlasDenseMatrix>(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
-      }
-#endif
 #ifdef HAVE_PETSC
       if (A.has_type<PETScMatrix>())
       {
@@ -126,13 +99,6 @@ namespace dolfin
     // Preconditioner type
     PreconditionerType pc_type;
     
-#ifndef NO_UBLAS
-    // uBLAS solver
-    uBlasKrylovSolver* ublas_solver;
-#else
-    int* ublas_solver;
-#endif
-
     // PETSc solver
 #ifdef HAVE_PETSC
     PETScKrylovSolver* petsc_solver;

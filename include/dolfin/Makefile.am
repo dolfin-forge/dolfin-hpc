@@ -81,7 +81,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				io/BinaryFile.h\
 				io/MFile.h\
 				io/XMLDofMap.h\
-				io/PythonFile.h\
 				io/GenericFile.h\
 				io/XMLObject.h\
 				parameter/DefaultParameters.h\
@@ -171,7 +170,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/PreconditionerType.h\
 				la/EpetraMatrix.h\
 				la/JANPACKKrylovSolver.h\
-				la/uBlasVector.h\
 				la/PETScMatrix.h\
 				la/GenericSparsityPattern.h\
 				la/GenericVector.h\
@@ -182,18 +180,13 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/LUSolver.h\
 				la/SparsityPattern.h\
 				la/LinearAlgebraFactory.h\
-				la/uBlasILUPreconditioner.h\
-				la/uBlasPreconditioner.h\
 				la/Vector.h\
 				la/EpetraVector.h\
 				la/EpetraSparsityPattern.h\
-				la/uBlasLUSolver.h\
 				la/PETScLUSolver.h\
-				la/uBlasDummyPreconditioner.h\
 				la/JANPACKMat.h\
 				la/JANPACKFactory.h\
 				la/dolfin_la.h\
-				la/uBlasDenseMatrix.h\
 				la/DefaultFactory.h\
 				la/PETScKrylovSolver.h\
 				la/GenericMatrix.h\
@@ -203,22 +196,16 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/SolverType.h\
 				la/PETScPreconditioner.h\
 				la/SLEPcEigenvalueSolver.h\
-				la/uBlasSparseMatrix.h\
-				la/uBlasKrylovSolver.h\
 				la/VectorNormType.h\
 				la/PETScObject.h\
 				la/PETScFactory.h\
 				la/EpetraKrylovSolver.h\
 				la/EpetraPreconditioner.h\
-				la/uBlasKrylovMatrix.h\
 				la/EpetraLUSolver.h\
 				la/PETScKrylovMatrix.h\
-				la/ublas.h\
 				la/LinearSolver.h\
-				la/uBlasFactory.h\
 				la/PETScVector.h\
 				la/SingularSolver.h\
-				la/uBlasMatrix.h\
 				graph/GraphEditor.h\
 				graph/DirectedClique.h\
 				graph/dolfin_graph.h\

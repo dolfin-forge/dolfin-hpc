@@ -21,9 +21,6 @@ AC_ARG_ENABLE(optimize-p1, AC_HELP_STRING([--enable-optimize-p1],
 			   [Compile with optimization for P1 elements]),
 			   [enable_optimize_p1=${enableval}],[enable_optimize_p1=no])
 
-AC_ARG_ENABLE(ublas, AC_HELP_STRING([--disable-ublas], [Compile without support for uBlas]),
-		     [enable_ublas=no],[enable_ublas=yes])
-
 AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],[Compile without progress bar]),
 			    [enable_progressbar=no],[enable_progressbar=yes])
 AC_ARG_ENABLE(mpi,
@@ -56,12 +53,6 @@ fi
 
 if test "x${enable_optimize_p1}" = xyes; then
    AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], [Compile with optimization for P1 elements])
-fi
-
-if test "x${enable_ublas}" != xyes; then
-   AC_DEFINE(NO_UBLAS, [1], [Compile without support for uBlas])
-else
-   need_boost=yes	
 fi
 
 if test "x${enable_progressbar}" != xyes; then
@@ -215,7 +206,6 @@ Package features:
 
   MPI: ${enable_mpi}
   OpenMP: ${enable_openmp}
-  uBlas: ${enable_ublas}
   PETSc: ${with_petsc}
   JANPACK: ${with_janpack}
   GTS: ${with_gts}

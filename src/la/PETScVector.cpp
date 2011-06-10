@@ -18,7 +18,6 @@
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/PETScVector.h>
-#include <dolfin/la/uBlasVector.h>
 #include <dolfin/la/PETScFactory.h>
 #include <dolfin/main/MPI.h>
 

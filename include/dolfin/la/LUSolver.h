@@ -5,9 +5,10 @@
 // Modified by Dag Lindbo, 2008.
 // Modified by Anders Logg, 2008.
 // Modified by Kent-Andre Mardal, 2008.
+// Modified by Niclas Jansson, 2010-2011.
 //
 // First added:  2007-07-03
-// Last changed: 2008-06-13
+// Last changed: 2011-06-10
 
 #ifndef __LU_SOLVER_H
 #define __LU_SOLVER_H
@@ -22,11 +23,6 @@
 #include "EpetraLUSolver.h"
 #include "EpetraMatrix.h"
 
-#ifndef NO_UBLAS
-#include "uBlasLUSolver.h"
-#include "uBlasSparseMatrix.h"
-#include "uBlasDenseMatrix.h"
-#endif
 
 namespace dolfin
 {
@@ -38,11 +34,10 @@ namespace dolfin
     
   public:
 
-    LUSolver() : ublas_solver(0), petsc_solver(0), epetra_solver(0) {}
+    LUSolver() : petsc_solver(0), epetra_solver(0) {}
     
     ~LUSolver() 
     { 
-      delete ublas_solver; 
       delete petsc_solver; 
       delete epetra_solver; 
     }
@@ -50,27 +45,7 @@ namespace dolfin
     uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b)
     {
       Timer timer("LU solver");
-#ifndef NO_UBLAS
-      if (A.has_type<uBlasSparseMatrix>()) 
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasLUSolver();
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->solve(A.down_cast<uBlasSparseMatrix>(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
-      }
 
-      if (A.has_type<uBlasDenseMatrix>()) 
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasLUSolver();
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->solve(A.down_cast<uBlasDenseMatrix >(), x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
-      }
-#endif
 #ifdef HAVE_PETSC
       if (A.has_type<PETScMatrix>()) 
       {
@@ -100,20 +75,7 @@ namespace dolfin
 
     uint factorize(const GenericMatrix& A)
     {
-#ifndef NO_UBLAS
-      if (A.has_type<uBlasSparseMatrix>()) 
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasLUSolver();
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->factorize(A.down_cast<uBlasSparseMatrix>());
-      }
 
-      if (A.has_type<uBlasDenseMatrix>())
-        error("Will only factorize sparse matrices");
-#endif
       error("No matrix factorization for given backend.");
       return 0;
 
@@ -121,30 +83,12 @@ namespace dolfin
     
     uint factorized_solve(GenericVector& x, const GenericVector& b)
     {
-#ifndef NO_UBLAS
-      if (b.has_type<uBlasVector>()) 
-      {
-        if (!ublas_solver)
-        {
-          ublas_solver = new uBlasLUSolver();
-          ublas_solver->set("parent", *this);
-        }
-        return ublas_solver->factorized_solve(x.down_cast<uBlasVector>(), b.down_cast<uBlasVector>());
-      }
-
       error("No factorized LU solver for given backend.");
-#endif
       return 0;
     }
 
   private:
 
-#ifndef NO_UBLAS
-    // uBLAS solver
-    uBlasLUSolver* ublas_solver;
-#else
-    int* ublas_solver;
-#endif
     // PETSc Solver
 #ifdef HAVE_PETSC
     PETScLUSolver* petsc_solver;

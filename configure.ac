@@ -13,6 +13,9 @@ AC_SUBST(PACKAGE_REQUIRES)
 
 
 # Feature options.
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[Compile with debug symbols]),
+		     [enable_debug=${enableval}],[enable_debug=no])
+
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
 			      [Compile with local data cache in functions]),
 			      [enable_function_cache=${enableval}],[enable_function_cache=no])
@@ -20,9 +23,6 @@ AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
 AC_ARG_ENABLE(optimize-p1, AC_HELP_STRING([--enable-optimize-p1],
 			   [Compile with optimization for P1 elements]),
 			   [enable_optimize_p1=${enableval}],[enable_optimize_p1=no])
-
-AC_ARG_ENABLE(ublas, AC_HELP_STRING([--disable-ublas], [Compile without support for uBlas]),
-		     [enable_ublas=no],[enable_ublas=yes])
 
 AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],[Compile without progress bar]),
 			    [enable_progressbar=no],[enable_progressbar=yes])
@@ -63,12 +63,6 @@ fi
 
 if test "x${enable_optimize_p1}" = xyes; then
    AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], [Compile with optimization for P1 elements])
-fi
-
-if test "x${enable_ublas}" != xyes; then
-   AC_DEFINE(NO_UBLAS, [1], [Compile without support for uBlas])
-else
-   need_boost=yes	
 fi
 
 if test "x${enable_progressbar}" != xyes; then
@@ -177,6 +171,10 @@ if test "x${with_janpack}" != xno; then
    AX_JANPACK
 fi
 
+if test "x${enable_debug}" != xno; then
+   CXXFLAGS="-g -DDEBUG $CXXFLAGS"
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -207,12 +205,9 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/main/Makefile\
 			  src/math/Makefile\
 			  src/mesh/Makefile\
-			  src/mf/Makefile\
 			  src/nls/Makefile\
-			  src/ode/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
-			  src/quadrature/Makefile\
 			  src/dolfin.pc
 			  include/Makefile
 			  include/dolfin/Makefile])
@@ -235,7 +230,6 @@ Package features:
   MPI: ${enable_mpi} 
   MPI I/O: ${enable_mpiio}
   OpenMP: ${enable_openmp}
-  uBlas: ${enable_ublas}
   PETSc: ${with_petsc}
   JANPACK: ${with_janpack}
   GTS: ${with_gts}

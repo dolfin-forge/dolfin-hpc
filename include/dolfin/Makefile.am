@@ -81,7 +81,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				io/BinaryFile.h\
 				io/MFile.h\
 				io/XMLDofMap.h\
-				io/PythonFile.h\
 				io/GenericFile.h\
 				io/XMLObject.h\
 				parameter/DefaultParameters.h\
@@ -110,47 +109,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				pde/NonlinearPDE.h\
 				pde/dolfin_pde.h\
 				pde/LinearPDE.h\
-				ode/TimeSlabSolver.h\
-				ode/MonoAdaptiveNewtonSolver.h\
-				ode/dolfin_ode.h\
-				ode/MultiAdaptiveTimeSlab.h\
-				ode/HomotopyODE.h\
-				ode/Dual.h\
-				ode/MonoAdaptivity.h\
-				ode/Partition.h\
-				ode/Adaptivity.h\
-				ode/MultiAdaptiveFixedPointSolver.h\
-				ode/UpdatedMultiAdaptiveJacobian.h\
-				ode/MonoAdaptiveTimeSlab.h\
-				ode/ReducedModel.h\
-				ode/ODESolver.h\
-				ode/ODE.h\
-				ode/dGqMethod.h\
-				ode/ODESolution.h\
-				ode/TimeSlabJacobian.h\
-				ode/Alloc.h\
-				ode/Sample.h\
-				ode/Dependencies.h\
-				ode/Method.h\
-				ode/Homotopy.h\
-				ode/HomotopyJacobian.h\
-				ode/MultiAdaptivePreconditioner.h\
-				ode/MultiAdaptiveNewtonSolver.h\
-				ode/MultiAdaptivity.h\
-				ode/Controller.h\
-				ode/MonoAdaptiveFixedPointSolver.h\
-				ode/cGqMethod.h\
-				ode/ComplexODE.h\
-				ode/TimeSlab.h\
-				ode/MultiAdaptiveJacobian.h\
-				ode/TimeStepper.h\
-				ode/MonoAdaptiveJacobian.h\
-				quadrature/GaussianQuadrature.h\
-				quadrature/LobattoQuadrature.h\
-				quadrature/GaussQuadrature.h\
-				quadrature/RadauQuadrature.h\
-				quadrature/Quadrature.h\
-				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
@@ -206,37 +164,25 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/IntervalCell.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
-				math/Lagrange.h\
-				math/Legendre.h\
 				math/basic.h\
 				math/dolfin_math.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
-				la/EpetraMatrix.h\
 				la/JANPACKKrylovSolver.h\
-				la/uBlasVector.h\
 				la/PETScMatrix.h\
 				la/GenericSparsityPattern.h\
 				la/GenericVector.h\
 				la/GenericTensor.h\
 				la/JANPACKVec.h\
 				la/NormalizationType.h\
-				la/EpetraFactory.h\
 				la/LUSolver.h\
 				la/SparsityPattern.h\
 				la/LinearAlgebraFactory.h\
-				la/uBlasILUPreconditioner.h\
-				la/uBlasPreconditioner.h\
 				la/Vector.h\
-				la/EpetraVector.h\
-				la/EpetraSparsityPattern.h\
-				la/uBlasLUSolver.h\
 				la/PETScLUSolver.h\
-				la/uBlasDummyPreconditioner.h\
 				la/JANPACKMat.h\
 				la/JANPACKFactory.h\
 				la/dolfin_la.h\
-				la/uBlasDenseMatrix.h\
 				la/DefaultFactory.h\
 				la/PETScKrylovSolver.h\
 				la/GenericMatrix.h\
@@ -246,22 +192,13 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/SolverType.h\
 				la/PETScPreconditioner.h\
 				la/SLEPcEigenvalueSolver.h\
-				la/uBlasSparseMatrix.h\
-				la/uBlasKrylovSolver.h\
 				la/VectorNormType.h\
 				la/PETScObject.h\
 				la/PETScFactory.h\
-				la/EpetraKrylovSolver.h\
-				la/EpetraPreconditioner.h\
-				la/uBlasKrylovMatrix.h\
-				la/EpetraLUSolver.h\
 				la/PETScKrylovMatrix.h\
-				la/ublas.h\
 				la/LinearSolver.h\
-				la/uBlasFactory.h\
 				la/PETScVector.h\
 				la/SingularSolver.h\
-				la/uBlasMatrix.h\
 				graph/GraphEditor.h\
 				graph/DirectedClique.h\
 				graph/dolfin_graph.h\
@@ -282,20 +219,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				fem/DofMap.h\
 				fem/BoundaryCondition.h\
 				fem/UFCMesh.h\
-				mf/StiffnessMatrix.h\
-				mf/MassMatrix.h\
-				mf/dolfin_mf.h\
-				mf/MatrixFactory.h\
-				mf/ffc-forms/StiffnessMatrix2D.h\
-				mf/ffc-forms/ConvectionMatrix3D.h\
-				mf/ffc-forms/ConvectionMatrix2D.h\
-				mf/ffc-forms/LoadVector2D.h\
-				mf/ffc-forms/MassMatrix3D.h\
-				mf/ffc-forms/LoadVector3D.h\
-				mf/ffc-forms/MassMatrix2D.h\
-				mf/ffc-forms/StiffnessMatrix3D.h\
-				mf/ConvectionMatrix.h\
-				mf/LoadVector.h\
 				log/Event.h\
 				log/Logger.h\
 				log/dolfin_log.h\

@@ -2,13 +2,6 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_la.la
 libdolfin_la_la_SOURCES = \
 			DefaultFactory.cpp\
-			EpetraFactory.cpp\
-			EpetraKrylovSolver.cpp\
-			EpetraLUSolver.cpp\
-			EpetraMatrix.cpp\
-			EpetraPreconditioner.cpp\
-			EpetraSparsityPattern.cpp\
-			EpetraVector.cpp\
 			JANPACKFactory.cpp\
 			JANPACKKrylovSolver.cpp\
 			JANPACKMat.cpp\
@@ -24,11 +17,5 @@ libdolfin_la_la_SOURCES = \
 			SLEPcEigenvalueSolver.cpp\
 			SingularSolver.cpp\
 			SparsityPattern.cpp\
-			solve.cpp\
-			uBlasDummyPreconditioner.cpp\
-			uBlasILUPreconditioner.cpp\
-			uBlasKrylovMatrix.cpp\
-			uBlasKrylovSolver.cpp\
-			uBlasLUSolver.cpp\
-			uBlasVector.cpp
+			solve.cpp
 

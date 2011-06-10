@@ -32,7 +32,6 @@ namespace dolfin
     virtual void operator<< (GenericMatrix& A) = 0;
     void operator<< (Mesh& mesh);
     void operator<< (Function& u);
-    void operator<< (Sample& sample);
 
   };
   

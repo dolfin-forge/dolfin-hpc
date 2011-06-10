@@ -8,14 +8,12 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/function/Function.h>
-#include <dolfin/ode/Sample.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/io/MFile.h>
@@ -203,57 +201,5 @@ void MFile::operator<<(Function& u)
 */
 }
 //-----------------------------------------------------------------------------
-void MFile::operator<<(Sample& sample)
-{
-  // Open file
-  FILE *fp = fopen(filename.c_str(), "a");
 
-  // Initialize data structures first time
-  if ( counter2 == 0 )
-  {
-    fprintf(fp, "t = [];\n");
-    fprintf(fp, "%s = [];\n", sample.name().c_str());
-    fprintf(fp, "k = [];\n");
-    fprintf(fp, "r = [];\n");
-    fprintf(fp, "\n");
-  }
-  
-  // Save time
-  fprintf(fp, "t = [t %.15e];\n", sample.t());
 
-  // Save solution
-  fprintf(fp, "tmp = [ ");
-  for (unsigned int i = 0; i < sample.size(); i++)
-    fprintf(fp, "%.15e ", sample.u(i));  
-  fprintf(fp, "];\n");
-  fprintf(fp, "%s = [%s tmp'];\n", 
-	  sample.name().c_str(), sample.name().c_str());
-  //fprintf(fp, "clear tmp;\n");
-
-  // Save time steps
-  fprintf(fp, "tmp = [ ");
-  for (unsigned int i = 0; i < sample.size(); i++)
-    fprintf(fp, "%.15e ", sample.k(i));
-
-  fprintf(fp, "];\n");
-  fprintf(fp, "k = [k tmp'];\n");
-  //fprintf(fp, "clear tmp;\n");
-
-  // Save residuals
-  fprintf(fp, "tmp = [ ");
-  for (unsigned int i = 0; i < sample.size(); i++)
-    fprintf(fp, "%.15e ", sample.r(i));
-
-  fprintf(fp, "];\n");
-  fprintf(fp, "r = [r tmp'];\n");
-  fprintf(fp, "clear tmp;\n");
-
-  // Increase frame counter
-  counter2++;
-  
-  // Close file
-  fclose(fp);
-}
-//-----------------------------------------------------------------------------
-
-#endif

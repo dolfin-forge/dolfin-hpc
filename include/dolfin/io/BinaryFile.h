@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-08
+// Last changed: 2011-06-10
 
 
 #ifndef __BINARY_FILE_H
@@ -13,6 +13,8 @@
 #include <dolfin/la/Vector.h>
 #include "GenericFile.h"
 
+
+#define BINARY_MAGIC 0xBABE
 
 namespace dolfin
 {
@@ -33,13 +35,16 @@ namespace dolfin
 
   private:
     
+    enum Binary_data_type { BINARY_MESH_DATA, BINARY_VECTOR_DATA};
+    
 #ifdef ENABLE_MPIIO
     typedef struct {
+      uint32_t magic;
       uint32_t bendian; 
       uint32_t pe_size;
+      Binary_data_type type;
     } BinaryFileHeader;
 #endif      
-
 
     typedef struct {
       uint v1; 
@@ -55,17 +60,28 @@ namespace dolfin
 				    (double)  L));
     };
 
-    inline void hdr_check(BinaryFileHeader hdr, uint pe_size, bool check_pe_size)
+#ifdef ENABLE_MPIIO
+    inline void hdr_check(BinaryFileHeader hdr, Binary_data_type type, uint pe_size)
     {     
+      
+      if (hdr.magic != BINARY_MAGIC)
+	error("Corrupt header");
+
 #ifdef HAVE_BIG_ENDIAN
-      if (!hdr.bendian || (check_pe_size && hdr.pe_size != pe_size))
-	error("Shut her down, Scotty, she's sucking mud again!");
+      if (!hdr.bendian)
+	error("File written in little endian");
 #else
-      message("hdr.bendian: %d hdr.pe_size: %d sizeof(hdr): %d", hdr.bendian, hdr.pe_size, sizeof(BinaryFileHeader));
-      if (hdr.bendian || (check_pe_size && hdr.pe_size != pe_size))
-	error("Shut her down, Scotty, she's sucking mud again!");
+      if (hdr.bendian)
+	error("File written in big endian");
 #endif
+
+      if (hdr.type != type)
+	error("Invalid data type in file");
+      
+      if (hdr.type == BINARY_VECTOR_DATA && (hdr.pe_size != pe_size))
+	error("File stored on %d PE's, currently running on %d PE's", hdr.pe_size, pe_size);
     };
+#endif
   };
 }
 #endif

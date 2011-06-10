@@ -1,43 +1,35 @@
-Contents
 
-    1. Installation
-    2. License
-    3. Feedback
-    4. About
+DOLFIN HPC
+----------
 
--------------------------------------------------------------------------------
-1. Installation
+Background:
 
-To build DOLFIN, run
+DOLFIN HPC is a special branch of DOLFIN optimized for distributed
+memory architectures. Based on DOLFIN 0.8.0, the HPC branch is
+parallelized using a hybrid MPI/OpenMP approach with parallel local
+mesh refinement, dynamic load balancing and parallel I/O (MPI
+I/O). The implementation is portable and has been verified to work on
+several different architectures such as SGI Origin systems, IBM
+BlueGene/L and Cray XT6-XE6 systems.
 
-    scons
 
-After a successful build, you may install DOLFIN by running
+The package dependencies of DOLFIN HPC are:
 
-    scons install prefix=<somewhere>
+    * ufc 1.1
+    * ffc 0.5.1
+    * ParMETIS
+    * Supported LA-backend (currently PETSc or JANPACK)
 
-For detailed installation instructions, see
+Installation:
 
-    <insert page here after removing old autotools page on wiki>
+DOLFIN HPC uses autotools. To build and install the package, follow
+these steps:
 
-------------------------------------------------------------------------------
-2. License
+1. ./configure
+2. make 
+3. make install
 
-DOLFIN is licensed under the GNU LGPL Version 2.1, see http://www.gnu.org.
+DOLFIN HPC can be build with various options, issue ./configure --help
+to list all of them.
 
--------------------------------------------------------------------------------
-3. Feed back
 
-Feed back, patches, and comments should be sent to
-
-    dolfin-dev@fenics.org
-
-------------------------------------------------------------------------------
-4. About
-
-A hopefully complete list of authors is given in the file AUTHORS.
-
-For more information about DOLFIN, visit
-
-    http://www.fenics.org/dolfin/
-------------------------------------------------------------------------------

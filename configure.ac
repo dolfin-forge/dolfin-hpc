@@ -13,6 +13,9 @@ AC_SUBST(PACKAGE_REQUIRES)
 
 
 # Feature options.
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[Compile with debug symbols]),
+		     [enable_debug=${enableval}],[enable_debug=no])
+
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
 			      [Compile with local data cache in functions]),
 			      [enable_function_cache=${enableval}],[enable_function_cache=no])
@@ -150,6 +153,10 @@ fi
 
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
+fi
+
+if test "x${enable_debug}" != xno; then
+   CXXFLAGS="-g -DDEBUG $CXXFLAGS"
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.

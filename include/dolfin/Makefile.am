@@ -168,7 +168,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				math/dolfin_math.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
-				la/EpetraMatrix.h\
 				la/JANPACKKrylovSolver.h\
 				la/PETScMatrix.h\
 				la/GenericSparsityPattern.h\
@@ -176,13 +175,10 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/GenericTensor.h\
 				la/JANPACKVec.h\
 				la/NormalizationType.h\
-				la/EpetraFactory.h\
 				la/LUSolver.h\
 				la/SparsityPattern.h\
 				la/LinearAlgebraFactory.h\
 				la/Vector.h\
-				la/EpetraVector.h\
-				la/EpetraSparsityPattern.h\
 				la/PETScLUSolver.h\
 				la/JANPACKMat.h\
 				la/JANPACKFactory.h\
@@ -199,9 +195,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/VectorNormType.h\
 				la/PETScObject.h\
 				la/PETScFactory.h\
-				la/EpetraKrylovSolver.h\
-				la/EpetraPreconditioner.h\
-				la/EpetraLUSolver.h\
 				la/PETScKrylovMatrix.h\
 				la/LinearSolver.h\
 				la/PETScVector.h\

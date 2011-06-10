@@ -9,7 +9,6 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/la/PETScFactory.h>
-#include <dolfin/la/EpetraFactory.h>
 #include <dolfin/la/JANPACKFactory.h>
 #include <dolfin/la/DefaultFactory.h>
 
@@ -42,12 +41,6 @@ LinearAlgebraFactory& DefaultFactory::factory() const
   {
 #ifdef HAVE_PETSC
     return PETScFactory::instance();
-#endif
-  }
-  else if (backend == "Epetra")
-  {
-#ifdef HAVE_TRILINOS
-    return EpetraFactory::instance();
 #endif
   }
   else if (backend == "JANPACK")

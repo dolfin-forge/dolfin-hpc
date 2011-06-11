@@ -214,7 +214,8 @@ void BinaryFile::operator>>(Mesh& mesh)
   }
   else
   {
-
+#ifdef ENABLE_MPIIO
+    
     uint pe_size = MPI::numProcesses();
     uint pe_rank = MPI::processNumber();
 
@@ -587,7 +588,9 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete[] non_local_cells;
     delete[] ghosts;
 
-
+#else
+    error("MPI and MPI I/O is required for reading binary meshes in parallel");
+#endif
 
   }
 }  
@@ -631,6 +634,7 @@ void BinaryFile::operator<<(Mesh& mesh)
   else 
   {
 
+#ifdef ENABLE_MPIIO
     BinaryFileHeader hdr;
     hdr.magic = BINARY_MAGIC;
     hdr.pe_size = MPI::numProcesses();
@@ -721,6 +725,10 @@ void BinaryFile::operator<<(Mesh& mesh)
 
 
     MPI_File_close(&fh);
+    
+#else
+    error("MPI and MPI I/O is required for writing a mesh in parallel");
+#endif
     
   }
 

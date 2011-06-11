@@ -12,12 +12,14 @@
 
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/parameter/parameters.h>
 #include "GenericTensor.h"
 #include <dolfin/main/MPI.h>
 
 #ifdef HAVE_PETSC
 #include "PETScFactory.h"
-#else
+#endif
+#ifdef HAVE_JANPACK
 #include "JANPACKFactory.h"
 #endif
 
@@ -105,11 +107,23 @@ namespace dolfin
     inline LinearAlgebraFactory& factory() const 
     {
 
+      // Get backend from parameter system
+      std::string backend = dolfin_get("linear algebra backend");
+      
+      if (backend == "PETSc")
+	{
 #ifdef HAVE_PETSC
-      return PETScFactory::instance();
-#else
-      return JANPACKFactory::instance();
+	  return PETScFactory::instance();
 #endif
+	}
+      else if (backend == "JANPACK")
+	{
+#ifdef HAVE_JANPACK
+	  return JANPACKFactory::instance();
+#endif
+	}
+
+      error("Linear algebra backend \"" + backend + "\" not available.");
     }
 
     /// Get value

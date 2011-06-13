@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-10
+// Last changed: 2011-06-13
 
 
 #ifndef __BINARY_FILE_H
@@ -15,6 +15,7 @@
 
 
 #define BINARY_MAGIC 0xBABE
+#define FNAME_LENGTH 256
 
 namespace dolfin
 {
@@ -54,6 +55,8 @@ namespace dolfin
       uint32_t dim;
       uint32_t offset;
       uint32_t size;
+      real t;
+      char name[FNAME_LENGTH];      
     } BinaryFunctionHeader;
 #endif      
 

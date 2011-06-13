@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-08
+// Last changed: 2011-06-13
 
 #include <algorithm>
 #include <fstream>
@@ -23,13 +23,14 @@
 using namespace dolfin;
 
 //----------------------------------------------------------------------------
-BinaryFile::BinaryFile(const std::string filename) : GenericFile(filename)
+BinaryFile::BinaryFile(const std::string filename) : GenericFile(filename), 
+						     _t(0)
 {
   type = "Binary";
 }
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real &t) : 
-  GenericFile(filename), _t(0)
+  GenericFile(filename), _t(&t)
 {
   type = "Binary";
 }
@@ -230,7 +231,13 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
       f_hdr.dim = dim;
       f_hdr.size = size;
       f_hdr.offset = u->vector().offset();
-
+      if (name.length() >FNAME_LENGTH)
+	error("Function name too long.");      
+      memcpy(&f_hdr.name[0], name.c_str(), name.length());
+      if (_t) 	
+	f_hdr.t = *_t;
+      else 
+	f_hdr.t = counter;
       MPI_File_write_at_all(fh, byte_offset + pe_rank * sizeof(BinaryFunctionHeader), 
 			    &f_hdr, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
       byte_offset += hdr.pe_size * sizeof(BinaryFunctionHeader);

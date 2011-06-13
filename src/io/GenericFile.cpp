@@ -175,7 +175,7 @@ void GenericFile::write()
 {
 
 
-  if ( !opened_write ) {
+  if ( !opened_write && type != "Binary") {
     //FIXME: temporary fix, only rank == 0 is allowed to clear the file
     if(type == "VTK" ) {
       if(MPI::processNumber() == 0) {

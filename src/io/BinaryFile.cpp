@@ -28,6 +28,12 @@ BinaryFile::BinaryFile(const std::string filename) : GenericFile(filename)
   type = "Binary";
 }
 //----------------------------------------------------------------------------
+BinaryFile::BinaryFile(const std::string filename, real &t) : 
+  GenericFile(filename), _t(0)
+{
+  type = "Binary";
+}
+//----------------------------------------------------------------------------
 BinaryFile::~BinaryFile()
 {
   // Do nothing
@@ -85,6 +91,8 @@ void BinaryFile::operator<<(GenericVector& x)
   uint size = x.local_size();
   real *values = new real[size];
 
+  nameUpdate(counter);
+
 #ifdef ENABLE_MPIIO
   uint offset[2] = {0,0};
   offset[0] = x.offset();
@@ -107,7 +115,7 @@ void BinaryFile::operator<<(GenericVector& x)
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename.c_str(),
 		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
   MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 
@@ -127,9 +135,116 @@ void BinaryFile::operator<<(GenericVector& x)
   fp.close();
 #endif
 
+  counter++;
   delete[] values;     
-
+  
   message(1, "Saved vector to file %s in binary format.", filename.c_str());  
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(Function &u)
+{
+  std::pair<Function*, std::string> f(&u, "U");
+  std::vector<std::pair<Function*, std::string> > tmp;
+  tmp.push_back(f);
+  write_function(tmp);
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
+{
+  write_function(f);
+}
+//----------------------------------------------------------------------------
+void BinaryFile::write_function(std::vector<std::pair<Function*, 
+				std::string> >& f) 
+{
+
+#ifdef ENABLE_MPIIO
+
+  nameUpdate(counter);
+
+  BinaryFileHeader hdr;
+  uint pe_rank = MPI::processNumber();  
+  hdr.magic = BINARY_MAGIC;
+  hdr.pe_size = MPI::numProcesses();
+  hdr.type = BINARY_FUNCTION_DATA;  
+#ifdef HAVE_BIG_ENDIAN
+  hdr.bendian = 1;
+#else
+  hdr.bendian = 0;
+#endif
+
+  MPI_File fh;
+  MPI_Offset byte_offset;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename.c_str(),
+		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 
+		     MPI_BYTE, MPI_STATUS_IGNORE);
+  byte_offset = sizeof(BinaryFileHeader);
+
+  // Assume same mesh for all data arrays
+  Mesh& mesh = f[0].first->mesh();
+
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+       it != f.end(); it++) 
+    {
+      Function* u = it->first;
+      
+      std::string& name = it->second;
+      const uint rank = u->rank();
+      if(rank > 1)
+	error("Only scalar and vectors functions can be saved in Binary.");
+      
+      // Get number of components
+      const uint dim = u->dim(0);
+      
+      // Allocate memory for function values at vertices
+      uint size = mesh.numVertices();
+      for (uint i = 0; i < u->rank(); i++)
+	size *= u->dim(i);
+      real *values = new real[size];
+      
+      // Pointer to final data
+      real *dp;
+
+      // Get function values at vertices
+      u->interpolate(values);
+
+      if (rank == 0)
+	dp = &values[0];
+      else 
+      {
+	real *data = new real[size];
+	dp = &data[0];
+	for (VertexIterator v(mesh); !v.end(); ++v) 
+	{
+	  if (!mesh.distdata().is_ghost(v->index(), 0))
+	    for (uint i = 0; i < u->dim(0); i++)
+	    *(dp++) = values[ v->index() + i * mesh.numVertices()];
+	}	       
+	dp = &data[0];
+
+      }            
+      size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));      
+      
+      BinaryFunctionHeader f_hdr;
+      f_hdr.dim = dim;
+      f_hdr.size = size;
+      f_hdr.offset = u->vector().offset();
+
+      MPI_File_write_at_all(fh, byte_offset + pe_rank * sizeof(BinaryFunctionHeader), 
+			    &f_hdr, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+      byte_offset += hdr.pe_size * sizeof(BinaryFunctionHeader);
+      MPI_File_write_at_all(fh, byte_offset + f_hdr.offset*sizeof(real),
+			    values, f_hdr.size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+      byte_offset += u->dim(0) * (mesh.distdata().global_numVertices() * sizeof(real));
+    }
+  
+  MPI_File_close(&fh);
+
+  counter++;
+#else
+  error("MPI I/O is required to save functions in Binary.");
+#endif
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(Mesh& mesh)
@@ -734,6 +849,23 @@ void BinaryFile::operator<<(Mesh& mesh)
   }
 
   message(1, "Saved mesh to file %s in binary format.", filename.c_str());    
+}
+//----------------------------------------------------------------------------
+void BinaryFile::nameUpdate(const int counter)
+{
+  std::string filestart, extension;
+  std::ostringstream fileid, newfilename;
+  
+  fileid.fill('0');
+  fileid.width(6);
+  
+  filestart.assign(filename, 0, filename.find("."));
+  extension.assign(filename, filename.find("."), filename.size());
+  
+  fileid << counter;
+  newfilename << filestart << fileid.str() << ".bin";
+  
+  bin_filename = newfilename.str();
 }
 //----------------------------------------------------------------------------
 

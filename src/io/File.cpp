@@ -80,7 +80,9 @@ File::File(const std::string& filename, real& t)
 {
 
   if ( filename.rfind(".pvd") != filename.npos )
-      file = new VTKFile(filename, t);
+    file = new VTKFile(filename, t);
+  else if( filename.rfind(".bin") != filename.npos)
+    file = new BinaryFile(filename , t);
   else
   {
     file = 0;

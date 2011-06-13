@@ -23,6 +23,7 @@ namespace dolfin
     
   public:
     BinaryFile(const std::string filename);
+    BinaryFile(const std::string filename, real& t);
     ~BinaryFile();
     
     // Input
@@ -32,10 +33,14 @@ namespace dolfin
     // Output
     void operator<< (GenericVector& x);
     void operator<< (Mesh& mesh);
+    void operator<< (Function& u);
+    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
 
   private:
     
-    enum Binary_data_type { BINARY_MESH_DATA, BINARY_VECTOR_DATA};
+    enum Binary_data_type { BINARY_MESH_DATA, 
+			    BINARY_VECTOR_DATA,
+			    BINARY_FUNCTION_DATA};
     
 #ifdef ENABLE_MPIIO
     typedef struct {
@@ -44,6 +49,12 @@ namespace dolfin
       uint32_t pe_size;
       Binary_data_type type;
     } BinaryFileHeader;
+
+    typedef struct {
+      uint32_t dim;
+      uint32_t offset;
+      uint32_t size;
+    } BinaryFunctionHeader;
 #endif      
 
     typedef struct {
@@ -60,7 +71,14 @@ namespace dolfin
 				    (double)  L));
     };
 
+
+    void nameUpdate(const int counter);
+
 #ifdef ENABLE_MPIIO
+
+    void write_function(std::vector<std::pair<Function*, std::string> >& f);
+
+
     inline void hdr_check(BinaryFileHeader hdr, Binary_data_type type, uint pe_size)
     {     
       
@@ -82,6 +100,12 @@ namespace dolfin
 	error("File stored on %d PE's, currently running on %d PE's", hdr.pe_size, pe_size);
     };
 #endif
+
+    // function filename
+    std::string bin_filename;
+
+    // Current time
+    real* _t;
   };
 }
 #endif

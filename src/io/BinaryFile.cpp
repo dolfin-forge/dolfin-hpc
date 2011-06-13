@@ -96,8 +96,9 @@ void BinaryFile::operator<<(GenericVector& x)
 #ifdef ENABLE_MPIIO  
   BinaryFileHeader hdr;
   uint pe_rank = MPI::processNumber();  
+  hdr.magic = BINARY_MAGIC;
   hdr.pe_size = MPI::numProcesses();
-  hdr.type = BINARY_VECTOR_DATA;
+  hdr.type = BINARY_VECTOR_DATA;  
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
 #else

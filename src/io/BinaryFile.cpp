@@ -5,6 +5,7 @@
 // Last changed: 2011-06-13
 
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
@@ -179,72 +180,58 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
 		     MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset = sizeof(BinaryFileHeader);
 
+  uint n_func = f.size();
+  MPI_File_write_all(fh, &n_func, 1, MPI_INT, MPI_STATUS_IGNORE);
+  byte_offset += sizeof(int);
+
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
 
   for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
        it != f.end(); it++) 
-    {
-      Function* u = it->first;
-      
-      std::string& name = it->second;
-      const uint rank = u->rank();
-      if(rank > 1)
-	error("Only scalar and vectors functions can be saved in Binary.");
-      
-      // Get number of components
-      const uint dim = u->dim(0);
-      
-      // Allocate memory for function values at vertices
-      uint size = mesh.numVertices();
-      for (uint i = 0; i < u->rank(); i++)
-	size *= u->dim(i);
-      real *values = new real[size];
-      
-      // Pointer to final data
-      real *dp;
+  {
+    Function* u = it->first;
+    
+    std::string& name = it->second;
+    const uint rank = u->rank();
+    if(rank > 1)
+      error("Only scalar and vectors functions can be saved in Binary.");
+    
+    // Get number of components
+    const uint dim = u->dim(0);
+    
+    // Allocate memory for function values at vertices
+    uint size = mesh.numVertices();
+    for (uint i = 0; i < u->rank(); i++)
+      size *= u->dim(i);
+    real *values = new real[size];
+    u->vector().get(values);
 
-      // Get function values at vertices
-      u->interpolate(values);
+    size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));      
+    
+    BinaryFunctionHeader f_hdr;
+    f_hdr.dim = dim;
+    f_hdr.size = u->dim(0) * mesh.distdata().global_numVertices();
+    if (name.length() >FNAME_LENGTH)
+      error("Function name too long.");      
+    strcpy(&f_hdr.name[0], name.c_str());
+    if (_t) 	
+      f_hdr.t = *_t;
+    else 
+      f_hdr.t = counter;
+    MPI_File_write_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
+			  MPI_BYTE, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(BinaryFunctionHeader);
 
-      if (rank == 0)
-	dp = &values[0];
-      else 
-      {
-	real *data = new real[size];
-	dp = &data[0];
-	for (VertexIterator v(mesh); !v.end(); ++v) 
-	{
-	  if (!mesh.distdata().is_ghost(v->index(), 0))
-	    for (uint i = 0; i < u->dim(0); i++)
-	    *(dp++) = values[ v->index() + i * mesh.numVertices()];
-	}	       
-	dp = &data[0];
+    MPI_File_write_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
+			  values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+    byte_offset += u->dim(0) * (mesh.distdata().global_numVertices() * sizeof(real));
 
-      }            
-      size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));      
-      
-      BinaryFunctionHeader f_hdr;
-      f_hdr.dim = dim;
-      f_hdr.size = size;
-      f_hdr.offset = u->vector().offset();
-      if (name.length() >FNAME_LENGTH)
-	error("Function name too long.");      
-      memcpy(&f_hdr.name[0], name.c_str(), name.length());
-      if (_t) 	
-	f_hdr.t = *_t;
-      else 
-	f_hdr.t = counter;
-      MPI_File_write_at_all(fh, byte_offset + pe_rank * sizeof(BinaryFunctionHeader), 
-			    &f_hdr, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-      byte_offset += hdr.pe_size * sizeof(BinaryFunctionHeader);
-      MPI_File_write_at_all(fh, byte_offset + f_hdr.offset*sizeof(real),
-			    values, f_hdr.size, MPI_DOUBLE, MPI_STATUS_IGNORE);
-      byte_offset += u->dim(0) * (mesh.distdata().global_numVertices() * sizeof(real));
-    }
+    delete[] values;
+  }
   
   MPI_File_close(&fh);
-
+  
   counter++;
 #else
   error("MPI I/O is required to save functions in Binary.");

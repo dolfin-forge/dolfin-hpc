@@ -53,7 +53,6 @@ namespace dolfin
 
     typedef struct {
       uint32_t dim;
-      uint32_t offset;
       uint32_t size;
       real t;
       char name[FNAME_LENGTH];      

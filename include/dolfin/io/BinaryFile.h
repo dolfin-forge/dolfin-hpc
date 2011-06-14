@@ -39,7 +39,7 @@ namespace dolfin
 
   private:
     
-    enum Binary_data_type { BINARY_MESH_DATA, 
+    enum Binary_data_t { BINARY_MESH_DATA, 
 			    BINARY_VECTOR_DATA,
 			    BINARY_FUNCTION_DATA};
     
@@ -48,7 +48,7 @@ namespace dolfin
       uint32_t magic;
       uint32_t bendian; 
       uint32_t pe_size;
-      Binary_data_type type;
+      Binary_data_t type;
     } BinaryFileHeader;
 
     typedef struct {
@@ -82,7 +82,7 @@ namespace dolfin
     void write_function(std::vector<std::pair<Function*, std::string> >& f);
 
 
-    inline void hdr_check(BinaryFileHeader hdr, Binary_data_type type, uint pe_size)
+    inline void hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size)
     {     
       
       if (hdr.magic != BINARY_MAGIC)

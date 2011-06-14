@@ -92,8 +92,6 @@ void BinaryFile::operator<<(GenericVector& x)
   uint size = x.local_size();
   real *values = new real[size];
 
-  nameUpdate(counter);
-
 #ifdef ENABLE_MPIIO
   uint offset[2] = {0,0};
   offset[0] = x.offset();
@@ -116,7 +114,7 @@ void BinaryFile::operator<<(GenericVector& x)
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename.c_str(),
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
   MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 
@@ -136,7 +134,6 @@ void BinaryFile::operator<<(GenericVector& x)
   fp.close();
 #endif
 
-  counter++;
   delete[] values;     
   
   message(1, "Saved vector to file %s in binary format.", filename.c_str());  

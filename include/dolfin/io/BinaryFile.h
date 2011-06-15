@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-13
+// Last changed: 2011-06-16
 
 
 #ifndef __BINARY_FILE_H
@@ -35,13 +35,17 @@ namespace dolfin
     void operator<< (GenericVector& x);
     void operator<< (Mesh& mesh);
     void operator<< (Function& u);
+    void operator<< (MeshFunction<int>& meshfunction);
+    void operator<< (MeshFunction<unsigned int>& meshfunction);
+    void operator<< (MeshFunction<double>& meshfunction);
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
 
   private:
     
     enum Binary_data_t { BINARY_MESH_DATA, 
-			    BINARY_VECTOR_DATA,
-			    BINARY_FUNCTION_DATA};
+			 BINARY_VECTOR_DATA,
+			 BINARY_FUNCTION_DATA,
+			 BINARY_MESH_FUNCTION_DATA};
     
 #ifdef ENABLE_MPIIO
     typedef struct {
@@ -65,6 +69,9 @@ namespace dolfin
       uint v3;
       uint v4;
     } atomic_cell;
+
+    template<class T>
+    void write_meshfunction(T& meshfunction);    
 
     inline int vertex_owner(uint L, uint R, uint i ) 
     {

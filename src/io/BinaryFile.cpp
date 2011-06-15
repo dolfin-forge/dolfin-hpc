@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-13
+// Last changed: 2011-06-16
 
 #include <algorithm>
 #include <cstring>
@@ -13,6 +13,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/dolfin.h>
 
@@ -857,6 +858,102 @@ void BinaryFile::nameUpdate(const int counter)
   newfilename << filestart << fileid.str() << ".bin";
   
   bin_filename = newfilename.str();
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(MeshFunction<int>& meshfunction)
+{
+  write_meshfunction(meshfunction);
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+{
+  write_meshfunction(meshfunction);
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator<<(MeshFunction<double>& meshfunction)
+{
+  write_meshfunction(meshfunction);
+}
+//----------------------------------------------------------------------------
+template<class T>
+void BinaryFile::write_meshfunction(T& meshfunction)
+{
+
+#ifdef ENABLE_MPIIO
+  nameUpdate(counter);
+
+  Mesh& mesh  = meshfunction.mesh();
+  T *values = new T[meshfunction.size()];
+  T *vp = &values[0];
+  
+  BinaryFileHeader hdr;
+  uint pe_rank = MPI::processNumber();  
+  hdr.magic = BINARY_MAGIC;
+  hdr.pe_size = MPI::numProcesses();
+  hdr.type = BINARY_MESH_FUNCTION_DATA;  
+#ifdef HAVE_BIG_ENDIAN
+  hdr.bendian = 1;
+#else
+  hdr.bendian = 0;
+#endif
+
+  MPI_File fh;
+  MPI_Offset byte_offset;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+
+  MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 
+		     MPI_BYTE, MPI_STATUS_IGNORE);
+  byte_offset = sizeof(BinaryFileHeader);
+
+  uint local_size = 0;
+  uint mfunc_type = 0;
+  if ( meshfunction.dim() == mesh.topology().dim()) 
+  {        
+    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(uint);
+
+    for (CellIterator c(mesh); !c.end(); ++c)
+      *(vp++) = meshfunction.get(c->index());
+
+    local_size = mesh.numCells();
+  }
+  else if ( meshfunction.dim() == 0) 
+  {
+    mfunc_type = 1;
+    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(uint);
+
+    for (VertexIterator v(mesh); !v.end(); ++v)
+      if (!mesh.distdata().is_ghost(v->index(), 0))
+	*(vp++) = meshfunction.get(v->index());
+    
+    local_size = mesh.numVertices() - mesh.distdata().num_ghost(0);
+  }
+  else
+    error("Binary output of mesh functions is implemenetd for cell/vertex-based functions only.");    
+
+  uint offset = 0;
+#if ( MPI_VERSION > 1 )
+  MPI_Exscan(&local_size, &offset, 1, 
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+  MPI_Scan(&local_size, &offset, 1, 
+	   MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  offset -= local_size;
+#endif
+
+  MPI_File_write_at_all(fh, byte_offset + offset * sizeof(T), values,
+			sizeof(T), MPI_BYTE, MPI_STATUS_IGNORE);
+
+  MPI_File_close(&fh);
+  
+  counter++;
+
+#else
+  error("MPI I/O required for writing mesh functions to binary files");
+#endif
+  
 }
 //----------------------------------------------------------------------------
 

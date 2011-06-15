@@ -129,6 +129,8 @@ namespace dolfin
     /// Write a collection of funtion to file
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
+    void set_counter(uint new_value);
+
   private:
     
     GenericFile* file;

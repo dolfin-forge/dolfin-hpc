@@ -286,3 +286,8 @@ void File::operator<<(std::vector<std::pair<Function*, std::string> >& f)
   *file << f;
 }
 //-----------------------------------------------------------------------------
+void File::set_counter(uint new_value)
+{
+  file->set_counter(new_value);
+}
+//-----------------------------------------------------------------------------

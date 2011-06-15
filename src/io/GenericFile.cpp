@@ -205,3 +205,8 @@ void GenericFile::write_not_impl(const std::string object)
 		object.c_str(), type.c_str());
 }
 //-----------------------------------------------------------------------------
+void GenericFile::set_counter(uint value)
+{
+  counter = value;
+}
+//-----------------------------------------------------------------------------

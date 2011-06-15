@@ -67,6 +67,8 @@ namespace dolfin
     virtual void operator<< (Graph& graph);
     virtual void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
+    void set_counter(uint value);
+
     void read();
     void write();
     

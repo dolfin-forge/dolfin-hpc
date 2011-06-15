@@ -899,7 +899,7 @@ void BinaryFile::write_meshfunction(T& meshfunction)
 
   MPI_File fh;
   MPI_Offset byte_offset;
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) bin_filename.c_str(),
 		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
   MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader) , 

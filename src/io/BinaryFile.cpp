@@ -883,8 +883,8 @@ void BinaryFile::write_meshfunction(T& meshfunction)
   nameUpdate(counter);
 
   Mesh& mesh  = meshfunction.mesh();
-  T *values = new T[meshfunction.size()];
-  T *vp = &values[0];
+  real *values = new real[meshfunction.size()];
+  real *vp = &values[0];
 
   BinaryFileHeader hdr;
   uint pe_rank = MPI::processNumber();  
@@ -907,31 +907,31 @@ void BinaryFile::write_meshfunction(T& meshfunction)
   byte_offset = sizeof(BinaryFileHeader);
 
   uint local_size = 0;
-  uint mfunc_type = 0;
+  int mfunc_type = 0;
   if ( meshfunction.dim() == mesh.topology().dim()) 
   {        
-    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_INT, MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
 
     for (CellIterator c(mesh); !c.end(); ++c)
-      *(vp++) = meshfunction.get(c->index());
+      *(vp++) = (real) meshfunction.get(c->index());
 
     local_size = mesh.numCells();
   }
   else if ( meshfunction.dim() == 0) 
   {
     mfunc_type = 1;
-    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_INT, MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
 
     for (VertexIterator v(mesh); !v.end(); ++v)
       if (!mesh.distdata().is_ghost(v->index(), 0))
-	*(vp++) = meshfunction.get(v->index());
+	*(vp++) = (real) meshfunction.get(v->index());
     
     local_size = mesh.numVertices() - mesh.distdata().num_ghost(0);
   }
   else
-    error("Binary output of mesh functions is implemenetd for cell/vertex-based functions only.");    
+    error("Binary output of mesh functions is implemented for cell/vertex-based functions only.");    
 
   uint offset = 0;
 #if ( MPI_VERSION > 1 )
@@ -943,8 +943,8 @@ void BinaryFile::write_meshfunction(T& meshfunction)
   offset -= local_size;
 #endif
 
-  MPI_File_write_at_all(fh, byte_offset + offset * sizeof(T), values,
-			local_size * sizeof(T), MPI_BYTE, MPI_STATUS_IGNORE);
+  MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real), values,
+			local_size * sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
 
   MPI_File_close(&fh);
   

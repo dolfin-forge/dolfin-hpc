@@ -885,7 +885,7 @@ void BinaryFile::write_meshfunction(T& meshfunction)
   Mesh& mesh  = meshfunction.mesh();
   T *values = new T[meshfunction.size()];
   T *vp = &values[0];
-  
+
   BinaryFileHeader hdr;
   uint pe_rank = MPI::processNumber();  
   hdr.magic = BINARY_MAGIC;
@@ -944,7 +944,7 @@ void BinaryFile::write_meshfunction(T& meshfunction)
 #endif
 
   MPI_File_write_at_all(fh, byte_offset + offset * sizeof(T), values,
-			sizeof(T), MPI_BYTE, MPI_STATUS_IGNORE);
+			local_size * sizeof(T), MPI_BYTE, MPI_STATUS_IGNORE);
 
   MPI_File_close(&fh);
   

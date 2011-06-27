@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2011-04-19
+// Last changed: 2011-06-27
 
 #include <cstring>
 #include <sstream>
@@ -348,7 +348,7 @@ void Checkpoint::load(std::vector<Vector *> vec)
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in, byte_offset + vector_offset[0] * sizeof(real),
 			 values, vector_offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += vector_offset[3] * sizeof(double);
+    byte_offset += vector_offset[2] * sizeof(double);
 #else
     in.read((char *)values, local_size * sizeof(real));
 #endif

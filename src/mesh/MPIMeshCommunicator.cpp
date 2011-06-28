@@ -306,6 +306,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 	    send_buff.push_back(coords[offset + 2]);
 	  send_buff_indices.push_back(shared[j]);
 	  distdata.set_shared(distdata.get_local(shared[j], 0), 0);
+	  distdata.set_shared_adj(distdata.get_local(shared[j], 0), src, 0);
 	}
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,

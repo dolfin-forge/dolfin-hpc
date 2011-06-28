@@ -48,6 +48,9 @@ namespace dolfin
     void set_ghost_owner(uint i, uint rank, uint dim);
     void set_ghost_owner(MeshEntity& m, uint rank);
 
+    void set_shared_adj(uint i, uint rank, uint dim);
+    void set_shared_adj(MeshEntity& m, uint rank);
+    
     inline void set_global_numVertices(uint num_global) 
     { _num_global_vertex = num_global; }
 
@@ -125,6 +128,7 @@ namespace dolfin
     _map<uint, uint> local_indices[4];
 
     _map<uint, uint> ghost_owner[3];
+    _map<uint, _set<uint> > shared_adj[3];
 
     _set<uint> shared[3];
     _set<uint> ghost[3];
@@ -170,6 +174,7 @@ namespace dolfin
     MeshSharedIterator& operator++() { ++_iter; return *this;}
     inline uint index() const { return *_iter; }
     inline bool end() const { return _iter == _distdata.shared[_dim].end();}
+    inline _set<uint> adj() const { return _distdata.shared_adj[_dim][*_iter]; }
    
   private:
     MeshDistributedData& _distdata;

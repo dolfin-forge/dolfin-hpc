@@ -57,6 +57,7 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
  
   for(uint i = 0 ; i < 3; i++) {
     shared[i] = distributed_data.shared[i];
+    shared_adj[i] = distributed_data.shared_adj[i];
     ghost[i] = distributed_data.ghost[i];
     ghost_owner[i] = distributed_data.ghost_owner[i];
   }
@@ -94,6 +95,7 @@ void MeshDistributedData::clear()
 
   for(uint i = 0; i < 3; i++) {
     shared[i].clear(); 
+    shared_adj[i].clear();
     ghost[i].clear();
     ghost_owner[i].clear();
   }
@@ -195,6 +197,16 @@ void MeshDistributedData::set_ghost_owner(MeshEntity& m, uint rank)
 void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
 {
   ghost_owner[dim][i] = rank;
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::set_shared_adj(MeshEntity& m, uint rank)
+{
+  set_shared_adj(m.index(), rank, m.dim());
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
+{
+  shared_adj[dim][i].insert(rank);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_global(MeshEntity& e)

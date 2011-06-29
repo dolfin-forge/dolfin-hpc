@@ -254,7 +254,7 @@ void SparsityPattern::initRange(uint num_local)
   local[dolfin::MPI::processNumber()] = num_local;
 
 #ifdef HAVE_MPI  
-  MPI_Allgather(&local[MPI::processNumber()],1,MPI_UNSIGNED, 
+  MPI_Allgather(&num_local,1,MPI_UNSIGNED, 
 		local, 1, MPI_UNSIGNED, MPI::DOLFIN_COMM);
 #endif
 

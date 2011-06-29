@@ -89,7 +89,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   idxtype *elmdist = new idxtype[size + 1];
   int ncells = mesh.numCells();
   elmdist[rank] = ncells;
-  MPI_Allgather(&elmdist[rank], 1, MPI_INT, elmdist, 
+  MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 
 		1, MPI_INT, MPI::DOLFIN_COMM);
 
   idxtype *elmwgt = NULL;
@@ -167,9 +167,9 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   // Gather number of locally stored vertices for each processor
   idxtype *vtxdist = new idxtype[size+1];  
   vtxdist[rank] = static_cast<idxtype> (mesh.numVertices());
+  idxtype local_vertices = vtxdist[rank];
 
-
-  MPI_Allgather(&vtxdist[rank], 1, MPI_INT, vtxdist, 1, 
+  MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, 
 		MPI_INT, MPI::DOLFIN_COMM);
 
   int i,tmp;

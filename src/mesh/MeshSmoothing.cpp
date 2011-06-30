@@ -46,7 +46,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
     
   smooth_data.prepare_mesh();  
   // Create an local boundary mesh
-  int boundary_number = smooth_data.boundary.numVertices();
+  int boundary_number = smooth_data.boundary().numVertices();
   const int d = mesh.geometry().dim();
   int module=d+2;//number of saved information, vertex index, number of neighbors, sum_x, sum_y, sum_z
 

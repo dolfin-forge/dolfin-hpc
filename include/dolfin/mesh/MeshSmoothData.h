@@ -38,7 +38,9 @@ namespace dolfin
     */
     void sum_contribution(double*& recv_buff, 
 			  int& mod, double& stopper, uint& src);
-    
+
+    inline BoundaryMesh& boundary() { return _boundary; }
+
     _map<uint,std::vector<double> > owner_tree;
     _map<uint,std::vector<uint> > ghost_tree;
     _map<uint,std::vector<double> > send_inner;
@@ -47,9 +49,10 @@ namespace dolfin
     MeshFunction<bool> on_boundary;
     MeshFunction<bool> on_boundary_global;
 
-    BoundaryMesh boundary;
     
   private:
+
+    BoundaryMesh _boundary;
 
     Mesh& mesh;    
   };  

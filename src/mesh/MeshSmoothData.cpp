@@ -32,11 +32,11 @@ void MeshSmoothData::prepare_mesh()
   on_boundary_global = false;
 
   //interior
-  boundary.init_interior(mesh);
-  MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
+  _boundary.init_interior(mesh);
+  MeshFunction<uint>* vertex_map = _boundary.data().meshFunction("vertex map");
   dolfin_assert(vertex_map);
 
-  for (VertexIterator vertex(boundary); !vertex.end(); ++vertex)
+  for (VertexIterator vertex(_boundary); !vertex.end(); ++vertex)
      on_boundary.set((*vertex_map)(*vertex), true);
   
   //global boundary
@@ -55,7 +55,7 @@ void MeshSmoothData::prepare_mesh()
   _map<uint,std::vector<double> >::iterator owner_iterator=owner_tree.begin();
   _map<uint,std::vector<uint> >::iterator ghost_iterator=ghost_tree.begin();
 
-  for (VertexIterator vertex(boundary); !vertex.end(); ++vertex){
+  for (VertexIterator vertex(_boundary); !vertex.end(); ++vertex){
     Vertex on_mesh(mesh,  vertex_map->get(*vertex));
     //building owner tree: the number of the CPU which owns the vertex is saved as key 
     if(mesh.distdata().is_ghost(on_mesh.index(), 0)){

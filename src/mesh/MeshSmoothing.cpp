@@ -4,21 +4,21 @@
 // Modified by Niclas Jansson, 2010.
 // Modified by Jeanentte Spuhler, Rodrigo Vilela De Abreu and Kaspar Muller 2011.
 // First added:  2008-07-16
-// Last changed: 2011-04-23
+// Last changed: 2011-06-30
 
 #include <dolfin/common/constants.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/BoundaryMesh.h>
+
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/MeshData.h>
-#include "MeshSmoothing.h"
-#include <mpi.h>
+#include <dolfin/mesh/MeshSmoothing.h>
 #include <map>
 #include <vector>
 #include <algorithm>
-#include <dolfin/main/MPI.h>
+
 
 
 using namespace dolfin;
@@ -57,20 +57,21 @@ void MeshSmoothing::prepare_mesh(std::map<uint,std::vector<double> >& owner_tree
       std::vector<double> boundary_info;
       //building send_inner
       for (VertexIterator vn(on_mesh); !vn.end(); ++vn)
-	{
-	  if (on_mesh.index() == vn->index())
-	    continue;
-	  //else if(!on_boundary.get(vn->index())){
-	  else{
-	    num_neigh += 1.0;
-	    // Compute center of mass
-	    const real* xn = vn->x();
-	    for (int i = 0; i < d; i++)
-	      sum[i] += xn[i];
+      {
+	if (on_mesh.index() == vn->index())
+	  continue;
+	//else if(!on_boundary.get(vn->index())){
+	else{
+	  num_neigh += 1.0;
+	  // Compute center of mass
+	  const real* xn = vn->x();
+	  for (int i = 0; i < d; i++)
+	    sum[i] += xn[i];
 	  }
-	}
+      }
       vertex_info.push_back(num_neigh); 
-      for (int i = 0; i < d; i++){
+      for (int i = 0; i < d; i++)
+      {
 	vertex_info.push_back(sum[i]);
       }
       send_inner.insert(std::pair<uint,std::vector<double> >(double(mesh.distdata().get_global(on_mesh.index(),0)), vertex_info));
@@ -80,16 +81,17 @@ void MeshSmoothing::prepare_mesh(std::map<uint,std::vector<double> >& owner_tree
     //building recv_sum
     else{
       _set<uint> NeighboringProcessor = mesh.distdata().get_shared_adj(on_mesh.index(),0);
-      for (_set<uint>::iterator it =  NeighboringProcessor.begin(); it!= NeighboringProcessor.end();it++){
+      for (_set<uint>::iterator it =  NeighboringProcessor.begin(); it!= NeighboringProcessor.end();it++)
+      {
 	ghost_iterator=ghost_tree.find(*it);
 	if(ghost_iterator!=ghost_tree.end())
 	  (ghost_iterator->second).push_back(mesh.distdata().get_global(on_mesh.index(),0));
 	else
-	  {
-	    std::vector<uint> vertices_to_send;
-	    vertices_to_send.push_back(mesh.distdata().get_global(on_mesh.index(),0));
-	    ghost_tree.insert(std::pair<uint,std::vector<uint> >(*it, vertices_to_send));
-	  }
+	{
+	  std::vector<uint> vertices_to_send;
+	  vertices_to_send.push_back(mesh.distdata().get_global(on_mesh.index(),0));
+	  ghost_tree.insert(std::pair<uint,std::vector<uint> >(*it, vertices_to_send));
+	}
       }
       std::vector<double> vertex_info;
       std::vector<uint> vertex_check;
@@ -99,21 +101,20 @@ void MeshSmoothing::prepare_mesh(std::map<uint,std::vector<double> >& owner_tree
       for(int j=0;j<d;j++)
 	sum[j]=0.0;
       for (VertexIterator vn(on_mesh); !vn.end(); ++vn)
-	{
-	  // Skip the vertex itself
-	  if (on_mesh.index() == vn->index())
-	    continue;
-	  num_neigh += 1.0;
-	  
-	  // Compute center of mass
-	  const real* xn = vn->x();
-	  for (int i = 0; i < d; i++)
-	    sum[i] += xn[i];
-	}
-      vertex_info.push_back(num_neigh); 
-      for (int i = 0; i < d; i++){
-	vertex_info.push_back(sum[i]);
+      {
+	// Skip the vertex itself
+	if (on_mesh.index() == vn->index())
+	  continue;
+	num_neigh += 1.0;
+	
+	// Compute center of mass
+	const real* xn = vn->x();
+	for (int i = 0; i < d; i++)
+	  sum[i] += xn[i];
       }
+      vertex_info.push_back(num_neigh); 
+      for (int i = 0; i < d; i++)
+	vertex_info.push_back(sum[i]);
       recv_sum.insert(std::pair<uint,std::vector<double> >(mesh.distdata().get_global(on_mesh.index(),0), vertex_info));
       delete[] sum;
     }
@@ -127,7 +128,6 @@ void MeshSmoothing::sum_contribution(std::map<uint,std::vector<double> >& recv_s
   
   int l=0;
   std::map<uint,std::vector<double> >::iterator receive_iterator=recv_sum.begin();
-  //std::map<uint,std::vector<uint> >::iterator ghost_iterator=ghost_tree.begin();
   
   while(recv_buff[l]!=stopper){
     receive_iterator=recv_sum.find(recv_buff[l]);
@@ -135,17 +135,6 @@ void MeshSmoothing::sum_contribution(std::map<uint,std::vector<double> >& recv_s
       for (uint j=1;j<=(receive_iterator->second).size();j++){
 	(receive_iterator->second)[j-1]+=recv_buff[l+j];
       }
-    /*
-    ghost_iterator=ghost_tree.find(src);
-    if(ghost_iterator!=ghost_tree.end()){
-      (ghost_iterator->second).push_back(recv_buff[l]);
-    }
-    else{
-      std::vector<uint> ghost_info;
-      ghost_info.push_back(recv_buff[l]);
-      ghost_tree.insert(std::pair<uint,std::vector<uint> >(src, ghost_info));
-    }
-    */
     l+=mod;
   }
   
@@ -373,7 +362,5 @@ void MeshSmoothing::smooth(Mesh& mesh)
       }
       delete[] recv_buff;
     }
-  
-  //MPI_Finalize();
 }
 //-----------------------------------------------------------------------------

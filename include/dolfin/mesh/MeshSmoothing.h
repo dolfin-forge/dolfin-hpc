@@ -3,15 +3,18 @@
 //
 // Modified by Jeanentte Spuhler, Rodrigo Vilela De Abreu and Kaspar Muller 2011.
 // First added:  2008-07-16
-// Last changed: 2011-04-23
+// Last changed: 2011-06-30
 
 #ifndef __MESH_SMOOTHING_H
 #define __MESH_SMOOTHING_H
+
+#include <dolfin/mesh/BoundaryMesh.h>
 #include <map>
+
 namespace dolfin
 {
   
-  //class Mesh;
+  class Mesh;
 
   /// This class implements mesh smoothing. The coordinates of
   /// internal vertices are updated by local averaging.

@@ -7,9 +7,9 @@
 // Last changed: 2011-06-30
 
 #include <dolfin/common/constants.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
-
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
@@ -18,7 +18,6 @@
 #include <map>
 #include <vector>
 #include <algorithm>
-
 
 
 using namespace dolfin;
@@ -122,7 +121,7 @@ void MeshSmoothing::prepare_mesh(std::map<uint,std::vector<double> >& owner_tree
 }
 //-----------------------------------------------------------------------------
 void MeshSmoothing::sum_contribution(std::map<uint,std::vector<double> >& recv_sum,
-				     double*& recv_buff, 
+				     double*& recv_buff,
 				     int& mod, double& stopper, uint& src)
 {
   
@@ -188,49 +187,52 @@ void MeshSmoothing::smooth(Mesh& mesh)
   int boundary_number=boundary.numVertices();
   const int d = mesh.geometry().dim();
   int module=d+2;//number of saved information, vertex index, number of neighbors, sum_x, sum_y, sum_z
-  MeshSmoothing::prepare_mesh(owner_tree, ghost_tree,send_inner, recv_sum, boundary, mesh, vertex_map, on_boundary,d);
+  prepare_mesh(owner_tree, ghost_tree,send_inner, recv_sum, boundary, mesh, vertex_map, on_boundary,d);
   int max_un;
   int num_un = boundary_number * module;
  
+#ifdef HAVE_MPI
   MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
   MPI_Allreduce(&num_un, &max_un, 1, MPI_INTEGER,MPI_MAX, dolfin::MPI::DOLFIN_COMM);
-  
+
   for (uint j = 1; j < pe_size; j++) 
-    {
-      double *recv_buff = new double[max_un];
-      Array<double> send_buff;
-      MPI_Status status;
-            
-      src = (rank -j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
-      std::map<uint,std::vector<double> >::iterator sender_iterator=owner_tree.begin();
-      sender_iterator=owner_tree.find(dest);
-      
-      if(sender_iterator!=owner_tree.end()){
-	for (std::vector<double>::iterator iter_vector=sender_iterator->second.begin();iter_vector != sender_iterator->second.end();iter_vector++)
-	  {
-	    send_buff.push_back(*iter_vector);//send key(as vertex index)
-	    std::vector<double> to_send_info;
-	    to_send_info=send_inner.find(*iter_vector)->second;
-	    
-	    for(uint i=0;i<to_send_info.size();i++){
-	      send_buff.push_back(to_send_info[i]);
-	    }
-	  }
-      
+  {
+    double *recv_buff = new double[max_un];
+    std::vector<double> send_buff;
+    MPI_Status status;
+    
+    src = (rank -j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;
+    std::map<uint,std::vector<double> >::iterator sender_iterator=owner_tree.begin();
+    sender_iterator=owner_tree.find(dest);
+    
+    if(sender_iterator!=owner_tree.end()){
+      for (std::vector<double>::iterator iter_vector=sender_iterator->second.begin();
+	   iter_vector != sender_iterator->second.end();iter_vector++)
+      {
+	send_buff.push_back(*iter_vector);//send key(as vertex index)
+	std::vector<double> to_send_info;
+	to_send_info=send_inner.find(*iter_vector)->second;
+	
+	for(uint i=0;i<to_send_info.size();i++){
+	  send_buff.push_back(to_send_info[i]);
+	}
       }
-      send_buff.push_back(stopper);
-      MPI_Sendrecv(&send_buff[0], num_un, MPI_DOUBLE, dest, 1, recv_buff, max_un, MPI_DOUBLE, src, 1,MPI::DOLFIN_COMM, &status);
-      // sum inner contributions
-      MeshSmoothing::sum_contribution(recv_sum,recv_buff, module, stopper, src);
-      delete[] recv_buff;
+      
     }
+    send_buff.push_back(stopper);
+    MPI_Sendrecv(&send_buff[0], num_un, MPI_DOUBLE, dest, 1, recv_buff, max_un,
+		 MPI_DOUBLE, src, 1,MPI::DOLFIN_COMM, &status);
+    // sum inner contributions
+    sum_contribution(recv_sum,recv_buff, module, stopper, src);
 
+    delete[] recv_buff;
+  }
   MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
-
+#endif
+  
   // Iterate over all vertices
-
-  Array<real> xx(d);
+  std::vector<real> xx(d);
   std::map<uint,std::vector<double> >::iterator boundary_iterator=recv_sum.begin();
   std::map<uint,std::vector<double> >::iterator receive_iterator=recv_sum.begin();
 
@@ -259,26 +261,26 @@ void MeshSmoothing::smooth(Mesh& mesh)
 	  xx[i] /= static_cast<real>(num_neighbors); 
       }
     }
-
-    else{
+    else
+    {
       // Compute center of mass of neighboring vertices
       for (int i = 0; i < d; i++) 
 	xx[i] = 0.0;
       num_neighbors = 0.0;
       
       for (VertexIterator vn(*v); !vn.end(); ++vn)
-	{
-	  // Skip the vertex itself
-	  if (v->index() == vn->index())
-	    continue;
-	  
-	  num_neighbors += 1.0;
-	  
-	  // Compute center of mass
-	  const real* xn = vn->x();
-	  for (int i = 0; i < d; i++)
-	    xx[i] += xn[i];
-	}
+      {
+	// Skip the vertex itself
+	if (v->index() == vn->index())
+	  continue;
+	
+	num_neighbors += 1.0;
+	
+	// Compute center of mass
+	const real* xn = vn->x();
+	for (int i = 0; i < d; i++)
+	  xx[i] += xn[i];
+      }
       
       for (int i = 0; i < d; i++)
 	xx[i] /= static_cast<real>(num_neighbors);
@@ -291,14 +293,14 @@ void MeshSmoothing::smooth(Mesh& mesh)
     {
       // Get local number of vertex relative to facet
       const uint local_vertex = c->index(*v);
-
+      
       // Get normal of corresponding facet
       Point n = c->normal(local_vertex);
       
       // Get first vertex in facet
       Facet f(mesh, c->entities(mesh.topology().dim() - 1)[local_vertex]);
       VertexIterator fv(f);
-
+      
       // Compute length of projection of v - fv onto normal
       const real r = std::abs(n.dot(p - fv->point()));
       if (rmin == 0.0)
@@ -306,7 +308,7 @@ void MeshSmoothing::smooth(Mesh& mesh)
       else
         rmin = std::min(rmin, r);
     }
-
+    
     // Move vertex at most a distance rmin / 2
     real r = 0.0;
     for (int i = 0; i < d; i++)
@@ -321,46 +323,49 @@ void MeshSmoothing::smooth(Mesh& mesh)
     for (int i = 0; i < d; i++)
       x[i] += rmin*(xx[i] - x[i])/r;
   }
-
+  
+#ifdef HAVE_MPI
   //sending information back
   for (uint j = 1; j < pe_size; j++) 
-    {
-      double *recv_buff = new double[max_un];
-      Array<double> send_buff;
-      MPI_Status status;
+  {
+    double *recv_buff = new double[max_un];
+    std::vector<double> send_buff;
+    MPI_Status status;
+    
+    src = (rank -j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;
+    std::map<uint,std::vector<uint> >::iterator sender_iterator= ghost_tree.begin(); //key=processor rank, 
+    if(ghost_tree.size()!=0){
+      sender_iterator=ghost_tree.find(dest);
       
-      src = (rank -j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
-      std::map<uint,std::vector<uint> >::iterator sender_iterator= ghost_tree.begin(); //key=processor rank, 
-      if(ghost_tree.size()!=0){
-	sender_iterator=ghost_tree.find(dest);
-	
-	if(sender_iterator!=ghost_tree.end()){
-	  for (std::vector<uint>::iterator iter_vector=sender_iterator->second.begin();iter_vector != sender_iterator->second.end();iter_vector++)
-	    {
-	      send_buff.push_back(*iter_vector);// global vertex index
-	      std::vector<double> to_send_info;
-	      Vertex on_mesh(mesh, mesh.distdata().get_local((*iter_vector),0));
-	      for(int i=0;i<d;i++){
-		send_buff.push_back(on_mesh.x(i));//send x, y, z
-	      }
-	    }
+      if(sender_iterator!=ghost_tree.end()){
+	for (std::vector<uint>::iterator iter_vector=sender_iterator->second.begin();
+	     iter_vector != sender_iterator->second.end();iter_vector++)
+	{
+	  send_buff.push_back(*iter_vector);// global vertex index
+	  std::vector<double> to_send_info;
+	  Vertex on_mesh(mesh, mesh.distdata().get_local((*iter_vector),0));
+	  for(int i=0;i<d;i++){
+	    send_buff.push_back(on_mesh.x(i));//send x, y, z
+	  }
 	}
       }
-      send_buff.push_back(stopper);
-      MPI_Sendrecv(&send_buff[0], num_un, MPI_DOUBLE, dest, 1, recv_buff, max_un, MPI_DOUBLE, src, 1,MPI::DOLFIN_COMM, &status);
-      
-      int l=0;
-      while(recv_buff[l]!=stopper){
-	Vertex on_mesh(mesh, mesh.distdata().get_local(recv_buff[l],0));
-	// Get coordinates of vertex
-	real* x = on_mesh.x();
-	for(int j=0; j<d;j++){
-	  x[j]=recv_buff[l+j+1];
-	}
-	l+=d+1;
-      }
-      delete[] recv_buff;
     }
+    send_buff.push_back(stopper);
+    MPI_Sendrecv(&send_buff[0], num_un, MPI_DOUBLE, dest, 1, recv_buff, max_un, MPI_DOUBLE, src, 1,MPI::DOLFIN_COMM, &status);
+    
+    int l=0;
+    while(recv_buff[l]!=stopper){
+      Vertex on_mesh(mesh, mesh.distdata().get_local(recv_buff[l],0));
+      // Get coordinates of vertex
+      real* x = on_mesh.x();
+      for(int j=0; j<d;j++){
+	x[j]=recv_buff[l+j+1];
+	}
+      l+=d+1;
+    }
+    delete[] recv_buff;
+  }
+#endif
 }
 //-----------------------------------------------------------------------------

@@ -51,8 +51,8 @@ namespace dolfin
     void set_shared_adj(uint i, uint rank, uint dim);
     void set_shared_adj(MeshEntity& m, uint rank);
 
-    _set<uint> get_shared_adj(uint local_index, uint dim);
-    _set<uint> get_shared_adj(MeshEntity& m);
+    _set<uint>& get_shared_adj(uint local_index, uint dim);
+    _set<uint>& get_shared_adj(MeshEntity& m);
 	
     inline void set_global_numVertices(uint num_global) 
     { _num_global_vertex = num_global; }

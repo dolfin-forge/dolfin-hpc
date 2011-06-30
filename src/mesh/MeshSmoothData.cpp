@@ -1,6 +1,8 @@
 // Copyright (C) 2011 Jeannette Spuhler, Rodrigo Vilela De Abreu and Kaspar Muller.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2011.
+//
 // First added:  2011-06-30
 // Last changed: 2011-06-30
 
@@ -25,11 +27,27 @@ MeshSmoothData::~MeshSmoothData()
 void MeshSmoothData::prepare_mesh()
 {
   //mapping for different boundaries
-  on_boundary.init(mesh, 0);
-  on_boundary = false;
+  _on_boundary.init(mesh, 0);
+  _on_boundary = false;
   
-  on_boundary_global.init(mesh, 0);
-  on_boundary_global = false;
+  _on_boundary_global.init(mesh, 0);
+  _on_boundary_global = false;
+
+  
+  //global boundary
+  BoundaryMesh boundary_global;
+  boundary_global.init(mesh);
+  MeshFunction<uint>* vertex_map_global = boundary_global.data().meshFunction("vertex map");
+  dolfin_assert(vertex_map_global);
+  _on_boundary_global=false;
+  if(boundary_global.numVertices()!=0){
+    for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex){
+      _on_boundary_global.set((*vertex_map_global)(*vertex), true);
+    }
+  }
+
+  if (MPI::numProcesses() == 1) 
+    return ;
 
   //interior
   _boundary.init_interior(mesh);
@@ -37,21 +55,12 @@ void MeshSmoothData::prepare_mesh()
   dolfin_assert(vertex_map);
 
   for (VertexIterator vertex(_boundary); !vertex.end(); ++vertex)
-     on_boundary.set((*vertex_map)(*vertex), true);
-  
-  //global boundary
-  BoundaryMesh boundary_global;
-  boundary_global.init(mesh);
-  MeshFunction<uint>* vertex_map_global = boundary_global.data().meshFunction("vertex map");
-  dolfin_assert(vertex_map_global);
-  on_boundary_global=false;
-  if(boundary_global.numVertices()!=0){
-    for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex){
-      on_boundary_global.set((*vertex_map_global)(*vertex), true);
-    }
-  }
+     _on_boundary.set((*vertex_map)(*vertex), true);
+
+
   uint gdim = mesh.geometry().dim();
  
+
   _map<uint,std::vector<double> >::iterator owner_iterator=owner_tree.begin();
   _map<uint,std::vector<uint> >::iterator ghost_iterator=ghost_tree.begin();
 
@@ -66,7 +75,8 @@ void MeshSmoothData::prepare_mesh()
 	{
 	  std::vector<double> vertices_to_send;
 	  vertices_to_send.push_back(double(mesh.distdata().get_global(on_mesh.index(),0)));
-	  owner_tree.insert(std::pair<uint,std::vector<double> >(mesh.distdata().get_owner(on_mesh.index(),0), vertices_to_send));
+	  owner_tree.insert(std::pair<uint,std::vector<double> >
+			    (mesh.distdata().get_owner(on_mesh.index(),0), vertices_to_send));
 	}
       
       std::vector<double> vertex_info;
@@ -144,6 +154,9 @@ void MeshSmoothData::sum_contribution(double*& recv_buff, int& mod,
 				      double& stopper, uint& src)
 {
   
+  if (MPI::numProcesses() == 1) 
+    return;
+
   int l=0;
   _map<uint,std::vector<double> >::iterator receive_iterator=recv_sum.begin();
   

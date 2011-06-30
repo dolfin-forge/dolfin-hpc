@@ -1,8 +1,9 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2010.
+// Modified by Niclas Jansson, 2011.
 // Modified by Jeannette Spuhler, Rodrigo Vilela De Abreu and Kaspar Muller 2011.
+//
 // First added:  2008-07-16
 // Last changed: 2011-06-30
 
@@ -46,14 +47,14 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
     
   smooth_data.prepare_mesh();  
   // Create an local boundary mesh
-  int boundary_number = smooth_data.boundary().numVertices();
+  int boundary_number = (pe_size > 1 ? smooth_data.boundary().numVertices() : 0);
   const int d = mesh.geometry().dim();
   int module=d+2;//number of saved information, vertex index, number of neighbors, sum_x, sum_y, sum_z
-
+  
   int max_un;
   int num_un = boundary_number * module;
- 
 #ifdef HAVE_MPI
+    
   MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
   MPI_Allreduce(&num_un, &max_un, 1, MPI_INTEGER,MPI_MAX, dolfin::MPI::DOLFIN_COMM);
 
@@ -107,9 +108,9 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
     
     // Skip vertices on the boundary 
     double num_neighbors = 0.0;
-    if(smooth_data.on_boundary_global(*v))
+    if(smooth_data.on_boundary_global()(*v))
       continue;
-    else if(smooth_data.on_boundary(*v)){
+    else if(smooth_data.on_boundary()(*v) && pe_size > 1){
       receive_iterator=smooth_data.recv_sum.find(mesh.distdata().get_global(v->index(),0));
       if(receive_iterator!=smooth_data.recv_sum.end()){
 	for (int i = 0; i < d; i++) xx[i] = 0.0;

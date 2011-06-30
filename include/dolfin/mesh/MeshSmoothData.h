@@ -40,19 +40,23 @@ namespace dolfin
 			  int& mod, double& stopper, uint& src);
 
     inline BoundaryMesh& boundary() { return _boundary; }
+    inline MeshFunction<bool>& on_boundary() { return _on_boundary;}
+    inline MeshFunction<bool>& on_boundary_global() 
+    { return _on_boundary_global;}
+
 
     _map<uint,std::vector<double> > owner_tree;
     _map<uint,std::vector<uint> > ghost_tree;
     _map<uint,std::vector<double> > send_inner;
     _map<uint,std::vector<double> > recv_sum;
-
-    MeshFunction<bool> on_boundary;
-    MeshFunction<bool> on_boundary_global;
-
     
   private:
 
     BoundaryMesh _boundary;
+
+    MeshFunction<bool> _on_boundary;
+    MeshFunction<bool> _on_boundary_global;
+
 
     Mesh& mesh;    
   };  

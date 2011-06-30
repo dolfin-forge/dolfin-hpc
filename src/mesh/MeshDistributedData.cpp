@@ -255,6 +255,20 @@ dolfin::uint MeshDistributedData::get_owner(uint local_index, uint dim)
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
+_set<dolfin::uint> MeshDistributedData::get_shared_adj(MeshEntity& m)
+{
+  return get_shared_adj(m.index(), m.dim());
+}
+//-----------------------------------------------------------------------------
+_set<dolfin::uint> MeshDistributedData::get_shared_adj(uint local_index, 
+						       uint dim) 
+{
+  dolfin_assert(is_shared(local_index, dim));
+  dolfin_assert(!is_ghost(local_index, dim));
+
+  return shared_adj[dim][local_index];
+}
+//-----------------------------------------------------------------------------
 void MeshDistributedData::remap_owner(int* mapping) 
 {
 

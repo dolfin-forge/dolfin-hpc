@@ -32,6 +32,7 @@ libdolfin_mesh_la_SOURCES = \
 			MeshOrdering.cpp\
 			MeshPartition.cpp\
 			MeshRenumber.cpp\
+			MeshSmoothData.cpp\
 			MeshSmoothing.cpp\
 			MeshTopology.cpp\
 			Point.cpp\

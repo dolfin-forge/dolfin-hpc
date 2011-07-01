@@ -141,6 +141,7 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/UnitCircle.h\
 				mesh/UnitSphere.h\
 				mesh/MeshTopology.h\
+				mesh/MeshSmoothData.h\
 				mesh/MeshSmoothing.h\
 				mesh/UnitCube.h\
 				mesh/dolfin_mesh.h\

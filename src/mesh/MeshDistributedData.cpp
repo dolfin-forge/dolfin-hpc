@@ -57,6 +57,7 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
  
   for(uint i = 0 ; i < 3; i++) {
     shared[i] = distributed_data.shared[i];
+    shared_adj[i] = distributed_data.shared_adj[i];
     ghost[i] = distributed_data.ghost[i];
     ghost_owner[i] = distributed_data.ghost_owner[i];
   }
@@ -94,6 +95,7 @@ void MeshDistributedData::clear()
 
   for(uint i = 0; i < 3; i++) {
     shared[i].clear(); 
+    shared_adj[i].clear();
     ghost[i].clear();
     ghost_owner[i].clear();
   }
@@ -197,6 +199,16 @@ void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
   ghost_owner[dim][i] = rank;
 }
 //-----------------------------------------------------------------------------
+void MeshDistributedData::set_shared_adj(MeshEntity& m, uint rank)
+{
+  set_shared_adj(m.index(), rank, m.dim());
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
+{
+  shared_adj[dim][i].insert(rank);
+}
+//-----------------------------------------------------------------------------
 dolfin::uint MeshDistributedData::get_global(MeshEntity& e)
 {
   return get_global( e.index(), e.dim());
@@ -241,6 +253,20 @@ dolfin::uint MeshDistributedData::get_owner(uint local_index, uint dim)
     return 0;
   dolfin_assert( ghost_owner[dim].count(local_index) );
   return ghost_owner[dim][local_index];
+}
+//-----------------------------------------------------------------------------
+_set<dolfin::uint>& MeshDistributedData::get_shared_adj(MeshEntity& m)
+{
+  return get_shared_adj(m.index(), m.dim());
+}
+//-----------------------------------------------------------------------------
+_set<dolfin::uint>& MeshDistributedData::get_shared_adj(uint local_index, 
+						       uint dim) 
+{
+  dolfin_assert(is_shared(local_index, dim));
+  dolfin_assert(!is_ghost(local_index, dim));
+
+  return shared_adj[dim][local_index];
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::remap_owner(int* mapping) 

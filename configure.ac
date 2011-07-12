@@ -143,11 +143,16 @@ fi
 
 
 if test "x${enable_mpi}" != xno; then
-   AX_PARMETIS
-   if test "${PARMETIS_LIBS}"; then
-      LIBS="$PARMETIS_LIBS $LIBS"
+   # This assumes a modern CRAY, for example XT or XE series systems
+   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+      AC_DEFINE(HAVE_PARMETIS,1,[Define if you have the ParMETIS library])
    else
-      AC_MSG_ERROR([Required library ParMetis not found])
+      AX_PARMETIS
+      if test "${PARMETIS_LIBS}"; then     
+      	LIBS="$PARMETIS_LIBS $LIBS"
+      else
+	AC_MSG_ERROR([Required library ParMetis not found])
+      fi
    fi
 fi
 

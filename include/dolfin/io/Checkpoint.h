@@ -56,7 +56,10 @@ namespace dolfin
     };
 
     inline void reset() 
-    { state = CHECKPOINT; restart_state = OPEN; };
+    { 
+      state = CHECKPOINT; restart_state = OPEN; 
+      hdr_initialized = false; disp_initialized = false;
+    };
 
   private:
     

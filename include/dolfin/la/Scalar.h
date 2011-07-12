@@ -110,19 +110,20 @@ namespace dolfin
       // Get backend from parameter system
       std::string backend = dolfin_get("linear algebra backend");
       
+#if (HAVE_JANPACK  && HAVE_JANPACK)
       if (backend == "PETSc")
-	{
-#ifdef HAVE_PETSC
-	  return PETScFactory::instance();
-#endif
-	}
+      {
+	return PETScFactory::instance();
+      }
       else if (backend == "JANPACK")
-	{
-#ifdef HAVE_JANPACK
-	  return JANPACKFactory::instance();
-#endif
-	}
-
+      {
+	return JANPACKFactory::instance();
+      }      
+#elif HAVE_PETSC
+      return PETScFactory::instance();
+#elif HAVE_JANPACK 
+      return JANPACKFactory::instance();
+#endif      
       error("Linear algebra backend \"" + backend + "\" not available.");
     }
 

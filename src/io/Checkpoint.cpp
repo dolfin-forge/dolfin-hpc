@@ -108,7 +108,6 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   MPI_File out;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) _fname.str().c_str(),
 		MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &out);
-  MPI_File_set_size(out, 0);
   
   byte_offset = 0;
   MPI_File_write_all(out, &id, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);

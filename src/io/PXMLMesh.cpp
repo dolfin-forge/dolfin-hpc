@@ -30,7 +30,6 @@ PXMLMesh::PXMLMesh(Mesh& mesh) : XMLObject(), _mesh(mesh), state(OUTSIDE), f(0),
 
   warning("Reading DOLFIN xml meshes in parallel is depricated. "
 	  "For better I/O performance, consider converting to flat binary");
-  dolfin_set("output destination","silent");
 }
 //-----------------------------------------------------------------------------
 PXMLMesh::~PXMLMesh()

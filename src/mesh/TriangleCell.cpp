@@ -19,7 +19,7 @@
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/GeometricPredicates.h>
-
+#include <dolfin/parameter/parameters.h>
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -378,11 +378,12 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   //   {
   //     return true;
   //   }
-  if(d1 < 0.0)
+  real tol = (real) dolfin_get("Geometrical Tolerance");
+  if(d1 < (0.0-tol))
     return false;
-  if(d2 < 0.0)
+  if(d2 < (0.0-tol))
     return false;
-  if(d3 < 0.0)
+  if(d3 < (0.0-tol))
     return false;
 
   return true;

@@ -122,3 +122,10 @@ add("Mesh read in serial", false);
 //--- Load balancing ---
 add("Load balancer report", false);
 add("Load balancer redistribute", true);
+
+
+//Adjust tolerance for GTS box
+add("GTS Tolerance",0.0);
+//define size for trianlge tolerance ("is the point within this triangle?")
+add("Geometrical Tolerance",0.0);
+

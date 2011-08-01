@@ -17,6 +17,7 @@
 #include <dolfin/mesh/Cell.h>
 
 #include <dolfin/mesh/GTSInterface.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_GTS
 #include <gts.h>
@@ -76,10 +77,11 @@ GtsBBox* GTSInterface::bboxPoint(const Point& p)
 #ifdef HAVE_GTS
 
   GtsBBox* bbox;
-
+  
+  real btol = dolfin_get("GTS Tolerance");
   bbox = gts_bbox_new(gts_bbox_class(), (void *)0,
-		      p.x(), p.y(), p.z(),
-		      p.x(), p.y(), p.z());
+		      p.x()-btol, p.y()-btol, p.z()-btol,
+		      p.x()+btol, p.y()+btol, p.z()+btol);
   
   return bbox;
 

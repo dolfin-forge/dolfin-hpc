@@ -129,3 +129,5 @@ add("GTS Tolerance",0.0);
 //define size for trianlge tolerance ("is the point within this triangle?")
 add("Geometrical Tolerance",0.0);
 
+//--- Mesh smoothing ---
+add("Mesh smoothing restricted by rmin", true);

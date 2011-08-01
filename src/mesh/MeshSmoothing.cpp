@@ -17,6 +17,7 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshSmoothData.h>
 #include <dolfin/mesh/MeshSmoothing.h>
+#include <dolfin/parameter/parameters.h>
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -149,42 +150,48 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
 	xx[i] /= static_cast<real>(num_neighbors);
       
     }
-
-    // Compute closest distance to boundary of star
-    real rmin = 0.0;
-    for (CellIterator c(*v); !c.end(); ++c)
-    {
-      // Get local number of vertex relative to facet
-      const uint local_vertex = c->index(*v);
-      
-      // Get normal of corresponding facet
-      Point n = c->normal(local_vertex);
-      
-      // Get first vertex in facet
-      Facet f(mesh, c->entities(mesh.topology().dim() - 1)[local_vertex]);
-      VertexIterator fv(f);
-      
-      // Compute length of projection of v - fv onto normal
-      const real r = std::abs(n.dot(p - fv->point()));
-      if (rmin == 0.0)
-        rmin = r;
-      else
-        rmin = std::min(rmin, r);
-    }
     
-    // Move vertex at most a distance rmin / 2
-    real r = 0.0;
-    for (int i = 0; i < d; i++)
+    if(dolfin_get("Mesh smoothing restricted by rmin")) 
     {
-      const real dx = xx[i] - x[i];
-      r += dx*dx;
+      // Compute closest distance to boundary of star
+      real rmin = 0.0;
+      for (CellIterator c(*v); !c.end(); ++c)
+      {
+	// Get local number of vertex relative to facet
+	const uint local_vertex = c->index(*v);
+      
+	// Get normal of corresponding facet
+	Point n = c->normal(local_vertex);
+	
+	// Get first vertex in facet
+	Facet f(mesh, c->entities(mesh.topology().dim() - 1)[local_vertex]);
+	VertexIterator fv(f);
+	
+	// Compute length of projection of v - fv onto normal
+	const real r = std::abs(n.dot(p - fv->point()));
+	if (rmin == 0.0)
+	  rmin = r; 
+	else
+	  rmin = std::min(rmin, r);
+      }
+      
+      // Move vertex at most a distance rmin / 2
+      real r = 0.0;
+      for (int i = 0; i < d; i++)
+      {
+	const real dx = xx[i] - x[i];
+	r += dx*dx;
+      }
+      r = std::sqrt(r);
+      if (r < DOLFIN_EPS)
+	continue;
+      rmin = std::min(0.5*rmin, r);
+      for (int i = 0; i < d; i++)
+	x[i] += rmin*(xx[i] - x[i])/r;
     }
-    r = std::sqrt(r);
-    if (r < DOLFIN_EPS)
-      continue;
-    rmin = std::min(0.5*rmin, r);
-    for (int i = 0; i < d; i++)
-      x[i] += rmin*(xx[i] - x[i])/r;
+    else
+      for (uint i = 0; i < d; i++)
+	x[i] =xx[i];
   }
   
 #ifdef HAVE_MPI

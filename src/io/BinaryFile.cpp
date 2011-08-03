@@ -747,7 +747,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     hdr.magic = BINARY_MAGIC;
     hdr.pe_size = MPI::numProcesses();
     hdr.type = BINARY_MESH_DATA;
-#ifdef HAVE_BIGENDIAN
+#ifdef HAVE_BIG_ENDIAN
     hdr.bendian = 1;
 #else
     hdr.bendian = 0;

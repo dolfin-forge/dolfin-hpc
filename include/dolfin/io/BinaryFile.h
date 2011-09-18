@@ -88,6 +88,7 @@ namespace dolfin
 
     void write_function(std::vector<std::pair<Function*, std::string> >& f);
 
+#endif
 
     inline void hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size)
     {     
@@ -109,7 +110,7 @@ namespace dolfin
       if (hdr.type == BINARY_VECTOR_DATA && (hdr.pe_size != pe_size))
 	error("File stored on %d PE's, currently running on %d PE's", hdr.pe_size, pe_size);
     };
-#endif
+
 
     // function filename
     std::string bin_filename;

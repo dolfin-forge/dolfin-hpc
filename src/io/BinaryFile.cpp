@@ -243,6 +243,9 @@ void BinaryFile::operator>>(Mesh& mesh)
 {
  
   BinaryFileHeader hdr;
+  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::processNumber();
+
 
   if (MPI::numProcesses() == 1) 
   {    
@@ -250,6 +253,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     
     int celltype, gdim;
     fp.read((char *)&hdr, sizeof(BinaryFileHeader));  
+    hdr_check(hdr, BINARY_MESH_DATA, pe_size);
     fp.read((char *)&gdim, sizeof(int));  
     fp.read((char *)&celltype, sizeof(int));  
 
@@ -327,8 +331,6 @@ void BinaryFile::operator>>(Mesh& mesh)
   {
 #ifdef ENABLE_MPIIO
     
-    uint pe_size = MPI::numProcesses();
-    uint pe_rank = MPI::processNumber();
 
     MPI_File fh;
     MPI_Offset byte_offset;

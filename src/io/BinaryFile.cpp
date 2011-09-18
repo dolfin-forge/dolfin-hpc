@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-16
+// Last changed: 2011-09-18
 
 #include <algorithm>
 #include <cstring>
@@ -242,11 +242,14 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
 void BinaryFile::operator>>(Mesh& mesh)
 {
  
+  BinaryFileHeader hdr;
+
   if (MPI::numProcesses() == 1) 
   {    
     std::ifstream fp(filename.c_str(), std::ifstream::binary);
     
     int celltype, gdim;
+    fp.read((char *)&hdr, sizeof(BinaryFileHeader));  
     fp.read((char *)&gdim, sizeof(int));  
     fp.read((char *)&celltype, sizeof(int));  
 
@@ -329,7 +332,6 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     MPI_File fh;
     MPI_Offset byte_offset;
-    BinaryFileHeader hdr;
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
 		  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);    
 
@@ -718,11 +720,23 @@ void BinaryFile::operator<<(Mesh& mesh)
 		      mesh.numVertices());
   int num_cells = (MPI::numProcesses() > 1 ? 
 		      mesh.distdata().global_numCells() : mesh.numCells());
+
+  BinaryFileHeader hdr;
+  hdr.magic = BINARY_MAGIC;
+  hdr.pe_size = MPI::numProcesses();
+  hdr.type = BINARY_MESH_DATA;
+#ifdef HAVE_BIG_ENDIAN
+  hdr.bendian = 1;
+#else
+  hdr.bendian = 0;
+#endif
+      
   if (MPI::numProcesses() == 1) 
   {    
     std::ofstream fp(filename.c_str(), std::ofstream::binary);
-    
+      
     // Write Header
+    fp.write((char *)&hdr, sizeof(BinaryFileHeader));
     fp.write((char *)&dim, sizeof(int));
     
     fp.write((char *)&type, sizeof(int));
@@ -743,16 +757,6 @@ void BinaryFile::operator<<(Mesh& mesh)
   {
 
 #ifdef ENABLE_MPIIO
-    BinaryFileHeader hdr;
-    hdr.magic = BINARY_MAGIC;
-    hdr.pe_size = MPI::numProcesses();
-    hdr.type = BINARY_MESH_DATA;
-#ifdef HAVE_BIG_ENDIAN
-    hdr.bendian = 1;
-#else
-    hdr.bendian = 0;
-#endif
-
     
     MPI_File fh;
     MPI_Offset byte_offset;

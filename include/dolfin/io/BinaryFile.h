@@ -47,7 +47,7 @@ namespace dolfin
 			 BINARY_FUNCTION_DATA,
 			 BINARY_MESH_FUNCTION_DATA};
     
-#ifdef ENABLE_MPIIO
+
     typedef struct {
       uint32_t magic;
       uint32_t bendian; 
@@ -55,6 +55,7 @@ namespace dolfin
       Binary_data_t type;
     } BinaryFileHeader;
 
+#ifdef ENABLE_MPIIO
     typedef struct {
       uint32_t dim;
       uint32_t size;

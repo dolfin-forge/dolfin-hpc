@@ -208,8 +208,8 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
     real *values = new real[size];
     u->vector().get(values);
 
-    size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));      
-    
+    size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));   
+
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = dim;
     f_hdr.size = u->dim(0) * mesh.distdata().global_numVertices();
@@ -220,13 +220,15 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
       f_hdr.t = *_t;
     else 
       f_hdr.t = counter;
-    MPI_File_write_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
+    MPI_File_write_at_all(fh, byte_offset, &f_hdr, 
+			  sizeof(BinaryFunctionHeader),
 			  MPI_BYTE, MPI_STATUS_IGNORE);
     byte_offset += sizeof(BinaryFunctionHeader);
 
     MPI_File_write_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
 			  values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += u->dim(0) * (mesh.distdata().global_numVertices() * sizeof(real));
+    byte_offset += u->dim(0) *
+      (mesh.distdata().global_numVertices() * sizeof(real));
 
     delete[] values;
   }
@@ -453,7 +455,8 @@ void BinaryFile::operator>>(Mesh& mesh)
       local_max = std::max(local_max, (uint) non_local_cells[i].size());
       
     uint buff_size = 0;
-    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED,
+		  MPI_MAX, MPI::DOLFIN_COMM);
 
 
     uint *recv_buffer = new uint[buff_size];    
@@ -502,8 +505,8 @@ void BinaryFile::operator>>(Mesh& mesh)
     }
 
     // Number of vertices in mesh, used + ghosts
-    uint num_local_vertices = used_vertices.size() + ghosted_entities.size();    
-
+    uint num_local_vertices = used_vertices.size() + ghosted_entities.size(); 
+    
 
     std::string celltype;
     if (type == 0)
@@ -525,7 +528,8 @@ void BinaryFile::operator>>(Mesh& mesh)
       all_vertices.insert(offset[0] + i);
     std::set_difference(all_vertices.begin(), all_vertices.end(),
 			used_vertices.begin(), used_vertices.end(),
-			std::inserter(orphaned_vertices, orphaned_vertices.end()));
+			std::inserter(orphaned_vertices,
+				      orphaned_vertices.end()));
 
     // Open mesh for editing
     MeshEditor editor;

@@ -13,22 +13,28 @@ AC_SUBST(PACKAGE_REQUIRES)
 
 
 # Feature options.
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],[Compile with debug symbols]),
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],
+		     [Compile with debug symbols]),
 		     [enable_debug=${enableval}],[enable_debug=no])
 
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
 			      [Compile with local data cache in functions]),
-			      [enable_function_cache=${enableval}],[enable_function_cache=no])
+			      [enable_function_cache=${enableval}],
+			      [enable_function_cache=no])
 
 AC_ARG_ENABLE(optimize-p1, AC_HELP_STRING([--enable-optimize-p1],
 			   [Compile with optimization for P1 elements]),
-			   [enable_optimize_p1=${enableval}],[enable_optimize_p1=no])
+			   [enable_optimize_p1=${enableval}],
+			   [enable_optimize_p1=no])
 
-AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],[Compile without progress bar]),
-			    [enable_progressbar=no],[enable_progressbar=yes])
+AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],
+					   [Compile without progress bar]),
+			    	     	   [enable_progressbar=no],
+					   [enable_progressbar=yes])
 AC_ARG_ENABLE(mpi,
               AC_HELP_STRING([--enable-mpi],
-	      [Compile with support for MPI]),[enable_mpi=${enableval}], [enable_mpi=no])
+	      [Compile with support for MPI]),
+	      [enable_mpi=${enableval}], [enable_mpi=no])
 
 AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
 		     [Compile with support for MPI I/O]),
@@ -36,7 +42,8 @@ AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
 
 AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
-	      [Compile with support for OpenMP]),[enable_openmp=${enableval}], [enable_openmp=no])
+	      [Compile with support for OpenMP]),
+	      [enable_openmp=${enableval}], [enable_openmp=no])
 
 AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 			 [Compile with support for Boost TR1 headers]),
@@ -50,23 +57,28 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
 		 [with_gts=${withval}],[with_gts=no])
 
-AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], [Compile with support for JANPACK]),
+AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], 
+		     [Compile with support for JANPACK]),
 		     [with_janpack=${withval}],[with_janpack=no])
 
-AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], [Compile with support for PETSc linear algebra]),
-		     [with_petsc=${withval}],[with_petsc=no])
+AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], 
+		   [Compile with support for PETSc linear algebra]),
+		   [with_petsc=${withval}],[with_petsc=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
-   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], [Compile with local data cache in functions])
+   AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], 
+   [Compile with local data cache in functions])
 fi
 
 if test "x${enable_optimize_p1}" = xyes; then
-   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], [Compile with optimization for P1 elements])
+   AC_DEFINE(ENABLE_P1_OPTIMIZATIONS, [1], 
+   [Compile with optimization for P1 elements])
 fi
 
 if test "x${enable_progressbar}" != xyes; then
-   AC_DEFINE(NO_PROGRESS_BAR, [1], [Compile without progress bar])
+   AC_DEFINE(NO_PROGRESS_BAR, [1], 
+   [Compile without progress bar])
 fi
 
 if test "x${enable_boosttr1}" = xyes; then
@@ -163,17 +175,31 @@ if test "x${with_gts}" = xyes; then
    AC_DEFINE(HAVE_GTS,[1],[Have GTS library])
 fi
 
+found_la_backend="no"
+
 if test "x${with_petsc}" != xno; then
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
+      found_la_backend="yes"
    else
       AX_PETSC
+      if test "x${HAVE_PETSC}" != 0; then
+       	 found_la_backend="yes"
+      fi
    fi
 fi
 
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
+   if test "x${HAVE_JANPACK}" != 0; then
+     found_la_backend="yes"  
+   fi
+fi
+
+
+if test "x${found_la_backend}" != xyes; then
+   AC_MSG_ERROR([Linear Algebra backend not found])
 fi
 
 if test "x${enable_debug}" != xno; then

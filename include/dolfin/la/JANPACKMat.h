@@ -114,7 +114,7 @@ namespace dolfin
   private:
 
     // JANPACK Matrix pointer
-    char A[96];
+    char A[112];
     
     // True if we don't own the matrix A points to
     bool is_view;

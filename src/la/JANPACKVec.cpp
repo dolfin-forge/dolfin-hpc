@@ -25,7 +25,6 @@ JANPACKVec::JANPACKVec():
     Variable("x", "a sparse vector"),
     is_view(false), is_ghosted(false), is_init(false)
 {
-  message("Inside vec");
   // Do nothing
 }
 //-----------------------------------------------------------------------------
@@ -91,11 +90,13 @@ JANPACKVec* JANPACKVec::copy() const
 //-----------------------------------------------------------------------------
 void JANPACKVec::get(real* values) const
 {
+  error("Not implemented.");
   //  memcpy(values, x->x, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(real* values)
 {
+  error("Not implemented.");
   //  memcpy(x->x,values, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
@@ -143,9 +144,18 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 void JANPACKVec::apply(FinalizeType finaltype)
 {
 
+
+#ifdef HAVE_MPI
+  MPI_Barrier(MPI::DOLFIN_COMM);
+#endif
+
   jp_vec_finalize(x);
   if (is_ghosted)
     jp_vec_update_ghosts(x);
+
+#ifdef HAVE_MPI
+  MPI_Barrier(MPI::DOLFIN_COMM);
+#endif
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::zero()
@@ -171,11 +181,12 @@ dolfin::uint JANPACKVec::local_size() const
 //-----------------------------------------------------------------------------
 dolfin::uint JANPACKVec::offset() const
 {
-  int n = 0;
-  //  if (x) 
-    //    n = x->range[0];
+  uint32_t range[2];
 
-  return static_cast<uint>(n);
+  if(x)
+    jp_vec_range(const_cast<char *>(x), range);
+
+  return static_cast<uint>(range[0]);
 }
 //-----------------------------------------------------------------------------
 const GenericVector& JANPACKVec::operator= (const GenericVector& v)
@@ -198,7 +209,8 @@ const JANPACKVec& JANPACKVec::operator= (real a)
 {
   dolfin_assert(x);
   // VecSet(x, a);
-  error("Not implemented");
+  //  error("Not implemented");
+  message("....");
   return *this; 
 }
 //-----------------------------------------------------------------------------
@@ -286,20 +298,21 @@ char *JANPACKVec::vec() const
 void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
 			       std::map<uint, uint>& map)
 {
- 
-  /*
+
   if ( is_ghosted )
     apply();
   
-  int low, high;
+  uint32_t range[2];
+  //  int low, high;
 
-  low = x->range[0];
-  high = x->range[1];
+  //  low = x->range[0];
+  //  high = x->range[1];
+  jp_vec_range(x, range);
 
-  Array<int> ghost_indices;
+  Array<uint32_t> ghost_indices;
   std::set<uint>::iterator sit;
   for(sit = indices.begin(); sit != indices.end(); ++sit) {
-    if( *sit < (uint) low || *sit >= (uint) high ) {
+    if( *sit < (uint) range[0] || *sit >= (uint) range[1] ) {
       ghost_indices.push_back((int) *sit);
     }
   }
@@ -308,7 +321,7 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
   
   is_ghosted = true;
   apply();
-  */
+
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKVec::factory() const

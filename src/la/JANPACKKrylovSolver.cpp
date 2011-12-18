@@ -6,6 +6,10 @@
 
 #ifdef HAVE_JANPACK
 
+#ifdef HAVE_MPI
+#include <dolfin/main/MPI.h>
+#endif
+
 #include <janpack/krylov_solver.h>
 
 #include <dolfin/la/JANPACKMat.h>
@@ -43,11 +47,19 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
   else
     pc_type = JP_PC_NONE;
 
+#ifdef HAVE_MPI
+  MPI_Barrier(MPI::DOLFIN_COMM);
+#endif
+
   int num_iterations;
   num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), 
 				    (jp_solver_t) getType(method), pc_type,
 				    get("Krylov maximum iterations"),
 				    get("Krylov relative tolerance"));
+#ifdef HAVE_MPI
+  MPI_Barrier(MPI::DOLFIN_COMM);
+#endif
+
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;
 }

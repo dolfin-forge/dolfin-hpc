@@ -185,8 +185,7 @@ void JANPACKMat::apply(FinalizeType finaltype)
 //-----------------------------------------------------------------------------
 void JANPACKMat::disp(uint precision) const
 {
-  dolfin_assert(A); 
-  error("Not implemented.");
+  jp_mat_print(const_cast<char *>(A));
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::ident(uint m, const uint* rows)

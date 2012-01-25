@@ -117,14 +117,14 @@ void JANPACKVec::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
   jp_vec_get_block(x, const_cast<double*>(block), 
-		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
+		reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
   jp_vec_set_block(x, const_cast<double*>(block), 
-		reinterpret_cast<int*>(const_cast<uint*>(rows)) , m);
+		reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::add(const real* block, uint m, const uint* rows)
@@ -132,7 +132,7 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
   dolfin_assert(x);
 
   jp_vec_add_block(x, const_cast<double*>(block),
-		reinterpret_cast<int*>(const_cast<uint*>(rows)), m);
+		reinterpret_cast<uint*>(const_cast<uint*>(rows)), m);
   
   //  error("Not implemented.");
 }
@@ -295,7 +295,7 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
   low = x->range[0];
   high = x->range[1];
 
-  Array<int> ghost_indices;
+  Array<uint> ghost_indices;
   std::set<uint>::iterator sit;
   for(sit = indices.begin(); sit != indices.end(); ++sit) {
     if( *sit < (uint) low || *sit >= (uint) high ) {

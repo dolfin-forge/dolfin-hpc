@@ -80,8 +80,10 @@ void PETScVector::init(uint N)
   }
   else
   {
-    if (x && !is_view)
+    if (x && !is_view) {
       VecDestroy(x);
+      is_ghosted = false;
+    }
   }
 
   // Create vector

@@ -44,6 +44,8 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
     pc_type = JP_PC_NONE;
   else if(pc_janpack == jacobi)
     pc_type = JP_PC_JACOBI;
+  else if(pc_janpack == ilu)
+    pc_type = JP_PC_ILU;
   else if(pc_janpack == dilu)
     pc_type = JP_PC_DILU;
   else

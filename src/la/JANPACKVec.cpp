@@ -90,13 +90,15 @@ JANPACKVec* JANPACKVec::copy() const
 //-----------------------------------------------------------------------------
 void JANPACKVec::get(real* values) const
 {
-  error("Not implemented.");
-  //  memcpy(values, x->x, x->n * sizeof(real));
+  jp_vec_get_local(const_cast<char *>(x), values);
+  // error("Not implemented.");
+  //memcpy(values, x->x, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(real* values)
 {
-  error("Not implemented.");
+  jp_vec_set_local(const_cast<char *>(x), values);
+  //  error("Not implemented.");
   //  memcpy(x->x,values, x->n * sizeof(real));
 }
 //-----------------------------------------------------------------------------
@@ -303,17 +305,13 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
     apply();
   
   uint32_t range[2];
-  //  int low, high;
-
-  //  low = x->range[0];
-  //  high = x->range[1];
   jp_vec_range(x, range);
 
   Array<uint32_t> ghost_indices;
-  std::set<uint>::iterator sit;
+  std::set<uint32_t>::iterator sit;
   for(sit = indices.begin(); sit != indices.end(); ++sit) {
-    if( *sit < (uint) range[0] || *sit >= (uint) range[1] ) {
-      ghost_indices.push_back((int) *sit);
+    if( *sit < (uint32_t) range[0] || *sit >= (uint32_t) range[1] ) {
+      ghost_indices.push_back((uint32_t) *sit);
     }
   }
 

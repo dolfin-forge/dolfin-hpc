@@ -15,6 +15,8 @@
 
 #ifdef HAVE_JANPACK
 
+#include <cstdlib>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -125,7 +127,6 @@ void JANPACKMat::set(const real* block,
     for(uint j = 0; j < n; j++)
       jp_mat_set(A, rows[i], cols[j], *(bp++));
 
-  //  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,
@@ -140,18 +141,6 @@ void JANPACKMat::add(const real* block,
 	       m, const_cast<uint*>(rows),
 	       n, const_cast<uint*>(cols), 
 	       const_cast<real*>(block));
-
-  /*
-  const real *bp = &block[0];
-  for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
-<<<<<<< HEAD
-      mat_add_crs(&AA, rows[i], cols[j], *(bp++));
-=======
-      jp_mat_add(&_A, rows[i], cols[j], *(bp++));
->>>>>>> master
-*/
-  //error("Not implemented. (add)");
 }
 //-----------------------------------------------------------------------------
 real JANPACKMat::norm(std::string norm_type) const
@@ -164,7 +153,6 @@ void JANPACKMat::zero()
 {
   dolfin_assert(A); 
   jp_mat_zero(A);
-  //  error("Not implemented. (zero)");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::apply(FinalizeType finaltype)
@@ -180,7 +168,6 @@ void JANPACKMat::apply(FinalizeType finaltype)
   MPI_Barrier(MPI::DOLFIN_COMM);
 #endif
 
-  //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::disp(uint precision) const
@@ -219,15 +206,21 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
 {
-  dolfin_assert(A); 
-  /*
-  for (uint i = 0; i < A->rs[row].top; i++)
+
+  uint32_t n, *c = 0;
+  double *v = 0;
+  jp_mat_getrow(const_cast<char *>(A), row, c, v, n);
+  
+  for (uint i = 0; i < n; i++)
   {
-    columns.push_back(A->rs[row].A[i].i);
-    values.push_back(A->rs[row].A[i].v);
+    columns.push_back(c[i]);
+    values.push_back(v[i]);
   }
-  */
-  error("Not implemented.");
+
+  free(c);
+  free(v);
+
+  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)

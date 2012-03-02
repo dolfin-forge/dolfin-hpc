@@ -15,7 +15,6 @@
 
 #ifdef HAVE_JANPACK
 
-#include <cstdlib>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -124,8 +123,9 @@ void JANPACKMat::set(const real* block,
 
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
+    for(uint j = 0; j < n; j++) 
       jp_mat_set(A, rows[i], cols[j], *(bp++));
+    
 
 }
 //-----------------------------------------------------------------------------
@@ -207,20 +207,23 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
 {
 
-  uint32_t n, *c = 0;
-  double *v = 0;
-  jp_mat_getrow(const_cast<char *>(A), row, c, v, n);
-  
+  uint  n, *c = 0;
+  real *v = 0;
+ 
+  c = new uint[size(0)];
+  v = new real[size(0)];
+
+  jp_mat_getrow(const_cast<char *>(A), row, c, v, &n);
+
   for (uint i = 0; i < n; i++)
   {
     columns.push_back(c[i]);
     values.push_back(v[i]);
   }
 
-  free(c);
-  free(v);
+  delete c;
+  delete v;
 
-  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)

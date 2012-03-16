@@ -121,6 +121,7 @@ void JANPACKMat::set(const real* block,
 {
   dolfin_assert(A); 
 
+
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
     for(uint j = 0; j < n; j++) 
@@ -134,8 +135,6 @@ void JANPACKMat::add(const real* block,
 		       uint n, const uint* cols)
 {
   dolfin_assert(A); 
-
-
 
   jp_mat_add_block(A, 
 	       m, const_cast<uint*>(rows),
@@ -188,7 +187,9 @@ void JANPACKMat::ident(uint m, const uint* rows)
 void JANPACKMat::zero(uint m, const uint* rows)
 {
   dolfin_assert(A); 
-  jp_mat_zero(A);
+  
+  for (uint i = 0; i < m; i++)
+    jp_mat_zero_row(A,rows[i]);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed) const

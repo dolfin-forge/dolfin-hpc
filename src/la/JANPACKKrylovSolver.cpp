@@ -11,6 +11,7 @@
 #endif
 
 #include <janpack/krylov_solver.h>
+#include <janpack/ilu.h>
 
 #include <dolfin/la/JANPACKMat.h>
 #include <dolfin/la/JANPACKVec.h>
@@ -21,7 +22,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, 
 					 PreconditionerType pc) :
-  method(method), pc_janpack(pc)
+  method(method), pc_janpack(pc), precon(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -37,7 +38,15 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
   message("Solving linear system of size %d x %d (Krylov solver).", M, N);
 
   // Reinitialize solution vector if necessary
-  x.init(b.local_size());
+  if (x.local_size() != b.local_size())
+    x.init(b.local_size());
+
+  // Initialize preconditioner
+  if (precon == false) {
+    K.dup(A);
+    precon = true;
+  }
+
 
   jp_pc_t pc_type;
   if (pc_janpack == none)
@@ -51,18 +60,12 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
   else
     pc_type = JP_PC_NONE;
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
 
   int num_iterations;
-  num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), 
-				    (jp_solver_t) getType(method), pc_type,
-				    get("Krylov maximum iterations"),
+  num_iterations = jp_krylov_solver(A.mat(), K.mat(), x.vec(), b.vec(), 
+  				    (jp_solver_t) getType(method), pc_type,
+  				    get("Krylov maximum iterations"),
 				    get("Krylov relative tolerance"));
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
 
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;

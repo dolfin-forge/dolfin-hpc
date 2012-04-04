@@ -13,6 +13,7 @@
 #include "SolverType.h"
 #include "PreconditionerType.h"
 
+
 #include <janpack/krylov_solver.h>
 
 namespace dolfin 
@@ -41,7 +42,12 @@ namespace dolfin
 
     /// DOLFIN PETScPreconditioner
     PreconditionerType pc_janpack;
-
+    
+    
+    bool precon;
+    
+    // Preconditioner
+    JANPACKMat K;
   };
 }
 

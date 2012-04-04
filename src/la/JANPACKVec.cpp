@@ -10,7 +10,6 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/JANPACKVec.h>
 #include <dolfin/la/JANPACKFactory.h>
-#include <dolfin/main/MPI.h>
 
 #include <dolfin/common/Array.h>
 
@@ -146,18 +145,10 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 void JANPACKVec::apply(FinalizeType finaltype)
 {
 
-
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
-
   jp_vec_finalize(x);
   if (is_ghosted)
     jp_vec_update_ghosts(x);
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::zero()

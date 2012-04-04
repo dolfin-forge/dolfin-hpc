@@ -49,7 +49,7 @@ JANPACKMat::JANPACKMat(const JANPACKMat& A):
   Variable("A", "JANPACK matrix"),
    is_view(true)
 {
-  error("Not implemented.");
+  error("Not implemented");
 }
 //-----------------------------------------------------------------------------
 JANPACKMat::~JANPACKMat()
@@ -157,15 +157,7 @@ void JANPACKMat::zero()
 void JANPACKMat::apply(FinalizeType finaltype)
 {
 
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
-
   jp_mat_finalize(A);
-
-#ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
-#endif
 
 }
 //-----------------------------------------------------------------------------
@@ -259,13 +251,20 @@ const JANPACKMat& JANPACKMat::operator/= (real a)
 const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
 {
   //  jp_mat_copy(A.down_cast<JANPACKMat>().A, this->A);
-  //  return *this;
+  error("Not implemented.");
+  return *this;
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::dup(GenericMatrix& A) 
+void JANPACKMat::dup(const JANPACKMat& A) 
 {
-  error("Not implemented.");
-  //  jp_mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
+  uint range[2];
+  uint m;
+
+  jp_mat_range(const_cast<char *>(A.mat()), &range[0], &range[1]);
+  m = range[1] - range[0];
+  init(m, m);
+  //  error("Not implemented.");
+  //  jp_mat_dup_crs(, this->A);
 }
 //-----------------------------------------------------------------------------
 #endif

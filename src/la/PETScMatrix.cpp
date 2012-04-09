@@ -260,6 +260,17 @@ dolfin::uint PETScMatrix::size(uint dim) const
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
+dolfin::uint PETScMatrix::nz(bool global) const
+{
+  MatInfo info;
+  if (global) 
+    MatGetInfo(A,MAT_GLOBAL_SUM, &info);
+  else 
+    MatGetInfo(A,MAT_LOCAL, &info);
+
+  return info.nz_used;
+}
+//-----------------------------------------------------------------------------
 void PETScMatrix::get(real* block,
                       uint m, const uint* rows,
                       uint n, const uint* cols) const

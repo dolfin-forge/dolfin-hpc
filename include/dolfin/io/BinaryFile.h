@@ -105,7 +105,7 @@ namespace dolfin
 	error("Invalid data type in file");
       
       if (hdr.type == BINARY_VECTOR_DATA && (hdr.pe_size != pe_size))
-	error("File stored on %d PE's, currently running on %d PE's", 
+	error("File stored on %d PEs, currently running on %d PEs", 
 	      hdr.pe_size, pe_size);
     };
 

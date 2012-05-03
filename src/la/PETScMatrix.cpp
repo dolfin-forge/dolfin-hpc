@@ -260,14 +260,11 @@ dolfin::uint PETScMatrix::size(uint dim) const
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScMatrix::nz(bool global) const
+dolfin::uint PETScMatrix::nz() const
 {
   MatInfo info;
-  if (global) 
-    MatGetInfo(A,MAT_GLOBAL_SUM, &info);
-  else 
-    MatGetInfo(A,MAT_LOCAL, &info);
-
+  MatGetInfo(A,MAT_GLOBAL_SUM, &info);
+  
   return info.nz_used;
 }
 //-----------------------------------------------------------------------------
@@ -491,12 +488,12 @@ void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed
   if (transposed)
   { 
     if (size(0) != xx.size()) error("Matrix and vector dimensions don't match for matrix-vector product.");
-    yy.init(size(1));
+    yy.init(xx.local_size());
     MatMultTranspose(A, xx.vec(), yy.vec());
   }
   else {
     if (size(1) != xx.size()) error("Matrix and vector dimensions don't match for matrix-vector product.");
-    yy.init(size(0));
+    yy.init(xx.local_size());
     MatMult(A, xx.vec(), yy.vec());
   }
 }

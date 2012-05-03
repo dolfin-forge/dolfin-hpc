@@ -133,7 +133,7 @@ namespace dolfin
     virtual const GenericMatrix& operator= (const GenericMatrix& A);
 
     /// Get number of non-zeros in the matrix 
-    virtual uint nz(bool global = true) const;
+    virtual uint nz() const;
 
     //--- Special functions ---
 

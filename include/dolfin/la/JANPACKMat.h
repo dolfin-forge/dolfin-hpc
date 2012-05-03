@@ -94,6 +94,8 @@ namespace dolfin
     /// Assignment operator
     virtual const GenericMatrix& operator= (const GenericMatrix& x);
 
+    /// Get number of non-zeros in the matrix 
+    virtual uint nz() const;    
     //--- Special functions ---
 
     /// Return linear algebra backend factory
@@ -114,7 +116,7 @@ namespace dolfin
   private:
 
     // JANPACK Matrix pointer
-    char A[136];
+    char A[144];
     
     // True if we don't own the matrix A points to
     bool is_view;

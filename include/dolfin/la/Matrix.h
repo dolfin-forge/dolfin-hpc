@@ -123,8 +123,8 @@ namespace dolfin
     { *matrix = A; return *this; }
 
     /// Get number of non-zeros in the matrix
-    virtual uint nz(bool global = true) const
-    {return  matrix->nz(global);}
+    virtual uint nz() const
+    {return  matrix->nz();}
 
     //--- Special functions ---
 

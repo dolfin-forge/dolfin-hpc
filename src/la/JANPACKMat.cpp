@@ -103,6 +103,11 @@ dolfin::uint JANPACKMat::size(uint dim) const
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
+dolfin::uint JANPACKMat::nz() const
+{
+  return jp_mat_nz(const_cast<char *>(A), 1);
+}
+//-----------------------------------------------------------------------------
 void JANPACKMat::get(real* block,
 		       uint m, const uint* rows,
 		       uint n, const uint* cols) const
@@ -190,9 +195,9 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   const JANPACKVec& xx = x.down_cast<JANPACKVec>();  
   JANPACKVec& yy = y.down_cast<JANPACKVec>();
   if (transposed)
-    yy.init(size(1));
+    yy.init(xx.local_size());
   else
-    yy.init(size(0));
+    yy.init(xx.local_size());
   
   jp_spmv(const_cast<char *>(A), xx.vec(), yy.vec());  
 }

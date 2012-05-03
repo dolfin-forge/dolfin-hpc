@@ -22,8 +22,13 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, 
 					 PreconditionerType pc) :
-  method(method), pc_janpack(pc), precon(false)
+  method(method), pc_janpack(pc), ksp_init(false)
 {
+}
+//-----------------------------------------------------------------------------
+JANPACKKrylovSolver::~JANPACKKrylovSolver()
+{
+  jp_ksp_free(ksp);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
@@ -42,9 +47,9 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
     x.init(b.local_size());
 
   // Initialize preconditioner
-  if (precon == false) {
-    K.dup(A);
-    precon = true;
+  if (ksp_init == false) {
+    jp_ksp_init(ksp);
+    ksp_init = true;
   }
 
 
@@ -62,7 +67,7 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
 
 
   int num_iterations;
-  num_iterations = jp_krylov_solver(A.mat(), K.mat(), x.vec(), b.vec(), 
+  num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), ksp,
   				    (jp_solver_t) getType(method), pc_type,
   				    get("Krylov maximum iterations"),
 				    get("Krylov relative tolerance"));

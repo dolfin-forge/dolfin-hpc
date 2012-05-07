@@ -443,8 +443,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 	if (type == 1)
 	  non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v4);
       }
-
     }
+    delete[] cell_buffer;
 
     /*
      * FIXME
@@ -688,7 +688,6 @@ void BinaryFile::operator>>(Mesh& mesh)
     mesh.distdata() = distdata;
 
 
-    delete[] cell_buffer;
     delete[] recv_buffer;
     delete[] vertex_buffer;
     delete[] recv_buffer_coords;

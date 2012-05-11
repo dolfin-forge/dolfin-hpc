@@ -1,8 +1,8 @@
-// Copyright (C) 2009-2011 Niclas Jansson.
+// Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-09-18
+// Last changed: 2012-05-11
 
 #include <algorithm>
 #include <cstring>
@@ -139,6 +139,122 @@ void BinaryFile::operator<<(GenericVector& x)
   delete[] values;     
   
   message(1, "Saved vector to file %s in binary format.", filename.c_str());  
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator>>(Function &f)
+{
+
+#ifdef ENABLE_MPIIO
+  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  
+  MPI_File fh;
+  MPI_Offset byte_offset;
+  BinaryFileHeader hdr;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		MPI_MODE_RDONLY , MPI_INFO_NULL, &fh);
+  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), 
+		    MPI_BYTE, MPI_STATUS_IGNORE);
+  
+  hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
+
+  byte_offset = sizeof(BinaryFileHeader);
+
+  uint nfunc;
+  MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint),
+		       MPI_BYTE, MPI_STATUS_IGNORE);
+  byte_offset += sizeof(uint);
+  if (nfunc > 1)
+    warning("File contains %d functions, using first with matching dim.", nfunc);
+
+  BinaryFunctionHeader f_hdr;
+  for (uint i = 0; i < nfunc; i++) {
+    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
+			 MPI_BYTE, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(BinaryFunctionHeader);
+
+    /* Load function if dimension match */
+    if (f_hdr.dim == f.dim(0)) {
+
+      uint size = f.mesh().numVertices();
+      for (uint i = 0; i < f.rank(); i++)
+	size *= f.dim(i);
+      real *values = new real[size];
+      
+      MPI_File_read_at_all(fh, byte_offset + f.vector().offset()*sizeof(real),
+			   values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+      f.vector().set(values);
+      delete[] values;
+
+      return;
+    }
+
+    /* Otherwise continue searching*/
+    byte_offset +=  f_hdr.dim *
+      (f.mesh().distdata().global_numVertices() * sizeof(real));
+  }
+  error("No matching functions found in binary file");
+#else
+  error("MPI I/O required for loading functions written in  binary");
+#endif
+}
+//----------------------------------------------------------------------------
+void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)   
+{
+#ifdef ENABLE_MPIIO
+  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  
+  MPI_File fh;
+  MPI_Offset byte_offset;
+  BinaryFileHeader hdr;
+  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+		MPI_MODE_RDONLY , MPI_INFO_NULL, &fh);
+  MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), 
+		    MPI_BYTE, MPI_STATUS_IGNORE);
+  
+  hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
+
+  byte_offset = sizeof(BinaryFileHeader);
+
+  uint nfunc;
+  MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint),
+		       MPI_BYTE, MPI_STATUS_IGNORE);
+  byte_offset += sizeof(uint);
+
+  if (nfunc !=  f.size()) 
+    error("Number of functions does not match between set and file");
+
+  BinaryFunctionHeader f_hdr;  
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+       it != f.end(); it++) 
+    {
+      
+      MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
+			   MPI_BYTE, MPI_STATUS_IGNORE);
+      byte_offset += sizeof(BinaryFunctionHeader);
+      
+      Function* u = it->first;
+
+      if (f_hdr.dim != u->dim(0))
+	error("Dimension of file and function set does not match");
+     	
+      uint size = u->mesh().numVertices();
+      for (uint i = 0; i < u->rank(); i++)
+	size *= u->dim(i);
+      real *values = new real[size];	
+      MPI_File_read_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
+			   values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+      u->vector().set(values);
+      delete[] values;
+
+      byte_offset +=  f_hdr.dim *
+	(u->mesh().distdata().global_numVertices() * sizeof(real));
+    }
+  
+#else
+  error("MPI I/O required for loading functions written in  binary");
+#endif  
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Function &u)

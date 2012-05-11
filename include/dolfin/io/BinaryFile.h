@@ -1,8 +1,8 @@
-// Copyright (C) 2009-2011 Niclas Jansson.
+// Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-16
+// Last changed: 2012-05-11
 
 
 #ifndef __BINARY_FILE_H
@@ -30,6 +30,8 @@ namespace dolfin
     // Input
     void operator>> (GenericVector& x);
     void operator>> (Mesh& mesh);
+    void operator>> (Function& f);
+    void operator>> (std::vector<std::pair<Function*, std::string> >& f);
     
     // Output
     void operator<< (GenericVector& x);
@@ -104,7 +106,8 @@ namespace dolfin
       if (hdr.type != type)
 	error("Invalid data type in file");
       
-      if (hdr.type == BINARY_VECTOR_DATA && (hdr.pe_size != pe_size))
+      if ((hdr.type == BINARY_FUNCTION_DATA ||
+	   hdr.type == BINARY_VECTOR_DATA) && (hdr.pe_size != pe_size))
 	error("File stored on %d PEs, currently running on %d PEs", 
 	      hdr.pe_size, pe_size);
     };

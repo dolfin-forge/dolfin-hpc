@@ -1,8 +1,10 @@
 // Copyright (C) 2002-2008 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2008-2012.
+//
 // First added:  2002-11-12
-// Last changed: 2008-03-29
+// Last changed: 2012-05-11
 
 // FIXME: Use streams instead of stdio
 #include <stdio.h>
@@ -94,6 +96,11 @@ void GenericFile::operator>>(BLASFormData& blas)
 void GenericFile::operator>>(Graph& graph)
 {
   read_not_impl("Graph");
+}
+//-----------------------------------------------------------------------------
+void GenericFile::operator>> (std::vector<std::pair<Function*, std::string> >& f)
+{
+  read_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator<<(GenericVector& x)

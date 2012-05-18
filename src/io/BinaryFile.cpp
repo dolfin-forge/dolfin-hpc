@@ -176,11 +176,9 @@ void BinaryFile::operator>>(Function &f)
     /* Load function if dimension match */
     if (f_hdr.dim == f.dim(0)) {
 
-      uint size = f.mesh().numVertices();
-      for (uint i = 0; i < f.rank(); i++)
-	size *= f.dim(i);
+      uint size = f.dim(0) * f.mesh().numVertices() - 
+	(pe_size > 1 ? f.mesh().distdata().num_ghost(0) :  0);
       real *values = new real[size];
-      
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset()*sizeof(real),
 			   values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
       f.vector().set(values);
@@ -191,7 +189,8 @@ void BinaryFile::operator>>(Function &f)
 
     /* Otherwise continue searching*/
     byte_offset +=  f_hdr.dim *
-      (f.mesh().distdata().global_numVertices() * sizeof(real));
+      (pe_size > 1 ? f.mesh().distdata().global_numVertices() :
+       f.mesh().numVertices()) * sizeof(real);
   }
   error("No matching functions found in binary file");
 #else
@@ -238,10 +237,9 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 
       if (f_hdr.dim != u->dim(0))
 	error("Dimension of file and function set does not match");
-     	
-      uint size = u->mesh().numVertices();
-      for (uint i = 0; i < u->rank(); i++)
-	size *= u->dim(i);
+
+      uint size = u->dim(0) * u->mesh().numVertices() - 
+	(pe_size > 1 ? u->mesh().distdata().num_ghost(0) :  0);
       real *values = new real[size];	
       MPI_File_read_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
 			   values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -249,7 +247,9 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
       delete[] values;
 
       byte_offset +=  f_hdr.dim *
-	(u->mesh().distdata().global_numVertices() * sizeof(real));
+	(pe_size > 1 ? u->mesh().distdata().global_numVertices() :
+	 u->mesh().numVertices()) * sizeof(real);
+
     }
   
 #else

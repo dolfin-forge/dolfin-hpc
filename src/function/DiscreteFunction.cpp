@@ -155,6 +155,11 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f)
 
   // Initialize scratch space
   scratch = new Scratch(*finite_element);
+
+  if( MPI::numProcesses() > 1) 
+    init_ghosts();
+
+  renumberd = f.renumberd;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::~DiscreteFunction()
@@ -310,13 +315,13 @@ void DiscreteFunction::eval(real* values, const real* x) const
   intersection_detector->overlap(p, cells);
   if (cells.size() < 1)
   {
-    if (MPI::numProcesses() > 1)
-    {
-      values[0] = std::numeric_limits<real>::infinity(); 
-      return;
-    }
-    else
-      error("Unable to evaluate function at given point (not inside domain).");
+    if (MPI::numProcesses() == 1)
+      warning("Unable to evaluate function at given point (not inside domain).");
+    
+    values[0] = 1e50;
+    values[1] = 1e50;
+    values[2] = 1e50;
+    return;
   }
   
   Cell cell(mesh, cells[0]);

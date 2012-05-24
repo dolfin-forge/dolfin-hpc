@@ -378,7 +378,7 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   //   {
   //     return true;
   //   }
-  real tol = (real) dolfin_get("Geometrical Tolerance");
+  real tol = (real) dolfin_get("Geometrical Tolerance Triangle");
   if(d1 < (0.0-tol))
     return false;
   if(d2 < (0.0-tol))

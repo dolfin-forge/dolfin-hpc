@@ -17,6 +17,7 @@
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/GeometricPredicates.h>
+#include <dolfin/parameter/parameters.h>
 
 using namespace dolfin;
 
@@ -582,13 +583,14 @@ bool TetrahedronCell::intersects(const MeshEntity& tetrahedron,
 //   {
 //     return true;
 //   }
-  if(d1 < 0.0)
+  real tol = (real) dolfin_get("Geometrical Tolerance Tetrahedron");
+  if(d1 < (0.0 - tol))
     return false;
-  if(d2 < 0.0)
+  if(d2 < (0.0 - tol))
     return false;
-  if(d3 < 0.0)
+  if(d3 < (0.0 - tol))
     return false;
-  if(d4 < 0.0)
+  if(d4 < (0.0 - tol))
     return false;
 
   return true;

@@ -124,10 +124,11 @@ add("Load balancer report", false);
 add("Load balancer redistribute", true);
 
 
-//Adjust tolerance for GTS box
-add("GTS Tolerance",0.0);
+//--- Parameters for intersection detection ---
+add("GTS Tolerance",0.0);	// Tolerance of GTS BB
 //define size for trianlge tolerance ("is the point within this triangle?")
-add("Geometrical Tolerance",0.0);
+add("Geometrical Tolerance Triangle",0.0); 
+add("Geometrical Tolerance Tetrahedron",0.0);
 
 //--- Mesh smoothing ---
 add("Mesh smoothing restricted by rmin", true);

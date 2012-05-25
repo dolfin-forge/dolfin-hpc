@@ -1,0 +1,73 @@
+
+\chapter{\dolfin{} Binary file format}
+\label{app:dolfin_binary}
+\index{DOLFIN Binary}
+
+This chapter gives a detailed description of the \dolfin{} Binary file format.
+\section{General}
+Each binary file first contains the following generic header:
+\begin{code}
+/* Generic header */
+typedef struct {
+  uint32_t magic;               
+  uint32_t bendian;             
+  uint32_t pe_size;             
+  uint32_t type;                
+} header;
+\end{code}
+\begin{description}
+\item[\verb|magic|] apa
+\end{description}
+Where, \verb|magic| is the file's binary magic (\verb|0xBABE|), \verb|bendian| is endian information, always one if the file were written on a big endian system, \verb|pe_size| contains the number of PEs who wrote the data and \verb|type| is the type of data contained in the file: 0 for Mesh data, 1 for Vector data, 2 for Function(s) data and 3 for Mesh function data.
+
+\subsection{Mesh data}
+  % The mesh file format is as follows:
+   
+  %  a header    : the generic header above
+  %  one integer : geometric dimension of the mesh 
+  %  one integer : type of elements, 0: triangles, 1: tetrahedrons
+  %  one integer : number of vertices in the mesh
+  %  several doubles :  vertex coordinates, stored as x,y,(z). Size of field (dim * number of vertices)
+  %  one integer : number of triangles/tetrahedrons in the mesh
+  %  several integers : Connectivity information for each element, stored as a list of vertex id's.
+  %                     3 elements per triangle, and 4 elements per tetrahedron. Size of field (number of cells * (3 or 4 depending on element))
+   
+
+
+\subsection{Function data}
+If the generic headers type is 2, the rest of the file contains one or several functions. Directly following the generic header the file contains a single integer (\verb|sizeof(int)|) which tells how many functions the rest of the file contains.
+
+
+
+
+\begin{code}
+#define FNAME_LENGTH 256
+
+/* Header for function data */
+typedef struct {
+  uint32_t dim;                 /* Geometric dimension of function */
+  uint32_t size;                /* Size of functions data (typically dim * number of vertices) */
+  double t;                     /* Simulation time */
+  char name[FNAME_LENGTH];      /* Name of sample (e.g Velocity, Pressure) */
+} fheader;
+\end{code}
+
+\begin{description}
+\item[dim:] The geometric dimension of the function.
+\item[size:] Size of the function data (typically dim * number of vertices).
+\item[t:] Simulation time
+\item[name:] Name of sample (e.g Velocity, Pressure)
+\end{description}
+
+  %  The function file format is as follows:
+   
+  %  a header    : the generic header above
+  %  one integer : number of functions stored in the file
+  %  Then for each function, the file contains the following
+  %  a header    : the function header above
+  %  several doubles : function data, for scalar valued functions these corresponds to the vertices. For vector valued functions, 
+   %                   the data is stored as x,y,z for each vertices.
+
+
+
+\subsection{Mesh function}

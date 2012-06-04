@@ -15,9 +15,9 @@ typedef struct {
   uint32_t type;                
 } header;
 \end{code}
-\begin{description}
-\item[\verb|magic|] apa
-\end{description}
+%\begin{description}
+%\item[\verb|magic|] apa
+%\end{description}
 Where, \verb|magic| is the file's binary magic (\verb|0xBABE|), \verb|bendian| is endian information, always one if the file were written on a big endian system, \verb|pe_size| contains the number of PEs who wrote the data and \verb|type| is the type of data contained in the file: 0 for Mesh data, 1 for Vector data, 2 for Function(s) data and 3 for Mesh function data.
 
 \subsection{Mesh data}

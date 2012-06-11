@@ -32,15 +32,19 @@ namespace dolfin
     void operator>> (Mesh& mesh);
     void operator>> (Function& f);
     void operator>> (std::vector<std::pair<Function*, std::string> >& f);
+    void operator>> (MeshFunction<int>& meshfunction);
+    void operator>> (MeshFunction<unsigned int>& meshfunction);
+    void operator>> (MeshFunction<double>& meshfunction);
     
     // Output
     void operator<< (GenericVector& x);
     void operator<< (Mesh& mesh);
     void operator<< (Function& u);
+    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     void operator<< (MeshFunction<int>& meshfunction);
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
-    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
+
 
   private:
     
@@ -75,6 +79,9 @@ namespace dolfin
 
     template<class T>
     void write_meshfunction(T& meshfunction);    
+
+    template<class T>
+    void read_meshfunction(T& meshfunction);    
 
     inline int vertex_owner(uint L, uint R, uint i ) 
     {

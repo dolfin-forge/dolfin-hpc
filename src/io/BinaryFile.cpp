@@ -704,7 +704,8 @@ void BinaryFile::operator>>(Mesh& mesh)
       local_max = std::max(local_max, (uint) ghosts[i].size());
 
     buff_size = 0;
-    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local_max, &buff_size, 1, 
+		  MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
  
     delete[] recv_buffer;
     recv_buffer = new uint[buff_size]; 
@@ -776,7 +777,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 	break;
 	case 3:
 	editor.addVertex(local_vertex_index,
-			 recv_buffer_coords[k], recv_buffer_coords[k+1], recv_buffer_coords[k+2]);
+			 recv_buffer_coords[k], recv_buffer_coords[k+1], 
+			 recv_buffer_coords[k+2]);
 	break;
 	}
 	
@@ -790,12 +792,17 @@ void BinaryFile::operator>>(Mesh& mesh)
        switch(type)
       {
       case 0:
-	editor.addCell(local_cell_index, distdata.get_local(it->v1, 0), 
-		       distdata.get_local(it->v2, 0), distdata.get_local(it->v3, 0));
+	editor.addCell(local_cell_index, 
+		       distdata.get_local(it->v1, 0), 
+		       distdata.get_local(it->v2, 0), 
+		       distdata.get_local(it->v3, 0));
 	break;
       case 1:
-	editor.addCell(local_cell_index, distdata.get_local(it->v1, 0), distdata.get_local(it->v2, 0),
-		       distdata.get_local(it->v3, 0), distdata.get_local(it->v4, 0));
+	editor.addCell(local_cell_index, 
+		       distdata.get_local(it->v1, 0), 
+		       distdata.get_local(it->v2, 0),
+		       distdata.get_local(it->v3, 0),
+		       distdata.get_local(it->v4, 0));
 	break;
       }
     }

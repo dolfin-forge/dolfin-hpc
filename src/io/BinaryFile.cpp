@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2012-06-11
+// Last changed: 2012-06-12
 
 #include <algorithm>
 #include <cstring>
@@ -1086,23 +1086,21 @@ void BinaryFile::write_meshfunction(T& meshfunction)
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<int>& meshfunction)
 {
-  error("Not implemented yet!");
-  //  read_meshfunction(meshfunction);
+  read_meshfunction(meshfunction, 0);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<unsigned int>& meshfunction)
 {
-  error("Not implemented yet!");
-  //  read_meshfunction(meshfunction);
+  read_meshfunction(meshfunction, 1);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<double>& meshfunction)
 {
-  read_meshfunction(meshfunction);
+  read_meshfunction(meshfunction, 2);
 }
 //----------------------------------------------------------------------------
 template<class T>
-void BinaryFile::read_meshfunction(T& meshfunction)
+void BinaryFile::read_meshfunction(T& meshfunction, uint type)
 {
 
 #ifdef ENABLE_MPIIO
@@ -1151,12 +1149,24 @@ void BinaryFile::read_meshfunction(T& meshfunction)
 		       local_size * sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
 
   if (mfunc_type == 0) 
-    for (uint i =0; i < meshfunction.size(); i++) 
-      meshfunction.set(i, values[i]);
+    for (uint i =0; i < meshfunction.size(); i++)  {
+      if (type == 0)
+	meshfunction.set(i, (int) values[i]);
+      else if(type == 1)
+	meshfunction.set(i, (uint) values[i]);
+      else if(type == 2)
+	meshfunction.set(i, values[i]);
+    }
   if (mfunc_type == 1) {
-    for (uint i =0; i < meshfunction.size(); i++) 
-      meshfunction.set(i, values[i]);
-
+    for (uint i =0; i < meshfunction.size(); i++)  {
+      if (type == 0)
+	meshfunction.set(i, (int) values[i]);
+      else if(type == 1)
+	meshfunction.set(i, (uint) values[i]);
+      else if(type == 2)
+	meshfunction.set(i, values[i]);
+    }
+    
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
     for(MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it)
       ghost_buff[it.owner()].push_back(mesh.distdata().get_global(it.index(),0));
@@ -1175,7 +1185,7 @@ void BinaryFile::read_meshfunction(T& meshfunction)
     }
     uint *recv_ghost = new uint[ recv_size_gh];
     real *recv_buff = new real[ recv_size ];
-    
+    real tmp_value;
     for(uint j=1; j < pe_size; j++){
       src = (pe_rank - j + pe_size) % pe_size;
       dest = (pe_rank + j) % pe_size;
@@ -1193,8 +1203,17 @@ void BinaryFile::read_meshfunction(T& meshfunction)
 		   MPI::DOLFIN_COMM,&status);
       MPI_Get_count(&status,MPI_DOUBLE,&recv_count);
       
-      for(int j=0; j < recv_count; j++)
-	meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0), recv_buff[j]);
+      for(int j=0; j < recv_count; j++) {
+	if (type == 0)
+	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0), 
+			   (int) recv_buff[j]);
+	else if(type == 1)
+	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0), 
+			   (uint) recv_buff[j]);
+	else if(type == 2)
+	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0), 
+			   recv_buff[j]);
+      }
 
       send_buff.clear();
     }

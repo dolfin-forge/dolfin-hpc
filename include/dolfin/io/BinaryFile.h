@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2012-05-11
+// Last changed: 2012-06-12
 
 
 #ifndef __BINARY_FILE_H
@@ -81,7 +81,7 @@ namespace dolfin
     void write_meshfunction(T& meshfunction);    
 
     template<class T>
-    void read_meshfunction(T& meshfunction);    
+    void read_meshfunction(T& meshfunction, uint type);    
 
     inline int vertex_owner(uint L, uint R, uint i ) 
     {

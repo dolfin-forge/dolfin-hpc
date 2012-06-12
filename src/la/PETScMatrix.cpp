@@ -363,7 +363,7 @@ void PETScMatrix::getrow(uint row,
   else {
     if(!sub)
       error("No ghosted Processor rows");
-#if sun
+#if __SUNPRO_CC
     std::map<int, int>::const_iterator it = mapping.find(row);    
 #else
     std::map<const int, int>::const_iterator it = mapping.find(row);    

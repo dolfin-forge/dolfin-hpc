@@ -690,11 +690,23 @@ MatType PETScMatrix::getPETScType() const
       return MATSEQAIJ;
 #if PETSC_VERSION_MAJOR > 2 
   case spooles:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERSPOOLES;
+#else
       return MAT_SOLVER_SPOOLES;
+#endif
   case superlu:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERSUPERLU;
+#else
       return MAT_SOLVER_SUPERLU;
+#endif
   case umfpack:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERUMFPACK;
+#else
       return MAT_SOLVER_UMFPACK;
+#endif
   default:
     return "default";
 #else

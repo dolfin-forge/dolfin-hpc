@@ -441,8 +441,13 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   
   IS irow, icol;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, i, _rows, PETSC_COPY_VALUES, &irow);
+  ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, PETSC_COPY_VALUES, &icol);
+#else
   ISCreateGeneral(PETSC_COMM_SELF, i, _rows, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
+#endif
 
   if(!sub)
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);    
@@ -451,8 +456,13 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   sub = true;
   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISDestroy(&irow);
+  ISDestroy(&icol);
+#else
   ISDestroy(irow);
   ISDestroy(icol);
+#endif
 
   delete[] _cols;
   delete[] _rows;
@@ -492,19 +502,43 @@ void PETScMatrix::setrow(uint row,
 void PETScMatrix::zero(uint m, const uint* rows)
 {
   IS is = 0;
-  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
+		  PETSC_COPY_VALUES, &is);
+#else
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#endif
   PetscScalar null = 0.0;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  MatZeroRowsIS(A, is, null, PETSC_NULL, PETSC_NULL);
+  ISDestroy(&is);
+#else
   MatZeroRowsIS(A, is, null);
   ISDestroy(is);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::ident(uint m, const uint* rows)
 {
   IS is = 0;
-  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
+		  PETSC_COPY_VALUES, &is);
+#else
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#endif
   PetscScalar one = 1.0;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  MatZeroRowsIS(A, is, one, PETSC_NULL, PETSC_NULL);
+  ISDestroy(&is);
+#else
   MatZeroRowsIS(A, is, one);
   ISDestroy(is);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed) const

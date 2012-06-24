@@ -61,7 +61,11 @@ PETScVector::PETScVector(const PETScVector& v):
 PETScVector::~PETScVector()
 {
   if (x && !is_view)
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    VecDestroy(&x);
+#else
     VecDestroy(x);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScVector::init(uint N)
@@ -81,7 +85,11 @@ void PETScVector::init(uint N)
   else
   {
     if (x && !is_view) {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+      VecDestroy(&x);
+#else
       VecDestroy(x);
+#endif
       is_ghosted = false;
     }
   }
@@ -433,7 +441,11 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
     }
   }
 
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  VecDestroy(&x);
+#else
   VecDestroy(x);
+#endif
   
   Array<int> ghost_indices;
   int num_ghost = local_size;

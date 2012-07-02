@@ -57,7 +57,7 @@ PETScLUSolver::PETScLUSolver()
 //-----------------------------------------------------------------------------
 PETScLUSolver::~PETScLUSolver()
 {
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   if ( ksp ) KSPDestroy(&ksp);
   if ( B ) MatDestroy(&B);
 #else
@@ -96,7 +96,9 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
   #if PETSC_HAVE_MUMPS    
     if(_mat_type == MATMPIAIJ) {
       Mat Atemp = A.mat();
-#if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
+      MatConvert(A.mat(), MATSOLVERMUMPS, MAT_REUSE_MATRIX, &Atemp);
+#elif PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
       MatConvert(A.mat(), MAT_SOLVER_MUMPS, MAT_REUSE_MATRIX, &Atemp);
 #else
       MatConvert(A.mat(), MATAIJMUMPS, MAT_REUSE_MATRIX, &Atemp);

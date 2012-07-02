@@ -66,14 +66,14 @@ PETScMatrix::PETScMatrix(const PETScMatrix& A):
 PETScMatrix::~PETScMatrix()
 {
   if (A && !is_view)
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
 #endif
 
   if(sub)
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&AA_sub[0]); 
 #else
     MatDestroy(AA_sub[0]); 
@@ -86,7 +86,7 @@ void PETScMatrix::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   if ( A )
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
@@ -135,7 +135,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 {
   // Free previously allocated memory if necessary
   if ( A )
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
@@ -211,7 +211,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 {
   // Free previously allocated memory if necessary
   if ( A )
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
@@ -449,7 +449,7 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   
   IS irow, icol;
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, i, _rows, PETSC_COPY_VALUES, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, PETSC_COPY_VALUES, &icol);
 #else
@@ -464,7 +464,7 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   sub = true;
   
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISDestroy(&irow);
   ISDestroy(&icol);
 #else
@@ -510,7 +510,7 @@ void PETScMatrix::setrow(uint row,
 void PETScMatrix::zero(uint m, const uint* rows)
 {
   IS is = 0;
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
 		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
 		  PETSC_COPY_VALUES, &is);
@@ -519,7 +519,7 @@ void PETScMatrix::zero(uint m, const uint* rows)
 		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar null = 0.0;
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   MatZeroRowsIS(A, is, null, PETSC_NULL, PETSC_NULL);
   ISDestroy(&is);
 #else
@@ -531,7 +531,7 @@ void PETScMatrix::zero(uint m, const uint* rows)
 void PETScMatrix::ident(uint m, const uint* rows)
 {
   IS is = 0;
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
 		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
 		  PETSC_COPY_VALUES, &is);
@@ -540,7 +540,7 @@ void PETScMatrix::ident(uint m, const uint* rows)
 		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar one = 1.0;
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   MatZeroRowsIS(A, is, one, PETSC_NULL, PETSC_NULL);
   ISDestroy(&is);
 #else

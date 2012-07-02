@@ -56,7 +56,7 @@ PETScKrylovSolver::PETScKrylovSolver(SolverType method,
 PETScKrylovSolver::~PETScKrylovSolver()
 {
   // Destroy solver environment.
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   if ( ksp ) KSPDestroy(&ksp);
 #else
   if ( ksp ) KSPDestroy(ksp);
@@ -184,7 +184,7 @@ void PETScKrylovSolver::init(uint M, uint N)
 
   // Destroy old solver environment if necessary
   if ( ksp != 0 )
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     KSPDestroy(&ksp);
 #else
     KSPDestroy(ksp);

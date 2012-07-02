@@ -1,8 +1,8 @@
-// Copyright (C) 2009-2011 Niclas Jansson.
+// Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2011-06-16
+// Last changed: 2012-06-12
 
 
 #ifndef __BINARY_FILE_H
@@ -30,15 +30,21 @@ namespace dolfin
     // Input
     void operator>> (GenericVector& x);
     void operator>> (Mesh& mesh);
+    void operator>> (Function& f);
+    void operator>> (std::vector<std::pair<Function*, std::string> >& f);
+    void operator>> (MeshFunction<int>& meshfunction);
+    void operator>> (MeshFunction<unsigned int>& meshfunction);
+    void operator>> (MeshFunction<double>& meshfunction);
     
     // Output
     void operator<< (GenericVector& x);
     void operator<< (Mesh& mesh);
     void operator<< (Function& u);
+    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     void operator<< (MeshFunction<int>& meshfunction);
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
-    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
+
 
   private:
     
@@ -74,6 +80,9 @@ namespace dolfin
     template<class T>
     void write_meshfunction(T& meshfunction);    
 
+    template<class T>
+    void read_meshfunction(T& meshfunction, uint type);    
+
     inline int vertex_owner(uint L, uint R, uint i ) 
     {
       return (int) std::max( floor( (double) i / (double) (L + 1) ),
@@ -104,8 +113,9 @@ namespace dolfin
       if (hdr.type != type)
 	error("Invalid data type in file");
       
-      if (hdr.type == BINARY_VECTOR_DATA && (hdr.pe_size != pe_size))
-	error("File stored on %d PE's, currently running on %d PE's", 
+      if ((hdr.type == BINARY_FUNCTION_DATA ||
+	   hdr.type == BINARY_VECTOR_DATA) && (hdr.pe_size != pe_size))
+	error("File stored on %d PEs, currently running on %d PEs", 
 	      hdr.pe_size, pe_size);
     };
 

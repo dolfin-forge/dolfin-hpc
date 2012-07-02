@@ -43,7 +43,7 @@ PETScLUSolver::PETScLUSolver()
   PCSetType(pc, PCLU);
 
   // Allow matrices with zero diagonals to be solved
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
   PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
   PCFactorSetShiftAmount(pc, PETSC_DECIDE);
 #else    
@@ -57,8 +57,13 @@ PETScLUSolver::PETScLUSolver()
 //-----------------------------------------------------------------------------
 PETScLUSolver::~PETScLUSolver()
 {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  if ( ksp ) KSPDestroy(&ksp);
+  if ( B ) MatDestroy(&B);
+#else
   if ( ksp ) KSPDestroy(ksp);
   if ( B ) MatDestroy(B);
+#endif
   if ( idxm ) delete [] idxm;
   if ( idxn ) delete [] idxn;
 }

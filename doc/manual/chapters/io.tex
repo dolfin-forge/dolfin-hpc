@@ -60,6 +60,8 @@ File file("data.xml", File::octave);
       \hline
       \texttt{.xml}/\texttt{.xml.gz} & \texttt{File::xml} & \dolfin{} XML \\
       \hline
+      \texttt{.bin}  & \texttt{File::binary} & \dolfin{} Binary \\
+      \hline
       \texttt{.pvd} & \texttt{File::vtk} & VTK \\
       \hline
       \texttt{.m} & \texttt{File::octave} & GNU Octave \\
@@ -82,18 +84,20 @@ given in Table~\ref{tab:classes,formats}.
 
 \begin{table}[htbp]
   \begin{center}
-    \begin{tabular}{|l||c|c|c|c|c|}
+    \begin{tabular}{|l||c|c|c|c|c|c|}
       \hline
-      Format           & \texttt{Vector} & \texttt{Matrix} & \texttt{Mesh} & \texttt{Function} & \texttt{Sample} \\
+      Format           & \texttt{Vector} & \texttt{Matrix} & \texttt{Mesh} & \texttt{Function} & \texttt{Sample} & \texttt{Parallel}\\
       \hline
       \hline
-      \texttt{File::xml}     & in/out & in/out & in/out & --- & --- \\
+      \texttt{File::xml}     & in/out & in/out & in/out & --- & --- & Partial \\
       \hline
-      \texttt{File::vtk}     & ---    & ---    & out    & out & --- \\
+      \texttt{File::binary}     & in/out & --- & in/out & in/out & --- & Yes\\
       \hline
-      \texttt{File::octave}  & out    & out    & out    & out & out \\
+      \texttt{File::vtk}     & ---    & ---    & out    & out & --- & Yes \\
       \hline
-      \texttt{File::matlab}  & out    & out    & out    & out & out \\
+      \texttt{File::octave}  & out    & out    & out    & out & out & No \\
+      \hline
+      \texttt{File::matlab}  & out    & out    & out    & out & out & No\\
       \hline
     \end{tabular}
     \caption{Matrix of supported combinations of classes and file
@@ -140,6 +144,17 @@ The same thing can of course be accomplished by
 # gunzip -c mesh.xml.gz > mesh.xml
 \end{code}
 on the command-line.
+
+\subsection{\dolfin{} Binary}
+\index{DOLFIN Binary}
+
+\dolfin{} Binary is the new native HPC format of \dolfin{} and the only format with support for parallel I/O. As the name says, data is stored in uncompressed binary with some additionally header information. A complete specification of the file format can be found in appendix \ref{app:dolfin_binary}
+
+
+. As the name says, data is stored in uncompressed binary format.
+
+with
+support for parallel I/O in the form of MPI I/O \cite{mpi}.
 
 \subsection{VTK}
 

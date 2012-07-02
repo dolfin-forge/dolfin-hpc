@@ -138,7 +138,7 @@ void TriangleCell::orderEntities(Cell& cell) const
 	      uint* edge_vertices = topology(1, 0)(cell_edges[j]);
 
 	      // Check if the ith vertex of the cell is non-incident with edge j
-#if sun 
+#if __SUNPRO_CC 
 	      int n1 = 0;
 	      std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
 	      if ( n1 == 0)
@@ -378,7 +378,7 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   //   {
   //     return true;
   //   }
-  real tol = (real) dolfin_get("Geometrical Tolerance");
+  real tol = (real) dolfin_get("Geometrical Tolerance Triangle");
   if(d1 < (0.0-tol))
     return false;
   if(d2 < (0.0-tol))

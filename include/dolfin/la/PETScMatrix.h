@@ -193,7 +193,7 @@ namespace dolfin
 
     int block_size;
 
-#if sun
+#if __SUNPRO_CC
     std::map<int, int> mapping;
 #else
     std::map<const int, int> mapping;

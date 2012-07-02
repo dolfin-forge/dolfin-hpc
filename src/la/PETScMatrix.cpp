@@ -66,10 +66,18 @@ PETScMatrix::PETScMatrix(const PETScMatrix& A):
 PETScMatrix::~PETScMatrix()
 {
   if (A && !is_view)
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatDestroy(&A);
+#else
     MatDestroy(A);
+#endif
 
   if(sub)
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatDestroy(&AA_sub[0]); 
+#else
     MatDestroy(AA_sub[0]); 
+#endif
 
   // FIXME destroy sub
 }
@@ -78,7 +86,11 @@ void PETScMatrix::init(uint M, uint N)
 {
   // Free previously allocated memory if necessary
   if ( A )
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatDestroy(&A);
+#else
     MatDestroy(A);
+#endif
   
   // FIXME: maybe 50 should be a parameter?
   // FIXME: it should definitely be a parameter
@@ -91,8 +103,13 @@ void PETScMatrix::init(uint M, uint N)
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#endif
 #endif
   }
   else
@@ -102,7 +119,7 @@ void PETScMatrix::init(uint M, uint N)
 
     setType();
 #if PETSC_VERSION_MAJOR > 2
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
     MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
@@ -118,7 +135,11 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 {
   // Free previously allocated memory if necessary
   if ( A )
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatDestroy(&A);
+#else
     MatDestroy(A);
+#endif
 
   // Create a sparse matrix in compressed row format
   if (dolfin::MPI::numProcesses() > 1)
@@ -128,8 +149,14 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
+
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
+		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+#endif
 #endif
     //MatSetFromOptions(A);
     //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
@@ -144,7 +171,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     {      
       MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size, (int) M, (int) N, 1, PETSC_NULL, &A);
 #if PETSC_VERSION_MAJOR > 2
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
       MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
@@ -165,7 +192,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
       MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
       setType();
 #if PETSC_VERSION_MAJOR > 2
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0   
       MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
@@ -184,7 +211,11 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 {
   // Free previously allocated memory if necessary
   if ( A )
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    MatDestroy(&A);
+#else
     MatDestroy(A);
+#endif
   // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case) 
   // and number of off-diagonal non-zeroes (50 in this case).
   // Note that guessing too high leads to excessive memory usage.
@@ -193,14 +224,18 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		  //		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 #ifdef HAVE_MPI
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+#else
   MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+#endif
 #endif
   //MatCreateMPIAIJ(MPI::DOLFIN_COMM, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
 
   //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
 #if PETSC_VERSION_MAJOR > 2
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
     MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
@@ -371,7 +406,7 @@ void PETScMatrix::getrow(uint row,
   else {
     if(!sub)
       error("No ghosted Processor rows");
-#if sun
+#if __SUNPRO_CC
     std::map<int, int>::const_iterator it = mapping.find(row);    
 #else
     std::map<const int, int>::const_iterator it = mapping.find(row);    
@@ -414,8 +449,13 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   
   IS irow, icol;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, i, _rows, PETSC_COPY_VALUES, &irow);
+  ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, PETSC_COPY_VALUES, &icol);
+#else
   ISCreateGeneral(PETSC_COMM_SELF, i, _rows, &irow);
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
+#endif
 
   if(!sub)
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);    
@@ -424,8 +464,13 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
   sub = true;
   
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISDestroy(&irow);
+  ISDestroy(&icol);
+#else
   ISDestroy(irow);
   ISDestroy(icol);
+#endif
 
   delete[] _cols;
   delete[] _rows;
@@ -465,19 +510,43 @@ void PETScMatrix::setrow(uint row,
 void PETScMatrix::zero(uint m, const uint* rows)
 {
   IS is = 0;
-  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
+		  PETSC_COPY_VALUES, &is);
+#else
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#endif
   PetscScalar null = 0.0;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  MatZeroRowsIS(A, is, null, PETSC_NULL, PETSC_NULL);
+  ISDestroy(&is);
+#else
   MatZeroRowsIS(A, is, null);
   ISDestroy(is);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::ident(uint m, const uint* rows)
 {
   IS is = 0;
-  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), 
+		  PETSC_COPY_VALUES, &is);
+#else
+  ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m), 
+		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+#endif
   PetscScalar one = 1.0;
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  MatZeroRowsIS(A, is, one, PETSC_NULL, PETSC_NULL);
+  ISDestroy(&is);
+#else
   MatZeroRowsIS(A, is, one);
   ISDestroy(is);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed) const
@@ -698,11 +767,23 @@ MatType PETScMatrix::getPETScType() const
       return MATSEQAIJ;
 #if PETSC_VERSION_MAJOR > 2 
   case spooles:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERSPOOLES;
+#else
       return MAT_SOLVER_SPOOLES;
+#endif
   case superlu:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERSUPERLU;
+#else
       return MAT_SOLVER_SUPERLU;
+#endif
   case umfpack:
+#if PETSC_VERSION_MINOR > 1
+      return MATSOLVERUMFPACK;
+#else
       return MAT_SOLVER_UMFPACK;
+#endif
   default:
     return "default";
 #else

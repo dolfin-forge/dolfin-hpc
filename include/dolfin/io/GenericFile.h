@@ -1,8 +1,10 @@
 // Copyright (C) 2003-2008 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2008-2012.
+//
 // First added:  2003-07-15
-// Last changed: 2008-03-29
+// Last changed: 2012-05-11
 
 #ifndef __GENERIC_FILE_H
 #define __GENERIC_FILE_H
@@ -49,6 +51,7 @@ namespace dolfin
     virtual void operator>> (ParameterList& parameters);
     virtual void operator>> (BLASFormData& blas);
     virtual void operator>> (Graph& graph);
+    virtual void operator>> (std::vector<std::pair<Function*, std::string> >& f);
     
     // Output
     

@@ -122,14 +122,14 @@ void JANPACKVec::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
   jp_vec_get_block(const_cast<char *>(x), const_cast<double*>(block), 
-		reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
+		   reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
   jp_vec_set_block(const_cast<char *>(x), const_cast<double*>(block), 
-		reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
+		   reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::add(const real* block, uint m, const uint* rows)
@@ -137,7 +137,7 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
   dolfin_assert(x);
 
   jp_vec_add_block(const_cast<char *>(x), const_cast<double*>(block),
-		reinterpret_cast<uint*>(const_cast<uint*>(rows)), m);
+		   reinterpret_cast<uint*>(const_cast<uint*>(rows)), m);
   
   //  error("Not implemented.");
 }

@@ -11,7 +11,12 @@
 
 #ifdef HAVE_PETSC
 
+// Is this needed in PETSc 3.x?
+#if PETSC_VERSION_MAJOR == 2
 #include <private/pcimpl.h>
+#endif
+
+#include <petscksp.h>
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/PETScKrylovSolver.h>
@@ -51,7 +56,11 @@ PETScKrylovSolver::PETScKrylovSolver(SolverType method,
 PETScKrylovSolver::~PETScKrylovSolver()
 {
   // Destroy solver environment.
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+  if ( ksp ) KSPDestroy(&ksp);
+#else
   if ( ksp ) KSPDestroy(ksp);
+#endif
 }
 //-----------------------------------------------------------------------------
 dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b)
@@ -175,7 +184,11 @@ void PETScKrylovSolver::init(uint M, uint N)
 
   // Destroy old solver environment if necessary
   if ( ksp != 0 )
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+    KSPDestroy(&ksp);
+#else
     KSPDestroy(ksp);
+#endif
 
   // Set up solver environment
 #ifdef HAVE_MPI
@@ -236,7 +249,7 @@ void PETScKrylovSolver::readParameters()
     PC pc;
     KSPGetPC(ksp, &pc);
 
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 1
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
     PCFactorSetShiftAmount(pc, get("Krylov shift nonzero"));
 #else    

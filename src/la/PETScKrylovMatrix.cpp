@@ -51,7 +51,11 @@ PETScKrylovMatrix::PETScKrylovMatrix(const PETScVector& x, const PETScVector& y)
 PETScKrylovMatrix::~PETScKrylovMatrix()
 {
   // Free memory of matrix
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3 
+  if ( A ) MatDestroy(&A);
+#else
   if ( A ) MatDestroy(A);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
@@ -75,7 +79,11 @@ void PETScKrylovMatrix::init(const PETScVector& x, const PETScVector& y)
       return;
     else
     {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3 
+      MatDestroy(&A);
+#else
       MatDestroy(A);
+#endif
     }
   }
   
@@ -102,7 +110,11 @@ void PETScKrylovMatrix::init(int M, int N)
       if ( MM == M && NN == N )
 	return;
       else
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3 
+	MatDestroy(&A);
+#else
 	MatDestroy(A);
+#endif
     }
 
 #ifdef HAVE_MPI

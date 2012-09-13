@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First  added: 2009
-// Last changed: 2012-06-12
+// Last changed: 2012-09-13
 
 #include <algorithm>
 #include <cstring>
@@ -185,6 +185,8 @@ void BinaryFile::operator>>(Function &f)
       f.vector().set(values);
       delete[] values;
 
+      MPI_File_close(&fh);
+
       return;
     }
 
@@ -193,6 +195,9 @@ void BinaryFile::operator>>(Function &f)
       (pe_size > 1 ? f.mesh().distdata().global_numVertices() :
        f.mesh().numVertices()) * sizeof(real);
   }
+
+  MPI_File_close(&fh);
+
   error("No matching functions found in binary file");
 #else
   error("MPI I/O required for loading functions written in  binary");

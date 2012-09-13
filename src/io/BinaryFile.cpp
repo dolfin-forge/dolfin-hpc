@@ -233,30 +233,31 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
   BinaryFunctionHeader f_hdr;  
   for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
        it != f.end(); it++) 
-    {
+  {
       
-      MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
-			   MPI_BYTE, MPI_STATUS_IGNORE);
-      byte_offset += sizeof(BinaryFunctionHeader);
-      
-      Function* u = it->first;
-
-      if (f_hdr.dim != u->dim(0))
-	error("Dimension of file and function set does not match");
-
-      uint size = u->dim(0) * u->mesh().numVertices() - 
-	(pe_size > 1 ? u->mesh().distdata().num_ghost(0) :  0);
-      real *values = new real[size];	
-      MPI_File_read_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
-			   values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
-      u->vector().set(values);
-      delete[] values;
-
-      byte_offset +=  f_hdr.dim *
-	(pe_size > 1 ? u->mesh().distdata().global_numVertices() :
-	 u->mesh().numVertices()) * sizeof(real);
-
-    }
+    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader), 
+			 MPI_BYTE, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(BinaryFunctionHeader);
+    
+    Function* u = it->first;
+    
+    if (f_hdr.dim != u->dim(0))
+      error("Dimension of file and function set does not match");
+    
+    uint size = u->dim(0) * u->mesh().numVertices() - 
+      (pe_size > 1 ? u->mesh().distdata().num_ghost(0) :  0);
+    real *values = new real[size];	
+    MPI_File_read_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
+			 values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+    u->vector().set(values);
+    delete[] values;
+    
+    byte_offset +=  f_hdr.dim *
+      (pe_size > 1 ? u->mesh().distdata().global_numVertices() :
+       u->mesh().numVertices()) * sizeof(real);    
+  }
+  
+  MPI_File_close(&fh);
   
 #else
   error("MPI I/O required for loading functions written in  binary");

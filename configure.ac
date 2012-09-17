@@ -38,7 +38,7 @@ AC_ARG_ENABLE(mpi,
 
 AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
 		     [Compile with support for MPI I/O]),
-		     [enable_mpiio=yes],[enable_mpiio=no])
+		     [enable_mpiio=${enablebal}],[enable_mpiio=no])
 
 AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
@@ -47,7 +47,7 @@ AC_ARG_ENABLE(openmp,
 
 AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 			 [Compile with support for Boost TR1 headers]),
-			 [enable_boosttr1=yes],[enable_boostr1=no])
+			 [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
 
 
@@ -184,7 +184,7 @@ if test "x${with_petsc}" != xno; then
       found_la_backend="yes"
    else
       AX_PETSC
-      if test "x${HAVE_PETSC}" != 0; then
+      if test "${PETSC_LDFLAGS}"; then
        	 found_la_backend="yes"
       fi
    fi

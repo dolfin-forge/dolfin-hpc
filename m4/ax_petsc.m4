@@ -24,7 +24,7 @@ AC_DEFUN([AX_PETSC],[
 
 	CPPFLAGS_SAVED="$CPPFLAGS"
 	LDFLAGS_SAVED="$LDFLAGS"
-
+	have_petsc=no
 	if test -d "$ac_petsc_dir"; then
 	   if test -d "$ac_petsc_dir/bmake"; then
 	      ac_petsc_arch=`grep PETSC_ARCH  $ac_petsc_dir/bmake/petscconf | sed 's/PETSC_ARCH=/''/'`
@@ -51,7 +51,7 @@ AC_DEFUN([AX_PETSC],[
 	   fi
 		
 	fi
-
+	AC_SUBST(PETSC_LDFLAGS)
 	if test x"${have_petsc}" = xyes; then
 	   AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
 	   CPPFLAGS="$CPPFLAGS $PETSC_CPPFLAGS"
@@ -69,5 +69,4 @@ AC_DEFUN([AX_PETSC],[
 
 
 
-
-
+ 

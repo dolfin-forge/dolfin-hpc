@@ -45,15 +45,29 @@ AC_DEFUN([AX_PETSC],[
 	     PETSC_PKG_LIBS=`grep PACKAGES_LIBS $ac_petsc_dir/conf/petscvariables | sed 's/PACKAGES_LIBS =/''/'`
 	     PETSC_MPI_INC=`grep 'MPI_INCLUDE =' $ac_petsc_dir/conf/petscvariables | sed 's/MPI_INCLUDE =/''/'`
 	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include/ $PETSC_MPI_INC"
-	     PETSC_SYS_LIB=`grep 'PETSC_SYS_LIB_BASIC ' ${ac_petsc_dir}/conf/variables | sed 's/PETSC_SYS_LIB_BASIC      =/''/'`
-	     PETSC_VEC_LIB=`grep 'PETSC_VEC_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_VEC_LIB_BASIC      =/''/' | sed 's/${PETSC_SYS_LIB_BASIC}/''/'`
-	     PETSC_MAT_LIB=`grep 'PETSC_MAT_LIB_BASIC '  $ac_petsc_dir/conf/variables | sed 's/PETSC_MAT_LIB_BASIC      =/''/' | sed 's/${PETSC_VEC_LIB_BASIC}/''/'`
-	     PETSC_DM_LIB=`grep 'PETSC_DM_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_DM_LIB_BASIC       =/''/' | sed 's/${PETSC_MAT_LIB_BASIC}/''/'`
-	     PETSC_KSP_LIB=`grep 'PETSC_KSP_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_KSP_LIB_BASIC     =/''/' | sed 's/${PETSC_DM_LIB_BASIC}/''/'`
-	     PETSC_SNES_LIB=`grep 'PETSC_SNES_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_SNES_LIB_BASIC     =/''/' | sed 's/${PETSC_KSP_LIB_BASIC}/''/'`
-	     PETSC_TS_LIB=`grep 'PETSC_TS_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_TS_LIB_BASIC       =/''/' | sed 's/${PETSC_SNES_LIB_BASIC}/''/'`
-	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS $PETSC_TS_LIB $PETSC_SNES_LIB $PETSC_KSP_LIB $PETSC_DM_LIB $PETSC_MAT_LIB $PETSC_VEC_LIB $PETSC_SYS_LIB"
+	     PETSC_SYS_LIB=`grep 'PETSC_SYS_LIB_BASIC ' ${ac_petsc_dir}/conf/variables | sed 's/PETSC_SYS_LIB_BASIC/''/' | sed 's/=/''/'`
+	     PETSC_SYS_LIB=`echo $PETSC_SYS_LIB | sed 's/ //g'`
 
+	     PETSC_VEC_LIB=`grep 'PETSC_VEC_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_VEC_LIB_BASIC/''/' | sed 's/=/''/' | sed 's/${PETSC_SYS_LIB_BASIC}/''/'`
+	     PETSC_VEC_LIB=`echo $PETSC_VEC_LIB | sed 's/ //g'`
+
+	     PETSC_MAT_LIB=`grep 'PETSC_MAT_LIB_BASIC '  $ac_petsc_dir/conf/variables | sed 's/PETSC_MAT_LIB_BASIC/''/'| sed 's/=/''/' | sed 's/${PETSC_VEC_LIB_BASIC}/''/'`
+	     PETSC_MAT_LIB=`echo $PETSC_MAT_LIB | sed 's/ //g'`
+
+	     PETSC_DM_LIB=`grep 'PETSC_DM_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_DM_LIB_BASIC/''/'| sed 's/=/''/' | sed 's/${PETSC_MAT_LIB_BASIC}/''/'`
+	     PETSC_DM_LIB=`echo $PETSC_DM_LIB | sed 's/ //g'`
+
+	     PETSC_KSP_LIB=`grep 'PETSC_KSP_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_KSP_LIB_BASIC/''/' | sed 's/=/''/' | sed 's/${PETSC_DM_LIB_BASIC}/''/'`
+	     PETSC_KSP_LIB=`echo $PETSC_KSP_LIB | sed 's/ //g'`
+
+	     PETSC_SNES_LIB=`grep 'PETSC_SNES_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_SNES_LIB_BASIC/''/' | sed 's/=/''/' |  sed 's/^[ \t]*//' | sed 's/${PETSC_KSP_LIB_BASIC}/''/'`
+	     PETSC_SNES_LIB=`echo $PETSC_SNES_LIB | sed 's/ //g'`
+
+	     PETSC_TS_LIB=`grep 'PETSC_TS_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_TS_LIB_BASIC       =/''/' | sed 's/${PETSC_SNES_LIB_BASIC}/''/'`
+	     PETSC_TS_LIB=`echo $PETSC_TS_LIB | sed 's/ //g'`
+
+	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS $PETSC_TS_LIB $PETSC_SNES_LIB $PETSC_KSP_LIB $PETSC_DM_LIB $PETSC_MAT_LIB $PETSC_VEC_LIB $PETSC_SYS_LIB"
+#	     PETSC_LDFLAGS=`echo $PETSC_LDFLAGS | sed 's/ //g'`
 	     have_petsc="yes"
 	   fi
 		

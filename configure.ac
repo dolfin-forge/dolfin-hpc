@@ -38,7 +38,7 @@ AC_ARG_ENABLE(mpi,
 
 AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
 		     [Compile with support for MPI I/O]),
-		     [enable_mpiio=${enablebal}],[enable_mpiio=no])
+		     [enable_mpiio=${enableval}],[enable_mpiio=no])
 
 AC_ARG_ENABLE(openmp,
               AC_HELP_STRING([--enable-openmp],
@@ -185,7 +185,9 @@ if test "x${with_petsc}" != xno; then
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then
-       	 found_la_backend="yes"
+         found_la_backend="yes"
+      else
+	 with_petsc="no"
       fi
    fi
 fi

@@ -43,6 +43,7 @@ AC_DEFUN([AX_PETSC],[
 	   elif test -d "$ac_petsc_dir/conf"; then
 	     ac_petsc_libdir="$ac_petsc_dir/lib"
 	     PETSC_PKG_LIBS=`grep PACKAGES_LIBS $ac_petsc_dir/conf/petscvariables | sed 's/PACKAGES_LIBS =/''/'`
+	     PETSC_EXT_LIBS=`grep 'PETSC_EXTERNAL_LIB_BASIC ='  $ac_petsc_dir/conf/petscvariables | sed 's/PETSC_EXTERNAL_LIB_BASIC =/''/'`
 	     PETSC_MPI_INC=`grep 'MPI_INCLUDE =' $ac_petsc_dir/conf/petscvariables | sed 's/MPI_INCLUDE =/''/'`
 	     PETSC_CPPFLAGS="-I$ac_petsc_dir/include/ $PETSC_MPI_INC"
 	     PETSC_SYS_LIB=`grep 'PETSC_SYS_LIB_BASIC ' ${ac_petsc_dir}/conf/variables | sed 's/PETSC_SYS_LIB_BASIC/''/' | sed 's/=/''/'`
@@ -66,8 +67,8 @@ AC_DEFUN([AX_PETSC],[
 	     PETSC_TS_LIB=`grep 'PETSC_TS_LIB_BASIC ' $ac_petsc_dir/conf/variables | sed 's/PETSC_TS_LIB_BASIC/''/' | sed 's/=/''/' | sed 's/${PETSC_SNES_LIB_BASIC}/''/'`
 	     PETSC_TS_LIB=`echo $PETSC_TS_LIB | sed 's/ //g'`
 
-	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS $PETSC_TS_LIB $PETSC_SNES_LIB $PETSC_KSP_LIB $PETSC_DM_LIB $PETSC_MAT_LIB $PETSC_VEC_LIB $PETSC_SYS_LIB"
-#	     PETSC_LDFLAGS=`echo $PETSC_LDFLAGS | sed 's/ //g'`
+	     PETSC_LDFLAGS="-L$ac_petsc_libdir $PETSC_PKG_LIBS $PETSC_TS_LIB $PETSC_SNES_LIB $PETSC_KSP_LIB $PETSC_DM_LIB $PETSC_MAT_LIB $PETSC_VEC_LIB $PETSC_SYS_LIB $PETSC_EXT_LIBS"
+
 	     have_petsc="yes"
 	   fi
 		

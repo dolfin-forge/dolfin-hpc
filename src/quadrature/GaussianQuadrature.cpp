@@ -6,7 +6,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS
+#ifdef NO_UBLAS
 
 #include <cmath>
 #include <dolfin/common/constants.h>

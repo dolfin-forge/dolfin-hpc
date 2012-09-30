@@ -1,6 +1,6 @@
 LDFLAGS = $(XML_LDFLAGS)
 SUBDIRS = common elements fem function graph io\
-	la log main math mesh nls parameter pde
+	la log main math mesh nls parameter pde quadrature
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = dolfin.pc

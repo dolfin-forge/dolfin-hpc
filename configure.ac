@@ -241,6 +241,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/nls/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
+			  src/quadrature/Makefile\
 			  src/dolfin.pc
 			  include/Makefile
 			  include/dolfin/Makefile])

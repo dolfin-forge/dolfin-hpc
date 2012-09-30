@@ -21,6 +21,7 @@ libdolfin_la_LIBADD = \
 		mesh/libdolfin_mesh.la\
 		nls/libdolfin_nls.la\
 		parameter/libdolfin_parameter.la\
-		pde/libdolfin_pde.la
+		pde/libdolfin_pde.la\
+		quadrature/libdolfin_quadrature.la
 
 

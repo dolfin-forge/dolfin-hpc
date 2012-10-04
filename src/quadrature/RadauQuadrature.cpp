@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS 
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
@@ -98,4 +97,3 @@ void RadauQuadrature::computePoints()
 }
 //-----------------------------------------------------------------------------
 
-#endif

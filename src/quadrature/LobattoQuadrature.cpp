@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS 
 
 #include <cmath>
 #include <dolfin/common/constants.h>
@@ -94,4 +93,3 @@ void LobattoQuadrature::computePoints()
 }
 //----------------------------------------------------------------------------
 
-#endif

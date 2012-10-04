@@ -1,3 +1,5 @@
+/* include/dolfin/config/dolfin_config.h.in.  Generated from configure.ac by autoheader.  */
+
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
@@ -10,6 +12,9 @@
 /* Compile with local data cache in functions */
 #undef ENABLE_FUNCTION_CACHE
 
+/* Compile with support for MPI I/O */
+#undef ENABLE_MPIIO
+
 /* Compile with optimization for P1 elements */
 #undef ENABLE_P1_OPTIMIZATIONS
 
@@ -21,6 +26,9 @@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Have FORTRAN BLAS */
+#undef HAVE_F77_BLAS
 
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H
@@ -48,9 +56,6 @@
 
 /* Define if you have the MPI library. */
 #undef HAVE_MPI
-
-/* Compile with support for MPI I/O */
-#undef ENABLE_MPIIO
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP

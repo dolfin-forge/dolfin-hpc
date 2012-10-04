@@ -6,15 +6,21 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifdef NO_UBLAS
 
 #include <cmath>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/la/uBlasVector.h>
-#include <dolfin/la/uBlasDenseMatrix.h>
 #include <dolfin/math/Legendre.h>
 #include <dolfin/quadrature/GaussianQuadrature.h>
+
+#if HAVE_F77_BLAS
+extern "C" {
+  void dgesv_(int *n, int *nrhs, double *A, int *lda, int *ipiv, 
+	      double *b, int *ldb, int* info);
+}
+#endif
+#define RM(row,col,nrow) ((row) + ((nrow)*(col)))
+
 
 using namespace dolfin;
 
@@ -47,33 +53,39 @@ void GaussianQuadrature::computeWeights()
     weights[0] = 2.0;
     return;
   }
+#if HAVE_F77_BLAS  
+  const int nrhs = 1;
+  int info;
 
-  uBlasDenseMatrix A(n, n);
-  ublas_dense_matrix& AA = A.mat();
-  uBlasVector x(n), b(n);
-  ublas_vector& _x = x.vec();
-  ublas_vector& _b = b.vec();
-
+  real *A = new real[n * n];
+  real *x = new real[n];
+  real *b = new real[n];
+  int *ipiv = new int[n];
+  
   // Compute the matrix coefficients
   for (unsigned int i = 0; i < n; i++)
   {
     Legendre p(i);
     for (unsigned int j = 0; j < n; j++)
-      AA(i, j) = p(points[j]);
-    _b[i] = 0.0;
+      A[RM(i, j, n)] = p(points[j]);
+    b[i] = 0.0;
   }
-  _b[0] = 2.0;
-
+  b[0] = 2.0;
+  
   // Solve the system of equations
-  // FIXME: Do we get high enough precision?
-  //LU lu;
-  //lu.set("LU report", false);
-  //lu.solve(A, x, b);
-  A.solve(x, b);
-
+  dgesv_(&n, &nrhs, &A[0], &n, &ipiv, &b[0], &n, &info);
+  
   // Save the weights
   for (unsigned int i = 0; i < n; i++)
-    weights[i] = _x[i];
+    weights[i] = x[i];
+
+  delete[] ipiv;
+  delete[] b;
+  delete[] x;
+  delete[] A;
+#else
+  error("GaussianQuadrature needs LAPACK");
+#endif
 }
 //-----------------------------------------------------------------------------
 bool GaussianQuadrature::check(unsigned int q) const
@@ -107,4 +119,4 @@ bool GaussianQuadrature::check(unsigned int q) const
 }
 //-----------------------------------------------------------------------------
 
-#endif
+

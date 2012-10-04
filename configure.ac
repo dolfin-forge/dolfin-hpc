@@ -49,7 +49,9 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 			 [Compile with support for Boost TR1 headers]),
 			 [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
-
+AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
+		     [Enable various quadrature rules]),
+		     [enable_quad=${enableval}],[enable_quad=no])
 
 
 
@@ -208,6 +210,18 @@ if test "x${enable_debug}" != xno; then
    CXXFLAGS="-g -DDEBUG $CXXFLAGS"
 fi
 
+
+if test "x${enable_quad}" = xyes; then 
+   # This assumes a modern CRAY, for example XT or XE series systems
+   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+      AC_DEFINE(HAVE_F77_BLAS, [1], [Have FORTRAN BLAS])
+   else
+      AC_CHECK_LIB(lapack,dgesv_,[LIBS="-lblas -lapack"], 
+      [AC_MSG_ERROR([LAPACK not found])], [-lblas])
+      AC_DEFINE(HAVE_F77_BLAS, [1], [Have FORTRAN BLAS])	
+   fi   
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -271,6 +285,7 @@ Package features:
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
+  Quadrature: ${enable_quad}
 
 
 ---------------------------------------------------------

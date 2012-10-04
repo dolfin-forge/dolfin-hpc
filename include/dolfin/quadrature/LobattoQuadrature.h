@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS 
 
 #ifndef __LOBATTO_QUADRATURE_H
 #define __LOBATTO_QUADRATURE_H
@@ -44,4 +43,3 @@ namespace dolfin
 
 #endif
 
-#endif

@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS
 
 #include <stdio.h>
 #include <cmath>
@@ -80,4 +79,3 @@ void GaussQuadrature::computePoints()
 }
 //-----------------------------------------------------------------------------
 
-#endif

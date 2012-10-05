@@ -217,7 +217,7 @@ if test "x${enable_quad}" = xyes; then
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
    else
       AC_CHECK_LIB(lapack,dgesv_,[LIBS="-lblas -lapack"], 
-      [AC_MSG_ERROR([LAPACK not found])], [-lblas])
+      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])], [-lblas])
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
    fi   
 fi

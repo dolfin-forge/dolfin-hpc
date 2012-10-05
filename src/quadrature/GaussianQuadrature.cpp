@@ -13,10 +13,10 @@
 #include <dolfin/math/Legendre.h>
 #include <dolfin/quadrature/GaussianQuadrature.h>
 
-#if HAVE_F77_BLAS
+#if HAVE_F77_LAPACK
 extern "C" {
-  void dgesv_(int *n, int *nrhs, double *A, int *lda, int *ipiv, 
-	      double *b, int *ldb, int* info);
+  void dgesv_(unsigned int *n, int *nrhs, double *A, unsigned int *lda, int *ipiv, 
+	      double *b, unsigned int *ldb, int* info);
 }
 #endif
 #define RM(row,col,nrow) ((row) + ((nrow)*(col)))
@@ -53,8 +53,8 @@ void GaussianQuadrature::computeWeights()
     weights[0] = 2.0;
     return;
   }
-#if HAVE_F77_BLAS  
-  const int nrhs = 1;
+#if HAVE_F77_LAPACK
+  int nrhs = 1;
   int info;
 
   real *A = new real[n * n];
@@ -73,7 +73,7 @@ void GaussianQuadrature::computeWeights()
   b[0] = 2.0;
   
   // Solve the system of equations
-  dgesv_(&n, &nrhs, &A[0], &n, &ipiv, &b[0], &n, &info);
+  dgesv_(&n, &nrhs, &A[0], &n, &ipiv[0], &b[0], &n, &info);
   
   // Save the weights
   for (unsigned int i = 0; i < n; i++)
@@ -84,7 +84,7 @@ void GaussianQuadrature::computeWeights()
   delete[] x;
   delete[] A;
 #else
-  error("GaussianQuadrature needs LAPACK");
+  error("GaussianQuadrature needs F77 LAPACK");
 #endif
 }
 //-----------------------------------------------------------------------------

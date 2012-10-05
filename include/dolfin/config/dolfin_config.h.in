@@ -27,8 +27,8 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Have FORTRAN BLAS */
-#undef HAVE_F77_BLAS
+/* Have FORTRAN LAPACK */
+#undef HAVE_F77_LAPACK
 
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H

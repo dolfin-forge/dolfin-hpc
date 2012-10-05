@@ -214,11 +214,11 @@ fi
 if test "x${enable_quad}" = xyes; then 
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      AC_DEFINE(HAVE_F77_BLAS, [1], [Have FORTRAN BLAS])
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
    else
       AC_CHECK_LIB(lapack,dgesv_,[LIBS="-lblas -lapack"], 
       [AC_MSG_ERROR([LAPACK not found])], [-lblas])
-      AC_DEFINE(HAVE_F77_BLAS, [1], [Have FORTRAN BLAS])	
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
    fi   
 fi
 

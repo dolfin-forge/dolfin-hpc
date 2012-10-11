@@ -28,6 +28,7 @@
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/LinearSolver.h>
 #include <dolfin/la/KrylovSolver.h>
+#include <dolfin/la/AMGSolver.h>
 #include <dolfin/la/LUSolver.h>
 #include <dolfin/la/SingularSolver.h>
 #include <dolfin/la/solve.h>

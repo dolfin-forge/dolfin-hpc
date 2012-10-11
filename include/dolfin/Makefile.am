@@ -167,9 +167,11 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/MeshEntityIterator.h\
 				math/basic.h\
 				math/dolfin_math.h\
+				la/AMGSolver.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
 				la/JANPACKKrylovSolver.h\
+				la/JANPACKAMGSolver.h\
 				la/PETScMatrix.h\
 				la/GenericSparsityPattern.h\
 				la/GenericVector.h\

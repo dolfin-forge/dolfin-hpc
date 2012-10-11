@@ -109,6 +109,13 @@ add("Krylov report", true);
 add("Krylov monitor convergence", false);
 add("Krylov keep PC", false);
 
+//--- Parameters for AMG solvers ---
+
+add("AMG relative tolerance", 1e-9);
+add("AMG absolute tolerance", 1e-20);
+add("AMG maximum iterations", 10000);
+add("AMG theta", 0.25);
+
 //--- Parameter for direct (LU) solver ---
 add("LU report", true);
 

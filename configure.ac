@@ -215,6 +215,10 @@ if test "x${enable_quad}" = xyes; then
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
+      AC_CHECK_LIB(scs,dgesv_,[LIBS="-lscs"], 
+      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
    else
       AC_CHECK_LIB(lapack,dgesv_,[LIBS="-lblas -lapack"], 
       [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])], [-lblas])

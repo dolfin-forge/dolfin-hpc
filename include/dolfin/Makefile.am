@@ -168,6 +168,7 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				math/basic.h\
 				math/dolfin_math.h\
 				la/AMGSolver.h\
+				la/MultigridScheme.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
 				la/JANPACKKrylovSolver.h\

@@ -13,6 +13,7 @@
 #include "JANPACKMat.h"
 #include "JANPACKVec.h"
 #include "JANPACKAMGSolver.h"
+#include "MultigridScheme.h"
 
 namespace dolfin
 {
@@ -24,7 +25,8 @@ namespace dolfin
   public:
     
     /// Create Krylov solver
-    AMGSolver() : janpack_solver(0) {}
+    AMGSolver(MultigridScheme scheme_type=default_scheme) 
+      : scheme_type(scheme_type), janpack_solver(0) {}
     
     /// Destructor
     ~AMGSolver()
@@ -42,7 +44,7 @@ namespace dolfin
       {
 	if (!janpack_solver)
 	{
-	  janpack_solver = new JANPACKAMGSolver();
+	  janpack_solver = new JANPACKAMGSolver(scheme_type);
 	  janpack_solver->set("parent", *this);
 	}
 	return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
@@ -53,7 +55,11 @@ namespace dolfin
     }
     
   private:
-    
+
+    // Multigrid Scheme
+    MultigridScheme scheme_type;
+
+
 #ifdef HAVE_JANPACK
     JANPACKAMGSolver* janpack_solver;
 #else

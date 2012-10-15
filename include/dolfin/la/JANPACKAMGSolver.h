@@ -10,6 +10,7 @@
 #ifdef HAVE_JANPACK
 #include <dolfin/common/types.h>
 #include <dolfin/parameter/Parametrized.h>
+#include "MultigridScheme.h"
 
 #include <janpack/amg_solver.h>
 
@@ -24,7 +25,7 @@ namespace dolfin
   public:
 
     /// Create AMG solver for a particular method and preconditioner
-    JANPACKAMGSolver();
+    JANPACKAMGSolver(MultigridScheme scheme);
 
     ~JANPACKAMGSolver();
  
@@ -33,8 +34,11 @@ namespace dolfin
     
   private:
 
-    /// Get JANPACK Multigrid scheme id
-    //    int getType(SolverType method) const;
+    /// Multigrid Scheme
+    MultigridScheme scheme;
+    
+   // /Get JANPACK Multigrid scheme id
+    int getScheme(MultigridScheme scheme) const;
     
 
     

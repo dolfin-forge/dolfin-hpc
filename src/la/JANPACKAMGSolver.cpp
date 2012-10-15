@@ -19,7 +19,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-JANPACKAMGSolver::JANPACKAMGSolver()
+JANPACKAMGSolver::JANPACKAMGSolver(MultigridScheme scheme) : scheme(scheme)
 {
 }
 //-----------------------------------------------------------------------------
@@ -45,13 +45,31 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
 
   int num_iterations;
   num_iterations = jp_amg_solver(A.mat(), x.vec(), b.vec(), 
-				 JP_AMG_VCYCLE, 0.2, //get("AMG theta"),
-				 75,100,1e-3);
-  //				 get("AMG maximum iterations"),
-  //				 get("AMG relative tolerance"));
-
+				 (jp_amg_scheme_t) getScheme(scheme), 
+				 get("AMG theta"), 
+				 get("AMG levels"),
+				 get("AMG maximum iterations"),
+				 get("AMG relative tolerance"));
+  
   message("AMG solver converged in %d iterations.", num_iterations);
   return num_iterations;
+}
+//-----------------------------------------------------------------------------
+int JANPACKAMGSolver::getScheme(MultigridScheme scheme) const
+{
+
+  switch (scheme)
+  {
+  case v:
+    return JP_AMG_VCYCLE;
+  case w:
+    return JP_AMG_WCYCLE;
+  case fmv:
+    return JP_AMG_FMV;
+  default:
+    warning("Requested Multigrid scheme unknown. Using V-cycle.");
+    return JP_AMG_VCYCLE;
+  }
 }
 //-----------------------------------------------------------------------------
 #endif

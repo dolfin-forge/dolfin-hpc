@@ -16,6 +16,7 @@ namespace dolfin
   {
     none,      // No preconditioning
     jacobi,    // Jacobi
+    bjacobi,   // Block Jacobi 
     sor,       // SOR (successive over relaxation)
     ilu,       // Incomplete LU factorization
     dilu,      // diagonal Incomplete LU factorization

@@ -95,6 +95,8 @@ PCType PETScPreconditioner::getType(PreconditionerType pc)
     return PCILU;
   case jacobi:
     return PCJACOBI;
+  case bjacobi:
+    return PCBJACOBI;
   case sor:
     return PCSOR;
   case none:

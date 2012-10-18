@@ -25,7 +25,7 @@ namespace dolfin
   public:
 
     /// Create AMG solver for a particular method and preconditioner
-    JANPACKAMGSolver(MultigridScheme scheme);
+    JANPACKAMGSolver(MultigridScheme scheme, MultigridSmoother smoother);
 
     ~JANPACKAMGSolver();
  
@@ -36,9 +36,15 @@ namespace dolfin
 
     /// Multigrid Scheme
     MultigridScheme scheme;
+
+    /// Multigrid Smoother
+    MultigridSmoother smoother;
     
-   // /Get JANPACK Multigrid scheme id
+    // /Get JANPACK Multigrid scheme id
     int getScheme(MultigridScheme scheme) const;
+
+    // /Get JANPACK Multigrid smoother id
+    int getSmoother(MultigridSmoother smoother) const;
     
 
     

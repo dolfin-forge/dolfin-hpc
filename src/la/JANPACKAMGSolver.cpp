@@ -19,7 +19,9 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-JANPACKAMGSolver::JANPACKAMGSolver(MultigridScheme scheme) : scheme(scheme)
+JANPACKAMGSolver::JANPACKAMGSolver(MultigridScheme scheme, 
+				   MultigridSmoother smoother) 
+  : scheme(scheme), smoother(smoother)
 {
 }
 //-----------------------------------------------------------------------------
@@ -46,6 +48,7 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
   int num_iterations;
   num_iterations = jp_amg_solver(A.mat(), x.vec(), b.vec(), 
 				 (jp_amg_scheme_t) getScheme(scheme), 
+				 (jp_amg_smoother_t) getSmoother(smoother),
 				 get("AMG theta"), 
 				 get("AMG levels"),
 				 get("AMG maximum iterations"),
@@ -69,6 +72,23 @@ int JANPACKAMGSolver::getScheme(MultigridScheme scheme) const
   default:
     warning("Requested Multigrid scheme unknown. Using V-cycle.");
     return JP_AMG_VCYCLE;
+  }
+}
+//-----------------------------------------------------------------------------
+int JANPACKAMGSolver::getSmoother(MultigridSmoother smoother) const
+{
+
+  switch (smoother)
+  {
+  case mg_jacobi:
+    return JP_AMG_JACOBI;
+  case mg_gauss_seidel:
+    return JP_AMG_GAUSS_SEIDEL;
+  case mg_sor:
+    return JP_AMG_SOR;
+  default:
+    warning("Requested Multigrid smoother unknown. Using Gauss-Seidel.");
+    return JP_AMG_GAUSS_SEIDEL;
   }
 }
 //-----------------------------------------------------------------------------

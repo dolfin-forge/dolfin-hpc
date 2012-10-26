@@ -24,7 +24,7 @@ namespace dolfin
   public:
 
     /// Constructor
-    Form() : dof_map_set(0), local_dof_map_set(false) {}
+    Form() : dof_map_set(0), local_dof_map_set(0) {}
 
     /// Destructor
     virtual ~Form();

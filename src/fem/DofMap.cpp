@@ -34,7 +34,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(0), 
-               ufc_dof_map(&dof_map), ufc_dof_map_local(false), 
+               ufc_dof_map(&dof_map), ufc_dof_map_local(0), 
                dolfin_mesh(mesh), num_cells(mesh.numCells()), 
                partitions(0), _type_(-1), _local_size(0), v_map(0)
 {
@@ -51,7 +51,7 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local) : dof_map(
 //-----------------------------------------------------------------------------
 DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions,
                bool dof_map_local) : dof_map(0), ufc_dof_map(&dof_map), 
-               ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()), 
+               ufc_dof_map_local(0), dolfin_mesh(mesh), num_cells(mesh.numCells()), 
                partitions(&partitions),  _type_(-1), _local_size(0), v_map(0)
 {
   // Assume responsibilty for ufc_dof_map
@@ -64,7 +64,7 @@ DofMap::DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions
 }
 //-----------------------------------------------------------------------------
 DofMap::DofMap(const std::string signature, Mesh& mesh) 
-  : dof_map(0), ufc_dof_map(0), ufc_dof_map_local(false),
+  : dof_map(0), ufc_dof_map(0), ufc_dof_map_local(0),
     dolfin_mesh(mesh), num_cells(mesh.numCells()), partitions(0), 
     _type_(-1), _local_size(0), v_map(0)
 {
@@ -85,7 +85,7 @@ DofMap::DofMap(const std::string signature, Mesh& mesh)
 DofMap::DofMap(const std::string signature, Mesh& mesh, 
                MeshFunction<uint>& partitions) 
   : dof_map(0), ufc_dof_map(0), 
-    ufc_dof_map_local(false), dolfin_mesh(mesh), num_cells(mesh.numCells()),
+    ufc_dof_map_local(0), dolfin_mesh(mesh), num_cells(mesh.numCells()),
     partitions(&partitions), _type_(-1), _local_size(0), v_map(0)
 {
   // Create ufc dof map from signature

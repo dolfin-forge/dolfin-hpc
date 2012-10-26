@@ -34,7 +34,7 @@ void Form::setDofMaps(DofMapSet& dof_map_set)
     delete local_dof_map_set;
 
   // Relinquish ownership of dof maps
-  local_dof_map_set = false;
+  local_dof_map_set = 0;
 
   this->dof_map_set = &dof_map_set;
 }

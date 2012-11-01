@@ -1198,7 +1198,7 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
     }
     uint *recv_ghost = new uint[ recv_size_gh];
     real *recv_buff = new real[ recv_size ];
-    real tmp_value;
+
     for(uint j=1; j < pe_size; j++){
       src = (pe_rank - j + pe_size) % pe_size;
       dest = (pe_rank + j) % pe_size;

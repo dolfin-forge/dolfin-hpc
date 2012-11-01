@@ -191,8 +191,6 @@ namespace dolfin
 
   private:
 
-    friend class MPIMeshCommunicator;
-
     /// Values at the set of mesh entities
     T* _values;
 

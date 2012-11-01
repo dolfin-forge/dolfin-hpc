@@ -204,7 +204,6 @@ namespace dolfin
     friend class MeshEditor;
     friend class TopologyComputation;
     friend class MeshOrdering;
-    friend class MPIMeshCommunicator;
 
     // Mesh topology
     MeshTopology _topology;

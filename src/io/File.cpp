@@ -153,13 +153,6 @@ void File::operator>>(Function& f)
   *file >> f;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(Sample& sample)
-{
-  file->read();
-  
-  *file >> sample;
-}
-//-----------------------------------------------------------------------------
 void File::operator>>(FiniteElementSpec& spec)
 {
   file->read();
@@ -249,13 +242,6 @@ void File::operator<<(Function& u)
   file->write();
   
   *file << u;
-}
-//-----------------------------------------------------------------------------
-void File::operator<<(Sample& sample)
-{
-  file->write();
-  
-  *file << sample;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(FiniteElementSpec& spec)

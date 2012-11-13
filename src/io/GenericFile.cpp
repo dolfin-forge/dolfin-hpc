@@ -73,11 +73,6 @@ void GenericFile::operator>>(Function& f)
   read_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(Sample& sample)
-{
-  read_not_impl("Sample");
-}
-//-----------------------------------------------------------------------------
 void GenericFile::operator>>(FiniteElementSpec& spec)
 {
   read_not_impl("FiniteElementSpec");
@@ -141,11 +136,6 @@ void GenericFile::operator<<(MeshFunction<bool>& meshfunction)
 void GenericFile::operator<<(Function& u)
 {
   write_not_impl("Function");
-}
-//-----------------------------------------------------------------------------
-void GenericFile::operator<<(Sample& sample)
-{
-  write_not_impl("Sample");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator<<(FiniteElementSpec& spec)

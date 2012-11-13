@@ -26,7 +26,6 @@ namespace dolfin
   class Graph;
   template <class T> class MeshFunction;
   class Function;
-  class Sample;
   class FiniteElementSpec;
   class ParameterList;
   class BLASFormData;
@@ -76,9 +75,6 @@ namespace dolfin
     /// Read function from file
     void operator>> (Function& u);
 
-    /// Read ODE sample from file
-    void operator>> (Sample& sample);
-    
     /// Read finite element specification from file
     void operator>> (FiniteElementSpec& spec);
 
@@ -113,9 +109,6 @@ namespace dolfin
 
     /// Write function to file
     void operator<< (Function& u);
-
-    /// Write ODE sample to file
-    void operator<< (Sample& sample);
 
     /// Write finite element specification to file
     void operator<< (FiniteElementSpec& spec);

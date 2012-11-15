@@ -272,14 +272,17 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
     else
     {
       //      fprintf(fp, "<PointData  Vectors=\"%s\"> \n", name.c_str());
-      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">	 ", name.c_str(), dim);	
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">	 ", name.c_str());	
     }
     
     if ( dim > 3 )
       warning("Cannot handle VTK file with number of components > 3. Writing first three components only");
     
     std::vector<float> data;
-    data.resize(size);
+    if (rank == 0)
+      data.resize(size);
+    else
+      data.resize(3 * mesh.numVertices());
     std::vector<float>::iterator entry = data.begin();
     
     for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
@@ -290,6 +293,7 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
       {
 	*entry++ = values[ vertex->index() ];
 	*entry++ = values[ vertex->index() + mesh.numVertices()];
+	*entry++ = 0.0;
       }
       else
       {
@@ -426,7 +430,7 @@ void VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> >
       const uint dim = u->dim(0);
     
       //      pvtuFile << "<PPointData Vectors=\"" << name << "\">" << std::endl;    
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"" << dim << "\" />" << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"3\" />" << std::endl;
     }
   }    
   pvtuFile << "</PPointData>" << std::endl;

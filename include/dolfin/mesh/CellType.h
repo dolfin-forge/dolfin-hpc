@@ -104,7 +104,6 @@ namespace dolfin
 
   protected:
 
-    friend class MPIMeshCommunicator;
 
     Type cell_type;
     Type facet_type;

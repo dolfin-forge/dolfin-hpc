@@ -74,7 +74,6 @@ namespace dolfin
 
   private:
     
-    friend class MPIMeshCommunicator;
 
     // Euclidean dimension
     uint _dim;

@@ -15,8 +15,13 @@
 
 #ifdef HAVE_JANPACK
 
+
 #ifdef _OPENMP
 #include <omp.h>
+#endif
+
+#ifdef HAVE_MPI
+#include <dolfin/main/MPI.h>
 #endif
 
 #include <janpack/spmv.h>
@@ -26,14 +31,14 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat():
     Variable("A", "JANPACK matrix"),
-    A(0), is_view(false)
+    is_view(false)
 {
   // TODO: call JANPACK_Init or something?
 }
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat(uint M, uint N):
     Variable("A", "JANPACK matrix"),
-    A(0), is_view(false)
+    is_view(false)
  {
   // TODO: call JANPACK_Init or something?
   // Create JANPACK matrix
@@ -42,15 +47,15 @@ JANPACKMat::JANPACKMat(uint M, uint N):
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat(const JANPACKMat& A):
   Variable("A", "JANPACK matrix"),
-  A(0), is_view(true)
+   is_view(true)
 {
-  error("Not implemented.");
+  error("Not implemented");
 }
 //-----------------------------------------------------------------------------
 JANPACKMat::~JANPACKMat()
 {
   // Free memory of matrix
-  if(A)
+  //  if(A)
     jp_mat_free(A);  
 
   //  if (!is_view) delete A;
@@ -61,7 +66,7 @@ void JANPACKMat::init(uint M, uint N)
   // Free previously allocated memory if necessary
   //  if (A) delete A;
 
-  A = &AA;
+  //  A = &AA;
   jp_mat_init(A, M, N);
 
   // Not yet implemented
@@ -92,9 +97,15 @@ JANPACKMat* JANPACKMat::copy() const
 dolfin::uint JANPACKMat::size(uint dim) const
 {
   dolfin_assert(A); 
-  int M = A->M;
-  int N = A->N;
+  uint32_t M = 0;
+  uint32_t N = 0;
+  jp_mat_size(const_cast<char *>(A), &M, &N);
   return (dim == 0 ? M : N);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint JANPACKMat::nz() const
+{
+  return jp_mat_nz(const_cast<char *>(A), 1);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::get(real* block,
@@ -115,12 +126,13 @@ void JANPACKMat::set(const real* block,
 {
   dolfin_assert(A); 
 
+
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
+    for(uint j = 0; j < n; j++) 
       jp_mat_set(A, rows[i], cols[j], *(bp++));
+    
 
-  //  error("Not implemented (set).");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,
@@ -129,24 +141,10 @@ void JANPACKMat::add(const real* block,
 {
   dolfin_assert(A); 
 
-
-
-  jp_mat_add_block(&AA, 
+  jp_mat_add_block(A, 
 	       m, const_cast<uint*>(rows),
 	       n, const_cast<uint*>(cols), 
 	       const_cast<real*>(block));
-
-  /*
-  const real *bp = &block[0];
-  for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
-<<<<<<< HEAD
-      mat_add_crs(&AA, rows[i], cols[j], *(bp++));
-=======
-      jp_mat_add(&_A, rows[i], cols[j], *(bp++));
->>>>>>> master
-*/
-  //error("Not implemented. (add)");
 }
 //-----------------------------------------------------------------------------
 real JANPACKMat::norm(std::string norm_type) const
@@ -159,7 +157,6 @@ void JANPACKMat::zero()
 {
   dolfin_assert(A); 
   jp_mat_zero(A);
-  //  error("Not implemented. (zero)");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::apply(FinalizeType finaltype)
@@ -167,13 +164,11 @@ void JANPACKMat::apply(FinalizeType finaltype)
 
   jp_mat_finalize(A);
 
-  //  error("Not implemented. (apply)");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::disp(uint precision) const
 {
-  dolfin_assert(A); 
-  error("Not implemented.");
+  jp_mat_print(const_cast<char *>(A));
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::ident(uint m, const uint* rows)
@@ -184,14 +179,14 @@ void JANPACKMat::ident(uint m, const uint* rows)
     jp_mat_zero_row(A, rows[i]);
     jp_mat_insert(A, rows[i], rows[i], 1.0);
   }
-
-  //  error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::zero(uint m, const uint* rows)
 {
   dolfin_assert(A); 
-  error("Not implemented.");
+  
+  for (uint i = 0; i < m; i++)
+    jp_mat_zero_row(A,rows[i]);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed) const
@@ -200,21 +195,33 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   const JANPACKVec& xx = x.down_cast<JANPACKVec>();  
   JANPACKVec& yy = y.down_cast<JANPACKVec>();
   if (transposed)
-    yy.init(size(1));
+    yy.init(xx.local_size());
   else
-    yy.init(size(0));
+    yy.init(xx.local_size());
   
-  jp_spmv(A, xx.vec(), yy.vec());  
+  jp_spmv(const_cast<char *>(A), xx.vec(), yy.vec());  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
 {
-  dolfin_assert(A); 
-  for (uint i = 0; i < A->rs[row].top; i++)
+
+  uint  n, *c = 0;
+  real *v = 0;
+ 
+  c = new uint[size(0)];
+  v = new real[size(0)];
+
+  jp_mat_getrow(const_cast<char *>(A), row, c, v, &n);
+
+  for (uint i = 0; i < n; i++)
   {
-    columns.push_back(A->rs[row].A[i].i);
-    values.push_back(A->rs[row].A[i].v);
+    columns.push_back(c[i]);
+    values.push_back(v[i]);
   }
+
+  delete c;
+  delete v;
+
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)
@@ -227,9 +234,9 @@ LinearAlgebraFactory& JANPACKMat::factory() const
   return JANPACKFactory::instance();
 }
 //-----------------------------------------------------------------------------
-jp_mat_t *JANPACKMat::mat() const
+char* JANPACKMat::mat() const
 {
-  return A;
+  return const_cast<char *>(A);
 }
 //-----------------------------------------------------------------------------
 const JANPACKMat& JANPACKMat::operator*= (real a)
@@ -248,14 +255,21 @@ const JANPACKMat& JANPACKMat::operator/= (real a)
 //-----------------------------------------------------------------------------
 const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
 {
-  jp_mat_copy(A.down_cast<JANPACKMat>().A, this->A);
+  //  jp_mat_copy(A.down_cast<JANPACKMat>().A, this->A);
+  error("Not implemented.");
   return *this;
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::dup(GenericMatrix& A) 
+void JANPACKMat::dup(const JANPACKMat& A) 
 {
-  error("Not implemented.");
-  //  jp_mat_dup_crs(A.down_cast<JANPACKMat>().A, this->A);
+  uint range[2];
+  uint m;
+
+  jp_mat_range(const_cast<char *>(A.mat()), &range[0], &range[1]);
+  m = range[1] - range[0];
+  init(m, m);
+  //  error("Not implemented.");
+  //  jp_mat_dup_crs(, this->A);
 }
 //-----------------------------------------------------------------------------
 #endif

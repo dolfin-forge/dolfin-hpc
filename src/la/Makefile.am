@@ -4,6 +4,7 @@ libdolfin_la_la_SOURCES = \
 			DefaultFactory.cpp\
 			JANPACKFactory.cpp\
 			JANPACKKrylovSolver.cpp\
+			JANPACKAMGSolver.cpp\
 			JANPACKMat.cpp\
 			JANPACKVec.cpp\
 			LinearSolver.cpp\

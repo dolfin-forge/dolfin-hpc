@@ -17,7 +17,7 @@ JANPACKMat* JANPACKFactory::createMatrix() const
 }
 //-----------------------------------------------------------------------------
 JANPACKVec* JANPACKFactory::createVector() const 
-{ 
+{   
   JANPACKVec* jv = new JANPACKVec();
   return jv;
 }

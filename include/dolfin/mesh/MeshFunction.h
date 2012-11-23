@@ -12,14 +12,10 @@
 #include <dolfin/common/types.h>
 #include <dolfin/io/File.h>
 #include "MeshEntity.h"
-#include <dolfin/main/MPI.h>
-#include "MPIMeshCommunicator.h"
 
 namespace dolfin
 {
   
-  class MPIManager;
-
   /// A MeshFunction is a function that can be evaluated at a set of
   /// mesh entities. A MeshFunction is discrete and is only defined
   /// at the set of mesh entities of a fixed topological dimension.
@@ -194,8 +190,6 @@ namespace dolfin
     }
 
   private:
-
-    friend class MPIMeshCommunicator;
 
     /// Values at the set of mesh entities
     T* _values;

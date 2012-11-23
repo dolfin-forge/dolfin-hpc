@@ -128,7 +128,7 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK jp_vec_t pointer
-    jp_vec_t *vec() const;
+    char *vec() const;
 
     /// Assignment operator
     const JANPACKVec& operator= (const JANPACKVec& x);
@@ -139,14 +139,17 @@ namespace dolfin
   private:
 
     // JANPACK vector pointer
-    jp_vec_t *x;
-    jp_vec_t _x;
+    //    char *x;
+    char x[152];
        
     // True if we don't own the vector x points to
     bool is_view;
 
     // True if the vector has ghost points
     bool is_ghosted;
+
+    bool is_init;
+
     //    Array<int> ghost_indices;
 #if (sun || __sun)    
     std::map<int, int> mapping;

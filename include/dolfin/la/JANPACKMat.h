@@ -82,9 +82,6 @@ namespace dolfin
     /// Set given rows to identity matrix
     virtual void ident(uint m, const uint* rows);
 
-    /// Duplicate matrix
-    void dup(GenericMatrix& A); 
-
     // Matrix-vector product, y = Ax
     virtual void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
 
@@ -97,6 +94,8 @@ namespace dolfin
     /// Assignment operator
     virtual const GenericMatrix& operator= (const GenericMatrix& x);
 
+    /// Get number of non-zeros in the matrix 
+    virtual uint nz() const;    
     //--- Special functions ---
 
     /// Return linear algebra backend factory
@@ -105,18 +104,19 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK jp_mat_t pointer;
-    jp_mat_t *mat() const;
+    char *mat() const;
 
     /// Assignment operator
     const JANPACKMat& operator= (const JANPACKMat& x)
     { error("Not implemented."); return *this; }
 
+    /// Duplicate matrix
+    void dup(const JANPACKMat& A); 
+
   private:
 
     // JANPACK Matrix pointer
-    jp_mat_t* A;
-
-    jp_mat_t AA;
+    char A[144];
     
     // True if we don't own the matrix A points to
     bool is_view;

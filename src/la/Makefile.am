@@ -14,7 +14,6 @@ libdolfin_la_la_SOURCES = \
 			PETScMatrix.cpp\
 			PETScPreconditioner.cpp\
 			PETScVector.cpp\
-			SLEPcEigenvalueSolver.cpp\
 			SingularSolver.cpp\
 			SparsityPattern.cpp\
 			solve.cpp

@@ -192,7 +192,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/Scalar.h\
 				la/SolverType.h\
 				la/PETScPreconditioner.h\
-				la/SLEPcEigenvalueSolver.h\
 				la/VectorNormType.h\
 				la/PETScObject.h\
 				la/PETScFactory.h\

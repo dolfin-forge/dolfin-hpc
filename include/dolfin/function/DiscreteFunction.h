@@ -143,8 +143,8 @@ private:
 	// Scratch space
 	Scratch* scratch;
 
-	// Renumbred dof_map;
-	bool renumberd;
+	// Renumbered dof_map;
+	bool renumbered;
 
 	uint _cache_size;
 	uint *_indices;

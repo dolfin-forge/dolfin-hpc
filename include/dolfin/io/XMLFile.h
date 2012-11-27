@@ -27,8 +27,6 @@ namespace dolfin
   class Graph;
   template <class T> class MeshFunction;
   class ParameterList;
-  class BLASFormData;
-
   class XMLObject;
   
   class XMLFile : public GenericFile
@@ -49,7 +47,6 @@ namespace dolfin
     void operator>> (MeshFunction<bool>& meshfunction);
     void operator>> (Function& f);
     void operator>> (ParameterList& parameters);
-    void operator>> (BLASFormData& blas);
     void operator>> (Graph& graph);
     
     void parse(Function& f, FiniteElement& element);

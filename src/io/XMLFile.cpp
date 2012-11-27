@@ -45,7 +45,6 @@
 #include <dolfin/io/XMLFunction.h>
 #include <dolfin/io/XMLFiniteElement.h>
 #include <dolfin/io/XMLParameterList.h>
-#include <dolfin/io/XMLBLASFormData.h>
 #include <dolfin/io/XMLGraph.h>
 #include <dolfin/io/XMLFile.h>
 
@@ -196,14 +195,6 @@ void XMLFile::operator>>(ParameterList& parameters)
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLParameterList(parameters);
-  parseFile();
-}
-//-----------------------------------------------------------------------------
-void XMLFile::operator>>(BLASFormData& blas)
-{
-  if ( xmlObject )
-    delete xmlObject;
-  xmlObject = new XMLBLASFormData(blas);
   parseFile();
 }
 //-----------------------------------------------------------------------------

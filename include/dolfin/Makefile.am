@@ -64,7 +64,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				io/XMLGraph.h\
 				io/XMLMatrix.h\
 				io/PXMLMesh.h\
-				io/XMLBLASFormData.h\
 				io/File.h\
 				io/XMLFunction.h\
 				io/Encoder.h\

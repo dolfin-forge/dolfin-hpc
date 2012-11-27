@@ -163,25 +163,11 @@ void File::operator>>(Function& f)
   *file >> f;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(FiniteElementSpec& spec)
-{
-  file->read();
-  
-  *file >> spec;
-}
-//-----------------------------------------------------------------------------
 void File::operator>>(ParameterList& parameters)
 {
   file->read();
   
   *file >> parameters;
-}
-//-----------------------------------------------------------------------------
-void File::operator>>(BLASFormData& blas)
-{
-  file->read();
-  
-  *file >> blas;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Graph& graph)
@@ -254,25 +240,11 @@ void File::operator<<(Function& u)
   *file << u;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(FiniteElementSpec& spec)
-{
-  file->write();
-  
-  *file << spec;
-}
-//-----------------------------------------------------------------------------
 void File::operator<<(ParameterList& parameters)
 {
   file->write();
   
   *file << parameters;
-}
-//-----------------------------------------------------------------------------
-void File::operator<<(BLASFormData& blas)
-{
-  file->write();
-  
-  *file << blas;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Graph& graph)

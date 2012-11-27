@@ -7,7 +7,11 @@
 #ifndef __XML_OBJECT_H
 #define __XML_OBJECT_H
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
 #include <libxml/parser.h>
+
 #include <string>
 
 #include <dolfin/common/types.h>
@@ -57,5 +61,5 @@ namespace dolfin
   };
   
 }
-
+#endif
 #endif

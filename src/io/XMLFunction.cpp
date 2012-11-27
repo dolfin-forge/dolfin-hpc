@@ -4,6 +4,10 @@
 // First added:  2006-02-15
 // Last changed: 2006-05-23
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/io/XMLFunction.h>
@@ -58,3 +62,4 @@ void XMLFunction::readFunction(const xmlChar* name, const xmlChar** attrs)
   // Nothing to do here, since we are cheating, see XMLFile.cpp
 }
 //-----------------------------------------------------------------------------
+#endif

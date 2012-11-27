@@ -4,6 +4,10 @@
 // First added:  2002-12-06
 // Last changed: 2006-10-16
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <cstring>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/XMLObject.h>
@@ -196,3 +200,4 @@ bool XMLObject::close()
   return true;
 }
 //-----------------------------------------------------------------------------
+#endif

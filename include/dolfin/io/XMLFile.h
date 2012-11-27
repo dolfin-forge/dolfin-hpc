@@ -9,7 +9,11 @@
 #ifndef __XML_FILE_H
 #define __XML_FILE_H
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
 #include <libxml/parser.h>
+#endif
 
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
@@ -65,10 +69,10 @@ namespace dolfin
     void operator<< (ParameterList& parameters);
     
     // Friends
-    
+    #ifdef HAVE_XML
     friend void sax_start_element (void *ctx, const xmlChar *name, const xmlChar **attrs);
     friend void sax_end_element   (void *ctx, const xmlChar *name);
-    
+    #endif
   private:
     
     void parseFile();
@@ -89,7 +93,7 @@ namespace dolfin
   };
   
   // Callback functions for the SAX interface
-  
+#ifdef HAVE_XML  
   void sax_start_document (void *ctx);
   void sax_end_document   (void *ctx);
   void sax_start_element  (void *ctx, const xmlChar *name, const xmlChar **attrs);
@@ -98,7 +102,7 @@ namespace dolfin
   void sax_warning     (void *ctx, const char *msg, ...);
   void sax_error       (void *ctx, const char *msg, ...);
   void sax_fatal_error (void *ctx, const char *msg, ...);
-  
+#endif  
 }
 
 #endif

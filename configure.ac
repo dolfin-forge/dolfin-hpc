@@ -51,9 +51,14 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 
 
 
-
-
 # Optional packages
+AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
+		 [Compile with support for reading/writing XML data]),
+		 [with_xml=${withval}],[with_xml=yes])
+
+
+
+
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
 		 [with_gts=${withval}],[with_gts=no])
 
@@ -141,8 +146,11 @@ fi
 
 
 # Checks for libraries.
-AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
-LIBS="$XML_LIBS $LIBS"
+if test "x${with_xml}" != xno; then
+   AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
+   LIBS="$XML_LIBS $LIBS"
+   AC_DEFINE(HAVE_XML, 1, [Compile with support for reading/writing XML data])
+fi
 
 AX_ZLIB
 

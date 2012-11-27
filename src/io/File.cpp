@@ -10,7 +10,7 @@
 // First added:  2002-11-12
 // Last changed: 2012-05-11
 
-#include <dolfin/config/dolfin_config.h>
+
 #include <string>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
@@ -35,9 +35,17 @@ File::File(const std::string& filename)
   // FIXME: it essential that the suffixes are checked in the correct order.
 
   if ( filename.rfind(".xml") != filename.npos )
+#ifdef HAVE_XML
     file = new XMLFile(filename);
+#else
+    error("DOLFIN is not built with XML support");
+#endif
   else if ( filename.rfind(".xml.gz") != filename.npos )
+#ifdef HAVE_XML
     file = new XMLFile(filename);
+#else
+    error("DOLFIN is not built with XML support");
+#endif
   else if ( filename.rfind(".bin") != filename.npos)
     file = new BinaryFile(filename);
   else if ( filename.rfind(".m") != filename.npos )
@@ -58,9 +66,11 @@ File::File(const std::string& filename)
 File::File(const std::string& filename, Type type)
 {
   switch ( type ) {
+#ifdef HAVE_XML
   case xml:
     file = new XMLFile(filename);
     break;
+#endif
   case matlab:
     file = new MatlabFile(filename);
     break;

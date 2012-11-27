@@ -6,6 +6,10 @@
 // First added:  2006-11-27
 // Last changed: 2008-04-30
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <cstring>
 
 #include <dolfin/log/dolfin_log.h>
@@ -202,3 +206,5 @@ void XMLMeshFunction::readEntities(const xmlChar *name, const xmlChar **attrs)
   }
 }
 //-----------------------------------------------------------------------------
+
+#endif

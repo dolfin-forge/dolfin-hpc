@@ -10,6 +10,9 @@
 /* Compile with local data cache in functions */
 #undef ENABLE_FUNCTION_CACHE
 
+/* Compile with support for MPI I/O */
+#undef ENABLE_MPIIO
+
 /* Compile with optimization for P1 elements */
 #undef ENABLE_P1_OPTIMIZATIONS
 
@@ -48,9 +51,6 @@
 
 /* Define if you have the MPI library. */
 #undef HAVE_MPI
-
-/* Compile with support for MPI I/O */
-#undef ENABLE_MPIIO
 
 /* Define if OpenMP is enabled */
 #undef HAVE_OPENMP
@@ -93,6 +93,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Compile with support for reading/writing XML data */
+#undef HAVE_XML
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

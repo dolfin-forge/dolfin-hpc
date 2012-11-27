@@ -6,6 +6,9 @@
 // First added:  2003-10-21
 // Last changed: 2008-07-01
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
 #include <cstring>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
@@ -668,3 +671,4 @@ bool PXMLMesh::close()
 }
 //-----------------------------------------------------------------------------
 #endif
+#endif /* HAVE_XML */

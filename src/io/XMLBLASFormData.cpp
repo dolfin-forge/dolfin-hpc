@@ -4,8 +4,11 @@
 // First added:  2005-10-02
 // Last changed: 2006-05-23
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/log/dolfin_log.h>
-//#include <dolfin/BLASFormData.h>
 #include <dolfin/io/XMLBLASFormData.h>
 
 using namespace dolfin;
@@ -301,3 +304,4 @@ void XMLBLASFormData::initForm()
 */
 }
 //-----------------------------------------------------------------------------
+#endif

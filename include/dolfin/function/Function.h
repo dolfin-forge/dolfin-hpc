@@ -101,7 +101,7 @@ namespace dolfin
 
     /// Return the dimension of the value space for axis i
     virtual uint dim(uint i) const;
-    
+
     /// Return the mesh
     Mesh& mesh() const;
 
@@ -113,7 +113,7 @@ namespace dolfin
 
     /// Return the number of sub functions (only for discrete functions)
     uint numSubFunctions() const;
-    
+
     /// Extract sub function/slice (only for discrete function)
     SubFunction operator[] (uint i);
 
@@ -122,7 +122,7 @@ namespace dolfin
 
     /// Assign sub function/slice
     const Function& operator= (SubFunction f);
-    
+
     /// Interpolate function to vertices of mesh
     void interpolate(real* values);
 
@@ -139,7 +139,7 @@ namespace dolfin
     virtual void eval(real* values, const real* x) const;
 
     /// Evaluate scalar function at given point (overload for scalar user-defined function)
-    virtual real eval(const real* x) const;
+    //virtual real eval(const real* x) const;
 
     void sync_ghosts();
 
@@ -148,7 +148,7 @@ namespace dolfin
     friend class LinearPDE;
 
   protected:
-    
+
     /// Access current cell (available during assembly for user-defined function)
     const Cell& cell() const;
 
@@ -159,13 +159,13 @@ namespace dolfin
     int facet() const;
 
   private:
-    
+
     // Pointer to current implementation (letter base class)
     GenericFunction* f;
 
     // Type of function
     Type _type;
-    
+
     // Pointer to current cell (if any, otherwise 0)
     Cell* _cell;
 

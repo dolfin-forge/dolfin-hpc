@@ -1,4 +1,3 @@
-
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 
@@ -20,141 +19,157 @@
 
 namespace dolfin
 {
-  class SubSytem;
-  class UFC;
+class SubSytem;
+class UFC;
 
-  /// This class handles the mapping of degrees of freedom.
-  /// It wraps a ufc::dof_map on a specific mesh and provides
-  /// optional precomputation and reordering of dofs.
+/// This class handles the mapping of degrees of freedom.
+/// It wraps a ufc::dof_map on a specific mesh and provides
+/// optional precomputation and reordering of dofs.
 
-  class DofMap
-  {
-  public:
+class DofMap
+{
+public:
 
-    /// Create dof map on mesh
-    DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local = false);
+	/// Create dof map on mesh
+	DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local = false);
 
-    /// Create dof map on mesh (parallel)
-    DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions, 
-           bool dof_map_local = false);
+	/// Create dof map on mesh (parallel)
+	DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions,
+			bool dof_map_local = false);
 
-    /// Create dof map on mesh
-    DofMap(const std::string signature, Mesh& mesh);
+	/// Create dof map on mesh
+	DofMap(const std::string signature, Mesh& mesh);
 
-    /// Create dof map on mesh (parallel)
-    DofMap(const std::string signature, Mesh& mesh, 
-        MeshFunction<uint>& partitions);
+	/// Create dof map on mesh (parallel)
+	DofMap(const std::string signature, Mesh& mesh,
+			MeshFunction<uint>& partitions);
 
-    /// Destructor
-    ~DofMap();
+	/// Destructor
+	~DofMap();
 
-    /// Return a string identifying the dof map
-    const char* signature() const
-    { 
-      if (!dof_map)
-        return ufc_dof_map->signature(); 
-      else
-      {
-	//        error("DofMap has been re-ordered. Cannot return signature string.");
-        return ufc_dof_map->signature(); 
-      }  
-    }
-    
-    /// Return the dimension of the global finite element function space
-    unsigned int global_dimension() const
-    { return ufc_dof_map->global_dimension(); }
+	/// Return a string identifying the dof map
+	const char* signature() const
+	{
+		return ufc_dof_map->signature();
+	}
 
-    /// Return the dimension of the local finite element function space
-    unsigned int local_dimension() const
-    { return ufc_dof_map->local_dimension(); }
+	/// Return the dimension of the global finite element function space
+	unsigned int global_dimension() const
+	{
+		return ufc_dof_map->global_dimension();
+	}
 
-    /// Return the dimension of the local finite element function space
-    unsigned int macro_local_dimension() const
-    { return ufc_dof_map->local_dimension(); }
+	/// Return the dimension of the local finite element function space
+	unsigned int local_dimension() const
+	{
+		return ufc_dof_map->local_dimension();
+	}
 
-    /// Return number of facet dofs
-    unsigned int num_facet_dofs() const
-    { return ufc_dof_map->num_facet_dofs(); }
+	/// Return the dimension of the local finite element function space
+	unsigned int macro_local_dimension() const
+	{
+		return ufc_dof_map->local_dimension();
+	}
 
-    /// Tabulate the local-to-global mapping of dofs on a cell
-    void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
+	/// Return number of facet dofs
+	unsigned int num_facet_dofs() const
+	{
+		return ufc_dof_map->num_facet_dofs();
+	}
 
-    /// Tabulate the local-to-global mapping of dofs on a cell
-    void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_index) const;
+	/// Tabulate the local-to-global mapping of dofs on a cell
+	void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
 
-    /// Tabulate local-local facet dofs
-    void tabulate_facet_dofs(uint* dofs, uint local_facet) const
-    { ufc_dof_map->tabulate_facet_dofs(dofs, local_facet); }
+	/// Tabulate the local-to-global mapping of dofs on a cell
+	void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
+						uint cell_index) const;
 
-    // FIXME: Can this function eventually be removed?
-    /// Tabulate the local-to-global mapping of dofs on a ufc cell
-    void tabulate_dofs(uint* dofs, const ufc::cell& cell) const 
-    { ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, cell); }
+	/// Tabulate local-local facet dofs
+	void tabulate_facet_dofs(uint* dofs, uint local_facet) const
+	{
+		ufc_dof_map->tabulate_facet_dofs(dofs, local_facet);
+	}
 
-    void tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const
-    { ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell); }
+	// FIXME: Can this function eventually be removed?
+	/// Tabulate the local-to-global mapping of dofs on a ufc cell
+	void tabulate_dofs(uint* dofs, const ufc::cell& cell) const
+	{
+		ufc_dof_map->tabulate_dofs(dofs, ufc_mesh, cell);
+	}
 
-    /// Extract sub dof map
-    DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
+	void tabulate_coordinates(real** coordinates,
+								const ufc::cell& ufc_cell) const
+	{
+		ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell);
+	}
 
-    /// Return mesh associated with map
-    Mesh& mesh() const
-    { return dolfin_mesh; }
+	/// Extract sub dof map
+	DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
 
-    /// Build parallel dof map
-    void build();
+	/// Return mesh associated with map
+	Mesh& mesh() const
+	{
+		return dolfin_mesh;
+	}
 
-    /// Return renumbering (used for testing)
-    std::map<uint, uint> getMap(); // const;
+	/// Build parallel dof map
+	void build();
 
-    /// Display mapping
-    void disp() const;
+	/// Return renumbering (used for testing)
+	std::map<uint, uint> getMap();  // const;
 
-    inline bool renumbered() 
-    { return (dof_map > 0 || _type_ > -1 || v_map > 0); }
+	/// Display mapping
+	void disp() const;
 
-    inline uint local_size()
-    { return _local_size;}
+	inline bool renumbered()
+	{
+		return (dof_map > 0 || _type_ > -1 || v_map > 0);
+	}
 
+	inline uint local_size()
+	{
+		return _local_size;
+	}
 
-  private:
+private:
 
-    /// Initialise DofMap
-    void init();
+	/// Initialise DofMap
+	void init();
 
-    /// Extract sub DofMap
-    ufc::dof_map* extractDofMap(const ufc::dof_map& dof_map, uint& offset, const Array<uint>& sub_system) const;
+	/// Extract sub DofMap
+	ufc::dof_map* extractDofMap(const ufc::dof_map& dof_map, uint& offset,
+								const Array<uint>& sub_system) const;
 
-    // Parallel dof map
-    uint* dof_map;
+	// Parallel dof map
+	uint* dof_map;
 
-    // UFC dof map
-    ufc::dof_map* ufc_dof_map;
+	// UFC dof map
+	ufc::dof_map* ufc_dof_map;
 
-    // Local UFC dof map
-    ufc::dof_map* ufc_dof_map_local;
+	// Local UFC dof map
+	ufc::dof_map* ufc_dof_map_local;
 
-    // UFC mesh
-    UFCMesh ufc_mesh;
+	// UFC mesh
+	UFCMesh ufc_mesh;
 
-    // DOLFIN mesh
-    Mesh& dolfin_mesh;
+	// DOLFIN mesh
+	Mesh& dolfin_mesh;
 
-    // Number of cells in the mesh
-    uint num_cells;
+	// Number of cells in the mesh
+	uint num_cells;
 
-    // Partitions
-    MeshFunction<uint>* partitions;
+	// Partitions
+	MeshFunction<uint>* partitions;
 
-    // Provide easy access to map for testing
-    std::map<uint, uint> map;
+	// Provide easy access to map for testing
+	std::map<uint, uint> map;
 
-    int _type_;
-    uint _offset_;
-    uint _local_size;
+	int _type_;
+	uint _offset_;
+	uint _local_size;
 
-    uint *v_map;
-  };
+	uint *v_map;
+};
 
 }
 

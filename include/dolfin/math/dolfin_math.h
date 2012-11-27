@@ -4,5 +4,7 @@
 // DOLFIN math
 
 #include <dolfin/math/basic.h>
+#include <dolfin/math/Lagrange.h>
+#include <dolfin/math/Legendre.h>
 
 #endif

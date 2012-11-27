@@ -109,6 +109,16 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				pde/NonlinearPDE.h\
 				pde/dolfin_pde.h\
 				pde/LinearPDE.h\
+				math/Lagrange.h\
+				math/Legendre.h\
+				math/basic.h\
+				math/dolfin_math.h\
+				quadrature/GaussianQuadrature.h\
+				quadrature/LobattoQuadrature.h\
+				quadrature/GaussQuadrature.h\
+				quadrature/RadauQuadrature.h\
+				quadrature/Quadrature.h\
+				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/Edge.h\
 				mesh/rounding.h\

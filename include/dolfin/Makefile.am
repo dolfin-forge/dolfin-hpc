@@ -54,9 +54,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				elements/ffc_L2proj_15.h\
 				elements/ffc_L2proj_05.h\
 				elements/ffc_09.h\
-				nls/NonlinearProblem.h\
-				nls/NewtonSolver.h\
-				nls/dolfin_nls.h\
 				io/XMLFiniteElement.h\
 				io/Checkpoint.h\
 				io/XMLMeshFunction.h\
@@ -106,9 +103,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				main/SubSystemsManager.h\
 				main/dolfin_doc.h\
 				main/init.h\
-				pde/NonlinearPDE.h\
-				pde/dolfin_pde.h\
-				pde/LinearPDE.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
@@ -232,7 +226,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				common/Array.h\
 				common/unittest.h\
 				common/dolfin_common.h\
-				common/TimeDependent.h\
 				common/constants.h\
 				common/Variable.h\
 				common/List.h\

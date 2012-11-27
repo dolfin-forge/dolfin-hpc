@@ -28,18 +28,12 @@ namespace dolfin
     /// Destructor
     virtual ~SubDomain();
 
-    /// Return true for points inside the sub domain (used for subclassing through SWIG interface)
-    virtual bool inside(const simple_array<real>& x, bool on_boundary) const { return inside(x.data, on_boundary); }
-
     /// Return true for points inside the sub domain
     virtual bool inside(const real* x, bool on_boundary) const;
-    
-    /// Map coordinate x in domain H to coordinate y in domain G (used for subclassing through SWIG interface)
-    virtual void map(const simple_array<real>& x, simple_array<real>& y) const { map(x.data, y.data); }
 
     /// Map coordinate x in domain H to coordinate y in domain G (used for periodic boundary conditions)
     virtual void map(const real* x, real* y) const;
-    
+
     /// Set sub domain markers for given sub domain
     void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
 

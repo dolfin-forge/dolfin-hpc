@@ -132,9 +132,6 @@ namespace dolfin
                      const ufc::finite_element& finite_element,
                      Cell& cell, int facet = -1);
 
-    /// Evaluate function at given point (used for subclassing through SWIG interface)
-    virtual void eval(simple_array<real>& values, const simple_array<real>& x) const { eval(values.data, x.data); }
-
     /// Evaluate function at given point (overload for scalar user-defined function)
     virtual void eval(real* values, const real* x) const;
 

@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <dolfin.h>
+#include <cstring>
 
 using namespace dolfin;
 

@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS 
 
 #ifndef __GAUSSIAN_QUADRATURE_H
 #define __GAUSSIAN_QUADRATURE_H
@@ -44,11 +43,10 @@ namespace dolfin {
 
     /// Display quadrature data
     virtual void disp() const = 0;
-    
+
   };
   
 }
 
-#endif
 
 #endif

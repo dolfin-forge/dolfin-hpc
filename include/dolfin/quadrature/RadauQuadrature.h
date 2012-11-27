@@ -6,7 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS 
 
 #ifndef __RADAU_QUADRATURE_H
 #define __RADAU_QUADRATURE_H
@@ -46,4 +45,3 @@ namespace dolfin
 
 #endif
 
-#endif

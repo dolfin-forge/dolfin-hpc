@@ -49,7 +49,9 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 			 [Compile with support for Boost TR1 headers]),
 			 [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
-
+AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
+		     [Enable various quadrature rules]),
+		     [enable_quad=${enableval}],[enable_quad=no])
 
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
@@ -216,6 +218,27 @@ if test "x${enable_debug}" != xno; then
    CXXFLAGS="-g -DDEBUG $CXXFLAGS"
 fi
 
+
+if test "x${enable_quad}" = xyes; then 
+   # This assumes a modern CRAY, for example XT or XE series systems
+   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
+      AC_CHECK_LIB(scs,dgesv_,[LIBS="$LIBS -lscs"], 
+      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
+      AC_CHECK_LIB(sunperf,dgesv_,[LIBS="$LIBS -lsunperf"], 
+      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
+   else
+      AC_CHECK_LIB(lapack,dgesv_,[LIBS="$LIBS -lblas -llapack"], 
+      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],
+      [-lblas])
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
+   fi   
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -249,6 +272,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/nls/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
+			  src/quadrature/Makefile\
 			  src/dolfin.pc
 			  include/Makefile
 			  include/dolfin/Makefile])
@@ -278,6 +302,7 @@ Package features:
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
+  Quadrature: ${enable_quad}
 
 
 ---------------------------------------------------------

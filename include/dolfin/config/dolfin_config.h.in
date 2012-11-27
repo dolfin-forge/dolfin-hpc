@@ -1,3 +1,5 @@
+/* include/dolfin/config/dolfin_config.h.in.  Generated from configure.ac by autoheader.  */
+
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
@@ -24,6 +26,9 @@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Have FORTRAN LAPACK */
+#undef HAVE_F77_LAPACK
 
 /* Define to 1 if you have the <float.h> header file. */
 #undef HAVE_FLOAT_H

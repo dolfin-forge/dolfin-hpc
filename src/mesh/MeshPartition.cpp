@@ -23,202 +23,209 @@
 #include <parmetis.h>
 #endif
 
-
-
-
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(Mesh& mesh,
-                              MeshFunction<uint>& partitions,
-                              uint num_partitions)
+void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
+								uint num_partitions)
 {
-  partitions.init(mesh, mesh.topology().dim());
-  Graph graph(mesh);
-  GraphPartition::partition(graph, num_partitions, partitions.values());
+	partitions.init(mesh, mesh.topology().dim());
+	Graph graph(mesh);
+	GraphPartition::partition(graph, num_partitions, partitions.values());
 
-  bool report_edge_cut = dolfin_get("report edge cut");
-  if(report_edge_cut)
-    GraphPartition::edgecut(graph, num_partitions, partitions.values());
+	bool report_edge_cut = dolfin_get("report edge cut");
+	if (report_edge_cut)
+		GraphPartition::edgecut(graph, num_partitions, partitions.values());
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
 {
-  partitionCommonMetis(mesh, partitions, 0);
+	partitionCommonMetis(mesh, partitions, 0);
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-			      MeshFunction<uint>& weight)
+								MeshFunction<uint>& weight)
 {
-  partitionCommonMetis(mesh, partitions, &weight);
+	partitionCommonMetis(mesh, partitions, &weight);
 }
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void MeshPartition::partitionCommonMetis(Mesh& mesh, 
-					 MeshFunction<uint>& partitions,
-					 MeshFunction<uint>* weight)
+void MeshPartition::partitionCommonMetis(Mesh& mesh,
+											MeshFunction<uint>& partitions,
+											MeshFunction<uint>* weight)
 {
 
-  // Metis assumes vertices numbered from process 0 
-  MeshRenumber::renumber_vertices(mesh);
+	// Metis assumes vertices numbered from process 0
+	MeshRenumber::renumber_vertices(mesh);
 
-  float ubvec = 1.05; 
-  int numflag = 0;    // C-style numbering
-  int edgecut = 0;    
-  int wgtflag, ncon;
-  if( weight ) {
-    wgtflag = 2;    // Weights on vertices only
-    ncon = 1;       // One weight per vertex
-  }
-  else {
-    wgtflag = 0;    // Turn off graph weights 
-    ncon = 0;       // No weights on vertices
-  }
+	float ubvec = 1.05;
+	int numflag = 0;    // C-style numbering
+	int edgecut = 0;
+	int wgtflag, ncon;
+	if (weight)
+	{
+		wgtflag = 2;    // Weights on vertices only
+		ncon = 1;       // One weight per vertex
+	}
+	else
+	{
+		wgtflag = 0;    // Turn off graph weights
+		ncon = 0;       // No weights on vertices
+	}
 
-  // Duplicate MPI communicator
-  MPI_Comm comm;
-  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
+	// Duplicate MPI communicator
+	MPI_Comm comm;
+	MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
 
-  // Get information about the PE
-  int size, rank;  
-  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
-  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
+	// Get information about the PE
+	int size, rank;
+	MPI_Comm_size(MPI::DOLFIN_COMM, &size);
+	MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
 
+	idxtype *elmdist = new idxtype[size + 1];
+	int ncells = mesh.numCells();
 
-  idxtype *elmdist = new idxtype[size + 1];
-  int ncells = mesh.numCells();
-  elmdist[rank] = ncells;
-  MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 
-		1, MPI_INT, MPI::DOLFIN_COMM);
+	if (ncells == 0)
+	{
+		dolfin::error(
+				"One mesh partition contains zero cells, which makes it impossible to compute the problem.");
+	}
 
-  idxtype *elmwgt = NULL;
-  if( weight ) {
-    elmwgt = new idxtype[ncells];
-    for(CellIterator c(mesh); !c.end(); ++c) 
-      elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
-  }
+	elmdist[rank] = ncells;
+	MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, MPI::DOLFIN_COMM);
 
-  int sum_elm = elmdist[0];  
-  int tmp_elm;
-  elmdist[0] = 0;
-  for(int i=1;i<size+1;i++){    
-    tmp_elm = elmdist[i];
-    elmdist[i] = sum_elm;
-    sum_elm = tmp_elm + sum_elm;
-  }
+	idxtype *elmwgt = NULL;
+	if (weight)
+	{
+		elmwgt = new idxtype[ncells];
+		for (CellIterator c(mesh); !c.end(); ++c)
+			elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
+	}
 
-  int nvertices = mesh.type().numVertices(mesh.topology().dim());
-  int ncnodes = nvertices - 1 ;
+	int sum_elm = elmdist[0];
+	int tmp_elm;
+	elmdist[0] = 0;
+	for (int i = 1; i < size + 1; i++)
+	{
+		tmp_elm = elmdist[i];
+		elmdist[i] = sum_elm;
+		sum_elm = tmp_elm + sum_elm;
+	}
 
-  idxtype *eptr = new idxtype[ncells + 1];
-  eptr[0] = 0;
-  for(uint i=1;i < (mesh.numCells() + 1);i++)
-    eptr[i] = eptr[i-1] + nvertices;
+	int nvertices = mesh.type().numVertices(mesh.topology().dim());
+	int ncnodes = nvertices - 1;
 
-  int *eind =  new idxtype[nvertices * ncells];  
-  int i = 0;
-  for(CellIterator c(mesh); !c.end(); ++c)
-    for(VertexIterator v(*c); !v.end(); ++v)
-      eind[i++] = mesh.distdata().get_global(*v);
+	idxtype *eptr = new idxtype[ncells + 1];
+	eptr[0] = 0;
+	for (uint i = 1; i < (mesh.numCells() + 1); i++)
+		eptr[i] = eptr[i - 1] + nvertices;
 
-  idxtype *part = new idxtype[ncells];
+	int *eind = new idxtype[nvertices * ncells];
+	int i = 0;
+	for (CellIterator c(mesh); !c.end(); ++c)
+		for (VertexIterator v(*c); !v.end(); ++v)
+			eind[i++] = mesh.distdata().get_global(*v);
 
-  float *tpwgts = new float[size];
-  for(i=0; i<size; i++)
-    tpwgts[i] =  1.0/(float)(size); 
+	idxtype *part = new idxtype[ncells];
 
-  // default options
-  int options[3] = {1, 0, 15};
+	float *tpwgts = new float[size];
+	for (i = 0; i < size; i++)
+		tpwgts[i] = 1.0 / (float) (size);
 
+	// default options
+	int options[3] =
+		{ 1, 0, 15 };
 
-  ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag,&numflag,
-                           &ncon,&ncnodes,&size, tpwgts, &ubvec,
-                           options, &edgecut, part,&comm);
+	ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag, &numflag,
+			&ncon, &ncnodes, &size, tpwgts, &ubvec, options, &edgecut, part,
+			&comm);
 
-  delete[] eind;
-  delete[] elmdist;
-  delete[] tpwgts;
-  delete[] eptr;
-  if(weight)
-    delete[] elmwgt;
+	delete[] eind;
+	delete[] elmdist;
+	delete[] tpwgts;
+	delete[] eptr;
+	if (weight)
+		delete[] elmwgt;
 
-  // Create partition function
-  partitions.init(mesh, mesh.topology().dim());
-  partitions = size;
-  for(CellIterator cell(mesh); !cell.end(); ++cell)
-    partitions.set(*cell, (uint) part[ cell->index() ]);
+	// Create partition function
+	partitions.init(mesh, mesh.topology().dim());
+	partitions = size;
+	for (CellIterator cell(mesh); !cell.end(); ++cell)
+		partitions.set(*cell, (uint) part[cell->index()]);
 
-  delete[] part;
-  MPI_Comm_free(&comm);
+	delete[] part;
+	MPI_Comm_free(&comm);
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 {
-  // Duplicate MPI communicator
-  MPI_Comm comm; 
-  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
+	// Duplicate MPI communicator
+	MPI_Comm comm;
+	MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
 
-  int size, rank;
-  // Get information about the PE
-  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
-  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
-  
-  // Gather number of locally stored vertices for each processor
-  idxtype *vtxdist = new idxtype[size+1];  
-  vtxdist[rank] = static_cast<idxtype> (mesh.numVertices());
-  idxtype local_vertices = vtxdist[rank];
+	int size, rank;
+	// Get information about the PE
+	MPI_Comm_size(MPI::DOLFIN_COMM, &size);
+	MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
 
-  MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, 
-		MPI_INT, MPI::DOLFIN_COMM);
+	// Gather number of locally stored vertices for each processor
+	idxtype *vtxdist = new idxtype[size + 1];
+	vtxdist[rank] = static_cast<idxtype>(mesh.numVertices());
+	idxtype local_vertices = vtxdist[rank];
 
-  int i,tmp;
-  int sum = vtxdist[0];  
-  vtxdist[0] = 0;
-  for(i=1;i<size+1;i++){    
-    tmp = vtxdist[i];
-    vtxdist[i] = sum;
-    sum = tmp + sum;
-  }
+	MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT,
+			MPI::DOLFIN_COMM);
 
-  idxtype *part = new idxtype[mesh.numVertices()];
-  int gdim =  static_cast<int>( mesh.geometry().dim() );
-  float *xdy = new float[gdim * mesh.numVertices()];
+	int i, tmp;
+	int sum = vtxdist[0];
+	vtxdist[0] = 0;
+	for (i = 1; i < size + 1; i++)
+	{
+		tmp = vtxdist[i];
+		vtxdist[i] = sum;
+		sum = tmp + sum;
+	}
 
-  i = 0;
-  for(VertexIterator vertex(mesh); !vertex.end(); ++vertex) {
-    xdy[i] = static_cast<float>(vertex->point().x());
-    xdy[i+1] = static_cast<float>(vertex->point().y());
-    if(gdim > 2)
-      xdy[i+2] = static_cast<float>(vertex->point().z());
-    i +=gdim;
-  }
+	idxtype *part = new idxtype[mesh.numVertices()];
+	int gdim = static_cast<int>(mesh.geometry().dim());
+	float *xdy = new float[gdim * mesh.numVertices()];
 
-  ParMETIS_V3_PartGeom(vtxdist,&gdim,xdy,part,&comm);
+	i = 0;
+	for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+	{
+		xdy[i] = static_cast<float>(vertex->point().x());
+		xdy[i + 1] = static_cast<float>(vertex->point().y());
+		if (gdim > 2)
+			xdy[i + 2] = static_cast<float>(vertex->point().z());
+		i += gdim;
+	}
 
-  // Create meshfunction from partitions
-  partitions.init(mesh,0);
-  for(VertexIterator vertex(mesh); !vertex.end(); ++vertex)
-    partitions.set(*vertex, static_cast<uint>( part[vertex->index()]) );
+	ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);
 
-  delete[] xdy;
-  delete[] part;
-  delete[] vtxdist;
-  MPI_Comm_free(&comm);
+	// Create meshfunction from partitions
+	partitions.init(mesh, 0);
+	for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+		partitions.set(*vertex, static_cast<uint>(part[vertex->index()]));
+
+	delete[] xdy;
+	delete[] part;
+	delete[] vtxdist;
+	MPI_Comm_free(&comm);
 }
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void MeshPartition::partitionCommonMetis(Mesh& mesh, 
-					 MeshFunction<uint>& partitions,
-					 MeshFunction<uint>* weight)
+void MeshPartition::partitionCommonMetis(Mesh& mesh,
+		MeshFunction<uint>& partitions,
+		MeshFunction<uint>* weight)
 {
-  error("ParMetis needs MPI");
+	error("ParMetis needs MPI");
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 {
-  error("ParMetis needs MPI");
+	error("ParMetis needs MPI");
 }
 //-----------------------------------------------------------------------------
 #endif

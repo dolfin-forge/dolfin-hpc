@@ -58,7 +58,6 @@ void GaussianQuadrature::computeWeights()
   int info;
 
   real *A = new real[n * n];
-  real *x = new real[n];
   real *b = new real[n];
   int *ipiv = new int[n];
   
@@ -77,11 +76,10 @@ void GaussianQuadrature::computeWeights()
   
   // Save the weights
   for (unsigned int i = 0; i < n; i++)
-    weights[i] = x[i];
+    weights[i] = b[i];
 
   delete[] ipiv;
   delete[] b;
-  delete[] x;
   delete[] A;
 #else
   error("GaussianQuadrature needs F77 LAPACK");

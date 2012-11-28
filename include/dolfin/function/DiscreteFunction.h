@@ -89,7 +89,6 @@ public:
 
 	/// Friends
 	friend class XMLFile;
-	friend class LinearPDE;
 
 private:
 

@@ -97,7 +97,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				function/ConstantFunction.h\
 				function/SubFunction.h\
 				function/Function.h\
-				function/ProjectL2.h\
 				main/dolfin_main.h\
 				main/MPI.h\
 				main/SubSystemsManager.h\

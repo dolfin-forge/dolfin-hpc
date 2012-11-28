@@ -10,6 +10,7 @@
 // First added:  2002-11-12
 // Last changed: 2012-05-11
 
+#include <dolfin/config/dolfin_config.h>
 
 #include <string>
 #include <dolfin/log/dolfin_log.h>
@@ -71,6 +72,9 @@ File::File(const std::string& filename, Type type)
     file = new XMLFile(filename);
     break;
 #endif
+  case binary:
+    file = new BinaryFile(filename);
+    break;
   case matlab:
     file = new MatlabFile(filename);
     break;

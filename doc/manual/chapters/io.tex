@@ -79,25 +79,22 @@ it is not supported by all classes and the support varies with the
 choice of file format. A summary of supported classes/formats is
 given in Table~\ref{tab:classes,formats}.
 
-\devnote{Some of the file formats are partly broken after changing the
-  linear algebra backend to PETSc. (Do \texttt{grep FIXME} in \texttt{src/kernel/io/}.)}
-
 \begin{table}[htbp]
   \begin{center}
-    \begin{tabular}{|l||c|c|c|c|c|c|}
+    \begin{tabular}{|l||c|c|c|c|c|}
       \hline
-      Format           & \texttt{Vector} & \texttt{Matrix} & \texttt{Mesh} & \texttt{Function} & \texttt{Sample} & \texttt{Parallel}\\
+      Format           & \texttt{Vector} & \texttt{Matrix} & \texttt{Mesh} & \texttt{Function}  & \texttt{Parallel}\\
       \hline
       \hline
-      \texttt{File::xml}     & in/out & in/out & in/out & --- & --- & Partial \\
+      \texttt{File::xml}     & in/out & in/out & in/out & --- & Partial \\
       \hline
-      \texttt{File::binary}     & in/out & --- & in/out & in/out & --- & Yes\\
+      \texttt{File::binary}     & in/out & --- & in/out & in/out & Yes\\
       \hline
-      \texttt{File::vtk}     & ---    & ---    & out    & out & --- & Yes \\
+      \texttt{File::vtk}     & ---    & ---    & out    & out  & Yes \\
       \hline
-      \texttt{File::octave}  & out    & out    & out    & out & out & No \\
+      \texttt{File::octave}  & out    & out    & out    & out  & No \\
       \hline
-      \texttt{File::matlab}  & out    & out    & out    & out & out & No\\
+      \texttt{File::matlab}  & out    & out    & out    & out  & No\\
       \hline
     \end{tabular}
     \caption{Matrix of supported combinations of classes and file
@@ -148,13 +145,11 @@ on the command-line.
 \subsection{\dolfin{} Binary}
 \index{DOLFIN Binary}
 
-\dolfin{} Binary is the new native HPC format of \dolfin{} and the only format with support for parallel I/O. As the name says, data is stored in uncompressed binary with some additionally header information. A complete specification of the file format can be found in appendix \ref{app:dolfin_binary}
-
-
-. As the name says, data is stored in uncompressed binary format.
-
-with
-support for parallel I/O in the form of MPI I/O \cite{mpi}.
+\dolfin{} Binary is the new native HPC format of \dolfin{} and the
+only format with support for parallel I/O. As the name says, data is
+stored in uncompressed binary with some additionally header
+information. A complete specification of the file format can be found
+in appendix \ref{app:dolfin_binary}
 
 \subsection{VTK}
 
@@ -183,13 +178,7 @@ data000001.vtu
 data000002.vtu
 \end{code}
 would be produced. Individual snapshots can be visualized by opening the 
-desired file with the extension~\texttt{.vtu} using ParaView.
-
-ParaView can produce on-screen animations. High quality animations 
-in various formats can be produced using a combination of ParaView and 
-MEncoder~\cite{www:MEncoder}.
-
-\devnote{Add MEncoder example to create animation.}
+desired file with the extension~\texttt{.vtu} or~\texttt{.pvd} using ParaView.
 
 \subsection{GNU Octave}
 

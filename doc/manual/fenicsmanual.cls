@@ -9,7 +9,7 @@
 %--- Set up class ----
 \ProvidesClass{fenicsmanual}[2005/09/03 FEniCS manual]
 \NeedsTeXFormat{LaTeX2e}
-\LoadClass[12pt,twoside]{book}
+\LoadClass[10pt,a4paper,twoside]{book}
 
 %--- Load packages ---
 \RequirePackage{graphicx}
@@ -28,10 +28,11 @@
 \RequirePackage[colorlinks]{hyperref}
 \RequirePackage[small]{caption}
 \RequirePackage{algorithm}
+\RequirePackage{a4wide}
 
 %--- Misc options ---
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{12pt}
+\setlength{\parskip}{10pt}
 \allsectionsfont{\sffamily}
 \newcommand{\tab}{\hspace*{2em}}
 \makeindex

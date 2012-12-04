@@ -31,7 +31,8 @@ JANPACKKrylovSolver::~JANPACKKrylovSolver()
   jp_ksp_free(ksp);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
+dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x,
+					const JANPACKVec& b)
 {
   // Check dimensions
   uint M = A.size(0);

@@ -18,6 +18,14 @@ namespace dolfin
     default_scheme      // Default multigrid scheme
   };
 
+  enum MultigridCoarsening
+  {
+    rs,                 // Classic Rugen-Stueben
+    cljp,               // Cleary-Luby-Jones-Plassman (CLJP) 
+    pmis,               // Parallel Modified Independent Set 
+    default_coarsening  // Default coarsening scheme
+  };
+
   enum MultigridSmoother
   {
     mg_jacobi,          // Jacobi

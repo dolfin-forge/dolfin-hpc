@@ -6,10 +6,6 @@
 
 #ifdef HAVE_JANPACK
 
-#ifdef HAVE_MPI
-#include <dolfin/main/MPI.h>
-#endif
-
 #include <janpack/amg_solver.h>
 
 #include <dolfin/la/JANPACKMat.h>
@@ -20,8 +16,9 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 JANPACKAMGSolver::JANPACKAMGSolver(MultigridScheme scheme, 
-				   MultigridSmoother smoother) 
-  : scheme(scheme), smoother(smoother)
+				   MultigridSmoother smoother,
+				   MultigridCoarsening cscheme)
+  : scheme(scheme), smoother(smoother), cscheme(cscheme)
 {
 }
 //-----------------------------------------------------------------------------
@@ -49,6 +46,7 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
   num_iterations = jp_amg_solver(A.mat(), x.vec(), b.vec(), 
 				 (jp_amg_scheme_t) getScheme(scheme), 
 				 (jp_amg_smoother_t) getSmoother(smoother),
+				 (jp_amg_cscheme_t) getCoarsening(cscheme),
 				 get("AMG theta"), 
 				 get("AMG levels"),
 				 get("AMG maximum iterations"),
@@ -89,6 +87,22 @@ int JANPACKAMGSolver::getSmoother(MultigridSmoother smoother) const
   default:
     warning("Requested Multigrid smoother unknown. Using Gauss-Seidel.");
     return JP_AMG_GAUSS_SEIDEL;
+  }
+}
+//-----------------------------------------------------------------------------
+int JANPACKAMGSolver::getCoarsening(MultigridCoarsening cscheme) const 
+{
+  switch (cscheme)
+  {
+  case rs:
+    return JP_AMG_RS;
+  case cljp:
+    return JP_AMG_CLJP;
+  case pmis:
+    return JP_AMG_PMIS;
+  default:
+    warning("Requested Multigrid coarsening unknown. Using Rugen-Stueben.");
+    return JP_AMG_RS;
   }
 }
 //-----------------------------------------------------------------------------

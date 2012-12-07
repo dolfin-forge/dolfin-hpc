@@ -25,10 +25,11 @@ namespace dolfin
   public:
     
     /// Create Krylov solver
-    AMGSolver(MultigridScheme scheme_type=default_scheme,
-	      MultigridSmoother smoother_type=default_smoother)
+    AMGSolver(MultigridScheme scheme_type = default_scheme,
+	      MultigridSmoother smoother_type = default_smoother,
+	      MultigridCoarsening coarsening_type = default_coarsening)
       : scheme_type(scheme_type), smoother_type(smoother_type),
-      janpack_solver(0) {}
+      coarsening_type(coarsening_type), janpack_solver(0) {}
     
     /// Destructor
     ~AMGSolver()
@@ -46,7 +47,7 @@ namespace dolfin
       {
 	if (!janpack_solver)
 	{
-	  janpack_solver = new JANPACKAMGSolver(scheme_type, smoother_type);
+	  janpack_solver = new JANPACKAMGSolver(scheme_type, smoother_type, coarsening_type);
 	  janpack_solver->set("parent", *this);
 	}
 	return janpack_solver->solve(A.down_cast<JANPACKMat>(), x.down_cast<JANPACKVec>(), b.down_cast<JANPACKVec>());
@@ -63,6 +64,9 @@ namespace dolfin
 
     // Multigrid Smoother
     MultigridSmoother smoother_type;
+
+    // Multigrid Coarsening scheme
+    MultigridCoarsening coarsening_type;
 
 
 #ifdef HAVE_JANPACK

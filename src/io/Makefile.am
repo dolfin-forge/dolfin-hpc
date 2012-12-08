@@ -23,4 +23,5 @@ libdolfin_io_la_SOURCES = \
 			XMLObject.cpp\
 			XMLParameterList.cpp\
 			XMLVector.cpp\
+			STLFile.cpp\
 			XYZFile.cpp

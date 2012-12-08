@@ -69,6 +69,7 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				io/Encoder.h\
 				io/MatlabFile.h\
 				io/XYZFile.h\
+				io/STLFile.h\
 				io/XMLMesh.h\
 				io/XMLVector.h\
 				io/VTKFile.h\

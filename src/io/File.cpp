@@ -23,6 +23,7 @@
 #include <dolfin/io/OctaveFile.h>
 #include <dolfin/io/VTKFile.h>
 #include <dolfin/io/RAWFile.h>
+#include <dolfin/io/STLFile.h>
 #include <dolfin/io/XYZFile.h>
 
 using namespace dolfin;
@@ -55,6 +56,8 @@ File::File(const std::string& filename)
     file = new VTKFile(filename);
   else if ( filename.rfind(".raw") != filename.npos )
     file = new RAWFile(filename);
+  else if ( filename.rfind(".stl") != filename.npos )
+    file = new STLFile(filename);
   else if ( filename.rfind(".xyz") != filename.npos )
     file = new XYZFile(filename);
   else

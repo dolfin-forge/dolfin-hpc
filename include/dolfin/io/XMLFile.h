@@ -47,9 +47,7 @@ namespace dolfin
     void operator>> (MeshFunction<bool>& meshfunction);
     void operator>> (Function& f);
     void operator>> (ParameterList& parameters);
-    void operator>> (Graph& graph);
-    
-    void parse(Function& f, FiniteElement& element);
+    void operator>> (Graph& graph);    
     
     // Output
     

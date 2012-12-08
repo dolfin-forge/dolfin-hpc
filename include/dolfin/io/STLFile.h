@@ -17,7 +17,7 @@ namespace dolfin
   public:
     
     STLFile(const std::string filename);
-    virtual ~STLFile();
+    ~STLFile();
 
     // Input
     void operator>> (Mesh& mesh);    

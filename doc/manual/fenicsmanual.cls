@@ -76,15 +76,15 @@
   \vspace{-0.5cm}
   \hrule height 2pt
   \hfill\large\textsf{\today}
-  \vspace{3cm}
+  \vspace{4cm}
   \@fenicsimage
   \vfill\large\textsf{\textbf{\@fenicsauthor}} \\
   \hrule height 2pt
-  \hfill\large\texttt{www.fenics.org}
+  \hfill\large\texttt{www.fenicsproject.org}
   \newpage
   \null\vfill
   \normalsize
-  Visit \texttt{http://www.fenics.org/} for the latest version of this manual. \\
+  Visit \texttt{http://www.fenicsproject.org/} for the latest version of this manual. \\
   Send comments and suggestions to \texttt{\@fenicspackagett{}-dev@fenics.org}.
   \pagestyle{empty}
   \cleardoublepage

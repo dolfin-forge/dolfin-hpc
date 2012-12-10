@@ -73,35 +73,17 @@ matrix from a bilinear form.
 
 The default \dolfin{} class \texttt{Matrix} is a sparse matrix, which
 efficiently represents the discretization of a partial differential
-equation where most entries in the matrix are zero. Alternatively,
-the class \texttt{SparseMatrix} may be used which is identical with
-the class \texttt{Matrix}\footnote{The class \texttt{Matrix} is a
-\texttt{typedef} for the class \texttt{SparseMatrix}.}.
+equation where most entries in the matrix are zero. 
 
 If \dolfin{} has been compiled with support for PETSc, then the sparse
-matrix is represented as a sparse PETSc matrix\footnote{By default, the
-sparse matrix is represented as a PETSc \texttt{MATSEQAIJ} matrix, but
-other PETSc representations are also available.}. Alternatively, the
-class \texttt{PETScMatrix} may be used, together with the corresponding
-class \texttt{PETScVector}.
+matrix is represented as a sparse PETSc matrix Alternatively, the
+class \texttt{PETScMatrix} may be used, together with the
+corresponding class \texttt{PETScVector}.
 
 If \dolfin{} has been compiled without support for PETSc, then the
-sparse matrix is represented as a uBLAS sparse matrix. Alternatively,
-the class \texttt{uBlasSparseMatrix} may be used, together with the
-corresponding class \texttt{uBlasVector}.
-
-\subsection{Dense matrices}
-\index{dense matrix}
-
-\dolfin{} provides the class \texttt{DenseMatrix} for representation
-of dense matrices. A dense matrix representation is often preferable
-when computing with matrices of small to moderate size. In particular,
-accessing individual elements 
-is more efficient with a dense matrix representation.
-
-A \texttt{DenseMatrix} is represented as uBLAS dense matrix and
-alternatively the class \texttt{uBlasDenseMatrix} may be used,
-together with the corresponding class \texttt{uBlasVector}.
+sparse matrix is represented as a JANPACK matrix. Alternatively,
+the class \texttt{JANPACKMatrix} may be used, together with the
+corresponding class \texttt{JANPACKVector}.
 
 \subsection{The common interface}
 \index{\texttt{GenericMatrix}}
@@ -121,10 +103,19 @@ The following points should be noted:
 \item
   If you don't care about the backend, then use \texttt{Vector}/\texttt{Matrix}.
 \item
+  The backend for \texttt{Vector}/\texttt{Matrix} is determined by the
+  parameter \texttt{linear algebra backend}, which can be changed
+  during runtime as follows:
+\begin{code}
+dolfin_set("linear algebra backend", "JANPACK");
+\end{code}
+For more information on the parameter system see chapter \ref{sec:parameters}.
+\item
   If you write a \emph{function} that should be able to accept vectors
   and matrices from any backend as input, then use
   \texttt{GenericVector}/\texttt{GenericMatrix}.
 \end{enumerate}
+
 
 %------------------------------------------------------------------------------
 \section{Solving linear systems}
@@ -161,10 +152,6 @@ of both the Krylov method and the preconditioner:
 KrylovSolver solver(gmres, ilu);
 solver.solve(A, x, b);
 \end{code}
-
-For uBLAS matrices and vectors, the class \texttt{uBlasKrylovSolver}
-may be used and for PETSc matrices and vectors, the class
-\texttt{PETScKrylovSolver} may be used.
 
 \subsubsection{Krylov methods}
 \index{conjugate gradient method}

@@ -45,7 +45,7 @@ AC_DEFUN([AX_PETSC],[
 	     cat <<EOF >config_petsc
 include $PETSC_DIR/conf/variables
 petsclibs:
-	echo -L$PETSC_DIR/lib \$(PACKAGES_LIBS) \$(PETSC_TS_LIB_BASIC) 
+	echo -L$PETSC_DIR/lib  \$(PETSC_TS_LIB_BASIC) \$(PACKAGES_LIBS)
 
 petscinc:
 	echo -I$PETSC_DIR/include \$(MPI_INCLUDE) 

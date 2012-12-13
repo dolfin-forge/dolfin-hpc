@@ -24,6 +24,7 @@ void STLFile::operator>>(Mesh& mesh)
 {
 
   char hdr[80];
+  float data[3];
   uint ntri;
 
 
@@ -35,7 +36,19 @@ void STLFile::operator>>(Mesh& mesh)
   editor.open(mesh, CellType::triangle, 2, 3);  
   editor.close();
 
-  for (uint i = 0; i < ntri; i++) {
+  printf("%d ntris\n", ntri);
+  for (uint i = 0; i < ntri; i++) {    
+    /* Normal */
+    fp.read((char *)&data, 3*sizeof(float)); 
+
+    /* Vertex v1 v2 v3 */
+    fp.read((char *)&data, 3*sizeof(float));
+    printf("%g %g %g\n", data[0], data[1], data[2]);
+    fp.read((char *)&data, 3*sizeof(float));
+    fp.read((char *)&data, 3*sizeof(float));
+
+    /* Aux data */
+    fp.read((char *)&hdr, 2*sizeof(char));
     /*
       REAL32[3] Normal vector
       REAL32[3]  Vertex 1

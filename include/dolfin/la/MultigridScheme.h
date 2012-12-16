@@ -12,8 +12,8 @@ namespace dolfin
 
   enum MultigridScheme
   {
-    v,                  // V-cycle scheme
-    w,                  // W-cycle scheme
+    mgv,                // V-cycle scheme
+    mgw,                // W-cycle scheme
     fmv,                // Full Multigrid V-cycle
     default_scheme      // Default multigrid scheme
   };
@@ -23,6 +23,7 @@ namespace dolfin
     rs,                 // Classic Rugen-Stueben
     cljp,               // Cleary-Luby-Jones-Plassman (CLJP) 
     pmis,               // Parallel Modified Independent Set 
+    hmis,               // Hybrid Modified Independent Set 
     default_coarsening  // Default coarsening scheme
   };
 

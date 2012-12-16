@@ -61,9 +61,9 @@ int JANPACKAMGSolver::getScheme(MultigridScheme scheme) const
 
   switch (scheme)
   {
-  case v:
+  case mgv:
     return JP_AMG_VCYCLE;
-  case w:
+  case mgw:
     return JP_AMG_WCYCLE;
   case fmv:
     return JP_AMG_FMV;

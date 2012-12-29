@@ -254,7 +254,7 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
     // Get number of components
     const uint dim = u->dim(0);
     
-  // Allocate memory for function values at vertices
+    // Allocate memory for function values at vertices
     uint size = mesh.numVertices();
     for (uint i = 0; i < u->rank(); i++)
       size *= u->dim(i);

@@ -51,7 +51,7 @@ petscinc:
 	echo -I$PETSC_DIR/include \$(MPI_INCLUDE) 
 EOF
 	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
-	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
+	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`/
 	     rm -fr config_petsc
 	     have_petsc="yes"
 	   fi

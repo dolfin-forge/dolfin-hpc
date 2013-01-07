@@ -10,8 +10,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS
-
 #include <stdio.h>
 
 #include <dolfin/log/dolfin_log.h>
@@ -69,4 +67,3 @@ void MatlabFile::operator<<(GenericMatrix& A)
 }
 //-----------------------------------------------------------------------------
 
-#endif

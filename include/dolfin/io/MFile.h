@@ -6,8 +6,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef NO_UBLAS
-
 #ifndef __M_FILE_H
 #define __M_FILE_H
 
@@ -39,4 +37,3 @@ namespace dolfin
 
 #endif
 
-#endif

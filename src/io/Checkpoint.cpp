@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-09
-// Last changed: 2011-06-27
+// Last changed: 2013-01-07
 
 #include <cstring>
 #include <sstream>
@@ -128,8 +128,6 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   out.close();
 #endif
 
-
-  state = RESTART;
 
 }
 //-----------------------------------------------------------------------------

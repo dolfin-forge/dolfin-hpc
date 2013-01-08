@@ -15,7 +15,7 @@ AC_DEFUN([AX_PARMETIS],[
 	if test -d "$withval"; then
 		ac_parmetis_path="$withval";
 		PARMETIS_LDFLAGS="-L$ac_parmetis_path/lib"  
-		PARMETIS_CPPFLAGS="-I$ac_parmetis_path/include/"
+		PARMETIS_CPPFLAGS="-I$ac_parmetis_path/include"
 	fi
 	],)
 

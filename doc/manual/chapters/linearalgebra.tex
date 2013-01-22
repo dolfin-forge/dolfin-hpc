@@ -15,7 +15,7 @@ PETSc~\cite{www:petsc} and JANPACK~\cite{www:janpack}.
 
 The two basic linear algebra data structures are the classes
 \texttt{Matrix} and \texttt{Vector}, representing a sparse $M\times
-N$ matrix and a vector of length $N$ respectively.
+N$ matrix and a vector of length $N$ respectively. 
 
 The following code demonstrates how to create a matrix and a vector:
 \begin{code}
@@ -127,7 +127,7 @@ the form
   Ax = b,
 \end{equation}
 where $A$ is an $N\times N$ matrix and where $x$ and $b$ are vectors
-of length $N$. Both iterative (Krylov subspace) solvers and direct
+of length $N$. Both iterative (Krylov subspace) solvers Multilevel (algebraic multigrid) solvers and direct
 (LU) solvers are provided.
 
 \subsection{Iterative methods}
@@ -142,16 +142,14 @@ A linear system may be solved by the GMRES Krylov method as follows:
 Matrix A;
 Vector x, b:
 
-GMRES::solve(A, x, b);
+KrylovSolver solver(gmres, ilu);
+solver.solve(A, x, b);
 \end{code}
 Alternatively, the linear system may be solved by first creating an
 object of the class \texttt{KrylovSolver}, which is more efficient for
 repeated solution of linear systems and also allows the specification
 of both the Krylov method and the preconditioner:
-\begin{code}
-KrylovSolver solver(gmres, ilu);
-solver.solve(A, x, b);
-\end{code}
+
 
 \subsubsection{Krylov methods}
 \index{conjugate gradient method}
@@ -212,8 +210,21 @@ method \\
 \index{multilevel methods}
 \index{AMG}
 \index{\texttt{AMGSolver}}
-A linear system may be solved by Algebraic multigrid as follows:
+A linear system may be solved by a W-cycle Algebraic multigrid as follows:
+\begin{code}
+Matrix A;
+Vector x, b:
 
+AMGSolver solver(w, mg_gauss_seidel, rs);
+solver.solve(A, x, b);
+\end{code}
+
+\subsubsection{Multigrid schemes}
+\dolfin{} provides the following set of multigrid schemes:
+\subsubsection{Multigrid smoothers}
+\dolfin{} provides the following set of multigrid smoothers:
+\subsubsection{Coarsening schemes}
+\dolfin{} provides the following set of coarsening strategies:
 \subsection{Direct methods}
 \index{\texttt{LU}}
 \index{\texttt{LUSolver}}

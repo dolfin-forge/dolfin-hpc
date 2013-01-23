@@ -228,7 +228,8 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				common/constants.h\
 				common/Variable.h\
 				common/List.h\
-				common/Timer.h
+				common/Timer.h\
+				common/TimeDependent.h
 
 
 

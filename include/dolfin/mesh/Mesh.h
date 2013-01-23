@@ -22,7 +22,7 @@
 
 namespace dolfin
 {
-  
+
   template <class T> class MeshFunction;
   class MeshData;
 
@@ -52,25 +52,25 @@ namespace dolfin
   /// by a call to mesh.init(1). Similarly, connectivities such as
   /// all edges connected to a given vertex must also be explicitly
   /// created (in this case by a call to mesh.init(0, 1)).
-  
+
   class Mesh : public Variable
   {
   public:
-    
+
     /// Create empty mesh
     Mesh();
 
     /// Copy constructor
-    Mesh(const Mesh& mesh);
+    Mesh(Mesh const & mesh);
 
     /// Create mesh from data file
     Mesh(std::string filename);
-    
+
     /// Destructor
     ~Mesh();
 
     /// Assignment
-    const Mesh& operator=(const Mesh& mesh);
+    const Mesh& operator=(Mesh const & mesh);
 
     /// Return number of vertices
     inline uint numVertices() const { return _topology.size(0); }
@@ -101,7 +101,7 @@ namespace dolfin
 
     /// Return number of entities of given topological dimension
     inline uint size(uint dim) const { return _topology.size(dim); }
-    
+
     /// Return mesh topology (non-const version)
     inline MeshTopology& topology() { return _topology; }
 
@@ -162,10 +162,10 @@ namespace dolfin
 
     /// Move coordinates of mesh according to new boundary coordinates
     void move(Mesh& boundary, ALEType method=lagrange);
-    
-    /// Smooth mesh using Lagrangian mesh smoothing 
+
+    /// Smooth mesh using Lagrangian mesh smoothing
     void smooth();
-    
+
     /// Partition mesh into num_processes partitions
     void partition(MeshFunction<uint>& partitions);
 
@@ -177,12 +177,12 @@ namespace dolfin
 
     /// Partition mesh into num_partitions = numProc
     void partition_geom(MeshFunction<uint>& partitions);
-    
+
     // Distribute a mesh according to a mesh function
     void distribute(MeshFunction<uint>& distribution);
 
     // Distribute a mesh according to a mesh function and transfer marked cells
-    void distribute(MeshFunction<uint>& distribution, 
+    void distribute(MeshFunction<uint>& distribution,
                     MeshFunction<bool>& cell_markers,
                     MeshFunction<bool>& new_cell_markers);
 
@@ -191,13 +191,13 @@ namespace dolfin
 
     /// Display mesh data
     void disp() const;
-    
+
     /// Return a short desriptive string
     std::string str() const;
 
     /// Output
     friend LogStream& operator<< (LogStream& stream, const Mesh& mesh);
-    
+
   private:
 
     // Friends

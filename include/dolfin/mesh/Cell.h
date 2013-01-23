@@ -28,10 +28,10 @@ namespace dolfin
 
     /// Destructor
     ~Cell() {}
-    
+
     /// Return type of cell
     inline CellType::Type type() const { return _mesh.type().cellType(); }
-    
+
     /// Compute orientation of cell (0 is right, 1 is left)
     inline real orientation() const { return _mesh.type().orientation(*this); }
 
@@ -42,7 +42,7 @@ namespace dolfin
     inline real diameter() const { return _mesh.type().diameter(*this); }
 
     /// Compute midpoint of cell
-    Point midpoint(); 
+    Point midpoint();
 
     /// Compute component i of normal of given facet with respect to the cell
     inline real normal(uint facet, uint i) const { return _mesh.type().normal(*this, facet, i); }
@@ -56,18 +56,18 @@ namespace dolfin
   };
 
   /// A CellIterator is a MeshEntityIterator of topological codimension 0.
-  
+
   class CellIterator : public MeshEntityIterator
   {
   public:
-    
+
     CellIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.topology().dim()) {}
     CellIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().topology().dim()) {}
 
     inline Cell& operator*() { return *operator->(); }
     inline Cell* operator->() { return static_cast<Cell*>(MeshEntityIterator::operator->()); }
 
-  };    
+  };
 
 }
 

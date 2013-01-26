@@ -10,6 +10,10 @@
 // First added:  2002-12-03
 // Last changed: 2008-06-25
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <stdarg.h>
 
 #include <dolfin/log/log.h>
@@ -30,6 +34,7 @@
 #include <dolfin/parameter/ParameterList.h>
 #include <dolfin/main/MPI.h>
 
+
 #include <dolfin/io/XMLObject.h>
 #include <dolfin/io/XMLVector.h>
 #include <dolfin/io/XMLMatrix.h>
@@ -40,7 +45,6 @@
 #include <dolfin/io/XMLFunction.h>
 #include <dolfin/io/XMLFiniteElement.h>
 #include <dolfin/io/XMLParameterList.h>
-#include <dolfin/io/XMLBLASFormData.h>
 #include <dolfin/io/XMLGraph.h>
 #include <dolfin/io/XMLFile.h>
 
@@ -191,14 +195,6 @@ void XMLFile::operator>>(ParameterList& parameters)
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLParameterList(parameters);
-  parseFile();
-}
-//-----------------------------------------------------------------------------
-void XMLFile::operator>>(BLASFormData& blas)
-{
-  if ( xmlObject )
-    delete xmlObject;
-  xmlObject = new XMLBLASFormData(blas);
   parseFile();
 }
 //-----------------------------------------------------------------------------
@@ -711,3 +707,4 @@ void dolfin::sax_fatal_error(void *ctx, const char *msg, ...)
   va_end(args);
 }
 //-----------------------------------------------------------------------------
+#endif

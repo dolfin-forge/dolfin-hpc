@@ -9,7 +9,7 @@
 %--- Set up class ----
 \ProvidesClass{fenicsmanual}[2005/09/03 FEniCS manual]
 \NeedsTeXFormat{LaTeX2e}
-\LoadClass[12pt,twoside]{book}
+\LoadClass[10pt,a4paper,twoside]{book}
 
 %--- Load packages ---
 \RequirePackage{graphicx}
@@ -28,10 +28,11 @@
 \RequirePackage[colorlinks]{hyperref}
 \RequirePackage[small]{caption}
 \RequirePackage{algorithm}
+\RequirePackage{a4wide}
 
 %--- Misc options ---
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{12pt}
+\setlength{\parskip}{10pt}
 \allsectionsfont{\sffamily}
 \newcommand{\tab}{\hspace*{2em}}
 \makeindex
@@ -75,15 +76,15 @@
   \vspace{-0.5cm}
   \hrule height 2pt
   \hfill\large\textsf{\today}
-  \vspace{3cm}
+  \vspace{4cm}
   \@fenicsimage
   \vfill\large\textsf{\textbf{\@fenicsauthor}} \\
   \hrule height 2pt
-  \hfill\large\texttt{www.fenics.org}
+  \hfill\large\texttt{www.fenicsproject.org}
   \newpage
   \null\vfill
   \normalsize
-  Visit \texttt{http://www.fenics.org/} for the latest version of this manual. \\
+  Visit \texttt{http://www.fenicsproject.org/} for the latest version of this manual. \\
   Send comments and suggestions to \texttt{\@fenicspackagett{}-dev@fenics.org}.
   \pagestyle{empty}
   \cleardoublepage

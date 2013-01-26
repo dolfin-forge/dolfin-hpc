@@ -6,7 +6,12 @@
 
 #ifdef HAVE_JANPACK
 
+#ifdef HAVE_MPI
+#include <dolfin/main/MPI.h>
+#endif
+
 #include <janpack/krylov_solver.h>
+#include <janpack/ilu.h>
 
 #include <dolfin/la/JANPACKMat.h>
 #include <dolfin/la/JANPACKVec.h>
@@ -17,11 +22,17 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, 
 					 PreconditionerType pc) :
-  method(method), pc_janpack(pc)
+  method(method), pc_janpack(pc), ksp_init(false)
 {
 }
 //-----------------------------------------------------------------------------
-dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
+JANPACKKrylovSolver::~JANPACKKrylovSolver()
+{
+  jp_ksp_free(ksp);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x,
+					const JANPACKVec& b)
 {
   // Check dimensions
   uint M = A.size(0);
@@ -33,23 +44,37 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x, cons
   message("Solving linear system of size %d x %d (Krylov solver).", M, N);
 
   // Reinitialize solution vector if necessary
-  x.init(b.local_size());
+  if (x.local_size() != b.local_size())
+    x.init(b.local_size());
+
+  // Initialize preconditioner
+  if (ksp_init == false) {
+    jp_ksp_init(ksp);
+    ksp_init = true;
+  }
+
 
   jp_pc_t pc_type;
   if (pc_janpack == none)
     pc_type = JP_PC_NONE;
   else if(pc_janpack == jacobi)
     pc_type = JP_PC_JACOBI;
+  else if(pc_janpack == ilu)
+    pc_type = JP_PC_ILU;
   else if(pc_janpack == dilu)
     pc_type = JP_PC_DILU;
+  else if(pc_janpack == amg)
+    pc_type = JP_PC_AMG;
   else
     pc_type = JP_PC_NONE;
 
+
   int num_iterations;
-  num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), 
-				    (jp_solver_t) getType(method), pc_type,
-				    get("Krylov maximum iterations"),
+  num_iterations = jp_krylov_solver(A.mat(), x.vec(), b.vec(), ksp,
+  				    (jp_solver_t) getType(method), pc_type,
+  				    get("Krylov maximum iterations"),
 				    get("Krylov relative tolerance"));
+
   message("Krylov solver converged in %d iterations.", num_iterations);
   return num_iterations;
 }

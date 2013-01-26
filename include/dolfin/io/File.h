@@ -26,12 +26,8 @@ namespace dolfin
   class Graph;
   template <class T> class MeshFunction;
   class Function;
-  class Sample;
-  class FiniteElementSpec;
   class ParameterList;
-  class BLASFormData;
   class GenericFile;
-  class FiniteElement;
   
   /// A File represents a data file for reading and writing objects.
   /// Unless specified explicitly, the format is determined by the
@@ -42,7 +38,7 @@ namespace dolfin
   public:
     
     /// File formats
-    enum Type {xml, matlab, octave, opendx, vtk, python ,raw, xyz};
+    enum Type {xml, matlab, octave, opendx, vtk, binary ,raw, stl, xyz};
     
     /// Create a file with given name
     File(const std::string& filename);
@@ -76,18 +72,9 @@ namespace dolfin
     /// Read function from file
     void operator>> (Function& u);
 
-    /// Read ODE sample from file
-    void operator>> (Sample& sample);
-    
-    /// Read finite element specification from file
-    void operator>> (FiniteElementSpec& spec);
-
     /// Read parameter list from file
     void operator>> (ParameterList& parameters);
 
-    /// Read FFC BLAS data from file
-    void operator>> (BLASFormData& blas);
-	 
     /// Read graph from file
     void operator>> (Graph& graph);
 
@@ -114,18 +101,9 @@ namespace dolfin
     /// Write function to file
     void operator<< (Function& u);
 
-    /// Write ODE sample to file
-    void operator<< (Sample& sample);
-
-    /// Write finite element specification to file
-    void operator<< (FiniteElementSpec& spec);
-
     /// Write parameter list to file
     void operator<< (ParameterList& parameters);
 
-    /// Write FFC BLAS data to file
-    void operator<< (BLASFormData& blas);
-	 
     /// Write graph to file
     void operator<< (Graph& graph);
 

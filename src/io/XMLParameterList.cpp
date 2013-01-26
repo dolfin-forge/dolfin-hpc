@@ -4,6 +4,10 @@
 // First added:  2004-03-31
 // Last changed: 2006-05-23
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <stdlib.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/parameter/ParameterList.h>
@@ -104,3 +108,5 @@ void XMLParameterList::readParameter(const xmlChar *name, const xmlChar **attrs)
     warning("Illegal parameter type: %s", ptype.c_str());
 }
 //-----------------------------------------------------------------------------
+
+#endif

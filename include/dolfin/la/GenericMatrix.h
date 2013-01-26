@@ -107,6 +107,10 @@ namespace dolfin
     /// Assignment operator
     virtual const GenericMatrix& operator= (const GenericMatrix& x) = 0;
 
+    /// Get number of non-zeros in the matrix
+    virtual uint nz() const = 0;
+
+
     //--- Convenience functions ---
 
     /// Get value of given entry 

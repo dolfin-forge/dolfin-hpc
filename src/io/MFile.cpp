@@ -8,6 +8,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 
+#include <stdio.h>
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/GenericVector.h>

@@ -132,6 +132,9 @@ namespace dolfin
     /// Assignment operator
     virtual const GenericMatrix& operator= (const GenericMatrix& A);
 
+    /// Get number of non-zeros in the matrix 
+    virtual uint nz() const;
+
     //--- Special functions ---
 
     /// Return linear algebra backend factory

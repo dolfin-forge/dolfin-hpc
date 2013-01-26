@@ -1,6 +1,10 @@
 LDFLAGS = $(XML_LDFLAGS)
 SUBDIRS = common elements fem function graph io\
+<<<<<<< HEAD
 	la log main math mesh parameter 
+=======
+	la log main math mesh nls parameter pde quadrature
+>>>>>>> master
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = dolfin.pc
@@ -19,6 +23,7 @@ libdolfin_la_LIBADD = \
 		main/libdolfin_main.la\
 		math/libdolfin_math.la\
 		mesh/libdolfin_mesh.la\
-		parameter/libdolfin_parameter.la
+		parameter/libdolfin_parameter.la\
+		quadrature/libdolfin_quadrature.la
 
 

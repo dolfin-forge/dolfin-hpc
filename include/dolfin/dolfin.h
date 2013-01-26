@@ -15,5 +15,6 @@
 #include <dolfin/math/dolfin_math.h>
 #include <dolfin/mesh/dolfin_mesh.h>
 #include <dolfin/fem/dolfin_fem.h>
+#include <dolfin/quadrature/dolfin_quadrature.h>
 
 #endif

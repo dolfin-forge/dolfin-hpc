@@ -61,12 +61,12 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				io/XMLGraph.h\
 				io/XMLMatrix.h\
 				io/PXMLMesh.h\
-				io/XMLBLASFormData.h\
 				io/File.h\
 				io/XMLFunction.h\
 				io/Encoder.h\
 				io/MatlabFile.h\
 				io/XYZFile.h\
+				io/STLFile.h\
 				io/XMLMesh.h\
 				io/XMLVector.h\
 				io/VTKFile.h\
@@ -102,6 +102,16 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				main/SubSystemsManager.h\
 				main/dolfin_doc.h\
 				main/init.h\
+				math/Lagrange.h\
+				math/Legendre.h\
+				math/basic.h\
+				math/dolfin_math.h\
+				quadrature/GaussianQuadrature.h\
+				quadrature/LobattoQuadrature.h\
+				quadrature/GaussQuadrature.h\
+				quadrature/RadauQuadrature.h\
+				quadrature/Quadrature.h\
+				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
@@ -158,11 +168,12 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/IntervalCell.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
-				math/basic.h\
-				math/dolfin_math.h\
+				la/AMGSolver.h\
+				la/MultigridScheme.h\
 				la/KrylovSolver.h\
 				la/PreconditionerType.h\
 				la/JANPACKKrylovSolver.h\
+				la/JANPACKAMGSolver.h\
 				la/PETScMatrix.h\
 				la/GenericSparsityPattern.h\
 				la/GenericVector.h\
@@ -185,7 +196,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				la/Scalar.h\
 				la/SolverType.h\
 				la/PETScPreconditioner.h\
-				la/SLEPcEigenvalueSolver.h\
 				la/VectorNormType.h\
 				la/PETScObject.h\
 				la/PETScFactory.h\

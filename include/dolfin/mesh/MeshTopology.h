@@ -70,7 +70,6 @@ namespace dolfin
 
   private:
 
-    friend class MPIMeshCommunicator;
 
     // Topological dimension
     uint _dim;

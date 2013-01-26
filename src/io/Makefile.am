@@ -12,7 +12,6 @@ libdolfin_io_la_SOURCES = \
 			PXMLMesh.cpp\
 			RAWFile.cpp\
 			VTKFile.cpp\
-			XMLBLASFormData.cpp\
 			XMLDofMap.cpp\
 			XMLFile.cpp\
 			XMLFiniteElement.cpp\
@@ -24,4 +23,5 @@ libdolfin_io_la_SOURCES = \
 			XMLObject.cpp\
 			XMLParameterList.cpp\
 			XMLVector.cpp\
+			STLFile.cpp\
 			XYZFile.cpp

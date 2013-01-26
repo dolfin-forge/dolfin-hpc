@@ -4,6 +4,10 @@
 // First added:  2003-02-17
 // Last changed: 2008-06-15
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/XMLMatrix.h>
@@ -121,3 +125,5 @@ void XMLMatrix::setRow()
   A.setrow(row, columns, values);
 }
 //-----------------------------------------------------------------------------
+
+#endif

@@ -73,24 +73,9 @@ void GenericFile::operator>>(Function& f)
   read_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(Sample& sample)
-{
-  read_not_impl("Sample");
-}
-//-----------------------------------------------------------------------------
-void GenericFile::operator>>(FiniteElementSpec& spec)
-{
-  read_not_impl("FiniteElementSpec");
-}
-//-----------------------------------------------------------------------------
 void GenericFile::operator>>(ParameterList& parameters)
 {
   read_not_impl("ParameterList");
-}
-//-----------------------------------------------------------------------------
-void GenericFile::operator>>(BLASFormData& blas)
-{
-  read_not_impl("BLASFormData");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator>>(Graph& graph)
@@ -143,24 +128,9 @@ void GenericFile::operator<<(Function& u)
   write_not_impl("Function");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(Sample& sample)
-{
-  write_not_impl("Sample");
-}
-//-----------------------------------------------------------------------------
-void GenericFile::operator<<(FiniteElementSpec& spec)
-{
-  write_not_impl("FiniteElementSpec");
-}
-//-----------------------------------------------------------------------------
 void GenericFile::operator<<(ParameterList& parameters)
 {
   write_not_impl("ParameterList");
-}
-//-----------------------------------------------------------------------------
-void GenericFile::operator<<(BLASFormData& blas)
-{
-  write_not_impl("BLASFormData");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator<<(Graph& graph)

@@ -4,6 +4,7 @@ libdolfin_la_la_SOURCES = \
 			DefaultFactory.cpp\
 			JANPACKFactory.cpp\
 			JANPACKKrylovSolver.cpp\
+			JANPACKAMGSolver.cpp\
 			JANPACKMat.cpp\
 			JANPACKVec.cpp\
 			LinearSolver.cpp\
@@ -14,7 +15,6 @@ libdolfin_la_la_SOURCES = \
 			PETScMatrix.cpp\
 			PETScPreconditioner.cpp\
 			PETScVector.cpp\
-			SLEPcEigenvalueSolver.cpp\
 			SingularSolver.cpp\
 			SparsityPattern.cpp\
 			solve.cpp

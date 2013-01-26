@@ -1,17 +1,14 @@
 \chapter{The mesh}
 
-\devnote{This chapter is just a quick write-up of the most basic
-  functionality of the mesh library and will be expanded.}
-
-% FIXME: Need to write about mesh.init()
 
 \section{Basic concepts}
 
 \subsection{Mesh}
 
-A \emph{mesh} consists of \emph{mesh topology} and \emph{mesh geometry}.
-These concepts are implemented by the classes \texttt{Mesh},
-\texttt{MeshTopology} and \texttt{MeshGeometry}.
+A \emph{mesh} consists of \emph{mesh topology}, \emph{mesh geometry}
+and \emph{mesh overlap} (when running in parallel).  These concepts
+are implemented by the classes \texttt{Mesh}, \texttt{MeshTopology},
+\texttt{MeshGeometry} and \texttt{MeshDistributedData}.
 
 \subsection{Mesh entities}
 
@@ -104,7 +101,10 @@ mesh.refine();
 \end{code}
 A mesh may also be refined locally by supplying a
 \texttt{MeshFunction} with boolean markers for the cells that should
-be refined.
+be refined as follows:
+\begin{code}
+mesh.refine(cell_marker);
+\end{code}
 
 \section{Working with meshes}
 

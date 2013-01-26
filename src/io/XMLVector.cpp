@@ -4,6 +4,10 @@
 // First added:  2002-12-06
 // Last changed: 2006-05-23
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/Vector.h>
@@ -100,3 +104,5 @@ void XMLVector::readEntry(const xmlChar *name, const xmlChar **attrs)
   values[row] = value;
 }
 //-----------------------------------------------------------------------------
+
+#endif

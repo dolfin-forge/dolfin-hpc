@@ -326,16 +326,57 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
     
     // Allocate memory for function values at vertices
     uint size = mesh.numVertices();
-    for (uint i = 0; i < u->rank(); i++)
+    for (uint i = 0; i < rank; i++)
       size *= u->dim(i);
     real *values = new real[size];
-    u->vector().get(values);
+    uint offset = u->vector().offset();
+    
+    if ((u->vector().local_size() / u->dim(0)) != 
+	(mesh.numVertices() - mesh.distdata().num_ghost(0)))
+    {
+      real *interp_values = new real[size];
+      
+      // Get function values at vertices
+      u->interpolate(interp_values);
+      
+      uint ii = 0;
+      for (VertexIterator v(mesh); !v.end(); ++v) 
+      {
+	if (!mesh.distdata().is_ghost(v->index(), 0)) 
+	{
+	  values[ii++] = interp_values[v->index()];
+	  if (rank > 0) 
+	  {
+	    values[ii++] = interp_values[v->index() + mesh.numVertices()];
+	    if (dim == 3)
+	      values[ii++] = interp_values[v->index() + 2*mesh.numVertices()];
+	  }
+	}
+      }
+      delete[] interp_values;
+      
+      // Compute new vertex based offset
+      uint num_values = dim*(mesh.numVertices() - 
+			     mesh.distdata().num_ghost(0));
+#if ( MPI_VERSION > 1 )
+      MPI_Exscan(&num_values, &offset, 1, 
+		 MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+      MPI_Scan(&num_values, &offset, 1, 
+	       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+      offset -= num_values;
+#endif
+      
+    }    
+    else 
+      u->vector().get(values);
+    
+    size = dim * (mesh.numVertices() - mesh.distdata().num_ghost(0)); 
 
-    size = u->dim(0) * (mesh.numVertices() - mesh.distdata().num_ghost(0));   
-
+    
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = dim;
-    f_hdr.size = u->dim(0) * mesh.distdata().global_numVertices();
+    f_hdr.size = dim * mesh.distdata().global_numVertices();
     if (name.length() >FNAME_LENGTH)
       error("Function name too long.");      
     strcpy(&f_hdr.name[0], name.c_str());
@@ -348,10 +389,9 @@ void BinaryFile::write_function(std::vector<std::pair<Function*,
 			  MPI_BYTE, MPI_STATUS_IGNORE);
     byte_offset += sizeof(BinaryFunctionHeader);
 
-    MPI_File_write_at_all(fh, byte_offset + u->vector().offset()*sizeof(real),
+    MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real),
 			  values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += u->dim(0) *
-      (mesh.distdata().global_numVertices() * sizeof(real));
+    byte_offset += dim * (mesh.distdata().global_numVertices() * sizeof(real));
 
     delete[] values;
   }
@@ -1198,7 +1238,7 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
     }
     uint *recv_ghost = new uint[ recv_size_gh];
     real *recv_buff = new real[ recv_size ];
-    real tmp_value;
+
     for(uint j=1; j < pe_size; j++){
       src = (pe_rank - j + pe_size) % pe_size;
       dest = (pe_rank + j) % pe_size;

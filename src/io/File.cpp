@@ -11,6 +11,7 @@
 // Last changed: 2012-05-11
 
 #include <dolfin/config/dolfin_config.h>
+
 #include <string>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
@@ -22,6 +23,7 @@
 #include <dolfin/io/OctaveFile.h>
 #include <dolfin/io/VTKFile.h>
 #include <dolfin/io/RAWFile.h>
+#include <dolfin/io/STLFile.h>
 #include <dolfin/io/XYZFile.h>
 
 using namespace dolfin;
@@ -35,9 +37,17 @@ File::File(const std::string& filename)
   // FIXME: it essential that the suffixes are checked in the correct order.
 
   if ( filename.rfind(".xml") != filename.npos )
+#ifdef HAVE_XML
     file = new XMLFile(filename);
+#else
+    error("DOLFIN is not built with XML support");
+#endif
   else if ( filename.rfind(".xml.gz") != filename.npos )
+#ifdef HAVE_XML
     file = new XMLFile(filename);
+#else
+    error("DOLFIN is not built with XML support");
+#endif
   else if ( filename.rfind(".bin") != filename.npos)
     file = new BinaryFile(filename);
   else if ( filename.rfind(".m") != filename.npos )
@@ -46,6 +56,8 @@ File::File(const std::string& filename)
     file = new VTKFile(filename);
   else if ( filename.rfind(".raw") != filename.npos )
     file = new RAWFile(filename);
+  else if ( filename.rfind(".stl") != filename.npos )
+    file = new STLFile(filename);
   else if ( filename.rfind(".xyz") != filename.npos )
     file = new XYZFile(filename);
   else
@@ -58,8 +70,13 @@ File::File(const std::string& filename)
 File::File(const std::string& filename, Type type)
 {
   switch ( type ) {
+#ifdef HAVE_XML
   case xml:
     file = new XMLFile(filename);
+    break;
+#endif
+  case binary:
+    file = new BinaryFile(filename);
     break;
   case matlab:
     file = new MatlabFile(filename);
@@ -153,32 +170,11 @@ void File::operator>>(Function& f)
   *file >> f;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(Sample& sample)
-{
-  file->read();
-  
-  *file >> sample;
-}
-//-----------------------------------------------------------------------------
-void File::operator>>(FiniteElementSpec& spec)
-{
-  file->read();
-  
-  *file >> spec;
-}
-//-----------------------------------------------------------------------------
 void File::operator>>(ParameterList& parameters)
 {
   file->read();
   
   *file >> parameters;
-}
-//-----------------------------------------------------------------------------
-void File::operator>>(BLASFormData& blas)
-{
-  file->read();
-  
-  *file >> blas;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Graph& graph)
@@ -251,32 +247,11 @@ void File::operator<<(Function& u)
   *file << u;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(Sample& sample)
-{
-  file->write();
-  
-  *file << sample;
-}
-//-----------------------------------------------------------------------------
-void File::operator<<(FiniteElementSpec& spec)
-{
-  file->write();
-  
-  *file << spec;
-}
-//-----------------------------------------------------------------------------
 void File::operator<<(ParameterList& parameters)
 {
   file->write();
   
   *file << parameters;
-}
-//-----------------------------------------------------------------------------
-void File::operator<<(BLASFormData& blas)
-{
-  file->write();
-  
-  *file << blas;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Graph& graph)

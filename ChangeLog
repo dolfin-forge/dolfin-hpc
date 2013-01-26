@@ -1,3 +1,23 @@
+0.8.3-hpc [2013-01-08]
+ - Hybrid MPI+PGAS parallelization
+ - Re-add quadrature rules (Gauss, Radau, and Lobatto) 
+ - Add JANPACK AMG solver	
+ - Various bugs and portability fixes
+0.8.2-hpc [2011-10-08]
+ - Parallel mesh smoothing
+ - Add support for MPI I/O
+ - New binary file format
+0.8.1-hpc [2011-02-04]
+ - Revert back to an autotools based build system   
+ - Add support for JANPACK
+ - Hybrid MPI+OpenMP parallelization
+ - Multiple data array in VTK output
+ - Various bugs and portability fixes
+0.8.0-hpc [2010-06-08]
+ - Added checkpoint restart 
+ - Parallel local mesh refinement (Rivara)
+ - Remove uBlas dependency
+ - Merge with previous HPC version (based on DOLFIN 0.7.2)
  - Fix problem with mesh smoothing near nonconvex corners
  - Simple projection of functions in Python
  - New file format: XYZ for use with Xd3d

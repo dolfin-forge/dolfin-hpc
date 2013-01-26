@@ -4,6 +4,10 @@
 // First added:  2007-02-12
 // Last changed: 2007-03-21
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/XMLGraph.h>
 
@@ -167,3 +171,4 @@ void XMLGraph::closeGraph()
   editor.close();
 }
 //-----------------------------------------------------------------------------
+#endif

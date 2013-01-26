@@ -4,6 +4,10 @@
 // First added:  2007-04-13
 // Last changed: 2007-04-13
 
+#include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_XML
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/XMLFiniteElement.h>
 
@@ -60,3 +64,4 @@ void XMLFiniteElement::readFiniteElement(const xmlChar* name,
   signature = parseString(name, attrs, "signature");
 }
 //-----------------------------------------------------------------------------
+#endif

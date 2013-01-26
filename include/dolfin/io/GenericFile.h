@@ -22,13 +22,8 @@ namespace dolfin
   class Graph;
   template <class T> class MeshFunction;
   class Function;
-  class Sample;
-  class FiniteElementSpec;
   class ParameterList;
-  class BLASFormData;
-
-  class FiniteElement;
-  
+   
   class GenericFile
   {
   public:
@@ -46,10 +41,7 @@ namespace dolfin
     virtual void operator>> (MeshFunction<double>& meshfunction);
     virtual void operator>> (MeshFunction<bool>& meshfunction);
     virtual void operator>> (Function& mesh);
-    virtual void operator>> (Sample& sample);
-    virtual void operator>> (FiniteElementSpec& spec);
     virtual void operator>> (ParameterList& parameters);
-    virtual void operator>> (BLASFormData& blas);
     virtual void operator>> (Graph& graph);
     virtual void operator>> (std::vector<std::pair<Function*, std::string> >& f);
     
@@ -63,10 +55,7 @@ namespace dolfin
     virtual void operator<< (MeshFunction<double>& meshfunction);
     virtual void operator<< (MeshFunction<bool>& meshfunction);
     virtual void operator<< (Function& u);
-    virtual void operator<< (Sample& sample);
-    virtual void operator<< (FiniteElementSpec& spec);
     virtual void operator<< (ParameterList& parameters);
-    virtual void operator<< (BLASFormData& blas);
     virtual void operator<< (Graph& graph);
     virtual void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     

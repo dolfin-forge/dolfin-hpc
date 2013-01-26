@@ -19,7 +19,7 @@ namespace dolfin
     bjacobi,   // Block Jacobi 
     sor,       // SOR (successive over relaxation)
     ilu,       // Incomplete LU factorization
-    dilu,      // diagonal Incomplete LU factorization    
+    dilu,      // diagonal Incomplete LU factorization
     icc,       // Incomplete Cholesky factorization
     amg,       // Algebraic multigrid (through Hypre when available)
     default_pc // Default choice of preconditioner

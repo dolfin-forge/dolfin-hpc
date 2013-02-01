@@ -96,6 +96,9 @@ namespace dolfin
     /// Create discrete function for argument function i of form
     void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
 
+    /// Create discrete function from signature
+    void init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
+
     /// Return the type of function
     Type type() const;
 

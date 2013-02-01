@@ -77,13 +77,25 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
 
   // Check size of vector
   if (x.size() != dof_map->global_dimension())
-    error("Size of vector does not match global dimension of finite element space.");
+    {
+      if(MPI::numProcesses() > 1)
+        x.init(dof_map->local_size());
+      else
+        x.init(dof_map->global_dimension());
+    }
 
   // Assume responsibility for data
   local_dof_map = dof_map;
 
   // Initialize scratch space
-  scratch = new Scratch(*finite_element);
+  if (!scratch)
+    scratch = new Scratch(*finite_element);
+
+
+  if( MPI::numProcesses() > 1)
+    init_ghosts();
+
+  renumberd = false;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function)

@@ -95,7 +95,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
   if( MPI::numProcesses() > 1)
     init_ghosts();
 
-  renumberd = false;
+  renumbered = false;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function)

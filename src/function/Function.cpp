@@ -114,6 +114,14 @@ Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 {
 	f = new DiscreteFunction(mesh, x, dof_map, form, i);
 }
+
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
+  : Variable("u", "discrete function"),
+    f(0), _type(discrete), _cell(0), _facet(-1)
+{
+  f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
+}
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
 		Variable("u", "discrete function from data file"),
@@ -189,6 +197,17 @@ void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 
 	rename("u", "discrete function");
 	_type = discrete;
+}
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
+{
+  if (f)
+    delete f;
+
+  f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
+
+  rename("u", "discrete function");
+  _type = discrete;
 }
 //-----------------------------------------------------------------------------
 Function::Type Function::type() const

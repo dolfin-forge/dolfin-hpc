@@ -436,7 +436,6 @@ void Assembler::check(const ufc::form& form,
         error("Invalid value rank of Function %d, got %d but expecting %d. \
 You may need to provide the rank of a user defined Function.", i, r, fe_r);
       }
-
       for(uint j=0; j<r; ++j)
       {
         uint dim = coefficients[i]->dim(j);

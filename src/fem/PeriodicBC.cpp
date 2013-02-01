@@ -34,7 +34,7 @@ struct lt_coordinate
   {
     if (x.size() > (y.size() + DOLFIN_EPS))
       return false;
-    
+
     for (unsigned int i = 0; i < x.size(); i++)
     {
       if (x[i] < (y[i] - DOLFIN_EPS))
@@ -42,7 +42,7 @@ struct lt_coordinate
       else if (x[i] > (y[i] + DOLFIN_EPS))
         return false;
     }
-    
+
     return false;
   }
 };
@@ -55,7 +55,7 @@ PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain)
 }
 //-----------------------------------------------------------------------------
 PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain,
-                      const SubSystem& sub_system) : BoundaryCondition(), 
+                      const SubSystem& sub_system) : BoundaryCondition(),
                       mesh(mesh), sub_domain(sub_domain), sub_system(sub_system)
 {
   // Do nothing
@@ -85,11 +85,13 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
   std::map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
   typedef std::map<std::vector<real>, std::pair<int, int>, lt_coordinate>::iterator iterator;
   std::vector<real> xx(mesh.geometry().dim());
-  
+
   // Array used for mapping coordinates
-  simple_array<real> y(mesh.geometry().dim(), new real[mesh.geometry().dim()]);
+  real * y = new real[mesh.geometry().dim()];
   for (uint i = 0; i < mesh.geometry().dim(); i++)
+  {
     y[i] = 0.0;
+  }
 
   // Create local data for application of boundary conditions
   BoundaryCondition::LocalData data(form, mesh, dof_map, sub_system);
@@ -97,10 +99,10 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
   // Make sure we have the facet - cell connectivity
   const uint D = mesh.topology().dim();
   mesh.init(D - 1, D);
-  
+
   // Create UFC view of mesh
   UFCMesh ufc_mesh(mesh);
-  
+
   // Iterate over the facets of the mesh
 #ifndef NO_PROGRESS_BAR
   Progress p("Applying periodic boundary conditions", mesh.size(D - 1));
@@ -116,7 +118,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
 
     // Tabulate dofs on cell
     data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
-    
+
     // Tabulate coordinates on cell
     data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
 
@@ -129,11 +131,13 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
       // Get dof and coordinate of dof
       const uint local_dof = data.facet_dofs[i];
       const int global_dof = static_cast<int>(data.offset + data.cell_dofs[local_dof]);
-      const simple_array<real> x(mesh.geometry().dim(), data.coordinates[local_dof]);
+      real *& x = data.coordinates[local_dof];
 
       // Map coordinate from H to G
       for (uint j = 0; j < mesh.geometry().dim(); j++)
+      {
         y[j] = x[j];
+      }
       sub_domain.map(x, y);
 
       // Check if coordinate is inside the domain G or in H
@@ -142,10 +146,12 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
       {
         // Coordinate x is in G
         //cout << "Inside: " << x[0] << " " << x[1] << endl;
-        
+
         // Copy coordinate to std::vector
         for (uint j = 0; j < mesh.geometry().dim(); j++)
+        {
           xx[j] = x[j];
+        }
 
         // Check if coordinate exists from before
         iterator it = coordinate_dofs.find(xx);
@@ -176,11 +182,11 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
       {
         // y = F(x) is in G, so coordinate x is in H
         //cout << "Mapped: " << x[0] << " " << x[1] << endl;
-        
+
         // Copy coordinate to std::vector
         for (uint j = 0; j < mesh.geometry().dim(); j++)
           xx[j] = y[j];
-        
+
         // Check if coordinate exists from before
         iterator it = coordinate_dofs.find(xx);
         if (it != coordinate_dofs.end())
@@ -241,7 +247,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
     //for (uint j = 0; j < mesh.geometry().dim(); j++)
     //  cout << " " << it->first[j];
     //cout << ": " << dof0 << " " << dof1 << endl;
-    
+
     // FIXME: Perhaps this can be done more efficiently?
 
     // Set x_i - x_j = 0
@@ -257,7 +263,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
   delete [] cols;
   delete [] vals;
   delete [] zero;
-  delete [] y.data;
+  delete [] y;
 
   // Apply changes
   A.apply();

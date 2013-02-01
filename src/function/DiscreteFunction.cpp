@@ -155,7 +155,7 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f)
                   f.finite_element->signature());
 
   // Create dof map
-  dof_map = new DofMap(f.dof_map->signature(), mesh); 
+  dof_map = new DofMap(f.dof_map->signature(), mesh);
 
   // Create vector and copy values
   x  = new Vector(dof_map->global_dimension());
@@ -168,23 +168,23 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f)
   // Initialize scratch space
   scratch = new Scratch(*finite_element);
 
-  if( MPI::numProcesses() > 1) 
+  if( MPI::numProcesses() > 1)
     init_ghosts();
 
-  renumberd = f.renumberd;
+  renumbered = f.renumbered;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::~DiscreteFunction()
 {
   if (finite_element)
     delete finite_element;
-      
+
   if (local_vector)
     delete local_vector;
 
   if (local_dof_map)
     delete local_dof_map;
-  
+
   if (intersection_detector)
     delete intersection_detector;
 
@@ -193,7 +193,7 @@ DiscreteFunction::~DiscreteFunction()
 
   if(_indices)
     delete[] _indices;
-  
+
   if(data_cache)
     delete[] data_cache;
 }
@@ -238,7 +238,7 @@ void DiscreteFunction::interpolate(real* values) const
   dolfin_assert(finite_element);
   dolfin_assert(dof_map);
   dolfin_assert(scratch);
-  
+
   // Local data for interpolation on each cell
   CellIterator cell(mesh);
   UFCCell ufc_cell(*cell);
@@ -295,7 +295,7 @@ void DiscreteFunction::interpolate(real* coefficients,
 
   // Tabulate dofs
   dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
-  
+
   // Pick values from global vector
 #ifdef ENABLE_FUNCTION_CACHE
   if(MPI::numProcesses() > 1) {
@@ -304,7 +304,7 @@ void DiscreteFunction::interpolate(real* coefficients,
       coefficients[i] = data_cache[it->second];
     }
   }
-  else 
+  else
 #endif
     x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
 }
@@ -329,16 +329,16 @@ void DiscreteFunction::eval(real* values, const real* x) const
   {
     if (MPI::numProcesses() == 1)
       warning("Unable to evaluate function at given point (not inside domain).");
-    
+
     values[0] = 1e50;
     values[1] = 1e50;
     values[2] = 1e50;
     return;
   }
-  
+
   Cell cell(mesh, cells[0]);
   UFCCell ufc_cell(cell);
-  
+
   // Change to global numbering
   ufc_cell.update(cell, mesh.distdata());
 
@@ -388,7 +388,7 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
   if (x.size() != dof_map->global_dimension())
   {
     if(MPI::numProcesses() > 1)
-      x.init(dof_map->local_size());      
+      x.init(dof_map->local_size());
     else
       x.init(dof_map->global_dimension());
   }
@@ -398,10 +398,10 @@ void DiscreteFunction::init(Mesh& mesh, GenericVector& x, const ufc::form& form,
     scratch = new Scratch(*finite_element);
 
 
-  if( MPI::numProcesses() > 1) 
+  if( MPI::numProcesses() > 1)
     init_ghosts();
-  
-  renumberd = false;
+
+  renumbered = false;
 
 }
 //-----------------------------------------------------------------------------
@@ -413,51 +413,51 @@ void DiscreteFunction::init_ghosts()
   for (; !cell.end(); ++cell) {
     // Update to current cell
     ufc_cell.update(*cell, mesh.distdata());
-    
+
     // Tabulate dofs
     dof_map->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
-    
+
     for(uint j = 0; j <   finite_element->space_dimension(); j++)
       indices.insert(scratch->dofs[j]);
-    
+
   }
   std::map<uint, uint> map = dof_map->getMap();
   x->init_ghosted(indices.size(), indices, map);
-  
+
 #ifdef ENABLE_FUNCTION_CACHE
   if(_indices )
-    delete[] _indices;  
+    delete[] _indices;
   if(data_cache)
     delete[] data_cache;
-  
+
   cache_mapping.clear();
- 
+
   _indices = new uint[indices.size()];
   data_cache = new real[indices.size()];
-  
+
   uint i = 0;
   std::set<uint>::iterator it;
   for(it = indices.begin(); it != indices.end(); it++) {
     _indices[i] = *it;
     cache_mapping[*it] = i++;
   }
-  
+
   _cache_size = indices.size();
 #endif
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
-{ 
+{
 
   if(MPI::numProcesses() == 1)
     return;
 
-  if(dof_map->renumbered() && !renumberd && MPI::numProcesses() > 1) {
+  if(dof_map->renumbered() && !renumbered && MPI::numProcesses() > 1) {
     init_ghosts();
-    renumberd = true ;
+    renumbered = true ;
   }
-  
-  x->apply(); 
+
+  x->apply();
 #ifdef ENABLE_FUNCTION_CACHE
   if(_indices)
     x->get(data_cache, _cache_size, _indices);
@@ -485,7 +485,7 @@ DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element)
   // Initialize local array for values
   values = new real[size];
   for (uint i = 0; i < size; i++)
-    values[i] = 0.0;  
+    values[i] = 0.0;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::~Scratch()

@@ -199,7 +199,6 @@ void Logger::__assert(std::string msg)
 //-----------------------------------------------------------------------------
 void Logger::write(int debug_level, std::string msg)
 {
-  std::cout << msg << std::endl;
   // Check debug level
   if (debug_level > this->debug_level)
     return;

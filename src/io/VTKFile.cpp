@@ -92,6 +92,11 @@ void VTKFile::operator<<(MeshFunction<double>& meshfunction)
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
+void VTKFile::operator<<(MeshFunction<bool>& meshfunction)
+{
+  MeshFunctionWrite(meshfunction);
+}
+//----------------------------------------------------------------------------
 void VTKFile::operator<<(Function& u)
 {
   std::pair<Function*, std::string> f(&u, "U");

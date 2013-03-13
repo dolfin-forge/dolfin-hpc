@@ -15,9 +15,11 @@
 #include <dolfin/mesh/LocalMeshRefinement.h>
 #include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/TopologyComputation.h>
+
+#include <dolfin/mesh/MeshFunction.h>
+
 #include <dolfin/mesh/MeshSmoothing.h>
 #include <dolfin/mesh/MeshOrdering.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
@@ -135,6 +137,18 @@ void Mesh::refine()
 {
   message("No cells marked for refinement, assuming uniform mesh refinement.");
   UniformMeshRefinement::refine(*this);
+}
+//-----------------------------------------------------------------------------
+void Mesh::refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
+{
+  message("No cells marked for refinement, assuming uniform mesh refinement with geometry informations.");
+  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u, bnd_v);
+}
+//-----------------------------------------------------------------------------
+void Mesh::refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
+{
+  message("No cells marked for refinement, assuming uniform mesh refinement with geometry informations.");
+  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u);
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,

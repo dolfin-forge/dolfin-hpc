@@ -9,6 +9,11 @@
 
 #include <dolfin/common/types.h>
 
+#include <dolfin/mesh/MeshFunction.h>
+
+//#include <libgeom/Geometry.h>
+#include <Geometry.h>
+
 namespace dolfin
 {
 
@@ -23,8 +28,20 @@ namespace dolfin
     /// Refine mesh uniformly according to mesh type
     static void refine(Mesh& mesh);
 
+		/// Refine mesh uniformly according to mesh type overloaded method to include geometry informations surfaces
+    static void refine(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v );
+
+		/// Refine mesh uniformly according to mesh type overloaded method to include geometry informations curves
+    static void refine(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u);
+
     /// Refine simplicial mesh uniformly
     static void refineSimplex(Mesh& mesh);
+
+    /// Refine simplicial mesh uniformly overloaded method to include geometry informations surfaces
+    static void refineSimplex(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v );
+
+    /// Refine simplicial mesh uniformly overloaded method to include geometry informations curves
+    static void refineSimplex(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u );
 
   };
 

@@ -72,6 +72,9 @@ AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
 		   [Compile with support for PETSc linear algebra]),
 		   [with_petsc=${withval}],[with_petsc=no])
 
+AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom], [Compile with support for LIBGEOM]),
+		 [with_libgeom=${withval}],[with_libgeom=no])
+
 
 if test "x${enable_function_cache}" = xyes; then
    AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], 
@@ -239,6 +242,13 @@ if test "x${enable_quad}" = xyes; then
    fi   
 fi
 
+if test "x${with_libgeom}" = xyes; then
+   PKG_CHECK_MODULES([libgeom], [libgeom])
+   CPPFLAGS="$CPPFLAGS $libgeom_CFLAGS"
+   LIBS="$LIBS $libgeom_LIBS"
+   AC_DEFINE(HAVE_LIBGEOM,[1],[Have LIBGEOM library])
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -303,6 +313,7 @@ Package features:
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
+	LIBGEOM: ${with_libgeom}
 
 
 ---------------------------------------------------------

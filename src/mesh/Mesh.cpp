@@ -8,6 +8,7 @@
 // Last changed: 2008-07-16
 
 #include <sstream>
+#include <fstream>
 
 #include <dolfin/io/File.h>
 #include <dolfin/mesh/ALE.h>
@@ -58,6 +59,53 @@ Mesh::Mesh(std::string filename)
     renumber();
   }
 }
+//-----------------------------------------------------------------------------
+/*Mesh::Mesh(std::string filename, std::string geomDataFilename)
+  : Variable("mesh", "DOLFIN mesh"), _data(0), _cell_type(0), _ordered(false)
+{
+  File file(filename);
+  file >> *this;
+	std::cout<<this->str()<<std::endl;
+	//create meshfunctions for the geometry data
+	MeshFunction<int>* u_ = 0;
+	u_ = this->data().createMeshFunctionInt("u");
+	dolfin_assert(u_);
+	u_->init(0);
+	MeshFunction<real>* v_ = 0;
+	v_ = this->data().createMeshFunctionReal("v");
+	dolfin_assert(v_);
+	v_->init(0);
+	MeshFunction<real>* patch_id_ = 0;
+	patch_id_ = this->data().createMeshFunctionReal("patch_id");
+	dolfin_assert(patch_id_);
+	patch_id_->init(0);
+
+	real u_value, v_value;
+	int patch_id_value;
+
+	std::ifstream ifile;
+  ifile.open(geomDataFilename.c_str());	
+	
+  int i = 0;
+  while(ifile >> patch_id_value >> u_value >> v_value)
+  {
+	//	if(i<15)
+	//		std::cout << patch_id_temp << " " << x << " " << y << std::endl;
+		patch_id_->set(i,patch_id_value);
+    u_->set(i, u_value);
+    v_->set(i, v_value);
+    i++;
+  }
+  
+  ifile.close();	
+
+  if( MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial")) {
+    MeshFunction<uint> partitions;
+    partition(partitions);
+    distribute(partitions);
+    renumber();
+  }
+}*/
 //-----------------------------------------------------------------------------
 Mesh::~Mesh()
 {

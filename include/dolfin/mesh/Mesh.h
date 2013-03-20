@@ -12,6 +12,7 @@
 #define __MESH_H
 
 #include <string>
+
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
 //#include <dolfin/mesh/MeshFunction.h>
@@ -70,7 +71,10 @@ namespace dolfin
     /// Create mesh from data file
     Mesh(std::string filename);
     
-    /// Destructor
+    // Create mesh from data file
+    //Mesh(std::string filename, std::string geomDateFilename);
+    
+		/// Destructor
     ~Mesh();
 
     /// Assignment

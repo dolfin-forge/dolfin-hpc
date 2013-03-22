@@ -3,6 +3,7 @@
 //
 // Modified by: Magnus Vikstrøm, 2007.
 // Modified by: Niclas Jansson, 2008.
+// Modified by: Balthasar Reuter, 2013.
 //
 // First added:  2007-05-30
 // Last changed: 2008-01-14
@@ -36,11 +37,20 @@ namespace dolfin
     static void distribute(Mesh& mesh, MeshFunction<uint>& distribution, 
 			   MeshFunction<bool>& old_cell_marker,
 			   MeshFunction<bool>& cell_marker);
+
+    /// Distribute mesh according to mesh function and preserve mesh functions
+    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
+         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+          >& cell_functions);
     
   private:
     static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution, 
 				 MeshFunction<bool>* old_cell_marker,
 				 MeshFunction<bool>* cell_marker);
+
+    static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
+         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+          >& cell_functions);
   };
 }
 

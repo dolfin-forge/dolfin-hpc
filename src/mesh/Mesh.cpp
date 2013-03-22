@@ -207,6 +207,13 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
 				  cell_markers, new_cell_markers);
 }
 //-----------------------------------------------------------------------------
+void Mesh::distribute(MeshFunction<uint>& distribution, 
+          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+          >& cell_functions)
+{
+  MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
+}
+//-----------------------------------------------------------------------------
 void Mesh::renumber()
 {
   MeshRenumber::renumber(*this);

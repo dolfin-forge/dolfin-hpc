@@ -6,7 +6,7 @@
 // Modified by: Balthasar Reuter, 2013.
 //
 // First added:  2007-05-30
-// Last changed: 2008-01-14
+// Last changed: 2013-03-22
 
 #ifndef __MPI_MESH_COMMUNICATOR_H
 #define __MPI_MESH_COMMUNICATOR_H
@@ -38,19 +38,33 @@ namespace dolfin
 			   MeshFunction<bool>& old_cell_marker,
 			   MeshFunction<bool>& cell_marker);
 
-    /// Distribute mesh according to mesh function and preserve mesh functions
+    /// Distribute mesh according to mesh function and preserve cell-based functions
     static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
           >& cell_functions);
     
+    /// Distribute mesh according to mesh function and preserve vertex-based functions
+    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
+         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+          >& vertex_functions);
+
+    /// Distribute mesh according to mesh function and preserve cell- and vertex-
+    /// based functions
+    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
+         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+          >& cell_functions,
+         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+          >& vertex_functions);
   private:
     static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution, 
-				 MeshFunction<bool>* old_cell_marker,
-				 MeshFunction<bool>* cell_marker);
+				 MeshFunction<bool> *old_cell_marker,
+				 MeshFunction<bool> *cell_marker);
 
     static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          >& cell_functions);
+          > *cell_functions,
+         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+          > *vertex_functions);
   };
 }
 

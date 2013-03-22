@@ -187,12 +187,31 @@ namespace dolfin
                     MeshFunction<bool>& cell_markers,
                     MeshFunction<bool>& new_cell_markers);
 
-    /// Distribute a mesh according to a mesh function and preserve cell functions
+    /// Distribute a mesh according to a mesh function and transfer cell functions
     ///
     /// cell_functions contains pairs as <old_function,new_function>
     void distribute(MeshFunction<uint>& distribution, 
                     Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
                     >& cell_functions);
+
+    /// Distribute a mesh according to a mesh function and transfer vertex functions
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution, 
+                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+                    >& vertex_functions);
+
+    /// Distribute a mesh according to a mesh function and transfer cell and
+    /// vertex functions
+    ///
+    /// cell_functions contains pairs as <old_function,new_function>
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution, 
+                    Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+                    >& cell_functions,
+                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+                    >& vertex_functions);
 
     /// Renumber mesh global numbering
     void renumber();

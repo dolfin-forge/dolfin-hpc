@@ -3,9 +3,10 @@
 //
 // Modified by Johan Hoffman, 2007.
 // Modified by Garth N. Wells 2007.
+// Modified by Balthasar Reuter, 2013.
 //
 // First added:  2006-05-09
-// Last changed: 2008-07-16
+// Last changed: 2013-03-22
 
 #include <sstream>
 
@@ -212,6 +213,23 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
           >& cell_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshFunction<uint>& distribution, 
+          Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+          >& vertex_functions)
+{
+  MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshFunction<uint>& distribution, 
+          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+          >& cell_functions, 
+          Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+          >& vertex_functions)
+{
+  MPIMeshCommunicator::distribute(*this, distribution, 
+          cell_functions, vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::renumber()

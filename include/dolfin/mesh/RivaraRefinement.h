@@ -15,6 +15,9 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/MeshFunction.h>
 
+//#include <libgeom/Geometry.h>
+#include <Geometry.h>
+
 namespace dolfin
 {
 
@@ -33,6 +36,17 @@ namespace dolfin
 		       real tb = 0.0, 
 		       real ts = 0.0,
 		       bool balance = true);
+		/// Refine simplicial mesh locally by recursive edge bisection. Including Boundary smoothing
+		static void refine(Mesh& mesh, 
+		       MeshFunction<bool>& cell_marker,
+					 libgeom::Geometry& geom,
+					 MeshFunction<int>& patch_id_list,
+					 MeshFunction<float>& bnd_u,
+					 MeshFunction<float>& bnd_v,
+		       real tf = 0.0, 
+		       real tb = 0.0, 
+		       real ts = 0.0,
+		       bool balance = true);
   };
 
   class DVertex;
@@ -47,6 +61,11 @@ namespace dolfin
 
     int id;
     int glb_id;
+
+		//geometry parameter
+		int patch_id;
+		float u;
+		float v; 
 
     std::list<DCell *> cells;
     Point p;
@@ -98,12 +117,23 @@ namespace dolfin
     void removeCell(DCell* c);
 
     void imp(Mesh& mesh);
+		void imp(Mesh& mesh, 
+					 MeshFunction<int>& patch_id_list,
+					 MeshFunction<float>& bnd_u,
+					 MeshFunction<float>& bnd_v);
     void exp(Mesh& mesh);
+    void exp(Mesh& mesh, 
+					 MeshFunction<int>& patch_id_list,
+					 MeshFunction<float>& bnd_u,
+					 MeshFunction<float>& bnd_v);
     void number();
 
-    void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
+		void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
+    void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
+					 libgeom::Geometry& geom);
 
     void bisectMarked(std::vector<bool> marked_ids);
+		void bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom);
 
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 

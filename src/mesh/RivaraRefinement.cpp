@@ -39,7 +39,7 @@ void RivaraRefinement::refine(Mesh& mesh,
 			      MeshFunction<bool>& cell_marker,
 			      real tf, real tb, real ts, bool balance)
 {
-  message("Refining simplicial mesh by recursive Rivara bisection.");
+  message("Refining simplicial mesh by recursive Rivara bisection without boundary smoothing.");
 
   // Start Loadbalancer
   if(MPI::numProcesses() > 1 && balance) {
@@ -90,6 +90,88 @@ void RivaraRefinement::refine(Mesh& mesh,
   dmesh.exp(omesh);
   
   mesh = omesh;
+}
+//-----------------------------------------------------------------------------
+void RivaraRefinement::refine(Mesh& mesh, 
+			      MeshFunction<bool>& cell_marker,	
+					  libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
+					  MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v,
+			      real tf, real tb, real ts, bool balance)
+{
+  message("Refining simplicial mesh by recursive Rivara bisection with boundary smoothing");
+
+  // Start Loadbalancer
+  if(MPI::numProcesses() > 1 && balance) {
+    begin("Load balancing");
+    // Tune loadbalancer using machine specific parameters, if available
+    if( tf > 0.0 && tb > 0.0 && ts > 0.0)
+      LoadBalancer::balance(mesh, cell_marker, tf, tb, ts, LoadBalancer::LEPP);
+    else
+      LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
+    end();
+  }
+
+  if (MPI::numProcesses() > 1) mesh.renumber();
+
+  DMesh dmesh;
+  dmesh.imp(mesh, patch_id_list, bnd_u , bnd_v);
+  
+  std::vector<bool> dmarked(mesh.numCells());
+  for (CellIterator ci(mesh); !ci.end(); ++ci)
+  {
+    if(cell_marker.get(*ci) == true)
+    {
+      dmarked[ci->index()] = true;
+    }  
+    else
+    {
+      dmarked[ci->index()] = false;
+    }
+  }
+	for( std::set<DVertex *>::iterator vi = dmesh.vertices.begin(); vi != dmesh.vertices.end(); ++vi)
+	{
+		message("POINT (%f, %f, %f) patch_id %i u %f v %f ", (*vi)->p.x(), (*vi)->p.y(), (*vi)->p.z(), (*vi)->patch_id, (*vi)->u, (*vi)->v);
+	}
+  
+  dmesh.bisectMarked(dmarked, geom);
+
+
+  // Remove deleted cells from global list
+  for(std::list<DCell* >::iterator it = dmesh.cells.begin();
+      it != dmesh.cells.end(); )
+  {
+    
+    DCell* dc = *it;
+    
+    if(dc->deleted)
+      it = dmesh.cells.erase(it);
+    else
+      it++;
+  }
+  
+  Mesh omesh; 
+	MeshFunction<int> patch_id_omesh(omesh);
+	MeshFunction<float> u_omesh(omesh);
+	MeshFunction<float> v_omesh(omesh);   
+  dmesh.exp(omesh, patch_id_omesh, u_omesh, v_omesh);
+  
+  mesh = omesh;
+	bnd_u = MeshFunction<float>(mesh);
+	bnd_v = MeshFunction<float>(mesh);
+	patch_id_list = MeshFunction<int>(mesh);
+	
+	bnd_u.init(0);
+	bnd_v.init(0);
+	patch_id_list.init(0);
+	
+	for (VertexIterator v(mesh); !v.end(); ++v)
+	{
+		bnd_u.set(v->index(), u_omesh.get(v->index()));
+		bnd_v.set(v->index(), v_omesh.get(v->index()));
+		patch_id_list.set(v->index(), patch_id_omesh.get(v->index()));
+	}
+
+	
 }
 //-----------------------------------------------------------------------------
 DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0), 
@@ -243,6 +325,124 @@ void DMesh::imp(Mesh& mesh)
   }
 }
 //-----------------------------------------------------------------------------
+void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
+					 MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
+{
+	message("imp Mesh with geometric informations");
+  cell_type = &(mesh.type());
+  d = mesh.topology().dim();
+
+  vertices.clear();
+  cells.clear();
+
+  //MeshRenumber::renumber_vertices(mesh);
+
+  std::vector<DVertex *> vertexvec;
+
+  BoundaryMesh boundary;
+  boundary.init_interior(mesh);
+  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
+  MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
+  boundary_cell = false;
+
+  // Generate facet - cell connectivity if not generated
+  mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
+  for (CellIterator bf(boundary); !bf.end(); ++bf) 
+  {
+    Facet f(mesh, cell_map->get(*bf));    
+    for (CellIterator c(f); !c.end(); ++c) 
+      boundary_cell.set(*c, true);	  
+  }
+
+  // Assume uniform refinement
+  uint num_new = mesh.size(1);
+
+  // Since the mesh is linear numbered, the maximum global index assigned is
+  // the number of vertices in the mesh
+  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
+#ifdef HAVE_MPI
+  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
+
+  Cell c(mesh, 0);
+  _salt = c.numEntities(0) * 
+    (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
+
+  // Assign a safe range for each processor
+  _start_offset = 0;
+#ifdef HAVE_MPI
+#if ( MPI_VERSION > 1 )
+  MPI_Exscan(&num_new, &_start_offset, 1,
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+  MPI_Scan(&num_new, &_start_offset, 1,
+	   MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  _start_offset -= num_new;
+#endif
+  _start_offset += glb_max;
+
+  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
+
+  uint counter = 1;
+  for (VertexIterator vi(mesh); !vi.end(); ++vi)
+  {
+    DVertex* dv = new DVertex;    
+    dv->p = vi->point();
+    dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
+    dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
+    dv->shared = mesh.distdata().is_shared(vi->index(), 0);
+    dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
+
+		dv->patch_id = patch_id_list.get(vi->index());
+		dv->u = bnd_u.get(vi->index());
+		dv->v =	bnd_v.get(vi->index());
+
+    if (dv->ghosted)
+      dv->owner = mesh.distdata().get_owner(*vi);    
+
+    if(dv->on_boundary)     
+      bc_dvs[dv->glb_id] = dv;
+    
+    vertices.insert(dv);
+    vertexvec.push_back(dv);
+    counter++;
+  }
+
+  for (CellIterator ci(mesh); !ci.end(); ++ci)
+  {
+    DCell* dc = new DCell;
+
+    std::vector<DVertex*> vs(ci->numEntities(0));
+    uint i = 0;
+    for (VertexIterator vi(*ci); !vi.end(); ++vi)
+    {
+      DVertex* dv = vertexvec[vi->index()];
+
+      vs[i] = dv;
+      i++;
+    }
+
+    addCell(dc, vs, ci->index());
+    // Define the same cell numbering
+    dc->id = ci->index();
+    
+    // Add dynamic cell to list of boundary cells
+    if ( boundary_cell.get(*ci) ) 
+    {
+      for (EdgeIterator e(*ci); !e.end(); ++e) 
+      {
+	const uint *edge_v = e->entities(0);
+	if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0)) 
+	{
+	  EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
+				 mesh.distdata().get_global(edge_v[1], 0));
+	}
+      }
+    }
+  }
+}
+//-----------------------------------------------------------------------------
 void DMesh::exp(Mesh& mesh)
 {
   number();
@@ -260,6 +460,67 @@ void DMesh::exp(Mesh& mesh)
   {
     DVertex* dv = *it;
     editor.addVertex(current_vertex, dv->p);
+    if(dv->ghosted) {
+      mesh.distdata().set_ghost(current_vertex, 0);
+      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+    }
+    else if(dv->shared)
+      mesh.distdata().set_shared(current_vertex, 0);
+    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);      
+  }
+
+  Array<uint> cell_vertices(cell_type->numEntities(0));
+  uint current_cell = 0;
+  for(std::list<DCell* >::iterator it = cells.begin();
+      it != cells.end(); ++it)
+  {
+    DCell* dc = *it;
+
+    for(uint j = 0; j < dc->vertices.size(); j++)
+    {
+      DVertex* dv = dc->vertices[j];
+      cell_vertices[j] = dv->id;
+    }
+    editor.addCell(current_cell, cell_vertices);
+
+    current_cell++;
+  }
+  editor.close();
+
+  if (MPI::numProcesses() > 1) 
+  {
+    mesh.distdata().invalid_numbering();
+    mesh.distdata().invalid_ownership();
+    mesh.renumber();
+  }
+}
+//-----------------------------------------------------------------------------
+void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
+					 MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
+{
+  number();
+
+  MeshEditor editor;
+  editor.open(mesh, cell_type->cellType(), d, d);
+  
+  editor.initVertices(vertices.size());
+  editor.initCells(cells.size());
+
+	//initialize Meshfunctions for refined mesh
+	patch_id_list.init(0);
+	bnd_u.init(0);
+	bnd_v.init(0);
+
+  // Add old vertices
+  uint current_vertex = 0;
+  for(std::set<DVertex* >::iterator it = vertices.begin();
+      it != vertices.end(); ++it)
+  {
+    DVertex* dv = *it;
+    editor.addVertex(current_vertex, dv->p);
+		patch_id_list.set(current_vertex, dv->patch_id);
+		bnd_u.set(current_vertex, dv->u);
+		bnd_v.set(current_vertex, dv->v);
     if(dv->ghosted) {
       mesh.distdata().set_ghost(current_vertex, 0);
       mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
@@ -318,12 +579,10 @@ void DMesh::number()
 //-----------------------------------------------------------------------------
 void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 {
-
-
   bool closing = false;
 
   // Find longest edge
-  real lmax = 0.0;
+	real lmax = 0.0;
   int ptmax = 0;
   uint ii = 0;
   uint jj = 0;
@@ -333,33 +592,33 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       if(i != j)
       {
-	DVertex* v0 = dcell->vertices[i];
-	DVertex* v1 = dcell->vertices[j];
+				DVertex* v0 = dcell->vertices[i];
+				DVertex* v1 = dcell->vertices[j];
 	
-	real l = 0.0;
-	if( v0->glb_id > v1->glb_id)
-	  l = v0->p.distance(v1->p); 
-	else
-	  l = v1->p.distance(v0->p); 
+				real l = 0.0;
+				if( v0->glb_id > v1->glb_id)
+	  			l = v0->p.distance(v1->p); 
+				else
+	  			l = v1->p.distance(v0->p); 
 	
-	if(fabs(l - lmax) < DOLFIN_EPS)
-	{
-	  int ptsum = (v0->glb_id) + (v1->glb_id) ;
-	  if(ptsum > ptmax)
-	  {
-	    ii = i;
-	    jj = j;
-	    lmax = l;
-	    ptmax = (v0->glb_id + v1->glb_id);
-	  }
-	}
-	else if(l >= lmax)
- 	{
- 	  ii = i;
- 	  jj = j;
- 	  lmax = l;
-	  ptmax = (v0->glb_id + v1->glb_id) ;
-	}
+				if(fabs(l - lmax) < DOLFIN_EPS)
+				{
+	  			int ptsum = (v0->glb_id) + (v1->glb_id) ;
+	  			if(ptsum > ptmax)
+	  			{
+	    			ii = i;
+	    			jj = j;
+	    			lmax = l;
+	    			ptmax = (v0->glb_id + v1->glb_id);
+	  			}
+				}
+				else if(l >= lmax)
+ 				{
+ 	  			ii = i;
+ 	  			jj = j;
+ 	  			lmax = l;
+	  			ptmax = (v0->glb_id + v1->glb_id) ;
+				}
       }
     }
   }
@@ -395,6 +654,247 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0; 
 
+    // Add hanging node on shared edges to propagation buffer
+    if( v0->on_boundary && v1->on_boundary) 
+    {
+      prop_edge node;
+      node.mv = mv->glb_id;
+      node.v1 = v0->glb_id;
+      node.v2 = v1->glb_id;
+      node.owner = MPI::processNumber();
+      std::pair<uint, prop_edge> _prop_( dcell->nref, node);
+      propagate.push_back( _prop_ );
+      dcell->nref++;
+      bc_dvs[mv->glb_id] = mv;		
+      mv->on_boundary = true;
+      mv->shared = true;
+      mv->ghosted = false;
+      mv->owner = MPI::processNumber();
+      ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
+    }
+    
+    closing = false;
+  }
+
+  // Create new cells
+  DCell* c0 = new DCell;
+  DCell* c1 = new DCell;
+  c0->nref = dcell->nref;
+  c1->nref = dcell->nref;
+  std::vector<DVertex*> vs0(0);
+  std::vector<DVertex*> vs1(0);
+  for(uint i = 0; i < dcell->vertices.size(); i++)
+  {
+    if(i != ii)
+      vs0.push_back(dcell->vertices[i]);
+
+    if(i != jj)
+      vs1.push_back(dcell->vertices[i]);
+  } 
+  vs0.push_back(mv);
+  vs1.push_back(mv);
+
+  addCell(c0, vs0, dcell->parent_id);
+  addCell(c1, vs1, dcell->parent_id);    
+
+  removeCell(dcell);
+
+  // Continue refinement
+  if(!closing)
+  {
+    // Bisect opposite cell of edge with hanging node
+    for(;;)
+    {
+      DCell* copp = opposite(dcell, v0, v1);
+      if(copp != 0)
+      {
+				bisect(copp, mv, v0, v1);
+      }
+      else
+      {
+				break;
+      }
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1, 
+										libgeom::Geometry& geom)
+{
+
+	//message("bisect for hanging vertex with boundary smoothing");
+  bool closing = false;
+
+  // Find longest edge
+  real lmax = 0.0;
+  int ptmax = 0;
+  uint ii = 0;
+  uint jj = 0;
+  for(uint i = 0; i < dcell->vertices.size(); i++)
+  {
+    for(uint j = 0; j < dcell->vertices.size(); j++)
+    {
+      if(i != j)
+      {
+				DVertex* v0 = dcell->vertices[i];
+				DVertex* v1 = dcell->vertices[j];
+	
+				real l = 0.0;
+				if( v0->glb_id > v1->glb_id)
+	  			l = v0->p.distance(v1->p); 
+				else
+	 		 		l = v1->p.distance(v0->p); 
+	
+				if(fabs(l - lmax) < DOLFIN_EPS)
+				{
+	  			int ptsum = (v0->glb_id) + (v1->glb_id) ;
+	  			if(ptsum > ptmax)
+	  			{
+	    			ii = i;
+	    			jj = j;
+	    			lmax = l;
+	    			ptmax = (v0->glb_id + v1->glb_id);
+	  			}
+				}
+				else if(l >= lmax)
+ 				{
+ 	  			ii = i;
+ 	  			jj = j;
+ 	  			lmax = l;
+	  			ptmax = (v0->glb_id + v1->glb_id) ;
+				}
+      }
+    }
+  }
+  
+  DVertex* v0 = dcell->vertices[ii];
+  DVertex* v1 = dcell->vertices[jj];
+  DVertex* mv = 0;
+
+  // Check if no hanging vertices remain, otherwise create hanging
+  // vertex and continue refinement
+  if((v0 == hv0 || v0 == hv1) && (v1 == hv0 || v1 == hv1))
+  {
+
+    mv = hangv;
+    closing = true;
+
+    if( v0->on_boundary && v1->on_boundary ) 
+    {
+      mv->on_boundary = true;
+      mv->shared = true;
+      bc_dvs[mv->glb_id] = mv;		      
+      dolfin_assert(v0->glb_id != v1->glb_id);
+      dolfin_assert( ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
+    }
+  }
+  else
+  {
+    mv = new DVertex;
+    addVertex(mv);
+    if( v0->glb_id < v1->glb_id )
+      mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
+    else
+      mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
+
+		//use the regular mitpoint rule when both neighbor vertices are not on the geometry
+		if(dcell->vertices[ii]->patch_id < 0 || dcell->vertices[jj]->patch_id < 0)
+		{
+			mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
+			mv->patch_id 	= -1;
+			mv->u 			 	= -1;
+			mv->v					= -1;
+		}
+		else
+		{
+			//distinguish between curve and surface geometry:			
+			if(geom.get_geometric_dimension() == 2) //curve
+			{
+				//both vertices are located on the same patch -> get the midpoint
+				if(dcell->vertices[ii]->patch_id == dcell->vertices[jj]->patch_id)
+				{
+					float u_tmp;
+					std::vector<float> p_tmp;
+					
+					//curve
+					geom.get_midpoint(dcell->vertices[ii]->patch_id, 
+														dcell->vertices[ii]->u, dcell->vertices[jj]->u,
+														u_tmp, p_tmp);
+					mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
+					mv->patch_id = dcell->vertices[ii]->patch_id;		
+					mv->u = u_tmp;
+					mv->v = -1;
+					
+				}//closest point search is necessary
+				else
+				{
+					Point midpoint = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
+					libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+					libgeom::Point3D r0, r1;
+					float u0, u1;
+					real dist0 = geom.find_closest_point(midpoint_lib, r0, u0, dcell->vertices[ii]->patch_id);
+					real dist1 = geom.find_closest_point(midpoint_lib, r1, u1, dcell->vertices[jj]->patch_id);
+					if(dist0 < dist1)
+					{
+						mv->p = Point( r0.x(), r0.y(), r0.z());
+						mv->patch_id = dcell->vertices[ii]->patch_id;		
+						mv->u = u0;
+						mv->v = -1;
+					}
+					else
+					{
+						mv->p = Point( r1.x(), r1.y(), r1.z());
+						mv->patch_id = dcell->vertices[jj]->patch_id;		
+						mv->u = u1;
+						mv->v = -1;
+					}
+				}	
+			}
+			else //surface
+			{
+				//both vertices are located on the same patch -> get the midpoint
+				if(dcell->vertices[ii]->patch_id == dcell->vertices[jj]->patch_id)
+				{
+					float u_tmp, v_tmp;
+					std::vector<float> p_tmp;				
+					geom.get_midpoint(dcell->vertices[ii]->patch_id, 
+														dcell->vertices[ii]->u, dcell->vertices[ii]->v,
+														dcell->vertices[jj]->u, dcell->vertices[jj]->v,
+													u_tmp, v_tmp,  p_tmp);
+					mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
+					mv->patch_id = dcell->vertices[ii]->patch_id;		
+					mv->u = u_tmp;
+					mv->v = v_tmp;
+					
+				}//closest point search is necessary
+				else
+				{
+					Point midpoint = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
+					libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+					libgeom::Point3D r0, r1;
+					float u0, u1, v0, v1;
+					real dist0 = geom.find_closest_point(midpoint_lib, r0, u0, v0, 
+																							dcell->vertices[ii]->patch_id);
+					real dist1 = geom.find_closest_point(midpoint_lib, r1, u1, v1, 
+																							dcell->vertices[jj]->patch_id);
+					if(dist0 < dist1)
+					{
+						mv->p = Point( r0.x(), r0.y(), r0.z());
+						mv->patch_id = dcell->vertices[ii]->patch_id;		
+						mv->u = u0;
+						mv->v = v0;
+					}
+					else
+					{
+						mv->p = Point( r1.x(), r1.y(), r1.z());
+						mv->patch_id = dcell->vertices[jj]->patch_id;		
+						mv->u = u1;
+						mv->v = v1;
+					}
+				}
+			}
+		}
+			
     // Add hanging node on shared edges to propagation buffer
     if( v0->on_boundary && v1->on_boundary) 
     {
@@ -651,6 +1151,236 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     if(MPI::processNumber() == 0)
       end();    
     
+  }  
+}
+//-----------------------------------------------------------------------------
+void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
+{
+	message("starting with bisecting the marked cells");
+  std::list<DCell*> marked_cells;
+  for(std::list<DCell* >::iterator it = cells.begin(); it != cells.end(); ++it)
+  {
+    DCell* c = *it;
+
+    if(marked_ids[c->id])
+    {
+      marked_cells.push_back(c);
+    }
+  }
+
+  for(std::list<DCell* >::iterator it = marked_cells.begin(); it != marked_cells.end(); ++it)
+  {
+    DCell* c = *it;
+
+    if(!c->deleted)
+    {
+      bisect(c, 0, 0, 0, geom);
+    }
+  }
+
+  std::vector<Propagation> propagated;
+  std::list<Propagation> leftovers;
+
+  bool empty = false;
+
+  while(!empty) 
+	{    
+    if(MPI::processNumber() == 0 && propagate.size() > 0)
+      begin("Propagate refinement...");
+
+    propagate_refinement(propagated, empty);
+
+    if( empty && propagated.size() == 0) break;         
+    propagate.clear();
+
+    for(std::vector<Propagation>::iterator it = propagated.begin(); it != propagated.end();++it) 
+		{
+      DVertex* mv = 0;
+      dolfin_assert(it->second.v1 != it->second.v2);
+      if(ref_edge.find(edge_key(it->second.v1, it->second.v2)) != ref_edge.end()) 
+			{
+        mv = ref_edge[edge_key(it->second.v1, it->second.v2)];
+
+				if( mv->owner > (int) it->second.owner) 
+				{
+	  			mv->ghosted = true;
+	  			mv->shared = true;
+       	 	mv->owner = it->second.owner;
+				}
+
+				continue;
+    	}
+      
+    	DVertex* v1 = 0;
+    	DVertex* v2 = 0;
+      
+    	if(!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end()) 
+    	{
+				dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
+				v1 = bc_dvs[it->second.v1];
+    	}
+    	if(!v2 && bc_dvs.find(it->second.v2) != bc_dvs.end())
+    	{ 
+				dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
+				v2 = bc_dvs[it->second.v2];
+    	}
+	
+	    if(!v1 || !v2)
+	    {
+				leftovers.push_back(*it);    
+				continue;
+	    }
+	
+	    for(std::list<DCell* >::iterator ic = v1->cells.begin(); ic != v1->cells.end();++ic)       
+	    {
+				if(!(*ic)->deleted) 
+				{
+		  		if((*ic)->has_edge(v1, v2))  
+					{
+		    		dolfin_assert((*ic)->vertices.size() > 0);
+		    		if(mv == 0) 
+		    		{
+		      		mv = new DVertex;
+		      		mv->shared = true;
+		      		mv->glb_id = it->second.mv;				
+		      		vertices.insert(mv);	      
+	
+		      		if( MPI::processNumber() < it->second.owner)
+		      		{
+								mv->ghosted = false;
+								mv->owner = MPI::processNumber();		  
+								prop_edge node;
+								node.mv = mv->glb_id;
+								node.v1 = it->second.v1;
+								node.v2 = it->second.v2;
+								node.owner = mv->owner;
+								std::pair<uint, prop_edge> prop(0, node);
+								propagate.push_back(prop);
+		      		}
+		      		else 
+		      		{
+								mv->ghosted = true;
+								mv->owner = it->second.owner;
+		      		}
+		      
+		      		//mv->p = (v1->p + v2->p) / 2.0;
+							
+							//use the regular mitpoint rule when both neighbor vertices are not on the geometry
+							if(v1->patch_id < 0 || v2->patch_id < 0)
+							{
+								mv->p = (v1->p + v2->p) / 2.0;
+								mv->patch_id 	= -1;
+								mv->u 			 	= -1;
+								mv->v					= -1;
+							}
+							else
+							{
+								//distinguish between curve and surface geometry:			
+								if(geom.get_geometric_dimension() == 2) //curve
+								{
+									//both vertices are located on the same patch -> get the midpoint
+									if(v1->patch_id == v2->patch_id)
+									{
+										float u_tmp;
+										std::vector<float> p_tmp;
+					
+										//curve
+										geom.get_midpoint(v1->patch_id, 
+																			v1->u, v2->u,
+																			u_tmp, p_tmp);
+										mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
+										mv->patch_id = v1->patch_id;		
+										mv->u = u_tmp;
+										mv->v = -1;
+					
+									}//closest point search is necessary
+									else
+									{
+										Point midpoint = (v1->p + v2->p) / 2.0;
+										libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+										libgeom::Point3D r0, r1;
+										float u0_tmp, u1_tmp;
+										real dist0 = geom.find_closest_point(midpoint_lib, r0, u0_tmp, v1->patch_id);
+										real dist1 = geom.find_closest_point(midpoint_lib, r1, u1_tmp, v2->patch_id);
+										if(dist0 < dist1)
+										{
+											mv->p = Point( r0.x(), r0.y(), r0.z());
+											mv->patch_id = v1->patch_id;		
+											mv->u = u0_tmp;
+											mv->v = -1;
+										}
+										else
+										{
+											mv->p = Point( r1.x(), r1.y(), r1.z());
+											mv->patch_id = v2->patch_id;		
+											mv->u = u1_tmp;
+											mv->v = -1;
+										}
+									}	
+								}
+								else //surface
+								{
+									//both vertices are located on the same patch -> get the midpoint
+									if(v1->patch_id == v2->patch_id)
+									{
+										float u_tmp, v_tmp;
+										std::vector<float> p_tmp;				
+										geom.get_midpoint(v1->patch_id, 
+																			v1->u, v1->v,
+																			v2->u, v2->v,
+																			u_tmp, v_tmp,  p_tmp);
+										mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
+										mv->patch_id = v1->patch_id;		
+										mv->u = u_tmp;
+										mv->v = v_tmp;
+					
+									}//closest point search is necessary
+									else
+									{
+										Point midpoint = (v1->p + v2->p) / 2.0;
+										libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+										libgeom::Point3D r0, r1;
+										float u0_tmp, u1_tmp, v0_tmp, v1_tmp;
+										real dist0 = geom.find_closest_point(midpoint_lib, r0, u0_tmp, v0_tmp, 
+																							v1->patch_id);
+										real dist1 = geom.find_closest_point(midpoint_lib, r1, u1_tmp, v1_tmp, 
+																							v2->patch_id);
+										if(dist0 < dist1)
+										{
+											mv->p = Point( r0.x(), r0.y(), r0.z());
+											mv->patch_id = v1->patch_id;		
+											mv->u = u0_tmp;
+											mv->v = v0_tmp;
+										}
+										else
+										{
+											mv->p = Point( r1.x(), r1.y(), r1.z());
+											mv->patch_id = v2->patch_id;		
+											mv->u = u1_tmp;
+											mv->v = v1_tmp;
+										}
+									}
+								}
+							}
+		      		mv->on_boundary = true;
+		      		bc_dvs[mv->glb_id] = mv;
+		      		ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
+		    		}
+		    		dolfin_assert((*ic) > 0);
+		    		bisect((*ic), mv, v1, v2, geom);
+		  		}
+				}
+	    }
+	  }
+    
+	  propagated.clear();
+	  for(std::list<Propagation>::iterator it = leftovers.begin(); it != leftovers.end(); ++it)
+			propagated.push_back(*it);
+	  leftovers.clear();
+	
+	 	if(MPI::processNumber() == 0)
+	  	end();    
+	    
   }  
 }
 //-----------------------------------------------------------------------------

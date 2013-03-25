@@ -74,34 +74,6 @@ namespace dolfin
     std::transform( source_values, source_values + num_values, target_values, castWithSymmetricRounding<RealType,IntegerType> );
     }
   };
-
-  template<>
-  void MeshFunctionConverter::cast<double, uint>(MeshFunction<double>& source_function,
-                                                 MeshFunction<uint>& target_function)
-  {
-    castRealToIntegerWithRounding(source_function, target_function);
-  }
-
-  template<>
-  void MeshFunctionConverter::cast<float, uint>(MeshFunction<float>& source_function,
-                                                 MeshFunction<uint>& target_function)
-  {
-    castRealToIntegerWithRounding(source_function, target_function);
-  }
-
-  template<>
-  void MeshFunctionConverter::cast<double, int>(MeshFunction<double>& source_function,
-                                                 MeshFunction<int>& target_function)
-  {
-    castRealToIntegerWithRounding(source_function, target_function);
-  }
-
-  template<>
-  void MeshFunctionConverter::cast<float, int>(MeshFunction<float>& source_function,
-                                                 MeshFunction<int>& target_function)
-  {
-    castRealToIntegerWithRounding(source_function, target_function);
-  }
 }
 
 #endif

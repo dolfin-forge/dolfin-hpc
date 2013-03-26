@@ -656,8 +656,6 @@ void DofMap::build()
 
 #endif
   }
-
-  disp();
 }
 //-----------------------------------------------------------------------------
 std::map<dolfin::uint, dolfin::uint> DofMap::getMap() //FIXME: const

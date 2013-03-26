@@ -235,7 +235,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
        {
-	 dofs[k + i * (gdim)] = v_map[c.entities(0)[i]] + k;
+	 dofs[i + k * (num_entities)] = v_map[c.entities(0)[i]] + k;
        }
   }
   else if(_type_ == 3)
@@ -276,7 +276,7 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
        {
-	 dofs[k + i * (gdim)] = v_map[c.entities(0)[i]] + k;
+	 dofs[i + k * (num_entities)] = v_map[c.entities(0)[i]] + k;
        }
   }
   else if(_type_ == 3)

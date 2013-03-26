@@ -84,6 +84,7 @@ UFC::UFC(const ufc::form& form, Mesh& mesh, const DofMapSet& dof_map_set) : form
   dofs = new uint*[form.rank()];
   for (uint i = 0; i < form.rank(); i++)
   {
+    std::cout << "UFC dof size[" << i << "]: " << local_dimensions[i] << std::endl; 
     dofs[i] = new uint[local_dimensions[i]];
     for (uint j = 0; j < local_dimensions[i]; j++)
       dofs[i][j] = 0;

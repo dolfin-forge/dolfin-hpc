@@ -232,9 +232,22 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
     uint gdim = ufc_dof_map->geometric_dimension();
     uint num_entities = c.numEntities(0);
     dolfin_assert(gdim * num_entities == local_dimension());
+    for (uint j = 0; j < gdim * num_entities; j++)
+    {
+      std::cout << "DM:t_d dofs before[" << j << "]: " <<  dofs[j] << std::endl;
+    }
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
-	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       {
+	 std::cout << "DM:t_d idx: " << (k + i * gdim) << std::endl;
+	 //std::cout << "DM:t_d idx: " << (i + k * (gdim + 1)) << std::endl;
+	 dofs[k + i * (gdim)] = v_map[c.entities(0)[i]] + k;
+	 //dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       }
+    for (uint j = 0; j < gdim * num_entities; j++)
+    {
+      std::cout << "DM:t_d dofs[" << j << "]: " <<  dofs[j] << std::endl;
+    }
   }
   else if(_type_ == 3)
   {
@@ -273,7 +286,12 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
     uint num_entities = c.numEntities(0);
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
-	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       {
+	 std::cout << "DM:t_d idx: " << (k + i * gdim) << std::endl;
+	 //std::cout << "DM:t_d idx: " << (i + k * (gdim + 1)) << std::endl;
+	 dofs[k + i * (gdim)] = v_map[c.entities(0)[i]] + k;
+	 //dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       }
   }
   else if(_type_ == 3)
   {

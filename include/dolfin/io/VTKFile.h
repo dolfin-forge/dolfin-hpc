@@ -30,6 +30,7 @@ namespace dolfin
     void operator<< (MeshFunction<int>& meshfunction);
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
+    void operator<< (MeshFunction<bool>& meshfunction);
     void operator<< (Function& u);
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     

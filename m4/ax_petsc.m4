@@ -46,9 +46,9 @@ AC_DEFUN([AX_PETSC],[
 include $PETSC_DIR/conf/variables
 
 petsclibs:
-	echo -L$PETSC_DIR/lib  \$(PETSC_LIB)
+	echo -L$PETSC_DIR/lib/  \$(PETSC_LIB)
 petscinc:
-	echo -I$PETSC_DIR/include \$(MPI_INCLUDE) 
+	echo -I$PETSC_DIR/include/ \$(MPI_INCLUDE) 
 EOF
 	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
 	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`

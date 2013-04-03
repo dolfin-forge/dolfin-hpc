@@ -229,16 +229,18 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
   else if(_type_ == 2 && v_map)
   {
     Cell c(dolfin_mesh, cell_index);
-    uint gdim = ufc_dof_map->geometric_dimension();
+    uint gdim = ufc_dof_map->num_sub_dof_maps();
     uint num_entities = c.numEntities(0);
     dolfin_assert(gdim * num_entities == local_dimension());
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
-	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       {
+	 dofs[i + k * (num_entities)] = v_map[c.entities(0)[i]] + k;
+       }
   }
   else if(_type_ == 3)
   {
-    uint gdim = ufc_dof_map->geometric_dimension();
+    uint gdim = ufc_dof_map->num_sub_dof_maps();
     dolfin_assert(local_dimension() == gdim);
     for(uint i = 0; i < gdim; i++)
       dofs[i] = (cell_index + i * dolfin_mesh.numCells()) + _offset_;
@@ -269,15 +271,17 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_inde
   else if(_type_ == 2 && v_map)
   {
     Cell c(dolfin_mesh, cell_index);
-    uint gdim = ufc_dof_map->geometric_dimension();
+    uint gdim = ufc_dof_map->num_sub_dof_maps();
     uint num_entities = c.numEntities(0);
     for (uint k = 0; k < gdim; k++)
       for (uint i = 0;  i < num_entities; i++)
-	dofs[i + k * (gdim + 1)] = v_map[c.entities(0)[i]] + k;
+       {
+	 dofs[i + k * (num_entities)] = v_map[c.entities(0)[i]] + k;
+       }
   }
   else if(_type_ == 3)
   {
-    uint gdim = ufc_dof_map->geometric_dimension();
+    uint gdim = ufc_dof_map->num_sub_dof_maps();
     for(uint i = 0; i < gdim; i++)
       dofs[i] = (cell_index + i * dolfin_mesh.numCells()) + _offset_;
 
@@ -308,7 +312,7 @@ void DofMap::build()
 
      uint num = 0;
 
-     uint tt = local_dimension() / ufc_dof_map->geometric_dimension();
+     uint tt = local_dimension() / ufc_dof_map->num_sub_dof_maps();
      for(CellIterator c(dolfin_mesh); !c.end(); ++c) {
        
        dof_map[c->index()] = new uint[local_dimension()];    
@@ -336,7 +340,7 @@ void DofMap::build()
 	 }
 	 else 
 	   for(uint i = 0; i < tt; i++) {
-	     for(uint k = 0; k < ufc_dof_map->geometric_dimension(); k++) {
+	     for(uint k = 0; k < ufc_dof_map->num_sub_dof_maps(); k++) {
 	       const uint dof = dofs[i + k * tt];
 	       
 	       std::map<uint, uint>::iterator it = map.find(dof);
@@ -388,9 +392,9 @@ void DofMap::build()
       _local_size = dolfin_mesh.numCells();
     }
     else if(ufc_dof_map->global_dimension() == 
-       ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numVertices()) {
+       ufc_dof_map->num_sub_dof_maps() * dolfin_mesh.distdata().global_numVertices()) {
       
-      uint gdim = ufc_dof_map->geometric_dimension();
+      uint gdim = ufc_dof_map->num_sub_dof_maps();
       uint num_local = dolfin_mesh.numVertices() - dolfin_mesh.distdata().num_ghost(0);
       
       uint num_dofs = gdim * num_local;
@@ -474,9 +478,9 @@ void DofMap::build()
       
     }
     else if(ufc_dof_map->global_dimension() == 
-       ufc_dof_map->geometric_dimension() * dolfin_mesh.distdata().global_numCells()) {
+       ufc_dof_map->num_sub_dof_maps() * dolfin_mesh.distdata().global_numCells()) {
 
-      uint gdim = ufc_dof_map->geometric_dimension();
+      uint gdim = ufc_dof_map->num_sub_dof_maps();
       uint num_dofs =  gdim * dolfin_mesh.numCells();      
       uint offset = 0;
 
@@ -679,14 +683,14 @@ void DofMap::disp() const
   cout << "Number of subdofmaps: " << ufc_dof_map->num_sub_dof_maps() << endl;
   cout << "Number of facet dofs: " << ufc_dof_map->num_facet_dofs() << endl;
 
-  for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
-  {
-    cout << "Number of entity dofs (dim " << d << "): " << ufc_dof_map->num_entity_dofs(d) << endl;
-  }
-  for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
-  {
-    cout << "Needs mesh entities (dim " << d << "):   " << ufc_dof_map->needs_mesh_entities(d) << endl;
-  }
+  // for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
+  // {
+  //   cout << "Number of entity dofs (dim " << d << "): " << ufc_dof_map->num_entity_dofs(d) << endl;
+  // }
+  // for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
+  // {
+  //   cout << "Needs mesh entities (dim " << d << "):   " << ufc_dof_map->needs_mesh_entities(d) << endl;
+  // }
   cout << endl;
   end();
 
@@ -704,59 +708,59 @@ void DofMap::disp() const
   cout << endl;
   end();
 
-  cout << "Local cell dofs associated with cell entities (tabulate_entity_dofs output):" << endl;
-  cout << "----------------------------------------------------------------------------" << endl;
-  begin("");
-  {
-    uint tdim = dolfin_mesh.topology().dim();
-    for(uint d=0; d<=tdim; d++)
-    {
-      uint num_dofs = ufc_dof_map->num_entity_dofs(d);
-      if(num_dofs)
-      {
-        uint num_entities = dolfin_mesh.type().numEntities(d);
-        uint* dofs = new uint[num_dofs];
-        for(uint i=0; i<num_entities; i++)
-        {
-          cout << "Entity (" << d << ", " << i << "):  ";
-          ufc_dof_map->tabulate_entity_dofs(dofs, d, i);
-          for(uint j=0; j<num_dofs; j++)
-          {
-            cout << dofs[j];
-            if(j < num_dofs-1) cout << ", ";
-          }
-          cout << endl;
-        }
-        delete [] dofs;
-      }
-    }
-    cout << endl;
-  }
-  end();
+  // cout << "Local cell dofs associated with cell entities (tabulate_entity_dofs output):" << endl;
+  // cout << "----------------------------------------------------------------------------" << endl;
+  // begin("");
+  // {
+  //   uint tdim = dolfin_mesh.topology().dim();
+  //   for(uint d=0; d<=tdim; d++)
+  //   {
+  //     uint num_dofs = ufc_dof_map->num_entity_dofs(d);
+  //     if(num_dofs)
+  //     {
+  //       uint num_entities = dolfin_mesh.type().numEntities(d);
+  //       uint* dofs = new uint[num_dofs];
+  //       for(uint i=0; i<num_entities; i++)
+  //       {
+  //         cout << "Entity (" << d << ", " << i << "):  ";
+  //         ufc_dof_map->tabulate_entity_dofs(dofs, d, i);
+  //         for(uint j=0; j<num_dofs; j++)
+  //         {
+  //           cout << dofs[j];
+  //           if(j < num_dofs-1) cout << ", ";
+  //         }
+  //         cout << endl;
+  //       }
+  //       delete [] dofs;
+  //     }
+  //   }
+  //   cout << endl;
+  // }
+  // end();
 
-  cout << "Local cell dofs associated with facets (tabulate_facet_dofs output):" << endl;
-  cout << "--------------------------------------------------------------------" << endl;
-  begin("");
-  {
-    uint tdim = dolfin_mesh.topology().dim();
-    uint num_dofs = ufc_dof_map->num_facet_dofs();
-    uint num_facets = dolfin_mesh.type().numEntities(tdim-1);
-    uint* dofs = new uint[num_dofs];
-    for(uint i=0; i<num_facets; i++)
-    {
-      cout << "Facet " << i << ":  ";
-      ufc_dof_map->tabulate_facet_dofs(dofs, i);
-      for(uint j=0; j<num_dofs; j++)
-      {
-        cout << dofs[j];
-        if(j < num_dofs-1) cout << ", ";
-      }
-      cout << endl;
-    }
-    delete [] dofs;
-    cout << endl;
-  }
-  end();
+  // cout << "Local cell dofs associated with facets (tabulate_facet_dofs output):" << endl;
+  // cout << "--------------------------------------------------------------------" << endl;
+  // begin("");
+  // {
+  //   uint tdim = dolfin_mesh.topology().dim();
+  //   uint num_dofs = ufc_dof_map->num_facet_dofs();
+  //   uint num_facets = dolfin_mesh.type().numEntities(tdim-1);
+  //   uint* dofs = new uint[num_dofs];
+  //   for(uint i=0; i<num_facets; i++)
+  //   {
+  //     cout << "Facet " << i << ":  ";
+  //     ufc_dof_map->tabulate_facet_dofs(dofs, i);
+  //     for(uint j=0; j<num_dofs; j++)
+  //     {
+  //       cout << dofs[j];
+  //       if(j < num_dofs-1) cout << ", ";
+  //     }
+  //     cout << endl;
+  //   }
+  //   delete [] dofs;
+  //   cout << endl;
+  // }
+  // end();
 
   cout << "tabulate_dofs output" << endl;
   cout << "--------------------" << endl;

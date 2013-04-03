@@ -478,8 +478,8 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   Array<uint> shared_buffer;
 
   // exchanged function values
-  Array<uint> cfunctions[ncfunctions];
-  Array<double> vfunctions[nvfunctions];
+  Array<uint> *cfunctions = new Array<uint>[ncfunctions];
+  Array<double> *vfunctions = new Array<double>[nvfunctions];
 
   uint num_cells, num_vertices, target_proc, glb_index, offset;
 
@@ -1048,6 +1048,11 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       vfunctions[f_id].clear();
     }
   }
+
+
+  // Delete function arrays
+  delete[] cfunctions;
+  delete[] vfunctions; 
 }
 //-----------------------------------------------------------------------------
 

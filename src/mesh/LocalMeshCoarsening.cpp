@@ -14,6 +14,7 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/TriangleCell.h>
 
 #include <limits>
 
@@ -22,10 +23,20 @@ using namespace dolfin;
 static inline real distance(real const * x0, real const * x1, uint dim)
 {
   real sqrlength(0);
-  for ( uint i(0) ; i < dim ; ++i )
+
+  if ( dim == 2 )
   {
-    sqrlength += ( x0[i] - x1[i] )*( x0[i] - x1[i] );
+    sqrlength = ( x0[0] - x1[0] )*( x0[0] - x1[0] ) + 
+                ( x0[1] - x1[1] )*( x0[1] - x1[1] );
   }
+  else if ( dim == 3 )
+  {
+    sqrlength = ( x0[0] - x1[0] )*( x0[0] - x1[0] ) + 
+                ( x0[1] - x1[1] )*( x0[1] - x1[1] ) + 
+                ( x0[2] - x1[2] )*( x0[2] - x1[2] );
+  }
+  else
+    error("Unknown geometrical dimension!");
 
   return sqrt(sqrlength);
 }
@@ -79,7 +90,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
         if ( result.second )
         {
           manager.updateDistdata(mesh, coarse_mesh);
-          mesh = coarse_mesh;
+          mesh = coarse_mesh; // TODO: swap instead of assignment possible??
 
           manager.vertex_map().setNewFineFromCoarseSize(mesh.numVertices());
           manager.vertex_map().commit();
@@ -144,7 +155,8 @@ bool LocalMeshCoarsening::selectEdge(Cell& c, CoarseningManager& manager,
 
     for ( ++v_it2 ; !v_it2.end() ; ++v_it2 )
     {
-      real l = distance(v_it1->x(), v_it2->x(), c.mesh().geometry().dim());
+      uint dim = c.mesh().geometry().dim();
+      real l = distance(v_it1->x(), v_it2->x(), dim);
       if ( 
           lmin > l &&                            // no shorter edge found before
         !(            // edge cannot be coarsened if both vertices are forbidden
@@ -338,14 +350,14 @@ void LocalMeshCoarsening::regenerateCells(Mesh const & mesh,
   }
 }
 //-----------------------------------------------------------------------------
-bool LocalMeshCoarsening::checkMesh(Cell& removed_cell, Mesh& coarse_mesh,
+bool LocalMeshCoarsening::checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh,
                                     CoarseningManager& manager)
 {
   real vol_tol = 1.e-5;//1.e-3;
 
-  // Check new cell volumes of cells adjacent to coarsened cell
-  // and for inverted cells
-  for ( CellIterator c_it(removed_cell) ; !c_it.end() ; ++c_it ) 
+  // Check for inverted cells and new cell volumes of cells adjacent to 
+  // removed vertex
+  for ( CellIterator c_it(removed_vertex) ; !c_it.end() ; ++c_it ) 
   {
     int c_id( manager.cell_map().getNewCoarseFromCoarse(c_it->index()) );
 
@@ -510,7 +522,7 @@ std::pair<bool,bool> LocalMeshCoarsening::coarsenCell(Mesh& mesh, Mesh& coarse_m
 
   // Check quality
   return std::make_pair(
-          checkMesh(cell_to_coarsen, coarse_mesh, manager),
+          checkMesh(vertex_to_remove, coarse_mesh, manager),
           true
          );
 }

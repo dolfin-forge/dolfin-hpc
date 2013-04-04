@@ -136,7 +136,7 @@ namespace dolfin
     /// *Returns*
     ///   bool
     ///     true if all cells are ok, false otherwise
-    static bool checkMesh(Cell& removed_cell, Mesh& coarse_mesh, 
+    static bool checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh, 
                           CoarseningManager& manager);
 
     /// Coarsen a selected cell by edge collapse. Is called from 

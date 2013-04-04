@@ -120,6 +120,7 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				quadrature/Quadrature.h\
 				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
+				mesh/CoarseningManager.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
 				mesh/predicates_init.h\

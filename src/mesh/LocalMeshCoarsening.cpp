@@ -53,13 +53,13 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     error( "Wrong dimension of cell_marker" );
 
   // Generate cell - edge connectivity if not yet generated
-  mesh.init(mesh.topology().dim(), 1);
+  //mesh.init(mesh.topology().dim(), 1);
 
   // Generate edge - vertex connectivity if not yet generated
-  mesh.init(1,0);
+  //mesh.init(1,0);
 
   // Create new mesh
-  Mesh coarse_mesh(mesh);
+  Mesh coarse_mesh;//(mesh);
 
   // Instantiate coarsening manager
   CoarseningManager manager(cell_marker, coarsen_boundary);

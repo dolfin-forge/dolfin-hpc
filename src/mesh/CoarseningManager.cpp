@@ -37,7 +37,9 @@ CoarseningManager::~CoarseningManager()
 void CoarseningManager::init(MeshFunction<bool>& cell_marker, 
                              bool coarsen_boundary)
 {
-  _migrated_cells = 0;
+  // migrated cells are initially set to a value larger zero to match the
+  // break conditions
+  _migrated_cells = 1;
 
   initCommon(cell_marker);
 
@@ -221,11 +223,17 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
 
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
+  {
+    _migrated_cells = 0;
     return repeat;
+  }
 
   // no cells migrated before and nothing happened in the coarsening: we're done
   if ( max_num_migrated_cells == 0 && !repeat )
+  {
+    _migrated_cells = 0;
     return false;
+  }
 
   // List of vertices to request from owner
   Array<uint> *send_list_requests = new Array<uint>[pe_size];
@@ -280,7 +288,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
       uint requested_vertex = recv_buff_requests[i];
       m_it = requested_vertices.find(requested_vertex);
 
-      // Another process also requested this vertex: lower index wins
+      // Another process also requested this vertex: lower rank wins
       if ( m_it != requested_vertices.end() )
         m_it->second = std::min(src, m_it->second);
       // no conflict: simply insert into map

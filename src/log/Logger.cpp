@@ -105,8 +105,6 @@ void Logger::setOutputDestination(std::string destination)
     // Choose output destination
     if (destination == "terminal")
       this->destination = terminal;
-    else if (destination == "silent")
-      this->destination = silent;
     else if (destination == "stream"){
       warning("Please provide the actual stream. Using terminal instead.");
       this->destination = terminal;

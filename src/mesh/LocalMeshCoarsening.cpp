@@ -117,31 +117,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
      mesh.numVertices(), mesh.numCells() );
 }
 //-----------------------------------------------------------------------------
-int LocalMeshCoarsening::selectEdge(Cell& c, CoarseningManager& manager)
-{
-  real lmin(std::numeric_limits<real>::max());
-  int shortest_edge_index(-1);
-  for ( EdgeIterator e_it(c) ; !e_it.end() ; ++e_it )
-  {
-    uint * verts = e_it->entities(0);
-    real l = e_it->length();
-
-    if ( 
-        lmin < l &&                           // no shorter edge found before
-        !(          // edge cannot be coarsened if both vertices are forbidden
-          manager.isForbiddenVertex(
-            manager.vertex_map().getFineFromCoarse(verts[0]) ) && 
-          manager.isForbiddenVertex(
-            manager.vertex_map().getFineFromCoarse(verts[1]) ) 
-    ) ) 
-    {
-      lmin = l;
-      shortest_edge_index = e_it->index();
-    }
-  }
-
-  return shortest_edge_index;
-}
+#ifdef ____AVOID_TOPOLOGY_INIT____
 //-----------------------------------------------------------------------------
 bool LocalMeshCoarsening::selectEdge(Cell& c, CoarseningManager& manager, 
                                      uint * vertices)
@@ -174,92 +150,6 @@ bool LocalMeshCoarsening::selectEdge(Cell& c, CoarseningManager& manager,
     }
   }
   return edge_found;
-}
-//-----------------------------------------------------------------------------
-bool LocalMeshCoarsening::selectVertex(Edge& e, CoarseningManager& manager,
-                                       uint& vertD, uint& vertR)
-{
-  uint * verts = e.entities(0);
-
-  // Both end vertices forbidden: collapse not possible. Should not happen
-  // since edge should not have been selected in the first place
-  dolfin_assert( !(
-    manager.isForbiddenVertex(
-      manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
-    manager.isForbiddenVertex(
-      manager.vertex_map().getFineFromCoarse(verts[1]) ) 
-  ) );
-
-  // verts[0] allowed and verts[1] forbidden: select verts[0] for collapse
-  if ( !manager.isForbiddenVertex(
-          manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
-        manager.isForbiddenVertex(
-          manager.vertex_map().getFineFromCoarse(verts[1]) ) )
-  {
-    vertD = verts[0];
-    vertR = verts[1];
-  }
-  // verts[0] forbidden and verts[1] allowed: select verts[1] for collapse
-  else if ( manager.isForbiddenVertex(
-              manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
-           !manager.isForbiddenVertex(
-              manager.vertex_map().getFineFromCoarse(verts[1]) ) )
-  {
-    vertD = verts[1];
-    vertR = verts[0];
-  }
-  // both allowed
-  else
-  {
-    /*// verts[0] on a boundary and verts[1] not on a boundary: select verts[1]
-    if (
-       manager.isBoundaryVertex(
-        manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
-      !manager.isBoundaryVertex(
-        manager.vertex_map().getFineFromCoarse(verts[1]) ) )
-    {
-      vertD = verts[1];
-      vertR = verts[0];
-    }
-    // verts[0] not on a boundary and verts[1] on a boundary: select verts[0]
-    else if (
-      !manager.isBoundaryVertex(
-        manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
-       manager.isBoundaryVertex(
-        manager.vertex_map().getFineFromCoarse(verts[1]) ) )
-    {
-      vertD = verts[0];
-      vertR = verts[1];
-    }
-    // none on a boundary
-    else*/
-    {
-      if ( verts[0] < verts[1] )
-      {
-        vertD = verts[1];
-        vertR = verts[0];
-      }
-      else
-      {
-        vertD = verts[0];
-        vertR = verts[1];
-      }
-    }
-  }
-
-  // Check if selected vertex is on a process boundary. In this case neighboring
-  // entities have to be requested first from other processes
-  if ( manager.isInteriorBoundaryVertex( 
-          manager.vertex_map().getFineFromCoarse(vertD) ) )
-  {
-    manager.vertices_to_request().push_back( 
-          manager.vertex_map().getFineFromCoarse(vertD) );
-    return false;
-  }
-  else
-  {
-    return true;
-  }
 }
 //-----------------------------------------------------------------------------
 int LocalMeshCoarsening::selectVertex(uint * vertices, 
@@ -315,6 +205,98 @@ int LocalMeshCoarsening::selectVertex(uint * vertices,
     return ret;
   }
 }
+//-----------------------------------------------------------------------------
+#else
+//-----------------------------------------------------------------------------
+int LocalMeshCoarsening::selectEdge(Cell& c, CoarseningManager& manager)
+{
+  real lmin(std::numeric_limits<real>::max());
+  int shortest_edge_index(-1);
+  for ( EdgeIterator e_it(c) ; !e_it.end() ; ++e_it )
+  {
+    uint * verts = e_it->entities(0);
+    real l = e_it->length();
+
+    if ( 
+        lmin > l &&                           // no shorter edge found before
+        !(          // edge cannot be coarsened if both vertices are forbidden
+          manager.isForbiddenVertex(
+            manager.vertex_map().getFineFromCoarse(verts[0]) ) && 
+          manager.isForbiddenVertex(
+            manager.vertex_map().getFineFromCoarse(verts[1]) ) 
+    ) ) 
+    {
+      lmin = l;
+      shortest_edge_index = e_it->index();
+    }
+  }
+
+  return shortest_edge_index;
+}
+//-----------------------------------------------------------------------------
+bool LocalMeshCoarsening::selectVertex(Edge& e, CoarseningManager& manager,
+                                       uint& vertD, uint& vertR)
+{
+  uint * verts = e.entities(0);
+
+  // Both end vertices forbidden: collapse not possible. Should not happen
+  // since edge should not have been selected in the first place
+  dolfin_assert( !(
+    manager.isForbiddenVertex(
+      manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
+    manager.isForbiddenVertex(
+      manager.vertex_map().getFineFromCoarse(verts[1]) ) 
+  ) );
+
+  // verts[0] allowed and verts[1] forbidden: select verts[0] for collapse
+  if ( !manager.isForbiddenVertex(
+          manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
+        manager.isForbiddenVertex(
+          manager.vertex_map().getFineFromCoarse(verts[1]) ) )
+  {
+    vertD = verts[0];
+    vertR = verts[1];
+  }
+  // verts[0] forbidden and verts[1] allowed: select verts[1] for collapse
+  else if ( manager.isForbiddenVertex(
+              manager.vertex_map().getFineFromCoarse(verts[0]) ) &&
+           !manager.isForbiddenVertex(
+              manager.vertex_map().getFineFromCoarse(verts[1]) ) )
+  {
+    vertD = verts[1];
+    vertR = verts[0];
+  }
+  // both allowed
+  else
+  {
+    if ( verts[0] < verts[1] )
+    {
+      vertD = verts[1];
+      vertR = verts[0];
+    }
+    else
+    {
+      vertD = verts[0];
+      vertR = verts[1];
+    }
+  }
+
+  // Check if selected vertex is on a process boundary. In this case neighboring
+  // entities have to be requested first from other processes
+  if ( manager.isInteriorBoundaryVertex( 
+          manager.vertex_map().getFineFromCoarse(vertD) ) )
+  {
+    manager.vertices_to_request().push_back( 
+          manager.vertex_map().getFineFromCoarse(vertD) );
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+//-----------------------------------------------------------------------------
+#endif
 //-----------------------------------------------------------------------------
 void LocalMeshCoarsening::regenerateCells(Mesh const & mesh, 
                                           MeshEditor& editor, 
@@ -395,19 +377,22 @@ std::pair<bool,bool> LocalMeshCoarsening::coarsenCell(Mesh& mesh, Mesh& coarse_m
     return std::make_pair(true,false);
   Cell cell_to_coarsen(mesh, manager.cell_map().getCoarseFromFine(cell_to_coarsen_id));
 
-//  // Select edge for collapse
-//  int e_id = selectEdge(cell_to_coarsen, manager);
-//
-//  // if cell cannot be coarsened: simply return
-//  if ( e_id < 0 ) return std::make_pair(true,false);
+#ifdef ____AVOID_TOPOLOGY_INIT____
   uint verts[2];
   if ( !selectEdge(cell_to_coarsen, manager, verts) )
     return std::make_pair(true,false);
+#else
+  // Select edge for collapse
+  int e_id = selectEdge(cell_to_coarsen, manager);
 
-//  // select vertex for collapse
-//  Edge edge_to_collapse(mesh,e_id);
-//  uint vertD, vertR;
-//  if ( !selectVertex(edge_to_collapse, manager, vertD, vertR) )
+  // if cell cannot be coarsened: simply return
+  if ( e_id < 0 ) 
+    return std::make_pair(true,false);
+#endif
+
+  uint vertD, vertR;
+
+#ifdef ____AVOID_TOPOLOGY_INIT____
   int vert_idx = selectVertex( verts, manager );
   if ( vert_idx < 0 )
   {
@@ -415,8 +400,18 @@ std::pair<bool,bool> LocalMeshCoarsening::coarsenCell(Mesh& mesh, Mesh& coarse_m
     manager.cells_to_request().push_back( cell_to_coarsen_id );
     return std::make_pair(true,false);
   }
-  uint vertD = verts[vert_idx];
-  uint vertR = verts[!vert_idx];
+  vertD = verts[vert_idx];
+  vertR = verts[!vert_idx];
+#else
+  // select vertex for collapse
+  Edge edge_to_collapse(mesh,e_id);
+  if ( !selectVertex(edge_to_collapse, manager, vertD, vertR) )
+  {
+    // Cannot be coarsened due to missing entities from other processes
+    manager.cells_to_request().push_back( cell_to_coarsen_id );
+    return std::make_pair(true,false);
+  }
+#endif
 
   Vertex vertex_to_remove(mesh,vertD);
   Vertex vertex_to_keep(mesh,vertR);
@@ -425,15 +420,8 @@ std::pair<bool,bool> LocalMeshCoarsening::coarsenCell(Mesh& mesh, Mesh& coarse_m
   MeshFunction<bool> cells_to_remove(mesh, mesh.topology().dim());
   cells_to_remove = false;
   uint num_cells_to_remove(0);
-//  for ( CellIterator c_it(edge_to_collapse) ; !c_it.end() ; ++c_it )
-//  {
-//    cells_to_remove.set(c_it->index(),true);
-//    ++num_cells_to_remove;
 
-//    // Update cell map: cells don't exist anymore
-//    manager.cell_map().setNew(
-//      manager.cell_map().getFineFromCoarse(c_it->index()), -1 );
-//  }
+#ifdef ____AVOID_TOPOLOGY_INIT____
   for ( CellIterator c_it(vertex_to_remove) ; !c_it.end() ; ++c_it )
   {
     if ( c_it->incident(vertex_to_keep) )
@@ -443,9 +431,20 @@ std::pair<bool,bool> LocalMeshCoarsening::coarsenCell(Mesh& mesh, Mesh& coarse_m
 
       // Update cell map: cells don't exist anymore
       manager.cell_map().setNew(
-      manager.cell_map().getFineFromCoarse(c_it->index()), -1 );
+        manager.cell_map().getFineFromCoarse(c_it->index()), -1 );
     }
   }
+#else
+  for ( CellIterator c_it(edge_to_collapse) ; !c_it.end() ; ++c_it )
+  {
+    cells_to_remove.set(c_it->index(),true);
+    ++num_cells_to_remove;
+
+    // Update cell map: cells don't exist anymore
+    manager.cell_map().setNew(
+      manager.cell_map().getFineFromCoarse(c_it->index()), -1 );
+  }
+#endif
 
   // Cells to regenerate: cells adjacent to removed vertex excluding removed cells
   MeshFunction<bool> cells_to_regenerate(mesh, mesh.topology().dim());

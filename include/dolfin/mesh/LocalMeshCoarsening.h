@@ -9,6 +9,9 @@
 #ifndef __LOCAL_MESH_COARSENING_H
 #define __LOCAL_MESH_COARSENING_H
 
+//#define ____USE_D_MESH____            // Activate usage of dynamic mesh
+#define ____AVOID_TOPOLOGY_INIT____   // Avoid initialization of topology 
+
 #include <utility>
 
 #include "MeshFunction.h"
@@ -38,12 +41,36 @@ namespace dolfin
     ///
     ///   coarsen_boundary (bool)
     ///     Enable or disable coarsening of boundary cells
+    ///
     static void coarsenMeshByEdgeCollapse(Mesh& mesh, 
                                           MeshFunction<bool>& cell_marker,
                                           bool coarsen_boundary = false); 
 
   private:
 
+#ifdef ____AVOID_TOPOLOGY_INIT____
+    /// Selects the shortest edge for coarsening in the specified cell, which 
+    /// does not have two forbidden vertices.
+    ///
+    /// *Arguments*
+    ///
+    ///   c (Cell&)
+    ///     The cell to be coarsened
+    ///
+    ///   manager (CoarseningManager&)
+    ///     The Coarsening manager
+    ///
+    ///   vertices (uint *)
+    ///     List of vertex indices, that gets filled with indices of endpoints
+    ///     of the found edge. Has to be able to hold at least two uint.
+    ///
+    /// *Returns*
+    ///
+    ///   bool
+    ///     True if a suitable edge has been found
+    ///
+    static bool selectEdge(Cell& c, CoarseningManager& manager, uint *vertices);
+#else
     /// Selects an edge for coarsening in the specified cell, on which not both
     /// vertices are forbidden or on the boundary between two processes. If 
     /// coarsen_boundary is false, the edge may also not be on the global 
@@ -62,13 +89,31 @@ namespace dolfin
     ///   int
     ///     The index of the edge or -1 if none is found (i.e. all vertices
     ///     are forbidden)
+    ///
     static int selectEdge(Cell& c, CoarseningManager& manager);
-    static bool selectEdge(Cell& c, CoarseningManager& manager, uint *vertices);
+#endif
 
+#ifdef ____AVOID_TOPOLOGY_INIT____
     /// Selects the vertex that will be deleted. If one of the vertices is
-    /// forbidden the other is chosen. If one of the vertices is on a boundary
-    /// (process or domain), the other is chosen. If both are allowed the 
-    /// vertex with larger index is chosen.
+    /// forbidden the other is chosen else the vertex with larger index is used.
+    ///
+    /// *Arguments*
+    ///
+    ///   vertices (uint *)
+    ///     The indices of the two endpoints
+    ///
+    ///   manager (CoarseningManager&)
+    ///     The Coarsening manager
+    ///   
+    /// *Returns*
+    ///
+    ///   int
+    ///     The index of the vertex chosen for deletion.
+    ///
+    static int selectVertex(uint *vertices, CoarseningManager& manager);
+#else
+    /// Selects the vertex that will be deleted. If one of the vertices is
+    /// forbidden the other is chosen else the vertex with larger index is used.
     ///
     /// *Arguments*
     ///
@@ -79,14 +124,21 @@ namespace dolfin
     ///     The Coarsening manager
     ///   
     ///   vertD (uint&)
-    ///     The index (on the coarse mesh) of the vertex, that is selected for deletion.
+    ///     The index (on the coarse mesh) of the vertex, that is selected for 
+    ///     deletion.
     ///
     ///   vertR (uint&)
-    ///     The index (on the coarse mesh) of the vertex, that is selected to remain, i. e.
-    ///     on which the deleted vertex will be collapsed.
+    ///     The index (on the coarse mesh) of the vertex, that is selected to 
+    ///     remain, i. e. onto which the deleted vertex will be collapsed.
+    ///
+    /// *Returns*
+    ///
+    ///   bool
+    ///     True if a vertex has been found, false else.
+    ///
     static bool selectVertex(Edge& e, CoarseningManager& manager,
                              uint& vertD, uint& vertR);
-    static int selectVertex(uint *vertices, CoarseningManager& manager);
+#endif
 
     /// Regenerates the cells adjacent to the deleted vertex and inserts
     /// them in the MeshEditor.
@@ -104,6 +156,9 @@ namespace dolfin
     ///     The vertex that has been selected for deletion and that will be replaced
     ///     by the vertex with index vertR
     ///
+    ///   vertR (uint)
+    ///     Index of the vertex that replaces the removed vertex
+    ///
     ///   c_id (uint)
     ///     The cell_id in the coarse mesh that the first regenerated cell should be
     ///     assigned. The other regenerated cells should get following higher indices.
@@ -113,6 +168,7 @@ namespace dolfin
     ///
     ///   manager (CoarseningManager&)
     ///     The Coarsening manager
+    ///
     static void regenerateCells(Mesh const & mesh, MeshEditor& editor, 
                                 Vertex& vertex_to_remove, 
                                 uint vertR, uint c_id, 
@@ -134,8 +190,10 @@ namespace dolfin
     ///     The Coarsening manager
     /// 
     /// *Returns*
+    ///
     ///   bool
     ///     true if all cells are ok, false otherwise
+    ///
     static bool checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh, 
                           CoarseningManager& manager);
 

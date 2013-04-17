@@ -14,21 +14,29 @@ namespace dolfin
 {
   class DVertex;
 
-  /// Representation of a cell within a dynamic mesh DMesh
-  
+  /// Dynamic cell entity to be used with DMesh
+  ///
   class DCell
   {
   public:
     DCell();
+
+    /// Check if a certain edge (defined by endpoints) is part of the cell
     bool has_edge(DVertex* v1, DVertex* v2);
 
+    /// Local index of cell
     int id;
+
+    /// Index of parent cell
     int parent_id;
 
+    /// List of vertices spaning the cell
     std::vector<DVertex *> vertices;
 
+    /// Marker for deletion
     bool deleted;
     
+    /// reference number to be used for identification in bisect
     int nref;
   };
 }

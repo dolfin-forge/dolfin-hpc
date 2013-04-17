@@ -150,12 +150,12 @@ void DMesh::imp(Mesh& mesh)
     {
       for (EdgeIterator e(*ci); !e.end(); ++e) 
       {
-  const uint *edge_v = e->entities(0);
-  if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0)) 
-  {
-    EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
-         mesh.distdata().get_global(edge_v[1], 0));
-  }
+        const uint *edge_v = e->entities(0);
+        if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0)) 
+        {
+          EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
+          mesh.distdata().get_global(edge_v[1], 0));
+        }
       }
     }
   }
@@ -251,33 +251,33 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       if(i != j)
       {
-  DVertex* v0 = dcell->vertices[i];
-  DVertex* v1 = dcell->vertices[j];
+        DVertex* v0 = dcell->vertices[i];
+        DVertex* v1 = dcell->vertices[j];
   
-  real l = 0.0;
-  if( v0->glb_id > v1->glb_id)
-    l = v0->p.distance(v1->p); 
-  else
-    l = v1->p.distance(v0->p); 
+        real l = 0.0;
+        if( v0->glb_id > v1->glb_id)
+          l = v0->p.distance(v1->p); 
+        else
+          l = v1->p.distance(v0->p); 
   
-  if(fabs(l - lmax) < DOLFIN_EPS)
-  {
-    int ptsum = (v0->glb_id) + (v1->glb_id) ;
-    if(ptsum > ptmax)
-    {
-      ii = i;
-      jj = j;
-      lmax = l;
-      ptmax = (v0->glb_id + v1->glb_id);
-    }
-  }
-  else if(l >= lmax)
-  {
-    ii = i;
-    jj = j;
-    lmax = l;
-    ptmax = (v0->glb_id + v1->glb_id) ;
-  }
+        if(fabs(l - lmax) < DOLFIN_EPS)
+        {
+          int ptsum = (v0->glb_id) + (v1->glb_id) ;
+          if(ptsum > ptmax)
+          {
+            ii = i;
+            jj = j;
+            lmax = l;
+            ptmax = (v0->glb_id + v1->glb_id);
+          }
+        }
+        else if(l >= lmax)
+        {
+          ii = i;
+          jj = j;
+          lmax = l;
+          ptmax = (v0->glb_id + v1->glb_id) ;
+        }
       }
     }
   }
@@ -367,11 +367,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       DCell* copp = opposite(dcell, v0, v1);
       if(copp != 0)
       {
-  bisect(copp, mv, v0, v1);
+        bisect(copp, mv, v0, v1);
       }
       else
       {
-  break;
+        break;
       }
     }
   }
@@ -389,16 +389,16 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
       int matches = 0;
       for(uint i = 0; i < c->vertices.size(); i++)
       {
-  if(c->vertices[i] == v1 || c->vertices[i] == v2)
-  {
-    matches++;
-  }
+        if(c->vertices[i] == v1 || c->vertices[i] == v2)
+        {
+          matches++;
+        }
       }
 
       if(matches == 2)
       {
-  // Found opposite cell
-  return c;
+        // Found opposite cell
+        return c;
       }
     }
   }  
@@ -481,20 +481,20 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
     propagate.clear();
 
     for(std::vector<Propagation>::iterator it = propagated.begin(); 
-  it != propagated.end(); ++it) {
+        it != propagated.end(); ++it) {
 
       DVertex* mv = 0;
       dolfin_assert(it->second.v1 != it->second.v2);
       if(ref_edge.find(edge_key(it->second.v1, it->second.v2)) != ref_edge.end()) {
         mv = ref_edge[edge_key(it->second.v1, it->second.v2)];
 
-  if( mv->owner > (int) it->second.owner) {
-    mv->ghosted = true;
-    mv->shared = true;
-          mv->owner = it->second.owner;
-  }
+        if( mv->owner > (int) it->second.owner) {
+          mv->ghosted = true;
+          mv->shared = true;
+                mv->owner = it->second.owner;
+        }
 
-  continue;
+        continue;
       }
       
       DVertex* v1 = 0;
@@ -502,67 +502,67 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       
       if(!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end()) 
       {
-  dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
-  v1 = bc_dvs[it->second.v1];
+        dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
+        v1 = bc_dvs[it->second.v1];
       }
       if(!v2 && bc_dvs.find(it->second.v2) != bc_dvs.end())
       { 
-  dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
-  v2 = bc_dvs[it->second.v2];
+        dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
+        v2 = bc_dvs[it->second.v2];
       }
 
       if(!v1 || !v2)
       {
-  leftovers.push_back(*it);    
-  continue;
+        leftovers.push_back(*it);    
+        continue;
       }
 
       for(std::list<DCell* >::iterator ic = v1->cells.begin();
-    ic != v1->cells.end(); ++ic)       
+          ic != v1->cells.end(); ++ic)       
       {
-  if(!(*ic)->deleted) {
-    if((*ic)->has_edge(v1, v2))  {
-      dolfin_assert((*ic)->vertices.size() > 0);
-      if(mv == 0) 
-      {
-        mv = new DVertex;
-        mv->shared = true;
-        mv->glb_id = it->second.mv;       
-        vertices.insert(mv);        
+        if(!(*ic)->deleted) {
+          if((*ic)->has_edge(v1, v2))  {
+            dolfin_assert((*ic)->vertices.size() > 0);
+            if(mv == 0) 
+            {
+              mv = new DVertex;
+              mv->shared = true;
+              mv->glb_id = it->second.mv;       
+              vertices.insert(mv);        
 
-        if( MPI::processNumber() < it->second.owner)
-        {
-    mv->ghosted = false;
-    mv->owner = MPI::processNumber();     
-    prop_edge node;
-    node.mv = mv->glb_id;
-    node.v1 = it->second.v1;
-    node.v2 = it->second.v2;
-    node.owner = mv->owner;
-    std::pair<uint, prop_edge> prop(0, node);
-    propagate.push_back(prop);
+              if( MPI::processNumber() < it->second.owner)
+              {
+                mv->ghosted = false;
+                mv->owner = MPI::processNumber();     
+                prop_edge node;
+                node.mv = mv->glb_id;
+                node.v1 = it->second.v1;
+                node.v2 = it->second.v2;
+                node.owner = mv->owner;
+                std::pair<uint, prop_edge> prop(0, node);
+                propagate.push_back(prop);
+              }
+              else 
+              {
+                mv->ghosted = true;
+                mv->owner = it->second.owner;
+              }
+              
+              mv->p = (v1->p + v2->p) / 2.0;
+              mv->on_boundary = true;
+              bc_dvs[mv->glb_id] = mv;
+              ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
+            }
+            dolfin_assert((*ic) > 0);
+            bisect((*ic), mv, v1, v2);
+          }
         }
-        else 
-        {
-    mv->ghosted = true;
-    mv->owner = it->second.owner;
-        }
-        
-        mv->p = (v1->p + v2->p) / 2.0;
-        mv->on_boundary = true;
-        bc_dvs[mv->glb_id] = mv;
-        ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
-      }
-      dolfin_assert((*ic) > 0);
-      bisect((*ic), mv, v1, v2);
-    }
-  }
       }
     }
     
     propagated.clear();
     for(std::list<Propagation>::iterator it = leftovers.begin(); 
-  it != leftovers.end(); ++it)
+        it != leftovers.end(); ++it)
       propagated.push_back(*it);
     leftovers.clear();
 

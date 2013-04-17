@@ -177,6 +177,9 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunctionConverter.h\
+				mesh/DMesh.h\
+				mesh/DCell.h\
+				mesh/DVertex.h\
 				la/AMGSolver.h\
 				la/MultigridScheme.h\
 				la/KrylovSolver.h\

@@ -25,6 +25,10 @@ namespace dolfin
   class MeshEditor;
   class CoarseningManager;
 
+#ifdef ____USE_D_MESH____
+  class DMesh;
+#endif
+
   /// This class implements local mesh coarsening for different mesh types.
   class LocalMeshCoarsening
   {
@@ -196,7 +200,11 @@ namespace dolfin
     ///
     static bool checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh, 
                           CoarseningManager& manager);
-
+#ifdef ____USE_D_MESH____
+    static std::pair<bool,bool> coarsenCell(DMesh& dmesh,
+                                            CoarseningManager& manager,
+                                            uint cell_to_coarsen_id);
+#else
     /// Coarsen a selected cell by edge collapse. Is called from 
     /// coarsenMeshByEdgeCollapse().
     ///
@@ -233,6 +241,7 @@ namespace dolfin
     static std::pair<bool,bool> coarsenCell(Mesh& mesh, Mesh& coarse_mesh, 
                                             CoarseningManager& manager,
                                             uint cell_to_coarsen_id);
+#endif
 
   }; // end class LocalMeshCoarsening
 

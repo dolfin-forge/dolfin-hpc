@@ -9,7 +9,7 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/MeshFunctionConverter.h>
+//#include <dolfin/mesh/MeshFunctionConverter.h>
 #include <dolfin/main/MPI.h>
 
 #ifdef HAVE_MPI
@@ -43,8 +43,16 @@ void CoarseningManager::init(MeshFunction<bool>& cell_marker,
 
   initCommon(cell_marker);
 
+  dolfin_assert( _int_bnd_vertices.size() == cell_marker.mesh().numVertices() );
+  dolfin_assert( _int_bnd_cells.size() == cell_marker.mesh().numCells() );
+  dolfin_assert( _bnd_vertices.size() == cell_marker.mesh().numVertices() );
+  dolfin_assert( _bnd_cells.size() == cell_marker.mesh().numCells() );
+  dolfin_assert( _cells_to_coarsen.size() >= 0 );
+
   // find independent set
   findIndependentSet(cell_marker.mesh(), coarsen_boundary);
+
+  dolfin_assert( _forbidden_vertices.size() == cell_marker.mesh().numVertices() );
 }
 //-----------------------------------------------------------------------------
 template<typename T>
@@ -69,9 +77,9 @@ void CoarseningManager::initCommon(MeshFunction<T>& cell_marker)
 void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
 {
   // set to false on whole domain
-  _int_bnd_vertices.init(mesh, 0);
+  _int_bnd_vertices.resize(mesh.numVertices());
   _int_bnd_vertices = false;
-  _int_bnd_cells.init(mesh, mesh.topology().dim());
+  _int_bnd_cells.resize(mesh.numCells());
   _int_bnd_cells = false;
 
   // no process boundaries if only one process
@@ -93,20 +101,20 @@ void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
   for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
   {
     Vertex v(mesh, bnd_vertex_map->get(v_it->index()));
-    _int_bnd_vertices.set( v, true );
+    _int_bnd_vertices.at(v.index()) = true;
 
     // all connected cells are also on the boundary
     for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
-      _int_bnd_cells.set( *c_it, true );
+      _int_bnd_cells.at(c_it->index()) = true;
   }
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::findDomainBoundaries(Mesh& mesh)
 {
   // set to false on whole domain
-  _bnd_vertices.init(mesh, 0);
+  _bnd_vertices.resize(mesh.numVertices());
   _bnd_vertices = false;
-  _bnd_cells.init(mesh, mesh.topology().dim());
+  _bnd_cells.resize(mesh.numCells());
   _bnd_cells = false;
 
   // get boundary mesh
@@ -124,18 +132,18 @@ void CoarseningManager::findDomainBoundaries(Mesh& mesh)
   for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
   {
     Vertex v(mesh, bnd_vertex_map->get(v_it->index()));
-    _bnd_vertices.set( v, true );
+    _bnd_vertices.at(v.index()) = true;
 
     // all connected cells are also on the boundary
     for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
-      _bnd_cells.set( *c_it, true );
+      _bnd_cells.at(c_it->index()) = true;
   }
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
 {
   // set to false on whole domain
-  _forbidden_vertices.init(mesh, 0);
+  _forbidden_vertices.resize(mesh.numVertices());
   _forbidden_vertices = false;
 
   // if boundary coarsening is forbidden: put boundary vertices into set first
@@ -150,15 +158,15 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
 
       // add boundary vertices to set
       for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
-        _forbidden_vertices.set( bnd_vertex_map->get(v_it->index()), true );
+        _forbidden_vertices.at(bnd_vertex_map->get(v_it->index())) = true;
     }
   }
 
   // iterate over remaining vertices
-  for ( VertexIterator v_it(_forbidden_vertices.mesh()) ; !v_it.end() ; ++v_it )
+  for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
   {
-    if ( !_forbidden_vertices.get(v_it->index()) )
-      _forbidden_vertices.set( v_it->index(), isIndependentVertex(*v_it) );
+    if ( !_forbidden_vertices[v_it->index()] )
+      _forbidden_vertices.at(v_it->index()) = isIndependentVertex(*v_it);
   }
 }
 //-----------------------------------------------------------------------------
@@ -170,7 +178,7 @@ bool CoarseningManager::isIndependentVertex(Vertex& v)
     if ( v_it->index() == v.index() )
       continue;
 
-    if ( _forbidden_vertices.get(*v_it) )
+    if ( _forbidden_vertices.at(v_it->index()) )
       return false;
   }
 
@@ -202,7 +210,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
     return repeat;
   }
 
-  message("%d: Initializing migration", rank);
+  message("[%d] Initializing migration", rank);
 
   // TODO: also check previous number of exchanged cells
 
@@ -219,7 +227,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   repeat = remote_status[1];                          // global termination?
   uint max_num_migrated_cells = remote_status[2];     // max num migrated cells
 
-  message("%d: max_num_requested_vertices = %d", rank, max_num_requested_vertices);
+  message("[%d] max_num_requested_vertices = %d", rank, max_num_requested_vertices);
 
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
@@ -393,7 +401,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   MeshFunction<double> forbidden_vertices_new;
   for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
     forbidden_vertices.set(*v_it, double( 
-      isForbiddenVertex(_vertex_map.getFineFromCoarse(v_it->index())) ) );
+      isForbiddenVertex( _vertex_map.getFineFromCoarse(v_it->index()) ) ) );
   vertex_functions.push_back( 
     std::make_pair(&forbidden_vertices, &forbidden_vertices_new) );
 
@@ -420,7 +428,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   cell_functions.push_back( std::make_pair(&cell_marker, &cell_marker_new) );
 
   _migrated_cells = num_send_cells;
-  message("%d: Distribution. Sending %d cells", rank, num_send_cells);
+  message("[%d] Distribution. Sending %d cells", rank, num_send_cells);
 
   // distribute partitioning and MeshFunctions
   mesh.distribute( partitions, cell_functions, vertex_functions );
@@ -429,9 +437,14 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   initCommon(cell_marker_new);
 
   // Update independent set
-  MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);
+  //MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);
+  _forbidden_vertices.clear();
+  _forbidden_vertices.resize(mesh.numVertices(), false);
+  for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
+    if ( forbidden_vertices_new.get(v_it->index()) > 0.5 )
+      _forbidden_vertices[v_it->index()] = true;
 
-  message("%d: Distribution done! Now %d cells are marked for coarsening!", 
+  message("[%d] Distribution done! Now %d cells are marked for coarsening!", 
             rank, _cells_to_coarsen.size());
 
   return true;

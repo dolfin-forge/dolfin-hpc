@@ -39,31 +39,31 @@ namespace dolfin
 
     /// Check if a vertex is on any (interior or domain) boundary
     inline bool isBoundaryVertex(uint index)
-    { return _int_bnd_vertices.get(index) || _bnd_vertices.get(index); }
+    { return _int_bnd_vertices.at(index) || _bnd_vertices.at(index); }
 
     /// Check if a cell is on any (interior or domain) boundary
     inline bool isBoundaryCell(uint index)
-    { return _int_bnd_cells.get(index) || _bnd_cells.get(index); }
+    { return _int_bnd_cells.at(index) || _bnd_cells.at(index); }
 
     /// Check if a vertex is on the interior boundary
     inline bool isInteriorBoundaryVertex(uint index)
-    { return _int_bnd_vertices.get(index); }
+    { return _int_bnd_vertices.at(index); }
 
     /// Check if a cell is on the interior boundary
     inline bool isInteriorBoundaryCell(uint index)
-    { return _int_bnd_cells.get(index); }
+    { return _int_bnd_cells.at(index); }
 
     /// Check if a vertex is on the domain boundary
     inline bool isDomainBoundaryVertex(uint index)
-    { return _bnd_vertices.get(index); }
+    { return _bnd_vertices.at(index); }
 
     /// Check if a cell is on the domain boundary
     inline bool isDomainBoundaryCell(uint index)
-    { return _bnd_cells.get(index); }
+    { return _bnd_cells.at(index); }
 
     /// Check if a vertex is forbidden, i. e. part of the independent set
     inline bool isForbiddenVertex(uint index)
-    { return _forbidden_vertices.get(index); }
+    { return _forbidden_vertices.at(index); }
 
     /// Gives access to the IndexMap for cells
     inline IndexMap& cell_map()
@@ -403,19 +403,19 @@ namespace dolfin
 
   private:
     /// Indicator for vertices on domain boundaries
-    MeshFunction<bool> _bnd_vertices;
+    Array<bool> _bnd_vertices;
 
     /// Indicator for cells on domain boundaries
-    MeshFunction<bool> _bnd_cells;
+    Array<bool> _bnd_cells;
 
     /// Indicator for vertices on process boundaries
-    MeshFunction<bool> _int_bnd_vertices;
+    Array<bool> _int_bnd_vertices;
 
     /// Indicator for cells on process boundaries
-    MeshFunction<bool> _int_bnd_cells;
+    Array<bool> _int_bnd_cells;
 
     /// Indicator for independent set of vertices
-    MeshFunction<bool> _forbidden_vertices;
+    Array<bool> _forbidden_vertices;
 
     /// IndexMaps for relation between coarse and fine mesh indices
     IndexMap _vertex_map;

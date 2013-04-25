@@ -415,8 +415,10 @@ void Assembler::check(const ufc::form& form,
 {
   // Check that we get the correct number of coefficients
   if (coefficients.size() != form.num_coefficients())
+  {
     error("Incorrect number of coefficients for form: %d given but %d required.",
           coefficients.size(), form.num_coefficients());
+  }
 
   // Check that all coefficients have valid value dimensions
   for(uint i=0; i<coefficients.size(); ++i)
@@ -431,6 +433,7 @@ void Assembler::check(const ufc::form& form,
 
       uint r = coefficients[i]->rank();
       uint fe_r = fe->value_rank();
+      message("Coefficient %d : \tname %s;\trank %d", i, coefficients[i]->name().c_str(), r);
       if(fe_r != r)
       {
         error("Invalid value rank of Function %d, got %d but expecting %d. \

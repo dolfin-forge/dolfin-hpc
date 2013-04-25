@@ -12,6 +12,8 @@
 // functionality is handled by the specific implementation (subclass).
 
 #include <dolfin/io/File.h>
+#include <dolfin/elements/ElementLibrary.h>
+#include <dolfin/fem/DofMap.h>
 #include <dolfin/function/UserFunction.h>
 #include <dolfin/function/ConstantFunction.h>
 #include <dolfin/function/DiscreteFunction.h>
@@ -312,6 +314,69 @@ const Function& Function::operator=(SubFunction sub_function)
 	_type = discrete;
 
 	return *this;
+}
+//-----------------------------------------------------------------------------
+void Function::interpolate(const Function& other_func)
+{
+	if (f && this->type() == Function::discrete)
+	{
+		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(other_func.signature());
+		DofMap * dofmap =  new DofMap("FFC dof map for "+other_func.signature(), mesh());
+
+		uint valuedim = ufcfe->value_dimension(0);
+		uint dofspercell = dofmap->local_dimension();
+		uint nodespercell = dofspercell/valuedim;
+		uint * idx  = new uint[dofspercell];
+		real * block  = new real[dofspercell];
+		real * val = new real[valuedim];
+
+		real ** dofscoords = new real*[dofspercell];
+		for (uint i = 0; i < dofspercell; ++i)
+		{
+			dofscoords[i] = new real[3];  // Internally Point is implemented for d = 3
+		}
+
+		CellIterator refcell(mesh());
+		UFCCell ufccell(*refcell);
+
+		for (CellIterator cell(mesh()); !cell.end(); ++cell)
+		{
+			ufccell.update(*cell, mesh().distdata());
+			dofmap->tabulate_dofs(idx, ufccell, cell->index());
+			dofmap->tabulate_coordinates(dofscoords, ufccell);
+
+			// For each dof evaluate the value
+			uint dof_id = 0;
+			for (uint dof_node = 0; dof_node < nodespercell; ++dof_node)
+			{
+				other_func.eval(val, dofscoords[dof_node]);
+				for (uint vd = 0; vd < valuedim; ++vd, ++dof_id)
+				{
+					block[dof_node+nodespercell*vd] = val[vd];
+				}
+			}
+			this->vector().set(block, dofspercell,idx);
+			this->vector().apply();
+		}
+		f->sync_ghosts();
+
+		// cleanup
+		for (uint i = 0; i < dofspercell; ++i)
+		{
+			delete[] dofscoords[i];
+		}
+		delete [] val;
+		delete [] dofscoords;
+		delete [] block;
+		delete [] idx;
+		delete dofmap;
+		delete ufcfe;
+	}
+	else
+	{
+		dolfin::error("Function::interpolate(const Function&) can only be called on discrete Function");
+	}
+
 }
 //-----------------------------------------------------------------------------
 void Function::interpolate(real* values)

@@ -9,12 +9,13 @@
 #ifndef __LOCAL_MESH_COARSENING_H
 #define __LOCAL_MESH_COARSENING_H
 
-//#define ____USE_D_MESH____            // Activate usage of dynamic mesh
-#define ____AVOID_TOPOLOGY_INIT____   // Avoid initialization of topology 
-
 #include <utility>
+#include <list>
 
 #include "MeshFunction.h"
+
+#define ____USE_D_MESH____            // Activate usage of dynamic mesh
+//#define ____AVOID_TOPOLOGY_INIT____   // Avoid initialization of topology 
 
 namespace dolfin
 {
@@ -27,6 +28,8 @@ namespace dolfin
 
 #ifdef ____USE_D_MESH____
   class DMesh;
+  class DCell;
+  class DVertex;
 #endif
 
   /// This class implements local mesh coarsening for different mesh types.
@@ -51,7 +54,10 @@ namespace dolfin
                                           bool coarsen_boundary = false); 
 
   private:
-
+#ifdef ____USE_D_MESH____
+    static bool selectEdge(DCell* c, CoarseningManager& manager, 
+                           DVertex * vertices[]);
+#else // ____USE_D_MESH____
 #ifdef ____AVOID_TOPOLOGY_INIT____
     /// Selects the shortest edge for coarsening in the specified cell, which 
     /// does not have two forbidden vertices.
@@ -74,7 +80,7 @@ namespace dolfin
     ///     True if a suitable edge has been found
     ///
     static bool selectEdge(Cell& c, CoarseningManager& manager, uint *vertices);
-#else
+#else // ____AVOID_TOPOLOGY_INIT____
     /// Selects an edge for coarsening in the specified cell, on which not both
     /// vertices are forbidden or on the boundary between two processes. If 
     /// coarsen_boundary is false, the edge may also not be on the global 
@@ -95,8 +101,12 @@ namespace dolfin
     ///     are forbidden)
     ///
     static int selectEdge(Cell& c, CoarseningManager& manager);
-#endif
+#endif // ____AVOID_TOPOLOGY_INIT____
+#endif // ____USE_D_MESH____
 
+#ifdef ____USE_D_MESH____
+    static int selectVertex(DVertex * vertices[], CoarseningManager& manager);
+#else // ____USE_D_MESH____
 #ifdef ____AVOID_TOPOLOGY_INIT____
     /// Selects the vertex that will be deleted. If one of the vertices is
     /// forbidden the other is chosen else the vertex with larger index is used.
@@ -115,7 +125,7 @@ namespace dolfin
     ///     The index of the vertex chosen for deletion.
     ///
     static int selectVertex(uint *vertices, CoarseningManager& manager);
-#else
+#else // ____AVOID_TOPOLOGY_INIT____
     /// Selects the vertex that will be deleted. If one of the vertices is
     /// forbidden the other is chosen else the vertex with larger index is used.
     ///
@@ -142,8 +152,10 @@ namespace dolfin
     ///
     static bool selectVertex(Edge& e, CoarseningManager& manager,
                              uint& vertD, uint& vertR);
-#endif
+#endif // ____AVOID_TOPOLOGY_INIT____
+#endif // ____USE_D_MESH____
 
+#ifndef ____USE_D_MESH____
     /// Regenerates the cells adjacent to the deleted vertex and inserts
     /// them in the MeshEditor.
     ///
@@ -178,7 +190,12 @@ namespace dolfin
                                 uint vertR, uint c_id, 
                                 MeshFunction<bool> const & cells_to_remove,
                                 CoarseningManager& manager);
+#endif
 
+#ifdef ____USE_D_MESH____
+    static bool checkMesh(std::list<DCell *>& cells_to_regenerate,
+                          std::vector<uint>& cells_to_regenerate_orient);
+#else // ____USE_D_MESH____
     /// Checks the cells adjacent to the removed cell for wrong orientation
     /// and sufficient large ratio of volume to diameter (avoid stretched cells).
     ///
@@ -200,11 +217,11 @@ namespace dolfin
     ///
     static bool checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh, 
                           CoarseningManager& manager);
+#endif // ____USE_D_MESH____
+
 #ifdef ____USE_D_MESH____
-    static std::pair<bool,bool> coarsenCell(DMesh& dmesh,
-                                            CoarseningManager& manager,
-                                            uint cell_to_coarsen_id);
-#else
+    static int coarsenCell(CoarseningManager& manager, DCell* cell_to_coarsen);
+#else // ____USE_D_MESH____
     /// Coarsen a selected cell by edge collapse. Is called from 
     /// coarsenMeshByEdgeCollapse().
     ///
@@ -241,7 +258,7 @@ namespace dolfin
     static std::pair<bool,bool> coarsenCell(Mesh& mesh, Mesh& coarse_mesh, 
                                             CoarseningManager& manager,
                                             uint cell_to_coarsen_id);
-#endif
+#endif // ____USE_D_MESH____
 
   }; // end class LocalMeshCoarsening
 

@@ -8,6 +8,7 @@
 #ifndef __D_CELL_H
 #define __D_CELL_H
 
+#include <dolfin/common/types.h>
 #include <vector>
 
 namespace dolfin
@@ -23,6 +24,18 @@ namespace dolfin
 
     /// Check if a certain edge (defined by endpoints) is part of the cell
     bool has_edge(DVertex* v1, DVertex* v2);
+
+    /// Compute volume of given cell. CellType is determined by number of
+    /// vertices
+    real volume() const;
+
+    /// Compute diameter of given cell. CellType is determined by number of
+    /// vertices
+    real diameter() const;
+
+    /// Compute orientation of given cell. CellType is determined by number of
+    /// vertices
+    uint orientation() const;
 
     /// Local index of cell
     int id;

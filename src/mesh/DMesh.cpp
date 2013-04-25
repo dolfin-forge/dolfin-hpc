@@ -28,7 +28,30 @@
 #endif 
 
 using namespace dolfin;
-
+//-----------------------------------------------------------------------------
+/// Helper class for getCell method
+class CheckCellId {
+public:
+  explicit CheckCellId(int id_) : id(id_) {}
+  bool operator()(const DCell * const & cell) const { return (id == cell->id); }
+private:
+  int id;
+};
+//-----------------------------------------------------------------------------
+/// Helper class for getVertex method
+class CheckVertexId {
+public:
+  explicit CheckVertexId(int id_) : id(id_) {}
+  bool operator()(const DVertex * const & vertex) const { return (id == vertex->id); }
+private:
+  int id;
+};
+//-----------------------------------------------------------------------------
+/// Helper function for eraseRemovedEntities method
+static bool checkCellDeleted(DCell * cell)
+{
+  return cell->deleted;
+}
 //-----------------------------------------------------------------------------
 //DMesh::DMesh() : vertices(0), cells(0)
 DMesh::DMesh() :  cells(0)
@@ -37,7 +60,9 @@ DMesh::DMesh() :  cells(0)
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
-  
+  if ( cell_type )
+    delete cell_type;
+
   // Delete allocated DVertices
   for(std::set<DVertex* >::iterator it = vertices.begin();
       it != vertices.end(); ++it)
@@ -52,8 +77,19 @@ DMesh::~DMesh()
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)
 {
-  cell_type = &(mesh.type());
+  cell_type = CellType::create(mesh.type().cellType());
+  //cell_type = &(mesh.type());
   d = mesh.topology().dim();
+
+  // Delete allocated DVertices
+  for(std::set<DVertex* >::iterator it = vertices.begin();
+      it != vertices.end(); ++it)
+    delete *it;
+  
+  // Delete allocated DCells
+  for(std::list<DCell* >::iterator it = cells.begin();
+       it != cells.end(); ++it)
+     delete *it;
 
   vertices.clear();
   cells.clear();
@@ -62,6 +98,7 @@ void DMesh::imp(Mesh& mesh)
 
   std::vector<DVertex *> vertexvec;
 
+  /*
   BoundaryMesh boundary;
   boundary.init_interior(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
@@ -75,6 +112,25 @@ void DMesh::imp(Mesh& mesh)
     Facet f(mesh, cell_map->get(*bf));    
     for (CellIterator c(f); !c.end(); ++c) 
       boundary_cell.set(*c, true);    
+  }*/
+  // This approach saves the need to init facet-cell connectivity
+  BoundaryMesh boundary;
+  boundary.init_interior(mesh);
+  MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
+  boundary_cell = false;
+  if ( boundary.numVertices() > 0 )
+  {
+    MeshFunction<uint> *bnd_vertex_map = boundary.data().meshFunction("vertex map");
+    dolfin_assert(bnd_vertex_map);
+
+    for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
+    {
+      Vertex v(mesh, bnd_vertex_map->get(v_it->index()));
+
+      // all connected cells are on the boundary
+      for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
+        boundary_cell.set(c_it->index(), true);
+    }
   }
 
   // Assume uniform refinement
@@ -112,12 +168,15 @@ void DMesh::imp(Mesh& mesh)
   {
     DVertex* dv = new DVertex;    
     dv->p = vi->point();
+    dv->id = vi->index();
     dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
     dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
     dv->shared = mesh.distdata().is_shared(vi->index(), 0);
     dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
     if (dv->ghosted)
-      dv->owner = mesh.distdata().get_owner(*vi);    
+      dv->owner = mesh.distdata().get_owner(*vi);
+    else if (dv->shared)
+      dv->shared_adj = mesh.distdata().get_shared_adj(*vi);
 
     if(dv->on_boundary)     
       bc_dvs[dv->glb_id] = dv;
@@ -163,6 +222,7 @@ void DMesh::imp(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void DMesh::exp(Mesh& mesh)
 {
+  eraseRemovedEntities();
   number();
 
   MeshEditor editor;
@@ -177,6 +237,8 @@ void DMesh::exp(Mesh& mesh)
       it != vertices.end(); ++it)
   {
     DVertex* dv = *it;
+    dolfin_assert( !dv->deleted );
+
     editor.addVertex(current_vertex, dv->p);
     if(dv->ghosted) {
       mesh.distdata().set_ghost(current_vertex, 0);
@@ -193,6 +255,7 @@ void DMesh::exp(Mesh& mesh)
       it != cells.end(); ++it)
   {
     DCell* dc = *it;
+    dolfin_assert( !dc->deleted );
 
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
@@ -213,15 +276,89 @@ void DMesh::exp(Mesh& mesh)
   }
 }
 //-----------------------------------------------------------------------------
-void DMesh::number()
+void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
+                             Array<int> * old2new_vertices)
 {
+  // Remove entities marked for deletion
+  eraseRemovedEntities();
+
+  // Renumber and create mapping
+  number(old2new_cells, old2new_vertices);
+
+  MeshEditor editor;
+  editor.open(mesh, cell_type->cellType(), d, d);
+  
+  editor.initVertices(vertices.size());
+  editor.initCells(cells.size());
+
+  // Add old vertices
+  uint current_vertex = 0;
+  for(std::set<DVertex* >::iterator it = vertices.begin();
+      it != vertices.end(); ++it)
+  {
+    DVertex* dv = *it;
+    dolfin_assert( !dv->deleted );
+
+    editor.addVertex(current_vertex, dv->p);
+
+    if(dv->ghosted) {
+      mesh.distdata().set_ghost(current_vertex, 0);
+      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+    }
+    else if(dv->shared)
+    {
+      mesh.distdata().set_shared(current_vertex, 0);
+      mesh.distdata().get_shared_adj(current_vertex, 0) = dv->shared_adj;
+    }
+
+    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);      
+  }
+
+  Array<uint> cell_vertices(cell_type->numEntities(0));
+  uint current_cell = 0;
+  for(std::list<DCell* >::iterator it = cells.begin();
+      it != cells.end(); ++it)
+  {
+    DCell* dc = *it;
+    dolfin_assert( !dc->deleted );
+
+    for(uint j = 0; j < dc->vertices.size(); j++)
+    {
+      DVertex* dv = dc->vertices[j];
+      cell_vertices[j] = dv->id;
+    }
+    editor.addCell(current_cell, cell_vertices);
+
+    current_cell++;
+  }
+  editor.close();
+}
+//-----------------------------------------------------------------------------
+void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
+{
+  if ( old2new_vertices )
+  {
+    dolfin_assert( old2new_vertices->size() >= vertices.size() );
+    *old2new_vertices = -1;
+  }
+
   uint i = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
       it != vertices.end(); ++it)
   {
     DVertex* dv = *it;
+
+    if ( old2new_vertices )
+      old2new_vertices->at(dv->id) = i;
+
     dv->id = i;
-    i++;
+    ++i;
+  }
+
+  if ( old2new_cells )
+  {
+    dolfin_assert( old2new_cells->size() >= cells.size() );
+    *old2new_cells = -1;
   }
 
   i = 0;
@@ -229,8 +366,12 @@ void DMesh::number()
       it != cells.end(); ++it)
   {
     DCell* dc = *it;
+
+    if ( old2new_cells )
+      old2new_cells->at(dc->id) = i;
+    
     dc->id = i;
-    i++;
+    ++i;
   }  
 }
 //-----------------------------------------------------------------------------
@@ -407,10 +548,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 //-----------------------------------------------------------------------------
 void DMesh::addVertex(DVertex* v)
 {
-  //  vertices.push_back(v);
   vertices.insert(v);
-  //  if(v->glb_id < 0)
-  //    v->glb_id = _start_offset++;
 }
 //-----------------------------------------------------------------------------
 void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
@@ -428,16 +566,58 @@ void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
 //-----------------------------------------------------------------------------
 void DMesh::removeCell(DCell* c)
 {
-  /*
-  for(uint i = 0; i < c->vertices.size(); ++i)
-  {
-    DVertex* v = c->vertices[i];
-    v->cells.remove(c);
-  } 
-*/ 
-  //  cells.remove(c);
   c->deleted = true;
-  //  delete c;
+}
+//-----------------------------------------------------------------------------
+void DMesh::removeVertex(DVertex* v)
+{
+  v->deleted = true;
+}
+//-----------------------------------------------------------------------------
+void DMesh::eraseRemovedEntities()
+{
+  // Remove deleted cells from global list
+  for ( std::list<DCell *>::iterator c_it(cells.begin()) ; c_it != cells.end() ;)
+  {
+    DCell * dc = *c_it;
+    if ( dc->deleted )
+    {
+      c_it = cells.erase(c_it);
+      delete dc;
+    }
+    else
+      ++c_it;
+  }
+
+  // Remove deleted vertices from global list
+  for ( std::set<DVertex *>::iterator v_it(vertices.begin()) ; 
+        v_it != vertices.end() ; /* blank */ )
+  {
+    DVertex * dv = *v_it;
+    if ( dv->deleted )
+    {
+      vertices.erase( v_it++ );
+      delete dv;
+    }
+    else
+      ++v_it;
+  }
+}
+//-----------------------------------------------------------------------------
+DVertex* DMesh::getVertex(int local_id)
+{
+  std::set<DVertex *>::const_iterator it = std::find_if( vertices.begin(), 
+                vertices.end(), CheckVertexId(local_id) );
+
+  return ( it != vertices.end() ? *it : 0 );
+}
+//-----------------------------------------------------------------------------
+DCell* DMesh::getCell(int local_id)
+{
+  std::list<DCell *>::const_iterator it = std::find_if( cells.begin(), 
+                cells.end(), CheckCellId(local_id) );
+
+  return ( it != cells.end() ? *it : 0 );
 }
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(std::vector<bool> marked_ids)

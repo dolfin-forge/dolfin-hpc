@@ -9,7 +9,7 @@
 #define __D_VERTEX_H
 
 #include <list>
-
+#include <dolfin/common/types.h>
 #include <dolfin/mesh/Point.h>
 
 namespace dolfin
@@ -35,6 +35,9 @@ namespace dolfin
     /// Vertex coordinates as Point object
     Point p;
 
+    /// Marker for deletion
+    bool deleted;
+
     /// Indicator if vertex is on process boundary
     bool on_boundary;
 
@@ -46,6 +49,9 @@ namespace dolfin
 
     /// Rank of owning process
     int owner;
+
+    /// Adjacent processes for boundary vertices
+    _set<uint> shared_adj;
   };
 }
 

@@ -58,8 +58,27 @@ namespace dolfin
     /// Add a new cell with vertices vs and inside existing cell parent_id
     void addCell(DCell* c, std::vector<DVertex*> vs, int parent_id);
 
+    /// Remove a vertex
+    ///
+    /// Entity is just marked as deleted, but not yet erased
+    void removeVertex(DVertex* v);
+
     /// Remove a cell
+    ///
+    /// Entity is just marked as deleted, but not yet erased
     void removeCell(DCell* c);
+
+    /// Erase removed entities from datastructures
+    ///
+    /// removeVertex() and removeCell() only mark entitites for deletion but are
+    /// not actually erased
+    void eraseRemovedEntities();
+
+    /// Find Vertex by its local id
+    DVertex* getVertex(int local_id);
+
+    /// Find Cell by its local id
+    DCell* getCell(int local_id);
 
     /// Import an existing mesh
     void imp(Mesh& mesh);
@@ -67,8 +86,19 @@ namespace dolfin
     /// Export to a regular mesh
     void exp(Mesh& mesh);
 
+    /// Export to a regular mesh but keep global numbering
+    ///
+    /// An optional mapping between old and new indices is generated. The Arrays
+    /// have to have the size of the old numbering
+    void expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells = 0, 
+                          Array<int> * old2new_vertices = 0);
+
     /// Renumber mesh entities locally
-    void number();
+    ///
+    /// An optional mapping between old and new indices is generated. The Arrays
+    /// have to have the size of the old numbering
+    void number(Array<int> * old2new_cells = 0, 
+                Array<int> * old2new_vertices = 0);
 
     /// Bisect cell 
     ///

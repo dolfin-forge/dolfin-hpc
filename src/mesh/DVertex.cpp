@@ -10,7 +10,7 @@
 using namespace dolfin;
 //------------------------------------------------------------------------------
 DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0), 
-         on_boundary(false), shared(false),
+         deleted(false), on_boundary(false), shared(false),
          ghosted(false), owner(-1)
 {
 }

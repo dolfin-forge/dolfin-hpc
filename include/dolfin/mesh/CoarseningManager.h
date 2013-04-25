@@ -12,10 +12,18 @@
 #include <dolfin/common/List.h>
 #include <dolfin/mesh/MeshFunction.h>
 
+#define ____USE_D_MESH____            // Activate usage of dynamic mesh
+
 namespace dolfin
 {
   class Mesh;
   class Vertex;
+
+#ifdef ____USE_D_MESH____
+  class DMesh;
+  class DVertex;
+  class DCell;
+#endif
 
   /// Assists LocalMeshCoarsening by providing relevant information about mesh
   /// entities. 
@@ -65,6 +73,19 @@ namespace dolfin
     inline bool isForbiddenVertex(uint index)
     { return _forbidden_vertices.at(index); }
 
+#ifdef ____USE_D_MESH____
+    bool checkDCellNumbering(uint max_index);
+
+    /// Gives access to the dynamic mesh
+    inline DMesh * dmesh()
+    { return _dmesh; }
+
+    /// Gives access to the dynamic mesh
+    inline DMesh const * dmesh() const
+    { return _dmesh; }
+#endif
+
+#ifndef ____USE_D_MESH____
     /// Gives access to the IndexMap for cells
     inline IndexMap& cell_map()
     { return _cell_map; }
@@ -80,7 +101,17 @@ namespace dolfin
     /// Gives access to the IndexMap for vertices
     inline IndexMap const & vertex_map() const
     { return _vertex_map; }
+#endif
 
+#ifdef ____USE_D_MESH____
+    /// Gives access to the list of cells for coarsening
+    inline List<DCell *>& cells_to_coarsen()
+    { return _cells_to_coarsen; }
+
+    /// Gives access to the list of cells for coarsening
+    inline List<DCell *> const & cells_to_coarsen() const
+    { return _cells_to_coarsen; }
+#else // ____USE_D_MESH____
     /// Gives access to the list of cells for coarsening
     inline List<uint>& cells_to_coarsen()
     { return _cells_to_coarsen; }
@@ -88,6 +119,7 @@ namespace dolfin
     /// Gives access to the list of cells for coarsening
     inline List<uint> const & cells_to_coarsen() const
     { return _cells_to_coarsen; }
+#endif // ____USE_D_MESH____
 
     /// Gives access to the list of cells that have been attempted to be 
     /// coarsened but failed because of missing data from other processes
@@ -112,8 +144,10 @@ namespace dolfin
     /// Migrates cells according to request list
     bool migrate(Mesh& mesh, bool repeat);
 
+#ifndef ____USE_D_MESH____
     /// Update distributed data
     void updateDistdata(Mesh& mesh, Mesh& coarse_mesh);
+#endif
 
   private:
     /// Helper class that implements a BiMap-like datastructure, that allows lookup in both
@@ -402,6 +436,11 @@ namespace dolfin
     };
 
   private:
+#ifdef ____USE_D_MESH____
+    /// Dynamic mesh
+    DMesh* _dmesh;
+#endif // ____USE_D_MESH____
+
     /// Indicator for vertices on domain boundaries
     Array<bool> _bnd_vertices;
 
@@ -417,13 +456,19 @@ namespace dolfin
     /// Indicator for independent set of vertices
     Array<bool> _forbidden_vertices;
 
+#ifndef ____USE_D_MESH____
     /// IndexMaps for relation between coarse and fine mesh indices
     IndexMap _vertex_map;
     IndexMap _cell_map;
+#endif
 
+#ifdef ____USE_D_MESH____
+    /// List of cells to coarsen
+    List<DCell*> _cells_to_coarsen;
+#else // ____USE_D_MESH____
     /// List of cells to coarsen
     List<uint> _cells_to_coarsen;
-
+#endif // ____USE_D_MESH____
     /// List of cells that need neighboring cells from other processes
     List<uint> _cells_to_request;
 

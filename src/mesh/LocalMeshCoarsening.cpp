@@ -424,7 +424,13 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     }
   } while ( manager.migrate(mesh, prev_num_cells > mesh.numCells()) );
 
-  if (MPI::numProcesses() > 1) mesh.renumber();
+  if (MPI::numProcesses() > 1) 
+  {
+    message("[%d] renumbering", MPI::processNumber());
+    //mesh.distdata().invalid_numbering();
+    //mesh.distdata().invalid_ownership();
+    mesh.renumber();
+  }
 
   message(
     "[%d] Mesh coarsening done. Deleted %d vertices and %d cells, %d vertices and %d cells remain",

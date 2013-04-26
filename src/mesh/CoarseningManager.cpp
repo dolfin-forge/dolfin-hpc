@@ -42,8 +42,10 @@ CoarseningManager::CoarseningManager(MeshFunction<bool>& cell_marker,
 //-----------------------------------------------------------------------------
 CoarseningManager::~CoarseningManager()
 {
+#ifdef ____USE_D_MESH____
   if ( _dmesh )
     delete _dmesh;
+#endif
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::init(MeshFunction<bool>& cell_marker, 
@@ -524,23 +526,24 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   message("[%d] Initializing migration", rank);
 
   // exchange maximum number of requested vertices
-  int local_status[3], remote_status[3];
+  int local_status[3], global_status[3];
   local_status[0] = _vertices_to_request.size(); // local number of vertices
   local_status[1] = repeat;                      // local termination?
   local_status[2] = _migrated_cells;             // number of cells migrated
                                                  // in last migration
-  MPI_Allreduce(&local_status, &remote_status, 3, MPI_INT, 
+  MPI_Allreduce(&local_status, &global_status, 3, MPI_INT, 
                 MPI_MAX, MPI::DOLFIN_COMM);
 
-  uint max_num_requested_vertices = remote_status[0]; // max number of vertices
-  repeat = remote_status[1];                          // global termination?
-  uint max_num_migrated_cells = remote_status[2];     // max num migrated cells
+  uint max_num_requested_vertices = global_status[0]; // max number of vertices
+  repeat = global_status[1];                          // global termination?
+  uint max_num_migrated_cells = global_status[2];     // max num migrated cells
 
   message("[%d] max_num_requested_vertices = %d", rank, max_num_requested_vertices);
 
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
   {
+    message("[%d] nothing to do, returning with repeat = %d", rank, repeat);
     _migrated_cells = 0;
     return repeat;
   }

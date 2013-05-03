@@ -69,7 +69,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   dolfin_assert( manager.checkDCellNumbering(mesh.numCells() - 1) );
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  message("[%d] %d cells selected for coarsening", MPI::processNumber(), num_cells_to_coarsen);
+  message("[%d] Mesh coarsening", MPI::processNumber());
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
@@ -99,12 +99,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   manager.dmesh()->exp(omesh);
   mesh = omesh;
 
-  //if (MPI::numProcesses() > 1) mesh.renumber();
-
-  message(
-    "[%d] Mesh coarsening done. Deleted %d cells, now %d vertices and %d cells",
-     MPI::processNumber(), num_cells_coarsened, 
-     mesh.numVertices(), mesh.numCells() );
+  message("[%d] Mesh coarsening done.", MPI::processNumber());
 }
 //-----------------------------------------------------------------------------
 bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager, 
@@ -264,18 +259,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
 
   dolfin_assert( cells_to_regenerate.size() + cells_to_remove.size() == 
                   vertex_to_remove_cells.size() );
-/*
-  std::stringstream os;
-  os << "[" << MPI::processNumber() << "] cells_to_remove: ";
-  for ( std::list<DCell *>::iterator c_it(cells_to_remove.begin()) ; 
-        c_it != cells_to_remove.end() ; ++c_it )
-    os << (*c_it)->id << " ";
-  os << ", cells_to_regenerate: ";
-  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ;
-        c_it != cells_to_regenerate.end() ; ++c_it )
-    os << (*c_it)->id << " ";
-  message( os.str() );
-*/
+
   // Save cell orientations for checkMesh
   std::vector<uint> cells_to_regenerate_orientations(cells_to_regenerate.size());
   std::vector<uint>::iterator o_it(cells_to_regenerate_orientations.begin());
@@ -378,7 +362,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   manager.init(cell_marker, coarsen_boundary);
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  message("[%d] %d cells selected for coarsening", MPI::processNumber(), num_cells_to_coarsen);
+  message("[%d] Mesh coarsening", MPI::processNumber());
 
   // Coarsen until nothing happens anymore
   std::pair<bool,bool> result;
@@ -426,16 +410,12 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   if (MPI::numProcesses() > 1) 
   {
-    message("[%d] renumbering", MPI::processNumber());
     //mesh.distdata().invalid_numbering();
     //mesh.distdata().invalid_ownership();
     mesh.renumber();
   }
 
-  message(
-    "[%d] Mesh coarsening done. Deleted %d vertices and %d cells, %d vertices and %d cells remain",
-     MPI::processNumber(), init_num_verts - mesh.numVertices(), 
-     init_num_cells - mesh.numCells(), mesh.numVertices(), mesh.numCells() );
+  message("[%d] Mesh coarsening done.", MPI::processNumber() );
 }
 //-----------------------------------------------------------------------------
 #ifdef ____AVOID_TOPOLOGY_INIT____

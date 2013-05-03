@@ -210,22 +210,6 @@ bool CoarseningManager::isIndependentVertex(Vertex& v)
   return true;
 }
 //-----------------------------------------------------------------------------
-template<typename T>
-void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker)
-{
-  _cells_to_coarsen.clear();
-
-  for ( CellIterator c_it(cell_marker.mesh()) ; !c_it.end() ; ++c_it )
-  {
-    if ( cell_marker.get(c_it->index()) )
-#ifdef ____USE_D_MESH____
-      _cells_to_coarsen.push_back( _dmesh->getCell(c_it->index()) );
-#else
-      _cells_to_coarsen.push_back(c_it->index());
-#endif
-  }
-}
-//-----------------------------------------------------------------------------
 #ifdef ____USE_D_MESH____
 //-----------------------------------------------------------------------------
 bool CoarseningManager::checkDCellNumbering(uint max_index)
@@ -238,6 +222,20 @@ bool CoarseningManager::checkDCellNumbering(uint max_index)
       ret = false;
   }
   return ret;
+}
+//-----------------------------------------------------------------------------
+template<typename T>
+void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker)
+{
+  _cells_to_coarsen.clear();
+
+  for ( std::list<DCell *>::iterator c_it(_dmesh->cells.begin()) ;
+        c_it != _dmesh->cells.end() ; ++c_it )
+  {
+    DCell * dc = *c_it;
+    if ( cell_marker.get(dc->id) )
+      _cells_to_coarsen.push_back(dc);
+  }
 }
 //-----------------------------------------------------------------------------
 bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
@@ -268,8 +266,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
   uint max_num_requested_vertices = remote_status[0]; // max number of vertices
   repeat = remote_status[1];                          // global termination?
   uint max_num_migrated_cells = remote_status[2];     // max num migrated cells
-
-  message("[%d] max_num_requested_vertices = %d", rank, max_num_requested_vertices);
 
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
@@ -322,8 +318,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
       requested_vertices[global_index] = rank;
     }
   }
-
-  message("[%d] Sending requests to owners", MPI::processNumber());
 
   // pairwise communication to exchange requests
   MPI_Status status;
@@ -399,8 +393,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
       partitions(*c_it) = target_proc;
     }
   }
-
-  message("[%d] Receiving requests from owners", MPI::processNumber());
 
   // pairwise communication to exchange requests
   for ( uint i(1) ; i < pe_size ; ++i )
@@ -487,7 +479,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
   cell_functions.push_back( std::make_pair(&cell_marker, &cell_marker_new) );
 
   _migrated_cells = num_send_cells;
-  message("[%d] Distribution. Sending %d cells", rank, num_send_cells);
 
   // distribute partitioning and MeshFunctions
   omesh.distribute( partitions, cell_functions, vertex_functions );
@@ -510,6 +501,18 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
 }
 //-----------------------------------------------------------------------------
 #else // ____USE_D_MESH____
+//-----------------------------------------------------------------------------
+template<typename T>
+void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker)
+{
+  _cells_to_coarsen.clear();
+
+  for ( CellIterator c_it(cell_marker.mesh()) ; !c_it.end() ; ++c_it )
+  {
+    if ( cell_marker.get(c_it->index()) )
+      _cells_to_coarsen.push_back(c_it->index());
+  }
+}
 //-----------------------------------------------------------------------------
 bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
 {
@@ -538,12 +541,9 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   repeat = global_status[1];                          // global termination?
   uint max_num_migrated_cells = global_status[2];     // max num migrated cells
 
-  message("[%d] max_num_requested_vertices = %d", rank, max_num_requested_vertices);
-
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
   {
-    message("[%d] nothing to do, returning with repeat = %d", rank, repeat);
     _migrated_cells = 0;
     return repeat;
   }
@@ -740,7 +740,6 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   cell_functions.push_back( std::make_pair(&cell_marker, &cell_marker_new) );
 
   _migrated_cells = num_send_cells;
-  message("[%d] Distribution. Sending %d cells", rank, num_send_cells);
 
   // distribute partitioning and MeshFunctions
   mesh.distribute( partitions, cell_functions, vertex_functions );

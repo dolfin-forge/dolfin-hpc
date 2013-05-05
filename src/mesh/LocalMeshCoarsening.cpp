@@ -73,7 +73,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
-  uint result;
+  int result;
   do {
     prev_num_cells_coarsened = num_cells_coarsened;
 

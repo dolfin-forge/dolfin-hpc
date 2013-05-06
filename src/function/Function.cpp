@@ -320,8 +320,8 @@ void Function::interpolate(const Function& other_func)
 {
 	if (f && this->type() == Function::discrete)
 	{
-		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(other_func.signature());
-		DofMap * dofmap =  new DofMap("FFC dof map for "+other_func.signature(), mesh());
+		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(this->signature());
+		DofMap * dofmap =  new DofMap("FFC dof map for "+this->signature(), mesh());
 
 		uint valuedim = ufcfe->value_dimension(0);
 		uint dofspercell = dofmap->local_dimension();
@@ -345,16 +345,15 @@ void Function::interpolate(const Function& other_func)
 			dofmap->tabulate_dofs(idx, ufccell, cell->index());
 			dofmap->tabulate_coordinates(dofscoords, ufccell);
 
-			// For each dof evaluate the value
 			uint dof_id = 0;
-			for (uint dof_node = 0; dof_node < nodespercell; ++dof_node)
-			{
+			for (uint vd = 0; vd < valuedim; ++vd)
+			  {
+			    for (uint dof_node = 0; dof_node < nodespercell; ++dof_node, ++dof_id)
+			      {
 				other_func.eval(val, dofscoords[dof_node]);
-				for (uint vd = 0; vd < valuedim; ++vd, ++dof_id)
-				{
-					block[dof_node+nodespercell*vd] = val[vd];
-				}
-			}
+				block[dof_id] = val[vd];
+			      }
+			  }
 			this->vector().set(block, dofspercell,idx);
 			this->vector().apply();
 		}

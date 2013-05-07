@@ -252,8 +252,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
     return repeat;
   }
 
-  message("[%d] Initializing migration", rank);
-
   // exchange maximum number of requested vertices
   int local_status[3], remote_status[3];
   local_status[0] = _vertices_to_request.size(); // local number of vertices
@@ -494,9 +492,6 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
     if ( forbidden_vertices_new.get(v_it->index()) > 0.5 )
       _forbidden_vertices[v_it->index()] = true;
 
-  message("[%d] Distribution done! Now %d cells are marked for coarsening!", 
-            rank, _cells_to_coarsen.size());
-
   return true;
 }
 //-----------------------------------------------------------------------------
@@ -525,8 +520,6 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
     dolfin_assert(_vertices_to_request.size() == 0);
     return repeat;
   }
-
-  message("[%d] Initializing migration", rank);
 
   // exchange maximum number of requested vertices
   int local_status[3], global_status[3];
@@ -754,9 +747,6 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
     if ( forbidden_vertices_new.get(v_it->index()) > 0.5 )
       _forbidden_vertices[v_it->index()] = true;
-
-  message("[%d] Distribution done! Now %d cells are marked for coarsening!", 
-            rank, _cells_to_coarsen.size());
 
   return true;
 }

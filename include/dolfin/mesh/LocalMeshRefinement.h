@@ -26,10 +26,10 @@ namespace dolfin
     static void refineMeshByEdgeBisection(Mesh& mesh, 
                                           MeshFunction<bool>& cell_marker,
                                           bool refine_boundary = true,
-					  real tf = 0.0, 
-					  real tb = 0.0, 
-					  real ts = 0.0,
-					  bool balance = true);
+                                          real tf = 0.0, 
+                                          real tb = 0.0, 
+                                          real ts = 0.0,
+                                          bool balance = true);
   private: 
 
     /// Bisect edge of simplex cell

@@ -42,6 +42,7 @@ namespace dolfin
 
     /// Friends
     friend class XMLFile;
+    friend LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
     
   private:
 
@@ -69,6 +70,7 @@ namespace dolfin
     
   };
   
+  LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
 }
 
 #endif

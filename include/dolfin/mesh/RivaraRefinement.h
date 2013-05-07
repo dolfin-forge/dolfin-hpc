@@ -20,11 +20,11 @@ namespace dolfin
     
     /// Refine simplicial mesh locally by recursive edge bisection 
     static void refine(Mesh& mesh, 
-		       MeshFunction<bool>& cell_marker,
-		       real tf = 0.0, 
-		       real tb = 0.0, 
-		       real ts = 0.0,
-		       bool balance = true);
+                       MeshFunction<bool>& cell_marker,
+                       real tf = 0.0, 
+                       real tb = 0.0, 
+                       real ts = 0.0,
+                       bool balance = true);
   };
 }
 

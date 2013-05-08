@@ -26,7 +26,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 Function::Function() :
-		Variable("u", "empty function"),
+		Variable("*no name*", "empty function"),
 		f(0),
 		_type(empty),
 		_cell(0),
@@ -36,7 +36,7 @@ Function::Function() :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
-		Variable("u", "user-defined function"),
+		Variable("*no name*", "user-defined function"),
 		f(0),
 		_type(user),
 		_cell(0),
@@ -46,7 +46,7 @@ Function::Function(Mesh& mesh) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
-		Variable("u", "constant function"),
+		Variable("*no name*", "constant function"),
 		f(0),
 		_type(constant),
 		_cell(0),
@@ -56,7 +56,7 @@ Function::Function(Mesh& mesh, real value) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, uint size, real value) :
-		Variable("u", "constant function"),
+		Variable("*no name*", "constant function"),
 		f(0),
 		_type(constant),
 		_cell(0),
@@ -66,7 +66,7 @@ Function::Function(Mesh& mesh, uint size, real value) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<real>& values) :
-		Variable("u", "constant function"),
+		Variable("*no name*", "constant function"),
 		f(0),
 		_type(constant),
 		_cell(0),
@@ -77,7 +77,7 @@ Function::Function(Mesh& mesh, const Array<real>& values) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<uint>& shape,
 					const Array<real>& values) :
-		Variable("u", "constant function"),
+		Variable("*no name*", "constant function"),
 		f(0),
 		_type(constant),
 		_cell(0),
@@ -87,7 +87,7 @@ Function::Function(Mesh& mesh, const Array<uint>& shape,
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const ufc::function& function, uint size) :
-		Variable("u", "ufc function"),
+		Variable("*no name*", "ufc function"),
 		f(0),
 		_type(ufc),
 		_cell(0),
@@ -97,7 +97,7 @@ Function::Function(Mesh& mesh, const ufc::function& function, uint size) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
-		Variable("u", "discrete function"),
+		Variable("*no name*", "discrete function"),
 		f(0),
 		_type(discrete),
 		_cell(0),
@@ -108,7 +108,7 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 					const ufc::form& form, uint i) :
-		Variable("u", "discrete function"),
+		Variable("*no name*", "discrete function"),
 		f(0),
 		_type(discrete),
 		_cell(0),
@@ -119,14 +119,14 @@ Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
-  : Variable("u", "discrete function"),
+  : Variable("*no name*", "discrete function"),
     f(0), _type(discrete), _cell(0), _facet(-1)
 {
   f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
-		Variable("u", "discrete function from data file"),
+		Variable("*no name*", "discrete function from data file"),
 		f(0),
 		_type(empty),
 		_cell(0),
@@ -137,7 +137,7 @@ Function::Function(const std::string filename) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(SubFunction f) :
-		Variable("u", "discrete function"),
+		Variable("*no name*", "discrete function"),
 		f(0),
 		_type(discrete),
 		_cell(0),
@@ -156,36 +156,40 @@ Function::Function(const Function& f) :
 	if (f.type() == discrete)
 	{
 		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f));
-		rename("x", "discrete function");
+		rename(f.name(), "discrete function");
 	}
 	else if (f.type() == constant)
 	{
 		this->f = new ConstantFunction(*static_cast<ConstantFunction*>(f.f));
-		rename("x", "constant function");
+		rename(f.name(), "constant function");
 	}
 	else if (f.type() == empty)
 	{
-		rename("x", "empty function");
+		rename(f.name(), "empty function");
 	}
 	else
+	{
 		error(
 				"Copy constructor works for discrete, constant and empty functions only (so far).");
+	}
 }
 //-----------------------------------------------------------------------------
 Function::~Function()
 {
 	if (f)
+	{
 		delete f;
+	}
 }
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 {
 	if (f)
+	{
 		delete f;
+	}
 
 	f = new DiscreteFunction(mesh, x, form, i);
-
-	rename("u", "discrete function");
 	_type = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -193,22 +197,22 @@ void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 					const ufc::form& form, uint i)
 {
 	if (f)
+	{
 		delete f;
+	}
 
 	f = new DiscreteFunction(mesh, x, dof_map, form, i);
-
-	rename("u", "discrete function");
 	_type = discrete;
 }
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
 {
   if (f)
+  {
     delete f;
+  }
 
   f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
-
-  rename("u", "discrete function");
   _type = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -220,7 +224,9 @@ Function::Type Function::type() const
 dolfin::uint Function::rank() const
 {
 	if (!f)
+	{
 		error("Function contains no data.");
+	}
 
 	return f->rank();
 }
@@ -228,7 +234,9 @@ dolfin::uint Function::rank() const
 dolfin::uint Function::dim(unsigned int i) const
 {
 	if (!f)
+	{
 		error("Function contains no data.");
+	}
 
 	return f->dim(i);
 }
@@ -236,7 +244,9 @@ dolfin::uint Function::dim(unsigned int i) const
 Mesh& Function::mesh() const
 {
 	if (!f)
+	{
 		error("Function contains no data.");
+	}
 
 	return f->mesh;
 }
@@ -244,10 +254,14 @@ Mesh& Function::mesh() const
 std::string Function::signature() const
 {
 	if (!f)
+	{
 		error("Function contains no data.");
+	}
 
 	if (_type != discrete)
+	{
 		error("A signature can only be returned by discrete functions.");
+	}
 
 	return (static_cast<DiscreteFunction*>(f))->signature();
 }
@@ -258,7 +272,9 @@ GenericVector& Function::vector() const
 		error("Function contains no data.");
 
 	if (_type != discrete)
+	{
 		error("A vector can only be extracted from discrete functions.");
+	}
 
 	return (static_cast<DiscreteFunction*>(f))->vector();
 }
@@ -298,7 +314,7 @@ const Function& Function::operator=(Function& f)
 		delete this->f;
 		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f));
 		_type = discrete;
-		rename(name(), "discrete function");
+		rename(f.name(), "discrete function");
 	}
 	return *this;
 }
@@ -306,11 +322,13 @@ const Function& Function::operator=(Function& f)
 const Function& Function::operator=(SubFunction sub_function)
 {
 	if (f)
+	{
 		delete f;
+	}
 
 	f = new DiscreteFunction(sub_function);
 
-	rename("u", "discrete function");
+	rename("*no name*", "discrete function");
 	_type = discrete;
 
 	return *this;

@@ -91,9 +91,9 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     uint presize = cells_to_coarsen.size();
 
     //cout << "presize: " << presize << endl;
-
+    
     for(std::list<int>::iterator iter = cells_to_coarsen.begin();
-	      iter != cells_to_coarsen.end(); iter++)
+	iter != cells_to_coarsen.end(); iter++)
     {
       // Map cells to new mesh
       if(*iter >= 0)
@@ -114,19 +114,19 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
       if(cid != -1)
       {
-	      mesh_ok = coarsenCell(mesh, coarse_mesh, cid,
+	mesh_ok = coarsenCell(mesh, coarse_mesh, cid,
 			      old2new_vertex, old2new_cell,
 			      coarsen_boundary);
-	      if(!mesh_ok)
-	      {
-	        warning("Mesh not ok");
-	      }
-	      else
-	      {
-	        mesh = coarse_mesh;
-	        cells_to_coarsen.erase(iter);
-	        break;
-	      }
+	if(!mesh_ok)
+	{
+	  warning("Mesh not ok");
+	}
+	else
+	{
+	  mesh = coarse_mesh;
+	  cells_to_coarsen.erase(iter);
+	  break;
+	}
       }
     }
 

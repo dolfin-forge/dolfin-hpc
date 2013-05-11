@@ -275,9 +275,9 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-      MPI_UNSIGNED, dest, 0, 
-      recv_buff_requests, max_num_requested_vertices, MPI_UNSIGNED, src, 0,
-      MPI::DOLFIN_COMM, &status );
+		  MPI_UNSIGNED, dest, 0, 
+		  recv_buff_requests, max_num_requested_vertices, MPI_UNSIGNED, src, 0,
+		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
 
     // process received requests and puts them into the map
@@ -348,9 +348,9 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-      MPI_UNSIGNED, dest, 0, 
-      recv_buff_requests, 2 * max_num_requested_vertices, MPI_UNSIGNED, src, 0,
-      MPI::DOLFIN_COMM, &status );
+		  MPI_UNSIGNED, dest, 0, 
+		  recv_buff_requests, 2 * max_num_requested_vertices, MPI_UNSIGNED, src, 0,
+		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
 
     // process received requests and marks cells accordingly
@@ -384,18 +384,18 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
 
   // Lists of MeshFunctions for exchange
   Array< std::pair< MeshFunction<uint> * , MeshFunction<uint> * > > 
-                                                              cell_functions;
+    cell_functions;
   Array< std::pair< MeshFunction<double> * , MeshFunction<double> * > > 
-                                                              vertex_functions;
+    vertex_functions;
   
   // Prepare forbidden vertices for exchange
   MeshFunction<double> forbidden_vertices(mesh, 0);
   MeshFunction<double> forbidden_vertices_new;
   for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
     forbidden_vertices.set(*v_it, double( 
-      isForbiddenVertex(_vertex_map.getFineFromCoarse(v_it->index())) ) );
+					 isForbiddenVertex(_vertex_map.getFineFromCoarse(v_it->index())) ) );
   vertex_functions.push_back( 
-    std::make_pair(&forbidden_vertices, &forbidden_vertices_new) );
+			     std::make_pair(&forbidden_vertices, &forbidden_vertices_new) );
 
   // Prepare cell_marker for coarsening for exchange
   MeshFunction<uint> cell_marker(mesh, mesh.topology().dim());
@@ -432,7 +432,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);
 
   message("%d: Distribution done! Now %d cells are marked for coarsening!", 
-            rank, _cells_to_coarsen.size());
+	  rank, _cells_to_coarsen.size());
 
   return true;
 }
@@ -454,13 +454,13 @@ void CoarseningManager::updateDistdata(Mesh& old_mesh, Mesh& new_mesh)
     {
       new_mesh.distdata().set_ghost(v_it->index(), 0);
       new_mesh.distdata().set_ghost_owner(v_it->index(), 
-                  old_mesh.distdata().get_owner(old_index, 0), 0);
+					  old_mesh.distdata().get_owner(old_index, 0), 0);
     }
     else if (old_mesh.distdata().is_shared(old_index, 0))
     {
       new_mesh.distdata().set_shared(v_it->index(), 0);
       new_mesh.distdata().get_shared_adj(v_it->index(), 0) =
-                  old_mesh.distdata().get_shared_adj(old_index, 0);
+	old_mesh.distdata().get_shared_adj(old_index, 0);
     }
     else
       continue;

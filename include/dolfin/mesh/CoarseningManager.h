@@ -283,7 +283,14 @@ namespace dolfin
       ///   int
       ///     Index in the fine mesh, i.e. left hand entry in the pair (fine_id, coarse_id).
       inline int getFineFromCoarse(int coarse_id) const 
-      { return _fine2coarse.right().at(coarse_id); }
+      {
+#if (__sgi)
+	return (_fine2coarse.right())[coarse_id];
+#else
+	return _fine2coarse.right().at(coarse_id); 
+#endif
+      }
+
 
       /// Gives the corresponding coarse index to a given fine index
       ///
@@ -295,7 +302,14 @@ namespace dolfin
       ///   int
       ///     Index in the coarse mesh, i.e. right hand entry in the pair (fine_id, coarse_id).
       inline int getCoarseFromFine(int fine_id) const 
-      { return _fine2coarse.left().at(fine_id); }
+      { 
+#if (__sgi)
+	return (_fine2coarse.left())[fine_id]; 
+#else
+	return _fine2coarse.left().at(fine_id); 
+#endif
+      }
+
 
       /// Gives the corresponding fine index to a given coarse index in the second map
       ///
@@ -307,7 +321,13 @@ namespace dolfin
       ///   int
       ///     Index in the fine mesh, i.e. left hand entry in the pair (fine_id, coarse_id).
       inline int getNewFineFromCoarse(int coarse_id) const 
-      { return _fine2coarse_new.right().at(coarse_id); }
+      {
+#if (__sgi)
+	return (_fine2coarse_new.right())[coarse_id]; 
+#else
+	return _fine2coarse_new.right().at(coarse_id); 
+#endif
+      }
       
       /// Gives the corresponding coarse index to a given fine index in the second map
       ///
@@ -319,7 +339,13 @@ namespace dolfin
       ///   int
       ///     Index in the coarse mesh, i.e. right hand entry in the pair (fine_id, coarse_id).
       inline int getNewCoarseFromFine(int fine_id) const 
-      { return _fine2coarse_new.left().at(fine_id); }
+      {
+#if (__sgi)
+	return (_fine2coarse_new.left())[fine_id];
+#else
+	return _fine2coarse_new.left().at(fine_id);
+#endif
+      }
 
       /// Gives the corresponding coarse index in the second map to a given coarse index in
       /// the first map.

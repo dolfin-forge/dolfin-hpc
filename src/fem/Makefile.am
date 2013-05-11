@@ -1,7 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_fem.la
 libdolfin_fem_la_SOURCES = \
-			assemble.cpp\
 			Assembler.cpp\
 			BoundaryCondition.cpp\
 			DirichletBC.cpp\

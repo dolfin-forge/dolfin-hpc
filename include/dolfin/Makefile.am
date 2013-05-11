@@ -214,7 +214,6 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				fem/UFC.h\
 				fem/SparsityPatternBuilder.h\
 				fem/DofMapSet.h\
-				fem/assemble.h\
 				fem/DirichletBC.h\
 				fem/Form.h\
 				fem/dolfin_fem.h\

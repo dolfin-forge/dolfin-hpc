@@ -514,7 +514,14 @@ void DofMap::build()
       UFCCell ufc_cell(c_tmp);
 
       // Initialize random number generator differently on each process
-      srand((uint)time(0) + MPI::processNumber());
+      // FIXME: if the ghosts are randomly generated for a given mesh then
+      // two instances for the same mesh and same numbering have different
+      // ghosts which leads to several issues:
+      // - non matching ghosts with consequence of accessing the wrong dof
+      // - different local size which leads to crash
+      // We have to remove the randomness until a better solution is found.
+      // srand((uint)time(0) + MPI::processNumber());
+      srand(MPI::processNumber());
 
       // Decide ownership of shared dofs
       for (CellIterator bc(interior_boundary); !bc.end(); ++bc)

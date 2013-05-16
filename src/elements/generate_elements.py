@@ -5,20 +5,8 @@ __date__ = "2007-04-12 -- 2008-04-13"
 __copyright__ = "Copyright (C) 2007-2008 Anders Logg"
 __license__  = "GNU LGPL Version 2.1"
 
-from ffc.constants import FFC_VERSION
-from ffc.parameters import FFC_PARAMETERS
-from ffc.compiler import compile_element
-from ffc.fiatinterface import create_element
-
-from ufl import FiniteElement
-from ufl import VectorElement
-
-print "Generating Finite Element with FFC version " + FFC_VERSION
-
-# Don't generate all functions
-OPTIONS = FFC_PARAMETERS.copy()
-OPTIONS["no-evaluate_basis"] = False
-OPTIONS["no-evaluate_basis_derivatives"] = False
+from ffc import *
+from ffc.common.constants import FFC_OPTIONS
 
 # Fancy import of list of elements from elements.py
 from elements import __doc__ as elements
@@ -28,19 +16,20 @@ elements = [eval(element) for element in elements.split("\n")[1:-1]]
 signatures = []
 for i in range(len(elements)):
     
+    # Don't generate all functions
+    OPTIONS = FFC_OPTIONS.copy()
+    OPTIONS["no-evaluate_basis"] = False
+    OPTIONS["no-evaluate_basis_derivatives"] = False
+
     # Generate code
     print "Compiling element %d out of %d..." % (i, len(elements))
-    ufl_element = elements[i]
-    nb_subelm = ufl_element.num_sub_elements()
-    valuetype = ""
-    if nb_subelm > 0:
-        valuetype = "Vector"
-    name = "ffc_" + ufl_element.family().replace(" ","_") + "_" + str(ufl_element.degree()) + "_" + str(ufl_element.cell().d) + "d" + valuetype
-    compile_element(ufl_element, name, parameters=OPTIONS)
-	
+    element = elements[i]
+    name = "ffc_%.2d" % i
+    compile(element, name, options=OPTIONS)
+
     # Save signatures of elements and dof maps
-    # Rely on the same code snippet as in ffc.representation.py
-    signatures += [(name, repr(ufl_element), "FFC dofmap for " + repr(ufl_element))]
+    dof_map = DofMap(element)
+    signatures += [(name, element.signature(), dof_map.signature())]
     
 # Generate code for elementmap.cpp
 filename = "element_library.inc"
@@ -52,7 +41,7 @@ file.write("\n")
 file.write("#include <cstring>\n")
 file.write("\n")
 for (name, element_signature, dof_map_signature) in signatures:
-    file.write("#include <dolfin/elements/%s.h>\n" % name)
+    file.write("#include \"%s.h\"\n" % name)
 file.write("\n")
 file.write("#include \"ElementLibrary.h\"\n")
 file.write("\n")

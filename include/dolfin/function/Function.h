@@ -25,6 +25,7 @@ namespace dolfin
   class Mesh;
   class Form;
   class GenericFunction;
+  class GenericVector;
   class DofMap;
 
   /// This class represents a function that can be evaluated on a
@@ -131,6 +132,9 @@ namespace dolfin
     /// Interpolate function to vertices of mesh
     void interpolate(real* values);
 
+    /// Interpolate values from the given Function
+    void interpolate(const Function& other_func);
+
     /// Interpolate function to finite element space on cell
     void interpolate(real* coefficients,
                      const ufc::cell& ufc_cell,
@@ -160,6 +164,9 @@ namespace dolfin
 
     // Pointer to current implementation (letter base class)
     GenericFunction* f;
+
+    //TODO: set the Vector as attribute of the Function
+    //GenericVector v;
 
     // Type of function
     Type _type;

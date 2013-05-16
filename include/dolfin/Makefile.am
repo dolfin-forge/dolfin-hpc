@@ -1,59 +1,60 @@
 include_HEADERS = dolfin.h
 
 nobase_pkginclude_HEADERS = config/dolfin_config.h\
-				elements/ElementLibrary.h\
-				elements/ffc_L2proj_21.h\
-				elements/ffc_L2proj_24.h\
-				elements/ffc_L2proj_17.h\
-				elements/ffc_07.h\
-				elements/ffc_06.h\
-				elements/ffc_02.h\
-				elements/ffc_05.h\
-				elements/ffc_14.h\
-				elements/ffc_20.h\
-				elements/ffc_L2proj_19.h\
-				elements/ffc_L2proj_06.h\
-				elements/ffc_L2proj_22.h\
-				elements/ffc_19.h\
-				elements/ffc_00.h\
-				elements/ffc_L2proj_18.h\
-				elements/ffc_L2proj_01.h\
-				elements/ffc_21.h\
-				elements/ffc_L2proj_11.h\
-				elements/ffc_L2proj_13.h\
-				elements/ffc_L2proj_00.h\
-				elements/ffc_L2proj_23.h\
-				elements/ffc_08.h\
-				elements/ffc_L2proj_20.h\
-				elements/ffc_L2proj_02.h\
-				elements/ffc_L2proj_10.h\
-				elements/ffc_24.h\
-				elements/ffc_16.h\
-				elements/ffc_L2proj_07.h\
-				elements/ffc_22.h\
 				elements/dolfin_elements.h\
-				elements/ffc_03.h\
-				elements/ffc_L2proj_04.h\
+				elements/ElementLibrary.h\
+				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
+				elements/ffc_Discontinuous_Lagrange_0_1d.h\
+				elements/ffc_Discontinuous_Lagrange_0_2d.h\
+				elements/ffc_Discontinuous_Lagrange_0_2dVector.h\
+				elements/ffc_Discontinuous_Lagrange_0_3d.h\
+				elements/ffc_Discontinuous_Lagrange_0_3dVector.h\
+				elements/ffc_Discontinuous_Lagrange_1_1d.h\
+				elements/ffc_Discontinuous_Lagrange_1_2d.h\
+				elements/ffc_Discontinuous_Lagrange_1_2dVector.h\
+				elements/ffc_Discontinuous_Lagrange_1_3d.h\
+				elements/ffc_Discontinuous_Lagrange_1_3dVector.h\
+				elements/ffc_Discontinuous_Lagrange_2_1d.h\
+				elements/ffc_Discontinuous_Lagrange_2_2d.h\
+				elements/ffc_Discontinuous_Lagrange_2_2dVector.h\
+				elements/ffc_Discontinuous_Lagrange_2_3d.h\
+				elements/ffc_Discontinuous_Lagrange_2_3dVector.h\
+				elements/ffc_Lagrange_1_1d.h\
+				elements/ffc_Lagrange_1_2d.h\
+				elements/ffc_Lagrange_1_2dVector.h\
+				elements/ffc_Lagrange_1_3d.h\
+				elements/ffc_Lagrange_1_3dVector.h\
+				elements/ffc_Lagrange_2_1d.h\
+				elements/ffc_Lagrange_2_2d.h\
+				elements/ffc_Lagrange_2_2dVector.h\
+				elements/ffc_Lagrange_2_3d.h\
+				elements/ffc_Lagrange_2_3dVector.h\
 				elements/ProjectionLibrary.h\
-				elements/ffc_04.h\
-				elements/ffc_23.h\
-				elements/ffc_11.h\
-				elements/ffc_01.h\
-				elements/ffc_10.h\
-				elements/ffc_L2proj_08.h\
-				elements/ffc_17.h\
+				elements/ffc_L2proj_00.h\
+				elements/ffc_L2proj_01.h\
+				elements/ffc_L2proj_02.h\
 				elements/ffc_L2proj_03.h\
-				elements/ffc_L2proj_14.h\
-				elements/ffc_L2proj_12.h\
-				elements/ffc_15.h\
-				elements/ffc_12.h\
-				elements/ffc_18.h\
-				elements/ffc_13.h\
-				elements/ffc_L2proj_09.h\
-				elements/ffc_L2proj_16.h\
-				elements/ffc_L2proj_15.h\
+				elements/ffc_L2proj_04.h\
 				elements/ffc_L2proj_05.h\
-				elements/ffc_09.h\
+				elements/ffc_L2proj_06.h\
+				elements/ffc_L2proj_07.h\
+				elements/ffc_L2proj_08.h\
+				elements/ffc_L2proj_09.h\
+				elements/ffc_L2proj_10.h\
+				elements/ffc_L2proj_11.h\
+				elements/ffc_L2proj_12.h\
+				elements/ffc_L2proj_13.h\
+				elements/ffc_L2proj_14.h\
+				elements/ffc_L2proj_15.h\
+				elements/ffc_L2proj_16.h\
+				elements/ffc_L2proj_17.h\
+				elements/ffc_L2proj_18.h\
+				elements/ffc_L2proj_19.h\
+				elements/ffc_L2proj_20.h\
+				elements/ffc_L2proj_21.h\
+				elements/ffc_L2proj_22.h\
+				elements/ffc_L2proj_23.h\
+				elements/ffc_L2proj_24.h\
 				io/XMLFiniteElement.h\
 				io/Checkpoint.h\
 				io/XMLMeshFunction.h\

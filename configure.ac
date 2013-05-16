@@ -53,6 +53,10 @@ AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
 		     [Enable various quadrature rules]),
 		     [enable_quad=${enableval}],[enable_quad=no])
 
+AC_ARG_ENABLE(ufl, AC_HELP_STRING([--enable-ufl],
+		     [Enable UFL support using UFC version 2.1.1]),
+		     [enable_ufl=${enableval}],[enable_ufl=no])
+
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
 		 [Compile with support for reading/writing XML data]),
@@ -131,8 +135,14 @@ fi
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
-PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
-CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
+
+if test "x${enable_ufl}" == xno; then
+   PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
+   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
+else
+   PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
+   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+fi
 
 
 if test "x${need_boost}" = xyes; then
@@ -301,6 +311,7 @@ Package features:
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
+  UFL support: ${enable_ufl}
 
 
 ---------------------------------------------------------

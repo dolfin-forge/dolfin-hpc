@@ -41,21 +41,20 @@ AC_DEFUN([AX_PETSC],[
 	      
 	      have_petsc="yes"
 	   elif test -d "$ac_petsc_dir/conf"; then
-
-	     cat <<EOF >config_petsc
+	   
+          cat <<EOF >config_petsc
 include $PETSC_DIR/conf/variables
-petsclibs:
-	echo -L$PETSC_DIR/lib  \$(PETSC_TS_LIB_BASIC) \$(PACKAGES_LIBS)
 
+petsclibs:
+	echo -L$PETSC_DIR/lib/  \$(PETSC_LIB)
 petscinc:
-	echo -I$PETSC_DIR/include \$(MPI_INCLUDE) 
+	echo -I$PETSC_DIR/include/ \$(MPI_INCLUDE) 
 EOF
 	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
 	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
 	     rm -fr config_petsc
 	     have_petsc="yes"
-	   fi
-		
+	  fi		
 	fi
 	AC_SUBST(PETSC_LDFLAGS)
 	if test x"${have_petsc}" = xyes; then

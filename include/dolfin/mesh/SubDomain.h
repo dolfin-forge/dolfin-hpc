@@ -8,7 +8,6 @@
 #define __SUB_DOMAIN_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/common/simple_array.h>
 #include "MeshFunction.h"
 
 namespace dolfin

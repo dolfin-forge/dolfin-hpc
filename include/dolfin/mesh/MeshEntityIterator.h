@@ -52,7 +52,7 @@ public:
 	{
 		// FIXME: NOT GOOD
 		// Compute entities if empty and if number of cells is not zero
-		if ( (pos_end == 0) && (!mesh.numCells() == 0))
+		if ( (pos_end == 0) && (mesh.numCells() != 0))
 		{
 		  pos_end = mesh.init(dim);
 		}

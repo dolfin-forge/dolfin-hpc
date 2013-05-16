@@ -4,9 +4,10 @@
 // Modified by Johan Hoffman 2007.
 // Modified by Magnus Vikstrøm 2007.
 // Modified by Garth N. Wells 2007.
+// Modified by Balthasar Reuter, 2013.
 //
 // First added:  2006-05-08
-// Last changed: 2008-06-17
+// Last changed: 2013-03-22
 
 #ifndef __MESH_H
 #define __MESH_H
@@ -22,6 +23,7 @@
 
 namespace dolfin
 {
+
   
   template <class T> class MeshFunction;
   class MeshData;
@@ -52,10 +54,12 @@ namespace dolfin
   /// by a call to mesh.init(1). Similarly, connectivities such as
   /// all edges connected to a given vertex must also be explicitly
   /// created (in this case by a call to mesh.init(0, 1)).
+
   
   class Mesh : public Variable
   {
   public:
+
     
     /// Create empty mesh
     Mesh();
@@ -65,6 +69,7 @@ namespace dolfin
 
     /// Create mesh from data file
     Mesh(std::string filename);
+
     
     /// Destructor
     ~Mesh();
@@ -101,6 +106,7 @@ namespace dolfin
 
     /// Return number of entities of given topological dimension
     inline uint size(uint dim) const { return _topology.size(dim); }
+
     
     /// Return mesh topology (non-const version)
     inline MeshTopology& topology() { return _topology; }
@@ -162,9 +168,11 @@ namespace dolfin
 
     /// Move coordinates of mesh according to new boundary coordinates
     void move(Mesh& boundary, ALEType method=lagrange);
+
     
     /// Smooth mesh using Lagrangian mesh smoothing 
     void smooth();
+
     
     /// Partition mesh into num_processes partitions
     void partition(MeshFunction<uint>& partitions);
@@ -177,26 +185,55 @@ namespace dolfin
 
     /// Partition mesh into num_partitions = numProc
     void partition_geom(MeshFunction<uint>& partitions);
+
     
-    // Distribute a mesh according to a mesh function
+    /// Distribute a mesh according to a mesh function
     void distribute(MeshFunction<uint>& distribution);
 
-    // Distribute a mesh according to a mesh function and transfer marked cells
+    /// Distribute a mesh according to a mesh function and transfer marked cells
     void distribute(MeshFunction<uint>& distribution, 
                     MeshFunction<bool>& cell_markers,
                     MeshFunction<bool>& new_cell_markers);
 
-    // Renumber mesh global numbering
+    /// Distribute a mesh according to a mesh function and transfer cell functions
+    ///
+    /// cell_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution, 
+                    Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+                    >& cell_functions);
+
+    /// Distribute a mesh according to a mesh function and transfer vertex functions
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution, 
+                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+                    >& vertex_functions);
+
+    /// Distribute a mesh according to a mesh function and transfer cell and
+    /// vertex functions
+    ///
+    /// cell_functions contains pairs as <old_function,new_function>
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution, 
+                    Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
+                    >& cell_functions,
+                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
+                    >& vertex_functions);
+
+    /// Renumber mesh global numbering
     void renumber();
 
     /// Display mesh data
     void disp() const;
+
     
     /// Return a short desriptive string
     std::string str() const;
 
     /// Output
     friend LogStream& operator<< (LogStream& stream, const Mesh& mesh);
+
     
   private:
 

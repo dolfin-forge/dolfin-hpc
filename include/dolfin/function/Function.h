@@ -13,7 +13,6 @@
 
 #include <ufc.h>
 #include <dolfin/common/types.h>
-#include <dolfin/common/simple_array.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
@@ -98,7 +97,6 @@ namespace dolfin
 
     /// Create discrete function from signature
     void init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
-
 
     /// Return the type of function
     Type type() const;

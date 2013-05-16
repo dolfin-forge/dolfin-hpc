@@ -1,7 +1,10 @@
 // Copyright (C) 2006 Johan Hoffman.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Balthasar Reuter, 2013.
+//
 // First added:  2006-11-01
+// Last changed: 2013-02-06
 
 #ifndef __LOCAL_MESH_COARSENING_H
 #define __LOCAL_MESH_COARSENING_H
@@ -17,12 +20,19 @@ namespace dolfin
   class MeshEditor;
 
   /// This class implements local mesh coarsening for different mesh types.
-
   class LocalMeshCoarsening
   {
   public:
 
     /// Coarsen simplicial mesh locally by edge collapse 
+    ///
+    /// *Arguments*
+    ///   mesh (Mesh&)
+    ///     The mesh to be coarsened
+    ///   cell_marker (MeshFunction<bool>&)
+    ///     Indicates cells for coarsening with true
+    ///   coarsen_boundary (bool)
+    ///     Enable or disable coarsening of boundary cells
     static void coarsenMeshByEdgeCollapse(Mesh& mesh, 
                                           MeshFunction<bool>& cell_marker,
                                           bool coarsen_boundary = false); 

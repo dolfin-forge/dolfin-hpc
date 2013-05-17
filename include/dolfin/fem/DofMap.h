@@ -38,10 +38,10 @@ public:
 			bool dof_map_local = false);
 
 	/// Create dof map on mesh
-	DofMap(const std::string signature, Mesh& mesh);
+	DofMap(std::string const signature, Mesh& mesh);
 
 	/// Create dof map on mesh (parallel)
-	DofMap(const std::string signature, Mesh& mesh,
+	DofMap(std::string const signature, Mesh& mesh,
 			MeshFunction<uint>& partitions);
 
 	/// Destructor

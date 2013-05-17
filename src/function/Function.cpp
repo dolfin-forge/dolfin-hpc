@@ -22,7 +22,11 @@
 
 #include <dolfin/fem/UFCCell.h>
 
+#ifdef UFC2
 #define FFC_DOFMAP_FOR "FFC dofmap for "
+#else
+#define FFC_DOFMAP_FOR "FFC dof map for "
+#endif
 
 using namespace dolfin;
 

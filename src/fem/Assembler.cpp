@@ -36,6 +36,8 @@
 #include <mpi.h>
 #endif
 
+#include <iomanip>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -152,7 +154,9 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 #pragma omp master
   {
     if(reset_tensor)
+    {
       check(form, coefficients, mesh);
+    }
   }
 
   // Create data structure for local assembly data
@@ -433,7 +437,29 @@ void Assembler::check(const ufc::form& form,
 
       uint r = coefficients[i]->rank();
       uint fe_r = fe->value_rank();
-      message("Coefficient %d : \tname %s;\trank %d", i, coefficients[i]->name().c_str(), r);
+      std::string sign;
+      Function::Type ftype = coefficients[i]->type();
+      if (ftype == Function::discrete)
+      {
+        sign = fe->signature();
+      }
+      else if (ftype == Function::constant)
+      {
+        sign = "Constant Function";
+      }
+      else if (ftype == Function::user)
+      {
+        sign = "User Function";
+      }
+      else
+      {
+        sign = "None";
+      }
+      std::stringstream ss;
+      ss << "Coef" << std::setw(2) << i << ": " << std::setw(32)
+      << coefficients[i]->name() << "; rank " << r << "; "
+      << sign << " (Type =" << coefficients[i]->type() << ")";
+      message(ss.str());
       if(fe_r != r)
       {
         error("Invalid value rank of Function %d, got %d but expecting %d. \

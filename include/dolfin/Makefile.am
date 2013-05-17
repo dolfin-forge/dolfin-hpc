@@ -1,6 +1,10 @@
 include_HEADERS = dolfin.h
 
-nobase_pkginclude_HEADERS = config/dolfin_config.h\
+nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
+				adaptivity/AdaptiveRefinementProjectScalar.h\
+				adaptivity/AdaptiveRefinementProjectVector.h\
+				adaptivity/SpaceTimeFunction.h\
+				config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
@@ -212,6 +216,8 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				graph/Graph.h\
 				graph/UndirectedClique.h\
 				fem/SubSystem.h\
+				fem/SlipBC.h\
+				fem/NodeNormal.h\
 				fem/UFC.h\
 				fem/SparsityPatternBuilder.h\
 				fem/DofMapSet.h\

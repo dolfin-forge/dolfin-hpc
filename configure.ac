@@ -268,6 +268,7 @@ AC_CHECK_FUNCS([floor memset pow sqrt])
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
+			  src/adaptivity/Makefile\
 			  src/common/Makefile\
 			  src/elements/Makefile\
 			  src/fem/Makefile\

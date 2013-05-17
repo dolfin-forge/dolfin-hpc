@@ -7,7 +7,9 @@ libdolfin_fem_la_SOURCES = \
 			DofMap.cpp\
 			DofMapSet.cpp\
 			Form.cpp\
+			NodeNormal.cpp\
 			PeriodicBC.cpp\
+			SlipBC.cpp\
 			SparsityPatternBuilder.cpp\
 			SubSystem.cpp\
 			UFC.cpp

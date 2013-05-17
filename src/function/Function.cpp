@@ -22,6 +22,8 @@
 
 #include <dolfin/fem/UFCCell.h>
 
+#define FFC_DOFMAP_FOR "FFC dofmap for "
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -122,7 +124,7 @@ Function::Function(Mesh& mesh, GenericVector& x, std::string const& finite_eleme
   : Variable("*no name*", "discrete function"),
     f(0), _type(discrete), _cell(0), _facet(-1)
 {
-  f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
+  f = new DiscreteFunction(mesh, x, finite_element_signature, FFC_DOFMAP_FOR+finite_element_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
@@ -212,7 +214,7 @@ void Function::init(Mesh& mesh, GenericVector& x, std::string const& finite_elem
     delete f;
   }
 
-  f = new DiscreteFunction(mesh, x, finite_element_signature, "FFC dof map for "+finite_element_signature);
+  f = new DiscreteFunction(mesh, x, finite_element_signature, FFC_DOFMAP_FOR+finite_element_signature);
   _type = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -339,7 +341,7 @@ void Function::interpolate(const Function& other_func)
 	if (f && this->type() == Function::discrete)
 	{
 		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(this->signature());
-		DofMap * dofmap =  new DofMap("FFC dof map for "+this->signature(), mesh());
+		DofMap * dofmap =  new DofMap(FFC_DOFMAP_FOR+this->signature(), mesh());
 
 		uint valuedim = ufcfe->value_dimension(0);
 		uint dofspercell = dofmap->local_dimension();

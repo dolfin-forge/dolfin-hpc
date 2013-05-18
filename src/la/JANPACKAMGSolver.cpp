@@ -48,6 +48,8 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
 				 (jp_amg_smoother_t) getSmoother(smoother),
 				 (jp_amg_cscheme_t) getCoarsening(cscheme),
 				 get("AMG theta"), 
+				 get("AMG pre-smoothing steps"),
+				 get("AMG post-smoothing steps"),
 				 get("AMG levels"),
 				 get("AMG maximum iterations"),
 				 get("AMG relative tolerance"));

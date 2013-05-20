@@ -7,6 +7,7 @@
 #ifndef __SPACE_TIME_FUNCTION_H
 #define __SPACE_TIME_FUNCTION_H
 
+#include <stdint.h>
 #include <ufc.h>
 #include <dolfin/function/GenericFunction.h>
 

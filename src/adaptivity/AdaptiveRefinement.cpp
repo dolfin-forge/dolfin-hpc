@@ -9,10 +9,20 @@
 #include <fstream>
 #include <errno.h>
 #include <sys/stat.h>
-#include <dolfin.h>
+
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
+#include <dolfin/function/Function.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/parameter/parameters.h>
 
 //#include "unicorn/AdaptiveRefinement.h"
 //#include "unicorn/AdaptiveRefinementProjectScalar.h"

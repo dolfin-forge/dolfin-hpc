@@ -11,19 +11,25 @@
 #ifndef __SLIPBC_H
 #define __SLIPBC_H
 
-#include <set>
-#include <dolfin.h> //FIXME: Not a very good style.
+#include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/fem/NodeNormal.h>
+#include <dolfin/fem/SubSystem.h>
+#include <dolfin/la/Matrix.h>
+#include <dolfin/la/Vector.h>
+
+#include <ufc.h>
+
+#include <set>
 
 namespace dolfin
 {
   class DofMap;
-  class Function;
-  class Mesh;
-  class SubDomain;
   class Form;
+  class Function;
   class GenericMatrix;
   class GenericVector;
+  class Mesh;
+  class SubDomain;
 //  namespace unicorn
 //  {
     class SlipBC : public BoundaryCondition

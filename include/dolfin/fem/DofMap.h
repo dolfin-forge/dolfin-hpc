@@ -30,6 +30,18 @@ class DofMap
 {
 public:
 
+	static std::string const dofmap_signature(std::string const& fe_signature)
+	{
+#if UFC_VERSION_MAJOR == 1
+		return "FFC dof map for "+fe_signature;
+#elif UFC_VERSION_MAJOR == 2
+		return "FFC dofmap for "+fe_signature;
+#else
+		error("Invalid UFC version, supported major are 1.1.x and 2.x");
+		return "";
+#endif
+	}
+
 	/// Create dof map on mesh
 	DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool dof_map_local = false);
 

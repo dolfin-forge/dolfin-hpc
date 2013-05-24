@@ -8,10 +8,11 @@
 #define __USER_FUNCTION_H
 
 #include "GenericFunction.h"
+#include "Function.h"
+#include "Expression.h"
 
 namespace dolfin
 {
-  class Function;
 
   /// This class implements the functionality for a user-defined
   /// function defined by overloading the evaluation operator in
@@ -19,10 +20,14 @@ namespace dolfin
 
   class UserFunction : public GenericFunction, public ufc::function
   {
+
   public:
 
     /// Create user-defined function
     UserFunction(Mesh& mesh, Function* f);
+
+    /// Create user-defined function
+    UserFunction(Mesh& mesh, Expression const& expr);
 
     /// Destructor
     ~UserFunction();
@@ -50,13 +55,39 @@ namespace dolfin
                   const real* coordinates,
                   const ufc::cell& cell) const;
 
-    void sync_ghosts() 
-    {return;}
+    void sync_ghosts() { return; }
 
   private:
 
+    // Expression
+    Expression const& e;
+
     // Pointer to Function with overloaded evaluation operator
     Function* f;
+
+	// Backward compatibility
+	class FunctionWrapper : public Expression
+	{
+	public:
+
+		FunctionWrapper(Function const& f) : Expression(), f_(f) {};
+		inline uint rank() const
+		{
+			return f_.rank();
+		}
+		inline uint dim( uint i) const
+		{
+			return f_.dim(i);
+		}
+		void eval(real* values, const real* x) const
+		{
+			f_.eval(values,x);
+		}
+	private:
+		Function const& f_;
+
+	};
+
 
   };
 

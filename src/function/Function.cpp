@@ -45,6 +45,16 @@ Function::Function(Mesh& mesh) :
 	f = new UserFunction(mesh, this);
 }
 //-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, Expression const& expr) :
+		Variable("*no name*", "user-defined function"),
+		f(0),
+		_type(user),
+		_cell(0),
+		_facet(-1)
+{
+	f = new UserFunction(mesh, expr);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
 		Variable("*no name*", "constant function"),
 		f(0),

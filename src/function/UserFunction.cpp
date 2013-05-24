@@ -20,10 +20,22 @@ using namespace dolfin;
 UserFunction::UserFunction(Mesh& mesh, Function* f) :
 		GenericFunction(mesh),
 		ufc::function(),
+		e(FunctionWrapper(*f)),
 		f(f)
 {
 	// Do nothing
 }
+
+//-----------------------------------------------------------------------------
+UserFunction::UserFunction(Mesh& mesh, Expression const& expr) :
+		GenericFunction(mesh),
+		ufc::function(),
+		e(expr),
+		f(NULL)
+{
+	// Do nothing
+}
+
 //-----------------------------------------------------------------------------
 UserFunction::~UserFunction()
 {
@@ -33,25 +45,23 @@ UserFunction::~UserFunction()
 dolfin::uint UserFunction::rank() const
 {
 	// Just return 0 (if not overloaded by user)
-	return 0;
+	return e.rank();
 }
 //-----------------------------------------------------------------------------
 dolfin::uint UserFunction::dim(uint i) const
 {
-	// Just return 1 (if not overloaded by user)
-	return 1;
+	return e.dim(i);
 }
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate(real* values) const
 {
 	dolfin_assert(values);
-	dolfin_assert(f);
 
 	// Compute size of value (number of entries in tensor value)
 	uint size = 1;
-	for (uint i = 0; i < f->rank(); i++)
+	for (uint i = 0; i < e.rank(); i++)
 	{
-		size *= f->dim(i);
+		size *= e.dim(i);
 	}
 
 	// Call overloaded eval function at each vertex
@@ -60,7 +70,7 @@ void UserFunction::interpolate(real* values) const
 	for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
 	{
 		// Evaluate at function at vertex
-		f->eval(local_values, vertex->x());
+		e.eval(local_values, vertex->x());
 
 		// Copy values to array of vertex values
 		for (uint i = 0; i < size; i++)
@@ -79,7 +89,9 @@ void UserFunction::interpolate(real* coefficients, const ufc::cell& cell,
 
 	// Evaluate each dof to get coefficients for nodal basis expansion
 	for (uint i = 0; i < finite_element.space_dimension(); i++)
+	{
 		coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
+	}
 }
 //-----------------------------------------------------------------------------
 void UserFunction::eval(real* values, const real* x) const
@@ -87,7 +99,7 @@ void UserFunction::eval(real* values, const real* x) const
 	message("Calling user function");
 
 	// Call user-overloaded eval function in Function
-	f->eval(values, x);
+	e.eval(values, x);
 }
 //-----------------------------------------------------------------------------
 void UserFunction::evaluate(real* values, const real* coordinates,
@@ -97,10 +109,12 @@ void UserFunction::evaluate(real* values, const real* coordinates,
 
 	// Compute size of value (number of entries in tensor value)
 	uint size = 1;
-	for (uint i = 0; i < f->rank(); i++)
-		size *= f->dim(i);
+	for (uint i = 0; i < e.rank(); i++)
+	{
+		size *= e.dim(i);
+	}
 
 	// Call user-overloaded eval function in Function
-	f->eval(values, coordinates);
+	e.eval(values, coordinates);
 }
 //-----------------------------------------------------------------------------

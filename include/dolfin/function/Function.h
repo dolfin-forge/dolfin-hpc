@@ -24,11 +24,12 @@
 namespace dolfin
 {
 
-  class Mesh;
+  class DofMap;
+  class Expression;
   class Form;
   class GenericFunction;
   class GenericVector;
-  class DofMap;
+  class Mesh;
 
   /// This class represents a function that can be evaluated on a
   /// mesh. The actual representation of the function can vary, but
@@ -52,6 +53,9 @@ namespace dolfin
 
     /// Create user-defined function (evaluation operator must be overloaded)
     explicit Function(Mesh& mesh);
+
+    /// Create user-defined function from expression
+    explicit Function(Mesh& mesh, Expression const& expr);
 
     /// Create constant scalar function from given value
     Function(Mesh& mesh, real value);

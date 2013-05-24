@@ -1,5 +1,5 @@
 
-nobase_include_HEADERS = 	adaptivity/AdaptiveRefinement.h\
+nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				adaptivity/AdaptiveRefinementProjectScalar.h\
 				adaptivity/AdaptiveRefinementProjectVector.h\
 				adaptivity/SpaceTimeFunction.h\

@@ -3,8 +3,8 @@
 //
 // First added:  2007-01-09
 
-#include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/MeshGeometry.h>

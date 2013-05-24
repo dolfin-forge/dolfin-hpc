@@ -4,11 +4,11 @@
 // Modified by Niclas Jansson, 2009-2010.
 //
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/common/constants.h>
-#include <dolfin/math/dolfin_math.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshTopology.h>

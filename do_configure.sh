@@ -4,15 +4,13 @@ ARCH=amd64
 if [ "X" = "X${CTLOPTROOT}" ];
 then
 	echo "CTLOPTROOT not set.";
-	exit;
 fi;
 
-#export gts_CFLAGS="-I${CTLOPTROOT}/include -Wl,-rpath ${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib -R${CTLOPTROOT}/lib"
 export gts_LIBS="/usr/lib/libgts.so"
-#export gts_LIBS="-Wl,-rpath /usr/lib/libgts.so"
 export CXX=mpicxx
-export CXXFLAGS=" -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
-export LDFLAGS=" -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
+export CFLAGS="-m64 -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
+export CXXFLAGS="-m64 -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
+export LDFLAGS="-m64 -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
 
 # --enable-optimize-p1 \
 

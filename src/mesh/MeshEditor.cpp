@@ -5,7 +5,7 @@
 // Last changed: 2008-05-19
 
 #include <dolfin/log/dolfin_log.h>
-#include <dolfin/parameter/dolfin_parameter.h>
+#include <dolfin/parameter/parameters.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/MeshEditor.h>

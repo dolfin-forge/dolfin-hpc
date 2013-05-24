@@ -6,8 +6,8 @@
 // First added:  2006-06-08
 // Last changed: 2008-07-07
 
-#include <dolfin/math/dolfin_math.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/MeshGeometry.h>

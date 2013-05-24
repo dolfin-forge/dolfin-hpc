@@ -6,7 +6,7 @@
 
 #ifdef HAVE_JANPACK
 
-#include <dolfin/math/dolfin_math.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/JANPACKVec.h>
 #include <dolfin/la/JANPACKFactory.h>

@@ -46,7 +46,7 @@ namespace dolfin
   public:
 
     /// Function types
-    enum Type {empty, user, constant, discrete, ufc};
+    enum Type {constant, discrete, empty, expression, ufc, user};
 
     /// Create empty function (read data from file)
     Function();
@@ -95,6 +95,12 @@ namespace dolfin
 
     /// Destructor
     virtual ~Function();
+
+    /// Create constant function
+    void init(Mesh& mesh, real value);
+
+    /// Create expression function
+    void init(Mesh& mesh, Expression const& expr);
 
     /// Create discrete function for argument function i of form
     void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);

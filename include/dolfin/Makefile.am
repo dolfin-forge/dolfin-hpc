@@ -10,7 +10,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				common/Array.h\
 				common/List.h\
 				common/Timer.h\
-				common/Variable.h
+				common/Variable.h\
 				config/dolfin_config.h\
 				elements/ElementLibrary.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
@@ -65,23 +65,24 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				elements/ffc_L2proj_22.h\
 				elements/ffc_L2proj_23.h\
 				elements/ffc_L2proj_24.h\
-				fem/SubSystem.h\
-				fem/SlipBC.h\
-				fem/NodeNormal.h\
-				fem/UFC.h\
-				fem/SparsityPatternBuilder.h\
-				fem/DofMapSet.h\
-				fem/DirichletBC.h\
-				fem/Form.h\
 				fem/Assembler.h\
-				fem/PeriodicBC.h\
-				fem/UFCCell.h\
-				fem/DofMap.h\
 				fem/BoundaryCondition.h\
+				fem/DirichletBC.h\
+				fem/DofMap.h\
+				fem/DofMapSet.h\
+				fem/Form.h\
+				fem/NodeNormal.h\
+				fem/PeriodicBC.h\
+				fem/SlipBC.h\
+				fem/SparsityPatternBuilder.h\
+				fem/SubSystem.h\
+				fem/UFC.h\
+				fem/UFCCell.h\
 				fem/UFCMesh.h\
 				function/ConstantFunction.h\
 				function/DiscreteFunction.h\
 				function/Expression.h\
+				function/ExpressionFunction.h\
 				function/Function.h\
 				function/GenericFunction.h\
 				function/SpecialFunctions.h\

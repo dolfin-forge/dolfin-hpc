@@ -11,18 +11,20 @@
 // to a letter class that is a subclass of GenericFunction. All the
 // functionality is handled by the specific implementation (subclass).
 
-#include <dolfin/io/File.h>
-#include <dolfin/elements/ElementLibrary.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/function/UserFunction.h>
-#include <dolfin/function/ConstantFunction.h>
-#include <dolfin/function/DiscreteFunction.h>
-#include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/Function.h>
 
+#include <dolfin/elements/ElementLibrary.h>
+#include <dolfin/io/File.h>
+#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/UFCCell.h>
+#include <dolfin/function/ConstantFunction.h>
+#include <dolfin/function/DiscreteFunction.h>
+#include <dolfin/function/ExpressionFunction.h>
+#include <dolfin/function/UFCFunction.h>
+#include <dolfin/function/UserFunction.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 Function::Function() :
@@ -46,13 +48,13 @@ Function::Function(Mesh& mesh) :
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
-		Variable("*no name*", "user-defined function"),
+		Variable("*no name*", "expression function"),
 		f(0),
-		_type(user),
+		_type(expression),
 		_cell(0),
 		_facet(-1)
 {
-	f = new UserFunction(mesh, expr);
+	f = new ExpressionFunction(mesh, expr);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
@@ -128,11 +130,16 @@ Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 }
 
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
-  : Variable("*no name*", "discrete function"),
-    f(0), _type(discrete), _cell(0), _facet(-1)
+Function::Function(Mesh& mesh, GenericVector& x,
+					std::string const& finite_element_signature) :
+		Variable("*no name*", "discrete function"),
+		f(0),
+		_type(discrete),
+		_cell(0),
+		_facet(-1)
 {
-  f = new DiscreteFunction(mesh, x, finite_element_signature, DofMap::dofmap_signature(finite_element_signature));
+	f = new DiscreteFunction(mesh, x, finite_element_signature,
+			DofMap::dofmap_signature(finite_element_signature));
 }
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
@@ -153,7 +160,6 @@ Function::Function(SubFunction f) :
 		_cell(0),
 		_facet(-1)
 {
-	cout << "Extracting sub function." << endl;
 	this->f = new DiscreteFunction(f);
 }
 //-----------------------------------------------------------------------------
@@ -191,6 +197,31 @@ Function::~Function()
 		delete f;
 	}
 }
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, real value)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new ConstantFunction(mesh, value);
+	_type = constant;
+}
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, Expression const& expr)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new ExpressionFunction(mesh, expr);
+	_type = expression;
+}
+
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 {
@@ -215,15 +246,17 @@ void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 	_type = discrete;
 }
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature)
+void Function::init(Mesh& mesh, GenericVector& x,
+					std::string const& finite_element_signature)
 {
-  if (f)
-  {
-    delete f;
-  }
+	if (f)
+	{
+		delete f;
+	}
 
-  f = new DiscreteFunction(mesh, x, finite_element_signature, DofMap::dofmap_signature(finite_element_signature));
-  _type = discrete;
+	f = new DiscreteFunction(mesh, x, finite_element_signature,
+			DofMap::dofmap_signature(finite_element_signature));
+	_type = discrete;
 }
 //-----------------------------------------------------------------------------
 Function::Type Function::type() const
@@ -348,14 +381,16 @@ void Function::interpolate(const Function& other_func)
 {
 	if (f && this->type() == Function::discrete)
 	{
-		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(this->signature());
-		DofMap * dofmap =  new DofMap(DofMap::dofmap_signature(this->signature()), mesh());
+		ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(
+				this->signature());
+		DofMap * dofmap = new DofMap(
+				DofMap::dofmap_signature(this->signature()), mesh());
 
 		uint valuedim = ufcfe->value_dimension(0);
 		uint dofspercell = dofmap->local_dimension();
-		uint nodespercell = dofspercell/valuedim;
-		uint * idx  = new uint[dofspercell];
-		real * block  = new real[dofspercell];
+		uint nodespercell = dofspercell / valuedim;
+		uint * idx = new uint[dofspercell];
+		real * block = new real[dofspercell];
 		real * val = new real[valuedim];
 
 		real ** dofscoords = new real*[dofspercell];
@@ -375,14 +410,15 @@ void Function::interpolate(const Function& other_func)
 
 			uint dof_id = 0;
 			for (uint vd = 0; vd < valuedim; ++vd)
-			  {
-			    for (uint dof_node = 0; dof_node < nodespercell; ++dof_node, ++dof_id)
-			      {
-				other_func.eval(val, dofscoords[dof_node]);
-				block[dof_id] = val[vd];
-			      }
-			  }
-			this->vector().set(block, dofspercell,idx);
+			{
+				for (uint dof_node = 0; dof_node < nodespercell;
+						++dof_node, ++dof_id)
+				{
+					other_func.eval(val, dofscoords[dof_node]);
+					block[dof_id] = val[vd];
+				}
+			}
+			this->vector().set(block, dofspercell, idx);
 			this->vector().apply();
 		}
 		f->sync_ghosts();
@@ -392,16 +428,17 @@ void Function::interpolate(const Function& other_func)
 		{
 			delete[] dofscoords[i];
 		}
-		delete [] val;
-		delete [] dofscoords;
-		delete [] block;
-		delete [] idx;
+		delete[] val;
+		delete[] dofscoords;
+		delete[] block;
+		delete[] idx;
 		delete dofmap;
 		delete ufcfe;
 	}
 	else
 	{
-		dolfin::error("Function::interpolate(const Function&) can only be called on discrete Function");
+		dolfin::error(
+				"Function::interpolate(const Function&) can only be called on discrete Function");
 	}
 
 }
@@ -468,3 +505,5 @@ int Function::facet() const
 	return _facet;
 }
 //-----------------------------------------------------------------------------
+
+}

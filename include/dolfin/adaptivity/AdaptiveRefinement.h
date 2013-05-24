@@ -7,11 +7,19 @@
 #ifndef __ADAPTIVEREFINEMENT_H
 #define __ADAPTIVEREFINEMENT_H
 
+#include <dolfin/common/types.h>
+
 #include <vector>
-#include <dolfin.h>
 
 namespace dolfin
 {
+    class Form;
+    class Function;
+    class Mesh;
+    class MeshData;
+    template <class T> class MeshFunction;
+    class Function;
+
 //  namespace unicorn
 //  {
     class AdaptiveRefinement

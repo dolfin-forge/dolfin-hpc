@@ -11,13 +11,15 @@
 #ifndef __FUNCTION_H
 #define __FUNCTION_H
 
-#include <ufc.h>
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/common/Variable.h>
+
 #include "SubFunction.h"
+
+#include <ufc.h>
 
 namespace dolfin
 {

@@ -8,17 +8,16 @@
 
 #ifndef __NODENORMAL_H
 #define __NODENORMAL_H
-#include <dolfin/mesh/Mesh.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/BoundaryMesh.h>
 #include <map>
 
 namespace dolfin
 {
+    class BoundaryMesh;
+    class Mesh;
 //  namespace unicorn
 //  {
     class NodeNormal

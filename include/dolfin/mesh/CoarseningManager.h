@@ -36,14 +36,15 @@ namespace dolfin
     CoarseningManager();
 
     /// Create a new instance and initialize it.
-    explicit CoarseningManager(MeshFunction<bool>& cell_marker, 
+    explicit CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker, 
                                bool coarsen_boundary = false);
 
     ~CoarseningManager();
 
     /// Initialize the coarsening manager: build independent set, list of cells
     /// that are marked for coarsening and boundary information
-    void init(MeshFunction<bool>& cell_marker, bool coarsen_boundary = false);
+    void init(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+              bool coarsen_boundary = false);
 
     /// Check if a vertex is on any (interior or domain) boundary
     inline bool isBoundaryVertex(uint index)
@@ -478,11 +479,20 @@ namespace dolfin
     /// Number of cells that have been migrated away in the last iteration
     uint _migrated_cells;
 
+    /// Max number of cells that have been migrated away in the last iteration
+    uint _max_migrated_cells;
+
+    /// Number of migrations performed
+    uint _migrations;
+
+    /// Number of load balances performed
+    uint _load_balances;
+
     /// performs part of the initialization which is also used by migrate().
     /// MeshFunction is templated, because migrate() needs it for uint while
     /// init() provides bool.
     template<typename T>
-    void initCommon(MeshFunction<T>& cell_marker);
+    void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker);
 
     /// Extract process boundary information and store them in 
     /// _int_bnd_vertices and _bnd_cells.
@@ -503,6 +513,10 @@ namespace dolfin
     /// Find all cells that are marked for coarsening and put them into a list
     template<typename T>
     void findCellsToCoarsen(MeshFunction<T>& cell_marker);
+
+#ifdef ____USE_D_MESH____
+    void removeErasedCellsFromCoarseningList();
+#endif
   };
 }
 

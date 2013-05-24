@@ -19,12 +19,27 @@
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DCell.h>
 #include <dolfin/mesh/DVertex.h>
+#include <dolfin/parameter/parameters.h>
+#include <dolfin/mesh/LoadBalancer.h>
 #endif
 
 #include <limits>
 #include <algorithm>
 
 using namespace dolfin;
+
+static inline void countCheckMeshFailures(bool print_and_reset)
+{
+  static uint failures = 0;
+  if (print_and_reset)
+  {
+    message("[%d] checkMesh failed %d times", dolfin::MPI::processNumber(), 
+            failures);
+    failures = 0;
+  }
+  else
+    ++failures;
+}
 //-----------------------------------------------------------------------------
 static inline real distance(real const * x0, real const * x1, uint dim)
 {
@@ -62,14 +77,19 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   if ( cell_marker.size() != mesh.numCells() )
     error( "Wrong dimension of cell_marker" );
 
+  // Initial load balancing
+  dolfin_set("Load balancer redistribute", true);
+  LoadBalancer::balance(mesh, cell_marker);
+
   // Instantiate coarsening manager
   CoarseningManager manager;
-  manager.init(cell_marker, coarsen_boundary);
+  manager.init(mesh, cell_marker, coarsen_boundary);
 
   dolfin_assert( manager.checkDCellNumbering(mesh.numCells() - 1) );
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  message("[%d] Mesh coarsening", MPI::processNumber());
+  message("[%d] Mesh coarsening, %d cells selected", 
+            MPI::processNumber(), num_cells_to_coarsen);
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
@@ -98,6 +118,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   Mesh omesh;
   manager.dmesh()->exp(omesh);
   mesh = omesh;
+
+  countCheckMeshFailures(true);
 
   message("[%d] Mesh coarsening done.", MPI::processNumber());
 }
@@ -181,7 +203,7 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
                                     std::vector<uint>& cells_to_regenerate_orient)
 {
-  real vol_tol = 1.e-5;//1.e-3;
+  real vol_tol = 1.e-5;
 
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex
@@ -196,6 +218,7 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
     real qm = dc->volume() / dc->diameter();
     if ( qm < vol_tol )
     {
+      countCheckMeshFailures(false);
       //warning("Cell quality too low, qm = %f", qm);
       return false;
     }
@@ -359,7 +382,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   // Instantiate coarsening manager
   CoarseningManager manager;
-  manager.init(cell_marker, coarsen_boundary);
+  manager.init(mesh, cell_marker, coarsen_boundary);
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
   message("[%d] Mesh coarsening", MPI::processNumber());
@@ -636,7 +659,7 @@ void LocalMeshCoarsening::regenerateCells(Mesh const & mesh,
 bool LocalMeshCoarsening::checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh,
                                     CoarseningManager& manager)
 {
-  real vol_tol = 1.e-5;//1.e-3;
+  real vol_tol = 1.e-3;
 
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex

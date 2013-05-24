@@ -9,7 +9,9 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-//#include <dolfin/mesh/MeshFunctionConverter.h>
+#include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/parameter/parameters.h>
+#include <dolfin/mesh/MeshFunctionConverter.h>
 #include <dolfin/main/MPI.h>
 
 #ifdef ____USE_D_MESH____
@@ -31,13 +33,13 @@ CoarseningManager::CoarseningManager()
   // do nothing
 }
 //-----------------------------------------------------------------------------
-CoarseningManager::CoarseningManager(MeshFunction<bool>& cell_marker, 
+CoarseningManager::CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker, 
                                      bool coarsen_boundary)
 #ifdef ____USE_D_MESH____
 : _dmesh(0)
 #endif
 {
-  init(cell_marker, coarsen_boundary);
+  init(mesh, cell_marker, coarsen_boundary);
 }
 //-----------------------------------------------------------------------------
 CoarseningManager::~CoarseningManager()
@@ -48,14 +50,19 @@ CoarseningManager::~CoarseningManager()
 #endif
 }
 //-----------------------------------------------------------------------------
-void CoarseningManager::init(MeshFunction<bool>& cell_marker, 
+void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker, 
                              bool coarsen_boundary)
 {
+  dolfin_assert( &mesh == &(cell_marker.mesh()) );
+
   // migrated cells are initially set to a value larger zero to match the
   // break conditions
   _migrated_cells = 1;
+  _max_migrated_cells = 1;
+  _migrations = 0;
+  _load_balances = 0;
 
-  initCommon(cell_marker);
+  initCommon(mesh, cell_marker);
 
   dolfin_assert( _int_bnd_vertices.size() == cell_marker.mesh().numVertices() );
   dolfin_assert( _int_bnd_cells.size() == cell_marker.mesh().numCells() );
@@ -64,32 +71,34 @@ void CoarseningManager::init(MeshFunction<bool>& cell_marker,
   dolfin_assert( _cells_to_coarsen.size() >= 0 );
 
   // find independent set
-  findIndependentSet(cell_marker.mesh(), coarsen_boundary);
+  findIndependentSet(mesh, coarsen_boundary);
 
   dolfin_assert( _forbidden_vertices.size() == cell_marker.mesh().numVertices() );
 }
 //-----------------------------------------------------------------------------
 template<typename T>
-void CoarseningManager::initCommon(MeshFunction<T>& cell_marker)
+void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker)
 {
+  dolfin_assert( &mesh == &(cell_marker.mesh()) );
+
 #ifdef ____USE_D_MESH____
     /// Delete old dmesh and import new mesh into dmesh
     if ( _dmesh )
       delete _dmesh;
     _dmesh = new DMesh;
-    _dmesh->imp(cell_marker.mesh());
+    _dmesh->imp(mesh);
 #endif 
 
   // extract boundary information
-  findInteriorBoundaries(cell_marker.mesh());
-  findDomainBoundaries(cell_marker.mesh());
+  findInteriorBoundaries(mesh);
+  findDomainBoundaries(mesh);
 
   // build list of cells to coarsen
   findCellsToCoarsen(cell_marker);
 
   // initialize mapping
 #ifndef ____USE_D_MESH____
-  _vertex_map.init(cell_marker.mesh().numVertices());
+  _vertex_map.init(mesh.numVertices());
   _cell_map.init(cell_marker.size());
 #endif
 
@@ -238,12 +247,28 @@ void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker)
   }
 }
 //-----------------------------------------------------------------------------
+void CoarseningManager::removeErasedCellsFromCoarseningList()
+{
+  // remove deleted entities from coarsening list
+  for ( List<DCell *>::iterator it(_cells_to_coarsen.begin()) ; 
+        it != _cells_to_coarsen.end() ; )
+  {
+    DCell * dc = *it;
+    if ( dc->deleted ) 
+      it = _cells_to_coarsen.erase(it);
+    else
+      ++it;
+  }
+}
+//-----------------------------------------------------------------------------
 bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
 {
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
 
   dolfin_assert( checkDCellNumbering(_bnd_cells.size() - 1) );
+
+  message("[%d] starting migration %d", rank, _migrations);
 
   if ( pe_size == 1 )
   {
@@ -265,6 +290,8 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
   repeat = remote_status[1];                          // global termination?
   uint max_num_migrated_cells = remote_status[2];     // max num migrated cells
 
+  message("[%d] requested %d vertices out of a max of %d", rank, _vertices_to_request.size(), max_num_requested_vertices);
+
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )
   {
@@ -279,7 +306,106 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
     return false;
   }
 
-  dolfin_assert( checkDCellNumbering(_bnd_cells.size() - 1) );
+  // no cells migrated twice: we're done
+  if (_max_migrated_cells == 0 && max_num_migrated_cells == 0)
+  {
+    return false;
+  }
+
+  _max_migrated_cells = max_num_migrated_cells;
+
+  if ( _migrations >= 5 )
+  {
+    message("[%d] Performing load balance %d instead of migration", rank, _load_balances);
+    removeErasedCellsFromCoarseningList();
+
+    // Export DMesh to Mesh
+    Array<int> old2new_cells(_bnd_cells.size());
+    Array<int> old2new_vertices(_bnd_vertices.size());
+    Mesh omesh;
+    _dmesh->expKeepNumbering(omesh, &old2new_cells, &old2new_vertices);
+
+
+    // Lists of MeshFunctions for exchange
+    Array< std::pair< MeshFunction<uint> * , MeshFunction<uint> * > > 
+                                                                cell_functions;
+    Array< std::pair< MeshFunction<double> * , MeshFunction<double> * > > 
+                                                                vertex_functions;
+    
+    // Prepare forbidden vertices for exchange
+    MeshFunction<double> forbidden_vertices(omesh, 0);
+    MeshFunction<double> forbidden_vertices_new;
+    for ( uint old_idx(0) ; old_idx < _forbidden_vertices.size();
+          ++old_idx )
+    {
+      int new_idx = old2new_vertices[old_idx];
+      if ( new_idx < 0 )
+        continue;
+      forbidden_vertices.set(new_idx, double(isForbiddenVertex(old_idx)) );
+    }
+    vertex_functions.push_back( 
+      std::make_pair(&forbidden_vertices, &forbidden_vertices_new) );
+
+    // Prepare cell_marker for coarsening for exchange
+    MeshFunction<uint> cell_marker(omesh, omesh.topology().dim());
+    MeshFunction<uint> cell_marker_new;
+    cell_marker = false;
+    for ( List<uint>::iterator it(_cells_to_request.begin()) ; 
+          it != _cells_to_request.end() ; ++it )
+    {
+      int new_idx = old2new_cells[*it];
+      if ( new_idx < 0 ) 
+        continue;
+      cell_marker.set(new_idx, 1);
+    }
+    for ( List<DCell *>::iterator it(_cells_to_coarsen.begin()) ; 
+          it != _cells_to_coarsen.end() ; ++it )
+    {
+      DCell * dc = *it;
+      int new_idx = old2new_cells[dc->id];
+      if ( new_idx < 0 ) 
+        continue;
+      cell_marker.set(new_idx, 1);
+    }
+    cell_functions.push_back( std::make_pair(&cell_marker, &cell_marker_new) );
+
+    // obtain new partitions from loadbalancer
+    //MeshFunction<uint> partitions;
+    //omesh.partition(partitions);
+
+    // obtain new partitions from loadbalancer
+    dolfin_set("Load balancer redistribute", false);
+    MeshFunction<bool> cell_marker_b;
+    MeshFunctionConverter::cast(cell_marker, cell_marker_b);
+    LoadBalancer::balance(omesh, cell_marker_b);
+    MeshFunction<uint> *partitions = omesh.data().meshFunction("partitions");
+    dolfin_assert(partitions);
+
+    // distribute partitioning and MeshFunctions
+    omesh.distribute( *partitions, cell_functions, vertex_functions );
+    omesh.renumber();
+
+    // Re-initialize
+    initCommon(omesh, cell_marker_new);
+
+    // Update independent set
+    //MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);
+    _forbidden_vertices.resize(omesh.numVertices());
+    _forbidden_vertices = false;
+    for ( VertexIterator v_it(omesh) ; !v_it.end() ; ++v_it )
+      if ( forbidden_vertices_new.get(v_it->index()) > 0.5 )
+        _forbidden_vertices[v_it->index()] = true;
+
+    message("[%d] numCells=%d, numVertices=%d, %d marked for coarsening",
+            rank, omesh.numCells(), omesh.numVertices(), _cells_to_coarsen.size());
+
+    _migrations = 0;
+    ++_load_balances;
+
+    return true;
+  }
+
+  removeErasedCellsFromCoarseningList();
 
   // Export DMesh to Mesh
   Array<int> old2new_cells(_bnd_cells.size());
@@ -335,6 +461,13 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
     std::map<uint,uint>::iterator m_it;
     for ( uint i(0) ; i < recv_size ; ++i )
     {
+      /*
+      uint requested_vertex = recv_buff_requests[i];
+      uint local_index = omesh.distdata().get_local(requested_vertex, 0);
+      uint lowest_sharing_rank = 
+            *( omesh.distdata().get_shared_adj(local_index, 0).begin() );
+      requested_vertices[requested_vertex] = lowest_sharing_rank;
+      */
       // search for this index in the map
       uint requested_vertex = recv_buff_requests[i];
       m_it = requested_vertices.find(requested_vertex);
@@ -345,6 +478,7 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
       // no conflict: simply insert into map
       else
         requested_vertices[requested_vertex] = src;
+      
     }
   }
 
@@ -391,6 +525,8 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
       partitions(*c_it) = target_proc;
     }
   }
+
+  message("[%d] sending %d cells", rank, num_send_cells);
 
   // pairwise communication to exchange requests
   for ( uint i(1) ; i < pe_size ; ++i )
@@ -480,9 +616,10 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
 
   // distribute partitioning and MeshFunctions
   omesh.distribute( partitions, cell_functions, vertex_functions );
+  omesh.renumber();
 
   // Re-initialize
-  initCommon(cell_marker_new);
+  initCommon(omesh, cell_marker_new);
 
   // Update independent set
   //MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);
@@ -491,6 +628,12 @@ bool CoarseningManager::migrate(Mesh& /*omesh*/, bool repeat)
   for ( VertexIterator v_it(omesh) ; !v_it.end() ; ++v_it )
     if ( forbidden_vertices_new.get(v_it->index()) > 0.5 )
       _forbidden_vertices[v_it->index()] = true;
+
+  message("[%d] numCells=%d, numVertices=%d, %d marked for coarsening",
+          rank, omesh.numCells(), omesh.numVertices(), _cells_to_coarsen.size());
+
+  // increase counter of performed migrations
+  ++_migrations;
 
   return true;
 }
@@ -738,7 +881,7 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   mesh.distribute( partitions, cell_functions, vertex_functions );
 
   // Re-initialize
-  initCommon(cell_marker_new);
+  initCommon(mesh, cell_marker_new);
 
   // Update independent set
   //MeshFunctionConverter::cast(forbidden_vertices_new, _forbidden_vertices);

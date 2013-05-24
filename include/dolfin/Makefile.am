@@ -94,6 +94,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				parameter/ParameterList.h\
 				parameter/ParameterValue.h\
 				function/GenericFunction.h\
+				function/Expression.h\
 				function/UFCFunction.h\
 				function/SpecialFunctions.h\
 				function/UserFunction.h\

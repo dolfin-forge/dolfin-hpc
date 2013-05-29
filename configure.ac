@@ -142,6 +142,7 @@ if test "x${enable_ufl}" == xno; then
 else
    PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+   AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.1])
 fi
 
 

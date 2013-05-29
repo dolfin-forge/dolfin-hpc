@@ -103,7 +103,7 @@ void PETScMatrix::init(uint M, uint N)
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
@@ -150,7 +150,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
 
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
@@ -224,7 +224,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, 
 		  //		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 #ifdef HAVE_MPI
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
   MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 #else
   MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
@@ -767,7 +767,10 @@ MatType PETScMatrix::getPETScType() const
       return MATSEQAIJ;
 #if PETSC_VERSION_MAJOR > 2 
   case spooles:
-#if PETSC_VERSION_MINOR > 1
+#if PETSC_VERSION_MINOR > 3
+    warning("Spooles interface has been removed in PETSc 3.4");
+    return "default";
+#elif PETSC_VERSION_MINOR > 1
       return MATSOLVERSPOOLES;
 #else
       return MAT_SOLVER_SPOOLES;

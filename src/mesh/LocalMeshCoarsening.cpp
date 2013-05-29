@@ -20,7 +20,7 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
-static inline real distance(real const * x0, real const * x1, uint dim)
+static inline real distance(real const * x0, real const * x1, dolfin::uint dim)
 {
   real sqrlength(0);
 

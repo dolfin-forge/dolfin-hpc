@@ -138,7 +138,6 @@ void LoadBalancer::weight_function(Mesh& mesh,
   weight = 1;
   //  *w_sum = mesh.numCells();
   if( type == Default) {
-
     MeshFunction<bool> used_cell(mesh, mesh.topology().dim());
     MeshFunction<bool> used_edge(mesh, 1);
     used_cell = false;
@@ -146,47 +145,65 @@ void LoadBalancer::weight_function(Mesh& mesh,
 
     for(CellIterator c(mesh); !c.end(); ++c) {
       if( cell_marker.get(*c) && !used_cell.get(*c)) {
-	max = 0.0;
-	for(EdgeIterator e(*c); !e.end(); ++e) {
-	  if(!used_edge.get(*e)){
-	    l = e->length();
-	    if(max < l) {
-	      max = l;
-	      index = e->index();	    
-	    }
-	  }
-	}
-	if(max == 0.0)
-	  continue; 
-	Edge le(mesh, index);
-	for(CellIterator nc(le); !nc.end(); ++nc) {
-	  if(!used_cell.get(*nc)) {
-	    //	  *w_sum++;
-	    weight.set(*nc, weight.get(*nc) + 1);
-	    used_cell.set(*nc, true);
-	    for(EdgeIterator e(*nc); !e.end(); ++e)
-	      used_edge.set(*e, true);
-	  }
-	}
+        max = 0.0;
+        for(EdgeIterator e(*c); !e.end(); ++e) {
+          if(!used_edge.get(*e)){
+            l = e->length();
+            if(max < l) {
+              max = l;
+              index = e->index();	    
+            }
+          }
+        }
+        if(max == 0.0)
+          continue; 
+        Edge le(mesh, index);
+        for(CellIterator nc(le); !nc.end(); ++nc) {
+          if(!used_cell.get(*nc)) {
+            //	  *w_sum++;
+            weight.set(*nc, weight.get(*nc) + 1);
+            used_cell.set(*nc, true);
+            for(EdgeIterator e(*nc); !e.end(); ++e)
+              used_edge.set(*e, true);
+          }
+        }
       }
     }
   }
-  else if(type == LEPP) { 
+  else if(type == LEPP) 
+  { 
     for(CellIterator c(mesh); !c.end(); ++c) 
       if(cell_marker.get(*c)) {
-	max = 0.0;
-	for(EdgeIterator e(*c); !e.end(); ++e) {
-	  l = e->length();
-	  if(max < l) {
-	    max = l;
-	    index = e->index();	    
-	  }
-	}
-	Edge le(mesh, index);  
-	for(CellIterator oc(le); !oc.end(); ++oc)
-	  weight_lepp(mesh, *oc, le, weight, 0);
+        max = 0.0;
+        for(EdgeIterator e(*c); !e.end(); ++e) {
+          l = e->length();
+          if(max < l) {
+            max = l;
+            index = e->index();	    
+          }
+        }
+        Edge le(mesh, index);  
+        for(CellIterator oc(le); !oc.end(); ++oc)
+          weight_lepp(mesh, *oc, le, weight, 0);
       }
   }
+  else if (type == EdgeCollapse)
+  {
+    for ( CellIterator c_it(mesh) ; !c_it.end() ; ++c_it )
+    {
+      if ( cell_marker.get(*c_it) )
+      {
+        // cell marked for coarsening gets increased weight
+        weight.set(*c_it, weight.get(*c_it) + 1);
+
+        // all neighboring cells also get increased weight
+        //for ( CellIterator nc_it(*c_it) ; !nc_it.end() ; ++nc_it )
+        //  weight.set(*nc_it, weight.get(*nc_it) + 1);
+      }
+    }
+  }
+  else
+    error("Unknown Type for LoadBalancer.");
 
   *w_sum = 0;
   for(CellIterator c(mesh); !c.end(); ++c)

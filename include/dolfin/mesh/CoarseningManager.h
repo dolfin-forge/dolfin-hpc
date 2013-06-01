@@ -106,11 +106,11 @@ namespace dolfin
 
 #ifdef ____USE_D_MESH____
     /// Gives access to the list of cells for coarsening
-    inline List<DCell *>& cells_to_coarsen()
+    inline List< std::pair<DCell *, uint> >& cells_to_coarsen()
     { return _cells_to_coarsen; }
 
     /// Gives access to the list of cells for coarsening
-    inline List<DCell *> const & cells_to_coarsen() const
+    inline List< std::pair<DCell *, uint> > const & cells_to_coarsen() const
     { return _cells_to_coarsen; }
 #else // ____USE_D_MESH____
     /// Gives access to the list of cells for coarsening
@@ -143,7 +143,11 @@ namespace dolfin
     { return _vertices_to_request; }
 
     /// Migrates cells according to request list
+#ifdef ____USE_D_MESH____
+    bool migrate(uint num_cells_coarsened);
+#else
     bool migrate(Mesh& mesh, bool repeat);
+#endif
 
 #ifndef ____USE_D_MESH____
     /// Update distributed data
@@ -465,7 +469,7 @@ namespace dolfin
 
 #ifdef ____USE_D_MESH____
     /// List of cells to coarsen
-    List<DCell*> _cells_to_coarsen;
+    List< std::pair<DCell *, uint> > _cells_to_coarsen;
 #else // ____USE_D_MESH____
     /// List of cells to coarsen
     List<uint> _cells_to_coarsen;
@@ -492,7 +496,8 @@ namespace dolfin
     /// MeshFunction is templated, because migrate() needs it for uint while
     /// init() provides bool.
     template<typename T>
-    void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker);
+    void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
+                    MeshFunction<uint> * attempt_count );
 
     /// Extract process boundary information and store them in 
     /// _int_bnd_vertices and _bnd_cells.
@@ -512,10 +517,31 @@ namespace dolfin
 
     /// Find all cells that are marked for coarsening and put them into a list
     template<typename T>
-    void findCellsToCoarsen(MeshFunction<T>& cell_marker);
+    void findCellsToCoarsen(MeshFunction<T>& cell_marker,
+                            MeshFunction<uint> * attempt_count);
 
 #ifdef ____USE_D_MESH____
     void removeErasedCellsFromCoarseningList();
+
+    void buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
+                       Array<int>& old2new_vertices,
+                       Array< std::pair< MeshFunction<uint>*, 
+                       MeshFunction<uint>* > >& cell_functions,
+                       Array< std::pair< MeshFunction<double>*,
+                       MeshFunction<double>*> >& vertex_functions);
+
+    void cleanupMFArrays(Array< std::pair< MeshFunction<uint>*, 
+                         MeshFunction<uint>* > >& cell_functions,
+                         Array< std::pair< MeshFunction<double>*,
+                         MeshFunction<double>*> >& vertex_functions);
+
+    void updateIndependentSet(Mesh& mesh, MeshFunction<double>& 
+                              forbidden_vertices_new);
+
+    void exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
+                          Array<int>& old2new_vertices,
+                          uint max_num_requested_vertices,
+                          MeshFunction<uint> *& partitions);
 #endif
   };
 }

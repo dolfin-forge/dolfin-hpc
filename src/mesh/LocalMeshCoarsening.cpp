@@ -5,7 +5,7 @@
 // Modified by Balthasar Reuter, 2013.
 // 
 // First added:  2006-11-01
-// Last changed: 2013-04-03
+// Last changed: 2013-06-01
 
 #include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/CoarseningManager.h>
@@ -79,7 +79,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   // Initial load balancing
   dolfin_set("Load balancer redistribute", true);
-  LoadBalancer::balance(mesh, cell_marker);
+  //LoadBalancer::balance(mesh, cell_marker);
+  LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
 
   // Instantiate coarsening manager
   CoarseningManager manager;
@@ -98,22 +99,32 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     prev_num_cells_coarsened = num_cells_coarsened;
 
     // Try all the cells that are marked for coarsening
-    for ( List<DCell*>::iterator c_it(manager.cells_to_coarsen().begin()) ; 
+    for ( List< std::pair<DCell*,uint> >::iterator c_it(manager.cells_to_coarsen().begin()) ; 
           c_it != manager.cells_to_coarsen().end() ; /* do nothing */ )
     {
       // try to coarsen the cell
-      result = coarsenCell(manager, *c_it);
+      result = coarsenCell(manager, c_it->first);
 
       // Coarsening not successful: try the next one
-      if ( result < 0 ) 
+      if ( result < -1 ) 
         ++c_it;
+      // Coarsening failed due to mesh quality
+      else if ( result == -1 )
+      {
+        ++(c_it->second);
+        // give up on this if failed several times
+        if ( c_it->second >= 5 )
+          c_it = manager.cells_to_coarsen().erase(c_it);
+        else
+          ++c_it;
+      }
       else // successful: remove cell from coarsening list
       {
         c_it = manager.cells_to_coarsen().erase(c_it);
         num_cells_coarsened += result;
       }
     }
-  } while ( manager.migrate(mesh, prev_num_cells_coarsened < num_cells_coarsened) );
+  } while ( manager.migrate(num_cells_coarsened - prev_num_cells_coarsened) );
 
   Mesh omesh;
   manager.dmesh()->exp(omesh);
@@ -251,7 +262,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
   {
     // Cannot be coarsened due to missing entities from other processes
     manager.cells_to_request().push_back( cell_to_coarsen->id );
-    return -1;
+    return -2;
   }
   DVertex * vertex_to_remove = verts[vert_idx];
   DVertex * vertex_to_keep = verts[!vert_idx];
@@ -360,8 +371,15 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
                                                      vertex_to_keep);
     *v_it = vertex_to_remove;
   }
+/*
+  // Increase failure count for cell
+  ++(cell_to_coarsen->nref);
 
-  return -1;
+  if ( cell_to_coarsen->nref >= 3 )
+    return -1;
+  else
+    return -2;
+*/ return -1;
 }
 //-----------------------------------------------------------------------------
 #else // ____USE_D_MESH____

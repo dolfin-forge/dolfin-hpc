@@ -478,11 +478,11 @@ namespace dolfin
     /// List of vertices that need neighboring cells from other processes
     List<uint> _vertices_to_request;
 
-    /// Number of cells that have been migrated away in the last iteration
-    uint _migrated_cells;
+    /// Number of cells that have been coarsened in the last iteration
+    uint _global_coarsened_cells;
 
-    /// Max number of cells that have been migrated away in the last iteration
-    uint _max_migrated_cells;
+    /// Number of cells that remain for coarsening in the last iteration
+    uint _global_remaining_cells;
 
     /// Number of migrations performed
     uint _migrations;

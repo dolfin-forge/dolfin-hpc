@@ -29,44 +29,6 @@
 
 using namespace dolfin;
 
-static inline void countCheckMeshFailures(bool print_and_reset)
-{
-  static uint failures = 0;
-  if (print_and_reset)
-  {
-    message("[%d] checkMesh failed %d times", dolfin::MPI::processNumber(), 
-            failures);
-    failures = 0;
-  }
-  else
-    ++failures;
-}
-//-----------------------------------------------------------------------------
-static inline void countSelectVertexFailures(bool print_and_reset)
-{
-  static uint failures = 0;
-  if (print_and_reset)
-  {
-    message("[%d] selectVertex failed %d times", dolfin::MPI::processNumber(), 
-            failures);
-    failures = 0;
-  }
-  else
-    ++failures;
-}
-//-----------------------------------------------------------------------------
-static inline void countSelectEdgeFailures(bool print_and_reset)
-{
-  static uint failures = 0;
-  if (print_and_reset)
-  {
-    message("[%d] selectEdge failed %d times", dolfin::MPI::processNumber(), 
-            failures);
-    failures = 0;
-  }
-  else
-    ++failures;
-}
 //-----------------------------------------------------------------------------
 static inline real distance(real const * x0, real const * x1, uint dim)
 {
@@ -109,23 +71,18 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   // Initial load balancing
   dolfin_set("Load balancer redistribute", true);
-  //LoadBalancer::balance(mesh, cell_marker);
   LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
 
   // Instantiate coarsening manager
   CoarseningManager manager;
   manager.init(mesh, cell_marker, coarsen_boundary);
 
-  dolfin_assert( manager.checkDCellNumbering(mesh.numCells() - 1) );
-
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  begin("Coarsening simplicial mesh by edge collapse, %d cells selected.", 
-        num_cells_to_coarsen);
+  begin("Coarsening simplicial mesh by edge collapse.");
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
   int result;
-  uint num_cells_skipped(0);
   do {
     prev_num_cells_coarsened = num_cells_coarsened;
 
@@ -146,10 +103,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
         ++(c_it->second);
         // give up on this cell if failed several times
         if ( c_it->second >= 5 )
-        {
-          ++num_cells_skipped;
           c_it = manager.cells_to_coarsen().erase(c_it);
-        }
         else
           ++c_it;
       }
@@ -168,25 +122,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   if (MPI::processNumber() == 0)
     tocd();
 
-  {
-    File f("coarsened_mesh.pvd");
-    f << mesh;
-  }
-
-  countCheckMeshFailures(true);
-  countSelectVertexFailures(true);
-  countSelectEdgeFailures(true);
-
-  message("[%d] skipped cells: %d, migration-waiting cells: %d", 
-    MPI::processNumber(), num_cells_skipped, manager.vertices_to_request().size());
-  message("[%d] Mesh coarsening done, now %d cells.", 
-    MPI::processNumber(), mesh.distdata().global_numCells());
-
-  MPI_Barrier(MPI::DOLFIN_COMM);
-
   end();
-
-  error("Stopping here.");
 }
 //-----------------------------------------------------------------------------
 bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager, 
@@ -218,9 +154,6 @@ bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
       }
     }
   }
-
-  if(!edge_found)
-    countSelectEdgeFailures(false);
 
   return edge_found;
 }
@@ -261,13 +194,10 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
   if ( manager.isInteriorBoundaryVertex( vertices[ret]->id ) )
   {
     manager.vertices_to_request().push_back( vertices[ret]->id );
-    countSelectVertexFailures(false);
     return -1;
   }
   else
-  {
     return ret;
-  }
 }
 //-----------------------------------------------------------------------------
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
@@ -286,19 +216,12 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
 
     // check orientation of new cell
     if ( dc->orientation() != *o_it )
-    {
-      //warning("Cell orientation inverted");
       return false;
-    }
 
     // check qm of new cell
     real qm = dc->volume() / dc->diameter();
     if ( qm < vol_tol )
-    {
-      countCheckMeshFailures(false);
-      //warning("Cell quality too low, qm = %f", qm);
       return false;
-    }
 
   }
 
@@ -324,6 +247,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
     manager.cells_to_request().push_back( cell_to_coarsen->id );
     return -2;
   }
+  
   DVertex * vertex_to_remove = verts[vert_idx];
   DVertex * vertex_to_keep = verts[!vert_idx];
 

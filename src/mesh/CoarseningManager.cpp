@@ -55,10 +55,8 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
-  // migrated cells are initially set to a value larger zero to match the
-  // break conditions
-  _migrated_cells = 1;
-  _max_migrated_cells = 1;
+  _global_coarsened_cells = 0;
+  _global_remaining_cells = -1;
   _migrations = 0;
   _load_balances = 0;
 
@@ -281,7 +279,6 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
   MeshFunction<uint> * attempts_new = new MeshFunction<uint>();
   *cell_marker = 0u;
   *attempts = 0u;
-  uint local_num(0);
   for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ; 
         it != _cells_to_coarsen.end() ; ++it )
   {
@@ -291,7 +288,6 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
       continue;
     cell_marker->set(new_idx, 1u);
     attempts->set(new_idx,it->second);
-    ++local_num;
   }
   cell_functions.push_back( std::make_pair(cell_marker, cell_marker_new) );
   cell_functions.push_back( std::make_pair(attempts, attempts_new) );
@@ -461,8 +457,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     }
   }
 
-  _migrated_cells = num_send_cells;
-
   // pairwise communication to exchange requests
   for ( uint i(1) ; i < pe_size ; ++i )
   {
@@ -514,8 +508,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   // Cleanup Coarsening List
   removeErasedCellsFromCoarseningList();
 
-//  message("[%d] starting migration %d", rank, _migrations);
-
   if ( pe_size == 1 )
   {
     message("%d cells coarsened.", num_cells_coarsened);
@@ -524,20 +516,28 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     return (num_cells_coarsened > 0);
   }
 
-  // determine global number of coarsened cells
+  // determine global numbers of coarsened cells and remaining cells
   uint global_nums[2];
   uint local_nums[2];
   local_nums[0] = num_cells_coarsened;
   local_nums[1] = _cells_to_coarsen.size();
   MPI_Allreduce(local_nums, global_nums, 2, 
                 MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  if (rank == 0)
-    message("Starting migration: %d cells coarsened, %d cells remaining", 
-            global_nums[0], global_nums[1]);
 
   // No cells left for coarsening: we're done!
   if ( global_nums[1] == 0 )
     return false;
+  // Nothing happened since last time: we consider ourselves done!
+  else if ( global_nums[0] == _global_coarsened_cells &&
+            global_nums[1] == _global_remaining_cells )
+    return false;
+
+  _global_coarsened_cells = global_nums[0];
+  _global_remaining_cells = global_nums[1];
+
+  if (rank == 0)
+    begin("Starting migration: %d cells coarsened, %d cells remaining", 
+            global_nums[0], global_nums[1]);
 
   // exchange maximum number of requested vertices
   uint local_num_requested_vertices = _vertices_to_request.size();
@@ -614,6 +614,9 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     _migrations = 0;
     ++_load_balances;
   }
+
+  if (rank == 0)
+    end();
 
   return true;
 }

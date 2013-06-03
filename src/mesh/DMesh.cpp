@@ -283,7 +283,21 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   eraseRemovedEntities();
 
   // Renumber and create mapping
-  number(old2new_cells, old2new_vertices);
+  //number(old2new_cells, old2new_vertices);
+
+  bool delete_vertices_array(!old2new_vertices);
+
+  if ( old2new_vertices )
+    dolfin_assert( old2new_vertices->size() >= vertices.size() );
+  else
+    old2new_vertices = new Array<int>(glb_max);
+  *old2new_vertices = -1;
+
+  if ( old2new_cells )
+  {
+    dolfin_assert( old2new_cells->size() >= cells.size() );
+    *old2new_cells = -1;
+  }
 
   MeshEditor editor;
   editor.open(mesh, cell_type->cellType(), d, d);
@@ -298,6 +312,9 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   {
     DVertex* dv = *it;
     dolfin_assert( !dv->deleted );
+
+    if ( old2new_vertices )
+      old2new_vertices->at(dv->id) = current_vertex;
 
     editor.addVertex(current_vertex, dv->p);
 
@@ -322,16 +339,22 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     DCell* dc = *it;
     dolfin_assert( !dc->deleted );
 
+    if ( old2new_cells )
+      old2new_cells->at(dc->id) = current_cell;
+
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
       DVertex* dv = dc->vertices[j];
-      cell_vertices[j] = dv->id;
+      cell_vertices[j] = old2new_vertices->at(dv->id);
     }
     editor.addCell(current_cell, cell_vertices);
 
     current_cell++;
   }
   editor.close();
+
+  if (delete_vertices_array)
+    delete old2new_vertices;
 }
 //-----------------------------------------------------------------------------
 void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
@@ -344,7 +367,7 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
 
   uint i = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
+      it != vertices.end(); ++it, ++i)
   {
     DVertex* dv = *it;
 
@@ -352,7 +375,6 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
       old2new_vertices->at(dv->id) = i;
 
     dv->id = i;
-    ++i;
   }
 
   if ( old2new_cells )
@@ -363,7 +385,7 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
 
   i = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
-      it != cells.end(); ++it)
+      it != cells.end(); ++it, ++i)
   {
     DCell* dc = *it;
 
@@ -371,7 +393,6 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
       old2new_cells->at(dc->id) = i;
     
     dc->id = i;
-    ++i;
   }  
 }
 //-----------------------------------------------------------------------------

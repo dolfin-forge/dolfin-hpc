@@ -55,8 +55,8 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
-  _global_coarsened_cells = 0;
-  _global_remaining_cells = -1;
+  _global_max_coarsened_cells = 0;
+  _global_max_remaining_cells = -1;
   _migrations = 0;
   _load_balances = 0;
 
@@ -64,10 +64,8 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   attempt_count = 0;
   initCommon(mesh, cell_marker, &attempt_count);
 
-  dolfin_assert( _int_bnd_vertices.size() == cell_marker.mesh().numVertices() );
-  dolfin_assert( _int_bnd_cells.size() == cell_marker.mesh().numCells() );
-  dolfin_assert( _bnd_vertices.size() == cell_marker.mesh().numVertices() );
-  dolfin_assert( _bnd_cells.size() == cell_marker.mesh().numCells() );
+  //dolfin_assert( _int_bnd_vertices.size() == cell_marker.mesh().numVertices() );
+  //dolfin_assert( _int_bnd_cells.size() == cell_marker.mesh().numCells() );
   dolfin_assert( _cells_to_coarsen.size() >= 0 );
 
   // find independent set
@@ -83,16 +81,18 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
 #ifdef ____USE_D_MESH____
-    /// Delete old dmesh and import new mesh into dmesh
-    if ( _dmesh )
-      delete _dmesh;
-    _dmesh = new DMesh;
-    _dmesh->imp(mesh);
-#endif 
-
+  /// Delete old dmesh and import new mesh into dmesh
+  if ( _dmesh )
+    delete _dmesh;
+  _dmesh = new DMesh;
+  _dmesh->imp(mesh);
+  
+  _orig_num_cells = mesh.numCells();
+  _orig_num_vertices = mesh.numVertices();
+#else
   // extract boundary information
   findInteriorBoundaries(mesh);
-  findDomainBoundaries(mesh);
+#endif 
 
   // build list of cells to coarsen
   findCellsToCoarsen(cell_marker, attempt_count);
@@ -108,13 +108,14 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
   _vertices_to_request.clear();
 }
 //-----------------------------------------------------------------------------
+#ifndef ____USE_D_MESH____
 void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
 {
   // set to false on whole domain
   _int_bnd_vertices.resize(mesh.numVertices());
   _int_bnd_vertices = false;
-  _int_bnd_cells.resize(mesh.numCells());
-  _int_bnd_cells = false;
+  //_int_bnd_cells.resize(mesh.numCells());
+  //_int_bnd_cells = false;
 
   // no process boundaries if only one process
   if ( MPI::numProcesses() == 1 )
@@ -138,12 +139,13 @@ void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
     _int_bnd_vertices.at(v.index()) = true;
 
     // all connected cells are also on the boundary
-    for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
-      _int_bnd_cells.at(c_it->index()) = true;
+    //for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
+    //  _int_bnd_cells.at(c_it->index()) = true;
   }
 }
+#endif
 //-----------------------------------------------------------------------------
-void CoarseningManager::findDomainBoundaries(Mesh& mesh)
+/*void CoarseningManager::findDomainBoundaries(Mesh& mesh)
 {
   // set to false on whole domain
   _bnd_vertices.resize(mesh.numVertices());
@@ -172,7 +174,7 @@ void CoarseningManager::findDomainBoundaries(Mesh& mesh)
     for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
       _bnd_cells.at(c_it->index()) = true;
   }
-}
+}*/
 //-----------------------------------------------------------------------------
 void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
 {
@@ -505,49 +507,48 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   uint pe_size = MPI::numProcesses();
   uint num_migrations_before_loadbalancing = 15;
 
+  if (rank == 0)
+    cout << "Starting migration." << endl;
+
   // Cleanup Coarsening List
   removeErasedCellsFromCoarseningList();
 
   if ( pe_size == 1 )
   {
-    message("%d cells coarsened.", num_cells_coarsened);
     dolfin_assert(_cells_to_request.size() == 0);
     dolfin_assert(_vertices_to_request.size() == 0);
     return (num_cells_coarsened > 0);
   }
 
   // determine global numbers of coarsened cells and remaining cells
-  uint global_nums[2];
-  uint local_nums[2];
+  uint global_nums[3];
+  uint local_nums[3];
   local_nums[0] = num_cells_coarsened;
   local_nums[1] = _cells_to_coarsen.size();
-  MPI_Allreduce(local_nums, global_nums, 2, 
-                MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  local_nums[2] = _vertices_to_request.size();
+  MPI_Allreduce(local_nums, global_nums, 3, 
+                MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+
+  if ( rank == 0 )
+    cout << "Max " << global_nums[0] << " coarsened, " << 
+            global_nums[1] << " remaining, " <<
+            global_nums[2] << " requested." << endl;
 
   // No cells left for coarsening: we're done!
   if ( global_nums[1] == 0 )
     return false;
   // Nothing happened since last time: we consider ourselves done!
-  else if ( global_nums[0] == _global_coarsened_cells &&
-            global_nums[1] == _global_remaining_cells )
+  else if ( global_nums[0] == _global_max_coarsened_cells &&
+            global_nums[1] == _global_max_remaining_cells )
     return false;
 
-  _global_coarsened_cells = global_nums[0];
-  _global_remaining_cells = global_nums[1];
-
-  if (rank == 0)
-    begin("Starting migration: %d cells coarsened, %d cells remaining", 
-            global_nums[0], global_nums[1]);
-
-  // exchange maximum number of requested vertices
-  uint local_num_requested_vertices = _vertices_to_request.size();
-  uint max_num_requested_vertices;
-  MPI_Allreduce(&local_num_requested_vertices, &max_num_requested_vertices, 1, 
-                MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+  _global_max_coarsened_cells = global_nums[0];
+  _global_max_remaining_cells = global_nums[1];
+  uint max_num_requested_vertices = global_nums[2];
 
   // Export DMesh to Mesh
-  Array<int> old2new_cells(_bnd_cells.size());
-  Array<int> old2new_vertices(_bnd_vertices.size());
+  Array<int> old2new_cells(_orig_num_cells);
+  Array<int> old2new_vertices(_orig_num_vertices);
   Mesh omesh;
   _dmesh->expKeepNumbering(omesh, &old2new_cells, &old2new_vertices);
 
@@ -614,9 +615,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     _migrations = 0;
     ++_load_balances;
   }
-
-  if (rank == 0)
-    end();
 
   return true;
 }

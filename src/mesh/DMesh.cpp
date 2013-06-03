@@ -114,7 +114,7 @@ void DMesh::imp(Mesh& mesh)
       boundary_cell.set(*c, true);    
   }*/
   // This approach saves the need to init facet-cell connectivity
-  BoundaryMesh boundary;
+  /*BoundaryMesh boundary;
   boundary.init_interior(mesh);
   MeshFunction<bool> boundary_cell(mesh, mesh.topology().dim());
   boundary_cell = false;
@@ -131,7 +131,7 @@ void DMesh::imp(Mesh& mesh)
       for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
         boundary_cell.set(c_it->index(), true);
     }
-  }
+  }*/
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
@@ -205,18 +205,32 @@ void DMesh::imp(Mesh& mesh)
     dc->id = ci->index();
     
     // Add dynamic cell to list of boundary cells
-    if ( boundary_cell.get(*ci) ) 
-    {
+    //if ( boundary_cell.get(*ci) ) 
+    //{
+      /*
       for (EdgeIterator e(*ci); !e.end(); ++e) 
       {
         const uint *edge_v = e->entities(0);
         if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0)) 
         {
           EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
-          mesh.distdata().get_global(edge_v[1], 0));
+                                 mesh.distdata().get_global(edge_v[1], 0));
         }
       }
-    }
+      */
+      // Avoid Edge-connectivity
+      /*uint * entities = ci->entities(0);
+      for ( uint i(0) ; i < cell_type->numEntities(0) - 1 ; ++i )
+      {
+        for uint j(i+1) ; j < cell_type->numEntities(0) ; ++j )
+        {
+          if ( mesh.distdata().is_shared(entities[i], 0) || 
+               mesh.distdata().is_shared(entities[j], 0) )
+            EdgeKey key = edge_key(mesh.distdata().get_global(entities[i], 0),
+                                   mesh.distdata().get_global(entities[j], 0));
+        }
+      }*/
+    //}
   }
 }
 //-----------------------------------------------------------------------------

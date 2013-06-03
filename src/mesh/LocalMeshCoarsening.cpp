@@ -29,6 +29,20 @@
 
 using namespace dolfin;
 
+static void countQuality(uint action)
+{
+  static uint orientation = 0;
+  static uint qm = 0;
+  if (action == 0)
+    ++orientation;
+  else if (action == 1)
+    ++qm;
+  else
+    cout << dolfin::MPI::processNumber() << ": "
+         << "failed for orientation: " << orientation
+         << "failed for qm: " << qm << endl;
+}
+
 //-----------------------------------------------------------------------------
 static inline real distance(real const * x0, real const * x1, uint dim)
 {
@@ -78,11 +92,13 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   manager.init(mesh, cell_marker, coarsen_boundary);
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  begin("Coarsening simplicial mesh by edge collapse.");
+  begin("Coarsening simplicial mesh by edge collapse, %d cells to coarsen.",
+    num_cells_to_coarsen);
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
   int result;
+  uint skip_for_quality(0), skip_for_success(0);
   do {
     prev_num_cells_coarsened = num_cells_coarsened;
 
@@ -102,8 +118,11 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
       {
         ++(c_it->second);
         // give up on this cell if failed several times
-        if ( c_it->second >= 5 )
+        if ( c_it->second >= 10 )
+        {
           c_it = manager.cells_to_coarsen().erase(c_it);
+          ++skip_for_quality;
+        }
         else
           ++c_it;
       }
@@ -111,6 +130,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
       {
         c_it = manager.cells_to_coarsen().erase(c_it);
         num_cells_coarsened += result;
+        ++skip_for_success;
       }
     }
   } while ( manager.migrate(num_cells_coarsened - prev_num_cells_coarsened) );
@@ -121,6 +141,12 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   if (MPI::processNumber() == 0)
     tocd();
+
+  cout << "[" << MPI::processNumber() << "] skip for quality = " 
+       << skip_for_quality << ", skip for success = "
+       << skip_for_success << endl;
+
+  countQuality(2);
 
   end();
 }
@@ -191,7 +217,8 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 
   // Check if selected vertex is on a process boundary. In this case neighboring
   // entities have to be requested first from other processes
-  if ( manager.isInteriorBoundaryVertex( vertices[ret]->id ) )
+  //if ( manager.isInteriorBoundaryVertex( vertices[ret]->id ) )
+  if ( vertices[ret]->on_boundary )
   {
     manager.vertices_to_request().push_back( vertices[ret]->id );
     return -1;
@@ -203,7 +230,7 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
                                     std::vector<uint>& cells_to_regenerate_orient)
 {
-  real vol_tol = 1e-12;
+  real vol_tol = 1e-15;
 
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex
@@ -216,12 +243,18 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
 
     // check orientation of new cell
     if ( dc->orientation() != *o_it )
+    {
+      countQuality(0);
       return false;
+    }
 
     // check qm of new cell
     real qm = dc->volume() / dc->diameter();
     if ( qm < vol_tol )
+    {
+      countQuality(1);
       return false;
+    }
 
   }
 
@@ -247,7 +280,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
     manager.cells_to_request().push_back( cell_to_coarsen->id );
     return -2;
   }
-  
+
   DVertex * vertex_to_remove = verts[vert_idx];
   DVertex * vertex_to_keep = verts[!vert_idx];
 

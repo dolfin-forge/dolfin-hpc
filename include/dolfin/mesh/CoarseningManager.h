@@ -45,7 +45,7 @@ namespace dolfin
     /// that are marked for coarsening and boundary information
     void init(Mesh& mesh, MeshFunction<bool>& cell_marker, 
               bool coarsen_boundary = false);
-
+/*
     /// Check if a vertex is on any (interior or domain) boundary
     inline bool isBoundaryVertex(uint index)
     { return _int_bnd_vertices.at(index) || _bnd_vertices.at(index); }
@@ -53,15 +53,18 @@ namespace dolfin
     /// Check if a cell is on any (interior or domain) boundary
     inline bool isBoundaryCell(uint index)
     { return _int_bnd_cells.at(index) || _bnd_cells.at(index); }
+*/
 
+#ifndef ____USE_D_MESH____
     /// Check if a vertex is on the interior boundary
     inline bool isInteriorBoundaryVertex(uint index)
     { return _int_bnd_vertices.at(index); }
+#endif
 
     /// Check if a cell is on the interior boundary
-    inline bool isInteriorBoundaryCell(uint index)
-    { return _int_bnd_cells.at(index); }
-
+    //inline bool isInteriorBoundaryCell(uint index)
+    //{ return _int_bnd_cells.at(index); }
+/*
     /// Check if a vertex is on the domain boundary
     inline bool isDomainBoundaryVertex(uint index)
     { return _bnd_vertices.at(index); }
@@ -69,7 +72,7 @@ namespace dolfin
     /// Check if a cell is on the domain boundary
     inline bool isDomainBoundaryCell(uint index)
     { return _bnd_cells.at(index); }
-
+*/
     /// Check if a vertex is forbidden, i. e. part of the independent set
     inline bool isForbiddenVertex(uint index)
     { return _forbidden_vertices.at(index); }
@@ -445,16 +448,13 @@ namespace dolfin
 #endif // ____USE_D_MESH____
 
     /// Indicator for vertices on domain boundaries
-    Array<bool> _bnd_vertices;
+    //Array<bool> _bnd_vertices;
 
     /// Indicator for cells on domain boundaries
-    Array<bool> _bnd_cells;
-
-    /// Indicator for vertices on process boundaries
-    Array<bool> _int_bnd_vertices;
+    //Array<bool> _bnd_cells;
 
     /// Indicator for cells on process boundaries
-    Array<bool> _int_bnd_cells;
+    //Array<bool> _int_bnd_cells;
 
     /// Indicator for independent set of vertices
     Array<bool> _forbidden_vertices;
@@ -463,11 +463,21 @@ namespace dolfin
     /// IndexMaps for relation between coarse and fine mesh indices
     IndexMap _vertex_map;
     IndexMap _cell_map;
+
+    /// Indicator for vertices on process boundaries
+    Array<bool> _int_bnd_vertices;
+
 #endif
 
 #ifdef ____USE_D_MESH____
     /// List of cells to coarsen
     List< std::pair<DCell *, uint> > _cells_to_coarsen;
+
+    /// Original number of cells in the mesh
+    uint _orig_num_cells;
+
+    /// Original number of vertices in the mesh
+    uint _orig_num_vertices;
 #else // ____USE_D_MESH____
     /// List of cells to coarsen
     List<uint> _cells_to_coarsen;
@@ -478,11 +488,11 @@ namespace dolfin
     /// List of vertices that need neighboring cells from other processes
     List<uint> _vertices_to_request;
 
-    /// Number of cells that have been coarsened in the last iteration
-    uint _global_coarsened_cells;
+    /// Maximum number of cells that have been coarsened in the last iteration
+    uint _global_max_coarsened_cells;
 
-    /// Number of cells that remain for coarsening in the last iteration
-    uint _global_remaining_cells;
+    /// Maximum number of cells that remain for coarsening in the last iteration
+    uint _global_max_remaining_cells;
 
     /// Number of migrations performed
     uint _migrations;
@@ -497,13 +507,15 @@ namespace dolfin
     void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
                     MeshFunction<uint> * attempt_count );
 
+#ifndef ____USE_D_MESH____
     /// Extract process boundary information and store them in 
     /// _int_bnd_vertices and _bnd_cells.
     void findInteriorBoundaries(Mesh& mesh);
+#endif
 
     /// Extract global boundary information and store them in _bnd_vertices
     /// and _bnd_cells.
-    void findDomainBoundaries(Mesh& mesh);
+    //void findDomainBoundaries(Mesh& mesh);
 
     /// Extract a independent set of the vertices by a greedy algorithm and
     /// store it in _forbidden_vertices

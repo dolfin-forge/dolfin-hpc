@@ -224,18 +224,6 @@ bool CoarseningManager::isIndependentVertex(Vertex& v)
 //-----------------------------------------------------------------------------
 #ifdef ____USE_D_MESH____
 //-----------------------------------------------------------------------------
-bool CoarseningManager::checkDCellNumbering(uint max_index)
-{
-  bool ret = true;
-  for ( std::list<DCell *>::iterator c_it(_dmesh->cells.begin()) ; 
-        c_it != _dmesh->cells.end() ; ++c_it )
-  {
-    if ( (*c_it)->id > max_index )
-      ret = false;
-  }
-  return ret;
-}
-//-----------------------------------------------------------------------------
 template<typename T>
 void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker,
                                            MeshFunction<uint> * attempt_count)
@@ -294,14 +282,6 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
   *cell_marker = 0u;
   *attempts = 0u;
   uint local_num(0);
-  /*for ( List<uint>::iterator it(_cells_to_request.begin()) ; 
-        it != _cells_to_request.end() ; ++it )
-  {
-    int new_idx = old2new_cells[*it];
-    if ( new_idx < 0 ) 
-      continue;
-    cell_marker->set(new_idx, 1u);
-  }*/
   for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ; 
         it != _cells_to_coarsen.end() ; ++it )
   {
@@ -315,12 +295,6 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
   }
   cell_functions.push_back( std::make_pair(cell_marker, cell_marker_new) );
   cell_functions.push_back( std::make_pair(attempts, attempts_new) );
-
-  uint global_num;
-  MPI_Allreduce(&local_num, &global_num, 1, 
-                MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  if (MPI::processNumber() == 0)
-    message("in cell_marker for distribution: %d cells remaining.", global_num);
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::cleanupMFArrays(Array< std::pair< MeshFunction<uint>*, 
@@ -390,9 +364,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
       requested_vertices[global_index] = rank;
     }
   }
-
-  if (rank == 0)
-    message("Exchanging requests with owners...");
 
   // pairwise communication to exchange requests
   MPI_Status status;
@@ -491,10 +462,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   }
 
   _migrated_cells = num_send_cells;
-  //message("[%d] sending %d cells", rank, num_send_cells);
-
-  if (rank == 0)
-    message("Exchanging requests with sharing procs...");
 
   // pairwise communication to exchange requests
   for ( uint i(1) ; i < pe_size ; ++i )
@@ -529,9 +496,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     }
   }
 
-  if (rank == 0)
-    message("Exchanges done.");
-
   // clear buffers
   for ( uint i(0) ; i < pe_size ; ++i )
   {
@@ -547,7 +511,8 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   uint pe_size = MPI::numProcesses();
   uint num_migrations_before_loadbalancing = 15;
 
-  dolfin_assert( checkDCellNumbering(_bnd_cells.size() - 1) );
+  // Cleanup Coarsening List
+  removeErasedCellsFromCoarseningList();
 
 //  message("[%d] starting migration %d", rank, _migrations);
 
@@ -560,62 +525,25 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   }
 
   // determine global number of coarsened cells
-  uint global_nums[4];
-  uint local_nums[4];
+  uint global_nums[2];
+  uint local_nums[2];
   local_nums[0] = num_cells_coarsened;
   local_nums[1] = _cells_to_coarsen.size();
-  local_nums[2] = _cells_to_request.size();
-  MPI_Allreduce(local_nums, global_nums, 3, 
+  MPI_Allreduce(local_nums, global_nums, 2, 
                 MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   if (rank == 0)
-    message("Starting migration: %d cells coarsened, %d cells remaining, %d cells requested", 
-            global_nums[0], global_nums[1], global_nums[2]);
+    message("Starting migration: %d cells coarsened, %d cells remaining", 
+            global_nums[0], global_nums[1]);
 
-  if ( global_nums[1] == 0 && global_nums[2] == 0 )
+  // No cells left for coarsening: we're done!
+  if ( global_nums[1] == 0 )
     return false;
 
   // exchange maximum number of requested vertices
-  int local_status[3], remote_status[3];
-  local_status[0] = _vertices_to_request.size();  // local number of vertices
-  local_status[1] = int(num_cells_coarsened > 0); // local termination?
-  local_status[2] = _migrated_cells;              // number of cells migrated
-                                                  // in last migration
-  MPI_Allreduce(&local_status, &remote_status, 3, MPI_INT, 
-                MPI_MAX, MPI::DOLFIN_COMM);
-
-  uint max_num_requested_vertices = remote_status[0]; // max number of vertices
-  bool repeat = remote_status[1];                          // global termination?
-  uint max_num_migrated_cells = remote_status[2];     // max num migrated cells
-
-  // migration nowhere necessary
-  if ( max_num_requested_vertices == 0 )
-  {
-    _migrated_cells = 0;
-    return repeat;
-  }
-
-  // no cells migrated twice: we're done
-  if (_max_migrated_cells == 0 && max_num_migrated_cells == 0)
-    return false;
-  else
-    _max_migrated_cells = max_num_migrated_cells;
-
-  // no cells migrated before and nothing happened in the coarsening: we're done
-  if ( max_num_migrated_cells == 0 && !repeat )
-  {
-    _migrated_cells = 0;
-    _max_migrated_cells = 0;
-    return false;
-  }
-
-  // Cleanup Coarsening List
-  removeErasedCellsFromCoarseningList();
-
-  local_nums[0] = _cells_to_coarsen.size();
-  MPI_Allreduce(local_nums, global_nums, 1, 
-                MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  if (rank == 0)
-    message("After cleanup: %d cells remaining.", global_nums[0]);
+  uint local_num_requested_vertices = _vertices_to_request.size();
+  uint max_num_requested_vertices;
+  MPI_Allreduce(&local_num_requested_vertices, &max_num_requested_vertices, 1, 
+                MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
   // Export DMesh to Mesh
   Array<int> old2new_cells(_bnd_cells.size());
@@ -626,45 +554,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   // Compute cell-vertex connectivity
   omesh.init(0,omesh.topology().dim());
 
-/*
-  if (rank == 0)
-    message("Checking indices of cells");
-
-  for(std::list<DCell* >::iterator it = _dmesh->cells.begin();
-      it != _dmesh->cells.end(); ++it)
-  {
-    DCell* dc = *it;
-
-    if ( old2new_cells[dc->id] < 0 )
-      warning("Cell in dmesh doesn't have new idx.");
-  }
-
-  if (rank == 0)
-    message("Checking number of indices < 0");
-
-  uint indices_smaller_zero(0);
-  for(Array<int>::iterator it = old2new_cells.begin(); 
-      it != old2new_cells.end(); ++it)
-    if (*it < 0)
-      ++indices_smaller_zero;
-
-  if (indices_smaller_zero + omesh.numCells() < old2new_cells.size())
-    warning("indices_smaller_zero + omesh.numCells() < old2new_cells.size()");
-  else if (indices_smaller_zero + omesh.numCells() > old2new_cells.size())
-    warning("indices_smaller_zero + omesh.numCells() > old2new_cells.size()");
-
-
-  if (rank == 0)
-    message("Checking coarsening list");
-
-  for ( List< std::pair<DCell *,uint> >::iterator it(_cells_to_coarsen.begin()) ; 
-        it != _cells_to_coarsen.end() ; )
-  {
-    DCell * dc = it->first;
-    if ( old2new_cells[dc->id] < 0 ) 
-      warning("Cell on list has id < 0.");
-  }
-*/
   // Pointer to MeshFunction with new partitions
   MeshFunction<uint> *partitions = 0;
 
@@ -685,8 +574,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   }
   else
   {
-//    message("[%d] Performing load balance %d instead of migration", rank, _load_balances);
-
     // obtain new partitions from loadbalancer
     //partitions = new MeshFunction<uint>();
     //omesh.partition(*partitions);
@@ -701,15 +588,9 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     dolfin_assert(partitions);
   }
 
-  if (rank == 0)
-    message("Distributing...");
-
   // distribute partitioning and MeshFunctions
   omesh.distribute( *partitions, cell_functions, vertex_functions );
   omesh.renumber();
-
-  if (rank == 0)
-    message("Distribution done.");
 
   dolfin_assert(omesh.numCells() > 0);
 
@@ -722,9 +603,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   // Cleanup MeshFunction Arrays
   cleanupMFArrays(cell_functions, vertex_functions);
 
-//  message("[%d] numCells=%d, numVertices=%d, %d marked for coarsening",
-//          rank, omesh.numCells(), omesh.numVertices(), _cells_to_coarsen.size());
-
   // increase counter
   if ( _migrations < num_migrations_before_loadbalancing )
   {
@@ -733,21 +611,9 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   }
   else
   {
-    message("[%d] %d marked for coarsening",
-          rank, _cells_to_coarsen.size());
     _migrations = 0;
     ++_load_balances;
   }
-
-  local_nums[0] = omesh.numCells();
-  local_nums[1] = _cells_to_coarsen.size();
-  local_nums[2] = _cells_to_request.size();
-  MPI_Allreduce(local_nums, global_nums, 3, 
-                MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  if (rank == 0)
-    message("Migration done. %d cells (distdata: %d), %d cells remaining, %d cells requested", 
-      global_nums[0], omesh.distdata().global_numCells(),
-      global_nums[1], global_nums[2]);
 
   return true;
 }

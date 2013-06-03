@@ -119,8 +119,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   dolfin_assert( manager.checkDCellNumbering(mesh.numCells() - 1) );
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  message("[%d] Mesh coarsening, %d cells selected", 
-            MPI::processNumber(), num_cells_to_coarsen);
+  begin("Coarsening simplicial mesh by edge collapse, %d cells selected.", 
+        num_cells_to_coarsen);
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
@@ -183,6 +183,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     MPI::processNumber(), mesh.distdata().global_numCells());
 
   MPI_Barrier(MPI::DOLFIN_COMM);
+
+  end();
 
   error("Stopping here.");
 }
@@ -271,7 +273,7 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
                                     std::vector<uint>& cells_to_regenerate_orient)
 {
-  real vol_tol = 1e-9;
+  real vol_tol = 1e-12;
 
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex

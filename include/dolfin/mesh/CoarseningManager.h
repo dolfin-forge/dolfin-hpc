@@ -75,8 +75,6 @@ namespace dolfin
     { return _forbidden_vertices.at(index); }
 
 #ifdef ____USE_D_MESH____
-    bool checkDCellNumbering(uint max_index);
-
     /// Gives access to the dynamic mesh
     inline DMesh * dmesh()
     { return _dmesh; }

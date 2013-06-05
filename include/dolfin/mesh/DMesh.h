@@ -24,7 +24,7 @@ namespace dolfin
   class CellType;
 
   /// Dynamic mesh class for on-the-fly changes to the mesh. It is used by the
-  /// recursive RivaraRefinement.
+  /// recursive RivaraRefinement and the EdgeCollapse-MeshCoarsening.
   ///
   /// It provides import- and export-routines from and to the regular Mesh class
   /// of DOLFIN but cannot be used directly for MeshFunction or assembly
@@ -81,15 +81,19 @@ namespace dolfin
     DCell* getCell(int local_id);
 
     /// Import an existing mesh
+    ///
+    /// The local numbering of cells and vertices from the mesh-object is
+    /// adopted in the DMesh
     void imp(Mesh& mesh);
 
     /// Export to a regular mesh
     void exp(Mesh& mesh);
 
-    /// Export to a regular mesh but keep global numbering
+    /// Export to a regular mesh but keep numbering in the DMesh
     ///
     /// An optional mapping between old and new indices is generated. The Arrays
-    /// have to have the size of the old numbering
+    /// have to have at least the size of the old numbering (as it was at the 
+    /// time of the import).
     void expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells = 0, 
                           Array<int> * old2new_vertices = 0);
 
@@ -97,12 +101,12 @@ namespace dolfin
     ///
     /// An optional mapping between old and new indices is generated. The Arrays
     /// have to have the size of the old numbering
-    void number(Array<int> * old2new_cells = 0, 
-                Array<int> * old2new_vertices = 0);
+    void number( Array<int> *old2new_cells=0, Array<int> *old2new_vertices=0 );
 
-    /// Bisect cell 
+    /// Bisect cell dcell
     ///
-    /// TODO: what is hangv, hv0, hv1???
+    /// The edge for the bisection is given by hv0 and hv1 and hangv is the
+    /// hanging node of the opposite cell
     void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
 
     /// Bisect marked cells

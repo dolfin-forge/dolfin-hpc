@@ -463,11 +463,11 @@ namespace dolfin
     /// IndexMaps for relation between coarse and fine mesh indices
     IndexMap _vertex_map;
     IndexMap _cell_map;
-
+#endif
     /// Indicator for vertices on process boundaries
     Array<bool> _int_bnd_vertices;
 
-#endif
+//#endif
 
 #ifdef ____USE_D_MESH____
     /// List of cells to coarsen
@@ -500,18 +500,28 @@ namespace dolfin
     /// Number of load balances performed
     uint _load_balances;
 
+#ifndef ____USE_D_MESH____
+    uint _migrated_cells;
+#endif
+
+
+#ifdef ____USE_D_MESH____
     /// performs part of the initialization which is also used by migrate().
     /// MeshFunction is templated, because migrate() needs it for uint while
     /// init() provides bool.
     template<typename T>
     void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
                     MeshFunction<uint> * attempt_count );
+#else
+    template<typename T>
+    void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker);
+#endif
 
-#ifndef ____USE_D_MESH____
+//#ifndef ____USE_D_MESH____
     /// Extract process boundary information and store them in 
     /// _int_bnd_vertices and _bnd_cells.
     void findInteriorBoundaries(Mesh& mesh);
-#endif
+//#endif
 
     /// Extract global boundary information and store them in _bnd_vertices
     /// and _bnd_cells.
@@ -525,10 +535,15 @@ namespace dolfin
     /// independent set and returns false in that case, otherwise true.
     bool isIndependentVertex(Vertex& v);
 
+#ifdef ____USE_D_MESH____
     /// Find all cells that are marked for coarsening and put them into a list
     template<typename T>
     void findCellsToCoarsen(MeshFunction<T>& cell_marker,
                             MeshFunction<uint> * attempt_count);
+#else
+    template<typename T>
+    void findCellsToCoarsen(MeshFunction<T>& cell_marker);
+#endif
 
 #ifdef ____USE_D_MESH____
     void removeErasedCellsFromCoarseningList();

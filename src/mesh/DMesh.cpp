@@ -98,7 +98,7 @@ void DMesh::imp(Mesh& mesh)
 
   std::vector<DVertex *> vertexvec;
 
-  /*
+  
   BoundaryMesh boundary;
   boundary.init_interior(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
@@ -107,12 +107,13 @@ void DMesh::imp(Mesh& mesh)
 
   // Generate facet - cell connectivity if not generated
   mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
-  for (CellIterator bf(boundary); !bf.end(); ++bf) 
-  {
-    Facet f(mesh, cell_map->get(*bf));    
-    for (CellIterator c(f); !c.end(); ++c) 
-      boundary_cell.set(*c, true);    
-  }*/
+  if ( boundary.numCells() > 0 )
+    for (CellIterator bf(boundary); !bf.end(); ++bf) 
+    {
+      Facet f(mesh, cell_map->get(*bf));    
+      for (CellIterator c(f); !c.end(); ++c) 
+        boundary_cell.set(*c, true);    
+    }
   // This approach saves the need to init facet-cell connectivity
   /*BoundaryMesh boundary;
   boundary.init_interior(mesh);
@@ -170,7 +171,7 @@ void DMesh::imp(Mesh& mesh)
     dv->p = vi->point();
     dv->id = vi->index();
     dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
-    dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
+    dv->on_boundary = MPI::numProcesses() > 1 && mesh.distdata().is_shared(vi->index(), 0);
     dv->shared = mesh.distdata().is_shared(vi->index(), 0);
     dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
     if (dv->ghosted)
@@ -205,32 +206,19 @@ void DMesh::imp(Mesh& mesh)
     dc->id = ci->index();
     
     // Add dynamic cell to list of boundary cells
-    //if ( boundary_cell.get(*ci) ) 
-    //{
-      /*
+    if ( boundary_cell.get(*ci) ) 
+    {
+      
       for (EdgeIterator e(*ci); !e.end(); ++e) 
       {
         const uint *edge_v = e->entities(0);
-        if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0)) 
+        if( mesh.distdata().is_shared(edge_v[0], 0) || mesh.distdata().is_shared(edge_v[1], 0) )
         {
           EdgeKey key = edge_key(mesh.distdata().get_global(edge_v[0], 0),
                                  mesh.distdata().get_global(edge_v[1], 0));
         }
       }
-      */
-      // Avoid Edge-connectivity
-      /*uint * entities = ci->entities(0);
-      for ( uint i(0) ; i < cell_type->numEntities(0) - 1 ; ++i )
-      {
-        for uint j(i+1) ; j < cell_type->numEntities(0) ; ++j )
-        {
-          if ( mesh.distdata().is_shared(entities[i], 0) || 
-               mesh.distdata().is_shared(entities[j], 0) )
-            EdgeKey key = edge_key(mesh.distdata().get_global(entities[i], 0),
-                                   mesh.distdata().get_global(entities[j], 0));
-        }
-      }*/
-    //}
+    }
   }
 }
 //-----------------------------------------------------------------------------

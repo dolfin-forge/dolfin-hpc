@@ -194,12 +194,10 @@ void LoadBalancer::weight_function(Mesh& mesh,
       if ( cell_marker.get(*c_it) )
       {
         // cell marked for coarsening gets increased weight
-        //weight.set(*c_it, weight.get(*c_it) + 5);
         weight.set(*c_it, 2u);
 
         // all neighboring cells also get increased weight
         for ( CellIterator nc_it(*c_it) ; !nc_it.end() ; ++nc_it )
-          //weight.set(*nc_it, weight.get(*nc_it) + 1);
           weight.set(*nc_it, 2u);
       }
     }

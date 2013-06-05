@@ -105,7 +105,8 @@ namespace dolfin
 #endif // ____USE_D_MESH____
 
 #ifdef ____USE_D_MESH____
-    static int selectVertex(DVertex * vertices[], CoarseningManager& manager);
+    static int selectVertex(DVertex * vertices[], CoarseningManager& manager,
+                            uint attempts);
 #else // ____USE_D_MESH____
 #ifdef ____AVOID_TOPOLOGY_INIT____
     /// Selects the vertex that will be deleted. If one of the vertices is
@@ -220,7 +221,8 @@ namespace dolfin
 #endif // ____USE_D_MESH____
 
 #ifdef ____USE_D_MESH____
-    static int coarsenCell(CoarseningManager& manager, DCell* cell_to_coarsen);
+    static int coarsenCell(CoarseningManager& manager, DCell* cell_to_coarsen,
+                           uint attempts);
 #else // ____USE_D_MESH____
     /// Coarsen a selected cell by edge collapse. Is called from 
     /// coarsenMeshByEdgeCollapse().

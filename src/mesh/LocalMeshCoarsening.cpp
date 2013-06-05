@@ -40,7 +40,7 @@ static void countQuality(uint action)
   else
     cout << dolfin::MPI::processNumber() << ": "
          << "failed for orientation: " << orientation
-         << "failed for qm: " << qm << endl;
+         << ", failed for qm: " << qm << endl;
 }
 
 //-----------------------------------------------------------------------------
@@ -82,11 +82,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   // check size of cell_marker
   if ( cell_marker.size() != mesh.numCells() )
     error( "Wrong dimension of cell_marker" );
-
-  // Initial load balancing
-  dolfin_set("Load balancer redistribute", true);
-  LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
-
+  
   // Instantiate coarsening manager
   CoarseningManager manager;
   manager.init(mesh, cell_marker, coarsen_boundary);
@@ -108,7 +104,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
           c_it != manager.cells_to_coarsen().end() ;  )
     {
       // try to coarsen the cell
-      result = coarsenCell(manager, c_it->first);
+      result = coarsenCell(manager, c_it->first, c_it->second);
 
       // Coarsening not successful: try the next one
       if ( result < -1 ) 
@@ -185,7 +181,8 @@ bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
 }
 //-----------------------------------------------------------------------------
 int LocalMeshCoarsening::selectVertex(DVertex * vertices[], 
-                                      CoarseningManager& manager)
+                                      CoarseningManager& manager,
+                                      uint attempts)
 {
   // Both end vertices forbidden: collapse not possible. Should not happen
   // since edge should not have been selected in the first place
@@ -206,10 +203,11 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
   {
     ret = 1;
   }
-  // both allowed: choose higher index for collapse
+  // both allowed: alternate the points between attempts to overcome previous
+  // failures due to mesh quality
   else
   {
-    if ( vertices[0]->id < vertices[1]->id )
+    if ( attempts % 2 == 0 && vertices[0]->id < vertices[1]->id )
       ret = 1;
     else
       ret = 0;
@@ -230,7 +228,7 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
                                     std::vector<uint>& cells_to_regenerate_orient)
 {
-  real vol_tol = 1e-15;
+  real vol_tol = 1e-3;
 
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex
@@ -262,7 +260,7 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
 }
 //-----------------------------------------------------------------------------
 int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
-                                     DCell * cell_to_coarsen)
+                                     DCell * cell_to_coarsen, uint attempts)
 {
   // Check if cell has already been deleted
   if ( cell_to_coarsen->deleted )
@@ -270,10 +268,10 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
 
   // Select edge for collapse
   DVertex * verts[2];
-  if ( !selectEdge(cell_to_coarsen, manager, verts) )
+  if ( !selectEdge( cell_to_coarsen, manager, verts ) )
     return 0;
 
-  int vert_idx = selectVertex( verts, manager );
+  int vert_idx = selectVertex( verts, manager, attempts );
   if ( vert_idx < 0 )
   {
     // Cannot be coarsened due to missing entities from other processes

@@ -60,9 +60,14 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   _migrations = 0;
   _load_balances = 0;
 
+#ifdef ____USE_D_MESH____
   MeshFunction<uint> attempt_count(mesh, mesh.topology().dim());
   attempt_count = 0;
+
   initCommon(mesh, cell_marker, &attempt_count);
+#else
+  initCommon(mesh, cell_marker);
+#endif
 
   //dolfin_assert( _int_bnd_vertices.size() == cell_marker.mesh().numVertices() );
   //dolfin_assert( _int_bnd_cells.size() == cell_marker.mesh().numCells() );
@@ -74,9 +79,14 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   dolfin_assert( _forbidden_vertices.size() == cell_marker.mesh().numVertices() );
 }
 //-----------------------------------------------------------------------------
+#ifdef ____USE_D_MESH____
 template<typename T>
 void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
                                    MeshFunction<uint> * attempt_count)
+#else
+template<typename T>
+void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker)
+#endif
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
@@ -89,13 +99,19 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
   
   _orig_num_cells = mesh.numCells();
   _orig_num_vertices = mesh.numVertices();
+
+  findInteriorBoundaries(mesh);
 #else
   // extract boundary information
   findInteriorBoundaries(mesh);
 #endif 
 
+#ifdef ____USE_D_MESH____
   // build list of cells to coarsen
   findCellsToCoarsen(cell_marker, attempt_count);
+#else
+  findCellsToCoarsen(cell_marker);
+#endif
 
   // initialize mapping
 #ifndef ____USE_D_MESH____
@@ -108,7 +124,7 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
   _vertices_to_request.clear();
 }
 //-----------------------------------------------------------------------------
-#ifndef ____USE_D_MESH____
+//#ifndef ____USE_D_MESH____
 void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
 {
   // set to false on whole domain
@@ -143,7 +159,7 @@ void CoarseningManager::findInteriorBoundaries(Mesh& mesh)
     //  _int_bnd_cells.at(c_it->index()) = true;
   }
 }
-#endif
+//#endif
 //-----------------------------------------------------------------------------
 /*void CoarseningManager::findDomainBoundaries(Mesh& mesh)
 {
@@ -505,7 +521,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 {
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
-  uint num_migrations_before_loadbalancing = 15;
+  uint num_migrations_before_loadbalancing = -1;
 
   if (rank == 0)
     cout << "Starting migration." << endl;
@@ -517,7 +533,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   {
     dolfin_assert(_cells_to_request.size() == 0);
     dolfin_assert(_vertices_to_request.size() == 0);
-    return (num_cells_coarsened > 0);
+    return (num_cells_coarsened > 0) && _vertices_to_request.size() == 0;
   }
 
   // determine global numbers of coarsened cells and remaining cells
@@ -545,6 +561,11 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   _global_max_coarsened_cells = global_nums[0];
   _global_max_remaining_cells = global_nums[1];
   uint max_num_requested_vertices = global_nums[2];
+
+  // no vertices requested: no migration necessary, but obviously still work to
+  // do
+  //if ( max_num_requested_vertices == 0 )
+  //  return true;
 
   // Export DMesh to Mesh
   Array<int> old2new_cells(_orig_num_cells);
@@ -657,6 +678,9 @@ bool CoarseningManager::migrate(Mesh& mesh, bool repeat)
   uint max_num_requested_vertices = global_status[0]; // max number of vertices
   repeat = global_status[1];                          // global termination?
   uint max_num_migrated_cells = global_status[2];     // max num migrated cells
+
+  if (rank == 0)
+    message("Migration. %d cells requested", max_num_requested_vertices);
 
   // migration nowhere necessary
   if ( max_num_requested_vertices == 0 )

@@ -98,7 +98,7 @@ void DMesh::imp(Mesh& mesh)
 
   std::vector<DVertex *> vertexvec;
 
-  
+  /*
   BoundaryMesh boundary;
   boundary.init_interior(mesh);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");  
@@ -114,6 +114,7 @@ void DMesh::imp(Mesh& mesh)
       for (CellIterator c(f); !c.end(); ++c) 
         boundary_cell.set(*c, true);    
     }
+  */
   // This approach saves the need to init facet-cell connectivity
   /*BoundaryMesh boundary;
   boundary.init_interior(mesh);
@@ -204,7 +205,7 @@ void DMesh::imp(Mesh& mesh)
     addCell(dc, vs, ci->index());
     // Define the same cell numbering
     dc->id = ci->index();
-    
+    /*
     // Add dynamic cell to list of boundary cells
     if ( boundary_cell.get(*ci) ) 
     {
@@ -218,7 +219,7 @@ void DMesh::imp(Mesh& mesh)
                                  mesh.distdata().get_global(edge_v[1], 0));
         }
       }
-    }
+    }*/
   }
 }
 //-----------------------------------------------------------------------------

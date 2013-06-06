@@ -14,9 +14,6 @@
 
 #include "MeshFunction.h"
 
-#define ____USE_D_MESH____            // Activate usage of dynamic mesh
-//#define ____AVOID_TOPOLOGY_INIT____   // Avoid initialization of topology 
-
 namespace dolfin
 {
 
@@ -25,12 +22,9 @@ namespace dolfin
   class Cell;
   class MeshEditor;
   class CoarseningManager;
-
-#ifdef ____USE_D_MESH____
   class DMesh;
   class DCell;
   class DVertex;
-#endif
 
   /// This class implements local mesh coarsening for different mesh types.
   class LocalMeshCoarsening
@@ -54,213 +48,101 @@ namespace dolfin
                                           bool coarsen_boundary = false); 
 
   private:
-#ifdef ____USE_D_MESH____
-    static bool selectEdge(DCell* c, CoarseningManager& manager, 
-                           DVertex * vertices[]);
-#else // ____USE_D_MESH____
-#ifdef ____AVOID_TOPOLOGY_INIT____
     /// Selects the shortest edge for coarsening in the specified cell, which 
     /// does not have two forbidden vertices.
     ///
     /// *Arguments*
     ///
-    ///   c (Cell&)
+    ///   c (DCell*)
     ///     The cell to be coarsened
     ///
     ///   manager (CoarseningManager&)
     ///     The Coarsening manager
     ///
-    ///   vertices (uint *)
-    ///     List of vertex indices, that gets filled with indices of endpoints
-    ///     of the found edge. Has to be able to hold at least two uint.
+    ///   vertices (DVertex **)
+    ///     List of vertex indices, that gets filled with pointers to endpoints
+    ///     of the found edge. Has to be able to hold at least two pointer.
     ///
     /// *Returns*
     ///
     ///   bool
     ///     True if a suitable edge has been found
     ///
-    static bool selectEdge(Cell& c, CoarseningManager& manager, uint *vertices);
-#else // ____AVOID_TOPOLOGY_INIT____
-    /// Selects an edge for coarsening in the specified cell, on which not both
-    /// vertices are forbidden or on the boundary between two processes. If 
-    /// coarsen_boundary is false, the edge may also not be on the global 
-    /// domain boundary.
+    static bool selectEdge(DCell* c, CoarseningManager& manager, 
+                           DVertex * vertices[]);
+
+    /// Selects the vertex that will be deleted. If one of the vertices is
+    /// forbidden the other is chosen else the vertices are chosen alternately
+    /// in each attempt.
     ///
     /// *Arguments*
     ///
-    ///   c (Cell&)
-    ///     The cell which edges are tested
+    ///   vertices (DVertex **)
+    ///     Pointer to the two endpoints
     ///
     ///   manager (CoarseningManager&)
     ///     The Coarsening manager
     ///
+    ///   attempts (uint)
+    ///     Number of previous attempts to coarsen the cell
+    ///   
     /// *Returns*
     ///
     ///   int
-    ///     The index of the edge or -1 if none is found (i.e. all vertices
-    ///     are forbidden)
+    ///     The index of the vertex chosen for deletion, -1 if no vertex chosen
+    ///     because entities from other processes are needed
     ///
-    static int selectEdge(Cell& c, CoarseningManager& manager);
-#endif // ____AVOID_TOPOLOGY_INIT____
-#endif // ____USE_D_MESH____
-
-#ifdef ____USE_D_MESH____
     static int selectVertex(DVertex * vertices[], CoarseningManager& manager,
                             uint attempts);
-#else // ____USE_D_MESH____
-#ifdef ____AVOID_TOPOLOGY_INIT____
-    /// Selects the vertex that will be deleted. If one of the vertices is
-    /// forbidden the other is chosen else the vertex with larger index is used.
-    ///
-    /// *Arguments*
-    ///
-    ///   vertices (uint *)
-    ///     The indices of the two endpoints
-    ///
-    ///   manager (CoarseningManager&)
-    ///     The Coarsening manager
-    ///   
-    /// *Returns*
-    ///
-    ///   int
-    ///     The index of the vertex chosen for deletion.
-    ///
-    static int selectVertex(uint *vertices, CoarseningManager& manager);
-#else // ____AVOID_TOPOLOGY_INIT____
-    /// Selects the vertex that will be deleted. If one of the vertices is
-    /// forbidden the other is chosen else the vertex with larger index is used.
-    ///
-    /// *Arguments*
-    ///
-    ///   e (Edge&)
-    ///     The selected edge
-    ///
-    ///   manager (CoarseningManager&)
-    ///     The Coarsening manager
-    ///   
-    ///   vertD (uint&)
-    ///     The index (on the coarse mesh) of the vertex, that is selected for 
-    ///     deletion.
-    ///
-    ///   vertR (uint&)
-    ///     The index (on the coarse mesh) of the vertex, that is selected to 
-    ///     remain, i. e. onto which the deleted vertex will be collapsed.
-    ///
-    /// *Returns*
-    ///
-    ///   bool
-    ///     True if a vertex has been found, false else.
-    ///
-    static bool selectVertex(Edge& e, CoarseningManager& manager,
-                             uint& vertD, uint& vertR);
-#endif // ____AVOID_TOPOLOGY_INIT____
-#endif // ____USE_D_MESH____
 
-#ifndef ____USE_D_MESH____
-    /// Regenerates the cells adjacent to the deleted vertex and inserts
-    /// them in the MeshEditor.
-    ///
-    /// *Arguments*
-    ///
-    ///   mesh (Mesh const & mesh)
-    ///     The fine mesh, from which the vertex_to_remove is removed.
-    ///
-    ///   editor (MeshEditor& editor)
-    ///     The MeshEditor, that is used to build up the coarsened mesh and into
-    ///     which the regenerated cells are inserted.
-    ///
-    ///   vertex_to_remove (Vertex&)
-    ///     The vertex that has been selected for deletion and that will be replaced
-    ///     by the vertex with index vertR
-    ///
-    ///   vertR (uint)
-    ///     Index of the vertex that replaces the removed vertex
-    ///
-    ///   c_id (uint)
-    ///     The cell_id in the coarse mesh that the first regenerated cell should be
-    ///     assigned. The other regenerated cells should get following higher indices.
-    ///
-    ///   cells_to_remove (MeshFuncion<bool> const &)
-    ///     Indicator that shows which cells in the fine mesh should be regenerated.
-    ///
-    ///   manager (CoarseningManager&)
-    ///     The Coarsening manager
-    ///
-    static void regenerateCells(Mesh const & mesh, MeshEditor& editor, 
-                                Vertex& vertex_to_remove, 
-                                uint vertR, uint c_id, 
-                                MeshFunction<bool> const & cells_to_remove,
-                                CoarseningManager& manager);
-#endif
-
-#ifdef ____USE_D_MESH____
-    static bool checkMesh(std::list<DCell *>& cells_to_regenerate,
-                          std::vector<uint>& cells_to_regenerate_orient);
-#else // ____USE_D_MESH____
-    /// Checks the cells adjacent to the removed cell for wrong orientation
+    /// Checks the cells adjacent to the removed vertex for wrong orientation
     /// and sufficient large ratio of volume to diameter (avoid stretched cells).
     ///
     /// *Arguments*
     ///
-    ///   removed_cell (Cell&)
-    ///     The removed cell, that has originally been chosen for coarsening
+    ///   cells_to_regenerate (std::list<DCell *>&)
+    ///     List of cells that has been changed
     ///
-    ///   coarse_mesh (Mesh&)
-    ///     The coarse mesh that will be checked
-    ///
-    ///   manager (CoarseningManager&)
-    ///     The Coarsening manager
+    ///   cells_to_regenerate_orient (std::vector<uint>&)
+    ///     Previous orientations of the changed cells
     /// 
     /// *Returns*
     ///
     ///   bool
     ///     true if all cells are ok, false otherwise
     ///
-    static bool checkMesh(Vertex& removed_vertex, Mesh& coarse_mesh, 
-                          CoarseningManager& manager);
-#endif // ____USE_D_MESH____
+    static bool checkMesh(std::list<DCell *>& cells_to_regenerate,
+                          std::vector<uint>& cells_to_regenerate_orient);
 
-#ifdef ____USE_D_MESH____
-    static int coarsenCell(CoarseningManager& manager, DCell* cell_to_coarsen,
-                           uint attempts);
-#else // ____USE_D_MESH____
-    /// Coarsen a selected cell by edge collapse. Is called from 
+    /// Coarsen a selected cell by edge collapse. It is called from 
     /// coarsenMeshByEdgeCollapse().
     ///
     /// *Arguments*
     ///
-    ///   mesh (Mesh&)
-    ///     The original mesh
-    ///
-    ///   coarse_mesh (Mesh&)
-    ///     The coarsened mesh
-    ///
     ///   manager (CoarseningManager&)
     ///     The CoarseningManager for meta data
     ///
-    ///   cell_to_coarsen_id (uint)
-    ///     Index of the cell to be coarsened
+    ///   cell_to_coarsen (DCell*)
+    ///     Pointer to the cell that is chosen for coarsening
+    ///
+    ///   attempts (uint)
+    ///     Number of previous attempts to coarsen this cell
     ///
     /// *Returns*
     ///
-    ///   std::pair<bool,bool>
+    ///   int
     ///
-    ///     The first value indicates wether the coarse mesh is ok, i.e. the 
-    ///     return value of checkMesh(). If it's true coarsening was successful.
-    ///     The second value indicates wether the mesh has been changed. Typically
-    ///     the following return values will occur:
+    ///     The number of cells deleted during the coarsening of the chosen cell
+    ///     Special cases:
     ///
-    ///     - (true,true): coarsening was successful, mesh quality is ok and the number 
-    ///       of cells and vertices has been reduced during that process.
-    ///     - (true,false): mesh quality is ok but the mesh has not been changed, usually
-    ///       because all vertices of the selected cell are forbidden.
-    ///     - (false,true): coarsening has been tried but the mesh quality is too bad
-    ///       afterwards such that reverting the changes is recommended.
+    ///     * 0 if the cell can't be coarsened (due to forbidden vertices etc.)
     ///
-    static std::pair<bool,bool> coarsenCell(Mesh& mesh, Mesh& coarse_mesh, 
-                                            CoarseningManager& manager,
-                                            uint cell_to_coarsen_id);
-#endif // ____USE_D_MESH____
+    ///     * -1 if coarsening failed due to the checkMesh failure
+    ///
+    ///     * -2 if coarsening failed due to missing entities from other processes
+    ///
+    static int coarsenCell(CoarseningManager& manager, DCell* cell_to_coarsen,
+                           uint attempts);
 
   }; // end class LocalMeshCoarsening
 

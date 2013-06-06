@@ -165,9 +165,13 @@ void DMesh::imp(Mesh& mesh)
   MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
 
+  // Copy vertices
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
   {
+    dolfin_assert(vi->index() == vertices.size());
+    dolfin_assert(vi->index() == vertexvec.size());
+
     DVertex* dv = new DVertex;    
     dv->p = vi->point();
     dv->id = vi->index();
@@ -188,6 +192,7 @@ void DMesh::imp(Mesh& mesh)
     counter++;
   }
 
+  // Copy cells
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     DCell* dc = new DCell;
@@ -311,17 +316,17 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
+      it != vertices.end(); ++it, ++current_vertex)
   {
     DVertex* dv = *it;
     dolfin_assert( !dv->deleted );
 
-    if ( old2new_vertices )
-      old2new_vertices->at(dv->id) = current_vertex;
+    old2new_vertices->at(dv->id) = current_vertex;
 
     editor.addVertex(current_vertex, dv->p);
 
-    if(dv->ghosted) {
+    if(dv->ghosted) 
+    {
       mesh.distdata().set_ghost(current_vertex, 0);
       mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
     }
@@ -331,13 +336,13 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
       mesh.distdata().get_shared_adj(current_vertex, 0) = dv->shared_adj;
     }
 
-    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);      
+    mesh.distdata().set_map(current_vertex, dv->glb_id, 0);      
   }
 
   Array<uint> cell_vertices(cell_type->numEntities(0));
   uint current_cell = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
-      it != cells.end(); ++it)
+      it != cells.end(); ++it, ++current_cell)
   {
     DCell* dc = *it;
     dolfin_assert( !dc->deleted );
@@ -351,8 +356,6 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
       cell_vertices[j] = old2new_vertices->at(dv->id);
     }
     editor.addCell(current_cell, cell_vertices);
-
-    current_cell++;
   }
   editor.close();
 

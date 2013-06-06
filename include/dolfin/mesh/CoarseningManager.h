@@ -17,7 +17,6 @@ namespace dolfin
   class Mesh;
   class Vertex;
   class DMesh;
-  class DVertex;
   class DCell;
 
   /// Assists LocalMeshCoarsening by providing relevant information about mesh
@@ -106,11 +105,9 @@ namespace dolfin
     /// List of vertices that need neighboring cells from other processes
     List<uint> _vertices_to_request;
 
-    /// Maximum number of cells that have been coarsened in the last iteration
-    uint _global_max_coarsened_cells;
-
-    /// Maximum number of cells that remain for coarsening in the last iteration
-    uint _global_max_remaining_cells;
+    /// Number of cells that have been migrated away by this process in the
+    /// previous migration
+    uint _num_migrated_cells;
 
     /// Number of migrations performed
     uint _migrations;

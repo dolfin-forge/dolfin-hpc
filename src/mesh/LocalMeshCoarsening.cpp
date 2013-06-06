@@ -275,8 +275,8 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
     return -2;
   }
 
-  DVertex * vertex_to_remove = verts[vert_idx];
-  DVertex * vertex_to_keep = verts[!vert_idx];
+  DVertex * vertex_to_remove = verts[vert_idx > 0];
+  DVertex * vertex_to_keep = verts[vert_idx == 0];
 
   // Cells to remove: all cells containing both vertices,
   // can be found as intersection of sorted cell lists of the two vertices

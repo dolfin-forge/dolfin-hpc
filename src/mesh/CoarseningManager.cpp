@@ -15,12 +15,14 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DCell.h>
+#include <dolfin/mesh/DVertex.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 
 using namespace dolfin;
+
 //-----------------------------------------------------------------------------
 CoarseningManager::CoarseningManager() 
 : _dmesh(0)
@@ -46,8 +48,7 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
-  _global_max_coarsened_cells = 0;
-  _global_max_remaining_cells = -1;
+  _num_migrated_cells = 0;
   _migrations = 0;
   _load_balances = 0;
 
@@ -257,7 +258,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   for ( List<uint>::iterator it(_vertices_to_request.begin()) ; 
         it != _vertices_to_request.end() ; ++it )
   {
-    dolfin_assert( isInteriorBoundaryVertex(*it) );
     dolfin_assert( old2new_vertices[*it] >= 0 );
     uint global_index = mesh.distdata().get_global(old2new_vertices[*it], 0);
 
@@ -403,6 +403,8 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     }
   }
 
+  _num_migrated_cells = num_send_cells;
+
   // clear buffers
   for ( uint i(0) ; i < pe_size ; ++i )
   {
@@ -432,30 +434,23 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   }
 
   // determine global numbers of coarsened cells and remaining cells
-  uint global_nums[3];
-  uint local_nums[3];
+  uint global_nums[4];
+  uint local_nums[4];
   local_nums[0] = num_cells_coarsened;
   local_nums[1] = _cells_to_coarsen.size();
-  local_nums[2] = _vertices_to_request.size();
-  MPI_Allreduce(local_nums, global_nums, 3, 
+  local_nums[2] = _num_migrated_cells;
+  local_nums[3] = _vertices_to_request.size();
+  MPI_Allreduce(local_nums, global_nums, 4, 
                 MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
-  if ( rank == 0 )
-    cout << "Max " << global_nums[0] << " coarsened, " << 
-            global_nums[1] << " remaining, " <<
-            global_nums[2] << " requested." << endl;
-
-  // No cells left for coarsening: we're done!
+  // no cells remaining: we're done!
   if ( global_nums[1] == 0 )
     return false;
-  // Nothing happened since last time: we consider ourselves done!
-  else if ( global_nums[0] == _global_max_coarsened_cells &&
-            global_nums[1] == _global_max_remaining_cells )
+  // No migration happened the last time and nothing coarsened: we're done!
+  else if ( global_nums[0] == 0 && global_nums[2] == 0 )
     return false;
 
-  _global_max_coarsened_cells = global_nums[0];
-  _global_max_remaining_cells = global_nums[1];
-  uint max_num_requested_vertices = global_nums[2];
+  uint max_num_requested_vertices = global_nums[3];
 
   // no vertices requested: no migration necessary, but obviously still work to
   // do
@@ -467,6 +462,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   Array<int> old2new_vertices(_orig_num_vertices);
   Mesh omesh;
   _dmesh->expKeepNumbering(omesh, &old2new_cells, &old2new_vertices);
+  //omesh.renumber();
 
   // Compute cell-vertex connectivity
   omesh.init(0,omesh.topology().dim());
@@ -505,11 +501,10 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     dolfin_assert(partitions);
   }
 
+
   // distribute partitioning and MeshFunctions
   omesh.distribute( *partitions, cell_functions, vertex_functions );
   omesh.renumber();
-
-  dolfin_assert(omesh.numCells() > 0);
 
   // Re-initialize
   initCommon(omesh, *(cell_functions[0].second), cell_functions[1].second);

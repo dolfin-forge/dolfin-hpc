@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2009-2010.
+// Modified by Balthasar Reuter, 2013.
 //
 
 #include <dolfin/main/MPI.h>
@@ -61,7 +62,8 @@ void RivaraRefinement::refine(Mesh& mesh,
 
 
   // Remove deleted cells from global list
-  for(std::list<DCell* >::iterator it = dmesh.cells.begin();
+  // Is done inside the exp()-function now.
+  /*for(std::list<DCell* >::iterator it = dmesh.cells.begin();
       it != dmesh.cells.end(); )
   {
     
@@ -71,7 +73,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       it = dmesh.cells.erase(it);
     else
       it++;
-  }
+  }*/ 
   
   Mesh omesh;    
   dmesh.exp(omesh);

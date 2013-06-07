@@ -105,6 +105,9 @@ namespace dolfin
     ///
     ///   cells_to_regenerate_orient (std::vector<uint>&)
     ///     Previous orientations of the changed cells
+    ///
+    ///   quality_threshold (real)
+    ///     Threshold for cell quality
     /// 
     /// *Returns*
     ///
@@ -112,7 +115,8 @@ namespace dolfin
     ///     true if all cells are ok, false otherwise
     ///
     static bool checkMesh(std::list<DCell *>& cells_to_regenerate,
-                          std::vector<uint>& cells_to_regenerate_orient);
+                          std::vector<uint>& cells_to_regenerate_orient,
+                          real quality_threshold);
 
     /// Coarsen a selected cell by edge collapse. It is called from 
     /// coarsenMeshByEdgeCollapse().

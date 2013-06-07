@@ -16,6 +16,7 @@
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DCell.h>
 #include <dolfin/mesh/DVertex.h>
+#include <dolfin/parameter/ParameterSystem.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -48,14 +49,24 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
 
-  _num_migrated_cells = 0;
+  _num_migrated_cells = 1; // choosing initally > 0 s.t. coarsening won't exit
+                           // in first migration if all marked cells are requested
   _migrations = 0;
   _load_balances = 0;
 
-  MeshFunction<uint> attempt_count(mesh, mesh.topology().dim());
-  attempt_count = 0;
 
-  initCommon(mesh, cell_marker, &attempt_count);
+  if (ParameterSystem::parameters.defined("coarsening quality threshold"))
+    _quality_threshold = dolfin_get("coarsening quality threshold");
+  else
+    _quality_threshold = 1e-3;
+  cout << "Quality threshold: " << _quality_threshold << endl;
+
+  // attempt count is for sake of simplicity in the migration phase always one
+  // larger than the number of actually performed attempts
+  MeshFunction<uint> attempt_count;
+  MeshFunctionConverter::cast(cell_marker, attempt_count);
+
+  initCommon(mesh, &attempt_count);
 
   // find independent set
   findIndependentSet(mesh, coarsen_boundary);
@@ -63,11 +74,9 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   dolfin_assert( _forbidden_vertices.size() == cell_marker.mesh().numVertices() );
 }
 //-----------------------------------------------------------------------------
-template<typename T>
-void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
-                                   MeshFunction<uint> * attempt_count)
+void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<uint> *attempt_count)
 {
-  dolfin_assert( &mesh == &(cell_marker.mesh()) );
+  dolfin_assert( &mesh == &(attempt_count->mesh()) );
 
   /// Delete old dmesh and import new mesh into dmesh
   if ( _dmesh )
@@ -79,7 +88,7 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
   _orig_num_vertices = mesh.numVertices();
 
   // build list of cells to coarsen
-  findCellsToCoarsen(cell_marker, attempt_count);
+  findCellsToCoarsen(attempt_count);
 
   // reset request lists
   _cells_to_request.clear();
@@ -132,9 +141,7 @@ bool CoarseningManager::isIndependentVertex(Vertex& v)
   return true;
 }
 //-----------------------------------------------------------------------------
-template<typename T>
-void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker,
-                                           MeshFunction<uint> * attempt_count)
+void CoarseningManager::findCellsToCoarsen(MeshFunction<uint> * attempt_count)
 {
   _cells_to_coarsen.clear();
 
@@ -142,7 +149,7 @@ void CoarseningManager::findCellsToCoarsen(MeshFunction<T>& cell_marker,
         c_it != _dmesh->cells.end() ; ++c_it )
   {
     DCell * dc = *c_it;
-    if ( cell_marker.get(dc->id) > 0 )
+    if ( attempt_count->get(dc->id) > 0 )
       _cells_to_coarsen.push_back(std::make_pair(dc, attempt_count->get(dc->id)));
   }
 }
@@ -183,11 +190,6 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
     std::make_pair(forbidden_vertices, forbidden_vertices_new) );
 
   // Prepare cell_marker and attempt count for exchange
-  MeshFunction<uint> * cell_marker = new MeshFunction<uint>(mesh, 
-                                                        mesh.topology().dim());
-  MeshFunction<uint> * cell_marker_new = new MeshFunction<uint>();
-  *cell_marker = 0u;
-
   MeshFunction<uint> * attempts = new MeshFunction<uint>(mesh, 
                                                         mesh.topology().dim());
   MeshFunction<uint> * attempts_new = new MeshFunction<uint>();
@@ -200,10 +202,9 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
     int new_idx = old2new_cells[dc->id];
     if ( new_idx < 0 ) 
       continue;
-    cell_marker->set(new_idx, 1u);
     attempts->set(new_idx,it->second);
+    dolfin_assert(it->second > 0);
   }
-  cell_functions.push_back( std::make_pair(cell_marker, cell_marker_new) );
   cell_functions.push_back( std::make_pair(attempts, attempts_new) );
 }
 //-----------------------------------------------------------------------------
@@ -443,6 +444,12 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   MPI_Allreduce(local_nums, global_nums, 4, 
                 MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
+  if (rank == 0)
+    cout << global_nums[0] << "max. coarsened, "
+         << global_nums[1] << "max. remaining, "
+         << global_nums[2] << "max. migrated, "
+         << global_nums[3] << "max. requested" << endl;
+
   // no cells remaining: we're done!
   if ( global_nums[1] == 0 )
     return false;
@@ -507,7 +514,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   omesh.renumber();
 
   // Re-initialize
-  initCommon(omesh, *(cell_functions[0].second), cell_functions[1].second);
+  initCommon(omesh, cell_functions[0].second);
 
   // Update independent set
   updateIndependentSet(omesh, *(vertex_functions.front().second));

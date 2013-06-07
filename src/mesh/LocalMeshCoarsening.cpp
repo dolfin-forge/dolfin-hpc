@@ -40,28 +40,6 @@ static void countQuality(uint action)
          << "failed for orientation: " << orientation
          << ", failed for qm: " << qm << endl;
 }
-
-//-----------------------------------------------------------------------------
-static inline real distance(real const * x0, real const * x1, uint dim)
-{
-  real sqrlength(0);
-
-  if ( dim == 2 )
-  {
-    sqrlength = ( x0[0] - x1[0] )*( x0[0] - x1[0] ) + 
-                ( x0[1] - x1[1] )*( x0[1] - x1[1] );
-  }
-  else if ( dim == 3 )
-  {
-    sqrlength = ( x0[0] - x1[0] )*( x0[0] - x1[0] ) + 
-                ( x0[1] - x1[1] )*( x0[1] - x1[1] ) + 
-                ( x0[2] - x1[2] )*( x0[2] - x1[2] );
-  }
-  else
-    error("Unknown geometrical dimension!");
-
-  return sqrt(sqrlength);
-}
 //-----------------------------------------------------------------------------
 void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
                                                     MeshFunction<bool>& cell_marker,
@@ -74,6 +52,9 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   uint init_num_verts = mesh.numVertices();
 
   dolfin_assert( &(cell_marker.mesh()) == &mesh );
+
+  //dolfin_set("Load balancer redistribute", true);
+  //LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
 
   // check size of cell_marker
   if ( cell_marker.size() != mesh.numCells() )
@@ -90,7 +71,6 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);
   int result;
-  uint skip_for_quality(0), skip_for_success(0);
   do {
     prev_num_cells_coarsened = num_cells_coarsened;
 
@@ -103,18 +83,14 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
       result = coarsenCell(manager, c_it->first, c_it->second);
 
       // Coarsening not successful: try the next one
-      if ( result < -1 ) 
-        ++c_it;
-      // Coarsening failed due to mesh quality
-      else if ( result == -1 )
+      if ( result < 0 ) 
       {
         ++(c_it->second);
         // give up on this cell if failed several times
-        if ( c_it->second >= 10 )
-        {
+        // attempt count is one larger than actual number of attempts for
+        // simplicity during migration phase
+        if ( c_it->second > 10 )
           c_it = manager.cells_to_coarsen().erase(c_it);
-          ++skip_for_quality;
-        }
         else
           ++c_it;
       }
@@ -122,7 +98,6 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
       {
         c_it = manager.cells_to_coarsen().erase(c_it);
         num_cells_coarsened += result;
-        ++skip_for_success;
       }
     }
   } while ( manager.migrate(num_cells_coarsened - prev_num_cells_coarsened) );
@@ -133,10 +108,6 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   if (MPI::processNumber() == 0)
     tocd();
-
-  cout << "[" << MPI::processNumber() << "] skip for quality = " 
-       << skip_for_quality << ", skip for success = "
-       << skip_for_success << endl;
 
   countQuality(2);
 
@@ -222,10 +193,9 @@ int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
 }
 //-----------------------------------------------------------------------------
 bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
-                                    std::vector<uint>& cells_to_regenerate_orient)
+                                    std::vector<uint>& cells_to_regenerate_orient,
+                                    real quality_threshold)
 {
-  real vol_tol = 1e-3;
-
   // Check for inverted cells and new cell volumes of cells adjacent to 
   // removed vertex
   std::vector<uint>::iterator o_it(cells_to_regenerate_orient.begin());
@@ -244,7 +214,7 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
 
     // check qm of new cell
     real qm = dc->volume() / dc->diameter();
-    if ( qm < vol_tol )
+    if ( qm <= quality_threshold )
     {
       countQuality(1);
       return false;
@@ -346,7 +316,8 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
   }
 
   // Check quality
-  if ( checkMesh(cells_to_regenerate, cells_to_regenerate_orientations) )
+  if ( checkMesh(cells_to_regenerate, cells_to_regenerate_orientations,
+                 manager.qualityThreshold()) )
     return cells_to_remove.size();
 
   // Quality not ok: revert changes (i. e. unmark vertex and cells as deleted,

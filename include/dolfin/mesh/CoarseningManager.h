@@ -83,6 +83,10 @@ namespace dolfin
     /// Migrates cells according to request list
     bool migrate(uint num_cells_coarsened);
 
+    /// Returns the acceptable mesh quality threshold
+    real qualityThreshold() const
+    { return _quality_threshold; }
+
   private:
     /// Dynamic mesh used instead of the regular mesh object during coarsening
     DMesh* _dmesh;
@@ -115,14 +119,17 @@ namespace dolfin
     /// Number of load balances performed
     uint _load_balances;
 
+    /// Quality threshold for the checkMesh routine
+    real _quality_threshold;
+
     /// performs part of the initialization which is also used by migrate().
     ///
-    /// cell_marker is templated, because migrate() needs it for uint while
-    /// init() provides bool. This way a conversion of the MeshFunction can
-    /// be avoided.
-    template<typename T>
-    void initCommon(Mesh& mesh, MeshFunction<T>& cell_marker,
-                    MeshFunction<uint> * attempt_count );
+    /// attempt count gives the number of precious attempts, with the number
+    /// being one larger than the actual number of attempts. This way 
+    /// 0 corresponds to not being marked for coarsening, 1 being marked for
+    /// coarsening without prior attempts and >1 marked for coarsening with 
+    /// the value being the number of prior attempts minus one.
+    void initCommon(Mesh& mesh, MeshFunction<uint> * attempt_count );
 
     /// Extracts an independent set of vertices by a greedy algorithm and
     /// stores it in _forbidden_vertices
@@ -133,9 +140,8 @@ namespace dolfin
     bool isIndependentVertex(Vertex& v);
 
     /// Find all cells that are marked for coarsening and put them into a list
-    template<typename T>
-    void findCellsToCoarsen(MeshFunction<T>& cell_marker,
-                            MeshFunction<uint> * attempt_count);
+    /// together with the number of previous attempts
+    void findCellsToCoarsen(MeshFunction<uint> * attempt_count);
 
     /// Remove erased cells from the coarsening list
     void removeErasedCellsFromCoarseningList();

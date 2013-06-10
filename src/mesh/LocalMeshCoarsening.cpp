@@ -53,6 +53,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   dolfin_assert( &(cell_marker.mesh()) == &mesh );
 
+  begin("Coarsening simplicial mesh by edge collapse.");
+
   //dolfin_set("Load balancer redistribute", true);
   //LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
 
@@ -65,8 +67,8 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   manager.init(mesh, cell_marker, coarsen_boundary);
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
-  begin("Coarsening simplicial mesh by edge collapse, %d cells to coarsen.",
-    num_cells_to_coarsen);
+  cout << num_cells_to_coarsen << " cells selected on process " 
+       << MPI::processNumber() << endl;
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);

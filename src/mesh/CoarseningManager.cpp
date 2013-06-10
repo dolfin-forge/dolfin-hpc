@@ -101,6 +101,7 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
   _forbidden_vertices.resize(mesh.numVertices());
   _forbidden_vertices = false;
 
+  uint num_independent_vertices(0);
   // if boundary coarsening is forbidden: put boundary vertices into set first
   if ( !coarsen_boundary )
   {
@@ -113,7 +114,11 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
 
       // add boundary vertices to set
       for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
+      {
         _forbidden_vertices.at(bnd_vertex_map->get(v_it->index())) = true;
+        if ( !mesh.distdata().is_ghost(bnd_vertex_map->get(v_it->index()),0) )
+          ++num_independent_vertices;
+      }
     }
   }
 
@@ -121,8 +126,18 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
   for ( VertexIterator v_it(mesh) ; !v_it.end() ; ++v_it )
   {
     if ( !_forbidden_vertices[v_it->index()] )
-      _forbidden_vertices.at(v_it->index()) = isIndependentVertex(*v_it);
+    {
+      bool independent = isIndependentVertex(*v_it);
+      _forbidden_vertices.at(v_it->index()) = independent;
+      if ( independent && !mesh.distdata().is_ghost(v_it->index(),0) )
+        ++num_independent_vertices;
+    }
   }
+  uint global_num_independent_vertices;
+  MPI_Reduce( &num_independent_vertices, &global_num_independent_vertices, 1,
+              MPI_UNSIGNED, MPI_SUM, 0, MPI::DOLFIN_COMM );
+  if (MPI::processNumber() == 0)
+    cout << "Global size of independent set: " << global_num_independent_vertices << endl;
 }
 //-----------------------------------------------------------------------------
 bool CoarseningManager::isIndependentVertex(Vertex& v)
@@ -175,36 +190,42 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
                                       Array< std::pair< MeshFunction<double>*,
                                       MeshFunction<double>*> >& vertex_functions)
 {
-  // Prepare forbidden vertices for exchange
-  MeshFunction<double> * forbidden_vertices = new MeshFunction<double>(mesh, 0);
+  MeshFunction<double> * forbidden_vertices = new MeshFunction<double>(mesh);
   MeshFunction<double> * forbidden_vertices_new = new MeshFunction<double>();
-  for ( uint old_idx(0) ; old_idx < _forbidden_vertices.size();
-        ++old_idx )
-  {
-    int new_idx = old2new_vertices[old_idx];
-    if ( new_idx < 0 )
-      continue;
-    forbidden_vertices->set(new_idx, double(isForbiddenVertex(old_idx)) );
-  }
-  vertex_functions.push_back( 
-    std::make_pair(forbidden_vertices, forbidden_vertices_new) );
-
-  // Prepare cell_marker and attempt count for exchange
-  MeshFunction<uint> * attempts = new MeshFunction<uint>(mesh, 
-                                                        mesh.topology().dim());
+  MeshFunction<uint> * attempts = new MeshFunction<uint>(mesh);
   MeshFunction<uint> * attempts_new = new MeshFunction<uint>();
-  *attempts = 0u;
 
-  for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ; 
-        it != _cells_to_coarsen.end() ; ++it )
+  if ( mesh.numCells() != 0 )
   {
-    DCell * dc = it->first;
-    int new_idx = old2new_cells[dc->id];
-    if ( new_idx < 0 ) 
-      continue;
-    attempts->set(new_idx,it->second);
-    dolfin_assert(it->second > 0);
+    // Prepare forbidden vertices for exchange
+    forbidden_vertices->init(0);
+    *forbidden_vertices = 0.0;
+    for ( uint old_idx(0) ; old_idx < _forbidden_vertices.size();
+          ++old_idx )
+    {
+      int new_idx = old2new_vertices[old_idx];
+      if ( new_idx < 0 )
+        continue;
+      forbidden_vertices->set(new_idx, double(isForbiddenVertex(old_idx)) );
+    }
+  
+    // Prepare cell_marker and attempt count for exchange
+    attempts->init(mesh.topology().dim());
+    *attempts = 0u;
+    for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ; 
+          it != _cells_to_coarsen.end() ; ++it )
+    {
+      DCell * dc = it->first;
+      int new_idx = old2new_cells[dc->id];
+      if ( new_idx < 0 ) 
+        continue;
+      attempts->set(new_idx,it->second);
+      dolfin_assert(it->second > 0);
+    }
   }
+
+  vertex_functions.push_back( 
+        std::make_pair(forbidden_vertices, forbidden_vertices_new) );
   cell_functions.push_back( std::make_pair(attempts, attempts_new) );
 }
 //-----------------------------------------------------------------------------
@@ -323,7 +344,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   partitions = new MeshFunction<uint>(mesh, mesh.topology().dim());
   *partitions = rank;
   uint num_send_cells(0);
-
   MeshFunction<bool> requested_cells(mesh, mesh.topology().dim());
   requested_cells = false;
 
@@ -404,6 +424,13 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     }
   }
 
+  // Check that at least one cell resides here
+  if ( num_send_cells >= mesh.numCells() )
+  {
+    partitions->set(0, rank);
+    --num_send_cells;
+  }
+
   _num_migrated_cells = num_send_cells;
 
   // clear buffers
@@ -469,8 +496,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   Array<int> old2new_vertices(_orig_num_vertices);
   Mesh omesh;
   _dmesh->expKeepNumbering(omesh, &old2new_cells, &old2new_vertices);
-  //omesh.renumber();
-
+  
   // Compute cell-vertex connectivity
   omesh.init(0,omesh.topology().dim());
 
@@ -507,7 +533,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
     partitions = omesh.data().meshFunction("partitions");
     dolfin_assert(partitions);
   }
-
 
   // distribute partitioning and MeshFunctions
   omesh.distribute( *partitions, cell_functions, vertex_functions );

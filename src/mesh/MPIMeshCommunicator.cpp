@@ -827,7 +827,8 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           {
             for ( uint f_id(0) ; f_id < nvfunctions ; ++f_id )
             {
-              vfunctions[f_id].push_back(recv_buff[i+gdim+f_id]);
+              //vfunctions[f_id].push_back(recv_buff[i+gdim+f_id]);
+              vfunctions[f_id].push_back(0);
             }
           }  
         }
@@ -1018,7 +1019,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   mesh.distdata().invalid_ownership();
 
   // Fill new cell functions
-  if( cell_functions ) 
+  if( cell_functions && mesh.numCells() > 0 ) 
   {
     uint f_id(0);
     for ( CellFunctionArrayType::iterator f_it(cell_functions->begin()) ; 
@@ -1033,7 +1034,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   }
 
   // Fill new vertex functions
-  if ( vertex_functions )
+  if ( vertex_functions && mesh.numVertices() > 0 )
   {
     uint f_id(0);
     for ( VertexFunctionArrayType::iterator f_it(vertex_functions->begin()) ;

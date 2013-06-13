@@ -117,17 +117,17 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
 {
 	f = new DiscreteFunction(mesh, x, form, i);
 }
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
-					const ufc::form& form, uint i) :
-		Variable("*no name*", "discrete function"),
-		f(0),
-		_type(discrete),
-		_cell(0),
-		_facet(-1)
-{
-	f = new DiscreteFunction(mesh, x, dof_map, form, i);
-}
+////-----------------------------------------------------------------------------
+//Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
+//					const ufc::form& form, uint i) :
+//		Variable("*no name*", "discrete function"),
+//		f(0),
+//		_type(discrete),
+//		_cell(0),
+//		_facet(-1)
+//{
+//	f = new DiscreteFunction(mesh, x, dof_map, form, i);
+//}
 
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x,
@@ -152,16 +152,16 @@ Function::Function(const std::string filename) :
 	File file(filename);
 	file >> *this;
 }
-//-----------------------------------------------------------------------------
-Function::Function(SubFunction f) :
-		Variable("*no name*", "discrete function"),
-		f(0),
-		_type(discrete),
-		_cell(0),
-		_facet(-1)
-{
-	this->f = new DiscreteFunction(f);
-}
+////-----------------------------------------------------------------------------
+//Function::Function(SubFunction f) :
+//		Variable("*no name*", "discrete function"),
+//		f(0),
+//		_type(discrete),
+//		_cell(0),
+//		_facet(-1)
+//{
+//	this->f = new DiscreteFunction(f);
+//}
 //-----------------------------------------------------------------------------
 Function::Function(const Function& f) :
 		f(0),
@@ -234,17 +234,17 @@ void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 	_type = discrete;
 }
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
-					const ufc::form& form, uint i)
-{
-	if (f)
-	{
-		delete f;
-	}
-
-	f = new DiscreteFunction(mesh, x, dof_map, form, i);
-	_type = discrete;
-}
+//void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
+//					const ufc::form& form, uint i)
+//{
+//	if (f)
+//	{
+//		delete f;
+//	}
+//
+//	f = new DiscreteFunction(mesh, x, dof_map, form, i);
+//	_type = discrete;
+//}
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x,
 					std::string const& finite_element_signature)
@@ -330,14 +330,14 @@ dolfin::uint Function::numSubFunctions() const
 	return static_cast<DiscreteFunction*>(f)->numSubFunctions();
 }
 //-----------------------------------------------------------------------------
-SubFunction Function::operator[](uint i)
-{
-	if (_type != discrete)
-		error("Sub functions can only be extracted from discrete functions.");
-
-	SubFunction sub_function(static_cast<DiscreteFunction*>(f), i);
-	return sub_function;
-}
+//SubFunction Function::operator[](uint i)
+//{
+//	if (_type != discrete)
+//		error("Sub functions can only be extracted from discrete functions.");
+//
+//	SubFunction sub_function(static_cast<DiscreteFunction*>(f), i);
+//	return sub_function;
+//}
 //-----------------------------------------------------------------------------
 const Function& Function::operator=(Function& f)
 {
@@ -362,20 +362,20 @@ const Function& Function::operator=(Function& f)
 	return *this;
 }
 //-----------------------------------------------------------------------------
-const Function& Function::operator=(SubFunction sub_function)
-{
-	if (f)
-	{
-		delete f;
-	}
-
-	f = new DiscreteFunction(sub_function);
-
-	rename("*no name*", "discrete function");
-	_type = discrete;
-
-	return *this;
-}
+//const Function& Function::operator=(SubFunction sub_function)
+//{
+//	if (f)
+//	{
+//		delete f;
+//	}
+//
+//	f = new DiscreteFunction(sub_function);
+//
+//	rename("*no name*", "discrete function");
+//	_type = discrete;
+//
+//	return *this;
+//}
 //-----------------------------------------------------------------------------
 void Function::interpolate(const Function& other_func)
 {

@@ -37,19 +37,26 @@ public:
 	/// Create discrete function for argument function i of form
 	DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
-	/// Create discrete function for argument function i of form
-	DiscreteFunction(Mesh& mesh, GenericVector& x, DofMap& dof_map,
-						const ufc::form& form, uint i);
+	/// Create discrete function for argument function i of form which owns the vector
+	DiscreteFunction(Mesh& mesh, Form& form, uint i);
 
-	/// Create discrete function from given data and assume responsibility for data
+//	/// Create discrete function for argument function i of form
+//	DiscreteFunction(Mesh& mesh, GenericVector& x, DofMap& dof_map,
+//						const ufc::form& form, uint i);
+
+/// Create discrete function from given signatures
 	DiscreteFunction(Mesh& mesh, GenericVector& x,
 						std::string finite_element_signature,
 						std::string dof_map_signature);
 
-	/// Create discrete function from sub function
-	DiscreteFunction(SubFunction& sub_function);
+	/// Create discrete function from given signatures which owns the vector
+	DiscreteFunction(Mesh& mesh, std::string finite_element_signature,
+						std::string dof_map_signature);
 
-	/// Copy constructor
+//	/// Create discrete function from sub function
+//	DiscreteFunction(SubFunction& sub_function);
+
+/// Copy constructor
 	DiscreteFunction(const DiscreteFunction& f);
 
 	/// Destructor
@@ -118,10 +125,19 @@ private:
 	};
 
 	// Initialize discrete function
-	void init(Mesh& mesh, GenericVector& x, const ufc::form& form, uint i);
+	void __init(Mesh& mesh, Form& form, uint i);
+
+	// Initialize discrete function
+	void __init(Mesh& mesh, std::string finite_element_signature,
+				std::string dof_map_signature);
+
+	void __init();
 
 	/// Initialize ghost pattern
-	void init_ghosts();
+	void __init_ghosts();
+
+	// Pointers to local data if owned
+	bool const local_vector;
 
 	// The vector of dofs
 	GenericVector* x;
@@ -131,10 +147,6 @@ private:
 
 	// The dof map
 	DofMap* dof_map;
-
-	// Pointers to local data if owned
-	GenericVector* local_vector;
-	DofMap* local_dof_map;
 
 	// Intersection detector
 	mutable IntersectionDetector* intersection_detector;

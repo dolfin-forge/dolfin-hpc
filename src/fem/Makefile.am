@@ -5,6 +5,7 @@ libdolfin_fem_la_SOURCES = \
 			BoundaryCondition.cpp\
 			DirichletBC.cpp\
 			DofMap.cpp\
+			DofMapCache.cpp\
 			DofMapSet.cpp\
 			Form.cpp\
 			NodeNormal.cpp\

@@ -79,13 +79,13 @@ namespace dolfin
     Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
     /// Create discrete function for argument function i of form
-    Function(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+    ///Function(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
 
     /// Create discrete function from signature
     Function(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
 
     /// Create discrete function from sub function
-    explicit Function(SubFunction sub_function);
+//    explicit Function(SubFunction sub_function);
 
     /// Create function from data file
     explicit Function(const std::string filename);
@@ -106,7 +106,7 @@ namespace dolfin
     void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
     /// Create discrete function for argument function i of form
-    void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+    //void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
 
     /// Create discrete function from signature
     void init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
@@ -133,13 +133,13 @@ namespace dolfin
     uint numSubFunctions() const;
 
     /// Extract sub function/slice (only for discrete function)
-    SubFunction operator[] (uint i);
+//    SubFunction operator[] (uint i);
 
     /// Assign function
     const Function& operator= (Function& f);
 
     /// Assign sub function/slice
-    const Function& operator= (SubFunction f);
+//    const Function& operator= (SubFunction f);
 
     /// Interpolate function to vertices of mesh
     void interpolate(real* values);

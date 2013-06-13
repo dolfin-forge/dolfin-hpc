@@ -236,6 +236,16 @@ void Mesh::renumber()
 {
   MeshRenumber::renumber(*this);
 }
+
+//-----------------------------------------------------------------------------
+std::string const Mesh::hash()
+{
+	std::stringstream ss;
+	ss << "Mesh@" << this << "C" << this->numCells() << "V" << this->numVertices();
+	return ss.str();
+}
+
+
 //-----------------------------------------------------------------------------
 void Mesh::disp() const
 {

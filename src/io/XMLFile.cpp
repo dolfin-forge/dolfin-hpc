@@ -183,7 +183,7 @@ void XMLFile::operator>>(Function& f)
   f._type = Function::discrete;
 
   DiscreteFunction& ff = dynamic_cast<DiscreteFunction&>(*f.f);
-  ff.local_vector = x;  
+  ff.x = x;
   
   f.rename("u", "discrete function from file data");
 }

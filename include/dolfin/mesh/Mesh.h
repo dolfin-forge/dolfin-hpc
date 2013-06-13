@@ -224,10 +224,12 @@ namespace dolfin
     /// Renumber mesh global numbering
     void renumber();
 
+    /// Return hash to identify the state of the mesh
+    std::string const hash();
+
     /// Display mesh data
     void disp() const;
 
-    
     /// Return a short desriptive string
     std::string str() const;
 

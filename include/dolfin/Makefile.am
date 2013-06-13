@@ -69,6 +69,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				fem/BoundaryCondition.h\
 				fem/DirichletBC.h\
 				fem/DofMap.h\
+				fem/DofMapCache.h\
 				fem/DofMapSet.h\
 				fem/Form.h\
 				fem/NodeNormal.h\

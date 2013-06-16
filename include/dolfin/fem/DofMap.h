@@ -32,19 +32,28 @@ public:
 
 	static std::string const dofmap_signature(std::string const& fe_signature)
 	{
-	#if UFC_VERSION_MAJOR == 1
+#if UFC_VERSION_MAJOR == 1
 		return "FFC dof map for "+fe_signature;
-	#elif UFC_VERSION_MAJOR == 2
+#elif UFC_VERSION_MAJOR == 2
 		return "FFC dofmap for " + fe_signature;
-	#else
+#else
 		error("Invalid UFC version, supported major are 1.1.x and 2.x");
 		return "";
-	#endif
+#endif
 	}
 
-	static std::string const make_hash(std::string const& dofmap_signature, Mesh& mesh);
+	static std::string const make_hash(std::string const& dofmap_signature,
+										Mesh& mesh)
+	{
+		std::stringstream ss;
+		ss << dofmap_signature << "+" << mesh.hash();
+		return ss.str();
+	}
 
-	static std::string const make_hash(ufc::dof_map& ufcdofmap, Mesh& mesh);
+	static std::string const make_hash(ufc::dof_map& ufcdofmap, Mesh& mesh)
+	{
+		return make_hash(ufcdofmap.signature(), mesh);
+	}
 
 	/// Create dof map on mesh
 	DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool const dof_map_local = false);
@@ -89,8 +98,9 @@ public:
 	void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
 
 	/// Tabulate the local-to-global mapping of dofs on a cell
-	void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
-						uint cell_index) const;
+	void
+			tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
+							uint cell_index) const;
 
 	/// Tabulate local-local facet dofs
 	void tabulate_facet_dofs(uint* dofs, uint local_facet) const;
@@ -99,8 +109,8 @@ public:
 	/// Tabulate the local-to-global mapping of dofs on a ufc cell
 	void tabulate_dofs(uint* dofs, const ufc::cell& cell) const;
 
-	void tabulate_coordinates(real** coordinates,
-								const ufc::cell& ufc_cell) const;
+	void
+			tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const;
 
 	/// Extract sub dof map
 	DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
@@ -112,7 +122,7 @@ public:
 	void build();
 
 	/// Return renumbering (used for testing)
-	std::map<uint, uint> getMap();  // const;
+	std::map<uint, uint> getMap(); // const;
 
 	///
 	std::string const& mesh_hash() const;
@@ -128,6 +138,7 @@ public:
 	uint local_size();
 
 private:
+
 
 	/// Initialise DofMap
 	void init();
@@ -238,22 +249,6 @@ inline bool DofMap::renumbered()
 inline uint DofMap::local_size()
 {
 	return _local_size;
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(std::string const& ufcdofmap_sign,
-											Mesh& mesh)
-{
-	std::stringstream ss;
-	ss << ufcdofmap_sign << "+" << mesh.hash();
-	return ss.str();
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(ufc::dof_map& ufcdofmap,
-											Mesh& mesh)
-{
-	return make_hash(ufcdofmap.signature(), mesh);
 }
 
 }

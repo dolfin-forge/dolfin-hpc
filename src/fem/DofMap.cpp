@@ -679,6 +679,7 @@ std::string const& DofMap::mesh_hash() const
 
 std::string const& DofMap::hash() const
 {
+	std::cout << "Get DofMap@" << this << " hash:\n" << hash_ << std::endl;
 	return hash_;
 }
 

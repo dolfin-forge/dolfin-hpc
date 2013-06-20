@@ -109,6 +109,19 @@ DofMap * DofMapCache::acquire_dofmap(std::string const& dofmap_signature,
 		ret = new DofMap(dofmap_signature, mesh);
 		dolfin_assert(ret);
 
+		std::string const dm_h = ret->hash();
+		if (h != dm_h)
+		{
+			info();
+			std::stringstream ss;
+			ss << std::endl << "DofMap@" << ret << std::endl
+					<< "Signature to be inserted  : " << h << std::endl
+					<< "Signature of DofMap       : " << dm_h
+					<< std::endl
+					<< "DofMap object refers to two different signatures";
+			error(ss.str());
+		}
+
 		cache_.insert(dofmap_item_t(h, dofmap_token_t(ret)));
 
 		if (rlist_.find(ret) == rlist_.end())
@@ -146,17 +159,17 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
 	}
 	else
 	{
-//		if (h != expected_h)
-//		{
-//			info();
-//			std::stringstream ss;
-//			ss << std::endl << "DofMap@" << &dof_map << std::endl
-//					<< "Signature to be released     : " << h << std::endl
-//					<< "Signature already registered : " << expected_h
-//					<< std::endl
-//					<< "DofMap object refers to two different signatures";
-//			error(ss.str());
-//		}
+		if (h != expected_h)
+		{
+			info();
+			std::stringstream ss;
+			ss << std::endl << "DofMap@" << &dof_map << std::endl
+					<< "Signature to be released     : " << h << std::endl
+					<< "Signature already registered : " << expected_h
+					<< std::endl
+					<< "DofMap object refers to two different signatures";
+			error(ss.str());
+		}
 		dofmap_container_t::iterator dm_it = cache_.find(expected_h);
 		dofmap_token_t& dm_token = dm_it->second;
 		dm_token.count--;
@@ -176,13 +189,14 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
 void DofMapCache::info() const
 {
 	message("Number of DofMaps in cache : %i", cache_.size());
-	for (dofmap_container_t::const_iterator it = cache_.begin(); it
-			!= cache_.end(); ++it)
+	for (dofmap_container_t::const_iterator it = cache_.begin();
+			it != cache_.end(); ++it)
 	{
 		std::cout << std::setw(128) << it->first << " : @" << it->second.dofmap
 				<< " : " << it->second.count << std::endl;
 	}
-	for (dofmap_rlist_t::const_iterator it = rlist_.begin(); it != rlist_.end(); ++it)
+	for (dofmap_rlist_t::const_iterator it = rlist_.begin(); it != rlist_.end();
+			++it)
 	{
 		std::cout << "@" << it->first << " : " << it->second << std::endl;
 	}

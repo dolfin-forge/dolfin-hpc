@@ -67,25 +67,25 @@ ufc::finite_element* dolfin::ElementLibrary::create_finite_element(const char* s
   if (strcmp(signature, "FiniteElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 2, None)") == 0)
     return new ffc_discontinuous_lagrange_2_3d_finite_element_0();
   if (strcmp(signature, "VectorElement('Lagrange', Cell('triangle', Space(2)), 1, 2, None)") == 0)
-    return new ffc_lagrange_1_2dvector_finite_element_0();
+    return new ffc_lagrange_1_2dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Lagrange', Cell('triangle', Space(2)), 2, 2, None)") == 0)
-    return new ffc_lagrange_2_2dvector_finite_element_0();
+    return new ffc_lagrange_2_2dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Lagrange', Cell('tetrahedron', Space(3)), 1, 3, None)") == 0)
-    return new ffc_lagrange_1_3dvector_finite_element_0();
+    return new ffc_lagrange_1_3dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Lagrange', Cell('tetrahedron', Space(3)), 2, 3, None)") == 0)
-    return new ffc_lagrange_2_3dvector_finite_element_0();
+    return new ffc_lagrange_2_3dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 0, 2, None)") == 0)
-    return new ffc_discontinuous_lagrange_0_2dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_0_2dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 1, 2, None)") == 0)
-    return new ffc_discontinuous_lagrange_1_2dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_1_2dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 2, 2, None)") == 0)
-    return new ffc_discontinuous_lagrange_2_2dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_2_2dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 0, 3, None)") == 0)
-    return new ffc_discontinuous_lagrange_0_3dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_0_3dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 1, 3, None)") == 0)
-    return new ffc_discontinuous_lagrange_1_3dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_1_3dvector_finite_element_1();
   if (strcmp(signature, "VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 2, 3, None)") == 0)
-    return new ffc_discontinuous_lagrange_2_3dvector_finite_element_0();
+    return new ffc_discontinuous_lagrange_2_3dvector_finite_element_1();
   if (strcmp(signature, "FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)") == 0)
     return new ffc_brezzi_douglas_marini_1_2d_finite_element_0();
   return 0;
@@ -124,25 +124,25 @@ ufc::dof_map* dolfin::ElementLibrary::create_dof_map(const char* signature)
   if (strcmp(signature, DofMap::dofmap_signature("FiniteElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 2, None)").c_str()) == 0)
     return new ffc_discontinuous_lagrange_2_3d_dofmap_0();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Lagrange', Cell('triangle', Space(2)), 1, 2, None)").c_str()) == 0)
-    return new ffc_lagrange_1_2dvector_dofmap_0();
+    return new ffc_lagrange_1_2dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Lagrange', Cell('triangle', Space(2)), 2, 2, None)").c_str()) == 0)
-    return new ffc_lagrange_2_2dvector_dofmap_0();
+    return new ffc_lagrange_2_2dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Lagrange', Cell('tetrahedron', Space(3)), 1, 3, None)").c_str()) == 0)
-    return new ffc_lagrange_1_3dvector_dofmap_0();
+    return new ffc_lagrange_1_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Lagrange', Cell('tetrahedron', Space(3)), 2, 3, None)").c_str()) == 0)
-    return new ffc_lagrange_2_3dvector_dofmap_0();
+    return new ffc_lagrange_2_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 0, 2, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_0_2dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_0_2dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 1, 2, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_1_2dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_1_2dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('triangle', Space(2)), 2, 2, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_2_2dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_2_2dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 0, 3, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_0_3dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_0_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 1, 3, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_1_3dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_1_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("VectorElement('Discontinuous Lagrange', Cell('tetrahedron', Space(3)), 2, 3, None)").c_str()) == 0)
-    return new ffc_discontinuous_lagrange_2_3dvector_dofmap_0();
+    return new ffc_discontinuous_lagrange_2_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)").c_str()) == 0)
     return new ffc_brezzi_douglas_marini_1_2d_dofmap_0();
   return 0;

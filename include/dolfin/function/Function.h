@@ -24,172 +24,209 @@
 namespace dolfin
 {
 
-  class DofMap;
-  class Expression;
-  class Form;
-  class GenericFunction;
-  class GenericVector;
-  class Mesh;
+class DofMap;
+class Expression;
+class Form;
+class GenericFunction;
+class GenericVector;
+class Mesh;
 
-  /// This class represents a function that can be evaluated on a
-  /// mesh. The actual representation of the function can vary, but
-  /// the typical representation is in terms of a mesh, a vector of
-  /// degrees of freedom, a finite element and a dof map that
-  /// determines the distribution of degrees of freedom on the mesh.
-  ///
-  /// It is also possible to have user-defined functions, either by
-  /// overloading the eval function of this class or by giving a
-  /// function (pointer) that returns the value of the function.
+/// This class represents a function that can be evaluated on a
+/// mesh. The actual representation of the function can vary, but
+/// the typical representation is in terms of a mesh, a vector of
+/// degrees of freedom, a finite element and a dof map that
+/// determines the distribution of degrees of freedom on the mesh.
+///
+/// It is also possible to have user-defined functions, either by
+/// overloading the eval function of this class or by giving a
+/// function (pointer) that returns the value of the function.
 
-  class Function : public Variable
-  {
-  public:
+class Function: public Variable
+{
+public:
 
-    /// Function types
-    enum Type {constant, discrete, empty, expression, ufc, user};
 
-    /// Create empty function (read data from file)
-    Function();
+	/// Function types
+	enum Type
+	{
+		constant, discrete, empty, expression, ufc, user
+	};
 
-    /// Create user-defined function (evaluation operator must be overloaded)
-    explicit Function(Mesh& mesh);
+	/// Create empty function (read data from file)
+	Function();
 
-    /// Create user-defined function from expression
-    explicit Function(Mesh& mesh, Expression const& expr);
+	/// Create user-defined function (evaluation operator must be overloaded)
+	explicit Function(Mesh& mesh);
 
-    /// Create constant scalar function from given value
-    Function(Mesh& mesh, real value);
+	/// Create user-defined function from expression
+	explicit Function(Mesh& mesh, Expression const& expr);
 
-    /// Create constant vector function from given size and value
-    Function(Mesh& mesh, uint size, real value);
+	/// Create constant scalar function from given value
+	Function(Mesh& mesh, real value);
 
-    /// Create constant vector function from given size and values
-    Function(Mesh& mesh, const Array<real>& values);
+	/// Create constant vector function from given size and value
+	Function(Mesh& mesh, uint size, real value);
 
-    /// Create constant tensor function from given shape and values
-    Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
+	/// Create constant vector function from given size and values
+	Function(Mesh& mesh, const Array<real>& values);
 
-    /// Create function from given ufc::function
-    Function(Mesh& mesh, const ufc::function& function, uint size);
+	/// Create constant tensor function from given shape and values
+	Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
 
-    /// Create function from given GenericFunction
-    //Function(Mesh& mesh, GenericFunction& function);
+	/// Create function from given ufc::function
+	Function(Mesh& mesh, const ufc::function& function, uint size);
 
-    /// Create discrete function for argument function i of form
-    Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
+	/// Create function from given GenericFunction
+	//Function(Mesh& mesh, GenericFunction& function);
 
-    /// Create discrete function for argument function i of form
-    ///Function(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+	/// Create discrete function for argument function i of form
+	Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
-    /// Create discrete function from signature
-    Function(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
+	/// Create discrete function for argument function i of form
+	Function(Mesh& mesh, Form& form, uint i = 1);
 
-    /// Create discrete function from sub function
-//    explicit Function(SubFunction sub_function);
+	/// Create discrete function for argument function i of form
+	///Function(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
 
-    /// Create function from data file
-    explicit Function(const std::string filename);
+	/// Create discrete function from signature
+	Function(Mesh& mesh, GenericVector& x,
+				std::string const& finite_element_signature);
 
-    /// Copy constructor
-    Function(const Function& f);
+	/// Create discrete function from signature
+	Function(Mesh& mesh, std::string const& finite_element_signature);
 
-    /// Destructor
-    virtual ~Function();
+	/// Create discrete function from signature
+	Function(Mesh& mesh, GenericVector& x,
+				std::string const& finite_element_signature,
+				std::string const& dof_map_signature);
 
-    /// Create constant function
-    void init(Mesh& mesh, real value);
+	/// Create discrete function from signature
+	Function(Mesh& mesh, std::string const& finite_element_signature,
+				std::string const& dof_map_signature);
 
-    /// Create expression function
-    void init(Mesh& mesh, Expression const& expr);
+	/// Create discrete function from sub function
+	//    explicit Function(SubFunction sub_function);
 
-    /// Create discrete function for argument function i of form
-    void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
+	/// Create function from data file
+	explicit Function(const std::string filename);
 
-    /// Create discrete function for argument function i of form
-    //void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+	/// Copy constructor
+	Function(const Function& f);
 
-    /// Create discrete function from signature
-    void init(Mesh& mesh, GenericVector& x, std::string const& finite_element_signature);
+	/// Destructor
+	virtual ~Function();
 
-    /// Return the type of function
-    Type type() const;
+	/// Create constant function
+	void init(Mesh& mesh, real value);
 
-    /// Return the rank of the value space
-    virtual uint rank() const;
+	/// Create expression function
+	void init(Mesh& mesh, Expression const& expr);
 
-    /// Return the dimension of the value space for axis i
-    virtual uint dim(uint i) const;
+	/// Create discrete function for argument function i of form
+	void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
-    /// Return the mesh
-    Mesh& mesh() const;
+	/// Create discrete function for argument function i of form
+	void init(Mesh& mesh, Form& form, uint i = 1);
 
-    /// Return the signature of a DiscreteFunction
-    std::string signature() const;
+	/// Create discrete function for argument function i of form
+	//void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
 
-    /// Return the vector associated with a DiscreteFunction
-    GenericVector& vector() const;
+	/// Create discrete function from signature
+	void init(Mesh& mesh, GenericVector& x,
+				std::string const& finite_element_signature);
 
-    /// Return the number of sub functions (only for discrete functions)
-    uint numSubFunctions() const;
+	/// Create discrete function from signature
+	void init(Mesh& mesh, std::string const& finite_element_signature);
 
-    /// Extract sub function/slice (only for discrete function)
-//    SubFunction operator[] (uint i);
+	/// Create discrete function from signature
+	void init(Mesh& mesh, std::string const& finite_element_signature,
+				std::string const& dof_map_signature);
 
-    /// Assign function
-    const Function& operator= (Function& f);
+	/// Create discrete function from signature
+	void init(Mesh& mesh, GenericVector& x,
+				std::string const& finite_element_signature,
+				std::string const& dof_map_signature);
 
-    /// Assign sub function/slice
-//    const Function& operator= (SubFunction f);
+	/// Return the type of function
+	Type type() const;
 
-    /// Interpolate function to vertices of mesh
-    void interpolate(real* values);
+	/// Return the rank of the value space
+	virtual uint rank() const;
 
-    /// Interpolate values from the given Function
-    void interpolate(const Function& other_func);
+	/// Return the dimension of the value space for axis i
+	virtual uint dim(uint i) const;
 
-    /// Interpolate function to finite element space on cell
-    void interpolate(real* coefficients,
-                     const ufc::cell& ufc_cell,
-                     const ufc::finite_element& finite_element,
-                     Cell& cell, int facet = -1);
+	/// Return the mesh
+	Mesh& mesh() const;
 
-    /// Evaluate function at given point (overload for scalar user-defined function)
-    virtual void eval(real* values, const real* x) const;
+	/// Return the signature of a DiscreteFunction
+	std::string signature() const;
 
-    void sync_ghosts();
+	/// Return the vector associated with a DiscreteFunction
+	GenericVector& vector() const;
 
-    /// Friends
-    friend class XMLFile;
+	/// Return the number of sub functions (only for discrete functions)
+	uint numSubFunctions() const;
 
-  protected:
+	/// Extract sub function/slice (only for discrete function)
+	//    SubFunction operator[] (uint i);
 
-    /// Access current cell (available during assembly for user-defined function)
-    const Cell& cell() const;
+	/// Assign function
+	const Function& operator=(Function& f);
 
-    /// Access current facet normal (available during assembly for user-defined function)
-    Point normal() const;
+	/// Assign sub function/slice
+	//    const Function& operator= (SubFunction f);
 
-    /// Access current facet (available during assembly for user-defined functions)
-    int facet() const;
+	/// Interpolate function to vertices of mesh
+	void interpolate(real* values);
 
-  private:
+	/// Interpolate values from the given Function
+	void interpolate(const Function& other_func);
 
-    // Pointer to current implementation (letter base class)
-    GenericFunction* f;
+	/// Interpolate function to finite element space on cell
+	void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+						const ufc::finite_element& finite_element, Cell& cell,
+						int facet = -1);
 
-    //TODO: set the Vector as attribute of the Function
-    //GenericVector v;
+	/// Evaluate function at given point (overload for scalar user-defined function)
+	virtual void eval(real* values, const real* x) const;
 
-    // Type of function
-    Type _type;
+	void sync_ghosts();
 
-    // Pointer to current cell (if any, otherwise 0)
-    Cell* _cell;
+	/// Friends
+	friend class XMLFile;
 
-    // Current facet (if any, otherwise -1)
-    int _facet;
+protected:
 
-  };
+
+	/// Access current cell (available during assembly for user-defined function)
+	const Cell& cell() const;
+
+	/// Access current facet normal (available during assembly for user-defined function)
+	Point normal() const;
+
+	/// Access current facet (available during assembly for user-defined functions)
+	int facet() const;
+
+private:
+
+
+	// Pointer to current implementation (letter base class)
+	GenericFunction* f;
+
+	//TODO: set the Vector as attribute of the Function
+	//GenericVector v;
+
+	// Type of function
+	Type _type;
+
+	// Pointer to current cell (if any, otherwise 0)
+	Cell* _cell;
+
+	// Current facet (if any, otherwise -1)
+	int _facet;
+
+};
 
 }
 

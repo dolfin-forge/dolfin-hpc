@@ -17,7 +17,6 @@ public:
 	Expression()
 	{
 	}
-	;
 
 	/// Return the rank of the value space
 	virtual uint rank() const = 0;
@@ -44,7 +43,7 @@ class RealReference: public Expression
 public:
 
 	/// Create user-defined function
-	RealReference(real const r) :
+	RealReference(real const& r) :
 			Expression(),
 			r_(r)
 	{

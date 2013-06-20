@@ -126,7 +126,6 @@ DofMap::DofMap(std::string const& signature, Mesh& mesh,
 		mesh_hash_(mesh.hash()),
 		hash_(make_hash(*ufc_dof_map, mesh)),
 		dof_map(NULL),
-
 		dolfin_mesh(mesh),
 		num_cells(mesh.numCells()),
 		partitions(&partitions),

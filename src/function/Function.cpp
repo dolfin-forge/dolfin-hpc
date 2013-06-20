@@ -28,94 +28,74 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 Function::Function() :
-		Variable("*no name*", "empty function"),
-		f(0),
-		_type(empty),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "empty function"), f(0), _type(empty), _cell(0),
+			_facet(-1)
 {
 	// Do nothing
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
-		Variable("*no name*", "user-defined function"),
-		f(0),
-		_type(user),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "user-defined function"), f(0), _type(user),
+			_cell(0), _facet(-1)
 {
 	f = new UserFunction(mesh, this);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
-		Variable("*no name*", "expression function"),
-		f(0),
-		_type(expression),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "expression function"), f(0), _type(expression),
+			_cell(0), _facet(-1)
 {
 	f = new ExpressionFunction(mesh, expr);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
-		Variable("*no name*", "constant function"),
-		f(0),
-		_type(constant),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "constant function"), f(0), _type(constant),
+			_cell(0), _facet(-1)
 {
 	f = new ConstantFunction(mesh, value);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, uint size, real value) :
-		Variable("*no name*", "constant function"),
-		f(0),
-		_type(constant),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "constant function"), f(0), _type(constant),
+			_cell(0), _facet(-1)
 {
 	f = new ConstantFunction(mesh, size, value);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<real>& values) :
-		Variable("*no name*", "constant function"),
-		f(0),
-		_type(constant),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "constant function"), f(0), _type(constant),
+			_cell(0), _facet(-1)
 {
 	f = new ConstantFunction(mesh, values);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<uint>& shape,
 					const Array<real>& values) :
-		Variable("*no name*", "constant function"),
-		f(0),
-		_type(constant),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "constant function"), f(0), _type(constant),
+			_cell(0), _facet(-1)
 {
 	f = new ConstantFunction(mesh, shape, values);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const ufc::function& function, uint size) :
-		Variable("*no name*", "ufc function"),
-		f(0),
-		_type(ufc),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "ufc function"), f(0), _type(ufc), _cell(0), _facet(
+			-1)
 {
 	f = new UFCFunction(mesh, function, size);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
-		Variable("*no name*", "discrete function"),
-		f(0),
-		_type(discrete),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
 {
 	f = new DiscreteFunction(mesh, x, form, i);
+}
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, Form& form, uint i) :
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
+{
+	f = new DiscreteFunction(mesh, form, i);
 }
 ////-----------------------------------------------------------------------------
 //Function::Function(Mesh& mesh, GenericVector& x, DofMap& dof_map,
@@ -132,22 +112,42 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x,
 					std::string const& finite_element_signature) :
-		Variable("*no name*", "discrete function"),
-		f(0),
-		_type(discrete),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
 {
 	f = new DiscreteFunction(mesh, x, finite_element_signature,
 			DofMap::dofmap_signature(finite_element_signature));
 }
 //-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
+{
+	f = new DiscreteFunction(mesh, finite_element_signature,
+			DofMap::dofmap_signature(finite_element_signature));
+}
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, GenericVector& x,
+					std::string const& finite_element_signature,
+					std::string const& dof_map_signature) :
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
+{
+	f = new DiscreteFunction(mesh, x, finite_element_signature,
+			dof_map_signature);
+}
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, std::string const& finite_element_signature,
+					std::string const& dof_map_signature) :
+	Variable("*no name*", "discrete function"), f(0), _type(discrete),
+			_cell(0), _facet(-1)
+{
+	f = new DiscreteFunction(mesh, finite_element_signature, dof_map_signature);
+}
+//-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
-		Variable("*no name*", "discrete function from data file"),
-		f(0),
-		_type(empty),
-		_cell(0),
-		_facet(-1)
+	Variable("*no name*", "discrete function from data file"), f(0), _type(
+			empty), _cell(0), _facet(-1)
 {
 	File file(filename);
 	file >> *this;
@@ -164,19 +164,16 @@ Function::Function(const std::string filename) :
 //}
 //-----------------------------------------------------------------------------
 Function::Function(const Function& f) :
-		f(0),
-		_type(f.type()),
-		_cell(0),
-		_facet(-1)
+	f(0), _type(f.type()), _cell(0), _facet(-1)
 {
 	if (f.type() == discrete)
 	{
-		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f));
+		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*> (f.f));
 		rename(f.name(), "discrete function");
 	}
 	else if (f.type() == constant)
 	{
-		this->f = new ConstantFunction(*static_cast<ConstantFunction*>(f.f));
+		this->f = new ConstantFunction(*static_cast<ConstantFunction*> (f.f));
 		rename(f.name(), "constant function");
 	}
 	else if (f.type() == empty)
@@ -233,6 +230,18 @@ void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 	f = new DiscreteFunction(mesh, x, form, i);
 	_type = discrete;
 }
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, Form& form, uint i)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new DiscreteFunction(mesh, form, i);
+	_type = discrete;
+}
 //-----------------------------------------------------------------------------
 //void Function::init(Mesh& mesh, GenericVector& x, DofMap& dof_map,
 //					const ufc::form& form, uint i)
@@ -258,6 +267,48 @@ void Function::init(Mesh& mesh, GenericVector& x,
 			DofMap::dofmap_signature(finite_element_signature));
 	_type = discrete;
 }
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, std::string const& finite_element_signature)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new DiscreteFunction(mesh, finite_element_signature,
+			DofMap::dofmap_signature(finite_element_signature));
+	_type = discrete;
+}
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, GenericVector& x,
+					std::string const& finite_element_signature,
+					std::string const& dof_map_signature)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new DiscreteFunction(mesh, x, finite_element_signature,
+			dof_map_signature);
+	_type = discrete;
+}
+
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, std::string const& finite_element_signature,
+					std::string const& dof_map_signature)
+{
+	if (f)
+	{
+		delete f;
+	}
+
+	f = new DiscreteFunction(mesh, finite_element_signature, dof_map_signature);
+	_type = discrete;
+}
+
 //-----------------------------------------------------------------------------
 Function::Type Function::type() const
 {
@@ -306,7 +357,7 @@ std::string Function::signature() const
 		error("A signature can only be returned by discrete functions.");
 	}
 
-	return (static_cast<DiscreteFunction*>(f))->signature();
+	return (static_cast<DiscreteFunction*> (f))->signature();
 }
 //-----------------------------------------------------------------------------
 GenericVector& Function::vector() const
@@ -319,7 +370,7 @@ GenericVector& Function::vector() const
 		error("A vector can only be extracted from discrete functions.");
 	}
 
-	return (static_cast<DiscreteFunction*>(f))->vector();
+	return (static_cast<DiscreteFunction*> (f))->vector();
 }
 //-----------------------------------------------------------------------------
 dolfin::uint Function::numSubFunctions() const
@@ -327,7 +378,7 @@ dolfin::uint Function::numSubFunctions() const
 	if (_type != discrete)
 		error("Only discrete functions have sub functions.");
 
-	return static_cast<DiscreteFunction*>(f)->numSubFunctions();
+	return static_cast<DiscreteFunction*> (f)->numSubFunctions();
 }
 //-----------------------------------------------------------------------------
 //SubFunction Function::operator[](uint i)
@@ -342,20 +393,22 @@ dolfin::uint Function::numSubFunctions() const
 const Function& Function::operator=(Function& f)
 {
 
+
 	// FIXME: Handle other assignments
 	if (f._type != discrete)
 		error("Can only handle assignment from discrete functions (for now).");
 
+
 	// Either create or copy discrete function
 	if (_type == discrete)
 	{
-		*static_cast<DiscreteFunction*>(this->f) =
-				*static_cast<DiscreteFunction*>(f.f);
+		*static_cast<DiscreteFunction*> (this->f)
+				= *static_cast<DiscreteFunction*> (f.f);
 	}
 	else
 	{
 		delete this->f;
-		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f));
+		this->f = new DiscreteFunction(*static_cast<DiscreteFunction*> (f.f));
 		_type = discrete;
 		rename(f.name(), "discrete function");
 	}
@@ -396,7 +449,7 @@ void Function::interpolate(const Function& other_func)
 		real ** dofscoords = new real*[dofspercell];
 		for (uint i = 0; i < dofspercell; ++i)
 		{
-			dofscoords[i] = new real[3];  // Internally Point is implemented for d = 3
+			dofscoords[i] = new real[3]; // Internally Point is implemented for d = 3
 		}
 
 		CellIterator refcell(mesh());
@@ -411,8 +464,7 @@ void Function::interpolate(const Function& other_func)
 			uint dof_id = 0;
 			for (uint vd = 0; vd < valuedim; ++vd)
 			{
-				for (uint dof_node = 0; dof_node < nodespercell;
-						++dof_node, ++dof_id)
+				for (uint dof_node = 0; dof_node < nodespercell; ++dof_node, ++dof_id)
 				{
 					other_func.eval(val, dofscoords[dof_node]);
 					block[dof_id] = val[vd];
@@ -422,6 +474,7 @@ void Function::interpolate(const Function& other_func)
 			this->vector().apply();
 		}
 		f->sync_ghosts();
+
 
 		// cleanup
 		for (uint i = 0; i < dofspercell; ++i)
@@ -458,12 +511,15 @@ void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
 	if (!f)
 		error("Function contains no data.");
 
+
 	// Make current cell and facet are available to user-defined function
 	_cell = &cell;
 	_facet = facet;
 
+
 	// Interpolate function
 	f->interpolate(coefficients, ufc_cell, finite_element, cell);
+
 
 	// Make cell and facet unavailable
 	_cell = 0;
@@ -480,6 +536,7 @@ void Function::eval(real* values, const real* x) const
 {
 	if (!f)
 		error("Function contains no data.");
+
 
 	// Try scalar version for user-defined function if not overloaded.
 	// Otherwise, call eval() function in implementation. Note that we

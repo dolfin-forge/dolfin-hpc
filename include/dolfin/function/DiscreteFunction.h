@@ -140,7 +140,7 @@ private:
 	bool const local_vector;
 
 	// The vector of dofs
-	GenericVector* x;
+	GenericVector * const x;
 
 	// The finite element
 	ufc::finite_element* finite_element;
@@ -159,7 +159,8 @@ private:
 
 	uint _cache_size;
 	uint *_indices;
-	real *data_cache;_map<uint, uint> cache_mapping;
+	real *data_cache;
+	_map<uint, uint> cache_mapping;
 
 };
 

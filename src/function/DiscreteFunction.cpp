@@ -53,7 +53,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
 DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
 		GenericFunction(mesh),
 		local_vector(true),
-		x(NULL),
+		x(new Vector()),
 		finite_element(NULL),
 		dof_map(NULL),
 		intersection_detector(NULL),
@@ -97,7 +97,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 									std::string dof_map_signature) :
 		GenericFunction(mesh),
 		local_vector(true),
-		x(NULL),
+		x(new Vector()),
 		finite_element(NULL),
 		dof_map(NULL),
 		intersection_detector(NULL),
@@ -105,6 +105,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 		_indices(NULL),
 		data_cache(NULL)
 {
+	dolfin_debug("In DiscreteFunction constructor");
 	__init(mesh, finite_element_signature, dof_map_signature);
 }
 
@@ -161,13 +162,18 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
 		GenericFunction(f.mesh),
 		local_vector(true),
-		x(NULL),
+		x(new Vector()),
+		finite_element(NULL),
+		dof_map(NULL),
 		intersection_detector(NULL),
 		scratch(NULL),
 		_indices(NULL),
 		data_cache(NULL)
 {
 	__init(f.mesh, f.finite_element->signature(), f.dof_map->signature());
+
+	// Copy vector
+	*x = *f.x;
 
 	renumbered = f.renumbered;
 }
@@ -188,8 +194,12 @@ DiscreteFunction::~DiscreteFunction()
 	if (scratch)
 		delete scratch;
 
+	std::cout << "delete _indices" << std::endl;
+
 	if (_indices)
 		delete[] _indices;
+
+	std::cout << "delete data_cache" << std::endl;
 
 	if (data_cache)
 		delete[] data_cache;
@@ -411,28 +421,19 @@ void DiscreteFunction::__init(Mesh& mesh, std::string finite_element_signature,
 	finite_element = ElementLibrary::create_finite_element(
 			finite_element_signature);
 
+	dolfin_debug("Acquire DofMap");
 	// Token is requested by the standalone function
 	dof_map = DofMapCache::instance().acquire_dofmap(dof_map_signature, mesh);
 
+	dolfin_debug("__init()");
 	__init();
 }
 
 //-----------------------------------------------------------------------------
 void DiscreteFunction::__init()
 {
-	// Initialize vector
-	if (x == NULL)
-	{
-		if (MPI::numProcesses() > 1)
-		{
-			x = new Vector(dof_map->local_size());
-		}
-		else
-		{
-			x = new Vector(dof_map->global_dimension());
-		}
-	}
-	else if (x->size() != dof_map->global_dimension())
+	dolfin_debug("Initialize vector");
+	if (x->size() != dof_map->global_dimension())
 	{
 		if (MPI::numProcesses() > 1)
 		{
@@ -444,15 +445,24 @@ void DiscreteFunction::__init()
 		}
 	}
 
+	dolfin_debug("Initialize scratch space");
 	// Initialize scratch space
 	if (!scratch)
+	{
 		scratch = new Scratch(*finite_element);
+	}
+	else
+	{
+		error("Scratch was not created");
+	}
 
+	dolfin_debug("Initialize ghosts");
 	if (MPI::numProcesses() > 1)
 	{
 		__init_ghosts();
 	}
 
+	dolfin_debug("Set renumbered to false");
 	renumbered = false;
 }
 
@@ -462,6 +472,8 @@ void DiscreteFunction::__init_ghosts()
 	std::set<uint> indices;
 	CellIterator cell(mesh);
 	UFCCell ufc_cell(*cell);
+
+	dolfin_debug("Fill scratch space");
 	for (; !cell.end(); ++cell)
 	{
 		// Update to current cell
@@ -474,9 +486,13 @@ void DiscreteFunction::__init_ghosts()
 			indices.insert(scratch->dofs[j]);
 
 	}
+	dolfin_debug("getMap()");
 	std::map<uint, uint> map = dof_map->getMap();
+
+	dolfin_debug("Initialize vector ghosts");
 	x->init_ghosted(indices.size(), indices, map);
 
+	dolfin_debug("Initialize function cache");
 #ifdef ENABLE_FUNCTION_CACHE
 	if (_indices)
 		delete[] _indices;
@@ -548,14 +564,18 @@ DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::~Scratch()
 {
+	std::cout << "Deleting Scratch" << std::endl;
 	if (dofs)
 		delete[] dofs;
+	std::cout << "Dofs deleted" << std::endl;
 
 	if (coefficients)
 		delete[] coefficients;
+	std::cout << "Coefficients deleted" << std::endl;
 
 	if (values)
 		delete[] values;
+	std::cout << "Values deleted" << std::endl;
 }
 //-----------------------------------------------------------------------------
 

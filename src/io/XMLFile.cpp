@@ -148,10 +148,6 @@ void XMLFile::operator>>(Function& f)
 
   message(1, "Reading function from %s.", filename.c_str());
 
-  // Read the vector
-  Vector* x = new Vector();
-  *this >> *x;
-
   // Read the mesh
   Mesh* mesh = new Mesh();
   *this >> *mesh;
@@ -176,16 +172,9 @@ void XMLFile::operator>>(Function& f)
   xmlObject = new XMLFunction(f);
   parseFile(); 
   
-  // Create the function (we're all friends here)
-  if ( f.f )
-    delete f.f;
-  f.f = new DiscreteFunction(*mesh, *x, finite_element_signature, dof_map_signature);
-  f._type = Function::discrete;
-
-  DiscreteFunction& ff = dynamic_cast<DiscreteFunction&>(*f.f);
-  ff.x = x;
-  
-  f.rename("u", "discrete function from file data");
+  // Create the function (we're all friends here) (friends my ass).
+  f.init(*mesh, finite_element_signature, dof_map_signature);
+   *this >> dynamic_cast<DiscreteFunction&>(f).vector();
 }
 //-----------------------------------------------------------------------------
 void XMLFile::operator>>(ParameterList& parameters)

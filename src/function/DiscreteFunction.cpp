@@ -5,6 +5,7 @@
 // Modified by Dag Lindbo, 2008.
 // Modified by Kristen Kaasbjerg, 2008.
 // Modified by Niclas Jansson, 2008-2010.
+// Modified by Aurélien Larcher 2013
 //
 // First added:  2007-04-02
 // Last changed: 2010-06-16
@@ -105,7 +106,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 		_indices(NULL),
 		data_cache(NULL)
 {
-	dolfin_debug("In DiscreteFunction constructor");
 	__init(mesh, finite_element_signature, dof_map_signature);
 }
 
@@ -194,12 +194,8 @@ DiscreteFunction::~DiscreteFunction()
 	if (scratch)
 		delete scratch;
 
-	std::cout << "delete _indices" << std::endl;
-
 	if (_indices)
 		delete[] _indices;
-
-	std::cout << "delete data_cache" << std::endl;
 
 	if (data_cache)
 		delete[] data_cache;
@@ -404,7 +400,7 @@ void DiscreteFunction::__init(Mesh& mesh, Form& form, uint i)
 	dof_map = &form.dofMaps()[i];
 
 	//Necessary to call acquire for the moment as we release in the destructor
-	if (dof_map != DofMapCache::instance().acquire_dofmap(form.form(), i, mesh))
+	if (dof_map != DofMapCache::instance().acquire_dofmap(mesh,form.form(), i))
 	{
 		error("Different DofMap object pointed by Form and DiscreteFunction");
 	}
@@ -421,18 +417,15 @@ void DiscreteFunction::__init(Mesh& mesh, std::string finite_element_signature,
 	finite_element = ElementLibrary::create_finite_element(
 			finite_element_signature);
 
-	dolfin_debug("Acquire DofMap");
 	// Token is requested by the standalone function
-	dof_map = DofMapCache::instance().acquire_dofmap(dof_map_signature, mesh);
+	dof_map = DofMapCache::instance().acquire_dofmap(mesh,dof_map_signature);
 
-	dolfin_debug("__init()");
 	__init();
 }
 
 //-----------------------------------------------------------------------------
 void DiscreteFunction::__init()
 {
-	dolfin_debug("Initialize vector");
 	if (x->size() != dof_map->global_dimension())
 	{
 		if (MPI::numProcesses() > 1)
@@ -445,7 +438,6 @@ void DiscreteFunction::__init()
 		}
 	}
 
-	dolfin_debug("Initialize scratch space");
 	// Initialize scratch space
 	if (!scratch)
 	{
@@ -456,13 +448,11 @@ void DiscreteFunction::__init()
 		error("Scratch was not created");
 	}
 
-	dolfin_debug("Initialize ghosts");
 	if (MPI::numProcesses() > 1)
 	{
 		__init_ghosts();
 	}
 
-	dolfin_debug("Set renumbered to false");
 	renumbered = false;
 }
 
@@ -473,7 +463,6 @@ void DiscreteFunction::__init_ghosts()
 	CellIterator cell(mesh);
 	UFCCell ufc_cell(*cell);
 
-	dolfin_debug("Fill scratch space");
 	for (; !cell.end(); ++cell)
 	{
 		// Update to current cell
@@ -486,13 +475,10 @@ void DiscreteFunction::__init_ghosts()
 			indices.insert(scratch->dofs[j]);
 
 	}
-	dolfin_debug("getMap()");
 	std::map<uint, uint> map = dof_map->getMap();
 
-	dolfin_debug("Initialize vector ghosts");
 	x->init_ghosted(indices.size(), indices, map);
 
-	dolfin_debug("Initialize function cache");
 #ifdef ENABLE_FUNCTION_CACHE
 	if (_indices)
 		delete[] _indices;
@@ -564,18 +550,14 @@ DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::~Scratch()
 {
-	std::cout << "Deleting Scratch" << std::endl;
 	if (dofs)
 		delete[] dofs;
-	std::cout << "Dofs deleted" << std::endl;
 
 	if (coefficients)
 		delete[] coefficients;
-	std::cout << "Coefficients deleted" << std::endl;
 
 	if (values)
 		delete[] values;
-	std::cout << "Values deleted" << std::endl;
 }
 //-----------------------------------------------------------------------------
 

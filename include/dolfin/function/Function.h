@@ -4,9 +4,10 @@
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Kristian B. Oelgaard, 2007.
 // Modified by Martin Sandve Alnes, 2008.
+// Modified by Aurélien Larcher, 2013.
 //
 // First added:  2003-11-28
-// Last changed: 2008-07-07
+// Last changed: 2013-06-11
 
 #ifndef __FUNCTION_H
 #define __FUNCTION_H

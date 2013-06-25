@@ -45,8 +45,8 @@ public:
 	static DofMapCache& instance()
 	{ return *instance_; }
 
-	DofMap * acquire_dofmap(ufc::form const& form, uint const& i, Mesh& mesh);
-	DofMap * acquire_dofmap(std::string const& dofmap_signature, Mesh& mesh);
+	DofMap * acquire_dofmap(Mesh& mesh, ufc::form const& form, uint const& i);
+	DofMap * acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
 	void release_dofmap(DofMap& dof_map);
 
 	void info() const;

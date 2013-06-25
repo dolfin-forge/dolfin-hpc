@@ -94,13 +94,15 @@ public:
 	/// Return number of facet dofs
 	unsigned int num_facet_dofs() const;
 
+	/// Return local to global mapping
+	uint * local2global() const {return local_to_global_;}
+
 	/// Tabulate the local-to-global mapping of dofs on a cell
 	void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
 
 	/// Tabulate the local-to-global mapping of dofs on a cell
 	void
-			tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
-							uint cell_index) const;
+	tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_index) const;
 
 	/// Tabulate local-local facet dofs
 	void tabulate_facet_dofs(uint* dofs, uint local_facet) const;
@@ -110,16 +112,13 @@ public:
 	void tabulate_dofs(uint* dofs, const ufc::cell& cell) const;
 
 	void
-			tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const;
+	tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const;
 
 	/// Extract sub dof map
 	DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
 
 	/// Return mesh associated with map
 	Mesh& mesh() const;
-
-	/// Build parallel dof map
-	void build();
 
 	/// Return renumbering (used for testing)
 	std::map<uint, uint> getMap(); // const;
@@ -139,9 +138,14 @@ public:
 
 private:
 
-
 	/// Initialise DofMap
 	void init();
+
+	/// Build parallel dof map
+	void build();
+
+	///
+	void tabulate_dofs();
 
 	/// Extract sub DofMap
 	ufc::dof_map* extractDofMap(const ufc::dof_map& dof_map, uint& offset,
@@ -159,6 +163,9 @@ private:
 
 	// Parallel dof map
 	uint* dof_map;
+
+	//
+	uint* local_to_global_;
 
 	// UFC mesh
 	UFCMesh ufc_mesh;

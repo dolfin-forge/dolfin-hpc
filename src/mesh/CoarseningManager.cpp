@@ -51,15 +51,15 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
 
   _num_migrated_cells = 1; // choosing initally > 0 s.t. coarsening won't exit
                            // in first migration if all marked cells are requested
-  _migrations = 0;
-  _load_balances = 0;
 
 
   if (ParameterSystem::parameters.defined("coarsening quality threshold"))
     _quality_threshold = dolfin_get("coarsening quality threshold");
   else
     _quality_threshold = 1e-3;
-  cout << "Quality threshold: " << _quality_threshold << endl;
+
+  if ( MPI::processNumber() == 0 )
+    cout << "Quality threshold: " << _quality_threshold << endl;
 
   // attempt count is for sake of simplicity in the migration phase always one
   // larger than the number of actually performed attempts
@@ -136,8 +136,6 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
   uint global_num_independent_vertices;
   MPI_Reduce( &num_independent_vertices, &global_num_independent_vertices, 1,
               MPI_UNSIGNED, MPI_SUM, 0, MPI::DOLFIN_COMM );
-  if (MPI::processNumber() == 0)
-    cout << "Global size of independent set: " << global_num_independent_vertices << endl;
 }
 //-----------------------------------------------------------------------------
 bool CoarseningManager::isIndependentVertex(Vertex& v)
@@ -314,13 +312,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     std::map<uint,uint>::iterator m_it;
     for ( uint i(0) ; i < recv_size ; ++i )
     {
-      /*
-      uint requested_vertex = recv_buff_requests[i];
-      uint local_index = mesh.distdata().get_local(requested_vertex, 0);
-      uint lowest_sharing_rank = 
-            *( mesh.distdata().get_shared_adj(local_index, 0).begin() );
-      requested_vertices[requested_vertex] = lowest_sharing_rank;
-      /*/
       // search for this index in the map
       uint requested_vertex = recv_buff_requests[i];
       m_it = requested_vertices.find(requested_vertex);
@@ -369,16 +360,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     Vertex v(mesh, local_index);
     uint target_proc = m_it->second;
 
-    /*for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
-      target_proc = std::min(target_proc, partitions->get(*c_it));
-
-    // set partitions
-    for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
-    {
-      if ( partitions->get(*c_it) == rank && target_proc != rank ) 
-        ++num_send_cells;
-      partitions->set(*c_it, target_proc);
-    }/*/
     for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
     {
       if ( partitions->get(*c_it) == rank && target_proc != rank )
@@ -446,7 +427,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 {
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
-  uint num_migrations_before_loadbalancing = -1;
 
   if (rank == 0)
     cout << "Starting migration." << endl;
@@ -471,12 +451,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   MPI_Allreduce(local_nums, global_nums, 4, 
                 MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
-  if (rank == 0)
-    cout << global_nums[0] << "max. coarsened, "
-         << global_nums[1] << "max. remaining, "
-         << global_nums[2] << "max. migrated, "
-         << global_nums[3] << "max. requested" << endl;
-
   // no cells remaining: we're done!
   if ( global_nums[1] == 0 )
     return false;
@@ -486,8 +460,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   uint max_num_requested_vertices = global_nums[3];
 
-  // no vertices requested: no migration necessary, but obviously still work to
-  // do
+  // no vertices requested: no migration necessary, but obviously still work left
   if ( max_num_requested_vertices == 0 )
     return true;
 
@@ -513,26 +486,8 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
                 cell_functions, vertex_functions);
 
   // Exchange requests
-  if ( _migrations < num_migrations_before_loadbalancing )
-  {
-    exchangeRequests(omesh, old2new_cells, old2new_vertices, 
+  exchangeRequests(omesh, old2new_cells, old2new_vertices, 
                      max_num_requested_vertices, partitions);
-  }
-  else
-  {
-    // obtain new partitions from loadbalancer
-    //partitions = new MeshFunction<uint>();
-    //omesh.partition(*partitions);
-
-    // obtain new partitions from loadbalancer
-    dolfin_set("Load balancer redistribute", false);
-    MeshFunction<bool> cell_marker_b;
-    MeshFunctionConverter::cast(*(cell_functions.front().first), cell_marker_b);
-    //LoadBalancer::balance(omesh, cell_marker_b);
-    LoadBalancer::balance(omesh, cell_marker_b, LoadBalancer::EdgeCollapse);
-    partitions = omesh.data().meshFunction("partitions");
-    dolfin_assert(partitions);
-  }
 
   // distribute partitioning and MeshFunctions
   omesh.distribute( *partitions, cell_functions, vertex_functions );
@@ -547,17 +502,8 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   // Cleanup MeshFunction Arrays
   cleanupMFArrays(cell_functions, vertex_functions);
 
-  // increase counter
-  if ( _migrations < num_migrations_before_loadbalancing )
-  {
-    ++_migrations;
-    delete partitions;
-  }
-  else
-  {
-    _migrations = 0;
-    ++_load_balances;
-  }
+  // free memory
+  delete partitions;
 
   return true;
 }

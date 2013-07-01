@@ -113,12 +113,6 @@ namespace dolfin
     /// previous migration
     uint _num_migrated_cells;
 
-    /// Number of migrations performed
-    uint _migrations;
-
-    /// Number of load balances performed
-    uint _load_balances;
-
     /// Quality threshold for the checkMesh routine
     real _quality_threshold;
 

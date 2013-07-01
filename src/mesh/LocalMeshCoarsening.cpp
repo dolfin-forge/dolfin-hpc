@@ -27,36 +27,17 @@
 
 using namespace dolfin;
 
-static void countQuality(uint action)
-{
-  static uint orientation = 0;
-  static uint qm = 0;
-  if (action == 0)
-    ++orientation;
-  else if (action == 1)
-    ++qm;
-  else
-    cout << dolfin::MPI::processNumber() << ": "
-         << "failed for orientation: " << orientation
-         << ", failed for qm: " << qm << endl;
-}
 //-----------------------------------------------------------------------------
 void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
                                                     MeshFunction<bool>& cell_marker,
                                                     bool coarsen_boundary )
 {
-  if (MPI::processNumber() == 0)
-    tic();
-
   uint init_num_cells = mesh.numCells();
   uint init_num_verts = mesh.numVertices();
 
   dolfin_assert( &(cell_marker.mesh()) == &mesh );
 
   begin("Coarsening simplicial mesh by edge collapse.");
-
-  //dolfin_set("Load balancer redistribute", true);
-  //LoadBalancer::balance(mesh, cell_marker, LoadBalancer::EdgeCollapse);
 
   // check size of cell_marker
   if ( cell_marker.size() != mesh.numCells() )
@@ -107,11 +88,6 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   Mesh omesh;
   manager.dmesh()->exp(omesh);
   mesh = omesh;
-
-  if (MPI::processNumber() == 0)
-    tocd();
-
-  countQuality(2);
 
   end();
 }
@@ -209,18 +185,12 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
 
     // check orientation of new cell
     if ( dc->orientation() != *o_it )
-    {
-      countQuality(0);
       return false;
-    }
 
     // check qm of new cell
     real qm = dc->volume() / dc->diameter();
     if ( qm <= quality_threshold )
-    {
-      countQuality(1);
       return false;
-    }
 
   }
 

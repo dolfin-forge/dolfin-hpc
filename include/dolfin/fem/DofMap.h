@@ -83,19 +83,20 @@ public:
 	char const * signature() const;
 
 	/// Return the dimension of the global finite element function space
-	unsigned int global_dimension() const;
+	uint global_dimension() const;
 
 	/// Return the dimension of the local finite element function space
-	unsigned int local_dimension() const;
+	uint local_dimension() const;
 
 	/// Return the dimension of the local finite element function space
-	unsigned int macro_local_dimension() const;
+	uint macro_local_dimension() const;
 
 	/// Return number of facet dofs
-	unsigned int num_facet_dofs() const;
+	uint num_facet_dofs() const;
 
 	/// Return local to global mapping
-	uint * local2global() const {return local_to_global_;}
+	uint const * dofsmapping();
+	uint dofsmapping_size() const;
 
 	/// Tabulate the local-to-global mapping of dofs on a cell
 	void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
@@ -145,7 +146,7 @@ private:
 	void build();
 
 	///
-	void tabulate_dofs();
+	void pretabulate_all_dofs();
 
 	/// Extract sub DofMap
 	ufc::dof_map* extractDofMap(const ufc::dof_map& dof_map, uint& offset,
@@ -166,6 +167,7 @@ private:
 
 	//
 	uint* local_to_global_;
+	uint local_to_global_size_;
 
 	// UFC mesh
 	UFCMesh ufc_mesh;
@@ -198,27 +200,41 @@ inline char const * DofMap::signature() const
 }
 
 //-----------------------------------------------------------------------------
-inline unsigned int DofMap::global_dimension() const
+inline uint DofMap::global_dimension() const
 {
 	return ufc_dof_map->global_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline unsigned int DofMap::local_dimension() const
+inline uint DofMap::local_dimension() const
 {
 	return ufc_dof_map->local_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline unsigned int DofMap::macro_local_dimension() const
+inline uint DofMap::macro_local_dimension() const
 {
 	return ufc_dof_map->local_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline unsigned int DofMap::num_facet_dofs() const
+inline uint DofMap::num_facet_dofs() const
 {
 	return ufc_dof_map->num_facet_dofs();
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * DofMap::dofsmapping()
+{
+	if (local_to_global_ == NULL)
+		pretabulate_all_dofs();
+	return local_to_global_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::dofsmapping_size() const
+{
+	return local_to_global_size_;
 }
 
 //-----------------------------------------------------------------------------

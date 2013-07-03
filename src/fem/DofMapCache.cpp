@@ -6,6 +6,7 @@
 
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/function/Function.h>
 
 #include <iomanip>
 
@@ -64,7 +65,7 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh, ufc::form const& form,
 //		message(0, "Creating dof map (not in cache): %s",
 //				ufc_dof_map->signature());
 
-		// Create DOLFIN dof map
+// Create DOLFIN dof map
 		ret = new DofMap(*ufc_dof_map, mesh, true);
 		dolfin_assert(ret);
 
@@ -109,7 +110,7 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh,
 //		message(0, "Creating dof map (not in cache): %s",
 //				dofmap_signature.c_str());
 
-		// Create DOLFIN dof map
+// Create DOLFIN dof map
 		ret = new DofMap(dofmap_signature, mesh);
 		dolfin_assert(ret);
 
@@ -145,6 +146,16 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh,
 		it->second.count++;
 	}
 	return ret;
+}
+
+//-----------------------------------------------------------------------------
+DofMap * DofMapCache::acquire_dofmap(Function& f)
+{
+	if (f.type() != Function::discrete)
+	{
+		error("Can only acquire DofMap from a discrete function.");
+	}
+	return acquire_dofmap(f.mesh(), DofMap::dofmap_signature(f.signature()));
 }
 
 //-----------------------------------------------------------------------------

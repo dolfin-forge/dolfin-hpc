@@ -120,6 +120,7 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				quadrature/Quadrature.h\
 				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
+				mesh/CoarseningManager.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
 				mesh/predicates_init.h\
@@ -176,6 +177,10 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunctionConverter.h\
+				mesh/DMesh.h\
+				mesh/DCell.h\
+				mesh/DVertex.h\
+				mesh/BarycentricPoint.h\
 				la/AMGSolver.h\
 				la/MultigridScheme.h\
 				la/KrylovSolver.h\

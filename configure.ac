@@ -313,7 +313,7 @@ Package features:
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
-	LIBGEOM: ${with_libgeom}
+  LIBGEOM: ${with_libgeom}
 
 
 ---------------------------------------------------------

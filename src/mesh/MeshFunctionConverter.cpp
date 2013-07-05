@@ -37,4 +37,18 @@ void MeshFunctionConverter::cast<float, int>(MeshFunction<float>& source_functio
   castRealToIntegerWithRounding(source_function, target_function);
 }
 //-----------------------------------------------------------------------------
+template<>
+void MeshFunctionConverter::cast<double, bool>(MeshFunction<double>& source_function,
+                                               MeshFunction<bool>& target_function)
+{
+  castRealToIntegerWithRounding(source_function, target_function);
+}
+//-----------------------------------------------------------------------------
+template<>
+void MeshFunctionConverter::cast<float, bool>(MeshFunction<float>& source_function,
+                                               MeshFunction<bool>& target_function)
+{
+  castRealToIntegerWithRounding(source_function, target_function);
+}
+//-----------------------------------------------------------------------------
 }

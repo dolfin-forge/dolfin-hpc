@@ -32,6 +32,10 @@
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
+#ifdef HAVE_LIBGEOM
+#include <Geometry.h>
+#endif
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -188,6 +192,8 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
+#ifdef HAVE_LIBGEOM
+//-----------------------------------------------------------------------------
 void Mesh::refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
   message("No cells marked for refinement, assuming uniform mesh refinement with geometry informations.");
@@ -199,6 +205,8 @@ void Mesh::refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, Mes
   message("No cells marked for refinement, assuming uniform mesh refinement with geometry informations.");
   UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u);
 }
+//-----------------------------------------------------------------------------
+#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
 		  bool load_balance)

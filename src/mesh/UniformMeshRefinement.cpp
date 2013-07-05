@@ -21,6 +21,10 @@
 #include <dolfin/mesh/RefinementManager.h>
 #include <dolfin/main/MPI.h>
 
+#ifdef HAVE_LIBGEOM
+#include <Geometry.h>
+#endif
+
 #include <algorithm>
 
 
@@ -32,6 +36,8 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   // Only know how to refine simplicial meshes
   refineSimplex(mesh);
 }
+//-----------------------------------------------------------------------------
+#ifdef HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refine(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v )
 {
@@ -54,6 +60,8 @@ void UniformMeshRefinement::refine(Mesh& mesh, libgeom::Geometry& geom, MeshFunc
   // Only know how to refine simplicial meshes
   refineSimplex(mesh, geom, patch_id_list, bnd_u  );
 }
+//-----------------------------------------------------------------------------
+#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 {
@@ -162,7 +170,9 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
   mesh.renumber();
 
 }
-
+//-----------------------------------------------------------------------------
+#ifdef HAVE_LIBGEOM
+//-----------------------------------------------------------------------------
 // overloaded method to include mesh boundary smoothing according to the geometry for a surface
 void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v  )
 {
@@ -697,4 +707,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
   mesh.renumber();
 
 }
+//-----------------------------------------------------------------------------
+#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------

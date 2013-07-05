@@ -10,6 +10,8 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshFunction.h>
 
+#include <dolfin/config/dolfin_config.h>
+
 #ifdef HAVE_LIBGEOM
 namespace libgeom
 {

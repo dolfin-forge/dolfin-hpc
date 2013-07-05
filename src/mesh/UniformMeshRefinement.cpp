@@ -164,7 +164,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 }
 
 // overloaded method to include mesh boundary smoothing according to the geometry for a surface
-//TODO the parallel case is untouched therefor no smoothing possible
 void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v  )
 {
   message(1, "Refining simplicial mesh uniformly with added boundary smoothing.");
@@ -211,7 +210,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
   Array<uint> shared_edge;
     
   uint vertex = 0;
-//parallel version without boundary smoothing so far TODO include boundary smoothing
   if(MPI::numProcesses() > 1){
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v) {
@@ -280,9 +278,12 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
      	 	else
       	  refman.addVertex(vertex, refined_mesh);
 
-				//TODO test with multiple patches
+				
 				if(patch_id_vertex0 == patch_id_vertex1)
 				{
+
+					warning("Midpoint computation gives wrong results for varying weights on different controll points.");
+					//THIS is an optimization which is only true if the weights (NURBS representation) of all the control points are the same. In most cases this is true. Tests showed that the error is not significant even if the the weight are not the same. It can occur that the cells will be inverted. In this case one has to use the else path for all cases. 
 					float u,v;
 					std::vector<float> pt;
 					geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),  bnd_v.get(edge_vert[0]),  bnd_u.get(edge_vert[1]),  bnd_v.get(edge_vert[1]), u , v , pt);
@@ -295,29 +296,21 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 				}
 				else
 				{	
-					//Vertex point1(mesh,edge_vert[0]);
-					libgeom::Point3D midpoint(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
-					libgeom::Point3D r0,r1;
-					float u0, u1, v0, v1;
-					real dist0 = geom.find_closest_point(midpoint, r0, u0, v0, patch_id_vertex0); 
-					real dist1 = geom.find_closest_point(midpoint, r1, u1, v1, patch_id_vertex1);
-					if(dist0 < dist1)
-					{
-						editor.addVertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
-						refined_patch_id_list.set( 	vertex, patch_id_vertex0);
-						refined_bnd_u.set(					vertex,	u0);
-						refined_bnd_v.set(					vertex, v0);
-						vertex++;
-
-					}
-					else
-					{
-						editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
-						refined_patch_id_list.set( 	vertex, patch_id_vertex1);
-						refined_bnd_u.set(					vertex,	u1);
-						refined_bnd_v.set(					vertex, v1);
-						vertex++;
-					}
+				
+					libgeom::Point3D midpoint_lib(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());							
+					libgeom::Point3D r1;
+					float u1, v1;
+					int pid_tmp;
+					real distance;
+			
+			
+					distance = geom.find_closest_point_all_patches(midpoint_lib, r1, u1, v1, pid_tmp, 100, 100, 5, 5, 0.00001, 0.00002, 100);
+			
+					editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
+					refined_patch_id_list.set( 	vertex, pid_tmp);
+					refined_bnd_u.set(					vertex,	u1);
+					refined_bnd_v.set(					vertex, v1);
+					vertex++;
 
 				}
 			}
@@ -335,7 +328,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 			vertex++;
     }
     // Add new vertices
-		// right now I assume single patch geometries... TODO fix to multiple patches
+		
     for (EdgeIterator e(mesh); !e.end(); ++e)
 		{    
 			//don´t in general add the mitpoint. add midpoint if only one or no vertex of the edge is on the boundary. In the case that all the vertices ly on the boundary one needs to adjust the point so that it is also on the geometry.
@@ -352,9 +345,11 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 				vertex++;
 			}
 			else{
-				//TODO test with multiple patches
+				
 				if(patch_id_vertex0 == patch_id_vertex1)
 				{
+					
+					warning("Midpoint computation gives wrong results for varying weights on different controll points.");
 					float u,v;
 					std::vector<float> pt;
 					geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),  bnd_v.get(edge_vert[0]),  bnd_u.get(edge_vert[1]),  bnd_v.get(edge_vert[1]), u , v , pt);
@@ -367,30 +362,21 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 				}
 				else
 				{	
-					//Vertex point1(mesh,edge_vert[0]);
-					libgeom::Point3D midpoint(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
-					libgeom::Point3D r0,r1;
-					float u0, u1, v0, v1;
-					real dist0 = geom.find_closest_point(midpoint, r0, u0, v0, patch_id_vertex0); 
-					real dist1 = geom.find_closest_point(midpoint, r1, u1, v1, patch_id_vertex1);
-					if(dist0 < dist1)
-					{
-						editor.addVertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
-						refined_patch_id_list.set( 	vertex, patch_id_vertex0);
-						refined_bnd_u.set(					vertex,	u0);
-						refined_bnd_v.set(					vertex, v0);
-						vertex++;
 
-					}
-					else
-					{
-						editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
-						refined_patch_id_list.set( 	vertex, patch_id_vertex1);
-						refined_bnd_u.set(					vertex,	u1);
-						refined_bnd_v.set(					vertex, v1);
-						vertex++;
-					}
-
+					libgeom::Point3D midpoint_lib(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());							
+					libgeom::Point3D r1;
+					float u1, v1;
+					int pid_tmp;
+					real distance;
+			
+			
+					distance = geom.find_closest_point_all_patches(midpoint_lib, r1, u1, v1, pid_tmp, 100, 100, 5, 5, 0.00001, 0.00002, 100);
+			
+					editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
+					refined_patch_id_list.set( 	vertex, pid_tmp);
+					refined_bnd_u.set(					vertex,	u1);
+					refined_bnd_v.set(					vertex, v1);
+					vertex++;
 				}
 			}
     }
@@ -433,8 +419,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 }
 //-----------------------------------------------------------------------------
 // overloaded method to include mesh boundary smoothing according to the geometry for a surface
-//TODO the parallel case is untouched therefor no smoothing possible
-//TODO include libgeom geometry.h
+//
 void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u  )
 {
   message(1, "Refining simplicial mesh uniformly with added boundary smoothing.");
@@ -580,8 +565,8 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 					libgeom::Point3D midpoint(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
 					libgeom::Point3D r0,r1;
 					libgeom::REAL u0, u1;
-					real dist0 = geom.find_closest_point(midpoint, r0, u0, patch_id_vertex0); 
-					real dist1 = geom.find_closest_point(midpoint, r1, u1, patch_id_vertex1);
+					real dist0 = geom.find_closest_point_curve(midpoint, r0, u0, patch_id_vertex0); 
+					real dist1 = geom.find_closest_point_curve(midpoint, r1, u1, patch_id_vertex1);
 					if(dist0 < dist1)
 					{
 						editor.addVertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
@@ -616,7 +601,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 		// right now I assume single patch geometries... TODO fix to multiple patches
     for (EdgeIterator e(mesh); !e.end(); ++e)
 		{    
-			//don´t in general add the mitpoint. add midpoint if only one or no vertex of the edge is on the boundary. In the case that all the vertices ly on the boundary one needs to adjust the point so that it is also on the geometry.
+			//don´t in general add the midpoint. add midpoint if only one or no vertex of the edge is on the boundary. In the case that all the vertices ly on the boundary one needs to adjust the point so that it is also on the geometry.
 			edge_vert = e->entities(0);
 			
 			int patch_id_vertex0 = patch_id_list.get(edge_vert[0]);
@@ -629,7 +614,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 				vertex++;
 			}
 			else{
-				//this is the point where I assume there is only one patch I only use patch id of vertex 0 TODO fix it to multiple patches
 				/*float u;
 				std::vector<float> pt;
 				geom.get_midpoint(patch_id_vertex0, bnd_u.get(vertices[0]),  bnd_u.get(vertices[1]), u  , pt);*/
@@ -651,8 +635,8 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom, M
 					libgeom::Point3D midpoint(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
 					libgeom::Point3D r0,r1;
 					float u0, u1;
-					real dist0 = geom.find_closest_point(midpoint, r0, u0, patch_id_vertex0); 
-					real dist1 = geom.find_closest_point(midpoint, r1, u1, patch_id_vertex1);
+					real dist0 = geom.find_closest_point_curve(midpoint, r0, u0, patch_id_vertex0); 
+					real dist1 = geom.find_closest_point_curve(midpoint, r1, u1, patch_id_vertex1);
 					if(dist0 < dist1)
 					{
 						editor.addVertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );

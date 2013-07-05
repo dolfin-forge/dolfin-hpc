@@ -24,6 +24,9 @@
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/MeshFunctionConverter.h>
+
+#include <dolfin/parameter/parameters.h>
 
 #include <algorithm>
 #include <cmath> 
@@ -100,22 +103,58 @@ void RivaraRefinement::refine(Mesh& mesh,
 {
   message("Refining simplicial mesh by recursive Rivara bisection with boundary smoothing");
 
+
   // Start Loadbalancer
   if(MPI::numProcesses() > 1 && balance) {
-    begin("Load balancing");
+
+			
+		MeshFunction<double> patch_id_double(mesh);
+		MeshFunction<double> u_double(mesh);
+		MeshFunction<double> v_double(mesh);
+
+		MeshFunction<double> new_patch_id_double(mesh);
+		MeshFunction<double> new_u_double(mesh);
+		MeshFunction<double> new_v_double(mesh);
+
+		MeshFunctionConverter::cast(patch_id_list, patch_id_double);
+		MeshFunctionConverter::cast(bnd_u, u_double);
+		MeshFunctionConverter::cast(bnd_v, v_double);
+	
+		Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > > vertex_functions;
+	
+  	vertex_functions.push_back( std::make_pair(&patch_id_double, &new_patch_id_double) );
+  	vertex_functions.push_back( std::make_pair(&u_double, &new_u_double) );
+  	vertex_functions.push_back( std::make_pair(&v_double, &new_v_double) );
+		
+		begin("Load balancing");
     // Tune loadbalancer using machine specific parameters, if available
     if( tf > 0.0 && tb > 0.0 && ts > 0.0)
-      LoadBalancer::balance(mesh, cell_marker, tf, tb, ts, LoadBalancer::LEPP);
+      LoadBalancer::balance(mesh, cell_marker, vertex_functions, tf, tb, ts, LoadBalancer::LEPP);
     else
-      LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
+      LoadBalancer::balance(mesh, cell_marker, vertex_functions, LoadBalancer::LEPP);
     end();
+		
+		if(new_patch_id_double.size() > 0)
+			MeshFunctionConverter::cast(new_patch_id_double, patch_id_list);
+		if(new_u_double.size() > 0 ) 
+			MeshFunctionConverter::cast(new_u_double, bnd_u);
+		if(new_v_double.size() > 0 )
+			MeshFunctionConverter::cast(new_v_double, bnd_v);
   }
+//	std::cout<<"rank: "<<MPI::processNumber()<<"line 148";
+//	std::cout<<" mesh.numVertices(): "<<mesh.numVertices();
+//	std::cout<<" pID.size: "<<patch_id_list.size();
+//	std::cout<<" u.size: "<<bnd_u.size();
+//	std::cout<<" v.size: "<<bnd_v.size()<<std::endl;
 
   if (MPI::numProcesses() > 1) mesh.renumber();
 
+  dolfin_set("output destination","terminal");
+
+
   DMesh dmesh;
   dmesh.imp(mesh, patch_id_list, bnd_u , bnd_v);
-  
+
   std::vector<bool> dmarked(mesh.numCells());
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
@@ -128,11 +167,7 @@ void RivaraRefinement::refine(Mesh& mesh,
       dmarked[ci->index()] = false;
     }
   }
-	for( std::set<DVertex *>::iterator vi = dmesh.vertices.begin(); vi != dmesh.vertices.end(); ++vi)
-	{
-		message("POINT (%f, %f, %f) patch_id %i u %f v %f ", (*vi)->p.x(), (*vi)->p.y(), (*vi)->p.z(), (*vi)->patch_id, (*vi)->u, (*vi)->v);
-	}
-  
+
   dmesh.bisectMarked(dmarked, geom);
 
 
@@ -171,6 +206,7 @@ void RivaraRefinement::refine(Mesh& mesh,
 		patch_id_list.set(v->index(), patch_id_omesh.get(v->index()));
 	}
 
+  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
 	
 }
 //-----------------------------------------------------------------------------
@@ -328,7 +364,7 @@ void DMesh::imp(Mesh& mesh)
 void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 					 MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
-	message("imp Mesh with geometric informations");
+	//message("imp Mesh with geometric informations");
   cell_type = &(mesh.type());
   d = mesh.topology().dim();
 
@@ -383,10 +419,14 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 
   MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
-
+//	std::cout<<"mesh.numVertices(): "<<mesh.numVertices();
+////	std::cout<<" pID.size: "<<patch_id_list.size();
+//	std::cout<<" u.size: "<<bnd_u.size();
+//	std::cout<<" v.size: "<<bnd_v.size()<<std::endl;
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
   {
+		//std::cout<<" "<<vi->index();
     DVertex* dv = new DVertex;    
     dv->p = vi->point();
     dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
@@ -408,7 +448,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     vertexvec.push_back(dv);
     counter++;
   }
-
+	//std::cout<<std::endl;
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     DCell* dc = new DCell;
@@ -499,7 +539,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 					 MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
   number();
-
+	//message("exp==============================================");
   MeshEditor editor;
   editor.open(mesh, cell_type->cellType(), d, d);
   
@@ -510,7 +550,9 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 	patch_id_list.init(0);
 	bnd_u.init(0);
 	bnd_v.init(0);
-
+	patch_id_list = -1;
+	bnd_u = -1;
+	bnd_v = -1;
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -519,6 +561,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     DVertex* dv = *it;
     editor.addVertex(current_vertex, dv->p);
 		patch_id_list.set(current_vertex, dv->patch_id);
+
 		bnd_u.set(current_vertex, dv->u);
 		bnd_v.set(current_vertex, dv->v);
     if(dv->ghosted) {
@@ -722,7 +765,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
 										libgeom::Geometry& geom)
 {
 
-	//message("bisect for hanging vertex with boundary smoothing");
   bool closing = false;
 
   // Find longest edge
@@ -734,6 +776,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
   {
     for(uint j = 0; j < dcell->vertices.size(); j++)
     {
+			
       if(i != j)
       {
 				DVertex* v0 = dcell->vertices[i];
@@ -766,6 +809,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
       }
     }
   }
+//	std::cout<<std::endl;
   
   DVertex* v0 = dcell->vertices[ii];
   DVertex* v1 = dcell->vertices[jj];
@@ -773,12 +817,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
 
   // Check if no hanging vertices remain, otherwise create hanging
   // vertex and continue refinement
+
   if((v0 == hv0 || v0 == hv1) && (v1 == hv0 || v1 == hv1))
   {
-
+//	message("rank %d closing set to true", MPI::processNumber());
     mv = hangv;
     closing = true;
-
+		
     if( v0->on_boundary && v1->on_boundary ) 
     {
       mv->on_boundary = true;
@@ -791,6 +836,9 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
   else
   {
     mv = new DVertex;
+		mv->patch_id = -1;
+		mv->u = -1;
+		mv->v = -1;
     addVertex(mv);
     if( v0->glb_id < v1->glb_id )
       mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
@@ -807,92 +855,25 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
 		}
 		else
 		{
-			//distinguish between curve and surface geometry:			
-			if(geom.get_geometric_dimension() == 2) //curve
+			Point midpoint = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
+			libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+			libgeom::Point3D r1;
+			float u1, v1;
+			int pid_tmp;
+			real distance;
+			if(dcell->vertices[ii]->patch_id == dcell->vertices[jj]->patch_id)
 			{
-				//both vertices are located on the same patch -> get the midpoint
-				if(dcell->vertices[ii]->patch_id == dcell->vertices[jj]->patch_id)
-				{
-					float u_tmp;
-					std::vector<float> p_tmp;
-					
-					//curve
-					geom.get_midpoint(dcell->vertices[ii]->patch_id, 
-														dcell->vertices[ii]->u, dcell->vertices[jj]->u,
-														u_tmp, p_tmp);
-					mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
-					mv->patch_id = dcell->vertices[ii]->patch_id;		
-					mv->u = u_tmp;
-					mv->v = -1;
-					
-				}//closest point search is necessary
-				else
-				{
-					Point midpoint = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
-					libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
-					libgeom::Point3D r0, r1;
-					float u0, u1;
-					real dist0 = geom.find_closest_point(midpoint_lib, r0, u0, dcell->vertices[ii]->patch_id);
-					real dist1 = geom.find_closest_point(midpoint_lib, r1, u1, dcell->vertices[jj]->patch_id);
-					if(dist0 < dist1)
-					{
-						mv->p = Point( r0.x(), r0.y(), r0.z());
-						mv->patch_id = dcell->vertices[ii]->patch_id;		
-						mv->u = u0;
-						mv->v = -1;
-					}
-					else
-					{
-						mv->p = Point( r1.x(), r1.y(), r1.z());
-						mv->patch_id = dcell->vertices[jj]->patch_id;		
-						mv->u = u1;
-						mv->v = -1;
-					}
-				}	
+				pid_tmp = dcell->vertices[jj]->patch_id;
+				distance = geom.find_closest_point(midpoint_lib, r1, u1, v1, pid_tmp, 100, 100, 0.00001, 0.00002, 100);
 			}
-			else //surface
+			else
 			{
-				//both vertices are located on the same patch -> get the midpoint
-				if(dcell->vertices[ii]->patch_id == dcell->vertices[jj]->patch_id)
-				{
-					float u_tmp, v_tmp;
-					std::vector<float> p_tmp;				
-					geom.get_midpoint(dcell->vertices[ii]->patch_id, 
-														dcell->vertices[ii]->u, dcell->vertices[ii]->v,
-														dcell->vertices[jj]->u, dcell->vertices[jj]->v,
-													u_tmp, v_tmp,  p_tmp);
-					mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
-					mv->patch_id = dcell->vertices[ii]->patch_id;		
-					mv->u = u_tmp;
-					mv->v = v_tmp;
-					
-				}//closest point search is necessary
-				else
-				{
-					Point midpoint = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
-					libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
-					libgeom::Point3D r0, r1;
-					float u0, u1, v0, v1;
-					real dist0 = geom.find_closest_point(midpoint_lib, r0, u0, v0, 
-																							dcell->vertices[ii]->patch_id);
-					real dist1 = geom.find_closest_point(midpoint_lib, r1, u1, v1, 
-																							dcell->vertices[jj]->patch_id);
-					if(dist0 < dist1)
-					{
-						mv->p = Point( r0.x(), r0.y(), r0.z());
-						mv->patch_id = dcell->vertices[ii]->patch_id;		
-						mv->u = u0;
-						mv->v = v0;
-					}
-					else
-					{
-						mv->p = Point( r1.x(), r1.y(), r1.z());
-						mv->patch_id = dcell->vertices[jj]->patch_id;		
-						mv->u = u1;
-						mv->v = v1;
-					}
-				}
+				distance = geom.find_closest_point_all_patches(midpoint_lib, r1, u1, v1, pid_tmp, 100, 100, 8, 8, 0.00001, 0.00002, 100);
 			}
+			mv->p = Point( r1.x(), r1.y(), r1.z());
+			mv->patch_id = pid_tmp;		
+			mv->u = u1;
+			mv->v = v1;
 		}
 			
     // Add hanging node on shared edges to propagation buffer
@@ -913,7 +894,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
       mv->owner = MPI::processNumber();
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
-    
+    //message("rank %d closing set to false", MPI::processNumber());
     closing = false;
   }
 
@@ -934,26 +915,37 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
   } 
   vs0.push_back(mv);
   vs1.push_back(mv);
+	
 
   addCell(c0, vs0, dcell->parent_id);
   addCell(c1, vs1, dcell->parent_id);    
 
   removeCell(dcell);
-
+	//message(" patchID %d line 995", mv->patch_id);
+	//message("closing %d", closing);
   // Continue refinement
   if(!closing)
   {
+		//TODO counter stuff entfernen
+		int counter = 0;
     // Bisect opposite cell of edge with hanging node
     for(;;)
     {
+			counter++;
       DCell* copp = opposite(dcell, v0, v1);
-      if(copp != 0)
+			if(counter == 10000)
+			{
+				
+error("you ran into an infinite loop in the refinement. Usually this is the case if something went wrong with the initial mapping of the geometric values fromt the initial projection.");
+				break;
+			}
+      else if(copp != 0)
       {
-	bisect(copp, mv, v0, v1);
+				bisect(copp, mv, v0, v1, geom);
       }
       else
       {
-	break;
+				break;
       }
     }
   }
@@ -971,16 +963,16 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
       int matches = 0;
       for(uint i = 0; i < c->vertices.size(); i++)
       {
-	if(c->vertices[i] == v1 || c->vertices[i] == v2)
-	{
-	  matches++;
-	}
+				if(c->vertices[i] == v1 || c->vertices[i] == v2)
+				{
+	  			matches++;
+				}
       }
 
       if(matches == 2)
       {
-	// Found opposite cell
-	return c;
+			// Found opposite cell
+				return c;
       }
     }
   }  
@@ -990,6 +982,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 void DMesh::addVertex(DVertex* v)
 {
   //  vertices.push_back(v);
+	//message(" ++++++++++++++++%d line 1056", v->patch_id);
   vertices.insert(v);
   //  if(v->glb_id < 0)
   //    v->glb_id = _start_offset++;
@@ -1000,6 +993,7 @@ void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
   for(uint i = 0; i < vs.size(); i++)
   {
     DVertex* v = vs[i];
+		//message(" ++++++++++++++++%d line 1066", v->patch_id);
     c->vertices.push_back(v);
     v->cells.push_back(c);
   }
@@ -1156,7 +1150,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 {
-	message("starting with bisecting the marked cells");
+	//message("starting with bisecting the marked cells");
   std::list<DCell*> marked_cells;
   for(std::list<DCell* >::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -1173,8 +1167,8 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
     DCell* c = *it;
 
     if(!c->deleted)
-    {
-      bisect(c, 0, 0, 0, geom);
+    { //message("rank: %d calling bisect line 1257", MPI::processNumber());
+      bisect(c, 0, 0, 0, geom);//message("rank: %d end of calling bisect line 1262", MPI::processNumber());
     }
   }
 
@@ -1240,11 +1234,16 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 		    		dolfin_assert((*ic)->vertices.size() > 0);
 		    		if(mv == 0) 
 		    		{
+						//	message(" line 1372");
 		      		mv = new DVertex;
+							//message("line 1325");
+							//mv->patch_id = -1;
+							//mv->u = -1;
+							//mv->v = -1;
 		      		mv->shared = true;
 		      		mv->glb_id = it->second.mv;				
 		      		vertices.insert(mv);	      
-	
+							//message("patch id %d line 1306",mv->patch_id);
 		      		if( MPI::processNumber() < it->second.owner)
 		      		{
 								mv->ghosted = false;
@@ -1268,6 +1267,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 							//use the regular mitpoint rule when both neighbor vertices are not on the geometry
 							if(v1->patch_id < 0 || v2->patch_id < 0)
 							{
+							//	message("midpoint: line 1356");
 								mv->p = (v1->p + v2->p) / 2.0;
 								mv->patch_id 	= -1;
 								mv->u 			 	= -1;
@@ -1275,96 +1275,32 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 							}
 							else
 							{
-								//distinguish between curve and surface geometry:			
-								if(geom.get_geometric_dimension() == 2) //curve
+								Point midpoint = (v1->p + v2->p) / 2.0;
+								libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+								libgeom::Point3D r1;
+								float um, vm;
+								int pid_tmp;
+								real distance;
+
+								if(v1->patch_id == v2->patch_id)
 								{
-									//both vertices are located on the same patch -> get the midpoint
-									if(v1->patch_id == v2->patch_id)
-									{
-										float u_tmp;
-										std::vector<float> p_tmp;
-					
-										//curve
-										geom.get_midpoint(v1->patch_id, 
-																			v1->u, v2->u,
-																			u_tmp, p_tmp);
-										mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
-										mv->patch_id = v1->patch_id;		
-										mv->u = u_tmp;
-										mv->v = -1;
-					
-									}//closest point search is necessary
-									else
-									{
-										Point midpoint = (v1->p + v2->p) / 2.0;
-										libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
-										libgeom::Point3D r0, r1;
-										float u0_tmp, u1_tmp;
-										real dist0 = geom.find_closest_point(midpoint_lib, r0, u0_tmp, v1->patch_id);
-										real dist1 = geom.find_closest_point(midpoint_lib, r1, u1_tmp, v2->patch_id);
-										if(dist0 < dist1)
-										{
-											mv->p = Point( r0.x(), r0.y(), r0.z());
-											mv->patch_id = v1->patch_id;		
-											mv->u = u0_tmp;
-											mv->v = -1;
-										}
-										else
-										{
-											mv->p = Point( r1.x(), r1.y(), r1.z());
-											mv->patch_id = v2->patch_id;		
-											mv->u = u1_tmp;
-											mv->v = -1;
-										}
-									}	
+									pid_tmp = v1->patch_id;
+									distance = geom.find_closest_point(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 0.00001, 0.00002, 100);
 								}
-								else //surface
+								else
 								{
-									//both vertices are located on the same patch -> get the midpoint
-									if(v1->patch_id == v2->patch_id)
-									{
-										float u_tmp, v_tmp;
-										std::vector<float> p_tmp;				
-										geom.get_midpoint(v1->patch_id, 
-																			v1->u, v1->v,
-																			v2->u, v2->v,
-																			u_tmp, v_tmp,  p_tmp);
-										mv->p = Point(p_tmp[0], p_tmp[1], p_tmp[2]);
-										mv->patch_id = v1->patch_id;		
-										mv->u = u_tmp;
-										mv->v = v_tmp;
-					
-									}//closest point search is necessary
-									else
-									{
-										Point midpoint = (v1->p + v2->p) / 2.0;
-										libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
-										libgeom::Point3D r0, r1;
-										float u0_tmp, u1_tmp, v0_tmp, v1_tmp;
-										real dist0 = geom.find_closest_point(midpoint_lib, r0, u0_tmp, v0_tmp, 
-																							v1->patch_id);
-										real dist1 = geom.find_closest_point(midpoint_lib, r1, u1_tmp, v1_tmp, 
-																							v2->patch_id);
-										if(dist0 < dist1)
-										{
-											mv->p = Point( r0.x(), r0.y(), r0.z());
-											mv->patch_id = v1->patch_id;		
-											mv->u = u0_tmp;
-											mv->v = v0_tmp;
-										}
-										else
-										{
-											mv->p = Point( r1.x(), r1.y(), r1.z());
-											mv->patch_id = v2->patch_id;		
-											mv->u = u1_tmp;
-											mv->v = v1_tmp;
-										}
-									}
+									distance = geom.find_closest_point_all_patches(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 8, 8, 0.00001, 0.00002, 100);
 								}
+								mv->p = Point( r1.x(), r1.y(), r1.z());
+								mv->patch_id = pid_tmp;		
+								mv->u = um;
+								mv->v = vm;
+
 							}
 		      		mv->on_boundary = true;
 		      		bc_dvs[mv->glb_id] = mv;
 		      		ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
+						//	message(" patch id: %d line 1421",mv->patch_id);	
 		    		}
 		    		dolfin_assert((*ic) > 0);
 		    		bisect((*ic), mv, v1, v2, geom);
@@ -1372,7 +1308,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 				}
 	    }
 	  }
-    
+   // message("end of propagation line 1469");
 	  propagated.clear();
 	  for(std::list<Propagation>::iterator it = leftovers.begin(); it != leftovers.end(); ++it)
 			propagated.push_back(*it);
@@ -1388,6 +1324,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 //-----------------------------------------------------------------------------
 void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
 {
+ //	message("rank: %d propagate naive line 1592", MPI::processNumber());
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int max_prop, recv_count;
@@ -1457,13 +1394,18 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
 void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, 
 				bool& empty)
 {
- 
-  // Allocate receive buffer
+  dolfin_set("output destination","terminal");
+//message("rank: %d propagate hypercube line 1555", MPI::processNumber());
+//MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+	  
+	// Allocate receive buffer
+	
   int num_prop = propagate.size() * 5;
+//	std::cout<<"propagate.size() line 1558 "<<propagate.size()<<std::endl;
   int total_prop, recv_count;
   MPI_Allreduce(&num_prop, &total_prop, 1,
 		MPI_INTEGER, MPI_SUM, MPI::DOLFIN_COMM);
-
+//	message("line 1561");
   int *recv_buff = new int[total_prop];
   int *state = new int[total_prop];
   int *sp = &state[0];
@@ -1472,6 +1414,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   for(std::vector<Propagation>::iterator it = propagate.begin();
       it != propagate.end(); ++it) 
   {
+//		message("line 1570");
     *(sp++) = it->first;
     *(sp++) = it->second.mv;
     *(sp++) = it->second.v1;
@@ -1479,6 +1422,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
     *(sp++) = it->second.owner;
     state_size += 5;
   }
+//	message("line 1578");
 
   MPI_Status status;
   uint rank = MPI::processNumber();
@@ -1495,6 +1439,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   for(uint j = 0; j < log2(pe_size) ; j++)
 #endif
   {
+	//	message("line 1595");
     dest = rank^(D<<j);
 
     MPI_Sendrecv(state, state_size, MPI_INTEGER, dest, 1, 
@@ -1521,6 +1466,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
 
   }
 
+//	message("line 1622");
   less_pair comp;
   std::sort(propagated.begin(), propagated.end(), comp);
   empty = (state_size == 0);

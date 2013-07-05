@@ -18,21 +18,84 @@ namespace dolfin
 
     enum Type { Default, LEPP};
 
-    // Balanace mesh according to predefined weight function
+    /// Balanace mesh according to predefined weight function
     static void balance(Mesh& mesh, MeshFunction<uint>& weight);
 
-    // Balance mesh according to marked cells, 
-    // new_cell_marker marks cells in cell_marker for new mesh
+    /// Balance mesh according to marked cells, 
+    /// new_cell_marker marks cells in cell_marker for new mesh
     static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
 			Type type = Default);
 
-    // Balance mesh according to marked cells, tune loadbalancer
-    // with machine specific parameters
-    // tb    Time to perform one flop in seconds
-    // tb    Time to transmit one byte in seconds
-    // ts    Startup time in seconds (Interconnect latency)
+    /// Balance mesh according to marked cells, tune loadbalancer
+    /// with machine specific parameters
+    /// tb    Time to perform one flop in seconds
+    /// tb    Time to transmit one byte in seconds
+    /// ts    Startup time in seconds (Interconnect latency)
     static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 			real tf, real tb, real ts, Type type = Default);
+
+    /// Balanace mesh according to predefined weight function and preserve mesh functions
+    static void balance(Mesh& mesh, MeshFunction<uint>& weight, 
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions);
+
+    /// Balance mesh according to marked cells, 
+    /// new_cell_marker marks cells in cell_marker for new mesh and  preserve mesh functions
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,
+			Type type = Default);
+
+    /// Balance mesh according to marked cells, tune loadbalancer
+    /// with machine specific parameters and  preserve mesh functions
+    /// tb    Time to perform one flop in seconds
+    /// tb    Time to transmit one byte in seconds
+    /// ts    Startup time in seconds (Interconnect latency)
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,			
+			real tf, real tb, real ts, 
+			Type type = Default);
+
+    /// Balanace mesh according to predefined weight function and preserve mesh functions (vertex and cell)
+    static void balance(Mesh& mesh, MeshFunction<uint>& weight, 
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions,
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions);
+
+    /// Balance mesh according to marked cells, 
+    /// new_cell_marker marks cells in cell_marker for new mesh and  preserve mesh functions(vertex and cell)
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions,
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,
+			Type type = Default);
+
+    /// Balance mesh according to marked cells, tune loadbalancer
+    /// with machine specific parameters and  preserve mesh functions (vertex and cell)
+    /// tb    Time to perform one flop in seconds
+    /// tb    Time to transmit one byte in seconds
+    /// ts    Startup time in seconds (Interconnect latency)
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions,
+			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,			
+			real tf, real tb, real ts, 
+			Type type = Default);
+
+    /// Balanace mesh according to predefined weight function and preserve mesh functions (cell)
+    static void balance(Mesh& mesh, MeshFunction<uint>& weight, 
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions);
+
+    /// Balance mesh according to marked cells, 
+    /// new_cell_marker marks cells in cell_marker for new mesh and  preserve mesh functions (cell)
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions, 
+			Type type = Default);
+
+    /// Balance mesh according to marked cells, tune loadbalancer
+    /// with machine specific parameters and  preserve mesh functions (cell)
+    /// tb    Time to perform one flop in seconds
+    /// tb    Time to transmit one byte in seconds
+    /// ts    Startup time in seconds (Interconnect latency)
+    static void balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
+			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions,			
+			real tf, real tb, real ts, 
+			Type type = Default);
 
   private:
 

@@ -7,100 +7,102 @@
 #ifndef __SPACE_TIME_FUNCTION_H
 #define __SPACE_TIME_FUNCTION_H
 
-#include <stdint.h>
+#include <dolfin/function/Function.h>
+
 #include <ufc.h>
-#include <dolfin/function/GenericFunction.h>
 
-namespace dolfin {
+#include <stdint.h>
 
-//namespace unicorn
-//{
+namespace dolfin
+{
 
-  class SpaceTimeFunction
-  {
-  public:
+class Mesh;
 
-    /// Create space-time function
-    SpaceTimeFunction(Mesh& mesh, Function& Ut);
+class SpaceTimeFunction
+{
+public:
 
-    /// Copy constructor
-    SpaceTimeFunction(const SpaceTimeFunction& f);
+  /// Create space-time function
+  SpaceTimeFunction(Mesh& mesh, Function& Ut);
 
-    /// Destructor
-    ~SpaceTimeFunction();
+  /// Copy constructor
+  SpaceTimeFunction(const SpaceTimeFunction& f);
 
-    /// Evaluate function at time t, giving result in Ut
-    void eval(real t);
+  /// Destructor
+  ~SpaceTimeFunction();
 
-    // Add a space function at time t
-    void addPoint(std::string Uname, real t);
+  /// Evaluate function at time t, giving result in Ut
+  void eval(real t);
 
-    // Add a set of functions with arbitrary time steps
-    void util_addFiles(std::vector<std::string> filenames );
+  // Add a space function at time t
+  void addPoint(std::string Uname, real t);
 
-    // Add a set of functions with fixed time step
-    void util_addFiles(std::vector<std::string> filenames, real T);
-    void util_fileList(std::string basename, int N,
-		       std::vector<std::string>& filenames);
+  // Add a set of functions with arbitrary time steps
+  void util_addFiles(std::vector<std::string> filenames);
 
-    /// Return mesh associated with function
-    Mesh& mesh();
+  // Add a set of functions with fixed time step
+  void util_addFiles(std::vector<std::string> filenames, real T);
+  void util_fileList(std::string basename, int N,
+                     std::vector<std::string>& filenames);
 
-    /// Return interpolant function
-    Function& evaluant();
+  /// Return mesh associated with function
+  Mesh& mesh();
 
-  protected:
+  /// Return interpolant function
+  Function& evaluant();
 
-    // Pointer to mesh associated with function (null if none)
-    Mesh* _mesh;
+private:
 
-    // Pointer to evaluant function
-    Function* _function;
+  // Pointer to mesh associated with function (null if none)
+  Mesh * const mesh_;
 
-    // Space functions defining the current time interval (cache)
-    Function U0;
-    Function U1;
+  // Pointer to evaluant function
+  Function * const function_;
 
-    real u0_t;
-    real u1_t;
+  // Space functions defining the current time interval (cache)
+  Function U0;
+  Function U1;
 
-    bool u0_t_valid;
-    bool u1_t_valid;
-    //    Function* dtU0;
-    //    Function* dtU1;
+  real u0_t;
+  real u1_t;
 
-    std::map<real, std::string> U_files;
+  bool u0_t_valid;
+  bool u1_t_valid;
 
-  private:
+  std::map<real, std::string> U_files;
 
 #ifdef ENABLE_MPIIO
 
-    // File headers for DOLFIN's binary file format, repeated here
-    // until this information is available outside of DOLFIN
+  // File headers for DOLFIN's binary file format, repeated here
+  // until this information is available outside of DOLFIN
 
-    enum Binary_data_t { BINARY_MESH_DATA,
-			 BINARY_VECTOR_DATA,
-			 BINARY_FUNCTION_DATA,
-			 BINARY_MESH_FUNCTION_DATA};
-
-    typedef struct {
-      uint32_t magic;
-      uint32_t bendian;
-      uint32_t pe_size;
-      Binary_data_t type;
-    } BinaryFileHeader;
-
-    typedef struct {
-      uint32_t dim;
-      uint32_t size;
-      real t;
-      char name[256];
-    } BinaryFunctionHeader;
-#endif
+  enum Binary_data_t
+  {
+    BINARY_MESH_DATA,
+    BINARY_VECTOR_DATA,
+    BINARY_FUNCTION_DATA,
+    BINARY_MESH_FUNCTION_DATA
   };
 
-}
+  typedef struct
+  {
+    uint32_t magic;
+    uint32_t bendian;
+    uint32_t pe_size;
+    Binary_data_t type;
+  } BinaryFileHeader;
 
-//}
+  typedef struct
+  {
+    uint32_t dim;
+    uint32_t size;
+    real t;
+    char name[256];
+  } BinaryFunctionHeader;
+
+#endif
+};
+
+}
 
 #endif

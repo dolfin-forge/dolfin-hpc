@@ -94,6 +94,12 @@ public:
     return 1;
   }
 
+  /// Return the degree of the finite element
+  virtual unsigned int degree() const
+  {
+    return 0;
+  }
+
   /// Evaluate basis function i at given point in cell
   virtual void evaluate_basis(unsigned int i,
                               double* values,
@@ -582,6 +588,12 @@ public:
       }
     }
     
+    return 0;
+  }
+
+  /// Return the degree of the finite element
+  virtual unsigned int degree() const
+  {
     return 0;
   }
 

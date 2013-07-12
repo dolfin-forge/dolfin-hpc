@@ -39,6 +39,9 @@ public:
   /// Return the dimension of the value space for axis i
   virtual unsigned int value_dimension(unsigned int i) const;
 
+  /// Return the degree of the finite element
+  virtual unsigned int degree() const;
+
   /// Evaluate basis function i at given point in cell
   virtual void evaluate_basis(unsigned int i,
                               double* values,
@@ -112,6 +115,9 @@ public:
 
   /// Return the dimension of the value space for axis i
   virtual unsigned int value_dimension(unsigned int i) const;
+
+  /// Return the degree of the finite element
+  virtual unsigned int degree() const;
 
   /// Evaluate basis function i at given point in cell
   virtual void evaluate_basis(unsigned int i,

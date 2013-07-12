@@ -103,6 +103,12 @@ public:
     return 0;
   }
 
+  /// Return the degree of the finite element
+  virtual unsigned int degree() const
+  {
+    return 1;
+  }
+
   /// Evaluate basis function i at given point in cell
   virtual void evaluate_basis(unsigned int i,
                               double* values,
@@ -196,7 +202,7 @@ public:
       {-0.471404520791032, -0.288675134594813, 0.166666666666667};
       
       static const double coefficients1[3] = \
-      {0.942809041582064, 0.0, 0.666666666666667};
+      {0.942809041582063, 0.0, 0.666666666666667};
       
       // Compute value(s).
       for (unsigned int r = 0; r < 3; r++)
@@ -231,7 +237,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, -0.577350269189626, -0.666666666666667};
+      {0.471404520791032, -0.577350269189626, -0.666666666666666};
       
       static const double coefficients1[3] = \
       {0.471404520791032, 0.0, 0.333333333333333};
@@ -269,10 +275,10 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, 0.288675134594813, 0.833333333333334};
+      {0.471404520791032, 0.288675134594813, 0.833333333333333};
       
       static const double coefficients1[3] = \
-      {-0.942809041582064, 0.0, -0.666666666666667};
+      {-0.942809041582063, 0.0, -0.666666666666667};
       
       // Compute value(s).
       for (unsigned int r = 0; r < 3; r++)
@@ -345,7 +351,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.942809041582064, 0.577350269189626, -0.333333333333333};
+      {0.942809041582063, 0.577350269189626, -0.333333333333334};
       
       static const double coefficients1[3] = \
       {-0.471404520791032, -0.866025403784439, 0.166666666666667};
@@ -665,7 +671,7 @@ public:
       {-0.471404520791032, -0.288675134594813, 0.166666666666667};
       
       static const double coefficients1[3] = \
-      {0.942809041582064, 0.0, 0.666666666666667};
+      {0.942809041582063, 0.0, 0.666666666666667};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
@@ -819,7 +825,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, -0.577350269189626, -0.666666666666667};
+      {0.471404520791032, -0.577350269189626, -0.666666666666666};
       
       static const double coefficients1[3] = \
       {0.471404520791032, 0.0, 0.333333333333333};
@@ -976,10 +982,10 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, 0.288675134594813, 0.833333333333334};
+      {0.471404520791032, 0.288675134594813, 0.833333333333333};
       
       static const double coefficients1[3] = \
-      {-0.942809041582064, 0.0, -0.666666666666667};
+      {-0.942809041582063, 0.0, -0.666666666666667};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
@@ -1290,7 +1296,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.942809041582064, 0.577350269189626, -0.333333333333333};
+      {0.942809041582063, 0.577350269189626, -0.333333333333334};
       
       static const double coefficients1[3] = \
       {-0.471404520791032, -0.866025403784439, 0.166666666666667};

@@ -38,6 +38,9 @@ public:
   /// Constructor
   BoundaryCondition(std::string const type);
 
+  /// Destructor
+  virtual ~BoundaryCondition();
+
   /// Apply boundary condition to linear system
   virtual void apply(GenericMatrix& A, GenericVector& b, const Form& form) = 0;
 
@@ -56,9 +59,6 @@ public:
   inline std::string const& type() const;
 
 protected:
-
-  /// Destructor
-  virtual ~BoundaryCondition();
 
   // Local data for application of boundary conditions
   class LocalData

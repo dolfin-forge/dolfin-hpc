@@ -23,113 +23,119 @@
 
 namespace dolfin
 {
-  class DofMap;
-  class Form;
-  class Function;
-  class GenericMatrix;
-  class GenericVector;
-  class Mesh;
-  class SubDomain;
-//  namespace unicorn
-//  {
-    class SlipBC : public BoundaryCondition
-    {
-    public:
 
-      /// Create boundary condition for sub domain
-      SlipBC(Mesh& mesh, SubDomain& sub_domain);
+class DofMap;
+class Form;
+class Function;
+class GenericMatrix;
+class GenericVector;
+class Mesh;
+class SubDomain;
 
-      /// Create boundary condition for sub domain
-      SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal);
+class SlipBC: public BoundaryCondition
+{
 
-      /// Create boundary condition for sub domain specified by index
-      SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
+public:
 
-      /// Create sub system boundary condition for sub domain
-      SlipBC(Mesh& mesh, SubDomain& sub_domain, const SubSystem& sub_system);
+  /// Create boundary condition for sub domain
+  SlipBC(Mesh& mesh, SubDomain& sub_domain);
 
-      /// Create sub system boundary condition for sub domain specified by index
-      SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-	     const SubSystem& sub_system);
+  /// Create boundary condition for sub domain
+  SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal);
 
-      /// Destructor
-      ~SlipBC();
+  /// Create boundary condition for sub domain specified by index
+  SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
 
-      /// Apply boundary condition to linear system
-      void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  /// Create sub system boundary condition for sub domain
+  SlipBC(Mesh& mesh, SubDomain& sub_domain, SubSystem const& sub_system);
 
-      void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-		 const DofMap& dof_map, const ufc::form& form);
+  /// Create sub system boundary condition for sub domain specified by index
+  SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
+         SubSystem const& sub_system);
 
-      void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-		 const Form& form);
+  /// Destructor
+  ~SlipBC();
 
+  /// Apply boundary condition to linear system
+  void apply(GenericMatrix& A, GenericVector& b, Form const& form);
 
+  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+             DofMap const& dof_map, const ufc::form& form);
 
+  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+             Form const& form);
 
-    private:
+private:
 
-      void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh,
-		       uint node, Array<uint>& nodes);
+  void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
+                   Array<uint>& nodes);
 
-      // Do: A(row,col) = value   using setblock not setvalue
-      inline void Aset(Matrix& A, uint row, uint col, real value)
-      { A.set(&value, 1, &row, 1, &col);};
+  // Do: A(row,col) = value   using setblock not setvalue
+  inline void Aset(Matrix& A, uint row, uint col, real value);
 
-      // Do: b(row) = value   using setblock not setvalue
-      inline void bset(Vector& b, uint row, real value)
-      { b.set(&value, 1, &row); };
+  // Do: b(row) = value   using setblock not setvalue
+  inline void bset(Vector& b, uint row, real value);
 
+  // Initialize sub domain markers
+  void init(SubDomain& sub_domain);
 
-      // Initialize sub domain markers
-      void init(SubDomain& sub_domain);
+  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
+             const ufc::form& form);
 
+  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
+             Form const& form);
 
-      void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-		 const ufc::form& form);
+  // The mesh
+  Mesh& mesh;
 
+  // Sub domain markers (if any)
+  MeshFunction<uint>* sub_domains;
 
-      void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-		 const Form& form);
+  // The sub domain
+  uint sub_domain;
 
-      // The mesh
-      Mesh& mesh;
+  // True if sub domain markers are created locally
+  bool sub_domains_local;
 
-      // Sub domain markers (if any)
-      MeshFunction<uint>* sub_domains;
+  // Sub system
+  SubSystem sub_system;
 
-      // The sub domain
-      uint sub_domain;
+  // User defined sub domain
+  SubDomain* user_sub_domain;
 
-      // True if sub domain markers are created locally
-      bool sub_domains_local;
+  // Node normal and tangents
+  NodeNormal node_normal;
 
-      // Sub system
-      SubSystem sub_system;
+  int nzm;
 
-      // User defined sub domain
-      SubDomain* user_sub_domain;
+  Matrix* As;
 
-      // Node normal and tangents
-      NodeNormal node_normal;
+  int N_local;
+  int N_offset;
+  std::set<uint> off_proc_rows;
 
-      int nzm;
+  real *row_block;
+  real *zero_block;
+  uint *a1_indices_array;
 
-      Matrix* As;
+  BoundaryMesh* boundary;
+  MeshFunction<uint> *cell_map;
+  MeshFunction<uint> *vertex_map;
 
-      int N_local;
-      int N_offset;
-      std::set<uint> off_proc_rows;
+};
 
-      real *row_block;
-      real *zero_block;
-      uint *a1_indices_array;
+//--- INLINE ------------------------------------------------------------------
 
-      BoundaryMesh* boundary;
-      MeshFunction<uint> *cell_map, *vertex_map;
-    };
-//  }
+inline void SlipBC::Aset(Matrix& A, uint row, uint col, real value)
+{
+  A.set(&value, 1, &row, 1, &col);
 }
 
+inline void SlipBC::bset(Vector& b, uint row, real value)
+{
+  b.set(&value, 1, &row);
+}
+
+}
 
 #endif

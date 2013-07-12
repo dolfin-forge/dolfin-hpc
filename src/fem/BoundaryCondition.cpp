@@ -14,7 +14,12 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition()
+BoundaryCondition::BoundaryCondition() : type_("NoType")
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+BoundaryCondition::BoundaryCondition(std::string const type) : type_(type)
 {
   // Do nothing
 }
@@ -24,8 +29,8 @@ BoundaryCondition::~BoundaryCondition()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh, 
-                                        const DofMap& global_dof_map, 
+BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
+                                        const DofMap& global_dof_map,
                                         const SubSystem& sub_system)
   : ufc_mesh(mesh), finite_element(0), dof_map(0), dof_map_local(0), offset(0),
     w(0), cell_dofs(0), facet_dofs(0)
@@ -39,7 +44,7 @@ BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
 
   // Create finite element (second argument of form)
   finite_element = form.create_finite_element(1);
-  
+
   // Extract sub element and sub dof map if we have a sub system
   if (sub_system.depth() > 0)
   {

@@ -30,7 +30,7 @@ using namespace dolfin;
 // coordinates are considered equal if equal to within round-off.
 struct lt_coordinate
 {
-  bool operator() (const std::vector<real>& x, const std::vector<real>& y) const
+  bool operator()(const std::vector<real>& x, const std::vector<real>& y) const
   {
     if (x.size() > (y.size() + DOLFIN_EPS))
       return false;
@@ -48,15 +48,20 @@ struct lt_coordinate
 };
 
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain)
-                       : BoundaryCondition(), mesh(mesh), sub_domain(sub_domain)
+PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain) :
+    BoundaryCondition("Periodic"),
+    mesh(mesh),
+    sub_domain(sub_domain)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain,
-                      const SubSystem& sub_system) : BoundaryCondition(),
-                      mesh(mesh), sub_domain(sub_domain), sub_system(sub_system)
+                       const SubSystem& sub_system) :
+    BoundaryCondition("Periodic"),
+    mesh(mesh),
+    sub_domain(sub_domain),
+    sub_system(sub_system)
 {
   // Do nothing
 }
@@ -71,8 +76,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
   apply(A, b, form.dofMaps()[0], form.form());
 }
 //-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                       const ufc::form& form)
+void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
+                       const DofMap& dof_map, const ufc::form& form)
 {
   cout << "Applying periodic boundary conditions to linear system." << endl;
 
@@ -130,7 +135,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
     {
       // Get dof and coordinate of dof
       const uint local_dof = data.facet_dofs[i];
-      const int global_dof = static_cast<int>(data.offset + data.cell_dofs[local_dof]);
+      const int global_dof = static_cast<int>(data.offset
+          + data.cell_dofs[local_dof]);
       real *& x = data.coordinates[local_dof];
 
       // Map coordinate from H to G
@@ -159,16 +165,16 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
         {
           // Check that we don't have more than one dof per coordinate
           /*
-          if (it->second.first != -1)
-          {
-            cout << "Coordinate: x =";
-            for (uint j = 0; j < mesh.geometry().dim(); j++)
-              cout << " " << xx[j];
-            cout << endl;
-            cout << "Degrees of freedom: " << it->second.first << " " << global_dof << endl;
-            error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
-          }
-          */
+           if (it->second.first != -1)
+           {
+           cout << "Coordinate: x =";
+           for (uint j = 0; j < mesh.geometry().dim(); j++)
+           cout << " " << xx[j];
+           cout << endl;
+           cout << "Degrees of freedom: " << it->second.first << " " << global_dof << endl;
+           error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
+           }
+           */
           it->second.first = global_dof;
         }
         else
@@ -193,16 +199,16 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
         {
           // Check that we don't have more than one dof per coordinate
           /*
-          if (it->second.second != -1)
-          {
-            cout << "Coordinate: x =";
-            for (uint j = 0; j < mesh.geometry().dim(); j++)
-              cout << " " << xx[j];
-            cout << endl;
-            cout << "Degrees of freedom: " << it->second.second << " " << global_dof << endl;
-            error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
-          }
-          */
+           if (it->second.second != -1)
+           {
+           cout << "Coordinate: x =";
+           for (uint j = 0; j < mesh.geometry().dim(); j++)
+           cout << " " << xx[j];
+           cout << endl;
+           cout << "Degrees of freedom: " << it->second.second << " " << global_dof << endl;
+           error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
+           }
+           */
           it->second.second = global_dof;
         }
         else
@@ -240,7 +246,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
       for (uint j = 0; j < mesh.geometry().dim(); j++)
         cout << " " << it->first[j];
       cout << endl;
-      error("Unable to find a pair of matching dofs for periodic boundary condition.");
+      error(
+          "Unable to find a pair of matching dofs for periodic boundary condition.");
     }
 
     //cout << "Setting periodic bc at x =";
@@ -259,11 +266,11 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map
     A.set(vals, 1, rows, 1, cols);
     b.set(zero, 1, rows);
   }
-  delete [] rows;
-  delete [] cols;
-  delete [] vals;
-  delete [] zero;
-  delete [] y;
+  delete[] rows;
+  delete[] cols;
+  delete[] vals;
+  delete[] zero;
+  delete[] y;
 
   // Apply changes
   A.apply();
@@ -277,7 +284,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 }
 //-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const GenericVector& x, const DofMap& dof_map, const ufc::form& form)
+                       const GenericVector& x, const DofMap& dof_map,
+                       const ufc::form& form)
 {
   // FIXME: Implement this (Garth?)
   error("Periodic boundary conditions not implemented for nonlinear systems.");

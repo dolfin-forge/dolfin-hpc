@@ -38,7 +38,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal) :
-    BoundaryCondition(),
+    BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
     sub_domain(0),
@@ -60,7 +60,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal) :
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
-    BoundaryCondition(),
+    BoundaryCondition("Slip"),
     mesh(sub_domains.mesh()),
     sub_domains(&sub_domains),
     sub_domain(sub_domain),
@@ -83,7 +83,7 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, const SubSystem& sub_system) :
-    BoundaryCondition(),
+    BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
     sub_domain(0),

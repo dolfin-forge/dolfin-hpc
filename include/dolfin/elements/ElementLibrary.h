@@ -23,14 +23,14 @@ namespace dolfin
     static ufc::finite_element* create_finite_element(const char* signature);
 
     /// Create finite element with given signature
-    static ufc::finite_element* create_finite_element(std::string signature)
+    static ufc::finite_element* create_finite_element(std::string const signature)
     { return create_finite_element(signature.c_str()); }
 
     /// Create dof map with given signature
     static ufc::dof_map* create_dof_map(const char* signature);
 
     /// Create dof map with given signature
-    static ufc::dof_map* create_dof_map(std::string signature)
+    static ufc::dof_map* create_dof_map(std::string const signature)
     { return create_dof_map(signature.c_str()); }
 
   };

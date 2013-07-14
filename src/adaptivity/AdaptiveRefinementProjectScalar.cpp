@@ -41,6 +41,12 @@ unsigned int UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_0::val
     return 1;
 }
 
+/// Return the degree of the finite element
+unsigned int UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_0::degree() const
+{
+    return 1;
+}
+
 /// Evaluate basis function i at given point in cell
 void UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_0::evaluate_basis(unsigned int i,
                                    double* values,
@@ -560,6 +566,12 @@ unsigned int UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_1::val
 
 /// Return the dimension of the value space for axis i
 unsigned int UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_1::value_dimension(unsigned int i) const
+{
+    return 1;
+}
+
+/// Return the degree of the finite element
+unsigned int UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_1::degree() const
 {
     return 1;
 }

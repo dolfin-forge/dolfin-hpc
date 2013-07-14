@@ -91,7 +91,7 @@ void XMLFile::operator>>(Mesh& mesh)
 
   if ( xmlObject )
     delete xmlObject;
-  
+
   if(MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
     xmlObject = new PXMLMesh(mesh);
   else
@@ -157,21 +157,21 @@ void XMLFile::operator>>(Function& f)
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLFiniteElement(finite_element_signature);
-  parseFile(); 
+  parseFile();
 
   // Read the dof map specification
   std::string dof_map_signature;
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLDofMap(dof_map_signature);
-  parseFile(); 
+  parseFile();
 
   // Read the function
   if ( xmlObject )
     delete xmlObject;
   xmlObject = new XMLFunction(f);
-  parseFile(); 
-  
+  parseFile();
+
   // Create the function (we're all friends here) (friends my ass).
   f.init(*mesh, finite_element_signature, dof_map_signature);
    *this >> dynamic_cast<DiscreteFunction&>(f).vector();
@@ -209,19 +209,19 @@ void XMLFile::operator<<(GenericVector& x)
 
   // Write vector in XML format
   fprintf(fp, "  <vector size=\"%u\"> \n", x.local_size() );
-  for (unsigned int i = 0; i < x.local_size(); i++) 
+  for (unsigned int i = 0; i < x.local_size(); i++)
   {
     fprintf(fp, "    <entry row=\"%u\" value=\"%.15g\"/>\n", i, values[i]);
 	if ( i == (x.local_size() - 1))
 	  fprintf(fp, "  </vector>\n");
   }
-  
+
   // Delete vector values
   delete [] values;
 
   // Close file
   closeFile(fp);
-  
+
 //  message(1, "Saved vector %s (%s) to file %s in DOLFIN XML format.", x.name().c_str(), x.label().c_str(), filename.c_str());
   message(1, "Saved vector  to file %s in DOLFIN XML format.", filename.c_str());
 
@@ -231,10 +231,10 @@ void XMLFile::operator<<(GenericMatrix& A)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Write matrix in XML format
   fprintf(fp, "  <matrix rows=\"%u\" columns=\"%u\">\n", A.size(0), A.size(1));
-        
+
   Array<uint> columns;
   Array<real> values;
 
@@ -264,7 +264,7 @@ void XMLFile::operator<<(Mesh& mesh)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Get cell type
   CellType::Type cell_type = mesh.type().cellType();
 
@@ -273,7 +273,7 @@ void XMLFile::operator<<(Mesh& mesh)
           CellType::type2string(cell_type).c_str(), mesh.geometry().dim());
 
   fprintf(fp, "    <vertices size=\"%u\">\n", mesh.numVertices());
-  
+
   for(VertexIterator v(mesh); !v.end(); ++v)
   {
     Point p = v->point();
@@ -325,7 +325,7 @@ void XMLFile::operator<<(Mesh& mesh)
 
   fprintf(fp, "    </cells>\n");
   fprintf(fp, "  </mesh>\n");
- 
+
   // Close file
   closeFile(fp);
 
@@ -336,11 +336,11 @@ void XMLFile::operator<<(MeshFunction<int>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Write mesh in XML format
   fprintf(fp, "  <meshfunction type=\"int\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
-  
+
   Mesh& mesh = meshfunction.mesh();
   for(MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
@@ -349,10 +349,10 @@ void XMLFile::operator<<(MeshFunction<int>& meshfunction)
   }
 
   fprintf(fp, "  </meshfunction>\n");
- 
+
   // Close file
   closeFile(fp);
-  
+
   message(1, "Saved mesh function to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
@@ -360,11 +360,11 @@ void XMLFile::operator<<(MeshFunction<unsigned int>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Write mesh in XML format
   fprintf(fp, "  <meshfunction type=\"uint\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
-  
+
   Mesh& mesh = meshfunction.mesh();
   for(MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
@@ -373,10 +373,10 @@ void XMLFile::operator<<(MeshFunction<unsigned int>& meshfunction)
   }
 
   fprintf(fp, "  </meshfunction>\n");
- 
+
   // Close file
   closeFile(fp);
-  
+
   message(1, "Saved mesh function to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
@@ -384,7 +384,7 @@ void XMLFile::operator<<(MeshFunction<double>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Write mesh in XML format
   fprintf(fp, "  <meshfunction type=\"double\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
@@ -397,10 +397,10 @@ void XMLFile::operator<<(MeshFunction<double>& meshfunction)
   }
 
   fprintf(fp, "  </meshfunction>\n");
- 
+
   // Close file
   closeFile(fp);
-  
+
   message(1, "Saved mesh function to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
@@ -408,7 +408,7 @@ void XMLFile::operator<<(MeshFunction<bool>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Write mesh in XML format
   fprintf(fp, "  <meshfunction type=\"bool\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
@@ -423,10 +423,10 @@ void XMLFile::operator<<(MeshFunction<bool>& meshfunction)
   }
 
   fprintf(fp, "  </meshfunction>\n");
- 
+
   // Close file
   closeFile(fp);
-  
+
   message(1, "Saved mesh function to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
@@ -436,28 +436,25 @@ void XMLFile::operator<<(Function& f)
   if ( f.type() != Function::discrete )
     error("Only discrete functions can be saved in XML format.");
 
-  // Get discrete function (we're all friends here)
-  DiscreteFunction* df = static_cast<DiscreteFunction*>(f.f);
-  
   // Begin function
   FILE *fp = openFile();
   fprintf(fp, "  <function> \n");
   closeFile(fp);
 
   // Write the mesh
-  *this << df->mesh;
-  
+  *this << f.mesh();
+
   // Write the vector
-  *this << *df->x;
+  *this << f.vector();
 
   // Write the finite element
   fp = openFile();
-  fprintf(fp, "  <finiteelement signature=\"%s\"/>\n", df->finite_element->signature());
+  fprintf(fp, "  <finiteelement signature=\"%s\"/>\n", f.finite_element().signature());
   closeFile(fp);
 
   // Write the dof map
   fp = openFile();
-  fprintf(fp, "  <dofmap signature=\"%s\"/>\n", df->dof_map->signature());
+  fprintf(fp, "  <dofmap signature=\"%s\"/>\n", f.dofmap().signature());
   closeFile(fp);
 
   // End function
@@ -507,7 +504,7 @@ void XMLFile::operator<<(ParameterList& parameters)
     }
 
   }
-  
+
   fprintf(fp, "  </parameters>\n" );
 
   // Close file
@@ -520,7 +517,7 @@ void XMLFile::operator<<(Graph& graph)
 {
   // Open file
   FILE *fp = openFile();
-  
+
   // Get graph type and number of vertices, edges and arches
   uint num_vertices = graph.numVertices();
 
@@ -537,17 +534,17 @@ void XMLFile::operator<<(Graph& graph)
   dolfin_assert(offsets);
   dolfin_assert(edge_weights);
   dolfin_assert(vertex_weights);
-  
-  // Write vertice header 
+
+  // Write vertice header
   fprintf(fp, "    <vertices size=\"%u\">\n", graph.numVertices());
 
   // Vertices
   for(uint i=0; i<num_vertices; ++i)
   {
-	  fprintf(fp, 
+	  fprintf(fp,
           "      <vertex index=\"%u\" num_edges=\"%u\" weight=\"%u\"/>\n", i,
           graph.numEdges(i), vertex_weights[i]);
-	  
+
   }
   fprintf(fp, "    </vertices>\n");
 
@@ -560,14 +557,14 @@ void XMLFile::operator<<(Graph& graph)
       // In undirected graphs an edge (v1, v2) is the same as edge (v2, v1)
       // and should not be stored twice
       if ( graph.type() == Graph::directed || i < connections[j] )
-        fprintf(fp, 
+        fprintf(fp,
         "      <edge v1=\"%u\" v2=\"%u\" weight=\"%u\"/>\n",
         i, connections[j], edge_weights[j]);
     }
   }
   fprintf(fp, "    </edges>\n");
   fprintf(fp, "  </graph>\n");
-  
+
   // Close file
   closeFile(fp);
 
@@ -584,13 +581,13 @@ FILE* XMLFile::openFile()
   //printf("Stepping to position: %ld\n", mark);
   fseek(fp, mark, SEEK_SET);
   fflush(fp);
-  
+
   // Write DOLFIN XML format header
   if ( !header_written )
   {
     fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" );
     fprintf(fp, "<dolfin xmlns:dolfin=\"http://www.fenics.org/dolfin/\">\n" );
-    
+
     header_written = true;
   }
 
@@ -618,7 +615,7 @@ void XMLFile::parseFile()
 
   // Parse file using the SAX interface
   parseSAX();
-  
+
   // Notify that file is being closed
   if ( !xmlObject->close() )
     error("Unable to find data in XML file.");
@@ -629,7 +626,7 @@ void XMLFile::parseSAX()
   // Set up the sax handler. Note that it is important that we initialise
   // all (24) fields, even the ones we don't use!
   xmlSAXHandler sax = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  
+
   // Set up handlers for parser events
   sax.startDocument = sax_start_document;
   sax.endDocument   = sax_end_document;
@@ -638,7 +635,7 @@ void XMLFile::parseSAX()
   sax.warning       = sax_warning;
   sax.error         = sax_error;
   sax.fatalError    = sax_fatal_error;
-  
+
   // Parse file
   xmlSAXUserParseFile(&sax, (void *) xmlObject, filename.c_str());
 }

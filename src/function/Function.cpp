@@ -418,8 +418,7 @@ DofMap const& Function::dofmap() const
 
   if (_type != discrete)
   {
-    error(
-        "The dofmap can only be extracted from discrete functions.");
+    error("The dofmap can only be extracted from discrete functions.");
   }
 
   return (static_cast<DiscreteFunction*>(f))->dofmap();
@@ -437,6 +436,32 @@ ufc::finite_element const& Function::finite_element() const
   }
 
   return (static_cast<DiscreteFunction*>(f))->finite_element();
+}
+//-----------------------------------------------------------------------------
+void Function::get(real *& values)
+{
+  if (!f)
+    error("Function contains no data.");
+
+  if (_type != discrete)
+  {
+    error("Values can be retrieved only from discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f))->get(values);
+}
+//-----------------------------------------------------------------------------
+void Function::set(real *& values)
+{
+  if (!f)
+    error("Function contains no data.");
+
+  if (_type != discrete)
+  {
+    error("Values can be set only to discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f))->set(values);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint Function::numSubFunctions() const

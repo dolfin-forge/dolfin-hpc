@@ -163,6 +163,7 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     x(new Vector()),
     intersection_detector(NULL),
     scratch(NULL),
+    _cache_size(0),
     _indices(NULL),
     data_cache(NULL)
 {
@@ -306,10 +307,7 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {
-  dolfin_assert(coefficients);
-  dolfin_assert(this->finite_element_);
-  dolfin_assert(this->dof_map);
-  dolfin_assert(scratch);
+  dolfin_assert(coefficients);dolfin_assert(this->finite_element_);dolfin_assert(this->dof_map);dolfin_assert(scratch);
   // FIXME: Better test here, compare against the local element
 
   // Check dimension
@@ -410,6 +408,21 @@ ufc::finite_element const& DiscreteFunction::finite_element() const
 {
   dolfin_assert(finite_element_);
   return *finite_element_;
+}
+//-----------------------------------------------------------------------------
+void DiscreteFunction::get(real *& values)
+{
+  if(!values)
+  {
+    values = new real[dof_map->dofsmapping_size()];
+  }
+  x->get(values, dof_map->dofsmapping_size(), dof_map->dofsmapping());
+}
+//-----------------------------------------------------------------------------
+void DiscreteFunction::set(real *& values)
+{
+  x->set(values, dof_map->dofsmapping_size(), dof_map->dofsmapping());
+  sync_ghosts();
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::__init(Mesh& mesh, Form& form, uint i)

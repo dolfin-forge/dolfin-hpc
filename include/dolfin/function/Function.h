@@ -153,6 +153,8 @@ public:
   /// Return the mesh
   Mesh& mesh() const;
 
+  //--- !!! BEGIN: Only valid for discrete functions --------------------------
+
   /// Return the signature of a DiscreteFunction
   std::string signature() const;
 
@@ -168,11 +170,19 @@ public:
   /// Return the finite element space of a DiscreteFunction
   ufc::finite_element const& finite_element() const;
 
+  /// Get values of a DiscreteFunction from array
+  void get(real *& values);
+
+  /// Set values to a DiscreteFunction from array
+  void set(real *& values);
+
   /// Return the number of sub functions (only for discrete functions)
   uint numSubFunctions() const;
 
   /// Extract sub function/slice (only for discrete function)
   SubFunction operator[](uint i);
+
+  //--- !!! END:  Only valid for discrete functions ---------------------------
 
   /// Assign function
   Function const& operator=(Function& f);

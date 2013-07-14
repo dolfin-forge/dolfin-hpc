@@ -99,6 +99,12 @@ public:
   /// Return finite element
   ufc::finite_element const& finite_element() const;
 
+  /// Get values to array
+  void get(real *& values);
+
+  /// Set values from array
+  void set(real *& values);
+
   /// Friends
   friend class XMLFile;
 

@@ -33,13 +33,13 @@ public:
   SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal,
                  real beta);
 
+  /// Create sub system boundary condition for sub domain
+  SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, SubSystem const& sub_system,
+                 real beta);
+
 // I do not now how to specify a Function using the vertex to match the SubDomain
 //  /// Create boundary condition for sub domain specified by index
 //  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain, real beta);
-
-/// Create sub system boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, SubSystem const& sub_system,
-                 real beta);
 
 //  /// Create sub system boundary condition for sub domain specified by index
 //  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
@@ -48,23 +48,26 @@ public:
 /// Destructor
   ~SlipFrictionBC();
 
-  /// Apply boundary condition to linear system
-  inline void apply(GenericMatrix& A, GenericVector& b, Form const& form);
+  //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  inline void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
-                    const ufc::form& form);
+  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+
+  /// Apply boundary condition to linear system
+  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+             const ufc::form& ufc_form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  inline void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                    Form const& form);
+  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+             const Form& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  inline void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                    const DofMap& dof_map, const ufc::form& form);
+  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+             const DofMap& dof_map, const ufc::form& ufc_form);
 
-  inline real beta() const;
-  inline Function& friction();
+  real beta() const;
+
+  Function& friction();
 
 private:
 
@@ -77,44 +80,49 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b, Form const& form)
+//-----------------------------------------------------------------------------
+inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
+                                  Form const& form)
 {
   slipbc_.apply(A, b, form);
 }
 
 //-----------------------------------------------------------------------------
-void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                           DofMap const& dof_map, const ufc::form& form)
+inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
+                                  DofMap const& dof_map,
+                                  const ufc::form& ufc_form)
 {
-  slipbc_.apply(A, b, dof_map, form);
+  slipbc_.apply(A, b, dof_map, ufc_form);
 }
 
 //-----------------------------------------------------------------------------
-void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                           const GenericVector& x, Form const& form)
+inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
+                                  const GenericVector& x, Form const& form)
 {
   slipbc_.apply(A, b, x, form);
 }
 
 //-----------------------------------------------------------------------------
-void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                           const GenericVector& x, const DofMap& dof_map,
-                           const ufc::form& form)
+inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
+                                  const GenericVector& x, const DofMap& dof_map,
+                                  const ufc::form& ufc_form)
 {
-  slipbc_.apply(A, b, x, dof_map, form);
+  slipbc_.apply(A, b, x, dof_map, ufc_form);
 }
 
 //-----------------------------------------------------------------------------
-real SlipFrictionBC::beta() const
+inline real SlipFrictionBC::beta() const
 {
   return beta_;
 }
 
 //-----------------------------------------------------------------------------
-Function& SlipFrictionBC::friction()
+inline Function& SlipFrictionBC::friction()
 {
   return Fbeta_;
 }
 
 } /* namespace dolfin */
+
 #endif /* SLIPFRICTIONBC_H_ */
+

@@ -37,14 +37,37 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal) :
+SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain) :
     BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
     sub_domain(0),
     sub_domains_local(false),
     user_sub_domain(&sub_domain),
-    node_normal(Node_normal),
+    node_normal(mesh),
+    As(NULL),
+    row_block(NULL),
+    zero_block(NULL),
+    a1_indices_array(NULL),
+    boundary(NULL),
+    cell_map(NULL),
+    vertex_map(NULL)
+{
+  // Initialize sub domain markers
+  init(sub_domain);
+
+  sub_system = SubSystem(0);
+}
+
+//-----------------------------------------------------------------------------
+SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal) :
+    BoundaryCondition("Slip"),
+    mesh(mesh),
+    sub_domains(NULL),
+    sub_domain(0),
+    sub_domains_local(false),
+    user_sub_domain(&sub_domain),
+    node_normal(node_normal),
     As(NULL),
     row_block(NULL),
     zero_block(NULL),
@@ -110,6 +133,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, const SubSystem& sub_system) :
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
                const SubSystem& sub_system) :
+    BoundaryCondition("Slip"),
     mesh(sub_domains.mesh()),
     sub_domains(&sub_domains),
     sub_domain(sub_domain),
@@ -155,6 +179,14 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
   apply(A, b, form.dofMaps()[1], form);
 }
 //-----------------------------------------------------------------------------
+void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+                   const ufc::form& ufc_form)
+{
+  dolfin::error("Not implemented:\n",
+      "void apply(GenericMatrix& A, GenericVector& b,\n",
+      "\tDofMap const& dof_map, const ufc::form& form)");
+}
+//-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
                    const Form& form)
 {
@@ -162,18 +194,13 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                   const DofMap& dof_map, const ufc::form& form)
-{
-  apply(A, b, dof_map, form);
-}
-//-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                   const ufc::form& form)
+                   const DofMap& dof_map, const ufc::form& ufc_form)
 {
   dolfin::error("Not implemented:\n",
       "void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,\n",
-      "DofMap const& dof_map, const ufc::form& form)");
+      "\tDofMap const& dof_map, const ufc::form& form)");
 }
+
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
                    const Form& form)

@@ -56,21 +56,22 @@ public:
   /// Destructor
   ~SlipBC();
 
+  //--- INTERFACE -------------------------------------------------------------
+
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, Form const& form);
+  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& form);
+             const ufc::form& ufc_form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             Form const& form);
+             const Form& form);
 
-  /// !!! NOT IMPLEMENTED
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             DofMap const& dof_map, const ufc::form& form);
+             const DofMap& dof_map, const ufc::form& ufc_form);
 
 private:
 
@@ -78,10 +79,10 @@ private:
                    Array<uint>& nodes);
 
   // Do: A(row,col) = value   using setblock not setvalue
-  inline void Aset(Matrix& A, uint row, uint col, real value);
+  void Aset(Matrix& A, uint row, uint col, real value);
 
   // Do: b(row) = value   using setblock not setvalue
-  inline void bset(Vector& b, uint row, real value);
+  void bset(Vector& b, uint row, real value);
 
   // Initialize sub domain markers
   void init(SubDomain& sub_domain);

@@ -64,4 +64,8 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain,
 //{
 //}
 
+//-----------------------------------------------------------------------------
+SlipFrictionBC::~SlipFrictionBC()
+{}
+
 } /* namespace dolfin */

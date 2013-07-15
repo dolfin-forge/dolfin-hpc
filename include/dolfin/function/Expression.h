@@ -82,7 +82,12 @@ class IndicatorExpression: public Expression
 {
 public:
 
-  IndicatorExpression(SubDomain& sub_domain, real value);
+  IndicatorExpression(SubDomain& sub_domain, real value) :
+      Expression(),
+      sd_(sub_domain),
+      value_(value)
+  {
+  }
 
   /// Destructor
   ~IndicatorExpression()
@@ -101,7 +106,7 @@ public:
 
   inline void eval(real* values, const real* x) const
   {
-    if (sd_->inside(x, true))
+    if (sd_.inside(x, true))
     {
       values[0] = value_;
     }
@@ -113,7 +118,7 @@ public:
 
 private:
 
-  SubDomain * sd_;
+  SubDomain& sd_;
   real value_;
 
 };

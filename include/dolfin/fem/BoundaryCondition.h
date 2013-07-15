@@ -46,7 +46,7 @@ public:
 
   /// Apply boundary condition to linear system
   virtual void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                     const ufc::form& form) = 0;
+                     const ufc::form& ufc_form) = 0;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
@@ -54,9 +54,9 @@ public:
 
   /// Apply boundary condition to linear system for a nonlinear problem
   virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                     const DofMap& dof_map, const ufc::form& form) = 0;
+                     const DofMap& dof_map, const ufc::form& ufc_form) = 0;
 
-  inline std::string const& type() const;
+  std::string const& type() const;
 
 protected:
 
@@ -102,7 +102,8 @@ private:
 };
 
 //--- INLINE ------------------------------------------------------------------
-std::string const& BoundaryCondition::type() const
+
+inline std::string const& BoundaryCondition::type() const
 {
   return type_;
 }

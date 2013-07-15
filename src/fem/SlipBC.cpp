@@ -170,7 +170,9 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
                    const ufc::form& form)
 {
-
+  dolfin::error("Not implemented:\n",
+      "void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,\n",
+      "DofMap const& dof_map, const ufc::form& form)");
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,

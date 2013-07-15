@@ -59,11 +59,18 @@ public:
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, Form const& form);
 
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             DofMap const& dof_map, const ufc::form& form);
+  /// Apply boundary condition to linear system
+  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+             const ufc::form& form);
 
+  /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
              Form const& form);
+
+  /// !!! NOT IMPLEMENTED
+  /// Apply boundary condition to linear system for a nonlinear problem
+  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+             DofMap const& dof_map, const ufc::form& form);
 
 private:
 
@@ -78,9 +85,6 @@ private:
 
   // Initialize sub domain markers
   void init(SubDomain& sub_domain);
-
-  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
-             const ufc::form& form);
 
   void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
              Form const& form);

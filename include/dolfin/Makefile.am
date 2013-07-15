@@ -75,6 +75,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
 				fem/SlipBC.h\
+				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\
 				fem/SubSystem.h\
 				fem/UFC.h\

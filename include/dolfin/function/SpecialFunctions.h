@@ -12,114 +12,114 @@
 #define __SPECIAL_FUNCTIONS_H
 
 #include "Function.h"
+#include "ExpressionFunction.h"
 
 namespace dolfin
 {
 
-  class Form;
-  class UFC;
+class Form;
+class UFC;
 
+/// This Function represents the local mesh size on a given mesh.
+class MeshSize: public Function
+{
+public:
 
-  /// This Function represents the local mesh size on a given mesh.
-  class MeshSize : public Function
-  {
-  public:
+  /// Constructor
+  MeshSize(Mesh& mesh);
 
-    /// Constructor
-    MeshSize(Mesh& mesh);
+  /// Return cell size
+  real eval(const real* x) const;
 
-    /// Return cell size
-    real eval(const real* x) const;
-    
-    /// Compute minimal cell diameter
-    real min() const;
+  /// Compute minimal cell diameter
+  real min() const;
 
-    /// Compute maximal cell diameter
-    real max() const;    
-  };
+  /// Compute maximal cell diameter
+  real max() const;
+};
 
-  /// This Function represents the inverse of the local cell size on a given 
-  /// mesh.
-  class InvMeshSize : public Function
-  {
-  public:
+/// This Function represents the inverse of the local cell size on a given
+/// mesh.
+class InvMeshSize: public Function
+{
+public:
 
-    /// Constructor
-    InvMeshSize(Mesh& mesh);
+  /// Constructor
+  InvMeshSize(Mesh& mesh);
 
-    /// Return inverse of cell size
-    real eval(const real* x) const;
-  };
+  /// Return inverse of cell size
+  real eval(const real* x) const;
+};
 
-  /// This Function represents the average of the local cell size (average of 
-  /// cell sharing a facet) on a given mesh.
-  class AvgMeshSize : public Function
-  {
-  public:
+/// This Function represents the average of the local cell size (average of
+/// cell sharing a facet) on a given mesh.
+class AvgMeshSize: public Function
+{
+public:
 
-    /// Constructor
-    AvgMeshSize(Mesh& mesh);
+  /// Constructor
+  AvgMeshSize(Mesh& mesh);
 
-    /// Return average cell size
-    real eval(const real* x) const;
-  };
+  /// Return average cell size
+  real eval(const real* x) const;
+};
 
-  /// This Function represents the outward unit normal on cell facets.
-  /// Note that it is only nonzero on cell facets (not on cells).
-  class FacetNormal : public Function
-  {
-  public:
+/// This Function represents the outward unit normal on cell facets.
+/// Note that it is only nonzero on cell facets (not on cells).
+class FacetNormal: public Function
+{
+public:
 
-    FacetNormal(Mesh& mesh);
+  FacetNormal(Mesh& mesh);
 
-    void eval(real* values, const real* x) const;
+  void eval(real* values, const real* x) const;
 
-    uint rank() const;
-    
-    uint dim(uint i) const;
-  };
+  uint rank() const;
 
-  /// This function represents the area/length of a cell facet.
-  class FacetArea : public Function
-  {
-  public:
+  uint dim(uint i) const;
+};
 
-    FacetArea(Mesh& mesh);
+/// This function represents the area/length of a cell facet.
+class FacetArea: public Function
+{
+public:
 
-    void eval(real* values, const real* x) const;
-  };
+  FacetArea(Mesh& mesh);
 
-  /// This function represents the inverse area/length of a cell facet.
-  class InvFacetArea : public Function
-  {
-  public:
+  void eval(real* values, const real* x) const;
+};
 
-    InvFacetArea(Mesh& mesh);
+/// This function represents the inverse area/length of a cell facet.
+class InvFacetArea: public Function
+{
+public:
 
-    void eval(real* values, const real* x) const;
-  };
+  InvFacetArea(Mesh& mesh);
 
-  /// This function determines if the current facet is an outflow facet with
-  /// respect to the current cell. It accepts as argument the mesh and a form
-  /// M = dot(n, v)*ds, a functional, defined on the normal vector to the
-  /// facet and velocity vector integrated over the exterior of the cell.
-  /// The function returns 1.0 if the dot product > 0, 0.0 otherwise.
-  class OutflowFacet : public Function
-  {
-  public:
+  void eval(real* values, const real* x) const;
+};
 
-    // Constructor
-    OutflowFacet(Mesh& mesh, Form& form);
+/// This function determines if the current facet is an outflow facet with
+/// respect to the current cell. It accepts as argument the mesh and a form
+/// M = dot(n, v)*ds, a functional, defined on the normal vector to the
+/// facet and velocity vector integrated over the exterior of the cell.
+/// The function returns 1.0 if the dot product > 0, 0.0 otherwise.
+class OutflowFacet: public Function
+{
+public:
 
-    ~OutflowFacet();
+  // Constructor
+  OutflowFacet(Mesh& mesh, Form& form);
 
-    real eval(const real* x) const;
+  ~OutflowFacet();
 
-  private:
+  real eval(const real* x) const;
 
-    Form& form;
-    UFC* ufc;
-  };
+private:
+
+  Form& form;
+  UFC* ufc;
+};
 
 }
 

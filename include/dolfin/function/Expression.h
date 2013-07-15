@@ -2,6 +2,7 @@
 #define __EXPRESSION_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/SubDomain.h>
 
 namespace dolfin
 {
@@ -13,26 +14,26 @@ class Expression
 {
 public:
 
-	/// Create user-defined function
-	Expression()
-	{
-	}
+  /// Create user-defined function
+  Expression()
+  {
+  }
 
-	/// Return the rank of the value space
-	virtual uint rank() const = 0;
+  /// Return the rank of the value space
+  virtual uint rank() const = 0;
 
-	/// Return the dimension of the value space for axis i
-	virtual uint dim(uint i) const = 0;
+  /// Return the dimension of the value space for axis i
+  virtual uint dim(uint i) const = 0;
 
-	/// Evaluate function at given point
-	virtual void eval(real* values, const real* x) const = 0;
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
 
 protected:
 
-	/// Destructor
-	virtual ~Expression()
-	{
-	}
+  /// Destructor
+  virtual ~Expression()
+  {
+  }
 
 private:
 
@@ -42,38 +43,78 @@ class RealReference: public Expression
 {
 public:
 
-	/// Create user-defined function
-	RealReference(real const& r) :
-			Expression(),
-			r_(r)
-	{
-	}
+  /// Create user-defined function
+  RealReference(real const& r) :
+      Expression(),
+      r_(r)
+  {
+  }
 
-	/// Destructor
-	~RealReference()
-	{
-	}
+  /// Destructor
+  ~RealReference()
+  {
+  }
 
-	/// Return the rank of the value space
-	virtual uint rank() const
-	{
-		return 0;
-	}
+  /// Return the rank of the value space
+  virtual uint rank() const
+  {
+    return 0;
+  }
 
-	/// Return the dimension of the value space for axis i
-	virtual uint dim(uint i) const
-	{
-		return 1;
-	}
+  /// Return the dimension of the value space for axis i
+  virtual uint dim(uint i) const
+  {
+    return 1;
+  }
 
-	/// Evaluate function at given point
-	virtual void eval(real* values, const real* x) const
-	{
-		values[0] = r_;
-	}
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const
+  {
+    values[0] = r_;
+  }
 
 private:
-	real const& r_;
+  real const& r_;
+
+};
+
+class IndicatorExpression: public Expression
+{
+public:
+
+  IndicatorExpression(SubDomain& sub_domain, real value);
+
+  /// Destructor
+  ~IndicatorExpression()
+  {
+  }
+
+  inline uint rank() const
+  {
+    return 0;
+  }
+
+  inline uint dim(uint i) const
+  {
+    return 1;
+  }
+
+  inline void eval(real* values, const real* x) const
+  {
+    if (sd_->inside(x, true))
+    {
+      values[0] = value_;
+    }
+    else
+    {
+      values[0] = 0.0;
+    }
+  }
+
+private:
+
+  SubDomain * sd_;
+  real value_;
 
 };
 

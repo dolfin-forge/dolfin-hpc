@@ -39,32 +39,6 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				elements/ffc_Lagrange_2_2dVector.h\
 				elements/ffc_Lagrange_2_3d.h\
 				elements/ffc_Lagrange_2_3dVector.h\
-				elements/ProjectionLibrary.h\
-				elements/ffc_L2proj_00.h\
-				elements/ffc_L2proj_01.h\
-				elements/ffc_L2proj_02.h\
-				elements/ffc_L2proj_03.h\
-				elements/ffc_L2proj_04.h\
-				elements/ffc_L2proj_05.h\
-				elements/ffc_L2proj_06.h\
-				elements/ffc_L2proj_07.h\
-				elements/ffc_L2proj_08.h\
-				elements/ffc_L2proj_09.h\
-				elements/ffc_L2proj_10.h\
-				elements/ffc_L2proj_11.h\
-				elements/ffc_L2proj_12.h\
-				elements/ffc_L2proj_13.h\
-				elements/ffc_L2proj_14.h\
-				elements/ffc_L2proj_15.h\
-				elements/ffc_L2proj_16.h\
-				elements/ffc_L2proj_17.h\
-				elements/ffc_L2proj_18.h\
-				elements/ffc_L2proj_19.h\
-				elements/ffc_L2proj_20.h\
-				elements/ffc_L2proj_21.h\
-				elements/ffc_L2proj_22.h\
-				elements/ffc_L2proj_23.h\
-				elements/ffc_L2proj_24.h\
 				fem/Assembler.h\
 				fem/BoundaryCondition.h\
 				fem/DirichletBC.h\

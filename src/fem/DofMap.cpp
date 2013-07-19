@@ -759,17 +759,16 @@ std::map<dolfin::uint, dolfin::uint> DofMap::getMap() //FIXME: const
 {
   return map;
 }
-
+//-----------------------------------------------------------------------------
 std::string const& DofMap::mesh_hash() const
 {
   return mesh_hash_;
 }
-
+//-----------------------------------------------------------------------------
 std::string const& DofMap::hash() const
 {
   return hash_;
 }
-
 //-----------------------------------------------------------------------------
 void DofMap::disp() const
 {

@@ -98,15 +98,16 @@ Function::Function(Mesh& mesh, const Array<uint>& shape,
   f = new ConstantFunction(mesh, shape, values);
 }
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, const ufc::function& function, uint size) :
-    Variable("*no name*", "ufc function"),
-    f(0),
-    _type(ufc),
-    _cell(0),
-    _facet(-1)
-{
-  f = new UFCFunction(mesh, function, size);
-}
+//??? Not declared
+//Function::Function(Mesh& mesh, const ufc::function& function, uint size) :
+//    Variable("*no name*", "ufc function"),
+//    f(0),
+//    _type(ufc),
+//    _cell(0),
+//    _facet(-1)
+//{
+//  f = new UFCFunction(mesh, function, size);
+//}
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
     Variable("*no name*", "discrete function"),

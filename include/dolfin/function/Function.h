@@ -13,6 +13,7 @@
 #define __FUNCTION_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/elements/FE.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>

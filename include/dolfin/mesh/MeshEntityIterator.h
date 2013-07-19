@@ -43,126 +43,95 @@ class MeshEntityIterator
 {
 public:
 
-	/// Create iterator for mesh entities over given topological dimension
-	MeshEntityIterator(Mesh& mesh, uint dim) :
-			entity(mesh, dim, 0),
-			_pos(0),
-			pos_end(mesh.size(dim)),
-			index(0)
-	{
-		// FIXME: NOT GOOD
-		// Compute entities if empty and if number of cells is not zero
-		if ( (pos_end == 0) && (mesh.numCells() != 0))
-		{
-		  pos_end = mesh.init(dim);
-		}
-		// In case we refine the mesh and renumber we lose the mesh entities
-		// of the other processes if we do not reinit.
+  /// Create iterator for mesh entities over given topological dimension
+  MeshEntityIterator(Mesh& mesh, uint dim);
 
-	}
+  /// Create iterator for entities of given dimension connected to given entity
+  MeshEntityIterator(MeshEntity& entity, uint dim);
 
-	/// Create iterator for entities of given dimension connected to given entity
-	MeshEntityIterator(MeshEntity& entity, uint dim) :
-			entity(entity.mesh(), dim, 0),
-			_pos(0)
-	{
-		// Get connectivity
-		MeshConnectivity& c = entity.mesh().topology()(entity.dim(), dim);
+  /// Destructor
+  virtual ~MeshEntityIterator();
 
-		// FIXME: NOT GOOD
-		// Compute connectivity if empty
-		if (c.size() == 0)
-		{
-			entity.mesh().init(entity.dim(), dim);
-		}
-		// In case we refine the mesh and renumber we lose the mesh entities
-		// if we do not reinit.
+  /// Step to next mesh entity (prefix increment)
+  MeshEntityIterator& operator++();
 
-		// Get size and index map
-		if (c.size() == 0)
-		{
-			pos_end = 0;
-			index = 0;
-		}
-		else
-		{
-			pos_end = c.size(entity.index());
-			index = c(entity.index());
-		}
-	}
+  /// Return current position
+  uint pos() const;
 
-	/// Destructor
-	virtual ~MeshEntityIterator()
-	{
-	}
+  /// Check if iterator has reached the end
+  bool end() const;
 
-	/// Step to next mesh entity (prefix increment)
-	MeshEntityIterator& operator++()
-	{
-		++_pos;
-		return *this;
-	}
+  /// Dereference operator
+  MeshEntity& operator*();
 
-	/// Return current position
-	inline uint pos() const
-	{
-		return _pos;
-	}
+  /// Member access operator
+  MeshEntity* operator->();
 
-	/// Check if iterator has reached the end
-	inline bool end() const
-	{
-		return _pos >= pos_end;
-	}
-
-	/// Dereference operator
-	inline MeshEntity& operator*()
-	{
-		return *operator->();
-	}
-
-	/// Member access operator
-	inline MeshEntity* operator->()
-	{
-		entity._index = (index ? index[_pos] : _pos);
-		return &entity;
-	}
-
-	/// Output
-	friend LogStream& operator<<(LogStream& stream,
-									MeshEntityIterator const& it);
+  /// Output
+  friend LogStream& operator<<(LogStream& stream, MeshEntityIterator const& it);
 
 private:
 
-	/// Copy constructor is private to disallow usage. If it were public (or not
-	/// declared and thus a default version available) it would allow code like
-	///
-	/// for (CellIterator c0(mesh); !c0.end(); ++c0)
-	///   for (CellIterator c1(c0); !c1.end(); ++c1)
-	///      ...
-	///
-	/// c1 looks to be an iterator over the entities around c0 when it is in
-	/// fact a copy of c0.
-	MeshEntityIterator(MeshEntityIterator& entity) :
-			entity(entity.entity.mesh(), 0, 0),
-			_pos(0)
-	{
-		error("Illegal use of mesh entity iterator.");
-	}
+  /// Copy constructor is private to disallow usage. If it were public (or not
+  /// declared and thus a default version available) it would allow code like
+  ///
+  /// for (CellIterator c0(mesh); !c0.end(); ++c0)
+  ///   for (CellIterator c1(c0); !c1.end(); ++c1)
+  ///      ...
+  ///
+  /// c1 looks to be an iterator over the entities around c0 when it is in
+  /// fact a copy of c0.
+  MeshEntityIterator(MeshEntityIterator& entity);
 
-	// Mesh entity
-	MeshEntity entity;
+  // Mesh entity
+  MeshEntity entity;
 
-	// Current position
-	uint _pos;
+  // Current position
+  uint _pos;
 
-	// End position
-	uint pos_end;
+  // End position
+  uint pos_end;
 
-	// Mapping from pos to index (if any)
-	uint* index;
+  // Mapping from pos to index (if any)
+  uint* index;
 
 };
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline MeshEntityIterator& MeshEntityIterator::operator++()
+{
+  ++_pos;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshEntityIterator::pos() const
+{
+  return _pos;
+}
+
+//-----------------------------------------------------------------------------
+inline bool MeshEntityIterator::end() const
+{
+  return _pos >= pos_end;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshEntity& MeshEntityIterator::operator*()
+{
+  return *operator->();
+}
+
+//-----------------------------------------------------------------------------
+inline MeshEntity* MeshEntityIterator::operator->()
+{
+  entity._index = (index ? index[_pos] : _pos);
+  return &entity;
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

@@ -32,8 +32,6 @@
 #include <dolfin/elements/ffc_Discontinuous_Lagrange_2_3dVector.h>
 #include <dolfin/elements/ffc_Brezzi_Douglas_Marini_1_2d.h>
 
-#include <dolfin/elements/ElementLibrary.h>
-
 ufc::finite_element* dolfin::ElementLibrary::create_finite_element(const char* signature)
 {
   if (strcmp(signature, "FiniteElement('Lagrange', Cell('interval', Space(1)), 1, None)") == 0)

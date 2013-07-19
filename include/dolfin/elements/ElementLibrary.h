@@ -7,8 +7,11 @@
 #ifndef __ELEMENT_LIBRARY_H
 #define __ELEMENT_LIBRARY_H
 
-#include <string>
+#include <dolfin/common/Array.h>
+
 #include <ufc.h>
+
+#include <string>
 
 namespace dolfin
 {
@@ -32,6 +35,12 @@ namespace dolfin
     /// Create dof map with given signature
     static ufc::dof_map* create_dof_map(std::string const signature)
     { return create_dof_map(signature.c_str()); }
+
+    /// List of finite element families
+    static Array<std::string> const families;
+
+    /// List of finite element signatures
+    static Array<std::string> const signatures;
 
   };
 

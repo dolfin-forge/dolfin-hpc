@@ -7,23 +7,53 @@
 #ifndef __BASIC_H
 #define __BASIC_H
 
-#include <cmath>
 #include <dolfin/common/types.h>
+
+#include <time.h>
+#include <cstdlib>
+#include <cmath>
 
 namespace dolfin
 {
 
-  /// Return the square of x
-  real sqr(real x);
+/// Return the square of x
+inline real sqr(real x)
+{
+  return x * x;
+}
 
-  /// Return a to the power n
-  uint ipow(uint a, uint n);
+/// Return a to the power n
+inline uint ipow(uint a, uint n)
+{
+  uint p = a;
+  for (uint i = 1; i < n; i++)
+    p *= a;
+  return p;
+}
 
-  /// Return a random number, uniformly distributed between [0.0, 1.0)
-  real rand();
+/// Seed only first time
+static bool rand_seeded = false;
 
-  /// Seed random number generator
-  void seed(unsigned int s);
+/// Return a random number, uniformly distributed between [0.0, 1.0)
+/// !!! Not quite
+inline real rand()
+{
+  if (!rand_seeded)
+  {
+    unsigned int s = static_cast<long int>(time(0));
+    std::srand(s);
+    rand_seeded = true;
+  }
+
+  return static_cast<real>(std::rand()) / static_cast<real>(RAND_MAX);
+}
+
+/// Seed random number generator
+inline void seed(unsigned int s)
+{
+  std::srand(s);
+  rand_seeded = true;
+}
 
 }
 

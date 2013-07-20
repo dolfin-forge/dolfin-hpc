@@ -24,11 +24,11 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 NodeNormal::NodeNormal(NodeNormal& node_normal) :
-    mesh(node_normal.mesh),
     normal(NULL),
     tau(NULL),
     tau_1(NULL),
     tau_2(NULL),
+    mesh(node_normal.mesh),
     alpha_max_(DOLFIN_PI / 2 - DOLFIN_EPS),
     weighting_(none)
 {
@@ -37,11 +37,11 @@ NodeNormal::NodeNormal(NodeNormal& node_normal) :
 
 //-----------------------------------------------------------------------------
 NodeNormal::NodeNormal(Mesh& mesh) :
-    mesh(mesh),
     normal(NULL),
     tau(NULL),
     tau_1(NULL),
     tau_2(NULL),
+    mesh(mesh),
     alpha_max_(DOLFIN_PI / 2 - DOLFIN_EPS),
     weighting_(none)
 {
@@ -272,7 +272,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       // Add neighbouring bound.cell/facet contributions from other processes
       if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
       {
-        uint tabulated_idx = shared_offsetidx_[global_id];
+//        uint tabulated_idx = shared_offsetidx_[global_id];
         // Add normals
 //        for (uint d = 0; d < nsdim; ++d)
 //        {

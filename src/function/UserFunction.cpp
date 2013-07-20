@@ -81,7 +81,7 @@ void UserFunction::interpolate(real* coefficients,
 //-----------------------------------------------------------------------------
 void UserFunction::eval(real* values, const real* x) const
 {
-  message("Calling user function");
+  error("eval(real* values, const real* x) const should be overloaded");
 
   // Call user-overloaded eval function in Function
   f->eval(values, x);

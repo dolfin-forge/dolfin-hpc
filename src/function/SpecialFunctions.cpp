@@ -26,9 +26,9 @@ MeshSize::MeshSize(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-real MeshSize::eval(const real* x) const
+void MeshSize::eval(real * values, real const * x) const
 {
-  return cell().diameter();
+  values[0] = cell().diameter();
 }
 //-----------------------------------------------------------------------------
 uint MeshSize::rank() const
@@ -85,9 +85,9 @@ InvMeshSize::InvMeshSize(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-real InvMeshSize::eval(const real* x) const
+void InvMeshSize::eval(real * values, real const * x) const
 {
-  return 1.0 / cell().diameter();
+  values[0] = 1.0 / cell().diameter();
 }
 //-----------------------------------------------------------------------------
 uint InvMeshSize::rank() const
@@ -106,9 +106,9 @@ CellVolume::CellVolume(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-real CellVolume::eval(const real* x) const
+void CellVolume::eval(real * values, real const * x) const
 {
-  return cell().volume();
+  values[0] = cell().volume();
 }
 //-----------------------------------------------------------------------------
 uint CellVolume::rank() const
@@ -165,9 +165,9 @@ InvCellVolume::InvCellVolume(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-real InvCellVolume::eval(const real* x) const
+void InvCellVolume::eval(real * values, real const * x) const
 {
-  return 1.0 / cell().volume();
+  values[0] = 1.0 / cell().volume();
 }
 //-----------------------------------------------------------------------------
 uint InvCellVolume::rank() const
@@ -186,11 +186,11 @@ AvgMeshSize::AvgMeshSize(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-real AvgMeshSize::eval(const real* x) const
+void AvgMeshSize::eval(real * values, real const * x) const
 {
   // If there is no facet (assembling on interior), return cell diameter
   if (facet() < 0)
-    return cell().diameter();
+    values[0] = cell().diameter();
   else
   {
     // Create facet from the global facet number
@@ -204,12 +204,12 @@ real AvgMeshSize::eval(const real* x) const
       Cell cell0(mesh(), facet0.entities(cell().mesh().topology().dim())[0]);
       Cell cell1(mesh(), facet0.entities(cell().mesh().topology().dim())[1]);
 
-      return (cell0.diameter() + cell1.diameter()) / 2.0;
+      values[0] = (cell0.diameter() + cell1.diameter()) / 2.0;
     }
     // Else there is only one cell connected to the facet and the average is
     // the cell diameter
     else
-      return cell().diameter();
+      values[0] = cell().diameter();
   }
 }
 //-----------------------------------------------------------------------------
@@ -229,7 +229,7 @@ FacetNormal::FacetNormal(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void FacetNormal::eval(real* values, const real* x) const
+void FacetNormal::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
   {
@@ -261,7 +261,7 @@ FacetArea::FacetArea(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void FacetArea::eval(real* values, const real* x) const
+void FacetArea::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
     values[0] = cell().facetArea(facet());
@@ -285,7 +285,7 @@ InvFacetArea::InvFacetArea(Mesh& mesh) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void InvFacetArea::eval(real* values, const real* x) const
+void InvFacetArea::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
     values[0] = 1.0 / cell().facetArea(facet());
@@ -326,12 +326,12 @@ OutflowFacet::~OutflowFacet()
   delete ufc;
 }
 //-----------------------------------------------------------------------------
-real OutflowFacet::eval(const real* x) const
+void OutflowFacet::eval(real * values, real const * x) const
 {
   // If there is no facet (assembling on interior), return 0.0
   if (facet() < 0)
   {
-    return 0.0;
+    values[0] = 0.0;
   }
   else
   {
@@ -357,11 +357,11 @@ real OutflowFacet::eval(const real* x) const
   // If dot product is positive, the current facet is an outflow facet
   if (ufc->A[0] > DOLFIN_EPS)
   {
-    return 1.0;
+    values[0] = 1.0;
   }
   else
   {
-    return 0.0;
+    values[0] = 0.0;
   }
 }
 //-----------------------------------------------------------------------------

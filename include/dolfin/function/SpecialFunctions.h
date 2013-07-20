@@ -28,7 +28,7 @@ public:
   MeshSize(Mesh& mesh);
 
   /// Return cell size
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -51,7 +51,7 @@ public:
   InvMeshSize(Mesh& mesh);
 
   /// Return inverse of cell size
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -68,7 +68,7 @@ public:
   AvgMeshSize(Mesh& mesh);
 
   /// Return average cell size
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -84,7 +84,7 @@ public:
   CellVolume(Mesh& mesh);
 
   /// Return cell size
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -107,7 +107,7 @@ public:
   InvCellVolume(Mesh& mesh);
 
   /// Return inverse of cell size
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -122,7 +122,7 @@ public:
 
   FacetNormal(Mesh& mesh);
 
-  void eval(real* values, const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -136,7 +136,7 @@ public:
 
   FacetArea(Mesh& mesh);
 
-  void eval(real* values, const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -150,7 +150,7 @@ public:
 
   InvFacetArea(Mesh& mesh);
 
-  void eval(real* values, const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 
@@ -171,7 +171,7 @@ public:
 
   ~OutflowFacet();
 
-  real eval(const real* x) const;
+  void eval(real * values, real const * x) const;
 
   uint rank() const;
 

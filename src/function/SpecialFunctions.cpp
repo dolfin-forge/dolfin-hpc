@@ -31,6 +31,16 @@ real MeshSize::eval(const real* x) const
   return cell().diameter();
 }
 //-----------------------------------------------------------------------------
+uint MeshSize::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint MeshSize::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
 real MeshSize::min() const
 {
   CellIterator c(mesh());
@@ -80,6 +90,96 @@ real InvMeshSize::eval(const real* x) const
   return 1.0 / cell().diameter();
 }
 //-----------------------------------------------------------------------------
+uint InvMeshSize::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint InvMeshSize::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+CellVolume::CellVolume(Mesh& mesh) :
+    Function(mesh)
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+real CellVolume::eval(const real* x) const
+{
+  return cell().volume();
+}
+//-----------------------------------------------------------------------------
+uint CellVolume::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint CellVolume::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+real CellVolume::min() const
+{
+  CellIterator c(mesh());
+  real hmin = c->volume();
+  for (; !c.end(); ++c)
+    hmin = std::min(hmin, c->volume());
+
+#ifdef HAVE_MPI
+  // Compute the global minimum
+  if (MPI::numProcesses() > 1)
+  {
+    real hmin_tmp = hmin;
+    MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
+  }
+#endif
+
+  return hmin;
+}
+//-----------------------------------------------------------------------------
+real CellVolume::max() const
+{
+  CellIterator c(mesh());
+  real hmax = c->volume();
+  for (; !c.end(); ++c)
+    hmax = std::max(hmax, c->volume());
+
+#ifdef HAVE_MPI
+  // Compute the global maximum
+  if (MPI::numProcesses() > 1)
+  {
+    real hmax_tmp = hmax;
+    MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
+  }
+#endif
+
+  return hmax;
+}
+//-----------------------------------------------------------------------------
+InvCellVolume::InvCellVolume(Mesh& mesh) :
+    Function(mesh)
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+real InvCellVolume::eval(const real* x) const
+{
+  return 1.0 / cell().volume();
+}
+//-----------------------------------------------------------------------------
+uint InvCellVolume::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint InvCellVolume::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
 AvgMeshSize::AvgMeshSize(Mesh& mesh) :
     Function(mesh)
 {
@@ -113,6 +213,16 @@ real AvgMeshSize::eval(const real* x) const
   }
 }
 //-----------------------------------------------------------------------------
+uint AvgMeshSize::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint AvgMeshSize::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
 FacetNormal::FacetNormal(Mesh& mesh) :
     Function(mesh)
 {
@@ -133,12 +243,12 @@ void FacetNormal::eval(real* values, const real* x) const
   }
 }
 //-----------------------------------------------------------------------------
-dolfin::uint FacetNormal::rank() const
+uint FacetNormal::rank() const
 {
   return 1;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint FacetNormal::dim(uint i) const
+uint FacetNormal::dim(uint i) const
 {
   if (i > 0)
     error("Invalid dimension %d in FacetNormal::dim.", i);
@@ -159,6 +269,16 @@ void FacetArea::eval(real* values, const real* x) const
     values[0] = 0.0;
 }
 //-----------------------------------------------------------------------------
+uint FacetArea::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint FacetArea::dim(uint i) const
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
 InvFacetArea::InvFacetArea(Mesh& mesh) :
     Function(mesh)
 {
@@ -171,6 +291,16 @@ void InvFacetArea::eval(real* values, const real* x) const
     values[0] = 1.0 / cell().facetArea(facet());
   else
     values[0] = 0.0;
+}
+//-----------------------------------------------------------------------------
+uint InvFacetArea::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint InvFacetArea::dim(uint i) const
+{
+  return 1;
 }
 //-----------------------------------------------------------------------------
 OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) :
@@ -211,7 +341,7 @@ real OutflowFacet::eval(const real* x) const
     //      ufc->update(cell0, mesh.distdata());
 
     // Interpolate coefficients on cell and current facet
-    for (dolfin::uint i = 0; i < form.coefficients().size(); i++)
+    for (uint i = 0; i < form.coefficients().size(); i++)
       form.coefficients()[i]->interpolate(ufc->w[i], ufc->cell,
           *ufc->coefficient_elements[i], cell0, facet());
 
@@ -233,6 +363,16 @@ real OutflowFacet::eval(const real* x) const
   {
     return 0.0;
   }
+}
+//-----------------------------------------------------------------------------
+uint OutflowFacet::rank() const
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint OutflowFacet::dim(uint i) const
+{
+  return 1;
 }
 //-----------------------------------------------------------------------------
 

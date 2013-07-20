@@ -12,7 +12,6 @@
 #define __SPECIAL_FUNCTIONS_H
 
 #include "Function.h"
-#include "ExpressionFunction.h"
 
 namespace dolfin
 {
@@ -30,6 +29,10 @@ public:
 
   /// Return cell size
   real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 
   /// Compute minimal cell diameter
   real min() const;
@@ -49,6 +52,10 @@ public:
 
   /// Return inverse of cell size
   real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 };
 
 /// This Function represents the average of the local cell size (average of
@@ -62,6 +69,49 @@ public:
 
   /// Return average cell size
   real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
+};
+
+/// This Function represents the cell volume on a given mesh.
+class CellVolume: public Function
+{
+public:
+
+  /// Constructor
+  CellVolume(Mesh& mesh);
+
+  /// Return cell size
+  real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
+
+  /// Compute minimal cell diameter
+  real min() const;
+
+  /// Compute maximal cell diameter
+  real max() const;
+};
+
+/// This Function represents the inverse of the cell volume on a given
+/// mesh.
+class InvCellVolume: public Function
+{
+public:
+
+  /// Constructor
+  InvCellVolume(Mesh& mesh);
+
+  /// Return inverse of cell size
+  real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 };
 
 /// This Function represents the outward unit normal on cell facets.
@@ -87,6 +137,10 @@ public:
   FacetArea(Mesh& mesh);
 
   void eval(real* values, const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 };
 
 /// This function represents the inverse area/length of a cell facet.
@@ -97,6 +151,10 @@ public:
   InvFacetArea(Mesh& mesh);
 
   void eval(real* values, const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 };
 
 /// This function determines if the current facet is an outflow facet with
@@ -114,6 +172,10 @@ public:
   ~OutflowFacet();
 
   real eval(const real* x) const;
+
+  uint rank() const;
+
+  uint dim(uint i) const;
 
 private:
 

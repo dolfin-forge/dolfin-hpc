@@ -40,7 +40,7 @@ inline real rand()
 {
   if (!rand_seeded)
   {
-    unsigned int s = static_cast<long int>(time(0));
+    unsigned int s = static_cast<long int>(::time(0));
     std::srand(s);
     rand_seeded = true;
   }

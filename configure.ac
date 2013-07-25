@@ -72,8 +72,9 @@ AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc],
 		   [Compile with support for PETSc linear algebra]),
 		   [with_petsc=${withval}],[with_petsc=no])
 
-AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom], [Compile with support for LIBGEOM]),
-		 [with_libgeom=${withval}],[with_libgeom=no])
+AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom], 
+		     [Compile with support for LIBGEOM]),
+		     [with_libgeom=${withval}],[with_libgeom=no])
 
 
 if test "x${enable_function_cache}" = xyes; then

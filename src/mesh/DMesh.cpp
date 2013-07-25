@@ -531,7 +531,12 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     DVertex* dv = *it;
     dolfin_assert( !dv->deleted );
 
+#if (__sgi)
+    (*old2new_vertices)[dv->id] = current_vertex;
+#else
     old2new_vertices->at(dv->id) = current_vertex;
+#endif
+
 
     editor.addVertex(current_vertex, dv->p);
 
@@ -558,12 +563,20 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     dolfin_assert( !dc->deleted );
 
     if ( old2new_cells )
+#if (__sgi)
+      (*old2new_cells)[dc->id] = current_cell;
+#else
       old2new_cells->at(dc->id) = current_cell;
+#endif
 
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
       DVertex* dv = dc->vertices[j];
+#if (__sgi)
+      cell_vertices[j] = (*old2new_vertices)[dv->id];
+#else
       cell_vertices[j] = old2new_vertices->at(dv->id);
+#endif
     }
     editor.addCell(current_cell, cell_vertices);
   }
@@ -588,7 +601,11 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
     DVertex* dv = *it;
 
     if ( old2new_vertices )
+#if (__sgi)
+      (*old2new_vertices)[dv->id] = i;
+#else
       old2new_vertices->at(dv->id) = i;
+#endif
 
     dv->id = i;
   }
@@ -606,7 +623,13 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
     DCell* dc = *it;
 
     if ( old2new_cells )
+    {
+#if (__sgi)
+      (*old2new_cells)[dc->id] = i;
+#else
       old2new_cells->at(dc->id) = i;
+#endif
+    }
     
     dc->id = i;
   }  

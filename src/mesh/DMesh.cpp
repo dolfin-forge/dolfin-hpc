@@ -828,7 +828,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
       }
     }
   }
-//	std::cout<<std::endl;
   
   DVertex* v0 = dcell->vertices[ii];
   DVertex* v1 = dcell->vertices[jj];
@@ -945,8 +944,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
   // Continue refinement
   if(!closing)
   {
-		//TODO counter stuff entfernen
-		int counter = 0;
+    //TODO counter stuff entfernen
+    int counter = 0;
     // Bisect opposite cell of edge with hanging node
     for(;;)
     {

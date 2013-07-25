@@ -31,7 +31,8 @@ CoarseningManager::CoarseningManager()
   // do nothing
 }
 //-----------------------------------------------------------------------------
-CoarseningManager::CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+CoarseningManager::CoarseningManager(Mesh& mesh, 
+				     MeshFunction<bool>& cell_marker, 
                                      bool coarsen_boundary)
 : _dmesh(0)
 {
@@ -59,7 +60,7 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
     _quality_threshold = 1e-3;
 
   if ( MPI::processNumber() == 0 )
-    cout << "Quality threshold: " << _quality_threshold << endl;
+    message("Quality threshold: %d", _quality_threshold);
 
   // attempt count is for sake of simplicity in the migration phase always one
   // larger than the number of actually performed attempts
@@ -429,7 +430,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   uint pe_size = MPI::numProcesses();
 
   if (rank == 0)
-    cout << "Starting migration." << endl;
+    message("Starting migration.");
 
   // Cleanup Coarsening List
   removeErasedCellsFromCoarseningList();

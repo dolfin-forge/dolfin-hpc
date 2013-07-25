@@ -325,9 +325,14 @@ void PETScKrylovSolver::writeReport(int num_iterations)
   if ( !report )
     return;
     
-#if PETSC_VERSION_MAJOR >2 
+#if PETSC_VERSION_MAJOR > 2 
+#if PETSC_VERSION_MINOR > 3
+  KSPType ksp_type;
+  PCType pc_type;
+#else
   const KSPType ksp_type;
   const PCType pc_type;
+#endif
 #else
   KSPType ksp_type;
   PCType pc_type;

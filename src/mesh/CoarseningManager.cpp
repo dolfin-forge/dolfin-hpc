@@ -303,9 +303,9 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-      MPI_UNSIGNED, dest, 0, 
-      recv_buff_requests, max_num_requested_vertices, MPI_UNSIGNED, src, 0,
-      MPI::DOLFIN_COMM, &status );
+		  MPI_UNSIGNED, dest, 0, 
+		  recv_buff_requests, max_num_requested_vertices, MPI_UNSIGNED, src, 0,
+		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
 
     // process received requests and puts them into the map
@@ -379,9 +379,9 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-      MPI_UNSIGNED, dest, 0, 
-      recv_buff_requests, 2 * max_num_requested_vertices, MPI_UNSIGNED, src, 0,
-      MPI::DOLFIN_COMM, &status );
+		  MPI_UNSIGNED, dest, 0, 
+		  recv_buff_requests, 2 * max_num_requested_vertices, MPI_UNSIGNED, src, 0,
+		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
 
     // process received requests and marks cells accordingly
@@ -478,9 +478,9 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   // Lists of MeshFunctions for exchange
   Array< std::pair< MeshFunction<uint> * , MeshFunction<uint> * > > 
-                                                              cell_functions;
+    cell_functions;
   Array< std::pair< MeshFunction<double> * , MeshFunction<double> * > > 
-                                                              vertex_functions;
+    vertex_functions;
   
   buildMFArrays(omesh, old2new_cells, old2new_vertices, 
                 cell_functions, vertex_functions);
@@ -508,3 +508,5 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   return true;
 }
 //-----------------------------------------------------------------------------
+
+

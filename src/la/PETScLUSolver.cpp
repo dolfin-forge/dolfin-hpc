@@ -72,7 +72,11 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
 		       PETScVector& x, const PETScVector& b)
 {
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MINOR > 3
+  MatType mat_type;
+#else
   const MatType mat_type;
+#endif
 #else
   MatType mat_type;
 #endif
@@ -128,8 +132,13 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
   KSPSolve(ksp, b.vec(), x.vec());
   
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MINOR > 3
+  KSPType ksp_type;
+  PCType pc_type;
+#else
   const KSPType ksp_type;
   const PCType pc_type;
+#endif
 #else
   KSPType ksp_type;
   PCType pc_type;

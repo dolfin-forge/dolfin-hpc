@@ -48,6 +48,8 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
 				 (jp_amg_smoother_t) getSmoother(smoother),
 				 (jp_amg_cscheme_t) getCoarsening(cscheme),
 				 get("AMG theta"), 
+				 get("AMG pre-smoothing steps"),
+				 get("AMG post-smoothing steps"),
 				 get("AMG levels"),
 				 get("AMG maximum iterations"),
 				 get("AMG relative tolerance"));
@@ -82,8 +84,12 @@ int JANPACKAMGSolver::getSmoother(MultigridSmoother smoother) const
     return JP_AMG_JACOBI;
   case mg_gauss_seidel:
     return JP_AMG_GAUSS_SEIDEL;
+  case mg_cf_gauss_seidel:
+    return JP_AMG_CF_GAUSS_SEIDEL;
   case mg_sor:
     return JP_AMG_SOR;
+  case mg_cf_sor:
+    return JP_AMG_CF_SOR;
   default:
     warning("Requested Multigrid smoother unknown. Using Gauss-Seidel.");
     return JP_AMG_GAUSS_SEIDEL;

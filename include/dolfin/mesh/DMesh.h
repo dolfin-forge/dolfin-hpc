@@ -122,7 +122,8 @@ namespace dolfin
     ///
     /// An optional mapping between old and new indices is generated. The Arrays
     /// have to have the size of the old numbering
-    void number( Array<int> *old2new_cells=0, Array<int> *old2new_vertices=0 );
+    void number( Array<int> *old2new_cells=0, 
+		 Array<int> *old2new_vertices=0 );
 
     /// Bisect cell dcell
     ///

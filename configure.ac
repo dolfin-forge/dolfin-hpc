@@ -309,12 +309,12 @@ Package features:
   PETSc: ${with_petsc}
   JANPACK: ${with_janpack}
   GTS: ${with_gts}
+  LIBGEOM: ${with_libgeom}
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
-  LIBGEOM: ${with_libgeom}
 
 
 ---------------------------------------------------------

@@ -8,8 +8,6 @@
 // First added:  2006-05-09
 // Last changed: 2013-03-22
 
-#include <sstream>
-
 #include <dolfin/io/File.h>
 #include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/UniformMeshRefinement.h>
@@ -29,28 +27,41 @@
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
 
-using namespace dolfin;
+#include <sstream>
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-Mesh::Mesh()
-  : Variable("mesh", "DOLFIN mesh"), _data(0), _cell_type(0), _ordered(false)
+Mesh::Mesh() :
+    Variable("mesh", "DOLFIN mesh"),
+    _data(0),
+    _cell_type(0),
+    _ordered(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(const Mesh& mesh)
-  : Variable("mesh", "DOLFIN mesh"), _data(0), _cell_type(0), _ordered(false)
+Mesh::Mesh(const Mesh& mesh) :
+    Variable("mesh", "DOLFIN mesh"),
+    _data(0),
+    _cell_type(0),
+    _ordered(false)
 {
   *this = mesh;
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(std::string filename)
-  : Variable("mesh", "DOLFIN mesh"), _data(0), _cell_type(0), _ordered(false)
+Mesh::Mesh(std::string filename) :
+    Variable("mesh", "DOLFIN mesh"),
+    _data(0),
+    _cell_type(0),
+    _ordered(false)
 {
   File file(filename);
   file >> *this;
-  
-  if( MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial")) {
+
+  if (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
+  {
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);
@@ -70,10 +81,10 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
   _topology = mesh._topology;
   _geometry = mesh._geometry;
   _distdata = mesh._distdata;
-  
+
   if (mesh._cell_type)
     _cell_type = CellType::create(mesh._cell_type->cellType());
-  
+
   rename(mesh.name(), mesh.label());
 
   return *this;
@@ -139,10 +150,10 @@ void Mesh::refine()
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
-		  bool load_balance)
+                  bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-                                                 refine_boundary, load_balance);
+      refine_boundary, load_balance);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen()
@@ -153,15 +164,15 @@ void Mesh::coarsen()
   MeshFunction<bool> cell_marker(*this);
   cell_marker.init(this->topology().dim());
   for (CellIterator c(*this); !c.end(); ++c)
-    cell_marker.set(c->index(),true);
+    cell_marker.set(c->index(), true);
 
-  LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this,cell_marker);
+  LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_marker);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary)
 {
   LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_markers,
-                                                 coarsen_boundary);
+      coarsen_boundary);
 }
 //-----------------------------------------------------------------------------
 void Mesh::move(Mesh& boundary, ALEType method)
@@ -169,7 +180,7 @@ void Mesh::move(Mesh& boundary, ALEType method)
   ALE::move(*this, boundary, method);
 }
 //-----------------------------------------------------------------------------
-void Mesh::smooth() 
+void Mesh::smooth()
 {
   MeshSmoothing::smooth(*this);
 }
@@ -179,7 +190,7 @@ void Mesh::partition(MeshFunction<uint>& partitions)
   MeshPartition::partition(*this, partitions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::partition(MeshFunction<uint>& partitions,MeshFunction<uint>& weight)
+void Mesh::partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight)
 {
   MeshPartition::partition(*this, partitions, weight);
 }
@@ -200,36 +211,35 @@ void Mesh::distribute(MeshFunction<uint>& distribution)
   MPIMeshCommunicator::distribute(*this, distribution);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution, 
-		      MeshFunction<bool>& cell_markers,
-		      MeshFunction<bool>& new_cell_markers)
+void Mesh::distribute(MeshFunction<uint>& distribution,
+                      MeshFunction<bool>& cell_markers,
+                      MeshFunction<bool>& new_cell_markers)
 {
-  MPIMeshCommunicator::distribute(*this, distribution, 
-				  cell_markers, new_cell_markers);
+  MPIMeshCommunicator::distribute(*this, distribution, cell_markers,
+      new_cell_markers);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution, 
-          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          >& cell_functions)
+void Mesh::distribute(
+    MeshFunction<uint>& distribution,
+    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution, 
-          Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-          >& vertex_functions)
+void Mesh::distribute(
+    MeshFunction<uint>& distribution,
+    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution, 
-          Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          >& cell_functions, 
-          Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-          >& vertex_functions)
+void Mesh::distribute(
+    MeshFunction<uint>& distribution,
+    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
 {
-  MPIMeshCommunicator::distribute(*this, distribution, 
-          cell_functions, vertex_functions);
+  MPIMeshCommunicator::distribute(*this, distribution, cell_functions,
+      vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::renumber()
@@ -240,11 +250,11 @@ void Mesh::renumber()
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash()
 {
-	std::stringstream ss;
-	ss << "Mesh@" << this << "C" << this->numCells() << "V" << this->numVertices();
-	return ss.str();
+  std::stringstream ss;
+  ss << "Mesh@" << this << "C" << this->numCells() << "V"
+      << this->numVertices();
+  return ss.str();
 }
-
 
 //-----------------------------------------------------------------------------
 void Mesh::disp() const
@@ -274,7 +284,7 @@ void Mesh::disp() const
     cout << endl;
     _data->disp();
   }
-  
+
   // End indentation
   end();
 }
@@ -282,19 +292,17 @@ void Mesh::disp() const
 std::string Mesh::str() const
 {
   std::ostringstream stream;
-  stream << "[Mesh of topological dimension "
-         << topology().dim()
-         << " with "
-         << numVertices()
-         << " and "
-         << numCells()
-         << " cells]";
+  stream << "[Mesh of topological dimension " << topology().dim() << " with "
+      << numVertices() << " and " << numCells() << " cells]";
   return stream.str();
 }
 //-----------------------------------------------------------------------------
-dolfin::LogStream& dolfin::operator<< (LogStream& stream, const Mesh& mesh)
+LogStream& operator<<(LogStream& stream, const Mesh& mesh)
 {
   stream << mesh.str();
   return stream;
 }
 //-----------------------------------------------------------------------------
+
+}
+

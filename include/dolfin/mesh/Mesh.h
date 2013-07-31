@@ -24,43 +24,40 @@
 namespace dolfin
 {
 
-  
-  template <class T> class MeshFunction;
-  class MeshData;
+template<class T> class MeshFunction;
+class MeshData;
 
-  /// A Mesh consists of a set of connected and numbered mesh entities.
-  ///
-  /// Both the representation and the interface are dimension-independent,
-  /// but a concrete interface is also provided for standard named mesh
-  /// entities:
-  ///
-  ///     Entity  Dimension  Codimension
-  ///
-  ///     Vertex      0           -
-  ///     Edge        1           -
-  ///     Face        2           -
-  ///
-  ///     Facet       -           1
-  ///     Cell        -           0
-  ///
-  /// When working with mesh iterators, all entities and connectivity
-  /// are precomputed automatically the first time an iterator is
-  /// created over any given topological dimension or connectivity.
-  ///
-  /// Note that for efficiency, only entities of dimension zero
-  /// (vertices) and entities of the maximal dimension (cells) exist
-  /// when creating a Mesh. Other entities must be explicitly created
-  /// by calling init(). For example, all edges in a mesh may be created
-  /// by a call to mesh.init(1). Similarly, connectivities such as
-  /// all edges connected to a given vertex must also be explicitly
-  /// created (in this case by a call to mesh.init(0, 1)).
+/// A Mesh consists of a set of connected and numbered mesh entities.
+///
+/// Both the representation and the interface are dimension-independent,
+/// but a concrete interface is also provided for standard named mesh
+/// entities:
+///
+///     Entity  Dimension  Codimension
+///
+///     Vertex      0           -
+///     Edge        1           -
+///     Face        2           -
+///
+///     Facet       -           1
+///     Cell        -           0
+///
+/// When working with mesh iterators, all entities and connectivity
+/// are precomputed automatically the first time an iterator is
+/// created over any given topological dimension or connectivity.
+///
+/// Note that for efficiency, only entities of dimension zero
+/// (vertices) and entities of the maximal dimension (cells) exist
+/// when creating a Mesh. Other entities must be explicitly created
+/// by calling init(). For example, all edges in a mesh may be created
+/// by a call to mesh.init(1). Similarly, connectivities such as
+/// all edges connected to a given vertex must also be explicitly
+/// created (in this case by a call to mesh.init(0, 1)).
 
-  
-  class Mesh : public Variable
-  {
+class Mesh: public Variable
+{
   public:
 
-    
     /// Create empty mesh
     Mesh();
 
@@ -70,7 +67,6 @@ namespace dolfin
     /// Create mesh from data file
     Mesh(std::string filename);
 
-    
     /// Destructor
     ~Mesh();
 
@@ -78,62 +74,61 @@ namespace dolfin
     const Mesh& operator=(const Mesh& mesh);
 
     /// Return number of vertices
-    inline uint numVertices() const { return _topology.size(0); }
+    uint numVertices() const;
 
     /// Return number of edges
-    inline uint numEdges() const { return _topology.size(1); }
+    uint numEdges() const;
 
     /// Return number of faces
-    inline uint numFaces() const { return _topology.size(2); }
+    uint numFaces() const;
 
     /// Return number of facets
-    inline uint numFacets() const { return _topology.size(_topology.dim() - 1); }
+    uint numFacets() const;
 
     /// Return number of cells
-    inline uint numCells() const { return _topology.size(_topology.dim()); }
+    uint numCells() const;
 
     /// Return coordinates of all vertices
-    inline real* coordinates() { return _geometry.x(); }
+    real* coordinates();
 
     /// Return coordinates of all vertices
-    inline const real* coordinates() const { return _geometry.x(); }
+    const real* coordinates() const;
 
     /// Return connectivity for all cells
-    inline uint* cells() { return _topology(_topology.dim(), 0)(); }
+    uint* cells();
 
     /// Return connectivity for all cells
-    inline const uint* cells() const { return _topology(_topology.dim(), 0)(); }
+    const uint* cells() const;
 
     /// Return number of entities of given topological dimension
-    inline uint size(uint dim) const { return _topology.size(dim); }
+    uint size(uint dim) const;
 
-    
     /// Return mesh topology (non-const version)
-    inline MeshTopology& topology() { return _topology; }
+    MeshTopology& topology();
 
     /// Return mesh topology (const version)
-    inline const MeshTopology& topology() const { return _topology; }
+    const MeshTopology& topology() const;
 
     /// Return mesh geometry (non-const version)
-    inline MeshGeometry& geometry() { return _geometry; }
+    MeshGeometry& geometry();
 
     /// Return mesh geometry (const version)
-    inline const MeshGeometry& geometry() const { return _geometry; }
+    const MeshGeometry& geometry() const;
 
     /// Return mesh distribution data
-    inline MeshDistributedData& distdata() { return _distdata; }
+    MeshDistributedData& distdata();
 
     /// Return mesh distribution data (const version)
-    const inline MeshDistributedData& distdata() const { return _distdata; }
+    const MeshDistributedData& distdata() const;
 
     /// Return mesh data
     MeshData& data();
 
     /// Return mesh cell type
-    inline CellType& type() { dolfin_assert(_cell_type); return *_cell_type; }
+    CellType& type();
 
     /// Return mesh cell type
-    inline const CellType& type() const { dolfin_assert(_cell_type); return *_cell_type; }
+    const CellType& type() const;
 
     /// Compute entities of given topological dimension and return number of entities
     uint init(uint dim);
@@ -158,22 +153,21 @@ namespace dolfin
 
     /// Refine mesh according to cells marked for refinement
     void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
-		bool load_balance = true);
+                bool load_balance = true);
 
     /// Coarsen mesh uniformly
     void coarsen();
 
     /// Coarsen mesh according to cells marked for coarsening
-    void coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary = false);
+    void coarsen(MeshFunction<bool>& cell_markers,
+                 bool coarsen_boundary = false);
 
     /// Move coordinates of mesh according to new boundary coordinates
-    void move(Mesh& boundary, ALEType method=lagrange);
+    void move(Mesh& boundary, ALEType method = lagrange);
 
-    
-    /// Smooth mesh using Lagrangian mesh smoothing 
+    /// Smooth mesh using Lagrangian mesh smoothing
     void smooth();
 
-    
     /// Partition mesh into num_processes partitions
     void partition(MeshFunction<uint>& partitions);
 
@@ -186,28 +180,27 @@ namespace dolfin
     /// Partition mesh into num_partitions = numProc
     void partition_geom(MeshFunction<uint>& partitions);
 
-    
     /// Distribute a mesh according to a mesh function
     void distribute(MeshFunction<uint>& distribution);
 
     /// Distribute a mesh according to a mesh function and transfer marked cells
-    void distribute(MeshFunction<uint>& distribution, 
+    void distribute(MeshFunction<uint>& distribution,
                     MeshFunction<bool>& cell_markers,
                     MeshFunction<bool>& new_cell_markers);
 
     /// Distribute a mesh according to a mesh function and transfer cell functions
     ///
     /// cell_functions contains pairs as <old_function,new_function>
-    void distribute(MeshFunction<uint>& distribution, 
-                    Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-                    >& cell_functions);
+    void distribute(
+        MeshFunction<uint>& distribution,
+        Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
 
     /// Distribute a mesh according to a mesh function and transfer vertex functions
     ///
     /// vertex_functions contains pairs as <old_function,new_function>
-    void distribute(MeshFunction<uint>& distribution, 
-                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-                    >& vertex_functions);
+    void distribute(
+        MeshFunction<uint>& distribution,
+        Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
     /// Distribute a mesh according to a mesh function and transfer cell and
     /// vertex functions
@@ -215,11 +208,10 @@ namespace dolfin
     /// cell_functions contains pairs as <old_function,new_function>
     ///
     /// vertex_functions contains pairs as <old_function,new_function>
-    void distribute(MeshFunction<uint>& distribution, 
-                    Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-                    >& cell_functions,
-                    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-                    >& vertex_functions);
+    void distribute(
+        MeshFunction<uint>& distribution,
+        Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+        Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
     /// Renumber mesh global numbering
     void renumber();
@@ -234,9 +226,8 @@ namespace dolfin
     std::string str() const;
 
     /// Output
-    friend LogStream& operator<< (LogStream& stream, const Mesh& mesh);
+    friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
 
-    
   private:
 
     // Friends
@@ -263,7 +254,121 @@ namespace dolfin
     /// Distribued Mesh data
     MeshDistributedData _distdata;
 
-  };
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::numVertices() const
+{
+  return _topology.size(0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::numEdges() const
+{
+  return _topology.size(1);
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::numFaces() const
+{
+  return _topology.size(2);
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::numFacets() const
+{
+  return _topology.size(_topology.dim() - 1);
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::numCells() const
+{
+  return _topology.size(_topology.dim());
+}
+
+//-----------------------------------------------------------------------------
+inline real* Mesh::coordinates()
+{
+  return _geometry.x();
+}
+
+//-----------------------------------------------------------------------------
+inline const real* Mesh::coordinates() const
+{
+  return _geometry.x();
+}
+
+//-----------------------------------------------------------------------------
+inline uint* Mesh::cells()
+{
+  return _topology(_topology.dim(), 0)();
+}
+
+//-----------------------------------------------------------------------------
+inline const uint* Mesh::cells() const
+{
+  return _topology(_topology.dim(), 0)();
+}
+
+//-----------------------------------------------------------------------------
+inline uint Mesh::size(uint dim) const
+{
+  return _topology.size(dim);
+}
+
+//-----------------------------------------------------------------------------
+inline MeshTopology& Mesh::topology()
+{
+  return _topology;
+}
+
+//-----------------------------------------------------------------------------
+inline const MeshTopology& Mesh::topology() const
+{
+  return _topology;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshGeometry& Mesh::geometry()
+{
+  return _geometry;
+}
+
+//-----------------------------------------------------------------------------
+inline const MeshGeometry& Mesh::geometry() const
+{
+  return _geometry;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshDistributedData& Mesh::distdata()
+{
+  return _distdata;
+}
+
+//-----------------------------------------------------------------------------
+const inline MeshDistributedData& Mesh::distdata() const
+{
+  return _distdata;
+}
+
+//-----------------------------------------------------------------------------
+inline CellType& Mesh::type()
+{
+  dolfin_assert(_cell_type);
+  return *_cell_type;
+}
+
+//-----------------------------------------------------------------------------
+inline const CellType& Mesh::type() const
+{
+  dolfin_assert(_cell_type);
+  return *_cell_type;
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

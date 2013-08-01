@@ -56,203 +56,203 @@ class MeshData;
 
 class Mesh: public Variable
 {
-  public:
 
-    /// Create empty mesh
-    Mesh();
+  // Friends
+  friend class MeshEditor;
+  friend class TopologyComputation;
+  friend class MeshOrdering;
+  friend class MPIMeshCommunicator;
 
-    /// Copy constructor
-    Mesh(const Mesh& mesh);
+public:
 
-    /// Create mesh from data file
-    Mesh(std::string filename);
+  /// Create empty mesh
+  Mesh();
 
-    /// Destructor
-    ~Mesh();
+  /// Copy constructor
+  Mesh(const Mesh& mesh);
 
-    /// Assignment
-    const Mesh& operator=(const Mesh& mesh);
+  /// Create mesh from data file
+  Mesh(std::string filename);
 
-    /// Return number of vertices
-    uint numVertices() const;
+  /// Destructor
+  ~Mesh();
 
-    /// Return number of edges
-    uint numEdges() const;
+  /// Assignment
+  const Mesh& operator=(const Mesh& mesh);
 
-    /// Return number of faces
-    uint numFaces() const;
+  /// Return number of vertices
+  uint numVertices() const;
 
-    /// Return number of facets
-    uint numFacets() const;
+  /// Return number of edges
+  uint numEdges() const;
 
-    /// Return number of cells
-    uint numCells() const;
+  /// Return number of faces
+  uint numFaces() const;
 
-    /// Return coordinates of all vertices
-    real* coordinates();
+  /// Return number of facets
+  uint numFacets() const;
 
-    /// Return coordinates of all vertices
-    const real* coordinates() const;
+  /// Return number of cells
+  uint numCells() const;
 
-    /// Return connectivity for all cells
-    uint* cells();
+  /// Return coordinates of all vertices
+  real* coordinates();
 
-    /// Return connectivity for all cells
-    const uint* cells() const;
+  /// Return coordinates of all vertices
+  const real* coordinates() const;
 
-    /// Return number of entities of given topological dimension
-    uint size(uint dim) const;
+  /// Return connectivity for all cells
+  uint* cells();
 
-    /// Return mesh topology (non-const version)
-    MeshTopology& topology();
+  /// Return connectivity for all cells
+  const uint* cells() const;
 
-    /// Return mesh topology (const version)
-    const MeshTopology& topology() const;
+  /// Return number of entities of given topological dimension
+  uint size(uint dim) const;
 
-    /// Return mesh geometry (non-const version)
-    MeshGeometry& geometry();
+  /// Return mesh topology (non-const version)
+  MeshTopology& topology();
 
-    /// Return mesh geometry (const version)
-    const MeshGeometry& geometry() const;
+  /// Return mesh topology (const version)
+  const MeshTopology& topology() const;
 
-    /// Return mesh distribution data
-    MeshDistributedData& distdata();
+  /// Return mesh geometry (non-const version)
+  MeshGeometry& geometry();
 
-    /// Return mesh distribution data (const version)
-    const MeshDistributedData& distdata() const;
+  /// Return mesh geometry (const version)
+  const MeshGeometry& geometry() const;
 
-    /// Return mesh data
-    MeshData& data();
+  /// Return mesh distribution data
+  MeshDistributedData& distdata();
 
-    /// Return mesh cell type
-    CellType& type();
+  /// Return mesh distribution data (const version)
+  const MeshDistributedData& distdata() const;
 
-    /// Return mesh cell type
-    const CellType& type() const;
+  /// Return mesh data
+  MeshData& data();
 
-    /// Compute entities of given topological dimension and return number of entities
-    uint init(uint dim);
+  /// Return mesh cell type
+  CellType& type();
 
-    /// Compute connectivity between given pair of dimensions
-    void init(uint d0, uint d1);
+  /// Return mesh cell type
+  const CellType& type() const;
 
-    /// Compute all entities and connectivity
-    void init();
+  /// Compute entities of given topological dimension and return number of entities
+  uint init(uint dim);
 
-    /// Clear all mesh data
-    void clear();
+  /// Compute connectivity between given pair of dimensions
+  void init(uint d0, uint d1);
 
-    /// Order all mesh entities (not needed if "mesh order entities" is set)
-    void order();
+  /// Compute all entities and connectivity
+  void init();
 
-    /// Return true iff topology is ordered according to the UFC numbering
-    bool ordered() const;
+  /// Clear all mesh data
+  void clear();
 
-    /// Refine mesh uniformly
-    void refine();
+  /// Order all mesh entities (not needed if "mesh order entities" is set)
+  void order();
 
-    /// Refine mesh according to cells marked for refinement
-    void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
-                bool load_balance = true);
+  /// Return true iff topology is ordered according to the UFC numbering
+  bool ordered() const;
 
-    /// Coarsen mesh uniformly
-    void coarsen();
+  /// Refine mesh uniformly
+  void refine();
 
-    /// Coarsen mesh according to cells marked for coarsening
-    void coarsen(MeshFunction<bool>& cell_markers,
-                 bool coarsen_boundary = false);
+  /// Refine mesh according to cells marked for refinement
+  void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
+              bool load_balance = true);
 
-    /// Move coordinates of mesh according to new boundary coordinates
-    void move(Mesh& boundary, ALEType method = lagrange);
+  /// Coarsen mesh uniformly
+  void coarsen();
 
-    /// Smooth mesh using Lagrangian mesh smoothing
-    void smooth();
+  /// Coarsen mesh according to cells marked for coarsening
+  void coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary = false);
 
-    /// Partition mesh into num_processes partitions
-    void partition(MeshFunction<uint>& partitions);
+  /// Move coordinates of mesh according to new boundary coordinates
+  void move(Mesh& boundary, ALEType method = lagrange);
 
-    /// Partition mesh into num_partitions partitions
-    void partition(MeshFunction<uint>& partitions, uint num_partitions);
+  /// Smooth mesh using Lagrangian mesh smoothing
+  void smooth();
 
-    /// Partition mesh into num_partitions = numProc with weights on vertices
-    void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
+  /// Partition mesh into num_processes partitions
+  void partition(MeshFunction<uint>& partitions);
 
-    /// Partition mesh into num_partitions = numProc
-    void partition_geom(MeshFunction<uint>& partitions);
+  /// Partition mesh into num_partitions partitions
+  void partition(MeshFunction<uint>& partitions, uint num_partitions);
 
-    /// Distribute a mesh according to a mesh function
-    void distribute(MeshFunction<uint>& distribution);
+  /// Partition mesh into num_partitions = numProc with weights on vertices
+  void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
 
-    /// Distribute a mesh according to a mesh function and transfer marked cells
-    void distribute(MeshFunction<uint>& distribution,
-                    MeshFunction<bool>& cell_markers,
-                    MeshFunction<bool>& new_cell_markers);
+  /// Partition mesh into num_partitions = numProc
+  void partition_geom(MeshFunction<uint>& partitions);
 
-    /// Distribute a mesh according to a mesh function and transfer cell functions
-    ///
-    /// cell_functions contains pairs as <old_function,new_function>
-    void distribute(
-        MeshFunction<uint>& distribution,
-        Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
+  /// Distribute a mesh according to a mesh function
+  void distribute(MeshFunction<uint>& distribution);
 
-    /// Distribute a mesh according to a mesh function and transfer vertex functions
-    ///
-    /// vertex_functions contains pairs as <old_function,new_function>
-    void distribute(
-        MeshFunction<uint>& distribution,
-        Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+  /// Distribute a mesh according to a mesh function and transfer marked cells
+  void distribute(MeshFunction<uint>& distribution,
+                  MeshFunction<bool>& cell_markers,
+                  MeshFunction<bool>& new_cell_markers);
 
-    /// Distribute a mesh according to a mesh function and transfer cell and
-    /// vertex functions
-    ///
-    /// cell_functions contains pairs as <old_function,new_function>
-    ///
-    /// vertex_functions contains pairs as <old_function,new_function>
-    void distribute(
-        MeshFunction<uint>& distribution,
-        Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-        Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+  /// Distribute a mesh according to a mesh function and transfer cell functions
+  ///
+  /// cell_functions contains pairs as <old_function,new_function>
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
 
-    /// Renumber mesh global numbering
-    void renumber();
+  /// Distribute a mesh according to a mesh function and transfer vertex functions
+  ///
+  /// vertex_functions contains pairs as <old_function,new_function>
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
-    /// Return hash to identify the state of the mesh
-    std::string const hash();
+  /// Distribute a mesh according to a mesh function and transfer cell and
+  /// vertex functions
+  ///
+  /// cell_functions contains pairs as <old_function,new_function>
+  ///
+  /// vertex_functions contains pairs as <old_function,new_function>
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
-    /// Display mesh data
-    void disp() const;
+  /// Renumber mesh global numbering
+  void renumber();
 
-    /// Return a short desriptive string
-    std::string str() const;
+  /// Return hash to identify the state of the mesh
+  std::string const hash();
 
-    /// Output
-    friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
+  /// Display mesh data
+  void disp() const;
 
-  private:
+  /// Return a short desriptive string
+  std::string str() const;
 
-    // Friends
-    friend class MeshEditor;
-    friend class TopologyComputation;
-    friend class MeshOrdering;
-    friend class MPIMeshCommunicator;
+  /// Output
+  friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
 
-    // Mesh topology
-    MeshTopology _topology;
+private:
 
-    // Mesh geometry
-    MeshGeometry _geometry;
+  // Mesh topology
+  MeshTopology _topology;
 
-    // Auxiliary mesh data
-    MeshData* _data;
+  // Mesh geometry
+  MeshGeometry _geometry;
 
-    // Cell type
-    CellType* _cell_type;
+  // Auxiliary mesh data
+  MeshData* _data;
 
-    /// Return true iff topology is ordered according to the UFC numbering
-    bool _ordered;
+  // Cell type
+  CellType* _cell_type;
 
-    /// Distribued Mesh data
-    MeshDistributedData _distdata;
+  /// Return true iff topology is ordered according to the UFC numbering
+  bool _ordered;
+
+  /// Distribued Mesh data
+  MeshDistributedData _distdata;
 
 };
 

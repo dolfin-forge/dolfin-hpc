@@ -22,10 +22,8 @@ void dolfin::dolfin_init(int argc, char* argv[])
   MPI::initComm();
 #endif
 
-#ifndef HAVE_JANPACK
 #ifdef HAVE_PETSC 
   SubSystemsManager::initPETSc(argc, argv);
-#endif
 #endif
 
 

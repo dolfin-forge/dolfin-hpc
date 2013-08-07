@@ -23,7 +23,6 @@ STLFile::~STLFile()
 //-----------------------------------------------------------------------------
 void STLFile::operator>>(Mesh& mesh)
 {
-
   char hdr[80];
   float data[3];
   uint ntri, v_index, c_index, index[3];
@@ -52,16 +51,13 @@ void STLFile::operator>>(Mesh& mesh)
       V.v2 = (double) data[1];
       V.v3 = (double) data[2];
       
-      if (vertices.find(V) == vertices.end()) {
+      if (vertices.find(V) != vertices.end()) 
+	index[j] = vertices.find(V)->index;
+      else {
 	V.index = v_index++;
 	index[j] = V.index;
 	vertices.insert(V);
-
-	editor.addVertex(V.index, V.v1, V.v2, V.v3);
       }	
-      else {
-	index[j] = vertices.find(V)->index;
-      }
     }
 
     editor.addCell(c_index++, index[0], index[1], index[2]);
@@ -69,6 +65,12 @@ void STLFile::operator>>(Mesh& mesh)
     /* Aux data */
     fp.read((char *)&hdr, 2*sizeof(char));
   }
+
+  editor.initVertices(vertices.size());
+  for (std::set<stl_vertex>::iterator it = vertices.begin(); 
+       it != vertices.end(); ++it)
+    editor.addVertex(it->index, it->v1, it->v2, it->v3);
+
   fp.close();
   editor.close();
 

@@ -32,7 +32,9 @@ namespace dolfin
 
       bool operator < (const stl_vertex& v) const
       {
-	return v1 < v.v1;
+	return (v1 < v.v1 || 
+		(v1 == v.v1 && 
+		 (v2 < v.v2 || (v2 == v.v2 && v3 < v.v3))));
       }
       
       bool operator == (const stl_vertex& v) const

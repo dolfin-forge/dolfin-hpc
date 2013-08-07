@@ -9,6 +9,7 @@
 #include <dolfin/common/types.h>
 #include "GenericFile.h"
 
+
 namespace dolfin
 {
   
@@ -21,6 +22,26 @@ namespace dolfin
 
     // Input
     void operator>> (Mesh& mesh);    
+
+  private:
+    
+    struct stl_vertex
+    {
+      double v1, v2, v3;
+      dolfin::uint index;
+
+      bool operator < (const stl_vertex& v) const
+      {
+	return v1 < v.v1;
+      }
+      
+      bool operator == (const stl_vertex& v) const
+      {
+	return (v1 == v.v1 && 
+		v2 == v.v2 &&
+		v3 == v.v3);
+      }
+    };        
 
   };
   

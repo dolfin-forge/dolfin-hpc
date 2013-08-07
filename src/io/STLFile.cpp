@@ -6,6 +6,7 @@
 #include <fstream>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/io/STLFile.h>
+#include <set>
 
 using namespace dolfin;
 
@@ -25,8 +26,9 @@ void STLFile::operator>>(Mesh& mesh)
 
   char hdr[80];
   float data[3];
-  uint ntri;
-
+  uint ntri, v_index, c_index, index[3];
+  struct stl_vertex V;
+  std::set<stl_vertex> vertices;
 
   std::ifstream fp(filename.c_str(), std::ifstream::binary);
   fp.read((char *)&hdr, 80*sizeof(char));
@@ -34,32 +36,42 @@ void STLFile::operator>>(Mesh& mesh)
   
   MeshEditor editor;
   editor.open(mesh, CellType::triangle, 2, 3);  
-  editor.close();
+  editor.initCells(ntri);
 
-  printf("%d ntris\n", ntri);
+  
+
+  v_index = c_index = 0;
   for (uint i = 0; i < ntri; i++) {    
     /* Normal */
     fp.read((char *)&data, 3*sizeof(float)); 
 
-    /* Vertex v1 v2 v3 */
-    fp.read((char *)&data, 3*sizeof(float));
-    printf("%g %g %g\n", data[0], data[1], data[2]);
-    fp.read((char *)&data, 3*sizeof(float));
-    fp.read((char *)&data, 3*sizeof(float));
+    for (uint j = 0; j < 3; j++) {
+      /* Vertex v1 v2 v3 */
+      fp.read((char *)&data, 3*sizeof(float));
+      V.v1 = (double) data[0];
+      V.v2 = (double) data[1];
+      V.v3 = (double) data[2];
+      
+      if (vertices.find(V) == vertices.end()) {
+	V.index = v_index++;
+	index[j] = V.index;
+	vertices.insert(V);
 
+	editor.addVertex(V.index, V.v1, V.v2, V.v3);
+      }	
+      else {
+	index[j] = vertices.find(V)->index;
+      }
+    }
+
+    editor.addCell(c_index++, index[0], index[1], index[2]);
+    
     /* Aux data */
     fp.read((char *)&hdr, 2*sizeof(char));
-    /*
-      REAL32[3] Normal vector
-      REAL32[3]  Vertex 1
-      REAL32[3]  Vertex 2
-      REAL32[3]  Vertex 3
-      UINT16  Attribute byte count
-    */
   }
-
-
   fp.close();
+  editor.close();
+
 }
 //-----------------------------------------------------------------------------
 

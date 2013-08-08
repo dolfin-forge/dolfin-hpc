@@ -1,8 +1,10 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson 2013.
+//
 // First added:  2007-04-10
-// Last changed: 2007-08-20
+// Last changed: 2013-08-08
 
 #ifndef __SUB_DOMAIN_H
 #define __SUB_DOMAIN_H
@@ -14,6 +16,9 @@
 namespace dolfin
 {
 
+
+  class IntersectionDetector;
+
   /// This class defines the interface for definition of sub domains.
   /// Alternatively, sub domains may be defined by a Mesh and a
   /// MeshFunction<uint> over the mesh.
@@ -24,6 +29,8 @@ namespace dolfin
 
     /// Constructor
     SubDomain();
+
+    SubDomain(Mesh& bmesh);
 
     /// Destructor
     virtual ~SubDomain();
@@ -42,6 +49,14 @@ namespace dolfin
     
     /// Set sub domain markers for given sub domain
     void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
+
+  private:
+
+    bool intersect(real* x, uint dim) const;
+    bool intersect(Point p) const;
+
+    /// Intersection detector
+    mutable IntersectionDetector* intersection_detector;
 
   };
 

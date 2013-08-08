@@ -12,6 +12,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/GlobalFacetMap.h>
+#include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
 
@@ -22,14 +23,20 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain()
+SubDomain::SubDomain() : intersection_detector(0)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+SubDomain::SubDomain(Mesh& bmesh) 
+{
+  intersection_detector = new IntersectionDetector(bmesh);
+}
+//-----------------------------------------------------------------------------
 SubDomain::~SubDomain()
 {
-  // Do nothing
+  if (intersection_detector)
+    delete intersection_detector;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::inside(const real* x, bool on_boundary) const
@@ -41,6 +48,24 @@ bool SubDomain::inside(const real* x, bool on_boundary) const
 void SubDomain::map(const real* x, real* y) const
 {
   error("Mapping between subdomains missing for periodic boundary conditions, function map() not implemented by user.");
+}
+//-----------------------------------------------------------------------------
+bool SubDomain::intersect(real* x, uint dim) const
+{
+  Point p;
+  for (uint i = 0; i < dim; i++)
+    p[i] = x[i];
+  
+  return intersect(p);
+}
+//-----------------------------------------------------------------------------
+bool SubDomain::intersect(Point p) const
+{
+
+  Array<uint> cells;
+  intersection_detector->overlap(p, cells);
+  
+  return (cells.size() > 0);
 }
 //-----------------------------------------------------------------------------
 void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
@@ -97,21 +122,37 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
       {
         simple_array<real> x(mesh.geometry().dim(), vertex->x());
-        if (!inside(x, on_boundary))
-        {
-          all_vertices_inside = false;
-          break;
-        }
+	if (intersection_detector) 
+	{
+	  if (!intersect(vertex->point())) {
+	    all_vertices_inside = false;
+	    break;
+	  }
+	}
+	else if (!inside(x, on_boundary))
+	{
+	  all_vertices_inside = false;
+	  break;
+	}
       }
     }
     // Dimension of facet == 0, so just check the vertex itself
     else
     {
 
-      simple_array<real> x(mesh.geometry().dim(), mesh.geometry().x(entity->index()));
-      if (!inside(x, on_boundary))
+      simple_array<real> x(mesh.geometry().dim(),
+			   mesh.geometry().x(entity->index()));
+      if (intersection_detector) 
       {
-        all_vertices_inside = false;	
+	if (!intersect(x.data, mesh.geometry().dim())) {
+	  all_vertices_inside = false;
+	  break;
+	}
+      }
+      else if (!inside(x, on_boundary))
+      {
+	all_vertices_inside = false;
+	break;
       }
     }
 

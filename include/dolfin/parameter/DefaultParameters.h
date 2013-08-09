@@ -139,6 +139,7 @@ add("GTS Tolerance",0.0);	// Tolerance of GTS BB
 //define size for trianlge tolerance ("is the point within this triangle?")
 add("Geometrical Tolerance Triangle",0.0); 
 add("Geometrical Tolerance Tetrahedron",0.0);
+add("SubDomain Geometrical Tolerance", 1e-6);
 
 //--- Mesh smoothing ---
 add("Mesh smoothing restricted by rmin", true);

@@ -15,6 +15,7 @@
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -71,6 +72,20 @@ bool SubDomain::intersect(Point p) const
 void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
 {
   message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
+
+  // Save GTS tolerances
+  real gts_tol = dolfin_get("GTS Tolerance");
+  real geom_tri_tol = dolfin_get("Geometrical Tolerance Triangle");
+  real geom_tet_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
+
+  if (intersection_detector) 
+  {
+    dolfin_set("GTS Tolerance",1e-6);
+    dolfin_set("Geometrical Tolerance Triangle", 
+	       dolfin_get("SubDomain Geometrical Tolerance"));
+    dolfin_set("Geometrical Tolerance Tetrahedron",
+	       dolfin_get("SubDomain Geometrical Tolerance"));
+  }
 
   // Get the dimension of the entities we are marking
   const uint dim = sub_domains.dim();
@@ -160,6 +175,11 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     if (all_vertices_inside)
       sub_domains(*entity) = sub_domain;
   }
+
+  // Reset GTS tolerances
+  dolfin_set("GTS Tolerance",gts_tol);
+  dolfin_set("Geometrical Tolerance Triangle", geom_tri_tol);
+  dolfin_set("Geometrical Tolerance Tetrahedron", geom_tet_tol);
 
 #ifdef HAVE_MPI
   if(MPI::numProcesses() > 1) {

@@ -51,22 +51,24 @@ void SubDomain::map(const real* x, real* y) const
   error("Mapping between subdomains missing for periodic boundary conditions, function map() not implemented by user.");
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::intersect(real* x, uint dim) const
+bool SubDomain::intersect(real* x, uint dim, bool on_boundary) const
 {
   Point p;
   for (uint i = 0; i < dim; i++)
     p[i] = x[i];
   
-  return intersect(p);
+  return intersect(p, on_boundary);
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::intersect(Point p) const
+bool SubDomain::intersect(Point p, bool on_boundary) const
 {
 
   Array<uint> cells;
   intersection_detector->overlap(p, cells);
-  
-  return (cells.size() > 0);
+  if (dolfin_get("SubDomain Intersect Boundary"))
+    return (cells.size() > 0) && on_boundary;
+  else
+    return (cells.size() > 0);
 }
 //-----------------------------------------------------------------------------
 void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
@@ -139,7 +141,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
         simple_array<real> x(mesh.geometry().dim(), vertex->x());
 	if (intersection_detector) 
 	{
-	  if (!intersect(vertex->point())) {
+	  if (!intersect(vertex->point(), on_boundary)) {
 	    all_vertices_inside = false;
 	    break;
 	  }
@@ -159,7 +161,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
 			   mesh.geometry().x(entity->index()));
       if (intersection_detector) 
       {
-	if (!intersect(x.data, mesh.geometry().dim())) {
+	if (!intersect(x.data, mesh.geometry().dim(), on_boundary)) {
 	  all_vertices_inside = false;
 	  break;
 	}

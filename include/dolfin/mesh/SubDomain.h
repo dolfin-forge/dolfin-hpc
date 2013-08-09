@@ -52,8 +52,8 @@ namespace dolfin
 
   private:
 
-    bool intersect(real* x, uint dim) const;
-    bool intersect(Point p) const;
+    bool intersect(real* x, uint dim, bool on_boundary) const;
+    bool intersect(Point p, bool on_boundary) const;
 
     /// Intersection detector
     mutable IntersectionDetector* intersection_detector;

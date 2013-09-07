@@ -128,6 +128,8 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   finite_element_ = sub_system.extractFiniteElement(
       *sub_function.f->finite_element_);
 
+  message("SubFunction finite element:"+finite_element_->signature());
+
   // Extract sub dof map and offset
   uint offset = 0;
   dof_map = sub_function.f->dof_map->extractDofMap(sub_system.array(), offset);
@@ -261,7 +263,10 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(real* values) const
 {
-  dolfin_assert(values);dolfin_assert(finite_element_);dolfin_assert(dof_map);dolfin_assert(scratch);
+  dolfin_assert(values);
+  dolfin_assert(finite_element_);
+  dolfin_assert(dof_map);
+  dolfin_assert(scratch);
 
   // Local data for interpolation on each cell
   CellIterator cell(mesh);
@@ -307,7 +312,10 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {
-  dolfin_assert(coefficients);dolfin_assert(this->finite_element_);dolfin_assert(this->dof_map);dolfin_assert(scratch);
+  dolfin_assert(coefficients);
+  dolfin_assert(this->finite_element_);
+  dolfin_assert(this->dof_map);
+  dolfin_assert(scratch);
   // FIXME: Better test here, compare against the local element
 
   // Check dimension

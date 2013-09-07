@@ -359,7 +359,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         curr_facet = normals_offsets[0];
         uint offset_to_update = 0;
 
-        std::cout << "Nb neighbouring cells = " << NbNeighCells << std::endl;
+        // std::cout << "Nb neighbouring cells = " << NbNeighCells << std::endl;
         for (uint curr_offset = 0;
             curr_facet < NbNeighCells && curr_offset < NbNeighCells;
             curr_facet += normals_offsets[++curr_offset])
@@ -376,7 +376,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           if (cosalpha > cosalpha_max)
           {
             // DEBUG: belongs to same plane
-            std::cout << "IN ";
+            // std::cout << "IN ";
             surfaces.insert(std::pair<uint, uint>(curr_facet, curr_surface));
 
             // add contribution to surface normal
@@ -396,14 +396,14 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           }
           else
           {
-            std::cout << "OUT ";
+            // std::cout << "OUT ";
             // found normal not belonging to the same plane
             // increase offset position then set offset value to one
             normals_offsets[offset_to_update] += normals_offsets[curr_offset]
                 - 1;
             normals_offsets[++offset_to_update] = 1;
           }
-          std::cout << std::endl;
+          // std::cout << std::endl;
         }
 
         // add surface normal to the list of surface normals
@@ -411,9 +411,9 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 
         // next loop we add a new surface and discriminate again across
         // the remaining normals
-        std::cout << remaining_normals_count << std::endl;
+        // std::cout << remaining_normals_count << std::endl;
       }
-      std::cout << "Nb of surfaces = " << curr_surface << std::endl;
+      // std::cout << "Nb of surfaces = " << curr_surface << std::endl;
       vertex_type = curr_surface;
       delete nref;
       delete normals_offsets;
@@ -443,18 +443,12 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         {
           Savrgn[d] *= invnormSavrgn;
           normal_vec[d] += Savrgn[d];
-          if (nb_surfaces == 3)
-          {
-            std::cout << Savrgn[d] << " ";
-          }
 
           if (std::abs(Savrgn[d]) < DOLFIN_EPS)
           {
             Savrgn[d] = 0.0;
           }
         }
-        if (nb_surfaces == 3)
-          std::cout << std::endl;
       }
 
       // Taken from V. John, J. Comp. and Appl. Math. 2002
@@ -463,10 +457,6 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       real normal_nrm = 0.0;
       for (uint d = 0; d < nsdim; ++d)
       {
-        if (nb_surfaces == 3)
-        {
-          std::cout << normal_vec[d] << " ";
-        }
         normal_vec[d] /= sum_weights;
         normal_nrm += normal_vec[d] * normal_vec[d];
       }
@@ -627,7 +617,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         uint index = mesh.distdata().get_local(recv_index[idx], 0);
         if (!used_shared[index])
         {
-          node_type.set(index, (int) recv_type[j]);
+          node_type.set(index, (uint) recv_type[j]);
 
           uint offset = j + 1;
           for (uint basisvec = 0; basisvec < nsdim; ++basisvec)

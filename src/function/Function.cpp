@@ -515,12 +515,10 @@ void Function::interpolate(Function const& other_func)
   {
     ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(
         this->signature());
-    DofMap * dofmap = new DofMap(DofMap::dofmap_signature(this->signature()),
-        mesh());
+    DofMap const& dofmap = this->dofmap();
 
     uint valuedim = ufcfe->value_dimension(0);
-    uint dofspercell = dofmap->local_dimension();
-    uint nodespercell = dofspercell / valuedim;
+    uint dofspercell = dofmap.local_dimension();
     uint * idx = new uint[dofspercell];
     real * block = new real[dofspercell];
     real * val = new real[valuedim];
@@ -537,17 +535,22 @@ void Function::interpolate(Function const& other_func)
     for (CellIterator cell(mesh()); !cell.end(); ++cell)
     {
       ufccell.update(*cell, mesh().distdata());
-      dofmap->tabulate_dofs(idx, ufccell, cell->index());
-      dofmap->tabulate_coordinates(dofscoords, ufccell);
+      dofmap.tabulate_dofs(idx, ufccell, cell->index());
+      dofmap.tabulate_coordinates(dofscoords, ufccell);
 
-      uint dof_id = 0;
-      for (uint vd = 0; vd < valuedim; ++vd)
+      // initial version for support of mixed elements	
+      uint const * offsets = dofmap.sub_dof_maps_offsets();
+      uint vd = 0;
+      uint cur_offset = offsets[0];
+      for (uint dof_id = 0; dof_id < dofspercell; ++dof_id)
       {
-        for (uint dof_node = 0; dof_node < nodespercell; ++dof_node, ++dof_id)
-        {
-          other_func.eval(val, dofscoords[dof_node]);
-          block[dof_id] = val[vd];
+	if(dof_id == cur_offset)
+	{
+          ++vd;
+          cur_offset = offsets[vd];
         }
+        other_func.eval(val, dofscoords[dof_id]);
+        block[dof_id] = val[vd];
       }
       this->vector().set(block, dofspercell, idx);
       this->vector().apply();
@@ -563,7 +566,6 @@ void Function::interpolate(Function const& other_func)
     delete[] dofscoords;
     delete[] block;
     delete[] idx;
-    delete dofmap;
     delete ufcfe;
   }
   else

@@ -130,8 +130,20 @@ public:
   void
   tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const;
 
+  //// Return the number of sub dof maps (for a mixed element)
+  uint num_sub_dof_maps() const;
+
+  /// Create a new dof_map for sub dof map i (for a mixed element)
+  ufc::dof_map* create_sub_dof_map(uint i) const;
+
+  /// Get sub dof maps offset (for a mixed element)
+  uint const * sub_dof_maps_offsets() const;
+
   /// Extract sub dof map
   DofMap* extractDofMap(const Array<uint>& sub_system, uint& offset) const;
+
+  /// Extract sub dof map
+  ufc::dof_map* extractUFCDofMap(const Array<uint>& sub_system, uint& offset) const;
 
   /// Return mesh associated with map
   Mesh& mesh() const;
@@ -182,6 +194,9 @@ private:
 
   // Parallel dof map
   uint* dof_map;
+
+  // Sub dof maps offsets
+  uint* sub_dof_maps_off_;
 
   //
   mutable uint* local_to_global_;
@@ -290,6 +305,21 @@ inline void DofMap::tabulate_coordinates(real** coordinates,
                                          const ufc::cell& ufc_cell) const
 {
   ufc_dof_map->tabulate_coordinates(coordinates, ufc_cell);
+}
+//-----------------------------------------------------------------------------
+inline uint DofMap::num_sub_dof_maps() const
+{
+  return ufc_dof_map->num_sub_dof_maps();
+}
+//-----------------------------------------------------------------------------
+inline ufc::dof_map* DofMap::create_sub_dof_map(uint i) const
+{
+  return ufc_dof_map->create_sub_dof_map(i);
+}
+//-----------------------------------------------------------------------------
+inline uint const * DofMap::sub_dof_maps_offsets() const
+{
+  return sub_dof_maps_off_;
 }
 
 //-----------------------------------------------------------------------------

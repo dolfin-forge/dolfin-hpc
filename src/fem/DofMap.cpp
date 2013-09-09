@@ -188,6 +188,23 @@ DofMap::~DofMap()
     delete[] v_map;
 }
 //-----------------------------------------------------------------------------
+ufc::dof_map* DofMap::extractUFCDofMap(const Array<uint>& sub_system, uint& offset) const
+{
+  // Check that dof map has not be re-ordered
+  //  if (dof_map)
+  //    error("Dof map has been re-ordered. Don't yet know how to extract sub dof maps.");
+
+  // Reset offset
+  offset = 0;
+
+  // Recursively extract sub dof map
+  ufc::dof_map* sub_dof_map = extractDofMap(*ufc_dof_map, offset, sub_system);
+  message(0, "Extracted ufc dof map for sub system: %s", sub_dof_map->signature());
+  message(0, "Offset for sub system: %d", offset);
+
+  return sub_dof_map;
+}
+//-----------------------------------------------------------------------------
 DofMap* DofMap::extractDofMap(const Array<uint>& sub_system, uint& offset) const
 {
   // Check that dof map has not be re-ordered
@@ -199,8 +216,8 @@ DofMap* DofMap::extractDofMap(const Array<uint>& sub_system, uint& offset) const
 
   // Recursively extract sub dof map
   ufc::dof_map* sub_dof_map = extractDofMap(*ufc_dof_map, offset, sub_system);
-  message(2, "Extracted dof map for sub system: %s", sub_dof_map->signature());
-  message(2, "Offset for sub system: %d", offset);
+  message(0, "Extracted dof map for sub system: %s", sub_dof_map->signature());
+  message(0, "Offset for sub system: %d", offset);
 
   if (partitions)
   {
@@ -290,6 +307,15 @@ void DofMap::init()
   }
 
   build();
+
+  // Set offset for mixed elements
+  sub_dof_maps_off_ = new uint[this->num_sub_dof_maps()];
+  for (uint i = 0; i < this->num_sub_dof_maps(); ++i)
+  {
+    ufc::dof_map * subdm = this->create_sub_dof_map(i);
+    sub_dof_maps_off_[i] = subdm->local_dimension();
+    delete subdm;
+  }
 
   local_to_global_size_ = ufc_dof_map->local_dimension() * num_cells;
   local_to_cell_size_ = ufc_dof_map->local_dimension();

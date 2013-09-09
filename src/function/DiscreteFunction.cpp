@@ -124,19 +124,23 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   // Create sub system
   SubSystem sub_system(sub_function.i);
 
-  // Extract sub element
+  // Extract sub element (return value is a newly created finite_element)
   finite_element_ = sub_system.extractFiniteElement(
       *sub_function.f->finite_element_);
-
-  message("SubFunction finite element:"+finite_element_->signature());
+  message("SubFunction finite element:"+std::string(finite_element_->signature()));
 
   // Extract sub dof map and offset
   uint offset = 0;
-  dof_map = sub_function.f->dof_map->extractDofMap(sub_system.array(), offset);
+  ufc::dof_map * ufcdofmap = sub_function.f->dof_map->extractUFCDofMap(sub_system.array(), offset);
 
-  // Create vector of dofs and copy values
-  uint const n = dof_map->global_dimension();
-  x->init(n);
+  // Token is requested by the standalone function
+    dof_map = DofMapCache::instance().acquire_dofmap(mesh, ufcdofmap->signature());
+
+  // Initialize vector, scratch space and init ghosts
+  __init();
+
+  //
+  uint const n = x->local_size();
   real* values = new real[n];
   uint* get_rows = new uint[n];
   uint* set_rows = new uint[n];
@@ -152,9 +156,6 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   delete[] values;
   delete[] get_rows;
   delete[] set_rows;
-
-  // Initialize scratch space
-  scratch = new Scratch(*finite_element_);
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :

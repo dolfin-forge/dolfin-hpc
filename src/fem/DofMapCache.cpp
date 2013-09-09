@@ -202,12 +202,14 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
 void DofMapCache::info() const
 {
 	message("Number of DofMaps in cache : %i", cache_.size());
+	message("Cache :");
 	for (dofmap_container_t::const_iterator it = cache_.begin();
 			it != cache_.end(); ++it)
 	{
 		std::cout << std::setw(128) << it->first << " : @" << it->second.dofmap
 				<< " : " << it->second.count << std::endl;
 	}
+	message("Reverse list :");
 	for (dofmap_rlist_t::const_iterator it = rlist_.begin(); it != rlist_.end();
 			++it)
 	{

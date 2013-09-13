@@ -46,6 +46,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				fem/DofMap.h\
 				fem/DofMapCache.h\
 				fem/DofMapSet.h\
+				fem/FiniteElement.h\
 				fem/Form.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\

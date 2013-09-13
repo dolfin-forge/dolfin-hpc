@@ -414,7 +414,7 @@ DofMap const& Function::dofmap() const
   return (static_cast<DiscreteFunction*>(f))->dofmap();
 }
 //-----------------------------------------------------------------------------
-ufc::finite_element const& Function::finite_element() const
+FiniteElement const& Function::finite_element() const
 {
   if (!f)
     error("Function contains no data.");
@@ -538,14 +538,14 @@ void Function::interpolate(Function const& other_func)
       dofmap.tabulate_dofs(idx, ufccell, cell->index());
       dofmap.tabulate_coordinates(dofscoords, ufccell);
 
-      // initial version for support of mixed elements	
+      // initial version for support of mixed elements
       uint const * offsets = dofmap.sub_dof_maps_offsets();
       uint vd = 0;
       uint cur_offset = offsets[0];
       for (uint dof_id = 0; dof_id < dofspercell; ++dof_id)
       {
-	if(dof_id == cur_offset)
-	{
+        if (dof_id == cur_offset)
+        {
           ++vd;
           cur_offset = offsets[vd];
         }

@@ -19,6 +19,7 @@ class Mesh;
 class Cell;
 class Form;
 class DofMap;
+class FinitElement;
 class SubFunction;
 class IntersectionDetector;
 
@@ -97,16 +98,13 @@ public:
   DofMap const& dofmap() const;
 
   /// Return finite element
-  ufc::finite_element const& finite_element() const;
+  FiniteElement const& finite_element() const;
 
   /// Get values to array
   void get(real *& values);
 
   /// Set values from array
   void set(real *& values);
-
-  /// Friends
-  friend class XMLFile;
 
 private:
 
@@ -148,10 +146,12 @@ private:
   void __init_ghosts();
 
   // The finite element
-  ufc::finite_element* finite_element_;
+  FiniteElement * finite_element_;
+  ufc::finite_element * ufc_finite_element_;
 
   // The dof map
-  DofMap* dof_map;
+  DofMap * dof_map_;
+  uint dof_map_local_dim_; // Cache it to save indirections in interpolate
 
   // Pointers to local data if owned
   bool const local_vector;
@@ -170,7 +170,8 @@ private:
 
   uint _cache_size;
   uint *_indices;
-  real *data_cache;_map<uint, uint> cache_mapping;
+  real *data_cache;
+  _map<uint, uint> cache_mapping;
 
 };
 

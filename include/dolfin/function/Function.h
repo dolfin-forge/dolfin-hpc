@@ -28,6 +28,7 @@ namespace dolfin
 
 class DofMap;
 class Expression;
+class FiniteElement;
 class Form;
 class GenericFunction;
 class GenericVector;
@@ -169,7 +170,7 @@ public:
   DofMap const& dofmap() const;
 
   /// Return the finite element space of a DiscreteFunction
-  ufc::finite_element const& finite_element() const;
+  FiniteElement const& finite_element() const;
 
   /// Get values of a DiscreteFunction from array
   void get(real *& values);

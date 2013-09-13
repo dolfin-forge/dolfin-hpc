@@ -16,13 +16,13 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/fem/Form.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofMapCache.h>
+#include <dolfin/fem/Form.h>
+#include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/function/SubFunction.h>
 #include <dolfin/function/DiscreteFunction.h>
 
@@ -38,7 +38,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
                                    uint i) :
     GenericFunction(mesh),
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(false),
     x(&x),
     intersection_detector(NULL),
@@ -55,7 +57,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
 DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
     GenericFunction(mesh),
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(true),
     x(new Vector()),
     intersection_detector(NULL),
@@ -74,7 +78,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
                                    std::string dof_map_signature) :
     GenericFunction(mesh),
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(false),
     x(&x),
     intersection_detector(NULL),
@@ -94,7 +100,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     GenericFunction(mesh),
 
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(true),
     x(new Vector()),
     intersection_detector(NULL),
@@ -111,7 +119,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     GenericFunction(sub_function.f->mesh),
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(true),
     x(new Vector()),
     intersection_detector(NULL),
@@ -125,16 +135,22 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   SubSystem sub_system(sub_function.i);
 
   // Extract sub element (return value is a newly created finite_element)
-  finite_element_ = sub_system.extractFiniteElement(
-      *sub_function.f->finite_element_);
-  message("SubFunction finite element:"+std::string(finite_element_->signature()));
+  ufc_finite_element_ = sub_function.f->finite_element_->create_sub_element(
+      sub_system.array());
+  message(
+      "SubFunction finite element:"
+          + std::string(ufc_finite_element_->signature()));
 
   // Extract sub dof map and offset
   uint offset = 0;
-  ufc::dof_map * ufcdofmap = sub_function.f->dof_map->extractUFCDofMap(sub_system.array(), offset);
+  ufc::dof_map * ufc_dof_map = sub_function.f->dof_map_->create_sub_dof_map(
+      sub_system.array(), offset);
 
   // Token is requested by the standalone function
-    dof_map = DofMapCache::instance().acquire_dofmap(mesh, ufcdofmap->signature());
+  dof_map_ = DofMapCache::instance().acquire_dofmap(mesh,
+      ufc_dof_map->signature());
+
+  delete ufc_dof_map;
 
   // Initialize vector, scratch space and init ghosts
   __init();
@@ -161,7 +177,9 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     GenericFunction(f.mesh),
     finite_element_(NULL),
-    dof_map(NULL),
+    ufc_finite_element_(NULL),
+    dof_map_(NULL),
+    dof_map_local_dim_(0),
     local_vector(true),
     x(new Vector()),
     intersection_detector(NULL),
@@ -170,7 +188,8 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     _indices(NULL),
     data_cache(NULL)
 {
-  __init(f.mesh, f.finite_element_->signature(), f.dof_map->signature());
+  __init(f.mesh, f.ufc_finite_element_->signature(),
+      f.dof_map_->signature());
 
   // Copy vector
   *x = *f.x;
@@ -180,7 +199,7 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::~DiscreteFunction()
 {
-  DofMapCache::instance().release_dofmap(*dof_map);
+  DofMapCache::instance().release_dofmap(*dof_map_);
 
   if (finite_element_)
     delete finite_element_;
@@ -203,53 +222,33 @@ DiscreteFunction::~DiscreteFunction()
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::rank() const
 {
-  dolfin_assert(finite_element_);
-  return finite_element_->value_rank();
+  dolfin_assert(ufc_finite_element_);
+  return ufc_finite_element_->value_rank();
 }
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::dim(uint i) const
 {
-  dolfin_assert(finite_element_);
-  return finite_element_->value_dimension(i);
+  dolfin_assert(ufc_finite_element_);
+  return ufc_finite_element_->value_dimension(i);
 }
 //-----------------------------------------------------------------------------
 uint DiscreteFunction::degree() const
 {
-  dolfin_assert(finite_element_);
-  uint deg = 0;
-  // Lookup signature to get degree until part of UFC 2.x interface
-  // for FiniteElement and VectorElement the token offset is 3
-  // if  the tokem offset is 3
-  char * sign = new char[128];
-  std::strcpy(sign, finite_element_->signature());
-  char * tok = std::strtok(sign, ",");
-  size_t offset = 3;
-  size_t t = 0;
-  while (tok != NULL)
-  {
-    ++t;
-    tok = std::strtok(NULL, ",");
-    if (offset == t)
-    {
-      std::stringstream d;
-      d << tok;
-      d >> deg;
-    }
-  }
-  return deg;
+  return finite_element_->degree();
 }
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::numSubFunctions() const
 {
-  dolfin_assert(finite_element_);
-  return finite_element_->num_sub_elements();
+  dolfin_assert(ufc_finite_element_);
+  return ufc_finite_element_->num_sub_elements();
 }
 //-----------------------------------------------------------------------------
 const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 {
   // Check that data matches
-  if (strcmp(finite_element_->signature(), f.finite_element_->signature()) != 0
-      || strcmp(dof_map->signature(), f.dof_map->signature()) != 0
+  if (strcmp(ufc_finite_element_->signature(),
+      f.ufc_finite_element_->signature()) != 0
+      || strcmp(dof_map_->signature(), f.dof_map_->signature()) != 0
       || x->size() != f.x->size())
   {
     error(
@@ -264,11 +263,6 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(real* values) const
 {
-  dolfin_assert(values);
-  dolfin_assert(finite_element_);
-  dolfin_assert(dof_map);
-  dolfin_assert(scratch);
-
   // Local data for interpolation on each cell
   CellIterator cell(mesh);
   UFCCell ufc_cell(*cell);
@@ -286,23 +280,26 @@ void DiscreteFunction::interpolate(real* values) const
     ufc_cell.update(*cell, mesh.distdata());
 
     // Tabulate dofs
-    //    dof_map->tabulate_dofs(scratch->dofs, ufc_cell);
+    //    dof_map_->tabulate_dofs(scratch->dofs, ufc_cell);
 
-    dof_map->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
+    dof_map_->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
 
     // Pick values from global vector
-    x->get(scratch->coefficients, dof_map->local_dimension(), scratch->dofs);
+    x->get(scratch->coefficients, dof_map_->local_dimension(), scratch->dofs);
 
     // Interpolate values at the vertices
-    finite_element_->interpolate_vertex_values(vertex_values,
+    ufc_finite_element_->interpolate_vertex_values(vertex_values,
         scratch->coefficients, ufc_cell);
 
     // Copy values to array of vertex values
     for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
+    {
       for (uint i = 0; i < scratch->size; ++i)
+      {
         values[i * mesh.numVertices() + vertex->index()] =
             vertex_values[vertex.pos() * scratch->size + i];
-
+      }
+    }
   }
 
   // Delete local data
@@ -313,25 +310,19 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {
-  dolfin_assert(coefficients);
-  dolfin_assert(this->finite_element_);
-  dolfin_assert(this->dof_map);
-  dolfin_assert(scratch);
-  // FIXME: Better test here, compare against the local element
-
   // Check dimension
-  if (finite_element.space_dimension() != dof_map->local_dimension())
+  if (finite_element.space_dimension() != dof_map_local_dim_)
     error(
         "Finite element does not match for interpolation of discrete function.");
 
   // Tabulate dofs
-  dof_map->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
+  dof_map_->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());
 
   // Pick values from global vector
 #ifdef ENABLE_FUNCTION_CACHE
   if (MPI::numProcesses() > 1)
   {
-    for (uint i = 0; i < dof_map->local_dimension(); i++)
+    for (uint i = 0; i < dof_map_local_dim_; i++)
     {
       _map<uint, uint>::const_iterator it = cache_mapping.find(scratch->dofs[i]);
       coefficients[i] = data_cache[it->second];
@@ -339,7 +330,7 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
   }
   else
 #endif
-  x->get(coefficients, dof_map->local_dimension(), scratch->dofs);
+  x->get(coefficients, dof_map_local_dim_, scratch->dofs);
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::eval(real* values, const real* x) const
@@ -379,25 +370,30 @@ void DiscreteFunction::eval(real* values, const real* x) const
   ufc_cell.update(cell, mesh.distdata());
 
   // Get expansion coefficients on cell
-  this->interpolate(scratch->coefficients, ufc_cell, *finite_element_, cell);
+  this->interpolate(scratch->coefficients, ufc_cell, *ufc_finite_element_,
+      cell);
 
   // Compute linear combination
   for (uint j = 0; j < scratch->size; j++)
-    values[j] = 0.0;
-  for (uint i = 0; i < finite_element_->space_dimension(); i++)
   {
-    finite_element_->evaluate_basis(i, scratch->values, x, ufc_cell);
+    values[j] = 0.0;
+  }
+  for (uint i = 0; i < ufc_finite_element_->space_dimension(); i++)
+  {
+    ufc_finite_element_->evaluate_basis(i, scratch->values, x, ufc_cell);
     for (uint j = 0; j < scratch->size; j++)
+    {
       values[j] += scratch->coefficients[i] * scratch->values[j];
+    }
   }
 }
 //-----------------------------------------------------------------------------
 std::string DiscreteFunction::signature() const
 {
-  if (!finite_element_)
+  if (!ufc_finite_element_)
     error("No finite element has been associated with this DiscreteFunction.");
 
-  return finite_element_->signature();
+  return ufc_finite_element_->signature();
 }
 //-----------------------------------------------------------------------------
 GenericVector& DiscreteFunction::vector() const
@@ -410,10 +406,11 @@ GenericVector& DiscreteFunction::vector() const
 //-----------------------------------------------------------------------------
 DofMap const& DiscreteFunction::dofmap() const
 {
-  return *dof_map;
+  dolfin_assert(dof_map_);
+  return *dof_map_;
 }
 //-----------------------------------------------------------------------------
-ufc::finite_element const& DiscreteFunction::finite_element() const
+FiniteElement const& DiscreteFunction::finite_element() const
 {
   dolfin_assert(finite_element_);
   return *finite_element_;
@@ -421,40 +418,32 @@ ufc::finite_element const& DiscreteFunction::finite_element() const
 //-----------------------------------------------------------------------------
 void DiscreteFunction::get(real *& values)
 {
-  if(!values)
+  if (!values)
   {
-    values = new real[dof_map->dofsmapping_size()];
+    values = new real[dof_map_->dofsmapping_size()];
   }
-  x->get(values, dof_map->dofsmapping_size(), dof_map->dofsmapping());
+  x->get(values, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::set(real *& values)
 {
-  x->set(values, dof_map->dofsmapping_size(), dof_map->dofsmapping());
+  x->set(values, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
   sync_ghosts();
 }
 //-----------------------------------------------------------------------------
 void DiscreteFunction::__init(Mesh& mesh, Form& form, uint i)
 {
-  // Check argument
-  const uint num_arguments = form.form().rank()
-      + form.form().num_coefficients();
-  if (i >= num_arguments)
-    error("Illegal function index %d. Form only has %d arguments.", i,
-        num_arguments);
-
   // Create finite element
-  finite_element_ = form.form().create_finite_element(i);
-
-  // Update dof maps
-  form.updateDofMaps(mesh);
+  finite_element_ = new FiniteElement(mesh, form, i);
+  ufc_finite_element_ = finite_element_->ufc_finite_element_;
 
   // Get DofMap pointer from DofMapSet
   // Token has been requested by the Form
-  dof_map = &form.dofMaps()[i];
+  dof_map_ = DofMapCache::instance().acquire_dofmap(mesh, form.form(), i);
+  dof_map_local_dim_ = dof_map_->local_dimension();
 
   //Necessary to call acquire for the moment as we release in the destructor
-  if (dof_map != DofMapCache::instance().acquire_dofmap(mesh, form.form(), i))
+  if (dof_map_ != &form.dofMaps()[i])
   {
     error("Different DofMap object pointed by Form and DiscreteFunction");
   }
@@ -468,11 +457,12 @@ void DiscreteFunction::__init(Mesh& mesh, std::string finite_element_signature,
                               std::string dof_map_signature)
 {
   // Create finite element
-  finite_element_ = ElementLibrary::create_finite_element(
-      finite_element_signature);
+  finite_element_ = new FiniteElement(finite_element_signature);
+  ufc_finite_element_ = finite_element_->ufc_finite_element_;
 
   // Token is requested by the standalone function
-  dof_map = DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature);
+  dof_map_ = DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature);
+  dof_map_local_dim_ = dof_map_->local_dimension();
 
   __init();
 }
@@ -480,22 +470,22 @@ void DiscreteFunction::__init(Mesh& mesh, std::string finite_element_signature,
 //-----------------------------------------------------------------------------
 void DiscreteFunction::__init()
 {
-  if (x->size() != dof_map->global_dimension())
+  if (x->size() != dof_map_->global_dimension())
   {
     if (MPI::numProcesses() > 1)
     {
-      x->init(dof_map->local_size());
+      x->init(dof_map_->local_size());
     }
     else
     {
-      x->init(dof_map->global_dimension());
+      x->init(dof_map_->global_dimension());
     }
   }
 
   // Initialize scratch space
   if (!scratch)
   {
-    scratch = new Scratch(*finite_element_);
+    scratch = new Scratch(*ufc_finite_element_);
   }
   else
   {
@@ -523,13 +513,15 @@ void DiscreteFunction::__init_ghosts()
     ufc_cell.update(*cell, mesh.distdata());
 
     // Tabulate dofs
-    dof_map->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
+    dof_map_->tabulate_dofs(scratch->dofs, ufc_cell, cell->index());
 
-    for (uint j = 0; j < finite_element_->space_dimension(); j++)
+    for (uint j = 0; j < ufc_finite_element_->space_dimension(); j++)
+    {
       indices.insert(scratch->dofs[j]);
+    }
 
   }
-  std::map<uint, uint> map = dof_map->getMap();
+  std::map<uint, uint> map = dof_map_->getMap();
 
   x->init_ghosted(indices.size(), indices, map);
 
@@ -562,7 +554,7 @@ void DiscreteFunction::sync_ghosts()
   if (MPI::numProcesses() == 1)
     return;
 
-  if (dof_map->renumbered() && !renumbered && MPI::numProcesses() > 1)
+  if (dof_map_->renumbered() && !renumbered && MPI::numProcesses() > 1)
   {
     __init_ghosts();
     renumbered = true;
@@ -577,29 +569,37 @@ void DiscreteFunction::sync_ghosts()
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::Scratch(ufc::finite_element& finite_element) :
     size(0),
-    dofs(0),
-    coefficients(0),
-    values(0)
+    dofs(NULL),
+    coefficients(NULL),
+    values(NULL)
 {
   // Compute size of value (number of entries in tensor value)
   size = 1;
   for (uint i = 0; i < finite_element.value_rank(); i++)
+  {
     size *= finite_element.value_dimension(i);
+  }
 
   // Initialize local array for mapping of dofs
   dofs = new uint[finite_element.space_dimension()];
   for (uint i = 0; i < finite_element.space_dimension(); i++)
+  {
     dofs[i] = 0;
+  }
 
   // Initialize local array for expansion coefficients
   coefficients = new real[finite_element.space_dimension()];
   for (uint i = 0; i < finite_element.space_dimension(); i++)
+  {
     coefficients[i] = 0.0;
+  }
 
   // Initialize local array for values
   values = new real[size];
   for (uint i = 0; i < size; i++)
+  {
     values[i] = 0.0;
+  }
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::Scratch::~Scratch()

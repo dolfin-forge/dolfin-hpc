@@ -29,6 +29,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/FiniteElement.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterList.h>

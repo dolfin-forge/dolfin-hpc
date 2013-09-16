@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009-2010.
+// Modified by Niclas Jansson, 2009-2013.
 // Modified by Balthasar Reuter, 2013
 //
 
@@ -20,6 +20,7 @@
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DVertex.h>
 #include <dolfin/mesh/DCell.h>
+#include <cstring>
 
 #ifdef HAVE_LIBGEOM
 #include <Geometry.h>
@@ -1209,173 +1210,163 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 {
-	//message("starting with bisecting the marked cells");
+
   std::list<DCell*> marked_cells;
   for(std::list<DCell* >::iterator it = cells.begin(); it != cells.end(); ++it)
   {
     DCell* c = *it;
-
+    
     if(marked_ids[c->id])
     {
       marked_cells.push_back(c);
     }
   }
-
+  
   for(std::list<DCell* >::iterator it = marked_cells.begin(); it != marked_cells.end(); ++it)
   {
     DCell* c = *it;
-
+    
     if(!c->deleted)
-    { //message("rank: %d calling bisect line 1257", MPI::processNumber());
-      bisect(c, 0, 0, 0, geom);//message("rank: %d end of calling bisect line 1262", MPI::processNumber());
-    }
+      bisect(c, 0, 0, 0, geom);
   }
-
+  
   std::vector<Propagation> propagated;
   std::list<Propagation> leftovers;
-
+  
   bool empty = false;
-
+  
   while(!empty) 
-	{    
+  {    
     if(MPI::processNumber() == 0 && propagate.size() > 0)
       begin("Propagate refinement...");
-
+    
     propagate_refinement(propagated, empty);
-
+    
     if( empty && propagated.size() == 0) break;         
     propagate.clear();
-
+    
     for(std::vector<Propagation>::iterator it = propagated.begin(); it != propagated.end();++it) 
-		{
+    {
       DVertex* mv = 0;
       dolfin_assert(it->second.v1 != it->second.v2);
       if(ref_edge.find(edge_key(it->second.v1, it->second.v2)) != ref_edge.end()) 
-			{
+      {
         mv = ref_edge[edge_key(it->second.v1, it->second.v2)];
-
-				if( mv->owner > (int) it->second.owner) 
-				{
-	  			mv->ghosted = true;
-	  			mv->shared = true;
-       	 	mv->owner = it->second.owner;
-				}
-
-				continue;
-    	}
-      
-    	DVertex* v1 = 0;
-    	DVertex* v2 = 0;
-      
-    	if(!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end()) 
-    	{
-				dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
-				v1 = bc_dvs[it->second.v1];
-    	}
-    	if(!v2 && bc_dvs.find(it->second.v2) != bc_dvs.end())
-    	{ 
-				dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
-				v2 = bc_dvs[it->second.v2];
-    	}
 	
-	    if(!v1 || !v2)
-	    {
-				leftovers.push_back(*it);    
-				continue;
-	    }
+	if( mv->owner > (int) it->second.owner) 
+	{
+	  mv->ghosted = true;
+	  mv->shared = true;
+	  mv->owner = it->second.owner;
+	}
 	
-	    for(std::list<DCell* >::iterator ic = v1->cells.begin(); ic != v1->cells.end();++ic)       
+	continue;
+      }
+      
+      DVertex* v1 = 0;
+      DVertex* v2 = 0;
+      
+      if(!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end()) 
+      {
+	dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
+	v1 = bc_dvs[it->second.v1];
+      }
+      if(!v2 && bc_dvs.find(it->second.v2) != bc_dvs.end())
+      { 
+	dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
+	v2 = bc_dvs[it->second.v2];
+      }
+      
+      if(!v1 || !v2)
+      {
+	leftovers.push_back(*it);    
+	continue;
+      }
+      
+      for(std::list<DCell* >::iterator ic = v1->cells.begin(); ic != v1->cells.end();++ic)       
+      {
+	if(!(*ic)->deleted) 
+	{
+	  if((*ic)->has_edge(v1, v2))  
+	  {
+	    dolfin_assert((*ic)->vertices.size() > 0);
+	    if(mv == 0) 
 	    {
-				if(!(*ic)->deleted) 
-				{
-		  		if((*ic)->has_edge(v1, v2))  
-					{
-		    		dolfin_assert((*ic)->vertices.size() > 0);
-		    		if(mv == 0) 
-		    		{
-						//	message(" line 1372");
-		      		mv = new DVertex;
-							//message("line 1325");
-							//mv->patch_id = -1;
-							//mv->u = -1;
-							//mv->v = -1;
-		      		mv->shared = true;
-		      		mv->glb_id = it->second.mv;				
-		      		vertices.insert(mv);	      
-							//message("patch id %d line 1306",mv->patch_id);
-		      		if( MPI::processNumber() < it->second.owner)
-		      		{
-								mv->ghosted = false;
-								mv->owner = MPI::processNumber();		  
-								prop_edge node;
-								node.mv = mv->glb_id;
-								node.v1 = it->second.v1;
-								node.v2 = it->second.v2;
-								node.owner = mv->owner;
-								std::pair<uint, prop_edge> prop(0, node);
-								propagate.push_back(prop);
-		      		}
-		      		else 
-		      		{
-								mv->ghosted = true;
-								mv->owner = it->second.owner;
-		      		}
-		      
-		      		//mv->p = (v1->p + v2->p) / 2.0;
-							
-							//use the regular mitpoint rule when both neighbor vertices are not on the geometry
-							if(v1->patch_id < 0 || v2->patch_id < 0)
-							{
-							//	message("midpoint: line 1356");
-								mv->p = (v1->p + v2->p) / 2.0;
-								mv->patch_id 	= -1;
-								mv->u 			 	= -1;
-								mv->v					= -1;
-							}
-							else
-							{
-								Point midpoint = (v1->p + v2->p) / 2.0;
-								libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
-								libgeom::Point3D r1;
-								float um, vm;
-								int pid_tmp;
-								real distance;
-
-								if(v1->patch_id == v2->patch_id)
-								{
-									pid_tmp = v1->patch_id;
-									distance = geom.find_closest_point(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 0.00001, 0.00002, 100);
-								}
-								else
-								{
-									distance = geom.find_closest_point_all_patches(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 8, 8, 0.00001, 0.00002, 100);
-								}
-								mv->p = Point( r1.x(), r1.y(), r1.z());
-								mv->patch_id = pid_tmp;		
-								mv->u = um;
-								mv->v = vm;
-
-							}
-		      		mv->on_boundary = true;
-		      		bc_dvs[mv->glb_id] = mv;
-		      		ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
-						//	message(" patch id: %d line 1421",mv->patch_id);	
-		    		}
-		    		dolfin_assert((*ic) > 0);
-		    		bisect((*ic), mv, v1, v2, geom);
-		  		}
-				}
+	      mv = new DVertex;
+	      mv->shared = true;
+	      mv->glb_id = it->second.mv;				
+	      vertices.insert(mv);	      
+	      
+	      if( MPI::processNumber() < it->second.owner)
+	      {
+		mv->ghosted = false;
+		mv->owner = MPI::processNumber();		  
+		prop_edge node;
+		node.mv = mv->glb_id;
+		node.v1 = it->second.v1;
+		node.v2 = it->second.v2;
+		node.owner = mv->owner;
+		std::pair<uint, prop_edge> prop(0, node);
+		propagate.push_back(prop);
+	      }
+	      else 
+	      {
+		mv->ghosted = true;
+		mv->owner = it->second.owner;
+	      }
+	      
+	      //use the regular midpoint rule when both neighbor vertices are not on the geometry
+	      if(v1->patch_id < 0 || v2->patch_id < 0)
+	      {
+		
+		mv->p = (v1->p + v2->p) / 2.0;
+		mv->patch_id = -1;
+		mv->u = -1;
+		mv->v = -1;
+	      }
+	      else
+	      {
+		Point midpoint = (v1->p + v2->p) / 2.0;
+		libgeom::Point3D midpoint_lib(midpoint.x(), midpoint.y(), midpoint.z());
+		libgeom::Point3D r1;
+		float um, vm;
+		int pid_tmp;
+		real distance;
+		
+		if(v1->patch_id == v2->patch_id)
+		{
+		  pid_tmp = v1->patch_id;
+		  distance = geom.find_closest_point(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 0.00001, 0.00002, 100);
+		}
+		else
+		{
+		  distance = geom.find_closest_point_all_patches(midpoint_lib, r1, um, vm, pid_tmp, 100, 100, 8, 8, 0.00001, 0.00002, 100);
+		}
+		mv->p = Point( r1.x(), r1.y(), r1.z());
+		mv->patch_id = pid_tmp;		
+		mv->u = um;
+		mv->v = vm;
+		
+	      }
+	      mv->on_boundary = true;
+	      bc_dvs[mv->glb_id] = mv;
+	      ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
 	    }
+	    dolfin_assert((*ic) > 0);
+	    bisect((*ic), mv, v1, v2, geom);
 	  }
-   // message("end of propagation line 1469");
-	  propagated.clear();
-	  for(std::list<Propagation>::iterator it = leftovers.begin(); it != leftovers.end(); ++it)
-			propagated.push_back(*it);
-	  leftovers.clear();
-	
-	 	if(MPI::processNumber() == 0)
-	  	end();    
-	    
+	}
+      }
+    }
+
+    propagated.clear();
+    for(std::list<Propagation>::iterator it = leftovers.begin(); it != leftovers.end(); ++it)
+      propagated.push_back(*it);
+    leftovers.clear();
+    
+    if(MPI::processNumber() == 0)
+      end();    
+    
   }  
 }
 //-----------------------------------------------------------------------------

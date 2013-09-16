@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2008.
+// Modified by Stefanie Strunk, 2013.
 //
 // First added:  2006-06-08
 // Last changed: 2008-07-07
@@ -718,7 +719,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
     patch_id_list.set(v->index(), refined_patch_id_list.get(v->index()));
   }
   
-  //mesh.disp();
   mesh.distdata().invalid_numbering();
   mesh.renumber();  
 }

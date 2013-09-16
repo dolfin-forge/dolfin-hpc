@@ -76,10 +76,7 @@ namespace dolfin
     /// Create mesh from data file
     Mesh(std::string filename);
     
-    // Create mesh from data file
-    //Mesh(std::string filename, std::string geomDateFilename);
-    
-		/// Destructor
+    /// Destructor
     ~Mesh();
 
     /// Assignment
@@ -164,11 +161,13 @@ namespace dolfin
     void refine();
 
 #ifdef HAVE_LIBGEOM
-		/// Refine mesh uniformly including geometry informations -surfaces
-    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
+    /// Refine mesh uniformly including geometry informations -surfaces
+    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
+		MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
 		
-		/// Refine mesh uniformly including geometry informations -curves
-    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u);
+    /// Refine mesh uniformly including geometry informations -curves
+    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, 
+		MeshFunction<float>& bnd_u);
 #endif
 
     /// Refine mesh according to cells marked for refinement

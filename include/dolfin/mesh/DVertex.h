@@ -30,10 +30,10 @@ namespace dolfin
     int glb_id;
 
 #ifdef HAVE_LIBGEOM
-		/// geometry parameter
-		int patch_id;
-		float u;
-		float v; 
+    /// geometry parameter
+    int patch_id;
+    float u;
+    float v; 
 #endif
 
     /// List of cells containing the vertex

@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009-2010.
+// Modified by Niclas Jansson, 2009-2013.
 // Modified by Balthasar Reuter, 2013
 //
 
@@ -44,10 +44,10 @@ namespace dolfin
   public:
     DMesh();
     ~DMesh();
-
+    
     /// Edge Identifier containing ids of end vertices
     typedef std::pair<int, int> EdgeKey;    
-
+    
     /// Edge data structure for propagation
     typedef struct __edge__ {
       uint mv;    //< global index of midpoint vertex
@@ -55,7 +55,7 @@ namespace dolfin
       uint v2;    //< global index of endpoint
       uint owner; //< rank of owner
     } prop_edge;
-
+    
     /// Pair datatype for propagation 
     typedef std::pair<uint, prop_edge> Propagation;
 
@@ -94,22 +94,22 @@ namespace dolfin
     void imp(Mesh& mesh);
 
 #ifdef HAVE_LIBGEOM
-		/// Import an existing mesh along with geometric parameters
-	  void imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-					   MeshFunction<float>& bnd_u,
-					   MeshFunction<float>& bnd_v);
+    /// Import an existing mesh along with geometric parameters
+    void imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
+	     MeshFunction<float>& bnd_u,
+	     MeshFunction<float>& bnd_v);
 #endif
-
+    
     /// Export to a regular mesh
     void exp(Mesh& mesh);
-
+    
 #ifdef HAVE_LIBGEOM
     /// Export to a regular mesh along with geometric parameters
     void exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-  					 MeshFunction<float>& bnd_u,
-	  				 MeshFunction<float>& bnd_v);
+	     MeshFunction<float>& bnd_u,
+	     MeshFunction<float>& bnd_v);
 #endif
-
+    
     /// Export to a regular mesh but keep numbering in the DMesh
     ///
     /// An optional mapping between old and new indices is generated. The Arrays
@@ -117,37 +117,37 @@ namespace dolfin
     /// time of the import).
     void expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells = 0, 
                           Array<int> * old2new_vertices = 0);
-
+    
     /// Renumber mesh entities locally
     ///
     /// An optional mapping between old and new indices is generated. The Arrays
     /// have to have the size of the old numbering
     void number( Array<int> *old2new_cells=0, 
 		 Array<int> *old2new_vertices=0 );
-
+    
     /// Bisect cell dcell
     ///
     /// The edge for the bisection is given by hv0 and hv1 and hangv is the
     /// hanging node of the opposite cell
     void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
-
+    
 #ifdef HAVE_LIBGEOM
     /// Bisect cell dcell with respect to geometry
     void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
-					      libgeom::Geometry& geom);
+		libgeom::Geometry& geom);
 #endif
-
+    
     /// Bisect marked cells
     void bisectMarked(std::vector<bool> marked_ids);
-
+    
 #ifdef HAVE_LIBGEOM
     /// Bisect marked cells with respect to geometry
-		void bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom);
+    void bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom);
 #endif
-
+    
     /// Get opposite cell with respect to vertices v1 and v2
     DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
-
+    
     /// Propagate refinement
     ///
     /// TODO: what are the arguments???
@@ -159,40 +159,40 @@ namespace dolfin
       else
         propagate_hypercube(propagated, empty); 
     }
-
+    
     /// Naive refinement propagation with pairwise communication
     void propagate_naive(std::vector<Propagation>& propagated, bool& empty);
-
+    
     /// Refinement propagation within hypercube
     void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
     
     /// Vertices contained in the mesh
     std::set<DVertex *> vertices;
-
+    
     /// Cells contained in the mesh
     std::list<DCell *> cells;
-
+    
     /// CellType of mesh
     CellType* cell_type;
-
+    
     /// Dimension of MeshTopology
     uint d;
-
+    
     /// Maximum number of vertices in one process
     uint glb_max;
-
+    
     /// enumeration salt for bisect
     uint _salt;
-
+    
     /// Start offset for new global id
     uint _start_offset;
-
+    
     /// Global maximum start offset
     uint _max;
-
+    
     /// Propagation buffer
     std::vector<Propagation> propagate;
-
+    
     /// Map between global number of boundary vertex to vertex
     _map<uint, DVertex*> bc_dvs;
 #if (__GNUG__ || __sgi )
@@ -202,15 +202,15 @@ namespace dolfin
 #endif
 
     /// Comparison operator for index/value pairs
-    struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
-                       std::pair<uint, prop_edge>, bool>
+    struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,  
+      std::pair<uint, prop_edge>, bool>
     {
       bool operator()(std::pair<uint, prop_edge> x, std::pair<uint, prop_edge> y)
       {
-        return x.first < y.first;
+	return x.first < y.first;
       }
     };
-
+    
 
     /// Construct an edge id from given vertices
     inline EdgeKey edge_key(int id1, int id2) 
@@ -227,7 +227,7 @@ namespace dolfin
         return key;
       }      
     }
-
+    
   };
 }
 

@@ -34,10 +34,10 @@ namespace dolfin
                        real tb = 0.0, 
                        real ts = 0.0,
                        bool balance = true);
-
+    
 #ifdef HAVE_LIBGEOM
-		/// Refine simplicial mesh locally by recursive edge bisection. Including Boundary smoothing
-		static void refine(Mesh& mesh, 
+    /// Refine simplicial mesh locally by recursive edge bisection. Including Boundary smoothing
+    static void refine(Mesh& mesh, 
                        MeshFunction<bool>& cell_marker,
                        libgeom::Geometry& geom,
                        MeshFunction<int>& patch_id_list,

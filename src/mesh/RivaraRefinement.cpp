@@ -21,9 +21,6 @@
 #include <Geometry.h>
 #endif
 
-#include <vector>
-#include <list>
-
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif 

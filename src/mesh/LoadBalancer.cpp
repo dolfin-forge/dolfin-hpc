@@ -146,28 +146,21 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, Array< std::p
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker, 
-			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions, 
-			Type type)
+			   Array< std::pair< MeshFunction<double> *, 
+					     MeshFunction<double> * > 
+				  >& vertex_functions, 
+			   Type type)
 {  
   balance(mesh, cell_marker, vertex_functions, 0.0, 0.0, 0.0, type);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,
-			real tf, real tb, real ts, Type type)
+			   Array< std::pair< MeshFunction<double> *, 
+					     MeshFunction<double> * > 
+				  >& vertex_functions,
+			   real tf, real tb, real ts, Type type)
 {  
-/*	/////////
-		for(dolfin::VertexIterator vIter(mesh); !vIter.end(); ++vIter)
-		{
-			if(vIter->index() < 15)
-				std::cout<<"patch_id_double: "<<((vertex_functions[0]).first)->get(vIter->index()) << " new_patch_id_double "<<((vertex_functions[0]).second)->get(vIter->index())<<std::endl;
-			else
-				continue;
-		}
-
-
-
-////////*/
+  
   // Construct weight function 
   MeshFunction<uint> weight;
   uint w_local, w_sum, w_max;
@@ -211,25 +204,20 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   if( tf > 0.0 && tb > 0.0 && ts > 0.0 ) 
     if(!computational_gain(mesh, weight, partitions, max_sendrecv, tf, tb, ts))
       return;
-
+  
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
-  {
-		MeshFunction<uint> new_cell_marker_uint;
-		MeshFunction<uint> cell_marker_uint;
-		MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-		Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
-		cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
-		
-//    mesh.distribute(partitions, cell_marker, new_cell_marker);
-		mesh.distribute(partitions, cell_functions, vertex_functions);
-
-//    MeshFunction<bool> new_cell_marker;
-		MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
-//    cell_marker.init(mesh, mesh.topology().dim());  
-//    for(CellIterator c(mesh); !c.end(); ++c)
-//      cell_marker.set(*c, new_cell_marker.get(*c));
-  }
+    {
+      MeshFunction<uint> new_cell_marker_uint;
+      MeshFunction<uint> cell_marker_uint;
+      MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+      Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
+      cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
+      
+      mesh.distribute(partitions, cell_functions, vertex_functions);
+      
+      MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
+    }
   else 
   {
     MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
@@ -250,24 +238,16 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("%0.2f percent load imbalance after repartitioning.", 
 	    (new_imbalance - 1.0) * 100);
   }
-/*/////////
-		for(dolfin::VertexIterator vIter(mesh); !vIter.end(); ++vIter)
-		{
-			if(vIter->index() < 15)
-				std::cout<<"patch_id_double: "<<((vertex_functions[0]).first)->get(vIter->index()) << " new_patch_id_double "<<((vertex_functions[0]).second)->get(vIter->index())<<std::endl;
-			else
-				continue;
-		}
-
-
-
-////////*/
 }
 
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, 
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions, 
-			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions)
+			   Array< std::pair< MeshFunction<uint> *, 
+					     MeshFunction<uint> * > 
+				  >& cell_functions, 
+			   Array< std::pair< MeshFunction<double> *, 
+					     MeshFunction<double> * > 
+				  >& vertex_functions)
 {
   begin("Load balancing");
     
@@ -286,17 +266,25 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions,  
-			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions, 
-			Type type)
+			   Array< std::pair< MeshFunction<uint> *, 
+					     MeshFunction<uint> * > 
+				  >& cell_functions,  
+			   Array< std::pair< MeshFunction<double> *, 
+					     MeshFunction<double> * > 
+				  >& vertex_functions, 
+			   Type type)
 {  
   balance(mesh, cell_marker,cell_functions, vertex_functions, 0.0, 0.0, 0.0, type);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions, 
-			Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions,
-			real tf, real tb, real ts, Type type)
+			   Array< std::pair< MeshFunction<uint> *, 
+					  MeshFunction<uint> * > 
+				  >& cell_functions, 
+			   Array< std::pair< MeshFunction<double> *,
+					     MeshFunction<double> * > 
+				  >& vertex_functions,
+			   real tf, real tb, real ts, Type type)
 {  
   // Construct weight function 
   MeshFunction<uint> weight;
@@ -345,18 +333,16 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-		MeshFunction<uint> new_cell_marker_uint;
-		MeshFunction<uint> cell_marker_uint;
-		MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-		//Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
-		cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
-		    
-//    mesh.distribute(partitions, cell_marker, new_cell_marker);
-		mesh.distribute(partitions, cell_functions, vertex_functions);
-		
-		MeshFunction<bool> new_cell_marker;
-		MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
-
+    MeshFunction<uint> new_cell_marker_uint;
+    MeshFunction<uint> cell_marker_uint;
+    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+    cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
+    
+    mesh.distribute(partitions, cell_functions, vertex_functions);
+    
+    MeshFunction<bool> new_cell_marker;
+    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
+    
     cell_marker.init(mesh, mesh.topology().dim());  
     for(CellIterator c(mesh); !c.end(); ++c)
       cell_marker.set(*c, new_cell_marker.get(*c));
@@ -384,10 +370,12 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, 
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions)
+			   Array< std::pair< MeshFunction<uint> *,
+					     MeshFunction<uint> * > 
+				  >& cell_functions)
 {
   begin("Load balancing");
-    
+  
   // Repartition mesh
   MeshFunction<uint> partitions;
   mesh.partition(partitions, weight);
@@ -403,15 +391,19 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions, 
-			Type type)
+			   Array< std::pair< MeshFunction<uint> *,
+					     MeshFunction<uint> * > 
+				  >& cell_functions, 
+			   Type type)
 {  
   balance(mesh, cell_marker,cell_functions, 0.0, 0.0, 0.0, type);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-			Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > >& cell_functions, 
-			real tf, real tb, real ts, Type type)
+			   Array< std::pair< MeshFunction<uint> *, 
+					     MeshFunction<uint> * > 
+				  >& cell_functions, 
+			   real tf, real tb, real ts, Type type)
 {  
   // Construct weight function 
   MeshFunction<uint> weight;
@@ -430,24 +422,24 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   if( threshold > imbalance ) {
     message("Load imbalance %0.2f percent, below threshold.",
 	    (imbalance - 1.0) * 100);
-   
+    
     if (!dolfin_get("Load balancer redistribute"))
     {
       MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
       part->init(mesh, mesh.topology().dim());      
       *part = MPI::processNumber();
     }
-
+    
     return;
   }
   else
     message("Repartitioning %0.2f percent load imbalance.",
 	    (imbalance - 1.0) * 100);
-
+  
   // Repartition mesh
   MeshFunction<uint> partitions;
   mesh.partition(partitions, weight);
-
+  
   // Calculate process reassignment
   uint max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
@@ -456,22 +448,20 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   if( tf > 0.0 && tb > 0.0 && ts > 0.0 ) 
     if(!computational_gain(mesh, weight, partitions, max_sendrecv, tf, tb, ts))
       return;
-
+  
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-		MeshFunction<uint> new_cell_marker_uint;
-		MeshFunction<uint> cell_marker_uint;
-		MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-		//Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
-		cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
-		    
-//    mesh.distribute(partitions, cell_marker, new_cell_marker);
-		mesh.distribute(partitions, cell_functions);
-		
-		MeshFunction<bool> new_cell_marker;
-		MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
-
+    MeshFunction<uint> new_cell_marker_uint;
+    MeshFunction<uint> cell_marker_uint;
+    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+    cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
+    
+    mesh.distribute(partitions, cell_functions);
+    
+    MeshFunction<bool> new_cell_marker;
+    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
+    
     cell_marker.init(mesh, mesh.topology().dim());  
     for(CellIterator c(mesh); !c.end(); ++c)
       cell_marker.set(*c, new_cell_marker.get(*c));
@@ -504,7 +494,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
 				   uint* w_sum, Type type)
 {
   // Calculated weights for the dual graph with a simulated mesh refinement
-
+  
   weight.init(mesh, mesh.topology().dim()); 
   real max, l;
   uint index = 0;
@@ -515,7 +505,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
     MeshFunction<bool> used_edge(mesh, 1);
     used_cell = false;
     used_edge = false;
-
+    
     for(CellIterator c(mesh); !c.end(); ++c) {
       if( cell_marker.get(*c) && !used_cell.get(*c)) {
         max = 0.0;
@@ -568,7 +558,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
       {
         // cell marked for coarsening gets increased weight
         weight.set(*c_it, 2u);
-
+	
         // all neighboring cells also get increased weight
         for ( CellIterator nc_it(*c_it) ; !nc_it.end() ; ++nc_it )
           weight.set(*nc_it, 2u);
@@ -577,12 +567,12 @@ void LoadBalancer::weight_function(Mesh& mesh,
   }
   else
     error("Unknown Type for LoadBalancer.");
-
+  
   *w_sum = 0;
   for(CellIterator c(mesh); !c.end(); ++c)
     *w_sum += weight.get(*c);
   
-
+  
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
@@ -599,16 +589,16 @@ void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
       index = e->index();	    
     }
   }
-
+  
   Edge le(mesh, index);  
-
+  
   if(le.index() == ce.index() || depth > 1)
     return;
   
   weight.set(c.index(), weight.get(c.index()) + 1);
-
+  
   depth++;
-
+  
   for(CellIterator nc(le); !nc.end(); ++nc)
     weight_lepp(mesh, *nc, le, weight, depth);
 }

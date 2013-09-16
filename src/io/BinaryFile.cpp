@@ -1270,6 +1270,11 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
 
       send_buff.clear();
     }
+
+    delete[] ghost_buff;
+    delete[] recv_buff;
+    delete[] recv_ghost;
+
   }
 
 

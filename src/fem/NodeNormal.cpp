@@ -359,7 +359,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         curr_facet = normals_offsets[0];
         uint offset_to_update = 0;
 
-        std::cout << "Nb neighbouring cells = " << NbNeighCells << std::endl;
+//        std::cout << "Nb neighbouring cells = " << NbNeighCells << std::endl;
         for (uint curr_offset = 0;
             curr_facet < NbNeighCells && curr_offset < NbNeighCells;
             curr_facet += normals_offsets[++curr_offset])
@@ -376,7 +376,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           if (cosalpha > cosalpha_max)
           {
             // DEBUG: belongs to same plane
-            std::cout << "IN ";
+//            std::cout << "IN ";
             surfaces.insert(std::pair<uint, uint>(curr_facet, curr_surface));
 
             // add contribution to surface normal
@@ -396,14 +396,14 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           }
           else
           {
-            std::cout << "OUT ";
+//            std::cout << "OUT ";
             // found normal not belonging to the same plane
             // increase offset position then set offset value to one
             normals_offsets[offset_to_update] += normals_offsets[curr_offset]
                 - 1;
             normals_offsets[++offset_to_update] = 1;
           }
-          std::cout << std::endl;
+//          std::cout << std::endl;
         }
 
         // add surface normal to the list of surface normals
@@ -411,9 +411,9 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 
         // next loop we add a new surface and discriminate again across
         // the remaining normals
-        std::cout << remaining_normals_count << std::endl;
+//        std::cout << remaining_normals_count << std::endl;
       }
-      std::cout << "Nb of surfaces = " << curr_surface << std::endl;
+//      std::cout << "Nb of surfaces = " << curr_surface << std::endl;
       vertex_type = curr_surface;
       delete nref;
       delete normals_offsets;
@@ -443,18 +443,12 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         {
           Savrgn[d] *= invnormSavrgn;
           normal_vec[d] += Savrgn[d];
-          if (nb_surfaces == 3)
-          {
-            std::cout << Savrgn[d] << " ";
-          }
 
           if (std::abs(Savrgn[d]) < DOLFIN_EPS)
           {
             Savrgn[d] = 0.0;
           }
         }
-        if (nb_surfaces == 3)
-          std::cout << std::endl;
       }
 
       // Taken from V. John, J. Comp. and Appl. Math. 2002
@@ -463,10 +457,6 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       real normal_nrm = 0.0;
       for (uint d = 0; d < nsdim; ++d)
       {
-        if (nb_surfaces == 3)
-        {
-          std::cout << normal_vec[d] << " ";
-        }
         normal_vec[d] /= sum_weights;
         normal_nrm += normal_vec[d] * normal_vec[d];
       }
@@ -494,13 +484,13 @@ void NodeNormal::__compute_normal(Mesh& mesh)
                   normal_vec[0] * normal_vec[0]
                       + normal_vec[1] * normal_vec[1]);
           // t11 = n2/n
-          basis_vec[3] = -basis_vec[1] * norm_inv;
+          basis_vec[3] = basis_vec[1] * norm_inv;
           // t12 = -n1/n
-          basis_vec[4] = basis_vec[0] * norm_inv;
+          basis_vec[4] = - basis_vec[0] * norm_inv;
           // t13 = 0
           basis_vec[5] = 0.0;
           // t21 = -t12*n3
-          basis_vec[6] = -basis_vec[4] * basis_vec[2];
+          basis_vec[6] = - basis_vec[4] * basis_vec[2];
           // t22 = t11*n3
           basis_vec[7] = basis_vec[3] * basis_vec[2];
           // t23 = t12*n1 - t11*n2
@@ -516,14 +506,14 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           // t11 = 0
           basis_vec[3] = 0.0;
           // t12 = -n3/n
-          basis_vec[4] = basis_vec[2] * norm_inv;
+          basis_vec[4] = - basis_vec[2] * norm_inv;
           // t13 = n2/n
-          basis_vec[5] = -basis_vec[1] * norm_inv;
+          basis_vec[5] = basis_vec[1] * norm_inv;
           // t21 = t13*n2 - t12*n3
           basis_vec[6] = basis_vec[5] * basis_vec[1]
               - basis_vec[4] * basis_vec[2];
           // t22 = -t13*n1
-          basis_vec[7] = -basis_vec[5] * basis_vec[0];
+          basis_vec[7] = - basis_vec[5] * basis_vec[0];
           // t23 = t12*n1
           basis_vec[8] = basis_vec[4] * basis_vec[0];
         }

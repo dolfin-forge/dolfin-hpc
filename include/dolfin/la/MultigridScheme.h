@@ -31,7 +31,9 @@ namespace dolfin
   {
     mg_jacobi,          // Jacobi
     mg_gauss_seidel,    // Gauss-Seidel 
+    mg_cf_gauss_seidel, // C/F colored Gauss-Seidel 
     mg_sor,             // SOR (successive over relaxation)
+    mg_cf_sor,          // C/F colored SOR (successive over relaxation)
     default_smoother    // Default smoother
   };
 

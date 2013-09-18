@@ -84,8 +84,12 @@ int JANPACKAMGSolver::getSmoother(MultigridSmoother smoother) const
     return JP_AMG_JACOBI;
   case mg_gauss_seidel:
     return JP_AMG_GAUSS_SEIDEL;
+  case mg_cf_gauss_seidel:
+    return JP_AMG_CF_GAUSS_SEIDEL;
   case mg_sor:
     return JP_AMG_SOR;
+  case mg_cf_sor:
+    return JP_AMG_CF_SOR;
   default:
     warning("Requested Multigrid smoother unknown. Using Gauss-Seidel.");
     return JP_AMG_GAUSS_SEIDEL;

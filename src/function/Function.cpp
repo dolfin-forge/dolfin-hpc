@@ -16,6 +16,7 @@
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/io/File.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/ConstantFunction.h>
 #include <dolfin/function/DiscreteFunction.h>
@@ -513,11 +514,10 @@ void Function::interpolate(Function const& other_func)
 {
   if (f && this->type() == Function::discrete)
   {
-    ufc::finite_element * ufcfe = ElementLibrary::create_finite_element(
-        this->signature());
+    FiniteElement const& fe = this->finite_element();
     DofMap const& dofmap = this->dofmap();
 
-    uint valuedim = ufcfe->value_dimension(0);
+    uint valuedim = fe.value_dimension(0);
     uint dofspercell = dofmap.local_dimension();
     uint * idx = new uint[dofspercell];
     real * block = new real[dofspercell];
@@ -566,7 +566,6 @@ void Function::interpolate(Function const& other_func)
     delete[] dofscoords;
     delete[] block;
     delete[] idx;
-    delete ufcfe;
   }
   else
   {

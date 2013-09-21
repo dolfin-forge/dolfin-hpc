@@ -145,10 +145,15 @@ public:
   ufc::finite_element* create_sub_element(Array<uint> const& sub_system) const;
 
   /// Get value dimensions for sub spaces just one level down for axis i
-  uint const * sub_value_dimensions(uint i) const;
+  Array<uint> const& sub_value_dimensions(uint i) const;
+
+  /// Get value dimensions for sub spaces just one level down for axis i
+  Array<uint> const& sub_value_offsets(uint i) const;
 
   /// Returs the degree of the finite element
   uint const degree() const;
+
+  void info() const;
 
 private:
 
@@ -157,7 +162,8 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
   mutable ufc::finite_element * ufc_finite_element_;
   bool const finite_element_local_;
-  uint * sub_value_dims_;
+  Array<uint> * sub_value_dims_;
+  Array<uint> * sub_value_offs_;
   uint topo_dim_;
   uint geom_dim_;
   uint degree_;

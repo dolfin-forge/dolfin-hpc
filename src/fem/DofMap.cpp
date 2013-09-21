@@ -314,8 +314,12 @@ DofMap::init()
 
   // Initialize mesh entities used by dof map
   for (uint d = 0; d <= dolfin_mesh.topology().dim(); d++)
+  {
     if (ufc_dof_map_->needs_mesh_entities(d))
+    {
       dolfin_mesh.init(d);
+    }
+  }
 
   // Initialize UFC mesh data (must be done after entities are created)
   ufc_mesh.init(dolfin_mesh);
@@ -340,18 +344,22 @@ DofMap::init()
   uint const nb_sub = this->num_sub_dof_maps();
   if (nb_sub > 0)
   {
-    sub_dof_maps_off_ = new uint[nb_sub];
+    uint off = 0;
     for (uint i = 0; i < nb_sub; ++i)
     {
       ufc::dof_map * subdm = this->create_sub_dof_map(i);
-      sub_dof_maps_off_[i] = subdm->local_dimension();
+      sub_dof_maps_dims_.push_back(subdm->local_dimension());
+      sub_dof_maps_offs_.push_back(off);
+      off += subdm->local_dimension();
+
+
       delete subdm;
     }
   }
   else
   {
-    sub_dof_maps_off_ = new uint[1];
-    sub_dof_maps_off_[0] = local_dimension();
+    sub_dof_maps_dims_.push_back(local_dimension());
+    sub_dof_maps_offs_.push_back(0);
   }
 
   local_to_global_size_ = ufc_dof_map_->local_dimension() * num_cells_;

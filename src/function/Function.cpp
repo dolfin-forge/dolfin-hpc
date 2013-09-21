@@ -514,58 +514,7 @@ void Function::interpolate(Function const& other_func)
 {
   if (f && this->type() == Function::discrete)
   {
-    FiniteElement const& fe = this->finite_element();
-    DofMap const& dofmap = this->dofmap();
-
-    uint valuedim = fe.value_dimension(0);
-    uint dofspercell = dofmap.local_dimension();
-    uint * idx = new uint[dofspercell];
-    real * block = new real[dofspercell];
-    real * val = new real[valuedim];
-
-    real ** dofscoords = new real*[dofspercell];
-    for (uint i = 0; i < dofspercell; ++i)
-    {
-      dofscoords[i] = new real[3]; // Internally Point is implemented for d = 3
-    }
-
-    CellIterator refcell(mesh());
-    UFCCell ufccell(*refcell);
-
-    for (CellIterator cell(mesh()); !cell.end(); ++cell)
-    {
-      ufccell.update(*cell, mesh().distdata());
-      dofmap.tabulate_dofs(idx, ufccell, cell->index());
-      dofmap.tabulate_coordinates(dofscoords, ufccell);
-
-      // initial version for support of mixed elements
-      uint const * offsets = dofmap.sub_dof_maps_offsets();
-      uint vd = 0;
-      uint cur_offset = offsets[0];
-      for (uint dof_id = 0; dof_id < dofspercell; ++dof_id)
-      {
-        if (dof_id == cur_offset)
-        {
-          ++vd;
-          cur_offset = offsets[vd];
-        }
-        other_func.eval(val, dofscoords[dof_id]);
-        block[dof_id] = val[vd];
-      }
-      this->vector().set(block, dofspercell, idx);
-      this->vector().apply();
-    }
-    f->sync_ghosts();
-
-    // cleanup
-    for (uint i = 0; i < dofspercell; ++i)
-    {
-      delete[] dofscoords[i];
-    }
-    delete[] val;
-    delete[] dofscoords;
-    delete[] block;
-    delete[] idx;
+    static_cast<DiscreteFunction *>(f)->interpolate(other_func);
   }
   else
   {

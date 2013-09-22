@@ -15,7 +15,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>
 #include <dolfin/log/Logger.h>
-#include <dolfin/main/MPI.h>
 
 using namespace dolfin;
 
@@ -23,7 +22,7 @@ typedef std::map<std::string, std::pair<dolfin::uint, real> >::iterator map_iter
 
 //-----------------------------------------------------------------------------
 Logger::Logger()
-  : destination((MPI::processNumber() == 0) ? terminal : silent), debug_level(0), indentation_level(0), logstream(0)
+  : destination(terminal), debug_level(0), indentation_level(0), logstream(0)
 {
   // Do nothing
 }
@@ -50,7 +49,6 @@ void Logger::warning(std::string msg)
 void Logger::error(std::string msg)
 {
   std::string s = std::string("*** Error: ") + msg;
-  write(0, s);
   throw std::runtime_error(s);
 }
 //-----------------------------------------------------------------------------
@@ -70,14 +68,14 @@ void Logger::progress(std::string title, real p)
 {
   int N = DOLFIN_TERM_WIDTH - 15;
   int n = static_cast<int>(p*static_cast<real>(N));
-
+  
   // Print the title
   std::string s = "| " + title;
   for (uint i = 0; i < (N - title.size() - 1); i++)
     s += " ";
   s += "|";
   write(0, s);
-
+  
   // Print the progress bar
   s = "|";
   for (int i = 0; i < n; i++)
@@ -100,25 +98,20 @@ void Logger::progress(std::string title, real p)
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::string destination)
 {
-  if (MPI::processNumber() == 0)
-  {
-    // Choose output destination
-    if (destination == "terminal")
-      this->destination = terminal;
-    else if (destination == "stream"){
-      warning("Please provide the actual stream. Using terminal instead.");
-      this->destination = terminal;
-    }
-    else
-    {
-      this->destination = terminal;
-      message("Unknown output destination, using plain text.");
-    }
-  }
-  else {
+  // Choose output destination
+  if (destination == "terminal")
+    this->destination = terminal;
+  else if (destination == "silent")
     this->destination = silent;
+  else if (destination == "stream"){
+    warning("Please provide the actual stream. Using terminal instead.");
+    this->destination = terminal;
   }
-
+  else
+  {
+    this->destination = terminal;
+    message("Unknown output destination, using plain text.");
+  }
 }
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::ostream& ostream)
@@ -204,7 +197,7 @@ void Logger::write(int debug_level, std::string msg)
   // Add indentation
   for (int i = 0; i < indentation_level; i++)
     msg = "  " + msg;
-
+  
   // Choose destination
   switch (destination)
   {

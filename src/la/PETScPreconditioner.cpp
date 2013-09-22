@@ -14,7 +14,7 @@
 #include <dolfin/la/PETScPreconditioner.h>
 #include <dolfin/la/PETScVector.h>
 
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR == 3
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
 #include <petsc-private/pcimpl.h>
 #else
 #include <private/pcimpl.h>

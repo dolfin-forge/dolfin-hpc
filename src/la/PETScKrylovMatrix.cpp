@@ -177,7 +177,11 @@ LogStream& dolfin::operator<< (LogStream& stream, const PETScKrylovMatrix& A)
 {
 
 #if PETSC_VERSION_MAJOR > 2
+#if PETSC_VERSION_MINOR > 3
+  MatType type = 0;
+#else
   const MatType type = 0;
+#endif
 #else
   MatType type = 0;
 #endif

@@ -141,7 +141,8 @@ if test "x${enable_ufl}" == xno; then
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 else
    PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
-   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY=1"
+   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+   AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.1])
 fi
 
 
@@ -242,9 +243,9 @@ if test "x${enable_quad}" = xyes; then
       [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
    else
-      AC_CHECK_LIB(lapack,dgesv_,[LIBS="$LIBS"], 
+      AC_CHECK_LIB(lapack,dgesv_,[LIBS="$LIBS -lblas -llapack"], 
       [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],
-      )
+      [-lblas])
       AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
    fi   
 fi
@@ -280,7 +281,9 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/main/Makefile\
 			  src/math/Makefile\
 			  src/mesh/Makefile\
+			  src/nls/Makefile\
 			  src/parameter/Makefile\
+			  src/pde/Makefile\
 			  src/quadrature/Makefile\
 			  src/dolfin.pc
 			  include/Makefile

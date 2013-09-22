@@ -40,31 +40,31 @@ namespace dolfin
 
     /// Distribute mesh according to mesh function and preserve cell-based functions
     static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          >& cell_functions);
+			   Array< std::pair< MeshFunction<uint> *, 
+			   MeshFunction<uint> * > >& cell_functions);
     
     /// Distribute mesh according to mesh function and preserve vertex-based functions
     static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-          >& vertex_functions);
+			   Array< std::pair< MeshFunction<double> *, 
+			   MeshFunction<double> * > >& vertex_functions);
 
     /// Distribute mesh according to mesh function and preserve cell- and vertex-
     /// based functions
     static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          >& cell_functions,
-         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-          >& vertex_functions);
+			   Array< std::pair< MeshFunction<uint> *, 
+			   MeshFunction<uint> * > >& cell_functions,
+			   Array< std::pair< MeshFunction<double> *, 
+			   MeshFunction<double> * > >& vertex_functions);
   private:
     static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution, 
 				 MeshFunction<bool> *old_cell_marker,
 				 MeshFunction<bool> *cell_marker);
 
     static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
-         Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > 
-          > *cell_functions,
-         Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > 
-          > *vertex_functions);
+				 Array< std::pair< MeshFunction<uint> *, 
+				 MeshFunction<uint> * > > *cell_functions,
+				 Array< std::pair< MeshFunction<double> *, 
+				 MeshFunction<double> * > > *vertex_functions);
   };
 }
 

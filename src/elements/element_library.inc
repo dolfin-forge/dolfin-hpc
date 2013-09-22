@@ -36,6 +36,37 @@
 
 #else  // UFC 1.1 headers
 
+#ifdef ENABLE_UFL		// UFC 2.1.1 headers
+
+#include <dolfin/elements/ffc_Lagrange_1_1d.h>
+#include <dolfin/elements/ffc_Lagrange_2_1d.h>
+#include <dolfin/elements/ffc_Lagrange_1_2d.h>
+#include <dolfin/elements/ffc_Lagrange_2_2d.h>
+#include <dolfin/elements/ffc_Lagrange_1_3d.h>
+#include <dolfin/elements/ffc_Lagrange_2_3d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_0_1d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_1_1d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_2_1d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_0_2d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_1_2d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_2_2d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_0_3d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_1_3d.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_2_3d.h>
+#include <dolfin/elements/ffc_Lagrange_1_2dVector.h>
+#include <dolfin/elements/ffc_Lagrange_2_2dVector.h>
+#include <dolfin/elements/ffc_Lagrange_1_3dVector.h>
+#include <dolfin/elements/ffc_Lagrange_2_3dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_0_2dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_1_2dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_2_2dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_0_3dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_1_3dVector.h>
+#include <dolfin/elements/ffc_Discontinuous_Lagrange_2_3dVector.h>
+#include <dolfin/elements/ffc_Brezzi_Douglas_Marini_1_2d.h>
+
+#else  // UFC 1.1 headers
+
 #include <dolfin/elements/ffc_00.h>
 #include <dolfin/elements/ffc_01.h>
 #include <dolfin/elements/ffc_02.h>

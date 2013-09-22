@@ -53,6 +53,8 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x,
     ksp_init = true;
   }
 
+  if (get("Krylov keep PC"))
+    jp_ksp_freeze_pc(ksp);
 
   jp_pc_t pc_type;
   if (pc_janpack == none)

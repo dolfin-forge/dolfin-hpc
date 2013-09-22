@@ -12,8 +12,10 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/GlobalFacetMap.h>
+#include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/parameter/parameters.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -22,156 +24,208 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain()
+SubDomain::SubDomain() : intersection_detector(0)
 {
-	// Do nothing
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+SubDomain::SubDomain(Mesh& bmesh) 
+{
+  intersection_detector = new IntersectionDetector(bmesh);
 }
 //-----------------------------------------------------------------------------
 SubDomain::~SubDomain()
 {
-	// Do nothing
+  if (intersection_detector)
+    delete intersection_detector;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::inside(const real* x, bool on_boundary) const
 {
-	error(
-			"Unable to determine if point is inside subdomain, function inside() not implemented by user.");
-	return false;
+  error("Unable to determine if point is inside subdomain, function inside() not implemented by user.");
+  return false;
 }
 //-----------------------------------------------------------------------------
 void SubDomain::map(const real* x, real* y) const
 {
-	error(
-			"Mapping between subdomains missing for periodic boundary conditions, function map() not implemented by user.");
+  error("Mapping between subdomains missing for periodic boundary conditions, function map() not implemented by user.");
+}
+//-----------------------------------------------------------------------------
+bool SubDomain::intersect(real* x, uint dim, bool on_boundary) const
+{
+  Point p;
+  for (uint i = 0; i < dim; i++)
+    p[i] = x[i];
+  
+  return intersect(p, on_boundary);
+}
+//-----------------------------------------------------------------------------
+bool SubDomain::intersect(Point p, bool on_boundary) const
+{
+
+  Array<uint> cells;
+  intersection_detector->overlap(p, cells);
+  if (dolfin_get("SubDomain Intersect Boundary"))
+    return (cells.size() > 0) && on_boundary;
+  else
+    return (cells.size() > 0);
 }
 //-----------------------------------------------------------------------------
 void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
 {
-	message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
+  message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
 
-	// Get the dimension of the entities we are marking
-	const uint dim = sub_domains.dim();
+  // Save GTS tolerances
+  real gts_tol = dolfin_get("GTS Tolerance");
+  real geom_tri_tol = dolfin_get("Geometrical Tolerance Triangle");
+  real geom_tet_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
 
-	// Compute facet - cell connectivity if necessary
-	Mesh& mesh = sub_domains.mesh();
-	const uint D = mesh.topology().dim();
-	if (dim == D - 1)
+  if (intersection_detector) 
+  {
+    dolfin_set("GTS Tolerance",1e-6);
+    dolfin_set("Geometrical Tolerance Triangle", 
+	       dolfin_get("SubDomain Geometrical Tolerance"));
+    dolfin_set("Geometrical Tolerance Tetrahedron",
+	       dolfin_get("SubDomain Geometrical Tolerance"));
+  }
+
+  // Get the dimension of the entities we are marking
+  const uint dim = sub_domains.dim();
+
+  // Compute facet - cell connectivity if necessary
+  Mesh& mesh = sub_domains.mesh();
+  const uint D = mesh.topology().dim();
+  if (dim == D - 1)
+  {
+    mesh.init(D - 1);
+    mesh.init(D - 1, D);
+  }
+
+  GlobalFacetMap facetmap(mesh);
+  facetmap.init();
+
+  // Always false when not marking facets
+  bool on_boundary = false;
+
+  // Compute sub domain markers
+  for (MeshEntityIterator entity(mesh, dim); !entity.end(); ++entity)
+  {
+    on_boundary = false;
+    // Check if entity is on the boundary if entity is a facet
+    if (dim == D - 1) 
+      on_boundary = entity->numEntities(D) == 1;
+    else if ( dim == 0)
+      for( FacetIterator fi(*entity); !fi.end(); ++fi) {
+	/*
+	if( fi->numEntities(D) == 1 ||
+	    (MPI::numProcesses() > 1 && facetmap.globalFacet(*fi) &&
+	     fi->numEntities(D) == 1))
+	*/
+	if(fi->numEntities(D) &&  facetmap.globalFacet(*fi))
+	  on_boundary = true;
+      }
+    
+    bool all_vertices_inside = true;
+    // Dimension of facet > 0, check incident vertices
+    if (entity->dim() > 0)
+    {
+
+      if(MPI::numProcesses() > 1){
+	Facet f(mesh, entity->index());
+	if(!facetmap.globalFacet(f))
+	  on_boundary = false; 
+      }
+
+      for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
+      {
+        simple_array<real> x(mesh.geometry().dim(), vertex->x());
+	if (intersection_detector) 
 	{
-		mesh.init(D - 1);
-		mesh.init(D - 1, D);
+	  if (!intersect(vertex->point(), on_boundary)) {
+	    all_vertices_inside = false;
+	    break;
+	  }
 	}
-
-	GlobalFacetMap facetmap(mesh);
-	facetmap.init();
-
-	// Always false when not marking facets
-	bool on_boundary = false;
-
-	// Compute sub domain markers
-	for (MeshEntityIterator entity(mesh, dim); !entity.end(); ++entity)
+	else if (!inside(x, on_boundary))
 	{
-		on_boundary = false;
-		// Check if entity is on the boundary if entity is a facet
-		if (dim == D - 1)
-			on_boundary = entity->numEntities(D) == 1;
-		else if (dim == 0)
-			for (FacetIterator fi(*entity); !fi.end(); ++fi)
-			{
-				/*
-				 if( fi->numEntities(D) == 1 ||
-				 (MPI::numProcesses() > 1 && facetmap.globalFacet(*fi) &&
-				 fi->numEntities(D) == 1))
-				 */
-				if (fi->numEntities(D) && facetmap.globalFacet(*fi))
-					on_boundary = true;
-			}
-
-		bool all_vertices_inside = true;
-		// Dimension of facet > 0, check incident vertices
-		if (entity->dim() > 0)
-		{
-
-			if (MPI::numProcesses() > 1)
-			{
-				Facet f(mesh, entity->index());
-				if (!facetmap.globalFacet(f))
-					on_boundary = false;
-			}
-
-			for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
-			{
-				if (!inside(vertex->x(), on_boundary))
-				{
-					all_vertices_inside = false;
-					break;
-				}
-			}
-		}
-		// Dimension of facet == 0, so just check the vertex itself
-		else
-		{
-			if (!inside(mesh.geometry().x(entity->index()), on_boundary))
-			{
-				all_vertices_inside = false;
-			}
-		}
-
-		// Mark entity with all vertices inside
-		if (all_vertices_inside)
-			sub_domains(*entity) = sub_domain;
+	  all_vertices_inside = false;
+	  break;
 	}
+      }
+    }
+    // Dimension of facet == 0, so just check the vertex itself
+    else
+    {
+
+      simple_array<real> x(mesh.geometry().dim(),
+			   mesh.geometry().x(entity->index()));
+      if (intersection_detector) 
+      {
+	if (!intersect(x.data, mesh.geometry().dim(), on_boundary)) {
+	  all_vertices_inside = false;
+	  break;
+	}
+      }
+      else if (!inside(x, on_boundary))
+      {
+	all_vertices_inside = false;
+	break;
+      }
+    }
+
+    // Mark entity with all vertices inside
+    if (all_vertices_inside)
+      sub_domains(*entity) = sub_domain;
+  }
+
+  // Reset GTS tolerances
+  dolfin_set("GTS Tolerance",gts_tol);
+  dolfin_set("Geometrical Tolerance Triangle", geom_tri_tol);
+  dolfin_set("Geometrical Tolerance Tetrahedron", geom_tet_tol);
 
 #ifdef HAVE_MPI
-	if (MPI::numProcesses() > 1)
-	{
-		if (dim == 0)
-		{
-			uint pe_size = MPI::numProcesses();
-			uint rank = MPI::processNumber();
-
-			Array<uint> *ghost_buff = new Array<uint> [pe_size];
-			for (MeshGhostIterator iter(mesh.distdata(), 0); !iter.end();
-					++iter)
-				if (sub_domains.get(iter.index()) == sub_domain)
-					ghost_buff[iter.owner()].push_back(
-							mesh.distdata().get_global(iter.index(), 0));
-
-			int recv_size, recv_count, send_size;
-			for (uint i = 0; i < pe_size; i++)
-			{
-				send_size = ghost_buff[i].size();
-				MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i,
-						MPI::DOLFIN_COMM);
-			}
-			uint *recv_buff = new uint[recv_size];
-
-			MPI_Status status;
-			uint src, dest;
-
-			for (uint j = 1; j < pe_size; j++)
-			{
-
-				src = (rank - j + pe_size) % pe_size;
-				dest = (rank + j) % pe_size;
-
-				MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
-						MPI_UNSIGNED, dest, 1, recv_buff, recv_size,
-						MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
-				MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-				for (int i = 0; i < recv_count; i++)
-					sub_domains.set(mesh.distdata().get_local(recv_buff[i], 0),
-							sub_domain);
-
-			}
-			delete[] recv_buff;
-
-			for (uint i = 0; i < pe_size; i++)
-				ghost_buff[i].clear();
-			delete[] ghost_buff;
-
-		}
-	}
+  if(MPI::numProcesses() > 1) {
+    if(dim == 0) {
+      uint pe_size = MPI::numProcesses();
+      uint rank = MPI::processNumber();
+      
+      Array<uint> *ghost_buff = new Array<uint>[pe_size];
+      for(MeshGhostIterator iter(mesh.distdata(), 0); !iter.end(); ++iter)
+	if(sub_domains.get(iter.index()) == sub_domain)
+	  ghost_buff[iter.owner()].push_back(mesh.distdata().get_global(iter.index(),0));
+      
+      int recv_size,recv_count, send_size;
+      for(uint i=0; i<pe_size; i++){
+	send_size = ghost_buff[i].size();
+	MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i, MPI::DOLFIN_COMM);
+      }
+      uint *recv_buff = new uint[ recv_size];
+      
+      MPI_Status status;
+      uint src,dest;
+      
+      for(uint j=1; j<pe_size; j++){
+	
+	src = (rank - j + pe_size) % pe_size;
+	dest = (rank + j) % pe_size;    
+	
+	MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(), MPI_UNSIGNED,
+		     dest, 1, recv_buff, recv_size, MPI_UNSIGNED, src, 1,
+		     MPI::DOLFIN_COMM, &status);
+	MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);      
+	
+	for(int i = 0; i < recv_count; i++) 
+	  sub_domains.set(mesh.distdata().get_local(recv_buff[i], 0), sub_domain);
+	
+      }
+      delete[] recv_buff;
+      
+      for(uint i = 0; i < pe_size; i++)
+	ghost_buff[i].clear();
+      delete[] ghost_buff;
+      
+    }
+  }
 #endif
 
 }

@@ -1,4 +1,5 @@
 
+
 nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				adaptivity/AdaptiveRefinementProjectScalar.h\
 				adaptivity/AdaptiveRefinementProjectVector.h\
@@ -12,6 +13,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				common/Timer.h\
 				common/Variable.h\
 				config/dolfin_config.h\
+				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/FE.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
@@ -201,6 +203,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				math/Lagrange.h\
 				math/Legendre.h\
 				mesh/LocalMeshCoarsening.h\
+				mesh/CoarseningManager.h\
 				mesh/Edge.h\
 				mesh/rounding.h\
 				mesh/predicates_init.h\

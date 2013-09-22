@@ -140,7 +140,7 @@ namespace dolfin
 
     // JANPACK vector pointer
     //    char *x;
-    char x[152];
+    char x[160];
        
     // True if we don't own the vector x points to
     bool is_view;

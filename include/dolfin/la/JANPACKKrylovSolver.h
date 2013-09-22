@@ -48,7 +48,7 @@ namespace dolfin
     bool ksp_init;
 
     // JANPACK ksp data
-    char ksp[208];
+    char ksp[216];
     
   };
 }

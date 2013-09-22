@@ -7,6 +7,7 @@ libdolfin_mesh_la_SOURCES = \
 			Box.cpp\
 			Cell.cpp\
 			CellType.cpp\
+			CoarseningManager.cpp\
 			Edge.cpp\
 			Face.cpp\
 			Facet.cpp\

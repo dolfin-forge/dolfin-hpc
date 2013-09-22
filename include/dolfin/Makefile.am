@@ -1,21 +1,12 @@
+include_HEADERS = dolfin.h
 
-
-nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
-				adaptivity/AdaptiveRefinementProjectScalar.h\
+nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
+				adaptivity/AdaptiveRefinement.h\
+				aptivity/AdaptiveRefinementProjectScalar.h\
 				adaptivity/AdaptiveRefinementProjectVector.h\
 				adaptivity/SpaceTimeFunction.h\
-				common/constants.h\
-				common/timing.h\
-				common/types.h\
-				common/unittest.h\
-				common/Array.h\
-				common/List.h\
-				common/Timer.h\
-				common/Variable.h\
-				config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
-				elements/FE.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
 				elements/ffc_Discontinuous_Lagrange_0_1d.h\
 				elements/ffc_Discontinuous_Lagrange_0_2d.h\
@@ -93,115 +84,71 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				elements/ffc_L2proj_22.h\
 				elements/ffc_L2proj_23.h\
 				elements/ffc_L2proj_24.h\
-				fem/Assembler.h\
-				fem/BoundaryCondition.h\
-				fem/DirichletBC.h\
-				fem/DofMap.h\
-				fem/DofMapCache.h\
-				fem/DofMapSet.h\
-				fem/FiniteElement.h\
-				fem/Form.h\
-				fem/NodeNormal.h\
-				fem/PeriodicBC.h\
-				fem/SlipBC.h\
-				fem/SlipFrictionBC.h\
-				fem/SparsityPatternBuilder.h\
-				fem/SubSystem.h\
-				fem/UFC.h\
-				fem/UFCCell.h\
-				fem/UFCMesh.h\
-				function/ConstantFunction.h\
-				function/DiscreteFunction.h\
-				function/Expression.h\
-				function/ExpressionFunction.h\
-				function/Function.h\
-				function/GenericFunction.h\
-				function/SpecialFunctions.h\
-				function/SubFunction.h\
-				function/UFCFunction.h\
-				function/UserFunction.h\
-				graph/GraphEditor.h\
-				graph/DirectedClique.h\
-				graph/GraphPartition.h\
-				graph/Graph.h\
-				graph/UndirectedClique.h\
 				nls/NonlinearProblem.h\
 				nls/NewtonSolver.h\
 				nls/dolfin_nls.h\
-				io/base64.h\
 				io/XMLFiniteElement.h\
 				io/Checkpoint.h\
-				io/BinaryFile.h\
-				io/Encoder.h\
-				io/File.h\
-				io/GenericFile.h\
-				io/MatlabFile.h\
-				io/MFile.h\
-				io/OctaveFile.h\
-				io/PXMLMesh.h\
-				io/RAWFile.h\
-				io/STLFile.h\
-				io/VTKFile.h\
-				io/XMLDofMap.h\
+				io/XMLMeshFunction.h\
 				io/XMLFile.h\
-				io/XMLFiniteElement.h\
-				io/XMLFunction.h\
 				io/XMLGraph.h\
 				io/XMLMatrix.h\
-				io/XMLMesh.h\
-				io/XMLMeshFunction.h\
-				io/XMLObject.h\
-				io/XMLParameterList.h\
-				io/XMLVector.h\
+				io/PXMLMesh.h\
+				io/File.h\
+				io/XMLFunction.h\
+				io/Encoder.h\
+				io/MatlabFile.h\
 				io/XYZFile.h\
-				la/AMGSolver.h\
-				la/MultigridScheme.h\
-				la/KrylovSolver.h\
-				la/PreconditionerType.h\
-				la/JANPACKKrylovSolver.h\
-				la/JANPACKAMGSolver.h\
-				la/PETScMatrix.h\
-				la/GenericSparsityPattern.h\
-				la/GenericVector.h\
-				la/GenericTensor.h\
-				la/JANPACKVec.h\
-				la/NormalizationType.h\
-				la/LUSolver.h\
-				la/SparsityPattern.h\
-				la/LinearAlgebraFactory.h\
-				la/Vector.h\
-				la/PETScLUSolver.h\
-				la/JANPACKMat.h\
-				la/JANPACKFactory.h\
-				la/DefaultFactory.h\
-				la/PETScKrylovSolver.h\
-				la/GenericMatrix.h\
-				la/Matrix.h\
-				la/solve.h\
-				la/Scalar.h\
-				la/SolverType.h\
-				la/PETScPreconditioner.h\
-				la/VectorNormType.h\
-				la/PETScObject.h\
-				la/PETScFactory.h\
-				la/PETScKrylovMatrix.h\
-				la/LinearSolver.h\
-				la/PETScVector.h\
-				la/SingularSolver.h\
-				log/Event.h\
-				log/Logger.h\
-				log/dolfin_log.h\
-				log/LogManager.h\
-				log/Progress.h\
-				log/LogStream.h\
-				log/log.h\
-				main/dolfin_doc.h\
-				main/init.h\
+				io/STLFile.h\
+				io/XMLMesh.h\
+				io/XMLVector.h\
+				io/VTKFile.h\
+				io/XMLParameterList.h\
+				io/RAWFile.h\
+				io/OctaveFile.h\
+				io/base64.h\
+				io/dolfin_io.h\
+				io/BinaryFile.h\
+				io/MFile.h\
+				io/XMLDofMap.h\
+				io/GenericFile.h\
+				io/XMLObject.h\
+				parameter/DefaultParameters.h\
+				parameter/dolfin_parameter.h\
+				parameter/Parametrized.h\
+				parameter/parameters.h\
+				parameter/ParameterSystem.h\
+				parameter/Parameter.h\
+				parameter/ParameterList.h\
+				parameter/ParameterValue.h\
+				function/GenericFunction.h\
+				function/UFCFunction.h\
+				function/SpecialFunctions.h\
+				function/UserFunction.h\
+				function/DiscreteFunction.h\
+				function/dolfin_function.h\
+				function/ConstantFunction.h\
+				function/SubFunction.h\
+				function/Function.h\
+				function/ProjectL2.h\
+				main/dolfin_main.h\
 				main/MPI.h\
 				main/SubSystemsManager.h\
-				math/basic.h\
+				main/dolfin_doc.h\
+				main/init.h\
+				pde/NonlinearPDE.h\
+				pde/dolfin_pde.h\
+				pde/LinearPDE.h\
 				math/Lagrange.h\
 				math/Legendre.h\
+				math/basic.h\
+				math/dolfin_math.h\
+				quadrature/GaussianQuadrature.h\
+				quadrature/LobattoQuadrature.h\
+				quadrature/GaussQuadrature.h\
+				quadrature/RadauQuadrature.h\
+				quadrature/Quadrature.h\
+				quadrature/dolfin_quadrature.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/CoarseningManager.h\
 				mesh/Edge.h\
@@ -238,6 +185,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				mesh/MeshSmoothData.h\
 				mesh/MeshSmoothing.h\
 				mesh/UnitCube.h\
+				mesh/dolfin_mesh.h\
 				mesh/LoadBalancer.h\
 				mesh/GTSInterface.h\
 				mesh/MPIMeshCommunicator.h\
@@ -259,16 +207,79 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunctionConverter.h\
-				parameter/parameters.h\
-				parameter/DefaultParameters.h\
-				parameter/Parameter.h\
-				parameter/ParameterList.h\
-				parameter/ParameterSystem.h\
-				parameter/ParameterValue.h\
-				parameter/Parametrized.h\
-				quadrature/GaussianQuadrature.h\
-				quadrature/LobattoQuadrature.h\
-				quadrature/GaussQuadrature.h\
-				quadrature/RadauQuadrature.h\
-				quadrature/Quadrature.h
+				la/AMGSolver.h\
+				la/MultigridScheme.h\
+				la/KrylovSolver.h\
+				la/PreconditionerType.h\
+				la/JANPACKKrylovSolver.h\
+				la/JANPACKAMGSolver.h\
+				la/PETScMatrix.h\
+				la/GenericSparsityPattern.h\
+				la/GenericVector.h\
+				la/GenericTensor.h\
+				la/JANPACKVec.h\
+				la/NormalizationType.h\
+				la/LUSolver.h\
+				la/SparsityPattern.h\
+				la/LinearAlgebraFactory.h\
+				la/Vector.h\
+				la/PETScLUSolver.h\
+				la/JANPACKMat.h\
+				la/JANPACKFactory.h\
+				la/dolfin_la.h\
+				la/DefaultFactory.h\
+				la/PETScKrylovSolver.h\
+				la/GenericMatrix.h\
+				la/Matrix.h\
+				la/solve.h\
+				la/Scalar.h\
+				la/SolverType.h\
+				la/PETScPreconditioner.h\
+				la/VectorNormType.h\
+				la/PETScObject.h\
+				la/PETScFactory.h\
+				la/PETScKrylovMatrix.h\
+				la/LinearSolver.h\
+				la/PETScVector.h\
+				la/SingularSolver.h\
+				graph/GraphEditor.h\
+				graph/DirectedClique.h\
+				graph/dolfin_graph.h\
+				graph/GraphPartition.h\
+				graph/Graph.h\
+				graph/UndirectedClique.h\
+				fem/SubSystem.h\
+				fem/UFC.h\
+				fem/SparsityPatternBuilder.h\
+				fem/DofMapSet.h\
+				fem/assemble.h\
+				fem/DirichletBC.h\
+				fem/Form.h\
+				fem/dolfin_fem.h\
+				fem/Assembler.h\
+				fem/PeriodicBC.h\
+				fem/UFCCell.h\
+				fem/DofMap.h\
+				fem/BoundaryCondition.h\
+				fem/UFCMesh.h\
+				log/Event.h\
+				log/Logger.h\
+				log/dolfin_log.h\
+				log/LogManager.h\
+				log/Progress.h\
+				log/LogStream.h\
+				log/log.h\
+				common/timing.h\
+				common/types.h\
+				common/Array.h\
+				common/unittest.h\
+				common/dolfin_common.h\
+				common/TimeDependent.h\
+				common/constants.h\
+				common/Variable.h\
+				common/List.h\
+				common/Timer.h\
+				common/simple_array.h
+
+
 

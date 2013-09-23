@@ -23,238 +23,239 @@
 
 namespace dolfin
 {
-
-template<class T> class MeshFunction;
-class MeshData;
-
-/// A Mesh consists of a set of connected and numbered mesh entities.
-///
-/// Both the representation and the interface are dimension-independent,
-/// but a concrete interface is also provided for standard named mesh
-/// entities:
-///
-///     Entity  Dimension  Codimension
-///
-///     Vertex      0           -
-///     Edge        1           -
-///     Face        2           -
-///
-///     Facet       -           1
-///     Cell        -           0
-///
-/// When working with mesh iterators, all entities and connectivity
-/// are precomputed automatically the first time an iterator is
-/// created over any given topological dimension or connectivity.
-///
-/// Note that for efficiency, only entities of dimension zero
-/// (vertices) and entities of the maximal dimension (cells) exist
-/// when creating a Mesh. Other entities must be explicitly created
-/// by calling init(). For example, all edges in a mesh may be created
-/// by a call to mesh.init(1). Similarly, connectivities such as
-/// all edges connected to a given vertex must also be explicitly
-/// created (in this case by a call to mesh.init(0, 1)).
-
-class Mesh: public Variable
-{
-
-  // Friends
-  friend class MeshEditor;
-  friend class TopologyComputation;
-  friend class MeshOrdering;
-  friend class MPIMeshCommunicator;
-
-public:
-
-  /// Create empty mesh
-  Mesh();
-
-  /// Copy constructor
-  Mesh(const Mesh& mesh);
-
-  /// Create mesh from data file
-  Mesh(std::string filename);
-
-  /// Destructor
-  ~Mesh();
-
-  /// Assignment
-  const Mesh& operator=(const Mesh& mesh);
-
-  /// Return number of vertices
-  uint numVertices() const;
-
-  /// Return number of edges
-  uint numEdges() const;
-
-  /// Return number of faces
-  uint numFaces() const;
-
-  /// Return number of facets
-  uint numFacets() const;
-
-  /// Return number of cells
-  uint numCells() const;
-
-  /// Return coordinates of all vertices
-  real* coordinates();
-
-  /// Return coordinates of all vertices
-  const real* coordinates() const;
-
-  /// Return connectivity for all cells
-  uint* cells();
-
-  /// Return connectivity for all cells
-  const uint* cells() const;
-
-  /// Return number of entities of given topological dimension
-  uint size(uint dim) const;
-
-  /// Return mesh topology (non-const version)
-  MeshTopology& topology();
-
-  /// Return mesh topology (const version)
-  const MeshTopology& topology() const;
-
-  /// Return mesh geometry (non-const version)
-  MeshGeometry& geometry();
-
-  /// Return mesh geometry (const version)
-  const MeshGeometry& geometry() const;
-
-  /// Return mesh distribution data
-  MeshDistributedData& distdata();
-
-  /// Return mesh distribution data (const version)
-  const MeshDistributedData& distdata() const;
-
-  /// Return mesh data
-  MeshData& data();
-
-  /// Return mesh cell type
-  CellType& type();
-
-  /// Return mesh cell type
-  const CellType& type() const;
-
-  /// Compute entities of given topological dimension and return number of entities
-  uint init(uint dim);
-
-  /// Compute connectivity between given pair of dimensions
-  void init(uint d0, uint d1);
-
-  /// Compute all entities and connectivity
-  void init();
-
-  /// Clear all mesh data
-  void clear();
-
-  /// Order all mesh entities (not needed if "mesh order entities" is set)
-  void order();
-
-  /// Return true iff topology is ordered according to the UFC numbering
-  bool ordered() const;
-
-  /// Refine mesh uniformly
-  void refine();
-
-  /// Refine mesh according to cells marked for refinement
-  void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
-              bool load_balance = true);
-
-  /// Coarsen mesh uniformly
-  void coarsen();
-
-  /// Coarsen mesh according to cells marked for coarsening
-  void coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary = false);
-
-  /// Move coordinates of mesh according to new boundary coordinates
-  void move(Mesh& boundary, ALEType method = lagrange);
-
-  /// Smooth mesh using Lagrangian mesh smoothing
-  void smooth();
-
-  /// Partition mesh into num_processes partitions
-  void partition(MeshFunction<uint>& partitions);
-
-  /// Partition mesh into num_partitions partitions
-  void partition(MeshFunction<uint>& partitions, uint num_partitions);
-
-  /// Partition mesh into num_partitions = numProc with weights on vertices
-  void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
-
-  /// Partition mesh into num_partitions = numProc
-  void partition_geom(MeshFunction<uint>& partitions);
-
-  /// Distribute a mesh according to a mesh function
-  void distribute(MeshFunction<uint>& distribution);
-
-  /// Distribute a mesh according to a mesh function and transfer marked cells
-  void distribute(MeshFunction<uint>& distribution,
-                  MeshFunction<bool>& cell_markers,
-                  MeshFunction<bool>& new_cell_markers);
-
-  /// Distribute a mesh according to a mesh function and transfer cell functions
+  
+  template<class T> class MeshFunction;
+  class MeshData;
+  
+  /// A Mesh consists of a set of connected and numbered mesh entities.
   ///
-  /// cell_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
-
-  /// Distribute a mesh according to a mesh function and transfer vertex functions
+  /// Both the representation and the interface are dimension-independent,
+  /// but a concrete interface is also provided for standard named mesh
+  /// entities:
   ///
-  /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
-
-  /// Distribute a mesh according to a mesh function and transfer cell and
-  /// vertex functions
+  ///     Entity  Dimension  Codimension
   ///
-  /// cell_functions contains pairs as <old_function,new_function>
+  ///     Vertex      0           -
+  ///     Edge        1           -
+  ///     Face        2           -
   ///
-  /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
-
-  /// Renumber mesh global numbering
-  void renumber();
-
-  /// Return hash to identify the state of the mesh
-  std::string const hash();
-
-  /// Display mesh data
-  void disp() const;
-
-  /// Return a short desriptive string
-  std::string str() const;
-
-  /// Output
-  friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
-
-private:
-
-  // Mesh topology
-  MeshTopology _topology;
-
-  // Mesh geometry
-  MeshGeometry _geometry;
-
-  // Auxiliary mesh data
-  MeshData* _data;
-
-  // Cell type
-  CellType* _cell_type;
-
-  /// Return true iff topology is ordered according to the UFC numbering
-  bool _ordered;
-
-  /// Distribued Mesh data
-  MeshDistributedData _distdata;
-
-};
+  ///     Facet       -           1
+  ///     Cell        -           0
+  ///
+  /// When working with mesh iterators, all entities and connectivity
+  /// are precomputed automatically the first time an iterator is
+  /// created over any given topological dimension or connectivity.
+  ///
+  /// Note that for efficiency, only entities of dimension zero
+  /// (vertices) and entities of the maximal dimension (cells) exist
+  /// when creating a Mesh. Other entities must be explicitly created
+  /// by calling init(). For example, all edges in a mesh may be created
+  /// by a call to mesh.init(1). Similarly, connectivities such as
+  /// all edges connected to a given vertex must also be explicitly
+  /// created (in this case by a call to mesh.init(0, 1)).
+  
+  class Mesh: public Variable
+  {
+    
+    // Friends
+    friend class MeshEditor;
+    friend class TopologyComputation;
+    friend class MeshOrdering;
+    friend class MPIMeshCommunicator;
+    
+  public:
+    
+    /// Create empty mesh
+    Mesh();
+    
+    /// Copy constructor
+    Mesh(const Mesh& mesh);
+    
+    /// Create mesh from data file
+    Mesh(std::string filename);
+    
+    /// Destructor
+    ~Mesh();
+    
+    /// Assignment
+    const Mesh& operator=(const Mesh& mesh);
+    
+    /// Return number of vertices
+    uint numVertices() const;
+    
+    /// Return number of edges
+    uint numEdges() const;
+    
+    /// Return number of faces
+    uint numFaces() const;
+    
+    /// Return number of facets
+    uint numFacets() const;
+    
+    /// Return number of cells
+    uint numCells() const;
+    
+    /// Return coordinates of all vertices
+    real* coordinates();
+    
+    /// Return coordinates of all vertices
+    const real* coordinates() const;
+    
+    /// Return connectivity for all cells
+    uint* cells();
+    
+    /// Return connectivity for all cells
+    const uint* cells() const;
+    
+    /// Return number of entities of given topological dimension
+    uint size(uint dim) const;
+    
+    /// Return mesh topology (non-const version)
+    MeshTopology& topology();
+    
+    /// Return mesh topology (const version)
+    const MeshTopology& topology() const;
+    
+    /// Return mesh geometry (non-const version)
+    MeshGeometry& geometry();
+    
+    /// Return mesh geometry (const version)
+    const MeshGeometry& geometry() const;
+    
+    /// Return mesh distribution data
+    MeshDistributedData& distdata();
+    
+    /// Return mesh distribution data (const version)
+    const MeshDistributedData& distdata() const;
+    
+    /// Return mesh data
+    MeshData& data();
+    
+    /// Return mesh cell type
+    CellType& type();
+    
+    /// Return mesh cell type
+    const CellType& type() const;
+    
+    /// Compute entities of given topological dimension and return number of entities
+    uint init(uint dim);
+    
+    /// Compute connectivity between given pair of dimensions
+    void init(uint d0, uint d1);
+    
+    /// Compute all entities and connectivity
+    void init();
+    
+    /// Clear all mesh data
+    void clear();
+    
+    /// Order all mesh entities (not needed if "mesh order entities" is set)
+    void order();
+    
+    /// Return true iff topology is ordered according to the UFC numbering
+    bool ordered() const;
+    
+    /// Refine mesh uniformly
+    void refine();
+    
+    /// Refine mesh according to cells marked for refinement
+    void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
+		bool load_balance = true);
+    
+    /// Coarsen mesh uniformly
+    void coarsen();
+    
+    /// Coarsen mesh according to cells marked for coarsening
+    void coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary = false);
+    
+    /// Move coordinates of mesh according to new boundary coordinates
+    void move(Mesh& boundary, ALEType method = lagrange);
+    
+    /// Smooth mesh using Lagrangian mesh smoothing
+    void smooth();
+    
+    /// Partition mesh into num_processes partitions
+    void partition(MeshFunction<uint>& partitions);
+    
+    /// Partition mesh into num_partitions partitions
+    void partition(MeshFunction<uint>& partitions, uint num_partitions);
+    
+    /// Partition mesh into num_partitions = numProc with weights on vertices
+    void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
+    
+    /// Partition mesh into num_partitions = numProc
+    void partition_geom(MeshFunction<uint>& partitions);
+    
+    /// Distribute a mesh according to a mesh function
+    void distribute(MeshFunction<uint>& distribution);
+    
+    /// Distribute a mesh according to a mesh function and transfer marked cells
+    void distribute(MeshFunction<uint>& distribution,
+		    MeshFunction<bool>& cell_markers,
+		    MeshFunction<bool>& new_cell_markers);
+    
+    /// Distribute a mesh according to a mesh function and transfer cell functions
+    ///
+    /// cell_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution,
+		    Array<std::pair<MeshFunction<uint> *, 
+		    MeshFunction<uint> *> >& cell_functions);
+    
+    /// Distribute a mesh according to a mesh function and transfer vertex functions
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution,
+		    Array<std::pair<MeshFunction<double> *, 
+		    MeshFunction<double> *> >& vertex_functions);
+    
+    /// Distribute a mesh according to a mesh function and transfer cell and
+    /// vertex functions
+    ///
+    /// cell_functions contains pairs as <old_function,new_function>
+    ///
+    /// vertex_functions contains pairs as <old_function,new_function>
+    void distribute(MeshFunction<uint>& distribution,
+		    Array<std::pair<MeshFunction<uint> *, 
+		    MeshFunction<uint> *> >& cell_functions,
+		    Array<std::pair<MeshFunction<double> *, 
+		    MeshFunction<double> *> >& vertex_functions);
+    
+    /// Renumber mesh global numbering
+    void renumber();
+    
+    /// Return hash to identify the state of the mesh
+    std::string const hash();
+    
+    /// Display mesh data
+    void disp() const;
+    
+    /// Return a short desriptive string
+    std::string str() const;
+    
+    /// Output
+    friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
+    
+  private:
+    
+    // Mesh topology
+    MeshTopology _topology;
+    
+    // Mesh geometry
+    MeshGeometry _geometry;
+    
+    // Auxiliary mesh data
+    MeshData* _data;
+    
+    // Cell type
+    CellType* _cell_type;
+    
+    /// Return true iff topology is ordered according to the UFC numbering
+    bool _ordered;
+    
+    /// Distribued Mesh data
+    MeshDistributedData _distdata;
+    
+  };
 
 //--- INLINES -----------------------------------------------------------------
 
@@ -276,7 +277,7 @@ inline uint Mesh::numFaces() const
   return _topology.size(2);
 }
 
-//-----------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------
 inline uint Mesh::numFacets() const
 {
   return _topology.size(_topology.dim() - 1);

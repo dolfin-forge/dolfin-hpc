@@ -29,43 +29,42 @@
 
 #include <sstream>
 
-namespace dolfin
-{
+using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
-    Variable("mesh", "DOLFIN mesh"),
-    _data(0),
-    _cell_type(0),
-    _ordered(false)
+  Variable("mesh", "DOLFIN mesh"),
+  _data(0),
+  _cell_type(0),
+  _ordered(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(const Mesh& mesh) :
-    Variable("mesh", "DOLFIN mesh"),
-    _data(0),
-    _cell_type(0),
-    _ordered(false)
+  Variable("mesh", "DOLFIN mesh"),
+  _data(0),
+  _cell_type(0),
+  _ordered(false)
 {
   *this = mesh;
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
-    Variable("mesh", "DOLFIN mesh"),
-    _data(0),
-    _cell_type(0),
-    _ordered(false)
+  Variable("mesh", "DOLFIN mesh"),
+  _data(0),
+  _cell_type(0),
+  _ordered(false)
 {
   File file(filename);
   file >> *this;
-
+  
   if (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
   {
-    MeshFunction<uint> partitions;
-    partition(partitions);
-    distribute(partitions);
-    renumber();
+      MeshFunction<uint> partitions;
+      partition(partitions);
+      distribute(partitions);
+      renumber();
   }
 }
 //-----------------------------------------------------------------------------
@@ -77,16 +76,16 @@ Mesh::~Mesh()
 const Mesh& Mesh::operator=(const Mesh& mesh)
 {
   clear();
-
+  
   _topology = mesh._topology;
   _geometry = mesh._geometry;
   _distdata = mesh._distdata;
-
+  
   if (mesh._cell_type)
     _cell_type = CellType::create(mesh._cell_type->cellType());
-
+  
   rename(mesh.name(), mesh.label());
-
+  
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -94,7 +93,7 @@ MeshData& Mesh::data()
 {
   if (!_data)
     _data = new MeshData(*this);
-
+  
   return *_data;
 }
 //-----------------------------------------------------------------------------
@@ -113,7 +112,7 @@ void Mesh::init()
   // Compute all entities
   for (uint d = 0; d <= topology().dim(); d++)
     init(d);
-
+  
   // Compute all connectivity
   for (uint d0 = 0; d0 <= topology().dim(); d0++)
     for (uint d1 = 0; d1 <= topology().dim(); d1++)
@@ -149,30 +148,30 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
-void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
-                  bool load_balance)
+void Mesh::refine(MeshFunction<bool>& cell_markers, 
+		  bool refine_boundary, bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-      refine_boundary, load_balance);
+						 refine_boundary, load_balance);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen()
 {
   // FIXME: Move implementation to separate class and just call function here
-
+  
   message("No cells marked for coarsening, assuming uniform mesh coarsening.");
   MeshFunction<bool> cell_marker(*this);
   cell_marker.init(this->topology().dim());
   for (CellIterator c(*this); !c.end(); ++c)
     cell_marker.set(c->index(), true);
-
+  
   LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_marker);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary)
 {
   LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_markers,
-      coarsen_boundary);
+						 coarsen_boundary);
 }
 //-----------------------------------------------------------------------------
 void Mesh::move(Mesh& boundary, ALEType method)
@@ -216,30 +215,31 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
                       MeshFunction<bool>& new_cell_markers)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_markers,
-      new_cell_markers);
+				  new_cell_markers);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions)
+void Mesh::distribute(MeshFunction<uint>& distribution,
+		      Array<std::pair<MeshFunction<uint> *, 
+		      MeshFunction<uint> *> >& cell_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+void Mesh::distribute(MeshFunction<uint>& distribution,
+		      Array<std::pair<MeshFunction<double> *, 
+		      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+void Mesh::distribute(MeshFunction<uint>& distribution,
+		      Array<std::pair<MeshFunction<uint> *, 
+		      MeshFunction<uint> *> >& cell_functions,
+		      Array<std::pair<MeshFunction<double> *, 
+		      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions,
-      vertex_functions);
+				  vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::renumber()
@@ -252,10 +252,9 @@ std::string const Mesh::hash()
 {
   std::stringstream ss;
   ss << "Mesh@" << this << "C" << this->numCells() << "V"
-      << this->numVertices();
+     << this->numVertices();
   return ss.str();
 }
-
 //-----------------------------------------------------------------------------
 void Mesh::disp() const
 {
@@ -303,6 +302,4 @@ LogStream& operator<<(LogStream& stream, const Mesh& mesh)
   return stream;
 }
 //-----------------------------------------------------------------------------
-
-}
 

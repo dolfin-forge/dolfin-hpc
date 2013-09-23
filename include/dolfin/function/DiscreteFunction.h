@@ -114,7 +114,10 @@ namespace dolfin
     
     /// Set values from array
     void set(real *& values);
-    
+
+    /// Friends
+    friend class LinearPDE;
+
   private:
     
     // Scratch space
@@ -169,7 +172,7 @@ namespace dolfin
     bool const local_vector;
     
     // The vector of dofs
-    GenericVector * const x;
+    GenericVector *x;
     
     // Intersection detector
     mutable IntersectionDetector* intersection_detector;

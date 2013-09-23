@@ -83,7 +83,8 @@ void LinearPDE::solve(Function& u)
 
   u.init(mesh, *x, a, 1);
   DiscreteFunction& uu = dynamic_cast<DiscreteFunction&>(*u.f);
-  uu.local_vector = x;
+  //uu.local_vector = x;
+  uu.x = x;
 
   end();
 }

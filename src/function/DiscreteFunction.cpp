@@ -388,8 +388,7 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
 {
   // Check dimension
   if (finite_element.space_dimension() != local_dim_)
-    error(
-	  "Finite element does not match for interpolation of discrete function.");
+    error("Finite element does not match for interpolation of discrete function.");
   
   // Tabulate dofs
   dof_map_->tabulate_dofs(scratch->dofs, cell, dolfin_cell.index());

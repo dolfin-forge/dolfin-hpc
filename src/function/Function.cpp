@@ -24,8 +24,7 @@
 #include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/UserFunction.h>
 
-namespace dolfin
-{
+using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 Function::Function() :
@@ -209,8 +208,8 @@ Function::Function(Function const& f) :
   }
   else
   {
-    error(
-        "Copy constructor works for discrete, constant and empty functions only (so far).");
+    error("Copy constructor works for discrete,"
+	  "constant and empty functions only (so far).");
   }
 }
 //-----------------------------------------------------------------------------
@@ -221,7 +220,6 @@ Function::~Function()
     delete f;
   }
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, real value)
 {
@@ -233,7 +231,6 @@ void Function::init(Mesh& mesh, real value)
   f = new ConstantFunction(mesh, value);
   _type = constant;
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, Expression const& expr)
 {
@@ -245,7 +242,6 @@ void Function::init(Mesh& mesh, Expression const& expr)
   f = new ExpressionFunction(mesh, expr);
   _type = expression;
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 {
@@ -257,7 +253,6 @@ void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
   f = new DiscreteFunction(mesh, x, form, i);
   _type = discrete;
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, Form& form, uint i)
 {
@@ -295,7 +290,6 @@ void Function::init(Mesh& mesh, std::string const& finite_element_signature)
       DofMap::dofmap_signature(finite_element_signature));
   _type = discrete;
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x,
                     std::string const& finite_element_signature,
@@ -310,7 +304,6 @@ void Function::init(Mesh& mesh, GenericVector& x,
       dof_map_signature);
   _type = discrete;
 }
-
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, std::string const& finite_element_signature,
                     std::string const& dof_map_signature)
@@ -323,7 +316,6 @@ void Function::init(Mesh& mesh, std::string const& finite_element_signature,
   f = new DiscreteFunction(mesh, finite_element_signature, dof_map_signature);
   _type = discrete;
 }
-
 //-----------------------------------------------------------------------------
 Function::Type Function::type() const
 {
@@ -495,7 +487,7 @@ Function const& Function::operator=(Function& f)
   return *this;
 }
 //-----------------------------------------------------------------------------
-Function const& Function::operator=(SubFunction& sub_function)
+Function const& Function::operator=(SubFunction sub_function)
 {
   if (f)
   {
@@ -566,7 +558,28 @@ void Function::eval(real* values, const real* x) const
   // Otherwise, call eval() function in implementation. Note that we
   // must check if we have a user-defined function or we will go into
   // a loop between Function and UserFunction...
-  f->eval(values, x);
+  if (_type == user)
+    values[0] = eval(x);
+  else
+    f->eval(values, x);
+}
+//-----------------------------------------------------------------------------
+dolfin::real Function::eval(const real* x) const
+{
+  // Try vector-version for non-user-defined function if not
+  // overloaded. Otherwise, raise an exception. Note that we must
+  // check that we *don't* have a user-defined function or we will go
+  // into a loop between Function and UserFunction...
+  
+  if (_type != user)
+  {
+    real values[1] = {0.0};
+    eval(values, x);
+    return values[0];
+  }
+  
+  error("Missing eval() for user-defined function (must be overloaded).");
+  return 0.0;
 }
 //-----------------------------------------------------------------------------
 const Cell& Function::cell() const
@@ -587,4 +600,4 @@ int Function::facet() const
 }
 //-----------------------------------------------------------------------------
 
-}
+

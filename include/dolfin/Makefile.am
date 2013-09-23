@@ -1,6 +1,7 @@
 include_HEADERS = dolfin.h
 
 nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
+				adaptivity/dolfin_adaptivity.h\
 				adaptivity/AdaptiveRefinement.h\
 				adaptivity/AdaptiveRefinementProjectScalar.h\
 				adaptivity/AdaptiveRefinementProjectVector.h\
@@ -122,6 +123,8 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				parameter/Parameter.h\
 				parameter/ParameterList.h\
 				parameter/ParameterValue.h\
+				function/Expression.h\
+				function/ExpressionFunction.h\
 				function/GenericFunction.h\
 				function/UFCFunction.h\
 				function/SpecialFunctions.h\
@@ -256,9 +259,12 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/assemble.h\
 				fem/DirichletBC.h\
 				fem/Form.h\
+				fem/NodeNormal.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/PeriodicBC.h\
+				fem/SlipBC.h\
+				fem/SlipFrictionBC.h\
 				fem/UFCCell.h\
 				fem/DofMap.h\
 				fem/BoundaryCondition.h\

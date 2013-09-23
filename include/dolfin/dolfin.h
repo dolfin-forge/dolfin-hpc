@@ -3,6 +3,7 @@
 
 // DOLFIN interface
 
+#include <dolfin/adaptivity/dolfin_adaptivity.h>
 #include <dolfin/common/dolfin_common.h>
 #include <dolfin/parameter/dolfin_parameter.h>
 #include <dolfin/log/dolfin_log.h>

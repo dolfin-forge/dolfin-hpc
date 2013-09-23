@@ -8,7 +8,6 @@
 #define __ADAPTIVEREFINEMENT_H
 
 #include <dolfin/common/types.h>
-
 #include <vector>
 
 namespace dolfin
@@ -19,6 +18,7 @@ namespace dolfin
     class MeshData;
     template <class T> class MeshFunction;
     class Function;
+    class Vector;
 
 //  namespace unicorn
 //  {

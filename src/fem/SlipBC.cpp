@@ -207,11 +207,15 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
 {
 
   if (MPI::processNumber() == 0)
+  {
     dolfin_set("output destination", "terminal");
+  }
   message("Applying SlipBC boundary conditions to linear system.");
   dolfin_set("output destination", "silent");
 
   UFC ufc(form.form(), mesh, form.dofMaps());
+
+  /// Create boundary mesh
   if (boundary == 0)
   {
     boundary = new BoundaryMesh(mesh);
@@ -221,6 +225,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
       vertex_map = boundary->data().meshFunction("vertex map");
     }
   }
+
+  /// Create matrix to hold a copy of the current linear system
   if (As == 0)
   {
 
@@ -240,6 +246,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
 
     if (MPI::numProcesses() > 1)
     {
+      /// Initialize the list of DoFs not on process
       std::map<uint, uint> mapping;
       for (CellIterator c(mesh); !c.end(); ++c)
       {
@@ -247,7 +254,9 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
         (form.dofMaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, c->index());
 
         for (uint j = 0; j < (form.dofMaps())[0].local_dimension(); j++)
+        {
           off_proc_rows.insert(ufc.dofs[0][j]);
+        }
       }
 
       b.init_ghosted(off_proc_rows.size(), off_proc_rows, mapping);
@@ -267,6 +276,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   uint count = 0;
   if (boundary->numCells())
   {
+	/// Loop on boundary cells
     for (VertexIterator v(*boundary); !v.end(); ++v)
     {
       Vertex vertex(mesh, vertex_map->get(*v));
@@ -285,16 +295,21 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
         uint *cvi = cell.entities(0);
         uint ci = 0;
         for (ci = 0; ci < cell.numEntities(0); ci++)
+        {
           if (cvi[ci] == node)
+          {
             break;
+          }
+        }
 
         ufc.update(cell, mesh.distdata());
         (form.dofMaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, cell.index());
 
         // Get components of the vector-valued function at the current node.
         for (uint i = 0; i < gdim; i++, ci += cdim)
+        {
           nodes.push_back(ufc.dofs[0][ci]);
-
+        }
         applySlipBC((Matrix&) A, *As, (Vector&) b, mesh, node, nodes);
         count++;
         nodes.clear();
@@ -330,15 +345,15 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
                          uint node, Array<uint>& nodes)
 {
 
-  int nsdim = mesh.topology().dim();
+  uint nsdim = mesh.topology().dim();
 
   // Get number of nozero elements in the rows of A
   //FIXME implement nzmax in dolfin 0.8
-  int nzm = A.size(0);
+  uint nzm = A.size(0);
 
   // Now, we use node_type vector, which is defined for all nodes at the boundary:
   // node_type = 1: node at the surface; Apply slip BC as usual
-  // node_type = 2: node at the edge; Apply slip BC in modified way using the secong normal which is tau_1
+  // node_type = 2: node at the edge; Apply slip BC in modified way using the second normal which is tau_1
   // node_type = 3: node at the corner; Apply no slip BC, meening that u = 0 at this node
 
   // Note a2 is just index(a1) + N
@@ -346,10 +361,16 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
   // define type of node, in 3D: 1 - surface; 2 - edge; 3 - corner;
   //                      in 2D: 1 - surface; 2 - corner;
 
-  uint a1_ncols, a2_ncols, a3_ncols;
-  Array<real> a1, a2, a3;
-  Array<uint> a1_indices, a2_indices, a3_indices;
-  a1_ncols = a2_ncols = a3_ncols = 0;
+  uint a1_ncols = 0;
+  uint a2_ncols = 0;
+  uint a3_ncols = 0;
+  Array<real> a1;
+  Array<real> a2;
+  Array<real> a3;
+  Array<uint> a1_indices;
+  Array<uint> a2_indices;
+  Array<uint> a3_indices;
+
 
   A.getrow(nodes[0], a1_indices, a1);
   a1_ncols = a1_indices.size();
@@ -372,13 +393,15 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
   l1 = b[nodes[0]];
   l2 = b[nodes[1]];
   if (nsdim == 3)
+  {
     l3 = b[nodes[2]];
+  }
 
   std::copy(a1_indices.begin(), a1_indices.end(), a1_indices_array);
-  int n_type = node_normal.node_type.get(node);
+  uint n_type = node_normal.node_type.get(node);
 
   // Apply no-slip for the node on the corner in 3D and 2D
-  if ((n_type == 3 && nsdim == 3) || (n_type == 2 && nsdim == 2))
+  if (n_type >= nsdim)
   {
     As.set(zero_block, 1, &nodes[0], static_cast<uint>(a1_ncols),
         a1_indices_array);
@@ -391,20 +414,27 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
     Aset(As, nodes[0], nodes[0], 1.0);
     Aset(As, nodes[1], nodes[1], 1.0);
     if (nsdim == 3)
+    {
       Aset(As, nodes[2], nodes[2], 1.0);
+    }
 
     bset(b, nodes[0], 0.0);
     bset(b, nodes[1], 0.0);
     if (nsdim == 3)
+    {
       bset(b, nodes[2], 0.0);
+    }
   }
   else
   {
 
     // get components of tau
-    real t11, t12, t13;
-    real t21, t22, t23;
-    t11 = t12 = t21 = t22 = t13 = t23 = 0;
+    real t11 = 0.;
+    real t12 = 0.;
+    real t13 = 0.;
+    real t21 = 0.;
+    real t22 = 0.;
+    real t23 = 0.;
     if (nsdim == 3)
     {
       t11 = node_normal.tau_1[0].get(node);
@@ -428,8 +458,9 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
     // find maximum of the normal components and put them to the diagonal
     real maxn = fmax(fabs(n1), fabs(n2));
     if (nsdim == 3)
+    {
       maxn = fmax(maxn, fabs(n3));
-
+    }
     // r1, r2, r3 are rows which are corresponds to the boundary point
     // find the maximum component of the normal and put it to the diagonal
     uint r1 = 0;

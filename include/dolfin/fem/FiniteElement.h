@@ -46,6 +46,12 @@ public:
   /// Return the cell shape
   ufc::shape cell_shape() const;
 
+  /// Return the topological dimension of the cell shape (UFC v2.1.1)
+  unsigned int topological_dimension() const;
+
+  /// Return the geometric dimension of the cell shape  (UFC v2.1.1)
+  unsigned int geometric_dimension() const;
+
   /// Return the dimension of the finite element function space
   unsigned int space_dimension() const;
 
@@ -138,8 +144,16 @@ public:
   /// Create sub finite element of given finite element
   ufc::finite_element* create_sub_element(Array<uint> const& sub_system) const;
 
+  /// Get value dimensions for sub spaces just one level down for axis i
+  Array<uint> const& sub_value_dimensions(uint i) const;
+
+  /// Get value dimensions for sub spaces just one level down for axis i
+  Array<uint> const& sub_value_offsets(uint i) const;
+
   /// Returs the degree of the finite element
   uint const degree() const;
+
+  void info() const;
 
 private:
 
@@ -148,6 +162,10 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
   mutable ufc::finite_element * ufc_finite_element_;
   bool const finite_element_local_;
+  Array<uint> * sub_value_dims_;
+  Array<uint> * sub_value_offs_;
+  uint topo_dim_;
+  uint geom_dim_;
   uint degree_;
 
 };
@@ -162,6 +180,18 @@ inline const char* FiniteElement::signature() const
 inline ufc::shape FiniteElement::cell_shape() const
 {
   return ufc_finite_element_->cell_shape();
+}
+
+//-----------------------------------------------------------------------------
+inline unsigned int FiniteElement::topological_dimension() const
+{
+  return topo_dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline unsigned int FiniteElement::geometric_dimension() const
+{
+  return geom_dim_;
 }
 
 //-----------------------------------------------------------------------------
@@ -234,6 +264,12 @@ inline ufc::finite_element* FiniteElement::create_sub_element(
     unsigned int i) const
 {
   return ufc_finite_element_->create_sub_element(i);
+}
+
+//-----------------------------------------------------------------------------
+inline uint const FiniteElement::degree() const
+{
+  return degree_;
 }
 
 }

@@ -139,7 +139,10 @@ public:
   void tabulate_dofs(uint* dofs, const ufc::cell& cell) const;
 
   /// Get sub dof maps offset (for a mixed element)
-  uint const * sub_dof_maps_offsets() const;
+  Array<uint> const& sub_dof_maps_dimensions() const;
+
+  /// Get sub dof maps offset (for a mixed element)
+  Array<uint> const& sub_dof_maps_offsets() const;
 
   /// Extract sub dof map
   ufc::dof_map* create_sub_dof_map(Array<uint> const& sub_system,
@@ -233,7 +236,10 @@ private:
   std::string const hash_;
 
   // Sub dof maps offsets
-  uint* sub_dof_maps_off_;
+  Array<uint> sub_dof_maps_dims_;
+
+  // Sub dof maps offsets
+  Array<uint> sub_dof_maps_offs_;
 
   //
   mutable uint* local_to_global_;
@@ -366,10 +372,17 @@ inline ufc::dof_map* DofMap::create_sub_dof_map(uint i) const
 {
   return ufc_dof_map_->create_sub_dof_map(i);
 }
+
 //-----------------------------------------------------------------------------
-inline uint const * DofMap::sub_dof_maps_offsets() const
+inline Array<uint> const& DofMap::sub_dof_maps_dimensions() const
 {
-  return sub_dof_maps_off_;
+  return sub_dof_maps_dims_;
+}
+
+//-----------------------------------------------------------------------------
+inline Array<uint> const& DofMap::sub_dof_maps_offsets() const
+{
+  return sub_dof_maps_offs_;
 }
 
 //-----------------------------------------------------------------------------

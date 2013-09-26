@@ -31,7 +31,7 @@ class IntersectionDetector;
 /// the dof map determines how the degrees of freedom are
 /// distributed on the mesh.
 
-class DiscreteFunction: public GenericFunction
+class DiscreteFunction : public GenericFunction
 {
 public:
 
@@ -43,12 +43,18 @@ public:
 
   /// Create discrete function from given signatures
   DiscreteFunction(Mesh& mesh, GenericVector& x,
-                   std::string finite_element_signature,
-                   std::string dof_map_signature);
+      std::string finite_element_signature, std::string dof_map_signature);
 
   /// Create discrete function from given signatures which owns the vector
   DiscreteFunction(Mesh& mesh, std::string finite_element_signature,
-                   std::string dof_map_signature);
+      std::string dof_map_signature);
+
+  /// Create discrete function from given signatures
+  DiscreteFunction(Mesh& mesh, GenericVector& x,
+      std::string finite_element_signature);
+
+  /// Create discrete function from given signatures which owns the vector
+  DiscreteFunction(Mesh& mesh, std::string finite_element_signature);
 
   /// Create discrete function from sub function
   DiscreteFunction(SubFunction& sub_function);
@@ -60,51 +66,69 @@ public:
   ~DiscreteFunction();
 
   /// Return the rank of the value space
-  uint rank() const;
+  uint
+  rank() const;
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const;
+  uint
+  dim(uint i) const;
 
   /// Return the degree of the finite element
-  uint degree() const;
+  uint
+  degree() const;
 
   /// Return the number of sub functions
-  uint numSubFunctions() const;
+  uint
+  numSubFunctions() const;
 
   /// Assign discrete function
-  const DiscreteFunction& operator=(const DiscreteFunction& f);
+  const DiscreteFunction&
+  operator=(const DiscreteFunction& f);
 
   /// Interpolate function to vertices of mesh
-  void interpolate(real* values) const;
+  void
+  interpolate(real* values) const;
 
   /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const ufc::cell& cell,
-                   const ufc::finite_element& finite_element,
-                   const Cell& dolfin_cell) const;
+  void
+  interpolate(real* coefficients, const ufc::cell& cell,
+      const ufc::finite_element& finite_element, const Cell& dolfin_cell) const;
+
+  /// Interpolate values from the given Function
+  void
+  interpolate(Function const& other_func);
 
   /// Evaluate function at given point
-  void eval(real* values, const real* x) const;
+  void
+  eval(real* values, const real* x) const;
 
   /// Update vector
-  void sync_ghosts();
+  void
+  sync_ghosts();
 
   /// Return signature
-  std::string signature() const;
+  std::string
+  signature() const;
 
   /// Return vector
-  GenericVector& vector() const;
+  GenericVector&
+  vector() const;
 
   /// Return dof map
-  DofMap const& dofmap() const;
+  DofMap const&
+  dofmap() const;
 
   /// Return finite element
-  FiniteElement const& finite_element() const;
+  FiniteElement const&
+  finite_element() const;
 
   /// Get values to array
-  void get(real *& values);
+  void
+  get(real *& values);
 
   /// Set values from array
-  void set(real *& values);
+  void
+  set(real *& values);
 
 private:
 
@@ -134,16 +158,20 @@ private:
   };
 
   // Initialize discrete function
-  void __init(Mesh& mesh, Form& form, uint i);
+  void
+  __init(Mesh& mesh, Form& form, uint i);
 
   // Initialize discrete function
-  void __init(Mesh& mesh, std::string finite_element_signature,
-              std::string dof_map_signature);
+  void
+  __init(Mesh& mesh, std::string finite_element_signature,
+      std::string dof_map_signature);
 
-  void __init();
+  void
+  __init();
 
   /// Initialize ghost pattern
-  void __init_ghosts();
+  void
+  __init_ghosts();
 
   // The finite element
   FiniteElement * finite_element_;
@@ -151,7 +179,9 @@ private:
 
   // The dof map
   DofMap * dof_map_;
-  uint dof_map_local_dim_; // Cache it to save indirections in interpolate
+  uint local_dim_; // Cache it to save indirections in interpolate
+  real ** dofs_coordinates_;
+  real * cell_dof_values_;
 
   // Pointers to local data if owned
   bool const local_vector;
@@ -170,8 +200,7 @@ private:
 
   uint _cache_size;
   uint *_indices;
-  real *data_cache;
-  _map<uint, uint> cache_mapping;
+  real *data_cache;_map<uint, uint> cache_mapping;
 
 };
 

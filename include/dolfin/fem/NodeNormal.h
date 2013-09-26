@@ -47,7 +47,7 @@ public:
   MeshFunction<real> * tau_2;
 
   // Define node type: 1 surface, 2 edge, 3 surface
-  MeshFunction<int> node_type;
+  MeshFunction<uint> node_type;
 
   Array<MeshFunction<real> *> const& basis() const;
 

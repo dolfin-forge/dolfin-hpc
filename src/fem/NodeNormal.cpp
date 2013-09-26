@@ -359,24 +359,18 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         curr_facet = normals_offsets[0];
         uint offset_to_update = 0;
 
-//        std::cout << "Nb neighbouring cells = " << NbNeighCells << std::endl;
         for (uint curr_offset = 0;
             curr_facet < NbNeighCells && curr_offset < NbNeighCells;
             curr_facet += normals_offsets[++curr_offset])
         {
           // then let us loop on the other facet normals to compute the scalar product
           cosalpha = 0.0;
-          //          std::cout << "Facet " << curr_facet << " | ";
           for (uint d = 0; d < nsdim; ++d)
           {
-            //            std_out << std::setw(3) << n_block[B(curr_facet, d, NbNeighCells)] << " ";
             cosalpha += nref[d] * n_block[B(curr_facet, d, NbNeighCells)];
           }
-          //          std_out << " | ";
           if (cosalpha > cosalpha_max)
           {
-            // DEBUG: belongs to same plane
-//            std::cout << "IN ";
             surfaces.insert(std::pair<uint, uint>(curr_facet, curr_surface));
 
             // add contribution to surface normal
@@ -396,14 +390,12 @@ void NodeNormal::__compute_normal(Mesh& mesh)
           }
           else
           {
-//            std::cout << "OUT ";
             // found normal not belonging to the same plane
             // increase offset position then set offset value to one
             normals_offsets[offset_to_update] += normals_offsets[curr_offset]
                 - 1;
             normals_offsets[++offset_to_update] = 1;
           }
-//          std::cout << std::endl;
         }
 
         // add surface normal to the list of surface normals
@@ -411,9 +403,8 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 
         // next loop we add a new surface and discriminate again across
         // the remaining normals
-//        std::cout << remaining_normals_count << std::endl;
+
       }
-//      std::cout << "Nb of surfaces = " << curr_surface << std::endl;
       vertex_type = curr_surface;
       delete nref;
       delete normals_offsets;
@@ -557,14 +548,6 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       delete[] w_block;
       delete[] n_block;
     }
-    //DEBUG
-    //    std::stringstream ss;
-    //    for (uint d = 0; d < nsdim * nsdim; ++d)
-    //    {
-    //      ss << "type_count[" << d << "] = " << type_count[d] << std::endl;
-    //    }
-    //    std::cout << ss.str();
-    //    delete[] type_count;
   }
 
   // Synchronize basis vectors, node_types across processes
@@ -617,7 +600,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         uint index = mesh.distdata().get_local(recv_index[idx], 0);
         if (!used_shared[index])
         {
-          node_type.set(index, (int) recv_type[j]);
+          node_type.set(index, (uint) recv_type[j]);
 
           uint offset = j + 1;
           for (uint basisvec = 0; basisvec < nsdim; ++basisvec)

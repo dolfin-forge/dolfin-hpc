@@ -6,24 +6,33 @@
 
 #include <dolfin/fem/FiniteElement.h>
 
+#include <algorithm>
+#include <iomanip>
+
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(std::string const& signature) :
-    ufc_finite_element_(ElementLibrary::create_finite_element(signature)),
-    finite_element_local_(true),
-    degree_(0)
+        ufc_finite_element_(ElementLibrary::create_finite_element(signature)),
+        finite_element_local_(true),
+        sub_value_dims_(NULL),
+        topo_dim_(0),
+        geom_dim_(0),
+        degree_(0)
 
 {
-
+  init();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
-    ufc_finite_element_(NULL),
-    finite_element_local_(true),
-    degree_(0)
+        ufc_finite_element_(NULL),
+        finite_element_local_(true),
+        sub_value_dims_(NULL),
+        topo_dim_(0),
+        geom_dim_(0),
+        degree_(0)
 {
   // Check argument
   uint const num_arguments = form.form().rank()
@@ -39,70 +48,132 @@ FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
 
   // Update dof maps
   form.updateDofMaps(mesh);
+
+  init();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufc::finite_element& finite_element,
-                             bool const finite_element_local) :
-    ufc_finite_element_(&finite_element),
-    finite_element_local_(finite_element_local),
-    degree_(0)
+    bool const finite_element_local) :
+        ufc_finite_element_(&finite_element),
+        finite_element_local_(finite_element_local),
+        sub_value_dims_(NULL),
+        topo_dim_(0),
+        geom_dim_(0),
+        degree_(0)
 {
-
+  init();
 }
 
 FiniteElement::~FiniteElement()
 
 {
-  if(finite_element_local_)
+  if (finite_element_local_)
     delete ufc_finite_element_;
+
+  if (sub_value_dims_)
+    delete[] sub_value_dims_;
+
+  if (sub_value_offs_)
+    delete[] sub_value_offs_;
 }
 
 //-----------------------------------------------------------------------------
-uint const FiniteElement::degree() const
-{
-  return degree_;
-}
-
-//-----------------------------------------------------------------------------
-void FiniteElement::init()
+void
+FiniteElement::init()
 {
   dolfin_assert(ufc_finite_element_);
+
+  //
+  switch (ufc_finite_element_->cell_shape())
+    {
+  case ufc::interval:
+    topo_dim_ = 1;
+    geom_dim_ = 1;
+    break;
+  case ufc::triangle:
+    topo_dim_ = 2;
+    geom_dim_ = 2;
+    break;
+  case ufc::tetrahedron:
+    topo_dim_ = 3;
+    geom_dim_ = 3;
+    break;
+  default:
+    error("Unknown cell type.");
+    break;
+    }
+
+  // Add sub value dimensions for mixed elements, packed by axis
+  sub_value_dims_ = new Array<uint> [geom_dim_];
+  sub_value_offs_ = new Array<uint> [geom_dim_];
+  uint nb_subs = this->num_sub_elements();
+  if (nb_subs > 0)
+  {
+    uint * off = new uint[geom_dim_];
+    std::fill_n(off, geom_dim_, 0);
+    for (uint e = 0; e < nb_subs; ++e)
+    {
+      ufc::finite_element * sub_fe = ufc_finite_element_->create_sub_element(e);
+      for (uint a = 0; a < geom_dim_; ++a)
+      {
+        sub_value_dims_[a].push_back(sub_fe->value_dimension(a));
+        sub_value_offs_[a].push_back(off[a]);
+        off[a] += sub_fe->value_dimension(a);
+      }
+      delete sub_fe;
+    }
+  }
+  else
+  {
+    for (uint a = 0; a < geom_dim_; ++a)
+    {
+      sub_value_dims_[a].push_back(value_dimension(a));
+      sub_value_offs_[a].push_back(0);
+    }
+  }
+
   // Lookup signature to get degree until part of UFC 2.x interface
   // for FiniteElement and VectorElement the token offset is 3
   // if  the tokem offset is 3
-  char * sign = new char[128];
-  std::strcpy(sign, ufc_finite_element_->signature());
-  char * tok = std::strtok(sign, ",");
-  size_t offset = 3;
-  size_t t = 0;
-  while (tok != NULL)
+  //FIXME: Not mixed element aware
+  if (nb_subs == 0)
   {
-    ++t;
-    tok = std::strtok(NULL, ",");
-    if (offset == t)
+    char * sign = new char[1024];
+    std::strcpy(sign, ufc_finite_element_->signature());
+    char * tok = std::strtok(sign, ",");
+    size_t offset = 3;
+    size_t t = 0;
+    while (tok != NULL)
     {
-      std::stringstream d;
-      d << tok;
-      d >> degree_;
+      ++t;
+      tok = std::strtok(NULL, ",");
+      if (offset == t)
+      {
+        std::stringstream d;
+        d << tok;
+        d >> degree_;
+      }
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-ufc::finite_element* FiniteElement::create_sub_element(Array<uint> const& sub_system) const
+ufc::finite_element*
+FiniteElement::create_sub_element(Array<uint> const& sub_system) const
 {
   // Recursively extract sub element
-  ufc::finite_element* sub_finite_element = create_sub_element(*ufc_finite_element_,
-      sub_system);
+  ufc::finite_element* sub_finite_element = create_sub_element(
+      *ufc_finite_element_, sub_system);
   message(2, "Extracted finite element for sub system: %s",
       sub_finite_element->signature());
 
   return sub_finite_element;
 }
 //-----------------------------------------------------------------------------
-ufc::finite_element* FiniteElement::create_sub_element(
-    const ufc::finite_element& finite_element, Array<uint> const& sub_system)
+ufc::finite_element*
+FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
+    Array<uint> const& sub_system)
 {
   // Check if there are any sub systems
   if (finite_element.num_sub_elements() == 0)
@@ -139,12 +210,78 @@ ufc::finite_element* FiniteElement::create_sub_element(
   {
     sub_sub_system.push_back(sub_system[i]);
   }
-  ufc::finite_element* sub_sub_element = create_sub_element(*sub_element, sub_sub_system);
+  ufc::finite_element* sub_sub_element = create_sub_element(*sub_element,
+      sub_sub_system);
   delete sub_element;
 
   return sub_sub_element;
 }
 //-----------------------------------------------------------------------------
+Array<uint> const&
+FiniteElement::sub_value_dimensions(uint i) const
+{
+  return sub_value_dims_[i];
+}
+//-----------------------------------------------------------------------------
+Array<uint> const&
+FiniteElement::sub_value_offsets(uint i) const
+{
+  return sub_value_offs_[i];
+}
+//-----------------------------------------------------------------------------
+void
+FiniteElement::info() const
+{
+  std::stringstream msg;
+  uint const padding = 24;
+  msg << std::endl;
+  msg << std::setw(padding) << "signature = " << signature() << std::endl;
+  std::string shape;
+  switch (ufc_finite_element_->cell_shape())
+    {
+  case ufc::interval:
+    shape = "";
+    break;
+  case ufc::triangle:
+    shape = "triangle";
+    break;
+  case ufc::tetrahedron:
+    shape = "tetrahedron";
+    break;
+  default:
+    shape = "unknown";
+    break;
+    }
+  msg << std::setw(padding) << "cell_shape = " << shape << std::endl;
+  msg << std::setw(padding) << "topological_dimension = "
+      << topological_dimension() << std::endl;
+  msg << std::setw(padding) << "geometric_dimension = " << geometric_dimension()
+      << std::endl;
+  msg << std::setw(padding) << "space_dimension = " << space_dimension()
+      << std::endl;
+  msg << std::setw(padding) << "value_rank = " << value_rank() << std::endl;
+  msg << std::setw(padding) << "value_dimension = " << std::endl;
+  for (uint a = 0; a < geom_dim_; ++a)
+  {
+    msg << std::setw(padding + 1) << " [" << "axis " << a << "] : "
+        << value_dimension(a) << std::endl;
+  }
+  msg << std::setw(padding) << "num_sub_elements = " << num_sub_elements()
+      << std::endl;
+  msg << std::setw(padding) << "sub_value_dimensions = " << std::endl;
+  for (uint a = 0; a < geom_dim_; ++a)
+  {
+    msg << std::setw(padding + 1) << " [" << "axis " << a << "] : "
+        << std::endl;
+    for (uint sub = 0; sub < sub_value_dimensions(a).size(); ++sub)
+    {
+      msg << std::setw(padding + 12) << " [" << "element " << sub << "] : "
+          << sub_value_dimensions(a)[sub] << " ( +" << sub_value_offsets(a)[sub]
+          << ")" << std::endl;
+    }
+  }
+  std::cout << msg.str();
+}
 
 }
 

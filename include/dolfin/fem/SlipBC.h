@@ -32,7 +32,7 @@ class GenericVector;
 class Mesh;
 class SubDomain;
 
-class SlipBC: public BoundaryCondition
+class SlipBC : public BoundaryCondition
 {
 
 public:
@@ -51,7 +51,7 @@ public:
 
   /// Create sub system boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-         SubSystem const& sub_system);
+      SubSystem const& sub_system);
 
   /// Destructor
   ~SlipBC();
@@ -59,36 +59,45 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  void
+  apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& ufc_form);
+  void
+  apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+      const ufc::form& ufc_form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const Form& form);
+  void
+  apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+      const Form& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const DofMap& dof_map, const ufc::form& ufc_form);
+  void
+  apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+      const DofMap& dof_map, const ufc::form& ufc_form);
 
 private:
 
-  void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
-                   Array<uint>& nodes);
+  void
+  applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
+      Array<uint>& nodes);
 
   // Do: A(row,col) = value   using setblock not setvalue
-  void Aset(Matrix& A, uint row, uint col, real value);
+  void
+  Aset(Matrix& A, uint row, uint col, real value);
 
   // Do: b(row) = value   using setblock not setvalue
-  void bset(Vector& b, uint row, real value);
+  void
+  bset(Vector& b, uint row, real value);
 
   // Initialize sub domain markers
-  void init(SubDomain& sub_domain);
+  void
+  init(SubDomain& sub_domain);
 
-  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
-             Form const& form);
+  void
+  apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
+      Form const& form);
 
   // The mesh
   Mesh& mesh;
@@ -119,6 +128,10 @@ private:
   int N_offset;
   std::set<uint> off_proc_rows;
 
+  // Data structure for local assembly
+  real n_[3];
+  real tau_1_[3];
+  real tau_2_[3];
   real *row_block;
   real *zero_block;
   uint *a1_indices_array;
@@ -127,16 +140,20 @@ private:
   MeshFunction<uint> *cell_map;
   MeshFunction<uint> *vertex_map;
 
+  uint permutation_matrix_[3][3];
+
 };
 
 //--- INLINE ------------------------------------------------------------------
 
-inline void SlipBC::Aset(Matrix& A, uint row, uint col, real value)
+inline void
+SlipBC::Aset(Matrix& A, uint row, uint col, real value)
 {
   A.set(&value, 1, &row, 1, &col);
 }
 
-inline void SlipBC::bset(Vector& b, uint row, real value)
+inline void
+SlipBC::bset(Vector& b, uint row, real value)
 {
   b.set(&value, 1, &row);
 }

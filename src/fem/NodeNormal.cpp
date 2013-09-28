@@ -423,7 +423,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       for (size_t s = 0; s < nb_surfaces; ++s)
       {
         //real invSwght = 1. / surface_totalweights.at(s);  // assume at least one measure of facet is positive :P
-        real *& Savrgn = surface_normals.at(s);
+        real *& Savrgn = surface_normals[s];
         real invnormSavrgn = 0.;
         for (uint d = 0; d < nsdim; ++d)
         {
@@ -510,6 +510,13 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         }
         //        std_out << "Done computing basis" << std::endl;
       }
+      basis_vec[6] = surface_normals[0][1] * basis_vec[2] - surface_normals[0][2] * basis_vec[1] ;
+      basis_vec[7] = surface_normals[0][2] * basis_vec[0] - surface_normals[0][0] * basis_vec[2] ;
+      basis_vec[8] = surface_normals[0][0] * basis_vec[1] - surface_normals[0][1] * basis_vec[0] ;
+
+      basis_vec[3] = basis_vec[7] * basis_vec[2] - basis_vec[8] * basis_vec[1] ;
+      basis_vec[4] = basis_vec[8] * basis_vec[0] - basis_vec[6] * basis_vec[2] ;
+      basis_vec[5] = basis_vec[6] * basis_vec[1] - basis_vec[7] * basis_vec[0] ;
 
       //---
       // Prepare data structures

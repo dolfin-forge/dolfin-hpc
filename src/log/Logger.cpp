@@ -116,7 +116,8 @@ void Logger::setOutputDestination(std::string destination)
     }
   }
   else {
-    this->destination = silent;
+//    this->destination = silent;
+    this->destination = terminal;
   }
 
 }

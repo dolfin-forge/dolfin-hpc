@@ -189,7 +189,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
 {
   // Create sub system
   SubSystem sub_system(sub_function.i);
-  DiscreteFunction const& global_func = *sub_function.f;
+  DiscreteFunction& global_func = *sub_function.f;
 
   // Extract sub element (return value is a newly created finite_element)
   ufc_finite_element_ = global_func.finite_element_->create_sub_element(
@@ -199,48 +199,40 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
       "SubFunction finite element:"
           + std::string(ufc_finite_element_->signature()));
 
-  // Extract sub dof map and offset
-  uint offset = 0;
-  ufc::dof_map * ufc_dof_map = global_func.dof_map_->create_sub_dof_map(
-      sub_system.array(), offset);
-
   // Token is requested by the standalone function
   dof_map_ = DofMapCache::instance().acquire_dofmap(mesh,
-      ufc_dof_map->signature());
-
-  delete ufc_dof_map;
+      DofMap::dofmap_signature(ufc_finite_element_->signature()));
 
   // Initialize vector, scratch space and init ghosts
   __init();
+  sync_ghosts();
 
   // Copy subvector, naive implementation
   uint const global_dm_offset =
       global_func.dof_map_->sub_dof_maps_offsets()[sub_function.i];
   DofMap const& global_dm = global_func.dofmap();
-  uint * global_dofs = new uint[global_dm.local_dimension()];
-  uint global_block_size = global_func.finite_element().space_dimension();
+  uint const global_local_dim = global_func.dofmap().local_dimension();
+  uint const global_block_size = global_dm.dofsmapping_size();
   real * global_block = new real[global_block_size];
+  global_func.get(global_block);
 
+  real * this_block = new real[dof_map_->dofsmapping_size()];
   CellIterator cell(mesh);
   UFCCell ufccell(*cell);
-  for (; !cell.end(); ++cell)
+  uint cell_offset = 0;
+  uint glob_func_cell_offset = 0;
+  for (; !cell.end(); ++cell, cell_offset+=local_dim_, glob_func_cell_offset+=global_local_dim)
   {
-    ufccell.update(*cell, mesh.distdata());
-    global_dm.tabulate_dofs(global_dofs, ufccell, cell->index());
-    dof_map_->tabulate_dofs(scratch->dofs, ufccell, cell->index());
-
-    global_func.vector().get(global_block, global_block_size, global_dofs);
     for (uint dof_id = 0; dof_id < local_dim_; ++dof_id)
     {
-      cell_dof_values_[dof_id] = global_block[global_dm_offset + dof_id];
+      this_block[cell_offset + dof_id] = global_block[glob_func_cell_offset + global_dm_offset + dof_id];
     }
-    this->vector().set(cell_dof_values_, local_dim_, scratch->dofs);
-    this->vector().apply();
   }
-  sync_ghosts();
+  x->set(this_block, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
+  this->sync_ghosts();
 
   delete[] global_block;
-  delete[] global_dofs;
+  delete[] this_block;
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
@@ -287,7 +279,9 @@ DiscreteFunction::~DiscreteFunction()
     delete finite_element_;
 
   if (local_vector)
+  {
     delete x;
+  }
 
   if (intersection_detector)
     delete intersection_detector;
@@ -431,6 +425,10 @@ DiscreteFunction::interpolate(Function const& other_func)
   Array<uint> const& dm_offs = dof_map_->sub_dof_maps_offsets();
   uint const nb_subspaces = dm_dims.size();
 
+  // Make sure vectors ghost values are updated)
+  x->apply();
+
+  // Cell tabulated version
   CellIterator cell(mesh);
   UFCCell ufccell(*cell);
   for (; !cell.end(); ++cell)
@@ -450,7 +448,8 @@ DiscreteFunction::interpolate(Function const& other_func)
         other_func.eval(values, dofs_coordinates_[sub_id]);
         for (uint v = 0; v < sub_val_dim; ++v)
         {
-          cell_dof_values_[off + v * nb_nodes + sub_id] = values[value_offs[sub] + v];
+          cell_dof_values_[off + v * nb_nodes + sub_id] = values[value_offs[sub]
+              + v];
         }
         ++dof_id;
       }
@@ -458,7 +457,7 @@ DiscreteFunction::interpolate(Function const& other_func)
     this->vector().set(cell_dof_values_, local_dim_, scratch->dofs);
     this->vector().apply();
   }
-  sync_ghosts();
+  this->vector().apply();
 
   delete[] values;
 }
@@ -614,7 +613,6 @@ DiscreteFunction::__init(Mesh& mesh, std::string finite_element_signature,
 void
 DiscreteFunction::__init()
 {
-  local_dim_ = dof_map_->local_dimension();
   if (x->size() != dof_map_->global_dimension())
   {
     if (MPI::numProcesses() > 1)
@@ -627,6 +625,7 @@ DiscreteFunction::__init()
     }
   }
 
+  local_dim_ = dof_map_->local_dimension();
   dofs_coordinates_ = new real*[local_dim_];
   for (uint i = 0; i < local_dim_; ++i)
   {

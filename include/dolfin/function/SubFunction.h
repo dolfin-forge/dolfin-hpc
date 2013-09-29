@@ -36,7 +36,9 @@ namespace dolfin
     SubFunction(DiscreteFunction* f, uint i) : f(f), i(i) {}
 
     /// Destructor
-    ~SubFunction() {}
+    ~SubFunction()
+    {
+    }
 
     /// Friends
     friend class DiscreteFunction;

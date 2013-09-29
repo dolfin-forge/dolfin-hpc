@@ -104,7 +104,7 @@ public:
   Function(Mesh& mesh, std::string const& finite_element_signature);
 
   /// Create discrete function from sub function
-  explicit Function(SubFunction& sub_function);
+  explicit Function(SubFunction sub_function);
 
   /// Create function from data file
   explicit Function(const std::string filename);
@@ -190,7 +190,7 @@ public:
   Function const& operator=(Function& f);
 
   /// Assign sub function/slice
-  Function const& operator=(SubFunction& sub_function);
+  Function const& operator=(SubFunction sub_function);
 
   /// Interpolate function to vertices of mesh
   void interpolate(real* values);

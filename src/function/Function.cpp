@@ -177,7 +177,7 @@ Function::Function(const std::string filename) :
   file >> *this;
 }
 ////-----------------------------------------------------------------------------
-Function::Function(SubFunction& sub_function) :
+Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
     f(NULL),
     _type(discrete),
@@ -495,7 +495,7 @@ Function const& Function::operator=(Function& f)
   return *this;
 }
 //-----------------------------------------------------------------------------
-Function const& Function::operator=(SubFunction& sub_function)
+Function const& Function::operator=(SubFunction sub_function)
 {
   if (f)
   {

@@ -14,7 +14,6 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/pde/LinearPDE.h>
-#include <dolfin/io/dolfin_io.h>
 #include <dolfin/fem/Form.h>
 
 using namespace dolfin;
@@ -54,6 +53,7 @@ void LinearPDE::solve(Function& u)
   Matrix A;
   Vector b;
   Vector* x = new Vector();
+  u.init(mesh, *x, a, 1);
 
   // Assemble linear system
   Assembler assembler(mesh);
@@ -80,11 +80,6 @@ void LinearPDE::solve(Function& u)
   }
   else
     error("Unknown solver type \"%s\".", solver_type.c_str());
-
-  u.init(mesh, *x, a, 1);
-  DiscreteFunction& uu = dynamic_cast<DiscreteFunction&>(*u.f);
-  //uu.local_vector = x;
-  uu.x = x;
 
   end();
 }

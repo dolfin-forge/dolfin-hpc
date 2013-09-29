@@ -201,6 +201,8 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				mesh/CellType.h\
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunctionConverter.h\
+				nls/NewtonSolver.h\
+				nls/NonlinearProblem.h\
 				parameter/parameters.h\
 				parameter/DefaultParameters.h\
 				parameter/Parameter.h\
@@ -208,6 +210,8 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				parameter/ParameterSystem.h\
 				parameter/ParameterValue.h\
 				parameter/Parametrized.h\
+				pde/LinearPDE.h\
+				pde/NonlinearPDE.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/GaussQuadrature.h\

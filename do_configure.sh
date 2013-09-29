@@ -6,7 +6,7 @@ then
 	echo "CTLOPTROOT not set.";
 fi;
 
-export gts_LIBS="/usr/lib/libgts.so"
+#export gts_LIBS="/usr/lib/libgts.so"
 export CXX=mpicxx
 export CFLAGS="-m64 -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib "
 export CXXFLAGS="-m64 -Wl,-rpath,${CTLOPTROOT}/lib -L${CTLOPTROOT}/lib -g -std=c++0x -Wall -pedantic-errors -fno-fast-math -finline -fbounds-check "

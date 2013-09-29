@@ -24,26 +24,26 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 NodeNormal::NodeNormal(NodeNormal& node_normal) :
-    normal(NULL),
-    tau(NULL),
-    tau_1(NULL),
-    tau_2(NULL),
-    mesh(node_normal.mesh),
-    alpha_max_(DOLFIN_PI / 2 - DOLFIN_EPS),
-    weighting_(none)
+        normal(NULL),
+        tau(NULL),
+        tau_1(NULL),
+        tau_2(NULL),
+        mesh(node_normal.mesh),
+        alpha_max_(0.5 * DOLFIN_PI * 0.99),
+        weighting_(none)
 {
   *this = node_normal;
 }
 
 //-----------------------------------------------------------------------------
 NodeNormal::NodeNormal(Mesh& mesh) :
-    normal(NULL),
-    tau(NULL),
-    tau_1(NULL),
-    tau_2(NULL),
-    mesh(mesh),
-    alpha_max_(DOLFIN_PI / 2 - DOLFIN_EPS),
-    weighting_(none)
+        normal(NULL),
+        tau(NULL),
+        tau_1(NULL),
+        tau_2(NULL),
+        mesh(mesh),
+        alpha_max_(0.5 * DOLFIN_PI * 0.99),
+        weighting_(none)
 {
   uint const nsdim = mesh.topology().dim();
 
@@ -79,7 +79,8 @@ NodeNormal::~NodeNormal()
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::clear()
+void
+NodeNormal::clear()
 {
   while (!basis_.empty())
   {
@@ -89,7 +90,8 @@ void NodeNormal::clear()
 }
 
 //-----------------------------------------------------------------------------
-NodeNormal& NodeNormal::operator=(NodeNormal& node_normal)
+NodeNormal&
+NodeNormal::operator=(NodeNormal& node_normal)
 {
   clear();
 
@@ -138,7 +140,8 @@ NodeNormal& NodeNormal::operator=(NodeNormal& node_normal)
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::__compute_normal(Mesh& mesh)
+void
+NodeNormal::__compute_normal(Mesh& mesh)
 {
   message("BoundaryNormals: Compute normals");
   mesh.renumber();
@@ -155,6 +158,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 
   // Iterate over all cells in the boundary mesh
   BoundaryMesh boundary(mesh);
+
   //  uint const boundary_nsdim = boundary.topology().dim();
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
   MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
@@ -166,7 +170,6 @@ void NodeNormal::__compute_normal(Mesh& mesh)
   }
 
   //-------------------------------------------------------------------------
-  real * normal_vec = new real[nsdim];
   real * basis_vec = new real[nsdim * nsdim];
 
   real * n_block = NULL;
@@ -174,10 +177,9 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 
   uint NbNeighCells = 0;
   // Computation of normals to the boundary vertices
+
   if (boundary.numCells())
   {
-    //    real * type_count = new real[nsdim * nsdim];  //DEBUG
-    //    std::fill_n(type_count, nsdim * nsdim, 0);  //DEBUG
 
     for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
         ++boundary_vertex)
@@ -189,8 +191,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       bool const vertex_is_shared = mesh.distdata().is_shared(boundary_id, 0);
       bool const vertex_is_ghosted = mesh.distdata().is_ghost(boundary_id, 0);
 
-      // Reset normal and basis to zero
-      std::fill_n(normal_vec, nsdim, 0.);
+      // Reset basis to zero
       std::fill_n(basis_vec, nsdim * nsdim, 0.);
 
       NbNeighCells = 0;
@@ -217,6 +218,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
          }
          */
       }
+
       if (NbNeighCells == 0)
       {
         dolfin::error("This vertex was found to have zero neighbouring facets");
@@ -230,6 +232,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       // sum of all areas of the elements
       real sum_weights = 0.0;
       uint neighcell_count = 0;
+
       for (CellIterator boundary_cell(*boundary_vertex); !boundary_cell.end();
           ++boundary_cell)
       {
@@ -259,11 +262,11 @@ void NodeNormal::__compute_normal(Mesh& mesh)
         // Get sum of the length/area of all neighbouring cells
         sum_weights += facet_normal_weight;
 
-        // Compute a normal to the boundary
+        // Save facet normals to block
         for (uint d = 0; d < nsdim; ++d)
         {
           real nd = mesh_cell.normal(local_facet, d);
-          //normal_vec[d] += facet_normal_weight * nd;
+          basis_vec[d] += facet_normal_weight * nd;
           n_block[B(neighcell_count, d, NbNeighCells)] = nd;
         }
         ++neighcell_count;
@@ -272,12 +275,12 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       // Add neighbouring bound.cell/facet contributions from other processes
       if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
       {
-//        uint tabulated_idx = shared_offsetidx_[global_id];
-        // Add normals
-//        for (uint d = 0; d < nsdim; ++d)
-//        {
-//          normal_vec[d] += shared_vertexnormals_[tabulated_idx + d];
-//        }
+        // Add normals computed at vertex from other processes
+        uint tabulated_idx = shared_offsetidx_[global_id];
+        for (uint d = 0; d < nsdim; ++d)
+        {
+          basis_vec[d] += shared_vertexnormals_[tabulated_idx + d];
+        }
         Array<real> tmp = shared_facetweights_block_[global_id];
         Array<real>::iterator iter;
 
@@ -301,7 +304,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       }
 
       // Now, we have:
-      //    normal_vec  : Vertex normal (*not* unit !) nsdim components
+      //    basis_vec  : Vertex normal (*not* unit !) nsdim components
       //    n_block   : NbNeighCells facet unit normals with nsdim components
       //      w_block   : NbNeighCells facet weights
       //    sum_weights : sum of the facet weights
@@ -409,53 +412,29 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       delete nref;
       delete normals_offsets;
 
-      //      if (!vertex_is_ghosted)
-      //      {
-      //        type_count[curr_surface]++;  //DEBUG
-      //      }
-      //      dolfin_assert(curr_surface == surface_normals.size());
+      // n_k    = sum_{i=1}^k nS_i
+      // tau1_k = |n_{k-1}|^2 nS_k - (n_{k-1} . nS_k ) n_{k-1}
+      // tau2_k = n_k ^ tau1_k
 
-      //
+      // In 2d tau2_k = ez = (0,0,1)
+
       // Now we have a nice list of surface normals...
       // ... and apparently we shamelessly take them as averaged normals and tangents
       // But why would I divide by the sum if I am merely normalizing them right after?
       uint const nb_surfaces = surface_normals.size();
-      for (size_t s = 0; s < nb_surfaces; ++s)
-      {
-        //real invSwght = 1. / surface_totalweights.at(s);  // assume at least one measure of facet is positive :P
-        real *& Savrgn = surface_normals[s];
-        real invnormSavrgn = 0.;
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          invnormSavrgn += Savrgn[d] * Savrgn[d];
-        }
-        invnormSavrgn = 1. / std::sqrt(invnormSavrgn);
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          Savrgn[d] *= invnormSavrgn;
-          normal_vec[d] += Savrgn[d];
-
-          if (std::abs(Savrgn[d]) < DOLFIN_EPS)
-          {
-            Savrgn[d] = 0.0;
-          }
-        }
-      }
 
       // Taken from V. John, J. Comp. and Appl. Math. 2002
       // Let's fit everything in basis_vec of size nsdim*nsdim
-      // normalize normal_vec and copy to first vector of basis_vec
+      // normalize the first vector in basis_vec (which is the normal)
       real normal_nrm = 0.0;
       for (uint d = 0; d < nsdim; ++d)
       {
-        normal_vec[d] /= sum_weights;
-        normal_nrm += normal_vec[d] * normal_vec[d];
+        normal_nrm += basis_vec[d] * basis_vec[d];
       }
       normal_nrm = std::sqrt(normal_nrm);
       for (uint in = 0; in < nsdim; ++in)
       {
-        normal_vec[in] /= normal_nrm;
-        basis_vec[in] = normal_vec[in];
+        basis_vec[in] /= normal_nrm;
       }
       // Compute unit tangents from unit normal
       if (nsdim == 2)
@@ -467,56 +446,68 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       else
       {
         // 3D case
-        real norm_inv = 0.0;
-        if (std::fabs(normal_vec[0]) >= 0.5 || std::fabs(normal_vec[1]) >= 0.5)
+        if (vertex_type == 1)
         {
-          norm_inv = 1.
-              / std::sqrt(
-                  normal_vec[0] * normal_vec[0]
-                      + normal_vec[1] * normal_vec[1]);
-          // t11 = n2/n
-          basis_vec[3] = basis_vec[1] * norm_inv;
-          // t12 = -n1/n
-          basis_vec[4] = - basis_vec[0] * norm_inv;
-          // t13 = 0
-          basis_vec[5] = 0.0;
-          // t21 = -t12*n3
-          basis_vec[6] = - basis_vec[4] * basis_vec[2];
-          // t22 = t11*n3
-          basis_vec[7] = basis_vec[3] * basis_vec[2];
-          // t23 = t12*n1 - t11*n2
-          basis_vec[8] = basis_vec[4] * basis_vec[0]
-              - basis_vec[3] * basis_vec[1];
+          real norm_inv = 0.0;
+          if (std::fabs(basis_vec[0]) >= 0.5 || std::fabs(basis_vec[1]) >= 0.5)
+          {
+            norm_inv = 1.
+                / std::sqrt(
+                    basis_vec[0] * basis_vec[0] + basis_vec[1] * basis_vec[1]);
+            // t11 = n2/n
+            basis_vec[3] = basis_vec[1] * norm_inv;
+            // t12 = -n1/n
+            basis_vec[4] = -basis_vec[0] * norm_inv;
+            // t13 = 0
+            basis_vec[5] = 0.0;
+            // t21 = -t12*n3
+            basis_vec[6] = -basis_vec[4] * basis_vec[2];
+            // t22 = t11*n3
+            basis_vec[7] = basis_vec[3] * basis_vec[2];
+            // t23 = t12*n1 - t11*n2
+            basis_vec[8] = basis_vec[4] * basis_vec[0]
+                - basis_vec[3] * basis_vec[1];
+          }
+          else
+          {
+            norm_inv = 1.
+                / std::sqrt(
+                    basis_vec[1] * basis_vec[1] + basis_vec[2] * basis_vec[2]);
+            // t11 = 0
+            basis_vec[3] = 0.0;
+            // t12 = -n3/n
+            basis_vec[4] = -basis_vec[2] * norm_inv;
+            // t13 = n2/n
+            basis_vec[5] = basis_vec[1] * norm_inv;
+            // t21 = t13*n2 - t12*n3
+            basis_vec[6] = basis_vec[5] * basis_vec[1]
+                - basis_vec[4] * basis_vec[2];
+            // t22 = -t13*n1
+            basis_vec[7] = -basis_vec[5] * basis_vec[0];
+            // t23 = t12*n1
+            basis_vec[8] = basis_vec[4] * basis_vec[0];
+          }
         }
         else
         {
-          norm_inv = 1.
-              / std::sqrt(
-                  normal_vec[1] * normal_vec[1]
-                      + normal_vec[2] * normal_vec[2]);
-          // t11 = 0
-          basis_vec[3] = 0.0;
-          // t12 = -n3/n
-          basis_vec[4] = - basis_vec[2] * norm_inv;
-          // t13 = n2/n
-          basis_vec[5] = basis_vec[1] * norm_inv;
-          // t21 = t13*n2 - t12*n3
-          basis_vec[6] = basis_vec[5] * basis_vec[1]
-              - basis_vec[4] * basis_vec[2];
-          // t22 = -t13*n1
-          basis_vec[7] = - basis_vec[5] * basis_vec[0];
-          // t23 = t12*n1
-          basis_vec[8] = basis_vec[4] * basis_vec[0];
-        }
-        //        std_out << "Done computing basis" << std::endl;
-      }
-      basis_vec[6] = surface_normals[0][1] * basis_vec[2] - surface_normals[0][2] * basis_vec[1] ;
-      basis_vec[7] = surface_normals[0][2] * basis_vec[0] - surface_normals[0][0] * basis_vec[2] ;
-      basis_vec[8] = surface_normals[0][0] * basis_vec[1] - surface_normals[0][1] * basis_vec[0] ;
+          uint const Sk = vertex_type - 1;
+          basis_vec[6] = basis_vec[1] * surface_normals[Sk][2] - surface_normals[Sk][1] * basis_vec[2];
+          basis_vec[7] = basis_vec[2] * surface_normals[Sk][0] - surface_normals[Sk][2] * basis_vec[0];
+          basis_vec[8] = basis_vec[0] * surface_normals[Sk][1] - surface_normals[Sk][0] * basis_vec[1];
 
-      basis_vec[3] = basis_vec[7] * basis_vec[2] - basis_vec[8] * basis_vec[1] ;
-      basis_vec[4] = basis_vec[8] * basis_vec[0] - basis_vec[6] * basis_vec[2] ;
-      basis_vec[5] = basis_vec[6] * basis_vec[1] - basis_vec[7] * basis_vec[0] ;
+          real tau2_norm = std::sqrt(basis_vec[6]*basis_vec[6]+basis_vec[7]*basis_vec[7]+basis_vec[8]*basis_vec[8]);
+
+          basis_vec[6] /= tau2_norm;
+          basis_vec[7] /= tau2_norm;
+          basis_vec[8] /= tau2_norm;
+
+
+          basis_vec[3] = basis_vec[7] * basis_vec[2] - basis_vec[8] * basis_vec[1];
+          basis_vec[4] = basis_vec[8] * basis_vec[0] - basis_vec[6] * basis_vec[2];
+          basis_vec[5] = basis_vec[6] * basis_vec[1] - basis_vec[7] * basis_vec[0];
+        }
+
+      }
 
       //---
       // Prepare data structures
@@ -533,6 +524,10 @@ void NodeNormal::__compute_normal(Mesh& mesh)
       else
       {
         node_type.set(boundary_id, vertex_type);
+        if (vertex_type == 0)
+        {
+          error("Surface multiplicity is equal to zero");
+        }
         for (uint basisvec = 0; basisvec < nsdim; ++basisvec)
         {
           for (uint in = 0; in < nsdim; ++in)
@@ -627,6 +622,7 @@ void NodeNormal::__compute_normal(Mesh& mesh)
     delete[] recv_type;
 
   }
+
   //--- Cleanup
   for (uint i = 0; i < pe_size; ++i)
   {
@@ -657,10 +653,10 @@ void NodeNormal::__compute_normal(Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
+void
+NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
 {
   uint const nsdim = mesh.topology().dim();
-  //  uint const boundary_nsdim = boundary.topology().dim();
 
   int rank = dolfin::MPI::processNumber();
   int pe_size = dolfin::MPI::numProcesses();
@@ -691,7 +687,8 @@ void NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
 
   uint SharedVertexCount = 0;
   uint SharedMeshFacetCount = 0;
-  // Computation of normals to the boundary vertices
+
+  // Computation of normals to the boundary vertices shared between processes
   if (boundary.numCells())
   {
     uint NbNeighCells = 0;
@@ -700,7 +697,6 @@ void NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
     {
       uint boundary_id = vertex_map->get(*boundary_vertex);
       uint global_id = mesh.distdata().get_global(boundary_id, 0);
-      //      std_out << "global_id = " << global_id << std::endl;
 
       // Mark vertex as part of the boundary
       GlobalIdOnBoundary[global_id] = true;
@@ -792,7 +788,7 @@ void NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
   int sh_facetnormals_count = sendbuff_facetnormals.size();
   int sh_facetweights_count = sendbuff_facetweights.size();
 
-  dolfin_assert(sh_vertidx_count == SharedVertexCount);dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
+  dolfin_assert(sh_vertidx_count == SharedVertexCount); dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim); dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim); dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
 
   int recv_size_vertidx;
   int recv_size_vertexnormals;
@@ -900,7 +896,6 @@ void NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
       // Increase data offsets
       vertidx += nsdim;
       facetidx += offsetidx_padding_;
-
     }
 
   }

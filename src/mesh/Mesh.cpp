@@ -249,7 +249,7 @@ void Mesh::renumber()
 {
   MeshRenumber::renumber(*this);
   dolfin::warning("Renumbering mesh");
-  _timestamp = time(0);
+//  _timestamp = time(0);
 }
 
 //-----------------------------------------------------------------------------

@@ -254,6 +254,7 @@ private:
   /// Distribued Mesh data
   MeshDistributedData _distdata;
 
+  int _timestamp;
 };
 
 //--- INLINES -----------------------------------------------------------------

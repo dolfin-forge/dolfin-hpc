@@ -163,7 +163,7 @@ namespace dolfin
   //--- INLINES --------------------------------------------------------------
   inline void Matrix::spy() const
   {
-    if(MPI::processNumber() == 0)
+    if(MPI::numProcesses() == 1)
     {
       std::stringstream ss;
       ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;

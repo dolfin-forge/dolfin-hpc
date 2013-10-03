@@ -164,6 +164,10 @@ private:
   bool const finite_element_local_;
   Array<uint> * sub_value_dims_;
   Array<uint> * sub_value_offs_;
+
+  std::string type_;
+  std::string family_;
+  std::string strshape_;
   uint topo_dim_;
   uint geom_dim_;
   uint degree_;
@@ -269,6 +273,10 @@ inline ufc::finite_element* FiniteElement::create_sub_element(
 //-----------------------------------------------------------------------------
 inline uint const FiniteElement::degree() const
 {
+  if (degree_ == -1)
+  {
+    error("Degree is not supported for MixedElement");
+  }
   return degree_;
 }
 

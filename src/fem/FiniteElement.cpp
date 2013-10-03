@@ -4,6 +4,7 @@
 // First added:  2013-09-12
 // Last changed: 2013-09-12
 
+#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/FiniteElement.h>
 
 #include <algorithm>
@@ -14,12 +15,12 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(std::string const& signature) :
-        ufc_finite_element_(ElementLibrary::create_finite_element(signature)),
-        finite_element_local_(true),
-        sub_value_dims_(NULL),
-        topo_dim_(0),
-        geom_dim_(0),
-        degree_(0)
+    ufc_finite_element_(ElementLibrary::create_finite_element(signature)),
+    finite_element_local_(true),
+    sub_value_dims_(NULL),
+    topo_dim_(0),
+    geom_dim_(0),
+    degree_(0)
 
 {
   init();
@@ -27,12 +28,12 @@ FiniteElement::FiniteElement(std::string const& signature) :
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
-        ufc_finite_element_(NULL),
-        finite_element_local_(true),
-        sub_value_dims_(NULL),
-        topo_dim_(0),
-        geom_dim_(0),
-        degree_(0)
+    ufc_finite_element_(NULL),
+    finite_element_local_(true),
+    sub_value_dims_(NULL),
+    topo_dim_(0),
+    geom_dim_(0),
+    degree_(-1)
 {
   // Check argument
   uint const num_arguments = form.form().rank()
@@ -54,13 +55,13 @@ FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufc::finite_element& finite_element,
-    bool const finite_element_local) :
-        ufc_finite_element_(&finite_element),
-        finite_element_local_(finite_element_local),
-        sub_value_dims_(NULL),
-        topo_dim_(0),
-        geom_dim_(0),
-        degree_(0)
+                             bool const finite_element_local) :
+    ufc_finite_element_(&finite_element),
+    finite_element_local_(finite_element_local),
+    sub_value_dims_(NULL),
+    topo_dim_(0),
+    geom_dim_(0),
+    degree_(0)
 {
   init();
 }
@@ -79,30 +80,34 @@ FiniteElement::~FiniteElement()
 }
 
 //-----------------------------------------------------------------------------
-void
-FiniteElement::init()
+void FiniteElement::init()
 {
   dolfin_assert(ufc_finite_element_);
 
-  //
+  // Set attributes
+  FE::attributes const attr = ElementLibrary::get_attributes(ufc_finite_element_->signature());
+  type_ = attr.type;
+  family_ = attr.family;
+  degree_ = attr.degree;
+
   switch (ufc_finite_element_->cell_shape())
-    {
-  case ufc::interval:
-    topo_dim_ = 1;
-    geom_dim_ = 1;
-    break;
-  case ufc::triangle:
-    topo_dim_ = 2;
-    geom_dim_ = 2;
-    break;
-  case ufc::tetrahedron:
-    topo_dim_ = 3;
-    geom_dim_ = 3;
-    break;
-  default:
-    error("Unknown cell type.");
-    break;
-    }
+  {
+    case ufc::interval:
+      topo_dim_ = 1;
+      geom_dim_ = 1;
+      break;
+    case ufc::triangle:
+      topo_dim_ = 2;
+      geom_dim_ = 2;
+      break;
+    case ufc::tetrahedron:
+      topo_dim_ = 3;
+      geom_dim_ = 3;
+      break;
+    default:
+      error("Unknown cell type.");
+      break;
+  }
 
   // Add sub value dimensions for mixed elements, packed by axis
   sub_value_dims_ = new Array<uint> [geom_dim_];
@@ -132,30 +137,6 @@ FiniteElement::init()
       sub_value_offs_[a].push_back(0);
     }
   }
-
-  // Lookup signature to get degree until part of UFC 2.x interface
-  // for FiniteElement and VectorElement the token offset is 3
-  // if  the tokem offset is 3
-  //FIXME: Not mixed element aware
-  if (nb_subs == 0)
-  {
-    char * sign = new char[1024];
-    std::strcpy(sign, ufc_finite_element_->signature());
-    char * tok = std::strtok(sign, ",");
-    size_t offset = 3;
-    size_t t = 0;
-    while (tok != NULL)
-    {
-      ++t;
-      tok = std::strtok(NULL, ",");
-      if (offset == t)
-      {
-        std::stringstream d;
-        d << tok;
-        d >> degree_;
-      }
-    }
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -173,7 +154,7 @@ FiniteElement::create_sub_element(Array<uint> const& sub_system) const
 //-----------------------------------------------------------------------------
 ufc::finite_element*
 FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
-    Array<uint> const& sub_system)
+                                  Array<uint> const& sub_system)
 {
   // Check if there are any sub systems
   if (finite_element.num_sub_elements() == 0)
@@ -229,8 +210,7 @@ FiniteElement::sub_value_offsets(uint i) const
   return sub_value_offs_[i];
 }
 //-----------------------------------------------------------------------------
-void
-FiniteElement::info() const
+void FiniteElement::info() const
 {
   std::stringstream msg;
   uint const padding = 24;
@@ -238,20 +218,20 @@ FiniteElement::info() const
   msg << std::setw(padding) << "signature = " << signature() << std::endl;
   std::string shape;
   switch (ufc_finite_element_->cell_shape())
-    {
-  case ufc::interval:
-    shape = "";
-    break;
-  case ufc::triangle:
-    shape = "triangle";
-    break;
-  case ufc::tetrahedron:
-    shape = "tetrahedron";
-    break;
-  default:
-    shape = "unknown";
-    break;
-    }
+  {
+    case ufc::interval:
+      shape = "";
+      break;
+    case ufc::triangle:
+      shape = "triangle";
+      break;
+    case ufc::tetrahedron:
+      shape = "tetrahedron";
+      break;
+    default:
+      shape = "unknown";
+      break;
+  }
   msg << std::setw(padding) << "cell_shape = " << shape << std::endl;
   msg << std::setw(padding) << "topological_dimension = "
       << topological_dimension() << std::endl;

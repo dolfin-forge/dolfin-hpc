@@ -229,7 +229,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     }
   }
   x->set(this_block, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
-  this->sync_ghosts();
+  sync_ghosts();
 
   delete[] global_block;
   delete[] this_block;
@@ -567,6 +567,7 @@ DiscreteFunction::get(real *& values)
   {
     values = new real[dof_map_->dofsmapping_size()];
   }
+  x->apply();
   x->get(values, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
 }
 //-----------------------------------------------------------------------------
@@ -574,7 +575,7 @@ void
 DiscreteFunction::set(real *& values)
 {
   x->set(values, dof_map_->dofsmapping_size(), dof_map_->dofsmapping());
-  sync_ghosts();
+  x->apply();
 }
 //-----------------------------------------------------------------------------
 void

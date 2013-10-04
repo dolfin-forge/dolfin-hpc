@@ -140,6 +140,8 @@ if test "x${enable_ufl}" == xno; then
    PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 else
+   AC_DEFINE(ENABLE_UFL, [1], 
+   [Enable UFL support using UFC version 2.1.1])
    PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY=1"
 fi
@@ -284,9 +286,12 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
 			  src/quadrature/Makefile\
-			  src/dolfin.pc
-			  include/Makefile
-			  include/dolfin/Makefile])
+			  src/dolfin.pc\
+			  include/Makefile\
+			  include/dolfin/Makefile\
+              demo/Makefile\
+              demo/pde/Makefile\
+			  demo/pde/poisson/cpp/Makefile])
 
 AC_OUTPUT
 

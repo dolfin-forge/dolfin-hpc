@@ -298,7 +298,7 @@ inline std::string const& FiniteElement::type() const
 //-----------------------------------------------------------------------------
 inline uint const FiniteElement::degree() const
 {
-  if (degree_ == -1)
+  if (type_ == FE::MIXED_ELEMENT)
   {
     error("Degree is not supported for MixedElement");
   }

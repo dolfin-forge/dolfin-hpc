@@ -61,7 +61,7 @@ public:
     if (it == Elements.end())
     {
       dolfin::warning(
-          "Extracting attributes from a finite element not registered in ElementLibrary");
+          "Extracting attributes from a finite element not registered in ElementLibrary\n"+signature);
       std::string s(signature);
       size_t pos = s.find("(", 0);
       type = s.substr(0, pos);

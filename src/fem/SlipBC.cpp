@@ -174,6 +174,11 @@ SlipBC::~SlipBC()
     delete boundary;
 }
 //-----------------------------------------------------------------------------
+NodeNormal& SlipBC::node_normals()
+{
+  return node_normal;
+}
+//-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 {
   apply(A, b, form.dofMaps()[1], form);

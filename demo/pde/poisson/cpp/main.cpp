@@ -18,7 +18,13 @@
 //     du/dn(x, y) = 25 sin(5 pi y)  for x = 1
 //     du/dn(x, y) = 0               otherwise
 
-#include "Poisson.h"
+#include <dolfin/config/dolfin_config.h>
+#if ENABLE_UFL 
+#include "ufc2/Poisson.h"
+#else
+#include "ufc1/Poisson.h"
+#endif
+
 #include <dolfin/common/constants.h>
 #include <dolfin/fem/DirichletBC.h>
 #include <dolfin/function/Function.h>

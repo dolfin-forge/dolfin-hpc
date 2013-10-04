@@ -260,6 +260,7 @@ void FiniteElement::info() const
           << ")" << std::endl;
     }
   }
+  msg << std::setw(padding) << "degree = " << degree_ << std::endl;
   std::cout << msg.str();
 }
 

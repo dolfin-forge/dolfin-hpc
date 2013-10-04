@@ -42,7 +42,7 @@ ElementLibrary::ElementsTable const init_elements()
   ret.insert(ElementLibrary::ElementsItem( FE::LAGRANGE2DP1V, FE::attributes(FE::VECTOR_ELEMENT, FE::LAGRANGE, ufc::triangle, 2, 1, 2)));
   ret.insert(ElementLibrary::ElementsItem( FE::LAGRANGE2DP2V, FE::attributes(FE::VECTOR_ELEMENT, FE::LAGRANGE, ufc::triangle, 2, 2, 2)));
   ret.insert(ElementLibrary::ElementsItem( FE::LAGRANGE3DP1V, FE::attributes(FE::VECTOR_ELEMENT, FE::LAGRANGE, ufc::tetrahedron, 3, 1, 3)));
-  ret.insert(ElementLibrary::ElementsItem( FE::LAGRANGE3DP2V, FE::attributes(FE::VECTOR_ELEMENT, FE::LAGRANGE, ufc::tetrahedron, 3, 1, 3)));
+  ret.insert(ElementLibrary::ElementsItem( FE::LAGRANGE3DP2V, FE::attributes(FE::VECTOR_ELEMENT, FE::LAGRANGE, ufc::tetrahedron, 3, 2, 3)));
   ret.insert(ElementLibrary::ElementsItem( FE::DG1DP0S, FE::attributes(FE::FINITE_ELEMENT, FE::DG, ufc::interval, 1, 0, 1)));
   ret.insert(ElementLibrary::ElementsItem( FE::DG1DP1S, FE::attributes(FE::FINITE_ELEMENT, FE::DG, ufc::interval, 1, 1, 1)));
   ret.insert(ElementLibrary::ElementsItem( FE::DG1DP2S, FE::attributes(FE::FINITE_ELEMENT, FE::DG, ufc::interval, 1, 2, 1)));

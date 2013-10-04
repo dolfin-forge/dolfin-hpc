@@ -72,7 +72,6 @@ public:
         size_t t0 = 0;
         size_t t1 = 0;
         std::string tok;
-        size_t offset = 3;
         while ((t1 = s.find(",", t0)) != std::string::npos)
         {
           tok = s.substr(t0, t1 - t0);

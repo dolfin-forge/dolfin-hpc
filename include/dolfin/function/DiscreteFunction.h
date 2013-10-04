@@ -73,9 +73,11 @@ public:
   uint
   dim(uint i) const;
 
+#if ENABLE_UFL
   /// Return the degree of the finite element
   uint
   degree() const;
+#endif
 
   /// Return the number of sub functions
   uint

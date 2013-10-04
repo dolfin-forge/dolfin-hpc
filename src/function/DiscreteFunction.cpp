@@ -309,12 +309,14 @@ DiscreteFunction::dim(uint i) const
   dolfin_assert(ufc_finite_element_);
   return ufc_finite_element_->value_dimension(i);
 }
+#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 uint
 DiscreteFunction::degree() const
 {
   return finite_element_->degree();
 }
+#endif
 //-----------------------------------------------------------------------------
 dolfin::uint
 DiscreteFunction::numSubFunctions() const

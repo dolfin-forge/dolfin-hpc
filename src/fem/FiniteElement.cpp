@@ -4,7 +4,6 @@
 // First added:  2013-09-12
 // Last changed: 2013-09-12
 
-#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/FiniteElement.h>
 
 #include <algorithm>
@@ -84,11 +83,15 @@ void FiniteElement::init()
 {
   dolfin_assert(ufc_finite_element_);
 
+#if ENABLE_UFL
   // Set attributes
   FE::attributes const attr = ElementLibrary::get_attributes(ufc_finite_element_->signature());
   type_ = attr.type;
   family_ = attr.family;
+  type_ = attr.type;
   degree_ = attr.degree;
+
+#endif
 
   switch (ufc_finite_element_->cell_shape())
   {
@@ -209,6 +212,8 @@ FiniteElement::sub_value_offsets(uint i) const
 {
   return sub_value_offs_[i];
 }
+
+#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 void FiniteElement::info() const
 {
@@ -263,6 +268,7 @@ void FiniteElement::info() const
   msg << std::setw(padding) << "degree = " << degree_ << std::endl;
   std::cout << msg.str();
 }
+#endif
 
 }
 

@@ -1,9 +1,12 @@
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/elements/ElementLibrary.h>
 
 #include "element_library.inc"
 
 namespace dolfin
 {
+
+#if ENABLE_UFL
 
 //-----------------------------------------------------------------------------
 Array<std::string> const init_types()
@@ -64,5 +67,7 @@ ElementLibrary::ElementsTable const init_elements()
 
 //-----------------------------------------------------------------------------
 ElementLibrary::ElementsTable const ElementLibrary::Elements = init_elements();
+
+#endif
 
 }

@@ -1,6 +1,7 @@
 #ifndef FE_H_
 #define FE_H_
 
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/Array.h>
 
 using dolfin::Array;
@@ -29,6 +30,7 @@ struct attributes {
       }
 };
 
+#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 static char const FINITE_ELEMENT     [] =  "FiniteElement";
 static char const VECTOR_ELEMENT     [] =  "VectorElement";
@@ -66,6 +68,8 @@ static char const DG3DP2V      [] =  "VectorElement('Discontinuous Lagrange', Ce
 
 static char const BDM          [] =  "Brezzi-Douglas-Marini";
 static char const BDM2DP1      [] =  "FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)";
+
+#endif
 
 }
 

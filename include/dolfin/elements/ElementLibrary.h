@@ -41,6 +41,8 @@ public:
     return create_dof_map(signature.c_str());
   }
 
+#if ENABLE_UFL
+
   static FE::attributes const get_attributes(const char* signature)
   {
     return get_attributes(std::string(signature));
@@ -144,6 +146,8 @@ public:
   typedef std::map<std::string, struct FE::attributes> ElementsTable;
   typedef std::pair<std::string, struct FE::attributes> ElementsItem;
   static ElementsTable const Elements;
+
+#endif
 
 };
 

@@ -1,10 +1,12 @@
 // Automatically generated code mapping element and dof map signatures
 // to the corresponding ufc::finite_element and ufc::dof_map classes
 
+#include <dolfin/config/dolfin_config.h>
 #include <cstring>
 
 #include <dolfin/fem/DofMap.h>
 
+#if ENABLE_UFL
 #include <dolfin/elements/ffc_Lagrange_1_1d.h>
 #include <dolfin/elements/ffc_Lagrange_2_1d.h>
 #include <dolfin/elements/ffc_Lagrange_1_2d.h>
@@ -145,3 +147,6 @@ ufc::dof_map* dolfin::ElementLibrary::create_dof_map(const char* signature)
     return new ffc_brezzi_douglas_marini_1_2d_dofmap_0();
   return 0;
 }
+
+#endif
+

@@ -7,6 +7,7 @@
 #ifndef __FINITE_ELEMENT_H
 #define __FINITE_ELEMENT_H
 
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/Form.h>
 
@@ -150,10 +151,20 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
-  /// Returs the degree of the finite element
+#if ENABLE_UFL
+
+  /// Returns the family of the finite element
+  std::string const& family() const;
+
+  /// Returns the type of the finite element
+  std::string const& type() const;
+
+  /// Returns the degree of the finite element
   uint const degree() const;
 
   void info() const;
+
+#endif
 
 private:
 
@@ -270,6 +281,20 @@ inline ufc::finite_element* FiniteElement::create_sub_element(
   return ufc_finite_element_->create_sub_element(i);
 }
 
+#if ENABLE_UFL
+
+//-----------------------------------------------------------------------------
+inline std::string const& FiniteElement::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+inline std::string const& FiniteElement::type() const
+{
+  return type_;
+}
+
 //-----------------------------------------------------------------------------
 inline uint const FiniteElement::degree() const
 {
@@ -279,6 +304,8 @@ inline uint const FiniteElement::degree() const
   }
   return degree_;
 }
+
+#endif
 
 }
 

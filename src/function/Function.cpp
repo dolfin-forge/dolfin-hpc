@@ -387,6 +387,7 @@ GenericVector& Function::vector() const
 
   return (static_cast<DiscreteFunction*>(f))->vector();
 }
+#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 uint Function::degree() const
 {
@@ -401,6 +402,7 @@ uint Function::degree() const
 
   return (static_cast<DiscreteFunction*>(f))->degree();
 }
+#endif
 //-----------------------------------------------------------------------------
 DofMap const& Function::dofmap() const
 {

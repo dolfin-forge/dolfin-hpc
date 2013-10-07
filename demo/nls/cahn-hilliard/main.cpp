@@ -152,8 +152,6 @@ int main(int argc, char* argv[])
     file << c;
   }
 
-  // Plot solution
-  plot(c);
   
   return 0;
 }

@@ -160,8 +160,6 @@ int main(int argc, char* argv[])
     nonlinear_solver.solve(nonlinear_problem, x);
   }
 
-  // Plot solution
-  plot(u);
 
   // Save function to file
   File file("nonlinear_poisson.pvd");

@@ -13,17 +13,15 @@ using namespace dolfin;
 int main()
 {
   // Read mesh from file
-  Mesh mesh("../mesh2D.xml.gz");
+  Mesh mesh("mesh2D.xml.gz");
   
   // Read mesh function from file
-  File in("../meshfunction.xml");
+  File in("meshfunction.xml");
   MeshFunction<double> f(mesh);
   in >> f;
 
   // Write mesh function to file
-  File out("meshfunction_out.xml");
+  File out("meshfunction_out.pvd");
   out << f;
 
-  // Plot mesh function
-  plot(f);
 } 

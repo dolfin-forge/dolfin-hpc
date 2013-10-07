@@ -116,8 +116,8 @@ add("AMG absolute tolerance", 1e-20);
 add("AMG maximum iterations", 10000);
 add("AMG pre-smoothing steps", 5);
 add("AMG post-smoothing steps", 5);
-add("AMG theta", 0.25);
-add("AMG levels", 3);
+add("AMG theta", 0.15);
+add("AMG levels", 20);
 
 //--- Parameter for direct (LU) solver ---
 add("LU report", true);

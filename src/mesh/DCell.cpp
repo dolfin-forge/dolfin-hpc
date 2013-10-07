@@ -25,7 +25,7 @@ bool DCell::has_edge(DVertex *v1, DVertex *v2)
   return (found == 2);
 }
 //------------------------------------------------------------------------------
-real DCell::volume() const
+dolfin::real DCell::volume() const
 {
   switch(vertices.size())
   {
@@ -62,7 +62,7 @@ real DCell::volume() const
   return 0.0;
 }
 //------------------------------------------------------------------------------
-real DCell::diameter() const
+dolfin::real DCell::diameter() const
 {
   switch(vertices.size())
   {
@@ -105,7 +105,7 @@ real DCell::diameter() const
   return 0.0;
 }
 //------------------------------------------------------------------------------
-uint DCell::orientation() const
+dolfin::uint DCell::orientation() const
 {
   switch(vertices.size())
   {

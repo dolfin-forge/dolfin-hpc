@@ -78,7 +78,7 @@ int main()
   };
 
   // Read mesh
-  Mesh mesh("../../../../data/meshes/gear.xml.gz");
+  Mesh mesh("../../../data/meshes/gear.xml.gz");
 
   // Create right-hand side
   Function f(mesh, 3, 0.0);
@@ -113,9 +113,6 @@ int main()
   Function u;
   pde.set("PDE linear solver", "direct");
   pde.solve(u);
-
-  // Plot solution
-  plot(u, "displacement");
 
   // Save solution to VTK format
   File vtk_file("elasticity.pvd");

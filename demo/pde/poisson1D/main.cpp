@@ -71,8 +71,6 @@ int main()
   File file_u("poisson.pvd");
   file_u << u;
 
-  // Plot solution
-  plot(u);
 
   return 0;
 }

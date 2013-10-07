@@ -67,7 +67,7 @@ DMesh::~DMesh()
 {
   if ( cell_type )
     delete cell_type;
-
+  
   // Delete allocated DVertices
   for(std::set<DVertex* >::iterator it = vertices.begin();
       it != vertices.end(); ++it)
@@ -75,8 +75,8 @@ DMesh::~DMesh()
   
   // Delete allocated DCells
   for(std::list<DCell* >::iterator it = cells.begin();
-       it != cells.end(); ++it)
-     delete *it;
+      it != cells.end(); ++it)
+    delete *it;
   
 }
 //-----------------------------------------------------------------------------
@@ -84,112 +84,6 @@ void DMesh::imp(Mesh& mesh)
 {
   cell_type = CellType::create(mesh.type().cellType());
   //cell_type = &(mesh.type());
-  d = mesh.topology().dim();
-
-  // Delete allocated DVertices
-  for(std::set<DVertex* >::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
-    delete *it;
-  
-  // Delete allocated DCells
-  for(std::list<DCell* >::iterator it = cells.begin();
-       it != cells.end(); ++it)
-     delete *it;
-
-  vertices.clear();
-  cells.clear();
-
-  //MeshRenumber::renumber_vertices(mesh);
-
-  std::vector<DVertex *> vertexvec;
-
-  // Assume uniform refinement
-  uint num_new = mesh.size(1);
-
-  // Since the mesh is linear numbered, the maximum global index assigned is
-  // the number of vertices in the mesh
-  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
-#ifdef HAVE_MPI
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-#endif
-
-  Cell c(mesh, 0);
-  _salt = c.numEntities(0) * 
-    (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
-
-  // Assign a safe range for each processor
-  _start_offset = 0;
-#ifdef HAVE_MPI
-#if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_new, &_start_offset, 1,
-       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-#else
-  MPI_Scan(&num_new, &_start_offset, 1,
-     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  _start_offset -= num_new;
-#endif
-  _start_offset += glb_max;
-
-  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-#endif
-
-  // Copy vertices
-  uint counter = 1;
-  for (VertexIterator vi(mesh); !vi.end(); ++vi)
-  {
-    dolfin_assert(vi->index() == vertices.size());
-    dolfin_assert(vi->index() == vertexvec.size());
-
-    DVertex* dv = new DVertex;    
-    dv->p = vi->point();
-    dv->id = vi->index();
-    dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
-    dv->on_boundary = MPI::numProcesses() > 1 && mesh.distdata().is_shared(vi->index(), 0);
-    dv->shared = mesh.distdata().is_shared(vi->index(), 0);
-    dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
-    if (dv->ghosted)
-      dv->owner = mesh.distdata().get_owner(*vi);
-    else if (dv->shared)
-      dv->shared_adj = mesh.distdata().get_shared_adj(*vi);
-
-    if(dv->on_boundary)     
-      bc_dvs[dv->glb_id] = dv;
-    
-    vertices.insert(dv);
-    vertexvec.push_back(dv);
-    counter++;
-  }
-
-  // Copy cells
-  for (CellIterator ci(mesh); !ci.end(); ++ci)
-  {
-    DCell* dc = new DCell;
-
-    std::vector<DVertex*> vs(ci->numEntities(0));
-    uint i = 0;
-    for (VertexIterator vi(*ci); !vi.end(); ++vi)
-    {
-      DVertex* dv = vertexvec[vi->index()];
-
-      vs[i] = dv;
-      i++;
-    }
-
-    addCell(dc, vs, ci->index());
-    // Define the same cell numbering
-    dc->id = ci->index();
-
-  }
-}
-//-----------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
-void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-		MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
-{
-
-  cell_type = CellType::create(mesh.type().cellType());
-
   d = mesh.topology().dim();
   
   // Delete allocated DVertices
@@ -201,17 +95,17 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   for(std::list<DCell* >::iterator it = cells.begin();
       it != cells.end(); ++it)
     delete *it;
-
+  
   vertices.clear();
   cells.clear();
-
+  
   //MeshRenumber::renumber_vertices(mesh);
-
+  
   std::vector<DVertex *> vertexvec;
-
+  
   // Assume uniform refinement
   uint num_new = mesh.size(1);
-
+  
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
   uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
@@ -222,7 +116,113 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   Cell c(mesh, 0);
   _salt = c.numEntities(0) * 
     (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
-
+  
+  // Assign a safe range for each processor
+  _start_offset = 0;
+#ifdef HAVE_MPI
+#if ( MPI_VERSION > 1 )
+  MPI_Exscan(&num_new, &_start_offset, 1,
+	     MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+#else
+  MPI_Scan(&num_new, &_start_offset, 1,
+	   MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  _start_offset -= num_new;
+#endif
+  _start_offset += glb_max;
+  
+  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
+  
+  // Copy vertices
+  uint counter = 1;
+  for (VertexIterator vi(mesh); !vi.end(); ++vi)
+  {
+    dolfin_assert(vi->index() == vertices.size());
+    dolfin_assert(vi->index() == vertexvec.size());
+    
+    DVertex* dv = new DVertex;    
+    dv->p = vi->point();
+    dv->id = vi->index();
+    dv->glb_id = mesh.distdata().get_global(vi->index(), 0);
+    dv->on_boundary = MPI::numProcesses() > 1 && mesh.distdata().is_shared(vi->index(), 0);
+    dv->shared = mesh.distdata().is_shared(vi->index(), 0);
+    dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
+    if (dv->ghosted)
+      dv->owner = mesh.distdata().get_owner(*vi);
+    else if (dv->shared)
+      dv->shared_adj = mesh.distdata().get_shared_adj(*vi);
+    
+    if(dv->on_boundary)     
+      bc_dvs[dv->glb_id] = dv;
+    
+    vertices.insert(dv);
+    vertexvec.push_back(dv);
+    counter++;
+  }
+  
+  // Copy cells
+  for (CellIterator ci(mesh); !ci.end(); ++ci)
+  {
+    DCell* dc = new DCell;
+    
+    std::vector<DVertex*> vs(ci->numEntities(0));
+    uint i = 0;
+    for (VertexIterator vi(*ci); !vi.end(); ++vi)
+    {
+      DVertex* dv = vertexvec[vi->index()];
+      
+      vs[i] = dv;
+      i++;
+    }
+    
+    addCell(dc, vs, ci->index());
+    // Define the same cell numbering
+    dc->id = ci->index();
+    
+  }
+}
+//-----------------------------------------------------------------------------
+#ifdef HAVE_LIBGEOM
+//-----------------------------------------------------------------------------
+void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
+		MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
+{
+  
+  cell_type = CellType::create(mesh.type().cellType());
+  
+  d = mesh.topology().dim();
+  
+  // Delete allocated DVertices
+  for(std::set<DVertex* >::iterator it = vertices.begin();
+      it != vertices.end(); ++it)
+    delete *it;
+  
+  // Delete allocated DCells
+  for(std::list<DCell* >::iterator it = cells.begin();
+      it != cells.end(); ++it)
+    delete *it;
+  
+  vertices.clear();
+  cells.clear();
+  
+  //MeshRenumber::renumber_vertices(mesh);
+  
+  std::vector<DVertex *> vertexvec;
+  
+  // Assume uniform refinement
+  uint num_new = mesh.size(1);
+  
+  // Since the mesh is linear numbered, the maximum global index assigned is
+  // the number of vertices in the mesh
+  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
+#ifdef HAVE_MPI
+  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
+  
+  Cell c(mesh, 0);
+  _salt = c.numEntities(0) * 
+    (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
+  
   // Assign a safe range for each processor
   _start_offset = 0;
 #ifdef HAVE_MPI
@@ -265,7 +265,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     vertexvec.push_back(dv);
     counter++;
   }
-
+  
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     DCell* dc = new DCell;
@@ -281,7 +281,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     }
     
     addCell(dc, vs, ci->index());
-
+    
     // Define the same cell numbering
     dc->id = ci->index();
   }
@@ -293,13 +293,13 @@ void DMesh::exp(Mesh& mesh)
 {
   eraseRemovedEntities();
   number();
-
+  
   MeshEditor editor;
   editor.open(mesh, cell_type->cellType(), d, d);
   
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
-
+  
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -317,7 +317,7 @@ void DMesh::exp(Mesh& mesh)
       mesh.distdata().set_shared(current_vertex, 0);
     mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);      
   }
-
+  
   Array<uint> cell_vertices(cell_type->numEntities(0));
   uint current_cell = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
@@ -325,7 +325,7 @@ void DMesh::exp(Mesh& mesh)
   {
     DCell* dc = *it;
     dolfin_assert( !dc->deleted );
-
+    
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
       DVertex* dv = dc->vertices[j];
@@ -350,7 +350,7 @@ void DMesh::exp(Mesh& mesh)
 void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
                 MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
-
+  
   eraseRemovedEntities();
   number();
   
@@ -367,7 +367,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   patch_id_list = -1;
   bnd_u = -1;
   bnd_v = -1;
-
+  
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -444,7 +444,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
-
+  
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -453,7 +453,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     DVertex* dv = *it;
     dolfin_assert( !dv->deleted );
     
-#if (__sgi)
+#if (__sgi) 
     (*old2new_vertices)[dv->id] = current_vertex;
 #else
     old2new_vertices->at(dv->id) = current_vertex;
@@ -485,12 +485,14 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     dolfin_assert( !dc->deleted );
     
     if ( old2new_cells )
+    {
 #if (__sgi)
       (*old2new_cells)[dc->id] = current_cell;
 #else
       old2new_cells->at(dc->id) = current_cell;
 #endif
-      
+    }
+    
     for(uint j = 0; j < dc->vertices.size(); j++)
     {
       DVertex* dv = dc->vertices[j];
@@ -503,7 +505,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     editor.addCell(current_cell, cell_vertices);
   }
   editor.close();
-
+  
   if (delete_vertices_array)
     delete old2new_vertices;
 }
@@ -515,35 +517,36 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
     dolfin_assert( old2new_vertices->size() >= vertices.size() );
     *old2new_vertices = -1;
   }
-
+  
   uint i = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
       it != vertices.end(); ++it, ++i)
   {
     DVertex* dv = *it;
-
+    
     if ( old2new_vertices )
+    {
 #if (__sgi)
       (*old2new_vertices)[dv->id] = i;
 #else
       old2new_vertices->at(dv->id) = i;
 #endif
-
+    }
     dv->id = i;
   }
-
+  
   if ( old2new_cells )
   {
     dolfin_assert( old2new_cells->size() >= cells.size() );
     *old2new_cells = -1;
   }
-
+  
   i = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
       it != cells.end(); ++it, ++i)
   {
     DCell* dc = *it;
-
+    
     if ( old2new_cells )
     {
 #if (__sgi)
@@ -1178,8 +1181,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom)
 	  mv->ghosted = true;
 	  mv->shared = true;
 	  mv->owner = it->second.owner;
-	}
-	
+	}	
 	continue;
       }
       

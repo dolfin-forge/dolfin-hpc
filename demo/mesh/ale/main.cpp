@@ -34,7 +34,8 @@ int main()
   mesh.move(boundary);
 
   // Plot mesh
-  plot(mesh);
+  File f_mesh("mesh.pvd");
+  f_mesh << mesh;
 
   return 0;
 }

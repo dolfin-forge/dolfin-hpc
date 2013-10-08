@@ -161,15 +161,12 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
 			   mesh.geometry().x(entity->index()));
       if (intersection_detector) 
       {
-	if (!intersect(x.data, mesh.geometry().dim(), on_boundary)) {
+	if (!intersect(x.data, mesh.geometry().dim(), on_boundary))
 	  all_vertices_inside = false;
-	  break;
-	}
       }
       else if (!inside(x, on_boundary))
       {
 	all_vertices_inside = false;
-	break;
       }
     }
 

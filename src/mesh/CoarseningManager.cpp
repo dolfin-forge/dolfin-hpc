@@ -134,9 +134,11 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
         ++num_independent_vertices;
     }
   }
+#ifdef HAVE_MPI
   uint global_num_independent_vertices;
   MPI_Reduce( &num_independent_vertices, &global_num_independent_vertices, 1,
-              MPI_UNSIGNED, MPI_SUM, 0, MPI::DOLFIN_COMM );
+	      MPI_UNSIGNED, MPI_SUM, 0, MPI::DOLFIN_COMM );
+#endif
 }
 //-----------------------------------------------------------------------------
 bool CoarseningManager::isIndependentVertex(Vertex& v)
@@ -263,6 +265,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
                                          uint max_num_requested_vertices,
                                          MeshFunction<uint> *& partitions)
 {
+#ifdef HAVE_MPI
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
 
@@ -422,10 +425,12 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   }
   delete[] send_list_requests;
   delete[] recv_buff_requests;
+#endif
 }
 //-----------------------------------------------------------------------------
 bool CoarseningManager::migrate(uint num_cells_coarsened)
 {
+#ifdef HAVE_MPI
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
 
@@ -505,7 +510,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   // free memory
   delete partitions;
-
+#endif
   return true;
 }
 //-----------------------------------------------------------------------------

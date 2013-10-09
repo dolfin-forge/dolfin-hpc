@@ -599,7 +599,7 @@ bool TetrahedronCell::intersects(const MeshEntity& tetrahedron,
 bool TetrahedronCell::intersects(const MeshEntity& interval, const Point& p1, const Point& p2) const
 {
   // FIXME: Not implemented
-  error("Interval::intersects() not implemented");
+  error("TetrahedronCell::intersects() not implemented");
 
   return false;
 }

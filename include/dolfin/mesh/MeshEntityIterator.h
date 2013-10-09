@@ -47,8 +47,8 @@ namespace dolfin
     MeshEntityIterator(Mesh& mesh, uint dim) 
       : entity(mesh, dim, 0), _pos(0), pos_end(mesh.size(dim)), index(0)
     {
-      // Compute entities if empty
-      if ( pos_end == 0 )
+      // Compute entities if empty and if mesh is not empty
+      if ( pos_end == 0 && mesh.numCells() != 0 )
         pos_end = mesh.init(dim);
     }
 
@@ -60,7 +60,7 @@ namespace dolfin
       MeshConnectivity& c = entity.mesh().topology()(entity.dim(), dim);
       
       // Compute connectivity if empty
-      if ( c.size() == 0 )
+      if ( c.size() == 0 && entity.mesh().numCells() != 0 )
         entity.mesh().init(entity.dim(), dim);
       
       // Get size and index map

@@ -224,7 +224,7 @@ EXTRACT_ALL            = YES
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class 
 # will be included in the documentation.
 
-EXTRACT_PRIVATE        = NO
+EXTRACT_PRIVATE        = YES
 
 # If the EXTRACT_STATIC tag is set to YES all static members of a file 
 # will be included in the documentation.
@@ -317,7 +317,7 @@ SORT_MEMBER_DOCS       = YES
 # by member name. If set to NO (the default) the members will appear in 
 # declaration order.
 
-SORT_BRIEF_DOCS        = NO
+SORT_BRIEF_DOCS        = YES
 
 # If the SORT_BY_SCOPE_NAME tag is set to YES, the class list will be 
 # sorted by fully-qualified names, including namespaces. If set to 
@@ -450,7 +450,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = include/dolfin src
+INPUT                  = include src
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -643,7 +643,7 @@ HTML_HEADER             =
 # standard footer.
 
 #HTML_FOOTER            = doc/progr_reference/html/myfooter.inc
-HTML_FOOTER
+HTML_FOOTER             =
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 

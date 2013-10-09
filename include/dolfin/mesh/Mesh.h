@@ -13,13 +13,22 @@
 #define __MESH_H
 
 #include <string>
+
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
+//#include <dolfin/mesh/MeshFunction.h>
 #include "ALEType.h"
 #include "MeshTopology.h"
 #include "MeshGeometry.h"
 #include "CellType.h"
 #include "MeshDistributedData.h"
+
+#ifdef HAVE_LIBGEOM
+namespace libgeom
+{
+  class Geometry;
+}
+#endif
 
 namespace dolfin
 {
@@ -150,6 +159,16 @@ namespace dolfin
 
     /// Refine mesh uniformly
     void refine();
+
+#ifdef HAVE_LIBGEOM
+    /// Refine mesh uniformly including geometry informations -surfaces
+    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
+		MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
+		
+    /// Refine mesh uniformly including geometry informations -curves
+    void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list, 
+		MeshFunction<float>& bnd_u);
+#endif
 
     /// Refine mesh according to cells marked for refinement
     void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,

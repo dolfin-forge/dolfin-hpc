@@ -812,28 +812,29 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       // vertex indices
       else 
       {
-	// own vertex
-	if(distdata.have_global(recv_buff_cell[i], 0))
-	  cl.push_back(distdata.get_local(recv_buff_cell[i], 0));
-	// ghosted vertex
-	else
-	{
-	  cl.push_back(vi);
-	  for(uint j=0;j<gdim;j++)
-	    coords.push_back(0.0);
-	  distdata.set_map(vi, recv_buff_cell[i], 0);
-	  distdata.set_ghost(vi++, 0);
-	  shared_buffer.push_back(recv_buff_cell[i]);
+        // own vertex
+        if(distdata.have_global(recv_buff_cell[i], 0))
+          cl.push_back(distdata.get_local(recv_buff_cell[i], 0));
+        // ghosted vertex
+        else
+        {
+          cl.push_back(vi);
+          for(uint j=0;j<gdim;j++)
+            coords.push_back(0.0);
+          distdata.set_map(vi, recv_buff_cell[i], 0);
+          distdata.set_ghost(vi++, 0);
+          shared_buffer.push_back(recv_buff_cell[i]);
 
-	  if ( vertex_functions )
-	  {
-	    for ( uint f_id(0) ; f_id < nvfunctions ; ++f_id )
-	    {
-	      vfunctions[f_id].push_back(recv_buff[i+gdim+f_id]);
-	    }
-	  }  
-	}
-	cell_n++;
+          if ( vertex_functions )
+          {
+            for ( uint f_id(0) ; f_id < nvfunctions ; ++f_id )
+            {
+              //vfunctions[f_id].push_back(recv_buff[i+gdim+f_id]);
+              vfunctions[f_id].push_back(0);
+            }
+          }  
+        }
+        cell_n++;
       }
     }
 
@@ -1020,7 +1021,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   mesh.distdata().invalid_ownership();
 
   // Fill new cell functions
-  if( cell_functions ) 
+  if( cell_functions && mesh.numCells() > 0 ) 
   {
     uint f_id(0);
     for ( CellFunctionArrayType::iterator f_it(cell_functions->begin()) ; 
@@ -1035,7 +1036,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   }
 
   // Fill new vertex functions
-  if ( vertex_functions )
+  if ( vertex_functions && mesh.numVertices() > 0 )
   {
     uint f_id(0);
     for ( VertexFunctionArrayType::iterator f_it(vertex_functions->begin()) ;

@@ -9,6 +9,7 @@
 // Last changed: 2013-03-22
 
 #include <sstream>
+#include <fstream>
 
 #include <dolfin/io/File.h>
 #include <dolfin/mesh/ALE.h>
@@ -16,9 +17,11 @@
 #include <dolfin/mesh/LocalMeshRefinement.h>
 #include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/TopologyComputation.h>
+
+#include <dolfin/mesh/MeshFunction.h>
+
 #include <dolfin/mesh/MeshSmoothing.h>
 #include <dolfin/mesh/MeshOrdering.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
@@ -28,6 +31,10 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/parameter/parameters.h>
+
+#ifdef HAVE_LIBGEOM
+#include <Geometry.h>
+#endif
 
 using namespace dolfin;
 
@@ -138,6 +145,28 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
+#ifdef HAVE_LIBGEOM
+//-----------------------------------------------------------------------------
+void Mesh::refine(libgeom::Geometry& geom, 
+		  MeshFunction<int>& patch_id_list, 
+		  MeshFunction<float>& bnd_u, 
+		  MeshFunction<float>& bnd_v)
+{
+  message("No cells marked for refinement, "
+	  "assuming uniform mesh refinement with geometry informations.");
+  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u, bnd_v);
+}
+//-----------------------------------------------------------------------------
+void Mesh::refine(libgeom::Geometry& geom, 
+		  MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
+{
+  message("No cells marked for refinement, "
+	  "assuming uniform mesh refinement with geometry informations.");
+  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u);
+}
+//-----------------------------------------------------------------------------
+#endif // HAVE_LIBGEOM
+//-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
 		  bool load_balance)
 {
@@ -150,10 +179,8 @@ void Mesh::coarsen()
   // FIXME: Move implementation to separate class and just call function here
 
   message("No cells marked for coarsening, assuming uniform mesh coarsening.");
-  MeshFunction<bool> cell_marker(*this);
-  cell_marker.init(this->topology().dim());
-  for (CellIterator c(*this); !c.end(); ++c)
-    cell_marker.set(c->index(),true);
+  MeshFunction<bool> cell_marker(*this, this->topology().dim());
+  cell_marker = true;
 
   LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this,cell_marker);
 }

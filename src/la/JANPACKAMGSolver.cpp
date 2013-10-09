@@ -116,8 +116,6 @@ int JANPACKAMGSolver::getCoarsening(MultigridCoarsening cscheme) const
     return JP_AMG_CLJP;
   case pmis:
     return JP_AMG_PMIS;
-  case hmis:
-    return JP_AMG_HMIS;
   default:
     warning("Requested Multigrid coarsening unknown. Using Rugen-Stueben.");
     return JP_AMG_RS;

@@ -53,6 +53,10 @@ namespace dolfin
     // Get JANPACK Multigrid coarsening scheme id
     int getCoarsening(MultigridCoarsening cscheme) const;
     
+    bool mls_init;
+
+    // JANPACK multilevel solver cache
+    char mls[648];
   };
 }
 

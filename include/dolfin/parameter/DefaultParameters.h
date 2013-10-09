@@ -118,6 +118,7 @@ add("AMG pre-smoothing steps", 5);
 add("AMG post-smoothing steps", 5);
 add("AMG theta", 0.15);
 add("AMG levels", 20);
+add("AMG keep levels", false);
 
 //--- Parameter for direct (LU) solver ---
 add("LU report", true);

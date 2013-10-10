@@ -56,7 +56,7 @@ namespace dolfin
     bool mls_init;
 
     // JANPACK multilevel solver cache
-    char mls[648];
+    char mls[664];
   };
 }
 

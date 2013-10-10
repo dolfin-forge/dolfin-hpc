@@ -55,3 +55,15 @@ bool ParameterList::defined(std::string key) const
   return parameters.find(key) != parameters.end();
 }
 //-----------------------------------------------------------------------------
+dolfin::LogStream& dolfin::operator<< (LogStream& stream, 
+                                       const ParameterList& parameter_list)
+{
+  stream << "Parameters: \n";
+  for ( ParameterList::const_iterator it(parameter_list.parameters.begin());
+        it != parameter_list.parameters.end(); ++it )
+  {
+    stream << it->first << ": " << it->second << "\n";
+  }
+  return stream;
+}
+//-----------------------------------------------------------------------------

@@ -88,18 +88,6 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
   uint num_new_vertices = 0;
   uint num_new_cells = 0;
   
-  // Compute number of vertices and cells 
-  /*
-  for (CellIterator c(mesh); !c.end(); ++c)
-  {
-    if((cell_marker.get(*c) == true))
-    {
-      //cout << "marked cell: " << endl;
-      //cout << c->midpoint() << endl;
-      //cout << c->index() << endl;
-    }
-  }
-  */
 
   // Create new mesh and open for editing
   Mesh refined_mesh;
@@ -153,11 +141,6 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     
     if ( (cell_marker.get(*c) == true) && (cell_forbidden.get(*c) == false) )
     {
-//       cout << "marked cell: " << endl;
-//       cout << c->midpoint() << endl;
-//       cout << c->index() << endl;
-
-
       // Find longest edge of cell c
       lmax = 0.0;
       for (EdgeIterator e(*c); !e.end(); ++e)
@@ -214,8 +197,6 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
     editor.initCells(num_cells + num_new_cells);
   }
 
-  //cout << "Number of cells in old mesh: " << num_cells << "; to add: " << num_new_cells << endl;
-  //cout << "Number of vertices in old mesh: " << num_vertices << "; to add: " << num_new_vertices << endl;
   // Add old vertices
   uint current_vertex = 0;
   for (VertexIterator v(mesh); !v.end(); ++v) {
@@ -340,9 +321,6 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(Mesh& mesh,
 
 	// Add new vertex
 	editor.addVertex(current_vertex++, longest_edge.midpoint());
-
-	//cout << "adding new vertex: " << endl;
-	//cout << longest_edge.midpoint() << endl;
 
 	for (CellIterator cn(longest_edge); !cn.end(); ++cn)
 	{

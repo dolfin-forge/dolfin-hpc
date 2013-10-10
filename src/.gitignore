@@ -1,6 +1,0 @@
-*.la
-dolfin.pc
-.libs
-Makefile
-Makefile.in
-

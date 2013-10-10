@@ -69,6 +69,7 @@ void JANPACKMat::init(uint M, uint N)
   //  A = &AA;
   jp_mat_init(A, M, N);
 
+  //  jp_mat_setopt(A, JP_MAT_SORTED);
   // Not yet implemented
   //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
@@ -176,6 +177,7 @@ void JANPACKMat::ident(uint m, const uint* rows)
   dolfin_assert(A); 
 
   for(uint i = 0; i < m; i ++) {
+    //jp_mat_ident(A, rows[i]);
     jp_mat_zero_row(A, rows[i]);
     jp_mat_insert(A, rows[i], rows[i], 1.0);
   }

@@ -15,124 +15,124 @@
 namespace dolfin
 {
 
-/// MeshEntityIterator provides a common iterator for mesh entities
-/// over meshes, boundaries and incidence relations. The basic use
-/// is illustrated below.
-///
-/// The following example shows how to iterate over all mesh entities
-/// of a mesh of topological dimension dim:
-///
-///     for (MeshEntityIterator e(mesh, dim); !e.end(); ++e)
-///     {
-///       e->foo();
-///     }
-///
-/// The following example shows how to iterate over mesh entities of
-/// topological dimension dim connected (incident) to some mesh entity f:
-///
-///     for (MeshEntityIterator e(f, dim); !e.end(); ++e)
-///     {
-///       e->foo();
-///     }
-///
-/// In addition to the general iterator, a set of specific named iterators
-/// are provided for entities of type Vertex, Edge, Face, Facet and Cell.
-/// These iterators are defined along with their respective classes.
-
-class MeshEntityIterator
-{
-public:
-
-  /// Create iterator for mesh entities over given topological dimension
-  MeshEntityIterator(Mesh& mesh, uint dim);
-
-  /// Create iterator for entities of given dimension connected to given entity
-  MeshEntityIterator(MeshEntity& entity, uint dim);
-
-  /// Destructor
-  virtual ~MeshEntityIterator();
-
-  /// Step to next mesh entity (prefix increment)
-  MeshEntityIterator& operator++();
-
-  /// Return current position
-  uint pos() const;
-
-  /// Check if iterator has reached the end
-  bool end() const;
-
-  /// Dereference operator
-  MeshEntity& operator*();
-
-  /// Member access operator
-  MeshEntity* operator->();
-
-  /// Output
-  friend LogStream& operator<<(LogStream& stream, MeshEntityIterator const& it);
-
-private:
-
-  /// Copy constructor is private to disallow usage. If it were public (or not
-  /// declared and thus a default version available) it would allow code like
+  /// MeshEntityIterator provides a common iterator for mesh entities
+  /// over meshes, boundaries and incidence relations. The basic use
+  /// is illustrated below.
   ///
-  /// for (CellIterator c0(mesh); !c0.end(); ++c0)
-  ///   for (CellIterator c1(c0); !c1.end(); ++c1)
-  ///      ...
+  /// The following example shows how to iterate over all mesh entities
+  /// of a mesh of topological dimension dim:
   ///
-  /// c1 looks to be an iterator over the entities around c0 when it is in
-  /// fact a copy of c0.
-  MeshEntityIterator(MeshEntityIterator& entity);
-
-  // Mesh entity
-  MeshEntity entity;
-
-  // Current position
-  uint _pos;
-
-  // End position
-  uint pos_end;
-
-  // Mapping from pos to index (if any)
-  uint* index;
-
-};
-
-//--- INLINES -----------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-inline MeshEntityIterator& MeshEntityIterator::operator++()
-{
-  ++_pos;
-  return *this;
-}
-
-//-----------------------------------------------------------------------------
-inline uint MeshEntityIterator::pos() const
-{
-  return _pos;
-}
-
-//-----------------------------------------------------------------------------
-inline bool MeshEntityIterator::end() const
-{
-  return _pos >= pos_end;
-}
-
-//-----------------------------------------------------------------------------
-inline MeshEntity& MeshEntityIterator::operator*()
-{
-  return *operator->();
-}
-
-//-----------------------------------------------------------------------------
-inline MeshEntity* MeshEntityIterator::operator->()
-{
-  entity._index = (index ? index[_pos] : _pos);
-  return &entity;
-}
-
-//-----------------------------------------------------------------------------
-
+  ///     for (MeshEntityIterator e(mesh, dim); !e.end(); ++e)
+  ///     {
+  ///       e->foo();
+  ///     }
+  ///
+  /// The following example shows how to iterate over mesh entities of
+  /// topological dimension dim connected (incident) to some mesh entity f:
+  ///
+  ///     for (MeshEntityIterator e(f, dim); !e.end(); ++e)
+  ///     {
+  ///       e->foo();
+  ///     }
+  ///
+  /// In addition to the general iterator, a set of specific named iterators
+  /// are provided for entities of type Vertex, Edge, Face, Facet and Cell.
+  /// These iterators are defined along with their respective classes.
+  
+  class MeshEntityIterator
+  {
+  public:
+    
+    /// Create iterator for mesh entities over given topological dimension
+    MeshEntityIterator(Mesh& mesh, uint dim);
+    
+    /// Create iterator for entities of given dimension connected to given entity
+    MeshEntityIterator(MeshEntity& entity, uint dim);
+    
+    /// Destructor
+    virtual ~MeshEntityIterator();
+    
+    /// Step to next mesh entity (prefix increment)
+    MeshEntityIterator& operator++();
+    
+    /// Return current position
+    uint pos() const;
+    
+    /// Check if iterator has reached the end
+    bool end() const;
+    
+    /// Dereference operator
+    MeshEntity& operator*();
+    
+    /// Member access operator
+    MeshEntity* operator->();
+    
+    /// Output
+    friend LogStream& operator<<(LogStream& stream, MeshEntityIterator const& it);
+    
+  private:
+    
+    /// Copy constructor is private to disallow usage. If it were public (or not
+    /// declared and thus a default version available) it would allow code like
+    ///
+    /// for (CellIterator c0(mesh); !c0.end(); ++c0)
+    ///   for (CellIterator c1(c0); !c1.end(); ++c1)
+    ///      ...
+    ///
+    /// c1 looks to be an iterator over the entities around c0 when it is in
+    /// fact a copy of c0.
+    MeshEntityIterator(MeshEntityIterator& entity);
+    
+    // Mesh entity
+    MeshEntity entity;
+    
+    // Current position
+    uint _pos;
+    
+    // End position
+    uint pos_end;
+    
+    // Mapping from pos to index (if any)
+    uint* index;
+    
+  };
+  
+  //--- INLINES -----------------------------------------------------------------
+  
+  //-----------------------------------------------------------------------------
+  inline MeshEntityIterator& MeshEntityIterator::operator++()
+  {
+    ++_pos;
+    return *this;
+  }
+  
+  //-----------------------------------------------------------------------------
+  inline uint MeshEntityIterator::pos() const
+  {
+    return _pos;
+  }
+  
+  //-----------------------------------------------------------------------------
+  inline bool MeshEntityIterator::end() const
+  {
+    return _pos >= pos_end;
+  }
+  
+  //-----------------------------------------------------------------------------
+  inline MeshEntity& MeshEntityIterator::operator*()
+  {
+    return *operator->();
+  }
+  
+  //-----------------------------------------------------------------------------
+  inline MeshEntity* MeshEntityIterator::operator->()
+  {
+    entity._index = (index ? index[_pos] : _pos);
+    return &entity;
+  }
+  
+  //-----------------------------------------------------------------------------
+  
 }
 
 #endif

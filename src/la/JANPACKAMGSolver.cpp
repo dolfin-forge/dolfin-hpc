@@ -18,15 +18,17 @@ using namespace dolfin;
 JANPACKAMGSolver::JANPACKAMGSolver(MultigridScheme scheme, 
 				   MultigridSmoother smoother,
 				   MultigridCoarsening cscheme)
-  : scheme(scheme), smoother(smoother), cscheme(cscheme)
+  : scheme(scheme), smoother(smoother), cscheme(cscheme), mls_init(false)
 {
 }
 //-----------------------------------------------------------------------------
 JANPACKAMGSolver::~JANPACKAMGSolver()
 {
+  jp_mls_free(mls);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const JANPACKVec& b)
+dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A,
+				     JANPACKVec& x, const JANPACKVec& b)
 {
   // Check dimensions
   uint M = A.size(0);
@@ -41,9 +43,16 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
   if (x.local_size() != b.local_size())
     x.init(b.local_size());
 
+  if (mls_init == false) {
+    jp_mls_init(mls, b.local_size());
+    mls_init = true;
+  }
+
+  if (get("AMG keep levels"))
+    jp_mls_setopt(mls, JP_ML_KEEP_LEVELS);
 
   int num_iterations;
-  num_iterations = jp_amg_solver(A.mat(), x.vec(), b.vec(), 
+  num_iterations = jp_amg_solver(A.mat(), x.vec(), b.vec(), mls,
 				 (jp_amg_scheme_t) getScheme(scheme), 
 				 (jp_amg_smoother_t) getSmoother(smoother),
 				 (jp_amg_cscheme_t) getCoarsening(cscheme),
@@ -55,6 +64,7 @@ dolfin::uint JANPACKAMGSolver::solve(const JANPACKMat& A, JANPACKVec& x, const J
 				 get("AMG relative tolerance"));
   
   message("AMG solver converged in %d iterations.", num_iterations);
+
   return num_iterations;
 }
 //-----------------------------------------------------------------------------
@@ -106,8 +116,6 @@ int JANPACKAMGSolver::getCoarsening(MultigridCoarsening cscheme) const
     return JP_AMG_CLJP;
   case pmis:
     return JP_AMG_PMIS;
-  case hmis:
-    return JP_AMG_HMIS;
   default:
     warning("Requested Multigrid coarsening unknown. Using Rugen-Stueben.");
     return JP_AMG_RS;

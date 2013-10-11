@@ -7,6 +7,7 @@
 #ifndef __FINITE_ELEMENT_H
 #define __FINITE_ELEMENT_H
 
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/Form.h>
 
@@ -150,10 +151,20 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
-  /// Returs the degree of the finite element
+#if ENABLE_UFL
+
+  /// Returns the family of the finite element
+  std::string const& family() const;
+
+  /// Returns the type of the finite element
+  std::string const& type() const;
+
+  /// Returns the degree of the finite element
   uint const degree() const;
 
   void info() const;
+
+#endif
 
 private:
 
@@ -164,6 +175,10 @@ private:
   bool const finite_element_local_;
   Array<uint> * sub_value_dims_;
   Array<uint> * sub_value_offs_;
+
+  std::string type_;
+  std::string family_;
+  std::string strshape_;
   uint topo_dim_;
   uint geom_dim_;
   uint degree_;
@@ -266,11 +281,31 @@ inline ufc::finite_element* FiniteElement::create_sub_element(
   return ufc_finite_element_->create_sub_element(i);
 }
 
+#if ENABLE_UFL
+
+//-----------------------------------------------------------------------------
+inline std::string const& FiniteElement::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+inline std::string const& FiniteElement::type() const
+{
+  return type_;
+}
+
 //-----------------------------------------------------------------------------
 inline uint const FiniteElement::degree() const
 {
+  if (type_ == FE::MIXED_ELEMENT)
+  {
+    error("Degree is not supported for MixedElement");
+  }
   return degree_;
 }
+
+#endif
 
 }
 

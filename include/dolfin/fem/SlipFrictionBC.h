@@ -48,6 +48,8 @@ public:
 /// Destructor
   ~SlipFrictionBC();
 
+  NodeNormal& node_normals();
+
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system

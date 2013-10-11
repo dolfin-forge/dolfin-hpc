@@ -37,11 +37,6 @@ DofMapCache::~DofMapCache()
 	for (dofmap_container_t::iterator it = cache_.begin(); it != cache_.end();
 			++it)
 	{
-//		std::stringstream msg;
-//		msg << "Delete DofMap with hash : \'" << it->first
-//				<< "\'\n\thas still a count of " << it->second.count
-//				<< std::endl;
-//		warning(msg.str());
 		delete it->second.dofmap;
 	}
 	cache_.clear();

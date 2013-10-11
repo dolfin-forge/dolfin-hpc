@@ -12,8 +12,11 @@
 #define __MATRIX_H
 
 #include <dolfin/common/Variable.h>
+#include <dolfin/main/MPI.h>
 #include "DefaultFactory.h"
 #include "GenericMatrix.h"
+
+#include <fstream>
 
 namespace dolfin
 {
@@ -148,12 +151,56 @@ namespace dolfin
     const Matrix& operator= (const Matrix& A)
     { *matrix = *A.matrix; return *this; }
 
+    void spy() const;
+
   private:
 
     // Pointer to concrete implementation
     GenericMatrix* matrix;
 
   };
+
+  //--- INLINES --------------------------------------------------------------
+  inline void Matrix::spy() const
+  {
+    if(MPI::numProcesses() == 1)
+    {
+      std::stringstream ss;
+      ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;
+      std::ofstream Afile(ss.str());
+      real val = 0.;
+      std::stringstream xpm;
+      xpm << "/* XPM */\n" <<
+      "static char * map_xpm = {\n" <<
+      "/* width height number_of_colors chars_per_pixel */\n" <<
+      "\""<< matrix->size(0) << " "<< matrix->size(1)<<" 2 1\",\n" <<
+      "/* intensity levels */\n"<<
+      "\"0 c #ffffff\",\n" <<
+      "\"1 c none\",\n" <<
+      "/* map */\n";
+      Afile << xpm.str();
+      for (uint i = 0; i < matrix->size(0); ++i)
+      {
+        std::stringstream row;
+        row << "\"";
+        for (uint j = 0; j < matrix->size(1); ++j)
+        {
+          val = matrix->getitem(std::pair<uint,uint>(i,j));
+          if(val > 1.0e-14)
+          {
+            row<< "1";
+          }
+          else
+          {
+            row<< "0";
+          }
+        }
+        row << "\",\n";
+        Afile << row.str();
+      }
+      Afile << "};";
+    }
+  }
 
 }
 

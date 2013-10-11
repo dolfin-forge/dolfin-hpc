@@ -66,6 +66,13 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain,
 
 //-----------------------------------------------------------------------------
 SlipFrictionBC::~SlipFrictionBC()
-{}
+{
+}
+
+//-----------------------------------------------------------------------------
+NodeNormal& SlipFrictionBC::node_normals()
+{
+  return slipbc_.node_normals();
+}
 
 } /* namespace dolfin */

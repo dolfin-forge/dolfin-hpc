@@ -176,7 +176,7 @@ Function::Function(const std::string filename) :
   file >> *this;
 }
 ////-----------------------------------------------------------------------------
-Function::Function(SubFunction& sub_function) :
+Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
     f(NULL),
     _type(discrete),
@@ -379,6 +379,7 @@ GenericVector& Function::vector() const
 
   return (static_cast<DiscreteFunction*>(f))->vector();
 }
+#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 uint Function::degree() const
 {
@@ -393,6 +394,7 @@ uint Function::degree() const
 
   return (static_cast<DiscreteFunction*>(f))->degree();
 }
+#endif
 //-----------------------------------------------------------------------------
 DofMap const& Function::dofmap() const
 {

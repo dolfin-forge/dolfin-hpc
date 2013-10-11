@@ -21,9 +21,15 @@
 // of degree q (tau, sigma) and DG (discontinuous Galerkin)
 // elements of degree q - 1 for (w, u).
 
-#include <dolfin.h>
+#
 #include "MixedPoisson.h"
 #include "P1Projection.h"
+
+#include <dolfin/common/constants.h>
+#include <dolfin/fem/DirichletBC.h>
+#include <dolfin/function/Function.h>
+#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/pde/LinearPDE.h>
 
 using namespace dolfin;
 
@@ -36,11 +42,21 @@ int main()
     
     Source(Mesh& mesh) : Function(mesh) {}
 
-    real eval(const real* x) const
+    void eval(real * value, const real* x) const
     {
       real dx = x[0] - 0.5;
       real dy = x[1] - 0.5;
-      return 500.0*exp(-(dx*dx + dy*dy)/0.02);
+      value[0] = 500.0*exp(-(dx*dx + dy*dy)/0.02);
+    }
+
+    uint rank() const
+    {
+      return 0;
+    }
+
+    uint dim(uint i) const
+    {
+      return 1;
     }
 
   };
@@ -67,8 +83,8 @@ int main()
   pde_project.solve(sigma_projected);
 
   // Plot solution
-  plot(sigma_projected);
-  plot(u);
+//  plot(sigma_projected);
+//  plot(u);
 
   // Save solution to file
   File f0("sigma.xml");

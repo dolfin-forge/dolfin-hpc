@@ -42,11 +42,12 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-Mesh::Mesh() :
+Mesh::Mesh() :  
   Variable("mesh", "DOLFIN mesh"),
   _data(0),
   _cell_type(0),
-  _ordered(false)
+  _ordered(false),
+  _timestamp(time(0))
 {
   // Do nothing
 }
@@ -55,7 +56,8 @@ Mesh::Mesh(const Mesh& mesh) :
   Variable("mesh", "DOLFIN mesh"),
   _data(0),
   _cell_type(0),
-  _ordered(false)
+  _ordered(false),
+  _timestamp(time(0))
 {
   *this = mesh;
 }
@@ -64,7 +66,8 @@ Mesh::Mesh(std::string filename) :
   Variable("mesh", "DOLFIN mesh"),
   _data(0),
   _cell_type(0),
-  _ordered(false)
+  _ordered(false),
+  _timestamp(time(0))
 {
   File file(filename);
   file >> *this;
@@ -275,14 +278,16 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
 void Mesh::renumber()
 {
   MeshRenumber::renumber(*this);
+  dolfin::warning("Renumbering mesh");
+//  _timestamp = time(0);
 }
 
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash()
 {
   std::stringstream ss;
-  ss << "Mesh@" << this << "C" << this->numCells() << "V"
-     << this->numVertices();
+  ss << "Mesh@" << this << ":C" << this->numCells() << ":V"
+     << this->numVertices() << ":T" << _timestamp;
   return ss.str();
 }
 //-----------------------------------------------------------------------------

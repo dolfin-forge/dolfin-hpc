@@ -177,7 +177,6 @@ namespace dolfin
 		MeshFunction<float>& bnd_u);
 #endif
 
-
     /// Refine mesh according to cells marked for refinement
     void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
 		bool load_balance = true);
@@ -276,6 +275,9 @@ namespace dolfin
     MeshDistributedData _distdata;
     
   };
+  
+  int _timestamp;
+};
 
 //--- INLINES -----------------------------------------------------------------
 

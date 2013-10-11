@@ -1,0 +1,19 @@
+# Copyright (C) 2008 Garth N. Wells
+# Licensed under the GNU LGPL Version 2.1
+#
+# The bilinear.ufl a(v, u) and linear.ufl L(v) for projecting a function from 
+# a BDM (Brezzi-Douglas-Marini) space onto a vector P1 continuous Lagrange 
+# basis.
+
+# Compile this.ufl with FFC: ffc -l dolfin P1Projection.ufl
+
+q = 1
+BDM = FiniteElement("Brezzi-Douglas-Marini", "triangle", q)
+P1  = VectorElement("Lagrange", "triangle", 1)
+
+w = TestFunction(P1)
+u = TrialFunction(P1)
+f =Coefficient(BDM)
+
+a = inner(w, u)*dx
+L = inner(w, f)*dx

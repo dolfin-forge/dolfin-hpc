@@ -24,15 +24,11 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
-//#include "unicorn/AdaptiveRefinement.h"
-//#include "unicorn/AdaptiveRefinementProjectScalar.h"
-//#include "unicorn/AdaptiveRefinementProjectVector.h"
 #include <dolfin/adaptivity/AdaptiveRefinement.h>
 #include <dolfin/adaptivity/AdaptiveRefinementProjectScalar.h>
 #include <dolfin/adaptivity/AdaptiveRefinementProjectVector.h>
 
 using namespace dolfin;
-//using namespace dolfin::unicorn;
 
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)

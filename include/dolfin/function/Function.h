@@ -12,6 +12,7 @@
 #ifndef __FUNCTION_H
 #define __FUNCTION_H
 
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/elements/FE.h>
 #include <dolfin/la/Vector.h>
@@ -163,8 +164,10 @@ namespace dolfin
     /// Return the vector associated with a DiscreteFunction
     GenericVector& vector() const;
 
+#if ENABLE_UFL
     /// Return the degree of the approximation space of a DiscreteFunction
     uint degree() const;
+#endif
 
     /// Return the dofmap of a DiscreteFunction
     DofMap const& dofmap() const;
@@ -188,6 +191,7 @@ namespace dolfin
 
     /// Assign function
     Function const& operator=(Function& f);
+
 
     /// Assign sub function/slice
     Function const& operator=(SubFunction sub_function);

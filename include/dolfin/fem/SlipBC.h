@@ -41,7 +41,7 @@ public:
   SlipBC(Mesh& mesh, SubDomain& sub_domain);
 
   /// Create boundary condition for sub domain
-  SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& Node_normal);
+  SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal);
 
   /// Create boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
@@ -55,6 +55,9 @@ public:
 
   /// Destructor
   ~SlipBC();
+
+  /// Access to node normals
+  NodeNormal& node_normals();
 
   //--- INTERFACE -------------------------------------------------------------
 

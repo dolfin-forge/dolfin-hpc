@@ -274,11 +274,10 @@ namespace dolfin
     /// Distribued Mesh data
     MeshDistributedData _distdata;
     
-  };
-  
-  int _timestamp;
-};
+    
+    int _timestamp;
 
+  };
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

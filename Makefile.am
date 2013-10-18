@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4 --install
-SUBDIRS = src include demo
+SUBDIRS = src include
 
 dist_data_DATA = regen.sh
 

@@ -19,7 +19,7 @@
 //     du/dn(x, y) = 0               otherwise
 
 #include <dolfin/config/dolfin_config.h>
-#if ENABLE_UFL 
+#ifdef ENABLE_UFL 
 #include "ufc2/Poisson.h"
 #else
 #include "ufc1/Poisson.h"

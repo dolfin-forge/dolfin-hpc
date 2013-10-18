@@ -11,7 +11,12 @@
 // ends and twisted 30 degrees.
 
 #include <dolfin.h>
-#include "Elasticity.h"
+#include <dolfin/config/dolfin_config.h>
+#ifdef ENABLE_UFL 
+#include "ufc2/Elasticity.h"
+#else
+#include "ufc1/Elasticity.h"
+#endif
 
 using namespace dolfin;
 

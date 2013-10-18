@@ -15,7 +15,9 @@
 #include <dolfin/main/MPI.h>
 #include "DefaultFactory.h"
 #include "GenericMatrix.h"
-
+#include <string>
+#include <ostream>
+#include <sstream>
 #include <fstream>
 
 namespace dolfin
@@ -167,7 +169,7 @@ namespace dolfin
     {
       std::stringstream ss;
       ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;
-      std::ofstream Afile(ss.str());
+      std::ofstream Afile(ss.str().c_str());
       real val = 0.;
       std::stringstream xpm;
       xpm << "/* XPM */\n" <<

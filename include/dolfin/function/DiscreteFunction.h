@@ -71,10 +71,8 @@ namespace dolfin
     /// Return the dimension of the value space for axis i
     uint dim(uint i) const;
     
-#if ENABLE_UFL
     /// Return the degree of the finite element
     uint degree() const;
-#endif
     
     /// Return the number of sub functions
     uint numSubFunctions() const;

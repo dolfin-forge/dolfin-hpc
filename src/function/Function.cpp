@@ -379,7 +379,7 @@ GenericVector& Function::vector() const
 
   return (static_cast<DiscreteFunction*>(f))->vector();
 }
-#if ENABLE_UFL
+#ifdef ENABLE_UFL
 //-----------------------------------------------------------------------------
 uint Function::degree() const
 {

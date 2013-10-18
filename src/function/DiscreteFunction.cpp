@@ -311,7 +311,9 @@ dolfin::uint DiscreteFunction::dim(uint i) const
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::degree() const
 {
+#if ENABLE_UFL
   return finite_element_->degree();
+#endif
 }
 //-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::numSubFunctions() const

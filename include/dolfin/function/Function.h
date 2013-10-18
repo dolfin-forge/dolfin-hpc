@@ -105,7 +105,7 @@ namespace dolfin
     Function(Mesh& mesh, std::string const& finite_element_signature);
 
     /// Create discrete function from sub function
-    explicit Function(SubFunction& sub_function);
+    explicit Function(SubFunction sub_function);
 
     /// Create function from data file
     explicit Function(const std::string filename);
@@ -164,7 +164,7 @@ namespace dolfin
     /// Return the vector associated with a DiscreteFunction
     GenericVector& vector() const;
 
-#if ENABLE_UFL
+#ifdef ENABLE_UFL
     /// Return the degree of the approximation space of a DiscreteFunction
     uint degree() const;
 #endif

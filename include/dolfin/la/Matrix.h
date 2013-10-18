@@ -15,9 +15,7 @@
 #include <dolfin/main/MPI.h>
 #include "DefaultFactory.h"
 #include "GenericMatrix.h"
-#include <string>
-#include <ostream>
-#include <sstream>
+
 #include <fstream>
 
 namespace dolfin

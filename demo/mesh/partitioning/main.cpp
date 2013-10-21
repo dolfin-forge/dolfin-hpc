@@ -23,7 +23,8 @@ int main()
   mesh.partition(partitions, 20);
 
   // Plot mesh partition
-  plot(partitions);
+  File f_partitions("partitions.pvd");
+  f_partitions << partitions;
 
   return 0;
 }

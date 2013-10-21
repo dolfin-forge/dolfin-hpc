@@ -20,8 +20,8 @@
 // using a discontinuous Galerkin formulation (interior penalty method).
 
 #include <dolfin.h>
-#include "Poisson.h"
-#include "P1Projection.h"
+#include "ufc1/Poisson.h"
+#include "ufc1/P1Projection.h"
 
 using namespace dolfin;
 
@@ -66,9 +66,6 @@ int main()
   P1ProjectionLinearForm L_proj(u);
   LinearPDE pde_proj(a_proj, L_proj, mesh);
   pde_proj.solve(u_proj);
-
-  // Plot solution
-  plot(u_proj);
 
   // Save solution to file
   File file("poisson.pvd");

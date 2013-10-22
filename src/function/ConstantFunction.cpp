@@ -96,7 +96,7 @@ dolfin::uint ConstantFunction::rank() const
 //-----------------------------------------------------------------------------
 dolfin::uint ConstantFunction::dim(uint i) const
 {
-  if(i >= value_rank)
+  if(i > value_rank)
     error("Too large dimension in dim.");
   return shape[i];
 }

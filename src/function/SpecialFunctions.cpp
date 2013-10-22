@@ -164,7 +164,8 @@ void InvFacetArea::eval(real* values, const real* x) const
     values[0] = 0.0;
 }
 //-----------------------------------------------------------------------------
-OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) : Function(mesh), form(form)                            
+OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) : Function(mesh), mesh(mesh),
+						     form(form)                            
 {
   // Some simple sanity checks on form
   if (!(form.form().rank() == 0 && form.form().num_coefficients() == 2))
@@ -192,8 +193,7 @@ real OutflowFacet::eval(const real* x) const
     {
       // Copy cell, cannot call interpolate with const cell()
       Cell cell0(cell());
-      error("Specialfunction not implemented in parallel");
-      //      ufc->update(cell0, mesh.distdata());
+      ufc->update(cell0, mesh.distdata());
 
       // Interpolate coefficients on cell and current facet
       for (dolfin::uint i = 0; i < form.coefficients().size(); i++)
@@ -216,6 +216,8 @@ real OutflowFacet::eval(const real* x) const
     return 0.0;
 }
 //-----------------------------------------------------------------------------
+
+
 
 
 

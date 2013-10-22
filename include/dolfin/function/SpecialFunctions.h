@@ -118,6 +118,7 @@ namespace dolfin
   private:
 
     Form& form;
+    Mesh& mesh;
     UFC* ufc;
   };
 

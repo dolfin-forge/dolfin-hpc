@@ -1,3 +1,8 @@
+0.8.4-hpc [2013-10-22]
+ - Parallel mesh coarsening
+ - Parallel CAD projection
+ - Improved Doxygen documentation
+ - Various bugs and portability fixes
 0.8.3-hpc [2013-01-08]
  - Hybrid MPI+PGAS parallelization
  - Re-add quadrature rules (Gauss, Radau, and Lobatto) 

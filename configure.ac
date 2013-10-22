@@ -242,9 +242,9 @@ if test "x${enable_quad}" = xyes; then
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"], 
                    have_lapack=no,)
-   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
-      AC_CHECK_LIB(sunperf,dgesv_,[LIBS="$LIBS -lsunperf"], 
-                   [have_lapack=yes], [have_lapack=no],)
+   elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then 
+      AC_CHECK_LIB(sunperf,dgesv_,[have_lapack=yes, LIBS="$LIBS -lsunperf"], 
+                   [have_lapack=no],)
    else
       AC_CHECK_LIB(lapack,dgesv_,
                    [have_lapack=yes, LIBS="$LIBS -lblas -llapack"], 

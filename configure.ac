@@ -240,8 +240,8 @@ if test "x${enable_quad}" = xyes; then
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
       have_lapack=yes
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
-      AC_CHECK_LIB(scs,dgesv_,[LIBS="$LIBS -lscs"], 
-                   have_lapack=yes, have_lapack=no,)
+      AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"], 
+                   have_lapack=no,)
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
       AC_CHECK_LIB(sunperf,dgesv_,[LIBS="$LIBS -lsunperf"], 
                    [have_lapack=yes], [have_lapack=no],)

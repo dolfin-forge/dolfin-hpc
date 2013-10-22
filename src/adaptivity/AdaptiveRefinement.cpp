@@ -126,7 +126,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   uint *x_rows, *y_rows, *z_rows;
   uint x_m, y_m, z_m;
   x_values = y_values = z_values = 0;
-  x_rows = y_rows, z_rows = 0;
+  x_rows = y_rows = z_rows = 0;
   x_m = y_m = z_m = 0;
   Function coarse_x, coarse_y, coarse_z;
   Vector x_coarse_x, x_coarse_y, x_coarse_z;

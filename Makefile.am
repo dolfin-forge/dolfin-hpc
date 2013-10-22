@@ -69,7 +69,6 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/pde/convection-diffusion/velocity.xml.gz\
              demo/pde/convection-diffusion/ConvectionDiffusion.h\
              demo/pde/convection-diffusion/main.cpp\
-             demo/pde/convection-diffusion/temperature.pvd\
              demo/pde/dg/advection_diffusion/main.cpp\
              demo/pde/dg/advection_diffusion/AdvectionDiffusion.form\
              demo/pde/dg/advection_diffusion/velocity.xml.gz\

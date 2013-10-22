@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 {
   // Read simple velocity field (-1.0, -0.4)
   // defined on a 64x64 unit square mesh and a quadratic vector Lagrange element
-  Function velocity("../velocity.xml.gz");
+  Function velocity("velocity.xml.gz");
 
   UnitSquare mesh(64, 64);
 
@@ -110,6 +110,4 @@ int main(int argc, char *argv[])
   File file("temperature.pvd");
   file << up;
 
-  // Plot projected solution
-  plot(up);
 }

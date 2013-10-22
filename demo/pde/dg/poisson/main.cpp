@@ -67,8 +67,6 @@ int main()
   LinearPDE pde_proj(a_proj, L_proj, mesh);
   pde_proj.solve(u_proj);
 
-  // Plot solution
-  plot(u_proj);
 
   // Save solution to file
   File file("poisson.pvd");

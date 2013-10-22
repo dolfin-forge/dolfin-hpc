@@ -66,10 +66,6 @@ int main()
   LinearPDE pde_project(a_projection, L_projection, mesh);
   pde_project.solve(sigma_projected);
 
-  // Plot solution
-  plot(sigma_projected);
-  plot(u);
-
   // Save solution to file
   File f0("sigma.xml");
   File f1("u.xml");

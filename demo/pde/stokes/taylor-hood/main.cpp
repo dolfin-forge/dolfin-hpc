@@ -49,8 +49,8 @@ int main()
   };
 
   // Read mesh and sub domain markers
-  Mesh mesh("../../../../../data/meshes/dolfin-2.xml.gz");
-  MeshFunction<unsigned int> sub_domains(mesh, "../subdomains.xml.gz");
+  Mesh mesh("../../../../data/meshes/dolfin-2.xml.gz");
+  MeshFunction<unsigned int> sub_domains(mesh, "subdomains.xml.gz");
 
   // Create functions for boundary conditions
   Noslip noslip(mesh);
@@ -84,10 +84,6 @@ int main()
   Function p;
   pde.set("PDE linear solver", "direct");
   pde.solve(u, p);
-
-  // Plot solution
-  plot(u);
-  plot(p);
 
   // Save solution
   File ufile("velocity.xml");

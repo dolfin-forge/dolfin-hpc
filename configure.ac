@@ -234,24 +234,34 @@ if test "x${enable_debug}" != xno; then
 fi
 
 
+
 if test "x${enable_quad}" = xyes; then 
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
+      have_lapack=yes
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       AC_CHECK_LIB(scs,dgesv_,[LIBS="$LIBS -lscs"], 
-      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
-      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
+                   have_lapack=yes, have_lapack=no,)
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsun; then
       AC_CHECK_LIB(sunperf,dgesv_,[LIBS="$LIBS -lsunperf"], 
-      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],)
-      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
+                   [have_lapack=yes], [have_lapack=no],)
    else
-      AC_CHECK_LIB(lapack,dgesv_,[LIBS="$LIBS -lblas -llapack"], 
-      [AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])],
-      [-lblas])
-      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])	
-   fi   
+      AC_CHECK_LIB(lapack,dgesv_,
+                   [have_lapack=yes, LIBS="$LIBS -lblas -llapack"], 
+      		   [have_lapack=no], [-lblas])
+   fi 
+
+   if test $have_lapack = no; then
+      AC_CHECK_LIB(lapack,dgesv_,[have_lapack=yes, LIBS="$LIBS"], 
+                   have_lapack=no,)
+   fi    
+
+  
+   if test $have_lapack = yes; then
+      AC_DEFINE(HAVE_F77_LAPACK, [1], [Have FORTRAN LAPACK])
+   elif test $have_lapack = no; then
+      AC_MSG_ERROR([LAPACK not found, needed for various quadrature rules])
+   fi
 fi
 
 if test "x${with_libgeom}" = xyes; then

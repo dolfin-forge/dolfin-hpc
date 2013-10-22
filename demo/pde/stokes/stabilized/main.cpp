@@ -11,7 +11,7 @@
 // src/demo/mesh/subdomains.
 
 #include <dolfin.h>
-#include "Stokes.h"
+#include "ufc1/Stokes.h"
 
 using namespace dolfin;
 

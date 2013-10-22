@@ -18,9 +18,20 @@
 //     du/dn(x, y) = 25 sin(5 pi y)  for x = 1
 //     du/dn(x, y) = 0               otherwise
 
-#include <dolfin.h>
-#include "Poisson.h"
-  
+#include <dolfin/config/dolfin_config.h>
+#ifdef ENABLE_UFL 
+#include "ufc2/Poisson.h"
+#else
+#include "ufc1/Poisson.h"
+#endif
+
+#include <dolfin/common/constants.h>
+#include <dolfin/fem/DirichletBC.h>
+
+#include <dolfin/function/Function.h>
+#include <dolfin/mesh/UnitSquare.h>
+#include <dolfin/pde/LinearPDE.h>
+
 using namespace dolfin;
 
 int main()
@@ -31,12 +42,22 @@ int main()
   public:
     
     Source(Mesh& mesh) : Function(mesh) {}
-
-    real eval(const real* x) const
+    
+    void eval(real * value, const real* x) const
     {
       real dx = x[0] - 0.5;
       real dy = x[1] - 0.5;
-      return 500.0*exp(-(dx*dx + dy*dy)/0.02);
+      value[0] = 500.0*exp(-(dx*dx + dy*dy)/0.02);
+    }
+
+    uint rank() const
+    {
+      return 0;
+    }
+
+    uint dim(uint i) const
+    {
+      return 1;
     }
 
   };
@@ -48,12 +69,22 @@ int main()
 
     Flux(Mesh& mesh) : Function(mesh) {}
 
-    real eval(const real* x) const
+    void eval(real * value, const real* x) const
     {
       if (x[0] > DOLFIN_EPS)
-        return 25.0*sin(5.0*DOLFIN_PI*x[1]);
+        value[0] = 25.0*sin(5.0*DOLFIN_PI*x[1]);
       else
-        return 0.0;
+        value[0] = 0.0;
+    }
+
+    uint rank() const
+    {
+      return 0;
+    }
+
+    uint dim(uint i) const
+    {
+      return 1;
     }
 
   };

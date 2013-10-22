@@ -46,10 +46,6 @@ namespace dolfin
 
     /// Return number of levels for nested sub system
     uint depth() const;
-    
-    /// Extract sub finite element of given finite element
-    ufc::finite_element* extractFiniteElement
-    (const ufc::finite_element& finite_element) const;
 
     /// Return array which defines sub system
     const Array<uint>& array() const
@@ -57,13 +53,9 @@ namespace dolfin
 
   private:
 
-    // Recursively extract sub finite element
-    static ufc::finite_element* extractFiniteElement
-    (const ufc::finite_element& finite_element, const Array<uint>& sub_system);
-
     // The array specifying the sub system
     Array<uint> sub_system;
-    
+
   };
 
 }

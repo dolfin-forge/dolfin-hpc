@@ -12,8 +12,12 @@
 #define __MATRIX_H
 
 #include <dolfin/common/Variable.h>
+#include <dolfin/main/MPI.h>
 #include "DefaultFactory.h"
 #include "GenericMatrix.h"
+
+#include <sstream>
+#include <fstream>
 
 namespace dolfin
 {
@@ -24,26 +28,26 @@ namespace dolfin
   class Matrix : public GenericMatrix, public Variable
   {
   public:
-
+    
     /// Create empty matrix
     Matrix() : Variable("A", "DOLFIN matrix"), matrix(0)
     { DefaultFactory factory; matrix = factory.createMatrix(); }
-
+    
     /// Create M x N matrix
     Matrix(uint M, uint N) : Variable("A", "DOLFIN matrix"), matrix(0)
     { DefaultFactory factory; matrix = factory.createMatrix(); matrix->init(M, N); }
-
+    
     /// Copy constructor
     explicit Matrix(const Matrix& A) : Variable("A", "DOLFIN matrix"),
                                        matrix(A.matrix->copy())
     {}
-
+    
     /// Destructor
     virtual ~Matrix()
     { delete matrix; }
-
+    
     //--- Implementation of the GenericTensor interface ---
-
+    
     /// Initialize zero tensor using sparsity pattern
     virtual void init(const GenericSparsityPattern& sparsity_pattern)
     { matrix->init(sparsity_pattern); }
@@ -51,57 +55,57 @@ namespace dolfin
     /// Return copy of tensor
     virtual Matrix* copy() const
     { Matrix* A = new Matrix(); delete A->matrix; A->matrix = matrix->copy(); return A; }
-
+    
     /// Return size of given dimension
     virtual uint size(uint dim) const
     { return matrix->size(dim); }
-
+    
     /// Set all entries to zero and keep any sparse structure
     virtual void zero()
     { matrix->zero(); }
-
+    
     /// Finalize assembly of tensor
     virtual void apply(FinalizeType finaltype=FINALIZE)
     { matrix->apply(finaltype); }
-
+    
     /// Display tensor
     virtual void disp(uint precision=2) const
     { matrix->disp(precision); }
-
+    
     //--- Implementation of the GenericMatrix interface ---
-
+    
     /// Initialize M x N matrix
     virtual void init(uint M, uint N)
     { matrix->init(M, N); }
-
+    
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const
     { matrix->get(block, m, rows, n, cols); }
-
+    
     /// Set block of values
     virtual void set(const real* block, uint m, const uint* rows, uint n, const uint* cols)
     { matrix->set(block, m, rows, n, cols); }
-
+    
     /// Add block of values
     virtual void add(const real* block, uint m, const uint* rows, uint n, const uint* cols)
     { matrix->add(block, m, rows, n, cols); }
-
+    
     /// Return norm of matrix
     virtual double norm(std::string norm_type = "frobenius") const
     { return matrix->norm(norm_type); }    
-
+    
     /// Get non-zero values of given row
     virtual void getrow(uint row, Array<uint>& columns, Array<real>& values) const
     { matrix->getrow(row, columns, values); }
-
+    
     /// Set values for given row
     virtual void setrow(uint row, const Array<uint>& columns, const Array<real>& values)
     { matrix->setrow(row, columns, values); }
-
+    
     /// Set given rows to zero
     virtual void zero(uint m, const uint* rows)
     { matrix->zero(m, rows); }
-
+    
     /// Set given rows to identity matrix
     virtual void ident(uint m, const uint* rows)
     { matrix->ident(m, rows); }
@@ -148,12 +152,56 @@ namespace dolfin
     const Matrix& operator= (const Matrix& A)
     { *matrix = *A.matrix; return *this; }
 
+    void spy() const;
+
   private:
 
     // Pointer to concrete implementation
     GenericMatrix* matrix;
 
   };
+
+  //--- INLINES --------------------------------------------------------------
+  inline void Matrix::spy() const
+  {
+    if(MPI::numProcesses() == 1)
+    {
+      std::stringstream ss;
+      ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;
+      std::ofstream Afile(ss.str().c_str());
+      real val = 0.;
+      std::stringstream xpm;
+      xpm << "/* XPM */\n" <<
+      "static char * map_xpm = {\n" <<
+      "/* width height number_of_colors chars_per_pixel */\n" <<
+      "\""<< matrix->size(0) << " "<< matrix->size(1)<<" 2 1\",\n" <<
+      "/* intensity levels */\n"<<
+      "\"0 c #ffffff\",\n" <<
+      "\"1 c none\",\n" <<
+      "/* map */\n";
+      Afile << xpm.str();
+      for (uint i = 0; i < matrix->size(0); ++i)
+      {
+        std::stringstream row;
+        row << "\"";
+        for (uint j = 0; j < matrix->size(1); ++j)
+        {
+          val = matrix->getitem(std::pair<uint,uint>(i,j));
+          if(val > 1.0e-14)
+          {
+            row<< "1";
+          }
+          else
+          {
+            row<< "0";
+          }
+        }
+        row << "\",\n";
+        Afile << row.str();
+      }
+      Afile << "};";
+    }
+  }
 
 }
 

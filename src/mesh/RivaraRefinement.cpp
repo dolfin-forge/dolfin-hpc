@@ -5,7 +5,12 @@
 // Modified by Balthasar Reuter, 2013.
 //
 
+#include <dolfin/common/constants.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/math/basic.h>
+
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Vertex.h>

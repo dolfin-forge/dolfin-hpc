@@ -28,6 +28,12 @@ elements = [eval(element) for element in elements.split("\n")[1:-1]]
 signatures = []
 for i in range(len(elements)):
     
+
+    # Don't generate all functions
+    OPTIONS = FFC_OPTIONS.copy()
+    OPTIONS["no-evaluate_basis"] = False
+    OPTIONS["no-evaluate_basis_derivatives"] = False
+
     # Generate code
     print "Compiling element %d out of %d..." % (i, len(elements))
     ufl_element = elements[i]
@@ -60,6 +66,7 @@ file.write("ufc::finite_element* dolfin::ElementLibrary::create_finite_element(c
 file.write("{\n")
 for (name, element_signature, dof_map_signature) in signatures:
     file.write("  if (strcmp(signature, \"%s\") == 0)\n" % element_signature)
+# FIXME: There is actually a change in the naming convention and the suffix number is the rank of the finite element
     file.write("    return new %s_finite_element_0();\n" % name)
 file.write("  return 0;\n")
 file.write("}\n")
@@ -68,6 +75,7 @@ file.write("ufc::dof_map* dolfin::ElementLibrary::create_dof_map(const char* sig
 file.write("{\n")
 for (name, element_signature, dof_map_signature) in signatures:
     file.write("  if (strcmp(signature, \"%s\") == 0)\n" % dof_map_signature)
+# FIXME: There is actually a change in the naming convention and the suffix number is the rank of the finite element
     file.write("    return new %s_dof_map_0();\n" % name)
 file.write("  return 0;\n")
 file.write("}\n")

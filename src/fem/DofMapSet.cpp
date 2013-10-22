@@ -9,6 +9,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/fem/Form.h>
@@ -18,33 +19,31 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet()
+DofMapSet::DofMapSet():
+				cache_(DofMapCache::instance())
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet(const Form& form, Mesh& mesh) 
+DofMapSet::DofMapSet(const Form& form, Mesh& mesh):
+		cache_(DofMapCache::instance())
 {
   update(form.form(), mesh);
 }
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet(const ufc::form& form, Mesh& mesh) 
+DofMapSet::DofMapSet(const ufc::form& form, Mesh& mesh) :
+				cache_(DofMapCache::instance())
 {
   update(form, mesh);
 }
 //-----------------------------------------------------------------------------
 DofMapSet::~DofMapSet()
 {
-  // Delete all dof maps in the cache
-  for (map_iterator it = dof_map_cache.begin(); it != dof_map_cache.end(); it++)
+  // Release all dof maps in the cache
+  for (std::vector<DofMap*>::iterator it = dof_map_set.begin(); it != dof_map_set.end(); ++it)
   {
-    // Delete UFC dof map
-    delete it->second.first;
-
-    // Delete DOLFIN dof map
-    delete it->second.second;
+	  cache_.release_dofmap(**it);
   }
-
 }
 //-----------------------------------------------------------------------------
 void DofMapSet::update(const Form& form, Mesh& mesh)
@@ -58,45 +57,16 @@ void DofMapSet::update(const ufc::form& form, Mesh& mesh)
 #ifdef DEBUG
   check(form, mesh);
 #endif
-  
+
   // Resize array of dof maps
-  const uint num_arguments = form.rank() + form.num_coefficients();  
+  const uint num_arguments = form.rank() + form.num_coefficients();
   dof_map_set.resize(num_arguments);
 
   // Create dof maps and reuse previously computed dof maps
-  for (uint i = 0; i < num_arguments; i++)
+  for (uint i = 0; i < num_arguments; ++i)
   {
-    // Create UFC dof map
-    ufc::dof_map* ufc_dof_map = form.create_dof_map(i);
-    dolfin_assert(ufc_dof_map);
-    
-    // Check if dof map is in cache
-    map_iterator it = dof_map_cache.find(ufc_dof_map->signature());
-    if ( it == dof_map_cache.end() )
-    {
-      message(2, "Creating dof map (not in cache): %s", ufc_dof_map->signature());
-
-      // Create DOLFIN dof map
-      DofMap* dolfin_dof_map = new DofMap(*ufc_dof_map, mesh);
-      dolfin_assert(dolfin_dof_map);
-
-      // Save pair of UFC and DOLFIN dof maps in cache
-      std::pair<ufc::dof_map*, DofMap*> dof_map_pair(ufc_dof_map, dolfin_dof_map);
-      dof_map_cache[ufc_dof_map->signature()] = dof_map_pair;
-      
-      // Set dof map for argument i
-      dof_map_set[i] = dolfin_dof_map;
-    }
-    else
-    {
-      message(2, "Reusing dof map (already in cache): %s", ufc_dof_map->signature());
-      
-      // Set dof map for argument i
-      dof_map_set[i] = it->second.second;
-     
-      // Delete UFC dof map (not used)
-      delete ufc_dof_map;
-    }
+    //
+	dof_map_set[i] = cache_.acquire_dofmap(mesh,form, i);
   }
 }
 //-----------------------------------------------------------------------------
@@ -118,8 +88,11 @@ void DofMapSet::check(const ufc::form& form, Mesh& mesh)
   {
     ufc::dof_map * dofmap = form.create_dof_map(0);
     if(dofmap->geometric_dimension() != mesh.geometry().dim())
+    {
       error("Geometric dimension mismatch between mesh and form.");
+    }
     delete dofmap;
   }
 }
 //-----------------------------------------------------------------------------
+

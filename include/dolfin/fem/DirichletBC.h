@@ -42,8 +42,11 @@ namespace dolfin
   /// pointwise boundary conditions e.g. pointloads, one will have to
   /// use the pointwise approach which in turn is the slowest of the
   /// three possible methods.
-  enum BCMethod {topological, geometric, pointwise};
-  
+  enum BCMethod
+  {
+    topological, geometric, pointwise
+  };
+
   /// This class specifies the interface for setting (strong)
   /// Dirichlet boundary conditions for partial differential
   /// equations,
@@ -75,47 +78,33 @@ namespace dolfin
   /// optional set of parameters may be used to specify for which sub
   /// system the boundary condition should be specified.
 
-  class DirichletBC : public BoundaryCondition
+  class DirichletBC: public BoundaryCondition
   {
   public:
 
     /// Create boundary condition for sub domain
-    DirichletBC(Function& g,
-                Mesh& mesh,
-                SubDomain& sub_domain,
-                BCMethod method = topological);
+    DirichletBC(Function& g, Mesh& mesh, SubDomain& sub_domain, BCMethod method =
+		topological);
 
     /// Create boundary condition for sub domain specified by index
-    DirichletBC(Function& g,
-                MeshFunction<uint>& sub_domains, uint sub_domain,
-                BCMethod method = topological);
-    
+    DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
+		BCMethod method = topological);
+
     /// Create boundary condition for boundary data included in the mesh
-    DirichletBC(Function& g,
-                Mesh& mesh,
-                uint sub_domain,
-                BCMethod method = topological);
+    DirichletBC(Function& g, Mesh& mesh, uint sub_domain, BCMethod method =
+		topological);
 
     /// Create sub system boundary condition for sub domain
-    DirichletBC(Function& g,
-                Mesh& mesh,
-                SubDomain& sub_domain,
-                const SubSystem& sub_system,
-                BCMethod method = topological);
+    DirichletBC(Function& g, Mesh& mesh, SubDomain& sub_domain,
+		const SubSystem& sub_system, BCMethod method = topological);
 
     /// Create sub system boundary condition for sub domain specified by index
-    DirichletBC(Function& g,
-                MeshFunction<uint>& sub_domains,
-                uint sub_domain,
-                const SubSystem& sub_system,
-                BCMethod method = topological);
+    DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
+		const SubSystem& sub_system, BCMethod method = topological);
 
     /// Create sub system boundary condition for boundary data included in the mesh
-    DirichletBC(Function& g,
-                Mesh& mesh,
-                uint sub_domain,
-                const SubSystem& sub_system,
-                BCMethod method = topological);
+    DirichletBC(Function& g, Mesh& mesh, uint sub_domain,
+		const SubSystem& sub_system, BCMethod method = topological);
 
     /// Destructor
     ~DirichletBC();
@@ -124,25 +113,29 @@ namespace dolfin
     void apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
     /// Apply boundary condition to linear system
-    void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map, const ufc::form& form);
+    void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+	       const ufc::form& form);
 
     /// Apply boundary condition to linear system for a nonlinear problem
-    void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x, const Form& form);
+    void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+	       const Form& form);
 
     /// Apply boundary condition to linear system for a nonlinear problem
-    void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x, const DofMap& dof_map, const ufc::form& form);
+    void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+	       const DofMap& dof_map, const ufc::form& form);
 
-    /// Make row associated with boundary conditions zero, useful for non-diagonal matrices in a block matrix. 
+    /// Make row associated with boundary conditions zero, useful for non-diagonal matrices in a block matrix.
     void zero(GenericMatrix& A, const Form& form);
 
-    /// Make row associated with boundary conditions zero, useful for non-diagonal matrices in a block matrix. 
+    /// Make row associated with boundary conditions zero, useful for non-diagonal matrices in a block matrix.
     void zero(GenericMatrix& A, const DofMap& dof_map, const ufc::form& form);
 
     /// Set (or update) value for sub system
     void setSubSystem(SubSystem sub_system);
 
-    /// get Dirichlet values and indicators 
-    void getBC(uint n, uint* indicators, double* values, const DofMap& dof_map, const ufc::form& form); 
+    /// get Dirichlet values and indicators
+    void getBC(uint n, uint* indicators, double* values, const DofMap& dof_map,
+	       const ufc::form& form);
 
     /// Return mesh
     Mesh& mesh();
@@ -150,34 +143,34 @@ namespace dolfin
   private:
 
     /// Apply boundary conditions
-    void apply(GenericMatrix& A, GenericVector& b,
-               const GenericVector* x, const DofMap& dof_map, const ufc::form& form);
-    
+    void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
+	       const DofMap& dof_map, const ufc::form& form);
+
     // Initialize sub domain markers from sub domain
     void initFromSubDomain(SubDomain& sub_domain);
-    
+
     // Initialize sub domain markers from MeshFunction
     void initFromMeshFunction(MeshFunction<uint>& sub_domains, uint sub_domain);
 
     // Initialize sub domain markers from mesh
     void initFromMesh(uint sub_domain);
-    
+
     // Compute dofs and values for application of boundary conditions
     void computeBC(_map<uint, real>& boundary_values,
-                   BoundaryCondition::LocalData& data);
-    
+		   BoundaryCondition::LocalData& data);
+
     // Compute boundary values for facet (topological approach)
     void computeBCTopological(_map<uint, real>& boundary_values,
-                              BoundaryCondition::LocalData& data);
-    
+			      BoundaryCondition::LocalData& data);
+
     // Compute boundary values for facet (geometrical approach)
     void computeBCGeometric(_map<uint, real>& boundary_values,
-                            BoundaryCondition::LocalData& data);
-    
+			    BoundaryCondition::LocalData& data);
+
     // Compute boundary values for facet (pointwise approach)
     void computeBCPointwise(_map<uint, real>& boundary_values,
-                            BoundaryCondition::LocalData& data);
-    
+			    BoundaryCondition::LocalData& data);
+
     // Check if the point is in the same plane as the given facet
     static bool onFacet(real* coordinates, Facet& facet);
 
@@ -198,7 +191,7 @@ namespace dolfin
 
     // Boundary facets, stored as pairs (cell, local facet number)
     std::vector< std::pair<uint, uint> > facets;
-    
+
   };
 
 }

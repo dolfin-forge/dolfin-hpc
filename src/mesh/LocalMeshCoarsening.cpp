@@ -7,6 +7,16 @@
 // First added:  2006-11-01
 // Last changed: 2013-06-01
 
+
+#include <list>
+
+#include <dolfin/math/basic.h>
+#include <dolfin/log/dolfin_log.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshTopology.h>
+#include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/CoarseningManager.h>
 #include <dolfin/mesh/MeshEditor.h>

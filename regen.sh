@@ -3,7 +3,7 @@
 
 echo "Updating configuration..."
 echo "Running libtoolize"
-libtoolize -i
+libtoolize 
 
 echo "Running aclocal"
 if which aclocal > /dev/null 2>&1; then

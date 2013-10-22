@@ -14,7 +14,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/UserFunction.h>
 
-using namespace dolfin;
+namespace dolfin {
 
 //-----------------------------------------------------------------------------
 UserFunction::UserFunction(Mesh& mesh, Function* f)
@@ -28,15 +28,17 @@ UserFunction::~UserFunction()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-dolfin::uint UserFunction::rank() const
+uint UserFunction::rank() const
 {
   // Just return 0 (if not overloaded by user)
+  //  error("uint UserFunction::rank() const should be overloaded");
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint UserFunction::dim(uint i) const
+uint UserFunction::dim(uint i) const
 {
   // Just return 1 (if not overloaded by user)
+  //  error("uint UserFunction::dim(uint i) const should be overloaded");
   return 1;
 }
 //-----------------------------------------------------------------------------
@@ -51,19 +53,18 @@ void UserFunction::interpolate(real* values) const
     size *= f->dim(i);
 
   // Call overloaded eval function at each vertex
-  simple_array<real> local_values(size, new real[size]);
-  
+  real * local_values = new real[size];
+
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
     // Evaluate at function at vertex
-    simple_array<real> x(mesh.geometry().dim(), vertex->x());
-    f->eval(local_values, x);
+    f->eval(local_values, vertex->x());
 
     // Copy values to array of vertex values
     for (uint i = 0; i < size; i++)
       values[i*mesh.numVertices() + vertex->index()] = local_values[i];
   }
-  delete [] local_values.data;
+  delete [] local_values;
 }
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate(real* coefficients,
@@ -80,7 +81,7 @@ void UserFunction::interpolate(real* coefficients,
 //-----------------------------------------------------------------------------
 void UserFunction::eval(real* values, const real* x) const
 {
-  message("Calling user function");
+  //  error("eval(real* values, const real* x) const should be overloaded");
 
   // Call user-overloaded eval function in Function
   f->eval(values, x);
@@ -100,8 +101,8 @@ void UserFunction::evaluate(real* values,
     size *= f->dim(i);
 
   // Call user-overloaded eval function in Function
-  simple_array<real> v(size, values);
-  simple_array<real> x(cell.geometric_dimension, const_cast<real*>(coordinates));
-  f->eval(v, x);
+  f->eval(values,coordinates);
 }
 //-----------------------------------------------------------------------------
+
+}

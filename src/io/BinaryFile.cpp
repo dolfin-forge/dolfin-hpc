@@ -8,14 +8,14 @@
 #include <cstring>
 #include <fstream>
 #include <dolfin/common/types.h>
-#include <dolfin/la/Vector.h>
+#include <dolfin/function/Function.h>
 #include <dolfin/io/BinaryFile.h>
+#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/dolfin.h>
 #include <typeinfo>
 
 

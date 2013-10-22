@@ -9,82 +9,104 @@
 #ifndef __BOUNDARY_CONDITION_H
 #define __BOUNDARY_CONDITION_H
 
-#include <ufc.h>
-#include <dolfin/common/types.h>
 #include "UFCMesh.h"
 #include "DofMap.h"
+
+#include <dolfin/common/types.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {
 
-  class DofMap;
-  class GenericMatrix;
-  class GenericVector;
-  class SubSystem;
-  class Mesh;
-  class Form;
+class DofMap;
+class GenericMatrix;
+class GenericVector;
+class SubSystem;
+class Mesh;
+class Form;
 
-  /// Common base class for boundary conditions
+/// Common base class for boundary conditions
 
-  class BoundaryCondition
+class BoundaryCondition
+{
+public:
+
+  /// Constructor
+  BoundaryCondition();
+
+  /// Constructor
+  BoundaryCondition(std::string const type);
+
+  /// Destructor
+  virtual ~BoundaryCondition();
+
+  /// Apply boundary condition to linear system
+  virtual void apply(GenericMatrix& A, GenericVector& b, const Form& form) = 0;
+
+  /// Apply boundary condition to linear system
+  virtual void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
+                     const ufc::form& ufc_form) = 0;
+
+  /// Apply boundary condition to linear system for a nonlinear problem
+  virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+                     const Form& form) = 0;
+
+  /// Apply boundary condition to linear system for a nonlinear problem
+  virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+                     const DofMap& dof_map, const ufc::form& ufc_form) = 0;
+
+  std::string const& type() const;
+
+protected:
+
+  // Local data for application of boundary conditions
+  class LocalData
   {
   public:
 
-    /// Constructor
-    BoundaryCondition();
+    // Constructor
+    LocalData(const ufc::form& form, Mesh& mesh, const DofMap& global_dof_map,
+              const SubSystem& sub_system);
 
-    /// Destructor
-    virtual ~BoundaryCondition();
+    // Destructor
+    ~LocalData();
 
-    /// Apply boundary condition to linear system
-    virtual void apply(GenericMatrix& A, GenericVector& b, const Form& form) = 0;
+    // UFC view of mesh
+    UFCMesh ufc_mesh;
 
-    /// Apply boundary condition to linear system
-    virtual void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map, const ufc::form& form) = 0;
+    // Finite element for sub system
+    ufc::finite_element* finite_element;
 
-    /// Apply boundary condition to linear system for a nonlinear problem
-    virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x, const Form& form) = 0;
+    // Dof map for sub system
+    const DofMap* dof_map;
 
-    /// Apply boundary condition to linear system for a nonlinear problem
-    virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x, const DofMap& dof_map, const ufc::form& form) = 0;
+    // Pointer to local DofMap if owned
+    const DofMap* dof_map_local;
 
-  protected:
+    // Offset for sub system
+    uint offset;
 
-    // Local data for application of boundary conditions
-    class LocalData
-    {
-    public:
-      
-      // Constructor
-      LocalData(const ufc::form& form, Mesh& mesh, const DofMap& global_dof_map, const SubSystem& sub_system);
-      
-      // Destructor
-      ~LocalData();
-      
-      // UFC view of mesh
-      UFCMesh ufc_mesh;
-      
-      // Finite element for sub system
-      ufc::finite_element* finite_element;
-      
-      // Dof map for sub system
-      const DofMap* dof_map;
-
-      // Pointer to local DofMap if owned
-      const DofMap* dof_map_local;
-
-      // Offset for sub system
-      uint offset;
-      
-      // Local data used to set boundary conditions
-      real* w;
-      uint* cell_dofs;
-      uint* facet_dofs;
-      real** coordinates;
-
-    };
+    // Local data used to set boundary conditions
+    real* w;
+    uint* cell_dofs;
+    uint* facet_dofs;
+    real** coordinates;
 
   };
+
+private:
+
+  std::string const type_;
+
+};
+
+//--- INLINE ------------------------------------------------------------------
+
+inline std::string const& BoundaryCondition::type() const
+{
+  return type_;
+}
 
 }
 

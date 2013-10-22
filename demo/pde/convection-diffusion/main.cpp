@@ -11,7 +11,7 @@
 // by the demo program in src/demo/subdomains.
 
 #include <dolfin.h>
-#include "ConvectionDiffusion.h"
+#include "ufc1/ConvectionDiffusion.h"
 
 using namespace dolfin;
 

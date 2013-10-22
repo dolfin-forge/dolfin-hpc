@@ -12,8 +12,8 @@
 // sub directory src/demo/pde/stokes/taylor-hood).
 
 #include <dolfin.h>
-#include "Lift.h"
-#include "Drag.h"
+#include "ufc1/Lift.h"
+#include "ufc1/Drag.h"
 
 using namespace dolfin;
 

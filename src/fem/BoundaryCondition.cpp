@@ -6,6 +6,7 @@
 // First added:  2008-06-18
 // Last changed: 2007-12-09
 
+#include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Mesh.h>
@@ -14,7 +15,14 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition()
+BoundaryCondition::BoundaryCondition() :
+    type_("NoType")
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+BoundaryCondition::BoundaryCondition(std::string const type) :
+    type_(type)
 {
   // Do nothing
 }
@@ -24,11 +32,17 @@ BoundaryCondition::~BoundaryCondition()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh, 
-                                        const DofMap& global_dof_map, 
-                                        const SubSystem& sub_system)
-  : ufc_mesh(mesh), finite_element(0), dof_map(0), dof_map_local(0), offset(0),
-    w(0), cell_dofs(0), facet_dofs(0)
+BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
+                                        const DofMap& global_dof_map,
+                                        const SubSystem& sub_system) :
+    ufc_mesh(mesh),
+    finite_element(0),
+    dof_map(0),
+    dof_map_local(0),
+    offset(0),
+    w(0),
+    cell_dofs(0),
+    facet_dofs(0)
 {
   // FIXME: Change behaviour of num_sub_elements() in FFC (return 0 when
   // FIXME: there are no nested elements
@@ -39,17 +53,17 @@ BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
 
   // Create finite element (second argument of form)
   finite_element = form.create_finite_element(1);
-  
+
   // Extract sub element and sub dof map if we have a sub system
   if (sub_system.depth() > 0)
   {
     // Finite element
-    ufc::finite_element* sub_finite_element = sub_system.extractFiniteElement(*finite_element);
+    ufc::finite_element* sub_finite_element = FiniteElement::create_sub_element(*finite_element, sub_system.array());
     delete finite_element;
     finite_element = sub_finite_element;
 
     // Create sub dof map
-    dof_map = global_dof_map.extractDofMap(sub_system.array(), offset);
+    dof_map = new DofMap(global_dof_map, sub_system.array(), offset);
 
     // Take responsibility for dof_map
     dof_map_local = dof_map;
@@ -84,8 +98,8 @@ BoundaryCondition::LocalData::~LocalData()
   if (coordinates)
   {
     for (uint i = 0; i < dof_map->local_dimension(); i++)
-      delete [] coordinates[i];
-    delete [] coordinates;
+      delete[] coordinates[i];
+    delete[] coordinates;
   }
 
   if (finite_element)
@@ -95,12 +109,12 @@ BoundaryCondition::LocalData::~LocalData()
     delete dof_map_local;
 
   if (w)
-    delete [] w;
+    delete[] w;
 
   if (cell_dofs)
-    delete [] cell_dofs;
+    delete[] cell_dofs;
 
   if (facet_dofs)
-    delete [] facet_dofs;
+    delete[] facet_dofs;
 }
 //-----------------------------------------------------------------------------

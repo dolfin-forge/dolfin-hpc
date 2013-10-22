@@ -8,7 +8,6 @@
 // First added:  2005-07-05
 // Last changed: 2011-01-20
 
-//#include <boost/detail/endian.hpp>
 
 #include <stdint.h>
 #include <dolfin/mesh/Mesh.h>
@@ -151,10 +150,7 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   
   // Increase the number of times we have saved the function
   counter++;
-  /*
-  cout << "Saved function " << u.name() << " (" << u.label()
-       << ") to file " << filename << " in VTK format." << endl;
-  */
+
 }
 //----------------------------------------------------------------------------
 void VTKFile::MeshWrite(Mesh& mesh) const
@@ -271,12 +267,10 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
     // Write function data at mesh vertices
     if ( rank == 0 )
     {
-      //      fprintf(fp, "<PointData  Scalars=\"%s\"> \n", name.c_str());
       fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">	 ", name.c_str());
     }
     else
     {
-      //      fprintf(fp, "<PointData  Vectors=\"%s\"> \n", name.c_str());
       fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">	 ", name.c_str());	
     }
     
@@ -601,10 +595,9 @@ void VTKFile::MeshFunctionWrite(T& meshfunction)
   // Increase the number of times we have saved the mesh function
   counter++;
 
-  cout << "saved mesh function " << counter << " times." << endl;
-
-  cout << "Saved mesh function " << mesh.name() << " (" << mesh.label()
-       << ") to file " << filename << " in VTK format." << endl;
+  message("saved mesh function %d times.", counter);
+  message("Saved mesh function ( %s ) to file %s in VTK format.", 
+	  mesh.label().c_str(), filename.c_str());
 }    
 //-----------------------------------------------------------------------------
 template<typename T>

@@ -30,13 +30,15 @@ namespace dolfin
   public:
 
     /// Create empty sub function
-    SubFunction() : f(0), i(0) {}
+    SubFunction() : f(NULL), i(0) {}
 
     /// Create sub function
     SubFunction(DiscreteFunction* f, uint i) : f(f), i(i) {}
 
     /// Destructor
-    ~SubFunction() {}
+    ~SubFunction()
+    {
+    }
 
     /// Friends
     friend class DiscreteFunction;

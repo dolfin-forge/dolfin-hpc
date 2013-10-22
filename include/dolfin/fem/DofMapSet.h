@@ -20,66 +20,57 @@
 namespace dolfin
 {
 
-  class Form;
-  class Mesh;
-  class UFC;
+class DofMapCache;
+class Form;
+class Mesh;
+class UFC;
 
-  /// This class provides storage and caching of (precomputed) dof
-  /// maps and enables reuse of already computed dof maps with equal
-  /// signatures.
+/// This class provides storage and caching of (precomputed) dof
+/// maps and enables reuse of already computed dof maps with equal
+/// signatures.
 
-  class DofMapSet
-  {
-  public:
-    
-    /// Create empty set of dof maps
-    DofMapSet();
+class DofMapSet
+{
+public:
 
-    /// Create set of dof maps
-    DofMapSet(const Form& form, Mesh& mesh);
+	/// Create empty set of dof maps
+	DofMapSet();
 
-    /// Create set of dof maps
-    DofMapSet(const ufc::form& form, Mesh& mesh);
+	/// Create set of dof maps
+	DofMapSet(const Form& form, Mesh& mesh);
 
-    /// Destructor
-    ~DofMapSet();
+	/// Create set of dof maps
+	DofMapSet(const ufc::form& form, Mesh& mesh);
 
-    /// Update set of dof maps for given form
-    void update(const Form& form, Mesh& mesh);
+	/// Destructor
+	~DofMapSet();
 
-    /// Update set of dof maps for given form
-    void update(const ufc::form& form, Mesh& mesh);
-    
-    /// Return number of dof maps
-    uint size() const;
-    
-    /// Return dof map for argument function i
-    DofMap& operator[] (uint i) const;
-    
-  private:
+	/// Update set of dof maps for given form
+	void update(const Form& form, Mesh& mesh);
 
-    // Consistency checking
-    void check(const ufc::form& form, Mesh& mesh);
+	/// Update set of dof maps for given form
+	void update(const ufc::form& form, Mesh& mesh);
 
-    // Cached precomputed dof maps
-#if __SUNPRO_CC 
-    std::map<std::string, std::pair<ufc::dof_map*, DofMap*> > dof_map_cache;
-#else
-    std::map<const std::string, std::pair<ufc::dof_map*, DofMap*> > dof_map_cache;
-#endif
+	/// Return number of dof maps
+	uint size() const;
 
-    // Array of dof maps for current form
-    std::vector<DofMap*> dof_map_set;
+	/// Return dof map for argument function i
+	DofMap& operator[](uint i) const;
 
-    // Iterator for map
-#if __SUNPRO_CC 
-    typedef std::map<std::string, std::pair<ufc::dof_map*, DofMap*> >::iterator map_iterator;
-#else
-    typedef std::map<const std::string, std::pair<ufc::dof_map*, DofMap*> >::iterator map_iterator;
-#endif
+private:
 
-  };
+	// Consistency checking
+	void check(const ufc::form& form, Mesh& mesh);
+
+	// Array of dof maps for current form
+	std::vector<DofMap*> dof_map_set;
+
+	// Global cache of precomputed dof maps
+	DofMapCache& cache_;
+
+};
 
 }
 
 #endif
+

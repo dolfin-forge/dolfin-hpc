@@ -8,9 +8,16 @@
 
 #include <dolfin.h>
 
-#include "AdvectionDiffusion.h"
-#include "OutflowFacet.h"
-#include "Projection.h"
+#ifdef ENABLE_UFL
+#include "ufc2/AdvectionDiffusion.h"
+#include "ufc2/OutflowFacet.h"
+#include "ufc2/Projection.h"
+#else
+#include "ufc1/AdvectionDiffusion.h"
+#include "ufc1/OutflowFacet.h"
+#include "ufc1/Projection.h"
+#endif
+
 
 using namespace dolfin;
 

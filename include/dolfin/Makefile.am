@@ -1,8 +1,14 @@
 include_HEADERS = dolfin.h
 
-nobase_pkginclude_HEADERS = config/dolfin_config.h\
+nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
+				adaptivity/dolfin_adaptivity.h\
+				adaptivity/AdaptiveRefinement.h\
+				adaptivity/AdaptiveRefinementProjectScalar.h\
+				adaptivity/AdaptiveRefinementProjectVector.h\
+				adaptivity/SpaceTimeFunction.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
+				elements/FE.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
 				elements/ffc_Discontinuous_Lagrange_0_1d.h\
 				elements/ffc_Discontinuous_Lagrange_0_2d.h\
@@ -117,6 +123,8 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				parameter/Parameter.h\
 				parameter/ParameterList.h\
 				parameter/ParameterValue.h\
+				function/Expression.h\
+				function/ExpressionFunction.h\
 				function/GenericFunction.h\
 				function/UFCFunction.h\
 				function/SpecialFunctions.h\
@@ -255,9 +263,12 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				fem/assemble.h\
 				fem/DirichletBC.h\
 				fem/Form.h\
+				fem/NodeNormal.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/PeriodicBC.h\
+				fem/SlipBC.h\
+				fem/SlipFrictionBC.h\
 				fem/UFCCell.h\
 				fem/DofMap.h\
 				fem/BoundaryCondition.h\
@@ -280,6 +291,4 @@ nobase_pkginclude_HEADERS = config/dolfin_config.h\
 				common/List.h\
 				common/Timer.h\
 				common/simple_array.h
-
-
 

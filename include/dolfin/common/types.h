@@ -15,7 +15,7 @@
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
-#elif (__IBMCPP__ && __IBMCPP_TR1__) 
+#elif (__IBMCPP__ && __IBMCPP_TR1__)
 #include <unordered_map>
 #include <unordered_set>
 #elif __sgi
@@ -38,13 +38,16 @@ namespace dolfin
   // Unsigned integers
   typedef unsigned int uint;
 
+  // Index type
+  typedef size_t idx_t;
+
   // Complex numbers
   typedef std::complex<double> complex;
 
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
-#elif (__IBMCPP__ && __IBMCPP_TR1__) 
+#elif (__IBMCPP__ && __IBMCPP_TR1__)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
 #elif __sgi
@@ -54,7 +57,7 @@ namespace dolfin
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
 #else
-#define _map std::map 
+#define _map std::map
 #define _set std::set
 #endif
 }

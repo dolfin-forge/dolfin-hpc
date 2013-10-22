@@ -4,29 +4,36 @@
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Kristian B. Oelgaard, 2007.
 // Modified by Martin Sandve Alnes, 2008.
+// Modified by Aurélien Larcher, 2013.
 //
 // First added:  2003-11-28
-// Last changed: 2008-07-07
+// Last changed: 2013-06-11
 
 #ifndef __FUNCTION_H
 #define __FUNCTION_H
 
-#include <ufc.h>
+#include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
-#include <dolfin/common/simple_array.h>
+#include <dolfin/elements/FE.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/common/Variable.h>
+
 #include "SubFunction.h"
+
+#include <ufc.h>
 
 namespace dolfin
 {
 
-  class Mesh;
+  class DofMap;
+  class Expression;
+  class FiniteElement;
   class Form;
   class GenericFunction;
-  class DofMap;
+  class GenericVector;
+  class Mesh;
 
   /// This class represents a function that can be evaluated on a
   /// mesh. The actual representation of the function can vary, but
@@ -38,18 +45,24 @@ namespace dolfin
   /// overloading the eval function of this class or by giving a
   /// function (pointer) that returns the value of the function.
 
-  class Function : public Variable
+  class Function: public Variable
   {
   public:
 
     /// Function types
-    enum Type {empty, user, constant, discrete, ufc};
+    enum Type
+    {
+      constant, discrete, empty, expression, ufc, user
+    };
 
     /// Create empty function (read data from file)
     Function();
 
     /// Create user-defined function (evaluation operator must be overloaded)
     explicit Function(Mesh& mesh);
+
+    /// Create user-defined function from expression
+    explicit Function(Mesh& mesh, Expression const& expr);
 
     /// Create constant scalar function from given value
     Function(Mesh& mesh, real value);
@@ -73,7 +86,23 @@ namespace dolfin
     Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
     /// Create discrete function for argument function i of form
-    Function(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+    Function(Mesh& mesh, Form& form, uint i = 1);
+
+    /// Create discrete function from signature
+    Function(Mesh& mesh, GenericVector& x,
+	     std::string const& finite_element_signature,
+	     std::string const& dof_map_signature);
+
+    /// Create discrete function from signature
+    Function(Mesh& mesh, std::string const& finite_element_signature,
+	     std::string const& dof_map_signature);
+
+    /// Create discrete function from signature
+    Function(Mesh& mesh, GenericVector& x,
+	     std::string const& finite_element_signature);
+
+    /// Create discrete function from signature
+    Function(Mesh& mesh, std::string const& finite_element_signature);
 
     /// Create discrete function from sub function
     explicit Function(SubFunction sub_function);
@@ -87,11 +116,33 @@ namespace dolfin
     /// Destructor
     virtual ~Function();
 
+    /// Create constant function
+    void init(Mesh& mesh, real value);
+
+    /// Create expression function
+    void init(Mesh& mesh, Expression const& expr);
+
     /// Create discrete function for argument function i of form
     void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 
     /// Create discrete function for argument function i of form
-    void init(Mesh& mesh, GenericVector& x, DofMap& dof_map, const ufc::form& form, uint i = 1);
+    void init(Mesh& mesh, Form& form, uint i = 1);
+
+    /// Create discrete function from signature
+    void init(Mesh& mesh, GenericVector& x,
+	      std::string const& finite_element_signature);
+
+    /// Create discrete function from signature
+    void init(Mesh& mesh, std::string const& finite_element_signature);
+
+    /// Create discrete function from signature
+    void init(Mesh& mesh, std::string const& finite_element_signature,
+	      std::string const& dof_map_signature);
+
+    /// Create discrete function from signature
+    void init(Mesh& mesh, GenericVector& x,
+	      std::string const& finite_element_signature,
+	      std::string const& dof_map_signature);
 
     /// Return the type of function
     Type type() const;
@@ -101,9 +152,11 @@ namespace dolfin
 
     /// Return the dimension of the value space for axis i
     virtual uint dim(uint i) const;
-    
+
     /// Return the mesh
     Mesh& mesh() const;
+
+    //--- !!! BEGIN: Only valid for discrete functions --------------------------
 
     /// Return the signature of a DiscreteFunction
     std::string signature() const;
@@ -111,29 +164,48 @@ namespace dolfin
     /// Return the vector associated with a DiscreteFunction
     GenericVector& vector() const;
 
+#ifdef ENABLE_UFL
+    /// Return the degree of the approximation space of a DiscreteFunction
+    uint degree() const;
+#endif
+
+    /// Return the dofmap of a DiscreteFunction
+    DofMap const& dofmap() const;
+
+    /// Return the finite element space of a DiscreteFunction
+    FiniteElement const& finite_element() const;
+
+    /// Get values of a DiscreteFunction from array
+    void get(real *& values);
+
+    /// Set values to a DiscreteFunction from array
+    void set(real *& values);
+
     /// Return the number of sub functions (only for discrete functions)
     uint numSubFunctions() const;
-    
+
     /// Extract sub function/slice (only for discrete function)
-    SubFunction operator[] (uint i);
+    SubFunction operator[](uint i);
+
+    //--- !!! END:  Only valid for discrete functions ---------------------------
 
     /// Assign function
-    const Function& operator= (Function& f);
+    Function const& operator=(Function& f);
+
 
     /// Assign sub function/slice
-    const Function& operator= (SubFunction f);
-    
+    Function const& operator=(SubFunction sub_function);
+
     /// Interpolate function to vertices of mesh
     void interpolate(real* values);
 
-    /// Interpolate function to finite element space on cell
-    void interpolate(real* coefficients,
-                     const ufc::cell& ufc_cell,
-                     const ufc::finite_element& finite_element,
-                     Cell& cell, int facet = -1);
+    /// Interpolate values from the given Function
+    void interpolate(const Function& other_func);
 
-    /// Evaluate function at given point (used for subclassing through SWIG interface)
-    virtual void eval(simple_array<real>& values, const simple_array<real>& x) const { eval(values.data, x.data); }
+    /// Interpolate function to finite element space on cell
+    void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+		     const ufc::finite_element& finite_element, Cell& cell,
+		     int facet = -1);
 
     /// Evaluate function at given point (overload for scalar user-defined function)
     virtual void eval(real* values, const real* x) const;
@@ -144,13 +216,13 @@ namespace dolfin
     void sync_ghosts();
 
     /// Friends
-    friend class XMLFile;
     friend class LinearPDE;
 
+
   protected:
-    
+
     /// Access current cell (available during assembly for user-defined function)
-    const Cell& cell() const;
+    Cell const& cell() const;
 
     /// Access current facet normal (available during assembly for user-defined function)
     Point normal() const;
@@ -159,13 +231,13 @@ namespace dolfin
     int facet() const;
 
   private:
-    
+
     // Pointer to current implementation (letter base class)
     GenericFunction* f;
 
     // Type of function
     Type _type;
-    
+
     // Pointer to current cell (if any, otherwise 0)
     Cell* _cell;
 

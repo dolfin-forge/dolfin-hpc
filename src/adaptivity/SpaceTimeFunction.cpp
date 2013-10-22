@@ -80,7 +80,7 @@ void SpaceTimeFunction::eval(real t)
   real t0 = (*it0).first;
   real t1 = (*it1).first;
   
-  if (isnan(t0) || isnan(t1))
+  if (t0 != t0 || t1 != t1)
   {
     error("At least one of the iteration times"
 	  "used for interpolation is a Nan.");

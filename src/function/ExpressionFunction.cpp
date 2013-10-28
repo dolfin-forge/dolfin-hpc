@@ -82,7 +82,6 @@ void ExpressionFunction::evaluate(real* values, const real* coordinates,
 {
 	dolfin_assert(values);
 	dolfin_assert(coordinates);
-	dolfin_assert(f);
 
 	// Compute size of value (number of entries in tensor value)
 	uint size = 1;

@@ -1,10 +1,11 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Garth N. Wells 2007, 2008.
+// Modified by Garth N. Wells, 2007, 2008.
+// Modified by Aurélien Larcher, 2013.
 //
 // First added:  2008-06-18
-// Last changed: 2007-12-09
+// Last changed: 2013-09-13
 
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/Form.h>

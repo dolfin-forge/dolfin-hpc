@@ -1,9 +1,8 @@
-/*
- * SlipFriction.cpp
- *
- *  Created on: Jul 15, 2013
- *      Author: larcher
- */
+// Copyright (C) 2013 Aurélien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2013-07-15 (merged from branch larcher)
+// Last changed: 2013-07-15
 
 #include <dolfin/fem/SlipFrictionBC.h>
 

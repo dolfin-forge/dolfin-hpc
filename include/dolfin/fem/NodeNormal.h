@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2009.
+// Modified by Aurélien Larcher, 2012-13. (partial rewrite)
 //
 // First added:  2007-05-01
 // Last changed: 2009-03-17

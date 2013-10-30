@@ -4,6 +4,7 @@
 // Modified by Johan Hoffman, 2007.
 // Modified by Garth N. Wells 2007.
 // Modified by Balthasar Reuter, 2013.
+// Modified by Aurélien Larcher, 2013.
 //
 // First added:  2006-05-09
 // Last changed: 2013-03-22
@@ -42,7 +43,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-Mesh::Mesh() :  
+Mesh::Mesh() :
   Variable("mesh", "DOLFIN mesh"),
   _data(0),
   _cell_type(0),
@@ -71,7 +72,7 @@ Mesh::Mesh(std::string filename) :
 {
   File file(filename);
   file >> *this;
-  
+
   if (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
   {
       MeshFunction<uint> partitions;
@@ -89,16 +90,16 @@ Mesh::~Mesh()
 const Mesh& Mesh::operator=(const Mesh& mesh)
 {
   clear();
-  
+
   _topology = mesh._topology;
   _geometry = mesh._geometry;
   _distdata = mesh._distdata;
-  
+
   if (mesh._cell_type)
     _cell_type = CellType::create(mesh._cell_type->cellType());
-  
+
   rename(mesh.name(), mesh.label());
-  
+
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -106,7 +107,7 @@ MeshData& Mesh::data()
 {
   if (!_data)
     _data = new MeshData(*this);
-  
+
   return *_data;
 }
 //-----------------------------------------------------------------------------
@@ -125,7 +126,7 @@ void Mesh::init()
   // Compute all entities
   for (uint d = 0; d <= topology().dim(); d++)
     init(d);
-  
+
   // Compute all connectivity
   for (uint d0 = 0; d0 <= topology().dim(); d0++)
     for (uint d1 = 0; d1 <= topology().dim(); d1++)
@@ -163,9 +164,9 @@ void Mesh::refine()
 //-----------------------------------------------------------------------------
 #ifdef HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
-void Mesh::refine(libgeom::Geometry& geom, 
-		  MeshFunction<int>& patch_id_list, 
-		  MeshFunction<float>& bnd_u, 
+void Mesh::refine(libgeom::Geometry& geom,
+		  MeshFunction<int>& patch_id_list,
+		  MeshFunction<float>& bnd_u,
 		  MeshFunction<float>& bnd_v)
 {
   message("No cells marked for refinement, "
@@ -173,7 +174,7 @@ void Mesh::refine(libgeom::Geometry& geom,
   UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u, bnd_v);
 }
 //-----------------------------------------------------------------------------
-void Mesh::refine(libgeom::Geometry& geom, 
+void Mesh::refine(libgeom::Geometry& geom,
 		  MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
 {
   message("No cells marked for refinement, "
@@ -193,7 +194,7 @@ void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
 void Mesh::coarsen()
 {
   // FIXME: Move implementation to separate class and just call function here
-  
+
   message("No cells marked for coarsening, assuming uniform mesh coarsening.");
   MeshFunction<bool> cell_marker(*this, this->topology().dim());
   cell_marker = true;
@@ -252,23 +253,23 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<uint> *, 
+		      Array<std::pair<MeshFunction<uint> *,
 		      MeshFunction<uint> *> >& cell_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<double> *, 
+		      Array<std::pair<MeshFunction<double> *,
 		      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<uint> *, 
+		      Array<std::pair<MeshFunction<uint> *,
 		      MeshFunction<uint> *> >& cell_functions,
-		      Array<std::pair<MeshFunction<double> *, 
+		      Array<std::pair<MeshFunction<double> *,
 		      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions,

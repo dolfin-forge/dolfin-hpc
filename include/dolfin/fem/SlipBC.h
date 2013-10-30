@@ -4,6 +4,7 @@
 // Existing code for Dirichlet BC is used
 //
 // Modified by Niclas Jansson, 2008-2009.
+// Modified by Aurélien Larcher, 2013.
 //
 // First added:  2007-05-01
 // Last changed: 2010-05-09

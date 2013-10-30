@@ -3,9 +3,10 @@
 //
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Martin Sandve Alnes 2008.
+// Modified by Aurélien Larcher 2013. (extension and partial rewrite)
 //
 // First added:  2003-11-28
-// Last changed: 2008-07-07
+// Last changed: 2013-09-13
 //
 // The class Function serves as the envelope class and holds a pointer
 // to a letter class that is a subclass of GenericFunction. All the
@@ -572,14 +573,14 @@ dolfin::real Function::eval(const real* x) const
   // overloaded. Otherwise, raise an exception. Note that we must
   // check that we *don't* have a user-defined function or we will go
   // into a loop between Function and UserFunction...
-  
+
   if (_type != user)
   {
     real values[1] = {0.0};
     eval(values, x);
     return values[0];
   }
-  
+
   error("Missing eval() for user-defined function (must be overloaded).");
   return 0.0;
 }

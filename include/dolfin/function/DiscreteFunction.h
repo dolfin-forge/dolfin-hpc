@@ -22,7 +22,7 @@ namespace dolfin
   class FinitElement;
   class SubFunction;
   class IntersectionDetector;
-  
+
   /// This class implements the functionality for discrete functions.
   /// A discrete function is defined in terms of a mesh, a vector of
   /// degrees of freedom, a finite element and a dof map. The finite
@@ -30,88 +30,88 @@ namespace dolfin
   /// cell of the mesh in terms of the local degrees of freedom, and
   /// the dof map determines how the degrees of freedom are
   /// distributed on the mesh.
-  
+
   class DiscreteFunction : public GenericFunction
   {
   public:
-    
+
     /// Create discrete function for argument function i of form
     DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form, uint i);
-    
+
     /// Create discrete function for argument function i of form which owns the vector
     DiscreteFunction(Mesh& mesh, Form& form, uint i);
-    
+
     /// Create discrete function from given signatures
     DiscreteFunction(Mesh& mesh, GenericVector& x,
-		     std::string finite_element_signature, std::string dof_map_signature);
-    
+         std::string finite_element_signature, std::string dof_map_signature);
+
     /// Create discrete function from given signatures which owns the vector
     DiscreteFunction(Mesh& mesh, std::string finite_element_signature,
-		     std::string dof_map_signature);
-    
+         std::string dof_map_signature);
+
     /// Create discrete function from given signatures
     DiscreteFunction(Mesh& mesh, GenericVector& x,
-		     std::string finite_element_signature);
-    
+         std::string finite_element_signature);
+
     /// Create discrete function from given signatures which owns the vector
     DiscreteFunction(Mesh& mesh, std::string finite_element_signature);
-    
+
     /// Create discrete function from sub function
     DiscreteFunction(SubFunction& sub_function);
-    
+
     /// Copy constructor
     DiscreteFunction(const DiscreteFunction& f);
-    
+
     /// Destructor
     ~DiscreteFunction();
-    
+
     /// Return the rank of the value space
     uint rank() const;
-    
+
     /// Return the dimension of the value space for axis i
     uint dim(uint i) const;
-    
+
     /// Return the degree of the finite element
     uint degree() const;
-    
+
     /// Return the number of sub functions
     uint numSubFunctions() const;
-    
+
     /// Assign discrete function
     const DiscreteFunction& operator=(const DiscreteFunction& f);
-    
+
     /// Interpolate function to vertices of mesh
     void interpolate(real* values) const;
-    
+
     /// Interpolate function to finite element space on cell
     void interpolate(real* coefficients, const ufc::cell& cell,
-		     const ufc::finite_element& finite_element, 
-		     const Cell& dolfin_cell) const;
-    
+         const ufc::finite_element& finite_element,
+         const Cell& dolfin_cell) const;
+
     /// Interpolate values from the given Function
     void interpolate(Function const& other_func);
-    
+
     /// Evaluate function at given point
     void eval(real* values, const real* x) const;
-    
+
     /// Update vector
     void sync_ghosts();
-    
+
     /// Return signature
     std::string signature() const;
 
     /// Return vector
     GenericVector& vector() const;
-    
+
     /// Return dof map
     DofMap const& dofmap() const;
-    
+
     /// Return finite element
     FiniteElement const& finite_element() const;
-    
+
     /// Get values to array
     void get(real *& values);
-    
+
     /// Set values from array
     void set(real *& values);
 
@@ -119,76 +119,76 @@ namespace dolfin
     friend class LinearPDE;
 
   private:
-    
+
     // Scratch space
     class Scratch
     {
     public:
-      
+
       // Constructor
       Scratch(ufc::finite_element& finite_element);
-      
+
       // Destructor
       ~Scratch();
-      
+
       // Value size (number of entries in tensor value)
       uint size;
-      
+
       // Local array for mapping of dofs
       uint* dofs;
-      
+
       // Local array for expansion coefficients
       real* coefficients;
-      
+
       // Local array for values
       real* values;
-      
+
     };
-    
+
     // Initialize discrete function
     void  __init(Mesh& mesh, Form& form, uint i);
-    
+
     // Initialize discrete function
     void __init(Mesh& mesh, std::string finite_element_signature,
-		std::string dof_map_signature);
-    
+        std::string dof_map_signature);
+
     void
       __init();
-    
+
     /// Initialize ghost pattern
     void  __init_ghosts();
-    
+
     // The finite element
     FiniteElement * finite_element_;
     ufc::finite_element * ufc_finite_element_;
-    
+
     // The dof map
     DofMap * dof_map_;
     uint local_dim_; // Cache it to save indirections in interpolate
     real ** dofs_coordinates_;
     real * cell_dof_values_;
-    
+
     // Pointers to local data if owned
     bool const local_vector;
-    
+
     // The vector of dofs
     GenericVector *x;
-    
+
     // Intersection detector
     mutable IntersectionDetector* intersection_detector;
-    
+
     // Scratch space
     Scratch* scratch;
-    
+
     // Renumbered dof_map;
     bool renumbered;
-    
+
     uint _cache_size;
     uint *_indices;
     real *data_cache;_map<uint, uint> cache_mapping;
-    
+
   };
-  
+
 }
 
 #endif

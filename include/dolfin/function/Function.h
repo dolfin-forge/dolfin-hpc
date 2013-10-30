@@ -4,7 +4,7 @@
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Kristian B. Oelgaard, 2007.
 // Modified by Martin Sandve Alnes, 2008.
-// Modified by Aurélien Larcher, 2013.
+// Modified by Aurélien Larcher 2013. (extension)
 //
 // First added:  2003-11-28
 // Last changed: 2013-06-11
@@ -90,16 +90,16 @@ namespace dolfin
 
     /// Create discrete function from signature
     Function(Mesh& mesh, GenericVector& x,
-	     std::string const& finite_element_signature,
-	     std::string const& dof_map_signature);
+       std::string const& finite_element_signature,
+       std::string const& dof_map_signature);
 
     /// Create discrete function from signature
     Function(Mesh& mesh, std::string const& finite_element_signature,
-	     std::string const& dof_map_signature);
+       std::string const& dof_map_signature);
 
     /// Create discrete function from signature
     Function(Mesh& mesh, GenericVector& x,
-	     std::string const& finite_element_signature);
+       std::string const& finite_element_signature);
 
     /// Create discrete function from signature
     Function(Mesh& mesh, std::string const& finite_element_signature);
@@ -130,19 +130,19 @@ namespace dolfin
 
     /// Create discrete function from signature
     void init(Mesh& mesh, GenericVector& x,
-	      std::string const& finite_element_signature);
+        std::string const& finite_element_signature);
 
     /// Create discrete function from signature
     void init(Mesh& mesh, std::string const& finite_element_signature);
 
     /// Create discrete function from signature
     void init(Mesh& mesh, std::string const& finite_element_signature,
-	      std::string const& dof_map_signature);
+        std::string const& dof_map_signature);
 
     /// Create discrete function from signature
     void init(Mesh& mesh, GenericVector& x,
-	      std::string const& finite_element_signature,
-	      std::string const& dof_map_signature);
+        std::string const& finite_element_signature,
+        std::string const& dof_map_signature);
 
     /// Return the type of function
     Type type() const;
@@ -204,8 +204,8 @@ namespace dolfin
 
     /// Interpolate function to finite element space on cell
     void interpolate(real* coefficients, const ufc::cell& ufc_cell,
-		     const ufc::finite_element& finite_element, Cell& cell,
-		     int facet = -1);
+         const ufc::finite_element& finite_element, Cell& cell,
+         int facet = -1);
 
     /// Evaluate function at given point (overload for scalar user-defined function)
     virtual void eval(real* values, const real* x) const;

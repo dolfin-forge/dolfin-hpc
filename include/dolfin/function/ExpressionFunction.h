@@ -1,3 +1,9 @@
+// Copyright (C) 2013 Aurélien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2013-05-25 (merged from branch larcher)
+// Last changed: 2013-05-25
+
 #ifndef __EXPRESSION_FUNCTION_H
 #define __EXPRESSION_FUNCTION_H
 

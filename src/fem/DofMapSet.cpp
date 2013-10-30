@@ -3,6 +3,7 @@
 //
 // Modified by Garth N. Wells, 2007.
 // Modified by Martin Sandve Alnes, 2008.
+// Modified by Aurélien Larcher, 2013. (implement dofmap cache)
 //
 // First added:  2007-01-17
 // Last changed: 2008-05-08
@@ -20,19 +21,19 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 DofMapSet::DofMapSet():
-				cache_(DofMapCache::instance())
+        cache_(DofMapCache::instance())
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 DofMapSet::DofMapSet(const Form& form, Mesh& mesh):
-		cache_(DofMapCache::instance())
+    cache_(DofMapCache::instance())
 {
   update(form.form(), mesh);
 }
 //-----------------------------------------------------------------------------
 DofMapSet::DofMapSet(const ufc::form& form, Mesh& mesh) :
-				cache_(DofMapCache::instance())
+        cache_(DofMapCache::instance())
 {
   update(form, mesh);
 }
@@ -42,7 +43,7 @@ DofMapSet::~DofMapSet()
   // Release all dof maps in the cache
   for (std::vector<DofMap*>::iterator it = dof_map_set.begin(); it != dof_map_set.end(); ++it)
   {
-	  cache_.release_dofmap(**it);
+    cache_.release_dofmap(**it);
   }
 }
 //-----------------------------------------------------------------------------
@@ -66,7 +67,7 @@ void DofMapSet::update(const ufc::form& form, Mesh& mesh)
   for (uint i = 0; i < num_arguments; ++i)
   {
     //
-	dof_map_set[i] = cache_.acquire_dofmap(mesh,form, i);
+  dof_map_set[i] = cache_.acquire_dofmap(mesh,form, i);
   }
 }
 //-----------------------------------------------------------------------------

@@ -1,3 +1,9 @@
+// Copyright (C) 2013 Aurélien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2013-10-07 (merged from branch larcher)
+// Last changed: 2013-10-07
+
 #ifndef FE_H_
 #define FE_H_
 

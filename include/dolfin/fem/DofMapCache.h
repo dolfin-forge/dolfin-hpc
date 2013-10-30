@@ -1,3 +1,9 @@
+// Copyright (C) 2013 Aurélien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2013-06-13 (merged from branch larcher)
+// Last changed: 2013-06-13
+
 #ifndef __DOF_MAP_CACHE_H
 #define __DOF_MAP_CACHE_H
 
@@ -18,52 +24,52 @@ class Function;
 class DofMapCache
 {
 
-	struct dofmap_token_t
-	{
-		uint count;
-		DofMap * const dofmap;
+  struct dofmap_token_t
+  {
+    uint count;
+    DofMap * const dofmap;
 
-		dofmap_token_t(DofMap * dm) :
-				count(1), dofmap(dm)
-		{
-		}
-	};
+    dofmap_token_t(DofMap * dm) :
+        count(1), dofmap(dm)
+    {
+    }
+  };
 
 #if __SUNPRO_CC
-	typedef std::map<std::string, dofmap_token_t > dofmap_container_t;
-	typedef std::pair<std::string, dofmap_token_t> dofmap_item_t;
-	typedef std::map<DofMap *, std::string > dofmap_rlist_t;
-	typedef std::pair<DofMap *, std::string> dofmap_ritem_t;
+  typedef std::map<std::string, dofmap_token_t > dofmap_container_t;
+  typedef std::pair<std::string, dofmap_token_t> dofmap_item_t;
+  typedef std::map<DofMap *, std::string > dofmap_rlist_t;
+  typedef std::pair<DofMap *, std::string> dofmap_ritem_t;
 #else
-	typedef std::map<std::string const, dofmap_token_t> dofmap_container_t;
-	typedef std::pair<std::string const, dofmap_token_t> dofmap_item_t;
-	typedef std::map<DofMap *, std::string const> dofmap_rlist_t;
-	typedef std::pair<DofMap *, std::string const> dofmap_ritem_t;
+  typedef std::map<std::string const, dofmap_token_t> dofmap_container_t;
+  typedef std::pair<std::string const, dofmap_token_t> dofmap_item_t;
+  typedef std::map<DofMap *, std::string const> dofmap_rlist_t;
+  typedef std::pair<DofMap *, std::string const> dofmap_ritem_t;
 #endif
 
 public:
 
-	static DofMapCache& instance()
-	{ return *instance_; }
+  static DofMapCache& instance()
+  { return *instance_; }
 
-	DofMap * acquire_dofmap(Mesh& mesh, ufc::form const& form, uint const& i);
-	DofMap * acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
-	DofMap * acquire_dofmap(Function& f);
-	void release_dofmap(DofMap& dof_map);
+  DofMap * acquire_dofmap(Mesh& mesh, ufc::form const& form, uint const& i);
+  DofMap * acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
+  DofMap * acquire_dofmap(Function& f);
+  void release_dofmap(DofMap& dof_map);
 
-	void info() const;
+  void info() const;
 
 private:
 
-	DofMapCache();
-	~DofMapCache();
+  DofMapCache();
+  ~DofMapCache();
 
-	void __request_dofmap(std::string const);
+  void __request_dofmap(std::string const);
 
-	dofmap_container_t cache_;
-	dofmap_rlist_t rlist_;
+  dofmap_container_t cache_;
+  dofmap_rlist_t rlist_;
 
-	static DofMapCache * const instance_;
+  static DofMapCache * const instance_;
 
 };
 

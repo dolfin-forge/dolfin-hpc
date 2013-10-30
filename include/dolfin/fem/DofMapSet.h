@@ -1,7 +1,8 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modifies by Garth N. Wells, 2007.
+// Modified by Garth N. Wells, 2007.
+// Modified by Aurélien Larcher, 2013. (implement dofmap cache)
 //
 // First added:  2007-01-17
 // Last changed: 2007-05-24
@@ -33,40 +34,40 @@ class DofMapSet
 {
 public:
 
-	/// Create empty set of dof maps
-	DofMapSet();
+  /// Create empty set of dof maps
+  DofMapSet();
 
-	/// Create set of dof maps
-	DofMapSet(const Form& form, Mesh& mesh);
+  /// Create set of dof maps
+  DofMapSet(const Form& form, Mesh& mesh);
 
-	/// Create set of dof maps
-	DofMapSet(const ufc::form& form, Mesh& mesh);
+  /// Create set of dof maps
+  DofMapSet(const ufc::form& form, Mesh& mesh);
 
-	/// Destructor
-	~DofMapSet();
+  /// Destructor
+  ~DofMapSet();
 
-	/// Update set of dof maps for given form
-	void update(const Form& form, Mesh& mesh);
+  /// Update set of dof maps for given form
+  void update(const Form& form, Mesh& mesh);
 
-	/// Update set of dof maps for given form
-	void update(const ufc::form& form, Mesh& mesh);
+  /// Update set of dof maps for given form
+  void update(const ufc::form& form, Mesh& mesh);
 
-	/// Return number of dof maps
-	uint size() const;
+  /// Return number of dof maps
+  uint size() const;
 
-	/// Return dof map for argument function i
-	DofMap& operator[](uint i) const;
+  /// Return dof map for argument function i
+  DofMap& operator[](uint i) const;
 
 private:
 
-	// Consistency checking
-	void check(const ufc::form& form, Mesh& mesh);
+  // Consistency checking
+  void check(const ufc::form& form, Mesh& mesh);
 
-	// Array of dof maps for current form
-	std::vector<DofMap*> dof_map_set;
+  // Array of dof maps for current form
+  std::vector<DofMap*> dof_map_set;
 
-	// Global cache of precomputed dof maps
-	DofMapCache& cache_;
+  // Global cache of precomputed dof maps
+  DofMapCache& cache_;
 
 };
 

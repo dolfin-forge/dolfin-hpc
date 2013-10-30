@@ -1,8 +1,10 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurélien Larcher 2013. (infinite loop fix)
+//
 // First added:  2006-05-12
-// Last changed: 2007-04-12
+// Last changed: 2013-07-19
 
 #include <dolfin/mesh/MeshEntityIterator.h>
 
@@ -16,7 +18,6 @@ MeshEntityIterator::MeshEntityIterator(Mesh& mesh, uint dim) :
     pos_end(mesh.size(dim)),
     index(0)
 {
-  // FIXME: NOT GOOD
   // Compute entities if empty and if number of cells is not zero
   if ((pos_end == 0) && (mesh.numCells() != 0))
   {
@@ -35,7 +36,6 @@ MeshEntityIterator::MeshEntityIterator(MeshEntity& entity, uint dim) :
   // Get connectivity
   MeshConnectivity& c = entity.mesh().topology()(entity.dim(), dim);
 
-  // FIXME: NOT GOOD
   // Compute connectivity if empty
   if (c.size() == 0)
   {

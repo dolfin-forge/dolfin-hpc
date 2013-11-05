@@ -412,20 +412,25 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(Function const& other_func)
 {
-  real * values = new real[finite_element_->value_dimension(0)];
-
   Array<uint> const& value_dims = finite_element_->sub_value_dimensions(0);
   Array<uint> const& value_offs = finite_element_->sub_value_offsets(0);
   Array<uint> const& dm_dims = dof_map_->sub_dof_maps_dimensions();
   Array<uint> const& dm_offs = dof_map_->sub_dof_maps_offsets();
   uint const nb_subspaces = dm_dims.size();
 
+  // Make sure vectors ghost values are updated)
+  x->apply();
+
+  // Cell tabulated version
   CellIterator cell(mesh);
   UFCCell ufccell(*cell);
-  for (; !cell.end(); ++cell)
+  real * values = new real[finite_element_->value_dimension(0)];
+  real * block = new real[dof_map_->dofsmapping_size()];
+  uint cell_offset = 0;
+  uint const local_dim = dof_map_->local_dimension();
+  for (; !cell.end(); ++cell, cell_offset+=local_dim)
   {
     ufccell.update(*cell, mesh.distdata());
-    dof_map_->tabulate_dofs(scratch->dofs, ufccell, cell->index());
     dof_map_->tabulate_coordinates(dofs_coordinates_, ufccell);
 
     uint dof_id = 0;
@@ -439,16 +444,16 @@ void DiscreteFunction::interpolate(Function const& other_func)
         other_func.eval(values, dofs_coordinates_[sub_id]);
         for (uint v = 0; v < sub_val_dim; ++v)
         {
-          cell_dof_values_[off + v * nb_nodes + sub_id] = values[value_offs[sub] + v];
+          block[cell_offset + off + v * nb_nodes + sub_id] = values[value_offs[sub]
+              + v];
         }
         ++dof_id;
       }
     }
-    this->vector().set(cell_dof_values_, local_dim_, scratch->dofs);
-    this->vector().apply();
   }
-  sync_ghosts();
+  this->set(block);
 
+  delete[] block;
   delete[] values;
 }
 //-----------------------------------------------------------------------------

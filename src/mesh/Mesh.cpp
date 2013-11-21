@@ -348,7 +348,8 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
 //-----------------------------------------------------------------------------
 void Mesh::renumber()
 {
-  topology().renumber(*this);
+  MeshRenumber::renumber(*this);
+//  _timestamp = time(0);
 }
 
 //-----------------------------------------------------------------------------

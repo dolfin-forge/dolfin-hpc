@@ -23,7 +23,7 @@ namespace dolfin
     virtual ~Quadrature();
     
     /// Return number of quadrature points
-    int size() const;
+    unsigned int size() const;
 
     /// Return quadrature point
     real point(unsigned int i) const;

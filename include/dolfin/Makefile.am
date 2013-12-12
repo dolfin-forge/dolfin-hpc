@@ -177,8 +177,6 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				la/KrylovSolver.h\
 				la/LinearAlgebraFactory.h\
 				la/LinearSolver.h\
-				la/LAPACKMatrix.h\
-				la/LAPACKVector.h\
 				la/LUSolver.h\
 				la/Matrix.h\
 				la/MultigridScheme.h\
@@ -329,4 +327,5 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLSpatialCoordinate.h\
 				ufl/UFLTensorElement.h\
 				ufl/UFLVectorElement.h
+				
 

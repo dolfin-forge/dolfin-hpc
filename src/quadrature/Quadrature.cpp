@@ -36,7 +36,7 @@ Quadrature::~Quadrature()
   weights = 0;
 }
 //-----------------------------------------------------------------------------
-int Quadrature::size() const
+unsigned int Quadrature::size() const
 {
   return n;
 }

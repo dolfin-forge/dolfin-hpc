@@ -14,6 +14,7 @@
 
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/quadrature/UFCCellIntegral.h>
 #include "DirichletBC.h"
 
 namespace dolfin
@@ -44,10 +45,16 @@ namespace dolfin
 
     /// Assemble tensor from given variational form
     void assemble(GenericTensor& A, Form& form, bool reset_tensor = true);
+    void assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor = true);
 
     /// Assemble tensor from given variational form over a sub domain
     void assemble(GenericTensor& A, Form& form,
-                  const SubDomain& sub_domain, bool reset_tensor = true);
+                  const SubDomain& sub_domain, 
+                  bool reset_tensor = true);
+    void assemble(GenericTensor& A, Form& form,
+                  const SubDomain& sub_domain, 
+                  const QuadratureRule& q,
+                  bool reset_tensor = true);
 
     /// Assemble tensor from given variational form over a sub domain
     //void assemble(GenericTensor& A, Form& form,
@@ -57,7 +64,14 @@ namespace dolfin
     void assemble(GenericTensor& A, Form& form,
                   const MeshFunction<uint>& cell_domains,
                   const MeshFunction<uint>& exterior_facet_domains,
-                  const MeshFunction<uint>& interior_facet_domains, bool reset_tensor = true);
+                  const MeshFunction<uint>& interior_facet_domains, 
+                  bool reset_tensor = true);
+    void assemble(GenericTensor& A, Form& form,
+                  const MeshFunction<uint>& cell_domains,
+                  const MeshFunction<uint>& exterior_facet_domains,
+                  const MeshFunction<uint>& interior_facet_domains, 
+                  const QuadratureRule& q,
+                  bool reset_tensor = true);
     
     /// Assemble scalar from given variational form
     real assemble(Form& form);
@@ -84,7 +98,16 @@ namespace dolfin
                   const DofMapSet& dof_map_set,
                   const MeshFunction<uint>* cell_domains,
                   const MeshFunction<uint>* exterior_facet_domains,
-                  const MeshFunction<uint>* interior_facet_domains, bool reset_tensor = true);
+                  const MeshFunction<uint>* interior_facet_domains,
+                  bool reset_tensor = true);
+    void assemble(GenericTensor& A, const ufc::form& form,
+                  const Array<Function*>& coefficients,
+                  const DofMapSet& dof_map_set,
+                  const MeshFunction<uint>* cell_domains,
+                  const MeshFunction<uint>* exterior_facet_domains,
+                  const MeshFunction<uint>* interior_facet_domains,
+                  const QuadratureRule& q,
+                  bool reset_tensor = true);
       
     void assemble_system(GenericTensor& A, const ufc::form& A_form, 
                          const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
@@ -92,7 +115,18 @@ namespace dolfin
                          const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
                          DirichletBC& bc, const MeshFunction<uint>* cell_domains, 
                          const MeshFunction<uint>* exterior_facet_domains,
-                         const MeshFunction<uint>* interior_facet_domains, bool reset_tensors);
+                         const MeshFunction<uint>* interior_facet_domains, 
+                         bool reset_tensors);
+
+    void assemble_system(GenericTensor& A, const ufc::form& A_form, 
+                         const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
+                         GenericTensor& b, const ufc::form& b_form, 
+                         const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
+                         DirichletBC& bc, const MeshFunction<uint>* cell_domains, 
+                         const MeshFunction<uint>* exterior_facet_domains,
+                         const MeshFunction<uint>* interior_facet_domains, 
+                         const QuadratureRule& q,
+                         bool reset_tensors);
 
 
     void applyTraces( GenericTensor& globalA, GenericTensor& globalb, 
@@ -109,6 +143,15 @@ namespace dolfin
                        const DofMapSet& dof_set_map,
                        UFC& data,
                        const MeshFunction<uint>* domains) const;
+    
+    // Assemble over cells using a user defined quadrature rule
+    void assembleCells(GenericTensor& A,
+                       const Array<Function*>& coefficients,
+                       const DofMapSet& dof_set_map,
+                       UFC& data,
+                       const MeshFunction<uint>* domains,
+                       const UFCCellIntegral& cell_integral, 
+                       const QuadratureRule& q) const;
 
     // Assemble over exterior facets
     void assembleExteriorFacets(GenericTensor& A,

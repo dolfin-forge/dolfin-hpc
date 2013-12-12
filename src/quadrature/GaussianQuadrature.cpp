@@ -8,6 +8,7 @@
 
 
 #include <cmath>
+#include <vector>
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/Legendre.h>
@@ -82,7 +83,13 @@ void GaussianQuadrature::computeWeights()
   delete[] b;
   delete[] A;
 #else
-  error("GaussianQuadrature needs F77 LAPACK");
+  // do it by hand
+  Legendre p(n);
+  for (unsigned int i=0; i<n; ++i)
+  {
+    real z = point(i);
+    weights[i] = 2./((1-z*z)*p.ddx(z)*p.ddx(z));
+  }
 #endif
 }
 //-----------------------------------------------------------------------------

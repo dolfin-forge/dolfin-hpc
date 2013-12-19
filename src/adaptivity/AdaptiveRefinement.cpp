@@ -14,6 +14,7 @@
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
@@ -32,6 +33,10 @@
 #else
 #include <dolfin/adaptivity/ufc1/AdaptiveRefinementProjectScalar.h>
 #include <dolfin/adaptivity/ufc1/AdaptiveRefinementProjectVector.h>
+#endif
+
+#ifdef HAVE_MPI
+#include <mpi.h>
 #endif
 
 using namespace dolfin;
@@ -158,7 +163,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 					  &x_rows, x_m, *partitions);
     AdaptiveRefinement::redistribute_func(mesh, &coarse_y, &y_values,
 					  &y_rows, y_m, *partitions);
-
     AdaptiveRefinement::redistribute_func(mesh, &coarse_z, &z_values,
 					  &z_rows, z_m, *partitions);
 
@@ -235,7 +239,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
 					   MeshFunction<uint>& distribution)
 {
 
-
+#ifdef HAVE_MPI
   uint pe_rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint target_proc, src, dest, recv_size, local_size;
@@ -351,6 +355,8 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
   *vp = values;
   *rp = rows;
   m = local_size;
+
+#endif
 
 }
 //-----------------------------------------------------------------------------

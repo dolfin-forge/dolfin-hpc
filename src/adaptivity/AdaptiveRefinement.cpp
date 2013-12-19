@@ -39,6 +39,10 @@
 #include <mpi.h>
 #endif
 
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------

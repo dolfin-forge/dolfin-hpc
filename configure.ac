@@ -147,7 +147,10 @@ else
    PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
    AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.1])
+   # Add variable for automake to select generated source to be compiled
+   AM_CONDITIONAL([ENABLE_UFL], ${ENABLE_UFL})
 fi
+
 
 
 if test "x${need_boost}" = xyes; then

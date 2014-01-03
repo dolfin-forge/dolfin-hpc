@@ -3,8 +3,10 @@ include_HEADERS = dolfin.h
 nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				adaptivity/dolfin_adaptivity.h\
 				adaptivity/AdaptiveRefinement.h\
-				adaptivity/AdaptiveRefinementProjectScalar.h\
-				adaptivity/AdaptiveRefinementProjectVector.h\
+				adaptivity/ufc1/AdaptiveRefinementProjectScalar.h\
+				adaptivity/ufc1/AdaptiveRefinementProjectVector.h\
+				adaptivity/ufc2/AdaptiveRefinementProjectScalar.h\
+				adaptivity/ufc2/AdaptiveRefinementProjectVector.h\
 				adaptivity/SpaceTimeFunction.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\

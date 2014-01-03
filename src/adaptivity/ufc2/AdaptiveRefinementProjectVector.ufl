@@ -1,0 +1,30 @@
+name = "AdaptiveRefinementProjectVector"
+vector = VectorElement("Lagrange", "tetrahedron", 1)
+
+Function = Coefficient
+
+def mult(a,b):
+        return a*b 
+
+def dot(a,b):
+        return inner(a,b)
+
+
+def transp(a):
+        return transpose(a)
+
+
+def trace(a):
+        ret = a[d-1][d-1]
+        for i in range(d-1):
+                ret = ret + a[i][i]
+        return ret 
+
+
+v      = TestFunction(vector)      
+u      = Function(vector)
+
+
+L = dot(v, u) * dx
+
+

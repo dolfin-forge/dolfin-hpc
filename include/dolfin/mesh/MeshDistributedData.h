@@ -119,13 +119,18 @@ namespace dolfin
   private:
 
     uint _max_global_index;
-    uint _num_global_vertex, _num_global_edge;
-    uint _num_global_face, _num_global_cell;
+    uint _num_global_vertex;
+    uint _num_global_edge;
+    uint _num_global_face;
+    uint _num_global_cell;
 
-    bool _valid_vertex_numbering, _valid_cell_numbering,
-      _valid_edge_numbering, _valid_face_numbering;
+    bool _valid_vertex_numbering;
+    bool _valid_edge_numbering;
+    bool _valid_face_numbering;
+    bool _valid_cell_numbering;
 
-    bool _valid_edge_ownership, _valid_face_ownership;
+    bool _valid_edge_ownership;
+    bool _valid_face_ownership;
 
     _map<uint, uint> global_indices[4];
     _map<uint, uint> local_indices[4];

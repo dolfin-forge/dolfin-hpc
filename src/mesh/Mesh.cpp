@@ -40,7 +40,7 @@
 #endif
 
 
-using namespace dolfin;
+namespace dolfin {
 
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
@@ -337,4 +337,6 @@ LogStream& operator<<(LogStream& stream, const Mesh& mesh)
   return stream;
 }
 //-----------------------------------------------------------------------------
+
+}
 

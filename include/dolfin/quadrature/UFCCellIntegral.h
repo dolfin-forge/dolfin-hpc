@@ -225,10 +225,8 @@ namespace dolfin
 //    x[2][0] = 0;
 //    x[2][1] = 1;
 
-//    std::cout << "x0 = " << x[0][0] << "  " << x[0][1] << std::endl;
-//    std::cout << "x1 = " << x[1][0] << "  " << x[1][1] << std::endl;
-//    std::cout << "x2 = " << x[2][0] << "  " << x[2][1] << std::endl;
-//
+//    std::cout << "x0 = " << x[0][0] << "  " << x[0][1] <<  ",    x1 = " << x[1][0] << "  " << x[1][1]  << ",    x2 = " << x[2][0] << "  " << x[2][1] << std::endl;
+
 //    std::cout << "x ref 0 = " << x_ref[0][0] << "  " << x_ref[0][1] << std::endl;
 //    std::cout << "x ref 1 = " << x_ref[1][0] << "  " << x_ref[1][1] << std::endl;
 //    std::cout << "x ref 2 = " << x_ref[2][0] << "  " << x_ref[2][1] << std::endl;
@@ -239,10 +237,7 @@ namespace dolfin
     J[1][0] = x[1][1] - x[0][1];
     J[1][1] = x[2][1] - x[0][1];
       
-//    std::cout << "J_00 = " << J_00 << std::endl;
-//    std::cout << "J_01 = " << J_01 << std::endl;
-//    std::cout << "J_10 = " << J_10 << std::endl;
-//    std::cout << "J_11 = " << J_11 << std::endl;
+//    std::cout << "J_00 = " << J[0][0] << ",  J_01 = " << J[0][1] << ",  J_10 = " << J[1][0] << ",  J_11 = " << J[1][1] << std::endl;
     // Compute determinant of Jacobian
     double detJ = J[0][0]*J[1][1] - J[0][1]*J[1][0];
       
@@ -259,7 +254,7 @@ namespace dolfin
     
     // Set scale factor
     const double det = std::abs(detJ);
-    std::cout << "det=" << det << std::endl;
+//    std::cout << "det=" << det << std::endl;
     
     unsigned int tensor_rank = ufc.form.rank();
     std::vector<unsigned int> n_test(tensor_rank);
@@ -287,6 +282,39 @@ namespace dolfin
     const std::vector<real*>& q_points = q.get_points();
     const std::vector<real*>& ref_points = q.get_reference_points();
 
+    std::vector<real*> real_points (q_points.size());
+    for(unsigned int i = 0; i<real_points.size(); ++i)
+    {
+//      std::cout << "i= " << i << "  ";
+        real_points[i] = new real[dim];
+        for(unsigned int d=0; d<dim; ++d)
+        {
+          real_points[i][d] = 0.;
+          for(unsigned int e=0; e<dim; ++e)
+            real_points[i][d] += J[d][e] * q_points[i][e];
+          real_points[i][d] += x[0][d];
+        }
+//        std::cout << real_points[i][0] << "  " << real_points[i][1] << std::endl;
+    }
+
+    /*
+    std::cout << "q_points" << std::endl;
+    for(unsigned int i = 0; i<q_points.size(); ++i)
+    {
+      for(unsigned int d=0; d<dim; ++d)
+        std::cout << q_points[i][d] << "   ";
+      std::cout << std::endl;
+    }
+
+    std::cout << "real points" << std::endl;
+    for(unsigned int i = 0; i<real_points.size(); ++i)
+    {
+      for(unsigned int d=0; d<dim; ++d)
+        std::cout << real_points[i][d] << "   ";
+      std::cout << std::endl;
+    }
+    */
+    
     std::vector<std::vector<real*> > q_coefficients (coefficients.size());
     std::vector<std::vector<real*> > ref_q_coefficients (coefficients.size());
     for(unsigned int i = 0; i<q_coefficients.size(); ++i)
@@ -295,7 +323,8 @@ namespace dolfin
       for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
       {
         q_coefficients[i][q] = new real[1];
-        coefficients[i]->eval(q_coefficients[i][q], q_points[q]);//, ref_cell);
+        coefficients[i]->eval(q_coefficients[i][q], real_points[q]);//, ref_cell);
+//        coefficients[i]->eval(q_coefficients[i][q], q_points[q]);//, ref_cell);
       }
     }
 
@@ -308,11 +337,11 @@ namespace dolfin
         coefficients[i]->eval(ref_q_coefficients[i][q], ref_points[q]);//, ref_cell);
       }
     }
-    std::cout << "coefs" << std::endl;
-    for(unsigned int i = 0; i<q_coefficients.size(); ++i)
-      for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
-        std::cout << q_coefficients[i][q][0] << "  ";
-    std::cout << std::endl;
+//    std::cout << "coefs" << std::endl;
+//    for(unsigned int i = 0; i<q_coefficients.size(); ++i)
+//      for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
+//        std::cout << q_coefficients[i][q][0] << "  ";
+//    std::cout << std::endl;
 
 //    std::cout << "ref points" << std::endl;
 //    for (unsigned int qp = 0; qp<ref_points.size(); ++qp)
@@ -341,7 +370,7 @@ namespace dolfin
           phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, phi_values[i][j][qp], q_points[qp], ref_cell);
 //          std::cout << "phi = " << phi_values[i][j][qp][0] << std::endl;
-          ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
+          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
 //          std::cout << "grad phi = " << phi_grads[i][j][qp][0] << "  " << phi_grads[i][j][qp][1] << std::endl;
         }
       }
@@ -363,7 +392,7 @@ namespace dolfin
           ref_phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, ref_phi_values[i][j][qp], ref_points[qp], ref_cell);
 //          std::cout << "phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " << ref_phi_values[i][j][qp][0] << std::endl;
-          ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
+          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
 //          std::cout << "grad phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " 
 //            << ref_phi_grads[i][j][qp][0] << "  " << ref_phi_grads[i][j][qp][1] << std::endl;
         }
@@ -449,16 +478,34 @@ namespace dolfin
     {
       if(tensor_rank == 2)
       {
-        for (unsigned int k = 0; k < n_test[1]; ++k)
-          std::cout << "A(" <<  j*n_test[1] + k << ")= " << ufc.A[j*n_test[1] + k] << std::endl;
+//        for (unsigned int k = 0; k < n_test[1]; ++k)
+//          std::cout << "A(" <<  j*n_test[1] + k << ")= " << ufc.A[j*n_test[1] + k] << std::endl;
       }
       else if(tensor_rank == 1)
       {
-        std::cout << "A(" <<  j << ")= " << ufc.A[j] << std::endl;
+//        std::cout << "A(" <<  j << ")= " << ufc.A[j] << std::endl;
 //        std::cout << "w[" <<  j << "]= " << ufc.w[0][j] << std::endl;
       }
     } 
-  }
 
+    for(unsigned int i = 0; i<real_points.size(); ++i)
+      delete real_points[i];
+
+    for(unsigned int i = 0; i<q_coefficients.size(); ++i)
+      for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
+        delete q_coefficients[i][q];
+
+    for(unsigned int i = 0; i<ref_q_coefficients.size(); ++i)
+      for(unsigned int q = 0; q<ref_q_coefficients[i].size(); ++q)
+        delete ref_q_coefficients[i][q];
+
+    for (unsigned int i = 0; i<tensor_rank; ++i)
+      for (unsigned int j = 0; j<n_test[i]; ++j)
+        for (unsigned int qp = 0; qp<q.size(); ++qp)
+        {
+          delete phi_values[i][j][qp];
+          delete phi_grads[i][j][qp];
+        }
+  }
 }
 #endif

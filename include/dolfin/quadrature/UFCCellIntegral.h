@@ -323,7 +323,7 @@ namespace dolfin
       for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
       {
         q_coefficients[i][q] = new real[1];
-        coefficients[i]->eval(q_coefficients[i][q], real_points[q]);//, ref_cell);
+		coefficients[i]->eval(q_coefficients[i][q], real_points[q]);//, ref_cell);
 //        coefficients[i]->eval(q_coefficients[i][q], q_points[q]);//, ref_cell);
       }
     }
@@ -490,7 +490,7 @@ namespace dolfin
       }
     }
 
-    for(unsigned int i = 0; i<real_points.size(); ++i)
+   for(unsigned int i = 0; i<real_points.size(); ++i)
       delete real_points[i];
 
     for(unsigned int i = 0; i<q_coefficients.size(); ++i)

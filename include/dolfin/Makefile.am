@@ -294,6 +294,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/dolfin_quadrature.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/GaussQuadrature.h\
+				quadrature/GaussQuadratureRule.h\
 				quadrature/GaussTensorQuadratureRule.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\

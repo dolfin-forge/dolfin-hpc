@@ -297,7 +297,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
-				quadrature/RadauQuadrature.h
+				quadrature/RadauQuadrature.h\
 				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h
 

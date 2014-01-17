@@ -57,13 +57,14 @@ AC_ARG_ENABLE(ufl, AC_HELP_STRING([--enable-ufl],
 		     [Enable UFL support using UFC version 2.1.1]),
 		     [enable_ufl=${enableval}],[enable_ufl=no])
 
+AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
+		     [Compile with support for unit testing, requires libcheck]),
+		     [enable_check=${enableval}],[enable_check=no])
+
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
 		 [Compile with support for reading/writing XML data]),
 		 [with_xml=${withval}],[with_xml=yes])
-
-
-
 
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
 		 [with_gts=${withval}],[with_gts=no])
@@ -134,7 +135,6 @@ else
 fi
 
 
-
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
@@ -150,7 +150,6 @@ else
 fi
 # Add variable for automake to select generated source to be compiled
 AM_CONDITIONAL([ENABLE_UFL], [test "x${enable_ufl}" == xyes])
-
 
 
 if test "x${need_boost}" = xyes; then
@@ -274,6 +273,17 @@ if test "x${with_libgeom}" = xyes; then
    AC_DEFINE(HAVE_LIBGEOM,[1],[Have LIBGEOM library])
 fi
 
+# Test for unit testing framework
+if test "x${enable_check}" = xyes; then
+   PKG_CHECK_EXISTS([check],[have_check=yes],[have_check=no])
+   if test "x${have_check}" = xyes; then
+      PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+      AC_DEFINE(HAVE_CHECK,[1],[Have CHECK library])
+   else
+      AC_MSG_ERROR([CHECK not found, needed for unit testing])
+   fi
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
 AC_C_INLINE
@@ -309,9 +319,15 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
 			  src/quadrature/Makefile\
-			  src/dolfin.pc
-			  include/Makefile
+			  src/dolfin.pc\
+			  include/Makefile\
 			  include/dolfin/Makefile])
+
+# Tests
+if test "x${enable_check}" = xyes; then
+AC_CONFIG_FILES([tests/Makefile\
+                 tests/fem/Makefile])
+fi
 
 AC_OUTPUT
 
@@ -341,6 +357,7 @@ Package features:
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
   UFL support: ${enable_ufl}
+  CHECK support: ${enable_check}
 
 
 ---------------------------------------------------------

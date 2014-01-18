@@ -10,8 +10,8 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/Array.h>
 
-using dolfin::Array;
 using dolfin::uint;
+using dolfin::Array;
 
 #include <ufc.h>
 
@@ -20,21 +20,11 @@ using dolfin::uint;
 namespace FE
 {
 
-//-----------------------------------------------------------------------------
-struct attributes {
-      char const * type;
-      char const * family;
-      ufc::shape shape;
-      uint space;
-      uint degree;
-      uint value;
-
-      attributes(char const * tp, char const * fm, ufc::shape sh, uint sp, uint dg, uint vl) :
-        type(tp),family(fm), shape(sh), space(sp), degree(dg), value(vl)
-      {
-
-      }
-};
+static char const INTERVAL     [] =  "interval";
+static char const TRIANGLE     [] =  "triangle";
+static char const QUADRILATERAL[] =  "quadrilateral";
+static char const TETRAHEDRON  [] =  "tetrahedron";
+static char const HEXAHEDRON   [] =  "hexahedron";
 
 #if ENABLE_UFL
 //UFC2.1
@@ -77,7 +67,6 @@ static char const DG3DP2V      [] =  "VectorElement('Discontinuous Lagrange', Ce
 //-----------------------------------------------------------------------------
 static char const BDM          [] =  "Brezzi-Douglas-Marini";
 static char const BDM2DP1      [] =  "FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)";
-
 
 #else
 // UFC1.1
@@ -122,6 +111,145 @@ static char const BDM          [] =  "Brezzi-Douglas-Marini";
 static char const BDM2DP1      [] =  "Brezzi-Douglas-Marini finite element of degree 1 on a triangle";
 
 #endif
+
+//-----------------------------------------------------------------------------
+class FunctionSpace
+{
+
+public:
+
+  //---------------------------------------------------------------------------
+  enum Type { FiniteElement, VectorElement, MixedElement };
+  //---------------------------------------------------------------------------
+  /// List of finite element spaces
+  static Array<std::string> const Names;
+  //---------------------------------------------------------------------------
+  static std::string const type2string(Type const& t);
+  static Type const string2type(std::string const& s);
+
+private:
+
+  static std::map<Type, std::string> const TypesOfFunctionSpaces;
+  static std::map<std::string, Type> const NamesOfFunctionSpaces;
+
+};
+
+inline std::string const FunctionSpace::type2string(FunctionSpace::Type const& t)
+{
+  return TypesOfFunctionSpaces.find(t)->second;
+}
+
+inline FunctionSpace::Type const FunctionSpace::string2type(std::string const& s)
+{
+  return NamesOfFunctionSpaces.find(s)->second;
+}
+
+//-----------------------------------------------------------------------------
+class Family
+{
+
+public:
+
+  //---------------------------------------------------------------------------
+  enum Type { Lagrange, DG, BDM };
+  //---------------------------------------------------------------------------
+  /// List of finite element families
+  static Array<std::string> const Names;
+  //---------------------------------------------------------------------------
+  static std::string const type2string(Type const& t);
+  static Type const string2type(std::string const& s);
+
+private:
+
+  static std::map<Type, std::string> const TypesOfFamilies;
+  static std::map<std::string, Type> const NamesOfFamilies;
+
+};
+
+inline std::string const Family::type2string(Family::Type const& t)
+{
+  return TypesOfFamilies.find(t)->second;
+}
+
+inline Family::Type const Family::string2type(std::string const& s)
+{
+  return NamesOfFamilies.find(s)->second;
+}
+
+//-----------------------------------------------------------------------------
+class Cell
+{
+
+public:
+
+  //---------------------------------------------------------------------------
+  //typedef ufc::shape Type;
+  enum Type {interval, triangle, quadrilateral, tetrahedron, hexahedron};
+  //---------------------------------------------------------------------------
+  /// List of cell types
+  static Array<std::string> const Names;
+  //---------------------------------------------------------------------------
+  static std::string const type2string(Type const& t);
+  static Type const string2type(std::string const& s);
+
+private:
+
+  static std::map<Type, std::string> const TypesOfCells;
+  static std::map<std::string, Type> const NamesOfCells;
+
+};
+
+inline std::string const Cell::type2string(Cell::Type const& t)
+{
+  return TypesOfCells.find(t)->second;
+}
+
+inline Cell::Type const Cell::string2type(std::string const& s)
+{
+  return NamesOfCells.find(s)->second;
+}
+
+//-----------------------------------------------------------------------------
+class attributes {
+
+public:
+
+      FunctionSpace::Type const type;
+      Family::Type const family;
+      Cell::Type const shape;
+      uint const space_dim;
+      uint const degree;
+      uint const value_dim;
+
+      attributes(FunctionSpace::Type tp, Family::Type fm, Cell::Type sh, uint sp, uint dg, uint vl) :
+        type(tp), family(fm), shape(sh), space_dim(sp), degree(dg), value_dim(vl)
+      {
+
+      }
+
+      attributes(std::string const& tp, std::string const& fm, std::string const& sh, uint sp, uint dg, uint vl) :
+        type(FunctionSpace::string2type(tp)), family(Family::string2type(fm)), shape(Cell::string2type(sh)), space_dim(sp), degree(dg), value_dim(vl)
+      {
+
+      }
+
+      void display()
+      {
+        std::cout << std::endl;
+      }
+
+};
+
+//-----------------------------------------------------------------------------
+std::string const get_signature(FE::FunctionSpace::Type const space,
+                                FE::Family::Type const family,
+                                FE::Cell::Type const cell,
+                                uint const space_dim,
+                                uint const degree,
+                                uint const value_dim = 1);
+
+//-----------------------------------------------------------------------------
+attributes const get_attributes(std::string const signature);
 
 }
 

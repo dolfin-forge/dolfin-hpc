@@ -7,6 +7,8 @@
 #ifndef __SOLVER_TYPE_H
 #define __SOLVER_TYPE_H
 
+#include <dolfin/log/log.h>
+
 namespace dolfin
 {
 
@@ -17,9 +19,26 @@ namespace dolfin
     lu,            // LU factorization
     cg,            // Krylov conjugate gradient method
     gmres,         // Krylov GMRES method
-    bicgstab,      // Krylov stabilised biconjugate gradient squared method 
+    bicgstab,      // Krylov stabilised biconjugate gradient squared method
     default_solver // Default Krylov solver
   };
+
+  //---------------------------------------------------------------------------
+  static SolverType krylov_method(std::string type)
+  {
+    if (type == "cg")
+      return cg;
+    else if (type == "gmres")
+      return gmres;
+    else if (type == "bicgstab")
+      return bicgstab;
+    else
+    {
+      warning("Undefined solver type            "
+              "Fallback to default krylov method");
+      return default_solver;
+    }
+  }
 
 }
 

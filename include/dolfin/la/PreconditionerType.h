@@ -7,6 +7,8 @@
 #ifndef __PRECONDITIONER_TYPE_H
 #define __PRECONDITIONER_TYPE_H
 
+#include <dolfin/log/log.h>
+
 namespace dolfin
 {
 
@@ -16,7 +18,7 @@ namespace dolfin
   {
     none,      // No preconditioning
     jacobi,    // Jacobi
-    bjacobi,   // Block Jacobi 
+    bjacobi,   // Block Jacobi
     sor,       // SOR (successive over relaxation)
     ilu,       // Incomplete LU factorization
     dilu,      // diagonal Incomplete LU factorization
@@ -24,6 +26,27 @@ namespace dolfin
     amg,       // Algebraic multigrid (through Hypre when available)
     default_pc // Default choice of preconditioner
   };
+
+  //---------------------------------------------------------------------------
+  static PreconditionerType pc_type(std::string type)
+  {
+    if (type == "none")
+      return none;
+    else if (type == "bjacobi")
+      return bjacobi;
+    else if (type == "sor")
+      return sor;
+    else if (type == "ilu")
+      return ilu;
+    else if (type == "amg")
+      return amg;
+    else
+    {
+      warning("Undefined preconditioner          "
+              "Fallback to default preconditioner");
+      return default_pc;
+    }
+  }
 
 }
 

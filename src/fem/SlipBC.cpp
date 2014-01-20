@@ -37,7 +37,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain) :
+SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain) :
     BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
@@ -60,7 +60,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain) :
 }
 
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal) :
+SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain, NodeNormal& node_normal) :
     BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
@@ -105,7 +105,7 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC(Mesh& mesh, SubDomain& sub_domain, const SubSystem& sub_system) :
+SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain, const SubSystem& sub_system) :
     BoundaryCondition("Slip"),
     mesh(mesh),
     sub_domains(NULL),
@@ -316,7 +316,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
 
 }
 //-----------------------------------------------------------------------------
-void SlipBC::init(SubDomain& sub_domain)
+void SlipBC::init(const SubDomain& sub_domain)
 {
   // Create mesh function for sub domain markers on facets
   mesh.init(0);

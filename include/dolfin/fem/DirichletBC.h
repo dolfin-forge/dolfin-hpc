@@ -83,7 +83,7 @@ namespace dolfin
   public:
 
     /// Create boundary condition for sub domain
-    DirichletBC(Function& g, Mesh& mesh, SubDomain& sub_domain, BCMethod method =
+    DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain, BCMethod method =
 		topological);
 
     /// Create boundary condition for sub domain specified by index
@@ -95,7 +95,7 @@ namespace dolfin
 		topological);
 
     /// Create sub system boundary condition for sub domain
-    DirichletBC(Function& g, Mesh& mesh, SubDomain& sub_domain,
+    DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
 		const SubSystem& sub_system, BCMethod method = topological);
 
     /// Create sub system boundary condition for sub domain specified by index
@@ -147,7 +147,7 @@ namespace dolfin
 	       const DofMap& dof_map, const ufc::form& form);
 
     // Initialize sub domain markers from sub domain
-    void initFromSubDomain(SubDomain& sub_domain);
+    void initFromSubDomain(const SubDomain& sub_domain);
 
     // Initialize sub domain markers from MeshFunction
     void initFromMeshFunction(MeshFunction<uint>& sub_domains, uint sub_domain);
@@ -184,7 +184,7 @@ namespace dolfin
     BCMethod method;
 
     // User defined sub domain
-    SubDomain* user_sub_domain;
+    SubDomain const* user_sub_domain;
 
     // Sub system
     SubSystem sub_system;

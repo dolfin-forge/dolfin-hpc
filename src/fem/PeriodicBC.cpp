@@ -48,7 +48,7 @@ struct lt_coordinate
 };
 
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain) :
+PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain) :
     BoundaryCondition("Periodic"),
     mesh(mesh),
     sub_domain(sub_domain)
@@ -56,7 +56,7 @@ PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, SubDomain& sub_domain,
+PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain,
                        const SubSystem& sub_system) :
     BoundaryCondition("Periodic"),
     mesh(mesh),

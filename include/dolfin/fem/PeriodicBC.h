@@ -45,10 +45,10 @@ class PeriodicBC: public BoundaryCondition
 public:
 
   /// Create periodic boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, SubDomain& sub_domain);
+  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, SubDomain& sub_domain, const SubSystem& sub_system);
+  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain, const SubSystem& sub_system);
 
   /// Destructor
   ~PeriodicBC();
@@ -74,7 +74,7 @@ private:
   Mesh& mesh;
 
   // The subdomain
-  SubDomain& sub_domain;
+  const SubDomain& sub_domain;
 
   // Sub system
   SubSystem sub_system;

@@ -10,7 +10,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, real beta) :
+SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real beta) :
     BoundaryCondition("SlipFriction"),
     slipbc_(mesh, sub_domain),
     beta_(beta),
@@ -20,7 +20,7 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, real beta) :
 }
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain,
+SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain,
                                NodeNormal& node_normal, real beta) :
     BoundaryCondition("SlipFriction"),
     slipbc_(mesh, sub_domain, node_normal),
@@ -42,7 +42,7 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain,
 //}
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain,
+SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain,
                                SubSystem const& sub_system, real beta) :
     BoundaryCondition("SlipFriction"),
     slipbc_(mesh, sub_domain, sub_system),

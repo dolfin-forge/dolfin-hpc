@@ -39,16 +39,16 @@ class SlipBC: public BoundaryCondition
 public:
 
   /// Create boundary condition for sub domain
-  SlipBC(Mesh& mesh, SubDomain& sub_domain);
+  SlipBC(Mesh& mesh, const SubDomain& sub_domain);
 
   /// Create boundary condition for sub domain
-  SlipBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal);
+  SlipBC(Mesh& mesh, const SubDomain& sub_domain, NodeNormal& node_normal);
 
   /// Create boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  SlipBC(Mesh& mesh, SubDomain& sub_domain, SubSystem const& sub_system);
+  SlipBC(Mesh& mesh, const SubDomain& sub_domain, SubSystem const& sub_system);
 
   /// Create sub system boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
@@ -89,7 +89,7 @@ private:
   void bset(Vector& b, uint row, real value);
 
   // Initialize sub domain markers
-  void init(SubDomain& sub_domain);
+  void init(const SubDomain& sub_domain);
 
   void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
              Form const& form);
@@ -110,7 +110,7 @@ private:
   SubSystem sub_system;
 
   // User defined sub domain
-  SubDomain* user_sub_domain;
+  SubDomain const * user_sub_domain;
 
   // Node normal and tangents
   NodeNormal node_normal;

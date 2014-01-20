@@ -88,7 +88,7 @@ class IndicatorExpression: public Expression
 {
 public:
 
-  IndicatorExpression(SubDomain& sub_domain, real value) :
+  IndicatorExpression(SubDomain const& sub_domain, real value) :
       Expression(),
       sd_(sub_domain),
       value_(value)
@@ -124,7 +124,7 @@ public:
 
 private:
 
-  SubDomain& sd_;
+  SubDomain const& sd_;
   real value_;
 
 };

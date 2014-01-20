@@ -26,14 +26,14 @@ class SlipFrictionBC: public BoundaryCondition
 {
 public:
   /// Create boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, real beta);
+  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real beta);
 
   /// Create boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, NodeNormal& node_normal,
+  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, NodeNormal& node_normal,
                  real beta);
 
   /// Create sub system boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain& sub_domain, SubSystem const& sub_system,
+  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, SubSystem const& sub_system,
                  real beta);
 
 // I do not now how to specify a Function using the vertex to match the SubDomain

@@ -45,6 +45,75 @@ private:
 
 };
 
+class ScalarExpression: public Expression
+{
+public:
+
+  /// Create user-defined function
+  ScalarExpression() :
+      Expression()
+  {
+  }
+
+  /// Destructor
+  ~ScalarExpression()
+  {
+  }
+
+  /// Return the rank of the value space
+  uint rank() const
+  {
+    return 0;
+  }
+
+  /// Return the dimension of the value space for axis i
+  uint dim(uint i) const
+  {
+    return 1;
+  }
+
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
+
+};
+
+class VectorExpression: public Expression
+{
+public:
+
+  /// Create user-defined function
+  VectorExpression(uint value_dim) :
+      Expression(),
+      value_dim_(value_dim)
+  {
+  }
+
+  /// Destructor
+  ~VectorExpression()
+  {
+  }
+
+  /// Return the rank of the value space
+  uint rank() const
+  {
+    return 1;
+  }
+
+  /// Return the dimension of the value space for axis i
+  uint dim(uint i) const
+  {
+    return value_dim_;
+  }
+
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
+
+private:
+
+  uint const value_dim_;
+
+};
+
 class RealReference: public Expression
 {
 public:

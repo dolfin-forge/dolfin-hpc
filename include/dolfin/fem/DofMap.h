@@ -80,47 +80,76 @@ public:
   ~DofMap();
 
   //--- INTERFACE -------------------------------------------------------------
-  // Exposes a subset of UFC v1.1
+  /// @remark Exposes a subset of UFC v1.1
 
   /// Return a string identifying the dof map
+  /// UFC @since 1.1
   char const * signature() const;
 
+  /// Return true iff mesh entities of topological dimension d are needed
+  /// UFC @since 1.1
+  bool needs_mesh_entities(uint d) const;
+
+  /**
+   * Not exposed to dolfin-hpc
+   *
+   * /// Initialize dofmap for mesh (return true iff init_cell() is needed)
+   * /// UFC @since 1.1
+   * virtual bool init_mesh(const mesh& mesh) = 0;
+   *
+   * /// Initialize dofmap for given cell
+   * /// UFC @since 1.1
+   * virtual void init_cell(const mesh& m, const cell& c) = 0;
+   *
+   * /// Finish initialization of dofmap for cells
+   * /// UFC @since 1.1
+   * virtual void init_cell_finalize() = 0;
+   *
+   */
+
   /// Return the dimension of the global finite element function space
+  /// UFC @since 1.1
   uint global_dimension() const;
 
   /// Return the dimension of the local finite element function space
+  /// UFC @since 1.1
   uint local_dimension() const;
 
   /// Return the geometric dimension of the coordinates this dof map provides
-  /// Not implemented in UFC v1.1 although declared
-  /// unsigned int geometric_dimension() const;
+  /// UFC @since 1.1 but not implemented
+  uint geometric_dimension() const;
 
   /// Return number of facet dofs
+  /// UFC @since 1.1
   uint num_facet_dofs() const;
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  /// Not implemented in UFC v1.1 although declared
-  /// unsigned int num_entity_dofs(unsigned int d) const;
+  /// UFC @since 1.1 but not implemented
+  uint num_entity_dofs(uint d) const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  /// Not implemented per se but though cell local versions
-  /// void tabulate_dofs(unsigned int* dofs, const mesh& m, const cell& c) const;
+  /// UFC @since 1.1, specific cell local versions are called in priority
+  void tabulate_dofs(uint* dofs, const ufc::mesh& m, const ufc::cell& c) const;
 
   /// Tabulate local-local facet dofs
+  /// UFC @since 1.1
   void tabulate_facet_dofs(uint* dofs, uint local_facet) const;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
-  /// Not implemented in UFC v1.1 although declared
-  /// void tabulate_entity_dofs(unsigned int* dofs, unsigned int d, unsigned int i) const;
+  /// UFC @since 1.1 but not implemented
+  void tabulate_entity_dofs(uint* dofs, uint d, uint i) const;
 
   /// Tabulate the coordinates of all dofs on a cell
-  void
-  tabulate_coordinates(real** coordinates, const ufc::cell& ufc_cell) const;
+  /// UFC @since 1.1
+  void tabulate_coordinates(real** coordinates,
+                            const ufc::cell& ufc_cell) const;
 
   //// Return the number of sub dof maps (for a mixed element)
+  /// UFC @since 1.1
   uint num_sub_dof_maps() const;
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
+  /// UFC @since 1.1
   ufc::dof_map* create_sub_dof_map(uint i) const;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
@@ -128,12 +157,12 @@ public:
   /// Return the dimension of the local finite element function space
   uint macro_local_dimension() const;
 
-  // Tabulate the local-to-global mapping of dofs on a cell
+  /// Tabulate the local-to-global mapping of dofs on a cell
   void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void
-  tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell, uint cell_index) const;
+  void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
+                     uint cell_index) const;
 
   // FIXME: Can this function eventually be removed?
   /// Tabulate the local-to-global mapping of dofs on a ufc cell
@@ -151,7 +180,8 @@ public:
 
   /// Extract sub DofMap
   ufc::dof_map* create_sub_dof_map(ufc::dof_map const& dof_map,
-                                   Array<uint> const& sub_system, uint& offset) const;
+                                   Array<uint> const& sub_system,
+                                   uint& offset) const;
 
   /// Unique identifier
   std::string const& hash() const;
@@ -294,6 +324,12 @@ inline char const * DofMap::signature() const
 }
 
 //-----------------------------------------------------------------------------
+inline bool DofMap::needs_mesh_entities(uint d) const
+{
+  return ufc_dof_map_->needs_mesh_entities(d);
+}
+
+//-----------------------------------------------------------------------------
 inline uint DofMap::global_dimension() const
 {
   return ufc_dof_map_->global_dimension();
@@ -306,9 +342,9 @@ inline uint DofMap::local_dimension() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::macro_local_dimension() const
+inline uint DofMap::geometric_dimension() const
 {
-  return ufc_dof_map_->local_dimension();
+  return ufc_dof_map_->geometric_dimension();
 }
 
 //-----------------------------------------------------------------------------
@@ -318,37 +354,9 @@ inline uint DofMap::num_facet_dofs() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint const * DofMap::dofsmapping() const
+inline uint DofMap::num_entity_dofs(uint d) const
 {
-  if (local_to_global_ == NULL)
-    pretabulate_all_dofs();
-  return local_to_global_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::dofsmapping_size() const
-{
-  return local_to_global_size_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint const * DofMap::cellmapping() const
-{
-  if (local_to_cell_ == NULL)
-    pretabulate_cell_dofs();
-  return local_to_cell_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::cellmapping_size() const
-{
-  return local_to_cell_size_;
-}
-
-//-----------------------------------------------------------------------------
-inline void DofMap::tabulate_facet_dofs(uint* dofs, uint local_facet) const
-{
-  ufc_dof_map_->tabulate_facet_dofs(dofs, local_facet);
+  return ufc_dof_map_->num_entity_dofs(d);
 }
 
 //-----------------------------------------------------------------------------
@@ -358,20 +366,40 @@ inline void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& cell) const
 }
 
 //-----------------------------------------------------------------------------
+inline void DofMap::tabulate_facet_dofs(uint* dofs, uint local_facet) const
+{
+  ufc_dof_map_->tabulate_facet_dofs(dofs, local_facet);
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::tabulate_entity_dofs(uint* dofs, uint d, uint i) const
+{
+  ufc_dof_map_->tabulate_entity_dofs(dofs, d, i);
+}
+
+//-----------------------------------------------------------------------------
 inline void DofMap::tabulate_coordinates(real** coordinates,
                                          const ufc::cell& ufc_cell) const
 {
   ufc_dof_map_->tabulate_coordinates(coordinates, ufc_cell);
 }
+
 //-----------------------------------------------------------------------------
 inline uint DofMap::num_sub_dof_maps() const
 {
   return ufc_dof_map_->num_sub_dof_maps();
 }
+
 //-----------------------------------------------------------------------------
 inline ufc::dof_map* DofMap::create_sub_dof_map(uint i) const
 {
   return ufc_dof_map_->create_sub_dof_map(i);
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::macro_local_dimension() const
+{
+  return ufc_dof_map_->local_dimension();
 }
 
 //-----------------------------------------------------------------------------
@@ -402,6 +430,34 @@ inline bool DofMap::renumbered()
 inline uint DofMap::local_size()
 {
   return _local_size_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * DofMap::dofsmapping() const
+{
+  if (local_to_global_ == NULL)
+    pretabulate_all_dofs();
+  return local_to_global_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::dofsmapping_size() const
+{
+  return local_to_global_size_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * DofMap::cellmapping() const
+{
+  if (local_to_cell_ == NULL)
+    pretabulate_cell_dofs();
+  return local_to_cell_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::cellmapping_size() const
+{
+  return local_to_cell_size_;
 }
 
 }

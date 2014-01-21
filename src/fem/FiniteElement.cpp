@@ -40,7 +40,7 @@ FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
   if (i >= num_arguments)
   {
     error("Illegal function index %d. Form only has %d arguments.", i,
-        num_arguments);
+          num_arguments);
   }
 
   // Create finite element
@@ -85,7 +85,8 @@ void FiniteElement::init()
 
 #if ENABLE_UFL
   // Set attributes
-  FE::attributes const attr = ElementLibrary::get_attributes(ufc_finite_element_->signature());
+  FE::attributes const attr = ElementLibrary::get_attributes(
+      ufc_finite_element_->signature());
   type_ = attr.type;
   family_ = attr.family;
   type_ = attr.type;
@@ -94,7 +95,7 @@ void FiniteElement::init()
 #endif
 
   switch (ufc_finite_element_->cell_shape())
-  {
+    {
     case ufc::interval:
       topo_dim_ = 1;
       geom_dim_ = 1;
@@ -110,7 +111,7 @@ void FiniteElement::init()
     default:
       error("Unknown cell type.");
       break;
-  }
+    }
 
   // Add sub value dimensions for mixed elements, packed by axis
   sub_value_dims_ = new Array<uint> [geom_dim_];
@@ -150,7 +151,7 @@ FiniteElement::create_sub_element(Array<uint> const& sub_system) const
   ufc::finite_element* sub_finite_element = create_sub_element(
       *ufc_finite_element_, sub_system);
   message(2, "Extracted finite element for sub system: %s",
-      sub_finite_element->signature());
+          sub_finite_element->signature());
 
   return sub_finite_element;
 }
@@ -175,7 +176,7 @@ FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
   if (sub_system[0] >= finite_element.num_sub_elements())
   {
     error("Unable to extract sub system %d (only %d sub systems defined).",
-        sub_system[0], finite_element.num_sub_elements());
+          sub_system[0], finite_element.num_sub_elements());
   }
 
   // Create sub system
@@ -195,7 +196,7 @@ FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
     sub_sub_system.push_back(sub_system[i]);
   }
   ufc::finite_element* sub_sub_element = create_sub_element(*sub_element,
-      sub_sub_system);
+                                                            sub_sub_system);
   delete sub_element;
 
   return sub_sub_element;
@@ -223,7 +224,7 @@ void FiniteElement::info() const
   msg << std::setw(padding) << "signature = " << signature() << std::endl;
   std::string shape;
   switch (ufc_finite_element_->cell_shape())
-  {
+    {
     case ufc::interval:
       shape = "";
       break;
@@ -236,7 +237,7 @@ void FiniteElement::info() const
     default:
       shape = "unknown";
       break;
-  }
+    }
   msg << std::setw(padding) << "cell_shape = " << shape << std::endl;
   msg << std::setw(padding) << "topological_dimension = "
       << topological_dimension() << std::endl;

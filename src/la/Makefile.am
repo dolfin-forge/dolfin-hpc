@@ -8,6 +8,8 @@ libdolfin_la_la_SOURCES = \
 			JANPACKMat.cpp\
 			JANPACKVec.cpp\
 			LinearSolver.cpp\
+			LAPACKMatrix.cpp\
+			LAPACKVector.cpp\
 			PETScFactory.cpp\
 			PETScKrylovMatrix.cpp\
 			PETScKrylovSolver.cpp\

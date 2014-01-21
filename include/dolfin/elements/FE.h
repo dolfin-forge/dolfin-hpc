@@ -246,7 +246,7 @@ std::string const get_signature(FE::FunctionSpace::Type const space,
                                 FE::Cell::Type const cell,
                                 uint const space_dim,
                                 uint const degree,
-                                uint const value_dim = 1);
+                                uint const value_dim = 0);
 
 //-----------------------------------------------------------------------------
 attributes const get_attributes(std::string const signature);

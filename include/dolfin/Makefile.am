@@ -22,6 +22,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/FE.h\
+				elements/UFLElementList.h\
 				elements/ffc_00.h\
 				elements/ffc_01.h\
 				elements/ffc_02.h\

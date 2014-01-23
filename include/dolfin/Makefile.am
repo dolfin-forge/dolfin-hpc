@@ -22,7 +22,6 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/FE.h\
-				elements/UFLElementList.h\
 				elements/ffc_00.h\
 				elements/ffc_01.h\
 				elements/ffc_02.h\
@@ -298,5 +297,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/GaussQuadrature.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
-				quadrature/RadauQuadrature.h
+				quadrature/RadauQuadrature.h\
+				ufl/UFLFiniteElement.h\
+				ufl/UFLElementList.h
 

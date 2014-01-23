@@ -319,6 +319,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 			  src/parameter/Makefile\
 			  src/pde/Makefile\
 			  src/quadrature/Makefile\
+			  src/ufl/Makefile\
 			  src/dolfin.pc\
 			  include/Makefile\
 			  include/dolfin/Makefile])
@@ -326,7 +327,8 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 # Tests
 if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
-                 tests/fem/Makefile])
+                 tests/fem/Makefile\
+                 tests/ufl/Makefile])
 fi
 
 AC_OUTPUT

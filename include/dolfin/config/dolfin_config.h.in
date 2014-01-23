@@ -27,7 +27,7 @@
 /* define if the Boost library is available */
 #undef HAVE_BOOST
 
-/* Has CHECK library */
+/* Have CHECK library */
 #undef HAVE_CHECK
 
 /* Define to 1 if you have the <dlfcn.h> header file. */

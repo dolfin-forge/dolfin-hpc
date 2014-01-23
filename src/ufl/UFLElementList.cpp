@@ -4,7 +4,7 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#include <dolfin/elements/UFLElementList.h>
+#include <dolfin/ufl/UFLElementList.h>
 
 namespace dolfin
 {

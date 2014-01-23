@@ -81,8 +81,8 @@ public:
 
   /// Evaluate order n derivatives of basis function i at given point in cell
   /// UFC @since 1.1
-  void evaluate_basis_derivatives(uint i, uint n,
-                                  double* values, const double* coordinates,
+  void evaluate_basis_derivatives(uint i, uint n, double* values,
+                                  const double* coordinates,
                                   const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
@@ -93,8 +93,7 @@ public:
 
   /// Evaluate linear functional for dof i on the function f
   /// UFC @since 1.1
-  double evaluate_dof(uint i, const ufc::function& f,
-                      const ufc::cell& c) const;
+  double evaluate_dof(uint i, const ufc::function& f, const ufc::cell& c) const;
 
   /// Evaluate linear functionals for all dofs on the function f
   /// UFC @since 1.1 but not implemented
@@ -126,7 +125,7 @@ public:
 #endif
 
   /// Return the number of sub elements (for a mixed element)
-  /// UFC @since 1.1
+  /// UFC @since 1.1 + FIAT + UFL
   uint num_sub_elements() const;
 
   /// Create a new finite element for sub element i (for a mixed element)
@@ -160,16 +159,20 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
+  //--- UFL INTERFACE ---------------------------------------------------------
+
 #if ENABLE_UFL
 
   /// Returns the family of the finite element (UFL+FIAT)
   std::string const& family() const;
 
-  /// Returns the type of the finite element
-  std::string const& type() const;
-
   /// Returns the degree of the finite element (UFL+FIAT)
   uint const degree() const;
+
+  //--- EXTENSION OF UFL INTERFACE --------------------------------------------
+
+  /// Returns the type of the finite element
+  std::string const& type() const;
 
   void info() const;
 
@@ -253,8 +256,7 @@ inline void FiniteElement::evaluate_basis_all(double* values,
 }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_basis_derivatives(uint i,
-                                                      uint n,
+inline void FiniteElement::evaluate_basis_derivatives(uint i, uint n,
                                                       double* values,
                                                       const double* coordinates,
                                                       const ufc::cell& c) const
@@ -263,17 +265,15 @@ inline void FiniteElement::evaluate_basis_derivatives(uint i,
 }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_basis_derivatives_all(uint n,
-                                                          double* values,
-                                                          const double* coordinates,
-                                                          const ufc::cell& c) const
+inline void FiniteElement::evaluate_basis_derivatives_all(
+    uint n, double* values, const double* coordinates, const ufc::cell& c) const
 {
-  ufc_finite_element_->evaluate_basis_derivatives_all(n, values, coordinates, c);
+  ufc_finite_element_->evaluate_basis_derivatives_all(n, values, coordinates,
+                                                      c);
 }
 
 //-----------------------------------------------------------------------------
-inline double FiniteElement::evaluate_dof(uint i,
-                                          const ufc::function& f,
+inline double FiniteElement::evaluate_dof(uint i, const ufc::function& f,
                                           const ufc::cell& c) const
 {
   return ufc_finite_element_->evaluate_dof(i, f, c);
@@ -303,14 +303,14 @@ inline void FiniteElement::map_from_reference_cell(double* x,
                                                    const double* xhat,
                                                    const ufc::cell& c) const
 {
-  ufc_finite_element_->map_from_reference_cell( x, xhat, c);
+  ufc_finite_element_->map_from_reference_cell(x, xhat, c);
 }
 
 //-----------------------------------------------------------------------------
 inline void FiniteElement::map_to_reference_cell(double* xhat, const double* x,
                                                  const ufc::cell& c) const
 {
-  ufc_finite_element_->map_to_reference_cell( xhat, x, c);
+  ufc_finite_element_->map_to_reference_cell(xhat, x, c);
 }
 
 // end omit ---------------------------------------------
@@ -325,20 +325,19 @@ inline uint FiniteElement::num_sub_elements() const
 
 #if UFC_VERSION_MAJOR >= 2
 #ifndef UFC_BACKWARD_COMPATIBILITY
-  // omitted for backward compatibility code -------------
+// omitted for backward compatibility code -------------
 
 //-----------------------------------------------------------------------------
 inline ufc::finite_element* FiniteElement::create() const
 {
   return ufc_finite_element_->create();
 }
-  // end omit ---------------------------------------------
+// end omit ---------------------------------------------
 #endif
 #endif
 
 //-----------------------------------------------------------------------------
-inline ufc::finite_element* FiniteElement::create_sub_element(
-    uint i) const
+inline ufc::finite_element* FiniteElement::create_sub_element(uint i) const
 {
   return ufc_finite_element_->create_sub_element(i);
 }

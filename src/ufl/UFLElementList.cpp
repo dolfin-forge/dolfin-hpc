@@ -132,6 +132,33 @@ bool UFLElementList::has_family(FamilyType const type) const
 }
 
 //-----------------------------------------------------------------------------
+bool UFLElementList::has_family_name(std::string const& name) const
+{
+  ElementFamilyList::const_iterator it = Elements.begin();
+  while (it->second.name != name)
+  {
+    ++it;
+  }
+  return it != Elements.end();
+}
+
+//-----------------------------------------------------------------------------
+bool UFLElementList::has_valid_domain(FamilyType const type,
+                                      UFLDomain::Type domain) const
+{
+  ElementDefinition const d = Elements.find(type)->second;
+  return d.domains.count(domain) > 0;
+}
+
+//-----------------------------------------------------------------------------
+bool UFLElementList::has_valid_degree(FamilyType const type,
+                                      uint const degree) const
+{
+  ElementDefinition const d = Elements.find(type)->second;
+  return (d.degree_range.first <= degree && d.degree_range.second >= degree);
+}
+
+//-----------------------------------------------------------------------------
 std::string UFLElementList::name(FamilyType const type) const
 {
   return element_definition(type).name;

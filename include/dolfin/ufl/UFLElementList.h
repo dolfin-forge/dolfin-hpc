@@ -113,6 +113,15 @@ public:
   bool has_family(FamilyType const type) const;
 
   ///
+  bool has_family_name(std::string const& name) const;
+
+  ///
+  bool has_valid_domain(FamilyType const type, UFLDomain::Type domain) const;
+
+  ///
+  bool has_valid_degree(FamilyType const type, uint const degree) const;
+
+  ///
   std::string name(FamilyType const type) const;
 
   ///

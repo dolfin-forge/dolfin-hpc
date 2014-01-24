@@ -7,10 +7,11 @@
 #ifndef  __UFL_ELEMENT_LIST_H_
 #define  __UFL_ELEMENT_LIST_H_
 
-#include <dolfin/common/Array.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/ufl/UFLDomain.h>
 
-#include <climits>
+#include <dolfin/common/types.h>
+#include <dolfin/log/log.h>
+
 #include <iomanip>
 #include <map>
 #include <set>
@@ -31,9 +32,7 @@ namespace dolfin
  *
  */
 
-/// Defines None as the maximum integer possible.
-#define None INT_MAX
-typedef std::set<CellType::Type> CellTypeSet;
+typedef std::set<UFLDomain::Type> DomainSet;
 
 struct ElementDefinition
 {
@@ -41,11 +40,11 @@ struct ElementDefinition
   std::string short_name;
   uint value_rank;
   std::pair<uint, uint> degree_range;
-  CellTypeSet domains;
+  DomainSet domains;
 
   ElementDefinition(std::string a_name, std::string a_short_name,
                     uint a_value_rank, uint a_degree_min, uint a_degree_max,
-                    CellTypeSet set_of_domains) :
+                    DomainSet set_of_domains) :
       name(a_name),
       short_name(a_short_name),
       value_rank(a_value_rank),
@@ -66,10 +65,10 @@ struct ElementDefinition
     ss << std::setw(p) << "degree_max" << ": " << degree_range.second
         << std::endl;
     ss << std::setw(p) << "domains" << ": ";
-    for (CellTypeSet::const_iterator it = domains.begin(); it != domains.end();
+    for (DomainSet::const_iterator it = domains.begin(); it != domains.end();
         ++it)
     {
-      ss << CellType::type2string(*it) << " ";
+      ss << UFLDomain::str(*it) << " ";
     }
     ss << std::endl;
     message(ss.str());
@@ -129,7 +128,7 @@ public:
   uint degree_max(FamilyType const type) const;
 
   ///
-  std::set<CellType::Type> domains(FamilyType const type) const;
+  DomainSet domains(FamilyType const type) const;
 
   ///
   void display() const;
@@ -146,6 +145,9 @@ private:
   typedef std::pair<FamilyType, ElementDefinition> ElementFamilyItem;
   typedef std::map<FamilyType, ElementDefinition> ElementFamilyList;
 
+  /// Defines None as the maximum integer possible.
+  static uint const None = DOLFIN_UINT_UNDEF;
+
   ///
   ElementDefinition const element_definition(FamilyType const type) const;
 
@@ -154,7 +156,7 @@ private:
   static void register_element(ElementFamilyList& m, FamilyType family,
                                std::string name, std::string short_name,
                                uint value_rank, uint degree_min,
-                               uint degree_max, CellTypeSet domains);
+                               uint degree_max, DomainSet domains);
 
   static ElementFamilyList const __init_elements();
 

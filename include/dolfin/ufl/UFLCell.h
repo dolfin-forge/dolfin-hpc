@@ -33,6 +33,8 @@ namespace dolfin
 class UFLCell : public UFLClass
 {
 
+public:
+
   ///
   UFLCell(UFLDomain::Type const& domain);
 

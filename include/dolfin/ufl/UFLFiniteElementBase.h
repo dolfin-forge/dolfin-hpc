@@ -8,6 +8,8 @@
 #define __UFL_FINITE_ELEMENT_BASE_H_
 
 #include <dolfin/ufl/UFLClass.h>
+
+#include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLElementList.h>
 
 #include <dolfin/common/types.h>
@@ -29,10 +31,10 @@ class UFLFiniteElementBase : public UFLClass
 public:
 
   /// Return finite element family
-  virtual UFLElementList::FamilyType const family() const = 0;
+  UFLElementList::FamilyType const family() const;
 
   /// Return cell of finite element
-  virtual CellType::Type const cell() const = 0;
+  UFLCell const cell() const;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
@@ -40,14 +42,14 @@ public:
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
-  virtual uint const degree() const = 0;
+  uint const degree() const;
 
   /// Return quadrature scheme of finite element
   virtual std::string const quadrature_scheme() const = 0;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
-  virtual uint const value_shape() const = 0;
+  std::vector<uint> const value_shape() const;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
@@ -63,13 +65,13 @@ public:
   virtual uint const extract_component(uint i) const = 0;
 
   /// Return the domain onto which the element is restricted
-  virtual domain_restriction() const = 0;
+  virtual UFLDomain::Type const domain_restriction() const = 0;
 
   /// Return number of sub elements
   virtual uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
-  virtual Array<UFLFiniteElementBase const *> sub_elements() const = 0;
+  virtual std::vector<UFLFiniteElementBase const *> sub_elements() const = 0;
 
   /// Operator: equality
   /// __eq__
@@ -85,23 +87,32 @@ public:
   /// __mult__
   /// TODO: Unimplemented
 
-  /// Format as string for signature evaluation
   /// __repr__
-  virtual std::string signature() = 0;
+  virtual std::string const repr() const = 0;
+
+  /// __str__
+  virtual std::string const str() const = 0;
 
 protected:
 
-  UFLFiniteElementBase();
+  ///
+  UFLFiniteElementBase(UFLElementList::FamilyType family, UFLCell const& cell,
+                       uint const degree);
 
+  ///
   virtual ~UFLFiniteElementBase();
+
+  ///
+  bool check_component(uint const i);
 
 private:
 
   UFLElementList::FamilyType const family_;
   UFLCell const cell_;
   uint const degree_;
-  //UFLQuadratureScheme quad_scheme_;
-  uint const value_shape_;
+  ///TODO:
+  ///UFLQuadratureScheme quad_scheme_;
+  std::vector<uint> const value_shape_;
 
   std::string const repr_;
   std::string const str_;

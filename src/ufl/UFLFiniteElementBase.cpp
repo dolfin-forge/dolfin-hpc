@@ -10,13 +10,48 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::UFLFiniteElementBase()
+UFLFiniteElementBase::UFLFiniteElementBase(UFLElementList::FamilyType family,
+                                           UFLCell const& cell,
+                                           uint const degree) :
+    UFLClass(),
+    family_(family),
+    cell_(cell),
+    degree_(degree),
+    value_shape_()
 {
+
+  // Check whether cell is valid
+
+  // Check whether degree is valid
 }
 
 //-----------------------------------------------------------------------------
 UFLFiniteElementBase::~UFLFiniteElementBase()
 {
+}
+
+//-----------------------------------------------------------------------------
+UFLElementList::FamilyType const UFLFiniteElementBase::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+UFLCell const UFLFiniteElementBase::cell() const
+{
+  return cell_;
+}
+
+//-----------------------------------------------------------------------------
+uint const UFLFiniteElementBase::degree() const
+{
+  return degree_;
+}
+
+//-----------------------------------------------------------------------------
+std::vector<uint> const UFLFiniteElementBase::value_shape() const
+{
+  return value_shape_;
 }
 
 }

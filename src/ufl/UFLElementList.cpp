@@ -13,7 +13,7 @@ namespace dolfin
 void UFLElementList::register_element(ElementFamilyList& m, FamilyType family,
                                       std::string name, std::string short_name,
                                       uint value_rank, uint degree_min,
-                                      uint degree_max, CellTypeSet domains)
+                                      uint degree_max, DomainSet domains)
 {
   ElementDefinition a(name, short_name, value_rank, degree_min, degree_max,
                       domains);
@@ -23,20 +23,20 @@ void UFLElementList::register_element(ElementFamilyList& m, FamilyType family,
 //-----------------------------------------------------------------------------
 UFLElementList::ElementFamilyList const UFLElementList::__init_elements()
 {
-  CellTypeSet interval;
-  interval.insert(CellType::interval);
+  DomainSet interval;
+  interval.insert(UFLDomain::interval);
 
-  CellTypeSet triangle;
-  triangle.insert(CellType::triangle);
+  DomainSet triangle;
+  triangle.insert(UFLDomain::triangle);
 
-  CellTypeSet triangle_tetrahedron;
-  triangle_tetrahedron.insert(CellType::triangle);
-  triangle_tetrahedron.insert(CellType::tetrahedron);
+  DomainSet triangle_tetrahedron;
+  triangle_tetrahedron.insert(UFLDomain::triangle);
+  triangle_tetrahedron.insert(UFLDomain::tetrahedron);
 
-  CellTypeSet interval_triangle_tetrahedron;
-  interval_triangle_tetrahedron.insert(CellType::interval);
-  interval_triangle_tetrahedron.insert(CellType::triangle);
-  interval_triangle_tetrahedron.insert(CellType::tetrahedron);
+  DomainSet interval_triangle_tetrahedron;
+  interval_triangle_tetrahedron.insert(UFLDomain::interval);
+  interval_triangle_tetrahedron.insert(UFLDomain::triangle);
+  interval_triangle_tetrahedron.insert(UFLDomain::tetrahedron);
 
   ElementFamilyList m;
 
@@ -162,7 +162,7 @@ uint UFLElementList::degree_max(FamilyType const type) const
 }
 
 //-----------------------------------------------------------------------------
-std::set<CellType::Type> UFLElementList::domains(FamilyType const type) const
+std::set<UFLDomain::Type> UFLElementList::domains(FamilyType const type) const
 {
   return element_definition(type).domains;
 }
@@ -173,7 +173,6 @@ void UFLElementList::display() const
   for (ElementFamilyList::const_iterator it = Elements.begin();
       it != Elements.end(); ++it)
   {
-    std::cout << std::setw(3) << it->first << ":" << std::endl;
     it->second.display();
   }
 }

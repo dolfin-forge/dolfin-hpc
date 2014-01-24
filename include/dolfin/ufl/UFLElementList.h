@@ -31,6 +31,7 @@ namespace dolfin
  *
  */
 
+/// Defines None as the maximum integer possible.
 #define None INT_MAX
 typedef std::set<CellType::Type> CellTypeSet;
 
@@ -103,7 +104,7 @@ public:
   };
 
   /// Meyers singleton
-  static UFLElementList const& instance()
+  static UFLElementList const& Supported()
   {
     static UFLElementList instance_;
     return instance_;

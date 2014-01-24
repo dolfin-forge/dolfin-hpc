@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_H_
-#define __UFL_FINITE_ELEMENT_H_
+#ifndef __UFL_FINITE_ELEMENT_BASE_H_
+#define __UFL_FINITE_ELEMENT_BASE_H_
 
 #include <dolfin/ufl/UFLElementList.h>
 
@@ -23,18 +23,16 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
  */
 
-using UFLElementList::FamilyType;
-
 class UFLFiniteElementBase
 {
 
 public:
 
   /// Return finite element family
-  virtual FamilyType const family() const = 0;
+  virtual UFLElementList::FamilyType const family() const = 0;
 
   /// Return cell of finite element
-  virtual CellType const cell() const = 0;
+  virtual CellType::Type const cell() const = 0;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
@@ -74,26 +72,40 @@ public:
   virtual Array<UFLFiniteElementBase const *> sub_elements() const = 0;
 
   /// Operator: equality
+  /// __eq__
   /// TODO: Unimplemented
 
   /// Add two elements, creating an enriched element
   /// Operator: addition
+  /// __add__
   /// TODO: Unimplemented
 
   /// Multiply two elements, creating a mixed element
   /// Operator: multiplication
+  /// __mult__
   /// TODO: Unimplemented
 
   /// Format as string for signature evaluation
-  virtual
+  /// __repr__
+  virtual std::string signature() = 0;
 
 protected:
 
-  UFLFiniteElementBase();
+  UFLFiniteElementBase()
+  {
+  }
 
-  virtual ~UFLFiniteElementBase();
+  virtual ~UFLFiniteElementBase()
+  {
+  }
+
+private:
+
+  UFLElementList::FamilyType family_;
+
+  CellType::Type cell_;
 
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FINITE_ELEMENT_H_ */
+#endif /* __UFL_FINITE_ELEMENT_BASE_H_ */

@@ -4,8 +4,9 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#include <dolfin/common/types.h>
 #include <dolfin/ufl/UFLDomain.h>
+
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {
@@ -44,9 +45,9 @@ uint const UFLDomain::dim(Type const& t)
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLDomain::num_facet(Type const& t)
+uint const UFLDomain::num_facets(Type const& t)
 {
-  return DomainDefinitions.find(t)->second.num_facet;
+  return DomainDefinitions.find(t)->second.num_facets;
 }
 
 //-----------------------------------------------------------------------------

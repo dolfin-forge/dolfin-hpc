@@ -7,10 +7,12 @@
 #ifndef __UFL_FINITE_ELEMENT_H_
 #define __UFL_FINITE_ELEMENT_H_
 
+#include <dolfin/ufl/UFLCell.h>
+#include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLElementList.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/CellType.h>
+
 
 namespace dolfin
 {
@@ -25,7 +27,7 @@ namespace dolfin
 
 using UFLElementList::FamilyType;
 
-class UFLFiniteElementBase
+class UFLFiniteElementBase : public UFLClass
 {
 
 public:
@@ -34,7 +36,7 @@ public:
   virtual FamilyType const family() const = 0;
 
   /// Return cell of finite element
-  virtual CellType const cell() const = 0;
+  virtual UFLCell const cell() const = 0;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
@@ -85,7 +87,7 @@ public:
   /// TODO: Unimplemented
 
   /// Format as string for signature evaluation
-  virtual
+
 
 protected:
 

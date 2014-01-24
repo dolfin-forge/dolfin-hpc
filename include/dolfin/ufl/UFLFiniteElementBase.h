@@ -7,10 +7,10 @@
 #ifndef __UFL_FINITE_ELEMENT_BASE_H_
 #define __UFL_FINITE_ELEMENT_BASE_H_
 
+#include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLElementList.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/CellType.h>
 
 namespace dolfin
 {
@@ -23,7 +23,7 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
  */
 
-class UFLFiniteElementBase
+class UFLFiniteElementBase : public UFLClass
 {
 
 public:
@@ -91,19 +91,20 @@ public:
 
 protected:
 
-  UFLFiniteElementBase()
-  {
-  }
+  UFLFiniteElementBase();
 
-  virtual ~UFLFiniteElementBase()
-  {
-  }
+  virtual ~UFLFiniteElementBase();
 
 private:
 
-  UFLElementList::FamilyType family_;
+  UFLElementList::FamilyType const family_;
+  UFLCell const cell_;
+  uint const degree_;
+  //UFLQuadratureScheme quad_scheme_;
+  uint const value_shape_;
 
-  CellType::Type cell_;
+  std::string const repr_;
+  std::string const str_;
 
 };
 

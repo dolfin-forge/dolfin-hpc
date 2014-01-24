@@ -142,7 +142,7 @@ private:
   ///
   ~UFLElementList();
 
-  /// Family list with attributes
+  /// Family list with definition
   typedef std::pair<FamilyType, ElementDefinition> ElementFamilyItem;
   typedef std::map<FamilyType, ElementDefinition> ElementFamilyList;
 

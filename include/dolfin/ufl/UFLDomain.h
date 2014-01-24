@@ -47,7 +47,7 @@ public:
   static uint const dim(Type const& t);
 
   ///
-  static uint const num_facet(Type const& t);
+  static uint const num_facets(Type const& t);
 
   ///
   static std::string const str(Type const& t);
@@ -66,13 +66,13 @@ private:
   {
     uint dim;
     Type facet;
-    uint num_facet;
+    uint num_facets;
     std::string str;
 
-    Definition(uint a_dim, Type a_facet, uint a_num_facet, std::string a_str) :
+    Definition(uint a_dim, Type a_facet, uint a_num_facets, std::string a_str) :
         dim(a_dim),
         facet(a_facet),
-        num_facet(a_num_facet),
+        num_facets(a_num_facets),
         str(a_str)
     {
     }

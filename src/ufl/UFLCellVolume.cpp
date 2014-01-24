@@ -7,6 +7,8 @@
 
 #include <dolfin/ufl/UFLCellVolume.h>
 
+#include <dolfin/ufl/UFLCell.h>
+
 namespace dolfin
 {
 

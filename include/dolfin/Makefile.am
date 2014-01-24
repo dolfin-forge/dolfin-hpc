@@ -298,6 +298,18 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
 				quadrature/RadauQuadrature.h\
+				ufl/UFLCell.h\
+				ufl/UFLCellSurfaceArea.h\
+				ufl/UFLCellVolume.h\
+				ufl/UFLCircumradius.h\
+				ufl/UFLClass.h\
+				ufl/UFLDomain.h\
+				ufl/UFLElementList.h\
+				ufl/UFLFacetArea.h\
+				ufl/UFLFacetNormal.h\
 				ufl/UFLFiniteElement.h\
-				ufl/UFLElementList.h
+				ufl/UFLFiniteElementBase.h\
+				ufl/UFLGeometricQuantity.h\
+				ufl/UFLSpace.h\
+				ufl/UFLSpatialCoordinate.h
 

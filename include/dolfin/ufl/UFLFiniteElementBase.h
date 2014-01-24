@@ -25,6 +25,10 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
  */
 
+///TODO: Implement quadrature scheme
+typedef std::string UFLQuadratureScheme;
+typedef std::vector<uint> ValueShape;
+
 class UFLFiniteElementBase : public UFLClass
 {
 
@@ -45,11 +49,11 @@ public:
   uint const degree() const;
 
   /// Return quadrature scheme of finite element
-  virtual std::string const quadrature_scheme() const = 0;
+  virtual UFLQuadratureScheme const quadrature_scheme() const = 0;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
-  std::vector<uint> const value_shape() const;
+  ValueShape const value_shape() const;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
@@ -110,12 +114,8 @@ private:
   UFLElementList::FamilyType const family_;
   UFLCell const cell_;
   uint const degree_;
-  ///TODO:
-  ///UFLQuadratureScheme quad_scheme_;
-  std::vector<uint> const value_shape_;
-
-  std::string const repr_;
-  std::string const str_;
+  UFLQuadratureScheme const quad_scheme_;
+  ValueShape const value_shape_;
 
 };
 

@@ -7,6 +7,8 @@
 
 #include <dolfin/ufl/UFLSpatialCoordinate.h>
 
+#include <dolfin/ufl/UFLCell.h>
+
 namespace dolfin
 {
 

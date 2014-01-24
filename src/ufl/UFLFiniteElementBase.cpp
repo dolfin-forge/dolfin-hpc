@@ -17,12 +17,9 @@ UFLFiniteElementBase::UFLFiniteElementBase(UFLElementList::FamilyType family,
     family_(family),
     cell_(cell),
     degree_(degree),
+    quad_scheme_(),
     value_shape_()
 {
-
-  // Check whether cell is valid
-
-  // Check whether degree is valid
 }
 
 //-----------------------------------------------------------------------------

@@ -7,6 +7,8 @@
 
 #include <dolfin/ufl/UFLFacetArea.h>
 
+#include <dolfin/ufl/UFLCell.h>
+
 namespace dolfin
 {
 

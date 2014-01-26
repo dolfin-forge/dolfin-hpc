@@ -70,13 +70,13 @@ public:
   bool const& is_undefined() const;
 
   /// Return the domain of the cell
-  UFLDomain::Type const domain() const;
+  UFLDomain::Type const& domain() const;
 
   /// Return the domain of the facet of this cell
-  UFLDomain::Type const facet_domain() const;
+  UFLDomain::Type const& facet_domain() const;
 
   /// Return the number of facets this cell has
-  uint const& num_facets() const;
+  uint const num_facets() const;
 
   /// Return the dimension of the space this cell is embedded in
   uint const& geometric_dimension() const;

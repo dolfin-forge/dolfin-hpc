@@ -92,19 +92,19 @@ bool const& UFLCell::is_undefined() const
 }
 
 //-----------------------------------------------------------------------------
-UFLDomain::Type const UFLCell::domain() const
+UFLDomain::Type const& UFLCell::domain() const
 {
   return domain_;
 }
 
 //-----------------------------------------------------------------------------
-UFLDomain::Type const UFLCell::facet_domain() const
+UFLDomain::Type const& UFLCell::facet_domain() const
 {
   return UFLDomain::facet(domain_);
 }
 
 //-----------------------------------------------------------------------------
-uint const& UFLCell::num_facets() const
+uint const UFLCell::num_facets() const
 {
   return UFLDomain::num_facets(domain_);
 }

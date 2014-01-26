@@ -99,7 +99,11 @@ public:
     B,
     Q,
     R,
-    U
+    U,
+    Mixed,
+    Vector,
+    Enriched,
+    Restricted
   };
 
   /// Meyers singleton
@@ -142,6 +146,9 @@ public:
 
   ///
   DomainSet domains(FamilyType const type) const;
+
+  ///
+  std::string const repr(FamilyType const type) const;
 
   ///
   void display() const;

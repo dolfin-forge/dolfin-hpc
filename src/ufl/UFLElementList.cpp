@@ -206,6 +206,12 @@ std::set<UFLDomain::Type> UFLElementList::domains(FamilyType const type) const
 }
 
 //-----------------------------------------------------------------------------
+std::string const UFLElementList::repr(FamilyType const type) const
+{
+  return name(type);
+}
+
+//-----------------------------------------------------------------------------
 void UFLElementList::display() const
 {
   for (ElementFamilyList::const_iterator it = Elements.begin();

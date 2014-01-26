@@ -13,7 +13,10 @@ namespace dolfin
 UFLFiniteElement::UFLFiniteElement(UFLElementList::FamilyType family,
                                            UFLCell const& cell,
                                            uint const degree) :
-    UFLFiniteElementBase(family, cell, degree)
+    UFLFiniteElementBase(family, cell, degree),
+    value_shape_(),
+    symmetry_(),
+    sub_elements_()
 {
   // Check finite element definition
   if(UFLElementList::Supported().has_valid_definition(family,
@@ -21,6 +24,18 @@ UFLFiniteElement::UFLFiniteElement(UFLElementList::FamilyType family,
   {
     error("The finite element definition is not valid.");
   };
+
+  UFLQuadratureScheme qs = "None";
+
+  std::stringstream ssrepr;
+  ssrepr << "FiniteElement("<< UFLElementList::Supported().repr(family)
+         << ", "<< cell.repr() << ", " << degree << ", " << qs << ")";
+  repr_ = ssrepr.str();
+
+  std::stringstream ssstr;
+  ssstr << "<" << UFLElementList::Supported().short_name(family) << degree
+        << qs << " on a " << cell.repr() << ">";
+  str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
@@ -29,27 +44,40 @@ UFLFiniteElement::~UFLFiniteElement()
 }
 
 //-----------------------------------------------------------------------------
-UFLElementList::FamilyType const UFLFiniteElement::family() const
+bool const UFLFiniteElement::is_cellwise_constant() const
 {
-  return family_;
+  return ( family() == UFLElementList::R && degree() == 0 );
 }
 
 //-----------------------------------------------------------------------------
-UFLCell const UFLFiniteElement::cell() const
+std::map<uint, uint> const UFLFiniteElement::symmetry() const
 {
-  return cell_;
+  return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLFiniteElement::degree() const
+std::pair<uint, uint> const UFLFiniteElement::extract_subelement_component(
+      uint i) const
 {
-  return degree_;
+  return std::pair<uint, uint>();
 }
 
 //-----------------------------------------------------------------------------
-ValueShape const UFLFiniteElement::value_shape() const
+uint const UFLFiniteElement::extract_component(uint i) const
 {
-  return value_shape_;
+  return i;
+}
+
+//-----------------------------------------------------------------------------
+uint const UFLFiniteElement::num_sub_elements() const
+{
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+std::vector<UFLFiniteElementBase const *> const& UFLFiniteElement::sub_elements() const
+{
+  return sub_elements_;
 }
 
 }

@@ -305,11 +305,15 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLClass.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
+				ufl/UFLEnrichedElement.h\
 				ufl/UFLFacetArea.h\
 				ufl/UFLFacetNormal.h\
 				ufl/UFLFiniteElement.h\
 				ufl/UFLFiniteElementBase.h\
 				ufl/UFLGeometricQuantity.h\
+				ufl/UFLMixedElement.h\
+				ufl/UFLRestrictedElement.h\
 				ufl/UFLSpace.h\
-				ufl/UFLSpatialCoordinate.h
+				ufl/UFLSpatialCoordinate.h\
+				ufl/UFLVectorElement.h
 

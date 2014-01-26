@@ -14,6 +14,8 @@
 
 #include <dolfin/common/types.h>
 
+#include <vector>
+
 namespace dolfin
 {
 
@@ -77,7 +79,7 @@ public:
   virtual uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
-  virtual std::vector<UFLFiniteElementBase const *> sub_elements() const = 0;
+  virtual std::vector<UFLFiniteElementBase const *> const& sub_elements() const = 0;
 
   /// Operator: equality
   /// __eq__
@@ -102,14 +104,23 @@ public:
 protected:
 
   ///
-  UFLFiniteElementBase(UFLElementList::FamilyType family, UFLCell const& cell,
-                       uint const degree);
+  UFLFiniteElementBase(UFLElementList::FamilyType family,
+                       UFLCell const& cell,
+                       uint const degree,
+                       UFLQuadratureScheme quad_scheme = "None",
+                       ValueShape value_shape = ValueShape());
 
   ///
   virtual ~UFLFiniteElementBase();
 
   ///
-  bool component_is_valid(uint const i);
+  bool component_is_valid(std::vector<uint> const i);
+
+  ///
+  UFLCell const get_cell(std::vector<UFLFiniteElementBase const *> const& elements);
+
+  ///
+  uint const get_degree_max(std::vector<UFLFiniteElementBase const *> const& elements);
 
 private:
 

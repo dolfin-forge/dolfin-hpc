@@ -31,6 +31,9 @@ public:
   /// __str__
   virtual std::string const str() const = 0;
 
+  /// __eq__
+  bool operator == (UFLClass const& other) const;
+
 protected:
 
   UFLClass();
@@ -43,6 +46,12 @@ private:
   static std::string const default_str_;
 
 };
+
+//-----------------------------------------------------------------------------
+inline bool UFLClass::operator == (UFLClass const& other) const
+{
+    return ( other.repr() == this->repr() );
+}
 
 } /* namespace dolfin */
 #endif /* __UFL_CLASS_H */

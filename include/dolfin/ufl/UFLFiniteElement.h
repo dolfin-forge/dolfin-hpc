@@ -35,28 +35,30 @@ public:
   ///
   ~UFLFiniteElement();
 
+  //--- INTERFACE -------------------------------------------------------------
+
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
-  virtual bool const is_cellwise_constant() const = 0;
+  bool const is_cellwise_constant() const;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  virtual std::map<uint, uint> const symmetry() const = 0;
+  std::map<uint, uint> const symmetry() const;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
-  virtual std::pair<uint, uint> const extract_subelement_component(
-      uint i) const = 0;
+  std::pair<uint, uint> const extract_subelement_component(
+      uint i) const;
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual uint const extract_component(uint i) const = 0;
+  uint const extract_component(uint i) const;
 
   /// Return number of sub elements
-  virtual uint const num_sub_elements() const = 0;
+  uint const num_sub_elements() const;
 
   /// Return list of sub elements
-  virtual std::vector<UFLFiniteElementBase const *> sub_elements() const = 0;
+  std::vector<UFLFiniteElementBase const *> const& sub_elements() const;
 
   /// __repr__
   std::string const repr() const;
@@ -65,6 +67,13 @@ public:
   std::string const str() const;
 
 protected:
+
+  ValueShape const value_shape_;
+  std::map<uint, uint> const symmetry_;
+  std::vector<UFLFiniteElementBase const *> const sub_elements_;
+
+  mutable std::string repr_;
+  mutable std::string str_;
 
 };
 

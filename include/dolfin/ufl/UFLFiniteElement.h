@@ -17,7 +17,7 @@ namespace dolfin
  *
  *  @class  UFLFiniteElement
  *
- *  @brief  Provides an interface complying with UFL FiniteElementBase.
+ *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
 class UFLFiniteElement : public UFLFiniteElementBase
@@ -39,13 +39,6 @@ public:
   /// over each cell
   virtual bool const is_cellwise_constant() const = 0;
 
-  /// Return quadrature scheme of finite element
-  virtual std::string const quadrature_scheme() const = 0;
-
-  /// Return the shape of the value space
-  /// Present in FIAT interface
-  virtual uint const value_shape() const = 0;
-
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
   virtual std::map<uint, uint> const symmetry() const = 0;
@@ -59,27 +52,17 @@ public:
   /// that element for given value component index
   virtual uint const extract_component(uint i) const = 0;
 
-  /// Return the domain onto which the element is restricted
-  virtual UFLDomain::Type const domain_restriction() const = 0;
-
   /// Return number of sub elements
   virtual uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
   virtual std::vector<UFLFiniteElementBase const *> sub_elements() const = 0;
 
-  /// Operator: equality
-  /// TODO: Unimplemented
+  /// __repr__
+  std::string const repr() const;
 
-  /// Add two elements, creating an enriched element
-  /// Operator: addition
-  /// TODO: Unimplemented
-
-  /// Multiply two elements, creating a mixed element
-  /// Operator: multiplication
-  /// TODO: Unimplemented
-
-  /// Format as string for signature evaluation
+  /// __str__
+  std::string const str() const;
 
 protected:
 

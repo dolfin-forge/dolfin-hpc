@@ -158,6 +158,17 @@ bool UFLElementList::has_valid_degree(FamilyType const type,
   return (d.degree_range.first <= degree && d.degree_range.second >= degree);
 }
 
+
+//-----------------------------------------------------------------------------
+bool UFLElementList::has_valid_definition(FamilyType const type,
+                                          UFLDomain::Type domain,
+                                          uint const degree) const
+{
+  ElementDefinition const d = Elements.find(type)->second;
+  return (d.domains.count(domain) > 0 && d.degree_range.first <= degree
+          && d.degree_range.second >= degree);
+}
+
 //-----------------------------------------------------------------------------
 std::string UFLElementList::name(FamilyType const type) const
 {

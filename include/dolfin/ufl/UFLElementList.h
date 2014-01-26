@@ -122,6 +122,10 @@ public:
   bool has_valid_degree(FamilyType const type, uint const degree) const;
 
   ///
+  bool has_valid_definition(FamilyType const type, UFLDomain::Type domain,
+                            uint const degree) const;
+
+  ///
   std::string name(FamilyType const type) const;
 
   ///

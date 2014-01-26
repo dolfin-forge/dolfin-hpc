@@ -40,20 +40,25 @@ public:
   /// Return cell of finite element
   UFLCell const cell() const;
 
-  /// Return whether the basis functions of this element is spatially constant
-  /// over each cell
-  virtual bool const is_cellwise_constant() const = 0;
-
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
   uint const degree() const;
 
   /// Return quadrature scheme of finite element
-  virtual UFLQuadratureScheme const quadrature_scheme() const = 0;
+  UFLQuadratureScheme const quadrature_scheme() const;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
   ValueShape const value_shape() const;
+
+  /// Return the domain onto which the element is restricted
+  //UFLDomain::Type const domain_restriction() const;
+
+  //--- INTERFACE -------------------------------------------------------------
+
+  /// Return whether the basis functions of this element is spatially constant
+  /// over each cell
+  virtual bool const is_cellwise_constant() const = 0;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
@@ -67,9 +72,6 @@ public:
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
   virtual uint const extract_component(uint i) const = 0;
-
-  /// Return the domain onto which the element is restricted
-  virtual UFLDomain::Type const domain_restriction() const = 0;
 
   /// Return number of sub elements
   virtual uint const num_sub_elements() const = 0;
@@ -107,7 +109,7 @@ protected:
   virtual ~UFLFiniteElementBase();
 
   ///
-  bool check_component(uint const i);
+  bool component_is_valid(uint const i);
 
 private:
 

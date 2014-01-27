@@ -124,7 +124,6 @@ private:
   FacetArea const facet_area_;
   FacetNormal const facet_normal_;
   SpatialCoordinate const x_;
-
 };
 
 } /* namespace ufl */

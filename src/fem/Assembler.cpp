@@ -24,6 +24,7 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/fem/Form.h>
+#include <dolfin/fem/FormExpansion.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/SparsityPatternBuilder.h>
@@ -31,6 +32,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
+#include <dolfin/quadrature/dolfin_quadrature.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -57,8 +59,15 @@ void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
   assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
-void Assembler::assemble(GenericTensor& A, Form& form,
-                         const SubDomain& sub_domain, bool reset_tensor)
+void Assembler::assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor)
+{
+  form.updateDofMaps(mesh);
+#pragma omp parallel
+  assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, q, reset_tensor);
+}
+//-----------------------------------------------------------------------------
+void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_domain, 
+    bool reset_tensor)
 {
   // Extract cell domains
   MeshFunction<uint>* cell_domains = 0;
@@ -99,6 +108,48 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   }
 }
 //-----------------------------------------------------------------------------
+void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_domain, 
+    const QuadratureRule& q, bool reset_tensor)
+{
+  // Extract cell domains
+  MeshFunction<uint>* cell_domains = 0;
+
+  // Extract facet domains
+  MeshFunction<uint>* facet_domains = 0;
+
+#pragma omp master
+  {
+    if (form.form().num_cell_integrals() > 0)
+    {
+      cell_domains = new MeshFunction<uint>(mesh, mesh.topology().dim());
+      (*cell_domains) = 1;
+      sub_domain.mark(*cell_domains, 0);
+    }
+    
+    if (form.form().num_exterior_facet_integrals() > 0 ||
+	form.form().num_interior_facet_integrals() > 0)
+    {
+      facet_domains = new MeshFunction<uint>(mesh, mesh.topology().dim() - 1);
+      (*facet_domains) = 1;
+      sub_domain.mark(*facet_domains, 0);
+    }
+  }
+
+  // Assemble
+  form.updateDofMaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofMaps(),
+           cell_domains, facet_domains, facet_domains, q, reset_tensor);
+
+  // Delete domains
+#pragma omp master
+  {
+    if (cell_domains)
+      delete cell_domains;
+    if (facet_domains)
+      delete facet_domains;
+  }
+}
+//-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form,
                          const MeshFunction<uint>& cell_domains,
                          const MeshFunction<uint>& exterior_facet_domains,
@@ -108,6 +159,18 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   form.updateDofMaps(mesh);
   assemble(A, form.form(), form.coefficients(), form.dofMaps(), &cell_domains, 
            &exterior_facet_domains, &interior_facet_domains, reset_tensor);
+}
+//-----------------------------------------------------------------------------
+void Assembler::assemble(GenericTensor& A, Form& form,
+                         const MeshFunction<uint>& cell_domains,
+                         const MeshFunction<uint>& exterior_facet_domains,
+                         const MeshFunction<uint>& interior_facet_domains,
+                         const QuadratureRule& q,
+                         bool reset_tensor)
+{
+  form.updateDofMaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofMaps(), &cell_domains, 
+           &exterior_facet_domains, &interior_facet_domains, q, reset_tensor);
 }
 //-----------------------------------------------------------------------------
 dolfin::real Assembler::assemble(Form& form)
@@ -155,6 +218,9 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
       check(form, coefficients, mesh);
   }
 
+  // Create data structure for user defined quadrature
+  UFCCellIntegral cell_integral;//(dof_map_set);
+
   // Create data structure for local assembly data
   UFC ufc(form, mesh, dof_map_set);
 
@@ -173,6 +239,73 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
+
+#pragma omp master
+  {
+  // Initialize boundary mesh
+  if (ufc.form.num_exterior_facet_integrals()  && !boundary)
+    boundary = new BoundaryMesh(mesh);
+  }
+#pragma omp flush
+#pragma omp barrier
+
+  // Assemble over exterior facets 
+  assembleExteriorFacets(A, coefficients, dof_map_set, ufc, exterior_facet_domains);
+
+  // Assemble over interior facets
+  assembleInteriorFacets(A, coefficients, dof_map_set, ufc, interior_facet_domains);
+
+  // Finalise assembly of global tensor
+#pragma omp master
+  A.apply();
+#pragma omp barrier
+}
+//-----------------------------------------------------------------------------
+void Assembler::assemble(GenericTensor& A, const ufc::form& form,
+                         const Array<Function*>& coefficients,
+                         const DofMapSet& dof_map_set,
+                         const MeshFunction<uint>* cell_domains,
+                         const MeshFunction<uint>* exterior_facet_domains,
+                         const MeshFunction<uint>* interior_facet_domains,
+                         const QuadratureRule& q,
+                         bool reset_tensor)
+{
+  // Note the imprtance of treating empty mesh functions as null pointers
+  // for the PyDOLFIN interface.
+
+
+  // Check arguments
+#pragma omp master
+  {
+    if(reset_tensor)
+      check(form, coefficients, mesh);
+  }
+
+  // Create data structure for user defined quadrature
+  UFCCellIntegral cell_integral;//(dof_map_set);
+
+  // Create data structure for form expansion since we do
+  // user defined quadrature
+  FormExpansion form_expansion(form, q);
+
+  // Create data structure for local assembly data
+  UFC ufc(form, mesh, dof_map_set);
+
+  // Initialize global tensor
+#pragma omp master
+  {
+    initGlobalTensor(A, dof_map_set, ufc, reset_tensor);
+    
+    
+    // Update all ghost points
+    for (uint i = 0; i < coefficients.size(); i++)
+      coefficients[i]->sync_ghosts();
+  }
+#pragma omp flush
+#pragma omp barrier
+
+  // Assemble over cells
+    assembleCells(A, coefficients, dof_map_set, ufc, cell_domains, cell_integral, q);
 
 #pragma omp master
   {
@@ -250,7 +383,67 @@ void Assembler::assembleCells(GenericTensor& A,
     p++;
 #endif
   }
-  
+
+}
+
+//-----------------------------------------------------------------------------
+void Assembler::assembleCells(GenericTensor& A,
+                              const Array<Function*>& coefficients,
+                              const DofMapSet& dof_map_set,
+                              UFC& ufc,
+                              const MeshFunction<uint>* domains,
+                              const UFCCellIntegral& cell_integral,
+                              const QuadratureRule& q) const
+{
+  // Skip assembly if there are no cell integrals
+  if (ufc.form.num_cell_integrals() == 0)
+    return;
+
+  // Cell integral
+  const ufc::cell_integral* integral;// = &cell_integral;
+
+  // Assemble over cells
+#ifndef NO_PROGRESS_BAR
+  Progress p(progressMessage(A.rank(), "cells"), mesh.numCells());
+#endif
+  //  for (CellIterator cell(mesh); !cell.end(); ++cell)
+#pragma omp for
+  for (uint i = 0; i < mesh.numCells(); i++)
+  {
+    Cell cell(mesh, i);
+
+    // Get integral for sub domain (if any)
+    if (domains && domains->size() > 0)
+    {
+      const uint domain = (*domains)(cell);
+      if (domain < ufc.form.num_cell_integrals())
+	integral = ufc.cell_integrals[domain];
+      else
+	continue;
+    }
+    
+    // Update to current cell
+    ufc.update(cell, mesh.distdata());    
+    
+    // Interpolate coefficients on cell
+    for (uint i = 0; i < coefficients.size(); i++) 
+      coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], cell);
+    
+    // Tabulate dofs for each dimension
+    for (uint i = 0; i < ufc.form.rank(); i++)
+      dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell.index());
+    
+    // Tabulate cell tensor
+    cell_integral.tabulate_tensor(ufc, cell, coefficients, q, ufc.dofs);
+    
+    // Add entries to global tensor
+    A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
+
+#ifndef NO_PROGRESS_BAR
+    p++;
+#endif
+  }
+
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,
@@ -527,6 +720,9 @@ void Assembler::assemble_system(GenericTensor& A, const ufc::form& A_form,
 
   // FIXME: consistency check between A_dof_map_set and b_dof_map_set 
 
+  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
+  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
+
   // Create data structure for local assembly data
   UFC A_ufc(A_form, mesh, A_dof_map_set);
   UFC b_ufc(b_form, mesh, b_dof_map_set);
@@ -538,6 +734,62 @@ void Assembler::assemble_system(GenericTensor& A, const ufc::form& A_form,
   // Assemble over cells
   assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains);
   assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains);
+
+  // Assemble over exterior facets 
+  assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);
+  assembleExteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, exterior_facet_domains);
+
+  // Assemble over interior facets
+  assembleInteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, interior_facet_domains);
+  assembleInteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, interior_facet_domains);
+
+  // Flush assembly of global tensor
+  A.apply(FLUSH);
+  b.apply(FLUSH);
+
+  // Apply Trace constraints (Dirichlet boundary conditions) 
+  applyTraces(A, b, bc, A_dof_map_set, b_dof_map_set, A_form, b_form, exterior_facet_domains);  
+
+  // Finalise BC (need to finalize twice for each tensor) 
+  A.apply();
+  b.apply();
+}
+//-----------------------------------------------------------------------------
+void Assembler::assemble_system(GenericTensor& A, const ufc::form& A_form, 
+                                const Array<Function*>& A_coefficients, 
+                                const DofMapSet& A_dof_map_set,
+                                GenericTensor& b, const ufc::form& b_form, 
+                                const Array<Function*>& b_coefficients, 
+                                const DofMapSet& b_dof_map_set, DirichletBC& bc, 
+                                const MeshFunction<uint>* cell_domains,
+                                const MeshFunction<uint>* exterior_facet_domains,
+                                const MeshFunction<uint>* interior_facet_domains,
+                                const QuadratureRule& q,
+                                bool reset_tensors)
+{
+  // Note the importance of treating empty mesh functions as null pointers
+  // for the PyDOLFIN interface.
+  
+  // Check arguments
+  check(A_form, A_coefficients, mesh);
+  check(b_form, b_coefficients, mesh);
+
+  // FIXME: consistency check between A_dof_map_set and b_dof_map_set 
+
+  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
+  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
+
+  // Create data structure for local assembly data
+  UFC A_ufc(A_form, mesh, A_dof_map_set);
+  UFC b_ufc(b_form, mesh, b_dof_map_set);
+
+  // Initialize global tensor
+  initGlobalTensor(A, A_dof_map_set, A_ufc, reset_tensors);
+  initGlobalTensor(b, b_dof_map_set, b_ufc, reset_tensors);
+
+  // Assemble over cells
+  assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains, A_cell_integral, q);
+  assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains, b_cell_integral, q);
 
   // Assemble over exterior facets 
   assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);

@@ -11,27 +11,27 @@
 
 #include <dolfin/common/types.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLCell
+ *  @class  Cell
  *
  *  @brief  Provides an interface complying with UFL Space.
  */
 
-class UFLSpace : public UFLClass
+class Space : public Class
 {
 
 public:
 
   ///
-  UFLSpace(uint const& dim);
+  Space(uint const& dim);
 
   ///
-  ~UFLSpace();
+  ~Space();
 
   /// Return number of space dimensions
   uint dimension() const;
@@ -51,5 +51,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_SPACE_H */

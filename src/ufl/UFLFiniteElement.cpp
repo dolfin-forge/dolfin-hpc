@@ -6,77 +6,79 @@
 
 #include <dolfin/ufl/UFLFiniteElement.h>
 
-namespace dolfin
+namespace ufl
 {
 
+using dolfin::error;
+
 //-----------------------------------------------------------------------------
-UFLFiniteElement::UFLFiniteElement(UFLElementList::FamilyType family,
-                                           UFLCell const& cell,
+FiniteElement::FiniteElement(ElementList::FamilyType family,
+                                           Cell const& cell,
                                            uint const degree) :
-    UFLFiniteElementBase(family, cell, degree),
+    FiniteElementBase(family, cell, degree),
     value_shape_(),
     symmetry_(),
     sub_elements_()
 {
   // Check finite element definition
-  if(UFLElementList::Supported().has_valid_definition(family,
+  if(ElementList::Supported().has_valid_definition(family,
                                                       cell.domain(), degree))
   {
     error("The finite element definition is not valid.");
   };
 
-  UFLQuadratureScheme qs = "None";
+  QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "FiniteElement("<< UFLElementList::Supported().repr(family)
-         << ", "<< cell.repr() << ", " << degree << ", " << qs << ")";
+  ssrepr << "FiniteElement("<< ElementList::Supported().repr(family)
+         << ", "<< cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << UFLElementList::Supported().short_name(family) << degree
-        << qs << " on a " << cell.repr() << ">";
+  ssstr << "<" << ElementList::Supported().short_name(family) << degree
+        << qs.str() << " on a " << cell.repr() << ">";
   str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElement::~UFLFiniteElement()
+FiniteElement::~FiniteElement()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool const UFLFiniteElement::is_cellwise_constant() const
+bool const FiniteElement::is_cellwise_constant() const
 {
-  return ( family() == UFLElementList::R && degree() == 0 );
+  return ( family() == ElementList::R && degree() == 0 );
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const UFLFiniteElement::symmetry() const
+std::map<uint, uint> const FiniteElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const UFLFiniteElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<uint, uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, UFLFiniteElementBase const * const> const UFLFiniteElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const> const FiniteElement::extract_component(ValueArray const& i) const
 {
   check_component(i);
-  return std::pair<uint, UFLFiniteElementBase const * const>(i[0], this);
+  return std::pair<uint, FiniteElementBase const * const>(i[0], this);
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLFiniteElement::num_sub_elements() const
+uint const FiniteElement::num_sub_elements() const
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::FiniteElementBaseList const& UFLFiniteElement::sub_elements() const
+FiniteElementBase::FiniteElementBaseList const& FiniteElement::sub_elements() const
 {
   return sub_elements_;
 }

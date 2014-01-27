@@ -10,18 +10,18 @@
 #include <string>
 #include <vector>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLCell
+ *  @class  Cell
  *
  *  @brief  Provides an interface for Python objects from UFL.
  */
 
-class UFLClass
+class Class
 {
 
 public:
@@ -33,13 +33,13 @@ public:
   virtual std::string const str() const = 0;
 
   /// __eq__
-  bool operator == (UFLClass const& other) const;
+  bool operator == (Class const& other) const;
 
 protected:
 
-  UFLClass();
+  Class();
 
-  virtual ~UFLClass();
+  virtual ~Class();
 
 private:
 
@@ -49,7 +49,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool UFLClass::operator == (UFLClass const& other) const
+inline bool Class::operator == (Class const& other) const
 {
     return ( other.repr() == this->repr() );
 }
@@ -80,5 +80,5 @@ private:
 };
 
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_CLASS_H */

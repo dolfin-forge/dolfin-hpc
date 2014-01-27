@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,17 +20,17 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL RestrictedElement.
  */
 
-class UFLRestrictedElement : public UFLFiniteElementBase
+class RestrictedElement : public FiniteElementBase
 {
 
 public:
 
   ///
-  UFLRestrictedElement(UFLFiniteElementBase const& element,
-                       UFLDomain::Type const domain);
+  RestrictedElement(FiniteElementBase const& element,
+                       Domain::Type const domain);
 
   ///
-  ~UFLRestrictedElement();
+  ~RestrictedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -49,7 +49,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
 
   /// Return number of sub elements
   uint const num_sub_elements() const;
@@ -60,7 +60,7 @@ public:
   //---------------------------------------------------------------------------
 
   ///
-  UFLFiniteElementBase const& element();
+  FiniteElementBase const& element();
 
   /// __repr__
   std::string const repr() const;
@@ -72,12 +72,12 @@ protected:
 
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase const& element_;
+  FiniteElementBase const& element_;
 
   mutable std::string repr_;
   mutable std::string str_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_RESTRICTED_ELEMENT_H_ */

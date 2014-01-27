@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,18 +20,18 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLCellVolume : public UFLGeometricQuantity
+class CellVolume : public GeometricQuantity
 {
 
 public:
 
   ///
-  UFLCellVolume(UFLCell const& cell);
+  CellVolume(Cell const& cell);
 
   ///
-  ~UFLCellVolume();
+  ~CellVolume();
 
   ///
   ValueArray const& shape() const;
@@ -51,5 +51,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_CELL_VOLUME_H_ */

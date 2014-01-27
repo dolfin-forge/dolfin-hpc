@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLClass.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,16 +20,16 @@ namespace dolfin
  *  @brief  Provides an interface for UFL QuadratureScheme.
  */
 
-class UFLQuadratureScheme : public UFLClass
+class QuadratureScheme : public Class
 {
 
 public:
 
   ///
-  UFLQuadratureScheme();
+  QuadratureScheme();
 
   ///
-  ~UFLQuadratureScheme();
+  ~QuadratureScheme();
 
   /// __repr__
   std::string const repr() const;
@@ -44,5 +44,5 @@ private:
 
 };
 
-} /* namespace dolfin */
-#endif /* __UFL_CLASS_H */
+} /* namespace ufl */
+#endif /* __UFL_QUADRATURE_SCHEME_H_ */

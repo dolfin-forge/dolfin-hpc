@@ -6,16 +6,18 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
-namespace dolfin
+namespace ufl
 {
 
+using dolfin::error;
+
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::UFLFiniteElementBase(UFLElementList::FamilyType family,
-                                           UFLCell const& cell,
+FiniteElementBase::FiniteElementBase(ElementList::FamilyType family,
+                                           Cell const& cell,
                                            uint const degree,
-                                           UFLQuadratureScheme quad_scheme,
+                                           QuadratureScheme quad_scheme,
                                            ValueArray value_shape) :
-    UFLClass(),
+    Class(),
     family_(family),
     cell_(cell),
     degree_(degree),
@@ -25,36 +27,36 @@ UFLFiniteElementBase::UFLFiniteElementBase(UFLElementList::FamilyType family,
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::~UFLFiniteElementBase()
+FiniteElementBase::~FiniteElementBase()
 {
 }
 
 //-----------------------------------------------------------------------------
-UFLElementList::FamilyType const UFLFiniteElementBase::family() const
+ElementList::FamilyType const FiniteElementBase::family() const
 {
   return family_;
 }
 
 //-----------------------------------------------------------------------------
-UFLCell const UFLFiniteElementBase::cell() const
+Cell const FiniteElementBase::cell() const
 {
   return cell_;
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLFiniteElementBase::degree() const
+uint const FiniteElementBase::degree() const
 {
   return degree_;
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const UFLFiniteElementBase::value_shape() const
+ValueArray const FiniteElementBase::value_shape() const
 {
   return value_shape_;
 }
 
 //-----------------------------------------------------------------------------
-bool UFLFiniteElementBase::component_is_valid(ValueArray const& i) const
+bool FiniteElementBase::component_is_valid(ValueArray const& i) const
 {
   uint r = value_shape_.size();
   bool range_ok = true;
@@ -66,7 +68,7 @@ bool UFLFiniteElementBase::component_is_valid(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-void UFLFiniteElementBase::check_component(ValueArray const& i) const
+void FiniteElementBase::check_component(ValueArray const& i) const
 {
   if(!component_is_valid(i))
   {
@@ -75,11 +77,11 @@ void UFLFiniteElementBase::check_component(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-UFLCell const UFLFiniteElementBase::get_cell(
+Cell const FiniteElementBase::get_cell(
     FiniteElementBaseList const& elements)
 {
   FiniteElementBaseList::const_iterator it = elements.begin();
-  UFLCell ret = (*it)->cell();
+  Cell ret = (*it)->cell();
   for (++it ; it != elements.end(); ++it)
   {
     if( ret.repr() != (*it)->cell().repr())
@@ -91,7 +93,7 @@ UFLCell const UFLFiniteElementBase::get_cell(
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLFiniteElementBase::get_degree_max(
+uint const FiniteElementBase::get_degree_max(
     FiniteElementBaseList const& elements)
 {
   uint ret = 0;

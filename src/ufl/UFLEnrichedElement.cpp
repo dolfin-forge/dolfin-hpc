@@ -7,19 +7,17 @@
 #include <dolfin/ufl/UFLEnrichedElement.h>
 #include <dolfin/ufl/UFLElementList.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLEnrichedElement::UFLEnrichedElement(
+EnrichedElement::EnrichedElement(
     FiniteElementBaseList const& elements ) :
-    UFLFiniteElementBase(UFLElementList::Enriched, get_cell(elements),
+    FiniteElementBase(ElementList::Enriched, get_cell(elements),
                          get_degree_max(elements)),
     sub_elements_(elements)
 {
   // Create string representation
-  UFLQuadratureScheme qs = "None";
-
   std::stringstream ssrepr;
   std::stringstream ssstr;
   ssrepr << "EnrichedElement(";
@@ -43,12 +41,12 @@ UFLEnrichedElement::UFLEnrichedElement(
 }
 
 //-----------------------------------------------------------------------------
-UFLEnrichedElement::~UFLEnrichedElement()
+EnrichedElement::~EnrichedElement()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool const UFLEnrichedElement::is_cellwise_constant() const
+bool const EnrichedElement::is_cellwise_constant() const
 {
   bool ret = true;
   for ( FiniteElementBaseList::const_iterator it = sub_elements_.begin();
@@ -60,32 +58,32 @@ bool const UFLEnrichedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const UFLEnrichedElement::symmetry() const
+std::map<uint, uint> const EnrichedElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const UFLEnrichedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> const EnrichedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<uint, uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, UFLFiniteElementBase const * const> const UFLEnrichedElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const> const EnrichedElement::extract_component(ValueArray const& i) const
 {
-  return std::pair<uint, UFLFiniteElementBase const * const>( i[0] , sub_elements_[i[0]] );
+  return std::pair<uint, FiniteElementBase const * const>( i[0] , sub_elements_[i[0]] );
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLEnrichedElement::num_sub_elements() const
+uint const EnrichedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::FiniteElementBaseList const& UFLEnrichedElement::sub_elements() const
+FiniteElementBase::FiniteElementBaseList const& EnrichedElement::sub_elements() const
 {
   return sub_elements_;
 }

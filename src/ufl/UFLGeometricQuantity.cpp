@@ -6,22 +6,22 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLGeometricQuantity::UFLGeometricQuantity(UFLCell const& cell):
+GeometricQuantity::GeometricQuantity(Cell const& cell):
     cell_(cell)
 {
 }
 
 //-----------------------------------------------------------------------------
-UFLGeometricQuantity::~UFLGeometricQuantity()
+GeometricQuantity::~GeometricQuantity()
 {
 }
 
 //-----------------------------------------------------------------------------
-UFLCell const& UFLGeometricQuantity::cell()
+Cell const& GeometricQuantity::cell()
 {
   return cell_;
 }

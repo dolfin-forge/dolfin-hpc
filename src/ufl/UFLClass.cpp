@@ -8,30 +8,30 @@
 
 #include <sstream>
 
-namespace dolfin
+namespace ufl
 {
 
-std::string const UFLClass::default_repr_ = "object";
-std::string const UFLClass::default_str_ = "Class";
+std::string const Class::default_repr_ = "object";
+std::string const Class::default_str_ = "Class";
 
 //-----------------------------------------------------------------------------
-UFLClass::UFLClass()
-{
-}
-
-//-----------------------------------------------------------------------------
-UFLClass::~UFLClass()
+Class::Class()
 {
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLClass::repr() const
+Class::~Class()
+{
+}
+
+//-----------------------------------------------------------------------------
+std::string const Class::repr() const
 {
   return default_repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLClass::str() const
+std::string const Class::str() const
 {
   return default_str_;
 }

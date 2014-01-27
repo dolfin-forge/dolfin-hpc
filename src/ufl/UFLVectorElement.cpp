@@ -6,41 +6,41 @@
 
 #include <dolfin/ufl/UFLVectorElement.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLVectorElement::UFLVectorElement(UFLElementList::FamilyType family,
-                                   UFLCell const& cell, uint const degree,
+VectorElement::VectorElement(ElementList::FamilyType family,
+                                   Cell const& cell, uint const degree,
                                    uint const dim) :
-    UFLFiniteElementBase(UFLElementList::Vector, cell, degree),
+    FiniteElementBase(ElementList::Vector, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {
   // Check mixed finite element definition
 
   // Create string representation
-  UFLQuadratureScheme qs = "None";
+  QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "VectorElement(" << UFLElementList::Supported().repr(family)
-         << ", " << cell.repr() << ", " << degree << ", " << qs << ")";
+  ssrepr << "VectorElement(" << ElementList::Supported().repr(family)
+         << ", " << cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << UFLElementList::Supported().short_name(family)
+  ssstr << "<" << ElementList::Supported().short_name(family)
         << " vector element of degree " << degree << " on a " << cell.str()
         << ": " << sub_elements_.size() << " x " << sub_element_.str() << ">";
   str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
-UFLVectorElement::~UFLVectorElement()
+VectorElement::~VectorElement()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool const UFLVectorElement::is_cellwise_constant() const
+bool const VectorElement::is_cellwise_constant() const
 {
   bool ret = true;
   for ( FiniteElementBaseList::const_iterator it = sub_elements_.begin();
@@ -52,32 +52,32 @@ bool const UFLVectorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const UFLVectorElement::symmetry() const
+std::map<uint, uint> const VectorElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const UFLVectorElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> const VectorElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<uint, uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, UFLFiniteElementBase const * const> const UFLVectorElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const> const VectorElement::extract_component(ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLVectorElement::num_sub_elements() const
+uint const VectorElement::num_sub_elements() const
 {
   return 0;
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::FiniteElementBaseList const& UFLVectorElement::sub_elements() const
+FiniteElementBase::FiniteElementBaseList const& VectorElement::sub_elements() const
 {
   return sub_elements_;
 }

@@ -1,20 +1,19 @@
-/*
- * UFLCellVolume.cpp
- *
- *  Created on: Jan 24, 2014
- *      Author: larcher
- */
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLCellVolume.h>
 
 #include <dolfin/ufl/UFLCell.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLCellVolume::UFLCellVolume(UFLCell const& cell) :
-    UFLGeometricQuantity(cell),
+CellVolume::CellVolume(Cell const& cell) :
+    GeometricQuantity(cell),
     shape_(),
     repr_("CellVolume(" + cell.repr() + ")"),
     str_("volume")
@@ -23,26 +22,26 @@ UFLCellVolume::UFLCellVolume(UFLCell const& cell) :
 }
 
 //-----------------------------------------------------------------------------
-UFLCellVolume::~UFLCellVolume()
+CellVolume::~CellVolume()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& UFLCellVolume::shape() const
+ValueArray const& CellVolume::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCellVolume::repr() const
+std::string const CellVolume::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCellVolume::str() const
+std::string const CellVolume::str() const
 {
   return str_;
 }
 
-} /* namespace dolfin */
+} /* namespace ufl */

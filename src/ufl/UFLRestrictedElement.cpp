@@ -6,75 +6,73 @@
 
 #include <dolfin/ufl/UFLRestrictedElement.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLRestrictedElement::UFLRestrictedElement(UFLFiniteElementBase const& element,
-                                           UFLDomain::Type const domain) :
-    UFLFiniteElementBase(UFLElementList::Restricted, element.cell(),
+RestrictedElement::RestrictedElement(FiniteElementBase const& element,
+                                           Domain::Type const domain) :
+    FiniteElementBase(ElementList::Restricted, element.cell(),
                          element.degree(), element.quadrature_scheme(),
                          element.value_shape()),
     element_(element)
 {
   // Check mixed finite element definition
 
-  UFLQuadratureScheme qs = "None";
-
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", "
-         << UFLDomain::str(domain) << ")";
+         << Domain::str(domain) << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << element_.str() << ">|_" << UFLDomain::str(domain) << ">";
+  ssstr << "<" << element_.str() << ">|_" << Domain::str(domain) << ">";
   str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
-UFLRestrictedElement::~UFLRestrictedElement()
+RestrictedElement::~RestrictedElement()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool const UFLRestrictedElement::is_cellwise_constant() const
+bool const RestrictedElement::is_cellwise_constant() const
 {
   return element_.is_cellwise_constant();
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const UFLRestrictedElement::symmetry() const
+std::map<uint, uint> const RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const UFLRestrictedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return element_.extract_subelement_component(i);
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, UFLFiniteElementBase const * const> const UFLRestrictedElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLRestrictedElement::num_sub_elements() const
+uint const RestrictedElement::num_sub_elements() const
 {
   return element_.num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::FiniteElementBaseList const& UFLRestrictedElement::sub_elements() const
+FiniteElementBase::FiniteElementBaseList const& RestrictedElement::sub_elements() const
 {
   return element_.sub_elements();
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase const& UFLRestrictedElement::element()
+FiniteElementBase const& RestrictedElement::element()
 {
   return element_;
 }

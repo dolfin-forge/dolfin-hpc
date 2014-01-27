@@ -9,31 +9,31 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLFiniteElement
+ *  @class  FiniteElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class UFLFiniteElement : public UFLFiniteElementBase
+class FiniteElement : public FiniteElementBase
 {
 
 public:
 
-  typedef UFLElementList::FamilyType FamilyType;
+  typedef ElementList::FamilyType FamilyType;
 
   ///
-  UFLFiniteElement(UFLElementList::FamilyType family,
-                   UFLCell const& cell,
+  FiniteElement(ElementList::FamilyType family,
+                   Cell const& cell,
                    uint const degree);
 
   ///
-  ~UFLFiniteElement();
+  ~FiniteElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -52,7 +52,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
 
   /// Return number of sub elements
   uint const num_sub_elements() const;
@@ -70,12 +70,12 @@ protected:
 
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase::FiniteElementBaseList const sub_elements_;
+  FiniteElementBase::FiniteElementBaseList const sub_elements_;
 
   mutable std::string repr_;
   mutable std::string str_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_FINITE_ELEMENT_H_ */

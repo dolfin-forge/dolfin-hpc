@@ -11,7 +11,7 @@
 
 #include <vector>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -22,20 +22,20 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLGeometricQuantity : public UFLClass
+class GeometricQuantity : public Class
 {
 public:
 
   ///
-  UFLGeometricQuantity(UFLCell const& cell);
+  GeometricQuantity(Cell const& cell);
 
   ///
-  ~UFLGeometricQuantity();
+  ~GeometricQuantity();
 
   ///
-  UFLCell const& cell();
+  Cell const& cell();
 
   ///
   virtual ValueArray const& shape() const = 0;
@@ -48,9 +48,9 @@ public:
 
 private:
 
-  UFLCell const& cell_;
+  Cell const& cell_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_GEOMETRIC_QUANTITY_H_ */

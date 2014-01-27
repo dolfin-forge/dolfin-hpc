@@ -9,27 +9,27 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLMixedElement
+ *  @class  MixedElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class UFLMixedElement : public UFLFiniteElementBase
+class MixedElement : public FiniteElementBase
 {
 
 public:
 
   ///
-  UFLMixedElement(FiniteElementBaseList const& elements);
+  MixedElement(FiniteElementBaseList const& elements);
 
   ///
-  ~UFLMixedElement();
+  ~MixedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -48,7 +48,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
 
   /// Return number of sub elements
   uint const num_sub_elements() const;
@@ -75,5 +75,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_MIXED_ELEMENT_H_ */

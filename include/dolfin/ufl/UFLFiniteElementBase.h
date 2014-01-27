@@ -11,12 +11,13 @@
 
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLElementList.h>
+#include <dolfin/ufl/UFLQuadratureScheme.h>
 
 #include <dolfin/common/types.h>
 
 #include <vector>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -27,36 +28,33 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
  */
 
-///TODO: Implement quadrature scheme
-typedef std::string UFLQuadratureScheme;
-
-class UFLFiniteElementBase : public UFLClass
+class FiniteElementBase : public Class
 {
 
 public:
 
   //
-  typedef std::vector<UFLFiniteElementBase const *> FiniteElementBaseList;
+  typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
 
   /// Return finite element family
-  UFLElementList::FamilyType const family() const;
+  ElementList::FamilyType const family() const;
 
   /// Return cell of finite element
-  UFLCell const cell() const;
+  Cell const cell() const;
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
   uint const degree() const;
 
   /// Return quadrature scheme of finite element
-  UFLQuadratureScheme const quadrature_scheme() const;
+  QuadratureScheme const quadrature_scheme() const;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
   ValueArray const value_shape() const;
 
   /// Return the domain onto which the element is restricted
-  //UFLDomain::Type const domain_restriction() const;
+  //Domain::Type const domain_restriction() const;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -75,7 +73,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
+  virtual std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
 
   /// Return number of sub elements
   virtual uint const num_sub_elements() const = 0;
@@ -106,14 +104,14 @@ public:
 protected:
 
   ///
-  UFLFiniteElementBase(UFLElementList::FamilyType family,
-                       UFLCell const& cell,
+  FiniteElementBase(ElementList::FamilyType family,
+                       Cell const& cell,
                        uint const degree,
-                       UFLQuadratureScheme quad_scheme = "None",
+                       QuadratureScheme quad_scheme = QuadratureScheme(),
                        ValueArray value_shape = ValueArray());
 
   ///
-  virtual ~UFLFiniteElementBase();
+  virtual ~FiniteElementBase();
 
   ///
   bool component_is_valid(ValueArray const& i) const;
@@ -122,20 +120,20 @@ protected:
   void check_component(ValueArray const& i) const;
 
   ///
-  UFLCell const get_cell(FiniteElementBaseList const& elements);
+  Cell const get_cell(FiniteElementBaseList const& elements);
 
   ///
   uint const get_degree_max(FiniteElementBaseList const& elements);
 
 private:
 
-  UFLElementList::FamilyType const family_;
-  UFLCell const cell_;
+  ElementList::FamilyType const family_;
+  Cell const cell_;
   uint const degree_;
-  UFLQuadratureScheme const quad_scheme_;
+  QuadratureScheme const quad_scheme_;
   ValueArray const value_shape_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_FINITE_ELEMENT_BASE_H_ */

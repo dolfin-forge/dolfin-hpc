@@ -8,11 +8,11 @@
 
 #include <sstream>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLSpace::UFLSpace(uint const& dim) :
+Space::Space(uint const& dim) :
     dimension_(dim)
 {
   std::stringstream ssrepr;
@@ -25,24 +25,24 @@ UFLSpace::UFLSpace(uint const& dim) :
 }
 
 //-----------------------------------------------------------------------------
-UFLSpace::~UFLSpace()
+Space::~Space()
 {
 }
 
 //-----------------------------------------------------------------------------
-uint UFLSpace::dimension() const
+uint Space::dimension() const
 {
   return dimension_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLSpace::repr() const
+std::string const Space::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLSpace::str() const
+std::string const Space::str() const
 {
   return str_;
 }

@@ -19,50 +19,50 @@
 #include <dolfin/ufl/UFLFacetNormal.h>
 #include <dolfin/ufl/UFLSpatialCoordinate.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLCell
+ *  @class  Cell
  *
  *  @brief  Provides an interface complying with UFL Cell.
  */
 
-class UFLCell : public UFLClass
+class Cell : public Class
 {
 
 public:
 
   ///
-  UFLCell(UFLDomain::Type const& domain);
+  Cell(Domain::Type const& domain);
 
   ///
-  UFLCell(UFLDomain::Type const& domain, UFLSpace const& space);
+  Cell(Domain::Type const& domain, Space const& space);
 
   ///
-  ~UFLCell();
+  ~Cell();
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// UFL geometry value: The global spatial coordinates
-  UFLSpatialCoordinate const& x() const;
+  SpatialCoordinate const& x() const;
 
   /// UFL geometry value: The facet normal on the cell boundary
-  UFLFacetNormal const& n() const;
+  FacetNormal const& n() const;
 
   /// UFL geometry value: The volume of the cell
-  UFLCellVolume const& volume() const;
+  CellVolume const& volume() const;
 
   /// UFL geometry value: The circumradius of the cell
-  UFLCircumradius const& circumradius() const;
+  Circumradius const& circumradius() const;
 
   /// UFL geometry value: The area of a facet of the cell
-  UFLFacetArea const& facet_area() const;
+  FacetArea const& facet_area() const;
 
   /// UFL geometry value: The total surface area of the cell
-  UFLCellSurfaceArea const& surface_area() const;
+  CellSurfaceArea const& surface_area() const;
 
   //---------------------------------------------------------------------------
 
@@ -70,10 +70,10 @@ public:
   bool const& is_undefined() const;
 
   /// Return the domain of the cell
-  UFLDomain::Type const& domain() const;
+  Domain::Type const& domain() const;
 
   /// Return the domain of the facet of this cell
-  UFLDomain::Type const& facet_domain() const;
+  Domain::Type const& facet_domain() const;
 
   /// Return the number of facets this cell has
   uint const num_facets() const;
@@ -98,8 +98,8 @@ public:
 
 private:
 
-  UFLDomain::Type const domain_;
-  UFLSpace const space_;
+  Domain::Type const domain_;
+  Space const space_;
 
   bool const invalid_;
 
@@ -107,17 +107,17 @@ private:
   uint const topological_dimension_;
 
   /// Geometrical quantities
-  UFLCellSurfaceArea const cell_surface_area_;
-  UFLCellVolume const cell_volume_;
-  UFLCircumradius const circumradius_;
-  UFLFacetArea const facet_area_;
-  UFLFacetNormal const facet_normal_;
-  UFLSpatialCoordinate const x_;
+  CellSurfaceArea const cell_surface_area_;
+  CellVolume const cell_volume_;
+  Circumradius const circumradius_;
+  FacetArea const facet_area_;
+  FacetNormal const facet_normal_;
+  SpatialCoordinate const x_;
 
   std::string const repr_;
   std::string const str_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_CELL_H */

@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,18 +20,18 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLCircumradius : public UFLGeometricQuantity
+class Circumradius : public GeometricQuantity
 {
 
 public:
 
   ///
-  UFLCircumradius(UFLCell const& cell);
+  Circumradius(Cell const& cell);
 
   ///
-  ~UFLCircumradius();
+  ~Circumradius();
 
   ///
   ValueArray const& shape() const;
@@ -51,5 +51,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_CIRCUMRADIUS_H_ */

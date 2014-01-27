@@ -1,20 +1,19 @@
-/*
- * UFLCircumradius.cpp
- *
- *  Created on: Jan 24, 2014
- *      Author: larcher
- */
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLCircumradius.h>
 
 #include <dolfin/ufl/UFLCell.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLCircumradius::UFLCircumradius(UFLCell const& cell) :
-    UFLGeometricQuantity(cell),
+Circumradius::Circumradius(Cell const& cell) :
+    GeometricQuantity(cell),
     shape_(),
     repr_("Circumradius(" + cell.repr() + ")"),
     str_("circumradius")
@@ -23,26 +22,26 @@ UFLCircumradius::UFLCircumradius(UFLCell const& cell) :
 }
 
 //-----------------------------------------------------------------------------
-UFLCircumradius::~UFLCircumradius()
+Circumradius::~Circumradius()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& UFLCircumradius::shape() const
+ValueArray const& Circumradius::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCircumradius::repr() const
+std::string const Circumradius::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCircumradius::str() const
+std::string const Circumradius::str() const
 {
   return str_;
 }
 
-} /* namespace dolfin */
+} /* namespace ufl */

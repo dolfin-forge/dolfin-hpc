@@ -6,13 +6,15 @@
 
 #include <dolfin/ufl/UFLMixedElement.h>
 
-namespace dolfin
+namespace ufl
 {
 
+using dolfin::error;
+
 //-----------------------------------------------------------------------------
-UFLMixedElement::UFLMixedElement(
+MixedElement::MixedElement(
     FiniteElementBaseList const& elements ) :
-    UFLFiniteElementBase(UFLElementList::Mixed, get_cell(elements),
+    FiniteElementBase(ElementList::Mixed, get_cell(elements),
                          get_degree_max(elements)),
     sub_elements_(elements)
 {
@@ -23,8 +25,6 @@ UFLMixedElement::UFLMixedElement(
   }
 
   // Create string representation
-  UFLQuadratureScheme qs = "None";
-
   std::stringstream ssrepr;
   std::stringstream ssstr;
   ssrepr << "MixedElement(*[";
@@ -48,12 +48,12 @@ UFLMixedElement::UFLMixedElement(
 }
 
 //-----------------------------------------------------------------------------
-UFLMixedElement::~UFLMixedElement()
+MixedElement::~MixedElement()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool const UFLMixedElement::is_cellwise_constant() const
+bool const MixedElement::is_cellwise_constant() const
 {
   bool ret = true;
   for ( FiniteElementBaseList::const_iterator it = sub_elements_.begin();
@@ -65,13 +65,13 @@ bool const UFLMixedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const UFLMixedElement::symmetry() const
+std::map<uint, uint> const MixedElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const UFLMixedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   check_component(i);
@@ -121,7 +121,7 @@ std::pair<ValueArray, ValueArray> const UFLMixedElement::extract_subelement_comp
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, UFLFiniteElementBase const * const> const UFLMixedElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const> const MixedElement::extract_component(ValueArray const& i) const
 {
   ValueArray subidx;
   subidx.insert(subidx.begin(),i.begin()+1,i.end());
@@ -129,13 +129,13 @@ std::pair<uint, UFLFiniteElementBase const * const> const UFLMixedElement::extra
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLMixedElement::num_sub_elements() const
+uint const MixedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
 
 //-----------------------------------------------------------------------------
-UFLFiniteElementBase::FiniteElementBaseList const& UFLMixedElement::sub_elements() const
+FiniteElementBase::FiniteElementBaseList const& MixedElement::sub_elements() const
 {
   return sub_elements_;
 }

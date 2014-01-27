@@ -1,20 +1,19 @@
-/*
- * UFLCellSurfaceArea.cpp
- *
- *  Created on: Jan 24, 2014
- *      Author: larcher
- */
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLCellSurfaceArea.h>
 
 #include <dolfin/ufl/UFLCell.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLCellSurfaceArea::UFLCellSurfaceArea(UFLCell const& cell) :
-    UFLGeometricQuantity(cell),
+CellSurfaceArea::CellSurfaceArea(Cell const& cell) :
+    GeometricQuantity(cell),
     shape_(),
     repr_("CellSurfaceArea(" + cell.repr() + ")"),
     str_("surfacearea")
@@ -23,26 +22,26 @@ UFLCellSurfaceArea::UFLCellSurfaceArea(UFLCell const& cell) :
 }
 
 //-----------------------------------------------------------------------------
-UFLCellSurfaceArea::~UFLCellSurfaceArea()
+CellSurfaceArea::~CellSurfaceArea()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& UFLCellSurfaceArea::shape() const
+ValueArray const& CellSurfaceArea::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCellSurfaceArea::repr() const
+std::string const CellSurfaceArea::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLCellSurfaceArea::str() const
+std::string const CellSurfaceArea::str() const
 {
   return str_;
 }
 
-} /* namespace dolfin */
+} /* namespace ufl */

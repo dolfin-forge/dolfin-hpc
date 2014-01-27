@@ -8,30 +8,30 @@
 
 #include <sstream>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLQuadratureScheme::UFLQuadratureScheme() :
-    UFLClass(),
-    repr_("QuadratureScheme"),
-    str_()
-{
-}
-
-//-----------------------------------------------------------------------------
-UFLQuadratureScheme::~UFLQuadratureScheme()
+QuadratureScheme::QuadratureScheme() :
+    Class(),
+    repr_("None"),
+    str_("None")
 {
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLQuadratureScheme::repr() const
+QuadratureScheme::~QuadratureScheme()
+{
+}
+
+//-----------------------------------------------------------------------------
+std::string const QuadratureScheme::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLQuadratureScheme::str() const
+std::string const QuadratureScheme::str() const
 {
   return str_;
 }

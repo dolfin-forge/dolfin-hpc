@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,18 +20,18 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLSpatialCoordinate : public UFLGeometricQuantity
+class SpatialCoordinate : public GeometricQuantity
 {
 
 public:
 
   ///
-  UFLSpatialCoordinate(UFLCell const& cell);
+  SpatialCoordinate(Cell const& cell);
 
   ///
-  ~UFLSpatialCoordinate();
+  ~SpatialCoordinate();
 
   ///
   bool const is_cellwise_constant();
@@ -54,5 +54,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_SPATIAL_COORDINATE_H_ */

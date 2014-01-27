@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,18 +20,18 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLFacetNormal : public UFLGeometricQuantity
+class FacetNormal : public GeometricQuantity
 {
 
 public:
 
   ///
-  UFLFacetNormal(UFLCell const& cell);
+  FacetNormal(Cell const& cell);
 
   ///
-  ~UFLFacetNormal();
+  ~FacetNormal();
 
   ///
   ValueArray const& shape() const;
@@ -51,5 +51,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_FACET_NORMAL_H_ */

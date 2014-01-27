@@ -1,20 +1,19 @@
-/*
- * UFLSpatialCoordinate.cpp
- *
- *  Created on: Jan 24, 2014
- *      Author: larcher
- */
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLSpatialCoordinate.h>
 
 #include <dolfin/ufl/UFLCell.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLSpatialCoordinate::UFLSpatialCoordinate(UFLCell const& cell) :
-    UFLGeometricQuantity(cell),
+SpatialCoordinate::SpatialCoordinate(Cell const& cell) :
+    GeometricQuantity(cell),
     shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
     repr_("SpatialCoordinate(" + cell.repr() + ")"),
     str_("x")
@@ -22,26 +21,26 @@ UFLSpatialCoordinate::UFLSpatialCoordinate(UFLCell const& cell) :
 }
 
 //-----------------------------------------------------------------------------
-UFLSpatialCoordinate::~UFLSpatialCoordinate()
+SpatialCoordinate::~SpatialCoordinate()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& UFLSpatialCoordinate::shape() const
+ValueArray const& SpatialCoordinate::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLSpatialCoordinate::repr() const
+std::string const SpatialCoordinate::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLSpatialCoordinate::str() const
+std::string const SpatialCoordinate::str() const
 {
   return str_;
 }
 
-} /* namespace dolfin */
+} /* namespace ufl */

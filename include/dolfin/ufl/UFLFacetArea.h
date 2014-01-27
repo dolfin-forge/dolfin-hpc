@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -20,18 +20,18 @@ namespace dolfin
  *  @brief
  */
 
-class UFLCell;
+class Cell;
 
-class UFLFacetArea : public UFLGeometricQuantity
+class FacetArea : public GeometricQuantity
 {
 
 public:
 
   ///
-  UFLFacetArea(UFLCell const& cell);
+  FacetArea(Cell const& cell);
 
   ///
-  ~UFLFacetArea();
+  ~FacetArea();
 
   ///
   ValueArray const& shape() const;
@@ -51,5 +51,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_FACET_AREA_H_ */

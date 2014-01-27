@@ -7,10 +7,12 @@
 #ifndef __UFL_DOMAIN_H_
 #define __UFL_DOMAIN_H_
 
+#include <dolfin/ufl/UFLClass.h>
+
 #include <map>
 #include <string>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -21,7 +23,7 @@ namespace dolfin
  *  @brief  Provides a C++ equivalent to ufl_domains from ufl.geometry.
  */
 
-class UFLDomain
+class Domain : public Class
 {
 
 public:
@@ -41,6 +43,12 @@ public:
   };
 
   ///
+  Domain(Type const& t);
+
+  ///
+  ~Domain();
+
+  ///
   static Type const facet(Type const& t);
 
   ///
@@ -52,15 +60,19 @@ public:
   ///
   static std::string const str(Type const& t);
 
+  /// __repr__
+  std::string const repr() const;
+
+  /// __str__
+  std::string const str() const;
+
 private:
 
-  UFLDomain()
-  {
-  }
+  Domain::Type const domain_;
+  std::string const repr_;
+  std::string const str_;
 
-  ~UFLDomain()
-  {
-  }
+  //--- STATIC ----------------------------------------------------------------
 
   struct Definition
   {
@@ -85,5 +97,5 @@ private:
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_DOMAIN_H */

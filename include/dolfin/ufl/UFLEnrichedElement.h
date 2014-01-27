@@ -10,7 +10,7 @@
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 #include <dolfin/ufl/UFLCell.h>
 
-namespace dolfin
+namespace ufl
 {
 
 /**
@@ -21,16 +21,16 @@ namespace dolfin
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class UFLEnrichedElement : public UFLFiniteElementBase
+class EnrichedElement : public FiniteElementBase
 {
 
 public:
 
   ///
-  UFLEnrichedElement(FiniteElementBaseList const& elements);
+  EnrichedElement(FiniteElementBaseList const& elements);
 
   ///
-  ~UFLEnrichedElement();
+  ~EnrichedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -49,7 +49,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
 
   /// Return number of sub elements
   uint const num_sub_elements() const;
@@ -67,12 +67,12 @@ protected:
 
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase::FiniteElementBaseList const sub_elements_;
+  FiniteElementBase::FiniteElementBaseList const sub_elements_;
 
   mutable std::string repr_;
   mutable std::string str_;
 
 };
 
-} /* namespace dolfin */
+} /* namespace ufl */
 #endif /* __UFL_ENRICHED_ELEMENT_H_ */

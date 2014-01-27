@@ -8,11 +8,13 @@
 
 #include <dolfin/common/types.h>
 
-namespace dolfin
+using dolfin::DOLFIN_UINT_UNDEF;
+
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLDomain::DefinitionList const UFLDomain::__init_domain_definitions()
+Domain::DefinitionList const Domain::__init_domain_definitions()
 {
   DefinitionList m;
   m.insert(DefinitionItem(None , Definition(DOLFIN_UINT_UNDEF, None , DOLFIN_UINT_UNDEF, "None") ));
@@ -29,31 +31,56 @@ UFLDomain::DefinitionList const UFLDomain::__init_domain_definitions()
 }
 
 //-----------------------------------------------------------------------------
-UFLDomain::DefinitionList const UFLDomain::DomainDefinitions =
+Domain::DefinitionList const Domain::DomainDefinitions =
     __init_domain_definitions();
 
 //-----------------------------------------------------------------------------
-UFLDomain::Type const UFLDomain::facet(Type const& t)
+Domain::Domain(Type const& t) :
+    domain_(t),
+    repr_(Domain::str(t)),
+    str_(Domain::str(t))
+{
+}
+
+//-----------------------------------------------------------------------------
+Domain::~Domain()
+{
+}
+
+//-----------------------------------------------------------------------------
+Domain::Type const Domain::facet(Type const& t)
 {
   return DomainDefinitions.find(t)->second.facet;
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLDomain::dim(Type const& t)
+uint const Domain::dim(Type const& t)
 {
   return DomainDefinitions.find(t)->second.dim;
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLDomain::num_facets(Type const& t)
+uint const Domain::num_facets(Type const& t)
 {
   return DomainDefinitions.find(t)->second.num_facets;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLDomain::str(Type const& t)
+std::string const Domain::str(Type const& t)
 {
   return DomainDefinitions.find(t)->second.str;
+}
+
+//-----------------------------------------------------------------------------
+std::string const Domain::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const Domain::str() const
+{
+  return str_;
 }
 
 }

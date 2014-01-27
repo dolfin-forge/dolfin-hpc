@@ -1,18 +1,17 @@
-/*
- * UFLFacetNormal.cpp
- *
- *  Created on: Jan 24, 2014
- *      Author: larcher
- */
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLFacetNormal.h>
 
-namespace dolfin
+namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-UFLFacetNormal::UFLFacetNormal(UFLCell const& cell) :
-    UFLGeometricQuantity(cell),
+FacetNormal::FacetNormal(Cell const& cell) :
+    GeometricQuantity(cell),
     shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
     repr_("FacetNormal(" + cell.repr() + ")"),
     str_("n")
@@ -21,26 +20,26 @@ UFLFacetNormal::UFLFacetNormal(UFLCell const& cell) :
 }
 
 //-----------------------------------------------------------------------------
-UFLFacetNormal::~UFLFacetNormal()
+FacetNormal::~FacetNormal()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& UFLFacetNormal::shape() const
+ValueArray const& FacetNormal::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLFacetNormal::repr() const
+std::string const FacetNormal::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const UFLFacetNormal::str() const
+std::string const FacetNormal::str() const
 {
   return str_;
 }
 
-} /* namespace dolfin */
+} /* namespace ufl */

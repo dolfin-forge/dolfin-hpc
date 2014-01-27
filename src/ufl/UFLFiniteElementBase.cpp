@@ -1,0 +1,109 @@
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
+
+#include <dolfin/ufl/UFLFiniteElementBase.h>
+
+namespace ufl
+{
+
+using dolfin::error;
+
+//-----------------------------------------------------------------------------
+FiniteElementBase::FiniteElementBase(ElementList::FamilyType family,
+                                           Cell const& cell,
+                                           uint const degree,
+                                           QuadratureScheme quad_scheme,
+                                           ValueArray value_shape) :
+    Class(),
+    family_(family),
+    cell_(cell),
+    degree_(degree),
+    quad_scheme_(quad_scheme),
+    value_shape_(value_shape)
+{
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementBase::~FiniteElementBase()
+{
+}
+
+//-----------------------------------------------------------------------------
+ElementList::FamilyType const FiniteElementBase::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+Cell const FiniteElementBase::cell() const
+{
+  return cell_;
+}
+
+//-----------------------------------------------------------------------------
+uint const FiniteElementBase::degree() const
+{
+  return degree_;
+}
+
+//-----------------------------------------------------------------------------
+ValueArray const FiniteElementBase::value_shape() const
+{
+  return value_shape_;
+}
+
+//-----------------------------------------------------------------------------
+bool FiniteElementBase::component_is_valid(ValueArray const& i) const
+{
+  uint r = value_shape_.size();
+  bool range_ok = true;
+  for(size_t idx = 0; idx < value_shape_.size(); ++idx)
+  {
+    range_ok = range_ok && (i[idx] < value_shape_[idx]);
+  }
+  return ( i.size() == r && range_ok);
+}
+
+//-----------------------------------------------------------------------------
+void FiniteElementBase::check_component(ValueArray const& i) const
+{
+  if(!component_is_valid(i))
+  {
+    error("Requested component is invalid");
+  }
+}
+
+//-----------------------------------------------------------------------------
+Cell const FiniteElementBase::get_cell(
+    FiniteElementBaseList const& elements)
+{
+  FiniteElementBaseList::const_iterator it = elements.begin();
+  Cell ret = (*it)->cell();
+  for (++it ; it != elements.end(); ++it)
+  {
+    if( ret.repr() != (*it)->cell().repr())
+    {
+      error("All subelements of mixed element should have the same cell.");
+    }
+  }
+  return ret;
+}
+
+//-----------------------------------------------------------------------------
+uint const FiniteElementBase::get_degree_max(
+    FiniteElementBaseList const& elements)
+{
+  uint ret = 0;
+  for (FiniteElementBaseList::const_iterator it = elements.begin();
+       it != elements.end(); ++it)
+  {
+    ret = std::max((*it)->degree(), ret);
+  }
+  return ret;
+}
+
+}
+

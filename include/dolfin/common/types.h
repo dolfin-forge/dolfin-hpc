@@ -29,6 +29,9 @@
 #include <set>
 #endif
 
+#include <climits>
+#include <cfloat>
+
 namespace dolfin
 {
 
@@ -43,6 +46,18 @@ namespace dolfin
 
   // Complex numbers
   typedef std::complex<double> complex;
+
+  uint const DOLFIN_UINT_MIN = 0;
+  uint const DOLFIN_UINT_MAX = UINT_MAX;
+  uint const DOLFIN_UINT_UNDEF = UINT_MAX;
+
+  int const DOLFIN_INT_MIN = INT_MIN;
+  int const DOLFIN_INT_MAX = INT_MAX;
+  int const DOLFIN_INT_UNDEF = INT_MAX;
+
+  real const DOLFIN_REAL_MIN = DBL_MIN;
+  real const DOLFIN_REAL_MAX = DBL_MAX;
+  real const DOLFIN_REAL_UNDEF = DBL_MAX;
 
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #define _map std::tr1::unordered_map

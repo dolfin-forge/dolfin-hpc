@@ -1,0 +1,84 @@
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-21
+// Last changed: 2014-01-21
+
+#ifndef __UFL_CLASS_H_
+#define __UFL_CLASS_H_
+
+#include <string>
+#include <vector>
+
+namespace ufl
+{
+
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Cell
+ *
+ *  @brief  Provides an interface for Python objects from UFL.
+ */
+
+class Class
+{
+
+public:
+
+  /// __repr__
+  virtual std::string const repr() const = 0;
+
+  /// __str__
+  virtual std::string const str() const = 0;
+
+  /// __eq__
+  bool operator == (Class const& other) const;
+
+protected:
+
+  Class();
+
+  virtual ~Class();
+
+private:
+
+  static std::string const default_repr_;
+  static std::string const default_str_;
+
+};
+
+//-----------------------------------------------------------------------------
+inline bool Class::operator == (Class const& other) const
+{
+    return ( other.repr() == this->repr() );
+}
+
+//-----------------------------------------------------------------------------
+class ValueArray : public std::vector<uint>
+{
+
+public:
+
+  ///
+  ValueArray();
+
+  ///
+  ValueArray(uint const i);
+
+  ///
+  ValueArray(uint const k, uint const i);
+
+  ///
+  ~ValueArray();
+
+  ///
+  std::string const str() const;
+
+private:
+
+};
+
+
+} /* namespace ufl */
+#endif /* __UFL_CLASS_H */

@@ -66,22 +66,22 @@ public:
 
   //---------------------------------------------------------------------------
 
-  /// Return whether this cell is undefined
+  /// UFL: Return whether this cell is undefined
   bool const& is_undefined() const;
 
-  /// Return the domain of the cell
+  /// UFL: Return the domain of the cell
   Domain const domain() const;
 
-  /// Return the domain of the facet of this cell
+  /// UFL: Return the domain of the facet of this cell
   Domain const facet_domain() const;
 
-  /// Return the number of facets this cell has
+  /// UFL: Return the number of facets this cell has
   uint const num_facets() const;
 
-  /// Return the dimension of the space this cell is embedded in
+  /// UFL: Return the dimension of the space this cell is embedded in
   uint const geometric_dimension() const;
 
-  /// Return the dimension of the topology of this cell
+  /// UFL: Return the dimension of the topology of this cell
   uint const topological_dimension() const;
 
   /// The dimension of the cell is only valid is the geometric and topological
@@ -96,26 +96,31 @@ public:
   /// __str__
   std::string const str() const;
 
+  ///
+  void display() const;
+
 private:
 
   Domain const domain_;
   Space const space_;
+
+  // Do not put the initialization of these variables at the end as the
+  // GeometricalQuantities require the representation string to be valid.
+  repr_t const repr_;
+  std::string const str_;
 
   bool const invalid_;
 
   uint const geometric_dimension_;
   uint const topological_dimension_;
 
-  /// Geometrical quantities
+  /// GeometricalQuantities
   CellSurfaceArea const cell_surface_area_;
   CellVolume const cell_volume_;
   Circumradius const circumradius_;
   FacetArea const facet_area_;
   FacetNormal const facet_normal_;
   SpatialCoordinate const x_;
-
-  repr_t const repr_;
-  std::string const str_;
 
 };
 

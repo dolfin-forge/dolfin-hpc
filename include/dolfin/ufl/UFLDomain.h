@@ -86,17 +86,20 @@ public:
   ///
   static std::string const str(Type const& t);
 
-  ///
+  /// UFL:
   Type const facet() const;
 
-  ///
+  /// UFL:
   uint const dim() const;
 
-  ///
+  /// UFL:
   uint const num_facets() const;
 
   ///
   Type const type() const;
+
+  ///
+  bool const is_undefined() const;
 
   /// __repr__
   repr_t const repr() const;

@@ -15,7 +15,7 @@ namespace ufl
 Circumradius::Circumradius(Cell const& cell) :
     GeometricQuantity("Circumradius", cell),
     shape_(),
-    repr_("Circumradius(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("circumradius")
 
 {

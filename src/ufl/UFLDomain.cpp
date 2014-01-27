@@ -20,16 +20,30 @@ namespace ufl
 Domain::DefinitionList const Domain::__init_domain_definitions()
 {
   DefinitionList m;
-  m.insert(DefinitionItem(None , Definition(DOLFIN_UINT_UNDEF, None , DOLFIN_UINT_UNDEF, "None") ));
-  m.insert(DefinitionItem(cell1D , Definition(1, vertex, DOLFIN_UINT_UNDEF, "cell1D") ));
-  m.insert(DefinitionItem(cell2D , Definition(2, cell1D , DOLFIN_UINT_UNDEF, "cell2D") ));
-  m.insert(DefinitionItem(cell3D , Definition(3, cell2D , DOLFIN_UINT_UNDEF, "cell3D") ));
-  m.insert(DefinitionItem(vertex , Definition(0, None, 0, "vertex") ));
-  m.insert(DefinitionItem(interval , Definition(1, vertex, 2, "interval") ));
-  m.insert(DefinitionItem(triangle , Definition(2, interval, 3, "triangle") ));
-  m.insert(DefinitionItem(tetrahedron , Definition(3, triangle, 4, "tetrahedron") ));
-  m.insert(DefinitionItem(quadrilateral , Definition(2, interval, 4, "quadrilateral") ));
-  m.insert(DefinitionItem(hexahedron, Definition(3, quadrilateral, 6, "hexahedron") ));
+  m.insert(
+      DefinitionItem(
+          None,
+          Definition(DOLFIN_UINT_UNDEF, None, DOLFIN_UINT_UNDEF, "None")));
+  m.insert(
+      DefinitionItem(cell1D,
+                     Definition(1, vertex, DOLFIN_UINT_UNDEF, "cell1D")));
+  m.insert(
+      DefinitionItem(cell2D,
+                     Definition(2, cell1D, DOLFIN_UINT_UNDEF, "cell2D")));
+  m.insert(
+      DefinitionItem(cell3D,
+                     Definition(3, cell2D, DOLFIN_UINT_UNDEF, "cell3D")));
+  m.insert(DefinitionItem(vertex, Definition(0, None, 0, "vertex")));
+  m.insert(DefinitionItem(interval, Definition(1, vertex, 2, "interval")));
+  m.insert(DefinitionItem(triangle, Definition(2, interval, 3, "triangle")));
+  m.insert(
+      DefinitionItem(tetrahedron, Definition(3, triangle, 4, "tetrahedron")));
+  m.insert(
+      DefinitionItem(quadrilateral,
+                     Definition(2, interval, 4, "quadrilateral")));
+  m.insert(
+      DefinitionItem(hexahedron,
+                     Definition(3, quadrilateral, 6, "hexahedron")));
   return m;
 }
 
@@ -37,7 +51,7 @@ Domain::DefinitionList const Domain::__init_domain_definitions()
 Domain::Domain(Type const& t) :
     Object(),
     domain_(t),
-    repr_(Domain::str(t)),
+    repr_("'"+Domain::str(t)+"'"),
     str_(Domain::str(t))
 {
 }
@@ -96,6 +110,12 @@ Domain::Type const Domain::type() const
 }
 
 //-----------------------------------------------------------------------------
+bool const Domain::is_undefined() const
+{
+  return domain_ == Domain::None;
+}
+
+//-----------------------------------------------------------------------------
 Object::repr_t const Domain::repr() const
 {
   return repr_;
@@ -111,9 +131,12 @@ std::string const Domain::str() const
 void Domain::display() const
 {
   Object::display();
-  std::cout << std::setw(16) << "dimension" << " = " << this->dim() << std::endl;
-  std::cout << std::setw(16) << "facet" << " = " << Domain::str(this->facet()) << std::endl;
-  std::cout << std::setw(16) << "num_facets" << " = " << this->num_facets() << std::endl;
+  std::cout << std::setw(16) << "dimension" << " = " << this->dim()
+      << std::endl;
+  std::cout << std::setw(16) << "facet" << " = " << Domain::str(this->facet())
+      << std::endl;
+  std::cout << std::setw(16) << "num_facets" << " = " << this->num_facets()
+      << std::endl;
   std::cout << std::endl;
 }
 

@@ -15,7 +15,7 @@ namespace ufl
 CellVolume::CellVolume(Cell const& cell) :
     GeometricQuantity("CellVolume", cell),
     shape_(),
-    repr_("CellVolume(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("volume")
 
 {

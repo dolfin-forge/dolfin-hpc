@@ -6,6 +6,7 @@
 #include <dolfin/ufl/UFLSpace.h>
 
 using ufl::Cell;
+using ufl::CellSurfaceArea;
 using ufl::Domain;
 using ufl::Space;
 
@@ -45,6 +46,9 @@ START_TEST( test_init_cell )
 
 	  Space s(d.dim());
 	  s.display();
+
+	  Cell c(d,s);
+	  c.display();
 	}
 
 	fail_unless( init_failed == 0 );

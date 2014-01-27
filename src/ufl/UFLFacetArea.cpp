@@ -15,7 +15,7 @@ namespace ufl
 FacetArea::FacetArea(Cell const& cell) :
     GeometricQuantity("FacetArea", cell),
     shape_(),
-    repr_("FacetArea(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("facetarea")
 
 {

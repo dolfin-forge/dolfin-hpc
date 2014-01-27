@@ -33,7 +33,7 @@ public:
   ///
   ~Space();
 
-  /// Return number of space dimensions
+  /// UFL: Return number of space dimensions
   uint dimension() const;
 
   /// __repr__

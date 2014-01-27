@@ -109,6 +109,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/DofMapSet.h\
 				fem/FiniteElement.h\
 				fem/Form.h\
+				fem/FormExpansion.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
 				fem/SlipBC.h\

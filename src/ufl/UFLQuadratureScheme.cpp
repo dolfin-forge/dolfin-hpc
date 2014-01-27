@@ -25,7 +25,7 @@ QuadratureScheme::~QuadratureScheme()
 }
 
 //-----------------------------------------------------------------------------
-std::string const QuadratureScheme::repr() const
+Object::repr_t const QuadratureScheme::repr() const
 {
   return repr_;
 }

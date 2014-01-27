@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include <dolfin/ufl/UFLrepr.h>
+
 namespace ufl
 {
 
@@ -26,14 +28,16 @@ class Object
 
 public:
 
+  typedef ufl::repr repr_t;
+
   /// __repr__
-  virtual std::string const repr() const = 0;
+  virtual repr_t const repr() const = 0;
 
   /// __str__
   virtual std::string const str() const = 0;
 
   /// __eq__
-  bool operator == (Object const& other) const;
+  virtual bool operator == (Object const& other) const;
 
 protected:
 

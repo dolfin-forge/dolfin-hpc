@@ -149,7 +149,7 @@ public:
   DomainSet domains(FamilyType const type) const;
 
   ///
-  std::string const repr(FamilyType const type) const;
+  Object::repr_t const repr(FamilyType const type) const;
 
   ///
   void display() const;

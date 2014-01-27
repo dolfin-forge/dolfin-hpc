@@ -33,7 +33,7 @@ ValueArray const& CellSurfaceArea::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const CellSurfaceArea::repr() const
+Object::repr_t const CellSurfaceArea::repr() const
 {
   return repr_;
 }

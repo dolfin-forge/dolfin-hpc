@@ -36,7 +36,7 @@ uint Space::dimension() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const Space::repr() const
+Object::repr_t const Space::repr() const
 {
   return repr_;
 }

@@ -208,9 +208,9 @@ std::set<Domain::Type> ElementList::domains(FamilyType const type) const
 }
 
 //-----------------------------------------------------------------------------
-std::string const ElementList::repr(FamilyType const type) const
+Object::repr_t const ElementList::repr(FamilyType const type) const
 {
-  return name(type);
+  return Object::repr_t(name(type));
 }
 
 //-----------------------------------------------------------------------------

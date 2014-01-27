@@ -31,7 +31,7 @@ ValueArray const& FacetNormal::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetNormal::repr() const
+Object::repr_t const FacetNormal::repr() const
 {
   return repr_;
 }

@@ -10,30 +10,32 @@
 #include <string>
 #include <vector>
 
+#include <dolfin/ufl/UFLObject.h>
+
 namespace ufl
 {
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  Cell
+ *  @class  Class
  *
- *  @brief  Provides an interface for Python objects from UFL.
+ *  @brief  Provides an interface for Python classes from UFL.
  */
 
-class Class
+class Class : public Object
 {
 
 public:
 
   /// __repr__
-  virtual std::string const repr() const = 0;
+  virtual repr_t const repr() const = 0;
 
   /// __str__
   virtual std::string const str() const = 0;
 
   /// __eq__
-  bool operator == (Class const& other) const;
+  virtual bool operator == (Class const& other) const;
 
 protected:
 
@@ -43,7 +45,7 @@ protected:
 
 private:
 
-  static std::string const default_repr_;
+  static repr_t const default_repr_;
   static std::string const default_str_;
 
 };

@@ -59,7 +59,7 @@ public:
   FiniteElementBaseList const& sub_elements() const;
 
   /// __repr__
-  std::string const repr() const;
+  repr_t const repr() const;
 
   /// __str__
   std::string const str() const;

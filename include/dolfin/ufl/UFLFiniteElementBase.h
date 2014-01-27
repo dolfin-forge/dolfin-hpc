@@ -96,7 +96,7 @@ public:
   /// TODO: Unimplemented
 
   /// __repr__
-  virtual std::string const repr() const = 0;
+  virtual repr_t const repr() const = 0;
 
   /// __str__
   virtual std::string const str() const = 0;

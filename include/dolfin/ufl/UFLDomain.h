@@ -61,7 +61,7 @@ public:
   static std::string const str(Type const& t);
 
   /// __repr__
-  std::string const repr() const;
+  repr_t const repr() const;
 
   /// __str__
   std::string const str() const;
@@ -69,7 +69,7 @@ public:
 private:
 
   Domain::Type const domain_;
-  std::string const repr_;
+  repr_t const repr_;
   std::string const str_;
 
   //--- STATIC ----------------------------------------------------------------

@@ -72,7 +72,7 @@ std::string const Domain::str(Type const& t)
 }
 
 //-----------------------------------------------------------------------------
-std::string const Domain::repr() const
+Object::repr_t const Domain::repr() const
 {
   return repr_;
 }

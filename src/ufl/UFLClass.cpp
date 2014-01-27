@@ -11,8 +11,8 @@
 namespace ufl
 {
 
-std::string const Class::default_repr_ = "object";
-std::string const Class::default_str_ = "Class";
+Object::repr_t const Class::default_repr_ = Object::repr_t("Class");
+std::string const Class::default_str_ = "class";
 
 //-----------------------------------------------------------------------------
 Class::Class()
@@ -25,7 +25,7 @@ Class::~Class()
 }
 
 //-----------------------------------------------------------------------------
-std::string const Class::repr() const
+Object::repr_t const Class::repr() const
 {
   return default_repr_;
 }

@@ -122,7 +122,7 @@ uint const& Cell::topological_dimension() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const Cell::repr() const
+Object::repr_t const Cell::repr() const
 {
   return repr_;
 }

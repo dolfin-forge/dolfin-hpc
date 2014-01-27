@@ -70,7 +70,7 @@ private:
   std::map<uint, uint> const symmetry_;
   FiniteElementBaseList const sub_elements_;
 
-  mutable std::string repr_;
+  mutable repr_t repr_;
   mutable std::string str_;
 
 };

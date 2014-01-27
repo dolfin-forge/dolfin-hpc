@@ -46,7 +46,7 @@ private:
 
   uint const dimension_;
 
-  mutable std::string repr_;
+  mutable repr_t repr_;
   mutable std::string str_;
 
 };

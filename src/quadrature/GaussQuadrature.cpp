@@ -44,6 +44,12 @@ void GaussQuadrature::computePoints()
   // Compute Gauss quadrature points on [-1,1] as the
   // as the zeroes of the Legendre polynomials using Newton's method
   
+  if ( n < 1 )
+  {
+    error("Degree of rule must be at least 1, but given degree was %d", n);
+    return;
+  }
+  
   // Special case n = 1
   if ( n == 1 )
   {
@@ -57,14 +63,15 @@ void GaussQuadrature::computePoints()
   // Compute the points by Newton's method
   for (unsigned int i = 0; i <= ((n-1)/2); i++) 
   {
-    
     // Initial guess
     x = cos(DOLFIN_PI*(real(i+1)-0.25)/(real(n)+0.5));
     
     // Newton's method
+    unsigned int step = 0;
     do {
       dx = - p(x) / p.ddx(x);
       x  = x + dx;
+      step++;
     } while ( fabs(dx) > DOLFIN_EPS );
     
     // Save the value using the symmetry of the points

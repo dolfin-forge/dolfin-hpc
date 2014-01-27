@@ -102,6 +102,7 @@ public:
     U,
     Mixed,
     Vector,
+    Tensor,
     Enriched,
     Restricted
   };

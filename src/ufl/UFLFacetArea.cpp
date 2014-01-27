@@ -28,7 +28,7 @@ UFLFacetArea::~UFLFacetArea()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLFacetArea::shape() const
+ValueArray const& UFLFacetArea::shape() const
 {
   return shape_;
 }

@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_H_
-#define __UFL_FINITE_ELEMENT_H_
+#ifndef __UFL_MIXED_ELEMENT_H_
+#define __UFL_MIXED_ELEMENT_H_
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
@@ -15,25 +15,21 @@ namespace dolfin
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLFiniteElement
+ *  @class  UFLMixedElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class UFLFiniteElement : public UFLFiniteElementBase
+class UFLMixedElement : public UFLFiniteElementBase
 {
 
 public:
 
-  typedef UFLElementList::FamilyType FamilyType;
+  ///
+  UFLMixedElement(FiniteElementBaseList const& elements);
 
   ///
-  UFLFiniteElement(UFLElementList::FamilyType family,
-                   UFLCell const& cell,
-                   uint const degree);
-
-  ///
-  ~UFLFiniteElement();
+  ~UFLMixedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -68,9 +64,11 @@ public:
 
 protected:
 
+private:
+
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase::FiniteElementBaseList const sub_elements_;
+  FiniteElementBaseList const sub_elements_;
 
   mutable std::string repr_;
   mutable std::string str_;
@@ -78,4 +76,4 @@ protected:
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FINITE_ELEMENT_H_ */
+#endif /* __UFL_MIXED_ELEMENT_H_ */

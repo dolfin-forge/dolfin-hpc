@@ -4,10 +4,11 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_H_
-#define __UFL_FINITE_ELEMENT_H_
+#ifndef __UFL_ENRICHED_ELEMENT_H_
+#define __UFL_ENRICHED_ELEMENT_H_
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLCell.h>
 
 namespace dolfin
 {
@@ -15,25 +16,21 @@ namespace dolfin
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLFiniteElement
+ *  @class  UFLEnrichedElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class UFLFiniteElement : public UFLFiniteElementBase
+class UFLEnrichedElement : public UFLFiniteElementBase
 {
 
 public:
 
-  typedef UFLElementList::FamilyType FamilyType;
+  ///
+  UFLEnrichedElement(FiniteElementBaseList const& elements);
 
   ///
-  UFLFiniteElement(UFLElementList::FamilyType family,
-                   UFLCell const& cell,
-                   uint const degree);
-
-  ///
-  ~UFLFiniteElement();
+  ~UFLEnrichedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -78,4 +75,4 @@ protected:
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FINITE_ELEMENT_H_ */
+#endif /* __UFL_ENRICHED_ELEMENT_H_ */

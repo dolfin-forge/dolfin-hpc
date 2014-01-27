@@ -14,7 +14,7 @@ UFLFiniteElementBase::UFLFiniteElementBase(UFLElementList::FamilyType family,
                                            UFLCell const& cell,
                                            uint const degree,
                                            UFLQuadratureScheme quad_scheme,
-                                           ValueShape value_shape) :
+                                           ValueArray value_shape) :
     UFLClass(),
     family_(family),
     cell_(cell),
@@ -48,13 +48,13 @@ uint const UFLFiniteElementBase::degree() const
 }
 
 //-----------------------------------------------------------------------------
-ValueShape const UFLFiniteElementBase::value_shape() const
+ValueArray const UFLFiniteElementBase::value_shape() const
 {
   return value_shape_;
 }
 
 //-----------------------------------------------------------------------------
-bool UFLFiniteElementBase::component_is_valid(std::vector<uint> const i)
+bool UFLFiniteElementBase::component_is_valid(ValueArray const& i) const
 {
   uint r = value_shape_.size();
   bool range_ok = true;
@@ -66,10 +66,19 @@ bool UFLFiniteElementBase::component_is_valid(std::vector<uint> const i)
 }
 
 //-----------------------------------------------------------------------------
-UFLCell const UFLFiniteElementBase::get_cell(
-    std::vector<UFLFiniteElementBase const *> const& elements)
+void UFLFiniteElementBase::check_component(ValueArray const& i) const
 {
-  std::vector<UFLFiniteElementBase const *>::const_iterator it = elements.begin();
+  if(!component_is_valid(i))
+  {
+    error("Requested component is invalid");
+  }
+}
+
+//-----------------------------------------------------------------------------
+UFLCell const UFLFiniteElementBase::get_cell(
+    FiniteElementBaseList const& elements)
+{
+  FiniteElementBaseList::const_iterator it = elements.begin();
   UFLCell ret = (*it)->cell();
   for (++it ; it != elements.end(); ++it)
   {
@@ -83,10 +92,10 @@ UFLCell const UFLFiniteElementBase::get_cell(
 
 //-----------------------------------------------------------------------------
 uint const UFLFiniteElementBase::get_degree_max(
-    std::vector<UFLFiniteElementBase const *> const& elements)
+    FiniteElementBaseList const& elements)
 {
   uint ret = 0;
-  for (std::vector<UFLFiniteElementBase const *>::const_iterator it = elements.begin();
+  for (FiniteElementBaseList::const_iterator it = elements.begin();
        it != elements.end(); ++it)
   {
     ret = std::max((*it)->degree(), ret);

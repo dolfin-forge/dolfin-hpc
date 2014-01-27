@@ -29,12 +29,14 @@ namespace dolfin
 
 ///TODO: Implement quadrature scheme
 typedef std::string UFLQuadratureScheme;
-typedef std::vector<uint> ValueShape;
 
 class UFLFiniteElementBase : public UFLClass
 {
 
 public:
+
+  //
+  typedef std::vector<UFLFiniteElementBase const *> FiniteElementBaseList;
 
   /// Return finite element family
   UFLElementList::FamilyType const family() const;
@@ -51,7 +53,7 @@ public:
 
   /// Return the shape of the value space
   /// Present in FIAT interface
-  ValueShape const value_shape() const;
+  ValueArray const value_shape() const;
 
   /// Return the domain onto which the element is restricted
   //UFLDomain::Type const domain_restriction() const;
@@ -68,18 +70,18 @@ public:
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
-  virtual std::pair<uint, uint> const extract_subelement_component(
-      uint i) const = 0;
+  virtual std::pair<ValueArray, ValueArray> const extract_subelement_component(
+      ValueArray const& i) const = 0;
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual uint const extract_component(uint i) const = 0;
+  virtual std::pair<uint, UFLFiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
 
   /// Return number of sub elements
   virtual uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
-  virtual std::vector<UFLFiniteElementBase const *> const& sub_elements() const = 0;
+  virtual FiniteElementBaseList const& sub_elements() const = 0;
 
   /// Operator: equality
   /// __eq__
@@ -108,19 +110,22 @@ protected:
                        UFLCell const& cell,
                        uint const degree,
                        UFLQuadratureScheme quad_scheme = "None",
-                       ValueShape value_shape = ValueShape());
+                       ValueArray value_shape = ValueArray());
 
   ///
   virtual ~UFLFiniteElementBase();
 
   ///
-  bool component_is_valid(std::vector<uint> const i);
+  bool component_is_valid(ValueArray const& i) const;
 
   ///
-  UFLCell const get_cell(std::vector<UFLFiniteElementBase const *> const& elements);
+  void check_component(ValueArray const& i) const;
 
   ///
-  uint const get_degree_max(std::vector<UFLFiniteElementBase const *> const& elements);
+  UFLCell const get_cell(FiniteElementBaseList const& elements);
+
+  ///
+  uint const get_degree_max(FiniteElementBaseList const& elements);
 
 private:
 
@@ -128,7 +133,7 @@ private:
   UFLCell const cell_;
   uint const degree_;
   UFLQuadratureScheme const quad_scheme_;
-  ValueShape const value_shape_;
+  ValueArray const value_shape_;
 
 };
 

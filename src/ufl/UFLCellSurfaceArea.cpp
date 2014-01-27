@@ -28,7 +28,7 @@ UFLCellSurfaceArea::~UFLCellSurfaceArea()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLCellSurfaceArea::shape() const
+ValueArray const& UFLCellSurfaceArea::shape() const
 {
   return shape_;
 }

@@ -28,7 +28,7 @@ UFLCircumradius::~UFLCircumradius()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLCircumradius::shape() const
+ValueArray const& UFLCircumradius::shape() const
 {
   return shape_;
 }

@@ -6,6 +6,8 @@
 
 #include <dolfin/ufl/UFLClass.h>
 
+#include <sstream>
+
 namespace dolfin
 {
 
@@ -32,6 +34,39 @@ std::string const UFLClass::repr() const
 std::string const UFLClass::str() const
 {
   return default_str_;
+}
+
+//-----------------------------------------------------------------------------
+ValueArray::ValueArray() : std::vector<uint>()
+{
+}
+
+//-----------------------------------------------------------------------------
+ValueArray::ValueArray(uint const i) : std::vector<uint>(1, i)
+{
+}
+
+//-----------------------------------------------------------------------------
+ValueArray::ValueArray(uint const k, uint const i) : std::vector<uint>(k,i)
+{
+}
+
+//-----------------------------------------------------------------------------
+ValueArray::~ValueArray()
+{
+}
+
+//-----------------------------------------------------------------------------
+std::string const ValueArray::str() const
+{
+  std::stringstream ss;
+  ss << "(";
+  for(ValueArray::const_iterator it = this->begin(); it != this->end(); ++it)
+  {
+    ss << *it << ",";
+  }
+  ss << ")";
+  return ss.str();
 }
 
 }

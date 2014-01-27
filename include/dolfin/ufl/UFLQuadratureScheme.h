@@ -4,10 +4,10 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FACET_AREA_H_
-#define __UFL_FACET_AREA_H_
+#ifndef __UFL_QUADRATURE_SCHEME_H_
+#define __UFL_QUADRATURE_SCHEME_H_
 
-#include <dolfin/ufl/UFLGeometricQuantity.h>
+#include <dolfin/ufl/UFLClass.h>
 
 namespace dolfin
 {
@@ -15,26 +15,21 @@ namespace dolfin
 /**
  *  DOCUMENTATION:
  *
- *  @class
+ *  @class  UFLQuadratureScheme
  *
- *  @brief
+ *  @brief  Provides an interface for UFL QuadratureScheme.
  */
 
-class UFLCell;
-
-class UFLFacetArea : public UFLGeometricQuantity
+class UFLQuadratureScheme : public UFLClass
 {
 
 public:
 
   ///
-  UFLFacetArea(UFLCell const& cell);
+  UFLQuadratureScheme();
 
   ///
-  ~UFLFacetArea();
-
-  ///
-  ValueArray const& shape() const;
+  ~UFLQuadratureScheme();
 
   /// __repr__
   std::string const repr() const;
@@ -44,12 +39,10 @@ public:
 
 private:
 
-  ValueArray const shape_;
-
   std::string const repr_;
   std::string const str_;
 
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FACET_AREA_H_ */
+#endif /* __UFL_CLASS_H */

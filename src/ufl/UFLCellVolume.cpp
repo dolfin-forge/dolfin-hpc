@@ -28,7 +28,7 @@ UFLCellVolume::~UFLCellVolume()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLCellVolume::shape() const
+ValueArray const& UFLCellVolume::shape() const
 {
   return shape_;
 }

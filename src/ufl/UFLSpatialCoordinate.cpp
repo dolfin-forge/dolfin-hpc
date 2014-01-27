@@ -27,7 +27,7 @@ UFLSpatialCoordinate::~UFLSpatialCoordinate()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLSpatialCoordinate::shape() const
+ValueArray const& UFLSpatialCoordinate::shape() const
 {
   return shape_;
 }

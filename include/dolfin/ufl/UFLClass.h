@@ -8,6 +8,7 @@
 #define __UFL_CLASS_H_
 
 #include <string>
+#include <vector>
 
 namespace dolfin
 {
@@ -52,6 +53,32 @@ inline bool UFLClass::operator == (UFLClass const& other) const
 {
     return ( other.repr() == this->repr() );
 }
+
+//-----------------------------------------------------------------------------
+class ValueArray : public std::vector<uint>
+{
+
+public:
+
+  ///
+  ValueArray();
+
+  ///
+  ValueArray(uint const i);
+
+  ///
+  ValueArray(uint const k, uint const i);
+
+  ///
+  ~ValueArray();
+
+  ///
+  std::string const str() const;
+
+private:
+
+};
+
 
 } /* namespace dolfin */
 #endif /* __UFL_CLASS_H */

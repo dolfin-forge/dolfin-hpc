@@ -12,6 +12,7 @@ libdolfin_ufl_la_SOURCES = UFLCell.cpp\
                            UFLFiniteElementBase.cpp\
                            UFLGeometricQuantity.cpp\
                            UFLMixedElement.cpp\
+                           UFLQuadratureScheme.cpp\
                            UFLRestrictedElement.cpp\
                            UFLSpace.cpp\
                            UFLSpatialCoordinate.cpp\

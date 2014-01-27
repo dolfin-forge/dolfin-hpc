@@ -4,10 +4,11 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_H_
-#define __UFL_FINITE_ELEMENT_H_
+#ifndef __UFL_VECTOR_ELEMENT_H_
+#define __UFL_VECTOR_ELEMENT_H_
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElement.h>
 
 namespace dolfin
 {
@@ -15,25 +16,22 @@ namespace dolfin
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLFiniteElement
+ *  @class  UFLVectorElement
  *
- *  @brief  Provides an interface complying with UFL FiniteElement.
+ *  @brief  Provides an interface complying with UFL VectorElement.
  */
 
-class UFLFiniteElement : public UFLFiniteElementBase
+class UFLVectorElement : public UFLFiniteElementBase
 {
 
 public:
 
-  typedef UFLElementList::FamilyType FamilyType;
+  ///
+  UFLVectorElement(UFLElementList::FamilyType family, UFLCell const& cell,
+                   uint const degree, uint const dim);
 
   ///
-  UFLFiniteElement(UFLElementList::FamilyType family,
-                   UFLCell const& cell,
-                   uint const degree);
-
-  ///
-  ~UFLFiniteElement();
+  ~UFLVectorElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -70,7 +68,8 @@ protected:
 
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase::FiniteElementBaseList const sub_elements_;
+  UFLFiniteElement const sub_element_;
+  FiniteElementBaseList const sub_elements_;
 
   mutable std::string repr_;
   mutable std::string str_;
@@ -78,4 +77,4 @@ protected:
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FINITE_ELEMENT_H_ */
+#endif /* __UFL_VECTOR_ELEMENT_H_ */

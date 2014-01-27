@@ -37,7 +37,7 @@ public:
   bool const is_cellwise_constant();
 
   ///
-  std::vector<uint> const& shape() const;
+  ValueArray const& shape() const;
 
   /// __repr__
   std::string const repr() const;
@@ -47,7 +47,7 @@ public:
 
 private:
 
-  std::vector<uint> const shape_;
+  ValueArray const shape_;
 
   std::string const repr_;
   std::string const str_;

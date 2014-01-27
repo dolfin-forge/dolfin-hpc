@@ -56,16 +56,17 @@ std::map<uint, uint> const UFLFiniteElement::symmetry() const
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, uint> const UFLFiniteElement::extract_subelement_component(
-      uint i) const
+std::pair<ValueArray, ValueArray> const UFLFiniteElement::extract_subelement_component(
+    ValueArray const& i) const
 {
   return std::pair<uint, uint>();
 }
 
 //-----------------------------------------------------------------------------
-uint const UFLFiniteElement::extract_component(uint i) const
+std::pair<uint, UFLFiniteElementBase const * const> const UFLFiniteElement::extract_component(ValueArray const& i) const
 {
-  return i;
+  check_component(i);
+  return std::pair<uint, UFLFiniteElementBase const * const>(i[0], this);
 }
 
 //-----------------------------------------------------------------------------
@@ -75,7 +76,7 @@ uint const UFLFiniteElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-std::vector<UFLFiniteElementBase const *> const& UFLFiniteElement::sub_elements() const
+UFLFiniteElementBase::FiniteElementBaseList const& UFLFiniteElement::sub_elements() const
 {
   return sub_elements_;
 }

@@ -38,7 +38,7 @@ public:
   UFLCell const& cell();
 
   ///
-  virtual std::vector<uint> const& shape() const = 0;
+  virtual ValueArray const& shape() const = 0;
 
   /// __repr__
   virtual std::string const repr() const = 0;

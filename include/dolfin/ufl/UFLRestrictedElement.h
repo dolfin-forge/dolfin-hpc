@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_H_
-#define __UFL_FINITE_ELEMENT_H_
+#ifndef __UFL_RESTRICTED_ELEMENT_H_
+#define __UFL_RESTRICTED_ELEMENT_H_
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
@@ -15,25 +15,22 @@ namespace dolfin
 /**
  *  DOCUMENTATION:
  *
- *  @class  UFLFiniteElement
+ *  @class  UFLRestrictedElement
  *
- *  @brief  Provides an interface complying with UFL FiniteElement.
+ *  @brief  Provides an interface complying with UFL RestrictedElement.
  */
 
-class UFLFiniteElement : public UFLFiniteElementBase
+class UFLRestrictedElement : public UFLFiniteElementBase
 {
 
 public:
 
-  typedef UFLElementList::FamilyType FamilyType;
+  ///
+  UFLRestrictedElement(UFLFiniteElementBase const& element,
+                       UFLDomain::Type const domain);
 
   ///
-  UFLFiniteElement(UFLElementList::FamilyType family,
-                   UFLCell const& cell,
-                   uint const degree);
-
-  ///
-  ~UFLFiniteElement();
+  ~UFLRestrictedElement();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -60,6 +57,11 @@ public:
   /// Return list of sub elements
   FiniteElementBaseList const& sub_elements() const;
 
+  //---------------------------------------------------------------------------
+
+  ///
+  UFLFiniteElementBase const& element();
+
   /// __repr__
   std::string const repr() const;
 
@@ -70,7 +72,7 @@ protected:
 
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
-  UFLFiniteElementBase::FiniteElementBaseList const sub_elements_;
+  UFLFiniteElementBase const& element_;
 
   mutable std::string repr_;
   mutable std::string str_;
@@ -78,4 +80,4 @@ protected:
 };
 
 } /* namespace dolfin */
-#endif /* __UFL_FINITE_ELEMENT_H_ */
+#endif /* __UFL_RESTRICTED_ELEMENT_H_ */

@@ -26,7 +26,7 @@ UFLFacetNormal::~UFLFacetNormal()
 }
 
 //-----------------------------------------------------------------------------
-std::vector<uint> const& UFLFacetNormal::shape() const
+ValueArray const& UFLFacetNormal::shape() const
 {
   return shape_;
 }

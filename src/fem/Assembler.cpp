@@ -24,6 +24,7 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/fem/Form.h>
+#include <dolfin/fem/FormExpansion.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/SparsityPatternBuilder.h>
@@ -282,6 +283,10 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
 
   // Create data structure for user defined quadrature
   UFCCellIntegral cell_integral;//(dof_map_set);
+
+  // Create data structure for form expansion since we do
+  // user defined quadrature
+  FormExpansion form_expansion(form, q);
 
   // Create data structure for local assembly data
   UFC ufc(form, mesh, dof_map_set);

@@ -27,4 +27,11 @@ Cell const& GeometricQuantity::cell()
   return cell_;
 }
 
+//-----------------------------------------------------------------------------
+void GeometricQuantity::display() const
+{
+  Class::display();
+  std::cout << std::endl;
+}
+
 }

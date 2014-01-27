@@ -46,6 +46,9 @@ public:
   /// __str__
   virtual std::string const str() const = 0;
 
+  ///
+  virtual void display() const;
+
 private:
 
   Cell const& cell_;

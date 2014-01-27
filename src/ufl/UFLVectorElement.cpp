@@ -13,7 +13,7 @@ namespace ufl
 VectorElement::VectorElement(ElementList::FamilyType family,
                                    Cell const& cell, uint const degree,
                                    uint const dim) :
-    FiniteElementBase(ElementList::Vector, cell, degree),
+    FiniteElementBase("VectorElement",ElementList::Vector, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {
@@ -80,6 +80,18 @@ uint const VectorElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& VectorElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const VectorElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const VectorElement::str() const
+{
+  return str_;
 }
 
 }

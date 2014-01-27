@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 QuadratureScheme::QuadratureScheme() :
-    Class(),
+    Class("QuadratureScheme"),
     repr_("None"),
     str_("None")
 {

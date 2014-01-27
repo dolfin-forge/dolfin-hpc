@@ -15,14 +15,15 @@ using dolfin::error;
 FiniteElement::FiniteElement(ElementList::FamilyType family,
                                            Cell const& cell,
                                            uint const degree) :
-    FiniteElementBase(family, cell, degree),
+    FiniteElementBase("FiniteElement", family, cell, degree),
     value_shape_(),
     symmetry_(),
     sub_elements_()
 {
   // Check finite element definition
   if(ElementList::Supported().has_valid_definition(family,
-                                                      cell.domain(), degree))
+                                                   cell.domain().type(),
+                                                   degree))
   {
     error("The finite element definition is not valid.");
   };
@@ -81,6 +82,18 @@ uint const FiniteElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& FiniteElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const FiniteElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const FiniteElement::str() const
+{
+  return str_;
 }
 
 }

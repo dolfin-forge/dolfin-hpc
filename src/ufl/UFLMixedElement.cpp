@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 MixedElement::MixedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase(ElementList::Mixed, get_cell(elements),
+    FiniteElementBase("MixedElement", ElementList::Mixed, get_cell(elements),
                          get_degree_max(elements)),
     sub_elements_(elements)
 {
@@ -138,6 +138,18 @@ uint const MixedElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& MixedElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const MixedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const MixedElement::str() const
+{
+  return str_;
 }
 
 }

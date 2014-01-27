@@ -12,12 +12,13 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBase(ElementList::FamilyType family,
-                                           Cell const& cell,
-                                           uint const degree,
-                                           QuadratureScheme quad_scheme,
-                                           ValueArray value_shape) :
-    Class(),
+FiniteElementBase::FiniteElementBase(std::string const& name,
+                                     ElementList::FamilyType family,
+                                     Cell const& cell,
+                                     uint const degree,
+                                     QuadratureScheme quad_scheme,
+                                     ValueArray value_shape) :
+    Class(name),
     family_(family),
     cell_(cell),
     degree_(degree),
@@ -47,6 +48,12 @@ Cell const FiniteElementBase::cell() const
 uint const FiniteElementBase::degree() const
 {
   return degree_;
+}
+
+//-----------------------------------------------------------------------------
+QuadratureScheme const FiniteElementBase::quadrature_scheme() const
+{
+  return quad_scheme_;
 }
 
 //-----------------------------------------------------------------------------

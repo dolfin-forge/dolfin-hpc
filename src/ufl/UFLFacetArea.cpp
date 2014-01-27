@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 FacetArea::FacetArea(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("FacetArea", cell),
     shape_(),
     repr_("FacetArea(" + cell.repr() + ")"),
     str_("facetarea")

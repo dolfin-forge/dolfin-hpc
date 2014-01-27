@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 CellSurfaceArea::CellSurfaceArea(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("CellSurfaceArea", cell),
     shape_(),
     repr_("CellSurfaceArea(" + cell.repr() + ")"),
     str_("surfacearea")

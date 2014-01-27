@@ -6,6 +6,7 @@
 
 #include <dolfin/ufl/UFLClass.h>
 
+#include <iostream>
 #include <sstream>
 
 namespace ufl
@@ -15,13 +16,26 @@ Object::repr_t const Class::default_repr_ = Object::repr_t("Class");
 std::string const Class::default_str_ = "class";
 
 //-----------------------------------------------------------------------------
-Class::Class()
+Class::Class() :
+    name_()
+{
+}
+
+//-----------------------------------------------------------------------------
+Class::Class(std::string const& name) :
+    name_(name)
 {
 }
 
 //-----------------------------------------------------------------------------
 Class::~Class()
 {
+}
+
+//-----------------------------------------------------------------------------
+std::string const& Class::name() const
+{
+  return name_;
 }
 
 //-----------------------------------------------------------------------------
@@ -34,6 +48,14 @@ Object::repr_t const Class::repr() const
 std::string const Class::str() const
 {
   return default_str_;
+}
+
+//-----------------------------------------------------------------------------
+void Class::display() const
+{
+  std::cout << "Class '" << this->name() << "'" << std::endl;
+  std::cout << ".str : " << this->str() << std::endl;
+  std::cout << ".repr: " << this->repr() << std::endl;
 }
 
 //-----------------------------------------------------------------------------

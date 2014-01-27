@@ -1,7 +1,16 @@
 
 #include <dolfin/config/dolfin_config.h>
 
+#include <dolfin/ufl/UFLCell.h>
+#include <dolfin/ufl/UFLDomain.h>
+#include <dolfin/ufl/UFLSpace.h>
+
+using ufl::Cell;
+using ufl::Domain;
+using ufl::Space;
+
 #include <iostream>
+#include <iomanip>
 
 #ifdef HAVE_CHECK
 
@@ -18,24 +27,41 @@ void teardown()
 {
 }
 
-START_TEST( test_init_function_from_signature )
+//-----------------------------------------------------------------------------
+START_TEST( test_init_cell )
 {
 	int init_failed = 0;
+
+	std::vector<Domain::Type> domains;
+	domains.push_back(Domain::interval);
+	domains.push_back(Domain::triangle);
+	domains.push_back(Domain::tetrahedron);
+
+	for(std::vector<Domain::Type>::const_iterator it = domains.begin();
+	    it != domains.end(); ++it)
+	{
+	  Domain d(*it);
+	  d.display();
+
+	  Space s(d.dim());
+	  s.display();
+	}
 
 	fail_unless( init_failed == 0 );
 }
 END_TEST
+//-----------------------------------------------------------------------------
 
-Suite *fem_suite()
+Suite *ufl_suite()
 {
 	TCase *tc;
 	Suite *s;
 
-	s = suite_create("FEM");
-	tc = tcase_create("fem");
+	s = suite_create("UFL");
+	tc = tcase_create("ufl");
 
-	tcase_add_test(tc, test_init_function_from_signature);
-	
+	tcase_add_test(tc, test_init_cell);
+
 	suite_add_tcase(s, tc);
 	tcase_add_checked_fixture(tc, setup, teardown);
 
@@ -45,9 +71,9 @@ Suite *fem_suite()
 int main(void)
 {
 	int number_failed;
-	Suite* s = fem_suite();
+	Suite* s = ufl_suite();
 	SRunner* sr = srunner_create(s);
-	
+
 	srunner_run_all(sr, CK_NORMAL);
 	number_failed = srunner_ntests_failed(sr);
 	srunner_free(sr);

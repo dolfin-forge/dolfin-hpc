@@ -104,11 +104,12 @@ public:
 protected:
 
   ///
-  FiniteElementBase(ElementList::FamilyType family,
-                       Cell const& cell,
-                       uint const degree,
-                       QuadratureScheme quad_scheme = QuadratureScheme(),
-                       ValueArray value_shape = ValueArray());
+  FiniteElementBase(std::string const& name,
+                    ElementList::FamilyType family,
+                    Cell const& cell,
+                    uint const degree,
+                    QuadratureScheme quad_scheme = QuadratureScheme(),
+                    ValueArray value_shape = ValueArray());
 
   ///
   virtual ~FiniteElementBase();

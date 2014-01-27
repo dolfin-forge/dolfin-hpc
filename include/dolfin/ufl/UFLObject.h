@@ -7,10 +7,11 @@
 #ifndef __UFL_OBJECT_H_
 #define __UFL_OBJECT_H_
 
+#include <dolfin/ufl/UFLrepr.h>
+
+#include <iostream>
 #include <string>
 #include <vector>
-
-#include <dolfin/ufl/UFLrepr.h>
 
 namespace ufl
 {
@@ -47,12 +48,23 @@ protected:
   ///
   virtual ~Object() {}
 
+  ///
+  virtual void display() const;
+
 };
 
 //-----------------------------------------------------------------------------
 inline bool Object::operator == (Object const& other) const
 {
     return ( other.repr() == this->repr() );
+}
+
+//-----------------------------------------------------------------------------
+inline void Object::display() const
+{
+  std::cout << "Object" << std::endl;
+  std::cout << ".str : " << this->str() << std::endl;
+  std::cout << ".repr: " << this->repr() << std::endl;
 }
 
 } /* namespace ufl */

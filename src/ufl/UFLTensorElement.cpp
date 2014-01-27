@@ -13,7 +13,7 @@ namespace ufl
 TensorElement::TensorElement(ElementList::FamilyType family,
                                    Cell const& cell, uint const degree,
                                    uint const dim) :
-    FiniteElementBase(ElementList::Tensor, cell, degree),
+    FiniteElementBase("TensorElement",ElementList::Tensor, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {
@@ -80,6 +80,18 @@ uint const TensorElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& TensorElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const TensorElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const TensorElement::str() const
+{
+  return str_;
 }
 
 }

@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 CellVolume::CellVolume(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("CellVolume", cell),
     shape_(),
     repr_("CellVolume(" + cell.repr() + ")"),
     str_("volume")

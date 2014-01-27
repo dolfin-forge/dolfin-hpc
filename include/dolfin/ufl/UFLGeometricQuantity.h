@@ -29,7 +29,7 @@ class GeometricQuantity : public Class
 public:
 
   ///
-  GeometricQuantity(Cell const& cell);
+  GeometricQuantity(std::string const& name, Cell const& cell);
 
   ///
   ~GeometricQuantity();

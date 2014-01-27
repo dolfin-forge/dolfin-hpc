@@ -13,8 +13,9 @@ namespace ufl
 //-----------------------------------------------------------------------------
 EnrichedElement::EnrichedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase(ElementList::Enriched, get_cell(elements),
-                         get_degree_max(elements)),
+    FiniteElementBase("EnrichedElement", ElementList::Enriched,
+                      get_cell(elements),
+                      get_degree_max(elements)),
     sub_elements_(elements)
 {
   // Create string representation
@@ -86,6 +87,18 @@ uint const EnrichedElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& EnrichedElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const EnrichedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const EnrichedElement::str() const
+{
+  return str_;
 }
 
 }

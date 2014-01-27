@@ -12,40 +12,45 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Cell::Cell(Domain::Type const& domain) :
-    Class(),
+Cell::Cell(Domain const& domain) :
+    Class("Cell"),
     domain_(domain),
-    space_(Domain::dim(domain)),
-    invalid_((domain == Domain::None ? true : false)),
+    space_(domain.dim()),
+    invalid_((domain.type() == Domain::None ? true : false)),
     geometric_dimension_(space_.dimension()),
-    topological_dimension_(Domain::dim(domain)),
+    topological_dimension_(domain.dim()),
     cell_surface_area_(*this),
     cell_volume_(*this),
     circumradius_(*this),
     facet_area_(*this),
     facet_normal_(*this),
     x_(*this),
-    repr_("Cell(" + Domain::str(domain_) + ", " + space_.repr() + ")"),
-    str_("<" + Domain::str(domain_) + " cell in " + space_.str() + ">")
+    repr_("Cell(" + domain_.repr() + ", " + space_.repr() + ")"),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">")
 {
 }
 
 //-----------------------------------------------------------------------------
-Cell::Cell(Domain::Type const& domain, Space const& space) :
-    Class(),
+Cell::Cell(Domain const& domain, Space const& space) :
+    Class("Cell"),
     domain_(domain),
     space_(space),
-    invalid_((domain == Domain::None ? true : false)),
+    invalid_((domain.type() == Domain::None ? true : false)),
     geometric_dimension_(space_.dimension()),
-    topological_dimension_(Domain::dim(domain)),
+    topological_dimension_(domain.dim()),
     cell_surface_area_(*this),
     cell_volume_(*this),
     circumradius_(*this),
     facet_area_(*this),
     facet_normal_(*this),
     x_(*this),
-    repr_("Cell(" + Domain::str(domain_) + ", " + space_.repr() + ")"),
-    str_("<" + Domain::str(domain_) + " cell in " + space_.str() + ">")
+    repr_("Cell(" + domain_.repr() + ", " + space_.repr() + ")"),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">")
+{
+}
+
+//-----------------------------------------------------------------------------
+Cell::~Cell()
 {
 }
 
@@ -92,31 +97,31 @@ bool const& Cell::is_undefined() const
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const& Cell::domain() const
+Domain const Cell::domain() const
 {
   return domain_;
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const& Cell::facet_domain() const
+Domain const Cell::facet_domain() const
 {
-  return Domain::facet(domain_);
+  return Domain(domain_.facet());
 }
 
 //-----------------------------------------------------------------------------
 uint const Cell::num_facets() const
 {
-  return Domain::num_facets(domain_);
+  return domain_.num_facets();
 }
 
 //-----------------------------------------------------------------------------
-uint const& Cell::geometric_dimension() const
+uint const Cell::geometric_dimension() const
 {
   return geometric_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-uint const& Cell::topological_dimension() const
+uint const Cell::topological_dimension() const
 {
   return topological_dimension_;
 }

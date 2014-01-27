@@ -36,10 +36,10 @@ class Cell : public Class
 public:
 
   ///
-  Cell(Domain::Type const& domain);
+  Cell(Domain const& domain);
 
   ///
-  Cell(Domain::Type const& domain, Space const& space);
+  Cell(Domain const& domain, Space const& space);
 
   ///
   ~Cell();
@@ -70,19 +70,19 @@ public:
   bool const& is_undefined() const;
 
   /// Return the domain of the cell
-  Domain::Type const& domain() const;
+  Domain const domain() const;
 
   /// Return the domain of the facet of this cell
-  Domain::Type const& facet_domain() const;
+  Domain const facet_domain() const;
 
   /// Return the number of facets this cell has
   uint const num_facets() const;
 
   /// Return the dimension of the space this cell is embedded in
-  uint const& geometric_dimension() const;
+  uint const geometric_dimension() const;
 
   /// Return the dimension of the topology of this cell
-  uint const& topological_dimension() const;
+  uint const topological_dimension() const;
 
   /// The dimension of the cell is only valid is the geometric and topological
   /// dimensions are the same which does not seem to be useful.
@@ -98,7 +98,7 @@ public:
 
 private:
 
-  Domain::Type const domain_;
+  Domain const domain_;
   Space const space_;
 
   bool const invalid_;

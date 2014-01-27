@@ -42,6 +42,9 @@ public:
   /// __str__
   std::string const str() const;
 
+  ///
+  void display() const;
+
 private:
 
   uint const dimension_;

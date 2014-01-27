@@ -7,7 +7,7 @@
 #ifndef __UFL_DOMAIN_H_
 #define __UFL_DOMAIN_H_
 
-#include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLObject.h>
 
 #include <map>
 #include <string>
@@ -23,7 +23,7 @@ namespace ufl
  *  @brief  Provides a C++ equivalent to ufl_domains from ufl.geometry.
  */
 
-class Domain : public Class
+class Domain : public Object
 {
 
 public:
@@ -49,31 +49,6 @@ public:
   ~Domain();
 
   ///
-  static Type const facet(Type const& t);
-
-  ///
-  static uint const dim(Type const& t);
-
-  ///
-  static uint const num_facets(Type const& t);
-
-  ///
-  static std::string const str(Type const& t);
-
-  /// __repr__
-  repr_t const repr() const;
-
-  /// __str__
-  std::string const str() const;
-
-private:
-
-  Domain::Type const domain_;
-  repr_t const repr_;
-  std::string const str_;
-
-  //--- STATIC ----------------------------------------------------------------
-
   struct Definition
   {
     uint dim;
@@ -92,7 +67,53 @@ private:
 
   typedef std::map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
-  static DefinitionList const DomainDefinitions;
+
+  static DefinitionList const Definitions()
+  {
+    static DefinitionList const DomainDefinitions = __init_domain_definitions();
+    return DomainDefinitions;
+  }
+
+  ///
+  static Type const facet(Type const& t);
+
+  ///
+  static uint const dim(Type const& t);
+
+  ///
+  static uint const num_facets(Type const& t);
+
+  ///
+  static std::string const str(Type const& t);
+
+  ///
+  Type const facet() const;
+
+  ///
+  uint const dim() const;
+
+  ///
+  uint const num_facets() const;
+
+  ///
+  Type const type() const;
+
+  /// __repr__
+  repr_t const repr() const;
+
+  /// __str__
+  std::string const str() const;
+
+  ///
+  void display() const;
+
+private:
+
+  Domain::Type const domain_;
+  repr_t const repr_;
+  std::string const str_;
+
+  //--- STATIC ----------------------------------------------------------------
   static DefinitionList const __init_domain_definitions();
 
 };

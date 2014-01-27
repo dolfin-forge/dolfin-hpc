@@ -28,6 +28,9 @@ class Class : public Object
 
 public:
 
+  ///
+  std::string const& name() const;
+
   /// __repr__
   virtual repr_t const repr() const = 0;
 
@@ -40,11 +43,16 @@ public:
 protected:
 
   Class();
+  Class(std::string const& name);
 
   virtual ~Class();
 
+  ///
+  virtual void display() const;
+
 private:
 
+  std::string const name_;
   static repr_t const default_repr_;
   static std::string const default_str_;
 

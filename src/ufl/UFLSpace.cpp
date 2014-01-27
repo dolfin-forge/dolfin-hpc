@@ -6,6 +6,7 @@
 
 #include <dolfin/ufl/UFLSpace.h>
 
+#include <iomanip>
 #include <sstream>
 
 namespace ufl
@@ -13,6 +14,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 Space::Space(uint const& dim) :
+    Class("Space"),
     dimension_(dim)
 {
   std::stringstream ssrepr;
@@ -45,6 +47,14 @@ Object::repr_t const Space::repr() const
 std::string const Space::str() const
 {
   return str_;
+}
+
+//-----------------------------------------------------------------------------
+void Space::display() const
+{
+  Class::display();
+  std::cout << std::setw(16) << "dimension" << " = " << this->dimension() << std::endl;
+  std::cout << std::endl;
 }
 
 }

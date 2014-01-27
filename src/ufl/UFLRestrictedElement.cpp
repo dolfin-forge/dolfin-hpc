@@ -12,7 +12,8 @@ namespace ufl
 //-----------------------------------------------------------------------------
 RestrictedElement::RestrictedElement(FiniteElementBase const& element,
                                            Domain::Type const domain) :
-    FiniteElementBase(ElementList::Restricted, element.cell(),
+    FiniteElementBase("RestrictedElement",ElementList::Restricted,
+                         element.cell(),
                          element.degree(), element.quadrature_scheme(),
                          element.value_shape()),
     element_(element)
@@ -75,6 +76,18 @@ FiniteElementBase::FiniteElementBaseList const& RestrictedElement::sub_elements(
 FiniteElementBase const& RestrictedElement::element()
 {
   return element_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const RestrictedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const RestrictedElement::str() const
+{
+  return str_;
 }
 
 }

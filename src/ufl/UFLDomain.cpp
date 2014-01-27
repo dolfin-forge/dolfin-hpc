@@ -131,11 +131,11 @@ std::string const Domain::str() const
 void Domain::display() const
 {
   Object::display();
-  std::cout << std::setw(16) << "dimension" << " = " << this->dim()
+  std::cout << std::setw(24) << "dimension" << " = " << this->dim()
       << std::endl;
-  std::cout << std::setw(16) << "facet" << " = " << Domain::str(this->facet())
+  std::cout << std::setw(24) << "facet" << " = " << Domain::str(this->facet())
       << std::endl;
-  std::cout << std::setw(16) << "num_facets" << " = " << this->num_facets()
+  std::cout << std::setw(24) << "num_facets" << " = " << this->num_facets()
       << std::endl;
   std::cout << std::endl;
 }

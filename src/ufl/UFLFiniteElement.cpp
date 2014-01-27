@@ -21,23 +21,23 @@ FiniteElement::FiniteElement(ElementList::FamilyType family,
     sub_elements_()
 {
   // Check finite element definition
-  if(ElementList::Supported().has_valid_definition(family,
+  if(!ElementList::Supported().has_valid_definition(family,
                                                    cell.domain().type(),
                                                    degree))
   {
     error("The finite element definition is not valid.");
-  };
+  }
 
   QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "FiniteElement("<< ElementList::Supported().repr(family)
-         << ", "<< cell.repr() << ", " << degree << ", " << qs.repr() << ")";
+  ssrepr << "FiniteElement('"<< ElementList::Supported().repr(family)
+         << "', "<< cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
   ssstr << "<" << ElementList::Supported().short_name(family) << degree
-        << qs.str() << " on a " << cell.repr() << ">";
+        << qs.str() << " on a " << cell.str() << ">";
   str_ = ssstr.str();
 }
 

@@ -53,7 +53,7 @@ std::string const Space::str() const
 void Space::display() const
 {
   Class::display();
-  std::cout << std::setw(16) << "dimension" << " = " << this->dimension() << std::endl;
+  std::cout << std::setw(24) << "dimension" << " = " << this->dimension() << std::endl;
   std::cout << std::endl;
 }
 

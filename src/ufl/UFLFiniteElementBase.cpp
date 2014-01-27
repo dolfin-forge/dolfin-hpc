@@ -14,8 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name,
                                      ElementList::FamilyType family,
-                                     Cell const& cell,
-                                     uint const degree,
+                                     Cell const& cell, uint const degree,
                                      QuadratureScheme quad_scheme,
                                      ValueArray value_shape) :
     Class(name),
@@ -67,31 +66,30 @@ bool FiniteElementBase::component_is_valid(ValueArray const& i) const
 {
   uint r = value_shape_.size();
   bool range_ok = true;
-  for(size_t idx = 0; idx < value_shape_.size(); ++idx)
+  for (size_t idx = 0; idx < value_shape_.size(); ++idx)
   {
     range_ok = range_ok && (i[idx] < value_shape_[idx]);
   }
-  return ( i.size() == r && range_ok);
+  return (i.size() == r && range_ok);
 }
 
 //-----------------------------------------------------------------------------
 void FiniteElementBase::check_component(ValueArray const& i) const
 {
-  if(!component_is_valid(i))
+  if (!component_is_valid(i))
   {
     error("Requested component is invalid");
   }
 }
 
 //-----------------------------------------------------------------------------
-Cell const FiniteElementBase::get_cell(
-    FiniteElementBaseList const& elements)
+Cell const FiniteElementBase::get_cell(FiniteElementBaseList const& elements)
 {
   FiniteElementBaseList::const_iterator it = elements.begin();
   Cell ret = (*it)->cell();
-  for (++it ; it != elements.end(); ++it)
+  for (++it; it != elements.end(); ++it)
   {
-    if( ret.repr() != (*it)->cell().repr())
+    if (ret.repr() != (*it)->cell().repr())
     {
       error("All subelements of mixed element should have the same cell.");
     }
@@ -105,11 +103,22 @@ uint const FiniteElementBase::get_degree_max(
 {
   uint ret = 0;
   for (FiniteElementBaseList::const_iterator it = elements.begin();
-       it != elements.end(); ++it)
+      it != elements.end(); ++it)
   {
     ret = std::max((*it)->degree(), ret);
   }
   return ret;
+}
+
+//-----------------------------------------------------------------------------
+void FiniteElementBase::display() const
+{
+  Class::display();
+  std::cout << std::setw(24) << "family" << " = " << ElementList::Supported().name(this->family()) << std::endl;
+  std::cout << std::setw(24) << "cell" << " = " << this->cell().str() << std::endl;
+  std::cout << std::setw(24) << "degree" << " = " << this->degree() << std::endl;
+  std::cout << std::setw(24) << "quadrature_scheme" << " = " << this->quadrature_scheme().str() << std::endl;
+  std::cout << std::endl;
 }
 
 }

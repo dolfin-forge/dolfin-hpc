@@ -108,6 +108,7 @@ template<typename T>
   std::cout << "Type" << std::endl;
   std::cout << ".str : " << (std::string) this->str() << std::endl;
   std::cout << ".repr: " << (std::string) this->repr() << std::endl;
+  std::cout << std::endl;
 }
 
 //-----------------------------------------------------------------------------

@@ -57,6 +57,41 @@ START_TEST( test_init_cell )
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
+START_TEST( test_init_family )
+  {
+    int init_failed = 0;
+
+    std::vector<Family::Type> v;
+    v.push_back(Family::ARG);
+    v.push_back(Family::AW);
+    v.push_back(Family::BDFM);
+    v.push_back(Family::BDM);
+    v.push_back(Family::CR);
+    v.push_back(Family::DG);
+    v.push_back(Family::HER);
+    v.push_back(Family::CG);
+    v.push_back(Family::MTW);
+    v.push_back(Family::MOR);
+    v.push_back(Family::N1curl);
+    v.push_back(Family::N2curl);
+    v.push_back(Family::RT);
+    v.push_back(Family::BQ);
+    v.push_back(Family::B);
+    v.push_back(Family::Q);
+    v.push_back(Family::R);
+    v.push_back(Family::U);
+
+    for (std::vector<Family::Type>::const_iterator it = v.begin();
+        it != v.end(); ++it)
+    {
+      Family f(*it);
+      f.display();
+    }
+    std::cout << std::endl;
+
+    fail_unless( init_failed == 0 );
+  }END_TEST
+//-----------------------------------------------------------------------------
 START_TEST( test_init_element_list )
   {
     int init_failed = 0;
@@ -143,6 +178,7 @@ Suite *ufl_suite()
   tc = tcase_create("ufl");
 
   tcase_add_test(tc, test_init_cell);
+  tcase_add_test(tc, test_init_family);
   tcase_add_test(tc, test_init_element_list);
   tcase_add_test(tc, test_init_finite_element);
 

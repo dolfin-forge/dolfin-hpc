@@ -10,10 +10,10 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-TensorElement::TensorElement(ElementList::FamilyType family,
+TensorElement::TensorElement(Family::Type family,
                                    Cell const& cell, uint const degree,
                                    uint const dim) :
-    FiniteElementBase("TensorElement",ElementList::Tensor, cell, degree),
+    FiniteElementBase("TensorElement",Family::Tensor, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {

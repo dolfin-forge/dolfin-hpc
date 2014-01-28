@@ -17,7 +17,7 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Domain::DefinitionList const Domain::__init_domain_definitions()
+Domain::DefinitionList const Domain::__init_definitions()
 {
   DefinitionList m;
   m.insert(
@@ -48,11 +48,10 @@ Domain::DefinitionList const Domain::__init_domain_definitions()
 }
 
 //-----------------------------------------------------------------------------
-Domain::Domain(Type const& t) :
-    Object(),
-    domain_(t),
-    repr_("'"+Domain::str(t)+"'"),
-    str_(Domain::str(t))
+Domain::Domain(Domain::Type const& t) :
+    ufl::Type<std::string>(Domain::type_str(t),
+                           "'" + Domain::type_str(t) + "'"),
+    type_(t)
 {
 }
 
@@ -62,25 +61,25 @@ Domain::~Domain()
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const Domain::facet(Type const& t)
+Domain::Type const Domain::type_facet(Domain::Type const& t)
 {
   return Definitions().find(t)->second.facet;
 }
 
 //-----------------------------------------------------------------------------
-uint const Domain::dim(Type const& t)
+uint const Domain::type_dim(Domain::Type const& t)
 {
   return Definitions().find(t)->second.dim;
 }
 
 //-----------------------------------------------------------------------------
-uint const Domain::num_facets(Type const& t)
+uint const Domain::type_num_facets(Domain::Type const& t)
 {
   return Definitions().find(t)->second.num_facets;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Domain::str(Type const& t)
+std::string const Domain::type_str(Domain::Type const& t)
 {
   return Definitions().find(t)->second.str;
 }
@@ -88,52 +87,40 @@ std::string const Domain::str(Type const& t)
 //-----------------------------------------------------------------------------
 Domain::Type const Domain::facet() const
 {
-  return Domain::facet(domain_);
+  return Domain::type_facet(type_);
 }
 
 //-----------------------------------------------------------------------------
 uint const Domain::dim() const
 {
-  return Domain::dim(domain_);
+  return Domain::type_dim(type_);
 }
 
 //-----------------------------------------------------------------------------
 uint const Domain::num_facets() const
 {
-  return Domain::num_facets(domain_);
+  return Domain::type_num_facets(type_);
 }
 
 //-----------------------------------------------------------------------------
 Domain::Type const Domain::type() const
 {
-  return domain_;
+  return type_;
 }
 
 //-----------------------------------------------------------------------------
 bool const Domain::is_undefined() const
 {
-  return domain_ == Domain::None;
-}
-
-//-----------------------------------------------------------------------------
-Object::repr_t const Domain::repr() const
-{
-  return repr_;
-}
-
-//-----------------------------------------------------------------------------
-std::string const Domain::str() const
-{
-  return str_;
+  return (type_ == Domain::None);
 }
 
 //-----------------------------------------------------------------------------
 void Domain::display() const
 {
-  Object::display();
+  ufl::Type<std::string>::display();
   std::cout << std::setw(24) << "dimension" << " = " << this->dim()
       << std::endl;
-  std::cout << std::setw(24) << "facet" << " = " << Domain::str(this->facet())
+  std::cout << std::setw(24) << "facet" << " = " << Domain::type_str(this->facet())
       << std::endl;
   std::cout << std::setw(24) << "num_facets" << " = " << this->num_facets()
       << std::endl;

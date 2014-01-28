@@ -27,7 +27,7 @@ class TensorElement : public FiniteElementBase
 public:
 
   ///
-  TensorElement(ElementList::FamilyType family, Cell const& cell,
+  TensorElement(Family::Type family, Cell const& cell,
                    uint const degree, uint const dim);
 
   ///

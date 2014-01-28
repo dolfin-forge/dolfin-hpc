@@ -11,6 +11,7 @@
 
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLElementList.h>
+#include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLQuadratureScheme.h>
 
 #include <dolfin/common/types.h>
@@ -26,6 +27,7 @@ namespace ufl
  *  @class  UFLFiniteElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
+ *
  */
 
 class FiniteElementBase : public Class
@@ -36,8 +38,8 @@ public:
   //
   typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
 
-  /// Return finite element family
-  ElementList::FamilyType const family() const;
+  /// Return finite element family type
+  Family::Type const& family() const;
 
   /// Return cell of finite element
   Cell const cell() const;
@@ -108,7 +110,7 @@ protected:
 
   ///
   FiniteElementBase(std::string const& name,
-                    ElementList::FamilyType family,
+                    Family::Type const& family,
                     Cell const& cell,
                     uint const degree,
                     QuadratureScheme quad_scheme = QuadratureScheme(),
@@ -131,7 +133,7 @@ protected:
 
 private:
 
-  ElementList::FamilyType const family_;
+  Family::Type const family_;
   Cell const cell_;
   uint const degree_;
   QuadratureScheme const quad_scheme_;

@@ -13,7 +13,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
 EnrichedElement::EnrichedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase("EnrichedElement", ElementList::Enriched,
+    FiniteElementBase("EnrichedElement", Family::Enriched,
                       get_cell(elements),
                       get_degree_max(elements)),
     sub_elements_(elements)

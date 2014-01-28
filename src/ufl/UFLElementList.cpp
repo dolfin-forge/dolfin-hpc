@@ -12,10 +12,10 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-void ElementList::register_element(ElementFamilyList& m, FamilyType family,
+void ElementList::register_element(ElementFamilyList& m, Family::Type family,
                                       std::string name, std::string short_name,
                                       uint value_rank, uint degree_min,
-                                      uint degree_max, DomainSet domains)
+                                      uint degree_max, Domain::Set domains)
 {
   ElementDefinition a(name, short_name, value_rank, degree_min, degree_max,
                       domains);
@@ -25,17 +25,17 @@ void ElementList::register_element(ElementFamilyList& m, FamilyType family,
 //-----------------------------------------------------------------------------
 ElementList::ElementFamilyList const ElementList::__init_elements()
 {
-  DomainSet interval;
+  Domain::Set interval;
   interval.insert(Domain::interval);
 
-  DomainSet triangle;
+  Domain::Set triangle;
   triangle.insert(Domain::triangle);
 
-  DomainSet triangle_tetrahedron;
+  Domain::Set triangle_tetrahedron;
   triangle_tetrahedron.insert(Domain::triangle);
   triangle_tetrahedron.insert(Domain::tetrahedron);
 
-  DomainSet interval_triangle_tetrahedron;
+  Domain::Set interval_triangle_tetrahedron;
   interval_triangle_tetrahedron.insert(Domain::interval);
   interval_triangle_tetrahedron.insert(Domain::triangle);
   interval_triangle_tetrahedron.insert(Domain::tetrahedron);
@@ -43,59 +43,59 @@ ElementList::ElementFamilyList const ElementList::__init_elements()
   ElementFamilyList m;
 
   //--- Standard elements -----------------------------------------------------
-  register_element(m, ElementList::ARG, "Argyris", "ARG", 0, 1, None,
+  register_element(m, Family::ARG, "Argyris", "ARG", 0, 1, None,
                    triangle_tetrahedron);
 
-  register_element(m, ElementList::AW, "Arnold-Winther", "AW", 0, 0, None,
+  register_element(m, Family::AW, "Arnold-Winther", "AW", 0, 0, None,
                    triangle);
 
-  register_element(m, ElementList::BDFM, "Brezzi-Douglas-Fortin-Marini",
+  register_element(m, Family::BDFM, "Brezzi-Douglas-Fortin-Marini",
                    "BDFM", 1, 1, None, triangle_tetrahedron);
 
-  register_element(m, ElementList::BDM, "Brezzi-Douglas-Marini", "BDM", 1, 1,
+  register_element(m, Family::BDM, "Brezzi-Douglas-Marini", "BDM", 1, 1,
                    None, triangle_tetrahedron);
 
-  register_element(m, ElementList::CR, "Crouzeix-Raviart", "CR", 0, 1, 1,
+  register_element(m, Family::CR, "Crouzeix-Raviart", "CR", 0, 1, 1,
                    triangle_tetrahedron);
 
-  register_element(m, ElementList::DG, "Discontinuous Lagrange", "DG", 0, 0,
+  register_element(m, Family::DG, "Discontinuous Lagrange", "DG", 0, 0,
                    None, interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::HER, "Hermite", "HER", 0, 0, None,
+  register_element(m, Family::HER, "Hermite", "HER", 0, 0, None,
                    triangle_tetrahedron);
 
-  register_element(m, ElementList::CG, "Lagrange", "CG", 0, 1, None,
+  register_element(m, Family::CG, "Lagrange", "CG", 0, 1, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::MTW, "Mardal-Tai-Winther", "MTW", 0, 0,
+  register_element(m, Family::MTW, "Mardal-Tai-Winther", "MTW", 0, 0,
                    None, triangle);
 
-  register_element(m, ElementList::MOR, "Morley", "MOR", 0, 0, None,
+  register_element(m, Family::MOR, "Morley", "MOR", 0, 0, None,
                    triangle);
 
-  register_element(m, ElementList::N1curl, "Nedelec 1st kind H(curl)",
+  register_element(m, Family::N1curl, "Nedelec 1st kind H(curl)",
                    "N1curl", 1, 1, None, triangle_tetrahedron);
 
-  register_element(m, ElementList::N2curl, "Nedelec 2nd kind H(curl)",
+  register_element(m, Family::N2curl, "Nedelec 2nd kind H(curl)",
                    "N2curl", 1, 1, None, triangle_tetrahedron);
 
-  register_element(m, ElementList::RT, "Raviart-Thomas", "RT", 1, 1, None,
+  register_element(m, Family::RT, "Raviart-Thomas", "RT", 1, 1, None,
                    triangle_tetrahedron);
 
   //--- Special elements ------------------------------------------------------
-  register_element(m, ElementList::BQ, "Boundary Quadrature", "BQ", 0, 0,
+  register_element(m, Family::BQ, "Boundary Quadrature", "BQ", 0, 0,
                    None, interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::B, "Bubble", "B", 0, 2, None,
+  register_element(m, Family::B, "Bubble", "B", 0, 2, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::Q, "Quadrature", "Q", 0, 0, None,
+  register_element(m, Family::Q, "Quadrature", "Q", 0, 0, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::R, "Real", "R", 0, 0, 0,
+  register_element(m, Family::R, "Real", "R", 0, 0, 0,
                    interval_triangle_tetrahedron);
 
-  register_element(m, ElementList::U, "Undefined", "U", 0, 0, None,
+  register_element(m, Family::U, "Undefined", "U", 0, 0, None,
                    interval_triangle_tetrahedron);
 
   return m;
@@ -117,7 +117,7 @@ ElementList::~ElementList()
 
 //-----------------------------------------------------------------------------
 ElementDefinition const ElementList::element_definition(
-    FamilyType const type) const
+    Family::Type const type) const
 {
   ElementFamilyList::const_iterator it = Elements.find(type);
   if (it == Elements.end())
@@ -128,7 +128,7 @@ ElementDefinition const ElementList::element_definition(
 }
 
 //-----------------------------------------------------------------------------
-bool ElementList::has_family(FamilyType const type) const
+bool ElementList::has_family(Family::Type const type) const
 {
   return (Elements.find(type) != Elements.end());
 }
@@ -145,7 +145,7 @@ bool ElementList::has_family_name(std::string const& name) const
 }
 
 //-----------------------------------------------------------------------------
-bool ElementList::has_valid_domain(FamilyType const type,
+bool ElementList::has_valid_domain(Family::Type const type,
                                       Domain::Type domain) const
 {
   ElementDefinition const d = Elements.find(type)->second;
@@ -153,7 +153,7 @@ bool ElementList::has_valid_domain(FamilyType const type,
 }
 
 //-----------------------------------------------------------------------------
-bool ElementList::has_valid_degree(FamilyType const type,
+bool ElementList::has_valid_degree(Family::Type const type,
                                       uint const degree) const
 {
   ElementDefinition const d = Elements.find(type)->second;
@@ -162,7 +162,7 @@ bool ElementList::has_valid_degree(FamilyType const type,
 
 
 //-----------------------------------------------------------------------------
-bool ElementList::has_valid_definition(FamilyType const type,
+bool ElementList::has_valid_definition(Family::Type const type,
                                           Domain::Type domain,
                                           uint const degree) const
 {
@@ -172,43 +172,43 @@ bool ElementList::has_valid_definition(FamilyType const type,
 }
 
 //-----------------------------------------------------------------------------
-std::string ElementList::name(FamilyType const type) const
+std::string ElementList::name(Family::Type const type) const
 {
   return element_definition(type).name;
 }
 
 //-----------------------------------------------------------------------------
-std::string ElementList::short_name(FamilyType const type) const
+std::string ElementList::short_name(Family::Type const type) const
 {
   return element_definition(type).short_name;
 }
 
 //-----------------------------------------------------------------------------
-uint ElementList::value_rank(FamilyType const type) const
+uint ElementList::value_rank(Family::Type const type) const
 {
   return element_definition(type).value_rank;
 }
 
 //-----------------------------------------------------------------------------
-uint ElementList::degree_min(FamilyType const type) const
+uint ElementList::degree_min(Family::Type const type) const
 {
   return element_definition(type).degree_range.first;
 }
 
 //-----------------------------------------------------------------------------
-uint ElementList::degree_max(FamilyType const type) const
+uint ElementList::degree_max(Family::Type const type) const
 {
   return element_definition(type).degree_range.second;
 }
 
 //-----------------------------------------------------------------------------
-std::set<Domain::Type> ElementList::domains(FamilyType const type) const
+std::set<Domain::Type> ElementList::domains(Family::Type const type) const
 {
   return element_definition(type).domains;
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const ElementList::repr(FamilyType const type) const
+Object::repr_t const ElementList::repr(Family::Type const type) const
 {
   return Object::repr_t(name(type));
 }

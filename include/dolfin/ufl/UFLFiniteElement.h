@@ -25,10 +25,8 @@ class FiniteElement : public FiniteElementBase
 
 public:
 
-  typedef ElementList::FamilyType FamilyType;
-
   ///
-  FiniteElement(ElementList::FamilyType family,
+  FiniteElement(Family::Type family,
                    Cell const& cell,
                    uint const degree);
 

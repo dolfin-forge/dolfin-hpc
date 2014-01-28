@@ -12,7 +12,7 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(ElementList::FamilyType family,
+FiniteElement::FiniteElement(Family::Type family,
                                            Cell const& cell,
                                            uint const degree) :
     FiniteElementBase("FiniteElement", family, cell, degree),
@@ -49,7 +49,7 @@ FiniteElement::~FiniteElement()
 //-----------------------------------------------------------------------------
 bool const FiniteElement::is_cellwise_constant() const
 {
-  return ( family() == ElementList::R && degree() == 0 );
+  return ( family() == Family::R && degree() == 0 );
 }
 
 //-----------------------------------------------------------------------------

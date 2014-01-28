@@ -7,6 +7,10 @@
 #ifndef __UFL_TYPE_H_
 #define __UFL_TYPE_H_
 
+#include <dolfin/ufl/UFLObject.h>
+
+#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace ufl
@@ -23,9 +27,27 @@ public:
   {
   }
 
-  ///
+  /// Constructor with default representation for given type
   Type<T>(T const& s) :
-    val_(s)
+    val_(s),
+    repr_(make_str(s)),
+    str_(make_str(s))
+  {
+  }
+
+  /// Constructor with user-defined representation for given type
+  Type<T>(T const& s, repr_t const& r) :
+    val_(s),
+    repr_(r),
+    str_(make_str(s))
+  {
+  }
+
+  /// Constructor with user-defined representation and string for given type
+  Type<T>(T const& s, repr_t const& r, std::string const& str) :
+    val_(s),
+    repr_(r),
+    str_(str)
   {
   }
 
@@ -35,15 +57,31 @@ public:
   }
 
   /// __repr__
-  repr_t const repr() const;
+  virtual repr_t const repr() const;
 
-    /// __str__
-  std::string const str() const;
+  /// __str__
+  virtual std::string const str() const;
 
+  ///
+  virtual void display() const;
+
+  ///
+  virtual repr_t const make_repr(
+        std::vector<Object const *> const& prototype) const;
+
+protected:
+
+  ///
+  virtual repr_t const make_repr( T const& val) const;
+
+  ///
+  std::string const make_str( T const& val) const;
 
 private:
 
   T val_;
+  repr_t const repr_;
+  std::string const str_;
 
 };
 
@@ -51,9 +89,7 @@ private:
 template<typename T>
   Object::repr_t const Type<T>::repr() const
 {
-  std::stringstream ss;
-  ss << val_;
-  return repr_t(ss.str());
+  return repr_;
 }
 
 //-----------------------------------------------------------------------------
@@ -62,7 +98,42 @@ template<typename T>
 {
   std::stringstream ss;
   ss << val_;
-  return ss.str();
+  return str_;
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  void Type<T>::display() const
+{
+  std::cout << "Type" << std::endl;
+  std::cout << ".str : " << (std::string) this->str() << std::endl;
+  std::cout << ".repr: " << (std::string) this->repr() << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  Object::repr_t const Type<T>::make_repr(
+        std::vector<Object const *> const& prototype) const
+{
+  return Object::make_repr(prototype);
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  Object::repr_t const Type<T>::make_repr(T const& val) const
+{
+  std::stringstream ret;
+  ret << val;
+  return ret.str();
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  std::string const Type<T>::make_str( T const& val) const
+{
+  std::stringstream ret;
+  ret << val;
+  return ret.str();
 }
 
 } /* namespace icorne */

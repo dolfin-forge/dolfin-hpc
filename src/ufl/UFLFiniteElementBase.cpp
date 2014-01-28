@@ -13,7 +13,7 @@ using dolfin::error;
 
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name,
-                                     ElementList::FamilyType family,
+                                     Family::Type const& family,
                                      Cell const& cell, uint const degree,
                                      QuadratureScheme quad_scheme,
                                      ValueArray value_shape) :
@@ -32,7 +32,7 @@ FiniteElementBase::~FiniteElementBase()
 }
 
 //-----------------------------------------------------------------------------
-ElementList::FamilyType const FiniteElementBase::family() const
+Family::Type const& FiniteElementBase::family() const
 {
   return family_;
 }

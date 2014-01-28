@@ -27,7 +27,7 @@ public:
 
   ///
   RestrictedElement(FiniteElementBase const& element,
-                       Domain::Type const domain);
+                       Domain const& domain);
 
   ///
   ~RestrictedElement();

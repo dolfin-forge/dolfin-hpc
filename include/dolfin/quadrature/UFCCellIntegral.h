@@ -370,7 +370,8 @@ namespace dolfin
           phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, phi_values[i][j][qp], q_points[qp], ref_cell);
 //          std::cout << "phi = " << phi_values[i][j][qp][0] << std::endl;
-          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
+//FIXME          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
+          ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
 //          std::cout << "grad phi = " << phi_grads[i][j][qp][0] << "  " << phi_grads[i][j][qp][1] << std::endl;
         }
       }
@@ -392,7 +393,8 @@ namespace dolfin
           ref_phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, ref_phi_values[i][j][qp], ref_points[qp], ref_cell);
 //          std::cout << "phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " << ref_phi_values[i][j][qp][0] << std::endl;
-          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
+          //FIXME:ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
+          ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
 //          std::cout << "grad phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " 
 //            << ref_phi_grads[i][j][qp][0] << "  " << ref_phi_grads[i][j][qp][1] << std::endl;
         }

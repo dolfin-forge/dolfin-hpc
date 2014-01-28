@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 MixedElement::MixedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase("MixedElement", ElementList::Mixed, get_cell(elements),
+    FiniteElementBase("MixedElement", Family::Mixed, get_cell(elements),
                          get_degree_max(elements)),
     sub_elements_(elements)
 {

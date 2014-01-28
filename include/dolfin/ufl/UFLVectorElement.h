@@ -27,7 +27,7 @@ class VectorElement : public FiniteElementBase
 public:
 
   ///
-  VectorElement(ElementList::FamilyType family, Cell const& cell,
+  VectorElement(Family::Type family, Cell const& cell,
                    uint const degree, uint const dim);
 
   ///

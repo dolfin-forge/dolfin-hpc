@@ -41,14 +41,10 @@ public:
 
 private:
 
-  std::string const make_representation(
-          Class const& owner, Object const& arg1);
+  static std::string const make_repr(Class const& owner, Object const& arg1);
 
-  std::string const make_representation(
-        Class const& owner, Object const& arg1, Object const& arg2);
-
-  std::string const make_representation(
-      Class const& owner, std::vector<Object const *> const& prototype);
+  static std::string const make_repr(Class const& owner, Object const& arg1,
+                                     Object const& arg2);
 
 };
 

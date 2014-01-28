@@ -28,19 +28,19 @@ repr::repr(std::string const& s) :
 
 //-----------------------------------------------------------------------------
 repr::repr(Class const& owner, Object const& arg1) :
-    std::string(make_representation(owner, arg1))
+    std::string(make_repr(owner, arg1))
 {
 }
 
 //-----------------------------------------------------------------------------
 repr::repr(Class const& owner, Object const& arg1, Object const& arg2) :
-    std::string(make_representation(owner, arg1, arg2))
+    std::string(make_repr(owner, arg1, arg2))
 {
 }
 
 //-----------------------------------------------------------------------------
 repr::repr(Class const& owner, std::vector<Object const *> const& prototype) :
-    std::string(make_representation(owner, prototype))
+    std::string(owner.make_repr(prototype))
 {
 }
 
@@ -50,37 +50,21 @@ repr::~repr()
 }
 
 //-----------------------------------------------------------------------------
-std::string const repr::make_representation(Class const& owner,
-                                            Object const& arg1)
+std::string const repr::make_repr(Class const& owner, Object const& arg1)
 {
-  std::stringstream ret;
-  ret << owner.name() << "(" << arg1.repr() << ")";
-  return ret.str();
+  std::vector<Object const *> p;
+  p.push_back(&arg1);
+  return owner.make_repr(p);
 }
 
 //-----------------------------------------------------------------------------
-std::string const repr::make_representation(Class const& owner,
-                                            Object const& arg1,
-                                            Object const& arg2)
+std::string const repr::make_repr(Class const& owner, Object const& arg1,
+                                  Object const& arg2)
 {
-  std::stringstream ret;
-  ret << owner.name() << "(" << arg1.repr() << ", " << arg2.repr() << ")";
-  return ret.str();
-}
-
-//-----------------------------------------------------------------------------
-std::string const repr::make_representation(
-    Class const& owner, std::vector<Object const *> const& prototype)
-{
-  std::stringstream ret;
-  ret << owner.name() << "(";
-  std::vector<Object const *>::const_iterator arg = prototype.begin();
-  for (; arg != prototype.end(); ++arg, ret << ", ")
-  {
-    ret << (*arg)->repr();
-  }
-  ret << ")";
-  return ret.str();
+  std::vector<Object const *> p;
+  p.push_back(&arg1);
+  p.push_back(&arg2);
+  return owner.make_repr(p);
 }
 
 } /* namespace icorne */

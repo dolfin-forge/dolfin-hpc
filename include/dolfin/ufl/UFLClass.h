@@ -38,7 +38,10 @@ public:
   virtual std::string const str() const = 0;
 
   /// __eq__
-  virtual bool operator == (Class const& other) const;
+  virtual bool operator ==(Class const& other) const;
+
+  ///
+  repr_t const make_repr(std::vector<Object const *> const& prototype) const;
 
 protected:
 
@@ -59,9 +62,9 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-inline bool Class::operator == (Class const& other) const
+inline bool Class::operator ==(Class const& other) const
 {
-    return ( other.repr() == this->repr() );
+  return (other.repr() == this->repr());
 }
 
 //-----------------------------------------------------------------------------
@@ -88,7 +91,6 @@ public:
 private:
 
 };
-
 
 } /* namespace ufl */
 #endif /* __UFL_CLASS_H */

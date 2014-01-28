@@ -11,8 +11,8 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 RestrictedElement::RestrictedElement(FiniteElementBase const& element,
-                                           Domain::Type const domain) :
-    FiniteElementBase("RestrictedElement",ElementList::Restricted,
+                                           Domain const& domain) :
+    FiniteElementBase("RestrictedElement",Family::Restricted,
                          element.cell(),
                          element.degree(), element.quadrature_scheme(),
                          element.value_shape()),
@@ -22,11 +22,11 @@ RestrictedElement::RestrictedElement(FiniteElementBase const& element,
 
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", "
-         << Domain::str(domain) << ")";
+         << domain.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << element_.str() << ">|_" << Domain::str(domain) << ">";
+  ssstr << "<" << element_.str() << ">|_" << domain.str() << ">";
   str_ = ssstr.str();
 }
 

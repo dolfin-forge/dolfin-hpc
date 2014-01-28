@@ -10,10 +10,10 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-VectorElement::VectorElement(ElementList::FamilyType family,
+VectorElement::VectorElement(Family::Type family,
                                    Cell const& cell, uint const degree,
                                    uint const dim) :
-    FiniteElementBase("VectorElement",ElementList::Vector, cell, degree),
+    FiniteElementBase("VectorElement",Family::Vector, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {

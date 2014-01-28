@@ -10,6 +10,7 @@ using ufl::Cell;
 using ufl::CellSurfaceArea;
 using ufl::Domain;
 using ufl::ElementList;
+using ufl::Family;
 using ufl::Space;
 
 #include <iostream>
@@ -63,27 +64,27 @@ START_TEST( test_init_element_list )
     // Display full list of supported elements
     ElementList::Supported().display();
 
-    std::vector<ElementList::FamilyType> v;
-    v.push_back(ElementList::ARG);
-    v.push_back(ElementList::AW);
-    v.push_back(ElementList::BDFM);
-    v.push_back(ElementList::BDM);
-    v.push_back(ElementList::CR);
-    v.push_back(ElementList::DG);
-    v.push_back(ElementList::HER);
-    v.push_back(ElementList::CG);
-    v.push_back(ElementList::MTW);
-    v.push_back(ElementList::MOR);
-    v.push_back(ElementList::N1curl);
-    v.push_back(ElementList::N2curl);
-    v.push_back(ElementList::RT);
-    v.push_back(ElementList::BQ);
-    v.push_back(ElementList::B);
-    v.push_back(ElementList::Q);
-    v.push_back(ElementList::R);
-    v.push_back(ElementList::U);
+    std::vector<Family::Type> v;
+    v.push_back(Family::ARG);
+    v.push_back(Family::AW);
+    v.push_back(Family::BDFM);
+    v.push_back(Family::BDM);
+    v.push_back(Family::CR);
+    v.push_back(Family::DG);
+    v.push_back(Family::HER);
+    v.push_back(Family::CG);
+    v.push_back(Family::MTW);
+    v.push_back(Family::MOR);
+    v.push_back(Family::N1curl);
+    v.push_back(Family::N2curl);
+    v.push_back(Family::RT);
+    v.push_back(Family::BQ);
+    v.push_back(Family::B);
+    v.push_back(Family::Q);
+    v.push_back(Family::R);
+    v.push_back(Family::U);
 
-    for (std::vector<ElementList::FamilyType>::const_iterator it = v.begin();
+    for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
       bool has_success = ElementList::Supported().has_family(*it);
@@ -104,19 +105,19 @@ START_TEST( test_init_finite_element )
     int init_failed = 0;
 
     uint const deg_max = 2;
-    std::vector<ElementList::FamilyType> v;
-    v.push_back(ElementList::DG);
-    v.push_back(ElementList::CG);
+    std::vector<Family::Type> v;
+    v.push_back(Family::DG);
+    v.push_back(Family::CG);
 
-    for (std::vector<ElementList::FamilyType>::const_iterator it = v.begin();
+    for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
       uint d_min = ElementList::Supported().degree_min(*it);
       uint d_max = std::min(ElementList::Supported().degree_max(*it),
                             std::max(d_min, deg_max));
-      ufl::DomainSet domains = ElementList::Supported().domains(*it);
+      ufl::Domain::Set domains = ElementList::Supported().domains(*it);
 
-      for (ufl::DomainSet::const_iterator dom_it = domains.begin();
+      for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
           dom_it != domains.end(); ++dom_it)
       {
         Domain dom(*dom_it);

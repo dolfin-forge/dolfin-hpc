@@ -7,9 +7,10 @@
 #ifndef __UFL_DOMAIN_H_
 #define __UFL_DOMAIN_H_
 
-#include <dolfin/ufl/UFLObject.h>
+#include <dolfin/ufl/UFLType.h>
 
 #include <map>
+#include <set>
 #include <string>
 
 namespace ufl
@@ -23,7 +24,7 @@ namespace ufl
  *  @brief  Provides a C++ equivalent to ufl_domains from ufl.geometry.
  */
 
-class Domain : public Object
+class Domain : public Type<std::string>
 {
 
 public:
@@ -41,6 +42,9 @@ public:
     quadrilateral,
     hexahedron
   };
+
+  ///
+  typedef std::set<Domain::Type> Set;
 
   ///
   Domain(Type const& t);
@@ -70,21 +74,21 @@ public:
 
   static DefinitionList const Definitions()
   {
-    static DefinitionList const DomainDefinitions = __init_domain_definitions();
+    static DefinitionList const DomainDefinitions = __init_definitions();
     return DomainDefinitions;
   }
 
   ///
-  static Type const facet(Type const& t);
+  static Type const type_facet(Domain::Type const& t);
 
   ///
-  static uint const dim(Type const& t);
+  static uint const type_dim(Domain::Type const& t);
 
   ///
-  static uint const num_facets(Type const& t);
+  static uint const type_num_facets(Domain::Type const& t);
 
   ///
-  static std::string const str(Type const& t);
+  static std::string const type_str(Domain::Type const& t);
 
   /// UFL:
   Type const facet() const;
@@ -101,23 +105,15 @@ public:
   ///
   bool const is_undefined() const;
 
-  /// __repr__
-  repr_t const repr() const;
-
-  /// __str__
-  std::string const str() const;
-
   ///
   void display() const;
 
 private:
 
-  Domain::Type const domain_;
-  repr_t const repr_;
-  std::string const str_;
+  Domain::Type const type_;
 
   //--- STATIC ----------------------------------------------------------------
-  static DefinitionList const __init_domain_definitions();
+  static DefinitionList const __init_definitions();
 
 };
 

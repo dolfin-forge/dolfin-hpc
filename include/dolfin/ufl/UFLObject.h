@@ -10,6 +10,7 @@
 #include <dolfin/ufl/UFLrepr.h>
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -37,26 +38,37 @@ public:
   /// __str__
   virtual std::string const str() const = 0;
 
+  ///
+  virtual repr_t const make_repr(
+      std::vector<Object const *> const& prototype) const = 0;
+
   /// __eq__
-  virtual bool operator == (Object const& other) const;
+  virtual bool operator ==(Object const& other) const;
 
 protected:
 
   ///
-  Object() {}
+  Object()
+  {
+  }
 
   ///
-  virtual ~Object() {}
+  virtual ~Object()
+  {
+  }
 
   ///
-  virtual void display() const;
+  virtual void display() const = 0;
+
+  /// Create from representation
+  static Object * create(repr_t representation);
 
 };
 
 //-----------------------------------------------------------------------------
-inline bool Object::operator == (Object const& other) const
+inline bool Object::operator ==(Object const& other) const
 {
-    return ( other.repr() == this->repr() );
+  return (other.repr() == this->repr());
 }
 
 //-----------------------------------------------------------------------------
@@ -65,6 +77,20 @@ inline void Object::display() const
   std::cout << "Object" << std::endl;
   std::cout << ".str : " << this->str() << std::endl;
   std::cout << ".repr: " << this->repr() << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+inline Object::repr_t const Object::make_repr(
+    std::vector<Object const *> const& prototype) const
+{
+  std::stringstream ret;
+  std::vector<Object const *>::const_iterator arg = prototype.begin();
+  ret << (*arg)->repr();
+  for ( ++arg; arg != prototype.end(); ++arg)
+  {
+    ret << ", " << (*arg)->repr();
+  }
+  return ret.str();
 }
 
 } /* namespace ufl */

@@ -163,10 +163,12 @@ public:
 
 #if ENABLE_UFL
 
-  /// Returns the family of the finite element (UFL+FIAT)
+  /// Returns the family of the finite element
+  /// UFL + FIAT
   std::string const& family() const;
 
-  /// Returns the degree of the finite element (UFL+FIAT)
+  /// Returns the degree of the finite element
+  /// UFL + FIAT
   uint const degree() const;
 
   //--- EXTENSION OF UFL INTERFACE --------------------------------------------

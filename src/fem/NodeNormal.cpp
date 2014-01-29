@@ -69,18 +69,18 @@ NodeNormal::NodeNormal(Mesh& mesh) :
     tau_2 = basis_[2];
   }
 
-  __compute_normal(mesh);
+  ComputeNormal(mesh);
 }
 
 //-----------------------------------------------------------------------------
 NodeNormal::~NodeNormal()
 {
-  clear();
+  Clear();
 }
 
 //-----------------------------------------------------------------------------
 void
-NodeNormal::clear()
+NodeNormal::Clear()
 {
   while (!basis_.empty())
   {
@@ -93,7 +93,7 @@ NodeNormal::clear()
 NodeNormal&
 NodeNormal::operator=(NodeNormal& node_normal)
 {
-  clear();
+  Clear();
 
   normal = new MeshFunction<real> [mesh.topology().dim()];
   tau = new MeshFunction<real> [mesh.topology().dim()];
@@ -141,7 +141,7 @@ NodeNormal::operator=(NodeNormal& node_normal)
 
 //-----------------------------------------------------------------------------
 void
-NodeNormal::__compute_normal(Mesh& mesh)
+NodeNormal::ComputeNormal(Mesh& mesh)
 {
   message("BoundaryNormals: Compute normals");
   mesh.renumber();
@@ -159,14 +159,15 @@ NodeNormal::__compute_normal(Mesh& mesh)
   // Iterate over all cells in the boundary mesh
   BoundaryMesh boundary(mesh);
 
-  //  uint const boundary_nsdim = boundary.topology().dim();
+  //
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
   MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
   uint const nsdim = mesh.topology().dim();
+
   //
   if (dolfin::MPI::numProcesses() > 1)
   {
-    __cache_shared_area(mesh, boundary);
+    CacheSharedArea(mesh, boundary);
   }
 
   //-------------------------------------------------------------------------
@@ -176,8 +177,8 @@ NodeNormal::__compute_normal(Mesh& mesh)
   real * w_block = NULL;
 
   uint NbNeighCells = 0;
-  // Computation of normals to the boundary vertices
 
+  // Computation of normals to the boundary vertices
   if (boundary.numCells())
   {
 
@@ -186,7 +187,6 @@ NodeNormal::__compute_normal(Mesh& mesh)
     {
       uint boundary_id = vertex_map->get(*boundary_vertex);
       uint global_id = mesh.distdata().get_global(boundary_id, 0);
-      //std_out << "global_id = " << global_id << std::endl;
 
       bool const vertex_is_shared = mesh.distdata().is_shared(boundary_id, 0);
       bool const vertex_is_ghosted = mesh.distdata().is_ghost(boundary_id, 0);
@@ -194,29 +194,20 @@ NodeNormal::__compute_normal(Mesh& mesh)
       // Reset basis to zero
       std::fill_n(basis_vec, nsdim * nsdim, 0.);
 
-      NbNeighCells = 0;
       // Get number of neighbouring cells
       // Add storage for shared vertices cell normals
+      NbNeighCells = 0;
       if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
       {
         NbNeighCells = num_neigh_cells_[global_id];
       }
       else
       {
-        //uint nbnc = boundary_vertex->numEntities(boundary_nsdim);
         for (CellIterator boundary_cell(*boundary_vertex); !boundary_cell.end();
             ++boundary_cell)
         {
           ++NbNeighCells;
         }
-        // FIXME: there seems to be a bug such that calling numEntities does not initialize the connectivities
-        /*
-         if (NbNeighCells != nbnc)
-         {
-         dolfin::error(
-         "Different number of neighbouring facets returned by methods.");
-         }
-         */
       }
 
       if (NbNeighCells == 0)
@@ -224,12 +215,12 @@ NodeNormal::__compute_normal(Mesh& mesh)
         dolfin::error("This vertex was found to have zero neighbouring facets");
       }
 
-      // contains of all normals from the facets
+      // Contains of all normals from the facets
       n_block = new real[NbNeighCells * nsdim];
-      // contains of all weights from the facets
+      // Contains of all weights from the facets
       w_block = new real[NbNeighCells];
 
-      // sum of all areas of the elements
+      // Sum of all areas of the elements
       real sum_weights = 0.0;
       uint neighcell_count = 0;
 
@@ -304,8 +295,8 @@ NodeNormal::__compute_normal(Mesh& mesh)
       }
 
       // Now, we have:
-      //    basis_vec  : Vertex normal (*not* unit !) nsdim components
-      //    n_block   : NbNeighCells facet unit normals with nsdim components
+      //    basis_vec   : Vertex normal (*not* unit !) nsdim components
+      //    n_block     : NbNeighCells facet unit normals with nsdim components
       //      w_block   : NbNeighCells facet weights
       //    sum_weights : sum of the facet weights
       Array<real> tangent_weights;
@@ -329,7 +320,7 @@ NodeNormal::__compute_normal(Mesh& mesh)
       // DEBUG: map facets to surfaces
       std::map<uint, uint> surfaces;
 
-      // add storage for normals to surfaces
+      // Add storage for normals to surfaces
       Array<real *> surface_normals;
       Array<real> surface_totalweights;
 
@@ -337,12 +328,11 @@ NodeNormal::__compute_normal(Mesh& mesh)
       int remaining_normals_count = NbNeighCells;
       uint curr_surface = 0;
       uint curr_facet = 0;
-      //      std_out << "Nb Facets = " << remaining_normals_count << std::endl;
       while (remaining_normals_count > 0)
       {
         ++curr_surface;
 
-        // set new reference normal to first remaining normal.
+        // Set new reference normal to first remaining normal.
         // Murtazo seems to use the second surface's averaged normal
         // to detect a third plane, should this be fixed ?
         uint nref_idx = normals_offsets[0];
@@ -351,13 +341,13 @@ NodeNormal::__compute_normal(Mesh& mesh)
           nref[d] = n_block[B(nref_idx,d,NbNeighCells)];
         }
 
-        // init storage for surface normal, deleted with cleanup of surface_normals Array
+        // Init storage for surface normal, deleted with cleanup of surface_normals Array
         real * nSx = new real[nsdim];
         real wSx = 0.;
         std::fill_n(nSx, nsdim, 0);
 
-        // loop through remaining normals indexes
-        // we read the sequence of offsets to jump through the remaining normals
+        // Loop through remaining normals indexes.
+        // We read the sequence of offsets to jump through the remaining normals
         // the first sequence is { 0, 1, 1, 1, ...} with NbNeighCells elements
         curr_facet = normals_offsets[0];
         uint offset_to_update = 0;
@@ -366,7 +356,7 @@ NodeNormal::__compute_normal(Mesh& mesh)
             curr_facet < NbNeighCells && curr_offset < NbNeighCells;
             curr_facet += normals_offsets[++curr_offset])
         {
-          // then let us loop on the other facet normals to compute the scalar product
+          // Then let us loop on the other facet normals to compute the scalar product
           cosalpha = 0.0;
           for (uint d = 0; d < nsdim; ++d)
           {
@@ -376,7 +366,7 @@ NodeNormal::__compute_normal(Mesh& mesh)
           {
             surfaces.insert(std::pair<uint, uint>(curr_facet, curr_surface));
 
-            // add contribution to surface normal
+            // Add contribution to surface normal
             for (uint d = 0; d < nsdim; ++d)
             {
               nSx[d] += w_block[curr_facet]
@@ -384,16 +374,16 @@ NodeNormal::__compute_normal(Mesh& mesh)
               wSx += w_block[curr_facet];
             }
 
-            // eliminate from count of remaining normals to discriminate
+            // Eliminate from count of remaining normals to discriminate
             --remaining_normals_count;
 
-            // update offset value
+            // Update offset value
             ++normals_offsets[offset_to_update];
 
           }
           else
           {
-            // found normal not belonging to the same plane
+            // Found normal not belonging to the same plane,
             // increase offset position then set offset value to one
             normals_offsets[offset_to_update] += normals_offsets[curr_offset]
                 - 1;
@@ -401,10 +391,10 @@ NodeNormal::__compute_normal(Mesh& mesh)
           }
         }
 
-        // add surface normal to the list of surface normals
+        // Add surface normal to the list of surface normals
         surface_normals.push_back(nSx);
 
-        // next loop we add a new surface and discriminate again across
+        // Next loop we add a new surface and discriminate again across
         // the remaining normals
 
       }
@@ -594,6 +584,7 @@ NodeNormal::__compute_normal(Mesh& mesh)
           recv_count_data, MPI_DOUBLE, src, 1, dolfin::MPI::DOLFIN_COMM,
           &status);
       MPI_Get_count(&status, MPI_DOUBLE, &recv_size);
+
       // Insert check if value assigned
       uint idx = 0;
       // Data alignment is n_tau + 1
@@ -654,7 +645,7 @@ NodeNormal::__compute_normal(Mesh& mesh)
 
 //-----------------------------------------------------------------------------
 void
-NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
+NodeNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
 {
   uint const nsdim = mesh.topology().dim();
 
@@ -788,7 +779,10 @@ NodeNormal::__cache_shared_area(Mesh& mesh, BoundaryMesh& boundary)
   int sh_facetnormals_count = sendbuff_facetnormals.size();
   int sh_facetweights_count = sendbuff_facetweights.size();
 
-  dolfin_assert(sh_vertidx_count == SharedVertexCount); dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim); dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim); dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
+  dolfin_assert(sh_vertidx_count == SharedVertexCount);
+  dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);
+  dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);
+  dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
 
   int recv_size_vertidx;
   int recv_size_vertexnormals;

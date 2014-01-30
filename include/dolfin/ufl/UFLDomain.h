@@ -50,33 +50,10 @@ public:
   Domain(Type const& t);
 
   ///
-  ~Domain();
+  Domain(repr_t const& repr);
 
   ///
-  struct Definition
-  {
-    uint dim;
-    Type facet;
-    uint num_facets;
-    std::string str;
-
-    Definition(uint a_dim, Type a_facet, uint a_num_facets, std::string a_str) :
-        dim(a_dim),
-        facet(a_facet),
-        num_facets(a_num_facets),
-        str(a_str)
-    {
-    }
-  };
-
-  typedef std::map<Type, Definition> DefinitionList;
-  typedef std::pair<Type, Definition> DefinitionItem;
-
-  static DefinitionList const Definitions()
-  {
-    static DefinitionList const DomainDefinitions = __init_definitions();
-    return DomainDefinitions;
-  }
+  ~Domain();
 
   ///
   static Type const type_facet(Domain::Type const& t);
@@ -86,9 +63,6 @@ public:
 
   ///
   static uint const type_num_facets(Domain::Type const& t);
-
-  ///
-  static std::string const type_str(Domain::Type const& t);
 
   /// UFL:
   Type const facet() const;
@@ -113,7 +87,44 @@ private:
   Domain::Type const type_;
 
   //--- STATIC ----------------------------------------------------------------
+  ///
+  struct Definition
+  {
+    uint dim;
+    Type facet;
+    uint num_facets;
+    repr_t str;
+
+    Definition(uint a_dim, Type a_facet, uint a_num_facets, std::string a_str) :
+        dim(a_dim),
+        facet(a_facet),
+        num_facets(a_num_facets),
+        str(a_str)
+    {
+    }
+  };
+
+  ///
+  static std::string const type_repr(Domain::Type const& t);
+  typedef std::map<Type, Definition> DefinitionList;
+  typedef std::pair<Type, Definition> DefinitionItem;
+  static DefinitionList const Definitions()
+  {
+    static DefinitionList const DomainDefinitions = __init_definitions();
+    return DomainDefinitions;
+  }
   static DefinitionList const __init_definitions();
+
+  ///
+  static Domain::Type const repr_type(repr_t const& repr);
+  typedef std::map<repr_t const, Domain::Type> MappingList;
+  typedef std::pair<repr_t const, Domain::Type> MappingItem;
+  static MappingList const Mapping()
+  {
+    static MappingList const DomainMapping = __init_mapping();
+    return DomainMapping;
+  }
+  static MappingList const __init_mapping();
 
 };
 

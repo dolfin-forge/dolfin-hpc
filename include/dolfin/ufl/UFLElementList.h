@@ -67,7 +67,7 @@ struct ElementDefinition
     for (Domain::Set::const_iterator it = domains.begin(); it != domains.end();
         ++it)
     {
-      ss << Domain::type_str(*it) << " ";
+      ss << Domain(*it).str() << " ";
     }
     ss << std::endl;
     dolfin::message(ss.str());

@@ -30,24 +30,8 @@ public:
   /// Constructor with default representation for given type
   type<T>(T const& s) :
     val_(s),
-    repr_(make_str(s)),
+    repr_(make_repr(s)),
     str_(make_str(s))
-  {
-  }
-
-  /// Constructor with user-defined representation for given type
-  type<T>(T const& s, repr_t const& r) :
-    val_(s),
-    repr_(r),
-    str_(make_str(s))
-  {
-  }
-
-  /// Constructor with user-defined representation and string for given type
-  type<T>(T const& s, repr_t const& r, std::string const& str) :
-    val_(s),
-    repr_(r),
-    str_(str)
   {
   }
 
@@ -57,27 +41,29 @@ public:
   }
 
   /// __repr__
-  virtual repr_t const repr() const;
+  repr_t const repr() const;
 
   /// __str__
-  virtual std::string const str() const;
+  std::string const str() const;
 
   ///
   virtual void display() const;
 
   ///
-  virtual repr_t const make_repr(
+  repr_t const make_repr(
         std::vector<Object const *> const& prototype) const;
 
 protected:
 
   ///
-  virtual repr_t const make_repr( T const& val) const;
+  repr_t const make_repr( T const& val) const;
 
   ///
   std::string const make_str( T const& val) const;
 
 private:
+
+  bool const is_string_type(std::string const& val) const;
 
   T val_;
   repr_t const repr_;
@@ -134,8 +120,23 @@ template<typename T>
 {
   std::stringstream ret;
   ret << val;
-  return ret.str();
+  // Hack to handle string.
+  std::string strval = ret.str();
+  if(is_string_type(strval))
+  {
+    strval.erase(strval.begin());
+    strval.erase(strval.end()-1);
+  }
+  return strval;
 }
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  bool const type<T>::is_string_type(std::string const& val) const
+{
+  return (*val.begin() == '\'' && *val.rbegin() == '\'');
+}
+
 
 } /* namespace icorne */
 #endif /* __UFL_TYPE_H_ */

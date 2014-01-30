@@ -7,7 +7,7 @@
 #ifndef __UFL_DOMAIN_H_
 #define __UFL_DOMAIN_H_
 
-#include <dolfin/ufl/UFLType.h>
+#include <dolfin/ufl/UFLtype.h>
 
 #include <map>
 #include <set>
@@ -24,7 +24,7 @@ namespace ufl
  *  @brief  Provides a C++ equivalent to ufl_domains from ufl.geometry.
  */
 
-class Domain : public Type<std::string>
+class Domain : public type<std::string>
 {
 
 public:

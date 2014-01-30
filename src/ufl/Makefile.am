@@ -1,6 +1,8 @@
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_ufl.la
-libdolfin_ufl_la_SOURCES = UFLrepr.cpp\
+libdolfin_ufl_la_SOURCES = UFLarray.cpp\
+                           UFLrepr.cpp\
+                           UFLtuple.cpp\
                            UFLCell.cpp\
                            UFLCellSurfaceArea.cpp\
                            UFLCellVolume.cpp\

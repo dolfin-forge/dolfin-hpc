@@ -17,18 +17,18 @@ namespace ufl
 {
 
 template<typename T>
-class Type : public Object
+class type : public Object
 {
 
 public:
 
   ///
-  Type<T>()
+  type<T>()
   {
   }
 
   /// Constructor with default representation for given type
-  Type<T>(T const& s) :
+  type<T>(T const& s) :
     val_(s),
     repr_(make_str(s)),
     str_(make_str(s))
@@ -36,7 +36,7 @@ public:
   }
 
   /// Constructor with user-defined representation for given type
-  Type<T>(T const& s, repr_t const& r) :
+  type<T>(T const& s, repr_t const& r) :
     val_(s),
     repr_(r),
     str_(make_str(s))
@@ -44,7 +44,7 @@ public:
   }
 
   /// Constructor with user-defined representation and string for given type
-  Type<T>(T const& s, repr_t const& r, std::string const& str) :
+  type<T>(T const& s, repr_t const& r, std::string const& str) :
     val_(s),
     repr_(r),
     str_(str)
@@ -52,7 +52,7 @@ public:
   }
 
   ///
-  ~Type<T>()
+  ~type<T>()
   {
   }
 
@@ -87,14 +87,14 @@ private:
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const Type<T>::repr() const
+  Object::repr_t const type<T>::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::string const Type<T>::str() const
+  std::string const type<T>::str() const
 {
   std::stringstream ss;
   ss << val_;
@@ -103,7 +103,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  void Type<T>::display() const
+  void type<T>::display() const
 {
   std::cout << "Type" << std::endl;
   std::cout << ".str : " << (std::string) this->str() << std::endl;
@@ -113,7 +113,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const Type<T>::make_repr(
+  Object::repr_t const type<T>::make_repr(
         std::vector<Object const *> const& prototype) const
 {
   return Object::make_repr(prototype);
@@ -121,7 +121,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const Type<T>::make_repr(T const& val) const
+  Object::repr_t const type<T>::make_repr(T const& val) const
 {
   std::stringstream ret;
   ret << val;
@@ -130,7 +130,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::string const Type<T>::make_str( T const& val) const
+  std::string const type<T>::make_str( T const& val) const
 {
   std::stringstream ret;
   ret << val;

@@ -1,0 +1,56 @@
+// Copyright (C) 2014 Aurélien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
+//
+// First added:  2014-01-27
+// Last changed: 2014-01-27
+
+#ifndef __UFL_TUPLE_H_
+#define __UFL_TUPLE_H_
+
+#include <dolfin/ufl/UFLObject.h>
+
+#include <iostream>
+#include <sstream>
+#include <string>
+
+namespace ufl
+{
+
+class tuple : public Object
+{
+
+public:
+
+  /// Constructor with default representation for given type
+  tuple(Object const& other) :
+      obj_(other)
+  {
+  }
+
+  ///
+  ~tuple()
+  {
+  }
+
+  /// __repr__
+  repr_t const repr() const;
+
+  /// __str__
+  std::string const str() const;
+
+  ///
+  void display() const;
+
+  ///
+  repr_t const make_repr(std::vector<Object const *> const& prototype) const;
+
+protected:
+
+private:
+
+  Object const& obj_;
+
+};
+
+} /* namespace icorne */
+#endif /* __UFL_TUPLE_H_ */

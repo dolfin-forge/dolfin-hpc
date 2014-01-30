@@ -7,7 +7,7 @@
 #ifndef __UFL_FAMILY_H_
 #define __UFL_FAMILY_H_
 
-#include <dolfin/ufl/UFLType.h>
+#include <dolfin/ufl/UFLtype.h>
 
 #include <map>
 #include <set>
@@ -24,7 +24,7 @@ namespace ufl
  *  @brief  Provides a C++ equivalent to family types.
  */
 
-class Family : public Type<std::string>
+class Family : public type<std::string>
 {
 
 public:

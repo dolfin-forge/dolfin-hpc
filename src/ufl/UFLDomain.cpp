@@ -49,7 +49,7 @@ Domain::DefinitionList const Domain::__init_definitions()
 
 //-----------------------------------------------------------------------------
 Domain::Domain(Domain::Type const& t) :
-    ufl::Type<std::string>(Domain::type_str(t),
+    ufl::type<std::string>(Domain::type_str(t),
                            "'" + Domain::type_str(t) + "'"),
     type_(t)
 {
@@ -117,7 +117,7 @@ bool const Domain::is_undefined() const
 //-----------------------------------------------------------------------------
 void Domain::display() const
 {
-  ufl::Type<std::string>::display();
+  ufl::type<std::string>::display();
   std::cout << std::setw(24) << "dimension" << " = " << this->dim()
       << std::endl;
   std::cout << std::setw(24) << "facet" << " = " << Domain::type_str(this->facet())

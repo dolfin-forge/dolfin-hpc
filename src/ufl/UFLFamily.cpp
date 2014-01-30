@@ -12,7 +12,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 Family::Family(Family::Type const& t) :
-    ufl::Type<std::string>(ElementList::Supported().name(t),
+    ufl::type<std::string>(ElementList::Supported().name(t),
                            "'" + ElementList::Supported().name(t) + "'"),
     type_(t)
 {

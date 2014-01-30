@@ -39,7 +39,7 @@ public:
   typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
 
   /// Return finite element family type
-  Family::Type const& family() const;
+  Family const family() const;
 
   /// Return cell of finite element
   Cell const cell() const;
@@ -133,9 +133,10 @@ protected:
 
 private:
 
-  Family::Type const family_;
+  Family const family_;
   Cell const cell_;
-  uint const degree_;
+  type<uint> const degree_;
+  uint const degree_val_;
   QuadratureScheme const quad_scheme_;
   ValueArray const value_shape_;
 

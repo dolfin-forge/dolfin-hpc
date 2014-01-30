@@ -43,59 +43,59 @@ ElementList::ElementFamilyList const ElementList::__init_elements()
   ElementFamilyList m;
 
   //--- Standard elements -----------------------------------------------------
-  register_element(m, Family::ARG, "'Argyris'", "'ARG'", 0, 1, None,
+  register_element(m, Family::ARG, "'Argyris'", "ARG", 0, 1, None,
                    triangle_tetrahedron);
 
-  register_element(m, Family::AW, "'Arnold-Winther'", "'AW'", 0, 0, None,
+  register_element(m, Family::AW, "'Arnold-Winther'", "AW", 0, 0, None,
                    triangle);
 
   register_element(m, Family::BDFM, "'Brezzi-Douglas-Fortin-Marini'",
-                   "'BDFM'", 1, 1, None, triangle_tetrahedron);
+                   "BDFM", 1, 1, None, triangle_tetrahedron);
 
-  register_element(m, Family::BDM, "'Brezzi-Douglas-Marini'", "'BDM'", 1, 1,
+  register_element(m, Family::BDM, "'Brezzi-Douglas-Marini'", "BDM", 1, 1,
                    None, triangle_tetrahedron);
 
-  register_element(m, Family::CR, "'Crouzeix-Raviart'", "'CR'", 0, 1, 1,
+  register_element(m, Family::CR, "'Crouzeix-Raviart'", "CR", 0, 1, 1,
                    triangle_tetrahedron);
 
-  register_element(m, Family::DG, "'Discontinuous Lagrange'", "'DG'", 0, 0,
+  register_element(m, Family::DG, "'Discontinuous Lagrange'", "DG", 0, 0,
                    None, interval_triangle_tetrahedron);
 
-  register_element(m, Family::HER, "'Hermite'", "'HER'", 0, 0, None,
+  register_element(m, Family::HER, "'Hermite'", "HER", 0, 0, None,
                    triangle_tetrahedron);
 
-  register_element(m, Family::CG, "'Lagrange'", "'CG'", 0, 1, None,
+  register_element(m, Family::CG, "'Lagrange'", "CG", 0, 1, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, Family::MTW, "'Mardal-Tai-Winther'", "'MTW'", 0, 0,
+  register_element(m, Family::MTW, "'Mardal-Tai-Winther'", "MTW", 0, 0,
                    None, triangle);
 
-  register_element(m, Family::MOR, "'Morley'", "'MOR'", 0, 0, None,
+  register_element(m, Family::MOR, "'Morley'", "MOR", 0, 0, None,
                    triangle);
 
   register_element(m, Family::N1curl, "'Nedelec 1st kind H(curl)'",
-                   "'N1curl'", 1, 1, None, triangle_tetrahedron);
+                   "N1curl", 1, 1, None, triangle_tetrahedron);
 
   register_element(m, Family::N2curl, "'Nedelec 2nd kind H(curl)'",
-                   "'N2curl'", 1, 1, None, triangle_tetrahedron);
+                   "N2curl", 1, 1, None, triangle_tetrahedron);
 
-  register_element(m, Family::RT, "'Raviart-Thomas'", "'RT'", 1, 1, None,
+  register_element(m, Family::RT, "'Raviart-Thomas'", "RT", 1, 1, None,
                    triangle_tetrahedron);
 
   //--- Special elements ------------------------------------------------------
-  register_element(m, Family::BQ, "'Boundary Quadrature'", "'BQ'", 0, 0,
+  register_element(m, Family::BQ, "'Boundary Quadrature'", "BQ", 0, 0,
                    None, interval_triangle_tetrahedron);
 
-  register_element(m, Family::B, "'Bubble'", "'B'", 0, 2, None,
+  register_element(m, Family::B, "'Bubble'", "B", 0, 2, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, Family::Q, "'Quadrature'", "'Q'", 0, 0, None,
+  register_element(m, Family::Q, "'Quadrature'", "Q", 0, 0, None,
                    interval_triangle_tetrahedron);
 
-  register_element(m, Family::R, "'Real'", "'R'", 0, 0, 0,
+  register_element(m, Family::R, "'Real'", "R", 0, 0, 0,
                    interval_triangle_tetrahedron);
 
-  register_element(m, Family::U, "'Undefined'", "'U'", 0, 0, None,
+  register_element(m, Family::U, "'Undefined'", "U", 0, 0, None,
                    interval_triangle_tetrahedron);
 
   return m;

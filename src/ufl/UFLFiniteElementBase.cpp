@@ -21,6 +21,7 @@ FiniteElementBase::FiniteElementBase(std::string const& name,
     family_(family),
     cell_(cell),
     degree_(degree),
+    degree_val_(degree),
     quad_scheme_(quad_scheme),
     value_shape_(value_shape)
 {
@@ -32,7 +33,7 @@ FiniteElementBase::~FiniteElementBase()
 }
 
 //-----------------------------------------------------------------------------
-Family::Type const& FiniteElementBase::family() const
+Family const FiniteElementBase::family() const
 {
   return family_;
 }
@@ -46,7 +47,7 @@ Cell const FiniteElementBase::cell() const
 //-----------------------------------------------------------------------------
 uint const FiniteElementBase::degree() const
 {
-  return degree_;
+  return degree_val_;
 }
 
 //-----------------------------------------------------------------------------
@@ -114,7 +115,7 @@ uint const FiniteElementBase::get_degree_max(
 void FiniteElementBase::display() const
 {
   Class::display();
-  std::cout << std::setw(24) << "family" << " = " << ElementList::Supported().name(this->family()) << std::endl;
+  std::cout << std::setw(24) << "family" << " = " << this->family().str() << std::endl;
   std::cout << std::setw(24) << "cell" << " = " << this->cell().str() << std::endl;
   std::cout << std::setw(24) << "degree" << " = " << this->degree() << std::endl;
   std::cout << std::setw(24) << "quadrature_scheme" << " = " << this->quadrature_scheme().str() << std::endl;

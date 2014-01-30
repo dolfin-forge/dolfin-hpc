@@ -22,4 +22,10 @@ Family::~Family()
 {
 }
 
+//-----------------------------------------------------------------------------
+Family::Type const Family::type() const
+{
+  return type_;
+}
+
 } /* namespace icorne */

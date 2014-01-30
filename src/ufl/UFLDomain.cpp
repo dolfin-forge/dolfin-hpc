@@ -150,7 +150,7 @@ void Domain::display() const
   std::cout << std::setw(24) << "dimension" << " = " << this->dim()
       << std::endl;
   std::cout << std::setw(24) << "facet" << " = "
-      << Domain::type_repr(this->facet()) << std::endl;
+      << Domain(this->facet()).str() << std::endl;
   std::cout << std::setw(24) << "num_facets" << " = " << this->num_facets()
       << std::endl;
   std::cout << std::endl;

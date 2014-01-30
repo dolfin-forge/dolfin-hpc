@@ -31,7 +31,7 @@ FiniteElement::FiniteElement(Family::Type family,
   QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "FiniteElement('"<< ElementList::Supported().repr(family)
+  ssrepr << "FiniteElement("<< this->family().repr()
          << "', "<< cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
@@ -49,7 +49,7 @@ FiniteElement::~FiniteElement()
 //-----------------------------------------------------------------------------
 bool const FiniteElement::is_cellwise_constant() const
 {
-  return ( family() == Family::R && degree() == 0 );
+  return ( family().type() == Family::R && degree() == 0 );
 }
 
 //-----------------------------------------------------------------------------

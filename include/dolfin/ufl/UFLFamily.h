@@ -56,9 +56,13 @@ public:
     Restricted
   };
 
+  ///
   Family(Family::Type const& t);
 
+  ///
   ~Family();
+
+  Family::Type const type() const;
 
 private:
 

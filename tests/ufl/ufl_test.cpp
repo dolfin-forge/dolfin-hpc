@@ -11,6 +11,7 @@ using ufl::CellSurfaceArea;
 using ufl::Domain;
 using ufl::ElementList;
 using ufl::Family;
+using ufl::Object;
 using ufl::Space;
 
 #include <iostream>
@@ -36,21 +37,54 @@ START_TEST( test_init_cell )
   {
     int init_failed = 0;
 
+    // C++ => Python
     std::vector<Domain::Type> domains;
     domains.push_back(Domain::interval);
     domains.push_back(Domain::triangle);
     domains.push_back(Domain::tetrahedron);
 
+    std::vector<Object::repr_t> domains_repr;
+    std::vector<Object::repr_t> spaces_repr;
+    std::vector<Object::repr_t> cells_repr;
+
+    std::cout << "======== Create from C++ constructor ========" << std::endl;
     for (std::vector<Domain::Type>::const_iterator it = domains.begin();
         it != domains.end(); ++it)
     {
       Domain d(*it);
       d.display();
+      domains_repr.push_back(d.repr());
 
       Space s(d.dim());
       s.display();
+      spaces_repr.push_back(s.repr());
 
       Cell c(d, s);
+      c.display();
+      cells_repr.push_back(c.repr());
+    }
+
+    // Python => C++
+    std::cout << "======== Create from repr constructor ========" << std::endl;
+    std::cout << "==== Domains ====" << std::endl;
+    for (std::vector<Object::repr_t>::const_iterator it = domains_repr.begin();
+        it != domains_repr.end(); ++it)
+    {
+      Domain d(*it);
+      d.display();
+    }
+    std::cout << "==== Spaces ====" << std::endl;
+    for (std::vector<Object::repr_t>::const_iterator it = spaces_repr.begin();
+        it != spaces_repr.end(); ++it)
+    {
+      Space s(*it);
+      s.display();
+    }
+    std::cout << "==== Cells ====" << std::endl;
+    for (std::vector<Object::repr_t>::const_iterator it = cells_repr.begin();
+        it != cells_repr.end(); ++it)
+    {
+      Cell c(*it);
       c.display();
     }
 

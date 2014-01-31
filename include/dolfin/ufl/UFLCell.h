@@ -36,10 +36,13 @@ class Cell : public Class
 public:
 
   ///
-  Cell(Domain const& domain);
+  explicit Cell(Domain const& domain);
 
   ///
-  Cell(Domain const& domain, Space const& space);
+  explicit Cell(Domain const& domain, Space const& space);
+
+  ///
+  explicit Cell(repr_t const& repr);
 
   ///
   ~Cell();

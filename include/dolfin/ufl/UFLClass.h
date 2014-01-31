@@ -41,20 +41,47 @@ public:
   virtual bool operator ==(Class const& other) const;
 
   ///
-  repr_t const make_repr(std::vector<Object const *> const& prototype) const;
+  repr_t const make_repr(std::vector<Object const *> const& args) const;
 
 protected:
 
+  ///
   Class();
+
+  ///
   Class(std::string const& name);
 
+  ///
+  explicit Class(std::string const& name, repr_t const& repr);
+
+  ///
   virtual ~Class();
 
   ///
   virtual void display() const;
 
+  ///
+  repr_t const make_repr(Object const *& arg1) const;
+
+  ///
+  repr_t const make_repr(Object const *& arg1, Object const *& arg2) const;
+
+  ///
+  std::vector<repr_t> const make_args_repr(repr_t const& repr) const;
+
+  ///
+  repr_t const& arg(size_t i);
+
 private:
 
+  typedef std::pair<std::string const, std::vector<Object const*> > CppProto;
+
+  ///
+  CppProto make_proto(repr_t repr) const;
+
+  //--- ATTRIBUTES ------------------------------------------------------------
+  CppProto cpp_proto_;
+  std::vector<repr_t> args_repr_;
   std::string const name_;
   static repr_t const default_repr_;
   static std::string const default_str_;
@@ -65,6 +92,12 @@ private:
 inline bool Class::operator ==(Class const& other) const
 {
   return (other.repr() == this->repr());
+}
+
+//-----------------------------------------------------------------------------
+inline Object::repr_t const& Class::arg(size_t i)
+{
+  return args_repr_.at(i);
 }
 
 //-----------------------------------------------------------------------------

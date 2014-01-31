@@ -41,7 +41,26 @@ Cell::Cell(Domain const& domain, Space const& space) :
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
     geometric_dimension_(space_.dimension()),
-    topological_dimension_(domain.dim()),
+    topological_dimension_(domain_.dim()),
+    cell_surface_area_(*this),
+    cell_volume_(*this),
+    circumradius_(*this),
+    facet_area_(*this),
+    facet_normal_(*this),
+    x_(*this)
+{
+}
+
+//-----------------------------------------------------------------------------
+Cell::Cell(repr_t const& repr) :
+    Class("Cell", repr),
+    domain_(arg(0)),
+    space_(arg(1)),
+    repr_(*this, domain_, space_),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
+    invalid_(domain_.is_undefined()),
+    geometric_dimension_(space_.dimension()),
+    topological_dimension_(domain_.dim()),
     cell_surface_area_(*this),
     cell_volume_(*this),
     circumradius_(*this),

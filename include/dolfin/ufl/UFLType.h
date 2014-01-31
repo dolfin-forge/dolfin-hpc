@@ -35,6 +35,14 @@ public:
   {
   }
 
+  /// Constructor with default representation for given type
+  type<T>(Object::repr_t const& repr) :
+    val_(make_val(repr)),
+    repr_(repr),
+    str_(make_str(val_))
+  {
+  }
+
   ///
   ~type<T>()
   {
@@ -53,13 +61,21 @@ public:
   repr_t const make_repr(
         std::vector<Object const *> const& prototype) const;
 
+  operator T() const { return val_;}
+
 protected:
 
   ///
   repr_t const make_repr( T const& val) const;
 
   ///
+  T const make_val(repr_t const& repr) const;
+
+  ///
   std::string const make_str( T const& val) const;
+
+  ///
+  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr) const;
 
 private:
 
@@ -116,6 +132,17 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
+T const type<T>::make_val(repr_t const& repr) const
+{
+  T val;
+  std::stringstream ss;
+  ss << repr;
+  ss >> val;
+  return val;
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
   std::string const type<T>::make_str( T const& val) const
 {
   std::stringstream ret;
@@ -128,6 +155,13 @@ template<typename T>
     strval.erase(strval.end()-1);
   }
   return strval;
+}
+
+//-----------------------------------------------------------------------------
+template<typename T>
+  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr) const
+{
+  return std::vector<Object::repr_t>();
 }
 
 //-----------------------------------------------------------------------------

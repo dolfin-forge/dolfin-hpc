@@ -60,6 +60,13 @@ protected:
   ///
   virtual void display() const = 0;
 
+  ///
+  virtual std::vector<repr_t> const make_args_repr(
+      repr_t const& repr) const = 0;
+
+  ///
+  std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
+
   /// Create from representation
   static Object * create(repr_t representation);
 
@@ -81,16 +88,50 @@ inline void Object::display() const
 
 //-----------------------------------------------------------------------------
 inline Object::repr_t const Object::make_repr(
-    std::vector<Object const *> const& prototype) const
+    std::vector<Object const *> const& args) const
 {
   std::stringstream ret;
-  std::vector<Object const *>::const_iterator arg = prototype.begin();
+  std::vector<Object const *>::const_iterator arg = args.begin();
   ret << (*arg)->repr();
-  for ( ++arg; arg != prototype.end(); ++arg)
+  for (++arg; arg != args.end(); ++arg)
   {
     ret << ", " << (*arg)->repr();
   }
   return ret.str();
+}
+
+//-----------------------------------------------------------------------------
+inline std::vector<Object const *> Object::make_args(
+    std::vector<repr_t> const& repr) const
+{
+  std::vector<Object const *> args;
+  for (std::vector<repr_t>::const_iterator it = repr.begin(); it != repr.end();
+      ++it)
+  {
+    args.push_back(this);
+  }
+  return args;
+}
+
+//-----------------------------------------------------------------------------
+inline std::vector<Object::repr_t> const Object::make_args_repr(
+    repr_t const& repr) const
+{
+  std::vector<Object::repr_t> args;
+  std::string str = repr;
+  std::string delimiter = ", ";
+
+  size_t pos = 0;
+  std::string token;
+  while (pos != std::string::npos)
+  {
+    pos = str.find(delimiter);
+    token = str.substr(0, pos);
+    args.push_back(Object::repr_t(token));
+//    std::cout << "new arg = " << token << std::endl;
+    str.erase(0, pos + delimiter.length());
+  }
+  return args;
 }
 
 } /* namespace ufl */

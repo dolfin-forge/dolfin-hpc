@@ -5,6 +5,7 @@
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 #include <dolfin/ufl/UFLSpace.h>
+#include <dolfin/ufl/UFLVectorElement.h>
 
 using ufl::Cell;
 using ufl::CellSurfaceArea;
@@ -193,7 +194,7 @@ START_TEST( test_init_finite_element )
     v.push_back(Family::DG);
     v.push_back(Family::CG);
 
-    std::cout << "======== Check CG and DG creation (C++) ========"
+    std::cout << "======== FiniteElement creation (C++) ========"
         << std::endl;
     std::vector<Object::repr_t> fem_repr;
     for (std::vector<Family::Type>::const_iterator it = v.begin();
@@ -217,12 +218,64 @@ START_TEST( test_init_finite_element )
         }
       }
     }
-    std::cout << "======== Check CG and DG creation (repr)========"
+    std::cout << "======== FiniteElement creation (repr)========"
         << std::endl;
     for (std::vector<Object::repr_t>::const_iterator it = fem_repr.begin();
         it != fem_repr.end(); ++it)
     {
       ufl::FiniteElement fem(*it);
+      fem.display();
+      if (*it != fem.repr())
+      {
+        init_failed = 1;
+      }
+    }
+
+    fail_unless( init_failed == 0 );
+  }END_TEST
+//-----------------------------------------------------------------------------
+START_TEST( test_init_vector_element )
+  {
+    int init_failed = 0;
+
+    uint const deg_max = 2;
+    std::vector<Family::Type> v;
+    v.push_back(Family::DG);
+    v.push_back(Family::CG);
+
+    std::cout << "======== VectorElement creation (C++) ========"
+        << std::endl;
+    std::vector<Object::repr_t> fem_repr;
+    for (std::vector<Family::Type>::const_iterator it = v.begin();
+        it != v.end(); ++it)
+    {
+      Family f(*it);
+      uint d_min = f.degree_min();
+      uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
+      ufl::Domain::Set domains = f.domains();
+
+      for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
+          dom_it != domains.end(); ++dom_it)
+      {
+        Domain dom(*dom_it);
+        Cell cell(dom);
+        for (uint d = d_min; d <= d_max; ++d)
+        {
+          for (uint vd = 1; vd <= cell.topological_dimension(); ++vd)
+          {
+            ufl::VectorElement fem(*it, cell, d, vd);
+            fem.display();
+            fem_repr.push_back(fem.repr());
+          }
+        }
+      }
+    }
+    std::cout << "======== VectorElement creation (repr)========"
+        << std::endl;
+    for (std::vector<Object::repr_t>::const_iterator it = fem_repr.begin();
+        it != fem_repr.end(); ++it)
+    {
+      ufl::VectorElement fem(*it);
       fem.display();
       if (*it != fem.repr())
       {
@@ -246,6 +299,7 @@ Suite *ufl_suite()
   tcase_add_test(tc, test_init_family);
   tcase_add_test(tc, test_init_element_list);
   tcase_add_test(tc, test_init_finite_element);
+  tcase_add_test(tc, test_init_vector_element);
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);

@@ -139,7 +139,6 @@ private:
   Family const family_;
   Cell const cell_;
   type<uint> const degree_;
-  uint const degree_val_;
   QuadratureScheme const quad_scheme_;
   ValueArray const value_shape_;
 

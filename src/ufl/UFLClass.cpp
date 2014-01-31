@@ -41,7 +41,8 @@ Class::Class(std::string const& name, repr_t const& repr) :
   if (name_ != cpp_proto_.first)
   {
     dolfin::error(
-        "The representation is invalid as it does not match the class");
+        "The representation :\n\t" + repr + "\n"
+        "is invalid as it does not match the class" + name_);
   }
 }
 

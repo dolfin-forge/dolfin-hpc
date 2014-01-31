@@ -34,6 +34,11 @@ Family::MappingList const Family::__init_mapping()
   m.insert(MappingItem(Object::repr_t("'Quadrature'"), Family::Q));
   m.insert(MappingItem(Object::repr_t("'Real'"), Family::R));
   m.insert(MappingItem(Object::repr_t("'Undefined'"), Family::U));
+  m.insert(MappingItem(Object::repr_t("'Mixed'"), Family::Mixed));
+  m.insert(MappingItem(Object::repr_t("'Vector'"), Family::Vector));
+  m.insert(MappingItem(Object::repr_t("'Tensor'"), Family::Tensor));
+  m.insert(MappingItem(Object::repr_t("'Enriched'"), Family::Enriched));
+  m.insert(MappingItem(Object::repr_t("'Restricted'"), Family::Restricted));
   return m;
 }
 
@@ -89,6 +94,13 @@ Family::DefinitionList const Family::__init_definitions()
   register_family(m, Family::Q, "'Quadrature'", "Q", 0, 0, None, interval_triangle_tetrahedron);
   register_family(m, Family::R, "'Real'", "R", 0, 0, 0, interval_triangle_tetrahedron);
   register_family(m, Family::U, "'Undefined'", "U", 0, 0, None, interval_triangle_tetrahedron);
+
+  //--- Meta elements ---------------------------------------------------------
+  register_family(m, Family::Mixed, "'Mixed'", "MIXED", 0, 0, None, interval_triangle_tetrahedron);
+  register_family(m, Family::Vector, "'Vector'", "VECTOR", 0, 0, None, interval_triangle_tetrahedron);
+  register_family(m, Family::Tensor, "'Tensor'", "TENSOR", 0, 0, None, interval_triangle_tetrahedron);
+  register_family(m, Family::Enriched, "'Enriched'", "ENRICHED", 0, 0, None, interval_triangle_tetrahedron);
+  register_family(m, Family::Restricted, "'Restricted'", "RESTRICTED", 0, 0, None, interval_triangle_tetrahedron);
 
   return m;
 }

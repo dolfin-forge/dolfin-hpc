@@ -141,7 +141,7 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     {
       token = str.substr(0, scpos);
       args.push_back(Object::repr_t(token));
-//      std::cout << "new arg = " << token << std::endl;
+      std::cout << "new arg = " << token << std::endl;
       str.erase(0, scpos + delimiter.length());
       currpos = 0;
     }

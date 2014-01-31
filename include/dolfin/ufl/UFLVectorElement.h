@@ -9,6 +9,7 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
+#include <dolfin/ufl/UFLtype.h>
 
 namespace ufl
 {
@@ -29,6 +30,9 @@ public:
   ///
   VectorElement(Family::Type family, Cell const& cell,
                    uint const degree, uint const dim);
+
+  ///
+  explicit VectorElement(repr_t const& repr);
 
   ///
   ~VectorElement();
@@ -69,6 +73,7 @@ protected:
   ValueArray const value_shape_;
   std::map<uint, uint> const symmetry_;
   FiniteElement const sub_element_;
+  type<uint> const dim_;
   FiniteElementBaseList const sub_elements_;
 
   mutable repr_t repr_;

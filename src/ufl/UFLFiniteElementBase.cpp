@@ -21,7 +21,6 @@ FiniteElementBase::FiniteElementBase(std::string const& name,
     family_(family),
     cell_(cell),
     degree_(degree),
-    degree_val_(degree),
     quad_scheme_(quad_scheme),
     value_shape_(value_shape)
 {
@@ -33,7 +32,6 @@ FiniteElementBase::FiniteElementBase(std::string const& name, repr_t repr) :
     family_(arg(0)),
     cell_(arg(1)),
     degree_(arg(2)),
-    degree_val_(degree_),
     quad_scheme_(),
     value_shape_()
 {
@@ -59,7 +57,7 @@ Cell const FiniteElementBase::cell() const
 //-----------------------------------------------------------------------------
 uint const FiniteElementBase::degree() const
 {
-  return degree_val_;
+  return degree_;
 }
 
 //-----------------------------------------------------------------------------

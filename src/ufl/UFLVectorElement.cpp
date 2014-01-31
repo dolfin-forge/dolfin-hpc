@@ -9,26 +9,46 @@
 namespace ufl
 {
 
+using dolfin::error;
+
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(Family::Type family, Cell const& cell,
                              uint const degree, uint const dim) :
     FiniteElementBase("VectorElement", Family::Vector, cell, degree),
     sub_element_(family, cell, degree),
+    dim_(dim),
     sub_elements_(dim, &sub_element_)
 {
   // Check mixed finite element definition
 
   // Create string representation
-  QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "VectorElement(" << this->family().repr() << ", "
-      << cell.repr() << ", " << degree << ", " << qs.repr() << ")";
+  ssrepr << "VectorElement(" << sub_element_.family().repr() << ", "
+      << cell.repr() << ", " << degree << ", " << dim << ", " << sub_element_.quadrature_scheme().repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << this->family().short_name()
+  ssstr << "<" << sub_element_.family().short_name()
       << " vector element of degree " << degree << " on a " << cell.str()
+      << ": " << sub_elements_.size() << " x " << sub_element_.str() << ">";
+  str_ = ssstr.str();
+}
+
+//-----------------------------------------------------------------------------
+VectorElement::VectorElement(repr_t const& repr) :
+    FiniteElementBase("VectorElement", repr),
+    value_shape_(),
+    symmetry_(),
+    sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<uint>(arg(2))),
+    dim_(arg(3)),
+    sub_elements_(dim_, &sub_element_)
+{
+  repr_ = repr;
+
+  std::stringstream ssstr;
+  ssstr << "<" << sub_element_.family().short_name()
+      << " vector element of degree " << degree() << " on a " << cell().str()
       << ": " << sub_elements_.size() << " x " << sub_element_.str() << ">";
   str_ = ssstr.str();
 }

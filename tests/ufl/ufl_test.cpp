@@ -71,6 +71,10 @@ START_TEST( test_init_cell )
     {
       Domain d(*it);
       d.display();
+      if (*it != d.repr())
+      {
+        init_failed = 1;
+      }
     }
     std::cout << "==== Spaces ====" << std::endl;
     for (std::vector<Object::repr_t>::const_iterator it = spaces_repr.begin();
@@ -78,6 +82,10 @@ START_TEST( test_init_cell )
     {
       Space s(*it);
       s.display();
+      if (*it != s.repr())
+      {
+        init_failed = 1;
+      }
     }
     std::cout << "==== Cells ====" << std::endl;
     for (std::vector<Object::repr_t>::const_iterator it = cells_repr.begin();
@@ -85,6 +93,10 @@ START_TEST( test_init_cell )
     {
       Cell c(*it);
       c.display();
+      if (*it != c.repr())
+      {
+        init_failed = 1;
+      }
     }
 
     fail_unless( init_failed == 0 );
@@ -181,14 +193,15 @@ START_TEST( test_init_finite_element )
     v.push_back(Family::DG);
     v.push_back(Family::CG);
 
-    std::cout << "======== Check CG and DG creation ========" << std::endl;
+    std::cout << "======== Check CG and DG creation (C++) ========"
+        << std::endl;
+    std::vector<Object::repr_t> fem_repr;
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
       Family f(*it);
       uint d_min = f.degree_min();
-      uint d_max = std::min(f.degree_max(),
-                            std::max(d_min, deg_max));
+      uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
       ufl::Domain::Set domains = f.domains();
 
       for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
@@ -200,10 +213,23 @@ START_TEST( test_init_finite_element )
         {
           ufl::FiniteElement fem(*it, cell, d);
           fem.display();
+          fem_repr.push_back(fem.repr());
         }
       }
     }
-    std::cout << "======== Done ========" << std::endl;
+    std::cout << "======== Check CG and DG creation (repr)========"
+        << std::endl;
+    for (std::vector<Object::repr_t>::const_iterator it = fem_repr.begin();
+        it != fem_repr.end(); ++it)
+    {
+      ufl::FiniteElement fem(*it);
+      fem.display();
+      if (*it != fem.repr())
+      {
+        init_failed = 1;
+      }
+    }
+
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------

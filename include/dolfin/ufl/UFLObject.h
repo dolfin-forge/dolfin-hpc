@@ -121,15 +121,34 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
   std::string str = repr;
   std::string delimiter = ", ";
 
-  size_t pos = 0;
+  size_t scpos = 0;
+  size_t currpos = 0;
+  size_t openbrace = 0;
+  size_t closebrace = 0;
   std::string token;
-  while (pos != std::string::npos)
+  while (scpos != std::string::npos)
   {
-    pos = str.find(delimiter);
-    token = str.substr(0, pos);
-    args.push_back(Object::repr_t(token));
-//    std::cout << "new arg = " << token << std::endl;
-    str.erase(0, pos + delimiter.length());
+    scpos = str.find(delimiter, currpos);
+    openbrace = str.find("(", currpos);
+    // Take into account of
+    // - one argument
+    // - class arguments
+    // - tuple argument
+    // - dict argument
+    if (scpos == std::string::npos || openbrace > scpos
+        || (openbrace < scpos && str.find(")", currpos) < scpos)
+        || (str.find("{", currpos) < scpos && str.find("}", currpos) < scpos))
+    {
+      token = str.substr(0, scpos);
+      args.push_back(Object::repr_t(token));
+//      std::cout << "new arg = " << token << std::endl;
+      str.erase(0, scpos + delimiter.length());
+      currpos = 0;
+    }
+    else
+    {
+      currpos = scpos + 1;
+    }
   }
   return args;
 }

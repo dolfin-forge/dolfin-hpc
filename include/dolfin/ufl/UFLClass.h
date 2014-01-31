@@ -95,12 +95,6 @@ inline bool Class::operator ==(Class const& other) const
 }
 
 //-----------------------------------------------------------------------------
-inline Object::repr_t const& Class::arg(size_t i)
-{
-  return args_repr_.at(i);
-}
-
-//-----------------------------------------------------------------------------
 class ValueArray : public std::vector<uint>
 {
 

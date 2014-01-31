@@ -26,9 +26,10 @@ class FiniteElement : public FiniteElementBase
 public:
 
   ///
-  FiniteElement(Family::Type family,
-                   Cell const& cell,
-                   uint const degree);
+  FiniteElement(Family::Type family, Cell const& cell, uint const degree);
+
+  ///
+  explicit FiniteElement(repr_t const& repr);
 
   ///
   ~FiniteElement();
@@ -50,7 +51,8 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<uint, FiniteElementBase const * const > const extract_component(
+      ValueArray const& i) const;
 
   /// Return number of sub elements
   uint const num_sub_elements() const;

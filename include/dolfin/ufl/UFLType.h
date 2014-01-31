@@ -137,7 +137,7 @@ T const type<T>::make_val(repr_t const& repr) const
   T val;
   std::stringstream ss;
   ss << repr;
-  ss >> val;
+  ss >> std::ws >> val; // Important to not ignore whitespaces
   return val;
 }
 

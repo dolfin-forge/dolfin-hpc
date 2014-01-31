@@ -33,8 +33,31 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << this->family().short_name() << degree
-      << qs.str() << " on a " << cell.str() << ">";
+  ssstr << "<" << this->family().short_name() << degree << qs.str() << " on a "
+      << cell.str() << ">";
+  str_ = ssstr.str();
+}
+
+//-----------------------------------------------------------------------------
+FiniteElement::FiniteElement(repr_t const& repr) :
+    FiniteElementBase("FiniteElement", repr),
+    value_shape_(),
+    symmetry_(),
+    sub_elements_()
+{
+  // Check finite element definition
+  if (!this->family().has_valid_definition(cell().domain().type(), degree()))
+  {
+    error("The finite element definition is not valid.");
+  }
+
+  QuadratureScheme qs;
+
+  repr_ = repr;
+
+  std::stringstream ssstr;
+  ssstr << "<" << this->family().short_name() << degree() << qs.str() << " on a "
+      << cell().str() << ">";
   str_ = ssstr.str();
 }
 

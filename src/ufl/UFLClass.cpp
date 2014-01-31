@@ -128,6 +128,20 @@ Class::CppProto Class::make_proto(Object::repr_t repr) const
 }
 
 //-----------------------------------------------------------------------------
+Object::repr_t const& Class::arg(size_t i)
+{
+  if(i >= args_repr_.size())
+  {
+    for(size_t k=0; k < args_repr_.size(); ++k)
+    {
+      std::cout << args_repr_[k] << ", ";
+    }
+    dolfin::error("Invalid index required for argument.");
+  }
+  return args_repr_[i];
+}
+
+//-----------------------------------------------------------------------------
 void Class::display() const
 {
   std::cout << "Class '" << this->name() << "'" << std::endl;

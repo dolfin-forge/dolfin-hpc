@@ -9,11 +9,11 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLCircumradius.cpp\
                            UFLClass.cpp\
                            UFLDomain.cpp\
-                           UFLElementList.cpp\
                            UFLEnrichedElement.cpp\
                            UFLFacetArea.cpp\
                            UFLFacetNormal.cpp\
                            UFLFamily.cpp\
+                           UFLElementList.cpp\
                            UFLFiniteElement.cpp\
                            UFLFiniteElementBase.cpp\
                            UFLGeometricQuantity.cpp\

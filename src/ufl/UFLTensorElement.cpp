@@ -23,12 +23,12 @@ TensorElement::TensorElement(Family::Type family,
   QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "TensorElement(" << ElementList::Supported().repr(family)
+  ssrepr << "TensorElement(" << this->family().repr()
          << ", " << cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << ElementList::Supported().short_name(family)
+  ssstr << "<" << this->family().short_name()
         << " vector element of degree " << degree << " on a " << cell.str()
         << ": " << sub_elements_.size() << " x " << sub_element_.str() << ">";
   str_ = ssstr.str();

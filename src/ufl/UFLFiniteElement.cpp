@@ -12,18 +12,15 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(Family::Type family,
-                                           Cell const& cell,
-                                           uint const degree) :
+FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
+                             uint const degree) :
     FiniteElementBase("FiniteElement", family, cell, degree),
     value_shape_(),
     symmetry_(),
     sub_elements_()
 {
   // Check finite element definition
-  if(!ElementList::Supported().has_valid_definition(family,
-                                                   cell.domain().type(),
-                                                   degree))
+  if (!this->family().has_valid_definition(cell.domain().type(), degree))
   {
     error("The finite element definition is not valid.");
   }
@@ -31,13 +28,13 @@ FiniteElement::FiniteElement(Family::Type family,
   QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "FiniteElement("<< this->family().repr()
-         << "', "<< cell.repr() << ", " << degree << ", " << qs.repr() << ")";
+  ssrepr << "FiniteElement(" << this->family().repr() << ", " << cell.repr()
+      << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << ElementList::Supported().short_name(family) << degree
-        << qs.str() << " on a " << cell.str() << ">";
+  ssstr << "<" << this->family().short_name() << degree
+      << qs.str() << " on a " << cell.str() << ">";
   str_ = ssstr.str();
 }
 
@@ -49,7 +46,7 @@ FiniteElement::~FiniteElement()
 //-----------------------------------------------------------------------------
 bool const FiniteElement::is_cellwise_constant() const
 {
-  return ( family().type() == Family::R && degree() == 0 );
+  return (family().type() == Family::R && degree() == 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -66,10 +63,11 @@ std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_compon
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const FiniteElement::extract_component(ValueArray const& i) const
+std::pair<uint, FiniteElementBase const * const > const FiniteElement::extract_component(
+    ValueArray const& i) const
 {
   check_component(i);
-  return std::pair<uint, FiniteElementBase const * const>(i[0], this);
+  return std::pair<uint, FiniteElementBase const * const >(i[0], this);
 }
 
 //-----------------------------------------------------------------------------

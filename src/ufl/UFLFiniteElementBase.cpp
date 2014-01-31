@@ -28,6 +28,18 @@ FiniteElementBase::FiniteElementBase(std::string const& name,
 }
 
 //-----------------------------------------------------------------------------
+FiniteElementBase::FiniteElementBase(std::string const& name, repr_t repr) :
+    Class(name, repr),
+    family_(arg(0)),
+    cell_(arg(1)),
+    degree_(arg(2)),
+    degree_val_(degree_),
+    quad_scheme_(),
+    value_shape_()
+{
+}
+
+//-----------------------------------------------------------------------------
 FiniteElementBase::~FiniteElementBase()
 {
 }
@@ -115,10 +127,14 @@ uint const FiniteElementBase::get_degree_max(
 void FiniteElementBase::display() const
 {
   Class::display();
-  std::cout << std::setw(24) << "family" << " = " << this->family().str() << std::endl;
-  std::cout << std::setw(24) << "cell" << " = " << this->cell().str() << std::endl;
-  std::cout << std::setw(24) << "degree" << " = " << this->degree() << std::endl;
-  std::cout << std::setw(24) << "quadrature_scheme" << " = " << this->quadrature_scheme().str() << std::endl;
+  std::cout << std::setw(24) << "family" << " = " << this->family().str()
+      << std::endl;
+  std::cout << std::setw(24) << "cell" << " = " << this->cell().str()
+      << std::endl;
+  std::cout << std::setw(24) << "degree" << " = " << this->degree()
+      << std::endl;
+  std::cout << std::setw(24) << "quadrature_scheme" << " = "
+      << this->quadrature_scheme().str() << std::endl;
   std::cout << std::endl;
 }
 

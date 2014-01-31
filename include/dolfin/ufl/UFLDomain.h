@@ -50,7 +50,7 @@ public:
   Domain(Type const& t);
 
   ///
-  Domain(repr_t const& repr);
+  explicit Domain(repr_t const& repr);
 
   ///
   ~Domain();
@@ -110,8 +110,8 @@ private:
   typedef std::pair<Type, Definition> DefinitionItem;
   static DefinitionList const Definitions()
   {
-    static DefinitionList const DomainDefinitions = __init_definitions();
-    return DomainDefinitions;
+    static DefinitionList const Definitions = __init_definitions();
+    return Definitions;
   }
   static DefinitionList const __init_definitions();
 
@@ -121,8 +121,8 @@ private:
   typedef std::pair<repr_t const, Domain::Type> MappingItem;
   static MappingList const Mapping()
   {
-    static MappingList const DomainMapping = __init_mapping();
-    return DomainMapping;
+    static MappingList const Mapping = __init_mapping();
+    return Mapping;
   }
   static MappingList const __init_mapping();
 

@@ -117,6 +117,9 @@ protected:
                     ValueArray value_shape = ValueArray());
 
   ///
+  FiniteElementBase(std::string const& name, repr_t repr);
+
+  ///
   virtual ~FiniteElementBase();
 
   ///

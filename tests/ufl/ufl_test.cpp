@@ -2,14 +2,13 @@
 
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLDomain.h>
-#include <dolfin/ufl/UFLElementList.h>
+#include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 #include <dolfin/ufl/UFLSpace.h>
 
 using ufl::Cell;
 using ufl::CellSurfaceArea;
 using ufl::Domain;
-using ufl::ElementList;
 using ufl::Family;
 using ufl::Object;
 using ufl::Space;
@@ -115,6 +114,7 @@ START_TEST( test_init_family )
     v.push_back(Family::R);
     v.push_back(Family::U);
 
+    std::cout << "======== List families ========" << std::endl;
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
@@ -130,9 +130,7 @@ START_TEST( test_init_element_list )
   {
     int init_failed = 0;
 
-    // Display full list of supported elements
-    ElementList::Supported().display();
-
+    std::cout << "======== Check supported elements ========" << std::endl;
     std::vector<Family::Type> v;
     v.push_back(Family::ARG);
     v.push_back(Family::AW);
@@ -156,12 +154,17 @@ START_TEST( test_init_element_list )
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
-      bool has_success = ElementList::Supported().has_family(*it);
+      bool has_success = Family::has_type(*it);
       init_failed &= !has_success;
       if (has_success)
       {
-        std::cout << std::setw(32) << ElementList::Supported().name(*it)
-            << " - " << ElementList::Supported().short_name(*it) << std::endl;
+        Family f(*it);
+        std::cout << std::setw(32) << f.name() << " - " << f.short_name()
+            << std::endl;
+      }
+      else
+      {
+        dolfin::error("Family type does not exist.");
       }
     }
     std::cout << std::endl;
@@ -178,13 +181,15 @@ START_TEST( test_init_finite_element )
     v.push_back(Family::DG);
     v.push_back(Family::CG);
 
+    std::cout << "======== Check CG and DG creation ========" << std::endl;
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
-      uint d_min = ElementList::Supported().degree_min(*it);
-      uint d_max = std::min(ElementList::Supported().degree_max(*it),
+      Family f(*it);
+      uint d_min = f.degree_min();
+      uint d_max = std::min(f.degree_max(),
                             std::max(d_min, deg_max));
-      ufl::Domain::Set domains = ElementList::Supported().domains(*it);
+      ufl::Domain::Set domains = f.domains();
 
       for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
           dom_it != domains.end(); ++dom_it)
@@ -198,7 +203,7 @@ START_TEST( test_init_finite_element )
         }
       }
     }
-
+    std::cout << "======== Done ========" << std::endl;
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------

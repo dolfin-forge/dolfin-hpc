@@ -55,6 +55,7 @@ libdolfin_mesh_la_SOURCES = \
 			UnitInterval.cpp\
 			UnitSphere.cpp\
 			UnitSquare.cpp\
+			VertexNormal.cpp\
 			Vertex.cpp
 
 

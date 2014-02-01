@@ -278,6 +278,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
+				mesh/VertexNormal.h\
 				nls/dolfin_nls.h\
 				nls/NewtonSolver.h\
 				nls/NonlinearProblem.h\

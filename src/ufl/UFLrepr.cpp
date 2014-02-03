@@ -27,6 +27,12 @@ repr::repr(std::string const& s) :
 }
 
 //-----------------------------------------------------------------------------
+repr::repr(const char*& s) :
+    std::string(s)
+{
+}
+
+//-----------------------------------------------------------------------------
 repr::repr(Class const& owner, Object const& arg1) :
     std::string(make_repr(owner, arg1))
 {

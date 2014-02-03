@@ -28,6 +28,9 @@ public:
   repr(std::string const& s);
 
   ///
+  repr(const char *& s);
+
+  ///
   repr(Class const& owner, Object const& arg1);
 
   ///
@@ -38,6 +41,9 @@ public:
 
   ///
   ~repr();
+
+  ///
+  operator const char *() { return this->c_str(); }
 
 private:
 

@@ -187,7 +187,7 @@ public:
   std::string const& hash() const;
 
   /// Return the dofmap size on the mesh partition
-  uint local_size();
+  uint local_size() const;
 
   //--- Management of local-to-global mapping
 
@@ -214,12 +214,13 @@ public:
   //--- Debugging
 
   /// Return renumbering (used for testing)
-  std::map<uint, uint> getMap();  // const;
+  std::map<uint, uint> getMap() const;
 
   /// Display mapping
   void disp() const;
 
-  bool renumbered();
+  /// Return if the dof map has been renumbered
+  bool renumbered() const;
 
 private:
 
@@ -421,13 +422,13 @@ inline Mesh& DofMap::mesh() const
 }
 
 //-----------------------------------------------------------------------------
-inline bool DofMap::renumbered()
+inline bool DofMap::renumbered() const
 {
   return (_dof_map_ || _type_ > -1 || _v_map_);
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::local_size()
+inline uint DofMap::local_size() const
 {
   return _local_size_;
 }

@@ -20,75 +20,68 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet():
-        cache_(DofMapCache::instance())
+DofMapSet::DofMapSet() :
+    cache_(DofMapCache::instance())
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet(const Form& form, Mesh& mesh):
+DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
     cache_(DofMapCache::instance())
-{
-  update(form.form(), mesh);
-}
-//-----------------------------------------------------------------------------
-DofMapSet::DofMapSet(const ufc::form& form, Mesh& mesh) :
-        cache_(DofMapCache::instance())
 {
   update(form, mesh);
 }
+
 //-----------------------------------------------------------------------------
 DofMapSet::~DofMapSet()
 {
   // Release all dof maps in the cache
-  for (std::vector<DofMap*>::iterator it = dof_map_set.begin(); it != dof_map_set.end(); ++it)
+  for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
+      it != dof_map_set.end(); ++it)
   {
     cache_.release_dofmap(**it);
   }
 }
+
 //-----------------------------------------------------------------------------
-void DofMapSet::update(const Form& form, Mesh& mesh)
-{
-  update(form.form(), mesh);
-}
-//-----------------------------------------------------------------------------
-void DofMapSet::update(const ufc::form& form, Mesh& mesh)
+void DofMapSet::update(Form const& form, Mesh& mesh)
 {
   // Consistency checking
 #ifdef DEBUG
-  check(form, mesh);
+  Check(form, mesh);
 #endif
 
   // Resize array of dof maps
-  const uint num_arguments = form.rank() + form.num_coefficients();
+  const uint num_arguments = form.form().rank() + form.form().num_coefficients();
   dof_map_set.resize(num_arguments);
 
   // Create dof maps and reuse previously computed dof maps
   for (uint i = 0; i < num_arguments; ++i)
   {
     //
-  dof_map_set[i] = cache_.acquire_dofmap(mesh,form, i);
+    dof_map_set[i] = &cache_.acquire_dofmap(mesh, form, i);
   }
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint DofMapSet::size() const
 {
   return dof_map_set.size();
 }
 //-----------------------------------------------------------------------------
-DofMap& DofMapSet::operator[] (uint i) const
+DofMap& DofMapSet::operator[](uint i) const
 {
   dolfin_assert(i < dof_map_set.size());
   return *dof_map_set[i];
 }
 //-----------------------------------------------------------------------------
-void DofMapSet::check(const ufc::form& form, Mesh& mesh)
+void DofMapSet::Check(const ufc::form& form, Mesh& mesh)
 {
   // Check that the form matches the mesh
   if (form.rank() + form.num_coefficients() > 0)
   {
     ufc::dof_map * dofmap = form.create_dof_map(0);
-    if(dofmap->geometric_dimension() != mesh.geometry().dim())
+    if (dofmap->geometric_dimension() != mesh.geometry().dim())
     {
       error("Geometric dimension mismatch between mesh and form.");
     }

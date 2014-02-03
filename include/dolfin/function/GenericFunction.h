@@ -13,46 +13,50 @@
 namespace dolfin
 {
 
-  class Mesh;
-  class Cell;
-  
-  /// This class serves as a base class/interface for implementations
-  /// of specific function representations.
+class Mesh;
+class Cell;
 
-  class GenericFunction
+/// This class serves as a base class/interface for implementations
+/// of specific function representations.
+
+class GenericFunction
+{
+public:
+
+  /// Constructor
+  GenericFunction(Mesh& mesh) :
+      mesh(mesh)
   {
-  public:
+  }
 
-    /// Constructor
-    GenericFunction(Mesh& mesh) : mesh(mesh) {};
+  /// Destructor
+  virtual ~GenericFunction()
+  {
+  }
 
-    /// Destructor
-    virtual ~GenericFunction() {};
+  /// Return the rank of the value space
+  virtual uint rank() const = 0;
 
-    /// Return the rank of the value space
-    virtual uint rank() const = 0;
+  /// Return the dimension of the value space for axis i
+  virtual uint dim(uint i) const = 0;
 
-    /// Return the dimension of the value space for axis i
-    virtual uint dim(uint i) const = 0;
+  /// Interpolate function to vertices of mesh
+  virtual void interpolate(real* values) const = 0;
 
-    /// Interpolate function to vertices of mesh
-    virtual void interpolate(real* values) const = 0;
+  /// Interpolate function to finite element space on cell
+  virtual void interpolate(real* coefficients, const ufc::cell& cell,
+                           const ufc::finite_element& finite_element,
+                           const Cell& dolfin_cell) const = 0;
 
-    /// Interpolate function to finite element space on cell
-    virtual void interpolate(real* coefficients,
-                             const ufc::cell& cell,
-                             const ufc::finite_element& finite_element,
-                             const Cell& dolfin_cell) const = 0;
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
 
-    /// Evaluate function at given point
-    virtual void eval(real* values, const real* x) const = 0;
+  virtual void sync_ghosts() = 0;
 
-    virtual void sync_ghosts() = 0;
+  /// The mesh
+  Mesh& mesh;
 
-    /// The mesh
-    Mesh& mesh;
-
-  };
+};
 
 }
 

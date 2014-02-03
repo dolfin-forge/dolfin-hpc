@@ -14,7 +14,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Point.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 CellType::CellType(Type cell_type, Type facet_type)
@@ -43,7 +44,7 @@ CellType* CellType::create(Type type)
   default:
     error("Unknown cell type: %d.", type);
   }
-  
+
   return 0;
 }
 //-----------------------------------------------------------------------------
@@ -62,7 +63,7 @@ CellType::Type CellType::string2type(std::string type)
     return tetrahedron;
   else
     error("Unknown cell type: \"%s\".", type.c_str());
-  
+
   return interval;
 }
 //-----------------------------------------------------------------------------
@@ -106,3 +107,6 @@ std::string CellType::type2string(Type type)
   return "";
 }
 //-----------------------------------------------------------------------------
+
+}
+

@@ -24,7 +24,7 @@ void MeshOrdering::order(Mesh& mesh)
   {
     cell_type.orderEntities(*cell);
   }
-  
+
   mesh._ordered = true;
 }
 //-----------------------------------------------------------------------------

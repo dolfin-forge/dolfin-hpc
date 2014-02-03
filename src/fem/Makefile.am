@@ -8,6 +8,7 @@ libdolfin_fem_la_SOURCES = \
 			DofMapCache.cpp\
 			DofMapSet.cpp\
 			FiniteElement.cpp\
+			FiniteElementSpace.cpp\
 			Form.cpp\
 			NodeNormal.cpp\
 			PeriodicBC.cpp\

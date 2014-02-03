@@ -6,6 +6,7 @@
 
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/function/Function.h>
 
 #include <iomanip>
@@ -43,22 +44,19 @@ DofMapCache::~DofMapCache()
 }
 
 //-----------------------------------------------------------------------------
-DofMap * DofMapCache::acquire_dofmap(Mesh& mesh, ufc::form const& form,
-                    uint const& i)
+DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 {
 //  message("Acquire DofMap for Form coefficient %i", i);
   DofMap * ret = NULL;
   // Create UFC dof map
-  ufc::dof_map * ufc_dof_map = form.create_dof_map(i);
+  ufc::dof_map * ufc_dof_map = form.form().create_dof_map(i);
   dolfin_assert(ufc_dof_map);
 
   std::string const h = DofMap::make_hash(*ufc_dof_map, mesh);
   dofmap_container_t::iterator it = cache_.find(h);
-//  message("Hash in cache is : %s", h.c_str());
+
   if (it == cache_.end())
   {
-//    message(0, "Creating dof map (not in cache): %s",
-//        ufc_dof_map->signature());
 
 // Create DOLFIN dof map
     ret = new DofMap(*ufc_dof_map, mesh, true);
@@ -72,27 +70,27 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh, ufc::form const& form,
     }
     else
     {
-      error(
-          "DofMap pointer has already been registered with another hash");
+      error("DofMap pointer has already been registered with another hash");
     }
   }
   else
   {
-//    message(0, "Reusing dof map (already in cache): %s",
-//        ufc_dof_map->signature());
-
     ret = it->second.dofmap;
     it->second.count++;
 
     // Delete UFC dof map (not used)
     delete ufc_dof_map;
   }
-  return ret;
+
+  // Update dof maps
+  form.updateDofMaps(mesh);
+
+  return *ret;
 }
 
 //-----------------------------------------------------------------------------
-DofMap * DofMapCache::acquire_dofmap(Mesh& mesh,
-                    std::string const& dofmap_signature)
+DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
+                                    std::string const& dofmap_signature)
 {
 //  message("Acquire DofMap from signature");
   DofMap * ret = NULL;
@@ -129,8 +127,7 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh,
     }
     else
     {
-      error(
-          "DofMap pointer has already been registered with another hash");
+      error("DofMap pointer has already been registered with another hash");
     }
   }
   else
@@ -140,11 +137,11 @@ DofMap * DofMapCache::acquire_dofmap(Mesh& mesh,
     ret = it->second.dofmap;
     it->second.count++;
   }
-  return ret;
+  return *ret;
 }
 
 //-----------------------------------------------------------------------------
-DofMap * DofMapCache::acquire_dofmap(Function& f)
+DofMap& DofMapCache::acquire_dofmap(Function& f)
 {
   if (f.type() != Function::discrete)
   {
@@ -173,8 +170,7 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
       std::stringstream ss;
       ss << std::endl << "DofMap@" << &dof_map << std::endl
           << "Signature to be released     : " << h << std::endl
-          << "Signature already registered : " << expected_h
-          << std::endl
+          << "Signature already registered : " << expected_h << std::endl
           << "DofMap object refers to two different signatures";
       error(ss.str());
     }

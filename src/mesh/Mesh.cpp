@@ -283,7 +283,7 @@ void Mesh::renumber()
 }
 
 //-----------------------------------------------------------------------------
-std::string const Mesh::hash()
+std::string const Mesh::hash() const
 {
   std::stringstream ss;
   ss << "Mesh@" << this << ":C" << this->numCells() << ":V"

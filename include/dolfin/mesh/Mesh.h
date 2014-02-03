@@ -261,7 +261,7 @@ namespace dolfin
     void renumber();
 
     /// Return hash to identify the state of the mesh
-    std::string const hash();
+    std::string const hash() const;
 
     /// Display mesh data
     void disp() const;

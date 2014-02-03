@@ -20,27 +20,36 @@ namespace dolfin
 
 class Mesh;
 
-///
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  FiniteElement
+ *
+ *  @brief  This class provides an interface to the UFC definition of a finite
+ *          element.
+ */
 
 class FiniteElement
 {
 
-  /// Dirty trick before ensuring that there is no critical performance hit
-  friend class DiscreteFunction;
-
 public:
 
+  ///
   FiniteElement(std::string const& signature);
 
-  FiniteElement(Mesh& mesh, Form& form, uint i);
+  ///
+  FiniteElement(CellType& cell, Form& form, uint const i);
 
+  ///
   FiniteElement(ufc::finite_element& finite_element,
                 bool const finite_element_local);
 
+  ///
   ~FiniteElement();
 
   //--- INTERFACE -----------------------------------------------------------
-  // Implements UFC v1.1, extension to v2.1.1 forseeable.
+  /// Implements UFC v1.1, extension to v2.1.1 forseeable.
+
   /// Return a string identifying the finite element
   /// UFC @since 1.1
   const char* signature() const;
@@ -132,10 +141,6 @@ public:
   /// UFC @since 1.1
   ufc::finite_element* create_sub_element(uint i) const;
 
-  /// Recursively extract sub finite element
-  static ufc::finite_element* create_sub_element(
-      ufc::finite_element const& finite_element, Array<uint> const& sub_system);
-
 #if UFC_VERSION_MAJOR >= 2
 #ifndef UFC_BACKWARD_COMPATIBILITY
   // omitted for backward compatibility code -------------
@@ -150,6 +155,10 @@ public:
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
+  /// Recursively extract sub finite element
+  static ufc::finite_element* create_sub_element(
+      ufc::finite_element const& finite_element, Array<uint> const& sub_system);
+
   /// Create sub finite element of given finite element
   ufc::finite_element* create_sub_element(Array<uint> const& sub_system) const;
 
@@ -159,30 +168,9 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
-  //--- UFL INTERFACE ---------------------------------------------------------
-
-#if ENABLE_UFL
-
-  /// Returns the family of the finite element
-  /// UFL + FIAT
-  std::string const& family() const;
-
-  /// Returns the degree of the finite element
-  /// UFL + FIAT
-  uint const degree() const;
-
-  //--- EXTENSION OF UFL INTERFACE --------------------------------------------
-
-  /// Returns the type of the finite element
-  std::string const& type() const;
-
-  void info() const;
-
-#endif
-
 private:
 
-  void init();
+  void Initialize();
 
   //--- ATTRIBUTES ------------------------------------------------------------
   mutable ufc::finite_element * ufc_finite_element_;
@@ -343,32 +331,6 @@ inline ufc::finite_element* FiniteElement::create_sub_element(uint i) const
 {
   return ufc_finite_element_->create_sub_element(i);
 }
-
-#if ENABLE_UFL
-
-//-----------------------------------------------------------------------------
-inline std::string const& FiniteElement::family() const
-{
-  return family_;
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const& FiniteElement::type() const
-{
-  return type_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint const FiniteElement::degree() const
-{
-  if (type_ == FE::MIXED_ELEMENT)
-  {
-    error("Degree is not supported for MixedElement");
-  }
-  return degree_;
-}
-
-#endif
 
 }
 

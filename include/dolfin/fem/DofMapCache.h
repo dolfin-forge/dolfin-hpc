@@ -19,6 +19,7 @@ namespace dolfin
 {
 
 class DofMap;
+class Form;
 class Function;
 
 class DofMapCache
@@ -52,9 +53,9 @@ public:
   static DofMapCache& instance()
   { return *instance_; }
 
-  DofMap * acquire_dofmap(Mesh& mesh, ufc::form const& form, uint const& i);
-  DofMap * acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
-  DofMap * acquire_dofmap(Function& f);
+  DofMap& acquire_dofmap(Mesh& mesh, Form const& form, uint const& i);
+  DofMap& acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
+  DofMap& acquire_dofmap(Function& f);
   void release_dofmap(DofMap& dof_map);
 
   void info() const;

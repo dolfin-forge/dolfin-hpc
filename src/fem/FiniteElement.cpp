@@ -22,11 +22,11 @@ FiniteElement::FiniteElement(std::string const& signature) :
     degree_(0)
 
 {
-  init();
+  Initialize();
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
+FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
     ufc_finite_element_(NULL),
     finite_element_local_(true),
     sub_value_dims_(NULL),
@@ -46,10 +46,7 @@ FiniteElement::FiniteElement(Mesh& mesh, Form& form, uint i) :
   // Create finite element
   ufc_finite_element_ = form.form().create_finite_element(i);
 
-  // Update dof maps
-  form.updateDofMaps(mesh);
-
-  init();
+  Initialize();
 }
 
 //-----------------------------------------------------------------------------
@@ -62,7 +59,7 @@ FiniteElement::FiniteElement(ufc::finite_element& finite_element,
     geom_dim_(0),
     degree_(0)
 {
-  init();
+  Initialize();
 }
 
 FiniteElement::~FiniteElement()
@@ -79,7 +76,7 @@ FiniteElement::~FiniteElement()
 }
 
 //-----------------------------------------------------------------------------
-void FiniteElement::init()
+void FiniteElement::Initialize()
 {
   dolfin_assert(ufc_finite_element_);
 
@@ -213,63 +210,6 @@ FiniteElement::sub_value_offsets(uint i) const
 {
   return sub_value_offs_[i];
 }
-
-#if ENABLE_UFL
-//-----------------------------------------------------------------------------
-void FiniteElement::info() const
-{
-  std::stringstream msg;
-  uint const padding = 24;
-  msg << std::endl;
-  msg << std::setw(padding) << "signature = " << signature() << std::endl;
-  std::string shape;
-  switch (ufc_finite_element_->cell_shape())
-    {
-    case ufc::interval:
-      shape = "";
-      break;
-    case ufc::triangle:
-      shape = "triangle";
-      break;
-    case ufc::tetrahedron:
-      shape = "tetrahedron";
-      break;
-    default:
-      shape = "unknown";
-      break;
-    }
-  msg << std::setw(padding) << "cell_shape = " << shape << std::endl;
-  msg << std::setw(padding) << "topological_dimension = "
-      << topological_dimension() << std::endl;
-  msg << std::setw(padding) << "geometric_dimension = " << geometric_dimension()
-      << std::endl;
-  msg << std::setw(padding) << "space_dimension = " << space_dimension()
-      << std::endl;
-  msg << std::setw(padding) << "value_rank = " << value_rank() << std::endl;
-  msg << std::setw(padding) << "value_dimension = " << std::endl;
-  for (uint a = 0; a < geom_dim_; ++a)
-  {
-    msg << std::setw(padding + 1) << " [" << "axis " << a << "] : "
-        << value_dimension(a) << std::endl;
-  }
-  msg << std::setw(padding) << "num_sub_elements = " << num_sub_elements()
-      << std::endl;
-  msg << std::setw(padding) << "sub_value_dimensions = " << std::endl;
-  for (uint a = 0; a < geom_dim_; ++a)
-  {
-    msg << std::setw(padding + 1) << " [" << "axis " << a << "] : "
-        << std::endl;
-    for (uint sub = 0; sub < sub_value_dimensions(a).size(); ++sub)
-    {
-      msg << std::setw(padding + 12) << " [" << "element " << sub << "] : "
-          << sub_value_dimensions(a)[sub] << " ( +" << sub_value_offsets(a)[sub]
-          << ")" << std::endl;
-    }
-  }
-  msg << std::setw(padding) << "degree = " << degree_ << std::endl;
-  std::cout << msg.str();
-}
-#endif
 
 }
 

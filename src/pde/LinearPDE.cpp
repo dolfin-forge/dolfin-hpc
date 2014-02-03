@@ -31,7 +31,7 @@ LinearPDE::LinearPDE(Form& a, Form& L, Mesh& mesh, BoundaryCondition& bc)
 {
   message("Creating linear PDE with one boundary condition.");
   bcs.push_back(&bc);
-} 
+}
 //-----------------------------------------------------------------------------
 LinearPDE::LinearPDE(Form& a, Form& L, Mesh& mesh, Array<BoundaryCondition*>& bcs)
   : a(a), L(L), mesh(mesh)
@@ -54,6 +54,7 @@ void LinearPDE::solve(Function& u)
   Matrix A;
   Vector b;
   Vector* x = new Vector();
+  u.init(mesh, *x, a, 1);
 
   // Assemble linear system
   Assembler assembler(mesh);
@@ -80,12 +81,6 @@ void LinearPDE::solve(Function& u)
   }
   else
     error("Unknown solver type \"%s\".", solver_type.c_str());
-
-
-  u.init(mesh, *x, a, 1);
-  DiscreteFunction& uu = dynamic_cast<DiscreteFunction&>(*u.f);
-  //uu.local_vector = x;
-  uu.x = x;
 
   end();
 }

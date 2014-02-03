@@ -10,45 +10,34 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+Form::Form() :
+    dof_map_set_(NULL)
+{
+}
+
+//-----------------------------------------------------------------------------
 Form::~Form()
 {
-  if( local_dof_map_set )
-    delete local_dof_map_set;
+  delete dof_map_set_;
 }
 
 //-----------------------------------------------------------------------------
-void Form::updateDofMaps(Mesh& mesh)
+void Form::updateDofMaps(Mesh& mesh) const
 {
-  if( !dof_map_set )
+  if (!dof_map_set_)
   {
     // Create dof maps
-    dof_map_set = new DofMapSet(form(), mesh);
-
-    // Take ownership of dof maps
-    local_dof_map_set = dof_map_set;
+    dof_map_set_ = new DofMapSet(*this, mesh);
   }
-}
-
-//-----------------------------------------------------------------------------
-void Form::setDofMaps(DofMapSet& dof_map_set)
-{
-  // Delete dof map if locally owned
-  if( local_dof_map_set )
-    delete local_dof_map_set;
-
-  // Relinquish ownership of dof maps
-  local_dof_map_set = 0;
-
-  this->dof_map_set = &dof_map_set;
 }
 
 //-----------------------------------------------------------------------------
 DofMapSet& Form::dofMaps() const
 {
-  if( !dof_map_set )
+  if (!dof_map_set_)
     error("Degree of freedom maps for Form have not been created.");
 
-  return *dof_map_set;
+  return *dof_map_set_;
 }
 
 //-----------------------------------------------------------------------------

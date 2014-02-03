@@ -9,6 +9,8 @@
 
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
+#include <dolfin/mesh/CellType.h>
+
 namespace ufl
 {
 
@@ -25,6 +27,11 @@ class FiniteElement : public FiniteElementBase
 
 public:
 
+  //--- DOLFIN-HPC ------------------------------------------------------------
+  ///
+  FiniteElement(Family::Type family, dolfin::CellType& cell, uint const degree);
+
+  //--- UFL -------------------------------------------------------------------
   ///
   FiniteElement(Family::Type family, Cell const& cell, uint const degree);
 

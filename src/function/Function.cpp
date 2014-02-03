@@ -380,22 +380,6 @@ GenericVector& Function::vector() const
 
   return (static_cast<DiscreteFunction*>(f))->vector();
 }
-#ifdef ENABLE_UFL
-//-----------------------------------------------------------------------------
-uint Function::degree() const
-{
-  if (!f)
-    error("Function contains no data.");
-
-  if (_type != discrete)
-  {
-    error(
-        "The degree of the approximation space can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f))->degree();
-}
-#endif
 //-----------------------------------------------------------------------------
 DofMap const& Function::dofmap() const
 {
@@ -463,7 +447,7 @@ SubFunction Function::operator[](uint i)
   if (_type != discrete)
     error("Sub functions can only be extracted from discrete functions.");
 
-  SubFunction sub_function(static_cast<DiscreteFunction*>(f), i);
+  SubFunction sub_function(*static_cast<DiscreteFunction*>(f), i);
   return sub_function;
 }
 //-----------------------------------------------------------------------------

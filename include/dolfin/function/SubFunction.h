@@ -12,46 +12,69 @@
 namespace dolfin
 {
 
-  class DiscreteFunction;
+class DiscreteFunction;
 
-  /// This class represents a sub function (view) of a (discrete function).
-  /// It's purpose is to enable expressions like
-  ///
-  ///    Function w;
-  ///    Function u = w[0];
-  ///    Function p = w[1];
-  ///
-  /// without needing to create and destroy temporaries. No data is created
-  /// until a Function is assigned to a SubFunction, at which point the data
-  /// needed to represent the sub function is created.
+/// This class represents a sub function (view) of a (discrete function).
+/// It's purpose is to enable expressions like
+///
+///    Function w;
+///    Function u = w[0];
+///    Function p = w[1];
+///
+/// without needing to create and destroy temporaries. No data is created
+/// until a Function is assigned to a SubFunction, at which point the data
+/// needed to represent the sub function is created.
 
-  class SubFunction
+class SubFunction
+{
+public:
+
+  /// Create empty sub function
+  SubFunction() :
+      f_(NULL),
+      i_(0)
   {
-  public:
+  }
 
-    /// Create empty sub function
-    SubFunction() : f(NULL), i(0) {}
+  /// Create sub function
+  SubFunction(DiscreteFunction& f, uint i) :
+      f_(&f),
+      i_(i)
+  {
+  }
 
-    /// Create sub function
-    SubFunction(DiscreteFunction* f, uint i) : f(f), i(i) {}
+  /// Destructor
+  ~SubFunction()
+  {
+  }
 
-    /// Destructor
-    ~SubFunction()
-    {
-    }
+  ///
+  DiscreteFunction& function() const;
 
-    /// Friends
-    friend class DiscreteFunction;
+  ///
+  uint const index() const;
 
-  private:
+private:
 
-    // Pointer to discrete function
-    DiscreteFunction* f;
+  // Pointer to discrete function
+  DiscreteFunction * const f_;
 
-    // Sub function index
-    uint i;
+  // Sub function index
+  uint const i_;
 
-  };
+};
+
+//-----------------------------------------------------------------------------
+inline DiscreteFunction& SubFunction::function() const
+{
+  return *f_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint const SubFunction::index() const
+{
+  return i_;
+}
 
 }
 

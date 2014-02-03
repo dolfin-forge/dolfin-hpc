@@ -38,19 +38,13 @@ public:
   DofMapSet();
 
   /// Create set of dof maps
-  DofMapSet(const Form& form, Mesh& mesh);
-
-  /// Create set of dof maps
-  DofMapSet(const ufc::form& form, Mesh& mesh);
+  DofMapSet(Form const& form, Mesh& mesh);
 
   /// Destructor
   ~DofMapSet();
 
   /// Update set of dof maps for given form
-  void update(const Form& form, Mesh& mesh);
-
-  /// Update set of dof maps for given form
-  void update(const ufc::form& form, Mesh& mesh);
+  void update(Form const& form, Mesh& mesh);
 
   /// Return number of dof maps
   uint size() const;
@@ -61,7 +55,7 @@ public:
 private:
 
   // Consistency checking
-  void check(const ufc::form& form, Mesh& mesh);
+  void Check(const ufc::form& form, Mesh& mesh);
 
   // Array of dof maps for current form
   std::vector<DofMap*> dof_map_set;

@@ -52,8 +52,19 @@ START_TEST( test_init_function_from_signature )
         Cell cell(dom);
         for (uint d = d_min; d <= d_max; ++d)
         {
-          ufl::FiniteElement fem(*it, cell, d);
-          std::cout << fem.repr() << std::endl;
+          ufl::FiniteElement uflfem(*it, cell, d);
+          std::cout << uflfem.repr();
+          dolfin::FiniteElement fem(uflfem.repr());
+          if(fem.signature() != uflfem.repr())
+          {
+            init_failed = 1;
+            std::cout << " WRONG ";
+          }
+          else
+          {
+            std::cout << " MATCHING ";
+          }
+          std::cout << std::endl;
         }
       }
     }

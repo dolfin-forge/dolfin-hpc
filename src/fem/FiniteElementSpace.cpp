@@ -75,8 +75,8 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
                                        uint const& i) :
-    finite_element_(*space.element().create_sub_element(i), true),
     mesh_(space.mesh()),
+    finite_element_(*space.element().create_sub_element(i), true),
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
             space.mesh(),
@@ -110,6 +110,7 @@ DofMap const& FiniteElementSpace::dofmap() const
 //-----------------------------------------------------------------------------
 FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
     size(0),
+    dimension(finite_element.space_dimension()),
     dofs(NULL),
     coefficients(NULL),
     values(NULL),
@@ -117,31 +118,38 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
 {
   // Compute size of value (number of entries in tensor value)
   size = 1;
-  for (uint i = 0; i < finite_element.value_rank(); i++)
+  for (uint i = 0; i < finite_element.value_rank(); ++i)
   {
     size *= finite_element.value_dimension(i);
   }
 
   // Initialize local array for mapping of dofs
-  dofs = new uint[finite_element.space_dimension()];
-  for (uint i = 0; i < finite_element.space_dimension(); i++)
+  dofs = new uint[dimension];
+  for (uint i = 0; i < dimension; ++i)
   {
     dofs[i] = 0;
   }
 
   // Initialize local array for expansion coefficients
-  coefficients = new real[finite_element.space_dimension()];
-  for (uint i = 0; i < finite_element.space_dimension(); i++)
+  coefficients = new real[dimension];
+  for (uint i = 0; i < dimension; ++i)
   {
     coefficients[i] = 0.0;
   }
 
   // Initialize local array for values
   values = new real[size];
-  for (uint i = 0; i < size; i++)
+  for (uint i = 0; i < size; ++i)
   {
     values[i] = 0.0;
   }
+
+  // Initialize local array for dof coordinates
+  for (uint i = 0; i < dimension; ++i)
+  {
+    coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
+  }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -150,6 +158,10 @@ FiniteElementSpace::Scratch::~Scratch()
   delete[] dofs;
   delete[] coefficients;
   delete[] values;
+  for (uint i = 0; i < dimension; ++i)
+  {
+    delete[] coordinates[i];
+  }
   delete[] coordinates;
 }
 

@@ -71,6 +71,12 @@ public:
   /// UFL + FIAT
   uint const degree() const;
 
+  ///
+  operator ufl::FiniteElement const&() const
+  {
+    return ufl_class_;
+  }
+
 #endif
 
 private:
@@ -78,17 +84,6 @@ private:
   Mesh& mesh_;
   FiniteElement const finite_element_;
   DofMap& dof_map_;
-
-#if ENABLE_UFL
-
-  ufl::FiniteElement const ufl_class_;
-
-  operator ufl::FiniteElement const&() const
-  {
-    return ufl_class_;
-  }
-
-#endif
 
   // Scratch space
   class Scratch
@@ -104,6 +99,9 @@ private:
 
     // Value size (number of entries in tensor value)
     uint size;
+
+    // Reference finite element space dimension
+    uint dimension;
 
     // Local array for mapping of dofs
     uint* dofs;
@@ -121,6 +119,12 @@ private:
 
   // Scratch space
   Scratch scratch;
+
+#if ENABLE_UFL
+
+  ufl::FiniteElement const ufl_class_;
+
+#endif
 
 };
 

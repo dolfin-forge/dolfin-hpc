@@ -1,4 +1,4 @@
 check_PROGRAMS = ufl_test
 ufl_test_SOURCES = ufl_test.cpp
 
-LDADD = -ldolfin @CHECK_LIBS@
+LDADD = $(top_builddir)/src/.libs/libdolfin.a @CHECK_LIBS@

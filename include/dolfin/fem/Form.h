@@ -44,10 +44,10 @@ public:
   virtual std::string coefficient_name(dolfin::uint i) const;
 
   /// Create degree of freedom maps
-  void updateDofMaps(Mesh& mesh) const;
+  void update_dofmaps(Mesh& mesh) const;
 
   /// Return DofMapSet
-  DofMapSet& dofMaps() const;
+  DofMapSet& dofmaps() const;
 
 private:
 

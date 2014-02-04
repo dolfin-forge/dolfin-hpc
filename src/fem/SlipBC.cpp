@@ -181,7 +181,7 @@ NodeNormal& SlipBC::node_normals()
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 {
-  apply(A, b, form.dofMaps()[1], form);
+  apply(A, b, form.dofmaps()[1], form);
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
@@ -195,7 +195,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
                    const Form& form)
 {
-  apply(A, b, form.dofMaps()[1], form);
+  apply(A, b, form.dofmaps()[1], form);
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
@@ -216,7 +216,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   message("Applying SlipBC boundary conditions to linear system.");
   dolfin_set("output destination", "silent");
 
-  UFC ufc(form.form(), mesh, form.dofMaps());
+  UFC ufc(form.form(), mesh, form.dofmaps());
   if (boundary == 0)
   {
     boundary = new BoundaryMesh(mesh);
@@ -249,9 +249,9 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
       for (CellIterator c(mesh); !c.end(); ++c)
       {
         ufc.update(*c, mesh.distdata());
-        (form.dofMaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, c->index());
+        (form.dofmaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, c->index());
 
-        for (uint j = 0; j < (form.dofMaps())[0].local_dimension(); j++)
+        for (uint j = 0; j < (form.dofmaps())[0].local_dimension(); j++)
           off_proc_rows.insert(ufc.dofs[0][j]);
       }
 
@@ -294,7 +294,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
             break;
 
         ufc.update(cell, mesh.distdata());
-        (form.dofMaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, cell.index());
+        (form.dofmaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, cell.index());
 
         // Get components of the vector-valued function at the current node.
         for (uint i = 0; i < gdim; i++, ci += cdim)

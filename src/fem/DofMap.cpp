@@ -307,6 +307,11 @@ DofMap::create_sub_dof_map(ufc::dof_map const& dof_map,
 void DofMap::init()
 {
   //dolfin_debug("Initializing dof map...");
+  if(ufc_dof_map_->geometric_dimension() != dolfin_mesh.topology().dim())
+  {
+    dolfin::error("The geometric dimension of the dof map is not equal to the "
+                  "topological dimension of the mesh.");
+  }
 
   // Order vertices, so entities will be created correctly according to convention
   dolfin_mesh.order();
@@ -1013,10 +1018,6 @@ void DofMap::disp() const
     cout << endl;
   }
   end();
-
-  // TODO: Display information on renumbering?
-  // TODO: Display information on parallel stuff?
-
   // End indentation
   end();
 }

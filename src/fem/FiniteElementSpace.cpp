@@ -19,7 +19,7 @@ FiniteElementSpace::FiniteElementSpace(
     mesh_(mesh),
     finite_element_(finite_element_signature),
     dof_map_(DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature)),
-    scratch(finite_element_)
+    scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
     ufl_class_(ufl::Object::repr_t(element().signature()))
@@ -34,7 +34,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
             mesh, DofMap::dofmap_signature(signature))),
-    scratch(finite_element_)
+    scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
     ufl_class_(ufl::Object::repr_t(element().signature()))
@@ -47,7 +47,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     mesh_(mesh),
     finite_element_(mesh.type(), form, i),
     dof_map_(DofMapCache::instance().acquire_dofmap(mesh, form, i)),
-    scratch(finite_element_)
+    scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
     ufl_class_(ufl::Object::repr_t(element().signature()))
@@ -64,7 +64,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
             mesh, DofMap::dofmap_signature(finite_element_.signature()))),
-    scratch(finite_element_)
+    scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
     ufl_class_(ufl::Object::repr_t(element().signature()))
@@ -81,7 +81,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
         DofMapCache::instance().acquire_dofmap(
             space.mesh(),
             DofMap::dofmap_signature(finite_element_.signature()))),
-    scratch(finite_element_)
+    scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
     ufl_class_(ufl::Object::repr_t(element().signature()))
@@ -108,9 +108,11 @@ DofMap const& FiniteElementSpace::dofmap() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
+FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element,
+                                     DofMap const& dof_map) :
     size(0),
     space_dimension(finite_element.space_dimension()),
+    local_dimension(dof_map.local_dimension()),
     dofs(NULL),
     coefficients(NULL),
     values(NULL),
@@ -145,7 +147,7 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
   }
 
   // Initialize local array for dof coordinates
-  for (uint i = 0; i < space_dimension; ++i)
+  for (uint i = 0; i < local_dimension; ++i)
   {
     coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
   }
@@ -158,7 +160,7 @@ FiniteElementSpace::Scratch::~Scratch()
   delete[] dofs;
   delete[] coefficients;
   delete[] values;
-  for (uint i = 0; i < space_dimension; ++i)
+  for (uint i = 0; i < local_dimension; ++i)
   {
     delete[] coordinates[i];
   }

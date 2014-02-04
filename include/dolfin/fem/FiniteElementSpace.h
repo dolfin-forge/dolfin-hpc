@@ -92,7 +92,7 @@ private:
   public:
 
     // Constructor
-    Scratch(FiniteElement const& finite_element);
+    Scratch(FiniteElement const& finite_element, DofMap const& dof_map);
 
     // Destructor
     ~Scratch();
@@ -102,6 +102,9 @@ private:
 
     // Reference finite element space dimension
     uint space_dimension;
+
+    // Reference finite element dof map dimension
+    uint local_dimension;
 
     // Local array for mapping of dofs
     uint* dofs;

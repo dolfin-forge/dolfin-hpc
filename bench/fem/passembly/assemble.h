@@ -32,7 +32,7 @@ void check_assembly(Mesh& mesh, MeshFunction<dolfin::uint>& partitions)
     pAssembler passembler(mesh, partitions);
     passembler.assemble(B, b, true);
   }
-  DofMapSet& dof_map_set = b.dofMaps();
+  DofMapSet& dof_map_set = b.dofmaps();
 
   // Would be nice to have automatic testing of B = A * modified dofs
   // Currently just printing so that matrices can be manually inspected

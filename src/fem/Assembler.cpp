@@ -54,16 +54,16 @@ Assembler::~Assembler()
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 {
-  form.updateDofMaps(mesh);
+  form.update_dofmaps(mesh);
 #pragma omp parallel
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, reset_tensor);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor)
 {
-  form.updateDofMaps(mesh);
+  form.update_dofmaps(mesh);
 #pragma omp parallel
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, q, reset_tensor);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(), 0, 0, 0, q, reset_tensor);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_domain, 
@@ -94,8 +94,8 @@ void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_doma
   }
 
   // Assemble
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(),
+  form.update_dofmaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(),
            cell_domains, facet_domains, facet_domains, reset_tensor);
 
   // Delete domains
@@ -136,8 +136,8 @@ void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_doma
   }
 
   // Assemble
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(),
+  form.update_dofmaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(),
            cell_domains, facet_domains, facet_domains, q, reset_tensor);
 
   // Delete domains
@@ -156,8 +156,8 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          const MeshFunction<uint>& interior_facet_domains,
                          bool reset_tensor)
 {
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), &cell_domains, 
+  form.update_dofmaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(), &cell_domains, 
            &exterior_facet_domains, &interior_facet_domains, reset_tensor);
 }
 //-----------------------------------------------------------------------------
@@ -168,8 +168,8 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          const QuadratureRule& q,
                          bool reset_tensor)
 {
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), &cell_domains, 
+  form.update_dofmaps(mesh);
+  assemble(A, form.form(), form.coefficients(), form.dofmaps(), &cell_domains, 
            &exterior_facet_domains, &interior_facet_domains, q, reset_tensor);
 }
 //-----------------------------------------------------------------------------

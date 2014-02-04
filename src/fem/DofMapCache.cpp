@@ -83,7 +83,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
   }
 
   // Update dof maps
-  form.updateDofMaps(mesh);
+  form.update_dofmaps(mesh);
 
   return *ret;
 }

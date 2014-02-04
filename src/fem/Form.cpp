@@ -22,17 +22,22 @@ Form::~Form()
 }
 
 //-----------------------------------------------------------------------------
-void Form::updateDofMaps(Mesh& mesh) const
+void Form::update_dofmaps(Mesh& mesh) const
 {
   if (!dof_map_set_)
   {
     // Create dof maps
     dof_map_set_ = new DofMapSet(*this, mesh);
   }
+  else if (mesh.hash() != dof_map_set_->mesh().hash())
+  {
+    error("Attempt to reinitialize the form's dof map set with a different mesh"
+          " topology.");
+  }
 }
 
 //-----------------------------------------------------------------------------
-DofMapSet& Form::dofMaps() const
+DofMapSet& Form::dofmaps() const
 {
   if (!dof_map_set_)
     error("Degree of freedom maps for Form have not been created.");

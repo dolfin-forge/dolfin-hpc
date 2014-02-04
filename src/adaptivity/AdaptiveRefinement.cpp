@@ -365,8 +365,8 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
 					Function &f_y, Function &f_z)
 {
 
-  UFC ufc(form.form(), mesh, form.dofMaps());
-  uint local_dim = (form.dofMaps())[offset].local_dimension();
+  UFC ufc(form.form(), mesh, form.dofmaps());
+  uint local_dim = (form.dofmaps())[offset].local_dimension();
   uint *indices = new uint[local_dim];
   uint new_index;
   MeshFunction<bool> marked(mesh, 0);
@@ -377,7 +377,7 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
   {
 
     ufc.update(*c, mesh.distdata());
-    (form.dofMaps())[offset].tabulate_dofs(indices, ufc.cell, c->index());
+    (form.dofmaps())[offset].tabulate_dofs(indices, ufc.cell, c->index());
 
     for (VertexIterator v(*c); !v.end(); ++v)
     {
@@ -428,13 +428,13 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   projected.init(new_mesh, x_proj, *refined, 0);
 
 
-  UFC ufc(refined->form(), new_mesh, refined->dofMaps());
+  UFC ufc(refined->form(), new_mesh, refined->dofmaps());
 
   real test_value;
   real x[3];
   real *vv = new real[x_proj.local_size()];
   uint *indices = new uint[x_proj.local_size()];
-  uint *local_indices = new uint[refined->dofMaps()[0].local_dimension()];
+  uint *local_indices = new uint[refined->dofmaps()[0].local_dimension()];
   uint i = 0;
   MeshFunction<bool> processed(new_mesh, 0);
   processed = false;
@@ -451,7 +451,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
 
 
     ufc.update(*c, new_mesh.distdata());
-    (refined->dofMaps())[0].tabulate_dofs(local_indices, ufc.cell, c->index());
+    (refined->dofmaps())[0].tabulate_dofs(local_indices, ufc.cell, c->index());
 
     for (VertexIterator v(*c); !v.end(); ++v) {
 

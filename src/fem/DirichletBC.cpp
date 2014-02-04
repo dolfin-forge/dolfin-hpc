@@ -105,7 +105,7 @@ DirichletBC::~DirichletBC()
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 {
-  apply(A, b, 0, form.dofMaps()[1], form.form());
+  apply(A, b, 0, form.dofmaps()[1], form.form());
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
@@ -117,7 +117,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         const GenericVector& x, const Form& form)
 {
-  apply(A, b, &x, form.dofMaps()[1], form.form());
+  apply(A, b, &x, form.dofmaps()[1], form.form());
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
@@ -192,7 +192,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
 //-----------------------------------------------------------------------------
 void DirichletBC::zero(GenericMatrix& A, const Form& form)
 {
-  zero(A, form.dofMaps()[1], form.form());
+  zero(A, form.dofmaps()[1], form.form());
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map,

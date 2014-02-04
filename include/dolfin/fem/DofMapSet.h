@@ -34,9 +34,6 @@ class DofMapSet
 {
 public:
 
-  /// Create empty set of dof maps
-  DofMapSet();
-
   /// Create set of dof maps
   DofMapSet(Form const& form, Mesh& mesh);
 
@@ -48,6 +45,9 @@ public:
 
   /// Return number of dof maps
   uint size() const;
+
+  /// Return the mesh on which dof maps have been initialized
+  Mesh const& mesh() const;
 
   /// Return dof map for argument function i
   DofMap& operator[](uint i) const;
@@ -62,6 +62,9 @@ private:
 
   // Global cache of precomputed dof maps
   DofMapCache& cache_;
+
+  // Mesh
+  Mesh const& mesh_;
 
 };
 

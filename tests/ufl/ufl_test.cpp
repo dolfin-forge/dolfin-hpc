@@ -1,5 +1,6 @@
 #include <dolfin/config/dolfin_config.h>
 
+#include <dolfin/function/Function.h>
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLDomain.h>
 #include <dolfin/ufl/UFLFamily.h>

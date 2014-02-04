@@ -34,7 +34,7 @@ namespace dolfin
     uint dim(uint i) const;
 
     /// Interpolate function to vertices of mesh
-    void interpolate(real* values) const;
+    void interpolate_vertex_values(real* values) const;
 
     /// Interpolate function to finite element space on cell
     void interpolate(real coefficients[],
@@ -50,7 +50,7 @@ namespace dolfin
                   const real* coordinates,
                   const ufc::cell& cell) const;
 
-    void sync_ghosts() 
+    void sync_ghosts()
     {return;}
 
   private:

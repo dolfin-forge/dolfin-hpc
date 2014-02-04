@@ -20,7 +20,7 @@ namespace dolfin
   {
   public:
 
-    /// Create function to wrap given ufc::function 
+    /// Create function to wrap given ufc::function
     UFCFunction(Mesh& mesh, const ufc::function& function, uint size);
 
     /// Destructor
@@ -33,7 +33,7 @@ namespace dolfin
     uint dim(uint i) const;
 
     /// Interpolate function to vertices of mesh
-    void interpolate(real* values) const;
+    void interpolate_vertex_values(real* values) const;
 
     /// Interpolate function to finite element space on cell
     void interpolate(real* coefficients,
@@ -48,7 +48,7 @@ namespace dolfin
     void evaluate(real* values,
                   const real* coordinates,
                   const ufc::cell& cell) const;
-    
+
     void sync_ghosts() { return; }
 
   private:

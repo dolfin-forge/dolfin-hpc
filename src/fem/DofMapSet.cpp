@@ -17,17 +17,13 @@
 
 #include <ufc.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet() :
-    cache_(DofMapCache::instance())
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
-    cache_(DofMapCache::instance())
+    cache_(DofMapCache::instance()),
+    mesh_(mesh)
 {
   update(form, mesh);
 }
@@ -64,16 +60,24 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint DofMapSet::size() const
+uint DofMapSet::size() const
 {
   return dof_map_set.size();
 }
+
+//-----------------------------------------------------------------------------
+Mesh const& DofMapSet::mesh() const
+{
+  return mesh_;
+}
+
 //-----------------------------------------------------------------------------
 DofMap& DofMapSet::operator[](uint i) const
 {
   dolfin_assert(i < dof_map_set.size());
   return *dof_map_set[i];
 }
+
 //-----------------------------------------------------------------------------
 void DofMapSet::Check(const ufc::form& form, Mesh& mesh)
 {
@@ -88,5 +92,9 @@ void DofMapSet::Check(const ufc::form& form, Mesh& mesh)
     delete dofmap;
   }
 }
+
 //-----------------------------------------------------------------------------
+
+}
+
 

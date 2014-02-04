@@ -55,7 +55,10 @@ public:
 private:
 
   // Consistency checking
-  void Check(const ufc::form& form, Mesh& mesh);
+  void Check(ufc::form const& form, Mesh& mesh);
+
+  // Release dof maps
+  void ReleaseAll();
 
   // Array of dof maps for current form
   std::vector<DofMap*> dof_map_set;

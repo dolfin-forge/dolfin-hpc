@@ -1,8 +1,8 @@
-// Copyright (C) 2013 Aurélien Larcher
+// Copyright (C) 2013-2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2013-06-11
-// Last changed: 2013-06-25
+// Last changed: 2014-02-04
 
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofMap.h>
@@ -17,9 +17,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DofMapCache * const DofMapCache::instance_ = new DofMapCache();
-
-//-----------------------------------------------------------------------------
 DofMapCache::DofMapCache()
 {
   cache_.clear();
@@ -31,10 +28,9 @@ DofMapCache::~DofMapCache()
 {
   if (cache_.size() != 0)
   {
-    warning(
-        "DofMapCache is not empty, consider checking if the dof maps have been properly released");
+    warning("DofMapCache is not empty: "
+            "consider checking if the dof maps have been properly released");
   }
-//  message("Cleanup DofMapCache");
   for (dofmap_container_t::iterator it = cache_.begin(); it != cache_.end();
       ++it)
   {
@@ -46,7 +42,15 @@ DofMapCache::~DofMapCache()
 //-----------------------------------------------------------------------------
 DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 {
-//  message("Acquire DofMap for Form coefficient %i", i);
+  message(2, "Acquire DofMap for Form coefficient %i", i);
+
+  // Update dof maps of form:
+  // This triggers creation of a dof map set if needed and acquistion of a token
+  // for each coefficient of the form.
+  // If the dof map set has been created the call just return without doing
+  // anything.
+  form.update_dofmaps(mesh);
+
   DofMap * ret = NULL;
   // Create UFC dof map
   ufc::dof_map * ufc_dof_map = form.form().create_dof_map(i);
@@ -58,7 +62,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
   if (it == cache_.end())
   {
 
-// Create DOLFIN dof map
+    // Create DOLFIN dof map
     ret = new DofMap(*ufc_dof_map, mesh, true);
     dolfin_assert(ret);
 
@@ -82,9 +86,6 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
     delete ufc_dof_map;
   }
 
-  // Update dof maps
-  form.update_dofmaps(mesh);
-
   return *ret;
 }
 
@@ -92,25 +93,23 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
                                     std::string const& dofmap_signature)
 {
-//  message("Acquire DofMap from signature");
+  message(2, "Acquire DofMap from signature: %s", dofmap_signature.c_str());
   DofMap * ret = NULL;
 
   std::string const h = DofMap::make_hash(dofmap_signature, mesh);
-//  message("Hash in cache is : %s", h.c_str());
   dofmap_container_t::iterator it = cache_.find(h);
+
   if (it == cache_.end())
   {
-//    message(0, "Creating dof map (not in cache): %s",
-//        dofmap_signature.c_str());
 
-// Create DOLFIN dof map
+    // Create DOLFIN dof map
     ret = new DofMap(dofmap_signature, mesh);
     dolfin_assert(ret);
 
     std::string const dm_h = ret->hash();
     if (h != dm_h)
     {
-      info();
+      disp();
       std::stringstream ss;
       ss << std::endl << "DofMap@" << ret << std::endl
           << "Signature to be inserted  : " << h << std::endl
@@ -132,8 +131,6 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
   }
   else
   {
-//    message(0, "Reusing dof map (already in cache): %s",
-//        dofmap_signature.c_str());
     ret = it->second.dofmap;
     it->second.count++;
   }
@@ -153,11 +150,10 @@ DofMap& DofMapCache::acquire_dofmap(Function& f)
 //-----------------------------------------------------------------------------
 void DofMapCache::release_dofmap(DofMap& dof_map)
 {
-//  message("Release DofMap");
   std::string const h = dof_map.hash();
-//  message("Hash to be released : %s", h.c_str());
   dofmap_rlist_t::iterator it = rlist_.find(&dof_map);
   std::string const expected_h = it->second;
+
   if (it == rlist_.end())
   {
     error("Trying to release inexistent DofMap");
@@ -166,7 +162,7 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
   {
     if (h != expected_h)
     {
-      info();
+      disp();
       std::stringstream ss;
       ss << std::endl << "DofMap@" << &dof_map << std::endl
           << "Signature to be released     : " << h << std::endl
@@ -179,18 +175,15 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
     dm_token.count--;
     if (dm_token.count == 0)
     {
-//      message("Cleanup unused DofMap");
       delete &dof_map;
       rlist_.erase(it);
       cache_.erase(dm_it);
     }
   }
-//  message("State of cache after releasing DofMap");
-//  info();
 }
 
 //-----------------------------------------------------------------------------
-void DofMapCache::info() const
+void DofMapCache::disp() const
 {
   message("Number of DofMaps in cache : %i", cache_.size());
   message("Cache :");

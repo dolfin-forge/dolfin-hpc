@@ -37,7 +37,7 @@ dolfin::uint ExpressionFunction::dim(uint i) const
   return e.dim(i);
 }
 //-----------------------------------------------------------------------------
-void ExpressionFunction::interpolate(real* values) const
+void ExpressionFunction::interpolate_vertex_values(real* values) const
 {
   dolfin_assert(values);
 

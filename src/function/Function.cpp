@@ -503,12 +503,12 @@ void Function::interpolate(Function const& other_func)
 
 }
 //-----------------------------------------------------------------------------
-void Function::interpolate(real* values)
+void Function::interpolate_vertex_values(real* values)
 {
   if (!f)
     error("Function contains no data.");
 
-  f->interpolate(values);
+  f->interpolate_vertex_values(values);
 }
 //-----------------------------------------------------------------------------
 void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,

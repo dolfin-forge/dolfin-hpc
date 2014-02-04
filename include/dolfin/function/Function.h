@@ -197,7 +197,7 @@ namespace dolfin
     Function const& operator=(SubFunction sub_function);
 
     /// Interpolate function to vertices of mesh
-    void interpolate(real* values);
+    void interpolate_vertex_values(real* values);
 
     /// Interpolate values from the given Function
     void interpolate(const Function& other_func);

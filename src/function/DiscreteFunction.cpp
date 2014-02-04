@@ -285,7 +285,7 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::interpolate(real* values) const
+void DiscreteFunction::interpolate_vertex_values(real* values) const
 {
   // Local data for interpolation on each cell
   CellIterator cell(mesh);
@@ -466,7 +466,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
 }
 
 //-----------------------------------------------------------------------------
-std::string DiscreteFunction::signature() const
+std::string const DiscreteFunction::signature() const
 {
   return finite_element_.signature();
 }
@@ -481,14 +481,12 @@ GenericVector& DiscreteFunction::vector() const
 //-----------------------------------------------------------------------------
 DofMap const& DiscreteFunction::dofmap() const
 {
-  dolfin_assert(dof_map_);
   return dof_map_;
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement const& DiscreteFunction::finite_element() const
 {
-  dolfin_assert(finite_element_);
   return finite_element_;
 }
 

@@ -102,7 +102,7 @@ dolfin::uint ConstantFunction::dim(uint i) const
   return shape[i];
 }
 //-----------------------------------------------------------------------------
-void ConstantFunction::interpolate(real* _values) const
+void ConstantFunction::interpolate_vertex_values(real* _values) const
 {
   dolfin_assert(_values);
 

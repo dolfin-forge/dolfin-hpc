@@ -42,7 +42,7 @@ uint UserFunction::dim(uint i) const
   return 1;
 }
 //-----------------------------------------------------------------------------
-void UserFunction::interpolate(real* values) const
+void UserFunction::interpolate_vertex_values(real* values) const
 {
   dolfin_assert(values);
   dolfin_assert(f);

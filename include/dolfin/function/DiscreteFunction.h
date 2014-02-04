@@ -74,9 +74,6 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const;
 
-  /// Return the discrete space
-  FiniteElementSpace const& space() const;
-
   /// Return the number of sub functions
   uint numSubFunctions() const;
 
@@ -84,7 +81,7 @@ public:
   DiscreteFunction const& operator=(const DiscreteFunction& f);
 
   /// Interpolate function to vertices of mesh
-  void interpolate(real* values) const;
+  void interpolate_vertex_values(real* values) const;
 
   /// Interpolate function to finite element space on cell
   void interpolate(real* coefficients, const ufc::cell& cell,
@@ -101,25 +98,25 @@ public:
   void sync_ghosts();
 
   /// Return signature
-  std::string signature() const;
+  std::string const signature() const;
 
   /// Return vector
   GenericVector& vector() const;
 
-  /// Return dof map
-  DofMap const& dofmap() const;
+  /// Return the discrete space
+  FiniteElementSpace const& space() const;
 
   /// Return finite element
   FiniteElement const& finite_element() const;
+
+  /// Return dof map
+  DofMap const& dofmap() const;
 
   /// Get values to array
   void get(real *& values);
 
   /// Set values from array
   void set(real *& values);
-
-  /// Friends
-  friend class LinearPDE;
 
 private:
 

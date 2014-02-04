@@ -32,11 +32,7 @@ DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
 DofMapSet::~DofMapSet()
 {
   // Release all dof maps in the cache
-  for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
-      it != dof_map_set.end(); ++it)
-  {
-    cache_.release_dofmap(**it);
-  }
+  ReleaseAll();
 }
 
 //-----------------------------------------------------------------------------
@@ -47,8 +43,12 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
   Check(form, mesh);
 #endif
 
+  // Release previously acquired dof maps if any
+  ReleaseAll();
+
   // Resize array of dof maps
-  const uint num_arguments = form.form().rank() + form.form().num_coefficients();
+  const uint num_arguments = form.form().rank()
+      + form.form().num_coefficients();
   dof_map_set.resize(num_arguments);
 
   // Create dof maps and reuse previously computed dof maps
@@ -79,7 +79,7 @@ DofMap& DofMapSet::operator[](uint i) const
 }
 
 //-----------------------------------------------------------------------------
-void DofMapSet::Check(const ufc::form& form, Mesh& mesh)
+void DofMapSet::Check(ufc::form const& form, Mesh& mesh)
 {
   // Check that the form matches the mesh
   if (form.rank() + form.num_coefficients() > 0)
@@ -94,7 +94,17 @@ void DofMapSet::Check(const ufc::form& form, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-
+void DofMapSet::ReleaseAll()
+{
+  // Release all dof maps in the cache
+  for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
+      it != dof_map_set.end(); ++it)
+  {
+    cache_.release_dofmap(**it);
+  }
 }
 
+//-----------------------------------------------------------------------------
+
+}
 

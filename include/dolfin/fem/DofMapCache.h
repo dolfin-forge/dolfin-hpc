@@ -1,8 +1,8 @@
-// Copyright (C) 2013 Aurélien Larcher
+// Copyright (C) 2013-2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2013-06-13 (merged from branch larcher)
-// Last changed: 2013-06-13
+// Last changed: 2014-02-04
 
 #ifndef __DOF_MAP_CACHE_H
 #define __DOF_MAP_CACHE_H
@@ -50,27 +50,41 @@ class DofMapCache
 
 public:
 
+  /// Meyers singleton
   static DofMapCache& instance()
-  { return *instance_; }
+  {
+    static DofMapCache instance_;
+    return instance_;
+  }
 
+  ///
   DofMap& acquire_dofmap(Mesh& mesh, Form const& form, uint const& i);
+
+  ///
   DofMap& acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
+
+  ///
   DofMap& acquire_dofmap(Function& f);
+
+  ///
   void release_dofmap(DofMap& dof_map);
 
-  void info() const;
+  ///
+  void disp() const;
 
 private:
 
+  ///
   DofMapCache();
+
+  ///
   ~DofMapCache();
 
-  void __request_dofmap(std::string const);
+  ///
+  void RequestDofmap(std::string const);
 
   dofmap_container_t cache_;
   dofmap_rlist_t rlist_;
-
-  static DofMapCache * const instance_;
 
 };
 

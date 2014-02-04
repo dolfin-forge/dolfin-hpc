@@ -110,7 +110,7 @@ DofMap const& FiniteElementSpace::dofmap() const
 //-----------------------------------------------------------------------------
 FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
     size(0),
-    dimension(finite_element.space_dimension()),
+    space_dimension(finite_element.space_dimension()),
     dofs(NULL),
     coefficients(NULL),
     values(NULL),
@@ -124,15 +124,15 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
   }
 
   // Initialize local array for mapping of dofs
-  dofs = new uint[dimension];
-  for (uint i = 0; i < dimension; ++i)
+  dofs = new uint[space_dimension];
+  for (uint i = 0; i < space_dimension; ++i)
   {
     dofs[i] = 0;
   }
 
   // Initialize local array for expansion coefficients
-  coefficients = new real[dimension];
-  for (uint i = 0; i < dimension; ++i)
+  coefficients = new real[space_dimension];
+  for (uint i = 0; i < space_dimension; ++i)
   {
     coefficients[i] = 0.0;
   }
@@ -145,7 +145,7 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element) :
   }
 
   // Initialize local array for dof coordinates
-  for (uint i = 0; i < dimension; ++i)
+  for (uint i = 0; i < space_dimension; ++i)
   {
     coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
   }
@@ -158,7 +158,7 @@ FiniteElementSpace::Scratch::~Scratch()
   delete[] dofs;
   delete[] coefficients;
   delete[] values;
-  for (uint i = 0; i < dimension; ++i)
+  for (uint i = 0; i < space_dimension; ++i)
   {
     delete[] coordinates[i];
   }

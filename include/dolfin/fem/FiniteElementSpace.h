@@ -83,7 +83,7 @@ private:
 
   Mesh& mesh_;
   FiniteElement const finite_element_;
-  DofMap& dof_map_;
+  DofMap& dof_map_; // The dof map is owned by the DofMapCache instance.
 
   // Scratch space
   class Scratch
@@ -101,7 +101,7 @@ private:
     uint size;
 
     // Reference finite element space dimension
-    uint dimension;
+    uint space_dimension;
 
     // Local array for mapping of dofs
     uint* dofs;

@@ -54,7 +54,7 @@ AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
 		     [enable_quad=${enableval}],[enable_quad=no])
 
 AC_ARG_ENABLE(ufl, AC_HELP_STRING([--enable-ufl],
-		     [Enable UFL support using UFC version 2.1.1]),
+		     [Enable UFL support using UFC version 2.1.2]),
 		     [enable_ufl=${enableval}],[enable_ufl=no])
 
 AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
@@ -144,9 +144,9 @@ if test "x${enable_ufl}" == xno; then
    PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
 else
-   PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.1])
+   PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.2])
    CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
-   AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.1])
+   AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.2])
 fi
 # Add variable for automake to select generated source to be compiled
 AM_CONDITIONAL([ENABLE_UFL], [test "x${enable_ufl}" == xyes])

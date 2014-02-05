@@ -203,5 +203,34 @@ Array<uint> const& FiniteElement::sub_value_offsets(uint i) const
   return sub_value_offs_[i];
 }
 
+//-----------------------------------------------------------------------------
+void FiniteElement::disp() const
+{
+  cout << "FiniteElement" << endl;
+  cout << "-------------" << endl;
+
+  // Begin indentation
+  begin("");
+
+  // Display UFC finite_element information
+  cout << "ufc::finite_element info" << endl;
+  cout << "------------------------" << endl;
+  begin("");
+  cout << "Signature             : " << ufc_finite_element_->signature() << endl;
+  cout << "Cell shape            : " << ufc_finite_element_->cell_shape() << endl;
+  cout << "Topological dimension : "
+      << ufc_finite_element_->topological_dimension() << endl;
+  cout << "Geometric dimension   : " << ufc_finite_element_->geometric_dimension()
+      << endl;
+  cout << "Space dimension       : " << ufc_finite_element_->space_dimension() << endl;
+  cout << "Value rank            : " << ufc_finite_element_->value_rank() << endl;
+  cout << "Value dimension       : " << ufc_finite_element_->value_dimension(0) << endl;
+  cout << "Nb of sub elements    : " << ufc_finite_element_->num_sub_elements() << endl;
+  cout << endl;
+  end();
+
+  end();
+}
+
 }
 

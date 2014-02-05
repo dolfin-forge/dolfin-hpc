@@ -18,7 +18,7 @@ namespace dolfin {
 
 //-----------------------------------------------------------------------------
 UserFunction::UserFunction(Mesh& mesh, Function* f)
-  : GenericFunction(mesh), ufc::function(), f(f)
+  : GenericFunction(mesh), ufc::function(), f_(f)
 {
   // Do nothing
 }
@@ -45,12 +45,12 @@ uint UserFunction::dim(uint i) const
 void UserFunction::interpolate_vertex_values(real* values) const
 {
   dolfin_assert(values);
-  dolfin_assert(f);
+  dolfin_assert(f_);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
-  for (uint i = 0; i < f->rank(); i++)
-    size *= f->dim(i);
+  for (uint i = 0; i < f_->rank(); i++)
+    size *= f_->dim(i);
 
   // Call overloaded eval function at each vertex
   real * local_values = new real[size];
@@ -58,7 +58,7 @@ void UserFunction::interpolate_vertex_values(real* values) const
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
     // Evaluate at function at vertex
-    f->eval(local_values, vertex->x());
+    f_->eval(local_values, vertex->x());
 
     // Copy values to array of vertex values
     for (uint i = 0; i < size; i++)
@@ -84,7 +84,7 @@ void UserFunction::eval(real* values, const real* x) const
   //  error("eval(real* values, const real* x) const should be overloaded");
 
   // Call user-overloaded eval function in Function
-  f->eval(values, x);
+  f_->eval(values, x);
 }
 //-----------------------------------------------------------------------------
 void UserFunction::evaluate(real* values,
@@ -93,15 +93,15 @@ void UserFunction::evaluate(real* values,
 {
   dolfin_assert(values);
   dolfin_assert(coordinates);
-  dolfin_assert(f);
+  dolfin_assert(f_);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
-  for (uint i = 0; i < f->rank(); i++)
-    size *= f->dim(i);
+  for (uint i = 0; i < f_->rank(); i++)
+    size *= f_->dim(i);
 
   // Call user-overloaded eval function in Function
-  f->eval(values,coordinates);
+  f_->eval(values,coordinates);
 }
 //-----------------------------------------------------------------------------
 

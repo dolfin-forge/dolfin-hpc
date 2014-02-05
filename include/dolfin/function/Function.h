@@ -55,7 +55,7 @@ namespace dolfin
       constant, discrete, empty, expression, ufc, user
     };
 
-    /// Create empty function (read data from file)
+    /// Create empty function
     Function();
 
     /// Create user-defined function (evaluation operator must be overloaded)
@@ -164,11 +164,6 @@ namespace dolfin
     /// Return the vector associated with a DiscreteFunction
     GenericVector& vector() const;
 
-#ifdef ENABLE_UFL
-    /// Return the degree of the approximation space of a DiscreteFunction
-    uint degree() const;
-#endif
-
     /// Return the dofmap of a DiscreteFunction
     DofMap const& dofmap() const;
 
@@ -213,11 +208,11 @@ namespace dolfin
     /// Evaluate scalar function at given point (overload for scalar user-defined function)
     virtual real eval(const real* x) const;
 
+    /// Synchronize ghosted entries across processes
     void sync_ghosts();
 
-    /// Friends
-    friend class LinearPDE;
-
+    /// Display basic information
+    void disp() const;
 
   protected:
 

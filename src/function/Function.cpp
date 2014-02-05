@@ -25,7 +25,8 @@
 #include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/UserFunction.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 Function::Function() :
@@ -150,7 +151,7 @@ Function::Function(Mesh& mesh, GenericVector& x,
     _facet(-1)
 {
   f = new DiscreteFunction(mesh, x, finite_element_signature,
-      dof_map_signature);
+                           dof_map_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, std::string const& finite_element_signature,
@@ -208,7 +209,7 @@ Function::Function(Function const& f) :
   else
   {
     error("Copy constructor works for discrete,"
-	  "constant and empty functions only (so far).");
+          "constant and empty functions only (so far).");
   }
 }
 //-----------------------------------------------------------------------------
@@ -273,7 +274,7 @@ void Function::init(Mesh& mesh, GenericVector& x,
   }
 
   f = new DiscreteFunction(mesh, x, finite_element_signature,
-      DofMap::dofmap_signature(finite_element_signature));
+                           DofMap::dofmap_signature(finite_element_signature));
   _type = discrete;
 }
 
@@ -286,7 +287,7 @@ void Function::init(Mesh& mesh, std::string const& finite_element_signature)
   }
 
   f = new DiscreteFunction(mesh, finite_element_signature,
-      DofMap::dofmap_signature(finite_element_signature));
+                           DofMap::dofmap_signature(finite_element_signature));
   _type = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -300,7 +301,7 @@ void Function::init(Mesh& mesh, GenericVector& x,
   }
 
   f = new DiscreteFunction(mesh, x, finite_element_signature,
-      dof_map_signature);
+                           dof_map_signature);
   _type = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -321,7 +322,7 @@ Function::Type Function::type() const
   return _type;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint Function::rank() const
+uint Function::rank() const
 {
   if (!f)
   {
@@ -331,7 +332,7 @@ dolfin::uint Function::rank() const
   return f->rank();
 }
 //-----------------------------------------------------------------------------
-dolfin::uint Function::dim(unsigned int i) const
+uint Function::dim(unsigned int i) const
 {
   if (!f)
   {
@@ -399,8 +400,8 @@ FiniteElement const& Function::finite_element() const
 
   if (_type != discrete)
   {
-    error(
-        "The finite element space can only be extracted from discrete functions.");
+    error("The finite element space can only be extracted from discrete "
+          "functions.");
   }
 
   return (static_cast<DiscreteFunction*>(f))->finite_element();
@@ -432,7 +433,7 @@ void Function::set(real *& values)
   return (static_cast<DiscreteFunction*>(f))->set(values);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint Function::numSubFunctions() const
+uint Function::numSubFunctions() const
 {
   if (_type != discrete)
     error("Only discrete functions have sub functions.");
@@ -495,8 +496,8 @@ void Function::interpolate(Function const& other_func)
   }
   else
   {
-    dolfin::error(
-        "Function::interpolate(Function const&) can only be called on discrete Function");
+    dolfin::error("Function::interpolate(Function const&) can only be called "
+                  "on discrete Function");
   }
 
 }
@@ -549,7 +550,7 @@ void Function::eval(real* values, const real* x) const
     f->eval(values, x);
 }
 //-----------------------------------------------------------------------------
-dolfin::real Function::eval(const real* x) const
+real Function::eval(const real* x) const
 {
   // Try vector-version for non-user-defined function if not
   // overloaded. Otherwise, raise an exception. Note that we must
@@ -558,13 +559,32 @@ dolfin::real Function::eval(const real* x) const
 
   if (_type != user)
   {
-    real values[1] = {0.0};
+    real values[1] =
+      { 0.0 };
     eval(values, x);
     return values[0];
   }
 
   error("Missing eval() for user-defined function (must be overloaded).");
   return 0.0;
+}
+//-----------------------------------------------------------------------------
+void Function::disp() const
+{
+  // Begin indentation
+  cout << "Function" << endl;
+  begin("---------");
+  cout << endl;
+
+  cout << "Type: " << this->type() << endl;
+
+  if (f != NULL)
+  {
+    f->disp();
+  }
+
+  // End indentation
+  end();
 }
 //-----------------------------------------------------------------------------
 const Cell& Function::cell() const
@@ -585,4 +605,5 @@ int Function::facet() const
 }
 //-----------------------------------------------------------------------------
 
+}
 

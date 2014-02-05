@@ -51,6 +51,10 @@ public:
   /// Evaluate function at given point
   virtual void eval(real* values, const real* x) const = 0;
 
+  /// Display basic information
+  virtual void disp() const = 0;
+
+  /// Synchronize ghosted entries
   virtual void sync_ghosts() = 0;
 
   /// The mesh

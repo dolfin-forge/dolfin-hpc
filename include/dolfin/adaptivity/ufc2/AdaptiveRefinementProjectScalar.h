@@ -52,13 +52,12 @@ public:
   /// Return the cell shape
   virtual ufc::shape cell_shape() const;
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the topological dimension of the cell shape
   virtual unsigned int topological_dimension() const;
 
   /// Return the geometric dimension of the cell shape
   virtual unsigned int geometric_dimension() const;
-#endif
+
   /// Return the dimension of the finite element function space
   virtual unsigned int space_dimension() const;
 
@@ -577,6 +576,7 @@ typedef Form_0::TestSpace FunctionSpace;
 // DOLFIN wrappers
 #include <dolfin/fem/Form.h>
 
+
 class AdaptiveRefinementProjectScalarLinearForm : public dolfin::Form
 {
 public:
@@ -596,6 +596,33 @@ public:
   virtual const dolfin::Array<dolfin::Function*>& coefficients() const
   {
     return __coefficients;
+  }
+
+  /// Return the number of the coefficient with this name
+  virtual dolfin::uint coefficient_number(std::string const& name) const
+  {
+    if (name == "u")
+      return 0;
+
+    dolfin::error("Generated code for class Form",
+                         "access coeficient data",
+                         "Invalid coeficient");
+    return 0;
+  }
+
+  /// Return the name of the coefficient with this number
+  virtual std::string coefficient_name(dolfin::uint const i) const
+  {
+    switch (i)
+    {
+    case 0:
+      return "u";
+    }
+
+    dolfin::error("Generated code for class Form",
+                         "access coeficient data",
+                         "Invalid coeficient");
+    return "unnamed";
   }
 
 private:

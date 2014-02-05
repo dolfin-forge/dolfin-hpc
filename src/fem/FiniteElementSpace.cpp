@@ -22,7 +22,7 @@ FiniteElementSpace::FiniteElementSpace(
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(finite_element_signature))
+    ufl_(ufl::Object::repr_t(finite_element_signature))
 #endif
 {
 }
@@ -37,7 +37,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(signature))
+    ufl_(ufl::Object::repr_t(signature))
 #endif
 {
 }
@@ -50,7 +50,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::Object::repr_t(element().signature()))
 #endif
 {
 }
@@ -67,7 +67,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::Object::repr_t(element().signature()))
 #endif
 {
 }
@@ -84,7 +84,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::Object::repr_t(element().signature()))
 #endif
 {
 }

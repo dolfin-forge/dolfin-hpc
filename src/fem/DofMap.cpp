@@ -858,28 +858,14 @@ void DofMap::disp() const
   cout << "-----------------" << endl;
   begin("");
 
-  cout << "Signature:            " << ufc_dof_map_->signature() << endl;
-  cout << "Global dimension:     " << ufc_dof_map_->global_dimension() << endl;
-  cout << "Local dimension:      " << ufc_dof_map_->local_dimension() << endl;
-  cout << "Geometric dimension:  " << ufc_dof_map_->geometric_dimension()
+  cout << "Signature            : " << ufc_dof_map_->signature() << endl;
+  cout << "Global dimension     : " << ufc_dof_map_->global_dimension() << endl;
+  cout << "Local dimension      : " << ufc_dof_map_->local_dimension() << endl;
+  cout << "Geometric dimension  : " << ufc_dof_map_->geometric_dimension()
       << endl;
-  cout << "Number of subdofmaps: " << ufc_dof_map_->num_sub_dof_maps() << endl;
-  cout << "Number of facet dofs: " << ufc_dof_map_->num_facet_dofs() << endl;
+  cout << "Number of subdofmaps : " << ufc_dof_map_->num_sub_dof_maps() << endl;
+  cout << "Number of facet dofs : " << ufc_dof_map_->num_facet_dofs() << endl;
 
-  cout << endl;
-  end();
-
-  // Display mesh information
-  cout << "Mesh info" << endl;
-  cout << "---------" << endl;
-  begin("");
-  cout << "Geometric dimension:   " << dolfin_mesh.geometry().dim() << endl;
-  cout << "Topological dimension: " << dolfin_mesh.topology().dim() << endl;
-  cout << "Number of vertices:    " << dolfin_mesh.numVertices() << endl;
-  cout << "Number of edges:       " << dolfin_mesh.numEdges() << endl;
-  cout << "Number of faces:       " << dolfin_mesh.numFaces() << endl;
-  cout << "Number of facets:      " << dolfin_mesh.numFacets() << endl;
-  cout << "Number of cells:       " << dolfin_mesh.numCells() << endl;
   cout << endl;
   end();
 

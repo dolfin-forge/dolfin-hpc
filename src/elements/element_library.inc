@@ -122,7 +122,7 @@ ufc::finite_element* dolfin::ElementLibrary::create_finite_element(const char* s
     return new ffc_discontinuous_lagrange_2_3dvector_finite_element_1();
   if (strcmp(signature, "FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)") == 0)
     return new ffc_brezzi_douglas_marini_1_2d_finite_element_0();
-  dolfin::error("Requested finite element:\n",signature,"\nhas not been pregenerated in the ElementLibrary");
+  dolfin::error("Requested finite element: ",signature," has not been pregenerated in the ElementLibrary");
   return 0;
 }
 
@@ -180,7 +180,7 @@ ufc::dof_map* dolfin::ElementLibrary::create_dof_map(const char* signature)
     return new ffc_discontinuous_lagrange_2_3dvector_dofmap_1();
   if (strcmp(signature, DofMap::dofmap_signature("FiniteElement('Brezzi-Douglas-Marini', Cell('triangle', Space(2)), 1, None)").c_str()) == 0)
     return new ffc_brezzi_douglas_marini_1_2d_dofmap_0();
-  dolfin::error("Requested dof map:\n",signature,"\nhas not been pregenerated in the ElementLibrary");
+  dolfin::error("Requested dof map: ",signature," has not been pregenerated in the ElementLibrary");
   return 0;
 }
 

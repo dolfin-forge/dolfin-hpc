@@ -15,148 +15,148 @@
 
 namespace dolfin
 {
-  
+
   class Form;
   class UFC;
-  
+
   /// This Function represents the local mesh size on a given mesh.
   class MeshSize: public Function
   {
   public:
-    
+
     /// Constructor
     MeshSize(Mesh& mesh);
-    
+
     /// Return cell size
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
-    
+
     /// Compute minimal cell diameter
     real min() const;
-    
+
     /// Compute maximal cell diameter
     real max() const;
   };
-  
+
   /// This Function represents the inverse of the local cell size on a given
   /// mesh.
   class InvMeshSize: public Function
   {
   public:
-    
+
     /// Constructor
     InvMeshSize(Mesh& mesh);
-    
+
     /// Return inverse of cell size
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
   uint dim(uint i) const;
   };
-  
+
   /// This Function represents the average of the local cell size (average of
   /// cell sharing a facet) on a given mesh.
   class AvgMeshSize: public Function
   {
   public:
-    
+
     /// Constructor
     AvgMeshSize(Mesh& mesh);
-    
+
     /// Return average cell size
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
   };
-  
+
   /// This Function represents the cell volume on a given mesh.
   class CellVolume: public Function
   {
   public:
-    
+
     /// Constructor
     CellVolume(Mesh& mesh);
-    
+
     /// Return cell size
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
-    
+
     /// Compute minimal cell diameter
     real min() const;
-    
+
     /// Compute maximal cell diameter
     real max() const;
   };
-  
+
   /// This Function represents the inverse of the cell volume on a given
   /// mesh.
   class InvCellVolume: public Function
   {
   public:
-    
+
     /// Constructor
     InvCellVolume(Mesh& mesh);
-    
+
     /// Return inverse of cell size
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
   };
-  
+
   /// This Function represents the outward unit normal on cell facets.
   /// Note that it is only nonzero on cell facets (not on cells).
   class FacetNormal: public Function
   {
   public:
-    
+
     FacetNormal(Mesh& mesh);
-    
+
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
   };
-  
+
   /// This function represents the area/length of a cell facet.
   class FacetArea: public Function
   {
   public:
-    
+
     FacetArea(Mesh& mesh);
-    
+
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
   };
-  
+
   /// This function represents the inverse area/length of a cell facet.
   class InvFacetArea: public Function
   {
   public:
-    
+
     InvFacetArea(Mesh& mesh);
-    
+
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
   };
-  
+
   /// This function determines if the current facet is an outflow facet with
   /// respect to the current cell. It accepts as argument the mesh and a form
   /// M = dot(n, v)*ds, a functional, defined on the normal vector to the
@@ -165,24 +165,24 @@ namespace dolfin
   class OutflowFacet: public Function
   {
   public:
-    
+
     // Constructor
     OutflowFacet(Mesh& mesh, Form& form);
-    
+
     ~OutflowFacet();
-    
+
     void eval(real * values, real const * x) const;
-    
+
     uint rank() const;
-    
+
     uint dim(uint i) const;
-    
+
   private:
-    
-    Form& form;
+
     Mesh& mesh;
+    Form& form;
     UFC* ufc;
-  };  
+  };
 }
 
 #endif

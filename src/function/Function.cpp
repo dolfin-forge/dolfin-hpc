@@ -127,8 +127,7 @@ Function::Function(Mesh& mesh, GenericVector& x,
     _cell(0),
     _facet(-1)
 {
-  f = new DiscreteFunction(mesh, x, finite_element_signature,
-      DofMap::dofmap_signature(finite_element_signature));
+  f = new DiscreteFunction(mesh, x, finite_element_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
@@ -138,8 +137,7 @@ Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
     _cell(0),
     _facet(-1)
 {
-  f = new DiscreteFunction(mesh, finite_element_signature,
-      DofMap::dofmap_signature(finite_element_signature));
+  f = new DiscreteFunction(mesh, finite_element_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x,

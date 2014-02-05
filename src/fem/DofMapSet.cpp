@@ -40,7 +40,7 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
 {
   // Consistency checking
 #ifdef DEBUG
-  Check(form, mesh);
+  Check(form.form(), mesh);
 #endif
 
   // Release previously acquired dof maps if any

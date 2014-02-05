@@ -59,6 +59,11 @@ void Logger::begin(std::string msg, int debug_level)
   indentation_level++;
 }
 //-----------------------------------------------------------------------------
+void Logger::skip()
+{
+  message("\n", debug_level);
+}
+//-----------------------------------------------------------------------------
 void Logger::end()
 {
   indentation_level--;
@@ -68,14 +73,14 @@ void Logger::progress(std::string title, real p)
 {
   int N = DOLFIN_TERM_WIDTH - 15;
   int n = static_cast<int>(p*static_cast<real>(N));
-  
+
   // Print the title
   std::string s = "| " + title;
   for (uint i = 0; i < (N - title.size() - 1); i++)
     s += " ";
   s += "|";
   write(0, s);
-  
+
   // Print the progress bar
   s = "|";
   for (int i = 0; i < n; i++)
@@ -197,7 +202,7 @@ void Logger::write(int debug_level, std::string msg)
   // Add indentation
   for (int i = 0; i < indentation_level; i++)
     msg = "  " + msg;
-  
+
   // Choose destination
   switch (destination)
   {

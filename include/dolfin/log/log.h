@@ -3,7 +3,7 @@
 //
 // Modified by Ola Skavhaug, 2007.
 // Modified by Niclas Jansson, 2009.
-// 
+//
 // First added:  2003-03-13
 // Last changed: 2009-05-04
 
@@ -17,7 +17,7 @@
 
 namespace dolfin
 {
-  
+
   /// The DOLFIN log system provides the following set of functions for
   /// uniform handling of log messages, warnings and errors. In addition,
   /// macros are provided for debug messages and assertions.
@@ -71,6 +71,9 @@ namespace dolfin
 
   /// End task (decrease indentation level)
   void end();
+
+  /// Skip line
+  void skip();
 
   /// Print summary of timings and tasks, clearing stored timings
   void summary();

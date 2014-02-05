@@ -108,6 +108,11 @@ void dolfin::end()
   LogManager::logger.end();
 }
 //-----------------------------------------------------------------------------
+void dolfin::skip()
+{
+  LogManager::logger.skip();
+}
+//-----------------------------------------------------------------------------
 void dolfin::summary()
 {
   LogManager::logger.summary();

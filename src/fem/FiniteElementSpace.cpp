@@ -22,7 +22,7 @@ FiniteElementSpace::FiniteElementSpace(
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(element().signature()))
+    ufl_class_(ufl::Object::repr_t(finite_element_signature))
 #endif
 {
 }
@@ -37,7 +37,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_class_(ufl::Object::repr_t(element().signature()))
+    ufl_class_(ufl::Object::repr_t(signature))
 #endif
 {
 }
@@ -118,6 +118,8 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element,
     values(NULL),
     coordinates(NULL)
 {
+  message(1,"Creating scratch space");
+
   // Compute size of value (number of entries in tensor value)
   size = 1;
   for (uint i = 0; i < finite_element.value_rank(); ++i)
@@ -147,6 +149,7 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element,
   }
 
   // Initialize local array for dof coordinates
+  coordinates = new real*[local_dimension];
   for (uint i = 0; i < local_dimension; ++i)
   {
     coordinates[i] = new real[3]; // Internally Point is implemented for d = 3

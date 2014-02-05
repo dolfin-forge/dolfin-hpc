@@ -168,6 +168,10 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
+  //---
+
+  void disp() const;
+
 private:
 
   void Initialize();
@@ -175,15 +179,12 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
   mutable ufc::finite_element * ufc_finite_element_;
   bool const finite_element_local_;
+
   Array<uint> * sub_value_dims_;
   Array<uint> * sub_value_offs_;
 
-  std::string type_;
-  std::string family_;
-  std::string strshape_;
   uint topo_dim_;
   uint geom_dim_;
-  uint degree_;
 
 };
 

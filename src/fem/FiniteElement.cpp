@@ -18,8 +18,7 @@ FiniteElement::FiniteElement(std::string const& signature) :
     finite_element_local_(true),
     sub_value_dims_(NULL),
     topo_dim_(0),
-    geom_dim_(0),
-    degree_(0)
+    geom_dim_(0)
 
 {
   Initialize();
@@ -31,8 +30,7 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
     finite_element_local_(true),
     sub_value_dims_(NULL),
     topo_dim_(0),
-    geom_dim_(0),
-    degree_(-1)
+    geom_dim_(0)
 {
   // Check argument
   uint const num_arguments = form.form().rank()
@@ -56,23 +54,19 @@ FiniteElement::FiniteElement(ufc::finite_element& finite_element,
     finite_element_local_(finite_element_local),
     sub_value_dims_(NULL),
     topo_dim_(0),
-    geom_dim_(0),
-    degree_(0)
+    geom_dim_(0)
 {
   Initialize();
 }
 
+//-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
-
 {
   if (finite_element_local_)
     delete ufc_finite_element_;
 
-  if (sub_value_dims_)
-    delete[] sub_value_dims_;
-
-  if (sub_value_offs_)
-    delete[] sub_value_offs_;
+  delete[] sub_value_dims_;
+  delete[] sub_value_offs_;
 }
 
 //-----------------------------------------------------------------------------
@@ -80,35 +74,32 @@ void FiniteElement::Initialize()
 {
   dolfin_assert(ufc_finite_element_);
 
-#if ENABLE_UFL
-  // Set attributes
-  FE::attributes const attr = ElementLibrary::get_attributes(
-      ufc_finite_element_->signature());
-  type_ = attr.type;
-  family_ = attr.family;
-  type_ = attr.type;
-  degree_ = attr.degree;
+  //Topological_dimension and geometric_dimension are generated with UFC 2.x
+  //but should be inferred from the cell shape if UFL is not enabled.
 
-#endif
-
+#if UFC_VERSION_MAJOR >= 2
+  topo_dim_ = ufc_finite_element_->topological_dimension();
+  geom_dim_ = ufc_finite_element_->geometric_dimension();
+#else
   switch (ufc_finite_element_->cell_shape())
-    {
+  {
     case ufc::interval:
-      topo_dim_ = 1;
-      geom_dim_ = 1;
-      break;
+    topo_dim_ = 1;
+    geom_dim_ = 1;
+    break;
     case ufc::triangle:
-      topo_dim_ = 2;
-      geom_dim_ = 2;
-      break;
+    topo_dim_ = 2;
+    geom_dim_ = 2;
+    break;
     case ufc::tetrahedron:
-      topo_dim_ = 3;
-      geom_dim_ = 3;
-      break;
+    topo_dim_ = 3;
+    geom_dim_ = 3;
+    break;
     default:
-      error("Unknown cell type.");
-      break;
-    }
+    error("Unknown cell type.");
+    break;
+  }
+#endif
 
   // Add sub value dimensions for mixed elements, packed by axis
   sub_value_dims_ = new Array<uint> [geom_dim_];
@@ -152,6 +143,7 @@ FiniteElement::create_sub_element(Array<uint> const& sub_system) const
 
   return sub_finite_element;
 }
+
 //-----------------------------------------------------------------------------
 ufc::finite_element*
 FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
@@ -198,15 +190,15 @@ FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
 
   return sub_sub_element;
 }
+
 //-----------------------------------------------------------------------------
-Array<uint> const&
-FiniteElement::sub_value_dimensions(uint i) const
+Array<uint> const& FiniteElement::sub_value_dimensions(uint i) const
 {
   return sub_value_dims_[i];
 }
+
 //-----------------------------------------------------------------------------
-Array<uint> const&
-FiniteElement::sub_value_offsets(uint i) const
+Array<uint> const& FiniteElement::sub_value_offsets(uint i) const
 {
   return sub_value_offs_[i];
 }

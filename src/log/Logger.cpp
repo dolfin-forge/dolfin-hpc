@@ -21,8 +21,11 @@ using namespace dolfin;
 typedef std::map<std::string, std::pair<dolfin::uint, real> >::iterator map_iterator;
 
 //-----------------------------------------------------------------------------
-Logger::Logger()
-  : destination(terminal), debug_level(0), indentation_level(0), logstream(0)
+Logger::Logger() :
+    destination(terminal),
+    debug_level(0),
+    indentation_level(0),
+    logstream(0)
 {
   // Do nothing
 }
@@ -66,13 +69,14 @@ void Logger::skip()
 //-----------------------------------------------------------------------------
 void Logger::end()
 {
-  indentation_level--;
+  if (indentation_level > 0)
+    indentation_level--;
 }
 //-----------------------------------------------------------------------------
 void Logger::progress(std::string title, real p)
 {
   int N = DOLFIN_TERM_WIDTH - 15;
-  int n = static_cast<int>(p*static_cast<real>(N));
+  int n = static_cast<int>(p * static_cast<real>(N));
 
   // Print the title
   std::string s = "| " + title;
@@ -96,7 +100,7 @@ void Logger::progress(std::string title, real p)
   std::stringstream line;
   line << std::setiosflags(std::ios::fixed);
   line << std::setprecision(1);
-  line << 100.0*p;
+  line << 100.0 * p;
   s += line.str() + "%";
   write(0, s);
 }
@@ -108,7 +112,8 @@ void Logger::setOutputDestination(std::string destination)
     this->destination = terminal;
   else if (destination == "silent")
     this->destination = silent;
-  else if (destination == "stream"){
+  else if (destination == "stream")
+  {
     warning("Please provide the actual stream. Using terminal instead.");
     this->destination = terminal;
   }
@@ -121,8 +126,8 @@ void Logger::setOutputDestination(std::string destination)
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::ostream& ostream)
 {
-   logstream = &ostream;
-   this->destination = stream;
+  logstream = &ostream;
+  this->destination = stream;
 }
 //-----------------------------------------------------------------------------
 void Logger::setDebugLevel(int debug_level)
@@ -162,13 +167,14 @@ void Logger::summary()
   message("Summary of timings:");
   for (map_iterator it = _timings.begin(); it != _timings.end(); ++it)
   {
-    const std::string task  = it->first;
-    const uint num_timings  = it->second.first;
-    const real total_time   = it->second.second;
+    const std::string task = it->first;
+    const uint num_timings = it->second.first;
+    const real total_time = it->second.second;
     const real average_time = total_time / static_cast<real>(num_timings);
 
     std::stringstream line;
-    line << "  " << task << ": " << total_time << " " << average_time << " " << num_timings;
+    line << "  " << task << ": " << total_time << " " << average_time << " "
+        << num_timings;
     message(line.str());
   }
 
@@ -205,18 +211,22 @@ void Logger::write(int debug_level, std::string msg)
 
   // Choose destination
   switch (destination)
-  {
-  case terminal:
-    std::cout << msg << std::endl;
-    break;
-  case stream:
-    if (logstream == NULL)
-      error("No stream attached, cannot write to stream");
-    *logstream << msg << std::endl;
-    break;
-  default:
-    // Do nothing if destination == silent
-    do {} while (false);
-  }
+    {
+    case terminal:
+      std::cout << msg << std::endl;
+      break;
+    case stream:
+      if (logstream == NULL)
+        error("No stream attached, cannot write to stream");
+      *logstream << msg << std::endl;
+      break;
+    default:
+      // Do nothing if destination == silent
+      do
+      {
+      }
+      while (false);
+      break;
+    }
 }
 //----------------------------------------------------------------------------

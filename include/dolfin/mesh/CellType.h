@@ -8,8 +8,11 @@
 #define __CELL_TYPE_H
 
 #include <string>
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
+
+#include <dolfin/ufl/UFLCell.h>
 
 namespace dolfin
 {
@@ -31,28 +34,31 @@ namespace dolfin
     enum Type { point, interval, triangle, tetrahedron };
 
     /// Constructor
-    CellType(Type cell_type, Type facet_type);
+    CellType(CellType::Type cell_type, CellType::Type facet_type);
 
     /// Destructor
     virtual ~CellType();
 
     /// Create cell type from type (factory function)
-    static CellType* create(Type type);
+    static CellType* create(CellType::Type type);
 
     /// Create cell type from string (factory function)
     static CellType* create(std::string type);
 
     /// Convert from string to cell type
-    static Type string2type(std::string type);
+    static CellType::Type string2type(std::string type);
 
     /// Convert from cell type to string
-    static std::string type2string(Type type);
+    static std::string type2string(CellType::Type type);
+
+    /// Convert from cell type to UFL cell type
+    static ufl::Domain::Type type2ufldomain(CellType::Type type);
 
     /// Return type of cell
-    inline Type cellType() const { return cell_type; }
+    inline CellType::Type cellType() const { return cell_type; }
 
     /// Return type of cell for facets
-    inline Type facetType() const { return facet_type; }
+    inline CellType::Type facetType() const { return facet_type; }
 
     /// Return topological dimension of cell
     virtual uint dim() const = 0;
@@ -102,11 +108,19 @@ namespace dolfin
     /// Return description of cell type
     virtual std::string description() const = 0;
 
+    /// UFL binding
+    operator ufl::Cell const&() { return ufl_; }
+
   protected:
 
+    CellType::Type cell_type;
+    CellType::Type facet_type;
 
-    Type cell_type;
-    Type facet_type;
+  private:
+
+#if ENABLE_UFL
+    ufl::Cell ufl_;
+#endif
 
   };
 

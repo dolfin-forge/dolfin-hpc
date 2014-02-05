@@ -9,21 +9,22 @@
 #ifndef __LOG_STREAM_H
 #define __LOG_STREAM_H
 
+#include <ostream>
 #include <string>
 #include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
-  class LogStream
+  class LogStream : public std::ostream
   {
   public:
-    
+
     enum Type {COUT, ENDL};
-    
+
     LogStream(Type type);
     ~LogStream();
-    
+
     LogStream& operator<<(const char* s);
     LogStream& operator<<(const std::string& s);
     LogStream& operator<<(int a);
@@ -33,20 +34,20 @@ namespace dolfin
     LogStream& operator<<(const LogStream& stream);
 
     void disp() const;
-    
+
   private:
-    
+
     void add(const char* msg);
-    
+
     Type type;
     char* buffer;
     int current;
-    
+
   };
-  
+
   extern LogStream cout;
   extern LogStream endl;
-  
+
 }
 
 #endif

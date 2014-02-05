@@ -22,13 +22,13 @@ namespace dolfin
   class Logger
   {
   public:
-    
+
     /// Constructor
     Logger();
 
     /// Destructor
     ~Logger();
-    
+
     /// Print message
     void message(std::string msg, int debug_level = 0);
 
@@ -43,6 +43,9 @@ namespace dolfin
 
     /// End task (decrease indentation level)
     void end();
+
+    /// Skip line
+    void skip();
 
     /// Draw progress bar
     void progress (std::string title, real p);
@@ -82,7 +85,7 @@ namespace dolfin
 
     // Write message to current output destination
     void write(int debug_level, std::string msg);
-    
+
     // Current debug level
     int debug_level;
 

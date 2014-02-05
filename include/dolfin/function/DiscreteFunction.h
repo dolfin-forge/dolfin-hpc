@@ -120,7 +120,8 @@ public:
 
 private:
 
-  void Initialize();
+  /// Initialize Vector
+  void InitializeVector();
 
   /// Initialize ghost pattern
   void InitializeGhosts();

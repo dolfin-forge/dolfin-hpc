@@ -94,6 +94,9 @@ public:
   /// Evaluate function at given point
   void eval(real* values, const real* x) const;
 
+  /// Display basic information
+  void disp() const { return; }
+
   /// Update vector
   void sync_ghosts();
 

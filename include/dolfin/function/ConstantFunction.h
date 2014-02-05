@@ -63,7 +63,11 @@ namespace dolfin
                   const real* coordinates,
                   const ufc::cell& cell) const;
 
-    void sync_ghosts() {return;}
+    /// Display basic information
+    void disp() const { return; }
+
+    /// Synchronize ghosted entries
+    void sync_ghosts() { return; }
 
   private:
 

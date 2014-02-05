@@ -857,7 +857,6 @@ void DofMap::disp() const
   cout << "ufc::dof_map info" << endl;
   cout << "-----------------" << endl;
   begin("");
-
   cout << "Signature            : " << ufc_dof_map_->signature() << endl;
   cout << "Global dimension     : " << ufc_dof_map_->global_dimension() << endl;
   cout << "Local dimension      : " << ufc_dof_map_->local_dimension() << endl;
@@ -865,7 +864,6 @@ void DofMap::disp() const
       << endl;
   cout << "Number of subdofmaps : " << ufc_dof_map_->num_sub_dof_maps() << endl;
   cout << "Number of facet dofs : " << ufc_dof_map_->num_facet_dofs() << endl;
-
   cout << endl;
   end();
 
@@ -886,7 +884,7 @@ void DofMap::disp() const
       ufc_dof_map_->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
 
       cout << "Cell " << ufc_cell.entity_indices[tdim][0] << ":  ";
-      for (uint j = 0; j < num_dofs; j++)
+      for (uint j = 0; j < num_dofs; ++j)
       {
         cout << dofs[j];
         if (j < num_dofs - 1)
@@ -907,9 +905,9 @@ void DofMap::disp() const
     uint gdim = ufc_dof_map_->geometric_dimension();
     uint num_dofs = ufc_dof_map_->local_dimension();
     double** coordinates = new double*[num_dofs];
-    for (uint k = 0; k < num_dofs; k++)
+    for (uint d = 0; d < num_dofs; ++d)
     {
-      coordinates[k] = new double[gdim];
+      coordinates[d] = new double[gdim];
     }
     CellIterator cell(dolfin_mesh);
     UFCCell ufc_cell(*cell);
@@ -923,7 +921,7 @@ void DofMap::disp() const
       for (uint j = 0; j < num_dofs; j++)
       {
         cout << "(";
-        for (uint k = 0; k < gdim; k++)
+        for (uint k = 0; k < gdim; ++k)
         {
           cout << coordinates[j][k];
           if (k < gdim - 1)
@@ -935,9 +933,9 @@ void DofMap::disp() const
       }
       cout << endl;
     }
-    for (uint k = 0; k < gdim; k++)
+    for (uint d = 0; d < num_dofs; ++d)
     {
-      delete[] coordinates[k];
+      delete[] coordinates[d];
     }
     delete[] coordinates;
     cout << endl;

@@ -307,7 +307,7 @@ DofMap::create_sub_dof_map(ufc::dof_map const& dof_map,
 void DofMap::init()
 {
   //dolfin_debug("Initializing dof map...");
-  if(ufc_dof_map_->geometric_dimension() != dolfin_mesh.topology().dim())
+  if (ufc_dof_map_->geometric_dimension() != dolfin_mesh.topology().dim())
   {
     dolfin::error("The geometric dimension of the dof map is not equal to the "
                   "topological dimension of the mesh.");
@@ -370,7 +370,8 @@ void DofMap::init()
   //dolfin_debug("Dof map initialized");
 }
 //-----------------------------------------------------------------------------
-void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index)
+void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell,
+                           uint cell_index) const
 {
   // Either lookup pretabulated values (if build() has been called)
   // or ask the ufc::dof_map to tabulate the values
@@ -888,7 +889,7 @@ void DofMap::disp() const
       {
         cout << dofs[j];
         if (j < num_dofs - 1)
-          cout << ", ";
+        cout << ", ";
       }
       cout << endl;
     }
@@ -925,11 +926,11 @@ void DofMap::disp() const
         {
           cout << coordinates[j][k];
           if (k < gdim - 1)
-            cout << ", ";
+          cout << ", ";
         }
         cout << ")";
         if (j < num_dofs - 1)
-          cout << ",  ";
+        cout << ",  ";
       }
       cout << endl;
     }

@@ -158,7 +158,7 @@ public:
   uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index);
+  void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index) const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
   void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,

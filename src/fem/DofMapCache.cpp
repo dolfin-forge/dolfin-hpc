@@ -28,8 +28,8 @@ DofMapCache::~DofMapCache()
 {
   if (cache_.size() != 0)
   {
-    warning("DofMapCache is not empty: "
-            "consider checking if the dof maps have been properly released");
+    error("DofMapCache is not empty: "
+          "some dof maps have not been properly released");
   }
   for (dofmap_container_t::iterator it = cache_.begin(); it != cache_.end();
       ++it)
@@ -42,7 +42,7 @@ DofMapCache::~DofMapCache()
 //-----------------------------------------------------------------------------
 DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 {
-  message(2, "Acquire DofMap for Form coefficient %i", i);
+  message(1,"Acquire DofMap for Form coefficient %i", i);
 
   // Update dof maps of form:
   // This triggers creation of a dof map set if needed and acquistion of a token
@@ -93,7 +93,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
                                     std::string const& dofmap_signature)
 {
-  message(2, "Acquire DofMap from signature: %s", dofmap_signature.c_str());
+  message(1,"Acquire DofMap from signature: %s", dofmap_signature.c_str());
   DofMap * ret = NULL;
 
   std::string const h = DofMap::make_hash(dofmap_signature, mesh);

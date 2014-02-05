@@ -866,14 +866,6 @@ void DofMap::disp() const
   cout << "Number of subdofmaps: " << ufc_dof_map_->num_sub_dof_maps() << endl;
   cout << "Number of facet dofs: " << ufc_dof_map_->num_facet_dofs() << endl;
 
-  // for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
-  // {
-  //   cout << "Number of entity dofs (dim " << d << "): " << ufc_dof_map_->num_entity_dofs(d) << endl;
-  // }
-  // for(uint d=0; d<=dolfin_mesh.topology().dim(); d++)
-  // {
-  //   cout << "Needs mesh entities (dim " << d << "):   " << ufc_dof_map_->needs_mesh_entities(d) << endl;
-  // }
   cout << endl;
   end();
 
@@ -891,60 +883,7 @@ void DofMap::disp() const
   cout << endl;
   end();
 
-  // cout << "Local cell dofs associated with cell entities (tabulate_entity_dofs output):" << endl;
-  // cout << "----------------------------------------------------------------------------" << endl;
-  // begin("");
-  // {
-  //   uint tdim = dolfin_mesh.topology().dim();
-  //   for(uint d=0; d<=tdim; d++)
-  //   {
-  //     uint num_dofs = ufc_dof_map_->num_entity_dofs(d);
-  //     if(num_dofs)
-  //     {
-  //       uint num_entities = dolfin_mesh.type().numEntities(d);
-  //       uint* dofs = new uint[num_dofs];
-  //       for(uint i=0; i<num_entities; i++)
-  //       {
-  //         cout << "Entity (" << d << ", " << i << "):  ";
-  //         ufc_dof_map_->tabulate_entity_dofs(dofs, d, i);
-  //         for(uint j=0; j<num_dofs; j++)
-  //         {
-  //           cout << dofs[j];
-  //           if(j < num_dofs-1) cout << ", ";
-  //         }
-  //         cout << endl;
-  //       }
-  //       delete [] dofs;
-  //     }
-  //   }
-  //   cout << endl;
-  // }
-  // end();
-
-  // cout << "Local cell dofs associated with facets (tabulate_facet_dofs output):" << endl;
-  // cout << "--------------------------------------------------------------------" << endl;
-  // begin("");
-  // {
-  //   uint tdim = dolfin_mesh.topology().dim();
-  //   uint num_dofs = ufc_dof_map_->num_facet_dofs();
-  //   uint num_facets = dolfin_mesh.type().numEntities(tdim-1);
-  //   uint* dofs = new uint[num_dofs];
-  //   for(uint i=0; i<num_facets; i++)
-  //   {
-  //     cout << "Facet " << i << ":  ";
-  //     ufc_dof_map_->tabulate_facet_dofs(dofs, i);
-  //     for(uint j=0; j<num_dofs; j++)
-  //     {
-  //       cout << dofs[j];
-  //       if(j < num_dofs-1) cout << ", ";
-  //     }
-  //     cout << endl;
-  //   }
-  //   delete [] dofs;
-  //   cout << endl;
-  // }
-  // end();
-
+#if DEBUG
   cout << "tabulate_dofs output" << endl;
   cout << "--------------------" << endl;
   begin("");
@@ -1018,6 +957,8 @@ void DofMap::disp() const
     cout << endl;
   }
   end();
+#endif
+
   // End indentation
   end();
 }

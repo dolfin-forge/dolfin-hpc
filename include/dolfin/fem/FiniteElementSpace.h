@@ -74,7 +74,7 @@ public:
   ///
   operator ufl::FiniteElement const&() const
   {
-    return ufl_class_;
+    return ufl_;
   }
 
 #endif
@@ -124,9 +124,7 @@ private:
   Scratch scratch;
 
 #if ENABLE_UFL
-
-  ufl::FiniteElement const ufl_class_;
-
+  ufl::FiniteElement const ufl_;
 #endif
 
 };
@@ -142,13 +140,13 @@ inline Mesh& FiniteElementSpace::mesh() const
 //-----------------------------------------------------------------------------
 inline ufl::Family::Type const FiniteElementSpace::family() const
 {
-  return ufl_class_.family().type();
+  return ufl_.family().type();
 }
 
 //-----------------------------------------------------------------------------
 inline uint const FiniteElementSpace::degree() const
 {
-  return ufl_class_.degree();
+  return ufl_.degree();
 }
 
 #endif

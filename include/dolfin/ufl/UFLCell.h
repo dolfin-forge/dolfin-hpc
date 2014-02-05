@@ -38,6 +38,9 @@ class Cell : public Class
 public:
 
   ///
+  explicit Cell(Domain::Type const& type);
+
+  ///
   explicit Cell(Domain const& domain);
 
   ///

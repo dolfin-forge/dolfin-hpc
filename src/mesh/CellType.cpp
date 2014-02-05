@@ -4,13 +4,14 @@
 // First added:  2006-06-05
 // Last changed: 2006-10-16
 
+#include <dolfin/mesh/CellType.h>
+
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/PointCell.h>
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Point.h>
 
@@ -18,8 +19,13 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-CellType::CellType(Type cell_type, Type facet_type)
-  : cell_type(cell_type), facet_type(facet_type)
+CellType::CellType(CellType::Type cell_type, CellType::Type facet_type) :
+    cell_type(cell_type),
+    facet_type(facet_type)
+#if ENABLE_UFL
+               ,
+    ufl_(CellType::type2ufldomain(cell_type))
+#endif
 {
   // Do nothing
 }
@@ -29,21 +35,22 @@ CellType::~CellType()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create(Type type)
+CellType* CellType::create(CellType::Type type)
 {
-  switch ( type )
-  {
-  case point:
-    return new PointCell();
-  case interval:
-    return new IntervalCell();
-  case triangle:
-    return new TriangleCell();
-  case tetrahedron:
-    return new TetrahedronCell();
-  default:
-    error("Unknown cell type: %d.", type);
-  }
+  switch (type)
+    {
+    case point:
+      return new PointCell();
+    case interval:
+      return new IntervalCell();
+    case triangle:
+      return new TriangleCell();
+    case tetrahedron:
+      return new TetrahedronCell();
+    default:
+      error("Unknown cell type: %d.", type);
+      break;
+    }
 
   return 0;
 }
@@ -55,11 +62,11 @@ CellType* CellType::create(std::string type)
 //-----------------------------------------------------------------------------
 CellType::Type CellType::string2type(std::string type)
 {
-  if ( type == "interval" )
+  if (type == "interval")
     return interval;
-  else if ( type == "triangle" )
+  else if (type == "triangle")
     return triangle;
-  else if ( type == "tetrahedron" )
+  else if (type == "tetrahedron")
     return tetrahedron;
   else
     error("Unknown cell type: \"%s\".", type.c_str());
@@ -69,42 +76,63 @@ CellType::Type CellType::string2type(std::string type)
 //-----------------------------------------------------------------------------
 bool CellType::intersects(MeshEntity& entity, Cell& c) const
 {
-  for(VertexIterator vi(entity); !vi.end(); ++vi)
+  for (VertexIterator vi(entity); !vi.end(); ++vi)
   {
     Point p = vi->point();
 
-    if(intersects(c, p))
+    if (intersects(c, p))
       return true;
   }
 
-  for(VertexIterator vi(c); !vi.end(); ++vi)
+  for (VertexIterator vi(c); !vi.end(); ++vi)
   {
     Point p = vi->point();
 
-    if(intersects(entity, p))
+    if (intersects(entity, p))
       return true;
   }
 
   return false;
 }
 //-----------------------------------------------------------------------------
-std::string CellType::type2string(Type type)
+std::string CellType::type2string(CellType::Type type)
 {
-  switch ( type )
-  {
-  case point:
-    return "point";
-  case interval:
-    return "interval";
-  case triangle:
-    return "triangle";
-  case tetrahedron:
-    return "tetrahedron";
-  default:
-    error("Unknown cell type: %d.", type);
-  }
+  switch (type)
+    {
+    case point:
+      return "point";
+    case interval:
+      return "interval";
+    case triangle:
+      return "triangle";
+    case tetrahedron:
+      return "tetrahedron";
+    default:
+      error("Unknown cell type: %d.", type);
+      break;
+    }
 
   return "";
+}
+//-----------------------------------------------------------------------------
+ufl::Domain::Type CellType::type2ufldomain(CellType::Type type)
+{
+  switch (type)
+    {
+    case CellType::point:
+      return ufl::Domain::vertex;
+    case CellType::interval:
+      return ufl::Domain::interval;
+    case CellType::triangle:
+      return ufl::Domain::triangle;
+    case CellType::tetrahedron:
+      return ufl::Domain::tetrahedron;
+    default:
+      error("Unknown cell type: %d.", type);
+      break;
+    }
+
+  return ufl::Domain::None;
 }
 //-----------------------------------------------------------------------------
 

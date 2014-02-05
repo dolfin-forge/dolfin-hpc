@@ -14,6 +14,25 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
+Cell::Cell(Domain::Type const& type) :
+    Class("Cell"),
+    domain_(type),
+    space_(domain_.dim()),
+    repr_(*this, domain_, space_),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
+    invalid_(domain_.is_undefined()),
+    geometric_dimension_(space_.dimension()),
+    topological_dimension_(domain_.dim()),
+    cell_surface_area_(*this),
+    cell_volume_(*this),
+    circumradius_(*this),
+    facet_area_(*this),
+    facet_normal_(*this),
+    x_(*this)
+{
+}
+
+//-----------------------------------------------------------------------------
 Cell::Cell(Domain const& domain) :
     Class("Cell"),
     domain_(domain),

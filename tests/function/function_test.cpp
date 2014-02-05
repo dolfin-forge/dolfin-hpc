@@ -1,6 +1,6 @@
 #include <dolfin/config/dolfin_config.h>
 
-#include <dolfin/function/Function.h>
+#include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/mesh/UnitCube.h>
 #include <dolfin/mesh/UnitSquare.h>
 
@@ -42,8 +42,14 @@ START_TEST( test_init_discrete )
     v.push_back(Family::CG);
 
     uint const N = 10;
-    dolfin::UnitSquare sq(N, N);
+    dolfin::UnitSquare mesh2d(N, N);
 
+    Domain dom(Domain::triangle);
+    Cell cell(dom);
+    ufl::FiniteElement uflfem(Family::CG, cell, 1);
+    dolfin::DiscreteFunction f(mesh2d, uflfem.repr());
+
+    /*
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
@@ -68,6 +74,7 @@ START_TEST( test_init_discrete )
         }
       }
     }
+    */
 
     fail_unless( init_failed == 0 );
   }END_TEST

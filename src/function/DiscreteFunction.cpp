@@ -52,7 +52,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
@@ -136,7 +136,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     _data_cache(NULL)
 {
   // Initialise function
-  Initialize();
+  InitializeVector();
 }
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
@@ -176,7 +176,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     _data_cache(NULL)
 {
   // Initialize vector, scratch space and ghosts
-  Initialize();
+  InitializeVector();
 
   // Copy subvector, naive implementation
   DiscreteFunction& global_func = sub_function.function();
@@ -508,8 +508,9 @@ void DiscreteFunction::set(real *& values)
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::Initialize()
+void DiscreteFunction::InitializeVector()
 {
+  message("Initialize");
   if (X_->size() != dof_map_.global_dimension())
   {
     if (MPI::numProcesses() > 1)

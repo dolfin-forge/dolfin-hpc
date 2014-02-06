@@ -22,7 +22,7 @@ FiniteElementSpace::FiniteElementSpace(
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::Object::repr_t(finite_element_signature))
+    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(finite_element_signature)))
 #endif
 {
 }
@@ -37,7 +37,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::Object::repr_t(signature))
+    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(signature)))
 #endif
 {
 }
@@ -50,7 +50,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
@@ -67,10 +67,25 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
+
+#if ENABLE_UFL
+//-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(
+    Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
+    mesh_(mesh),
+    finite_element_(finite_element),
+    dof_map_(
+        DofMapCache::instance().acquire_dofmap(
+            mesh, DofMap::dofmap_signature(finite_element_.signature()))),
+    scratch(finite_element_, dof_map_),
+    ufl_(&finite_element)
+{
+}
+#endif
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
@@ -84,7 +99,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::Object::repr_t(element().signature()))
+    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
@@ -118,7 +133,7 @@ FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element,
     values(NULL),
     coordinates(NULL)
 {
-  message(1,"Creating scratch space");
+  message(1, "Creating scratch space");
 
   // Compute size of value (number of entries in tensor value)
   size = 1;

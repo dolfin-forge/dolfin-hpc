@@ -40,8 +40,7 @@ Class::Class(std::string const& name, repr_t const& repr) :
 {
   if (name_ != cpp_proto_.first)
   {
-    dolfin::error(
-        "The representation :\n\t" + repr + "\n"
+    dolfin::error("The representation :\n\t" + repr + "\n"
         "is invalid as it does not match the class" + name_);
   }
 }
@@ -67,6 +66,14 @@ Object::repr_t const Class::repr() const
 std::string const Class::str() const
 {
   return default_str_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const Class::make_name(repr_t repr)
+{
+  std::string str = repr;
+  size_t openpos = str.find("(");
+  return str.substr(0, openpos);
 }
 
 //-----------------------------------------------------------------------------
@@ -131,9 +138,9 @@ Class::CppProto Class::make_proto(Object::repr_t repr) const
 //-----------------------------------------------------------------------------
 Object::repr_t const& Class::arg(size_t i)
 {
-  if(i >= args_repr_.size())
+  if (i >= args_repr_.size())
   {
-    for(size_t k=0; k < args_repr_.size(); ++k)
+    for (size_t k = 0; k < args_repr_.size(); ++k)
     {
       std::cout << args_repr_[k] << ", ";
     }

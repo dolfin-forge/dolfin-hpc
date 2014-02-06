@@ -28,6 +28,28 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+std::string Function::type2string(Function::Type type)
+{
+  switch (type)
+    {
+    case empty:
+      return "empty";
+    case constant:
+      return "constant";
+    case discrete:
+      return "discrete";
+    case expression:
+      return "expression";
+    case user:
+      return "user";
+    default:
+      error("Unknown function type: %d.", type);
+      break;
+    }
+
+  return "";
+}
+//-----------------------------------------------------------------------------
 Function::Function() :
     Variable("*no name*", "empty function"),
     f_(NULL),
@@ -441,7 +463,8 @@ void Function::disp() const
 
   // Begin indentation
   begin("");
-  cout << "Type: " << this->type() << endl;
+  cout << "Type: " << this->type() << " ("
+      << Function::type2string(this->type()) << ")" << endl;
   if (f_ != NULL)
   {
     f_->disp();

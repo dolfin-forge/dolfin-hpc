@@ -53,7 +53,7 @@ class Mesh;
 /// overloading the eval function of this class or by giving a
 /// function (pointer) that returns the value of the function.
 
-class Function : public Variable, public ufc::function
+class Function : public Variable
 {
 public:
 

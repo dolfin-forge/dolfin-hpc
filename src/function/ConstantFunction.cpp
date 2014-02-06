@@ -16,24 +16,32 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(const ConstantFunction& f)
-  : GenericFunction(f.mesh), values(0), value_rank(f.value_rank), shape(0), size(f.size)
+ConstantFunction::ConstantFunction(const ConstantFunction& f) :
+    GenericFunction(f.mesh),
+    values(0),
+    value_rank(f.value_rank),
+    shape(0),
+    size(f.size)
 {
   values = new real[size];
   shape = new uint[value_rank];
-  for(uint i=0; i<value_rank; i++)
+  for (uint i = 0; i < value_rank; i++)
   {
     shape[i] = f.shape[i];
   }
-  for(uint i=0; i<size; i++)
+  for (uint i = 0; i < size; i++)
   {
     values[i] = f.values[i];
   }
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, real value)
-  : GenericFunction(mesh), values(0), value_rank(0), shape(0), size(1)
+ConstantFunction::ConstantFunction(Mesh& mesh, real value) :
+    GenericFunction(mesh),
+    values(0),
+    value_rank(0),
+    shape(0),
+    size(1)
 {
   values = new real[1];
   shape = new uint[1];
@@ -42,48 +50,61 @@ ConstantFunction::ConstantFunction(Mesh& mesh, real value)
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value)
-  : GenericFunction(mesh), values(0), value_rank(1), shape(0), size(size)
+ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value) :
+    GenericFunction(mesh),
+    values(0),
+    value_rank(1),
+    shape(0),
+    size(size)
 {
   shape = new uint[1];
   shape[0] = size;
   values = new real[size];
-  for(uint i=0; i<size; i++)
+  for (uint i = 0; i < size; i++)
   {
     values[i] = value;
   }
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& _values)
-  : GenericFunction(mesh), values(0), value_rank(1), shape(0), size(0)
+ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& _values) :
+    GenericFunction(mesh),
+    values(0),
+    value_rank(1),
+    shape(0),
+    size(0)
 {
   size = _values.size();
   shape = new uint[1];
   shape[0] = size;
   values = new real[size];
-  for(uint i=0; i<size; i++)
+  for (uint i = 0; i < size; i++)
   {
     values[i] = _values[i];
   }
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape, const Array<real>& _values)
-  : GenericFunction(mesh), values(0), value_rank(0), shape(0), size(0)
+ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape,
+                                   const Array<real>& _values) :
+    GenericFunction(mesh),
+    values(0),
+    value_rank(0),
+    shape(0),
+    size(0)
 {
   value_rank = _shape.size();
   shape = new uint[value_rank];
   size = 1;
-  for(uint i=0; i<value_rank; i++)
+  for (uint i = 0; i < value_rank; i++)
   {
     shape[i] = _shape[i];
     size *= shape[i];
   }
-  if(size != _values.size())
+  if (size != _values.size())
     error("Size of given values does not match shape.");
   values = new real[size];
-  for(uint i=0; i<size; i++)
+  for (uint i = 0; i < size; i++)
   {
     values[i] = _values[i];
   }
@@ -92,8 +113,8 @@ ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape, const 
 //-----------------------------------------------------------------------------
 ConstantFunction::~ConstantFunction()
 {
-  delete [] shape;
-  delete [] values;
+  delete[] shape;
+  delete[] values;
 }
 
 //-----------------------------------------------------------------------------
@@ -105,7 +126,7 @@ dolfin::uint ConstantFunction::rank() const
 //-----------------------------------------------------------------------------
 dolfin::uint ConstantFunction::dim(uint i) const
 {
-  if(i > value_rank)
+  if (i > value_rank)
     error("Too large dimension in dim.");
   return shape[i];
 }
@@ -120,21 +141,21 @@ void ConstantFunction::interpolate_vertex_values(real* _values) const
   {
     for (uint j = 0; j < size; j++)
     {
-      uint k = i*size + j;
+      uint k = i * size + j;
       _values[k] = values[j];
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::interpolate(real* coefficients,
-                                   const ufc::cell& cell,
+void ConstantFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
 
-  // Assert same value shape (TODO: Slow to do this for every element, should probably remove later)
+  // Assert same value shape
+  // TODO: Slow to do this for every element, should probably remove later
   dolfin_assert(value_rank == finite_element.value_rank());
   for (uint i = 0; i < value_rank; i++)
     dolfin_assert(shape[i] == finite_element.value_dimension(i));
@@ -160,8 +181,7 @@ void ConstantFunction::eval(real* _values, const real* x) const
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::evaluate(real* _values,
-                                const real* coordinates,
+void ConstantFunction::evaluate(real* _values, const real* coordinates,
                                 const ufc::cell& cell) const
 {
   // Call eval(), cell ignored

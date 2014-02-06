@@ -107,7 +107,7 @@ public:
   void eval(real* values, const real* x) const;
 
   /// Display basic information
-  void disp() const { return; }
+  void disp() const;
 
   /// Update vector
   void sync_ghosts();

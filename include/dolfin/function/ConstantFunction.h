@@ -64,7 +64,7 @@ namespace dolfin
                   const ufc::cell& cell) const;
 
     /// Display basic information
-    void disp() const { return; }
+    void disp() const;
 
     /// Synchronize ghosted entries
     void sync_ghosts() { return; }

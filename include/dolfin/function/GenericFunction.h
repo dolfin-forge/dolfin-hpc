@@ -7,8 +7,11 @@
 #ifndef __GENERIC_FUNCTION_H
 #define __GENERIC_FUNCTION_H
 
-#include <ufc.h>
 #include <dolfin/common/types.h>
+#include <dolfin/log/log.h>
+#include <dolfin/log/LogStream.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {
@@ -61,6 +64,31 @@ public:
   Mesh& mesh;
 
 };
+
+//-----------------------------------------------------------------------------
+inline void GenericFunction::disp() const
+{
+  cout << "GenericFunction" << endl;
+  cout << "---------------" << endl;
+
+  // Begin indentation
+  begin("");
+  cout << "Value rank            : " << this->rank() << endl;
+  cout << "Value dimension       : " << this->dim(0) << endl;
+  cout << "Evaluate at origin    : ";
+  real x[3] = { 0., 0., 0.};
+  real * v = new real[this->dim(0)];
+  this->eval(v,x);
+  for (uint d = 0; d < this->dim(0); ++d)
+  {
+    cout << v[d] << " ";
+  }
+  delete [] v;
+  cout << endl;
+  // End indentation
+  end();
+  skip();
+}
 
 }
 

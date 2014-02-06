@@ -12,7 +12,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/function/ConstantFunction.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(const ConstantFunction& f)
@@ -29,6 +30,7 @@ ConstantFunction::ConstantFunction(const ConstantFunction& f)
     values[i] = f.values[i];
   }
 }
+
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, real value)
   : GenericFunction(mesh), values(0), value_rank(0), shape(0), size(1)
@@ -38,6 +40,7 @@ ConstantFunction::ConstantFunction(Mesh& mesh, real value)
   values[0] = value;
   shape[0] = 1;
 }
+
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value)
   : GenericFunction(mesh), values(0), value_rank(1), shape(0), size(size)
@@ -50,6 +53,7 @@ ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value)
     values[i] = value;
   }
 }
+
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& _values)
   : GenericFunction(mesh), values(0), value_rank(1), shape(0), size(0)
@@ -63,6 +67,7 @@ ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& _values)
     values[i] = _values[i];
   }
 }
+
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape, const Array<real>& _values)
   : GenericFunction(mesh), values(0), value_rank(0), shape(0), size(0)
@@ -83,17 +88,20 @@ ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape, const 
     values[i] = _values[i];
   }
 }
+
 //-----------------------------------------------------------------------------
 ConstantFunction::~ConstantFunction()
 {
   delete [] shape;
   delete [] values;
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint ConstantFunction::rank() const
 {
   return value_rank;
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint ConstantFunction::dim(uint i) const
 {
@@ -101,6 +109,7 @@ dolfin::uint ConstantFunction::dim(uint i) const
     error("Too large dimension in dim.");
   return shape[i];
 }
+
 //-----------------------------------------------------------------------------
 void ConstantFunction::interpolate_vertex_values(real* _values) const
 {
@@ -116,6 +125,7 @@ void ConstantFunction::interpolate_vertex_values(real* _values) const
     }
   }
 }
+
 //-----------------------------------------------------------------------------
 void ConstantFunction::interpolate(real* coefficients,
                                    const ufc::cell& cell,
@@ -138,6 +148,7 @@ void ConstantFunction::interpolate(real* coefficients,
   /// Evaluate linear functionals for all dofs on the function f
   //finite_element.evaluate_dofs(coefficients, *this, cell);
 }
+
 //-----------------------------------------------------------------------------
 void ConstantFunction::eval(real* _values, const real* x) const
 {
@@ -147,6 +158,7 @@ void ConstantFunction::eval(real* _values, const real* x) const
   for (uint i = 0; i < size; i++)
     _values[i] = values[i];
 }
+
 //-----------------------------------------------------------------------------
 void ConstantFunction::evaluate(real* _values,
                                 const real* coordinates,
@@ -155,4 +167,20 @@ void ConstantFunction::evaluate(real* _values,
   // Call eval(), cell ignored
   eval(_values, coordinates);
 }
+
 //-----------------------------------------------------------------------------
+void ConstantFunction::disp() const
+{
+  cout << "ConstantFunction" << endl;
+  cout << "----------------" << endl;
+
+  // Begin indentation
+  begin("");
+  GenericFunction::disp();
+  // End indentation
+  end();
+  skip();
+}
+//-----------------------------------------------------------------------------
+
+}

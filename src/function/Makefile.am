@@ -6,5 +6,6 @@ libdolfin_function_la_SOURCES = \
 				ExpressionFunction.cpp\
 				Function.cpp\
 				SpecialFunctions.cpp\
+				SubFunction.cpp\
 				UFCFunction.cpp\
 				UserFunction.cpp

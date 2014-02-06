@@ -123,6 +123,21 @@ DofMap const& FiniteElementSpace::dofmap() const
 }
 
 //-----------------------------------------------------------------------------
+void FiniteElementSpace::disp() const
+{
+  cout << "FiniteElementSpace" << endl;
+  cout << "------------------" << endl;
+
+  // Begin indentation
+  begin("");
+  cout << "Finite element        : " << this->element().signature() << endl;
+  cout << "Dof map               : " << this->dofmap().signature() << endl;
+  // End indentation
+  end();
+  skip();
+}
+
+//-----------------------------------------------------------------------------
 FiniteElementSpace::Scratch::Scratch(FiniteElement const& finite_element,
                                      DofMap const& dof_map) :
     size(0),

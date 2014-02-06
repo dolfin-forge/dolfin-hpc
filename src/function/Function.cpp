@@ -141,7 +141,7 @@ Function::Function(Mesh& mesh, GenericVector& x,
     facet_(-1)
 {
   f_ = new DiscreteFunction(mesh, x, finite_element_signature,
-                           dof_map_signature);
+                            dof_map_signature);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, std::string const& finite_element_signature,
@@ -287,7 +287,7 @@ void Function::init(Mesh& mesh, GenericVector& x,
   }
 
   f_ = new DiscreteFunction(mesh, x, finite_element_signature,
-                           dof_map_signature);
+                            dof_map_signature);
   type_ = discrete;
 }
 //-----------------------------------------------------------------------------
@@ -606,18 +606,16 @@ real Function::eval(const real* x) const
 //-----------------------------------------------------------------------------
 void Function::disp() const
 {
-  // Begin indentation
   cout << "Function" << endl;
-  begin("---------");
-  cout << endl;
+  cout << "------- " << endl;
 
+  // Begin indentation
+  begin("");
   cout << "Type: " << this->type() << endl;
-
   if (f_ != NULL)
   {
     f_->disp();
   }
-
   // End indentation
   end();
 }

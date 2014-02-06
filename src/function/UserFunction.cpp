@@ -22,11 +22,13 @@ UserFunction::UserFunction(Mesh& mesh, Function* f)
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 UserFunction::~UserFunction()
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 uint UserFunction::rank() const
 {
@@ -34,6 +36,7 @@ uint UserFunction::rank() const
   //  error("uint UserFunction::rank() const should be overloaded");
   return 0;
 }
+
 //-----------------------------------------------------------------------------
 uint UserFunction::dim(uint i) const
 {
@@ -41,6 +44,7 @@ uint UserFunction::dim(uint i) const
   //  error("uint UserFunction::dim(uint i) const should be overloaded");
   return 1;
 }
+
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate_vertex_values(real* values) const
 {
@@ -66,6 +70,7 @@ void UserFunction::interpolate_vertex_values(real* values) const
   }
   delete [] local_values;
 }
+
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate(real* coefficients,
                                const ufc::cell& cell,
@@ -78,6 +83,7 @@ void UserFunction::interpolate(real* coefficients,
   for (uint i = 0; i < finite_element.space_dimension(); i++)
     coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
 }
+
 //-----------------------------------------------------------------------------
 void UserFunction::eval(real* values, const real* x) const
 {
@@ -86,6 +92,7 @@ void UserFunction::eval(real* values, const real* x) const
   // Call user-overloaded eval function in Function
   f_->eval(values, x);
 }
+
 //-----------------------------------------------------------------------------
 void UserFunction::evaluate(real* values,
                             const real* coordinates,
@@ -102,6 +109,20 @@ void UserFunction::evaluate(real* values,
 
   // Call user-overloaded eval function in Function
   f_->eval(values,coordinates);
+}
+
+//-----------------------------------------------------------------------------
+void UserFunction::disp() const
+{
+  cout << "UserFunction" << endl;
+  cout << "------------" << endl;
+
+  // Begin indentation
+  begin("");
+  GenericFunction::disp();
+  // End indentation
+  end();
+  skip();
 }
 //-----------------------------------------------------------------------------
 

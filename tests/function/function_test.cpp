@@ -1,4 +1,5 @@
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/log/log.h>
 
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/mesh/UnitCube.h>
@@ -6,6 +7,8 @@
 
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
+
+using dolfin::message;
 
 using ufl::Cell;
 using ufl::Domain;
@@ -44,12 +47,6 @@ START_TEST( test_init_discrete )
     uint const N = 10;
     dolfin::UnitSquare mesh2d(N, N);
 
-    Domain dom(Domain::triangle);
-    Cell cell(dom);
-    ufl::FiniteElement uflfem(Family::CG, cell, 1);
-    dolfin::DiscreteFunction f(mesh2d, uflfem.repr());
-
-    /*
     for (std::vector<Family::Type>::const_iterator it = v.begin();
         it != v.end(); ++it)
     {
@@ -69,12 +66,12 @@ START_TEST( test_init_discrete )
           for (uint d = d_min; d <= d_max; ++d)
           {
             ufl::FiniteElement uflfem(*it, cell, d);
-            dolfin::Function f(sq, uflfem.repr());
+            message(uflfem.repr());
+            dolfin::DiscreteFunction f(mesh2d, uflfem.repr());
           }
         }
       }
     }
-    */
 
     fail_unless( init_failed == 0 );
   }END_TEST

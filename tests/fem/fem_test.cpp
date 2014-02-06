@@ -6,6 +6,8 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/UnitCube.h>
+#include <dolfin/mesh/UnitSquare.h>
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
@@ -47,8 +49,8 @@ START_TEST( test_init_space_from_signature )
   v.push_back(Family::DG);
   v.push_back(Family::CG);
 
-  Mesh sq("square16.bin");
-  Mesh cb("cube8.bin");
+  dolfin::UnitSquare sq(4,4);
+  dolfin::UnitCube cb(2,2,2);
 
   for (std::vector<Family::Type>::const_iterator it = v.begin();
       it != v.end(); ++it)

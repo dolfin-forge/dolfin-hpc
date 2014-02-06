@@ -17,7 +17,7 @@ namespace dolfin
   /// function defined by overloading the evaluation operator in
   /// the class Function.
 
-  class UserFunction : public GenericFunction, public ufc::function
+  class UserFunction : public GenericFunction
   {
   public:
 

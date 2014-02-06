@@ -17,7 +17,6 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 ExpressionFunction::ExpressionFunction(Mesh& mesh, Expression const& expr) :
     GenericFunction(mesh),
-    ufc::function(),
     e(expr)
 {
   // Do nothing
@@ -87,8 +86,7 @@ void ExpressionFunction::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void ExpressionFunction::eval(real* values, const real* x) const
 {
-  dolfin_assert(values);
-  dolfin_assert(x);
+  dolfin_assert(values); dolfin_assert(x);
 
   e.eval(values, x);
 }
@@ -97,8 +95,7 @@ void ExpressionFunction::eval(real* values, const real* x) const
 void ExpressionFunction::evaluate(real* values, const real* coordinates,
                                   const ufc::cell& cell) const
 {
-  dolfin_assert(values);
-  dolfin_assert(coordinates);
+  dolfin_assert(values); dolfin_assert(coordinates);
 
   e.eval(values, coordinates);
 }

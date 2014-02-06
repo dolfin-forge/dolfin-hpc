@@ -16,7 +16,7 @@ namespace dolfin
 
   ///
 
-  class ExpressionFunction : public GenericFunction, public ufc::function
+  class ExpressionFunction : public GenericFunction
   {
 
   public:

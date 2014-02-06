@@ -22,7 +22,7 @@ class Cell;
 /// This class serves as a base class/interface for implementations
 /// of specific function representations.
 
-class GenericFunction
+class GenericFunction : public ufc::function
 {
 public:
 

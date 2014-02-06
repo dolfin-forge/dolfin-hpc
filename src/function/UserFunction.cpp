@@ -14,11 +14,13 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/function/UserFunction.h>
 
-namespace dolfin {
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-UserFunction::UserFunction(Mesh& mesh, Function* f)
-  : GenericFunction(mesh), ufc::function(), f_(f)
+UserFunction::UserFunction(Mesh& mesh, Function* f) :
+    GenericFunction(mesh),
+    f_(f)
 {
   // Do nothing
 }
@@ -46,8 +48,7 @@ uint UserFunction::dim(uint i) const
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate_vertex_values(real* values) const
 {
-  dolfin_assert(values);
-  dolfin_assert(f_);
+  dolfin_assert(values); dolfin_assert(f_);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
@@ -64,14 +65,13 @@ void UserFunction::interpolate_vertex_values(real* values) const
 
     // Copy values to array of vertex values
     for (uint i = 0; i < size; i++)
-      values[i*mesh.numVertices() + vertex->index()] = local_values[i];
+      values[i * mesh.numVertices() + vertex->index()] = local_values[i];
   }
-  delete [] local_values;
+  delete[] local_values;
 }
 
 //-----------------------------------------------------------------------------
-void UserFunction::interpolate(real* coefficients,
-                               const ufc::cell& cell,
+void UserFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                const ufc::finite_element& finite_element,
                                const Cell& dolfin_cell) const
 {
@@ -93,13 +93,10 @@ void UserFunction::eval(real* values, const real* x) const
 }
 
 //-----------------------------------------------------------------------------
-void UserFunction::evaluate(real* values,
-                            const real* coordinates,
+void UserFunction::evaluate(real* values, const real* coordinates,
                             const ufc::cell& cell) const
 {
-  dolfin_assert(values);
-  dolfin_assert(coordinates);
-  dolfin_assert(f_);
+  dolfin_assert(values); dolfin_assert(coordinates); dolfin_assert(f_);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
@@ -107,7 +104,7 @@ void UserFunction::evaluate(real* values,
     size *= f_->dim(i);
 
   // Call user-overloaded eval function in Function
-  f_->eval(values,coordinates);
+  f_->eval(values, coordinates);
 }
 
 //-----------------------------------------------------------------------------

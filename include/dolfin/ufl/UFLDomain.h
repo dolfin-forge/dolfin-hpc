@@ -50,7 +50,30 @@ public:
   Domain(Type const& t);
 
   ///
-  explicit Domain(repr_t const& repr);
+  struct Definition
+  {
+    dolfin::uint dim;
+    Type facet;
+    dolfin::uint num_facets;
+    std::string str;
+
+    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
+        dim(a_dim),
+        facet(a_facet),
+        num_facets(a_num_facets),
+        str(a_str)
+    {
+    }
+  };
+
+  typedef std::map<Type, Definition> DefinitionList;
+  typedef std::pair<Type, Definition> DefinitionItem;
+
+  static DefinitionList const Definitions()
+  {
+    static DefinitionList const DomainDefinitions = __init_domain_definitions();
+    return DomainDefinitions;
+  }
 
   ///
   ~Domain();
@@ -68,10 +91,10 @@ public:
   Type const facet() const;
 
   /// UFL:
-  uint const dim() const;
+  dolfin::uint const dim() const;
 
   /// UFL:
-  uint const num_facets() const;
+  dolfin::uint const num_facets() const;
 
   ///
   Type const type() const;

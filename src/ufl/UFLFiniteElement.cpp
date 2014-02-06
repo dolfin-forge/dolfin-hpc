@@ -1,4 +1,3 @@
-    initeElementBase("FiniteElement", family, cell, degree),
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
@@ -74,7 +73,7 @@ bool const FiniteElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const FiniteElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const FiniteElement::symmetry() const
 {
   return symmetry_;
 }
@@ -83,19 +82,19 @@ std::map<uint, uint> const FiniteElement::symmetry() const
 std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<uint, uint>();
+  return std::pair<dolfin::uint, dolfin::uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const > const FiniteElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const * const> const FiniteElement::extract_component(
     ValueArray const& i) const
 {
   check_component(i);
-  return std::pair<uint, FiniteElementBase const * const >(i[0], this);
+  return std::pair<dolfin::uint, FiniteElementBase const * const>(i[0], this);
 }
 
 //-----------------------------------------------------------------------------
-uint const FiniteElement::num_sub_elements() const
+dolfin::uint const FiniteElement::num_sub_elements() const
 {
   return 0;
 }

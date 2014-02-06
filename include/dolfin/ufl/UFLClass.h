@@ -12,6 +12,8 @@
 
 #include <dolfin/ufl/UFLObject.h>
 
+#include <dolfin/common/types.h>
+
 namespace ufl
 {
 
@@ -95,7 +97,7 @@ inline bool Class::operator ==(Class const& other) const
 }
 
 //-----------------------------------------------------------------------------
-class ValueArray : public std::vector<uint>
+class ValueArray : public std::vector<dolfin::uint>
 {
 
 public:
@@ -104,10 +106,10 @@ public:
   ValueArray();
 
   ///
-  ValueArray(uint const i);
+  ValueArray(dolfin::uint const i);
 
   ///
-  ValueArray(uint const k, uint const i);
+  ValueArray(dolfin::uint const k, dolfin::uint const i);
 
   ///
   ~ValueArray();

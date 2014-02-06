@@ -55,7 +55,7 @@ Cell const FiniteElementBase::cell() const
 }
 
 //-----------------------------------------------------------------------------
-uint const FiniteElementBase::degree() const
+dolfin::uint const FiniteElementBase::degree() const
 {
   return degree_;
 }
@@ -75,7 +75,7 @@ ValueArray const FiniteElementBase::value_shape() const
 //-----------------------------------------------------------------------------
 bool FiniteElementBase::component_is_valid(ValueArray const& i) const
 {
-  uint r = value_shape_.size();
+  dolfin::uint r = value_shape_.size();
   bool range_ok = true;
   for (size_t idx = 0; idx < value_shape_.size(); ++idx)
   {
@@ -109,10 +109,10 @@ Cell const FiniteElementBase::get_cell(FiniteElementBaseList const& elements)
 }
 
 //-----------------------------------------------------------------------------
-uint const FiniteElementBase::get_degree_max(
+dolfin::uint const FiniteElementBase::get_degree_max(
     FiniteElementBaseList const& elements)
 {
-  uint ret = 0;
+  dolfin::uint ret = 0;
   for (FiniteElementBaseList::const_iterator it = elements.begin();
       it != elements.end(); ++it)
   {

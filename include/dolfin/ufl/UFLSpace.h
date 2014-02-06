@@ -29,7 +29,7 @@ class Space : public Class
 public:
 
   ///
-  Space(uint const& dim);
+  Space(dolfin::uint const& dim);
 
   ///
   Space(repr_t const& repr);
@@ -38,7 +38,7 @@ public:
   ~Space();
 
   /// UFL: Return number of space dimensions
-  uint dimension() const;
+  dolfin::uint dimension() const;
 
   /// __repr__
   repr_t const repr() const;

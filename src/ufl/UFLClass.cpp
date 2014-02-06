@@ -152,19 +152,19 @@ void Class::display() const
 
 //-----------------------------------------------------------------------------
 ValueArray::ValueArray() :
-    std::vector<uint>()
+    std::vector<dolfin::uint>()
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray::ValueArray(uint const i) :
-    std::vector<uint>(1, i)
+ValueArray::ValueArray(dolfin::uint const i) :
+    std::vector<dolfin::uint>(1, i)
 {
 }
 
 //-----------------------------------------------------------------------------
-ValueArray::ValueArray(uint const k, uint const i) :
-    std::vector<uint>(k, i)
+ValueArray::ValueArray(dolfin::uint const k, dolfin::uint const i) :
+    std::vector<dolfin::uint>(k, i)
 {
 }
 
@@ -178,7 +178,7 @@ std::string const ValueArray::str() const
 {
   std::stringstream ss;
   ss << "(";
-  for (ValueArray::const_iterator it = this->begin(); it != this->end(); ++it)
+  for(ValueArray::const_iterator it = this->begin(); it != this->end(); ++it)
   {
     ss << *it << ",";
   }

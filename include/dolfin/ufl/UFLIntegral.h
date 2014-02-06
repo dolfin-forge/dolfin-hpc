@@ -7,6 +7,8 @@
 #ifndef __UFL_INTEGRAL_H_
 #define __UFL_INTEGRAL_H_
 
+#include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLExpression.h>
 
 namespace ufl
 {
@@ -19,40 +21,9 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL Integral.
  */
 
-  class Integral : public Expression
-  {
-    public:
+  class Expression;
 
-      ///
-      Integral(const Expression& integrand, const Measure& measure);
-
-      ///
-      ~Integral();
-
-      //--- INTERFACE -------------------------------------------------------------
-
-      const Expression& integrand();
-
-      const Measure& measure();
-
-      const Expression& reconstruct(const Expression& integral)
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-
-      /// __repr__
-      std::string const repr() const;
-
-      /// __str__
-      std::string const str() const;
-
-    private:
-      const Expression integrand;
-      const Measure measure;
-
-      std::string const repr_;
-      std::string const str_;
-  };
-
-  class Measure : public Expression
+  class Measure : public Class
   {
     public:
 
@@ -67,41 +38,90 @@ namespace ufl
       };
 
       ///
-      Measure(const Type& measure_type, 
-          const MeasureData& measure_data, 
-          unsigned int measure_id);
+      Measure(Type const& measure_type, 
+//          MeasureData const& measure_data, 
+          dolfin::uint measure_id);
                                                                                                     
-      Measure(const Type& measure_type, 
-          const MeasureData& meta_data, 
-          const MeasureData& measure_data, 
-          unsigned int measure_id);
+//      Measure(Type const& measure_type, 
+//          MeasureData const& meta_data, 
+//          MeasureData const& measure_data, 
+//          dolfin::uint measure_id);
 
       ///
       ~Measure();
 
       //--- INTERFACE -------------------------------------------------------------
 
-      const Expression& reconstruct(const Expression& measure)
+//      Class const& reconstruct(const Class& measure);
 
-      const Type& measure_type();
+      Type const& measure_type() const;
 
-      const MeasureData& measure_data();
+//      MeasureData const& measure_data() const;
 
-      const MeasureData& meta_data();
+//      MeasureData const& meta_data() const;
 
-      const unsigned int& measure_id();
+      dolfin::uint const& measure_id() const;
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
       /// __repr__
-      std::string const repr() const;
+      repr_t const repr() const;
 
       /// __str__
       std::string const str() const;
 
+      ///
+      void display() const;
+
+      ///
+      Measure const* create(repr_t const & repr) const;
+
     private:
-      std::string const repr_;
-      std::string const str_;
+      Measure::Type const measure_;
+      dolfin::uint const measure_id_;
+      mutable repr_t repr_;
+      mutable std::string str_;
+  };
+
+  class Integral : public Class
+  {
+    public:
+
+      ///
+      Integral(Expression const& integrand, const Measure& measure);
+
+      ///
+      ~Integral();
+
+      //--- INTERFACE -------------------------------------------------------------
+
+      Expression const& integrand() const;
+
+      Measure const& measure() const;
+
+//      Class const& reconstruct(const Class& integral);
+
+      //--- INTERFACE inherited from UFLClass -------------------------------------
+
+      /// __repr__
+      repr_t const repr() const;
+
+      /// __str__
+      std::string const str() const;
+
+      ///
+      void display() const;
+
+      ///
+      Integral const* create(repr_t const & repr) const;
+
+    private:
+
+      Expression const& integrand_;
+      Measure const measure_;
+
+      mutable repr_t repr_;
+      mutable std::string str_;
   };
 } /* namespace ufl */
 #endif /* __UFL_INTEGRAL_H_ */

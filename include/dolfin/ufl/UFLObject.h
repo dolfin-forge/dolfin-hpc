@@ -45,6 +45,9 @@ public:
   /// __eq__
   virtual bool operator ==(Object const& other) const;
 
+  ///
+  Object const* create(repr_t const & repr) const;
+
 protected:
 
   ///
@@ -151,7 +154,11 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     }
   }
   return args;
-}
+
+  inline Object const* Object::create(repr_t const & repr) const
+  {
+    return 0;
+  }
 
 } /* namespace ufl */
 #endif /* __UFL_OBJECT_H_ */

@@ -87,6 +87,9 @@ void ExpressionFunction::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void ExpressionFunction::eval(real* values, const real* x) const
 {
+  dolfin_assert(values);
+  dolfin_assert(x);
+
   e.eval(values, x);
 }
 
@@ -94,17 +97,10 @@ void ExpressionFunction::eval(real* values, const real* x) const
 void ExpressionFunction::evaluate(real* values, const real* coordinates,
                                   const ufc::cell& cell) const
 {
-  dolfin_assert(values); dolfin_assert(coordinates);
-
-  // Compute size of value (number of entries in tensor value)
-  uint size = 1;
-  for (uint i = 0; i < e.rank(); i++)
-  {
-    size *= e.dim(i);
-  }
+  dolfin_assert(values);
+  dolfin_assert(coordinates);
 
   e.eval(values, coordinates);
-
 }
 
 //-----------------------------------------------------------------------------

@@ -6,6 +6,8 @@
 
 #include <dolfin/fem/FiniteElement.h>
 
+#include <dolfin/ufl/UFLFiniteElement.h>
+
 #include <algorithm>
 #include <iomanip>
 
@@ -58,6 +60,20 @@ FiniteElement::FiniteElement(ufc::finite_element& finite_element,
 {
   Initialize();
 }
+
+#if ENABLE_UFL
+//-----------------------------------------------------------------------------
+FiniteElement::FiniteElement(ufl::FiniteElementBase const& finite_element) :
+    ufc_finite_element_(ElementLibrary::create_finite_element(finite_element.repr())),
+    finite_element_local_(true),
+    sub_value_dims_(NULL),
+    topo_dim_(0),
+    geom_dim_(0)
+
+{
+  Initialize();
+}
+#endif
 
 //-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()

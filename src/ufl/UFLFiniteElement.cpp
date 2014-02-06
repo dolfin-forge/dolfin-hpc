@@ -56,8 +56,8 @@ FiniteElement::FiniteElement(repr_t const& repr) :
   repr_ = repr;
 
   std::stringstream ssstr;
-  ssstr << "<" << this->family().short_name() << degree() << qs.str() << " on a "
-      << cell().str() << ">";
+  ssstr << "<" << this->family().short_name() << degree() << qs.str()
+      << " on a " << cell().str() << ">";
   str_ = ssstr.str();
 }
 

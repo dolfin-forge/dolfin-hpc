@@ -14,6 +14,13 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 
+namespace ufl
+{
+
+class FiniteElementBase;
+
+}
+
 namespace dolfin
 {
 
@@ -58,6 +65,11 @@ public:
 
   /// Create discrete function from given signatures which owns the vector
   DiscreteFunction(Mesh& mesh, std::string const& finite_element_signature);
+
+#if ENABLE_UFL
+  /// Create discrete function from given UFL Finite Element
+    DiscreteFunction(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
+#endif
 
   /// Create discrete function from sub function
   DiscreteFunction(SubFunction& sub_function);

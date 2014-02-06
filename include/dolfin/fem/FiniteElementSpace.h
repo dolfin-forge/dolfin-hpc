@@ -9,7 +9,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/FiniteElement.h>
-#include <dolfin/ufl/UFLFiniteElement.h>
+#include <dolfin/ufl/UFLFiniteElementBase.h>
 
 #include <ufc.h>
 
@@ -44,6 +44,12 @@ public:
   FiniteElementSpace(Mesh& mesh, ufc::finite_element& finite_element,
                      bool const finite_element_local);
 
+#if ENABLE_UFL
+  ///
+  explicit FiniteElementSpace(Mesh& mesh,
+                              ufl::FiniteElementBase const& finite_element);
+#endif
+
   ///
   FiniteElementSpace(FiniteElementSpace const& space, uint const& i);
 
@@ -72,9 +78,9 @@ public:
   uint const degree() const;
 
   ///
-  operator ufl::FiniteElement const&() const
+  operator ufl::FiniteElementBase const&() const
   {
-    return ufl_;
+    return *ufl_;
   }
 
 #endif
@@ -124,7 +130,7 @@ private:
   Scratch scratch;
 
 #if ENABLE_UFL
-  ufl::FiniteElement const ufl_;
+  ufl::FiniteElementBase const * const ufl_;
 #endif
 
 };
@@ -140,13 +146,13 @@ inline Mesh& FiniteElementSpace::mesh() const
 //-----------------------------------------------------------------------------
 inline ufl::Family::Type const FiniteElementSpace::family() const
 {
-  return ufl_.family().type();
+  return ufl_->family().type();
 }
 
 //-----------------------------------------------------------------------------
 inline uint const FiniteElementSpace::degree() const
 {
-  return ufl_.degree();
+  return ufl_->degree();
 }
 
 #endif

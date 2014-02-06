@@ -15,6 +15,13 @@
 
 #include <cstring>
 
+namespace ufl
+{
+
+class FiniteElement;
+
+}
+
 namespace dolfin
 {
 
@@ -43,6 +50,11 @@ public:
   ///
   FiniteElement(ufc::finite_element& finite_element,
                 bool const finite_element_local);
+
+#if ENABLE_UFL
+  ///
+  FiniteElement(ufl::FiniteElementBase const& finite_element);
+#endif
 
   ///
   ~FiniteElement();

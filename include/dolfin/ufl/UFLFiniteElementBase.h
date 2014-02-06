@@ -38,6 +38,9 @@ public:
   //
   typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
 
+  /// Stupid factory function
+  static FiniteElementBase * create(Object::repr_t const repr);
+
   /// Return finite element family type
   Family const family() const;
 

@@ -118,6 +118,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
   // Initialise function
   InitializeVector();
 }
+
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
                                    std::string const& finite_element_signature) :
@@ -159,6 +160,30 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
   // Initialise function
   InitializeVector();
 }
+
+#if ENABLE_UFL
+//-----------------------------------------------------------------------------
+DiscreteFunction::DiscreteFunction(Mesh& mesh,
+                                   ufl::FiniteElementBase const& finite_element) :
+    GenericFunction(mesh),
+    discrete_space_(mesh, finite_element),
+    finite_element_(discrete_space_.element()),
+    dof_map_(discrete_space_.dofmap()),
+    scratch(discrete_space_.scratch),
+    local_dimension_(0),
+    local_vector_(true),
+    X_(new Vector()),
+    intersection_detector_(NULL),
+    renumbered(false),
+    _cache_size(0),
+    _indices(NULL),
+    _data_cache(NULL)
+{
+  // Initialise function
+  InitializeVector();
+}
+#endif
+
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     GenericFunction(sub_function.function().mesh),
@@ -510,7 +535,6 @@ void DiscreteFunction::set(real *& values)
 //-----------------------------------------------------------------------------
 void DiscreteFunction::InitializeVector()
 {
-  message("Initialize");
   if (X_->size() != dof_map_.global_dimension())
   {
     if (MPI::numProcesses() > 1)

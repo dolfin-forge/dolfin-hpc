@@ -63,6 +63,9 @@ protected:
   virtual void display() const;
 
   ///
+  static std::string const make_name(repr_t repr);
+
+  ///
   repr_t const make_repr(Object const *& arg1) const;
 
   ///

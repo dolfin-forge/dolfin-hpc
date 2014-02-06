@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Garth N. Wells, 2007.
+// Modified by Aurélien Larcher 2013-2014.
 //
 // First added:  2007-04-02
-// Last changed: 2008-03-17
+// Last changed: 2014-02-06
 
 #ifndef __DISCRETE_FUNCTION_H
 #define __DISCRETE_FUNCTION_H
@@ -32,13 +33,17 @@ class FiniteElement;
 class SubFunction;
 class IntersectionDetector;
 
-/// This class implements the functionality for discrete functions.
-/// A discrete function is defined in terms of a mesh, a vector of
-/// degrees of freedom, a finite element and a dof map. The finite
-/// element determines how the function is defined locally on each
-/// cell of the mesh in terms of the local degrees of freedom, and
-/// the dof map determines how the degrees of freedom are
-/// distributed on the mesh.
+/**
+ *  @class  DiscreteFunction
+ *
+ *  @brief  This class implements the functionality for discrete functions.
+ *          A discrete function is defined in terms of a mesh, a vector of
+ *          degrees of freedom, a finite element and a dof map. The finite
+ *          element determines how the function is defined locally on each
+ *          cell of the mesh in terms of the local degrees of freedom, and
+ *          the dof map determines how the degrees of freedom are
+ *          distributed on the mesh.
+ */
 
 class DiscreteFunction : public GenericFunction
 {
@@ -114,15 +119,6 @@ public:
 
   //---------------------------------------------------------------------------
 
-  /// Interpolate values from the given Function
-  void interpolate(Function const& other_func);
-
-  /// Return the number of sub functions
-  uint numSubFunctions() const;
-
-  /// Return signature
-  std::string const signature() const;
-
   /// Return vector
   GenericVector& vector() const;
 
@@ -135,10 +131,19 @@ public:
   /// Return dof map
   DofMap const& dofmap() const;
 
-  /// Get values to array
+  /// Return signature
+  std::string const signature() const;
+
+  /// Return the number of sub functions
+  uint const num_sub_functions() const;
+
+  /// Interpolate values from the given Function
+  void interpolate(Function const& other_func);
+
+  /// Get values to cell tabulated block array
   void get(real *& values);
 
-  /// Set values from array
+  /// Set values from cell tabulated block array
   void set(real *& values);
 
 private:

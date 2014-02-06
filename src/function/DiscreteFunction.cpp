@@ -5,10 +5,10 @@
 // Modified by Dag Lindbo, 2008.
 // Modified by Kristen Kaasbjerg, 2008.
 // Modified by Niclas Jansson, 2008-2010.
-// Modified by Aurélien Larcher 2013.
+// Modified by Aurélien Larcher 2013-2014.
 //
 // First added:  2007-04-02
-// Last changed: 2013-09-13
+// Last changed: 2014-02-06
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
@@ -42,7 +42,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
     intersection_detector_(NULL),
@@ -62,7 +62,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -84,7 +84,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
     intersection_detector_(NULL),
@@ -106,7 +106,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -127,7 +127,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
     intersection_detector_(NULL),
@@ -148,7 +148,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -170,7 +170,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -191,7 +191,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -243,7 +243,7 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
-    local_dimension_(0),
+    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
     intersection_detector_(NULL),
@@ -261,7 +261,10 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::~DiscreteFunction()
 {
-  delete X_;
+  if (local_vector_)
+  {
+    delete X_;
+  }
   delete intersection_detector_;
   delete[] _indices;
   delete[] _data_cache;
@@ -285,28 +288,25 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
   return *this;
 }
 
+//--- UFC INTERFACE -----------------------------------------------------------
 //-----------------------------------------------------------------------------
-dolfin::uint DiscreteFunction::rank() const
+void DiscreteFunction::evaluate(real* values, const real* coordinates,
+                                const ufc::cell& cell) const
+{
+  this->eval(values, coordinates);
+}
+
+//--- GenericFunction ---------------------------------------------------------
+//-----------------------------------------------------------------------------
+uint DiscreteFunction::rank() const
 {
   return finite_element_.value_rank();
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint DiscreteFunction::dim(uint i) const
+uint DiscreteFunction::dim(uint i) const
 {
   return finite_element_.value_dimension(i);
-}
-
-//-----------------------------------------------------------------------------
-FiniteElementSpace const& DiscreteFunction::space() const
-{
-  return discrete_space_;
-}
-
-//-----------------------------------------------------------------------------
-dolfin::uint DiscreteFunction::numSubFunctions() const
-{
-  return finite_element_.num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
@@ -381,54 +381,6 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::interpolate(Function const& other_func)
-{
-  Array<uint> const& value_dims = finite_element_.sub_value_dimensions(0);
-  Array<uint> const& value_offs = finite_element_.sub_value_offsets(0);
-  Array<uint> const& dm_dims = dof_map_.sub_dof_maps_dimensions();
-  Array<uint> const& dm_offs = dof_map_.sub_dof_maps_offsets();
-  uint const nb_subspaces = dm_dims.size();
-
-  // Make sure vectors ghost values are updated)
-  X_->apply();
-
-  // Cell tabulated version
-  CellIterator cell(mesh);
-  UFCCell ufccell(*cell);
-  real * values = new real[finite_element_.value_dimension(0)];
-  real * block = new real[dof_map_.dofsmapping_size()];
-  uint cell_offset = 0;
-  uint const local_dim = dof_map_.local_dimension();
-  for (; !cell.end(); ++cell, cell_offset += local_dim)
-  {
-    ufccell.update(*cell, mesh.distdata());
-    dof_map_.tabulate_coordinates(scratch.coordinates, ufccell);
-
-    uint dof_id = 0;
-    for (uint sub = 0; sub < nb_subspaces; ++sub)
-    {
-      uint sub_val_dim = value_dims[sub];
-      uint nb_nodes = dm_dims[sub] / sub_val_dim;
-      uint off = dm_offs[sub];
-      for (uint sub_id = 0; sub_id < nb_nodes; ++sub_id)
-      {
-        other_func.eval(values, scratch.coordinates[sub_id]);
-        for (uint v = 0; v < sub_val_dim; ++v)
-        {
-          block[cell_offset + off + v * nb_nodes + sub_id] =
-              values[value_offs[sub] + v];
-        }
-        ++dof_id;
-      }
-    }
-  }
-  this->set(block);
-
-  delete[] block;
-  delete[] values;
-}
-
-//-----------------------------------------------------------------------------
 void DiscreteFunction::eval(real* values, const real* x) const
 {
   // Initialize intersection detector if not done before
@@ -491,23 +443,22 @@ void DiscreteFunction::eval(real* values, const real* x) const
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::evaluate(real* values, const real* coordinates,
-                                const ufc::cell& cell) const
-{
-  this->eval(values, coordinates);
-}
-
-//-----------------------------------------------------------------------------
-std::string const DiscreteFunction::signature() const
-{
-  return finite_element_.signature();
-}
-
-//-----------------------------------------------------------------------------
 GenericVector& DiscreteFunction::vector() const
 {
   dolfin_assert(X_);
   return *X_;
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace const& DiscreteFunction::space() const
+{
+  return discrete_space_;
+}
+
+//-----------------------------------------------------------------------------
+FiniteElement const& DiscreteFunction::finite_element() const
+{
+  return finite_element_;
 }
 
 //-----------------------------------------------------------------------------
@@ -517,9 +468,63 @@ DofMap const& DiscreteFunction::dofmap() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement const& DiscreteFunction::finite_element() const
+std::string const DiscreteFunction::signature() const
 {
-  return finite_element_;
+  return finite_element_.signature();
+}
+
+//-----------------------------------------------------------------------------
+uint const DiscreteFunction::num_sub_functions() const
+{
+  return finite_element_.num_sub_elements();
+}
+
+//-----------------------------------------------------------------------------
+void DiscreteFunction::interpolate(Function const& other_func)
+{
+  Array<uint> const& value_dims = finite_element_.sub_value_dimensions(0);
+  Array<uint> const& value_offs = finite_element_.sub_value_offsets(0);
+  Array<uint> const& dm_dims = dof_map_.sub_dof_maps_dimensions();
+  Array<uint> const& dm_offs = dof_map_.sub_dof_maps_offsets();
+  uint const nb_subspaces = dm_dims.size();
+
+  // Make sure vectors ghost values are updated)
+  X_->apply();
+
+  // Cell tabulated version
+  CellIterator cell(mesh);
+  UFCCell ufccell(*cell);
+  real * values = new real[finite_element_.value_dimension(0)];
+  real * block = new real[dof_map_.dofsmapping_size()];
+  uint cell_offset = 0;
+  uint const local_dim = dof_map_.local_dimension();
+  for (; !cell.end(); ++cell, cell_offset += local_dim)
+  {
+    ufccell.update(*cell, mesh.distdata());
+    dof_map_.tabulate_coordinates(scratch.coordinates, ufccell);
+
+    uint dof_id = 0;
+    for (uint sub = 0; sub < nb_subspaces; ++sub)
+    {
+      uint sub_val_dim = value_dims[sub];
+      uint nb_nodes = dm_dims[sub] / sub_val_dim;
+      uint off = dm_offs[sub];
+      for (uint sub_id = 0; sub_id < nb_nodes; ++sub_id)
+      {
+        other_func.eval(values, scratch.coordinates[sub_id]);
+        for (uint v = 0; v < sub_val_dim; ++v)
+        {
+          block[cell_offset + off + v * nb_nodes + sub_id] =
+              values[value_offs[sub] + v];
+        }
+        ++dof_id;
+      }
+    }
+  }
+  this->set(block);
+
+  delete[] block;
+  delete[] values;
 }
 
 //-----------------------------------------------------------------------------

@@ -206,34 +206,32 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   // Copy subvector, naive implementation
   DiscreteFunction& global_func = sub_function.function();
   DofMap const& global_dm = global_func.dofmap();
-  FiniteElement const& global_fe = global_func.finite_element();
+  uint const global_local_dim = global_func.dofmap().local_dimension();
+  uint const global_block_size = global_dm.dofsmapping_size();
   uint const global_dm_offset =
       global_dm.sub_dof_maps_offsets()[sub_function.index()];
-
-  uint * global_dofs = new uint[global_dm.local_dimension()];
-  uint global_block_size = global_func.finite_element().space_dimension();
   real * global_block = new real[global_block_size];
 
+  // Loop baby, loop...
   CellIterator cell(mesh);
-  UFCCell ufccell(*cell);
-  for (; !cell.end(); ++cell)
+  uint cell_offset = 0;
+  uint glob_func_cell_offset = 0;
+  real * this_block = new real[dof_map_.dofsmapping_size()];
+  for (; !cell.end();
+      ++cell, cell_offset += local_dimension_, glob_func_cell_offset +=
+          global_local_dim)
   {
-    ufccell.update(*cell, mesh.distdata());
-    global_dm.tabulate_dofs(global_dofs, ufccell, cell->index());
-    dof_map_.tabulate_dofs(scratch.dofs, ufccell, cell->index());
-
-    global_func.vector().get(global_block, global_block_size, global_dofs);
     for (uint dof_id = 0; dof_id < local_dimension_; ++dof_id)
     {
-      scratch.coefficients[dof_id] = global_block[global_dm_offset + dof_id];
+      this_block[cell_offset + dof_id] = global_block[glob_func_cell_offset
+          + global_dm_offset + dof_id];
     }
-    this->vector().set(scratch.coefficients, local_dimension_, scratch.dofs);
-    this->vector().apply();
   }
+  X_->set(this_block, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
   sync_ghosts();
 
+  delete[] this_block;
   delete[] global_block;
-  delete[] global_dofs;
 }
 
 //-----------------------------------------------------------------------------
@@ -393,10 +391,9 @@ void DiscreteFunction::eval(real* values, const real* x) const
   uint const gdim = mesh.geometry().dim();
   if (gdim > 3)
   {
-    error(
-        "Sorry,"
-        "point evaluation of functions not implemented for meshes of dimension %d.",
-        gdim);
+    error("Sorry, point evaluation of functions not implemented for meshes of "
+          "dimension %d.",
+          gdim);
   }
   Point p;
   for (uint i = 0; i < gdim; i++)
@@ -408,8 +405,9 @@ void DiscreteFunction::eval(real* values, const real* x) const
   if (cells.size() < 1)
   {
     if (MPI::numProcesses() == 1)
-      warning(
-          "Unable to evaluate function at given point (not inside domain).");
+    {
+      error("Unable to evaluate function at given point (not inside domain).");
+    }
 
     values[0] = 1e50;
     values[1] = 1e50;

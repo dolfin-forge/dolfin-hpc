@@ -25,7 +25,6 @@ DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
     cache_(DofMapCache::instance()),
     mesh_(mesh)
 {
-  update(form, mesh);
 }
 
 //-----------------------------------------------------------------------------

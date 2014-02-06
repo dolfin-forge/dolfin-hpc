@@ -11,7 +11,8 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 
-namespace dolfin {
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 ExpressionFunction::ExpressionFunction(Mesh& mesh, Expression const& expr) :
@@ -21,21 +22,25 @@ ExpressionFunction::ExpressionFunction(Mesh& mesh, Expression const& expr) :
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 ExpressionFunction::~ExpressionFunction()
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint ExpressionFunction::rank() const
 {
   return e.rank();
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint ExpressionFunction::dim(uint i) const
 {
   return e.dim(i);
 }
+
 //-----------------------------------------------------------------------------
 void ExpressionFunction::interpolate_vertex_values(real* values) const
 {
@@ -64,10 +69,11 @@ void ExpressionFunction::interpolate_vertex_values(real* values) const
   }
   delete[] local_values;
 }
+
 //-----------------------------------------------------------------------------
 void ExpressionFunction::interpolate(real* coefficients, const ufc::cell& cell,
-                const ufc::finite_element& finite_element,
-                const Cell& dolfin_cell) const
+                                     const ufc::finite_element& finite_element,
+                                     const Cell& dolfin_cell) const
 {
   dolfin_assert(coefficients);
 
@@ -77,17 +83,18 @@ void ExpressionFunction::interpolate(real* coefficients, const ufc::cell& cell,
     coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
   }
 }
+
 //-----------------------------------------------------------------------------
 void ExpressionFunction::eval(real* values, const real* x) const
 {
   e.eval(values, x);
 }
+
 //-----------------------------------------------------------------------------
 void ExpressionFunction::evaluate(real* values, const real* coordinates,
-              const ufc::cell& cell) const
+                                  const ufc::cell& cell) const
 {
-  dolfin_assert(values);
-  dolfin_assert(coordinates);
+  dolfin_assert(values); dolfin_assert(coordinates);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
@@ -98,6 +105,20 @@ void ExpressionFunction::evaluate(real* values, const real* coordinates,
 
   e.eval(values, coordinates);
 
+}
+
+//-----------------------------------------------------------------------------
+void ExpressionFunction::disp() const
+{
+  cout << "ExpressionFunction" << endl;
+  cout << "------------------" << endl;
+
+  // Begin indentation
+  begin("");
+  GenericFunction::disp();
+  // End indentation
+  end();
+  skip();
 }
 //-----------------------------------------------------------------------------
 

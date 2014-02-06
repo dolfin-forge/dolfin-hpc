@@ -598,6 +598,21 @@ void DiscreteFunction::InitializeGhosts()
 }
 
 //-----------------------------------------------------------------------------
+void DiscreteFunction::disp() const
+{
+  cout << "DiscreteFunction" << endl;
+  cout << "----------------" << endl;
+
+  // Begin indentation
+  begin("");
+  GenericFunction::disp();
+  this->space().disp();
+  // End indentation
+  end();
+  skip();
+}
+
+//-----------------------------------------------------------------------------
 void DiscreteFunction::sync_ghosts()
 {
 

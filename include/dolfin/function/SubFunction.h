@@ -48,11 +48,14 @@ public:
   {
   }
 
-  ///
+  /// Return global function
   DiscreteFunction& function() const;
 
-  ///
+  /// Return index of the sub function
   uint const index() const;
+
+  /// Display basic information
+  void disp() const;
 
 private:
 

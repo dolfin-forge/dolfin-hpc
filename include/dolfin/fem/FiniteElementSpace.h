@@ -65,6 +65,9 @@ public:
   ///
   DofMap const& dofmap() const;
 
+  /// Display basic information
+  void disp() const;
+
   //--- UFL INTERFACE ---------------------------------------------------------
 
 #if ENABLE_UFL

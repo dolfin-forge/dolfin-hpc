@@ -20,23 +20,27 @@ UFCFunction::UFCFunction(Mesh& mesh, const ufc::function& function, uint size)
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 UFCFunction::~UFCFunction()
 {
   // Do nothing
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint UFCFunction::rank() const
 {
   // TODO: Take rank and shape instead of size in constructor. Or better: add rank() and dim(i) to ufc::function in next version.
   return size > 1 ? 1: 0;
 }
+
 //-----------------------------------------------------------------------------
 dolfin::uint UFCFunction::dim(uint i) const
 {
   // TODO: Take rank and shape instead of size in constructor. Or better: add rank() and dim(i) to ufc::function in next version.
   return size;
 }
+
 //-----------------------------------------------------------------------------
 void UFCFunction::interpolate_vertex_values(real* values) const
 {
@@ -73,6 +77,7 @@ void UFCFunction::interpolate_vertex_values(real* values) const
   delete [] local_values;
   delete [] visited_vertex;
 }
+
 //-----------------------------------------------------------------------------
 void UFCFunction::interpolate(real* coefficients,
                               const ufc::cell& cell,
@@ -91,6 +96,7 @@ void UFCFunction::interpolate(real* coefficients,
   for (uint i = 0; i < finite_element.space_dimension(); i++)
     coefficients[i] = finite_element.evaluate_dof(i, function, cell);
 }
+
 //-----------------------------------------------------------------------------
 void UFCFunction::eval(real* values, const real* x) const
 {
@@ -100,6 +106,7 @@ void UFCFunction::eval(real* values, const real* x) const
   // TODO: Need to find cell, then call evaluate.
   error("Not implemented.");
 }
+
 //-----------------------------------------------------------------------------
 void UFCFunction::evaluate(real* values,
                            const real* coordinates,
@@ -107,4 +114,19 @@ void UFCFunction::evaluate(real* values,
 {
   function.evaluate(values, coordinates, cell);
 }
+
+//-----------------------------------------------------------------------------
+void UFCFunction::disp() const
+{
+  cout << "UFCFunction" << endl;
+  cout << "-----------" << endl;
+
+  // Begin indentation
+  begin("");
+  GenericFunction::disp();
+  // End indentation
+  end();
+  skip();
+}
+
 //-----------------------------------------------------------------------------

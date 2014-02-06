@@ -53,24 +53,18 @@ class Mesh;
 /// overloading the eval function of this class or by giving a
 /// function (pointer) that returns the value of the function.
 
-class Function : public Variable
+class Function : public Variable, public ufc::function
 {
 public:
 
   /// Function types
   enum Type
   {
-    constant, discrete, empty, expression, ufc, user
+    empty = 0, constant, discrete, expression, user
   };
 
   /// Create empty function
   Function();
-
-  /// Create user-defined function (evaluation operator must be overloaded)
-  explicit Function(Mesh& mesh);
-
-  /// Create user-defined function from expression
-  explicit Function(Mesh& mesh, Expression const& expr);
 
   /// Create constant scalar function from given value
   Function(Mesh& mesh, real value);
@@ -83,9 +77,6 @@ public:
 
   /// Create constant tensor function from given shape and values
   Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
-
-  /// Create function from given ufc::function
-  Function(Mesh& mesh, const ufc::function& function, uint size);
 
   /// Create discrete function for argument function i of form
   Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
@@ -117,6 +108,18 @@ public:
   /// Create discrete function from sub function
   explicit Function(SubFunction sub_function);
 
+  /// Assign sub function/slice to discrete function
+  Function const& operator=(SubFunction sub_function);
+
+  /// Create expression function
+  explicit Function(Mesh& mesh, Expression const& expr);
+
+  /// Create user-defined function (evaluation operator must be overloaded)
+  explicit Function(Mesh& mesh);
+
+  /// Assign function
+  Function const& operator=(Function& f);
+
   /// Create function from data file
   explicit Function(const std::string filename);
 
@@ -126,11 +129,10 @@ public:
   /// Destructor
   virtual ~Function();
 
+  //--- DEFERRED INITIALIZATION -----------------------------------------------
+
   /// Create constant function
   void init(Mesh& mesh, real value);
-
-  /// Create expression function
-  void init(Mesh& mesh, Expression const& expr);
 
   /// Create discrete function for argument function i of form
   void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
@@ -159,8 +161,16 @@ public:
   void init(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
 #endif
 
-  /// Return the type of function
-  Type type() const;
+  /// Create expression function
+  void init(Mesh& mesh, Expression const& expr);
+
+  //--- UFC INTERFACE ---------------------------------------------------------
+
+  /// Evaluate function at given point in cell
+  void evaluate(real* values, const real* coordinates,
+                const ufc::cell& cell) const;
+
+  //--- COMPOSITION GenericFunction -------------------------------------------
 
   /// Return the rank of the value space
   virtual uint rank() const;
@@ -168,10 +178,32 @@ public:
   /// Return the dimension of the value space for axis i
   virtual uint dim(uint i) const;
 
+  /// Interpolate function to vertices of mesh
+  void interpolate_vertex_values(real* values);
+
+  /// Interpolate function to finite element space on cell
+  void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+                   const ufc::finite_element& finite_element, Cell& cell,
+                   int facet = -1);
+
+  /// Evaluate function at given point (overload for user-defined function)
+  virtual void eval(real* values, const real* x) const;
+
+  /// Display basic information
+  void disp() const;
+
+  /// Synchronize ghosted entries across processes
+  void sync_ghosts();
+
   /// Return the mesh
   Mesh& mesh() const;
 
-  //--- !!! BEGIN: Only valid for discrete functions --------------------------
+  //---------------------------------------------------------------------------
+
+  /// Return the type of function
+  Type type() const;
+
+  //--- Wrapper Facade for DiscreteFunction -----------------------------------
 
   /// Return the signature of a DiscreteFunction
   std::string signature() const;
@@ -188,48 +220,22 @@ public:
   /// Return the finite element space of a DiscreteFunction
   FiniteElement const& finite_element() const;
 
+  /// Return the number of sub functions of a DiscreteFunction
+  uint num_sub_functions() const;
+
+  /// Interpolate values from the given Function
+  void interpolate(const Function& other_func);
+
   /// Get values of a DiscreteFunction from array
   void get(real *& values);
 
   /// Set values to a DiscreteFunction from array
   void set(real *& values);
 
-  /// Return the number of sub functions of a DiscreteFunction
-  uint num_sub_functions() const;
-
   /// Extract sub function/slice from a DiscreteFunction
   SubFunction operator[](uint i);
 
-  //--- !!! END:  Only valid for discrete functions ---------------------------
-
-  /// Assign function
-  Function const& operator=(Function& f);
-
-  /// Assign sub function/slice
-  Function const& operator=(SubFunction sub_function);
-
-  /// Interpolate function to vertices of mesh
-  void interpolate_vertex_values(real* values);
-
-  /// Interpolate values from the given Function
-  void interpolate(const Function& other_func);
-
-  /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const ufc::cell& ufc_cell,
-                   const ufc::finite_element& finite_element, Cell& cell,
-                   int facet = -1);
-
-  /// Evaluate function at given point (overload for scalar user-defined function)
-  virtual void eval(real* values, const real* x) const;
-
-  /// Evaluate scalar function at given point (overload for scalar user-defined function)
-  virtual real eval(const real* x) const;
-
-  /// Synchronize ghosted entries across processes
-  void sync_ghosts();
-
-  /// Display basic information
-  void disp() const;
+  //---------------------------------------------------------------------------
 
 protected:
 

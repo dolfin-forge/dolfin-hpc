@@ -268,6 +268,24 @@ DiscreteFunction::~DiscreteFunction()
 }
 
 //-----------------------------------------------------------------------------
+const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
+{
+  // Check that data matches
+  if (strcmp(finite_element_.signature(), f.finite_element_.signature()) != 0
+      || strcmp(dof_map_.signature(), f.dof_map_.signature()) != 0
+      || X_->size() != f.X_->size())
+  {
+    error("Assignment of discrete function failed."
+          "Finite element spaces or dimensions don't match.");
+  }
+
+  // Copy vector
+  *X_ = *f.X_;
+
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
 dolfin::uint DiscreteFunction::rank() const
 {
   return finite_element_.value_rank();
@@ -289,24 +307,6 @@ FiniteElementSpace const& DiscreteFunction::space() const
 dolfin::uint DiscreteFunction::numSubFunctions() const
 {
   return finite_element_.num_sub_elements();
-}
-
-//-----------------------------------------------------------------------------
-const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
-{
-  // Check that data matches
-  if (strcmp(finite_element_.signature(), f.finite_element_.signature()) != 0
-      || strcmp(dof_map_.signature(), f.dof_map_.signature()) != 0
-      || X_->size() != f.X_->size())
-  {
-    error("Assignment of discrete function failed."
-          "Finite element spaces or dimensions don't match.");
-  }
-
-  // Copy vector
-  *X_ = *f.X_;
-
-  return *this;
 }
 
 //-----------------------------------------------------------------------------
@@ -488,6 +488,13 @@ void DiscreteFunction::eval(real* values, const real* x) const
       values[j] += scratch.coefficients[i] * scratch.values[j];
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+void DiscreteFunction::evaluate(real* values, const real* coordinates,
+                                const ufc::cell& cell) const
+{
+  this->eval(values, coordinates);
 }
 
 //-----------------------------------------------------------------------------

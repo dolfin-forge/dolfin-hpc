@@ -32,16 +32,14 @@ UserFunction::~UserFunction()
 //-----------------------------------------------------------------------------
 uint UserFunction::rank() const
 {
-  // Just return 0 (if not overloaded by user)
-  //  error("uint UserFunction::rank() const should be overloaded");
+  error("uint UserFunction::rank() const should be overloaded");
   return 0;
 }
 
 //-----------------------------------------------------------------------------
 uint UserFunction::dim(uint i) const
 {
-  // Just return 1 (if not overloaded by user)
-  //  error("uint UserFunction::dim(uint i) const should be overloaded");
+  error("uint UserFunction::dim(uint i) const should be overloaded");
   return 1;
 }
 
@@ -87,7 +85,8 @@ void UserFunction::interpolate(real* coefficients,
 //-----------------------------------------------------------------------------
 void UserFunction::eval(real* values, const real* x) const
 {
-  //  error("eval(real* values, const real* x) const should be overloaded");
+  error("void UserFunction::eval(real* values, const real* x) const should be "
+        "overloaded");
 
   // Call user-overloaded eval function in Function
   f_->eval(values, x);

@@ -68,7 +68,7 @@ public:
 
 #if ENABLE_UFL
   /// Create discrete function from given UFL Finite Element
-    DiscreteFunction(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
+  DiscreteFunction(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
 #endif
 
   /// Create discrete function from sub function
@@ -80,17 +80,20 @@ public:
   /// Destructor
   ~DiscreteFunction();
 
+  /// Assign discrete function
+  DiscreteFunction const& operator=(const DiscreteFunction& f);
+
+  //--- UFC INTERFACE ---------------------------------------------------------
+  /// Evaluate function at given point in cell
+  void evaluate(real* values, const real* coordinates,
+                const ufc::cell& cell) const;
+
+  //--- GenericFunction -------------------------------------------------------
   /// Return the rank of the value space
   uint rank() const;
 
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const;
-
-  /// Return the number of sub functions
-  uint numSubFunctions() const;
-
-  /// Assign discrete function
-  DiscreteFunction const& operator=(const DiscreteFunction& f);
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const;
@@ -100,9 +103,6 @@ public:
                    const ufc::finite_element& finite_element,
                    const Cell& dolfin_cell) const;
 
-  /// Interpolate values from the given Function
-  void interpolate(Function const& other_func);
-
   /// Evaluate function at given point
   void eval(real* values, const real* x) const;
 
@@ -111,6 +111,14 @@ public:
 
   /// Update vector
   void sync_ghosts();
+
+  //---------------------------------------------------------------------------
+
+  /// Interpolate values from the given Function
+  void interpolate(Function const& other_func);
+
+  /// Return the number of sub functions
+  uint numSubFunctions() const;
 
   /// Return signature
   std::string const signature() const;

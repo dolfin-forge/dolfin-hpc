@@ -37,6 +37,14 @@ public:
   {
   }
 
+  //--- UFC INTERFACE ---------------------------------------------------------
+
+  /// Evaluate function at given point in cell
+  virtual void evaluate(real* values, const real* coordinates,
+                const ufc::cell& cell) const = 0;
+
+  //--- INTERFACE -------------------------------------------------------------
+
   /// Return the rank of the value space
   virtual uint rank() const = 0;
 
@@ -76,14 +84,15 @@ inline void GenericFunction::disp() const
   cout << "Value rank            : " << this->rank() << endl;
   cout << "Value dimension       : " << this->dim(0) << endl;
   cout << "Evaluate at origin    : ";
-  real x[3] = { 0., 0., 0.};
+  real x[3] =
+    { 0., 0., 0. };
   real * v = new real[this->dim(0)];
-  this->eval(v,x);
+  this->eval(v, x);
   for (uint d = 0; d < this->dim(0); ++d)
   {
     cout << v[d] << " ";
   }
-  delete [] v;
+  delete[] v;
   cout << endl;
   // End indentation
   end();

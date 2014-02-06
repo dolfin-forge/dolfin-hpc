@@ -22,7 +22,6 @@
 #include <dolfin/function/ConstantFunction.h>
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/function/ExpressionFunction.h>
-#include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/UserFunction.h>
 
 namespace dolfin
@@ -37,26 +36,6 @@ Function::Function() :
     facet_(-1)
 {
   // Do nothing
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh) :
-    Variable("*no name*", "user-defined function"),
-    f_(NULL),
-    type_(user),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new UserFunction(mesh, this);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, Expression const& expr) :
-    Variable("*no name*", "expression function"),
-    f_(NULL),
-    type_(expression),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new ExpressionFunction(mesh, expr);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
@@ -176,6 +155,59 @@ Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
   f_ = new DiscreteFunction(mesh, finite_element);
 }
 #endif
+////-----------------------------------------------------------------------------
+Function::Function(SubFunction sub_function) :
+    Variable("*no name*", "discrete function"),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  this->f_ = new DiscreteFunction(sub_function);
+}
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, Expression const& expr) :
+    Variable("*no name*", "expression function"),
+    f_(NULL),
+    type_(expression),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new ExpressionFunction(mesh, expr);
+}
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh) :
+    Variable("*no name*", "user-defined function"),
+    f_(NULL),
+    type_(user),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new UserFunction(mesh, this);
+}
+//-----------------------------------------------------------------------------
+Function const& Function::operator=(Function& f)
+{
+
+  // FIXME: Handle other assignments
+  if (f.type_ != discrete)
+    error("Can only handle assignment from discrete functions (for now).");
+
+  // Either create or copy discrete function
+  if (type_ == discrete)
+  {
+    *static_cast<DiscreteFunction*>(this->f_) =
+        *static_cast<DiscreteFunction*>(f.f_);
+  }
+  else
+  {
+    delete this->f_;
+    this->f_ = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f_));
+    type_ = discrete;
+    rename(f.name(), "discrete function");
+  }
+  return *this;
+}
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
     Variable("*no name*", "discrete function from data file"),
@@ -186,16 +218,6 @@ Function::Function(const std::string filename) :
 {
   File file(filename);
   file >> *this;
-}
-////-----------------------------------------------------------------------------
-Function::Function(SubFunction sub_function) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  this->f_ = new DiscreteFunction(sub_function);
 }
 //-----------------------------------------------------------------------------
 Function::Function(Function const& f) :
@@ -242,17 +264,6 @@ void Function::init(Mesh& mesh, real value)
 
   f_ = new ConstantFunction(mesh, value);
   type_ = constant;
-}
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, Expression const& expr)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new ExpressionFunction(mesh, expr);
-  type_ = expression;
 }
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
@@ -339,10 +350,28 @@ void Function::init(Mesh& mesh, ufl::FiniteElementBase const& finite_element)
 }
 #endif
 //-----------------------------------------------------------------------------
-Function::Type Function::type() const
+void Function::init(Mesh& mesh, Expression const& expr)
 {
-  return type_;
+  if (f_)
+  {
+    delete f_;
+  }
+
+  f_ = new ExpressionFunction(mesh, expr);
+  type_ = expression;
 }
+//--- UFC INTERFACE -----------------------------------------------------------
+//-----------------------------------------------------------------------------
+void Function::evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const
+{
+  if (!f_)
+  {
+    error("Function contains no data.");
+  }
+  f_->evaluate(values, coordinates, cell);
+}
+//--- COMPOSITION GenericFunction ---------------------------------------------
 //-----------------------------------------------------------------------------
 uint Function::rank() const
 {
@@ -364,6 +393,63 @@ uint Function::dim(unsigned int i) const
   return f_->dim(i);
 }
 //-----------------------------------------------------------------------------
+void Function::interpolate_vertex_values(real* values)
+{
+  if (!f_)
+    error("Function contains no data.");
+
+  f_->interpolate_vertex_values(values);
+}
+//-----------------------------------------------------------------------------
+void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
+                           const ufc::finite_element& finite_element,
+                           Cell& cell, int facet)
+{
+  if (!f_)
+    error("Function contains no data.");
+
+  // Make current cell and facet are available to user-defined function
+  cell_ = &cell;
+  facet_ = facet;
+
+  // Interpolate function
+  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
+
+  // Make cell and facet unavailable
+  cell_ = 0;
+  facet_ = -1;
+}
+//-----------------------------------------------------------------------------
+void Function::eval(real* values, const real* x) const
+{
+  if (!f_)
+    error("Function contains no data.");
+
+  f_->eval(values, x);
+}
+//-----------------------------------------------------------------------------
+void Function::sync_ghosts()
+{
+  if (f_)
+    f_->sync_ghosts();
+}
+//-----------------------------------------------------------------------------
+void Function::disp() const
+{
+  cout << "Function" << endl;
+  cout << "------- " << endl;
+
+  // Begin indentation
+  begin("");
+  cout << "Type: " << this->type() << endl;
+  if (f_ != NULL)
+  {
+    f_->disp();
+  }
+  // End indentation
+  end();
+}
+//-----------------------------------------------------------------------------
 Mesh& Function::mesh() const
 {
   if (!f_)
@@ -373,6 +459,13 @@ Mesh& Function::mesh() const
 
   return f_->mesh;
 }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+Function::Type Function::type() const
+{
+  return type_;
+}
+//--- Wrapper Facade for DiscreteFunction -------------------------------------
 //-----------------------------------------------------------------------------
 std::string Function::signature() const
 {
@@ -442,6 +535,28 @@ FiniteElement const& Function::finite_element() const
   return (static_cast<DiscreteFunction*>(f_))->finite_element();
 }
 //-----------------------------------------------------------------------------
+uint Function::num_sub_functions() const
+{
+  if (type_ != discrete)
+    error("Only discrete functions have sub functions.");
+
+  return static_cast<DiscreteFunction*>(f_)->numSubFunctions();
+}
+//-----------------------------------------------------------------------------
+void Function::interpolate(Function const& other_func)
+{
+  if (f_ && this->type() == Function::discrete)
+  {
+    static_cast<DiscreteFunction *>(f_)->interpolate(other_func);
+  }
+  else
+  {
+    dolfin::error("Function::interpolate(Function const&) can only be called "
+                  "on discrete Function");
+  }
+
+}
+//-----------------------------------------------------------------------------
 void Function::get(real *& values)
 {
   if (!f_)
@@ -468,14 +583,6 @@ void Function::set(real *& values)
   return (static_cast<DiscreteFunction*>(f_))->set(values);
 }
 //-----------------------------------------------------------------------------
-uint Function::num_sub_functions() const
-{
-  if (type_ != discrete)
-    error("Only discrete functions have sub functions.");
-
-  return static_cast<DiscreteFunction*>(f_)->numSubFunctions();
-}
-//-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)
 {
   if (type_ != discrete)
@@ -484,143 +591,9 @@ SubFunction Function::operator[](uint i)
   SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
   return sub_function;
 }
+//--- PROTECTED ---------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Function const& Function::operator=(Function& f)
-{
-
-  // FIXME: Handle other assignments
-  if (f.type_ != discrete)
-    error("Can only handle assignment from discrete functions (for now).");
-
-  // Either create or copy discrete function
-  if (type_ == discrete)
-  {
-    *static_cast<DiscreteFunction*>(this->f_) =
-        *static_cast<DiscreteFunction*>(f.f_);
-  }
-  else
-  {
-    delete this->f_;
-    this->f_ = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f_));
-    type_ = discrete;
-    rename(f.name(), "discrete function");
-  }
-  return *this;
-}
-//-----------------------------------------------------------------------------
-Function const& Function::operator=(SubFunction sub_function)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new DiscreteFunction(sub_function);
-
-  rename("*no name*", "discrete function");
-  type_ = discrete;
-
-  return *this;
-}
-//-----------------------------------------------------------------------------
-void Function::interpolate(Function const& other_func)
-{
-  if (f_ && this->type() == Function::discrete)
-  {
-    static_cast<DiscreteFunction *>(f_)->interpolate(other_func);
-  }
-  else
-  {
-    dolfin::error("Function::interpolate(Function const&) can only be called "
-                  "on discrete Function");
-  }
-
-}
-//-----------------------------------------------------------------------------
-void Function::interpolate_vertex_values(real* values)
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  f_->interpolate_vertex_values(values);
-}
-//-----------------------------------------------------------------------------
-void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
-                           const ufc::finite_element& finite_element,
-                           Cell& cell, int facet)
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  // Make current cell and facet are available to user-defined function
-  cell_ = &cell;
-  facet_ = facet;
-
-  // Interpolate function
-  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
-
-  // Make cell and facet unavailable
-  cell_ = 0;
-  facet_ = -1;
-}
-//-----------------------------------------------------------------------------
-void Function::sync_ghosts()
-{
-  if (f_)
-    f_->sync_ghosts();
-}
-//-----------------------------------------------------------------------------
-void Function::eval(real* values, const real* x) const
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  // Try scalar version for user-defined function if not overloaded.
-  // Otherwise, call eval() function in implementation. Note that we
-  // must check if we have a user-defined function or we will go into
-  // a loop between Function and UserFunction...
-  if (type_ == user)
-    values[0] = eval(x);
-  else
-    f_->eval(values, x);
-}
-//-----------------------------------------------------------------------------
-real Function::eval(const real* x) const
-{
-  // Try vector-version for non-user-defined function if not
-  // overloaded. Otherwise, raise an exception. Note that we must
-  // check that we *don't* have a user-defined function or we will go
-  // into a loop between Function and UserFunction...
-
-  if (type_ != user)
-  {
-    real values[1] =
-      { 0.0 };
-    eval(values, x);
-    return values[0];
-  }
-
-  error("Missing eval() for user-defined function (must be overloaded).");
-  return 0.0;
-}
-//-----------------------------------------------------------------------------
-void Function::disp() const
-{
-  cout << "Function" << endl;
-  cout << "------- " << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Type: " << this->type() << endl;
-  if (f_ != NULL)
-  {
-    f_->disp();
-  }
-  // End indentation
-  end();
-}
-//-----------------------------------------------------------------------------
-const Cell& Function::cell() const
+Cell const& Function::cell() const
 {
   if (!cell_)
     error("Current cell is unknown (only available during assembly).");
@@ -639,4 +612,3 @@ int Function::facet() const
 //-----------------------------------------------------------------------------
 
 }
-

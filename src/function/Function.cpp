@@ -3,10 +3,10 @@
 //
 // Modified by Garth N. Wells 2005-2007.
 // Modified by Martin Sandve Alnes 2008.
-// Modified by Aurélien Larcher 2013. (extension and partial rewrite)
+// Modified by Aurélien Larcher 2013-2014. (extension and partial rewrite)
 //
 // First added:  2003-11-28
-// Last changed: 2013-09-13
+// Last changed: 2014-02-06
 //
 // The class Function serves as the envelope class and holds a pointer
 // to a letter class that is a subclass of GenericFunction. All the
@@ -186,6 +186,21 @@ Function::Function(SubFunction sub_function) :
     facet_(-1)
 {
   this->f_ = new DiscreteFunction(sub_function);
+}
+//-----------------------------------------------------------------------------
+Function const& Function::operator=(SubFunction sub_function)
+{
+  if (f_)
+  {
+    delete f_;
+  }
+
+  f_ = new DiscreteFunction(sub_function);
+
+  rename("*no name*", "discrete function");
+  type_ = discrete;
+
+  return *this;
 }
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
@@ -490,21 +505,6 @@ Function::Type Function::type() const
 }
 //--- Wrapper Facade for DiscreteFunction -------------------------------------
 //-----------------------------------------------------------------------------
-std::string Function::signature() const
-{
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-
-  if (type_ != discrete)
-  {
-    error("A signature can only be returned by discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->signature();
-}
-//-----------------------------------------------------------------------------
 GenericVector& Function::vector() const
 {
   if (!f_)
@@ -531,19 +531,6 @@ FiniteElementSpace const& Function::space() const
   return (static_cast<DiscreteFunction*>(f_))->space();
 }
 //-----------------------------------------------------------------------------
-DofMap const& Function::dofmap() const
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  if (type_ != discrete)
-  {
-    error("The dofmap can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->dofmap();
-}
-//-----------------------------------------------------------------------------
 FiniteElement const& Function::finite_element() const
 {
   if (!f_)
@@ -558,12 +545,40 @@ FiniteElement const& Function::finite_element() const
   return (static_cast<DiscreteFunction*>(f_))->finite_element();
 }
 //-----------------------------------------------------------------------------
-uint Function::num_sub_functions() const
+DofMap const& Function::dofmap() const
+{
+  if (!f_)
+    error("Function contains no data.");
+
+  if (type_ != discrete)
+  {
+    error("The dofmap can only be extracted from discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f_))->dofmap();
+}
+//-----------------------------------------------------------------------------
+std::string const Function::signature() const
+{
+  if (!f_)
+  {
+    error("Function contains no data.");
+  }
+
+  if (type_ != discrete)
+  {
+    error("A signature can only be returned by discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f_))->signature();
+}
+//-----------------------------------------------------------------------------
+uint const Function::num_sub_functions() const
 {
   if (type_ != discrete)
     error("Only discrete functions have sub functions.");
 
-  return static_cast<DiscreteFunction*>(f_)->numSubFunctions();
+  return static_cast<DiscreteFunction*>(f_)->num_sub_functions();
 }
 //-----------------------------------------------------------------------------
 void Function::interpolate(Function const& other_func)

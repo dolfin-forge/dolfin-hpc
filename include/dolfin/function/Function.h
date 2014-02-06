@@ -43,15 +43,18 @@ class GenericFunction;
 class GenericVector;
 class Mesh;
 
-/// This class represents a function that can be evaluated on a
-/// mesh. The actual representation of the function can vary, but
-/// the typical representation is in terms of a mesh, a vector of
-/// degrees of freedom, a finite element and a dof map that
-/// determines the distribution of degrees of freedom on the mesh.
-///
-/// It is also possible to have user-defined functions, either by
-/// overloading the eval function of this class or by giving a
-/// function (pointer) that returns the value of the function.
+/**
+ *  @class  Function
+ *
+ *  @brief  This class represents a function that can be evaluated on a mesh.
+ *          The actual representation of the function can vary, but the typical
+ *          representation is in terms of a mesh, a vector of degrees of
+ *          freedom, a finite element and a dof map that determines the
+ *          distribution of degrees of freedom on the mesh.
+ *          It is also possible to have user-defined functions, either by
+ *          overloading the eval function of this class or by giving a
+ *          function (pointer) that returns the value of the function.
+ */
 
 class Function : public Variable
 {
@@ -208,31 +211,31 @@ public:
 
   //--- Wrapper Facade for DiscreteFunction -----------------------------------
 
-  /// Return the signature of a DiscreteFunction
-  std::string signature() const;
-
   /// Return the vector associated with a DiscreteFunction
   GenericVector& vector() const;
 
   /// Return the discrete space of a DiscreteFunction
   FiniteElementSpace const& space() const;
 
-  /// Return the dofmap of a DiscreteFunction
-  DofMap const& dofmap() const;
-
   /// Return the finite element space of a DiscreteFunction
   FiniteElement const& finite_element() const;
 
+  /// Return the dofmap of a DiscreteFunction
+  DofMap const& dofmap() const;
+
+  /// Return the signature of a DiscreteFunction
+  std::string const signature() const;
+
   /// Return the number of sub functions of a DiscreteFunction
-  uint num_sub_functions() const;
+  uint const num_sub_functions() const;
 
   /// Interpolate values from the given Function
   void interpolate(const Function& other_func);
 
-  /// Get values of a DiscreteFunction from array
+  /// Get values of a DiscreteFunction from cell tabulated block array
   void get(real *& values);
 
-  /// Set values to a DiscreteFunction from array
+  /// Set values to a DiscreteFunction from cell tabulated block array
   void set(real *& values);
 
   /// Extract sub function/slice from a DiscreteFunction
@@ -242,13 +245,16 @@ public:
 
 protected:
 
-  /// Access current cell (available during assembly for user-defined function)
+  /// Access current cell
+  /// (available during assembly for user-defined function)
   Cell const& cell() const;
 
-  /// Access current facet normal (available during assembly for user-defined function)
+  /// Access current facet normal
+  /// (available during assembly for user-defined function)
   Point normal() const;
 
-  /// Access current facet (available during assembly for user-defined functions)
+  /// Access current facet
+  /// (available during assembly for user-defined functions)
   int facet() const;
 
 private:

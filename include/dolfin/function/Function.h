@@ -63,6 +63,9 @@ public:
     empty = 0, constant, discrete, expression, user
   };
 
+  /// Convert from function type to string
+  static std::string type2string(Function::Type type);
+
   /// Create empty function
   Function();
 

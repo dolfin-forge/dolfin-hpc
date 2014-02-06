@@ -130,7 +130,6 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				function/ProjectL2.h\
 				function/SpecialFunctions.h\
 				function/SubFunction.h\
-				function/UFCFunction.h\
 				function/UserFunction.h\
 				graph/dolfin_graph.h\
 				graph/DirectedClique.h\

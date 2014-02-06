@@ -7,5 +7,4 @@ libdolfin_function_la_SOURCES = \
 				Function.cpp\
 				SpecialFunctions.cpp\
 				SubFunction.cpp\
-				UFCFunction.cpp\
 				UserFunction.cpp

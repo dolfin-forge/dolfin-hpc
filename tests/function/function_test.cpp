@@ -14,6 +14,7 @@
 
 using dolfin::real;
 using dolfin::message;
+using dolfin::Function;
 using dolfin::ConstantFunction;
 using dolfin::DiscreteFunction;
 using dolfin::ExpressionFunction;
@@ -102,7 +103,7 @@ START_TEST(test_init_discrete)
 END_TEST
 
 //-----------------------------------------------------------------------------
-START_TEST( test_init_expression )
+START_TEST(test_init_expression)
 {
   int init_failed = 0;
 
@@ -114,8 +115,59 @@ START_TEST( test_init_expression )
   ExpressionFunction F(mesh2d, expr);
   F.disp();
 
-  fail_unless( init_failed == 0 );
-}END_TEST
+  fail_unless(init_failed == 0);
+}
+END_TEST
+
+//-----------------------------------------------------------------------------
+START_TEST(test_init_function_and_refine)
+{
+  int init_failed = 0;
+
+  uint const deg_max = 2;
+  std::vector<Family::Type> v;
+  v.push_back(Family::DG);
+  v.push_back(Family::CG);
+
+  uint const N = 16;
+  dolfin::UnitSquare mesh2d(N, N);
+
+  Function F;
+  size_t const NTEST = 4;
+  for (size_t iter = 0; iter < NTEST; ++iter)
+  {
+    for (std::vector<Family::Type>::const_iterator it = v.begin();
+        it != v.end(); ++it)
+    {
+      Family f(*it);
+      uint d_min = f.degree_min();
+      uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
+      ufl::Domain::Set domains = f.domains();
+
+      for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
+          dom_it != domains.end(); ++dom_it)
+      {
+        Domain dom(*dom_it);
+        Cell cell(dom);
+        // Test just for UnitSquare
+        if (cell.topological_dimension() == 2)
+        {
+          for (uint d = d_min; d <= d_max; ++d)
+          {
+            ufl::FiniteElement uflfem(*it, cell, d);
+            F.init(mesh2d, uflfem.repr());
+            F.disp();
+          }
+        }
+      }
+    }
+    mesh2d.refine();
+  }
+
+  fail_unless(init_failed == 0);
+}
+END_TEST
+
 //-----------------------------------------------------------------------------
 
 Suite *ufl_suite()
@@ -126,9 +178,11 @@ Suite *ufl_suite()
   s = suite_create("FUNCTION");
   tc = tcase_create("function");
 
+  tcase_set_timeout(tc, 16);
   tcase_add_test(tc, test_init_constant);
   tcase_add_test(tc, test_init_discrete);
   tcase_add_test(tc, test_init_expression);
+  tcase_add_test(tc, test_init_function_and_refine);
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);

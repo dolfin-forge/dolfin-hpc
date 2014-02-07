@@ -4,23 +4,27 @@
 // Modified by Anders Logg 2005-2006.
 // Modified by Kristian Oelgaard 2006.
 // Modified by Niclas Jansson 2008-2009.
+// Modified by Kaspar Mueller 2013.
+// Modified by Aurélien Larcher 2014.
 //
 // First added:  2005-07-05
-// Last changed: 2011-01-20
+// Last changed: 2014-02-08
 
+#include <dolfin/io/VTKFile.h>
 
-#include <stdint.h>
+#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/function/Function.h>
+#include <dolfin/io/Encoder.h>
+#include <dolfin/la/Vector.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/function/Function.h>
-#include <dolfin/la/Vector.h>
-#include <dolfin/io/Encoder.h>
-#include <dolfin/io/VTKFile.h>
 
+#include <stdint.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename) : GenericFile(filename), _t(0)
@@ -45,7 +49,8 @@ void VTKFile::operator<<(Mesh& mesh)
   vtuNameUpdate(counter);
 
   // Only the root updates the pvd file
-  if(MPI::processNumber() == 0) {
+  if(MPI::processNumber() == 0)
+  {
 
     if (MPI::numProcesses() > 1)
     {
@@ -70,10 +75,10 @@ void VTKFile::operator<<(Mesh& mesh)
   VTKHeaderClose();
 
   // Increase the number of times we have saved the mesh
-  counter++;
+  ++counter;
 
-  message(1, "Saved mesh %s (%s) to file %s in VTK format.",
-          mesh.name().c_str(), mesh.label().c_str(), filename.c_str());
+//  dolfin_debug(message(1, "Saved mesh %s (%s) to file %s in VTK format.",
+//          mesh.name().c_str(), mesh.label().c_str(), filename.c_str());)
 }
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(MeshFunction<int>& meshfunction)
@@ -98,7 +103,7 @@ void VTKFile::operator<<(MeshFunction<bool>& meshfunction)
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(Function& u)
 {
-  std::pair<Function*, std::string> f(&u, "U");
+  std::pair<Function*, std::string> f(&u, u.name());
   std::vector<std::pair<Function*, std::string> > tmp;
   tmp.push_back(f);
   write_dataset(tmp);
@@ -119,7 +124,8 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   // Write pvd file
 
   // Only the root updates the pvd file
-  if(MPI::processNumber() == 0) {
+  if(MPI::processNumber() == 0)
+  {
 
     if(MPI::numProcesses() > 1)
     {
@@ -149,7 +155,7 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   VTKHeaderClose();
 
   // Increase the number of times we have saved the function
-  counter++;
+  ++counter;
 
 }
 //----------------------------------------------------------------------------
@@ -158,12 +164,16 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Open file
   FILE* fp = fopen(vtu_filename.c_str(), "a");
 
+  uint const num_mesh_verts = mesh.numVertices();
+  uint const num_mesh_cells = mesh.numCells();
+  uint const num_cell_verts = mesh.type().numEntities(0);
+  uint const cell_verts_block_size = num_cell_verts * num_mesh_cells;
+
   // Write vertex positions
   fprintf(fp, "<Points>  \n");
   fprintf(fp, "<DataArray  type=\"Float32\"  NumberOfComponents=\"3\"  format=\"binary\"> \n");
-  std::vector<float> data;
-  data.resize(3*mesh.numVertices());
-  std::vector<float>::iterator entry = data.begin();
+  std::vector<float> v_data(3*num_mesh_verts);
+  std::vector<float>::iterator entry = v_data.begin();
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
     Point p = v->point();
@@ -174,7 +184,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   // Create encoded stream
   std::stringstream base64_stream;
-  encode_stream(base64_stream, data);
+  encode_stream(base64_stream, v_data);
   fprintf(fp, "%s\n", base64_stream.str().c_str());
   fprintf(fp, "</DataArray>  \n");
   fprintf(fp, "</Points>  \n");
@@ -182,13 +192,14 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Write cell connectivity
   fprintf(fp, "<Cells>  \n");
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\"> \n");
-  std::vector<uint32_t> c_data;
-  c_data.resize(mesh.numCells() * mesh.type().numEntities(0));
+  std::vector<uint32_t> c_data(cell_verts_block_size);
   std::vector<uint32_t>::iterator c_entry = c_data.begin();
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     for (VertexIterator v(*c); !v.end(); ++v)
+    {
       *c_entry++ = v->index();
+    }
   }
 
   // Create encoded stream
@@ -200,8 +211,11 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Write offset into connectivity array for the end of each cell
   fprintf(fp, "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
   std::vector<uint32_t>::iterator cc_entry = c_data.begin();
-  for (uint offsets = 1; offsets <= mesh.numCells(); offsets++)
-    *cc_entry++ = offsets*mesh.type().numEntities(0);
+
+  for (uint offsets = 1; offsets <= num_mesh_cells; ++offsets)
+  {
+    *cc_entry++ = offsets * num_cell_verts;
+  }
 
   std::stringstream base64_cc_stream;
   encode_stream(base64_cc_stream, c_data);
@@ -210,18 +224,24 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   //Write cell type
   fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">  \n");
-  std::vector<uint8_t> t_data;
-  t_data.resize(mesh.numCells());
-  std::vector<uint8_t>::iterator t_entry = t_data.begin();
-  for (uint types = 1; types <= mesh.numCells(); types++)
+
+  uint8_t typeval = 0;
+  switch(mesh.type().cellType())
   {
-    if (mesh.type().cellType() == CellType::tetrahedron )
-      *t_entry++ = uint8_t(10);
-    if (mesh.type().cellType() == CellType::triangle )
-      *t_entry++ = uint8_t(5);
-    if (mesh.type().cellType() == CellType::interval )
-      *t_entry++ = uint8_t(3);
+    case CellType::tetrahedron:
+      typeval = uint8_t(10);
+      break;
+    case CellType::triangle:
+      typeval = uint8_t(5);
+      break;
+    case CellType::interval:
+      typeval = uint8_t(3);
+      break;
+    default:
+      error("Provided mesh type is not supported");
+      break;
   }
+  std::vector<uint8_t> t_data(num_mesh_cells, typeval);
 
   // Create encoded stream
   std::stringstream base64_t_stream;
@@ -242,76 +262,210 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
 
+  //--- Interpolation to vertices for general functions-----------------------
   fprintf(fp, "<PointData> \n");
   for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
        it != f.end(); it++)
   {
     Function* u = it->first;
-    std::string& name = it->second;
-    const uint rank = u->rank();
-    if(rank > 1)
-      error("Only scalar and vectors functions can be saved in VTK format.");
 
-    // Get number of components
-    const uint dim = u->dim(0);
+    // Check type of function space
+    if(u->type() == Function::discrete && u->space().is_cellwise_constant())
+    {
+      // These are cell based function and will be written as CellData
+      continue;
+    }
+
+    //
+    uint const value_rank = u->rank();
+    uint const value_dim = u->dim(0);
+    if ( value_dim > 3 )
+    {
+      error("Cannot handle VTK file with number of components > 3.");
+    }
+
+    // Write function data at mesh vertices
+    std::string& name = it->second;
+    switch(value_rank)
+    {
+      case 0:
+        fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">   ", name.c_str());
+        break;
+      case 1:
+        fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">  ", name.c_str());
+        break;
+      default:
+        error("Only scalar and vectors functions can be saved in VTK format.");
+        break;
+    }
 
     // Allocate memory for function values at vertices
-    uint size = mesh.numVertices();
-    for (uint i = 0; i < u->rank(); i++)
+    uint const num_verts = mesh.numVertices();
+    uint size = 1;
+    for (uint i = 0; i < value_rank; i++)
+    {
       size *= u->dim(i);
-    real* values = new real[size];
+    }
+    real* values = new real[size*num_verts];
 
     // Get function values at vertices
     u->interpolate_vertex_values(values);
 
-    // Write function data at mesh vertices
-    if ( rank == 0 )
-    {
-      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">	 ", name.c_str());
-    }
-    else
-    {
-      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">	 ", name.c_str());
-    }
-
-    if ( dim > 3 )
-      warning("Cannot handle VTK file with number of components > 3. Writing first three components only");
-
+    // Copy values
+    // Should be value_dim^value_rank but 1^0 = 1 and (2|3)^1 = (2|3) so ...
     std::vector<float> data;
-    if (rank == 0)
-      data.resize(size);
-    else
-      data.resize(3 * mesh.numVertices());
-    std::vector<float>::iterator entry = data.begin();
 
-    for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+    switch(value_dim)
     {
-      if ( rank == 0 )
-	*entry++ = values[ vertex->index() ] ;
-      else if ( u->dim(0) == 2 )
+    case 1:
+      data.resize(num_verts);
       {
-	*entry++ = values[ vertex->index() ];
-	*entry++ = values[ vertex->index() + mesh.numVertices()];
-	*entry++ = 0.0;
+        std::vector<float>::iterator entry = data.begin();
+        for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+        {
+          *entry++ = values[ vertex->index() ];
+        }
       }
-      else
+      break;
+    case 2:
+      data.resize(3*num_verts);
       {
-	*entry++ = values[ vertex->index() ];
-	*entry++ = values[ vertex->index() + mesh.numVertices()];
-	*entry++ = values[ vertex->index() + 2*mesh.numVertices()];
+        std::vector<float>::iterator entry = data.begin();
+        for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+        {
+          *entry++ = values[ vertex->index() ];
+          *entry++ = values[ vertex->index() + num_verts];
+          *entry++ = 0.0;
+        }
       }
+      break;
+    case 3:
+    default:
+      data.resize(3*num_verts);
+      {
+        std::vector<float>::iterator entry = data.begin();
+        for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+        {
+          *entry++ = values[ vertex->index() ];
+          *entry++ = values[ vertex->index() + num_verts];
+          *entry++ = values[ vertex->index() + 2*num_verts];
+        }
+      }
+      break;
     }
+
+    //
+    delete [] values;
 
     // Create encoded stream
     std::stringstream base64_stream;
     encode_stream(base64_stream, data);
     fprintf(fp, "%s\n", base64_stream.str().c_str());
-
     fprintf(fp, "</DataArray> \n");
 
-    delete [] values;
   }
   fprintf(fp, "</PointData> \n");
+
+  //--- Cellwise functions----------------------------------------------------
+  fprintf(fp, "<CellData> \n");
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+       it != f.end(); it++)
+  {
+    Function* u = it->first;
+
+    // Check type of function space
+    if(!u->type() == Function::discrete || !u->space().is_cellwise_constant())
+    {
+      // These are not cell based functions and will be written as PointData
+      continue;
+    }
+
+    //
+    uint const value_rank = u->rank();
+    uint const value_dim = u->dim(0);
+    if ( value_dim > 3 )
+    {
+      error("Cannot handle VTK file with number of components > 3.");
+    }
+
+    //
+    DofMap const& dm_u   = u->dofmap();
+    uint nbdofspercell_u    = dm_u.local_dimension();
+
+    // Write function data in cell
+    std::string& name = it->second;
+    std::vector<float> data;
+    switch(value_rank)
+    {
+      case 0:
+        fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">   ", name.c_str());
+        break;
+      case 1:
+        fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"3\" format=\"binary\">  ", name.c_str());
+        break;
+      default:
+        error("Only scalar and vectors functions can be saved in VTK format.");
+        break;
+    }
+
+    // Copy values
+    // Should be value_dim^value_rank but 1^0 = 1 and (2|3)^1 = (2|3) so ...
+    real * values = new real[dm_u.dofsmapping_size()];
+    u->get_block(values);
+
+    switch(value_dim)
+    {
+    case 1:
+      data.resize(mesh.numCells());
+      {
+        std::vector<float>::iterator entry = data.begin();
+        uint ii = 0;
+        for (CellIterator cell(mesh); !cell.end(); ++cell, ++ii)
+        {
+          *entry++ = values[ cell->index() ];
+        }
+      }
+      break;
+    case 2:
+      data.resize(3*mesh.numCells());
+      {
+        std::vector<float>::iterator entry = data.begin();
+        uint ii = 0;
+        for (CellIterator cell(mesh); !cell.end(); ++cell, ++ii)
+        {
+          *entry++ = values[ cell->index()*nbdofspercell_u ];
+          *entry++ = values[ cell->index()*nbdofspercell_u + 1 ];
+          *entry++ = 0.0;
+        }
+      }
+      break;
+    case 3:
+    default:
+      data.resize(3*mesh.numCells());
+      {
+        std::vector<float>::iterator entry = data.begin();
+        uint ii = 0;
+        for (CellIterator cell(mesh); !cell.end(); ++cell, ++ii)
+        {
+          *entry++ = values[ cell->index()*nbdofspercell_u ];
+          *entry++ = values[ cell->index()*nbdofspercell_u + 1 ];
+          *entry++ = values[ cell->index()*nbdofspercell_u + 2 ];
+        }
+      }
+      break;
+    }
+
+    //
+    delete [] values;
+
+    // Create encoded stream
+    std::stringstream base64_stream;
+    encode_stream(base64_stream, data);
+    fprintf(fp, "%s\n", base64_stream.str().c_str());
+    fprintf(fp, "</DataArray> \n");
+  }
+  fprintf(fp, "</CellData> \n");
+
 
   // Close file
   fclose(fp);
@@ -336,20 +490,30 @@ void VTKFile::pvdFileWrite(uint num)
     // Open pvd file
     pvdFile.open(filename.c_str(),  std::ios::out|std::ios::in);
     pvdFile.seekp(mark);
-
   }
+
   // Remove directory path from name for pvd file
   std::string fname;
   if(MPI::numProcesses() > 1)
+  {
     fname.assign(pvtu_filename, filename.find_last_of("/") + 1, pvtu_filename.size());
+  }
   else
+  {
     fname.assign(vtu_filename, filename.find_last_of("/") + 1, vtu_filename.size());
+  }
 
   // Data file name
   if(_t)
-    pvdFile << "<DataSet timestep=\"" << *_t << "\" part=\"0\"" << " file=\"" <<  fname <<  "\"/>" << std::endl;
+  {
+    pvdFile << "<DataSet timestep=\"" << *_t << "\" part=\"0\"" << " file=\""
+            <<  fname <<  "\"/>" << std::endl;
+  }
   else
-    pvdFile << "<DataSet timestep=\"" << num << "\" part=\"0\"" << " file=\"" <<  fname <<  "\"/>" << std::endl;
+  {
+    pvdFile << "<DataSet timestep=\"" << num << "\" part=\"0\"" << " file=\""
+            <<  fname <<  "\"/>" << std::endl;
+  }
   mark = pvdFile.tellp();
 
   // Close headers
@@ -393,7 +557,9 @@ void VTKFile::pvtuFileWrite(bool mesh_function)
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1, vtu_filename.size() - 5 );
   for(uint i=0; i< MPI::numProcesses(); i++)
+  {
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>" << std::endl;
+  }
 
 
   pvtuFile << "</PUnstructuredGrid>" << std::endl;
@@ -420,19 +586,54 @@ void VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> >
     Function* u = it->first;
     std::string& name = it->second;
 
-    if(u->rank() == 0) {
-      //      pvtuFile << "<PPointData Scalars=\"" << name << "\">" << std::endl;
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />" << std::endl;
+    // Check type of function space
+    if(u->type() == Function::discrete && u->space().is_cellwise_constant())
+    {
+      // These are cell based function and will be written as CellData
+      continue;
     }
-    else {
-      // Get number of components
-      const uint dim = u->dim(0);
 
-      //      pvtuFile << "<PPointData Vectors=\"" << name << "\">" << std::endl;
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\"  NumberOfComponents=\"3\" />" << std::endl;
+    if(u->rank() == 0)
+    {
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />"
+               << std::endl;
+    }
+    else
+    {
+      // Get number of components
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
+               << "\"  NumberOfComponents=\"3\" />" << std::endl;
     }
   }
   pvtuFile << "</PPointData>" << std::endl;
+
+  pvtuFile << "<PCellData>" << std::endl;
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+       it != f.end(); it++)
+  {
+    Function* u = it->first;
+    std::string& name = it->second;
+
+    // Check type of function space
+    if(!u->type() == Function::discrete || !u->space().is_cellwise_constant())
+    {
+      // These are not cell based functions and will be written as PointData
+      continue;
+    }
+
+    if(u->rank() == 0)
+    {
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />"
+               << std::endl;
+    }
+    else
+    {
+      // Get number of components
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
+               << "\"  NumberOfComponents=\"3\" />" << std::endl;
+    }
+  }
+  pvtuFile << "</PCellData>" << std::endl;
 
 
   pvtuFile << "<PCellData>" << std::endl;
@@ -446,6 +647,7 @@ void VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> >
   pvtuFile << "</PPoints>" << std::endl;
 
   std::string fname;
+
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1, vtu_filename.size() - 5 );
   for(uint i=0; i< MPI::numProcesses(); i++)
@@ -478,10 +680,10 @@ void VTKFile::VTKHeaderOpen(Mesh& mesh) const
 
   // Write headers
   fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s %s>\n",
-	  endianness.c_str(), compressor.c_str());
+          endianness.c_str(), compressor.c_str());
   fprintf(fp, "<UnstructuredGrid>  \n");
   fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">  \n",
-	  mesh.numVertices(), mesh.numCells());
+          mesh.numVertices(), mesh.numCells());
 
   // Close file
   fclose(fp);
@@ -558,7 +760,9 @@ void VTKFile::MeshFunctionWrite(T& meshfunction)
   Mesh& mesh = meshfunction.mesh();
 
   if( meshfunction.dim() != mesh.topology().dim() )
-    error("VTK output of mesh functions is implemenetd for cell-based functions only.");
+  {
+    error("VTK output of mesh functions is implemented for cell-based functions only.");
+  }
 
   // Write headers
   VTKHeaderOpen(mesh);
@@ -593,11 +797,11 @@ void VTKFile::MeshFunctionWrite(T& meshfunction)
   VTKHeaderClose();
 
   // Increase the number of times we have saved the mesh function
-  counter++;
+  ++counter;
 
   message("saved mesh function %d times.", counter);
   message("Saved mesh function ( %s ) to file %s in VTK format.",
-	  mesh.label().c_str(), filename.c_str());
+          mesh.label().c_str(), filename.c_str());
 }
 //-----------------------------------------------------------------------------
 template<typename T>
@@ -608,7 +812,8 @@ void VTKFile::encode_stream(std::stringstream& stream,
 #ifdef HAVE_LIBZ
   encode_inline_compressed_base64(stream, data);
 #else
-  warning("zlib must be configured to enable compressed VTK output. Using uncompressed base64 encoding instead.");
+  warning("zlib must be configured to enable compressed VTK output. "
+          "Using uncompressed base64 encoding instead.");
   encode_inline_base64(stream, data);
 #endif
 
@@ -650,3 +855,6 @@ void VTKFile::encode_inline_compressed_base64(std::stringstream& stream,
 }
 #endif
 //----------------------------------------------------------------------------
+
+}
+

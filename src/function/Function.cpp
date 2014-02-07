@@ -595,7 +595,7 @@ void Function::interpolate(Function const& other_func)
 
 }
 //-----------------------------------------------------------------------------
-void Function::get(real *& values)
+void Function::get_block(real *& values)
 {
   if (!f_)
     error("Function contains no data.");
@@ -608,7 +608,7 @@ void Function::get(real *& values)
   return (static_cast<DiscreteFunction*>(f_))->get(values);
 }
 //-----------------------------------------------------------------------------
-void Function::set(real *& values)
+void Function::set_block(real *& values)
 {
   if (!f_)
     error("Function contains no data.");

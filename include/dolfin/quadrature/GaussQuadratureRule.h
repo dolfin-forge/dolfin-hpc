@@ -204,7 +204,10 @@ namespace dolfin
                 for(unsigned int i=0; i<n; ++i)
                   points[i] = new real[dim];
 
+<<<<<<< HEAD
                 /*
+=======
+>>>>>>> medium stage in adding quadrature rules
                 points[0][0]  = 0.501426509658180; 
                 points[0][1]  = 0.249286745170910;
                 points[1][0]  = 0.249286745170910;
@@ -242,6 +245,7 @@ namespace dolfin
                 weights[9]  = 0.041425537809187;
                 weights[10] = 0.041425537809187;
                 weights[11] = 0.041425537809187;
+<<<<<<< HEAD
                 */
 
                 points[0][0]  = 0.501426509658179; 
@@ -322,6 +326,8 @@ namespace dolfin
                 weights[11] = 0.041425537809187;
                 */
 
+=======
+>>>>>>> medium stage in adding quadrature rules
                 break;
               }
             case 7:

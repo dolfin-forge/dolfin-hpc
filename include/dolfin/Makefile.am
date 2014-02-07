@@ -296,6 +296,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
+<<<<<<< HEAD
 				quadrature/RadauQuadrature.h\
 				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
@@ -341,3 +342,12 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLTuple.h\
 				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h
+<<<<<<< HEAD
+=======
+=======
+				quadrature/RadauQuadrature.h
+				quadrature/UFCCellIntegral.h\
+				quadrature/UFCReferenceCell.h
+>>>>>>> medium stage in adding quadrature rules
+
+>>>>>>> commit quadrature

@@ -233,10 +233,10 @@ public:
   void interpolate(const Function& other_func);
 
   /// Get values of a DiscreteFunction from cell tabulated block array
-  void get(real *& values);
+  void get_block(real *& values);
 
   /// Set values to a DiscreteFunction from cell tabulated block array
-  void set(real *& values);
+  void set_block(real *& values);
 
   /// Extract sub function/slice from a DiscreteFunction
   SubFunction operator[](uint i);

@@ -41,6 +41,9 @@ public:
   /// Stupid factory function
   static FiniteElementBase * create(Object::repr_t const repr);
 
+  ///
+  virtual ~FiniteElementBase();
+
   /// Return finite element family type
   Family const family() const;
 
@@ -121,9 +124,6 @@ protected:
 
   ///
   FiniteElementBase(std::string const& name, repr_t repr);
-
-  ///
-  virtual ~FiniteElementBase();
 
   ///
   bool component_is_valid(ValueArray const& i) const;

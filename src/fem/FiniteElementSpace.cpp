@@ -22,7 +22,9 @@ FiniteElementSpace::FiniteElementSpace(
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(finite_element_signature)))
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(finite_element_signature)))
 #endif
 {
 }
@@ -50,7 +52,9 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
@@ -67,7 +71,9 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
@@ -99,7 +105,9 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     scratch(finite_element_, dof_map_)
 #if ENABLE_UFL
             ,
-    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(element().signature())))
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
 #endif
 {
 }
@@ -135,6 +143,19 @@ void FiniteElementSpace::disp() const
   // End indentation
   end();
   skip();
+}
+
+//-----------------------------------------------------------------------------
+bool FiniteElementSpace::is_cellwise_defined() const
+{
+  return (mesh_.numCells() * dof_map_.local_dimension())
+      == dof_map_.global_dimension();
+}
+
+//-----------------------------------------------------------------------------
+bool FiniteElementSpace::is_cellwise_constant() const
+{
+  return mesh_.numCells() == dof_map_.global_dimension();
 }
 
 //-----------------------------------------------------------------------------

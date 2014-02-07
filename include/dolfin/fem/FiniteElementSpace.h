@@ -68,6 +68,14 @@ public:
   /// Display basic information
   void disp() const;
 
+  //---------------------------------------------------------------------------
+
+  ///
+  bool is_cellwise_defined() const;
+
+  ///
+  bool is_cellwise_constant() const;
+
   //--- UFL INTERFACE ---------------------------------------------------------
 
 #if ENABLE_UFL

@@ -20,41 +20,38 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
 {
-  FiniteElementBase * ret = NULL;
-
   std::string name = Class::make_name(repr);
   if (name == "FiniteElement")
   {
-    ret = new FiniteElement(repr);
+    return new FiniteElement(repr);
   }
   else if (name == "VectorElement")
   {
-    ret = new VectorElement(repr);
+    return new VectorElement(repr);
   }
-  /*
-  else if (name == "MixedElement")
-  {
-    ret = new MixedElement(repr);
-  }
-  else if (name == "EnrichedElement")
-  {
-    ret = new EnrichedElement(repr);
-  }
-  else if (name == "RestrictedElement")
-  {
-    ret = new RestrictedElement(repr);
-  }
-  else if (name == "TensorElement")
-  {
-    ret = new TensorElement(repr);
-  }
-  */
+//  FIXME: add support for other elements
+//  else if (name == "MixedElement")
+//  {
+//    ret = new MixedElement(repr);
+//  }
+//  else if (name == "EnrichedElement")
+//  {
+//    ret = new EnrichedElement(repr);
+//  }
+//  else if (name == "RestrictedElement")
+//  {
+//    ret = new RestrictedElement(repr);
+//  }
+//  else if (name == "TensorElement")
+//  {
+//    ret = new TensorElement(repr);
+//  }
   else
   {
     error("Unknown type of ufl::FiniteElementBase: '" + name + "'");
   }
 
-  return ret;
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------

@@ -13,19 +13,76 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-  SpatialDerivative::SpatialDerivative(Expression const& expression, IndexBase const& index) :
+  SpatialDerivative::SpatialDerivative(Expression const& expression, Index const& index) :
     Class("SpatialDerivative"),
     expression_(expression),
-    index_(index)
+    index_(index),
+    repr_(*this, expression_, index_),
+    str_("d/dx_" + index_.str() + " " + expression_.str())
   {
-    std::stringstream ssrepr;
-    ssrepr << "SpatialDerivative(" << expression_.repr() << "," << index_.repr() << ")";
-    repr_ = ssrepr.str();
+//    std::stringstream ssrepr;
+//    ssrepr << "SpatialDerivative(" << expression_.repr() << "," << index_.repr() << ")";
+//    repr_ = ssrepr.str();
+//
+//    //Is this the same implementation as in python?
+//    std::stringstream ssstr;
+//    ssstr << "d/dx_" << index_.str() << " " << expression_.str();
+//    str_ = ssstr.str();
+  }
 
-    //Is this the same implementation as in python?
-    std::stringstream ssstr;
-    ssstr << "d/dx_" << index_.str() << " " << expression_.str();
-    str_ = ssstr.str();
+//-----------------------------------------------------------------------------
+  SpatialDerivative::SpatialDerivative(repr_t const & repr) :
+    Class("SpatialDerivative"),
+    expression_(arg(0)),
+    index_(arg(1)),
+    repr_(*this, expression_, index_),
+    str_("d/dx_" + index_.str() + " " + expression_.str())
+  {
+//    if(repr.length() == 0)
+//      dolfin_assert("An empty signature was passed to create a SpatialDerivative.");
+//
+//    Expression const * expression;
+//    IndexBase const * index;
+//
+//    std::string::const_iterator it;
+//    std::string help_string;
+//    dolfin::uint i = 0;
+//    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
+//    {
+//      help_string += *it;
+//      if(help_string == "SpatialDerivative(")
+//      {
+//        help_string.clear();
+//        std::string::const_iterator jt;
+//        dolfin::uint pos_end_expr = 0;
+//        dolfin::uint open_parentheses = 0;
+//        dolfin::uint close_parentheses = 0;
+//
+//        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_expr)
+//        {
+//          if(*jt == '(')
+//            open_parentheses++;
+//        
+//          if(*jt == ')')
+//            close_parentheses++;
+//
+//          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
+//            break;
+//          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
+//          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
+//          std::cout << "  " << pos_end_expr;
+//        }
+//        std::cout << std::endl;
+//
+//        std::string string_expr = repr.substr(i+1, pos_end_expr);
+//        std::string string_index = repr.substr(i+pos_end_expr+3, repr.length()-pos_end_expr-i-4);
+//        std::cout << "substring EXPR  " << string_expr << std::endl;
+//        std::cout << "substring INDEX  " << string_index << std::endl;
+//        expression = expression->create(string_expr);
+//        index = index->create(string_index);
+//      }
+//    }
+//    return new SpatialDerivative(*expression, *index);
   }
 
 //-----------------------------------------------------------------------------
@@ -34,7 +91,7 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, IndexBase const> const& SpatialDerivative::operands() const
+  std::pair<Expression const, Index const> const& SpatialDerivative::operands() const
   {
     return std::make_pair(expression_, index_);  
   }
@@ -56,54 +113,4 @@ namespace ufl
   {
   }
 
-
-//-----------------------------------------------------------------------------
-  SpatialDerivative const* SpatialDerivative::create(repr_t const & repr) const
-  {
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create a SpatialDerivative.");
-
-    Expression const * expression;
-    IndexBase const * index;
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint i = 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
-    {
-      help_string += *it;
-      if(help_string == "SpatialDerivative(")
-      {
-        help_string.clear();
-        std::string::const_iterator jt;
-        dolfin::uint pos_end_expr = 0;
-        dolfin::uint open_parentheses = 0;
-        dolfin::uint close_parentheses = 0;
-
-        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_expr)
-        {
-          if(*jt == '(')
-            open_parentheses++;
-        
-          if(*jt == ')')
-            close_parentheses++;
-
-          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
-            break;
-          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
-          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
-          std::cout << "  " << pos_end_expr;
-        }
-        std::cout << std::endl;
-
-        std::string string_expr = repr.substr(i+1, pos_end_expr);
-        std::string string_index = repr.substr(i+pos_end_expr+3, repr.length()-pos_end_expr-i-4);
-        std::cout << "substring EXPR  " << string_expr << std::endl;
-        std::cout << "substring INDEX  " << string_index << std::endl;
-        expression = expression->create(string_expr);
-        index = index->create(string_index);
-      }
-    }
-    return new SpatialDerivative(*expression, *index);
-  }
 }

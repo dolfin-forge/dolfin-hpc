@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name,
                                      Family::Type const& family,
-                                     Cell const& cell, uint const degree,
+                                     Cell const& cell, dolfin::uint const degree,
                                      QuadratureScheme quad_scheme,
                                      ValueArray value_shape) :
     Class(name),

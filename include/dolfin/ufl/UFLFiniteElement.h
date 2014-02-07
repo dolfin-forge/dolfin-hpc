@@ -26,12 +26,10 @@ class FiniteElement : public FiniteElementBase
 public:
 
   ///
-  FiniteElement(Family::Type family, Cell const& cell, uint const degree);
+  FiniteElement(Family::Type family, Cell const& cell, dolfin::uint const degree);
 
   ///
-  FiniteElement(ElementList::FamilyType family,
-                   Cell const& cell,
-                   dolfin::uint const degree);
+  explicit FiniteElement(repr_t const& repr);
 
   ///
   ~FiniteElement();

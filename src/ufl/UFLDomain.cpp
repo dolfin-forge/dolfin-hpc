@@ -90,13 +90,13 @@ Domain::Type const Domain::type_facet(Domain::Type const& t)
 }
 
 //-----------------------------------------------------------------------------
-uint const Domain::type_dim(Domain::Type const& t)
+dolfin::uint const Domain::type_dim(Domain::Type const& t)
 {
   return Definitions().find(t)->second.dim;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Domain::num_facets(Type const& t)
+dolfin::uint const Domain::type_num_facets(Type const& t)
 {
   return Definitions().find(t)->second.num_facets;
 }

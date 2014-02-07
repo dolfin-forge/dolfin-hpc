@@ -36,18 +36,21 @@ namespace ufl
       IndexSum(Expression const& summand, IndexBase const& index);
 
       ///
+      IndexSum(repr_t const & repr);
+
+      ///
       ~IndexSum();
 
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      IndexBase const& index() const;
+      MultiIndex const& index() const;
       
       ///
       dolfin::uint const& dimension() const;
 
       ///
-      std::pair<Expression const, IndexBase const> const& operands() const;
+      std::pair<Expression const, MultiIndex const> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -72,13 +75,10 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      IndexSum const* create(repr_t const & repr) const;
-
     private:
 
       Expression const summand_;
-      IndexBase const& index_;
+      MultiIndex const index_;
 
       mutable repr_t repr_;
       mutable std::string str_;

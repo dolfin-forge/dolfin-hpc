@@ -338,5 +338,4 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLSpatialCoordinate.h\
 				ufl/UFLTensorElement.h\
 				ufl/UFLTensors.h\
-				ufl/UFLType.h\
 				ufl/UFLVectorElement.h

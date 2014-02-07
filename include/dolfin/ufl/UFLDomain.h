@@ -9,6 +9,8 @@
 
 #include <dolfin/ufl/UFLtype.h>
 
+#include <dolfin/common/types.h>
+
 #include <map>
 #include <set>
 #include <string>
@@ -50,30 +52,7 @@ public:
   Domain(Type const& t);
 
   ///
-  struct Definition
-  {
-    dolfin::uint dim;
-    Type facet;
-    dolfin::uint num_facets;
-    std::string str;
-
-    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
-        dim(a_dim),
-        facet(a_facet),
-        num_facets(a_num_facets),
-        str(a_str)
-    {
-    }
-  };
-
-  typedef std::map<Type, Definition> DefinitionList;
-  typedef std::pair<Type, Definition> DefinitionItem;
-
-  static DefinitionList const Definitions()
-  {
-    static DefinitionList const DomainDefinitions = __init_domain_definitions();
-    return DomainDefinitions;
-  }
+  explicit Domain(repr_t const& repr);
 
   ///
   ~Domain();
@@ -82,10 +61,10 @@ public:
   static Type const type_facet(Domain::Type const& t);
 
   ///
-  static uint const type_dim(Domain::Type const& t);
+  static dolfin::uint const type_dim(Domain::Type const& t);
 
   ///
-  static uint const type_num_facets(Domain::Type const& t);
+  static dolfin::uint const type_num_facets(Domain::Type const& t);
 
   /// UFL:
   Type const facet() const;
@@ -110,15 +89,15 @@ private:
   Domain::Type const type_;
 
   //--- STATIC ----------------------------------------------------------------
-  ///
+
   struct Definition
   {
-    uint dim;
+    dolfin::uint dim;
     Type facet;
-    uint num_facets;
-    repr_t str;
+    dolfin::uint num_facets;
+    std::string str;
 
-    Definition(uint a_dim, Type a_facet, uint a_num_facets, std::string a_str) :
+    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
         dim(a_dim),
         facet(a_facet),
         num_facets(a_num_facets),

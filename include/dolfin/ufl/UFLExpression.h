@@ -21,7 +21,7 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL Expression.
  */
 
-  class Expression : public Object
+  class Expression : public Class
   {
     public:
 
@@ -29,7 +29,10 @@ namespace ufl
       Expression(Object const& object);
 
       ///
-      Expression();
+      Expression (repr_t const & repr);
+
+//      ///
+//      Expression();
       
       ///
       ~Expression();
@@ -64,17 +67,15 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      Expression const* create(repr_t const & repr) const;
-
     private:
 
-      mutable repr_t repr_;
-      mutable std::string str_;
+      repr_t const repr_;
+      std::string const str_;
 
       bool const is_cellwise_constant_;
   };
 
+  /*
   class Operator : public Expression
   {
     public:
@@ -87,5 +88,6 @@ namespace ufl
     private:
       Expression const expression_;
   };
+  */
 } /* namespace ufl */
 #endif /* __UFL_EXPRESSION_H_ */

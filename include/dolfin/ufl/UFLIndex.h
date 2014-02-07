@@ -10,7 +10,7 @@
 //#include <string>
 //#include <vector>
 
-#include <dolfin/ufl/UFLObject.h>
+#include <dolfin/ufl/UFLClass.h>
 
 #include <dolfin/common/types.h>
 
@@ -25,16 +25,13 @@ namespace ufl
    *  @brief  Provides an interface complying with UFL IndexSum.
    */
 
-  class IndexBase : public Object
+  class IndexBase : public Class
   {
 
     public:
 
-      ///
-      IndexBase(dolfin::uint const& count);
-
-      ///
-      ~IndexBase();
+//      ///
+//      IndexBase(dolfin::uint const& count);
 
       //--- INTERFACE -------------------------------------------------------------
       
@@ -45,16 +42,30 @@ namespace ufl
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
       /// __repr__
-      repr_t const repr() const;
+      virtual repr_t const repr() const = 0;
 
       /// __str__
-      std::string const str() const;
+      virtual std::string const str() const = 0;
 
       ///
-      void display() const;
+      virtual void display() const;
+
+    protected:
 
       ///
-      IndexBase const* create(repr_t const & repr) const;
+      IndexBase(std::string const& name,
+          dolfin::uint const& count);
+
+      ///
+      IndexBase(std::string const& name,
+          IndexBase const& index);
+
+      ///
+      IndexBase(std::string const & name, repr_t const & repr);
+
+      ///
+      virtual ~IndexBase();
+
 
     private:
 
@@ -74,6 +85,9 @@ namespace ufl
       Index(dolfin::uint const& count);
 
       ///
+      Index(repr_t const & repr);
+
+      ///
       ~Index();
 
       //--- INTERFACE -------------------------------------------------------------
@@ -88,9 +102,6 @@ namespace ufl
 
       ///
       void display() const;
-
-      ///
-      Index const* create(repr_t const & repr) const;
 
     private:
 
@@ -108,6 +119,9 @@ namespace ufl
       FixedIndex(dolfin::uint const& value);
 
       ///
+      FixedIndex(repr_t const & repr);
+
+      ///
       ~FixedIndex();
 
       //--- INTERFACE -------------------------------------------------------------
@@ -122,9 +136,6 @@ namespace ufl
 
       ///
       void display() const;
-
-      ///
-      FixedIndex const* create(repr_t const & repr) const;
 
     private:
 
@@ -145,6 +156,9 @@ namespace ufl
       MultiIndex(IndexBase const& index);
 
       ///
+      MultiIndex(repr_t const & repr);
+
+      ///
       ~MultiIndex();
 
       //--- INTERFACE -------------------------------------------------------------
@@ -159,9 +173,6 @@ namespace ufl
 
       ///
       void display() const;
-
-      ///
-      MultiIndex const* create(repr_t const & repr) const;
 
     private:
 

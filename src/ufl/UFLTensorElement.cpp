@@ -11,8 +11,8 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(Family::Type family,
-                                   Cell const& cell, uint const degree,
-                                   uint const dim) :
+                                   Cell const& cell, dolfin::uint const degree,
+                                   dolfin::uint const dim) :
     FiniteElementBase("TensorElement",Family::Tensor, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)

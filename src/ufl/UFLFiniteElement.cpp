@@ -13,7 +13,7 @@ using dolfin::error;
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
-                             uint const degree) :
+                             dolfin::uint const degree) :
     FiniteElementBase("FiniteElement", family, cell, degree),
     value_shape_(),
     symmetry_(),

@@ -16,16 +16,68 @@ namespace ufl
   Product::Product(Expression const& p1, Expression const& p2) :
     Class("Product"),
     p1_(p1),
-    p2_(p2)
+    p2_(p2),
+    repr_(*this, p1_, p2_),
+    str_(p1_.str() + " * " + p2_.str())
   {
-    std::stringstream ssrepr;
-    ssrepr << "Product(" << p1_.repr() << "," << p2_.repr() << ")";
-    repr_ = ssrepr.str();
+  }
 
-    //Is this the same implementation as in python?
-    std::stringstream ssstr;
-    ssstr << p1.str() << " * " << p2.str();
-    str_ = ssstr.str();
+//-----------------------------------------------------------------------------
+  Product::Product(repr_t const & repr):
+    Class("Product", repr),
+    p1_(arg(0)),
+    p2_(arg(1)),
+    repr_(*this, p1_, p2_),
+    str_(p1_.str() + " * " + p2_.str())
+  {
+//    if(repr.length() == 0)
+//      dolfin_assert("An empty signature was passed to create a Product.");
+//
+//    Expression const * p1;
+//    Expression const * p2;
+//
+//    std::string::const_iterator it;
+//    std::string help_string;
+//    dolfin::uint i= 0;
+//    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
+//    {
+//      help_string += *it;
+//      if(help_string == "Product(")
+//      {
+//        help_string.clear();
+//        std::string::const_iterator jt;
+//        dolfin::uint pos_end_summand = 0;
+//        dolfin::uint open_parentheses = 0;
+//        dolfin::uint close_parentheses = 0;
+//
+//        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_summand)
+//        {
+//          if(*jt == '(')
+//            open_parentheses++;
+//        
+//          if(*jt == ')')
+//            close_parentheses++;
+//
+//          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
+//            break;
+//          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
+//          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
+//          std::cout << "                  " << pos_end_summand << std::endl;
+//        }
+//
+//        std::string string_p1 = repr.substr(i+1, pos_end_summand);
+//        std::string string_p2 = repr.substr(i+pos_end_summand+3, repr.length()-pos_end_summand-i-4);
+//        std::cout << "substring P1  " << string_p1 << std::endl;
+//        std::cout << "substring P2  " << string_p2 << std::endl;
+//        std::cout << "create Expression 1" << std::endl;
+//        p1 = p1->create(string_p1);
+//        std::cout << "create Expression 1 done" << std::endl;
+//        std::cout << "create Expression 2" << std::endl;
+//        p2 = p2->create(string_p2);
+//        std::cout << "create Expression 2 done" << std::endl;
+//      }
+//    }
+//    return new Product(*p1, *p2);
   }
 
 //-----------------------------------------------------------------------------
@@ -57,56 +109,4 @@ namespace ufl
   }
 
 
-//-----------------------------------------------------------------------------
-  Product const* Product::create(repr_t const & repr) const
-  {
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create a Product.");
-
-    Expression const * p1;
-    Expression const * p2;
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint i= 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
-    {
-      help_string += *it;
-      if(help_string == "Product(")
-      {
-        help_string.clear();
-        std::string::const_iterator jt;
-        dolfin::uint pos_end_summand = 0;
-        dolfin::uint open_parentheses = 0;
-        dolfin::uint close_parentheses = 0;
-
-        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_summand)
-        {
-          if(*jt == '(')
-            open_parentheses++;
-        
-          if(*jt == ')')
-            close_parentheses++;
-
-          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
-            break;
-//          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
-//          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
-//          std::cout << "                  " << pos_end_summand << std::endl;
-        }
-
-        std::string string_p1 = repr.substr(i+1, pos_end_summand);
-        std::string string_p2 = repr.substr(i+pos_end_summand+3, repr.length()-pos_end_summand-i-4);
-        std::cout << "substring P1  " << string_p1 << std::endl;
-        std::cout << "substring P2  " << string_p2 << std::endl;
-        std::cout << "create Expression 1" << std::endl;
-        p1 = p1->create(string_p1);
-        std::cout << "create Expression 1 done" << std::endl;
-        std::cout << "create Expression 2" << std::endl;
-        p2 = p2->create(string_p2);
-        std::cout << "create Expression 2 done" << std::endl;
-      }
-    }
-    return new Product(*p1, *p2);
-  }
 }

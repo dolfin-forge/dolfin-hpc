@@ -41,6 +41,9 @@ namespace ufl
       Measure(Type const& measure_type, 
 //          MeasureData const& measure_data, 
           dolfin::uint measure_id);
+
+      ///
+      Measure(repr_t const & repr);
                                                                                                     
 //      Measure(Type const& measure_type, 
 //          MeasureData const& meta_data, 
@@ -73,14 +76,12 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      Measure const* create(repr_t const & repr) const;
-
     private:
       Measure::Type const measure_;
       dolfin::uint const measure_id_;
-      mutable repr_t repr_;
-      mutable std::string str_;
+
+      repr_t const repr_;
+      std::string const str_;
   };
 
   class Integral : public Class
@@ -89,6 +90,9 @@ namespace ufl
 
       ///
       Integral(Expression const& integrand, const Measure& measure);
+
+      ///
+      Integral(repr_t const & repr);
 
       ///
       ~Integral();
@@ -112,16 +116,13 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      Integral const* create(repr_t const & repr) const;
-
     private:
 
       Expression const& integrand_;
       Measure const measure_;
 
-      mutable repr_t repr_;
-      mutable std::string str_;
+      repr_t const repr_;
+      std::string const str_;
   };
 } /* namespace ufl */
 #endif /* __UFL_INTEGRAL_H_ */

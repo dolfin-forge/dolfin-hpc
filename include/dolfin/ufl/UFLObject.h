@@ -45,9 +45,6 @@ public:
   /// __eq__
   virtual bool operator ==(Object const& other) const;
 
-  ///
-  Object const* create(repr_t const & repr) const;
-
 protected:
 
   ///
@@ -138,9 +135,10 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     // - class arguments
     // - tuple argument
     // - dict argument
-    if (scpos == std::string::npos || openbrace > scpos
-        || (openbrace < scpos && str.find(")", currpos) < scpos)
-        || (str.find("{", currpos) < scpos && str.find("}", currpos) < scpos))
+    if (scpos == std::string::npos //no comma
+        || openbrace > scpos //comma is enclosed in a tuple or class
+        || (openbrace < scpos && str.find(")", currpos) < scpos) //comma is after a tuple or a class
+        || (str.find("{", currpos) < scpos && str.find("}", currpos) < scpos)) //comma is after a dict
     {
       token = str.substr(0, scpos);
       args.push_back(Object::repr_t(token));
@@ -154,11 +152,6 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     }
   }
   return args;
-}
-
-inline Object const* Object::create(repr_t const & repr) const
-{
-  return 0;
 }
 
 } /* namespace ufl */

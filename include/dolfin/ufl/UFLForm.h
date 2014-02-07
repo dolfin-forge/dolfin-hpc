@@ -25,10 +25,13 @@ namespace ufl
     public:
 
 //      ///
-      Form(std::vector<Integral> const& integrals);
+//      Form(std::vector<Integral> const& integrals);
 
       ///
       Form(Integral const& integral);
+
+      ///
+      Form(repr_t const & repr);
 
       ///
       ~Form();
@@ -70,17 +73,14 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      Form const* create(repr_t const & repr) const;
-
     private:
-      std::vector<Integral> integrals_;
-//      Integral const integral_;
+//      std::vector<Integral> integrals_;
+      Integral const integral_;
 
 //      const FormData form_data;
 
-      mutable std::string repr_;
-      mutable std::string str_;
+      repr_t const repr_;
+      std::string const str_;
 
       bool const is_preprocessed_;
   };

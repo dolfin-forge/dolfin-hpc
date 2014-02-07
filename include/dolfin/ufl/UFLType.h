@@ -172,5 +172,5 @@ template<typename T>
 }
 
 
-} /* namespace icorne */
+} /* namespace ufl */
 #endif /* __UFL_TYPE_H_ */

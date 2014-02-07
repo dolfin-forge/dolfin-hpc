@@ -13,7 +13,7 @@ using dolfin::error;
 
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(Family::Type family, Cell const& cell,
-                             uint const degree, uint const dim) :
+                             dolfin::uint const degree, dolfin::uint const dim) :
     FiniteElementBase("VectorElement", Family::Vector, cell, degree),
     sub_element_(family, cell, degree),
     dim_(dim),
@@ -40,7 +40,7 @@ VectorElement::VectorElement(repr_t const& repr) :
     FiniteElementBase("VectorElement", repr),
     value_shape_(),
     symmetry_(),
-    sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<uint>(arg(2))),
+    sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<dolfin::uint>(arg(2))),
     dim_(arg(3)),
     sub_elements_(dim_, &sub_element_)
 {

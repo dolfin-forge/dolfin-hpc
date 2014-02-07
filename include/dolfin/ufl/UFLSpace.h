@@ -51,7 +51,7 @@ public:
 
 private:
 
-  type<uint> const dimension_;
+  type<dolfin::uint> const dimension_;
 
   mutable repr_t repr_;
   mutable std::string str_;

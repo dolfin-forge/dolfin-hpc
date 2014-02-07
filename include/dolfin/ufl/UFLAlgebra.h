@@ -35,8 +35,8 @@ namespace ufl
       ///
       Product(Expression const& p1, Expression const& p2);
 
-//      ///
-//      Product(std::vector<Expression const> const& p);
+      ///
+      Product (repr_t const & repr);
 
       ///
       ~Product();
@@ -65,9 +65,6 @@ namespace ufl
 
       ///
       void display() const;
-
-      ///
-      Product const* create(repr_t const & repr) const;
 
     private:
 

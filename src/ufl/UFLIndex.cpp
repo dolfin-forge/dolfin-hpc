@@ -13,8 +13,26 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-  IndexBase::IndexBase(dolfin::uint const& count) :
+  IndexBase::IndexBase(std::string const& name,
+      dolfin::uint const& count) :
+    Class(name),
     count_(count)
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  IndexBase::IndexBase(std::string const& name,
+      IndexBase const& index) :
+    Class(name),
+    count_(index.count())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  IndexBase::IndexBase(std::string const& name,
+      repr_t const & repr) : 
+    Class(name, repr),
+    count_(0)
   {
   }
 
@@ -24,77 +42,31 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  Object::repr_t const IndexBase::repr() const
-  {
-    return repr_;
-  }
+//  Object::repr_t const IndexBase::repr() const
+//  {
+//    return repr_;
+//  }
 
 //-----------------------------------------------------------------------------
-  std::string const IndexBase::str() const
-  {
-    return str_;
-  }
+//  std::string const IndexBase::str() const
+//  {
+//    return str_;
+//  }
 
 //-----------------------------------------------------------------------------
-  void IndexBase::display() const
-  {
-  }
-
+//  void IndexBase::display() const
+//  {
+//  }
 
 //-----------------------------------------------------------------------------
-  IndexBase const* IndexBase::create(repr_t const & repr) const
+  Index::Index(dolfin::uint const& count) :
+    IndexBase("Index", count)
   {
-    /*
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create an IndexSum.");
-
-    Expression const * summand;
-    Index const * index;
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint index = 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++index)
-    {
-      help_string += *it;
-      if(help_string == "IndexSum(")
-      {
-        help_string.clear();
-        std::string::const_iterator jt;
-        dolfin::uint pos_end_summand = 0;
-        dolfin::uint open_parentheses = 0;
-        dolfin::uint close_parentheses = 0;
-
-        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_summand)
-        {
-          if(*jt == '(')
-            open_parentheses++;
-        
-          if(*jt == ')')
-            close_parentheses++;
-
-          if(open_parentheses>0 && open_parentheses == close_parentheses)
-            break;
-          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
-          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
-          std::cout << "                  " << pos_end_summand << std::endl;
-        }
-
-        std::string string_summand = repr.substr(index+1, pos_end_summand);
-        std::string string_index = repr.substr(pos_end_summand+1, repr.length());
-        std::cout << "substring SUMMAND  " << string_summand << std::endl;
-        std::cout << "substring INDEX  " << string_index << std::endl;
-        summand = summand->create(string_summand);
-        index = index->create(string_index);
-      }
-    }
-    */
-    return new IndexBase(0);
   }
   
 //-----------------------------------------------------------------------------
-  Index::Index(dolfin::uint const& count) :
-    IndexBase(count)
+  Index::Index(repr_t const& repr) :
+    IndexBase("Index", repr)
   {
   }
 
@@ -120,33 +92,15 @@ namespace ufl
   {
   }
 
-
 //-----------------------------------------------------------------------------
-  Index const* Index::create(repr_t const & repr) const
+  FixedIndex::FixedIndex(dolfin::uint const& count) :
+    IndexBase("FixedIndex", count)
   {
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create an Index.");
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint index = 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++index)
-    {
-      help_string += *it;
-      if(help_string == "Index(")
-      {
-        help_string.clear();
-
-        std::string sub_string = repr.substr(index+1, 1);
-        std::cout << "substring " << sub_string << std::endl;
-      }
-    }
-    return new Index(index);
   }
 
 //-----------------------------------------------------------------------------
-  FixedIndex::FixedIndex(dolfin::uint const& count) :
-    IndexBase(count)
+  FixedIndex::FixedIndex(repr_t const& repr) :
+    IndexBase("FixedIndex", repr)
   {
   }
 
@@ -172,39 +126,21 @@ namespace ufl
   {
   }
 
-
-//-----------------------------------------------------------------------------
-  FixedIndex const* FixedIndex::create(repr_t const & repr) const
-  {
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create a FixedIndex.");
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint index = 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++index)
-    {
-      help_string += *it;
-      if(help_string == "FixedIndex(")
-      {
-        help_string.clear();
-
-        std::string sub_string = repr.substr(index+1, 1);
-        std::cout << "substring " << sub_string << std::endl;
-      }
-    }
-    return new FixedIndex(index);
-  }
-  
 //-----------------------------------------------------------------------------
   MultiIndex::MultiIndex(dolfin::uint const& count) :
-    IndexBase(count)    
+    IndexBase("MultiIndex", count)    
   {
   }
 
 //-----------------------------------------------------------------------------
   MultiIndex::MultiIndex(IndexBase const& index) :
-    IndexBase(index)
+    IndexBase("MultiIndex", index)
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  MultiIndex::MultiIndex(repr_t const& repr) :
+    IndexBase("MultiIndex", repr)
   {
   }
 
@@ -228,29 +164,5 @@ namespace ufl
 //-----------------------------------------------------------------------------
   void MultiIndex::display() const
   {
-  }
-
-
-//-----------------------------------------------------------------------------
-  MultiIndex const* MultiIndex::create(repr_t const & repr) const
-  {
-    if(repr.length() == 0)
-      dolfin_assert("An empty signature was passed to create a MultiIndex.");
-
-    std::string::const_iterator it;
-    std::string help_string;
-    dolfin::uint index = 0;
-    for(it = repr.begin(); it!=repr.end(); ++it, ++index)
-    {
-      help_string += *it;
-      if(help_string == "MultiIndex(")
-      {
-        help_string.clear();
-
-        std::string sub_string = repr.substr(index+1, 1);
-        std::cout << "substring " << sub_string << std::endl;
-      }
-    }
-    return new MultiIndex(index);
   }
 }

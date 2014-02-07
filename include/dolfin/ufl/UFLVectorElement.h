@@ -29,7 +29,7 @@ public:
 
   ///
   VectorElement(Family::Type family, Cell const& cell,
-                   uint const degree, uint const dim);
+                   dolfin::uint const degree, dolfin::uint const dim);
 
   ///
   explicit VectorElement(repr_t const& repr);
@@ -73,7 +73,7 @@ protected:
   ValueArray const value_shape_;
   std::map<dolfin::uint, dolfin::uint> const symmetry_;
   FiniteElement const sub_element_;
-  type<uint> const dim_;
+  type<dolfin::uint> const dim_;
   FiniteElementBaseList const sub_elements_;
 
   mutable repr_t repr_;

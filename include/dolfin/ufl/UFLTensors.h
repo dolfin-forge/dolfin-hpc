@@ -36,12 +36,15 @@ namespace ufl
       ComponentTensor(Expression const& expression, IndexBase const& index);
 
       ///
+      ComponentTensor(repr_t const & repr);
+
+      ///
       ~ComponentTensor();
 
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, IndexBase const> const& operands() const;
+      std::pair<Expression const, MultiIndex const> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -66,13 +69,10 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      ComponentTensor const* create(repr_t const & repr) const;
-
     private:
 
       Expression const expression_;
-      IndexBase const& index_;
+      MultiIndex const index_;
 
       mutable repr_t repr_;
       mutable std::string str_;

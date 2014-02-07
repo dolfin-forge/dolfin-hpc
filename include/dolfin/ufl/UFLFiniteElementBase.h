@@ -138,7 +138,7 @@ private:
 
   Family const family_;
   Cell const cell_;
-  type<uint> const degree_;
+  type<dolfin::uint> const degree_;
   QuadratureScheme const quad_scheme_;
   ValueArray const value_shape_;
 

@@ -45,8 +45,8 @@ Family::MappingList const Family::__init_mapping()
 //-----------------------------------------------------------------------------
 void Family::register_family(DefinitionList& m, Family::Type family,
                                       std::string name, std::string short_name,
-                                      uint value_rank, uint degree_min,
-                                      uint degree_max, Domain::Set domains)
+                                      dolfin::uint value_rank, dolfin::uint degree_min,
+                                      dolfin::uint degree_max, Domain::Set domains)
 {
   Definition a(name, short_name, value_rank, degree_min, degree_max,
                       domains);
@@ -145,19 +145,19 @@ std::string Family::short_name() const
 }
 
 //-----------------------------------------------------------------------------
-uint Family::value_rank() const
+dolfin::uint Family::value_rank() const
 {
   return def_.value_rank;
 }
 
 //-----------------------------------------------------------------------------
-uint Family::degree_min() const
+dolfin::uint Family::degree_min() const
 {
   return def_.degree_range.first;
 }
 
 //-----------------------------------------------------------------------------
-uint Family::degree_max() const
+dolfin::uint Family::degree_max() const
 {
   return def_.degree_range.second;
 }
@@ -204,13 +204,13 @@ bool Family::has_valid_domain(Domain::Type domain) const
 }
 
 //-----------------------------------------------------------------------------
-bool Family::has_valid_degree(uint const degree) const
+bool Family::has_valid_degree(dolfin::uint const degree) const
 {
   return (def_.degree_range.first <= degree && def_.degree_range.second >= degree);
 }
 
 //-----------------------------------------------------------------------------
-bool Family::has_valid_definition(Domain::Type domain, uint const degree) const
+bool Family::has_valid_definition(Domain::Type domain, dolfin::uint const degree) const
 {
   return (has_valid_domain(domain) && has_valid_degree(degree));
 }

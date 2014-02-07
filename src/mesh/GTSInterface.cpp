@@ -26,7 +26,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-GTSInterface::GTSInterface(Mesh& m) : mesh(m), tree(0) 
+GTSInterface::GTSInterface(Mesh& m) : mesh(m), tree(0)
 {
   if (m.geometry().dim() > 3)
     error("Sorry, GTS interface not implemented for meshes of dimension %d.", m.geometry().dim());
@@ -34,7 +34,7 @@ GTSInterface::GTSInterface(Mesh& m) : mesh(m), tree(0)
   buildCellTree();
 }
 //-----------------------------------------------------------------------------
-GTSInterface::~GTSInterface() 
+GTSInterface::~GTSInterface()
 {
 #ifdef HAVE_GTS
   gts_bb_tree_destroy(tree, 1);
@@ -53,7 +53,7 @@ GtsBBox* GTSInterface::bboxCell(Cell& c)
   bbox = gts_bbox_new(gts_bbox_class(), (void *)c.index(),
 		      p.x(), p.y(), p.z(),
 		      p.x(), p.y(), p.z());
-  
+
   for(++v; !v.end(); ++v)
     {
       p = v->point();
@@ -67,37 +67,37 @@ GtsBBox* GTSInterface::bboxCell(Cell& c)
   return bbox;
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-GtsBBox* GTSInterface::bboxPoint(const Point& p)
+GtsBBox* GTSInterface::bboxPoint(Point const& p)
 {
 #ifdef HAVE_GTS
 
   GtsBBox* bbox;
-  
+
   real btol = dolfin_get("GTS Tolerance");
   bbox = gts_bbox_new(gts_bbox_class(), (void *)0,
 		      p.x()-btol, p.y()-btol, p.z()-btol,
 		      p.x()+btol, p.y()+btol, p.z()+btol);
-  
+
   return bbox;
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
   return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
-GtsBBox* GTSInterface::bboxPoint(const Point& p1, const Point& p2)
+GtsBBox* GTSInterface::bboxPoint(Point const& p1, Point const& p2)
 {
 #ifdef HAVE_GTS
 
   GtsBBox* bbox;
 
-  real x1, x2; 
+  real x1, x2;
   real y1, y2;
   real z1, z2;
 
@@ -123,11 +123,11 @@ GtsBBox* GTSInterface::bboxPoint(const Point& p1, const Point& p2)
   bbox = gts_bbox_new(gts_bbox_class(), (void *)0,
 		      x1, y1, z1,
 		      x2, y2, z2);
-  
+
   return bbox;
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
   return 0;
 #endif
 }
@@ -140,18 +140,18 @@ void GTSInterface::buildCellTree()
     warning("tree already initialized");
 
   GSList* bboxes = NULL;
- 
+
   for(CellIterator ci(mesh); !ci.end(); ++ci)
     {
       Cell& c = *ci;
       bboxes = g_slist_prepend(bboxes, bboxCell(c));
     }
-  
+
   tree = gts_bb_tree_new(bboxes);
   g_slist_free(bboxes);
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -183,16 +183,16 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells)
 	}
       overlaps = overlaps->next;
     }
-  
+
   g_slist_free(overlaps_base);
   gts_object_destroy(GTS_OBJECT(bbprobe));
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
 #endif
 }
 //-----------------------------------------------------------------------------
-void GTSInterface::overlap(Point& p, Array<uint>& cells)
+void GTSInterface::overlap(Point const& p, Array<uint>& cells)
 {
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
@@ -224,11 +224,11 @@ void GTSInterface::overlap(Point& p, Array<uint>& cells)
   gts_object_destroy(GTS_OBJECT(bbprobe));
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
 #endif
 }
 //-----------------------------------------------------------------------------
-void GTSInterface::overlap(Point& p1, Point& p2, Array<uint>& cells)
+void GTSInterface::overlap(Point const& p1, Point const& p2, Array<uint>& cells)
 {
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
@@ -259,7 +259,7 @@ void GTSInterface::overlap(Point& p1, Point& p2, Array<uint>& cells)
   gts_object_destroy(GTS_OBJECT(bbprobe));
 
 #else
-  error("missing GTS");
+  error("Missing GTS");
 #endif
 }
 //-----------------------------------------------------------------------------

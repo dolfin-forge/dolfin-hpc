@@ -13,40 +13,45 @@
 
 namespace dolfin
 {
-  class Mesh;
-  class Cell;
-  class Point;
-  //class GTSInterface;
-  template <class T> class Array;
 
-  class IntersectionDetector
-  {
-  public:
+class Mesh;
+class Cell;
+class Point;
 
-    /// Constructor
-    IntersectionDetector(Mesh& mesh);
+template<class T> class Array;
 
-    /// Destructor
-    ~IntersectionDetector();
+class IntersectionDetector
+{
+public:
 
-    /// Compute overlap with mesh
-    void overlap(Cell& c, Array<uint>& overlap);
+  /// Constructor
+  IntersectionDetector(Mesh& mesh);
 
-    /// Compute overlap with point
-    void overlap(Point& p, Array<uint>& overlap);
+  /// Destructor
+  ~IntersectionDetector();
 
-    /// Compute overlap with bounding box
-    void overlap(Point& p1, Point& p2, Array<uint>& overlap);
+  /// Compute overlap with mesh
+  void overlap(Cell& c, Array<uint>& overlap);
 
-    /// Compute which cells are intersected by a polygon (defined by points)
-    void overlap(Array<Point>& points, Array<uint>& overlap);
+  /// Compute overlap with point
+  void overlap(Point const& p, Array<uint>& overlap);
 
-  private:
-    IntersectionDetector();
-    IntersectionDetector(const IntersectionDetector&);
+  /// Compute overlap with bounding box
+  void overlap(Point const& p1, Point const& p2, Array<uint>& overlap);
 
-    GTSInterface gts;
-  };
+  /// Compute which cells are intersected by a polygon (defined by points)
+  void overlap(Array<Point> const& points, Array<uint>& overlap);
+
+private:
+
+  ///
+  IntersectionDetector();
+
+  ///
+  IntersectionDetector(IntersectionDetector const&);
+
+  GTSInterface gts;
+};
 }
 
 #endif

@@ -18,12 +18,18 @@
 #include <dolfin/mesh/GTSInterface.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-IntersectionDetector::IntersectionDetector(Mesh& mesh) : gts(mesh) {}
+IntersectionDetector::IntersectionDetector(Mesh& mesh) :
+    gts(mesh)
+{
+}
 //-----------------------------------------------------------------------------
-IntersectionDetector::~IntersectionDetector() {}
+IntersectionDetector::~IntersectionDetector()
+{
+}
 //-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Cell& c, Array<uint>& cells)
 {
@@ -31,28 +37,29 @@ void IntersectionDetector::overlap(Cell& c, Array<uint>& cells)
   gts.overlap(c, cells);
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Point& p, Array<uint>& cells)
+void IntersectionDetector::overlap(Point const& p, Array<uint>& cells)
 {
   cells.clear();
   gts.overlap(p, cells);
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Point& p1, Point& p2, Array<uint>& cells)
+void IntersectionDetector::overlap(Point const& p1, Point const& p2,
+                                   Array<uint>& cells)
 {
   cells.clear();
   gts.overlap(p1, p2, cells);
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Array<Point>& points, 
-				   Array<uint>& cells) 
+void IntersectionDetector::overlap(Array<Point> const& points,
+                                   Array<uint>& cells)
 {
   // Intersect each segment with mesh
   Array<uint> cc;
   for (uint i = 0; i < points.size() - 1; i++)
-    gts.overlap(points[i],points[i+1],cc);
+    gts.overlap(points[i], points[i + 1], cc);
 
   // sort cells
-  std::sort(cc.begin(),cc.end());
+  std::sort(cc.begin(), cc.end());
 
   // remove repeated cells
   cells.clear();
@@ -69,3 +76,6 @@ void IntersectionDetector::overlap(Array<Point>& points,
   }
 }
 //-----------------------------------------------------------------------------
+
+}
+

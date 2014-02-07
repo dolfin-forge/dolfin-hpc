@@ -10,54 +10,62 @@
 #include <dolfin/common/types.h>
 
 // Forward declarations
-struct  _GtsBBox;
+struct _GtsBBox;
 typedef _GtsBBox GtsBBox;
-struct  _GNode;
+struct _GNode;
 typedef _GNode GNode;
 
 namespace dolfin
 {
 
-  class Mesh;
-  class Point;
-  class Cell;
-  template <class T> class Array;
+class Mesh;
+class Point;
+class Cell;
 
-  class GTSInterface
-  {
-  public:
+template<class T> class Array;
 
-    GTSInterface(Mesh& m);
-    ~GTSInterface(void);
+class GTSInterface
+{
+public:
 
-    /// Compute cells overlapping c
-    void overlap(Cell& c, Array<uint>& cells);
+  ///
+  GTSInterface(Mesh& m);
 
-    /// Compute cells overlapping p
-    void overlap(Point& p, Array<uint>& cells);
+  ///
+  ~GTSInterface(void);
 
-    /// Compute cells overlapping bounding box constructed from p1 and p2
-    void overlap(Point& p1, Point& p2, Array<uint>& cells);
+  /// Compute cells overlapping c
+  void overlap(Cell& c, Array<uint>& cells);
 
-  private:
+  /// Compute cells overlapping p
+  void overlap(Point const& p, Array<uint>& cells);
 
-    GTSInterface(void);
-    GTSInterface(const GTSInterface&);
+  /// Compute cells overlapping bounding box constructed from p1 and p2
+  void overlap(Point const& p1, Point const& p2, Array<uint>& cells);
 
-    /// Construct bounding box of cell
-    GtsBBox* bboxCell(Cell&);
+private:
 
-    /// Construct bounding box of a single point
-    GtsBBox* bboxPoint(const Point&);
+  ///
+  GTSInterface(void);
 
-    /// Construct bounding box of a pair of points
-    GtsBBox* bboxPoint(const Point&, const Point&);
+  ///
+  GTSInterface(const GTSInterface&);
 
-    /// Construct hierarchical space partition tree of mesh
-    void buildCellTree(void);
+  /// Construct bounding box of cell
+  GtsBBox* bboxCell(Cell&);
 
-    Mesh& mesh;
-    GNode* tree;
-  };
+  /// Construct bounding box of a single point
+  GtsBBox* bboxPoint(Point const& p);
+
+  /// Construct bounding box of a pair of points
+  GtsBBox* bboxPoint(Point const& p1, Point const& p2);
+
+  /// Construct hierarchical space partition tree of mesh
+  void buildCellTree(void);
+
+  Mesh& mesh;
+  GNode* tree;
+};
+
 }
 #endif

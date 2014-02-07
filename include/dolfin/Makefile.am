@@ -10,7 +10,6 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				adaptivity/SpaceTimeFunction.h\
 				common/constants.h\
 				common/dolfin_common.h\
-				common/simple_array.h\
 				common/timing.h\
 				common/types.h\
 				common/unittest.h\

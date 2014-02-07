@@ -10,10 +10,10 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-TensorElement::TensorElement(ElementList::FamilyType family,
-                                   Cell const& cell, uint const degree,
-                                   uint const dim) :
-    FiniteElementBase(ElementList::Tensor, cell, degree),
+TensorElement::TensorElement(Family::Type family,
+                                   Cell const& cell, dolfin::uint const degree,
+                                   dolfin::uint const dim) :
+    FiniteElementBase("TensorElement",Family::Tensor, cell, degree),
     sub_element_(family, cell, degree),
     sub_elements_(dim, &sub_element_)
 {
@@ -23,12 +23,12 @@ TensorElement::TensorElement(ElementList::FamilyType family,
   QuadratureScheme qs;
 
   std::stringstream ssrepr;
-  ssrepr << "TensorElement(" << ElementList::Supported().repr(family)
+  ssrepr << "TensorElement(" << this->family().repr()
          << ", " << cell.repr() << ", " << degree << ", " << qs.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << ElementList::Supported().short_name(family)
+  ssstr << "<" << this->family().short_name()
         << " vector element of degree " << degree << " on a " << cell.str()
         << ": " << sub_elements_.size() << " x " << sub_element_.str() << ">";
   str_ = ssstr.str();
@@ -52,7 +52,7 @@ bool const TensorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const TensorElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const TensorElement::symmetry() const
 {
   return symmetry_;
 }
@@ -61,17 +61,17 @@ std::map<uint, uint> const TensorElement::symmetry() const
 std::pair<ValueArray, ValueArray> const TensorElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<uint, uint>();
+  return std::pair<dolfin::uint, dolfin::uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const TensorElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const * const> const TensorElement::extract_component(ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const TensorElement::num_sub_elements() const
+dolfin::uint const TensorElement::num_sub_elements() const
 {
   return 0;
 }
@@ -80,6 +80,18 @@ uint const TensorElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& TensorElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const TensorElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const TensorElement::str() const
+{
+  return str_;
 }
 
 }

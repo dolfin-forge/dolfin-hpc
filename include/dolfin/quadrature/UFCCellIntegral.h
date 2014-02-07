@@ -18,7 +18,7 @@
 namespace dolfin
 {
 
-  class UFCCellIntegral 
+  class UFCCellIntegral
   {
   public:
     
@@ -58,7 +58,7 @@ namespace dolfin
     J[0][1] = x[2][0] - x[0][0];
     J[1][0] = x[1][1] - x[0][1];
     J[1][1] = x[2][1] - x[0][1];
-      
+
 //    std::cout << "J_00 = " << J[0][0] << ",  J_01 = " << J[0][1] << ",  J_10 = " << J[1][0] << ",  J_11 = " << J[1][1] << std::endl;
     // Compute determinant of Jacobian
     double detJ = J[0][0]*J[1][1] - J[0][1]*J[1][0];
@@ -210,7 +210,7 @@ namespace dolfin
       
     }// end loop over 'ip
 
-    for(unsigned int i = 0; i<real_points.size(); ++i)
+   for(unsigned int i = 0; i<real_points.size(); ++i)
       delete real_points[i];
 
     for(unsigned int i = 0; i<q_coefficients.size(); ++i)

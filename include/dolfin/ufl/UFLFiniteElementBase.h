@@ -11,6 +11,7 @@
 
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLElementList.h>
+#include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLQuadratureScheme.h>
 
 #include <dolfin/common/types.h>
@@ -26,6 +27,7 @@ namespace ufl
  *  @class  UFLFiniteElement
  *
  *  @brief  Provides an interface complying with UFL FiniteElementBase.
+ *
  */
 
 class FiniteElementBase : public Class
@@ -36,15 +38,15 @@ public:
   //
   typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
 
-  /// Return finite element family
-  ElementList::FamilyType const family() const;
+  /// Return finite element family type
+  Family const family() const;
 
   /// Return cell of finite element
   Cell const cell() const;
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
-  uint const degree() const;
+  dolfin::uint const degree() const;
 
   /// Return quadrature scheme of finite element
   QuadratureScheme const quadrature_scheme() const;
@@ -64,7 +66,7 @@ public:
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  virtual std::map<uint, uint> const symmetry() const = 0;
+  virtual std::map<dolfin::uint, dolfin::uint> const symmetry() const = 0;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
@@ -73,10 +75,10 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual std::pair<uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
+  virtual std::pair<dolfin::uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
 
   /// Return number of sub elements
-  virtual uint const num_sub_elements() const = 0;
+  virtual dolfin::uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
   virtual FiniteElementBaseList const& sub_elements() const = 0;
@@ -96,19 +98,26 @@ public:
   /// TODO: Unimplemented
 
   /// __repr__
-  virtual std::string const repr() const = 0;
+  virtual repr_t const repr() const = 0;
 
   /// __str__
   virtual std::string const str() const = 0;
 
+  ///
+  virtual void display() const;
+
 protected:
 
   ///
-  FiniteElementBase(ElementList::FamilyType family,
-                       Cell const& cell,
-                       uint const degree,
-                       QuadratureScheme quad_scheme = QuadratureScheme(),
-                       ValueArray value_shape = ValueArray());
+  FiniteElementBase(std::string const& name,
+                    Family::Type const& family,
+                    Cell const& cell,
+                    dolfin::uint const degree,
+                    QuadratureScheme quad_scheme = QuadratureScheme(),
+                    ValueArray value_shape = ValueArray());
+
+  ///
+  FiniteElementBase(std::string const& name, repr_t repr);
 
   ///
   virtual ~FiniteElementBase();
@@ -123,13 +132,13 @@ protected:
   Cell const get_cell(FiniteElementBaseList const& elements);
 
   ///
-  uint const get_degree_max(FiniteElementBaseList const& elements);
+  dolfin::uint const get_degree_max(FiniteElementBaseList const& elements);
 
 private:
 
-  ElementList::FamilyType const family_;
+  Family const family_;
   Cell const cell_;
-  uint const degree_;
+  type<dolfin::uint> const degree_;
   QuadratureScheme const quad_scheme_;
   ValueArray const value_shape_;
 

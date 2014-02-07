@@ -13,9 +13,9 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 CellVolume::CellVolume(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("CellVolume", cell),
     shape_(),
-    repr_("CellVolume(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("volume")
 
 {
@@ -33,7 +33,7 @@ ValueArray const& CellVolume::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const CellVolume::repr() const
+Object::repr_t const CellVolume::repr() const
 {
   return repr_;
 }

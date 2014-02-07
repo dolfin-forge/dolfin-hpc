@@ -11,8 +11,9 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 RestrictedElement::RestrictedElement(FiniteElementBase const& element,
-                                           Domain::Type const domain) :
-    FiniteElementBase(ElementList::Restricted, element.cell(),
+                                           Domain const& domain) :
+    FiniteElementBase("RestrictedElement",Family::Restricted,
+                         element.cell(),
                          element.degree(), element.quadrature_scheme(),
                          element.value_shape()),
     element_(element)
@@ -21,11 +22,11 @@ RestrictedElement::RestrictedElement(FiniteElementBase const& element,
 
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", "
-         << Domain::str(domain) << ")";
+         << domain.repr() << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
-  ssstr << "<" << element_.str() << ">|_" << Domain::str(domain) << ">";
+  ssstr << "<" << element_.str() << ">|_" << domain.str() << ">";
   str_ = ssstr.str();
 }
 
@@ -41,7 +42,7 @@ bool const RestrictedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const RestrictedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }
@@ -54,13 +55,13 @@ std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_co
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const RestrictedElement::num_sub_elements() const
+dolfin::uint const RestrictedElement::num_sub_elements() const
 {
   return element_.num_sub_elements();
 }
@@ -75,6 +76,18 @@ FiniteElementBase::FiniteElementBaseList const& RestrictedElement::sub_elements(
 FiniteElementBase const& RestrictedElement::element()
 {
   return element_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const RestrictedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const RestrictedElement::str() const
+{
+  return str_;
 }
 
 }

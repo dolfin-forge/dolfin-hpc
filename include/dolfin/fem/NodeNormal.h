@@ -21,43 +21,56 @@ namespace dolfin
 class BoundaryMesh;
 class Mesh;
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  NodeNormal
+ *
+ *  @brief  Provides an orthonormal basis at each vertex located on an exterior
+ *          facet of the mesh, defining an outward normal vector and two
+ *          tangential vectors.
+ */
+
 class NodeNormal
 {
 public:
 
-  // Copy constructor
+  /// Copy constructor
   NodeNormal(NodeNormal& node_normal);
 
-  // Create normal, tangents for the boundary of mesh
+  /// Create normal, tangents to the boundary of mesh at vertices
   NodeNormal(Mesh& mesh);
 
+  /// Destructor
   ~NodeNormal();
 
-  // Assignment
+  /// Assignment
   NodeNormal& operator=(NodeNormal& node_normal);
 
-  // Cleanup
-  void clear();
-
-  // Define mesh functions for normal and tangents
-  // These are merely aliases now
-  // One-liner is bad coding style.
+  /// Define mesh functions for normal and tangents
+  /// These are merely aliases now
   MeshFunction<real> * normal;
   MeshFunction<real> * tau;
   MeshFunction<real> * tau_1;
   MeshFunction<real> * tau_2;
 
-  // Define node type: 1 surface, 2 edge, 3 surface
+  /// Define node type as the number of discriminated hyperplanes:
+  /// 1 surface, 2 edge, >= 3 corner
   MeshFunction<uint> node_type;
 
+  /// Return the orthonormal basis (n, tau) in 2d or (n, tau1, tau2) in 3d
   Array<MeshFunction<real> *> const& basis() const;
 
 private:
 
-  // Compute normals to the boundary nodes
-  void __compute_normal(Mesh& mesh);
+  /// Cleanup
+  void Clear();
 
-  void __cache_shared_area(Mesh& mesh, BoundaryMesh& boundary);
+  /// Compute normals to the boundary nodes
+  void ComputeNormal(Mesh& mesh);
+
+  ///
+  void CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
@@ -65,24 +78,28 @@ private:
 
   Array<MeshFunction<real> *> basis_;
 
+  /// Entities shared between processors
   Array<real> shared_vertexnormals_;
   std::map<uint, Array<real> > shared_facetnormals_block_;
   std::map<uint, Array<real> > shared_facetweights_block_;
 
-  // Number of boundary mesh cells (facets for global) neighbouring a boundary vertex
+  /// Number of boundary mesh cells (facets for global) neighbouring a boundary
+  /// vertex
   std::map<uint, uint> num_neigh_cells_;
   std::map<uint, uint> shared_offsetidx_;
   uint vertex_offset_;
   uint facetnormals_offset_;
   uint facetweights_offset_;
 
-  // Should be set to the size of the offset information stored for each vertex
-  // Here padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
+  /// Should be set to the size of the offset information stored for each vertex
+  /// Padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
   static uint const offsetidx_padding_ = 3;
 
-  // Maximum absolute angle between two neighbouring facets
+  /// Maximum absolute angle between two neighbouring facets to be discriminated
+  /// as belonging to difference hyperplanes.
   real const alpha_max_;
 
+  /// Weighing use to computing the node normal from facet normals.
   enum weight_type
   {
     none, facet, cell
@@ -92,6 +109,7 @@ private:
 
 };
 
+//-----------------------------------------------------------------------------
 inline Array<MeshFunction<real> *> const& NodeNormal::basis() const
 {
   return basis_;

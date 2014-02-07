@@ -29,7 +29,7 @@ class GeometricQuantity : public Class
 public:
 
   ///
-  GeometricQuantity(Cell const& cell);
+  GeometricQuantity(std::string const& name, Cell const& cell);
 
   ///
   ~GeometricQuantity();
@@ -41,10 +41,13 @@ public:
   virtual ValueArray const& shape() const = 0;
 
   /// __repr__
-  virtual std::string const repr() const = 0;
+  virtual repr_t const repr() const = 0;
 
   /// __str__
   virtual std::string const str() const = 0;
+
+  ///
+  virtual void display() const;
 
 private:
 

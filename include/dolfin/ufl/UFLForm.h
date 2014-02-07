@@ -7,6 +7,7 @@
 #ifndef __UFL_FORM_H_
 #define __UFL_FORM_H_
 
+#include <dolfin/ufl/UFLIntegral.h>
 
 namespace ufl
 {
@@ -19,62 +20,71 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL Form.
  */
 
-  class Form : public Expression
+  class Form : public Class
   {
     public:
 
-      ///
-      Form(const std::vector<Integral>& integrals);
+//      ///
+//      Form(std::vector<Integral> const& integrals);
 
       ///
-      Form(const Integral& integral);
+      Form(Integral const& integral);
+
+      ///
+      Form(repr_t const & repr);
 
       ///
       ~Form();
 
       //--- INTERFACE -------------------------------------------------------------
 
-      const Cell& cell() const;
+      Cell const& cell() const;
 
-      const std::vector<Integral>& integrals() const;
+      std::vector<Integral> const& integrals(Measure::Type const& measure_type=Measure::None) const;
 
-      const std::vector<Measure>& measures() const;
+      std::vector<Measure> const measures(Measure::Type const& measure_type=Measure::None) const;
 
-      const std::vector<Domain::Type>& domains() const;
+      std::vector<Measure::Type> const domains(Measure::Type const& measure_type=Measure::None) const;
 
-      const std::vector<Integral>& cell_integrals() const;
+      std::vector<Integral> const& cell_integrals() const;
 
-      const std::vector<Integral>& exterior_facet_integrals() const;
+      std::vector<Integral> const& exterior_facet_integrals() const;
       
-      const std::vector<Integral>& interior_facet_integrals() const;
+      std::vector<Integral> const& interior_facet_integrals() const;
       
-      const std::vector<Integral>& macro_cell_integrals() const;
+      std::vector<Integral> const& macro_cell_integrals() const;
       
-      const std::vector<Integral>& surface_integrals() const;
+      std::vector<Integral> const& surface_integrals() const;
       
-      const FormData& form_data() const;
+//      FormData const& form_data() const;
       
-      const FormData& compute_form_data() const;
+//      FormData const& compute_form_data() const;
 
-      bool is_preprocessed() const;
+      bool const is_preprocessed() const;
       
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __repr__
-      std::string const repr() const;
+      repr_t const repr() const;
 
       /// __str__
       std::string const str() const;
+      
+      ///
+      void display() const;
 
     private:
-      const std::vector<Integral> integrals;
+//      std::vector<Integral> integrals_;
+      Integral const integral_;
 
-      const FormData form_data;
+//      const FormData form_data;
 
-      std::string const repr_;
+      repr_t const repr_;
       std::string const str_;
 
-      bool is_preprocessed;
+      bool const is_preprocessed_;
   };
+  
+  
+
 } /* namespace ufl */
 #endif /* __UFL_FORM_H_ */

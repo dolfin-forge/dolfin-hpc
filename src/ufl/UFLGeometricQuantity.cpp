@@ -10,7 +10,8 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-GeometricQuantity::GeometricQuantity(Cell const& cell):
+GeometricQuantity::GeometricQuantity(std::string const& name, Cell const& cell):
+    Class(name),
     cell_(cell)
 {
 }
@@ -24,6 +25,13 @@ GeometricQuantity::~GeometricQuantity()
 Cell const& GeometricQuantity::cell()
 {
   return cell_;
+}
+
+//-----------------------------------------------------------------------------
+void GeometricQuantity::display() const
+{
+  Class::display();
+  std::cout << std::endl;
 }
 
 }

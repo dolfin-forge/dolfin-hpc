@@ -283,6 +283,8 @@ if test "x${enable_check}" = xyes; then
       AC_MSG_ERROR([CHECK not found, needed for unit testing])
    fi
 fi
+# Add variable for automake to compile tests
+AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" == xyes])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
@@ -328,6 +330,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
                  tests/fem/Makefile\
+                 tests/function/Makefile\
                  tests/ufl/Makefile])
 fi
 

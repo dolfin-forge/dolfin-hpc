@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 QuadratureScheme::QuadratureScheme() :
-    Class(),
+    Class("QuadratureScheme"),
     repr_("None"),
     str_("None")
 {
@@ -25,7 +25,7 @@ QuadratureScheme::~QuadratureScheme()
 }
 
 //-----------------------------------------------------------------------------
-std::string const QuadratureScheme::repr() const
+Object::repr_t const QuadratureScheme::repr() const
 {
   return repr_;
 }

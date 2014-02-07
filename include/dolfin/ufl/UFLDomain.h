@@ -7,9 +7,12 @@
 #ifndef __UFL_DOMAIN_H_
 #define __UFL_DOMAIN_H_
 
-#include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLtype.h>
+
+#include <dolfin/common/types.h>
 
 #include <map>
+#include <set>
 #include <string>
 
 namespace ufl
@@ -23,7 +26,7 @@ namespace ufl
  *  @brief  Provides a C++ equivalent to ufl_domains from ufl.geometry.
  */
 
-class Domain : public Class
+class Domain : public type<std::string>
 {
 
 public:
@@ -43,45 +46,58 @@ public:
   };
 
   ///
+  typedef std::set<Domain::Type> Set;
+
+  ///
   Domain(Type const& t);
+
+  ///
+  explicit Domain(repr_t const& repr);
 
   ///
   ~Domain();
 
   ///
-  static Type const facet(Type const& t);
+  static Type const type_facet(Domain::Type const& t);
 
   ///
-  static uint const dim(Type const& t);
+  static dolfin::uint const type_dim(Domain::Type const& t);
 
   ///
-  static uint const num_facets(Type const& t);
+  static dolfin::uint const type_num_facets(Domain::Type const& t);
+
+  /// UFL:
+  Type const facet() const;
+
+  /// UFL:
+  dolfin::uint const dim() const;
+
+  /// UFL:
+  dolfin::uint const num_facets() const;
 
   ///
-  static std::string const str(Type const& t);
+  Type const type() const;
 
-  /// __repr__
-  std::string const repr() const;
+  ///
+  bool const is_undefined() const;
 
-  /// __str__
-  std::string const str() const;
+  ///
+  void display() const;
 
 private:
 
-  Domain::Type const domain_;
-  std::string const repr_;
-  std::string const str_;
+  Domain::Type const type_;
 
   //--- STATIC ----------------------------------------------------------------
 
   struct Definition
   {
-    uint dim;
+    dolfin::uint dim;
     Type facet;
-    uint num_facets;
+    dolfin::uint num_facets;
     std::string str;
 
-    Definition(uint a_dim, Type a_facet, uint a_num_facets, std::string a_str) :
+    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
         dim(a_dim),
         facet(a_facet),
         num_facets(a_num_facets),
@@ -90,10 +106,27 @@ private:
     }
   };
 
+  ///
+  static std::string const type_repr(Domain::Type const& t);
   typedef std::map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
-  static DefinitionList const DomainDefinitions;
-  static DefinitionList const __init_domain_definitions();
+  static DefinitionList const Definitions()
+  {
+    static DefinitionList const Definitions = __init_definitions();
+    return Definitions;
+  }
+  static DefinitionList const __init_definitions();
+
+  ///
+  static Domain::Type const repr_type(repr_t const& repr);
+  typedef std::map<repr_t const, Domain::Type> MappingList;
+  typedef std::pair<repr_t const, Domain::Type> MappingItem;
+  static MappingList const Mapping()
+  {
+    static MappingList const Mapping = __init_mapping();
+    return Mapping;
+  }
+  static MappingList const __init_mapping();
 
 };
 

@@ -8,6 +8,7 @@
 #define __UFL_SPACE_H_
 
 #include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLtype.h>
 
 #include <dolfin/common/types.h>
 
@@ -28,25 +29,31 @@ class Space : public Class
 public:
 
   ///
-  Space(uint const& dim);
+  Space(dolfin::uint const& dim);
+
+  ///
+  Space(repr_t const& repr);
 
   ///
   ~Space();
 
-  /// Return number of space dimensions
-  uint dimension() const;
+  /// UFL: Return number of space dimensions
+  dolfin::uint dimension() const;
 
   /// __repr__
-  std::string const repr() const;
+  repr_t const repr() const;
 
   /// __str__
   std::string const str() const;
 
+  ///
+  void display() const;
+
 private:
 
-  uint const dimension_;
+  type<dolfin::uint> const dimension_;
 
-  mutable std::string repr_;
+  mutable repr_t repr_;
   mutable std::string str_;
 
 };

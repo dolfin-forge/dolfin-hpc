@@ -279,6 +279,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
+				mesh/VertexNormal.h\
 				nls/dolfin_nls.h\
 				nls/NewtonSolver.h\
 				nls/NonlinearProblem.h\
@@ -300,27 +301,43 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/GaussTensorQuadratureRule.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
+				quadrature/QuadratureRule.h\
 				quadrature/RadauQuadrature.h\
 				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
+				ufl/UFLarray.h\
+				ufl/UFLrepr.h\
+				ufl/UFLtuple.h\
+				ufl/UFLtype.h\
+				ufl/UFLAlgebra.h\
+				ufl/UFLArgument.h\
 				ufl/UFLCell.h\
 				ufl/UFLCellSurfaceArea.h\
 				ufl/UFLCellVolume.h\
 				ufl/UFLCircumradius.h\
 				ufl/UFLClass.h\
+				ufl/UFLDifferentiation.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
 				ufl/UFLEnrichedElement.h\
+				ufl/UFLExpression.h\
 				ufl/UFLFacetArea.h\
 				ufl/UFLFacetNormal.h\
+				ufl/UFLFamily.h\
 				ufl/UFLFiniteElement.h\
 				ufl/UFLFiniteElementBase.h\
+				ufl/UFLForm.h\
 				ufl/UFLGeometricQuantity.h\
+				ufl/UFLIndex.h\
+				ufl/UFLIndexed.h\
+				ufl/UFLIndexSum.h\
+				ufl/UFLIntegral.h\
 				ufl/UFLMixedElement.h\
+				ufl/UFLObject.h\
 				ufl/UFLQuadratureScheme.h\
 				ufl/UFLRestrictedElement.h\
 				ufl/UFLSpace.h\
 				ufl/UFLSpatialCoordinate.h\
 				ufl/UFLTensorElement.h\
+				ufl/UFLTensors.h\
 				ufl/UFLVectorElement.h
-

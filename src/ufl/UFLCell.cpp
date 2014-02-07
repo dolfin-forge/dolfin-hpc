@@ -8,44 +8,70 @@
 
 #include <dolfin/log/log.h>
 
+#include <iomanip>
+
 namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Cell::Cell(Domain::Type const& domain) :
-    Class(),
+Cell::Cell(Domain const& domain) :
+    Class("Cell"),
     domain_(domain),
-    space_(Domain::dim(domain)),
-    invalid_((domain == Domain::None ? true : false)),
+    space_(domain_.dim()),
+    repr_(*this, domain_, space_),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
+    invalid_(domain_.is_undefined()),
     geometric_dimension_(space_.dimension()),
-    topological_dimension_(Domain::dim(domain)),
+    topological_dimension_(domain_.dim()),
     cell_surface_area_(*this),
     cell_volume_(*this),
     circumradius_(*this),
     facet_area_(*this),
     facet_normal_(*this),
-    x_(*this),
-    repr_("Cell(" + Domain::str(domain_) + ", " + space_.repr() + ")"),
-    str_("<" + Domain::str(domain_) + " cell in " + space_.str() + ">")
+    x_(*this)
 {
 }
 
 //-----------------------------------------------------------------------------
-Cell::Cell(Domain::Type const& domain, Space const& space) :
-    Class(),
+Cell::Cell(Domain const& domain, Space const& space) :
+    Class("Cell"),
     domain_(domain),
     space_(space),
-    invalid_((domain == Domain::None ? true : false)),
+    repr_(*this, domain_, space_),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
+    invalid_(domain_.is_undefined()),
     geometric_dimension_(space_.dimension()),
-    topological_dimension_(Domain::dim(domain)),
+    topological_dimension_(domain_.dim()),
     cell_surface_area_(*this),
     cell_volume_(*this),
     circumradius_(*this),
     facet_area_(*this),
     facet_normal_(*this),
-    x_(*this),
-    repr_("Cell(" + Domain::str(domain_) + ", " + space_.repr() + ")"),
-    str_("<" + Domain::str(domain_) + " cell in " + space_.str() + ">")
+    x_(*this)
+{
+}
+
+//-----------------------------------------------------------------------------
+Cell::Cell(repr_t const& repr) :
+    Class("Cell", repr),
+    domain_(arg(0)),
+    space_(arg(1)),
+    repr_(*this, domain_, space_),
+    str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
+    invalid_(domain_.is_undefined()),
+    geometric_dimension_(space_.dimension()),
+    topological_dimension_(domain_.dim()),
+    cell_surface_area_(*this),
+    cell_volume_(*this),
+    circumradius_(*this),
+    facet_area_(*this),
+    facet_normal_(*this),
+    x_(*this)
+{
+}
+
+//-----------------------------------------------------------------------------
+Cell::~Cell()
 {
 }
 
@@ -92,37 +118,37 @@ bool const& Cell::is_undefined() const
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const& Cell::domain() const
+Domain const Cell::domain() const
 {
   return domain_;
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const& Cell::facet_domain() const
+Domain const Cell::facet_domain() const
 {
-  return Domain::facet(domain_);
+  return Domain(domain_.facet());
 }
 
 //-----------------------------------------------------------------------------
-uint const Cell::num_facets() const
+dolfin::uint const Cell::num_facets() const
 {
-  return Domain::num_facets(domain_);
+  return domain_.num_facets();
 }
 
 //-----------------------------------------------------------------------------
-uint const& Cell::geometric_dimension() const
+dolfin::uint const Cell::geometric_dimension() const
 {
   return geometric_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-uint const& Cell::topological_dimension() const
+dolfin::uint const Cell::topological_dimension() const
 {
   return topological_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Cell::repr() const
+Object::repr_t const Cell::repr() const
 {
   return repr_;
 }
@@ -131,6 +157,18 @@ std::string const Cell::repr() const
 std::string const Cell::str() const
 {
   return str_;
+}
+
+//-----------------------------------------------------------------------------
+void Cell::display() const
+{
+  Class::display();
+  std::cout << std::setw(24) << "is_undefined" << " = " << this->is_undefined() << std::endl;
+  std::cout << std::setw(24) << "domain" << " = " << this->domain().str() << std::endl;
+  std::cout << std::setw(24) << "facet_domain" << " = " << this->facet_domain().str() << std::endl;
+  std::cout << std::setw(24) << "geometric_dimension" << " = " << this->geometric_dimension() << std::endl;
+  std::cout << std::setw(24) << "topological_dimension" << " = " << this->topological_dimension() << std::endl;
+  std::cout << std::endl;
 }
 
 }

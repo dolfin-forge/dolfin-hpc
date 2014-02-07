@@ -7,6 +7,8 @@
 #ifndef __UFL_EXPRESSION_H_
 #define __UFL_EXPRESSION_H_
 
+#include <dolfin/ufl/UFLCell.h>
+#include <dolfin/ufl/UFLIntegral.h>
 
 namespace ufl
 {
@@ -24,63 +26,68 @@ namespace ufl
     public:
 
       ///
-      Expression();
-    
+      Expression(Object const& object);
+
+      ///
+      Expression (repr_t const & repr);
+
+//      ///
+//      Expression();
+      
       ///
       ~Expression();
 
       //--- INTERFACE -------------------------------------------------------------
 
-      Expression& reconstruct(const Expression &expression);
-
-      operands();
+//      std::vector<Expression> operands() const;
       
-      shape();
+      /// UFL: Return the tensor shape of the expression
+//      shape();
       
-      rank();
+      /// UFL: Return the tensor rank of the expression
+//      uint const rank() const;
       
-      cell();
+      /// UFL: Return the cell this expression is defined on
+      Cell const& cell() const;
       
-      geometric_dimension();
+      /// UFL: Return the geometric dimension this expression is defined on
+//      uint const geometric_dimension() const;
       
-      is_cellwise_constant();
+      /// UFL: Return whether this expression is spatially constant over each cell
+      bool const is_cellwise_constant() const;
       
-      evaluate(const Coordinate& x, const Mapping& mapping, const IndexValues& index_values);
-      
-      free_indices();
-      
-      index_dimensions();
-      
-      hash();
-
-
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
       /// __repr__
-      std::string const repr() const;
+      repr_t const repr() const;
 
       /// __str__
       std::string const str() const;
 
+      ///
+      void display() const;
+
     private:
 
-      const Expression integrand;
-      const Measure measure;
-
-      std::string const repr_;
+      repr_t const repr_;
       std::string const str_;
+
+      bool const is_cellwise_constant_;
   };
 
+  /*
   class Operator : public Expression
   {
     public:
 
-      Operator (const Expression& expression);
+      Operator (Expression const& expression);
       ~Operator ();
 
-      const Expression& reconstruct(const Expression& expression);
-      bool is_cellwise_constant() const;
-  
+      bool const is_cellwise_constant() const;
+    
+    private:
+      Expression const expression_;
   };
+  */
 } /* namespace ufl */
 #endif /* __UFL_EXPRESSION_H_ */

@@ -13,9 +13,9 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 Circumradius::Circumradius(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("Circumradius", cell),
     shape_(),
-    repr_("Circumradius(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("circumradius")
 
 {
@@ -33,7 +33,7 @@ ValueArray const& Circumradius::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const Circumradius::repr() const
+Object::repr_t const Circumradius::repr() const
 {
   return repr_;
 }

@@ -6,14 +6,16 @@
 
 #include <dolfin/ufl/UFLFacetNormal.h>
 
+#include <dolfin/ufl/UFLCell.h>
+
 namespace ufl
 {
 
 //-----------------------------------------------------------------------------
 FacetNormal::FacetNormal(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("FacetNormal", cell),
     shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
-    repr_("FacetNormal(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("n")
 
 {
@@ -31,7 +33,7 @@ ValueArray const& FacetNormal::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetNormal::repr() const
+Object::repr_t const FacetNormal::repr() const
 {
   return repr_;
 }

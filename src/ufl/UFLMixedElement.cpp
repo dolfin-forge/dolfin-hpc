@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 MixedElement::MixedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase(ElementList::Mixed, get_cell(elements),
+    FiniteElementBase("MixedElement", Family::Mixed, get_cell(elements),
                          get_degree_max(elements)),
     sub_elements_(elements)
 {
@@ -31,7 +31,7 @@ MixedElement::MixedElement(
   ssstr << "<Mixed element: (";
 
   FiniteElementBaseList::const_iterator it = sub_elements_.begin();
-  uint value_size_sum = (*it)->value_shape().size();
+  dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
   for ( ++it ; it != sub_elements_.end(); ++it)
@@ -65,7 +65,7 @@ bool const MixedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const MixedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const MixedElement::symmetry() const
 {
   return symmetry_;
 }
@@ -121,7 +121,7 @@ std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_compone
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const MixedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const * const> const MixedElement::extract_component(ValueArray const& i) const
 {
   ValueArray subidx;
   subidx.insert(subidx.begin(),i.begin()+1,i.end());
@@ -129,7 +129,7 @@ std::pair<uint, FiniteElementBase const * const> const MixedElement::extract_com
 }
 
 //-----------------------------------------------------------------------------
-uint const MixedElement::num_sub_elements() const
+dolfin::uint const MixedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
@@ -138,6 +138,18 @@ uint const MixedElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& MixedElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const MixedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const MixedElement::str() const
+{
+  return str_;
 }
 
 }

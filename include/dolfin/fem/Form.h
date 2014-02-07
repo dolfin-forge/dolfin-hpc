@@ -14,6 +14,8 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/MeshFunction.h>
 
+#include <string>
+
 namespace dolfin
 {
 
@@ -35,7 +37,13 @@ namespace dolfin
     /// Return array of coefficients
     virtual const Array<Function*>& coefficients() const = 0;
 
-    /// Create degree of freedom maps 
+    ///
+    virtual uint coefficient_number(const std::string& name) const;
+
+    ///
+    virtual std::string coefficient_name(dolfin::uint i) const;
+
+    /// Create degree of freedom maps
     void updateDofMaps(Mesh& mesh);
 
     /// Set degree of freedom maps

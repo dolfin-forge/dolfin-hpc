@@ -13,8 +13,9 @@ namespace ufl
 //-----------------------------------------------------------------------------
 EnrichedElement::EnrichedElement(
     FiniteElementBaseList const& elements ) :
-    FiniteElementBase(ElementList::Enriched, get_cell(elements),
-                         get_degree_max(elements)),
+    FiniteElementBase("EnrichedElement", Family::Enriched,
+                      get_cell(elements),
+                      get_degree_max(elements)),
     sub_elements_(elements)
 {
   // Create string representation
@@ -24,7 +25,7 @@ EnrichedElement::EnrichedElement(
   ssstr << "<";
 
   FiniteElementBaseList::const_iterator it = sub_elements_.begin();
-  uint value_size_sum = (*it)->value_shape().size();
+  dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
   for ( ++it ; it != sub_elements_.end(); ++it)
@@ -58,7 +59,7 @@ bool const EnrichedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const EnrichedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const EnrichedElement::symmetry() const
 {
   return symmetry_;
 }
@@ -67,17 +68,17 @@ std::map<uint, uint> const EnrichedElement::symmetry() const
 std::pair<ValueArray, ValueArray> const EnrichedElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<uint, uint>();
+  return std::pair<dolfin::uint, dolfin::uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const EnrichedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const * const> const EnrichedElement::extract_component(ValueArray const& i) const
 {
-  return std::pair<uint, FiniteElementBase const * const>( i[0] , sub_elements_[i[0]] );
+  return std::pair<dolfin::uint, FiniteElementBase const * const>( i[0] , sub_elements_[i[0]] );
 }
 
 //-----------------------------------------------------------------------------
-uint const EnrichedElement::num_sub_elements() const
+dolfin::uint const EnrichedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
@@ -86,6 +87,18 @@ uint const EnrichedElement::num_sub_elements() const
 FiniteElementBase::FiniteElementBaseList const& EnrichedElement::sub_elements() const
 {
   return sub_elements_;
+}
+
+//-----------------------------------------------------------------------------
+Object::repr_t const EnrichedElement::repr() const
+{
+  return repr_;
+}
+
+//-----------------------------------------------------------------------------
+std::string const EnrichedElement::str() const
+{
+  return str_;
 }
 
 }

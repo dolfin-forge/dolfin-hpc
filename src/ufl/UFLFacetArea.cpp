@@ -13,9 +13,9 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 FacetArea::FacetArea(Cell const& cell) :
-    GeometricQuantity(cell),
+    GeometricQuantity("FacetArea", cell),
     shape_(),
-    repr_("FacetArea(" + cell.repr() + ")"),
+    repr_(*this, cell),
     str_("facetarea")
 
 {
@@ -33,7 +33,7 @@ ValueArray const& FacetArea::shape() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetArea::repr() const
+Object::repr_t const FacetArea::repr() const
 {
   return repr_;
 }

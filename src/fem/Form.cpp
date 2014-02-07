@@ -6,7 +6,8 @@
 
 #include <dolfin/fem/Form.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 Form::~Form()
@@ -14,6 +15,7 @@ Form::~Form()
   if( local_dof_map_set )
     delete local_dof_map_set;
 }
+
 //-----------------------------------------------------------------------------
 void Form::updateDofMaps(Mesh& mesh)
 {
@@ -26,10 +28,11 @@ void Form::updateDofMaps(Mesh& mesh)
     local_dof_map_set = dof_map_set;
   }
 }
+
 //-----------------------------------------------------------------------------
 void Form::setDofMaps(DofMapSet& dof_map_set)
 {
-  // Delete dof map if locally owned 
+  // Delete dof map if locally owned
   if( local_dof_map_set )
     delete local_dof_map_set;
 
@@ -38,6 +41,7 @@ void Form::setDofMaps(DofMapSet& dof_map_set)
 
   this->dof_map_set = &dof_map_set;
 }
+
 //-----------------------------------------------------------------------------
 DofMapSet& Form::dofMaps() const
 {
@@ -46,5 +50,21 @@ DofMapSet& Form::dofMaps() const
 
   return *dof_map_set;
 }
-//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+uint Form::coefficient_number(std::string const& name) const
+{
+  error("Not implemented without UFL support: \n"
+        "uint Form::coefficient_number(const std::string& name) const");
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+std::string Form::coefficient_name(uint const i) const
+{
+  error("Not implemented without UFL support: \n"
+        "std::string Form::coefficient_name(dolfin::uint i) const");
+  return "";
+}
+
+}

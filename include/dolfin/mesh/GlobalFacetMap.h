@@ -13,24 +13,39 @@
 
 namespace dolfin
 {
-  class GlobalFacetMap
-  {
-  public:
-    GlobalFacetMap(Mesh& mesh);
-    ~GlobalFacetMap();
 
-    void init();
-    bool globalFacet(Facet& facet);
-    
-  private:
+class GlobalFacetMap
+{
+public:
 
-    void findGlobal2D();
-    void findGlobal3D();
+  ///
+  GlobalFacetMap(Mesh& mesh);
 
-    // Map of processor global facets, 
-    // stores only the facets with shared vertices
-    _map<uint, bool> global_facet;
-    Mesh& _mesh;
-  };
+  ///
+  ~GlobalFacetMap();
+
+  ///
+  void init();
+
+  ///
+  bool globalFacet(Facet& facet);
+
+private:
+
+  ///
+  void findGlobal2D();
+
+  ///
+  void findGlobal3D();
+
+  // Map of processor global facets,
+  // stores only the facets with shared vertices
+  _map<uint, bool> global_facet;
+
+  //
+  Mesh& _mesh;
+
+};
+
 }
 #endif

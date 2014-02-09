@@ -116,6 +116,9 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 //-----------------------------------------------------------------------------
 void MeshDistributedData::clear()
 {
+  _dim = 0;
+  _cell_dim = 0;
+  _facet_dim = 0;
   _max_global_index = 0;
 
   for(uint i = 0; i < MAX_DIM; ++i)

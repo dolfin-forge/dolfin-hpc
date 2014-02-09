@@ -88,7 +88,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
                                            MeshFunction<bool> *cell_marker)
 {
 
-  MeshDistributedData distdata;
+  MeshDistributedData distdata(mesh);
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint gdim = mesh.geometry().dim();
@@ -451,7 +451,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     VertexFunctionArrayType;
 
   // new local distdata
-  MeshDistributedData distdata;
+  MeshDistributedData distdata(mesh);
 
   // sizes and numbers
   uint rank = MPI::processNumber();

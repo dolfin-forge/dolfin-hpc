@@ -15,6 +15,7 @@ namespace dolfin
 class Vertex;
 class Edge;
 class Face;
+class Mesh;
 class MeshEntity;
 class MeshDistributedData
 {
@@ -22,7 +23,7 @@ class MeshDistributedData
 
 public:
 
-  MeshDistributedData();
+  MeshDistributedData(Mesh const& mesh);
 
   ~MeshDistributedData();
 
@@ -132,6 +133,8 @@ public:
 protected:
 
 private:
+
+  Mesh const& _mesh;
 
   uint _max_global_index;
   uint _num_global_vertex;

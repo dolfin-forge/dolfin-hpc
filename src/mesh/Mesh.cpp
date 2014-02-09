@@ -50,20 +50,20 @@ Mesh::Mesh() :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _distdata(),
+  _distdata(*this),
   _timestamp(time(0))
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(const Mesh& mesh) :
+Mesh::Mesh(Mesh const& mesh) :
   Variable("mesh", "DOLFIN mesh"),
   _topology(),
   _geometry(),
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _distdata(),
+  _distdata(*this),
   _timestamp(time(0))
 {
   *this = mesh;
@@ -76,7 +76,7 @@ Mesh::Mesh(std::string filename) :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _distdata(),
+  _distdata(*this),
   _timestamp(time(0))
 {
   File file(filename);

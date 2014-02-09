@@ -3,6 +3,7 @@
 //
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshEntity.h>
 #include <dolfin/mesh/Vertex.h>
@@ -16,7 +17,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshDistributedData::MeshDistributedData() :
+MeshDistributedData::MeshDistributedData(Mesh const& mesh) :
+    _mesh(mesh),
     _max_global_index(0),
     _num_global_vertex(0),
     _num_global_edge(0),

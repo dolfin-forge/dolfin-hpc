@@ -29,9 +29,11 @@ MeshDistributedData::MeshDistributedData() :
     _valid_edge_ownership(false),
     _valid_face_ownership(false),
     finalized(false),
-    _global_indices(0),
+    _global_vertex_indices(0),
+    _global_facet_indices(0),
     _global_cell_indices(0),
-    _global_indices_size(0),
+    _global_vertex_indices_size(0),
+    _global_facet_indices_size(0),
     _global_cell_indices_size(0)
 {
 
@@ -78,17 +80,22 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 
   finalized =  distributed_data.finalized;
 
-  _global_indices_size = distributed_data._global_indices_size;
+  _global_vertex_indices_size = distributed_data._global_vertex_indices_size;
+  _global_facet_indices_size = distributed_data._global_facet_indices_size;
   _global_cell_indices_size = distributed_data._global_cell_indices_size;
 
   if ( finalized )
   {
-    dolfin_assert(_global_indices_size > 0);
+    dolfin_assert(_global_vertex_indices_size > 0);
     dolfin_assert(_global_cell_indices_size > 0);
 
-    _global_indices = new uint[_global_indices_size];
-    memcpy(_global_indices, distributed_data._global_indices,
-           _global_indices_size * sizeof(uint));
+    _global_vertex_indices = new uint[_global_vertex_indices_size];
+    memcpy(_global_vertex_indices, distributed_data._global_vertex_indices,
+           _global_vertex_indices_size * sizeof(uint));
+
+    _global_facet_indices = new uint[_global_facet_indices_size];
+     memcpy(_global_facet_indices, distributed_data._global_facet_indices,
+            _global_facet_indices_size * sizeof(uint));
 
     _global_cell_indices = new uint[_global_cell_indices_size];
     memcpy(_global_cell_indices, distributed_data._global_cell_indices,
@@ -125,11 +132,17 @@ void MeshDistributedData::clear()
   _valid_edge_ownership = false;
   _valid_face_ownership = false;
 
-  if( _global_indices )
+  if( _global_vertex_indices )
   {
-    delete[] _global_indices;
+    delete[] _global_vertex_indices;
   }
-  _global_indices = 0;
+  _global_vertex_indices = 0;
+
+  if( _global_facet_indices )
+  {
+    delete[] _global_facet_indices;
+  }
+  _global_facet_indices = 0;
 
   if( _global_cell_indices )
   {
@@ -149,27 +162,42 @@ void MeshDistributedData::finalize(uint dim)
   switch(dim)
   {
   case 0:
-    if(_global_indices)
+    if(_global_vertex_indices)
     {
-      delete[] _global_indices;
+      delete[] _global_vertex_indices;
     }
-    _global_indices = new uint[global_indices[0].size()];
+    _global_vertex_indices = new uint[global_indices[0].size()];
 
     for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it)
     {
-      _global_indices[it->first] = it->second;
+      _global_vertex_indices[it->first] = it->second;
     }
-    _global_indices_size = global_indices[0].size();
-    _max_global_index = _global_indices_size;
+    _global_vertex_indices_size = global_indices[0].size();
+    _max_global_index = _global_vertex_indices_size;
     global_indices[0].clear();
+    break;
+  case 2:
+    if(_global_facet_indices)
+    {
+      delete[] _global_facet_indices;
+    }
+    _global_facet_indices = new uint[global_indices[dim-1].size()];
+
+    for(it = global_indices[dim-1].begin(); it != global_indices[dim-1].end(); ++it)
+    {
+      _global_facet_indices[it->first] = it->second;
+    }
+    _global_facet_indices_size = global_indices[2].size();
+    _max_global_index = _global_facet_indices_size;
+    global_indices[2].clear();
     break;
   case 3:
     if(_global_cell_indices)
     {
       delete[] _global_cell_indices;
     }
-
     _global_cell_indices = new uint[global_indices[dim].size()];
+
     for(it = global_indices[dim].begin(); it != global_indices[dim].end(); ++it)
     {
       _global_cell_indices[it->first] = it->second;
@@ -252,7 +280,7 @@ uint MeshDistributedData::get_global(uint i, uint dim)
 
   if( dim == 0 && finalized)
   {
-    return _global_indices[i];
+    return _global_vertex_indices[i];
   }
   else
   {

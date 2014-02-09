@@ -30,22 +30,22 @@ void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
   computeBoundaryCommon(mesh, boundary, false, false);
 }
 //-----------------------------------------------------------------------------
-void BoundaryComputation::computeLocalBoundary(Mesh& mesh, 
-					       BoundaryMesh& boundary)
+void BoundaryComputation::computeLocalBoundary(Mesh& mesh,
+                                               BoundaryMesh& boundary)
 {
   computeBoundaryCommon(mesh, boundary, true, false);
 }
 //-----------------------------------------------------------------------------
-void BoundaryComputation::computeInteriorBoundary(Mesh& mesh, 
-						  BoundaryMesh& boundary)
+void BoundaryComputation::computeInteriorBoundary(Mesh& mesh,
+                                                  BoundaryMesh& boundary)
 {
   computeBoundaryCommon(mesh, boundary, false, true);
 }
 //-----------------------------------------------------------------------------
-void BoundaryComputation::computeBoundaryCommon(Mesh& mesh, 
-						BoundaryMesh& boundary,
-						bool local_boundary,
-						bool interior_boundary)
+void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
+                                                BoundaryMesh& boundary,
+                                                bool local_boundary,
+                                                bool interior_boundary)
 {
   // We iterate over all facets in the mesh and check if they are on
   // the boundary. A facet is on the boundary if it is connected to
@@ -57,7 +57,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   const uint D = mesh.topology().dim();
   MeshEditor editor;
   editor.open(boundary, mesh.type().facetType(),
-	      D - 1, mesh.geometry().dim());
+              D - 1, mesh.geometry().dim());
 
   // Generate facet - cell connectivity if not generated
   mesh.init(D - 1, D);
@@ -80,34 +80,38 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     //    if (f->numEntities(D) == 1)
     //      {
 
-    if((!interior_boundary && facetmap.globalFacet(*f)) || 
+    if((!interior_boundary && facetmap.globalFacet(*f)) ||
        (local_boundary && f->numEntities(D) == 1) ||
-       (f->numEntities(D) == 1 && 
-	interior_boundary && !facetmap.globalFacet(*f))) {
+       (f->numEntities(D) == 1 &&
+           interior_boundary && !facetmap.globalFacet(*f)))
+    {
 
       // Count boundary vertices and assign indices
       for (VertexIterator v(*f); !v.end(); ++v)
-	{
-	  const uint vertex_index = v->index();
-	  if (boundary_vertices[vertex_index] == num_vertices)
-	    boundary_vertices[vertex_index] = num_boundary_vertices++;
-	} 
-      
+      {
+        const uint vertex_index = v->index();
+        if (boundary_vertices[vertex_index] == num_vertices)
+        {
+          boundary_vertices[vertex_index] = num_boundary_vertices++;
+        }
+      }
+
       // Count boundary cells (facets of the mesh)
       num_boundary_cells++;
     }
   }
-  
+
   // Specify number of vertices and cells
   editor.initVertices(num_boundary_vertices);
   editor.initCells(num_boundary_cells);
 
   // Return if no boundary where found
-  if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1) {
-    editor.close(); 
+  if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1)
+  {
+    editor.close();
     return;
   }
-  
+
   // Initialize mapping from vertices in boundary to vertices in mesh
   MeshFunction<uint>* vertex_map = 0;
   if (num_boundary_vertices > 0)
@@ -116,7 +120,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     dolfin_assert(vertex_map);
     vertex_map->init(boundary, 0, num_boundary_vertices);
   }
-  
+
   // Initialize mapping from cells in boundary to facets in mesh
   MeshFunction<uint>* cell_map = 0;
   if (num_boundary_cells > 0)
@@ -135,7 +139,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
       // Create mapping from boundary vertex to mesh vertex if requested
       if ( vertex_map )
         vertex_map->set(vertex_index, v->index());
-      
+
       // Add vertex
       editor.addVertex(vertex_index, v->point());
     }
@@ -151,20 +155,25 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     //        {
     if((!interior_boundary && facetmap.globalFacet(*f)) ||
        (local_boundary && f->numEntities(D) == 1) ||
-       (f->numEntities(D) == 1 && 
-	interior_boundary && !facetmap.globalFacet(*f))) {
+       (f->numEntities(D) == 1 &&
+           interior_boundary && !facetmap.globalFacet(*f)))
+    {
 
       // Compute new vertex numbers for cell
       uint* vertices = f->entities(0);
       for (uint i = 0; i < cell.size(); i++)
-	cell[i] = boundary_vertices[vertices[i]];
+      {
+        cell[i] = boundary_vertices[vertices[i]];
+      }
 
       // Reorder vertices so facet is right-oriented w.r.t. facet normal
       reorder(cell, *f);
 
       // Create mapping from boundary cell to mesh facet if requested
       if (cell_map)
+      {
         cell_map->set(current_cell, f->index());
+      }
 
       // Add cell
       editor.addCell(current_cell++, cell);
@@ -196,7 +205,9 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
       }
     }
     if (not_in_facet)
+    {
       break;
+    }
   }
   const Point p = mesh.geometry().point(vertex);
 
@@ -209,7 +220,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
   case CellType::triangle:
     {
       dolfin_assert(facet.numEntities(0) == 2);
-      
+
       Point p0 = mesh.geometry().point(facet.entities(0)[0]);
       Point p1 = mesh.geometry().point(facet.entities(0)[1]);
       Point v = p1 - p0;
@@ -226,7 +237,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
   case CellType::tetrahedron:
     {
       dolfin_assert(facet.numEntities(0) == 3);
-    
+
       Point p0 = mesh.geometry().point(facet.entities(0)[0]);
       Point p1 = mesh.geometry().point(facet.entities(0)[1]);
       Point p2 = mesh.geometry().point(facet.entities(0)[2]);
@@ -244,6 +255,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
     break;
   default:
     error("Unknown cell type, down know how to reorder.");
+    break;
   }
 }
 //-----------------------------------------------------------------------------

@@ -154,6 +154,7 @@ void Mesh::clear()
   _cell_type = 0;
   delete _data;
   _data = 0;
+  _distdata.clear();
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()

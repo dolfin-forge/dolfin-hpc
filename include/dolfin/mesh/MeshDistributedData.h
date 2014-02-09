@@ -142,10 +142,12 @@ namespace dolfin
     _set<uint> ghost[3];
 
     bool finalized;
-    uint *_global_indices;
+    uint *_global_vertex_indices;
+    uint *_global_facet_indices;
     uint *_global_cell_indices;
 
-    uint _global_indices_size;
+    uint _global_vertex_indices_size;
+    uint _global_facet_indices_size;
     uint _global_cell_indices_size;
 
     friend class MeshGhostIterator;
@@ -162,6 +164,7 @@ namespace dolfin
 
     ~MeshGhostIterator() {}
     MeshGhostIterator& operator++() { ++_iter; return *this;}
+//    MeshGhostIterator operator++(int) { _iter++; return *this;}
     inline uint index() const { return *_iter; }
     inline uint owner() { return _distdata.get_owner(*_iter, _dim); }
     inline bool end() const { return _iter == _distdata.ghost[_dim].end();}
@@ -180,6 +183,7 @@ namespace dolfin
 
     ~MeshSharedIterator() {}
     MeshSharedIterator& operator++() { ++_iter; return *this;}
+//    MeshSharedIterator operator++(int) { _iter++; return *this;}
     inline uint index() const { return *_iter; }
     inline bool end() const { return _iter == _distdata.shared[_dim].end();}
     inline _set<uint> adj() const { return _distdata.shared_adj[_dim][*_iter]; }

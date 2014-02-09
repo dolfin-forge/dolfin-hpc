@@ -42,6 +42,9 @@ namespace dolfin
     uint get_local(uint i, uint dim);
     uint get_local(MeshEntity& e);
 
+    uint get_facet_global(uint i);
+    uint get_facet_local(uint i);
+
     uint get_cell_global(uint i);
     uint get_cell_local(uint i);
 

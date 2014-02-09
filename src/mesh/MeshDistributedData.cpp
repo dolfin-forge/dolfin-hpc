@@ -350,6 +350,36 @@ void MeshDistributedData::remap_owner(int* mapping)
 
 }
 //-----------------------------------------------------------------------------
+uint MeshDistributedData::get_facet_global(uint i)
+{
+  if(MPI::numProcesses() == 1)
+  {
+    return i;
+  }
+
+  if ( finalized )
+  {
+    return _global_facet_indices[i];
+  }
+  else
+  {
+    dolfin_assert( global_indices[2].count(i) );
+    return global_indices[2][i];
+  }
+
+}
+//-----------------------------------------------------------------------------
+uint MeshDistributedData::get_facet_local(uint i)
+{
+  if(MPI::numProcesses() == 1)
+  {
+    return i;
+  }
+
+  dolfin_assert( local_indices[2].count(i) );
+  return local_indices[2][i];
+}
+//-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_global(uint i)
 {
   if(MPI::numProcesses() == 1)

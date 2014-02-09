@@ -595,7 +595,7 @@ void Function::interpolate(Function const& other_func)
 
 }
 //-----------------------------------------------------------------------------
-void Function::get_block(real *& values)
+void Function::get_block(real *& values) const
 {
   if (!f_)
     error("Function contains no data.");
@@ -605,7 +605,7 @@ void Function::get_block(real *& values)
     error("Values can be retrieved only from discrete functions.");
   }
 
-  return (static_cast<DiscreteFunction*>(f_))->get(values);
+  return (static_cast<DiscreteFunction*>(f_))->get_block(values);
 }
 //-----------------------------------------------------------------------------
 void Function::set_block(real *& values)
@@ -618,7 +618,7 @@ void Function::set_block(real *& values)
     error("Values can be set only to discrete functions.");
   }
 
-  return (static_cast<DiscreteFunction*>(f_))->set(values);
+  return (static_cast<DiscreteFunction*>(f_))->set_block(values);
 }
 //-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)

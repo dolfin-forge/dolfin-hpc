@@ -519,14 +519,14 @@ void DiscreteFunction::interpolate(Function const& other_func)
       }
     }
   }
-  this->set(block);
+  this->set_block(block);
 
   delete[] block;
   delete[] values;
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::get(real *& values)
+void DiscreteFunction::get_block(real *& values) const
 {
   if (!values)
   {
@@ -536,7 +536,7 @@ void DiscreteFunction::get(real *& values)
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::set(real *& values)
+void DiscreteFunction::set_block(real *& values)
 {
   X_->set(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
   sync_ghosts();

@@ -16,7 +16,6 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
-//#include <dolfin/mesh/MeshFunction.h>
 #include "ALEType.h"
 #include "MeshTopology.h"
 #include "MeshGeometry.h"
@@ -188,16 +187,16 @@ namespace dolfin
 #ifdef HAVE_LIBGEOM
     /// Refine mesh uniformly including geometry informations -surfaces
     void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-		MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
+                MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
 
     /// Refine mesh uniformly including geometry informations -curves
     void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-		MeshFunction<float>& bnd_u);
+                MeshFunction<float>& bnd_u);
 #endif
 
     /// Refine mesh according to cells marked for refinement
     void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
-		bool load_balance = true);
+                bool load_balance = true);
 
     /// Coarsen mesh uniformly
     void coarsen();
@@ -228,22 +227,22 @@ namespace dolfin
 
     /// Distribute a mesh according to a mesh function and transfer marked cells
     void distribute(MeshFunction<uint>& distribution,
-		    MeshFunction<bool>& cell_markers,
-		    MeshFunction<bool>& new_cell_markers);
+                    MeshFunction<bool>& cell_markers,
+                    MeshFunction<bool>& new_cell_markers);
 
     /// Distribute a mesh according to a mesh function and transfer cell functions
     ///
     /// cell_functions contains pairs as <old_function,new_function>
     void distribute(MeshFunction<uint>& distribution,
-		    Array<std::pair<MeshFunction<uint> *,
-		    MeshFunction<uint> *> >& cell_functions);
+                    Array<std::pair<MeshFunction<uint> *,
+                    MeshFunction<uint> *> >& cell_functions);
 
     /// Distribute a mesh according to a mesh function and transfer vertex functions
     ///
     /// vertex_functions contains pairs as <old_function,new_function>
     void distribute(MeshFunction<uint>& distribution,
-		    Array<std::pair<MeshFunction<double> *,
-		    MeshFunction<double> *> >& vertex_functions);
+                    Array<std::pair<MeshFunction<double> *,
+                    MeshFunction<double> *> >& vertex_functions);
 
     /// Distribute a mesh according to a mesh function and transfer cell and
     /// vertex functions
@@ -252,10 +251,10 @@ namespace dolfin
     ///
     /// vertex_functions contains pairs as <old_function,new_function>
     void distribute(MeshFunction<uint>& distribution,
-		    Array<std::pair<MeshFunction<uint> *,
-		    MeshFunction<uint> *> >& cell_functions,
-		    Array<std::pair<MeshFunction<double> *,
-		    MeshFunction<double> *> >& vertex_functions);
+                    Array<std::pair<MeshFunction<uint> *,
+                    MeshFunction<uint> *> >& cell_functions,
+                    Array<std::pair<MeshFunction<double> *,
+                    MeshFunction<double> *> >& vertex_functions);
 
     /// Renumber mesh global numbering
     void renumber();

@@ -18,6 +18,8 @@ class Face;
 class MeshEntity;
 class MeshDistributedData
 {
+  static uint const MAX_DIM = 3;
+
 public:
 
   MeshDistributedData();
@@ -29,15 +31,7 @@ public:
   void clear();
   void finalize(uint dim);
 
-  void set_map(uint local_index, uint global_index, uint dim);
-
-  void set_shared(uint local_index, uint dim);
-  void set_ghost(uint local_index, uint dim);
-
-  void set_shared(MeshEntity& m);
-  void set_ghost(MeshEntity& m);
-
-  /// These cannot be const as they access the element in the map with [].
+  //--- These cannot be const as they access the element in the map with [].
 
   uint get_global(uint i, uint dim);
   uint get_global(MeshEntity& e);
@@ -53,6 +47,16 @@ public:
 
   uint get_cell_global(uint i);
   uint get_cell_local(uint i);
+
+  //---
+
+  void set_map(uint local_index, uint global_index, uint dim);
+
+  void set_shared(uint local_index, uint dim);
+  void set_ghost(uint local_index, uint dim);
+
+  void set_shared(MeshEntity& m);
+  void set_ghost(MeshEntity& m);
 
   void set_ghost_owner(uint i, uint rank, uint dim);
   void set_ghost_owner(MeshEntity& m, uint rank);
@@ -143,14 +147,14 @@ private:
   bool _valid_edge_ownership;
   bool _valid_face_ownership;
 
-  _map<uint, uint> global_indices[4];
-  _map<uint, uint> local_indices[4];
+  _map<uint, uint> global_indices[MAX_DIM+1];
+  _map<uint, uint> local_indices[MAX_DIM+1];
 
-  _map<uint, uint> ghost_owner[3];
-  _map<uint, _set<uint> > shared_adj[3];
+  _map<uint, uint> ghost_owner[MAX_DIM];
+  _map<uint, _set<uint> > shared_adj[MAX_DIM];
 
-  _set<uint> shared[3];
-  _set<uint> ghost[3];
+  _set<uint> shared[MAX_DIM];
+  _set<uint> ghost[MAX_DIM];
 
   bool finalized;
   uint *_global_vertex_indices;

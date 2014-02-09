@@ -122,11 +122,15 @@ MeshData& Mesh::data()
 //-----------------------------------------------------------------------------
 dolfin::uint Mesh::init(uint dim)
 {
+  // Dirty hack, do not remove or the first call to UFCCell will fail !
+  _distdata.set_topological_dimension(this->topology().dim());
   return TopologyComputation::computeEntities(*this, dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1)
 {
+  // Dirty hack, do not remove or the first call to UFCCell will fail !
+  _distdata.set_topological_dimension(this->topology().dim());
   TopologyComputation::computeConnectivity(*this, d0, d1);
 }
 //-----------------------------------------------------------------------------

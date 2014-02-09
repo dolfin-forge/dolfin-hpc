@@ -19,6 +19,9 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshDistributedData::MeshDistributedData(Mesh const& mesh) :
     _mesh(mesh),
+    _dim(0),
+    _cell_dim(0),
+    _facet_dim(0),
     _max_global_index(0),
     _num_global_vertex(0),
     _num_global_edge(0),
@@ -38,6 +41,9 @@ MeshDistributedData::MeshDistributedData(Mesh const& mesh) :
     _global_facet_indices_size(0),
     _global_cell_indices_size(0)
 {
+  // If the mesh has not been initialized, the topological dimension is set
+  // to zero.
+  set_topological_dimension(mesh.topology().dim());
 
 }
 //-----------------------------------------------------------------------------
@@ -161,9 +167,8 @@ void MeshDistributedData::finalize(uint dim)
 
   _map<uint, uint>::iterator it;
 
-  switch(dim)
+  if (dim == 0) // Vertices
   {
-  case 0: // Vertices
     if(_global_vertex_indices)
     {
       delete[] _global_vertex_indices;
@@ -177,8 +182,9 @@ void MeshDistributedData::finalize(uint dim)
     _global_vertex_indices_size = global_indices[0].size();
     _max_global_index = _global_vertex_indices_size;
     global_indices[0].clear();
-    break;
-  case 2: // Facets
+  }
+  else if (dim == _facet_dim) // Facets
+  {
     if(_global_facet_indices)
     {
       delete[] _global_facet_indices;
@@ -192,8 +198,9 @@ void MeshDistributedData::finalize(uint dim)
     _global_facet_indices_size = global_indices[2].size();
     _max_global_index = _global_facet_indices_size;
     global_indices[2].clear();
-    break;
-  case MAX_DIM: // Cells
+  }
+  else if (dim == _cell_dim) // Cells
+  {
     if(_global_cell_indices)
     {
       delete[] _global_cell_indices;
@@ -206,13 +213,27 @@ void MeshDistributedData::finalize(uint dim)
     }
     _global_cell_indices_size = global_indices[MAX_DIM].size();
     global_indices[MAX_DIM].clear();
-    break;
-  default:
+  }
+  else
+  {
     error("MeshDistributedData::finalize not implemented for %ud.", dim);
-    break;
   }
 
   finalized = true;
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::set_topological_dimension(uint const dim)
+{
+  if(dim > 0 && _dim == 0)
+  {
+    _dim = dim;
+    _cell_dim = _dim;
+    _facet_dim = _dim - 1;
+  }
+  else if (dim != _dim)
+  {
+    error("Trying to set a different topological dimension");
+  }
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
@@ -395,8 +416,9 @@ uint MeshDistributedData::get_facet_global(uint i)
   }
   else
   {
-    dolfin_assert( global_indices[2].count(i) );
-    return global_indices[2][i];
+    dolfin_assert( _cell_dim != 0 );
+    dolfin_assert( global_indices[_facet_dim].count(i) );
+    return global_indices[_facet_dim][i];
   }
 
 }
@@ -408,8 +430,9 @@ uint MeshDistributedData::get_facet_local(uint i)
     return i;
   }
 
-  dolfin_assert( local_indices[2].count(i) );
-  return local_indices[2][i];
+  dolfin_assert( _cell_dim != 0 );
+  dolfin_assert( local_indices[_facet_dim].count(i) );
+  return local_indices[_facet_dim][i];
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_global(uint i)
@@ -425,8 +448,9 @@ uint MeshDistributedData::get_cell_global(uint i)
   }
   else
   {
-    dolfin_assert( global_indices[MAX_DIM].count(i) );
-    return global_indices[MAX_DIM][i];
+    dolfin_assert( _cell_dim != 0 );
+    dolfin_assert( global_indices[_cell_dim].count(i) );
+    return global_indices[_cell_dim][i];
   }
 
 }
@@ -438,8 +462,9 @@ uint MeshDistributedData::get_cell_local(uint i)
     return i;
   }
 
-  dolfin_assert( local_indices[MAX_DIM].count(i) );
-  return local_indices[MAX_DIM][i];
+  dolfin_assert( _cell_dim != 0 );
+  dolfin_assert( local_indices[_cell_dim].count(i) );
+  return local_indices[_cell_dim][i];
 }
 //-----------------------------------------------------------------------------
 

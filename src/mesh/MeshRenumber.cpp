@@ -51,6 +51,9 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
     return;
   }
 
+  // Dirty hack
+  mddata.set_topological_dimension(mesh.topology().dim());
+
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
@@ -154,6 +157,9 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   {
     return;
   }
+
+  // Dirty hack
+  mddata.set_topological_dimension(mesh.topology().dim());
 
   // Flush shared/ghosted edges
   mddata.flush_edges();
@@ -350,6 +356,9 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   {
     return;
   }
+
+  // Dirty hack
+  mddata.set_topological_dimension(mesh.topology().dim());
 
   mddata.flush_faces();
 
@@ -567,6 +576,9 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
     return;
   }
 
+  // Dirty hack
+  mddata.set_topological_dimension(mesh.topology().dim());
+
   uint offset = 0;
   uint num_cells = mesh.numCells();
 
@@ -591,11 +603,12 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   mddata.set_global_numCells(num_glb);
 
   // Use new numbering
-  mddata.local_indices[3] = new_local;
-  mddata.global_indices[3] = new_global;
+  uint const dim = mesh.topology().dim();
+  mddata.local_indices[dim] = new_local;
+  mddata.global_indices[dim] = new_global;
   mddata._valid_cell_numbering = true;
 #if ENABLE_P1_OPTIMIZATIONS
-  mddata.finalize(3);
+  mddata.finalize(dim);
 #endif
 }
 //-----------------------------------------------------------------------------

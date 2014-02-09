@@ -13,17 +13,17 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology()
   : _dim(0), num_entities(0), connectivity(0)
-  
+
 {
   // Do nothing
 }
-//-----------------------------------------------------------------------------  
+//-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(const MeshTopology& topology)
   : _dim(0), num_entities(0), connectivity(0)
 {
   *this = topology;
 }
-//-----------------------------------------------------------------------------  
+//-----------------------------------------------------------------------------
 MeshTopology::~MeshTopology()
 {
   clear();
@@ -39,16 +39,24 @@ const MeshTopology& MeshTopology::operator= (const MeshTopology& topology)
   num_entities = new uint[_dim + 1];
   connectivity = new MeshConnectivity*[_dim + 1];
   for (uint d = 0; d <= _dim; d++)
+  {
     connectivity[d] = new MeshConnectivity[_dim + 1];
+  }
 
   // Copy data
   if ( _dim > 0 )
   {
-    for (uint d = 0; d <= _dim; d++)
+    for (uint d = 0; d <= _dim; ++d)
+    {
       num_entities[d] = topology.num_entities[d];
-    for (uint d0 = 0; d0 <= _dim; d0++)
-      for (uint d1 = 0; d1 <= _dim; d1++)
-	connectivity[d0][d1] = topology.connectivity[d0][d1];
+    }
+    for (uint d0 = 0; d0 <= _dim; ++d0)
+    {
+      for (uint d1 = 0; d1 <= _dim; ++d1)
+      {
+        connectivity[d0][d1] = topology.connectivity[d0][d1];
+      }
+    }
   }
 
   return *this;
@@ -60,12 +68,14 @@ void MeshTopology::clear()
   if ( num_entities )
     delete [] num_entities;
   num_entities = 0;
-  
+
   // Delete mesh connectivity
   if ( connectivity )
   {
-    for (uint d = 0; d <= _dim; d++)
+    for (uint d = 0; d <= _dim; ++d)
+    {
       delete [] connectivity[d];
+    }
     delete [] connectivity;
   }
   connectivity = 0;
@@ -82,12 +92,16 @@ void MeshTopology::init(uint dim)
   // Initialize number of mesh entities
   num_entities = new uint[dim + 1];
   for (uint d = 0; d <= dim; d++)
+  {
     num_entities[d] = 0;
+  }
 
   // Initialize mesh connectivity
   connectivity = new MeshConnectivity*[dim + 1];
   for (uint d = 0; d <= dim; d++)
+  {
     connectivity[d] = new MeshConnectivity[dim + 1];
+  }
 
   // Save dimension
   _dim = dim;
@@ -115,34 +129,42 @@ void MeshTopology::disp() const
     end();
     return;
   }
-  
+
   // Display topological dimension
   cout << "Topological dimension: " << _dim << endl << endl;
-  
+
   // Display number of entities for each topological dimension
   cout << "Number of entities:" << endl;
   begin("");
-  for (uint d = 0; d <= _dim; d++)
+  for (uint d = 0; d <= _dim; ++d)
+  {
     cout << "dim = " << d << ": " << num_entities[d] << endl;
+  }
   end();
   cout << endl;
-  
+
   // Display matrix of connectivities
   cout << "Connectivity:" << endl;
   begin("");
   cout << " ";
-  for (uint d1 = 0; d1 <= _dim; d1++)
+  for (uint d1 = 0; d1 <= _dim; ++d1)
+  {
     cout << " " << d1;
+  }
   cout << endl;
-  for (uint d0 = 0; d0 <= _dim; d0++)
+  for (uint d0 = 0; d0 <= _dim; ++d0)
   {
     cout << d0;
-    for (uint d1 = 0; d1 <= _dim; d1++)
+    for (uint d1 = 0; d1 <= _dim; ++d1)
     {
       if ( connectivity[d0][d1].size() > 0 )
-	cout << " x";
+      {
+        cout << " x";
+      }
       else
-	cout << " -";
+      {
+        cout << " -";
+      }
     }
     cout << endl;
   }
@@ -150,12 +172,14 @@ void MeshTopology::disp() const
   end();
 
   // Display connectivity for each topological dimension
-  for (uint d0 = 0; d0 <= _dim; d0++)
+  for (uint d0 = 0; d0 <= _dim; ++d0)
   {
-    for (uint d1 = 0; d1 <= _dim; d1++)
+    for (uint d1 = 0; d1 <= _dim; ++d1)
     {
       if ( connectivity[d0][d1].size() == 0 )
-	continue;
+      {
+        continue;
+      }
       cout << "Connectivity " << d0 << " -- " << d1 << ":" << endl;
       begin("");
       connectivity[d0][d1].disp();

@@ -141,10 +141,10 @@ public:
   void interpolate(Function const& other_func);
 
   /// Get values to cell tabulated block array
-  void get(real *& values);
+  void get_block(real *& values) const;
 
   /// Set values from cell tabulated block array
-  void set(real *& values);
+  void set_block(real *& values);
 
 private:
 

@@ -17,7 +17,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-Progress::Progress(std::string title, unsigned int n) 
+Progress::Progress(std::string title, unsigned int n)
   : title(title), n(n), i(0), p_step(0.1), t_step(1.0), p(0), t(0)
 {
   if (n <= 0)
@@ -50,11 +50,22 @@ void Progress::operator=(real p)
   update(p);
 }
 //-----------------------------------------------------------------------------
+Progress& Progress::operator++()
+{
+  if (n == 0)
+    error("Cannot step progress for session with unknown number of steps.");
+
+  if (i < n)
+    ++i;
+
+  update(static_cast<real>(i) / static_cast<real>(n));
+}
+//-----------------------------------------------------------------------------
 void Progress::operator++(int)
 {
   if (n == 0)
     error("Cannot step progress for session with unknown number of steps.");
-  
+
   if (i < n)
     i++;
 

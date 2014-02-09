@@ -181,7 +181,7 @@ void GlobalFacetMap::findGlobal3D()
         continue;
       }
 
-      Vertex vertex(_mesh, mddata.get_local(recv_buff[i], 0));
+      Vertex vertex(_mesh, mddata.get_vertex_local(recv_buff[i]));
 
       for(FacetIterator f(vertex); !f.end(); ++f)
       {

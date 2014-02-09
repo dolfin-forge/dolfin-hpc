@@ -380,7 +380,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell& ufc_cell,
   {
     Cell c(dolfin_mesh, cell_index);
     for (uint i = 0; i < local_dimension(); i++)
-      dofs[i] = dolfin_mesh.distdata().get_global(c.entities(0)[i], 0);
+      dofs[i] = dolfin_mesh.distdata().get_vertex_global(c.entities(0)[i]);
   }
   else if (_type_ == 1)
   {
@@ -423,7 +423,7 @@ void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
   {
     Cell c(dolfin_mesh, cell_index);
     for (uint i = 0; i < local_dimension(); i++)
-      dofs[i] = dolfin_mesh.distdata().get_global(c.entities(0)[i], 0);
+      dofs[i] = dolfin_mesh.distdata().get_vertex_global(c.entities(0)[i]);
   }
   else if (_type_ == 1)
   {
@@ -565,7 +565,7 @@ void DofMap::build()
       for (MeshGhostIterator iter(dolfin_mesh.distdata(), 0); !iter.end();
           ++iter)
         ghost_buff[iter.owner()].push_back(
-            dolfin_mesh.distdata().get_global(iter.index(), 0));
+            dolfin_mesh.distdata().get_vertex_global(iter.index()));
 
       MPI_Status status;
       Array<uint> send_buff;
@@ -615,8 +615,8 @@ void DofMap::build()
 
       _v_map_ = new uint[dolfin_mesh.numVertices()];
       for (VertexIterator v(dolfin_mesh); !v.end(); ++v)
-        _v_map_[v->index()] = v_offset[dolfin_mesh.distdata().get_global(
-            v->index(), 0)];
+        _v_map_[v->index()] = v_offset[dolfin_mesh.distdata().get_vertex_global(
+            v->index())];
 
       _type_ = 2;
       v_offset.clear();

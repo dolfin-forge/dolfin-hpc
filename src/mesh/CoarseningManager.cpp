@@ -25,14 +25,14 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-CoarseningManager::CoarseningManager() 
+CoarseningManager::CoarseningManager()
 : _dmesh(0)
 {
   // do nothing
 }
 //-----------------------------------------------------------------------------
-CoarseningManager::CoarseningManager(Mesh& mesh, 
-				     MeshFunction<bool>& cell_marker, 
+CoarseningManager::CoarseningManager(Mesh& mesh,
+				     MeshFunction<bool>& cell_marker,
                                      bool coarsen_boundary)
 : _dmesh(0)
 {
@@ -45,7 +45,7 @@ CoarseningManager::~CoarseningManager()
     delete _dmesh;
 }
 //-----------------------------------------------------------------------------
-void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker, 
+void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
                              bool coarsen_boundary)
 {
   dolfin_assert( &mesh == &(cell_marker.mesh()) );
@@ -84,7 +84,7 @@ void CoarseningManager::initCommon(Mesh& mesh, MeshFunction<uint> *attempt_count
     delete _dmesh;
   _dmesh = new DMesh;
   _dmesh->imp(mesh);
-  
+
   _orig_num_cells = mesh.numCells();
   _orig_num_vertices = mesh.numVertices();
 
@@ -173,11 +173,11 @@ void CoarseningManager::findCellsToCoarsen(MeshFunction<uint> * attempt_count)
 void CoarseningManager::removeErasedCellsFromCoarseningList()
 {
   // remove deleted entities from coarsening list
-  for ( List< std::pair<DCell *,uint> >::iterator it(_cells_to_coarsen.begin()) ; 
+  for ( List< std::pair<DCell *,uint> >::iterator it(_cells_to_coarsen.begin()) ;
         it != _cells_to_coarsen.end() ; )
   {
     DCell * dc = it->first;
-    if ( dc->deleted ) 
+    if ( dc->deleted )
       it = _cells_to_coarsen.erase(it);
     else
       ++it;
@@ -186,7 +186,7 @@ void CoarseningManager::removeErasedCellsFromCoarseningList()
 //-----------------------------------------------------------------------------
 void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
                                       Array<int>& old2new_vertices,
-                                      Array< std::pair< MeshFunction<uint>*, 
+                                      Array< std::pair< MeshFunction<uint>*,
                                       MeshFunction<uint>* > >& cell_functions,
                                       Array< std::pair< MeshFunction<double>*,
                                       MeshFunction<double>*> >& vertex_functions)
@@ -209,28 +209,28 @@ void CoarseningManager::buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
         continue;
       forbidden_vertices->set(new_idx, double(isForbiddenVertex(old_idx)) );
     }
-  
+
     // Prepare cell_marker and attempt count for exchange
     attempts->init(mesh.topology().dim());
     *attempts = 0u;
-    for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ; 
+    for ( List< std::pair<DCell *, uint> >::iterator it(_cells_to_coarsen.begin()) ;
           it != _cells_to_coarsen.end() ; ++it )
     {
       DCell * dc = it->first;
       int new_idx = old2new_cells[dc->id];
-      if ( new_idx < 0 ) 
+      if ( new_idx < 0 )
         continue;
       attempts->set(new_idx,it->second);
       dolfin_assert(it->second > 0);
     }
   }
 
-  vertex_functions.push_back( 
+  vertex_functions.push_back(
         std::make_pair(forbidden_vertices, forbidden_vertices_new) );
   cell_functions.push_back( std::make_pair(attempts, attempts_new) );
 }
 //-----------------------------------------------------------------------------
-void CoarseningManager::cleanupMFArrays(Array< std::pair< MeshFunction<uint>*, 
+void CoarseningManager::cleanupMFArrays(Array< std::pair< MeshFunction<uint>*,
                                         MeshFunction<uint>* > >& cell_functions,
                                         Array< std::pair< MeshFunction<double>*,
                                         MeshFunction<double>*> >& vertex_functions)
@@ -250,7 +250,7 @@ void CoarseningManager::cleanupMFArrays(Array< std::pair< MeshFunction<uint>*,
   }
 }
 //-----------------------------------------------------------------------------
-void CoarseningManager::updateIndependentSet(Mesh& mesh, MeshFunction<double>& 
+void CoarseningManager::updateIndependentSet(Mesh& mesh, MeshFunction<double>&
                                              forbidden_vertices_new)
 {
   _forbidden_vertices.resize(mesh.numVertices());
@@ -279,11 +279,11 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   std::map<uint,uint> requested_vertices;
 
   // Build send lists of requests
-  for ( List<uint>::iterator it(_vertices_to_request.begin()) ; 
+  for ( List<uint>::iterator it(_vertices_to_request.begin()) ;
         it != _vertices_to_request.end() ; ++it )
   {
     dolfin_assert( old2new_vertices[*it] >= 0 );
-    uint global_index = mesh.distdata().get_global(old2new_vertices[*it], 0);
+    uint global_index = mesh.distdata().get_vertex_global(old2new_vertices[*it]);
 
     // vertex belongs to other process: request has to be distributed by owner
     if ( mesh.distdata().is_ghost(old2new_vertices[*it], 0) )
@@ -307,7 +307,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-		  MPI_UNSIGNED, dest, 0, 
+		  MPI_UNSIGNED, dest, 0,
 		  recv_buff_requests, max_num_requested_vertices, MPI_UNSIGNED, src, 0,
 		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
@@ -343,10 +343,10 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   requested_cells = false;
 
   // Build send list of vertices with requesting processes
-  for ( std::map<uint,uint>::iterator m_it(requested_vertices.begin()) ; 
+  for ( std::map<uint,uint>::iterator m_it(requested_vertices.begin()) ;
         m_it != requested_vertices.end() ; ++m_it )
   {
-    uint local_index = mesh.distdata().get_local(m_it->first, 0);
+    uint local_index = mesh.distdata().get_vertex_local(m_it->first);
     uint pe = m_it->second;
 
     // set of processes that share this vertex
@@ -383,7 +383,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     uint dest = (rank + i) % pe_size;
 
     MPI_Sendrecv( &send_list_requests[dest][0], send_list_requests[dest].size(),
-		  MPI_UNSIGNED, dest, 0, 
+		  MPI_UNSIGNED, dest, 0,
 		  recv_buff_requests, 2 * max_num_requested_vertices, MPI_UNSIGNED, src, 0,
 		  MPI::DOLFIN_COMM, &status );
     MPI_Get_count( &status, MPI_UNSIGNED, &recv_size );
@@ -391,7 +391,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     // process received requests and marks cells accordingly
     for ( uint i(0) ; i < recv_size ; i += 2 )
     {
-      uint local_index = mesh.distdata().get_local(recv_buff_requests[i], 0);
+      uint local_index = mesh.distdata().get_vertex_local(recv_buff_requests[i]);
       Vertex v(mesh, local_index);
 
       // select lowest process index for all cells around requested vertex
@@ -402,7 +402,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
       // set partitions
       for ( CellIterator c_it(v) ; !c_it.end() ; ++c_it )
       {
-        if ( partitions->get(*c_it) == rank && target_proc != rank ) 
+        if ( partitions->get(*c_it) == rank && target_proc != rank )
           ++num_send_cells;
         partitions->set(*c_it, target_proc);
       }
@@ -454,7 +454,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   local_nums[1] = _cells_to_coarsen.size();
   local_nums[2] = _num_migrated_cells;
   local_nums[3] = _vertices_to_request.size();
-  MPI_Allreduce(local_nums, global_nums, 4, 
+  MPI_Allreduce(local_nums, global_nums, 4,
                 MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 
   // no cells remaining: we're done!
@@ -475,7 +475,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   Array<int> old2new_vertices(_orig_num_vertices);
   Mesh omesh;
   _dmesh->expKeepNumbering(omesh, &old2new_cells, &old2new_vertices);
-  
+
   // Compute cell-vertex connectivity
   omesh.init(0,omesh.topology().dim());
 
@@ -483,16 +483,16 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
   MeshFunction<uint> *partitions = 0;
 
   // Lists of MeshFunctions for exchange
-  Array< std::pair< MeshFunction<uint> * , MeshFunction<uint> * > > 
+  Array< std::pair< MeshFunction<uint> * , MeshFunction<uint> * > >
     cell_functions;
-  Array< std::pair< MeshFunction<double> * , MeshFunction<double> * > > 
+  Array< std::pair< MeshFunction<double> * , MeshFunction<double> * > >
     vertex_functions;
-  
-  buildMFArrays(omesh, old2new_cells, old2new_vertices, 
+
+  buildMFArrays(omesh, old2new_cells, old2new_vertices,
                 cell_functions, vertex_functions);
 
   // Exchange requests
-  exchangeRequests(omesh, old2new_cells, old2new_vertices, 
+  exchangeRequests(omesh, old2new_cells, old2new_vertices,
                      max_num_requested_vertices, partitions);
 
   // distribute partitioning and MeshFunctions
@@ -504,7 +504,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   // Update independent set
   updateIndependentSet(omesh, *(vertex_functions.front().second));
-  
+
   // Cleanup MeshFunction Arrays
   cleanupMFArrays(cell_functions, vertex_functions);
 

@@ -46,17 +46,17 @@ void PXMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
   switch ( state )
   {
   case OUTSIDE:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "mesh") == 0 )
     {
       readMesh(name, attrs);
       state = INSIDE_MESH;
     }
-    
+
     break;
 
   case INSIDE_MESH:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "vertices") == 0 )
     {
       readVertices(name, attrs);
@@ -73,27 +73,27 @@ void PXMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
     }
 
     break;
-    
+
   case INSIDE_VERTICES:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "vertex") == 0 )
       readVertex(name, attrs);
 
     break;
-    
+
   case INSIDE_CELLS:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "interval") == 0 )
       readInterval(name, attrs);
     else if ( xmlStrcasecmp(name, (xmlChar *) "triangle") == 0 )
       readTriangle(name, attrs);
     else if ( xmlStrcasecmp(name, (xmlChar *) "tetrahedron") == 0 )
       readTetrahedron(name, attrs);
-    
+
     break;
 
   case INSIDE_DATA:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "meshfunction") == 0 )
     {
       error("Parsing mesh function is not supported in parallel");
@@ -110,14 +110,14 @@ void PXMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
     break;
 
   case INSIDE_MESH_FUNCTION:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "entity") == 0 )
       readMeshEntity(name, attrs);
 
     break;
 
   case INSIDE_ARRAY:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "element") == 0 )
       readArrayElement(name, attrs);
 
@@ -133,26 +133,26 @@ void PXMLMesh::endElement(const xmlChar *name)
   switch ( state )
   {
   case INSIDE_MESH:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "mesh") == 0 )
     {
       closeMesh();
       state = DONE;
     }
-    
+
     break;
-    
+
   case INSIDE_VERTICES:
-    
+
     if ( xmlStrcasecmp(name, (xmlChar *) "vertices") == 0 )
     {
-      state = INSIDE_MESH;    
+      state = INSIDE_MESH;
     }
 
     break;
 
   case INSIDE_CELLS:
-	 
+
     if ( xmlStrcasecmp(name, (xmlChar *) "cells") == 0 )
     {
       state = INSIDE_MESH;
@@ -207,7 +207,7 @@ void PXMLMesh::readMesh(const xmlChar *name, const xmlChar **attrs)
   // Parse values
   std::string type = parseString(name, attrs, "celltype");
   uint gdim = parseUnsignedInt(name, attrs, "dim");
-  
+
   // Create cell type to get topological dimension
   CellType* cell_type = CellType::create(type);
   uint tdim = cell_type->dim();
@@ -250,11 +250,11 @@ void PXMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   numParsedCells = 0;
 
  //FIXME
-  editor.initCells(1); 
+  editor.initCells(1);
   editor.close();
   MeshFunction<uint> pre_partition;
-  _mesh.partition_geom(pre_partition); 
-  _mesh.distribute(pre_partition);    
+  _mesh.partition_geom(pre_partition);
+  _mesh.distribute(pre_partition);
 
   for(VertexIterator vertex(_mesh); !vertex.end(); ++vertex)
     own_vertex[_mesh.distdata().get_global(*vertex)] = true;
@@ -268,9 +268,9 @@ void PXMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 
   if(v < startIndex_vert || v > endIndex_vert)
     return;
-  
+
   _mesh.distdata().set_map(numParsedVertices, v, 0);
-  
+
   // Handle differently depending on geometric dimension
   switch ( _mesh.geometry().dim() )
     {
@@ -307,14 +307,14 @@ void PXMLMesh::readInterval(const xmlChar *name, const xmlChar **attrs)
   if ( _mesh.topology().dim() != 1 )
     error("Mesh entity (interval) does not match dimension of mesh (%d).",
 	  _mesh.topology().dim());
-  
+
   // Parse values
   uint c  = parseUnsignedInt(name, attrs, "index");
-  
+
   if(c < startIndex_cell || c > endIndex_cell)
     return;
-  c = numParsedCells++;  
-  
+  c = numParsedCells++;
+
   uint v0 = parseUnsignedInt(name, attrs, "v0");
   uint v1 = parseUnsignedInt(name, attrs, "v1");
   // Add cell
@@ -328,7 +328,7 @@ void PXMLMesh::readTriangle(const xmlChar *name, const xmlChar **attrs)
     error("Mesh entity (triangle) does not match dimension of mesh (%d).",
 		 _mesh.topology().dim());
 
-  
+
 // Parse values
 //  uint c  = parseUnsignedInt(name, attrs, "index");
 
@@ -339,12 +339,12 @@ void PXMLMesh::readTriangle(const xmlChar *name, const xmlChar **attrs)
   // Return if no vertices are local
   if(!(own_vertex[v1] || own_vertex[v2] || own_vertex[v0]) || !own_vertex[v0])
     return;
-  
-  used_vertex[_mesh.distdata().get_local(v0, 0)] = true;
+
+  used_vertex[_mesh.distdata().get_vertex_local(v0)] = true;
   if(own_vertex[v1])
-    used_vertex[_mesh.distdata().get_local(v1, 0)] = true;
+    used_vertex[_mesh.distdata().get_vertex_local(v1)] = true;
   if(own_vertex[v2])
-    used_vertex[_mesh.distdata().get_local(v2, 0)] = true;
+    used_vertex[_mesh.distdata().get_vertex_local(v2)] = true;
 
   // Add shared vertices to shared list
   if(!(own_vertex[v1] && own_vertex[v2] && own_vertex[v0])){
@@ -374,19 +374,19 @@ void PXMLMesh::readTetrahedron(const xmlChar *name, const xmlChar **attrs)
   uint v1 = parseUnsignedInt(name, attrs, "v1");
   uint v2 = parseUnsignedInt(name, attrs, "v2");
   uint v3 = parseUnsignedInt(name, attrs, "v3");
-  
+
   // Return if no vertices are local
   if(!(own_vertex[v1] || own_vertex[v2] || own_vertex[v0] || own_vertex[v3])
      || !own_vertex[v0])
     return;
 
-  used_vertex[_mesh.distdata().get_local(v0, 0)] = true;
+  used_vertex[_mesh.distdata().get_vertex_local(v0)] = true;
   if(own_vertex[v1])
-    used_vertex[_mesh.distdata().get_local(v1, 0)] = true;
+    used_vertex[_mesh.distdata().get_vertex_local(v1)] = true;
   if(own_vertex[v2])
-    used_vertex[_mesh.distdata().get_local(v2, 0)] = true;
+    used_vertex[_mesh.distdata().get_vertex_local(v2)] = true;
   if(own_vertex[v3])
-    used_vertex[_mesh.distdata().get_local(v3, 0)] = true;
+    used_vertex[_mesh.distdata().get_vertex_local(v3)] = true;
   // Add shared vertices to shared list
   if(!(own_vertex[v1] && own_vertex[v2] && own_vertex[v0] && own_vertex[v3])){
     if(!own_vertex[v1])
@@ -396,13 +396,13 @@ void PXMLMesh::readTetrahedron(const xmlChar *name, const xmlChar **attrs)
     if(!own_vertex[v3])
       shared_buffer[v3] = true;
   }
-  
+
   // Add cell to cell buffer
   cell_buffer.push_back(v0);
   cell_buffer.push_back(v1);
   cell_buffer.push_back(v2);
-  cell_buffer.push_back(v3);  
-  
+  cell_buffer.push_back(v3);
+
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readMeshFunction(const xmlChar* name, const xmlChar** attrs)
@@ -487,7 +487,7 @@ void PXMLMesh::closeMesh()
       shared++;
       send_buff.push_back(i);
     }
-   
+
   _map<uint,bool> assigned_orphan, ghost_vertex;
   for(uint i=0;i<_mesh.numVertices();i++){
     if(!used_vertex[i]){
@@ -502,13 +502,13 @@ void PXMLMesh::closeMesh()
   uint num_shared = shared;
   uint num_coords = gdim * num_shared;
   uint num_orphan = num_shared;
-  real *shared_coords = new real[num_coords];      
+  real *shared_coords = new real[num_coords];
   real *shp = &shared_coords[0];
   uint *shared_indices = new uint[num_shared];
   uint *shpi = &shared_indices[0];
   uint *shared_orphans = new uint[num_shared];
   uint *shpo = &shared_orphans[0];
-  MPI_Allreduce(&num_shared, &max_nsh, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM); 
+  MPI_Allreduce(&num_shared, &max_nsh, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *shvert = new uint[max_nsh];
   uint src,dest;
   _map<uint, uint> owner_map;
@@ -519,18 +519,18 @@ void PXMLMesh::closeMesh()
     dest = (rank + j) % pe_size;
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, dest, 1,
-		 shvert, max_nsh, MPI_UNSIGNED, src, 1, 
+		 shvert, max_nsh, MPI_UNSIGNED, src, 1,
 		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);
 
     for(int k=0; k<num_recv; k++)
       if(own_vertex[shvert[k]]){
-	Vertex vertex(_mesh,_mesh.distdata().get_local(shvert[k], 0));
+	Vertex vertex(_mesh,_mesh.distdata().get_vertex_local(shvert[k]));
 	send_buff_coords.push_back(vertex.point().x());
 	send_buff_coords.push_back(vertex.point().y());
 	if(gdim >2)
 	  send_buff_coords.push_back(vertex.point().z());
-	
+
 	send_buff_indices.push_back(shvert[k]);
 	if(!used_vertex[vertex.index()] &&
 	   !assigned_orphan[vertex.index()]){
@@ -540,17 +540,17 @@ void PXMLMesh::closeMesh()
 	}
 	else {
 	  if(owner_map.count(vertex.index()) == 0)
-	    send_buff_orphan.push_back(rank);	 
+	    send_buff_orphan.push_back(rank);
 	  else
-	    send_buff_orphan.push_back(owner_map[vertex.index()]);	 
+	    send_buff_orphan.push_back(owner_map[vertex.index()]);
 	}
-	ghost_vertex[_mesh.distdata().get_local(shvert[k], 0)]  = true;
+	ghost_vertex[_mesh.distdata().get_vertex_local(shvert[k])]  = true;
       }
 
     MPI_Sendrecv(&send_buff_indices[0], send_buff_indices.size(), MPI_UNSIGNED,
-		 src, 1, shpi, num_shared, MPI_UNSIGNED, dest, 1, 
+		 src, 1, shpi, num_shared, MPI_UNSIGNED, dest, 1,
 		 MPI::DOLFIN_COMM, &status);
-    MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);	
+    MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);
     num_shared -=num_recv;
     shpi += num_recv;
 
@@ -559,28 +559,28 @@ void PXMLMesh::closeMesh()
 		 &status);
     MPI_Get_count(&status,MPI_DOUBLE,&num_recv);
     num_coords -=num_recv;
-    shp +=num_recv;	
+    shp +=num_recv;
 
     MPI_Sendrecv(&send_buff_orphan[0], send_buff_orphan.size(), MPI_UNSIGNED,
-		 src, 3, shpo, num_orphan, MPI_UNSIGNED, dest, 3, 
+		 src, 3, shpo, num_orphan, MPI_UNSIGNED, dest, 3,
 		 MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&num_recv);
     num_orphan -= num_recv;
-    shpo += num_recv;    
+    shpo += num_recv;
 
     send_buff_coords.clear();
     send_buff_indices.clear();
     send_buff_orphan.clear();
 
   }
-  
+
   // Init new mesh
   editor.initVertices(_mesh.numVertices() + shared - orphan);
   //  new_mesh.distdata().init(_mesh.numVertices() + shared - orphan);
   new_mesh.distdata().set_global_numVertices(_mesh.distdata().global_numVertices());
 
   uint v=0;
-  for(VertexIterator vertex(_mesh); !vertex.end(); ++vertex){    
+  for(VertexIterator vertex(_mesh); !vertex.end(); ++vertex){
     if(used_vertex[vertex->index()]){
       editor.addVertex(v,vertex->point());
       new_mesh.distdata().set_map(v, _mesh.distdata().get_global(*vertex), 0);
@@ -604,12 +604,12 @@ void PXMLMesh::closeMesh()
 	editor.addVertex(v++,shared_coords[ci],shared_coords[ci+1]); break;
       case 3:
 	editor.addVertex(v++,shared_coords[ci],shared_coords[ci+1],
-			 shared_coords[ci+2]); 
+			 shared_coords[ci+2]);
 	break;
-	
+
       }
     ci += gdim;
-  }  
+  }
 
   uint ndims =  _mesh.type().numVertices(_mesh.topology().dim());
   editor.initCells(cell_buffer.size() / ndims);
@@ -618,20 +618,20 @@ void PXMLMesh::closeMesh()
     switch(ndims)
       {
       case 2:
-	editor.addCell(c++,new_mesh.distdata().get_local(cell_buffer[i], 0),
-		       new_mesh.distdata().get_local(cell_buffer[i+1], 0));
-	break;	
+	editor.addCell(c++,new_mesh.distdata().get_vertex_local(cell_buffer[i]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+1]));
+	break;
       case 3:
-	editor.addCell(c++,new_mesh.distdata().get_local(cell_buffer[i], 0),
-		       new_mesh.distdata().get_local(cell_buffer[i+1], 0),
-		       new_mesh.distdata().get_local(cell_buffer[i+2], 0));
-	break;	
+	editor.addCell(c++,new_mesh.distdata().get_vertex_local(cell_buffer[i]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+1]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+2]));
+	break;
       case 4:
-	editor.addCell(c++,new_mesh.distdata().get_local(cell_buffer[i], 0),
-		       new_mesh.distdata().get_local(cell_buffer[i+1], 0), 
-		       new_mesh.distdata().get_local(cell_buffer[i+2], 0),
-		       new_mesh.distdata().get_local(cell_buffer[i+3], 0));
-	break;	
+	editor.addCell(c++,new_mesh.distdata().get_vertex_local(cell_buffer[i]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+1]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+2]),
+		       new_mesh.distdata().get_vertex_local(cell_buffer[i+3]));
+	break;
       }
   }
 
@@ -640,7 +640,7 @@ void PXMLMesh::closeMesh()
 
   ghost_vertex.clear();
   assigned_orphan.clear();
-  shared_buffer.clear();  
+  shared_buffer.clear();
   send_buff.clear();
   cell_buffer.clear();
   used_vertex.clear();

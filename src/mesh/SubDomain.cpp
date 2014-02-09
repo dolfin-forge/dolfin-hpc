@@ -196,7 +196,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       for (MeshGhostIterator iter(mesh.distdata(), 0); !iter.end(); ++iter)
         if (sub_domains.get(iter.index()) == sub_domain)
           ghost_buff[iter.owner()].push_back(
-              mesh.distdata().get_global(iter.index(), 0));
+              mesh.distdata().get_vertex_global(iter.index()));
 
       int recv_size, recv_count, send_size;
       for (uint i = 0; i < pe_size; i++)
@@ -222,7 +222,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
         MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
         for (int i = 0; i < recv_count; i++)
-          sub_domains.set(mesh.distdata().get_local(recv_buff[i], 0),
+          sub_domains.set(mesh.distdata().get_vertex_local(recv_buff[i]),
                           sub_domain);
 
       }

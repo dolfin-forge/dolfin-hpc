@@ -161,7 +161,7 @@ void MeshDistributedData::finalize(uint dim)
 
   switch(dim)
   {
-  case 0:
+  case 0: // Vertices
     if(_global_vertex_indices)
     {
       delete[] _global_vertex_indices;
@@ -176,7 +176,7 @@ void MeshDistributedData::finalize(uint dim)
     _max_global_index = _global_vertex_indices_size;
     global_indices[0].clear();
     break;
-  case 2:
+  case 2: // Facets
     if(_global_facet_indices)
     {
       delete[] _global_facet_indices;
@@ -191,7 +191,7 @@ void MeshDistributedData::finalize(uint dim)
     _max_global_index = _global_facet_indices_size;
     global_indices[2].clear();
     break;
-  case 3:
+  case 3: // Cells
     if(_global_cell_indices)
     {
       delete[] _global_cell_indices;
@@ -348,6 +348,36 @@ void MeshDistributedData::remap_owner(int* mapping)
 #endif
   }
 
+}
+//-----------------------------------------------------------------------------
+uint MeshDistributedData::get_vertex_global(uint i)
+{
+  if(MPI::numProcesses() == 1)
+  {
+    return i;
+  }
+
+  if ( finalized )
+  {
+    return _global_facet_indices[i];
+  }
+  else
+  {
+    dolfin_assert( global_indices[0].count(i) );
+    return global_indices[0][i];
+  }
+
+}
+//-----------------------------------------------------------------------------
+uint MeshDistributedData::get_vertex_local(uint i)
+{
+  if(MPI::numProcesses() == 1)
+  {
+    return i;
+  }
+
+  dolfin_assert( local_indices[0].count(i) );
+  return local_indices[0][i];
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_global(uint i)

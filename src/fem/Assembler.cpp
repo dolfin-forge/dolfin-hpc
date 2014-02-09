@@ -457,7 +457,8 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
   MeshFunction<uint>* cell_map = boundary_->data().meshFunction("cell map");
-  // FIXME MeshEntityIterator, empty BoundaryMesh
+
+  //
   if(boundary_->numCells()  == 0) return;
 
   dolfin_assert(cell_map);

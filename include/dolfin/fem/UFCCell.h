@@ -152,7 +152,7 @@ public:
     {
 #if ENABLE_P1_OPTIMIZATIONS
       for(uint i = 0; i < cell.numEntities(0); i++)
-      entity_indices[0][i] = distdata.get_global( (cell.entities(0))[i], 0);
+      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
 #else
       for (uint d = 0; d < topological_dimension; d++)
         for (uint i = 0; i < cell.numEntities(d); i++)

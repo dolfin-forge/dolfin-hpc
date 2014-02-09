@@ -82,7 +82,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   Array<uint> *ghost_buff = new Array<uint>[pe_size];
   for(MeshGhostIterator iter(mddata, 0); !iter.end(); ++iter)
   {
-    ghost_buff[iter.owner()].push_back(mddata.get_global(iter.index(), 0));
+    ghost_buff[iter.owner()].push_back(mddata.get_vertex_global(iter.index()));
   }
 
   MPI_Status status;
@@ -113,7 +113,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
     for(int k=0; k < recv_count; ++k)
     {
-      send_buff.push_back(new_global[mddata.get_local(recv_ghost[k], 0)]);
+      send_buff.push_back(new_global[mddata.get_vertex_local(recv_ghost[k])]);
     }
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
@@ -123,8 +123,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
     for(int j=0; j < recv_count; ++j)
     {
-      new_global[mddata.get_local(ghost_buff[dest][j] , 0)] = recv_buff[j];
-      new_local[recv_buff[j] ] = mddata.get_local(ghost_buff[dest][j], 0);
+      new_global[mddata.get_vertex_local(ghost_buff[dest][j])] = recv_buff[j];
+      new_local[recv_buff[j] ] = mddata.get_vertex_local(ghost_buff[dest][j]);
     }
     send_buff.clear();
   }
@@ -139,7 +139,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 
   delete[] recv_buff;
   delete[] recv_ghost;
-  for(uint i = 0; i < pe_size; ++i)
+  for(int i = 0; i < pe_size; ++i)
   {
     ghost_buff[i].clear();
   }
@@ -149,7 +149,8 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 void MeshRenumber::renumber_edges(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
-  if( mddata._valid_edge_numbering || MPI::numProcesses() == 1)
+  if( mddata._valid_edge_numbering ||
+      MPI::numProcesses() == 1  || mesh.topology().dim() == 1)
   {
     return;
   }
@@ -178,8 +179,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
         key = edge_key(edge_v[0], edge_v[1]);
         edge_map[key] = e->index();
         edge_id[key] = (uint) rand();
-        send_buff.push_back( mddata.get_global(edge_v[0], 0) );
-        send_buff.push_back( mddata.get_global(edge_v[1], 0) );
+        send_buff.push_back( mddata.get_vertex_global(edge_v[0]) );
+        send_buff.push_back( mddata.get_vertex_global(edge_v[1]) );
         send_buff_id.push_back(edge_id[key]);
         used_edge.insert(e->index());
         mddata.set_shared(*e);
@@ -223,8 +224,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
       {
 
         // Generate edge key
-        key = edge_key(mddata.get_local(recv_buff[i], 0),
-                 mddata.get_local(recv_buff[i+1], 0));
+        key = edge_key(mddata.get_vertex_local(recv_buff[i]),
+                 mddata.get_vertex_local(recv_buff[i+1]));
 
         // Check if I have the corresponding edge
         if(edge_id.count(key))
@@ -275,8 +276,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
     {
       Edge e(mesh, i);
       const uint *edge_v = e.entities(0);
-      send_buff.push_back( mddata.get_global(edge_v[0], 0) );
-      send_buff.push_back( mddata.get_global(edge_v[1], 0) );
+      send_buff.push_back( mddata.get_vertex_global(edge_v[0]) );
+      send_buff.push_back( mddata.get_vertex_global(edge_v[1]) );
       send_mapping[num++] = e.index();
     }
   }
@@ -303,8 +304,8 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
       {
 
         // Generate edge key
-        key = edge_key(mddata.get_local(recv_buff[i], 0),
-                       mddata.get_local(recv_buff[i+1], 0));
+        key = edge_key(mddata.get_vertex_local(recv_buff[i]),
+                       mddata.get_vertex_local(recv_buff[i+1]));
 
         if(edge_id.count(key))
         {
@@ -421,8 +422,8 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
            && mddata.have_global(recv_buff[i+k+1], 0))
         {
           // Generate edge key
-          key = edge_key(mddata.get_local(recv_buff[i+k], 0),
-             mddata.get_local(recv_buff[i+k+1], 0));
+          key = edge_key(mddata.get_vertex_local(recv_buff[i+k]),
+             mddata.get_vertex_local(recv_buff[i+k+1]));
           facekey.insert(key);
           ++num_ok;
         }
@@ -513,8 +514,8 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
            mddata.have_global(recv_buff[i+k+1], 0))
         {
           // Generate edge key
-          key = edge_key(mddata.get_local(recv_buff[i+k], 0),
-             mddata.get_local(recv_buff[i+k+1], 0));
+          key = edge_key(mddata.get_vertex_local(recv_buff[i+k]),
+             mddata.get_vertex_local(recv_buff[i+k+1]));
 
           facekey.insert(key);
           ++num_ok;
@@ -641,24 +642,24 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
 {
   MeshDistributedData& mddata = mesh.distdata();
   const uint *face_v = f.entities(0);
-  send_buff.push_back( mddata.get_global(face_v[0], 0) );
-  send_buff.push_back( mddata.get_global(face_v[1], 0) );
+  send_buff.push_back( mddata.get_vertex_global(face_v[0]) );
+  send_buff.push_back( mddata.get_vertex_global(face_v[1]) );
 
-  send_buff.push_back( mddata.get_global(face_v[1], 0) );
-  send_buff.push_back( mddata.get_global(face_v[2], 0) );
+  send_buff.push_back( mddata.get_vertex_global(face_v[1]) );
+  send_buff.push_back( mddata.get_vertex_global(face_v[2]) );
 
   switch(f.numEntities(0))
     {
     case 3:
-      send_buff.push_back( mddata.get_global(face_v[2], 0) );
-      send_buff.push_back( mddata.get_global(face_v[0], 0) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[2]) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[0]) );
       break;
     case 4:
-      send_buff.push_back( mddata.get_global(face_v[2], 0) );
-      send_buff.push_back( mddata.get_global(face_v[3], 0) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[2]) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[3]) );
 
-      send_buff.push_back( mddata.get_global(face_v[3], 0) );
-      send_buff.push_back( mddata.get_global(face_v[0], 0) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[3]) );
+      send_buff.push_back( mddata.get_vertex_global(face_v[0]) );
       break;
     default:
       error("Unkown entity");

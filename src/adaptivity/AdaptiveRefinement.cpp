@@ -206,8 +206,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   MeshFunction<bool> new_cell_marker;
   mesh.distribute(*partitions, cell_marker, new_cell_marker);
 
-  Mesh new_mesh;
-  new_mesh = mesh;
+  Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.renumber();
 
@@ -308,7 +307,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
     for (VertexIterator v(*c); !v.end(); ++v)
     {
 
-      global_index = mesh.distdata().get_global(v->index(), 0);
+      global_index = mesh.distdata().get_vertex_global(v->index());
       f->vector().get(&value, 1, &global_index);
 
       if (target_proc == pe_rank
@@ -435,7 +434,7 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
       if (!mesh.distdata().is_ghost(v->index(), 0) && !marked.get(*v))
       {
 
-        new_index = mesh.distdata().get_global(v->index(), 0);
+        new_index = mesh.distdata().get_vertex_global(v->index());
 
         f->vector().get(&dof_value, 1, &indices[ci]);
         f_x.vector().set(&dof_value, 1, &new_index);

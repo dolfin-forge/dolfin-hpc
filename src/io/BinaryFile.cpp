@@ -839,16 +839,16 @@ void BinaryFile::operator>>(Mesh& mesh)
       {
       case 0:
 	editor.addCell(local_cell_index,
-		       distdata.get_local(it->v1, 0),
-		       distdata.get_local(it->v2, 0),
-		       distdata.get_local(it->v3, 0));
+		       distdata.get_vertex_local(it->v1),
+		       distdata.get_vertex_local(it->v2),
+		       distdata.get_vertex_local(it->v3));
 	break;
       case 1:
 	editor.addCell(local_cell_index,
-		       distdata.get_local(it->v1, 0),
-		       distdata.get_local(it->v2, 0),
-		       distdata.get_local(it->v3, 0),
-		       distdata.get_local(it->v4, 0));
+		       distdata.get_vertex_local(it->v1),
+		       distdata.get_vertex_local(it->v2),
+		       distdata.get_vertex_local(it->v3),
+		       distdata.get_vertex_local(it->v4));
 	break;
       }
     }
@@ -1002,7 +1002,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     int *cp = &cell_buffer[0];
     for (CellIterator c(mesh); !c.end(); ++c)
       for (uint i = 0; i < c->numEntities(0); i++)
-	*(cp++) = mesh.distdata().get_global(c->entities(0)[i], 0);
+	*(cp++) = mesh.distdata().get_vertex_global(c->entities(0)[i]);
 
     MPI_File_write_at_all(fh, byte_offset + offset * sizeof(int),
 		      cell_buffer,local_cell_entities ,
@@ -1222,7 +1222,7 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
 
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
     for(MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it)
-      ghost_buff[it.owner()].push_back(mesh.distdata().get_global(it.index(),0));
+      ghost_buff[it.owner()].push_back(mesh.distdata().get_vertex_global(it.index()));
 
 
     MPI_Status status;
@@ -1249,7 +1249,7 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
       for(int k=0; k < recv_count; k++)
-	send_buff.push_back(meshfunction.get(mesh.distdata().get_local(recv_ghost[k], 0)));
+	send_buff.push_back(meshfunction.get(mesh.distdata().get_vertex_local(recv_ghost[k])));
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
 		   recv_buff, recv_size , MPI_DOUBLE, dest, 2,
@@ -1258,13 +1258,13 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
 
       for(int j=0; j < recv_count; j++) {
 	if (type == 0)
-	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0),
+	  meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
 			   (int) recv_buff[j]);
 	else if(type == 1)
-	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0),
+	  meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
 			   (uint) recv_buff[j]);
 	else if(type == 2)
-	  meshfunction.set(mesh.distdata().get_local(ghost_buff[dest][j] , 0),
+	  meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
 			   recv_buff[j]);
       }
 

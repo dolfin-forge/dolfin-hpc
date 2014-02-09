@@ -184,7 +184,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
         ++boundary_vertex)
     {
       uint boundary_id = vertex_map->get(*boundary_vertex);
-      uint global_id = mesh.distdata().get_global(boundary_id, 0);
+      uint global_id = mesh.distdata().get_vertex_global(boundary_id);
       //std_out << "global_id = " << global_id << std::endl;
 
       bool const vertex_is_shared = mesh.distdata().is_shared(boundary_id, 0);
@@ -598,7 +598,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
       // Data alignment is n_tau + 1
       for (int j = 0; j < recv_size; j += data_alignment, ++idx)
       {
-        uint index = mesh.distdata().get_local(recv_index[idx], 0);
+        uint index = mesh.distdata().get_vertex_local(recv_index[idx]);
         if (!used_shared[index])
         {
           vertex_type.set(index, (uint) recv_type[j]);
@@ -694,7 +694,7 @@ void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
         ++boundary_vertex, SharedMeshFacetCount += NbNeighCells)
     {
       uint boundary_id = vertex_map->get(*boundary_vertex);
-      uint global_id = mesh.distdata().get_global(boundary_id, 0);
+      uint global_id = mesh.distdata().get_vertex_global(boundary_id);
 
       // Mark vertex as part of the boundary
       GlobalIdOnBoundary[global_id] = true;

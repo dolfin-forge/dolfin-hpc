@@ -77,7 +77,7 @@ namespace dolfin
     Mesh();
 
     /// Copy constructor
-    Mesh(const Mesh& mesh);
+    Mesh(Mesh const& mesh);
 
     /// Create mesh from data file
     Mesh(std::string filename);

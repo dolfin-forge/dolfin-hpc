@@ -5,9 +5,10 @@
 // Modified by Kent-Andre Mardal, 2008.
 // Modified by Ola Skavhaug, 2008.
 // Modified by Martin Alnæs, 2008.
+// Modified by Niyazi Cem Degirmenci 2013.
 //
 // First added:  2004-01-01
-// Last changed: 2008-04-29
+// Last changed: 2008-10-28
 
 
 #ifndef __PETSC_VECTOR_H
@@ -78,14 +79,14 @@ namespace dolfin
     virtual void init(uint N);
 
     virtual void init_ghosted(uint n, std::set<uint>& indices,
-			      std::map<uint, uint>& map);
+                              std::map<uint, uint>& map);
 
     /// Return size of vector
     virtual uint size() const;
 
     /// Return local size of vector
     virtual uint local_size() const;
-    
+
     /// Return rank's offset into vector
     virtual uint offset() const;
 
@@ -108,7 +109,7 @@ namespace dolfin
     virtual void add(real* values);
 
     /// Add multiple of given vector (AXPY operation)
-    virtual void axpy(real a, const GenericVector& x); 
+    virtual void axpy(real a, const GenericVector& x);
 
     /// Return inner product with given vector
     virtual real inner(const GenericVector& v) const;
@@ -124,6 +125,9 @@ namespace dolfin
 
     /// Multiply vector by given number
     virtual const PETScVector& operator*= (real a);
+
+    /// Multiply vector by given vector componentwise
+    virtual const PETScVector& operator*= (const GenericVector& x);
 
     /// Divide vector by given number
     virtual const PETScVector& operator/= (real a);
@@ -161,7 +165,7 @@ namespace dolfin
 
     // PETSc Vec pointer
     Vec x;
-       
+
     // True if we don't own the vector x points to
     bool is_view;
 
@@ -169,7 +173,7 @@ namespace dolfin
     bool is_ghosted;
 
     //    Array<int> ghost_indices;
-#if (sun || __sun)    
+#if (sun || __sun)
     std::map<int, int> mapping;
 #else
     std::map<const int, int> mapping;
@@ -180,7 +184,7 @@ namespace dolfin
 
   /// Output of PETScVector
   LogStream& operator<< (LogStream& stream, const PETScVector& x);
-  
+
 }
 
 #endif

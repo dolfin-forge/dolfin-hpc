@@ -48,7 +48,8 @@ Mesh::Mesh() :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0))
+  _timestamp(time(0)),
+  _distdata()
 {
   // Do nothing
 }
@@ -58,7 +59,8 @@ Mesh::Mesh(const Mesh& mesh) :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0))
+  _timestamp(time(0)),
+  _distdata()
 {
   *this = mesh;
 }
@@ -68,7 +70,8 @@ Mesh::Mesh(std::string filename) :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0))
+  _timestamp(time(0)),
+  _distdata()
 {
   File file(filename);
   file >> *this;

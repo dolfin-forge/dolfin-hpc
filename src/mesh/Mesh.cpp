@@ -45,6 +45,8 @@ namespace dolfin {
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
   Variable("mesh", "DOLFIN mesh"),
+  _topology(),
+  _geometry(),
   _data(0),
   _cell_type(0),
   _ordered(false),
@@ -56,6 +58,8 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(const Mesh& mesh) :
   Variable("mesh", "DOLFIN mesh"),
+  _topology(),
+  _geometry(),
   _data(0),
   _cell_type(0),
   _ordered(false),
@@ -67,6 +71,8 @@ Mesh::Mesh(const Mesh& mesh) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
   Variable("mesh", "DOLFIN mesh"),
+  _topology(),
+  _geometry(),
   _data(0),
   _cell_type(0),
   _ordered(false),

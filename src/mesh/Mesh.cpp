@@ -48,8 +48,8 @@ Mesh::Mesh() :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0)),
-  _distdata()
+  _distdata(),
+  _timestamp(time(0))
 {
   // Do nothing
 }
@@ -59,8 +59,8 @@ Mesh::Mesh(const Mesh& mesh) :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0)),
-  _distdata()
+  _distdata(),
+  _timestamp(time(0))
 {
   *this = mesh;
 }
@@ -70,8 +70,8 @@ Mesh::Mesh(std::string filename) :
   _data(0),
   _cell_type(0),
   _ordered(false),
-  _timestamp(time(0)),
-  _distdata()
+  _distdata(),
+  _timestamp(time(0))
 {
   File file(filename);
   file >> *this;
@@ -168,30 +168,30 @@ void Mesh::refine()
 #ifdef HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void Mesh::refine(libgeom::Geometry& geom,
-		  MeshFunction<int>& patch_id_list,
-		  MeshFunction<float>& bnd_u,
-		  MeshFunction<float>& bnd_v)
+                  MeshFunction<int>& patch_id_list,
+                  MeshFunction<float>& bnd_u,
+                  MeshFunction<float>& bnd_v)
 {
   message("No cells marked for refinement, "
-	  "assuming uniform mesh refinement with geometry informations.");
+          "assuming uniform mesh refinement with geometry informations.");
   UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u, bnd_v);
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine(libgeom::Geometry& geom,
-		  MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
+                  MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
 {
   message("No cells marked for refinement, "
-	  "assuming uniform mesh refinement with geometry informations.");
+          "assuming uniform mesh refinement with geometry informations.");
   UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u);
 }
 //-----------------------------------------------------------------------------
 #endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
-		  bool load_balance)
+                  bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-						 refine_boundary, load_balance);
+                                                 refine_boundary, load_balance);
 }
 //-----------------------------------------------------------------------------
 void Mesh::coarsen()
@@ -208,7 +208,7 @@ void Mesh::coarsen()
 void Mesh::coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary)
 {
   LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_markers,
-						 coarsen_boundary);
+                                                 coarsen_boundary);
 }
 //-----------------------------------------------------------------------------
 void Mesh::move(Mesh& boundary, ALEType method)
@@ -252,31 +252,31 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
                       MeshFunction<bool>& new_cell_markers)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_markers,
-				  new_cell_markers);
+                                  new_cell_markers);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<uint> *,
-		      MeshFunction<uint> *> >& cell_functions)
+                      Array<std::pair<MeshFunction<uint> *,
+                      MeshFunction<uint> *> >& cell_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<double> *,
-		      MeshFunction<double> *> >& vertex_functions)
+                      Array<std::pair<MeshFunction<double> *,
+                      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute(MeshFunction<uint>& distribution,
-		      Array<std::pair<MeshFunction<uint> *,
-		      MeshFunction<uint> *> >& cell_functions,
-		      Array<std::pair<MeshFunction<double> *,
-		      MeshFunction<double> *> >& vertex_functions)
+                      Array<std::pair<MeshFunction<uint> *,
+                      MeshFunction<uint> *> >& cell_functions,
+                      Array<std::pair<MeshFunction<double> *,
+                      MeshFunction<double> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions,
-				  vertex_functions);
+                                  vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::renumber()

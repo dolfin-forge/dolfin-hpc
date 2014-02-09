@@ -18,15 +18,6 @@ class Mesh;
  *
  *  @brief  Provides algorithms to renumbers mesh entities and store the indices
  *          into one array of local map and one array of global maps.
- *          The entities numbering are stored at index given by 3D definition:
- *            - 0: vertex, filled by renumber_vertices(Mesh& mesh),
- *            - 1: edge, filled by renumber_edges(Mesh& mesh),
- *            - 2: face, filled by renumber_faces(Mesh& mesh),
- *            - 3: cell, filled by renumber_cells(Mesh& mesh).
- *          In the 2D, the same indices apply but faces are ignored.
- *          In the 1D, the same indices apply but faces are ignored.
- *          If P1 optimizations are enabled only vertices and cells are
- *          renumbered.
  */
 
 class MeshRenumber

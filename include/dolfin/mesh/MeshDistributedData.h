@@ -31,6 +31,7 @@ public:
 
   void clear();
   void finalize(uint dim);
+  void set_topological_dimension(uint const dim);
 
   //--- These cannot be const as they access the element in the map with [].
 
@@ -135,6 +136,10 @@ protected:
 private:
 
   Mesh const& _mesh;
+
+  uint _dim;
+  mutable uint _cell_dim;
+  mutable uint _facet_dim;
 
   uint _max_global_index;
   uint _num_global_vertex;

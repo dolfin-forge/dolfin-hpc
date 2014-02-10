@@ -25,6 +25,9 @@ class Function;
 class DofMapCache
 {
 
+  friend class DofMapSet;
+  friend class FiniteElementSpace;
+
   struct dofmap_token_t
   {
     uint count;
@@ -50,6 +53,11 @@ class DofMapCache
 
 public:
 
+  ///
+  void disp() const;
+
+protected:
+
   /// Meyers singleton
   static DofMapCache& instance()
   {
@@ -64,13 +72,7 @@ public:
   DofMap& acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
 
   ///
-  DofMap& acquire_dofmap(Function& f);
-
-  ///
   void release_dofmap(DofMap& dof_map);
-
-  ///
-  void disp() const;
 
 private:
 

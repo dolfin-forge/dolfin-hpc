@@ -28,6 +28,7 @@ DofMapCache::~DofMapCache()
 {
   if (cache_.size() != 0)
   {
+    disp();
     error("DofMapCache is not empty: "
           "some dof maps have not been properly released");
   }
@@ -138,16 +139,6 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
 }
 
 //-----------------------------------------------------------------------------
-DofMap& DofMapCache::acquire_dofmap(Function& f)
-{
-  if (f.type() != Function::discrete)
-  {
-    error("Can only acquire DofMap from a discrete function.");
-  }
-  return acquire_dofmap(f.mesh(), DofMap::dofmap_signature(f.signature()));
-}
-
-//-----------------------------------------------------------------------------
 void DofMapCache::release_dofmap(DofMap& dof_map)
 {
   std::string const h = dof_map.hash();
@@ -173,6 +164,7 @@ void DofMapCache::release_dofmap(DofMap& dof_map)
     dofmap_container_t::iterator dm_it = cache_.find(expected_h);
     dofmap_token_t& dm_token = dm_it->second;
     dm_token.count--;
+    //message("Release dofmap: %s",h.c_str());
     if (dm_token.count == 0)
     {
       delete &dof_map;

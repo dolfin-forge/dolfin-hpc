@@ -54,7 +54,7 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
   for (uint i = 0; i < num_arguments; ++i)
   {
     //
-    dof_map_set[i] = &cache_.acquire_dofmap(mesh, form, i);
+    dof_map_set[i] = &(cache_.acquire_dofmap(mesh, form, i));
   }
 }
 

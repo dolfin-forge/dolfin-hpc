@@ -40,6 +40,12 @@ namespace ufl
   IndexBase::~IndexBase()
   {
   }
+
+//-----------------------------------------------------------------------------
+  dolfin::uint const & IndexBase::count() const
+  {
+    return count_;
+  }
   
 //-----------------------------------------------------------------------------
 //  Object::repr_t const IndexBase::repr() const
@@ -54,9 +60,9 @@ namespace ufl
 //  }
 
 //-----------------------------------------------------------------------------
-//  void IndexBase::display() const
-//  {
-//  }
+  void IndexBase::display() const
+  {
+  }
 
 //-----------------------------------------------------------------------------
   Index::Index(dolfin::uint const& count) :

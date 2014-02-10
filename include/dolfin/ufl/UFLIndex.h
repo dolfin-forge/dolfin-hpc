@@ -36,7 +36,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
       
       /// 
-      dolfin::uint const count() const;
+      dolfin::uint const & count() const;
 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------

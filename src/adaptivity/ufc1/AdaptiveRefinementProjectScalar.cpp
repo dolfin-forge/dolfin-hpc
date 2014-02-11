@@ -1,4 +1,4 @@
-#include <dolfin/adaptivity/AdaptiveRefinementProjectScalar.h>
+#include <dolfin/adaptivity/ufc1/AdaptiveRefinementProjectScalar.h>
 /// Constructor
 UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_0::UFC_AdaptiveRefinementProjectScalarLinearForm_finite_element_0() : ufc::finite_element()
 {

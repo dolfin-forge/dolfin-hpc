@@ -272,8 +272,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
-					   real **vp, uint **rp, uint& m,
-					   MeshFunction<uint>& distribution)
+                                           real **vp, uint **rp, uint& m,
+                                           MeshFunction<uint>& distribution)
 {
 
 #ifdef HAVE_MPI

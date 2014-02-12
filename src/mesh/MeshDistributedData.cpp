@@ -43,7 +43,7 @@ MeshDistributedData::MeshDistributedData(Mesh const& mesh) :
 {
   // If the mesh has not been initialized, the topological dimension is set
   // to zero.
-  set_topological_dimension(mesh.topology().dim());
+  init(mesh.topology().dim());
 
 }
 //-----------------------------------------------------------------------------
@@ -112,6 +112,20 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 
 
   return *this;
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::init(uint const& dim)
+{
+  if(dim > 0 && _dim == 0)
+  {
+    _dim = dim;
+    _cell_dim = _dim;
+    _facet_dim = _dim - 1;
+  }
+  else if (dim != _dim)
+  {
+    error("Trying to set a different topological dimension");
+  }
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::clear()
@@ -223,20 +237,6 @@ void MeshDistributedData::finalize(uint dim)
   }
 
   finalized = true;
-}
-//-----------------------------------------------------------------------------
-void MeshDistributedData::set_topological_dimension(uint const dim)
-{
-  if(dim > 0 && _dim == 0)
-  {
-    _dim = dim;
-    _cell_dim = _dim;
-    _facet_dim = _dim - 1;
-  }
-  else if (dim != _dim)
-  {
-    error("Trying to set a different topological dimension");
-  }
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)

@@ -52,7 +52,7 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
   }
 
   // Dirty hack
-  mddata.set_topological_dimension(mesh.topology().dim());
+  mddata.init(mesh.topology().dim());
 
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
@@ -159,7 +159,7 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   }
 
   // Dirty hack
-  mddata.set_topological_dimension(mesh.topology().dim());
+  mddata.init(mesh.topology().dim());
 
   // Flush shared/ghosted edges
   mddata.flush_edges();
@@ -358,7 +358,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   }
 
   // Dirty hack
-  mddata.set_topological_dimension(mesh.topology().dim());
+  mddata.init(mesh.topology().dim());
 
   mddata.flush_faces();
 
@@ -577,7 +577,7 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
   }
 
   // Dirty hack
-  mddata.set_topological_dimension(mesh.topology().dim());
+  mddata.init(mesh.topology().dim());
 
   uint offset = 0;
   uint num_cells = mesh.numCells();

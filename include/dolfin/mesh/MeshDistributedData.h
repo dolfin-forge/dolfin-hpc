@@ -29,9 +29,9 @@ public:
 
   const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
 
+  void init(uint const& dim);
   void clear();
   void finalize(uint dim);
-  void set_topological_dimension(uint const dim);
 
   //--- These cannot be const as they access the element in the map with [].
 

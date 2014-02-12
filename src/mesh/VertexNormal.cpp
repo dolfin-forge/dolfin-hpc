@@ -13,6 +13,7 @@
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 
@@ -29,7 +30,7 @@ VertexNormal::VertexNormal(VertexNormal& other) :
         tau(NULL),
         tau_1(NULL),
         tau_2(NULL),
-        mesh(other.mesh),
+        mesh_(other.mesh_),
         alpha_max_(0.5 * DOLFIN_PI * 0.99),
         weighting_(none)
 {
@@ -37,14 +38,14 @@ VertexNormal::VertexNormal(VertexNormal& other) :
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal::VertexNormal(Mesh& mesh) :
+VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
         normal(NULL),
         tau(NULL),
         tau_1(NULL),
         tau_2(NULL),
-        mesh(mesh),
+        mesh_(mesh),
         alpha_max_(0.5 * DOLFIN_PI * 0.99),
-        weighting_(none)
+        weighting_(weight)
 {
   uint const nsdim = mesh.topology().dim();
 
@@ -94,24 +95,24 @@ VertexNormal& VertexNormal::operator=(VertexNormal& other)
 {
   Clear();
 
-  normal = new MeshFunction<real> [mesh.topology().dim()];
-  tau = new MeshFunction<real> [mesh.topology().dim()];
-  tau_1 = new MeshFunction<real> [mesh.topology().dim()];
-  tau_2 = new MeshFunction<real> [mesh.topology().dim()];
+  normal = new MeshFunction<real> [mesh_.topology().dim()];
+  tau = new MeshFunction<real> [mesh_.topology().dim()];
+  tau_1 = new MeshFunction<real> [mesh_.topology().dim()];
+  tau_2 = new MeshFunction<real> [mesh_.topology().dim()];
 
-  uint const nsdim = mesh.topology().dim();
+  uint const nsdim = mesh_.topology().dim();
 
-  vertex_type.init(mesh, 0);
+  vertex_type.init(mesh_, 0);
   for (uint d = 0; d < nsdim; ++d)
   {
     basis_.push_back(new MeshFunction<real> [nsdim]);
     for (uint i = 0; i < nsdim; ++i)
     {
-      basis_.back()[i].init(mesh, 0);
+      basis_.back()[i].init(mesh_, 0);
     }
 
   }
-  for (VertexIterator v(mesh); !v.end(); ++v)
+  for (VertexIterator v(mesh_); !v.end(); ++v)
   {
     vertex_type.set(*v, other.vertex_type.get(*v));
     for (uint d = 0; d < nsdim; ++d)
@@ -144,6 +145,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
 {
   message("BoundaryNormals: Compute normals");
   mesh.renumber();
+
   uint rank = dolfin::MPI::processNumber();
   uint pe_size = dolfin::MPI::numProcesses();
   Array<real> *send_buff_type_basis = new Array<real> [pe_size];
@@ -208,7 +210,8 @@ VertexNormal::ComputeNormal(Mesh& mesh)
         {
           ++NbNeighCells;
         }
-        // FIXME: there seems to be a bug such that calling numEntities does not initialize the connectivities
+        // FIXME: there seems to be a bug such that calling numEntities does not
+        // initialize the connectivities
         /*
          if (NbNeighCells != nbnc)
          {
@@ -392,7 +395,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
           }
           else
           {
-            // found normal not belonging to the same plane
+            // Found normal not belonging to the same plane
             // increase offset position then set offset value to one
             normals_offsets[offset_to_update] += normals_offsets[curr_offset]
                 - 1;
@@ -420,7 +423,6 @@ VertexNormal::ComputeNormal(Mesh& mesh)
       // Now we have a nice list of surface normals...
       // ... and apparently we shamelessly take them as averaged normals and tangents
       // But why would I divide by the sum if I am merely normalizing them right after?
-      uint const nb_surfaces = surface_normals.size();
 
       // Taken from V. John, J. Comp. and Appl. Math. 2002
       // Let's fit everything in basis_vec of size nsdim*nsdim
@@ -554,6 +556,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
   // Synchronize basis vectors, vertex_types across processes
   if (dolfin::MPI::numProcesses() > 1)
   {
+#ifdef HAVE_MPI
     MPI_Status status;
     uint src = 0;
     uint dest = 0;
@@ -619,7 +622,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
 
     delete[] recv_index;
     delete[] recv_type;
-
+#endif
   }
 
   //--- Cleanup
@@ -654,6 +657,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
 {
+#ifdef HAVE_MPI
   uint const nsdim = mesh.topology().dim();
 
   int rank = dolfin::MPI::processNumber();
@@ -905,6 +909,7 @@ void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
   delete[] recv_facetnormals;
   delete[] recv_offsetidx;
   delete[] recv_facetweights;
+#endif
 }
 
 //-----------------------------------------------------------------------------

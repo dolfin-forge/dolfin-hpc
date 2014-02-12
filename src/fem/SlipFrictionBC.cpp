@@ -20,13 +20,14 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real bet
 }
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain,
-                               NodeNormal& node_normal, real beta) :
+SlipFrictionBC::SlipFrictionBC(VertexNormal& normal,
+                               const SubDomain& sub_domain,
+                               real beta) :
     BoundaryCondition("SlipFriction"),
-    slipbc_(mesh, sub_domain, node_normal),
+    slipbc_(normal, sub_domain),
     beta_(beta),
     expr_(sub_domain, beta),
-    Fbeta_(mesh, expr_)
+    Fbeta_(normal.mesh(), expr_)
 {
 }
 
@@ -69,9 +70,9 @@ SlipFrictionBC::~SlipFrictionBC()
 }
 
 //-----------------------------------------------------------------------------
-NodeNormal& SlipFrictionBC::node_normals()
+VertexNormal& SlipFrictionBC::normals()
 {
-  return slipbc_.node_normals();
+  return slipbc_.normals();
 }
 
 } /* namespace dolfin */

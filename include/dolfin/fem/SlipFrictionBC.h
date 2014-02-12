@@ -29,7 +29,7 @@ public:
   SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real beta);
 
   /// Create boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, NodeNormal& node_normal,
+  SlipFrictionBC(VertexNormal& node_normal, const SubDomain& sub_domain,
                  real beta);
 
   /// Create sub system boundary condition for sub domain
@@ -47,7 +47,7 @@ public:
 /// Destructor
   ~SlipFrictionBC();
 
-  NodeNormal& node_normals();
+  VertexNormal& normals();
 
   //--- INTERFACE -------------------------------------------------------------
 

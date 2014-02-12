@@ -13,7 +13,7 @@
 #define __SLIPBC_H
 
 #include <dolfin/fem/BoundaryCondition.h>
-#include <dolfin/fem/NodeNormal.h>
+#include <dolfin/mesh/VertexNormal.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Vector.h>
@@ -39,16 +39,16 @@ class SlipBC: public BoundaryCondition
 public:
 
   /// Create boundary condition for sub domain
-  SlipBC(Mesh& mesh, const SubDomain& sub_domain);
+  SlipBC(Mesh& mesh, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain
-  SlipBC(Mesh& mesh, const SubDomain& sub_domain, NodeNormal& node_normal);
+  SlipBC(VertexNormal& node_normal, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  SlipBC(Mesh& mesh, const SubDomain& sub_domain, SubSystem const& sub_system);
+  SlipBC(Mesh& mesh, SubDomain const& sub_domain, SubSystem const& sub_system);
 
   /// Create sub system boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
@@ -58,24 +58,24 @@ public:
   ~SlipBC();
 
   /// Access to node normals
-  NodeNormal& node_normals();
+  VertexNormal& normals();
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  void apply(GenericMatrix& A, GenericVector& b, Form const& form);
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& ufc_form);
+  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
+             ufc::form const& ufc_form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const Form& form);
+  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
+             Form const& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const DofMap& dof_map, const ufc::form& ufc_form);
+  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
+             DofMap const& dof_map, ufc::form const& ufc_form);
 
 private:
 
@@ -89,7 +89,7 @@ private:
   void bset(Vector& b, uint row, real value);
 
   // Initialize sub domain markers
-  void init(const SubDomain& sub_domain);
+  void init(SubDomain const& sub_domain);
 
   void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
              Form const& form);
@@ -113,9 +113,11 @@ private:
   SubDomain const * user_sub_domain;
 
   // Node normal and tangents
-  NodeNormal node_normal;
+  VertexNormal normal;
 
-  int nzm;
+  BoundaryMesh * boundary;
+  MeshFunction<uint> * cell_map;
+  MeshFunction<uint> * vertex_map;
 
   Matrix* As;
 
@@ -123,14 +125,21 @@ private:
   int N_offset;
   std::set<uint> off_proc_rows;
 
-  real *row_block;
-  real *zero_block;
-  uint *a1_indices_array;
+  real * row_block;
+  real * zero_block;
+  uint * a1_indices_array;
 
-  BoundaryMesh* boundary;
-  MeshFunction<uint> *cell_map;
-  MeshFunction<uint> *vertex_map;
+  // Local data structures for assembly
+  uint const tdim_;
+  int nzm_;
+  Array<real> a[3];
+  Array<uint> a_col_indices[3];
+  uint a_ncols[3];
+  real l[3];
+  real basis_[3][3];
+  uint maxcomp[3];
 
+  static real const permutation_matrix_[3][3];
 };
 
 //--- INLINE ------------------------------------------------------------------

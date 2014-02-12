@@ -35,11 +35,17 @@ class VertexNormal
 {
 public:
 
+  enum Type
+  {
+    none, facet, cell
+  };
+
+
   // Copy constructor
   VertexNormal(VertexNormal& other);
 
   // Create normal, tangents for the boundary of mesh
-  VertexNormal(Mesh& mesh);
+  VertexNormal(Mesh& mesh, Type weight);
 
   /// Destructor
   ~VertexNormal();
@@ -47,9 +53,13 @@ public:
   // Assignment
   VertexNormal& operator=(VertexNormal& other);
 
+  Mesh& mesh()
+  {
+    return mesh_;
+  }
+
   // Define mesh functions for normal and tangents
   // These are merely aliases now
-  // One-liner is bad coding style.
   MeshFunction<real> * normal;
   MeshFunction<real> * tau;
   MeshFunction<real> * tau_1;
@@ -73,7 +83,7 @@ private:
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  Mesh& mesh;
+  Mesh& mesh_;
 
   Array<MeshFunction<real> *> basis_;
 
@@ -95,12 +105,7 @@ private:
   // Maximum absolute angle between two neighbouring facets
   real const alpha_max_;
 
-  enum weight_type
-  {
-    none, facet, cell
-  };
-
-  weight_type weighting_;
+  Type weighting_;
 
 };
 

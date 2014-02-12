@@ -18,11 +18,11 @@ namespace dolfin
 {
 
   /// Array is a container that provides O(1) access time to elements
-  /// and O(1) memory overhead.  
+  /// and O(1) memory overhead.
   ///
   /// It is a wrapper for std::vector, so see the STL manual for further
   /// details: http://www.sgi.com/tech/stl/
-  
+
   template <class T>
   class Array : public std::vector<T>
   {
@@ -30,7 +30,7 @@ namespace dolfin
 
     /// Create empty array
     Array() : std::vector<T>() {}
-    
+
     /// Create array of given size
     Array(uint n) : std::vector<T>(n) {}
 
@@ -74,7 +74,7 @@ namespace dolfin
     /// Assign to all elements in the array
     const Array& operator=(const T& t)
     {
-      for (uint i = 0; i < std::vector<T>::size(); i++)
+      for (uint i = 0; i < std::vector<T>::size(); ++i)
       (*this)[i] = t;
       return *this;
     }

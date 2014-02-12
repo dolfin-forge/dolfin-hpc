@@ -20,7 +20,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
-				   Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
+                                   Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
 {
   // Initialise sparsity pattern
   if( dolfin::MPI::numProcesses() > 1)
@@ -30,7 +30,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 
   if( dolfin::MPI::numProcesses() > 1)
     sparsity_pattern.initRange(dof_map_set[0].local_size());
-  
+
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
     return;
@@ -47,11 +47,11 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     {
       // Update to current cell
       ufc.update(*cell, mesh.distdata());
-  
+
       // Tabulate dofs for each dimension
       for (uint i = 0; i < ufc.form.rank(); ++i)
         dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
- 
+
       // Fill sparsity pattern.
       if( dolfin::MPI::numProcesses() > 1)
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
@@ -77,7 +77,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       // Check if we have an interior facet
       if (facet->numEntities(mesh.topology().dim()) != 2)
         continue;
-      
+
       // Get cells incident with facet
       Cell cell0(mesh, facet->entities(mesh.topology().dim())[0]);
       Cell cell1(mesh, facet->entities(mesh.topology().dim())[1]);
@@ -97,7 +97,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
     }
   }
-  
+
   // Finalize sparsity pattern
   sparsity_pattern.apply();
 }

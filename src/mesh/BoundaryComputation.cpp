@@ -54,7 +54,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   message(1, "Computing boundary mesh.");
 
   // Open boundary mesh for editing
-  const uint D = mesh.topology().dim();
+  uint const D = mesh.topology().dim();
   MeshEditor editor;
   editor.open(boundary, mesh.type().facetType(),
               D - 1, mesh.geometry().dim());
@@ -63,7 +63,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   mesh.init(D - 1, D);
 
   // Temporary array for assignment of indices to vertices on the boundary
-  const uint num_vertices = mesh.numVertices();
+  uint const num_vertices = mesh.numVertices();
   Array<uint> boundary_vertices(num_vertices);
   boundary_vertices = num_vertices;
 
@@ -89,7 +89,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
       // Count boundary vertices and assign indices
       for (VertexIterator v(*f); !v.end(); ++v)
       {
-        const uint vertex_index = v->index();
+        uint const vertex_index = v->index();
         if (boundary_vertices[vertex_index] == num_vertices)
         {
           boundary_vertices[vertex_index] = num_boundary_vertices++;
@@ -97,7 +97,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
       }
 
       // Count boundary cells (facets of the mesh)
-      num_boundary_cells++;
+      ++num_boundary_cells;
     }
   }
 
@@ -133,7 +133,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   // Create vertices
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    const uint vertex_index = boundary_vertices[v->index()];
+    uint const vertex_index = boundary_vertices[v->index()];
     if ( vertex_index != mesh.numVertices() )
     {
       // Create mapping from boundary vertex to mesh vertex if requested
@@ -161,7 +161,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
 
       // Compute new vertex numbers for cell
       uint* vertices = f->entities(0);
-      for (uint i = 0; i < cell.size(); i++)
+      for (uint i = 0; i < cell.size(); ++i)
       {
         cell[i] = boundary_vertices[vertices[i]];
       }
@@ -228,7 +228,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
 
       if (n.dot(p0 - p) < 0.0)
       {
-        const uint tmp = vertices[0];
+        uint const tmp = vertices[0];
         vertices[0] = vertices[1];
         vertices[1] = tmp;
       }
@@ -247,7 +247,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
 
       if (n.dot(p0 - p) < 0.0)
       {
-        const uint tmp = vertices[0];
+        uint const tmp = vertices[0];
         vertices[0] = vertices[1];
         vertices[1] = tmp;
       }

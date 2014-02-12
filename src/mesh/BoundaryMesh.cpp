@@ -32,16 +32,19 @@ BoundaryMesh::~BoundaryMesh()
 //-----------------------------------------------------------------------------
 void BoundaryMesh::init(Mesh& mesh)
 {
+  global_mesh_hash_ = mesh.hash();
   BoundaryComputation::computeBoundary(mesh, *this);
 }
 //-----------------------------------------------------------------------------
 void BoundaryMesh::init_local(Mesh& mesh)
 {
+  global_mesh_hash_ = mesh.hash();
   BoundaryComputation::computeLocalBoundary(mesh, *this);
 }
 //-----------------------------------------------------------------------------
 void BoundaryMesh::init_interior(Mesh& mesh)
 {
+  global_mesh_hash_ = mesh.hash();
   BoundaryComputation::computeInteriorBoundary(mesh, *this);
 }
 //-----------------------------------------------------------------------------

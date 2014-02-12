@@ -38,6 +38,11 @@ namespace dolfin
     /// Initialize interior boundary mesh (facets between processors)
     void init_interior(Mesh& mesh);
 
+  private:
+
+    /// Global mesh hash
+    std::string global_mesh_hash_;
+
   };
 
 }

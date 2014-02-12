@@ -84,8 +84,7 @@ void SpaceTimeFunction::eval(real t)
 
   if (t0 != t0 || t1 != t1)
   {
-    error("At least one of the iteration times"
-	  "used for interpolation is a Nan.");
+    error("At least one of the iteration times used for interpolation is NaN.");
   }
 
   std::string name0 = (*it0).second;
@@ -142,20 +141,19 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
     MPI_Offset byte_offset;
     BinaryFileHeader hdr;
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-		  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
     MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
-		      MPI_STATUS_IGNORE);
+                      MPI_STATUS_IGNORE);
 
     byte_offset = sizeof(BinaryFileHeader);
 
     uint nfunc;
     MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
-			 MPI_STATUS_IGNORE);
+                         MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
     BinaryFunctionHeader f_hdr;
-    MPI_File_read_at_all(fh, byte_offset, &f_hdr,
-			 sizeof(BinaryFunctionHeader),
-			 MPI_BYTE, MPI_STATUS_IGNORE);
+    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
+                         MPI_BYTE, MPI_STATUS_IGNORE);
 
     // Temporary load function, and parse time stamp
     addPoint(filename, f_hdr.t);
@@ -181,7 +179,7 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames,
 
   if (num_files == 1)
   {
-    error("Divide by zero");
+    error("Number of files is one, divide by zero foreseen.");
   }
   for (std::vector<std::string>::iterator it = filenames.begin();
        it != filenames.end(); ++it)

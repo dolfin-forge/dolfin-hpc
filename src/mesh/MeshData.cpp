@@ -26,13 +26,17 @@ MeshData::~MeshData()
 }
 //-----------------------------------------------------------------------------
 void MeshData::clear()
-{ 
+{
   for (mf_iterator it = meshfunctions.begin(); it != meshfunctions.end(); ++it)
+  {
     delete it->second;
+  }
   meshfunctions.clear();
 
   for (a_iterator it = arrays.begin(); it != arrays.end(); ++it)
+  {
     delete it->second;
+  }
   arrays.clear();
 }
 //-----------------------------------------------------------------------------
@@ -82,7 +86,7 @@ MeshFunction<dolfin::uint>* MeshData::meshFunction(std::string name)
   mf_iterator it = meshfunctions.find(name);
   if (it == meshfunctions.end())
     return 0;
-  
+
   return it->second;
 }
 //-----------------------------------------------------------------------------
@@ -92,7 +96,7 @@ Array<dolfin::uint>* MeshData::array(std::string name)
   a_iterator it = arrays.find(name);
   if (it == arrays.end())
     return 0;
-  
+
   return it->second;
 }
 //-----------------------------------------------------------------------------

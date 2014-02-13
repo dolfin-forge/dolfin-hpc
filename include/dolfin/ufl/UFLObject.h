@@ -8,7 +8,9 @@
 #define __UFL_OBJECT_H_
 
 #include <dolfin/ufl/UFLrepr.h>
+#include <dolfin/common/types.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -117,36 +119,133 @@ inline std::vector<Object const *> Object::make_args(
 inline std::vector<Object::repr_t> const Object::make_args_repr(
     repr_t const& repr) const
 {
+//  std::cout << "make_args_repr" << std::endl;
+//  std::cout << repr << std::endl;
   std::vector<Object::repr_t> args;
   std::string str = repr;
   std::string delimiter = ", ";
+  char open_delimiter;
+  char close_delimiter;
+
+  std::vector<char> open_delimiters;
+  std::vector<char> close_delimiters;
+  std::vector<size_t> open_delimiter_positions(3,0);
+  std::vector<size_t> close_delimiter_positions(3,0);
+  std::vector<size_t> n_open_delimiters(3,0);
+  std::vector<size_t> n_close_delimiters(3,0);
+
+  open_delimiters.push_back('(');
+  open_delimiters.push_back('[');
+  open_delimiters.push_back('{');
+
+  close_delimiters.push_back(')');
+  close_delimiters.push_back(']');
+  close_delimiters.push_back('}');
 
   size_t scpos = 0;
   size_t currpos = 0;
-  size_t openbrace = 0;
+  size_t open_pos = 0;
+  size_t close_pos = 0;
+
+  for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+  {
+    open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
+    close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+  }
+  
+  size_t actual_open_delimiter_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
+  dolfin::uint actual_index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(), 
+      open_delimiter_positions.end(), actual_open_delimiter_pos));
+  char actual_open_delimiter = open_delimiters[actual_index];
+  char actual_close_delimiter = close_delimiters[actual_index];
+  size_t actual_close_delimiter_pos = close_delimiter_positions[actual_index];
+
+//  std::cout << "actual_index " << actual_index << std::endl;
+//  std::cout << "actual_open_delimiter_pos " << actual_open_delimiter_pos << std::endl;
+//  std::cout << "actual_open_delimiter " << actual_open_delimiter << std::endl;
+//  std::cout << "actual_close_delimiter " << actual_close_delimiter << std::endl;
+//  std::cout << "actual_close_delimiter_pos " << actual_close_delimiter_pos << std::endl;
+
   std::string token;
+
   while (scpos != std::string::npos)
   {
     scpos = str.find(delimiter, currpos);
-    openbrace = str.find("(", currpos);
+    std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
+//    std::cout << "it " << *it << std::endl;
+    for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+    {
+      open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
+      close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+      n_open_delimiters[i] = std::count(str.begin(), it, open_delimiters[i]);
+      n_close_delimiters[i] = std::count(str.begin(), it, close_delimiters[i]);
+    }
+
+    bool equal_number_open_close = true;
+    for(dolfin::uint i = 0; i<n_open_delimiters.size(); ++i)
+      if(n_open_delimiters[i] != n_close_delimiters[i])
+        equal_number_open_close = false;
+
+    open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
+    dolfin::uint index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(), 
+          open_delimiter_positions.end(), open_pos));
+    char open_delimiter = open_delimiters[index];
+    char close_delimiter = close_delimiters[index];
+    close_pos = close_delimiter_positions[index];
+
+//    std::cout << "n_open = " << n_open_delimiters << std::endl;
+//    std::cout << "n_close = " << n_close_delimiters << std::endl;
+
+//    std::cout << "index " << index << std::endl;
+//    std::cout << "open_pos " << open_pos << std::endl;
+//    std::cout << "open_delimiter " << open_delimiter << std::endl;
+//    std::cout << "close_delimiter " << close_delimiter << std::endl;
+//    std::cout << "close_pos " << close_pos << std::endl;
+//    std::cout << "scpos " << scpos << std::endl;
     // Take into account of
     // - one argument
     // - class arguments
     // - tuple argument
     // - dict argument
     if (scpos == std::string::npos //no comma
-        || openbrace > scpos //comma is enclosed in a tuple or class
-        || (openbrace < scpos && str.find(")", currpos) < scpos) //comma is after a tuple or a class
-        || (str.find("{", currpos) < scpos && str.find("}", currpos) < scpos)) //comma is after a dict
+        || (open_pos > scpos && actual_open_delimiter_pos > scpos
+          && equal_number_open_close) //comma is enclosed in a tuple or class
+        || ((open_pos < scpos && close_pos < scpos)
+          && (actual_open_delimiter_pos < scpos && actual_close_delimiter_pos < scpos)
+          && equal_number_open_close)) //comma is after a tuple or a class
     {
       token = str.substr(0, scpos);
+      if(scpos != std::string::npos)
+        str.erase(0, scpos + delimiter.length());
+      else
+        str.erase(0, scpos);
+
+//      std::cout << "new arg = " << token << std::endl;
+//      std::cout << "str = " << str << std::endl;
       args.push_back(Object::repr_t(token));
-      str.erase(0, scpos + delimiter.length());
+      for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+      {
+        open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
+        close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+      }
+
+      actual_open_delimiter_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
+      uint actual_index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(), 
+          open_delimiter_positions.end(), actual_open_delimiter_pos));
+      actual_open_delimiter = open_delimiters[actual_index];
+      actual_close_delimiter = close_delimiters[actual_index];
+      actual_close_delimiter_pos = close_delimiter_positions[actual_index];
+
+//      std::cout << "actual_index" << actual_index << std::endl;
+//      std::cout << "actual_open_delimiter_pos" << actual_open_delimiter_pos << std::endl;
+//      std::cout << "actual_open_delimiter " << actual_open_delimiter << std::endl;
+//      std::cout << "actual_close_delimiter " << actual_close_delimiter << std::endl;
       currpos = 0;
     }
     else
     {
       currpos = scpos + 1;
+//      std::cout << "currpos " << currpos << std::endl;
     }
   }
   return args;

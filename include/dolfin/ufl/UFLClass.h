@@ -52,9 +52,15 @@ protected:
 
   ///
   Class(std::string const& name);
+  
+  ///
+  Class(std::string const& pre, std::string const& pos);
 
   ///
   explicit Class(std::string const& name, repr_t const& repr);
+
+  ///
+  explicit Class(std::string const& pre, std::string const& pos, repr_t const& repr);
 
   ///
   virtual ~Class();
@@ -77,9 +83,12 @@ protected:
   ///
   repr_t const& arg(size_t i);
 
+  ///
+  std::vector<repr_t> const& args();
+
 private:
 
-  typedef std::pair<std::string const, std::vector<Object const*> > CppProto;
+  typedef std::pair<std::pair<std::string const, std::string const> const, std::vector<Object const*> > CppProto;
 
   ///
   CppProto make_proto(repr_t repr) const;
@@ -87,7 +96,8 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
   CppProto cpp_proto_;
   std::vector<repr_t> args_repr_;
-  std::string const name_;
+  std::string const pre_;
+  std::string const pos_;
   static repr_t const default_repr_;
   static std::string const default_str_;
 

@@ -26,6 +26,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLIndexed.cpp\
                            UFLIndexSum.cpp\
                            UFLIntegral.cpp\
+                           UFLList.cpp\
                            UFLMixedElement.cpp\
                            UFLQuadratureScheme.cpp\
                            UFLRestrictedElement.cpp\

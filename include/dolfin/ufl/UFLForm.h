@@ -7,7 +7,7 @@
 #ifndef __UFL_FORM_H_
 #define __UFL_FORM_H_
 
-#include <dolfin/ufl/UFLIntegral.h>
+#include <dolfin/ufl/UFLList.h>
 
 namespace ufl
 {
@@ -24,11 +24,8 @@ namespace ufl
   {
     public:
 
-//      ///
-//      Form(std::vector<Integral> const& integrals);
-
       ///
-      Form(Integral const& integral);
+      Form(List const& list);
 
       ///
       Form(repr_t const & repr);
@@ -73,8 +70,7 @@ namespace ufl
       void display() const;
 
     private:
-//      std::vector<Integral> integrals_;
-      Integral const integral_;
+      List const list_;
 
 //      const FormData form_data;
 

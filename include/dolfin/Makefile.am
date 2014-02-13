@@ -1,13 +1,6 @@
 include_HEADERS = dolfin.h
 
 nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
-				adaptivity/dolfin_adaptivity.h\
-				adaptivity/AdaptiveRefinement.h\
-				adaptivity/ufc1/AdaptiveRefinementProjectScalar.h\
-				adaptivity/ufc1/AdaptiveRefinementProjectVector.h\
-				adaptivity/ufc2/AdaptiveRefinementProjectScalar.h\
-				adaptivity/ufc2/AdaptiveRefinementProjectVector.h\
-				adaptivity/SpaceTimeFunction.h\
 				common/constants.h\
 				common/dolfin_common.h\
 				common/timing.h\
@@ -331,6 +324,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLIndexed.h\
 				ufl/UFLIndexSum.h\
 				ufl/UFLIntegral.h\
+				ufl/UFLList.h\
 				ufl/UFLMixedElement.h\
 				ufl/UFLObject.h\
 				ufl/UFLQuadratureScheme.h\

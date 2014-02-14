@@ -4,10 +4,12 @@
 // First added:  2014-02-13
 // Last changed: 2014-02-13
 
-#include <dolfin/common/types.h>
-
 #ifndef __SCRATCH_SPACE_H_
 #define __SCRATCH_SPACE_H_
+
+#include <dolfin/common/types.h>
+
+#include <dolfin/fem/UFCCell.h>
 
 namespace dolfin
 {
@@ -29,7 +31,8 @@ class ScratchSpace
 public:
 
   // Constructor
-  ScratchSpace(Cell const& cell, FiniteElement const& finite_element, DofMap const& dof_map);
+  ScratchSpace(Cell& cell, FiniteElement const& finite_element,
+               DofMap const& dof_map);
 
   // Constructor
   ScratchSpace(FiniteElementSpace const& space);
@@ -53,13 +56,13 @@ public:
   uint const topological_dimension;
 
   // Tabulation on reference cell
-  uint * const& cell_tabulation() const;
+  uint * const & cell_tabulation() const;
 
   // Tabulation per subspace
-  uint ** const& sub_element_cell_tabulation() const;
+  uint ** const & sub_element_cell_tabulation() const;
 
   // Tabulation per entity
-  uint ** const& entity_cell_tabulation() const;
+  uint ** const & entity_cell_tabulation() const;
 
   // Local array for mapping of dofs
   uint * const dofs;
@@ -73,6 +76,9 @@ public:
   // Local array for coordinates
   real** const coordinates;
 
+  // UFC Cell
+  UFCCell cell;
+
 private:
 
   void Initialize(Cell const& cell, FiniteElement const& finite_element,
@@ -80,7 +86,7 @@ private:
 
   uint value_size(FiniteElement const& finite_element);
 
-  void set_cell_tabulation(Cell const& cell, ufc::dof_map const& dof_map,
+  void set_cell_tabulation(Cell const& cell, DofMap const& dof_map,
                            uint **& dofs);
 
   uint * const tabulation_on_cell_;

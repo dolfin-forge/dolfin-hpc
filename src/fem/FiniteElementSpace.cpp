@@ -125,7 +125,7 @@ FiniteElementSpace::~FiniteElementSpace()
 }
 
 //-----------------------------------------------------------------------------
-Cell const& FiniteElementSpace::cell() const
+Cell& FiniteElementSpace::cell() const
 {
   return cell_;
 }

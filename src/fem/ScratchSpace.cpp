@@ -15,7 +15,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(Cell const& cell,
+ScratchSpace::ScratchSpace(Cell& c,
                            FiniteElement const& finite_element,
                            DofMap const& dof_map) :
     size(value_size(finite_element)),
@@ -27,13 +27,14 @@ ScratchSpace::ScratchSpace(Cell const& cell,
     coefficients(new real[space_dimension]),
     values(new real[size]),
     coordinates(new real*[local_dimension]),
+    cell(c),
     tabulation_on_cell_(new uint[space_dimension]),
     tabulation_per_sub_element_(new uint*[num_sub_elements]),
     sub_element_space_dimensions_(new uint[num_sub_elements]),
     tabulation_per_entity_(new uint*[topological_dimension + 1]),
     num_entity_dofs_(new uint[topological_dimension + 1])
 {
-  Initialize(cell, finite_element, dof_map);
+  Initialize(c, finite_element, dof_map);
 }
 
 //-----------------------------------------------------------------------------
@@ -47,6 +48,7 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
     coefficients(new real[space_dimension]),
     values(new real[size]),
     coordinates(new real*[local_dimension]),
+    cell(space.cell()),
     tabulation_on_cell_(new uint[space_dimension]),
     tabulation_per_sub_element_(new uint*[num_sub_elements]),
     sub_element_space_dimensions_(new uint[num_sub_elements]),
@@ -126,15 +128,18 @@ uint ScratchSpace::value_size(FiniteElement const& finite_element)
 
 //-----------------------------------------------------------------------------
 void ScratchSpace::set_cell_tabulation(Cell const& cell,
-                                       ufc::dof_map const& dof_map,
+                                       DofMap const& dof_map,
                                        uint **& dofs)
 {
   for (uint e = 0; e < topological_dimension; ++e)
   {
     uint *& entity_dofs = dofs[e];
-    for()
+    uint nbe = cell.numEntities(e);
+    uint offset = dof_map.num_entity_dofs(e);
+    for(uint i = 0; i< nbe; ++i)
     {
-      tabulate_entity_dofs()
+      uint * curr = &entity_dofs[e]+i*offset;
+      dof_map.tabulate_entity_dofs(curr, e, i);
     }
   }
 }

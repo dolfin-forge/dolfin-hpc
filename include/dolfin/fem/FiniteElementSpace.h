@@ -62,7 +62,7 @@ public:
   Mesh& mesh() const;
 
   ///
-  Cell const& cell() const;
+  Cell& cell() const; //FIXME: Cannot const this due to Mesh implementation
 
   ///
   FiniteElement const& element() const;
@@ -104,7 +104,7 @@ public:
 private:
 
   Mesh& mesh_;
-  Cell cell_;
+  mutable Cell cell_;
   FiniteElement const finite_element_;
   DofMap& dof_map_; // The dof map is owned by the DofMapCache instance.
 

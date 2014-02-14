@@ -149,24 +149,6 @@ START_TEST( test_init_finite_element_space )
         end();
         skip();
 
-        begin("Creating DofMap from DofMapCache:");
-        dolfin::DofMap& dmc = dolfin::DofMapCache::instance().acquire_dofmap(*m, dm.signature());
-        message(dmc.signature());
-        if(dmc.signature() != dolfin::DofMap::dofmap_signature(uflfem.repr()))
-        {
-          init_failed = 1;
-          message("WRONG");
-        }
-        else
-        {
-          message("MATCHING");
-        }
-        skip();
-        dolfin::DofMapCache::instance().disp();
-        dolfin::DofMapCache::instance().release_dofmap(dmc);
-        end();
-        skip();
-
         begin("Creating corresponding DiscreteSpace:");
         dolfin::FiniteElementSpace femspace(*m,fem.signature());
         femspace.disp();
@@ -289,25 +271,6 @@ START_TEST(test_init_vector_element_space)
         }
         skip();
         dm.disp();
-        end();
-        skip();
-
-        begin("Creating DofMap from DofMapCache:");
-        dolfin::DofMap& dmc = dolfin::DofMapCache::instance().acquire_dofmap(
-            *m, dm.signature());
-        message(dmc.signature());
-        if (dmc.signature() != dolfin::DofMap::dofmap_signature(uflfem.repr()))
-        {
-          init_failed = 1;
-          message("WRONG");
-        }
-        else
-        {
-          message("MATCHING");
-        }
-        skip();
-        dolfin::DofMapCache::instance().disp();
-        dolfin::DofMapCache::instance().release_dofmap(dmc);
         end();
         skip();
 

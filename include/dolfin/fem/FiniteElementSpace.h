@@ -9,6 +9,8 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/ScratchSpace.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
 #include <ufc.h>
@@ -60,6 +62,9 @@ public:
   Mesh& mesh() const;
 
   ///
+  Cell const& cell() const;
+
+  ///
   FiniteElement const& element() const;
 
   ///
@@ -99,46 +104,12 @@ public:
 private:
 
   Mesh& mesh_;
+  Cell cell_;
   FiniteElement const finite_element_;
   DofMap& dof_map_; // The dof map is owned by the DofMapCache instance.
 
   // Scratch space
-  class Scratch
-  {
-
-  public:
-
-    // Constructor
-    Scratch(FiniteElement const& finite_element, DofMap const& dof_map);
-
-    // Destructor
-    ~Scratch();
-
-    // Value size (number of entries in tensor value)
-    uint size;
-
-    // Reference finite element space dimension
-    uint space_dimension;
-
-    // Reference finite element dof map dimension
-    uint local_dimension;
-
-    // Local array for mapping of dofs
-    uint* dofs;
-
-    // Local array for expansion coefficients
-    real* coefficients;
-
-    // Local array for values
-    real* values;
-
-    // Local array for coordinates
-    real** coordinates;
-
-  };
-
-  // Scratch space
-  Scratch scratch;
+  ScratchSpace scratch;
 
 #if ENABLE_UFL
   ufl::FiniteElementBase const * const ufl_;

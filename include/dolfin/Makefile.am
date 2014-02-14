@@ -111,6 +111,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/Form.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
+				fem/ScratchSpace.h\
 				fem/SlipBC.h\
 				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\

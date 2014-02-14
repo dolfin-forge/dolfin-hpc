@@ -31,7 +31,7 @@ class UFC;
 /// It wraps a ufc::dof_map on a specific mesh and provides
 /// optional precomputation and reordering of dofs.
 
-class DofMap
+class DofMap : protected ufc::dof_map
 {
 
   static std::string const SIGN_PREFIX;
@@ -90,22 +90,17 @@ public:
   /// UFC @since 1.1
   bool needs_mesh_entities(uint d) const;
 
-  /**
-   * Not exposed to dolfin-hpc
-   *
-   * /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-   * /// UFC @since 1.1
-   * virtual bool init_mesh(const mesh& mesh) = 0;
-   *
-   * /// Initialize dofmap for given cell
-   * /// UFC @since 1.1
-   * virtual void init_cell(const mesh& m, const cell& c) = 0;
-   *
-   * /// Finish initialization of dofmap for cells
-   * /// UFC @since 1.1
-   * virtual void init_cell_finalize() = 0;
-   *
-   */
+  /// Initialize dofmap for mesh (return true iff init_cell() is needed)
+  /// UFC @since 1.1
+  bool init_mesh(const ufc::mesh& mesh);
+
+  /// Initialize dofmap for given cell
+  /// UFC @since 1.1
+  void init_cell(const ufc::mesh& m, const ufc::cell& c);
+
+  /// Finish initialization of dofmap for cells
+  /// UFC @since 1.1
+  void init_cell_finalize();
 
   /// Return the dimension of the global finite element function space
   /// UFC @since 1.1
@@ -331,6 +326,24 @@ inline bool DofMap::needs_mesh_entities(uint d) const
 }
 
 //-----------------------------------------------------------------------------
+inline bool DofMap::init_mesh(const ufc::mesh& mesh)
+{
+  return ufc_dof_map_->init_mesh(mesh);
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::init_cell(const ufc::mesh& m, const ufc::cell& c)
+{
+  ufc_dof_map_->init_cell(m,c);
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::init_cell_finalize()
+{
+  ufc_dof_map_->init_cell_finalize();
+}
+
+//-----------------------------------------------------------------------------
 inline uint DofMap::global_dimension() const
 {
   return ufc_dof_map_->global_dimension();
@@ -358,6 +371,13 @@ inline uint DofMap::num_facet_dofs() const
 inline uint DofMap::num_entity_dofs(uint d) const
 {
   return ufc_dof_map_->num_entity_dofs(d);
+}
+
+//-----------------------------------------------------------------------------
+inline void DofMap::tabulate_dofs(uint* dofs, const ufc::mesh& m,
+                                  const ufc::cell& c) const
+{
+  ufc_dof_map_->tabulate_dofs(dofs, m, c);
 }
 
 //-----------------------------------------------------------------------------

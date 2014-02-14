@@ -162,12 +162,12 @@ void ConstantFunction::interpolate(real* coefficients, const ufc::cell& cell,
 
   // UFC 1.0 version:
   // Evaluate each dof to get coefficients for nodal basis expansion
-  for (uint i = 0; i < finite_element.space_dimension(); i++)
-    coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
+//  for (uint i = 0; i < finite_element.space_dimension(); i++)
+//    coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
 
   // UFC 1.1 version:
   /// Evaluate linear functionals for all dofs on the function f
-  //finite_element.evaluate_dofs(coefficients, *this, cell);
+  finite_element.evaluate_dofs(coefficients, *this, cell);
 }
 
 //-----------------------------------------------------------------------------

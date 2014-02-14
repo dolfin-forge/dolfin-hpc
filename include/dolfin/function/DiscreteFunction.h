@@ -158,7 +158,7 @@ private:
   FiniteElementSpace discrete_space_;
   FiniteElement const& finite_element_;
   DofMap const& dof_map_;
-  FiniteElementSpace::Scratch& scratch;
+  ScratchSpace& scratch;
 
   /// Cached variable to save indirections in interpolate
   uint const local_dimension_;

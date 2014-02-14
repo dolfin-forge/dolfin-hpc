@@ -12,6 +12,7 @@ libdolfin_fem_la_SOURCES = \
 			Form.cpp\
 			NodeNormal.cpp\
 			PeriodicBC.cpp\
+			ScratchSpace.cpp\
 			SlipBC.cpp\
 			SlipFrictionBC.cpp\
 			SparsityPatternBuilder.cpp\

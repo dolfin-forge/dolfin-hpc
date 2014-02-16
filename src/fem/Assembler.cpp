@@ -50,7 +50,6 @@ Assembler::Assembler(Mesh& mesh) :
 //-----------------------------------------------------------------------------
 Assembler::~Assembler()
 {
-  if (boundary_)
     delete boundary_;
 }
 //-----------------------------------------------------------------------------
@@ -675,8 +674,10 @@ void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
     A.init(*sparsity_pattern);
     delete sparsity_pattern;
   }
-
-  A.zero();
+  else
+  {
+    A.zero();
+  }
 
 }
 //-----------------------------------------------------------------------------

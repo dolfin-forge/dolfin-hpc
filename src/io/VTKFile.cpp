@@ -374,7 +374,7 @@ void VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) co
     Function* u = it->first;
 
     // Check type of function space
-    if(!u->type() == Function::discrete || !u->space().is_cellwise_constant())
+    if(u->type() != Function::discrete || !u->space().is_cellwise_constant())
     {
       // These are not cell based functions and will be written as PointData
       continue;

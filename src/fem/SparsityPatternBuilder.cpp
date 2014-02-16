@@ -16,7 +16,8 @@
 #include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/UFC.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
@@ -24,21 +25,31 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 {
   // Initialise sparsity pattern
   if( dolfin::MPI::numProcesses() > 1)
+  {
     sparsity_pattern.pinit(ufc.form.rank(), ufc.global_dimensions);
+  }
   else
+  {
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
+  }
 
   if( dolfin::MPI::numProcesses() > 1)
+  {
     sparsity_pattern.initRange(dof_map_set[0].local_size());
+  }
 
   // Only build for rank >= 2 (matrices and higher order tensors)
   if (ufc.form.rank() < 2)
+  {
     return;
+  }
 
   // JANPACK doesn't need any sparsity pattern information
   std::string la_backend = dolfin_get("linear algebra backend");
   if(la_backend == "JANPACK")
+  {
     return;
+  }
 
   // Build sparsity pattern for cell integrals
   if (ufc.form.num_cell_integrals() != 0)
@@ -50,14 +61,19 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 
       // Tabulate dofs for each dimension
       for (uint i = 0; i < ufc.form.rank(); ++i)
+      {
         dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell->index());
+      }
 
       // Fill sparsity pattern.
       if( dolfin::MPI::numProcesses() > 1)
+      {
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
+      }
       else
+      {
         sparsity_pattern.insert(ufc.local_dimensions, ufc.dofs);
-
+      }
     }
   }
 
@@ -67,20 +83,24 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   // Build sparsity pattern for interior facet integrals
   if (ufc.form.num_interior_facet_integrals() != 0)
   {
+    uint const tdim = mesh.topology().dim();
+
     // Compute facets and facet - cell connectivity if not already computed
-    mesh.init(mesh.topology().dim() - 1);
-    mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
+    mesh.init(tdim - 1);
+    mesh.init(tdim - 1, tdim);
     mesh.order();
 
     for (FacetIterator facet(mesh); !facet.end(); ++facet)
     {
       // Check if we have an interior facet
-      if (facet->numEntities(mesh.topology().dim()) != 2)
+      if (facet->numEntities(tdim) != 2)
+      {
         continue;
+      }
 
       // Get cells incident with facet
-      Cell cell0(mesh, facet->entities(mesh.topology().dim())[0]);
-      Cell cell1(mesh, facet->entities(mesh.topology().dim())[1]);
+      Cell cell0(mesh, facet->entities(tdim)[0]);
+      Cell cell1(mesh, facet->entities(tdim)[1]);
 
       // Update to current pair of cells
       ufc.update(cell0, cell1, mesh.distdata());
@@ -102,3 +122,6 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   sparsity_pattern.apply();
 }
 //-----------------------------------------------------------------------------
+
+}
+

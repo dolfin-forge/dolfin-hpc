@@ -13,22 +13,26 @@
 namespace dolfin
 {
 
-  class DofMapSet;
-  class Mesh;
-  class GenericSparsityPattern;
-  class UFC;
+class DofMapSet;
+class Mesh;
+class GenericSparsityPattern;
+class UFC;
 
-  /// This class provides functions to compute the sparsity pattern.
+/**
+ *  @class  SparsityPatternBuilder
+ *
+ *  @brief   This class provides functions to compute the sparsity pattern.
+ */
 
-  class SparsityPatternBuilder
-  {
-  public:
-    
-    /// Build sparsity pattern
-    static void build(GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
-                      UFC& ufc, const DofMapSet& dof_map_set);
+class SparsityPatternBuilder
+{
+public:
 
-  };
+  /// Build sparsity pattern
+  static void build(GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
+                    UFC& ufc, const DofMapSet& dof_map_set);
+
+};
 
 }
 

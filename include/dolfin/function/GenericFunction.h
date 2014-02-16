@@ -10,6 +10,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 #include <dolfin/log/LogStream.h>
+#include <dolfin/mesh/Cell.h>
 
 #include <ufc.h>
 
@@ -83,9 +84,10 @@ inline void GenericFunction::disp() const
   begin("");
   cout << "Value rank            : " << this->rank() << endl;
   cout << "Value dimension       : " << this->dim(0) << endl;
-  cout << "Evaluate at origin    : ";
-  real x[3] =
-    { 0., 0., 0. };
+  cout << "Evaluate at cell 0    : ";
+  Cell cell(mesh, 0);
+  Point p = cell.midpoint();
+  real x[3] = { p[0], p[1], p[2]};
   real * v = new real[this->dim(0)];
   this->eval(v, x);
   for (uint d = 0; d < this->dim(0); ++d)

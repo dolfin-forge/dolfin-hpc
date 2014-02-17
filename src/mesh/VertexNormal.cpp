@@ -158,7 +158,7 @@ VertexNormal::ComputeNormal(Mesh& mesh)
   }
 
   // Iterate over all cells in the boundary mesh
-  BoundaryMesh boundary(mesh);
+  BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
 
   //  uint const boundary_nsdim = boundary.topology().dim();
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
@@ -790,10 +790,10 @@ void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
   int sh_facetnormals_count = sendbuff_facetnormals.size();
   int sh_facetweights_count = sendbuff_facetweights.size();
 
-  dolfin_assert(sh_vertidx_count == SharedVertexCount);
-  dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);
-  dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);
-  dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
+  dolfin_assert(sh_vertidx_count == (int) SharedVertexCount);
+  dolfin_assert(sh_vertexnormals_count == (int) SharedVertexCount*nsdim);
+  dolfin_assert(sh_facetnormals_count == (int) SharedMeshFacetCount*nsdim);
+  dolfin_assert(sh_facetweights_count == (int) SharedMeshFacetCount);
 
   int recv_size_vertidx;
   int recv_size_vertexnormals;

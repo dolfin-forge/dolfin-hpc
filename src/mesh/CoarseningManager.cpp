@@ -106,8 +106,7 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
   // if boundary coarsening is forbidden: put boundary vertices into set first
   if ( !coarsen_boundary )
   {
-    BoundaryMesh boundary;
-    boundary.init(mesh);
+    BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
 
     if ( boundary.numVertices() > 0 )
     {

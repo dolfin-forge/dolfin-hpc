@@ -651,8 +651,7 @@ void DofMap::build()
     else
     {
 
-      BoundaryMesh interior_boundary;
-      interior_boundary.init_interior(dolfin_mesh);
+      BoundaryMesh interior_boundary(dolfin_mesh, BoundaryMesh::interior);
       MeshFunction<uint>* cell_map = interior_boundary.data().meshFunction(
           "cell map");
 

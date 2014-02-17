@@ -365,8 +365,7 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
-  BoundaryMesh local_boundary;
-  local_boundary.init_interior(mesh);
+  BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
   MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
 
   Array<uint> send_buff, send_buff_id;

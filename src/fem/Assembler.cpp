@@ -241,7 +241,9 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   {
   // Initialize boundary mesh
   if (ufc.form.num_exterior_facet_integrals()  && !boundary_)
-    boundary_ = new BoundaryMesh(mesh_);
+  {
+    boundary_ = new BoundaryMesh(mesh_, BoundaryMesh::exterior);
+  }
   }
 #pragma omp flush
 #pragma omp barrier
@@ -300,7 +302,7 @@ void Assembler::assemble(GenericTensor& A, const ufc::form& form,
   {
   // Initialize boundary mesh
   if (ufc.form.num_exterior_facet_integrals()  && !boundary_)
-    boundary_ = new BoundaryMesh(mesh_);
+    boundary_ = new BoundaryMesh(mesh_, BoundaryMesh::exterior);
   }
 #pragma omp flush
 #pragma omp barrier
@@ -849,7 +851,7 @@ void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
   UFC b_ufc(b_form, mesh_, b_dof_map_set);
 
   // fetch pointers to element matrix and vector
-  BoundaryMesh boundary(mesh_);
+  BoundaryMesh boundary(mesh_, BoundaryMesh::exterior);
   MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
 #ifndef NO_PROGRESS_BAR
   Progress p(progressMessage(globalA.rank(), "exterior facets"), boundary.numCells());

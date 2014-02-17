@@ -12,40 +12,40 @@
 #include <dolfin/mesh/BoundaryComputation.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-BoundaryMesh::BoundaryMesh() : Mesh()
+BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
+    Mesh(),
+    mesh_(mesh),
+    global_mesh_hash_(mesh.hash())
+
 {
-  // Do nothing
+  switch (type)
+  {
+  case BoundaryMesh::exterior:
+    BoundaryComputation::computeBoundary(mesh, *this);
+    break;
+  case BoundaryMesh::interior:
+    BoundaryComputation::computeInteriorBoundary(mesh, *this);
+    break;
+  case BoundaryMesh::full:
+    BoundaryComputation::computeLocalBoundary(mesh, *this);
+    break;
+  }
 }
-//-----------------------------------------------------------------------------
-BoundaryMesh::BoundaryMesh(Mesh& mesh) : Mesh()
-{
-  init(mesh);
-}
+
 //-----------------------------------------------------------------------------
 BoundaryMesh::~BoundaryMesh()
 {
   // Do nothing
 }
-//-----------------------------------------------------------------------------
-void BoundaryMesh::init(Mesh& mesh)
-{
-  global_mesh_hash_ = mesh.hash();
-  BoundaryComputation::computeBoundary(mesh, *this);
-}
-//-----------------------------------------------------------------------------
-void BoundaryMesh::init_local(Mesh& mesh)
-{
-  global_mesh_hash_ = mesh.hash();
-  BoundaryComputation::computeLocalBoundary(mesh, *this);
-}
-//-----------------------------------------------------------------------------
-void BoundaryMesh::init_interior(Mesh& mesh)
-{
-  global_mesh_hash_ = mesh.hash();
-  BoundaryComputation::computeInteriorBoundary(mesh, *this);
-}
-//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+Mesh& BoundaryMesh::mesh()
+{
+  return mesh_;
+}
+
+}

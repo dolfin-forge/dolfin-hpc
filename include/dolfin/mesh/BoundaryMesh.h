@@ -14,36 +14,35 @@
 namespace dolfin
 {
 
-  /// A BoundaryMesh is a mesh over the boundary of some given mesh.
+/**
+ *  @class  BoundaryMesh
+ *
+ *  @brief  A BoundaryMesh is a mesh over the boundary of some given mesh seen
+ *          as a partition of a global mesh.
+ */
 
-  class BoundaryMesh : public Mesh
-  {
-  public:
+class BoundaryMesh : public Mesh
+{
+public:
 
-    /// Create an empty boundary mesh
-    BoundaryMesh();
+  enum Type { full, interior, exterior };
 
-    /// Create boundary mesh from given mesh
-    BoundaryMesh(Mesh& mesh);
+  /// Create boundary mesh from given mesh
+  BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type);
 
-    /// Destructor
-    ~BoundaryMesh();
+  /// Destructor
+  ~BoundaryMesh();
 
-    /// Initialize boundary mesh
-    void init(Mesh& mesh);
+  ///
+  Mesh& mesh();
 
-    /// Initialize boundary mesh (incl. facets between processors)
-    void init_local(Mesh& mesh);
+private:
 
-    /// Initialize interior boundary mesh (facets between processors)
-    void init_interior(Mesh& mesh);
+  /// Global mesh hash
+  Mesh& mesh_;
+  std::string global_mesh_hash_;
 
-  private:
-
-    /// Global mesh hash
-    std::string global_mesh_hash_;
-
-  };
+};
 
 }
 

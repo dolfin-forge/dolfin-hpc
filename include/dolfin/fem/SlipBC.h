@@ -42,7 +42,7 @@ public:
   /// Create boundary condition for sub domain
   SlipBC(Mesh& mesh, SubDomain const& sub_domain);
 
-  /// Create boundary condition for sub domain
+  /// Create boundary condition for sub domain given a boundary normal function
   SlipBC(BoundaryNormal& normal, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain specified by index
@@ -83,20 +83,17 @@ private:
   void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
                    Array<uint>& nodes);
 
-  // Do: A(row,col) = value   using setblock not setvalue
-  void Aset(Matrix& A, uint row, uint col, real value);
-
-  // Do: b(row) = value   using setblock not setvalue
-  void bset(Vector& b, uint row, real value);
-
   // Initialize sub domain markers
   void init(SubDomain const& sub_domain);
 
   void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
              Form const& form);
 
-  // The mesh
+  // Global mesh
   Mesh& mesh_;
+
+  // Boundary mesh
+  BoundaryMesh& boundary_;
 
   // Sub domain markers (if any)
   MeshFunction<uint>* sub_domains_;
@@ -116,10 +113,6 @@ private:
   // Node normal and tangents
   BoundaryNormal * const normal_;
 
-  BoundaryMesh * boundary_;
-  MeshFunction<uint> * cell_map_;
-  MeshFunction<uint> * vertex_map_;
-
   Matrix* As_;
 
   int N_local_;
@@ -128,7 +121,6 @@ private:
 
   // Local data structures for assembly
   uint const tdim_;
-  int nzm_;
   Array<real> a[3];
   Array<uint> a_col_indices[3];
   uint a_ncols[3];
@@ -137,19 +129,8 @@ private:
   uint maxcomp[3];
 
   static real const permutation_matrix_[3][3];
+
 };
-
-//--- INLINE ------------------------------------------------------------------
-
-inline void SlipBC::Aset(Matrix& A, uint row, uint col, real value)
-{
-  A.set(&value, 1, &row, 1, &col);
-}
-
-inline void SlipBC::bset(Vector& b, uint row, real value)
-{
-  b.set(&value, 1, &row);
-}
 
 }
 

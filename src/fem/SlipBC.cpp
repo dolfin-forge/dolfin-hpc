@@ -41,14 +41,12 @@ namespace dolfin
 SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain) :
     BoundaryCondition("Slip"),
     mesh_(mesh),
+    boundary_(mesh.exterior_boundary()),
     sub_domains_(NULL),
     sub_domain_(0),
     local_sub_domains_(false),
     user_sub_domain_(&sub_domain),
     normal_(NULL),
-    boundary_(NULL),
-    cell_map_(NULL),
-    vertex_map_(NULL),
     As_(NULL),
     tdim_(mesh.topology().dim())
 {
@@ -62,14 +60,12 @@ SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain) :
 SlipBC::SlipBC(BoundaryNormal& normal, const SubDomain& sub_domain) :
     BoundaryCondition("Slip"),
     mesh_(normal.mesh()),
+    boundary_(normal.boundary()),
     sub_domains_(NULL),
     sub_domain_(0),
     local_sub_domains_(false),
     user_sub_domain_(&sub_domain),
     normal_(&normal),
-    boundary_(NULL),
-    cell_map_(NULL),
-    vertex_map_(NULL),
     As_(NULL),
     tdim_(mesh_.topology().dim())
 {
@@ -82,15 +78,13 @@ SlipBC::SlipBC(BoundaryNormal& normal, const SubDomain& sub_domain) :
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
     BoundaryCondition("Slip"),
     mesh_(sub_domains.mesh()),
+    boundary_(sub_domains.mesh().exterior_boundary()),
     sub_domains_(&sub_domains),
     sub_domain_(sub_domain),
     local_sub_domains_(false),
     sub_system_(),
     user_sub_domain_(NULL),
     normal_(NULL),
-    boundary_(NULL),
-    cell_map_(NULL),
-    vertex_map_(NULL),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
@@ -103,15 +97,13 @@ SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain,
                const SubSystem& sub_system) :
     BoundaryCondition("Slip"),
     mesh_(mesh),
+    boundary_(mesh.exterior_boundary()),
     sub_domains_(NULL),
     sub_domain_(0),
     local_sub_domains_(false),
     sub_system_(sub_system),
     user_sub_domain_(&sub_domain),
     normal_(NULL),
-    boundary_(NULL),
-    cell_map_(NULL),
-    vertex_map_(NULL),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
@@ -127,15 +119,13 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
                const SubSystem& sub_system) :
     BoundaryCondition("Slip"),
     mesh_(sub_domains.mesh()),
+    boundary_(sub_domains.mesh().exterior_boundary()),
     sub_domains_(&sub_domains),
     sub_domain_(sub_domain),
     local_sub_domains_(false),
     sub_system_(sub_system),
     user_sub_domain_(NULL),
     normal_(NULL),
-    boundary_(NULL),
-    cell_map_(NULL),
-    vertex_map_(NULL),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
@@ -152,7 +142,6 @@ SlipBC::~SlipBC()
     delete sub_domains_;
   }
   delete As_;
-  delete boundary_;
 }
 //-----------------------------------------------------------------------------
 BoundaryNormal& SlipBC::normal()
@@ -201,15 +190,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   }
 
   UFC ufc(form.form(), mesh_, form.dofmaps());
-  if (boundary_ == 0)
-  {
-    boundary_ = new BoundaryMesh(mesh_);
-    if (boundary_->numCells())
-    {
-      cell_map_ = boundary_->data().meshFunction("cell map");
-      vertex_map_ = boundary_->data().meshFunction("vertex map");
-    }
-  }
+
   if (As_ == NULL)
   {
 
@@ -252,11 +233,12 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   uint cdim = mesh_.type().numVertices(mesh_.topology().dim());
 
   uint count = 0;
-  if (boundary_->numCells())
+  if (boundary_.numCells())
   {
-    for (VertexIterator v(*boundary_); !v.end(); ++v)
+    MeshFunction<uint> * vertex_map = boundary_.data().meshFunction("vertex map");
+    for (VertexIterator v(boundary_); !v.end(); ++v)
     {
-      Vertex vertex(mesh_, vertex_map_->get(*v));
+      Vertex vertex(mesh_, vertex_map->get(*v));
 
       // Skip facets not inside the sub domain
       if ((*sub_domains_)(vertex) != sub_domain_)

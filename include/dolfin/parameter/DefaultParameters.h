@@ -54,7 +54,7 @@ add("ODE size threshold", 50);
 
 add("ODE tolerance", 0.1);
 add("ODE start time", 0.0);
-add("ODE end time", 10.0);      
+add("ODE end time", 10.0);
 add("ODE discrete tolerance", 0.001);
 add("ODE discrete tolerance factor", 0.001);
 add("ODE discrete Krylov tolerance factor", 0.01);
@@ -99,7 +99,7 @@ add("Newton report", true);
 
 //--- Parameters for Krylov solvers ---
 
-add("Krylov relative tolerance", 1e-9);
+add("Krylov relative tolerance", 1e-10);
 add("Krylov absolute tolerance", 1e-20);
 add("Krylov divergence limit",   1e4);
 add("Krylov maximum iterations", 10000);
@@ -111,7 +111,7 @@ add("Krylov keep PC", false);
 
 //--- Parameters for AMG solvers ---
 
-add("AMG relative tolerance", 1e-9);
+add("AMG relative tolerance", 1e-10);
 add("AMG absolute tolerance", 1e-20);
 add("AMG maximum iterations", 10000);
 add("AMG pre-smoothing steps", 5);
@@ -138,7 +138,7 @@ add("Load balancer redistribute", true);
 //--- Parameters for intersection detection ---
 add("GTS Tolerance",0.0);	// Tolerance of GTS BB
 //define size for trianlge tolerance ("is the point within this triangle?")
-add("Geometrical Tolerance Triangle",0.0); 
+add("Geometrical Tolerance Triangle",0.0);
 add("Geometrical Tolerance Tetrahedron",0.0);
 add("SubDomain Geometrical Tolerance", 1e-6);
 add("SubDomain Intersect Boundary", true);

@@ -16,89 +16,134 @@
 
 namespace dolfin
 {
-  class Mesh;
-  class Cell;
-  class Edge;
-  class RefinementManager
-  {
-  public:
 
-    RefinementManager();
-    RefinementManager(Mesh& mesh);
-    ~RefinementManager();
+class Mesh;
+class Cell;
+class Edge;
 
-    void init(Mesh& mesh);
+/**
+ *  @class  RefinementManager
+ *
+ *  @brief
+ */
 
-    // Map new vertices global number
-    void map_new_vertices(Array<uint> shared_edge,
-			  Mesh& oldmesh, Mesh& newmesh);
+class RefinementManager
+{
+public:
 
-    // Add a new vertex inside the refinement manager
-    void add_new_vertex(uint* edge,uint vertex, Mesh& mesh, bool shared);
+  //
+  RefinementManager();
 
-    // 
-    void mark_localboundary(Mesh& oldmesh,
-			    MeshFunction<bool>& cell_marker,
-			    uint& num_new_vertices,
-			    uint& num_new_cells);
+  //
+  RefinementManager(Mesh& mesh);
 
-    // Propagate refinement to other processes
-    void propagate_refinement(Array<uint> shared_edge,
-			      Mesh& oldmesh, Mesh& newmesh,
-			      Array<uint>& new_edge);
+  //
+  ~RefinementManager();
 
+  //
+  void init(Mesh& mesh);
 
-    // Add a new nonshared vertex
-    inline void addVertex(uint vertex, Mesh& mesh)
-    { if(MPI::numProcesses() > 1) add_new_vertex(0, vertex, mesh, false);}
-    
-    // Add a new vertex on a shared edge
-    inline void addVertex(uint* edge, uint vertex, Mesh& mesh)
-    { if(MPI::numProcesses() > 1) add_new_vertex(edge, vertex, mesh, true);}
+  // Map new vertices global number
+  void map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh, Mesh& newmesh);
 
-    // Check if the edge lies between processors
-    inline bool on_boundary(Edge& edge)
-    { return (MPI::numProcesses() > 1 ? boundary_edge.get(edge) : false);}
+  // Add a new vertex inside the refinement manager
+  void add_new_vertex(uint* edge, uint vertex, Mesh& mesh, bool shared);
 
-    // Check if the cell has recvied a propagation
-    inline bool forbidden_cell(Cell& cell)
-    { return (MPI::numProcesses() > 1 ? cell_forbidden.get(cell) : false);}
+  //
+  void mark_localboundary(Mesh& oldmesh, MeshFunction<bool>& cell_marker,
+                          uint& num_new_vertices, uint& num_new_cells);
 
-    // Check if the edge are forbidden from propagated refinement
-    inline bool forbidden_edge(Edge& edge)
-    { return (MPI::numProcesses() > 1 ? edge_forbidden.get(edge) : false);}
+  // Propagate refinement to other processes
+  void propagate_refinement(Array<uint> shared_edge, Mesh& oldmesh,
+                            Mesh& newmesh, Array<uint>& new_edge);
 
-    inline uint edge_refined(Cell& cell)
-    { dolfin_assert(cell_refedge.count(cell.index())); 
-      return cell_refedge[cell.index()]; }
+  // Add a new nonshared vertex
+  void addVertex(uint vertex, Mesh& mesh);
 
+  // Add a new vertex on a shared edge
+  void addVertex(uint* edge, uint vertex, Mesh& mesh);
 
-  private:
-    typedef std::pair<uint, uint> EdgeKey;
-    
-    // Set of boundary cell index
-    _set<uint> boundary_set;
+  // Check if the edge lies between processors
+  bool on_boundary(Edge& edge);
 
-    // Construct a key from edge vertices
-    EdgeKey edge_key(uint id1, uint id2);
+  // Check if the cell has recvied a propagation
+  bool forbidden_cell(Cell& cell);
 
-    std::map< EdgeKey, uint> new_global;
-    std::map< EdgeKey, uint> new_vertex;
-    
-    std::map<EdgeKey, uint> edge_cell_map;
-    std::map<EdgeKey, bool> refined_edge;
+  // Check if the edge are forbidden from propagated refinement
+  bool forbidden_edge(Edge& edge);
 
-    _map<uint, uint> cell_refedge;
+  //
+  uint edge_refined(Cell& cell);
 
-    MeshFunction<bool> boundary_edge;
+private:
 
-    MeshFunction<bool> cell_forbidden; 
+  typedef std::pair<uint, uint> EdgeKey;
 
-    MeshFunction<bool> edge_forbidden;
-    
-    uint _start_offset;
-    bool _refm_init;
-  };
+  // Set of boundary cell index
+  _set<uint> boundary_set;
+
+  // Construct a key from edge vertices
+  EdgeKey edge_key(uint id1, uint id2);
+
+  std::map< EdgeKey, uint> new_global;
+  std::map< EdgeKey, uint> new_vertex;
+
+  std::map<EdgeKey, uint> edge_cell_map;
+  std::map<EdgeKey, bool> refined_edge;
+
+  _map<uint, uint> cell_refedge;
+
+  MeshFunction<bool> boundary_edge;
+
+  MeshFunction<bool> cell_forbidden;
+
+  MeshFunction<bool> edge_forbidden;
+
+  uint _start_offset;
+  bool _refm_init;
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline void RefinementManager::addVertex(uint vertex, Mesh& mesh)
+{
+  if (MPI::numProcesses() > 1)
+    add_new_vertex(0, vertex, mesh, false);
+}
+
+//-----------------------------------------------------------------------------
+inline void RefinementManager::addVertex(uint* edge, uint vertex, Mesh& mesh)
+{
+  if (MPI::numProcesses() > 1)
+    add_new_vertex(edge, vertex, mesh, true);
+}
+
+//-----------------------------------------------------------------------------
+inline bool RefinementManager::on_boundary(Edge& edge)
+{
+  return (MPI::numProcesses() > 1 ? boundary_edge.get(edge) : false);
+}
+
+//-----------------------------------------------------------------------------
+inline bool RefinementManager::forbidden_cell(Cell& cell)
+{
+  return (MPI::numProcesses() > 1 ? cell_forbidden.get(cell) : false);
+}
+
+//-----------------------------------------------------------------------------
+inline bool RefinementManager::forbidden_edge(Edge& edge)
+{
+  return (MPI::numProcesses() > 1 ? edge_forbidden.get(edge) : false);
+}
+
+//-----------------------------------------------------------------------------
+inline uint RefinementManager::edge_refined(Cell& cell)
+{
+  dolfin_assert(cell_refedge.count(cell.index()));
+  return cell_refedge[cell.index()];
+}
+
 }
 
 #endif

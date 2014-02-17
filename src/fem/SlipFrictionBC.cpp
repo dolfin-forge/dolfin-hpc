@@ -5,6 +5,7 @@
 // Last changed: 2013-07-15
 
 #include <dolfin/fem/SlipFrictionBC.h>
+#include <dolfin/fem/BoundaryNormal.h>
 
 namespace dolfin
 {
@@ -20,7 +21,7 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real bet
 }
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(VertexNormal& normal,
+SlipFrictionBC::SlipFrictionBC(BoundaryNormal& normal,
                                const SubDomain& sub_domain,
                                real beta) :
     BoundaryCondition("SlipFriction"),
@@ -70,9 +71,9 @@ SlipFrictionBC::~SlipFrictionBC()
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal& SlipFrictionBC::normals()
+BoundaryNormal& SlipFrictionBC::normal()
 {
-  return slipbc_.normals();
+  return slipbc_.normal();
 }
 
 } /* namespace dolfin */

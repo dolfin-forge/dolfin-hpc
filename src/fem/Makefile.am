@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libdolfin_fem.la
 libdolfin_fem_la_SOURCES = \
 			Assembler.cpp\
 			BoundaryCondition.cpp\
+			BoundaryNormal.cpp\
 			DirichletBC.cpp\
 			DofMap.cpp\
 			DofMapCache.cpp\

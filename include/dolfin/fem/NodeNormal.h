@@ -7,6 +7,8 @@
 #ifndef __NODENORMAL_H
 #define __NODENORMAL_H
 
+#include <dolfin/fem/BoundaryNormal.h>
+
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/function/Function.h>
@@ -16,7 +18,6 @@
 namespace dolfin
 {
 
-class BoundaryMesh;
 class FiniteElementSpace;
 class Mesh;
 
@@ -30,24 +31,18 @@ class Mesh;
  *          defining an outward normal vector and two tangential vectors.
  */
 
-class NodeNormal
+class NodeNormal : public BoundaryNormal
 {
 public:
 
   /// Create normal, tangents to the boundary of mesh at vertices
-  NodeNormal(Function& function, VertexNormal::Type weight);
+  NodeNormal(Mesh& function, VertexNormal::Type weight);
 
   /// Destructor
   ~NodeNormal();
 
-  /// Return mesh
-  Mesh& mesh()
-  {
-    return mesh_;
-  }
-
-  /// Return the orthonormal basis (n, tau) in 2d or (n, tau1, tau2) in 3d
-  Array<Function> const& basis() const;
+  ///
+  void init(FiniteElementSpace& space);
 
 private:
 
@@ -59,23 +54,14 @@ private:
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  Mesh& mesh_;
   uint const tdim_;
   mutable FiniteElementSpace const * space_;
   mutable bool local_space_;
   VertexNormal normals_;
   Array<MeshFunction<real> *> const& meshbasis_;
-  Array<Function> basis_;
   Array<GenericVector *> V_;
-  Function nodetype_;
 
 };
-
-//-----------------------------------------------------------------------------
-inline Array<Function> const& NodeNormal::basis() const
-{
-  return basis_;
-}
 
 }
 #endif

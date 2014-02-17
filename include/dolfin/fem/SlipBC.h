@@ -13,7 +13,6 @@
 #define __SLIPBC_H
 
 #include <dolfin/fem/BoundaryCondition.h>
-#include <dolfin/mesh/VertexNormal.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/la/Matrix.h>
 #include <dolfin/la/Vector.h>
@@ -25,6 +24,8 @@
 namespace dolfin
 {
 
+class BoundaryMesh;
+class BoundaryNormal;
 class DofMap;
 class Form;
 class Function;
@@ -42,7 +43,7 @@ public:
   SlipBC(Mesh& mesh, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain
-  SlipBC(VertexNormal& node_normal, SubDomain const& sub_domain);
+  SlipBC(BoundaryNormal& normal, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
@@ -57,8 +58,8 @@ public:
   /// Destructor
   ~SlipBC();
 
-  /// Access to node normals
-  VertexNormal& normals();
+  /// Access to boundary normals
+  BoundaryNormal& normal();
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -95,39 +96,35 @@ private:
              Form const& form);
 
   // The mesh
-  Mesh& mesh;
+  Mesh& mesh_;
 
   // Sub domain markers (if any)
-  MeshFunction<uint>* sub_domains;
+  MeshFunction<uint>* sub_domains_;
 
   // The sub domain
-  uint sub_domain;
+  uint sub_domain_;
 
   // True if sub domain markers are created locally
-  bool sub_domains_local;
+  bool local_sub_domains_;
 
   // Sub system
-  SubSystem sub_system;
+  SubSystem sub_system_;
 
   // User defined sub domain
-  SubDomain const * user_sub_domain;
+  SubDomain const * user_sub_domain_;
 
   // Node normal and tangents
-  VertexNormal normal;
+  BoundaryNormal * const normal_;
 
-  BoundaryMesh * boundary;
-  MeshFunction<uint> * cell_map;
-  MeshFunction<uint> * vertex_map;
+  BoundaryMesh * boundary_;
+  MeshFunction<uint> * cell_map_;
+  MeshFunction<uint> * vertex_map_;
 
-  Matrix* As;
+  Matrix* As_;
 
-  int N_local;
-  int N_offset;
-  std::set<uint> off_proc_rows;
-
-  real * row_block;
-  real * zero_block;
-  uint * a1_indices_array;
+  int N_local_;
+  int N_offset_;
+  std::set<uint> off_proc_rows_;
 
   // Local data structures for assembly
   uint const tdim_;

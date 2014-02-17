@@ -11,163 +11,221 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/MeshSmoothData.h>
 
-using namespace dolfin;
-
-//-----------------------------------------------------------------------------
-MeshSmoothData::MeshSmoothData(Mesh& _mesh) : mesh(_mesh)
+namespace dolfin
 {
 
-
+//-----------------------------------------------------------------------------
+MeshSmoothData::MeshSmoothData(Mesh& mesh) :
+    _mesh(mesh),
+    _boundary(NULL)
+{
 }
+
 //-----------------------------------------------------------------------------
 MeshSmoothData::~MeshSmoothData()
 {
 }
+
 //-----------------------------------------------------------------------------
 void MeshSmoothData::prepare_mesh()
 {
+  if (_boundary != NULL)
+  {
+    error("In MeshSmoothData, calling prepare_mesh() twice.");
+  }
+
   //mapping for different boundaries
-  _on_boundary.init(mesh, 0);
+  _on_boundary.init(_mesh, 0);
   _on_boundary = false;
 
-  _on_boundary_global.init(mesh, 0);
+  _on_boundary_global.init(_mesh, 0);
   _on_boundary_global = false;
 
-
   //global boundary
-  BoundaryMesh boundary_global;
-  boundary_global.init(mesh);
-  MeshFunction<uint>* vertex_map_global = boundary_global.data().meshFunction("vertex map");
+  BoundaryMesh boundary_global(_mesh, BoundaryMesh::exterior);
+  MeshFunction<uint>* vertex_map_global = boundary_global.data().meshFunction(
+      "vertex map");
   dolfin_assert(vertex_map_global);
-  _on_boundary_global=false;
-  if(boundary_global.numVertices()!=0){
-    for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex){
+  _on_boundary_global = false;
+  if (boundary_global.numVertices() != 0)
+  {
+    for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex)
+    {
       _on_boundary_global.set((*vertex_map_global)(*vertex), true);
     }
   }
 
   if (MPI::numProcesses() == 1)
-    return ;
+  {
+    return;
+  }
 
-  //interior
-  _boundary.init_interior(mesh);
-  MeshFunction<uint>* vertex_map = _boundary.data().meshFunction("vertex map");
+  //Build interior boundary
+  _boundary = new BoundaryMesh(_mesh, BoundaryMesh::interior);
+  MeshFunction<uint>* vertex_map = _boundary->data().meshFunction("vertex map");
   dolfin_assert(vertex_map);
 
-  for (VertexIterator vertex(_boundary); !vertex.end(); ++vertex)
-     _on_boundary.set((*vertex_map)(*vertex), true);
+  for (VertexIterator vertex(*_boundary); !vertex.end(); ++vertex)
+  {
+    _on_boundary.set((*vertex_map)(*vertex), true);
+  }
 
-
-  uint gdim = mesh.geometry().dim();
-
+  //
+  uint gdim = _mesh.geometry().dim();
+  MeshDistributedData& distdata = _mesh.distdata();
 
   _map<uint,std::vector<double> >::iterator owner_iterator=owner_tree.begin();
   _map<uint,std::vector<uint> >::iterator ghost_iterator=ghost_tree.begin();
 
-  for (VertexIterator vertex(_boundary); !vertex.end(); ++vertex){
-    Vertex on_mesh(mesh,  vertex_map->get(*vertex));
-    //building owner tree: the number of the CPU which owns the vertex is saved as key
-    if(mesh.distdata().is_ghost(on_mesh.index(), 0)){
-      owner_iterator=owner_tree.find(mesh.distdata().get_owner(on_mesh.index(),0));
-      if(owner_iterator!=owner_tree.end())
-	(owner_iterator->second).push_back(double(mesh.distdata().get_vertex_global(on_mesh.index())));
+  for (VertexIterator vertex(*_boundary); !vertex.end(); ++vertex)
+  {
+    Vertex on_mesh(_mesh, vertex_map->get(*vertex));
+    //Building owner tree:
+    //The process number which owns the vertex is saved as key
+    if (distdata.is_ghost(on_mesh.index(), 0))
+    {
+      owner_iterator = owner_tree.find(distdata.get_owner(on_mesh.index(), 0));
+      if (owner_iterator != owner_tree.end())
+      {
+        (owner_iterator->second).push_back(
+            double(distdata.get_vertex_global(on_mesh.index())));
+      }
       else
-	{
-	  std::vector<double> vertices_to_send;
-	  vertices_to_send.push_back(double(mesh.distdata().get_vertex_global(on_mesh.index())));
-	  owner_tree.insert(std::pair<uint,std::vector<double> >
-			    (mesh.distdata().get_owner(on_mesh.index(),0), vertices_to_send));
-	}
+      {
+        std::vector<double> vertices_to_send;
+        vertices_to_send.push_back(
+            double(distdata.get_vertex_global(on_mesh.index())));
+        owner_tree.insert(
+            std::pair<uint, std::vector<double> >(
+                distdata.get_owner(on_mesh.index(), 0), vertices_to_send));
+      }
 
       std::vector<double> vertex_info;
       double num_neigh = 0.0;
       double *sum = new double[gdim];
-      for(int j=0; j < gdim; j++)
-	sum[j]=0.0;
+      for (uint j = 0; j < gdim; ++j)
+      {
+        sum[j] = 0.0;
+      }
       std::vector<double> boundary_info;
       //building send_inner
       for (VertexIterator vn(on_mesh); !vn.end(); ++vn)
       {
-	if (on_mesh.index() == vn->index())
-	  continue;
-	else{
-	  num_neigh += 1.0;
-	  // Compute center of mass
-	  const real* xn = vn->x();
-	  for (int i = 0; i < gdim; i++)
-	    sum[i] += xn[i];
-	  }
+        if (on_mesh.index() == vn->index())
+        {
+          continue;
+        }
+        else
+        {
+          num_neigh += 1.0;
+          // Compute center of mass
+          const real* xn = vn->x();
+          for (uint i = 0; i < gdim; ++i)
+          {
+            sum[i] += xn[i];
+          }
+        }
       }
       vertex_info.push_back(num_neigh);
-      for (int i = 0; i < gdim; i++)
+      for (uint i = 0; i < gdim; ++i)
       {
-	vertex_info.push_back(sum[i]);
+        vertex_info.push_back(sum[i]);
       }
-      send_inner.insert(std::pair<uint,std::vector<double> >(double(mesh.distdata().get_vertex_global(on_mesh.index())), vertex_info));
+      send_inner.insert(
+          std::pair<uint, std::vector<double> >(
+              double(distdata.get_vertex_global(on_mesh.index())),
+              vertex_info));
       delete[] sum;
     }
 
     //building recv_sum
-    else{
-      _set<uint> NeighboringProcessor = mesh.distdata().get_shared_adj(on_mesh.index(),0);
-      for (_set<uint>::iterator it =  NeighboringProcessor.begin(); it!= NeighboringProcessor.end();it++)
+    else
+    {
+      _set<uint> NeighboringProcessor = distdata.get_shared_adj(on_mesh.index(),
+                                                                0);
+      for (_set<uint>::iterator it = NeighboringProcessor.begin();
+          it!= NeighboringProcessor.end();++it)
       {
-	ghost_iterator=ghost_tree.find(*it);
-	if(ghost_iterator!=ghost_tree.end())
-	  (ghost_iterator->second).push_back(mesh.distdata().get_vertex_global(on_mesh.index()));
-	else
-	{
-	  std::vector<uint> vertices_to_send;
-	  vertices_to_send.push_back(mesh.distdata().get_vertex_global(on_mesh.index()));
-	  ghost_tree.insert(std::pair<uint,std::vector<uint> >(*it, vertices_to_send));
-	}
+        ghost_iterator=ghost_tree.find(*it);
+        if(ghost_iterator!=ghost_tree.end())
+        {
+          (ghost_iterator->second).push_back(
+              distdata.get_vertex_global(on_mesh.index()));
+        }
+        else
+        {
+          std::vector<uint> vertices_to_send;
+          vertices_to_send.push_back(
+              distdata.get_vertex_global(on_mesh.index()));
+          ghost_tree.insert(
+              std::pair<uint,std::vector<uint> >(*it, vertices_to_send));
+        }
       }
       std::vector<double> vertex_info;
       std::vector<uint> vertex_check;
       double num_neigh = 0.0;
       double *sum = new double[gdim];
 
-      for(int j=0; j < gdim; j++)
-	sum[j]=0.0;
+      for(uint j=0; j < gdim; ++j)
+      {
+        sum[j]=0.0;
+      }
       for (VertexIterator vn(on_mesh); !vn.end(); ++vn)
       {
-	// Skip the vertex itself
-	if (on_mesh.index() == vn->index())
-	  continue;
-	num_neigh += 1.0;
+        // Skip the vertex itself
+        if (on_mesh.index() == vn->index())
+        {
+          continue;
+        }
+        num_neigh += 1.0;
 
-	// Compute center of mass
-	const real* xn = vn->x();
-	for (int i = 0; i < gdim; i++)
-	  sum[i] += xn[i];
+        // Compute center of mass
+        const real* xn = vn->x();
+        for (uint i = 0; i < gdim; ++i)
+        {
+          sum[i] += xn[i];
+        }
       }
       vertex_info.push_back(num_neigh);
-      for (int i = 0; i < gdim; i++)
-	vertex_info.push_back(sum[i]);
-      recv_sum.insert(std::pair<uint,std::vector<double> >(mesh.distdata().get_vertex_global(on_mesh.index()), vertex_info));
+      for (uint i = 0; i < gdim; ++i)
+      {
+        vertex_info.push_back(sum[i]);
+      }
+      recv_sum.insert(
+          std::pair<uint,std::vector<double> >(
+              distdata.get_vertex_global(on_mesh.index()), vertex_info));
       delete[] sum;
     }
   }
 }
 //-----------------------------------------------------------------------------
 void MeshSmoothData::sum_contribution(double*& recv_buff, int& mod,
-				      double& stopper, uint& src)
+                                      double& stopper, uint& src)
 {
 
   if (MPI::numProcesses() == 1)
+  {
     return;
+  }
 
-  int l=0;
+  int l = 0;
   _map<uint,std::vector<double> >::iterator receive_iterator=recv_sum.begin();
 
-  while(recv_buff[l]!=stopper){
-    receive_iterator=recv_sum.find(recv_buff[l]);
-    if(receive_iterator!=recv_sum.end())
-      for (uint j=1;j<=(receive_iterator->second).size();j++){
-	(receive_iterator->second)[j-1]+=recv_buff[l+j];
+  while (recv_buff[l] != stopper)
+  {
+    receive_iterator = recv_sum.find(recv_buff[l]);
+    if (receive_iterator != recv_sum.end())
+    {
+      for (uint j = 1; j <= (receive_iterator->second).size(); ++j)
+      {
+        (receive_iterator->second)[j - 1] += recv_buff[l + j];
       }
-    l+=mod;
+    }
+    l += mod;
   }
 
 }
 //-----------------------------------------------------------------------------
+
+}
+

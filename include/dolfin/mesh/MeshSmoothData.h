@@ -15,50 +15,78 @@
 
 namespace dolfin
 {
-  class MeshSmoothData
-  {
-    //    class Mesh;
-    
-  public:
-    MeshSmoothData(Mesh& _mesh);
-    ~MeshSmoothData();
-    
-    /*
-      This function builds the map "owner_tree" which has the owner as
-      key and attaches the number of neighbors, the sum in x direction,
-      y direction and z direction. At the same time a map "recv_sum" is
-      created with the same information but for the vertices owned by
-      the core itself.x
-    */
-    void prepare_mesh();
-    /*
-      Summing up all the information which the process gets from the
-      other process. In the map "ghost_tree" the source will be saved
-      to able to send information back.
-    */
-    void sum_contribution(double*& recv_buff, 
-			  int& mod, double& stopper, uint& src);
 
-    inline BoundaryMesh& boundary() { return _boundary; }
-    inline MeshFunction<bool>& on_boundary() { return _on_boundary;}
-    inline MeshFunction<bool>& on_boundary_global() 
-    { return _on_boundary_global;}
+class MeshSmoothData
+{
 
+public:
 
-    _map<uint,std::vector<double> > owner_tree;
-    _map<uint,std::vector<uint> > ghost_tree;
-    _map<uint,std::vector<double> > send_inner;
-    _map<uint,std::vector<double> > recv_sum;
-    
-  private:
+  ///
+  MeshSmoothData(Mesh& mesh);
 
-    BoundaryMesh _boundary;
+  ///
+  ~MeshSmoothData();
 
-    MeshFunction<bool> _on_boundary;
-    MeshFunction<bool> _on_boundary_global;
+  /**
+   This function builds the map "owner_tree" which has the owner as
+   key and attaches the number of neighbors, the sum in x direction,
+   y direction and z direction. At the same time a map "recv_sum" is
+   created with the same information but for the vertices owned by
+   the core itself.x
+   */
+  void prepare_mesh();
 
+  /**
+   Summing up all the information which the process gets from the
+   other process. In the map "ghost_tree" the source will be saved
+   to able to send information back.
+   */
+  void sum_contribution(double*& recv_buff, int& mod, double& stopper,
+                        uint& src);
 
-    Mesh& mesh;    
-  };  
+  ///
+  BoundaryMesh& boundary();
+
+  ///
+  MeshFunction<bool>& on_boundary();
+
+  ///
+  MeshFunction<bool>& on_boundary_global();
+
+  ///
+  _map<uint,std::vector<double> > owner_tree;
+  _map<uint,std::vector<uint> > ghost_tree;
+  _map<uint,std::vector<double> > send_inner;
+  _map<uint,std::vector<double> > recv_sum;
+
+private:
+
+  Mesh& _mesh;
+  BoundaryMesh * _boundary;
+
+  MeshFunction<bool> _on_boundary;
+  MeshFunction<bool> _on_boundary_global;
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline BoundaryMesh& MeshSmoothData::boundary()
+{
+  return *_boundary;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshFunction<bool>& MeshSmoothData::on_boundary()
+{
+  return _on_boundary;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshFunction<bool>& MeshSmoothData::on_boundary_global()
+{
+  return _on_boundary_global;
+}
+
 }
 #endif

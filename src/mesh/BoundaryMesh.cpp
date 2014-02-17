@@ -48,4 +48,10 @@ Mesh& BoundaryMesh::mesh()
   return mesh_;
 }
 
+//-----------------------------------------------------------------------------
+std::string const BoundaryMesh::mesh_hash()
+{
+  return global_mesh_hash_;
+}
+
 }

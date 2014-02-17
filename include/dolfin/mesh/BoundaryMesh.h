@@ -36,6 +36,9 @@ public:
   ///
   Mesh& mesh();
 
+  ///
+  std::string const mesh_hash();
+
 private:
 
   /// Global mesh hash

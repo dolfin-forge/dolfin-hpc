@@ -78,7 +78,7 @@ namespace ufl
 
     private:
       Measure::Type const measure_;
-      dolfin::uint const measure_id_;
+      type<dolfin::uint> const measure_id_;
 
       repr_t const repr_;
       std::string const str_;

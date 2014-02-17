@@ -75,7 +75,8 @@ protected:
   std::string const make_str( T const& val) const;
 
   ///
-  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr) const;
+  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr, 
+      bool const& without_pre_pos = false) const;
 
 private:
 
@@ -159,7 +160,8 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr) const
+  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr, 
+      bool const& without_pre_pos) const
 {
   return std::vector<Object::repr_t>();
 }

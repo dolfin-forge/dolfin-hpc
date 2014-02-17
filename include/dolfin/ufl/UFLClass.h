@@ -78,13 +78,16 @@ protected:
   repr_t const make_repr(Object const *& arg1, Object const *& arg2) const;
 
   ///
-  std::vector<repr_t> const make_args_repr(repr_t const& repr) const;
+  std::vector<repr_t> const make_args_repr(repr_t const& repr, bool const& without_pre_pos = false) const;
 
   ///
   repr_t const& arg(size_t i);
 
   ///
   std::vector<repr_t> const& args();
+
+  ///
+  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre, std::string& pos) const; 
 
 private:
 

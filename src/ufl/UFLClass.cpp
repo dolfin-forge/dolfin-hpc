@@ -134,23 +134,31 @@ Object::repr_t const Class::make_repr(Object const *& arg1,
 
 //-----------------------------------------------------------------------------
 std::vector<Object::repr_t> const Class::make_args_repr(
-    repr_t const& repr) const
+    repr_t const& repr, bool const& without_pre_pos) const
 {
   std::string str = repr;
 //  std::cout << "Class make args repr " << str << std::endl;
 
-  std::vector<std::string> open_delimiters;
-  open_delimiters.push_back("(");
-  open_delimiters.push_back("[");
-  open_delimiters.push_back("{");
+  std::vector<char> open_delimiters;
+  open_delimiters.push_back('(');
+  open_delimiters.push_back('[');
+  open_delimiters.push_back('{');
 
-  std::vector<std::string> close_delimiters;
-  close_delimiters.push_back(")");
-  close_delimiters.push_back("]");
-  close_delimiters.push_back("}");
+  std::vector<char> close_delimiters;
+  close_delimiters.push_back(')');
+  close_delimiters.push_back(']');
+  close_delimiters.push_back('}');
 
-  std::vector<size_t> openpositions(3,0);// = str.find(dopen);
-  std::vector<size_t> closepositions(3,0);// = str.rfind(dclose);
+  std::vector<size_t> openpositions(3,0);
+  std::vector<size_t> closepositions(3,0);
+
+  std::string pre;
+  std::string pos;
+
+  //from here, the name (pre and pos) should have been removed
+  if(!without_pre_pos)
+    remove_pre_pos(repr, str, pre, pos);
+
   for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
   {
     openpositions[i] = str.find(open_delimiters[i]);  
@@ -160,58 +168,27 @@ std::vector<Object::repr_t> const Class::make_args_repr(
 
   const size_t openpos = *std::min_element(openpositions.begin(), openpositions.end());
   const size_t closepos = *std::max_element(closepositions.begin(), closepositions.end());
+  
+  std::vector<repr_t> args;
+  if(str.substr(openpos,1) == "(" && openpos == 0) 
+    args = Object::make_args_repr(
+        str.substr(openpos + 1, closepos - openpos - 1), true);
+  else
+    args = Object::make_args_repr(
+        str, true);
 
-//  std::cout << "open = " << openpos << "   close = " << closepos << std::endl;
-
-  std::string pre = str.substr(0, openpos);
-  std::string pos;
-  if(pre == "[")
-    std::string pos = str.substr(closepos);
-
-//  std::cout << "pre = " << pre << std::endl;
-//  std::cout << "pos = " << pos << std::endl;
-//  std::cout << openpos << "-" << closepos << std::endl;
-//  std::cout << "arg = " << str.substr(openpos + 1, closepos - openpos - 1)
-//      << std::endl;
-  std::vector<repr_t> args = Object::make_args_repr(
-      str.substr(openpos + 1, closepos - openpos - 1));
   return args;
 }
 
 //-----------------------------------------------------------------------------
 Class::CppProto Class::make_proto(Object::repr_t repr) const
 {
-  std::string str = repr;
-//  std::cout << "make proto " << str << std::endl;
-
-  std::vector<std::string> open_delimiters;
-  open_delimiters.push_back("(");
-  open_delimiters.push_back("[");
-  open_delimiters.push_back("{");
-
-  std::vector<size_t> open_delimiter_pos(3,0);
-
-  for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
-    open_delimiter_pos[i] = str.find(open_delimiters[i]);
-
-  size_t openpos = *std::min_element(open_delimiter_pos.begin(), open_delimiter_pos.end());
-
+  std::string str;
   std::string pre;
   std::string pos;
-  if(str.substr(openpos,1) == "(")
-  {
-    pre = str.substr(0, openpos);
-    str.erase(0, openpos);
-  }
-  else// if(str.substr(openpos,1) == "[" )
-  {
-    pre = str.substr(openpos,1);
-    pos = str.substr(str.length()-1,1);
-    str.erase(openpos,1);
-    str.erase(str.length()-1,1);
-  }
-//  std::cout << "make proto end " << str << std::endl;
-  std::vector<repr_t> args = Class::make_args_repr(str);
+
+  remove_pre_pos(repr, str, pre, pos);
+  std::vector<repr_t> args = Class::make_args_repr(str, true);
   return CppProto(std::make_pair(pre, pos), Object::make_args(args));
 }
 
@@ -234,6 +211,51 @@ std::vector<Object::repr_t> const& Class::args()
 {
   return args_repr_;
 }
+
+//-----------------------------------------------------------------------------
+void Class::remove_pre_pos(repr_t const& repr, 
+    std::string& str, std::string& pre, std::string& pos) const
+{
+  str = repr;
+  pre.clear();
+  pos.clear();
+  
+  std::vector<std::string> open_delimiters;
+  open_delimiters.push_back("(");
+  open_delimiters.push_back("[");
+  open_delimiters.push_back("{");
+  std::vector<std::string> close_delimiters;
+  close_delimiters.push_back(")");
+  close_delimiters.push_back("]");
+  close_delimiters.push_back("}");
+
+  std::vector<size_t> open_delimiter_pos(3,0);
+  std::vector<size_t> close_delimiter_pos(3,0);
+
+  for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+  {
+    open_delimiter_pos[i] = str.find(open_delimiters[i]);
+    close_delimiter_pos[i] = (str.rfind(close_delimiters[i]) == std::string::npos ? 
+        0 : str.rfind(close_delimiters[i]));  
+  }
+
+  const size_t openpos = *std::min_element(open_delimiter_pos.begin(), open_delimiter_pos.end());
+  const size_t closepos = *std::max_element(close_delimiter_pos.begin(), close_delimiter_pos.end());
+
+  if(str.substr(openpos,1) == "(" && openpos > 0)
+  {
+    pre = str.substr(0, openpos);
+    str.erase(0, openpos);
+  }
+  else
+  {
+    pre = str.substr(0, openpos+1);
+    pos = str.substr(closepos);
+    std::string substring = str.substr(openpos+1, closepos-1);
+    str = substring;
+  }
+}
+
 //-----------------------------------------------------------------------------
 void Class::display() const
 {

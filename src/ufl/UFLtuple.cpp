@@ -1,43 +1,61 @@
-// Copyright (C) 2014 Aurélien Larcher.
+// Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-28
-// Last changed: 2014-01-28
+// First added:  
+// Last changed: 
 
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFLExpression.h>
+#include <dolfin/ufl/UFLTuple.h>
 
 namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Object::repr_t const tuple::repr() const
-{
-  std::stringstream ss;
-  ss << "(" << obj_.repr() << ")";
-  return ss.str();
-}
+  Tuple::Tuple(std::vector<Expression const *>& expressions) :
+    Class("Tuple"),
+    expressions_(expressions),
+//    repr_(*this, expressions_),
+    str_("")//Tuple(*(" + expressions.str() + "))")
+  {
+//    expressions_.clear();
+//    expressions_.resize(integrals.size());
+//    for(dolfin::uint i=0; i<args.size(); ++i)
+//      expressions_[i] = new Expression(*args[i]);
+  }
 
 //-----------------------------------------------------------------------------
-std::string const tuple::str() const
-{
-  std::stringstream ss;
-  return "(" + obj_.str() + ")";
-}
+  Tuple::Tuple(repr_t const & repr) :
+    Class("Tuple", repr),
+//    repr_(*this, arg(0)),
+    str_("")//Tuple(*(" + arg(0) + "))")
+  {
+//    std::cout << "C Tuple" << std::endl;
+    std::vector<repr_t> const arguments = args();
+    expressions_.clear();
+    expressions_.resize(arguments.size());
+    for(dolfin::uint i=0; i<arguments.size(); ++i)
+      expressions_[i]= new Expression(arguments[i]);
+//    std::cout << "C Tuple end" << std::endl;
+  }
+//-----------------------------------------------------------------------------
+  Tuple::~Tuple()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Object::repr_t const Tuple::repr() const
+  {
+    return repr_;
+  }
+
+  //-----------------------------------------------------------------------------
+  std::string const Tuple::str() const
+  {
+    return str_;
+  }
 
 //-----------------------------------------------------------------------------
-void tuple::display() const
-{
-  std::cout << "Tuple of " << std::endl;
-  Object::display();
+  void Tuple::display() const
+  {
+  }
 }
-
-//-----------------------------------------------------------------------------
-Object::repr_t const tuple::make_repr(
-    std::vector<Object const *> const& prototype) const
-{
-  std::stringstream ss;
-  ss << "(" << Object::make_repr(prototype) << ")";
-  return ss.str();
-}
-
-} /* namespace icorne */

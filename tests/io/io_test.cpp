@@ -1,6 +1,26 @@
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/io/File.h>
+#include <dolfin/log/log.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshFunction.h>
 
+#include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+
+using dolfin::real;
+using dolfin::CellIterator;
+using dolfin::CellType;
+using dolfin::File;
+using dolfin::Mesh;
+using dolfin::MeshEditor;
+using dolfin::MeshFunction;
+
+#include <set>
 
 #ifdef HAVE_CHECK
 
@@ -22,6 +42,24 @@ START_TEST( test_init_offset_file )
 {
   int init_failed = 0;
 
+  Mesh mesh;
+  File test("test.off");
+
+  test >> mesh;
+
+  File f("test.pvd");
+  f << mesh;
+
+  // Create a MeshFunction for cells
+  MeshFunction<uint> cellfunction(mesh, 2);
+  for(CellIterator c(mesh); !c.end(); ++c)
+  {
+    cellfunction.set(c->index(), c->index());
+  }
+
+  //
+  File fcell("cells.pvd");
+  fcell << cellfunction;
 
   fail_unless( init_failed == 0 );
 }END_TEST

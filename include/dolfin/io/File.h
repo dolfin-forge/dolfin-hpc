@@ -28,7 +28,7 @@ namespace dolfin
   class Function;
   class ParameterList;
   class GenericFile;
-  
+
   /// A File represents a data file for reading and writing objects.
   /// Unless specified explicitly, the format is determined by the
   /// file name suffix.
@@ -36,10 +36,10 @@ namespace dolfin
   class File
   {
   public:
-    
+
     /// File formats
-    enum Type {xml, matlab, octave, opendx, vtk, binary ,raw, stl, xyz};
-    
+    enum Type {xml, matlab, octave, opendx, vtk, binary, off ,raw, stl, xyz};
+
     /// Create a file with given name
     File(const std::string& filename);
 
@@ -53,7 +53,7 @@ namespace dolfin
     ~File();
 
     //--- Input ---
-    
+
     /// Read vector from file
     void operator>> (GenericVector& x);
 
@@ -109,15 +109,15 @@ namespace dolfin
 
     /// Write a collection of funtion to file
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
-    
+
     void set_counter(uint new_value);
 
   private:
-    
+
     GenericFile* file;
-    
+
   };
-  
+
 }
 
 #endif

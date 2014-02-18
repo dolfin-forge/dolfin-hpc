@@ -147,6 +147,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				io/MatlabFile.h\
 				io/MFile.h\
 				io/OctaveFile.h\
+				io/OFFFile.h\
 				io/PXMLMesh.h\
 				io/RAWFile.h\
 				io/STLFile.h\

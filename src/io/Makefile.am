@@ -9,6 +9,7 @@ libdolfin_io_la_SOURCES = \
 			MatlabFile.cpp\
 			MFile.cpp\
 			OctaveFile.cpp\
+			OFFFile.cpp\
 			PXMLMesh.cpp\
 			RAWFile.cpp\
 			VTKFile.cpp\

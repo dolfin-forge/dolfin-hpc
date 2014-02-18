@@ -23,6 +23,7 @@
 #include <dolfin/io/OctaveFile.h>
 #include <dolfin/io/VTKFile.h>
 #include <dolfin/io/RAWFile.h>
+#include <dolfin/io/OFFFile.h>
 #include <dolfin/io/STLFile.h>
 #include <dolfin/io/XYZFile.h>
 
@@ -52,6 +53,8 @@ File::File(const std::string& filename)
     file = new BinaryFile(filename);
   else if ( filename.rfind(".m") != filename.npos )
     file = new OctaveFile(filename);
+  else if ( filename.rfind(".off") != filename.npos )
+    file = new OFFFile(filename);
   else if ( filename.rfind(".pvd") != filename.npos )
     file = new VTKFile(filename);
   else if ( filename.rfind(".raw") != filename.npos )
@@ -90,6 +93,7 @@ File::File(const std::string& filename, Type type)
   default:
     file = 0;
     error("Unknown file type for \"%s\".", filename.c_str());
+    break;
   }
 }
 //-----------------------------------------------------------------------------
@@ -117,74 +121,74 @@ File::~File()
 void File::operator>>(GenericVector& x)
 {
   file->read();
-  
+
   *file >> x;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(GenericMatrix& A)
 {
   file->read();
-  
+
   *file >> A;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Mesh& mesh)
 {
   file->read();
-  
+
   *file >> mesh;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<int>& meshfunction)
 {
   file->read();
-  
+
   *file >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<unsigned int>& meshfunction)
 {
   file->read();
-  
+
   *file >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<double>& meshfunction)
 {
   file->read();
-  
+
   *file >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<bool>& meshfunction)
 {
   file->read();
-  
+
   *file >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Function& f)
 {
   file->read();
-  
+
   *file >> f;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(ParameterList& parameters)
 {
   file->read();
-  
+
   *file >> parameters;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Graph& graph)
 {
   file->read();
-  
+
   *file >> graph;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(std::vector<std::pair<Function*, std::string> >& f) 
+void File::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 {
   file->read();
 
@@ -194,74 +198,74 @@ void File::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 void File::operator<<(GenericVector& x)
 {
   file->write();
-  
+
   *file << x;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(GenericMatrix& A)
 {
   file->write();
-	 
+
   *file << A;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Mesh& mesh)
 {
   file->write();
-  
+
   *file << mesh;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<int>& meshfunction)
 {
   file->write();
-  
+
   *file << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<unsigned int>& meshfunction)
 {
   file->write();
-  
+
   *file << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<double>& meshfunction)
 {
   file->write();
-  
+
   *file << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<bool>& meshfunction)
 {
   file->write();
-  
+
   *file << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Function& u)
 {
   file->write();
-  
+
   *file << u;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(ParameterList& parameters)
 {
   file->write();
-  
+
   *file << parameters;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Graph& graph)
 {
   file->write();
-  
+
   *file << graph;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(std::vector<std::pair<Function*, std::string> >& f) 
+void File::operator<<(std::vector<std::pair<Function*, std::string> >& f)
 {
   file->write();
 

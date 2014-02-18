@@ -10,6 +10,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLCellVolume.cpp\
                            UFLCircumradius.cpp\
                            UFLClass.cpp\
+                           UFLCoefficient.cpp\
                            UFLDifferentiation.cpp\
                            UFLDomain.cpp\
                            UFLElementList.cpp\

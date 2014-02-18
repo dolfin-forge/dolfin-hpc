@@ -70,7 +70,7 @@ protected:
   std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
 
   /// Create from representation
-  static Object * create(repr_t representation);
+  static Object * create(repr_t const& representation);
 
 };
 
@@ -201,6 +201,11 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
   }
   return args;
 }
+
+//-----------------------------------------------------------------------------
+//inline Object * Object::create(repr_t const& repr)
+//{
+//}
 
 } /* namespace ufl */
 #endif /* __UFL_OBJECT_H_ */

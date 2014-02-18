@@ -25,7 +25,7 @@ namespace ufl
     public:
 
       ///
-      List(std::vector<Integral> const & integrals);
+      List(std::vector<Integral const *>& integrals);
 
       ///
       List (repr_t const & repr);

@@ -13,6 +13,54 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
+  Sum::Sum(Expression const& s1, Expression const& s2) :
+    Class("Sum"),
+    s1_(s1),
+    s2_(s2),
+    repr_(*this, s1_, s2_),
+    str_(s1_.str() + " + " + s2_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Sum::Sum(repr_t const & repr):
+    Class("Sum", repr),
+    s1_(arg(0)),
+    s2_(arg(1)),
+    repr_(*this, s1_, s2_),
+    str_(s1_.str() + " + " + s2_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Sum::~Sum()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  std::pair<Expression const, Expression const> const& Sum::operands() const
+  {
+    return std::make_pair(s1_, s2_);  
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Sum::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Sum::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Sum::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
   Product::Product(Expression const& p1, Expression const& p2) :
     Class("Product"),
     p1_(p1),
@@ -30,54 +78,6 @@ namespace ufl
     repr_(*this, p1_, p2_),
     str_(p1_.str() + " * " + p2_.str())
   {
-//    if(repr.length() == 0)
-//      dolfin_assert("An empty signature was passed to create a Product.");
-//
-//    Expression const * p1;
-//    Expression const * p2;
-//
-//    std::string::const_iterator it;
-//    std::string help_string;
-//    dolfin::uint i= 0;
-//    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
-//    {
-//      help_string += *it;
-//      if(help_string == "Product(")
-//      {
-//        help_string.clear();
-//        std::string::const_iterator jt;
-//        dolfin::uint pos_end_summand = 0;
-//        dolfin::uint open_parentheses = 0;
-//        dolfin::uint close_parentheses = 0;
-//
-//        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_summand)
-//        {
-//          if(*jt == '(')
-//            open_parentheses++;
-//        
-//          if(*jt == ')')
-//            close_parentheses++;
-//
-//          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
-//            break;
-//          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
-//          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
-//          std::cout << "                  " << pos_end_summand << std::endl;
-//        }
-//
-//        std::string string_p1 = repr.substr(i+1, pos_end_summand);
-//        std::string string_p2 = repr.substr(i+pos_end_summand+3, repr.length()-pos_end_summand-i-4);
-//        std::cout << "substring P1  " << string_p1 << std::endl;
-//        std::cout << "substring P2  " << string_p2 << std::endl;
-//        std::cout << "create Expression 1" << std::endl;
-//        p1 = p1->create(string_p1);
-//        std::cout << "create Expression 1 done" << std::endl;
-//        std::cout << "create Expression 2" << std::endl;
-//        p2 = p2->create(string_p2);
-//        std::cout << "create Expression 2 done" << std::endl;
-//      }
-//    }
-//    return new Product(*p1, *p2);
   }
 
 //-----------------------------------------------------------------------------
@@ -108,5 +108,145 @@ namespace ufl
   {
   }
 
+//-----------------------------------------------------------------------------
+  Division::Division(Expression const& d1, Expression const& d2) :
+    Class("Division"),
+    d1_(d1),
+    d2_(d2),
+    repr_(*this, d1_, d2_),
+    str_(d1_.str() + " / " + d2_.str())
+  {
+  }
 
+//-----------------------------------------------------------------------------
+  Division::Division(repr_t const & repr):
+    Class("Division", repr),
+    d1_(arg(0)),
+    d2_(arg(1)),
+    repr_(*this, d1_, d2_),
+    str_(d1_.str() + " / " + d2_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Division::~Division()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  std::pair<Expression const, Expression const> const& Division::operands() const
+  {
+    return std::make_pair(d1_, d2_);  
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Division::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Division::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Division::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Power::Power(Expression const& a, Expression const& b) :
+    Class("Power"),
+    a_(a),
+    b_(b),
+    repr_(*this, a_, b_),
+    str_(a_.str() + " ** " + b_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Power::Power(repr_t const & repr):
+    Class("Power", repr),
+    a_(arg(0)),
+    b_(arg(1)),
+    repr_(*this, a_, b_),
+    str_(a_.str() + " ** " + b_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Power::~Power()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  std::pair<Expression const, Expression const> const& Power::operands() const
+  {
+    return std::make_pair(a_, b_);  
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Power::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Power::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Power::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Abs::Abs(Expression const& a) :
+    Class("Abs"),
+    a_(a),
+    repr_(*this, a_),
+    str_("| " + a_.str() + " |")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Abs::Abs(repr_t const & repr):
+    Class("Abs", repr),
+    a_(arg(0)),
+    repr_(*this, a_),
+    str_("| " + a_.str() + " |")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Abs::~Abs()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& Abs::operands() const
+  {
+    return a_;  
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Abs::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Abs::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Abs::display() const
+  {
+  }
 }

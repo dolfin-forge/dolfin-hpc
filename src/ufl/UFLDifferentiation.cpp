@@ -13,6 +13,61 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
+  CoefficientDerivative::CoefficientDerivative(type<dolfin::real> const& integrand,
+      Tuple const& coefficients, Tuple const& arguments/*, 
+      type<std::map<dolfin::uint, dolfin::uint> > const& coeff_derivatives*/) :
+    Class("CoefficientDerivative"),
+    integrand_(integrand),
+    coefficients_(coefficients),
+    arguments_(arguments),
+//    coeff_derivatives_(coeff_derivatives),
+    repr_(*this, integrand_, coefficients_, arguments_/*, coeff_derivatives_*/),
+    str_("d/dfj { " + integrand_.str() + " } with fh=" + coefficients_.str() + ", dfh/dfj = " + arguments_.str() + ". and coefficient derivatives "/* + coeff_derivatives_.str()*/)
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  CoefficientDerivative::CoefficientDerivative(repr_t const & repr) :
+    Class("CoefficientDerivative"),
+    integrand_(arg(0)),
+    coefficients_(arg(1)),
+    arguments_(arg(2)),
+//    coeff_derivatives_(arg(3)),
+    repr_(*this, integrand_, coefficients_, arguments_/*, coeff_derivatives_*/),
+    str_("d/dfj { " + integrand_.str() + " } with fh=" + coefficients_.str() + ", dfh/dfj = "
+        + arguments_.str() + ". and coefficient derivatives "/* + coeff_derivatives_.str()*/)
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  CoefficientDerivative::~CoefficientDerivative()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+//  std::pair<Expression const, Index const> const& CoefficientDerivative::operands() const
+//  {
+//    return std::make_pair(expression_, index_);  
+//  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const CoefficientDerivative::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const CoefficientDerivative::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void CoefficientDerivative::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
   SpatialDerivative::SpatialDerivative(Expression const& expression, Index const& index) :
     Class("SpatialDerivative"),
     expression_(expression),
@@ -20,14 +75,6 @@ namespace ufl
     repr_(*this, expression_, index_),
     str_("d/dx_" + index_.str() + " " + expression_.str())
   {
-//    std::stringstream ssrepr;
-//    ssrepr << "SpatialDerivative(" << expression_.repr() << "," << index_.repr() << ")";
-//    repr_ = ssrepr.str();
-//
-//    //Is this the same implementation as in python?
-//    std::stringstream ssstr;
-//    ssstr << "d/dx_" << index_.str() << " " << expression_.str();
-//    str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
@@ -38,51 +85,6 @@ namespace ufl
     repr_(*this, expression_, index_),
     str_("d/dx_" + index_.str() + " " + expression_.str())
   {
-//    if(repr.length() == 0)
-//      dolfin_assert("An empty signature was passed to create a SpatialDerivative.");
-//
-//    Expression const * expression;
-//    IndexBase const * index;
-//
-//    std::string::const_iterator it;
-//    std::string help_string;
-//    dolfin::uint i = 0;
-//    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
-//    {
-//      help_string += *it;
-//      if(help_string == "SpatialDerivative(")
-//      {
-//        help_string.clear();
-//        std::string::const_iterator jt;
-//        dolfin::uint pos_end_expr = 0;
-//        dolfin::uint open_parentheses = 0;
-//        dolfin::uint close_parentheses = 0;
-//
-//        for(jt = it; jt!=repr.end(); ++jt, ++pos_end_expr)
-//        {
-//          if(*jt == '(')
-//            open_parentheses++;
-//        
-//          if(*jt == ')')
-//            close_parentheses++;
-//
-//          if(close_parentheses>0 && open_parentheses == close_parentheses + 1)
-//            break;
-//          std::cout << "Anzahl offene Klammern = " << open_parentheses << std::endl;
-//          std::cout << "Anzahl geschlossene Klammern = " << close_parentheses << std::endl;
-//          std::cout << "  " << pos_end_expr;
-//        }
-//        std::cout << std::endl;
-//
-//        std::string string_expr = repr.substr(i+1, pos_end_expr);
-//        std::string string_index = repr.substr(i+pos_end_expr+3, repr.length()-pos_end_expr-i-4);
-//        std::cout << "substring EXPR  " << string_expr << std::endl;
-//        std::cout << "substring INDEX  " << string_index << std::endl;
-//        expression = expression->create(string_expr);
-//        index = index->create(string_index);
-//      }
-//    }
-//    return new SpatialDerivative(*expression, *index);
   }
 
 //-----------------------------------------------------------------------------
@@ -113,4 +115,281 @@ namespace ufl
   {
   }
 
+//-----------------------------------------------------------------------------
+  VariableDerivative::VariableDerivative(Expression const& expression, Variable const& variable) :
+    Class("VariableDerivative"),
+    expression_(expression),
+    variable_(variable),
+    repr_(*this, expression_, variable_),
+    str_("d/d[" + variable_.str() + "] " + expression_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  VariableDerivative::VariableDerivative(repr_t const & repr) :
+    Class("VariableDerivative"),
+    expression_(arg(0)),
+    variable_(arg(1)),
+    repr_(*this, expression_, variable_),
+    str_("d/d[" + variable_.str() + "] " + expression_.str())
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  VariableDerivative::~VariableDerivative()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  std::pair<Expression const, Variable const> const& VariableDerivative::operands() const
+  {
+    return std::make_pair(expression_, variable_);  
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const VariableDerivative::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const VariableDerivative::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void VariableDerivative::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Grad::Grad(Expression const& expression) :
+    Class("Grad"),
+    expression_(expression),
+    repr_(*this, expression_),
+    str_("grad(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Grad::Grad(repr_t const & repr) :
+    Class("Grad"),
+    expression_(arg(0)),
+    repr_(*this, expression_),
+    str_("grad(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Grad::~Grad()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& Grad::operands() const
+  {
+    return expression_;
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Grad::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Grad::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Grad::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Div::Div(Expression const& expression) :
+    Class("Div"),
+    expression_(expression),
+    repr_(*this, expression_),
+    str_("div(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Div::Div(repr_t const & repr) :
+    Class("Div"),
+    expression_(arg(0)),
+    repr_(*this, expression_),
+    str_("div(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Div::~Div()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& Div::operands() const
+  {
+    return expression_;
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Div::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Div::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Div::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaGrad::NablaGrad(Expression const& expression) :
+    Class("NablaGrad"),
+    expression_(expression),
+    repr_(*this, expression_),
+    str_("nabla_grad(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaGrad::NablaGrad(repr_t const & repr) :
+    Class("NablaGrad"),
+    expression_(arg(0)),
+    repr_(*this, expression_),
+    str_("nabla_grad(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaGrad::~NablaGrad()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& NablaGrad::operands() const
+  {
+    return expression_;
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const NablaGrad::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const NablaGrad::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void NablaGrad::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaDiv::NablaDiv(Expression const& expression) :
+    Class("NablaDiv"),
+    expression_(expression),
+    repr_(*this, expression_),
+    str_("nabla_div(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaDiv::NablaDiv(repr_t const & repr) :
+    Class("NablaDiv"),
+    expression_(arg(0)),
+    repr_(*this, expression_),
+    str_("nabla_div(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  NablaDiv::~NablaDiv()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& NablaDiv::operands() const
+  {
+    return expression_;
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const NablaDiv::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const NablaDiv::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void NablaDiv::display() const
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Curl::Curl(Expression const& expression) :
+    Class("Curl"),
+    expression_(expression),
+    repr_(*this, expression_),
+    str_("curl(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Curl::Curl(repr_t const & repr) :
+    Class("Curl"),
+    expression_(arg(0)),
+    repr_(*this, expression_),
+    str_("curl(" + expression_.str() + ")")
+  {
+  }
+
+//-----------------------------------------------------------------------------
+  Curl::~Curl()
+  {
+  }
+  
+//-----------------------------------------------------------------------------
+  Expression const& Curl::operands() const
+  {
+    return expression_;
+  }
+
+//-----------------------------------------------------------------------------
+  Object::repr_t const Curl::repr() const
+  {
+    return repr_;
+  }
+
+//-----------------------------------------------------------------------------
+  std::string const Curl::str() const
+  {
+    return str_;
+  }
+
+//-----------------------------------------------------------------------------
+  void Curl::display() const
+  {
+  }
 }

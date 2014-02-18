@@ -34,6 +34,8 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLSpatialCoordinate.cpp\
                            UFLTensorElement.cpp\
                            UFLTensors.cpp\
+                           UFLTuple.cpp\
+                           UFLVariable.cpp\
                            UFLVectorElement.cpp
 
 dist_data_DATA =  

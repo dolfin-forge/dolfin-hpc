@@ -30,6 +30,9 @@ namespace ufl
           dolfin::uint const& count);
 
       ///
+      Argument(repr_t const& repr);
+
+      ///
       ~Argument();
   
       //--- INTERFACE -------------------------------------------------------------
@@ -39,6 +42,9 @@ namespace ufl
 
       /// Return a reference to the value shape of the FiniteElementBase of this Argument
       ValueArray const& shape() const;
+
+      /// Return a reference to the cell of the FiniteElementBase of this Argument
+      Cell const& cell() const;
 
       /// Return whether the basis functions of this element is spatially constant
       /// over each cell
@@ -53,17 +59,14 @@ namespace ufl
       ///
       void display() const;
 
-      ///
-      Argument const* create(repr_t const & repr) const;
-
     protected:
 
       FiniteElementBase const& finite_element_;
 
-      mutable repr_t repr_;
-      mutable std::string str_;
+      repr_t const repr_;
+      std::string const str_;
 
-      dolfin::uint const count_;
+      type<dolfin::uint> const count_;
   };
 
 } /* namespace ufl */

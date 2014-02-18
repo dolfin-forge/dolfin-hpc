@@ -10,18 +10,23 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-  List::List(std::vector<Integral> const & integrals) :
-    Class("[", "]")
+  List::List(std::vector<Integral const *>& integrals) :
+    Class("[", "]"),
+    integrals_(integrals),
+//    repr_(*this, integrals),
+    str_("")
   {
-    integrals_.clear();
-    integrals_.resize(integrals.size());
-    for(dolfin::uint i=0; i<integrals.size(); ++i)
-      integrals_[i] = new Integral(integrals[i]);
+//    integrals_.clear();
+//    integrals_.resize(integrals.size());
+//    for(dolfin::uint i=0; i<integrals.size(); ++i)
+//      integrals_[i] = new Integral(integrals[i]);
   }
 
 //-----------------------------------------------------------------------------
-  List::List(repr_t const & repr) :
-    Class("[", "]", repr)
+  List::List(repr_t const& repr) :
+    Class("[", "]", repr),
+//    repr_(*this, ),
+    str_("")
   {
 //    std::cout << "C List" << std::endl;
     std::vector<repr_t> const arguments = args();

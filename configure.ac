@@ -14,72 +14,70 @@ AC_SUBST(PACKAGE_REQUIRES)
 
 # Feature options.
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],
-		     [Compile with debug symbols]),
-		     [enable_debug=${enableval}],[enable_debug=no])
+             [Compile with debug symbols]),
+             [enable_debug=${enableval}],[enable_debug=no])
 
 AC_ARG_ENABLE(function-cache, AC_HELP_STRING([--enable-function-cache],
-			      [Compile with local data cache in functions]),
-			      [enable_function_cache=${enableval}],
-			      [enable_function_cache=no])
+              [Compile with local data cache in functions]),
+              [enable_function_cache=${enableval}],
+              [enable_function_cache=no])
 
 AC_ARG_ENABLE(optimize-p1, AC_HELP_STRING([--enable-optimize-p1],
-			   [Compile with optimization for P1 elements]),
-			   [enable_optimize_p1=${enableval}],
-			   [enable_optimize_p1=no])
+              [Compile with optimization for P1 elements]),
+              [enable_optimize_p1=${enableval}],
+              [enable_optimize_p1=no])
 
 AC_ARG_ENABLE(progress-bar, AC_HELP_STRING([--disable-progress-bar],
-					   [Compile without progress bar]),
-			    	     	   [enable_progressbar=no],
-					   [enable_progressbar=yes])
-AC_ARG_ENABLE(mpi,
-              AC_HELP_STRING([--enable-mpi],
-	      [Compile with support for MPI]),
-	      [enable_mpi=${enableval}], [enable_mpi=no])
+              [Compile without progress bar]),
+              [enable_progressbar=no],
+              [enable_progressbar=yes])
+AC_ARG_ENABLE(mpi, AC_HELP_STRING([--enable-mpi],
+              [Compile with support for MPI]),
+              [enable_mpi=${enableval}], [enable_mpi=no])
 
 AC_ARG_ENABLE(mpi-io, AC_HELP_STRING([--enable-mpi-io],
-		     [Compile with support for MPI I/O]),
-		     [enable_mpiio=${enableval}],[enable_mpiio=no])
+              [Compile with support for MPI I/O]),
+              [enable_mpiio=${enableval}],[enable_mpiio=no])
 
-AC_ARG_ENABLE(openmp,
-              AC_HELP_STRING([--enable-openmp],
-	      [Compile with support for OpenMP]),
-	      [enable_openmp=${enableval}], [enable_openmp=no])
+AC_ARG_ENABLE(openmp, AC_HELP_STRING([--enable-openmp],
+              [Compile with support for OpenMP]),
+              [enable_openmp=${enableval}], [enable_openmp=no])
 
 AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
-			 [Compile with support for Boost TR1 headers]),
-			 [enable_boosttr1=${enableval}],[enable_boostr1=no])
+              [Compile with support for Boost TR1 headers]),
+              [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
-		     [Enable various quadrature rules]),
-		     [enable_quad=${enableval}],[enable_quad=no])
+              [Enable various quadrature rules]),
+              [enable_quad=${enableval}],[enable_quad=no])
 
 AC_ARG_ENABLE(ufl, AC_HELP_STRING([--enable-ufl],
-		     [Enable UFL support using UFC version 2.1.2]),
-		     [enable_ufl=${enableval}],[enable_ufl=no])
+              [Enable UFL support using UFC version 2.1.2]),
+              [enable_ufl=${enableval}],[enable_ufl=no])
 
 AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
-		     [Compile with support for unit testing, requires libcheck]),
-		     [enable_check=${enableval}],[enable_check=no])
+              [Compile with support for unit testing, requires libcheck]),
+              [enable_check=${enableval}],[enable_check=no])
 
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
-		 [Compile with support for reading/writing XML data]),
-		 [with_xml=${withval}],[with_xml=yes])
+            [Compile with support for reading/writing XML data]),
+            [with_xml=${withval}],[with_xml=yes])
 
 AC_ARG_WITH(gts, AC_HELP_STRING([--with-gts], [Compile with support for GTS]),
-		 [with_gts=${withval}],[with_gts=no])
+            [with_gts=${withval}],[with_gts=no])
 
 AC_ARG_WITH(janpack, AC_HELP_STRING([--with-janpack], 
-		     [Compile with support for JANPACK]),
-		     [with_janpack=${withval}],[with_janpack=no])
+             [Compile with support for JANPACK]),
+             [with_janpack=${withval}],[with_janpack=no])
 
 AC_ARG_WITH(petsc, AC_HELP_STRING([--with-petsc], 
-		   [Compile with support for PETSc linear algebra]),
-		   [with_petsc=${withval}],[with_petsc=no])
+           [Compile with support for PETSc linear algebra]),
+           [with_petsc=${withval}],[with_petsc=no])
 
 AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom], 
-		     [Compile with support for LIBGEOM]),
-		     [with_libgeom=${withval}],[with_libgeom=no])
+            [Compile with support for LIBGEOM]),
+            [with_libgeom=${withval}],[with_libgeom=no])
 
 
 if test "x${enable_function_cache}" = xyes; then
@@ -99,7 +97,7 @@ fi
 
 if test "x${enable_boosttr1}" = xyes; then
    AC_DEFINE(ENABLE_BOOST_TR1,[1],[Compile with support for Boost TR1 headers])
-   need_boost=yes	
+   need_boost=yes    
 fi
 
 
@@ -111,7 +109,7 @@ AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
 if test "x${enable_mpi}" != xno; then
-   AX_MPI	
+   AX_MPI    
    CXX="$MPICXX"
    LIBS="$MPILIBS $LIBS"   
    if test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
@@ -188,9 +186,9 @@ if test "x${enable_mpi}" != xno; then
    else
       AX_PARMETIS
       if test "${PARMETIS_LIBS}"; then     
-      	LIBS="$PARMETIS_LIBS $LIBS"
+          LIBS="$PARMETIS_LIBS $LIBS"
       else
-	AC_MSG_ERROR([Required library ParMetis not found])
+    AC_MSG_ERROR([Required library ParMetis not found])
       fi
    fi
 fi
@@ -214,7 +212,7 @@ if test "x${with_petsc}" != xno; then
       if test "${PETSC_LDFLAGS}"; then
          found_la_backend="yes"
       else
-	 with_petsc="no"
+         with_petsc="no"
       fi
    fi
 fi
@@ -250,7 +248,7 @@ if test "x${enable_quad}" = xyes; then
    else
       AC_CHECK_LIB(lapack,dgesv_,
                    [have_lapack=yes, LIBS="$LIBS -lblas -llapack"], 
-      		   [have_lapack=no], [-lblas])
+                   [have_lapack=no], [-lblas])
    fi 
 
    if test $have_lapack = no; then
@@ -305,32 +303,33 @@ AC_CHECK_FUNCS([floor memset pow sqrt])
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
-			  src/adaptivity/Makefile\
-			  src/common/Makefile\
-			  src/elements/Makefile\
-			  src/fem/Makefile\
-			  src/function/Makefile\
-			  src/graph/Makefile\
-			  src/io/Makefile\
-			  src/la/Makefile\
-			  src/log/Makefile\
-			  src/main/Makefile\
-			  src/math/Makefile\
-			  src/mesh/Makefile\
-			  src/nls/Makefile\
-			  src/parameter/Makefile\
-			  src/pde/Makefile\
-			  src/quadrature/Makefile\
-			  src/ufl/Makefile\
-			  src/dolfin.pc\
-			  include/Makefile\
-			  include/dolfin/Makefile])
+                 src/adaptivity/Makefile\
+                 src/common/Makefile\
+                 src/elements/Makefile\
+                 src/fem/Makefile\
+                 src/function/Makefile\
+                 src/graph/Makefile\
+                 src/io/Makefile\
+                 src/la/Makefile\
+                 src/log/Makefile\
+                 src/main/Makefile\
+                 src/math/Makefile\
+                 src/mesh/Makefile\
+                 src/nls/Makefile\
+                 src/parameter/Makefile\
+                 src/pde/Makefile\
+                 src/quadrature/Makefile\
+                 src/ufl/Makefile\
+                 src/dolfin.pc\
+                 include/Makefile\
+                 include/dolfin/Makefile])
 
 # Tests
 if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
+                 tests/io/Makefile\
                  tests/ufl/Makefile])
 fi
 

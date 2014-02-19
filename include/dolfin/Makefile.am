@@ -309,6 +309,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLCircumradius.h\
 				ufl/UFLClass.h\
 				ufl/UFLCoefficient.h\
+				ufl/UFLConditional.h\
 				ufl/UFLDifferentiation.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\

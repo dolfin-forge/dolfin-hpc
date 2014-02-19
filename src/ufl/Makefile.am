@@ -11,6 +11,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLCircumradius.cpp\
                            UFLClass.cpp\
                            UFLCoefficient.cpp\
+                           UFLConditional.cpp\
                            UFLDifferentiation.cpp\
                            UFLDomain.cpp\
                            UFLElementList.cpp\

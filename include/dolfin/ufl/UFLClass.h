@@ -12,6 +12,8 @@
 
 #include <dolfin/ufl/UFLObject.h>
 
+#include <dolfin/common/types.h>
+
 namespace ufl
 {
 
@@ -50,9 +52,15 @@ protected:
 
   ///
   Class(std::string const& name);
+  
+  ///
+  Class(std::string const& pre, std::string const& pos);
 
   ///
   explicit Class(std::string const& name, repr_t const& repr);
+
+  ///
+  explicit Class(std::string const& pre, std::string const& pos, repr_t const& repr);
 
   ///
   virtual ~Class();
@@ -70,14 +78,20 @@ protected:
   repr_t const make_repr(Object const *& arg1, Object const *& arg2) const;
 
   ///
-  std::vector<repr_t> const make_args_repr(repr_t const& repr) const;
+  std::vector<repr_t> const make_args_repr(repr_t const& repr, bool const& without_pre_pos = false) const;
 
   ///
   repr_t const& arg(size_t i);
 
+  ///
+  std::vector<repr_t> const& args();
+
+  ///
+  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre, std::string& pos) const; 
+
 private:
 
-  typedef std::pair<std::string const, std::vector<Object const*> > CppProto;
+  typedef std::pair<std::pair<std::string const, std::string const> const, std::vector<Object const*> > CppProto;
 
   ///
   CppProto make_proto(repr_t repr) const;
@@ -85,7 +99,8 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
   CppProto cpp_proto_;
   std::vector<repr_t> args_repr_;
-  std::string const name_;
+  std::string const pre_;
+  std::string const pos_;
   static repr_t const default_repr_;
   static std::string const default_str_;
 
@@ -98,7 +113,7 @@ inline bool Class::operator ==(Class const& other) const
 }
 
 //-----------------------------------------------------------------------------
-class ValueArray : public std::vector<uint>
+class ValueArray : public std::vector<dolfin::uint>
 {
 
 public:
@@ -107,10 +122,10 @@ public:
   ValueArray();
 
   ///
-  ValueArray(uint const i);
+  ValueArray(dolfin::uint const i);
 
   ///
-  ValueArray(uint const k, uint const i);
+  ValueArray(dolfin::uint const k, dolfin::uint const i);
 
   ///
   ~ValueArray();

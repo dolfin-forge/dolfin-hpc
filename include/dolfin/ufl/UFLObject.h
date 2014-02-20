@@ -8,7 +8,9 @@
 #define __UFL_OBJECT_H_
 
 #include <dolfin/ufl/UFLrepr.h>
+#include <dolfin/common/types.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -62,13 +64,13 @@ protected:
 
   ///
   virtual std::vector<repr_t> const make_args_repr(
-      repr_t const& repr) const = 0;
+      repr_t const& repr, bool const& without_pre_pos = false) const = 0;
 
   ///
   std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
 
   /// Create from representation
-  static Object * create(repr_t representation);
+  static Object * create(repr_t const& representation);
 
 };
 
@@ -115,32 +117,79 @@ inline std::vector<Object const *> Object::make_args(
 
 //-----------------------------------------------------------------------------
 inline std::vector<Object::repr_t> const Object::make_args_repr(
-    repr_t const& repr) const
+    repr_t const& repr, bool const& without_pre_pos) const
 {
+  //assumes repr to be a comma separated list
   std::vector<Object::repr_t> args;
   std::string str = repr;
   std::string delimiter = ", ";
 
+  std::vector<char> open_delimiters;
+  std::vector<char> close_delimiters;
+  std::vector<size_t> open_delimiter_positions(3,0);
+  std::vector<size_t> close_delimiter_positions(3,0);
+  std::vector<size_t> n_open_delimiters(3,0);
+  std::vector<size_t> n_close_delimiters(3,0);
+
+  open_delimiters.push_back('(');
+  open_delimiters.push_back('[');
+  open_delimiters.push_back('{');
+
+  close_delimiters.push_back(')');
+  close_delimiters.push_back(']');
+  close_delimiters.push_back('}');
+
   size_t scpos = 0;
   size_t currpos = 0;
-  size_t openbrace = 0;
+  size_t open_pos = 0;
+  size_t close_pos = 0;
+
   std::string token;
+
   while (scpos != std::string::npos)
   {
     scpos = str.find(delimiter, currpos);
-    openbrace = str.find("(", currpos);
+    std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
+    for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+    {
+      open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
+      close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+      n_open_delimiters[i] = std::count(str.begin(), it, open_delimiters[i]);
+      n_close_delimiters[i] = std::count(str.begin(), it, close_delimiters[i]);
+    }
+
+    bool equal_number_open_close = true;
+    for(dolfin::uint i = 0; i<n_open_delimiters.size(); ++i)
+      if(n_open_delimiters[i] != n_close_delimiters[i])
+        equal_number_open_close = false;
+
+    open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
+    dolfin::uint index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(), 
+          open_delimiter_positions.end(), open_pos));
+    close_pos = close_delimiter_positions[index];
+
     // Take into account of
     // - one argument
     // - class arguments
     // - tuple argument
     // - dict argument
-    if (scpos == std::string::npos || openbrace > scpos
-        || (openbrace < scpos && str.find(")", currpos) < scpos)
-        || (str.find("{", currpos) < scpos && str.find("}", currpos) < scpos))
+    if (scpos == std::string::npos //no comma
+        || (open_pos > scpos && equal_number_open_close) //comma is enclosed in a tuple or class
+        || ((open_pos < scpos && close_pos < scpos) && equal_number_open_close)) //comma is after a tuple or a class
     {
       token = str.substr(0, scpos);
+
+      if(scpos != std::string::npos)
+        str.erase(0, scpos + delimiter.length());
+      else
+        str.erase(0, scpos);
+
       args.push_back(Object::repr_t(token));
-      str.erase(0, scpos + delimiter.length());
+      for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+      {
+        open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
+        close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+      }
       currpos = 0;
     }
     else
@@ -150,6 +199,11 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
   }
   return args;
 }
+
+//-----------------------------------------------------------------------------
+//inline Object * Object::create(repr_t const& repr)
+//{
+//}
 
 } /* namespace ufl */
 #endif /* __UFL_OBJECT_H_ */

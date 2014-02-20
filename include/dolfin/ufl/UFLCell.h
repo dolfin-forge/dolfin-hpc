@@ -19,6 +19,8 @@
 #include <dolfin/ufl/UFLFacetNormal.h>
 #include <dolfin/ufl/UFLSpatialCoordinate.h>
 
+#include <dolfin/common/types.h>
+
 namespace ufl
 {
 
@@ -82,17 +84,17 @@ public:
   Domain const facet_domain() const;
 
   /// UFL: Return the number of facets this cell has
-  uint const num_facets() const;
+  dolfin::uint const num_facets() const;
 
   /// UFL: Return the dimension of the space this cell is embedded in
-  uint const geometric_dimension() const;
+  dolfin::uint const geometric_dimension() const;
 
   /// UFL: Return the dimension of the topology of this cell
-  uint const topological_dimension() const;
+  dolfin::uint const topological_dimension() const;
 
   /// The dimension of the cell is only valid is the geometric and topological
   /// dimensions are the same which does not seem to be useful.
-  ///uint const d() const;
+  ///dolfin::uint const d() const;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -117,8 +119,8 @@ private:
 
   bool const invalid_;
 
-  uint const geometric_dimension_;
-  uint const topological_dimension_;
+  dolfin::uint const geometric_dimension_;
+  dolfin::uint const topological_dimension_;
 
   /// GeometricalQuantities
   CellSurfaceArea const cell_surface_area_;
@@ -127,7 +129,6 @@ private:
   FacetArea const facet_area_;
   FacetNormal const facet_normal_;
   SpatialCoordinate const x_;
-
 };
 
 } /* namespace ufl */

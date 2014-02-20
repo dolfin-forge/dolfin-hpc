@@ -13,7 +13,7 @@ using dolfin::error;
 
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(Family::Type family, Cell const& cell,
-                             uint const degree, uint const dim) :
+                             dolfin::uint const degree, dolfin::uint const dim) :
     FiniteElementBase("VectorElement", Family::Vector, cell, degree),
     sub_element_(family, cell, degree),
     dim_(dim),
@@ -40,7 +40,7 @@ VectorElement::VectorElement(repr_t const& repr) :
     FiniteElementBase("VectorElement", repr),
     value_shape_(),
     symmetry_(),
-    sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<uint>(arg(2))),
+    sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<dolfin::uint>(arg(2))),
     dim_(arg(3)),
     sub_elements_(dim_, &sub_element_)
 {
@@ -71,7 +71,7 @@ bool const VectorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const VectorElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const VectorElement::symmetry() const
 {
   return symmetry_;
 }
@@ -80,18 +80,18 @@ std::map<uint, uint> const VectorElement::symmetry() const
 std::pair<ValueArray, ValueArray> const VectorElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<uint, uint>();
+  return std::pair<dolfin::uint, dolfin::uint>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const > const VectorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const * const> const VectorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const VectorElement::num_sub_elements() const
+dolfin::uint const VectorElement::num_sub_elements() const
 {
   return 0;
 }

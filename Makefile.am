@@ -40,17 +40,17 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              data/meshes/trimesh-8.xml.gz\
              data/meshes/two_particles.xml.gz\
              data/meshes/unstruct-trimesh-1.xml.gz\
-	     data/meshes/unstruct-trimesh-2.xml.gz\
+             data/meshes/unstruct-trimesh-2.xml.gz\
              demo/function/Makefile\
-	     demo/function/Projection.form\
-	     demo/function/Projection.h\
-	     demo/function/main.cpp\
+             demo/function/Projection.form\
+             demo/function/Projection.h\
+             demo/function/main.cpp\
              demo/mesh/ale/Makefile\
              demo/mesh/ale/main.cpp\
              demo/mesh/refinement/Makefile\
-	     demo/mesh/refinement/main.cpp\
-	     demo/mesh/meshfunction/mesh2D.xml.gz\
-	     demo/mesh/meshfunction/meshfunction.xml\
+             demo/mesh/refinement/main.cpp\
+             demo/mesh/meshfunction/mesh2D.xml.gz\
+             demo/mesh/meshfunction/meshfunction.xml\
              demo/mesh/meshfunction/Makefile\
              demo/mesh/meshfunction/main.cpp\
              demo/mesh/partitioning/main.cpp\
@@ -110,20 +110,20 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/pde/mixed-poisson/Makefile\
              demo/pde/mixed-poisson/main.cpp\
              demo/pde/nonlinear-poisson/Makefile\
-	     demo/pde/nonlinear-poisson/NonlinearPoisson.form\
+             demo/pde/nonlinear-poisson/NonlinearPoisson.form\
              demo/pde/nonlinear-poisson/NonlinearPoisson.h\
              demo/pde/nonlinear-poisson/main.cpp\
              demo/pde/poisson/README\
              demo/pde/poisson/Makefile\
              demo/pde/poisson/main.cpp\
-	     demo/pde/poisson/Poisson.form\
+             demo/pde/poisson/Poisson.form\
              demo/pde/poisson/Poisson.h\
              demo/pde/stokes/stabilized/Makefile\
              demo/pde/stokes/stabilized/subdomains.xml.gz\
              demo/pde/stokes/stabilized/Stokes.form\
              demo/pde/stokes/stabilized/Stokes.h\
              demo/pde/stokes/stabilized/main.cpp\
-	     demo/pde/stokes/taylor-hood/Makefile\
+             demo/pde/stokes/taylor-hood/Makefile\
              demo/pde/stokes/taylor-hood/Stokes.form\
              demo/pde/stokes/taylor-hood/subdomains.xml.gz\
              demo/pde/stokes/taylor-hood/Stokes.h\

@@ -314,6 +314,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
 				ufl/UFLEnrichedElement.h\
+				ufl/UFLEquation.h\
 				ufl/UFLExpression.h\
 				ufl/UFLFacetArea.h\
 				ufl/UFLFacetNormal.h\

@@ -37,11 +37,11 @@ namespace ufl
 
       Cell const& cell() const;
 
-      std::vector<Integral> const& integrals(Measure::Type const& measure_type=Measure::None) const;
+      std::vector<Integral> const& integrals(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
-      std::vector<Measure> const measures(Measure::Type const& measure_type=Measure::None) const;
+      std::vector<Measure> const measures(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
-      std::vector<Measure::Type> const domains(Measure::Type const& measure_type=Measure::None) const;
+      std::vector<MeasureDomain::Type> const domains(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
       std::vector<Integral> const& cell_integrals() const;
 

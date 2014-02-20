@@ -16,6 +16,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLDomain.cpp\
                            UFLElementList.cpp\
                            UFLEnrichedElement.cpp\
+                           UFLEquation.cpp\
                            UFLExpression.cpp\
                            UFLFacetArea.cpp\
                            UFLFacetNormal.cpp\

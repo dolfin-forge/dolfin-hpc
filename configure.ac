@@ -333,7 +333,49 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
-                 tests/ufl/Makefile])
+                 tests/ufl/Makefile\
+                 tests/ufl/Algebra/Makefile\
+                 tests/ufl/Argument/Makefile\
+                 tests/ufl/array/Makefile\
+                 tests/ufl/Cell/Makefile\
+                 tests/ufl/CellSurfaceArea/Makefile\
+                 tests/ufl/CellVolume/Makefile\
+                 tests/ufl/Circumradius/Makefile\
+                 tests/ufl/Class/Makefile\
+                 tests/ufl/Coefficient/Makefile\
+                 tests/ufl/Conditional/Makefile\
+                 tests/ufl/Differentiation/Makefile\
+                 tests/ufl/Domain/Makefile\
+                 tests/ufl/ElementList/Makefile\
+                 tests/ufl/EnrichedElement/Makefile\
+                 tests/ufl/Equation/Makefile\
+                 tests/ufl/Expression/Makefile\
+                 tests/ufl/FacetArea/Makefile\
+                 tests/ufl/FacetNormal/Makefile\
+                 tests/ufl/Family/Makefile\
+                 tests/ufl/FiniteElement/Makefile\
+                 tests/ufl/FiniteElementBase/Makefile\
+                 tests/ufl/Form/Makefile\
+                 tests/ufl/GeometricQuantity/Makefile\
+                 tests/ufl/Index/Makefile\
+                 tests/ufl/Indexed/Makefile\
+                 tests/ufl/IndexSum/Makefile\
+                 tests/ufl/Integral/Makefile\
+                 tests/ufl/List/Makefile\
+                 tests/ufl/MixedElement/Makefile\
+                 tests/ufl/Object/Makefile\
+                 tests/ufl/QuadratureScheme/Makefile\
+                 tests/ufl/repr/Makefile\
+                 tests/ufl/RestrictedElement/Makefile\
+                 tests/ufl/Space/Makefile\
+                 tests/ufl/SpatialCoordinate/Makefile\
+                 tests/ufl/TensorElement/Makefile\
+                 tests/ufl/Tensors/Makefile\
+                 tests/ufl/tuple/Makefile\
+                 tests/ufl/Tuple/Makefile\
+                 tests/ufl/type/Makefile\
+                 tests/ufl/Variable/Makefile\
+                 tests/ufl/VectorElement/Makefile])
 fi
 
 AC_OUTPUT

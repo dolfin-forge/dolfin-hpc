@@ -1,1 +1,1 @@
-SUBDIRS = Class
+SUBDIRS = Algebra Argument array Cell CellSurfaceArea CellVolume Circumradius Class Coefficient Conditional Differentiation Domain ElementList EnrichedElement Equation Expression FacetArea FacetNormal Family FiniteElement FiniteElementBase Form GeometricQuantity Index Indexed IndexSum Integral List MixedElement Object QuadratureScheme repr RestrictedElement Space SpatialCoordinate TensorElement Tensors tuple Tuple type Variable VectorElement

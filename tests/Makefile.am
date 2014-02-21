@@ -1,1 +1,1 @@
-SUBDIRS = fem function ufl
+SUBDIRS = ufl #fem function 

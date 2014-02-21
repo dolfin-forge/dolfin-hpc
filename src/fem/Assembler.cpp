@@ -62,19 +62,9 @@ void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor)
 {
-<<<<<<< HEAD
   form.update_dofmaps(mesh_);
-=======
-<<<<<<< HEAD
-  form.update_dofmaps(mesh);
->>>>>>> commit quadrature
 #pragma omp parallel
   assemble(A, form.form(), form.coefficients(), form.dofmaps(), 0, 0, 0, q, reset_tensor);
-=======
-  form.updateDofMaps(mesh);
-#pragma omp parallel
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), 0, 0, 0, q, reset_tensor);
->>>>>>> medium stage in adding quadrature rules
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_domain,
@@ -147,17 +137,8 @@ void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_doma
   }
 
   // Assemble
-<<<<<<< HEAD
   form.update_dofmaps(mesh_);
-=======
-<<<<<<< HEAD
-  form.update_dofmaps(mesh);
->>>>>>> commit quadrature
   assemble(A, form.form(), form.coefficients(), form.dofmaps(),
-=======
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(),
->>>>>>> medium stage in adding quadrature rules
            cell_domains, facet_domains, facet_domains, q, reset_tensor);
 
   // Delete domains
@@ -188,18 +169,8 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          const QuadratureRule& q,
                          bool reset_tensor)
 {
-<<<<<<< HEAD
   form.update_dofmaps(mesh_);
   assemble(A, form.form(), form.coefficients(), form.dofmaps(), &cell_domains,
-=======
-<<<<<<< HEAD
-  form.update_dofmaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofmaps(), &cell_domains, 
-=======
-  form.updateDofMaps(mesh);
-  assemble(A, form.form(), form.coefficients(), form.dofMaps(), &cell_domains, 
->>>>>>> medium stage in adding quadrature rules
->>>>>>> commit quadrature
            &exterior_facet_domains, &interior_facet_domains, q, reset_tensor);
 }
 //-----------------------------------------------------------------------------

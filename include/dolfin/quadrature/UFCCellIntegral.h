@@ -53,49 +53,11 @@ namespace dolfin
 
     const unsigned int dim = ufc.mesh.topological_dimension;
     const unsigned int n_vertices = (dim == 1 ? 2 : (dim == 2 ? 3 : 4));
-<<<<<<< HEAD
-=======
-//    std::vector<std::vector<double> > x(n_vertices, std::vector<double>(dim,0.));
-
-//    x[0][0] = 0;
-//    x[0][1] = 0;
-//    x[1][0] = 1;
-//    x[1][1] = 0;
-//    x[2][0] = 0;
-//    x[2][1] = 1;
-
-<<<<<<< HEAD
-//    std::cout << "x0 = " << x[0][0] << "  " << x[0][1] <<  ",    x1 = " << x[1][0] << "  " << x[1][1]  << ",    x2 = " << x[2][0] << "  " << x[2][1] << std::endl;
-
-=======
-//    std::cout << "x0 = " << x[0][0] << "  " << x[0][1] << std::endl;
-//    std::cout << "x1 = " << x[1][0] << "  " << x[1][1] << std::endl;
-//    std::cout << "x2 = " << x[2][0] << "  " << x[2][1] << std::endl;
-//
->>>>>>> medium stage in adding quadrature rules
-//    std::cout << "x ref 0 = " << x_ref[0][0] << "  " << x_ref[0][1] << std::endl;
-//    std::cout << "x ref 1 = " << x_ref[1][0] << "  " << x_ref[1][1] << std::endl;
-//    std::cout << "x ref 2 = " << x_ref[2][0] << "  " << x_ref[2][1] << std::endl;
-
->>>>>>> commit quadrature
     std::vector<std::vector<double> > J (2, std::vector<double>(2,0.));
     J[0][0] = x[1][0] - x[0][0];
     J[0][1] = x[2][0] - x[0][0];
     J[1][0] = x[1][1] - x[0][1];
     J[1][1] = x[2][1] - x[0][1];
-<<<<<<< HEAD
-
-=======
-      
-<<<<<<< HEAD
->>>>>>> commit quadrature
-//    std::cout << "J_00 = " << J[0][0] << ",  J_01 = " << J[0][1] << ",  J_10 = " << J[1][0] << ",  J_11 = " << J[1][1] << std::endl;
-=======
-//    std::cout << "J_00 = " << J_00 << std::endl;
-//    std::cout << "J_01 = " << J_01 << std::endl;
-//    std::cout << "J_10 = " << J_10 << std::endl;
-//    std::cout << "J_11 = " << J_11 << std::endl;
->>>>>>> medium stage in adding quadrature rules
     // Compute determinant of Jacobian
     double detJ = J[0][0]*J[1][1] - J[0][1]*J[1][0];
       
@@ -108,14 +70,6 @@ namespace dolfin
     
     // Set scale factor
     const double det = std::abs(detJ);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-//    std::cout << "det=" << det << std::endl;
-=======
-    std::cout << "det=" << det << std::endl;
->>>>>>> medium stage in adding quadrature rules
->>>>>>> commit quadrature
     
     unsigned int tensor_rank = ufc.form.rank();
     std::vector<unsigned int> n_test(tensor_rank);
@@ -143,7 +97,6 @@ namespace dolfin
     const std::vector<real*>& q_points = q.get_points();
     const std::vector<real*>& ref_points = q.get_reference_points();
 
-<<<<<<< HEAD
     std::vector<real*> real_points (q_points.size());
     for(unsigned int i = 0; i<real_points.size(); ++i)
     {
@@ -157,29 +110,6 @@ namespace dolfin
         }
     }
 
-<<<<<<< HEAD
-=======
-    /*
-    std::cout << "q_points" << std::endl;
-    for(unsigned int i = 0; i<q_points.size(); ++i)
-    {
-      for(unsigned int d=0; d<dim; ++d)
-        std::cout << q_points[i][d] << "   ";
-      std::cout << std::endl;
-    }
-
-    std::cout << "real points" << std::endl;
-    for(unsigned int i = 0; i<real_points.size(); ++i)
-    {
-      for(unsigned int d=0; d<dim; ++d)
-        std::cout << real_points[i][d] << "   ";
-      std::cout << std::endl;
-    }
-    */
-    
-=======
->>>>>>> medium stage in adding quadrature rules
->>>>>>> commit quadrature
     std::vector<std::vector<real*> > q_coefficients (coefficients.size());
     for(unsigned int i = 0; i<q_coefficients.size(); ++i)
     {
@@ -187,52 +117,10 @@ namespace dolfin
       for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
       {
         q_coefficients[i][q] = new real[1];
-<<<<<<< HEAD
         coefficients[i]->eval(q_coefficients[i][q], real_points[q]);
       }
     }
 
-=======
-<<<<<<< HEAD
-        coefficients[i]->eval(q_coefficients[i][q], real_points[q]);//, ref_cell);
-//        coefficients[i]->eval(q_coefficients[i][q], q_points[q]);//, ref_cell);
-=======
-        coefficients[i]->eval(q_coefficients[i][q], q_points[q]);//, ref_cell);
->>>>>>> medium stage in adding quadrature rules
-      }
-    }
-
-    for(unsigned int i = 0; i<ref_q_coefficients.size(); ++i)
-    {
-      ref_q_coefficients[i].resize(ref_points.size());
-      for(unsigned int q = 0; q<ref_q_coefficients[i].size(); ++q)
-      {
-        ref_q_coefficients[i][q] = new real[1];
-        coefficients[i]->eval(ref_q_coefficients[i][q], ref_points[q]);//, ref_cell);
-      }
-    }
-<<<<<<< HEAD
-//    std::cout << "coefs" << std::endl;
-//    for(unsigned int i = 0; i<q_coefficients.size(); ++i)
-//      for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
-//        std::cout << q_coefficients[i][q][0] << "  ";
-//    std::cout << std::endl;
-=======
-    std::cout << "coefs" << std::endl;
-    for(unsigned int i = 0; i<q_coefficients.size(); ++i)
-      for(unsigned int q = 0; q<q_coefficients[i].size(); ++q)
-        std::cout << q_coefficients[i][q][0] << "  ";
-    std::cout << std::endl;
->>>>>>> medium stage in adding quadrature rules
-
-//    std::cout << "ref points" << std::endl;
-//    for (unsigned int qp = 0; qp<ref_points.size(); ++qp)
-//      for(unsigned int d=0; d<dim; ++d)
-//        std::cout << ref_points[qp][d] << "  ";
-//    std::cout << std::endl;
-
-
->>>>>>> commit quadrature
     std::vector<std::vector<std::vector<real*> > > phi_values(tensor_rank);
     std::vector<std::vector<std::vector<real*> > > phi_grads(tensor_rank);
 
@@ -252,16 +140,8 @@ namespace dolfin
           phi_values[i][j][qp] = new real[1];
           phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, phi_values[i][j][qp], q_points[qp], ref_cell);
-<<<<<<< HEAD
-          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
-=======
-//          std::cout << "phi = " << phi_values[i][j][qp][0] << std::endl;
-<<<<<<< HEAD
 //FIXME          ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
-=======
->>>>>>> medium stage in adding quadrature rules
           ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
-//          std::cout << "grad phi = " << phi_grads[i][j][qp][0] << "  " << phi_grads[i][j][qp][1] << std::endl;
         }
       }
     }
@@ -281,15 +161,8 @@ namespace dolfin
           ref_phi_values[i][j][qp] = new real[1];
           ref_phi_grads[i][j][qp] = new real[dim];
           ufc.finite_elements[i]->evaluate_basis(j, ref_phi_values[i][j][qp], ref_points[qp], ref_cell);
-//          std::cout << "phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " << ref_phi_values[i][j][qp][0] << std::endl;
-<<<<<<< HEAD
           //FIXME:ufc.finite_elements[i]->evaluate_reference_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
-=======
->>>>>>> medium stage in adding quadrature rules
           ufc.finite_elements[i]->evaluate_basis_derivatives(j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
-//          std::cout << "grad phi(" << ref_points[qp][0] << "," << ref_points[qp][1] << ") = " 
-//            << ref_phi_grads[i][j][qp][0] << "  " << ref_phi_grads[i][j][qp][1] << std::endl;
->>>>>>> commit quadrature
         }
       }
     }
@@ -357,26 +230,7 @@ namespace dolfin
       
     }// end loop over 'ip
 
-<<<<<<< HEAD
    for(unsigned int i = 0; i<real_points.size(); ++i)
-=======
-    for (unsigned int j = 0; j < n_test[0]; ++j)
-    {
-      if(tensor_rank == 2)
-      {
-<<<<<<< HEAD
-//        for (unsigned int k = 0; k < n_test[1]; ++k)
-//          std::cout << "A(" <<  j*n_test[1] + k << ")= " << ufc.A[j*n_test[1] + k] << std::endl;
-      }
-      else if(tensor_rank == 1)
-      {
-//        std::cout << "A(" <<  j << ")= " << ufc.A[j] << std::endl;
-//        std::cout << "w[" <<  j << "]= " << ufc.w[0][j] << std::endl;
-      }
-    } 
-
-    for(unsigned int i = 0; i<real_points.size(); ++i)
->>>>>>> commit quadrature
       delete real_points[i];
 
     for(unsigned int i = 0; i<q_coefficients.size(); ++i)
@@ -391,18 +245,5 @@ namespace dolfin
           delete phi_grads[i][j][qp];
         }
   }
-=======
-        for (unsigned int k = 0; k < n_test[1]; ++k)
-          std::cout << "A(" <<  j*n_test[1] + k << ")= " << ufc.A[j*n_test[1] + k] << std::endl;
-      }
-      else if(tensor_rank == 1)
-      {
-        std::cout << "A(" <<  j << ")= " << ufc.A[j] << std::endl;
-//        std::cout << "w[" <<  j << "]= " << ufc.w[0][j] << std::endl;
-      }
-    } 
-  }
-
->>>>>>> medium stage in adding quadrature rules
 }
 #endif

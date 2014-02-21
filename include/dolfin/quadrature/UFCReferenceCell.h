@@ -119,17 +119,10 @@ public:
         {
           coordinates[0][0] = 0.;
           coordinates[0][1] = 0.;
-<<<<<<< HEAD
           coordinates[1][0] = 1.;
           coordinates[1][1] = 0.;
           coordinates[2][0] = 0.;
           coordinates[2][1] = 1.;
-=======
-          coordinates[1][0] = 0.;
-          coordinates[1][1] = 1.;
-          coordinates[2][0] = 1.;
-          coordinates[2][1] = 0.;
->>>>>>> medium stage in adding quadrature rules
           break;
         }
       case 3:

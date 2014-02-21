@@ -331,7 +331,8 @@ if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
-                 tests/ufl/Makefile])
+                 tests/ufl/Makefile\
+                 tests/ufl/Class/Makefile])
 fi
 
 AC_OUTPUT

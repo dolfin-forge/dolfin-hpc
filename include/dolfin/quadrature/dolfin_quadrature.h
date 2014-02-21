@@ -12,5 +12,6 @@
 #include <dolfin/quadrature/GaussQuadratureRule.h>
 #include <dolfin/quadrature/GaussTensorQuadratureRule.h>
 #include <dolfin/quadrature/UFCCellIntegral.h>
+#include <dolfin/quadrature/UFCReferenceCell.h>
 
 #endif

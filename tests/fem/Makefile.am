@@ -1,3 +1,4 @@
+TESTS = fem_test
 check_PROGRAMS = fem_test
 fem_test_SOURCES = fem_test.cpp
 

@@ -42,7 +42,7 @@ bool const RestrictedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<uint, uint> const RestrictedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }
@@ -55,13 +55,13 @@ std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_co
 }
 
 //-----------------------------------------------------------------------------
-std::pair<uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-uint const RestrictedElement::num_sub_elements() const
+dolfin::uint const RestrictedElement::num_sub_elements() const
 {
   return element_.num_sub_elements();
 }

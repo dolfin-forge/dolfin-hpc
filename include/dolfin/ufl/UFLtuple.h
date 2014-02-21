@@ -1,56 +1,56 @@
-// Copyright (C) 2014 Aurélien Larcher.
+// Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-27
-// Last changed: 2014-01-27
+// First added:
+// Last changed:
 
-#ifndef __UFL_TUPLE_H_
-#define __UFL_TUPLE_H_
+#ifndef __UFL_TUPLE_H
+#define __UFL_TUPLE_H
 
-#include <dolfin/ufl/UFLObject.h>
-
-#include <iostream>
-#include <sstream>
-#include <string>
+#include <dolfin/ufl/UFLExpression.h>
 
 namespace ufl
 {
 
-class tuple : public Object
-{
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Tuple
+ *
+ *  @brief  Provides an interface complying with Tuple.
+ */
 
-public:
-
-  /// Constructor with default representation for given type
-  tuple(Object const& other) :
-      obj_(other)
+  class Tuple : public Class
   {
-  }
+    public:
 
-  ///
-  ~tuple()
-  {
-  }
+      ///
+      Tuple(std::vector<Expression const *>& args);
 
-  /// __repr__
-  repr_t const repr() const;
+      ///
+      Tuple (repr_t const & repr);
 
-  /// __str__
-  std::string const str() const;
+      ///
+      ~Tuple();
 
-  ///
-  void display() const;
+      //--- INTERFACE inherited from UFLClass -------------------------------------
 
-  ///
-  repr_t const make_repr(std::vector<Object const *> const& prototype) const;
+      /// __repr__
+      repr_t const repr() const;
 
-protected:
+      /// __str__
+      std::string const str() const;
 
-private:
+      ///
+      void display() const;
 
-  Object const& obj_;
+    private:
 
-};
+      std::vector<Expression const *> expressions_;
 
-} /* namespace icorne */
-#endif /* __UFL_TUPLE_H_ */
+      repr_t const repr_;
+      std::string const str_;
+  };
+
+} /* namespace ufl */
+#endif /* __UFL_LIST_H */

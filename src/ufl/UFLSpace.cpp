@@ -15,7 +15,7 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Space::Space(uint const& dim) :
+Space::Space(dolfin::uint const& dim) :
     Class("Space"),
     dimension_(dim)
 {
@@ -56,7 +56,7 @@ Space::~Space()
 }
 
 //-----------------------------------------------------------------------------
-uint Space::dimension() const
+dolfin::uint Space::dimension() const
 {
   return dimension_;
 }

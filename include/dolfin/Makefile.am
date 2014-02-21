@@ -1,13 +1,6 @@
 include_HEADERS = dolfin.h
 
 nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
-				adaptivity/dolfin_adaptivity.h\
-				adaptivity/AdaptiveRefinement.h\
-				adaptivity/ufc1/AdaptiveRefinementProjectScalar.h\
-				adaptivity/ufc1/AdaptiveRefinementProjectVector.h\
-				adaptivity/ufc2/AdaptiveRefinementProjectScalar.h\
-				adaptivity/ufc2/AdaptiveRefinementProjectVector.h\
-				adaptivity/SpaceTimeFunction.h\
 				common/constants.h\
 				common/dolfin_common.h\
 				common/timing.h\
@@ -110,6 +103,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
+				fem/FormExpansion.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
 				fem/ScratchSpace.h\
@@ -298,6 +292,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				quadrature/dolfin_quadrature.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/GaussQuadrature.h\
+				quadrature/GaussQuadratureRule.h\
 				quadrature/GaussTensorQuadratureRule.h\
 				quadrature/LobattoQuadrature.h\
 				quadrature/Quadrature.h\
@@ -309,20 +304,33 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLrepr.h\
 				ufl/UFLtuple.h\
 				ufl/UFLtype.h\
+				ufl/UFLAlgebra.h\
+				ufl/UFLArgument.h\
 				ufl/UFLCell.h\
 				ufl/UFLCellSurfaceArea.h\
 				ufl/UFLCellVolume.h\
 				ufl/UFLCircumradius.h\
 				ufl/UFLClass.h\
+				ufl/UFLCoefficient.h\
+				ufl/UFLConditional.h\
+				ufl/UFLDifferentiation.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
 				ufl/UFLEnrichedElement.h\
+				ufl/UFLEquation.h\
+				ufl/UFLExpression.h\
 				ufl/UFLFacetArea.h\
 				ufl/UFLFacetNormal.h\
 				ufl/UFLFamily.h\
 				ufl/UFLFiniteElement.h\
 				ufl/UFLFiniteElementBase.h\
+				ufl/UFLForm.h\
 				ufl/UFLGeometricQuantity.h\
+				ufl/UFLIndex.h\
+				ufl/UFLIndexed.h\
+				ufl/UFLIndexSum.h\
+				ufl/UFLIntegral.h\
+				ufl/UFLList.h\
 				ufl/UFLMixedElement.h\
 				ufl/UFLObject.h\
 				ufl/UFLQuadratureScheme.h\
@@ -330,5 +338,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				ufl/UFLSpace.h\
 				ufl/UFLSpatialCoordinate.h\
 				ufl/UFLTensorElement.h\
+				ufl/UFLTensors.h\
+				ufl/UFLTuple.h\
+				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h
-

@@ -149,19 +149,19 @@ Domain const Cell::facet_domain() const
 }
 
 //-----------------------------------------------------------------------------
-uint const Cell::num_facets() const
+dolfin::uint const Cell::num_facets() const
 {
   return domain_.num_facets();
 }
 
 //-----------------------------------------------------------------------------
-uint const Cell::geometric_dimension() const
+dolfin::uint const Cell::geometric_dimension() const
 {
   return geometric_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-uint const Cell::topological_dimension() const
+dolfin::uint const Cell::topological_dimension() const
 {
   return topological_dimension_;
 }

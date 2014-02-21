@@ -328,11 +328,12 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 
 # Tests
 if test "x${enable_check}" = xyes; then
-AC_CONFIG_FILES([tests/Makefile\
+AC_CONFIG_FILES([data/tests/Makefile\
+                 data/Makefile\
+                 tests/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
-                 tests/ufl/Makefile\
-                 tests/ufl/Class/Makefile])
+                 tests/ufl/Makefile])
 fi
 
 AC_OUTPUT

@@ -34,7 +34,7 @@ class GenericVector;
 class Mesh;
 class SubDomain;
 
-class SlipBC: public BoundaryCondition
+class SlipBC : public BoundaryCondition
 {
 
 public:
@@ -80,8 +80,8 @@ public:
 
 private:
 
-  void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
-                   Array<uint>& nodes);
+  void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh const& mesh,
+                   uint const& node, Array<uint> const& dofs);
 
   // Initialize sub domain markers
   void init(SubDomain const& sub_domain);
@@ -110,6 +110,9 @@ private:
   // User defined sub domain
   SubDomain const * user_sub_domain_;
 
+  // True if boundary normals are created locally
+  bool local_normal_;
+
   // Node normal and tangents
   BoundaryNormal * const normal_;
 
@@ -120,13 +123,14 @@ private:
   std::set<uint> off_proc_rows_;
 
   // Local data structures for assembly
-  uint const tdim_;
-  Array<real> a[3];
-  Array<uint> a_col_indices[3];
-  uint a_ncols[3];
-  real l[3];
-  real basis_[3][3];
-  uint maxcomp[3];
+  uint const tdim_; // topological dimension
+  Array<real> a[3]; // local lhs extracted from A
+  Array<real> a_slip_row; // local lhs row after slip enforcement
+  Array<uint> a_col_indices[3]; // non-zero indices per row
+  real l[3];  // local rhs extracted from b
+  real l_slip[3];  // local rhs after slip enforcement
+  real basis_[3][3]; // local basis (n, tau1, tau2)
+  uint row[3]; // row reordering
 
   static real const permutation_matrix_[3][3];
 

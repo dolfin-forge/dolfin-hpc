@@ -46,8 +46,17 @@ public:
   /// Return the node type
   Function& node_type();
 
+  /// Convenience initialization of basis functions
+  void init(Mesh& mesh, Form& form, uint i);
+
+  /// Convenience initialization of basis functions
+  void init(Mesh& mesh, std::string const& signature);
+
+  /// Convenience initialization of basis functions
+  void init(Function& other);
+
   ///
-  virtual void init(FiniteElementSpace& space) = 0;
+  virtual void compute() = 0;
 
 protected:
 

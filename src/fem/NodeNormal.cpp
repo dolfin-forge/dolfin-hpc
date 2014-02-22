@@ -8,6 +8,7 @@
 
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/function/Function.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
@@ -23,8 +24,6 @@ namespace dolfin
 NodeNormal::NodeNormal(Mesh& mesh, VertexNormal::Type weight) :
     BoundaryNormal(mesh),
     tdim_(mesh.topology().dim()),
-    space_(NULL),
-    local_space_(false),
     normals_(mesh, weight),
     meshbasis_(normals_.basis())
 {
@@ -37,16 +36,17 @@ NodeNormal::~NodeNormal()
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::init(FiniteElementSpace& space)
+void NodeNormal::compute()
 {
-  space_ = &space;
-  local_space_ = false;
-  for (uint i = 0; i < tdim_; ++i)
+  if (V_.size() == 0)
   {
-    basis()[i].init(mesh(), space_->element().signature());
-    V_.push_back(&(basis()[i].vector()));
+    for (uint i = 0; i < tdim_; ++i)
+    {
+      V_.push_back(&(basis()[i].vector()));
+    }
   }
 
+  // Only for Lagrange P1
   ComputeBasisP1();
 }
 
@@ -54,10 +54,6 @@ void NodeNormal::init(FiniteElementSpace& space)
 void NodeNormal::Clear()
 {
   V_.clear();
-  if (local_space_)
-  {
-    delete space_;
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -72,7 +68,7 @@ void NodeNormal::ComputeBasisP1()
   uint *idx = new uint[tdim_ * local_dim];
   uint *id = new uint[tdim_ * local_dim];
 
-  DofMap const& dm = space_->dofmap();
+  DofMap const& dm = this->basis()[0].space().dofmap();
   GenericVector& type = node_type().vector();
   MeshDistributedData& distdata = mesh.distdata();
 

@@ -61,4 +61,34 @@ Function& BoundaryNormal::node_type()
   return node_type_;
 }
 
+//-----------------------------------------------------------------------------
+void BoundaryNormal::init(Mesh& mesh, Form& form, uint i)
+{
+  uint tdim = mesh.topology().dim();
+  for (uint i = 0; i < tdim; ++i)
+  {
+    basis_[i].init(mesh, form, i);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void BoundaryNormal::init(Mesh& mesh, std::string const& signature)
+{
+  uint tdim = mesh.topology().dim();
+  for (uint i = 0; i < tdim; ++i)
+  {
+    basis_[i].init(mesh, signature);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void BoundaryNormal::init(Function& other)
+{
+  uint tdim = other.mesh().topology().dim();
+  for (uint i = 0; i < tdim; ++i)
+  {
+    basis_[i].init(other.mesh(), other.signature());
+  }
+}
+
 }

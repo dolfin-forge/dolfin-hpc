@@ -42,7 +42,7 @@ public:
   ~NodeNormal();
 
   ///
-  void init(FiniteElementSpace& space);
+  void compute();
 
 private:
 
@@ -55,8 +55,6 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
 
   uint const tdim_;
-  mutable FiniteElementSpace const * space_;
-  mutable bool local_space_;
   VertexNormal normals_;
   Array<MeshFunction<real> *> const& meshbasis_;
   Array<GenericVector *> V_;

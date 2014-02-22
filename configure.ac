@@ -330,6 +330,7 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  data/Makefile\
                  tests/Makefile\
                  tests/fem/Makefile\
+                 tests/fem/NodeNormal/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\
                  tests/ufl/Makefile\

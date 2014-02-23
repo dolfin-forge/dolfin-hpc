@@ -22,28 +22,27 @@
 
 using namespace dolfin;
 
-
 //-----------------------------------------------------------------------------
 SpaceTimeFunction::SpaceTimeFunction(Mesh& mesh, Function& Ut) :
-  mesh_(&mesh),
-  function_(&Ut),
-  U0(Ut),
-  U1(Ut),
-  u0_t(0.),
-  u1_t(0.),
-  u0_t_valid(false),
-  u1_t_valid(false)
+    mesh_(mesh),
+    function_(Ut),
+    U0(Ut),
+    U1(Ut),
+    u0_t(0.),
+    u1_t(0.),
+    u0_t_valid(false),
+    u1_t_valid(false)
 {
 }
 
 //-----------------------------------------------------------------------------
-SpaceTimeFunction::SpaceTimeFunction(const SpaceTimeFunction& f) :
-  mesh_(f.mesh_),
-  function_(f.function_),
-  u0_t(f.u0_t),
-  u1_t(f.u1_t),
-  u0_t_valid(false),
-  u1_t_valid(false)
+SpaceTimeFunction::SpaceTimeFunction(SpaceTimeFunction const& f) :
+    mesh_(f.mesh_),
+    function_(f.function_),
+    u0_t(f.u0_t),
+    u1_t(f.u1_t),
+    u0_t_valid(false),
+    u1_t_valid(false)
 {
 }
 
@@ -133,7 +132,7 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
   int num_files = filenames.size();
 
   for (std::vector<std::string>::iterator it = filenames.begin();
-       it != filenames.end(); ++it)
+      it != filenames.end(); ++it)
   {
     std::string filename = *it;
 
@@ -182,7 +181,7 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames,
     error("Number of files is one, divide by zero foreseen.");
   }
   for (std::vector<std::string>::iterator it = filenames.begin();
-       it != filenames.end(); ++it)
+      it != filenames.end(); ++it)
   {
     std::string filename = *it;
 
@@ -202,7 +201,7 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames,
     error("Counter irremediably stayed stuck at zero.");
   }
   for (std::map<real, std::string>::const_iterator it = U_files.begin();
-       it != U_files.end(); ++it)
+      it != U_files.end(); ++it)
   {
     std::cout << std::setw(4) << it->first << " : " << it->second << std::endl;
   }
@@ -244,16 +243,12 @@ void SpaceTimeFunction::util_fileList(std::string basename, int N,
 //-----------------------------------------------------------------------------
 Mesh& SpaceTimeFunction::mesh()
 {
-  dolfin_assert(mesh_);
-  return *mesh_;
+  return mesh_;
 }
 //-----------------------------------------------------------------------------
 Function& SpaceTimeFunction::evaluant()
 {
-  dolfin_assert(function_);
-  return *function_;
+  return function_;
 }
 //-----------------------------------------------------------------------------
-
-
 

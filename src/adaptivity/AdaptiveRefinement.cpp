@@ -43,15 +43,16 @@
 #include <mpi.h>
 #endif
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
 
 {
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    dolfin_set("output destination","terminal");
+    dolfin_set("output destination", "terminal");
     message("Adaptive refinement");
     message("cells before: %d", mesh.global_numCells());
     message("vertices before: %d", mesh.global_numVertices());
@@ -67,28 +68,28 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
   std::ostringstream marked_filename;
   marked_filename << "marked";
   std::string const marked_format = dolfin_get("output_format");
-  if(marked_format == "vtk")
+  if (marked_format == "vtk")
   {
     marked_filename << ".pvd";
   }
-  else if(marked_format == "binary")
+  else if (marked_format == "binary")
   {
     marked_filename << ".bin";
   }
   File refinefile(marked_filename.str());
   refinefile << cell_refinement_marker_r;
 
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    dolfin_set("output destination","terminal");
+    dolfin_set("output destination", "terminal");
   }
 
   std::string const refine_type = dolfin_get("adapt_algorithm");
-  if(refine_type == "rivara")
+  if (refine_type == "rivara")
   {
     RivaraRefinement::refine(mesh, cell_marker);
   }
-  else if(refine_type == "simple")
+  else if (refine_type == "simple")
   {
     mesh.refine(cell_marker, true);
   }
@@ -97,14 +98,14 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
     dolfin::error("Unknown refinement algorithm");
   }
 
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    dolfin_set("output destination","silent");
+    dolfin_set("output destination", "silent");
   }
 
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    dolfin_set("output destination","terminal");
+    dolfin_set("output destination", "terminal");
     message("cells after: %d", mesh.global_numCells());
     message("vertices after: %d", mesh.global_numVertices());
   }
@@ -117,20 +118,20 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   dolfin_set("Load balancer redistribute", false);
 
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    dolfin_set("output destination","terminal");
+    dolfin_set("output destination", "terminal");
     message("Adaptive refinement (with projection)");
     message("cells before: %d", mesh.distdata().global_numCells());
     message("vertices before: %d", mesh.distdata().global_numVertices());
   }
 
   std::string const refine_type = dolfin_get("adapt_algorithm");
-  if(refine_type == "simple")
+  if (refine_type == "simple")
   {
     LoadBalancer::balance(mesh, cell_marker);
   }
-  else if(refine_type == "rivara")
+  else if (refine_type == "rivara")
   {
     LoadBalancer::balance(mesh, cell_marker, LoadBalancer::LEPP);
   }
@@ -149,11 +150,11 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   std::ostringstream marked_filename;
   marked_filename << "marked";
   std::string const marked_format = dolfin_get("output_format");
-  if(marked_format == "vtk")
+  if (marked_format == "vtk")
   {
     marked_filename << ".pvd";
   }
-  else if(marked_format == "binary")
+  else if (marked_format == "binary")
   {
     marked_filename << ".bin";
   }
@@ -181,25 +182,24 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   coarse_y.init(mesh, *pre_y, 1);
   coarse_z.init(mesh, *pre_z, 1);
 
-
-  for (std::vector<project_func>::iterator it = pf.begin();
-       it != pf.end(); ++it)
+  for (std::vector<project_func>::iterator it = pf.begin(); it != pf.end();
+      ++it)
   {
-    if(it->first->type() != Function::discrete)
+    if (it->first->type() != Function::discrete)
     {
       error("Projection only implemented for discrete functions");
     }
 
-    AdaptiveRefinement::decompose_func(mesh, it->first,
-                                       it->second.second, *(it->second.first),
-                                       coarse_x, coarse_y, coarse_z);
+    AdaptiveRefinement::decompose_func(mesh, it->first, it->second.second,
+                                       *(it->second.first), coarse_x, coarse_y,
+                                       coarse_z);
 
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_x, &x_values,
-                                          &x_rows, x_m, *partitions);
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_y, &y_values,
-                                          &y_rows, y_m, *partitions);
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_z, &z_values,
-                                          &z_rows, z_m, *partitions);
+    AdaptiveRefinement::redistribute_func(mesh, &coarse_x, &x_values, &x_rows,
+                                          x_m, *partitions);
+    AdaptiveRefinement::redistribute_func(mesh, &coarse_y, &y_values, &y_rows,
+                                          y_m, *partitions);
+    AdaptiveRefinement::redistribute_func(mesh, &coarse_z, &z_values, &z_rows,
+                                          z_m, *partitions);
 
   }
 
@@ -210,20 +210,19 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.renumber();
 
-
-  if(MPI::processNumber() == 0)
+  if (MPI::processNumber() == 0)
   {
-    if(mkdir("../scratch", S_IRWXU) < 0)
+    if (mkdir("../scratch", S_IRWXU) < 0)
     {
       perror("mkdir failed");
     }
   }
 
   int p_count = 0;
-  for (std::vector<project_func>::iterator it = pf.begin();
-       it != pf.end(); ++it)
+  for (std::vector<project_func>::iterator it = pf.begin(); it != pf.end();
+      ++it)
   {
-    if(it->first->type() != Function::discrete)
+    if (it->first->type() != Function::discrete)
     {
       error("Projection only implemented for discrete functions");
     }
@@ -271,8 +270,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
 }
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
-                                           real **vp, uint **rp, uint& m,
+void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
+                                           uint **rp, uint& m,
                                            MeshFunction<uint>& distribution)
 {
 
@@ -286,9 +285,8 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
   real *values = new real[f->vector().local_size()];
   f->vector().get(values);
 
-  Array<real> *send_buffer = new Array<real>[pe_size];
-  Array<uint> *send_buffer_indices = new Array<uint>[pe_size];
-
+  Array<real> *send_buffer = new Array<real> [pe_size];
+  Array<uint> *send_buffer_indices = new Array<uint> [pe_size];
 
   MeshFunction<bool> marked(mesh, 0);
   marked = false;
@@ -310,8 +308,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
       global_index = mesh.distdata().get_vertex_global(v->index());
       f->vector().get(&value, 1, &global_index);
 
-      if (target_proc == pe_rank
-          && !mesh.distdata().is_ghost(v->index(), 0)
+      if (target_proc == pe_rank && !mesh.distdata().is_ghost(v->index(), 0)
           && !marked.get(*v))
       {
 
@@ -359,7 +356,6 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f,
                  MPI::DOLFIN_COMM, &status);
 
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
 
     for (int i = 0; i < recv_count; i++)
     {
@@ -423,9 +419,9 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
 
       uint *cvi = c->entities(0);
       uint ci = 0;
-      for(ci = 0; ci < c->numEntities(0); ci++)
+      for (ci = 0; ci < c->numEntities(0); ci++)
       {
-        if(cvi[ci] == v->index())
+        if (cvi[ci] == v->index())
         {
           break;
         }
@@ -456,7 +452,6 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
   f_y.sync_ghosts();
   f_z.sync_ghosts();
 
-
   delete[] indices;
 
 }
@@ -469,7 +464,6 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   Function projected;
   Form *refined = new AdaptiveRefinementProjectVectorLinearForm(projected);
   projected.init(new_mesh, x_proj, *refined, 0);
-
 
   UFC ufc(refined->form(), new_mesh, refined->dofmaps());
 
@@ -488,7 +482,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   real gts_tol = dolfin_get("GTS Tolerance");
   real geom_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
 
-  dolfin_set("GTS Tolerance",1e-10);
+  dolfin_set("GTS Tolerance", 1e-10);
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);
   for (CellIterator c(new_mesh); !c.end(); ++c)
   {
@@ -501,15 +495,15 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
 
       uint *cvi = c->entities(0);
       uint ci = 0;
-      for(ci = 0; ci < c->numEntities(0); ci++)
+      for (ci = 0; ci < c->numEntities(0); ci++)
       {
-        if(cvi[ci] == v->index())
+        if (cvi[ci] == v->index())
         {
           break;
         }
       }
 
-      if(new_mesh.distdata().is_ghost(v->index(), 0) || processed.get(*v))
+      if (new_mesh.distdata().is_ghost(v->index(), 0) || processed.get(*v))
       {
         continue;
       }
@@ -527,7 +521,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
         {
           uint const *edge_v = e->entities(0);
 
-          if(edge_v[0] != v->index())
+          if (edge_v[0] != v->index())
           {
             v_e = new Vertex(new_mesh, edge_v[0]);
           }
@@ -557,12 +551,11 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
       vv[i] = test_value;
       indices[i++] = local_indices[ci];
 
-
       post_y.eval(&test_value, &x[0]);
       if (test_value != std::numeric_limits<real>::infinity())
       {
         vv[i] = test_value;
-        indices[i++] = local_indices[ci +  c->numEntities(0)];
+        indices[i++] = local_indices[ci + c->numEntities(0)];
       }
 
       post_z.eval(&test_value, &x[0]);
@@ -578,7 +571,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   dolfin_set("GTS Tolerance", gts_tol);
   dolfin_set("Geometrical Tolerance Tetrahedron", geom_tol);
 
-  if ( i > 0)
+  if (i > 0)
   {
     x_proj.set(vv, i, indices);
     x_proj.apply();
@@ -590,3 +583,6 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   delete[] local_indices;
 }
 //-----------------------------------------------------------------------------
+
+}
+

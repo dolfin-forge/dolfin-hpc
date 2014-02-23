@@ -59,12 +59,14 @@ START_TEST( test_init )
           begin("Creating UFLFiniteElement:");
           ufl::FiniteElement uflfem(*it, cell, d);
           message(uflfem.repr());
+          uflfem.display();
           end();
           skip();
 
           begin("Creating UFLFiniteElement from factory function:");
           ufl::FiniteElementBase * factuflfem = ufl::FiniteElementBase::create(uflfem.repr());
           message(factuflfem->repr());
+          factuflfem->display();
           if(factuflfem->repr() != uflfem.repr())
           {
               init_failed += 1;
@@ -72,6 +74,7 @@ START_TEST( test_init )
           delete factuflfem;
           end();
           skip();
+
         }
       }
     }

@@ -74,7 +74,7 @@ protected:
   std::map<dolfin::uint, dolfin::uint> const symmetry_;
   FiniteElementBase::FiniteElementBaseList const sub_elements_;
 
-  mutable repr_t repr_;
+  repr_t const repr_;
   mutable std::string str_;
 
 };

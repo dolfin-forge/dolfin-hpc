@@ -37,11 +37,16 @@ public:
   repr(Class const& owner, Object const& arg1, Object const& arg2);
 
   ///
-  repr(Class const& owner, Object const& arg1, Object const& arg2, Object const& arg3);
+  repr(Class const& owner, Object const& arg1, Object const& arg2,
+       Object const& arg3);
 
   ///
-  repr(Class const& owner, Object const& arg1, Object const& arg2, 
-      Object const& arg3, Object const& arg4);
+  repr(Class const& owner, Object const& arg1, Object const& arg2,
+       Object const& arg3, Object const& arg4);
+
+  ///
+  repr(Class const& owner, Object const& arg1, Object const& arg2,
+       Object const& arg3, Object const& arg4, Object const& arg5);
 
   ///
   repr(Class const& owner, std::vector<Object const *> const& prototype);
@@ -63,7 +68,12 @@ private:
                                      Object const& arg2, Object const& arg3);
 
   static std::string const make_repr(Class const& owner, Object const& arg1,
-      Object const& arg2, Object const& arg3, Object const& arg4);
+                                     Object const& arg2, Object const& arg3,
+                                     Object const& arg4);
+
+  static std::string const make_repr(Class const& owner, Object const& arg1,
+                                     Object const& arg2, Object const& arg3,
+                                     Object const& arg4, Object const& arg5);
 };
 
 } /* namespace ufl */

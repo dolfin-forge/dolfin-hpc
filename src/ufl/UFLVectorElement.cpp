@@ -17,16 +17,13 @@ VectorElement::VectorElement(Family::Type family, Cell const& cell,
     FiniteElementBase("VectorElement", Family::Vector, cell, degree),
     sub_element_(family, cell, degree),
     dim_(dim),
-    sub_elements_(dim, &sub_element_)
+    value_shape_(),
+    symmetry_(),
+    sub_elements_(dim, &sub_element_),
+    repr_(*this, sub_element_.family(), cell, sub_element_.degree(), dim_,
+          sub_element_.quadrature_scheme())
 {
-  // Check mixed finite element definition
-
-  // Create string representation
-
-  std::stringstream ssrepr;
-  ssrepr << "VectorElement(" << sub_element_.family().repr() << ", "
-      << cell.repr() << ", " << degree << ", " << dim << ", " << sub_element_.quadrature_scheme().repr() << ")";
-  repr_ = ssrepr.str();
+  //TODO: Check mixed finite element definition
 
   std::stringstream ssstr;
   ssstr << "<" << sub_element_.family().short_name()
@@ -38,13 +35,13 @@ VectorElement::VectorElement(Family::Type family, Cell const& cell,
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(repr_t const& repr) :
     FiniteElementBase("VectorElement", repr),
-    value_shape_(),
-    symmetry_(),
     sub_element_(Family(arg(0)).type(), Cell(arg(1)), type<dolfin::uint>(arg(2))),
     dim_(arg(3)),
-    sub_elements_(dim_, &sub_element_)
+    value_shape_(),
+    symmetry_(),
+    sub_elements_(dim_, &sub_element_),
+    repr_(repr)
 {
-  repr_ = repr;
 
   std::stringstream ssstr;
   ssstr << "<" << sub_element_.family().short_name()

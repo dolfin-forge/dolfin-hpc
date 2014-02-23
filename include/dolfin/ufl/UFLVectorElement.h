@@ -29,7 +29,7 @@ public:
 
   ///
   VectorElement(Family::Type family, Cell const& cell,
-                   dolfin::uint const degree, dolfin::uint const dim);
+                dolfin::uint const degree, dolfin::uint const dim);
 
   ///
   explicit VectorElement(repr_t const& repr);
@@ -54,7 +54,8 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<dolfin::uint, FiniteElementBase const * const > const extract_component(
+      ValueArray const& i) const;
 
   /// Return number of sub elements
   dolfin::uint const num_sub_elements() const;
@@ -70,13 +71,14 @@ public:
 
 protected:
 
-  ValueArray const value_shape_;
-  std::map<dolfin::uint, dolfin::uint> const symmetry_;
   FiniteElement const sub_element_;
   type<dolfin::uint> const dim_;
+  ValueArray const value_shape_; // Not implemented
+  std::map<dolfin::uint, dolfin::uint> const symmetry_; // Not implemented
+
   FiniteElementBaseList const sub_elements_;
 
-  mutable repr_t repr_;
+  repr_t const repr_;
   mutable std::string str_;
 
 };

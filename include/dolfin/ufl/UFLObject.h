@@ -147,8 +147,7 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
 
   std::string token;
 
-  std::cout << "Parsing" << std::endl;
-  while (scpos != MAX_STRING_LENGTH)
+  while (scpos < MAX_STRING_LENGTH)
   {
     scpos = str.find(delimiter, currpos);
     std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;

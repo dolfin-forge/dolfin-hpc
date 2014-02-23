@@ -98,7 +98,7 @@ Cell const FiniteElementBase::cell() const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const FiniteElementBase::degree() const
+type<dolfin::uint> const FiniteElementBase::degree() const
 {
   return degree_;
 }
@@ -159,7 +159,7 @@ dolfin::uint const FiniteElementBase::get_degree_max(
   for (FiniteElementBaseList::const_iterator it = elements.begin();
       it != elements.end(); ++it)
   {
-    ret = std::max((*it)->degree(), ret);
+    ret = std::max((dolfin::uint)(*it)->degree(), ret);
   }
   return ret;
 }

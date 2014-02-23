@@ -52,7 +52,7 @@ public:
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
-  dolfin::uint const degree() const;
+  type<dolfin::uint> const degree() const;
 
   /// Return quadrature scheme of finite element
   QuadratureScheme const quadrature_scheme() const;
@@ -62,7 +62,7 @@ public:
   ValueArray const value_shape() const;
 
   /// Return the domain onto which the element is restricted
-  //Domain::Type const domain_restriction() const;
+  //Domain::Type const domain_restriction() const; Not implemented
 
   //--- INTERFACE -------------------------------------------------------------
 

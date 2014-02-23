@@ -107,7 +107,7 @@ namespace dolfin
     /// Write graph to file
     void operator<< (Graph& graph);
 
-    /// Write a collection of funtion to file
+    /// Write a collection of functions to file
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
 
     void set_counter(uint new_value);

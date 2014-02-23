@@ -1,5 +1,9 @@
 #include <dolfin/config/dolfin_config.h>
 
+#include <dolfin/ufl/UFLSpace.h>
+
+using ufl::Space;
+
 #include <iostream>
 #include <iomanip>
 
@@ -23,6 +27,12 @@ START_TEST( test_init )
   {
     int init_failed = 0;
 
+    for (uint d = 0; d < 4; ++d)
+    {
+      Space s(d);
+      s.display();
+    }
+
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
@@ -35,7 +45,7 @@ Suite *ufl_suite()
   s = suite_create("UFL");
   tc = tcase_create("ufl");
 
-  tcase_add_test(tc, test_init );
+  tcase_add_test(tc, test_init);
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);

@@ -71,7 +71,7 @@ protected:
   std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
 
   /// Create from representation
-  static Object * create(repr_t const& representation);
+//  static Object * create(repr_t const& representation);
 
 };
 
@@ -93,7 +93,6 @@ inline void Object::display() const
 inline Object::repr_t const Object::make_repr(
     std::vector<Object const *> const& args) const
 {
-  std::cout << "Object::make_repr" << std::endl;
   std::stringstream ret;
   std::vector<Object const *>::const_iterator arg = args.begin();
   ret << (*arg)->repr();

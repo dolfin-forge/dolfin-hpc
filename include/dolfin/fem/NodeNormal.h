@@ -54,7 +54,7 @@ private:
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  uint const tdim_;
+  uint const dim_;
   VertexNormal normals_;
   Array<MeshFunction<real> *> const& meshbasis_;
   Array<GenericVector *> V_;

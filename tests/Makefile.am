@@ -1,2 +1,3 @@
 SUBDIRS = ufl\
-          fem #function 
+          fem\
+					mesh #function 

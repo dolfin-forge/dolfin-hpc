@@ -333,6 +333,8 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/fem/NodeNormal/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\
+                 tests/mesh/Makefile\
+                 tests/mesh/VertexNormal/Makefile\
                  tests/ufl/Makefile\
                  tests/ufl/Algebra/Makefile\
                  tests/ufl/Argument/Makefile\

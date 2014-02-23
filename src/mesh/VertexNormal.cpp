@@ -143,7 +143,7 @@ VertexNormal& VertexNormal::operator=(VertexNormal& other)
 void
 VertexNormal::ComputeNormal(Mesh& mesh)
 {
-  message("BoundaryNormals: Compute normals");
+  message(1,"VertexNormal: Compute normals");
   mesh.renumber();
 
   uint rank = dolfin::MPI::processNumber();

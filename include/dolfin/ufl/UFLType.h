@@ -30,16 +30,16 @@ public:
   /// Constructor with default representation for given type
   type<T>(T const& s) :
     val_(s),
-    repr_(make_repr(s)),
-    str_(make_str(s))
+    repr_(type::make_repr(s)),
+    str_(type::make_str(s))
   {
   }
 
   /// Constructor with default representation for given type
   type<T>(Object::repr_t const& repr) :
-    val_(make_val(repr)),
+    val_(type::make_val(repr)),
     repr_(repr),
-    str_(make_str(val_))
+    str_(type::make_str(val_))
   {
   }
 
@@ -75,7 +75,7 @@ protected:
   std::string const make_str( T const& val) const;
 
   ///
-  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr, 
+  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr,
       bool const& without_pre_pos = false) const;
 
 private:
@@ -160,7 +160,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr, 
+  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr,
       bool const& without_pre_pos) const
 {
   return std::vector<Object::repr_t>();

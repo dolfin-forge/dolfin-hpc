@@ -17,12 +17,9 @@ namespace ufl
 //-----------------------------------------------------------------------------
 Space::Space(dolfin::uint const& dim) :
     Class("Space"),
-    dimension_(dim)
+    dimension_(dim),
+    repr_(*this, dimension_)
 {
-  std::stringstream ssrepr;
-  ssrepr << "Space(" << dimension_ << ")";
-  repr_ = ssrepr.str();
-
   std::stringstream ssstr;
   ssstr << "R" << dimension_;
   str_ = ssstr.str();
@@ -36,10 +33,9 @@ Space::Space(dolfin::uint const& dim) :
 //-----------------------------------------------------------------------------
 Space::Space(repr_t const& repr) :
     Class("Space", repr),
-    dimension_(arg(0))
+    dimension_(arg(0)),
+    repr_(repr)
 {
-  repr_ = repr;
-
   std::stringstream ssstr;
   ssstr << "R" << dimension_;
   str_ = ssstr.str();

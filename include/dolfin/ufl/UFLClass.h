@@ -30,8 +30,8 @@ class Class : public Object
 
 public:
 
-  ///
-  std::string const& name() const;
+  /// Return the name of the class, prefixed if needed
+  std::string const name() const;
 
   /// __repr__
   virtual repr_t const repr() const = 0;
@@ -42,7 +42,7 @@ public:
   /// __eq__
   virtual bool operator ==(Class const& other) const;
 
-  ///
+  /// Create representation from a list of argument objects
   repr_t const make_repr(std::vector<Object const *> const& args) const;
 
 protected:
@@ -52,7 +52,7 @@ protected:
 
   ///
   Class(std::string const& name);
-  
+
   ///
   Class(std::string const& pre, std::string const& pos);
 
@@ -87,20 +87,19 @@ protected:
   std::vector<repr_t> const& args();
 
   ///
-  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre, std::string& pos) const; 
+  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre, std::string& pos) const;
 
 private:
 
-  typedef std::pair<std::pair<std::string const, std::string const> const, std::vector<Object const*> > CppProto;
+  typedef std::pair<std::pair<std::string, std::string>, std::vector<Object const*> > CppProto;
 
   ///
   CppProto make_proto(repr_t repr) const;
 
   //--- ATTRIBUTES ------------------------------------------------------------
+  std::pair<std::string, std::string> const prefixed_name_;
   CppProto cpp_proto_;
   std::vector<repr_t> args_repr_;
-  std::string const pre_;
-  std::string const pos_;
   static repr_t const default_repr_;
   static std::string const default_str_;
 

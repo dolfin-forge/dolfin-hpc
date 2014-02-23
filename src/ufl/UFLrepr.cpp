@@ -34,26 +34,27 @@ repr::repr(const char*& s) :
 
 //-----------------------------------------------------------------------------
 repr::repr(Class const& owner, Object const& arg1) :
-    std::string(make_repr(owner, arg1))
+    std::string(repr::make_repr(owner, arg1))
 {
 }
 
 //-----------------------------------------------------------------------------
 repr::repr(Class const& owner, Object const& arg1, Object const& arg2) :
-    std::string(make_repr(owner, arg1, arg2))
+    std::string(repr::make_repr(owner, arg1, arg2))
 {
 }
 
 //-----------------------------------------------------------------------------
-repr::repr(Class const& owner, Object const& arg1, Object const& arg2, Object const& arg3) :
-    std::string(make_repr(owner, arg1, arg2, arg3))
+repr::repr(Class const& owner, Object const& arg1, Object const& arg2,
+           Object const& arg3) :
+    std::string(repr::make_repr(owner, arg1, arg2, arg3))
 {
 }
 
 //-----------------------------------------------------------------------------
-repr::repr(Class const& owner, Object const& arg1, Object const& arg2, 
-    Object const& arg3, Object const& arg4) :
-    std::string(make_repr(owner, arg1, arg2, arg3, arg4))
+repr::repr(Class const& owner, Object const& arg1, Object const& arg2,
+           Object const& arg3, Object const& arg4) :
+    std::string(repr::make_repr(owner, arg1, arg2, arg3, arg4))
 {
 }
 
@@ -99,7 +100,8 @@ std::string const repr::make_repr(Class const& owner, Object const& arg1,
 
 //-----------------------------------------------------------------------------
 std::string const repr::make_repr(Class const& owner, Object const& arg1,
-    Object const& arg2, Object const& arg3, Object const& arg4)
+                                  Object const& arg2, Object const& arg3,
+                                  Object const& arg4)
 {
   std::vector<Object const *> p;
   p.push_back(&arg1);

@@ -29,6 +29,7 @@ namespace ufl
 
 class Object
 {
+  static std::size_t const MAX_STRING_LENGTH = 2048;
 
 public:
 
@@ -92,6 +93,7 @@ inline void Object::display() const
 inline Object::repr_t const Object::make_repr(
     std::vector<Object const *> const& args) const
 {
+  std::cout << "Object::make_repr" << std::endl;
   std::stringstream ret;
   std::vector<Object const *>::const_iterator arg = args.begin();
   ret << (*arg)->repr();
@@ -146,14 +148,15 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
 
   std::string token;
 
-  while (scpos != std::string::npos)
+  std::cout << "Parsing" << std::endl;
+  while (scpos != MAX_STRING_LENGTH)
   {
     scpos = str.find(delimiter, currpos);
     std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
     for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
     {
-      open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
-      close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+      open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);
+      close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);
       n_open_delimiters[i] = std::count(str.begin(), it, open_delimiters[i]);
       n_close_delimiters[i] = std::count(str.begin(), it, close_delimiters[i]);
     }
@@ -164,7 +167,7 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
         equal_number_open_close = false;
 
     open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
-    dolfin::uint index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(), 
+    dolfin::uint index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(),
           open_delimiter_positions.end(), open_pos));
     close_pos = close_delimiter_positions[index];
 
@@ -187,8 +190,8 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
       args.push_back(Object::repr_t(token));
       for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
       {
-        open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);  
-        close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);  
+        open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);
+        close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);
       }
       currpos = 0;
     }

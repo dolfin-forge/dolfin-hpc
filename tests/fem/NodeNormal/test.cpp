@@ -3,10 +3,10 @@
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/mesh/Mesh.h>
 
-using namespace dolfin;
-
 #include <iostream>
 #include <iomanip>
+
+using namespace dolfin;
 
 #ifdef HAVE_CHECK
 

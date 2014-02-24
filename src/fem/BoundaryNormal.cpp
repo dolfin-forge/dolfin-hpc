@@ -66,7 +66,7 @@ Function& BoundaryNormal::node_type()
 void BoundaryNormal::init(Mesh& mesh, Form& form, uint i)
 {
   uint gdim = mesh.geometry().dim();
-  for (uint i = 0; i < gdim; ++i)
+  for (uint i = 0; i < 3; ++i)
   {
     basis_[i].init(mesh, form, i);
   }
@@ -87,7 +87,7 @@ void BoundaryNormal::init(Mesh& mesh, Form& form, uint i)
 void BoundaryNormal::init(Mesh& mesh, std::string const& signature)
 {
   uint gdim = mesh.geometry().dim();
-  for (uint i = 0; i < gdim; ++i)
+  for (uint i = 0; i < 3; ++i)
   {
     basis_[i].init(mesh, signature);
   }
@@ -113,7 +113,7 @@ void BoundaryNormal::init(Function& other)
           "possible with a DiscreteFunction.");
   }
   uint gdim = other.mesh().geometry().dim();
-  for (uint i = 0; i < gdim; ++i)
+  for (uint i = 0; i < 3; ++i)
   {
     basis_[i].init(other.mesh(), other.signature());
   }

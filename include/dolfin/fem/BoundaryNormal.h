@@ -56,6 +56,9 @@ public:
   void init(Function& other);
 
   ///
+  void write(std::string const& filename);
+
+  ///
   virtual void compute() = 0;
 
 protected:

@@ -131,4 +131,19 @@ void BoundaryNormal::init(Function& other)
   }
 }
 
+//-----------------------------------------------------------------------------
+void BoundaryNormal::write(std::string const& filename)
+{
+    std::vector<std::pair<Function *, std::string> > fields;
+    for(uint i = 0 ; i < 3 ; ++i)
+    {
+      std::stringstream ss;
+      ss << "E" << i;
+      fields.push_back(std::pair<Function *, std::string>(this->basis()[i],ss.str()));
+    }
+    fields.push_back(std::pair<Function *, std::string>(this->node_type(),"TYPE"));
+    File f(filename);
+    f << fields;
+}
+
 }

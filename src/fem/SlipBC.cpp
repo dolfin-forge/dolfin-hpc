@@ -245,7 +245,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   uint count = 0;
   if (boundary_.numCells())
   {
-    MeshFunction<uint> * vertex_map = boundary_.data().meshFunction("vertex map");
+    MeshFunction<uint> * vertex_map = boundary_.data().meshFunction(
+        "vertex map");
     for (VertexIterator v(boundary_); !v.end(); ++v)
     {
       Vertex vertex(mesh_, vertex_map->get(*v));
@@ -361,10 +362,14 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
       row[i] = dofs[i];
 
       // Zero the row
-      A.zero(1, &row[i]);
+      uint nb_cols = a_col_indices[i].size();
+      a_slip_row.resize(nb_cols, 0.0);
+      As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
+
+      As.zero(1, &row[i]);
 
       // Update the LHS row with the vector components
-      A.set(&basis_[i][0], 1, &row[i], tdim_, &dofs[i]);
+      As.set(&basis_[i][0], 1, &row[i], tdim_, &dofs[i]);
 
       // Reset rhs for slip
       l_slip[i] = 0.0;
@@ -400,9 +405,6 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
   }
   else // All directions are constrained
   {
-    // Zero all the rows
-    A.zero(tdim_, &dofs[0]);
-
     for (uint i = 0; i < tdim_; ++i)
     {
       // Set row to the global index
@@ -422,8 +424,13 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
       // Scale the diagonal entry
       real diag_val = std::fabs(a[i][diag_idx]);
 
+      // Zero the row
+      uint nb_cols = a_col_indices[i].size();
+      a_slip_row.resize(nb_cols, 0.0);
+      As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
+
       // Update the LHS diagonal
-      A.set(&diag_val, 1, &row[i], 1, &row[i]);
+      As.set(&diag_val, 1, &row[i], 1, &row[i]);
 
       // Reset rhs for slip
       l_slip[i] = 0.0;

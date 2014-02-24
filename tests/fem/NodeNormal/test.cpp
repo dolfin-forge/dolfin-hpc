@@ -63,6 +63,7 @@ START_TEST( test_init )
     test_node_normal(relpath+"square16.bin", VertexNormal::none);
     test_node_normal(relpath+"cylinder.xml.gz", VertexNormal::none);
     test_node_normal(relpath+"aneurysm.xml.gz", VertexNormal::none);
+    test_node_normal(relpath+"sphere.xml.gz", VertexNormal::none);
 
     ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1,
                              mesh.topology().dim());

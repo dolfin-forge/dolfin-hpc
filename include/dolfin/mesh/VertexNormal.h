@@ -40,35 +40,26 @@ public:
     none, facet, cell
   };
 
-
-  // Copy constructor
+  /// Copy constructor
   VertexNormal(VertexNormal& other);
 
-  // Create normal, tangents for the boundary of mesh
+  /// Create normal, tangents for the boundary of mesh
   VertexNormal(Mesh& mesh, Type weight);
 
   /// Destructor
   ~VertexNormal();
 
-  // Assignment
+  /// Assignment
   VertexNormal& operator=(VertexNormal& other);
 
-  Mesh& mesh()
-  {
-    return mesh_;
-  }
+  ///
+  Mesh& mesh();
 
-  // Define mesh functions for normal and tangents
-  // These are merely aliases now
-  MeshFunction<real> * normal;
-  MeshFunction<real> * tau;
-  MeshFunction<real> * tau_1;
-  MeshFunction<real> * tau_2;
-
-  // Define vertex type: 1 surface, 2 edge, 3 surface
-  MeshFunction<uint> vertex_type;
-
+  ///
   Array<MeshFunction<real> *> const& basis() const;
+
+  ///
+  MeshFunction<uint> const& vertex_type() const;
 
 private:
 
@@ -81,17 +72,31 @@ private:
   ///
   void CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary);
 
+  /// Implemented as a 3D vector.
+  void NormalizeVector(real (&v)[3]);
+
+  ///
+  void GetLocalFacetsData(uint const& gdim, Vertex& vertex,
+                          MeshFunction<uint>& cell_map, uint& nb_neigh,
+                          Array<real>& normals, Array<real>& weights);
+
   //--- ATTRIBUTES ------------------------------------------------------------
 
+  // Global mesh
   Mesh& mesh_;
 
+  //
   Array<MeshFunction<real> *> basis_;
 
-  Array<real> shared_vertexnormals_;
+  // Define vertex type: 1 surface, 2 edge, 3 surface
+  MeshFunction<uint> vertex_type_;
+
+  //
   std::map<uint, Array<real> > shared_facetnormals_block_;
   std::map<uint, Array<real> > shared_facetweights_block_;
 
-  // Number of boundary mesh cells (facets for global) neighbouring a boundary vertex
+  // Number of boundary mesh cells (facets for global) neighbouring a boundary
+  // vertex
   std::map<uint, uint> num_neigh_cells_;
   std::map<uint, uint> shared_offsetidx_;
   uint vertex_offset_;
@@ -99,7 +104,7 @@ private:
   uint facetweights_offset_;
 
   // Should be set to the size of the offset information stored for each vertex
-  // Here padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
+  // Padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
   static uint const offsetidx_padding_ = 3;
 
   // Maximum absolute angle between two neighbouring facets
@@ -110,9 +115,31 @@ private:
 };
 
 //-----------------------------------------------------------------------------
+inline Mesh& VertexNormal::mesh()
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
 inline Array<MeshFunction<real> *> const& VertexNormal::basis() const
 {
   return basis_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshFunction<uint> const& VertexNormal::vertex_type() const
+{
+  return vertex_type_;
+}
+
+//-----------------------------------------------------------------------------
+inline void VertexNormal::NormalizeVector(real (&v)[3])
+{
+  real nrm = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+  dolfin_assert(nrm > 0);
+  v[0] /= nrm;
+  v[1] /= nrm;
+  v[2] /= nrm;
 }
 
 }

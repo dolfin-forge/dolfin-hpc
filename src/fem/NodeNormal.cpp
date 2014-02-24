@@ -119,7 +119,7 @@ void NodeNormal::ComputeBasisP1()
     {
       if (!distdata.is_ghost(v->index(), 0))
       {
-        type_block[v.pos()] = normals_.vertex_type.get(*v);
+        type_block[v.pos()] = normals_.vertex_type().get(*v);
       }
     }
     type.set(type_block, local_dim, type_idx);

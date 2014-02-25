@@ -385,7 +385,7 @@ uint MeshDistributedData::get_vertex_global(uint i)
 
   if ( finalized )
   {
-    return _global_facet_indices[i];
+    return _global_vertex_indices[i];
   }
   else
   {

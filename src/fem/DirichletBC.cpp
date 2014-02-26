@@ -135,10 +135,10 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   const uint N = dof_map.global_dimension();
   if (N != A.size(0) /*  || N != A.size(1) alow for rectangular matrices */)
     error("Incorrect dimension of matrix for application of boundary conditions."
-	  "Did you assemble it on a different mesh?");
+          "Did you assemble it on a different mesh?");
   if (N != b.size())
     error("Incorrect dimension of matrix for application of boundary conditions."
-	  "Did you assemble it on a different mesh?");
+        "Did you assemble it on a different mesh?");
 
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
@@ -202,7 +202,7 @@ void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map,
   const uint N = dof_map.global_dimension();
   if (N != A.size(0))
     error("Incorrect dimension of matrix for application of boundary conditions."
-	  "Did you assemble it on a different mesh?");
+          "Did you assemble it on a different mesh?");
 
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
@@ -352,6 +352,7 @@ BoundaryCondition::LocalData& data)
       break;
       default:
       error("Unknown method for application of boundary conditions.");
+      break;
     }
   }
 //-----------------------------------------------------------------------------
@@ -507,7 +508,7 @@ BoundaryCondition::LocalData& data)
       {
         // Check if the coordinates are part of the sub domain
         if ( !user_sub_domain->inside(data.coordinates[i], false) )
-	  continue;
+          continue;
 
         if(!interpolated)
         {
@@ -579,7 +580,7 @@ bool DirichletBC::onFacet(real* coordinates, Facet& facet)
   }
 
   error("Unable to determine if given point is on facet"
-	"(not implemented for given facet dimension).");
+        "(not implemented for given facet dimension).");
 
   return false;
 }
@@ -608,7 +609,8 @@ void DirichletBC::getBC(uint n, uint* indicators, double* values,
 
   _map<uint, real>::const_iterator boundary_value;
   uint i = 0;
-  for (boundary_value = boundary_values.begin(); boundary_value != boundary_values.end(); ++boundary_value)
+  for (boundary_value = boundary_values.begin();
+      boundary_value != boundary_values.end(); ++boundary_value)
   {
     i = boundary_value->first;
     indicators[i] = 1;

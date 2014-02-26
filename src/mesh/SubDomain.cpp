@@ -25,20 +25,19 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 SubDomain::SubDomain() :
-    intersection_detector(0)
+    intersection_detector(NULL)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain(Mesh& bmesh)
+SubDomain::SubDomain(Mesh& mesh)
 {
-  intersection_detector = new IntersectionDetector(bmesh);
+  intersection_detector = new IntersectionDetector(mesh);
 }
 //-----------------------------------------------------------------------------
 SubDomain::~SubDomain()
 {
-  if (intersection_detector)
-    delete intersection_detector;
+  delete intersection_detector;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::inside(real const * x, bool const on_boundary) const

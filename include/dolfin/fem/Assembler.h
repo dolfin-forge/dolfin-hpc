@@ -93,14 +93,14 @@ namespace dolfin
     /// of the mesh cells, exterior facets and interior facets. Either a null pointer
     /// or an empty MeshFunction may be used to specify that the tensor should be
     /// assembled over the entire set of cells or facets.
-    void assemble(GenericTensor& A, const ufc::form& form,
+    void assemble(GenericTensor& A, const Form& form,
                   const Array<Function*>& coefficients,
                   const DofMapSet& dof_map_set,
                   const MeshFunction<uint>* cell_domains,
                   const MeshFunction<uint>* exterior_facet_domains,
                   const MeshFunction<uint>* interior_facet_domains,
                   bool reset_tensor = true);
-    void assemble(GenericTensor& A, const ufc::form& form,
+    void assemble(GenericTensor& A, const Form& form,
                   const Array<Function*>& coefficients,
                   const DofMapSet& dof_map_set,
                   const MeshFunction<uint>* cell_domains,
@@ -109,18 +109,18 @@ namespace dolfin
                   const QuadratureRule& q,
                   bool reset_tensor = true);
 
-    void assemble_system(GenericTensor& A, const ufc::form& A_form,
+    void assemble_system(GenericTensor& A, const Form& A_form,
                          const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
-                         GenericTensor& b, const ufc::form& b_form,
+                         GenericTensor& b, const Form& b_form,
                          const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
                          DirichletBC& bc, const MeshFunction<uint>* cell_domains,
                          const MeshFunction<uint>* exterior_facet_domains,
                          const MeshFunction<uint>* interior_facet_domains,
                          bool reset_tensors);
 
-    void assemble_system(GenericTensor& A, const ufc::form& A_form,
+    void assemble_system(GenericTensor& A, const Form& A_form,
                          const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
-                         GenericTensor& b, const ufc::form& b_form,
+                         GenericTensor& b, const Form& b_form,
                          const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
                          DirichletBC& bc, const MeshFunction<uint>* cell_domains,
                          const MeshFunction<uint>* exterior_facet_domains,
@@ -132,7 +132,7 @@ namespace dolfin
     void applyTraces( GenericTensor& globalA, GenericTensor& globalb,
         DirichletBC& bc,
         const DofMapSet& A_dof_map_set, const DofMapSet& b_dof_map_set,
-        const ufc::form& A_form, const ufc::form& b_form,
+        const Form& A_form, const Form& b_form,
         const MeshFunction<uint>* domains);
 
   private:
@@ -168,12 +168,13 @@ namespace dolfin
                                 const MeshFunction<uint>* domains) const;
 
     // Check arguments
-    void check(const ufc::form& form,
+    void check(const Form& form,
                const Array<Function*>& coefficients,
                const Mesh& mesh) const;
 
     // Initialize global tensor
-    void initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set, UFC& ufc, bool reset_tensor) const;
+    void initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
+                          UFC& ufc, bool reset_tensor) const;
 
     // Pretty-printing for progress bar
     std::string progressMessage(uint rank, std::string integral_type) const;
@@ -181,11 +182,11 @@ namespace dolfin
     // The mesh
     Mesh& mesh_;
 
+    // Boundary mesh
+    BoundaryMesh& boundary_;
+
     //
     uint const dim_;
-
-    // Boundary mesh
-    mutable BoundaryMesh * boundary_;
 
   };
 

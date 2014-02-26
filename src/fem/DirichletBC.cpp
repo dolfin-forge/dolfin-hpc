@@ -25,50 +25,33 @@
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/fem/DirichletBC.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
                          BCMethod method) :
-  BoundaryCondition("Dirichlet"),
-  g(g),
-  _mesh(mesh),
-  method(method),
-  user_sub_domain(&sub_domain)
+  BoundaryCondition("Dirichlet", mesh, sub_domain),
+  g_(g),
+  method_(method)
 {
   initFromSubDomain(sub_domain);
 }
 //-----------------------------------------------------------------------------
 DirichletBC::DirichletBC(Function& g, MeshFunction<uint>& sub_domains,
                          uint sub_domain, BCMethod method) :
-  BoundaryCondition(),
-  g(g),
-  _mesh(sub_domains.mesh()),
-  method(method),
-  user_sub_domain(0)
+  BoundaryCondition("Dirichlet", sub_domains, sub_domain),
+  g_(g),
+  method_(method)
 {
   initFromMeshFunction(sub_domains, sub_domain);
 }
 //-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, Mesh& mesh, uint sub_domain,
-                         BCMethod method) :
-  BoundaryCondition(),
-  g(g),
-  _mesh(mesh),
-  method(method),
-  user_sub_domain(0)
-{
-  initFromMesh(sub_domain);
-}
-//-----------------------------------------------------------------------------
 DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
                          const SubSystem& sub_system, BCMethod method) :
-  BoundaryCondition(),
-  g(g),
-  _mesh(mesh),
-  method(method),
-  user_sub_domain(&sub_domain),
-  sub_system(sub_system)
+  BoundaryCondition("Dirichlet", mesh, sub_domain, sub_system),
+  g_(g),
+  method_(method)
 {
   initFromSubDomain(sub_domain);
 }
@@ -76,26 +59,11 @@ DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
 DirichletBC::DirichletBC(Function& g, MeshFunction<uint>& sub_domains,
                          uint sub_domain, const SubSystem& sub_system,
                          BCMethod method) :
-  BoundaryCondition(),
-  g(g),
-  _mesh(sub_domains.mesh()),
-  method(method),
-  user_sub_domain(0),
-  sub_system(sub_system)
+  BoundaryCondition("Dirichlet", sub_domains, sub_domain, sub_system),
+  g_(g),
+  method_(method)
 {
   initFromMeshFunction(sub_domains, sub_domain);
-}
-//-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, Mesh& mesh, uint sub_domain,
-                         const SubSystem& sub_system, BCMethod method) :
-  BoundaryCondition(),
-  g(g),
-  _mesh(mesh),
-  method(method),
-  user_sub_domain(0),
-  sub_system(sub_system)
-{
-  initFromMesh(sub_domain);
 }
 //-----------------------------------------------------------------------------
 DirichletBC::~DirichletBC()
@@ -103,36 +71,25 @@ DirichletBC::~DirichletBC()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
+void DirichletBC::apply(GenericMatrix& A, GenericVector& b, Form const& form)
 {
-  apply(A, b, 0, form.dofmaps()[1], form.form());
+  apply(A, b, 0, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        const DofMap& dof_map, const ufc::form& form)
+                        GenericVector const& x, Form const& form)
 {
-  apply(A, b, 0, dof_map, form);
+  apply(A, b, &x, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        const GenericVector& x, const Form& form)
+                        GenericVector const* x, Form const& form)
 {
-  apply(A, b, &x, form.dofmaps()[1], form.form());
-}
-//-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        const GenericVector& x, const DofMap& dof_map,
-                        const ufc::form& form)
-{
-  apply(A, b, &x, dof_map, form);
-}
-//-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        const GenericVector* x, const DofMap& dof_map,
-                        const ufc::form& form)
-{
+  // Get local data for application of boundary conditions
+  BoundaryCondition::LocalData& data = this->updateLocalData(form);
+
   // Simple check
-  const uint N = dof_map.global_dimension();
+  const uint N = data.dof_map->global_dimension();
   if (N != A.size(0) /*  || N != A.size(1) alow for rectangular matrices */)
     error("Incorrect dimension of matrix for application of boundary conditions."
           "Did you assemble it on a different mesh?");
@@ -142,9 +99,6 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
 
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
-
-  // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
 
   // Compute dofs and values
   computeBC(boundary_values, data);
@@ -190,14 +144,14 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   b.apply();
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::zero(GenericMatrix& A, const Form& form)
+void DirichletBC::zero(GenericMatrix& A, Form const& form)
 {
-  zero(A, form.dofmaps()[1], form.form());
-}
-//-----------------------------------------------------------------------------
-void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map,
-                       const ufc::form& form)
-{
+  // Get local data for application of boundary conditions
+  BoundaryCondition::LocalData& data = this->updateLocalData(form);
+
+  //
+  DofMap const& dof_map = form.dofmaps()[1];
+
   // Simple check
   const uint N = dof_map.global_dimension();
   if (N != A.size(0))
@@ -206,9 +160,6 @@ void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map,
 
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
-
-  // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
 
   // Compute dofs and values
   computeBC(boundary_values, data);
@@ -231,14 +182,9 @@ void DirichletBC::zero(GenericMatrix& A, const DofMap& dof_map,
   delete[] dofs;
 }
 //-----------------------------------------------------------------------------
-Mesh& DirichletBC::mesh()
-{
-  return _mesh;
-}
-//-----------------------------------------------------------------------------
 void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
 {
-  dolfin_assert(facets.size() == 0);
+  dolfin_assert(facets_.size() == 0);
 
   // FIXME: This can be made more efficient, we should be able to
   // FIXME: extract the facets without first creating a MeshFunction on
@@ -246,12 +192,12 @@ void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
   // FIXME: mainly for convenience (we may reuse mark() in SubDomain).
 
   // Make sure the mesh has been ordered
-  _mesh.order();
+  mesh().order();
 
   // Create mesh function for sub domain markers on facets
-  const uint dim = _mesh.topology().dim();
-  _mesh.init(dim - 1);
-  MeshFunction<uint> sub_domains(_mesh, dim - 1);
+  const uint dim = mesh().topology().dim();
+  mesh().init(dim - 1);
+  MeshFunction<uint> sub_domains(mesh(), dim - 1);
 
   // Mark everything as sub domain 1
   sub_domains = 1;
@@ -266,80 +212,40 @@ void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
 void DirichletBC::initFromMeshFunction(MeshFunction<uint>& sub_domains,
                                        uint sub_domain)
 {
-  dolfin_assert(facets.size() == 0);
+  dolfin_assert(facets_.size() == 0);
 
   // Make sure we have the facet - cell connectivity
-  const uint dim = _mesh.topology().dim();
-  _mesh.init(dim - 1, dim);
+  const uint dim = mesh().topology().dim();
+  mesh().init(dim - 1, dim);
 
   // Make sure the mesh has been ordered
-  _mesh.order();
+  mesh().order();
 
   // Build set of boundary facets
-  for (FacetIterator facet(_mesh); !facet.end(); ++facet)
+  for (FacetIterator facet(mesh()); !facet.end(); ++facet)
   {
     // Skip facets not on this boundary
     if (sub_domains(*facet) != sub_domain)
+    {
       continue;
+    }
 
     // Get cell to which facet belongs (there may be two, but pick first)
-    Cell cell(_mesh, facet->entities(dim)[0]);
+    Cell cell(mesh(), facet->entities(dim)[0]);
 
     // Get local index of facet with respect to the cell
     const uint facet_number = cell.index(*facet);
 
     // Copy data
-    facets.push_back(std::pair<uint, uint>(cell.index(), facet_number));
-  }
-}
-//-----------------------------------------------------------------------------
-void DirichletBC::initFromMesh(uint sub_domain)
-{
-  dolfin_assert(facets.size() == 0);
-  error("mesh");
-  // For this to work, the mesh *needs* to be ordered according to
-  // the UFC ordering before it gets here. So reordering the mesh
-  // here will either have no effect (if the mesh is already ordered
-  // or it won't do anything good (since the markers are wrong anyway).
-  // In conclusion: we don't need to order the mesh here.
-
-  cout << "Creating sub domain markers for boundary condition." << endl;
-
-  // Get data
-  Array<uint>* facet_cells = _mesh.data().array("boundary facet cells");
-  Array<uint>* facet_numbers = _mesh.data().array("boundary facet numbers");
-  Array<uint>* indicators = _mesh.data().array("boundary indicators");
-
-  // Check data
-  if (!facet_cells)
-    error("Mesh data \"boundary facet cells\" not available.");
-  if (!facet_numbers)
-    error("Mesh data \"boundary facet numbers\" not available.");
-  if (!indicators)
-    error("Mesh data \"boundary indicators\" not available.");
-
-  // Get size
-  const uint size = facet_cells->size();
-  dolfin_assert(size == facet_numbers->size()); dolfin_assert(size == indicators->size());
-
-  // Build set of boundary facets
-  for (uint i = 0; i < size; i++)
-  {
-    // Skip facets not on this boundary
-    if ((*indicators)[i] != sub_domain)
-      continue;
-
-    // Copy data
-    facets.push_back(
-        std::pair<uint, uint>((*facet_cells)[i], (*facet_numbers)[i]));
+    facets_.push_back(std::pair<uint, uint>(cell.index(), facet_number));
   }
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::computeBC(_map<uint, real>& boundary_values,
-BoundaryCondition::LocalData& data)
+                            BoundaryCondition::LocalData& data)
 {
   // Choose strategy
-    switch (method)
+    switch (method_)
     {
       case topological:
       computeBCTopological(boundary_values, data);
@@ -357,10 +263,10 @@ BoundaryCondition::LocalData& data)
   }
 //-----------------------------------------------------------------------------
 void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
-BoundaryCondition::LocalData& data)
+                                       BoundaryCondition::LocalData& data)
 {
   // Special case
-    if (facets.size() == 0 && dolfin::MPI::numProcesses() == 1)
+    if (facets_.size() == 0 && dolfin::MPI::numProcesses() == 1)
     {
       warning("Found no facets matching domain for boundary condition.");
       return;
@@ -368,22 +274,22 @@ BoundaryCondition::LocalData& data)
 
     // Iterate over facets
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, topological search", facets.size());
+    Progress p("Computing Dirichlet boundary values, topological search", facets_.size());
 #endif
-    for (uint f = 0; f < facets.size(); f++)
+    for (uint f = 0; f < facets_.size(); f++)
     {
       // Get cell number and local facet number
-      uint cell_number = facets[f].first;
-      uint facet_number = facets[f].second;
+      uint cell_number = facets_[f].first;
+      uint facet_number = facets_[f].second;
 
       // Create cell
-      Cell cell(_mesh, cell_number);
+      Cell cell(mesh(), cell_number);
       UFCCell ufc_cell(cell);
 
-      ufc_cell.update(cell, _mesh.distdata());
+      ufc_cell.update(cell, mesh().distdata());
 
       // Interpolate function on cell
-      g.interpolate(data.w, ufc_cell, *data.finite_element, cell, facet_number);
+      g_.interpolate(data.w, ufc_cell, *data.finite_element, cell, facet_number);
 
       // Tabulate dofs on cell
       //data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
@@ -416,10 +322,10 @@ BoundaryCondition::LocalData& data)
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
-BoundaryCondition::LocalData& data)
+                                     BoundaryCondition::LocalData& data)
 {
   // Special case
-    if (facets.size() == 0 && dolfin::MPI::numProcesses() == 1)
+    if (facets_.size() == 0 && dolfin::MPI::numProcesses() == 1)
     {
       warning("Found no facets matching domain for boundary condition.");
       return;
@@ -427,21 +333,21 @@ BoundaryCondition::LocalData& data)
 
     // Initialize facets, needed for geometric search
     message("Computing facets, needed for geometric application of boundary conditions.");
-    _mesh.init(_mesh.topology().dim() - 1);
+    mesh().init(mesh().topology().dim() - 1);
 
     // Iterate over facets
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, geometric search", facets.size());
+    Progress p("Computing Dirichlet boundary values, geometric search", facets_.size());
 #endif
-    for (uint f = 0; f < facets.size(); f++)
+    for (uint f = 0; f < facets_.size(); f++)
     {
       // Get cell number and local facet number
-      uint cell_number = facets[f].first;
-      uint facet_number = facets[f].second;
+      uint cell_number = facets_[f].first;
+      uint facet_number = facets_[f].second;
 
       // Create facet
-      Cell cell(_mesh, cell_number);
-      Facet facet(_mesh, cell.entities(_mesh.topology().dim() - 1)[facet_number]);
+      Cell cell(mesh(), cell_number);
+      Facet facet(mesh(), cell.entities(mesh().topology().dim() - 1)[facet_number]);
 
       // Loop the vertices associated with the facet
       for (VertexIterator vertex(facet); !vertex.end(); ++vertex)
@@ -450,7 +356,7 @@ BoundaryCondition::LocalData& data)
         for (CellIterator c(*vertex); !c.end(); ++c)
         {
           UFCCell ufc_cell(*c);
-          ufc_cell.update(*c, _mesh.distdata());
+          ufc_cell.update(*c, mesh().distdata());
           bool interpolated = false;
 
           // Tabulate coordinates of dofs on cell
@@ -470,7 +376,7 @@ BoundaryCondition::LocalData& data)
               data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
 
               // Interpolate function on cell
-              g.interpolate(data.w, ufc_cell, *data.finite_element, *c);
+              g_.interpolate(data.w, ufc_cell, *data.finite_element, *c);
             }
 
             // Set boundary value
@@ -485,18 +391,16 @@ BoundaryCondition::LocalData& data)
   }
 //-----------------------------------------------------------------------------
 void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
-BoundaryCondition::LocalData& data)
+                                     BoundaryCondition::LocalData& data)
 {
-  dolfin_assert(user_sub_domain);
-
   // Iterate over cells
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, pointwise search", _mesh.numCells());
+    Progress p("Computing Dirichlet boundary values, pointwise search", mesh().numCells());
 #endif
-    for (CellIterator cell(_mesh); !cell.end(); ++cell)
+    for (CellIterator cell(mesh()); !cell.end(); ++cell)
     {
       UFCCell ufc_cell(*cell);
-      ufc_cell.update(*cell, _mesh.distdata());
+      ufc_cell.update(*cell, mesh().distdata());
       // Tabulate coordinates of dofs on cell
       data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
 
@@ -507,7 +411,7 @@ BoundaryCondition::LocalData& data)
       for (uint i = 0; i < data.dof_map->local_dimension(); ++i)
       {
         // Check if the coordinates are part of the sub domain
-        if ( !user_sub_domain->inside(data.coordinates[i], false) )
+        if ( !this->sub_domain().inside(data.coordinates[i], false) )
           continue;
 
         if(!interpolated)
@@ -516,7 +420,7 @@ BoundaryCondition::LocalData& data)
           // Tabulate dofs on cell
           data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
           // Interpolate function on cell
-          g.interpolate(data.w, ufc_cell, *data.finite_element, *cell);
+          g_.interpolate(data.w, ufc_cell, *data.finite_element, *cell);
         }
 
         // Set boundary value
@@ -585,19 +489,14 @@ bool DirichletBC::onFacet(real* coordinates, Facet& facet)
   return false;
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::setSubSystem(SubSystem sub_system)
-{
-  this->sub_system = sub_system;
-}
-//-----------------------------------------------------------------------------
 void DirichletBC::getBC(uint n, uint* indicators, double* values,
-                        const DofMap& dof_map, const ufc::form& form)
+                        DofMap const& dof_map, Form const& form)
 {
+  // Create local data for application of boundary conditions
+  BoundaryCondition::LocalData& data = this->updateLocalData(form);
+
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
-
-  // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData data(form, _mesh, dof_map, sub_system);
 
   // Compute dofs and values
   computeBC(boundary_values, data);
@@ -619,3 +518,4 @@ void DirichletBC::getBC(uint n, uint* indicators, double* values,
 }
 //-----------------------------------------------------------------------------
 
+}

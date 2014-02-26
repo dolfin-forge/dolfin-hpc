@@ -94,10 +94,6 @@ public:
   DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
               BCMethod method = topological);
 
-  /// Create boundary condition for boundary data included in the mesh
-  DirichletBC(Function& g, Mesh& mesh, uint sub_domain, BCMethod method =
-              topological);
-
   /// Create sub system boundary condition for sub domain
   DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
               const SubSystem& sub_system, BCMethod method = topological);
@@ -106,51 +102,29 @@ public:
   DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
               const SubSystem& sub_system, BCMethod method = topological);
 
-  /// Create sub system boundary condition for boundary data included in the mesh
-  DirichletBC(Function& g, Mesh& mesh, uint sub_domain,
-              const SubSystem& sub_system, BCMethod method = topological);
-
   /// Destructor
   ~DirichletBC();
 
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
-  /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& form);
-
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
              const Form& form);
-
-  /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const DofMap& dof_map, const ufc::form& form);
 
   /// Make row associated with boundary conditions zero,
   /// useful for non-diagonal matrices in a block matrix.
   void zero(GenericMatrix& A, const Form& form);
 
-  /// Make row associated with boundary conditions zero,
-  /// useful for non-diagonal matrices in a block matrix.
-  void zero(GenericMatrix& A, const DofMap& dof_map, const ufc::form& form);
-
-  /// Set (or update) value for sub system
-  void setSubSystem(SubSystem sub_system);
-
-  /// get Dirichlet values and indicators
-  void getBC(uint n, uint* indicators, double* values, const DofMap& dof_map,
-             const ufc::form& form);
-
-  /// Return mesh
-  Mesh& mesh();
+  /// Get Dirichlet values and indicators
+  void getBC(uint n, uint* indicators, double* values, DofMap const& dof_map,
+             Form const& form);
 
 private:
 
   /// Apply boundary conditions
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
-             const DofMap& dof_map, const ufc::form& form);
+             const Form& form);
 
   // Initialize sub domain markers from sub domain
   void initFromSubDomain(const SubDomain& sub_domain);
@@ -181,22 +155,13 @@ private:
   static bool onFacet(real* coordinates, Facet& facet);
 
   // The function
-  Function& g;
-
-  // The mesh
-  Mesh& _mesh;
+  Function& g_;
 
   // Search method
-  BCMethod method;
-
-  // User defined sub domain
-  SubDomain const* user_sub_domain;
-
-  // Sub system
-  SubSystem sub_system;
+  BCMethod method_;
 
   // Boundary facets, stored as pairs (cell, local facet number)
-  std::vector< std::pair<uint, uint> > facets;
+  std::vector< std::pair<uint, uint> > facets_;
 
 };
 

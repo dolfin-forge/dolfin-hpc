@@ -24,10 +24,10 @@ NonlinearPDE::NonlinearPDE(Form& a,
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
 
   // Check ranks of forms
-  if ( a.form().rank() != 2 )
-    error("Expected a bilinear form but rank is %d.", a.form().rank());
-  if ( L.form().rank() != 1 )
-    error("Expected a linear form but rank is %d.", L.form().rank());
+  if ( a.rank() != 2 )
+    error("Expected a bilinear form but rank is %d.", a.rank());
+  if ( L.rank() != 1 )
+    error("Expected a linear form but rank is %d.", L.rank());
 
   // Create array with one boundary condition
   bcs.push_back(&bc);
@@ -42,10 +42,10 @@ NonlinearPDE::NonlinearPDE(Form& a,
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
 
   // Check ranks of forms
-  if ( a.form().rank() != 2 )
-    error("Expected a bilinear form but rank is %d.", a.form().rank());
-  if ( L.form().rank() != 1 )
-    error("Expected a linear form but rank is %d.", L.form().rank());
+  if ( a.rank() != 2 )
+    error("Expected a bilinear form but rank is %d.", a.rank());
+  if ( L.rank() != 1 )
+    error("Expected a linear form but rank is %d.", L.rank());
 }
 //-----------------------------------------------------------------------------
 NonlinearPDE::~NonlinearPDE()
@@ -60,7 +60,7 @@ void NonlinearPDE::update(const GenericVector& x)
 //-----------------------------------------------------------------------------
 void NonlinearPDE::form(GenericMatrix& A, GenericVector& b, const GenericVector& x)
 {
-  // Assemble 
+  // Assemble
   assembler.assemble(A, a);
   assembler.assemble(b, L);
 
@@ -71,7 +71,7 @@ void NonlinearPDE::form(GenericMatrix& A, GenericVector& b, const GenericVector&
 //-----------------------------------------------------------------------------
 void NonlinearPDE::solve(Function& u, real& t, const real& T, const real& dt)
 {
-  begin("Solving nonlinear PDE.");  
+  begin("Solving nonlinear PDE.");
 
   // Initialise function
   u.init(mesh, x, a, 1);

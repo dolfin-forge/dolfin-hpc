@@ -31,7 +31,7 @@ class UFC;
 /// It wraps a ufc::dof_map on a specific mesh and provides
 /// optional precomputation and reordering of dofs.
 
-class DofMap : protected ufc::dof_map
+class DofMap : public ufc::dof_map
 {
 
   static std::string const SIGN_PREFIX;
@@ -173,7 +173,7 @@ public:
   ufc::dof_map* create_sub_dof_map(Array<uint> const& sub_system,
                                    uint& offset) const;
 
-  /// Extract sub DofMap
+  /// Extract sub dof map
   ufc::dof_map* create_sub_dof_map(ufc::dof_map const& dof_map,
                                    Array<uint> const& sub_system,
                                    uint& offset) const;

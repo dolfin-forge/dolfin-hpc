@@ -400,7 +400,7 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
                                         Function &f_y, Function &f_z)
 {
 
-  UFC ufc(form.form(), mesh, form.dofmaps());
+  UFC ufc(form, mesh, form.dofmaps());
   uint local_dim = (form.dofmaps())[offset].local_dimension();
   uint *indices = new uint[local_dim];
   uint new_index;
@@ -465,7 +465,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
   Form *refined = new AdaptiveRefinementProjectVectorLinearForm(projected);
   projected.init(new_mesh, x_proj, *refined, 0);
 
-  UFC ufc(refined->form(), new_mesh, refined->dofmaps());
+  UFC ufc(*refined, new_mesh, refined->dofmaps());
 
   real test_value;
   real x[3];

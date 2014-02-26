@@ -309,17 +309,17 @@ OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) :
   form(form)
 {
   // Some simple sanity checks on form
-  if (!(form.form().rank() == 0 && form.form().num_coefficients() == 2))
+  if (!(form.rank() == 0 && form.num_coefficients() == 2))
     error("Invalid form: rank = %d, number of coefficients = %d." 
 	  "Must be rank 0 form with 2 coefficients.",
-	  form.form().rank(), form.form().num_coefficients());
-  if (!(form.form().num_cell_integrals() == 0
-	&& form.form().num_exterior_facet_integrals() == 1
-	&& form.form().num_interior_facet_integrals() == 0))
+	  form.rank(), form.num_coefficients());
+  if (!(form.num_cell_integrals() == 0
+	&& form.num_exterior_facet_integrals() == 1
+	&& form.num_interior_facet_integrals() == 0))
     error("Invalid form: Must have exactly 1 exterior facet integral");
   
   form.update_dofmaps(mesh);
-  ufc = new UFC(form.form(), mesh, form.dofmaps());
+  ufc = new UFC(form, mesh, form.dofmaps());
 }
 //-----------------------------------------------------------------------------
 OutflowFacet::~OutflowFacet()

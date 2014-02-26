@@ -26,21 +26,20 @@ class SlipFrictionBC: public BoundaryCondition
 {
 public:
   /// Create boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real beta);
+  SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain, real beta);
 
   /// Create boundary condition for sub domain
-  SlipFrictionBC(BoundaryNormal& normal, const SubDomain& sub_domain,
+  SlipFrictionBC(BoundaryNormal& normal, SubDomain const& sub_domain,
                  real beta);
 
   /// Create sub system boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, SubSystem const& sub_system,
-                 real beta);
+  SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain,
+                 SubSystem const& sub_system, real beta);
 
-// I do not now how to specify a Function using the vertex to match the SubDomain
-//  /// Create boundary condition for sub domain specified by index
+  /// Create boundary condition for sub domain specified by index
 //  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain, real beta);
 
-//  /// Create sub system boundary condition for sub domain specified by index
+  /// Create sub system boundary condition for sub domain specified by index
 //  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
 //                 SubSystem const& sub_system, real beta);
 
@@ -54,17 +53,9 @@ public:
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
-  /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& ufc_form);
-
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
              const Form& form);
-
-  /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const DofMap& dof_map, const ufc::form& ufc_form);
 
   real beta() const;
 
@@ -90,25 +81,9 @@ inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
 
 //-----------------------------------------------------------------------------
 inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                                  DofMap const& dof_map,
-                                  const ufc::form& ufc_form)
-{
-  slipbc_.apply(A, b, dof_map, ufc_form);
-}
-
-//-----------------------------------------------------------------------------
-inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
                                   const GenericVector& x, Form const& form)
 {
   slipbc_.apply(A, b, x, form);
-}
-
-//-----------------------------------------------------------------------------
-inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                                  const GenericVector& x, const DofMap& dof_map,
-                                  const ufc::form& ufc_form)
-{
-  slipbc_.apply(A, b, x, dof_map, ufc_form);
 }
 
 //-----------------------------------------------------------------------------

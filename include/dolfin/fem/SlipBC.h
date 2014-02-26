@@ -66,52 +66,20 @@ public:
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, Form const& form);
 
-  /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
-             ufc::form const& ufc_form);
-
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
              Form const& form);
-
-  /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-             DofMap const& dof_map, ufc::form const& ufc_form);
 
 private:
 
   void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh const& mesh,
                    uint const& node, Array<uint> const& dofs);
 
-  // Initialize sub domain markers
-  void init(SubDomain const& sub_domain);
-
-  void apply(GenericMatrix& A, GenericVector& b, DofMap const& dof_map,
-             Form const& form);
-
-  // Global mesh
-  Mesh& mesh_;
-
   // Boundary mesh
   BoundaryMesh& boundary_;
 
-  // Sub domain markers (if any)
-  MeshFunction<uint>* sub_domains_;
-
-  // The sub domain
-  uint sub_domain_;
-
-  // True if sub domain markers are created locally
-  bool local_sub_domains_;
-
-  // Sub system
-  SubSystem sub_system_;
-
-  // User defined sub domain
-  SubDomain const * user_sub_domain_;
-
   // True if boundary normals are created locally
-  bool local_normal_;
+  bool const local_normal_;
 
   // Node normal and tangents
   BoundaryNormal * const normal_;
@@ -130,9 +98,6 @@ private:
   real l[3];  // local rhs extracted from b
   real l_slip[3];  // local rhs after slip enforcement
   real basis_[3][3]; // local basis (n, tau1, tau2)
-  uint row[3]; // row reordering
-
-  static real const permutation_matrix_[3][3];
 
 };
 

@@ -35,8 +35,8 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
     geom_dim_(0)
 {
   // Check argument
-  uint const num_arguments = form.form().rank()
-      + form.form().num_coefficients();
+  uint const num_arguments = form.rank()
+      + form.num_coefficients();
   if (i >= num_arguments)
   {
     error("Illegal function index %d. Form only has %d arguments.", i,
@@ -44,7 +44,7 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
   }
 
   // Create finite element
-  ufc_finite_element_ = form.form().create_finite_element(i);
+  ufc_finite_element_ = form.create_finite_element(i);
 
   Initialize();
 }
@@ -151,13 +151,7 @@ void FiniteElement::Initialize()
 ufc::finite_element*
 FiniteElement::create_sub_element(Array<uint> const& sub_system) const
 {
-  // Recursively extract sub element
-  ufc::finite_element* sub_finite_element = create_sub_element(
-      *ufc_finite_element_, sub_system);
-  message(2, "Extracted finite element for sub system: %s",
-          sub_finite_element->signature());
-
-  return sub_finite_element;
+  return FiniteElement::create_sub_element(*ufc_finite_element_, sub_system);
 }
 
 //-----------------------------------------------------------------------------

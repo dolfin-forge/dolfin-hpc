@@ -13,6 +13,7 @@
 #include "DofMap.h"
 
 #include <dolfin/common/types.h>
+#include <dolfin/fem/SubSystem.h>
 
 #include <ufc.h>
 
@@ -22,7 +23,7 @@ namespace dolfin
 class DofMap;
 class GenericMatrix;
 class GenericVector;
-class SubSystem;
+class SubDomain;
 class Mesh;
 class Form;
 
@@ -33,10 +34,20 @@ class BoundaryCondition
 public:
 
   /// Constructor
-  BoundaryCondition();
+  BoundaryCondition(std::string const& type, Mesh& mesh,
+                    SubDomain const& sub_domain);
 
   /// Constructor
-  BoundaryCondition(std::string const type);
+  BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
+                    uint sub_domain);
+
+  /// Constructor
+  BoundaryCondition(std::string const& type, Mesh& mesh,
+                    SubDomain const& sub_domain, SubSystem const sub_system);
+
+  /// Constructor
+  BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
+                    uint sub_domain, SubSystem const sub_system);
 
   /// Destructor
   virtual ~BoundaryCondition();
@@ -44,30 +55,38 @@ public:
   /// Apply boundary condition to linear system
   virtual void apply(GenericMatrix& A, GenericVector& b, const Form& form) = 0;
 
-  /// Apply boundary condition to linear system
-  virtual void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                     const ufc::form& ufc_form) = 0;
-
   /// Apply boundary condition to linear system for a nonlinear problem
   virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
                      const Form& form) = 0;
 
-  /// Apply boundary condition to linear system for a nonlinear problem
-  virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                     const DofMap& dof_map, const ufc::form& ufc_form) = 0;
-
+  ///
   std::string const& type() const;
+
+  ///
+  Mesh& mesh() const;
+
+  ///
+  SubDomain const& sub_domain() const;
+
+  ///
+  uint const& sub_domain_index() const;
+
+  ///
+  MeshFunction<uint> const& sub_domain_markers() const;
+
+  ///
+  SubSystem const& sub_system() const;
 
 protected:
 
   // Local data for application of boundary conditions
   class LocalData
   {
+
   public:
 
     // Constructor
-    LocalData(const ufc::form& form, Mesh& mesh, const DofMap& global_dof_map,
-              const SubSystem& sub_system);
+    LocalData(Mesh& mesh, SubSystem const& sub_system, Form const& form);
 
     // Destructor
     ~LocalData();
@@ -76,13 +95,10 @@ protected:
     UFCMesh ufc_mesh;
 
     // Finite element for sub system
-    ufc::finite_element* finite_element;
+    ufc::finite_element const * finite_element;
 
     // Dof map for sub system
-    const DofMap* dof_map;
-
-    // Pointer to local DofMap if owned
-    const DofMap* dof_map_local;
+    DofMap const * dof_map;
 
     // Offset for sub system
     uint offset;
@@ -93,19 +109,97 @@ protected:
     uint* facet_dofs;
     real** coordinates;
 
+  private:
+
+      //
+      bool const is_subspace_;
+
   };
+
+  LocalData& updateLocalData(Form const& form) const;
 
 private:
 
+  // Default constructor
+  BoundaryCondition();
+
+  // String identifier for the boundary condition type.
   std::string const type_;
+
+  // Mesh
+  Mesh& mesh_;
+
+  //
+  mutable LocalData * data_;
+
+  // Sub domain index
+  uint const sub_domain_index_;
+
+  // Is the subdomain geometrical
+  bool const has_geometrical_sub_domain_;
+
+  // User defined sub domain
+  SubDomain const * geometrical_sub_domain_;
+
+  // Sub domain markers
+  MeshFunction<uint> * const sub_domain_markers_;
+
+  // True if sub domain markers are created locally
+  bool const local_sub_domain_markers_;
+
+  // Sub system
+  SubSystem const sub_system_;
 
 };
 
 //--- INLINE ------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
 inline std::string const& BoundaryCondition::type() const
 {
   return type_;
+}
+
+//-----------------------------------------------------------------------------
+inline Mesh& BoundaryCondition::mesh() const
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline SubDomain const& BoundaryCondition::sub_domain() const
+{
+  return *geometrical_sub_domain_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint const& BoundaryCondition::sub_domain_index() const
+{
+  return sub_domain_index_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshFunction<uint> const& BoundaryCondition::sub_domain_markers() const
+{
+  dolfin_assert(sub_domain_markers_);
+  return *sub_domain_markers_;
+}
+
+//-----------------------------------------------------------------------------
+inline SubSystem const& BoundaryCondition::sub_system() const
+{
+  return sub_system_;
+}
+
+//-----------------------------------------------------------------------------
+inline BoundaryCondition::LocalData&
+BoundaryCondition::updateLocalData(Form const& form) const
+{
+  if(data_ == NULL)
+  {
+    data_ = new LocalData(mesh_, sub_system_, form);
+  }
+  return *data_;
 }
 
 }

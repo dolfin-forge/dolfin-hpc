@@ -143,6 +143,8 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
     // Initialize the connectivities between vertices and boundary cells.
     uint const boundary_nsdim = boundary.topology().dim();
     boundary.init(0, boundary_nsdim);
+    // Initialize the connectivities between facets and boundary cells.
+    mesh_.init(boundary_nsdim, nsdim);
     for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
         ++boundary_vertex)
     {
@@ -185,7 +187,9 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
                        shared_normals.end());
 
         neighbour += shared_weights.size();
-      }dolfin_assert(neighbour == NbNeighCells);dolfin_assert(normals.size() == nsdim * weights.size());
+      }
+      dolfin_assert(neighbour == NbNeighCells);
+      dolfin_assert(normals.size() == nsdim * weights.size());
 
       //--- Determine vertex type by discriminating surfaces ------------------
       // Add storage for normals to surfaces
@@ -260,7 +264,8 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
           remaining_normals.erase(*it);
         }
         ++vertex_type;
-      }dolfin_assert(surface_totalweights.size() == vertex_type);
+      }
+      dolfin_assert(surface_totalweights.size() == vertex_type);
 
       //--- Compute vertex normal ---------------------------------------------
       // The typical algorithm would be:
@@ -640,7 +645,9 @@ void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
   int sh_facetnormals_count = sendbuff_facetnormals.size();
   int sh_facetweights_count = sendbuff_facetweights.size();
 
-  dolfin_assert(sh_vertidx_count == (int) SharedVertexCount);dolfin_assert(sh_facetnormals_count == (int) SharedMeshFacetCount* (int) nsdim);dolfin_assert(sh_facetweights_count == (int) SharedMeshFacetCount);
+  dolfin_assert(sh_vertidx_count == (int) SharedVertexCount);
+  dolfin_assert(sh_facetnormals_count == (int) SharedMeshFacetCount* (int) nsdim);
+  dolfin_assert(sh_facetweights_count == (int) SharedMeshFacetCount);
 
   int recv_size_vertidx;
   int recv_size_facetnormals;

@@ -39,15 +39,15 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
 {
   // Consistency checking
 #ifdef DEBUG
-  Check(form.form(), mesh);
+  Check(form, mesh);
 #endif
 
   // Release previously acquired dof maps if any
   ReleaseAll();
 
   // Resize array of dof maps
-  const uint num_arguments = form.form().rank()
-      + form.form().num_coefficients();
+  const uint num_arguments = form.rank()
+      + form.num_coefficients();
   dof_map_set.resize(num_arguments);
 
   // Create dof maps and reuse previously computed dof maps

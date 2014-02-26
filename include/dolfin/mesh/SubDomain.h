@@ -30,7 +30,8 @@ public:
   /// Constructor
   SubDomain();
 
-  SubDomain(Mesh& bmesh);
+  ///
+  SubDomain(Mesh& mesh);
 
   /// Destructor
   virtual ~SubDomain();

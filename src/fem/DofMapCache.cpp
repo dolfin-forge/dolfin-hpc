@@ -54,7 +54,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
 
   DofMap * ret = NULL;
   // Create UFC dof map
-  ufc::dof_map * ufc_dof_map = form.form().create_dof_map(i);
+  ufc::dof_map * ufc_dof_map = form.create_dof_map(i);
   dolfin_assert(ufc_dof_map);
 
   std::string const h = DofMap::make_hash(*ufc_dof_map, mesh);

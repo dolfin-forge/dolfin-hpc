@@ -8,22 +8,78 @@
 // Last changed: 2013-09-13
 
 #include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/fem/BoundaryCondition.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition() :
-    type_("NoType")
+BoundaryCondition::BoundaryCondition(std::string const& type,
+                                     Mesh& mesh,
+                                     SubDomain const& sub_domain) :
+    type_(type),
+    mesh_(mesh),
+    data_(NULL),
+    sub_domain_index_(0),
+    has_geometrical_sub_domain_(true),
+    geometrical_sub_domain_(&sub_domain),
+    sub_domain_markers_(),
+    local_sub_domain_markers_(true),
+    sub_system_()
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition(std::string const type) :
-    type_(type)
+BoundaryCondition::BoundaryCondition(std::string const& type,
+                                     MeshFunction<uint>& sub_domains,
+                                     uint sub_domain) :
+    type_(type),
+    mesh_(sub_domains.mesh()),
+    data_(NULL),
+    sub_domain_index_(sub_domain),
+    has_geometrical_sub_domain_(false),
+    geometrical_sub_domain_(NULL),
+    sub_domain_markers_(&sub_domains),
+    local_sub_domain_markers_(false),
+    sub_system_()
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+BoundaryCondition::BoundaryCondition(std::string const& type,
+                                     Mesh& mesh,
+                                     SubDomain const& sub_domain,
+                                     SubSystem const sub_system) :
+    type_(type),
+    mesh_(mesh),
+    data_(NULL),
+    sub_domain_index_(0),
+    has_geometrical_sub_domain_(true),
+    geometrical_sub_domain_(&sub_domain),
+    sub_domain_markers_(),
+    local_sub_domain_markers_(true),
+    sub_system_(sub_system)
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+BoundaryCondition::BoundaryCondition(std::string const& type,
+                                     MeshFunction<uint>& sub_domains,
+                                     uint sub_domain,
+                                     SubSystem const sub_system) :
+    type_(type),
+    mesh_(sub_domains.mesh()),
+    data_(NULL),
+    sub_domain_index_(sub_domain),
+    has_geometrical_sub_domain_(false),
+    geometrical_sub_domain_(NULL),
+    sub_domain_markers_(&sub_domains),
+    local_sub_domain_markers_(false),
+    sub_system_(sub_system)
 {
   // Do nothing
 }
@@ -33,44 +89,40 @@ BoundaryCondition::~BoundaryCondition()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
-                                        const DofMap& global_dof_map,
-                                        const SubSystem& sub_system) :
+BoundaryCondition::LocalData::LocalData(Mesh& mesh, SubSystem const& sub_system,
+                                        Form const& form) :
     ufc_mesh(mesh),
-    finite_element(0),
-    dof_map(0),
-    dof_map_local(0),
+    finite_element(NULL),
+    dof_map(NULL),
     offset(0),
-    w(0),
-    cell_dofs(0),
-    facet_dofs(0)
+    w(NULL),
+    cell_dofs(NULL),
+    facet_dofs(NULL),
+    is_subspace_(sub_system.depth() > 0)
 {
-  // FIXME: Change behaviour of num_sub_elements() in FFC (return 0 when
-  // FIXME: there are no nested elements
-
   // Check arity of form
   if (form.rank() != 2)
+  {
     error("Form must be bilinear for application of boundary conditions.");
+  }
 
   // Create finite element (second argument of form)
   finite_element = form.create_finite_element(1);
 
   // Extract sub element and sub dof map if we have a sub system
-  if (sub_system.depth() > 0)
+  if (is_subspace_)
   {
-    // Finite element
-    ufc::finite_element* sub_finite_element = FiniteElement::create_sub_element(*finite_element, sub_system.array());
+    ufc::finite_element * sub_finite_element =
+      FiniteElement::create_sub_element(*finite_element, sub_system.array());
     delete finite_element;
     finite_element = sub_finite_element;
 
-    // Create sub dof map
-    dof_map = new DofMap(global_dof_map, sub_system.array(), offset);
-
-    // Take responsibility for dof_map
-    dof_map_local = dof_map;
+    dof_map = new DofMap(form.dofmaps()[1], sub_system.array(), offset);
   }
   else
-    dof_map = &global_dof_map;
+  {
+    dof_map = &form.dofmaps()[1];
+  }
 
   // Create local data used to set boundary conditions
   w = new real[finite_element->space_dimension()];
@@ -81,16 +133,20 @@ BoundaryCondition::LocalData::LocalData(const ufc::form& form, Mesh& mesh,
     cell_dofs[i] = 0;
   }
   facet_dofs = new uint[dof_map->num_facet_dofs()];
-  for (uint i = 0; i < dof_map->num_facet_dofs(); i++)
+  for (uint i = 0; i < dof_map->num_facet_dofs(); ++i)
+  {
     facet_dofs[i] = 0;
+  }
 
   // Create local coordinate data
   coordinates = new real*[dof_map->local_dimension()];
-  for (uint i = 0; i < dof_map->local_dimension(); i++)
+  for (uint i = 0; i < dof_map->local_dimension(); ++i)
   {
     coordinates[i] = new real[mesh.geometry().dim()];
-    for (uint j = 0; j < mesh.geometry().dim(); j++)
+    for (uint j = 0; j < mesh.geometry().dim(); ++j)
+    {
       coordinates[i][j] = 0.0;
+    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -98,24 +154,26 @@ BoundaryCondition::LocalData::~LocalData()
 {
   if (coordinates)
   {
-    for (uint i = 0; i < dof_map->local_dimension(); i++)
+    for (uint i = 0; i < dof_map->local_dimension(); ++i)
+    {
       delete[] coordinates[i];
+    }
     delete[] coordinates;
   }
 
-  if (finite_element)
-    delete finite_element;
+  //TODO: Always delete it until we fix the problem of the unkown space at the
+  //      Form level
+  delete finite_element;
 
-  if (dof_map_local)
-    delete dof_map_local;
+  if(is_subspace_)
+  {
+    delete dof_map;
+  }
 
-  if (w)
-    delete[] w;
-
-  if (cell_dofs)
-    delete[] cell_dofs;
-
-  if (facet_dofs)
-    delete[] facet_dofs;
+  delete[] w;
+  delete[] cell_dofs;
+  delete[] facet_dofs;
 }
 //-----------------------------------------------------------------------------
+
+}

@@ -6,6 +6,8 @@
 
 #include <dolfin/fem/Form.h>
 
+#include <dolfin/fem/FiniteElement.h>
+
 namespace dolfin
 {
 

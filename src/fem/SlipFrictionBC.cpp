@@ -11,8 +11,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real beta) :
-    BoundaryCondition("SlipFriction"),
+SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain, real beta) :
+    BoundaryCondition("SlipFriction", mesh, sub_domain),
     slipbc_(mesh, sub_domain),
     beta_(beta),
     expr_(sub_domain, beta),
@@ -22,9 +22,9 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain, real bet
 
 //-----------------------------------------------------------------------------
 SlipFrictionBC::SlipFrictionBC(BoundaryNormal& normal,
-                               const SubDomain& sub_domain,
+                               SubDomain const& sub_domain,
                                real beta) :
-    BoundaryCondition("SlipFriction"),
+    BoundaryCondition("SlipFriction", normal.mesh(), sub_domain),
     slipbc_(normal, sub_domain),
     beta_(beta),
     expr_(sub_domain, beta),
@@ -35,7 +35,7 @@ SlipFrictionBC::SlipFrictionBC(BoundaryNormal& normal,
 ////-----------------------------------------------------------------------------
 //SlipFrictionBC::SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
 //                               real beta) :
-//    BoundaryCondition("SlipFriction"),
+//    BoundaryCondition("SlipFriction", sub_domains, sub_domain),
 //    slipbc_(sub_domains, sub_domain),
 //    beta_(beta),
 //    expr_(sub_domain, beta),
@@ -44,9 +44,9 @@ SlipFrictionBC::SlipFrictionBC(BoundaryNormal& normal,
 //}
 
 //-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain,
+SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain,
                                SubSystem const& sub_system, real beta) :
-    BoundaryCondition("SlipFriction"),
+    BoundaryCondition("SlipFriction", mesh, sub_domain, sub_system),
     slipbc_(mesh, sub_domain, sub_system),
     beta_(beta),
     expr_(sub_domain, beta),
@@ -57,7 +57,7 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, const SubDomain& sub_domain,
 ////-----------------------------------------------------------------------------
 //SlipFrictionBC::SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
 //                               SubSystem const& sub_system, real beta) :
-//    BoundaryCondition("SlipFriction"),
+//    BoundaryCondition("SlipFriction", sub_domains, sub_domain, sub_system),
 //    slipbc_(sub_domains, sub_domain, sub_system),
 //    beta_(beta),
 //    expr_(sub_domain, beta),

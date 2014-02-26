@@ -49,19 +49,14 @@ struct lt_coordinate
 
 //-----------------------------------------------------------------------------
 PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain) :
-    BoundaryCondition("Periodic"),
-    mesh(mesh),
-    sub_domain(sub_domain)
+    BoundaryCondition("Periodic", mesh, sub_domain)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain,
                        const SubSystem& sub_system) :
-    BoundaryCondition("Periodic"),
-    mesh(mesh),
-    sub_domain(sub_domain),
-    sub_system(sub_system)
+    BoundaryCondition("Periodic", mesh, sub_domain, sub_system)
 {
   // Do nothing
 }
@@ -73,49 +68,45 @@ PeriodicBC::~PeriodicBC()
 //-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 {
-  apply(A, b, form.dofmaps()[0], form.form());
-}
-//-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const DofMap& dof_map, const ufc::form& form)
-{
-  cout << "Applying periodic boundary conditions to linear system." << endl;
+  message("Applying periodic boundary conditions to linear system.");
 
   // FIXME: Make this work for non-scalar subsystems, like vector-valued
   // FIXME: Lagrange where more than one per element is associated with
   // FIXME: each coordinate. Note that globally there may very well be
   // FIXME: more than one dof per coordinate (for conforming elements).
+  DofMap const& dof_map = form.dofmaps()[0];
+  uint const gdim = mesh().geometry().dim();
+  uint const tdim = mesh().geometry().dim();
 
   // Table of mappings from coordinates to dofs
   std::map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;
   typedef std::map<std::vector<real>, std::pair<int, int>, lt_coordinate>::iterator iterator;
-  std::vector<real> xx(mesh.geometry().dim());
+  std::vector<real> xx(gdim);
 
   // Array used for mapping coordinates
-  real * y = new real[mesh.geometry().dim()];
-  for (uint i = 0; i < mesh.geometry().dim(); i++)
+  real * y = new real[gdim];
+  for (uint i = 0; i < gdim; i++)
   {
     y[i] = 0.0;
   }
 
   // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData data(form, mesh, dof_map, sub_system);
+  BoundaryCondition::LocalData& data = this->updateLocalData(form);
 
   // Make sure we have the facet - cell connectivity
-  const uint D = mesh.topology().dim();
-  mesh.init(D - 1, D);
+  mesh().init(tdim - 1, tdim);
 
   // Create UFC view of mesh
-  UFCMesh ufc_mesh(mesh);
+  UFCMesh ufc_mesh(mesh());
 
   // Iterate over the facets of the mesh
 #ifndef NO_PROGRESS_BAR
-  Progress p("Applying periodic boundary conditions", mesh.size(D - 1));
+  Progress p("Applying periodic boundary conditions", mesh().size(tdim - 1));
 #endif
-  for (FacetIterator facet(mesh); !facet.end(); ++facet)
+  for (FacetIterator facet(mesh()); !facet.end(); ++facet)
   {
     // Get cell to which facet belongs (there may be two, but pick first)
-    Cell cell(mesh, facet->entities(D)[0]);
+    Cell cell(mesh(), facet->entities(tdim)[0]);
     UFCCell ufc_cell(cell);
 
     // Get local index of facet with respect to the cell
@@ -140,21 +131,21 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
       real *& x = data.coordinates[local_dof];
 
       // Map coordinate from H to G
-      for (uint j = 0; j < mesh.geometry().dim(); j++)
+      for (uint j = 0; j < gdim; j++)
       {
         y[j] = x[j];
       }
-      sub_domain.map(x, y);
+      sub_domain().map(x, y);
 
       // Check if coordinate is inside the domain G or in H
-      const bool on_boundary = facet->numEntities(D) == 1;
-      if (sub_domain.inside(x, on_boundary))
+      const bool on_boundary = facet->numEntities(tdim) == 1;
+      if (sub_domain().inside(x, on_boundary))
       {
         // Coordinate x is in G
         //cout << "Inside: " << x[0] << " " << x[1] << endl;
 
         // Copy coordinate to std::vector
-        for (uint j = 0; j < mesh.geometry().dim(); j++)
+        for (uint j = 0; j < gdim; j++)
         {
           xx[j] = x[j];
         }
@@ -168,7 +159,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            if (it->second.first != -1)
            {
            cout << "Coordinate: x =";
-           for (uint j = 0; j < mesh.geometry().dim(); j++)
+           for (uint j = 0; j < gdim; j++)
            cout << " " << xx[j];
            cout << endl;
            cout << "Degrees of freedom: " << it->second.first << " " << global_dof << endl;
@@ -184,13 +175,13 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
           coordinate_dofs[xx] = dofs;
         }
       }
-      else if (sub_domain.inside(y, on_boundary))
+      else if (sub_domain().inside(y, on_boundary))
       {
         // y = F(x) is in G, so coordinate x is in H
         //cout << "Mapped: " << x[0] << " " << x[1] << endl;
 
         // Copy coordinate to std::vector
-        for (uint j = 0; j < mesh.geometry().dim(); j++)
+        for (uint j = 0; j < gdim; j++)
           xx[j] = y[j];
 
         // Check if coordinate exists from before
@@ -202,7 +193,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            if (it->second.second != -1)
            {
            cout << "Coordinate: x =";
-           for (uint j = 0; j < mesh.geometry().dim(); j++)
+           for (uint j = 0; j < gdim; j++)
            cout << " " << xx[j];
            cout << endl;
            cout << "Degrees of freedom: " << it->second.second << " " << global_dof << endl;
@@ -243,7 +234,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     if (dof0 == -1 || dof1 == -1)
     {
       cout << "At coordinate: x =";
-      for (uint j = 0; j < mesh.geometry().dim(); j++)
+      for (uint j = 0; j < gdim; j++)
         cout << " " << it->first[j];
       cout << endl;
       error(
@@ -251,7 +242,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     }
 
     //cout << "Setting periodic bc at x =";
-    //for (uint j = 0; j < mesh.geometry().dim(); j++)
+    //for (uint j = 0; j < gdim; j++)
     //  cout << " " << it->first[j];
     //cout << ": " << dof0 << " " << dof1 << endl;
 
@@ -280,14 +271,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
                        const GenericVector& x, const Form& form)
 {
-  apply(A, b, x, form.dofmaps()[0], form.form());
-}
-//-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const GenericVector& x, const DofMap& dof_map,
-                       const ufc::form& form)
-{
-  // FIXME: Implement this (Garth?)
   error("Periodic boundary conditions not implemented for nonlinear systems.");
 }
 //-----------------------------------------------------------------------------

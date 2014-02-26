@@ -48,7 +48,7 @@ namespace dolfin
     /// Return array of indices for incident mesh entitites of given topological dimension
     inline const uint* entities(uint dim) const { return _mesh.topology()(_dim, dim)(_index); }
 
-    /// Check if given entity is indicent
+    /// Check if given entity is incident
     bool incident(const MeshEntity& entity) const;
 
     /// Compute local index of given incident entity (error if not found)

@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <iomanip>
 #include <map>
 
 #if (__sgi)
@@ -41,100 +42,66 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain) :
-    BoundaryCondition("Slip"),
-    mesh_(mesh),
+    BoundaryCondition("Slip", mesh, sub_domain),
     boundary_(mesh.exterior_boundary()),
-    sub_domains_(NULL),
-    sub_domain_(0),
-    local_sub_domains_(false),
-    user_sub_domain_(&sub_domain),
-    normal_(new NodeNormal(mesh_, VertexNormal::none)),
+    local_normal_(true),
+    normal_(new NodeNormal(mesh, VertexNormal::none)),
     As_(NULL),
+    N_local_(0),
+    N_offset_(0),
     tdim_(mesh.topology().dim())
 {
-  // Initialize sub domain markers
-  init(sub_domain);
-
-  sub_system_ = SubSystem(0);
 }
 
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(BoundaryNormal& normal, const SubDomain& sub_domain) :
-    BoundaryCondition("Slip"),
-    mesh_(normal.mesh()),
+    BoundaryCondition("Slip", normal.mesh(), sub_domain),
     boundary_(normal.boundary()),
-    sub_domains_(NULL),
-    sub_domain_(0),
-    local_sub_domains_(false),
-    user_sub_domain_(&sub_domain),
     local_normal_(false),
     normal_(&normal),
     As_(NULL),
-    tdim_(mesh_.topology().dim())
+    N_local_(0),
+    N_offset_(0),
+    tdim_(mesh().topology().dim())
 {
-  // Initialize sub domain markers
-  init(sub_domain);
-
-  sub_system_ = SubSystem(0);
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
-    BoundaryCondition("Slip"),
-    mesh_(sub_domains.mesh()),
+    BoundaryCondition("Slip", sub_domains, sub_domain),
     boundary_(sub_domains.mesh().exterior_boundary()),
-    sub_domains_(&sub_domains),
-    sub_domain_(sub_domain),
-    local_sub_domains_(false),
-    sub_system_(),
-    user_sub_domain_(NULL),
     local_normal_(true),
-    normal_(new NodeNormal(mesh_, VertexNormal::none)),
+    normal_(new NodeNormal(mesh(), VertexNormal::none)),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
-    tdim_(mesh_.topology().dim())
+    tdim_(mesh().topology().dim())
 {
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, const SubDomain& sub_domain,
                const SubSystem& sub_system) :
-    BoundaryCondition("Slip"),
-    mesh_(mesh),
+    BoundaryCondition("Slip", mesh, sub_domain, sub_system),
     boundary_(mesh.exterior_boundary()),
-    sub_domains_(NULL),
-    sub_domain_(0),
-    local_sub_domains_(false),
-    sub_system_(sub_system),
-    user_sub_domain_(&sub_domain),
     local_normal_(true),
-    normal_(new NodeNormal(mesh_, VertexNormal::none)),
+    normal_(new NodeNormal(mesh, VertexNormal::none)),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
     tdim_(mesh.topology().dim())
 {
-  // Set sub domain markers
-  init(sub_domain);
 }
 
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
                const SubSystem& sub_system) :
-    BoundaryCondition("Slip"),
-    mesh_(sub_domains.mesh()),
+    BoundaryCondition("Slip", sub_domains, sub_domain, sub_system),
     boundary_(sub_domains.mesh().exterior_boundary()),
-    sub_domains_(&sub_domains),
-    sub_domain_(sub_domain),
-    local_sub_domains_(false),
-    sub_system_(sub_system),
-    user_sub_domain_(NULL),
     local_normal_(true),
-    normal_(new NodeNormal(mesh_, VertexNormal::none)),
+    normal_(new NodeNormal(mesh(), VertexNormal::none)),
     As_(NULL),
     N_local_(0),
     N_offset_(0),
-    tdim_(mesh_.topology().dim())
+    tdim_(mesh().topology().dim())
 {
   // Do nothing
 }
@@ -144,11 +111,6 @@ SlipBC::~SlipBC()
   if (local_normal_)
   {
     delete normal_;
-  }
-  // Delete sub domain markers if created locally
-  if (local_sub_domains_)
-  {
-    delete sub_domains_;
   }
   delete As_;
 }
@@ -160,37 +122,6 @@ BoundaryNormal& SlipBC::normal()
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 {
-  apply(A, b, form.dofmaps()[1], form);
-}
-//-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                   const ufc::form& ufc_form)
-{
-  dolfin::error("Not implemented:\n",
-                "void apply(GenericMatrix& A, GenericVector& b,\n",
-                "\tDofMap const& dof_map, const ufc::form& form)");
-}
-//-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                   const Form& form)
-{
-  apply(A, b, form.dofmaps()[1], form);
-}
-//-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                   const DofMap& dof_map, const ufc::form& ufc_form)
-{
-  dolfin::error(
-      "Not implemented:\n",
-      "void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,\n",
-      "\tDofMap const& dof_map, const ufc::form& form)");
-}
-
-//-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-                   const Form& form)
-{
-
   if (MPI::processNumber() == 0)
   {
     dolfin_set("output destination", "terminal");
@@ -198,12 +129,10 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
     dolfin_set("output destination", "silent");
   }
 
-  UFC ufc(form.form(), mesh_, form.dofmaps());
+  UFC ufc(form, mesh(), form.dofmaps());
 
   if (As_ == NULL)
   {
-    // Need to recompute the boundary normals.
-
     // Create data structure for local assembly data
     std::string const la_backend = dolfin_get("linear algebra backend");
     if (la_backend == "JANPACK")
@@ -218,12 +147,13 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
       (*(As_->instance())).down_cast<PETScMatrix>().dup(A);
     }
 
+    //
     if (MPI::numProcesses() > 1)
     {
       std::map<uint, uint> mapping;
-      for (CellIterator c(mesh_); !c.end(); ++c)
+      for (CellIterator c(mesh()); !c.end(); ++c)
       {
-        ufc.update(*c, mesh_.distdata());
+        ufc.update(*c, mesh().distdata());
         (form.dofmaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, c->index());
 
         for (uint j = 0; j < (form.dofmaps())[0].local_dimension(); ++j)
@@ -239,8 +169,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
   *(As_->instance()) = A;
 
   Array<uint> nodes;
-  uint gdim = mesh_.geometry().dim();
-  uint cdim = mesh_.type().numVertices(mesh_.topology().dim());
+  uint gdim = mesh().geometry().dim();
+  uint cdim = mesh().type().numVertices(mesh().topology().dim());
 
   uint count = 0;
   if (boundary_.numCells())
@@ -249,32 +179,32 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
         "vertex map");
     for (VertexIterator v(boundary_); !v.end(); ++v)
     {
-      Vertex vertex(mesh_, vertex_map->get(*v));
+      Vertex vertex(mesh(), vertex_map->get(*v));
 
       // Skip facets not inside the sub domain
-      if ((*sub_domains_)(vertex) != sub_domain_)
+      if (this->sub_domain_markers()(vertex) != this->sub_domain_index())
       {
         continue;
       }
 
       uint node = vertex.index();
-      if (!mesh_.distdata().is_ghost(node, 0) || MPI::numProcesses() == 1)
+      if (!mesh().distdata().is_ghost(node, 0) || MPI::numProcesses() == 1)
       {
-        Cell cell(mesh_, (vertex.entities(gdim))[0]);
+        Cell cell(mesh(), (vertex.entities(gdim))[0]);
 
         uint *cvi = cell.entities(0);
         uint ci = 0;
         for (ci = 0; ci < cell.numEntities(0); ci++)
           if (cvi[ci] == node) break;
 
-        ufc.update(cell, mesh_.distdata());
+        ufc.update(cell, mesh().distdata());
         (form.dofmaps())[0].tabulate_dofs(ufc.dofs[0], ufc.cell, cell.index());
 
         // Get components of the vector-valued function at the current node.
         for (uint i = 0; i < gdim; i++, ci += cdim)
           nodes.push_back(ufc.dofs[0][ci]);
 
-        applySlipBC((Matrix&) A, *As_, (Vector&) b, mesh_, node, nodes);
+        applySlipBC((Matrix&) A, *As_, (Vector&) b, mesh(), node, nodes);
         count++;
         nodes.clear();
       }
@@ -290,20 +220,11 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
 
 }
 //-----------------------------------------------------------------------------
-void SlipBC::init(const SubDomain& sub_domain)
+void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+                   const Form& form)
 {
-  // Create mesh function for sub domain markers on facets
-  mesh_.init(0);
-  sub_domains_ = new MeshFunction<uint>(mesh_, 0);
-  local_sub_domains_ = true;
-
-  // Mark everything as sub domain 1
-  (*sub_domains_) = 1;
-
-  // Mark the sub domain as sub domain 0
-  sub_domain.mark(*sub_domains_, 0);
+  error("Slip boundary conditions not implemented for nonlinear systems.");
 }
-
 //-----------------------------------------------------------------------------
 void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
                          uint const& node, Array<uint> const& dofs)
@@ -318,6 +239,7 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
   int const n_type = std::max((int) std::floor(node_type), (int) tdim_);
 
   // Initialize set of row indices for reordering
+  uint row[3] = { 0, 1, 2 }; // Important for assertion checking later
   std::set<uint> row_idx;
   std::set<uint>::iterator it = row_idx.begin();
   for (uint i = 0; i < tdim_; ++i)
@@ -332,6 +254,13 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
     // Copy non-zero entries from the stiffness matrix into local row
     A.getrow(dofs[i], a_col_indices[i], a[i]);
 
+    std::cout << dofs[i] << " : ";
+    for(uint col = 0; col < a_col_indices[i].size(); ++col )
+    {
+      std::cout << std::setw(12) <<  a_col_indices[i][col];
+    }
+    std::cout <<  std::endl;
+
     // Copy rhs to local vector
     l[i] = b[dofs[i]];
 
@@ -340,7 +269,9 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
     basis_functions[i].vector().get(&v[0], tdim_, &dofs[0]);
 
     // Determine maximum component:
-    for (it = row_idx.begin(); it != row_idx.end(); ++it)
+    it = row_idx.begin();
+    row[i] = (*it);
+    for (++it; it != row_idx.end(); ++it)
     {
       if (std::fabs(v[*it]) > std::fabs(v[row[i]]))
       {
@@ -348,6 +279,16 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
       }
     }
     row_idx.erase(row[i]);
+  }
+  dolfin_assert(row[0] != row[1]);
+  dolfin_assert(row[1] != row[2]);
+  dolfin_assert(row[2] != row[0]);
+
+  //--- Apply initial row reordering ---
+  for(uint i = 0; i < tdim_; ++i)
+  {
+    // Set row to the global index
+    row[i] = dofs[i];
   }
 
   //--- Apply local equation LHS to the copy of the matrix ---
@@ -358,18 +299,17 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
     // For each constrained direction
     for (uint i = 0; i < n_type; ++i)
     {
-      // Set row to the global index
-      row[i] = dofs[i];
-
       // Zero the row
       uint nb_cols = a_col_indices[i].size();
       a_slip_row.resize(nb_cols, 0.0);
       As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
 
-      As.zero(1, &row[i]);
-
       // Update the LHS row with the vector components
-      As.set(&basis_[i][0], 1, &row[i], tdim_, &dofs[i]);
+      As.set(&basis_[i][0], 1, &row[i], tdim_, &row[0]);
+
+      dolfin_assert((std::fabs(basis_[i][row[i]])
+                      - std::fabs(basis_[i][(row[i]+1)%tdim_])
+                      - std::fabs(basis_[i][(row[i]+2)%tdim_])) >= 0);
 
       // Reset rhs for slip
       l_slip[i] = 0.0;
@@ -378,9 +318,6 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
     // For each free direction
     for (uint i = n_type; i < tdim_; ++i)
     {
-      // Set row to the global index
-      row[i] = dofs[i];
-
       // Initialize row for application of the boundary condition
       uint nb_cols = a_col_indices[i].size();
       a_slip_row.resize(nb_cols, 0.0);
@@ -399,7 +336,7 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
       }
 
       // Update the LHS row with the projection of the equation on tau_i
-      As.setrow(row[i], a_col_indices[i], a_slip_row);
+      As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
     }
 
   }
@@ -407,9 +344,6 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
   {
     for (uint i = 0; i < tdim_; ++i)
     {
-      // Set row to the global index
-      row[i] = dofs[i];
-
       // Find position of the diagonal in the vectors
       // Not really sexy but we know that the diag index is in the vector,
       // so let us save a bound checking at each loop...
@@ -438,6 +372,9 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
   }
 
   //--- Apply local equation RHS to the copy of the matrix ---
+  std::cout << "L = " << std::setw(12) << l_slip[0]
+                      << std::setw(12) << l_slip[1]
+                      << std::setw(12) << l_slip[2] << std::endl;
   b.set(&l_slip[0], tdim_, &row[0]);
 
 }

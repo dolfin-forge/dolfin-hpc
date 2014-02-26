@@ -36,7 +36,7 @@ class Mesh;
  *          element.
  */
 
-class FiniteElement : protected ufc::finite_element
+class FiniteElement : public ufc::finite_element
 {
 
 public:

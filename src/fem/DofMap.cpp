@@ -213,20 +213,11 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& sub_system,
 //-----------------------------------------------------------------------------
 DofMap::~DofMap()
 {
-  if (local_to_global_)
-    delete[] local_to_global_;
-
-  if (local_to_cell_)
-    delete[] local_to_cell_;
-
-  if (_dof_map_)
-    delete[] _dof_map_;
-
-  if (ufc_dof_map_local_)
-    delete ufc_dof_map_;
-
-  if (_v_map_)
-    delete[] _v_map_;
+  delete[] local_to_global_;
+  delete[] local_to_cell_;
+  delete[] _dof_map_;
+  delete ufc_dof_map_;
+  delete[] _v_map_;
 }
 //-----------------------------------------------------------------------------
 ufc::dof_map*

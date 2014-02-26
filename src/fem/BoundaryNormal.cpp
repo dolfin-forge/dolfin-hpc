@@ -71,7 +71,7 @@ void BoundaryNormal::init(Mesh& mesh, Form& form, uint i)
     basis_[i].init(mesh, form, i);
   }
 
-  ufc::finite_element * fe = form.form().create_finite_element(i);
+  ufc::finite_element * fe = form.create_finite_element(i);
   std::string sign = fe->signature();
   if (gdim > 1)
   {

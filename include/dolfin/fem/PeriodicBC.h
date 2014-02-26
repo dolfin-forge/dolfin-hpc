@@ -48,7 +48,8 @@ public:
   PeriodicBC(Mesh& mesh, const SubDomain& sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain, const SubSystem& sub_system);
+  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain,
+             const SubSystem& sub_system);
 
   /// Destructor
   ~PeriodicBC();
@@ -56,28 +57,11 @@ public:
   /// Apply boundary condition to linear system
   void apply(GenericMatrix& A, GenericVector& b, const Form& form);
 
-  /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const DofMap& dof_map,
-             const ufc::form& form);
-
   /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
              const Form& form);
 
-  /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const DofMap& dof_map, const ufc::form& form);
-
 private:
-
-  // The mesh
-  Mesh& mesh;
-
-  // The subdomain
-  const SubDomain& sub_domain;
-
-  // Sub system
-  SubSystem sub_system;
 
 };
 

@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg, 2003-2007.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2003-09-03
 // Last changed: 2007-04-24
@@ -33,6 +34,9 @@ namespace dolfin
 
     /// Create array of given size
     Array(uint n) : std::vector<T>(n) {}
+
+    /// Create array of given size with default value
+    Array(uint n, const T& t) : std::vector<T>(n, t) {}
 
     /// Create array containing two elements
     Array(const T& t0, const T& t1)

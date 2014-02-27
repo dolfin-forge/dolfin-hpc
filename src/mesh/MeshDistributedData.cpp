@@ -292,12 +292,12 @@ void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
   shared_adj[dim][i].insert(rank);
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_global(MeshEntity& e)
+uint MeshDistributedData::get_global(MeshEntity& e) const
 {
   return get_global( e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_global(uint i, uint dim)
+uint MeshDistributedData::get_global(uint i, uint dim) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -315,12 +315,12 @@ uint MeshDistributedData::get_global(uint i, uint dim)
   }
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_local(MeshEntity& e)
+uint MeshDistributedData::get_local(MeshEntity& e) const
 {
   return get_local(e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
- uint MeshDistributedData::get_local(uint i, uint dim)
+ uint MeshDistributedData::get_local(uint i, uint dim) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -331,12 +331,12 @@ uint MeshDistributedData::get_local(MeshEntity& e)
   return local_indices[dim][i];
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_owner(MeshEntity& e)
+uint MeshDistributedData::get_owner(MeshEntity& e) const
 {
   return get_owner(e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_owner(uint local_index, uint dim)
+uint MeshDistributedData::get_owner(uint local_index, uint dim) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -346,13 +346,12 @@ uint MeshDistributedData::get_owner(uint local_index, uint dim)
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
-_set<uint>& MeshDistributedData::get_shared_adj(MeshEntity& m)
+_set<uint>& MeshDistributedData::get_shared_adj(MeshEntity& m) const
 {
   return get_shared_adj(m.index(), m.dim());
 }
 //-----------------------------------------------------------------------------
-_set<uint>& MeshDistributedData::get_shared_adj(uint local_index,
-                               uint dim)
+_set<uint>& MeshDistributedData::get_shared_adj(uint local_index, uint dim) const
 {
   dolfin_assert(is_shared(local_index, dim));
   dolfin_assert(!is_ghost(local_index, dim));
@@ -376,7 +375,7 @@ void MeshDistributedData::remap_owner(int* mapping)
 
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_vertex_global(uint i)
+uint MeshDistributedData::get_vertex_global(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -395,7 +394,7 @@ uint MeshDistributedData::get_vertex_global(uint i)
 
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_vertex_local(uint i)
+uint MeshDistributedData::get_vertex_local(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -406,7 +405,7 @@ uint MeshDistributedData::get_vertex_local(uint i)
   return local_indices[0][i];
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_facet_global(uint i)
+uint MeshDistributedData::get_facet_global(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -426,7 +425,7 @@ uint MeshDistributedData::get_facet_global(uint i)
 
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_facet_local(uint i)
+uint MeshDistributedData::get_facet_local(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -438,7 +437,7 @@ uint MeshDistributedData::get_facet_local(uint i)
   return local_indices[_facet_dim][i];
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_cell_global(uint i)
+uint MeshDistributedData::get_cell_global(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {
@@ -458,7 +457,7 @@ uint MeshDistributedData::get_cell_global(uint i)
 
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_cell_local(uint i)
+uint MeshDistributedData::get_cell_local(uint i) const
 {
   if(MPI::numProcesses() == 1)
   {

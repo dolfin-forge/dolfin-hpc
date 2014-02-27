@@ -33,22 +33,28 @@ public:
   void clear();
   void finalize(uint dim);
 
-  //--- These cannot be const as they access the element in the map with [].
+  //---
 
-  uint get_global(uint i, uint dim);
-  uint get_global(MeshEntity& e);
+  uint get_global(uint i, uint dim) const;
+  uint get_global(MeshEntity& e) const;
 
-  uint get_local(uint i, uint dim);
-  uint get_local(MeshEntity& e);
+  uint get_local(uint i, uint dim) const;
+  uint get_local(MeshEntity& e) const;
 
-  uint get_vertex_global(uint i);
-  uint get_vertex_local(uint i);
+  uint get_owner(uint local_index, uint dim) const;
+  uint get_owner(MeshEntity& m) const;
 
-  uint get_facet_global(uint i);
-  uint get_facet_local(uint i);
+  _set<uint>& get_shared_adj(uint local_index, uint dim) const;
+  _set<uint>& get_shared_adj(MeshEntity& m) const;
 
-  uint get_cell_global(uint i);
-  uint get_cell_local(uint i);
+  uint get_vertex_global(uint i) const;
+  uint get_vertex_local(uint i) const;
+
+  uint get_facet_global(uint i) const;
+  uint get_facet_local(uint i) const;
+
+  uint get_cell_global(uint i) const;
+  uint get_cell_local(uint i) const;
 
   //---
 
@@ -65,9 +71,6 @@ public:
 
   void set_shared_adj(uint i, uint rank, uint dim);
   void set_shared_adj(MeshEntity& m, uint rank);
-
-  _set<uint>& get_shared_adj(uint local_index, uint dim);
-  _set<uint>& get_shared_adj(MeshEntity& m);
 
   inline void set_global_numVertices(uint num_global)
   { _num_global_vertex = num_global; }
@@ -95,8 +98,6 @@ public:
     finalized = false;
   }
 
-  uint get_owner(uint local_index, uint dim);
-  uint get_owner(MeshEntity& m);
   void remap_owner(int* mapping);
 
   inline bool have_global(uint i, uint dim) const
@@ -155,11 +156,11 @@ private:
   bool _valid_edge_ownership;
   bool _valid_face_ownership;
 
-  _map<uint, uint> global_indices[MAX_DIM+1];
-  _map<uint, uint> local_indices[MAX_DIM+1];
+  mutable _map<uint, uint> global_indices[MAX_DIM+1];
+  mutable _map<uint, uint> local_indices[MAX_DIM+1];
 
-  _map<uint, uint> ghost_owner[MAX_DIM];
-  _map<uint, _set<uint> > shared_adj[MAX_DIM];
+  mutable _map<uint, uint> ghost_owner[MAX_DIM];
+  mutable _map<uint, _set<uint> > shared_adj[MAX_DIM];
 
   _set<uint> shared[MAX_DIM];
   _set<uint> ghost[MAX_DIM];

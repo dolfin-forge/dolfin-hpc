@@ -2,6 +2,7 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_fem.la
 libdolfin_fem_la_SOURCES = \
 			Assembler.cpp\
+			BilinearForm.cpp\
 			BoundaryCondition.cpp\
 			BoundaryNormal.cpp\
 			DirichletBC.cpp\
@@ -11,6 +12,8 @@ libdolfin_fem_la_SOURCES = \
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
 			Form.cpp\
+			Functional.cpp\
+			LinearForm.cpp\
 			NodeNormal.cpp\
 			PeriodicBC.cpp\
 			ScratchSpace.cpp\

@@ -1,8 +1,10 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurélien Larcher, 2014.
+//
 // First added:  2007-04-02
-// Last changed: 2007-04-05
+// Last changed: 2014-02-27
 
 #ifndef __FORM_H
 #define __FORM_H
@@ -28,10 +30,10 @@ class Form : public ufc::form
 public:
 
   /// Constructor
-  Form();
+  Form(Mesh& mesh);
 
   /// Destructor
-  ~Form();
+  virtual ~Form();
 
   /// Return array of coefficients
   virtual Array<Function*> const& coefficients() const = 0;
@@ -47,6 +49,9 @@ public:
 
   /// Return DofMapSet
   DofMapSet& dofmaps() const;
+
+  /// Return mesh
+  Mesh& mesh() const;
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
@@ -92,12 +97,21 @@ protected:
 
 private:
 
+  // Mesh
+  Mesh& mesh_;
+
   // Degree of freedom maps
   mutable DofMapSet * dof_map_set_;
 
 };
 
 //--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline Mesh& Form::mesh() const
+{
+  return mesh_;
+}
 
 //-----------------------------------------------------------------------------
 inline const char* Form::signature() const

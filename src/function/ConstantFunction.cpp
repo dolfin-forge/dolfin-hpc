@@ -17,7 +17,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(const ConstantFunction& f) :
-    GenericFunction(f.mesh),
+    GenericFunction(f.mesh()),
     values(0),
     value_rank(f.value_rank),
     shape(0),
@@ -137,9 +137,10 @@ void ConstantFunction::interpolate_vertex_values(real* _values) const
   dolfin_assert(_values);
 
   // Set all vertex values to the constant tensor value
-  for (uint i = 0; i < mesh.numVertices(); i++)
+  uint const num_verts = mesh_.numVertices();
+  for (uint i = 0; i < num_verts; ++i)
   {
-    for (uint j = 0; j < size; j++)
+    for (uint j = 0; j < size; ++j)
     {
       uint k = i * size + j;
       _values[k] = values[j];

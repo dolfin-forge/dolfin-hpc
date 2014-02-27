@@ -29,13 +29,19 @@ public:
 
   /// Constructor
   GenericFunction(Mesh& mesh) :
-      mesh(mesh)
+      mesh_(mesh)
   {
   }
 
   /// Destructor
   virtual ~GenericFunction()
   {
+  }
+
+  ///
+  inline Mesh& mesh() const
+  {
+    return mesh_;
   }
 
   //--- UFC INTERFACE ---------------------------------------------------------
@@ -69,8 +75,12 @@ public:
   /// Synchronize ghosted entries
   virtual void sync_ghosts() = 0;
 
+protected:
+
   /// The mesh
-  Mesh& mesh;
+    Mesh& mesh_;
+
+private:
 
 };
 
@@ -85,7 +95,7 @@ inline void GenericFunction::disp() const
   cout << "Value rank            : " << this->rank() << endl;
   cout << "Value dimension       : " << this->dim(0) << endl;
   cout << "Evaluate at cell 0    : ";
-  Cell cell(mesh, 0);
+  Cell cell(mesh_, 0);
   Point p = cell.midpoint();
   real x[3] = { p[0], p[1], p[2]};
   real * v = new real[this->dim(0)];

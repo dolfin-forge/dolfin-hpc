@@ -15,6 +15,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/elements/FE.h>
+#include <dolfin/function/GenericFunction.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
@@ -39,7 +40,6 @@ class Expression;
 class FiniteElement;
 class FiniteElementSpace;
 class Form;
-class GenericFunction;
 class GenericVector;
 class Mesh;
 
@@ -70,25 +70,25 @@ public:
   static std::string type2string(Function::Type type);
 
   /// Create empty function
-  Function();
+  explicit Function(Mesh& mesh);
 
   /// Create constant scalar function from given value
-  Function(Mesh& mesh, real value);
+  explicit Function(Mesh& mesh, real value);
 
   /// Create constant vector function from given size and value
-  Function(Mesh& mesh, uint size, real value);
+  explicit Function(Mesh& mesh, uint size, real value);
 
   /// Create constant vector function from given size and values
-  Function(Mesh& mesh, const Array<real>& values);
+  explicit Function(Mesh& mesh, const Array<real>& values);
 
   /// Create constant tensor function from given shape and values
-  Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
+  explicit Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
 
   /// Create discrete function for argument function i of form
-  Function(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
+  explicit Function(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
   /// Create discrete function for argument function i of form
-  Function(Mesh& mesh, Form& form, uint i = 1);
+  explicit Function(Mesh& mesh, Form& form, uint i);
 
   /// Create discrete function from signature
   Function(Mesh& mesh, GenericVector& x,
@@ -119,9 +119,6 @@ public:
 
   /// Create expression function
   explicit Function(Mesh& mesh, Expression const& expr);
-
-  /// Create user-defined function (evaluation operator must be overloaded)
-  explicit Function(Mesh& mesh);
 
   /// Assign function
   Function const& operator=(Function& f);
@@ -245,6 +242,9 @@ public:
 
 protected:
 
+  /// Create user-defined function (evaluation operator must be overloaded)
+  explicit Function(Mesh& mesh, uint const& rank, uint const& dim);
+
   /// Access current cell
   /// (available during assembly for user-defined function)
   Cell const& cell() const;
@@ -259,6 +259,12 @@ protected:
 
 private:
 
+  /// Default constructor
+  Function();
+
+  // Mesh
+  Mesh * mesh_;
+
   // Pointer to current implementation (letter base class)
   GenericFunction* f_;
 
@@ -272,6 +278,81 @@ private:
   int facet_;
 
 };
+
+//--- INLINES -----------------------------------------------------------------
+
+//--- UFC INTERFACE -----------------------------------------------------------
+//-----------------------------------------------------------------------------
+inline void Function::evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const
+{
+  f_->evaluate(values, coordinates, cell);
+}
+//--- COMPOSITION GenericFunction ---------------------------------------------
+//-----------------------------------------------------------------------------
+inline uint Function::rank() const
+{
+  return f_->rank();
+}
+//-----------------------------------------------------------------------------
+inline uint Function::dim(unsigned int i) const
+{
+  return f_->dim(i);
+}
+//-----------------------------------------------------------------------------
+inline void Function::interpolate_vertex_values(real* values)
+{
+  f_->interpolate_vertex_values(values);
+}
+//-----------------------------------------------------------------------------
+inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
+                           const ufc::finite_element& finite_element,
+                           Cell& cell, int facet)
+{
+  // Make current cell and facet are available to user-defined function
+  cell_ = &cell;
+  facet_ = facet;
+
+  // Interpolate function
+  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
+
+  // Make cell and facet unavailable
+  cell_ = 0;
+  facet_ = -1;
+}
+//-----------------------------------------------------------------------------
+inline void Function::eval(real* values, const real* x) const
+{
+  f_->eval(values, x);
+}
+//-----------------------------------------------------------------------------
+inline void Function::sync_ghosts()
+{
+    f_->sync_ghosts();
+}
+//-----------------------------------------------------------------------------
+inline void Function::disp() const
+{
+  cout << "Function" << endl;
+  cout << "------- " << endl;
+
+  // Begin indentation
+  begin("");
+  cout << "Type: " << this->type() << " ("
+      << Function::type2string(this->type()) << ")" << endl;
+  if (f_ != NULL)
+  {
+    f_->disp();
+  }
+  // End indentation
+  end();
+}
+//-----------------------------------------------------------------------------
+inline Mesh& Function::mesh() const
+{
+  return f_->mesh();
+}
+//-----------------------------------------------------------------------------
 
 }
 

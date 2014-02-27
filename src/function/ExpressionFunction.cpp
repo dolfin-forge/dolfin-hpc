@@ -54,8 +54,8 @@ void ExpressionFunction::interpolate_vertex_values(real* values) const
 
   // Call overloaded eval function at each vertex
   real * local_values = new real[size];
-
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  uint const num_verts = mesh_.numVertices();
+  for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
   {
     // Evaluate at function at vertex
     e.eval(local_values, vertex->x());
@@ -63,7 +63,7 @@ void ExpressionFunction::interpolate_vertex_values(real* values) const
     // Copy values to array of vertex values
     for (uint i = 0; i < size; i++)
     {
-      values[i * mesh.numVertices() + vertex->index()] = local_values[i];
+      values[i * num_verts + vertex->index()] = local_values[i];
     }
   }
   delete[] local_values;

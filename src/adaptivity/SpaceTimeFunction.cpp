@@ -39,6 +39,8 @@ SpaceTimeFunction::SpaceTimeFunction(Mesh& mesh, Function& Ut) :
 SpaceTimeFunction::SpaceTimeFunction(SpaceTimeFunction const& f) :
     mesh_(f.mesh_),
     function_(f.function_),
+    U0(f.function_),
+    U1(f.function_),
     u0_t(f.u0_t),
     u1_t(f.u1_t),
     u0_t_valid(false),
@@ -129,7 +131,6 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
 #ifdef ENABLE_MPIIO
 
   int counter = 0;
-  int num_files = filenames.size();
 
   for (std::vector<std::string>::iterator it = filenames.begin();
       it != filenames.end(); ++it)

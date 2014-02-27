@@ -52,6 +52,7 @@ std::string Function::type2string(Function::Type type)
 //-----------------------------------------------------------------------------
 Function::Function() :
     Variable("*no name*", "empty function"),
+    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -60,8 +61,20 @@ Function::Function() :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh) :
+    Variable("*no name*", "empty function"),
+    mesh_(&mesh),
+    f_(NULL),
+    type_(user),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new UserFunction(mesh, this);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
     Variable("*no name*", "constant function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -72,6 +85,7 @@ Function::Function(Mesh& mesh, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, uint size, real value) :
     Variable("*no name*", "constant function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -82,6 +96,7 @@ Function::Function(Mesh& mesh, uint size, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<real>& values) :
     Variable("*no name*", "constant function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -93,6 +108,7 @@ Function::Function(Mesh& mesh, const Array<real>& values) :
 Function::Function(Mesh& mesh, const Array<uint>& shape,
                    const Array<real>& values) :
     Variable("*no name*", "constant function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -103,6 +119,7 @@ Function::Function(Mesh& mesh, const Array<uint>& shape,
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -113,6 +130,7 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -124,6 +142,7 @@ Function::Function(Mesh& mesh, Form& form, uint i) :
 Function::Function(Mesh& mesh, GenericVector& x,
                    std::string const& finite_element_signature) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -136,6 +155,7 @@ Function::Function(Mesh& mesh, GenericVector& x,
                    std::string const& finite_element_signature,
                    std::string const& dof_map_signature) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -148,6 +168,7 @@ Function::Function(Mesh& mesh, GenericVector& x,
 Function::Function(Mesh& mesh, std::string const& finite_element_signature,
                    std::string const& dof_map_signature) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -158,6 +179,7 @@ Function::Function(Mesh& mesh, std::string const& finite_element_signature,
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -169,6 +191,7 @@ Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
     Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -180,6 +203,7 @@ Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
 ////-----------------------------------------------------------------------------
 Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
+    mesh_(&sub_function.function().mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -205,22 +229,13 @@ Function const& Function::operator=(SubFunction sub_function)
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
     Variable("*no name*", "expression function"),
+    mesh_(&mesh),
     f_(NULL),
     type_(expression),
     cell_(0),
     facet_(-1)
 {
   f_ = new ExpressionFunction(mesh, expr);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh) :
-    Variable("*no name*", "user-defined function"),
-    f_(NULL),
-    type_(user),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new UserFunction(mesh, this);
 }
 //-----------------------------------------------------------------------------
 Function const& Function::operator=(Function& f)
@@ -248,6 +263,7 @@ Function const& Function::operator=(Function& f)
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
     Variable("*no name*", "discrete function from data file"),
+    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -255,9 +271,11 @@ Function::Function(const std::string filename) :
 {
   File file(filename);
   file >> *this;
+  mesh_ = &f_->mesh();
 }
 //-----------------------------------------------------------------------------
 Function::Function(Function const& f) :
+    mesh_(f.mesh_),
     f_(NULL),
     type_(f.type()),
     cell_(0),
@@ -286,10 +304,7 @@ Function::Function(Function const& f) :
 //-----------------------------------------------------------------------------
 Function::~Function()
 {
-  if (f_)
-  {
-    delete f_;
-  }
+  delete f_;
 }
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, real value)
@@ -397,107 +412,6 @@ void Function::init(Mesh& mesh, Expression const& expr)
   f_ = new ExpressionFunction(mesh, expr);
   type_ = expression;
 }
-//--- UFC INTERFACE -----------------------------------------------------------
-//-----------------------------------------------------------------------------
-void Function::evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const
-{
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-  f_->evaluate(values, coordinates, cell);
-}
-//--- COMPOSITION GenericFunction ---------------------------------------------
-//-----------------------------------------------------------------------------
-uint Function::rank() const
-{
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-
-  return f_->rank();
-}
-//-----------------------------------------------------------------------------
-uint Function::dim(unsigned int i) const
-{
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-
-  return f_->dim(i);
-}
-//-----------------------------------------------------------------------------
-void Function::interpolate_vertex_values(real* values)
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  f_->interpolate_vertex_values(values);
-}
-//-----------------------------------------------------------------------------
-void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
-                           const ufc::finite_element& finite_element,
-                           Cell& cell, int facet)
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  // Make current cell and facet are available to user-defined function
-  cell_ = &cell;
-  facet_ = facet;
-
-  // Interpolate function
-  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
-
-  // Make cell and facet unavailable
-  cell_ = 0;
-  facet_ = -1;
-}
-//-----------------------------------------------------------------------------
-void Function::eval(real* values, const real* x) const
-{
-  if (!f_)
-    error("Function contains no data.");
-
-  f_->eval(values, x);
-}
-//-----------------------------------------------------------------------------
-void Function::sync_ghosts()
-{
-  if (f_)
-    f_->sync_ghosts();
-}
-//-----------------------------------------------------------------------------
-void Function::disp() const
-{
-  cout << "Function" << endl;
-  cout << "------- " << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Type: " << this->type() << " ("
-      << Function::type2string(this->type()) << ")" << endl;
-  if (f_ != NULL)
-  {
-    f_->disp();
-  }
-  // End indentation
-  end();
-}
-//-----------------------------------------------------------------------------
-Mesh& Function::mesh() const
-{
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-
-  return f_->mesh;
-}
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Function::Type Function::type() const
 {
@@ -507,9 +421,6 @@ Function::Type Function::type() const
 //-----------------------------------------------------------------------------
 GenericVector& Function::vector() const
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("A vector can only be extracted from discrete functions.");
@@ -520,9 +431,6 @@ GenericVector& Function::vector() const
 //-----------------------------------------------------------------------------
 FiniteElementSpace const& Function::space() const
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("The dofmap can only be extracted from discrete functions.");
@@ -533,9 +441,6 @@ FiniteElementSpace const& Function::space() const
 //-----------------------------------------------------------------------------
 FiniteElement const& Function::finite_element() const
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("The finite element space can only be extracted from discrete "
@@ -547,9 +452,6 @@ FiniteElement const& Function::finite_element() const
 //-----------------------------------------------------------------------------
 DofMap const& Function::dofmap() const
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("The dofmap can only be extracted from discrete functions.");
@@ -560,11 +462,6 @@ DofMap const& Function::dofmap() const
 //-----------------------------------------------------------------------------
 std::string const Function::signature() const
 {
-  if (!f_)
-  {
-    error("Function contains no data.");
-  }
-
   if (type_ != discrete)
   {
     error("A signature can only be returned by discrete functions.");
@@ -583,7 +480,7 @@ uint const Function::num_sub_functions() const
 //-----------------------------------------------------------------------------
 void Function::interpolate(Function const& other_func)
 {
-  if (f_ && this->type() == Function::discrete)
+  if (type_ == discrete)
   {
     static_cast<DiscreteFunction *>(f_)->interpolate(other_func);
   }
@@ -597,9 +494,6 @@ void Function::interpolate(Function const& other_func)
 //-----------------------------------------------------------------------------
 void Function::get_block(real *& values) const
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("Values can be retrieved only from discrete functions.");
@@ -610,9 +504,6 @@ void Function::get_block(real *& values) const
 //-----------------------------------------------------------------------------
 void Function::set_block(real *& values)
 {
-  if (!f_)
-    error("Function contains no data.");
-
   if (type_ != discrete)
   {
     error("Values can be set only to discrete functions.");

@@ -88,7 +88,7 @@ void LinearPDE::solve(Function& u)
 void LinearPDE::solve(Function& u0, Function& u1)
 {
   // Solve system
-  Function u;
+  Function u(mesh);
   solve(u);
 
   // Extract sub functions
@@ -99,7 +99,7 @@ void LinearPDE::solve(Function& u0, Function& u1)
 void LinearPDE::solve(Function& u0, Function& u1, Function& u2)
 {
   // Solve system
-  Function u;
+  Function u(mesh);
   solve(u);
 
   // Extract sub functions

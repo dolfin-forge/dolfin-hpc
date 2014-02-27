@@ -48,7 +48,8 @@ uint UserFunction::dim(uint i) const
 //-----------------------------------------------------------------------------
 void UserFunction::interpolate_vertex_values(real* values) const
 {
-  dolfin_assert(values);dolfin_assert(f_);
+  dolfin_assert(values);
+  dolfin_assert(f_);
 
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
@@ -57,15 +58,17 @@ void UserFunction::interpolate_vertex_values(real* values) const
 
   // Call overloaded eval function at each vertex
   real * local_values = new real[size];
-
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  uint const num_verts = mesh_.numVertices();
+  for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
   {
     // Evaluate at function at vertex
     f_->eval(local_values, vertex->x());
 
     // Copy values to array of vertex values
     for (uint i = 0; i < size; i++)
-      values[i * mesh.numVertices() + vertex->index()] = local_values[i];
+    {
+      values[i * num_verts + vertex->index()] = local_values[i];
+    }
   }
   delete[] local_values;
 }
@@ -89,7 +92,8 @@ void UserFunction::eval(real* values, const real* x) const
         "overloaded");
 
   // Call user-overloaded eval function in Function
-  dolfin_assert(values); dolfin_assert(x);
+  dolfin_assert(values);
+  dolfin_assert(x);
   f_->eval(values, x);
 }
 
@@ -97,7 +101,9 @@ void UserFunction::eval(real* values, const real* x) const
 void UserFunction::evaluate(real* values, const real* coordinates,
                             const ufc::cell& cell) const
 {
-  dolfin_assert(values); dolfin_assert(coordinates); dolfin_assert(f_);
+  dolfin_assert(values);
+  dolfin_assert(coordinates);
+  dolfin_assert(f_);
 
   // Call user-overloaded eval function in Function
   f_->eval(values, coordinates);

@@ -186,7 +186,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
-    GenericFunction(sub_function.function().mesh),
+    GenericFunction(sub_function.function().mesh()),
     discrete_space_(sub_function.function().space(), sub_function.index()),
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
@@ -213,7 +213,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   real * global_block = new real[global_block_size];
 
   // Loop baby, loop...
-  CellIterator cell(mesh);
+  CellIterator cell(mesh_);
   uint cell_offset = 0;
   uint glob_func_cell_offset = 0;
   real * this_block = new real[dof_map_.dofsmapping_size()];
@@ -236,8 +236,8 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
-    GenericFunction(f.mesh),
-    discrete_space_(f.mesh, f.finite_element_.signature()),
+    GenericFunction(f.mesh()),
+    discrete_space_(f.mesh(), f.finite_element_.signature()),
     finite_element_(discrete_space_.element()),
     dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_.scratch),
@@ -311,9 +311,11 @@ uint DiscreteFunction::dim(uint i) const
 void DiscreteFunction::interpolate_vertex_values(real* values) const
 {
   // Local data for interpolation on each cell
-  CellIterator cell(mesh);
+  CellIterator cell(mesh_);
   UFCCell ufc_cell(*cell);
-  const uint num_cell_vertices = mesh.type().numVertices(mesh.topology().dim());
+  uint const tdim = mesh_.topology().dim();
+  uint const num_verts = mesh_.numVertices();
+  uint const num_cell_vertices = mesh_.type().numVertices(tdim);
   real* vertex_values = new real[scratch.size * num_cell_vertices];
 
   // Make sure vector's ghost values are updated)
@@ -321,11 +323,12 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
 
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values
-  // Well... discontiuous approximations might disagree
+  //FIXME: Well... discontinuous approximations might disagree
+  MeshDistributedData& distdata = mesh_.distdata();
   for (; !cell.end(); ++cell)
   {
     // Update to current cell
-    ufc_cell.update(*cell, mesh.distdata());
+    ufc_cell.update(*cell, distdata);
 
     // Tabulate dofs
     dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());
@@ -342,7 +345,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
     {
       for (uint i = 0; i < scratch.size; ++i)
       {
-        values[i * mesh.numVertices() + vertex->index()] =
+        values[i * num_verts + vertex->index()] =
             vertex_values[vertex.pos() * scratch.size + i];
       }
     }
@@ -384,11 +387,11 @@ void DiscreteFunction::eval(real* values, const real* x) const
   // Initialize intersection detector if not done before
   if (!intersection_detector_)
   {
-    intersection_detector_ = new IntersectionDetector(mesh);
+    intersection_detector_ = new IntersectionDetector(mesh_);
   }
 
   // Find the cell that contains x
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh_.geometry().dim();
   if (gdim > 3)
   {
     error("Sorry, point evaluation of functions not implemented for meshes of "
@@ -415,11 +418,11 @@ void DiscreteFunction::eval(real* values, const real* x) const
     return;
   }
 
-  Cell cell(mesh, cells[0]);
+  Cell cell(mesh_, cells[0]);
   UFCCell ufc_cell(cell);
 
   // Change to global numbering
-  ufc_cell.update(cell, mesh.distdata());
+  ufc_cell.update(cell, mesh_.distdata());
 
   // Get expansion coefficients on cell
   dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell.index());
@@ -490,15 +493,16 @@ void DiscreteFunction::interpolate(Function const& other_func)
   X_->apply();
 
   // Cell tabulated version
-  CellIterator cell(mesh);
+  CellIterator cell(mesh_);
   UFCCell ufccell(*cell);
   real * values = new real[finite_element_.value_dimension(0)];
   real * block = new real[dof_map_.dofsmapping_size()];
   uint cell_offset = 0;
   uint const local_dim = dof_map_.local_dimension();
+  MeshDistributedData& distdata = mesh_.distdata();
   for (; !cell.end(); ++cell, cell_offset += local_dim)
   {
-    ufccell.update(*cell, mesh.distdata());
+    ufccell.update(*cell, distdata);
     dof_map_.tabulate_coordinates(scratch.coordinates, ufccell);
 
     uint dof_id = 0;
@@ -563,13 +567,14 @@ void DiscreteFunction::InitializeVector()
 void DiscreteFunction::InitializeGhosts()
 {
   std::set<uint> indices;
-  CellIterator cell(mesh);
+  CellIterator cell(mesh_);
   UFCCell ufc_cell(*cell);
 
+  MeshDistributedData& distdata = mesh_.distdata();
   for (; !cell.end(); ++cell)
   {
     // Update to current cell
-    ufc_cell.update(*cell, mesh.distdata());
+    ufc_cell.update(*cell, distdata);
 
     // Tabulate dofs
     dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());

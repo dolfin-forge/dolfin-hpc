@@ -16,7 +16,8 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(3)
+    basis_(3, Function(mesh)),
+    node_type_(mesh)
 {
 }
 
@@ -25,7 +26,8 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary.mesh()),
     boundary_(&boundary),
     local_boundary_(false),
-    basis_(3)
+    basis_(3, Function(mesh_)),
+    node_type_(mesh_)
 {
 }
 

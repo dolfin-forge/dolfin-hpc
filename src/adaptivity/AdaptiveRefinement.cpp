@@ -172,9 +172,9 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   uint x_m = 0;
   uint y_m = 0;
   uint z_m = 0;
-  Function coarse_x;
-  Function coarse_y;
-  Function coarse_z;
+  Function coarse_x(mesh);
+  Function coarse_y(mesh);
+  Function coarse_z(mesh);
   Form *pre_x = new AdaptiveRefinementProjectScalarLinearForm(coarse_x);
   Form *pre_y = new AdaptiveRefinementProjectScalarLinearForm(coarse_y);
   Form *pre_z = new AdaptiveRefinementProjectScalarLinearForm(coarse_z);
@@ -461,7 +461,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
                                  Vector& x_proj)
 {
 
-  Function projected;
+  Function projected(new_mesh);
   Form *refined = new AdaptiveRefinementProjectVectorLinearForm(projected);
   projected.init(new_mesh, x_proj, *refined, 0);
 

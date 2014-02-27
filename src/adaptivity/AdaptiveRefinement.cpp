@@ -13,6 +13,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
@@ -26,14 +27,6 @@
 #include <dolfin/parameter/parameters.h>
 
 #include <dolfin/adaptivity/AdaptiveRefinement.h>
-
-#ifdef ENABLE_UFL
-#include <dolfin/adaptivity/ufc2/AdaptiveRefinementProjectScalar.h>
-#include <dolfin/adaptivity/ufc2/AdaptiveRefinementProjectVector.h>
-#else
-#include <dolfin/adaptivity/ufc1/AdaptiveRefinementProjectScalar.h>
-#include <dolfin/adaptivity/ufc1/AdaptiveRefinementProjectVector.h>
-#endif
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -172,15 +165,9 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   uint x_m = 0;
   uint y_m = 0;
   uint z_m = 0;
-  Function coarse_x(mesh);
-  Function coarse_y(mesh);
-  Function coarse_z(mesh);
-  Form *pre_x = new AdaptiveRefinementProjectScalarLinearForm(coarse_x);
-  Form *pre_y = new AdaptiveRefinementProjectScalarLinearForm(coarse_y);
-  Form *pre_z = new AdaptiveRefinementProjectScalarLinearForm(coarse_z);
-  coarse_x.init(mesh, *pre_x, 1);
-  coarse_y.init(mesh, *pre_y, 1);
-  coarse_z.init(mesh, *pre_z, 1);
+  Function coarse_x(mesh, FE::LAGRANGE3DP1S);
+  Function coarse_y(mesh, FE::LAGRANGE3DP1S);
+  Function coarse_z(mesh, FE::LAGRANGE3DP1S);
 
   for (std::vector<project_func>::iterator it = pf.begin(); it != pf.end();
       ++it)
@@ -227,9 +214,9 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       error("Projection only implemented for discrete functions");
     }
 
-    Function post_x(mesh, *pre_x, 1);
-    Function post_y(mesh, *pre_y, 1);
-    Function post_z(mesh, *pre_z, 1);
+    Function post_x(mesh, FE::LAGRANGE3DP1S);
+    Function post_y(mesh, FE::LAGRANGE3DP1S);
+    Function post_z(mesh, FE::LAGRANGE3DP1S);
 
     post_x.vector().set(x_values, x_m, x_rows);
     post_y.vector().set(y_values, y_m, y_rows);
@@ -258,10 +245,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 #endif
     File p_file(p_filename.str());
     p_file << xproj;
-
-    delete pre_z;
-    delete pre_y;
-    delete pre_x;
 
   }
 
@@ -461,17 +444,13 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
                                  Vector& x_proj)
 {
 
-  Function projected(new_mesh);
-  Form *refined = new AdaptiveRefinementProjectVectorLinearForm(projected);
-  projected.init(new_mesh, x_proj, *refined, 0);
-
-  UFC ufc(*refined, new_mesh, refined->dofmaps());
+  Function projected(new_mesh, x_proj, FE::LAGRANGE3DP1V);
 
   real test_value;
   real x[3];
   real *vv = new real[x_proj.local_size()];
   uint *indices = new uint[x_proj.local_size()];
-  uint *local_indices = new uint[refined->dofmaps()[0].local_dimension()];
+  uint *local_indices = new uint[projected.dofmap().local_dimension()];
   uint i = 0;
   MeshFunction<bool> processed(new_mesh, 0);
   processed = false;
@@ -484,11 +463,13 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
 
   dolfin_set("GTS Tolerance", 1e-10);
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);
-  for (CellIterator c(new_mesh); !c.end(); ++c)
+  CellIterator c(new_mesh);
+  UFCCell ufccell(*c);
+  for (; !c.end(); ++c)
   {
 
-    ufc.update(*c, new_mesh.distdata());
-    (refined->dofmaps())[0].tabulate_dofs(local_indices, ufc.cell, c->index());
+    ufccell.update(*c, new_mesh.distdata());
+    projected.dofmap().tabulate_dofs(local_indices, ufccell, c->index());
 
     for (VertexIterator v(*c); !v.end(); ++v)
     {

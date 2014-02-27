@@ -1,6 +1,8 @@
 include_HEADERS = dolfin.h
 
-nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
+nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
+                                adaptivity/SpaceTimeFunction.h\
+                                config/dolfin_config.h\
 				common/constants.h\
 				common/dolfin_common.h\
 				common/timing.h\
@@ -94,6 +96,7 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/assemble.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
+				fem/BilinearForm.h\
 				fem/BoundaryCondition.h\
 				fem/BoundaryNormal.h\
 				fem/DirichletBC.h\
@@ -104,6 +107,8 @@ nobase_pkginclude_HEADERS = 	config/dolfin_config.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
 				fem/FormExpansion.h\
+				fem/Functional.h\
+				fem/LinearForm.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
 				fem/ScratchSpace.h\

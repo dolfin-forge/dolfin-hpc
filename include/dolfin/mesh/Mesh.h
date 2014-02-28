@@ -168,6 +168,9 @@ public:
   /// Return exterior boundary of the mesh
   BoundaryMesh& exterior_boundary();
 
+  /// Return interior boundary of the mesh
+  BoundaryMesh& interior_boundary();
+
   /// Compute entities of given topological dimension and return number of entities
   uint init(uint dim);
 
@@ -291,7 +294,10 @@ private:
   CellType* _cell_type;
 
   /// Exterior boundary mesh
-  mutable BoundaryMesh * _boundary;
+  mutable BoundaryMesh * _exterior_boundary;
+
+  /// Interior boundary mesh
+  mutable BoundaryMesh * _interior_boundary;
 
   int _timestamp;
 

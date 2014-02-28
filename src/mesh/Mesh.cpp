@@ -49,7 +49,8 @@ Mesh::Mesh() :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _boundary(NULL),
+  _exterior_boundary(NULL),
+  _interior_boundary(NULL),
   _timestamp(time(0))
 {
   // Do nothing
@@ -61,7 +62,8 @@ Mesh::Mesh(Mesh const& mesh) :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _boundary(NULL),
+  _exterior_boundary(NULL),
+  _interior_boundary(NULL),
   _timestamp(time(0))
 {
   *this = mesh;
@@ -73,7 +75,8 @@ Mesh::Mesh(std::string filename) :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _boundary(NULL),
+  _exterior_boundary(NULL),
+  _interior_boundary(NULL),
   _timestamp(time(0))
 {
   File file(filename);
@@ -123,12 +126,25 @@ MeshData& Mesh::data()
 BoundaryMesh& Mesh::exterior_boundary()
 {
   ///FIXME: Improve hash logic to regenerate bounday at topology change
-  if(_boundary == NULL || (_boundary->mesh_hash() != this->hash()))
+  if(_exterior_boundary == NULL
+      || (_exterior_boundary->mesh_hash() != this->hash()))
   {
-    delete _boundary;
-    _boundary = new BoundaryMesh(*this, BoundaryMesh::exterior);
+    delete _exterior_boundary;
+    _exterior_boundary = new BoundaryMesh(*this, BoundaryMesh::exterior);
   }
-  return *_boundary;
+  return *_exterior_boundary;
+}
+//-----------------------------------------------------------------------------
+BoundaryMesh& Mesh::interior_boundary()
+{
+  ///FIXME: Improve hash logic to regenerate bounday at topology change
+  if(_interior_boundary == NULL
+      || (_interior_boundary->mesh_hash() != this->hash()))
+  {
+    delete _interior_boundary;
+    _interior_boundary = new BoundaryMesh(*this, BoundaryMesh::interior);
+  }
+  return *_interior_boundary;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint Mesh::init(uint dim)
@@ -160,6 +176,8 @@ void Mesh::clear()
   delete _cell_type;
   _cell_type = 0;
   delete _data;
+  delete _exterior_boundary;
+  delete _interior_boundary;
   _data = 0;
 }
 //-----------------------------------------------------------------------------

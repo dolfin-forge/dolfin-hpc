@@ -47,7 +47,7 @@ real MeshSize::min() const
   real hmin = c->diameter();
   for (; !c.end(); ++c)
     hmin = std::min(hmin, c->diameter());
-  
+
 #ifdef HAVE_MPI
   // Compute the global minimum
   if (MPI::numProcesses() > 1)
@@ -56,7 +56,7 @@ real MeshSize::min() const
     MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
   }
 #endif
-  
+
   return hmin;
 }
 //-----------------------------------------------------------------------------
@@ -66,7 +66,7 @@ real MeshSize::max() const
   real hmax = c->diameter();
   for (; !c.end(); ++c)
     hmax = std::max(hmax, c->diameter());
-  
+
 #ifdef HAVE_MPI
   // Compute the global maximum
   if (MPI::numProcesses() > 1)
@@ -75,7 +75,7 @@ real MeshSize::max() const
     MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
   }
 #endif
-  
+
   return hmax;
 }
 //-----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ real CellVolume::min() const
   real hmin = c->volume();
   for (; !c.end(); ++c)
     hmin = std::min(hmin, c->volume());
-  
+
 #ifdef HAVE_MPI
   // Compute the global minimum
   if (MPI::numProcesses() > 1)
@@ -136,7 +136,7 @@ real CellVolume::min() const
     MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
   }
 #endif
-  
+
   return hmin;
 }
 //-----------------------------------------------------------------------------
@@ -146,7 +146,7 @@ real CellVolume::max() const
   real hmax = c->volume();
   for (; !c.end(); ++c)
     hmax = std::max(hmax, c->volume());
-  
+
 #ifdef HAVE_MPI
   // Compute the global maximum
   if (MPI::numProcesses() > 1)
@@ -155,7 +155,7 @@ real CellVolume::max() const
     MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
   }
 #endif
-  
+
   return hmax;
 }
 //-----------------------------------------------------------------------------
@@ -194,16 +194,16 @@ void AvgMeshSize::eval(real * values, real const * x) const
   else
   {
     // Create facet from the global facet number
-    Facet facet0(mesh(), 
+    Facet facet0(mesh(),
 		 cell().entities(cell().mesh().topology().dim() - 1)[facet()]);
-    
+
     // If there are two cells connected to the facet
     if (facet0.numEntities(cell().mesh().topology().dim()) == 2)
     {
       // Create the two connected cells and return the average of their diameter
       Cell cell0(mesh(), facet0.entities(cell().mesh().topology().dim())[0]);
       Cell cell1(mesh(), facet0.entities(cell().mesh().topology().dim())[1]);
-      
+
       values[0] = (cell0.diameter() + cell1.diameter()) / 2.0;
     }
     // Else there is only one cell connected to the facet and the average is
@@ -310,15 +310,15 @@ OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) :
 {
   // Some simple sanity checks on form
   if (!(form.rank() == 0 && form.num_coefficients() == 2))
-    error("Invalid form: rank = %d, number of coefficients = %d." 
+    error("Invalid form: rank = %d, number of coefficients = %d."
 	  "Must be rank 0 form with 2 coefficients.",
 	  form.rank(), form.num_coefficients());
   if (!(form.num_cell_integrals() == 0
 	&& form.num_exterior_facet_integrals() == 1
 	&& form.num_interior_facet_integrals() == 0))
     error("Invalid form: Must have exactly 1 exterior facet integral");
-  
-  form.update_dofmaps(mesh);
+
+  form.update_dofmaps();
   ufc = new UFC(form, mesh, form.dofmaps());
 }
 //-----------------------------------------------------------------------------
@@ -339,18 +339,18 @@ void OutflowFacet::eval(real * values, real const * x) const
     // Copy cell, cannot call interpolate with const cell()
     Cell cell0(cell());
     ufc->update(cell0, mesh.distdata());
-    
+
     // Interpolate coefficients on cell and current facet
     for (dolfin::uint i = 0; i < form.coefficients().size(); i++)
-      form.coefficients()[i]->interpolate(ufc->w[i], ufc->cell, 
-					  *ufc->coefficient_elements[i], 
+      form.coefficients()[i]->interpolate(ufc->w[i], ufc->cell,
+					  *ufc->coefficient_elements[i],
 					  cell0, facet());
-    
-    // Get exterior facet integral (we need to be able to tabulate ALL facets 
+
+    // Get exterior facet integral (we need to be able to tabulate ALL facets
     // of a given cell)
     ufc::exterior_facet_integral* integral = ufc->exterior_facet_integrals[0];
-    
-    // Call tabulate_tensor on exterior facet integral, 
+
+    // Call tabulate_tensor on exterior facet integral,
     // dot(velocity, facet_normal)
     integral->tabulate_tensor(ufc->A, ufc->w, ufc->cell, facet());
   }

@@ -44,8 +44,8 @@ public:
   /// Return name of argument associated with the given number
   std::string coefficient_name(dolfin::uint i) const;
 
-  /// Create degree of freedom maps
-  void update_dofmaps(Mesh& mesh) const;
+  /// Update degree of freedom maps if needed
+  void update_dofmaps() const;
 
   /// Return DofMapSet
   DofMapSet& dofmaps() const;
@@ -101,7 +101,7 @@ private:
   Mesh& mesh_;
 
   // Degree of freedom maps
-  mutable DofMapSet * dof_map_set_;
+  mutable DofMapSet dof_map_set_;
 
 };
 

@@ -54,14 +54,12 @@ Assembler::~Assembler()
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 {
-  form.update_dofmaps(mesh_);
 #pragma omp parallel
   assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor)
 {
-  form.update_dofmaps(mesh_);
 #pragma omp parallel
   assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, q, reset_tensor);
 }
@@ -94,7 +92,6 @@ void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_doma
   }
 
   // Assemble
-  form.update_dofmaps(mesh_);
   assemble(A, form, form.coefficients(), form.dofmaps(),
            cell_domains, facet_domains, facet_domains, reset_tensor);
 
@@ -136,7 +133,6 @@ void Assembler::assemble(GenericTensor& A, Form& form, const SubDomain& sub_doma
   }
 
   // Assemble
-  form.update_dofmaps(mesh_);
   assemble(A, form, form.coefficients(), form.dofmaps(),
            cell_domains, facet_domains, facet_domains, q, reset_tensor);
 
@@ -156,7 +152,6 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          const MeshFunction<uint>& interior_facet_domains,
                          bool reset_tensor)
 {
-  form.update_dofmaps(mesh_);
   assemble(A, form, form.coefficients(), form.dofmaps(), &cell_domains,
            &exterior_facet_domains, &interior_facet_domains, reset_tensor);
 }
@@ -168,7 +163,6 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          const QuadratureRule& q,
                          bool reset_tensor)
 {
-  form.update_dofmaps(mesh_);
   assemble(A, form, form.coefficients(), form.dofmaps(), &cell_domains,
            &exterior_facet_domains, &interior_facet_domains, q, reset_tensor);
 }

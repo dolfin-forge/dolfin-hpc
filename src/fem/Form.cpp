@@ -16,39 +16,29 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Form::Form(Mesh& mesh) :
     mesh_(mesh),
-    dof_map_set_(NULL)
+    dof_map_set_(*this, mesh)
 {
 }
 
 //-----------------------------------------------------------------------------
 Form::~Form()
 {
-  delete dof_map_set_;
 }
 
 //-----------------------------------------------------------------------------
-void Form::update_dofmaps(Mesh& mesh) const
+void Form::update_dofmaps() const
 {
-  if (dof_map_set_ == NULL)
+  if (dof_map_set_.size() == 0)
   {
-    // Create dof maps
-    dof_map_set_ = new DofMapSet(*this, mesh);
-    dof_map_set_->update(*this, mesh);
-  }
-  else if (mesh.hash() != dof_map_set_->mesh().hash())
-  {
-    error("Attempt to reinitialize the form's dof map set with a different mesh"
-          " topology.");
+    dof_map_set_.update(*this, mesh_);
   }
 }
 
 //-----------------------------------------------------------------------------
 DofMapSet& Form::dofmaps() const
 {
-  if (!dof_map_set_)
-    error("Degree of freedom maps for Form have not been created.");
-
-  return *dof_map_set_;
+  this->update_dofmaps();
+  return dof_map_set_;
 }
 
 //-----------------------------------------------------------------------------

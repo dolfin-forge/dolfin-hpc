@@ -50,7 +50,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
   // for each coefficient of the form.
   // If the dof map set has been created the call just return without doing
   // anything.
-  form.update_dofmaps(mesh);
+  form.update_dofmaps();
 
   DofMap * ret = NULL;
   // Create UFC dof map

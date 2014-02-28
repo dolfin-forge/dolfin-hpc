@@ -705,7 +705,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     editor.initCells(cells.size());
 
 
-    MeshDistributedData distdata(mesh);
+    MeshDistributedData distdata(mesh.topology());
 
     /* Add local indices
      * Use start_index for global number

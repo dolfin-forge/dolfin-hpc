@@ -5,6 +5,7 @@
 // Modified by Magnus Vikstrøm 2007.
 // Modified by Garth N. Wells 2007.
 // Modified by Balthasar Reuter, 2013.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2006-05-08
 // Last changed: 2013-03-22
@@ -17,10 +18,10 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
 #include "ALEType.h"
-#include "MeshTopology.h"
-#include "MeshGeometry.h"
-#include "CellType.h"
 #include "MeshDistributedData.h"
+#include "MeshGeometry.h"
+#include "MeshTopology.h"
+#include "CellType.h"
 
 #ifdef HAVE_LIBGEOM
 namespace libgeom
@@ -68,9 +69,9 @@ class Mesh: public Variable
 
   // Friends
   friend class MeshEditor;
-  friend class TopologyComputation;
   friend class MeshOrdering;
   friend class MPIMeshCommunicator;
+  friend class TopologyComputation;
 
 public:
 
@@ -289,12 +290,6 @@ private:
   // Cell type
   CellType* _cell_type;
 
-  /// Return true iff topology is ordered according to the UFC numbering
-  bool _ordered;
-
-  /// Distribued Mesh data
-  MeshDistributedData _distdata;
-
   /// Exterior boundary mesh
   mutable BoundaryMesh * _boundary;
 
@@ -452,13 +447,13 @@ inline const MeshGeometry& Mesh::geometry() const
 //-----------------------------------------------------------------------------
 inline MeshDistributedData& Mesh::distdata()
 {
-  return _distdata;
+  return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------
 const inline MeshDistributedData& Mesh::distdata() const
 {
-  return _distdata;
+  return topology().distdata();
 }
 
 //-----------------------------------------------------------------------------

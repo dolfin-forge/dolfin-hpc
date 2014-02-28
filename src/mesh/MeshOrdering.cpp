@@ -9,7 +9,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshOrdering.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 void MeshOrdering::order(Mesh& mesh)
@@ -25,6 +26,8 @@ void MeshOrdering::order(Mesh& mesh)
     cell_type.orderEntities(*cell);
   }
 
-  mesh._ordered = true;
+  mesh._topology._ordered = true;
 }
 //-----------------------------------------------------------------------------
+
+}

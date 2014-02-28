@@ -11,76 +11,140 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include "MeshConnectivity.h"
+#include "MeshDistributedData.h"
 
 namespace dolfin
 {
-  
-  /// MeshTopology stores the topology of a mesh, consisting of mesh entities
-  /// and connectivity (incidence relations for the mesh entities). Note that
-  /// the mesh entities don't need to be stored, only the number of entities
-  /// and the connectivity. Any numbering scheme for the mesh entities is
-  /// stored separately in a MeshFunction over the entities.
+
+/// MeshTopology stores the topology of a mesh, consisting of mesh entities
+/// and connectivity (incidence relations for the mesh entities). Note that
+/// the mesh entities don't need to be stored, only the number of entities
+/// and the connectivity. Any numbering scheme for the mesh entities is
+/// stored separately in a MeshFunction over the entities.
+///
+/// A mesh entity e may be identified globally as a pair e = (dim, i), where
+/// dim is the topological dimension and i is the index of the entity within
+/// that topological dimension.
+
+class MeshTopology
+{
+
+  friend class MeshOrdering;
+  friend class MPIMeshCommunicator;
+  friend class TopologyComputation;
+
+public:
+
+  /// Create empty mesh topology
+  MeshTopology();
+
+  /// Copy constructor
+  MeshTopology(const MeshTopology& topology);
+
+  /// Destructor
+  ~MeshTopology();
+
+  /// Assignment
+  const MeshTopology& operator=(const MeshTopology& topology);
+
+  /// Return topological dimension
+  uint dim() const;
+
+  /// Return number of entities for given dimension
+  uint size(uint dim) const;
+
+  /// Clear all data
+  void clear();
+
+  /// Initialize topology of given maximum dimension
+  void init(uint dim);
+
+  /// Set number of entities (size) for given topological dimension
+  void init(uint dim, uint size);
+
+  /// Return connectivity for given pair of topological dimensions
+  MeshConnectivity& operator()(uint d0, uint d1);
+
+  /// Return connectivity for given pair of topological dimensions
+  const MeshConnectivity& operator()(uint d0, uint d1) const;
+
+  /// Return mesh distribution data
+  MeshDistributedData& distdata();
+
+  /// Return mesh distribution data (const version)
+  const MeshDistributedData& distdata() const;
+
   ///
-  /// A mesh entity e may be identified globally as a pair e = (dim, i), where
-  /// dim is the topological dimension and i is the index of the entity within
-  /// that topological dimension.
-  
-  class MeshTopology
-  {
-  public:
-    
-    /// Create empty mesh topology
-    MeshTopology();
+  bool is_ordered() const;
 
-    /// Copy constructor
-    MeshTopology(const MeshTopology& topology);
-    
-    /// Destructor
-    ~MeshTopology();
+  /// Display data
+  void disp() const;
 
-    /// Assignment
-    const MeshTopology& operator= (const MeshTopology& topology);
- 
-    /// Return topological dimension
-    inline uint dim() const { return _dim; }
-    
-    /// Return number of entities for given dimension
-    inline uint size(uint dim) const
-    { dolfin_assert(dim <= _dim); return num_entities[dim]; }
+private:
 
-    /// Clear all data
-    void clear();
+  /// Topological dimension
+  uint _dim;
 
-    /// Initialize topology of given maximum dimension
-    void init(uint dim);
+  /// Number of mesh entities for each topological dimension
+  uint * _num_entities;
 
-    /// Set number of entities (size) for given topological dimension
-    void init(uint dim, uint size);
+  /// Connectivity for pairs of topological dimensions
+  MeshConnectivity ** _connectivity;
 
-    /// Return connectivity for given pair of topological dimensions
-    inline MeshConnectivity& operator() (uint d0, uint d1)
-    { dolfin_assert(d0 <= _dim && d1 <= _dim); return connectivity[d0][d1]; }
+  /// Distributed mesh topology data
+  MeshDistributedData _distdata;
 
-    /// Return connectivity for given pair of topological dimensions
-    inline const MeshConnectivity& operator() (uint d0, uint d1) const
-    { dolfin_assert(d0 <= _dim && d1 <= _dim); return connectivity[d0][d1]; }
+  /// Return true iff topology is ordered according to the UFC numbering
+  bool _ordered;
 
-    /// Display data
-    void disp() const;
+};
 
-  private:
+//--- INLINE ------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::dim() const
+{
+  return _dim;
+}
 
-    // Topological dimension
-    uint _dim;
-  
-    // Number of mesh entities for each topological dimension
-    uint* num_entities;
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::size(uint dim) const
+{
+  dolfin_assert(dim <= _dim);
+  return _num_entities[dim];
+}
 
-    // Connectivity for pairs of topological dimensions
-    MeshConnectivity** connectivity;
-   
-  };
+//-----------------------------------------------------------------------------
+inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
+{
+  dolfin_assert(d0 <= _dim && d1 <= _dim);
+  return _connectivity[d0][d1];
+}
+
+//-----------------------------------------------------------------------------
+const inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= _dim && d1 <= _dim);
+  return _connectivity[d0][d1];
+}
+
+//-----------------------------------------------------------------------------
+inline MeshDistributedData& MeshTopology::distdata()
+{
+  return _distdata;
+}
+
+//-----------------------------------------------------------------------------
+const inline MeshDistributedData& MeshTopology::distdata() const
+{
+  return _distdata;
+}
+
+//-----------------------------------------------------------------------------
+inline bool MeshTopology::is_ordered() const
+{
+  return _ordered;
+}
 
 }
 

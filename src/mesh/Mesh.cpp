@@ -49,8 +49,6 @@ Mesh::Mesh() :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _ordered(false),
-  _distdata(*this),
   _boundary(NULL),
   _timestamp(time(0))
 {
@@ -63,8 +61,6 @@ Mesh::Mesh(Mesh const& mesh) :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _ordered(false),
-  _distdata(*this),
   _boundary(NULL),
   _timestamp(time(0))
 {
@@ -77,8 +73,6 @@ Mesh::Mesh(std::string filename) :
   _geometry(),
   _data(0),
   _cell_type(0),
-  _ordered(false),
-  _distdata(*this),
   _boundary(NULL),
   _timestamp(time(0))
 {
@@ -105,10 +99,11 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 
   _topology = mesh._topology;
   _geometry = mesh._geometry;
-  _distdata = mesh._distdata;
 
   if (mesh._cell_type)
+  {
     _cell_type = CellType::create(mesh._cell_type->cellType());
+  }
 
   rename(mesh.name(), mesh.label());
 
@@ -118,7 +113,9 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 MeshData& Mesh::data()
 {
   if (!_data)
+  {
     _data = new MeshData(*this);
+  }
 
   return *_data;
 }
@@ -136,15 +133,11 @@ BoundaryMesh& Mesh::exterior_boundary()
 //-----------------------------------------------------------------------------
 dolfin::uint Mesh::init(uint dim)
 {
-  // Dirty hack, do not remove or the first call to UFCCell will fail !
-  _distdata.init(this->topology().dim());
   return TopologyComputation::computeEntities(*this, dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1)
 {
-  // Dirty hack, do not remove or the first call to UFCCell will fail !
-  _distdata.init(this->topology().dim());
   TopologyComputation::computeConnectivity(*this, d0, d1);
 }
 //-----------------------------------------------------------------------------
@@ -168,20 +161,23 @@ void Mesh::clear()
   _cell_type = 0;
   delete _data;
   _data = 0;
-  _distdata.clear();
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()
 {
-  if (_ordered)
+  if (_topology.is_ordered())
+  {
     message(1, "Mesh has already been ordered, no need to reorder entities.");
+  }
   else
+  {
     MeshOrdering::order(*this);
+  }
 }
 //-----------------------------------------------------------------------------
 bool Mesh::ordered() const
 {
-  return _ordered;
+  return _topology.is_ordered();
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine()

@@ -17,21 +17,29 @@ class Edge;
 class Face;
 class Mesh;
 class MeshEntity;
+class MeshTopology;
+
+/**
+ *  @class  MeshDistributedData
+ *
+ *  @brief
+ */
+
 class MeshDistributedData
 {
   static uint const MAX_DIM = 3;
 
 public:
 
-  MeshDistributedData(Mesh const& mesh);
+  MeshDistributedData(MeshTopology& topology);
 
   ~MeshDistributedData();
 
   const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
 
-  void init(uint const& dim);
   void clear();
-  void finalize(uint dim);
+  void init(uint const dim);
+  void finalize(uint const dim);
 
   //---
 
@@ -88,14 +96,14 @@ public:
   {
     _valid_vertex_numbering = _valid_cell_numbering = false;
     _valid_edge_numbering = _valid_face_numbering = false;
-    finalized = false;
+    _finalized = false;
   }
 
   inline void invalid_ownership()
   {
     _valid_edge_numbering = _valid_face_numbering = false;
     flush_edges(); flush_faces();
-    finalized = false;
+    _finalized = false;
   }
 
   void remap_owner(int* mapping);
@@ -136,8 +144,6 @@ protected:
 
 private:
 
-  Mesh const& _mesh;
-
   uint _dim;
   mutable uint _cell_dim;
   mutable uint _facet_dim;
@@ -165,7 +171,7 @@ private:
   _set<uint> shared[MAX_DIM];
   _set<uint> ghost[MAX_DIM];
 
-  bool finalized;
+  bool _finalized;
   uint *_global_vertex_indices;
   uint *_global_facet_indices;
   uint *_global_cell_indices;

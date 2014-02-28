@@ -88,7 +88,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
                                            MeshFunction<bool> *cell_marker)
 {
 
-  MeshDistributedData distdata(mesh);
+  MeshDistributedData distdata(mesh.topology());
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint gdim = mesh.geometry().dim();
@@ -423,7 +423,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   editor.close();
 
   // Overwrite old mesh with new, and invalidate numbering
-  new_mesh._distdata = distdata;
+  new_mesh._topology._distdata = distdata;
   mesh = new_mesh;
   mesh.distdata().invalid_numbering();
   mesh.distdata().invalid_ownership();
@@ -451,7 +451,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     VertexFunctionArrayType;
 
   // new local distdata
-  MeshDistributedData distdata(mesh);
+  MeshDistributedData distdata(mesh.topology());
 
   // sizes and numbers
   uint rank = MPI::processNumber();
@@ -1015,7 +1015,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   editor.close();
 
   // Overwrite old mesh with new, and invalidate numbering
-  new_mesh._distdata = distdata;
+  new_mesh._topology._distdata = distdata;
   mesh = new_mesh;
   mesh.distdata().invalid_numbering();
   mesh.distdata().invalid_ownership();

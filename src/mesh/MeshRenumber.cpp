@@ -46,13 +46,11 @@ void MeshRenumber::renumber(Mesh& mesh)
 void MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
+  mddata.init(mesh.topology().dim());
   if(mddata._valid_vertex_numbering || MPI::numProcesses() == 1)
   {
     return;
   }
-
-  // Dirty hack
-  mddata.init(mesh.topology().dim());
 
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
@@ -152,14 +150,12 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
 void MeshRenumber::renumber_edges(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
+  mddata.init(mesh.topology().dim());
   if( mddata._valid_edge_numbering ||
       MPI::numProcesses() == 1  || mesh.topology().dim() == 1)
   {
     return;
   }
-
-  // Dirty hack
-  mddata.init(mesh.topology().dim());
 
   // Flush shared/ghosted edges
   mddata.flush_edges();
@@ -351,14 +347,12 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
 void MeshRenumber::renumber_faces(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
+  mddata.init(mesh.topology().dim());
   if( mddata._valid_face_numbering ||
       MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
   {
     return;
   }
-
-  // Dirty hack
-  mddata.init(mesh.topology().dim());
 
   mddata.flush_faces();
 
@@ -570,13 +564,11 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
 void MeshRenumber::renumber_cells(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
+  mddata.init(mesh.topology().dim());
   if( mddata._valid_cell_numbering || MPI::numProcesses() == 1)
   {
     return;
   }
-
-  // Dirty hack
-  mddata.init(mesh.topology().dim());
 
   uint offset = 0;
   uint num_cells = mesh.numCells();

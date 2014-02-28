@@ -9,7 +9,6 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/ufl/UFLFiniteElementBase.h>
 
@@ -27,8 +26,6 @@ class SubFunction;
 
 class FiniteElementSpace
 {
-
-  friend class DiscreteFunction;
 
 public:
 
@@ -107,9 +104,6 @@ private:
   mutable Cell cell_;
   FiniteElement const finite_element_;
   DofMap& dof_map_; // The dof map is owned by the DofMapCache instance.
-
-  // Scratch space
-  ScratchSpace scratch;
 
 #if ENABLE_UFL
   ufl::FiniteElementBase const * const ufl_;

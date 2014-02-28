@@ -19,8 +19,7 @@ FiniteElementSpace::FiniteElementSpace(
     mesh_(mesh),
     cell_(mesh, 0),
     finite_element_(finite_element_signature),
-    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature)),
-    scratch(cell_, finite_element_, dof_map_)
+    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature))
 #if ENABLE_UFL
             ,
     ufl_(
@@ -37,8 +36,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
     finite_element_(signature),
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
-            mesh, DofMap::dofmap_signature(signature))),
-    scratch(cell_, finite_element_, dof_map_)
+            mesh, DofMap::dofmap_signature(signature)))
 #if ENABLE_UFL
             ,
     ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(signature)))
@@ -51,8 +49,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     mesh_(mesh),
     cell_(mesh, 0),
     finite_element_(mesh.type(), form, i),
-    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, form, i)),
-    scratch(cell_, finite_element_, dof_map_)
+    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, form, i))
 #if ENABLE_UFL
             ,
     ufl_(
@@ -71,8 +68,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
     finite_element_(finite_element, finite_element_local),
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
-            mesh, DofMap::dofmap_signature(finite_element_.signature()))),
-    scratch(cell_, finite_element_, dof_map_)
+            mesh, DofMap::dofmap_signature(finite_element_.signature())))
 #if ENABLE_UFL
             ,
     ufl_(
@@ -92,7 +88,6 @@ FiniteElementSpace::FiniteElementSpace(
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
             mesh, DofMap::dofmap_signature(finite_element_.signature()))),
-    scratch(cell_, finite_element_, dof_map_),
     ufl_(&finite_element)
 {
 }
@@ -107,8 +102,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     dof_map_(
         DofMapCache::instance().acquire_dofmap(
             space.mesh(),
-            DofMap::dofmap_signature(finite_element_.signature()))),
-    scratch(cell_, finite_element_, dof_map_)
+            DofMap::dofmap_signature(finite_element_.signature())))
 #if ENABLE_UFL
             ,
     ufl_(

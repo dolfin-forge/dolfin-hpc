@@ -3,6 +3,7 @@
 //
 // Modified by Garth N. Wells 2006, 2007.
 // Modified by Dag Lindbo, 2008.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2004
 // Last changed: 2007-12-09
@@ -11,64 +12,77 @@
 #define __LINEAR_PDE_H
 
 #include <dolfin/common/Array.h>
-#include <dolfin/parameter/Parametrized.h>
+#include <dolfin/fem/BilinearForm.h>
+#include <dolfin/fem/LinearForm.h>
 #include <dolfin/la/Vector.h>
-#include <dolfin/fem/DofMapSet.h>
+#include <dolfin/parameter/Parametrized.h>
 
 namespace dolfin
 {
 
-  class Form;
-  class Mesh;
-  class BoundaryCondition;
-  class Function;
+class Form;
+class Mesh;
+class BoundaryCondition;
+class Function;
 
-  /// A LinearPDE represents a (system of) linear partial differential
-  /// equation(s) in variational form: Find u in V such that
-  ///
-  ///     a(v, u) = L(v) for all v in V',
-  ///
-  /// where a is a bilinear form and L is a linear form.
+/**
+ *  @class  LinearPDE
+ *
+ *  @brief  A LinearPDE represents a (system of) linear partial differential
+ *          equation(s) in variational form: Find u in V such that
+ *
+ *               a(v, u) = L(v) for all v in V',
+ *
+ *          where a is a bilinear form and L is a linear form.
+ */
 
-  class LinearPDE : public Parametrized
-  {
-  public:
+class LinearPDE : public Parametrized
+{
+public:
 
-    /// Define a linear PDE with natural boundary conditions
-    LinearPDE(Form& a, Form& L, Mesh& mesh);
-    
-    /// Define a linear PDE with a single Dirichlet boundary condition
-    LinearPDE(Form& a, Form& L, Mesh& mesh, BoundaryCondition& bc);
-    
-    /// Define a linear PDE with a set of Dirichlet boundary conditions
-    LinearPDE(Form& a, Form& L, Mesh& mesh, Array<BoundaryCondition*>& bcs);
+  /// Define a linear PDE with natural boundary conditions
+  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh);
 
-    /// Destructor
-    ~LinearPDE();
-    
-    /// Solve PDE system
-    void solve(Function& u);
+  /// Define a linear PDE with a single Dirichlet boundary condition
+  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh, BoundaryCondition& bc);
 
-    /// Solve PDE system and extract sub functions
-    void solve(Function& u0, Function& u1);
+  /// Define a linear PDE with a set of Dirichlet boundary conditions
+  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+            Array<BoundaryCondition*>& bcs);
 
-    /// Solve PDE system and extract sub functions
-    void solve(Function& u0, Function& u1, Function& u2);
+  /// Destructor
+  ~LinearPDE();
 
-  private:
-    
-    // The bilinear form
-    Form& a;
-    
-    // The linear form
-    Form& L;
+  /// Solve PDE system
+  void solve(Function& u);
 
-    // The mesh
-    Mesh& mesh;
+  /// Solve PDE system and extract sub functions
+  void solve(Function& u0, Function& u1);
 
-    // The boundary conditions
-    Array<BoundaryCondition*> bcs;
-  };
+  /// Solve PDE system and extract sub functions
+  void solve(Function& u0, Function& u1, Function& u2);
+
+private:
+
+  // The bilinear form
+  BilinearForm& a;
+
+  // The linear form
+  LinearForm& L;
+
+  // The mesh
+  Mesh& mesh;
+
+  // The assembler
+  Assembler assembler;
+
+  // The boundary conditions
+  Array<BoundaryCondition*> bcs;
+
+  // Not assembled ?
+  bool not_assembled;
+};
+
 }
 
 #endif

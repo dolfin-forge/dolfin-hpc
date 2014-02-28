@@ -15,37 +15,28 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-NonlinearPDE::NonlinearPDE(Form& a,
-                           Form& L,
-                           Mesh& mesh,
-                           BoundaryCondition& bc)
-  : a(a), L(L), mesh(mesh), assembler(mesh)
+NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+                           BoundaryCondition& bc) :
+    a(a),
+    L(L),
+    mesh(mesh),
+    assembler(mesh)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
-
-  // Check ranks of forms
-  if ( a.rank() != 2 )
-    error("Expected a bilinear form but rank is %d.", a.rank());
-  if ( L.rank() != 1 )
-    error("Expected a linear form but rank is %d.", L.rank());
 
   // Create array with one boundary condition
   bcs.push_back(&bc);
 }
 //-----------------------------------------------------------------------------
-NonlinearPDE::NonlinearPDE(Form& a,
-                           Form& L,
-                           Mesh& mesh,
-                           Array<BoundaryCondition*>& bcs)
-  : a(a), L(L), mesh(mesh), bcs(bcs), assembler(mesh)
+NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+                           Array<BoundaryCondition*>& bcs) :
+    a(a),
+    L(L),
+    mesh(mesh),
+    bcs(bcs),
+    assembler(mesh)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
-
-  // Check ranks of forms
-  if ( a.rank() != 2 )
-    error("Expected a bilinear form but rank is %d.", a.rank());
-  if ( L.rank() != 1 )
-    error("Expected a linear form but rank is %d.", L.rank());
 }
 //-----------------------------------------------------------------------------
 NonlinearPDE::~NonlinearPDE()
@@ -58,15 +49,18 @@ void NonlinearPDE::update(const GenericVector& x)
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void NonlinearPDE::form(GenericMatrix& A, GenericVector& b, const GenericVector& x)
+void NonlinearPDE::form(GenericMatrix& A, GenericVector& b,
+                        const GenericVector& x)
 {
   // Assemble
-  assembler.assemble(A, a);
-  assembler.assemble(b, L);
+  assembler.assemble(A, a, true);
+  assembler.assemble(b, L, true);
 
   // Apply boundary conditions
   for (uint i = 0; i < bcs.size(); i++)
+  {
     bcs[i]->apply(A, b, x, a);
+  }
 }
 //-----------------------------------------------------------------------------
 void NonlinearPDE::solve(Function& u, real& t, const real& T, const real& dt)
@@ -77,10 +71,10 @@ void NonlinearPDE::solve(Function& u, real& t, const real& T, const real& dt)
   u.init(mesh, x, a, 1);
 
   // Solve
-  while( t < T )
+  while (t < T)
   {
     t += dt;
-    newton_solver.solve(*this ,x);
+    newton_solver.solve(*this, x);
   }
 
   end();

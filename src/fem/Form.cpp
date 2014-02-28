@@ -57,4 +57,72 @@ std::string Form::coefficient_name(uint const i) const
   return "";
 }
 
+//-----------------------------------------------------------------------------
+bool Form::check(Array<Function*> const& coefficients) const
+{
+  // Check that we get the correct number of coefficients
+  if (coefficients.size() != this->num_coefficients())
+  {
+    error("Incorrect number of coefficients: %d given but %d required.",
+          coefficients.size(), this->num_coefficients());
+  }
+
+  // Check that all coefficients have valid value dimensions
+  for (uint i = 0; i < coefficients.size(); ++i)
+  {
+    if (coefficients[i] == NULL)
+    {
+      error("Got NULL Function as coefficient %d.", i);
+    }
+
+    ufc::finite_element* fe = this->create_finite_element(i + this->rank());
+    uint r = coefficients[i]->rank();
+    uint fe_r = fe->value_rank();
+    if (fe_r != r)
+    {
+      error("Invalid value rank of Function %d, got %d but expecting %d.",
+            "You may need to provide the rank of a user defined Function.", i,
+            r, fe_r);
+    }
+
+    for (uint j = 0; j < r; ++j)
+    {
+      uint dim = coefficients[i]->dim(j);
+      uint fe_dim = fe->value_dimension(j);
+      if (dim != fe_dim)
+      {
+        error(
+            "Invalid value dimension %d of Function %d, got %d but expecting %d.",
+            "You may need to provide the dimension of a user defined Function.",
+            j, i, dim, fe_dim);
+      }
+    }
+    delete fe;
+  }
+
+  // Check that the cell dimension matches the mesh dimension
+  if (this->rank() + this->num_coefficients() > 0)
+  {
+    ufc::finite_element* element = this->create_finite_element(0);
+    dolfin_assert(element);
+    CellType::Type celltype = mesh().type().cellType();
+    ufc::shape shape = element->cell_shape();
+
+    if (celltype == CellType::interval && shape != ufc::interval)
+    {
+      error("Mesh cell type (intervals) does not match cell type of form.");
+    }
+    if (celltype == CellType::triangle && shape != ufc::triangle)
+    {
+      error("Mesh cell type (triangles) does not match cell type of form.");
+    }
+    if (celltype == CellType::tetrahedron && shape != ufc::tetrahedron)
+    {
+      error("Mesh cell type (tetrahedra) does not match cell type of form.");
+    }
+    delete element;
+  }
+  return true;
+}
+
 }

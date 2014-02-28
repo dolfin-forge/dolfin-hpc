@@ -20,175 +20,176 @@
 namespace dolfin
 {
 
-  class DofMapSet;
-  class GenericTensor;
-  class Function;
-  class Form;
-  class Mesh;
-  class SubDomain;
-  class UFC;
-  class BoundaryMesh;
+class DofMapSet;
+class GenericTensor;
+class Function;
+class Form;
+class Mesh;
+class SubDomain;
+class UFC;
+class BoundaryMesh;
 
-  /// This class provides automated assembly of linear systems, or
-  /// more generally, assembly of a sparse tensor from a given
-  /// variational form.
+/**
+ *  @class Assembler
+ *
+ *  @brief  This class provides assembly of linear systems, or more generally,
+ *          assembly of a sparse tensor from a given variational form.
+ */
 
-  class Assembler
-  {
-  public:
+class Assembler
+{
+public:
 
-    /// Constructor
-    Assembler(Mesh& mesh);
+  /// Constructor
+  Assembler(Mesh& mesh);
 
-    /// Destructor
-    ~Assembler();
+  /// Destructor
+  ~Assembler();
 
-    /// Assemble tensor from given variational form
-    void assemble(GenericTensor& A, Form& form, bool reset_tensor = true);
-    void assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor = true);
+  /// Assemble tensor from given variational form
+  void assemble(GenericTensor& A, Form& form, bool reset_tensor);
+  void assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor);
 
-    /// Assemble tensor from given variational form over a sub domain
-    void assemble(GenericTensor& A, Form& form,
-                  const SubDomain& sub_domain,
-                  bool reset_tensor = true);
-    void assemble(GenericTensor& A, Form& form,
-                  const SubDomain& sub_domain,
-                  const QuadratureRule& q,
-                  bool reset_tensor = true);
+  /// Assemble tensor from given variational form over a sub domain
+  void assemble(GenericTensor& A, Form& form,
+                const SubDomain& sub_domain,
+                bool reset_tensor);
+  void assemble(GenericTensor& A, Form& form,
+                const SubDomain& sub_domain,
+                const QuadratureRule& q,
+                bool reset_tensor);
 
-    /// Assemble tensor from given variational form over a sub domain
-    //void assemble(GenericTensor& A, Form& form,
-    //              const MeshFunction<uint>& domains, uint domain, bool reset_tensor = true);
+  /// Assemble tensor from given variational form over a sub domain
+  //void assemble(GenericTensor& A, Form& form,
+  //              const MeshFunction<uint>& domains, uint domain, bool reset_tensor);
 
-    /// Assemble tensor from given variational form over sub domains
-    void assemble(GenericTensor& A, Form& form,
-                  const MeshFunction<uint>& cell_domains,
-                  const MeshFunction<uint>& exterior_facet_domains,
-                  const MeshFunction<uint>& interior_facet_domains,
-                  bool reset_tensor = true);
-    void assemble(GenericTensor& A, Form& form,
-                  const MeshFunction<uint>& cell_domains,
-                  const MeshFunction<uint>& exterior_facet_domains,
-                  const MeshFunction<uint>& interior_facet_domains,
-                  const QuadratureRule& q,
-                  bool reset_tensor = true);
+  /// Assemble tensor from given variational form over sub domains
+  void assemble(GenericTensor& A, Form& form,
+                const MeshFunction<uint>& cell_domains,
+                const MeshFunction<uint>& exterior_facet_domains,
+                const MeshFunction<uint>& interior_facet_domains,
+                bool reset_tensor);
+  void assemble(GenericTensor& A, Form& form,
+                const MeshFunction<uint>& cell_domains,
+                const MeshFunction<uint>& exterior_facet_domains,
+                const MeshFunction<uint>& interior_facet_domains,
+                const QuadratureRule& q,
+                bool reset_tensor);
 
-    /// Assemble scalar from given variational form
-    real assemble(Form& form);
+  /// Assemble scalar from given variational form
+  real assemble(Form& form);
 
-    /// Assemble scalar from given variational form over a sub domain
-    real assemble(Form& form, const SubDomain& sub_domain);
+  /// Assemble scalar from given variational form over a sub domain
+  real assemble(Form& form, const SubDomain& sub_domain);
 
-    /// Assemble scalar from given variational form over sub domains
-    real assemble(Form& form,
-                  const MeshFunction<uint>& cell_domains,
-                  const MeshFunction<uint>& exterior_facet_domains,
-                  const MeshFunction<uint>& interior_facet_domains);
+  /// Assemble scalar from given variational form over sub domains
+  real assemble(Form& form,
+                const MeshFunction<uint>& cell_domains,
+                const MeshFunction<uint>& exterior_facet_domains,
+                const MeshFunction<uint>& interior_facet_domains);
 
-    /// Assemble tensor from given (UFC) form, coefficients and sub domains.
-    /// This is the main assembly function in DOLFIN. All other assembly functions
-    /// end up calling this function.
-    ///
-    /// The MeshFunction arguments can be used to specify assembly over subdomains
-    /// of the mesh cells, exterior facets and interior facets. Either a null pointer
-    /// or an empty MeshFunction may be used to specify that the tensor should be
-    /// assembled over the entire set of cells or facets.
-    void assemble(GenericTensor& A, const Form& form,
-                  const Array<Function*>& coefficients,
-                  const DofMapSet& dof_map_set,
-                  const MeshFunction<uint>* cell_domains,
-                  const MeshFunction<uint>* exterior_facet_domains,
-                  const MeshFunction<uint>* interior_facet_domains,
-                  bool reset_tensor = true);
-    void assemble(GenericTensor& A, const Form& form,
-                  const Array<Function*>& coefficients,
-                  const DofMapSet& dof_map_set,
-                  const MeshFunction<uint>* cell_domains,
-                  const MeshFunction<uint>* exterior_facet_domains,
-                  const MeshFunction<uint>* interior_facet_domains,
-                  const QuadratureRule& q,
-                  bool reset_tensor = true);
+  /// Assemble tensor from given (UFC) form, coefficients and sub domains.
+  /// This is the main assembly function in DOLFIN. All other assembly functions
+  /// end up calling this function.
+  ///
+  /// The MeshFunction arguments can be used to specify assembly over subdomains
+  /// of the mesh cells, exterior facets and interior facets. Either a null pointer
+  /// or an empty MeshFunction may be used to specify that the tensor should be
+  /// assembled over the entire set of cells or facets.
+  void assemble(GenericTensor& A, const Form& form,
+                const Array<Function*>& coefficients,
+                const DofMapSet& dof_map_set,
+                const MeshFunction<uint>* cell_domains,
+                const MeshFunction<uint>* exterior_facet_domains,
+                const MeshFunction<uint>* interior_facet_domains,
+                bool reset_tensor = true);
+  void assemble(GenericTensor& A, const Form& form,
+                const Array<Function*>& coefficients,
+                const DofMapSet& dof_map_set,
+                const MeshFunction<uint>* cell_domains,
+                const MeshFunction<uint>* exterior_facet_domains,
+                const MeshFunction<uint>* interior_facet_domains,
+                const QuadratureRule& q,
+                bool reset_tensor = true);
 
-    void assemble_system(GenericTensor& A, const Form& A_form,
-                         const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
-                         GenericTensor& b, const Form& b_form,
-                         const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
-                         DirichletBC& bc, const MeshFunction<uint>* cell_domains,
-                         const MeshFunction<uint>* exterior_facet_domains,
-                         const MeshFunction<uint>* interior_facet_domains,
-                         bool reset_tensors);
+  void assemble_system(GenericTensor& A, const Form& A_form,
+                       const Array<Function*>& A_coefficients,
+                       const DofMapSet& A_dof_map_set,
+                       GenericTensor& b, const Form& b_form,
+                       const Array<Function*>& b_coefficients,
+                       const DofMapSet& b_dof_map_set,
+                       DirichletBC& bc, const MeshFunction<uint>* cell_domains,
+                       const MeshFunction<uint>* exterior_facet_domains,
+                       const MeshFunction<uint>* interior_facet_domains,
+                       bool reset_tensors);
 
-    void assemble_system(GenericTensor& A, const Form& A_form,
-                         const Array<Function*>& A_coefficients, const DofMapSet& A_dof_map_set,
-                         GenericTensor& b, const Form& b_form,
-                         const Array<Function*>& b_coefficients, const DofMapSet& b_dof_map_set,
-                         DirichletBC& bc, const MeshFunction<uint>* cell_domains,
-                         const MeshFunction<uint>* exterior_facet_domains,
-                         const MeshFunction<uint>* interior_facet_domains,
-                         const QuadratureRule& q,
-                         bool reset_tensors);
+  void assemble_system(GenericTensor& A, const Form& A_form,
+                       const Array<Function*>& A_coefficients,
+                       const DofMapSet& A_dof_map_set,
+                       GenericTensor& b, const Form& b_form,
+                       const Array<Function*>& b_coefficients,
+                       const DofMapSet& b_dof_map_set,
+                       DirichletBC& bc, const MeshFunction<uint>* cell_domains,
+                       const MeshFunction<uint>* exterior_facet_domains,
+                       const MeshFunction<uint>* interior_facet_domains,
+                       const QuadratureRule& q,
+                       bool reset_tensors);
 
 
-    void applyTraces( GenericTensor& globalA, GenericTensor& globalb,
-        DirichletBC& bc,
-        const DofMapSet& A_dof_map_set, const DofMapSet& b_dof_map_set,
-        const Form& A_form, const Form& b_form,
-        const MeshFunction<uint>* domains);
+  void applyTraces( GenericTensor& globalA, GenericTensor& globalb,
+                    DirichletBC& bc, const DofMapSet& A_dof_map_set,
+                    const DofMapSet& b_dof_map_set, const Form& A_form,
+                    const Form& b_form, const MeshFunction<uint>* domains);
 
-  private:
+private:
 
-    // Assemble over cells
-    void assembleCells(GenericTensor& A,
-                       const Array<Function*>& coefficients,
-                       const DofMapSet& dof_set_map,
-                       UFC& data,
-                       const MeshFunction<uint>* domains) const;
+  // Assemble over cells
+  void assembleCells(GenericTensor& A,
+                     const Array<Function*>& coefficients,
+                     const DofMapSet& dof_set_map,
+                     UFC& data,
+                     const MeshFunction<uint>* domains) const;
 
-    // Assemble over cells using a user defined quadrature rule
-    void assembleCells(GenericTensor& A,
-                       const Array<Function*>& coefficients,
-                       const DofMapSet& dof_set_map,
-                       UFC& data,
-                       const MeshFunction<uint>* domains,
-                       const UFCCellIntegral& cell_integral,
-                       const QuadratureRule& q) const;
+  // Assemble over cells using a user defined quadrature rule
+  void assembleCells(GenericTensor& A,
+                     const Array<Function*>& coefficients,
+                     const DofMapSet& dof_set_map,
+                     UFC& data,
+                     const MeshFunction<uint>* domains,
+                     const UFCCellIntegral& cell_integral,
+                     const QuadratureRule& q) const;
 
-    // Assemble over exterior facets
-    void assembleExteriorFacets(GenericTensor& A,
-                                const Array<Function*>& coefficients,
-                                const DofMapSet& dof_set_map,
-                                UFC& data,
-                                const MeshFunction<uint>* domains) const;
+  // Assemble over exterior facets
+  void assembleExteriorFacets(GenericTensor& A,
+                              const Array<Function*>& coefficients,
+                              const DofMapSet& dof_set_map,
+                              UFC& data,
+                              const MeshFunction<uint>* domains) const;
 
-    // Assemble over interior facets
-    void assembleInteriorFacets(GenericTensor& A,
-                                const Array<Function*>& coefficients,
-                                const DofMapSet& dof_set_map,
-                                UFC& data,
-                                const MeshFunction<uint>* domains) const;
+  // Assemble over interior facets
+  void assembleInteriorFacets(GenericTensor& A,
+                              const Array<Function*>& coefficients,
+                              const DofMapSet& dof_set_map,
+                              UFC& data,
+                              const MeshFunction<uint>* domains) const;
 
-    // Check arguments
-    void check(const Form& form,
-               const Array<Function*>& coefficients,
-               const Mesh& mesh) const;
+  // Initialize global tensor
+  void initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
+                        UFC& ufc, bool reset_tensor) const;
 
-    // Initialize global tensor
-    void initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
-                          UFC& ufc, bool reset_tensor) const;
+  // Pretty-printing for progress bar
+  std::string progressMessage(uint rank, std::string integral_type) const;
 
-    // Pretty-printing for progress bar
-    std::string progressMessage(uint rank, std::string integral_type) const;
+  // The mesh
+  Mesh& mesh_;
 
-    // The mesh
-    Mesh& mesh_;
+  // Boundary mesh
+  BoundaryMesh& boundary_;
 
-    // Boundary mesh
-    BoundaryMesh& boundary_;
+  //
+  uint const dim_;
 
-    //
-    uint const dim_;
-
-  };
+};
 
 }
 

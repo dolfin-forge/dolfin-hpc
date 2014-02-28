@@ -90,6 +90,8 @@ public:
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
+  bool check(Array<Function*> const& coefficients) const;
+
 protected:
 
   /// Return UFC form

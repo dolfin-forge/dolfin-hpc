@@ -9,63 +9,66 @@
 #ifndef __NONLINEAR_PDE_H
 #define __NONLINEAR_PDE_H
 
+#include <dolfin/fem/Assembler.h>
+#include <dolfin/fem/BilinearForm.h>
+#include <dolfin/fem/LinearForm.h>
 #include <dolfin/nls/NonlinearProblem.h>
 #include <dolfin/nls/NewtonSolver.h>
-#include <dolfin/fem/Assembler.h>
-#include <dolfin/fem/DofMapSet.h>
 
 namespace dolfin
 {
 
-  /// This class provides automated solution of nonlinear PDEs.
-  
-  class NonlinearPDE : public NonlinearProblem, public Parametrized
-  {
-  public:
+/// This class provides automated solution of nonlinear PDEs.
 
-    /// Constructor
-    NonlinearPDE(Form& a, Form& L, Mesh& mesh, BoundaryCondition& bc);
+class NonlinearPDE : public NonlinearProblem, public Parametrized
+{
+public:
 
-    /// Constructor
-    NonlinearPDE(Form& a, Form& L, Mesh& mesh, Array<BoundaryCondition*>& bcs);
+  /// Constructor
+  NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+               BoundaryCondition& bc);
 
-    /// Destructor
-    ~NonlinearPDE();
+  /// Constructor
+  NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+               Array<BoundaryCondition*>& bcs);
 
-    /// Function called before Jacobian matrix and RHS vector are formed. Users
-    /// can supply this function to perform updates.
-    virtual void update(const GenericVector& x);
+  /// Destructor
+  ~NonlinearPDE();
 
-    /// User-defined function to compute F(u) its Jacobian
-    void form(GenericMatrix& A, GenericVector& b, const GenericVector& x); 
+  /// Function called before Jacobian matrix and RHS vector are formed. Users
+  /// can supply this function to perform updates.
+  virtual void update(const GenericVector& x);
 
-    /// Solve PDE
-    void solve(Function& u, real& t, const real& T, const real& dt);
+  /// User-defined function to compute F(u) its Jacobian
+  void form(GenericMatrix& A, GenericVector& b, const GenericVector& x);
 
-  private:
+  /// Solve PDE
+  void solve(Function& u, real& t, const real& T, const real& dt);
 
-    // The bilinear form
-    Form& a;
-    
-    // The linear form
-    Form& L;
+private:
 
-    // The mesh
-    Mesh& mesh;
+  // The bilinear form
+  BilinearForm& a;
 
-    // The boundary conditions
-    Array<BoundaryCondition*> bcs;
+  // The linear form
+  LinearForm& L;
 
-    // The solution vector
-    Vector x;
+  // The mesh
+  Mesh& mesh;
 
-    // Assembler 
-    Assembler assembler;
+  // The boundary conditions
+  Array<BoundaryCondition*> bcs;
 
-    // Solver
-    NewtonSolver newton_solver;
-      
-  };
+  // The solution vector
+  Vector x;
+
+  // Assembler
+  Assembler assembler;
+
+  // Solver
+  NewtonSolver newton_solver;
+
+};
 
 }
 

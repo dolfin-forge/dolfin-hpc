@@ -183,9 +183,6 @@ private:
   // The mesh
   Mesh& mesh_;
 
-  // Boundary mesh
-  BoundaryMesh& boundary_;
-
   //
   uint const dim_;
 

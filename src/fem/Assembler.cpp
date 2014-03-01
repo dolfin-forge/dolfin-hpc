@@ -42,7 +42,6 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 Assembler::Assembler(Mesh& mesh) :
     mesh_(mesh),
-    boundary_(mesh.exterior_boundary()),
     dim_(mesh_.topology().dim())
 {
   // Do nothing
@@ -453,20 +452,21 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   // Exterior facet integral
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
-  MeshFunction<uint>* cell_map = boundary_.data().meshFunction("cell map");
+  BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
+  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
 
   //
-  if(boundary_.numCells()  == 0) return;
+  if(exterior_boundary.numCells()  == 0) return;
 
   dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
 #ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(A.rank(), "exterior facets"), boundary_.numCells());
+  Progress p(progressMessage(A.rank(), "exterior facets"), exterior_boundary.numCells());
 #endif
   //  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
 #pragma omp for
-  for (uint i = 0; i < boundary_.numCells(); i++)
+  for (uint i = 0; i < exterior_boundary.numCells(); i++)
   {
 
     //    Cell boundary_cell(*boundary, i);
@@ -783,11 +783,12 @@ void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
   UFC b_ufc(b_form, mesh_, b_dof_map_set);
 
   // fetch pointers to element matrix and vector
-  MeshFunction<uint>* cell_map = boundary_.data().meshFunction("cell map");
+  BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
+  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
 #ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(globalA.rank(), "exterior facets"), boundary_.numCells());
+  Progress p(progressMessage(globalA.rank(), "exterior facets"), exterior_boundary.numCells());
 #endif
-  for (CellIterator boundary_cell(boundary_); !boundary_cell.end(); ++boundary_cell)
+  for (CellIterator boundary_cell(exterior_boundary); !boundary_cell.end(); ++boundary_cell)
   {
     // Get mesh facet corresponding to boundary cell
     Facet mesh_facet(mesh_, (*cell_map)(*boundary_cell));

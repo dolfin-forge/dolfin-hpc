@@ -264,6 +264,9 @@ public:
                   Array<std::pair<MeshFunction<double> *,
                   MeshFunction<double> *> >& vertex_functions);
 
+  /// Return whether the mesh is distributed
+  bool distributed() const;
+
   /// Renumber mesh global numbering
   void renumber();
 
@@ -280,6 +283,8 @@ public:
   friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
 
 private:
+
+  bool _is_distributed;
 
   // Mesh topology
   MeshTopology _topology;
@@ -477,6 +482,10 @@ inline const CellType& Mesh::type() const
 }
 
 //-----------------------------------------------------------------------------
+inline bool Mesh::distributed() const
+{
+  return _is_distributed;
+}
 
 }
 

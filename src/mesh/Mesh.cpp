@@ -45,6 +45,7 @@ namespace dolfin {
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
   Variable("mesh", "DOLFIN mesh"),
+  _is_distributed(false),
   _topology(),
   _geometry(),
   _data(0),
@@ -58,6 +59,7 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
   Variable("mesh", "DOLFIN mesh"),
+  _is_distributed(mesh._is_distributed),
   _topology(),
   _geometry(),
   _data(0),
@@ -71,6 +73,7 @@ Mesh::Mesh(Mesh const& mesh) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
   Variable("mesh", "DOLFIN mesh"),
+  _is_distributed(false),
   _topology(),
   _geometry(),
   _data(0),
@@ -88,6 +91,7 @@ Mesh::Mesh(std::string filename) :
       partition(partitions);
       distribute(partitions);
       renumber();
+      _is_distributed = true;
   }
 }
 //-----------------------------------------------------------------------------
@@ -100,6 +104,7 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 {
   clear();
 
+  _is_distributed = mesh._is_distributed;
   _topology = mesh._topology;
   _geometry = mesh._geometry;
 

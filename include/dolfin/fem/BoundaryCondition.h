@@ -33,19 +33,19 @@ class BoundaryCondition
 {
 public:
 
-  /// Constructor
+  /// Constructor based on a geometrical subdomain
   BoundaryCondition(std::string const& type, Mesh& mesh,
                     SubDomain const& sub_domain);
 
-  /// Constructor
+  /// Constructor based on boundary sub domain markers
   BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
                     uint sub_domain);
 
-  /// Constructor
+  /// Constructor on a geometrical subdomain for a given subspace
   BoundaryCondition(std::string const& type, Mesh& mesh,
                     SubDomain const& sub_domain, SubSystem const sub_system);
 
-  /// Constructor
+  /// Constructor on boundary sub domain markers for a given subspace
   BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
                     uint sub_domain, SubSystem const sub_system);
 

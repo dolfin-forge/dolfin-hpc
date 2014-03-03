@@ -29,13 +29,6 @@ class SubFunction
 {
 public:
 
-  /// Create empty sub function
-  SubFunction() :
-      f_(NULL),
-      i_(0)
-  {
-  }
-
   /// Create sub function
   SubFunction(DiscreteFunction& f, uint i) :
       f_(&f),
@@ -58,6 +51,13 @@ public:
   void disp() const;
 
 private:
+
+  /// Create empty sub function
+  SubFunction() :
+      f_(NULL),
+      i_(0)
+  {
+  }
 
   // Pointer to discrete function
   DiscreteFunction * const f_;

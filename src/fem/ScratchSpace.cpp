@@ -15,8 +15,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(Cell& c,
-                           FiniteElement const& finite_element,
+ScratchSpace::ScratchSpace(Cell& c, FiniteElement const& finite_element,
                            DofMap const& dof_map) :
     size(value_size(finite_element)),
     space_dimension(finite_element.space_dimension()),
@@ -128,18 +127,31 @@ uint ScratchSpace::value_size(FiniteElement const& finite_element)
 
 //-----------------------------------------------------------------------------
 void ScratchSpace::set_cell_tabulation(Cell const& cell,
-                                       DofMap const& dof_map,
-                                       uint **& dofs)
+                                       ufc::dof_map const& dof_map, uint * dofs)
 {
-  for (uint e = 0; e < topological_dimension; ++e)
+  uint const num_subspaces = dof_map.num_sub_dof_maps();
+  if (num_subspaces > 0)
   {
-    uint *& entity_dofs = dofs[e];
-    uint nbe = cell.numEntities(e);
-    uint offset = dof_map.num_entity_dofs(e);
-    for(uint i = 0; i< nbe; ++i)
+    for (uint s = 0; s < num_subspaces; ++s)
     {
-      uint * curr = &entity_dofs[e]+i*offset;
-      dof_map.tabulate_entity_dofs(curr, e, i);
+      ufc::dof_map const * dm = dof_map.create_sub_dof_map(s);
+      set_cell_tabulation(cell, *dm, dofs);
+      dofs += dm->local_dimension();
+      delete dm;
+    }
+  }
+  else
+  {
+    for (uint e = 0; e < topological_dimension; ++e)
+    {
+      uint * entity_dofs = &dofs[e];
+      uint nbe = cell.numEntities(e);
+      uint offset = dof_map.num_entity_dofs(e);
+      for (uint i = 0; i < nbe; ++i)
+      {
+        uint * curr = &entity_dofs[e] + i * offset;
+        dof_map.tabulate_entity_dofs(curr, e, i);
+      }
     }
   }
 }

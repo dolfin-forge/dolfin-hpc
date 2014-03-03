@@ -311,8 +311,6 @@ uint DiscreteFunction::dim(uint i) const
 void DiscreteFunction::interpolate_vertex_values(real* values) const
 {
   // Local data for interpolation on each cell
-  CellIterator cell(mesh_);
-  UFCCell ufc_cell(*cell);
   uint const tdim = mesh_.topology().dim();
   uint const num_verts = mesh_.numVertices();
 
@@ -322,7 +320,6 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values
   //FIXME: Well... discontinuous approximations might disagree
-  MeshDistributedData& distdata = mesh_.distdata();
   if(this->space().is_cellwise_defined())
   {
     warning("Interpolation to vertex values is implemented incorrectly for"
@@ -332,20 +329,22 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   {
     uint const num_cell_vertices = mesh_.type().numVertices(tdim);
     real* vertex_values = new real[scratch.size * num_cell_vertices];
-    for (; !cell.end(); ++cell)
+    MeshDistributedData& distdata = mesh_.distdata();
+    for (CellIterator cell(mesh_); !cell.end(); ++cell)
     {
       // Update to current cell
-      ufc_cell.update(*cell, distdata);
+      scratch.cell.update(*cell, distdata);
 
       // Tabulate dofs
-      dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());
+      dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
 
       // Pick values from global vector
       X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
 
       // Interpolate values at the vertices
       finite_element_.interpolate_vertex_values(vertex_values,
-                                                scratch.coefficients, ufc_cell);
+                                                scratch.coefficients,
+                                                scratch.cell);
 
       // Copy values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
@@ -427,13 +426,12 @@ void DiscreteFunction::eval(real* values, const real* x) const
   }
 
   Cell cell(mesh_, cells[0]);
-  UFCCell ufc_cell(cell);
 
   // Change to global numbering
-  ufc_cell.update(cell, mesh_.distdata());
+  scratch.cell.update(cell, mesh_.distdata());
 
   // Get expansion coefficients on cell
-  dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell.index());
+  dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell.index());
   X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
 
   // Compute linear combination
@@ -443,7 +441,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
   }
   for (uint i = 0; i < finite_element_.space_dimension(); i++)
   {
-    finite_element_.evaluate_basis(i, scratch.values, x, ufc_cell);
+    finite_element_.evaluate_basis(i, scratch.values, x, scratch.cell);
     for (uint j = 0; j < scratch.size; j++)
     {
       values[j] += scratch.coefficients[i] * scratch.values[j];
@@ -501,17 +499,15 @@ void DiscreteFunction::interpolate(Function const& other_func)
   X_->apply();
 
   // Cell tabulated version
-  CellIterator cell(mesh_);
-  UFCCell ufccell(*cell);
   real * values = new real[finite_element_.value_dimension(0)];
   real * block = new real[dof_map_.dofsmapping_size()];
   uint cell_offset = 0;
   uint const local_dim = dof_map_.local_dimension();
   MeshDistributedData& distdata = mesh_.distdata();
-  for (; !cell.end(); ++cell, cell_offset += local_dim)
+  for (CellIterator cell(mesh_); !cell.end(); ++cell, cell_offset += local_dim)
   {
-    ufccell.update(*cell, distdata);
-    dof_map_.tabulate_coordinates(scratch.coordinates, ufccell);
+    scratch.cell.update(*cell, distdata);
+    dof_map_.tabulate_coordinates(scratch.coordinates, scratch.cell);
 
     uint dof_id = 0;
     for (uint sub = 0; sub < nb_subspaces; ++sub)
@@ -585,17 +581,15 @@ void DiscreteFunction::InitializeVector()
 void DiscreteFunction::InitializeGhosts()
 {
   std::set<uint> indices;
-  CellIterator cell(mesh_);
-  UFCCell ufc_cell(*cell);
 
   MeshDistributedData& distdata = mesh_.distdata();
-  for (; !cell.end(); ++cell)
+  for (CellIterator cell(mesh_); !cell.end(); ++cell)
   {
     // Update to current cell
-    ufc_cell.update(*cell, distdata);
+    scratch.cell.update(*cell, distdata);
 
     // Tabulate dofs
-    dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());
+    dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
 
     for (uint j = 0; j < finite_element_.space_dimension(); ++j)
     {

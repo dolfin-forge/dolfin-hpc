@@ -8,8 +8,9 @@
 #define __SCRATCH_SPACE_H_
 
 #include <dolfin/common/types.h>
-
 #include <dolfin/fem/UFCCell.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {
@@ -77,7 +78,7 @@ public:
   real** const coordinates;
 
   // UFC Cell
-  UFCCell cell;
+  mutable UFCCell cell;
 
 private:
 
@@ -86,8 +87,8 @@ private:
 
   uint value_size(FiniteElement const& finite_element);
 
-  void set_cell_tabulation(Cell const& cell, DofMap const& dof_map,
-                           uint **& dofs);
+  void set_cell_tabulation(Cell const& cell, ufc::dof_map const& dof_map,
+                           uint * dofs);
 
   uint * const tabulation_on_cell_;
 

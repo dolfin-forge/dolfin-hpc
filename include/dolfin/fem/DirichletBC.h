@@ -151,9 +151,6 @@ private:
   void computeBCPointwise(_map<uint, real>& boundary_values,
                           BoundaryCondition::LocalData& data);
 
-  // Check if the point is in the same plane as the given facet
-  static bool onFacet(real* coordinates, Facet& facet);
-
   // The function
   Function& g_;
 

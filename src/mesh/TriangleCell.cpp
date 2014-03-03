@@ -4,7 +4,7 @@
 // Modified by Garth N. Wells, 2006.
 // Modified by Kristian Oelgaard, 2006-2007.
 // Modified by Dag Lindbo, 2008
-// 
+//
 // First added:  2006-06-05
 // Last changed: 2008-06-20
 //
@@ -138,7 +138,7 @@ void TriangleCell::orderEntities(Cell& cell) const
 	      uint* edge_vertices = topology(1, 0)(cell_edges[j]);
 
 	      // Check if the ith vertex of the cell is non-incident with edge j
-#if __SUNPRO_CC 
+#if __SUNPRO_CC
 	      int n1 = 0;
 	      std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
 	      if ( n1 == 0)
@@ -176,7 +176,7 @@ void TriangleCell::refineCell(Cell& cell, MeshEditor& editor,
   const uint e0 = offset + e[findEdge(0, cell)];
   const uint e1 = offset + e[findEdge(1, cell)];
   const uint e2 = offset + e[findEdge(2, cell)];
-  
+
   // Add the four new cells
   editor.addCell(current_cell++, v0, e2, e1);
   editor.addCell(current_cell++, v1, e0, e2);
@@ -198,28 +198,28 @@ real TriangleCell::volume(const MeshEntity& triangle) const
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
   const real* x2 = geometry.x(vertices[2]);
-  
+
   if ( geometry.dim() == 2 )
     {
       // Compute area of triangle embedded in R^2
       real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
-    
-      // Formula for volume from http://mathworld.wolfram.com 
+
+      // Formula for volume from http://mathworld.wolfram.com
       return v2 = 0.5 * std::abs(v2);
     }
   else if ( geometry.dim() == 3 )
-    { 
+    {
       // Compute area of triangle embedded in R^3
       real v0 = (x0[1]*x1[2] + x0[2]*x2[1] + x1[1]*x2[2]) - (x2[1]*x1[2] + x2[2]*x0[1] + x1[1]*x0[2]);
       real v1 = (x0[2]*x1[0] + x0[0]*x2[2] + x1[2]*x2[0]) - (x2[2]*x1[0] + x2[0]*x0[2] + x1[2]*x0[0]);
       real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
-  
-      // Formula for volume from http://mathworld.wolfram.com 
+
+      // Formula for volume from http://mathworld.wolfram.com
       return  0.5 * sqrt(v0*v0 + v1*v1 + v2*v2);
     }
   else
     error("Only know how to volume (area) of a triangle when embedded in R^2 or R^3.");
- 
+
   return 0.0;
 }
 //-----------------------------------------------------------------------------
@@ -263,24 +263,24 @@ Point TriangleCell::normal(const Cell& cell, uint facet) const
 {
   // This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
-  
+
   // Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(1)[facet]);
-  
+
   // The normal vector is currently only defined for a triangle in R^2
   if (c.mesh().geometry().dim() != 2)
     error("The normal vector is only defined when the triangle is in R^2");
-  
+
   // Get global index of opposite vertex
   const uint v0 = cell.entities(0)[facet];
-  
+
   // Get global index of vertices on the facet
   const uint v1 = f.entities(0)[0];
   const uint v2 = f.entities(0)[1];
-  
+
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
-  
+
   // Get the coordinates of the three vertices
   const real* p0 = geometry.x(v0);
   const real* p1 = geometry.x(v1);
@@ -305,14 +305,14 @@ dolfin::real TriangleCell::facetArea(const Cell& cell, uint facet) const
 {
   // This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
-  
+
   // Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(1)[facet]);
-  
+
   // Get global index of vertices on the facet
   const uint v0 = f.entities(0)[0];
   const uint v1 = f.entities(0)[1];
-  
+
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
 
@@ -327,7 +327,7 @@ dolfin::real TriangleCell::facetArea(const Cell& cell, uint facet) const
     const real dp = p0[i] - p1[i];
     d += dp*dp;
   }
-  
+
   return std::sqrt(d);
 }
 //-----------------------------------------------------------------------------
@@ -372,12 +372,6 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   d3 = orient2d((double *)x2, (double *)x0, x);
 
   // FIXME: Need to check the predicates for correctness
-  //   if(fabs(d1) == DOLFIN_EPS ||
-  //      fabs(d2) == DOLFIN_EPS ||
-  //      fabs(d3) == DOLFIN_EPS)
-  //   {
-  //     return true;
-  //   }
   real tol = (real) dolfin_get("Geometrical Tolerance Triangle");
   if(d1 < (0.0-tol))
     return false;
@@ -387,6 +381,30 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
     return false;
 
   return true;
+
+//--- Legacy implementation from:
+//    DirichletBC::bool onFacet(real* coordinates, Facet& facet);
+//  // Create points
+//     Point p(coordinates[0], coordinates[1], coordinates[2]);
+//     Point v0 = Vertex(facet.mesh(), facet.entities(0)[0]).point();
+//     Point v1 = Vertex(facet.mesh(), facet.entities(0)[1]).point();
+//     Point v2 = Vertex(facet.mesh(), facet.entities(0)[2]).point();
+//
+//     // Create vectors
+//     Point v01 = v1 - v0;
+//     Point v02 = v2 - v0;
+//     Point vp0 = v0 - p;
+//     Point vp1 = v1 - p;
+//     Point vp2 = v2 - p;
+//
+//     // Check if the sum of the area of the sub triangles is equal to the total
+//     // area of the facet
+//     if (std::abs(
+//         v01.cross(v02).norm() - vp0.cross(vp1).norm() - vp1.cross(vp2).norm()
+//             - vp2.cross(vp0).norm()) < DOLFIN_EPS)
+//       return true;
+//     else
+//       return false;
 }
 //-----------------------------------------------------------------------------
 bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point& p2) const
@@ -458,7 +476,7 @@ bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point&
 
   if( d1<0 && d2<0)
     return false;
-  
+
   // Line pa-pb intersects triangle but both pa and pb are
   // on the negative side of x2-x0:
   d1 = orient2d((double*)x2, (double*)x0, (double*) pa);
@@ -466,7 +484,7 @@ bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point&
 
   if( d1<0 && d2<0)
     return false;
-  
+
   return true;
 }
 //-----------------------------------------------------------------------------
@@ -483,7 +501,7 @@ dolfin::uint TriangleCell::findEdge(uint i, const Cell& cell) const
   const uint* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
-  
+
   // Look for edge satisfying ordering convention
   for (uint j = 0; j < 3; j++)
     {

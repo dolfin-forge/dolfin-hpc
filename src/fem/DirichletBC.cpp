@@ -25,6 +25,8 @@
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/fem/DirichletBC.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 
@@ -333,13 +335,16 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
 
     // Initialize facets, needed for geometric search
     message("Computing facets, needed for geometric application of boundary conditions.");
-    mesh().init(mesh().topology().dim() - 1);
+    uint const facet_dim = mesh().topology().dim() - 1;
+    mesh().init(facet_dim);
 
     // Iterate over facets
 #ifndef NO_PROGRESS_BAR
     Progress p("Computing Dirichlet boundary values, geometric search", facets_.size());
 #endif
-    for (uint f = 0; f < facets_.size(); f++)
+    CellType& celltype = mesh().type();
+    Point dof_node;
+    for (uint f = 0; f < facets_.size(); ++f)
     {
       // Get cell number and local facet number
       uint cell_number = facets_[f].first;
@@ -365,9 +370,14 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
           // Loop over all dofs on cell
           for (uint i = 0; i < data.dof_map->local_dimension(); ++i)
           {
+            // Copy coordinates to node Point
+            std::memcpy(&dof_node[0], &data.coordinates[i][0],
+                        facet_dim*sizeof(real));
             // Check if the coordinates are on current facet and thus on boundary
-            if (!onFacet(data.coordinates[i], facet))
-            continue;
+            if (!celltype.intersects(facet, dof_node))
+            {
+              continue;
+            }
 
             if(!interpolated)
             {
@@ -433,60 +443,6 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
       p++;
 #endif
   }
-}
-//-----------------------------------------------------------------------------
-bool DirichletBC::onFacet(real* coordinates, Facet& facet)
-{
-  // Check if the coordinates are on the same line as the line segment
-  if (facet.dim() == 1)
-  {
-    // Create points
-    Point p(coordinates[0], coordinates[1]);
-    Point v0 = Vertex(facet.mesh(), facet.entities(0)[0]).point();
-    Point v1 = Vertex(facet.mesh(), facet.entities(0)[1]).point();
-
-    // Create vectors
-    Point v01 = v1 - v0;
-    Point vp0 = v0 - p;
-    Point vp1 = v1 - p;
-
-    // Check if the length of the sum of the two line segments vp0 and vp1 is
-    // equal to the total length of the facet
-    if (std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS)
-      return true;
-    else
-      return false;
-  }
-  // Check if the coordinates are in the same plane as the triangular facet
-  else if (facet.dim() == 2)
-  {
-    // Create points
-    Point p(coordinates[0], coordinates[1], coordinates[2]);
-    Point v0 = Vertex(facet.mesh(), facet.entities(0)[0]).point();
-    Point v1 = Vertex(facet.mesh(), facet.entities(0)[1]).point();
-    Point v2 = Vertex(facet.mesh(), facet.entities(0)[2]).point();
-
-    // Create vectors
-    Point v01 = v1 - v0;
-    Point v02 = v2 - v0;
-    Point vp0 = v0 - p;
-    Point vp1 = v1 - p;
-    Point vp2 = v2 - p;
-
-    // Check if the sum of the area of the sub triangles is equal to the total
-    // area of the facet
-    if (std::abs(
-        v01.cross(v02).norm() - vp0.cross(vp1).norm() - vp1.cross(vp2).norm()
-            - vp2.cross(vp0).norm()) < DOLFIN_EPS)
-      return true;
-    else
-      return false;
-  }
-
-  error("Unable to determine if given point is on facet"
-        "(not implemented for given facet dimension).");
-
-  return false;
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::getBC(uint n, uint* indicators, double* values,

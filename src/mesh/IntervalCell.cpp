@@ -7,11 +7,13 @@
 // Modified by Kristian Oelgaard, 2007.
 
 #include <algorithm>
+#include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/IntervalCell.h>
+#include <dolfin/mesh/Vertex.h>
 
 using namespace dolfin;
 
@@ -31,6 +33,7 @@ dolfin::uint IntervalCell::numEntities(uint dim) const
     return 1; // cells
   default:
     error("Illegal topological dimension %d for interval.", dim);
+    break;
   }
 
   return 0;
@@ -46,6 +49,7 @@ dolfin::uint IntervalCell::numVertices(uint dim) const
     return 2; // cells
   default:
     error("Illegal topological dimension %d for interval.", dim);
+    break;
   }
 
   return 0;
@@ -96,7 +100,7 @@ void IntervalCell::refineCell(Cell& cell, MeshEditor& editor,
   const uint v0 = v[0];
   const uint v1 = v[1];
   const uint e0 = offset + e[0];
-  
+
   // Add the two new cells
   editor.addCell(current_cell++, v0, e0);
   editor.addCell(current_cell++, e0, v1);
@@ -115,7 +119,7 @@ real IntervalCell::volume(const MeshEntity& interval) const
   const uint* vertices = interval.entities(0);
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
-  
+
   // Compute length of interval (line segment)
   real sum = 0.0;
   for (uint i = 0; i < geometry.dim(); ++i)
@@ -174,10 +178,27 @@ dolfin::real IntervalCell::facetArea(const Cell& cell, uint facet) const
 //-----------------------------------------------------------------------------
 bool IntervalCell::intersects(const MeshEntity& interval, const Point& p) const
 {
-  // FIXME: Not implemented
-  error("Interval::intersects() not implemented");
+  //FIXME: Due to constness inconsistency in Mesh
+  Mesh * m = const_cast<Mesh *>(&interval.mesh());
+  // Create points
+  Point v0 = Vertex(*m, interval.entities(0)[0]).point();
+  Point v1 = Vertex(*m, interval.entities(0)[1]).point();
 
-  return false;
+  // Create vectors
+  Point v01 = v1 - v0;
+  Point vp0 = v0 - p;
+  Point vp1 = v1 - p;
+
+  // Check if the length of the sum of the two line segments vp0 and vp1 is
+  // equal to the total length of the facet
+  if (std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 //-----------------------------------------------------------------------------
 bool IntervalCell::intersects(const MeshEntity& interval, const Point& p1, const Point& p2) const

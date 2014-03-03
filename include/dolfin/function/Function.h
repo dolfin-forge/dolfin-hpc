@@ -235,6 +235,9 @@ public:
   /// Set values to a DiscreteFunction from cell tabulated block array
   void set_block(real *& values);
 
+  /// Add values to a DiscreteFunction from cell tabulated block array
+  void add_block(real *& values);
+
   /// Extract sub function/slice from a DiscreteFunction
   SubFunction operator[](uint i);
 

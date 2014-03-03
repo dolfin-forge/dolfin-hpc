@@ -315,8 +315,6 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   UFCCell ufc_cell(*cell);
   uint const tdim = mesh_.topology().dim();
   uint const num_verts = mesh_.numVertices();
-  uint const num_cell_vertices = mesh_.type().numVertices(tdim);
-  real* vertex_values = new real[scratch.size * num_cell_vertices];
 
   // Make sure vector's ghost values are updated)
   X_->apply();
@@ -325,34 +323,44 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   // if two or more cells disagree on the vertex values
   //FIXME: Well... discontinuous approximations might disagree
   MeshDistributedData& distdata = mesh_.distdata();
-  for (; !cell.end(); ++cell)
+  if(this->space().is_cellwise_defined())
   {
-    // Update to current cell
-    ufc_cell.update(*cell, distdata);
-
-    // Tabulate dofs
-    dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());
-
-    // Pick values from global vector
-    X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
-
-    // Interpolate values at the vertices
-    finite_element_.interpolate_vertex_values(vertex_values,
-                                              scratch.coefficients, ufc_cell);
-
-    // Copy values to array of vertex values
-    for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
+    warning("Interpolation to vertex values is implemented incorrectly for"
+            "discontinuous approximations");
+  }
+  //else
+  {
+    uint const num_cell_vertices = mesh_.type().numVertices(tdim);
+    real* vertex_values = new real[scratch.size * num_cell_vertices];
+    for (; !cell.end(); ++cell)
     {
-      for (uint i = 0; i < scratch.size; ++i)
+      // Update to current cell
+      ufc_cell.update(*cell, distdata);
+
+      // Tabulate dofs
+      dof_map_.tabulate_dofs(scratch.dofs, ufc_cell, cell->index());
+
+      // Pick values from global vector
+      X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
+
+      // Interpolate values at the vertices
+      finite_element_.interpolate_vertex_values(vertex_values,
+                                                scratch.coefficients, ufc_cell);
+
+      // Copy values to array of vertex values
+      for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
       {
-        values[i * num_verts + vertex->index()] =
-            vertex_values[vertex.pos() * scratch.size + i];
+        for (uint i = 0; i < scratch.size; ++i)
+        {
+          values[i * num_verts + vertex->index()] =
+              vertex_values[vertex.pos() * scratch.size + i];
+        }
       }
     }
+    // Delete local data
+    delete[] vertex_values;
   }
 
-  // Delete local data
-  delete[] vertex_values;
 }
 
 //-----------------------------------------------------------------------------
@@ -544,6 +552,16 @@ void DiscreteFunction::set_block(real *& values)
 {
   X_->set(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
   sync_ghosts();
+}
+
+//-----------------------------------------------------------------------------
+void DiscreteFunction::add_block(real *& values)
+{
+  if (!values)
+  {
+    values = new real[dof_map_.dofsmapping_size()];
+  }
+  X_->add(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
 }
 
 //-----------------------------------------------------------------------------

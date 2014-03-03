@@ -147,6 +147,9 @@ public:
   /// Set values from cell tabulated block array
   void set_block(real *& values);
 
+  /// Add values from cell tabulated block array
+  void add_block(real *& values);
+
 private:
 
   /// Initialize Vector

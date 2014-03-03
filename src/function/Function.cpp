@@ -512,6 +512,16 @@ void Function::set_block(real *& values)
   return (static_cast<DiscreteFunction*>(f_))->set_block(values);
 }
 //-----------------------------------------------------------------------------
+void Function::add_block(real *& values)
+{
+  if (type_ != discrete)
+  {
+    error("Values can be set only to discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f_))->add_block(values);
+}
+//-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)
 {
   if (type_ != discrete)

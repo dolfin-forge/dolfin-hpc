@@ -172,13 +172,13 @@ public:
   BoundaryMesh& interior_boundary();
 
   /// Compute entities of given topological dimension and return number of entities
-  uint init(uint dim);
+  uint init(uint dim) const;
 
   /// Compute connectivity between given pair of dimensions
-  void init(uint d0, uint d1);
+  void init(uint d0, uint d1) const;
 
   /// Compute all entities and connectivity
-  void init();
+  void init() const;
 
   /// Clear all mesh data
   void clear();

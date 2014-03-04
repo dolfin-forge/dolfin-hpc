@@ -152,17 +152,19 @@ BoundaryMesh& Mesh::interior_boundary()
   return *_interior_boundary;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint Mesh::init(uint dim)
+dolfin::uint Mesh::init(uint dim) const
 {
-  return TopologyComputation::computeEntities(*this, dim);
+  Mesh* mesh = const_cast<Mesh*>(this);
+  return TopologyComputation::computeEntities(*mesh, dim);
 }
 //-----------------------------------------------------------------------------
-void Mesh::init(uint d0, uint d1)
+void Mesh::init(uint d0, uint d1) const
 {
-  TopologyComputation::computeConnectivity(*this, d0, d1);
+  Mesh* mesh = const_cast<Mesh*>(this);
+  TopologyComputation::computeConnectivity(*mesh, d0, d1);
 }
 //-----------------------------------------------------------------------------
-void Mesh::init()
+void Mesh::init() const
 {
   // Compute all entities
   for (uint d = 0; d <= topology().dim(); d++)

@@ -648,252 +648,252 @@ std::string Assembler::progressMessage(uint rank, std::string integral_type) con
 
   return s.str();
 }
-//-----------------------------------------------------------------------------
-void Assembler::assemble_system(GenericTensor& A, const Form& A_form,
-                                Array<Function*> const& A_coefficients,
-                                const DofMapSet& A_dof_map_set,
-                                GenericTensor& b, const Form& b_form,
-                                Array<Function*> const& b_coefficients,
-                                const DofMapSet& b_dof_map_set, DirichletBC& bc,
-                                const MeshFunction<uint>* cell_domains,
-                                const MeshFunction<uint>* exterior_facet_domains,
-                                const MeshFunction<uint>* interior_facet_domains,
-                                bool reset_tensors)
-{
-  // Check arguments
-  dolfin_assert(A_form.check(A_coefficients));
-  dolfin_assert(b_form.check(b_coefficients));
-
-  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
-  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
-
-  // Create data structure for local assembly data
-  UFC A_ufc(A_form, mesh_, A_dof_map_set);
-  UFC b_ufc(b_form, mesh_, b_dof_map_set);
-
-  // Initialize global tensor
-  initGlobalTensor(A, A_dof_map_set, A_ufc, reset_tensors);
-  initGlobalTensor(b, b_dof_map_set, b_ufc, reset_tensors);
-
-  // Assemble over cells
-  assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains);
-  assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains);
-
-  // Assemble over exterior facets
-  assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);
-  assembleExteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, exterior_facet_domains);
-
-  // Assemble over interior facets
-  assembleInteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, interior_facet_domains);
-  assembleInteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, interior_facet_domains);
-
-  // Flush assembly of global tensor
-  A.apply(FLUSH);
-  b.apply(FLUSH);
-
-  // Apply Trace constraints (Dirichlet boundary conditions)
-  applyTraces(A, b, bc, A_dof_map_set, b_dof_map_set, A_form, b_form, exterior_facet_domains);
-
-  // Finalise BC (need to finalize twice for each tensor)
-  A.apply();
-  b.apply();
-}
-//-----------------------------------------------------------------------------
-void Assembler::assemble_system(GenericTensor& A, const Form& A_form,
-                                Array<Function*> const& A_coefficients,
-                                const DofMapSet& A_dof_map_set,
-                                GenericTensor& b, const Form& b_form,
-                                Array<Function*> const& b_coefficients,
-                                const DofMapSet& b_dof_map_set, DirichletBC& bc,
-                                const MeshFunction<uint>* cell_domains,
-                                const MeshFunction<uint>* exterior_facet_domains,
-                                const MeshFunction<uint>* interior_facet_domains,
-                                const QuadratureRule& q,
-                                bool reset_tensors)
-{
-  // Check arguments
-  dolfin_assert(A_form.check(A_coefficients));
-  dolfin_assert(b_form.check(b_coefficients));
-
-  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
-  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
-
-  // Create data structure for local assembly data
-  UFC A_ufc(A_form, mesh_, A_dof_map_set);
-  UFC b_ufc(b_form, mesh_, b_dof_map_set);
-
-  // Initialize global tensor
-  initGlobalTensor(A, A_dof_map_set, A_ufc, reset_tensors);
-  initGlobalTensor(b, b_dof_map_set, b_ufc, reset_tensors);
-
-  // Assemble over cells
-  assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains, A_cell_integral, q);
-  assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains, b_cell_integral, q);
-
-  // Assemble over exterior facets
-  assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);
-  assembleExteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, exterior_facet_domains);
-
-  // Assemble over interior facets
-  assembleInteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, interior_facet_domains);
-  assembleInteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, interior_facet_domains);
-
-  // Flush assembly of global tensor
-  A.apply(FLUSH);
-  b.apply(FLUSH);
-
-  // Apply Trace constraints (Dirichlet boundary conditions)
-  applyTraces(A, b, bc, A_dof_map_set, b_dof_map_set, A_form, b_form, exterior_facet_domains);
-
-  // Finalise BC (need to finalize twice for each tensor)
-  A.apply();
-  b.apply();
-}
-//-----------------------------------------------------------------------------
-void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
-                            DirichletBC& bc, const DofMapSet& A_dof_map_set,
-                            const DofMapSet& b_dof_map_set,
-                            const Form& A_form, const Form& b_form,
-                            const MeshFunction<uint>* domains)
-{
-  // Create data structure for local assembly data
-
-  // get BC indicators and values from DirichletBC
-  uint N = A_dof_map_set[1].global_dimension();
-//  uint M = A_dof_map_set[0].global_dimension();
-  uint* indicators = new uint[N];
-  real* x = new real[N];
-  for (uint i = 0; i < N; i++)
-  {
-    indicators[i] = 0;
-    x[i] = 0.0;
-  }
-  bc.getBC(N, indicators, x, A_dof_map_set[1], A_form);
-
-  /* // For debugging
-  // print out BC indicator and values
-  for (uint k=0; k<N; k++) {
-    std::cout <<" indicator        "<<k<<" has value "<<indicators[k];
-    std::cout <<" corresponding bc "<<k<<" has value "<<x[k]<<std::endl;
-  }
-  */
-
-  // create local UFC data holders
-  UFC A_ufc(A_form, mesh_, A_dof_map_set);
-  UFC b_ufc(b_form, mesh_, b_dof_map_set);
-
-  // fetch pointers to element matrix and vector
-  BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
-  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
-#ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(globalA.rank(), "exterior facets"), exterior_boundary.numCells());
-#endif
-  for (CellIterator boundary_cell(exterior_boundary); !boundary_cell.end(); ++boundary_cell)
-  {
-    // Get mesh facet corresponding to boundary cell
-    Facet mesh_facet(mesh_, (*cell_map)(*boundary_cell));
-
-    // Get mesh cell to which mesh facet belongs (pick first, there is only one)
-    dolfin_assert(mesh_facet.numEntities(dim_) == 1);
-    Cell mesh_cell(mesh_, mesh_facet.entities(dim_)[0]);
-
-    // Update to current cell
-    A_ufc.update(mesh_cell, mesh_.distdata());
-    b_ufc.update(mesh_cell, mesh_.distdata());
-
-    // Tabulate dofs for each dimension
-    A_dof_map_set[0].tabulate_dofs(A_ufc.dofs[0], A_ufc.cell, mesh_cell.index());
-    A_dof_map_set[1].tabulate_dofs(A_ufc.dofs[1], A_ufc.cell, mesh_cell.index());
-    b_dof_map_set[0].tabulate_dofs(b_ufc.dofs[0], b_ufc.cell, mesh_cell.index());
-
-    // Aji = A[i+j*n]
-
-    // PETSc needs this
-    globalA.apply(PETSC_HACK);
-    globalb.apply(PETSC_HACK);
-
-    // fetch local element matrix and vector
-    globalA.get(A_ufc.A, A_ufc.local_dimensions, A_ufc.dofs);
-    globalb.get(b_ufc.A, b_ufc.local_dimensions, b_ufc.dofs);
-
-    uint m = A_ufc.local_dimensions[0];
-    uint n = A_ufc.local_dimensions[1];
-
-    /*
-    // For debugging
-    for (uint i=0; i<m; i++) {
-      std::cout << "dof_map 0["<<i<<"]="<<A_ufc.dofs[0][i]<<std::endl;
-    }
-    for (uint i=0; i<n; i++) {
-      std::cout << "dof_map 1["<<i<<"]="<<A_ufc.dofs[1][i]<<std::endl;
-    }
-    */
-
-    real* A = A_ufc.A;
-    real* b = b_ufc.A;
-
-    /*
-    // For debugging
-    std::cout <<"-------------------"<<std::endl;
-    std::cout <<"before enforcing bc "<<std::endl;
-    for (uint i=0; i<n; i++) {
-      for (uint j=0; j<m; j++) {
-        std::cout <<"i+j*n ="<<j+i*n;
-        std::cout <<" A["<<j<<","<<i<<"]="<<A[j+i*n]<<std::endl;
-      }
-    }
-    for (uint i=0; i<n; i++) {
-      std::cout <<"b["<<i<<"]="<<b[i]<<std::endl;
-    }
-    std::cout <<"-------------------"<<std::endl;
-    */
-
-
-
-    // for each dof, check if it is associated with Dirichlet condition
-    for (uint i=0; i<n; i++)
-    {
-      uint ii = A_ufc.dofs[1][i];
-      if (indicators[ii])
-      {
-        b[i] = x[ii];
-        for (uint k=0; k<n; k++)
-          A[k+i*n] = 0.0;
-        for (uint j=0; j<m; j++)
-        {
-          b[j] -= A[i+j*n]*x[ii];
-          A[i+j*n] = 0.0;
-        }
-        A[i+i*n] = 1.0;
-      }
-    }
-
-    /*
-    // For debugging
-    std::cout <<"-------------------"<<std::endl;
-    std::cout <<"after enforcing bc "<<std::endl;
-    for (uint i=0; i<n; i++) {
-      for (uint j=0; j<m; j++) {
-        std::cout <<"i+j*n ="<<j+i*n;
-        std::cout <<" A["<<j<<","<<i<<"]="<<A[j+i*n]<<std::endl;
-      }
-    }
-    for (uint i=0; i<n; i++) {
-      std::cout <<"b["<<i<<"]="<<b[i]<<std::endl;
-    }
-    std::cout <<"-------------------"<<std::endl;
-    */
-
-    // PETSc needs this
-    globalA.apply(PETSC_HACK);
-    globalb.apply(PETSC_HACK);
-
-    globalA.set(A_ufc.A, A_ufc.local_dimensions, A_ufc.dofs);
-    globalb.set(b_ufc.A, b_ufc.local_dimensions, b_ufc.dofs);
-  }
-
-  delete [] indicators;
-  delete [] x;
-}
-//-----------------------------------------------------------------------------
+////-----------------------------------------------------------------------------
+//void Assembler::assemble_system(GenericTensor& A, const Form& A_form,
+//                                Array<Function*> const& A_coefficients,
+//                                const DofMapSet& A_dof_map_set,
+//                                GenericTensor& b, const Form& b_form,
+//                                Array<Function*> const& b_coefficients,
+//                                const DofMapSet& b_dof_map_set, DirichletBC& bc,
+//                                const MeshFunction<uint>* cell_domains,
+//                                const MeshFunction<uint>* exterior_facet_domains,
+//                                const MeshFunction<uint>* interior_facet_domains,
+//                                bool reset_tensors)
+//{
+//  // Check arguments
+//  dolfin_assert(A_form.check(A_coefficients));
+//  dolfin_assert(b_form.check(b_coefficients));
+//
+//  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
+//  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
+//
+//  // Create data structure for local assembly data
+//  UFC A_ufc(A_form, mesh_, A_dof_map_set);
+//  UFC b_ufc(b_form, mesh_, b_dof_map_set);
+//
+//  // Initialize global tensor
+//  initGlobalTensor(A, A_dof_map_set, A_ufc, reset_tensors);
+//  initGlobalTensor(b, b_dof_map_set, b_ufc, reset_tensors);
+//
+//  // Assemble over cells
+//  assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains);
+//  assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains);
+//
+//  // Assemble over exterior facets
+//  assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);
+//  assembleExteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, exterior_facet_domains);
+//
+//  // Assemble over interior facets
+//  assembleInteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, interior_facet_domains);
+//  assembleInteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, interior_facet_domains);
+//
+//  // Flush assembly of global tensor
+//  A.apply(FLUSH);
+//  b.apply(FLUSH);
+//
+//  // Apply Trace constraints (Dirichlet boundary conditions)
+//  applyTraces(A, b, bc, A_dof_map_set, b_dof_map_set, A_form, b_form, exterior_facet_domains);
+//
+//  // Finalise BC (need to finalize twice for each tensor)
+//  A.apply();
+//  b.apply();
+//}
+////-----------------------------------------------------------------------------
+//void Assembler::assemble_system(GenericTensor& A, const Form& A_form,
+//                                Array<Function*> const& A_coefficients,
+//                                const DofMapSet& A_dof_map_set,
+//                                GenericTensor& b, const Form& b_form,
+//                                Array<Function*> const& b_coefficients,
+//                                const DofMapSet& b_dof_map_set, DirichletBC& bc,
+//                                const MeshFunction<uint>* cell_domains,
+//                                const MeshFunction<uint>* exterior_facet_domains,
+//                                const MeshFunction<uint>* interior_facet_domains,
+//                                const QuadratureRule& q,
+//                                bool reset_tensors)
+//{
+//  // Check arguments
+//  dolfin_assert(A_form.check(A_coefficients));
+//  dolfin_assert(b_form.check(b_coefficients));
+//
+//  UFCCellIntegral A_cell_integral;//(A_dof_map_set);
+//  UFCCellIntegral b_cell_integral;//(b_dof_map_set);
+//
+//  // Create data structure for local assembly data
+//  UFC A_ufc(A_form, mesh_, A_dof_map_set);
+//  UFC b_ufc(b_form, mesh_, b_dof_map_set);
+//
+//  // Initialize global tensor
+//  initGlobalTensor(A, A_dof_map_set, A_ufc, reset_tensors);
+//  initGlobalTensor(b, b_dof_map_set, b_ufc, reset_tensors);
+//
+//  // Assemble over cells
+//  assembleCells(A, A_coefficients, A_dof_map_set, A_ufc, cell_domains, A_cell_integral, q);
+//  assembleCells(b, b_coefficients, b_dof_map_set, b_ufc, cell_domains, b_cell_integral, q);
+//
+//  // Assemble over exterior facets
+//  assembleExteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, exterior_facet_domains);
+//  assembleExteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, exterior_facet_domains);
+//
+//  // Assemble over interior facets
+//  assembleInteriorFacets(A, A_coefficients, A_dof_map_set, A_ufc, interior_facet_domains);
+//  assembleInteriorFacets(b, b_coefficients, b_dof_map_set, b_ufc, interior_facet_domains);
+//
+//  // Flush assembly of global tensor
+//  A.apply(FLUSH);
+//  b.apply(FLUSH);
+//
+//  // Apply Trace constraints (Dirichlet boundary conditions)
+//  applyTraces(A, b, bc, A_dof_map_set, b_dof_map_set, A_form, b_form, exterior_facet_domains);
+//
+//  // Finalise BC (need to finalize twice for each tensor)
+//  A.apply();
+//  b.apply();
+//}
+////-----------------------------------------------------------------------------
+//void Assembler::applyTraces(GenericTensor& globalA, GenericTensor& globalb,
+//                            DirichletBC& bc, const DofMapSet& A_dof_map_set,
+//                            const DofMapSet& b_dof_map_set,
+//                            const Form& A_form, const Form& b_form,
+//                            const MeshFunction<uint>* domains)
+//{
+//  // Create data structure for local assembly data
+//
+//  // get BC indicators and values from DirichletBC
+//  uint N = A_dof_map_set[1].global_dimension();
+////  uint M = A_dof_map_set[0].global_dimension();
+//  uint* indicators = new uint[N];
+//  real* x = new real[N];
+//  for (uint i = 0; i < N; i++)
+//  {
+//    indicators[i] = 0;
+//    x[i] = 0.0;
+//  }
+//  bc.getBC(N, indicators, x, A_dof_map_set[1], A_form);
+//
+//  /* // For debugging
+//  // print out BC indicator and values
+//  for (uint k=0; k<N; k++) {
+//    std::cout <<" indicator        "<<k<<" has value "<<indicators[k];
+//    std::cout <<" corresponding bc "<<k<<" has value "<<x[k]<<std::endl;
+//  }
+//  */
+//
+//  // create local UFC data holders
+//  UFC A_ufc(A_form, mesh_, A_dof_map_set);
+//  UFC b_ufc(b_form, mesh_, b_dof_map_set);
+//
+//  // fetch pointers to element matrix and vector
+//  BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
+//  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
+//#ifndef NO_PROGRESS_BAR
+//  Progress p(progressMessage(globalA.rank(), "exterior facets"), exterior_boundary.numCells());
+//#endif
+//  for (CellIterator boundary_cell(exterior_boundary); !boundary_cell.end(); ++boundary_cell)
+//  {
+//    // Get mesh facet corresponding to boundary cell
+//    Facet mesh_facet(mesh_, (*cell_map)(*boundary_cell));
+//
+//    // Get mesh cell to which mesh facet belongs (pick first, there is only one)
+//    dolfin_assert(mesh_facet.numEntities(dim_) == 1);
+//    Cell mesh_cell(mesh_, mesh_facet.entities(dim_)[0]);
+//
+//    // Update to current cell
+//    A_ufc.update(mesh_cell, mesh_.distdata());
+//    b_ufc.update(mesh_cell, mesh_.distdata());
+//
+//    // Tabulate dofs for each dimension
+//    A_dof_map_set[0].tabulate_dofs(A_ufc.dofs[0], A_ufc.cell, mesh_cell.index());
+//    A_dof_map_set[1].tabulate_dofs(A_ufc.dofs[1], A_ufc.cell, mesh_cell.index());
+//    b_dof_map_set[0].tabulate_dofs(b_ufc.dofs[0], b_ufc.cell, mesh_cell.index());
+//
+//    // Aji = A[i+j*n]
+//
+//    // PETSc needs this
+//    globalA.apply(PETSC_HACK);
+//    globalb.apply(PETSC_HACK);
+//
+//    // fetch local element matrix and vector
+//    globalA.get(A_ufc.A, A_ufc.local_dimensions, A_ufc.dofs);
+//    globalb.get(b_ufc.A, b_ufc.local_dimensions, b_ufc.dofs);
+//
+//    uint m = A_ufc.local_dimensions[0];
+//    uint n = A_ufc.local_dimensions[1];
+//
+//    /*
+//    // For debugging
+//    for (uint i=0; i<m; i++) {
+//      std::cout << "dof_map 0["<<i<<"]="<<A_ufc.dofs[0][i]<<std::endl;
+//    }
+//    for (uint i=0; i<n; i++) {
+//      std::cout << "dof_map 1["<<i<<"]="<<A_ufc.dofs[1][i]<<std::endl;
+//    }
+//    */
+//
+//    real* A = A_ufc.A;
+//    real* b = b_ufc.A;
+//
+//    /*
+//    // For debugging
+//    std::cout <<"-------------------"<<std::endl;
+//    std::cout <<"before enforcing bc "<<std::endl;
+//    for (uint i=0; i<n; i++) {
+//      for (uint j=0; j<m; j++) {
+//        std::cout <<"i+j*n ="<<j+i*n;
+//        std::cout <<" A["<<j<<","<<i<<"]="<<A[j+i*n]<<std::endl;
+//      }
+//    }
+//    for (uint i=0; i<n; i++) {
+//      std::cout <<"b["<<i<<"]="<<b[i]<<std::endl;
+//    }
+//    std::cout <<"-------------------"<<std::endl;
+//    */
+//
+//
+//
+//    // for each dof, check if it is associated with Dirichlet condition
+//    for (uint i=0; i<n; i++)
+//    {
+//      uint ii = A_ufc.dofs[1][i];
+//      if (indicators[ii])
+//      {
+//        b[i] = x[ii];
+//        for (uint k=0; k<n; k++)
+//          A[k+i*n] = 0.0;
+//        for (uint j=0; j<m; j++)
+//        {
+//          b[j] -= A[i+j*n]*x[ii];
+//          A[i+j*n] = 0.0;
+//        }
+//        A[i+i*n] = 1.0;
+//      }
+//    }
+//
+//    /*
+//    // For debugging
+//    std::cout <<"-------------------"<<std::endl;
+//    std::cout <<"after enforcing bc "<<std::endl;
+//    for (uint i=0; i<n; i++) {
+//      for (uint j=0; j<m; j++) {
+//        std::cout <<"i+j*n ="<<j+i*n;
+//        std::cout <<" A["<<j<<","<<i<<"]="<<A[j+i*n]<<std::endl;
+//      }
+//    }
+//    for (uint i=0; i<n; i++) {
+//      std::cout <<"b["<<i<<"]="<<b[i]<<std::endl;
+//    }
+//    std::cout <<"-------------------"<<std::endl;
+//    */
+//
+//    // PETSc needs this
+//    globalA.apply(PETSC_HACK);
+//    globalb.apply(PETSC_HACK);
+//
+//    globalA.set(A_ufc.A, A_ufc.local_dimensions, A_ufc.dofs);
+//    globalb.set(b_ufc.A, b_ufc.local_dimensions, b_ufc.dofs);
+//  }
+//
+//  delete [] indicators;
+//  delete [] x;
+//}
+////-----------------------------------------------------------------------------
 

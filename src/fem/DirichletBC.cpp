@@ -146,43 +146,43 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   b.apply();
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::zero(GenericMatrix& A, Form const& form)
-{
-  // Get local data for application of boundary conditions
-  BoundaryCondition::LocalData& data = this->updateLocalData(form);
-
-  //
-  DofMap const& dof_map = form.dofmaps()[1];
-
-  // Simple check
-  const uint N = dof_map.global_dimension();
-  if (N != A.size(0))
-    error("Incorrect dimension of matrix for application of boundary conditions."
-          "Did you assemble it on a different mesh?");
-
-  // A map to hold the mapping from boundary dofs to boundary values
-  _map<uint, real> boundary_values;
-
-  // Compute dofs and values
-  computeBC(boundary_values, data);
-
-  // Copy boundary value data to arrays
-  uint* dofs = new uint[boundary_values.size()];
-  _map<uint, real>::const_iterator boundary_value;
-  uint i = 0;
-  for (boundary_value = boundary_values.begin();
-       boundary_value != boundary_values.end(); ++boundary_value)
-    dofs[i++] = boundary_value->first;
-
-  // Modify linear system (A_ii = 1)
-  A.zero(boundary_values.size(), dofs);
-
-  // Finalise changes to A
-  A.apply();
-
-  // Clear temporary arrays
-  delete[] dofs;
-}
+//void DirichletBC::zero(GenericMatrix& A, Form const& form)
+//{
+//  // Get local data for application of boundary conditions
+//  BoundaryCondition::LocalData& data = this->updateLocalData(form);
+//
+//  //
+//  DofMap const& dof_map = form.dofmaps()[1];
+//
+//  // Simple check
+//  const uint N = dof_map.global_dimension();
+//  if (N != A.size(0))
+//    error("Incorrect dimension of matrix for application of boundary conditions."
+//          "Did you assemble it on a different mesh?");
+//
+//  // A map to hold the mapping from boundary dofs to boundary values
+//  _map<uint, real> boundary_values;
+//
+//  // Compute dofs and values
+//  computeBC(boundary_values, data);
+//
+//  // Copy boundary value data to arrays
+//  uint* dofs = new uint[boundary_values.size()];
+//  _map<uint, real>::const_iterator boundary_value;
+//  uint i = 0;
+//  for (boundary_value = boundary_values.begin();
+//       boundary_value != boundary_values.end(); ++boundary_value)
+//    dofs[i++] = boundary_value->first;
+//
+//  // Modify linear system (A_ii = 1)
+//  A.zero(boundary_values.size(), dofs);
+//
+//  // Finalise changes to A
+//  A.apply();
+//
+//  // Clear temporary arrays
+//  delete[] dofs;
+//}
 //-----------------------------------------------------------------------------
 void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
 {
@@ -445,33 +445,33 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
   }
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::getBC(uint n, uint* indicators, double* values,
-                        DofMap const& dof_map, Form const& form)
-{
-  // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData& data = this->updateLocalData(form);
-
-  // A map to hold the mapping from boundary dofs to boundary values
-  _map<uint, real> boundary_values;
-
-  // Compute dofs and values
-  computeBC(boundary_values, data);
-
-  if ( n != dof_map.global_dimension())
-  {
-    error("The n should be the same as dof_map.global_dimension()");
-  }
-
-  _map<uint, real>::const_iterator boundary_value;
-  uint i = 0;
-  for (boundary_value = boundary_values.begin();
-      boundary_value != boundary_values.end(); ++boundary_value)
-  {
-    i = boundary_value->first;
-    indicators[i] = 1;
-    values[i] = boundary_value->second;
-  }
-}
+//void DirichletBC::getBC(uint n, uint* indicators, double* values,
+//                        DofMap const& dof_map, Form const& form)
+//{
+//  // Create local data for application of boundary conditions
+//  BoundaryCondition::LocalData& data = this->updateLocalData(form);
+//
+//  // A map to hold the mapping from boundary dofs to boundary values
+//  _map<uint, real> boundary_values;
+//
+//  // Compute dofs and values
+//  computeBC(boundary_values, data);
+//
+//  if ( n != dof_map.global_dimension())
+//  {
+//    error("The n should be the same as dof_map.global_dimension()");
+//  }
+//
+//  _map<uint, real>::const_iterator boundary_value;
+//  uint i = 0;
+//  for (boundary_value = boundary_values.begin();
+//      boundary_value != boundary_values.end(); ++boundary_value)
+//  {
+//    i = boundary_value->first;
+//    indicators[i] = 1;
+//    values[i] = boundary_value->second;
+//  }
+//}
 //-----------------------------------------------------------------------------
 
 }

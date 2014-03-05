@@ -84,6 +84,9 @@ public:
     entity_indices[topological_dimension] = new uint[1];
     entity_indices[topological_dimension][0] = cell.index();
 
+    // Cell index (short-cut for entity_indices[topological_dimension][0])
+    index = entity_indices[topological_dimension][0];
+
     // Two different cases
     if (MPI::numProcesses() == 1)
     {

@@ -242,8 +242,8 @@ Function const& Function::operator=(Function& f)
 {
 
   // FIXME: Handle other assignments
-  if (f.type_ != discrete)
-    error("Can only handle assignment from discrete functions (for now).");
+  if (f.type_ != discrete) error(
+      "Can only handle assignment from discrete functions (for now).");
 
   // Either create or copy discrete function
   if (type_ == discrete)
@@ -290,6 +290,11 @@ Function::Function(Function const& f) :
   {
     this->f_ = new ConstantFunction(*static_cast<ConstantFunction*>(f.f_));
     rename(f.name(), "constant function");
+  }
+  else if (f.type() == user)
+  {
+    this->f_ = new UserFunction(*static_cast<UserFunction*>(f.f_));
+    rename(f.name(), "user function");
   }
   else if (f.type() == empty)
   {
@@ -472,8 +477,7 @@ std::string const Function::signature() const
 //-----------------------------------------------------------------------------
 uint const Function::num_sub_functions() const
 {
-  if (type_ != discrete)
-    error("Only discrete functions have sub functions.");
+  if (type_ != discrete) error("Only discrete functions have sub functions.");
 
   return static_cast<DiscreteFunction*>(f_)->num_sub_functions();
 }
@@ -524,8 +528,8 @@ void Function::add_block(real *& values)
 //-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)
 {
-  if (type_ != discrete)
-    error("Sub functions can only be extracted from discrete functions.");
+  if (type_ != discrete) error(
+      "Sub functions can only be extracted from discrete functions.");
 
   SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
   return sub_function;
@@ -534,8 +538,8 @@ SubFunction Function::operator[](uint i)
 //-----------------------------------------------------------------------------
 Cell const& Function::cell() const
 {
-  if (!cell_)
-    error("Current cell is unknown (only available during assembly).");
+  if (!cell_) error(
+      "Current cell is unknown (only available during assembly).");
   return *cell_;
 }
 //-----------------------------------------------------------------------------

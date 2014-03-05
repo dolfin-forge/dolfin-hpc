@@ -112,35 +112,6 @@ public:
                 const QuadratureRule& q,
                 bool reset_tensor = true);
 
-//  void assemble_system(GenericTensor& A, const Form& A_form,
-//                       const Array<Function*>& A_coefficients,
-//                       const DofMapSet& A_dof_map_set,
-//                       GenericTensor& b, const Form& b_form,
-//                       const Array<Function*>& b_coefficients,
-//                       const DofMapSet& b_dof_map_set,
-//                       DirichletBC& bc, const MeshFunction<uint>* cell_domains,
-//                       const MeshFunction<uint>* exterior_facet_domains,
-//                       const MeshFunction<uint>* interior_facet_domains,
-//                       bool reset_tensors);
-//
-//  void assemble_system(GenericTensor& A, const Form& A_form,
-//                       const Array<Function*>& A_coefficients,
-//                       const DofMapSet& A_dof_map_set,
-//                       GenericTensor& b, const Form& b_form,
-//                       const Array<Function*>& b_coefficients,
-//                       const DofMapSet& b_dof_map_set,
-//                       DirichletBC& bc, const MeshFunction<uint>* cell_domains,
-//                       const MeshFunction<uint>* exterior_facet_domains,
-//                       const MeshFunction<uint>* interior_facet_domains,
-//                       const QuadratureRule& q,
-//                       bool reset_tensors);
-//
-//
-//  void applyTraces( GenericTensor& globalA, GenericTensor& globalb,
-//                    DirichletBC& bc, const DofMapSet& A_dof_map_set,
-//                    const DofMapSet& b_dof_map_set, const Form& A_form,
-//                    const Form& b_form, const MeshFunction<uint>* domains);
-
 private:
 
   // Assemble over cells

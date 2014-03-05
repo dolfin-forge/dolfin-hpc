@@ -444,34 +444,7 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
 #endif
   }
 }
-//-----------------------------------------------------------------------------
-//void DirichletBC::getBC(uint n, uint* indicators, double* values,
-//                        DofMap const& dof_map, Form const& form)
-//{
-//  // Create local data for application of boundary conditions
-//  BoundaryCondition::LocalData& data = this->updateLocalData(form);
-//
-//  // A map to hold the mapping from boundary dofs to boundary values
-//  _map<uint, real> boundary_values;
-//
-//  // Compute dofs and values
-//  computeBC(boundary_values, data);
-//
-//  if ( n != dof_map.global_dimension())
-//  {
-//    error("The n should be the same as dof_map.global_dimension()");
-//  }
-//
-//  _map<uint, real>::const_iterator boundary_value;
-//  uint i = 0;
-//  for (boundary_value = boundary_values.begin();
-//      boundary_value != boundary_values.end(); ++boundary_value)
-//  {
-//    i = boundary_value->first;
-//    indicators[i] = 1;
-//    values[i] = boundary_value->second;
-//  }
-//}
+
 //-----------------------------------------------------------------------------
 
 }

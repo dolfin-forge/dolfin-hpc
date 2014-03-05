@@ -112,14 +112,6 @@ public:
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
              const Form& form);
 
-  /// Make row associated with boundary conditions zero,
-  /// useful for non-diagonal matrices in a block matrix.
-//  void zero(GenericMatrix& A, const Form& form);
-
-  /// Get Dirichlet values and indicators
-//  void getBC(uint n, uint* indicators, double* values, DofMap const& dof_map,
-//             Form const& form);
-
 private:
 
   /// Apply boundary conditions

@@ -26,6 +26,7 @@ libdolfin_mesh_la_SOURCES = \
 			Mesh.cpp\
 			MeshConnectivity.cpp\
 			MeshData.cpp\
+			MeshDependent.cpp\
 			MeshDistributedData.cpp\
 			MeshEditor.cpp\
 			MeshEntity.cpp\

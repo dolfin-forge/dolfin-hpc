@@ -12,6 +12,9 @@
 #include <dolfin/common/Array.h>
 #include "MeshConnectivity.h"
 #include "MeshDistributedData.h"
+#include "MeshOrdering.h"
+#include "MeshRenumber.h"
+#include "TopologyComputation.h"
 
 namespace dolfin
 {
@@ -30,6 +33,7 @@ class MeshTopology
 {
 
   friend class MeshOrdering;
+  friend class MeshRenumber;
   friend class MPIMeshCommunicator;
   friend class TopologyComputation;
 
@@ -59,6 +63,12 @@ public:
   /// Initialize topology of given maximum dimension
   void init(uint dim);
 
+  /// Compute mesh entities of given topological dimension
+  uint compute_entities(Mesh& mesh, uint dim) const;
+
+  /// Compute connectivity for given pair of topological dimensions
+  void compute_connectivity(Mesh& mesh, uint d0, uint d1) const;
+
   /// Set number of entities (size) for given topological dimension
   void init(uint dim, uint size);
 
@@ -75,7 +85,16 @@ public:
   const MeshDistributedData& distdata() const;
 
   ///
+  void order(Mesh& mesh);
+
+  ///
   bool is_ordered() const;
+
+  ///
+  void renumber(Mesh& mesh);
+
+  /// Return token identifying the internal state of mesh topology
+  int token() const;
 
   /// Display data
   void disp() const;
@@ -97,6 +116,12 @@ private:
   /// Return true iff topology is ordered according to the UFC numbering
   bool _ordered;
 
+  //
+  int _token;
+
+  //
+  uint _renumbering_count;
+
 };
 
 //--- INLINE ------------------------------------------------------------------
@@ -112,6 +137,18 @@ inline uint MeshTopology::size(uint dim) const
 {
   dolfin_assert(dim <= _dim);
   return _num_entities[dim];
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::compute_entities(Mesh& mesh, uint dim) const
+{
+  return TopologyComputation::computeEntities(mesh, dim);
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
+{
+  TopologyComputation::computeConnectivity(mesh, d0, d1);
 }
 
 //-----------------------------------------------------------------------------
@@ -141,9 +178,22 @@ const inline MeshDistributedData& MeshTopology::distdata() const
 }
 
 //-----------------------------------------------------------------------------
+inline void MeshTopology::order(Mesh& mesh)
+{
+  MeshOrdering::order(mesh);
+  _ordered = true;
+}
+
+//-----------------------------------------------------------------------------
 inline bool MeshTopology::is_ordered() const
 {
   return _ordered;
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshTopology::renumber(Mesh& mesh)
+{
+  if(MeshRenumber::renumber(mesh)) ++_renumbering_count;
 }
 
 }

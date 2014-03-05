@@ -20,18 +20,6 @@ SlipFrictionBC::SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain, real bet
 {
 }
 
-//-----------------------------------------------------------------------------
-SlipFrictionBC::SlipFrictionBC(BoundaryNormal& normal,
-                               SubDomain const& sub_domain,
-                               real beta) :
-    BoundaryCondition("SlipFriction", normal.mesh(), sub_domain),
-    slipbc_(normal, sub_domain),
-    beta_(beta),
-    expr_(sub_domain, beta),
-    Fbeta_(normal.mesh(), expr_)
-{
-}
-
 ////-----------------------------------------------------------------------------
 //SlipFrictionBC::SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
 //                               real beta) :

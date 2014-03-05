@@ -370,7 +370,7 @@ void Assembler::assembleCells(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
 #ifndef NO_PROGRESS_BAR
-    ++p;
+    p++;
 #endif
   }
 
@@ -394,6 +394,7 @@ void Assembler::assembleCells(GenericTensor& A,
 
   // Assemble over cells
 #ifndef NO_PROGRESS_BAR
+  dolfin_assert(mesh_.numCells());
   Progress p(progressMessage(A.rank(), "cells"), mesh_.numCells());
 #endif
   //  for (CellIterator cell(mesh); !cell.end(); ++cell)
@@ -434,7 +435,7 @@ void Assembler::assembleCells(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
 #ifndef NO_PROGRESS_BAR
-    ++p;
+    p++;
 #endif
   }
 
@@ -454,24 +455,20 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
   BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
-  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
-
-  //
   if(exterior_boundary.numCells()  == 0) return;
+  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
 
   dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
 #ifndef NO_PROGRESS_BAR
+  dolfin_assert(exterior_boundary.numCells());
   Progress p(progressMessage(A.rank(), "exterior facets"), exterior_boundary.numCells());
 #endif
   //  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
 #pragma omp for
   for (uint i = 0; i < exterior_boundary.numCells(); i++)
   {
-
-    //    Cell boundary_cell(*boundary, i);
-
     // Get mesh facet corresponding to boundary cell
     Facet mesh_facet(mesh_, (*cell_map).get(i));
 
@@ -514,7 +511,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
 
 #ifndef NO_PROGRESS_BAR
-    ++p;
+    p++;
 #endif
 
   }
@@ -538,8 +535,13 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   mesh_.init(dim_ - 1, dim_);
   mesh_.order();
 
+  //
+  BoundaryMesh& interior_boundary = mesh_.interior_boundary();
+  if(interior_boundary.numCells()  == 0) return;
+
   // Assemble over interior facets (the facets of the mesh)
 #ifndef NO_PROGRESS_BAR
+  dolfin_assert(mesh_.numFacets());
   Progress p(progressMessage(A.rank(), "interior facets"), mesh_.numFacets());
 #endif
   for (FacetIterator facet(mesh_); !facet.end(); ++facet)
@@ -548,7 +550,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     if ( facet->numEntities(dim_) != 2 )
     {
 #ifndef NO_PROGRESS_BAR
-      ++p;
+      p++;
 #endif
       continue;
     }
@@ -601,7 +603,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
 
 #ifndef NO_PROGRESS_BAR
-    ++p;
+    p++;
 #endif
   }
 }

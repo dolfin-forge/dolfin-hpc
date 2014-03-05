@@ -12,11 +12,11 @@
 
 namespace dolfin
 {
-  
+
   /// MeshGeometry stores the geometry imposed on a mesh. Currently,
   /// the geometry is represented by the set of coordinates for the
   /// vertices of a mesh, but other representations are possible.
-  
+
   class MeshGeometry
   {
   public:
@@ -38,13 +38,13 @@ namespace dolfin
 
     /// Return number of coordinates
     inline uint size() const { return _size; }
-    
+
     /// Return value of coordinate n in direction i
     inline real& x(uint n, uint i) { dolfin_assert(n < _size && i < _dim); return coordinates[n*_dim + i]; }
 
     /// Return value of coordinate n in direction i
     inline real x(uint n, uint i) const { dolfin_assert(n < _size && i < _dim); return coordinates[n*_dim + i]; }
-    
+
     /// Return array of values for coordinate n
     inline real* x(uint n) { return coordinates + n*_dim; }
 
@@ -59,7 +59,7 @@ namespace dolfin
 
     /// Return coordinate n as a 3D point value
     Point point(uint n) const;
-    
+
     /// Clear all data
     void clear();
 
@@ -69,21 +69,27 @@ namespace dolfin
     /// Set value of coordinate n in direction i
     void set(uint n, uint i, real x);
 
+    /// Return token identifying the internal state of mesh geometry
+    int token() const;
+
     /// Display data
     void disp() const;
 
   private:
-    
+
 
     // Euclidean dimension
     uint _dim;
-    
+
     // Number of coordinates
     uint _size;
 
     // Coordinates for all vertices stored as a contiguous array
     real* coordinates;
-    
+
+    //
+    int _token;
+
   };
 
 }

@@ -18,6 +18,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>
 #include "ALEType.h"
+#include "MeshDependent.h"
 #include "MeshDistributedData.h"
 #include "MeshGeometry.h"
 #include "MeshTopology.h"
@@ -65,14 +66,15 @@ class MeshData;
 /// all edges connected to a given vertex must also be explicitly
 /// created (in this case by a call to mesh.init(0, 1)).
 
-class Mesh: public Variable
+class Mesh: public Variable, public MeshDependent
 {
 
   // Friends
+  friend class MeshDependent;
   friend class MeshEditor;
-  friend class MeshOrdering;
+  friend class MeshTopology;
+  friend class MeshGeometry;
   friend class MPIMeshCommunicator;
-  friend class TopologyComputation;
 
 public:
 

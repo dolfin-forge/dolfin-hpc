@@ -28,10 +28,6 @@ public:
   /// Create boundary condition for sub domain
   SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain, real beta);
 
-  /// Create boundary condition for sub domain
-  SlipFrictionBC(BoundaryNormal& normal, SubDomain const& sub_domain,
-                 real beta);
-
   /// Create sub system boundary condition for sub domain
   SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain,
                  SubSystem const& sub_system, real beta);

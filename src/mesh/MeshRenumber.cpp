@@ -31,25 +31,26 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void MeshRenumber::renumber(Mesh& mesh)
+bool MeshRenumber::renumber(Mesh& mesh)
 {
-  renumber_vertices(mesh);
+  bool ret = renumber_vertices(mesh);
 #ifndef ENABLE_P1_OPTIMIZATIONS
-  renumber_edges(mesh);
-  renumber_faces(mesh);
+  ret &= renumber_edges(mesh);
+  ret &= renumber_faces(mesh);
 #endif
-  renumber_cells(mesh);
+  ret &= renumber_cells(mesh);
+  return ret;
 }
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void MeshRenumber::renumber_vertices(Mesh& mesh)
+bool MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if(mddata._valid_vertex_numbering || MPI::numProcesses() == 1)
   {
-    return;
+    return false;
   }
 
   int const rank = MPI::processNumber();
@@ -145,16 +146,18 @@ void MeshRenumber::renumber_vertices(Mesh& mesh)
     ghost_buff[i].clear();
   }
   delete[] ghost_buff;
+
+  return true;
 }
 //-----------------------------------------------------------------------------
-void MeshRenumber::renumber_edges(Mesh& mesh)
+bool MeshRenumber::renumber_edges(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if( mddata._valid_edge_numbering ||
       MPI::numProcesses() == 1  || mesh.topology().dim() == 1)
   {
-    return;
+    return false;
   }
 
   // Flush shared/ghosted edges
@@ -342,16 +345,17 @@ void MeshRenumber::renumber_edges(Mesh& mesh)
   delete[] recv_buff;
   delete[] recv_buff_id;
 
+  return true;
 }
 //-----------------------------------------------------------------------------
-void MeshRenumber::renumber_faces(Mesh& mesh)
+bool MeshRenumber::renumber_faces(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if( mddata._valid_face_numbering ||
       MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
   {
-    return;
+    return false;
   }
 
   mddata.flush_faces();
@@ -559,15 +563,16 @@ void MeshRenumber::renumber_faces(Mesh& mesh)
   delete[] recv_buff;
   delete[] recv_buff_id;
 
+  return true;
 }
 //-----------------------------------------------------------------------------
-void MeshRenumber::renumber_cells(Mesh& mesh)
+bool MeshRenumber::renumber_cells(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if( mddata._valid_cell_numbering || MPI::numProcesses() == 1)
   {
-    return;
+    return false;
   }
 
   uint offset = 0;
@@ -601,6 +606,8 @@ void MeshRenumber::renumber_cells(Mesh& mesh)
 #if ENABLE_P1_OPTIMIZATIONS
   mddata.finalize(dim);
 #endif
+
+  return true;
 }
 //-----------------------------------------------------------------------------
 std::pair<dolfin::uint, dolfin::uint> MeshRenumber::edge_key(uint id1,uint id2)

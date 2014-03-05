@@ -16,7 +16,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(3, Function(mesh)),
+    basis_(3, Function(mesh, 0.0)),
     node_type_(mesh)
 {
 }
@@ -26,7 +26,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary.mesh()),
     boundary_(&boundary),
     local_boundary_(false),
-    basis_(3, Function(mesh_)),
+    basis_(3, Function(mesh_, 0.0)),
     node_type_(mesh_)
 {
 }
@@ -65,15 +65,15 @@ Function& BoundaryNormal::node_type()
 }
 
 //-----------------------------------------------------------------------------
-void BoundaryNormal::init(Mesh& mesh, Form& form, uint i)
+void BoundaryNormal::init(Mesh& mesh, Form& form, uint index)
 {
   uint gdim = mesh.geometry().dim();
   for (uint i = 0; i < 3; ++i)
   {
-    basis_[i].init(mesh, form, i);
+    basis_[i].init(mesh, form, index);
   }
 
-  ufc::finite_element * fe = form.create_finite_element(i);
+  ufc::finite_element * fe = form.create_finite_element(index);
   std::string sign = fe->signature();
   if (gdim > 1)
   {
@@ -141,9 +141,9 @@ void BoundaryNormal::write(std::string const& filename)
     {
       std::stringstream ss;
       ss << "E" << i;
-      fields.push_back(std::pair<Function *, std::string>(this->basis()[i],ss.str()));
+      fields.push_back(std::pair<Function *, std::string>(&this->basis()[i],ss.str()));
     }
-    fields.push_back(std::pair<Function *, std::string>(this->node_type(),"TYPE"));
+    fields.push_back(std::pair<Function *, std::string>(&this->node_type(),"TYPE"));
     File f(filename);
     f << fields;
 }

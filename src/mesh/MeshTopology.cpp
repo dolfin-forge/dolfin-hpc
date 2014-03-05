@@ -16,7 +16,9 @@ MeshTopology::MeshTopology() :
     _num_entities(NULL),
     _connectivity(NULL),
     _distdata(*this),
-    _ordered(false)
+    _ordered(false),
+    _token(0),
+    _renumbering_count(0)
 
 {
   // Do nothing
@@ -27,7 +29,9 @@ MeshTopology::MeshTopology(const MeshTopology& topology) :
     _num_entities(NULL),
     _connectivity(NULL),
     _distdata(*this),
-    _ordered(false)
+    _ordered(false),
+    _token(0),
+    _renumbering_count(0)
 {
   *this = topology;
 }
@@ -124,6 +128,11 @@ void MeshTopology::init(uint dim, uint size)
   dolfin_assert(_num_entities);dolfin_assert(dim <= _dim);
 
   _num_entities[dim] = size;
+}
+//-----------------------------------------------------------------------------
+int MeshTopology::token() const
+{
+  return _token;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::disp() const

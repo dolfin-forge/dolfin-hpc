@@ -153,9 +153,6 @@ public:
   uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(uint* dofs, ufc::cell& ufc_cell, uint cell_index) const;
-
-  /// Tabulate the local-to-global mapping of dofs on a cell
   void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
                      uint cell_index) const;
 
@@ -247,14 +244,14 @@ private:
   // DOLFIN mesh
   Mesh& dolfin_mesh;
 
+  // UFC mesh
+  UFCMesh ufc_mesh;
+
   // Partitions
   MeshFunction<uint>* partitions;
 
   // Number of cells in the mesh
   uint num_cells_;
-
-  // UFC mesh
-  UFCMesh ufc_mesh;
 
   // Hash
   std::string const mesh_hash_;

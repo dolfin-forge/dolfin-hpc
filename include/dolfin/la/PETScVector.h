@@ -179,7 +179,6 @@ namespace dolfin
     std::map<const int, int> mapping;
 #endif
 
-
   };
 
   /// Output of PETScVector

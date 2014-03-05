@@ -66,6 +66,9 @@ public:
   Mesh& mesh() const;
 
   ///
+  bool const has_geometrical_sub_domain() const;
+
+  ///
   SubDomain const& sub_domain() const;
 
   ///
@@ -78,6 +81,9 @@ public:
   SubSystem const& sub_system() const;
 
 protected:
+
+  // Mark sub domain with mesh function
+  void init_markers(uint const& topological_dim);
 
   // Local data for application of boundary conditions
   class LocalData
@@ -138,11 +144,11 @@ private:
   // Is the subdomain geometrical
   bool const has_geometrical_sub_domain_;
 
-  // User defined sub domain
+  // Sub domain
   SubDomain const * geometrical_sub_domain_;
 
   // Sub domain markers
-  MeshFunction<uint> * const sub_domain_markers_;
+  MeshFunction<uint> * sub_domain_markers_;
 
   // True if sub domain markers are created locally
   bool const local_sub_domain_markers_;
@@ -164,6 +170,12 @@ inline std::string const& BoundaryCondition::type() const
 inline Mesh& BoundaryCondition::mesh() const
 {
   return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline bool const BoundaryCondition::has_geometrical_sub_domain() const
+{
+  return has_geometrical_sub_domain_;
 }
 
 //-----------------------------------------------------------------------------

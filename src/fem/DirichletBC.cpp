@@ -92,7 +92,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
 
   // Simple check
   const uint N = data.dof_map->global_dimension();
-  if (N != A.size(0) /*  || N != A.size(1) alow for rectangular matrices */)
+  if (N != A.size(0) /*  || N != A.size(1) allow for rectangular matrices */)
     error("Incorrect dimension of matrix for application of boundary conditions."
           "Did you assemble it on a different mesh?");
   if (N != b.size())
@@ -268,8 +268,9 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
                                        BoundaryCondition::LocalData& data)
 {
   // Special case
-    if (facets_.size() == 0 && dolfin::MPI::numProcesses() == 1)
+    if (facets_.size() == 0)
     {
+      if(dolfin::MPI::numProcesses() == 1)
       warning("Found no facets matching domain for boundary condition.");
       return;
     }

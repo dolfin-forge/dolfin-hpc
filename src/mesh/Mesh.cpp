@@ -21,9 +21,7 @@
 #include <dolfin/mesh/TopologyComputation.h>
 
 #include <dolfin/mesh/MeshFunction.h>
-
 #include <dolfin/mesh/MeshSmoothing.h>
-#include <dolfin/mesh/MeshOrdering.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
@@ -31,7 +29,6 @@
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
@@ -46,6 +43,7 @@ namespace dolfin {
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
   Variable("mesh", "DOLFIN mesh"),
+  MeshDependent(*this),
   _is_distributed(false),
   _topology(),
   _geometry(),
@@ -61,6 +59,7 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
   Variable("mesh", "DOLFIN mesh"),
+  MeshDependent(*this),
   _is_distributed(mesh._is_distributed),
   _topology(),
   _geometry(),
@@ -76,6 +75,7 @@ Mesh::Mesh(Mesh const& mesh) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
   Variable("mesh", "DOLFIN mesh"),
+  MeshDependent(*this),
   _is_distributed(false),
   _topology(),
   _geometry(),
@@ -169,25 +169,31 @@ IntersectionDetector& Mesh::intersector()
 dolfin::uint Mesh::init(uint dim) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  return TopologyComputation::computeEntities(*mesh, dim);
+  return _topology.compute_entities(*mesh, dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  TopologyComputation::computeConnectivity(*mesh, d0, d1);
+  _topology.compute_connectivity(*mesh, d0, d1);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
 {
   // Compute all entities
-  for (uint d = 0; d <= topology().dim(); d++)
+  for (uint d = 0; d <= topology().dim(); ++d)
+  {
     init(d);
+  }
 
   // Compute all connectivity
-  for (uint d0 = 0; d0 <= topology().dim(); d0++)
-    for (uint d1 = 0; d1 <= topology().dim(); d1++)
+  for (uint d0 = 0; d0 <= topology().dim(); ++d0)
+  {
+    for (uint d1 = 0; d1 <= topology().dim(); ++d1)
+    {
       init(d0, d1);
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 void Mesh::clear()
@@ -211,7 +217,7 @@ void Mesh::order()
   }
   else
   {
-    MeshOrdering::order(*this);
+    _topology.order(*this);
   }
 }
 //-----------------------------------------------------------------------------
@@ -342,17 +348,13 @@ void Mesh::distribute(MeshFunction<uint>& distribution,
 //-----------------------------------------------------------------------------
 void Mesh::renumber()
 {
-  MeshRenumber::renumber(*this);
-//  _timestamp = time(0);
+  topology().renumber(*this);
 }
 
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash() const
 {
-  std::stringstream ss;
-  ss << "Mesh@" << this << ":C" << this->numCells() << ":V"
-     << this->numVertices() << ":T" << _timestamp;
-  return ss.str();
+  return this->mesh_hash();
 }
 //-----------------------------------------------------------------------------
 void Mesh::disp() const

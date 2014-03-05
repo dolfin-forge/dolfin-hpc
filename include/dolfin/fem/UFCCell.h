@@ -165,6 +165,9 @@ public:
           cell.index());
     }
 
+    // Cell index (short-cut for entity_indices[topological_dimension][0])
+    index = entity_indices[topological_dimension][0];
+
     /// Set vertex coordinates
     const uint* vertices = cell.entities(0);
     for (uint i = 0; i < num_vertices; i++)

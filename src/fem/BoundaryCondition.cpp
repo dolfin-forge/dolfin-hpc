@@ -12,6 +12,7 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/SubDomain.h>
 #include <dolfin/fem/BoundaryCondition.h>
 
 namespace dolfin
@@ -87,6 +88,27 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
 BoundaryCondition::~BoundaryCondition()
 {
   // Do nothing
+  if(has_geometrical_sub_domain_)
+  {
+    delete sub_domain_markers_;
+  }
+}
+//-----------------------------------------------------------------------------
+void BoundaryCondition::init_markers(uint const& topological_dim)
+{
+  // Make sure the mesh has been ordered
+  mesh().order();
+
+  // Create mesh function for sub domain markers on facets
+  uint const dim = mesh().topology().dim();
+  mesh().init(topological_dim);
+  sub_domain_markers_ = new MeshFunction<uint>(mesh_, topological_dim);
+
+  // Mark everything as sub domain 1
+  (*sub_domain_markers_) = 1;
+
+  // Mark the sub domain as sub domain 0
+  geometrical_sub_domain_->mark(*sub_domain_markers_, 0);
 }
 //-----------------------------------------------------------------------------
 BoundaryCondition::LocalData::LocalData(Mesh& mesh, SubSystem const& sub_system,

@@ -4,13 +4,13 @@
 #ifndef __MESH_RENUMBER_H
 #define __MESH_RENUMBER_H
 
-#include "Face.h"
 #include <dolfin/common/Array.h>
 #include <set>
 
 namespace dolfin
 {
 
+class Face;
 class Mesh;
 
 /**
@@ -25,19 +25,19 @@ class MeshRenumber
 public:
 
   /// Renumber all mesh entities
-  static void renumber(Mesh& mesh);
+  static bool renumber(Mesh& mesh);
 
   /// Renumber mesh vertices
-  static void renumber_vertices(Mesh& mesh);
+  static bool renumber_vertices(Mesh& mesh);
 
   /// Renumber mesh edges
-  static void renumber_edges(Mesh& mesh);
+  static bool renumber_edges(Mesh& mesh);
 
   /// Renumber mesh faces
-  static void renumber_faces(Mesh& mesh);
+  static bool renumber_faces(Mesh& mesh);
 
   /// Renumber mesh cells
-  static void renumber_cells(Mesh& mesh);
+  static bool renumber_cells(Mesh& mesh);
 
 private:
 

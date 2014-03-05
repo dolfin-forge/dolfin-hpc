@@ -1,66 +1,79 @@
-// Copyright (C) 2014 Aurélien Larcher
+// Copyright (C) 2007 Murtazo Nazarov
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-30
-// Last changed: 2014-01-30
+// Modified by Niclas Jansson, 2009.
+//
+// First added:  2007-05-01
+// Last changed: 2009-03-17
 
 #ifndef __NODENORMAL_H
 #define __NODENORMAL_H
 
 #include <dolfin/fem/BoundaryNormal.h>
+#include <dolfin/mesh/Mesh.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/function/Function.h>
+#include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/VertexNormal.h>
+#include <dolfin/mesh/BoundaryMesh.h>
+#include <map>
 
 namespace dolfin
 {
-
-class FiniteElementSpace;
-class Mesh;
-
-/**
- *  DOCUMENTATION:
- *
- *  @class  NodeNormal
- *
- *  @brief  Provides an orthonormal basis at each geometrical node located on an
- *          exterior facet of the mesh for a given finite element space,
- *          defining an outward normal vector and two tangential vectors.
- */
-
 class NodeNormal : public BoundaryNormal
 {
 public:
 
-  /// Create normal, tangents to the boundary of mesh at vertices
-  NodeNormal(Mesh& function, VertexNormal::Type weight);
+  // Copy constructor
+  NodeNormal(NodeNormal& node_normal);
 
-  /// Destructor
+  // Create normal, tangents for the boundary of mesh
+  NodeNormal(Mesh& mesh);
+
   ~NodeNormal();
+
+  // Assignment
+  NodeNormal& operator=(NodeNormal& node_normal);
+
+  // Cleanup
+  void clear();
 
   ///
   void compute();
 
+  Mesh& mesh;
+
+  // Define mesh functions for normal and tangents
+  MeshFunction<real> *normal, *tau, *tau_1, *tau_2;
+
+  // Define node type: 1 surface, 2 edge, 3 surface
+  MeshFunction<int> node_type;
+
 private:
 
-  /// Cleanup
-  void Clear();
+  // Compute normals to the boundary nodes
+  void ComputeNormal(Mesh& mesh);
 
-  /// Compute normals to the boundary nodes
-  void ComputeBasisP1();
+  void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau,
+                                NodeNormal& node_normal);
 
-  //--- ATTRIBUTES ------------------------------------------------------------
+  void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau_1,
+                                Function& Ftau_2, NodeNormal& node_normal);
 
-  uint const dim_;
-  VertexNormal normals_;
-  Array<MeshFunction<real> *> const& meshbasis_;
-  Array<GenericVector *> V_;
+  //
+  void cache_shared_area(Mesh& mesh, BoundaryMesh& boundary, uint nsdim,
+                         MeshFunction<uint> *vertex_map,
+                         MeshFunction<uint> *cell_map);
+
+  std::map<uint, uint> shared_noffset;
+  std::map<uint, uint> num_cells;
+  Array<real> shared_normal;
+  std::map<uint, Array<real> > normal_block;
+  std::map<uint, Array<real> > shared_area_block;
+  uint _offset;
 
 };
-
 }
 #endif
 

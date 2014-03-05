@@ -47,7 +47,7 @@ public:
   Function& node_type();
 
   /// Convenience initialization of basis functions
-  void init(Mesh& mesh, Form& form, uint i);
+  void init(Mesh& mesh, Form& form, uint index);
 
   /// Convenience initialization of basis functions
   void init(Mesh& mesh, std::string const& signature);

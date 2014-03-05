@@ -67,6 +67,9 @@ private:
   void Clear();
 
   // Compute normals to the boundary nodes
+  void ComputeSimpleNormal(Mesh& mesh);
+
+  // Compute normals to the boundary nodes
   void ComputeNormal(Mesh& mesh);
 
   ///
@@ -92,6 +95,7 @@ private:
   MeshFunction<uint> vertex_type_;
 
   //
+  Array<real> shared_normal;
   std::map<uint, Array<real> > shared_facetnormals_block_;
   std::map<uint, Array<real> > shared_facetweights_block_;
 

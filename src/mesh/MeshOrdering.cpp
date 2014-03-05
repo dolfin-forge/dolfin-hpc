@@ -25,8 +25,6 @@ void MeshOrdering::order(Mesh& mesh)
   {
     cell_type.orderEntities(*cell);
   }
-
-  mesh._topology._ordered = true;
 }
 //-----------------------------------------------------------------------------
 

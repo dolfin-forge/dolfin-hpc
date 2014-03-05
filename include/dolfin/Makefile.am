@@ -1,8 +1,10 @@
 include_HEADERS = dolfin.h
 
-nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
-                                adaptivity/SpaceTimeFunction.h\
-                                config/dolfin_config.h\
+nobase_pkginclude_HEADERS = \
+				adaptivity/dolfin_adaptivity.h\
+				adaptivity/AdaptiveRefinement.h\
+				adaptivity/SpaceTimeFunction.h\
+				config/dolfin_config.h\
 				common/constants.h\
 				common/dolfin_common.h\
 				common/timing.h\
@@ -243,6 +245,7 @@ nobase_pkginclude_HEADERS = 	adaptivity/AdaptiveRefinement.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/LocalMeshRefinement.h\
 				mesh/Mesh.h\
+				mesh/MeshDependent.h\
 				mesh/MeshConnectivity.h\
 				mesh/MeshData.h\
 				mesh/MeshDistributedData.h\

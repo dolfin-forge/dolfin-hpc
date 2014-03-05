@@ -27,11 +27,12 @@
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshRenumber.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
 
@@ -52,6 +53,7 @@ Mesh::Mesh() :
   _cell_type(0),
   _exterior_boundary(NULL),
   _interior_boundary(NULL),
+  _intersection_detector(NULL),
   _timestamp(time(0))
 {
   // Do nothing
@@ -66,6 +68,7 @@ Mesh::Mesh(Mesh const& mesh) :
   _cell_type(0),
   _exterior_boundary(NULL),
   _interior_boundary(NULL),
+  _intersection_detector(NULL),
   _timestamp(time(0))
 {
   *this = mesh;
@@ -80,6 +83,7 @@ Mesh::Mesh(std::string filename) :
   _cell_type(0),
   _exterior_boundary(NULL),
   _interior_boundary(NULL),
+  _intersection_detector(NULL),
   _timestamp(time(0))
 {
   File file(filename);
@@ -124,7 +128,6 @@ MeshData& Mesh::data()
   {
     _data = new MeshData(*this);
   }
-
   return *_data;
 }
 //-----------------------------------------------------------------------------
@@ -150,6 +153,17 @@ BoundaryMesh& Mesh::interior_boundary()
     _interior_boundary = new BoundaryMesh(*this, BoundaryMesh::interior);
   }
   return *_interior_boundary;
+}
+//-----------------------------------------------------------------------------
+IntersectionDetector& Mesh::intersector()
+{
+  ///FIXME: Improve hash logic to regenerate detector at topology change
+  if(_intersection_detector == NULL)
+  {
+    delete _intersection_detector;
+    _intersection_detector = new IntersectionDetector(*this);
+  }
+  return *_intersection_detector;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint Mesh::init(uint dim) const
@@ -181,11 +195,12 @@ void Mesh::clear()
   _topology.clear();
   _geometry.clear();
   delete _cell_type;
-  _cell_type = 0;
+  _cell_type = NULL;
   delete _data;
+  _data = NULL;
   delete _exterior_boundary;
   delete _interior_boundary;
-  _data = 0;
+  delete _intersection_detector;
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()

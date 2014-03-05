@@ -34,6 +34,7 @@ namespace dolfin
 {
 
 class BoundaryMesh;
+class IntersectionDetector;
 template<class T> class MeshFunction;
 class MeshData;
 
@@ -171,6 +172,9 @@ public:
   /// Return interior boundary of the mesh
   BoundaryMesh& interior_boundary();
 
+  /// Return intersection detector for the mesh
+  IntersectionDetector& intersector();
+
   /// Compute entities of given topological dimension and return number of entities
   uint init(uint dim) const;
 
@@ -303,6 +307,9 @@ private:
 
   /// Interior boundary mesh
   mutable BoundaryMesh * _interior_boundary;
+
+  /// Intersection detector
+  mutable IntersectionDetector * _intersection_detector;
 
   int _timestamp;
 

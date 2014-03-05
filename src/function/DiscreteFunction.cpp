@@ -45,7 +45,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -65,7 +64,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -87,7 +85,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -109,7 +106,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -130,7 +126,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -151,7 +146,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -173,7 +167,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -194,7 +187,6 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     renumbered(false),
     _cache_size(0),
     _indices(NULL),
@@ -244,7 +236,6 @@ DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    intersection_detector_(NULL),
     _cache_size(0),
     _indices(NULL),
     _data_cache(NULL)
@@ -263,7 +254,6 @@ DiscreteFunction::~DiscreteFunction()
   {
     delete X_;
   }
-  delete intersection_detector_;
   delete[] _indices;
   delete[] _data_cache;
 }
@@ -291,6 +281,7 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 void DiscreteFunction::evaluate(real* values, const real* coordinates,
                                 const ufc::cell& cell) const
 {
+  //FIXME: Should interpolate on the cell.
   this->eval(values, coordinates);
 }
 
@@ -391,12 +382,6 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void DiscreteFunction::eval(real* values, const real* x) const
 {
-  // Initialize intersection detector if not done before
-  if (!intersection_detector_)
-  {
-    intersection_detector_ = new IntersectionDetector(mesh_);
-  }
-
   // Find the cell that contains x
   uint const gdim = mesh_.geometry().dim();
   if (gdim > 3)
@@ -411,7 +396,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
     p[i] = x[i];
   }
   Array<uint> cells;
-  intersection_detector_->overlap(p, cells);
+  mesh_.intersector().overlap(p, cells);
   if (cells.size() < 1)
   {
     if (MPI::numProcesses() == 1)
@@ -602,10 +587,8 @@ void DiscreteFunction::InitializeGhosts()
   X_->init_ghosted(indices.size(), indices, map);
 
 #ifdef ENABLE_FUNCTION_CACHE
-  if (_indices)
-    delete[] _indices;
-  if (_data_cache)
-    delete[] _data_cache;
+  delete[] _indices;
+  delete[] _data_cache;
 
   _cache_mapping.clear();
 

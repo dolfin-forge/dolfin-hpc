@@ -56,7 +56,9 @@ void IntersectionDetector::overlap(Array<Point> const& points,
   // Intersect each segment with mesh
   Array<uint> cc;
   for (uint i = 0; i < points.size() - 1; i++)
+  {
     gts.overlap(points[i], points[i + 1], cc);
+  }
 
   // sort cells
   std::sort(cc.begin(), cc.end());

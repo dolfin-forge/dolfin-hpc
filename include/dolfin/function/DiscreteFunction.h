@@ -173,14 +173,12 @@ private:
   /// The vector of dofs
   GenericVector * const X_;
 
-  /// Intersection detector
-  mutable IntersectionDetector * intersection_detector_;
-
   /// Renumbered dof_map;
   bool renumbered;
   uint _cache_size;
   uint *_indices;
-  real *_data_cache;_map<uint, uint> _cache_mapping;
+  real *_data_cache;
+  _map<uint, uint> _cache_mapping;
 
 };
 

@@ -1,8 +1,7 @@
 // Copyright (C) 1999 Jonathan Richard Shewchuk
 // Licensed under the GNU LGPL Version 2.1.
-// 
+//
 // Modified by Johan Jansson, 2006.
-
 
 #ifndef __GEOMETRIC_PREDICATES_H
 #define __GEOMETRIC_PREDICATES_H
@@ -13,7 +12,7 @@ namespace dolfin
 {
 
 /* GTS - Library for the manipulation of triangulated surfaces
- * Copyright (C) 1999 Stéphane Popinet
+ * Copyright (C) 1999 Stï¿½phane Popinet
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -32,22 +31,10 @@ namespace dolfin
  */
 /* Header file for robust predicates by Jonathan Richard Shewchuk */
 
-double orient2d            (double* pa,
-			    double* pb,
-			    double* pc);
-double orient3d            (double* pa,
-			    double* pb,
-			    double* pc,
-			    double* pd);
-double incircle            (double* pa,
-			    double* pb,
-			    double* pc,
-			    double* pd);
-double insphere            (double* pa,
-			    double* pb,
-			    double* pc,
-			    double* pd,
-			    double* pe);
+double orient2d(double* pa, double* pb, double* pc);
+double orient3d(double* pa, double* pb, double* pc, double* pd);
+double incircle(double* pa, double* pb, double* pc, double* pd);
+double insphere(double* pa, double* pb, double* pc, double* pd, double* pe);
 
 }
 

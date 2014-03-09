@@ -431,7 +431,6 @@ VTKFile::ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3)^1 = (2|3) so ...
     real * values = NULL;
     u->get_block(values);
-    std::cout << "Value dim = " << value_dim << std::endl;
     switch (value_dim)
       {
     case 1:

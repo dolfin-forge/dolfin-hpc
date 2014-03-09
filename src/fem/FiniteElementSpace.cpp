@@ -160,14 +160,15 @@ void FiniteElementSpace::disp() const
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::is_cellwise_defined() const
 {
-  return (mesh_.numCells() * dof_map_.local_dimension())
+  return (mesh_.global_numCells() * dof_map_.local_dimension())
       == dof_map_.global_dimension();
 }
 
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::is_cellwise_constant() const
 {
-  return mesh_.numCells() == dof_map_.global_dimension();
+  return is_cellwise_defined()
+      && (dof_map_.local_dimension() == finite_element_.value_dimension(0));
 }
 
 //-----------------------------------------------------------------------------

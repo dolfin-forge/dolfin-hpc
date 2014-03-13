@@ -6,9 +6,15 @@
 // First added:  2007-05-01
 // Last changed: 2009-12-30
 
-#include <dolfin.h>
+#include <dolfin/fem/NodeNormal.h>
+
+#include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/UFCCell.h>
+#include <dolfin/math/basic.h>
+#include <dolfin/mesh/Facet.h>
 #include <dolfin/main/MPI.h>
-#include "dolfin/fem/NodeNormal.h"
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/Vertex.h>
 
 #include <map>
 

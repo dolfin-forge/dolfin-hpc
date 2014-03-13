@@ -8,13 +8,17 @@
 // First added:  2007-05-01
 // Last changed: 2012-03-04
 
-#include <dolfin.h>
 #include <dolfin/fem/UFC.h>
-#include <dolfin/main/MPI.h>
 
-#include <dolfin/fem/SlipBC.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/NodeNormal.h>
+#include <dolfin/fem/SlipBC.h>
+#include <dolfin/la/PETScMatrix.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/SubDomain.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <cmath>
 #include <cstring>

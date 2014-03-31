@@ -330,10 +330,11 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  data/Makefile\
                  tests/Makefile\
                  tests/fem/Makefile\
-                 tests/fem/NodeNormal/Makefile\
+                 tests/fem/BoundaryNormal/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\
                  tests/mesh/Makefile\
+                 tests/mesh/SubDomain/Makefile\
                  tests/mesh/VertexNormal/Makefile\
                  tests/ufl/Makefile\
                  tests/ufl/Algebra/Makefile\

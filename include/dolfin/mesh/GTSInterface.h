@@ -22,26 +22,27 @@ class Mesh;
 class Point;
 class Cell;
 
-template<class T> class Array;
+template<class T>
+  class Array;
 
 class GTSInterface
 {
 public:
 
   ///
-  GTSInterface(Mesh& m);
+  GTSInterface(Mesh& mesh);
 
   ///
   ~GTSInterface(void);
 
   /// Compute cells overlapping c
-  void overlap(Cell& c, Array<uint>& cells);
+  void overlap(Cell& c, Array<uint>& cells) const;
 
   /// Compute cells overlapping p
-  void overlap(Point const& p, Array<uint>& cells);
+  void overlap(Point const& p, Array<uint>& cells) const;
 
   /// Compute cells overlapping bounding box constructed from p1 and p2
-  void overlap(Point const& p1, Point const& p2, Array<uint>& cells);
+  void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const;
 
 private:
 
@@ -49,22 +50,22 @@ private:
   GTSInterface(void);
 
   ///
-  GTSInterface(const GTSInterface&);
+  GTSInterface(GTSInterface const& other);
 
   /// Construct bounding box of cell
-  GtsBBox* bboxCell(Cell&);
+  GtsBBox* bboxCell(Cell&) const;
 
   /// Construct bounding box of a single point
-  GtsBBox* bboxPoint(Point const& p);
+  GtsBBox* bboxPoint(Point const& p) const;
 
   /// Construct bounding box of a pair of points
-  GtsBBox* bboxPoint(Point const& p1, Point const& p2);
+  GtsBBox* bboxPoint(Point const& p1, Point const& p2) const;
 
   /// Construct hierarchical space partition tree of mesh
   void buildCellTree(void);
 
-  Mesh& mesh;
-  GNode* tree;
+  Mesh& mesh_;
+  mutable GNode * tree_;
 };
 
 }

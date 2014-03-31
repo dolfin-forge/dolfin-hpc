@@ -1,1 +1,1 @@
-SUBDIRS = NodeNormal
+SUBDIRS = BoundaryNormal

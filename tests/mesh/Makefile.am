@@ -1,1 +1,2 @@
-SUBDIRS = VertexNormal
+SUBDIRS = SubDomain \
+          VertexNormal

@@ -1,7 +1,10 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
-
+// Modified by Aurélien Larcher, 2014.
+//
+// First added:  2008-07-03
+// Last changed: 2014-03-18
 
 #ifndef __MESH_DISTRIBUTED_DATA_H
 #define __MESH_DISTRIBUTED_DATA_H
@@ -43,25 +46,50 @@ public:
 
   //---
 
+  /// Return global index of mesh entity given its local index and topological
+  /// dimension
   uint get_global(uint i, uint dim) const;
+
+  /// Return global index of mesh entity
   uint get_global(MeshEntity& e) const;
 
+  /// Return local index of mesh entity given its global index and topological
+  /// dimension
   uint get_local(uint i, uint dim) const;
+
+  /// Return local index of mesh entity
   uint get_local(MeshEntity& e) const;
 
+  /// Return owner of the ghosted entity given its global index and topological
+  /// dimension
   uint get_owner(uint local_index, uint dim) const;
+
+  /// Return owner of the ghosted entity
   uint get_owner(MeshEntity& m) const;
 
-  _set<uint>& get_shared_adj(uint local_index, uint dim) const;
-  _set<uint>& get_shared_adj(MeshEntity& m) const;
+  /// Return the set of adjacent ranks of a shared entity given its global index
+  /// and topological dimension
+  _set<uint> const& get_shared_adj(uint local_index, uint dim) const;
 
+  /// Return the set of adjacent ranks of a shared entity
+  _set<uint> const& get_shared_adj(MeshEntity& m) const;
+
+  /// Return global index of a vertex given the local index
   uint get_vertex_global(uint i) const;
+
+  /// Return local index of a vertex given the global index
   uint get_vertex_local(uint i) const;
 
+  /// Return global index of a facet given the local index
   uint get_facet_global(uint i) const;
+
+  /// Return local index of a facet given the global index
   uint get_facet_local(uint i) const;
 
+  /// Return global index of a cell given the local index
   uint get_cell_global(uint i) const;
+
+  /// Return local index of a cell given the global index
   uint get_cell_local(uint i) const;
 
   //---
@@ -79,6 +107,9 @@ public:
 
   void set_shared_adj(uint i, uint rank, uint dim);
   void set_shared_adj(MeshEntity& m, uint rank);
+
+  void setall_shared_adj(uint i, _set<uint> const& ranks, uint dim);
+  void setall_shared_adj(MeshEntity& m, _set<uint> const& ranks);
 
   inline void set_global_numVertices(uint num_global)
   { _num_global_vertex = num_global; }
@@ -110,15 +141,23 @@ public:
 
   inline bool have_global(uint i, uint dim) const
   {return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);}
+  
+  bool have_global(MeshEntity const& entity) const;
 
   inline bool have_local(uint i, uint dim) const
   {return (MPI::numProcesses() > 1 ? (global_indices[dim].count(i) > 0) : true);}
 
+  bool have_local(MeshEntity const& entity) const;
+
   inline bool is_shared(uint i, uint dim) const
   {return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);}
 
+  bool is_shared(MeshEntity const& entity) const;
+
   inline bool is_ghost(uint i, uint dim) const
   {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : false);}
+
+  bool is_ghost(MeshEntity const& entity) const;
 
   inline uint num_shared(uint dim) const {return shared[dim].size(); }
 

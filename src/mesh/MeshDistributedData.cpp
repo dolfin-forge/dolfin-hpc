@@ -1,6 +1,10 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurélien Larcher, 2014.
+//
+// First added:  2008-07-03
+// Last changed: 2014-03-18
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/Mesh.h>
@@ -289,6 +293,19 @@ void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
   shared_adj[dim][i].insert(rank);
 }
 //-----------------------------------------------------------------------------
+void MeshDistributedData::setall_shared_adj(uint i, _set<uint> const& ranks,
+                                            uint dim)
+{
+  shared_adj[dim][i].clear();
+  shared_adj[dim][i].insert(ranks.begin(), ranks.end());
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::setall_shared_adj(MeshEntity& m,
+                                            _set<uint> const& ranks)
+{
+  setall_shared_adj(m.index(), ranks, m.dim());
+}
+//-----------------------------------------------------------------------------
 uint MeshDistributedData::get_global(MeshEntity& e) const
 {
   return get_global( e.index(), e.dim());
@@ -343,15 +360,15 @@ uint MeshDistributedData::get_owner(uint local_index, uint dim) const
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
-_set<uint>& MeshDistributedData::get_shared_adj(MeshEntity& m) const
+_set<uint> const& MeshDistributedData::get_shared_adj(MeshEntity& m) const
 {
   return get_shared_adj(m.index(), m.dim());
 }
 //-----------------------------------------------------------------------------
-_set<uint>& MeshDistributedData::get_shared_adj(uint local_index, uint dim) const
+_set<uint> const& MeshDistributedData::get_shared_adj(uint local_index,
+                                                      uint dim) const
 {
   dolfin_assert(is_shared(local_index, dim));
-
   return shared_adj[dim][local_index];
 }
 //-----------------------------------------------------------------------------
@@ -362,6 +379,7 @@ void MeshDistributedData::remap_owner(int* mapping)
   {
     for (MeshGhostIterator it(*this, i); !it.end(); ++it)
     {
+      //FIXME: logic with shared_adj
       set_ghost_owner(it.index(), mapping[it.owner()], i);
     }
 #ifdef ENABLE_P1_OPTIMIZATIONS
@@ -463,6 +481,26 @@ uint MeshDistributedData::get_cell_local(uint i) const
   dolfin_assert( _cell_dim != 0 );
   dolfin_assert( local_indices[_cell_dim].count(i) );
   return local_indices[_cell_dim][i];
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::have_global(MeshEntity const& entity) const
+{
+  return have_global(entity.index(), entity.dim());
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::have_local(MeshEntity const& entity) const
+{
+  return have_local(entity.index(), entity.dim());
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::is_shared(MeshEntity const& entity) const
+{
+  return is_shared(entity.index(), entity.dim());
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::is_ghost(MeshEntity const& entity) const
+{
+  return is_ghost(entity.index(), entity.dim());
 }
 //-----------------------------------------------------------------------------
 

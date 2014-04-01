@@ -124,9 +124,6 @@ private:
   // Initialize sub domain markers from MeshFunction
   void initFromMeshFunction(MeshFunction<uint>& sub_domains, uint sub_domain);
 
-  // Initialize sub domain markers from mesh
-  void initFromMesh(uint sub_domain);
-
   // Compute dofs and values for application of boundary conditions
   void computeBC(_map<uint, real>& boundary_values,
                  BoundaryCondition::LocalData& data);

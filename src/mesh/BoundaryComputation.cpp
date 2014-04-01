@@ -69,7 +69,6 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
 
   //FIXME rename
   GlobalFacetMap facetmap(mesh);
-  facetmap.init();
 
   // Count boundary vertices and facets, and assign vertex indices
   uint num_boundary_vertices = 0;

@@ -105,7 +105,6 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
   }
 
   GlobalFacetMap facetmap(mesh);
-  facetmap.init();
 
   // Always false when not marking facets
   bool on_boundary = false;

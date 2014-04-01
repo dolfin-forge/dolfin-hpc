@@ -23,6 +23,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 GlobalFacetMap::GlobalFacetMap(Mesh& mesh) : _mesh(mesh)
 {
+  init();
 }
 //-----------------------------------------------------------------------------
 GlobalFacetMap::~GlobalFacetMap()
@@ -71,7 +72,7 @@ void GlobalFacetMap::init()
 void GlobalFacetMap::findGlobal2D()
 {
   uint const tdim = _mesh.topology().dim();
-  MeshDistributedData& mddata = _mesh.distdata(); //FIXME:  Set const
+  MeshDistributedData const& mddata = _mesh.distdata();
 
   _map<uint,bool>::iterator iter;
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
@@ -100,7 +101,7 @@ void GlobalFacetMap::findGlobal3D()
 
   Array<uint> send_buff;
   uint const tdim = _mesh.topology().dim();
-  MeshDistributedData& mddata = _mesh.distdata(); //FIXME:  Set const
+  MeshDistributedData const& mddata = _mesh.distdata();
 
   _map<uint,bool>::iterator iter;
   _map<uint, uint>::iterator  uiter;

@@ -25,12 +25,12 @@ public:
   ~GlobalFacetMap();
 
   ///
-  void init();
-
-  ///
   bool globalFacet(Facet& facet);
 
 private:
+
+  ///
+  void init();
 
   ///
   void findGlobal2D();

@@ -25,7 +25,6 @@
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/GlobalFacetMap.h>
 #include <cstring>
 #include <cstdlib>
 

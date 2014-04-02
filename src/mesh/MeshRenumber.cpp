@@ -435,7 +435,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
         }
       }
 
-      if(num_ok < 3)
+      if(num_ok < f.numEntities(0))
       {
         continue;
       }
@@ -528,7 +528,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 
         }
       }
-      if(num_ok < 3)
+      if(num_ok < f.numEntities(0))
       {
         continue;
       }

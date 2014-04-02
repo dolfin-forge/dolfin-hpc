@@ -87,7 +87,7 @@ void GlobalFacetMap::findGlobal2D()
       }
     }
 
-    if ( f.numEntities(tdim) == 1 && num_shared < tdim )
+    if ( f.numEntities(tdim) == 1 && num_shared < f.numEntities(0) )
     {
       global_facet[f.index()] = true;
     }
@@ -122,7 +122,7 @@ void GlobalFacetMap::findGlobal3D()
     }
 
     if ( f.numEntities(tdim) == 1
-        && num_shared < tdim )
+        && num_shared < f.numEntities(0) )
     {
       global_facet[f.index()] = true;
     }
@@ -139,7 +139,10 @@ void GlobalFacetMap::findGlobal3D()
   }
 
   int sh_count = send_buff.size();
-  int res_size = sh_count/tdim;
+  //FIXME: Cannot work as it is with heterogeneous mesh since the data packing
+  //       is not constant, maybe use the maximum
+  uint const num_facet_vertices = _mesh.type().numEntities(0);
+  int res_size = sh_count / num_facet_vertices;
   int recv_size,recv_count;
 
   MPI_Allreduce(&sh_count, &recv_size, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
@@ -165,10 +168,10 @@ void GlobalFacetMap::findGlobal3D()
                  MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
 
-    for(int i = 0; i < recv_count; i += tdim)
+    for(int i = 0; i < recv_count; i += num_facet_vertices)
     {
       uint vi = 0;
-      for(uint k = 0; k < tdim; ++k)
+      for(uint k = 0; k < num_facet_vertices; ++k)
       {
         if(! mddata.have_global(recv_buff[i+k], 0))
         {
@@ -187,7 +190,7 @@ void GlobalFacetMap::findGlobal3D()
       {
         num_own = 0;
 
-        // Only consider facets conneted to one cell
+        // Only consider facets connected to one cell
         if ( f->numEntities(tdim) != 1)
         {
           continue;
@@ -203,12 +206,12 @@ void GlobalFacetMap::findGlobal3D()
             }
           }
         }
-        if(num_own == tdim)
+        if(num_own == num_facet_vertices)
         {
           break;
         }
       }
-      if(num_own == tdim)
+      if(num_own == num_facet_vertices)
       {
         shared_buff.push_back(1);
       }

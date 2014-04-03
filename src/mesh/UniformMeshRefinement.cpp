@@ -435,6 +435,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         {
 
           libgeom::Point3D midpoint_lib(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
+	  libgeom::Point3D r1;
           float u1, v1;
           int pid_tmp;
           real distance;

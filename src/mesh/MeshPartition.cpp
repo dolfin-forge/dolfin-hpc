@@ -84,7 +84,13 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   MPI_Comm_size(MPI::DOLFIN_COMM, &size);
   MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
 
+
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *elmdist = new idx_t[size + 1];
+#else
   idxtype *elmdist = new idxtype[size + 1];
+#endif
+
   int ncells = mesh.numCells();
 
   if (ncells == 0)
@@ -96,12 +102,27 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   elmdist[rank] = ncells;
   MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, MPI::DOLFIN_COMM);
 
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *elmwgt = NULL;
+#else
   idxtype *elmwgt = NULL;
   if (weight)
   {
     elmwgt = new idxtype[ncells];
     for (CellIterator c(mesh); !c.end(); ++c)
+#endif
+  if( weight ) {
+#if PARMETIS_MAJOR_VERSION > 3
+    elmwgt = new idx_t[ncells];
+#else
+    elmwgt = new idxtype[ncells];
+#endif
+    for(CellIterator c(mesh); !c.end(); ++c) 
+#if PARMETIS_MAJOR_VERSION > 3
+      elmwgt[c->index()] = static_cast<idx_t>(weight->get(*c));
+#else
       elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
+#endif
   }
   
   int sum_elm = elmdist[0];
@@ -117,19 +138,34 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   int nvertices = mesh.type().numVertices(mesh.topology().dim());
   int ncnodes = nvertices - 1;
   
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *eptr = new idx_t[ncells + 1];
+#else
   idxtype *eptr = new idxtype[ncells + 1];
+#endif
+
   eptr[0] = 0;
-  for (uint i = 1; i < (mesh.numCells() + 1); i++)
-    eptr[i] = eptr[i - 1] + nvertices;
-  
-  int *eind = new idxtype[nvertices * ncells];
+  for(uint i=1;i < (mesh.numCells() + 1);i++)
+    eptr[i] = eptr[i-1] + nvertices;
+
+#if PARMETIS_MAJOR_VERSION > 3
+  int *eind =  new idx_t[nvertices * ncells];  
+#else
+  int *eind =  new idxtype[nvertices * ncells];  
+#endif
+
   int i = 0;
   for (CellIterator c(mesh); !c.end(); ++c)
     for (VertexIterator v(*c); !v.end(); ++v)
       eind[i++] = mesh.distdata().get_global(*v);
-  
+
+
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *part = new idx_t[ncells];
+#else
   idxtype *part = new idxtype[ncells];
-  
+#endif
+
   float *tpwgts = new float[size];
   for (i = 0; i < size; i++)
     tpwgts[i] = 1.0 / (float) (size);
@@ -170,9 +206,15 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
 
   // Gather number of locally stored vertices for each processor
-  idxtype *vtxdist = new idxtype[size + 1];
-  vtxdist[rank] = static_cast<idxtype>(mesh.numVertices());
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *vtxdist = new idx_t[size+1];  
+  vtxdist[rank] = static_cast<idx_t> (mesh.numVertices());
+  idx_t local_vertices = vtxdist[rank];
+#else
+  idxtype *vtxdist = new idxtype[size+1];  
+  vtxdist[rank] = static_cast<idxtype> (mesh.numVertices());
   idxtype local_vertices = vtxdist[rank];
+#endif
 
   MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT,
 		MPI::DOLFIN_COMM);
@@ -187,8 +229,12 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
     sum = tmp + sum;
   }
 
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t *part = new idx_t[mesh.numVertices()];
+#else
   idxtype *part = new idxtype[mesh.numVertices()];
-  int gdim = static_cast<int>(mesh.geometry().dim());
+#endif
+  int gdim =  static_cast<int>( mesh.geometry().dim() );
   float *xdy = new float[gdim * mesh.numVertices()];
 
   i = 0;

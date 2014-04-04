@@ -28,12 +28,12 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-                uint num_partitions)
+			      uint num_partitions)
 {
   partitions.init(mesh, mesh.topology().dim());
   Graph graph(mesh);
   GraphPartition::partition(graph, num_partitions, partitions.values());
-
+  
   bool report_edge_cut = dolfin_get("report edge cut");
   if (report_edge_cut)
     GraphPartition::edgecut(graph, num_partitions, partitions.values());
@@ -45,7 +45,7 @@ void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
 }
 //-----------------------------------------------------------------------------
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-                MeshFunction<uint>& weight)
+			      MeshFunction<uint>& weight)
 {
   partitionCommonMetis(mesh, partitions, &weight);
 }
@@ -53,8 +53,8 @@ void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
 void MeshPartition::partitionCommonMetis(Mesh& mesh,
-                      MeshFunction<uint>& partitions,
-                      MeshFunction<uint>* weight)
+					 MeshFunction<uint>& partitions,
+					 MeshFunction<uint>* weight)
 {
 
   // Metis assumes vertices numbered from process 0
@@ -74,7 +74,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
     wgtflag = 0;    // Turn off graph weights
     ncon = 0;       // No weights on vertices
   }
-
+  
   // Duplicate MPI communicator
   MPI_Comm comm;
   MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
@@ -90,9 +90,9 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   if (ncells == 0)
   {
     dolfin::error(
-        "One mesh partition contains zero cells, which makes it impossible to compute the problem.");
+		  "One mesh partition contains zero cells, which makes it impossible to compute the problem.");
   }
-
+  
   elmdist[rank] = ncells;
   MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, MPI::DOLFIN_COMM);
 
@@ -103,7 +103,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
     for (CellIterator c(mesh); !c.end(); ++c)
       elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
   }
-
+  
   int sum_elm = elmdist[0];
   int tmp_elm;
   elmdist[0] = 0;
@@ -113,35 +113,34 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
     elmdist[i] = sum_elm;
     sum_elm = tmp_elm + sum_elm;
   }
-
+  
   int nvertices = mesh.type().numVertices(mesh.topology().dim());
   int ncnodes = nvertices - 1;
-
+  
   idxtype *eptr = new idxtype[ncells + 1];
   eptr[0] = 0;
   for (uint i = 1; i < (mesh.numCells() + 1); i++)
     eptr[i] = eptr[i - 1] + nvertices;
-
+  
   int *eind = new idxtype[nvertices * ncells];
   int i = 0;
   for (CellIterator c(mesh); !c.end(); ++c)
     for (VertexIterator v(*c); !v.end(); ++v)
       eind[i++] = mesh.distdata().get_global(*v);
-
+  
   idxtype *part = new idxtype[ncells];
-
+  
   float *tpwgts = new float[size];
   for (i = 0; i < size; i++)
     tpwgts[i] = 1.0 / (float) (size);
-
+  
   // default options
-  int options[3] =
-    { 1, 0, 15 };
-
+  int options[3] = { 1, 0, 15 };
+  
   ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag, &numflag,
-      &ncon, &ncnodes, &size, tpwgts, &ubvec, options, &edgecut, part,
-      &comm);
-
+			   &ncon, &ncnodes, &size, tpwgts, &ubvec, options, &edgecut, part,
+			   &comm);
+  
   delete[] eind;
   delete[] elmdist;
   delete[] tpwgts;
@@ -164,7 +163,7 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   // Duplicate MPI communicator
   MPI_Comm comm;
   MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
-
+  
   int size, rank;
   // Get information about the PE
   MPI_Comm_size(MPI::DOLFIN_COMM, &size);
@@ -176,7 +175,7 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   idxtype local_vertices = vtxdist[rank];
 
   MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT,
-      MPI::DOLFIN_COMM);
+		MPI::DOLFIN_COMM);
 
   int i, tmp;
   int sum = vtxdist[0];
@@ -218,8 +217,8 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 #else
 //-----------------------------------------------------------------------------
 void MeshPartition::partitionCommonMetis(Mesh& mesh,
-    MeshFunction<uint>& partitions,
-    MeshFunction<uint>* weight)
+					 MeshFunction<uint>& partitions,
+					 MeshFunction<uint>* weight)
 {
   error("ParMetis needs MPI");
 }

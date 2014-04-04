@@ -106,11 +106,8 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   idx_t *elmwgt = NULL;
 #else
   idxtype *elmwgt = NULL;
-  if (weight)
-  {
-    elmwgt = new idxtype[ncells];
-    for (CellIterator c(mesh); !c.end(); ++c)
 #endif
+
   if( weight ) {
 #if PARMETIS_MAJOR_VERSION > 3
     elmwgt = new idx_t[ncells];

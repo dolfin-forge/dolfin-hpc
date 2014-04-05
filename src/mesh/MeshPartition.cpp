@@ -72,7 +72,11 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   else
   {
     wgtflag = 0;    // Turn off graph weights
+#if PARMETIS_MAJOR_VERSION > 3
+    ncon = 1;       // No weights on vertices
+#else
     ncon = 0;       // No weights on vertices
+#endif
   }
   
   // Duplicate MPI communicator

@@ -26,6 +26,7 @@
 #endif
 
 #include <dolfin/common/constants.h>
+#include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/DirichletBC.h>
 
 #include <dolfin/function/Function.h>
@@ -111,12 +112,12 @@ int main()
   DirichletBC bc(u0, mesh, boundary);
   
   // Define PDE
-  PoissonBilinearForm a;
+  PoissonBilinearForm a(mesh);
   PoissonLinearForm L(f, g);
   LinearPDE pde(a, L, mesh, bc);
 
   // Solve PDE
-  Function u;
+  Function u(mesh);
   pde.solve(u);
 
   // Save solution to file

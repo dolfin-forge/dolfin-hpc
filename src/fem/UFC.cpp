@@ -4,16 +4,33 @@
 // First added:  2007-01-17
 // Last changed: 2008-06-10
 
-#include <dolfin/common/types.h>
-#include <dolfin/fem/DofMapSet.h>
-#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/UFC.h>
+
+#include <dolfin/common/types.h>
+#include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-UFC::UFC(const ufc::form& form, Mesh& mesh, const DofMapSet& dof_map_set) : form(form)
+UFC::UFC(Form const& form) :
+    form(form)
+{
+  init(form, form.mesh(), form.dofmaps());
+}
+
+//-----------------------------------------------------------------------------
+UFC::UFC(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set) :
+    form(form)
+{
+  init(form, mesh, dof_map_set);
+}
+
+//-----------------------------------------------------------------------------
+void UFC::init(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set)
 {
   // Create finite elements
   finite_elements = new ufc::finite_element*[form.rank()];
@@ -44,10 +61,10 @@ UFC::UFC(const ufc::form& form, Mesh& mesh, const DofMapSet& dof_map_set) : form
   this->mesh.init(mesh);
 
   // Initialize cells with first cell in mesh
-  CellIterator cell(mesh);
-  this->cell.init(*cell);
-  this->cell0.init(*cell);
-  this->cell1.init(*cell);
+  Cell cell(mesh, 0);
+  this->cell.init(cell);
+  this->cell0.init(cell);
+  this->cell1.init(cell);
 
   // Initialize local tensor
   uint num_entries = 1;
@@ -184,26 +201,16 @@ UFC::~UFC()
 //-----------------------------------------------------------------------------
 void UFC::update(Cell& cell, MeshDistributedData& distdata)
 {
-  // Update UFC cell
+  // Update UFC cell to global numbering
   this->cell.update(cell, distdata);
-
-  // FIXME: Update coefficients
 }
 //-----------------------------------------------------------------------------
 void UFC::update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata)
 {
-  // Update UFC cells
-  //  this->cell0.update(cell0);
-  //  this->cell1.update(cell1);
-
   // Update UFC cells to global numbering
   this->cell0.update(cell0, distdata);
   this->cell1.update(cell1, distdata);
-
-  // FIXME: Update coefficients
 }
 //-----------------------------------------------------------------------------
 
-
-
-
+}

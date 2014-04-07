@@ -7,96 +7,105 @@
 #ifndef __UFC_DATA_H
 #define __UFC_DATA_H
 
-#include <ufc.h>
 #include "UFCMesh.h"
 #include "UFCCell.h"
+
+#include <ufc.h>
 
 namespace dolfin
 {
 
-  class Mesh;
-  class Cell;
-  class DofMapSet;
-  class MeshDistributedData;
+class Cell;
+class DofMapSet;
+class Form;
+class Mesh;
+class MeshDistributedData;
 
-  /// This class is a simple data structure that holds data used
-  /// during assembly of a given UFC form. Data is created for each
-  /// primary argument, that is, v_j for j < r. In addition, nodal
-  /// basis expansion coefficients and a finite element are created
-  /// for each coefficient function.
+/// This class is a simple data structure that holds data used
+/// during assembly of a given UFC form. Data is created for each
+/// primary argument, that is, v_j for j < r. In addition, nodal
+/// basis expansion coefficients and a finite element are created
+/// for each coefficient function.
 
-  class UFC
-  {
-  public:
+class UFC
+{
+public:
 
-    /// Constructor
-    UFC(const ufc::form& form, Mesh& mesh, const DofMapSet& dof_map_set);
+  /// Constructor
+  UFC(Form const& form);
 
-    /// Destructor
-    ~UFC();
-    
-    /// Update current cell
-    void update(Cell& cell, MeshDistributedData& distdata);
+  /// Constructor
+  UFC(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set);
 
-    /// Update current pair of cells for macro element, global numbering
-    void update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
+  /// Destructor
+  ~UFC();
 
-    // Array of finite elements for primary arguments
-    ufc::finite_element** finite_elements;
+  /// Update current cell
+  void update(Cell& cell, MeshDistributedData& distdata);
 
-    // Array of finite elements for coefficients
-    ufc::finite_element** coefficient_elements;
+  /// Update current pair of cells for macro element, global numbering
+  void update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
 
-    // Array of cell integrals
-    ufc::cell_integral** cell_integrals;
+  // Array of finite elements for primary arguments
+  ufc::finite_element** finite_elements;
 
-    // Array of exterior facet integrals
-    ufc::exterior_facet_integral** exterior_facet_integrals;
+  // Array of finite elements for coefficients
+  ufc::finite_element** coefficient_elements;
 
-    // Array of interior facet integrals
-    ufc::interior_facet_integral** interior_facet_integrals;
+  // Array of cell integrals
+  ufc::cell_integral** cell_integrals;
 
-    // Form
-    const ufc::form& form;
+  // Array of exterior facet integrals
+  ufc::exterior_facet_integral** exterior_facet_integrals;
 
-    // Mesh
-    UFCMesh mesh;
-    
-    // Current cell
-    UFCCell cell;
+  // Array of interior facet integrals
+  ufc::interior_facet_integral** interior_facet_integrals;
 
-    // Current pair of cells of macro element
-    UFCCell cell0;
-    UFCCell cell1;
+  // Form
+  ufc::form const& form;
 
-    // Local tensor
-    real* A;
+  // Mesh
+  UFCMesh mesh;
 
-    // Local tensor for macro element
-    real* macro_A;
+  // Current cell
+  UFCCell cell;
 
-    // Array of local dimensions for each argument
-    uint* local_dimensions;
+  // Current pair of cells of macro element
+  UFCCell cell0;
+  UFCCell cell1;
 
-    // Array of local dimensions of macro element for primary arguments
-    uint* macro_local_dimensions;
+  // Local tensor
+  real* A;
 
-    // Array of global dimensions for primary arguments
-    uint* global_dimensions;
-    
-    // Array of mapped dofs for primary arguments
-    uint** dofs;
+  // Local tensor for macro element
+  real* macro_A;
 
-    // Array of mapped dofs of macro element for primary arguments
-    uint** macro_dofs;
+  // Array of local dimensions for each argument
+  uint* local_dimensions;
 
-    // Array of coefficients
-    real** w;
+  // Array of local dimensions of macro element for primary arguments
+  uint* macro_local_dimensions;
 
-    // Array of coefficients on macro element
-    real** macro_w;
+  // Array of global dimensions for primary arguments
+  uint* global_dimensions;
 
-  };
+  // Array of mapped dofs for primary arguments
+  uint** dofs;
+
+  // Array of mapped dofs of macro element for primary arguments
+  uint** macro_dofs;
+
+  // Array of coefficients
+  real** w;
+
+  // Array of coefficients on macro element
+  real** macro_w;
+
+private:
+
+  void init(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set);
+
+};
 
 }
 

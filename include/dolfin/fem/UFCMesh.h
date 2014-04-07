@@ -8,76 +8,101 @@
 #define __UFC_MESH_H
 
 #include <ufc.h>
+
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
 
-  /// This class is simple wrapper for a UFC mesh and provides
-  /// a layer between a DOLFIN mesh and a UFC mesh.
+/// This class is simple wrapper for a UFC mesh and provides
+/// a layer between a DOLFIN mesh and a UFC mesh.
 
-  class UFCMesh : public ufc::mesh
+class UFCMesh : public ufc::mesh
+{
+public:
+
+  /// Create emtpy UFC mesh
+  UFCMesh() :
+      ufc::mesh(),
+      mesh(NULL)
   {
-  public:
-    
-    /// Create empty UFC mesh
-    UFCMesh() : ufc::mesh() {}
+  }
 
-    /// Create UFC mesh from DOLFIN mesh
-    UFCMesh(Mesh& mesh) : ufc::mesh()
+  /// Create UFC mesh from DOLFIN mesh
+  UFCMesh(Mesh& dolfin_mesh) :
+      ufc::mesh(),
+      mesh(&dolfin_mesh)
+  {
+    init(dolfin_mesh);
+  }
+
+  /// Destructor
+  ~UFCMesh()
+  {
+    clear();
+  }
+
+  Mesh const * mesh;
+
+  /// Initialize UFC mesh data
+  void init(Mesh const& mesh);
+
+private:
+
+  // Clear UFC cell data
+  void clear();
+
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline void UFCMesh::init(Mesh const& mesh)
+{
+  clear();
+
+  // Update pointer to current mesh
+  this->mesh = &mesh;
+
+  // Set topological dimension
+  uint const tdim = mesh.topology().dim();
+  topological_dimension = tdim;
+
+  // Set geometric dimension
+  geometric_dimension = mesh.geometry().dim();
+
+  // Set number of entities for each topological dimension
+  num_entities = new uint[tdim + 1];
+  switch (tdim)
     {
-      init(mesh);
+    // Fallthrough to set the number of entities for lower dimensions
+    case 3:
+      num_entities[3] = mesh.global_numCells();
+    case 2:
+      num_entities[2] = (
+          tdim > 2 ? mesh.global_numFaces() : mesh.global_numCells());
+    case 1:
+      num_entities[1] = (
+          tdim > 1 ? mesh.global_numEdges() : mesh.global_numCells());
+    case 0:
+      num_entities[0] = mesh.global_numVertices();
+      break;
+    default:
+      error("Unsupported topological dimension greater than 3");
+      break;
     }
+}
 
-    /// Destructor
-    ~UFCMesh()
-    {
-      clear();
-    }
-
-    /// Initialize UFC cell data
-    void init(Mesh& mesh)
-    {
-      // Clear old data
-      clear();
-
-      // Set topological dimension
-      topological_dimension = mesh.topology().dim();
-      
-      // Set geometric dimension
-      geometric_dimension = mesh.geometry().dim();
-
-      // Set number of entities for each topological dimension
-      num_entities = new uint[mesh.topology().dim() + 1];
-      for (uint d = 0; d <= mesh.topology().dim(); d++)
-	if( d == 0 && MPI::numProcesses() > 1)
-	  num_entities[0] = mesh.distdata().global_numVertices();
-	else if( d == 1 && MPI::numProcesses() > 1)
-	  num_entities[1] = mesh.distdata().global_numEdges();
-	else if( d == 2 && MPI::numProcesses() > 1)
-	  if( mesh.topology().dim() > 2)
-	    num_entities[2] = mesh.distdata().global_numFaces();
-	  else
-	    num_entities[2] = mesh.distdata().global_numCells();
-	else if( d == 3 && MPI::numProcesses() > 1)
-	    num_entities[3] = mesh.distdata().global_numCells();
-	else 
-	  num_entities[d] = mesh.size(d);
-    }
-
-    // Clear UFC cell data
-    void clear()
-    {
-      topological_dimension = 0;
-      geometric_dimension = 0;
-
-      if ( num_entities )
-        delete [] num_entities;
-      num_entities = 0;
-    }
-
-  };
+//-----------------------------------------------------------------------------
+inline void UFCMesh::clear()
+{
+  mesh = NULL;
+  topological_dimension = 0;
+  geometric_dimension = 0;
+  delete[] num_entities;
+  num_entities = NULL;
+}
 
 }
 

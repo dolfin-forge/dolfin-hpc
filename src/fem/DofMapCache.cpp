@@ -64,7 +64,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh, Form const& form, uint const& i)
   {
 
     // Create DOLFIN dof map
-    ret = new DofMap(*ufc_dof_map, mesh, true);
+    ret = new DofMap(mesh, *ufc_dof_map, true);
     dolfin_assert(ret);
 
     cache_.insert(dofmap_item_t(h, dofmap_token_t(ret)));
@@ -104,7 +104,7 @@ DofMap& DofMapCache::acquire_dofmap(Mesh& mesh,
   {
 
     // Create DOLFIN dof map
-    ret = new DofMap(dofmap_signature, mesh);
+    ret = new DofMap(mesh, dofmap_signature);
     dolfin_assert(ret);
 
     std::string const dm_h = ret->hash();

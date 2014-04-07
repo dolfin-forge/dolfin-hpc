@@ -362,7 +362,7 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
   dolfin_assert(finite_element.space_dimension() == local_dimension_);
 
   // Tabulate dofs
-  dof_map_.tabulate_dofs(scratch.dofs, cell, dolfin_cell.index());
+  dof_map_.tabulate_dofs(scratch.dofs, cell, dolfin_cell);
 
   // Pick values from global vector
 #ifdef ENABLE_FUNCTION_CACHE

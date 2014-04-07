@@ -10,6 +10,8 @@
 #ifndef __DOF_MAP_H
 #define __DOF_MAP_H
 
+#include <dolfin/mesh/MeshDependent.h>
+
 #include "UFCCell.h"
 #include "UFCMesh.h"
 
@@ -31,10 +33,14 @@ class UFC;
 /// It wraps a ufc::dof_map on a specific mesh and provides
 /// optional precomputation and reordering of dofs.
 
-class DofMap : public ufc::dof_map
+class DofMap : public ufc::dof_map, public MeshDependent
 {
 
   static std::string const SIGN_PREFIX;
+  enum Type
+  {
+    scalar_p1, scalar_dg0, vector_p1, vector_dg0, generic, ufc_default
+  };
 
 public:
 
@@ -53,25 +59,13 @@ public:
   static std::string const make_hash(ufc::dof_map& ufc_dofmap, Mesh& mesh);
 
   /// Create dof map on mesh
-  DofMap(ufc::dof_map& dof_map, Mesh& mesh, bool const dof_map_local = false);
-
-  /// Create dof map on mesh (parallel)
-  DofMap(ufc::dof_map& dof_map, Mesh& mesh, MeshFunction<uint>& partitions,
-         bool const dof_map_local = false);
+  DofMap(Mesh& mesh, ufc::dof_map& dof_map, bool const owner);
 
   /// Create dof map on mesh
-  DofMap(ufc::form const& form, uint const& i, Mesh& mesh);
-
-  /// Create dof map on mesh (parallel)
-  DofMap(ufc::form const& form, uint const& i, Mesh& mesh,
-         MeshFunction<uint>& partitions);
+  DofMap(Mesh& mesh, std::string const& signature);
 
   /// Create dof map on mesh
-  DofMap(std::string const& signature, Mesh& mesh);
-
-  /// Create dof map on mesh (parallel)
-  DofMap(std::string const& signature, Mesh& mesh,
-         MeshFunction<uint>& partitions);
+  DofMap(Mesh& mesh, ufc::form const& form, uint const i);
 
   /// Create dof map on a sub space
   DofMap(DofMap const& dofmap, Array<uint> const& sub_system, uint& offset);
@@ -153,12 +147,11 @@ public:
   uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(uint* dofs, const ufc::cell& ufc_cell,
-                     uint cell_index) const;
+  void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
+                     Cell const& cell) const;
 
-  // FIXME: Can this function eventually be removed?
-  /// Tabulate the local-to-global mapping of dofs on a ufc cell
-  void tabulate_dofs(uint* dofs, const ufc::cell& cell) const;
+  /// Tabulate the local-to-global mapping of dofs on a cell
+  void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
 
   /// Get sub dof maps offset (for a mixed element)
   Array<uint> const& sub_dof_maps_dimensions() const;
@@ -189,20 +182,6 @@ public:
   /// Return the size of the local to global mapping
   uint dofsmapping_size() const;
 
-  /// Return local cell mapping from component grouped numbering to node grouped
-  uint const * cellmapping() const;
-
-  /// Return the size of the local cell mapping
-  uint cellmapping_size() const;
-
-  //--- Mesh information
-
-  /// Return mesh associated with map
-  Mesh& mesh() const;
-
-  ///
-  std::string const& mesh_hash() const;
-
   //--- Debugging
 
   /// Return renumbering (used for testing)
@@ -225,36 +204,20 @@ private:
   ///
   void pretabulate_all_dofs() const;
 
-  ///
-  void pretabulate_cell_dofs() const;
+  // UFC mesh
+  UFCMesh ufc_mesh_;
 
-  // Forward declaration of internals for parallelism to ensure initialization
-  int _type_;
-  uint _offset_;
-  uint _local_size_;
-  uint * _v_map_;
-  uint * _dof_map_; // Parallel dof map
+  // Use type to allow optimization of dof map ordering
+  mutable Type type_;
+
+  // Forward declaration of offset to be update at creation of ufc::dof_map
+  uint offset_;
 
   // Is UFC dof map lifetime managed by the DofMap instance
   bool const ufc_dof_map_local_;
 
   // UFC dof map
   ufc::dof_map * const ufc_dof_map_;
-
-  // DOLFIN mesh
-  Mesh& dolfin_mesh;
-
-  // UFC mesh
-  UFCMesh ufc_mesh;
-
-  // Partitions
-  MeshFunction<uint>* partitions;
-
-  // Number of cells in the mesh
-  uint num_cells_;
-
-  // Hash
-  std::string const mesh_hash_;
 
   // Dofmap hash
   std::string const hash_;
@@ -266,12 +229,14 @@ private:
   Array<uint> sub_dof_maps_offs_;
 
   //
-  mutable uint* local_to_global_;
-  uint local_to_global_size_;
+  uint local_size_;
 
-  //
-  mutable uint* local_to_cell_;
-  uint local_to_cell_size_;
+  // Vertex ordering map used for tabulation of vector Lagrange P1
+  uint * vertex_map_;
+
+  // Pretabulated parallel dof map
+  mutable uint * pretabulated_dof_map_;
+  uint pretabulated_dof_map_size_;
 
   // Provide easy access to map for testing
   std::map<uint, uint> map;
@@ -331,7 +296,7 @@ inline bool DofMap::init_mesh(const ufc::mesh& mesh)
 //-----------------------------------------------------------------------------
 inline void DofMap::init_cell(const ufc::mesh& m, const ufc::cell& c)
 {
-  ufc_dof_map_->init_cell(m,c);
+  ufc_dof_map_->init_cell(m, c);
 }
 
 //-----------------------------------------------------------------------------
@@ -375,12 +340,6 @@ inline void DofMap::tabulate_dofs(uint* dofs, const ufc::mesh& m,
                                   const ufc::cell& c) const
 {
   ufc_dof_map_->tabulate_dofs(dofs, m, c);
-}
-
-//-----------------------------------------------------------------------------
-inline void DofMap::tabulate_dofs(uint* dofs, const ufc::cell& cell) const
-{
-  ufc_dof_map_->tabulate_dofs(dofs, ufc_mesh, cell);
 }
 
 //-----------------------------------------------------------------------------
@@ -433,49 +392,28 @@ inline Array<uint> const& DofMap::sub_dof_maps_offsets() const
 }
 
 //-----------------------------------------------------------------------------
-inline Mesh& DofMap::mesh() const
-{
-  return dolfin_mesh;
-}
-
-//-----------------------------------------------------------------------------
 inline bool DofMap::renumbered() const
 {
-  return (_dof_map_ || _type_ > -1 || _v_map_);
+  return (pretabulated_dof_map_ || type_ > -1 || vertex_map_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::local_size() const
 {
-  return _local_size_;
+  return local_size_;
 }
 
 //-----------------------------------------------------------------------------
 inline uint const * DofMap::dofsmapping() const
 {
-  if (local_to_global_ == NULL)
-    pretabulate_all_dofs();
-  return local_to_global_;
+  if (pretabulated_dof_map_ == NULL) pretabulate_all_dofs();
+  return pretabulated_dof_map_;
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::dofsmapping_size() const
 {
-  return local_to_global_size_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint const * DofMap::cellmapping() const
-{
-  if (local_to_cell_ == NULL)
-    pretabulate_cell_dofs();
-  return local_to_cell_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::cellmapping_size() const
-{
-  return local_to_cell_size_;
+  return pretabulated_dof_map_size_;
 }
 
 }

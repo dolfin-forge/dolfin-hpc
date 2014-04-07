@@ -66,11 +66,10 @@ public:
                    std::string const& dof_map_signature);
 
   /// Create discrete function from given signatures
-  DiscreteFunction(Mesh& mesh, GenericVector& x,
-                   std::string const& finite_element_signature);
+  DiscreteFunction(Mesh& mesh, GenericVector& x, std::string const& signature);
 
   /// Create discrete function from given signatures which owns the vector
-  DiscreteFunction(Mesh& mesh, std::string const& finite_element_signature);
+  DiscreteFunction(Mesh& mesh, std::string const& signature);
 
 #if ENABLE_UFL
   /// Create discrete function from given UFL Finite Element
@@ -160,12 +159,7 @@ private:
 
   /// Discrete space
   FiniteElementSpace discrete_space_;
-  FiniteElement const& finite_element_;
-  DofMap const& dof_map_;
-  ScratchSpace scratch;
-
-  /// Cached variable to save indirections in interpolate
-  uint const local_dimension_;
+  mutable ScratchSpace scratch;
 
   /// Set to true if local data is owned
   bool const local_vector_;
@@ -174,11 +168,11 @@ private:
   GenericVector * const X_;
 
   /// Renumbered dof_map;
-  bool renumbered;
-  uint _cache_size;
-  uint *_indices;
-  real *_data_cache;
-  _map<uint, uint> _cache_mapping;
+  bool renumbered_;
+  uint cache_size_;
+  uint * indices_;
+  real * data_cache_;
+  _map<uint, uint> cache_mapping_;
 
 };
 

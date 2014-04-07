@@ -39,16 +39,13 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
                                    uint i) :
     GenericFunction(mesh),
     discrete_space_(mesh, form, i),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -58,16 +55,13 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
 DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
     GenericFunction(mesh),
     discrete_space_(mesh, form, i),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -79,16 +73,13 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
                                    std::string const& dof_map_signature) :
     GenericFunction(mesh),
     discrete_space_(mesh, finite_element_signature, dof_map_signature),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -100,16 +91,13 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
                                    std::string const& dof_map_signature) :
     GenericFunction(mesh),
     discrete_space_(mesh, finite_element_signature, dof_map_signature),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -117,39 +105,32 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
-                                   std::string const& finite_element_signature) :
+                                   std::string const& signature) :
     GenericFunction(mesh),
-    discrete_space_(mesh, finite_element_signature),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
+    discrete_space_(mesh, signature),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(false),
     X_(&x),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
 }
 
 //-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(Mesh& mesh,
-                                   std::string const& finite_element_signature) :
+DiscreteFunction::DiscreteFunction(Mesh& mesh, std::string const& signature) :
     GenericFunction(mesh),
-    discrete_space_(mesh, finite_element_signature),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
+    discrete_space_(mesh, signature),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -161,16 +142,13 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
                                    ufl::FiniteElementBase const& finite_element) :
     GenericFunction(mesh),
     discrete_space_(mesh, finite_element),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialise function
   InitializeVector();
@@ -181,24 +159,21 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
     GenericFunction(sub_function.function().mesh()),
     discrete_space_(sub_function.function().space(), sub_function.index()),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    renumbered(false),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
   // Initialize vector, scratch space and ghosts
   InitializeVector();
 
   // Copy subvector, naive implementation
   DiscreteFunction& global_func = sub_function.function();
-  DofMap const& global_dm = global_func.dofmap();
-  uint const global_local_dim = global_func.dofmap().local_dimension();
+  DofMap const& global_dm = global_func.space().dofmap();
+  uint const global_local_dim = global_dm.local_dimension();
   uint const global_block_size = global_dm.dofsmapping_size();
   uint const global_dm_offset =
       global_dm.sub_dof_maps_offsets()[sub_function.index()];
@@ -208,18 +183,18 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   CellIterator cell(mesh_);
   uint cell_offset = 0;
   uint glob_func_cell_offset = 0;
-  real * this_block = new real[dof_map_.dofsmapping_size()];
+  real * this_block = new real[dofmap().dofsmapping_size()];
   for (; !cell.end();
-      ++cell, cell_offset += local_dimension_, glob_func_cell_offset +=
+      ++cell, cell_offset += scratch.local_dimension, glob_func_cell_offset +=
           global_local_dim)
   {
-    for (uint dof_id = 0; dof_id < local_dimension_; ++dof_id)
+    for (uint dof_id = 0; dof_id < scratch.local_dimension; ++dof_id)
     {
       this_block[cell_offset + dof_id] = global_block[glob_func_cell_offset
           + global_dm_offset + dof_id];
     }
   }
-  X_->set(this_block, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
+  X_->set(this_block, dofmap().dofsmapping_size(), dofmap().dofsmapping());
   sync_ghosts();
 
   delete[] this_block;
@@ -229,22 +204,19 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     GenericFunction(f.mesh()),
-    discrete_space_(f.mesh(), f.finite_element_.signature()),
-    finite_element_(discrete_space_.element()),
-    dof_map_(discrete_space_.dofmap()),
+    discrete_space_(f.mesh(), f.signature()),
     scratch(discrete_space_),
-    local_dimension_(dof_map_.local_dimension()),
     local_vector_(true),
     X_(new Vector()),
-    _cache_size(0),
-    _indices(NULL),
-    _data_cache(NULL)
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
 {
 
   // Copy vector
   *X_ = *f.X_;
 
-  renumbered = f.renumbered;
+  renumbered_ = f.renumbered_;
 }
 
 //-----------------------------------------------------------------------------
@@ -254,16 +226,16 @@ DiscreteFunction::~DiscreteFunction()
   {
     delete X_;
   }
-  delete[] _indices;
-  delete[] _data_cache;
+  delete[] indices_;
+  delete[] data_cache_;
 }
 
 //-----------------------------------------------------------------------------
 const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 {
   // Check that data matches
-  if (strcmp(finite_element_.signature(), f.finite_element_.signature()) != 0
-      || strcmp(dof_map_.signature(), f.dof_map_.signature()) != 0
+  if (strcmp(finite_element().signature(), f.finite_element().signature()) != 0
+      || strcmp(dofmap().signature(), f.dofmap().signature()) != 0
       || X_->size() != f.X_->size())
   {
     error("Assignment of discrete function failed."
@@ -278,24 +250,42 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 
 //--- UFC INTERFACE -----------------------------------------------------------
 //-----------------------------------------------------------------------------
-void DiscreteFunction::evaluate(real* values, const real* coordinates,
+void DiscreteFunction::evaluate(real* values, const real* x,
                                 const ufc::cell& cell) const
 {
-  //FIXME: Should interpolate on the cell.
-  this->eval(values, coordinates);
+  //FIXME: Inconsistency of interface
+  UFCCell const * ufc_cell = dynamic_cast<UFCCell const *>(&cell);
+
+  // Get expansion coefficients on cell
+  dofmap().tabulate_dofs(scratch.dofs, *ufc_cell);
+  X_->get(scratch.coefficients, scratch.local_dimension, scratch.dofs);
+
+  // Compute linear combination
+  for (uint j = 0; j < scratch.size; j++)
+  {
+    values[j] = 0.0;
+  }
+  for (uint i = 0; i < finite_element().space_dimension(); i++)
+  {
+    finite_element().evaluate_basis(i, scratch.values, x, *ufc_cell);
+    for (uint j = 0; j < scratch.size; j++)
+    {
+      values[j] += scratch.coefficients[i] * scratch.values[j];
+    }
+  }
 }
 
 //--- GenericFunction ---------------------------------------------------------
 //-----------------------------------------------------------------------------
 uint DiscreteFunction::rank() const
 {
-  return finite_element_.value_rank();
+  return finite_element().value_rank();
 }
 
 //-----------------------------------------------------------------------------
 uint DiscreteFunction::dim(uint i) const
 {
-  return finite_element_.value_dimension(i);
+  return finite_element().value_dimension(i);
 }
 
 //-----------------------------------------------------------------------------
@@ -327,23 +317,23 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
       scratch.cell.update(*cell, distdata);
 
       // Tabulate dofs
-      dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
+      dofmap().tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
 
       // Pick values from global vector
-      X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
+      X_->get(scratch.coefficients, scratch.local_dimension, scratch.dofs);
 
       // Interpolate values at the vertices
-      finite_element_.interpolate_vertex_values(vertex_values,
-                                                scratch.coefficients,
-                                                scratch.cell);
+      finite_element().interpolate_vertex_values(vertex_values,
+                                                 scratch.coefficients,
+                                                 scratch.cell);
 
       // Copy values to array of vertex values
       for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
       {
         for (uint i = 0; i < scratch.size; ++i)
         {
-          values[i * num_verts + vertex->index()] =
-              vertex_values[vertex.pos() * scratch.size + i];
+          values[i * num_verts + vertex->index()] = vertex_values[vertex.pos()
+              * scratch.size + i];
         }
       }
     }
@@ -359,24 +349,24 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
                                    const Cell& dolfin_cell) const
 {
   // Check dimension
-  dolfin_assert(finite_element.space_dimension() == local_dimension_);
+  dolfin_assert(finite_element.space_dimension() == scratch.local_dimension);
 
   // Tabulate dofs
-  dof_map_.tabulate_dofs(scratch.dofs, cell, dolfin_cell);
+  dofmap().tabulate_dofs(scratch.dofs, cell, dolfin_cell);
 
   // Pick values from global vector
 #ifdef ENABLE_FUNCTION_CACHE
   if (MPI::numProcesses() > 1)
   {
-    for (uint i = 0; i < local_dimension_; i++)
+    for (uint i = 0; i < scratch.local_dimension; i++)
     {
-      _map<uint, uint>::const_iterator it = _cache_mapping.find(scratch.dofs[i]);
-      coefficients[i] = _data_cache[it->second];
+      _map<uint, uint>::const_iterator it = cache_mapping_.find(scratch.dofs[i]);
+      coefficients[i] = data_cache_[it->second];
     }
   }
   else
 #endif
-  X_->get(coefficients, local_dimension_, scratch.dofs);
+  X_->get(coefficients, scratch.local_dimension, scratch.dofs);
 }
 
 //-----------------------------------------------------------------------------
@@ -416,17 +406,17 @@ void DiscreteFunction::eval(real* values, const real* x) const
   scratch.cell.update(cell, mesh_.distdata());
 
   // Get expansion coefficients on cell
-  dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell.index());
-  X_->get(scratch.coefficients, local_dimension_, scratch.dofs);
+  dofmap().tabulate_dofs(scratch.dofs, scratch.cell);
+  X_->get(scratch.coefficients, scratch.local_dimension, scratch.dofs);
 
   // Compute linear combination
   for (uint j = 0; j < scratch.size; j++)
   {
     values[j] = 0.0;
   }
-  for (uint i = 0; i < finite_element_.space_dimension(); i++)
+  for (uint i = 0; i < finite_element().space_dimension(); i++)
   {
-    finite_element_.evaluate_basis(i, scratch.values, x, scratch.cell);
+    finite_element().evaluate_basis(i, scratch.values, x, scratch.cell);
     for (uint j = 0; j < scratch.size; j++)
     {
       values[j] += scratch.coefficients[i] * scratch.values[j];
@@ -450,49 +440,49 @@ FiniteElementSpace const& DiscreteFunction::space() const
 //-----------------------------------------------------------------------------
 FiniteElement const& DiscreteFunction::finite_element() const
 {
-  return finite_element_;
+  return discrete_space_.element();
 }
 
 //-----------------------------------------------------------------------------
 DofMap const& DiscreteFunction::dofmap() const
 {
-  return dof_map_;
+  return discrete_space_.dofmap();
 }
 
 //-----------------------------------------------------------------------------
 std::string const DiscreteFunction::signature() const
 {
-  return finite_element_.signature();
+  return finite_element().signature();
 }
 
 //-----------------------------------------------------------------------------
 uint const DiscreteFunction::num_sub_functions() const
 {
-  return finite_element_.num_sub_elements();
+  return finite_element().num_sub_elements();
 }
 
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(Function const& other_func)
 {
-  Array<uint> const& value_dims = finite_element_.sub_value_dimensions(0);
-  Array<uint> const& value_offs = finite_element_.sub_value_offsets(0);
-  Array<uint> const& dm_dims = dof_map_.sub_dof_maps_dimensions();
-  Array<uint> const& dm_offs = dof_map_.sub_dof_maps_offsets();
+  Array<uint> const& value_dims = finite_element().sub_value_dimensions(0);
+  Array<uint> const& value_offs = finite_element().sub_value_offsets(0);
+  Array<uint> const& dm_dims = dofmap().sub_dof_maps_dimensions();
+  Array<uint> const& dm_offs = dofmap().sub_dof_maps_offsets();
   uint const nb_subspaces = dm_dims.size();
 
   // Make sure vectors ghost values are updated)
   X_->apply();
 
   // Cell tabulated version
-  real * values = new real[finite_element_.value_dimension(0)];
-  real * block = new real[dof_map_.dofsmapping_size()];
+  real * values = new real[finite_element().value_dimension(0)];
+  real * block = new real[dofmap().dofsmapping_size()];
   uint cell_offset = 0;
-  uint const local_dim = dof_map_.local_dimension();
+  uint const local_dim = dofmap().local_dimension();
   MeshDistributedData& distdata = mesh_.distdata();
   for (CellIterator cell(mesh_); !cell.end(); ++cell, cell_offset += local_dim)
   {
     scratch.cell.update(*cell, distdata);
-    dof_map_.tabulate_coordinates(scratch.coordinates, scratch.cell);
+    dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
 
     uint dof_id = 0;
     for (uint sub = 0; sub < nb_subspaces; ++sub)
@@ -523,15 +513,15 @@ void DiscreteFunction::get_block(real *& values) const
 {
   if (!values)
   {
-    values = new real[dof_map_.dofsmapping_size()];
+    values = new real[dofmap().dofsmapping_size()];
   }
-  X_->get(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
+  X_->get(values, dofmap().dofsmapping_size(), dofmap().dofsmapping());
 }
 
 //-----------------------------------------------------------------------------
 void DiscreteFunction::set_block(real *& values)
 {
-  X_->set(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
+  X_->set(values, dofmap().dofsmapping_size(), dofmap().dofsmapping());
   sync_ghosts();
 }
 
@@ -540,26 +530,26 @@ void DiscreteFunction::add_block(real *& values)
 {
   if (!values)
   {
-    values = new real[dof_map_.dofsmapping_size()];
+    values = new real[dofmap().dofsmapping_size()];
   }
-  X_->add(values, dof_map_.dofsmapping_size(), dof_map_.dofsmapping());
+  X_->add(values, dofmap().dofsmapping_size(), dofmap().dofsmapping());
 }
 
 //-----------------------------------------------------------------------------
 void DiscreteFunction::InitializeVector()
 {
-  if (X_->size() != dof_map_.global_dimension())
+  if (X_->size() != dofmap().global_dimension())
   {
     if (MPI::numProcesses() > 1)
     {
-      X_->init(dof_map_.local_size());
+      X_->init(dofmap().local_size());
     }
     else
     {
-      X_->init(dof_map_.global_dimension());
+      X_->init(dofmap().global_dimension());
     }
   }
-  renumbered = false;
+  renumbered_ = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -574,36 +564,36 @@ void DiscreteFunction::InitializeGhosts()
     scratch.cell.update(*cell, distdata);
 
     // Tabulate dofs
-    dof_map_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
+    dofmap().tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
 
-    for (uint j = 0; j < finite_element_.space_dimension(); ++j)
+    for (uint j = 0; j < finite_element().space_dimension(); ++j)
     {
       indices.insert(scratch.dofs[j]);
     }
 
   }
-  std::map<uint, uint> map = dof_map_.getMap();
+  std::map<uint, uint> map = dofmap().getMap();
 
   X_->init_ghosted(indices.size(), indices, map);
 
 #ifdef ENABLE_FUNCTION_CACHE
-  delete[] _indices;
-  delete[] _data_cache;
+  delete[] indices_;
+  delete[] data_cache_;
 
-  _cache_mapping.clear();
+  cache_mapping_.clear();
 
-  _indices = new uint[indices.size()];
-  _data_cache = new real[indices.size()];
+  indices_ = new uint[indices.size()];
+  data_cache_ = new real[indices.size()];
 
   uint i = 0;
   std::set<uint>::iterator it;
   for (it = indices.begin(); it != indices.end(); it++)
   {
-    _indices[i] = *it;
-    _cache_mapping[*it] = i++;
+    indices_[i] = *it;
+    cache_mapping_[*it] = i++;
   }
 
-  _cache_size = indices.size();
+  cache_size_ = indices.size();
 #endif
 }
 
@@ -626,21 +616,20 @@ void DiscreteFunction::disp() const
 void DiscreteFunction::sync_ghosts()
 {
 
-  if (MPI::numProcesses() == 1)
-    return;
+  if (MPI::numProcesses() == 1) return;
 
-  if (dof_map_.renumbered() && !renumbered && MPI::numProcesses() > 1)
+  if (dofmap().renumbered() && !renumbered_ && MPI::numProcesses() > 1)
   {
     InitializeGhosts();
-    renumbered = true;
+    renumbered_ = true;
   }
 
   X_->apply();
 
 #ifdef ENABLE_FUNCTION_CACHE
-  if (_indices)
+  if (indices_)
   {
-    X_->get(_data_cache, _cache_size, _indices);
+    X_->get(data_cache_, cache_size_, indices_);
   }
 #endif
 }

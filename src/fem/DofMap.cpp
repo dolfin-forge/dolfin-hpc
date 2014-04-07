@@ -704,6 +704,7 @@ void DofMap::disp() const
   cout << "--------------------" << endl;
   begin("");
   {
+    Mesh& dolfin_mesh = mesh();
     uint tdim = dolfin_mesh.topology().dim();
     uint num_dofs = ufc_dof_map_->local_dimension();
     uint* dofs = new uint[num_dofs];

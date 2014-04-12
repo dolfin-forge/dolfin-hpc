@@ -110,21 +110,21 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   // Distribution defined per vertex
   if(distribution.dim() == 0) {
     for (VertexIterator v(mesh); !v.end(); ++v){
-      glb_index = mesh.distdata().get_global(*v);
       if(!mesh.distdata().is_ghost(v->index(), 0)){
+        glb_index = mesh.distdata().get_global(*v);
         if(distribution.get(*v) != rank) {
           target_proc = distribution.get(*v);
           send_list_mappings[target_proc].push_back(glb_index);
-          send_list_vertices[target_proc].push_back(v->point().x());
-          send_list_vertices[target_proc].push_back(v->point().y());
-          if(gdim > 2)
-            send_list_vertices[target_proc].push_back(v->point().z());
+          for (uint d = 0; d < gdim; ++d)
+          {
+            send_list_vertices[target_proc].push_back(v->x(d));
+          }
         }
-        else if(distribution.get(*v) == rank) {
-          coords.push_back(v->point().x());
-          coords.push_back(v->point().y());
-          if(gdim > 2)
-            coords.push_back(v->point().z());
+        else {
+          for (uint d = 0; d < gdim; ++d)
+          {
+            coords.push_back(v->x(d));
+          }
           distdata.set_map(vi++, glb_index, 0);
         }
       }
@@ -148,10 +148,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           // Buffer all cell vertices that belong to another processor
           if(!mesh.distdata().is_ghost(v->index(), 0) && !vertex_used.get(*v)){
             send_list_mappings[target_proc].push_back(glb_index);
-            send_list_vertices[target_proc].push_back(v->point().x());
-            send_list_vertices[target_proc].push_back(v->point().y());
-            if(gdim > 2)
-              send_list_vertices[target_proc].push_back(v->point().z());
+            for (uint d = 0; d < gdim; ++d)
+            {
+              send_list_vertices[target_proc].push_back(v->x(d));
+            }
             vertex_used.set(*v, true);
           }
         }
@@ -167,12 +167,12 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       else {
         for(VertexIterator v(*c); !v.end(); ++v) {
           if(!vertex_used.get(*v)) {
-            glb_index = mesh.distdata().get_global(*v);
             if(!mesh.distdata().is_ghost(v->index(), 0)){
-              coords.push_back(v->point().x());
-              coords.push_back(v->point().y());
-              if(gdim > 2)
-                coords.push_back(v->point().z());
+              for (uint d = 0; d < gdim; ++d)
+              {
+                coords.push_back(v->x(d));
+              }
+              glb_index = mesh.distdata().get_global(*v);
               distdata.set_map(vi++, glb_index, 0);
               vertex_used.set(*v, true);
             }
@@ -235,10 +235,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     for(int i=0; i < recv_size; i +=gdim){
       if(!distdata.have_global( recv_buff_map[buff_map], 0)) {
         distdata.set_map(vi++, recv_buff_map[buff_map], 0);
-        coords.push_back(recv_buff[i]);
-        coords.push_back(recv_buff[i+1]);
-        if( gdim > 2)
-          coords.push_back(recv_buff[i+2]);
+        for (uint d = 0; d < gdim; ++d)
+        {
+          coords.push_back(recv_buff[i + d]);
+        }
       }
       buff_map++;
     }
@@ -266,8 +266,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           glb_index = mesh.distdata().get_global(*v);
           if(!distdata.have_global(glb_index, 0)){
             cl.push_back(vi);
-            for(uint j=0;j<gdim;j++)
+            for (uint j = 0; j < gdim; ++j)
+            {
               coords.push_back(0.0);
+            }
             distdata.set_map(vi, glb_index, 0);
             distdata.set_ghost(vi++, 0);
             shared_buffer.push_back(glb_index);
@@ -294,8 +296,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           cl.push_back(distdata.get_vertex_local(recv_buff_cell[i]));
         else{
           cl.push_back(vi);
-          for(uint j=0;j<gdim;j++)
+          for (uint j = 0; j < gdim; ++j)
+          {
             coords.push_back(0.0);
+          }
           distdata.set_map(vi, recv_buff_cell[i], 0);
           distdata.set_ghost(vi++, 0);
           shared_buffer.push_back(recv_buff_cell[i]);
@@ -331,10 +335,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           if(!distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0))
           {
             offset = distdata.get_vertex_local(shared[j]) * gdim;
-            send_buff.push_back(coords[offset]);
-            send_buff.push_back(coords[offset + 1]);
-            if(gdim >2)
-              send_buff.push_back(coords[offset + 2]);
+            for (uint d = 0; d < gdim; ++d)
+            {
+              send_buff.push_back(coords[offset + d]);
+            }
             send_buff_indices.push_back(shared[j]);
             distdata.set_shared(distdata.get_vertex_local(shared[j]), 0);
           }
@@ -367,10 +371,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     uint j=0;
     for(uint i=0; i < shared_buffer.size(); i++){
       offset = distdata.get_vertex_local(recv_buff_map[i]) * gdim;
-      coords[offset] = recv_buff[j];
-      coords[offset+1] = recv_buff[j+1];
-      if(gdim > 2)
-        coords[offset+2] = recv_buff[j+2];
+      for (uint d = 0; d < gdim; ++d)
+      {
+        coords[offset + d] = recv_buff[j + d];
+      }
       j += gdim;
       distdata.set_ghost_owner( distdata.get_vertex_local(recv_buff_map[i]),
                                 recv_source[i], 0);
@@ -504,18 +508,18 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   {
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      glb_index = mesh.distdata().get_global(*v);
       if(!mesh.distdata().is_ghost(v->index(), 0))
       {
         // vertex has to be sent
+        glb_index = mesh.distdata().get_global(*v);
         if(distribution.get(*v) != rank)
         {
           target_proc = distribution.get(*v);
           send_list_mappings[target_proc].push_back(glb_index);
-          send_list_vertices[target_proc].push_back(v->point().x());
-          send_list_vertices[target_proc].push_back(v->point().y());
-          if(gdim > 2)
-            send_list_vertices[target_proc].push_back(v->point().z());
+          for (uint d = 0; d < gdim; ++d)
+          {
+            send_list_vertices[target_proc].push_back(v->x(d));
+          }
 
           // Transfer vertex functions
           if ( vertex_functions )
@@ -530,10 +534,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
         // vertex stays here
         else if(distribution.get(*v) == rank)
         {
-          coords.push_back(v->point().x());
-          coords.push_back(v->point().y());
-          if(gdim > 2)
-            coords.push_back(v->point().z());
+          for (uint d = 0; d < gdim; ++d)
+          {
+            coords.push_back(v->x(d));
+          }
           distdata.set_map(vi++, glb_index, 0);
 
           // store function values
@@ -574,10 +578,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           if(!mesh.distdata().is_ghost(v->index(), 0) && !vertex_used.get(*v))
           {
             send_list_mappings[target_proc].push_back(glb_index);
-            send_list_vertices[target_proc].push_back(v->point().x());
-            send_list_vertices[target_proc].push_back(v->point().y());
-            if(gdim > 2)
-              send_list_vertices[target_proc].push_back(v->point().z());
+            for (uint d = 0; d < gdim; ++d)
+            {
+              send_list_vertices[target_proc].push_back(v->x(d));
+            }
             vertex_used.set(*v, true);
 
             // Transfer vertex functions
@@ -609,13 +613,13 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
         {
           if(!vertex_used.get(*v))
           {
-            glb_index = mesh.distdata().get_global(*v);
             if(!mesh.distdata().is_ghost(v->index(), 0))
             {
-              coords.push_back(v->point().x());
-              coords.push_back(v->point().y());
-              if(gdim > 2)
-                coords.push_back(v->point().z());
+              for (uint d = 0; d < gdim; ++d)
+              {
+                coords.push_back(v->x(d));
+              }
+              glb_index = mesh.distdata().get_global(*v);
               distdata.set_map(vi++, glb_index, 0);
               vertex_used.set(*v, true);
 
@@ -717,10 +721,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       if(!distdata.have_global( recv_buff_map[buff_map], 0))
       {
         distdata.set_map(vi++, recv_buff_map[buff_map], 0);
-        coords.push_back(recv_buff[i]);
-        coords.push_back(recv_buff[i+1]);
-        if( gdim > 2)
-          coords.push_back(recv_buff[i+2]);
+        for (uint d = 0; d < gdim; ++d)
+        {
+          coords.push_back(recv_buff[i + d]);
+        }
 
         // store function values
         if ( vertex_functions )
@@ -822,8 +826,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
         else
         {
           cl.push_back(vi);
-          for(uint j=0;j<gdim;j++)
+          for(uint j = 0; j < gdim; ++j)
+          {
             coords.push_back(0.0);
+          }
           distdata.set_map(vi, recv_buff_cell[i], 0);
           distdata.set_ghost(vi++, 0);
           shared_buffer.push_back(recv_buff_cell[i]);
@@ -890,10 +896,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
           if(!distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0) )
           {
             offset = distdata.get_vertex_local(shared[j]) * gdim;
-            send_buff.push_back(coords[offset]);
-            send_buff.push_back(coords[offset + 1]);
-            if(gdim > 2)
-              send_buff.push_back(coords[offset + 2]);
+            for (uint d = 0; d < gdim; ++d)
+            {
+              send_buff.push_back(coords[offset + d]);
+            }
 
             if ( vertex_functions )
             {
@@ -942,10 +948,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     for(uint i=0; i < shared_buffer.size(); i++)
     {
       offset = distdata.get_vertex_local(recv_buff_map[i]) * gdim;
-      coords[offset] = recv_buff[j];
-      coords[offset+1] = recv_buff[j+1];
-      if(gdim > 2)
-        coords[offset+2] = recv_buff[j+2];
+      for (uint d = 0; d < gdim; ++d)
+      {
+        coords[offset + d] = recv_buff[j + d];
+      }
       j += gdim;
       distdata.set_ghost_owner( distdata.get_vertex_local(recv_buff_map[i]),
                                 recv_source[i], 0);

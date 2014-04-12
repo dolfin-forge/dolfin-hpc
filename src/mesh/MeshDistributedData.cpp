@@ -251,7 +251,7 @@ void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
   local_indices[dim][ global_index ] = local_index;
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::set_shared(MeshEntity& m)
+void MeshDistributedData::set_shared(MeshEntity const& m)
 {
   set_shared(m.index(), m.dim());
 }
@@ -261,7 +261,7 @@ void MeshDistributedData::set_shared(uint local_index, uint dim)
   shared[dim].insert(local_index);
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::set_ghost(MeshEntity& m)
+void MeshDistributedData::set_ghost(MeshEntity const& m)
 {
   set_ghost(m.index(), m.dim());
 }
@@ -272,7 +272,7 @@ void MeshDistributedData::set_ghost(uint local_index, uint dim)
   set_shared(local_index, dim);
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::set_ghost_owner(MeshEntity& m, uint rank)
+void MeshDistributedData::set_ghost_owner(MeshEntity const& m, uint rank)
 {
   set_ghost_owner(m.index(), rank, m.dim());
 }
@@ -283,7 +283,7 @@ void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
   ghost_owner[dim][i] = rank;
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::set_shared_adj(MeshEntity& m, uint rank)
+void MeshDistributedData::set_shared_adj(MeshEntity const& m, uint rank)
 {
   set_shared_adj(m.index(), rank, m.dim());
 }
@@ -300,13 +300,13 @@ void MeshDistributedData::setall_shared_adj(uint i, _set<uint> const& ranks,
   shared_adj[dim][i].insert(ranks.begin(), ranks.end());
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::setall_shared_adj(MeshEntity& m,
+void MeshDistributedData::setall_shared_adj(MeshEntity const& m,
                                             _set<uint> const& ranks)
 {
   setall_shared_adj(m.index(), ranks, m.dim());
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_global(MeshEntity& e) const
+uint MeshDistributedData::get_global(MeshEntity const& e) const
 {
   return get_global( e.index(), e.dim());
 }
@@ -329,7 +329,7 @@ uint MeshDistributedData::get_global(uint i, uint dim) const
   }
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_local(MeshEntity& e) const
+uint MeshDistributedData::get_local(MeshEntity const& e) const
 {
   return get_local(e.index(), e.dim());
 }
@@ -345,7 +345,7 @@ uint MeshDistributedData::get_local(MeshEntity& e) const
   return local_indices[dim][i];
 }
 //-----------------------------------------------------------------------------
-uint MeshDistributedData::get_owner(MeshEntity& e) const
+uint MeshDistributedData::get_owner(MeshEntity const& e) const
 {
   return get_owner(e.index(), e.dim());
 }
@@ -360,7 +360,7 @@ uint MeshDistributedData::get_owner(uint local_index, uint dim) const
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
-_set<uint> const& MeshDistributedData::get_shared_adj(MeshEntity& m) const
+_set<uint> const& MeshDistributedData::get_shared_adj(MeshEntity const& m) const
 {
   return get_shared_adj(m.index(), m.dim());
 }

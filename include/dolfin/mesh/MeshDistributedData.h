@@ -51,28 +51,28 @@ public:
   uint get_global(uint i, uint dim) const;
 
   /// Return global index of mesh entity
-  uint get_global(MeshEntity& e) const;
+  uint get_global(MeshEntity const& e) const;
 
   /// Return local index of mesh entity given its global index and topological
   /// dimension
   uint get_local(uint i, uint dim) const;
 
   /// Return local index of mesh entity
-  uint get_local(MeshEntity& e) const;
+  uint get_local(MeshEntity const& e) const;
 
   /// Return owner of the ghosted entity given its global index and topological
   /// dimension
   uint get_owner(uint local_index, uint dim) const;
 
   /// Return owner of the ghosted entity
-  uint get_owner(MeshEntity& m) const;
+  uint get_owner(MeshEntity const& m) const;
 
   /// Return the set of adjacent ranks of a shared entity given its global index
   /// and topological dimension
   _set<uint> const& get_shared_adj(uint local_index, uint dim) const;
 
   /// Return the set of adjacent ranks of a shared entity
-  _set<uint> const& get_shared_adj(MeshEntity& m) const;
+  _set<uint> const& get_shared_adj(MeshEntity const& m) const;
 
   /// Return global index of a vertex given the local index
   uint get_vertex_global(uint i) const;
@@ -99,17 +99,17 @@ public:
   void set_shared(uint local_index, uint dim);
   void set_ghost(uint local_index, uint dim);
 
-  void set_shared(MeshEntity& m);
-  void set_ghost(MeshEntity& m);
+  void set_shared(MeshEntity const& m);
+  void set_ghost(MeshEntity const& m);
 
   void set_ghost_owner(uint i, uint rank, uint dim);
-  void set_ghost_owner(MeshEntity& m, uint rank);
+  void set_ghost_owner(MeshEntity const& m, uint rank);
 
   void set_shared_adj(uint i, uint rank, uint dim);
-  void set_shared_adj(MeshEntity& m, uint rank);
+  void set_shared_adj(MeshEntity const& m, uint rank);
 
   void setall_shared_adj(uint i, _set<uint> const& ranks, uint dim);
-  void setall_shared_adj(MeshEntity& m, _set<uint> const& ranks);
+  void setall_shared_adj(MeshEntity const& m, _set<uint> const& ranks);
 
   inline void set_global_numVertices(uint num_global)
   { _num_global_vertex = num_global; }

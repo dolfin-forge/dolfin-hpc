@@ -176,19 +176,22 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   for(MeshSharedIterator sv(mddata, 0); !sv.end(); ++sv)
   {
     Vertex v(mesh, sv.index());
-    for(EdgeIterator e(v); !e.end(); ++e)
+    for(MeshEntityIterator e(v, 1); !e.end(); ++e)
     {
       if( used_edge.count(e->index()) == 0)
       {
         const uint *edge_v = e->entities(0);
-        key = edge_key(edge_v[0], edge_v[1]);
-        edge_map[key] = e->index();
-        edge_id[key] = (uint) rand();
-        send_buff.push_back( mddata.get_vertex_global(edge_v[0]) );
-        send_buff.push_back( mddata.get_vertex_global(edge_v[1]) );
-        send_buff_id.push_back(edge_id[key]);
+        uint w = (sv.index() == edge_v[0] ? edge_v[1] : edge_v[0]);
+        if(mddata.is_shared(w, 0))
+        {
+          key = edge_key(edge_v[0], edge_v[1]);
+          edge_map[key] = e->index();
+          edge_id[key] = (uint) rand();
+          send_buff.push_back( mddata.get_vertex_global(edge_v[0]) );
+          send_buff.push_back( mddata.get_vertex_global(edge_v[1]) );
+          send_buff_id.push_back(edge_id[key]);
+        }
         used_edge.insert(e->index());
-        mddata.set_shared(*e);
       }
     }
   }

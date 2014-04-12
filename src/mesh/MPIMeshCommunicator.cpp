@@ -326,15 +326,18 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       MPI_Get_count(&status,MPI_UNSIGNED,&recv_size);
 
       for(int j=0; j<recv_size; j++)
-        if(distdata.have_global(shared[j], 0) &&
-            !distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0)){
-          offset = distdata.get_vertex_local(shared[j]) * gdim;
-          send_buff.push_back(coords[offset]);
-          send_buff.push_back(coords[offset + 1]);
-          if(gdim >2)
-            send_buff.push_back(coords[offset + 2]);
-          send_buff_indices.push_back(shared[j]);
-          distdata.set_shared(distdata.get_vertex_local(shared[j]), 0);
+        if(distdata.have_global(shared[j], 0))
+        {
+          if(!distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0))
+          {
+            offset = distdata.get_vertex_local(shared[j]) * gdim;
+            send_buff.push_back(coords[offset]);
+            send_buff.push_back(coords[offset + 1]);
+            if(gdim >2)
+              send_buff.push_back(coords[offset + 2]);
+            send_buff_indices.push_back(shared[j]);
+            distdata.set_shared(distdata.get_vertex_local(shared[j]), 0);
+          }
           distdata.set_shared_adj(distdata.get_vertex_local(shared[j]), src, 0);
         }
 
@@ -882,25 +885,27 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       // prepare coordinates and global indices of requested vertices
       for(int j=0; j<recv_size; j++)
       {
-        if( distdata.have_global(shared[j], 0) &&
-            !distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0) )
+        if( distdata.have_global(shared[j], 0))
         {
-          offset = distdata.get_vertex_local(shared[j]) * gdim;
-          send_buff.push_back(coords[offset]);
-          send_buff.push_back(coords[offset + 1]);
-          if(gdim > 2)
-            send_buff.push_back(coords[offset + 2]);
-
-          if ( vertex_functions )
+          if(!distdata.is_ghost(distdata.get_vertex_local(shared[j]), 0) )
           {
-            for ( uint f_id(0) ; f_id < nvfunctions ; ++f_id )
-            {
-              send_buff.push_back(vfunctions[f_id][distdata.get_vertex_local(shared[j])]);
-            }
-          }
+            offset = distdata.get_vertex_local(shared[j]) * gdim;
+            send_buff.push_back(coords[offset]);
+            send_buff.push_back(coords[offset + 1]);
+            if(gdim > 2)
+              send_buff.push_back(coords[offset + 2]);
 
-          send_buff_indices.push_back(shared[j]);
-          distdata.set_shared(distdata.get_vertex_local(shared[j]), 0);
+            if ( vertex_functions )
+            {
+              for ( uint f_id(0) ; f_id < nvfunctions ; ++f_id )
+              {
+                send_buff.push_back(vfunctions[f_id][distdata.get_vertex_local(shared[j])]);
+              }
+            }
+
+            send_buff_indices.push_back(shared[j]);
+            distdata.set_shared(distdata.get_vertex_local(shared[j]), 0);
+          }
           distdata.set_shared_adj(distdata.get_vertex_local(shared[j]), src, 0);
         }
       }

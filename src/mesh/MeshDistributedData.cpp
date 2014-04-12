@@ -350,7 +350,6 @@ _set<uint>& MeshDistributedData::get_shared_adj(MeshEntity& m) const
 _set<uint>& MeshDistributedData::get_shared_adj(uint local_index, uint dim) const
 {
   dolfin_assert(is_shared(local_index, dim));
-  dolfin_assert(!is_ghost(local_index, dim));
 
   return shared_adj[dim][local_index];
 }

@@ -275,6 +275,7 @@ void MeshDistributedData::set_ghost_owner(MeshEntity& m, uint rank)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
 {
+  shared_adj[dim][i].insert(rank);
   ghost_owner[dim][i] = rank;
 }
 //-----------------------------------------------------------------------------

@@ -55,11 +55,11 @@ public:
   ~PeriodicBC();
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const Form& form);
+             const BilinearForm& form);
 
 private:
 

@@ -19,7 +19,7 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/fem/Form.h>
+#include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
@@ -73,19 +73,19 @@ DirichletBC::~DirichletBC()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b, Form const& form)
+void DirichletBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
 {
   apply(A, b, 0, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        GenericVector const& x, Form const& form)
+                        GenericVector const& x, BilinearForm const& form)
 {
   apply(A, b, &x, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        GenericVector const* x, Form const& form)
+                        GenericVector const* x, BilinearForm const& form)
 {
   // Get local data for application of boundary conditions
   BoundaryCondition::LocalData& data = this->updateLocalData(form);

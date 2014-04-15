@@ -17,7 +17,7 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/fem/Form.h>
+#include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
@@ -66,7 +66,7 @@ PeriodicBC::~PeriodicBC()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
+void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
 {
   message("Applying periodic boundary conditions to linear system.");
 
@@ -269,7 +269,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 }
 //-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const GenericVector& x, const Form& form)
+                       const GenericVector& x, const BilinearForm& form)
 {
   error("Periodic boundary conditions not implemented for nonlinear systems.");
 }

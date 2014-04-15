@@ -47,11 +47,11 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const Form& form);
+             const BilinearForm& form);
 
   real beta() const;
 
@@ -70,14 +70,14 @@ private:
 
 //-----------------------------------------------------------------------------
 inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                                  Form const& form)
+                                  BilinearForm const& form)
 {
   slipbc_.apply(A, b, form);
 }
 
 //-----------------------------------------------------------------------------
 inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                                  const GenericVector& x, Form const& form)
+                                  const GenericVector& x, BilinearForm const& form)
 {
   slipbc_.apply(A, b, x, form);
 }

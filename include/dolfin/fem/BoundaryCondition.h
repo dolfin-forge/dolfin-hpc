@@ -25,7 +25,7 @@ class GenericMatrix;
 class GenericVector;
 class SubDomain;
 class Mesh;
-class Form;
+class BilinearForm;
 
 /// Common base class for boundary conditions
 
@@ -53,11 +53,11 @@ public:
   virtual ~BoundaryCondition();
 
   /// Apply boundary condition to linear system
-  virtual void apply(GenericMatrix& A, GenericVector& b, const Form& form) = 0;
+  virtual void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form) = 0;
 
   /// Apply boundary condition to linear system for a nonlinear problem
   virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                     const Form& form) = 0;
+                     const BilinearForm& form) = 0;
 
   ///
   std::string const& type() const;
@@ -92,7 +92,7 @@ protected:
   public:
 
     // Constructor
-    LocalData(Mesh& mesh, SubSystem const& sub_system, Form const& form);
+    LocalData(Mesh& mesh, SubSystem const& sub_system, BilinearForm const& form);
 
     // Destructor
     ~LocalData();
@@ -122,7 +122,7 @@ protected:
 
   };
 
-  LocalData& updateLocalData(Form const& form) const;
+  LocalData& updateLocalData(BilinearForm const& form) const;
 
 private:
 
@@ -205,7 +205,7 @@ inline SubSystem const& BoundaryCondition::sub_system() const
 
 //-----------------------------------------------------------------------------
 inline BoundaryCondition::LocalData&
-BoundaryCondition::updateLocalData(Form const& form) const
+BoundaryCondition::updateLocalData(BilinearForm const& form) const
 {
   if(data_ == NULL)
   {

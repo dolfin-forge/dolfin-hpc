@@ -7,9 +7,9 @@
 // First added:  2008-06-18
 // Last changed: 2013-09-13
 
+#include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
-#include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/SubDomain.h>
@@ -112,7 +112,7 @@ void BoundaryCondition::init_markers(uint const& topological_dim)
 }
 //-----------------------------------------------------------------------------
 BoundaryCondition::LocalData::LocalData(Mesh& mesh, SubSystem const& sub_system,
-                                        Form const& form) :
+                                        BilinearForm const& form) :
     ufc_mesh(mesh),
     finite_element(NULL),
     dof_map(NULL),

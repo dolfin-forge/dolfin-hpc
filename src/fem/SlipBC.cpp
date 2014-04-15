@@ -10,7 +10,7 @@
 
 #include <dolfin/fem/UFC.h>
 
-#include <dolfin/fem/Form.h>
+#include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/fem/SlipBC.h>
 #include <dolfin/la/PETScMatrix.h>
@@ -127,7 +127,7 @@ SlipBC::~SlipBC()
   if (boundary) delete boundary;
 }
 //-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
+void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
 {
 
   if (MPI::processNumber() == 0) dolfin_set("output destination", "terminal");
@@ -236,7 +236,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const Form& form)
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-                   const Form& form)
+                   const BilinearForm& form)
 {
   error("SlipBC not implemented for non linear systems");
 }

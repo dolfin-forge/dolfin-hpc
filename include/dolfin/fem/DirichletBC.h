@@ -106,17 +106,17 @@ public:
   ~DirichletBC();
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const Form& form);
+  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const Form& form);
+             const BilinearForm& form);
 
 private:
 
   /// Apply boundary conditions
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
-             const Form& form);
+             const BilinearForm& form);
 
   // Initialize sub domain markers from sub domain
   void initFromSubDomain(const SubDomain& sub_domain);

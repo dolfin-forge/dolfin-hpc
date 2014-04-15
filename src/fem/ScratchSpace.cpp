@@ -6,73 +6,61 @@
 
 #include <dolfin/fem/ScratchSpace.h>
 
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Cell.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(Cell& c, FiniteElement const& finite_element,
-                           DofMap const& dof_map) :
-    size(value_size(finite_element)),
-    space_dimension(finite_element.space_dimension()),
-    local_dimension(dof_map.local_dimension()),
-    num_sub_elements(finite_element.num_sub_elements()),
-    topological_dimension(finite_element.topological_dimension()),
+ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
+    mesh(space.mesh()),
+    cell(space.cell()),
+    offset(0),
+    finite_element(&space.element()),
+    dof_map(&space.dofmap()),
+    size(value_size(*finite_element)),
+    space_dimension(finite_element->space_dimension()),
+    local_dimension(dof_map->local_dimension()),
+    num_sub_elements(finite_element->num_sub_elements()),
+    topological_dimension(finite_element->topological_dimension()),
     dofs(new uint[space_dimension]),
+    facet_dofs(new uint[dof_map->num_facet_dofs()]),
     coefficients(new real[space_dimension]),
     values(new real[size]),
-    coordinates(new real*[local_dimension]),
-    cell(c),
-    tabulation_on_cell_(new uint[space_dimension]),
-    tabulation_per_sub_element_(new uint*[num_sub_elements]),
-    sub_element_space_dimensions_(new uint[num_sub_elements]),
-    tabulation_per_entity_(new uint*[topological_dimension + 1]),
-    num_entity_dofs_(new uint[topological_dimension + 1])
+    coordinates(new real*[local_dimension])
 {
-  Initialize(c, finite_element, dof_map);
+  init();
 }
 
 //-----------------------------------------------------------------------------
-ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
-    size(value_size(space.element())),
-    space_dimension(space.element().space_dimension()),
-    local_dimension(space.dofmap().local_dimension()),
-    num_sub_elements(space.element().num_sub_elements()),
-    topological_dimension(space.element().topological_dimension()),
+ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
+                           SubSystem const& sub_system) :
+    mesh(space.mesh()),
+    cell(space.cell()),
+    offset(0),
+    finite_element(space.element().create_sub_element(sub_system.array())),
+    dof_map(space.dofmap().create_sub_dof_map(sub_system.array(),offset)),
+    size(value_size(*finite_element)),
+    space_dimension(finite_element->space_dimension()),
+    local_dimension(dof_map->local_dimension()),
+    num_sub_elements(finite_element->num_sub_elements()),
+    topological_dimension(finite_element->topological_dimension()),
     dofs(new uint[space_dimension]),
+    facet_dofs(new uint[dof_map->num_facet_dofs()]),
     coefficients(new real[space_dimension]),
     values(new real[size]),
-    coordinates(new real*[local_dimension]),
-    cell(space.cell()),
-    tabulation_on_cell_(new uint[space_dimension]),
-    tabulation_per_sub_element_(new uint*[num_sub_elements]),
-    sub_element_space_dimensions_(new uint[num_sub_elements]),
-    tabulation_per_entity_(new uint*[topological_dimension + 1]),
-    num_entity_dofs_(new uint[topological_dimension + 1])
+    coordinates(new real*[local_dimension])
 {
-  Initialize(space.cell(), space.element(), space.dofmap());
+  init();
 }
 
 //-----------------------------------------------------------------------------
 ScratchSpace::~ScratchSpace()
 {
-  delete[] num_entity_dofs_;
-  for (uint i = 0; i < topological_dimension + 1; ++i)
-  {
-    delete[] tabulation_per_entity_[i];
-  }
-  delete[] tabulation_per_entity_;
-  delete[] sub_element_space_dimensions_;
-  for (uint i = 0; i < num_sub_elements; ++i)
-  {
-    delete[] tabulation_per_sub_element_[i];
-  }
-  delete[] tabulation_per_sub_element_;
-  delete[] tabulation_on_cell_;
   for (uint i = 0; i < local_dimension; ++i)
   {
     delete[] coordinates[i];
@@ -80,41 +68,12 @@ ScratchSpace::~ScratchSpace()
   delete[] coordinates;
   delete[] values;
   delete[] coefficients;
+  delete[] facet_dofs;
   delete[] dofs;
 }
 
 //-----------------------------------------------------------------------------
-void ScratchSpace::Initialize(Cell const& cell,
-                              FiniteElement const& finite_element,
-                              DofMap const& dof_map)
-{
-  message(1, "Creating scratch space");
-
-  // Initialize local array for dof coordinates
-  for (uint i = 0; i < local_dimension; ++i)
-  {
-    coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
-  }
-
-  // Initialize tabulation per subspace
-  for (uint s = 0; s < num_sub_elements; ++s)
-  {
-    ufc::finite_element * sub = finite_element.create_sub_element(s);
-    sub_element_space_dimensions_[s] = sub->space_dimension();
-    tabulation_per_sub_element_[s] = new uint[sub_element_space_dimensions_[s]];
-    delete sub;
-  }
-
-  // Initialize tabulation per entity
-  for (uint d = 0; d < topological_dimension + 1; ++d)
-  {
-    num_entity_dofs_[d] = dof_map.num_entity_dofs(d);
-    tabulation_per_entity_[d] = new uint[num_entity_dofs_[d]];
-  }
-}
-
-//-----------------------------------------------------------------------------
-uint ScratchSpace::value_size(FiniteElement const& finite_element)
+uint ScratchSpace::value_size(ufc::finite_element const& finite_element)
 {
   // Compute size of value (number of entries in tensor value)
   uint size = 1;
@@ -126,33 +85,14 @@ uint ScratchSpace::value_size(FiniteElement const& finite_element)
 }
 
 //-----------------------------------------------------------------------------
-void ScratchSpace::set_cell_tabulation(Cell const& cell,
-                                       ufc::dof_map const& dof_map, uint * dofs)
+void ScratchSpace::init()
 {
-  uint const num_subspaces = dof_map.num_sub_dof_maps();
-  if (num_subspaces > 0)
+  message(1, "Creating scratch space");
+
+  // Initialize local array for dof coordinates
+  for (uint i = 0; i < local_dimension; ++i)
   {
-    for (uint s = 0; s < num_subspaces; ++s)
-    {
-      ufc::dof_map const * dm = dof_map.create_sub_dof_map(s);
-      set_cell_tabulation(cell, *dm, dofs);
-      dofs += dm->local_dimension();
-      delete dm;
-    }
-  }
-  else
-  {
-    for (uint e = 0; e < topological_dimension; ++e)
-    {
-      uint * entity_dofs = &dofs[e];
-      uint nbe = cell.numEntities(e);
-      uint offset = dof_map.num_entity_dofs(e);
-      for (uint i = 0; i < nbe; ++i)
-      {
-        uint * curr = &entity_dofs[e] + i * offset;
-        dof_map.tabulate_entity_dofs(curr, e, i);
-      }
-    }
+    coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
   }
 }
 

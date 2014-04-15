@@ -8,6 +8,7 @@
 #define __SCRATCH_SPACE_H_
 
 #include <dolfin/common/types.h>
+#include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 
 #include <ufc.h>
@@ -16,9 +17,10 @@ namespace dolfin
 {
 
 class Cell;
-class FiniteElement;
 class FiniteElementSpace;
+class FiniteElement;
 class DofMap;
+class SubSystem;
 
 /**
  *  @class  ScratchSpace
@@ -32,14 +34,28 @@ class ScratchSpace
 public:
 
   // Constructor
-  ScratchSpace(Cell& cell, FiniteElement const& finite_element,
-               DofMap const& dof_map);
+  ScratchSpace(FiniteElementSpace const& space);
 
   // Constructor
-  ScratchSpace(FiniteElementSpace const& space);
+  ScratchSpace(FiniteElementSpace const& space, SubSystem const& sub_system);
 
   // Destructor
   ~ScratchSpace();
+
+  // UFC Mesh
+  UFCMesh mesh;
+
+  // UFC Cell
+  UFCCell cell;
+
+  // Offset for sub system
+  uint offset;
+
+  // Finite element
+  ufc::finite_element const * finite_element;
+
+  // Dof map
+  ufc::dof_map const * dof_map;
 
   // Value size (number of entries in tensor value)
   uint const size;
@@ -56,17 +72,11 @@ public:
   // Topological dimension
   uint const topological_dimension;
 
-  // Tabulation on reference cell
-  uint * const & cell_tabulation() const;
-
-  // Tabulation per subspace
-  uint ** const & sub_element_cell_tabulation() const;
-
-  // Tabulation per entity
-  uint ** const & entity_cell_tabulation() const;
-
   // Local array for mapping of dofs
   uint * const dofs;
+
+  // Local array for mapping of facet dofs
+  uint * const facet_dofs;
 
   // Local array for expansion coefficients
   real * const coefficients;
@@ -77,28 +87,11 @@ public:
   // Local array for coordinates
   real** const coordinates;
 
-  // UFC Cell
-  mutable UFCCell cell;
-
 private:
 
-  void Initialize(Cell const& cell, FiniteElement const& finite_element,
-                  DofMap const& dof_map);
+  uint value_size(ufc::finite_element const& finite_element);
 
-  uint value_size(FiniteElement const& finite_element);
-
-  void set_cell_tabulation(Cell const& cell, ufc::dof_map const& dof_map,
-                           uint * dofs);
-
-  uint * const tabulation_on_cell_;
-
-  uint ** const tabulation_per_sub_element_;
-
-  uint * const sub_element_space_dimensions_;
-
-  uint ** const tabulation_per_entity_;
-
-  uint * const num_entity_dofs_;
+  void init();
 
 };
 

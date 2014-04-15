@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Garth N. Wells 2007, 2008.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2008-06-18
-// Last changed: 2007-12-09
+// Last changed: 2014-04-02
 
 #ifndef __BOUNDARY_CONDITION_H
 #define __BOUNDARY_CONDITION_H
@@ -85,45 +86,6 @@ protected:
   // Mark sub domain with mesh function
   void init_markers(uint const& topological_dim);
 
-  // Local data for application of boundary conditions
-  class LocalData
-  {
-
-  public:
-
-    // Constructor
-    LocalData(Mesh& mesh, SubSystem const& sub_system, BilinearForm const& form);
-
-    // Destructor
-    ~LocalData();
-
-    // UFC view of mesh
-    UFCMesh ufc_mesh;
-
-    // Finite element for sub system
-    ufc::finite_element const * finite_element;
-
-    // Dof map for sub system
-    DofMap const * dof_map;
-
-    // Offset for sub system
-    uint offset;
-
-    // Local data used to set boundary conditions
-    real* w;
-    uint* cell_dofs;
-    uint* facet_dofs;
-    real** coordinates;
-
-  private:
-
-      //
-      bool const is_subspace_;
-
-  };
-
-  LocalData& updateLocalData(BilinearForm const& form) const;
-
 private:
 
   // Default constructor
@@ -134,9 +96,6 @@ private:
 
   // Mesh
   Mesh& mesh_;
-
-  //
-  mutable LocalData * data_;
 
   // Sub domain index
   uint const sub_domain_index_;
@@ -201,17 +160,6 @@ inline MeshFunction<uint> const& BoundaryCondition::sub_domain_markers() const
 inline SubSystem const& BoundaryCondition::sub_system() const
 {
   return sub_system_;
-}
-
-//-----------------------------------------------------------------------------
-inline BoundaryCondition::LocalData&
-BoundaryCondition::updateLocalData(BilinearForm const& form) const
-{
-  if(data_ == NULL)
-  {
-    data_ = new LocalData(mesh_, sub_system_, form);
-  }
-  return *data_;
 }
 
 }

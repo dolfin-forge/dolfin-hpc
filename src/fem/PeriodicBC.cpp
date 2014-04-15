@@ -6,8 +6,7 @@
 // First added:  2007-07-08
 // Last changed: 2008-04-22
 
-#include <vector>
-#include <map>
+#include <dolfin/fem/PeriodicBC.h>
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Mesh.h>
@@ -18,11 +17,15 @@
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/fem/BilinearForm.h>
+#include <dolfin/fem/BoundaryCondition.h>
+#include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/ScratchSpace.h>
+#include <dolfin/fem/SubSystem.h>
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
-#include <dolfin/fem/SubSystem.h>
-#include <dolfin/fem/BoundaryCondition.h>
-#include <dolfin/fem/PeriodicBC.h>
+
+#include <vector>
+#include <map>
 
 using namespace dolfin;
 
@@ -74,7 +77,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
   // FIXME: Lagrange where more than one per element is associated with
   // FIXME: each coordinate. Note that globally there may very well be
   // FIXME: more than one dof per coordinate (for conforming elements).
-  DofMap const& dof_map = form.dofmaps()[0];
   uint const gdim = mesh().geometry().dim();
   uint const tdim = mesh().geometry().dim();
 
@@ -90,14 +92,12 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
     y[i] = 0.0;
   }
 
-  // Create local data for application of boundary conditions
-  BoundaryCondition::LocalData& data = this->updateLocalData(form);
-
   // Make sure we have the facet - cell connectivity
   mesh().init(tdim - 1, tdim);
 
-  // Create UFC view of mesh
-  UFCMesh ufc_mesh(mesh());
+  // Create local data for application of boundary conditions
+  FiniteElementSpace const& space = form.trial_space();
+  ScratchSpace scratch(space);
 
   // Iterate over the facets of the mesh
 #ifndef NO_PROGRESS_BAR
@@ -107,28 +107,27 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
   {
     // Get cell to which facet belongs (there may be two, but pick first)
     Cell cell(mesh(), facet->entities(tdim)[0]);
-    UFCCell ufc_cell(cell);
+    scratch.cell.update(cell, mesh().distdata());
 
     // Get local index of facet with respect to the cell
     const uint local_facet = cell.index(*facet);
 
     // Tabulate dofs on cell
-    data.dof_map->tabulate_dofs(data.cell_dofs, ufc_cell);
+    scratch.dof_map->tabulate_dofs(scratch.dofs, scratch.mesh, scratch.cell);
 
     // Tabulate coordinates on cell
-    data.dof_map->tabulate_coordinates(data.coordinates, ufc_cell);
+    scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
 
     // Tabulate which dofs are on the facet
-    data.dof_map->tabulate_facet_dofs(data.facet_dofs, local_facet);
+    scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
 
     // Iterate over facet dofs
-    for (uint i = 0; i < data.dof_map->num_facet_dofs(); i++)
+    for (uint i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
     {
       // Get dof and coordinate of dof
-      const uint local_dof = data.facet_dofs[i];
-      const int global_dof = static_cast<int>(data.offset
-          + data.cell_dofs[local_dof]);
-      real *& x = data.coordinates[local_dof];
+      uint const local_dof = scratch.facet_dofs[i];
+      int const global_dof = static_cast<int>(scratch.offset + scratch.dofs[local_dof]);
+      real *& x = scratch.coordinates[local_dof];
 
       // Map coordinate from H to G
       for (uint j = 0; j < gdim; j++)
@@ -141,9 +140,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
       const bool on_boundary = facet->numEntities(tdim) == 1;
       if (sub_domain().inside(x, on_boundary))
       {
-        // Coordinate x is in G
-        //cout << "Inside: " << x[0] << " " << x[1] << endl;
-
         // Copy coordinate to std::vector
         for (uint j = 0; j < gdim; j++)
         {
@@ -178,7 +174,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
       else if (sub_domain().inside(y, on_boundary))
       {
         // y = F(x) is in G, so coordinate x is in H
-        //cout << "Mapped: " << x[0] << " " << x[1] << endl;
 
         // Copy coordinate to std::vector
         for (uint j = 0; j < gdim; j++)
@@ -240,11 +235,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
       error(
           "Unable to find a pair of matching dofs for periodic boundary condition.");
     }
-
-    //cout << "Setting periodic bc at x =";
-    //for (uint j = 0; j < gdim; j++)
-    //  cout << " " << it->first[j];
-    //cout << ": " << dof0 << " " << dof1 << endl;
 
     // FIXME: Perhaps this can be done more efficiently?
 

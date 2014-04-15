@@ -26,6 +26,7 @@ namespace dolfin
 class DofMap;
 class Function;
 class Mesh;
+class FiniteElementSpace;
 class Form;
 class GenericMatrix;
 class GenericVector;
@@ -124,21 +125,17 @@ private:
   // Initialize sub domain markers from MeshFunction
   void initFromMeshFunction(MeshFunction<uint>& sub_domains, uint sub_domain);
 
-  // Compute dofs and values for application of boundary conditions
-  void computeBC(_map<uint, real>& boundary_values,
-                 BoundaryCondition::LocalData& data);
-
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,
-                            BoundaryCondition::LocalData& data);
+                            FiniteElementSpace const& space);
 
   // Compute boundary values for facet (geometrical approach)
   void computeBCGeometric(_map<uint, real>& boundary_values,
-                          BoundaryCondition::LocalData& data);
+                          FiniteElementSpace const& space);
 
   // Compute boundary values for facet (pointwise approach)
   void computeBCPointwise(_map<uint, real>& boundary_values,
-                          BoundaryCondition::LocalData& data);
+                          FiniteElementSpace const& space);
 
   // The function
   Function& g_;

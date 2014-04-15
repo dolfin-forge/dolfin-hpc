@@ -4,9 +4,10 @@
 // Modified by Kristian Oelgaard, 2007
 // Modified by Martin Sandve Alnes, 2008
 // Modified by Niclas Jansson, 2008
+// Modified by Aurélien Larcher, 2014
 //
 // First added:  2007-04-10
-// Last changed: 2008-07-07
+// Last changed: 2014-04-15
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/log.h>
@@ -161,44 +162,6 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   // Finalise changes to b
   b.apply();
 }
-//-----------------------------------------------------------------------------
-//void DirichletBC::zero(GenericMatrix& A, Form const& form)
-//{
-//  // Get local data for application of boundary conditions
-//  BoundaryCondition::LocalData& data = this->updateLocalData(form);
-//
-//  //
-//  DofMap const& dof_map = form.dofmaps()[1];
-//
-//  // Simple check
-//  const uint N = dof_map.global_dimension();
-//  if (N != A.size(0))
-//    error("Incorrect dimension of matrix for application of boundary conditions."
-//          "Did you assemble it on a different mesh?");
-//
-//  // A map to hold the mapping from boundary dofs to boundary values
-//  _map<uint, real> boundary_values;
-//
-//  // Compute dofs and values
-//  computeBC(boundary_values, data);
-//
-//  // Copy boundary value data to arrays
-//  uint* dofs = new uint[boundary_values.size()];
-//  _map<uint, real>::const_iterator boundary_value;
-//  uint i = 0;
-//  for (boundary_value = boundary_values.begin();
-//       boundary_value != boundary_values.end(); ++boundary_value)
-//    dofs[i++] = boundary_value->first;
-//
-//  // Modify linear system (A_ii = 1)
-//  A.zero(boundary_values.size(), dofs);
-//
-//  // Finalise changes to A
-//  A.apply();
-//
-//  // Clear temporary arrays
-//  delete[] dofs;
-//}
 //-----------------------------------------------------------------------------
 void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
 {

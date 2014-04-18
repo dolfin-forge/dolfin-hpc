@@ -39,10 +39,10 @@ public:
   virtual Array<Function*> const& coefficients() const = 0;
 
   /// Return number of argument associated with the given name
-  uint coefficient_number(const std::string& name) const;
+  virtual uint coefficient_number(const std::string& name) const;
 
   /// Return name of argument associated with the given number
-  std::string coefficient_name(dolfin::uint i) const;
+  virtual std::string coefficient_name(dolfin::uint i) const;
 
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;

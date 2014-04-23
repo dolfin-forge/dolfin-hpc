@@ -95,7 +95,6 @@ nobase_pkginclude_HEADERS = \
 				elements/ffc_L2proj_22.h\
 				elements/ffc_L2proj_23.h\
 				elements/ffc_L2proj_24.h\
-				fem/assemble.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\

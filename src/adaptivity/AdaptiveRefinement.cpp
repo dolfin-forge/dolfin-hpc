@@ -14,6 +14,7 @@
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/fem/Form.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
@@ -40,7 +41,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
+void
+AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
 
 {
   if (MPI::processNumber() == 0)
@@ -104,9 +106,9 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
   }
 }
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::refine_and_project(Mesh& mesh,
-                                            std::vector<project_func> pf,
-                                            MeshFunction<bool>& cell_marker)
+void
+AdaptiveRefinement::refine_and_project(Mesh& mesh, std::vector<project_func> pf,
+    MeshFunction<bool>& cell_marker)
 {
 
   dolfin_set("Load balancer redistribute", false);
@@ -156,38 +158,44 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   MeshFunction<uint> *partitions = mesh.data().meshFunction("partitions");
 
-  real *x_values = NULL;
-  real *y_values = NULL;
-  real *z_values = NULL;
-  uint *x_rows = NULL;
-  uint *y_rows = NULL;
-  uint *z_rows = NULL;
-  uint x_m = 0;
-  uint y_m = 0;
-  uint z_m = 0;
-  Function coarse_x(mesh, FE::LAGRANGE3DP1S);
-  Function coarse_y(mesh, FE::LAGRANGE3DP1S);
-  Function coarse_z(mesh, FE::LAGRANGE3DP1S);
+  uint const maxvecsize = 3;
+  real * x_values[maxvecsize];
+  uint * x_rows[maxvecsize];
+  uint x_m[maxvecsize];
 
   for (std::vector<project_func>::iterator it = pf.begin(); it != pf.end();
       ++it)
   {
-    if (it->first->type() != Function::discrete)
+    Function& func_to_project = *(it->first);
+    if (func_to_project.type() != Function::discrete)
     {
       error("Projection only implemented for discrete functions");
     }
+    Array<Function *> coarse;
+    uint const num_components = func_to_project.space().dofmap().num_sub_dof_maps();
+    // FIXME: Invalid for scalar functions due to the zero subspace assumption
+    for (uint i = 0; i < num_components; ++i)
+    {
+      ufc::finite_element * subfem =
+          func_to_project.space().element().create_sub_element(i);
+      coarse.push_back(new Function(mesh, subfem->signature()));
+      delete subfem;
+    }
 
     AdaptiveRefinement::decompose_func(mesh, it->first, it->second.second,
-                                       *(it->second.first), coarse_x, coarse_y,
-                                       coarse_z);
+        *(it->second.first), coarse);
 
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_x, &x_values, &x_rows,
-                                          x_m, *partitions);
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_y, &y_values, &y_rows,
-                                          y_m, *partitions);
-    AdaptiveRefinement::redistribute_func(mesh, &coarse_z, &z_values, &z_rows,
-                                          z_m, *partitions);
+    for (uint i = 0; i < num_components; ++i)
+    {
+      AdaptiveRefinement::redistribute_func(mesh, coarse[i], &x_values[i],
+          &x_rows[i], x_m[i], *partitions);
+    }
 
+    while(!coarse.empty())
+    {
+      delete coarse.back();
+      coarse.pop_back();
+    }
   }
 
   MeshFunction<bool> new_cell_marker;
@@ -209,33 +217,38 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   for (std::vector<project_func>::iterator it = pf.begin(); it != pf.end();
       ++it)
   {
-    if (it->first->type() != Function::discrete)
+    Function& func_to_project = *(it->first);
+    if (func_to_project.type() != Function::discrete)
     {
       error("Projection only implemented for discrete functions");
     }
 
-    Function post_x(mesh, FE::LAGRANGE3DP1S);
-    Function post_y(mesh, FE::LAGRANGE3DP1S);
-    Function post_z(mesh, FE::LAGRANGE3DP1S);
+    Array<Function *> post;
+    uint const num_components = func_to_project.dofmap().num_sub_dof_maps();
+    // FIXME: Invalid for scalar functions due to the zero subspace assumption
+    for (uint i = 0; i < num_components; ++i)
+    {
+      ufc::finite_element * subfem =
+      func_to_project.space().element().create_sub_element(i);
+      post.push_back(new Function(mesh, subfem->signature()));
+      post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
+      post.back()->sync_ghosts();
+      delete subfem;
+    }
 
-    post_x.vector().set(x_values, x_m, x_rows);
-    post_y.vector().set(y_values, y_m, y_rows);
-    post_z.vector().set(z_values, z_m, z_rows);
-
-    post_x.sync_ghosts();
-    post_y.sync_ghosts();
-    post_z.sync_ghosts();
-
-    delete[] z_values;
-    delete[] y_values;
-    delete[] x_values;
-
-    delete[] z_rows;
-    delete[] y_rows;
-    delete[] x_rows;
-
+    for (uint i = 0; i < maxvecsize; ++i)
+    {
+      delete[] x_values[i];
+      delete[] x_rows[i];
+    }
     Vector xproj;
-    AdaptiveRefinement::project(new_mesh, post_x, post_y, post_z, xproj);
+    AdaptiveRefinement::project(new_mesh, post, xproj);
+
+    while(!post.empty())
+    {
+      delete post.back();
+      post.pop_back();
+    }
 
     std::stringstream p_filename;
 #ifdef ENABLE_MPIIO
@@ -253,9 +266,9 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
 }
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
-                                           uint **rp, uint& m,
-                                           MeshFunction<uint>& distribution)
+void
+AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
+    uint **rp, uint& m, MeshFunction<uint>& distribution)
 {
 
 #ifdef HAVE_MPI
@@ -316,7 +329,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
   delete[] values;
 
   MPI_Allreduce(&local_size, &recv_size, 1, MPI_UNSIGNED, MPI_MAX,
-                MPI::DOLFIN_COMM);
+      MPI::DOLFIN_COMM);
 
   real *recv_buffer = new real[recv_size];
   uint *recv_buffer_indices = new uint[recv_size];
@@ -330,13 +343,13 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
     dest = (pe_rank + j) % pe_size;
 
     MPI_Sendrecv(&send_buffer[dest][0], send_buffer[dest].size(), MPI_DOUBLE,
-                 dest, 1, recv_buffer, recv_size, MPI_DOUBLE, src, 1,
-                 MPI::DOLFIN_COMM, &status);
+        dest, 1, recv_buffer, recv_size, MPI_DOUBLE, src, 1, MPI::DOLFIN_COMM,
+        &status);
 
     MPI_Sendrecv(&send_buffer_indices[dest][0],
-                 send_buffer_indices[dest].size(), MPI_UNSIGNED, dest, 1,
-                 recv_buffer_indices, recv_size, MPI_UNSIGNED, src, 1,
-                 MPI::DOLFIN_COMM, &status);
+        send_buffer_indices[dest].size(), MPI_UNSIGNED, dest, 1,
+        recv_buffer_indices, recv_size, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM,
+        &status);
 
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
@@ -378,9 +391,9 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function *f, real **vp,
 
 }
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
-                                        Form& form, Function &f_x,
-                                        Function &f_y, Function &f_z)
+void
+AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
+    Form& form, Array<Function *>& f_components)
 {
 
   UFC ufc(form, mesh, form.dofmaps());
@@ -414,15 +427,11 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
       {
 
         new_index = mesh.distdata().get_vertex_global(v->index());
-
-        f->vector().get(&dof_value, 1, &indices[ci]);
-        f_x.vector().set(&dof_value, 1, &new_index);
-
-        f->vector().get(&dof_value, 1, &indices[ci + c->numEntities(0)]);
-        f_y.vector().set(&dof_value, 1, &new_index);
-
-        f->vector().get(&dof_value, 1, &indices[ci + 2 * c->numEntities(0)]);
-        f_z.vector().set(&dof_value, 1, &new_index);
+        for (uint i = 0; i < f_components.size(); ++i)
+        {
+          f->vector().get(&dof_value, 1, &indices[ci]);
+          f_components[i]->vector().set(&dof_value, 1, &new_index);
+        }
 
         marked.set(*v, true);
         continue;
@@ -430,18 +439,17 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function *f, uint offset,
       }
     }
   }
-
-  f_x.sync_ghosts();
-  f_y.sync_ghosts();
-  f_z.sync_ghosts();
+  for(uint i=0; i < f_components.size(); ++i)
+  {
+    f_components[i]->sync_ghosts();
+  }
 
   delete[] indices;
 
 }
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
-                                 Function& post_y, Function& post_z,
-                                 Vector& x_proj)
+void
+AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post, Vector& x_proj)
 {
 
   Function projected(new_mesh, x_proj, FE::LAGRANGE3DP1V);
@@ -471,6 +479,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
     ufccell.update(*c, new_mesh.distdata());
     projected.dofmap().tabulate_dofs(local_indices, ufccell, c->index());
 
+    //FIXME: Only P1 friendly.
     for (VertexIterator v(*c); !v.end(); ++v)
     {
 
@@ -495,7 +504,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
       x[0] = v->x()[0];
       x[1] = v->x()[1];
       x[2] = v->x()[2];
-      post_x.eval(&test_value, &x[0]);
+      f_post[0]->eval(&test_value, &x[0]);
       if (test_value == std::numeric_limits<real>::infinity())
       {
         for (EdgeIterator e(*v); !e.end(); ++e)
@@ -514,7 +523,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
           x[0] = v_e->x()[0];
           x[1] = v_e->x()[1];
           x[2] = v_e->x()[2];
-          post_x.eval(&test_value, &x[0]);
+          f_post[0]->eval(&test_value, &x[0]);
 
           if (test_value != std::numeric_limits<real>::infinity())
           {
@@ -532,14 +541,14 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Function& post_x,
       vv[i] = test_value;
       indices[i++] = local_indices[ci];
 
-      post_y.eval(&test_value, &x[0]);
+      f_post[1]->eval(&test_value, &x[0]);
       if (test_value != std::numeric_limits<real>::infinity())
       {
         vv[i] = test_value;
         indices[i++] = local_indices[ci + c->numEntities(0)];
       }
 
-      post_z.eval(&test_value, &x[0]);
+      f_post[2]->eval(&test_value, &x[0]);
       if (test_value != std::numeric_limits<real>::infinity())
       {
         vv[i] = test_value;

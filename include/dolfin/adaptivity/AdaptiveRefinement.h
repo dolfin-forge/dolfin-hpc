@@ -44,11 +44,10 @@ private:
 
   ///
   static void decompose_func(Mesh& mesh, Function *f, uint offset, Form& form,
-                             Function& f_x, Function& f_y, Function& f_z);
+                             Array<Function *>& f_components);
 
   ///
-  static void project(Mesh& new_mesh, Function& post_x, Function& post_y,
-                      Function& post_z, Vector& x_proj);
+  static void project(Mesh& new_mesh, Array<Function *>& f, Vector& x_proj);
 
 };
 }

@@ -176,7 +176,7 @@ void XMLFile::operator>>(Function& f)
 
   // Create the function (we're all friends here) (friends my ass).
   f.init(*mesh, finite_element_signature, dof_map_signature);
-   *this >> dynamic_cast<DiscreteFunction&>(f).vector();
+   *this >> f.vector();
 }
 //-----------------------------------------------------------------------------
 void XMLFile::operator>>(ParameterList& parameters)

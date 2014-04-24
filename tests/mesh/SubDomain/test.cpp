@@ -1,8 +1,7 @@
 #include <dolfin/config/dolfin_config.h>
 
-#include <dolfin/mesh/DynamicSubDomain.h>
-#include <dolfin/mesh/GeometricSubDomain.h>
 #include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/UnitSquare.h>
 
 #include <iostream>
@@ -25,25 +24,24 @@ void teardown()
 {
 }
 
-bool test_create(SubDomain& sd)
-{
-  uint const dim = sd.mesh().topology().dim();
-  for (uint i = 0; i < dim; ++i)
-  {
-    MeshFunction<uint>& marker = sd.marker(i);
-  }
-  return false;
-}
+//bool test_create(SubDomain& sd)
+//{
+ // uint const dim = sd.mesh().topology().dim();
+//  for (uint i = 0; i < dim; ++i)
+//  {
+//    MeshFunction<uint>& marker = sd.marker(i);
+//  }
+//  return false;
+//}
 
 //-----------------------------------------------------------------------------
-START_TEST( test_dynamic_create )
+START_TEST( test_geometric_create )
 {
   int init_failed = 0;
 
   uint const N = 16;
   UnitSquare mesh(N, N);
-  DynamicSubDomain sd(mesh);
-  init_failed = test_create(sd);
+  //init_failed = test_create(sd);
 
   fail_unless( init_failed == 0 );
 }END_TEST
@@ -54,9 +52,9 @@ Suite * test_suite()
   Suite * s = suite_create("mesh/SubDomain");
 
   // Dynamic
-  TCase * tc_dynamic = tcase_create("mesh/SubDomain/DynamicSubDomain");
-  tcase_add_test(tc_dynamic, test_dynamic_create);
-  suite_add_tcase(s, tc_dynamic);
+  TCase * tc_geometric = tcase_create("mesh/SubDomain/GeometricSubDomain");
+  tcase_add_test(tc_geometric, test_geometric_create);
+  suite_add_tcase(s, tc_geometric);
 
   // Geometric
 //  TCase * tc_geometric = tcase_create("mesh/SubDomain/GeometricSubDomain");

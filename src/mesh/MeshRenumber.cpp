@@ -320,6 +320,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
           global_buff.push_back(i>>1);
           global_buff.push_back( new_global[ edge_map[key] ] );
           mddata.set_shared( edge_map[key], 1);
+          mddata.set_shared_adj(edge_map[key], src, 1);
         }
       }
     }
@@ -542,6 +543,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
         global_buff.push_back(ii);
         global_buff.push_back( new_global[ face_map[facekey] ] );
         mddata.set_shared(face_map[facekey], 2);
+        mddata.set_shared_adj(face_map[facekey], src, 2);
       }
     }
 

@@ -631,6 +631,21 @@ VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f)
   }
   pvtuFile << "</PPointData>" << std::endl;
 
+  //
+  pvtuFile << "<PCellData>" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />"
+             << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
+  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />" << std::endl;
+  pvtuFile << "</PCellData>" << std::endl;
+
+  //
+  pvtuFile << "<PPoints>" << std::endl;
+  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />"
+      << std::endl;
+  pvtuFile << "</PPoints>" << std::endl;
+
+  //
   pvtuFile << "<PCellData>" << std::endl;
   for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
       it != f.end(); it++)
@@ -657,16 +672,7 @@ VTKFile::pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f)
           << "\"  NumberOfComponents=\"3\" />" << std::endl;
     }
   }
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />"
-           << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />" << std::endl;
   pvtuFile << "</PCellData>" << std::endl;
-
-  pvtuFile << "<PPoints>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />"
-      << std::endl;
-  pvtuFile << "</PPoints>" << std::endl;
 
   std::string fname;
 

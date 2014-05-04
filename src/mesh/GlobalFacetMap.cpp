@@ -4,6 +4,7 @@
 // First added:  2008-02-25
 // Last changed: 2009-03-03
 
+#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Vertex.h>
@@ -33,12 +34,15 @@ GlobalFacetMap::~GlobalFacetMap()
 #ifdef HAVE_MPI
 void GlobalFacetMap::init()
 {
+  dolfin_debug("Initialize global facet map");
   uint const tdim = _mesh.topology().dim();
 
   // Generate facet - cell connectivity if not generated
   _mesh.init(tdim - 1, tdim);
+  _mesh.init(0, tdim - 1);
 
   // Iterate over all Facets connected to the shared vertices
+  dolfin_assert(_mesh.distdata().num_shared(0) > 0);
   for(MeshSharedIterator sv(_mesh.distdata(), 0); !sv.end(); ++sv)
   {
     Vertex v(_mesh, sv.index());
@@ -67,6 +71,7 @@ void GlobalFacetMap::init()
     error("Could not handle local to global map with facet of dim %d", tdim);
     break;
   }
+  dolfin_assert(global_facet.size() > 0);
 }
 //-----------------------------------------------------------------------------
 void GlobalFacetMap::findGlobal2D()
@@ -78,6 +83,8 @@ void GlobalFacetMap::findGlobal2D()
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Facet f(_mesh, iter->first);
+    //TODO: Remove assertion when enabling hex meshes.
+    dolfin_assert(f.numEntities(0) == tdim);
     uint num_shared = 0;
 
     for (VertexIterator v(f); !v.end(); ++v)
@@ -88,6 +95,7 @@ void GlobalFacetMap::findGlobal2D()
       }
     }
 
+    // Mark as an exterior facet
     if ( f.numEntities(tdim) == 1 && num_shared < f.numEntities(0) )
     {
       global_facet[f.index()] = true;
@@ -112,6 +120,8 @@ void GlobalFacetMap::findGlobal3D()
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Facet f(_mesh, iter->first);
+    //TODO: Remove assertion when enabling hex meshes.
+    dolfin_assert(f.numEntities(0) == tdim);
     uint num_shared = 0;
 
     for (VertexIterator v(f); !v.end(); ++v)
@@ -142,9 +152,12 @@ void GlobalFacetMap::findGlobal3D()
   int sh_count = send_buff.size();
   //FIXME: Cannot work as it is with heterogeneous mesh since the data packing
   //       is not constant, maybe use the maximum
-  uint const num_facet_vertices = _mesh.type().numEntities(0);
+  uint const num_facet_vertices = _mesh.type().numVertices(tdim - 1);
+  //TODO: Remove assertion valid only in the simplicial case when hex arrives
+  dolfin_assert(num_facet_vertices == tdim);
   int res_size = sh_count / num_facet_vertices;
-  int recv_size,recv_count;
+  int recv_size = 0;
+  int recv_count = 0;
 
   MPI_Allreduce(&sh_count, &recv_size, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);
   uint *recv_buff = new uint[ recv_size ];
@@ -160,7 +173,6 @@ void GlobalFacetMap::findGlobal3D()
 
   for(uint j=1; j<pe_size; ++j)
   {
-
     src = (rank - j + pe_size) % pe_size;
     dest = (rank + j) % pe_size;
 
@@ -233,9 +245,8 @@ void GlobalFacetMap::findGlobal3D()
       {
         global_facet[unassigned[i]] = false;
       }
-      shared_buff.clear();
     }
-
+    shared_buff.clear();
   }
 
   delete[] recv_buff;

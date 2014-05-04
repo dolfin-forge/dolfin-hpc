@@ -39,10 +39,8 @@ void GlobalFacetMap::init()
 
   // Generate facet - cell connectivity if not generated
   _mesh.init(tdim - 1, tdim);
-  _mesh.init(0, tdim - 1);
 
   // Iterate over all Facets connected to the shared vertices
-  dolfin_assert(_mesh.distdata().num_shared(0) > 0);
   for(MeshSharedIterator sv(_mesh.distdata(), 0); !sv.end(); ++sv)
   {
     Vertex v(_mesh, sv.index());
@@ -71,7 +69,6 @@ void GlobalFacetMap::init()
     error("Could not handle local to global map with facet of dim %d", tdim);
     break;
   }
-  dolfin_assert(global_facet.size() > 0);
 }
 //-----------------------------------------------------------------------------
 void GlobalFacetMap::findGlobal2D()

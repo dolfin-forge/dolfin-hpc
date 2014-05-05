@@ -420,6 +420,8 @@ void DiscreteFunction::eval(real* values, const real* x) const
     for (uint j = 0; j < scratch.size; j++)
     {
       values[j] += scratch.coefficients[i] * scratch.values[j];
+      // Check that values are not NaN
+      dolfin_assert(values[j] == values[j]);
     }
   }
 }
@@ -473,7 +475,7 @@ void DiscreteFunction::interpolate(Function const& other_func)
   // Make sure vectors ghost values are updated)
   X_->apply();
 
-  // Cell tabulated version
+  // Pretabulated version
   real * values = new real[finite_element().value_dimension(0)];
   real * block = new real[dofmap().dofsmapping_size()];
   uint cell_offset = 0;
@@ -549,6 +551,15 @@ void DiscreteFunction::InitializeVector()
       X_->init(dofmap().global_dimension());
     }
   }
+
+  if (MPI::numProcesses() > 1)
+  {
+    InitializeGhosts();
+  }
+
+  X_->zero();
+  X_->apply();
+
   renumbered_ = false;
 }
 

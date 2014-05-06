@@ -38,7 +38,31 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain) :
     sub_domain(0),
     sub_domains_local(false),
     user_sub_domain(&sub_domain),
-    node_normal(mesh),
+    node_normal(new NodeNormal(mesh)),
+    node_normal_local(true),
+    As(0),
+    row_block(0),
+    zero_block(0),
+    a1_indices_array(0),
+    boundary(0),
+    cell_map(0),
+    vertex_map(0)
+{
+  // Initialize sub domain markers
+  init(sub_domain);
+
+  sub_system = SubSystem(0);
+}
+//-----------------------------------------------------------------------------
+SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals) :
+    BoundaryCondition("SlipBC", mesh, sub_domain),
+    mesh(mesh),
+    sub_domains(0),
+    sub_domain(0),
+    sub_domains_local(false),
+    user_sub_domain(&sub_domain),
+    node_normal(&normals),
+    node_normal_local(false),
     As(0),
     row_block(0),
     zero_block(0),
@@ -59,7 +83,8 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
     sub_domains(&sub_domains),
     sub_domain(sub_domain),
     sub_domains_local(false),
-    node_normal(mesh),
+    node_normal(new NodeNormal(mesh)),
+    node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
@@ -80,7 +105,8 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
     sub_domains_local(false),
     sub_system(sub_system),
     user_sub_domain(&sub_domain),
-    node_normal(mesh),
+    node_normal(new NodeNormal(mesh)),
+    node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
@@ -102,7 +128,8 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
     sub_domain(sub_domain),
     sub_domains_local(false),
     sub_system(sub_system),
-    node_normal(node_normal),
+    node_normal(new NodeNormal(mesh)),
+    node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
@@ -119,12 +146,14 @@ SlipBC::~SlipBC()
   // Delete sub domain markers if created locally
   if (sub_domains_local) delete sub_domains;
 
-  if (As) delete As;
+  if (node_normal_local) delete node_normal;
 
-  if (a1_indices_array) delete[] a1_indices_array;
-  if (row_block) delete[] row_block;
-  if (zero_block) delete[] zero_block;
-  if (boundary) delete boundary;
+  delete As;
+
+  delete[] a1_indices_array;
+  delete[] row_block;
+  delete[] zero_block;
+  delete boundary;
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
@@ -304,7 +333,7 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
   if (nsdim == 3) l3 = b[nodes[2]];
 
   std::copy(a1_indices.begin(), a1_indices.end(), a1_indices_array);
-  int n_type = node_normal.node_type.get(node);
+  int n_type = node_normal->node_type.get(node);
 
   // Apply no-slip for the node on the corner  in 3D and 2D
   if ((n_type == 3 && nsdim == 3) || (n_type == 2 && nsdim == 2))
@@ -328,27 +357,35 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
   {
 
     // get components of tau
-    real t11, t12, t13;
-    real t21, t22, t23;
-    t11 = t12 = t21 = t22 = t13 = t23 = 0;
-    if (nsdim == 3)
-    {
-      t11 = node_normal.tau_1[0].get(node);
-      t12 = node_normal.tau_1[1].get(node);
-      t13 = node_normal.tau_1[2].get(node);
+    real t11 = 0;
+    real t12 = 0;
+    real t13 = 0;
+    real t21 = 0;
+    real t22 = 0;
+    real t23 = 0;
 
-      t21 = node_normal.tau_2[0].get(node);
-      t22 = node_normal.tau_2[1].get(node);
-      t23 = node_normal.tau_2[2].get(node);
+    if (nsdim == 2)
+    {
+      t11 = node_normal->tau[0].get(node);
+      t12 = node_normal->tau[1].get(node);
+    }
+    else if (nsdim == 3)
+    {
+      t11 = node_normal->tau_1[0].get(node);
+      t12 = node_normal->tau_1[1].get(node);
+      t13 = node_normal->tau_1[2].get(node);
+
+      t21 = node_normal->tau_2[0].get(node);
+      t22 = node_normal->tau_2[1].get(node);
+      t23 = node_normal->tau_2[2].get(node);
     }
 
     // get componets of normal
     real n1, n2, n3;
     n3 = 0;
-    n1 = node_normal.normal[0].get(node);
-    n2 = node_normal.normal[1].get(node);
-
-    if (nsdim == 3) n3 = node_normal.normal[2].get(node);
+    n1 = node_normal->normal[0].get(node);
+    n2 = node_normal->normal[1].get(node);
+    if (nsdim == 3) n3 = node_normal->normal[2].get(node);
 
     // find maximum of the normal components and put them to the diagonal
     real maxn = fmax(fabs(n1), fabs(n2));
@@ -389,19 +426,18 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
     bset(b, r1, 0.0);
 
     // set the row using tangent vector in 2D
-    /*
-     if (nsdim == 2) {
-     rows[0] = r2;
+    if (nsdim == 2)
+    {
+      // Set rows of matrix to the identity matrix
+      for (uint i = 0; i < a1_ncols; ++i)
+      {
+        row_block[i] = (a1[i] * t11 + a2[i] * t12);
+      }
 
-     // Set rows of matrix to the identity matrix
-     for(uint i = 0; i < a1_ncols; i++)
-     row_block[i] = (a1[i] * t1 + a2[i] * t2);
+      As.set(row_block, 1, &r2, static_cast<uint>(a1_ncols), a1_indices_array);
 
-     As.set(row_block, 1, rows, static_cast<uint>(a1_ncols), a1_indices_array);
-
-     bset(b, r2, (l1 * t1 + l2 * t2));
-     }
-     */
+      bset(b, r2, (l1 * t11 + l2 * t12));
+    }
 
     // if node is on the edge in 3D case:
     if (n_type == 2 && nsdim == 3)
@@ -606,5 +642,143 @@ void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh& mesh,
     }
   }
 }
+/*
 //-----------------------------------------------------------------------------
+void SlipBC::applySlipBC(Matrix& A, Matrix& As, Vector& b, Mesh const& mesh,
+                         uint const& node, Array<uint> const& dofs)
+{
+  // Naive reimplementation -- Aurélien
 
+  // The node type defines the number of discriminated surfaces at the node.
+  // Therefore it is the number of constrained directions up to the topological
+  // dimension
+  real node_type = 0;
+  normal_->node_type().vector().get(&node_type, 1, &node);
+  int const n_type = std::max((int) std::floor(node_type), (int) tdim_);
+
+  // Initialize set of row indices for reordering
+  std::set<uint> row_idx;
+  std::set<uint>::iterator it = row_idx.begin();
+  for (uint i = 0; i < tdim_; ++i)
+  {
+    it = row_idx.insert(it, i);
+  }
+
+  //--- Fill data structures for each space coordinate ---
+  Array<Function>& basis_functions = normal_->basis();
+  for (uint i = 0; i < tdim_; ++i)
+  {
+    // Copy non-zero entries from the stiffness matrix into local row
+    A.getrow(dofs[i], a_col_indices[i], a[i]);
+
+    // Copy rhs to local vector
+    l[i] = b[dofs[i]];
+
+    // Fill component i-th basis vector
+    real (&v)[3] = basis_[i];
+    basis_functions[i].vector().get(&v[0], tdim_, &dofs[0]);
+
+    // Determine maximum component:
+    for (it = row_idx.begin(); it != row_idx.end(); ++it)
+    {
+      if (std::fabs(v[*it]) > std::fabs(v[row[i]]))
+      {
+        row[i] = *it;
+      }
+    }
+    row_idx.erase(row[i]);
+  }
+
+  //--- Apply local equation LHS to the copy of the matrix ---
+  // n_type represents the number of constrained directions
+  if (n_type < (int) tdim_)  // At least one free direction
+  {
+
+    // For each constrained direction
+    for (uint i = 0; i < n_type; ++i)
+    {
+      // Set row to the global index
+      row[i] = dofs[i];
+
+      // Zero the row
+      uint nb_cols = a_col_indices[i].size();
+      a_slip_row.resize(nb_cols, 0.0);
+      As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
+
+      As.zero(1, &row[i]);
+
+      // Update the LHS row with the vector components
+      As.set(&basis_[i][0], 1, &row[i], tdim_, &dofs[i]);
+
+      // Reset rhs for slip
+      l_slip[i] = 0.0;
+    }
+
+    // For each free direction
+    for (uint i = n_type; i < tdim_; ++i)
+    {
+      // Set row to the global index
+      row[i] = dofs[i];
+
+      // Initialize row for application of the boundary condition
+      uint nb_cols = a_col_indices[i].size();
+      a_slip_row.resize(nb_cols, 0.0);
+
+      // Project equation on the tangential vector: a[j].tau_i
+      // Beware, we assume here that the component contributions were
+      // inserted in the same order !
+      l_slip[i] = 0.0;
+      for (uint d = 0; d < tdim_; ++d)
+      {
+        for (uint j = 0; j < nb_cols; ++j)
+        {
+          a_slip_row[j] += a[d][j] * basis_[i][d];
+        }
+        l_slip[i] += l[d] * basis_[i][d];
+      }
+
+      // Update the LHS row with the projection of the equation on tau_i
+      As.setrow(row[i], a_col_indices[i], a_slip_row);
+    }
+
+  }
+  else // All directions are constrained
+  {
+    for (uint i = 0; i < tdim_; ++i)
+    {
+      // Set row to the global index
+      row[i] = dofs[i];
+
+      // Find position of the diagonal in the vectors
+      // Not really sexy but we know that the diag index is in the vector,
+      // so let us save a bound checking at each loop...
+      // We cannot use a binary search as the indices might not be sorted.
+      uint row_idx = dofs[i];
+      uint diag_idx = 0;
+      while (a_col_indices[i][diag_idx] != row_idx)
+      {
+        ++diag_idx;
+      }
+
+      // Scale the diagonal entry
+      real diag_val = std::fabs(a[i][diag_idx]);
+
+      // Zero the row
+      uint nb_cols = a_col_indices[i].size();
+      a_slip_row.resize(nb_cols, 0.0);
+      As.set(&a_slip_row[0], 1, &row[i], nb_cols, &a_col_indices[i][0]);
+
+      // Update the LHS diagonal
+      As.set(&diag_val, 1, &row[i], 1, &row[i]);
+
+      // Reset rhs for slip
+      l_slip[i] = 0.0;
+    }
+  }
+
+  //--- Apply local equation RHS to the copy of the matrix ---
+  b.set(&l_slip[0], tdim_, &row[0]);
+
+}
+//-----------------------------------------------------------------------------
+*/

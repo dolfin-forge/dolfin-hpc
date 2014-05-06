@@ -33,6 +33,9 @@ public:
   /// Create boundary condition for sub domain
   SlipBC(Mesh& mesh, SubDomain const& sub_domain);
 
+  /// Create boundary condition for sub domain given normals
+  SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals);
+
   /// Create boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
 
@@ -55,7 +58,7 @@ public:
 
   BoundaryNormal& normal()
   {
-    return node_normal;
+    return *node_normal;
   }
 
 private:
@@ -97,7 +100,8 @@ private:
   SubDomain const* user_sub_domain;
 
   // Node normal and tangents
-  NodeNormal node_normal;
+  NodeNormal * node_normal;
+  bool node_normal_local;
 
   int nzm;
 

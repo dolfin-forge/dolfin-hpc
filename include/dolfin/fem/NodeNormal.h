@@ -2,6 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2009.
+// Modified by Aurélien Larcher, 2012-13. (partial rewrite)
 //
 // First added:  2007-05-01
 // Last changed: 2009-03-17
@@ -25,55 +26,88 @@ class NodeNormal : public BoundaryNormal
 {
 public:
 
-  // Copy constructor
+  /// Copy constructor
   NodeNormal(NodeNormal& node_normal);
 
-  // Create normal, tangents for the boundary of mesh
+  /// Create normal, tangents for the boundary of mesh
   NodeNormal(Mesh& mesh);
 
+  ///
   ~NodeNormal();
 
-  // Assignment
+  ///
+  void compute() {}
+
+  /// Assignment
   NodeNormal& operator=(NodeNormal& node_normal);
 
-  // Cleanup
-  void clear();
+  /// Define mesh functions for normal and tangents
+  /// These are merely aliases now
+  MeshFunction<real> * normal;
+  MeshFunction<real> * tau;
+  MeshFunction<real> * tau_1;
+  MeshFunction<real> * tau_2;
 
-  ///
-  void compute();
-
-  Mesh& mesh;
-
-  // Define mesh functions for normal and tangents
-  MeshFunction<real> *normal, *tau, *tau_1, *tau_2;
-
-  // Define node type: 1 surface, 2 edge, 3 surface
-  MeshFunction<int> node_type;
+  /// Define node type as the number of discriminated hyperplanes:
+  /// 1 surface, 2 edge, >= 3 corner
+  MeshFunction<uint> node_type;
 
 private:
 
-  // Compute normals to the boundary nodes
+  /// Cleanup
+  void Clear();
+
+  /// Compute normals to the boundary nodes
   void ComputeNormal(Mesh& mesh);
 
+  ///
   void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau,
                                 NodeNormal& node_normal);
 
+  ///
   void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau_1,
                                 Function& Ftau_2, NodeNormal& node_normal);
 
-  //
-  void cache_shared_area(Mesh& mesh, BoundaryMesh& boundary, uint nsdim,
-                         MeshFunction<uint> *vertex_map,
-                         MeshFunction<uint> *cell_map);
+  ///
+  void CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary);
 
-  std::map<uint, uint> shared_noffset;
-  std::map<uint, uint> num_cells;
-  Array<real> shared_normal;
-  std::map<uint, Array<real> > normal_block;
-  std::map<uint, Array<real> > shared_area_block;
-  uint _offset;
+  //--- ATTRIBUTES ------------------------------------------------------------
+
+  Mesh& mesh;
+
+  Array<MeshFunction<real> *> basis_;
+
+  /// Entities shared between processors
+  Array<real> shared_vertexnormals_;
+  std::map<uint, Array<real> > shared_facetnormals_block_;
+  std::map<uint, Array<real> > shared_facetweights_block_;
+
+  /// Number of boundary mesh cells (facets for global) neighbouring a boundary
+  /// vertex
+  std::map<uint, uint> num_neigh_cells_;
+  std::map<uint, uint> shared_offsetidx_;
+  uint vertex_offset_;
+  uint facetnormals_offset_;
+  uint facetweights_offset_;
+
+  /// Should be set to the size of the offset information stored for each vertex
+  /// Padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
+  static uint const offsetidx_padding_ = 3;
+
+  /// Maximum absolute angle between two neighbouring facets to be discriminated
+  /// as belonging to difference hyperplanes.
+  real const alpha_max_;
+
+  /// Weighing use to computing the node normal from facet normals.
+  enum weight_type
+  {
+    none, facet, cell
+  };
+
+  weight_type weighting_;
 
 };
+
 }
 #endif
 

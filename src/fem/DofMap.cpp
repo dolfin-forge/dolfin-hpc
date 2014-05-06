@@ -276,10 +276,12 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       for (uint i = 0; i < local_dimension(); ++i)
       {
         dofs[i] = ufc_cell.entity_indices[0][i];
+        dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
       }
       break;
     case scalar_dg0:
-      *dofs = ufc_cell.index;
+      dofs[0] = ufc_cell.index;
+      dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
       break;
     case vector_p1:
       for (uint k = 0; k < ufc_dof_map_->num_sub_dof_maps(); ++k)
@@ -307,7 +309,8 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       ufc_dof_map_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
       break;
     default:
-			error("Uknown dofmap type.");
+      error("Unknown dofmap type.");
+      break;
     }
 }
 
@@ -326,7 +329,7 @@ void DofMap::pretabulate_all_dofs() const
     {
       // cell indices for real valued function
       ufc_cell.update(*cell, distdata);
-      this->tabulate_dofs(ip, ufc_cell);
+      this->tabulate_dofs(ip, ufc_cell, *cell);
       ip += local_dim;
     }
   }

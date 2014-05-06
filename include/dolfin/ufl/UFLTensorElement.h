@@ -28,7 +28,10 @@ public:
 
   ///
   TensorElement(Family::Type family, Cell const& cell,
-                   dolfin::uint const degree, dolfin::uint const dim);
+                dolfin::uint const degree, dolfin::uint const dim);
+
+  ///
+  TensorElement(repr_t const& repr);
 
   ///
   ~TensorElement();

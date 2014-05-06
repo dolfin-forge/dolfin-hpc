@@ -29,23 +29,25 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
   {
     return new VectorElement(repr);
   }
-//  FIXME: add support for other elements
-//  else if (name == "MixedElement")
-//  {
-//    ret = new MixedElement(repr);
-//  }
-//  else if (name == "EnrichedElement")
-//  {
-//    ret = new EnrichedElement(repr);
-//  }
-//  else if (name == "RestrictedElement")
-//  {
-//    ret = new RestrictedElement(repr);
-//  }
-//  else if (name == "TensorElement")
-//  {
-//    ret = new TensorElement(repr);
-//  }
+  else if (name == "TensorElement")
+  {
+    return new TensorElement(repr);
+  }
+  else if (name == "MixedElement")
+  {
+    error("UFL implementation for MixedElement is not available yet.");
+//    return new MixedElement(repr);
+  }
+  else if (name == "EnrichedElement")
+  {
+    error("UFL implementation for EnrichedElement is not available yet.");
+//    return new EnrichedElement(repr);
+  }
+  else if (name == "RestrictedElement")
+  {
+    error("UFL implementation for RestrictedElement is not available yet.");
+//    return new RestrictedElement(repr);
+  }
   else
   {
     error("Unknown type of ufl::FiniteElementBase: '" + name + "'");
@@ -57,7 +59,8 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name,
                                      Family::Type const& family,
-                                     Cell const& cell, dolfin::uint const degree,
+                                     Cell const& cell,
+                                     dolfin::uint const degree,
                                      QuadratureScheme quad_scheme,
                                      ValueArray value_shape) :
     Class(name),
@@ -159,7 +162,7 @@ dolfin::uint const FiniteElementBase::get_degree_max(
   for (FiniteElementBaseList::const_iterator it = elements.begin();
       it != elements.end(); ++it)
   {
-    ret = std::max((dolfin::uint)(*it)->degree(), ret);
+    ret = std::max((dolfin::uint) (*it)->degree(), ret);
   }
   return ret;
 }
@@ -169,13 +172,13 @@ void FiniteElementBase::display() const
 {
   Class::display();
   std::cout << std::setw(24) << "family" << " = " << this->family().str()
-      << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "cell" << " = " << this->cell().str()
-      << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "degree" << " = " << this->degree()
-      << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "quadrature_scheme" << " = "
-      << this->quadrature_scheme().str() << std::endl;
+            << this->quadrature_scheme().str() << std::endl;
   std::cout << std::endl;
 }
 

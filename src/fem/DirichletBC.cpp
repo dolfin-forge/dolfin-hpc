@@ -94,13 +94,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   FiniteElementSpace const& space = form.trial_space();
 
   // Simple check
-  const uint N = space.dofmap().global_dimension();
-  if (N != A.size(0) /*  || N != A.size(1) allow for rectangular matrices */)
-    error("Incorrect dimension of matrix for application of boundary conditions."
-          "Did you assemble it on a different mesh?");
-  if (N != b.size())
-    error("Incorrect dimension of matrix for application of boundary conditions."
-        "Did you assemble it on a different mesh?");
+  form.check(A,b);
 
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;

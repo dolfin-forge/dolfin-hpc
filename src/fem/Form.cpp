@@ -60,6 +60,7 @@ std::string Form::coefficient_name(uint const i) const
 //-----------------------------------------------------------------------------
 bool Form::check(Array<Function*> const& coefficients) const
 {
+  dolfin_debug("Form::check: validating coefficients against form.");
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
   {
@@ -70,22 +71,23 @@ bool Form::check(Array<Function*> const& coefficients) const
   // Check that all coefficients have valid value dimensions
   for (uint i = 0; i < coefficients.size(); ++i)
   {
+    message("Checking coefficient %d:",i);
     if (coefficients[i] == NULL)
     {
       error("Got NULL Function as coefficient %d.", i);
     }
 
-    ufc::finite_element* fe = this->create_finite_element(i + this->rank());
-    uint r = coefficients[i]->rank();
-    uint fe_r = fe->value_rank();
-    if (fe_r != r)
+    ufc::finite_element * fe = this->create_finite_element(i + this->rank());
+    uint coef_rank = coefficients[i]->rank();
+    uint fe_rank = fe->value_rank();
+    if (fe_rank != coef_rank)
     {
       error("Invalid value rank of Function %d, got %d but expecting %d.",
             "You may need to provide the rank of a user defined Function.", i,
-            r, fe_r);
+            coef_rank, fe_rank);
     }
 
-    for (uint j = 0; j < r; ++j)
+    for (uint j = 0; j < coef_rank; ++j)
     {
       uint dim = coefficients[i]->dim(j);
       uint fe_dim = fe->value_dimension(j);

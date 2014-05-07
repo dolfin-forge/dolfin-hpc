@@ -20,18 +20,23 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     Mesh(),
     mesh_(mesh),
     global_mesh_hash_(mesh.hash())
-
 {
   switch (type)
   {
   case BoundaryMesh::exterior:
+    // Exterior boundary i.e facets at the domain boundary
     BoundaryComputation::computeBoundary(mesh, *this);
     break;
   case BoundaryMesh::interior:
+    // Interior boundary i.e facets between processors
     BoundaryComputation::computeInteriorBoundary(mesh, *this);
     break;
   case BoundaryMesh::full:
+    // Full boundary incl. facets between processors
     BoundaryComputation::computeLocalBoundary(mesh, *this);
+    break;
+  default:
+    error("Unknown boundary mesh type.");
     break;
   }
 }

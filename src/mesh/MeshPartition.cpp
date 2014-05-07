@@ -63,7 +63,8 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
   float ubvec = 1.05;
   int numflag = 0;    // C-style numbering
   int edgecut = 0;
-  int wgtflag, ncon;
+  int wgtflag = 1;
+  int ncon = 0;
   if (weight)
   {
     wgtflag = 2;    // Weights on vertices only

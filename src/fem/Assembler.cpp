@@ -357,11 +357,15 @@ void Assembler::assembleCells(GenericTensor& A,
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
+    {
       coefficients[i]->interpolate(ufc.w[i], ufc.cell, *ufc.coefficient_elements[i], cell);
+    }
 
     // Tabulate dofs for each dimension
     for (uint i = 0; i < ufc.form.rank(); i++)
+    {
       dof_map_set[i].tabulate_dofs(ufc.dofs[i], ufc.cell, cell.index());
+    }
 
     // Tabulate cell tensor
     integral->tabulate_tensor(ufc.A, ufc.w, ufc.cell);

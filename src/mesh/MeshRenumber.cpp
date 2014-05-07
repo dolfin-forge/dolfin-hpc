@@ -155,7 +155,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if( mddata._valid_edge_numbering ||
-      MPI::numProcesses() == 1  || mesh.topology().dim() == 1)
+      MPI::numProcesses() == 1  || mesh.topology().dim() < 2)
   {
     return false;
   }
@@ -339,8 +339,8 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
     global_buff.clear();
   }
 
-
   // Use new numbering
+  dolfin_assert(mddata.num_shared(1) > 0);
   mddata.local_indices[1] = new_local;
   mddata.global_indices[1] = new_global;
   mddata._valid_edge_numbering =  true;
@@ -356,7 +356,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if( mddata._valid_face_numbering ||
-      MPI::numProcesses() == 1 || mesh.topology().dim() == 2)
+      MPI::numProcesses() == 1 || mesh.topology().dim() < 3)
   {
     return false;
   }
@@ -367,6 +367,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   int const pe_size = MPI::numProcesses();
 
   BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
+//  dolfin_assert(local_boundary.numCells() > 0);
   MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
 
   Array<uint> send_buff, send_buff_id;
@@ -559,6 +560,8 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
     global_buff.clear();
   }
 
+  // Use new numbering
+  dolfin_assert(mddata.num_shared(2) > 0);
   mddata.local_indices[2] = new_local;
   mddata.global_indices[2] = new_global;
   mddata._valid_face_numbering =  true;

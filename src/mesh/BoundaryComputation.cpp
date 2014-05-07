@@ -27,18 +27,21 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
 {
+  dolfin_debug("Compute exterior boundary");
   computeBoundaryCommon(mesh, boundary, false, false);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeLocalBoundary(Mesh& mesh,
                                                BoundaryMesh& boundary)
 {
+  dolfin_debug("Compute local (partition) boundary");
   computeBoundaryCommon(mesh, boundary, true, false);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeInteriorBoundary(Mesh& mesh,
                                                   BoundaryMesh& boundary)
 {
+  dolfin_debug("Compute interior boundary");
   computeBoundaryCommon(mesh, boundary, false, true);
 }
 //-----------------------------------------------------------------------------
@@ -56,8 +59,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   // Open boundary mesh for editing
   uint const D = mesh.topology().dim();
   MeshEditor editor;
-  editor.open(boundary, mesh.type().facetType(),
-              D - 1, mesh.geometry().dim());
+  editor.open(boundary, mesh.type().facetType(), D - 1, mesh.geometry().dim());
 
   // Generate facet - cell connectivity if not generated
   mesh.init(D - 1, D);
@@ -73,12 +75,10 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   // Count boundary vertices and facets, and assign vertex indices
   uint num_boundary_vertices = 0;
   uint num_boundary_cells = 0;
+  dolfin_assert(mesh.numFacets() != 0);
   for (FacetIterator f(mesh); !f.end(); ++f)
   {
     // Boundary facets are connected to exactly one cell
-    //    if (f->numEntities(D) == 1)
-    //      {
-
     if((!interior_boundary && facetmap.globalFacet(*f)) ||
        (local_boundary && f->numEntities(D) == 1) ||
        (f->numEntities(D) == 1 &&
@@ -104,9 +104,13 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   editor.initVertices(num_boundary_vertices);
   editor.initCells(num_boundary_cells);
 
-  // Return if no boundary where found
+  // Return if no boundary is found
   if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1)
   {
+    if(interior_boundary)
+    {
+      error("No interior boundary found for the mesh partition.");
+    }
     editor.close();
     return;
   }

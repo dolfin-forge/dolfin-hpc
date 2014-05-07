@@ -15,6 +15,9 @@
 namespace dolfin
 {
 
+class GenericMatrix;
+class GenericVector;
+
 class BilinearForm : public Form
 {
 public:
@@ -30,6 +33,9 @@ public:
 
   /// Test space
   FiniteElementSpace const& test_space() const;
+
+  /// Check whether linear system's dimensions match discrete spaces
+  void check(GenericMatrix const& A, GenericVector const& b) const;
 
 private:
 

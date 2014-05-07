@@ -90,15 +90,15 @@ BoundaryCondition::~BoundaryCondition()
   }
 }
 //-----------------------------------------------------------------------------
-void BoundaryCondition::init_markers(uint const& topological_dim)
+void BoundaryCondition::init_markers(uint const entity_dim)
 {
   // Make sure the mesh has been ordered
   mesh().order();
 
   // Create mesh function for sub domain markers on facets
-  uint const dim = mesh().topology().dim();
-  mesh().init(topological_dim);
-  sub_domain_markers_ = new MeshFunction<uint>(mesh_, topological_dim);
+  dolfin_assert(entity_dim < mesh().topology().dim());
+  mesh().init(entity_dim);
+  sub_domain_markers_ = new MeshFunction<uint>(mesh_, entity_dim);
 
   // Mark everything as sub domain 1
   (*sub_domain_markers_) = 1;

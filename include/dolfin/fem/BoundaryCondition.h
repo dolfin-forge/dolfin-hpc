@@ -76,15 +76,16 @@ public:
   uint const& sub_domain_index() const;
 
   ///
-  MeshFunction<uint> const& sub_domain_markers() const;
-
-  ///
   SubSystem const& sub_system() const;
 
 protected:
 
-  // Mark sub domain with mesh function
-  void init_markers(uint const& topological_dim);
+  ///
+  MeshFunction<uint> const& sub_domain_markers() const;
+
+  /// Mark sub domain with mesh function defined for given mesh entity type
+  /// Convention: 0 for matching entities, 1 elsewhere
+  void init_markers(uint const entity_dim);
 
 private:
 

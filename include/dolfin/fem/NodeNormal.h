@@ -36,7 +36,7 @@ public:
   ~NodeNormal();
 
   ///
-  void compute() {}
+  void compute();
 
   /// Assignment
   NodeNormal& operator=(NodeNormal& node_normal);
@@ -48,9 +48,9 @@ public:
   MeshFunction<real> * tau_1;
   MeshFunction<real> * tau_2;
 
-  /// Define node type as the number of discriminated hyperplanes:
+  /// Define vertex type as the number of discriminated hyperplanes:
   /// 1 surface, 2 edge, >= 3 corner
-  MeshFunction<uint> node_type;
+  MeshFunction<uint> vertex_type;
 
 private:
 

@@ -20,11 +20,13 @@
 
 namespace dolfin
 {
+
 class DofMap;
+class Form;
 class Function;
 class Mesh;
+class ScratchSpace;
 class SubDomain;
-class Form;
 
 class SlipBC : public BoundaryCondition
 {
@@ -63,20 +65,11 @@ public:
 
 private:
 
-  void applySlipBC(Matrix& A, Matrix& As, Vector&, Mesh& mesh, uint node,
-                   Array<uint>& nodes);
+  void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
+                      const BilinearForm& form, ScratchSpace& scratch);
 
-  // Do: A(row,col) = value   using setblock not setvalue
-  inline void Aset(Matrix& A, uint row, uint col, real value)
-  {
-    A.set(&value, 1, &row, 1, &col);
-  }
-
-  // Do: b(row) = value   using setblock not setvalue
-  inline void bset(Vector& b, uint row, real value)
-  {
-    b.set(&value, 1, &row);
-  }
+  void applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
+                 uint const node, Array<uint> const& nodes);
 
   // Initialize sub domain markers
   void init(SubDomain const& sub_domain);
@@ -91,9 +84,18 @@ private:
   Matrix* As;
   std::set<uint> off_proc_rows;
 
-  real *row_block;
-  real *zero_block;
-  uint *a1_indices_array;
+  // Local data structures for assembly
+  std::set<uint> row_indices;
+  Array<real> a[3]; // local lhs extracted from A
+  Array<real> a_slip_row[3]; // local lhs row after slip enforcement
+  Array<uint> a_col_indices[3]; // non-zero indices per row
+  real l[3];  // local rhs extracted from b
+  real l_slip[3];  // local rhs after slip enforcement
+  real basis_[3][3]; // local basis (n, tau1, tau2)
+  uint max[3]; // maximum component
+  uint row[3]; // row reordering
+
+
 };
 
 }

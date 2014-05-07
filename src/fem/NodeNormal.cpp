@@ -8,7 +8,7 @@
 
 #include <dolfin/fem/NodeNormal.h>
 
-#include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Facet.h>
@@ -60,7 +60,7 @@ NodeNormal::NodeNormal(Mesh& mesh) :
       basis_.back()[i].init(mesh, 0);
     }
   }
-  node_type.init(mesh, 0);
+  vertex_type.init(mesh, 0);
 
   // backward compatbility
   normal = basis_[0];
@@ -101,7 +101,7 @@ NodeNormal::operator=(NodeNormal& node_normal)
 
   uint const nsdim = mesh.topology().dim();
 
-  node_type.init(mesh, 0);
+  vertex_type.init(mesh, 0);
   for (uint d = 0; d < nsdim; ++d)
   {
     basis_.push_back(new MeshFunction<real> [nsdim]);
@@ -113,7 +113,7 @@ NodeNormal::operator=(NodeNormal& node_normal)
   }
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    node_type.set(*v, node_normal.node_type.get(*v));
+    vertex_type.set(*v, node_normal.vertex_type.get(*v));
     for (uint d = 0; d < nsdim; ++d)
     {
       for (uint i = 0; i < nsdim; ++i)
@@ -136,6 +136,24 @@ NodeNormal::operator=(NodeNormal& node_normal)
   }
 
   return *this;
+}
+
+//-----------------------------------------------------------------------------
+void NodeNormal::compute()
+{
+  int tdim = mesh.topology().dim();
+  switch (tdim)
+    {
+    case 2:
+      ComputeTangentialVectors(mesh, basis()[0], basis()[1], *this);
+      break;
+    case 3:
+      ComputeTangentialVectors(mesh, basis()[0], basis()[1], basis()[2], *this);
+      break;
+    default:
+      error("Unsupported topological dimension for NodeNormal computation");
+      break;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -298,7 +316,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
       //      w_block   : NbNeighCells facet weights
       //    sum_weights : sum of the facet weights
       Array<real> tangent_weights;
-      uint vertex_type = 0; // if at the end the value is still zero then something is wrong
+      uint v_type = 0; // if at the end the value is still zero then something is wrong
       real cosalpha_max = std::cos(alpha_max_);
       real cosalpha = 0.0;
       //real sinalpha_max = std::sin(alpha_max_);
@@ -396,7 +414,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
         // the remaining normals
 
       }
-      vertex_type = curr_surface;
+      v_type = curr_surface;
       delete nref;
       delete normals_offsets;
 
@@ -434,7 +452,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
       else
       {
         // 3D case
-        if (vertex_type == 1)
+        if (v_type == 1)
         {
           real norm_inv = 0.0;
           if (std::fabs(basis_vec[0]) >= 0.5 || std::fabs(basis_vec[1]) >= 0.5)
@@ -478,7 +496,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
         }
         else
         {
-          uint const Sk = vertex_type - 1;
+          uint const Sk = v_type - 1;
           basis_vec[6] = basis_vec[1] * surface_normals[Sk][2]
               - surface_normals[Sk][1] * basis_vec[2];
           basis_vec[7] = basis_vec[2] * surface_normals[Sk][0]
@@ -509,7 +527,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
       if (vertex_is_ghosted)
       {
         uint owner = mesh.distdata().get_owner(boundary_id, 0);
-        send_buff_type_basis[owner].push_back((double) vertex_type);
+        send_buff_type_basis[owner].push_back((double) v_type);
         for (uint basisidx = 0; basisidx < nsdim * nsdim; ++basisidx)
         {
           send_buff_type_basis[owner].push_back(basis_vec[basisidx]);
@@ -518,8 +536,8 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
       }
       else
       {
-        node_type.set(boundary_id, vertex_type);
-        if (vertex_type == 0)
+        vertex_type.set(boundary_id, v_type);
+        if (v_type == 0)
         {
           error("Surface multiplicity is equal to zero");
         }
@@ -547,7 +565,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
     }
   }
 
-  // Synchronize basis vectors, node_types across processes
+  // Synchronize basis vectors, vertex type across processes
   if (dolfin::MPI::numProcesses() > 1)
   {
     MPI_Status status;
@@ -570,7 +588,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
                  dolfin::MPI::DOLFIN_COMM);
     }
 
-    // Storage is (node_type (size = 1), basis (size = nsdim*nsdim))
+    // Storage is (v_type (size = 1), basis (size = nsdim*nsdim))
     uint data_alignment = 1 + nsdim * nsdim;
     uint *recv_index = new uint[recv_count];
     real *recv_type = new real[recv_count_data];
@@ -598,7 +616,7 @@ void NodeNormal::ComputeNormal(Mesh& mesh)
         uint index = mesh.distdata().get_vertex_local(recv_index[idx]);
         if (!used_shared[index])
         {
-          node_type.set(index, (uint) recv_type[j]);
+          vertex_type.set(index, (uint) recv_type[j]);
 
           uint offset = j + 1;
           for (uint basisvec = 0; basisvec < nsdim; ++basisvec)
@@ -783,10 +801,7 @@ void NodeNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
   int sh_facetnormals_count = sendbuff_facetnormals.size();
   int sh_facetweights_count = sendbuff_facetweights.size();
 
-  dolfin_assert(sh_vertidx_count == SharedVertexCount);
-  dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);
-  dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);
-  dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
+  dolfin_assert(sh_vertidx_count == SharedVertexCount);dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
 
   int recv_size_vertidx;
   int recv_size_vertexnormals;
@@ -902,6 +917,113 @@ void NodeNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
   delete[] recv_facetnormals;
   delete[] recv_offsetidx;
   delete[] recv_facetweights;
+}
+
+//-----------------------------------------------------------------------------
+void NodeNormal::ComputeTangentialVectors(Mesh& mesh, Function& Fnormal,
+                                          Function& Ftau_1, Function& Ftau_2,
+                                          NodeNormal& node_normal)
+{
+  DofMap const& dmF = Fnormal.space().dofmap();
+  GenericVector& tau_1 = Ftau_1.vector();
+  GenericVector& tau_2 = Ftau_2.vector();
+  GenericVector& normal = Fnormal.vector();
+  Cell c(mesh, 0);
+  UFCCell ufccell(c);
+  uint local_dim = c.numEntities(0);
+  uint const nsd = c.dim();
+  uint *idx = new uint[nsd * local_dim];
+  uint *id = new uint[nsd * local_dim];
+  real *tau_1_block = new real[nsd * local_dim];
+  real *tau_2_block = new real[nsd * local_dim];
+  real *normal_block = new real[nsd * local_dim];
+
+  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  {
+
+    ufccell.update(*cell, mesh.distdata());
+
+    dmF.tabulate_dofs(idx, ufccell, cell->index());
+
+    uint ii = 0;
+    uint jj = 0;
+    for (uint i = 0; i < nsd; ++i)
+    {
+      for (VertexIterator v(*cell); !v.end(); ++v, ++ii)
+      {
+        if (!mesh.distdata().is_ghost(v->index(), 0))
+        {
+          tau_1_block[jj] = node_normal.tau_1[i].get(*v);
+          tau_2_block[jj] = node_normal.tau_2[i].get(*v);
+          normal_block[jj] = node_normal.normal[i].get(*v);
+          id[jj++] = idx[ii];
+        }
+      }
+    }
+
+    tau_1.set(tau_1_block, jj, id);
+    tau_2.set(tau_2_block, jj, id);
+    normal.set(normal_block, jj, id);
+  }
+
+  tau_1.apply();
+  tau_2.apply();
+  normal.apply();
+  delete[] tau_1_block;
+  delete[] tau_2_block;
+  delete[] normal_block;
+  delete[] id;
+  delete[] idx;
+}
+
+//-----------------------------------------------------------------------------
+void NodeNormal::ComputeTangentialVectors(Mesh& mesh, Function& Fnormal,
+                                          Function& Ftau,
+                                          NodeNormal& node_normal)
+{
+  DofMap const& dmF = Fnormal.space().dofmap();
+  GenericVector& tau = Ftau.vector();
+  GenericVector& normal = Fnormal.vector();
+  Cell c(mesh, 0);
+  UFCCell ufccell(c);
+  uint local_dim = c.numEntities(0);
+  uint const nsd = c.dim();
+  uint *idx = new uint[nsd * local_dim];
+  uint *id = new uint[nsd * local_dim];
+  real *tau_block = new real[nsd * local_dim];
+  real *normal_block = new real[nsd * local_dim];
+
+  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  {
+
+    ufccell.update(*cell, mesh.distdata());
+
+    dmF.tabulate_dofs(idx, ufccell, cell->index());
+
+    uint ii = 0;
+    uint jj = 0;
+    for (uint i = 0; i < nsd; ++i)
+    {
+      for (VertexIterator v(*cell); !v.end(); ++v, ++ii)
+      {
+        if (!mesh.distdata().is_ghost(v->index(), 0))
+        {
+          tau_block[jj] = node_normal.tau[i].get(*v);
+          normal_block[jj] = node_normal.normal[i].get(*v);
+          id[jj++] = idx[ii];
+        }
+      }
+    }
+    tau.set(tau_block, jj, id);
+    normal.set(normal_block, jj, id);
+  }
+
+  tau.apply();
+  normal.apply();
+  delete[] tau_block;
+  delete[] normal_block;
+  delete[] id;
+  delete[] idx;
 }
 
 //-----------------------------------------------------------------------------

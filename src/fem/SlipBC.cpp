@@ -34,64 +34,40 @@ using namespace dolfin;
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain) :
     BoundaryCondition("SlipBC", mesh, sub_domain),
     mesh(mesh),
-    sub_domains(0),
-    sub_domain(0),
-    sub_domains_local(false),
-    user_sub_domain(&sub_domain),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
-    a1_indices_array(0),
-    boundary(0),
-    cell_map(0),
-    vertex_map(0)
+    a1_indices_array(0)
 {
-  // Initialize sub domain markers
-  init(sub_domain);
-
-  sub_system = SubSystem(0);
+  // Initialize sub domain markers on vertices
+  BoundaryCondition::init_markers(0);
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals) :
     BoundaryCondition("SlipBC", mesh, sub_domain),
     mesh(mesh),
-    sub_domains(0),
-    sub_domain(0),
-    sub_domains_local(false),
-    user_sub_domain(&sub_domain),
     node_normal(&normals),
     node_normal_local(false),
     As(0),
     row_block(0),
     zero_block(0),
-    a1_indices_array(0),
-    boundary(0),
-    cell_map(0),
-    vertex_map(0)
+    a1_indices_array(0)
 {
   // Initialize sub domain markers
-  init(sub_domain);
-
-  sub_system = SubSystem(0);
+  BoundaryCondition::init_markers(0);
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
     BoundaryCondition("SlipBC", sub_domains, sub_domain),
     mesh(sub_domains.mesh()),
-    sub_domains(&sub_domains),
-    sub_domain(sub_domain),
-    sub_domains_local(false),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
-    a1_indices_array(0),
-    boundary(0),
-    cell_map(0),
-    vertex_map(0)
+    a1_indices_array(0)
 {
   // Do nothing
 }
@@ -100,23 +76,15 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
                const SubSystem& sub_system) :
     BoundaryCondition("SlipBC", mesh, sub_domain, sub_system),
     mesh(mesh),
-    sub_domains(0),
-    sub_domain(0),
-    sub_domains_local(false),
-    sub_system(sub_system),
-    user_sub_domain(&sub_domain),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
-    a1_indices_array(0),
-    boundary(0),
-    cell_map(0),
-    vertex_map(0)
+    a1_indices_array(0)
 {
   // Set sub domain markers
-  init(sub_domain);
+  BoundaryCondition::init_markers(0);
 }
 
 //-----------------------------------------------------------------------------
@@ -124,36 +92,27 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
                const SubSystem& sub_system) :
     BoundaryCondition("SlipBC", sub_domains, sub_domain, sub_system),
     mesh(sub_domains.mesh()),
-    sub_domains(&sub_domains),
-    sub_domain(sub_domain),
-    sub_domains_local(false),
-    sub_system(sub_system),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(0),
     row_block(0),
     zero_block(0),
-    a1_indices_array(0),
-    boundary(0),
-    cell_map(0),
-    vertex_map(0)
+    a1_indices_array(0)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 SlipBC::~SlipBC()
 {
-  // Delete sub domain markers if created locally
-  if (sub_domains_local) delete sub_domains;
-
   if (node_normal_local) delete node_normal;
 
+  //
   delete As;
 
+  //
   delete[] a1_indices_array;
   delete[] row_block;
   delete[] zero_block;
-  delete boundary;
 }
 //-----------------------------------------------------------------------------
 void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
@@ -165,21 +124,10 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
 
   UFC ufc(form, mesh, form.dofmaps());
 
-  if (boundary == 0)
-  {
-    boundary = new BoundaryMesh(mesh, BoundaryMesh::exterior);
-    if (boundary->numCells())
-    {
-      cell_map = boundary->data().meshFunction("cell map");
-      vertex_map = boundary->data().meshFunction("vertex map");
-    }
-  }
-
   if (As == 0)
   {
 
     // Create data structure for local assembly data
-
     const std::string la_backend = dolfin_get("linear algebra backend");
     if (la_backend == "JANPACK")
     {
@@ -221,15 +169,19 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
   uint cdim = mesh.type().numVertices(mesh.topology().dim());
 
   uint count = 0;
-  if (boundary->numCells())
+  BoundaryMesh& boundary = mesh.exterior_boundary();
+  MeshFunction<uint> * vertex_map = boundary.data().meshFunction("vertex map");
+  MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
+  uint sub_domain_idx = this->sub_domain_index();
+  if (boundary.numCells())
   {
-    for (VertexIterator v(*boundary); !v.end(); ++v)
+    for (VertexIterator v(boundary); !v.end(); ++v)
     {
 
       Vertex vertex(mesh, vertex_map->get(*v));
 
-      // Skip facets not inside the sub domain
-      if ((*sub_domains)(vertex) != sub_domain) continue;
+      // Skip vertices not inside the sub domain
+      if (sub_domains(vertex) != sub_domain_idx) continue;
 
       uint node = vertex.index();
       if (!mesh.distdata().is_ghost(node, 0) || MPI::numProcesses() == 1)
@@ -268,20 +220,6 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
                    const BilinearForm& form)
 {
   error("SlipBC not implemented for non linear systems");
-}
-//-----------------------------------------------------------------------------
-void SlipBC::init(SubDomain const& sub_domain)
-{
-  // Create mesh function for sub domain markers on facets
-  mesh.init(0);
-  sub_domains = new MeshFunction<uint>(mesh, 0);
-  sub_domains_local = true;
-
-  // Mark everything as sub domain 1
-  (*sub_domains) = 1;
-
-  // Mark the sub domain as sub domain 0
-  sub_domain.mark(*sub_domains, 0);
 }
 
 //-----------------------------------------------------------------------------

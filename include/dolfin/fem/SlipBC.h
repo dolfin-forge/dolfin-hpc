@@ -84,39 +84,16 @@ private:
   // The mesh
   Mesh& mesh;
 
-  // Sub domain markers (if any)
-  MeshFunction<uint>* sub_domains;
-
-  // The sub domain
-  uint sub_domain;
-
-  // True if sub domain markers are created locally
-  bool sub_domains_local;
-
-  // Sub system
-  SubSystem sub_system;
-
-  // User defined sub domain
-  SubDomain const* user_sub_domain;
-
   // Node normal and tangents
   NodeNormal * node_normal;
   bool node_normal_local;
 
-  int nzm;
-
   Matrix* As;
-
-  int N_local;
-  int N_offset;
   std::set<uint> off_proc_rows;
 
   real *row_block;
   real *zero_block;
   uint *a1_indices_array;
-
-  BoundaryMesh* boundary;
-  MeshFunction<uint> *cell_map, *vertex_map;
 };
 
 }

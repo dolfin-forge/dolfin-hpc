@@ -34,7 +34,6 @@ GlobalFacetMap::~GlobalFacetMap()
 #ifdef HAVE_MPI
 void GlobalFacetMap::init()
 {
-  dolfin_debug("Initialize global facet map");
   uint const tdim = _mesh.topology().dim();
 
   // Generate facet - cell connectivity if not generated

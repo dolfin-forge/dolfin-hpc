@@ -60,7 +60,6 @@ std::string Form::coefficient_name(uint const i) const
 //-----------------------------------------------------------------------------
 bool Form::check(Array<Function*> const& coefficients) const
 {
-  dolfin_debug("Form::check: validating coefficients against form.");
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
   {

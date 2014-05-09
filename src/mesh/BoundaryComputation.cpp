@@ -27,21 +27,21 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeBoundary(Mesh& mesh, BoundaryMesh& boundary)
 {
-  dolfin_debug("Compute exterior boundary");
+  message(1,"Compute exterior boundary mesh");
   computeBoundaryCommon(mesh, boundary, false, false);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeLocalBoundary(Mesh& mesh,
                                                BoundaryMesh& boundary)
 {
-  dolfin_debug("Compute local (partition) boundary");
+  message(1,"Compute local (partition) boundary mesh");
   computeBoundaryCommon(mesh, boundary, true, false);
 }
 //-----------------------------------------------------------------------------
 void BoundaryComputation::computeInteriorBoundary(Mesh& mesh,
                                                   BoundaryMesh& boundary)
 {
-  dolfin_debug("Compute interior boundary");
+  message(1,"Compute interior (interprocess) boundary mesh");
   computeBoundaryCommon(mesh, boundary, false, true);
 }
 //-----------------------------------------------------------------------------
@@ -53,8 +53,6 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   // We iterate over all facets in the mesh and check if they are on
   // the boundary. A facet is on the boundary if it is connected to
   // exactly one cell.
-
-  message(1, "Computing boundary mesh.");
 
   // Open boundary mesh for editing
   uint const D = mesh.topology().dim();

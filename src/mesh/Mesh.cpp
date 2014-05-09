@@ -111,6 +111,7 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
   _is_distributed = mesh._is_distributed;
   _topology = mesh._topology;
   _geometry = mesh._geometry;
+  _timestamp = mesh._timestamp;
 
   if (mesh._cell_type)
   {
@@ -198,6 +199,7 @@ void Mesh::init() const
 //-----------------------------------------------------------------------------
 void Mesh::clear()
 {
+  _timestamp = 0;
   _topology.clear();
   _geometry.clear();
   delete _cell_type;
@@ -205,8 +207,11 @@ void Mesh::clear()
   delete _data;
   _data = NULL;
   delete _exterior_boundary;
+  _exterior_boundary = NULL;
   delete _interior_boundary;
+  _interior_boundary = NULL;
   delete _intersection_detector;
+  _intersection_detector = NULL;
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()

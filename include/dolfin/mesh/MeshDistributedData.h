@@ -10,11 +10,13 @@
 #define __MESH_DISTRIBUTED_DATA_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
+
 class Vertex;
 class Edge;
 class Face;
@@ -38,7 +40,8 @@ public:
 
   ~MeshDistributedData();
 
-  const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
+  const MeshDistributedData& operator=(
+      const MeshDistributedData& distributed_data);
 
   bool empty() const;
 
@@ -46,7 +49,21 @@ public:
   void init(uint const dim);
   void finalize(uint const dim);
 
-  //---
+  //--- Numbering -------------------------------------------------------------
+
+  inline bool have_global(uint i, uint dim) const
+  {
+    return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);
+  }
+
+  bool have_global(MeshEntity const& entity) const;
+
+  inline bool have_local(uint i, uint dim) const
+  {
+    return (MPI::numProcesses() > 1 ? (global_indices[dim].count(i) > 0) : true);
+  }
+
+  bool have_local(MeshEntity const& entity) const;
 
   /// Return global index of mesh entity given its local index and topological
   /// dimension
@@ -55,6 +72,15 @@ public:
   /// Return global index of mesh entity
   uint get_global(MeshEntity const& e) const;
 
+  /// Return global index of a vertex given the local index
+  uint get_vertex_global(uint i) const;
+
+  /// Return global index of a facet given the local index
+  uint get_facet_global(uint i) const;
+
+  /// Return global index of a cell given the local index
+  uint get_cell_global(uint i) const;
+
   /// Return local index of mesh entity given its global index and topological
   /// dimension
   uint get_local(uint i, uint dim) const;
@@ -62,12 +88,37 @@ public:
   /// Return local index of mesh entity
   uint get_local(MeshEntity const& e) const;
 
-  /// Return owner of the ghosted entity given its global index and topological
-  /// dimension
-  uint get_owner(uint local_index, uint dim) const;
+  /// Return local index of a vertex given the global index
+  uint get_vertex_local(uint i) const;
 
-  /// Return owner of the ghosted entity
-  uint get_owner(MeshEntity const& m) const;
+  /// Return local index of a facet given the global index
+  uint get_facet_local(uint i) const;
+
+  /// Return local index of a cell given the global index
+  uint get_cell_local(uint i) const;
+
+  //--- Ownership -------------------------------------------------------------
+
+  /// Return the set of adjacent ranks for the given topological dimension
+  _set<uint> const& get_adj(uint dim) const;
+
+  /// Return the number of adjacent ranks for the given dimension
+  uint num_adj(uint dim) const
+  {
+    return adjacent_ranks[dim].size();
+  }
+
+  inline bool is_shared(uint i, uint dim) const
+  {
+    return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);
+  }
+
+  bool is_shared(MeshEntity const& entity) const;
+
+  inline uint num_shared(uint dim) const
+  {
+    return shared[dim].size();
+  }
 
   /// Return the set of adjacent ranks of a shared entity given its global index
   /// and topological dimension
@@ -76,23 +127,36 @@ public:
   /// Return the set of adjacent ranks of a shared entity
   _set<uint> const& get_shared_adj(MeshEntity const& m) const;
 
-  /// Return global index of a vertex given the local index
-  uint get_vertex_global(uint i) const;
+  /// Return the mapping of shared entities ordering from local ordering of
+  /// shared iterator to adjacent rank ordering (send), and the converse (recv)
+  Array<uint> const& get_shared_mapping_to(uint rank, uint dim) const;
+  Array<uint> const& get_shared_mapping_from(uint rank, uint dim) const;
 
-  /// Return local index of a vertex given the global index
-  uint get_vertex_local(uint i) const;
+  /// Return the number of shared facets per adjacent rank
+  uint num_shared_with(uint rank, uint dim) const;
 
-  /// Return global index of a facet given the local index
-  uint get_facet_global(uint i) const;
+  inline bool is_ghost(uint i, uint dim) const
+  { return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : false);}
 
-  /// Return local index of a facet given the global index
-  uint get_facet_local(uint i) const;
+  bool is_ghost(MeshEntity const& entity) const;
 
-  /// Return global index of a cell given the local index
-  uint get_cell_global(uint i) const;
+  inline uint num_ghost(uint dim) const
+  { return ghost[dim].size();}
 
-  /// Return local index of a cell given the global index
-  uint get_cell_local(uint i) const;
+  /// Return owner of the ghosted entity given its global index and topological
+  /// dimension
+  uint get_owner(uint local_index, uint dim) const;
+
+  /// Return owner of the ghosted entity
+  uint get_owner(MeshEntity const& m) const;
+
+  /// Return the mapping of ghost entities ordering from local ordering of
+  /// shared iterator to adjacent rank ordering (send), and the converse (recv)
+  Array<uint> const& get_ghost_mapping_to(uint rank, uint dim) const;
+  Array<uint> const& get_ghost_mapping_from(uint rank, uint dim) const;
+
+  /// Return the number of ghosted facets per owner rank
+  uint num_ghost_from(uint rank, uint dim) const;
 
   //---
 
@@ -114,16 +178,16 @@ public:
   void setall_shared_adj(MeshEntity const& m, _set<uint> const& ranks);
 
   inline void set_global_numVertices(uint num_global)
-  { _num_global_vertex = num_global; }
+  { _num_global_vertex = num_global;}
 
   inline void set_global_numEdges(uint num_global)
-  { _num_global_edge = num_global; }
+  { _num_global_edge = num_global;}
 
   inline void set_global_numFaces(uint num_global)
-  { _num_global_face = num_global; }
+  { _num_global_face = num_global;}
 
   inline void set_global_numCells(uint num_global)
-  { _num_global_cell = num_global; }
+  { _num_global_cell = num_global;}
 
   inline void invalid_numbering()
   {
@@ -141,45 +205,31 @@ public:
 
   void remap_owner(int* mapping);
 
-  inline bool have_global(uint i, uint dim) const
-  {return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);}
+  inline uint global_numVertices() const
+  { return _num_global_vertex;}
 
-  bool have_global(MeshEntity const& entity) const;
+  inline uint global_numEdges() const
+  { return _num_global_edge;}
 
-  inline bool have_local(uint i, uint dim) const
-  {return (MPI::numProcesses() > 1 ? (global_indices[dim].count(i) > 0) : true);}
+  inline uint global_numFaces() const
+  { return _num_global_face;}
 
-  bool have_local(MeshEntity const& entity) const;
+  inline uint global_numCells() const
+  { return _num_global_cell;}
 
-  inline bool is_shared(uint i, uint dim) const
-  {return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);}
-
-  bool is_shared(MeshEntity const& entity) const;
-
-  inline bool is_ghost(uint i, uint dim) const
-  {return (MPI::numProcesses() > 1 ? (ghost[dim].count(i) > 0) : false);}
-
-  bool is_ghost(MeshEntity const& entity) const;
-
-  inline uint num_shared(uint dim) const {return shared[dim].size(); }
-
-  inline uint num_ghost(uint dim) const {return ghost[dim].size(); }
-
-  inline uint global_numVertices() const { return _num_global_vertex; }
-
-  inline uint global_numEdges() const { return _num_global_edge; }
-
-  inline uint global_numFaces() const { return _num_global_face; }
-
-  inline uint global_numCells() const { return _num_global_cell; }
-
-  inline uint max_index() const { return _max_global_index; }
+  inline uint max_index() const
+  { return _max_global_index;}
 
   inline void flush_edges()
   { shared[1].clear(); ghost[1].clear(); ghost_owner[1].clear();}
 
   inline void flush_faces()
   { shared[2].clear(); ghost[2].clear(); ghost_owner[2].clear();}
+
+  void flush_mappings(uint dim);
+
+  //
+  void disp() const;
 
 protected:
 
@@ -203,14 +253,22 @@ private:
   bool _valid_edge_ownership;
   bool _valid_face_ownership;
 
+  bool _valid_shared_facets_mapping;
+
   mutable _map<uint, uint> global_indices[MAX_DIM+1];
   mutable _map<uint, uint> local_indices[MAX_DIM+1];
 
   mutable _map<uint, uint> ghost_owner[MAX_DIM];
   mutable _map<uint, _set<uint> > shared_adj[MAX_DIM];
 
+  _set<uint> adjacent_ranks[MAX_DIM];
   _set<uint> shared[MAX_DIM];
   _set<uint> ghost[MAX_DIM];
+
+  // Adjacent mappings and reverse mappings
+  typedef _map<uint, std::pair< Array<uint>, Array<uint> > > AdjacentMapping;
+  AdjacentMapping shared_mapping[MAX_DIM];
+  AdjacentMapping ghost_mapping[MAX_DIM];
 
   bool _finalized;
   uint *_global_vertex_indices;
@@ -225,39 +283,74 @@ private:
   friend class MeshSharedIterator;
   friend class MeshRenumber;
 
- };
+};
 
 class MeshGhostIterator
 {
 public:
-  MeshGhostIterator(MeshDistributedData& distdata, uint i) : _distdata(distdata)
-  { _iter = _distdata.ghost[i].begin(); _dim = i;}
+  MeshGhostIterator(MeshDistributedData& distdata, uint i) :
+      _distdata(distdata)
+  {
+    _iter = _distdata.ghost[i].begin();
+    _dim = i;
+  }
 
-  ~MeshGhostIterator() {}
-  MeshGhostIterator& operator++() { ++_iter; return *this;}
+  ~MeshGhostIterator()
+  {
+  }
+  MeshGhostIterator& operator++()
+  {
+    ++_iter;
+    return *this;
+  }
 //    MeshGhostIterator operator++(int) { _iter++; return *this;}
-  inline uint index() const { return *_iter; }
-  inline uint owner() { return _distdata.get_owner(*_iter, _dim); }
-  inline bool end() const { return _iter == _distdata.ghost[_dim].end();}
+  inline uint index() const
+  {
+    return *_iter;
+  }
+  inline uint owner()
+  {
+    return _distdata.get_owner(*_iter, _dim);
+  }
+  inline bool end() const
+  {
+    return _iter == _distdata.ghost[_dim].end();
+  }
 
 private:
-  MeshDistributedData& _distdata;
-  _set<uint>::iterator _iter;
+  MeshDistributedData& _distdata;_set<uint>::iterator _iter;
   uint _dim;
 };
 
 class MeshSharedIterator
 {
 public:
-  MeshSharedIterator(MeshDistributedData& distdata, uint i) : _distdata(distdata)
-  { _iter = _distdata.shared[i].begin(); _dim = i;}
+  MeshSharedIterator(MeshDistributedData& distdata, uint i) :
+      _distdata(distdata)
+  {
+    _iter = _distdata.shared[i].begin();
+    _dim = i;
+  }
 
-  ~MeshSharedIterator() {}
-  MeshSharedIterator& operator++() { ++_iter; return *this;}
+  ~MeshSharedIterator()
+  {
+  }
+  MeshSharedIterator& operator++()
+  {
+    ++_iter;
+    return *this;
+  }
 //    MeshSharedIterator operator++(int) { _iter++; return *this;}
-  inline uint index() const { return *_iter; }
-  inline bool end() const { return _iter == _distdata.shared[_dim].end();}
-  inline _set<uint> adj() const { return _distdata.shared_adj[_dim][*_iter]; }
+  inline uint index() const
+  {
+    return *_iter;
+  }
+  inline bool end() const
+  {
+    return _iter == _distdata.shared[_dim].end();
+  }
+  inline _set<uint> adj() const
+  { return _distdata.shared_adj[_dim][*_iter];}
 
 private:
   MeshDistributedData& _distdata;

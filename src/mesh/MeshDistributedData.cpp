@@ -36,6 +36,7 @@ MeshDistributedData::MeshDistributedData(MeshTopology& topology) :
     _valid_cell_numbering(false),
     _valid_edge_ownership(false),
     _valid_face_ownership(false),
+    _valid_shared_facets_mapping(false),
     _finalized(false),
     _global_vertex_indices(0),
     _global_facet_indices(0),
@@ -52,7 +53,8 @@ MeshDistributedData::~MeshDistributedData()
   clear();
 }
 //-----------------------------------------------------------------------------
-const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedData& distributed_data)
+const MeshDistributedData& MeshDistributedData::operator=(
+    const MeshDistributedData& distributed_data)
 {
   clear();
 
@@ -70,19 +72,23 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _valid_edge_ownership = distributed_data._valid_edge_ownership;
   _valid_face_ownership = distributed_data._valid_face_ownership;
 
+  _valid_shared_facets_mapping = distributed_data._valid_shared_facets_mapping;
 
-  for(uint i = 0 ; i < MAX_DIM+1; i++)
+  for (uint i = 0; i < MAX_DIM + 1; i++)
   {
     global_indices[i] = distributed_data.global_indices[i];
     local_indices[i] = distributed_data.local_indices[i];
   }
 
-  for(uint i = 0 ; i < MAX_DIM; i++)
+  for (uint i = 0; i < MAX_DIM; i++)
   {
+    adjacent_ranks[i] = distributed_data.adjacent_ranks[i];
     shared[i] = distributed_data.shared[i];
     shared_adj[i] = distributed_data.shared_adj[i];
     ghost[i] = distributed_data.ghost[i];
     ghost_owner[i] = distributed_data.ghost_owner[i];
+    shared_mapping[i] = distributed_data.shared_mapping[i];
+    ghost_mapping[i] = distributed_data.ghost_mapping[i];
   }
 
   _num_global_vertex = distributed_data._num_global_vertex;
@@ -90,13 +96,13 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   _num_global_face = distributed_data._num_global_face;
   _num_global_cell = distributed_data._num_global_cell;
 
-  _finalized =  distributed_data._finalized;
+  _finalized = distributed_data._finalized;
 
   _global_vertex_indices_size = distributed_data._global_vertex_indices_size;
   _global_facet_indices_size = distributed_data._global_facet_indices_size;
   _global_cell_indices_size = distributed_data._global_cell_indices_size;
 
-  if ( _finalized )
+  if (_finalized)
   {
     dolfin_assert(_global_vertex_indices_size > 0);
     dolfin_assert(_global_cell_indices_size > 0);
@@ -106,14 +112,13 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
            _global_vertex_indices_size * sizeof(uint));
 
     _global_facet_indices = new uint[_global_facet_indices_size];
-     memcpy(_global_facet_indices, distributed_data._global_facet_indices,
-            _global_facet_indices_size * sizeof(uint));
+    memcpy(_global_facet_indices, distributed_data._global_facet_indices,
+           _global_facet_indices_size * sizeof(uint));
 
     _global_cell_indices = new uint[_global_cell_indices_size];
     memcpy(_global_cell_indices, distributed_data._global_cell_indices,
            _global_cell_indices_size * sizeof(uint));
   }
-
 
   return *this;
 }
@@ -125,7 +130,7 @@ bool MeshDistributedData::empty() const
 //-----------------------------------------------------------------------------
 void MeshDistributedData::init(uint const dim)
 {
-  if(dim > 0 && _dim == 0)
+  if (dim > 0 && _dim == 0)
   {
     _dim = dim;
     _cell_dim = _dim;
@@ -144,15 +149,18 @@ void MeshDistributedData::clear()
   _facet_dim = 0;
   _max_global_index = 0;
 
-  for(uint i = 0; i < MAX_DIM; ++i)
+  for (uint i = 0; i < MAX_DIM; ++i)
   {
+    adjacent_ranks[i].clear();
     shared[i].clear();
     shared_adj[i].clear();
     ghost[i].clear();
     ghost_owner[i].clear();
+    shared_mapping[i].clear();
+    ghost_mapping[i].clear();
   }
 
-  for(uint i = 0; i < MAX_DIM+1; ++i)
+  for (uint i = 0; i < MAX_DIM + 1; ++i)
   {
     global_indices[i].clear();
     local_indices[i].clear();
@@ -166,23 +174,16 @@ void MeshDistributedData::clear()
   _valid_edge_ownership = false;
   _valid_face_ownership = false;
 
-  if( _global_vertex_indices )
-  {
-    delete[] _global_vertex_indices;
-  }
-  _global_vertex_indices = 0;
+  _valid_shared_facets_mapping = false;
 
-  if( _global_facet_indices )
-  {
-    delete[] _global_facet_indices;
-  }
-  _global_facet_indices = 0;
+  delete[] _global_vertex_indices;
+  _global_vertex_indices = NULL;
 
-  if( _global_cell_indices )
-  {
-    delete[] _global_cell_indices;
-  }
-  _global_cell_indices = 0;
+  delete[] _global_facet_indices;
+  _global_facet_indices = NULL;
+
+  delete[] _global_cell_indices;
+  _global_cell_indices = NULL;
 
   _finalized = false;
 
@@ -195,10 +196,7 @@ void MeshDistributedData::finalize(uint const dim)
 
   if (dim == 0) // Vertices
   {
-    if(_global_vertex_indices)
-    {
-      delete[] _global_vertex_indices;
-    }
+    delete[] _global_vertex_indices;
     _global_vertex_indices = new uint[global_indices[0].size()];
 
     for(it = global_indices[0].begin(); it != global_indices[0].end(); ++it)
@@ -211,10 +209,7 @@ void MeshDistributedData::finalize(uint const dim)
   }
   else if (dim == _facet_dim) // Facets
   {
-    if(_global_facet_indices)
-    {
-      delete[] _global_facet_indices;
-    }
+    delete[] _global_facet_indices;
     _global_facet_indices = new uint[global_indices[dim-1].size()];
 
     for(it = global_indices[dim-1].begin(); it != global_indices[dim-1].end(); ++it)
@@ -227,10 +222,7 @@ void MeshDistributedData::finalize(uint const dim)
   }
   else if (dim == _cell_dim) // Cells
   {
-    if(_global_cell_indices)
-    {
-      delete[] _global_cell_indices;
-    }
+    delete[] _global_cell_indices;
     _global_cell_indices = new uint[global_indices[dim].size()];
 
     for(it = global_indices[dim].begin(); it != global_indices[dim].end(); ++it)
@@ -251,13 +243,13 @@ void MeshDistributedData::finalize(uint const dim)
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
 {
 
-  if( dim == 0)
+  if (dim == 0)
   {
     _max_global_index = std::max(_max_global_index, global_index);
   }
 
-  global_indices[dim][ local_index ] = global_index;
-  local_indices[dim][ global_index ] = local_index;
+  global_indices[dim][local_index] = global_index;
+  local_indices[dim][global_index] = local_index;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_shared(MeshEntity const& m)
@@ -277,8 +269,8 @@ void MeshDistributedData::set_ghost(MeshEntity const& m)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost(uint local_index, uint dim)
 {
-  ghost[dim].insert(local_index);
   set_shared(local_index, dim);
+  ghost[dim].insert(local_index);
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost_owner(MeshEntity const& m, uint rank)
@@ -288,7 +280,7 @@ void MeshDistributedData::set_ghost_owner(MeshEntity const& m, uint rank)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
 {
-  shared_adj[dim][i].insert(rank);
+  set_shared_adj( i, rank, dim);
   ghost_owner[dim][i] = rank;
 }
 //-----------------------------------------------------------------------------
@@ -300,13 +292,15 @@ void MeshDistributedData::set_shared_adj(MeshEntity const& m, uint rank)
 void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
 {
   shared_adj[dim][i].insert(rank);
+  adjacent_ranks[dim].insert(rank);
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::setall_shared_adj(uint i, _set<uint> const& ranks,
-                                            uint dim)
+uint dim)
 {
   shared_adj[dim][i].clear();
   shared_adj[dim][i].insert(ranks.begin(), ranks.end());
+  adjacent_ranks[dim].insert(ranks.begin(), ranks.end());
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::setall_shared_adj(MeshEntity const& m,
@@ -317,17 +311,17 @@ void MeshDistributedData::setall_shared_adj(MeshEntity const& m,
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_global(MeshEntity const& e) const
 {
-  return get_global( e.index(), e.dim());
+  return get_global(e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_global(uint i, uint dim) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
 
-  if( dim == 0 && _finalized)
+  if (dim == 0 && _finalized)
   {
     return _global_vertex_indices[i];
   }
@@ -343,9 +337,9 @@ uint MeshDistributedData::get_local(MeshEntity const& e) const
   return get_local(e.index(), e.dim());
 }
 //-----------------------------------------------------------------------------
- uint MeshDistributedData::get_local(uint i, uint dim) const
+uint MeshDistributedData::get_local(uint i, uint dim) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
@@ -361,11 +355,10 @@ uint MeshDistributedData::get_owner(MeshEntity const& e) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_owner(uint local_index, uint dim) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return 0;
-  }
-  dolfin_assert( ghost_owner[dim].count(local_index) );
+  }dolfin_assert( ghost_owner[dim].count(local_index) );
   return ghost_owner[dim][local_index];
 }
 //-----------------------------------------------------------------------------
@@ -375,16 +368,77 @@ _set<uint> const& MeshDistributedData::get_shared_adj(MeshEntity const& m) const
 }
 //-----------------------------------------------------------------------------
 _set<uint> const& MeshDistributedData::get_shared_adj(uint local_index,
-                                                      uint dim) const
+    uint dim) const
 {
   dolfin_assert(is_shared(local_index, dim));
   return shared_adj[dim][local_index];
 }
 //-----------------------------------------------------------------------------
+uint MeshDistributedData::num_shared_with(uint rank, uint dim) const
+{
+  AdjacentMapping::const_iterator it = shared_mapping[dim].find(rank);
+  if(it != shared_mapping[dim].end())
+  {
+    return it->second.first.size();
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+uint MeshDistributedData::num_ghost_from(uint rank, uint dim) const
+{
+  AdjacentMapping::const_iterator it = ghost_mapping[dim].find(rank);
+  if(it != ghost_mapping[dim].end())
+  {
+    return it->second.first.size();
+  }
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& MeshDistributedData::get_shared_mapping_to(uint rank,
+                                                              uint dim) const
+{
+  dolfin_assert(shared_mapping[dim].find(rank) != shared_mapping[dim].end());
+  return shared_mapping[dim].find(rank)->second.first;
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& MeshDistributedData::get_shared_mapping_from(uint rank,
+                                                                uint dim) const
+{
+  dolfin_assert(shared_mapping[dim].find(rank) != shared_mapping[dim].end());
+  return shared_mapping[dim].find(rank)->second.second;
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& MeshDistributedData::get_ghost_mapping_to(uint rank,
+                                                              uint dim) const
+{
+  dolfin_assert(shared_mapping[dim].find(rank) != shared_mapping[dim].end());
+  return ghost_mapping[dim].find(rank)->second.first;
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& MeshDistributedData::get_ghost_mapping_from(uint rank,
+                                                                uint dim) const
+{
+  dolfin_assert(shared_mapping[dim].find(rank) != shared_mapping[dim].end());
+  return ghost_mapping[dim].find(rank)->second.second;
+}
+
+//-----------------------------------------------------------------------------
+_set<uint> const& MeshDistributedData::get_adj(uint dim) const
+{
+  dolfin_assert(dim <= _dim);
+  return adjacent_ranks[dim];
+}
+
+//-----------------------------------------------------------------------------
 void MeshDistributedData::remap_owner(int* mapping)
 {
 
-  for (uint i = 0;  i < MAX_DIM; i++)
+  for (uint i = 0; i < MAX_DIM; i++)
   {
     for (MeshGhostIterator it(*this, i); !it.end(); ++it)
     {
@@ -400,12 +454,12 @@ void MeshDistributedData::remap_owner(int* mapping)
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_global(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
 
-  if ( _finalized )
+  if (_finalized)
   {
     return _global_vertex_indices[i];
   }
@@ -419,7 +473,7 @@ uint MeshDistributedData::get_vertex_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_local(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
@@ -430,12 +484,12 @@ uint MeshDistributedData::get_vertex_local(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_global(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
 
-  if ( _finalized )
+  if (_finalized)
   {
     return _global_facet_indices[i];
   }
@@ -450,7 +504,7 @@ uint MeshDistributedData::get_facet_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_local(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
@@ -462,12 +516,12 @@ uint MeshDistributedData::get_facet_local(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_global(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
 
-  if ( _finalized )
+  if (_finalized)
   {
     return _global_cell_indices[i];
   }
@@ -482,7 +536,7 @@ uint MeshDistributedData::get_cell_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_local(uint i) const
 {
-  if(MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1)
   {
     return i;
   }
@@ -512,6 +566,50 @@ bool MeshDistributedData::is_ghost(MeshEntity const& entity) const
   return is_ghost(entity.index(), entity.dim());
 }
 //-----------------------------------------------------------------------------
+void MeshDistributedData::flush_mappings(uint dim)
+{
+  shared_mapping[dim].clear();
+  ghost_mapping[dim].clear();
+}
+//-----------------------------------------------------------------------------
+void MeshDistributedData::disp() const
+{
+  cout << "MeshDistributedData" << endl;
+  cout << "-------------------" << endl;
+
+  begin("");
+  cout << "Topological dimension     : " << (uint) _dim << endl;
+  cout << "Cell dimension            : " << (uint) _cell_dim << endl;
+  cout << "Facet dimension           : " << (uint) _facet_dim << endl;
+  skip();
+  cout << "Maximum global index      : " << (uint) _max_global_index << endl;
+  cout << "Number of global vertices : " << (uint) _num_global_vertex << endl;
+  cout << "Number of global edges    : " << (uint) _num_global_edge << endl;
+  cout << "Number of global faces    : " << (uint) _num_global_face << endl;
+  cout << "Number of global cells    : " << (uint) _num_global_cell << endl;
+  skip();
+  cout << "Valid vertex numbering    : " << (bool) _valid_vertex_numbering
+       << endl;
+  cout << "Valid edge   numbering    : " << (bool) _valid_edge_numbering
+       << endl;
+  cout << "Valid face   numbering    : " << (bool) _valid_face_numbering
+       << endl;
+  cout << "Valid cell   numbering    : " << (bool) _valid_cell_numbering
+       << endl;
+  skip();
+  cout << "Number of shared entities : " << endl;
+  for (uint d = 0; d < _dim; ++d)
+  {
+    cout << "  - dim " << " : " << (uint) this->num_shared(d) << endl;
+  }
+  skip();
+  cout << "Number of ghost entities : " << endl;
+  for (uint d = 0; d < _dim; ++d)
+  {
+    cout << "  - dim " << " : " << (uint) this->num_ghost(d) << endl;
+  }
+  end();
+}
 
 }
 

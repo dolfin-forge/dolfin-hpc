@@ -10,6 +10,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Form.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 
 namespace dolfin
@@ -65,6 +66,8 @@ void UFC::init(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set)
   this->cell.init(cell);
   this->cell0.init(cell);
   this->cell1.init(cell);
+  facet0 = 0;
+  facet1 = 0;
 
   // Initialize local tensor
   uint num_entries = 1;
@@ -212,5 +215,4 @@ void UFC::update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata)
   this->cell1.update(cell1, distdata);
 }
 //-----------------------------------------------------------------------------
-
 }

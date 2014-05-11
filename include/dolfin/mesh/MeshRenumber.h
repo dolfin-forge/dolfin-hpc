@@ -39,6 +39,9 @@ public:
   /// Renumber mesh cells
   static bool renumber_cells(Mesh& mesh);
 
+  /// Recompute mapping between shared entities
+  static bool remap_facets(Mesh& mesh);
+
 private:
 
   /// An edge contains a pair of vertices
@@ -54,6 +57,8 @@ private:
   static FaceKey face_key(Face& f);
 
   static void send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f);
+
+  static void remap_shared_entities(Mesh& mesh, uint const dim);
 
 };
 

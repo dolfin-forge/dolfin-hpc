@@ -21,4 +21,5 @@ libdolfin_fem_la_SOURCES = \
 			SlipFrictionBC.cpp\
 			SparsityPatternBuilder.cpp\
 			SubSystem.cpp\
-			UFC.cpp
+			UFC.cpp \
+			UFCHalo.cpp

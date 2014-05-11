@@ -74,6 +74,10 @@ public:
   UFCCell cell0;
   UFCCell cell1;
 
+  // Current pair of local facet indices of macro element
+  uint facet0;
+  uint facet1;
+
   // Local tensor
   real* A;
 

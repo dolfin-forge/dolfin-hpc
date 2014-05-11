@@ -25,6 +25,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
+#include <dolfin/fem/UFCHalo.h>
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/DofMapSet.h>
@@ -35,6 +36,9 @@
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
+
+#include <algorithm> //TODO: for facets, remove after refactoring
+#include <map>
 
 namespace dolfin
 {
@@ -343,7 +347,9 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 {
   // Skip assembly if there are no interior facet integrals
   if (ufc.form.num_interior_facet_integrals() == 0)
+  {
     return;
+  }
 
   Mesh& mesh = dof_map_set[0].mesh();
   uint const tdim = mesh.topology().dim();
@@ -352,23 +358,26 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   ufc::interior_facet_integral* integral = ufc.interior_facet_integrals[0];
 
   // Compute facets and facet - cell connectivity if not already computed
-  mesh.init(tdim - 1);
-  mesh.init(tdim - 1, tdim);
+  uint const facet_dim = tdim - 1;
+  mesh.init(facet_dim);
+  mesh.init(facet_dim, tdim);
   mesh.order();
-
-  //
-  BoundaryMesh& interior_boundary = mesh.interior_boundary();
-  if(interior_boundary.numCells()  == 0) return;
 
   // Assemble over interior facets (the facets of the mesh)
 #ifndef NO_PROGRESS_BAR
   dolfin_assert(mesh.numFacets());
   Progress p(progressMessage(A.rank(), "interior facets"), mesh.numFacets());
 #endif
+
+  // The halo data structure caches macro element coefficients and dofs for each
+  // shared facet
+  UFCHalo halo(ufc, coefficients, dof_map_set);
+
+  //
   for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Check if we have an interior facet
-    if ( facet->numEntities(tdim) != 2 )
+    if (facet->numEntities(tdim) != 2)
     {
 #ifndef NO_PROGRESS_BAR
       p++;
@@ -390,35 +399,49 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       }
     }
 
-    // Get cells incident with facet
-    Cell cell0(mesh, facet->entities(tdim)[0]);
-    Cell cell1(mesh, facet->entities(tdim)[1]);
-
-    // Get local index of facet with respect to each cell
-    uint facet0 = cell0.index(*facet);
-    uint facet1 = cell1.index(*facet);
-
-    // Update to current pair of cells
-    ufc.update(cell0, cell1, mesh.distdata());
-
-    // Interpolate coefficients on cell
-    for (uint i = 0; i < coefficients.size(); i++)
+    if(!facet->is_shared())
     {
-      const uint offset = ufc.coefficient_elements[i]->space_dimension();
-      coefficients[i]->interpolate(ufc.macro_w[i], ufc.cell0, *ufc.coefficient_elements[i], cell0, facet0);
-      coefficients[i]->interpolate(ufc.macro_w[i] + offset, ufc.cell1, *ufc.coefficient_elements[i], cell1, facet1);
-    }
+      // Get cells incident with facet, local index of facet
+      Cell cell0(mesh, facet->entities(tdim)[0]);
+      ufc.facet0 = cell0.index(*facet);
+      ufc.cell0.update(cell0, mesh.distdata());
 
-    // Tabulate dofs for each dimension on macro element
-    for (uint i = 0; i < ufc.form.rank(); i++)
+      // Contributions from cell1 are local
+      Cell cell1(mesh, facet->entities(tdim)[1]);
+      ufc.facet1 = cell1.index(*facet);
+      ufc.cell1.update(cell1, mesh.distdata());
+
+      // Interpolate coefficients on cell1
+      for (uint i = 0; i < coefficients.size(); ++i)
+      {
+        coefficients[i]->interpolate(ufc.macro_w[i], ufc.cell0, *ufc.coefficient_elements[i], cell0, ufc.facet0);
+        uint const offset = ufc.coefficient_elements[i]->space_dimension();
+        coefficients[i]->interpolate(ufc.macro_w[i] + offset, ufc.cell1, *ufc.coefficient_elements[i], cell1, ufc.facet1);
+      }
+
+      // Tabulate dofs for each dimension on cell1
+      for (uint i = 0; i < ufc.form.rank(); ++i)
+      {
+        dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i], ufc.cell0, cell0.index());
+        uint const offset = ufc.local_dimensions[i];
+        dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1, cell1.index());
+      }
+
+      integral->tabulate_tensor(ufc.macro_A, ufc.macro_w, ufc.cell0, ufc.cell1,
+                                ufc.facet0, ufc.facet1);
+    }
+    else
     {
-      const uint offset = ufc.local_dimensions[i];
-      dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i],          ufc.cell0, cell0.index());
-      dof_map_set[i].tabulate_dofs(ufc.macro_dofs[i] + offset, ufc.cell1, cell1.index());
-    }
+      // Contributions from cell0 is restored from data stored in the halo data
+      // while contribution from cell1 are fetched from adjacent ranks
+      // Implementation updates pointers to coordinates, but has to copy dofs
+      // and coefficients until data structures are reworked.
+      halo.update(*facet);
 
-    // Tabulate exterior interior facet tensor on macro element
-    integral->tabulate_tensor(ufc.macro_A, ufc.macro_w, ufc.cell0, ufc.cell1, facet0, facet1);
+      integral->tabulate_tensor(ufc.macro_A, halo.macro_w, halo.cell0,
+                                halo.cell1, halo.facet0, halo.facet1);
+
+    }
 
     // Add entries to global tensor
     A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
@@ -427,6 +450,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     p++;
 #endif
   }
+
 }
 //-----------------------------------------------------------------------------
 void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,

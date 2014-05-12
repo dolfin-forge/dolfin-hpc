@@ -34,21 +34,23 @@ public:
   static void refine(Mesh& mesh, MeshFunction<bool>& cell_marker);
 
   ///
-  static void refine_and_project(Mesh& mesh, std::vector<project_func> pf,
+  static void refine_and_project(Mesh& mesh, Array<Function *> const& functions,
                                  MeshFunction<bool>& cell_marker);
 
 private:
 
   ///
-  static void redistribute_func(Mesh& mesh, Function *f, real **vp, uint **rp,
-                                uint& m, MeshFunction<uint>& distribution);
+  static void redistribute_func(Mesh& mesh, Function const& f, real **vp,
+                                uint **rp, uint& m,
+                                MeshFunction<uint>& distribution);
 
   ///
-  static void decompose_func(Mesh& mesh, Function *f, uint offset, Form& form,
-                             Array<Function *>& f_components);
+  static void decompose_func(Mesh& mesh, Function const& function,
+                             Array<Function *>& subfunctions);
 
   ///
-  static void project(Mesh& new_mesh, Array<Function *>& f, Vector& x_proj);
+  static void project(Mesh& new_mesh, Array<Function *>& f_post,
+                      Function& projected);
 
 };
 }

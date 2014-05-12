@@ -1041,6 +1041,11 @@ void BinaryFile::nameUpdate(const int counter)
   bin_filename = newfilename.str();
 }
 //----------------------------------------------------------------------------
+void BinaryFile::operator<<(MeshFunction<bool>& meshfunction)
+{
+  write_meshfunction(meshfunction);
+}
+//----------------------------------------------------------------------------
 void BinaryFile::operator<<(MeshFunction<int>& meshfunction)
 {
   write_meshfunction(meshfunction);
@@ -1056,8 +1061,8 @@ void BinaryFile::operator<<(MeshFunction<double>& meshfunction)
   write_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-template<class T>
-void BinaryFile::write_meshfunction(T& meshfunction)
+template<typename T>
+void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 {
 
 #ifdef ENABLE_MPIIO
@@ -1139,23 +1144,28 @@ void BinaryFile::write_meshfunction(T& meshfunction)
 
 }
 //----------------------------------------------------------------------------
+void BinaryFile::operator>>(MeshFunction<bool>& meshfunction)
+{
+  read_meshfunction(meshfunction);
+}
+//----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<int>& meshfunction)
 {
-  read_meshfunction(meshfunction, 0);
+  read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<unsigned int>& meshfunction)
 {
-  read_meshfunction(meshfunction, 1);
+  read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(MeshFunction<double>& meshfunction)
 {
-  read_meshfunction(meshfunction, 2);
+  read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-template<class T>
-void BinaryFile::read_meshfunction(T& meshfunction, uint type)
+template<typename T>
+void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 {
 
 #ifdef ENABLE_MPIIO
@@ -1204,22 +1214,17 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
                        local_size * sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
 
   if (mfunc_type == 0)
-    for (uint i =0; i < meshfunction.size(); i++)  {
-      if (type == 0)
-        meshfunction.set(i, (int) values[i]);
-      else if(type == 1)
-        meshfunction.set(i, (uint) values[i]);
-      else if(type == 2)
-        meshfunction.set(i, values[i]);
+  {
+    for (uint i =0; i < meshfunction.size(); ++i)
+    {
+      meshfunction.set(i, static_cast<T>(values[i]));
     }
-  if (mfunc_type == 1) {
-    for (uint i =0; i < meshfunction.size(); i++)  {
-      if (type == 0)
-        meshfunction.set(i, (int) values[i]);
-      else if(type == 1)
-        meshfunction.set(i, (uint) values[i]);
-      else if(type == 2)
-        meshfunction.set(i, values[i]);
+  }
+  if (mfunc_type == 1)
+  {
+    for (uint i =0; i < meshfunction.size(); ++i)
+    {
+      meshfunction.set(i, static_cast<T>(values[i]));
     }
 
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
@@ -1259,15 +1264,8 @@ void BinaryFile::read_meshfunction(T& meshfunction, uint type)
       MPI_Get_count(&status,MPI_DOUBLE,&recv_count);
 
       for(int j=0; j < recv_count; j++) {
-        if (type == 0)
           meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
-                           (int) recv_buff[j]);
-        else if(type == 1)
-          meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
-                           (uint) recv_buff[j]);
-        else if(type == 2)
-          meshfunction.set(mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
-                           recv_buff[j]);
+                           static_cast<T>(recv_buff[j]));
       }
 
       send_buff.clear();

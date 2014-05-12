@@ -32,6 +32,7 @@ namespace dolfin
     void operator>> (Mesh& mesh);
     void operator>> (Function& f);
     void operator>> (std::vector<std::pair<Function*, std::string> >& f);
+    void operator>> (MeshFunction<bool>& meshfunction);
     void operator>> (MeshFunction<int>& meshfunction);
     void operator>> (MeshFunction<unsigned int>& meshfunction);
     void operator>> (MeshFunction<double>& meshfunction);
@@ -41,6 +42,7 @@ namespace dolfin
     void operator<< (Mesh& mesh);
     void operator<< (Function& u);
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);
+    void operator<< (MeshFunction<bool>& meshfunction);
     void operator<< (MeshFunction<int>& meshfunction);
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
@@ -77,11 +79,11 @@ namespace dolfin
       uint v4;
     } atomic_cell;
 
-    template<class T>
-    void write_meshfunction(T& meshfunction);
+    template<typename T>
+    void write_meshfunction(MeshFunction<T>& meshfunction);
 
     template<class T>
-    void read_meshfunction(T& meshfunction, uint type);
+    void read_meshfunction(MeshFunction<T>& meshfunction);
 
     inline int vertex_owner(uint L, uint R, uint i )
     {

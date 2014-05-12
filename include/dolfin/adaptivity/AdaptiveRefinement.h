@@ -13,6 +13,7 @@
 namespace dolfin
 {
 
+template<class T> class Array;
 class Form;
 class Function;
 class Mesh;

@@ -48,6 +48,9 @@ namespace dolfin
     /// Compute diameter of interval
     real diameter(const MeshEntity& interval) const;
 
+    /// Compute circumradius of interval
+    real circumradius(const MeshEntity& interval) const;
+
     /// Compute component i of normal of given facet with respect to the cell
     real normal(const Cell& cell, uint facet, uint i) const;
 

@@ -30,6 +30,7 @@ dolfin::uint PointCell::numEntities(uint dim) const
     return 1; // vertices
   default:
     error("Illegal topological dimension %d for point.", dim);
+    break;
   }
 
   return 0;
@@ -43,8 +44,9 @@ dolfin::uint PointCell::numVertices(uint dim) const
     return 1; // vertices
   default:
     error("Illegal topological dimension %d for point.", dim);
+    break;
   }
-  
+
   return 0;
 }
 //-----------------------------------------------------------------------------
@@ -77,6 +79,12 @@ real PointCell::volume(const MeshEntity& triangle) const
 }
 //-----------------------------------------------------------------------------
 real PointCell::diameter(const MeshEntity& triangle) const
+{
+  error("PointCell::diameter() not defined.");
+  return 0.0;
+}
+//-----------------------------------------------------------------------------
+real PointCell::circumradius(const MeshEntity& triangle) const
 {
   error("PointCell::diameter() not defined.");
   return 0.0;

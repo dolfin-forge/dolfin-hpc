@@ -40,7 +40,7 @@ namespace dolfin
 
     /// Order entities locally (connectivity 1-0, 2-0, 2-1)
     void orderEntities(Cell& cell) const;
-    
+
     /// Refine cell uniformly
     void refineCell(Cell& cell, MeshEditor& editor, uint& current_cell) const;
 
@@ -49,6 +49,9 @@ namespace dolfin
 
     /// Compute diameter of triangle
     real diameter(const MeshEntity& triangle) const;
+
+    /// Compute circumradius of triangle
+    real circumradius(const MeshEntity& triangle) const;
 
     /// Compute component i of normal of given facet with respect to the cell
     real normal(const Cell& cell, uint facet, uint i) const;

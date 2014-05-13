@@ -87,6 +87,9 @@ namespace dolfin
     /// Compute diameter of mesh entity
     virtual real diameter(const MeshEntity& entity) const = 0;
 
+    /// Compute circumradius of mesh entity
+    virtual real circumradius(const MeshEntity& entity) const = 0;
+
     /// Compute component i of normal of given facet with respect to the cell
     virtual real normal(const Cell& cell, uint facet, uint i) const = 0;
 

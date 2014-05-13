@@ -44,18 +44,21 @@ namespace dolfin
     /// Order entities locally (connectivity 1-0, 2-0, 2-1, 3-0, 3-1, 3-2)
     void orderEntities(Cell& cell) const;
 
-    /// Regular refinement of cell 
+    /// Regular refinement of cell
     void refineCell(Cell& cell, MeshEditor& editor, uint& current_cell) const;
 
-    /// Irregular refinement of cell 
-    void refineCellIrregular(Cell& cell, MeshEditor& editor, uint& current_cell, 
-			     uint refinement_rule, uint* marked_edges) const;
+    /// Irregular refinement of cell
+    void refineCellIrregular(Cell& cell, MeshEditor& editor, uint& current_cell,
+                             uint refinement_rule, uint* marked_edges) const;
 
     /// Compute volume of tetrahedron
     real volume(const MeshEntity& tetrahedron) const;
 
     /// Compute diameter of tetrahedron
     real diameter(const MeshEntity& tetrahedron) const;
+
+    /// Compute circumradius of tetrahedron
+    real circumradius(const MeshEntity& tetrahedron) const;
 
     /// Compute component i of normal of given facet with respect to the cell
     real normal(const Cell& cell, uint facet, uint i) const;
@@ -76,7 +79,7 @@ namespace dolfin
     std::string description() const;
 
   private:
-    
+
     // Find local index of edge i according to ordering convention
     uint findEdge(uint i, const Cell& cell) const;
 

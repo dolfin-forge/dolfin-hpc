@@ -109,8 +109,7 @@ void IntervalCell::refineCell(Cell& cell, MeshEditor& editor,
 real IntervalCell::volume(const MeshEntity& interval) const
 {
   // Check that we get an interval
-  if ( interval.dim() != 1 )
-    error("Illegal mesh entity for computation of interval volume (length). Not an interval.");
+  dolfin_assert(interval.dim() == 1 );
 
   // Get mesh geometry
   const MeshGeometry& geometry = interval.mesh().geometry();
@@ -133,11 +132,13 @@ real IntervalCell::volume(const MeshEntity& interval) const
 //-----------------------------------------------------------------------------
 real IntervalCell::diameter(const MeshEntity& interval) const
 {
-  // Check that we get an interval
-  if ( interval.dim() != 1 )
-    error("Illegal mesh entity for computation of interval diameter. Not an interval.");
-
   // Diameter is same as volume for interval (line segment)
+  return volume(interval);
+}
+//-----------------------------------------------------------------------------
+real IntervalCell::circumradius(const MeshEntity& interval) const
+{
+  // Circumradius is same as volume for interval (line segment)
   return volume(interval);
 }
 //-----------------------------------------------------------------------------

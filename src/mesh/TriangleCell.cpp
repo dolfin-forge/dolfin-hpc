@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/TriangleCell.h>
@@ -40,6 +41,7 @@ dolfin::uint TriangleCell::numEntities(uint dim) const
       return 1; // cells
     default:
       error("Illegal topological dimension %d for triangle.", dim);
+      break;
     }
 
   return 0;
@@ -57,6 +59,7 @@ dolfin::uint TriangleCell::numVertices(uint dim) const
       return 3; // cells
     default:
       error("Illegal topological dimension %d for triangle.", dim);
+      break;
     }
 
   return 0;
@@ -107,10 +110,10 @@ void TriangleCell::orderEntities(Cell& cell) const
 
       // Sort vertices on each edge
       for (uint i = 0; i < 3; i++)
-	{
-	  uint* edge_vertices = topology(1, 0)(cell_edges[i]);
-	  std::sort(edge_vertices, edge_vertices + 2);
-	}
+      {
+        uint* edge_vertices = topology(1, 0)(cell_edges[i]);
+        std::sort(edge_vertices, edge_vertices + 2);
+      }
     }
 
   // Sort local vertices on cell in ascending order, connectivity 2 - 0
@@ -131,34 +134,34 @@ void TriangleCell::orderEntities(Cell& cell) const
 
       // Loop over vertices on cell
       for (uint i = 0; i < 3; i++)
-	{
-	  // Loop over edges on cell
-	  for (uint j = i; j < 3; j++)
-	    {
-	      uint* edge_vertices = topology(1, 0)(cell_edges[j]);
+      {
+        // Loop over edges on cell
+        for (uint j = i; j < 3; j++)
+        {
+          uint* edge_vertices = topology(1, 0)(cell_edges[j]);
 
-	      // Check if the ith vertex of the cell is non-incident with edge j
+          // Check if the ith vertex of the cell is non-incident with edge j
 #if __SUNPRO_CC
-	      int n1 = 0;
-	      std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
-	      if ( n1 == 0)
+          int n1 = 0;
+          std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
+          if ( n1 == 0)
 #else
-	      if ( std::count(edge_vertices, edge_vertices + 2, cell_vertices[i]) == 0 )
+            if ( std::count(edge_vertices, edge_vertices + 2, cell_vertices[i]) == 0 )
 #endif
-		{
-		  // Swap edge numbers
-		  uint tmp = cell_edges[i];
-		  cell_edges[i] = cell_edges[j];
-		  cell_edges[j] = tmp;
-		  break;
-		}
-	    }
-	}
+            {
+              // Swap edge numbers
+              uint tmp = cell_edges[i];
+              cell_edges[i] = cell_edges[j];
+              cell_edges[j] = tmp;
+              break;
+            }
+        }
+      }
     }
 }
 //-----------------------------------------------------------------------------
 void TriangleCell::refineCell(Cell& cell, MeshEditor& editor,
-			      uint& current_cell) const
+                              uint& current_cell) const
 {
   // Get vertices and edges
   const uint* v = cell.entities(0);
@@ -187,8 +190,7 @@ void TriangleCell::refineCell(Cell& cell, MeshEditor& editor,
 real TriangleCell::volume(const MeshEntity& triangle) const
 {
   // Check that we get a triangle
-  if ( triangle.dim() != 2 )
-    error("Illegal mesh entity for computation of triangle volume (area). Not a triangle.");
+  dolfin_assert(triangle.numEntities(1) == 3);
 
   // Get mesh geometry
   const MeshGeometry& geometry = triangle.mesh().geometry();
@@ -218,7 +220,9 @@ real TriangleCell::volume(const MeshEntity& triangle) const
       return  0.5 * sqrt(v0*v0 + v1*v1 + v2*v2);
     }
   else
+  {
     error("Only know how to volume (area) of a triangle when embedded in R^2 or R^3.");
+  }
 
   return 0.0;
 }
@@ -226,15 +230,27 @@ real TriangleCell::volume(const MeshEntity& triangle) const
 real TriangleCell::diameter(const MeshEntity& triangle) const
 {
   // Check that we get a triangle
-  if ( triangle.dim() != 2 )
-    error("Illegal mesh entity for computation of triangle diameter. Not a triangle.");
+  dolfin_assert(triangle.numEntities(1) == 3);
+
+  real hmax = 0.0;
+  MeshEntity * tri = const_cast<MeshEntity *>(&triangle); //FIXME: constness
+  for (EdgeIterator edge(*tri); !edge.end(); ++edge)
+  {
+    hmax = std::max(hmax, edge->length());
+  }
+  return hmax;
+}
+//-----------------------------------------------------------------------------
+real TriangleCell::circumradius(const MeshEntity& triangle) const
+{
+  // Check that we get a triangle
+  dolfin_assert(triangle.numEntities(1) == 3);
 
   // Get mesh geometry
   const MeshGeometry& geometry = triangle.mesh().geometry();
 
-  // Only know how to compute the diameter when embedded in R^2 or R^3
-  if ( geometry.dim() != 2 && geometry.dim() != 3 )
-    error("Only know how to volume (area) of a triangle when embedded in R^2 or R^3.");
+  // Only know how to compute the diameter when embedded in R^2, R^3. (etc :P)
+  dolfin_assert(geometry.dim() > 1);
 
   // Get the coordinates of the three vertices
   const uint* vertices = triangle.entities(0);
@@ -242,16 +258,13 @@ real TriangleCell::diameter(const MeshEntity& triangle) const
   Point p1 = geometry.point(vertices[1]);
   Point p2 = geometry.point(vertices[2]);
 
-  // FIXME: Assuming 3D coordinates, could be more efficient if
-  // FIXME: if we assumed 2D coordinates in 2D
-
   // Compute side lengths
   real a  = p1.distance(p2);
   real b  = p0.distance(p2);
   real c  = p0.distance(p1);
 
-  // Formula for diameter (2*circumradius) from http://mathworld.wolfram.com
-  return 0.5 * a*b*c / volume(triangle);
+  // Formula for circumradius from http://mathworld.wolfram.com
+  return 0.25 * a*b*c / volume(triangle);
 }
 //-----------------------------------------------------------------------------
 real TriangleCell::normal(const Cell& cell, uint facet, uint i) const

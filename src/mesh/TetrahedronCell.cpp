@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/Facet.h>
@@ -41,6 +42,7 @@ dolfin::uint TetrahedronCell::numEntities(uint dim) const
     return 1; // cells
   default:
     error("Illegal topological dimension %d for tetrahedron.", dim);
+    break;
   }
 
   return 0;
@@ -60,6 +62,7 @@ dolfin::uint TetrahedronCell::numVertices(uint dim) const
     return 4; // cells
   default:
     error("Illegal topological dimension %d for tetrahedron.", dim);
+    break;
   }
 
   return 0;
@@ -107,6 +110,7 @@ void TetrahedronCell::createEntities(uint** e, uint dim, const uint* v) const
     break;
   default:
     error("Don't know how to create entities of topological dimension %d.", dim);
+    break;
   }
 }
 //-----------------------------------------------------------------------------
@@ -180,8 +184,8 @@ void TetrahedronCell::orderEntities(Cell& cell) const
 
           // Check if the jth vertex of facet i is non-incident on edge k
 #if __SUNPRO_CC
-	  int n1 = 0;
-	  std::count(edge_vertices, edge_vertices+2, facet_vertices[j], n1);
+          int n1 = 0;
+          std::count(edge_vertices, edge_vertices+2, facet_vertices[j], n1);
           if (!n1)
 #else
           if (!std::count(edge_vertices, edge_vertices+2, facet_vertices[j]))
@@ -229,7 +233,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
           uint* edge_vertices = topology(1, 0)(cell_edges[k]);
 
           // Check if the ith and jth vertex of the cell are non-incident on edge k
-#if __SUNPRO_CC 
+#if __SUNPRO_CC
 	  int n1 = 0;
 	  int n2 = 0;
 	  std::count(edge_vertices, edge_vertices+2, cell_vertices[i], n1);
@@ -270,7 +274,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
         uint* facet_vertices = topology(2, 0)(cell_facets[j]);
 
         // Check if the ith vertex of the cell is non-incident on facet j
-#if __SUNPRO_CC 
+#if __SUNPRO_CC
 	int n1 = 0;
 	std::count(facet_vertices, facet_vertices+3, cell_vertices[i], n1);
 	if (!n1)
@@ -324,11 +328,11 @@ void TetrahedronCell::refineCell(Cell& cell, MeshEditor& editor,
   editor.addCell(current_cell++, e0, e3, e4, e5);
 }
 //-----------------------------------------------------------------------------
-void TetrahedronCell::refineCellIrregular(Cell& cell, MeshEditor& editor, 
-				      uint& current_cell, uint refinement_rule, 
-				      uint* marked_edges) const
+void TetrahedronCell::refineCellIrregular(Cell& cell, MeshEditor& editor,
+                                          uint& current_cell, uint refinement_rule,
+                                          uint* marked_edges) const
 {
-  warning("Not implemented yet.");
+  error("Not implemented yet.");
 
   /*
   // Get vertices and edges
@@ -353,8 +357,8 @@ void TetrahedronCell::refineCellIrregular(Cell& cell, MeshEditor& editor,
   const uint e5 = offset + e[5];
 
   // Refine according to refinement rule
-  // The rules are numbered according to the paper: 
-  // J. Bey, "Tetrahedral Grid Refinement", 1995.   
+  // The rules are numbered according to the paper:
+  // J. Bey, "Tetrahedral Grid Refinement", 1995.
   switch ( refinement_rule )
   {
   case 1:
@@ -394,8 +398,7 @@ real TetrahedronCell::volume(const MeshEntity& tetrahedron) const
   const MeshGeometry& geometry = tetrahedron.mesh().geometry();
 
   // Only know how to compute the volume when embedded in R^3
-  if ( geometry.dim() != 3 )
-    error("Only know how to compute the volume of a tetrahedron when embedded in R^3.");
+  dolfin_assert(geometry.dim() > 2 );
 
   // Get the coordinates of the four vertices
   const uint* vertices = tetrahedron.entities(0);
@@ -409,19 +412,30 @@ real TetrahedronCell::volume(const MeshEntity& tetrahedron) const
              x1[0] * ( x0[1]*x2[2] + x3[1]*x0[2] + x2[1]*x3[2] - x2[1]*x0[2] - x0[1]*x3[2] - x3[1]*x2[2] ) +
              x2[0] * ( x0[1]*x1[2] + x3[1]*x0[2] + x1[1]*x3[2] - x1[1]*x0[2] - x0[1]*x3[2] - x3[1]*x1[2] ) -
              x3[0] * ( x0[1]*x1[2] + x1[1]*x2[2] + x2[1]*x0[2] - x1[1]*x0[2] - x2[1]*x1[2] - x0[1]*x2[2] ) );
-  
+
   return std::abs(v) / 6.0;
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::diameter(const MeshEntity& tetrahedron) const
 {
+  dolfin_assert(tetrahedron.numEntities(1) == 6);
+  real hmax = 0.0;
+  MeshEntity * tet = const_cast<MeshEntity *>(&tetrahedron); //FIXME: constness
+  for (EdgeIterator edge(*tet); !edge.end(); ++edge)
+  {
+    hmax = std::max(hmax, edge->length());
+  }
+  return hmax;
+}
+//-----------------------------------------------------------------------------
+real TetrahedronCell::circumradius(const MeshEntity& tetrahedron) const
+{
   // Get mesh geometry
   const MeshGeometry& geometry = tetrahedron.mesh().geometry();
 
   // Only know how to compute the volume when embedded in R^3
-  if ( geometry.dim() != 3 )
-    error("Only know how to compute the diameter of a tetrahedron when embedded in R^3.");
-  
+  dolfin_assert(geometry.dim() > 2 );
+
   // Get the coordinates of the four vertices
   const uint* vertices = tetrahedron.entities(0);
   Point p0 = geometry.point(vertices[0]);
@@ -436,16 +450,16 @@ real TetrahedronCell::diameter(const MeshEntity& tetrahedron) const
   real aa = p0.distance(p3);
   real bb = p1.distance(p3);
   real cc = p2.distance(p3);
-                                
+
   // Compute "area" of triangle with strange side lengths
   real la   = a*aa;
   real lb   = b*bb;
   real lc   = c*cc;
   real s    = 0.5*(la+lb+lc);
   real area = sqrt(s*(s-la)*(s-lb)*(s-lc));
-                                
-  // Formula for diameter (2*circumradius) from http://mathworld.wolfram.com
-  return area / ( 3.0*volume(tetrahedron) );
+
+  // Formula for circumradius from http://mathworld.wolfram.com
+  return area / ( 6.0*volume(tetrahedron) );
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::normal(const Cell& cell, uint facet, uint i) const
@@ -457,13 +471,13 @@ Point TetrahedronCell::normal(const Cell& cell, uint facet) const
 {
   // This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
-  
+
   // Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(2)[facet]);
 
   // Get global index of opposite vertex
   const uint v0 = cell.entities(0)[facet];
-  
+
   // Get global index of vertices on the facet
   uint v1 = f.entities(0)[0];
   uint v2 = f.entities(0)[1];
@@ -471,7 +485,7 @@ Point TetrahedronCell::normal(const Cell& cell, uint facet) const
 
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
-  
+
   // Get the coordinates of the four vertices
   const real* p0 = geometry.x(v0);
   const real* p1 = geometry.x(v1);
@@ -509,10 +523,10 @@ dolfin::real TetrahedronCell::facetArea(const Cell& cell, uint facet) const
 
   // This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
-  
+
   // Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(2)[facet]);
-  
+
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
 
@@ -521,13 +535,13 @@ dolfin::real TetrahedronCell::facetArea(const Cell& cell, uint facet) const
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
   const real* x2 = geometry.x(vertices[2]);
-  
+
   // Compute area of triangle embedded in R^3
   real v0 = (x0[1]*x1[2] + x0[2]*x2[1] + x1[1]*x2[2]) - (x2[1]*x1[2] + x2[2]*x0[1] + x1[1]*x0[2]);
   real v1 = (x0[2]*x1[0] + x0[0]*x2[2] + x1[2]*x2[0]) - (x2[2]*x1[0] + x2[0]*x0[2] + x1[2]*x0[0]);
   real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
-  
-  // Formula for area from http://mathworld.wolfram.com 
+
+  // Formula for area from http://mathworld.wolfram.com
   return  0.5 * sqrt(v0*v0 + v1*v1 + v2*v2);
 }
 //-----------------------------------------------------------------------------
@@ -617,7 +631,7 @@ dolfin::uint TetrahedronCell::findEdge(uint i, const Cell& cell) const
   const uint* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
-  
+
   // Ordering convention for edges (order of non-incident vertices)
   static uint EV[6][2] = {{0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}};
 

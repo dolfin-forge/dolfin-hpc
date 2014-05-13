@@ -41,6 +41,9 @@ namespace dolfin
     /// Compute diameter of cell
     inline real diameter() const { return _mesh.type().diameter(*this); }
 
+    /// Compute circumradius of cell
+    inline real circumradius() const { return _mesh.type().circumradius(*this); }
+
     /// Compute midpoint of cell
     Point midpoint();
 

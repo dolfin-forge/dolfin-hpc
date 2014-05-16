@@ -36,12 +36,11 @@ namespace dolfin
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain) :
     BoundaryCondition("SlipBC", mesh, sub_domain),
     mesh(mesh),
-    node_normal(new NodeNormal(mesh)),
+    node_normal(new NodeNormal(mesh, sub_domain)),
     node_normal_local(true),
-    As(0)
+    As(NULL)
 {
-  // Initialize sub domain markers on vertices
-  BoundaryCondition::init_markers(0);
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals) :
@@ -49,10 +48,9 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals) :
     mesh(mesh),
     node_normal(&normals),
     node_normal_local(false),
-    As(0)
+    As(NULL)
 {
-  // Initialize sub domain markers
-  BoundaryCondition::init_markers(0);
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
 SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
@@ -60,7 +58,7 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
     mesh(sub_domains.mesh()),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
-    As(0)
+    As(NULL)
 {
   // Do nothing
 }
@@ -71,7 +69,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
     mesh(mesh),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
-    As(0)
+    As(NULL)
 {
   // Set sub domain markers
   BoundaryCondition::init_markers(0);
@@ -84,7 +82,7 @@ SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
     mesh(sub_domains.mesh()),
     node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
-    As(0)
+    As(NULL)
 {
   // Do nothing
 }
@@ -156,6 +154,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
   if (space.element().space_dimension()
       == mesh.type().numEntities(0) * mesh.type().dim())
   {
+    BoundaryCondition::init_markers(0);
     applySlipBC_P1(A, b, form, scratch);
   }
   else
@@ -191,7 +190,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 
     DofMap const& dofmap = form.test_space().dofmap();
 
-    Array<uint> nodes;
+    Array<uint> dofs;
     uint gdim = mesh.geometry().dim();
     uint cdim = mesh.type().numVertices(mesh.topology().dim());
 
@@ -220,11 +219,12 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 
         for (uint i = 0; i < gdim; i++, ci += cdim)
         {
-          nodes.push_back(scratch.dofs[ci]);
+          dofs.push_back(scratch.dofs[ci]);
         }
 
-        applyNodeBC(A, b, mesh, node, nodes);
-        nodes.clear();
+        // Assumes that dof index == global vertex index
+        applyNodeBC(A, b, mesh, !mesh.distdata().get_vertex_global(node), dofs);
+        dofs.clear();
       }
     }
   }
@@ -239,10 +239,11 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
   // Therefore it is the number of constrained directions up to the topological
   // dimension
   real node_type = 0;
-  node_type = node_normal->vertex_type.get(node);
+  node_type = node_normal->node_type(node);
   //node_normal->node_type().vector().get(&node_type, 1, &node);
   uint const tdim = mesh.topology().dim();
   int const n_type = std::min((int) std::floor(node_type), (int) tdim);
+  dolfin_assert(n_type > 0);
 
   // Initialize set of row indices for reordering
   std::set<uint> row_idx = row_indices;

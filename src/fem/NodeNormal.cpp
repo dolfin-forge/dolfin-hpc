@@ -2,79 +2,49 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2008-2009.
+// Modified by Aurélien Larcher, 2012-14. (rewrite, extension to any element)
 //
 // First added:  2007-05-01
-// Last changed: 2009-12-30
+// Last changed: 2014-05-22
 
 #include <dolfin/fem/NodeNormal.h>
 
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 
 #include <map>
-
-#define B(row,col,nrow) ((row) + ((nrow)*(col)))
-
-using namespace dolfin;
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-NodeNormal::NodeNormal(NodeNormal& node_normal) :
-    BoundaryNormal(node_normal.mesh),
-    normal(NULL),
-    tau(NULL),
-    tau_1(NULL),
-    tau_2(NULL),
-    mesh(node_normal.mesh),
-    alpha_max_(0.5 * DOLFIN_PI * 0.99),
-    weighting_(none)
+NodeNormal::NodeNormal(Mesh& mesh, Type w, real alpha) :
+    BoundaryNormal(mesh),
+    mesh_(mesh),
+    subdomain_(NULL),
+    no_subdomain_(true),
+    alpha_max_(alpha),
+    weighting_(w)
 {
-  *this = node_normal;
 }
 
 //-----------------------------------------------------------------------------
-NodeNormal::NodeNormal(Mesh& mesh) :
+NodeNormal::NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w,
+                       real alpha) :
     BoundaryNormal(mesh),
-    normal(NULL),
-    tau(NULL),
-    tau_1(NULL),
-    tau_2(NULL),
-    mesh(mesh),
-    alpha_max_(0.5 * DOLFIN_PI * 0.99),
-    weighting_(none)
+    mesh_(mesh),
+    subdomain_(&subdomain),
+    no_subdomain_(false),
+    alpha_max_(alpha),
+    weighting_(w)
 {
-  uint const nsdim = mesh.topology().dim();
-
-  for (uint d = 0; d < nsdim; ++d)
-  {
-    basis_.push_back(new MeshFunction<real> [nsdim]);
-    for (uint i = 0; i < nsdim; ++i)
-    {
-      basis_.back()[i].init(mesh, 0);
-    }
-  }
-  vertex_type.init(mesh, 0);
-
-  // backward compatbility
-  normal = basis_[0];
-  if (nsdim == 2)
-  {
-    tau = basis_[1];
-  }
-  if (nsdim == 3)
-  {
-    tau_1 = basis_[1];
-    tau_2 = basis_[2];
-  }
-
-  ComputeNormal(mesh);
 }
 
 //-----------------------------------------------------------------------------
@@ -86,946 +56,478 @@ NodeNormal::~NodeNormal()
 //-----------------------------------------------------------------------------
 void NodeNormal::Clear()
 {
-  while (!basis_.empty())
+  // Cleanup facet and node data
+  for (_map<uint, FacetData *>::iterator it = facets_.begin();
+  it != facets_.end(); ++it)
   {
-    delete[] basis_.back();
-    basis_.pop_back();
+    delete it->second;
   }
-}
-
-//-----------------------------------------------------------------------------
-NodeNormal&
-NodeNormal::operator=(NodeNormal& node_normal)
-{
-  Clear();
-
-  uint const nsdim = mesh.topology().dim();
-
-  vertex_type.init(mesh, 0);
-  for (uint d = 0; d < nsdim; ++d)
+  facets_.clear();
+  for (_map<uint, NodeData *>::iterator it = nodes_.begin();
+      it != nodes_.end(); ++it)
   {
-    basis_.push_back(new MeshFunction<real> [nsdim]);
-    for (uint i = 0; i < nsdim; ++i)
-    {
-      basis_.back()[i].init(mesh, 0);
-    }
-
+    delete it->second;
   }
-  for (VertexIterator v(mesh); !v.end(); ++v)
-  {
-    vertex_type.set(*v, node_normal.vertex_type.get(*v));
-    for (uint d = 0; d < nsdim; ++d)
-    {
-      for (uint i = 0; i < nsdim; ++i)
-      {
-        basis_[d][i].set(*v, node_normal.basis_[d][i].get(*v));
-      }
-    }
-  }
-
-  // backward compatbility
-  normal = basis_[0];
-  if (nsdim == 2)
-  {
-    tau = basis_[1];
-  }
-  if (nsdim == 3)
-  {
-    tau_1 = basis_[1];
-    tau_2 = basis_[2];
-  }
-
-  return *this;
+  nodes_.clear();
 }
 
 //-----------------------------------------------------------------------------
 void NodeNormal::compute()
 {
-  int tdim = mesh.topology().dim();
-  switch (tdim)
-    {
-    case 2:
-      ComputeTangentialVectors(mesh, basis()[0], basis()[1], *this);
-      break;
-    case 3:
-      ComputeTangentialVectors(mesh, basis()[0], basis()[1], basis()[2], *this);
-      break;
-    default:
-      error("Unsupported topological dimension for NodeNormal computation");
-      break;
-    }
+  Compute(mesh_, basis());
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::ComputeNormal(Mesh& mesh)
+uint NodeNormal::node_type(uint node_id) const
 {
-  message("BoundaryNormals: Compute normals");
-  mesh.renumber();
-  uint rank = dolfin::MPI::processNumber();
-  uint pe_size = dolfin::MPI::numProcesses();
-  Array<real> *send_buff_type_basis = new Array<real> [pe_size];
-  Array<uint> *send_buff_index = new Array<uint> [pe_size];
-  _map<uint, bool> used_shared;
+  _map<uint, NodeData *>::const_iterator it = nodes_.find(node_id);
+  dolfin_assert(it != nodes_.end());
+  return it->second->node_type;
+}
 
-  for (MeshSharedIterator s(mesh.distdata(), 0); !s.end(); ++s)
+//-----------------------------------------------------------------------------
+void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
+{
+  Clear();
+
+  BoundaryMesh& boundary = mesh.exterior_boundary();
+  if (!boundary.numCells() > 0)
   {
-    used_shared[s.index()] = false;
+    return;
   }
+  MeshFunction<uint> * cell_map = boundary.data().meshFunction("cell map");
+  MeshFunction<uint> * vertex_map = boundary.data().meshFunction("vertex map");
 
-  // Iterate over all cells in the boundary mesh
-  BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
+  //---------------------------------------------------------------------------
+  MeshDistributedData & distdata = mesh.distdata();
+  uint const tdim = mesh.topology().dim();
+  uint const facet_dim = tdim - 1;
+  uint const gdim = mesh.geometry().dim();
 
   //
-  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
-  MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
-  uint const nsdim = mesh.topology().dim();
-
-  //
-  if (dolfin::MPI::numProcesses() > 1)
+  if (functions.size() < gdim)
   {
-    CacheSharedArea(mesh, boundary);
+    error("Invalid size of storage vector for basis functions in NodeNormal");
   }
-
-  //-------------------------------------------------------------------------
-  real * basis_vec = new real[nsdim * nsdim];
-
-  real * n_block = NULL;
-  real * w_block = NULL;
-
-  uint NbNeighCells = 0;
-
-  // Computation of normals to the boundary vertices
-  if (boundary.numCells())
+  for (uint d = 0; d < gdim; ++d)
   {
-
-    for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
-        ++boundary_vertex)
+    if (functions[d].type() != Function::discrete)
     {
-      uint boundary_id = vertex_map->get(*boundary_vertex);
-      uint global_id = mesh.distdata().get_vertex_global(boundary_id);
+      error("All basis functions in NodeNormal should be discrete");
+    }
+  }
+  FiniteElementSpace const& space = functions[0].space();
+  DofMap const& dofmap = space.dofmap();
+  ScratchSpace scratch(space);
+  uint const value_dim = space.element().value_dimension(0);
+  dolfin_assert(value_dim == gdim);
+  uint const num_facet_dofs = dofmap.num_facet_dofs();
+  uint const num_facet_nodes = num_facet_dofs / value_dim;
+  uint const num_restricted_facet_dofs = dofmap.num_entity_dofs(facet_dim);
 
-      bool const vertex_is_shared = mesh.distdata().is_shared(boundary_id, 0);
-      bool const vertex_is_ghosted = mesh.distdata().is_ghost(boundary_id, 0);
+  // The implementation works only for dofs located on the exterior boundary
+  bool const on_boundary = true;
 
-      // Reset basis to zero
-      std::fill_n(basis_vec, nsdim * nsdim, 0.);
+  //--- Create facet data
+  // Mark facets in the subdomain based on dofs, naive implementation
+  for (CellIterator b_cell(boundary); !b_cell.end(); ++b_cell)
+  {
+    Facet facet(mesh, cell_map->get(*b_cell));
+    Cell cell(mesh, facet.entities(tdim)[0]);
+    uint local_facet = cell.index(facet);
 
-      // Get number of neighbouring cells
-      // Add storage for shared vertices cell normals
-      NbNeighCells = 0;
-      if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
+    // An exterior facet should be included in the subdomain if at least one
+    // of the dofs on the facet restriction (if any) or if the facet midpoint
+    // is in the subdomain.
+    // Skip the facet if it does not satifies one of these conditions.
+    if (no_subdomain_
+        || subdomain_->inside(&(b_cell->midpoint())[0], on_boundary))
+    {
+      // Update cell data and tabulate the coordinates
+      scratch.cell.update(cell, distdata);
+      dofmap.tabulate_coordinates(scratch.coordinates, scratch.cell);
+    }
+    else
+    {
+      bool invalid = true;
+      if (num_restricted_facet_dofs > 0)
       {
-        NbNeighCells = num_neigh_cells_[global_id];
-      }
-      else
-      {
-        for (CellIterator boundary_cell(*boundary_vertex); !boundary_cell.end();
-            ++boundary_cell)
+        // Tabulate dofs on facet restriction
+        scratch.cell.update(cell, distdata);
+        dofmap.tabulate_coordinates(scratch.coordinates, scratch.cell);
+        dofmap.tabulate_entity_dofs(scratch.facet_dofs, facet_dim, local_facet);
+        for (uint i = 0; i < num_restricted_facet_dofs; ++i)
         {
-          ++NbNeighCells;
-        }
-      }
-
-      if (NbNeighCells == 0)
-      {
-        dolfin::error("This vertex was found to have zero neighbouring facets");
-      }
-
-      // Contains of all normals from the facets
-      n_block = new real[NbNeighCells * nsdim];
-      // Contains of all weights from the facets
-      w_block = new real[NbNeighCells];
-
-      // Sum of all areas of the elements
-      real sum_weights = 0.0;
-      uint neighcell_count = 0;
-
-      for (CellIterator boundary_cell(*boundary_vertex); !boundary_cell.end();
-          ++boundary_cell)
-      {
-        // Create mesh facet corresponding to boundary cell
-        Facet mesh_facet(mesh, cell_map->get(*boundary_cell));
-        dolfin_assert(mesh_facet.numEntities(nsdim) == 1);
-
-        // Get cell to which facet belongs (pick first, there is only one)
-        Cell mesh_cell(mesh, mesh_facet.entities(nsdim)[0]);
-        // Get local index of facet with respect to the cell
-        uint local_facet = mesh_cell.index(mesh_facet);
-
-        // Compute area of facet
-        real facet_normal_weight = 1.0;
-        if (weighting_ == facet)
-        {
-          // Compute the measure of the facet
-          facet_normal_weight = boundary_cell->volume();
-        }
-        else if (weighting_ == cell)
-        {
-          // Compute the measure of the cell
-          facet_normal_weight = mesh_cell.volume();
-        }
-
-        w_block[neighcell_count] = facet_normal_weight;
-        // Get sum of the length/area of all neighbouring cells
-        sum_weights += facet_normal_weight;
-
-        // Save facet normals to block
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          real nd = mesh_cell.normal(local_facet, d);
-          basis_vec[d] += facet_normal_weight * nd;
-          n_block[B(neighcell_count, d, NbNeighCells)] = nd;
-        }
-        ++neighcell_count;
-      }
-
-      // Add neighbouring bound.cell/facet contributions from other processes
-      if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
-      {
-        // Add normals computed at vertex from other processes
-        uint tabulated_idx = shared_offsetidx_[global_id];
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          basis_vec[d] += shared_vertexnormals_[tabulated_idx + d];
-        }
-        Array<real> tmp = shared_facetweights_block_[global_id];
-        Array<real>::iterator iter;
-
-        int iirow = neighcell_count;
-        for (iter = tmp.begin(); iter != tmp.end(); iter++)
-        {
-          w_block[iirow] = *iter;
-          sum_weights += w_block[iirow];
-          ++iirow;
-        }
-
-        tmp = shared_facetnormals_block_[global_id];
-        for (iter = tmp.begin(); iter != tmp.end(); iter += nsdim)
-        {
-          for (uint d = 0; d < nsdim; ++d)
+          uint loc_dof = scratch.facet_dofs[i];
+          if (subdomain_->inside(scratch.coordinates[loc_dof], on_boundary))
           {
-            n_block[B(neighcell_count, d, NbNeighCells)] = *(iter + d);
-          }
-          ++neighcell_count;
-        }
-      }
-
-      // Now, we have:
-      //    basis_vec   : Vertex normal (*not* unit !) nsdim components
-      //    n_block     : NbNeighCells facet unit normals with nsdim components
-      //      w_block   : NbNeighCells facet weights
-      //    sum_weights : sum of the facet weights
-      Array<real> tangent_weights;
-      uint v_type = 0; // if at the end the value is still zero then something is wrong
-      real cosalpha_max = std::cos(alpha_max_);
-      real cosalpha = 0.0;
-      //real sinalpha_max = std::sin(alpha_max_);
-
-      // In 2D there are only and exactly only two facets but let us not
-      // speculate maybe we live in the 5th dimension
-      real * nref = new real[nsdim];
-
-      // Let first initialize the list of offset to jump from one normal to another
-      uint * normals_offsets = new uint[NbNeighCells];
-      // We start by jumping across all the normals starting from 0 since
-      // facet normal 0 is part of the computation of nS1
-      // (but it's clear that normal 0 belongs to the surface it generates...)
-      std::fill_n(normals_offsets, NbNeighCells, 1);
-      normals_offsets[0] = 0;
-
-      // DEBUG: map facets to surfaces
-      std::map<uint, uint> surfaces;
-
-      // Add storage for normals to surfaces
-      Array<real *> surface_normals;
-      Array<real> surface_totalweights;
-
-      // Has to be integer such that comparison to zero holds
-      int remaining_normals_count = NbNeighCells;
-      uint curr_surface = 0;
-      uint curr_facet = 0;
-      while (remaining_normals_count > 0)
-      {
-        ++curr_surface;
-
-        // Set new reference normal to first remaining normal.
-        // Murtazo seems to use the second surface's averaged normal
-        // to detect a third plane, should this be fixed ?
-        uint nref_idx = normals_offsets[0];
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          nref[d] = n_block[B(nref_idx,d,NbNeighCells)];
-        }
-
-        // Init storage for surface normal, deleted with cleanup of surface_normals Array
-        real * nSx = new real[nsdim];
-        real wSx = 0.;
-        std::fill_n(nSx, nsdim, 0);
-
-        // Loop through remaining normals indexes.
-        // We read the sequence of offsets to jump through the remaining normals
-        // the first sequence is { 0, 1, 1, 1, ...} with NbNeighCells elements
-        curr_facet = normals_offsets[0];
-        uint offset_to_update = 0;
-
-        for (uint curr_offset = 0;
-            curr_facet < NbNeighCells && curr_offset < NbNeighCells;
-            curr_facet += normals_offsets[++curr_offset])
-        {
-          // Then let us loop on the other facet normals to compute the scalar product
-          cosalpha = 0.0;
-          for (uint d = 0; d < nsdim; ++d)
-          {
-            cosalpha += nref[d] * n_block[B(curr_facet, d, NbNeighCells)];
-          }
-          if (cosalpha > cosalpha_max)
-          {
-            surfaces.insert(std::pair<uint, uint>(curr_facet, curr_surface));
-
-            // Add contribution to surface normal
-            for (uint d = 0; d < nsdim; ++d)
-            {
-              nSx[d] += w_block[curr_facet]
-                  * n_block[B(curr_facet,d,NbNeighCells)];
-              wSx += w_block[curr_facet];
-            }
-
-            // Eliminate from count of remaining normals to discriminate
-            --remaining_normals_count;
-
-            // Update offset value
-            ++normals_offsets[offset_to_update];
-
-          }
-          else
-          {
-            // Found normal not belonging to the same plane,
-            // increase offset position then set offset value to one
-            normals_offsets[offset_to_update] += normals_offsets[curr_offset]
-                - 1;
-            normals_offsets[++offset_to_update] = 1;
+            invalid = false;
+            break;
           }
         }
-
-        // Add surface normal to the list of surface normals
-        surface_normals.push_back(nSx);
-
-        // Next loop we add a new surface and discriminate again across
-        // the remaining normals
-
       }
-      v_type = curr_surface;
-      delete nref;
-      delete normals_offsets;
-
-      // n_k    = sum_{i=1}^k nS_i
-      // tau1_k = |n_{k-1}|^2 nS_k - (n_{k-1} . nS_k ) n_{k-1}
-      // tau2_k = n_k ^ tau1_k
-
-      // In 2d tau2_k = ez = (0,0,1)
-
-      // Now we have a nice list of surface normals...
-      // ... and apparently we shamelessly take them as averaged normals and tangents
-      // But why would I divide by the sum if I am merely normalizing them right after?
-      uint const nb_surfaces = surface_normals.size();
-
-      // Taken from V. John, J. Comp. and Appl. Math. 2002
-      // Let's fit everything in basis_vec of size nsdim*nsdim
-      // normalize the first vector in basis_vec (which is the normal)
-      real normal_nrm = 0.0;
-      for (uint d = 0; d < nsdim; ++d)
+      if (invalid)
       {
-        normal_nrm += basis_vec[d] * basis_vec[d];
+        // Skip facet
+        continue;
       }
-      normal_nrm = std::sqrt(normal_nrm);
-      for (uint in = 0; in < nsdim; ++in)
+    }
+
+    // Add facet to the list with facet weight and normal
+    FacetData * data = new FacetData();
+    data->global_index = distdata.get_facet_global(facet.index());
+    switch (weighting_)
+    {
+      case NodeNormal::none: // unit
+        data->weight = 1.0;
+        break;
+      case NodeNormal::facet: // facet area
+        data->weight = b_cell->volume();
+        break;
+      case NodeNormal::cell: // adjacent cell volume
+        data->weight = cell.volume();
+        break;
+      default:
+        break;
+    }
+    data->normal = cell.normal(local_facet);
+
+    // Set valid dofs within the current facet
+    dofmap.tabulate_dofs(scratch.dofs, scratch.cell, cell.index());
+    dofmap.tabulate_facet_dofs(scratch.facet_dofs, local_facet);
+    for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
+    {
+      uint dof0 = scratch.facet_dofs[f_n];
+      if (no_subdomain_
+          || subdomain_->inside(scratch.coordinates[dof0], on_boundary))
       {
-        basis_vec[in] /= normal_nrm;
-      }
-      // Compute unit tangents from unit normal
-      if (nsdim == 2)
-      {
-        // 2D case, make orthonormal
-        basis_vec[2] = -basis_vec[1];
-        basis_vec[3] = basis_vec[0];
-      }
-      else
-      {
-        // 3D case
-        if (v_type == 1)
+        // Take global dof index of the first component as node id
+        uint node_id = scratch.dofs[dof0];
+        data->nodes.insert(node_id);
+
+        // Trigger creation of node data if the entry does not exist
+        _map<uint, NodeData *>::iterator it = nodes_.find(node_id);
+        if (it == nodes_.end())
         {
-          real norm_inv = 0.0;
-          if (std::fabs(basis_vec[0]) >= 0.5 || std::fabs(basis_vec[1]) >= 0.5)
+          NodeData * n_data = new NodeData();
+          for (uint d = 0; d < value_dim; ++d)
           {
-            norm_inv = 1.
-                / std::sqrt(
-                    basis_vec[0] * basis_vec[0] + basis_vec[1] * basis_vec[1]);
-            // t11 = n2/n
-            basis_vec[3] = basis_vec[1] * norm_inv;
-            // t12 = -n1/n
-            basis_vec[4] = -basis_vec[0] * norm_inv;
-            // t13 = 0
-            basis_vec[5] = 0.0;
-            // t21 = -t12*n3
-            basis_vec[6] = -basis_vec[4] * basis_vec[2];
-            // t22 = t11*n3
-            basis_vec[7] = basis_vec[3] * basis_vec[2];
-            // t23 = t12*n1 - t11*n2
-            basis_vec[8] = basis_vec[4] * basis_vec[0]
-                - basis_vec[3] * basis_vec[1];
+            uint local_dof = scratch.facet_dofs[d * num_facet_nodes + f_n];
+            n_data->dofs.push_back(scratch.dofs[local_dof]);
+            dolfin_assert(no_subdomain_
+                || subdomain_->inside(scratch.coordinates[local_dof],
+                    on_boundary));
           }
-          else
-          {
-            norm_inv = 1.
-                / std::sqrt(
-                    basis_vec[1] * basis_vec[1] + basis_vec[2] * basis_vec[2]);
-            // t11 = 0
-            basis_vec[3] = 0.0;
-            // t12 = -n3/n
-            basis_vec[4] = -basis_vec[2] * norm_inv;
-            // t13 = n2/n
-            basis_vec[5] = basis_vec[1] * norm_inv;
-            // t21 = t13*n2 - t12*n3
-            basis_vec[6] = basis_vec[5] * basis_vec[1]
-                - basis_vec[4] * basis_vec[2];
-            // t22 = -t13*n1
-            basis_vec[7] = -basis_vec[5] * basis_vec[0];
-            // t23 = t12*n1
-            basis_vec[8] = basis_vec[4] * basis_vec[0];
-          }
+          n_data->facets.push_back(data);
+          nodes_[node_id] = n_data;
         }
         else
         {
-          uint const Sk = v_type - 1;
-          basis_vec[6] = basis_vec[1] * surface_normals[Sk][2]
-              - surface_normals[Sk][1] * basis_vec[2];
-          basis_vec[7] = basis_vec[2] * surface_normals[Sk][0]
-              - surface_normals[Sk][2] * basis_vec[0];
-          basis_vec[8] = basis_vec[0] * surface_normals[Sk][1]
-              - surface_normals[Sk][0] * basis_vec[1];
-
-          real tau2_norm = std::sqrt(
-              basis_vec[6] * basis_vec[6] + basis_vec[7] * basis_vec[7]
-                  + basis_vec[8] * basis_vec[8]);
-
-          basis_vec[6] /= tau2_norm;
-          basis_vec[7] /= tau2_norm;
-          basis_vec[8] /= tau2_norm;
-
-          basis_vec[3] = basis_vec[7] * basis_vec[2]
-              - basis_vec[8] * basis_vec[1];
-          basis_vec[4] = basis_vec[8] * basis_vec[0]
-              - basis_vec[6] * basis_vec[2];
-          basis_vec[5] = basis_vec[6] * basis_vec[1]
-              - basis_vec[7] * basis_vec[0];
+          it->second->facets.push_back(data);
         }
+      }
+    } dolfin_assert(!data->nodes.empty());
+    facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
+  }
 
+  //--- Exchange data for exterior facets with shared entities
+  if (mesh.distributed())
+  {
+    // Since an entity is shared is shared iff all it lower dimensional entities
+    // are shared we can loop over shared vertices and stack facets.
+    // If non-matching facet are send they will be eventually discarded.
+    // This does not hold if the subdomain has a hole in the interior of the
+    // facet.
+    uint rank = dolfin::MPI::processNumber();
+    uint pe_size = dolfin::MPI::numProcesses();
+    Array<uint> u_sendbuf;    //[facet, nb_nodes, [node indices]]
+    Array<real> r_sendbuf;    //[weight, normal]
+    uint const r_packet_size = 1 + gdim;
+    _set<uint> used_adj_facets;
+    for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
+        ++boundary_vertex)
+    {
+      uint vertex_idx = vertex_map->get(*boundary_vertex);
+      if (!mesh.distdata().is_shared(vertex_idx, 0))
+      {
+        continue;
       }
 
-      //---
-      // Prepare data structures
-      if (vertex_is_ghosted)
+      Vertex v(mesh, vertex_idx);
+      uint const num_adj_facets = v.numEntities(facet_dim);
+      dolfin_assert(num_adj_facets > 0);
+      uint * adj_facets_idx = v.entities(facet_dim);
+      for (uint f = 0; f < num_adj_facets; ++f)
       {
-        uint owner = mesh.distdata().get_owner(boundary_id, 0);
-        send_buff_type_basis[owner].push_back((double) v_type);
-        for (uint basisidx = 0; basisidx < nsdim * nsdim; ++basisidx)
+        uint const f_local = adj_facets_idx[f];
+
+        // Avoid sending the same facet twice
+        if (used_adj_facets.count(f_local) > 0)
         {
-          send_buff_type_basis[owner].push_back(basis_vec[basisidx]);
+          continue;
         }
-        send_buff_index[owner].push_back(global_id);
+        used_adj_facets.insert(f_local);
+
+        // Pack data to send buffer
+        uint const f_global = distdata.get_facet_global(f_local);
+        _map<uint, FacetData *>::iterator it = facets_.find(f_global);
+        if (it != facets_.end())
+        {
+          // Append data as the facet shares a dof
+          FacetData * data = it->second;
+          // global index
+          u_sendbuf.push_back(data->global_index);
+          // dofs
+          dolfin_assert(data->nodes.size() > 0);
+          u_sendbuf.push_back(data->nodes.size());
+          for (_set<uint>::const_iterator d_it = data->nodes.begin();
+          d_it != data->nodes.end(); ++d_it)
+          {
+            u_sendbuf.push_back(*d_it);
+          }
+          // weight
+          r_sendbuf.push_back(data->weight);
+          // normal
+          for (uint d = 0; d < gdim; ++d)
+          {
+            r_sendbuf.push_back(data->normal[d]);
+          }
+        }
+      }
+    }
+
+    // Exchange values
+    MPI_Status status;
+    uint src;
+    uint dest;
+    MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+
+    uint const u_sendcount = u_sendbuf.size();
+    int u_maxrecvcount = 0;
+    int u_recvcount = 0;
+    MPI_Allreduce(&u_sendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
+                  dolfin::MPI::DOLFIN_COMM);
+    uint * u_recvbuf = new uint[u_maxrecvcount];
+
+    uint const r_sendcount = r_sendbuf.size();
+    int r_maxrecvcount = 0;
+    int r_recvcount = 0;
+    MPI_Allreduce(&r_sendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
+                  dolfin::MPI::DOLFIN_COMM);
+    real * r_recvbuf = new real[r_maxrecvcount];
+
+    for (int proc = 1; proc < pe_size; ++proc)
+    {
+      src = (rank - proc + pe_size) % pe_size;
+      dest = (rank + proc) % pe_size;
+
+      MPI_Sendrecv(&u_sendbuf[0], u_sendcount, MPI_UNSIGNED, src, 1, u_recvbuf,
+                   u_maxrecvcount, MPI_UNSIGNED, dest, 1,
+                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
+      MPI_Sendrecv(&r_sendbuf[0], r_sendcount, MPI_DOUBLE, src, 1, r_recvbuf,
+                   r_maxrecvcount, MPI_DOUBLE, dest, 1,
+                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &r_recvcount);
+
+      uint i_r = 0;
+      for (uint i_u = 0; i_u < u_recvcount;)
+      {
+        // Add adjacent process facet data
+        FacetData * data = new FacetData();
+        data->global_index = u_recvbuf[i_u++];
+        uint nb_nodes = u_recvbuf[i_u++];
+        dolfin_assert(nb_nodes > 0);dolfin_assert(nb_nodes <= num_facet_nodes);
+        data->nodes.insert(&u_recvbuf[i_u], &u_recvbuf[i_u + nb_nodes]);
+        i_u += nb_nodes;
+        data->weight = r_recvbuf[i_r++];
+        std::copy(&r_recvbuf[i_r], &r_recvbuf[i_r + gdim], &data->normal[0]);
+        i_r += gdim;
+        facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
+
+        // Add facet to the nodes' list of adjacent facets
+        for (_set<uint>::const_iterator d_it = data->nodes.begin();
+        d_it != data->nodes.end(); ++d_it)
+        {
+          // If the node exists on the partition then add the facet
+          _map<uint, NodeData *>::iterator it = nodes_.find(*d_it);
+          if(it != nodes_.end())
+          {
+            it->second->facets.push_back(data);
+          }
+        }
+      }
+    }
+    delete[] r_recvbuf;
+    delete[] u_recvbuf;
+  }
+
+  //--- Determine node type from facet normals and compute surface normals
+  real cosalpha_max = std::cos(alpha_max_);
+  real cosalpha = 0.0;
+  uint const num_boundary_dofs = gdim * nodes_.size();
+  uint * dofs = new uint[num_boundary_dofs]; // dof indices
+  uint * node_dofs = &dofs[0];
+  real * block = new real[gdim * num_boundary_dofs]; // ( n, tau_1, tau_2 )
+  real * offset = &block[0];
+  Point basis[3]; //TODO: Remove Point
+  for (_map<uint, NodeData *>::iterator it = nodes_.begin();
+  it != nodes_.end(); ++it, node_dofs+=gdim, offset+=gdim)
+  {
+    NodeData * n_data = it->second;
+    // Copy dof indices to array for vector block set.
+    std::copy(n_data->dofs.begin(),n_data->dofs.end(),node_dofs);
+
+    //
+    Array<std::pair<real, Point> > surfaces;
+    Array<FacetData *>const & n_facets = n_data->facets;
+    uint const num_facets = n_facets.size();
+
+    uint num_remaining_facets = num_facets;
+    FacetData ** remaining_facets = new FacetData*[num_remaining_facets];
+    std::copy(n_facets.begin(), n_facets.end(), remaining_facets);
+    while(num_remaining_facets > 0)
+    {
+      // Set reference normal as the last of the remaining facet normal
+      // and initialize new surface.
+      Point& reference_normal = remaining_facets[0]->normal;
+      real s_weight = remaining_facets[0]->weight;
+      Point s_normal(reference_normal);
+      uint num_eliminated_facets = 1;
+
+      //
+      uint entry_to_update = 0;
+      for(uint f = 1; f < num_remaining_facets; ++f)
+      {
+        FacetData * curr_facet = remaining_facets[f];
+        cosalpha = curr_facet->normal.dot(reference_normal);
+        if (cosalpha > cosalpha_max)
+        {
+          // Add facet to current surface
+          s_weight += curr_facet->weight;
+          s_normal += curr_facet->weight * curr_facet->normal;
+          ++num_eliminated_facets;
+        }
+        else
+        {
+          // Update current cursor with the facet for next loop
+          remaining_facets[entry_to_update] = curr_facet;
+          ++entry_to_update;
+        }
+      }
+      s_weight /= num_eliminated_facets;
+      s_normal /= s_normal.norm();
+      surfaces.push_back(std::pair<real, Point>(s_weight, s_normal));
+      num_remaining_facets -= num_eliminated_facets;
+
+    }
+    // Update node type with the number of discriminated surfaces
+    n_data->node_type = surfaces.size();
+    dolfin_assert(n_data->node_type > 0);
+
+    //--- Compute node normals for piecewise linear boundary
+    basis[0] = 0;
+    for(Array<std::pair<real, Point> >::const_iterator s_it = surfaces.begin();
+    s_it != surfaces.end(); ++s_it)
+    {
+      basis[0] += s_it->first * s_it->second;
+    }
+    basis[0] /= basis[0].norm();
+
+    // Compute tangential vectors
+    switch(gdim)
+    {
+      case 2:
+      ComputeTangents2D(basis);
+      break;
+      case 3:
+      if(n_data->node_type == 1)
+      {
+        ComputeTangents3DSurface(basis);
       }
       else
       {
-        vertex_type.set(boundary_id, v_type);
-        if (v_type == 0)
-        {
-          error("Surface multiplicity is equal to zero");
-        }
-        for (uint basisvec = 0; basisvec < nsdim; ++basisvec)
-        {
-          for (uint in = 0; in < nsdim; ++in)
-          {
-            basis_[basisvec][in].set(boundary_id,
-                                     basis_vec[basisvec * nsdim + in]);
-          }
-        }
-        used_shared[boundary_id] = true;
+        ComputeTangents3D(basis, surfaces.rbegin()->second);
       }
-
-      //
-
-      while (!surface_normals.empty())
-      {
-        delete[] surface_normals.back();
-        surface_normals.pop_back();
-      }
-
-      delete[] w_block;
-      delete[] n_block;
+      break;
+      default:
+      break;
     }
-  }
 
-  // Synchronize basis vectors, vertex type across processes
-  if (dolfin::MPI::numProcesses() > 1)
-  {
-    MPI_Status status;
-    uint src = 0;
-    uint dest = 0;
-    int recv_count = 0;
-    int recv_size = 0;
-    int send_size = 0;
-    int recv_count_data = 0;
-
-    // Collect data size
-    for (uint i = 0; i < pe_size; i++)
+    // Copy data to block array, FIXME: avoid copy by removing Points
+    for(uint d = 0; d< gdim; ++d)
     {
-      send_size = send_buff_index[i].size();
-      MPI_Reduce(&send_size, &recv_count, 1, MPI_INT, MPI_SUM, i,
-                 dolfin::MPI::DOLFIN_COMM);
+      dolfin_assert(std::fabs(basis[d].norm() - 1.0) < DOLFIN_EPS);
+      dolfin_assert(std::fabs(basis[d].dot(basis[(d+1)%(gdim)])) < DOLFIN_EPS);
 
-      send_size = send_buff_type_basis[i].size();
-      MPI_Reduce(&send_size, &recv_count_data, 1, MPI_INT, MPI_SUM, i,
-                 dolfin::MPI::DOLFIN_COMM);
+      std::copy(&basis[d][0], &basis[d][0]+gdim, offset + d*num_boundary_dofs);
     }
-
-    // Storage is (v_type (size = 1), basis (size = nsdim*nsdim))
-    uint data_alignment = 1 + nsdim * nsdim;
-    uint *recv_index = new uint[recv_count];
-    real *recv_type = new real[recv_count_data];
-
-    for (uint i = 1; i < pe_size; i++)
-    {
-      src = (rank - i + pe_size) % pe_size;
-      dest = (rank + i) % pe_size;
-
-      MPI_Sendrecv(&send_buff_index[dest][0], send_buff_index[dest].size(),
-                   MPI_UNSIGNED, dest, 0, recv_index, recv_count, MPI_UNSIGNED,
-                   src, 0, dolfin::MPI::DOLFIN_COMM, &status);
-
-      MPI_Sendrecv(&send_buff_type_basis[dest][0],
-                   send_buff_type_basis[dest].size(), MPI_DOUBLE, dest, 1,
-                   recv_type, recv_count_data, MPI_DOUBLE, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &recv_size);
-
-      // Insert check if value assigned
-      uint idx = 0;
-      // Data alignment is n_tau + 1
-      for (int j = 0; j < recv_size; j += data_alignment, ++idx)
-      {
-        uint index = mesh.distdata().get_vertex_local(recv_index[idx]);
-        if (!used_shared[index])
-        {
-          vertex_type.set(index, (uint) recv_type[j]);
-
-          uint offset = j + 1;
-          for (uint basisvec = 0; basisvec < nsdim; ++basisvec)
-          {
-            for (uint in = 0; in < nsdim; ++in)
-            {
-              basis_[basisvec][in].set(
-                  index, recv_type[offset + basisvec * nsdim + in]);
-            }
-          }
-          used_shared[index] = true;
-        }
-      }
-    }
-
-    delete[] recv_index;
-    delete[] recv_type;
-
   }
 
-  //--- Cleanup
-  for (uint i = 0; i < pe_size; ++i)
+  for (uint d = 0; d < gdim; ++d)
   {
-    send_buff_type_basis[i].clear();
-    send_buff_index[i].clear();
+    GenericVector& v = functions[d].vector();
+    v.set(block + d * num_boundary_dofs, num_boundary_dofs, dofs);
+    v.apply();
   }
-  delete[] send_buff_type_basis;
-  delete[] send_buff_index;
-
-  num_neigh_cells_.clear();
-  shared_vertexnormals_.clear();
-  shared_offsetidx_.clear();
-
-  for (std::map<uint, Array<real> >::iterator it =
-      shared_facetnormals_block_.begin();
-      it != shared_facetnormals_block_.end(); ++it)
-  {
-    it->second.clear();
-  }
-  for (std::map<uint, Array<real> >::iterator it =
-      shared_facetweights_block_.begin();
-      it != shared_facetweights_block_.end(); ++it)
-  {
-    it->second.clear();
-  }
-  shared_facetnormals_block_.clear();
-  shared_facetweights_block_.clear();
+  delete[] dofs;
+  delete[] block;
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
+void NodeNormal::ComputeTangents2D(Point (&basis)[3])
 {
-  uint const nsdim = mesh.topology().dim();
-
-  int rank = dolfin::MPI::processNumber();
-  int pe_size = dolfin::MPI::numProcesses();
-
-  MeshFunction<uint>* cell_map = boundary.data().meshFunction("cell map");
-  MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
-
-  // Send buff for global indices of shared vertices
-  Array<uint> sendbuff_global_vert_indices;
-  // Send buff for normal contribution of shared vertices
-  Array<real> sendbuff_vertexnormals;
-  // Send buff for facets normals associated with shared vertices
-  Array<real> sendbuff_facetnormals;
-  // Send buff for weights of shared vertices
-  Array<real> sendbuff_facetweights;
-
-  // Send buff for offset indices packed by triplet for each shared vertex
-  // (NbNeighbouringCells, FacetNormalsOffset, FacetWeightsOffset )
-  Array<uint> sendbuff_offset_indices;
-  vertex_offset_ = 0;
-  facetnormals_offset_ = 0;
-  facetweights_offset_ = 0;
-
-  // Map global id of boundary vertices to boundary marker
-  std::map<uint, bool> GlobalIdOnBoundary;
-
-  real * const normal = new real[nsdim];
-
-  uint SharedVertexCount = 0;
-  uint SharedMeshFacetCount = 0;
-
-  // Computation of normals to the boundary vertices shared between processes
-  if (boundary.numCells())
-  {
-    uint NbNeighCells = 0;
-    for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
-        ++boundary_vertex, SharedMeshFacetCount += NbNeighCells)
-    {
-      uint boundary_id = vertex_map->get(*boundary_vertex);
-      uint global_id = mesh.distdata().get_vertex_global(boundary_id);
-
-      // Mark vertex as part of the boundary
-      GlobalIdOnBoundary[global_id] = true;
-
-      // Reset normal to zero
-      std::fill_n(normal, nsdim, 0.);
-
-      // Cache number of neighbouring cells for each shared vertex
-      NbNeighCells = 0;
-
-      bool const vertex_is_shared = mesh.distdata().is_shared(boundary_id, 0);
-
-      if (vertex_is_shared)
-      {
-        ++SharedVertexCount;
-        sendbuff_global_vert_indices.push_back(global_id);
-
-        //
-        for (CellIterator boundary_cell(*boundary_vertex); !boundary_cell.end();
-            ++boundary_cell)
-        {
-          // Create mesh facet corresponding to boundary cell
-          Facet mesh_facet(mesh, cell_map->get(*boundary_cell));
-          dolfin_assert(mesh_facet.numEntities(nsdim) == 1);
-
-          // Get cell to which facet belongs (pick first, there is only one)
-          Cell mesh_cell(mesh, mesh_facet.entities(nsdim)[0]);
-
-          // Get local index of facet with respect to the cell
-          uint local_facet = mesh_cell.index(mesh_facet);
-
-          // Compute area of facet
-          real facet_normal_weight = 1.0;
-          if (weighting_ == facet)
-          {
-            // Compute the measure of the facet
-            facet_normal_weight = boundary_cell->volume();
-          }
-          else if (weighting_ == cell)
-          {
-            // Compute the measure of the cell
-            facet_normal_weight = mesh_cell.volume();
-          }
-          sendbuff_facetweights.push_back(facet_normal_weight);
-
-          // Compute a normal to the boundary
-          for (uint d = 0; d < nsdim; ++d)
-          {
-            real nd = mesh_cell.normal(local_facet, d);
-            normal[d] += facet_normal_weight * nd;
-            sendbuff_facetnormals.push_back(nd);
-          }
-
-          ++NbNeighCells;
-        }
-        num_neigh_cells_[global_id] = NbNeighCells;
-
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          sendbuff_vertexnormals.push_back(normal[d]);
-        }
-
-        sendbuff_offset_indices.push_back(NbNeighCells);
-        sendbuff_offset_indices.push_back(facetnormals_offset_);
-        sendbuff_offset_indices.push_back(facetweights_offset_);
-
-        // Init datastructures for shared data
-        shared_offsetidx_[global_id] = vertex_offset_;
-
-        // Update shared vertex offset
-        vertex_offset_ += nsdim;
-        // Padding for NbNeighCells FacetNormals
-        facetnormals_offset_ += nsdim * NbNeighCells;
-        // Padding for NbNeighCells FacetWeights
-        facetweights_offset_ += NbNeighCells;
-      }
-    }
-  }
-
-  delete[] normal;
-
-  // Exchange values
-  MPI_Status status;
-  uint src;
-  uint dest;
-
-  int sh_vertidx_count = sendbuff_global_vert_indices.size();
-  int sh_vertexnormals_count = sendbuff_vertexnormals.size();
-  int sh_facetnormals_count = sendbuff_facetnormals.size();
-  int sh_facetweights_count = sendbuff_facetweights.size();
-
-  dolfin_assert(sh_vertidx_count == SharedVertexCount);dolfin_assert(sh_vertexnormals_count == SharedVertexCount*nsdim);dolfin_assert(sh_facetnormals_count == SharedMeshFacetCount*nsdim);dolfin_assert(sh_facetweights_count == SharedMeshFacetCount);
-
-  int recv_size_vertidx;
-  int recv_size_vertexnormals;
-  int recv_size_facetnormals;
-  int recv_size_facetweights;
-
-  int recv_count;
-
-  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
-  MPI_Allreduce(&sh_vertidx_count, &recv_size_vertidx, 1, MPI_INT, MPI_MAX,
-                dolfin::MPI::DOLFIN_COMM);
-  MPI_Allreduce(&sh_vertexnormals_count, &recv_size_vertexnormals, 1, MPI_INT,
-                MPI_MAX, dolfin::MPI::DOLFIN_COMM);
-
-  MPI_Allreduce(&sh_facetweights_count, &recv_size_facetweights, 1, MPI_INT,
-                MPI_MAX, dolfin::MPI::DOLFIN_COMM);
-
-  MPI_Allreduce(&sh_facetnormals_count, &recv_size_facetnormals, 1, MPI_INT,
-                MPI_MAX, dolfin::MPI::DOLFIN_COMM);
-
-  uint *recv_vertidx = new uint[recv_size_vertidx];
-  uint *recv_offsetidx = new uint[offsetidx_padding_ * recv_size_vertidx];
-
-  real *recv_vertexnormals = new real[recv_size_vertexnormals];
-  real *recv_facetnormals = new real[recv_size_facetnormals];
-  real *recv_facetweights = new real[recv_size_facetweights];
-
-  // Init and fill BoundaryNormals storage
-  shared_vertexnormals_.resize(SharedVertexCount * nsdim, 0.);
-
-  // For each process
-  for (int proc = 1; proc < pe_size; ++proc)
-  {
-    src = (rank - proc + pe_size) % pe_size;
-    dest = (rank + proc) % pe_size;
-
-    MPI_Sendrecv(&sendbuff_global_vert_indices[0], sh_vertidx_count,
-                 MPI_UNSIGNED, src, 1, recv_vertidx, recv_size_vertidx,
-                 MPI_UNSIGNED, dest, 1, dolfin::MPI::DOLFIN_COMM, &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-    MPI_Sendrecv(&sendbuff_vertexnormals[0], sh_vertexnormals_count, MPI_DOUBLE,
-                 src, 1, recv_vertexnormals, recv_size_vertexnormals,
-                 MPI_DOUBLE, dest, 1, dolfin::MPI::DOLFIN_COMM, &status);
-
-    MPI_Sendrecv(&sendbuff_facetnormals[0], sh_facetnormals_count, MPI_DOUBLE,
-                 src, 1, recv_facetnormals, recv_size_facetnormals, MPI_DOUBLE,
-                 dest, 1, dolfin::MPI::DOLFIN_COMM, &status);
-
-    MPI_Sendrecv(&sendbuff_facetweights[0], sh_facetweights_count, MPI_DOUBLE,
-                 src, 1, recv_facetweights, recv_size_facetweights, MPI_DOUBLE,
-                 dest, 1, dolfin::MPI::DOLFIN_COMM, &status);
-
-    MPI_Sendrecv(&sendbuff_offset_indices[0],
-                 (offsetidx_padding_ * sh_vertidx_count), MPI_UNSIGNED, src, 1,
-                 recv_offsetidx, offsetidx_padding_ * recv_size_vertidx,
-                 MPI_UNSIGNED, dest, 1, dolfin::MPI::DOLFIN_COMM, &status);
-
-    // Index for vertex
-    uint vertidx = 0;
-    // Index for boundary cells == global mesh facets
-    uint facetidx = 0;
-    // Number of neighbouring boundary cells
-    uint nbneighcells = 0;
-    // Offsets
-    uint facetnoffset = 0;
-    uint weightoffset = 0;
-    for (int i = 0; i < recv_count; i++)
-    {
-      uint glb_index = recv_vertidx[i];
-      if (mesh.distdata().have_global(glb_index, 0)
-          && GlobalIdOnBoundary.count(glb_index) > 0
-          && GlobalIdOnBoundary[glb_index])
-      {
-        // Compute shared normals
-        for (uint d = 0; d < nsdim; ++d)
-        {
-          shared_vertexnormals_[shared_offsetidx_[glb_index] + d] +=
-              recv_vertexnormals[vertidx + d];
-        }
-
-        // Get alignment and offsets
-        nbneighcells = recv_offsetidx[facetidx];
-        facetnoffset = recv_offsetidx[facetidx + 1];
-        weightoffset = recv_offsetidx[facetidx + 2];
-
-        // Update number of neighbouring boundary cells
-        num_neigh_cells_[glb_index] += nbneighcells;
-
-        // Add corresponding facet normals
-        for (uint k = 0; k < nsdim * nbneighcells; ++k)
-        {
-          shared_facetnormals_block_[glb_index].push_back(
-              recv_facetnormals[facetnoffset++]);
-        }
-
-        // Add corresponding facet weights
-        for (uint k = 0; k < nbneighcells; ++k)
-        {
-          shared_facetweights_block_[glb_index].push_back(
-              recv_facetweights[weightoffset++]);
-        }
-      }
-
-      // Increase data offsets
-      vertidx += nsdim;
-      facetidx += offsetidx_padding_;
-    }
-
-  }
-  delete[] recv_vertidx;
-  delete[] recv_vertexnormals;
-  delete[] recv_facetnormals;
-  delete[] recv_offsetidx;
-  delete[] recv_facetweights;
+  basis[1][0] = -basis[0][1];
+  basis[1][1] = +basis[0][0];
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::ComputeTangentialVectors(Mesh& mesh, Function& Fnormal,
-                                          Function& Ftau_1, Function& Ftau_2,
-                                          NodeNormal& node_normal)
+void NodeNormal::ComputeTangents3DSurface(Point (&basis)[3])
 {
-  DofMap const& dmF = Fnormal.space().dofmap();
-  GenericVector& tau_1 = Ftau_1.vector();
-  GenericVector& tau_2 = Ftau_2.vector();
-  GenericVector& normal = Fnormal.vector();
-  Cell c(mesh, 0);
-  UFCCell ufccell(c);
-  uint local_dim = c.numEntities(0);
-  uint const nsd = c.dim();
-  uint *idx = new uint[nsd * local_dim];
-  uint *id = new uint[nsd * local_dim];
-  real *tau_1_block = new real[nsd * local_dim];
-  real *tau_2_block = new real[nsd * local_dim];
-  real *normal_block = new real[nsd * local_dim];
-
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  real norm_inv = 0.0;
+  if (std::fabs(basis[0][0]) >= 0.5 || std::fabs(basis[0][1]) >= 0.5)
   {
-
-    ufccell.update(*cell, mesh.distdata());
-
-    dmF.tabulate_dofs(idx, ufccell, cell->index());
-
-    uint ii = 0;
-    uint jj = 0;
-    for (uint i = 0; i < nsd; ++i)
-    {
-      for (VertexIterator v(*cell); !v.end(); ++v, ++ii)
-      {
-        if (!mesh.distdata().is_ghost(v->index(), 0))
-        {
-          tau_1_block[jj] = node_normal.tau_1[i].get(*v);
-          tau_2_block[jj] = node_normal.tau_2[i].get(*v);
-          normal_block[jj] = node_normal.normal[i].get(*v);
-          id[jj++] = idx[ii];
-        }
-      }
-    }
-
-    tau_1.set(tau_1_block, jj, id);
-    tau_2.set(tau_2_block, jj, id);
-    normal.set(normal_block, jj, id);
+    norm_inv = 1.
+        / std::sqrt(basis[0][0] * basis[0][0] + basis[0][1] * basis[0][1]);
+    // t11 = n2/n
+    basis[1][0] = basis[0][1] * norm_inv;
+    // t12 = -n1/n
+    basis[1][1] = -basis[0][0] * norm_inv;
+    // t13 = 0
+    basis[1][2] = 0.0;
+    // t21 = -t12*n3
+    basis[2][0] = -basis[1][1] * basis[0][2];
+    // t22 = t11*n3
+    basis[2][1] = basis[1][0] * basis[0][2];
+    // t23 = t12*n1 - t11*n2
+    basis[2][2] = basis[1][1] * basis[0][0] - basis[1][0] * basis[0][1];
   }
-
-  tau_1.apply();
-  tau_2.apply();
-  normal.apply();
-  delete[] tau_1_block;
-  delete[] tau_2_block;
-  delete[] normal_block;
-  delete[] id;
-  delete[] idx;
+  else
+  {
+    norm_inv = 1.
+        / std::sqrt(basis[0][1] * basis[0][1] + basis[0][2] * basis[0][2]);
+    // t11 = 0
+    basis[1][0] = 0.0;
+    // t12 = -n3/n
+    basis[1][1] = -basis[0][2] * norm_inv;
+    // t13 = n2/n
+    basis[1][2] = basis[0][1] * norm_inv;
+    // t21 = t13*n2 - t12*n3
+    basis[2][0] = basis[1][2] * basis[0][1] - basis[1][1] * basis[0][2];
+    // t22 = -t13*n1
+    basis[2][1] = -basis[1][2] * basis[0][0];
+    // t23 = t12*n1
+    basis[2][2] = basis[1][1] * basis[0][0];
+  }
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::ComputeTangentialVectors(Mesh& mesh, Function& Fnormal,
-                                          Function& Ftau,
-                                          NodeNormal& node_normal)
+void NodeNormal::ComputeTangents3D(Point (&basis)[3], Point& surface)
 {
-  DofMap const& dmF = Fnormal.space().dofmap();
-  GenericVector& tau = Ftau.vector();
-  GenericVector& normal = Fnormal.vector();
-  Cell c(mesh, 0);
-  UFCCell ufccell(c);
-  uint local_dim = c.numEntities(0);
-  uint const nsd = c.dim();
-  uint *idx = new uint[nsd * local_dim];
-  uint *id = new uint[nsd * local_dim];
-  real *tau_block = new real[nsd * local_dim];
-  real *normal_block = new real[nsd * local_dim];
-
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
-  {
-
-    ufccell.update(*cell, mesh.distdata());
-
-    dmF.tabulate_dofs(idx, ufccell, cell->index());
-
-    uint ii = 0;
-    uint jj = 0;
-    for (uint i = 0; i < nsd; ++i)
-    {
-      for (VertexIterator v(*cell); !v.end(); ++v, ++ii)
-      {
-        if (!mesh.distdata().is_ghost(v->index(), 0))
-        {
-          tau_block[jj] = node_normal.tau[i].get(*v);
-          normal_block[jj] = node_normal.normal[i].get(*v);
-          id[jj++] = idx[ii];
-        }
-      }
-    }
-    tau.set(tau_block, jj, id);
-    normal.set(normal_block, jj, id);
-  }
-
-  tau.apply();
-  normal.apply();
-  delete[] tau_block;
-  delete[] normal_block;
-  delete[] id;
-  delete[] idx;
+  basis[2] = basis[0].cross(surface);
+  basis[2] /= basis[2].norm();
+  basis[1] = basis[2].cross(basis[0]);
 }
-
 //-----------------------------------------------------------------------------
 
 }

@@ -2,10 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2009.
-// Modified by Aurélien Larcher, 2012-13. (partial rewrite)
+// Modified by Aurélien Larcher, 2012-14. (rewrite, extension to any element)
 //
 // First added:  2007-05-01
-// Last changed: 2009-03-17
+// Last changed: 2014-05-22
 
 #ifndef __NODENORMAL_H
 #define __NODENORMAL_H
@@ -18,19 +18,31 @@
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+
 #include <map>
+
 
 namespace dolfin
 {
+
+class SubDomain;
+
 class NodeNormal : public BoundaryNormal
 {
+
 public:
 
-  /// Copy constructor
-  NodeNormal(NodeNormal& node_normal);
+  enum Type
+  {
+    none, facet, cell
+  };
 
   /// Create normal, tangents for the boundary of mesh
-  NodeNormal(Mesh& mesh);
+  NodeNormal(Mesh& mesh, Type w = none, real alpha = 1.57);
+
+  /// Create normal, tangents for the boundary of mesh for given subdomain
+  NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w = none,
+             real alpha = 1.57);
 
   ///
   ~NodeNormal();
@@ -38,73 +50,89 @@ public:
   ///
   void compute();
 
+  ///
+  uint node_type(uint node_id) const;
+
   /// Assignment
   NodeNormal& operator=(NodeNormal& node_normal);
-
-  /// Define mesh functions for normal and tangents
-  /// These are merely aliases now
-  MeshFunction<real> * normal;
-  MeshFunction<real> * tau;
-  MeshFunction<real> * tau_1;
-  MeshFunction<real> * tau_2;
-
-  /// Define vertex type as the number of discriminated hyperplanes:
-  /// 1 surface, 2 edge, >= 3 corner
-  MeshFunction<uint> vertex_type;
 
 private:
 
   /// Cleanup
   void Clear();
 
-  /// Compute normals to the boundary nodes
-  void ComputeNormal(Mesh& mesh);
+  /// Compute boundary normal basis
+  void Compute(Mesh& mesh, Array<Function>& basis);
 
-  ///
-  void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau,
-                                NodeNormal& node_normal);
-
-  ///
-  void ComputeTangentialVectors(Mesh& mesh, Function& Fnormal, Function& Ftau_1,
-                                Function& Ftau_2, NodeNormal& node_normal);
-
-  ///
-  void CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary);
+  /// Compute tangential vectors
+  void ComputeTangents2D(Point (& basis)[3]);
+  void ComputeTangents3DSurface(Point (& basis)[3]);
+  void ComputeTangents3D(Point (& basis)[3], Point& surface);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  Mesh& mesh;
+  Mesh& mesh_;
 
-  Array<MeshFunction<real> *> basis_;
-
-  /// Entities shared between processors
-  Array<real> shared_vertexnormals_;
-  std::map<uint, Array<real> > shared_facetnormals_block_;
-  std::map<uint, Array<real> > shared_facetweights_block_;
-
-  /// Number of boundary mesh cells (facets for global) neighbouring a boundary
-  /// vertex
-  std::map<uint, uint> num_neigh_cells_;
-  std::map<uint, uint> shared_offsetidx_;
-  uint vertex_offset_;
-  uint facetnormals_offset_;
-  uint facetweights_offset_;
-
-  /// Should be set to the size of the offset information stored for each vertex
-  /// Padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
-  static uint const offsetidx_padding_ = 3;
+  SubDomain const * const subdomain_;
+  bool const no_subdomain_;
 
   /// Maximum absolute angle between two neighbouring facets to be discriminated
-  /// as belonging to difference hyperplanes.
+  /// as belonging to different hyperplanes.
   real const alpha_max_;
 
-  /// Weighing use to computing the node normal from facet normals.
-  enum weight_type
+  /// Weighting use to computing the node normal from facet normals.
+  Type const weighting_;
+
+  struct FacetData
   {
-    none, facet, cell
+    uint global_index;_set<uint> nodes;
+    real weight;
+    Point normal;
+
+    void disp() const
+    {
+      cout << "FacetData" << endl;
+      cout << "---------" << endl;
+      // Begin indentation
+      begin("");
+      cout << "global_index : " << global_index << endl;
+      cout << "nodes        : " << (uint) nodes.size() << endl;
+      cout << "weight       : " << weight << endl;
+      cout << "normal       : " << normal.x() << ", "
+      << normal.y() << ", "
+      << normal.z() << endl;
+      // End indentation
+      end();
+      cout << endl;
+    }
   };
 
-  weight_type weighting_;
+  // Maps facet global index to (weight, normal)
+  _map<uint, FacetData *> facets_;
+
+  struct NodeData
+  {
+    uint node_type;
+    Array<uint> dofs;
+    Array<FacetData *> facets;
+
+    void disp() const
+    {
+      cout << "NodeData" << endl;
+      cout << "--------" << endl;
+      // Begin indentation
+      begin("");
+      cout << "node_type    : " << node_type << endl;
+      cout << "dofs         : " << (uint) dofs.size() << endl;
+      cout << "facets       : " << (uint) facets.size() << endl;
+      // End indentation
+      end();
+      cout << endl;
+    }
+  };
+
+  // Maps dofs to facet global indices
+  _map<uint, NodeData *> nodes_;
 
 };
 

@@ -345,7 +345,7 @@ void DofMap::build()
 
   map.clear();
 
-  if (MPI::numProcesses() > 1)
+  if (mesh().distributed())
   {
 #ifdef HAVE_MPI
     Mesh& dolfin_mesh = mesh();

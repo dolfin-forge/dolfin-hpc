@@ -4,9 +4,10 @@
 // Existing code for Dirichlet BC is used
 //
 // Modified by Niclas Jansson, 2008-2009.
+// Modified by Aurélien Larcher, 2013-2014. (rewrite, extension to any element)
 //
 // First added:  2007-05-01
-// Last changed: 2010-05-09
+// Last changed: 2014-05-22
 
 #ifndef __SLIPBC_H
 #define __SLIPBC_H
@@ -67,6 +68,9 @@ private:
 
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                       const BilinearForm& form, ScratchSpace& scratch);
+
+  void applySlipBC(GenericMatrix& A, GenericVector& b,
+                   const BilinearForm& form, ScratchSpace& scratch);
 
   void applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
                  uint const node, Array<uint> const& nodes);

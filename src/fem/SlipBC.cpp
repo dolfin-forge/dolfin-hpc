@@ -4,9 +4,10 @@
 // Existing code for Dirichlet BC is used
 //
 // Modified by Niclas Jansson, 2008-2012.
+// Modified by Aurélien Larcher, 2013-2014. (rewrite, extension to any element)
 //
 // First added:  2007-05-01
-// Last changed: 2012-03-04
+// Last changed: 2014-05-22
 
 #include <dolfin/fem/UFC.h>
 
@@ -16,6 +17,7 @@
 #include <dolfin/fem/SlipBC.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
@@ -71,8 +73,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
     node_normal_local(true),
     As(NULL)
 {
-  // Set sub domain markers
-  BoundaryCondition::init_markers(0);
+  // Do nothing
 }
 
 //-----------------------------------------------------------------------------
@@ -136,6 +137,21 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
     node_normal->init(mesh, space.element().signature());
     node_normal->compute();
 
+    // Create boundary markers for given topological dimension if the subdomain
+    // is defined geometrically.
+    if (this->has_geometrical_sub_domain())
+    {
+      if (space.element().space_dimension()
+          == mesh.type().numEntities(0) * mesh.type().dim())
+      {
+        BoundaryCondition::init_markers(0); // vertex-based
+      }
+      else
+      {
+        BoundaryCondition::init_markers(mesh.topology().dim() - 1); // facet based
+      }
+    }
+
     // Initialize local data structures
     std::set<uint>::iterator it = row_indices.begin();
     for (uint i = 0; i < mesh.type().dim(); ++i)
@@ -150,16 +166,15 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
   // Copy global stiffness matrix into temporary one
   *(As->instance()) = A;
 
-  // Use vertex-based implementation if Lagrange P1.
+  // Use legacy vertex-based implementation if Lagrange P1.
   if (space.element().space_dimension()
       == mesh.type().numEntities(0) * mesh.type().dim())
   {
-    BoundaryCondition::init_markers(0);
     applySlipBC_P1(A, b, form, scratch);
   }
   else
   {
-    error("SlipBC is not supported for other spaces than Lagrange P1");
+    applySlipBC(A, b, form, scratch);
   }
 
   // Apply changes in the temporary matrix
@@ -222,8 +237,9 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
           dofs.push_back(scratch.dofs[ci]);
         }
 
-        // Assumes that dof index == global vertex index
-        applyNodeBC(A, b, mesh, !mesh.distdata().get_vertex_global(node), dofs);
+        // Assumes that the node id is the global dof index of the 1st component
+        uint node_id = dofs[0];
+        applyNodeBC(A, b, mesh, node_id, dofs);
         dofs.clear();
       }
     }
@@ -231,18 +247,79 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 }
 
 //-----------------------------------------------------------------------------
+void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
+                         const BilinearForm& form, ScratchSpace& scratch)
+{
+  dolfin_assert(scratch.finite_element->value_dimension(0) == mesh.geometry().dim());
+
+  BoundaryMesh& boundary = mesh.exterior_boundary();
+  MeshFunction<uint> * cell_map = boundary.data().meshFunction("cell map");
+  if (boundary.numCells())
+  {
+    MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
+    uint sub_domain_idx = this->sub_domain_index();
+
+    DofMap const& dofmap = form.test_space().dofmap();
+    uint const local_dim = dofmap.local_dimension();
+    uint const vdim = scratch.finite_element->value_dimension(0);
+
+    Array<uint> node_dofs;
+    for (CellIterator c(boundary); !c.end(); ++c)
+    {
+      Facet facet(mesh, cell_map->get(c->index()));
+
+      // Skip facets outside the sub domain
+      if (sub_domains(facet) != sub_domain_idx)
+      {
+        continue;
+      }
+
+      //
+      Cell facet_cell(mesh, facet.entities(facet.dim()+1)[0]);
+      uint const local_facet = facet_cell.index(facet);
+
+      scratch.cell.update(facet_cell,mesh.distdata());
+      dofmap.tabulate_coordinates(scratch.coordinates, scratch.cell);
+      dofmap.tabulate_dofs(scratch.dofs, scratch.cell, facet_cell.index());
+      dofmap.tabulate_facet_dofs(scratch.facet_dofs, local_facet);
+
+      //
+      uint num_facet_dofs = scratch.dof_map->num_facet_dofs();
+      uint num_nodes =  num_facet_dofs / vdim;
+      for(uint n=0; n < num_nodes; ++n)
+      {
+        // Skip the node if the subdomain is defined geometrically
+        if(this->has_geometrical_sub_domain()
+            && !sub_domain().inside(scratch.coordinates[n], true))
+        {
+          continue;
+        }
+
+        uint ci = 0;
+        for (uint i = 0; i < vdim; ++i, ci += local_dim)
+        {
+          node_dofs.push_back(scratch.dofs[n+ci]);
+        }
+
+        // Assumes that the node id is the global dof index of the 1st component
+        uint node_id = scratch.dofs[n];
+        applyNodeBC(A, b, mesh, node_id, node_dofs);
+        node_dofs.clear();
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
-                       uint const node, Array<uint> const& dofs)
+                       uint const node_id, Array<uint> const& dofs)
 {
   // Naive reimplementation -- Aurélien
   // The node type defines the number of discriminated surfaces at the node.
   // Therefore it is the number of constrained directions up to the topological
   // dimension
-  real node_type = 0;
-  node_type = node_normal->node_type(node);
-  //node_normal->node_type().vector().get(&node_type, 1, &node);
   uint const tdim = mesh.topology().dim();
-  int const n_type = std::min((int) std::floor(node_type), (int) tdim);
+  uint const n_type = std::min(node_normal->node_type(node_id), tdim);
   dolfin_assert(n_type > 0);
 
   // Initialize set of row indices for reordering
@@ -301,6 +378,42 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
     }
     //--- Copy RHS to local vector (here since a surface node is most probable)
     b.get(&l[0], tdim, &dofs[0]);
+    //--- TODO: Row swapping of free directions assumes same row structure
+    if (tdim == 3 && n_type == 1)
+    {
+      // Find position of the diagonal columns in the vectors
+      uint const maxn_1 = max[1];
+      uint diag_idx_1 = 0;
+      while (a_col_indices[maxn_1][diag_idx_1] != dofs[maxn_1])
+      {
+        ++diag_idx_1;
+      }
+      real row_d1 = std::fabs( a[0][diag_idx_1] * basis_[1][0]
+                             + a[1][diag_idx_1] * basis_[1][1]
+                             + a[2][diag_idx_1] * basis_[1][2])
+                  - std::fabs( a[0][diag_idx_1] * basis_[2][0]
+                             + a[1][diag_idx_1] * basis_[2][1]
+                             + a[2][diag_idx_1] * basis_[2][2]);
+
+      uint const maxn_2 = max[2];
+      uint diag_idx_2 = 0;
+      while (a_col_indices[maxn_2][diag_idx_2] != dofs[maxn_2])
+      {
+        ++diag_idx_2;
+      }
+      real row_d2 = std::fabs( a[0][diag_idx_2] * basis_[2][0]
+                             + a[1][diag_idx_2] * basis_[2][1]
+                             + a[2][diag_idx_2] * basis_[2][2])
+                  - std::fabs( a[0][diag_idx_2] * basis_[1][0]
+                             + a[1][diag_idx_2] * basis_[1][1]
+                             + a[2][diag_idx_2] * basis_[1][2]);
+
+      if(row_d1 < 0.0 || row_d2 < 0.0)
+      {
+        max[1] = maxn_2;
+        max[2] = maxn_1;
+      }
+    }
     //--- For each free direction
     for (uint i = n_type; i < tdim; ++i)
     {

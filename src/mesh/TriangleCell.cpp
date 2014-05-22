@@ -230,7 +230,8 @@ real TriangleCell::volume(const MeshEntity& triangle) const
 real TriangleCell::diameter(const MeshEntity& triangle) const
 {
   // Check that we get a triangle
-  dolfin_assert(triangle.numEntities(1) == 3);
+  dolfin_assert(triangle.dim() == 2);
+  dolfin_assert(triangle.numEntities(0) == 3);
 
   real hmax = 0.0;
   MeshEntity * tri = const_cast<MeshEntity *>(&triangle); //FIXME: constness
@@ -521,7 +522,7 @@ dolfin::uint TriangleCell::findEdge(uint i, const Cell& cell) const
       const uint* ev = cell.mesh().topology()(1, 0)(e[j]);
       dolfin_assert(ev);
       if (ev[0] != v[i] && ev[1] != v[i])
-	return j;
+        return j;
     }
 
   // We should not reach this

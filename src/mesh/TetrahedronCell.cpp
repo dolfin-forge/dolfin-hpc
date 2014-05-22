@@ -234,11 +234,11 @@ void TetrahedronCell::orderEntities(Cell& cell) const
 
           // Check if the ith and jth vertex of the cell are non-incident on edge k
 #if __SUNPRO_CC
-	  int n1 = 0;
-	  int n2 = 0;
-	  std::count(edge_vertices, edge_vertices+2, cell_vertices[i], n1);
-	  std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
-	  if (!n1 && !n2 )
+          int n1 = 0;
+          int n2 = 0;
+          std::count(edge_vertices, edge_vertices+2, cell_vertices[i], n1);
+          std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
+          if (!n1 && !n2 )
 #else
           if (!std::count(edge_vertices, edge_vertices+2, cell_vertices[i]) && \
               !std::count(edge_vertices, edge_vertices+2, cell_vertices[j]) )
@@ -294,7 +294,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
 }
 //-----------------------------------------------------------------------------
 void TetrahedronCell::refineCell(Cell& cell, MeshEditor& editor,
-			     uint& current_cell) const
+                                 uint& current_cell) const
 {
   // Get vertices and edges
   const uint* v = cell.entities(0);
@@ -418,7 +418,8 @@ real TetrahedronCell::volume(const MeshEntity& tetrahedron) const
 //-----------------------------------------------------------------------------
 real TetrahedronCell::diameter(const MeshEntity& tetrahedron) const
 {
-  dolfin_assert(tetrahedron.numEntities(1) == 6);
+  dolfin_assert(tetrahedron.dim() == 3);
+  dolfin_assert(tetrahedron.numEntities(0) == 4);
   real hmax = 0.0;
   MeshEntity * tet = const_cast<MeshEntity *>(&tetrahedron); //FIXME: constness
   for (EdgeIterator edge(*tet); !edge.end(); ++edge)

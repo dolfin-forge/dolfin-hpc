@@ -33,7 +33,7 @@ public:
   GTSInterface(Mesh& mesh);
 
   ///
-  ~GTSInterface(void);
+  ~GTSInterface();
 
   /// Compute cells overlapping c
   void overlap(Cell& c, Array<uint>& cells) const;
@@ -45,12 +45,6 @@ public:
   void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const;
 
 private:
-
-  ///
-  GTSInterface(void);
-
-  ///
-  GTSInterface(GTSInterface const& other);
 
   /// Construct bounding box of cell
   GtsBBox* bboxCell(Cell&) const;

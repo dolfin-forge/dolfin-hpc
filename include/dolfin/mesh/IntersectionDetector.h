@@ -44,12 +44,6 @@ public:
 
 private:
 
-  ///
-  IntersectionDetector();
-
-  ///
-  IntersectionDetector(IntersectionDetector const&);
-
   GTSInterface gts;
 };
 }

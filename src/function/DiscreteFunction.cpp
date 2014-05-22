@@ -584,6 +584,7 @@ void DiscreteFunction::InitializeGhosts()
 
   }
   std::map<uint, uint> map = dofmap().getMap();
+  dolfin_assert(map.size() == 0);
 
   X_->init_ghosted(indices.size(), indices, map);
 

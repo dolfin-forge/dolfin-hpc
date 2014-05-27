@@ -1,50 +1,91 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
 //
-// Modified by Aurélien Larcher, 2013.
+// Modified by Niclas Jansson, 2013.
+// Modified by Aurélien Larcher, 2013-2014.
 //
 // First added:  2005-11-26
 // Last changed: 2013-05-17
 //
-// Note: this breaks the standard envelope-letter idiom slightly,
-// since we call the envelope class from one of the letter classes.
-
-#include <cmath>
-#include <iomanip>
-#include <sstream>
 
 #include <dolfin/adaptivity/SpaceTimeFunction.h>
+
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/io/File.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/main/MPI.h>
 
-using namespace dolfin;
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-SpaceTimeFunction::SpaceTimeFunction(Mesh& mesh, Function& Ut) :
-    mesh_(mesh),
+SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
+                                     std::pair<real, real> interval, uint N,
+                                     real k) :
     function_(Ut),
-    U0(Ut),
-    U1(Ut),
+    mesh_(Ut.mesh()),
+    timespan_(interval),
+    measure_(interval.second - interval.first),
+    num_intervals_(N),
+    fixed_timestep_(true),
+    evaluated_(false),
+    U0(mesh_),
+    U1(mesh_),
     u0_t(0.),
     u1_t(0.),
-    u0_t_valid(false),
-    u1_t_valid(false)
+    u0_t_valid_(false),
+    u1_t_valid_(false),
+    curr_sample_(0)
 {
+  std::vector<std::string> filenames;
+  this->getFileList(Ut.name(), N, filenames);
+  addFiles(filenames, k);
+}
+
+//-----------------------------------------------------------------------------
+SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
+                                     std::pair<real, real> interval, uint N) :
+    function_(Ut),
+    mesh_(Ut.mesh()),
+    timespan_(interval),
+    measure_(interval.second - interval.first),
+    num_intervals_(N),
+    fixed_timestep_(false),
+    evaluated_(false),
+    U0(mesh_),
+    U1(mesh_),
+    u0_t(0.),
+    u1_t(0.),
+    u0_t_valid_(false),
+    u1_t_valid_(false),
+    curr_sample_(0)
+{
+  std::vector<std::string> filenames;
+  this->getFileList(Ut.name(), N, filenames);
+  addFiles(filenames);
 }
 
 //-----------------------------------------------------------------------------
 SpaceTimeFunction::SpaceTimeFunction(SpaceTimeFunction const& f) :
-    mesh_(f.mesh_),
     function_(f.function_),
+    mesh_(f.mesh_),
+    timespan_(f.timespan_),
+    measure_(f.measure_),
+    num_intervals_(f.num_intervals_),
+    fixed_timestep_(f.fixed_timestep_),
+    evaluated_(f.evaluated_),
     U0(f.function_),
     U1(f.function_),
     u0_t(f.u0_t),
     u1_t(f.u1_t),
-    u0_t_valid(false),
-    u1_t_valid(false)
+    u0_t_valid_(false),
+    u1_t_valid_(false),
+    curr_sample_(0)
 {
 }
 
@@ -56,23 +97,23 @@ SpaceTimeFunction::~SpaceTimeFunction()
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::eval(real t)
 {
-
-  std::map<real, std::string>::iterator it1;
-  std::map<real, std::string>::iterator it0;
-
-  if (U_files.size() == 0)
+  if(!evaluated_)
   {
-    error("Cannot interpolate on zero sample files");
+    U0.init(mesh_,function_.signature());
+    U1.init(mesh_,function_.signature());
+    evaluated_ = true;
   }
 
   // NOTE: t is the current time in the primal referential t \in [0,primal_Tend]
   // Find element in U_files so that element < t
+  std::map<real, std::string>::iterator it1;
+  std::map<real, std::string>::iterator it0;
 
   // Select it1 such that the time t1 is just after t
-  it1 = U_files.upper_bound(t);
+  it1 = U_files_.upper_bound(t);
 
   // If t == T, we need to step back one
-  if (it1 == U_files.end())
+  if (it1 == U_files_.end())
   {
     --it1;
   }
@@ -91,18 +132,18 @@ void SpaceTimeFunction::eval(real t)
   std::string name0 = (*it0).second;
   std::string name1 = (*it1).second;
 
-  if (t0 != u0_t || !u0_t_valid)
+  if (t0 != u0_t || !u0_t_valid_)
   {
     File file0(name0);
-    u0_t_valid = true;
+    u0_t_valid_ = true;
     u0_t = t0;
     file0 >> U0.vector();
   }
 
-  if (t1 != u1_t || !u1_t_valid)
+  if (t1 != u1_t || !u1_t_valid_)
   {
     File file1(name1);
-    u1_t_valid = true;
+    u1_t_valid_ = true;
     u1_t = t1;
     file1 >> U1.vector();
   }
@@ -120,12 +161,29 @@ void SpaceTimeFunction::eval(real t)
   evaluant().vector().axpy(w1, U1.vector());
 }
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::addPoint(std::string Uname, real t)
+void SpaceTimeFunction::write(real t)
 {
-  U_files[t] = Uname;
 }
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
+void SpaceTimeFunction::write(Array<Function *> functions,
+                              std::pair<real, real> interval, uint n, real t)
+{
+
+  for (Array<Function *>::iterator it = functions.begin();
+      it != functions.end(); ++it)
+  {
+    Function * f = *it;
+    File binfile(getFileName(f->name(), n));
+    binfile << f->vector();
+  }
+}
+//-----------------------------------------------------------------------------
+void SpaceTimeFunction::addPoint(std::string Uname, real t)
+{
+  U_files_[t] = Uname;
+}
+//-----------------------------------------------------------------------------
+void SpaceTimeFunction::addFiles(std::vector<std::string> filenames)
 {
 
 #ifdef ENABLE_MPIIO
@@ -160,7 +218,7 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
 
     MPI_File_close(&fh);
 
-    counter++;
+    ++counter;
   }
 #else
   error("MPI I/O required for space time functions with arbitrary time step");
@@ -169,11 +227,9 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames)
 }
 
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames,
-                                      real T)
+void SpaceTimeFunction::addFiles(std::vector<std::string> filenames, real k)
 {
-  //FIXME: For now we assume a fixed time step
-
+  // Fixed time step only !
   int counter = 0;
   int num_files = filenames.size();
 
@@ -190,57 +246,41 @@ void SpaceTimeFunction::util_addFiles(std::vector<std::string> filenames,
     // - num_files is the number of samples
     // - T is the measure of the time interval for solving the dual problem
     //	 i.e [sampling_start_time, primal_end_time]
-    real t = T * real(counter) / real(num_files - 1);
-    std::cout << "add intermediate time t = " << t << std::endl;
-
+    real t = k * real(counter) / real(num_files - 1);
     addPoint(filename, t);
 
-    counter++;
+    ++counter;
   }
   if (counter == 0)
   {
     error("Counter irremediably stayed stuck at zero.");
   }
-  for (std::map<real, std::string>::const_iterator it = U_files.begin();
-      it != U_files.end(); ++it)
+  for (std::map<real, std::string>::const_iterator it = U_files_.begin();
+      it != U_files_.end(); ++it)
   {
     std::cout << std::setw(4) << it->first << " : " << it->second << std::endl;
   }
 
 }
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::util_fileList(std::string basename, int N,
-                                      std::vector<std::string>& filenames)
+void SpaceTimeFunction::getFileList(std::string basename, uint N,
+                                    std::vector<std::string>& filenames)
 {
   filenames.clear();
-
-  // OK so N is the number of samples spanning [T0,T1]
-  // Then there are N - 1 time intervals
-  for (int sample_id = 0; sample_id < N; ++sample_id)
+  // Let us define N as the number of sampling intervals spanning [T0,T1]
+  // Therefore the number of files to be loaded is N+1
+  // Precondition: N > 0
+  if (N == 0)
   {
-    std::stringstream filename, number;
-    number.fill('0');
-    number.width(6);
-
-    number << sample_id;
-
-    filename << basename;
-    filename << number.str();
-#ifdef ENABLE_MPIIO
-    filename << ".bin";
-#else
-    filename << "_" << MPI::processNumber() << ".bin";
-#endif
-    filename << std::ends;
-
-    filenames.push_back(filename.str());
+    error("Trying to interpolate over zero sampling intervals");
   }
-  if (filenames.size() == 0)
+
+  // This loop is merely constructing
+  for (uint sample_id = 0; sample_id <= N; ++sample_id)
   {
-    error("Trying to interpolate over zero samples");
+    filenames.push_back(getFileName(basename, sample_id));
   }
 }
-
 //-----------------------------------------------------------------------------
 Mesh& SpaceTimeFunction::mesh()
 {
@@ -252,4 +292,17 @@ Function& SpaceTimeFunction::evaluant()
   return function_;
 }
 //-----------------------------------------------------------------------------
+std::string SpaceTimeFunction::getFileName(std::string basename, uint sample)
+{
+  std::stringstream filename;
+  filename << basename << std::setw(6) << std::setfill('0') << sample;
+#ifdef ENABLE_MPIIO
+  filename << ".bin";
+#else
+  filename << "_" << MPI::processNumber() << ".bin";
+#endif
+  return filename.str();
+}
+
+}
 

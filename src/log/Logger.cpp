@@ -14,6 +14,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/log/Logger.h>
 
 using namespace dolfin;
@@ -28,6 +29,10 @@ Logger::Logger() :
     logstream(0)
 {
   // Do nothing
+  if (dolfin::MPI::processNumber() > 0)
+  {
+    this->destination = silent;
+  }
 }
 //-----------------------------------------------------------------------------
 Logger::~Logger()
@@ -107,6 +112,9 @@ void Logger::progress(std::string title, real p)
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::string destination)
 {
+  if (dolfin::MPI::processNumber() > 0)
+    return;
+
   // Choose output destination
   if (destination == "terminal")
     this->destination = terminal;

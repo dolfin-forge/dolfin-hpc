@@ -20,13 +20,17 @@ class Mesh;
 
 class SpaceTimeFunction
 {
+
 public:
 
-  /// Create space-time function
-  SpaceTimeFunction(Mesh& mesh, Function& Ut);
+  /// Create space-time function with fixed time step
+  SpaceTimeFunction(Function& Ut, std::pair<real, real> interval, uint N, real k);
+
+  /// Create space-time function with adaptive time step
+  SpaceTimeFunction(Function& Ut, std::pair<real, real> interval, uint N);
 
   /// Copy constructor
-  SpaceTimeFunction(const SpaceTimeFunction& f);
+  SpaceTimeFunction(SpaceTimeFunction const& f);
 
   /// Destructor
   ~SpaceTimeFunction();
@@ -34,18 +38,12 @@ public:
   /// Evaluate function at time t, giving result in Ut
   void eval(real t);
 
-  /// Add a space function at time t
-  void addPoint(std::string Uname, real t);
+  /// Write sample
+  void write(real t);
 
-  /// Add a set of functions with arbitrary time steps
-  void util_addFiles(std::vector<std::string> filenames);
-
-  /// Add a set of functions with fixed time step
-  void util_addFiles(std::vector<std::string> filenames, real T);
-
-  ///
-  void util_fileList(std::string basename, int N,
-                     std::vector<std::string>& filenames);
+  /// Write function at time t
+  static void write(Array<Function *> U, std::pair<real, real> interval, uint N,
+                    real t);
 
   /// Return mesh associated with function
   Mesh& mesh();
@@ -55,23 +53,47 @@ public:
 
 private:
 
-  // Mesh associated with function (null if none)
-  Mesh& mesh_;
+  /// Add a space function at time t
+  void addPoint(std::string Uname, real t);
+
+  /// Filename
+  static std::string getFileName(std::string basename, uint sample);
+
+  /// Add a set of functions with arbitrary time steps
+  void addFiles(std::vector<std::string> filenames);
+
+  /// Add a set of functions with fixed time step
+  void addFiles(std::vector<std::string> filenames, real k);
+
+  ///
+  void getFileList(std::string basename, uint N,
+                   std::vector<std::string>& files);
 
   // Evaluant function
   Function& function_;
 
-  // Space functions defining the current time interval (cache)
+  // Mesh associated with function
+  Mesh& mesh_;
+
+  // Interval and sampling
+  std::pair<real, real>  const timespan_;
+  real const measure_;
+  uint const num_intervals_;
+  bool const fixed_timestep_;
+
+  // Space functions defining the current time interval
+  bool evaluated_;
   Function U0;
   Function U1;
 
   real u0_t;
   real u1_t;
 
-  bool u0_t_valid;
-  bool u1_t_valid;
+  bool u0_t_valid_;
+  bool u1_t_valid_;
 
-  std::map<real, std::string> U_files;
+  std::map<real, std::string> U_files_;
+  uint curr_sample_;
 
 #ifdef ENABLE_MPIIO
 

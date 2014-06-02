@@ -32,6 +32,7 @@ Logger::Logger() :
   if (dolfin::MPI::processNumber() > 0)
   {
     this->destination_ = silent;
+    std::cout.clear(std::iostream::badbit);
   }
 }
 //-----------------------------------------------------------------------------

@@ -10,8 +10,10 @@
 
 #include <dolfin/adaptivity/SpaceTimeFunction.h>
 
+#include <dolfin/common/constants.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/io/BinaryFile.h>
 #include <dolfin/io/File.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/main/MPI.h>
@@ -19,6 +21,8 @@
 #include <cmath>
 #include <iomanip>
 #include <sstream>
+#include <sys/stat.h>
+#include <unistd.h>
 
 namespace dolfin
 {
@@ -31,8 +35,9 @@ SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
     mesh_(Ut.mesh()),
     timespan_(interval),
     measure_(interval.second - interval.first),
-    num_intervals_(N),
     fixed_timestep_(true),
+    timestep_(k),
+    num_intervals_(std::min(N, uint(std::floor(measure_ / k)))),
     evaluated_(false),
     U0(mesh_),
     U1(mesh_),
@@ -42,11 +47,8 @@ SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
     u1_t_valid_(false),
     curr_sample_(0)
 {
-  std::vector<std::string> filenames;
-  this->getFileList(Ut.name(), N, filenames);
-  addFiles(filenames, k);
+  this->addFiles(U_files_, Ut.name(), interval, num_intervals_);
 }
-
 //-----------------------------------------------------------------------------
 SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
                                      std::pair<real, real> interval, uint N) :
@@ -54,8 +56,9 @@ SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
     mesh_(Ut.mesh()),
     timespan_(interval),
     measure_(interval.second - interval.first),
-    num_intervals_(N),
     fixed_timestep_(false),
+    timestep_(0.0),
+    num_intervals_(N),
     evaluated_(false),
     U0(mesh_),
     U1(mesh_),
@@ -65,19 +68,17 @@ SpaceTimeFunction::SpaceTimeFunction(Function& Ut,
     u1_t_valid_(false),
     curr_sample_(0)
 {
-  std::vector<std::string> filenames;
-  this->getFileList(Ut.name(), N, filenames);
-  addFiles(filenames);
+  this->addFiles(U_files_, Ut.name(), interval);
 }
-
 //-----------------------------------------------------------------------------
 SpaceTimeFunction::SpaceTimeFunction(SpaceTimeFunction const& f) :
     function_(f.function_),
     mesh_(f.mesh_),
     timespan_(f.timespan_),
     measure_(f.measure_),
-    num_intervals_(f.num_intervals_),
     fixed_timestep_(f.fixed_timestep_),
+    timestep_(f.timestep_),
+    num_intervals_(f.num_intervals_),
     evaluated_(f.evaluated_),
     U0(f.function_),
     U1(f.function_),
@@ -88,20 +89,29 @@ SpaceTimeFunction::SpaceTimeFunction(SpaceTimeFunction const& f) :
     curr_sample_(0)
 {
 }
-
 //-----------------------------------------------------------------------------
 SpaceTimeFunction::~SpaceTimeFunction()
 {
 
 }
 //-----------------------------------------------------------------------------
+void SpaceTimeFunction::clear()
+{
+  U_files_.clear();
+}
+//-----------------------------------------------------------------------------
 void SpaceTimeFunction::eval(real t)
 {
-  if(!evaluated_)
+  if (!evaluated_)
   {
-    U0.init(mesh_,function_.signature());
-    U1.init(mesh_,function_.signature());
+    U0.init(mesh_, function_.signature());
+    U1.init(mesh_, function_.signature());
     evaluated_ = true;
+  }
+
+  if (U_files_.size() < 2)
+  {
+    error("The minimum number of sample files is two (one interval).");
   }
 
   // NOTE: t is the current time in the primal referential t \in [0,primal_Tend]
@@ -116,6 +126,12 @@ void SpaceTimeFunction::eval(real t)
   if (it1 == U_files_.end())
   {
     --it1;
+  }
+
+  // If t == 0-, we need to step forward one
+  if(it1 == U_files_.begin())
+  {
+    ++it1;
   }
 
   it0 = it1;
@@ -152,8 +168,8 @@ void SpaceTimeFunction::eval(real t)
   real w0 = (t1 - t) / (t1 - t0);
   real w1 = (t - t0) / (t1 - t0);
 
-  cout << "S0: t = " << t0 << "; name0 = " << name0 << "; w0 = " << w0 << endl;
-  cout << "S1: t = " << t1 << "; name1 = " << name1 << "; w1 = " << w1 << endl;
+  message("S0: t = %8f ; sample = %s; w0 = %8f", t0, name0.c_str(), w0);
+  message("S1: t = %8f ; sample = %s; w1 = %8f", t1, name1.c_str(), w1);
 
   // Compute interpolated value
   evaluant().vector() = 0.0;
@@ -161,8 +177,43 @@ void SpaceTimeFunction::eval(real t)
   evaluant().vector().axpy(w1, U1.vector());
 }
 //-----------------------------------------------------------------------------
+void SpaceTimeFunction::disp() const
+{
+  cout << "SpaceTimeFunction" << endl;
+  cout << "-----------------" << endl;
+
+  // Begin indentation
+  begin("");
+  cout << "Name                   : " << function_.name() << endl;
+  cout << "Number of intervals    : " << num_intervals_ << endl;
+  cout << "Number of sample files : " << (uint) U_files_.size() << endl;
+  if(!U_files_.empty())
+  {
+    begin("List of samples        : ");
+    for (std::map<real, std::string>::const_iterator it = U_files_.begin();
+        it != U_files_.end(); ++it)
+    {
+      cout << it->second << " :  t = " << real(it->first) << endl;
+    }
+    end();
+  }
+  // End indentation
+  end();
+  skip();
+}
+//-----------------------------------------------------------------------------
 void SpaceTimeFunction::write(real t)
 {
+  if (t + 0.5 * timestep_
+      >= measure_ * (real(curr_sample_) / real(num_intervals_)))
+  {
+    message("Save " + function_.name() + " sample to file");
+    std::string filename = getFileName(function_.name(), curr_sample_);
+    File binfile(filename);
+    binfile << function_.vector();
+    addPoint(filename, t);
+    ++curr_sample_;
+  }
 }
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::write(Array<Function *> functions,
@@ -183,13 +234,27 @@ void SpaceTimeFunction::addPoint(std::string Uname, real t)
   U_files_[t] = Uname;
 }
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::addFiles(std::vector<std::string> filenames)
+void SpaceTimeFunction::getFileList(std::vector<std::string>& filenames,
+                                    std::string basename)
+{
+  std::string curr_filename = getFileName(basename, 0);
+  for (uint sample_id = 0; access(curr_filename.c_str(), F_OK) == 0;
+      curr_filename = getFileName(basename, ++sample_id))
+  {
+    filenames.push_back(curr_filename);
+  }
+}
+//-----------------------------------------------------------------------------
+void SpaceTimeFunction::addFiles(std::map<real, std::string> files,
+                                 std::string basename,
+                                 std::pair<real, real> interval)
 {
 
 #ifdef ENABLE_MPIIO
+  std::vector<std::string> filenames;
+  this->getFileList(filenames, basename);
 
   int counter = 0;
-
   for (std::vector<std::string>::iterator it = filenames.begin();
       it != filenames.end(); ++it)
   {
@@ -197,28 +262,28 @@ void SpaceTimeFunction::addFiles(std::vector<std::string> filenames)
 
     MPI_File fh;
     MPI_Offset byte_offset;
-    BinaryFileHeader hdr;
+    BinaryFile::BinaryFileHeader hdr;
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                   MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-    MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
+    MPI_File_read_all(fh, &hdr, sizeof(BinaryFile::BinaryFileHeader), MPI_BYTE,
                       MPI_STATUS_IGNORE);
 
-    byte_offset = sizeof(BinaryFileHeader);
+    byte_offset = sizeof(BinaryFile::BinaryFileHeader);
 
     uint nfunc;
     MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
                          MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
-    BinaryFunctionHeader f_hdr;
-    MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
+    BinaryFile::BinaryFunctionHeader f_hdr;
+    MPI_File_read_at_all(fh, byte_offset, &f_hdr,
+                         sizeof(BinaryFile::BinaryFunctionHeader),
                          MPI_BYTE, MPI_STATUS_IGNORE);
 
     // Temporary load function, and parse time stamp
     addPoint(filename, f_hdr.t);
+    ++counter;
 
     MPI_File_close(&fh);
-
-    ++counter;
   }
 #else
   error("MPI I/O required for space time functions with arbitrary time step");
@@ -227,58 +292,38 @@ void SpaceTimeFunction::addFiles(std::vector<std::string> filenames)
 }
 
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::addFiles(std::vector<std::string> filenames, real k)
+void SpaceTimeFunction::addFiles(std::map<real, std::string> files,
+                                 std::string basename,
+                                 std::pair<real, real> interval, uint N)
 {
   // Fixed time step only !
-  int counter = 0;
-  int num_files = filenames.size();
+  std::vector<std::string> filenames;
+  this->getFileList(filenames, basename);
 
-  if (num_files == 1)
+  if(filenames.size() == 0)
   {
-    error("Number of files is one, divide by zero foreseen.");
+    return;
   }
+
+  dolfin_assert(N > 0);
+  real const subinterval_meas = std::fabs(interval.second - interval.first)
+      / real(N);
+
+  uint counter = 0;
   for (std::vector<std::string>::iterator it = filenames.begin();
       it != filenames.end(); ++it)
   {
-    std::string filename = *it;
-
-    // OK guys this is *only* valid if we do the right thing i.e:
-    // - num_files is the number of samples
-    // - T is the measure of the time interval for solving the dual problem
-    //	 i.e [sampling_start_time, primal_end_time]
-    real t = k * real(counter) / real(num_files - 1);
-    addPoint(filename, t);
-
+    real t = subinterval_meas * counter;
+    addPoint(*it, t);
     ++counter;
   }
-  if (counter == 0)
+  if (counter > N + 1)
   {
-    error("Counter irremediably stayed stuck at zero.");
+    warning("Number of sample files exceeds the number of sampling intervals.");
   }
-  for (std::map<real, std::string>::const_iterator it = U_files_.begin();
-      it != U_files_.end(); ++it)
+  if (counter < N + 1)
   {
-    std::cout << std::setw(4) << it->first << " : " << it->second << std::endl;
-  }
-
-}
-//-----------------------------------------------------------------------------
-void SpaceTimeFunction::getFileList(std::string basename, uint N,
-                                    std::vector<std::string>& filenames)
-{
-  filenames.clear();
-  // Let us define N as the number of sampling intervals spanning [T0,T1]
-  // Therefore the number of files to be loaded is N+1
-  // Precondition: N > 0
-  if (N == 0)
-  {
-    error("Trying to interpolate over zero sampling intervals");
-  }
-
-  // This loop is merely constructing
-  for (uint sample_id = 0; sample_id <= N; ++sample_id)
-  {
-    filenames.push_back(getFileName(basename, sample_id));
+    warning("Insufficient number of sample files.");
   }
 }
 //-----------------------------------------------------------------------------

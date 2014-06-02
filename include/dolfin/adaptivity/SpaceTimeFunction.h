@@ -24,7 +24,8 @@ class SpaceTimeFunction
 public:
 
   /// Create space-time function with fixed time step
-  SpaceTimeFunction(Function& Ut, std::pair<real, real> interval, uint N, real k);
+  SpaceTimeFunction(Function& Ut, std::pair<real, real> interval, uint N,
+                    real k);
 
   /// Create space-time function with adaptive time step
   SpaceTimeFunction(Function& Ut, std::pair<real, real> interval, uint N);
@@ -35,13 +36,19 @@ public:
   /// Destructor
   ~SpaceTimeFunction();
 
+  /// Clear list of sample files
+  void clear();
+
   /// Evaluate function at time t, giving result in Ut
   void eval(real t);
 
   /// Write sample
   void write(real t);
 
-  /// Write function at time t
+  /// List sample files
+  void disp() const;
+
+  /// Write function at time t using proper filename formatting
   static void write(Array<Function *> U, std::pair<real, real> interval, uint N,
                     real t);
 
@@ -59,15 +66,15 @@ private:
   /// Filename
   static std::string getFileName(std::string basename, uint sample);
 
-  /// Add a set of functions with arbitrary time steps
-  void addFiles(std::vector<std::string> filenames);
-
   /// Add a set of functions with fixed time step
-  void addFiles(std::vector<std::string> filenames, real k);
+  void addFiles(std::map<real, std::string> files, std::string basename,
+                std::pair<real, real> interval, uint N);
 
-  ///
-  void getFileList(std::string basename, uint N,
-                   std::vector<std::string>& files);
+  /// Add a set of functions with arbitrary time steps
+  void addFiles(std::map<real, std::string> files, std::string basename,
+                std::pair<real, real> interval);
+
+  void getFileList(std::vector<std::string>& filenames, std::string basename);
 
   // Evaluant function
   Function& function_;
@@ -78,8 +85,9 @@ private:
   // Interval and sampling
   std::pair<real, real>  const timespan_;
   real const measure_;
-  uint const num_intervals_;
   bool const fixed_timestep_;
+  real const timestep_;
+  uint const num_intervals_;
 
   // Space functions defining the current time interval
   bool evaluated_;
@@ -95,36 +103,6 @@ private:
   std::map<real, std::string> U_files_;
   uint curr_sample_;
 
-#ifdef ENABLE_MPIIO
-
-  // File headers for DOLFIN's binary file format, repeated here
-  // until this information is available outside of DOLFIN
-
-  enum Binary_data_t
-  {
-    BINARY_MESH_DATA,
-    BINARY_VECTOR_DATA,
-    BINARY_FUNCTION_DATA,
-    BINARY_MESH_FUNCTION_DATA
-  };
-
-  typedef struct
-  {
-    uint32_t magic;
-    uint32_t bendian;
-    uint32_t pe_size;
-    Binary_data_t type;
-  } BinaryFileHeader;
-
-  typedef struct
-  {
-    uint32_t dim;
-    uint32_t size;
-    real t;
-    char name[256];
-  } BinaryFunctionHeader;
-
-#endif
 };
 
 }

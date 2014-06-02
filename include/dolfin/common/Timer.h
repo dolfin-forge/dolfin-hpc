@@ -41,9 +41,9 @@ namespace dolfin
 
     /// Start timer
     inline void start() { t = time(); stopped = false; }
-    
+
     /// Stop timer
-    void stop() { LogManager::logger.timing(task, time() - t); stopped = true; }
+    void stop() { LogManager::logger().timing(task, time() - t); stopped = true; }
 
   private:
 

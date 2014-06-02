@@ -46,13 +46,13 @@ static char buffer[DOLFIN_LINELENGTH];
 void dolfin::message(_msg msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer));
+  LogManager::logger().message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::message(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
+  LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
 #if __sgi
@@ -60,13 +60,13 @@ void dolfin::message(int debug_level, _msg msg, ...)
 void dolfin::message(std::string msg, ...)
 {
   read_str(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer));
+  LogManager::logger().message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::message(int debug_level, std::string msg, ...)
 {
   read_str(buffer, msg);
-  LogManager::logger.message(static_cast<std::string>(buffer), debug_level);
+  LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
 #endif
@@ -78,7 +78,7 @@ void dolfin::warning(std::string msg, ...)
 #else
   read_str(buffer, msg);
 #endif
-  LogManager::logger.warning(static_cast<std::string>(buffer));
+  LogManager::logger().warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::error(std::string msg, ...)
@@ -88,39 +88,39 @@ void dolfin::error(std::string msg, ...)
 #else
   read_str(buffer, msg);
 #endif
-  LogManager::logger.error(static_cast<std::string>(buffer));
+  LogManager::logger().error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::begin(_msg msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.begin(static_cast<std::string>(buffer));
+  LogManager::logger().begin(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
 void dolfin::begin(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
-  LogManager::logger.begin(static_cast<std::string>(buffer), debug_level);
+  LogManager::logger().begin(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
 void dolfin::end()
 {
-  LogManager::logger.end();
+  LogManager::logger().end();
 }
 //-----------------------------------------------------------------------------
 void dolfin::skip()
 {
-  LogManager::logger.skip();
+  LogManager::logger().skip();
 }
 //-----------------------------------------------------------------------------
 void dolfin::summary()
 {
-  LogManager::logger.summary();
+  LogManager::logger().summary();
 }
 //-----------------------------------------------------------------------------
 const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& dolfin::timings()
 {
-  return LogManager::logger.timings();
+  return LogManager::logger().timings();
 }
 //-----------------------------------------------------------------------------
 void dolfin::__debug(std::string file, unsigned long line,
@@ -130,7 +130,7 @@ void dolfin::__debug(std::string file, unsigned long line,
   std::ostringstream ost;
   ost << file << ":" << line << " in " << function << "()";
   std::string msg = std::string(buffer) + " [at " + ost.str() + "]";
-  LogManager::logger.__debug(msg);
+  LogManager::logger().__debug(msg);
 }
 //-----------------------------------------------------------------------------
 void dolfin::__dolfin_assert(std::string file, unsigned long line,
@@ -140,6 +140,6 @@ void dolfin::__dolfin_assert(std::string file, unsigned long line,
   std::ostringstream ost;
   ost << file << ":" << line << " in " << function << "()";
   std::string msg = std::string(buffer) + " [at " + ost.str() + "]";
-  LogManager::logger.__assert(msg);
+  LogManager::logger().__assert(msg);
 }
 //-----------------------------------------------------------------------------

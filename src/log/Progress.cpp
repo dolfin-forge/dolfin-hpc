@@ -23,23 +23,23 @@ Progress::Progress(std::string title, unsigned int n)
   if (n <= 0)
     error("Number of steps for progress session must be positive.");
 
-  //LogManager::logger.progress(title, 0.0);
+  //LogManager::logger().progress(title, 0.0);
   t = time();
 }
 //-----------------------------------------------------------------------------
 Progress::Progress(std::string title)
   : title(title), n(0), i(0), p_step(0.1), t_step(1.0), p(0), t(0)
 {
-  //LogManager::logger.progress(title, 0.0);
+  //LogManager::logger().progress(title, 0.0);
   t = time();
 }
 //-----------------------------------------------------------------------------
 Progress::~Progress()
 {
   if (this->p == 0.0)
-    LogManager::logger.message(title + " (finished).");
+    LogManager::logger().message(title + " (finished).");
   else if (this ->p < 1.0)
-    LogManager::logger.progress(title, 1.0);
+    LogManager::logger().progress(title, 1.0);
 }
 //-----------------------------------------------------------------------------
 void Progress::operator=(real p)
@@ -83,7 +83,7 @@ void Progress::update(real p)
   // Only update when the increase is significant
   if (t_check)
   {
-    LogManager::logger.progress(title, p);
+    LogManager::logger().progress(title, p);
     this->p = p;
     this->t = t;
   }

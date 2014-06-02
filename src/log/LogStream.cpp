@@ -49,13 +49,13 @@ LogStream& LogStream::operator<<(const LogStream& stream)
 {
   if (stream.type == ENDL)
   {
-    LogManager::logger.message(buffer);
+    LogManager::logger().message(buffer);
     current = 0;
     buffer[0] = '\0';
   }
   else
     add(stream.buffer);
-  
+
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -120,7 +120,7 @@ void LogStream::add(const char* msg)
   {
     if (current >= (DOLFIN_LINELENGTH-1))
     {
-      LogManager::logger.message(buffer);
+      LogManager::logger().message(buffer);
       current = 0;
       buffer[0] = '\0';
       return;

@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Ola Skavhaug, 2007.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2003-03-13
-// Last changed: 2008-06-17
+// Last changed: 2014-05-29
 
 #include <string>
 #include <iostream>
@@ -17,21 +18,20 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/Logger.h>
 
-using namespace dolfin;
-
-typedef std::map<std::string, std::pair<dolfin::uint, real> >::iterator map_iterator;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 Logger::Logger() :
-    destination(terminal),
-    debug_level(0),
-    indentation_level(0),
-    logstream(0)
+    destination_(terminal),
+    debug_level_(0),
+    indentation_level_(0),
+    logstream_(&std::cout)
 {
   // Do nothing
   if (dolfin::MPI::processNumber() > 0)
   {
-    this->destination = silent;
+    this->destination_ = silent;
   }
 }
 //-----------------------------------------------------------------------------
@@ -42,9 +42,6 @@ Logger::~Logger()
 //-----------------------------------------------------------------------------
 void Logger::message(std::string msg, int debug_level)
 {
-  if (debug_level > this->debug_level)
-    return;
-
   write(debug_level, msg);
 }
 //-----------------------------------------------------------------------------
@@ -64,18 +61,20 @@ void Logger::begin(std::string msg, int debug_level)
 {
   // Write a message
   message(msg, debug_level);
-  indentation_level++;
+  ++indentation_level_;
 }
 //-----------------------------------------------------------------------------
 void Logger::skip()
 {
-  message("\n", debug_level);
+  message("\n", debug_level_);
 }
 //-----------------------------------------------------------------------------
 void Logger::end()
 {
-  if (indentation_level > 0)
-    indentation_level--;
+  if (indentation_level_ > 0)
+  {
+    --indentation_level_;
+  }
 }
 //-----------------------------------------------------------------------------
 void Logger::progress(std::string title, real p)
@@ -100,7 +99,9 @@ void Logger::progress(std::string title, real p)
     n++;
   }
   for (int i = n; i < N; i++)
+  {
     s += "-";
+  }
   s += "| ";
   std::stringstream line;
   line << std::setiosflags(std::ios::fixed);
@@ -113,34 +114,46 @@ void Logger::progress(std::string title, real p)
 void Logger::setOutputDestination(std::string destination)
 {
   if (dolfin::MPI::processNumber() > 0)
+  {
     return;
+  }
 
   // Choose output destination
   if (destination == "terminal")
-    this->destination = terminal;
+  {
+    this->destination_ = terminal;
+    std::cout.clear(std::iostream::goodbit);
+    logstream_ = &std::cout;
+  }
   else if (destination == "silent")
-    this->destination = silent;
+  {
+    this->destination_ = silent;
+    std::cout.clear(std::iostream::badbit);
+    logstream_ = &std::cout;
+  }
   else if (destination == "stream")
   {
     warning("Please provide the actual stream. Using terminal instead.");
-    this->destination = terminal;
+    this->destination_ = terminal;
+    logstream_ = &std::cout;
   }
   else
   {
-    this->destination = terminal;
+    this->destination_ = terminal;
+    logstream_ = &std::cout;
     message("Unknown output destination, using plain text.");
   }
 }
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::ostream& ostream)
 {
-  logstream = &ostream;
-  this->destination = stream;
+  logstream_ = &ostream;
+  this->destination_ = stream;
 }
 //-----------------------------------------------------------------------------
 void Logger::setDebugLevel(int debug_level)
 {
-  this->debug_level = debug_level;
+  this->debug_level_ = debug_level;
 }
 //-----------------------------------------------------------------------------
 void Logger::timing(std::string task, real elapsed_time)
@@ -151,11 +164,11 @@ void Logger::timing(std::string task, real elapsed_time)
   message(line.str(), 1);
 
   // Store values for summary
-  map_iterator it = _timings.find(task);
-  if (it == _timings.end())
+  timing_map_t::iterator it = timings_.find(task);
+  if (it == timings_.end())
   {
     std::pair<uint, real> timing(1, elapsed_time);
-    _timings[task] = timing;
+    timings_[task] = timing;
   }
   else
   {
@@ -166,14 +179,14 @@ void Logger::timing(std::string task, real elapsed_time)
 //-----------------------------------------------------------------------------
 void Logger::summary()
 {
-  if (_timings.size() == 0)
+  if (timings_.size() == 0)
   {
     message("Summary: no timings to report.");
     return;
   }
 
   message("Summary of timings:");
-  for (map_iterator it = _timings.begin(); it != _timings.end(); ++it)
+  for (timing_map_t::iterator it = timings_.begin(); it != timings_.end(); ++it)
   {
     const std::string task = it->first;
     const uint num_timings = it->second.first;
@@ -187,12 +200,12 @@ void Logger::summary()
   }
 
   // Clear timings
-  _timings.clear();
+  timings_.clear();
 }
 //-----------------------------------------------------------------------------
 const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& Logger::timings() const
 {
-  return _timings;
+  return timings_;
 }
 //-----------------------------------------------------------------------------
 void Logger::__debug(std::string msg)
@@ -207,34 +220,16 @@ void Logger::__assert(std::string msg)
   throw std::runtime_error(s);
 }
 //-----------------------------------------------------------------------------
-void Logger::write(int debug_level, std::string msg)
+void Logger::write(int debug_level, std::string& msg)
 {
   // Check debug level
-  if (debug_level > this->debug_level)
+  if (debug_level > this->debug_level_)
     return;
 
-  // Add indentation
-  for (int i = 0; i < indentation_level; i++)
-    msg = "  " + msg;
-
-  // Choose destination
-  switch (destination)
-    {
-    case terminal:
-      std::cout << msg << std::endl;
-      break;
-    case stream:
-      if (logstream == NULL)
-        error("No stream attached, cannot write to stream");
-      *logstream << msg << std::endl;
-      break;
-    default:
-      // Do nothing if destination == silent
-      do
-      {
-      }
-      while (false);
-      break;
-    }
+  // Indented;
+  *logstream_ << std::setw(2*indentation_level_) << " " << msg << std::endl;
 }
 //----------------------------------------------------------------------------
+
+}
+

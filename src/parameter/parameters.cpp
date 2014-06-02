@@ -14,7 +14,7 @@
 dolfin::Parameter dolfin::dolfin_get(std::string key)
 {
   if (key == "debug level")
-    return Parameter(LogManager::logger.getDebugLevel());
+    return Parameter(LogManager::logger().getDebugLevel());
   return ParameterSystem::parameters.get(key);
 }
 //-----------------------------------------------------------------------------
@@ -23,12 +23,12 @@ void dolfin::dolfin_set(std::string key, Parameter value)
   // Special cases: pass on to log system
   if (key == "debug level")
   {
-    LogManager::logger.setDebugLevel(value);
+    LogManager::logger().setDebugLevel(value);
     return;
   }
   else if (key == "output destination")
   {
-    LogManager::logger.setOutputDestination(value);
+    LogManager::logger().setOutputDestination(value);
     return;
   }
 
@@ -38,10 +38,10 @@ void dolfin::dolfin_set(std::string key, Parameter value)
 void dolfin::dolfin_set(std::string key, std::ostream& stream)
 {
   if (key == "output destination"){
-    LogManager::logger.setOutputDestination(stream);
+    LogManager::logger().setOutputDestination(stream);
     {
         if (key == "output destination"){
-              LogManager::logger.setOutputDestination(stream);
+              LogManager::logger().setOutputDestination(stream);
                 }
           else
                 error("Only key 'output destination' can take a stream as value.");

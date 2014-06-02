@@ -47,9 +47,6 @@ namespace dolfin
     void operator<< (MeshFunction<unsigned int>& meshfunction);
     void operator<< (MeshFunction<double>& meshfunction);
 
-
-  private:
-
     enum Binary_data_t { BINARY_MESH_DATA,
                          BINARY_VECTOR_DATA,
                          BINARY_FUNCTION_DATA,
@@ -71,6 +68,8 @@ namespace dolfin
       char name[FNAME_LENGTH];
     } BinaryFunctionHeader;
 #endif
+
+  private:
 
     typedef struct {
       uint v1;

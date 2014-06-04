@@ -61,7 +61,7 @@ dolfin::uint TopologyComputation::computeEntities(Mesh& mesh, uint dim)
   //message("Computing mesh entities of topological dimension %d.", dim);
 
   // Invalidate ordering
-  mesh.topology()._ordered = false;
+  mesh.topology().ordered_ = false;
 
   // Compute connectivity dim - dim if not already computed
   computeConnectivity(mesh, mesh.topology().dim(), mesh.topology().dim());
@@ -147,7 +147,7 @@ void TopologyComputation::computeConnectivity(Mesh& mesh, uint d0, uint d1)
   if (connectivity.size() > 0) return;
 
   // Invalidate ordering
-  mesh.topology()._ordered = false;
+  mesh.topology().ordered_ = false;
 
   //message("Computing mesh connectivity %d - %d.", d0, d1);
 

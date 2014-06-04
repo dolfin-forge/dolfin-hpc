@@ -102,25 +102,25 @@ public:
 private:
 
   /// Topological dimension
-  uint _dim;
+  uint dim_;
 
   /// Number of mesh entities for each topological dimension
-  uint * _num_entities;
+  uint * num_entities_;
 
   /// Connectivity for pairs of topological dimensions
-  MeshConnectivity ** _connectivity;
+  MeshConnectivity ** connectivity_;
 
   /// Distributed mesh topology data
-  MeshDistributedData _distdata;
+  MeshDistributedData distdata_;
 
   /// Return true iff topology is ordered according to the UFC numbering
-  bool _ordered;
+  bool ordered_;
 
   //
-  int _token;
+  int token_;
 
   //
-  uint _renumbering_count;
+  uint renumbering_count_;
 
 };
 
@@ -129,14 +129,14 @@ private:
 //-----------------------------------------------------------------------------
 inline uint MeshTopology::dim() const
 {
-  return _dim;
+  return dim_;
 }
 
 //-----------------------------------------------------------------------------
 inline uint MeshTopology::size(uint dim) const
 {
-  dolfin_assert(dim <= _dim);
-  return _num_entities[dim];
+  dolfin_assert(dim <= dim_);
+  return num_entities_[dim];
 }
 
 //-----------------------------------------------------------------------------
@@ -154,46 +154,46 @@ inline void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) con
 //-----------------------------------------------------------------------------
 inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 {
-  dolfin_assert(d0 <= _dim && d1 <= _dim);
-  return _connectivity[d0][d1];
+  dolfin_assert(d0 <= dim_ && d1 <= dim_);
+  return connectivity_[d0][d1];
 }
 
 //-----------------------------------------------------------------------------
 const inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1) const
 {
-  dolfin_assert(d0 <= _dim && d1 <= _dim);
-  return _connectivity[d0][d1];
+  dolfin_assert(d0 <= dim_ && d1 <= dim_);
+  return connectivity_[d0][d1];
 }
 
 //-----------------------------------------------------------------------------
 inline MeshDistributedData& MeshTopology::distdata()
 {
-  return _distdata;
+  return distdata_;
 }
 
 //-----------------------------------------------------------------------------
 const inline MeshDistributedData& MeshTopology::distdata() const
 {
-  return _distdata;
+  return distdata_;
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshTopology::order(Mesh& mesh)
 {
   MeshOrdering::order(mesh);
-  _ordered = true;
+  ordered_ = true;
 }
 
 //-----------------------------------------------------------------------------
 inline bool MeshTopology::is_ordered() const
 {
-  return _ordered;
+  return ordered_;
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshTopology::renumber(Mesh& mesh)
 {
-  if(MeshRenumber::renumber(mesh)) ++_renumbering_count;
+  if(MeshRenumber::renumber(mesh)) ++renumbering_count_;
 }
 
 }

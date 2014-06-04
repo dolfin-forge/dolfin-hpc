@@ -56,6 +56,10 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
 {
   clear();
 
+  _dim = distributed_data._dim;
+  _cell_dim = distributed_data._cell_dim;
+  _facet_dim = distributed_data._facet_dim;
+
   _max_global_index = distributed_data._max_global_index;
 
   _valid_vertex_numbering = distributed_data._valid_vertex_numbering;
@@ -432,7 +436,7 @@ uint MeshDistributedData::get_facet_global(uint i) const
   }
   else
   {
-    dolfin_assert( _cell_dim != 0 );
+    dolfin_assert( _facet_dim != 0 );
     dolfin_assert( global_indices[_facet_dim].count(i) );
     return global_indices[_facet_dim][i];
   }
@@ -446,7 +450,7 @@ uint MeshDistributedData::get_facet_local(uint i) const
     return i;
   }
 
-  dolfin_assert( _cell_dim != 0 );
+  dolfin_assert( _facet_dim != 0 );
   dolfin_assert( local_indices[_facet_dim].count(i) );
   return local_indices[_facet_dim][i];
 }

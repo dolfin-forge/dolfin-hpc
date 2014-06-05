@@ -30,25 +30,15 @@ Mesh& MeshDependent::mesh() const
 }
 
 //---------------------------------------------------------------------------
-std::string const MeshDependent::mesh_hash() const
-{
-  std::stringstream ss;
-  ss << "Mesh@" << this << ":" << mesh_.type().description()
-      << ":C" << mesh_.numCells() << ":F" << mesh_.numFacets()
-      << ":V" << mesh_.numVertices() << ":T" << mesh_._timestamp;
-  return ss.str();
-}
-
-//---------------------------------------------------------------------------
 bool MeshDependent::invalid_mesh_topology() const
 {
-  return topology_token_ == mesh_.topology_token_;
+  return topology_token_ == mesh_.topology().token();
 }
 
 //---------------------------------------------------------------------------
 bool MeshDependent::invalid_mesh_geometry() const
 {
-  return geometry_token_ == mesh_.geometry_token_;
+  return geometry_token_ == mesh_.geometry().token();
 }
 
 //---------------------------------------------------------------------------
@@ -60,8 +50,8 @@ bool MeshDependent::invalid_mesh() const
 //---------------------------------------------------------------------------
 void MeshDependent::update_mesh_dependency()
 {
-  topology_token_ = mesh_.topology_token_;
-  geometry_token_ = mesh_.geometry_token_;
+  topology_token_ = mesh_.topology().token();
+  geometry_token_ = mesh_.geometry().token();
 }
 
 }

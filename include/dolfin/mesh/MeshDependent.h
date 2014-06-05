@@ -25,9 +25,6 @@ public:
   virtual Mesh& mesh() const;
 
   ///
-  std::string const mesh_hash() const;
-
-  ///
   bool invalid_mesh_topology() const;
 
   ///

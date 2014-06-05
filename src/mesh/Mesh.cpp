@@ -43,7 +43,6 @@ namespace dolfin {
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
   Variable("mesh", "DOLFIN mesh"),
-  MeshDependent(*this),
   _is_distributed(false),
   _topology(),
   _geometry(),
@@ -59,7 +58,6 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
   Variable("mesh", "DOLFIN mesh"),
-  MeshDependent(*this),
   _is_distributed(mesh._is_distributed),
   _topology(),
   _geometry(),
@@ -75,7 +73,6 @@ Mesh::Mesh(Mesh const& mesh) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
   Variable("mesh", "DOLFIN mesh"),
-  MeshDependent(*this),
   _is_distributed(false),
   _topology(),
   _geometry(),
@@ -360,7 +357,12 @@ void Mesh::renumber()
 //-----------------------------------------------------------------------------
 std::string const Mesh::hash() const
 {
-  return this->mesh_hash();
+  std::stringstream ss;
+  ss << "Mesh@" << this << ":" << this->type().description()
+      << ":time" << _timestamp
+      << ":T" << this->topology().token()
+      << ":G" << this->geometry().token();
+  return ss.str();
 }
 //-----------------------------------------------------------------------------
 void Mesh::disp() const

@@ -8,8 +8,9 @@
 #define __BOUNDARY_MESH_H
 
 #include <dolfin/common/types.h>
+
 #include "Mesh.h"
-#include "MeshFunction.h"
+#include "MeshDependent.h"
 
 namespace dolfin
 {
@@ -21,7 +22,7 @@ namespace dolfin
  *          as a partition of a global mesh.
  */
 
-class BoundaryMesh : public Mesh
+class BoundaryMesh : public Mesh, public MeshDependent
 {
 public:
 
@@ -33,17 +34,8 @@ public:
   /// Destructor
   ~BoundaryMesh();
 
-  ///
-  Mesh& mesh();
-
-  ///
-  std::string const mesh_hash();
-
 private:
 
-  /// Global mesh hash
-  Mesh& mesh_;
-  std::string global_mesh_hash_;
 
 };
 

@@ -18,19 +18,19 @@ MeshTopology::MeshTopology() :
     connectivity_(NULL),
     distdata_(*this),
     ordered_(false),
-    token_(0),
+    timestamp_(time(0)),
     renumbering_count_(0)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology(const MeshTopology& topology) :
+MeshTopology::MeshTopology(MeshTopology const& topology) :
     dim_(0),
     num_entities_(NULL),
     connectivity_(NULL),
     distdata_(*this),
     ordered_(false),
-    token_(0),
+    timestamp_(time(0)),
     renumbering_count_(0)
 {
   *this = topology;
@@ -41,7 +41,7 @@ MeshTopology::~MeshTopology()
   clear();
 }
 //-----------------------------------------------------------------------------
-const MeshTopology& MeshTopology::operator=(const MeshTopology& topology)
+MeshTopology const& MeshTopology::operator=(MeshTopology const& topology)
 {
   // Clear old data if any
   clear();
@@ -71,6 +71,9 @@ const MeshTopology& MeshTopology::operator=(const MeshTopology& topology)
     }
   }
   distdata_ = topology.distdata_;
+  ordered_ = topology.ordered_;
+  timestamp_ = topology.timestamp_;
+  renumbering_count_ = topology.renumbering_count_;
 
   return *this;
 }
@@ -94,6 +97,9 @@ void MeshTopology::clear()
     delete[] connectivity_;
   }
   connectivity_ = NULL;
+  ordered_ = false;
+  timestamp_ = 0;
+  renumbering_count_ = 0;
 
   // Reset dimension
   dim_ = 0;
@@ -103,6 +109,8 @@ void MeshTopology::init(uint dim)
 {
   // Clear old data if any
   clear();
+
+  timestamp_ = time(0); // Reset token
 
   // Initialize number of mesh entities
   num_entities_ = new uint[dim + 1];
@@ -132,7 +140,7 @@ void MeshTopology::init(uint dim, uint size)
 //-----------------------------------------------------------------------------
 int MeshTopology::token() const
 {
-  return token_;
+  return timestamp_ + size(0) + size(dim_); // FIXME
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::disp() const
@@ -214,4 +222,5 @@ void MeshTopology::disp() const
 //-----------------------------------------------------------------------------
 
 }
+
 

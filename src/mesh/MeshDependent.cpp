@@ -13,8 +13,8 @@ namespace dolfin
 //---------------------------------------------------------------------------
 MeshDependent::MeshDependent(Mesh& mesh) :
     mesh_(mesh),
-    topology_token_(0), // mesh.topology().token()
-    geometry_token_(0) // mesh.geometry().token()
+    topology_token_(mesh.topology().token()),
+    geometry_token_(mesh.geometry().token())
 {
 }
 

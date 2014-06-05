@@ -12,6 +12,7 @@
 #include <dolfin/common/Array.h>
 #include "MeshConnectivity.h"
 #include "MeshDistributedData.h"
+#include "MeshEditor.h"
 #include "MeshOrdering.h"
 #include "MeshRenumber.h"
 #include "TopologyComputation.h"
@@ -43,13 +44,13 @@ public:
   MeshTopology();
 
   /// Copy constructor
-  MeshTopology(const MeshTopology& topology);
+  MeshTopology(MeshTopology const& topology);
 
   /// Destructor
   ~MeshTopology();
 
   /// Assignment
-  const MeshTopology& operator=(const MeshTopology& topology);
+  MeshTopology const& operator=(MeshTopology const& topology);
 
   /// Return topological dimension
   uint dim() const;
@@ -68,9 +69,6 @@ public:
 
   /// Compute connectivity for given pair of topological dimensions
   void compute_connectivity(Mesh& mesh, uint d0, uint d1) const;
-
-  /// Set number of entities (size) for given topological dimension
-  void init(uint dim, uint size);
 
   /// Return connectivity for given pair of topological dimensions
   MeshConnectivity& operator()(uint d0, uint d1);
@@ -99,6 +97,14 @@ public:
   /// Display data
   void disp() const;
 
+protected:
+
+  friend void MeshEditor::initVertices(uint num_vertices);
+  friend void MeshEditor::initCells(uint num_cells);
+
+  /// Set number of entities (size) for given topological dimension
+  void init(uint dim, uint size);
+
 private:
 
   /// Topological dimension
@@ -117,7 +123,7 @@ private:
   bool ordered_;
 
   //
-  int token_;
+  int timestamp_;
 
   //
   uint renumbering_count_;
@@ -172,7 +178,7 @@ inline MeshDistributedData& MeshTopology::distdata()
 }
 
 //-----------------------------------------------------------------------------
-const inline MeshDistributedData& MeshTopology::distdata() const
+inline MeshDistributedData const& MeshTopology::distdata() const
 {
   return distdata_;
 }

@@ -12,19 +12,19 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry() :
-    _dim(0),
-    _size(0),
-    coordinates(0),
-    _token(0)
+    dim_(0),
+    size_(0),
+    coordinates_(0),
+    timestamp_(time(0))
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(const MeshGeometry& geometry) :
-    _dim(0),
-    _size(0),
-    coordinates(0),
-    _token(0)
+MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
+    dim_(0),
+    size_(0),
+    coordinates_(0),
+    timestamp_(time(0))
 {
   *this = geometry;
 }
@@ -34,22 +34,24 @@ MeshGeometry::~MeshGeometry()
   clear();
 }
 //-----------------------------------------------------------------------------
-const MeshGeometry& MeshGeometry::operator=(const MeshGeometry& geometry)
+MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& geometry)
 {
   // Clear old data if any
   clear();
 
   // Allocate data
-  _dim = geometry._dim;
-  _size = geometry._size;
-  const uint n = _dim * _size;
-  coordinates = new real[n];
+  dim_ = geometry.dim_;
+  size_ = geometry.size_;
+  const uint n = dim_ * size_;
+  coordinates_ = new real[n];
 
   // Copy data
   for (uint i = 0; i < n; ++i)
   {
-    coordinates[i] = geometry.coordinates[i];
+    coordinates_[i] = geometry.coordinates_[i];
   }
+
+  timestamp_ = geometry.timestamp_;
 
   return *this;
 }
@@ -60,9 +62,9 @@ Point MeshGeometry::point(uint n) const
   real _y = 0.0;
   real _z = 0.0;
 
-  if (_dim > 0) _x = x(n, 0);
-  if (_dim > 1) _y = x(n, 1);
-  if (_dim > 2) _z = x(n, 2);
+  if (dim_ > 0) _x = x(n, 0);
+  if (dim_ > 1) _y = x(n, 1);
+  if (dim_ > 2) _z = x(n, 2);
 
   Point p(_x, _y, _z);
   return p;
@@ -70,10 +72,10 @@ Point MeshGeometry::point(uint n) const
 //-----------------------------------------------------------------------------
 void MeshGeometry::clear()
 {
-  _dim = 0;
-  _size = 0;
-  delete[] coordinates;
-  coordinates = NULL;
+  dim_ = 0;
+  size_ = 0;
+  delete[] coordinates_;
+  coordinates_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::init(uint dim, uint size)
@@ -82,21 +84,22 @@ void MeshGeometry::init(uint dim, uint size)
   clear();
 
   // Allocate new data
-  coordinates = new real[dim * size];
+  coordinates_ = new real[dim * size];
 
   // Save dimension and size
-  _dim = dim;
-  _size = size;
+  dim_ = dim;
+  size_ = size;
+  timestamp_ = time(0);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::set(uint n, uint i, real x)
 {
-  coordinates[n * _dim + i] = x;
+  coordinates_[n * dim_ + i] = x;
 }
 //-----------------------------------------------------------------------------
 int MeshGeometry::token() const
 {
-  return _token;
+  return timestamp_ + size(); // FIXME
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::disp() const
@@ -107,7 +110,7 @@ void MeshGeometry::disp() const
   cout << endl;
 
   // Check if empty
-  if (_dim == 0)
+  if (dim_ == 0)
   {
     cout << "empty" << endl << endl;
     end();
@@ -115,10 +118,10 @@ void MeshGeometry::disp() const
   }
 
   // Display coordinates for all vertices
-  for (uint i = 0; i < _size; ++i)
+  for (uint i = 0; i < size_; ++i)
   {
     cout << i << ":";
-    for (uint d = 0; d < _dim; ++d)
+    for (uint d = 0; d < dim_; ++d)
     {
       cout << " " << x(i, d);
     }

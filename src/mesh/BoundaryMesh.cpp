@@ -18,8 +18,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     Mesh(),
-    mesh_(mesh),
-    global_mesh_hash_(mesh.hash())
+    MeshDependent(mesh)
 {
   switch (type)
   {
@@ -45,18 +44,6 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
 BoundaryMesh::~BoundaryMesh()
 {
   // Do nothing
-}
-
-//-----------------------------------------------------------------------------
-Mesh& BoundaryMesh::mesh()
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-std::string const BoundaryMesh::mesh_hash()
-{
-  return global_mesh_hash_;
 }
 
 }

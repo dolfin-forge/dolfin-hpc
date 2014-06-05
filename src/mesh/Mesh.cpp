@@ -133,7 +133,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 {
   ///FIXME: Improve hash logic to regenerate bounday at topology change
   if(_exterior_boundary == NULL
-      || (_exterior_boundary->mesh_hash() != this->hash()))
+      || _exterior_boundary->invalid_mesh_topology())
   {
     delete _exterior_boundary;
     _exterior_boundary = new BoundaryMesh(*this, BoundaryMesh::exterior);
@@ -145,7 +145,7 @@ BoundaryMesh& Mesh::interior_boundary()
 {
   ///FIXME: Improve hash logic to regenerate bounday at topology change
   if(_interior_boundary == NULL
-      || (_interior_boundary->mesh_hash() != this->hash()))
+      || _interior_boundary->invalid_mesh_topology())
   {
     delete _interior_boundary;
     _interior_boundary = new BoundaryMesh(*this, BoundaryMesh::interior);

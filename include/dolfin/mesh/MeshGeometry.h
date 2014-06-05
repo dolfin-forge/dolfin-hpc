@@ -8,89 +8,140 @@
 #define __MESH_GEOMETRY_H
 
 #include "Point.h"
+
 #include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
-  /// MeshGeometry stores the geometry imposed on a mesh. Currently,
-  /// the geometry is represented by the set of coordinates for the
-  /// vertices of a mesh, but other representations are possible.
+/// MeshGeometry stores the geometry imposed on a mesh. Currently,
+/// the geometry is represented by the set of coordinates for the
+/// vertices of a mesh, but other representations are possible.
 
-  class MeshGeometry
-  {
-  public:
+class MeshGeometry
+{
+public:
 
-    /// Create empty set of coordinates
-    MeshGeometry();
+  /// Create empty set of coordinates
+  MeshGeometry();
 
-    /// Copy constructor
-    MeshGeometry(const MeshGeometry& geometry);
+  /// Copy constructor
+  MeshGeometry(MeshGeometry const& geometry);
 
-    /// Destructor
-    ~MeshGeometry();
+  /// Destructor
+  ~MeshGeometry();
 
-    /// Assignment
-    const MeshGeometry& operator= (const MeshGeometry& geometry);
+  /// Assignment
+  MeshGeometry const& operator=(MeshGeometry const& geometry);
 
-    /// Return Euclidean dimension of coordinate system
-    inline uint dim() const { return _dim; }
+  /// Return Euclidean dimension of coordinate system
+  uint dim() const;
 
-    /// Return number of coordinates
-    inline uint size() const { return _size; }
+  /// Return number of coordinates
+  uint size() const;
 
-    /// Return value of coordinate n in direction i
-    inline real& x(uint n, uint i) { dolfin_assert(n < _size && i < _dim); return coordinates[n*_dim + i]; }
+  /// Return value of coordinate n in direction i
+  real& x(uint n, uint i);
 
-    /// Return value of coordinate n in direction i
-    inline real x(uint n, uint i) const { dolfin_assert(n < _size && i < _dim); return coordinates[n*_dim + i]; }
+  /// Return value of coordinate n in direction i
+  real x(uint n, uint i) const;
 
-    /// Return array of values for coordinate n
-    inline real* x(uint n) { return coordinates + n*_dim; }
+  /// Return array of values for coordinate n
+  real* x(uint n);
 
-    /// Return array of values for coordinate n
-    inline const real* x(uint n) const { return coordinates + n*_dim; }
+  /// Return array of values for coordinate n
+  const real* x(uint n) const;
 
-    /// Return array of values for all coordinates
-    inline real* x() { return coordinates; }
+  /// Return array of values for all coordinates
+  real* x();
 
-    /// Return array of values for all coordinates
-    inline const real* x() const { return coordinates; }
+  /// Return array of values for all coordinates
+  const real* x() const;
 
-    /// Return coordinate n as a 3D point value
-    Point point(uint n) const;
+  /// Return coordinate n as a 3D point value
+  Point point(uint n) const;
 
-    /// Clear all data
-    void clear();
+  /// Clear all data
+  void clear();
 
-    /// Initialize coordinate list to given dimension and size
-    void init(uint dim, uint size);
+  /// Initialize coordinate list to given dimension and size
+  void init(uint dim, uint size);
 
-    /// Set value of coordinate n in direction i
-    void set(uint n, uint i, real x);
+  /// Set value of coordinate n in direction i
+  void set(uint n, uint i, real x);
 
-    /// Return token identifying the internal state of mesh geometry
-    int token() const;
+  /// Return token identifying the internal state of mesh geometry
+  int token() const;
 
-    /// Display data
-    void disp() const;
+  /// Display data
+  void disp() const;
 
-  private:
+private:
 
+  // Euclidean dimension
+  uint dim_;
 
-    // Euclidean dimension
-    uint _dim;
+  // Number of coordinates
+  uint size_;
 
-    // Number of coordinates
-    uint _size;
+  // Coordinates for all vertices stored as a contiguous array
+  real * coordinates_;
 
-    // Coordinates for all vertices stored as a contiguous array
-    real* coordinates;
+  //
+  int timestamp_;
 
-    //
-    int _token;
+};
 
-  };
+//--- INLINES -----------------------------------------------------------------
+
+inline uint MeshGeometry::dim() const
+{
+  return dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshGeometry::size() const
+{
+  return size_;
+}
+
+//-----------------------------------------------------------------------------
+inline real& MeshGeometry::x(uint n, uint i)
+{
+  dolfin_assert(n < size_ && i < dim_);
+  return coordinates_[n * dim_ + i];
+}
+
+//-----------------------------------------------------------------------------
+inline real MeshGeometry::x(uint n, uint i) const
+{
+  dolfin_assert(n < size_ && i < dim_);
+  return coordinates_[n * dim_ + i];
+}
+
+//-----------------------------------------------------------------------------
+inline real* MeshGeometry::x(uint n)
+{
+  return coordinates_ + n * dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline const real* MeshGeometry::x(uint n) const
+{
+  return coordinates_ + n * dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline real* MeshGeometry::x()
+{
+  return coordinates_;
+}
+
+//-----------------------------------------------------------------------------
+inline const real* MeshGeometry::x() const
+{
+  return coordinates_;
+}
 
 }
 

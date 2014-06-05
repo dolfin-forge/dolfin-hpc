@@ -31,7 +31,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
-#include <dolfin/quadrature/dolfin_quadrature.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -41,9 +40,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Assembler::Assembler(Mesh& mesh) :
-    mesh_(mesh),
-    dim_(mesh_.topology().dim())
+Assembler::Assembler(Mesh& mesh)
 {
   // Do nothing
 }
@@ -61,6 +58,9 @@ void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 void Assembler::assemble(GenericTensor& A, Form& form,
                          const SubDomain& sub_domain, bool reset_tensor)
 {
+  Mesh& mesh = form.mesh();
+  uint const tdim = mesh.topology().dim();
+
   // Extract cell domains
   MeshFunction<uint>* cell_domains = NULL;
 
@@ -71,7 +71,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   {
     if (form.num_cell_integrals() > 0)
     {
-      cell_domains = new MeshFunction<uint>(mesh_, dim_);
+      cell_domains = new MeshFunction<uint>(mesh, tdim);
       (*cell_domains) = 1;
       sub_domain.mark(*cell_domains, 0);
     }
@@ -79,7 +79,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
     if (form.num_exterior_facet_integrals() > 0 ||
         form.num_interior_facet_integrals() > 0)
     {
-      facet_domains = new MeshFunction<uint>(mesh_, dim_ - 1);
+      facet_domains = new MeshFunction<uint>(mesh, tdim - 1);
       (*facet_domains) = 1;
       sub_domain.mark(*facet_domains, 0);
     }
@@ -150,11 +150,8 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
     }
   }
 
-  // Create data structure for user defined quadrature
-  UFCCellIntegral cell_integral;//(dof_map_set);
-
   // Create data structure for local assembly data
-  UFC ufc(form, mesh_, dof_map_set);
+  UFC ufc(form, form.mesh(), dof_map_set);
 
   // Initialize global tensor
 #pragma omp master
@@ -171,17 +168,6 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
 
   // Assemble over cells
   assembleCells(A, coefficients, dof_map_set, ufc, cell_domains);
-
-#pragma omp master
-  {
-  // Initialize boundary mesh
-//  if (ufc.form.num_exterior_facet_integrals()  && !boundary_)
-//  {
-//    boundary_ = &mesh_.exterior_boundary();
-//  }
-  }
-#pragma omp flush
-#pragma omp barrier
 
   // Assemble over exterior facets
   assembleExteriorFacets(A, coefficients, dof_map_set, ufc, exterior_facet_domains);
@@ -205,18 +191,20 @@ void Assembler::assembleCells(GenericTensor& A,
   if (ufc.form.num_cell_integrals() == 0)
     return;
 
+  Mesh& mesh = dof_map_set[0].mesh();
+
   // Cell integral
   ufc::cell_integral* integral = ufc.cell_integrals[0];
 
   // Assemble over cells
 #ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(A.rank(), "cells"), mesh_.numCells());
+  Progress p(progressMessage(A.rank(), "cells"), mesh.numCells());
 #endif
   //  for (CellIterator cell(mesh); !cell.end(); ++cell)
 #pragma omp for
-  for (uint i = 0; i < mesh_.numCells(); i++)
+  for (uint i = 0; i < mesh.numCells(); i++)
   {
-    Cell cell(mesh_, i);
+    Cell cell(mesh, i);
 
     // Get integral for sub domain (if any)
     if (domains && domains->size() > 0)
@@ -233,7 +221,7 @@ void Assembler::assembleCells(GenericTensor& A,
     }
 
     // Update to current cell
-    ufc.update(cell, mesh_.distdata());
+    ufc.update(cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -270,10 +258,13 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   if (ufc.form.num_exterior_facet_integrals() == 0)
     return;
 
+  Mesh& mesh = dof_map_set[0].mesh();
+  uint const tdim = mesh.topology().dim();
+
   // Exterior facet integral
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
-  BoundaryMesh& exterior_boundary = mesh_.exterior_boundary();
+  BoundaryMesh& exterior_boundary = mesh.exterior_boundary();
   if(exterior_boundary.numCells()  == 0) return;
   MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
 
@@ -289,7 +280,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   for (uint i = 0; i < exterior_boundary.numCells(); i++)
   {
     // Get mesh facet corresponding to boundary cell
-    Facet mesh_facet(mesh_, (*cell_map).get(i));
+    Facet mesh_facet(mesh, (*cell_map).get(i));
 
     // Get integral for sub domain (if any)
     if (domains && domains->size() > 0)
@@ -306,14 +297,14 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     }
 
     // Get mesh cell to which mesh facet belongs (pick first, there is only one)
-    dolfin_assert(mesh_facet.numEntities(dim_) == 1);
-    Cell mesh_cell(mesh_, mesh_facet.entities(dim_)[0]);
+    dolfin_assert(mesh_facet.numEntities(tdim) == 1);
+    Cell mesh_cell(mesh, mesh_facet.entities(tdim)[0]);
 
     // Get local index of facet with respect to the cell
     const uint local_facet = mesh_cell.index(mesh_facet);
 
     // Update to current cell
-    ufc.update(mesh_cell, mesh_.distdata());
+    ufc.update(mesh_cell, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -346,27 +337,30 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   if (ufc.form.num_interior_facet_integrals() == 0)
     return;
 
+  Mesh& mesh = dof_map_set[0].mesh();
+  uint const tdim = mesh.topology().dim();
+
   // Interior facet integral
   ufc::interior_facet_integral* integral = ufc.interior_facet_integrals[0];
 
   // Compute facets and facet - cell connectivity if not already computed
-  mesh_.init(dim_ - 1);
-  mesh_.init(dim_ - 1, dim_);
-  mesh_.order();
+  mesh.init(tdim - 1);
+  mesh.init(tdim - 1, tdim);
+  mesh.order();
 
   //
-  BoundaryMesh& interior_boundary = mesh_.interior_boundary();
+  BoundaryMesh& interior_boundary = mesh.interior_boundary();
   if(interior_boundary.numCells()  == 0) return;
 
   // Assemble over interior facets (the facets of the mesh)
 #ifndef NO_PROGRESS_BAR
-  dolfin_assert(mesh_.numFacets());
-  Progress p(progressMessage(A.rank(), "interior facets"), mesh_.numFacets());
+  dolfin_assert(mesh.numFacets());
+  Progress p(progressMessage(A.rank(), "interior facets"), mesh.numFacets());
 #endif
-  for (FacetIterator facet(mesh_); !facet.end(); ++facet)
+  for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Check if we have an interior facet
-    if ( facet->numEntities(dim_) != 2 )
+    if ( facet->numEntities(tdim) != 2 )
     {
 #ifndef NO_PROGRESS_BAR
       p++;
@@ -389,15 +383,15 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
     }
 
     // Get cells incident with facet
-    Cell cell0(mesh_, facet->entities(dim_)[0]);
-    Cell cell1(mesh_, facet->entities(dim_)[1]);
+    Cell cell0(mesh, facet->entities(tdim)[0]);
+    Cell cell1(mesh, facet->entities(tdim)[1]);
 
     // Get local index of facet with respect to each cell
     uint facet0 = cell0.index(*facet);
     uint facet1 = cell1.index(*facet);
 
     // Update to current pair of cells
-    ufc.update(cell0, cell1, mesh_.distdata());
+    ufc.update(cell0, cell1, mesh.distdata());
 
     // Interpolate coefficients on cell
     for (uint i = 0; i < coefficients.size(); i++)
@@ -434,7 +428,8 @@ void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
   if (reset_tensor)
   {
     GenericSparsityPattern* sparsity_pattern = A.factory().createPattern();
-    SparsityPatternBuilder::build(*sparsity_pattern, mesh_, ufc, dof_map_set);
+    SparsityPatternBuilder::build(*sparsity_pattern, dof_map_set[0].mesh(), ufc,
+                                  dof_map_set);
     A.init(*sparsity_pattern);
     delete sparsity_pattern;
   }

@@ -14,8 +14,6 @@
 
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/quadrature/UFCCellIntegral.h>
-#include "DirichletBC.h"
 
 namespace dolfin
 {
@@ -27,7 +25,6 @@ class Form;
 class Mesh;
 class SubDomain;
 class UFC;
-class BoundaryMesh;
 
 /**
  *  @class Assembler
@@ -118,12 +115,6 @@ private:
 
   // Pretty-printing for progress bar
   std::string progressMessage(uint rank, std::string integral_type) const;
-
-  // The mesh
-  Mesh& mesh_;
-
-  //
-  uint const dim_;
 
 };
 

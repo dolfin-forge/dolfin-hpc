@@ -175,6 +175,10 @@ void SpaceTimeFunction::eval(real t)
   evaluant().vector() = 0.0;
   evaluant().vector().axpy(w0, U0.vector());
   evaluant().vector().axpy(w1, U1.vector());
+  evaluant().sync_ghosts();
+
+  dolfin_assert(evaluant().vector().max() == evaluant().vector().max() );
+  dolfin_assert(evaluant().vector().min() == evaluant().vector().min() );
 }
 //-----------------------------------------------------------------------------
 void SpaceTimeFunction::disp() const

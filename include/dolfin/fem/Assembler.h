@@ -48,32 +48,17 @@ public:
 
   /// Assemble tensor from given variational form
   void assemble(GenericTensor& A, Form& form, bool reset_tensor);
-  void assemble(GenericTensor& A, Form& form, const QuadratureRule& q, bool reset_tensor);
 
   /// Assemble tensor from given variational form over a sub domain
   void assemble(GenericTensor& A, Form& form,
                 const SubDomain& sub_domain,
                 bool reset_tensor);
-  void assemble(GenericTensor& A, Form& form,
-                const SubDomain& sub_domain,
-                const QuadratureRule& q,
-                bool reset_tensor);
-
-  /// Assemble tensor from given variational form over a sub domain
-  //void assemble(GenericTensor& A, Form& form,
-  //              const MeshFunction<uint>& domains, uint domain, bool reset_tensor);
 
   /// Assemble tensor from given variational form over sub domains
   void assemble(GenericTensor& A, Form& form,
                 const MeshFunction<uint>& cell_domains,
                 const MeshFunction<uint>& exterior_facet_domains,
                 const MeshFunction<uint>& interior_facet_domains,
-                bool reset_tensor);
-  void assemble(GenericTensor& A, Form& form,
-                const MeshFunction<uint>& cell_domains,
-                const MeshFunction<uint>& exterior_facet_domains,
-                const MeshFunction<uint>& interior_facet_domains,
-                const QuadratureRule& q,
                 bool reset_tensor);
 
   /// Assemble scalar from given variational form
@@ -103,14 +88,6 @@ public:
                 const MeshFunction<uint>* exterior_facet_domains,
                 const MeshFunction<uint>* interior_facet_domains,
                 bool reset_tensor = true);
-  void assemble(GenericTensor& A, const Form& form,
-                const Array<Function*>& coefficients,
-                const DofMapSet& dof_map_set,
-                const MeshFunction<uint>* cell_domains,
-                const MeshFunction<uint>* exterior_facet_domains,
-                const MeshFunction<uint>* interior_facet_domains,
-                const QuadratureRule& q,
-                bool reset_tensor = true);
 
 private:
 
@@ -120,15 +97,6 @@ private:
                      const DofMapSet& dof_set_map,
                      UFC& data,
                      const MeshFunction<uint>* domains) const;
-
-  // Assemble over cells using a user defined quadrature rule
-  void assembleCells(GenericTensor& A,
-                     const Array<Function*>& coefficients,
-                     const DofMapSet& dof_set_map,
-                     UFC& data,
-                     const MeshFunction<uint>* domains,
-                     const UFCCellIntegral& cell_integral,
-                     const QuadratureRule& q) const;
 
   // Assemble over exterior facets
   void assembleExteriorFacets(GenericTensor& A,

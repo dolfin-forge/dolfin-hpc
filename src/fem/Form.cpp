@@ -70,7 +70,7 @@ bool Form::check(Array<Function*> const& coefficients) const
   // Check that all coefficients have valid value dimensions
   for (uint i = 0; i < coefficients.size(); ++i)
   {
-    message("Checking coefficient %d:",i);
+    message(1,"Checking coefficient %d:",i);
     if (coefficients[i] == NULL)
     {
       error("Got NULL Function as coefficient %d.", i);
@@ -79,6 +79,7 @@ bool Form::check(Array<Function*> const& coefficients) const
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());
     uint coef_rank = coefficients[i]->rank();
     uint fe_rank = fe->value_rank();
+    message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank, coef_rank);
     if (fe_rank != coef_rank)
     {
       error("Invalid value rank of Function %d, got %d but expecting %d.",

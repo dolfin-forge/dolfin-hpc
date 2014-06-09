@@ -432,6 +432,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   // Overwrite old mesh with new, and invalidate numbering
   new_mesh._topology.distdata_ = distdata;
   mesh = new_mesh;
+  dolfin_assert(mesh.is_distributed());
   mesh.distdata().invalid_numbering();
   mesh.distdata().invalid_ownership();
 
@@ -1028,6 +1029,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   // Overwrite old mesh with new, and invalidate numbering
   new_mesh._topology.distdata_ = distdata;
   mesh = new_mesh;
+  dolfin_assert(mesh.is_distributed());
   mesh.distdata().invalid_numbering();
   mesh.distdata().invalid_ownership();
 

@@ -40,6 +40,8 @@ public:
 
   const MeshDistributedData& operator=(const MeshDistributedData& distributed_data);
 
+  bool empty() const;
+
   void clear();
   void init(uint const dim);
   void finalize(uint const dim);
@@ -141,7 +143,7 @@ public:
 
   inline bool have_global(uint i, uint dim) const
   {return (MPI::numProcesses() > 1 ? (local_indices[dim].count(i) > 0) : true);}
-  
+
   bool have_global(MeshEntity const& entity) const;
 
   inline bool have_local(uint i, uint dim) const

@@ -24,7 +24,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
                                    Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
 {
   // Initialise sparsity pattern
-  if( dolfin::MPI::numProcesses() > 1)
+  if(mesh.is_distributed())
   {
     sparsity_pattern.pinit(ufc.form.rank(), ufc.global_dimensions);
   }
@@ -33,7 +33,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
   }
 
-  if( dolfin::MPI::numProcesses() > 1)
+  if(mesh.is_distributed())
   {
     sparsity_pattern.initRange(dof_map_set[0].local_size());
   }
@@ -66,7 +66,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       }
 
       // Fill sparsity pattern.
-      if( dolfin::MPI::numProcesses() > 1)
+      if(mesh.is_distributed())
       {
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
       }

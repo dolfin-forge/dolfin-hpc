@@ -118,6 +118,11 @@ const MeshDistributedData& MeshDistributedData::operator=(const MeshDistributedD
   return *this;
 }
 //-----------------------------------------------------------------------------
+bool MeshDistributedData::empty() const
+{
+  return (global_indices[0].size() == 0);
+}
+//-----------------------------------------------------------------------------
 void MeshDistributedData::init(uint const dim)
 {
   if(dim > 0 && _dim == 0)

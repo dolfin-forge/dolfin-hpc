@@ -232,7 +232,7 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
   }
 
   //--- Exchange data for exterior facets with shared entities
-  if (mesh.distributed())
+  if (mesh.is_distributed())
   {
     // Since an entity is shared is shared iff all it lower dimensional entities
     // are shared we can loop over shared vertices and stack facets.

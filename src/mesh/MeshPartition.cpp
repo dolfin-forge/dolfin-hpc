@@ -100,8 +100,7 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
 
   if (ncells == 0)
   {
-    dolfin::error(
-		  "One mesh partition contains zero cells, which makes it impossible to compute the problem.");
+    dolfin::error("One mesh partition contains zero cells.");
   }
   
   elmdist[rank] = ncells;

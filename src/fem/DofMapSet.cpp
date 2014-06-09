@@ -73,6 +73,7 @@ Mesh const& DofMapSet::mesh() const
 //-----------------------------------------------------------------------------
 DofMap& DofMapSet::operator[](uint i) const
 {
+  dolfin_assert(dof_map_set.size() > 0);
   dolfin_assert(i < dof_map_set.size());
   return *dof_map_set[i];
 }

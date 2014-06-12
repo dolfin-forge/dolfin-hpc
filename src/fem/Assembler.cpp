@@ -160,8 +160,10 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
 
 
     // Update all ghost points
-    for (uint i = 0; i < coefficients.size(); i++)
+    for (uint i = 0; i < coefficients.size(); ++i)
+    {
       coefficients[i]->sync_ghosts();
+    }
   }
 #pragma omp flush
 #pragma omp barrier

@@ -9,6 +9,7 @@ libdolfin_fem_la_SOURCES = \
 			DofMap.cpp\
 			DofMapCache.cpp\
 			DofMapSet.cpp\
+			EquiAffineMap.cpp \
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
 			Form.cpp\

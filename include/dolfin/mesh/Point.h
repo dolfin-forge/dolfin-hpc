@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Garth N. Wells, 2006.
+// Modified by Aurélien Larcher, 2014.
 //
 // First added:  2006-06-12
-// Last changed: 2008-05-08
+// Last changed: 2014-06-12
 
 #ifndef __POINT_H
 #define __POINT_H
@@ -15,94 +16,202 @@
 namespace dolfin
 {
 
-  /// A Point represents a point in R^3 with coordinates x, y, z, or,
-  /// alternatively, a vector in R^3, supporting standard operations
-  /// like the norm, distances, scalar and vector products etc.
+/// A Point represents a point in R^3 with coordinates x, y, z, or,
+/// alternatively, a vector in R^3, supporting standard operations
+/// like the norm, distances, scalar and vector products etc.
 
-  class Point
-  {
-  public:
+class Point
+{
+public:
 
-    /// Create a point at (x, y, z)
-    Point(const real x = 0.0, const real y = 0.0, const real z =0.0) 
-    { _x[0] = x; _x[1] = y; _x[2] = z; }
+  static uint const max_size = 3;
 
-    /// Copy constructor
-    Point(const Point& p)
-    { _x[0] = p._x[0]; _x[1] = p._x[1]; _x[2] = p._x[2]; }
+  /// Create a point at (x, y, z)
+  Point(const real x = 0.0, const real y = 0.0, const real z = 0.0);
 
-    /// Destructor
-    ~Point() {};
+  /// Copy constructor
+  Point(Point const& p);
 
-    /// Return address of coordinate in direction i
-    inline real& operator[] (uint i) { dolfin_assert(i < 3); return _x[i]; }
+  /// Destructor
+  ~Point();
 
-    /// Return coordinate in direction i
-    inline real operator[] (uint i) const { dolfin_assert(i < 3); return _x[i]; }
+  /// Return address of coordinate in direction i
+  real& operator[](uint i);
 
-    /// Return x-coordinate
-    inline real x() const { return _x[0]; }
+  /// Return coordinate in direction i
+  real operator[](uint i) const;
 
-    /// Return y-coordinate
-    inline real y() const { return _x[1]; }
+  /// Return x-coordinate
+  real x() const;
 
-    /// Return z-coordinate
-    inline real z() const { return _x[2]; }
+  /// Return y-coordinate
+  real y() const;
 
-    /// Compute sum of two points
-    Point operator+ (const Point& p) const { Point q(_x[0] + p._x[0], _x[1] + p._x[1], _x[2] + p._x[2]); return q; }
-    
-    /// Compute difference of two points
-    Point operator- (const Point& p) const { Point q(_x[0] - p._x[0], _x[1] - p._x[1], _x[2] - p._x[2]); return q; }
+  /// Return z-coordinate
+  real z() const;
 
-    /// Add given point
-    const Point& operator+= (const Point& p) { _x[0] += p._x[0]; _x[1] += p._x[1]; _x[2] += p._x[2]; return *this; }
+  /// Compute sum of two points
+  Point operator+(Point const& p) const;
 
-    /// Subtract given point
-    const Point& operator-= (const Point& p) { _x[0] -= p._x[0]; _x[1] -= p._x[1]; _x[2] -= p._x[2]; return *this; }
+  /// Compute difference of two points
+  Point operator-(Point const& p) const;
 
-    /// Multiplication with scalar
-    Point operator* (real a) const { Point p(a*_x[0], a*_x[1], a*_x[2]); return p; }
+  /// Add given point
+  Point const& operator+=(Point const& p);
 
-    /// Incremental multiplication with scalar
-    const Point& operator*= (real a) { _x[0] *= a; _x[1] *= a; _x[2] *= a; return *this; }
-    
-    /// Division by scalar
-    Point operator/ (real a) const { Point p(_x[0]/a, _x[1]/a, _x[2]/a); return p; }
-
-    /// Incremental division by scalar
-    const Point& operator/= (real a) { _x[0] /= a; _x[1] /= a; _x[2] /= a; return *this; }
-
-    /// Assignment operator
-    const Point& operator= (const Point& p) { _x[0] = p._x[0]; _x[1] = p._x[1]; _x[2] = p._x[2]; return *this; }
-
-    /// Compute distance to given point
-    real distance(const Point& p) const;
-
-    /// Compute norm of point representing a vector from the origin
-    real norm() const;
-
-    /// Compute cross product with given vector
-    const Point cross(const Point& p) const;
-
-    /// Compute dot product with given vector
-    real dot(const Point& p) const;
-
-    /// Output
-    friend LogStream& operator<< (LogStream& stream, const Point& p);
-
-  private:
-
-    real _x[3];
-
-  };
+  /// Subtract given point
+  Point const& operator-=(Point const& p);
 
   /// Multiplication with scalar
-  inline Point operator*(real a, const Point& p) { return p*a; }
-  
+  Point operator*(real a) const;
+
+  /// Incremental multiplication with scalar
+  Point const& operator*=(real a);
+
+  /// Division by scalar
+  Point operator/(real a) const;
+
+  /// Incremental division by scalar
+  Point const& operator/=(real a);
+
+  /// Assignment operator
+  Point const& operator=(Point const& p);
+
+  /// Compute distance to given point
+  real distance(Point const& p) const;
+
+  /// Compute norm of point representing a vector from the origin
+  real norm() const;
+
+  /// Compute cross product with given vector
+  const Point cross(Point const& p) const;
+
+  /// Compute dot product with given vector
+  real dot(Point const& p) const;
+
   /// Output
-  LogStream& operator<< (LogStream& stream, const Point& p);
-  
+  friend LogStream& operator<<(LogStream& stream, Point const& p);
+
+private:
+
+  real _x[Point::max_size];
+
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+inline real& Point::operator[](uint i)
+{
+  dolfin_assert(i < Point::max_size);
+  return _x[i];
+}
+
+//-----------------------------------------------------------------------------
+inline real Point::operator[](uint i) const
+{
+  dolfin_assert(i < Point::max_size);
+  return _x[i];
+}
+
+//-----------------------------------------------------------------------------
+inline real Point::x() const
+{
+  return _x[0];
+}
+
+//-----------------------------------------------------------------------------
+inline real Point::y() const
+{
+  return _x[1];
+}
+
+//-----------------------------------------------------------------------------
+inline real Point::z() const
+{
+  return _x[2];
+}
+
+//-----------------------------------------------------------------------------
+inline Point Point::operator+(Point const& p) const
+{
+  Point q(_x[0] + p._x[0], _x[1] + p._x[1], _x[2] + p._x[2]);
+  return q;
+}
+
+//-----------------------------------------------------------------------------
+inline Point Point::operator-(Point const& p) const
+{
+  Point q(_x[0] - p._x[0], _x[1] - p._x[1], _x[2] - p._x[2]);
+  return q;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const& Point::operator+=(Point const& p)
+{
+  _x[0] += p._x[0];
+  _x[1] += p._x[1];
+  _x[2] += p._x[2];
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const& Point::operator-=(Point const& p)
+{
+  _x[0] -= p._x[0];
+  _x[1] -= p._x[1];
+  _x[2] -= p._x[2];
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Point Point::operator*(real a) const
+{
+  Point p(a * _x[0], a * _x[1], a * _x[2]);
+  return p;
+}
+
+//-----------------------------------------------------------------------------
+inline Point operator*(real a, Point const& p)
+{
+  return p * a;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const& Point::operator*=(real a)
+{
+  _x[0] *= a;
+  _x[1] *= a;
+  _x[2] *= a;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Point Point::operator/(real a) const
+{
+  Point p(_x[0] / a, _x[1] / a, _x[2] / a);
+  return p;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const& Point::operator/=(real a)
+{
+  _x[0] /= a;
+  _x[1] /= a;
+  _x[2] /= a;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+inline Point const& Point::operator=(Point const& p)
+{
+  _x[0] = p._x[0];
+  _x[1] = p._x[1];
+  _x[2] = p._x[2];
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+
 }
 
 #endif

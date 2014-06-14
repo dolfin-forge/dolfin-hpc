@@ -303,17 +303,17 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     uint dest;
     MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
 
-    uint const u_sendcount = u_sendbuf.size();
+    int const u_sendcount = u_sendbuf.size();
     int u_maxrecvcount = 0;
     int u_recvcount = 0;
-    MPI_Allreduce((void *)&u_sendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
+    MPI_Allreduce(&u_sendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
                   dolfin::MPI::DOLFIN_COMM);
     uint * u_recvbuf = new uint[u_maxrecvcount];
 
-    uint const r_sendcount = r_sendbuf.size();
+    int const r_sendcount = r_sendbuf.size();
     int r_maxrecvcount = 0;
     int r_recvcount = 0;
-    MPI_Allreduce((void *)&r_sendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
+    MPI_Allreduce(&r_sendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
                   dolfin::MPI::DOLFIN_COMM);
     real * r_recvbuf = new real[r_maxrecvcount];
 

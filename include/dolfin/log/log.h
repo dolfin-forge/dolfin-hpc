@@ -90,10 +90,17 @@ namespace dolfin
 }
 
 // Debug macros (with varying number of arguments)
+#ifdef __GNUG__
 #define dolfin_debug(msg)              do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg); } while (false)
 #define dolfin_debug1(msg, a0)         do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0); } while (false)
 #define dolfin_debug2(msg, a0, a1)     do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0, a1); } while (false)
 #define dolfin_debug3(msg, a0, a1, a2) do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0, a1, a2); } while (false)
+#else  // __FUNCTION__ is a non-standard GNU extension, disable for all other compilers
+#define dolfin_debug(msg)              
+#define dolfin_debug1(msg, a0)         
+#define dolfin_debug2(msg, a0, a1)     
+#define dolfin_debug3(msg, a0, a1, a2) 
+#endif
 
 // Assertion, only active if DEBUG is defined
 #ifdef DEBUG

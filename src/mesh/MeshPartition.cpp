@@ -59,12 +59,18 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
 
   // Metis assumes vertices numbered from process 0
   MeshRenumber::renumber_vertices(mesh);
-
+  
+#if PARMETIS_MAJOR_VERSION > 3
+  real_t ubvec = 1.05;
+  idx_t numflag = 0;    // C-style numbering
+  idx_t edgecut = 0;
+  idx_t wgtflag, ncon;
+#else
   float ubvec = 1.05;
-  int numflag = 0;    // C-style numbering
+  int numflag = 0;   
   int edgecut = 0;
-  int wgtflag = 1;
-  int ncon = 0;
+  int wgtflag, ncon;
+#endif
   if (weight)
   {
     wgtflag = 2;    // Weights on vertices only
@@ -163,16 +169,26 @@ void MeshPartition::partitionCommonMetis(Mesh& mesh,
 
 #if PARMETIS_MAJOR_VERSION > 3
   idx_t *part = new idx_t[ncells];
+  real_t *tpwgts = new real_t[size];
 #else
   idxtype *part = new idxtype[ncells];
+  float *tpwgts = new float[size];
 #endif
 
-  float *tpwgts = new float[size];
+
   for (i = 0; i < size; i++)
+#if PARMETIS_MAJOR_VERSION > 3
+    tpwgts[i] = 1.0 / (real_t) (size);
+#else
     tpwgts[i] = 1.0 / (float) (size);
-  
+#endif
+
   // default options
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t options[3] = { 1, 0, 15 };
+#else
   int options[3] = { 1, 0, 15 };
+#endif
   
   ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag, &numflag,
 			   &ncon, &ncnodes, &size, tpwgts, &ubvec, options, &edgecut, part,
@@ -220,8 +236,14 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
   MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT,
 		MPI::DOLFIN_COMM);
 
-  int i, tmp;
+  int i;
+#if PARMETIS_MAJOR_VERSION > 3
+  idx_t tmp;
+  idx_t sum = vtxdist[0];
+#else
+  int tmp;
   int sum = vtxdist[0];
+#endif
   vtxdist[0] = 0;
   for (i = 1; i < size + 1; i++)
   {
@@ -232,19 +254,29 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 
 #if PARMETIS_MAJOR_VERSION > 3
   idx_t *part = new idx_t[mesh.numVertices()];
+  idx_t gdim =  static_cast<idx_t>( mesh.geometry().dim() );
+  real_t *xdy = new real_t[gdim * mesh.numVertices()];
 #else
   idxtype *part = new idxtype[mesh.numVertices()];
-#endif
   int gdim =  static_cast<int>( mesh.geometry().dim() );
   float *xdy = new float[gdim * mesh.numVertices()];
+#endif
+
 
   i = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
+#if PARMETIS_MAJOR_VERSION > 3
+    xdy[i] = static_cast<real_t>(vertex->point().x());
+    xdy[i + 1] = static_cast<real_t>(vertex->point().y());
+    if (gdim > 2)
+      xdy[i + 2] = static_cast<real_t>(vertex->point().z());
+#else
     xdy[i] = static_cast<float>(vertex->point().x());
     xdy[i + 1] = static_cast<float>(vertex->point().y());
     if (gdim > 2)
       xdy[i + 2] = static_cast<float>(vertex->point().z());
+#endif
     i += gdim;
   }
 

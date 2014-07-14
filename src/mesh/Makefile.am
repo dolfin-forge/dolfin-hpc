@@ -12,6 +12,7 @@ libdolfin_mesh_la_SOURCES = \
 			DMesh.cpp\
 			DVertex.cpp\
 			Edge.cpp\
+			EquiAffineMap.cpp\
 			Face.cpp\
 			Facet.cpp\
 			GTSInterface.cpp\

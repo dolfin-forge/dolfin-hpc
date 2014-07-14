@@ -7,7 +7,7 @@
 // First added:  2005-05-17
 // Last changed: 2010-06-13
 
-#include <dolfin/fem/EquiAffineMap.h>
+#include <dolfin/mesh/EquiAffineMap.h>
 
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>

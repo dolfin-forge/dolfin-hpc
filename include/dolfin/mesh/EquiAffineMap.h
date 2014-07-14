@@ -69,7 +69,10 @@ private:
   void updateTetrahedron(Cell& cell);
 
   // Vertices of current cell
-  Point p0, p1, p2, p3;
+  Point p0;
+  Point p1;
+  Point p2;
+  Point p3;
 
 };
 

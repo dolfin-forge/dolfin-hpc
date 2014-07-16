@@ -57,7 +57,7 @@ namespace dolfin
     { vector->zero(); }
 
     /// Finalize assembly of tensor
-    virtual void apply(FinalizeType finaltype=FINALIZE) 
+    virtual void apply(FinalizeType finaltype=FINALIZE)
     { vector->apply(finaltype); }
 
     /// Display tensor
@@ -67,11 +67,11 @@ namespace dolfin
     //--- Implementation of the GenericVector interface ---
 
     /// Initialize vector of size N
-    virtual void init(uint N) 
+    virtual void init(uint N)
     { vector->init(N); }
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices, 
-			      std::map<uint, uint>& map)
+    virtual void init_ghosted(uint n, std::set<uint>& indices,
+                              std::map<uint, uint>& map)
     { vector->init_ghosted(n, indices, map); }
 
     /// Return size of vector
@@ -83,13 +83,13 @@ namespace dolfin
     { return vector->local_size(); }
 
     /// Return rank's offset into vector
-    virtual uint offset() const 
+    virtual uint offset() const
     { return vector->offset(); }
 
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows) const
     { vector->get(block, m, rows); }
- 
+
     /// Set block of values
     virtual void set(const real* block, uint m, const uint* rows)
     { vector->set(block, m, rows); }

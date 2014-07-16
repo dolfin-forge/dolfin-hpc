@@ -74,8 +74,8 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N) = 0;
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices, 
-			      std::map<uint, uint>& map) = 0;
+    virtual void init_ghosted(uint n, std::set<uint>& indices,
+                              std::map<uint, uint>& map) = 0;
 
     /// Return size of vector
     virtual uint size() const = 0;
@@ -85,7 +85,7 @@ namespace dolfin
 
     /// Return rank's offset into vector
     virtual uint offset() const = 0;
-    
+
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows) const = 0;
 
@@ -143,7 +143,7 @@ namespace dolfin
     virtual real operator[] (uint i) const
     { real value(0); get(&value, 1, &i); return value; }
 
-    /// Get value of given entry 
+    /// Get value of given entry
     virtual real getitem(uint i) const
     { real value(0); get(&value, 1, &i); return value; }
 

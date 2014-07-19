@@ -209,8 +209,10 @@ fi
 
 if test "x${with_janpack}" != xno; then
    AX_JANPACK
-   if test "x${HAVE_JANPACK}" != 0; then
+   if test "${janpack_LIBS}"; then
      found_la_backend="yes"  
+   else
+     with_janpack="no"
    fi
 fi
 

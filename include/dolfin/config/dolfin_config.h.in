@@ -51,6 +51,9 @@
 /* Define if you have the JANPACK library. */
 #undef HAVE_JANPACK
 
+/* Define if you have the MPI version of JANPACK. */
+#undef HAVE_JANPACK_MPI
+
 /* Have LIBGEOM library */
 #undef HAVE_LIBGEOM
 

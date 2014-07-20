@@ -211,6 +211,8 @@ if test "x${with_janpack}" != xno; then
    AX_JANPACK
    if test "${janpack_LIBS}"; then
      found_la_backend="yes"  
+   elif test "${janpack_mpi_LIBS}"; then
+     found_la_backend="yes"  
    else
      with_janpack="no"
    fi

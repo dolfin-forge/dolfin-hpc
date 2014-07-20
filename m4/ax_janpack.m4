@@ -8,13 +8,25 @@
 #
 
 AC_DEFUN([AX_JANPACK],[
-
 	PKG_CHECK_MODULES([janpack], [janpack >= 0.2.1], 
-			  have_janpack=yes, have_janpack=no)
+				     have_janpack=yes, have_janpack=no)
 	if test "x${have_janpack}" = xyes; then 	
 	   CPPFLAGS="$CPPFLAGS $janpack_CFLAGS"
 	   LIBS="$LIBS $janpack_LIBS"
 	   AC_DEFINE(HAVE_JANPACK,[1],
-		    [Define if you have the JANPACK library.])
+		     [Define if you have the JANPACK library.])
+	fi
+
+	if test "x${have_janpack}" = xno; then 	
+	PKG_CHECK_MODULES([janpack_mpi], [janpack >= mpi-0.2.2], 
+					 have_janpack=yes, have_janpack=no)
+		if test "x${have_janpack}" = xyes; then 	
+		   CPPFLAGS="$CPPFLAGS $janpack_mpi_CFLAGS"
+		   LIBS="$LIBS $janpack_mpi_LIBS"
+		   AC_DEFINE(HAVE_JANPACK,[1],
+			     [Define if you have the JANPACK library.])
+		   AC_DEFINE(HAVE_JANPACK_MPI,[1],
+			     [Define if you have the MPI version of JANPACK.])
+		fi
 	fi
 ])

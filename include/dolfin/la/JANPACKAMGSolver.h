@@ -7,7 +7,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifdef HAVE_JANPACK
+#if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
 #include <dolfin/common/types.h>
 #include <dolfin/parameter/Parametrized.h>
 #include "MultigridScheme.h"

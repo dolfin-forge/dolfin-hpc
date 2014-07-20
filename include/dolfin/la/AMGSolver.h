@@ -42,7 +42,7 @@ namespace dolfin
     { 
       Timer timer("AMG solver");
 
-#ifdef HAVE_JANPACK
+#if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
       if (A.has_type<JANPACKMat>())
       {
 	if (!janpack_solver)
@@ -69,7 +69,7 @@ namespace dolfin
     MultigridCoarsening coarsening_type;
 
 
-#ifdef HAVE_JANPACK
+#if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
     JANPACKAMGSolver* janpack_solver;
 #else
     int* janpack_solver;

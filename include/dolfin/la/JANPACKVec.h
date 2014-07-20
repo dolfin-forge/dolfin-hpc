@@ -9,6 +9,12 @@
 
 #ifdef HAVE_JANPACK
 
+#ifdef HAVE_JANPACK_MPI
+#define jp_vec_type jp_vec_t
+#else
+#define jp_vec_type char
+#endif
+
 #include <janpack/vec.h>
 
 #include <dolfin/log/LogStream.h>
@@ -128,7 +134,7 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK jp_vec_t pointer
-    char *vec() const;
+    jp_vec_type *vec() const;
 
     /// Assignment operator
     const JANPACKVec& operator= (const JANPACKVec& x);
@@ -139,8 +145,12 @@ namespace dolfin
   private:
 
     // JANPACK vector pointer
-    //    char *x;
+#ifdef HAVE_JANPACK_MPI
+    jp_vec_t _x;
+    jp_vec_t *x;
+#else
     char x[160];
+#endif
        
     // True if we don't own the vector x points to
     bool is_view;

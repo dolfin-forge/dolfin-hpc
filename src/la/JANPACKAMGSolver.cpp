@@ -4,7 +4,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifdef HAVE_JANPACK
+#if defined(HAVE_JANPACK) && !defined(HAVE_JANPACK_MPI)
 
 #include <janpack/amg_solver.h>
 

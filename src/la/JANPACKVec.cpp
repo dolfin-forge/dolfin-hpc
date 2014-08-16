@@ -23,7 +23,7 @@ using namespace dolfin;
 JANPACKVec::JANPACKVec():
     Variable("x", "a sparse vector"),
     is_view(false), is_ghosted(false), is_init(false)
-#ifdef JANPACK_HAVE_MPI
+#ifdef HAVE_JANPACK_MPI
     , x(&_x)
 #endif
 {
@@ -62,7 +62,7 @@ void JANPACKVec::init(uint N)
   // Otherwise do nothing
   
 
-  if ((is_init && this->size() == N ) || (this->local_size() == N))
+  if ((is_init && this->size() == N ) || (is_init && this->local_size() == N))
   {
     jp_vec_zero(x);
     return;      

@@ -81,7 +81,7 @@ namespace ufl
 
       //--- INTERFACE -------------------------------------------------------------
 
-      std::pair<Expression const, Label const> const& operands() const;
+      std::pair<Expression, Label> const& operands() const;
       
 //      ///
 //      free_indices() const;
@@ -112,8 +112,7 @@ namespace ufl
 
     private:
 
-      Expression const expression_;
-      Label const label_;
+      std::pair<Expression, Label> const expr_label_;
 
       repr_t const repr_;
       std::string const str_;

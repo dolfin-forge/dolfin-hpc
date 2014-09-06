@@ -15,24 +15,22 @@ namespace ufl
 //-----------------------------------------------------------------------------
   ComponentTensor::ComponentTensor(Expression const& expression, IndexBase const& index) :
     Class("ComponentTensor"),
-    expression_(expression),
-    index_(index)
+    expr_index_(expression, index)
   {
     std::stringstream ssrepr;
-    ssrepr << "ComponentTensor(" << expression_.repr() << "," << index_.repr() << ")";
+    ssrepr << "ComponentTensor(" << expression.repr() << "," << index.repr() << ")";
     repr_ = ssrepr.str();
 
     //Is this the same implementation as in python?
     std::stringstream ssstr;
-    ssstr << "{ A | A_{" << index_.str() << "} = " << expression_.str() << " }";
+    ssstr << "{ A | A_{" << index.str() << "} = " << expression.str() << " }";
     str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
   ComponentTensor::ComponentTensor(repr_t const & repr) :
     Class("ComponentTensor", repr),
-    expression_(arg(0)),
-    index_(arg(1))
+    expr_index_(arg(0), arg(1))
   {
   }
 
@@ -42,9 +40,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, MultiIndex const> const& ComponentTensor::operands() const
+  std::pair<Expression, MultiIndex> const& ComponentTensor::operands() const
   {
-    return std::make_pair(expression_, index_);  
+    return expr_index_;
   }
 
 //-----------------------------------------------------------------------------

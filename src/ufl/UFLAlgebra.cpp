@@ -15,20 +15,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Sum::Sum(Expression const& s1, Expression const& s2) :
     Class("Sum"),
-    s1_(s1),
-    s2_(s2),
-    repr_(*this, s1_, s2_),
-    str_(s1_.str() + " + " + s2_.str())
+    s_(s1, s2),
+    repr_(*this, s_.first, s_.second),
+    str_(s_.first.str() + " + " + s_.second.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   Sum::Sum(repr_t const & repr):
     Class("Sum", repr),
-    s1_(arg(0)),
-    s2_(arg(1)),
-    repr_(*this, s1_, s2_),
-    str_(s1_.str() + " + " + s2_.str())
+    s_(arg(0),arg(1)),
+    repr_(*this, s_.first, s_.second),
+    str_(s_.first.str() + " + " + s_.second.str())
   {
   }
 
@@ -38,9 +36,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Expression const> const& Sum::operands() const
+  std::pair<Expression, Expression> const& Sum::operands() const
   {
-    return std::make_pair(s1_, s2_);  
+    return s_;
   }
 
 //-----------------------------------------------------------------------------
@@ -63,20 +61,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Product::Product(Expression const& p1, Expression const& p2) :
     Class("Product"),
-    p1_(p1),
-    p2_(p2),
-    repr_(*this, p1_, p2_),
-    str_(p1_.str() + " * " + p2_.str())
+    p_(p1, p2),
+    repr_(*this, p_.first, p_.second),
+    str_(p_.first.str() + " * " + p_.second.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   Product::Product(repr_t const & repr):
     Class("Product", repr),
-    p1_(arg(0)),
-    p2_(arg(1)),
-    repr_(*this, p1_, p2_),
-    str_(p1_.str() + " * " + p2_.str())
+    p_(arg(0), arg(1)),
+    repr_(*this, p_.first, p_.second),
+    str_(p_.first.str() + " * " + p_.second.str())
   {
   }
 
@@ -86,9 +82,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Expression const> const& Product::operands() const
+  std::pair<Expression, Expression> const& Product::operands() const
   {
-    return std::make_pair(p1_, p2_);  
+    return p_;
   }
 
 //-----------------------------------------------------------------------------
@@ -111,20 +107,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Division::Division(Expression const& d1, Expression const& d2) :
     Class("Division"),
-    d1_(d1),
-    d2_(d2),
-    repr_(*this, d1_, d2_),
-    str_(d1_.str() + " / " + d2_.str())
+    d_(d1, d2),
+    repr_(*this, d_.first, d_.second),
+    str_(d_.first.str() + " / " + d_.second.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   Division::Division(repr_t const & repr):
     Class("Division", repr),
-    d1_(arg(0)),
-    d2_(arg(1)),
-    repr_(*this, d1_, d2_),
-    str_(d1_.str() + " / " + d2_.str())
+    d_(arg(0), arg(1)),
+    repr_(*this, d_.first, d_.second),
+    str_(d_.first.str() + " / " + d_.second.str())
   {
   }
 
@@ -134,9 +128,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Expression const> const& Division::operands() const
+  std::pair<Expression, Expression> const& Division::operands() const
   {
-    return std::make_pair(d1_, d2_);  
+    return d_;
   }
 
 //-----------------------------------------------------------------------------
@@ -159,20 +153,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Power::Power(Expression const& a, Expression const& b) :
     Class("Power"),
-    a_(a),
-    b_(b),
-    repr_(*this, a_, b_),
-    str_(a_.str() + " ** " + b_.str())
+    apowb_(a, b),
+    repr_(*this, apowb_.first, apowb_.second),
+    str_(apowb_.first.str() + " ** " + apowb_.second.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   Power::Power(repr_t const & repr):
     Class("Power", repr),
-    a_(arg(0)),
-    b_(arg(1)),
-    repr_(*this, a_, b_),
-    str_(a_.str() + " ** " + b_.str())
+    apowb_(arg(0), arg(1)),
+    repr_(*this, apowb_.first, apowb_.second),
+    str_(apowb_.first.str() + " ** " + apowb_.second.str())
   {
   }
 
@@ -182,9 +174,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Expression const> const& Power::operands() const
+  std::pair<Expression, Expression> const& Power::operands() const
   {
-    return std::make_pair(a_, b_);  
+    return apowb_;
   }
 
 //-----------------------------------------------------------------------------

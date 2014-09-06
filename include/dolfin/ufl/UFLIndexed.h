@@ -44,7 +44,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, Index const> const& operands() const;
+      std::pair<Expression, Index> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -71,8 +71,7 @@ namespace ufl
 
     private:
 
-      Expression const expression_;
-      Index const index_;
+      std::pair<Expression, Index> expr_index_;
 
       mutable repr_t repr_;
       mutable std::string str_;

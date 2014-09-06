@@ -47,10 +47,10 @@ namespace ufl
       MultiIndex const& index() const;
       
       ///
-      dolfin::uint const& dimension() const;
+      dolfin::uint dimension() const;
 
       ///
-      std::pair<Expression const, MultiIndex const> const& operands() const;
+      std::pair<Expression, MultiIndex> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -77,8 +77,7 @@ namespace ufl
 
     private:
 
-      Expression const summand_;
-      MultiIndex const index_;
+      std::pair<Expression, MultiIndex> const summand_mindex_;
 
       mutable repr_t repr_;
       mutable std::string str_;

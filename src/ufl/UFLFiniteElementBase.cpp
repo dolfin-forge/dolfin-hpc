@@ -35,18 +35,17 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
   }
   else if (name == "MixedElement")
   {
-    error("UFL implementation for MixedElement is not available yet.");
-//    return new MixedElement(repr);
+    return new MixedElement(repr);
   }
   else if (name == "EnrichedElement")
   {
     error("UFL implementation for EnrichedElement is not available yet.");
-//    return new EnrichedElement(repr);
+//FIXME:    return new EnrichedElement(repr);
   }
   else if (name == "RestrictedElement")
   {
     error("UFL implementation for RestrictedElement is not available yet.");
-//    return new RestrictedElement(repr);
+//FIXME:    return new RestrictedElement(repr);
   }
   else
   {
@@ -89,13 +88,13 @@ FiniteElementBase::~FiniteElementBase()
 }
 
 //-----------------------------------------------------------------------------
-Family const FiniteElementBase::family() const
+Family const& FiniteElementBase::family() const
 {
   return family_;
 }
 
 //-----------------------------------------------------------------------------
-Cell const FiniteElementBase::cell() const
+Cell const& FiniteElementBase::cell() const
 {
   return cell_;
 }
@@ -107,13 +106,13 @@ type<dolfin::uint> const FiniteElementBase::degree() const
 }
 
 //-----------------------------------------------------------------------------
-QuadratureScheme const FiniteElementBase::quadrature_scheme() const
+QuadratureScheme const& FiniteElementBase::quadrature_scheme() const
 {
   return quad_scheme_;
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const FiniteElementBase::value_shape() const
+ValueArray const& FiniteElementBase::value_shape() const
 {
   return value_shape_;
 }

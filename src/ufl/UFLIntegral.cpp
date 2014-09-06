@@ -117,7 +117,7 @@ void MeasureDomain::display() const
   }
 
 //-----------------------------------------------------------------------------
-  dolfin::uint const& Measure::measure_id() const
+  dolfin::uint Measure::measure_id() const
   {
     return measure_id_;
   }

@@ -124,7 +124,7 @@ namespace ufl
 
 //      MeasureData const& meta_data() const;
 
-      dolfin::uint const& measure_id() const;
+      dolfin::uint measure_id() const;
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
 

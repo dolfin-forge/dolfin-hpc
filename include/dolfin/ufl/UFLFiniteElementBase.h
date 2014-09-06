@@ -45,21 +45,21 @@ public:
   virtual ~FiniteElementBase();
 
   /// Return finite element family type
-  Family const family() const;
+  Family const& family() const;
 
   /// Return cell of finite element
-  Cell const cell() const;
+  Cell const& cell() const;
 
   /// Return polynomial degree of finite element
   /// Present in FIAT interface
   type<dolfin::uint> const degree() const;
 
   /// Return quadrature scheme of finite element
-  QuadratureScheme const quadrature_scheme() const;
+  QuadratureScheme const& quadrature_scheme() const;
 
   /// Return the shape of the value space
   /// Present in FIAT interface
-  ValueArray const value_shape() const;
+  ValueArray const& value_shape() const;
 
   /// Return the domain onto which the element is restricted
   //Domain::Type const domain_restriction() const; Not implemented

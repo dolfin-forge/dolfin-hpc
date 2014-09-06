@@ -70,20 +70,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   SpatialDerivative::SpatialDerivative(Expression const& expression, Index const& index) :
     Class("SpatialDerivative"),
-    expression_(expression),
-    index_(index),
-    repr_(*this, expression_, index_),
-    str_("d/dx_" + index_.str() + " " + expression_.str())
+    expr_index_(expression, index),
+    repr_(*this, expr_index_.first, expr_index_.second),
+    str_("d/dx_" + expr_index_.second.str() + " " + expr_index_.first.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   SpatialDerivative::SpatialDerivative(repr_t const & repr) :
     Class("SpatialDerivative"),
-    expression_(arg(0)),
-    index_(arg(1)),
-    repr_(*this, expression_, index_),
-    str_("d/dx_" + index_.str() + " " + expression_.str())
+    expr_index_(arg(0), arg(1)),
+    repr_(*this, expr_index_.first, expr_index_.second),
+    str_("d/dx_" + expr_index_.second.str() + " " + expr_index_.first.str())
   {
   }
 
@@ -93,9 +91,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Index const> const& SpatialDerivative::operands() const
+  std::pair<Expression, Index> const& SpatialDerivative::operands() const
   {
-    return std::make_pair(expression_, index_);  
+    return expr_index_;
   }
 
 //-----------------------------------------------------------------------------
@@ -118,20 +116,18 @@ namespace ufl
 //-----------------------------------------------------------------------------
   VariableDerivative::VariableDerivative(Expression const& expression, Variable const& variable) :
     Class("VariableDerivative"),
-    expression_(expression),
-    variable_(variable),
-    repr_(*this, expression_, variable_),
-    str_("d/d[" + variable_.str() + "] " + expression_.str())
+    expr_var_(expression, variable),
+    repr_(*this, expr_var_.first, expr_var_.second),
+    str_("d/d[" + expr_var_.second.str() + "] " + expr_var_.first.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   VariableDerivative::VariableDerivative(repr_t const & repr) :
     Class("VariableDerivative"),
-    expression_(arg(0)),
-    variable_(arg(1)),
-    repr_(*this, expression_, variable_),
-    str_("d/d[" + variable_.str() + "] " + expression_.str())
+    expr_var_(arg(0), arg(1)),
+    repr_(*this, expr_var_.first, expr_var_.second),
+    str_("d/d[" + expr_var_.second.str() + "] " + expr_var_.first.str())
   {
   }
 
@@ -141,9 +137,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Variable const> const& VariableDerivative::operands() const
+  std::pair<Expression, Variable> const& VariableDerivative::operands() const
   {
-    return std::make_pair(expression_, variable_);  
+    return expr_var_;
   }
 
 //-----------------------------------------------------------------------------

@@ -15,24 +15,22 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Indexed::Indexed(Expression const& expression, Index const& index) :
     Class("Indexed"),
-    expression_(expression),
-    index_(index)
+    expr_index_(expression, index)
   {
     std::stringstream ssrepr;
-    ssrepr << "Indexed(" << expression_.repr() << "," << index_.repr() << ")";
+    ssrepr << "Indexed(" << expression.repr() << "," << index.repr() << ")";
     repr_ = ssrepr.str();
 
     //Is this the same implementation as in python?
     std::stringstream ssstr;
-    ssstr << expression_.str() << "[" << index_.str() << "]";
+    ssstr << expression.str() << "[" << index.str() << "]";
     str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
   Indexed::Indexed(repr_t const & repr) :
     Class("Indexed", repr),
-    expression_(arg(0)),
-    index_(arg(1))
+    expr_index_(arg(0), arg(1))
   {
 //    if(repr.length() == 0)
 //      dolfin_assert("An empty signature was passed to create an Indexed.");
@@ -87,9 +85,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Index const> const& Indexed::operands() const
+  std::pair<Expression, Index> const& Indexed::operands() const
   {
-    return std::make_pair(expression_, index_);  
+    return expr_index_;
   }
 
 //-----------------------------------------------------------------------------

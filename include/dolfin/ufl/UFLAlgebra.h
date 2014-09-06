@@ -44,7 +44,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, Expression const> const& operands() const;
+      std::pair<Expression, Expression> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -71,8 +71,7 @@ namespace ufl
 
     private:
 
-      Expression const s1_;
-      Expression const s2_;
+      std::pair<Expression, Expression> const s_;
 
       repr_t const repr_;
       std::string const str_;
@@ -104,7 +103,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, Expression const> const& operands() const;
+      std::pair<Expression, Expression> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -131,8 +130,7 @@ namespace ufl
 
     private:
 
-      Expression const p1_;
-      Expression const p2_;
+      std::pair<Expression, Expression> const p_;
 
       repr_t const repr_;
       std::string const str_;
@@ -164,7 +162,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, Expression const> const& operands() const;
+      std::pair<Expression, Expression> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -191,8 +189,7 @@ namespace ufl
 
     private:
 
-      Expression const d1_;
-      Expression const d2_;
+      std::pair<Expression, Expression> const d_;
 
       repr_t const repr_;
       std::string const str_;
@@ -224,7 +221,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       ///
-      std::pair<Expression const, Expression const> const& operands() const;
+      std::pair<Expression, Expression> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -251,8 +248,7 @@ namespace ufl
 
     private:
 
-      Expression const a_;
-      Expression const b_;
+      std::pair<Expression, Expression> const apowb_;
 
       repr_t const repr_;
       std::string const str_;

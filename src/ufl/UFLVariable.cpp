@@ -62,19 +62,17 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
   Variable::Variable(Expression const& expression, Label const& label) :
-    expression_(expression),
-    label_(label),
-    repr_(*this, expression_, label_),
-    str_("var" + label_.count().str() + "(" + expression_.str() + ")")
+    expr_label_(expression, label),
+    repr_(*this, expression, label),
+    str_("var" + expr_label_.second.count().str() + "(" + expr_label_.first.str() + ")")
   {
   }
 
 //-----------------------------------------------------------------------------
   Variable::Variable(repr_t const& repr) :
-    expression_(arg(0)),
-    label_(arg(1)),
-    repr_(*this, expression_, label_),
-    str_("var" + label_.count().str() + "(" + expression_.str() + ")")
+    expr_label_(arg(0), arg(1)),
+    repr_(*this, expr_label_.first, expr_label_.second),
+    str_("var" + expr_label_.second.count().str() + "(" + expr_label_.first.str() + ")")
   {
   }
 //-----------------------------------------------------------------------------
@@ -83,9 +81,9 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, Label const> const& Variable::operands() const
+  std::pair<Expression, Label> const& Variable::operands() const
   {
-    return std::make_pair(expression_, label_);  
+    return expr_label_;
   }
 
 //-----------------------------------------------------------------------------
@@ -97,7 +95,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   bool const Variable::is_cellwise_constant() const
   {
-    return expression_.is_cellwise_constant();
+    return expr_label_.first.is_cellwise_constant();
   }
 
 //-----------------------------------------------------------------------------

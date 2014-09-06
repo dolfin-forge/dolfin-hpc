@@ -15,24 +15,22 @@ namespace ufl
 //-----------------------------------------------------------------------------
   IndexSum::IndexSum(Expression const& summand, IndexBase const& index) :
     Class("IndexSum"),
-    summand_(summand),
-    index_(index)
+    summand_mindex_(summand, index)
   {
     std::stringstream ssrepr;
-    ssrepr << "IndexSum(" << summand_.repr() << "," << index_.repr() << ")";
+    ssrepr << "IndexSum(" << summand.repr() << "," << index.repr() << ")";
     repr_ = ssrepr.str();
 
     //Is this the same implementation as in python?
     std::stringstream ssstr;
-    ssstr << "sum_{" << index_.str() << "} " << summand_.str() << " ";
+    ssstr << "sum_{" << index.str() << "} " << summand.str() << " ";
     str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
   IndexSum::IndexSum(repr_t const & repr) :
     Class("IndexSum", repr),
-    summand_(arg(0)),
-    index_(arg(1))
+    summand_mindex_(arg(0), arg(1))
   {
   }
 
@@ -44,19 +42,19 @@ namespace ufl
 //-----------------------------------------------------------------------------
   MultiIndex const& IndexSum::index() const
   {
-    return index_;  
+    return summand_mindex_.second;
   }
 
 //-----------------------------------------------------------------------------
-  dolfin::uint const& IndexSum::dimension() const
+  dolfin::uint IndexSum::dimension() const
   {
     return 0;  
   }
   
 //-----------------------------------------------------------------------------
-  std::pair<Expression const, MultiIndex const> const& IndexSum::operands() const
+  std::pair<Expression, MultiIndex> const& IndexSum::operands() const
   {
-    return std::make_pair(summand_, index_);  
+    return summand_mindex_;
   }
 
 //-----------------------------------------------------------------------------

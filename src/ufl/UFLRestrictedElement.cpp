@@ -11,18 +11,19 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 RestrictedElement::RestrictedElement(FiniteElementBase const& element,
-                                           Domain const& domain) :
-    FiniteElementBase("RestrictedElement",Family::Restricted,
-                         element.cell(),
-                         element.degree(), element.quadrature_scheme(),
-                         element.value_shape()),
-    element_(element)
+                                     Domain const& domain) :
+    FiniteElementBase("RestrictedElement", element.quadrature_scheme()),
+    element_(element),
+    family_(Family::Mixed),
+    cell_(element.cell()),
+    degree_(element.degree()),
+    value_shape_(element.value_shape())
 {
   // Check mixed finite element definition
 
   std::stringstream ssrepr;
-  ssrepr << "RestrictedElement(" << element_.repr() << ", "
-         << domain.repr() << ")";
+  ssrepr << "RestrictedElement(" << element_.repr() << ", " << domain.repr()
+      << ")";
   repr_ = ssrepr.str();
 
   std::stringstream ssstr;
@@ -33,6 +34,24 @@ RestrictedElement::RestrictedElement(FiniteElementBase const& element,
 //-----------------------------------------------------------------------------
 RestrictedElement::~RestrictedElement()
 {
+}
+
+//-----------------------------------------------------------------------------
+Family const& RestrictedElement::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+Cell const& RestrictedElement::cell() const
+{
+  return cell_;
+}
+
+//-----------------------------------------------------------------------------
+type<dolfin::uint> const& RestrictedElement::degree() const
+{
+  return degree_;
 }
 
 //-----------------------------------------------------------------------------
@@ -55,7 +74,8 @@ std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_co
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const * const> const RestrictedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const *> const RestrictedElement::extract_component(
+    ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
@@ -67,7 +87,7 @@ dolfin::uint const RestrictedElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBaseList const& RestrictedElement::sub_elements() const
+FiniteElementBase::List const& RestrictedElement::sub_elements() const
 {
   return element_.sub_elements();
 }

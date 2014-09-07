@@ -48,6 +48,9 @@ public:
   /// __eq__
   virtual bool operator ==(Object const& other) const;
 
+  /// __neq__
+  virtual bool operator !=(Object const& other) const;
+
 protected:
 
   ///
@@ -79,6 +82,12 @@ protected:
 inline bool Object::operator ==(Object const& other) const
 {
   return (other.repr() == this->repr());
+}
+
+//-----------------------------------------------------------------------------
+inline bool Object::operator !=(Object const& other) const
+{
+  return (other.repr() != this->repr());
 }
 
 //-----------------------------------------------------------------------------

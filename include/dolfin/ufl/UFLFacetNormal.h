@@ -9,6 +9,8 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
+#include <dolfin/ufl/UFLValueArray.h>
+
 namespace ufl
 {
 

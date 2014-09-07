@@ -14,8 +14,11 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
                              dolfin::uint const degree) :
-    FiniteElementBase("FiniteElement", family, cell, degree),
-    value_shape_(),
+    FiniteElementBase("FiniteElement"),
+    family_(family),
+    cell_(cell),
+    degree_(degree),
+    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(*this, this->family(), cell, this->degree(),
@@ -29,14 +32,17 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
 
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree
-        << quadrature_scheme().str() << " on a " << cell.str() << ">";
+      << quadrature_scheme().str() << " on a " << cell.str() << ">";
   str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(repr_t const& repr) :
     FiniteElementBase("FiniteElement", repr),
-    value_shape_(),
+    family_(arg(0)),
+    cell_(arg(1)),
+    degree_(arg(2)),
+    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(repr)
@@ -49,13 +55,37 @@ FiniteElement::FiniteElement(repr_t const& repr) :
 
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree()
-        << quadrature_scheme().str() << " on a " << cell().str() << ">";
+      << quadrature_scheme().str() << " on a " << cell().str() << ">";
   str_ = ssstr.str();
 }
 
 //-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
 {
+}
+
+//-----------------------------------------------------------------------------
+Family const& FiniteElement::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+Cell const& FiniteElement::cell() const
+{
+  return cell_;
+}
+
+//-----------------------------------------------------------------------------
+type<dolfin::uint> const& FiniteElement::degree() const
+{
+  return degree_;
+}
+
+//-----------------------------------------------------------------------------
+ValueArray const& FiniteElement::value_shape() const
+{
+  return value_shape_;
 }
 
 //-----------------------------------------------------------------------------
@@ -78,11 +108,11 @@ std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_compon
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const * const> const FiniteElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> const FiniteElement::extract_component(
     ValueArray const& i) const
 {
   check_component(i);
-  return std::pair<dolfin::uint, FiniteElementBase const * const>(i[0], this);
+  return std::pair<dolfin::uint, FiniteElementBase const *>(i[0], this);
 }
 
 //-----------------------------------------------------------------------------
@@ -92,7 +122,7 @@ dolfin::uint const FiniteElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBaseList const& FiniteElement::sub_elements() const
+FiniteElementBase::List const& FiniteElement::sub_elements() const
 {
   return sub_elements_;
 }

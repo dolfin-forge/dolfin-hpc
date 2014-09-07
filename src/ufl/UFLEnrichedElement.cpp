@@ -12,11 +12,12 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 EnrichedElement::EnrichedElement(
-    FiniteElementBaseList const& elements ) :
-    FiniteElementBase("EnrichedElement", Family::Enriched,
-                      get_cell(elements),
-                      get_degree_max(elements)),
-    sub_elements_(elements)
+    List const& elements ) :
+    FiniteElementBase("EnrichedElement"),
+    sub_elements_(elements),
+    family_(Family::Enriched),
+    cell_(get_cell(elements)),
+    degree_(get_degree_max(elements))
 {
   // Create string representation
   std::stringstream ssrepr;
@@ -24,7 +25,7 @@ EnrichedElement::EnrichedElement(
   ssrepr << "EnrichedElement(";
   ssstr << "<";
 
-  FiniteElementBaseList::const_iterator it = sub_elements_.begin();
+  List::const_iterator it = sub_elements_.begin();
   dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
@@ -47,10 +48,34 @@ EnrichedElement::~EnrichedElement()
 }
 
 //-----------------------------------------------------------------------------
+Family const& EnrichedElement::family() const
+{
+  return family_;
+}
+
+//-----------------------------------------------------------------------------
+Cell const& EnrichedElement::cell() const
+{
+  return cell_;
+}
+
+//-----------------------------------------------------------------------------
+type<dolfin::uint> const& EnrichedElement::degree() const
+{
+  return degree_;
+}
+
+//-----------------------------------------------------------------------------
+ValueArray const& EnrichedElement::value_shape() const
+{
+  return value_shape_;
+}
+
+//-----------------------------------------------------------------------------
 bool const EnrichedElement::is_cellwise_constant() const
 {
   bool ret = true;
-  for ( FiniteElementBaseList::const_iterator it = sub_elements_.begin();
+  for ( List::const_iterator it = sub_elements_.begin();
         it != sub_elements_.end(); ++it )
   {
     ret |= (*it)->is_cellwise_constant();
@@ -72,9 +97,9 @@ std::pair<ValueArray, ValueArray> const EnrichedElement::extract_subelement_comp
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const * const> const EnrichedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const *> const EnrichedElement::extract_component(ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, FiniteElementBase const * const>( i[0] , sub_elements_[i[0]] );
+  return std::pair<dolfin::uint, FiniteElementBase const *>( i[0] , sub_elements_[i[0]] );
 }
 
 //-----------------------------------------------------------------------------
@@ -84,7 +109,7 @@ dolfin::uint const EnrichedElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBaseList const& EnrichedElement::sub_elements() const
+FiniteElementBase::List const& EnrichedElement::sub_elements() const
 {
   return sub_elements_;
 }

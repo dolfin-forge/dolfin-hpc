@@ -22,15 +22,10 @@ class array : public Object
 public:
 
   /// Constructor with default representation for given type
-  array(Object const& other) :
-      obj_(other)
-  {
-  }
+  array(Object const& other, bool const unpack = false);
 
   ///
-  ~array()
-  {
-  }
+  ~array();
 
   /// __repr__
   repr_t const repr() const;
@@ -44,11 +39,15 @@ public:
   ///
   repr_t const make_repr(std::vector<Object const *> const& prototype) const;
 
+  ///
+  static Object::repr_t unpack(Object::repr_t const& repr_array);
+
 protected:
 
 private:
 
   Object const& obj_;
+  bool const unpack_;
 
 };
 

@@ -23,6 +23,7 @@ namespace ufl
  */
 
 class Cell;
+class ValueArray;
 
 class GeometricQuantity : public Class
 {

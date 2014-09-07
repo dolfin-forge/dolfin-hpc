@@ -39,6 +39,20 @@ public:
 
   //--- INTERFACE -------------------------------------------------------------
 
+  /// Return finite element family type
+  Family const& family() const;
+
+  /// Return cell of finite element
+  Cell const& cell() const;
+
+  /// Return polynomial degree of finite element
+  /// Present in FIAT interface
+  type<dolfin::uint> const& degree() const;
+
+  /// Return the shape of the value space
+  /// Present in FIAT interface
+  ValueArray const& value_shape() const;
+
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
   bool const is_cellwise_constant() const;
@@ -54,14 +68,14 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const * const > const extract_component(
+  std::pair<dolfin::uint, FiniteElementBase const *> const extract_component(
       ValueArray const& i) const;
 
   /// Return number of sub elements
   dolfin::uint const num_sub_elements() const;
 
   /// Return list of sub elements
-  FiniteElementBaseList const& sub_elements() const;
+  List const& sub_elements() const;
 
   /// __repr__
   repr_t const repr() const;
@@ -71,12 +85,15 @@ public:
 
 protected:
 
+  void createStr();
+
+  Family const family_;
   FiniteElement const sub_element_;
   type<dolfin::uint> const dim_;
   ValueArray const value_shape_; // Not implemented
   std::map<dolfin::uint, dolfin::uint> const symmetry_; // Not implemented
 
-  FiniteElementBaseList const sub_elements_;
+  List const sub_elements_;
 
   repr_t const repr_;
   mutable std::string str_;

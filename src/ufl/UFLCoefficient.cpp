@@ -193,7 +193,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   TensorConstant::TensorConstant(Cell const& cell, ValueArray const& shape,
       std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& c) :
-    CoefficientBase("TensorConstant", TensorElement(Family::R, cell, 0, cell.geometric_dimension()), c),
+    CoefficientBase("TensorConstant", TensorElement(Family::R, cell, 0), c),
     repr_(*this, finite_element_.cell(), /*finite_element_.value_shape(), 
         finite_element_.symmetry(),*/ count_),
     str_((count_ < 10 ? "C_" + count_.str() : "C_{" + count_.str() + "}"))
@@ -203,7 +203,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   TensorConstant::TensorConstant(repr_t const& repr) :
     CoefficientBase("TensorConstant", 
-        TensorElement(Family::R, Cell(arg(0)), 0, Cell(arg(0)).geometric_dimension()),
+        TensorElement(Family::R, Cell(arg(0)), 0),
         type<dolfin::uint>(arg(3))),
     repr_(*this, finite_element_.cell(), /*finite_element_.value_shape(), 
         finite_element_.symmetry(),*/ count_),

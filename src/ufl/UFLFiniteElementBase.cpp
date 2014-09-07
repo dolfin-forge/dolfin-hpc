@@ -57,28 +57,16 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
 
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name,
-                                     Family::Type const& family,
-                                     Cell const& cell,
-                                     dolfin::uint const degree,
-                                     QuadratureScheme quad_scheme,
-                                     ValueArray value_shape) :
+                                     QuadratureScheme quad_scheme) :
     Class(name),
-    family_(family),
-    cell_(cell),
-    degree_(degree),
-    quad_scheme_(quad_scheme),
-    value_shape_(value_shape)
+    quad_scheme_(quad_scheme)
 {
 }
 
 //-----------------------------------------------------------------------------
 FiniteElementBase::FiniteElementBase(std::string const& name, repr_t repr) :
     Class(name, repr),
-    family_(arg(0)),
-    cell_(arg(1)),
-    degree_(arg(2)),
-    quad_scheme_(),
-    value_shape_()
+    quad_scheme_()
 {
 }
 
@@ -88,43 +76,25 @@ FiniteElementBase::~FiniteElementBase()
 }
 
 //-----------------------------------------------------------------------------
-Family const& FiniteElementBase::family() const
-{
-  return family_;
-}
-
-//-----------------------------------------------------------------------------
-Cell const& FiniteElementBase::cell() const
-{
-  return cell_;
-}
-
-//-----------------------------------------------------------------------------
-type<dolfin::uint> const FiniteElementBase::degree() const
-{
-  return degree_;
-}
-
-//-----------------------------------------------------------------------------
 QuadratureScheme const& FiniteElementBase::quadrature_scheme() const
 {
   return quad_scheme_;
 }
 
 //-----------------------------------------------------------------------------
-ValueArray const& FiniteElementBase::value_shape() const
+dolfin::uint FiniteElementBase::value_size() const
 {
-  return value_shape_;
+  return std::max(this->value_shape().prod(), (dolfin::uint) 1);
 }
 
 //-----------------------------------------------------------------------------
 bool FiniteElementBase::component_is_valid(ValueArray const& i) const
 {
-  dolfin::uint r = value_shape_.size();
+  dolfin::uint r = this->value_shape().size();
   bool range_ok = true;
-  for (size_t idx = 0; idx < value_shape_.size(); ++idx)
+  for (size_t idx = 0; idx < this->value_shape().size(); ++idx)
   {
-    range_ok = range_ok && (i[idx] < value_shape_[idx]);
+    range_ok = range_ok && (i[idx] < this->value_shape()[idx]);
   }
   return (i.size() == r && range_ok);
 }
@@ -139,13 +109,17 @@ void FiniteElementBase::check_component(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-Cell const FiniteElementBase::get_cell(FiniteElementBaseList const& elements)
+Cell const FiniteElementBase::get_cell(List const& elements) const
 {
-  FiniteElementBaseList::const_iterator it = elements.begin();
+  if(elements.size() < 1)
+  {
+    error("Inavalid element list given as argument to get_cell");
+  }
+  List::const_iterator it = elements.begin();
   Cell ret = (*it)->cell();
   for (++it; it != elements.end(); ++it)
   {
-    if (ret.repr() != (*it)->cell().repr())
+    if (ret != (*it)->cell())
     {
       error("All subelements of mixed element should have the same cell.");
     }
@@ -154,14 +128,24 @@ Cell const FiniteElementBase::get_cell(FiniteElementBaseList const& elements)
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const FiniteElementBase::get_degree_max(
-    FiniteElementBaseList const& elements)
+dolfin::uint const FiniteElementBase::get_degree_max(List const& elements) const
 {
   dolfin::uint ret = 0;
-  for (FiniteElementBaseList::const_iterator it = elements.begin();
-      it != elements.end(); ++it)
+  for (List::const_iterator it = elements.begin(); it != elements.end(); ++it)
   {
     ret = std::max((dolfin::uint) (*it)->degree(), ret);
+  }
+  return ret;
+}
+
+//-----------------------------------------------------------------------------
+dolfin::uint FiniteElementBase::get_value_size(List const& elements) const
+{
+  // Compute value size
+  dolfin::uint ret = 0;
+  for (List::const_iterator it = elements.begin(); it != elements.end(); ++it)
+  {
+    ret += (*it)->value_size();
   }
   return ret;
 }
@@ -171,13 +155,15 @@ void FiniteElementBase::display() const
 {
   Class::display();
   std::cout << std::setw(24) << "family" << " = " << this->family().str()
-            << std::endl;
+      << std::endl;
   std::cout << std::setw(24) << "cell" << " = " << this->cell().str()
-            << std::endl;
+      << std::endl;
   std::cout << std::setw(24) << "degree" << " = " << this->degree()
-            << std::endl;
+                             << std::endl;
+  std::cout << std::setw(24) << "value_shape" << " = "
+      << this->value_shape().str() << std::endl;
   std::cout << std::setw(24) << "quadrature_scheme" << " = "
-            << this->quadrature_scheme().str() << std::endl;
+      << this->quadrature_scheme().str() << std::endl;
   std::cout << std::endl;
 }
 

@@ -29,7 +29,8 @@ public:
 
   //--- UFL -------------------------------------------------------------------
   ///
-  FiniteElement(Family::Type family, Cell const& cell, dolfin::uint const degree);
+  FiniteElement(Family::Type family, Cell const& cell,
+                dolfin::uint const degree);
 
   ///
   explicit FiniteElement(repr_t const& repr);
@@ -38,6 +39,20 @@ public:
   ~FiniteElement();
 
   //--- INTERFACE -------------------------------------------------------------
+
+  /// Return finite element family type
+  Family const& family() const;
+
+  /// Return cell of finite element
+  Cell const& cell() const;
+
+  /// Return polynomial degree of finite element
+  /// Present in FIAT interface
+  type<dolfin::uint> const& degree() const;
+
+  /// Return the shape of the value space
+  /// Present in FIAT interface
+  ValueArray const& value_shape() const;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
@@ -54,13 +69,14 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const;
+  std::pair<dolfin::uint, FiniteElementBase const *> const extract_component(
+      ValueArray const& i) const;
 
   /// Return number of sub elements
   dolfin::uint const num_sub_elements() const;
 
   /// Return list of sub elements
-  FiniteElementBaseList const& sub_elements() const;
+  List const& sub_elements() const;
 
   /// __repr__
   repr_t const repr() const;
@@ -70,9 +86,12 @@ public:
 
 protected:
 
+  Family const family_;
+  Cell const cell_;
+  type<dolfin::uint> const degree_;
   ValueArray const value_shape_;
   std::map<dolfin::uint, dolfin::uint> const symmetry_;
-  FiniteElementBase::FiniteElementBaseList const sub_elements_;
+  FiniteElementBase::List const sub_elements_;
 
   repr_t const repr_;
   mutable std::string str_;

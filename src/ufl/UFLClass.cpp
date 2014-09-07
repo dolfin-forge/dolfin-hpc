@@ -19,14 +19,14 @@ std::string const Class::default_str_ = "class";
 
 //-----------------------------------------------------------------------------
 Class::Class() :
-    prefixed_name_("",""),
+    prefixed_name_("", ""),
     args_repr_()
 {
 }
 
 //-----------------------------------------------------------------------------
 Class::Class(std::string const& name) :
-    prefixed_name_(name,""),
+    prefixed_name_(name, ""),
     cpp_proto_(std::make_pair(name, ""), std::vector<Object const *>()),
     args_repr_()
 {
@@ -34,7 +34,7 @@ Class::Class(std::string const& name) :
 
 //-----------------------------------------------------------------------------
 Class::Class(std::string const& pre, std::string const& pos) :
-    prefixed_name_(pre,pos),
+    prefixed_name_(pre, pos),
     cpp_proto_(std::make_pair(pre, pos), std::vector<Object const *>()),
     args_repr_()
 {
@@ -42,31 +42,33 @@ Class::Class(std::string const& pre, std::string const& pos) :
 
 //-----------------------------------------------------------------------------
 Class::Class(std::string const& name, repr_t const& repr) :
-    prefixed_name_(name,""),
+    prefixed_name_(name, ""),
     cpp_proto_(make_proto(repr)),
     args_repr_(make_args_repr(repr))
 {
   if (prefixed_name_.first != cpp_proto_.first.first
       || prefixed_name_.second != cpp_proto_.first.second)
   {
-    dolfin::error("The representation :\n\t" + repr + "\n"
-        "is invalid as it does not match the class " + prefixed_name_.first
-        + prefixed_name_.second);
+    dolfin::error(
+        "The representation :\n\t" + repr + "\n"
+            "is invalid as it does not match the class " + prefixed_name_.first
+            + prefixed_name_.second);
   }
 }
 
 //-----------------------------------------------------------------------------
 Class::Class(std::string const& pre, std::string const& pos, repr_t const& repr) :
-    prefixed_name_(pre,pos),
+    prefixed_name_(pre, pos),
     cpp_proto_(make_proto(repr)),
     args_repr_(make_args_repr(repr))
 {
   if (prefixed_name_.first != cpp_proto_.first.first
       || prefixed_name_.second != cpp_proto_.first.second)
   {
-    dolfin::error("The representation :\n\t" + repr + "\n"
-        "is invalid as it does not match the class " + prefixed_name_.first
-        + prefixed_name_.second);
+    dolfin::error(
+        "The representation :\n\t" + repr + "\n"
+            "is invalid as it does not match the class " + prefixed_name_.first
+            + prefixed_name_.second);
   }
 }
 
@@ -146,33 +148,33 @@ std::vector<Object::repr_t> const Class::make_args_repr(
   close_delimiters.push_back(']');
   close_delimiters.push_back('}');
 
-  std::vector<size_t> openpositions(3,0);
-  std::vector<size_t> closepositions(3,0);
+  std::vector<size_t> openpositions(3, 0);
+  std::vector<size_t> closepositions(3, 0);
 
   std::string pre;
   std::string pos;
 
   //from here, the name (pre and pos) should have been removed
-  if(!without_pre_pos)
-    remove_pre_pos(repr, str, pre, pos);
+  if (!without_pre_pos) remove_pre_pos(repr, str, pre, pos);
 
-  for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+  for (dolfin::uint i = 0; i < open_delimiters.size(); ++i)
   {
     openpositions[i] = str.find(open_delimiters[i]);
-    closepositions[i] = (str.rfind(close_delimiters[i]) == std::string::npos ?
-        0 : str.rfind(close_delimiters[i]));
+    closepositions[i] = (
+        str.rfind(close_delimiters[i]) == std::string::npos ?
+            0 : str.rfind(close_delimiters[i]));
   }
 
-  const size_t openpos = *std::min_element(openpositions.begin(), openpositions.end());
-  const size_t closepos = *std::max_element(closepositions.begin(), closepositions.end());
+  const size_t openpos = *std::min_element(openpositions.begin(),
+                                           openpositions.end());
+  const size_t closepos = *std::max_element(closepositions.begin(),
+                                            closepositions.end());
 
   std::vector<repr_t> args;
-  if(str.substr(openpos,1) == "(" && openpos == 0)
-    args = Object::make_args_repr(
-        str.substr(openpos + 1, closepos - openpos - 1), true);
-  else
-    args = Object::make_args_repr(
-        str, true);
+  if (str.substr(openpos, 1) == "(" && openpos == 0) args =
+      Object::make_args_repr(str.substr(openpos + 1, closepos - openpos - 1),
+                             true);
+  else args = Object::make_args_repr(str, true);
 
   return args;
 }
@@ -210,8 +212,8 @@ std::vector<Object::repr_t> const& Class::args()
 }
 
 //-----------------------------------------------------------------------------
-void Class::remove_pre_pos(repr_t const& repr,
-    std::string& str, std::string& pre, std::string& pos) const
+void Class::remove_pre_pos(repr_t const& repr, std::string& str,
+                           std::string& pre, std::string& pos) const
 {
   str = repr;
   pre.clear();
@@ -226,29 +228,32 @@ void Class::remove_pre_pos(repr_t const& repr,
   close_delimiters.push_back("]");
   close_delimiters.push_back("}");
 
-  std::vector<size_t> open_delimiter_pos(3,0);
-  std::vector<size_t> close_delimiter_pos(3,0);
+  std::vector<size_t> open_delimiter_pos(3, 0);
+  std::vector<size_t> close_delimiter_pos(3, 0);
 
-  for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+  for (dolfin::uint i = 0; i < open_delimiters.size(); ++i)
   {
     open_delimiter_pos[i] = str.find(open_delimiters[i]);
-    close_delimiter_pos[i] = (str.rfind(close_delimiters[i]) == std::string::npos ?
-        0 : str.rfind(close_delimiters[i]));
+    close_delimiter_pos[i] = (
+        str.rfind(close_delimiters[i]) == std::string::npos ?
+            0 : str.rfind(close_delimiters[i]));
   }
 
-  const size_t openpos = *std::min_element(open_delimiter_pos.begin(), open_delimiter_pos.end());
-  const size_t closepos = *std::max_element(close_delimiter_pos.begin(), close_delimiter_pos.end());
+  const size_t openpos = *std::min_element(open_delimiter_pos.begin(),
+                                           open_delimiter_pos.end());
+  const size_t closepos = *std::max_element(close_delimiter_pos.begin(),
+                                            close_delimiter_pos.end());
 
-  if(str.substr(openpos,1) == "(" && openpos > 0)
+  if (str.substr(openpos, 1) == "(" && openpos > 0)
   {
     pre = str.substr(0, openpos);
     str.erase(0, openpos);
   }
   else
   {
-    pre = str.substr(0, openpos+1);
+    pre = str.substr(0, openpos + 1);
     pos = str.substr(closepos);
-    std::string substring = str.substr(openpos+1, closepos-1);
+    std::string substring = str.substr(openpos + 1, closepos - 1);
     str = substring;
   }
 }
@@ -259,42 +264,6 @@ void Class::display() const
   std::cout << "Class '" << this->name() << "'" << std::endl;
   std::cout << ".str : " << this->str() << std::endl;
   std::cout << ".repr: " << this->repr() << std::endl;
-}
-
-//-----------------------------------------------------------------------------
-ValueArray::ValueArray() :
-    std::vector<dolfin::uint>()
-{
-}
-
-//-----------------------------------------------------------------------------
-ValueArray::ValueArray(dolfin::uint const i) :
-    std::vector<dolfin::uint>(1, i)
-{
-}
-
-//-----------------------------------------------------------------------------
-ValueArray::ValueArray(dolfin::uint const k, dolfin::uint const i) :
-    std::vector<dolfin::uint>(k, i)
-{
-}
-
-//-----------------------------------------------------------------------------
-ValueArray::~ValueArray()
-{
-}
-
-//-----------------------------------------------------------------------------
-std::string const ValueArray::str() const
-{
-  std::stringstream ss;
-  ss << "(";
-  for(ValueArray::const_iterator it = this->begin(); it != this->end(); ++it)
-  {
-    ss << *it << ",";
-  }
-  ss << ")";
-  return ss.str();
 }
 
 }

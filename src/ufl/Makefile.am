@@ -38,6 +38,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLTensorElement.cpp\
                            UFLTensors.cpp\
                            UFLTuple.cpp\
+                           UFLValueArray.cpp\
                            UFLVariable.cpp\
                            UFLVectorElement.cpp
 

@@ -11,44 +11,31 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(Family::Type family, Cell const& cell,
-                             dolfin::uint const degree, dolfin::uint const dim) :
-    FiniteElementBase("TensorElement", Family::Tensor, cell, degree),
+                             dolfin::uint const degree) :
+    FiniteElementBase("TensorElement"),
+    family_(Family::Tensor),
     sub_element_(family, cell, degree),
-    sub_elements_(dim, &sub_element_)
+    value_shape_(
+        ValueArray(2, cell.domain().dim()) + sub_element_.value_shape()),
+    symmetry_(),
+    sub_elements_(cell.domain().dim(), &sub_element_)
 {
-  // Check mixed finite element definition
-
-  // Create string representation
-  QuadratureScheme qs;
-
-  std::stringstream ssrepr;
-  ssrepr << "TensorElement(" << this->family().repr() << ", " << cell.repr()
-         << ", " << degree << ", " << qs.repr() << ")";
-  repr_ = ssrepr.str();
-
-  std::stringstream ssstr;
-  ssstr << "<" << this->family().short_name() << " vector element of degree "
-        << degree << " on a " << cell.str() << ": " << sub_elements_.size()
-        << " x " << sub_element_.str() << ">";
-  str_ = ssstr.str();
+  createReprStr();
 }
 
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(repr_t const& repr) :
     FiniteElementBase("TensorElement", repr),
-    value_shape_(),
-    symmetry_(),
+    family_(Family::Tensor),
     sub_element_(Family(arg(0)).type(), Cell(arg(1)),
-                     type<dolfin::uint>(arg(2))),
-    sub_elements_(sub_element_.cell().domain().dim(), &sub_element_),
-    repr_(repr)
+                 type<dolfin::uint>(arg(2))),
+    value_shape_(
+        ValueArray(2, sub_element_.cell().domain().dim())
+            + sub_element_.value_shape()),
+    symmetry_(),
+    sub_elements_(sub_element_.cell().domain().dim(), &sub_element_)
 {
-  std::stringstream ssstr;
-    ssstr << "<" << this->family().short_name() << " vector element of degree "
-          << sub_element_.degree() << " on a " << sub_element_.cell().str()
-          << ": " << sub_elements_.size()
-          << " x " << sub_element_.str() << ">";
-    str_ = ssstr.str();
+  createReprStr();
 }
 
 //-----------------------------------------------------------------------------
@@ -57,10 +44,34 @@ TensorElement::~TensorElement()
 }
 
 //-----------------------------------------------------------------------------
+Family const& TensorElement::family() const
+{
+  return sub_element_.family();
+}
+
+//-----------------------------------------------------------------------------
+Cell const& TensorElement::cell() const
+{
+  return sub_element_.cell();
+}
+
+//-----------------------------------------------------------------------------
+type<dolfin::uint> const& TensorElement::degree() const
+{
+  return sub_element_.degree();
+}
+
+//-----------------------------------------------------------------------------
+ValueArray const& TensorElement::value_shape() const
+{
+  return value_shape_;
+}
+
+//-----------------------------------------------------------------------------
 bool const TensorElement::is_cellwise_constant() const
 {
   bool ret = true;
-  for (FiniteElementBaseList::const_iterator it = sub_elements_.begin();
+  for (List::const_iterator it = sub_elements_.begin();
       it != sub_elements_.end(); ++it)
   {
     ret |= (*it)->is_cellwise_constant();
@@ -82,7 +93,7 @@ std::pair<ValueArray, ValueArray> const TensorElement::extract_subelement_compon
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const * const > const TensorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> const TensorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
@@ -95,7 +106,7 @@ dolfin::uint const TensorElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBaseList const& TensorElement::sub_elements() const
+FiniteElementBase::List const& TensorElement::sub_elements() const
 {
   return sub_elements_;
 }
@@ -110,6 +121,22 @@ Object::repr_t const TensorElement::repr() const
 std::string const TensorElement::str() const
 {
   return str_;
+}
+
+//-----------------------------------------------------------------------------
+void TensorElement::createReprStr()
+{
+  // Create string representation
+  std::stringstream ssrepr;
+  ssrepr << "TensorElement(" << this->family().repr() << ", " << cell().repr()
+      << ", " << this->degree() << ", " << quadrature_scheme().repr() << ")";
+  repr_ = ssrepr.str();
+
+  std::stringstream ssstr;
+  ssstr << "<" << this->family().short_name() << " vector element of degree "
+      << this->degree() << " on a " << cell().str() << ": "
+      << sub_elements_.size() << " x " << sub_element_.str() << ">";
+  str_ = ssstr.str();
 }
 
 }

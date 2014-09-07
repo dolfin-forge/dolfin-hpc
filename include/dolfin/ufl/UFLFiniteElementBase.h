@@ -13,6 +13,7 @@
 #include <dolfin/ufl/UFLElementList.h>
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLQuadratureScheme.h>
+#include <dolfin/ufl/UFLValueArray.h>
 
 #include <dolfin/common/types.h>
 
@@ -36,7 +37,7 @@ class FiniteElementBase : public Class
 public:
 
   //
-  typedef std::vector<FiniteElementBase const *> FiniteElementBaseList;
+  typedef std::vector<FiniteElementBase const *> List;
 
   /// Stupid factory function
   static FiniteElementBase * create(Object::repr_t const repr);
@@ -44,27 +45,30 @@ public:
   ///
   virtual ~FiniteElementBase();
 
-  /// Return finite element family type
-  Family const& family() const;
-
-  /// Return cell of finite element
-  Cell const& cell() const;
-
-  /// Return polynomial degree of finite element
-  /// Present in FIAT interface
-  type<dolfin::uint> const degree() const;
-
   /// Return quadrature scheme of finite element
   QuadratureScheme const& quadrature_scheme() const;
-
-  /// Return the shape of the value space
-  /// Present in FIAT interface
-  ValueArray const& value_shape() const;
 
   /// Return the domain onto which the element is restricted
   //Domain::Type const domain_restriction() const; Not implemented
 
+  ///
+  dolfin::uint value_size() const;
+
   //--- INTERFACE -------------------------------------------------------------
+
+  /// Return finite element family type
+  virtual Family const& family() const = 0;
+
+  /// Return cell of finite element
+  virtual Cell const& cell() const = 0;
+
+  /// Return polynomial degree of finite element
+  /// Present in FIAT interface
+  virtual type<dolfin::uint> const& degree() const = 0;
+
+  /// Return the shape of the value space
+  /// Present in FIAT interface
+  virtual ValueArray const& value_shape() const = 0;
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
@@ -81,13 +85,14 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual std::pair<dolfin::uint, FiniteElementBase const * const> const extract_component(ValueArray const& i) const = 0;
+  virtual std::pair<dolfin::uint, FiniteElementBase const *> const extract_component(
+      ValueArray const& i) const = 0;
 
   /// Return number of sub elements
   virtual dolfin::uint const num_sub_elements() const = 0;
 
   /// Return list of sub elements
-  virtual FiniteElementBaseList const& sub_elements() const = 0;
+  virtual List const& sub_elements() const = 0;
 
   /// Operator: equality
   /// __eq__
@@ -114,15 +119,11 @@ public:
 
 protected:
 
-  ///
-  FiniteElementBase(std::string const& name,
-                    Family::Type const& family,
-                    Cell const& cell,
-                    dolfin::uint const degree,
-                    QuadratureScheme quad_scheme = QuadratureScheme(),
-                    ValueArray value_shape = ValueArray());
+  /// Base constructor for finite element definition
+  FiniteElementBase(std::string const& name, QuadratureScheme quad_scheme =
+                        QuadratureScheme());
 
-  ///
+  /// Representation-based constructor
   FiniteElementBase(std::string const& name, repr_t repr);
 
   ///
@@ -132,18 +133,17 @@ protected:
   void check_component(ValueArray const& i) const;
 
   ///
-  Cell const get_cell(FiniteElementBaseList const& elements);
+  Cell const get_cell(List const& elements) const;
 
   ///
-  dolfin::uint const get_degree_max(FiniteElementBaseList const& elements);
+  dolfin::uint const get_degree_max(List const& elements) const;
+
+  /// Get the value size from subelements
+  dolfin::uint get_value_size(List const& elements) const;
 
 private:
 
-  Family const family_;
-  Cell const cell_;
-  type<dolfin::uint> const degree_;
   QuadratureScheme const quad_scheme_;
-  ValueArray const value_shape_;
 
 };
 

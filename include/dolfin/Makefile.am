@@ -348,5 +348,6 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLTensorElement.h\
 				ufl/UFLTensors.h\
 				ufl/UFLTuple.h\
+				ufl/UFLValueArray.h\
 				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h

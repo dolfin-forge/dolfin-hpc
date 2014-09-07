@@ -51,6 +51,7 @@ START_TEST( test_init )
 
     if(UPspace != UPspaceFormRepr)
     {
+      std::cout << "Representation string differ" << std::endl;
       init_failed = 1;
     }
 

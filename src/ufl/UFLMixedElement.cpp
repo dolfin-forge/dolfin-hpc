@@ -45,7 +45,7 @@ MixedElement::~MixedElement()
   for (FiniteElementBase::List::const_iterator it = sub_elements_.begin();
       it != sub_elements_.end(); ++it)
   {
-    delete sub_elements_.back();
+    delete (*it);
   }
 }
 

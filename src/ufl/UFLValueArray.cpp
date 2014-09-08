@@ -52,7 +52,7 @@ dolfin::uint ValueArray::prod() const
   {
     return 0;
   }
-  uint vs = 1;
+  dolfin::uint vs = 1;
   for (ValueArray::const_iterator j = this->begin(); j != this->end(); ++j)
   {
     vs *= *j;

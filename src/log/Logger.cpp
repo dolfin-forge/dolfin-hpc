@@ -55,6 +55,7 @@ void Logger::warning(std::string msg)
 void Logger::error(std::string msg)
 {
   std::string s = std::string("*** Error: ") + msg;
+  write(0, s);
   throw std::runtime_error(s);
 }
 //-----------------------------------------------------------------------------

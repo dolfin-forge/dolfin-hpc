@@ -32,6 +32,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/UnitSquare.h>
 #include <dolfin/pde/LinearPDE.h>
+#include <dolfin/parameter/parameters.h>
 
 using namespace dolfin;
 
@@ -59,7 +60,7 @@ int main()
     uint dim(uint i) const
     {
       return 1;
-    }
+  }
 
   };
 
@@ -100,7 +101,8 @@ int main()
   };
 
   // Create mesh
-  UnitSquare mesh(32, 32);
+  //UnitSquare mesh(32, 32);
+  Mesh mesh("UnitSquareMesh_32x32.xml");
 
   // Create functions
   Source f(mesh);
@@ -114,12 +116,14 @@ int main()
   // Define PDE
   PoissonBilinearForm a(mesh);
   PoissonLinearForm L(f, g);
+  dolfin_set("PDE linear solver", "iterative");
   LinearPDE pde(a, L, mesh, bc);
 
   // Solve PDE
   Function u(mesh);
-  pde.solve(u);
 
+  pde.solve(u);
+   
   // Save solution to file
   File file("poisson.pvd");
   file << u;

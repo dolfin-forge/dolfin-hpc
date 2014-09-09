@@ -55,6 +55,12 @@ type<dolfin::uint> const& RestrictedElement::degree() const
 }
 
 //-----------------------------------------------------------------------------
+ValueArray const& RestrictedElement::value_shape() const
+{
+  return value_shape_;
+}
+
+//-----------------------------------------------------------------------------
 bool const RestrictedElement::is_cellwise_constant() const
 {
   return element_.is_cellwise_constant();

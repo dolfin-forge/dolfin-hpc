@@ -62,11 +62,11 @@ namespace ufl
     protected:
 
       FiniteElementBase const& finite_element_;
+      type<dolfin::uint> const count_;
 
       repr_t const repr_;
       std::string const str_;
 
-      type<dolfin::uint> const count_;
   };
 
 } /* namespace ufl */

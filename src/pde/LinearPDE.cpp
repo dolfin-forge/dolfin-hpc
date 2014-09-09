@@ -86,6 +86,8 @@ void LinearPDE::solve(Function& u)
   const std::string solver_type = get("PDE linear solver");
   if (solver_type == "direct")
   {
+    if (u.mesh().is_distributed())
+	error("Direct Solvers don't work in parallel please use iterative solvers in parallel with dolfin_set(\"PDE linear solver\", \"iterative\"); or run in serial");
     LUSolver solver;
     solver.set("parent", *this);
     solver.solve(A, *x, b);

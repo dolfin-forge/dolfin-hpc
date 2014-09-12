@@ -323,6 +323,17 @@ void Function::init(Mesh& mesh, real value)
   type_ = constant;
 }
 //-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, uint i, real value)
+{
+  if (f_)
+  {
+    delete f_;
+  }
+
+  f_ = new ConstantFunction(mesh, i, value);
+  type_ = constant;
+}
+//-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 {
   if (f_)

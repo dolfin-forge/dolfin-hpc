@@ -137,6 +137,9 @@ public:
   /// Create constant function
   void init(Mesh& mesh, real value);
 
+  /// Create constant vector-valued function
+  void init(Mesh& mesh, uint i, real value);
+
   /// Create discrete function for argument function i of form
   void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
 

@@ -174,10 +174,10 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   DiscreteFunction& global_func = sub_function.function();
   DofMap const& global_dm = global_func.space().dofmap();
   uint const global_local_dim = global_dm.local_dimension();
-  uint const global_block_size = global_dm.dofsmapping_size();
   uint const global_dm_offset =
       global_dm.sub_dof_maps_offsets()[sub_function.index()];
-  real * global_block = new real[global_block_size];
+  real * global_block = NULL;
+  global_func.get_block(global_block);
 
   // Loop baby, loop...
   CellIterator cell(mesh_);

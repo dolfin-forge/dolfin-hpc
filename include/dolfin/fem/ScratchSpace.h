@@ -55,7 +55,7 @@ public:
   ufc::finite_element const * finite_element;
 
   // Dof map
-  ufc::dof_map const * dof_map;
+  ufc::dofmap const * dof_map;
 
   // Value size (number of entries in tensor value)
   uint const size;

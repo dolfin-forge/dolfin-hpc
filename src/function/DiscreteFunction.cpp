@@ -175,7 +175,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   DofMap const& global_dm = global_func.space().dofmap();
   uint const global_local_dim = global_dm.local_dimension();
   uint const global_dm_offset =
-      global_dm.sub_dof_maps_offsets()[sub_function.index()];
+      global_dm.sub_dofmaps_offsets()[sub_function.index()];
   real * global_block = NULL;
   global_func.get_block(global_block);
 
@@ -468,8 +468,8 @@ void DiscreteFunction::interpolate(Function const& other_func)
 {
   Array<uint> const& value_dims = finite_element().sub_value_dimensions(0);
   Array<uint> const& value_offs = finite_element().sub_value_offsets(0);
-  Array<uint> const& dm_dims = dofmap().sub_dof_maps_dimensions();
-  Array<uint> const& dm_offs = dofmap().sub_dof_maps_offsets();
+  Array<uint> const& dm_dims = dofmap().sub_dofmaps_dimensions();
+  Array<uint> const& dm_offs = dofmap().sub_dofmaps_offsets();
   uint const nb_subspaces = dm_dims.size();
 
   // Make sure vectors ghost values are updated)

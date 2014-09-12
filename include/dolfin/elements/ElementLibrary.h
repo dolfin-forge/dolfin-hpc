@@ -31,10 +31,10 @@ public:
   static ufc::finite_element* create_finite_element(std::string const signature);
 
   /// Create dof map with given signature
-  static ufc::dof_map* create_dof_map(const char* signature);
+  static ufc::dofmap* create_dof_map(const char* signature);
 
   /// Create dof map with given signature
-  static ufc::dof_map* create_dof_map(std::string const signature);
+  static ufc::dofmap* create_dof_map(std::string const signature);
 
 #if ENABLE_UFL
 

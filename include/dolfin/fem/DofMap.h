@@ -2,10 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Martin Alnes, 2008
-// Modified by Aurélien Larcher, 2013 (extension and partial rewrite)
+// Modified by Aurélien Larcher, 2014 (extension and partial rewrite)
 //
 // First added:  2007-03-01
-// Last changed: 2008-04-10
+// Last changed: 2014-09-13
 
 #ifndef __DOF_MAP_H
 #define __DOF_MAP_H
@@ -30,10 +30,10 @@ class SubSytem;
 class UFC;
 
 /// This class handles the mapping of degrees of freedom.
-/// It wraps a ufc::dof_map on a specific mesh and provides
+/// It wraps a ufc::dofmap on a specific mesh and provides
 /// optional precomputation and reordering of dofs.
 
-class DofMap : public ufc::dof_map, public MeshDependent
+class DofMap : public ufc::dofmap, public MeshDependent
 {
 
   static std::string const SIGN_PREFIX;
@@ -56,10 +56,10 @@ public:
                                      Mesh& mesh);
 
   /// Create unique string identifiers for dofmap from UFC dofmap
-  static std::string const make_hash(ufc::dof_map& ufc_dofmap, Mesh& mesh);
+  static std::string const make_hash(ufc::dofmap& ufc_dofmap, Mesh& mesh);
 
   /// Create dof map on mesh
-  DofMap(Mesh& mesh, ufc::dof_map& dof_map, bool const owner);
+  DofMap(Mesh& mesh, ufc::dofmap& dof_map, bool const owner);
 
   /// Create dof map on mesh
   DofMap(Mesh& mesh, std::string const& signature);
@@ -74,7 +74,7 @@ public:
   ~DofMap();
 
   //--- INTERFACE -------------------------------------------------------------
-  /// @remark Exposes a subset of UFC v1.1
+  /// @remark Exposes a subset of UFC v2.0
 
   /// Return a string identifying the dof map
   /// UFC @since 1.1
@@ -96,6 +96,14 @@ public:
   /// UFC @since 1.1
   void init_cell_finalize();
 
+  /// Return the topological dimension of the associated cell shape
+  /// UFC @since 2.0
+  uint topological_dimension() const;
+
+  /// Return the geometric dimension of the coordinates this dof map provides
+  /// UFC @since 1.1 but not implemented
+  uint geometric_dimension() const;
+
   /// Return the dimension of the global finite element function space
   /// UFC @since 1.1
   uint global_dimension() const;
@@ -103,10 +111,6 @@ public:
   /// Return the dimension of the local finite element function space
   /// UFC @since 1.1
   uint local_dimension() const;
-
-  /// Return the geometric dimension of the coordinates this dof map provides
-  /// UFC @since 1.1 but not implemented
-  uint geometric_dimension() const;
 
   /// Return number of facet dofs
   /// UFC @since 1.1
@@ -135,11 +139,15 @@ public:
 
   //// Return the number of sub dof maps (for a mixed element)
   /// UFC @since 1.1
-  uint num_sub_dof_maps() const;
+  uint num_sub_dofmaps() const;
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
   /// UFC @since 1.1
-  ufc::dof_map* create_sub_dof_map(uint i) const;
+  ufc::dofmap* create_sub_dofmap(uint i) const;
+
+  /// Create a new instance
+  /// UFC @since 2.0
+  ufc::dofmap* create() const;
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
@@ -154,19 +162,19 @@ public:
   void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
 
   /// Get sub dof maps offset (for a mixed element)
-  Array<uint> const& sub_dof_maps_dimensions() const;
+  Array<uint> const& sub_dofmaps_dimensions() const;
 
   /// Get sub dof maps offset (for a mixed element)
-  Array<uint> const& sub_dof_maps_offsets() const;
+  Array<uint> const& sub_dofmaps_offsets() const;
 
   /// Extract sub dof map
-  ufc::dof_map* create_sub_dof_map(Array<uint> const& sub_system,
-                                   uint& offset) const;
+  ufc::dofmap* create_sub_dofmap(Array<uint> const& sub_system,
+                                 uint& offset) const;
 
   /// Extract sub dof map
-  ufc::dof_map* create_sub_dof_map(ufc::dof_map const& dof_map,
-                                   Array<uint> const& sub_system,
-                                   uint& offset) const;
+  ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dof_map,
+                                 Array<uint> const& sub_system,
+                                 uint& offset) const;
 
   /// Unique identifier
   std::string const& hash() const;
@@ -210,23 +218,23 @@ private:
   // Use type to allow optimization of dof map ordering
   mutable Type type_;
 
-  // Forward declaration of offset to be update at creation of ufc::dof_map
+  // Forward declaration of offset to be update at creation of ufc::dofmap
   uint offset_;
 
   // Is UFC dof map lifetime managed by the DofMap instance
-  bool const ufc_dof_map_local_;
+  bool const ufc_dofmap_local_;
 
   // UFC dof map
-  ufc::dof_map * const ufc_dof_map_;
+  ufc::dofmap * const ufc_dofmap_;
 
   // Dofmap hash
   std::string const hash_;
 
   // Sub dof maps offsets
-  Array<uint> sub_dof_maps_dims_;
+  Array<uint> sub_dofmaps_dims_;
 
   // Sub dof maps offsets
-  Array<uint> sub_dof_maps_offs_;
+  Array<uint> sub_dofmaps_offs_;
 
   //
   uint local_size_;
@@ -270,7 +278,7 @@ inline std::string const DofMap::make_hash(std::string const& dofmap_signature,
 }
 
 //-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(ufc::dof_map& ufc_dofmap, Mesh& mesh)
+inline std::string const DofMap::make_hash(ufc::dofmap& ufc_dofmap, Mesh& mesh)
 {
   return make_hash(ufc_dofmap.signature(), mesh);
 }
@@ -278,117 +286,129 @@ inline std::string const DofMap::make_hash(ufc::dof_map& ufc_dofmap, Mesh& mesh)
 //-----------------------------------------------------------------------------
 inline char const * DofMap::signature() const
 {
-  return ufc_dof_map_->signature();
+  return ufc_dofmap_->signature();
 }
 
 //-----------------------------------------------------------------------------
 inline bool DofMap::needs_mesh_entities(uint d) const
 {
-  return ufc_dof_map_->needs_mesh_entities(d);
+  return ufc_dofmap_->needs_mesh_entities(d);
 }
 
 //-----------------------------------------------------------------------------
 inline bool DofMap::init_mesh(const ufc::mesh& mesh)
 {
-  return ufc_dof_map_->init_mesh(mesh);
+  return ufc_dofmap_->init_mesh(mesh);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::init_cell(const ufc::mesh& m, const ufc::cell& c)
 {
-  ufc_dof_map_->init_cell(m, c);
+  ufc_dofmap_->init_cell(m, c);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::init_cell_finalize()
 {
-  ufc_dof_map_->init_cell_finalize();
+  ufc_dofmap_->init_cell_finalize();
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::global_dimension() const
+inline uint DofMap::topological_dimension() const
 {
-  return ufc_dof_map_->global_dimension();
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::local_dimension() const
-{
-  return ufc_dof_map_->local_dimension();
+  return ufc_dofmap_->topological_dimension();
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::geometric_dimension() const
 {
-  return ufc_dof_map_->geometric_dimension();
+  return ufc_dofmap_->geometric_dimension();
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::global_dimension() const
+{
+  return ufc_dofmap_->global_dimension();
+}
+
+//-----------------------------------------------------------------------------
+inline uint DofMap::local_dimension() const
+{
+  return ufc_dofmap_->local_dimension();
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::num_facet_dofs() const
 {
-  return ufc_dof_map_->num_facet_dofs();
+  return ufc_dofmap_->num_facet_dofs();
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::num_entity_dofs(uint d) const
 {
-  return ufc_dof_map_->num_entity_dofs(d);
+  return ufc_dofmap_->num_entity_dofs(d);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_dofs(uint* dofs, const ufc::mesh& m,
                                   const ufc::cell& c) const
 {
-  ufc_dof_map_->tabulate_dofs(dofs, m, c);
+  ufc_dofmap_->tabulate_dofs(dofs, m, c);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_facet_dofs(uint* dofs, uint local_facet) const
 {
-  ufc_dof_map_->tabulate_facet_dofs(dofs, local_facet);
+  ufc_dofmap_->tabulate_facet_dofs(dofs, local_facet);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_entity_dofs(uint* dofs, uint d, uint i) const
 {
-  ufc_dof_map_->tabulate_entity_dofs(dofs, d, i);
+  ufc_dofmap_->tabulate_entity_dofs(dofs, d, i);
 }
 
 //-----------------------------------------------------------------------------
 inline void DofMap::tabulate_coordinates(real** coordinates,
                                          const ufc::cell& ufc_cell) const
 {
-  ufc_dof_map_->tabulate_coordinates(coordinates, ufc_cell);
+  ufc_dofmap_->tabulate_coordinates(coordinates, ufc_cell);
 }
 
 //-----------------------------------------------------------------------------
-inline uint DofMap::num_sub_dof_maps() const
+inline uint DofMap::num_sub_dofmaps() const
 {
-  return ufc_dof_map_->num_sub_dof_maps();
+  return ufc_dofmap_->num_sub_dofmaps();
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::dof_map* DofMap::create_sub_dof_map(uint i) const
+inline ufc::dofmap* DofMap::create_sub_dofmap(uint i) const
 {
-  return ufc_dof_map_->create_sub_dof_map(i);
+  return ufc_dofmap_->create_sub_dofmap(i);
+}
+
+//-----------------------------------------------------------------------------
+inline ufc::dofmap* DofMap::create() const
+{
+  return ufc_dofmap_->create();
 }
 
 //-----------------------------------------------------------------------------
 inline uint DofMap::macro_local_dimension() const
 {
-  return ufc_dof_map_->local_dimension();
+  return ufc_dofmap_->local_dimension();
 }
 
 //-----------------------------------------------------------------------------
-inline Array<uint> const& DofMap::sub_dof_maps_dimensions() const
+inline Array<uint> const& DofMap::sub_dofmaps_dimensions() const
 {
-  return sub_dof_maps_dims_;
+  return sub_dofmaps_dims_;
 }
 
 //-----------------------------------------------------------------------------
-inline Array<uint> const& DofMap::sub_dof_maps_offsets() const
+inline Array<uint> const& DofMap::sub_dofmaps_offsets() const
 {
-  return sub_dof_maps_offs_;
+  return sub_dofmaps_offs_;
 }
 
 //-----------------------------------------------------------------------------

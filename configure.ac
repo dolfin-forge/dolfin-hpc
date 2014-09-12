@@ -10,8 +10,6 @@ LT_INIT([disable-shared])
 PACKAGE_REQUIRES=""
 AC_SUBST(PACKAGE_REQUIRES)
 
-
-
 # Feature options.
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug],
              [Compile with debug symbols]),
@@ -50,10 +48,6 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
-
-AC_ARG_ENABLE(ufl, AC_HELP_STRING([--enable-ufl],
-              [Enable UFL support using UFC version 2.1.2]),
-              [enable_ufl=${enableval}],[enable_ufl=no])
 
 AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check], 
               [Compile with support for unit testing, requires libcheck]),
@@ -138,14 +132,9 @@ AC_CHECK_HEADERS([float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
 
-if test "x${enable_ufl}" == xno; then
-   PKG_CHECK_MODULES([UFC],[ufc-1 = 1.1])
-   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS"
-else
-   PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.2])
-   CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
-   AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.2])
-fi
+PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.3])
+CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
+AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.3])
 # Add variable for automake to select generated source to be compiled
 AM_CONDITIONAL([ENABLE_UFL], [test "x${enable_ufl}" == xyes])
 

@@ -1269,7 +1269,7 @@ public:
     // Loop dofs and call evaluate_reference_basis_derivatives.
     for (unsigned int r = 0; r < 3; r++)
     {
-      evaluate_basis_derivatives(r, n, dof_values, coordinates, c);
+      evaluate_reference_basis_derivatives(r, n, dof_values, coordinates, c);
       for (unsigned int s = 0; s < num_derivatives; s++)
       {
         values[r*num_derivatives + s] = dof_values[s];
@@ -1389,23 +1389,19 @@ public:
   {
     return 0;
   }
-#ifndef UFC_BACKWARD_COMPATIBILITY
+
   /// Create a new class instance 
   virtual ufc::finite_element* create() const
   {
     return new poisson_finite_element_0();
   }
-#endif
+
 };
 
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
 class poisson_dofmap_0: public ufc::dofmap
-#else 
-class poisson_dofmap_0: public ufc::dof_map
-#endif
 {
 private:
 
@@ -1413,11 +1409,7 @@ private:
 public:
 
   /// Constructor
-#ifndef UFC_BACKWARD_COMPATIBILITY
   poisson_dofmap_0() : ufc::dofmap()
-#else
-  poisson_dofmap_0() : ufc::dof_map()
-#endif
   {
     _global_dimension = 0;
   }
@@ -1479,7 +1471,6 @@ public:
     // Do nothing
   }
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the topological dimension of the associated cell shape
   virtual unsigned int topological_dimension() const
   {
@@ -1491,7 +1482,7 @@ public:
   {
     return 2;
   }
-#endif
+
   /// Return the dimension of the global finite element function space
   virtual unsigned int global_dimension() const
   {
@@ -1511,19 +1502,11 @@ public:
     return 3;
   }
 #else
-
   /// Return the dimension of the local finite element function space for a cell
   virtual unsigned int local_dimension() const
   {
     return 3;
   }
-
-  /// Return the maximum dimension of the local finite element function space
-  virtual unsigned int geometric_dimension() const
-  {
-    return 2;
-  }
-
 #endif
 
   /// Return the number of dofs on each cell facet
@@ -1662,7 +1645,6 @@ public:
     coordinates[2][1] = x[2][1];
   }
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the number of sub dofmaps (for a mixed element)
   virtual unsigned int num_sub_dofmaps() const
   {
@@ -1680,19 +1662,6 @@ public:
   {
     return new poisson_dofmap_0();
   }
-#else
-  /// Return the number of sub dofmaps (for a mixed element)
-  virtual unsigned int num_sub_dof_maps() const
-  {
-    return 0;
-  }
-
-  /// Create a new dofmap for sub dofmap i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
-  {
-    return 0;
-  }
-#endif
 
 };
 
@@ -1832,8 +1801,8 @@ public:
     const double G0_2 = det*w[0][2]*(1.0);
     
     // Compute element tensor
-    A[0] = 0.0833333333333333*G0_0 + 0.0416666666666666*G0_1 + 0.0416666666666667*G0_2;
-    A[1] = 0.0416666666666666*G0_0 + 0.0833333333333333*G0_1 + 0.0416666666666666*G0_2;
+    A[0] = 0.0833333333333334*G0_0 + 0.0416666666666667*G0_1 + 0.0416666666666667*G0_2;
+    A[1] = 0.0416666666666667*G0_0 + 0.0833333333333333*G0_1 + 0.0416666666666666*G0_2;
     A[2] = 0.0416666666666667*G0_0 + 0.0416666666666666*G0_1 + 0.0833333333333333*G0_2;
   }
  #ifndef UFC_BACKWARD_COMPATIBILITY 
@@ -1926,7 +1895,7 @@ public:
     case 2:
       {
         A[0] = 0.333333333333333*G0_0 + 0.166666666666667*G0_1;
-      A[1] = 0.166666666666666*G0_0 + 0.333333333333333*G0_1;
+      A[1] = 0.166666666666667*G0_0 + 0.333333333333333*G0_1;
       A[2] = 0.0;
         break;
       }
@@ -2750,8 +2719,9 @@ typedef Form_0::TestSpace FunctionSpace;
 
 // DOLFIN wrappers
 #include <dolfin/mesh/Mesh.h>
-
 #include <dolfin/fem/BilinearForm.h>
+#include <map>
+#include <string>
 
 class PoissonBilinearForm : public dolfin::BilinearForm
 {
@@ -2759,6 +2729,15 @@ public:
 
   PoissonBilinearForm(dolfin::Mesh& mesh) : dolfin::BilinearForm(mesh)
   {
+
+  }
+
+  PoissonBilinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::BilinearForm(mesh)
+  {
+    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
+    {
+      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
+    }
 
   }
 
@@ -2778,9 +2757,8 @@ public:
   dolfin::uint coefficient_number(std::string const& name) const
   {
 
-    dolfin::error("Generated code for class Form",
-                         "access coeficient data",
-                         "There are no coefficients");
+    dolfin::error("Generated code for class Form: accessing coefficient data."
+	      "There are no coefficients");
     return 0;
   }
 
@@ -2788,9 +2766,8 @@ public:
   std::string coefficient_name(dolfin::uint const i) const
   {
 
-    dolfin::error("Generated code for class Form",
-                         "access coeficient data",
-                         "There are no coefficients");
+    dolfin::error("Generated code for class Form: accessing coefficient data."
+	      "There are no coefficients");
     return "unnamed";
   }
 
@@ -2805,6 +2782,8 @@ private:
 };
 
 #include <dolfin/fem/LinearForm.h>
+#include <map>
+#include <string>
 
 class PoissonLinearForm : public dolfin::LinearForm
 {
@@ -2814,6 +2793,15 @@ public:
   {
     __coefficients.push_back(&w0);
     __coefficients.push_back(&w1);
+  }
+
+  PoissonLinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::LinearForm(mesh)
+  {
+    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
+    {
+      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
+    }
+
   }
 
   /// Return UFC form
@@ -2836,9 +2824,8 @@ public:
     else if (name == "g")
       return 1;
 
-    dolfin::error("Generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
+    dolfin::error("Generated code for class Form: accessing coefficient data."
+	      "Invalid coefficient name %s", name.c_str());
     return 0;
   }
 
@@ -2853,9 +2840,8 @@ public:
       return "g";
     }
 
-    dolfin::error("Generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
+    dolfin::error("Generated code for class Form: accessing coefficient data."
+	      "Invalid coefficient number %d", i);
     return "unnamed";
   }
 

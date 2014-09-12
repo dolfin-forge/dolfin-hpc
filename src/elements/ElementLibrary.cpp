@@ -13,7 +13,7 @@ ufc::finite_element* ElementLibrary::create_finite_element(std::string const sig
 }
 
 //-----------------------------------------------------------------------------
-ufc::dof_map* ElementLibrary::create_dof_map(std::string const signature)
+ufc::dofmap* ElementLibrary::create_dof_map(std::string const signature)
 {
   return create_dof_map(signature.c_str());
 }

@@ -5865,7 +5865,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_0_0: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_0_0: public ufc::dofmap
 {
 private:
 
@@ -5874,7 +5874,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_0_0() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_0_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6017,7 +6017,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_0_0();
   }
@@ -6027,7 +6027,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_0_1: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_0_1: public ufc::dofmap
 {
 private:
 
@@ -6036,7 +6036,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_0_1() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_0_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6179,7 +6179,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_0_1();
   }
@@ -6189,7 +6189,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_0: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_0: public ufc::dofmap
 {
 private:
 
@@ -6198,7 +6198,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_0() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6357,7 +6357,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -6376,7 +6376,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_1_0: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_1_0: public ufc::dofmap
 {
 private:
 
@@ -6385,7 +6385,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_1_0() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_1_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6528,7 +6528,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_1_0();
   }
@@ -6538,7 +6538,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_1_1: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_1_1: public ufc::dofmap
 {
 private:
 
@@ -6547,7 +6547,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_1_1() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_1_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6690,7 +6690,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_1_1();
   }
@@ -6700,7 +6700,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_1: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_1: public ufc::dofmap
 {
 private:
 
@@ -6709,7 +6709,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_1() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -6868,7 +6868,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -6887,7 +6887,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_2_0: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_2_0: public ufc::dofmap
 {
 private:
 
@@ -6896,7 +6896,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_2_0() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_2_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7039,7 +7039,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_2_0();
   }
@@ -7049,7 +7049,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_2_1: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_2_1: public ufc::dofmap
 {
 private:
 
@@ -7058,7 +7058,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_2_1() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_2_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7201,7 +7201,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_2_1();
   }
@@ -7211,7 +7211,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_2: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_2: public ufc::dofmap
 {
 private:
 
@@ -7220,7 +7220,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_2() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_2() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7379,7 +7379,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -7398,7 +7398,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_3: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_3: public ufc::dofmap
 {
 private:
 
@@ -7407,7 +7407,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_3() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_3() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7541,7 +7541,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_3();
   }
@@ -7551,7 +7551,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_4: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_4: public ufc::dofmap
 {
 private:
 
@@ -7560,7 +7560,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_4() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_4() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7694,7 +7694,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_4();
   }
@@ -7704,7 +7704,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_5: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_5: public ufc::dofmap
 {
 private:
 
@@ -7713,7 +7713,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_5() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_5() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -7847,7 +7847,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_5();
   }
@@ -7857,7 +7857,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DBilinearForm_dof_map_6: public ufc::dof_map
+class UFC_CahnHilliard2DBilinearForm_dof_map_6: public ufc::dofmap
 {
 private:
 
@@ -7866,7 +7866,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DBilinearForm_dof_map_6() : ufc::dof_map()
+  UFC_CahnHilliard2DBilinearForm_dof_map_6() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -8000,7 +8000,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DBilinearForm_dof_map_6();
   }
@@ -8233,7 +8233,7 @@ public:
   }
   
   /// Create a new dof map for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -14135,7 +14135,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_0_0: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_0_0: public ufc::dofmap
 {
 private:
 
@@ -14144,7 +14144,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_0_0() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_0_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -14287,7 +14287,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_0_0();
   }
@@ -14297,7 +14297,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_0_1: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_0_1: public ufc::dofmap
 {
 private:
 
@@ -14306,7 +14306,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_0_1() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_0_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -14449,7 +14449,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_0_1();
   }
@@ -14459,7 +14459,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_0: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_0: public ufc::dofmap
 {
 private:
 
@@ -14468,7 +14468,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_0() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -14627,7 +14627,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -14646,7 +14646,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_1_0: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_1_0: public ufc::dofmap
 {
 private:
 
@@ -14655,7 +14655,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_1_0() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_1_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -14798,7 +14798,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_1_0();
   }
@@ -14808,7 +14808,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_1_1: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_1_1: public ufc::dofmap
 {
 private:
 
@@ -14817,7 +14817,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_1_1() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_1_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -14960,7 +14960,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_1_1();
   }
@@ -14970,7 +14970,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_1: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_1: public ufc::dofmap
 {
 private:
 
@@ -14979,7 +14979,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_1() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15138,7 +15138,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -15157,7 +15157,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_2_0: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_2_0: public ufc::dofmap
 {
 private:
 
@@ -15166,7 +15166,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_2_0() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_2_0() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15309,7 +15309,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_2_0();
   }
@@ -15319,7 +15319,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_2_1: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_2_1: public ufc::dofmap
 {
 private:
 
@@ -15328,7 +15328,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_2_1() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_2_1() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15471,7 +15471,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_2_1();
   }
@@ -15481,7 +15481,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_2: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_2: public ufc::dofmap
 {
 private:
 
@@ -15490,7 +15490,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_2() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_2() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15649,7 +15649,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     switch ( i )
     {
@@ -15668,7 +15668,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_3: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_3: public ufc::dofmap
 {
 private:
 
@@ -15677,7 +15677,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_3() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_3() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15811,7 +15811,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_3();
   }
@@ -15821,7 +15821,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_4: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_4: public ufc::dofmap
 {
 private:
 
@@ -15830,7 +15830,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_4() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_4() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -15964,7 +15964,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_4();
   }
@@ -15974,7 +15974,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_5: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_5: public ufc::dofmap
 {
 private:
 
@@ -15983,7 +15983,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_5() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_5() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -16117,7 +16117,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_5();
   }
@@ -16127,7 +16127,7 @@ public:
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class UFC_CahnHilliard2DLinearForm_dof_map_6: public ufc::dof_map
+class UFC_CahnHilliard2DLinearForm_dof_map_6: public ufc::dofmap
 {
 private:
 
@@ -16136,7 +16136,7 @@ private:
 public:
 
   /// Constructor
-  UFC_CahnHilliard2DLinearForm_dof_map_6() : ufc::dof_map()
+  UFC_CahnHilliard2DLinearForm_dof_map_6() : ufc::dofmap()
   {
     __global_dimension = 0;
   }
@@ -16270,7 +16270,7 @@ public:
   }
 
   /// Create a new dof_map for sub dof map i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return new UFC_CahnHilliard2DLinearForm_dof_map_6();
   }
@@ -16564,7 +16564,7 @@ public:
   }
   
   /// Create a new dof map for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_dof_map(unsigned int i) const
   {
     switch ( i )
     {

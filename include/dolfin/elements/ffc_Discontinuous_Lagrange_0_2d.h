@@ -547,7 +547,7 @@ public:
                                               const ufc::cell& c) const
   {
     // Element is constant, calling evaluate_reference_basis_derivatives.
-    evaluate_basis_derivatives(0, n, values, coordinates, c);
+    evaluate_reference_basis_derivatives(0, n, values, coordinates, c);
   }
 
   /// Evaluate linear functional for dof i on the function f
@@ -635,23 +635,19 @@ public:
   {
     return 0;
   }
-#ifndef UFC_BACKWARD_COMPATIBILITY
+
   /// Create a new class instance 
   virtual ufc::finite_element* create() const
   {
     return new ffc_discontinuous_lagrange_0_2d_finite_element_0();
   }
-#endif
+
 };
 
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
 class ffc_discontinuous_lagrange_0_2d_dofmap_0: public ufc::dofmap
-#else 
-class ffc_discontinuous_lagrange_0_2d_dofmap_0: public ufc::dof_map
-#endif
 {
 private:
 
@@ -659,11 +655,7 @@ private:
 public:
 
   /// Constructor
-#ifndef UFC_BACKWARD_COMPATIBILITY
   ffc_discontinuous_lagrange_0_2d_dofmap_0() : ufc::dofmap()
-#else
-  ffc_discontinuous_lagrange_0_2d_dofmap_0() : ufc::dof_map()
-#endif
   {
     _global_dimension = 0;
   }
@@ -725,7 +717,6 @@ public:
     // Do nothing
   }
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the topological dimension of the associated cell shape
   virtual unsigned int topological_dimension() const
   {
@@ -737,7 +728,7 @@ public:
   {
     return 2;
   }
-#endif
+
   /// Return the dimension of the global finite element function space
   virtual unsigned int global_dimension() const
   {
@@ -757,19 +748,11 @@ public:
     return 1;
   }
 #else
-
   /// Return the dimension of the local finite element function space for a cell
   virtual unsigned int local_dimension() const
   {
     return 1;
   }
-
-  /// Return the maximum dimension of the local finite element function space
-  virtual unsigned int geometric_dimension() const
-  {
-    return 2;
-  }
-
 #endif
 
   /// Return the number of dofs on each cell facet
@@ -881,7 +864,6 @@ public:
     coordinates[0][1] = 0.333333333333333*x[0][1] + 0.333333333333333*x[1][1] + 0.333333333333333*x[2][1];
   }
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the number of sub dofmaps (for a mixed element)
   virtual unsigned int num_sub_dofmaps() const
   {
@@ -899,19 +881,6 @@ public:
   {
     return new ffc_discontinuous_lagrange_0_2d_dofmap_0();
   }
-#else
-  /// Return the number of sub dofmaps (for a mixed element)
-  virtual unsigned int num_sub_dof_maps() const
-  {
-    return 0;
-  }
-
-  /// Create a new dofmap for sub dofmap i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
-  {
-    return 0;
-  }
-#endif
 
 };
 

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2013-09-12 (merged from branch larcher)
-// Last changed: 2013-09-12
+// Last changed: 2014-09-13
 
 #ifndef __FINITE_ELEMENT_H
 #define __FINITE_ELEMENT_H
@@ -41,7 +41,7 @@ class FiniteElement : public ufc::finite_element
 
 public:
 
-  ///
+  ///TODO: Deprecate UFC1
   FiniteElement(std::string const& signature);
 
   ///
@@ -53,7 +53,7 @@ public:
 
 #if ENABLE_UFL
   ///
-  FiniteElement(ufl::FiniteElementBase const& finite_element);
+  explicit FiniteElement(ufl::FiniteElementBase const& finite_element);
 #endif
 
   ///
@@ -168,17 +168,9 @@ public:
   /// UFC @since 1.1
   ufc::finite_element* create_sub_element(uint i) const;
 
-#if UFC_VERSION_MAJOR >= 2
-#ifndef UFC_BACKWARD_COMPATIBILITY
-  // omitted for backward compatibility code -------------
-
   /// Create a new class instance
   /// UFC @since 2.1.1
   ufc::finite_element* create() const;
-
-  // end omit ---------------------------------------------
-#endif
-#endif
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
@@ -359,18 +351,11 @@ inline uint FiniteElement::num_sub_elements() const
   return ufc_finite_element_->num_sub_elements();
 }
 
-#if UFC_VERSION_MAJOR >= 2
-#ifndef UFC_BACKWARD_COMPATIBILITY
-// omitted for backward compatibility code -------------
-
 //-----------------------------------------------------------------------------
 inline ufc::finite_element* FiniteElement::create() const
 {
   return ufc_finite_element_->create();
 }
-// end omit ---------------------------------------------
-#endif
-#endif
 
 //-----------------------------------------------------------------------------
 inline ufc::finite_element* FiniteElement::create_sub_element(uint i) const

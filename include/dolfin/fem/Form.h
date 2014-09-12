@@ -76,7 +76,7 @@ public:
   ufc::finite_element* create_finite_element(uint i) const;
 
   /// Create a new dof map for argument function i
-  ufc::dof_map * create_dof_map(uint i) const;
+  ufc::dofmap * create_dofmap(uint i) const;
 
   /// Create a new cell integral on sub domain i
   ufc::cell_integral* create_cell_integral(uint i) const;
@@ -158,9 +158,9 @@ inline ufc::finite_element* Form::create_finite_element(uint i) const
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::dof_map * Form::create_dof_map(uint i) const
+inline ufc::dofmap * Form::create_dofmap(uint i) const
 {
-  return form().create_dof_map(i);
+  return form().create_dofmap(i);
 }
 
 //-----------------------------------------------------------------------------

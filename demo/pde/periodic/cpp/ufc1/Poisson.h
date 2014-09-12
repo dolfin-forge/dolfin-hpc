@@ -930,7 +930,7 @@ public:
 #ifndef UFC_BACKWARD_COMPATIBILITY
 class poisson_dofmap_0: public ufc::dofmap
 #else 
-class poisson_dofmap_0: public ufc::dof_map
+class poisson_dofmap_0: public ufc::dofmap
 #endif
 {
 private:
@@ -942,7 +942,7 @@ public:
 #ifndef UFC_BACKWARD_COMPATIBILITY
   poisson_dofmap_0() : ufc::dofmap()
 #else
-  poisson_dofmap_0() : ufc::dof_map()
+  poisson_dofmap_0() : ufc::dofmap()
 #endif
   {
     _global_dimension = 0;
@@ -1214,7 +1214,7 @@ public:
   }
 
   /// Create a new dofmap for sub dofmap i (for a mixed element)
-  virtual ufc::dof_map* create_sub_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_sub_dof_map(unsigned int i) const
   {
     return 0;
   }
@@ -1508,7 +1508,7 @@ public:
   }
 #else
   /// Create a new dofmap for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_dof_map(unsigned int i) const
   {
     switch (i)
     {
@@ -1688,7 +1688,7 @@ public:
   }
 #else
   /// Create a new dofmap for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
+  virtual ufc::dofmap* create_dof_map(unsigned int i) const
   {
     switch (i)
     {

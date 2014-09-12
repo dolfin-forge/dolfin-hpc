@@ -84,7 +84,7 @@ void DofMapSet::Check(ufc::form const& form, Mesh& mesh)
   // Check that the form matches the mesh
   if (form.rank() + form.num_coefficients() > 0)
   {
-    ufc::dof_map * dofmap = form.create_dof_map(0);
+    ufc::dofmap * dofmap = form.create_dofmap(0);
     if (dofmap->geometric_dimension() != mesh.geometry().dim())
     {
       error("Geometric dimension mismatch between mesh and form.");

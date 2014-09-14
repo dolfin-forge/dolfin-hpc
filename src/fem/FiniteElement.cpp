@@ -35,8 +35,7 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
     geom_dim_(0)
 {
   // Check argument
-  uint const num_arguments = form.rank()
-      + form.num_coefficients();
+  uint const num_arguments = form.rank() + form.num_coefficients();
   if (i >= num_arguments)
   {
     error("Illegal function index %d. Form only has %d arguments.", i,
@@ -64,7 +63,8 @@ FiniteElement::FiniteElement(ufc::finite_element& finite_element,
 #if ENABLE_UFL
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(ufl::FiniteElementBase const& finite_element) :
-    ufc_finite_element_(ElementLibrary::create_finite_element(finite_element.repr())),
+    ufc_finite_element_(
+        ElementLibrary::create_finite_element(finite_element.repr())),
     finite_element_local_(true),
     sub_value_dims_(NULL),
     topo_dim_(0),
@@ -76,10 +76,20 @@ FiniteElement::FiniteElement(ufl::FiniteElementBase const& finite_element) :
 #endif
 
 //-----------------------------------------------------------------------------
+FiniteElement::FiniteElement(FiniteElement const& other) :
+    ufc_finite_element_(other.create()),
+    finite_element_local_(true),
+    sub_value_dims_(NULL),
+    topo_dim_(0),
+    geom_dim_(0)
+{
+  Initialize();
+}
+
+//-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
 {
-  if (finite_element_local_)
-    delete ufc_finite_element_;
+  if (finite_element_local_) delete ufc_finite_element_;
 
   delete[] sub_value_dims_;
   delete[] sub_value_offs_;
@@ -226,16 +236,22 @@ void FiniteElement::disp() const
   cout << "ufc::finite_element info" << endl;
   cout << "------------------------" << endl;
   begin("");
-  cout << "Signature             : " << ufc_finite_element_->signature() << endl;
-  cout << "Cell shape            : " << ufc_finite_element_->cell_shape() << endl;
+  cout << "Signature             : " << ufc_finite_element_->signature()
+       << endl;
+  cout << "Cell shape            : " << ufc_finite_element_->cell_shape()
+       << endl;
   cout << "Topological dimension : "
-      << ufc_finite_element_->topological_dimension() << endl;
-  cout << "Geometric dimension   : " << ufc_finite_element_->geometric_dimension()
-      << endl;
-  cout << "Space dimension       : " << ufc_finite_element_->space_dimension() << endl;
-  cout << "Value rank            : " << ufc_finite_element_->value_rank() << endl;
-  cout << "Value dimension       : " << ufc_finite_element_->value_dimension(0) << endl;
-  cout << "Nb of sub elements    : " << ufc_finite_element_->num_sub_elements() << endl;
+       << ufc_finite_element_->topological_dimension() << endl;
+  cout << "Geometric dimension   : "
+       << ufc_finite_element_->geometric_dimension() << endl;
+  cout << "Space dimension       : " << ufc_finite_element_->space_dimension()
+       << endl;
+  cout << "Value rank            : " << ufc_finite_element_->value_rank()
+       << endl;
+  cout << "Value dimension       : " << ufc_finite_element_->value_dimension(0)
+       << endl;
+  cout << "Nb of sub elements    : " << ufc_finite_element_->num_sub_elements()
+       << endl;
   cout << endl;
   end();
 

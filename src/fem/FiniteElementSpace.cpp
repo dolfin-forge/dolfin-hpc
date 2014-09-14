@@ -21,7 +21,7 @@ FiniteElementSpace::FiniteElementSpace(
     finite_element_(finite_element_signature),
     dof_map_(DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature))
 #if ENABLE_UFL
-            ,
+    ,
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(finite_element_signature)))
@@ -38,7 +38,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature)
         DofMapCache::instance().acquire_dofmap(
             mesh, DofMap::dofmap_signature(signature)))
 #if ENABLE_UFL
-            ,
+    ,
     ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(signature)))
 #endif
 {
@@ -51,7 +51,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     finite_element_(mesh.type(), form, i),
     dof_map_(DofMapCache::instance().acquire_dofmap(mesh, form, i))
 #if ENABLE_UFL
-            ,
+    ,
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
@@ -70,7 +70,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
         DofMapCache::instance().acquire_dofmap(
             mesh, DofMap::dofmap_signature(finite_element_.signature())))
 #if ENABLE_UFL
-            ,
+    ,
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
@@ -94,6 +94,22 @@ FiniteElementSpace::FiniteElementSpace(
 #endif
 
 //-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& other) :
+    mesh_(other.mesh()),
+    cell_(other.cell()),
+    finite_element_(other.element()),
+    dof_map_(
+        DofMapCache::instance().acquire_dofmap(other.mesh(), other.dofmap().signature()))
+#if ENABLE_UFL
+    ,
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
+#endif
+{
+}
+
+//-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
                                        uint const& i) :
     mesh_(space.mesh()),
@@ -104,7 +120,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
             space.mesh(),
             DofMap::dofmap_signature(finite_element_.signature())))
 #if ENABLE_UFL
-            ,
+    ,
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))

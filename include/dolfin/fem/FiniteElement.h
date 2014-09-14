@@ -41,20 +41,22 @@ class FiniteElement : public ufc::finite_element
 
 public:
 
-  ///TODO: Deprecate UFC1
+  ///TODO: Deprecate UFC1 constructor
   FiniteElement(std::string const& signature);
 
-  ///
+  /// Create finite element from given coefficient space of form
   FiniteElement(CellType& cell, Form& form, uint const i);
 
-  ///
-  FiniteElement(ufc::finite_element& finite_element,
-                bool const finite_element_local);
+  /// Create finite element from UFC object
+  FiniteElement(ufc::finite_element& finite_element, bool const owner);
 
 #if ENABLE_UFL
-  ///
+  /// Create finite element from UFL object
   explicit FiniteElement(ufl::FiniteElementBase const& finite_element);
 #endif
+
+  /// Copy constructor
+  FiniteElement(FiniteElement const& other);
 
   ///
   ~FiniteElement();
@@ -108,11 +110,10 @@ public:
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   /// UFC @since 2.1.2-hpc
-  void evaluate_reference_basis_derivatives(unsigned int i,
-                                              unsigned int n,
-                                              double* values,
-                                              const double* coordinates,
-                                              const ufc::cell& c) const;
+  void evaluate_reference_basis_derivatives(unsigned int i, unsigned int n,
+                                            double* values,
+                                            const double* coordinates,
+                                            const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   /// UFC @since 1.1 but not implemented
@@ -122,10 +123,9 @@ public:
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
   /// UFC @since 2.1.2-hpc
-  void evaluate_reference_basis_derivatives_all(unsigned int n,
-                                                  double* values,
-                                                  const double* coordinates,
-                                                  const ufc::cell& c) const;
+  void evaluate_reference_basis_derivatives_all(unsigned int n, double* values,
+                                                const double* coordinates,
+                                                const ufc::cell& c) const;
 
   /// Evaluate linear functional for dof i on the function f
   /// UFC @since 1.1
@@ -275,10 +275,9 @@ inline void FiniteElement::evaluate_basis_derivatives(uint i, uint n,
 }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_reference_basis_derivatives(uint i, uint n,
-                                                      double* values,
-                                                      const double* coordinates,
-                                                      const ufc::cell& c) const
+inline void FiniteElement::evaluate_reference_basis_derivatives(
+    uint i, uint n, double* values, const double* coordinates,
+    const ufc::cell& c) const
 {
   ufc_finite_element_->evaluate_reference_basis_derivatives(i, n, values,
                                                             coordinates, c);

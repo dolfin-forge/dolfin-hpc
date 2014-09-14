@@ -49,7 +49,10 @@ public:
                               ufl::FiniteElementBase const& finite_element);
 #endif
 
-  ///
+  /// Copy constructor
+  FiniteElementSpace(FiniteElementSpace const& other);
+
+  /// Create a finite element space from ith subspace of given space
   FiniteElementSpace(FiniteElementSpace const& space, uint const& i);
 
   ///

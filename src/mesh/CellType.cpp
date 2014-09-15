@@ -21,11 +21,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 CellType::CellType(CellType::Type cell_type, CellType::Type facet_type) :
     cell_type(cell_type),
-    facet_type(facet_type)
-#if ENABLE_UFL
-               ,
+    facet_type(facet_type),
     ufl_(CellType::type2ufldomain(cell_type))
-#endif
 {
   // Do nothing
 }

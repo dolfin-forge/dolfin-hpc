@@ -25,30 +25,30 @@ class Function;
 class DofMapCache
 {
 
-  friend class DofMapSet;
-  friend class FiniteElementSpace;
+  friend class DofMap;
 
-  struct dofmap_token_t
+  struct token_t
   {
     uint count;
-    DofMap * const dofmap;
+    DofMap * const item;
 
-    dofmap_token_t(DofMap * dm) :
-        count(1), dofmap(dm)
+    token_t(DofMap * dm) :
+        count(1),
+        item(dm)
     {
     }
   };
 
 #if __SUNPRO_CC
-  typedef std::map<std::string, dofmap_token_t > dofmap_container_t;
-  typedef std::pair<std::string, dofmap_token_t> dofmap_item_t;
-  typedef std::map<DofMap *, std::string > dofmap_rlist_t;
-  typedef std::pair<DofMap *, std::string> dofmap_ritem_t;
+  typedef std::map<std::string, token_t > container_t;
+  typedef std::pair<std::string, token_t> item_t;
+  typedef std::map<DofMap *, std::string > rlist_t;
+  typedef std::pair<DofMap *, std::string> ritem_t;
 #else
-  typedef std::map<std::string const, dofmap_token_t> dofmap_container_t;
-  typedef std::pair<std::string const, dofmap_token_t> dofmap_item_t;
-  typedef std::map<DofMap *, std::string const> dofmap_rlist_t;
-  typedef std::pair<DofMap *, std::string const> dofmap_ritem_t;
+  typedef std::map<std::string const, token_t> container_t;
+  typedef std::pair<std::string const, token_t> item_t;
+  typedef std::map<DofMap *, std::string const> rlist_t;
+  typedef std::pair<DofMap *, std::string const> ritem_t;
 #endif
 
 public:
@@ -65,14 +65,14 @@ protected:
     return instance_;
   }
 
-  ///
-  DofMap& acquire_dofmap(Mesh& mesh, Form const& form, uint const& i);
+  /// Return a dofmap corresponding to the i-th coefficient space
+  DofMap& acquire(Mesh& mesh, Form const& form, uint const& i);
+
+  /// Return a dofmap for the UFC dofmap object
+  DofMap& acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner);
 
   ///
-  DofMap& acquire_dofmap(Mesh& mesh, std::string const& dofmap_signature);
-
-  ///
-  void release_dofmap(DofMap& dof_map);
+  void release(DofMap& dofmap);
 
 private:
 
@@ -82,16 +82,12 @@ private:
   ///
   ~DofMapCache();
 
-  ///
-  void RequestDofmap(std::string const);
-
-  dofmap_container_t cache_;
-  dofmap_rlist_t rlist_;
+  container_t cache_;
+  rlist_t rlist_;
 
 };
 
 }
 
 #endif /* __DOF_MAP_CACHE_H */
-
 

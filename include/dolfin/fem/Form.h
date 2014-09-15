@@ -44,6 +44,9 @@ public:
   /// Return name of argument associated with the given number
   virtual std::string coefficient_name(dolfin::uint i) const;
 
+  /// Return the mesh for the given coefficient index
+  Mesh& coefficient_mesh(uint i) const;
+
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 
@@ -90,7 +93,14 @@ public:
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
-  bool check(Array<Function*> const& coefficients) const;
+  ///
+  FiniteElementSpace * create_space(uint i) const;
+
+  /// Check dimension and rank of coefficients
+  bool check_coefficients(Array<Function*> const& coefficients) const;
+
+  /// Check if index is valid
+  bool check_index(uint i) const;
 
 protected:
 

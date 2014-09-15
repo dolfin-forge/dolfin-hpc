@@ -146,7 +146,7 @@ void XMLFile::operator>>(Function& f)
   // We are cheating here. Instead of actually parsing the XML for
   // Function data nested inside <function></function>, we just ignore
   // the nesting and look for the first occurence of the data which
-  // might be outide of <function></function>
+  // might be outside of <function></function>
 
   message(1, "Reading function from %s.", filename.c_str());
 
@@ -175,7 +175,18 @@ void XMLFile::operator>>(Function& f)
   parseFile();
 
   // Create the function (we're all friends here) (friends my ass).
-  f.init(*mesh, finite_element_signature, dof_map_signature);
+  if(f.type() == Function::discrete)
+  {
+    if((std::strcmp(f.space().element().signature(), finite_element_signature.c_str()) != 0)
+        || (std::strcmp(f.space().dofmap().signature(), dof_map_signature.c_str()) != 0))
+    {
+      error("Reading from XML, stored function does not match with provided space");
+    }
+  }
+  else
+  {
+    f.init(*mesh, finite_element_signature, dof_map_signature);
+  }
    *this >> f.vector();
 }
 //-----------------------------------------------------------------------------

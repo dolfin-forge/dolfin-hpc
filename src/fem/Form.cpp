@@ -9,6 +9,7 @@
 #include <dolfin/fem/Form.h>
 
 #include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 
 namespace dolfin
 {
@@ -57,8 +58,24 @@ std::string Form::coefficient_name(uint const i) const
   return "";
 }
 
+//----------------------------------------------------------------------------
+Mesh& Form::coefficient_mesh(uint i) const
+{
+  dolfin_assert(this->check_index(i));
+  return this->coefficients()[i]->mesh();
+}
+
+//----------------------------------------------------------------------------
+FiniteElementSpace * Form::create_space(uint i) const
+{
+  ufc::finite_element * test_f = this->form().create_finite_element(i);
+  ufc::dofmap * test_d = this->form().create_dofmap(i);
+  return new FiniteElementSpace(this->coefficient_mesh(i), *test_f, *test_d,
+                                true);
+}
+
 //-----------------------------------------------------------------------------
-bool Form::check(Array<Function*> const& coefficients) const
+bool Form::check_coefficients(Array<Function*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
@@ -70,7 +87,7 @@ bool Form::check(Array<Function*> const& coefficients) const
   // Check that all coefficients have valid value dimensions
   for (uint i = 0; i < coefficients.size(); ++i)
   {
-    message(1,"Checking coefficient %d:",i);
+    message(1, "Checking coefficient %d:", i);
     if (coefficients[i] == NULL)
     {
       error("Got NULL Function as coefficient %d.", i);
@@ -79,7 +96,8 @@ bool Form::check(Array<Function*> const& coefficients) const
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());
     uint coef_rank = coefficients[i]->rank();
     uint fe_rank = fe->value_rank();
-    message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank, coef_rank);
+    message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank,
+            coef_rank);
     if (fe_rank != coef_rank)
     {
       error("Invalid value rank of Function %d, got %d but expecting %d.",
@@ -123,6 +141,19 @@ bool Form::check(Array<Function*> const& coefficients) const
       error("Mesh cell type (tetrahedra) does not match cell type of form.");
     }
     delete element;
+  }
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+bool Form::check_index(uint i) const
+{
+  // Check argument
+  uint const num_arguments = form().rank() + form().num_coefficients();
+  if (i >= num_arguments)
+  {
+    error("Illegal function index %d. Form only has %d arguments.", i,
+          num_arguments);
   }
   return true;
 }

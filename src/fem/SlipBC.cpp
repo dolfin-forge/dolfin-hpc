@@ -133,8 +133,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
       b.init_ghosted(off_proc_rows.size(), off_proc_rows, mapping);
     }
 
-    // Initialize and compute normal field at the boundary
-    node_normal->init(mesh, space.element().signature());
+    // Initialize normal field on test space and compute at the boundary
+    node_normal->init(space);
     node_normal->compute();
 
     // Create boundary markers for given topological dimension if the subdomain

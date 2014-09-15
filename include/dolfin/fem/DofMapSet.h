@@ -21,7 +21,6 @@
 namespace dolfin
 {
 
-class DofMapCache;
 class Form;
 class Mesh;
 class UFC;
@@ -62,9 +61,6 @@ private:
 
   // Array of dof maps for current form
   std::vector<DofMap*> dof_map_set;
-
-  // Global cache of precomputed dof maps
-  DofMapCache& cache_;
 
   // Mesh
   Mesh const& mesh_;

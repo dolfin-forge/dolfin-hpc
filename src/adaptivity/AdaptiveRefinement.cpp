@@ -221,11 +221,12 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     dolfin_debug("refine_and_project 5.1");
     FiniteElementSpace const& space = func_to_project.space();
     uint const num_sub = space.element().num_sub_elements();
+
     // FIXME: Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
       FiniteElementSpace subspace(space, i);
-      post.push_back(new Function(mesh, subspace));
+      post.push_back(new Function(subspace));
       post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
       post.back()->sync_ghosts();
     }
@@ -238,7 +239,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
 
     dolfin_debug("refine_and_project 5.3");
-    Function proj(new_mesh, func_to_project.signature());
+    FiniteElementSpace projected_space(new_mesh, space);
+    Function proj(projected_space);
     AdaptiveRefinement::project(new_mesh, post, proj);
 
     while (!post.empty())

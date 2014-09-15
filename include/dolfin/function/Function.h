@@ -82,7 +82,8 @@ public:
   explicit Function(Mesh& mesh, const Array<real>& values);
 
   /// Create constant tensor function from given shape and values
-  explicit Function(Mesh& mesh, const Array<uint>& shape, const Array<real>& values);
+  explicit Function(Mesh& mesh, const Array<uint>& shape,
+                    const Array<real>& values);
 
   /// Create discrete function for argument function i of form
   explicit Function(Mesh& mesh, GenericVector& x, Form& form, uint i);
@@ -90,26 +91,17 @@ public:
   /// Create discrete function for argument function i of form
   explicit Function(Mesh& mesh, Form& form, uint i);
 
-  /// Create discrete function from signature
-  Function(Mesh& mesh, GenericVector& x,
-           std::string const& finite_element_signature,
-           std::string const& dof_map_signature);
+  /// Create discrete function on given discrete space
+  Function(GenericVector& x, FiniteElementSpace const& space);
 
-  /// Create discrete function from signature
-  Function(Mesh& mesh, std::string const& finite_element_signature,
-           std::string const& dof_map_signature);
+  /// Create discrete function on given discrete space
+  Function(FiniteElementSpace const& space);
 
-  /// Create discrete function from signature
-  Function(Mesh& mesh, GenericVector& x,
-           std::string const& finite_element_signature);
-
-  /// Create discrete function from signature
-  Function(Mesh& mesh, std::string const& finite_element_signature);
-
-#if ENABLE_UFL
   /// Create discrete function from UFL Finite Element
   Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
-#endif
+
+  /// Create discrete function on given discrete space [UFC1 compatible]
+  Function(Mesh& mesh, std::string const& element, std::string const& dofmap);
 
   /// Create discrete function from sub function
   explicit Function(SubFunction sub_function);
@@ -134,40 +126,31 @@ public:
 
   //--- DEFERRED INITIALIZATION -----------------------------------------------
 
-  /// Create constant function
+  /// Initialize constant function
   void init(Mesh& mesh, real value);
 
-  /// Create constant vector-valued function
+  /// Initialize constant vector-valued function
   void init(Mesh& mesh, uint i, real value);
 
-  /// Create discrete function for argument function i of form
-  void init(Mesh& mesh, GenericVector& x, Form& form, uint i = 1);
+  /// Initialize discrete function for argument function i of form
+  void init(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
-  /// Create discrete function for argument function i of form
-  void init(Mesh& mesh, Form& form, uint i = 1);
+  /// Initialize discrete function for argument function i of form
+  void init(Mesh& mesh, Form& form, uint i);
 
-  /// Create discrete function from signature
-  void init(Mesh& mesh, GenericVector& x,
-            std::string const& finite_element_signature,
-            std::string const& dof_map_signature);
+  /// Initialize discrete function on given discrete space
+  void init(FiniteElementSpace const& space);
 
-  /// Create discrete function from signature
-  void init(Mesh& mesh, std::string const& finite_element_signature,
-            std::string const& dof_map_signature);
+  /// Initialize discrete function on given discrete space
+  void init(GenericVector& x, FiniteElementSpace const& space);
 
-  /// Create discrete function from signature
-  void init(Mesh& mesh, GenericVector& x,
-            std::string const& finite_element_signature);
-
-  /// Create discrete function from signature
-  void init(Mesh& mesh, std::string const& finite_element_signature);
-
-#if ENABLE_UFL
-  /// Create discrete function from UFL Finite Element
+  /// Initialize discrete function from UFL Finite Element
   void init(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
-#endif
 
-  /// Create expression function
+  /// Initialize discrete function on given discrete space [UFC1 compatible]
+  void init(Mesh& mesh, std::string const& element, std::string const& dofmap);
+
+  /// Initialize expression function
   void init(Mesh& mesh, Expression const& expr);
 
   //--- UFC INTERFACE ---------------------------------------------------------
@@ -293,7 +276,7 @@ private:
 //--- UFC INTERFACE -----------------------------------------------------------
 //-----------------------------------------------------------------------------
 inline void Function::evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const
+                               const ufc::cell& cell) const
 {
   f_->evaluate(values, coordinates, cell);
 }
@@ -342,7 +325,7 @@ inline void Function::eval(real* values, const real* x) const
 //-----------------------------------------------------------------------------
 inline void Function::sync_ghosts()
 {
-    f_->sync_ghosts();
+  f_->sync_ghosts();
 }
 //-----------------------------------------------------------------------------
 inline void Function::disp() const
@@ -353,7 +336,7 @@ inline void Function::disp() const
   // Begin indentation
   begin("");
   cout << "Type: " << this->type() << " ("
-      << Function::type2string(this->type()) << ")" << endl;
+       << Function::type2string(this->type()) << ")" << endl;
   if (f_ != NULL)
   {
     f_->disp();

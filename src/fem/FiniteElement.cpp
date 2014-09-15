@@ -6,6 +6,7 @@
 
 #include <dolfin/fem/FiniteElement.h>
 
+#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <algorithm>
@@ -15,11 +16,27 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(std::string const& signature) :
-    ufc_finite_element_(ElementLibrary::create_finite_element(signature)),
-    finite_element_local_(true),
+FiniteElement::FiniteElement(ufc::finite_element const& element,
+                             bool const owner) :
+    ufc_finite_element_((owner ? &element : element.create())),
     sub_value_dims_(NULL)
+{
+  Initialize();
+}
 
+//-----------------------------------------------------------------------------
+FiniteElement::FiniteElement(ufc::finite_element const& element, uint const i) :
+    ufc_finite_element_(element.create_sub_element(i)),
+    sub_value_dims_(NULL)
+{
+  Initialize();
+}
+
+//-----------------------------------------------------------------------------
+FiniteElement::FiniteElement(ufc::finite_element const& element,
+                             Array<uint> const& sub_system) :
+    ufc_finite_element_(FiniteElement::create_sub_element(element, sub_system)),
+    sub_value_dims_(NULL)
 {
   Initialize();
 }
@@ -27,7 +44,6 @@ FiniteElement::FiniteElement(std::string const& signature) :
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
     ufc_finite_element_(NULL),
-    finite_element_local_(true),
     sub_value_dims_(NULL)
 {
   // Check argument
@@ -45,32 +61,16 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(ufc::finite_element& finite_element,
-                             bool const finite_element_local) :
-    ufc_finite_element_(&finite_element),
-    finite_element_local_(finite_element_local),
+FiniteElement::FiniteElement(ufl::FiniteElementBase const& element) :
+    ufc_finite_element_(ElementLibrary::create_finite_element(element.repr())),
     sub_value_dims_(NULL)
 {
   Initialize();
 }
-
-#if ENABLE_UFL
-//-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(ufl::FiniteElementBase const& finite_element) :
-    ufc_finite_element_(
-        ElementLibrary::create_finite_element(finite_element.repr())),
-    finite_element_local_(true),
-    sub_value_dims_(NULL)
-
-{
-  Initialize();
-}
-#endif
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(FiniteElement const& other) :
     ufc_finite_element_(other.create()),
-    finite_element_local_(true),
     sub_value_dims_(NULL)
 {
   Initialize();
@@ -86,11 +86,8 @@ FiniteElement::~FiniteElement()
   }
   delete[] sub_value_dims_;
   delete[] sub_value_offs_;
-  if (finite_element_local_)
-  {
-    delete ufc_finite_element_;
-    ufc_finite_element_ = NULL;
-  }
+  delete ufc_finite_element_;
+  ufc_finite_element_ = NULL;
 }
 
 //-----------------------------------------------------------------------------

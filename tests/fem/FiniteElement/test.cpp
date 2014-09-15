@@ -101,7 +101,7 @@ START_TEST( test_init )
         skip();
 
         begin("Creating FiniteElement from UFL representation:");
-        dolfin::FiniteElement fem(uflfem.repr());
+        dolfin::FiniteElement fem(uflfem);
         message(fem.signature());
         if(fem.signature() != uflfem.repr())
         {
@@ -151,7 +151,7 @@ START_TEST( test_init )
         skip();
 
         begin("Creating corresponding DiscreteSpace:");
-        dolfin::FiniteElementSpace femspace(*m,fem.signature());
+        dolfin::FiniteElementSpace femspace(*m,fem, dm, false); // Cannot set true
         femspace.disp();
         end();
         skip();

@@ -6,7 +6,7 @@
 
 #include <dolfin/fem/FiniteElementSpace.h>
 
-#include <dolfin/fem/DofMapCache.h>
+#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
 
 #include <cstring>
@@ -15,100 +15,43 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-FiniteElementSpace::FiniteElementSpace(
-    Mesh& mesh, std::string const& finite_element_signature,
-    std::string const& dof_map_signature) :
-    mesh_(mesh),
-    cell_(mesh, 0),
-    finite_element_(finite_element_signature),
-    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, dof_map_signature))
-#if ENABLE_UFL
-                                                    ,
-    ufl_(
-        ufl::FiniteElementBase::create(
-            ufl::Object::repr_t(finite_element_signature)))
-#endif
-{
-}
-
-//-----------------------------------------------------------------------------
-FiniteElementSpace::FiniteElementSpace(Mesh& mesh, std::string const& signature) :
-    mesh_(mesh),
-    cell_(mesh, 0),
-    finite_element_(signature),
-    dof_map_(
-        DofMapCache::instance().acquire_dofmap(
-            mesh, DofMap::dofmap_signature(signature)))
-#if ENABLE_UFL
-                                           ,
-    ufl_(ufl::FiniteElementBase::create(ufl::Object::repr_t(signature)))
-#endif
-{
-}
-
-//-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     mesh_(mesh),
     cell_(mesh, 0),
     finite_element_(mesh.type(), form, i),
-    dof_map_(DofMapCache::instance().acquire_dofmap(mesh, form, i))
-#if ENABLE_UFL
-                                                    ,
+    dof_map_(DofMap::acquire(mesh, form, i)),
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
-#endif
+{
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(Mesh& mesh, ufc::finite_element& element,
+                                       ufc::dofmap& dofmap, bool owner) :
+    mesh_(mesh),
+    cell_(mesh, 0),
+    finite_element_(element, owner),
+    dof_map_(DofMap::acquire(mesh, dofmap, owner)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(finite_element_.signature())))
 {
 }
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
-                                       ufc::finite_element& finite_element,
-                                       bool const finite_element_local) :
+                                       ufl::FiniteElementBase const& element) :
     mesh_(mesh),
     cell_(mesh, 0),
-    finite_element_(finite_element, finite_element_local),
+    finite_element_(element),
     dof_map_(
-        DofMapCache::instance().acquire_dofmap(
-            mesh, DofMap::dofmap_signature(finite_element_.signature())))
-#if ENABLE_UFL
-                                           ,
-    ufl_(
-        ufl::FiniteElementBase::create(
-            ufl::Object::repr_t(element().signature())))
-#endif
-{
-}
-
-#if ENABLE_UFL
-//-----------------------------------------------------------------------------
-FiniteElementSpace::FiniteElementSpace(
-    Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
-    mesh_(mesh),
-    cell_(mesh, 0),
-    finite_element_(finite_element),
-    dof_map_(
-        DofMapCache::instance().acquire_dofmap(
-            mesh, DofMap::dofmap_signature(finite_element_.signature()))),
-    ufl_(&finite_element)
-{
-}
-#endif
-
-//-----------------------------------------------------------------------------
-FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& other) :
-    mesh_(other.mesh()),
-    cell_(other.cell()),
-    finite_element_(other.element()),
-    dof_map_(
-        DofMapCache::instance().acquire_dofmap(other.mesh(),
-                                               other.dofmap().signature()))
-#if ENABLE_UFL
-                                               ,
-    ufl_(
-        ufl::FiniteElementBase::create(
-            ufl::Object::repr_t(element().signature())))
-#endif
+        DofMap::acquire(
+            mesh,
+            *ElementLibrary::create_dof_map(
+                DofMap::dofmap_signature(finite_element_.signature())),
+            true)),
+    ufl_(ufl::FiniteElementBase::create(element.repr()))
 {
 }
 
@@ -117,24 +60,50 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
                                        uint const& i) :
     mesh_(space.mesh()),
     cell_(space.cell()),
-    finite_element_(*space.element().create_sub_element(i), true),
+    finite_element_(space.element(), i),
     dof_map_(
-        DofMapCache::instance().acquire_dofmap(
-            space.mesh(),
-            DofMap::dofmap_signature(finite_element_.signature())))
-#if ENABLE_UFL
-                                     ,
+        DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(i),
+                        true)),
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
-#endif
+{
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(Mesh& other_mesh,
+                                       FiniteElementSpace const& space) :
+    mesh_(other_mesh),
+    cell_(space.cell()),
+    finite_element_(space.element()),
+    dof_map_(DofMap::acquire(other_mesh, *space.dofmap().create(), true)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
+
+{
+  if (other_mesh.type().cellType() != space.cell().type())
+  {
+    error("Provided mesh is incompatible with given space");
+  }
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& other) :
+    mesh_(other.mesh()),
+    cell_(other.cell()),
+    finite_element_(other.element()),
+    dof_map_(DofMap::acquire(other.mesh(), *other.dofmap().create(), true)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
 {
 }
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::~FiniteElementSpace()
 {
-  DofMapCache::instance().release_dofmap(dof_map_);
+  DofMap::release(dof_map_);
 }
 
 //-----------------------------------------------------------------------------

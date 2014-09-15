@@ -68,11 +68,10 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
 }
 
 //-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
-                                   std::string const& finite_element_signature,
-                                   std::string const& dof_map_signature) :
-    GenericFunction(mesh),
-    discrete_space_(mesh, finite_element_signature, dof_map_signature),
+DiscreteFunction::DiscreteFunction(GenericVector& x,
+                                   FiniteElementSpace const& space) :
+    GenericFunction(space.mesh()),
+    discrete_space_(space),
     scratch(discrete_space_),
     local_vector_(false),
     X_(&x),
@@ -86,11 +85,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
 }
 
 //-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(Mesh& mesh,
-                                   std::string const& finite_element_signature,
-                                   std::string const& dof_map_signature) :
-    GenericFunction(mesh),
-    discrete_space_(mesh, finite_element_signature, dof_map_signature),
+DiscreteFunction::DiscreteFunction(FiniteElementSpace const& space) :
+    GenericFunction(space.mesh()),
+    discrete_space_(space),
     scratch(discrete_space_),
     local_vector_(true),
     X_(new Vector()),
@@ -103,40 +100,6 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
   InitializeVector();
 }
 
-//-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x,
-                                   std::string const& signature) :
-    GenericFunction(mesh),
-    discrete_space_(mesh, signature),
-    scratch(discrete_space_),
-    local_vector_(false),
-    X_(&x),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL)
-{
-  // Initialise function
-  InitializeVector();
-}
-
-//-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(Mesh& mesh, std::string const& signature) :
-    GenericFunction(mesh),
-    discrete_space_(mesh, signature),
-    scratch(discrete_space_),
-    local_vector_(true),
-    X_(new Vector()),
-    renumbered_(false),
-    cache_size_(0),
-    indices_(NULL),
-    data_cache_(NULL)
-{
-  // Initialise function
-  InitializeVector();
-}
-
-#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh,
                                    ufl::FiniteElementBase const& finite_element) :
@@ -153,10 +116,9 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
   // Initialise function
   InitializeVector();
 }
-#endif
 
 //-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
+DiscreteFunction::DiscreteFunction(SubFunction const& sub_function) :
     GenericFunction(sub_function.function().mesh()),
     discrete_space_(sub_function.function().space(), sub_function.index()),
     scratch(discrete_space_),
@@ -529,7 +491,9 @@ void DiscreteFunction::interpolate(Function const& other_func)
           other_func.eval(scratch.values, scratch.coordinates[celldof++]);
           block[dof++] = scratch.values[value];
         }
-      }dolfin_assert(celldof == scratch.local_dimension);
+      }
+      //
+      dolfin_assert(celldof == scratch.local_dimension);
     }
   }
 

@@ -31,6 +31,7 @@ class Cell;
 class Form;
 class DofMap;
 class FiniteElement;
+class FiniteElementSpace;
 class SubFunction;
 class IntersectionDetector;
 
@@ -56,28 +57,17 @@ public:
   /// Create discrete function for argument function i of form which owns the vector
   DiscreteFunction(Mesh& mesh, Form& form, uint i);
 
-  /// Create discrete function from given signatures
-  DiscreteFunction(Mesh& mesh, GenericVector& x,
-                   std::string const& finite_element_signature,
-                   std::string const& dof_map_signature);
+  /// Create discrete function from given discrete space
+  DiscreteFunction(GenericVector& x, FiniteElementSpace const& space);
 
-  /// Create discrete function from given signatures which owns the vector
-  DiscreteFunction(Mesh& mesh, std::string const& finite_element_signature,
-                   std::string const& dof_map_signature);
+  /// Create discrete function from given  discrete space which owns the vector
+  DiscreteFunction(FiniteElementSpace const& space);
 
-  /// Create discrete function from given signatures
-  DiscreteFunction(Mesh& mesh, GenericVector& x, std::string const& signature);
-
-  /// Create discrete function from given signatures which owns the vector
-  DiscreteFunction(Mesh& mesh, std::string const& signature);
-
-#if ENABLE_UFL
-  /// Create discrete function from given UFL Finite Element
+  /// Create discrete function from given pregenerated UFL Finite Element
   DiscreteFunction(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
-#endif
 
   /// Create discrete function from sub function
-  DiscreteFunction(SubFunction& sub_function);
+  DiscreteFunction(SubFunction const& sub_function);
 
   /// Copy constructor
   DiscreteFunction(DiscreteFunction const& f);

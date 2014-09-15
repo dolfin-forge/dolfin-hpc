@@ -26,6 +26,7 @@
 namespace dolfin
 {
 
+class Form;
 class SubSytem;
 class UFC;
 
@@ -56,18 +57,21 @@ public:
                                      Mesh& mesh);
 
   /// Create unique string identifiers for dofmap from UFC dofmap
-  static std::string const make_hash(ufc::dofmap& ufc_dofmap, Mesh& mesh);
+  static std::string const make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap);
 
-  /// Create dof map on mesh
-  DofMap(Mesh& mesh, ufc::dofmap& dof_map, bool const owner);
-
-  /// Create dof map on mesh
-  DofMap(Mesh& mesh, std::string const& signature);
-
-  /// Create dof map on mesh
+  /// Create dof map on mesh for i-th coefficient of given form
   DofMap(Mesh& mesh, ufc::form const& form, uint const i);
 
-  /// Create dof map on a sub space
+  /// Create dof map on mesh from UFC object
+  /// Ownership of the UFC object is transfered to the instance if the boolean
+  /// is set to true, otherwise a clone of the dofmap is created.
+  /// In any case the instance the member attribute will be destroyed.
+  DofMap(Mesh& mesh, ufc::dofmap& dofmap, bool const owner);
+
+  /// Create dof map on a subspace
+  DofMap(DofMap const& dofmap, uint i);
+
+  /// Create dof map on a subspace for given subsystem
   DofMap(DofMap const& dofmap, Array<uint> const& sub_system, uint& offset);
 
   /// Destructor
@@ -76,6 +80,14 @@ public:
   /// Check if the element definitions are identical
   bool operator ==(DofMap const& other) const;
   bool operator !=(DofMap const& other) const;
+
+  //--- Instantiation using the dofmap cache
+
+  static DofMap& acquire(Mesh& mesh, Form const& form, uint const i);
+
+  static DofMap& acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner);
+
+  static void release(DofMap& dofmap);
 
   //--- INTERFACE -------------------------------------------------------------
   /// @remark Exposes a subset of UFC v2.0
@@ -145,7 +157,7 @@ public:
   /// UFC @since 1.1
   uint num_sub_dofmaps() const;
 
-  /// Create a new dof_map for sub dof map i (for a mixed element)
+  /// Create a new dofmap for sub dof map i (for a mixed element)
   /// UFC @since 1.1
   ufc::dofmap* create_sub_dofmap(uint i) const;
 
@@ -170,7 +182,7 @@ public:
                                  uint& offset) const;
 
   /// Extract sub dof map
-  ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dof_map,
+  ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dofmap,
                                  Array<uint> const& sub_system,
                                  uint& offset) const;
 
@@ -232,9 +244,6 @@ private:
   // Forward declaration of offset to be update at creation of ufc::dofmap
   uint offset_;
 
-  // Is UFC dof map lifetime managed by the DofMap instance
-  bool const ufc_dofmap_local_;
-
   // UFC dof map
   ufc::dofmap * const ufc_dofmap_;
 
@@ -257,8 +266,8 @@ private:
   uint * vertex_map_;
 
   // Pretabulated parallel dof map
-  mutable uint * pretabulated_dof_map_;
-  uint pretabulated_dof_map_size_;
+  mutable uint * pretabulated_dofmap_;
+  uint pretabulated_dofmap_size_;
 
   // Provide easy access to map for testing
   std::map<uint, uint> map;
@@ -292,7 +301,8 @@ inline std::string const DofMap::make_hash(std::string const& dofmap_signature,
 }
 
 //-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(ufc::dofmap& ufc_dofmap, Mesh& mesh)
+inline std::string const DofMap::make_hash(Mesh& mesh,
+                                           ufc::dofmap const& ufc_dofmap)
 {
   return make_hash(ufc_dofmap.signature(), mesh);
 }

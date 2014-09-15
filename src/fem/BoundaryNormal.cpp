@@ -65,71 +65,22 @@ Function& BoundaryNormal::node_type()
 }
 
 //-----------------------------------------------------------------------------
-void BoundaryNormal::init(Mesh& mesh, Form& form, uint index)
+void BoundaryNormal::init(FiniteElementSpace const& space)
 {
-  uint gdim = mesh.geometry().dim();
+  uint gdim = space.cell().dim();
   for (uint i = 0; i < 3; ++i)
   {
-    basis_[i].init(mesh, form, index);
+    basis_[i].init(space);
   }
 
-  ufc::finite_element * fe = form.create_finite_element(index);
-  std::string sign = fe->signature();
   if (gdim > 1)
   {
-    ufc::finite_element * sub = fe->create_sub_element(0);
-    sign = sub->signature();
-    delete sub;
-  }
-  node_type_.init(mesh, sign);
-  delete fe;
-}
-
-//-----------------------------------------------------------------------------
-void BoundaryNormal::init(Mesh& mesh, std::string const& signature)
-{
-  uint gdim = mesh.geometry().dim();
-  for (uint i = 0; i < 3; ++i)
-  {
-    basis_[i].init(mesh, signature);
-  }
-  if (gdim == 1)
-  {
-    node_type_.init(mesh, signature);
+    FiniteElementSpace sub0(space, 0);
+    node_type_.init(sub0);
   }
   else
   {
-    FiniteElement fem(signature);
-    ufc::finite_element * fe = fem.create_sub_element(0);
-    node_type_.init(mesh, fe->signature());
-    delete fe;
-  }
-}
-
-//-----------------------------------------------------------------------------
-void BoundaryNormal::init(Function& other)
-{
-  if (other.type() != Function::discrete)
-  {
-    error("Initialization of BoundaryNormal from Function argument is only "
-          "possible with a DiscreteFunction.");
-  }
-  uint gdim = other.mesh().geometry().dim();
-  for (uint i = 0; i < 3; ++i)
-  {
-    basis_[i].init(other.mesh(), other.signature());
-  }
-
-  //TODO: Integrate this functionality to FiniteElementSpace
-  if (gdim == 1)
-  {
-    node_type_.init(other.mesh(), other.signature());
-  }
-  else
-  {
-    ufc::finite_element * fe = other.space().element().create_sub_element(0);
-    node_type_.init(other.mesh(), fe->signature());
-    delete fe;
+    node_type_.init(space);
   }
 }
 

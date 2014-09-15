@@ -18,8 +18,6 @@ ufc::dofmap* ElementLibrary::create_dof_map(std::string const signature)
   return create_dof_map(signature.c_str());
 }
 
-#if ENABLE_UFL
-
 //-----------------------------------------------------------------------------
 ElementLibrary::ElementsTable const init_ElementsTable()
 {
@@ -75,7 +73,5 @@ FE::attributes const ElementLibrary::get_attributes(std::string const signature)
     return it->second;
   }
 }
-
-#endif
 
 }

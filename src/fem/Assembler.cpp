@@ -146,7 +146,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
   {
     if(reset_tensor)
     {
-      form.check(coefficients);
+      form.check_coefficients(coefficients);
     }
   }
 

@@ -111,13 +111,8 @@ namespace dolfin
     /// Return description of cell type
     virtual std::string description() const = 0;
 
-#if ENABLE_UFL
     /// UFL binding
-    operator ufl::Cell const&() { return ufl_; }
-
-    /// UFL binding
-    ufl::Cell const& ufl() { return ufl_; }
-#endif
+    operator ufl::Cell const&() const { return ufl_; }
 
   protected:
 
@@ -126,9 +121,7 @@ namespace dolfin
 
   private:
 
-#if ENABLE_UFL
     ufl::Cell ufl_;
-#endif
 
   };
 

@@ -22,7 +22,6 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
-    cache_(DofMapCache::instance()),
     mesh_(mesh)
 {
 }
@@ -46,15 +45,14 @@ void DofMapSet::update(Form const& form, Mesh& mesh)
   ReleaseAll();
 
   // Resize array of dof maps
-  const uint num_arguments = form.rank()
-      + form.num_coefficients();
+  uint const num_arguments = form.rank() + form.num_coefficients();
   dof_map_set.resize(num_arguments);
 
   // Create dof maps and reuse previously computed dof maps
   for (uint i = 0; i < num_arguments; ++i)
   {
     //
-    dof_map_set[i] = &(cache_.acquire_dofmap(mesh, form, i));
+    dof_map_set[i] = &(DofMap::acquire(mesh, form, i));
   }
 }
 
@@ -73,8 +71,7 @@ Mesh const& DofMapSet::mesh() const
 //-----------------------------------------------------------------------------
 DofMap& DofMapSet::operator[](uint i) const
 {
-  dolfin_assert(dof_map_set.size() > 0);
-  dolfin_assert(i < dof_map_set.size());
+  dolfin_assert(dof_map_set.size() > 0);dolfin_assert(i < dof_map_set.size());
   return *dof_map_set[i];
 }
 
@@ -100,7 +97,7 @@ void DofMapSet::ReleaseAll()
   for (std::vector<DofMap*>::iterator it = dof_map_set.begin();
       it != dof_map_set.end(); ++it)
   {
-    cache_.release_dofmap(**it);
+    DofMap::release(**it);
   }
 }
 

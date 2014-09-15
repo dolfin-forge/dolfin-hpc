@@ -8,7 +8,6 @@
 #define __FINITE_ELEMENT_H
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/Form.h>
 
 #include <ufc.h>
@@ -25,6 +24,7 @@ class FiniteElement;
 namespace dolfin
 {
 
+class Form;
 class Mesh;
 
 /**
@@ -33,7 +33,9 @@ class Mesh;
  *  @class  FiniteElement
  *
  *  @brief  This class provides an interface to the UFC definition of a finite
- *          element.
+ *          element as well as an extension to manage mixed elements.
+ *
+ *  @author Aurélien Larcher <larcher@kth.se>
  */
 
 class FiniteElement : public ufc::finite_element
@@ -41,19 +43,23 @@ class FiniteElement : public ufc::finite_element
 
 public:
 
-  ///TODO: Deprecate UFC1 constructor
-  FiniteElement(std::string const& signature);
-
   /// Create finite element from given coefficient space of form
   FiniteElement(CellType& cell, Form& form, uint const i);
 
   /// Create finite element from UFC object
-  FiniteElement(ufc::finite_element& finite_element, bool const owner);
+  /// Ownership of the UFC object is transfered to the instance if the boolean
+  /// is set to true, otherwise a clone of the finite element is created.
+  /// In any case the instance the member attribute will be destroyed.
+  FiniteElement(ufc::finite_element const& element, bool const owner);
 
-#if ENABLE_UFL
-  /// Create finite element from UFL object
+  /// Create the i-th subelement of the given element
+  FiniteElement(ufc::finite_element const& element, uint const i);
+
+  /// Create subelement of the given element for given subsystem
+  FiniteElement(ufc::finite_element const& element, Array<uint> const& sub_system);
+
+  /// Create finite element from UFL object from pregenerated element (testing)
   explicit FiniteElement(ufl::FiniteElementBase const& finite_element);
-#endif
 
   /// Copy constructor
   explicit FiniteElement(FiniteElement const& other);
@@ -66,7 +72,7 @@ public:
   bool operator !=(FiniteElement const& other) const;
 
   //--- INTERFACE -----------------------------------------------------------
-  /// Implements UFC v1.1, extension to v2.1.1 forseeable.
+  /// @implements UFC v2.1.3-hpc
 
   /// Return a string identifying the finite element
   /// UFC @since 1.1
@@ -207,8 +213,7 @@ private:
   void Initialize();
 
   //--- ATTRIBUTES ------------------------------------------------------------
-  mutable ufc::finite_element * ufc_finite_element_;
-  bool const finite_element_local_;
+  ufc::finite_element const * ufc_finite_element_;
 
   //
   Array<uint> * sub_value_dims_;

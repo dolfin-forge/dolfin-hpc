@@ -51,8 +51,7 @@ inline FiniteElementSpace const& BilinearForm::trial_space() const
 {
   if (!trial_space_)
   {
-    ufc::finite_element * test = this->form().create_finite_element(1);
-    trial_space_ = new FiniteElementSpace(mesh(), *test, true);
+    trial_space_ = this->create_space(1);
   }
   return *trial_space_;
 }
@@ -62,8 +61,7 @@ inline FiniteElementSpace const& BilinearForm::test_space() const
 {
   if (!test_space_)
   {
-    ufc::finite_element * test = this->form().create_finite_element(0);
-    test_space_ = new FiniteElementSpace(mesh(), *test, true);
+    test_space_ = this->create_space(0);
   }
   return *test_space_;
 }

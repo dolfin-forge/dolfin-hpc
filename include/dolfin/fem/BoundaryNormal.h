@@ -31,11 +31,11 @@ class BoundaryNormal
 {
 public:
 
-  ///
-  virtual ~BoundaryNormal();
-
   /// Return boundary mesh
   BoundaryMesh& boundary();
+
+  /// Destructor
+  virtual ~BoundaryNormal();
 
   /// Return global mesh
   Mesh& mesh();
@@ -46,16 +46,10 @@ public:
   /// Return the node type
   Function& node_type();
 
-  /// Convenience initialization of basis functions
-  void init(Mesh& mesh, Form& form, uint index);
+  /// Initialization of basis functions and node type for given space
+  void init(FiniteElementSpace const& space);
 
-  /// Convenience initialization of basis functions
-  void init(Mesh& mesh, std::string const& signature);
-
-  /// Convenience initialization of basis functions
-  void init(Function& other);
-
-  ///
+  /// Write orthonormal basis and node type to file
   void write(std::string const& filename);
 
   ///

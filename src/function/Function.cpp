@@ -139,55 +139,27 @@ Function::Function(Mesh& mesh, Form& form, uint i) :
   f_ = new DiscreteFunction(mesh, form, i);
 }
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, GenericVector& x,
-                   std::string const& finite_element_signature) :
+Function::Function(GenericVector& x, FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
+    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
     facet_(-1)
 {
-  f_ = new DiscreteFunction(mesh, x, finite_element_signature);
+  f_ = new DiscreteFunction(x, space);
 }
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, GenericVector& x,
-                   std::string const& finite_element_signature,
-                   std::string const& dof_map_signature) :
+Function::Function(FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
+    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
     facet_(-1)
 {
-  f_ = new DiscreteFunction(mesh, x, finite_element_signature,
-                            dof_map_signature);
+  f_ = new DiscreteFunction(space);
 }
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, std::string const& finite_element_signature,
-                   std::string const& dof_map_signature) :
-    Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(mesh, finite_element_signature, dof_map_signature);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, std::string const& finite_element_signature) :
-    Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(mesh, finite_element_signature);
-}
-#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
     Variable("*no name*", "discrete function"),
@@ -199,7 +171,21 @@ Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
 {
   f_ = new DiscreteFunction(mesh, finite_element);
 }
-#endif
+//-----------------------------------------------------------------------------
+Function::Function(Mesh& mesh, std::string const& element,
+                   std::string const& dofmap) :
+    Variable("*no name*", "discrete function"),
+    mesh_(&mesh),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  ufc::finite_element * f = ElementLibrary::create_finite_element(element);
+  ufc::dofmap * d = ElementLibrary::create_dof_map(dofmap);
+  FiniteElementSpace space(mesh, *f, *d, true);
+  f_ = new DiscreteFunction(space);
+}
 ////-----------------------------------------------------------------------------
 Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
@@ -356,55 +342,27 @@ void Function::init(Mesh& mesh, Form& form, uint i)
   type_ = discrete;
 }
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, GenericVector& x,
-                    std::string const& finite_element_signature,
-                    std::string const& dof_map_signature)
+void Function::init(GenericVector& x, FiniteElementSpace const& space)
 {
   if (f_)
   {
     delete f_;
   }
-
-  f_ = new DiscreteFunction(mesh, x, finite_element_signature,
-                            dof_map_signature);
+  //TODO: Check mesh consistency
+  f_ = new DiscreteFunction(x, space);
   type_ = discrete;
 }
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, std::string const& finite_element_signature,
-                    std::string const& dof_map_signature)
+void Function::init(FiniteElementSpace const& space)
 {
   if (f_)
   {
     delete f_;
   }
-
-  f_ = new DiscreteFunction(mesh, finite_element_signature, dof_map_signature);
+  //TODO: Check mesh consistency
+  f_ = new DiscreteFunction(space);
   type_ = discrete;
 }
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, GenericVector& x,
-                    std::string const& finite_element_signature)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new DiscreteFunction(mesh, x, finite_element_signature);
-  type_ = discrete;
-}
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, std::string const& finite_element_signature)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new DiscreteFunction(mesh, finite_element_signature);
-  type_ = discrete;
-}
-#if ENABLE_UFL
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, ufl::FiniteElementBase const& finite_element)
 {
@@ -416,7 +374,21 @@ void Function::init(Mesh& mesh, ufl::FiniteElementBase const& finite_element)
   f_ = new DiscreteFunction(mesh, finite_element);
   type_ = discrete;
 }
-#endif
+//-----------------------------------------------------------------------------
+void Function::init(Mesh& mesh, std::string const& element,
+                    std::string const& dofmap)
+{
+  if (f_)
+  {
+    delete f_;
+  }
+
+  ufc::finite_element * f = ElementLibrary::create_finite_element(element);
+  ufc::dofmap * d = ElementLibrary::create_dof_map(dofmap);
+  FiniteElementSpace space(mesh, *f, *d, true);
+  f_ = new DiscreteFunction(space);
+  type_ = discrete;
+}
 //-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, Expression const& expr)
 {

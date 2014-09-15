@@ -104,8 +104,8 @@ void SpaceTimeFunction::eval(real t)
 {
   if (!evaluated_)
   {
-    U0.init(mesh_, function_.signature());
-    U1.init(mesh_, function_.signature());
+    U0.init(function_.space());
+    U1.init(function_.space());
     evaluated_ = true;
   }
 

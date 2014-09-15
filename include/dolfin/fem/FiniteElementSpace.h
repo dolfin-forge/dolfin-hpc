@@ -29,7 +29,7 @@ class FiniteElementSpace
 
 public:
 
-  ///
+  /// Create
   FiniteElementSpace(Mesh& mesh, std::string const& signature);
 
   ///
@@ -55,8 +55,12 @@ public:
   /// Create a finite element space from ith subspace of given space
   FiniteElementSpace(FiniteElementSpace const& space, uint const& i);
 
-  ///
+  /// Destructor
   ~FiniteElementSpace();
+
+  /// Check if the finite element space definitions are identical
+  bool operator ==(FiniteElementSpace const& other) const;
+  bool operator !=(FiniteElementSpace const& other) const;
 
   ///
   Mesh& mesh() const;

@@ -91,6 +91,10 @@ public:
   /// Assignment
   const Mesh& operator=(const Mesh& mesh);
 
+  /// Identity
+  bool operator ==(Mesh const& other) const;
+  bool operator !=(Mesh const& other) const;
+
   /// Return number of vertices of mesh partition
   uint numVertices() const;
 

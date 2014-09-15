@@ -89,7 +89,11 @@ FiniteElement::FiniteElement(FiniteElement const& other) :
 //-----------------------------------------------------------------------------
 FiniteElement::~FiniteElement()
 {
-  if (finite_element_local_) delete ufc_finite_element_;
+  if (finite_element_local_)
+  {
+    delete ufc_finite_element_;
+    ufc_finite_element_ = NULL;
+  }
 
   delete[] sub_value_dims_;
   delete[] sub_value_offs_;

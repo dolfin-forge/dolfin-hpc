@@ -351,15 +351,15 @@ inline uint FiniteElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-inline ufc::finite_element* FiniteElement::create() const
-{
-  return ufc_finite_element_->create();
-}
-
-//-----------------------------------------------------------------------------
 inline ufc::finite_element* FiniteElement::create_sub_element(uint i) const
 {
   return ufc_finite_element_->create_sub_element(i);
+}
+
+//-----------------------------------------------------------------------------
+inline ufc::finite_element* FiniteElement::create() const
+{
+  return ufc_finite_element_->create();
 }
 
 }

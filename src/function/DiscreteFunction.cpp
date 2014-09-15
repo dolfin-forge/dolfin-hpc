@@ -234,9 +234,7 @@ DiscreteFunction::~DiscreteFunction()
 const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 {
   // Check that data matches
-  if (strcmp(finite_element().signature(), f.finite_element().signature()) != 0
-      || strcmp(dofmap().signature(), f.dofmap().signature()) != 0
-      || X_->size() != f.X_->size())
+  if ((this->space() != f.space()) || (X_->size() != f.X_->size()))
   {
     error("Assignment of discrete function failed."
           "Finite element spaces or dimensions don't match.");
@@ -301,7 +299,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values
   //FIXME: Well... discontinuous approximations might disagree
-  if(this->space().is_cellwise_defined())
+  if (this->space().is_cellwise_defined())
   {
     warning("Interpolation to vertex values is implemented incorrectly for"
             "discontinuous approximations");

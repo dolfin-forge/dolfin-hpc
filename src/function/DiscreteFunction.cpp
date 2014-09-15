@@ -204,7 +204,7 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
     GenericFunction(f.mesh()),
-    discrete_space_(f.mesh(), f.signature()),
+    discrete_space_(f.space()),
     scratch(discrete_space_),
     local_vector_(true),
     X_(new Vector()),

@@ -191,6 +191,13 @@ public:
   /// Get value dimensions for sub spaces just one level down for axis i
   Array<uint> const& sub_value_offsets(uint i) const;
 
+  /// Get list of scalar finite elements ordered by entries
+  Array<ufc::finite_element const *> const& flatten() const;
+
+  /// Create flatten representation finite element (append sub elements)
+  void flatten(ufc::finite_element const * element,
+               Array<ufc::finite_element const *>& stack) const;
+
   //---
 
   void disp() const;
@@ -203,11 +210,14 @@ private:
   mutable ufc::finite_element * ufc_finite_element_;
   bool const finite_element_local_;
 
+  //
   Array<uint> * sub_value_dims_;
+
+  //
   Array<uint> * sub_value_offs_;
 
-  uint topo_dim_;
-  uint geom_dim_;
+  //
+  mutable Array<ufc::finite_element const *> flattened_;
 
 };
 
@@ -226,13 +236,13 @@ inline ufc::shape FiniteElement::cell_shape() const
 //-----------------------------------------------------------------------------
 inline uint FiniteElement::topological_dimension() const
 {
-  return topo_dim_;
+  return ufc_finite_element_->topological_dimension();
 }
 
 //-----------------------------------------------------------------------------
 inline uint FiniteElement::geometric_dimension() const
 {
-  return geom_dim_;
+  return ufc_finite_element_->geometric_dimension();
 }
 
 //-----------------------------------------------------------------------------

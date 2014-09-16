@@ -123,6 +123,11 @@ DofMap::~DofMap()
 {
   delete[] pretabulated_dof_map_;
   delete[] vertex_map_;
+  while (!flattened_.empty())
+  {
+    delete flattened_.back();
+    flattened_.pop_back();
+  }
   if (ufc_dofmap_local_)
   {
     delete ufc_dofmap_;
@@ -326,6 +331,82 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       error("Unknown dofmap type.");
       break;
     }
+}
+
+//-----------------------------------------------------------------------------
+Array<ufc::dofmap const *> const& DofMap::flatten() const
+{
+  if (flattened_.empty())
+  {
+    flatten(ufc_dofmap_, flattened_);
+  }
+  return flattened_;
+}
+
+//-----------------------------------------------------------------------------
+void DofMap::flatten(ufc::dofmap const * dofmap,
+                     Array<ufc::dofmap const *>& stack) const
+{
+  // Single root dofmap
+  if (dofmap->num_sub_dofmaps() == 0)
+  {
+    stack.push_back(dofmap->create());
+    return;
+  }
+  for (uint s = 0; s < dofmap->num_sub_dofmaps(); ++s)
+  {
+    ufc::dofmap const * sub = dofmap->create_sub_dofmap(s);
+    if (sub->num_sub_dofmaps() == 0)
+    {
+      // Leaf dofmap
+      stack.push_back(sub);
+    }
+    else
+    {
+      // Branch
+      flatten(sub, stack);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& DofMap::sub_dofmaps_dimensions() const
+{
+  return sub_dofmaps_dims_;
+}
+
+//-----------------------------------------------------------------------------
+Array<uint> const& DofMap::sub_dofmaps_offsets() const
+{
+  return sub_dofmaps_offs_;
+}
+
+//-----------------------------------------------------------------------------
+bool DofMap::renumbered() const
+{
+  return (pretabulated_dof_map_ || type_ > -1 || vertex_map_);
+}
+
+//-----------------------------------------------------------------------------
+uint DofMap::local_size() const
+{
+  return local_size_;
+}
+
+//-----------------------------------------------------------------------------
+uint const * DofMap::dofsmapping() const
+{
+  if (pretabulated_dof_map_ == NULL)
+  {
+    pretabulate_all_dofs();
+  }
+  return pretabulated_dof_map_;
+}
+
+//-----------------------------------------------------------------------------
+uint DofMap::dofsmapping_size() const
+{
+  return pretabulated_dof_map_size_;
 }
 
 //--------------------------------------------------------------------------

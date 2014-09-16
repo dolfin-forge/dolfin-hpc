@@ -165,12 +165,6 @@ public:
   /// Tabulate the local-to-global mapping of dofs on a cell
   void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
 
-  /// Get sub dof maps offset (for a mixed element)
-  Array<uint> const& sub_dofmaps_dimensions() const;
-
-  /// Get sub dof maps offset (for a mixed element)
-  Array<uint> const& sub_dofmaps_offsets() const;
-
   /// Extract sub dof map
   ufc::dofmap* create_sub_dofmap(Array<uint> const& sub_system,
                                  uint& offset) const;
@@ -179,6 +173,19 @@ public:
   ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dof_map,
                                  Array<uint> const& sub_system,
                                  uint& offset) const;
+
+  /// Get sub dof maps offset (for a mixed element)
+  Array<uint> const& sub_dofmaps_dimensions() const;
+
+  /// Get sub dof maps offset (for a mixed element)
+  Array<uint> const& sub_dofmaps_offsets() const;
+
+  /// Get list of scalar dofmaps ordered by entries
+  Array<ufc::dofmap const *> const& flatten() const;
+
+  /// Create flatten representation of given dofmap (append sub dofmaps)
+  void flatten(ufc::dofmap const * dofmap,
+               Array<ufc::dofmap const *>& stack) const;
 
   /// Unique identifier
   std::string const& hash() const;
@@ -239,6 +246,9 @@ private:
 
   // Sub dof maps offsets
   Array<uint> sub_dofmaps_offs_;
+
+  //
+  mutable Array<ufc::dofmap const *> flattened_;
 
   //
   uint local_size_;
@@ -401,43 +411,6 @@ inline ufc::dofmap* DofMap::create() const
 inline uint DofMap::macro_local_dimension() const
 {
   return ufc_dofmap_->local_dimension();
-}
-
-//-----------------------------------------------------------------------------
-inline Array<uint> const& DofMap::sub_dofmaps_dimensions() const
-{
-  return sub_dofmaps_dims_;
-}
-
-//-----------------------------------------------------------------------------
-inline Array<uint> const& DofMap::sub_dofmaps_offsets() const
-{
-  return sub_dofmaps_offs_;
-}
-
-//-----------------------------------------------------------------------------
-inline bool DofMap::renumbered() const
-{
-  return (pretabulated_dof_map_ || type_ > -1 || vertex_map_);
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::local_size() const
-{
-  return local_size_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint const * DofMap::dofsmapping() const
-{
-  if (pretabulated_dof_map_ == NULL) pretabulate_all_dofs();
-  return pretabulated_dof_map_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint DofMap::dofsmapping_size() const
-{
-  return pretabulated_dof_map_size_;
 }
 
 }

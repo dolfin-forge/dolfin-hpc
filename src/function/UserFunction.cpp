@@ -51,10 +51,8 @@ void UserFunction::interpolate_vertex_values(real* values) const
   dolfin_assert(values);
   dolfin_assert(f_);
 
-  // Compute size of value (number of entries in tensor value)
-  uint size = 1;
-  for (uint i = 0; i < f_->rank(); i++)
-    size *= f_->dim(i);
+  // Get size of value (number of entries in tensor value)
+  uint const size = this->value_size();
 
   // Call overloaded eval function at each vertex
   real * local_values = new real[size];

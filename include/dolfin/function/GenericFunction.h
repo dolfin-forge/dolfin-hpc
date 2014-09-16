@@ -48,7 +48,7 @@ public:
 
   /// Evaluate function at given point in cell
   virtual void evaluate(real* values, const real* coordinates,
-                const ufc::cell& cell) const = 0;
+                        const ufc::cell& cell) const = 0;
 
   //--- INTERFACE -------------------------------------------------------------
 
@@ -75,10 +75,14 @@ public:
   /// Synchronize ghosted entries
   virtual void sync_ghosts() = 0;
 
+  //---------------------------------------------------------------------------
+
+  uint value_size() const;
+
 protected:
 
   /// The mesh
-    Mesh& mesh_;
+  Mesh& mesh_;
 
 private:
 
@@ -97,7 +101,7 @@ inline void GenericFunction::disp() const
   cout << "Evaluate at cell 0    : ";
   Cell cell(mesh_, 0);
   Point p = cell.midpoint();
-  real x[3] = { p[0], p[1], p[2]};
+  real x[3] = { p[0], p[1], p[2] };
   real * v = new real[this->dim(0)];
   this->eval(v, x);
   for (uint d = 0; d < this->dim(0); ++d)
@@ -109,6 +113,17 @@ inline void GenericFunction::disp() const
   // End indentation
   end();
   skip();
+}
+
+//-----------------------------------------------------------------------------
+inline uint GenericFunction::value_size() const
+{
+  uint size = 1;
+  for (uint i = 0; i < this->rank(); ++i)
+  {
+    size *= this->dim(i);
+  }
+  return size;
 }
 
 }

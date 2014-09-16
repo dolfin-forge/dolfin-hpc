@@ -184,6 +184,9 @@ public:
   /// Return the dimension of the value space for axis i
   virtual uint dim(uint i) const;
 
+  /// Return the value size
+  virtual uint value_size() const;
+
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values);
 
@@ -304,6 +307,11 @@ inline uint Function::rank() const
 inline uint Function::dim(unsigned int i) const
 {
   return f_->dim(i);
+}
+//-----------------------------------------------------------------------------
+inline uint Function::value_size() const
+{
+  return f_->value_size();
 }
 //-----------------------------------------------------------------------------
 inline void Function::interpolate_vertex_values(real* values)

@@ -1,1 +1,3 @@
-SUBDIRS = BoundaryNormal
+SUBDIRS = FiniteElement \
+          FiniteElementSpace \
+          BoundaryNormal

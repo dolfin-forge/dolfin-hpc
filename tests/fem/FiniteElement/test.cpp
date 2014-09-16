@@ -1,5 +1,6 @@
 #include <dolfin/config/dolfin_config.h>
 
+#include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/FiniteElement.h>
@@ -17,14 +18,13 @@ using dolfin::end;
 using dolfin::message;
 using dolfin::skip;
 using dolfin::Mesh;
+using dolfin::ElementLibrary;
 
 using ufl::Cell;
 using ufl::Domain;
 using ufl::Family;
 using ufl::Object;
 using ufl::Space;
-
-#include <iostream>
 
 #ifdef HAVE_CHECK
 
@@ -42,7 +42,7 @@ void teardown()
 }
 
 //-----------------------------------------------------------------------------
-START_TEST(test_init_vector_element_space)
+START_TEST( test_init )
 {
   int init_failed = 0;
 
@@ -54,8 +54,8 @@ START_TEST(test_init_vector_element_space)
   dolfin::UnitSquare sq(4, 4);
   dolfin::UnitCube cb(2, 2, 2);
 
-  for (std::vector<Family::Type>::const_iterator it = v.begin(); it != v.end();
-      ++it)
+  for (std::vector<Family::Type>::const_iterator it = v.begin();
+      it != v.end(); ++it)
   {
     Family f(*it);
     uint d_min = f.degree_min();
@@ -69,7 +69,7 @@ START_TEST(test_init_vector_element_space)
       Cell cell(dom);
       uint const dim = cell.topological_dimension();
       dolfin::Mesh * m;
-      if (dim == 2)
+      if(dim == 2)
       {
         m = &sq;
       }
@@ -88,14 +88,13 @@ START_TEST(test_init_vector_element_space)
         skip();
 
         begin("Creating UFLFiniteElement:");
-        ufl::VectorElement uflfem(*it, cell, d, dim);
+        ufl::FiniteElement uflfem(*it, cell, d);
         message(uflfem.repr());
         end();
         skip();
 
         begin("Creating UFLFiniteElement from factory function:");
-        ufl::FiniteElementBase * factuflfem = ufl::FiniteElementBase::create(
-            uflfem.repr());
+        ufl::FiniteElementBase * factuflfem = ufl::FiniteElementBase::create(uflfem.repr());
         message(factuflfem->repr());
         delete factuflfem;
         end();
@@ -104,7 +103,7 @@ START_TEST(test_init_vector_element_space)
         begin("Creating FiniteElement from UFL representation:");
         dolfin::FiniteElement fem(uflfem.repr());
         message(fem.signature());
-        if (fem.signature() != uflfem.repr())
+        if(fem.signature() != uflfem.repr())
         {
           init_failed = 1;
           message("WRONG");
@@ -119,9 +118,9 @@ START_TEST(test_init_vector_element_space)
         skip();
 
         begin("Creating UFL representation from FiniteElement:");
-        ufl::VectorElement uflfemd(Object::repr_t(fem.signature()));
+        ufl::FiniteElement uflfemd(Object::repr_t(fem.signature()));
         message(uflfemd.repr());
-        if (uflfem.repr() != uflfemd.repr())
+        if(uflfem.repr() != uflfemd.repr())
         {
           init_failed = 1;
           message("WRONG");
@@ -134,10 +133,10 @@ START_TEST(test_init_vector_element_space)
         skip();
 
         begin("Creating corresponding DofMap:");
-        dolfin::DofMap dm(dolfin::DofMap::dofmap_signature(fem.signature()),
-                          *m);
+        ufc::dofmap * ufcdm = ElementLibrary::create_dof_map(dolfin::DofMap::dofmap_signature(fem.signature()));
+        dolfin::DofMap dm(*m, *ufcdm, true);
         message(dm.signature());
-        if (dm.signature() != dolfin::DofMap::dofmap_signature(uflfem.repr()))
+        if(dm.signature() != dolfin::DofMap::dofmap_signature(uflfem.repr()))
         {
           init_failed = 1;
           message("WRONG");
@@ -151,27 +150,8 @@ START_TEST(test_init_vector_element_space)
         end();
         skip();
 
-        begin("Creating DofMap from DofMapCache:");
-        dolfin::DofMap& dmc = dolfin::DofMapCache::instance().acquire_dofmap(
-            *m, dm.signature());
-        message(dmc.signature());
-        if (dmc.signature() != dolfin::DofMap::dofmap_signature(uflfem.repr()))
-        {
-          init_failed = 1;
-          message("WRONG");
-        }
-        else
-        {
-          message("MATCHING");
-        }
-        skip();
-        dolfin::DofMapCache::instance().disp();
-        dolfin::DofMapCache::instance().release_dofmap(dmc);
-        end();
-        skip();
-
         begin("Creating corresponding DiscreteSpace:");
-        dolfin::FiniteElementSpace femspace(*m, fem.signature());
+        dolfin::FiniteElementSpace femspace(*m,fem.signature());
         femspace.disp();
         end();
         skip();
@@ -182,19 +162,20 @@ START_TEST(test_init_vector_element_space)
     }
   }
 
-  fail_unless(init_failed == 0);
-}
-END_TEST
+  fail_unless( init_failed == 0 );
+}END_TEST
 
-Suite *fem_suite()
+//-----------------------------------------------------------------------------
+
+Suite * test_suite()
 {
   TCase *tc;
   Suite *s;
 
-  s = suite_create("FEM");
-  tc = tcase_create("fem");
+  s = suite_create("data");
+  tc = tcase_create("data");
 
-  tcase_add_test(tc, test_init_vector_element_space);
+  tcase_add_test(tc, test_init );
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
@@ -205,7 +186,7 @@ Suite *fem_suite()
 int main(void)
 {
   int number_failed;
-  Suite* s = fem_suite();
+  Suite* s = test_suite();
   SRunner* sr = srunner_create(s);
 
   srunner_run_all(sr, CK_NORMAL);
@@ -219,7 +200,7 @@ int main(void)
 
 int main(void)
 {
-  fprintf(stderr, "*** Check is required for dolfin/fem tests ***\n");
+  fprintf(stderr, "*** Check is required for dolfin/data tests ***\n");
   return 0;
 }
 

@@ -67,7 +67,7 @@ START_TEST( test_init )
           ufl::FiniteElementBase * factuflfem = ufl::FiniteElementBase::create(uflfem.repr());
           message(factuflfem->repr());
           factuflfem->display();
-          if(factuflfem->repr() != uflfem.repr())
+          if(*factuflfem != uflfem)
           {
               init_failed += 1;
           }

@@ -320,7 +320,10 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/Makefile\
                  tests/fem/Makefile\
                  tests/fem/BoundaryNormal/Makefile\
+                 tests/fem/FiniteElement/Makefile\
+                 tests/fem/FiniteElementSpace/Makefile\
                  tests/function/Makefile\
+                 tests/function/DiscreteFunction/Makefile\
                  tests/io/Makefile\
                  tests/mesh/Makefile\
                  tests/mesh/SubDomain/Makefile\

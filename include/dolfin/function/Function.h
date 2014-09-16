@@ -188,12 +188,12 @@ public:
   virtual uint value_size() const;
 
   /// Interpolate function to vertices of mesh
-  void interpolate_vertex_values(real* values);
+  void interpolate_vertex_values(real* values) const;
 
   /// Interpolate function to finite element space on cell
   void interpolate(real* coefficients, const ufc::cell& ufc_cell,
                    const ufc::finite_element& finite_element, Cell& cell,
-                   int facet = -1);
+                   int facet = -1) const;
 
   /// Evaluate function at given point (overload for user-defined function)
   virtual void eval(real* values, const real* x) const;
@@ -281,10 +281,10 @@ private:
   Type type_;
 
   // Pointer to current cell (if any, otherwise 0)
-  Cell* cell_;
+  mutable Cell* cell_;
 
   // Current facet (if any, otherwise -1)
-  int facet_;
+  mutable int facet_;
 
 };
 
@@ -314,14 +314,14 @@ inline uint Function::value_size() const
   return f_->value_size();
 }
 //-----------------------------------------------------------------------------
-inline void Function::interpolate_vertex_values(real* values)
+inline void Function::interpolate_vertex_values(real* values) const
 {
   f_->interpolate_vertex_values(values);
 }
 //-----------------------------------------------------------------------------
 inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
                            const ufc::finite_element& finite_element,
-                           Cell& cell, int facet)
+                           Cell& cell, int facet) const
 {
   // Make current cell and facet are available to user-defined function
   cell_ = &cell;

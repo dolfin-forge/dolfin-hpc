@@ -171,52 +171,52 @@ DiscreteFunction::DiscreteFunction(SubFunction& sub_function) :
   InitializeVector();
 
   // Copy subvector, naive implementation
-  DiscreteFunction& global_func = sub_function.function();
-  DofMap const& global_dm = global_func.space().dofmap();
-  uint const global_local_dim = global_dm.local_dimension();
-  uint const global_dm_offset =
-      global_dm.sub_dofmaps_offsets()[sub_function.index()];
-  real * global_block = NULL;
-  global_func.get_block(global_block);
+  DiscreteFunction& gFunc = sub_function.function();
+  uint const gLocalDim = gFunc.space().dofmap().local_dimension();
+  uint const gDmOffset =
+      gFunc.space().dofmap().sub_dofmaps_offsets()[sub_function.index()];
+  uint const thisLocalDim = scratch.local_dimension;
+
+  // Sync ghosts before getting the block
+  real * gblock = gFunc.create_block();
+  gFunc.sync_ghosts();
+  gFunc.get_block(gblock);
 
   // Loop baby, loop...
-  CellIterator cell(mesh_);
-  uint cell_offset = 0;
-  uint glob_func_cell_offset = 0;
-  real * this_block = new real[dofmap().dofsmapping_size()];
-  for (; !cell.end();
-      ++cell, cell_offset += scratch.local_dimension, glob_func_cell_offset +=
-          global_local_dim)
+  uint gBlockOffset = 0;
+  uint ii = 0;
+  real * this_block = this->create_block();
+  for (CellIterator cell(mesh_); !cell.end(); ++cell, gBlockOffset += gLocalDim)
   {
-    for (uint dof_id = 0; dof_id < scratch.local_dimension; ++dof_id)
+    for (uint dof = 0; dof < thisLocalDim; ++dof)
     {
-      this_block[cell_offset + dof_id] = global_block[glob_func_cell_offset
-          + global_dm_offset + dof_id];
+      this_block[ii++] = gblock[gBlockOffset + gDmOffset + dof];
     }
   }
-  X_->set(this_block, dofmap().dofsmapping_size(), dofmap().dofsmapping());
-  sync_ghosts();
+  this->set_block(this_block);
 
   delete[] this_block;
-  delete[] global_block;
+  delete[] gblock;
 }
 
 //-----------------------------------------------------------------------------
-DiscreteFunction::DiscreteFunction(const DiscreteFunction& f) :
+DiscreteFunction::DiscreteFunction(DiscreteFunction const& f) :
     GenericFunction(f.mesh()),
     discrete_space_(f.space()),
     scratch(discrete_space_),
     local_vector_(true),
     X_(new Vector()),
+    renumbered_(false),
     cache_size_(0),
     indices_(NULL),
     data_cache_(NULL)
 {
+  dolfin_assert(this->space() == f.space());
 
   // Copy vector
   *X_ = *f.X_;
 
-  renumbered_ = f.renumbered_;
+  this->sync_ghosts();
 }
 
 //-----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ DiscreteFunction::~DiscreteFunction()
 }
 
 //-----------------------------------------------------------------------------
-const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
+DiscreteFunction const& DiscreteFunction::operator=(DiscreteFunction const& f)
 {
   // Check that data matches
   if ((this->space() != f.space()) || (X_->size() != f.X_->size()))
@@ -242,6 +242,8 @@ const DiscreteFunction& DiscreteFunction::operator=(const DiscreteFunction& f)
 
   // Copy vector
   *X_ = *f.X_;
+
+  this->sync_ghosts();
 
   return *this;
 }
@@ -321,6 +323,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
       X_->get(scratch.coefficients, scratch.local_dimension, scratch.dofs);
 
       // Interpolate values at the vertices
+      // Values are packed by vertex and not by subspace (if any)
       finite_element().interpolate_vertex_values(vertex_values,
                                                  scratch.coefficients,
                                                  scratch.cell);
@@ -464,48 +467,80 @@ uint const DiscreteFunction::num_sub_functions() const
 //-----------------------------------------------------------------------------
 void DiscreteFunction::interpolate(Function const& other_func)
 {
-  Array<uint> const& value_dims = finite_element().sub_value_dimensions(0);
-  Array<uint> const& value_offs = finite_element().sub_value_offsets(0);
-  Array<uint> const& dm_dims = dofmap().sub_dofmaps_dimensions();
-  Array<uint> const& dm_offs = dofmap().sub_dofmaps_offsets();
-  uint const nb_subspaces = dm_dims.size();
+  if ((this->rank() != other_func.rank())
+      || (this->value_size() != other_func.value_size())
+      || (this->dim(0) != other_func.dim(0)))
+  {
+    error("Attempt to interpolate between functions of different value shape");
+  }
 
   // Make sure vectors ghost values are updated)
   X_->apply();
 
   // Pretabulated version
-  real * values = new real[finite_element().value_dimension(0)];
-  real * block = new real[dofmap().dofsmapping_size()];
-  uint cell_offset = 0;
-  uint const local_dim = dofmap().local_dimension();
-  MeshDistributedData& distdata = mesh_.distdata();
-  for (CellIterator cell(mesh_); !cell.end(); ++cell, cell_offset += local_dim)
-  {
-    scratch.cell.update(*cell, distdata);
-    dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
+  real * block = this->create_block();
 
-    uint dof_id = 0;
-    for (uint sub = 0; sub < nb_subspaces; ++sub)
+  // The other function being discrete we need to interpolate.
+  if (other_func.type() == Function::discrete)
+  {
+    ScratchSpace other_scratch(other_func.space());
+    if (this->mesh() == other_func.mesh())
     {
-      uint sub_val_dim = value_dims[sub];
-      uint nb_nodes = dm_dims[sub] / sub_val_dim;
-      uint off = dm_offs[sub];
-      for (uint sub_id = 0; sub_id < nb_nodes; ++sub_id)
+      uint dof = 0;
+      for (CellIterator cell(mesh_); !cell.end(); ++cell)
       {
-        other_func.eval(values, scratch.coordinates[sub_id]);
-        for (uint v = 0; v < sub_val_dim; ++v)
+        scratch.cell.update(*cell, mesh_.distdata());
+        dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
+
+        // Get expansion coefficients of other discrete function on cell
+        other_func.interpolate(other_scratch.coefficients, scratch.cell,
+                               *other_scratch.finite_element, *cell);
+
+        for (uint dof = 0; dof < scratch.space_dimension; ++dof)
         {
-          block[cell_offset + off + v * nb_nodes + sub_id] =
-              values[value_offs[sub] + v];
+          other_func.evaluate(scratch.values, scratch.coordinates[dof],
+                              scratch.cell);
         }
-        ++dof_id;
       }
     }
-  }
-  this->set_block(block);
+    else
+    {
 
+    }
+  }
+  // Analytical expression (naive implementation)
+  else
+  {
+    //
+    Array<ufc::dofmap const*> const& flatten_dofmaps = this->dofmap().flatten();
+    dolfin_assert(flatten_dofmaps.size() == scratch.size);
+
+    uint dof = 0;
+    for (CellIterator cell(mesh_); !cell.end(); ++cell)
+    {
+      scratch.cell.update(*cell, mesh_.distdata());
+      dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
+
+      uint celldof = 0;
+      for (uint value = 0; value < flatten_dofmaps.size(); ++value)
+      {
+        for (uint ii = 0; ii < flatten_dofmaps[value]->local_dimension(); ++ii)
+        {
+          other_func.eval(scratch.values, scratch.coordinates[celldof++]);
+          block[dof++] = scratch.values[value];
+        }
+      }dolfin_assert(celldof == scratch.local_dimension);
+    }
+  }
+
+  this->set_block(block);
   delete[] block;
-  delete[] values;
+}
+
+//-----------------------------------------------------------------------------
+real * DiscreteFunction::create_block() const
+{
+  return new real[dofmap().dofsmapping_size()];
 }
 
 //-----------------------------------------------------------------------------
@@ -515,6 +550,7 @@ void DiscreteFunction::get_block(real *& values) const
   {
     values = new real[dofmap().dofsmapping_size()];
   }
+  X_->apply();
   X_->get(values, dofmap().dofsmapping_size(), dofmap().dofsmapping());
 }
 

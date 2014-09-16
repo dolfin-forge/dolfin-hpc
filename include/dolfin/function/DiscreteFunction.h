@@ -86,7 +86,7 @@ public:
   ~DiscreteFunction();
 
   /// Assign discrete function
-  DiscreteFunction const& operator=(const DiscreteFunction& f);
+  DiscreteFunction const& operator=(DiscreteFunction const& f);
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Evaluate function at given point in cell
@@ -139,6 +139,9 @@ public:
 
   /// Interpolate values from the given Function
   void interpolate(Function const& other_func);
+
+  /// Create a cell tabulated block array
+  real * create_block() const;
 
   /// Get values to cell tabulated block array
   void get_block(real *& values) const;

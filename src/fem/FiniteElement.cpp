@@ -100,6 +100,18 @@ FiniteElement::~FiniteElement()
 }
 
 //-----------------------------------------------------------------------------
+bool FiniteElement::operator ==(FiniteElement const& other) const
+{
+  return (std::strcmp(this->signature(), other.signature()) == 0);
+}
+
+//-----------------------------------------------------------------------------
+bool FiniteElement::operator !=(FiniteElement const& other) const
+{
+  return !(*this == other);
+}
+
+//-----------------------------------------------------------------------------
 void FiniteElement::Initialize()
 {
   dolfin_assert(ufc_finite_element_);

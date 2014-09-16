@@ -123,20 +123,34 @@ DofMap::~DofMap()
 {
   delete[] pretabulated_dof_map_;
   delete[] vertex_map_;
-  if(ufc_dofmap_local_)
+  if (ufc_dofmap_local_)
+  {
     delete ufc_dofmap_;
+  }
+}
+
+//-----------------------------------------------------------------------------
+bool DofMap::operator ==(DofMap const& other) const
+{
+  return (this->hash() == other.hash());
+}
+
+//-----------------------------------------------------------------------------
+bool DofMap::operator !=(DofMap const& other) const
+{
+  return !(*this == other);
 }
 
 //-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
-                                         uint& offset) const
+                                       uint& offset) const
 {
   // Reset offset
   offset = 0;
 
   // Recursively extract sub dof map
   ufc::dofmap* sub_dof_map = create_sub_dofmap(*ufc_dofmap_, sub_system,
-                                                 offset);
+                                               offset);
   message(0, "Extracted ufc dof map for sub system: %s",
           sub_dof_map->signature());
   message(0, "Offset for sub system: %d", offset);
@@ -146,21 +160,21 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
 
 //-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dof_map,
-                                         Array<uint> const& sub_system,
-                                         uint& offset) const
+                                       Array<uint> const& sub_system,
+                                       uint& offset) const
 {
   // Check if there are any sub systems
-  if (dof_map.num_sub_dofmaps() == 0)
-    error("Unable to extract sub system (there are no sub systems).");
+  if (dof_map.num_sub_dofmaps() == 0) error(
+      "Unable to extract sub system (there are no sub systems).");
 
   // Check that a sub system has been specified
-  if (sub_system.size() == 0)
-    error("Unable to extract sub system (no sub system specified).");
+  if (sub_system.size() == 0) error(
+      "Unable to extract sub system (no sub system specified).");
 
   // Check the number of available sub systems
-  if (sub_system[0] >= dof_map.num_sub_dofmaps())
-    error("Unable to extract sub system %d (only %d sub systems defined).",
-          sub_system[0], dof_map.num_sub_dofmaps());
+  if (sub_system[0] >= dof_map.num_sub_dofmaps()) error(
+      "Unable to extract sub system %d (only %d sub systems defined).",
+      sub_system[0], dof_map.num_sub_dofmaps());
 
   // Add to offset if necessary
   for (uint i = 0; i < sub_system[0]; i++)
@@ -183,8 +197,8 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dof_map,
   {
     sub_sub_system.push_back(sub_system[i]);
   }
-  ufc::dofmap* sub_sub_dof_map = create_sub_dofmap(*sub_dof_map,
-                                                     sub_sub_system, offset);
+  ufc::dofmap* sub_sub_dof_map = create_sub_dofmap(*sub_dof_map, sub_sub_system,
+                                                   offset);
   delete sub_dof_map;
 
   return sub_sub_dof_map;
@@ -267,7 +281,7 @@ void DofMap::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell,
 void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
                            Cell const& cell) const
 {
-	dolfin_assert(dofs != NULL);
+  dolfin_assert(dofs != NULL);
   // Either lookup pretabulated values (if build() has been called)
   // or ask the ufc::dofmap to tabulate the values
   switch (type_)
@@ -302,8 +316,8 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
     case generic:
       std::memcpy(
           dofs,
-          &pretabulated_dof_map_[ufc_dofmap_->local_dimension()*cell.index()],
-            sizeof(uint) * ufc_dofmap_->local_dimension());
+          &pretabulated_dof_map_[ufc_dofmap_->local_dimension() * cell.index()],
+          sizeof(uint) * ufc_dofmap_->local_dimension());
       break;
     case ufc_default:
       ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
@@ -333,7 +347,7 @@ void DofMap::pretabulate_all_dofs() const
       ip += local_dim;
     }
   }
-	type_ = generic;
+  type_ = generic;
 }
 
 //-----------------------------------------------------------------------------
@@ -456,8 +470,8 @@ void DofMap::build()
 
       vertex_map_ = new uint[dolfin_mesh.numVertices()];
       for (VertexIterator v(dolfin_mesh); !v.end(); ++v)
-        vertex_map_[v->index()] = v_offset[dolfin_mesh.distdata().get_vertex_global(
-            v->index())];
+        vertex_map_[v->index()] =
+            v_offset[dolfin_mesh.distdata().get_vertex_global(v->index())];
 
       v_offset.clear();
 
@@ -695,7 +709,7 @@ void DofMap::disp() const
   cout << "Global dimension     : " << ufc_dofmap_->global_dimension() << endl;
   cout << "Local dimension      : " << ufc_dofmap_->local_dimension() << endl;
   cout << "Geometric dimension  : " << ufc_dofmap_->geometric_dimension()
-      << endl;
+       << endl;
   cout << "Number of subdofmaps : " << ufc_dofmap_->num_sub_dofmaps() << endl;
   cout << "Number of facet dofs : " << ufc_dofmap_->num_facet_dofs() << endl;
   cout << endl;

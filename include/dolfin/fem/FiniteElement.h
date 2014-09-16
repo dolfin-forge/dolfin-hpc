@@ -56,10 +56,14 @@ public:
 #endif
 
   /// Copy constructor
-  FiniteElement(FiniteElement const& other);
+  explicit FiniteElement(FiniteElement const& other);
 
   ///
   ~FiniteElement();
+
+  /// Check if the element definitions are identical
+  bool operator ==(FiniteElement const& other) const;
+  bool operator !=(FiniteElement const& other) const;
 
   //--- INTERFACE -----------------------------------------------------------
   /// Implements UFC v1.1, extension to v2.1.1 forseeable.

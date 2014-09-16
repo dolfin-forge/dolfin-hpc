@@ -140,11 +140,8 @@ FiniteElementSpace::~FiniteElementSpace()
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::operator ==(FiniteElementSpace const& other) const
 {
-  return (this->mesh() == other.mesh())
-      && (std::strcmp(this->element().signature(), other.element().signature())
-          == 0)
-      && (std::strcmp(this->dofmap().signature(), other.dofmap().signature())
-          == 0);
+  return (this->mesh() == other.mesh()) && (this->element() == other.element())
+      && (this->dofmap() == other.dofmap());
 }
 
 //-----------------------------------------------------------------------------

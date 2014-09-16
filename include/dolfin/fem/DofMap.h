@@ -73,6 +73,10 @@ public:
   /// Destructor
   ~DofMap();
 
+  /// Check if the element definitions are identical
+  bool operator ==(DofMap const& other) const;
+  bool operator !=(DofMap const& other) const;
+
   //--- INTERFACE -------------------------------------------------------------
   /// @remark Exposes a subset of UFC v2.0
 

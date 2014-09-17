@@ -362,7 +362,7 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
   }
 
   // Integer n_type represents the number of constrained directions
-  if (n_type < (int) tdim)  // At least one free direction
+  if (n_type < tdim)  // At least one free direction
   {
     //--- For each constrained direction
     for (uint i = 0; i < n_type; ++i)
@@ -449,8 +449,8 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
         ++diag_idx;
       }
 
-      // Scale the diagonal entry and update the LHS diagonal
-      real diag_val = std::fabs(a[i][diag_idx]);
+      // Scale the diagonal entry and update the LHS diagonal [Disabled]
+      real diag_val = 1.; //std::fabs(a[i][diag_idx]);
       As->set(&diag_val, 1, &dofs[i], 1, &dofs[i]);
     }
     //Apply local equation RHS to the copy of the matrix

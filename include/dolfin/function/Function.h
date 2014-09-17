@@ -203,10 +203,10 @@ public:
   /// Return the discrete space of a DiscreteFunction
   FiniteElementSpace const& space() const;
 
-  /// Return the finite element space of a DiscreteFunction
+  /// Return the finite element space of a DiscreteFunction [TODO: Deprecate]
   FiniteElement const& finite_element() const;
 
-  /// Return the dofmap of a DiscreteFunction
+  /// Return the dofmap of a DiscreteFunction [TODO: Deprecate]
   DofMap const& dofmap() const;
 
   /// Return the signature of a DiscreteFunction
@@ -217,6 +217,9 @@ public:
 
   /// Interpolate values from the given Function
   void interpolate(const Function& other_func);
+
+  /// Create a cell tabulated block array
+  real * create_block() const;
 
   /// Get values of a DiscreteFunction from cell tabulated block array
   void get_block(real *& values) const;

@@ -479,6 +479,16 @@ void Function::interpolate(Function const& other_func)
 
 }
 //-----------------------------------------------------------------------------
+real * Function::create_block() const
+{
+  if (type_ != discrete)
+  {
+    error("Block array can be created only from discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f_))->create_block();
+}
+//-----------------------------------------------------------------------------
 void Function::get_block(real *& values) const
 {
   if (type_ != discrete)

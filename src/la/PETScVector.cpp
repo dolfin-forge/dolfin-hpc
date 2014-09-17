@@ -393,7 +393,7 @@ void PETScVector::axpy(real a, const GenericVector& y)
 
   if (size() != v.size())
   {
-    error("The vectors must be of the same size.");
+    error("The vectors must be of the same size to apply AXPY.");
   }
 
   VecAXPY(x, a, v.x);
@@ -453,7 +453,8 @@ Vec PETScVector::vec() const
 }
 //-----------------------------------------------------------------------------
 void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
-			       std::map<uint, uint>& map){
+                               std::map<uint, uint>& map)
+{
 
   if( is_ghosted )
   {
@@ -507,7 +508,7 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
 
 #ifdef HAVE_MPI
   VecCreateGhost(MPI::DOLFIN_COMM, local_size, size, (int) ghost_indices.size(),
-		 (const int *) &ghost_indices[0], &x);
+                 (const int *) &ghost_indices[0], &x);
 #endif
   VecSetValues(x, local_size, rows, values, INSERT_VALUES);
   delete[] rows;

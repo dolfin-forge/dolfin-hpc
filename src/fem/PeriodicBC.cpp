@@ -113,7 +113,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
     const uint local_facet = cell.index(*facet);
 
     // Tabulate dofs on cell
-    scratch.dof_map->tabulate_dofs(scratch.dofs, scratch.mesh, scratch.cell);
+    space.dofmap().tabulate_dofs(scratch.dofs, scratch.cell, cell);
 
     // Tabulate coordinates on cell
     scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);

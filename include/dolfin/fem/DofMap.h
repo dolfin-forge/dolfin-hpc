@@ -182,9 +182,10 @@ public:
                                  uint& offset) const;
 
   /// Extract sub dof map
-  ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dofmap,
-                                 Array<uint> const& sub_system,
-                                 uint& offset) const;
+  static ufc::dofmap* create_sub_dofmap(UFCMesh& ufc_mesh,
+                                        ufc::dofmap const& dofmap,
+                                        Array<uint> const& sub_system,
+                                        uint& offset);
 
   /// Get sub dof maps offset (for a mixed element)
   Array<uint> const& sub_dofmaps_dimensions() const;
@@ -229,14 +230,17 @@ private:
   /// Initialise DofMap
   void init();
 
+  /// Initialise UFC data structures: used to determine the global dimension
+  static void init_ufc(UFCMesh& ufc_mesh, ufc::dofmap& dofmap);
+
   /// Build parallel dof map
   void build();
 
   ///
   void pretabulate_all_dofs() const;
 
-  // UFC mesh
-  UFCMesh ufc_mesh_;
+  // UFC mesh, should be declared as mutable as deferred initialization occurs
+  mutable UFCMesh ufc_mesh_;
 
   // Use type to allow optimization of dof map ordering
   mutable Type type_;

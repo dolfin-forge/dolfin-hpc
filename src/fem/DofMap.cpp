@@ -168,7 +168,8 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
   offset = 0;
 
   // Recursively extract sub dof map
-  ufc::dofmap* sub_dofmap = create_sub_dofmap(*ufc_dofmap_, sub_system, offset);
+  ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(ufc_mesh_, *ufc_dofmap_,
+                                                      sub_system, offset);
   message(0, "Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
   message(0, "Offset for sub system: %d", offset);
@@ -177,9 +178,10 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
 }
 
 //-----------------------------------------------------------------------------
-ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
+ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
+                                       ufc::dofmap const& dofmap,
                                        Array<uint> const& sub_system,
-                                       uint& offset) const
+                                       uint& offset)
 {
   // Check if there are any sub systems
   if (dofmap.num_sub_dofmaps() == 0)
@@ -203,8 +205,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   // Add to offset if necessary
   for (uint i = 0; i < sub_system[0]; i++)
   {
-    ufc::dofmap* ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
-    DofMap dofmap_test(mesh(), *ufc_sub_dofmap, false);
+    ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
+    //Avoid creating a DOLFIN dofmap, just calling the static init_ufc function
+    DofMap::init_ufc(ufc_mesh, *ufc_sub_dofmap);
     offset += ufc_sub_dofmap->global_dimension();
     delete ufc_sub_dofmap;
   }
@@ -221,57 +224,67 @@ ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
   {
     sub_sub_system.push_back(sub_system[i]);
   }
-  ufc::dofmap* sub_sub_dofmap = create_sub_dofmap(*sub_dofmap, sub_sub_system,
-                                                  offset);
+  ufc::dofmap* sub_sub_dofmap = DofMap::create_sub_dofmap(ufc_mesh, *sub_dofmap,
+                                                          sub_sub_system,
+                                                          offset);
   delete sub_dofmap;
 
   return sub_sub_dofmap;
 }
 
 //-----------------------------------------------------------------------------
-void DofMap::init()
+void DofMap::init_ufc(UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)
 {
-  //dolfin_debug("Initializing dof map...");
-  Mesh& dolfin_mesh = mesh();
+  Mesh * mesh = const_cast<Mesh *>(ufc_mesh.mesh);
 
-  if (ufc_dofmap_->geometric_dimension() != dolfin_mesh.topology().dim())
+  if (ufc_dofmap.geometric_dimension() != mesh->topology().dim())
   {
     dolfin::error("The geometric dimension of the dof map is not equal to the "
                   "topological dimension of the mesh.");
   }
 
   // Order vertices, so entities will be created correctly according to convention
-  dolfin_mesh.order();
+  mesh->order();
 
   // Initialize mesh entities used by dof map
-  for (uint d = 0; d <= dolfin_mesh.topology().dim(); d++)
+  for (uint d = 0; d <= mesh->topology().dim(); d++)
   {
-    if (ufc_dofmap_->needs_mesh_entities(d))
+    if (ufc_dofmap.needs_mesh_entities(d))
     {
-      dolfin_mesh.init(d);
+      mesh->init(d);
     }
   }
 
   // Initialize UFC mesh data (must be done after entities are created)
-  ufc_mesh_.init(dolfin_mesh);
+  ufc_mesh.init(*mesh);
 
   // Initialize UFC dof map
-  const bool init_cells = ufc_dofmap_->init_mesh(ufc_mesh_);
+  const bool init_cells = ufc_dofmap.init_mesh(ufc_mesh);
   if (init_cells)
   {
-    CellIterator cell(dolfin_mesh);
+    CellIterator cell(*mesh);
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell, dolfin_mesh.distdata());
-      ufc_dofmap_->init_cell(ufc_mesh_, ufc_cell);
+      ufc_cell.update(*cell, mesh->distdata());
+      ufc_dofmap.init_cell(ufc_mesh, ufc_cell);
     }
-    ufc_dofmap_->init_cell_finalize();
+    ufc_dofmap.init_cell_finalize();
   }
+}
 
+//-----------------------------------------------------------------------------
+void DofMap::init()
+{
+  //dolfin_debug("Initializing dof map...");
+
+  // Initialize UFC data structures
+  DofMap::init_ufc(ufc_mesh_, *ufc_dofmap_);
+
+  // Build the DOLFIN dofmap
   build();
 
-  // Set offset for mixed elements
+  // Set offsets and local dimensions for mixed elements
   uint const nb_sub = this->num_sub_dofmaps();
   if (nb_sub > 0)
   {
@@ -287,12 +300,11 @@ void DofMap::init()
   }
   else
   {
-    sub_dofmaps_dims_.push_back(local_dimension());
+    sub_dofmaps_dims_.push_back(this->local_dimension());
     sub_dofmaps_offs_.push_back(0);
   }
 
-  pretabulated_dofmap_size_ = ufc_dofmap_->local_dimension()
-      * dolfin_mesh.numCells();
+  pretabulated_dofmap_size_ = this->local_dimension() * mesh().numCells();
 }
 //-----------------------------------------------------------------------------
 void DofMap::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell,
@@ -311,40 +323,51 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
   switch (type_)
     {
     case scalar_p1:
-      for (uint i = 0; i < local_dimension(); ++i)
       {
-        dofs[i] = ufc_cell.entity_indices[0][i];
-        dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
+        for (uint i = 0; i < local_dimension(); ++i)
+        {
+          dofs[i] = ufc_cell.entity_indices[0][i];
+          dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
+        }
       }
       break;
     case scalar_dg0:
-      dofs[0] = ufc_cell.index;
-      dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
+      {
+        dofs[0] = ufc_cell.index;
+        dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
+      }
       break;
     case vector_p1:
-      for (uint k = 0; k < ufc_dofmap_->num_sub_dofmaps(); ++k)
       {
-        for (uint i = 0; i < cell.numEntities(0); ++i)
+        uint const num_cellverts = cell.numEntities(0);
+        for (uint k = 0; k < ufc_dofmap_->num_sub_dofmaps(); ++k)
         {
-          dofs[i + k * (cell.numEntities(0))] = vertex_map_[cell.entities(0)[i]]
-              + k;
+          for (uint i = 0; i < num_cellverts; ++i)
+          {
+            dofs[i + k * num_cellverts] = vertex_map_[cell.entities(0)[i]] + k;
+          }
         }
       }
       break;
     case vector_dg0:
-      for (uint i = 0; i < ufc_dofmap_->num_sub_dofmaps(); ++i)
       {
-        dofs[i] = (cell.index() + i * mesh().numCells()) + offset_;
+        for (uint i = 0; i < ufc_dofmap_->num_sub_dofmaps(); ++i)
+        {
+          dofs[i] = (cell.index() + i * mesh().numCells()) + offset_;
+        }
       }
       break;
     case generic:
-      std::memcpy(
-          dofs,
-          &pretabulated_dofmap_[ufc_dofmap_->local_dimension() * cell.index()],
-          sizeof(uint) * ufc_dofmap_->local_dimension());
+      {
+        uint const local_dim = ufc_dofmap_->local_dimension();
+        std::memcpy(dofs, &pretabulated_dofmap_[local_dim * cell.index()],
+                    sizeof(uint) * local_dim);
+      }
       break;
     case ufc_default:
-      ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
+      {
+        ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
+      }
       break;
     default:
       error("Unknown dofmap type.");
@@ -433,19 +456,17 @@ void DofMap::pretabulate_all_dofs() const
 {
   CellIterator ref_cell(mesh());
   UFCCell ufc_cell(*ref_cell);
-  uint const local_dim = local_dimension();
+  uint const local_dim = this->local_dimension();
 
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
+  uint *ip = &pretabulated_dofmap_[0];
+  MeshDistributedData& distdata = mesh().distdata();
+  for (CellIterator cell(mesh()); !cell.end(); ++cell)
   {
-    uint *ip = &pretabulated_dofmap_[0];
-    MeshDistributedData& distdata = mesh().distdata();
-    for (CellIterator cell(mesh()); !cell.end(); ++cell)
-    {
-      // cell indices for real valued function
-      ufc_cell.update(*cell, distdata);
-      this->tabulate_dofs(ip, ufc_cell, *cell);
-      ip += local_dim;
-    }
+    // cell indices for real valued function
+    ufc_cell.update(*cell, distdata);
+    this->tabulate_dofs(ip, ufc_cell, *cell);
+    ip += local_dim;
   }
   type_ = generic;
 }
@@ -468,6 +489,7 @@ void DofMap::build()
     uint pe_size = MPI::numProcesses();
     uint rank = MPI::processNumber();
 
+    //
     dolfin_mesh.renumber();
 
     if (ufc_dofmap_->global_dimension()

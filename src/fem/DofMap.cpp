@@ -183,16 +183,17 @@ ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
                                        Array<uint> const& sub_system,
                                        uint& offset)
 {
+  // Check that a sub system has been specified
+  if (sub_system.size() == 0)
+  {
+    //error("Unable to extract sub system (no sub system specified).");
+    return dofmap.create();
+  }
+
   // Check if there are any sub systems
   if (dofmap.num_sub_dofmaps() == 0)
   {
     error("Unable to extract sub system (there are no sub systems).");
-  }
-
-  // Check that a sub system has been specified
-  if (sub_system.size() == 0)
-  {
-    error("Unable to extract sub system (no sub system specified).");
   }
 
   // Check the number of available sub systems

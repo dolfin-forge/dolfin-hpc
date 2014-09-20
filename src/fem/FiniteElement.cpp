@@ -150,16 +150,17 @@ ufc::finite_element*
 FiniteElement::create_sub_element(const ufc::finite_element& finite_element,
                                   Array<uint> const& sub_system)
 {
+  // If the subsystem is empty return self
+  if (sub_system.size() == 0)
+  {
+    //error("Unable to extract sub system (no sub system specified).");
+    return finite_element.create();
+  }
+
   // Check if there are any sub systems
   if (finite_element.num_sub_elements() == 0)
   {
     error("Unable to extract sub system (there are no sub systems).");
-  }
-
-  // Check that a sub system has been specified
-  if (sub_system.size() == 0)
-  {
-    error("Unable to extract sub system (no sub system specified).");
   }
 
   // Check the number of available sub systems

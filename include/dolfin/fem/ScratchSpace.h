@@ -93,6 +93,8 @@ private:
 
   void init();
 
+  bool const owner_;
+
 };
 
 } /* namespace dolfin */

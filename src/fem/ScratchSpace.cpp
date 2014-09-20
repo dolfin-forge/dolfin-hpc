@@ -31,7 +31,8 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
     facet_dofs(new uint[dof_map->num_facet_dofs()]),
     coefficients(new real[space_dimension]),
     values(new real[size]),
-    coordinates(new real*[local_dimension])
+    coordinates(new real*[local_dimension]),
+    owner_(false)
 {
   init();
 }
@@ -53,7 +54,8 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
     facet_dofs(new uint[dof_map->num_facet_dofs()]),
     coefficients(new real[space_dimension]),
     values(new real[size]),
-    coordinates(new real*[local_dimension])
+    coordinates(new real*[local_dimension]),
+    owner_(true)
 {
   init();
 }
@@ -70,6 +72,11 @@ ScratchSpace::~ScratchSpace()
   delete[] coefficients;
   delete[] facet_dofs;
   delete[] dofs;
+  if(owner_)
+  {
+    delete dof_map;
+    delete finite_element;
+  }
 }
 
 //-----------------------------------------------------------------------------

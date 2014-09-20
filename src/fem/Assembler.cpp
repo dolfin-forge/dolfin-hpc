@@ -40,9 +40,15 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+Assembler::Assembler()
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
 Assembler::Assembler(Mesh& mesh)
 {
   // Do nothing
+  warning("Assembler(Mesh& mesh) is deprecated, use Assembler().");
 }
 //-----------------------------------------------------------------------------
 Assembler::~Assembler()

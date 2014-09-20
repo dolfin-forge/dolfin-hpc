@@ -38,6 +38,9 @@ class Assembler
 public:
 
   /// Constructor
+  Assembler();
+
+  /// Constructor [TODO: Deprecate]
   Assembler(Mesh& mesh);
 
   /// Destructor

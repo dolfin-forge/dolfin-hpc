@@ -127,15 +127,18 @@ private:
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,
-                            FiniteElementSpace const& space);
+                            FiniteElementSpace const& space,
+                            SubSystem const& sub_system);
 
   // Compute boundary values for facet (geometrical approach)
   void computeBCGeometric(_map<uint, real>& boundary_values,
-                          FiniteElementSpace const& space);
+                          FiniteElementSpace const& space,
+                          SubSystem const& sub_system);
 
   // Compute boundary values for facet (pointwise approach)
   void computeBCPointwise(_map<uint, real>& boundary_values,
-                          FiniteElementSpace const& space);
+                          FiniteElementSpace const& space,
+                          SubSystem const& sub_system);
 
   // The function
   Function& g_;

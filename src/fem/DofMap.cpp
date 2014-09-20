@@ -162,26 +162,79 @@ void DofMap::release(DofMap& dofmap)
 
 //-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
-                                       uint& offset) const
+                                       uint& local_offset) const
 {
   // Reset offset
-  offset = 0;
+  local_offset = 0;
 
   // Recursively extract sub dof map
-  ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(ufc_mesh_, *ufc_dofmap_,
-                                                      sub_system, offset);
+  ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
+                                                      local_offset);
   message(0, "Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
-  message(0, "Offset for sub system: %d", offset);
+  message(0, "Local offset for sub system: %d", local_offset);
 
   return sub_dofmap;
+}
+
+//-----------------------------------------------------------------------------
+ufc::dofmap* DofMap::create_sub_dofmap(ufc::dofmap const& dofmap,
+                                       Array<uint> const& sub_system,
+                                       uint& local_offset)
+{
+  // Check that a sub system has been specified
+  if (sub_system.size() == 0)
+  {
+    //error("Unable to extract sub system (no sub system specified).");
+    return dofmap.create();
+  }
+
+  // Check if there are any sub systems
+  if (dofmap.num_sub_dofmaps() == 0)
+  {
+    error("Unable to extract sub system (there are no sub systems).");
+  }
+
+  // Check the number of available sub systems
+  if (sub_system[0] >= dofmap.num_sub_dofmaps())
+  {
+    error("Unable to extract sub system %d (only %d sub systems defined).",
+          sub_system[0], dofmap.num_sub_dofmaps());
+  }
+
+  // Add to offset if necessary
+  for (uint i = 0; i < sub_system[0]; i++)
+  {
+    ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
+    local_offset += ufc_sub_dofmap->local_dimension();
+    delete ufc_sub_dofmap;
+  }
+
+  // Create sub system
+  ufc::dofmap* sub_dofmap = dofmap.create_sub_dofmap(sub_system[0]);
+
+  // Return sub system if sub sub system should not be extracted
+  if (sub_system.size() == 1) return sub_dofmap;
+
+  // Otherwise, recursively extract the sub sub system
+  Array<uint> sub_sub_system;
+  for (uint i = 1; i < sub_system.size(); i++)
+  {
+    sub_sub_system.push_back(sub_system[i]);
+  }
+  ufc::dofmap* sub_sub_dofmap = DofMap::create_sub_dofmap(*sub_dofmap,
+                                                          sub_sub_system,
+                                                          local_offset);
+  delete sub_dofmap;
+
+  return sub_sub_dofmap;
 }
 
 //-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
                                        ufc::dofmap const& dofmap,
                                        Array<uint> const& sub_system,
-                                       uint& offset)
+                                       uint& global_offset)
 {
   // Check that a sub system has been specified
   if (sub_system.size() == 0)
@@ -209,7 +262,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
     ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
     //Avoid creating a DOLFIN dofmap, just calling the static init_ufc function
     DofMap::init_ufc(ufc_mesh, *ufc_sub_dofmap);
-    offset += ufc_sub_dofmap->global_dimension();
+    global_offset += ufc_sub_dofmap->global_dimension();
     delete ufc_sub_dofmap;
   }
 
@@ -227,7 +280,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
   }
   ufc::dofmap* sub_sub_dofmap = DofMap::create_sub_dofmap(ufc_mesh, *sub_dofmap,
                                                           sub_sub_system,
-                                                          offset);
+                                                          global_offset);
   delete sub_dofmap;
 
   return sub_sub_dofmap;

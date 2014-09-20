@@ -59,19 +59,15 @@ std::string Form::coefficient_name(uint const i) const
 }
 
 //----------------------------------------------------------------------------
-Mesh& Form::coefficient_mesh(uint i) const
-{
-  dolfin_assert(this->check_index(i));
-  return this->coefficients()[i]->mesh();
-}
-
-//----------------------------------------------------------------------------
 FiniteElementSpace * Form::create_space(uint i) const
 {
   ufc::finite_element * test_f = this->form().create_finite_element(i);
   ufc::dofmap * test_d = this->form().create_dofmap(i);
-  return new FiniteElementSpace(this->coefficient_mesh(i), *test_f, *test_d,
-                                true);
+  // For an argument the mesh is the one passed to the form and for coefficient
+  // the mesh passed to the function.
+  Mesh& mesh = (
+      i < this->rank() ? this->mesh() : this->coefficients()[i]->mesh());
+  return new FiniteElementSpace(mesh, *test_f, *test_d, true);
 }
 
 //-----------------------------------------------------------------------------

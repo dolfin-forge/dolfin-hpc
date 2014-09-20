@@ -44,9 +44,6 @@ public:
   /// Return name of argument associated with the given number
   virtual std::string coefficient_name(dolfin::uint i) const;
 
-  /// Return the mesh for the given coefficient index
-  Mesh& coefficient_mesh(uint i) const;
-
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 

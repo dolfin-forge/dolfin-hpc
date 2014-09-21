@@ -16,7 +16,6 @@ nobase_pkginclude_HEADERS = \
 				common/TimeDependent.h\
 				common/Variable.h\
 				elements/ElementLibrary.h\
-				elements/FE.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
 				elements/ffc_Discontinuous_Lagrange_0_1d.h\
 				elements/ffc_Discontinuous_Lagrange_0_2d.h\

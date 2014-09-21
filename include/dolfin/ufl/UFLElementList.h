@@ -7,16 +7,10 @@
 #ifndef  __UFL_ELEMENT_LIST_H_
 #define  __UFL_ELEMENT_LIST_H_
 
-#include <dolfin/ufl/UFLDomain.h>
-#include <dolfin/ufl/UFLFamily.h>
+#include <dolfin/ufl/UFLObject.h>
 
-#include <dolfin/common/types.h>
-#include <dolfin/log/log.h>
-
-#include <iomanip>
 #include <map>
-#include <set>
-#include <sstream>
+#include <string>
 
 namespace ufl
 {
@@ -33,25 +27,49 @@ namespace ufl
  *
  */
 
-class ElementList
+class FiniteElementBase;
+
+class ElementList : protected std::map<Object::repr_t, FiniteElementBase *>
 {
 
+  typedef std::pair<ufl::Object::repr_t, FiniteElementBase *> ElementItem;
+
 public:
-
-  /// Meyers singleton
-  static ElementList const& Supported()
-  {
-    static ElementList instance_;
-    return instance_;
-  }
-
-private:
 
   ///
   ElementList();
 
+  //
+  ElementList(ElementList const &other);
+
   ///
   ~ElementList();
+
+  /// Add element in the list, nothing is done if it is already registered
+  void add(Object::repr_t const& signature);
+
+  /// Check if element is contained in the list
+  bool has(Object::repr_t const& signature) const;
+
+  /// Set the iterator to the begin of the list and return first element
+  /// If the list is empty a null pointer is returned.
+  FiniteElementBase const * first() const;
+
+  /// Set the iterator to the next element
+  FiniteElementBase const * next() const;
+
+  /// Check if the end of the list is reached
+  bool valid() const;
+
+  /// Check the consistency of the list
+  bool check() const;
+
+  /// Display information on the list
+  void disp() const;
+
+private:
+
+  mutable ElementList::const_iterator it_;
 
 };
 

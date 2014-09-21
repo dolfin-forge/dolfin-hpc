@@ -1,16 +1,16 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurélien Larcher, 2014
+//
 // First added:  2007-04-12
-// Last changed: 2007-04-13
+// Last changed: 2014-09-21
 
 #ifndef __ELEMENT_LIBRARY_H
 #define __ELEMENT_LIBRARY_H
 
-#include <dolfin/common/Array.h>
-#include <dolfin/elements/FE.h>
-#include <dolfin/log/log.h>
-#include <dolfin/mesh/CellType.h>
+#include <dolfin/ufl/UFLElementList.h>
+
 #include <ufc.h>
 
 #include <string>
@@ -18,10 +18,11 @@
 namespace dolfin
 {
 
-/// Library of pregenerated finite elements and dof maps.
+/// Library of pre-generated finite elements and dof maps.
 
 class ElementLibrary
 {
+
 public:
 
   /// Create finite element with given signature
@@ -36,17 +37,20 @@ public:
   /// Create dof map with given signature
   static ufc::dofmap* create_dof_map(std::string const signature);
 
-  ///
-  static FE::attributes const get_attributes(const char* signature);
-
-  ///
-  static FE::attributes const get_attributes(std::string const signature);
-
   //---------------------------------------------------------------------------
   /// Table of finite elements
-  typedef std::map<std::string, struct FE::attributes> ElementsTable;
-  typedef std::pair<std::string, struct FE::attributes> ElementsItem;
-  static ElementsTable const Elements;
+
+private:
+
+  static ufl::ElementList const init_elements();
+
+public:
+
+  static ufl::ElementList const& elements()
+  {
+    static ufl::ElementList const list = init_elements();
+    return list;
+  }
 
 };
 

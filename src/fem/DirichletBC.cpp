@@ -93,6 +93,11 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   // Get local data for application of boundary conditions
   FiniteElementSpace const& space = form.trial_space();
 
+  if(form.trial_space() != form.test_space())
+  {
+    error("DirichletBC is implemented only for identical test and trial space");
+  }
+
   // Simple check
   form.check(A,b);
 
@@ -117,8 +122,8 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
     }
 
   // Copy boundary value data to arrays
-  uint* dofs = new uint[boundary_values.size()];
-  real* values = new real[boundary_values.size()];
+  uint * dofs = new uint[boundary_values.size()];
+  real * values = new real[boundary_values.size()];
   _map<uint, real>::const_iterator boundary_value;
   uint i = 0;
   for (boundary_value = boundary_values.begin();
@@ -131,14 +136,17 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   // Modify boundary values for nonlinear problems
   if (x)
   {
-    real* x_values = new real[boundary_values.size()];
+    real * x_values = new real[boundary_values.size()];
     x->get(x_values, boundary_values.size(), dofs);
-    for (uint i = 0; i < boundary_values.size(); i++)
+    for (uint i = 0; i < boundary_values.size(); ++i)
+    {
       values[i] -= x_values[i];
+    }
     delete[] x_values;
   }
 
-  message("Applying boundary conditions to linear system.");
+  message("Applying boundary conditions to linear system: (%d dofs).",
+          boundary_values.size());
 
   // Modify RHS vector (b[i] = value)
   b.set(values, boundary_values.size(), dofs);
@@ -190,7 +198,7 @@ void DirichletBC::initFromMeshFunction(MeshFunction<uint>& sub_domains,
   dolfin_assert(facets_.size() == 0);
 
   // Make sure we have the facet - cell connectivity
-  const uint dim = mesh().topology().dim();
+  uint const dim = mesh().topology().dim();
   mesh().init(dim - 1, dim);
 
   // Make sure the mesh has been ordered
@@ -221,46 +229,48 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
                                        SubSystem const& sub_system)
 {
   // Special case
-    if (facets_.size() == 0)
+  if (facets_.size() == 0)
+  {
+    if(dolfin::MPI::numProcesses() == 1)
     {
-      if(dolfin::MPI::numProcesses() == 1)
       warning("Found no facets matching domain for boundary condition.");
-      return;
     }
+    return;
+  }
 
-    // Iterate over facets
+  // Iterate over facets
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, topological search", facets_.size());
+  Progress p("Computing Dirichlet boundary values, topological search", facets_.size());
 #endif
-    DofMap const& dof_map = space.dofmap();
-    uint * cell_dofs = new uint[dof_map.local_dimension()];
-    ScratchSpace scratch(space, sub_system);
-    for (uint f = 0; f < facets_.size(); f++)
+  DofMap const& dof_map = space.dofmap();
+  uint * cell_dofs = new uint[dof_map.local_dimension()];
+  ScratchSpace scratch(space, sub_system);
+  for (uint f = 0; f < facets_.size(); ++f)
+  {
+    // Get cell number and local facet number
+    uint cell_number = facets_[f].first;
+    uint facet_number = facets_[f].second;
+
+    // Create cell
+    Cell cell(mesh(), cell_number);
+    scratch.cell.update(cell, mesh().distdata());
+
+    // Tabulate dofs on cell for the full space dofmap
+    dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell.index());
+
+    // Interpolate function on cell
+    g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, cell, facet_number);
+
+    // Tabulate which dofs of the subdofmap are on the facet
+    scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, facet_number);
+
+    // Pick values for facet
+    for (uint i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
     {
-      // Get cell number and local facet number
-      uint cell_number = facets_[f].first;
-      uint facet_number = facets_[f].second;
-
-      // Create cell
-      Cell cell(mesh(), cell_number);
-      scratch.cell.update(cell, mesh().distdata());
-
-      // Interpolate function on cell
-      g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, cell, facet_number);
-
-      // Tabulate dofs on cell for the full space dofmap
-      dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell.index());
-
-      // Tabulate which dofs of the subdofmap are on the facet
-      scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, facet_number);
-
-      // Pick values for facet
-      for (uint i = 0; i < scratch.dof_map->num_facet_dofs(); i++)
-      {
-        const uint dof = cell_dofs[scratch.offset + scratch.facet_dofs[i]];
-        const real value = scratch.coefficients[scratch.facet_dofs[i]];
-        boundary_values[dof] = value;
-      }
+      uint const dof = cell_dofs[scratch.offset + scratch.facet_dofs[i]];
+      real const value = scratch.coefficients[scratch.facet_dofs[i]];
+      boundary_values[dof] = value;
+    }
 
 #ifndef NO_PROGRESS_BAR
     p++;
@@ -274,82 +284,85 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
                                      SubSystem const& sub_system)
 {
   // Special case
-    if (facets_.size() == 0 && dolfin::MPI::numProcesses() == 1)
+  if (facets_.size() == 0)
+  {
+    if(dolfin::MPI::numProcesses() == 1)
     {
       warning("Found no facets matching domain for boundary condition.");
-      return;
     }
+    return;
+  }
 
-    // Initialize facets, needed for geometric search
-    message("Computing facets, needed for geometric application of boundary conditions.");
-    uint const tdim = mesh().topology().dim();
-    uint const facet_dim = tdim - 1;
-    mesh().init(facet_dim);
+  // Initialize facets, needed for geometric search
+  message("Computing facets, needed for geometric application of boundary conditions.");
+  uint const tdim = mesh().topology().dim();
+  uint const facet_dim = tdim - 1;
+  mesh().init(facet_dim);
 
-    // Iterate over facets
+  // Iterate over facets
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, geometric search", facets_.size());
+  Progress p("Computing Dirichlet boundary values, geometric search", facets_.size());
 #endif
-    DofMap const& dof_map = space.dofmap();
-    uint * cell_dofs = new uint[dof_map.local_dimension()];
-    ScratchSpace scratch(space, sub_system);
-    CellType& celltype = mesh().type();
-    Point dof_node;
-    for (uint f = 0; f < facets_.size(); ++f)
+  DofMap const& dof_map = space.dofmap();
+  uint * cell_dofs = new uint[dof_map.local_dimension()];
+  ScratchSpace scratch(space, sub_system);
+  CellType * facet_type = mesh().type().create(mesh().type().facetType());
+  Point xdof;
+  for (uint f = 0; f < facets_.size(); ++f)
+  {
+    // Get cell number and local facet number
+    uint cell_number = facets_[f].first;
+    uint facet_number = facets_[f].second;
+
+    // Create facet
+    Cell cell(mesh(), cell_number);
+    Facet facet(mesh(), cell.entities(facet_dim)[facet_number]);
+
+    // Loop the vertices associated with the facet
+    for (VertexIterator vertex(facet); !vertex.end(); ++vertex)
     {
-      // Get cell number and local facet number
-      uint cell_number = facets_[f].first;
-      uint facet_number = facets_[f].second;
-
-      // Create facet
-      Cell cell(mesh(), cell_number);
-      Facet facet(mesh(), cell.entities(facet_dim)[facet_number]);
-
-      // Loop the vertices associated with the facet
-      for (VertexIterator vertex(facet); !vertex.end(); ++vertex)
+      // Loop the cells associated with the vertex
+      for (CellIterator c(*vertex); !c.end(); ++c)
       {
-        // Loop the cells associated with the vertex
-        for (CellIterator c(*vertex); !c.end(); ++c)
+        scratch.cell.update(*c, mesh().distdata());
+        bool interpolated = false;
+
+        // Tabulate dofs on cell for the full space dofmap
+        dof_map.tabulate_dofs(cell_dofs, scratch.cell, c->index());
+
+        // Tabulate coordinates of dofs on cell
+        scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
+
+        // Loop over all dofs on cell
+        for (uint i = 0; i < scratch.local_dimension; ++i)
         {
-          scratch.cell.update(*c, mesh().distdata());
-          bool interpolated = false;
-
-          // Tabulate dofs on cell for the full space dofmap
-          dof_map.tabulate_dofs(cell_dofs, scratch.cell, c->index());
-
-          // Tabulate coordinates of dofs on cell
-          scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
-
-          // Loop over all dofs on cell
-          for (uint i = 0; i < scratch.local_dimension; ++i)
+          // Copy coordinates to node Point
+          std::memcpy(&xdof[0], &scratch.coordinates[i][0], tdim*sizeof(real));
+          // Check if the coordinates are on current facet and thus on boundary
+          if (!facet_type->intersects(facet, xdof))
           {
-            // Copy coordinates to node Point
-            std::memcpy(&dof_node[0], &scratch.coordinates[i][0],
-                        facet_dim*sizeof(real));
-            // Check if the coordinates are on current facet and thus on boundary
-            if (!celltype.intersects(facet, dof_node))
-            {
-              continue;
-            }
-
-            if(!interpolated)
-            {
-              interpolated = true;
-              // Interpolate function on cell for the given (sub)element
-              g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, *c);
-            }
-
-            // Set boundary value
-            const uint dof = cell_dofs[scratch.offset + i];
-            const real value = scratch.coefficients[i];
-            boundary_values[dof] = value;
+            continue;
           }
 
+          if(!interpolated)
+          {
+            interpolated = true;
+            // Interpolate function on cell for the given (sub)element
+            g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, *c);
+          }
+
+          // Set boundary value
+          uint const dof = cell_dofs[scratch.offset + i];
+          real const value = scratch.coefficients[i];
+          boundary_values[dof] = value;
         }
+
       }
     }
-    delete [] cell_dofs;
   }
+  delete facet_type;
+  delete [] cell_dofs;
+}
 //-----------------------------------------------------------------------------
 void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
                                      FiniteElementSpace const& space,
@@ -357,48 +370,48 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
 {
   // Iterate over cells
 #ifndef NO_PROGRESS_BAR
-    Progress p("Computing Dirichlet boundary values, pointwise search", mesh().numCells());
+  Progress p("Computing Dirichlet boundary values, pointwise search", mesh().numCells());
 #endif
-    DofMap const& dof_map = space.dofmap();
-    uint * cell_dofs = new uint[dof_map.local_dimension()];
-    ScratchSpace scratch(space, sub_system);
-    for (CellIterator cell(mesh()); !cell.end(); ++cell)
+  DofMap const& dof_map = space.dofmap();
+  uint * cell_dofs = new uint[dof_map.local_dimension()];
+  ScratchSpace scratch(space, sub_system);
+  for (CellIterator cell(mesh()); !cell.end(); ++cell)
+  {
+    scratch.cell.update(*cell, mesh().distdata());
+
+    // Tabulate dofs on cell
+    dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell->index());
+
+    // Tabulate coordinates of dofs on cell
+    scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
+
+    // Interpolate function only once and only on cells where necessary
+    bool interpolated = false;
+
+    // Loop all dofs on cell
+    for (uint i = 0; i < scratch.local_dimension; ++i)
     {
-      scratch.cell.update(*cell, mesh().distdata());
-
-      // Tabulate dofs on cell
-      dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell->index());
-
-      // Tabulate coordinates of dofs on cell
-      scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
-
-      // Interpolate function only once and only on cells where necessary
-      bool interpolated = false;
-
-      // Loop all dofs on cell
-      for (uint i = 0; i < scratch.local_dimension; ++i)
+      // Check if the coordinates are part of the sub domain
+      if ( !this->sub_domain().inside(scratch.coordinates[i], true) )
       {
-        // Check if the coordinates are part of the sub domain
-        if ( !this->sub_domain().inside(scratch.coordinates[i], false) )
-        {
-          continue;
-        }
-
-        if(!interpolated)
-        {
-          interpolated = true;
-          // Interpolate function on cell
-          g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, *cell);
-        }
-
-        // Set boundary value
-        const uint dof = cell_dofs[scratch.offset + i];
-        const real value = scratch.coefficients[i];
-        boundary_values[dof] = value;
+        continue;
       }
 
+      if(!interpolated)
+      {
+        interpolated = true;
+        // Interpolate function on cell
+        g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, *cell);
+      }
+
+      // Set boundary value
+      const uint dof = cell_dofs[scratch.offset + i];
+      const real value = scratch.coefficients[i];
+      boundary_values[dof] = value;
+    }
+
 #ifndef NO_PROGRESS_BAR
-      p++;
+    p++;
 #endif
   }
   delete [] cell_dofs;

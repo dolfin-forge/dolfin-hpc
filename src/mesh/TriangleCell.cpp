@@ -12,6 +12,7 @@
 //
 
 #include <algorithm>
+#include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
@@ -21,6 +22,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/GeometricPredicates.h>
 #include <dolfin/parameter/parameters.h>
+
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
@@ -386,7 +388,7 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   d3 = orient2d((double *)x2, (double *)x0, x);
 
   // FIXME: Need to check the predicates for correctness
-  real tol = (real) dolfin_get("Geometrical Tolerance Triangle");
+  real tol = DOLFIN_EPS;
   if(d1 < (0.0-tol))
     return false;
   if(d2 < (0.0-tol))

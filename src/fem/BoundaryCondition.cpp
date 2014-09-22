@@ -27,7 +27,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
     sub_domain_index_(0),
     has_geometrical_sub_domain_(true),
     geometrical_sub_domain_(&sub_domain),
-    sub_domain_markers_(),
+    sub_domain_markers_(NULL),
     local_sub_domain_markers_(true),
     sub_system_()
 {
@@ -58,7 +58,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
     sub_domain_index_(0),
     has_geometrical_sub_domain_(true),
     geometrical_sub_domain_(&sub_domain),
-    sub_domain_markers_(),
+    sub_domain_markers_(NULL),
     local_sub_domain_markers_(true),
     sub_system_(sub_system)
 {
@@ -83,8 +83,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
 //-----------------------------------------------------------------------------
 BoundaryCondition::~BoundaryCondition()
 {
-  // Do nothing
-  if(has_geometrical_sub_domain_)
+  if(local_sub_domain_markers_)
   {
     delete sub_domain_markers_;
   }
@@ -98,6 +97,7 @@ void BoundaryCondition::init_markers(uint const entity_dim)
   // Create mesh function for sub domain markers on facets
   dolfin_assert(entity_dim < mesh().topology().dim());
   mesh().init(entity_dim);
+  delete sub_domain_markers_;
   sub_domain_markers_ = new MeshFunction<uint>(mesh_, entity_dim);
 
   // Mark everything as sub domain 1

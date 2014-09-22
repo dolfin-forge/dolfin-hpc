@@ -34,6 +34,12 @@ public:
   /// Destructor
   ~BoundaryMesh();
 
+  /// Return facet index in the mesh associated with the boundary cell
+  uint facet_index(Cell const& boundary_cell);
+
+  /// Return vertex index in the mesh associated with the boundary vertex
+  uint vertex_index(Vertex const& boundary_vertex);
+
 private:
 
 

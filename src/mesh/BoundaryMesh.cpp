@@ -11,6 +11,9 @@
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/BoundaryComputation.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -44,6 +47,18 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
 BoundaryMesh::~BoundaryMesh()
 {
   // Do nothing
+}
+
+//-----------------------------------------------------------------------------
+uint BoundaryMesh::facet_index(Cell const& boundary_cell)
+{
+  return this->data().meshFunction("cell map")->get(boundary_cell);
+}
+
+//-----------------------------------------------------------------------------
+uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex)
+{
+  return this->data().meshFunction("vertex map")->get(boundary_vertex);
 }
 
 }

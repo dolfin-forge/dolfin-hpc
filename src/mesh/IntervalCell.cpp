@@ -85,7 +85,7 @@ void IntervalCell::orderEntities(Cell& cell) const
 }
 //-----------------------------------------------------------------------------
 void IntervalCell::refineCell(Cell& cell, MeshEditor& editor,
-			  uint& current_cell) const
+                              uint& current_cell) const
 {
   // Get vertices and edges
   const uint* v = cell.entities(0);
@@ -198,6 +198,10 @@ bool IntervalCell::intersects(const MeshEntity& interval, const Point& p) const
   }
   else
   {
+#if DEBUG
+    message(2,"Point does not instersect with IntervalCell: "
+              "epsilon = %f", std::abs(v01.norm() - vp0.norm() - vp1.norm()));
+#endif
     return false;
   }
 }

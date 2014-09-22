@@ -508,7 +508,7 @@ uint DofMap::dofsmapping_size() const
 //--------------------------------------------------------------------------
 void DofMap::pretabulate_all_dofs() const
 {
-  delete [] pretabulated_dofmap_;
+  delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
   uint *ip = &pretabulated_dofmap_[0];
   uint const local_dim = this->local_dimension();
@@ -594,8 +594,10 @@ void DofMap::build()
       Array<uint> *ghost_buff = new Array<uint> [pe_size];
       for (MeshGhostIterator iter(dolfin_mesh.distdata(), 0); !iter.end();
           ++iter)
+      {
         ghost_buff[iter.owner()].push_back(
             dolfin_mesh.distdata().get_vertex_global(iter.index()));
+      }
 
       MPI_Status status;
       Array<uint> send_buff;
@@ -691,7 +693,7 @@ void DofMap::build()
       _map<uint, uint> dof_vote;
       _map<uint, std::vector<uint> > dof2index;
 
-      uint local_dim = ufc_dofmap_->local_dimension();
+      uint const local_dim = ufc_dofmap_->local_dimension();
       pretabulated_dofmap_ = new uint[local_dim * mesh().numCells()];
       uint * dofs = new uint[local_dimension()];
       uint * facet_dofs = new uint[num_facet_dofs()];
@@ -728,7 +730,7 @@ void DofMap::build()
           if (shared_dofs.find(dofidx) == shared_dofs.end())
           {
             shared_dofs.insert(dofidx);
-            dof_vote[dofidx] = (uint) rand() + (uint) MPI::processNumber();
+            dof_vote[dofidx] = (uint) rand();
             send_buffer.push_back(dofidx);
             send_buffer.push_back(dof_vote[dofidx]);
           }
@@ -759,7 +761,9 @@ void DofMap::build()
           if (shared_dofs.find(recv_buffer[i]) != shared_dofs.end())
           {
             // Move dofs with higher ownership votes from shared to forbidden
-            if (recv_buffer[i + 1] < dof_vote[recv_buffer[i]])
+            if (recv_buffer[i + 1] < dof_vote[recv_buffer[i]]
+                || (recv_buffer[i + 1] == dof_vote[recv_buffer[i]]
+                    && (src < rank)))
             {
               forbidden_dofs.insert(recv_buffer[i]);
               shared_dofs.erase(recv_buffer[i]);
@@ -805,7 +809,9 @@ void DofMap::build()
       {
         for(std::vector<uint>::iterator di = dof2index[*it].begin();
         di != dof2index[*it].end(); ++di)
-        pretabulated_dofmap_[*di] = offset;
+        {
+          pretabulated_dofmap_[*di] = offset;
+        }
 
         if (shared_dofs.find(*it) != shared_dofs.end())
         {
@@ -838,7 +844,9 @@ void DofMap::build()
             for (std::vector<uint>::iterator di =
                 dof2index[recv_buffer[i]].begin();
                 di != dof2index[recv_buffer[i]].end(); ++di)
+            {
               pretabulated_dofmap_[*di] = recv_buffer[i + 1];
+            }
           }
         }
       }
@@ -847,6 +855,17 @@ void DofMap::build()
       delete[] facet_dofs;
       delete[] dofs;
     }
+
+#if DEBUG
+    // The sum of the local sizes should be the global size
+    uint loc_s = local_size_;
+    uint glb_s = 0;
+    MPI_Allreduce(&loc_s, &glb_s, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    if(glb_s != global_dimension())
+    {
+      error("The sum of local dofmap sizes is not equal to the global dimension.");
+    }
+#endif
 
 #endif
   }

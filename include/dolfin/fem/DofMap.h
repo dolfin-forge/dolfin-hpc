@@ -177,6 +177,9 @@ public:
   /// Tabulate the local-to-global mapping of dofs on a cell
   void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
 
+  /// Extract sub dof map
+  ufc::dofmap* create_sub_dofmap(Array<uint> const& sub_system) const;
+
   /// Extract sub dof map and compute the offset local to the reference element
   ufc::dofmap* create_sub_dofmap(Array<uint> const& sub_system,
                                  uint& local_offset) const;

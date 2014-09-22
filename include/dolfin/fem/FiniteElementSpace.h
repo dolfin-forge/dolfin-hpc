@@ -23,6 +23,7 @@ class DofMap;
 class Form;
 class Mesh;
 class SubFunction;
+class SubSystem;
 
 /**
  *  DOCUMENTATION:
@@ -57,7 +58,10 @@ public:
                               ufl::FiniteElementBase const& element);
 
   /// Create a finite element space from ith subspace of given space
-  FiniteElementSpace(FiniteElementSpace const& space, uint const& i);
+  FiniteElementSpace(FiniteElementSpace const& space, uint const i);
+
+  /// Create a finite element space from given subspace
+  FiniteElementSpace(FiniteElementSpace const& space, SubSystem const& sub);
 
   /// Create space similar to specified but on another mesh
   FiniteElementSpace(Mesh& other_mesh, FiniteElementSpace const& space);

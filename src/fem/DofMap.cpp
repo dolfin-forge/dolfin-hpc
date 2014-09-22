@@ -161,6 +161,22 @@ void DofMap::release(DofMap& dofmap)
 }
 
 //-----------------------------------------------------------------------------
+ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
+{
+  // Reset offset
+  uint local_offset = 0;
+
+  // Recursively extract sub dof map
+  ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
+                                                      local_offset);
+  message(0, "Extracted ufc dof map for sub system: %s",
+          sub_dofmap->signature());
+  message(0, "Local offset for sub system: %d", local_offset);
+
+  return sub_dofmap;
+}
+
+//-----------------------------------------------------------------------------
 ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
                                        uint& local_offset) const
 {

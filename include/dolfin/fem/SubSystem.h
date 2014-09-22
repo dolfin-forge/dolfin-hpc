@@ -53,7 +53,8 @@ namespace dolfin
     Array<uint> const& array() const;
 
     /// Cast
-    operator Array<uint>() { return sub_system; }
+    operator Array<uint>&() { return sub_system; }
+    operator Array<uint> const&() const { return sub_system; }
 
 
   private:

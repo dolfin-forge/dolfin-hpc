@@ -8,6 +8,7 @@
 
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/SubSystem.h>
 
 #include <cstring>
 
@@ -57,13 +58,28 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
-                                       uint const& i) :
+                                       uint const i) :
     mesh_(space.mesh()),
     cell_(space.cell()),
     finite_element_(space.element(), i),
     dof_map_(
         DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(i),
                         true)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
+{
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
+                                       SubSystem const& sub) :
+    mesh_(space.mesh()),
+    cell_(space.cell()),
+    finite_element_(space.element(), sub),
+    dof_map_(
+        DofMap::acquire(space.mesh(),
+                        *space.dofmap().create_sub_dofmap(sub), true)),
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))

@@ -29,18 +29,18 @@ SubSystem::SubSystem(uint sub_system, uint sub_sub_system)
   this->sub_system.push_back(sub_sub_system);
 }
 //-----------------------------------------------------------------------------
-SubSystem::SubSystem(const Array<uint>& sub_system) :
+SubSystem::SubSystem(Array<uint> const& sub_system) :
     sub_system(sub_system)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SubSystem::SubSystem(const SubSystem& sub_system)
+SubSystem::SubSystem(SubSystem const& sub_system)
 {
   this->sub_system = sub_system.sub_system;
 }
 //-----------------------------------------------------------------------------
-const SubSystem& SubSystem::operator=(const SubSystem& sub_system)
+SubSystem const& SubSystem::operator=(SubSystem const& sub_system)
 {
   this->sub_system = sub_system.sub_system;
   return *this;
@@ -51,5 +51,9 @@ uint SubSystem::depth() const
   return sub_system.size();
 }
 //-----------------------------------------------------------------------------
+Array<uint> const& SubSystem::array() const
+{
+  return sub_system;
+}
 
 }

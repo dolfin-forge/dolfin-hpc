@@ -38,20 +38,23 @@ namespace dolfin
     SubSystem(uint sub_system, uint sub_sub_system);
 
     /// Create sub system for given array (n levels)
-    SubSystem(const Array<uint>& sub_system);
+    SubSystem(Array<uint> const& sub_system);
 
     /// Copy constructor
-    SubSystem(const SubSystem& sub_system);
+    SubSystem(SubSystem const& sub_system);
 
     /// Assignment operator
-    const SubSystem& operator= (const SubSystem& sub_system);
+    SubSystem const& operator= (SubSystem const& sub_system);
 
     /// Return number of levels for nested sub system
     uint depth() const;
 
     /// Return array which defines sub system
-    const Array<uint>& array() const
-    { return sub_system; }
+    Array<uint> const& array() const;
+
+    /// Cast
+    operator Array<uint>() { return sub_system; }
+
 
   private:
 

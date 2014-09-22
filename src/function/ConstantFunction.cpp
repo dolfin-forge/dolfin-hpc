@@ -12,6 +12,8 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/function/ConstantFunction.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 
@@ -43,17 +45,17 @@ ConstantFunction::ConstantFunction(Mesh& mesh, real value) :
     shape(0),
     size(1)
 {
-  values = new real[1];
   shape = new uint[1];
-  values[0] = value;
   shape[0] = 1;
+  values = new real[1];
+  values[0] = value;
 }
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value) :
     GenericFunction(mesh),
     values(0),
-    value_rank(1),
+    value_rank((size > 1 ? 1 : 0)),
     shape(0),
     size(size)
 {
@@ -67,46 +69,59 @@ ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value) :
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& _values) :
+ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& some_values) :
     GenericFunction(mesh),
     values(0),
-    value_rank(1),
+    value_rank((some_values.size() > 1 ? 1 : 0)),
     shape(0),
-    size(0)
+    size(some_values.size())
 {
-  size = _values.size();
+  if (some_values.empty())
+  {
+    error("Constant function instantiation from an empty array of values.");
+  }
   shape = new uint[1];
   shape[0] = size;
   values = new real[size];
   for (uint i = 0; i < size; i++)
   {
-    values[i] = _values[i];
+    values[i] = some_values[i];
   }
 }
 
 //-----------------------------------------------------------------------------
-ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& _shape,
-                                   const Array<real>& _values) :
+ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& some_shape,
+                                   const Array<real>& some_values) :
     GenericFunction(mesh),
     values(0),
     value_rank(0),
     shape(0),
     size(0)
 {
-  value_rank = _shape.size();
+  if (some_values.empty())
+  {
+    error("Constant function instantiation from an empty array of values.");
+  }
+  if (some_shape.empty())
+  {
+    error("Constant function instantiation from an empty value_shape.");
+  }
+  value_rank = some_shape.size();
   shape = new uint[value_rank];
   size = 1;
   for (uint i = 0; i < value_rank; i++)
   {
-    shape[i] = _shape[i];
+    shape[i] = some_shape[i];
     size *= shape[i];
   }
-  if (size != _values.size())
-    error("Size of given values does not match shape.");
+  if (size != some_values.size())
+  {
+    error("Size of values does not match value shape of constant function.");
+  }
   values = new real[size];
   for (uint i = 0; i < size; i++)
   {
-    values[i] = _values[i];
+    values[i] = some_values[i];
   }
 }
 
@@ -127,14 +142,16 @@ dolfin::uint ConstantFunction::rank() const
 dolfin::uint ConstantFunction::dim(uint i) const
 {
   if (i > value_rank)
-    error("Too large dimension in dim.");
+  {
+    error("Too large dimension in dim requested to constant function.");
+  }
   return shape[i];
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::interpolate_vertex_values(real* _values) const
+void ConstantFunction::interpolate_vertex_values(real* v) const
 {
-  dolfin_assert(_values);
+  dolfin_assert(v);
 
   // Set all vertex values to the constant tensor value
   uint const num_verts = mesh_.numVertices();
@@ -143,7 +160,7 @@ void ConstantFunction::interpolate_vertex_values(real* _values) const
     for (uint j = 0; j < size; ++j)
     {
       uint k = i * size + j;
-      _values[k] = values[j];
+      v[k] = values[j];
     }
   }
 }
@@ -159,12 +176,9 @@ void ConstantFunction::interpolate(real* coefficients, const ufc::cell& cell,
   // TODO: Slow to do this for every element, should probably remove later
   dolfin_assert(value_rank == finite_element.value_rank());
   for (uint i = 0; i < value_rank; i++)
+  {
     dolfin_assert(shape[i] == finite_element.value_dimension(i));
-
-  // UFC 1.0 version:
-  // Evaluate each dof to get coefficients for nodal basis expansion
-//  for (uint i = 0; i < finite_element.space_dimension(); i++)
-//    coefficients[i] = finite_element.evaluate_dof(i, *this, cell);
+  }
 
   // UFC 1.1 version:
   /// Evaluate linear functionals for all dofs on the function f
@@ -172,21 +186,20 @@ void ConstantFunction::interpolate(real* coefficients, const ufc::cell& cell,
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::eval(real* _values, const real* x) const
+void ConstantFunction::eval(real* v, const real* x) const
 {
-  dolfin_assert(_values);
+  dolfin_assert(v);
 
   // Set all values to the constant tensor value
-  for (uint i = 0; i < size; i++)
-    _values[i] = values[i];
+  std::memcpy(&v[0], &values[0], sizeof(real) * size);
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::evaluate(real* _values, const real* coordinates,
+void ConstantFunction::evaluate(real* v, const real* coordinates,
                                 const ufc::cell& cell) const
 {
   // Call eval(), cell ignored
-  eval(_values, coordinates);
+  eval(v, coordinates);
 }
 
 //-----------------------------------------------------------------------------

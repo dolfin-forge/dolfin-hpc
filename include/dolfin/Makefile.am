@@ -15,6 +15,7 @@ nobase_pkginclude_HEADERS = \
 				common/Timer.h\
 				common/TimeDependent.h\
 				common/Variable.h\
+				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
 				elements/ffc_Discontinuous_Lagrange_0_1d.h\
@@ -42,6 +43,7 @@ nobase_pkginclude_HEADERS = \
 				elements/ffc_Lagrange_2_2dVector.h\
 				elements/ffc_Lagrange_2_3d.h\
 				elements/ffc_Lagrange_2_3dVector.h\
+				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\
 				fem/BoundaryCondition.h\

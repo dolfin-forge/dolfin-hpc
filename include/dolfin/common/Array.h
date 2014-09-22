@@ -41,35 +41,35 @@ namespace dolfin
     /// Create array containing two elements
     Array(const T& t0, const T& t1)
     {
-      push_back(t0);
-      push_back(t1);
+      this->push_back(t0);
+      this->push_back(t1);
     }
 
     /// Create array containing three elements
     Array(const T& t0, const T& t1, const T& t2)
     {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
+      this->push_back(t0);
+      this->push_back(t1);
+      this->push_back(t2);
     }
 
     /// Create array containing four elements
     Array(const T& t0, const T& t1, const T& t2, const T& t3)
     {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
-      push_back(t3);
+      this->push_back(t0);
+      this->push_back(t1);
+      this->push_back(t2);
+      this->push_back(t3);
     }
 
     /// Create array containing five elements
     Array(const T& t0, const T& t1, const T& t2, const T& t3, const T& t4)
     {
-      push_back(t0);
-      push_back(t1);
-      push_back(t2);
-      push_back(t3);
-      push_back(t4);
+      this->push_back(t0);
+      this->push_back(t1);
+      this->push_back(t2);
+      this->push_back(t3);
+      this->push_back(t4);
     }
 
     /// Copy constructor

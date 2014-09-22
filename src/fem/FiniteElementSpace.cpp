@@ -104,6 +104,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& other) :
 FiniteElementSpace::~FiniteElementSpace()
 {
   DofMap::release(dof_map_);
+  delete ufl_;
 }
 
 //-----------------------------------------------------------------------------

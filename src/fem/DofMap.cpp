@@ -508,14 +508,14 @@ uint DofMap::dofsmapping_size() const
 //--------------------------------------------------------------------------
 void DofMap::pretabulate_all_dofs() const
 {
-  CellIterator ref_cell(mesh());
-  UFCCell ufc_cell(*ref_cell);
-  uint const local_dim = this->local_dimension();
-
+  delete [] pretabulated_dofmap_;
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
   uint *ip = &pretabulated_dofmap_[0];
+  uint const local_dim = this->local_dimension();
   MeshDistributedData& distdata = mesh().distdata();
-  for (CellIterator cell(mesh()); !cell.end(); ++cell)
+  CellIterator cell(mesh());
+  UFCCell ufc_cell(*cell);
+  for (; !cell.end(); ++cell)
   {
     // cell indices for real valued function
     ufc_cell.update(*cell, distdata);
@@ -538,7 +538,6 @@ void DofMap::build()
   {
 #ifdef HAVE_MPI
     Mesh& dolfin_mesh = mesh();
-    uint *dofs = new uint[local_dimension()];
 
     uint pe_size = MPI::numProcesses();
     uint rank = MPI::processNumber();
@@ -686,13 +685,16 @@ void DofMap::build()
           "cell map");
 
       std::vector<uint> send_buffer;
-      _set<uint> shared_dofs, forbidden_dofs, owned_dofs;
+      _set<uint> shared_dofs;
+      _set<uint> forbidden_dofs;
+      _set<uint> owned_dofs;
       _map<uint, uint> dof_vote;
       _map<uint, std::vector<uint> > dof2index;
 
-      uint n = local_dimension();
-      pretabulated_dofmap_ = new uint[n * mesh().numCells()];
-      uint *facet_dofs = new uint[num_facet_dofs()];
+      uint local_dim = ufc_dofmap_->local_dimension();
+      pretabulated_dofmap_ = new uint[local_dim * mesh().numCells()];
+      uint * dofs = new uint[local_dimension()];
+      uint * facet_dofs = new uint[num_facet_dofs()];
 
       Cell c_tmp(dolfin_mesh, 1);
       UFCCell ufc_cell(c_tmp);
@@ -773,7 +775,7 @@ void DofMap::build()
       {
         ufc_cell.update(*c, dolfin_mesh.distdata());
         ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
-        for (uint i = 0; i < n; i++)
+        for (uint i = 0; i < local_dim; i++)
         {
           if (forbidden_dofs.find(dofs[i]) == forbidden_dofs.end())
           {
@@ -782,7 +784,7 @@ void DofMap::build()
           }
 
           // Create mapping from dof to dofmap offset
-          dof2index[dofs[i]].push_back(c->index() * n + i);
+          dof2index[dofs[i]].push_back(c->index() * local_dim + i);
         }
       }
 
@@ -843,8 +845,8 @@ void DofMap::build()
       delete[] recv_buffer;
       map.clear();
       delete[] facet_dofs;
+      delete[] dofs;
     }
-    delete[] dofs;
 
 #endif
   }

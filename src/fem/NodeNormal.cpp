@@ -96,8 +96,6 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
   {
     return;
   }
-  MeshFunction<uint> * cell_map = boundary.data().meshFunction("cell map");
-  MeshFunction<uint> * vertex_map = boundary.data().meshFunction("vertex map");
 
   //---------------------------------------------------------------------------
   MeshDistributedData & distdata = mesh.distdata();
@@ -133,7 +131,7 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
   // Mark facets in the subdomain based on dofs, naive implementation
   for (CellIterator b_cell(boundary); !b_cell.end(); ++b_cell)
   {
-    Facet facet(mesh, cell_map->get(*b_cell));
+    Facet facet(mesh, boundary.facet_index(*b_cell));
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint local_facet = cell.index(facet);
 
@@ -227,7 +225,8 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
           it->second->facets.push_back(data);
         }
       }
-    } dolfin_assert(!data->nodes.empty());
+    }
+    dolfin_assert(!data->nodes.empty());
     facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
   }
 
@@ -248,7 +247,7 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
         ++boundary_vertex)
     {
-      uint vertex_idx = vertex_map->get(*boundary_vertex);
+      uint vertex_idx = boundary.vertex_index(*boundary_vertex);
       if (!mesh.distdata().is_shared(vertex_idx, 0))
       {
         continue;

@@ -699,8 +699,6 @@ void DofMap::build()
     {
       type_ = generic;
       BoundaryMesh interior_boundary(dolfin_mesh, BoundaryMesh::interior);
-      MeshFunction<uint>* cell_map = interior_boundary.data().meshFunction(
-          "cell map");
 
       std::vector<uint> send_buffer;
       _set<uint> shared_dofs;
@@ -730,7 +728,7 @@ void DofMap::build()
       // Decide ownership of shared dofs
       for (CellIterator bc(interior_boundary); !bc.end(); ++bc)
       {
-        Facet f(dolfin_mesh, cell_map->get(*bc));
+        Facet f(dolfin_mesh, interior_boundary.facet_index(*bc));
         Cell c(dolfin_mesh, f.entities(dolfin_mesh.topology().dim())[0]);
 
         uint local_facet = c.index(f);

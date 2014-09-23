@@ -100,6 +100,9 @@ void ScratchSpace::init()
   for (uint i = 0; i < local_dimension; ++i)
   {
     coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
+		coordinates[i][0] = 0.0;
+		coordinates[i][1] = 0.0;
+		coordinates[i][2] = 0.0;
   }
 }
 

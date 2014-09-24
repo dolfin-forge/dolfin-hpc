@@ -12,7 +12,7 @@
 #ifdef HAVE_JANPACK_MPI
 #define jp_mat_type jp_mat_t
 #else
-#define char
+#define jp_mat_type char
 #endif
 
 #include <janpack/mat.h>

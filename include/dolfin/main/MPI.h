@@ -14,13 +14,13 @@
 
 #ifdef HAVE_MPI
 #include <mpi.h>
-#endif 
+#endif
 
 #include <dolfin/common/types.h>
 
 namespace dolfin
 {
-  /// This class provides utility functions for easy access of the number of 
+  /// This class provides utility functions for easy access of the number of
   /// processes and current process number.
 
   class Mesh;
@@ -37,7 +37,7 @@ namespace dolfin
 
     /// Start MPI timer
     static void startTimer();
-    
+
     /// Start MPI timer with external counter;
     static void startTimer(dolfin::real& stime);
 
@@ -59,7 +59,11 @@ namespace dolfin
     static int DOLFIN_COMM;
 #endif
 
+    /// Return seed value for current rank
+    static uint seed();
+
   private:
+
     static dolfin::real start_time;
     static int this_process, num_processes;
     static bool _this_process, _num_processes;

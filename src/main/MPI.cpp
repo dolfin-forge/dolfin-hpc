@@ -14,6 +14,7 @@
 #include <dolfin/main/SubSystemsManager.h>
 #include <dolfin/main/MPI.h>
 #include <cstring>
+#include <ctime>
 
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
@@ -67,9 +68,9 @@ dolfin::real dolfin::MPI::stopTimer(real& stime)
 //-----------------------------------------------------------------------------
 void dolfin::MPI::initComm()
 {
-  if(_dolfin_comm) 
+  if(_dolfin_comm)
     return;
-  
+
   MPI_Comm_dup(MPI_COMM_WORLD, &DOLFIN_COMM);
   _dolfin_comm = true;
 }
@@ -84,7 +85,7 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   short *neigh = new short[nnodes];
 
   memset(neigh, 0, nnodes * sizeof(short));
-  for (MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it) 
+  for (MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it)
     neigh[it.owner()] = 1;
 
   MPI_Status status;
@@ -95,13 +96,13 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   {
     src = (processNumber() - i + numProcesses()) % numProcesses();
     dest = (processNumber() + i ) % numProcesses();
-    
-    MPI_Sendrecv(&neigh[dest], 1, MPI_SHORT, dest, 0, 
+
+    MPI_Sendrecv(&neigh[dest], 1, MPI_SHORT, dest, 0,
 		 &recv, 1, MPI_SHORT, src, 0,  DOLFIN_COMM, &status);
-    neigh[src] |= recv;  
+    neigh[src] |= recv;
   }
 
-  int degree = 0;   
+  int degree = 0;
   for (int i = 0; i < nnodes; i++)
     degree += neigh[i];
   dolfin_assert(degree < (nnodes - 1));
@@ -119,18 +120,18 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
       edges[j++] = i ;
     if( j >= index[processNumber()] ) break;
   }
-  
+
   int *displs =  new int[nnodes];
   offset -= degree;
   MPI_Allgather(&offset, 1, MPI_INT, displs, 1, MPI_INT, DOLFIN_COMM);
-  
-  int *recvcount = new int[nnodes];  
+
+  int *recvcount = new int[nnodes];
   recvcount[0] = index[0];
   for (int i = 1; i < nnodes; i++)
     recvcount[i] = index[i] - index[i - 1];
 
   MPI_Allgatherv(&edges[(processNumber() > 0 ? index[processNumber() - 1] : 0)],
-		 recvcount[processNumber()], MPI_INT, 
+		 recvcount[processNumber()], MPI_INT,
 		 edges, recvcount, displs, MPI_INT, DOLFIN_COMM);
 
   MPI_Comm TMP_COMM;
@@ -138,9 +139,9 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
     MPI_Comm_dup(DOLFIN_COMM, &TMP_COMM);
   else
     MPI_Comm_dup(MPI_COMM_WORLD, &TMP_COMM);
-  
 
-  MPI_Graph_create(TMP_COMM, nnodes, index, edges, 1, &DOLFIN_COMM); 
+
+  MPI_Graph_create(TMP_COMM, nnodes, index, edges, 1, &DOLFIN_COMM);
 
   delete[] recvcount;
   delete[] displs;
@@ -155,7 +156,7 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   int *process_map = new int[nnodes];
   process_map[old_rank] = this_process;
   MPI_Allgather(&process_map[old_rank], 1, MPI_INT,process_map , 1, MPI_INT, TMP_COMM);
-  
+
   for (int i = 0; i < nnodes; i++)
   {
     if (process_map[i] != i)
@@ -194,3 +195,10 @@ dolfin::uint dolfin::MPI::numProcesses()
 //-----------------------------------------------------------------------------
 
 #endif
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::seed()
+{
+  static dolfin::uint s = std::time(0) + dolfin::MPI::processNumber();
+  return s;
+}
+

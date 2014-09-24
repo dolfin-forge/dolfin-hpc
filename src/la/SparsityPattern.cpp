@@ -22,7 +22,9 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern(uint M, uint N) : range(0), blocked(false)
+SparsityPattern::SparsityPattern(uint M, uint N) :
+    range(0),
+    blocked(false)
 {
   uint dims[2];
   dims[0] = M;
@@ -30,7 +32,9 @@ SparsityPattern::SparsityPattern(uint M, uint N) : range(0), blocked(false)
   init(2, dims);
 }
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern(uint M) : range(0), blocked(false)
+SparsityPattern::SparsityPattern(uint M) :
+    range(0),
+    blocked(false)
 {
   uint dims[2];
   dims[0] = M;
@@ -38,7 +42,8 @@ SparsityPattern::SparsityPattern(uint M) : range(0), blocked(false)
   init(1, dims);
 }
 //-----------------------------------------------------------------------------
-SparsityPattern::SparsityPattern() : range(0)
+SparsityPattern::SparsityPattern() :
+    range(0)
 {
   dim[0] = 0;
   dim[1] = 0;
@@ -48,16 +53,17 @@ SparsityPattern::SparsityPattern() : range(0)
 //-----------------------------------------------------------------------------
 SparsityPattern::~SparsityPattern()
 {
-  if(range)
-    delete [] range;
+  if (range) delete[] range;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::init(uint rank, const uint* dims)
 {
   dolfin_assert(rank <= 2);
   dim[0] = dim[1] = 0;
-  for (uint i = 0; i < rank; ++i) 
+  for (uint i = 0; i < rank; ++i)
+  {
     dim[i] = dims[i];
+  }
   sparsity_pattern.clear();
   //  sparsity_pattern.resize(dim[0]);
 }
@@ -67,48 +73,61 @@ void SparsityPattern::pinit(uint rank, const uint* dims)
   dolfin_assert(rank <= 2);
   dim[0] = dim[1] = 0;
   for (uint i = 0; i < rank; ++i)
+  {
     dim[i] = dims[i];
+  }
   sparsity_pattern.clear();
   //  sparsity_pattern.resize(dim[0]);
   o_sparsity_pattern.clear();
   //  o_sparsity_pattern.resize(dim[0]);
-  initRange(); 
+  initRange();
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::insert(uint m, const uint* rows, uint n, const uint* cols)
-{ 
+{
   for (uint i = 0; i < m; ++i)
+  {
     for (uint j = 0; j < n; ++j)
+    {
       sparsity_pattern[rows[i]].insert(cols[j]);
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
-{ 
+{
   uint process = dolfin::MPI::processNumber();
 
-  for (unsigned int i = 0; i<num_rows[0];++i)
+  for (unsigned int i = 0; i < num_rows[0]; ++i)
   {
     const uint global_row = rows[0][i];
     // If not in a row "owned" by this processor
-    if(global_row < range[process] || global_row >= range[process+1]) {
+    if (global_row < range[process] || global_row >= range[process + 1])
+    {
 
       off_processor.push_back(global_row);
       off_processor.push_back(num_rows[1]);
       for (uint j = 0; j < num_rows[1]; j++)
-	off_processor.push_back(rows[1][j]);
+      {
+        off_processor.push_back(rows[1][j]);
+      }
 
       continue;
     }
 
-    for (unsigned int j = 0; j<num_rows[1];++j)
+    for (unsigned int j = 0; j < num_rows[1]; ++j)
     {
       const uint global_col = rows[1][j];
       // On the off-diagonal
-      if(global_col < range[process] || global_col >= range[process+1])
+      if (global_col < range[process] || global_col >= range[process + 1])
+      {
         o_sparsity_pattern[rows[0][i]].insert(rows[1][j]);
+      }
       // On the diagonal
       else
+      {
         sparsity_pattern[rows[0][i]].insert(rows[1][j]);
+      }
     }
   }
 
@@ -117,20 +136,21 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
 dolfin::uint SparsityPattern::size(uint n) const
 {
   dolfin_assert(n < 2);
-  if(MPI::numProcesses() > 1)
+  if (MPI::numProcesses() > 1)
+  {
     return (range[MPI::processNumber() + 1] - range[MPI::processNumber()]);
-  else
-    return dim[n]; 
+  }
+  else return dim[n];
 
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
 {
-  if ( dim[1] == 0 )
-    error("Non-zero entries per row can be computed for matrices only.");
+  if (dim[1] == 0) error(
+      "Non-zero entries per row can be computed for matrices only.");
 
-  if ( sparsity_pattern.size() == 0 )
-    error("Sparsity pattern has not been computed.");
+  if (sparsity_pattern.size() == 0) error(
+      "Sparsity pattern has not been computed.");
 
   // Compute number of nonzeros per row
 #if __SUNPRO_CC
@@ -138,40 +158,50 @@ void SparsityPattern::numNonZeroPerRow(uint nzrow[]) const
 #else
   std::map<const uint, std::set<int> >::const_iterator set;
 #endif
-  for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
-    nzrow[set->first - sparsity_pattern.begin()->first ] = set->second.size();
+  for (set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
+    nzrow[set->first - sparsity_pattern.begin()->first] = set->second.size();
 
 }
 //-----------------------------------------------------------------------------
-void SparsityPattern::numNonZeroPerRow(uint process_number, uint d_nzrow[], uint o_nzrow[]) const
+void SparsityPattern::numNonZeroPerRow(uint process_number, uint d_nzrow[],
+                                       uint o_nzrow[]) const
 {
-  if ( dim[1] == 0 )
+  if (dim[1] == 0)
+  {
     error("Non-zero entries per row can be computed for matrices only.");
+  }
 
-  if ( sparsity_pattern.size() == 0 )
-    error("Sparsity pattern has not been computed.");
-#if __SUNPRO_CC 
+  if (sparsity_pattern.size() == 0) error(
+      "Sparsity pattern has not been computed.");
+#if __SUNPRO_CC
   std::map<uint, std::set<int> >::const_iterator it;
 #else
   std::map<const uint, std::set<int> >::const_iterator it;
 #endif
   // Compute number of nonzeros per row diagonal and off-diagonal
   uint offset = range[process_number];
-  for(uint i=0; i+offset<range[process_number+1]; ++i)
+  for (uint i = 0; i + offset < range[process_number + 1]; ++i)
   {
 
-    it = sparsity_pattern.find(i+offset);
-    if(it != sparsity_pattern.end())
+    it = sparsity_pattern.find(i + offset);
+    if (it != sparsity_pattern.end())
+    {
       d_nzrow[i] = it->second.size();
+    }
     else
+    {
       d_nzrow[i] = 0;
-    it = o_sparsity_pattern.find(i+offset);
-    if(it != o_sparsity_pattern.end())
+    }
+    it = o_sparsity_pattern.find(i + offset);
+    if (it != o_sparsity_pattern.end())
+    {
       o_nzrow[i] = it->second.size();
+    }
     else
+    {
       o_nzrow[i] = 0;
+    }
 
-    
     //    d_nzrow[i] = sparsity_pattern[i+offset].size();
     //    o_nzrow[i] = o_sparsity_pattern[i+offset].size();
   }
@@ -179,20 +209,20 @@ void SparsityPattern::numNonZeroPerRow(uint process_number, uint d_nzrow[], uint
 //-----------------------------------------------------------------------------
 dolfin::uint SparsityPattern::numNonZero() const
 {
-  if ( dim[1] == 0 )
-    error("Total non-zeros entries can be computed for matrices only.");
+  if (dim[1] == 0) error(
+      "Total non-zeros entries can be computed for matrices only.");
 
-  if ( sparsity_pattern.size() == 0 )
-    error("Sparsity pattern has not been computed.");
+  if (sparsity_pattern.size() == 0) error(
+      "Sparsity pattern has not been computed.");
 
   // Compute total number of nonzeros per row
   uint nz = 0;
-#if __SUNPRO_CC 
-  std::map<uint,  std::set<int> >::const_iterator set;
+#if __SUNPRO_CC
+  std::map<uint, std::set<int> >::const_iterator set;
 #else
-  std::map<const uint,  std::set<int> >::const_iterator set;
+  std::map<const uint, std::set<int> >::const_iterator set;
 #endif
-  for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
+  for (set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
     nz += set->second.size();
   return nz;
 
@@ -200,22 +230,22 @@ dolfin::uint SparsityPattern::numNonZero() const
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::disp() const
-{ 
+{
   /*
-  if ( dim[1] == 0 )
-    warning("Only matrix sparsity patterns can be displayed.");
+   if ( dim[1] == 0 )
+   warning("Only matrix sparsity patterns can be displayed.");
 
-  std::vector< _set<int> >::const_iterator set;
-  _set<int>::const_iterator element;
-  
-  for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
-  {
-    cout << "Row " << endl;
-    for(element = set->begin(); element != set->end(); ++element)
-      cout << *element << " ";
-    cout << endl;
-  } 
-  */ 
+   std::vector< _set<int> >::const_iterator set;
+   _set<int>::const_iterator element;
+
+   for(set = sparsity_pattern.begin(); set != sparsity_pattern.end(); ++set)
+   {
+   cout << "Row " << endl;
+   for(element = set->begin(); element != set->end(); ++element)
+   cout << *element << " ";
+   cout << endl;
+   }
+   */
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::processRange(uint process_number, uint local_range[])
@@ -232,35 +262,38 @@ dolfin::uint SparsityPattern::numLocalRows(uint process_number) const
 void SparsityPattern::initRange()
 {
   uint num_procs = dolfin::MPI::numProcesses();
-  range = new uint[num_procs+1];
+  range = new uint[num_procs + 1];
   range[0] = 0;
-  
-  for(uint p=0; p<num_procs; ++p)
-    range[p+1] = range[p] + dim[0]/num_procs + ((dim[0]%num_procs) > p ? 1 : 0);
+
+  for (uint p = 0; p < num_procs; ++p)
+  {
+    range[p + 1] = range[p] + dim[0] / num_procs
+        + ((dim[0] % num_procs) > p ? 1 : 0);
+  }
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::initRange(uint num_local)
 {
 
-  if(range)
-    delete[] range;
+  if (range) delete[] range;
 
   uint num_procs = dolfin::MPI::numProcesses();
-  range = new uint[num_procs+1];
+  range = new uint[num_procs + 1];
   range[0] = 0;
 
-
-  uint *local= new uint[num_procs];
+  uint *local = new uint[num_procs];
   local[dolfin::MPI::processNumber()] = num_local;
 
-#ifdef HAVE_MPI  
-  MPI_Allgather(&num_local,1,MPI_UNSIGNED, 
-		local, 1, MPI_UNSIGNED, MPI::DOLFIN_COMM);
+#ifdef HAVE_MPI
+  MPI_Allgather(&num_local, 1, MPI_UNSIGNED, local, 1, MPI_UNSIGNED,
+                MPI::DOLFIN_COMM);
 #endif
 
-  for(uint p=0; p<num_procs; ++p)
-    range[p+1] = range[p] + local[p];
-  
+  for (uint p = 0; p < num_procs; ++p)
+  {
+    range[p + 1] = range[p] + local[p];
+  }
+
 #ifdef HAVE_MPI
   delete[] local;
 #endif
@@ -269,8 +302,7 @@ void SparsityPattern::initRange(uint num_local)
 //-----------------------------------------------------------------------------
 void SparsityPattern::apply()
 {
-  if (MPI::numProcesses() == 1) 
-    return;
+  if (MPI::numProcesses() == 1) return;
 
 #ifdef HAVE_MPI
   int rank = MPI::processNumber();
@@ -279,39 +311,47 @@ void SparsityPattern::apply()
   MPI_Status status;
   int maxoff, recv_count, global_row, src, dest;
 
-  int numoff  = off_processor.size();  
-  MPI_Allreduce(&numoff, &maxoff, 1, MPI_INT,MPI_MAX, MPI::DOLFIN_COMM);  
+  int numoff = off_processor.size();
+  MPI_Allreduce(&numoff, &maxoff, 1, MPI_INT, MPI_MAX, MPI::DOLFIN_COMM);
   int *recv_buff = new int[maxoff];
 
-  for(int j = 1 ; j < pe_size; j++){
-    
-    src = (rank - j + pe_size) % pe_size;
-    dest = (rank + j) % pe_size;    
-    
-    MPI_Sendrecv(&off_processor[0], numoff, MPI_INT, dest, 1,
-		 recv_buff, maxoff, MPI_INT, src, 1, MPI::DOLFIN_COMM, &status);
-    MPI_Get_count(&status,MPI_UNSIGNED,&recv_count);
+  for (int j = 1; j < pe_size; j++)
+  {
 
-    for(int i = 0; i < recv_count; ) {
+    src = (rank - j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;
+
+    MPI_Sendrecv(&off_processor[0], numoff, MPI_INT, dest, 1, recv_buff, maxoff,
+                 MPI_INT, src, 1, MPI::DOLFIN_COMM, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+    for (int i = 0; i < recv_count;)
+    {
 
       global_row = recv_buff[i];
 
-      if( global_row >= (int) range[rank] && global_row < (int) range[rank+1]) {
-	for(int k = 0; k < recv_buff[i+1]; k++) {
-	  if(recv_buff[k+i+2] < (int) range[rank] || 
-	     recv_buff[k+i+2] >= (int) range[rank+1])
-	    o_sparsity_pattern[global_row].insert(recv_buff[k+i+2]);
-	  else
-	    sparsity_pattern[global_row].insert(recv_buff[k+i+2]);
-	}
-	
+      if (global_row >= (int) range[rank] && global_row < (int) range[rank + 1])
+      {
+        for (int k = 0; k < recv_buff[i + 1]; k++)
+        {
+          if (recv_buff[k + i + 2] < (int) range[rank]
+              || recv_buff[k + i + 2] >= (int) range[rank + 1])
+          {
+            o_sparsity_pattern[global_row].insert(recv_buff[k + i + 2]);
+          }
+          else
+          {
+            sparsity_pattern[global_row].insert(recv_buff[k + i + 2]);
+          }
+        }
+
       }
-	i += 2 + recv_buff[i+1];	
+      i += 2 + recv_buff[i + 1];
     }
 
   }
 
-  delete[] recv_buff;  
+  delete[] recv_buff;
 #endif
 }
 //-----------------------------------------------------------------------------

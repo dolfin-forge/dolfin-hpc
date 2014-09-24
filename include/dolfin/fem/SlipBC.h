@@ -43,21 +43,21 @@ public:
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  SlipBC(Mesh& mesh, SubDomain const& sub_domain, const SubSystem& sub_system);
+  SlipBC(Mesh& mesh, SubDomain const& sub_domain, SubSystem const& sub_system);
 
   /// Create sub system boundary condition for sub domain specified by index
   SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-         const SubSystem& sub_system);
+         SubSystem const& sub_system);
 
   /// Destructor
   ~SlipBC();
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
 
   /// Apply boundary condition to non linear system
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const BilinearForm& form);
+  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
+             BilinearForm const& form);
 
   BoundaryNormal& normal()
   {
@@ -67,13 +67,14 @@ public:
 private:
 
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
-                      const BilinearForm& form, ScratchSpace& scratch);
+                      BilinearForm const& form, ScratchSpace& scratch);
 
   void applySlipBC(GenericMatrix& A, GenericVector& b,
-                   const BilinearForm& form, ScratchSpace& scratch);
+                   BilinearForm const& form, ScratchSpace& scratch);
 
   void applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
-                 uint const node, Array<uint> const& nodes);
+                   uint const node, Array<uint> const& udofs,
+                   Array<uint> const& ndofs);
 
   // Initialize sub domain markers
   void init(SubDomain const& sub_domain);
@@ -86,7 +87,6 @@ private:
   bool node_normal_local;
 
   Matrix* As;
-  std::set<uint> off_proc_rows;
 
   // Local data structures for assembly
   std::set<uint> row_indices;

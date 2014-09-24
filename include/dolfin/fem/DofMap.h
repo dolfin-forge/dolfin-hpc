@@ -174,7 +174,7 @@ public:
   void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
                      Cell const& cell) const;
 
-  /// Tabulate the local-to-global mapping of dofs on a cell
+  /// Tabulate the local-to-global mapping of dofs on a cell [TODO: Obsolete]
   void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
 
   /// Extract sub dof map
@@ -226,6 +226,9 @@ public:
   /// Return renumbering (used for testing)
   std::map<uint, uint> getMap() const;
 
+  /// Return is the dof is ghosted (used for testing)
+  bool is_ghost(uint i) const;
+
   /// Display mapping
   void disp() const;
 
@@ -238,13 +241,25 @@ private:
   void init();
 
   /// Initialise UFC data structures: used to determine the global dimension
-  static void init_ufc(UFCMesh& ufc_mesh, ufc::dofmap& dofmap);
+  static void initUFC(UFCMesh& ufc_mesh, ufc::dofmap& dofmap);
 
   /// Build parallel dof map
   void build();
 
+  /// Attribute ownership based on voting system
+  void distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
+                        _set<uint>& owned_dofs, _set<uint>& shared_dofs,
+                        _set<uint>& ghost_dofs,
+                        _map<uint, std::vector<uint> >& dof2index);
+
+  /// Attribute ownership based on mesh distribution
+  void distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
+                            _set<uint>& owned_dofs, _set<uint>& shared_dofs,
+                            _set<uint>& ghost_dofs,
+                            _map<uint, std::vector<uint> >& dof2index);
+
   ///
-  void pretabulate_all_dofs() const;
+  void pretabulateAllDofs() const;
 
   // UFC mesh, should be declared as mutable as deferred initialization occurs
   mutable UFCMesh ufc_mesh_;
@@ -281,7 +296,11 @@ private:
   uint pretabulated_dofmap_size_;
 
   // Provide easy access to map for testing
-  std::map<uint, uint> map;
+  std::map<uint, uint> map_;
+
+  // Set of ghosts used for debugging
+  _set<uint> ghosts_;
+
 };
 
 //--- INLINES -----------------------------------------------------------------

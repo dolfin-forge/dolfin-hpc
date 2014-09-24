@@ -88,7 +88,7 @@ DofMap::DofMap(DofMap const& dofmap, uint i) :
     pretabulated_dofmap_(NULL),
     pretabulated_dofmap_size_(0)
 {
-  message(0, "Extracted dof map for subspace: %s", ufc_dofmap_->signature());
+  message(1, "Extracted dof map for subspace: %s", ufc_dofmap_->signature());
 
   init();
 }
@@ -109,8 +109,8 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& sub_system,
 {
   // Check that dof map has not be re-ordered
   offset = offset_;
-  message(0, "Extracted dof map for sub system: %s", ufc_dofmap_->signature());
-  message(0, "Offset for sub system: %d", offset);
+  message(1, "Extracted dof map for sub system: %s", ufc_dofmap_->signature());
+  message(1, "Offset for sub system: %d", offset);
 
   // Reset offset
   offset_ = 0;
@@ -169,9 +169,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system) const
   // Recursively extract sub dof map
   ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
                                                       local_offset);
-  message(0, "Extracted ufc dof map for sub system: %s",
+  message(1, "Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
-  message(0, "Local offset for sub system: %d", local_offset);
+  message(1, "Local offset for sub system: %d", local_offset);
 
   return sub_dofmap;
 }
@@ -186,9 +186,9 @@ ufc::dofmap* DofMap::create_sub_dofmap(Array<uint> const& sub_system,
   // Recursively extract sub dof map
   ufc::dofmap* sub_dofmap = DofMap::create_sub_dofmap(*ufc_dofmap_, sub_system,
                                                       local_offset);
-  message(0, "Extracted ufc dof map for sub system: %s",
+  message(1, "Extracted ufc dof map for sub system: %s",
           sub_dofmap->signature());
-  message(0, "Local offset for sub system: %d", local_offset);
+  message(1, "Local offset for sub system: %d", local_offset);
 
   return sub_dofmap;
 }
@@ -277,7 +277,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
   {
     ufc::dofmap * ufc_sub_dofmap = dofmap.create_sub_dofmap(i);
     //Avoid creating a DOLFIN dofmap, just calling the static init_ufc function
-    DofMap::init_ufc(ufc_mesh, *ufc_sub_dofmap);
+    DofMap::initUFC(ufc_mesh, *ufc_sub_dofmap);
     global_offset += ufc_sub_dofmap->global_dimension();
     delete ufc_sub_dofmap;
   }
@@ -303,7 +303,7 @@ ufc::dofmap* DofMap::create_sub_dofmap(UFCMesh& ufc_mesh,
 }
 
 //-----------------------------------------------------------------------------
-void DofMap::init_ufc(UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)
+void DofMap::initUFC(UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)
 {
   Mesh * mesh = const_cast<Mesh *>(ufc_mesh.mesh);
 
@@ -349,7 +349,7 @@ void DofMap::init()
   //dolfin_debug("Initializing dof map...");
 
   // Initialize UFC data structures
-  DofMap::init_ufc(ufc_mesh_, *ufc_dofmap_);
+  DofMap::initUFC(ufc_mesh_, *ufc_dofmap_);
 
   // Build the DOLFIN dofmap
   build();
@@ -373,8 +373,6 @@ void DofMap::init()
     sub_dofmaps_dims_.push_back(this->local_dimension());
     sub_dofmaps_offs_.push_back(0);
   }
-
-  pretabulated_dofmap_size_ = this->local_dimension() * mesh().numCells();
 }
 //-----------------------------------------------------------------------------
 void DofMap::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell,
@@ -391,58 +389,58 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
   // Either lookup pretabulated values (if build() has been called)
   // or ask the ufc::dofmap to tabulate the values
   switch (type_)
+  {
+  case scalar_p1:
     {
-    case scalar_p1:
+      for (uint i = 0; i < local_dimension(); ++i)
       {
-        for (uint i = 0; i < local_dimension(); ++i)
-        {
-          dofs[i] = ufc_cell.entity_indices[0][i];
-          dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
-        }
+        dofs[i] = ufc_cell.entity_indices[0][i];
+        dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
       }
-      break;
-    case scalar_dg0:
-      {
-        dofs[0] = ufc_cell.index;
-        dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
-      }
-      break;
-    case vector_p1:
-      {
-        uint const num_cellverts = cell.numEntities(0);
-        for (uint k = 0; k < ufc_dofmap_->num_sub_dofmaps(); ++k)
-        {
-          for (uint i = 0; i < num_cellverts; ++i)
-          {
-            dofs[i + k * num_cellverts] = vertex_map_[cell.entities(0)[i]] + k;
-          }
-        }
-      }
-      break;
-    case vector_dg0:
-      {
-        for (uint i = 0; i < ufc_dofmap_->num_sub_dofmaps(); ++i)
-        {
-          dofs[i] = (cell.index() + i * mesh().numCells()) + offset_;
-        }
-      }
-      break;
-    case generic:
-      {
-        uint const local_dim = ufc_dofmap_->local_dimension();
-        std::memcpy(dofs, &pretabulated_dofmap_[local_dim * cell.index()],
-                    sizeof(uint) * local_dim);
-      }
-      break;
-    case ufc_default:
-      {
-        ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
-      }
-      break;
-    default:
-      error("Unknown dofmap type.");
-      break;
     }
+    break;
+  case scalar_dg0:
+    {
+      dofs[0] = ufc_cell.index;
+      dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
+    }
+    break;
+  case vector_p1:
+    {
+      uint const num_cellverts = cell.numEntities(0);
+      for (uint k = 0; k < ufc_dofmap_->num_sub_dofmaps(); ++k)
+      {
+        for (uint i = 0; i < num_cellverts; ++i)
+        {
+          dofs[i + k * num_cellverts] = vertex_map_[cell.entities(0)[i]] + k;
+        }
+      }
+    }
+    break;
+  case vector_dg0:
+    {
+      for (uint i = 0; i < ufc_dofmap_->num_sub_dofmaps(); ++i)
+      {
+        dofs[i] = (cell.index() + i * mesh().numCells()) + offset_;
+      }
+    }
+    break;
+  case generic:
+    {
+      uint const local_dim = ufc_dofmap_->local_dimension();
+      std::memcpy(dofs, &pretabulated_dofmap_[local_dim * cell.index()],
+                  sizeof(uint) * local_dim);
+    }
+    break;
+  case ufc_default:
+    {
+      ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
+    }
+    break;
+  default:
+    error("Unknown dofmap type.");
+    break;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -510,7 +508,7 @@ uint const * DofMap::dofsmapping() const
 {
   if (pretabulated_dofmap_ == NULL)
   {
-    pretabulate_all_dofs();
+    pretabulateAllDofs();
   }
   return pretabulated_dofmap_;
 }
@@ -522,7 +520,7 @@ uint DofMap::dofsmapping_size() const
 }
 
 //--------------------------------------------------------------------------
-void DofMap::pretabulate_all_dofs() const
+void DofMap::pretabulateAllDofs() const
 {
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
@@ -545,10 +543,11 @@ void DofMap::pretabulate_all_dofs() const
 void DofMap::build()
 {
 
+  // Cleanup dofmap structures and set dimension of pretabulated array
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = NULL;
-
-  map.clear();
+  pretabulated_dofmap_size_ = this->local_dimension() * mesh().numCells();
+  map_.clear();
 
   if (mesh().is_distributed())
   {
@@ -568,6 +567,13 @@ void DofMap::build()
       type_ = scalar_p1;
       local_size_ = dolfin_mesh.numVertices()
           - dolfin_mesh.distdata().num_ghost(0);
+
+      //DEBUG: Create ghosts list
+      MeshDistributedData& distdata = dolfin_mesh.distdata();
+      for(MeshGhostIterator git(distdata, 0); !git.end(); ++git)
+      {
+        ghosts_.insert(distdata.get_vertex_global(git.index()));
+      }
     }
     else if (ufc_dofmap_->global_dimension()
         == dolfin_mesh.distdata().global_numCells())
@@ -575,6 +581,8 @@ void DofMap::build()
       // Scalar Discontinuous Lagrange P0
       type_ = scalar_dg0;
       local_size_ = dolfin_mesh.numCells();
+
+      // No ghosted dofs
     }
     else if (ufc_dofmap_->global_dimension()
         == ufc_dofmap_->num_sub_dofmaps()
@@ -663,17 +671,31 @@ void DofMap::build()
 
       vertex_map_ = new uint[dolfin_mesh.numVertices()];
       for (VertexIterator v(dolfin_mesh); !v.end(); ++v)
+      {
         vertex_map_[v->index()] =
             v_offset[dolfin_mesh.distdata().get_vertex_global(v->index())];
+      }
 
       v_offset.clear();
 
       local_size_ = gdim * num_local;
 
       for (uint i = 0; i < pe_size; i++)
+      {
         ghost_buff[i].clear();
+      }
       delete[] ghost_buff;
 
+      //DEBUG: Create ghosts list
+      MeshDistributedData& distdata = dolfin_mesh.distdata();
+      for(MeshGhostIterator git(distdata, 0); !git.end(); ++git)
+      {
+        for (uint k = 0; k < ufc_dofmap_->num_sub_dofmaps(); ++k)
+        {
+          uint gdof = vertex_map_[distdata.get_vertex_global(git.index())] + k;
+          ghosts_.insert(gdof);
+        }
+      }
     }
     else if (ufc_dofmap_->global_dimension()
         == ufc_dofmap_->num_sub_dofmaps()
@@ -694,117 +716,39 @@ void DofMap::build()
 #endif
       offset_ = offset;
       local_size_ = gdim * dolfin_mesh.numCells();
+
+      // No ghosted dofs
     }
     else
     {
       type_ = generic;
-      BoundaryMesh interior_boundary(dolfin_mesh, BoundaryMesh::interior);
 
-      std::vector<uint> send_buffer;
-      _set<uint> shared_dofs;
-      _set<uint> forbidden_dofs;
       _set<uint> owned_dofs;
-      _map<uint, uint> dof_vote;
+      _set<uint> shared_dofs; // shared dofs that are not ghosted (!)
+      _set<uint> ghost_dofs;
       _map<uint, std::vector<uint> > dof2index;
 
-      uint const local_dim = ufc_dofmap_->local_dimension();
-      pretabulated_dofmap_ = new uint[local_dim * mesh().numCells()];
-      uint * dofs = new uint[local_dimension()];
-      uint * facet_dofs = new uint[num_facet_dofs()];
-
-      Cell c_tmp(dolfin_mesh, 1);
-      UFCCell ufc_cell(c_tmp);
-
-      // Initialize random number generator differently on each process
-      // FIXME: if the ghosts are randomly generated for a given mesh then
-      // two instances for the same mesh and same numbering have different
-      // ghosts which leads to several issues:
-      // - non matching ghosts with consequence of accessing the wrong dof
-      // - different local size which leads to crash
-      // We have to remove the randomness until a better solution is found.
-      // srand((uint)time(0) + MPI::processNumber());
-      srand(MPI::processNumber());
-
-      // Decide ownership of shared dofs
-      for (CellIterator bc(interior_boundary); !bc.end(); ++bc)
+      //--- Attribute ownership -----------------------------------------------
+      // HPC distribution cannot be used with VectorElements
+      bool const hpc_distribution = (ufc_dofmap_->num_sub_dofmaps() == 0);
+      if(hpc_distribution)
       {
-        Facet f(dolfin_mesh, interior_boundary.facet_index(*bc));
-        Cell c(dolfin_mesh, f.entities(dolfin_mesh.topology().dim())[0]);
-
-        uint local_facet = c.index(f);
-
-        ufc_cell.update(c, dolfin_mesh.distdata());
-        ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
-        ufc_dofmap_->tabulate_facet_dofs(facet_dofs, local_facet);
-
-        for (uint i = 0; i < num_facet_dofs(); i++)
-        {
-          // Assign an ownership vote for each "shared" dof
-          uint dofidx = dofs[facet_dofs[i]];
-          if (shared_dofs.find(dofidx) == shared_dofs.end())
-          {
-            shared_dofs.insert(dofidx);
-            dof_vote[dofidx] = (uint) rand();
-            send_buffer.push_back(dofidx);
-            send_buffer.push_back(dof_vote[dofidx]);
-          }
-        }
+        distributeByVote(ufc_mesh_, ufc_dofmap_, owned_dofs, shared_dofs,
+                         ghost_dofs, dof2index);
       }
-
-      // Decide ownership of "shared" dofs
-      MPI_Status status;
-      int recv_count;
-      uint src, dest, max_recv;
-      uint num_proc = MPI::numProcesses();
-      uint proc_num = MPI::processNumber();
-      uint local_size = send_buffer.size();
-      MPI_Allreduce(&local_size, &max_recv, 1, MPI_UNSIGNED, MPI_MAX,
-                    MPI::DOLFIN_COMM);
-      uint *recv_buffer = new uint[max_recv];
-      for (uint k = 1; k < MPI::numProcesses(); ++k)
+      else
       {
-        src = (proc_num - k + num_proc) % num_proc;
-        dest = (proc_num + k) % num_proc;
-        MPI_Sendrecv(&send_buffer[0], send_buffer.size(), MPI_UNSIGNED, dest, 1,
-                     recv_buffer, max_recv, MPI_UNSIGNED, src, 1,
-                     MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-        for (int i = 0; i < recv_count; i += 2)
-        {
-          if (shared_dofs.find(recv_buffer[i]) != shared_dofs.end())
-          {
-            // Move dofs with higher ownership votes from shared to forbidden
-            if (recv_buffer[i + 1] < dof_vote[recv_buffer[i]]
-                || (recv_buffer[i + 1] == dof_vote[recv_buffer[i]]
-                    && (src < rank)))
-            {
-              forbidden_dofs.insert(recv_buffer[i]);
-              shared_dofs.erase(recv_buffer[i]);
-            }
-          }
-        }
+        distributeByEntities(ufc_mesh_, ufc_dofmap_, owned_dofs, shared_dofs,
+                             ghost_dofs, dof2index);
       }
+      dolfin_assert(owned_dofs.size() > shared_dofs.size());
+#if DEBUG
+      message("Owned  dofs : %d", owned_dofs.size());
+      message("Shared dofs : %d", shared_dofs.size());
+      message("Ghost  dofs : %d", ghost_dofs.size());
+#endif
 
-      send_buffer.clear();
-
-      // Mark all non forbidden dofs as owned by the processes
-      for (CellIterator c(dolfin_mesh); !c.end(); ++c)
-      {
-        ufc_cell.update(*c, dolfin_mesh.distdata());
-        ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
-        for (uint i = 0; i < local_dim; i++)
-        {
-          if (forbidden_dofs.find(dofs[i]) == forbidden_dofs.end())
-          {
-            // Mark dof as owned
-            owned_dofs.insert(dofs[i]);
-          }
-
-          // Create mapping from dof to dofmap offset
-          dof2index[dofs[i]].push_back(c->index() * local_dim + i);
-        }
-      }
+      //--- Global renumbering ------------------------------------------------
 
       // Compute offset for owned and non shared dofs
       uint range = owned_dofs.size();
@@ -816,13 +760,16 @@ void DofMap::build()
       MPI_Scan(&range, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
       offset -= range;
 #endif
+      uint const offset_ = offset;
 
       // Compute renumbering for local and owned shared dofs
+      std::vector<uint> send_buffer;
+      pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
       for (_set<uint>::iterator it = owned_dofs.begin();
-      it != owned_dofs.end(); ++it, offset++)
+           it != owned_dofs.end(); ++it, ++offset)
       {
         for(std::vector<uint>::iterator di = dof2index[*it].begin();
-        di != dof2index[*it].end(); ++di)
+            di != dof2index[*it].end(); ++di)
         {
           pretabulated_dofmap_[*di] = offset;
         }
@@ -835,15 +782,19 @@ void DofMap::build()
       }
 
       // Exchange new dof numbers for shared dofs
-      delete[] recv_buffer;
-      local_size = send_buffer.size();
+      MPI_Status status;
+      int recv_count;
+      uint pe_size = MPI::numProcesses();
+      uint rank = MPI::processNumber();
+      uint src, dest, max_recv;
+      uint local_size = send_buffer.size();
       MPI_Allreduce(&local_size, &max_recv, 1, MPI_UNSIGNED, MPI_MAX,
                     MPI::DOLFIN_COMM);
-      recv_buffer = new uint[max_recv];
-      for (uint k = 1; k < MPI::numProcesses(); ++k)
+      uint * recv_buffer = new uint[max_recv];
+      for (uint k = 1; k < pe_size; ++k)
       {
-        src = (proc_num - k + num_proc) % num_proc;
-        dest = (proc_num + k) % num_proc;
+        src = (rank - k + pe_size) % pe_size;
+        dest = (rank + k) % pe_size;
 
         MPI_Sendrecv(&send_buffer[0], send_buffer.size(), MPI_UNSIGNED, dest, 1,
                      recv_buffer, max_recv, MPI_UNSIGNED, src, 1,
@@ -852,32 +803,53 @@ void DofMap::build()
 
         for (int i = 0; i < recv_count; i += 2)
         {
+          uint ghost_index = recv_buffer[i + 1];
+          dolfin_assert(ghost_index < offset_
+                        || ghost_index >= offset_ + local_size_);
+
           // Assign new dof number for shared dofs
-          if (forbidden_dofs.find(recv_buffer[i]) != forbidden_dofs.end())
+          if (ghost_dofs.find(recv_buffer[i]) != ghost_dofs.end())
           {
             for (std::vector<uint>::iterator di =
                 dof2index[recv_buffer[i]].begin();
                 di != dof2index[recv_buffer[i]].end(); ++di)
             {
-              pretabulated_dofmap_[*di] = recv_buffer[i + 1];
+              pretabulated_dofmap_[*di] = ghost_index;
             }
+            // Create ghost dofs list
+            ghosts_.insert(ghost_index);
           }
         }
       }
       delete[] recv_buffer;
-      map.clear();
-      delete[] facet_dofs;
-      delete[] dofs;
+
+#if DEBUG
+      uint const low = offset_;
+      uint const high = offset_ + local_size_;
+      for(_set<uint>::const_iterator git = ghosts_.begin();
+          git != ghosts_.end(); ++git)
+      {
+        uint ii = *git;
+        if( ii >= low && ii < high)
+        {
+          error("Ghost dof index %d found to be in ownership range."
+                "Ownership range of dofs : %d, %d", ii, low, high);
+        }
+      }
+#endif
+      map_.clear();
     }
 
 #if DEBUG
     // The sum of the local sizes should be the global size
     uint loc_s = local_size_;
     uint glb_s = 0;
+    uint const expected_glob_s = this->global_dimension();
     MPI_Allreduce(&loc_s, &glb_s, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    if(glb_s != global_dimension())
+    if(glb_s != expected_glob_s)
     {
-      error("The sum of local dofmap sizes is not equal to the global dimension.");
+      error("The sum of local dofmap sizes is not equal to the global dimension."
+            "Sum: '%d' ; Global dimension : '%d'", glb_s, expected_glob_s);
     }
 #endif
 
@@ -892,9 +864,15 @@ void DofMap::build()
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> DofMap::getMap() const
+std::map<uint, uint> DofMap::getMap() const
 {
-  return map;
+  return map_;
+}
+
+//-----------------------------------------------------------------------------
+bool DofMap::is_ghost(uint i) const
+{
+  return (ghosts_.find(i) != ghosts_.end());
 }
 
 //-----------------------------------------------------------------------------
@@ -1008,5 +986,224 @@ void DofMap::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
+void DofMap::distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
+                              _set<uint>& owned_dofs, _set<uint>& shared_dofs,
+                              _set<uint>& ghost_dofs,
+                              _map<uint, std::vector<uint> >& dof2index)
+{
+#ifdef HAVE_MPI
+  message("Distribute dofs by voting process.");
 
+  owned_dofs.clear();
+  shared_dofs.clear();
+  ghost_dofs.clear();
+  dof2index.clear();
+
+  //
+  Mesh& mesh = *const_cast<Mesh *>(ufc_mesh.mesh);
+  uint const local_dim = ufc_dofmap->local_dimension();
+  uint * dofs = new uint[local_dim];
+  uint const nb_facet_dofs = ufc_dofmap->num_facet_dofs();
+  uint * facet_dofs = new uint[nb_facet_dofs];
+  _map<uint, uint> dof_vote;
+
+  Cell c_tmp(mesh, 1);
+  UFCCell ufc_cell(c_tmp);
+
+  // Initialize random number generator differently on each process
+  // FIXME: if the ghosts are randomly generated for a given mesh then
+  // two instances for the same mesh and same numbering have different
+  // ghosts which leads to several issues:
+  // - non matching ghosts with consequence of accessing the wrong dof
+  // - different local size which leads to crash
+  // We have to remove the randomness until a better solution is found.
+  // srand((uint)time(0) + MPI::processNumber());
+  srand(MPI::seed());
+
+  // List shared dofs and assign vote
+  std::vector<uint> send_buffer;
+  BoundaryMesh& interior_boundary = mesh.interior_boundary();
+  for (CellIterator bc(interior_boundary); !bc.end(); ++bc)
+  {
+    Facet f(mesh, interior_boundary.facet_index(*bc));
+    Cell c(mesh, f.entities(mesh.topology().dim())[0]);
+
+    uint local_facet = c.index(f);
+
+    ufc_cell.update(c, mesh.distdata());
+    ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+    ufc_dofmap->tabulate_facet_dofs(facet_dofs, local_facet);
+
+    for (uint i = 0; i < nb_facet_dofs; i++)
+    {
+      // Assign an ownership vote for each "shared" dof
+      uint dofidx = dofs[facet_dofs[i]];
+      if (shared_dofs.find(dofidx) == shared_dofs.end())
+      {
+        shared_dofs.insert(dofidx);
+        dof_vote[dofidx] = (uint) (rand() + (real) MPI::processNumber());
+        send_buffer.push_back(dofidx);
+        send_buffer.push_back(dof_vote[dofidx]);
+      }
+    }
+  }
+
+  // Decide ownership of "shared" dofs
+  MPI_Status status;
+  int recv_count;
+  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::processNumber();
+  uint src, dest, max_recv;
+  uint local_size = send_buffer.size();
+  MPI_Allreduce(&local_size, &max_recv, 1, MPI_UNSIGNED, MPI_MAX,
+                MPI::DOLFIN_COMM);
+  uint *recv_buffer = new uint[max_recv];
+  for (uint k = 1; k < MPI::numProcesses(); ++k)
+  {
+    src = (rank - k + pe_size) % pe_size;
+    dest = (rank + k) % pe_size;
+    MPI_Sendrecv(&send_buffer[0], send_buffer.size(), MPI_UNSIGNED, dest, 1,
+                 recv_buffer, max_recv, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM,
+                 &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+    for (int i = 0; i < recv_count; i += 2)
+    {
+      if (shared_dofs.find(recv_buffer[i]) != shared_dofs.end())
+      {
+        // Move dofs with higher ownership votes from shared to forbidden
+        if (recv_buffer[i + 1] < dof_vote[recv_buffer[i]]
+            || (recv_buffer[i + 1] == dof_vote[recv_buffer[i]] && (src < rank)))
+        {
+          ghost_dofs.insert(recv_buffer[i]);
+          shared_dofs.erase(recv_buffer[i]);
+        }
+      }
+    }
+  }
+  send_buffer.clear();
+
+  // Mark all non forbidden dofs as owned by the processes
+  for (CellIterator c(mesh); !c.end(); ++c)
+  {
+    ufc_cell.update(*c, mesh.distdata());
+    ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+    for (uint i = 0; i < local_dim; ++i)
+    {
+      if (ghost_dofs.find(dofs[i]) == ghost_dofs.end())
+      {
+        // Mark dof as owned
+        owned_dofs.insert(dofs[i]);
+      }
+
+      // Create mapping from dof to dofmap offset
+      dof2index[dofs[i]].push_back(c->index() * local_dim + i);
+    }
+  }
+
+  // Cleanup
+  delete[] recv_buffer;
+  delete[] facet_dofs;
+  delete[] dofs;
+
+#endif
+}
+//-----------------------------------------------------------------------------
+void DofMap::distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
+                                  _set<uint>& owned_dofs,
+                                  _set<uint>& shared_dofs,
+                                  _set<uint>& ghost_dofs,
+                                  _map<uint, std::vector<uint> >& dof2index)
+{
+  message("Distribute dofs by mesh entities ownership.");
+
+  owned_dofs.clear();
+  shared_dofs.clear();
+  ghost_dofs.clear();
+  dof2index.clear();
+
+  //
+  Mesh& mesh = *const_cast<Mesh *>(ufc_mesh.mesh);
+  uint const tdim = mesh.topology().dim();
+  uint const local_dim = ufc_dofmap->local_dimension();
+  uint * dofs = new uint[local_dim];
+  CellIterator cell(mesh);
+  UFCCell ufc_cell(*cell);
+
+  // Compute facets and facet - cell connectivity if not already computed
+  mesh.init(tdim - 1);
+  mesh.init(tdim - 1, tdim);
+  mesh.order();
+
+  // Cache number of dofs per mesh entity
+  Array<uint> num_entity_dofs;
+  uint max_num_entity_dof = 0;
+  for (uint d = 0; d <= mesh.topology().dim(); ++d)
+  {
+    uint const ned = ufc_dofmap->num_entity_dofs(d);
+    num_entity_dofs.push_back(ned);
+    max_num_entity_dof = std::max(max_num_entity_dof, ned);
+  }
+  dolfin_assert(max_num_entity_dof > 0);
+  uint * entity_local_dofs = new uint[max_num_entity_dof];
+  uint * entity_dofs = new uint[max_num_entity_dof];
+
+  // Loop, baby, loop !
+  for (; !cell.end(); ++cell)
+  {
+    ufc_cell.update(*cell, mesh.distdata());
+    ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
+
+    // Create mapping from dof to dofmap offset
+    for (uint i = 0; i < local_dim; ++i)
+    {
+      dof2index[dofs[i]].push_back(cell->index() * local_dim + i);
+    }
+
+    // Add dofs restricted to the cell as owned
+    uint const num_celldofs = num_entity_dofs[tdim];
+    ufc_dofmap->tabulate_entity_dofs(entity_local_dofs, tdim, 0);
+    for (uint dof = 0; dof < num_celldofs; ++dof)
+    {
+      owned_dofs.insert(dofs[entity_local_dofs[dof]]);
+    }
+
+    // Decide ownership
+    for (uint d = 0; d < mesh.topology().dim(); ++d)
+    {
+      uint const num_dofs = num_entity_dofs[d];
+      for (MeshEntityIterator m(*cell, d); !m.end(); ++m)
+      {
+        // Get the dof indices for the entity
+        ufc_dofmap->tabulate_entity_dofs(entity_local_dofs, d, m.pos());
+        for (uint dof = 0; dof < num_dofs; ++dof)
+        {
+          entity_dofs[dof] = dofs[entity_local_dofs[dof]];
+        }
+
+        //
+        if (mesh.distdata().is_shared(*m))
+        {
+          if (mesh.distdata().is_ghost(*m))
+          {
+            ghost_dofs.insert(entity_dofs, entity_dofs + num_dofs);
+          }
+          else
+          {
+            shared_dofs.insert(entity_dofs, entity_dofs + num_dofs);
+            owned_dofs.insert(entity_dofs, entity_dofs + num_dofs);
+          }
+        }
+        else
+        {
+          owned_dofs.insert(entity_dofs, entity_dofs + num_dofs);
+        }
+      }
+    }
+  }
+  delete[] entity_dofs;
+  delete[] entity_local_dofs;
+  delete[] dofs;
+}
+//-----------------------------------------------------------------------------
 }

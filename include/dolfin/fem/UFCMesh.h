@@ -48,6 +48,9 @@ public:
   /// Initialize UFC mesh data
   void init(Mesh const& mesh);
 
+  /// Display info
+  void disp() const;
+
 private:
 
   // Clear UFC cell data
@@ -102,6 +105,33 @@ inline void UFCMesh::clear()
   geometric_dimension = 0;
   delete[] num_entities;
   num_entities = NULL;
+}
+
+//-----------------------------------------------------------------------------
+inline void UFCMesh::disp() const
+{
+  cout << "UFCMesh" << endl;
+  cout << "-------" << endl;
+
+  // Begin indentation
+  begin("");
+
+  // Display UFC dofmap information
+  cout << "ufc::mesh info" << endl;
+  cout << "--------------" << endl;
+  begin("");
+  cout << "Topological dimension : " << topological_dimension << endl;
+  cout << "Geometric dimension   : " << geometric_dimension << endl;
+  for (uint d = 0; d <= topological_dimension; ++d)
+  {
+    cout << "Number of entities of dim(" << d << ") : " << num_entities[d]
+         << endl;
+  }
+  cout << endl;
+  end();
+
+  // End indentation
+  end();
 }
 
 }

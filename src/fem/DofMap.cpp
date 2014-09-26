@@ -390,6 +390,15 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
   // or ask the ufc::dofmap to tabulate the values
   switch (type_)
   {
+  case real_space:
+    {
+      uint const rank = MPI::processNumber();
+      for (uint i = 0; i < local_dimension(); ++i)
+      {
+        dofs[i] = rank * local_dimension() + i;
+      }
+    }
+    break;
   case scalar_p1:
     {
       for (uint i = 0; i < local_dimension(); ++i)
@@ -522,6 +531,10 @@ uint DofMap::dofsmapping_size() const
 //--------------------------------------------------------------------------
 void DofMap::pretabulateAllDofs() const
 {
+  if(real_space)
+  {
+    return;
+  }
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
   uint *ip = &pretabulated_dofmap_[0];
@@ -560,7 +573,12 @@ void DofMap::build()
     //
     dolfin_mesh.renumber();
 
-    if (ufc_dofmap_->global_dimension()
+    if(ufc_dofmap_->global_dimension() == ufc_dofmap_->local_dimension())
+    {
+      type_ = real_space;
+      local_size_ = ufc_dofmap_->local_dimension();
+    }
+    else if (ufc_dofmap_->global_dimension()
         == dolfin_mesh.distdata().global_numVertices())
     {
       // Scalar Lagrange P1
@@ -841,15 +859,22 @@ void DofMap::build()
     }
 
 #if DEBUG
-    // The sum of the local sizes should be the global size
-    uint loc_s = local_size_;
-    uint glb_s = 0;
-    uint const expected_glob_s = this->global_dimension();
-    MPI_Allreduce(&loc_s, &glb_s, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    if(glb_s != expected_glob_s)
+    if(type_ == real_space)
     {
-      error("The sum of local dofmap sizes is not equal to the global dimension."
-            "Sum: '%d' ; Global dimension : '%d'", glb_s, expected_glob_s);
+      dolfin_assert(local_size_ == global_dimension());
+    }
+    else
+    {
+      // The sum of the local sizes should be the global size
+      uint loc_s = local_size_;
+      uint glb_s = 0;
+      uint const expected_glob_s = this->global_dimension();
+      MPI_Allreduce(&loc_s, &glb_s, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+      if(glb_s != expected_glob_s)
+      {
+        error("The sum of local dofmap sizes is not equal to the global dimension."
+              "Sum: '%d' ; Global dimension : '%d'", glb_s, expected_glob_s);
+      }
     }
 #endif
 

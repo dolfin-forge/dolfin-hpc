@@ -40,7 +40,7 @@ class DofMap : public ufc::dofmap, public MeshDependent
   static std::string const SIGN_PREFIX;
   enum Type
   {
-    scalar_p1, scalar_dg0, vector_p1, vector_dg0, generic, ufc_default
+    real_space, scalar_p1, scalar_dg0, vector_p1, vector_dg0, generic, ufc_default
   };
 
 public:

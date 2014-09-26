@@ -531,10 +531,6 @@ uint DofMap::dofsmapping_size() const
 //--------------------------------------------------------------------------
 void DofMap::pretabulateAllDofs() const
 {
-  if(real_space)
-  {
-    return;
-  }
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
   uint *ip = &pretabulated_dofmap_[0];

@@ -55,7 +55,7 @@ class Mesh;
  *          function (pointer) that returns the value of the function.
  */
 
-class Function : public Variable
+class Function : public Variable, public ufc::function
 {
 public:
 

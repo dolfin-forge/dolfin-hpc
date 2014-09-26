@@ -265,10 +265,10 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   //FIXME: Well... discontinuous approximations might disagree
   if (this->space().is_cellwise_defined())
   {
-    warning("Interpolation to vertex values is implemented incorrectly for"
-            "discontinuous approximations");
+    error("Interpolation to vertex values is implemented incorrectly for"
+          "discontinuous approximations");
   }
-  //else
+  else
   {
     uint const num_cell_vertices = mesh_.type().numVertices(tdim);
     real* vertex_values = new real[scratch.size * num_cell_vertices];
@@ -442,48 +442,34 @@ void DiscreteFunction::interpolate(Function const& other_func)
   // Pretabulated version
   real * block = this->create_block();
 
+  // Can the space be flattened into scalar finite elements ?
+  Array<ufc::finite_element const*> const& flt_elms =
+      this->space().element().flatten();
+  bool const flattenable = (flt_elms.size() == this->value_size());
+
   // The other function being discrete we need to interpolate.
-  if (other_func.type() == Function::discrete)
+  if ((other_func.type() == Function::discrete) || !flattenable)
   {
     ScratchSpace other_scratch(other_func.space());
     if (this->mesh() == other_func.mesh())
     {
-      //
-      Array<ufc::dofmap const*> const& flt_dofmaps = this->dofmap().flatten();
-      dolfin_assert(flt_dofmaps.size() == scratch.size);
-
       uint dof = 0;
-      for (CellIterator cell(mesh_); !cell.end(); ++cell)
+      uint const local_dim = this->dofmap().local_dimension();
+      for (CellIterator cell(mesh_); !cell.end(); ++cell, dof += local_dim)
       {
         scratch.cell.update(*cell, mesh_.distdata());
-        dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
-
-        // Get expansion coefficients of the other discrete function on cell
-        other_func.interpolate(other_scratch.coefficients, scratch.cell,
-                               *other_scratch.finite_element, *cell);
-
-        for (uint value = 0; value < flt_dofmaps.size(); ++value)
-        {
-          for (uint ii = 0; ii < flt_dofmaps[value]->local_dimension(); ++ii)
-          {
-            other_func.evaluate(scratch.values, scratch.coordinates[dof],
-                                scratch.cell);
-          }
-        }
+        this->space().element().evaluate_dofs(&block[dof], other_func,
+                                              scratch.cell);
       }
     }
     else
     {
-      error("Interpolation on non-macthing meshes is not implemented.");
+      error("Interpolation on non-matching meshes is not implemented.");
     }
   }
-  // Analytical expression (naive implementation)
+  // Analytical expression and flattened space (naive implementation)
   else
   {
-    //
-    Array<ufc::dofmap const*> const& flt_dofmaps = this->dofmap().flatten();
-    dolfin_assert(flt_dofmaps.size() == scratch.size);
-
     uint dof = 0;
     for (CellIterator cell(mesh_); !cell.end(); ++cell)
     {
@@ -491,12 +477,12 @@ void DiscreteFunction::interpolate(Function const& other_func)
       dofmap().tabulate_coordinates(scratch.coordinates, scratch.cell);
 
       uint celldof = 0;
-      for (uint value = 0; value < flt_dofmaps.size(); ++value)
+      for (uint lfspace = 0; lfspace < flt_elms.size(); ++lfspace)
       {
-        for (uint ii = 0; ii < flt_dofmaps[value]->local_dimension(); ++ii)
+        for (uint ii = 0; ii < flt_elms[lfspace]->space_dimension(); ++ii)
         {
           other_func.eval(scratch.values, scratch.coordinates[celldof++]);
-          block[dof++] = scratch.values[value];
+          block[dof++] = scratch.values[lfspace];
         }
       }
       //

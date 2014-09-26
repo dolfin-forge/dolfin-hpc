@@ -45,7 +45,7 @@ public:
   DiscreteFunction& function() const;
 
   /// Return index of the sub function
-  uint const index() const;
+  uint index() const;
 
   /// Display basic information
   void disp() const;
@@ -74,7 +74,7 @@ inline DiscreteFunction& SubFunction::function() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint const SubFunction::index() const
+inline uint SubFunction::index() const
 {
   return i_;
 }

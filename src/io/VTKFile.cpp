@@ -61,7 +61,7 @@ void VTKFile::operator<<(Mesh& mesh)
       pvtuNameUpdate(counter);
 
       // Write pvtu file
-      pvtuFileWrite();
+      pvtuFileWrite(false, 0);
     }
 
     // Write pvd file
@@ -136,7 +136,7 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
       pvtuNameUpdate(counter);
 
       // Write pvtu file
-      pvtuFileWrite_func(f);
+      pvtuFileWriteFunction(f);
     }
 
     // Write pvd file
@@ -272,6 +272,14 @@ void VTKFile::ResultsWrite(
 
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
+  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+      it != f.end(); it++)
+  {
+    if (it->first->mesh() != mesh)
+    {
+      error("VTKFile implementation supports only one mesh per file.");
+    }
+  }
 
   //--- Interpolation to vertices for general functions-----------------------
   fprintf(fp, "<PointData> \n");
@@ -279,6 +287,12 @@ void VTKFile::ResultsWrite(
       it != f.end(); it++)
   {
     Function* u = it->first;
+
+    //
+    if (u->mesh() != mesh)
+    {
+      error("VTKFile implementation supports only one mesh per file.");
+    }
 
     // Check type of function space
     if (u->type() == Function::discrete && u->space().is_cellwise_constant())
@@ -559,7 +573,7 @@ void VTKFile::pvdFileWrite(uint num)
 
 }
 //----------------------------------------------------------------------------
-void VTKFile::pvtuFileWrite(bool mesh_function)
+void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
 {
   std::fstream pvtuFile;
 
@@ -584,9 +598,20 @@ void VTKFile::pvtuFileWrite(bool mesh_function)
 
   if (mesh_function)
   {
-    pvtuFile << "<PCellData Scalars=\"U\">" << std::endl;
-    pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
-    pvtuFile << "</PCellData>" << std::endl;
+    if (dim > 0)
+    {
+      // Cell-based mesh function
+      pvtuFile << "<PCellData Scalars=\"U\">" << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
+      pvtuFile << "</PCellData>" << std::endl;
+    }
+    else
+    {
+      // Vertex-based mesh function
+      pvtuFile << "<PPointData Scalars=\"U\">" << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
+      pvtuFile << "</PPointData>" << std::endl;
+    }
   }
 
   std::string fname;
@@ -603,7 +628,7 @@ void VTKFile::pvtuFileWrite(bool mesh_function)
   pvtuFile.close();
 
 } //----------------------------------------------------------------------------
-void VTKFile::pvtuFileWrite_func(
+void VTKFile::pvtuFileWriteFunction(
     std::vector<std::pair<Function*, std::string> > f)
 {
   std::fstream pvtuFile;
@@ -787,7 +812,7 @@ void VTKFile::pvtuNameUpdate(const int counter)
 }
 //----------------------------------------------------------------------------
 template<class T>
-  void VTKFile::MeshFunctionWrite(T& meshfunction)
+  void VTKFile::MeshFunctionWrite(MeshFunction<T>& meshfunction)
   {
     // Update vtu file name and clear file
     vtuNameUpdate(counter);
@@ -797,50 +822,90 @@ template<class T>
     {
       pvtuNameUpdate(counter);
       pvdFileWrite(counter);
-      pvtuFileWrite(true);
-
+      pvtuFileWrite(true, meshfunction.dim());
     }
 
     Mesh& mesh = meshfunction.mesh();
 
-    if (meshfunction.dim() != mesh.topology().dim())
+    if (meshfunction.dim() == mesh.topology().dim())
     {
-      error(
-          "VTK output of mesh functions is implemented for cell-based functions only.");
+      // Write headers
+      VTKHeaderOpen(mesh);
+
+      // Write mesh
+      MeshWrite(mesh);
+
+      std::vector<float> data;
+      data.resize(mesh.numCells());
+      std::vector<float>::iterator entry = data.begin();
+
+      for (CellIterator cell(mesh); !cell.end(); ++cell)
+      {
+        *entry++ = static_cast<float>(meshfunction.get(cell->index()));
+      }
+
+      // Open file
+      FILE *fp = fopen(vtu_filename.c_str(), "a");
+      fprintf(fp, "<CellData  Scalars=\"U\">\n");
+      fprintf(fp,
+              "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
+
+      // Create encoded stream
+      std::stringstream base64_stream;
+      encode_stream(base64_stream, data);
+      fprintf(fp, "%s\n", base64_stream.str().c_str());
+
+      fprintf(fp, "</DataArray>\n");
+      fprintf(fp, "</CellData>\n");
+
+      // Close file
+      fclose(fp);
+
+      // Close headers
+      VTKHeaderClose();
     }
+    else if (meshfunction.dim() == 0)
+    {
+      // Write headers
+      VTKHeaderOpen(mesh);
 
-    // Write headers
-    VTKHeaderOpen(mesh);
+      // Write mesh
+      MeshWrite(mesh);
 
-    // Write mesh
-    MeshWrite(mesh);
+      std::vector<float> data;
+      data.resize(mesh.numVertices());
+      std::vector<float>::iterator entry = data.begin();
 
-    std::vector<float> data;
-    data.resize(mesh.numCells());
-    std::vector<float>::iterator entry = data.begin();
+      for (VertexIterator v(mesh); !v.end(); ++v)
+      {
+        *entry++ = static_cast<float>(meshfunction.get(v->index()));
+      }
 
-    for (CellIterator cell(mesh); !cell.end(); ++cell)
-      *entry++ = static_cast<float>(meshfunction.get(cell->index()));
+      // Open file
+      FILE *fp = fopen(vtu_filename.c_str(), "a");
+      fprintf(fp, "<PointData  Scalars=\"U\">\n");
+      fprintf(fp,
+              "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
 
-    // Open file
-    FILE *fp = fopen(vtu_filename.c_str(), "a");
-    fprintf(fp, "<CellData  Scalars=\"U\">\n");
-    fprintf(fp,
-            "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
+      // Create encoded stream
+      std::stringstream base64_stream;
+      encode_stream(base64_stream, data);
+      fprintf(fp, "%s\n", base64_stream.str().c_str());
 
-    // Create encoded stream
-    std::stringstream base64_stream;
-    encode_stream(base64_stream, data);
-    fprintf(fp, "%s\n", base64_stream.str().c_str());
+      fprintf(fp, "</DataArray>\n");
+      fprintf(fp, "</PointData>\n");
 
-    fprintf(fp, "</DataArray>\n");
-    fprintf(fp, "</CellData>\n");
+      // Close file
+      fclose(fp);
 
-    // Close file
-    fclose(fp);
-
-    // Close headers
-    VTKHeaderClose();
+      // Close headers
+      VTKHeaderClose();
+    }
+    else
+    {
+      error("VTK output of mesh functions is implemented for cell-based and "
+            "vertex-based functions only.");
+    }
 
     // Increase the number of times we have saved the mesh function
     ++counter;

@@ -85,15 +85,15 @@ private:
   void MeshWrite(Mesh& mesh) const;
   void ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const;
   void pvdFileWrite(uint u);
-  void pvtuFileWrite(bool mesh_function = false);
-  void pvtuFileWrite_func(std::vector<std::pair<Function*, std::string> > f);
+  void pvtuFileWrite(bool mesh_function, uint const dim);
+  void pvtuFileWriteFunction(std::vector<std::pair<Function*, std::string> > f);
   void VTKHeaderOpen(Mesh& mesh) const;
   void VTKHeaderClose() const;
   void vtuNameUpdate(const int counter);
   void pvtuNameUpdate(const int counter);
 
   template<class T>
-    void MeshFunctionWrite(T& meshfunction);
+    void MeshFunctionWrite(MeshFunction<T>& meshfunction);
 
   // Most recent position in pvd file
   std::ios::pos_type mark;

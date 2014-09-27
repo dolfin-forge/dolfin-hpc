@@ -341,7 +341,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 2:
-        data.resize(3 * num_verts);
+        data.resize(2 * num_verts);
         {
           std::vector<float>::iterator entry = data.begin();
           for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
@@ -448,7 +448,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 2:
-        data.resize(3 * mesh.numCells());
+        data.resize(2 * mesh.numCells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;

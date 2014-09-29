@@ -101,6 +101,17 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   // Simple check
   form.check(A,b);
 
+  // Check compatibility of function g and the test (sub)space
+  ufc::finite_element * fe =
+      space.element().create_sub_element(this->sub_system());
+  if((fe->value_rank() != g_.rank())||(fe->value_dimension(0)!=g_.dim(0)))
+  {
+    error("Rank and/or value dimension mismatch between function and space.\n"
+          "Function : rank = %d, dim = %d; Space : rank = %d, dim = %d.",
+          g_.rank(), g_.dim(0), fe->value_rank(), fe->value_dimension(0));
+  }
+  delete fe;
+
   // A map to hold the mapping from boundary dofs to boundary values
   _map<uint, real> boundary_values;
 

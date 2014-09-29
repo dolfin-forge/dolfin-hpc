@@ -68,6 +68,9 @@ public:
   /// Convert from function type to string
   static std::string type2string(Function::Type type);
 
+  /// Default constructor [Obsolete]
+  Function();
+
   /// Create empty function
   explicit Function(Mesh& mesh);
 
@@ -252,9 +255,6 @@ protected:
   int facet() const;
 
 private:
-
-  /// Default constructor
-  Function();
 
   // Mesh
   Mesh * mesh_;

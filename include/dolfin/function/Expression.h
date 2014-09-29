@@ -45,7 +45,7 @@ private:
 
 };
 
-class ScalarExpression: public Expression
+class ScalarExpression : public Expression
 {
 public:
 
@@ -69,6 +69,10 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const
   {
+    if (i > 0)
+    {
+      return 0;
+    }
     return 1;
   }
 
@@ -77,7 +81,7 @@ public:
 
 };
 
-class VectorExpression: public Expression
+class VectorExpression : public Expression
 {
 public:
 
@@ -102,6 +106,18 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const
   {
+    switch (i)
+      {
+      case 0:
+        return value_dim_;
+        break;
+      case 1:
+        return 1;
+        break;
+      default:
+        return 0;
+        break;
+      }
     return value_dim_;
   }
 
@@ -114,13 +130,13 @@ private:
 
 };
 
-class RealReference: public Expression
+class RealReference : public ScalarExpression
 {
 public:
 
   /// Create user-defined function
   RealReference(real const& r) :
-      Expression(),
+      ScalarExpression(),
       r_(r)
   {
   }
@@ -128,18 +144,6 @@ public:
   /// Destructor
   ~RealReference()
   {
-  }
-
-  /// Return the rank of the value space
-  virtual uint rank() const
-  {
-    return 0;
-  }
-
-  /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const
-  {
-    return 1;
   }
 
   /// Evaluate function at given point
@@ -153,12 +157,12 @@ private:
 
 };
 
-class IndicatorExpression: public Expression
+class IndicatorExpression : public ScalarExpression
 {
 public:
 
   IndicatorExpression(SubDomain const& sub_domain, real value) :
-      Expression(),
+      ScalarExpression(),
       sd_(sub_domain),
       value_(value)
   {
@@ -167,16 +171,6 @@ public:
   /// Destructor
   ~IndicatorExpression()
   {
-  }
-
-  inline uint rank() const
-  {
-    return 0;
-  }
-
-  inline uint dim(uint i) const
-  {
-    return 1;
   }
 
   inline void eval(real* values, const real* x) const

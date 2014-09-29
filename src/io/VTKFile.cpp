@@ -288,12 +288,6 @@ void VTKFile::ResultsWrite(
   {
     Function* u = it->first;
 
-    //
-    if (u->mesh() != mesh)
-    {
-      error("VTKFile implementation supports only one mesh per file.");
-    }
-
     // Check type of function space
     if (u->type() == Function::discrete && u->space().is_cellwise_constant())
     {
@@ -319,7 +313,7 @@ void VTKFile::ResultsWrite(
         fprintf(
             fp,
             "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
-            name.c_str(), value_dim);
+            name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         error("Only scalar and vectors functions can be saved in VTK format.");
@@ -355,13 +349,14 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 2:
-        data.resize(2 * num_verts);
+        data.resize(3 * num_verts);
         {
           std::vector<float>::iterator entry = data.begin();
           for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
           {
             *entry++ = values[vertex->index()];
             *entry++ = values[vertex->index() + num_verts];
+            *entry++ = 0.0;
           }
         }
         break;
@@ -437,7 +432,7 @@ void VTKFile::ResultsWrite(
         fprintf(
             fp,
             "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
-            name.c_str(), value_dim);
+            name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         error("Only scalar and vectors functions can be saved in VTK format.");
@@ -462,7 +457,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 2:
-        data.resize(2 * mesh.numCells());
+        data.resize(3 * mesh.numCells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
@@ -470,6 +465,7 @@ void VTKFile::ResultsWrite(
           {
             *entry++ = values[ii++];
             *entry++ = values[ii++];
+            *entry++ = 0.0;
           }
         }
         break;
@@ -664,8 +660,8 @@ void VTKFile::pvtuFileWriteFunction(
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
-               << "\"  NumberOfComponents=\"" << u->dim(0) << "\" />"
-               << std::endl;
+               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
+               << "\" />" << std::endl;
     }
   }
   pvtuFile << "</PPointData>" << std::endl;
@@ -708,8 +704,8 @@ void VTKFile::pvtuFileWriteFunction(
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
-               << "\"  NumberOfComponents=\"" << u->dim(0) << "\" />"
-               << std::endl;
+               << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
+               << "\" />" << std::endl;
     }
   }
   pvtuFile << "</PCellData>" << std::endl;

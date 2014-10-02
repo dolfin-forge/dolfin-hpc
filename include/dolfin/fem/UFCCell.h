@@ -59,7 +59,8 @@ public:
   void clear();
 
   // Update cell entities to global indices and coordinates
-  void update(Cell& cell, MeshDistributedData& distdata);
+  void update(Cell& cell);
+  void update(Cell& cell, MeshDistributedData& distdata); // Obsolete
 
 private:
 
@@ -164,6 +165,43 @@ inline void UFCCell::clear()
 }
 
 //-----------------------------------------------------------------------------
+inline void UFCCell::update(Cell& cell)
+{
+  // Update dolfin cell pointer
+  this->cell = &cell;
+
+  // Set entity indices
+  if (MPI::numProcesses() == 1)
+  {
+    for (uint d = 0; d < topological_dimension; ++d)
+      entity_indices[d] = cell.entities(d);
+    entity_indices[topological_dimension][0] = cell.index();
+  }
+  else
+  {
+    MeshDistributedData& distdata = cell.mesh().distdata();
+#if ENABLE_P1_OPTIMIZATIONS
+    for(uint i = 0; i < cell.numEntities(0); ++i)
+      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
+#else
+    for (uint d = 0; d < topological_dimension; ++d)
+      for (uint i = 0; i < cell.numEntities(d); ++i)
+        entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+#endif
+    entity_indices[topological_dimension][0] = distdata.get_cell_global(
+        cell.index());
+  }
+
+  // Cell index (short-cut for entity_indices[topological_dimension][0])
+  index = entity_indices[topological_dimension][0];
+
+  /// Set vertex coordinates
+  const uint* vertices = cell.entities(0);
+  for (uint i = 0; i < num_vertices_; ++i)
+    coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+}
+
+//-----------------------------------------------------------------------------
 inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
 {
   // Update dolfin cell pointer
@@ -180,7 +218,7 @@ inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
   {
 #if ENABLE_P1_OPTIMIZATIONS
     for(uint i = 0; i < cell.numEntities(0); ++i)
-    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
+      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
 #else
     for (uint d = 0; d < topological_dimension; ++d)
       for (uint i = 0; i < cell.numEntities(d); ++i)

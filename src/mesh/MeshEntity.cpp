@@ -50,6 +50,16 @@ dolfin::uint MeshEntity::index(MeshEntity const& entity) const
   return 0;
 }
 //-----------------------------------------------------------------------------
+bool MeshEntity::is_shared() const
+{
+  return _mesh.distdata().is_shared(_index, _dim);
+}
+//-----------------------------------------------------------------------------
+bool MeshEntity::is_ghost() const
+{
+  return _mesh.distdata().is_ghost(_index, _dim);
+}
+//-----------------------------------------------------------------------------
 dolfin::LogStream& dolfin::operator<< (LogStream& stream,
 				       const MeshEntity& entity)
 {

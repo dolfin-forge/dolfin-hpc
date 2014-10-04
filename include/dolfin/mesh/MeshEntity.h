@@ -54,6 +54,12 @@ namespace dolfin
     /// Compute local index of given incident entity (error if not found)
     uint index(const MeshEntity& entity) const;
 
+    ///
+    bool is_shared() const;
+
+    ///
+    bool is_ghost() const;
+
     /// Output
     friend LogStream& operator<< (LogStream& stream, const MeshEntity& entity);
 

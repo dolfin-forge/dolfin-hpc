@@ -450,7 +450,7 @@ inline ufc::dofmap* DofMap::create() const
 //-----------------------------------------------------------------------------
 inline uint DofMap::macro_local_dimension() const
 {
-  return ufc_dofmap_->local_dimension();
+  return 2*ufc_dofmap_->local_dimension();
 }
 
 }

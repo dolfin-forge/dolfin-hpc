@@ -167,10 +167,11 @@ else
    enable_zlib="no"
 fi
 
+AX_CRAY
 
 if test "x${enable_mpi}" != xno; then
-   # This assumes a modern CRAY, for example XT or XE series systems
-   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+   # This assumes a modern CRAY, for example XT, XE or XC series systems
+   if test "x${is_cray}" = xyes; then
       AC_DEFINE(HAVE_PARMETIS,1,[Define if you have the ParMETIS library])
    else
       AX_PARMETIS
@@ -192,8 +193,8 @@ fi
 found_la_backend="no"
 
 if test "x${with_petsc}" != xno; then
-   # This assumes a modern CRAY, for example XT or XE series systems
-   if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
+   # This assumes a modern CRAY, for example XT, XE or XC series systems
+   if test "x${is_cray}" = xyes; then
       AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
       found_la_backend="yes"
    else

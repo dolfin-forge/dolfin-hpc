@@ -13,7 +13,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/SubDomain.h>
+#include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/fem/BilinearForm.h>
@@ -27,7 +27,8 @@
 #include <vector>
 #include <map>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 // Comparison operator for hashing coordinates. Note that two
 // coordinates are considered equal if equal to within round-off.
@@ -35,15 +36,12 @@ struct lt_coordinate
 {
   bool operator()(const std::vector<real>& x, const std::vector<real>& y) const
   {
-    if (x.size() > (y.size() + DOLFIN_EPS))
-      return false;
+    if (x.size() > (y.size() + DOLFIN_EPS)) return false;
 
     for (unsigned int i = 0; i < x.size(); i++)
     {
-      if (x[i] < (y[i] - DOLFIN_EPS))
-        return true;
-      else if (x[i] > (y[i] + DOLFIN_EPS))
-        return false;
+      if (x[i] < (y[i] - DOLFIN_EPS)) return true;
+      else if (x[i] > (y[i] + DOLFIN_EPS)) return false;
     }
 
     return false;
@@ -51,14 +49,14 @@ struct lt_coordinate
 };
 
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain) :
+PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain) :
     BoundaryCondition("Periodic", mesh, sub_domain)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-PeriodicBC::PeriodicBC(Mesh& mesh, const SubDomain& sub_domain,
-                       const SubSystem& sub_system) :
+PeriodicBC::PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
+                       SubSystem const& sub_system) :
     BoundaryCondition("Periodic", mesh, sub_domain, sub_system)
 {
   // Do nothing
@@ -69,7 +67,8 @@ PeriodicBC::~PeriodicBC()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form)
+void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
+                       BilinearForm const& form)
 {
   message("Applying periodic boundary conditions to linear system.");
 
@@ -126,7 +125,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
     {
       // Get dof and coordinate of dof
       uint const local_dof = scratch.facet_dofs[i];
-      int const global_dof = static_cast<int>(scratch.offset + scratch.dofs[local_dof]);
+      int const global_dof = static_cast<int>(scratch.offset
+          + scratch.dofs[local_dof]);
       real *& x = scratch.coordinates[local_dof];
 
       // Map coordinate from H to G
@@ -259,8 +259,11 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b, const BilinearForm& f
 }
 //-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const GenericVector& x, const BilinearForm& form)
+                       const GenericVector& x, BilinearForm const& form)
 {
   error("Periodic boundary conditions not implemented for nonlinear systems.");
 }
 //-----------------------------------------------------------------------------
+
+}
+

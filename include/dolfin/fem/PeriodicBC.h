@@ -22,6 +22,7 @@ class SubDomain;
 class Form;
 class GenericMatrix;
 class GenericVector;
+class PeriodicSubDomain;
 
 /// This class specifies the interface for setting periodic boundary
 /// conditions for partial differential equations,
@@ -45,21 +46,21 @@ class PeriodicBC: public BoundaryCondition
 public:
 
   /// Create periodic boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain);
+  PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain);
 
   /// Create sub system boundary condition for sub domain
-  PeriodicBC(Mesh& mesh, const SubDomain& sub_domain,
-             const SubSystem& sub_system);
+  PeriodicBC(Mesh& mesh, PeriodicSubDomain const& sub_domain,
+             SubSystem const& sub_system);
 
   /// Destructor
   ~PeriodicBC();
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem (not implemented)
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const BilinearForm& form);
+             BilinearForm const& form);
 
 private:
 

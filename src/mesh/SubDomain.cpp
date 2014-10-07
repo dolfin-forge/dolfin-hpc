@@ -47,7 +47,7 @@ bool SubDomain::inside(real const * x, bool const on_boundary) const
   return false;
 }
 //-----------------------------------------------------------------------------
-void SubDomain::map(real const * x, real* y) const
+void SubDomain::map(real const * xH, real* xG) const
 {
   error("Mapping between subdomains missing for periodic boundary conditions, "
         "function map() not implemented by user.");

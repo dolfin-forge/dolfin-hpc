@@ -56,11 +56,10 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
   VertexIterator v(c);
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), (void *)c.index(),
-      p.x(), p.y(), p.z(),
-      p.x(), p.y(), p.z());
+  bbox = gts_bbox_new(gts_bbox_class(), (void *) c.index(), p.x(), p.y(), p.z(),
+                      p.x(), p.y(), p.z());
 
-  for(++v; !v.end(); ++v)
+  for (++v; !v.end(); ++v)
   {
     p = v->point();
     if (p.x() > bbox->x2) bbox->x2 = p.x();
@@ -85,9 +84,8 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p) const
   GtsBBox* bbox;
 
   real btol = dolfin_get("GTS Tolerance");
-  bbox = gts_bbox_new(gts_bbox_class(), (void *)0,
-      p.x()-btol, p.y()-btol, p.z()-btol,
-      p.x()+btol, p.y()+btol, p.z()+btol);
+  bbox = gts_bbox_new(gts_bbox_class(), (void *) 0, p.x() - btol, p.y() - btol,
+                      p.z() - btol, p.x() + btol, p.y() + btol, p.z() + btol);
 
   return bbox;
 
@@ -107,34 +105,38 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p1, Point const& p2) const
   real y1, y2;
   real z1, z2;
 
-  if(p1.x()<p2.x())
+  if (p1.x() < p2.x())
   {
     x1 = p1.x();
-    x2 = p2.x();}
+    x2 = p2.x();
+  }
   else
   {
     x1 = p2.x();
-    x2 = p1.x();}
-  if(p1.y()<p2.y())
+    x2 = p1.x();
+  }
+  if (p1.y() < p2.y())
   {
     y1 = p1.y();
-    y2 = p2.y();}
+    y2 = p2.y();
+  }
   else
   {
     y1 = p2.y();
-    y2 = p1.y();}
-  if(p1.z()<p2.z())
+    y2 = p1.y();
+  }
+  if (p1.z() < p2.z())
   {
     z1 = p1.z();
-    z2 = p2.z();}
+    z2 = p2.z();
+  }
   else
   {
     z1 = p2.z();
-    z2 = p1.z();}
+    z2 = p1.z();
+  }
 
-  bbox = gts_bbox_new(gts_bbox_class(), (void *)0,
-      x1, y1, z1,
-      x2, y2, z2);
+  bbox = gts_bbox_new(gts_bbox_class(), (void *) 0, x1, y1, z1, x2, y2, z2);
 
   return bbox;
 
@@ -148,17 +150,20 @@ void GTSInterface::buildCellTree()
 {
 #ifdef HAVE_GTS
 
-  if(tree_)
-  warning("tree already initialized");
+  if (tree_)
+  {
+    error("GTS tree already initialized");
+  }
 
   GSList* bboxes = NULL;
 
-  for(CellIterator ci(mesh_); !ci.end(); ++ci)
+  for (CellIterator ci(mesh_); !ci.end(); ++ci)
   {
     Cell& c = *ci;
     bboxes = g_slist_prepend(bboxes, bboxCell(c));
   }
 
+  // A null pointer is returned if the mesh is empty
   tree_ = gts_bb_tree_new(bboxes);
   g_slist_free(bboxes);
 
@@ -182,14 +187,14 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
   overlaps = gts_bb_tree_overlap(tree_, bbprobe);
   overlaps_base = overlaps;
 
-  while(overlaps)
+  while (overlaps)
   {
-    bb = (GtsBBox *)overlaps->data;
-    boundedcell = (uint)(long)bb->bounded;
+    bb = (GtsBBox *) overlaps->data;
+    boundedcell = (uint) (long) bb->bounded;
 
     Cell close(mesh_, boundedcell);
 
-    if(type.intersects(c, close))
+    if (type.intersects(c, close))
     {
       cells.push_back(boundedcell);
     }
@@ -219,15 +224,14 @@ void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
   overlaps = gts_bb_tree_overlap(tree_, bbprobe);
   overlaps_base = overlaps;
 
-  while(overlaps)
+  while (overlaps)
   {
-    bb = (GtsBBox *)overlaps->data;
-    boundedcell = (uint)(long)bb->bounded;
+    bb = (GtsBBox *) overlaps->data;
+    boundedcell = (uint) (long) bb->bounded;
 
     Cell close(mesh_, boundedcell);
 
-    if(type.intersects(close, p))
-    cells.push_back(boundedcell);
+    if (type.intersects(close, p)) cells.push_back(boundedcell);
 
     overlaps = overlaps->next;
   }
@@ -246,25 +250,24 @@ void GTSInterface::overlap(Point const& p1, Point const& p2,
 #ifdef HAVE_GTS
   GtsBBox* bbprobe;
   GtsBBox* bb;
-  GSList* overlaps = 0,*overlaps_base;
+  GSList* overlaps = 0, *overlaps_base;
   uint boundedcell;
 
   CellType& type = mesh_.type();
 
-  bbprobe = bboxPoint(p1,p2);
+  bbprobe = bboxPoint(p1, p2);
 
   overlaps = gts_bb_tree_overlap(tree_, bbprobe);
   overlaps_base = overlaps;
 
-  while(overlaps)
+  while (overlaps)
   {
-    bb = (GtsBBox *)overlaps->data;
-    boundedcell = (uint)(long)bb->bounded;
+    bb = (GtsBBox *) overlaps->data;
+    boundedcell = (uint) (long) bb->bounded;
 
     Cell close(mesh_, boundedcell);
 
-    if( type.intersects(close, p1, p2) )
-    cells.push_back(boundedcell);
+    if (type.intersects(close, p1, p2)) cells.push_back(boundedcell);
 
     overlaps = overlaps->next;
   }

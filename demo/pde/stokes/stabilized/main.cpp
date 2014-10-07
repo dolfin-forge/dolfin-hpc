@@ -11,33 +11,37 @@
 // src/demo/mesh/subdomains.
 
 #include <dolfin.h>
+
+#ifdef ENABLE_UFL
+#include "ufc2/Stokes.h"
+#else
 #include "ufc1/Stokes.h"
+#endif
 
 using namespace dolfin;
 
 int main()
 {
   // Function for no-slip boundary condition for velocity
-  class Noslip : public Function
+  class Noslip : public VectorExpression
   {
   public:
 
-    Noslip(Mesh& mesh) : Function(mesh) {}
+    Noslip() : VectorExpression(2) {}
 
     void eval(real* values, const real* x) const
     {
       values[0] = 0.0;
       values[1] = 0.0;
     }
-
   };
 
   // Function for inflow boundary condition for velocity
-  class Inflow : public Function
+  class Inflow : public VectorExpression
   {
   public:
 
-    Inflow(Mesh& mesh) : Function(mesh) {}
+    Inflow() : VectorExpression(2) {}
 
     void eval(real* values, const real* x) const
     {
@@ -52,8 +56,10 @@ int main()
   MeshFunction<unsigned int> sub_domains(mesh, "subdomains.xml.gz");
 
   // Create functions for boundary conditions
-  Noslip noslip(mesh);
-  Inflow inflow(mesh);
+  Noslip nslip;
+  Function noslip(mesh, nslip);
+  Inflow in;
+  Function inflow(mesh, in);
   Function zero(mesh, 0.0);
   
   // Define sub systems for boundary conditions
@@ -80,8 +86,8 @@ int main()
   LinearPDE pde(a, L, mesh, bcs);
 
   // Solve PDE
-  Function u;
-  Function p;
+  Function u(mesh);
+  Function p(mesh);
   pde.set("PDE linear solver", "direct");
   pde.solve(u, p);
 

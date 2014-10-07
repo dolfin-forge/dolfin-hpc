@@ -18,7 +18,12 @@
 //    du/dx = 0 for x = 1
 
 #include <dolfin.h>
-#include "Poisson.h"
+
+#ifdef ENABLE_UFL
+#include "ufc2/Poisson.h"
+#else
+#include "ufc1/Poisson.h"
+#endif
   
 using namespace dolfin;
 
@@ -32,15 +37,15 @@ class DirichletBoundary : public SubDomain
 };
 
 // Source term
-class Source : public Function
+class Source : public ScalarExpression
 {
 public:
     
-  Source(Mesh& mesh) : Function(mesh) {}
+  Source() : ScalarExpression() {}
 
-  real eval(const real* x) const
+  void eval(real* values, const real* x) const
   {
-      return 9.0*DOLFIN_PI*DOLFIN_PI*sin(3.0*DOLFIN_PI*x[0]);
+    values[0] = 9.0*DOLFIN_PI*DOLFIN_PI*sin(3.0*DOLFIN_PI*x[0]);
   }
 
 };
@@ -56,15 +61,16 @@ int main()
   DirichletBC bc(zero, mesh, boundary);
 
   // Create source
-  Source f(mesh);
+  Source source;
+  Function f(mesh, source);
 
   // Define PDE
-  PoissonBilinearForm a;
+  PoissonBilinearForm a(mesh);
   PoissonLinearForm L(f);
   LinearPDE pde(a, L, mesh, bc);
 
   // Solve PDE
-  Function u;
+  Function u(mesh);
   pde.solve(u);
 
   // Save solution to file

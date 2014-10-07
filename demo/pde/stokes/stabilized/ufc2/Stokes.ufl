@@ -11,7 +11,7 @@
 
 vector = VectorElement("Lagrange", "triangle", 1)
 scalar = FiniteElement("Lagrange", "triangle", 1)
-system = vector + scalar
+system = vector * scalar
 
 (v, q) = TestFunctions(system)
 (u, p) = TrialFunctions(system)
@@ -22,5 +22,5 @@ h =Coefficient(scalar)
 beta  = 0.2
 delta = beta*h*h
 
-a = (dot(grad(v), grad(u)) - div(v)*p + q*div(u) + delta*dot(grad(q), grad(p)))*dx
-L = inner(v + mult(delta, grad(q)), f)*dx
+a = (inner(grad(v), grad(u)) - div(v)*p + q*div(u) + delta*dot(grad(q), grad(p)))*dx
+L = inner(v + (delta* grad(q)), f)*dx

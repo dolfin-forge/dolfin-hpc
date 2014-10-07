@@ -6,9 +6,9 @@
 // First added:  2005
 // Last changed: 2007-08-20
 //
-// This program illustrates the use of the DOLFIN nonlinear solver for solving 
-// problems of the form F(u) = 0. The user must provide functions for the 
-// function (Fu) and update of the (approximate) Jacobian.  
+// This program illustrates the use of the DOLFIN nonlinear solver for solving
+// problems of the form F(u) = 0. The user must provide functions for the
+// function (Fu) and update of the (approximate) Jacobian.
 //
 // This simple program solves a nonlinear variant of Poisson's equation
 //
@@ -25,37 +25,42 @@
 //
 // where t is pseudo time.
 //
-// This is equivalent to solving: 
+// This is equivalent to solving:
 // F(u) = (grad(v), (1-u^2)*grad(u)) - f(x,y) = 0
 
 #include <dolfin.h>
-#include "NonlinearPoisson.h"
-  
+
+#ifdef ENABLE_UFL
+#include "ufc2/NonlinearPoisson.h"
+#else
+#include "ufc1/NonlinearPoisson.h"
+#endif
+
 using namespace dolfin;
 
 // Right-hand side
-class Source : public Function, public TimeDependent
+class Source : public ScalarExpression, public TimeDependent
 {
 public:
-  
-    Source(Mesh& mesh, const real* t) : Function(mesh), TimeDependent(t) {}
 
-    real eval(const real* x) const
+    Source(const real* t) : ScalarExpression(), TimeDependent(t) {}
+
+    void eval(real* values, const real* x) const
     {
-      return time()*x[0]*sin(x[1]);
+      values[0] = time()*x[0]*sin(x[1]);
     }
 
 };
 
 // Dirichlet boundary condition
-class DirichletBoundaryCondition : public Function, public TimeDependent
+class DirichletBoundaryCondition : public ScalarExpression, public TimeDependent
 {
 public:
-  DirichletBoundaryCondition(Mesh& mesh, const real* t) : Function(mesh), TimeDependent(t) {}
-  
-  real eval(const real* x) const
+  DirichletBoundaryCondition(const real* t) : ScalarExpression(), TimeDependent(t) {}
+
+  void eval(real* values, const real* x) const
   {
-    return 1.0*time();
+    values[0] = 1.0*time();
   }
 };
 
@@ -68,15 +73,15 @@ class DirichletBoundary : public SubDomain
   }
 };
 
-// User defined nonlinear problem 
+// User defined nonlinear problem
 class MyNonlinearProblem : public NonlinearProblem
 {
   public:
 
-    // Constructor 
-    MyNonlinearProblem(Mesh& mesh, Vector& x, SubDomain& dirichlet_boundary, 
-                       Function& g, Function& f, Function& u)  
-                       : NonlinearProblem(), mesh(mesh)
+    // Constructor
+    MyNonlinearProblem(Mesh& mesh, Vector& x, SubDomain& dirichlet_boundary,
+                       Function& g, Function& f, Function& u)
+                       : NonlinearProblem(), mesh(mesh), dof_map_set(*a, mesh), reset(true)
     {
       // Create forms
       a = new NonlinearPoissonBilinearForm(u);
@@ -86,27 +91,28 @@ class MyNonlinearProblem : public NonlinearProblem
       bc = new DirichletBC(g, mesh, dirichlet_boundary);
 
       // Initialise dof map
-      dof_map_set.update(a->form(), mesh);
+      dof_map_set.update(*a, mesh);
 
       // Initialise solution vector u
       u.init(mesh, x, *a, 1);
     }
 
-    // Destructor 
+    // Destructor
     ~MyNonlinearProblem()
     {
       delete a;
       delete L;
       delete bc;
     }
- 
-    // User defined assemble of Jacobian and residual vector 
+
+    // User defined assemble of Jacobian and residual vector
     void form(GenericMatrix& A, GenericVector& b, const GenericVector& x)
     {
       dolfin_set("output destination", "silent");
       Assembler assembler(mesh);
-      assembler.assemble(A, *a);
-      assembler.assemble(b, *L);
+      assembler.assemble(A, *a, reset);
+      assembler.assemble(b, *L, reset);
+      reset = false;
       bc->apply(A, b, x, *a);
       dolfin_set("output destination", "terminal");
     }
@@ -115,17 +121,18 @@ class MyNonlinearProblem : public NonlinearProblem
   private:
 
     // Pointers to forms, mesh and boundary conditions
-    Form *a;
-    Form *L;
+    BilinearForm * a;
+    LinearForm * L;
     Mesh& mesh;
     DirichletBC* bc;
     DofMapSet dof_map_set;
+    bool reset;
 };
 
 int main(int argc, char* argv[])
 {
   dolfin_init(argc, argv);
- 
+
   // Create mesh
   UnitSquare mesh(64, 64);
 
@@ -133,14 +140,16 @@ int main(int argc, char* argv[])
   real t = 0.0;
 
   // Create source function
-  Source f(mesh, &t);
+  Source s(&t);
+  Function f(mesh, s);
 
   // Dirichlet boundary conditions
   DirichletBoundary dirichlet_boundary;
-  DirichletBoundaryCondition g(mesh, &t);
+  DirichletBoundaryCondition dbc(&t);
+  Function g(mesh, dbc);
 
   Vector x;
-  Function u;
+  Function u(mesh);
 
   // Create user-defined nonlinear problem
   MyNonlinearProblem nonlinear_problem(mesh, x, dirichlet_boundary, g, f, u);

@@ -20,7 +20,7 @@ int main()
   UnitSquare mesh(20, 20);
 
   // Create boundary mesh
-  BoundaryMesh boundary(mesh);
+  BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
 
   // Move vertices in boundary
   for (VertexIterator v(boundary); !v.end(); ++v)

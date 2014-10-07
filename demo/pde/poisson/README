@@ -8,8 +8,18 @@ such that
 
 DOLFIN uses the FEniCS Form Compiler FFC to process variational forms.
 The bilinear form a and the linear for L are here specified in the file
-Poisson.form which can be compiled using the command
 
-    ffc -l dolfin Poisson.form
+    ufc1/Poisson.form or
+    ufc2/Poisson.ufl
 
-to create the file Poisson.h included in the main program.
+depending on the ufc verion you use. They can be compiled using the command
+
+    ffc -l dolfin Poisson.form or
+    ffc -l dolfin Poisson.ufl
+
+to create the file 
+
+    ufc1/Poisson.h or
+    ufc2/Poisson.h
+
+included in the main program.

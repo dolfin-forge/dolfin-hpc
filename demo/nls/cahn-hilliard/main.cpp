@@ -12,8 +12,14 @@
 // iterative linear solvers.
 
 #include <dolfin.h>
-#include "CahnHilliard2D.h"
-#include "CahnHilliard3D.h"
+
+#ifdef ENABLE_UFL
+#include "ufc2/CahnHilliard2D.h"
+#include "ufc2/CahnHilliard3D.h"
+#else
+#include "ufc1/CahnHilliard2D.h"
+#include "ufc1/CahnHilliard3D.h"
+#endif
 
 using namespace dolfin;
 
@@ -66,8 +72,8 @@ class CahnHilliardEquation : public NonlinearProblem, public Parametrized
     {
       // Assemble system and RHS (Neumann boundary conditions)
       assembler.assemble(A, *a, reset_Jacobian);
+      assembler.assemble(b, *L, reset_Jacobian);
       reset_Jacobian  = false;
-      assembler.assemble(b, *L);
     
     }
 
@@ -99,8 +105,8 @@ int main(int argc, char* argv[])
   real T = 50*delta_t;
 
   // Solution functions
-  Function u; 
-  Function u0;
+  Function u(mesh); 
+  Function u0(mesh);
 
   // Create user-defined nonlinear problem
   CahnHilliardEquation cahn_hilliard(mesh, u, u0, dt, theta, lambda, muFactor);
@@ -134,7 +140,7 @@ int main(int argc, char* argv[])
 
   // Save initial condition to file
   File file("cahn_hilliard.pvd");
-  Function c;
+  Function c(mesh);
   c = u[1];
   file << c;
 

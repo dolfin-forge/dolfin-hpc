@@ -11,7 +11,11 @@
 // by the demo program in src/demo/subdomains.
 
 #include <dolfin.h>
+#ifdef ENABLE_UFL 
+#include "ufc2/ConvectionDiffusion.h"
+#else
 #include "ufc1/ConvectionDiffusion.h"
+#endif
 
 using namespace dolfin;
 
@@ -22,7 +26,14 @@ int main(int argc, char *argv[])
   MeshFunction<unsigned int> sub_domains(mesh, "subdomains.xml.gz");
 
   // Read velocity field
-  Function velocity("velocity.xml.gz");
+  Function velocity(mesh);
+#ifdef ENABLE_UFL 
+  File vel("ufc2/velocity.xml.gz");
+  vel >> velocity;
+#else
+  File vel("ufc1/velocity.xml.gz");
+  vel >> velocity;
+#endif
 
   // Source term and initial condition
   Function f(mesh, 0.0);
@@ -41,14 +52,15 @@ int main(int argc, char *argv[])
   Vector x, b;
 
   // Solution vector
-  Function u1(mesh, x, a);
+  Function u1(mesh, a, 1);
 
   // LU
   LUSolver lu;
 
   // Assemble matrix
-  assemble(A, a, mesh);
-  assemble(b, L, mesh);
+  Assembler assembler(mesh);
+  assembler.assemble(A, a, true);
+  assembler.assemble(b, L, true);
   bc.apply(A, b, a);
   //lu.factorize(A);
 
@@ -67,7 +79,7 @@ int main(int argc, char *argv[])
   while ( t < T )
   {
     // Assemble vector and apply boundary conditions
-    assemble(b, L, mesh);
+    assembler.assemble(b, L, false);
     bc.apply(A, b, a);
     
     // Solve the linear system

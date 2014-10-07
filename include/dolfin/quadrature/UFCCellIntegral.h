@@ -51,10 +51,10 @@ inline void UFCCellIntegral::tabulate_tensor(
   const double * const * x = ufc.cell.coordinates;
 
   UFCReferenceCell ref_cell(cell);
-  const double * const * x_ref = ref_cell.coordinates;
+  //const double * const * x_ref = ref_cell.coordinates;
 
   const unsigned int dim = ufc.mesh.topological_dimension;
-  const unsigned int n_vertices = (dim == 1 ? 2 : (dim == 2 ? 3 : 4));
+  //const unsigned int n_vertices = (dim == 1 ? 2 : (dim == 2 ? 3 : 4));
   std::vector<std::vector<double> > J(2, std::vector<double>(2, 0.));
   J[0][0] = x[1][0] - x[0][0];
   J[0][1] = x[2][0] - x[0][0];
@@ -86,12 +86,12 @@ inline void UFCCellIntegral::tabulate_tensor(
       for (unsigned int k = 0; k < n_test[0]; k++)
       {
         ufc.A[j * n_test[0] + k] = 0;
-      } // end loop over 'k'
+      }  // end loop over 'k'
     }
     else if (tensor_rank == 1) ufc.A[j] = 0;
     else std::cout << "not implemented" << std::endl;
 
-  } // end loop over 'j'
+  }  // end loop over 'j'
 
   const std::vector<real>& weights = q.get_weights();
   const std::vector<real*>& q_points = q.get_points();
@@ -173,7 +173,7 @@ inline void UFCCellIntegral::tabulate_tensor(
   std::vector<std::vector<std::vector<double> > > Jinv_phi_j(q.size());
   for (unsigned int ip = 0; ip < q.size(); ++ip)
   {
-    const double detxW = det * weights[ip];
+    //const double detxW = det * weights[ip];
     Jinv_phi_i[ip].resize(n_test[0]);
 
     // Loop primary indices.
@@ -221,16 +221,16 @@ inline void UFCCellIntegral::tabulate_tensor(
 
 //            if(std::abs(scalar_product*Gip0)>1.e-15)
           ufc.A[j * n_test[1] + k] += scalar_product * Gip0;
-        } // end loop over 'k'
+        }  // end loop over 'k'
       }
       else if (tensor_rank == 1)
       {
 //          if(std::abs(phi_values[0][j][ip][0]*Gip0)>1.e-15)
         ufc.A[j] += phi_values[0][j][ip][0] * q_coefficients[0][ip][0] * Gip0;
       }
-    } // end loop over 'j'
+    }  // end loop over 'j'
 
-  } // end loop over 'ip
+  }  // end loop over 'ip
 
   for (unsigned int i = 0; i < real_points.size(); ++i)
     delete real_points[i];

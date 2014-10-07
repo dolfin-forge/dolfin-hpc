@@ -26,32 +26,37 @@
 // F(u) = (grad(v), (1-u^2)*grad(u)) - f(x,y) = 0
 
 #include <dolfin.h>
-#include "NonlinearPoisson.h"
+
+#ifdef ENABLE_UFL
+#include "ufc2/NonlinearPoisson.h"
+#else
+#include "ufc1/NonlinearPoisson.h"
+#endif
   
 using namespace dolfin;
 
 // Right-hand side
-class Source : public Function, public TimeDependent
+class Source : public ScalarExpression, public TimeDependent
 {
   public:
 
-    Source(Mesh& mesh, const real* t) : Function(mesh), TimeDependent(t) {}
+    Source(const real* t) : ScalarExpression(), TimeDependent(t) {}
 
-    real eval(const real* x) const
+    void eval(real* values, const real* x) const
     {
-      return time()*x[0]*sin(x[1]);
+      values[0] = time()*x[0]*sin(x[1]);
     }
 };
 
 // Dirichlet boundary condition
-class DirichletBoundaryCondition : public Function, public TimeDependent
+class DirichletBoundaryCondition : public ScalarExpression, public TimeDependent
 {
   public:
-    DirichletBoundaryCondition(Mesh& mesh, const real* t) : Function(mesh), TimeDependent(t) {}
+    DirichletBoundaryCondition(const real* t) : ScalarExpression(), TimeDependent(t) {}
 
-    real eval(const real* x) const
+    void eval(real* values, const real* x) const
     {
-      return 1.0*time();
+      values[0] =  1.0*time();
     }
 };
 
@@ -75,15 +80,17 @@ int main(int argc, char* argv[])
   real t = 0.0;
 
   // Create source function
-  Source f(mesh, &t);
+  Source source(&t);
+  Function f(mesh, source);
 
   // Dirichlet boundary conditions
   DirichletBoundary dirichlet_boundary;
-  DirichletBoundaryCondition g(mesh, &t);
+  DirichletBoundaryCondition dbc(&t);
+  Function g(mesh, dbc);
   DirichletBC bc(g, mesh, dirichlet_boundary);
 
   // Solution function
-  Function u;
+  Function u(mesh);
 
   // Create forms and nonlinear PDE
   NonlinearPoissonBilinearForm a(u);

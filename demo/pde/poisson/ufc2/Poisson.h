@@ -2027,7 +2027,6 @@ public:
     return 0;
   }
 
- #ifndef UFC_BACKWARD_COMPATIBILITY 
   /// Create a new dofmap for argument function i
   virtual ufc::dofmap* create_dofmap(unsigned int i) const
   {
@@ -2047,28 +2046,7 @@ public:
     
     return 0;
   }
-#else
-  /// Create a new dofmap for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
-  {
-    switch (i)
-    {
-    case 0:
-      {
-        return new poisson_dofmap_0();
-        break;
-      }
-    case 1:
-      {
-        return new poisson_dofmap_0();
-        break;
-      }
-    }
-    
-    return 0;
-  }
 
-#endif
   /// Create a new cell integral on sub domain i
   virtual ufc::cell_integral* create_cell_integral(unsigned int i) const
   {
@@ -2212,7 +2190,6 @@ public:
     return 0;
   }
 
- #ifndef UFC_BACKWARD_COMPATIBILITY 
   /// Create a new dofmap for argument function i
   virtual ufc::dofmap* create_dofmap(unsigned int i) const
   {
@@ -2237,33 +2214,7 @@ public:
     
     return 0;
   }
-#else
-  /// Create a new dofmap for argument function i
-  virtual ufc::dof_map* create_dof_map(unsigned int i) const
-  {
-    switch (i)
-    {
-    case 0:
-      {
-        return new poisson_dofmap_0();
-        break;
-      }
-    case 1:
-      {
-        return new poisson_dofmap_0();
-        break;
-      }
-    case 2:
-      {
-        return new poisson_dofmap_0();
-        break;
-      }
-    }
-    
-    return 0;
-  }
 
-#endif
   /// Create a new cell integral on sub domain i
   virtual ufc::cell_integral* create_cell_integral(unsigned int i) const
   {

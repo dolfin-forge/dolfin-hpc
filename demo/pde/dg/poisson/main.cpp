@@ -20,49 +20,55 @@
 // using a discontinuous Galerkin formulation (interior penalty method).
 
 #include <dolfin.h>
+
+#ifdef ENABLE_UFL
+#include "ufc2/Poisson.h"
+#include "ufc2/P1Projection.h"
+#else
 #include "ufc1/Poisson.h"
 #include "ufc1/P1Projection.h"
+#endif
 
 using namespace dolfin;
 
 int main()
 {
   // Source term
-  class Source : public Function
+  class Source : public ScalarExpression
   {
   public:
     
-    Source(Mesh& mesh) : Function(mesh) {}
+    Source() : ScalarExpression() {}
 
-    real eval(const real* x) const
+    void eval(real* values, const real* x) const
     {
       real dx = x[0] - 0.5;
       real dy = x[1] - 0.5;
-      return 500.0*exp(-(dx*dx + dy*dy)/0.02);
+      values[0] = 500.0*exp(-(dx*dx + dy*dy)/0.02);
     }
-
   };
  
   // Create mesh
   UnitSquare mesh(64, 64);
 
   // Create functions
-  Source f(mesh);
-  FacetNormal n(mesh);
+  Source f;
+  Function source(mesh, f);
+//  FacetNormal n(mesh);
   AvgMeshSize h(mesh);
 
   // Define PDE
-  PoissonBilinearForm a(n, h);
-  PoissonLinearForm L(f);
+  PoissonBilinearForm a(mesh);
+  PoissonLinearForm L(source);
   LinearPDE pde(a, L, mesh);
 
   // Solve PDE
-  Function u;
+  Function u(mesh);
   pde.solve(u);
 
   // Project solution onto continuous basis for post-processing
-  Function u_proj;
-  P1ProjectionBilinearForm a_proj;
+  Function u_proj(mesh);
+  P1ProjectionBilinearForm a_proj(mesh);
   P1ProjectionLinearForm L_proj(u);
   LinearPDE pde_proj(a_proj, L_proj, mesh);
   pde_proj.solve(u_proj);

@@ -37,13 +37,13 @@ public:
 
   /// Function called before Jacobian matrix and RHS vector are formed. Users
   /// can supply this function to perform updates.
-  virtual void update(const GenericVector& x);
+  virtual void update(GenericVector const& x);
 
   /// User-defined function to compute F(u) its Jacobian
-  void form(GenericMatrix& A, GenericVector& b, const GenericVector& x);
+  void form(GenericMatrix& A, GenericVector& b, GenericVector const& x);
 
   /// Solve PDE
-  void solve(Function& u, real& t, const real& T, const real& dt);
+  void solve(Function& u, real& t, real const& T, real const& dt);
 
 private:
 
@@ -68,6 +68,7 @@ private:
   // Solver
   NewtonSolver newton_solver;
 
+  bool reset;
 };
 
 }

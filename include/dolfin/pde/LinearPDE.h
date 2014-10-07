@@ -12,6 +12,7 @@
 #define __LINEAR_PDE_H
 
 #include <dolfin/common/Array.h>
+#include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/la/Vector.h>

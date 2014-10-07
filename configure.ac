@@ -311,7 +311,13 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/ufl/Makefile\
                  src/dolfin.pc\
                  include/Makefile\
-                 include/dolfin/Makefile])
+                 include/dolfin/Makefile\
+                 demo/Makefile\
+                 demo/mesh/Makefile\
+                 demo/nls/Makefile\
+                 demo/pde/Makefile\
+                 demo/pde/dg/Makefile\
+                 demo/pde/stokes/Makefile])
 
 # Tests
 if test "x${enable_check}" = xyes; then

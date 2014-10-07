@@ -22,15 +22,15 @@
 using namespace dolfin;
 
 // Dirichlet boundary condition
-class BC : public Function
+class BC : public ScalarExpression
 {
 public:
 
-  BC(Mesh& mesh) : Function(mesh) {}
+  BC() : ScalarExpression () {}
 
-  real eval(const real* x) const
+  void eval(real* values, const real* x) const
   {
-    return sin(DOLFIN_PI*5.0*x[1]);
+    values[0] = sin(DOLFIN_PI*5.0*x[1]);
   }
 };
 
@@ -44,32 +44,39 @@ public:
   };
 
 // Advective velocity
-class Velocity : public Function
-{
-public:
-    
-  Velocity(Mesh& mesh) : Function(mesh) {}
-
-  void eval(real* values, const real* x) const
-  {
-    values[0] = -1.0;
-    values[1] = -0.4;
-  }
-
-  dolfin::uint rank() const
-  { return 1; }
-
-  dolfin::uint dim(dolfin::uint i) const
-  { return 2; }
-};
+//class Velocity : public VectorExpression
+//{
+//public:
+//    
+//  Velocity() : VectorExpression(2) {}
+//
+//  void eval(real* values, const real* x) const
+//  {
+//    values[0] = -1.0;
+//    values[1] = -0.4;
+//  }
+//
+//  dolfin::uint rank() const
+//  { return 1; }
+//
+//  dolfin::uint dim(dolfin::uint i) const
+//  { return 2; }
+//};
 
 int main(int argc, char *argv[])
 {
   // Read simple velocity field (-1.0, -0.4)
   // defined on a 64x64 unit square mesh and a quadratic vector Lagrange element
-  Function velocity("velocity.xml.gz");
-
   UnitSquare mesh(64, 64);
+  Function velocity(mesh);
+#ifdef ENABLE_UFL 
+  File vel("ufc2/velocity.xml.gz");
+  vel >> velocity;
+#else
+  File vel("ufc1/velocity.xml.gz");
+  vel >> velocity;
+#endif
+
 
   // Set up problem
   Matrix A;
@@ -77,44 +84,52 @@ int main(int argc, char *argv[])
   Function c(mesh, 0.0); // Diffusivity constant
   Function f(mesh, 0.0); // Source term
 
-  FacetNormal N(mesh);
+//  FacetNormal N(mesh);
   AvgMeshSize h(mesh);
 
   // Definitions for outflow facet function
-  OutflowFacetFunctional M_of(velocity, N);
+  std::map<std::string const, Function *> coef_map;
+  coef_map["velocity"] = &velocity;
+  OutflowFacetFunctional M_of(mesh, coef_map);
   OutflowFacet of(mesh, M_of); // From SpecialFunctions.h
 
   // Penalty parameter
   Function alpha(mesh, 20.0);
 
-  AdvectionDiffusionBilinearForm a(velocity, N, h, of, c, alpha);
+  std::map<std::string const, Function *> bil_coef_map;
+  bil_coef_map["u"] = &velocity;
+  bil_coef_map["kappa"] = &c;
+  bil_coef_map["alpha"] = &alpha;
+  AdvectionDiffusionBilinearForm a(mesh, bil_coef_map);
   AdvectionDiffusionLinearForm L(f);
 
   // Set up boundary condition (apply strong BCs)
-  BC g(mesh);
+  BC g;
+  Function g_func (mesh, g);
   DirichletBoundary boundary;
-  DirichletBC bc(g, mesh, boundary, geometric);
+  DirichletBC bc(g_func, mesh, boundary, geometric);
 
-  assemble(A, a, mesh);
-  assemble(b, L, mesh);
+  Assembler assembler(mesh);
+  assembler.assemble(A, a, true);
+  assembler.assemble(b, L, true);
   bc.apply(A, b, a);
+
+  // Discontinuous solution
+  Function uh(mesh);
+  uh.init(mesh, x, a, 1);
 
   solve(A, x, b);
 
-  // Discontinuous solution
-  Function uh(mesh, x, a);
-
   // Define PDE for projection
-  ProjectionBilinearForm ap;
+  ProjectionBilinearForm ap(mesh);
   ProjectionLinearForm Lp(uh);
   LinearPDE pde(ap, Lp, mesh);
 
   // Solve PDE
-  Function up;
+  Function up(mesh);
   pde.solve(up);
 
   // Save projected solution
   File file("temperature.pvd");
   file << up;
-
 }

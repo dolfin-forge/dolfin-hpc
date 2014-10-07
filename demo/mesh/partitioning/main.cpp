@@ -10,11 +10,6 @@ using namespace dolfin;
 
 int main()
 {
-#ifndef HAS_SCOTCH
-  message("Sorry, this demo requires SCOTCH.");
-  return 0;
-#endif
-
   // Create mesh
   UnitCube mesh(16, 16, 16);
 

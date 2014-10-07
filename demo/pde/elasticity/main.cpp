@@ -23,11 +23,11 @@ using namespace dolfin;
 int main()
 {
   // Dirichlet boundary condition for clamp at left end
-  class Clamp : public Function
+  class Clamp : public VectorExpression
   {
   public:
 
-    Clamp(Mesh& mesh) : Function(mesh) {}
+    Clamp() : VectorExpression(3) {}
 
     void eval(real* values, const real* x) const
     {
@@ -47,11 +47,11 @@ int main()
   };
 
   // Dirichlet boundary condition for rotation at right end
-  class Rotation : public Function
+  class Rotation : public VectorExpression
   {
   public:
 
-    Rotation(Mesh& mesh) : Function(mesh) {}
+    Rotation() : VectorExpression(3) {}
 
     void eval(real* values, const real* x) const
     {
@@ -89,14 +89,16 @@ int main()
   Function f(mesh, 3, 0.0);
 
   // Set up boundary condition at left end
-  Clamp c(mesh);
+  Clamp c;
+  Function clamp(mesh, c);
   Left left;
-  DirichletBC bcl(c, mesh, left);
+  DirichletBC bcl(clamp, mesh, left);
 
   // Set up boundary condition at right end
-  Rotation r(mesh);
+  Rotation r;
+  Function rotation(mesh, r);
   Right right;
-  DirichletBC bcr(r, mesh, right);
+  DirichletBC bcr(rotation, mesh, right);
 
   // Set up boundary conditions
   Array<BoundaryCondition*> bcs;
@@ -115,7 +117,7 @@ int main()
   LinearPDE pde(a, L, mesh, bcs);
 
   // Solve PDE (using direct solver)
-  Function u;
+  Function u(mesh);
   pde.set("PDE linear solver", "direct");
   pde.solve(u);
 

@@ -7,21 +7,25 @@
 // Testing evaluation at arbitrary points
 
 #include <dolfin.h>
-#include "Projection.h"
+
+#ifdef ENABLE_UFL
+#include "ufc2/Projection.h"
+#else 
+#include "ufc2/Projection.h"
+#endif
 
 using namespace dolfin;
 
-class F : public Function
+class F : public ScalarExpression
 {
 public:
   
-  F(Mesh& mesh) : Function(mesh) {}
+  F() : ScalarExpression() {}
 
-  real eval(const real* x) const
+  void eval(real* values, const real* x) const
   {
-    return sin(3.0*x[0])*sin(3.0*x[1])*sin(3.0*x[2]);
+    values[0] = sin(3.0*x[0])*sin(3.0*x[1])*sin(3.0*x[2]);
   }
-  
 };
 
 int main()
@@ -29,20 +33,25 @@ int main()
   // Create mesh and a point in the mesh
   UnitCube mesh(8, 8, 8);
   real x[3] = {0.3, 0.3, 0.3};
+  real f_values[1] = {0.0};
+  real g_values[1] = {0.0};
 
   // A user-defined function
-  F f(mesh);
+  F force;
+  Function f(mesh, force);
 
   // Project to a discrete function
-  ProjectionBilinearForm a;
+  ProjectionBilinearForm a(mesh);
   ProjectionLinearForm L(f);
   LinearPDE pde(a, L, mesh);
-  Function g;
+  Function g(mesh);
   pde.solve(g);
 
   // Evaluate user-defined function f
-  message("f(x) = %g", f.eval(x));
+  f.eval(f_values, x);
+  message("f(x) = %g", f_values[0]);
 
   // Evaluate discrete function g (projection of f)
-  message("g(x) = %g", g.eval(x));
+  g.eval(g_values, x);
+  message("g(x) = %g", g_values[0]);
 }

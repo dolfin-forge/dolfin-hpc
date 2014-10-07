@@ -15,31 +15,37 @@
 // simple reaction-diffusion equation.
 
 #include <dolfin.h>
-#include "EnergyNorm.h"
-  
+
+#ifdef ENABLE_UFL
+#include "ufc2/EnergyNorm.h"
+#else
+#include "ufc1/EnergyNorm.h"
+#endif
+
 using namespace dolfin;
 
 int main()
 {
   // The function v
-  class MyFunction : public Function
+  class MyFunction : public ScalarExpression
   {
   public:
 
-    MyFunction(Mesh& mesh) : Function(mesh) {}
+    MyFunction() : ScalarExpression() {}
     
-    real eval(const real* x) const
+    void eval(real* values, const real* x) const
     {
-      return sin(x[0]) + cos(x[1]);
+      values[0] = sin(x[0]) + cos(x[1]);
     }
-    
   };
 
   // Compute approximate value
   UnitSquare mesh(16, 16);
-  MyFunction v(mesh);
-  EnergyNormFunctional M(v);
-  real value = assemble(M, mesh);
+  MyFunction v;
+  Function my_function(mesh, v);
+  EnergyNormFunctional M(my_function);
+  Assembler assembler(mesh);
+  real value = assembler.assemble(M);
 
   // Compute exact value
   real exact_value = 2.0 + 2.0*sin(1.0)*(1.0 - cos(1.0));

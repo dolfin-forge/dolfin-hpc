@@ -20,7 +20,8 @@ NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     a(a),
     L(L),
     mesh(mesh),
-    assembler(mesh)
+    assembler(mesh),
+    reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
 
@@ -34,7 +35,8 @@ NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     L(L),
     mesh(mesh),
     bcs(bcs),
-    assembler(mesh)
+    assembler(mesh),
+    reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
 }
@@ -44,18 +46,19 @@ NonlinearPDE::~NonlinearPDE()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void NonlinearPDE::update(const GenericVector& x)
+void NonlinearPDE::update(GenericVector const& x)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 void NonlinearPDE::form(GenericMatrix& A, GenericVector& b,
-                        const GenericVector& x)
+                        GenericVector const& x)
 {
   // Assemble
-  assembler.assemble(A, a, true);
-  assembler.assemble(b, L, true);
+  assembler.assemble(A, a, reset);
+  assembler.assemble(b, L, reset);
 
+  reset = false;
   // Apply boundary conditions
   for (uint i = 0; i < bcs.size(); i++)
   {
@@ -63,7 +66,7 @@ void NonlinearPDE::form(GenericMatrix& A, GenericVector& b,
   }
 }
 //-----------------------------------------------------------------------------
-void NonlinearPDE::solve(Function& u, real& t, const real& T, const real& dt)
+void NonlinearPDE::solve(Function& u, real& t, real const& T, real const& dt)
 {
   begin("Solving nonlinear PDE.");
 

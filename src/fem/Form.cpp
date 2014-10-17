@@ -96,9 +96,10 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
             coef_rank);
     if (fe_rank != coef_rank)
     {
-      error("Invalid value rank of Function %d, got %d but expecting %d.",
-            "You may need to provide the rank of a user defined Function.", i,
-            coef_rank, fe_rank);
+      error("Invalid value rank of Function '%s' with index %d:\n"
+            "Got %d but expecting %d.\n"
+            "You may need to provide the rank of a user defined Function.",
+            this->coefficient_name(i).c_str(), i, coef_rank, fe_rank);
     }
 
     for (uint j = 0; j < coef_rank; ++j)
@@ -108,9 +109,10 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
       if (dim != fe_dim)
       {
         error(
-            "Invalid value dimension %d of Function %d, got %d but expecting %d.",
+            "Invalid value dimension %d of Function '%s' with index %d:\n"
+            "got %d but expecting %d.\n"
             "You may need to provide the dimension of a user defined Function.",
-            j, i, dim, fe_dim);
+            j, this->coefficient_name(i).c_str(), i, dim, fe_dim);
       }
     }
     delete fe;

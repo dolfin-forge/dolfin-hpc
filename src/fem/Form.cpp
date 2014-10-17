@@ -86,7 +86,8 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
     message(1, "Checking coefficient %d:", i);
     if (coefficients[i] == NULL)
     {
-      error("Got NULL Function as coefficient %d.", i);
+      error("Got NULL Function as coefficient %d labeled as '%s'.", i,
+            this->coefficient_name(i).c_str());
     }
 
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());

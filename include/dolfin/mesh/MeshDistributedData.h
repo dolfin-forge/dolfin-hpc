@@ -110,7 +110,7 @@ public:
 
   inline bool is_shared(uint i, uint dim) const
   {
-    return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : true);
+    return (MPI::numProcesses() > 1 ? (shared[dim].count(i) > 0) : false);
   }
 
   bool is_shared(MeshEntity const& entity) const;

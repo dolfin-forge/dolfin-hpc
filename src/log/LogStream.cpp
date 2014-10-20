@@ -78,13 +78,7 @@ LogStream& LogStream::operator<<(unsigned int a)
 LogStream& LogStream::operator<<(real a)
 {
   char tmp[DOLFIN_LINELENGTH];
-  /*
-    if (fabs(a) < 1e-5 || fabs(a) > 1e5)
-    sprintf(tmp, "%e", a);
-    else
-    sprintf(tmp, "%f", a);
-  */
-  snprintf(tmp, DOLFIN_LINELENGTH, "%.3g", a);
+  snprintf(tmp, DOLFIN_LINELENGTH, "%.8f", a);
   add(tmp);
   return *this;
 }

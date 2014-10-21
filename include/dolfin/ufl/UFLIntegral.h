@@ -16,6 +16,72 @@ namespace ufl
 /**
  *  DOCUMENTATION:
  *
+ *  @class  MeasureData
+ *
+ *  @brief  A domain description for different kinds of data that could be
+ *  passed to a Measure.
+ */
+
+  class MeasureData : public type<std::string>
+  {
+
+    public:
+
+      enum Type
+      {
+        None
+      };
+
+      ///
+      MeasureData(Type const& t);
+      
+      ///
+      MeasureData(repr_t const& repr);
+
+      ///
+      ~MeasureData();
+
+      ///
+      Type const type() const;
+
+      ///
+      void display() const;
+
+    private:
+
+      MeasureData::Type const type_;
+
+      //--- STATIC ----------------------------------------------------------------
+
+      ///
+      static std::string const type_repr(MeasureData::Type const& t);
+
+      ///
+      static MeasureData::Type const repr_type(repr_t const& repr);
+      typedef std::map<repr_t const, MeasureData::Type> MappingReprToType;
+      typedef std::map<MeasureData::Type, repr_t const> MappingTypeToRepr;
+      typedef std::pair<repr_t const, MeasureData::Type> MappingReprToTypeItem;
+      typedef std::pair<MeasureData::Type, repr_t const> MappingTypeToReprItem;
+
+      static MappingReprToType const MappingToType()
+      {
+        static MappingReprToType const MappingToType = __init_mapping_repr_to_type();
+        return MappingToType;
+      }
+
+      static MappingTypeToRepr const MappingToRepr()
+      {
+        static MappingTypeToRepr const MappingToRepr = __init_mapping_type_to_repr();
+        return MappingToRepr;
+      }
+
+      static MappingReprToType const __init_mapping_repr_to_type();
+      static MappingTypeToRepr const __init_mapping_type_to_repr();
+  };
+
+/**
+ *  DOCUMENTATION:
+ *
  *  @class  MeasureDomain
  *
  *  @brief  A domain description for different kinds of measures.
@@ -57,9 +123,11 @@ namespace ufl
 
       //--- STATIC ----------------------------------------------------------------
 
+    public:
       ///
       static std::string const type_repr(MeasureDomain::Type const& t);
 
+    private:
       ///
       static MeasureDomain::Type const repr_type(repr_t const& repr);
       typedef std::map<repr_t const, MeasureDomain::Type> MappingReprToType;
@@ -100,11 +168,11 @@ namespace ufl
 
       ///
       Measure(MeasureDomain::Type const& measure_type, 
-//          MeasureData const& measure_data, 
-          dolfin::uint measure_id);
+          MeasureData const& measure_data, 
+          dolfin::uint const& measure_id);
 
       ///
-      Measure(repr_t const & repr);
+      Measure(repr_t const& repr);
                                                                                                     
 //      Measure(MeasureDomain::Type const& measure_type, 
 //          MeasureData const& meta_data, 
@@ -114,17 +182,32 @@ namespace ufl
       ///
       ~Measure();
 
+      ///
+      std::vector<Class const *> const operands(std::string const& name) const;
+
+      ///
+      std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          dolfin::UFCReferenceCell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
+
       //--- INTERFACE -------------------------------------------------------------
 
-//      Class const& reconstruct(const Class& measure);
+      static Measure const * create(Object::repr_t const& repr);
 
-      MeasureDomain::Type const& measure_type() const;
+      MeasureDomain::Type const measure_type() const;
 
 //      MeasureData const& measure_data() const;
 
-//      MeasureData const& meta_data() const;
+      MeasureData const& meta_data() const;
 
-      dolfin::uint measure_id() const;
+      dolfin::uint const& measure_domain_id() const;
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -138,8 +221,9 @@ namespace ufl
       void display() const;
 
     private:
-      MeasureDomain::Type const measure_;
+      MeasureDomain const measure_domain_;
       type<dolfin::uint> const measure_id_;
+      MeasureData const meta_data_;
 
       repr_t const repr_;
       std::string const str_;
@@ -158,13 +242,28 @@ namespace ufl
       ///
       ~Integral();
 
+      ///
+      std::vector<Class const *> const operands(std::string const& name) const;
+
+      ///
+      std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          dolfin::UFCReferenceCell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
+
       //--- INTERFACE -------------------------------------------------------------
 
-      Expression const& integrand() const;
+      static Integral const * create(Object::repr_t const& repr);
+
+      std::vector<Expression const *> const& integrand() const;
 
       Measure const& measure() const;
-
-//      Class const& reconstruct(const Class& integral);
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -179,7 +278,10 @@ namespace ufl
 
     private:
 
-      Expression const& integrand_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& e);
+
+      std::vector<Expression const *> const expressions_;
       Measure const measure_;
 
       repr_t const repr_;

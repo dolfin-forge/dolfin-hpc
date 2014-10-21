@@ -7,7 +7,7 @@
 #ifndef __UFL_COEFFICIENT_H
 #define __UFL_COEFFICIENT_H
 
-#include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 namespace ufl
@@ -22,33 +22,60 @@ namespace ufl
  */
 
 
-  class CoefficientBase : public Class
+  class CoefficientBase : public Expression
   {
     public:
   
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const = 0;
+
+      ///
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const = 0;
+
       //--- INTERFACE -------------------------------------------------------------
+
+      static CoefficientBase const * create(Object::repr_t const& repr);
+
+      ///
+      std::vector<Expression const *> const& operands() const;
 
       /// Return a reference to the FiniteElementBase of this Coefficient
       FiniteElementBase const& element() const;
 
-      /// Return a reference to the value shape of the FiniteElementBase of this Coefficient
-      ValueArray const& shape() const;
-
       /// Return a reference to the cell of the FiniteElementBase of this Coefficient
-      Cell const& cell() const;
+      Cell const cell() const;
 
       /// Return whether the basis functions of this element is spatially constant
       /// over each cell
       bool const is_cellwise_constant() const;
 
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
+
       /// __repr__
-      repr_t const repr() const;
+      repr_t const repr() const = 0;
 
       /// __str__
-      std::string const str() const;
+      std::string const str() const = 0;
 
       ///
-      void display() const;
+      void display() const = 0;
 
     protected:
 
@@ -57,16 +84,26 @@ namespace ufl
           FiniteElementBase const& finite_element, dolfin::uint const& count);
 
       ///
+      CoefficientBase(std::string const& name, Cell const& cell, dolfin::uint const& count);
+
+      ///
+      CoefficientBase(std::string const& name, Cell const& cell, 
+          dolfin::uint const& dim, dolfin::uint const& count);
+
+      ///
+      CoefficientBase(std::string const& name, Cell const& cell,  ValueArray const& shape, 
+          std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& count);
+
+      ///
       CoefficientBase(std::string const& name, repr_t const& repr);
 
       ///
       ~CoefficientBase();
 
-      FiniteElementBase const& finite_element_;
+      FiniteElementBase const* finite_element_;
       type<dolfin::uint> const count_;
 
-      repr_t const repr_;
-      std::string const str_;
+//      std::vector<Expression const *> const expressions_;
 
   };
 
@@ -92,7 +129,16 @@ namespace ufl
       ///
       ~Coefficient();
   
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
+
+      ///
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
       //--- INTERFACE -------------------------------------------------------------
+
+      static Coefficient const * create(Object::repr_t const& repr);
 
       /// __repr__
       repr_t const repr() const;
@@ -133,6 +179,18 @@ namespace ufl
       ///
       ~Constant();
   
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
+
+      ///
+      virtual std::vector<std::vector<Class const* > > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
+      //--- INTERFACE -------------------------------------------------------------
+
+      ///
+      static Constant const * create(Object::repr_t const& repr);
+
       /// __repr__
       repr_t const repr() const;
 
@@ -171,6 +229,18 @@ namespace ufl
 
       ///
       ~VectorConstant();
+
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
+
+      ///
+      virtual std::vector<std::vector<Class const* > > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
+      //--- INTERFACE -------------------------------------------------------------
+
+      ///
+      static VectorConstant const * create(Object::repr_t const& repr);
   
       /// __repr__
       repr_t const repr() const;
@@ -211,6 +281,18 @@ namespace ufl
       ///
       ~TensorConstant();
   
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
+
+      ///
+      virtual std::vector<std::vector<Class const* > > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
+      //--- INTERFACE -------------------------------------------------------------
+
+      ///
+      static TensorConstant const * create(Object::repr_t const& repr);
+
       /// __repr__
       repr_t const repr() const;
 

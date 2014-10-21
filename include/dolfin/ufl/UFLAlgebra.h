@@ -7,14 +7,8 @@
 #ifndef __UFL_ALGEBRA_H_
 #define __UFL_ALGEBRA_H_
 
-//#include <string>
-//#include <vector>
-
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLExpression.h>
-//#include <dolfin/ufl/UFLIndex.h>
-
-//#include <dolfin/common/types.h>
 
 namespace ufl
 {
@@ -22,12 +16,12 @@ namespace ufl
   /**
    *  DOCUMENTATION:
    *
-   *  @class  Class
+   *  @class  Sum
    *
    *  @brief  Provides an interface complying with UFL Sum.
    */
 
-  class Sum : public Class
+  class Sum : public Expression
   {
 
     public:
@@ -41,22 +35,37 @@ namespace ufl
       ///
       ~Sum();
 
-      //--- INTERFACE -------------------------------------------------------------
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      std::pair<Expression, Expression> const& operands() const;
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
 
-//      ///
-//      free_indices() const;
+      //--- INTERFACE -------------------------------------------------------------
 
-//      ///
-//      index_dimensions() const;
+      static Sum const * create(Object::repr_t const& repr);
 
-//      ///
-//      shape() const;
+      ///
+      std::vector<Expression const *> const& operands() const;
 
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
@@ -71,7 +80,10 @@ namespace ufl
 
     private:
 
-      std::pair<Expression, Expression> const s_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& s1, Expression const& s2);
+
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -81,12 +93,12 @@ namespace ufl
   /**
    *  DOCUMENTATION:
    *
-   *  @class  Class
+   *  @class  Product
    *
    *  @brief  Provides an interface complying with UFL Product.
    */
 
-  class Product : public Class
+  class Product : public Expression
   {
 
     public:
@@ -100,22 +112,37 @@ namespace ufl
       ///
       ~Product();
 
-      //--- INTERFACE -------------------------------------------------------------
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      std::pair<Expression, Expression> const& operands() const;
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
 
-//      ///
-//      free_indices() const;
+      //--- INTERFACE -------------------------------------------------------------
 
-//      ///
-//      index_dimensions() const;
+      static Product const * create(Object::repr_t const& repr);
 
-//      ///
-//      shape() const;
+      ///
+      std::vector<Expression const *> const& operands() const;
 
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
@@ -130,7 +157,10 @@ namespace ufl
 
     private:
 
-      std::pair<Expression, Expression> const p_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& p1, Expression const& p2);
+
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -140,12 +170,12 @@ namespace ufl
   /**
    *  DOCUMENTATION:
    *
-   *  @class  Class
+   *  @class  Division
    *
    *  @brief  Provides an interface complying with UFL Division.
-   */
+   **/
 
-  class Division : public Class
+  class Division : public Expression
   {
 
     public:
@@ -159,22 +189,37 @@ namespace ufl
       ///
       ~Division();
 
-      //--- INTERFACE -------------------------------------------------------------
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      std::pair<Expression, Expression> const& operands() const;
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
 
-//      ///
-//      free_indices() const;
+      //--- INTERFACE -------------------------------------------------------------
 
-//      ///
-//      index_dimensions() const;
+      static Division const * create(Object::repr_t const& repr);
 
-//      ///
-//      shape() const;
+      ///
+      std::vector<Expression const *> const& operands() const;
 
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
@@ -189,7 +234,10 @@ namespace ufl
 
     private:
 
-      std::pair<Expression, Expression> const d_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& d1, Expression const& d2);
+
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -199,12 +247,12 @@ namespace ufl
   /**
    *  DOCUMENTATION:
    *
-   *  @class  Class
+   *  @class  Power
    *
    *  @brief  Provides an interface complying with UFL Power.
    */
 
-  class Power : public Class
+  class Power : public Expression
   {
 
     public:
@@ -218,22 +266,37 @@ namespace ufl
       ///
       ~Power();
 
-      //--- INTERFACE -------------------------------------------------------------
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      std::pair<Expression, Expression> const& operands() const;
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
 
-//      ///
-//      free_indices() const;
+      //--- INTERFACE -------------------------------------------------------------
 
-//      ///
-//      index_dimensions() const;
+      static Power const * create(Object::repr_t const& repr);
 
-//      ///
-//      shape() const;
+      ///
+      std::vector<Expression const *> const& operands() const;
 
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
@@ -248,7 +311,10 @@ namespace ufl
 
     private:
 
-      std::pair<Expression, Expression> const apowb_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& a, Expression const& b);
+
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -257,12 +323,12 @@ namespace ufl
   /**
    *  DOCUMENTATION:
    *
-   *  @class  Class
+   *  @class  Abs
    *
    *  @brief  Provides an interface complying with UFL Abs.
    */
 
-  class Abs : public Class
+  class Abs : public Expression
   {
 
     public:
@@ -276,22 +342,37 @@ namespace ufl
       ///
       ~Abs();
 
-      //--- INTERFACE -------------------------------------------------------------
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      Expression const& operands() const;
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
 
-//      ///
-//      free_indices() const;
+      //--- INTERFACE -------------------------------------------------------------
 
-//      ///
-//      index_dimensions() const;
+      static Abs const * create(Object::repr_t const& repr);
 
-//      ///
-//      shape() const;
+      ///
+      std::vector<Expression const *> const& operands() const;
 
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
@@ -306,7 +387,10 @@ namespace ufl
 
     private:
 
-      Expression const a_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& a);
+
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;

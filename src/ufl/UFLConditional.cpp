@@ -103,20 +103,18 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
   BinaryCondition::BinaryCondition(std::string const& name, Expression const& left, Expression const& right) :
     Condition(name),
-    left_expression_(left),
-    right_expression_(right),
-    repr_(*this, left_expression_, right_expression_),
-    str_(left_expression_.str() + " " + name + " " + right_expression_.str())
+    expressions_(fill_expressions(left, right)),
+    repr_(*this, left, right),
+    str_(left.str() + " " + name + " " + right.str())
   {
   }
 
 //-----------------------------------------------------------------------------
   BinaryCondition::BinaryCondition(std::string const& name, repr_t const & repr):
     Condition(name, repr),
-    left_expression_(arg(0)),
-    right_expression_(arg(1)),
-    repr_(*this, left_expression_, right_expression_),
-    str_(left_expression_.str() + " " + name + " " + right_expression_.str())
+    expressions_(fill_expressions(args())),
+    repr_(*this, *expressions_[0], *expressions_[1]),
+    str_(expressions_[0]->str() + " " + name + " " + expressions_[1]->str())
   {
   }
 
@@ -140,6 +138,25 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
   void BinaryCondition::display() const
   {
+  }
+
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const BinaryCondition::fill_expressions(std::vector<repr_t> const& reprs)
+  {
+    std::vector<Expression const *> expr(reprs.size());
+    for(dolfin::uint i=0; i<expr.size(); ++i)
+      expr[i] = expr[i]->create(reprs[i]);
+//    expr.push_back(Expression::create(reprs[1]));
+    return expr;
+  }
+
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const BinaryCondition::fill_expressions(Expression const& e1, Expression const& e2)
+  {
+    std::vector<Expression const *> expr;
+    expr.push_back(&e1);
+    expr.push_back(&e2);
+    return expr;
   }
 
 //-----------------------------------------------------------------------------
@@ -281,18 +298,18 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
   NotCondition::NotCondition(Expression const& e) :
     Condition("NotCondition"),
-    expression_(e),
-    repr_(*this, expression_),
-    str_("!(" + expression_.str() + ")")
+    expressions_(fill_expressions(e)),
+    repr_(*this, *expressions_[0]),
+    str_("!(" + expressions_[0]->str() + ")")
   {
   }
 
 //-----------------------------------------------------------------------------
   NotCondition::NotCondition(repr_t const & repr):
     Condition("NotCondition", repr),
-    expression_(arg(0)),
-    repr_(*this, expression_),
-    str_("!(" + expression_.str() + ")")
+    expressions_(fill_expressions(args())),
+    repr_(*this, *expressions_[0]),
+    str_("!(" + expressions_[0]->str() + ")")
   {
   }
 
@@ -319,25 +336,45 @@ using dolfin::error;
   }
 
 //-----------------------------------------------------------------------------
+  std::vector<Expression const *> const NotCondition::fill_expressions(std::vector<repr_t> const& reprs)
+  {
+    std::vector<Expression const *> expr(reprs.size());
+    for(dolfin::uint i=0; i<expr.size(); ++i)
+      expr[i] = expr[i]->create(reprs[i]);
+//    expr.push_back(Expression::create(reprs[0]));
+    return expr;
+  }
+
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const NotCondition::fill_expressions(Expression const& e)
+  {
+    std::vector<Expression const *> expr;
+    expr.push_back(&e);
+    return expr;
+  }
+
+//-----------------------------------------------------------------------------
   Conditional::Conditional(Condition const& c, Expression const& e1, Expression const& e2) :
     Class("Conditional"),
     c_(&c),
-    e1_(e1),
-    e2_(e2),
-    repr_(*this, *c_, e1_, e2_),
-    str_(c_->str() + " ? " + e1_.str() + " : " + e2_.str())
+    expressions_(fill_expressions(e1, e2)),
+    repr_(*this, *c_, *expressions_[0], *expressions_[1]),
+    str_(c_->str() + " ? " + e1.str() + " : " + e2.str())
   {
+    std::cout << "Conditional from C++" << std::endl;
+    std::cout << repr_ << std::endl;
   }
 
 //-----------------------------------------------------------------------------
   Conditional::Conditional(repr_t const& repr):
     Class("Conditional", repr),
     c_(Condition::create(arg(0))),
-    e1_(arg(1)),
-    e2_(arg(2)),
-    repr_(*this, *c_, e1_, e2_),
-    str_(c_->str() + " ? " + e1_.str() + " : " + e2_.str())
+    expressions_(fill_expressions(args())),
+    repr_(*this, *c_, *expressions_[0], *expressions_[1]),
+    str_(c_->str() + " ? " + expressions_[0]->str() + " : " + expressions_[1]->str())
   {
+    std::cout << "Conditional from repr" << std::endl;
+    std::cout << repr_ << std::endl;
   }
 
 //-----------------------------------------------------------------------------
@@ -362,5 +399,23 @@ using dolfin::error;
   {
   }
 
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const Conditional::fill_expressions(std::vector<repr_t> const& reprs)
+  {
+    std::vector<Expression const *> expr(2);
+    for(dolfin::uint i=0; i<expr.size(); ++i)
+      expr[i] = expr[i]->create(reprs[i+1]);
+//    expr.push_back(Expression::create(reprs[1]));
+//    expr.push_back(Expression::create(reprs[2]));
+    return expr;
+  }
 
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const Conditional::fill_expressions(Expression const& e1, Expression const& e2)
+  {
+    std::vector<Expression const *> expr;
+    expr.push_back(&e1);
+    expr.push_back(&e2);
+    return expr;
+  }
 }

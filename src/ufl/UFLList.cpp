@@ -10,37 +10,34 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-  List::List(std::vector<Integral const *>& integrals) :
+  List::List(std::vector<Integral const *> const& integrals) :
     Class("[", "]"),
     integrals_(integrals),
-//    repr_(*this, integrals),
+    repr_(*this, integrals_),
     str_("")
   {
-//    integrals_.clear();
-//    integrals_.resize(integrals.size());
-//    for(dolfin::uint i=0; i<integrals.size(); ++i)
-//      integrals_[i] = new Integral(integrals[i]);
   }
 
 //-----------------------------------------------------------------------------
   List::List(repr_t const& repr) :
     Class("[", "]", repr),
-//    repr_(*this, ),
+    integrals_(fill_expressions(args())),
+    repr_(*this, integrals_),
     str_("")
   {
-//    std::cout << "C List" << std::endl;
-    std::vector<repr_t> const arguments = args();
-    integrals_.clear();
-    integrals_.resize(arguments.size());
-    for(dolfin::uint i=0; i<arguments.size(); ++i)
-      integrals_[i]= new Integral(arguments[i]);
-//    std::cout << "C List end" << std::endl;
   }
+
 //-----------------------------------------------------------------------------
   List::~List()
   {
   }
   
+//-----------------------------------------------------------------------------
+  std::vector<Integral const *> const& List::get_integrals() const
+  {
+    return integrals_;
+  } 
+
 //-----------------------------------------------------------------------------
   Object::repr_t const List::repr() const
   {
@@ -56,5 +53,14 @@ namespace ufl
 //-----------------------------------------------------------------------------
   void List::display() const
   {
+  }
+
+//-----------------------------------------------------------------------------
+  std::vector<Integral const *> const List::fill_expressions(std::vector<repr_t> const& reprs)
+  {
+    std::vector<Integral const *> expr;
+    for(dolfin::uint i=0; i<reprs.size(); ++i)
+      expr.push_back(new Integral(reprs[i]));
+    return expr;
   }
 }

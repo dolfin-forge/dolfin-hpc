@@ -11,14 +11,14 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(Family::Type family, Cell const& cell,
-                             dolfin::uint const degree) :
+                             dolfin::uint const degree, dolfin::uint const dim) :
     FiniteElementBase("TensorElement"),
     family_(Family::Tensor),
     sub_element_(family, cell, degree),
     value_shape_(
-        ValueArray(2, cell.domain().dim()) + sub_element_.value_shape()),
+        ValueArray(2, dim) + sub_element_.value_shape()),
     symmetry_(),
-    sub_elements_(cell.domain().dim(), &sub_element_)
+    sub_elements_(dim*dim, &sub_element_)
 {
   createReprStr();
 }
@@ -30,10 +30,10 @@ TensorElement::TensorElement(repr_t const& repr) :
     sub_element_(Family(arg(0)).type(), Cell(arg(1)),
                  type<dolfin::uint>(arg(2))),
     value_shape_(
-        ValueArray(2, sub_element_.cell().domain().dim())
+        ValueArray(2, type<dolfin::uint>(arg(3)))
             + sub_element_.value_shape()),
     symmetry_(),
-    sub_elements_(sub_element_.cell().domain().dim(), &sub_element_)
+    sub_elements_(type<dolfin::uint>(arg(3))*type<dolfin::uint>(arg(3)), &sub_element_)
 {
   createReprStr();
 }

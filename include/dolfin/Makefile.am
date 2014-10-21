@@ -257,6 +257,7 @@ nobase_pkginclude_HEADERS = \
 				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
 				ufl/UFLarray.h\
+				ufl/UFLdict.h\
 				ufl/UFLrepr.h\
 				ufl/UFLtuple.h\
 				ufl/UFLtype.h\
@@ -269,6 +270,7 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLClass.h\
 				ufl/UFLCoefficient.h\
 				ufl/UFLConditional.h\
+				ufl/UFLData.h\
 				ufl/UFLDifferentiation.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
@@ -281,6 +283,7 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLFiniteElement.h\
 				ufl/UFLFiniteElementBase.h\
 				ufl/UFLForm.h\
+				ufl/UFLFormData.h\
 				ufl/UFLGeometricQuantity.h\
 				ufl/UFLIndex.h\
 				ufl/UFLIndexed.h\

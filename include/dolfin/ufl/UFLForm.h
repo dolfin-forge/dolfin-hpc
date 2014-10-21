@@ -7,10 +7,16 @@
 #ifndef __UFL_FORM_H_
 #define __UFL_FORM_H_
 
+#include <dolfin/ufl/UFLFormData.h>
 #include <dolfin/ufl/UFLList.h>
+#include <dolfin/ufl/UFLtuple.h>
+
+#include <ufc.h>
 
 namespace ufl
 {
+
+  class FormData;
 
 /**
  *  DOCUMENTATION:
@@ -28,36 +34,40 @@ namespace ufl
       Form(List const& list);
 
       ///
-      Form(repr_t const & repr);
+      Form(repr_t const& repr);
+
+      ///
+      Form(ufc::form const& ufc_form);
 
       ///
       ~Form();
 
       //--- INTERFACE -------------------------------------------------------------
 
+      ///Does this function make sense?
       Cell const& cell() const;
 
-      std::vector<Integral> const& integrals(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+      tuple<Integral> const integrals(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
-      std::vector<Measure> const measures(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+      tuple<Measure> const measures(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
-      std::vector<MeasureDomain::Type> const domains(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+      std::vector<std::pair<MeasureDomain::Type, dolfin::uint> > const domains(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
 
-      std::vector<Integral> const& cell_integrals() const;
+      tuple<Integral> const cell_integrals() const;
 
-      std::vector<Integral> const& exterior_facet_integrals() const;
+      tuple<Integral> const exterior_facet_integrals() const;
       
-      std::vector<Integral> const& interior_facet_integrals() const;
+      tuple<Integral> const interior_facet_integrals() const;
       
-      std::vector<Integral> const& macro_cell_integrals() const;
+      tuple<Integral> const macro_cell_integrals() const;
       
-      std::vector<Integral> const& surface_integrals() const;
+      tuple<Integral> const surface_integrals() const;
       
-//      FormData const& form_data() const;
+      FormData const& form_data() const;
       
 //      FormData const& compute_form_data() const;
 
-      bool const is_preprocessed() const;
+//      bool const is_preprocessed() const;
       
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -70,14 +80,15 @@ namespace ufl
       void display() const;
 
     private:
+
       List const list_;
 
-//      const FormData form_data;
+      FormData const * form_data_;
 
       repr_t const repr_;
       std::string const str_;
 
-      bool const is_preprocessed_;
+//      bool const is_preprocessed_;
   };
   
   

@@ -61,6 +61,10 @@ public:
   repr_t const make_repr(
         std::vector<Object const *> const& prototype) const;
 
+  ///
+//  repr_t const make_repr(
+//        std::vector<Expression const *> const& prototype) const;
+
   operator T() const { return val_;}
 
 protected:

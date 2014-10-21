@@ -1,13 +1,14 @@
-// Copyright (C) 2014 Aurélien Larcher.
+// Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-27
-// Last changed: 2014-01-27
+// First added:  
+// Last changed: 
 
-#ifndef __UFL_TUPLE_H_
-#define __UFL_TUPLE_H_
+#ifndef __UFL_DICT_H_
+#define __UFL_DICT_H_
 
 #include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLtype.h>
 
 #include <iostream>
 #include <sstream>
@@ -15,38 +16,40 @@
 
 namespace ufl
 {
-  class Expression;
 
 /**
  *  DOCUMENTATION:
  *
  *  @class  tuple
  *
- *  @brief  Provides an interface complying with python tuple.
+ *  @brief  Provides an interface complying with python dict.
  */
 
-  template <class T> class tuple : public Class
+  template <class KEY, class VALUE> class dict : public Class
   {
 
     public:
 
       /// Constructor with default representation for given type
-      tuple(T const& obj);
+      dict(std::vector<std::pair<KEY const *, VALUE const *> > const& map);
 
       /// Constructor with default representation for given type
-      tuple(std::vector<T const *> const& objs);
+      dict(std::pair<KEY const *, VALUE const *> const& map);
 
       /// Constructor with default representation for given type
-      tuple(tuple<T> const& other_tuple);
+      dict(KEY const & key, VALUE const & value);
+
+      /// Constructor with default representation for given type
+      dict(dict const& other_dict);
 
       ///
-      tuple (repr_t const & repr);
+      dict (repr_t const & repr);
 
-      /// Create an empty tuple
-      tuple ();
+      /// Create an empty dict
+      dict ();
 
       ///
-      ~tuple();
+      ~dict();
 
       ///
       std::vector<Class const *> const operands(std::string const& name) const;
@@ -59,7 +62,7 @@ namespace ufl
       dolfin::uint const size() const;
 
       ///
-      std::vector<T const *> const& operands() const;
+      std::vector<std::pair<KEY const *, VALUE const *> > const& map() const;
 
       /// __repr__
       repr_t const repr() const;
@@ -74,10 +77,9 @@ namespace ufl
 
     private:
 
-      std::vector<T const *> const fill_objects(std::vector<repr_t> const& reprs);
-      std::vector<T const *> const& objects() const;
+      std::vector<std::pair<KEY const *, VALUE const *> > const fill_map(std::vector<repr_t> const& reprs);
 
-      std::vector<T const *> const objects_;
+      std::vector<std::pair<KEY const *, VALUE const *> > const map_;
 
       mutable repr_t repr_;
       mutable std::string str_;
@@ -85,4 +87,4 @@ namespace ufl
   };
 
 } /* namespace ufl */
-#endif /* __UFL_TUPLE_H_ */
+#endif /* __UFL_DICT_H_ */

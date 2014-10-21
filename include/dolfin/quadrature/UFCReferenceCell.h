@@ -12,7 +12,7 @@
 //#include <dolfin/config/dolfin_config.h>
 //#include <dolfin/common/types.h>
 //#include <dolfin/log/dolfin_log.h>
-//#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Cell.h>
 //#include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/main/MPI.h>
 

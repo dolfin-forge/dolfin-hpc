@@ -5,6 +5,8 @@
 // Last changed: 
 
 #include <dolfin/ufl/UFLAlgebra.h>
+#include <dolfin/ufl/UFLArgument.h>
+#include <dolfin/ufl/UFLCoefficient.h>
 #include <dolfin/ufl/UFLDifferentiation.h>
 #include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLIndexed.h>
@@ -16,90 +18,44 @@
 namespace ufl
 {
 
+using dolfin::error;
+
 //-----------------------------------------------------------------------------
-  Expression::Expression(Object const& object) :
-    is_cellwise_constant_(false)
+  Expression::Expression(std::string const& name) : 
+    Class(name),
+    is_cellwise_constant_(true)
   {
-//    std::stringstream ssrepr;
-//    repr_ = ssrepr.str();
-//
-//    std::stringstream ssstr;
-//    str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
-  Expression::Expression(repr_t const & repr) :
-    is_cellwise_constant_(false)
+  Expression::Expression(std::string const& name, repr_t const & repr) :
+    Class(name, repr),
+    is_cellwise_constant_(true)
   {
-//    if(repr.length() == 0)
-//      dolfin_assert("An empty signature was passed to create an Expression.");
-//
-//
-//    Object const * object;
-//
-//    std::string::const_iterator it;
-//    std::string help_string;
-//    dolfin::uint i = 0;
-//    for(it = repr.begin(); it!=repr.end(); ++it, ++i)
-//    {
-//      help_string += *it;
-//
-//      if(help_string == "ComponentTensor")
-//      {
-//        std::cout << "create ComponentTensor form Expression : " << repr << std::endl;
-//        ComponentTensor const * c_tensor;
-//        c_tensor = c_tensor->create(repr);
-//        object = c_tensor;
-//        return new Expression(*object);
-//      }
-//
-//      if(help_string == "IndexSum")
-//      {
-//        std::cout << "create IndexSum form Expression : " << repr << std::endl;
-//        IndexSum const * index_sum;
-//        index_sum = index_sum->create(repr);
-//        object = index_sum;
-//        return new Expression(*object);
-//      }
-//
-//      if(help_string == "Indexed")
-//      {
-//        std::cout << "create Indexed form Expression : " << repr << std::endl;
-//        Indexed const * indexed;
-//        indexed = indexed->create(repr);
-//        object = indexed;
-//        return new Expression(*object);
-//      }
-//
-//      if(help_string == "Product")
-//      {
-//        std::cout << "create Product form Expression : " << repr << std::endl;
-//        Product const * p;
-//        p = p->create(repr);
-//        object = p;
-//        return new Expression(*object);
-//      }
-//
-//      if(help_string == "SpatialDerivative")
-//      {
-//        std::cout << "create SpatialDerivative form Expression : " << repr << std::endl;
-//        SpatialDerivative const * sd;
-//        sd = sd->create(repr);
-//        object = sd;
-//        return new Expression(*object);
-//      }
-//    }
-//
-//    return new Expression(*object);
   }
+
 //-----------------------------------------------------------------------------
   Expression::~Expression()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
-  Cell const& Expression::cell() const
+  Cell const Expression::cell() const
   {
+    for(dolfin::uint i=0; i<operands().size(); ++i)
+    {
+      Cell const& d = operands()[i]->cell();
+      if(d.domain().type() != Domain::None)
+        return d;
+    }
+
+    return Cell(Domain::None);
+  }
+
+//-----------------------------------------------------------------------------
+  dolfin::uint const Expression::geometric_dimension() const
+  {
+    return cell().geometric_dimension();
   }
 
 //-----------------------------------------------------------------------------
@@ -109,20 +65,127 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Expression::repr() const
+  Expression const* Expression::create(Object::repr_t const& repr)
   {
-    return repr_;
-  }
-
-  //-----------------------------------------------------------------------------
-  std::string const Expression::str() const
-  {
-    return str_;
-  }
-
-//-----------------------------------------------------------------------------
-  void Expression::display() const
-  {
+    std::string name = Class::make_name(repr);
+    if (name == "Sum")
+    {
+      return new Sum(repr);
+    }
+    else if (name == "Product")
+    {
+      return new Product(repr);
+    }
+    else if (name == "Division")
+    {
+      return new Division(repr);
+    }
+    else if (name == "Power")
+    {
+      return new Power(repr);
+    }
+    else if (name == "Abs")
+    {
+      return new Abs(repr);
+    }
+    else if (name == "Argument")
+    {
+      return new Argument(repr);
+    }
+    else if (name == "Coefficient")
+    {
+      return new Coefficient(repr);
+    }
+    else if (name == "Constant")
+    {
+      return new Constant(repr);
+    }
+    else if (name == "VectorConstant")
+    {
+      return new VectorConstant(repr);
+    }
+    else if (name == "TensorConstant")
+    {
+      return new TensorConstant(repr);
+    }
+    else if (name == "CoefficientDerivative")
+    {
+      return new CoefficientDerivative(repr);
+    }
+    else if (name == "SpatialDerivative")
+    {
+      return new SpatialDerivative(repr);
+    }
+    else if (name == "VariableDerivative")
+    {
+      return new VariableDerivative(repr);
+    }
+    else if (name == "Grad")
+    {
+      return new Grad(repr);
+    }
+    else if (name == "Div")
+    {
+      return new Div(repr);
+    }
+    else if (name == "NablaGrad")
+    {
+      return new NablaGrad(repr);
+    }
+    else if (name == "NablaDiv")
+    {
+      return new NablaDiv(repr);
+    }
+    else if (name == "Curl")
+    {
+      return new Curl(repr);
+    }
+    else if (name == "Index")
+    {
+      return new Index(repr);
+    }
+    else if (name == "FixedIndex")
+    {
+      return new FixedIndex(repr);
+    }
+    else if (name == "MultiIndex")
+    {
+      return new MultiIndex(repr);
+    }
+    else if (name == "IndexSum")
+    {
+      return new IndexSum(repr);
+    }
+    else if (name == "Indexed")
+    {
+      return new Indexed(repr);
+    }
+    else if (name == "ComponentTensor")
+    {
+      return new ComponentTensor(repr);
+    }
+    else if (name == "Tuple")
+    {
+      return new Tuple(repr);
+    }
+    else if (name == "Label")
+    {
+      return new Label(repr);
+    }
+    else if (name == "Variable")
+    {
+      return new Variable(repr);
+    }
+    else if (name == "Data")
+    {
+      return new Data(repr);
+    }
+    else
+    {
+      error("Unknown type of ufl::Expression: '" + name + "'");
+    }
+  
+    return NULL;
   }
 
   /*

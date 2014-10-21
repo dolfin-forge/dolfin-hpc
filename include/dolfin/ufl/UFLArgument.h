@@ -7,21 +7,21 @@
 #ifndef __UFL_ARGUMENT_H
 #define __UFL_ARGUMENT_H
 
-#include <dolfin/ufl/UFLClass.h>
+#include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 namespace ufl
 {
 
-/**
- *  DOCUMENTATION:
- *
- *  @class  Argument
- *
- *  @brief  Provides an interface complying with UFL Argument.
- */
+  /**
+   *  DOCUMENTATION:
+   *
+   *  @class  Argument
+   *
+   *  @brief  Provides an interface complying with UFL Argument.
+   */
 
-  class Argument : public Class
+  class Argument : public Expression
   {
     public:
 
@@ -35,20 +35,50 @@ namespace ufl
       ///
       ~Argument();
   
+      ///
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
+
+      ///
+      virtual std::vector<std::vector<Class const *> > const level_operands (
+          std::vector<std::vector<Class const *> > const& operands) const;
+
       //--- INTERFACE -------------------------------------------------------------
+
+      static Argument const * create(Object::repr_t const& repr);
+
+      ///
+      std::vector<Expression const *> const& operands() const;
 
       /// Return a reference to the FiniteElementBase of this Argument
       FiniteElementBase const& element() const;
 
-      /// Return a reference to the value shape of the FiniteElementBase of this Argument
-      ValueArray const& shape() const;
+      /// Return the count of this Argument
+      type<dolfin::uint> const& count() const;
 
       /// Return a reference to the cell of the FiniteElementBase of this Argument
-      Cell const& cell() const;
+      Cell const cell() const;
 
       /// Return whether the basis functions of this element is spatially constant
       /// over each cell
       bool const is_cellwise_constant() const;
+      
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       /// __repr__
       repr_t const repr() const;
@@ -63,6 +93,8 @@ namespace ufl
 
       FiniteElementBase const& finite_element_;
       type<dolfin::uint> const count_;
+
+//      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;

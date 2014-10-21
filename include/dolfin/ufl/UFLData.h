@@ -1,49 +1,37 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
-#ifndef __UFL_INDEX_SUM_H_
-#define __UFL_INDEX_SUM_H_
+#ifndef __UFL_DATA_H_
+#define __UFL_DATA_H_
 
-//#include <string>
-//#include <vector>
-
-#include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLExpression.h>
-#include <dolfin/ufl/UFLIndex.h>
-
-//#include <dolfin/common/types.h>
 
 namespace ufl
 {
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  IndexSum
-   *
-   *  @brief  Provides an interface complying with UFL IndexSum.
-   */
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Data
+ *
+ *  @brief  Provides an interface complying with UFL Data.
+ */
 
-  class IndexSum : public Expression
+  class Data : public Expression
   {
-
     public:
 
       ///
-      IndexSum(Expression const& expression, MultiIndex const& multi_index);
+      Data(Expression const& expression);
 
       ///
-      IndexSum(Expression const& expression, tuple<IndexBase> const& indices, 
-          dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
+      Data(repr_t const& repr);
 
       ///
-      IndexSum(repr_t const & repr);
-
-      ///
-      ~IndexSum();
+      ~Data();
 
       ///
       virtual std::vector<Class const* > const operands (std::string const& name) const;
@@ -54,17 +42,12 @@ namespace ufl
 
       //--- INTERFACE -------------------------------------------------------------
 
-      static IndexSum const * create(Object::repr_t const& repr);
-
       ///
-      MultiIndex const * index() const;
-      
-      ///
-      dolfin::uint const dimension() const;
+      static Data const * create (Object::repr_t const& repr);
 
       ///
       std::vector<Expression const *> const& operands() const;
-
+      
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
 
@@ -83,11 +66,7 @@ namespace ufl
           std::vector<dolfin::real*> const& q_points,
           const double * const * coordinates) const; 
 
-      /// UFL: Return whether this expression is spatially constant over each cell
-      bool const is_cellwise_constant() const;
-
       //--- INTERFACE inherited from UFLClass -------------------------------------
-      
       /// __repr__
       repr_t const repr() const;
 
@@ -97,17 +76,17 @@ namespace ufl
       ///
       void display() const;
 
+    protected:
+
     private:
 
       std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, MultiIndex const& i);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, 
-          tuple<IndexBase> const& indices, dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
       std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
 
   };
+
 } /* namespace ufl */
-#endif /* __UFL_INDEX_SUM_H_ */
+#endif /* __UFL_DATA_H_ */

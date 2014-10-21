@@ -1,6 +1,7 @@
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_ufl.la
 libdolfin_ufl_la_SOURCES = UFLarray.cpp\
+                           UFLdict.cpp\
                            UFLrepr.cpp\
                            UFLtuple.cpp\
                            UFLAlgebra.cpp\
@@ -12,6 +13,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLClass.cpp\
                            UFLCoefficient.cpp\
                            UFLConditional.cpp\
+                           UFLData.cpp\
                            UFLDifferentiation.cpp\
                            UFLDomain.cpp\
                            UFLElementList.cpp\
@@ -24,6 +26,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLFiniteElement.cpp\
                            UFLFiniteElementBase.cpp\
                            UFLForm.cpp\
+                           UFLFormData.cpp\
                            UFLGeometricQuantity.cpp\
                            UFLIndex.cpp\
                            UFLIndexed.cpp\

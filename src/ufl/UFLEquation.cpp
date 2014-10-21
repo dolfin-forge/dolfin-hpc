@@ -27,14 +27,13 @@ namespace ufl
     repr_(*this, lhs_, rhs_),
     str_("")
   {
-    std::cout << "C Equation " << repr << std::endl;
   }
 
 //-----------------------------------------------------------------------------
   Equation::~Equation()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   Object::repr_t const Equation::repr() const
   {
@@ -51,4 +50,5 @@ namespace ufl
   void Equation::display() const
   {
   }
+
 }

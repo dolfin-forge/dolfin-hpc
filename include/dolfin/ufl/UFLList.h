@@ -25,13 +25,15 @@ namespace ufl
     public:
 
       ///
-      List(std::vector<Integral const *>& integrals);
+      List(std::vector<Integral const *> const& integrals);
 
       ///
       List (repr_t const & repr);
 
       ///
       ~List();
+
+      std::vector<Integral const *> const& get_integrals() const;
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -46,6 +48,7 @@ namespace ufl
 
     private:
 
+      std::vector<Integral const *> const fill_expressions(std::vector<repr_t> const& reprs);
       std::vector<Integral const *> integrals_;
 
       repr_t const repr_;

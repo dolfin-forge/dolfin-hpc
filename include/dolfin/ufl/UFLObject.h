@@ -8,7 +8,9 @@
 #define __UFL_OBJECT_H_
 
 #include <dolfin/ufl/UFLrepr.h>
+
 #include <dolfin/common/types.h>
+#include <dolfin/log/log.h>
 
 #include <algorithm>
 #include <iostream>
@@ -18,6 +20,8 @@
 
 namespace ufl
 {
+
+using dolfin::error;
 
 /**
  *  DOCUMENTATION:
@@ -42,14 +46,15 @@ public:
   virtual std::string const str() const = 0;
 
   ///
-  virtual repr_t const make_repr(
-      std::vector<Object const *> const& prototype) const = 0;
+  template<class OBJ>
+  repr_t const make_repr(std::vector<OBJ const *> const& prototype) const;
 
   /// __eq__
   virtual bool operator ==(Object const& other) const;
 
   /// __neq__
   virtual bool operator !=(Object const& other) const;
+
 
 protected:
 
@@ -74,8 +79,7 @@ protected:
   std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
 
   /// Create from representation
-//  static Object * create(repr_t const& representation);
-
+  static Object const * create(repr_t const& representation);
 };
 
 //-----------------------------------------------------------------------------
@@ -99,11 +103,15 @@ inline void Object::display() const
 }
 
 //-----------------------------------------------------------------------------
+template<class OBJ>
 inline Object::repr_t const Object::make_repr(
-    std::vector<Object const *> const& args) const
+    std::vector<OBJ const *> const& args) const
 {
+  std::cout << "Object::make_repr" << std::endl;
   std::stringstream ret;
-  std::vector<Object const *>::const_iterator arg = args.begin();
+  if(args.size() == 0)
+    return ret.str();
+  typename std::vector<OBJ const *>::const_iterator arg = args.begin();
   ret << (*arg)->repr();
   for (++arg; arg != args.end(); ++arg)
   {
@@ -132,6 +140,15 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
   //assumes repr to be a comma separated list
   std::vector<Object::repr_t> args;
   std::string str = repr;
+
+  size_t star_pos = 0;
+  while(star_pos != std::string::npos && star_pos < str.length())
+  {
+    star_pos = str.find("*");
+    if(star_pos != std::string::npos)
+      str.erase(star_pos, 1);
+  }
+
   std::string delimiter = ", ";
 
   std::vector<char> open_delimiters;
@@ -156,8 +173,10 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
 
   std::string token;
 
-  while (scpos < MAX_STRING_LENGTH)
+  std::cout << "Parsing" << std::endl;
+  while (scpos != std::string::npos || scpos < str.size())
   {
+    std::cout << scpos << "  ";
     scpos = str.find(delimiter, currpos);
     std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
     for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
@@ -189,6 +208,7 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     {
       token = str.substr(0, scpos);
 
+      std::cout << "token " << token << std::endl;
       if(scpos != std::string::npos)
         str.erase(0, scpos + delimiter.length());
       else
@@ -207,13 +227,129 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
       currpos = scpos + 1;
     }
   }
+  std::cout << std::endl;
   return args;
 }
 
 //-----------------------------------------------------------------------------
-//inline Object * Object::create(repr_t const& repr)
-//{
-//}
+inline Object const* Object::create(repr_t const& repr)
+{
+  //FIXME complete this list
+//  std::string name = Class::make_name(repr);
+//  if (name == "Sum")
+//  {
+//    return new Sum(repr);
+//  }
+//  else if (name == "Product")
+//  {
+//    return new Product(repr);
+//  }
+//  else if (name == "Division")
+//  {
+//    return new Division(repr);
+//  }
+//  else if (name == "Power")
+//  {
+//    return new Power(repr);
+//  }
+//  else if (name == "Abs")
+//  {
+//    return new Abs(repr);
+//  }
+//  else if (name == "Argument")
+//  {
+//    return new Argument(repr);
+//  }
+//  else if (name == "Coefficient")
+//  {
+//    return new Coefficient(repr);
+//  }
+//  else if (name == "Constant")
+//  {
+//    return new Constant(repr);
+//  }
+//  else if (name == "VectorConstant")
+//  {
+//    return new VectorConstant(repr);
+//  }
+//  else if (name == "TensorConstant")
+//  {
+//    return new TensorConstant(repr);
+//  }
+//  else if (name == "CoefficientDerivative")
+//  {
+//    return new CoefficientDerivative(repr);
+//  }
+//  else if (name == "SpatialDerivative")
+//  {
+//    return new SpatialDerivative(repr);
+//  }
+//  else if (name == "VariableDerivative")
+//  {
+//    return new VariableDerivative(repr);
+//  }
+//  else if (name == "Grad")
+//  {
+//    return new Grad(repr);
+//  }
+//  else if (name == "Div")
+//  {
+//    return new Div(repr);
+//  }
+//  else if (name == "NablaGrad")
+//  {
+//    return new NablaGrad(repr);
+//  }
+//  else if (name == "NablaDiv")
+//  {
+//    return new NablaDiv(repr);
+//  }
+//  else if (name == "Curl")
+//  {
+//    return new Curl(repr);
+//  }
+//  else if (name == "Index")
+//  {
+//    return new Index(repr);
+//  }
+//  else if (name == "FixedIndex")
+//  {
+//    return new FixedIndex(repr);
+//  }
+//  else if (name == "MultiIndex")
+//  {
+//    return new MultiIndex(repr);
+//  }
+//  else if (name == "IndexSum")
+//  {
+//    return new IndexSum(repr);
+//  }
+//  else if (name == "Indexed")
+//  {
+//    return new Indexed(repr);
+//  }
+//  else if (name == "ComponentTensor")
+//  {
+//    return new ComponentTensor(repr);
+//  }
+//  else if (name == "Tuple")
+//  {
+//    return new Tuple(repr);
+//  }
+//  else if (name == "Label")
+//  {
+//    return new Label(repr);
+//  }
+//  else if (name == "Variable")
+//  {
+//    return new Variable(repr);
+//  }
+//  else
+//  {
+//    error("Unknown type of ufl::Object: '" + name + "'");
+//  }
 
+  return NULL;
+}
 } /* namespace ufl */
 #endif /* __UFL_OBJECT_H_ */

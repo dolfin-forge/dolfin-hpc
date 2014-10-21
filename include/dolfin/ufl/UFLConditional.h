@@ -107,8 +107,9 @@ namespace ufl
 
     private:
 
-      Expression const left_expression_;
-      Expression const right_expression_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& e1, Expression const& e2);
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -377,7 +378,10 @@ namespace ufl
 
     private:
 
-      Expression const expression_;
+//      Expression const expression_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& e);
+      std::vector<Expression const *> const expressions_;
 
       repr_t const repr_;
       std::string const str_;
@@ -410,7 +414,7 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
 //      ///
-//      std::pair<Expression const, Expression const> const& operands() const;
+      std::vector<Expression const *> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -438,8 +442,11 @@ namespace ufl
     private:
 
       Condition const * c_;
-      Expression const e1_;
-      Expression const e2_;
+      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
+      std::vector<Expression const *> const fill_expressions(Expression const& e1, Expression const& e2);
+      std::vector<Expression const *> const expressions_;
+//      Expression const e1_;
+//      Expression const e2_;
 
       repr_t const repr_;
       std::string const str_;

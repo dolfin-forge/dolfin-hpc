@@ -113,7 +113,7 @@ Cell const FiniteElementBase::get_cell(List const& elements) const
 {
   if(elements.size() < 1)
   {
-    error("Inavalid element list given as argument to get_cell");
+    error("Invalid element list given as argument to get_cell");
   }
   List::const_iterator it = elements.begin();
   Cell ret = (*it)->cell();

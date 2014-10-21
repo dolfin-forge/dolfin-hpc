@@ -10,6 +10,7 @@
 #include <dolfin/common/List.h>
 #include <dolfin/common/Timer.h>
 #include <dolfin/common/TimeDependent.h>
+#include <dolfin/common/TimeSeries.h>
 #include <dolfin/common/Variable.h>
 
 #endif

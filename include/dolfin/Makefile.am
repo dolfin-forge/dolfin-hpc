@@ -14,6 +14,7 @@ nobase_pkginclude_HEADERS = \
 				common/List.h\
 				common/Timer.h\
 				common/TimeDependent.h\
+				common/TimeSeries.h\
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\

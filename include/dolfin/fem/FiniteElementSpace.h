@@ -109,6 +109,10 @@ public:
   /// UFL + FIAT
   uint const degree() const;
 
+  /// Return the metatype of the finite element
+  /// UFL C++ only
+  ufl::Family::Type const metatype() const;
+
   /// Return UFL definition of the discrete space
   operator ufl::FiniteElementBase const&() const
   {
@@ -137,6 +141,12 @@ inline Mesh& FiniteElementSpace::mesh() const
 inline ufl::Family::Type const FiniteElementSpace::family() const
 {
   return ufl_->family().type();
+}
+
+//-----------------------------------------------------------------------------
+inline ufl::Family::Type const FiniteElementSpace::metatype() const
+{
+  return ufl_->metatype();
 }
 
 //-----------------------------------------------------------------------------

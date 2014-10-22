@@ -43,6 +43,12 @@ Family const& RestrictedElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type RestrictedElement::metatype() const
+{
+  return Family::Restricted;
+}
+
+//-----------------------------------------------------------------------------
 Cell const& RestrictedElement::cell() const
 {
   return cell_;

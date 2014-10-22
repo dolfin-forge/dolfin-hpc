@@ -54,6 +54,12 @@ Family const& EnrichedElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type EnrichedElement::metatype() const
+{
+  return Family::Enriched;
+}
+
+//-----------------------------------------------------------------------------
 Cell const& EnrichedElement::cell() const
 {
   return cell_;

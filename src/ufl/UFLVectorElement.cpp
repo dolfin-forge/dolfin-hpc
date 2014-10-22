@@ -54,6 +54,12 @@ Family const& VectorElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type VectorElement::metatype() const
+{
+  return Family::Vector;
+}
+
+//-----------------------------------------------------------------------------
 Cell const& VectorElement::cell() const
 {
   return sub_element_.cell();

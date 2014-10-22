@@ -59,6 +59,9 @@ public:
   /// Return finite element family type
   virtual Family const& family() const = 0;
 
+  /// Return the metatype of the finite element (C++ only)
+  virtual Family::Type metatype() const = 0;
+
   /// Return cell of finite element
   virtual Cell const& cell() const = 0;
 

@@ -50,6 +50,12 @@ Family const& TensorElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type TensorElement::metatype() const
+{
+  return Family::Tensor;
+}
+
+//-----------------------------------------------------------------------------
 Cell const& TensorElement::cell() const
 {
   return sub_element_.cell();

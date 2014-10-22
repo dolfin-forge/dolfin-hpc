@@ -71,6 +71,12 @@ Family const& FiniteElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type FiniteElement::metatype() const
+{
+  return family_.type();
+}
+
+//-----------------------------------------------------------------------------
 Cell const& FiniteElement::cell() const
 {
   return cell_;

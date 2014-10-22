@@ -37,6 +37,9 @@ public:
   /// Return finite element family type
   Family const& family() const;
 
+  /// Return the metatype of the finite element (C++ only)
+  Family::Type metatype() const;
+
   /// Return cell of finite element
   Cell const& cell() const;
 

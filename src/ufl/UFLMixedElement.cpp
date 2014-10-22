@@ -56,6 +56,12 @@ Family const& MixedElement::family() const
 }
 
 //-----------------------------------------------------------------------------
+Family::Type MixedElement::metatype() const
+{
+  return Family::Mixed;
+}
+
+//-----------------------------------------------------------------------------
 Cell const& MixedElement::cell() const
 {
   return cell_;

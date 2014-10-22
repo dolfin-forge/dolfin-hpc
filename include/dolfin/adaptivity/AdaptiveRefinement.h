@@ -14,7 +14,6 @@ namespace dolfin
 {
 
 template<class T> class Array;
-class Form;
 class Function;
 class Mesh;
 class MeshData;
@@ -26,11 +25,7 @@ class AdaptiveRefinement
 {
 public:
 
-  ///
-  typedef std::pair<Form *, uint> form_tuple;
-  typedef std::pair<Function *, form_tuple> project_func;
-
-  ///
+  /// Refine mesh using "simple" of "rivara" strategy
   static void refine(Mesh& mesh, MeshFunction<bool>& cell_marker);
 
   ///
@@ -44,11 +39,11 @@ private:
                                 uint **rp, uint& m,
                                 MeshFunction<uint>& distribution);
 
-  ///
+  /// Decompose the function into scalar functions (living on leaf spaces)
   static void decompose_func(Mesh& mesh, Function const& function,
                              Array<Function *>& subfunctions);
 
-  ///
+  /// Project function on new mesh i.e. interpolation on non-matching meshes.
   static void project(Mesh& new_mesh, Array<Function *>& f_post,
                       Function& projected);
 

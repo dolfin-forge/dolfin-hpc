@@ -107,7 +107,6 @@ template<class OBJ>
 inline Object::repr_t const Object::make_repr(
     std::vector<OBJ const *> const& args) const
 {
-  std::cout << "Object::make_repr" << std::endl;
   std::stringstream ret;
   if(args.size() == 0)
     return ret.str();
@@ -172,11 +171,8 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
   size_t close_pos = 0;
 
   std::string token;
-
-  std::cout << "Parsing" << std::endl;
   while (scpos != std::string::npos || scpos < str.size())
   {
-    std::cout << scpos << "  ";
     scpos = str.find(delimiter, currpos);
     std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
     for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
@@ -208,7 +204,6 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     {
       token = str.substr(0, scpos);
 
-      std::cout << "token " << token << std::endl;
       if(scpos != std::string::npos)
         str.erase(0, scpos + delimiter.length());
       else
@@ -227,7 +222,6 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
       currpos = scpos + 1;
     }
   }
-  std::cout << std::endl;
   return args;
 }
 

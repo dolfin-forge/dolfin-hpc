@@ -169,6 +169,7 @@ nobase_pkginclude_HEADERS = \
 				math/Lagrange.h\
 				math/Legendre.h\
 				mesh/dolfin_mesh.h\
+				mesh/AffineMapping.h \
 				mesh/ALE.h\
 				mesh/ALEType.h\
 				mesh/BarycentricPoint.h\
@@ -183,7 +184,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/DomainBoundary.h\
 				mesh/DVertex.h\
 				mesh/Edge.h\
-				mesh/EquiAffineMap.h \
+				mesh/EquiAffineMapping.h \
 				mesh/Face.h\
 				mesh/Facet.h\
 				mesh/GeometricPredicates.h\
@@ -194,6 +195,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/LoadBalancer.h\
 				mesh/LocalMeshCoarsening.h\
 				mesh/LocalMeshRefinement.h\
+				mesh/Mapping.h \
 				mesh/Mesh.h\
 				mesh/MeshDependent.h\
 				mesh/MeshConnectivity.h\

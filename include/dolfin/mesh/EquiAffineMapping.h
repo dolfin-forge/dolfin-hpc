@@ -6,8 +6,8 @@
 // First added:  2005-05-17
 // Last changed: 2006-12-06
 
-#ifndef __EQUI_AFFINE_MAP_H
-#define __EQUI_AFFINE_MAP_H
+#ifndef __EQUI_AFFINE_MAPPING_H
+#define __EQUI_AFFINE_MAPPING_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>
@@ -25,40 +25,34 @@ namespace dolfin
 /// The dimension d of the map is automatically determined from the
 /// arguments used when calling the map.
 
-class EquiAffineMap
+class EquiAffineMapping
 {
 
 public:
 
   /// Constructor
-  EquiAffineMap();
+  EquiAffineMapping(Mesh const& mesh);
 
   /// Destructor
-  ~EquiAffineMap();
+  ~EquiAffineMapping();
 
   /// Update map for current element
   void update(Cell& cell);
 
-  /// Map given point from the reference element (2D)
-  Point operator()(real X, real Y) const;
-
-  /// Map given point from the reference element (3D)
-  Point operator()(real X, real Y, real Z) const;
-
   /// Map given point from the reference element
-  Point map(real X, real Y, real Z) const;
+  void map_from_reference_cell(real const * xref, real * x) const;
 
-  /// Map given point from the reference element
-  Point mapinv(real X, real Y, real Z) const;
+  /// Map given point to the reference element
+  void map_to_reference_cell(real const * x, real * xref) const;
 
   // Determinant of Jacobian of map
   real det;
 
   // Jacobian of map
-  real *B;
+  real *J;
 
   // Inverse of Jacobian of map
-  real *C;
+  real *K;
 
 private:
 
@@ -68,11 +62,15 @@ private:
   // Update affine map from reference tetrahedron
   void updateTetrahedron(Cell& cell);
 
+  //
+  static uint const d_ = Point::max_size;
+  uint const gdim_;
+
   // Vertices of current cell
-  Point p0;
-  Point p1;
-  Point p2;
-  Point p3;
+  real p0[d_];
+  real p1[d_];
+  real p2[d_];
+  real p3[d_];
 
 };
 

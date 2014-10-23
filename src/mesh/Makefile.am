@@ -2,6 +2,7 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 libdolfin_mesh_la_SOURCES = \
 			ALE.cpp\
+			AffineMapping.cpp\
 			BoundaryComputation.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
@@ -12,7 +13,7 @@ libdolfin_mesh_la_SOURCES = \
 			DMesh.cpp\
 			DVertex.cpp\
 			Edge.cpp\
-			EquiAffineMap.cpp\
+			EquiAffineMapping.cpp\
 			Face.cpp\
 			Facet.cpp\
 			GTSInterface.cpp\

@@ -34,5 +34,6 @@
 #include <dolfin/mesh/UnitSphere.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/RivaraRefinement.h>
+#include <dolfin/mesh/AffineMapping.h>
 
 #endif

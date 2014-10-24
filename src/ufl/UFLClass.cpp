@@ -305,5 +305,5 @@ template Object::repr_t const Class::make_repr(std::vector<Index const *> const&
 template Object::repr_t const Class::make_repr(std::vector<IndexBase const *> const&) const;
 template Object::repr_t const Class::make_repr(std::vector<Integral const *> const&) const;
 template Object::repr_t const Class::make_repr(std::vector<Measure const *> const&) const;
-//template Object::repr_t const Class::make_repr(std::vector<Object const *> const&) const;
+template Object::repr_t const Class::make_repr(std::vector<Object const *> const&) const;
 }

@@ -24,6 +24,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef ENABLE_MPIIO
+#include <mpi.h>
+#endif
+
 namespace dolfin
 {
 

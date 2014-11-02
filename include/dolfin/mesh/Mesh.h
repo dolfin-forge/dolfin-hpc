@@ -128,12 +128,6 @@ public:
   /// Return number of cells of global mesh
   uint global_numCells() const;
 
-  /// Return coordinates of all vertices
-  real* coordinates();
-
-  /// Return coordinates of all vertices
-  const real* coordinates() const;
-
   /// Return connectivity for all cells
   uint* cells();
 
@@ -408,18 +402,6 @@ inline uint Mesh::global_numCells() const
   return (
       (dolfin::MPI::numProcesses() == 1) ?
           numCells() : distdata().global_numCells());
-}
-
-//-----------------------------------------------------------------------------
-inline real* Mesh::coordinates()
-{
-  return _geometry.x();
-}
-
-//-----------------------------------------------------------------------------
-inline const real* Mesh::coordinates() const
-{
-  return _geometry.x();
 }
 
 //-----------------------------------------------------------------------------

@@ -53,10 +53,10 @@ public:
   real const * x(uint n) const;
 
   /// Return array of values for all coordinates
-  real* x();
+  real* coordinates();
 
   /// Return array of values for all coordinates
-  real const * x() const;
+  real const * coordinates() const;
 
   /// Return coordinate n as a 3D point value
   Point point(uint n) const;
@@ -135,13 +135,13 @@ inline real const * MeshGeometry::x(uint n) const
 }
 
 //-----------------------------------------------------------------------------
-inline real* MeshGeometry::x()
+inline real* MeshGeometry::coordinates()
 {
   return coordinates_;
 }
 
 //-----------------------------------------------------------------------------
-inline real const * MeshGeometry::x() const
+inline real const * MeshGeometry::coordinates() const
 {
   return coordinates_;
 }

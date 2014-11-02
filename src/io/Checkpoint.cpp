@@ -382,7 +382,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
   byte_offset += pe_size * sizeof(chkp_mesh_hdr);
 
   MPI_File_write_at_all(out, byte_offset + hdr.offsets[0] * sizeof(real),
-                        mesh.coordinates(), hdr.num_coords, MPI_DOUBLE, MPI_STATUS_IGNORE);
+                        mesh.geometry().coordinates(), hdr.num_coords, MPI_DOUBLE, MPI_STATUS_IGNORE);
   byte_offset += hdr.disp[0] * sizeof(real);
 
   MPI_File_write_at_all(out, byte_offset + hdr.offsets[1] * sizeof(uint),

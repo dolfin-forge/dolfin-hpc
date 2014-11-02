@@ -5,7 +5,7 @@
 // Modified by Aurélien Larcher, 2014.
 //
 // First added:  2006-06-12
-// Last changed: 2014-06-12
+// Last changed: 2014-12-01
 
 #ifndef __POINT_H
 #define __POINT_H
@@ -35,11 +35,11 @@ public:
   /// Destructor
   ~Point();
 
-  /// Return address of coordinate in direction i
+  /// Return coordinate in direction i
   real& operator[](uint i);
 
   /// Return coordinate in direction i
-  real operator[](uint i) const;
+  real const& operator[](uint i) const;
 
   /// Return x-coordinate
   real x() const;
@@ -92,9 +92,12 @@ public:
   /// Output
   friend LogStream& operator<<(LogStream& stream, Point const& p);
 
+  /// Display info
+  void disp() const;
+
 private:
 
-  real _x[Point::max_size];
+  real x_[Point::max_size];
 
 };
 
@@ -103,70 +106,70 @@ private:
 inline real& Point::operator[](uint i)
 {
   dolfin_assert(i < Point::max_size);
-  return _x[i];
+  return x_[i];
 }
 
 //-----------------------------------------------------------------------------
-inline real Point::operator[](uint i) const
+inline real const& Point::operator[](uint i) const
 {
   dolfin_assert(i < Point::max_size);
-  return _x[i];
+  return x_[i];
 }
 
 //-----------------------------------------------------------------------------
 inline real Point::x() const
 {
-  return _x[0];
+  return x_[0];
 }
 
 //-----------------------------------------------------------------------------
 inline real Point::y() const
 {
-  return _x[1];
+  return x_[1];
 }
 
 //-----------------------------------------------------------------------------
 inline real Point::z() const
 {
-  return _x[2];
+  return x_[2];
 }
 
 //-----------------------------------------------------------------------------
 inline Point Point::operator+(Point const& p) const
 {
-  Point q(_x[0] + p._x[0], _x[1] + p._x[1], _x[2] + p._x[2]);
+  Point q(x_[0] + p.x_[0], x_[1] + p.x_[1], x_[2] + p.x_[2]);
   return q;
 }
 
 //-----------------------------------------------------------------------------
 inline Point Point::operator-(Point const& p) const
 {
-  Point q(_x[0] - p._x[0], _x[1] - p._x[1], _x[2] - p._x[2]);
+  Point q(x_[0] - p.x_[0], x_[1] - p.x_[1], x_[2] - p.x_[2]);
   return q;
 }
 
 //-----------------------------------------------------------------------------
 inline Point const& Point::operator+=(Point const& p)
 {
-  _x[0] += p._x[0];
-  _x[1] += p._x[1];
-  _x[2] += p._x[2];
+  x_[0] += p.x_[0];
+  x_[1] += p.x_[1];
+  x_[2] += p.x_[2];
   return *this;
 }
 
 //-----------------------------------------------------------------------------
 inline Point const& Point::operator-=(Point const& p)
 {
-  _x[0] -= p._x[0];
-  _x[1] -= p._x[1];
-  _x[2] -= p._x[2];
+  x_[0] -= p.x_[0];
+  x_[1] -= p.x_[1];
+  x_[2] -= p.x_[2];
   return *this;
 }
 
 //-----------------------------------------------------------------------------
 inline Point Point::operator*(real a) const
 {
-  Point p(a * _x[0], a * _x[1], a * _x[2]);
+  Point p(a * x_[0], a * x_[1], a * x_[2]);
   return p;
 }
 
@@ -179,34 +182,34 @@ inline Point operator*(real a, Point const& p)
 //-----------------------------------------------------------------------------
 inline Point const& Point::operator*=(real a)
 {
-  _x[0] *= a;
-  _x[1] *= a;
-  _x[2] *= a;
+  x_[0] *= a;
+  x_[1] *= a;
+  x_[2] *= a;
   return *this;
 }
 
 //-----------------------------------------------------------------------------
 inline Point Point::operator/(real a) const
 {
-  Point p(_x[0] / a, _x[1] / a, _x[2] / a);
+  Point p(x_[0] / a, x_[1] / a, x_[2] / a);
   return p;
 }
 
 //-----------------------------------------------------------------------------
 inline Point const& Point::operator/=(real a)
 {
-  _x[0] /= a;
-  _x[1] /= a;
-  _x[2] /= a;
+  x_[0] /= a;
+  x_[1] /= a;
+  x_[2] /= a;
   return *this;
 }
 
 //-----------------------------------------------------------------------------
 inline Point const& Point::operator=(Point const& p)
 {
-  _x[0] = p._x[0];
-  _x[1] = p._x[1];
-  _x[2] = p._x[2];
+  x_[0] = p.x_[0];
+  x_[1] = p.x_[1];
+  x_[2] = p.x_[2];
   return *this;
 }
 

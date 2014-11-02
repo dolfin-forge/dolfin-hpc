@@ -115,23 +115,39 @@ inline real QuadratureRule::measure() const
 //-----------------------------------------------------------------------------
 inline void QuadratureRule::disp() const
 {
-  std::cout << "size= " << weights.size() << std::endl;
-  std::cout << "points" << std::endl;
-  std::cout.precision(16);
-  for (unsigned int i = 0; i < points.size(); ++i)
-    for (unsigned int d = 0; d < dim; ++d)
-      std::cout << points[i][d] << " ";
-  std::cout << std::endl;
-  std::cout << "weights" << std::endl;
+  cout << "QuadratureRule" << endl;
+  cout << "--------------" << endl;
+  begin("");
+  cout << "Size             : " << uint(weights.size()) << endl;
+  cout << "Scaling factor   : " << m << endl;
+  cout << "Weights          : " << endl << endl;
   for (unsigned int i = 0; i < weights.size(); ++i)
-    std::cout << weights[i] << "  ";
-  std::cout << std::endl;
-  std::cout << "m = " << m << std::endl;
-  std::cout << "reference points" << std::endl;
-  for (unsigned int i = 0; i < reference_points.size(); ++i)
+  {
+    cout << "\t" << weights[i];
+  }
+  cout << endl;
+  cout << endl;
+  cout << "Points           : " << endl << endl;
+  for (unsigned int i = 0; i < points.size(); ++i)
+  {
     for (unsigned int d = 0; d < dim; ++d)
-      std::cout << reference_points[i][d] << " ";
-  std::cout << std::endl;
+    {
+      cout << "\t" << points[i][d];
+    }
+    cout << endl;
+  }
+  cout << endl;
+  cout << "Reference points : " << endl << endl;
+  for (unsigned int i = 0; i < points.size(); ++i)
+  {
+    for (unsigned int d = 0; d < dim; ++d)
+    {
+      cout << "\t" << reference_points[i][d];
+    }
+    cout << endl;
+  }
+  cout << endl;
+  end();
 }
 
 inline void QuadratureRule::fill_reference_points()

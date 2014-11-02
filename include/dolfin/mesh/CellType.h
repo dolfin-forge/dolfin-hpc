@@ -31,7 +31,7 @@ namespace dolfin
   public:
 
     /// Enum for different cell types
-    enum Type { point, interval, triangle, tetrahedron };
+    enum Type { point = 0, interval, triangle, tetrahedron };
 
     /// Constructor
     CellType(CellType::Type cell_type, CellType::Type facet_type);

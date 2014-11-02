@@ -90,8 +90,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Create new mesh and open for editing
   Mesh refined_mesh;
-  MeshEditor editor;
-  editor.open(refined_mesh, cell_type.cellType(), tdim, mesh.geometry().dim());
+  MeshEditor editor(refined_mesh, cell_type.cellType(), tdim, mesh.geometry().dim());
 
   // Get size of mesh
   uint const num_vertices = mesh.size(0);

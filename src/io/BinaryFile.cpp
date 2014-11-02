@@ -418,12 +418,14 @@ void BinaryFile::operator>>(Mesh& mesh)
   {
     std::ifstream fp(filename.c_str(), std::ifstream::binary);
 
-    int celltype, gdim;
+    int celltype = 0;
+    int gdim = 0;
     fp.read((char *)&hdr, sizeof(BinaryFileHeader));
     hdr_check(hdr, BINARY_MESH_DATA, pe_size);
     fp.read((char *)&gdim, sizeof(int));
     fp.read((char *)&celltype, sizeof(int));
 
+    // TODO: Error prone.
     std::string type;
     if (celltype == 0)
       type = "triangle";
@@ -439,8 +441,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete cell_type;
 
     // Open mesh for editing
-    MeshEditor editor;
-    editor.open(mesh, CellType::string2type(type), tdim, gdim);
+    MeshEditor editor(mesh, CellType::string2type(type), tdim, gdim);
 
     // Read vertex data
     int n_vertices;
@@ -698,8 +699,7 @@ void BinaryFile::operator>>(Mesh& mesh)
                                       orphaned_vertices.end()));
 
     // Open mesh for editing
-    MeshEditor editor;
-    editor.open(mesh, CellType::string2type(celltype), tdim, dim);
+    MeshEditor editor(mesh, CellType::string2type(celltype), tdim, dim);
     num_local_vertices = all_vertices.size() + ghosted_entities.size();
     editor.initVertices(num_local_vertices);
     editor.initCells(cells.size());

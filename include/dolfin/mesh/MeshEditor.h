@@ -13,97 +13,105 @@
 
 namespace dolfin
 {
+
+class Mesh;
+class Point;
+
+/// A simple mesh editor for creating simplicial meshes in 1D, 2D and 3D.
+
+class MeshEditor
+{
+public:
   
-  class Mesh;
-  class Point;
-  
-  /// A simple mesh editor for creating simplicial meshes in 1D, 2D and 3D.
+  /// Constructor for meshes with unique type of cell
+  //TODO: Deprecate.
+  MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
 
-  class MeshEditor
-  {
-  public:
-    
-    /// Constructor
-    MeshEditor();
-    
-    /// Destructor
-    ~MeshEditor();
+  /// Constructor for meshes with unique type of cell
+  MeshEditor(Mesh& mesh, CellType::Type type, uint gdim);
 
-    /// Open mesh of given cell type, topological and geometrical dimension
-    void open(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
+  /// Destructor
+  ~MeshEditor();
 
-    /// Open mesh of given cell type, topological and geometrical dimension
-    void open(Mesh& mesh, std::string type, uint tdim, uint gdim);
+  /// Specify number of vertices
+  void initVertices(uint num_vertices);
 
-    /// Specify number of vertices
-    void initVertices(uint num_vertices);
+  /// Specify number of cells
+  void initCells(uint num_cells);
 
-    /// Specify number of cells
-    void initCells(uint num_cells);
+  /// Add vertex v at given point p
+  ///FIXME: Deprecate.
+  void addVertex(uint v, Point const& p);
 
-    /// Add vertex v at given point p
-    void addVertex(uint v, const Point& p);
+  /// Add vertex v at given coordinates x
+  void addVertex(uint v, real const * x);
 
-    /// Add vertex v at given coordinate x
-    void addVertex(uint v, real x);
+  /// Add vertex v at given coordinate x
+  ///FIXME: Deprecate.
+  void addVertex(uint v, real x);
 
-    /// Add vertex v at given coordinate (x, y)
-    void addVertex(uint v, real x, real y);
+  /// Add vertex v at given coordinate (x, y)
+  ///FIXME: Deprecate.
+  void addVertex(uint v, real x, real y);
 
-    /// Add vertex v at given coordinate (x, y, z)
-    void addVertex(uint v, real x, real y, real z);
+  /// Add vertex v at given coordinate (x, y, z)
+  ///FIXME: Deprecate.
+  void addVertex(uint v, real x, real y, real z);
 
-    /// Add cell with given vertices
-    void addCell(uint c, const Array<uint>& v);
+  /// Add cell with given vertices
+  void addCell(uint c, Array<uint> const& v);
 
-    /// Add cell (interval) with given vertices
-    void addCell(uint c, uint v0, uint v1);
+  /// Add cell (interval) with given vertices
+  void addCell(uint c, uint v0, uint v1);
 
-    /// Add cell (triangle) with given vertices
-    void addCell(uint c, uint v0, uint v1, uint v2);
-    
-    /// Add cell (tetrahedron) with given vertices
-    void addCell(uint c, uint v0, uint v1, uint v2, uint v3);
+  /// Add cell (triangle) with given vertices
+  void addCell(uint c, uint v0, uint v1, uint v2);
 
-    /// Close mesh, finish editing
-    void close();
+  /// Add cell (tetrahedron) with given vertices
+  void addCell(uint c, uint v0, uint v1, uint v2, uint v3);
 
-  private:
+  /// Close mesh, finish editing
+  void close();
 
-    // Add vertex, common part
-    void addVertexCommon(uint v, uint dim);
+private:
 
-    // Add cell, common part
-    void addCellCommon(uint v, uint dim);
+  /// Open mesh of given cell type and geometrical dimension
+  void init(Mesh& mesh, CellType::Type type, uint gdim);
 
-    // Clear all data
-    void clear();
+  // Add vertex, common part
+  void addVertexCommon(uint v);
 
-    // Topological dimension
-    uint tdim;
-    
-    // Geometrical (Euclidean) dimension
-    uint gdim;
-    
-    // Number of vertices
-    uint num_vertices;
+  // Add cell, common part
+  void addCellCommon(uint v);
 
-    // Number of cells
-    uint num_cells;
+  // Clear all data
+  void clear();
 
-    // Next available vertex
-    uint next_vertex;
+  // The mesh
+  Mesh * const mesh_;
 
-    // Next available cell
-    uint next_cell;
+  // Topological dimension
+  uint tdim_;
 
-    // The mesh
-    Mesh* mesh;
+  // Geometrical (Euclidean) dimension
+  uint gdim_;
 
-    // Temporary storage for local cell data
-    Array<uint> vertices;
-   
-  };
+  // Number of vertices
+  uint num_vertices_;
+
+  // Number of cells
+  uint num_cells_;
+
+  // Next available vertex
+  uint vertex_index_;
+
+  // Next available cell
+  uint cell_index_;
+
+  // Temporary storage for local cell data
+  Array<uint> vertices;
+
+};
 
 }
 

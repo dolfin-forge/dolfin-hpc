@@ -201,8 +201,7 @@ void Checkpoint::load(Mesh& mesh)
 #endif
 
   Mesh _mesh;
-  MeshEditor editor;
-  editor.open(_mesh, hdr.type, hdr.tdim, hdr.gdim);
+  MeshEditor editor(_mesh, hdr.type, hdr.tdim, hdr.gdim);
   editor.initVertices(hdr.num_vertices);
 
   uint vi = 0;

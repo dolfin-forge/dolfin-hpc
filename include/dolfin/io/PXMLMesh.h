@@ -6,8 +6,8 @@
 // First added:  2003-10-21
 // Last changed: 2008-05-21
 
-#ifndef __NEW_PXML_MESH_H
-#define __NEW_PXML_MESH_H
+#ifndef __PXML_MESH_H
+#define __PXML_MESH_H
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
@@ -15,62 +15,75 @@
 
 namespace dolfin
 {
+
+class Mesh;
+
+class PXMLMesh : public XMLObject
+{
+public:
   
-  class Mesh;
+  PXMLMesh(Mesh& mesh);
+  ~PXMLMesh();
+
+  void startElement(const xmlChar* name, const xmlChar** attrs);
+  void endElement(const xmlChar* name);
+
+  void open(std::string filename);
+  bool close();
+
+private:
   
-  class PXMLMesh : public XMLObject
+  enum ParserState
   {
-  public:
-
-    PXMLMesh(Mesh& mesh);
-    ~PXMLMesh();
-    
-    void startElement (const xmlChar* name, const xmlChar** attrs);
-    void endElement   (const xmlChar* name);
-    
-    void open(std::string filename);
-    bool close();
-    
-  private:
-    
-    enum ParserState {OUTSIDE,
-                      INSIDE_MESH, INSIDE_VERTICES, INSIDE_CELLS,
-                      INSIDE_DATA, INSIDE_MESH_FUNCTION, INSIDE_ARRAY,
-                      DONE};
-    
-    void readMesh        (const xmlChar* name, const xmlChar** attrs);
-    void readVertices    (const xmlChar* name, const xmlChar** attrs);
-    void readCells       (const xmlChar* name, const xmlChar** attrs);
-    void readVertex      (const xmlChar* name, const xmlChar** attrs);
-    void readInterval    (const xmlChar* name, const xmlChar** attrs);
-    void readTriangle    (const xmlChar* name, const xmlChar** attrs);
-    void readTetrahedron (const xmlChar* name, const xmlChar** attrs);
-    void readMeshFunction(const xmlChar* name, const xmlChar** attrs);
-    void readArray       (const xmlChar* name, const xmlChar** attrs);
-    void readMeshEntity  (const xmlChar* name, const xmlChar** attrs);
-    void readArrayElement(const xmlChar* name, const xmlChar** attrs);
-    
-    void closeMesh();
-
-    Mesh& _mesh;
-    ParserState state;
-    MeshEditor editor;
-    MeshFunction<uint>* f;
-    Array<uint>* a;
-    
-    uint numParsedVertices,numParsedCells;
-    uint startIndex_vert,endIndex_vert,startIndex_cell,endIndex_cell;
-    
-    uint *local_vertices,*shared_vertices;
-    uint numLocalVertices, numLocalCells;
-
-    _map<uint,bool> own_vertex, used_vertex;
-    Array<uint> cell_buffer;
-    _map<uint,bool> shared_buffer;
-
-    
+    OUTSIDE,
+    INSIDE_MESH,
+    INSIDE_VERTICES,
+    INSIDE_CELLS,
+    INSIDE_DATA,
+    INSIDE_MESH_FUNCTION,
+    INSIDE_ARRAY,
+    DONE
   };
-  
+
+  void readMesh(const xmlChar* name, const xmlChar** attrs);
+  void readVertices(const xmlChar* name, const xmlChar** attrs);
+  void readCells(const xmlChar* name, const xmlChar** attrs);
+  void readVertex(const xmlChar* name, const xmlChar** attrs);
+  void readInterval(const xmlChar* name, const xmlChar** attrs);
+  void readTriangle(const xmlChar* name, const xmlChar** attrs);
+  void readTetrahedron(const xmlChar* name, const xmlChar** attrs);
+  void readMeshFunction(const xmlChar* name, const xmlChar** attrs);
+  void readArray(const xmlChar* name, const xmlChar** attrs);
+  void readMeshEntity(const xmlChar* name, const xmlChar** attrs);
+  void readArrayElement(const xmlChar* name, const xmlChar** attrs);
+
+  void closeMesh();
+
+  Mesh& mesh_;
+  ParserState state_;
+  MeshEditor * editor_;
+  MeshFunction<uint> * f_;
+  Array<uint> * a_;
+
+  uint numParsedVertices_;
+  uint numParsedCells_;
+  uint startIndex_vert_;
+  uint endIndex_vert_;
+  uint startIndex_cell_;
+  uint endIndex_cell_;
+
+  uint * local_vertices_;
+  uint * shared_vertices_;
+  uint numLocalVertices_;
+  uint numLocalCells_;
+
+  _map<uint,bool> own_vertex_;
+  _map<uint,bool> used_vertex_;
+  Array<uint> cell_buffer_;
+  _map<uint,bool> shared_buffer_;
+
+};
+
 }
 
 #endif

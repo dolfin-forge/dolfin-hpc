@@ -294,8 +294,7 @@ void DMesh::exp(Mesh& mesh)
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor;
-  editor.open(mesh, cell_type->cellType(), d, d);
+  MeshEditor editor(mesh, cell_type->cellType(), d, d);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -439,8 +438,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     *old2new_cells = -1;
   }
 
-  MeshEditor editor;
-  editor.open(mesh, cell_type->cellType(), d, d);
+  MeshEditor editor(mesh, cell_type->cellType(), d, d);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());

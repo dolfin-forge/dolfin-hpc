@@ -56,8 +56,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
 
   // Open boundary mesh for editing
   uint const D = mesh.topology().dim();
-  MeshEditor editor;
-  editor.open(boundary, mesh.type().facetType(), D - 1, mesh.geometry().dim());
+  MeshEditor editor(boundary, mesh.type().facetType(), mesh.geometry().dim());
 
   // Generate facet - cell connectivity if not generated
   mesh.init(D - 1, D);

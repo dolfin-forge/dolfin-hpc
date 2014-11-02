@@ -33,11 +33,8 @@ void STLFile::operator>>(Mesh& mesh)
   fp.read((char *)&hdr, 80*sizeof(char));
   fp.read((char *)&ntri, sizeof(uint));
   
-  MeshEditor editor;
-  editor.open(mesh, CellType::triangle, 2, 3);  
+  MeshEditor editor(mesh, CellType::triangle, 2, 3);
   editor.initCells(ntri);
-
-  
 
   v_index = c_index = 0;
   for (uint i = 0; i < ntri; i++) {    

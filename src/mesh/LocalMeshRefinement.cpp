@@ -94,9 +94,8 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
 
   // Create new mesh and open for editing
   Mesh refined_mesh;
-  MeshEditor editor;
-  editor.open(refined_mesh, cell_type.cellType(), mesh.topology().dim(),
-              mesh.geometry().dim());
+  MeshEditor editor(refined_mesh, cell_type.cellType(), mesh.topology().dim(),
+                    mesh.geometry().dim());
 
   // Initialize mappings
   Array<int> old2new_cell(mesh.numCells());

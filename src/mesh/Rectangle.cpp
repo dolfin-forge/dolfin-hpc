@@ -23,8 +23,7 @@ Rectangle::Rectangle(real a, real b, real c, real d, uint nx, uint ny,
 
   rename("mesh", "Mesh of the unit square (a,b) x (c,d)");
   // Open mesh for editing
-  MeshEditor editor;
-  editor.open(*this, CellType::triangle, 2, 2);
+  MeshEditor editor(*this, CellType::triangle, 2, 2);
 
   // Create vertices and cells:
   if (type == crisscross) 

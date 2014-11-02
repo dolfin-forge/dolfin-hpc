@@ -7,6 +7,8 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/MeshGeometry.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 
@@ -78,16 +80,16 @@ void MeshGeometry::clear()
   coordinates_ = NULL;
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::init(uint dim, uint size)
+void MeshGeometry::init(uint gdim, uint size)
 {
   // Delete old data if any
   clear();
 
   // Allocate new data
-  coordinates_ = new real[dim * size];
+  coordinates_ = new real[gdim * size];
 
   // Save dimension and size
-  dim_ = dim;
+  dim_ = gdim;
   size_ = size;
   timestamp_ = time(0);
 }
@@ -95,6 +97,11 @@ void MeshGeometry::init(uint dim, uint size)
 void MeshGeometry::set(uint n, uint i, real x)
 {
   coordinates_[n * dim_ + i] = x;
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::set(uint n, real const * x)
+{
+  std::memcpy(&coordinates_[n * dim_], x, dim_*sizeof(real));
 }
 //-----------------------------------------------------------------------------
 int MeshGeometry::token() const

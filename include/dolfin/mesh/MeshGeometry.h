@@ -50,13 +50,13 @@ public:
   real* x(uint n);
 
   /// Return array of values for coordinate n
-  const real* x(uint n) const;
+  real const * x(uint n) const;
 
   /// Return array of values for all coordinates
   real* x();
 
   /// Return array of values for all coordinates
-  const real* x() const;
+  real const * x() const;
 
   /// Return coordinate n as a 3D point value
   Point point(uint n) const;
@@ -64,11 +64,14 @@ public:
   /// Clear all data
   void clear();
 
-  /// Initialize coordinate list to given dimension and size
-  void init(uint dim, uint size);
+  /// Initialize coordinate list to given geometrical dimension and size
+  void init(uint gdim, uint size);
 
   /// Set value of coordinate n in direction i
   void set(uint n, uint i, real x);
+
+  /// Set value of coordinates n
+  void set(uint n, real const * x);
 
   /// Return token identifying the internal state of mesh geometry
   int token() const;
@@ -126,7 +129,7 @@ inline real* MeshGeometry::x(uint n)
 }
 
 //-----------------------------------------------------------------------------
-inline const real* MeshGeometry::x(uint n) const
+inline real const * MeshGeometry::x(uint n) const
 {
   return coordinates_ + n * dim_;
 }
@@ -138,7 +141,7 @@ inline real* MeshGeometry::x()
 }
 
 //-----------------------------------------------------------------------------
-inline const real* MeshGeometry::x() const
+inline real const * MeshGeometry::x() const
 {
   return coordinates_;
 }

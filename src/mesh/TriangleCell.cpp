@@ -192,7 +192,7 @@ void TriangleCell::refineCell(Cell& cell, MeshEditor& editor,
 real TriangleCell::volume(const MeshEntity& triangle) const
 {
   // Check that we get a triangle
-  dolfin_assert(triangle.numEntities(1) == 3);
+  dolfin_assert(triangle.numEntities(0) == 3);
 
   // Get mesh geometry
   const MeshGeometry& geometry = triangle.mesh().geometry();
@@ -247,7 +247,7 @@ real TriangleCell::diameter(const MeshEntity& triangle) const
 real TriangleCell::circumradius(const MeshEntity& triangle) const
 {
   // Check that we get a triangle
-  dolfin_assert(triangle.numEntities(1) == 3);
+  dolfin_assert(triangle.numEntities(0) == 3);
 
   // Get mesh geometry
   const MeshGeometry& geometry = triangle.mesh().geometry();

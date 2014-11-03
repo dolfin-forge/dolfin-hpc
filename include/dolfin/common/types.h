@@ -42,7 +42,7 @@ namespace dolfin
   typedef unsigned int uint;
 
   // Index type
-  typedef size_t idx_t;
+  typedef size_t uidx;
 
   // Complex numbers
   typedef std::complex<double> complex;

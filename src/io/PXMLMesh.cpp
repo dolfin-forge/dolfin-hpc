@@ -263,7 +263,7 @@ void PXMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 
   startIndex_vert_ = rank * L + std::min(rank, R);
   endIndex_vert_ = startIndex_vert_ + (numLocalVertices_ - 1);
-  mesh_.distdata().set_global_numVertices(num_vertices);
+  mesh_.distdata().set_num_global(0, num_vertices);
 
   // Set number of vertices
   editor_->initVertices(numLocalVertices_);
@@ -601,8 +601,7 @@ void PXMLMesh::closeMesh()
   // Init new mesh
   editor_->initVertices(mesh_.numVertices() + shared - orphan);
   //  new_mesh.distdata().init(_mesh.numVertices() + shared - orphan);
-  new_mesh.distdata().set_global_numVertices(
-      mesh_.distdata().global_numVertices());
+  new_mesh.distdata().set_num_global(0, mesh_.global_numVertices());
 
   uint v = 0;
   for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)

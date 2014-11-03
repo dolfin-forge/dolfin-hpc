@@ -18,7 +18,7 @@ MeshTopology::MeshTopology() :
     connectivity_(NULL),
     distdata_(*this),
     ordered_(false),
-    timestamp_(time(0)),
+    timestamp_(std::time(NULL)),
     renumbering_count_(0)
 {
   // Do nothing
@@ -30,7 +30,7 @@ MeshTopology::MeshTopology(MeshTopology const& topology) :
     connectivity_(NULL),
     distdata_(*this),
     ordered_(false),
-    timestamp_(time(0)),
+    timestamp_(std::time(NULL)),
     renumbering_count_(0)
 {
   *this = topology;
@@ -110,7 +110,7 @@ void MeshTopology::init(uint dim)
   // Clear old data if any
   clear();
 
-  timestamp_ = time(0); // Reset token
+  timestamp_ = std::time(NULL); // Reset token
 
   // Initialize number of mesh entities
   num_entities_ = new uint[dim + 1];
@@ -136,6 +136,16 @@ void MeshTopology::init(uint dim, uint size)
   dolfin_assert(num_entities_);dolfin_assert(dim <= dim_);
 
   num_entities_[dim] = size;
+}
+//-----------------------------------------------------------------------------
+uint MeshTopology::compute_entities(Mesh& mesh, uint dim) const
+{
+  return TopologyComputation::computeEntities(mesh, dim);
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
+{
+  TopologyComputation::computeConnectivity(mesh, d0, d1);
 }
 //-----------------------------------------------------------------------------
 int MeshTopology::token() const

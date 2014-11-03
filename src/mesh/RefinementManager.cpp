@@ -59,8 +59,7 @@ void RefinementManager::init(Mesh& mesh)
     return;
   }
 
-  uint max_index = std::max(mesh.distdata().global_numVertices(),
-                            mesh.distdata().max_index());
+  uint max_index = mesh.global_numVertices();
 
   // Assume uniform refinement
   uint num_new_vertices = mesh.size(1);
@@ -137,10 +136,10 @@ void RefinementManager::add_new_vertex(uint* edge, uint vertex, Mesh& mesh,
                                        bool shared)
 {
   // Invalidate global numbering
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
 
   // Invalidate mesh entity ownership
-  mesh.distdata().invalid_ownership();
+  mesh.distdata().set_invalid_ownership();
 
   // Store edge key in shared list
   if (shared)
@@ -160,8 +159,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
   MeshDistributedData& olddistdata = oldmesh.distdata();
   MeshDistributedData& newdistdata = newmesh.distdata();
 
-  newdistdata.invalid_numbering();
-  newdistdata.invalid_ownership();
+  newdistdata.set_invalid_numbering();
+  newdistdata.set_invalid_ownership();
 
   if (!_refm_init)
   {
@@ -217,8 +216,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       // Check if I have the vertices
-      if (olddistdata.have_global(recv_buff[i], 0)
-          && olddistdata.have_global(recv_buff[i + 1], 0))
+      if (olddistdata.has_global(recv_buff[i], 0)
+          && olddistdata.has_global(recv_buff[i + 1], 0))
       {
 
         // Generate edge key
@@ -257,8 +256,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
 
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
-      if (olddistdata.have_global(recv_buff[i], 0)
-          && olddistdata.have_global(recv_buff[i + 1], 0))
+      if (olddistdata.has_global(recv_buff[i], 0)
+          && olddistdata.has_global(recv_buff[i + 1], 0))
       {
 
         key = edge_key(olddistdata.get_vertex_local(recv_buff[i]),
@@ -294,7 +293,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
   uint num_glb;
   MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  newdistdata.set_global_numVertices(num_glb);
+  newdistdata.set_num_global(0, num_glb);
 
   delete[] recv_buff;
   delete[] recv_buff_id;

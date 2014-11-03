@@ -359,7 +359,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   // Overwrite old mesh with refined mesh
   editor.close();
   mesh = refined_mesh;
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
   end();

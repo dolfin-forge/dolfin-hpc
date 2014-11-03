@@ -710,7 +710,7 @@ void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
     for (int i = 0; i < recv_count; i++)
     {
       uint glb_index = recv_vertidx[i];
-      if (mesh.distdata().have_global(glb_index, 0)
+      if (mesh.distdata().has_global(glb_index, 0)
           && GlobalIdOnBoundary.count(glb_index) > 0
           && GlobalIdOnBoundary[glb_index])
       {

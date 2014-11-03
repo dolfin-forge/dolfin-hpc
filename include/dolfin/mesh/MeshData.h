@@ -7,16 +7,16 @@
 #ifndef __MESH_DATA_H
 #define __MESH_DATA_H
 
-#include <map>
-
 #include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
-#include "MeshFunction.h"
+
+#include <map>
 
 namespace dolfin
 {
 
   class Mesh;
+  template< class T> class Array;
+  template< class T> class MeshFunction;
 
   /// The class MeshData is a container for auxiliary mesh data,
   /// represented either as MeshFunctions over topological mesh
@@ -56,13 +56,13 @@ namespace dolfin
   private:
 
     // The mesh
-    Mesh& mesh;
+    Mesh& mesh_;
 
     // A map from named mesh data to MeshFunctions
-    std::map<std::string, MeshFunction<uint>*> meshfunctions;
+    std::map<std::string, MeshFunction<uint>*> meshfunctions_;
 
     // A map from named mesh data to Arrays
-    std::map<std::string, Array<uint>*> arrays;
+    std::map<std::string, Array<uint>*> arrays_;
 
   };
 

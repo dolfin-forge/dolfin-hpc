@@ -87,8 +87,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   dolfin_set("Load balancer redistribute", false);
   message("Adaptive refinement (with projection)");
-  message("  - cells before: %d", mesh.distdata().global_numCells());
-  message("  - vertices before: %d", mesh.distdata().global_numVertices());
+  message("  - cells before: %d", mesh.global_numCells());
+  message("  - vertices before: %d", mesh.global_numVertices());
 
   std::string const refine_type = dolfin_get("adapt_algorithm");
   if (refine_type == "simple")

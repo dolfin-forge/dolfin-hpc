@@ -284,7 +284,7 @@ void Checkpoint::load(Mesh& mesh)
   }
 
   mesh = _mesh;
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
   restart_state = FUNC;

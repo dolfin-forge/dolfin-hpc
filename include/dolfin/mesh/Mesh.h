@@ -21,6 +21,7 @@
 #include "MeshDistributedData.h"
 #include "MeshGeometry.h"
 #include "MeshTopology.h"
+#include "MeshData.h"
 #include "CellType.h"
 
 #ifdef HAVE_LIBGEOM
@@ -35,8 +36,8 @@ namespace dolfin
 
 class BoundaryMesh;
 class IntersectionDetector;
-template<class T> class MeshFunction;
-class MeshData;
+template<class T>
+  class MeshFunction;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
 ///
@@ -65,7 +66,7 @@ class MeshData;
 /// all edges connected to a given vertex must also be explicitly
 /// created (in this case by a call to mesh.init(0, 1)).
 
-class Mesh: public Variable
+class Mesh : public Variable
 {
 
   // Friends
@@ -95,11 +96,40 @@ public:
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;
 
+  /// Return mesh topology (non-const version)
+  MeshTopology& topology();
+
+  /// Return mesh topology (const version)
+  MeshTopology const& topology() const;
+
+  /// Return mesh geometry (non-const version)
+  MeshGeometry& geometry();
+
+  /// Return mesh geometry (const version)
+  MeshGeometry const& geometry() const;
+
+  /// Return mesh distribution data (non-const version)
+  MeshDistributedData& distdata();
+
+  /// Return mesh distribution data (const version)
+  MeshDistributedData const& distdata() const;
+
+  /// Return mesh data (non-const version)
+  MeshData& data();
+
+  /// Return mesh data (const version)
+  MeshData const& data() const;
+
+  /// Return mesh cell type (non-const version)
+  CellType& type();
+
+  /// Return mesh cell type (const version)
+  CellType const& type() const;
+
+  //--- TOPOLOGY --------------------------------------------------------------
+
   /// Return number of vertices of mesh partition
   uint numVertices() const;
-
-  /// Return number of ghost vertices
-  uint numGhostVertices() const;
 
   /// Return number of vertices of global mesh
   uint global_numVertices() const;
@@ -129,40 +159,13 @@ public:
   uint global_numCells() const;
 
   /// Return connectivity for all cells
-  uint* cells();
+  uint * cells();
 
   /// Return connectivity for all cells
-  const uint* cells() const;
+  const uint * cells() const;
 
   /// Return number of entities of given topological dimension
   uint size(uint dim) const;
-
-  /// Return mesh topology (non-const version)
-  MeshTopology& topology();
-
-  /// Return mesh topology (const version)
-  const MeshTopology& topology() const;
-
-  /// Return mesh geometry (non-const version)
-  MeshGeometry& geometry();
-
-  /// Return mesh geometry (const version)
-  const MeshGeometry& geometry() const;
-
-  /// Return mesh distribution data
-  MeshDistributedData& distdata();
-
-  /// Return mesh distribution data (const version)
-  const MeshDistributedData& distdata() const;
-
-  /// Return mesh data
-  MeshData& data();
-
-  /// Return mesh cell type
-  CellType& type();
-
-  /// Return mesh cell type
-  const CellType& type() const;
 
   /// Return exterior boundary of the mesh
   BoundaryMesh& exterior_boundary();
@@ -197,11 +200,11 @@ public:
 #ifdef HAVE_LIBGEOM
   /// Refine mesh uniformly including geometry informations -surfaces
   void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-              MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
+      MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
 
   /// Refine mesh uniformly including geometry informations -curves
   void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-              MeshFunction<float>& bnd_u);
+      MeshFunction<float>& bnd_u);
 #endif
 
   /// Refine mesh according to cells marked for refinement
@@ -243,16 +246,16 @@ public:
   /// Distribute a mesh according to a mesh function and transfer cell functions
   ///
   /// cell_functions contains pairs as <old_function,new_function>
-  void distribute(MeshFunction<uint>& distribution,
-                  Array<std::pair<MeshFunction<uint> *,
-                  MeshFunction<uint> *> >& cell_functions);
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
 
   /// Distribute a mesh according to a mesh function and transfer vertex functions
   ///
   /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(MeshFunction<uint>& distribution,
-                  Array<std::pair<MeshFunction<double> *,
-                  MeshFunction<double> *> >& vertex_functions);
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
   /// Distribute a mesh according to a mesh function and transfer cell and
   /// vertex functions
@@ -260,11 +263,10 @@ public:
   /// cell_functions contains pairs as <old_function,new_function>
   ///
   /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(MeshFunction<uint>& distribution,
-                  Array<std::pair<MeshFunction<uint> *,
-                  MeshFunction<uint> *> >& cell_functions,
-                  Array<std::pair<MeshFunction<double> *,
-                  MeshFunction<double> *> >& vertex_functions);
+  void distribute(
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
   /// Return whether the mesh is distributed
   bool is_distributed() const;
@@ -287,27 +289,27 @@ public:
 private:
 
   // Mesh topology
-  MeshTopology _topology;
+  MeshTopology topology_;
 
   // Mesh geometry
-  MeshGeometry _geometry;
+  MeshGeometry geometry_;
 
   // Auxiliary mesh data
-  MeshData* _data;
+  MeshData data_;
 
   // Cell type
-  CellType* _cell_type;
+  CellType * cell_type_;
 
   /// Exterior boundary mesh
-  mutable BoundaryMesh * _exterior_boundary;
+  mutable BoundaryMesh * exterior_boundary_;
 
   /// Interior boundary mesh
-  mutable BoundaryMesh * _interior_boundary;
+  mutable BoundaryMesh * interior_boundary_;
 
   /// Intersection detector
-  mutable IntersectionDetector * _intersection_detector;
+  mutable IntersectionDetector * intersection_detector_;
 
-  int _timestamp;
+  int timestamp_;
 
 };
 //--- INLINES -----------------------------------------------------------------
@@ -315,167 +317,99 @@ private:
 //-----------------------------------------------------------------------------
 inline uint Mesh::numVertices() const
 {
-  return _topology.size(0);
-}
-
-//-----------------------------------------------------------------------------
-inline uint Mesh::numGhostVertices() const
-{
-  return ((dolfin::MPI::numProcesses() == 1) ? 0 : distdata().num_ghost(0));
+  return topology_.size(0);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numVertices() const
 {
-  return (
-      (dolfin::MPI::numProcesses() == 1) ?
-          numVertices() : distdata().global_numVertices());
+  return topology_.num_global(0);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::numEdges() const
 {
-  return _topology.size(1);
+  return topology_.size(1);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numEdges() const
 {
-  return (
-      (dolfin::MPI::numProcesses() == 1) ?
-          numEdges() : distdata().global_numEdges());
+  return  topology_.num_global(1);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::numFaces() const
 {
-  return _topology.size(2);
+  return topology_.size(2);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numFaces() const
 {
-  return (
-      (dolfin::MPI::numProcesses() == 1) ?
-          numFaces() : distdata().global_numFaces());
+  return topology_.num_global(2);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::numFacets() const
 {
-  return _topology.size(_topology.dim() - 1);
+  return topology_.size(topology_.dim() - 1);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numFacets() const
 {
-  uint ret = numFacets();
-
-  if (dolfin::MPI::numProcesses() > 1)
-  {
-    switch(_topology.dim())
-    {
-      case 3:
-        ret= distdata().global_numFaces();
-        break;
-      case 2:
-        ret= distdata().global_numEdges();
-        break;
-      case 1:
-        ret= distdata().global_numVertices();
-        break;
-    }
-  }
-
-  return ret;
+  return topology_.num_global(topology_.dim() - 1);
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::numCells() const
 {
-  return _topology.size(_topology.dim());
+  return topology_.size(topology_.dim());
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numCells() const
 {
-  return (
-      (dolfin::MPI::numProcesses() == 1) ?
-          numCells() : distdata().global_numCells());
+  return topology_.num_global(topology_.dim());
 }
 
 //-----------------------------------------------------------------------------
 inline uint* Mesh::cells()
 {
-  return _topology(_topology.dim(), 0)();
+  return topology_(topology_.dim(), 0)();
 }
 
 //-----------------------------------------------------------------------------
-inline const uint* Mesh::cells() const
+inline uint const * Mesh::cells() const
 {
-  return _topology(_topology.dim(), 0)();
+  return topology_(topology_.dim(), 0)();
 }
 
 //-----------------------------------------------------------------------------
 inline uint Mesh::size(uint dim) const
 {
-  return _topology.size(dim);
-}
-
-//-----------------------------------------------------------------------------
-inline MeshTopology& Mesh::topology()
-{
-  return _topology;
-}
-
-//-----------------------------------------------------------------------------
-inline const MeshTopology& Mesh::topology() const
-{
-  return _topology;
-}
-
-//-----------------------------------------------------------------------------
-inline MeshGeometry& Mesh::geometry()
-{
-  return _geometry;
-}
-
-//-----------------------------------------------------------------------------
-inline const MeshGeometry& Mesh::geometry() const
-{
-  return _geometry;
-}
-
-//-----------------------------------------------------------------------------
-inline MeshDistributedData& Mesh::distdata()
-{
-  return topology().distdata();
-}
-
-//-----------------------------------------------------------------------------
-const inline MeshDistributedData& Mesh::distdata() const
-{
-  return topology().distdata();
+  return topology_.size(dim);
 }
 
 //-----------------------------------------------------------------------------
 inline CellType& Mesh::type()
 {
-  dolfin_assert(_cell_type);
-  return *_cell_type;
+  dolfin_assert(cell_type_);
+  return *cell_type_;
 }
 
 //-----------------------------------------------------------------------------
 inline const CellType& Mesh::type() const
 {
-  dolfin_assert(_cell_type);
-  return *_cell_type;
+  dolfin_assert(cell_type_);
+  return *cell_type_;
 }
 
 //-----------------------------------------------------------------------------
 inline bool Mesh::is_distributed() const
 {
-  return ! topology().distdata().empty();
+  return !topology().distdata().empty();
 }
 
 }

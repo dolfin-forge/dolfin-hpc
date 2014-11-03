@@ -60,13 +60,13 @@ void MeshEditor::init(Mesh& mesh, CellType::Type type, uint gdim)
   mesh.clear();
 
   // Set cell type
-  mesh._cell_type = CellType::create(type);
+  mesh.cell_type_ = CellType::create(type);
 
   // Save mesh and dimension
-  this->tdim_ = mesh._cell_type->dim();
+  this->tdim_ = mesh.cell_type_->dim();
 
   // Initialize topological dimension
-  mesh._topology.init(tdim_);
+  mesh.topology_.init(tdim_);
 
   // Initialize temporary storage for local cell data
   vertices.resize(mesh.type().numVertices(tdim_), 0.0);
@@ -82,8 +82,8 @@ void MeshEditor::initVertices(uint num_vertices)
   
   // Initialize mesh data
   this->num_vertices_ = num_vertices;
-  mesh_->_topology.init(0, num_vertices);
-  mesh_->_geometry.init(gdim_, num_vertices);
+  mesh_->topology_.init(0, num_vertices);
+  mesh_->geometry_.init(gdim_, num_vertices);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::initCells(uint num_cells)
@@ -96,8 +96,8 @@ void MeshEditor::initCells(uint num_cells)
 
   // Initialize mesh data
   this->num_cells_ = num_cells;
-  mesh_->_topology.init(tdim_, num_cells);
-  mesh_->_topology(tdim_, 0).init(num_cells, mesh_->type().numVertices(tdim_));
+  mesh_->topology_.init(tdim_, num_cells);
+  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().numVertices(tdim_));
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addVertex(uint v, Point const& p)
@@ -106,7 +106,7 @@ void MeshEditor::addVertex(uint v, Point const& p)
   addVertexCommon(v);
   
   // Set coordinate
-  mesh_->_geometry.set(v, &p[0]);
+  mesh_->geometry_.set(v, &p[0]);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addVertex(uint v, real const * x)
@@ -115,7 +115,7 @@ void MeshEditor::addVertex(uint v, real const * x)
   addVertexCommon(v);
 
   // Set coordinate
-  mesh_->_geometry.set(v, x);
+  mesh_->geometry_.set(v, x);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addVertex(uint v, real x)
@@ -124,7 +124,7 @@ void MeshEditor::addVertex(uint v, real x)
   addVertexCommon(v);
 
   // Set coordinate
-  mesh_->_geometry.set(v, 0, x);
+  mesh_->geometry_.set(v, 0, x);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addVertex(uint v, real x, real y)
@@ -133,8 +133,8 @@ void MeshEditor::addVertex(uint v, real x, real y)
   addVertexCommon(v);
 
   // Set coordinate
-  mesh_->_geometry.set(v, 0, x);
-  mesh_->_geometry.set(v, 1, y);
+  mesh_->geometry_.set(v, 0, x);
+  mesh_->geometry_.set(v, 1, y);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addVertex(uint v, real x, real y, real z)
@@ -143,9 +143,9 @@ void MeshEditor::addVertex(uint v, real x, real y, real z)
   addVertexCommon(v);
 
   // Set coordinate
-  mesh_->_geometry.set(v, 0, x);
-  mesh_->_geometry.set(v, 1, y);
-  mesh_->_geometry.set(v, 2, z);
+  mesh_->geometry_.set(v, 0, x);
+  mesh_->geometry_.set(v, 1, y);
+  mesh_->geometry_.set(v, 2, z);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addCell(uint c, const Array<uint>& v)
@@ -154,12 +154,12 @@ void MeshEditor::addCell(uint c, const Array<uint>& v)
   addCellCommon(c);
 
   // Set data
-  mesh_->_topology(tdim_, 0).set(c, v);
+  mesh_->topology_(tdim_, 0).set(c, v);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addCell(uint c, uint v0, uint v1)
 {
-  dolfin_assert(mesh_->_cell_type->numEntities(0) == 2);
+  dolfin_assert(mesh_->cell_type_->numEntities(0) == 2);
 
   // Add cell
   addCellCommon(c);
@@ -167,12 +167,12 @@ void MeshEditor::addCell(uint c, uint v0, uint v1)
   // Set data
   vertices[0] = v0;
   vertices[1] = v1;
-  mesh_->_topology(tdim_, 0).set(c, vertices);
+  mesh_->topology_(tdim_, 0).set(c, vertices);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2)
 {
-  dolfin_assert(mesh_->_cell_type->numEntities(0) == 3);
+  dolfin_assert(mesh_->cell_type_->numEntities(0) == 3);
 
   // Add cell
   addCellCommon(c);
@@ -181,12 +181,12 @@ void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2)
   vertices[0] = v0;
   vertices[1] = v1;
   vertices[2] = v2;
-  mesh_->_topology(tdim_, 0).set(c, vertices);
+  mesh_->topology_(tdim_, 0).set(c, vertices);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2, uint v3)
 {
-  dolfin_assert(mesh_->_cell_type->numEntities(0) == 4);
+  dolfin_assert(mesh_->cell_type_->numEntities(0) == 4);
 
   // Add cell
   addCellCommon(c);
@@ -196,7 +196,7 @@ void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2, uint v3)
   vertices[1] = v1;
   vertices[2] = v2;
   vertices[3] = v3;
-  mesh_->_topology(tdim_, 0).set(c, vertices);
+  mesh_->topology_(tdim_, 0).set(c, vertices);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::close()

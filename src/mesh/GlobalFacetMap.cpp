@@ -182,7 +182,7 @@ void GlobalFacetMap::findGlobal3D()
       uint vi = 0;
       for(uint k = 0; k < num_facet_vertices; ++k)
       {
-        if(! mddata.have_global(recv_buff[i+k], 0))
+        if(! mddata.has_global(recv_buff[i+k], 0))
         {
           ++vi;
         }

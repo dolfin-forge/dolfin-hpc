@@ -43,7 +43,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint dest, src;
-  uint global_num_vertex=mesh.distdata().global_numVertices();
+  uint global_num_vertex=mesh.global_numVertices();
   double stopper= double(global_num_vertex+1);
 
   smooth_data.prepare_mesh();

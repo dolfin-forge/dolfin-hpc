@@ -26,7 +26,6 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
@@ -41,42 +40,42 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
     Variable("mesh", "DOLFIN mesh"),
-    _topology(),
-    _geometry(),
-    _data(0),
-    _cell_type(0),
-    _exterior_boundary(NULL),
-    _interior_boundary(NULL),
-    _intersection_detector(NULL),
-    _timestamp(time(0))
+    topology_(),
+    geometry_(),
+    data_(*this),
+    cell_type_(0),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
-    _topology(),
-    _geometry(),
-    _data(0),
-    _cell_type(0),
-    _exterior_boundary(NULL),
-    _interior_boundary(NULL),
-    _intersection_detector(NULL),
-    _timestamp(time(0))
+    topology_(),
+    geometry_(),
+    data_(*this),
+    cell_type_(0),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
 {
   *this = mesh;
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string filename) :
     Variable("mesh", "DOLFIN mesh"),
-    _topology(),
-    _geometry(),
-    _data(0),
-    _cell_type(0),
-    _exterior_boundary(NULL),
-    _interior_boundary(NULL),
-    _intersection_detector(NULL),
-    _timestamp(time(0))
+    topology_(),
+    geometry_(),
+    data_(*this),
+    cell_type_(0),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
 {
   File file(filename);
   file >> *this;
@@ -99,13 +98,13 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 {
   clear();
 
-  _topology = mesh._topology;
-  _geometry = mesh._geometry;
-  _timestamp = mesh._timestamp;
+  topology_ = mesh.topology_;
+  geometry_ = mesh.geometry_;
+  timestamp_ = mesh.timestamp_;
 
-  if (mesh._cell_type)
+  if (mesh.cell_type_)
   {
-    _cell_type = CellType::create(mesh._cell_type->cellType());
+    cell_type_ = CellType::create(mesh.cell_type_->cellType());
   }
 
   rename(mesh.name(), mesh.label());
@@ -126,58 +125,96 @@ bool Mesh::operator !=(Mesh const& other) const
 }
 
 //-----------------------------------------------------------------------------
+MeshTopology& Mesh::topology()
+{
+  return topology_;
+}
+
+//-----------------------------------------------------------------------------
+MeshTopology const& Mesh::topology() const
+{
+  return topology_;
+}
+
+//-----------------------------------------------------------------------------
+MeshGeometry& Mesh::geometry()
+{
+  return geometry_;
+}
+
+//-----------------------------------------------------------------------------
+MeshGeometry const& Mesh::geometry() const
+{
+  return geometry_;
+}
+
+//-----------------------------------------------------------------------------
+MeshDistributedData& Mesh::distdata()
+{
+  return topology().distdata();
+}
+
+//-----------------------------------------------------------------------------
+MeshDistributedData const& Mesh::distdata() const
+{
+  return topology().distdata();
+}
+
+//-----------------------------------------------------------------------------
 MeshData& Mesh::data()
 {
-  if (!_data)
-  {
-    _data = new MeshData(*this);
-  }
-  return *_data;
+  return data_;
+}
+
+//-----------------------------------------------------------------------------
+MeshData const& Mesh::data() const
+{
+  return data_;
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
 {
   ///FIXME: Improve hash logic to regenerate bounday at topology change
-  if (_exterior_boundary == NULL || _exterior_boundary->invalid_mesh_topology())
+  if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
-    delete _exterior_boundary;
-    _exterior_boundary = new BoundaryMesh(*this, BoundaryMesh::exterior);
+    delete exterior_boundary_;
+    exterior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::exterior);
   }
-  return *_exterior_boundary;
+  return *exterior_boundary_;
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::interior_boundary()
 {
   ///FIXME: Improve hash logic to regenerate bounday at topology change
-  if (_interior_boundary == NULL || _interior_boundary->invalid_mesh_topology())
+  if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
-    delete _interior_boundary;
-    _interior_boundary = new BoundaryMesh(*this, BoundaryMesh::interior);
+    delete interior_boundary_;
+    interior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::interior);
   }
-  return *_interior_boundary;
+  return *interior_boundary_;
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
 {
   ///FIXME: Improve hash logic to regenerate detector at topology change
-  if (_intersection_detector == NULL)
+  if (intersection_detector_ == NULL)
   {
-    delete _intersection_detector;
-    _intersection_detector = new IntersectionDetector(*this);
+    delete intersection_detector_;
+    intersection_detector_ = new IntersectionDetector(*this);
   }
-  return *_intersection_detector;
+  return *intersection_detector_;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint Mesh::init(uint dim) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  return _topology.compute_entities(*mesh, dim);
+  return topology_.compute_entities(*mesh, dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  _topology.compute_connectivity(*mesh, d0, d1);
+  topology_.compute_connectivity(*mesh, d0, d1);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -200,36 +237,35 @@ void Mesh::init() const
 //-----------------------------------------------------------------------------
 void Mesh::clear()
 {
-  _timestamp = 0;
-  _topology.clear();
-  _geometry.clear();
-  delete _cell_type;
-  _cell_type = NULL;
-  delete _data;
-  _data = NULL;
-  delete _exterior_boundary;
-  _exterior_boundary = NULL;
-  delete _interior_boundary;
-  _interior_boundary = NULL;
-  delete _intersection_detector;
-  _intersection_detector = NULL;
+  timestamp_ = 0;
+  topology_.clear();
+  geometry_.clear();
+  data_.clear();
+  delete cell_type_;
+  cell_type_ = NULL;
+  delete exterior_boundary_;
+  exterior_boundary_ = NULL;
+  delete interior_boundary_;
+  interior_boundary_ = NULL;
+  delete intersection_detector_;
+  intersection_detector_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()
 {
-  if (_topology.is_ordered())
+  if (topology_.is_ordered())
   {
     message(1, "Mesh has already been ordered, no need to reorder entities.");
   }
   else
   {
-    _topology.order(*this);
+    topology_.order(*this);
   }
 }
 //-----------------------------------------------------------------------------
 bool Mesh::ordered() const
 {
-  return _topology.is_ordered();
+  return topology_.is_ordered();
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine()
@@ -353,7 +389,6 @@ void Mesh::distribute(
 void Mesh::renumber()
 {
   MeshRenumber::renumber(*this);
-//  _timestamp = time(0);
 }
 
 //-----------------------------------------------------------------------------
@@ -361,7 +396,7 @@ std::string const Mesh::hash() const
 {
   std::stringstream ss;
   ss << "Mesh@" << this << ":" << this->type().description() << ":time"
-      << _timestamp << ":T" << this->topology().token() << ":G"
+      << timestamp_ << ":T" << this->topology().token() << ":G"
       << this->geometry().token();
   return ss.str();
 }
@@ -374,23 +409,19 @@ void Mesh::disp() const
   cout << endl;
 
   // Display topology and geometry
-  _topology.disp();
-  _geometry.disp();
+  topology_.disp();
+  geometry_.disp();
 
   // Display cell type
   cout << "Cell type" << endl;
   cout << "---------" << endl;
   begin("");
-  if (_cell_type) cout << _cell_type->description() << endl;
+  if (cell_type_) cout << cell_type_->description() << endl;
   else cout << "undefined" << endl;
   end();
 
-  // Display mesh data
-  if (_data)
-  {
-    cout << endl;
-    _data->disp();
-  }
+  cout << endl;
+  data_.disp();
 
   // End indentation
   end();

@@ -77,24 +77,10 @@ inline void UFCMesh::init(Mesh const& mesh)
 
   // Set number of entities for each topological dimension
   num_entities = new uint[tdim + 1];
-  switch (tdim)
-    {
-    // Fallthrough to set the number of entities for lower dimensions
-    case 3:
-      num_entities[3] = mesh.global_numCells();
-    case 2:
-      num_entities[2] = (
-          tdim > 2 ? mesh.global_numFaces() : mesh.global_numCells());
-    case 1:
-      num_entities[1] = (
-          tdim > 1 ? mesh.global_numEdges() : mesh.global_numCells());
-    case 0:
-      num_entities[0] = mesh.global_numVertices();
-      break;
-    default:
-      error("Unsupported topological dimension greater than 3");
-      break;
-    }
+  for(uint d = 0; d < tdim + 1; ++d)
+  {
+    num_entities[d] = mesh.topology().num_global(d);
+  }
 }
 
 //-----------------------------------------------------------------------------

@@ -55,7 +55,7 @@ public:
   /// Return topological dimension
   uint dim() const;
 
-  /// Return number of entities for given dimension
+  /// Return number of entities in the local topology for given dimension
   uint size(uint dim) const;
 
   /// Clear all data
@@ -80,13 +80,23 @@ public:
   MeshDistributedData& distdata();
 
   /// Return mesh distribution data (const version)
-  const MeshDistributedData& distdata() const;
+  MeshDistributedData const& distdata() const;
+
+  /// Return number of given entities
+  uint num_local(uint dim) const;
+  uint num_global(uint dim) const;
+  uint num_shared(uint dim) const;
+  uint num_ghosts(uint dim) const;
+  uint num_owned(uint dim) const;
 
   ///
   void order(Mesh& mesh);
 
   ///
   bool is_ordered() const;
+
+  ///
+  bool is_distributed() const;
 
   ///
   void renumber(Mesh& mesh);
@@ -146,18 +156,6 @@ inline uint MeshTopology::size(uint dim) const
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::compute_entities(Mesh& mesh, uint dim) const
-{
-  return TopologyComputation::computeEntities(mesh, dim);
-}
-
-//-----------------------------------------------------------------------------
-inline void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
-{
-  TopologyComputation::computeConnectivity(mesh, d0, d1);
-}
-
-//-----------------------------------------------------------------------------
 inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 {
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
@@ -184,6 +182,38 @@ inline MeshDistributedData const& MeshTopology::distdata() const
 }
 
 //-----------------------------------------------------------------------------
+inline uint MeshTopology::num_local(uint dim) const
+{
+  return this->size(dim);
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_global(uint dim) const
+{
+  return (is_distributed() ? distdata().num_global(dim) : this->size(dim));
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_shared(uint dim) const
+{
+  return (is_distributed() ? distdata().num_shared(dim) : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_ghosts(uint dim) const
+{
+  return (is_distributed() ? distdata().num_ghost(dim) : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::num_owned(uint dim) const
+{
+  return (
+      is_distributed() ?
+          this->size(dim) - distdata().num_ghost(dim) : this->size(dim));
+}
+
+//-----------------------------------------------------------------------------
 inline void MeshTopology::order(Mesh& mesh)
 {
   MeshOrdering::order(mesh);
@@ -197,9 +227,18 @@ inline bool MeshTopology::is_ordered() const
 }
 
 //-----------------------------------------------------------------------------
+inline bool MeshTopology::is_distributed() const
+{
+  return !distdata_.empty();
+}
+
+//-----------------------------------------------------------------------------
 inline void MeshTopology::renumber(Mesh& mesh)
 {
-  if(MeshRenumber::renumber(mesh)) ++renumbering_count_;
+  if (MeshRenumber::renumber(mesh))
+  {
+    ++renumbering_count_;
+  }
 }
 
 }

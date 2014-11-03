@@ -404,14 +404,14 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       for (uint i = 0; i < local_dimension(); ++i)
       {
         dofs[i] = ufc_cell.entity_indices[0][i];
-        dolfin_assert(mesh().distdata().have_global(dofs[i], 0));
+        dolfin_assert(mesh().distdata().has_global(dofs[i], 0));
       }
     }
     break;
   case scalar_dg0:
     {
       dofs[0] = ufc_cell.index;
-      dolfin_assert(mesh().distdata().have_global(dofs[0], mesh().topology().dim()));
+      dolfin_assert(mesh().distdata().has_global(dofs[0], mesh().topology().dim()));
     }
     break;
   case vector_p1:
@@ -575,7 +575,7 @@ void DofMap::build()
       local_size_ = ufc_dofmap_->local_dimension();
     }
     else if (ufc_dofmap_->global_dimension()
-        == dolfin_mesh.distdata().global_numVertices())
+        == dolfin_mesh.global_numVertices())
     {
       // Scalar Lagrange P1
       type_ = scalar_p1;
@@ -590,7 +590,7 @@ void DofMap::build()
       }
     }
     else if (ufc_dofmap_->global_dimension()
-        == dolfin_mesh.distdata().global_numCells())
+        == dolfin_mesh.global_numCells())
     {
       // Scalar Discontinuous Lagrange P0
       type_ = scalar_dg0;
@@ -600,7 +600,7 @@ void DofMap::build()
     }
     else if (ufc_dofmap_->global_dimension()
         == ufc_dofmap_->num_sub_dofmaps()
-            * dolfin_mesh.distdata().global_numVertices())
+            * dolfin_mesh.global_numVertices())
     {
       // Vector Lagrange P1
       type_ = vector_p1;
@@ -622,7 +622,7 @@ void DofMap::build()
 
       for (VertexIterator v(dolfin_mesh); !v.end(); ++v)
       {
-        if (!dolfin_mesh.distdata().is_ghost(v->index(), 0))
+        if (!v->is_ghost())
         {
           v_offset[dolfin_mesh.distdata().get_global(*v)] = offset;
           offset += gdim;
@@ -713,7 +713,7 @@ void DofMap::build()
     }
     else if (ufc_dofmap_->global_dimension()
         == ufc_dofmap_->num_sub_dofmaps()
-            * dolfin_mesh.distdata().global_numCells())
+            * dolfin_mesh.global_numCells())
     {
       // Vector Discontinuous Lagrange P0
       type_ = vector_dg0;

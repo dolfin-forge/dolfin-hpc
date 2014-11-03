@@ -187,7 +187,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
 }
@@ -488,7 +488,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
     patch_id_list.set(v->index(), refined_patch_id_list.get(v->index()));
   }
 
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
 }
@@ -766,7 +766,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
     patch_id_list.set(v->index(), refined_patch_id_list.get(v->index()));
   }
 
-  mesh.distdata().invalid_numbering();
+  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 }
 //-----------------------------------------------------------------------------

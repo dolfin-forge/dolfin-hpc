@@ -108,14 +108,13 @@ void DMesh::imp(Mesh& mesh)
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
+  uint max_index = mesh.global_numVertices();
 #ifdef HAVE_MPI
   MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
 
   Cell c(mesh, 0);
-  _salt = c.numEntities(0) *
-    (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
+  _salt = c.numEntities(0) * mesh.global_numCells();
 
   // Assign a safe range for each processor
   _start_offset = 0;
@@ -338,8 +337,8 @@ void DMesh::exp(Mesh& mesh)
 
   if (MPI::numProcesses() > 1)
   {
-    mesh.distdata().invalid_numbering();
-    mesh.distdata().invalid_ownership();
+    mesh.distdata().set_invalid_numbering();
+    mesh.distdata().set_invalid_ownership();
     mesh.renumber();
   }
 }
@@ -407,8 +406,8 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 
   if (MPI::numProcesses() > 1)
   {
-    mesh.distdata().invalid_numbering();
-    mesh.distdata().invalid_ownership();
+    mesh.distdata().set_invalid_numbering();
+    mesh.distdata().set_invalid_ownership();
     mesh.renumber();
   }
 }

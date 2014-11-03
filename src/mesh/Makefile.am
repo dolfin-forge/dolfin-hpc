@@ -5,7 +5,6 @@ libdolfin_mesh_la_SOURCES = \
 			AffineMapping.cpp\
 			BoundaryComputation.cpp\
 			BoundaryMesh.cpp\
-			Box.cpp\
 			Cell.cpp\
 			CellType.cpp\
 			CoarseningManager.cpp\
@@ -45,7 +44,6 @@ libdolfin_mesh_la_SOURCES = \
 			MeshTopology.cpp\
 			Point.cpp\
 			PointCell.cpp\
-			Rectangle.cpp\
 			RefinementManager.cpp\
 			RivaraRefinement.cpp\
 			SubDomain.cpp\
@@ -53,11 +51,6 @@ libdolfin_mesh_la_SOURCES = \
 			TopologyComputation.cpp\
 			TriangleCell.cpp\
 			UniformMeshRefinement.cpp\
-			UnitCircle.cpp\
-			UnitCube.cpp\
-			UnitInterval.cpp\
-			UnitSphere.cpp\
-			UnitSquare.cpp\
 			VertexNormal.cpp\
 			Vertex.cpp
 

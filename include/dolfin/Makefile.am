@@ -175,7 +175,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryComputation.h\
 				mesh/BoundaryMesh.h\
-				mesh/Box.h\
 				mesh/Cell.h\
 				mesh/CellType.h\
 				mesh/CoarseningManager.h\
@@ -219,7 +218,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/Point.h\
 				mesh/PointCell.h\
 				mesh/predicates_init.h\
-				mesh/Rectangle.h\
 				mesh/RefinementManager.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
@@ -228,11 +226,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/TopologyComputation.h\
 				mesh/TriangleCell.h\
 				mesh/UniformMeshRefinement.h\
-				mesh/UnitCircle.h\
-				mesh/UnitCube.h\
-				mesh/UnitInterval.h\
-				mesh/UnitSphere.h\
-				mesh/UnitSquare.h\
 				mesh/Vertex.h\
 				mesh/VertexNormal.h\
 				nls/dolfin_nls.h\

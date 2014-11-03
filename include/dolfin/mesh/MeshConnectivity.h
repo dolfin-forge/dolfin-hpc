@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2006-05-09
-// Last changed: 2007-11-30
+// Last changed: 2014-11-03
 
 #ifndef __MESH_CONNECTIVITY_H
 #define __MESH_CONNECTIVITY_H
@@ -13,93 +13,129 @@
 namespace dolfin
 {
 
-  /// Mesh connectivity stores a sparse data structure of connections
-  /// (incidence relations) between mesh entities for a fixed pair of
-  /// topological dimensions.
-  ///
-  /// The connectivity can be specified either by first giving the
-  /// number of entities and the number of connections for each entity,
-  /// which may either be equal for all entities or different, or by
-  /// giving the entire (sparse) connectivity pattern.
+/// Mesh connectivity stores a sparse data structure of connections
+/// (incidence relations) between mesh entities for a fixed pair of
+/// topological dimensions.
+///
+/// The connectivity can be specified either by first giving the
+/// number of entities and the number of connections for each entity,
+/// which may either be equal for all entities or different, or by
+/// giving the entire (sparse) connectivity pattern.
 
-  class MeshConnectivity
-  {
-  public:
+class MeshConnectivity
+{
+public:
 
-    /// Create empty connectivity
-    MeshConnectivity();
+  /// Create empty connectivity
+  MeshConnectivity();
 
-    /// Copy constructor
-    MeshConnectivity(const MeshConnectivity& connectivity);
+  /// Copy constructor
+  MeshConnectivity(const MeshConnectivity& other);
 
-    /// Destructor
-    ~MeshConnectivity();
+  /// Destructor
+  ~MeshConnectivity();
 
-    /// Assignment
-    const MeshConnectivity& operator= (const MeshConnectivity& connectivity);
+  /// Assignment
+  MeshConnectivity const& operator=(MeshConnectivity const& other);
 
-    /// Return total number of connections
-    inline uint size() const { return _size; }
+  /// Return total number of connections
+  uint size() const;
 
-    /// Return number of connections for given entity
-    inline uint size(uint entity) const
-    { return (entity < num_entities ? offsets[entity + 1] - offsets[entity] : 0); }
+  /// Return number of connections for given entity
+  uint size(uint entity) const;
 
-    /// Return array of connections for given entity
-    inline uint* operator() (uint entity)
-    { return (entity < num_entities ? connections + offsets[entity] : 0); }
+  /// Return array of connections for given entity
+  uint* operator()(uint entity);
 
-    /// Return array of connections for given entity
-    inline const uint* operator() (uint entity) const
-    { return (entity < num_entities ? connections + offsets[entity] : 0); }
+  /// Return array of connections for given entity
+  uint const * operator()(uint entity) const;
 
-    /// Return contiguous array of connections for all entities
-    inline uint* operator() () { return connections; }
+  /// Return contiguous array of connections for all entities
+  uint* operator()();
 
-    /// Return contiguous array of connections for all entities
-    inline const uint* operator() () const { return connections; }
+  /// Return contiguous array of connections for all entities
+  uint const * operator()() const;
 
-    /// Clear all data
-    void clear();
+  /// Clear all data
+  void clear();
 
-    /// Initialize number of entities and number of connections (equal for all)
-    void init(uint num_entities, uint num_connections);
+  /// Initialize number of entities and number of connections (equal for all)
+  void init(uint num_entities, uint num_connections);
 
-    /// Initialize number of entities and number of connections (individually)
-    void init(Array<uint>& num_connections);
+  /// Initialize number of entities and number of connections (individually)
+  void init(Array<uint> const& num_connections);
 
-    /// Set given connection for given entity
-    void set(uint entity, uint connection, uint pos);
+  /// Set given connection for given entity
+  void set(uint entity, uint connection, uint pos);
 
-    /// Set all connections for given entity
-    void set(uint entity, const Array<uint>& connections);
+  /// Set all connections for given entity
+  void set(uint entity, Array<uint> const& connections);
 
-    /// Set all connections for given entity
-    void set(uint entity, uint* connections);
+  /// Set all connections for given entity
+  void set(uint entity, uint const * connections);
 
-    /// Set all connections for all entities
-    void set(const Array<Array<uint> >& connectivity);
+  /// Set all connections for all entities
+  void set(Array<Array<uint> > const& connectivity);
 
-    /// Display data
-    void disp() const;
-    
-  private:
+  /// Display data
+  void disp() const;
 
-    friend class MPIMeshCommunicator;
+private:
 
-    /// Total number of connections
-    uint _size;
+  friend class MPIMeshCommunicator;
 
-    /// Number of entities
-    uint num_entities;
-    
-    /// Connections for all entities stored as a contiguous array
-    uint* connections;
+  /// Total number of connections
+  uint size_;
 
-    /// Offset for first connection for each entity
-    uint* offsets;
+  /// Number of entities
+  uint num_entities_;
 
-  };
+  /// Connections for all entities stored as a contiguous array
+  uint * connections_;
+
+  /// Offset for first connection for each entity
+  uint * offsets_;
+
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+inline uint MeshConnectivity::size() const
+{
+  return size_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshConnectivity::size(uint entity) const
+{
+  return (entity < num_entities_ ? offsets_[entity + 1] - offsets_[entity] : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint * MeshConnectivity::operator()(uint entity)
+{
+  return (entity < num_entities_ ? connections_ + offsets_[entity] : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline const uint * MeshConnectivity::operator()(uint entity) const
+{
+  return (entity < num_entities_ ? connections_ + offsets_[entity] : 0);
+}
+
+//-----------------------------------------------------------------------------
+inline uint * MeshConnectivity::operator()()
+{
+  return connections_;
+}
+
+//-----------------------------------------------------------------------------
+inline const uint * MeshConnectivity::operator()() const
+{
+  return connections_;
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

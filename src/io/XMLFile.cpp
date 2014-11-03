@@ -228,7 +228,8 @@ void XMLFile::operator<<(GenericVector& x)
   // Close file
   closeFile(fp);
 
-//  message(1, "Saved vector %s (%s) to file %s in DOLFIN XML format.", x.name().c_str(), x.label().c_str(), filename.c_str());
+  //message(1, "Saved vector %s (%s) to file %s in DOLFIN XML format.",
+  //x.name().c_str(), x.label().c_str(), filename.c_str());
   message(1, "Saved vector  to file %s in DOLFIN XML format.",
           filename.c_str());
 
@@ -301,6 +302,7 @@ void XMLFile::operator<<(Mesh& mesh)
         break;
       default:
         error("The XML mesh file format only supports 1D, 2D and 3D meshes.");
+        break;
       }
   }
 
@@ -332,6 +334,7 @@ void XMLFile::operator<<(Mesh& mesh)
         break;
       default:
         error("Unknown cell type: %u.", cell_type);
+        break;
       }
   }
 
@@ -521,7 +524,7 @@ void XMLFile::operator<<(ParameterList& parameters)
                 it->first.c_str(), static_cast<std::string>(parameter).c_str());
         break;
       default:
-        ; // Do nothing
+        break; // Do nothing
       }
 
   }

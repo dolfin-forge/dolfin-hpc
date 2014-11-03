@@ -432,30 +432,16 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
 
   vi = 0;
   for (uint i = 0; i < coords.size(); i += gdim)
-    switch (gdim)
-      {
-      case 2:
-        editor.addVertex(vi++, coords[i], coords[i + 1]);
-        break;
-      case 3:
-        editor.addVertex(vi++, coords[i], coords[i + 1], coords[i + 2]);
-        break;
-      }
+  {
+    editor.addVertex(vi++, &coords[i]);
+  }
   coords.clear();
 
-  dolfin_assert(cl.size()%ndims == 0);
+  dolfin_assert(cl.size() % ndims == 0);
   uint ci = 0;
   for (uint i = 0; i < cl.size(); i += ndims)
   {
-    switch (ndims)
-      {
-      case 3:
-        editor.addCell(ci++, cl[i], cl[i + 1], cl[i + 2]);
-        break;
-      case 4:
-        editor.addCell(ci++, cl[i], cl[i + 1], cl[i + 2], cl[i + 3]);
-        break;
-      }
+    editor.addCell(ci++, &cl[i]);
   }
   cl.clear();
   editor.close();
@@ -470,7 +456,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   // Mark new cells for refinement
   if (cell_marker)
   {
-    dolfin_assert( cm.size() == mesh.numCells());
+    dolfin_assert(cm.size() == mesh.numCells());
     cell_marker->init(mesh, mesh.topology().dim());
     for (uint i = 0; i < cm.size(); i++)
       cell_marker->set(i, cm[i]);
@@ -1033,32 +1019,16 @@ void MPIMeshCommunicator::distributeCommon(
   vi = 0;
   for (uint i = 0; i < coords.size(); i += gdim)
   {
-    switch (gdim)
-      {
-      case 2:
-        editor.addVertex(vi++, coords[i], coords[i + 1]);
-        break;
-      case 3:
-        editor.addVertex(vi++, coords[i], coords[i + 1], coords[i + 2]);
-        break;
-      }
+    editor.addVertex(vi++, &coords[i]);
   }
   coords.clear();
 
   // Add cells
-  dolfin_assert(cl.size()%ndims == 0);
+  dolfin_assert(cl.size() % ndims == 0);
   uint ci = 0;
   for (uint i = 0; i < cl.size(); i += ndims)
   {
-    switch (ndims)
-      {
-      case 3:
-        editor.addCell(ci++, cl[i], cl[i + 1], cl[i + 2]);
-        break;
-      case 4:
-        editor.addCell(ci++, cl[i], cl[i + 1], cl[i + 2], cl[i + 3]);
-        break;
-      }
+    editor.addCell(ci++, &cl[i]);
   }
   cl.clear();
   editor.close();
@@ -1077,7 +1047,7 @@ void MPIMeshCommunicator::distributeCommon(
     for (CellFunctionArrayType::iterator f_it(cell_functions->begin());
         f_it != cell_functions->end(); ++f_it, ++f_id)
     {
-      dolfin_assert( cfunctions[f_id].size() == mesh.numCells() );
+      dolfin_assert(cfunctions[f_id].size() == mesh.numCells());
       f_it->second->init(mesh, mesh.topology().dim());
       for (uint i(0); i < cfunctions[f_id].size(); ++i)
       {
@@ -1094,7 +1064,7 @@ void MPIMeshCommunicator::distributeCommon(
     for (VertexFunctionArrayType::iterator f_it(vertex_functions->begin());
         f_it != vertex_functions->end(); ++f_it, ++f_id)
     {
-      dolfin_assert( vfunctions[f_id].size() == mesh.numVertices() );
+      dolfin_assert(vfunctions[f_id].size() == mesh.numVertices());
       f_it->second->init(mesh, 0);
       for (uint i(0); i < vfunctions[f_id].size(); ++i)
       {

@@ -23,8 +23,7 @@ class MeshEditor
 {
 public:
 
-  /// Constructor for meshes with unique type of cell
-  //TODO: Deprecate.
+  /// Constructor for meshes with unique type of cell [TODO: Deprecate]
   MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
 
   /// Constructor for meshes with unique type of cell

@@ -30,8 +30,8 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim) :
     mesh_(&mesh),
-    tdim_(tdim),
-    gdim_(gdim),
+    tdim_(0),
+    gdim_(0),
     num_vertices_(0),
     num_cells_(0),
     vertex_index_(0),
@@ -64,6 +64,7 @@ void MeshEditor::init(Mesh& mesh, CellType::Type type, uint gdim)
 
   // Save mesh and dimension
   this->tdim_ = mesh.cell_type_->dim();
+  this->gdim_ = gdim;
 
   // Initialize topological dimension
   mesh.topology_.init(tdim_);

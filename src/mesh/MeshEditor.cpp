@@ -67,19 +67,10 @@ void MeshEditor::init(Mesh& mesh, CellType::Type type, uint gdim)
 
   // Initialize topological dimension
   mesh.topology_.init(tdim_);
-
-  // Initialize temporary storage for local cell data
-  vertices.resize(mesh.type().numVertices(tdim_), 0.0);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::initVertices(uint num_vertices)
 {
-  // Check if we are currently editing a mesh
-  if (!mesh_)
-  {
-    error("No mesh opened, unable to edit.");
-  }
-  
   // Initialize mesh data
   this->num_vertices_ = num_vertices;
   mesh_->topology_.init(0, num_vertices);
@@ -88,12 +79,6 @@ void MeshEditor::initVertices(uint num_vertices)
 //-----------------------------------------------------------------------------
 void MeshEditor::initCells(uint num_cells)
 {
-  // Check if we are currently editing a mesh
-  if (!mesh_)
-  {
-    error("No mesh opened, unable to edit.");
-  }
-
   // Initialize mesh data
   this->num_cells_ = num_cells;
   mesh_->topology_.init(tdim_, num_cells);
@@ -104,7 +89,7 @@ void MeshEditor::addVertex(uint v, Point const& p)
 {
   // Add vertex
   addVertexCommon(v);
-  
+
   // Set coordinate
   mesh_->geometry_.set(v, &p[0]);
 }
@@ -118,36 +103,6 @@ void MeshEditor::addVertex(uint v, real const * x)
   mesh_->geometry_.set(v, x);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addVertex(uint v, real x)
-{
-  // Add vertex
-  addVertexCommon(v);
-
-  // Set coordinate
-  mesh_->geometry_.set(v, 0, x);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::addVertex(uint v, real x, real y)
-{
-  // Add vertex
-  addVertexCommon(v);
-
-  // Set coordinate
-  mesh_->geometry_.set(v, 0, x);
-  mesh_->geometry_.set(v, 1, y);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::addVertex(uint v, real x, real y, real z)
-{
-  // Add vertex
-  addVertexCommon(v);
-
-  // Set coordinate
-  mesh_->geometry_.set(v, 0, x);
-  mesh_->geometry_.set(v, 1, y);
-  mesh_->geometry_.set(v, 2, z);
-}
-//-----------------------------------------------------------------------------
 void MeshEditor::addCell(uint c, const Array<uint>& v)
 {
   // Add cell
@@ -157,46 +112,13 @@ void MeshEditor::addCell(uint c, const Array<uint>& v)
   mesh_->topology_(tdim_, 0).set(c, v);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addCell(uint c, uint v0, uint v1)
+void MeshEditor::addCell(uint c, uint const * v)
 {
-  dolfin_assert(mesh_->cell_type_->numEntities(0) == 2);
-
   // Add cell
   addCellCommon(c);
 
   // Set data
-  vertices[0] = v0;
-  vertices[1] = v1;
-  mesh_->topology_(tdim_, 0).set(c, vertices);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2)
-{
-  dolfin_assert(mesh_->cell_type_->numEntities(0) == 3);
-
-  // Add cell
-  addCellCommon(c);
-
-  // Set data
-  vertices[0] = v0;
-  vertices[1] = v1;
-  vertices[2] = v2;
-  mesh_->topology_(tdim_, 0).set(c, vertices);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::addCell(uint c, uint v0, uint v1, uint v2, uint v3)
-{
-  dolfin_assert(mesh_->cell_type_->numEntities(0) == 4);
-
-  // Add cell
-  addCellCommon(c);
-
-  // Set data
-  vertices[0] = v0;
-  vertices[1] = v1;
-  vertices[2] = v2;
-  vertices[3] = v3;
-  mesh_->topology_(tdim_, 0).set(c, vertices);
+  mesh_->topology_(tdim_, 0).set(c, v);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::close()
@@ -218,7 +140,7 @@ void MeshEditor::addVertexCommon(uint v)
   {
     error("Vertex list is full, %d vertices already specified.", num_vertices_);
   }
-  
+
   // Step to next vertex
   ++vertex_index_;
 }
@@ -249,7 +171,6 @@ void MeshEditor::clear()
   num_cells_ = 0;
   vertex_index_ = 0;
   cell_index_ = 0;
-  vertices.clear();
 }
 //-----------------------------------------------------------------------------
 

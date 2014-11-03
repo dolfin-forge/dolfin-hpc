@@ -22,7 +22,7 @@ class Point;
 class MeshEditor
 {
 public:
-  
+
   /// Constructor for meshes with unique type of cell
   //TODO: Deprecate.
   MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
@@ -40,35 +40,16 @@ public:
   void initCells(uint num_cells);
 
   /// Add vertex v at given point p
-  ///FIXME: Deprecate.
   void addVertex(uint v, Point const& p);
 
   /// Add vertex v at given coordinates x
   void addVertex(uint v, real const * x);
 
-  /// Add vertex v at given coordinate x
-  ///FIXME: Deprecate.
-  void addVertex(uint v, real x);
-
-  /// Add vertex v at given coordinate (x, y)
-  ///FIXME: Deprecate.
-  void addVertex(uint v, real x, real y);
-
-  /// Add vertex v at given coordinate (x, y, z)
-  ///FIXME: Deprecate.
-  void addVertex(uint v, real x, real y, real z);
-
   /// Add cell with given vertices
   void addCell(uint c, Array<uint> const& v);
 
-  /// Add cell (interval) with given vertices
-  void addCell(uint c, uint v0, uint v1);
-
-  /// Add cell (triangle) with given vertices
-  void addCell(uint c, uint v0, uint v1, uint v2);
-
-  /// Add cell (tetrahedron) with given vertices
-  void addCell(uint c, uint v0, uint v1, uint v2, uint v3);
+  /// Add cell with given vertices
+  void addCell(uint c, uint const * v);
 
   /// Close mesh, finish editing
   void close();
@@ -107,9 +88,6 @@ private:
 
   // Next available cell
   uint cell_index_;
-
-  // Temporary storage for local cell data
-  Array<uint> vertices;
 
 };
 

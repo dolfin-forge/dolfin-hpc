@@ -25,43 +25,66 @@ class Mesh;
 
 class Checkpoint
 {
+
 public:
 
+  ///
   Checkpoint();
+
+  ///
   ~Checkpoint();
 
-
-  void write(std::string fname,
-             uint id, real t, Mesh& mesh,
-             std::vector<Function *> func,
-             std::vector<Vector *> vec,
+  ///
+  void write(std::string fname, uint id, real t, Mesh& mesh,
+             std::vector<Function *> func, std::vector<Vector *> vec,
              bool static_mesh = false);
 
+  ///
   void restart(std::string fname);
 
+  ///
   void load(Mesh& mesh);
+
+  ///
   void load(std::vector<Function *> func);
+
+  ///
   void load(std::vector<Vector *> vec);
 
-  inline bool restart() {return state == RESTART;};
+  ///
+  inline bool restart()
+  {
+    return state_ == RESTART;
+  }
 
+  ///
   inline dolfin::uint id()
-  { if(state != RESTART)
+  {
+    if (state_ != RESTART)
+    {
       error("Shut her down, Scotty, she's sucking mud again!");
-    return _id;
-  };
+    }
+    return id_;
+  }
 
+  ///
   inline dolfin::real restart_time()
-  { if(state != RESTART)
+  {
+    if (state_ != RESTART)
+    {
       error("Shut her down, Scotty, she's sucking mud again!");
-    return _t;
-  };
+    }
+    return t_;
+  }
 
+  ///
   inline void reset()
   {
-    state = CHECKPOINT; restart_state = OPEN;
-    hdr_initialized = false; disp_initialized = false;
-  };
+    state_ = CHECKPOINT;
+    restart_state_ = OPEN;
+    hdr_initialized_ = false;
+    disp_initialized_ = false;
+  }
 
 private:
 
@@ -76,20 +99,27 @@ private:
   void write(std::vector<Function *> func, chkp_outstream& out);
   void write(std::vector<Vector *> vec, chkp_outstream& out);
 
-  enum CheckpointState {CHECKPOINT, RESTART};
-  enum RestartState {OPEN, MESH, FUNC, VEC};
+  enum CheckpointState
+  {
+    CHECKPOINT, RESTART
+  };
+  enum RestartState
+  {
+    OPEN, MESH, FUNC, VEC
+  };
 
-  CheckpointState state;
-  RestartState restart_state;
+  CheckpointState state_;
+  RestartState restart_state_;
 
 #ifdef ENABLE_MPIIO
-  MPI_Offset byte_offset;
-  MPI_File in;
+  MPI_Offset byte_offset_;
+  MPI_File in_;
 #else
-  std::ifstream in;
+  std::ifstream in_;
 #endif
 
-  typedef struct {
+  typedef struct
+  {
     CellType::Type type;
     uint tdim;
     uint gdim;
@@ -106,13 +136,13 @@ private:
 #endif
   } chkp_mesh_hdr;
 
-  chkp_mesh_hdr hdr;
+  chkp_mesh_hdr hdr_;
 
-  uint n;
-  uint _id;
-  real _t;
-  bool hdr_initialized;
-  bool disp_initialized;
+  uint n_;
+  uint id_;
+  real t_;
+  bool hdr_initialized_;
+  bool disp_initialized_;
 };
 
 }

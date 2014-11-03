@@ -99,8 +99,7 @@ void BinaryFile::operator<<(GenericVector& x)
   real *values = new real[size];
 
 #ifdef ENABLE_MPIIO
-  uint offset[2] =
-    { 0, 0 };
+  uint offset[2] = { 0, 0 };
   offset[0] = x.offset();
   offset[1] = size;
 #endif
@@ -150,7 +149,6 @@ void BinaryFile::operator>>(Function & f)
 {
 
 #ifdef ENABLE_MPIIO
-  uint pe_rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
 
   MPI_File fh;
@@ -169,22 +167,24 @@ void BinaryFile::operator>>(Function & f)
   MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
                        MPI_STATUS_IGNORE);
   byte_offset += sizeof(uint);
-  if (nfunc > 1) warning(
-      "File contains %d functions, using first with matching dim.", nfunc);
+  if (nfunc > 1)
+  {
+    warning("File contains %d functions, using first with matching dim.",
+            nfunc);
+  }
 
   BinaryFunctionHeader f_hdr;
-  for (uint i = 0; i < nfunc; i++)
+  for (uint i = 0; i < nfunc; ++i)
   {
     MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
                          MPI_BYTE, MPI_STATUS_IGNORE);
     byte_offset += sizeof(BinaryFunctionHeader);
 
     /* Load function if dimension match */
-    if (f_hdr.dim == f.dim(0))
+    if (f_hdr.dim == f.value_size())
     {
 
-      uint size = f.dim(0) * f.mesh().numVertices()
-          - (pe_size > 1 ? f.mesh().distdata().num_ghost(0) : 0);
+      uint size = f.value_size() * f.mesh().topology().num_owned(0);
       real *values = new real[size];
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -211,7 +211,6 @@ void BinaryFile::operator>>(Function & f)
 void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 {
 #ifdef ENABLE_MPIIO
-  uint pe_rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
 
   MPI_File fh;
@@ -231,8 +230,10 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
                        MPI_STATUS_IGNORE);
   byte_offset += sizeof(uint);
 
-  if (nfunc != f.size()) error(
-      "Number of functions does not match between set and file");
+  if (nfunc != f.size())
+  {
+    error("Number of functions mismatch between set and file");
+  }
 
   BinaryFunctionHeader f_hdr;
   for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
@@ -243,13 +244,14 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
                          MPI_BYTE, MPI_STATUS_IGNORE);
     byte_offset += sizeof(BinaryFunctionHeader);
 
-    Function* u = it->first;
+    Function * u = it->first;
 
-    if (f_hdr.dim != u->dim(0)) error(
-        "Dimension of file and function set does not match");
+    if (f_hdr.dim != u->value_size())
+    {
+      error("Dimension of file and function set does not match");
+    }
 
-    uint size = u->dim(0) * u->mesh().numVertices()
-        - (pe_size > 1 ? u->mesh().distdata().num_ghost(0) : 0);
+    uint size = u->value_size() * u->mesh().topology().num_owned(0);
     real *values = new real[size];
     MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
                          values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -269,9 +271,9 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 void BinaryFile::operator<<(Function & u)
 {
   std::pair<Function*, std::string> f(&u, "U");
-  std::vector < std::pair<Function*, std::string> > tmp;
+  std::vector<std::pair<Function*, std::string> > tmp;
   tmp.push_back(f);
-  write_function (tmp);
+  write_function(tmp);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(std::vector<std::pair<Function*, std::string> >& f)
@@ -288,7 +290,6 @@ void BinaryFile::write_function(
   nameUpdate(counter);
 
   BinaryFileHeader hdr;
-  uint pe_rank = MPI::processNumber();
   hdr.magic = BINARY_MAGIC;
   hdr.pe_size = MPI::numProcesses();
   hdr.type = BINARY_FUNCTION_DATA;
@@ -307,8 +308,8 @@ void BinaryFile::write_function(
   byte_offset = sizeof(BinaryFileHeader);
 
   uint n_func = f.size();
-  MPI_File_write_all(fh, &n_func, 1, MPI_INT, MPI_STATUS_IGNORE);
-  byte_offset += sizeof(int);
+  MPI_File_write_all(fh, &n_func, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  byte_offset += sizeof(uint);
 
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
@@ -320,21 +321,20 @@ void BinaryFile::write_function(
 
     std::string& name = it->second;
     const uint rank = u->rank();
-    if (rank > 1) error(
-        "Only scalar and vectors functions can be saved in Binary.");
+    if (rank > 1)
+    {
+      error("Only scalar and vectors functions can be saved in Binary.");
+    }
 
     // Get number of components
-    const uint dim = u->dim(0);
+    uint const value_dim = u->value_size();
 
     // Allocate memory for function values at vertices
-    uint size = mesh.numVertices();
-    for (uint i = 0; i < rank; i++)
-      size *= u->dim(i);
+    uint size = mesh.numVertices() * u->value_size();
     real *values = new real[size];
     uint offset = u->vector().offset();
 
-    if ((u->vector().local_size() / u->dim(0))
-        != (mesh.numVertices() - mesh.distdata().num_ghost(0)))
+    if ((u->vector().local_size() / value_dim) != mesh.topology().num_owned(0))
     {
       real *interp_values = new real[size];
 
@@ -344,42 +344,44 @@ void BinaryFile::write_function(
       uint ii = 0;
       for (VertexIterator v(mesh); !v.end(); ++v)
       {
-        if (!mesh.distdata().is_ghost(v->index(), 0))
+        if (!v->is_ghost())
         {
-          values[ii++] = interp_values[v->index()];
-          if (rank > 0)
+          for (uint i = 0; i < value_dim; ++i)
           {
-            values[ii++] = interp_values[v->index() + mesh.numVertices()];
-            if (dim == 3) values[ii++] = interp_values[v->index()
-                + 2 * mesh.numVertices()];
+            values[ii++] = interp_values[v->index() + i * mesh.numVertices()];
           }
         }
       }
       delete[] interp_values;
 
       // Compute new vertex based offset
-      uint num_values = dim
-          * (mesh.numVertices() - mesh.distdata().num_ghost(0));
+      uint num_values = value_dim * mesh.topology().num_owned(0);
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                  MPI::DOLFIN_COMM);
 #else
-      MPI_Scan(&num_values, &offset, 1,
-          MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+      MPI_Scan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+          MPI::DOLFIN_COMM);
       offset -= num_values;
 #endif
 
     }
-    else u->vector().get(values);
+    else
+    {
+      u->vector().get(values);
+    }
 
-    size = dim * (mesh.numVertices() - mesh.distdata().num_ghost(0));
+    size = value_dim * mesh.topology().num_owned(0);
 
     BinaryFunctionHeader f_hdr;
-    f_hdr.dim = dim;
-    f_hdr.size = dim * mesh.global_numVertices();
+    f_hdr.dim = value_dim;
+    f_hdr.size = value_dim * mesh.global_numVertices();
     if (name.length() > FNAME_LENGTH) error("Function name too long.");
     strcpy(&f_hdr.name[0], name.c_str());
-    if (t_) f_hdr.t = *t_;
+    if (t_)
+    {
+      f_hdr.t = *t_;
+    }
     else f_hdr.t = counter;
     MPI_File_write_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
                           MPI_BYTE, MPI_STATUS_IGNORE);
@@ -387,7 +389,7 @@ void BinaryFile::write_function(
 
     MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real), values, size,
                           MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += dim * (mesh.global_numVertices() * sizeof(real));
+    byte_offset += value_dim * (mesh.global_numVertices() * sizeof(real));
 
     delete[] values;
   }
@@ -411,79 +413,49 @@ void BinaryFile::operator>>(Mesh& mesh)
   {
     std::ifstream fp(filename.c_str(), std::ifstream::binary);
 
-    int celltype = 0;
-    int gdim = 0;
+    uint type = 0;
+    uint gdim = 0;
     fp.read((char *) &hdr, sizeof(BinaryFileHeader));
     hdr_check(hdr, BINARY_MESH_DATA, pe_size);
-    fp.read((char *) &gdim, sizeof(int));
-    fp.read((char *) &celltype, sizeof(int));
+    fp.read((char *) &gdim, sizeof(uint));
+    fp.read((char *) &type, sizeof(uint));
 
-    // TODO: Error prone.
-    std::string type;
-    if (celltype == 0) type = "triangle";
-    else if (celltype == 1) type = "tetrahedron";
-    else error("Unknown Cell type");
-
-    // Create cell type to get topological dimension
-    CellType* cell_type = CellType::create(type);
-    uint tdim = cell_type->dim();
+    // Create cell type to get topological dimension and number of vertices
+    CellType::Type ctype = BinaryFile::cell_type(type);
+    CellType* cell_type = CellType::create(ctype);
+    uint const num_cellvertices = cell_type->numEntities(0);
     delete cell_type;
 
     // Open mesh for editing
-    MeshEditor editor(mesh, CellType::string2type(type), tdim, gdim);
+    MeshEditor editor(mesh, ctype, gdim);
 
     // Read vertex data
-    int n_vertices;
-    fp.read((char *) &n_vertices, sizeof(int));
-    editor.initVertices(n_vertices);
-
-    real *vertex_data = new real[n_vertices * gdim];
-    fp.read((char *) vertex_data, n_vertices * gdim * sizeof(double));
-
-    int v = 0;
-    for (int i = 0; i < n_vertices * gdim; v++, i += gdim)
+    uint num_vertices = 0;
+    fp.read((char *) &num_vertices, sizeof(uint));
+    editor.initVertices(num_vertices);
+    uint const vertex_data_size = num_vertices * gdim;
+    real * vertex_data = new real[vertex_data_size];
+    fp.read((char *) vertex_data, vertex_data_size * sizeof(real));
+    for (uint v = 0; v < num_vertices; ++v)
     {
-      switch (gdim)
-        {
-        case 2:
-          editor.addVertex(v, vertex_data[i], vertex_data[i + 1]);
-          break;
-        case 3:
-          editor.addVertex(v, vertex_data[i], vertex_data[i + 1],
-                           vertex_data[i + 2]);
-          break;
-        default:
-          error("Dimension of mesh must be 1, 2 or 3.");
-          break;
-        }
+      editor.addVertex(v, &vertex_data[v * gdim]);
     }
     delete[] vertex_data;
 
     // Read cell data
-    int n_cells;
-    fp.read((char *) &n_cells, sizeof(int));
-    editor.initCells(n_cells);
-    int *cell_data = new int[n_cells * (3 + celltype)];
-    fp.read((char *) cell_data, n_cells * (3 + celltype) * sizeof(int));
-
-    int c = 0;
-    for (int i = 0; i < n_cells * (3 + celltype); c++, i += (3 + celltype))
+    uint num_cells = 0;
+    fp.read((char *) &num_cells, sizeof(uint));
+    editor.initCells(num_cells);
+    uint const cell_data_size = num_cells * num_cellvertices;
+    uint * cell_data = new uint[cell_data_size];
+    fp.read((char *) cell_data, cell_data_size * sizeof(uint));
+    for (uint c = 0; c < num_cells; ++c)
     {
-      switch (celltype)
-        {
-        case 0:
-          editor.addCell(c, cell_data[i], cell_data[i + 1], cell_data[i + 2]);
-          break;
-        case 1:
-          editor.addCell(c, cell_data[i], cell_data[i + 1], cell_data[i + 2],
-                         cell_data[i + 3]);
-          break;
-        }
+      editor.addCell(c, &cell_data[c * num_cellvertices]);
     }
     delete[] cell_data;
     editor.close();
     fp.close();
-
   }
   else
   {
@@ -494,61 +466,69 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                   MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
 
-    int dim, type, num_vertices;
+    // Read binary header
+    uint gdim, type, num_vertices;
     MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                       MPI_STATUS_IGNORE);
     hdr_check(hdr, BINARY_MESH_DATA, pe_size);
-    MPI_File_read_all(fh, &dim, 1, MPI_INT, MPI_STATUS_IGNORE);
-    MPI_File_read_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
-    MPI_File_read_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
+    MPI_File_read_all(fh, &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_read_all(fh, &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_read_all(fh, &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
 
-    byte_offset = sizeof(BinaryFileHeader) + 3 * sizeof(int);
+    // Update offset: header + (gdim + type + num_vertices)
+    byte_offset = sizeof(BinaryFileHeader) + 3 * sizeof(uint);
 
+    // Create cell type to get topological dimension and number of vertices
+    CellType::Type ctype = BinaryFile::cell_type(type);
+    CellType * cell_type = CellType::create(ctype);
+    uint const num_cellvertices = cell_type->numEntities(0);
+    delete cell_type;
+
+    //
     uint L = floor((real) num_vertices / (real) pe_size);
     uint R = num_vertices % pe_size;
     uint local_vertices = (num_vertices + pe_size - pe_rank - 1) / pe_size;
 
-    uint offset[2] =
-      { 0, 0 };
-    uint vertex_data[2] =
-      { local_vertices, dim * local_vertices };
+    uint vertex_offset[2] = { 0, 0 };
+    uint vertex_data[2] = { local_vertices, gdim * local_vertices };
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vertex_data[0], &offset[0], 2, MPI_UNSIGNED, MPI_SUM,
+    MPI_Exscan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_data[0], &offset[0], 2,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&vertex_data[0], &offset[0], 2, MPI_UNSIGNED, MPI_SUM,
+        MPI::DOLFIN_COMM);
     offset[0] -= vertex_data[0];
     offset[1] -= vertex_data[1];
 #endif
 
-    real *vertex_buffer = new real[vertex_data[1]];
-    MPI_File_read_at_all(fh, byte_offset + offset[1] * sizeof(double),
+    real * vertex_buffer = new real[vertex_data[1]];
+    MPI_File_read_at_all(fh, byte_offset + vertex_offset[1] * sizeof(real),
                          vertex_buffer, vertex_data[1], MPI_DOUBLE,
                          MPI_STATUS_IGNORE);
-    byte_offset += dim * num_vertices * sizeof(double);
+    byte_offset += gdim * num_vertices * sizeof(real);
 
-    int num_cells;
-    MPI_File_read_at_all(fh, byte_offset, &num_cells, 1, MPI_INT,
+    uint num_cells;
+    MPI_File_read_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
                          MPI_STATUS_IGNORE);
-    byte_offset += sizeof(int);
+    byte_offset += sizeof(uint);
 
-    uint local_cells = (num_cells + pe_size - pe_rank - 1) / pe_size;
+    uint const num_local_cells = (num_cells + pe_size - pe_rank - 1) / pe_size;
 
-    offset[1] = 0;
-    uint cell_data = (3 + type) * local_cells;
+    uint cell_offset = 0;
+    uint cell_data = num_cellvertices * num_local_cells;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&cell_data, &offset[1], 1, MPI_UNSIGNED, MPI_SUM,
+    MPI_Exscan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&cell_data, &offset[1], 1,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&cell_data, &offset[1], 1, MPI_UNSIGNED, MPI_SUM,
+        MPI::DOLFIN_COMM);
     offset[1] -= cell_data;
 #endif
 
-    int *cell_buffer = new int[cell_data];
-    MPI_File_read_at_all(fh, byte_offset + offset[1] * sizeof(int), cell_buffer,
-                         cell_data, MPI_INT, MPI_STATUS_IGNORE);
+    uint * cell_buffer = new uint[cell_data];
+    MPI_File_read_at_all(fh, byte_offset + cell_offset * sizeof(uint),
+                         cell_buffer, cell_data, MPI_UNSIGNED,
+                         MPI_STATUS_IGNORE);
 
     MPI_File_close(&fh);
 
@@ -556,42 +536,36 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Parse cells
     std::vector<atomic_cell> cells;
-    std::vector<uint> *non_local_cells = new std::vector<uint>[pe_size];
-    std::set<uint> used_vertices;
-
-    atomic_cell cell;
-    for (int i = 0; i < cell_data; i += (3 + type))
+    std::vector<uint> * non_local_cells = new std::vector<uint>[pe_size];
+    std::set<uint> owned_vertices;
+    atomic_cell cell(num_cellvertices);
+    for (uint i = 0; i < cell_data; i += num_cellvertices)
     {
-
-      cell.v1 = cell_buffer[i];
-      cell.v2 = cell_buffer[i + 1];
-      cell.v3 = cell_buffer[i + 2];
-      if (type == 1) cell.v4 = cell_buffer[i + 3];
-
-      if (vertex_owner(L, R, cell_buffer[i]) == pe_rank)
+      uint const owner = vertex_owner(L, R, cell_buffer[i]);
+      if (owner == pe_rank)
       {
-        used_vertices.insert(cell.v1);
+        cell.v[0] = cell_buffer[i];
+        owned_vertices.insert(cell.v[0]);
+        for (uint n = 1; n < num_cellvertices; ++n)
+        {
+          cell.v[n] = cell_buffer[i + n];
+          if (vertex_owner(L, R, cell_buffer[i + n]) != pe_rank)
+          {
+            ghosted_entities.insert(cell.v[n]);
+          }
+          else
+          {
+            owned_vertices.insert(cell.v[n]);
+          }
+        }
         cells.push_back(cell);
-
-        if (vertex_owner(L, R, cell.v2) != pe_rank) ghosted_entities.insert(
-            cell.v2);
-        else used_vertices.insert(cell.v2);
-
-        if (vertex_owner(L, R, cell.v3) != pe_rank) ghosted_entities.insert(
-            cell.v3);
-        else used_vertices.insert(cell.v3);
-
-        if (type == 1) if (vertex_owner(L, R, cell.v4) != pe_rank) ghosted_entities.insert(
-            cell.v4);
-        else used_vertices.insert(cell.v4);
       }
       else
       {
-        non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v1);
-        non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v2);
-        non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(cell.v3);
-        if (type == 1) non_local_cells[vertex_owner(L, R, cell_buffer[i])].push_back(
-            cell.v4);
+        for (uint n = 0; n < num_cellvertices; ++n)
+        {
+          non_local_cells[owner].push_back(cell_buffer[i + n]);
+        }
       }
     }
     delete[] cell_buffer;
@@ -601,19 +575,22 @@ void BinaryFile::operator>>(Mesh& mesh)
      * Reduce communication in this section
      */
     uint local_max = 0;
-    for (int i = 0; i < pe_size; i++)
+    for (uint i = 0; i < pe_size; ++i)
+    {
       local_max = std::max(local_max, (uint) non_local_cells[i].size());
+    }
 
     uint buff_size = 0;
     MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
                   MPI::DOLFIN_COMM);
-
     uint *recv_buffer = new uint[buff_size];
 
     // Exchange data
     MPI_Status status;
-    int num_recv, src, dest;
-    for (int i = 1; i < pe_size; i++)
+    int num_recv;
+    int src;
+    int dest;
+    for (uint i = 1; i < pe_size; ++i)
     {
       src = (pe_rank - i + pe_size) % pe_size;
       dest = (pe_rank + i) % pe_size;
@@ -624,54 +601,41 @@ void BinaryFile::operator>>(Mesh& mesh)
       MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
 
       // Add received cells
-      for (int j = 0; j < num_recv; j += (3 + type))
+      for (int j = 0; j < num_recv; j += num_cellvertices)
       {
-        cell.v1 = recv_buffer[j];
-        cell.v2 = recv_buffer[j + 1];
-        cell.v3 = recv_buffer[j + 2];
-        if (type == 1) cell.v4 = recv_buffer[j + 3];
-
-        used_vertices.insert(cell.v1);
+        std::memcpy(&cell.v[0], &recv_buffer[j],
+                    num_cellvertices * sizeof(uint));
+        owned_vertices.insert(cell.v[0]);
         cells.push_back(cell);
-
-        if (vertex_owner(L, R, cell.v2) != pe_rank) ghosted_entities.insert(
-            cell.v2);
-        else used_vertices.insert(cell.v2);
-
-        if (vertex_owner(L, R, cell.v3) != pe_rank) ghosted_entities.insert(
-            cell.v3);
-        else used_vertices.insert(cell.v3);
-
-        if (type == 1) if (vertex_owner(L, R, cell.v4) != pe_rank) ghosted_entities.insert(
-            cell.v4);
-        else used_vertices.insert(cell.v4);
+        for (uint n = 1; n < num_cellvertices; ++n)
+        {
+          if (vertex_owner(L, R, cell.v[n]) != pe_rank)
+          {
+            ghosted_entities.insert(cell.v[n]);
+          }
+          else
+          {
+            owned_vertices.insert(cell.v[n]);
+          }
+        }
       }
     }
 
-    // Number of vertices in mesh, used + ghosts
-    uint num_local_vertices = used_vertices.size() + ghosted_entities.size();
-
-    std::string celltype;
-    if (type == 0) celltype = "triangle";
-    else if (type == 1) celltype = "tetrahedron";
-    else error("Unknown Cell type");
-
-    // Create cell type to get topological dimension
-    CellType* cell_type = CellType::create(celltype);
-    uint tdim = cell_type->dim();
-    delete cell_type;
-
-    std::set<uint> all_vertices, orphaned_vertices;
-    for (uint i = 0; i < local_vertices; i++)
-      all_vertices.insert(offset[0] + i);
+    // Number of vertices in mesh, owned + ghosts
+    std::set<uint> all_vertices;
+    std::set<uint> orphaned_vertices;
+    for (uint i = 0; i < local_vertices; ++i)
+    {
+      all_vertices.insert(vertex_offset[0] + i);
+    }
     std::set_difference(
-        all_vertices.begin(), all_vertices.end(), used_vertices.begin(),
-        used_vertices.end(),
+        all_vertices.begin(), all_vertices.end(), owned_vertices.begin(),
+        owned_vertices.end(),
         std::inserter(orphaned_vertices, orphaned_vertices.end()));
+    uint const num_local_vertices = all_vertices.size() + ghosted_entities.size();
 
     // Open mesh for editing
-    MeshEditor editor(mesh, CellType::string2type(celltype), tdim, dim);
-    num_local_vertices = all_vertices.size() + ghosted_entities.size();
+    MeshEditor editor(mesh, ctype, gdim);
     editor.initVertices(num_local_vertices);
     editor.initCells(cells.size());
 
@@ -688,37 +652,28 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     uint local_vertex_index = 0;
     uint v_index;
-    for (std::set<uint>::iterator it = used_vertices.begin();
-        it != used_vertices.end(); local_vertex_index++, it++)
+    for (std::set<uint>::iterator it = owned_vertices.begin();
+        it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
-      v_index = *it - offset[0];
-
+      v_index = *it - vertex_offset[0];
       distdata.set_map(local_vertex_index, *it, 0);
-
-      switch (dim)
-        {
-        case 2:
-          editor.addVertex(local_vertex_index, vertex_buffer[(dim * v_index)],
-                           vertex_buffer[(dim * v_index) + 1]);
-          break;
-        case 3:
-          editor.addVertex(local_vertex_index, vertex_buffer[(dim * v_index)],
-                           vertex_buffer[(dim * v_index) + 1],
-                           vertex_buffer[(dim * v_index) + 2]);
-          break;
-        }
+      editor.addVertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
     }
 
     _map<uint, uint> new_owner;
     // Exchange ghost points
-    std::vector<uint> *ghosts = new std::vector<uint>[pe_size];
+    std::vector<uint> * ghosts = new std::vector<uint>[pe_size];
     for (_set<uint>::iterator it = ghosted_entities.begin();
     it != ghosted_entities.end(); it++)
-    ghosts[vertex_owner(L, R, *it)].push_back(*it);
+    {
+      ghosts[vertex_owner(L, R, *it)].push_back(*it);
+    }
 
     local_max = 0;
-    for (int i = 0; i < pe_size; i++)
+    for (uint i = 0; i < pe_size; ++i)
+    {
       local_max = std::max(local_max, (uint) ghosts[i].size());
+    }
 
     buff_size = 0;
     MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
@@ -730,10 +685,10 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint *send_new_owner = new uint[buff_size];
     uint *recv_new_owner = new uint[buff_size];
 
-    real *send_buffer_coords = new real[buff_size * dim];
-    real *recv_buffer_coords = new real[buff_size * dim];
+    real *send_buffer_coords = new real[buff_size * gdim];
+    real *recv_buffer_coords = new real[buff_size * gdim];
 
-    for (int i = 1; i < pe_size; i++)
+    for (uint i = 1; i < pe_size; ++i)
     {
       src = (pe_rank - i + pe_size) % pe_size;
       dest = (pe_rank + i) % pe_size;
@@ -750,15 +705,16 @@ void BinaryFile::operator>>(Mesh& mesh)
 
       real *sp = &send_buffer_coords[0];
       uint *np = &send_new_owner[0];
-      for (int k = 0; k < num_recv; k++)
+      for (int k = 0; k < num_recv; ++k)
       {
-
-        v_index = recv_buffer[k] - offset[0];
+        v_index = recv_buffer[k] - vertex_offset[0];
 
         if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end())
         {
-          if (new_owner.find(recv_buffer[k]) == new_owner.end()) new_owner[recv_buffer[k]] =
-              src;
+          if (new_owner.find(recv_buffer[k]) == new_owner.end())
+          {
+            new_owner[recv_buffer[k]] = src;
+          }
           *(np++) = new_owner[recv_buffer[k]];
         }
         else
@@ -766,63 +722,45 @@ void BinaryFile::operator>>(Mesh& mesh)
           *(np++) = pe_rank;
         }
 
-        for (uint l = 0; l < dim; l++)
-          *(sp++) = vertex_buffer[(dim * v_index) + l];
+        for (uint l = 0; l < gdim; ++l)
+        {
+          *(sp++) = vertex_buffer[(gdim * v_index) + l];
+        }
       }
       MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1,
                    recv_new_owner, buff_size, MPI_UNSIGNED, dest, 1,
                    MPI::DOLFIN_COMM, &status);
 
-      MPI_Sendrecv(send_buffer_coords, (num_recv * dim), MPI_DOUBLE, src, 1,
-                   recv_buffer_coords, (buff_size * dim), MPI_DOUBLE, dest, 1,
+      MPI_Sendrecv(send_buffer_coords, (num_recv * gdim), MPI_DOUBLE, src, 1,
+                   recv_buffer_coords, (buff_size * gdim), MPI_DOUBLE, dest, 1,
                    MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
 
       int g_i = 0;
-      for (int k = 0; k < num_recv; local_vertex_index++, g_i++, k += dim)
+      for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
       {
         distdata.set_map(local_vertex_index, ghosts[dest][g_i], 0);
-
         if (recv_new_owner[g_i] != pe_rank)
         {
           distdata.set_ghost(local_vertex_index, 0);
           distdata.set_ghost_owner(local_vertex_index, recv_new_owner[g_i], 0);
         }
-
-        switch (dim)
-          {
-          case 2:
-            editor.addVertex(local_vertex_index, recv_buffer_coords[k],
-                             recv_buffer_coords[k + 1]);
-            break;
-          case 3:
-            editor.addVertex(local_vertex_index, recv_buffer_coords[k],
-                             recv_buffer_coords[k + 1],
-                             recv_buffer_coords[k + 2]);
-            break;
-          }
+        editor.addVertex(local_vertex_index, &recv_buffer_coords[k]);
       }
     }
 
     uint local_cell_index = 0;
+    uint * connectivity = new uint[num_cellvertices];
     for (std::vector<atomic_cell>::iterator it = cells.begin();
-        it != cells.end(); local_cell_index++, it++)
+        it != cells.end(); ++local_cell_index, ++it)
     {
-      switch (type)
-        {
-        case 0:
-          editor.addCell(local_cell_index, distdata.get_vertex_local(it->v1),
-                         distdata.get_vertex_local(it->v2),
-                         distdata.get_vertex_local(it->v3));
-          break;
-        case 1:
-          editor.addCell(local_cell_index, distdata.get_vertex_local(it->v1),
-                         distdata.get_vertex_local(it->v2),
-                         distdata.get_vertex_local(it->v3),
-                         distdata.get_vertex_local(it->v4));
-          break;
-        }
+      for(uint n = 0; n < it->size; ++n)
+      {
+        connectivity[n] = distdata.get_vertex_local(it->v[n]);
+      }
+      editor.addCell(local_cell_index, &connectivity[0]);
     }
+    delete[] connectivity;
 
     editor.close();
     mesh.distdata() = distdata;
@@ -834,7 +772,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete[] recv_new_owner;
     delete[] send_new_owner;
 
-    for (uint i = 0; i < pe_size; i++)
+    for (uint i = 0; i < pe_size; ++i)
     {
       non_local_cells[i].clear();
       ghosts[i].clear();
@@ -851,11 +789,11 @@ void BinaryFile::operator>>(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
-  int const gdim = mesh.geometry().dim();
-  int const type = BinaryFile::cell_type(mesh.type().cellType());
-  int const num_vertices = mesh.global_numVertices();
-  int const num_cells = mesh.global_numCells();
-  int const num_cellverts = mesh.type().numEntities(0);
+  uint const gdim = mesh.geometry().dim();
+  uint const type = BinaryFile::cell_type(mesh.type().cellType());
+  uint const num_vertices = mesh.global_numVertices();
+  uint const num_cells = mesh.global_numCells();
+  uint const num_cellvertices = mesh.type().numEntities(0);
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;
@@ -873,21 +811,21 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     // Write Header
     fp.write((char *) &hdr, sizeof(BinaryFileHeader));
-    fp.write((char *) &gdim, sizeof(int));
-    fp.write((char *) &type, sizeof(int));
+    fp.write((char *) &gdim, sizeof(uint));
+    fp.write((char *) &type, sizeof(uint));
 
     // Write vertices
-    fp.write((char *) &num_vertices, sizeof(int));
+    fp.write((char *) &num_vertices, sizeof(uint));
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
       fp.write((char *) v->x(), gdim * sizeof(real));
     }
 
     // Write cells
-    fp.write((char *) &num_cells, sizeof(int));
+    fp.write((char *) &num_cells, sizeof(uint));
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      fp.write((char *) c->entities(0), num_cellverts * sizeof(int));
+      fp.write((char *) c->entities(0), num_cellvertices * sizeof(uint));
     }
 
     fp.close();
@@ -899,6 +837,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     MPI_File fh;
     MPI_Offset byte_offset;
+
     /* FIXME:
      * Add MPI_Info data
      * Split and cleanup implementation
@@ -910,65 +849,64 @@ void BinaryFile::operator<<(Mesh& mesh)
     // Write Header
     MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                        MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, &gdim, 1, MPI_INT, MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, &type, 1, MPI_INT, MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, &num_vertices, 1, MPI_INT, MPI_STATUS_IGNORE);
-    byte_offset = sizeof(BinaryFileHeader) + 3 * sizeof(int);
+    MPI_File_write_all(fh, &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset = sizeof(BinaryFileHeader) + 2 * sizeof(uint);
 
     // Write vertices
-    uint offset = 0;
-    uint vertex_data = gdim * mesh.topology().num_owned(0);
+    uint vertex_offset = 0;
+    uint vertex_buffer_size = gdim * mesh.topology().num_owned(0);
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vertex_data, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+    MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_data, &offset, 1,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= vertex_data;
+    MPI_Scan(&vertex_buffer_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    offset -= vertex_buffer_size;
 #endif
-
-    real *vertex_buffer = new real[vertex_data];
-    real *vp = &vertex_buffer[0];
+    real * vertex_buffer = new real[vertex_buffer_size];
+    real * vptr = &vertex_buffer[0];
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      if (!mesh.distdata().is_ghost(v->index(), 0))
+      if (!v->is_ghost())
       {
-        *(vp++) = v->x()[0];
-        *(vp++) = v->x()[1];
-        if (gdim == 3) *(vp++) = v->x()[2];
+        std::memcpy(vptr, &v->x()[0], gdim * sizeof(real));
+        vptr += gdim;
       }
     }
-
-    MPI_File_write_at_all(fh, byte_offset + offset * sizeof(double),
-                          vertex_buffer, vertex_data, MPI_DOUBLE,
+    MPI_File_write_all(fh, &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    byte_offset += sizeof(uint);
+    MPI_File_write_at_all(fh, byte_offset + vertex_offset * sizeof(real),
+                          vertex_buffer, vertex_buffer_size, MPI_DOUBLE,
                           MPI_STATUS_IGNORE);
-    byte_offset += gdim * num_vertices * sizeof(double);
+    byte_offset += gdim * num_vertices * sizeof(real);
     delete[] vertex_buffer;
 
     // Write Cells
-    MPI_File_write_at_all(fh, byte_offset, &num_cells, 1, MPI_INT,
-                          MPI_STATUS_IGNORE);
-    byte_offset += sizeof(int);
-
-    offset = 0;
-    uint local_cell_entities = (3 + type) * mesh.numCells();
+    uint cell_offset = 0;
+    uint cell_buffer_size = num_cellvertices * mesh.numCells();
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&local_cell_entities, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+    MPI_Exscan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_cell_entities, &offset, 1,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= local_cell_entities;
+    MPI_Scan(&cell_buffer_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+        MPI::DOLFIN_COMM);
+    offset -= cell_buffer_size;
 #endif
-
-    int *cell_buffer = new int[local_cell_entities];
-    int *cp = &cell_buffer[0];
+    uint * cell_buffer = new uint[cell_buffer_size];
+    uint * cp = &cell_buffer[0];
     for (CellIterator c(mesh); !c.end(); ++c)
-      for (uint i = 0; i < c->numEntities(0); i++)
+    {
+      for (uint i = 0; i < c->numEntities(0); ++i)
+      {
         *(cp++) = mesh.distdata().get_vertex_global(c->entities(0)[i]);
-
-    MPI_File_write_at_all(fh, byte_offset + offset * sizeof(int), cell_buffer,
-                          local_cell_entities, MPI_INT, MPI_STATUS_IGNORE);
+      }
+    }
+    MPI_File_write_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
+                          MPI_STATUS_IGNORE);
+    byte_offset += sizeof(uint);
+    MPI_File_write_at_all(fh, byte_offset + cell_offset * sizeof(uint),
+                          cell_buffer, cell_buffer_size, MPI_UNSIGNED,
+                          MPI_STATUS_IGNORE);
 
     delete[] cell_buffer;
 
@@ -1032,7 +970,6 @@ template<typename T>
     real *vp = &values[0];
 
     BinaryFileHeader hdr;
-    uint pe_rank = MPI::processNumber();
     hdr.magic = BINARY_MAGIC;
     hdr.pe_size = MPI::numProcesses();
     hdr.type = BINARY_MESH_FUNCTION_DATA;
@@ -1055,7 +992,7 @@ template<typename T>
     int mfunc_type = 0;
     if (meshfunction.dim() == mesh.topology().dim())
     {
-      MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_INT,
+      MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
                             MPI_STATUS_IGNORE);
       byte_offset += sizeof(uint);
 
@@ -1067,7 +1004,7 @@ template<typename T>
     else if (meshfunction.dim() == 0)
     {
       mfunc_type = 1;
-      MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_INT,
+      MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
                             MPI_STATUS_IGNORE);
       byte_offset += sizeof(uint);
 
@@ -1085,8 +1022,7 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 
@@ -1151,9 +1087,9 @@ template<typename T>
     byte_offset = sizeof(BinaryFileHeader);
 
     int mfunc_type = 0;
-    MPI_File_read_at_all(fh, byte_offset, &mfunc_type, 1, MPI_INT,
+    MPI_File_read_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
                          MPI_STATUS_IGNORE);
-    byte_offset += sizeof(int);
+    byte_offset += sizeof(uint);
 
     if ((mfunc_type == 0 && meshfunction.dim() != mesh.topology().dim())
         || (mfunc_type == 1 && meshfunction.dim() != 0)) error(
@@ -1168,8 +1104,7 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1,
-        MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 
@@ -1202,10 +1137,10 @@ template<typename T>
       uint recv_size = mesh.distdata().num_ghost(0);
       int recv_count, recv_size_gh, send_size;
 
-      for (uint i = 0; i < pe_size; i++)
+      for (uint i = 0; i < pe_size; ++i)
       {
         send_size = ghost_buff[i].size();
-        MPI_Reduce(&send_size, &recv_size_gh, 1, MPI_INT, MPI_SUM, i,
+        MPI_Reduce(&send_size, &recv_size_gh, 1, MPI_UNSIGNED, MPI_SUM, i,
                    MPI::DOLFIN_COMM);
       }
       uint *recv_ghost = new uint[recv_size_gh];
@@ -1221,7 +1156,7 @@ template<typename T>
                      MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
-        for (int k = 0; k < recv_count; k++)
+        for (int k = 0; k < recv_count; ++k)
           send_buff.push_back(
               meshfunction.get(
                   mesh.distdata().get_vertex_local(recv_ghost[k])));

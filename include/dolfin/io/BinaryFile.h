@@ -13,6 +13,9 @@
 #include <dolfin/mesh/CellType.h>
 #include "GenericFile.h"
 
+#include <cstring>
+#include <list>
+
 #define BINARY_MAGIC 0xBABE
 #define FNAME_LENGTH 256
 
@@ -81,12 +84,30 @@ public:
 
 private:
 
-  typedef struct
+  typedef struct atomic_cell
   {
-    uint v1;
-    uint v2;
-    uint v3;
-    uint v4;
+    uint const size;
+    uint * v;
+
+    //-----------------------------------
+    atomic_cell(uint d) :
+        size(d),
+        v(new uint[size])
+    {
+    }
+    //-----------------------------------
+    atomic_cell(atomic_cell const& other) :
+        size(other.size),
+        v(new uint[size])
+    {
+      std::memcpy(&v[0], &other.v[0], size * sizeof(uint));
+    }
+    //-----------------------------------
+    ~atomic_cell()
+    {
+      delete v;
+      v = NULL;
+    }
   } atomic_cell;
 
   template<typename T>
@@ -95,7 +116,7 @@ private:
   template<class T>
     void read_meshfunction(MeshFunction<T>& meshfunction);
 
-  int vertex_owner(uint L, uint R, uint i);
+  uint vertex_owner(uint L, uint R, uint i);
 
   void nameUpdate(const int counter);
 
@@ -104,7 +125,7 @@ private:
   void hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size);
 
   ///
-  int cell_type(CellType::Type const type);
+  uint cell_type(CellType::Type const type);
   CellType::Type cell_type(uint const type);
 
   // Function filename
@@ -112,15 +133,15 @@ private:
 
   // Current time
   real* t_;
+
 };
 
 //--- INLINES -----------------------------------------------------------------
-
-inline int BinaryFile::vertex_owner(uint L, uint R, uint i)
+inline uint BinaryFile::vertex_owner(uint L, uint R, uint i)
 {
-  return (int) std::max(
+  return static_cast<uint>(std::max(
       std::floor((double) i / (double) (L + 1)),
-      std::floor((double) ((double) i - (double) R) / (double) L));
+      std::floor((double) ((double) i - (double) R) / (double) L)));
 }
 
 //-----------------------------------------------------------------------------
@@ -158,21 +179,21 @@ inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
 }
 
 //-----------------------------------------------------------------------------
-inline int BinaryFile::cell_type(CellType::Type const type)
+inline uint BinaryFile::cell_type(CellType::Type const type)
 {
   switch (type)
     {
     case CellType::point:
-      return -2;
-      break;
-    case CellType::interval:
-      return -1;
-      break;
-    case CellType::triangle:
       return 0;
       break;
-    case CellType::tetrahedron:
+    case CellType::interval:
       return 1;
+      break;
+    case CellType::triangle:
+      return 2;
+      break;
+    case CellType::tetrahedron:
+      return 3;
       break;
     default:
       error("Unsupported mesh cell type in BinaryFile.");
@@ -186,16 +207,16 @@ inline CellType::Type BinaryFile::cell_type(uint const type)
 {
   switch (type)
     {
-    case -2:
+    case 0:
       return CellType::point;
       break;
-    case -1:
+    case 1:
       return CellType::interval;
       break;
-    case 0:
+    case 2:
       return CellType::triangle;
       break;
-    case 1:
+    case 3:
       return CellType::tetrahedron;
       break;
     default:

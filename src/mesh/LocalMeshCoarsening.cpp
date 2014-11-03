@@ -3,7 +3,7 @@
 //
 // Modified by Anders Logg, 2008.
 // Modified by Balthasar Reuter, 2013.
-// 
+//
 // First added:  2006-11-01
 // Last changed: 2013-06-01
 
@@ -42,9 +42,6 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
                                                     MeshFunction<bool>& cell_marker,
                                                     bool coarsen_boundary )
 {
-  uint init_num_cells = mesh.numCells();
-  uint init_num_verts = mesh.numVertices();
-
   dolfin_assert( &(cell_marker.mesh()) == &mesh );
 
   begin("Coarsening simplicial mesh by edge collapse.");
@@ -52,7 +49,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   // check size of cell_marker
   if ( cell_marker.size() != mesh.numCells() )
     error( "Wrong dimension of cell_marker" );
-  
+
   // Instantiate coarsening manager
   CoarseningManager manager;
   manager.init(mesh, cell_marker, coarsen_boundary);
@@ -68,15 +65,15 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
     prev_num_cells_coarsened = num_cells_coarsened;
 
     // Try all the cells that are marked for coarsening
-    for ( List< std::pair<DCell*,uint> >::iterator 
-          c_it(manager.cells_to_coarsen().begin()) ; 
+    for ( List< std::pair<DCell*,uint> >::iterator
+          c_it(manager.cells_to_coarsen().begin()) ;
           c_it != manager.cells_to_coarsen().end() ;  )
     {
       // try to coarsen the cell
       result = coarsenCell(manager, c_it->first, c_it->second);
 
       // Coarsening not successful: try the next one
-      if ( result < 0 ) 
+      if ( result < 0 )
       {
         ++(c_it->second);
         // give up on this cell if failed several times
@@ -102,12 +99,12 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   end();
 }
 //-----------------------------------------------------------------------------
-bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager, 
+bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
                                      DVertex * vertices[])
 {
   real lmin(std::numeric_limits<real>::max());
   bool edge_found(false);
-  for ( std::vector<DVertex *>::iterator v_it1(c->vertices.begin()) ; 
+  for ( std::vector<DVertex *>::iterator v_it1(c->vertices.begin()) ;
         v_it1 != c->vertices.end() ; ++v_it1 )
   {
     DVertex * v1 = *v_it1;
@@ -117,12 +114,12 @@ bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
     {
       DVertex * v2 = *v_it2;
       real l = v1->p.distance(v2->p);
-      if ( 
+      if (
           lmin > l &&                            // no shorter edge found before
         !(            // edge cannot be coarsened if both vertices are forbidden
-          manager.isForbiddenVertex( v1->id ) && 
+          manager.isForbiddenVertex( v1->id ) &&
           manager.isForbiddenVertex( v2->id )
-      ) ) 
+      ) )
       {
         lmin = l;
         vertices[0] = v1;
@@ -135,7 +132,7 @@ bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
   return edge_found;
 }
 //-----------------------------------------------------------------------------
-int LocalMeshCoarsening::selectVertex(DVertex * vertices[], 
+int LocalMeshCoarsening::selectVertex(DVertex * vertices[],
                                       CoarseningManager& manager,
                                       uint attempts)
 {
@@ -184,11 +181,11 @@ bool LocalMeshCoarsening::checkMesh(std::list<DCell *>& cells_to_regenerate,
                                     std::vector<uint>& cells_to_regenerate_orient,
                                     real quality_threshold)
 {
-  // Check for inverted cells and new cell volumes of cells adjacent to 
+  // Check for inverted cells and new cell volumes of cells adjacent to
   // removed vertex
   std::vector<uint>::iterator o_it(cells_to_regenerate_orient.begin());
-  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ; 
-        c_it != cells_to_regenerate.end() ; ++c_it, ++o_it ) 
+  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ;
+        c_it != cells_to_regenerate.end() ; ++c_it, ++o_it )
   {
     DCell * dc = *c_it;
     dolfin_assert( !dc->deleted );
@@ -238,29 +235,29 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
   vertex_to_keep_cells.sort();
 
   std::list<DCell *> cells_to_remove;
-  std::set_intersection( vertex_to_remove_cells.begin(), 
+  std::set_intersection( vertex_to_remove_cells.begin(),
                          vertex_to_remove_cells.end(),
-                         vertex_to_keep_cells.begin(), 
+                         vertex_to_keep_cells.begin(),
                          vertex_to_keep_cells.end(),
                          std::back_inserter(cells_to_remove) );
 
-  // Cells to regenerate: all cells adjacent to removed vertex, that are not 
+  // Cells to regenerate: all cells adjacent to removed vertex, that are not
   // marked for removal
   // can be found as difference of sorted cell lists of vertex and removal
   std::list<DCell *> cells_to_regenerate;
-  std::set_difference( vertex_to_remove_cells.begin(), 
+  std::set_difference( vertex_to_remove_cells.begin(),
                        vertex_to_remove_cells.end(),
                        cells_to_remove.begin(),
                        cells_to_remove.end(),
                        std::back_inserter(cells_to_regenerate) );
 
-  dolfin_assert( cells_to_regenerate.size() + cells_to_remove.size() == 
+  dolfin_assert( cells_to_regenerate.size() + cells_to_remove.size() ==
                   vertex_to_remove_cells.size() );
 
   // Save cell orientations for checkMesh
   std::vector<uint> cells_to_regenerate_orientations(cells_to_regenerate.size());
   std::vector<uint>::iterator o_it(cells_to_regenerate_orientations.begin());
-  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ; 
+  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ;
         c_it != cells_to_regenerate.end() ; ++c_it, ++o_it )
     *o_it = (*c_it)->orientation();
 
@@ -286,7 +283,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
 
   // Regenerate cells, i. e. replace vertex in vertices-vector of cell and add
   // to cell-vector of kept vertex
-  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ; 
+  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ;
         c_it != cells_to_regenerate.end() ; ++c_it )
   {
     DCell * dc = *c_it;
@@ -305,7 +302,7 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
   // Quality not ok: revert changes (i. e. unmark vertex and cells as deleted,
   // add cells to local lists in vertices and undo regeneration)
   vertex_to_remove->deleted = false;
-  
+
   for ( std::list<DCell *>::iterator c_it(cells_to_remove.begin()) ;
         c_it != cells_to_remove.end() ; ++c_it )
   {
@@ -319,11 +316,11 @@ int LocalMeshCoarsening::coarsenCell(CoarseningManager& manager,
     dc->deleted = false;
   }
 
-  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ; 
+  for ( std::list<DCell *>::iterator c_it(cells_to_regenerate.begin()) ;
         c_it != cells_to_regenerate.end() ; ++c_it )
   {
     DCell * dc = *c_it;
-    
+
     std::list<DCell *>::iterator rm_it = std::find(vertex_to_keep->cells.begin(),
                                                    vertex_to_keep->cells.end(),
                                                    dc);

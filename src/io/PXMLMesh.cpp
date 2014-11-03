@@ -309,7 +309,9 @@ void PXMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
       x[0] = parseReal(name, attrs, "x");
       break;
     default:
-      error("Dimension of mesh must be 1, 2 or 3.");
+      error("Dimension of mesh must be 1, 2 or 3: provided %d.",
+            mesh_.geometry().dim());
+      break;
     }
   editor_->addVertex(numParsedVertices_, &x[0]);
   numParsedVertices_++;

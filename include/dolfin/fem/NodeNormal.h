@@ -44,13 +44,13 @@ public:
   NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w = none,
              real alpha = 1.57);
 
-  ///
+  /// Destructor
   ~NodeNormal();
 
-  ///
+  /// Compute the orthogonal basis
   void compute();
 
-  ///
+  /// Returns the node type
   uint node_type(uint node_id) const;
 
   /// Assignment

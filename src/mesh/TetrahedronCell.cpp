@@ -20,55 +20,61 @@
 #include <dolfin/mesh/GeometricPredicates.h>
 #include <dolfin/parameter/parameters.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-dolfin::uint TetrahedronCell::dim() const
+TetrahedronCell::TetrahedronCell() :
+    CellType(tetrahedron, triangle)
+{
+}
+//-----------------------------------------------------------------------------
+uint TetrahedronCell::dim() const
 {
   return 3;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint TetrahedronCell::numEntities(uint dim) const
+uint TetrahedronCell::numEntities(uint dim) const
 {
-  switch ( dim )
-  {
-  case 0:
-    return 4; // vertices
-  case 1:
-    return 6; // edges
-  case 2:
-    return 4; // faces
-  case 3:
-    return 1; // cells
-  default:
-    error("Illegal topological dimension %d for tetrahedron.", dim);
-    break;
-  }
+  switch (dim)
+    {
+    case 0:
+      return 4;  // vertices
+    case 1:
+      return 6;  // edges
+    case 2:
+      return 4;  // faces
+    case 3:
+      return 1;  // cells
+    default:
+      error("Illegal topological dimension %d for tetrahedron.", dim);
+      break;
+    }
 
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint TetrahedronCell::numVertices(uint dim) const
+uint TetrahedronCell::numVertices(uint dim) const
 {
-  switch ( dim )
-  {
-  case 0:
-    return 1; // vertices
-  case 1:
-    return 2; // edges
-  case 2:
-    return 3; // faces
-  case 3:
-    return 4; // cells
-  default:
-    error("Illegal topological dimension %d for tetrahedron.", dim);
-    break;
-  }
+  switch (dim)
+    {
+    case 0:
+      return 1;  // vertices
+    case 1:
+      return 2;  // edges
+    case 2:
+      return 3;  // faces
+    case 3:
+      return 4;  // cells
+    default:
+      error("Illegal topological dimension %d for tetrahedron.", dim);
+      break;
+    }
 
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint TetrahedronCell::orientation(const Cell& cell) const
+uint TetrahedronCell::orientation(const Cell& cell) const
 {
   // This is a trick to be allowed to initialize mesh entities from cell
   Cell& c = const_cast<Cell&>(cell);
@@ -84,34 +90,49 @@ dolfin::uint TetrahedronCell::orientation(const Cell& cell) const
 
   Point n = p01.cross(p02);
 
-  return ( n.dot(p03) < 0.0 ? 1 : 0 );
+  return (n.dot(p03) < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void TetrahedronCell::createEntities(uint** e, uint dim, const uint* v) const
+void TetrahedronCell::createEntities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges and faces
-  switch ( dim )
-  {
-  case 1:
-    // Create the six edges
-    e[0][0] = v[2]; e[0][1] = v[3];
-    e[1][0] = v[1]; e[1][1] = v[3];
-    e[2][0] = v[1]; e[2][1] = v[2];
-    e[3][0] = v[0]; e[3][1] = v[3];
-    e[4][0] = v[0]; e[4][1] = v[2];
-    e[5][0] = v[0]; e[5][1] = v[1];
-    break;
-  case 2:
-    // Create the four faces
-    e[0][0] = v[1]; e[0][1] = v[2]; e[0][2] = v[3];
-    e[1][0] = v[0]; e[1][1] = v[2]; e[1][2] = v[3];
-    e[2][0] = v[0]; e[2][1] = v[1]; e[2][2] = v[3];
-    e[3][0] = v[0]; e[3][1] = v[1]; e[3][2] = v[2];
-    break;
-  default:
-    error("Don't know how to create entities of topological dimension %d.", dim);
-    break;
-  }
+  switch (dim)
+    {
+    case 1:
+      // Create the six edges
+      e[0][0] = v[2];
+      e[0][1] = v[3];
+      e[1][0] = v[1];
+      e[1][1] = v[3];
+      e[2][0] = v[1];
+      e[2][1] = v[2];
+      e[3][0] = v[0];
+      e[3][1] = v[3];
+      e[4][0] = v[0];
+      e[4][1] = v[2];
+      e[5][0] = v[0];
+      e[5][1] = v[1];
+      break;
+    case 2:
+      // Create the four faces
+      e[0][0] = v[1];
+      e[0][1] = v[2];
+      e[0][2] = v[3];
+      e[1][0] = v[0];
+      e[1][1] = v[2];
+      e[1][2] = v[3];
+      e[2][0] = v[0];
+      e[2][1] = v[1];
+      e[2][2] = v[3];
+      e[3][0] = v[0];
+      e[3][1] = v[1];
+      e[3][2] = v[2];
+      break;
+    default:
+      error("Don't know how to create entities of topological dimension %d.",
+            dim);
+      break;
+    }
 }
 //-----------------------------------------------------------------------------
 void TetrahedronCell::orderEntities(Cell& cell) const
@@ -122,7 +143,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if ( topology(1, 0).size() > 0 )
+  if (topology(1, 0).size() > 0)
   {
     dolfin_assert(topology(3, 1).size() > 0);
 
@@ -138,7 +159,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
   }
 
   // Sort local vertices on facets in ascending order, connectivity 2 - 0
-  if ( topology(2, 0).size() > 0 )
+  if (topology(2, 0).size() > 0)
   {
     dolfin_assert(topology(3, 2).size() > 0);
 
@@ -154,7 +175,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
   }
 
   // Sort local edges on local facets after non-incident vertex, connectivity 2 - 1
-  if ( topology(2, 1).size() > 0 )
+  if (topology(2, 1).size() > 0)
   {
     dolfin_assert(topology(3, 2).size() > 0);
     dolfin_assert(topology(2, 0).size() > 0);
@@ -188,7 +209,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
           std::count(edge_vertices, edge_vertices+2, facet_vertices[j], n1);
           if (!n1)
 #else
-          if (!std::count(edge_vertices, edge_vertices+2, facet_vertices[j]))
+          if (!std::count(edge_vertices, edge_vertices + 2, facet_vertices[j]))
 #endif
           {
             // Swap facet numbers
@@ -204,14 +225,14 @@ void TetrahedronCell::orderEntities(Cell& cell) const
   }
 
   // Sort local vertices on cell in ascending order, connectivity 3 - 0
-  if ( topology(3, 0).size() > 0 )
+  if (topology(3, 0).size() > 0)
   {
     uint* cell_vertices = cell.entities(0);
-    std::sort(cell_vertices, cell_vertices+4);
+    std::sort(cell_vertices, cell_vertices + 4);
   }
 
   // Sort local edges on cell after non-incident vertex tuble, connectivity 3-1
-  if ( topology(3, 1).size() > 0 )
+  if (topology(3, 1).size() > 0)
   {
     dolfin_assert(topology(1, 0).size() > 0);
 
@@ -224,7 +245,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
     uint m = 0;
     for (uint i = 0; i < 3; i++)
     {
-      for (uint j = i+1; j < 4; j++)
+      for (uint j = i + 1; j < 4; j++)
       {
         // Loop edge numbers
         for (uint k = m; k < 6; k++)
@@ -240,8 +261,9 @@ void TetrahedronCell::orderEntities(Cell& cell) const
           std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
           if (!n1 && !n2 )
 #else
-          if (!std::count(edge_vertices, edge_vertices+2, cell_vertices[i]) && \
-              !std::count(edge_vertices, edge_vertices+2, cell_vertices[j]) )
+          if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[i])
+              && !std::count(edge_vertices, edge_vertices + 2,
+                             cell_vertices[j]))
 #endif
           {
             // Swap edge numbers
@@ -257,7 +279,7 @@ void TetrahedronCell::orderEntities(Cell& cell) const
   }
 
   // Sort local facets on cell after non-incident vertex, connectivity 3 - 2
-  if ( topology(3, 2).size() > 0 )
+  if (topology(3, 2).size() > 0)
   {
     dolfin_assert(topology(2, 0).size() > 0);
 
@@ -275,11 +297,11 @@ void TetrahedronCell::orderEntities(Cell& cell) const
 
         // Check if the ith vertex of the cell is non-incident on facet j
 #if __SUNPRO_CC
-	int n1 = 0;
-	std::count(facet_vertices, facet_vertices+3, cell_vertices[i], n1);
-	if (!n1)
+        int n1 = 0;
+        std::count(facet_vertices, facet_vertices+3, cell_vertices[i], n1);
+        if (!n1)
 #else
-        if (!std::count(facet_vertices, facet_vertices+3, cell_vertices[i]))
+        if (!std::count(facet_vertices, facet_vertices + 3, cell_vertices[i]))
 #endif
         {
           // Swap facet numbers
@@ -297,121 +319,129 @@ void TetrahedronCell::refineCell(Cell& cell, MeshEditor& editor,
                                  uint& current_cell) const
 {
   // Get vertices and edges
-  const uint* v = cell.entities(0);
-  const uint* e = cell.entities(1);
+  uint const* v = cell.entities(0);
+  uint const* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
 
   // Get offset for new vertex indices
-  const uint offset = cell.mesh().numVertices();
+  uint const offset = cell.mesh().numVertices();
 
   // Compute indices for the ten new vertices
-  const uint v0 = v[0];
-  const uint v1 = v[1];
-  const uint v2 = v[2];
-  const uint v3 = v[3];
-  const uint e0 = offset + e[findEdge(0, cell)];
-  const uint e1 = offset + e[findEdge(1, cell)];
-  const uint e2 = offset + e[findEdge(2, cell)];
-  const uint e3 = offset + e[findEdge(3, cell)];
-  const uint e4 = offset + e[findEdge(4, cell)];
-  const uint e5 = offset + e[findEdge(5, cell)];
+  uint const v0 = v[0];
+  uint const v1 = v[1];
+  uint const v2 = v[2];
+  uint const v3 = v[3];
+  uint const e0 = offset + e[findEdge(0, cell)];
+  uint const e1 = offset + e[findEdge(1, cell)];
+  uint const e2 = offset + e[findEdge(2, cell)];
+  uint const e3 = offset + e[findEdge(3, cell)];
+  uint const e4 = offset + e[findEdge(4, cell)];
+  uint const e5 = offset + e[findEdge(5, cell)];
 
   // Regular refinement: 8 new cells
-  editor.addCell(current_cell++, v0, e3, e4, e5);
-  editor.addCell(current_cell++, v1, e1, e2, e5);
-  editor.addCell(current_cell++, v2, e0, e2, e4);
-  editor.addCell(current_cell++, v3, e0, e1, e3);
-  editor.addCell(current_cell++, e0, e1, e2, e5);
-  editor.addCell(current_cell++, e0, e1, e3, e5);
-  editor.addCell(current_cell++, e0, e2, e4, e5);
-  editor.addCell(current_cell++, e0, e3, e4, e5);
+  uint connectivity[40] = { v0, e3, e4, e5, v1, e1, e2, e5, v2, e0, e2, e4, v3,
+                            e0, e1, e3, e0, e1, e2, e5, e0, e1, e3, e5, e0, e2,
+                            e4, e5, e0, e3, e4, e5 };
+  for (uint i = 0; i < 10; ++i)
+  {
+    editor.addCell(current_cell++, &connectivity[i * 4]);
+  }
 }
 //-----------------------------------------------------------------------------
 void TetrahedronCell::refineCellIrregular(Cell& cell, MeshEditor& editor,
-                                          uint& current_cell, uint refinement_rule,
+                                          uint& current_cell,
+                                          uint refinement_rule,
                                           uint* marked_edges) const
 {
   error("Not implemented yet.");
 
   /*
-  // Get vertices and edges
-  const uint* v = cell.entities(0);
-  const uint* e = cell.entities(1);
-  dolfin_assert(v);
-  dolfin_assert(e);
+   // Get vertices and edges
+   uint const* v = cell.entities(0);
+   uint const* e = cell.entities(1);
+   dolfin_assert(v);
+   dolfin_assert(e);
 
-  // Get offset for new vertex indices
-  const uint offset = cell.mesh().numVertices();
+   // Get offset for new vertex indices
+   uint const offset = cell.mesh().numVertices();
 
-  // Compute indices for the ten new vertices
-  const uint v0 = v[0];
-  const uint v1 = v[1];
-  const uint v2 = v[2];
-  const uint v3 = v[3];
-  const uint e0 = offset + e[0];
-  const uint e1 = offset + e[1];
-  const uint e2 = offset + e[2];
-  const uint e3 = offset + e[3];
-  const uint e4 = offset + e[4];
-  const uint e5 = offset + e[5];
+   // Compute indices for the ten new vertices
+   uint const v0 = v[0];
+   uint const v1 = v[1];
+   uint const v2 = v[2];
+   uint const v3 = v[3];
+   uint const e0 = offset + e[0];
+   uint const e1 = offset + e[1];
+   uint const e2 = offset + e[2];
+   uint const e3 = offset + e[3];
+   uint const e4 = offset + e[4];
+   uint const e5 = offset + e[5];
 
-  // Refine according to refinement rule
-  // The rules are numbered according to the paper:
-  // J. Bey, "Tetrahedral Grid Refinement", 1995.
-  switch ( refinement_rule )
-  {
-  case 1:
-    // Rule 1: 4 new cells
-    editor.addCell(current_cell++, v0, e1, e3, e2);
-    editor.addCell(current_cell++, v1, e2, e4, e0);
-    editor.addCell(current_cell++, v2, e0, e5, e1);
-    editor.addCell(current_cell++, v3, e5, e4, e3);
-    break;
-  case 2:
-    // Rule 2: 2 new cells
-    editor.addCell(current_cell++, v0, e1, e3, e2);
-    editor.addCell(current_cell++, v1, e2, e4, e0);
-    break;
-  case 3:
-    // Rule 3: 3 new cells
-    editor.addCell(current_cell++, v0, e1, e3, e2);
-    editor.addCell(current_cell++, v1, e2, e4, e0);
-    editor.addCell(current_cell++, v2, e0, e5, e1);
-    break;
-  case 4:
-    // Rule 4: 4 new cells
-    editor.addCell(current_cell++, v0, e1, e3, e2);
-    editor.addCell(current_cell++, v1, e2, e4, e0);
-    editor.addCell(current_cell++, v2, e0, e5, e1);
-    editor.addCell(current_cell++, v3, e5, e4, e3);
-    break;
-  default:
-    error("Illegal rule for irregular refinement of tetrahedron.");
-  }
-  */
+   // Refine according to refinement rule
+   // The rules are numbered according to the paper:
+   // J. Bey, "Tetrahedral Grid Refinement", 1995.
+   switch ( refinement_rule )
+   {
+   case 1:
+   // Rule 1: 4 new cells
+   editor.addCell(current_cell++, v0, e1, e3, e2);
+   editor.addCell(current_cell++, v1, e2, e4, e0);
+   editor.addCell(current_cell++, v2, e0, e5, e1);
+   editor.addCell(current_cell++, v3, e5, e4, e3);
+   break;
+   case 2:
+   // Rule 2: 2 new cells
+   editor.addCell(current_cell++, v0, e1, e3, e2);
+   editor.addCell(current_cell++, v1, e2, e4, e0);
+   break;
+   case 3:
+   // Rule 3: 3 new cells
+   editor.addCell(current_cell++, v0, e1, e3, e2);
+   editor.addCell(current_cell++, v1, e2, e4, e0);
+   editor.addCell(current_cell++, v2, e0, e5, e1);
+   break;
+   case 4:
+   // Rule 4: 4 new cells
+   editor.addCell(current_cell++, v0, e1, e3, e2);
+   editor.addCell(current_cell++, v1, e2, e4, e0);
+   editor.addCell(current_cell++, v2, e0, e5, e1);
+   editor.addCell(current_cell++, v3, e5, e4, e3);
+   break;
+   default:
+   error("Illegal rule for irregular refinement of tetrahedron.");
+   }
+   */
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::volume(const MeshEntity& tetrahedron) const
 {
-  // Get mesh geometry
+// Get mesh geometry
   const MeshGeometry& geometry = tetrahedron.mesh().geometry();
 
-  // Only know how to compute the volume when embedded in R^3
-  dolfin_assert(geometry.dim() > 2 );
+// Only know how to compute the volume when embedded in R^3
+  dolfin_assert(geometry.dim() > 2);
 
-  // Get the coordinates of the four vertices
-  const uint* vertices = tetrahedron.entities(0);
+// Get the coordinates of the four vertices
+  uint const* vertices = tetrahedron.entities(0);
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
   const real* x2 = geometry.x(vertices[2]);
   const real* x3 = geometry.x(vertices[3]);
 
-  // Formula for volume from http://mathworld.wolfram.com
-  real v = ( x0[0] * ( x1[1]*x2[2] + x3[1]*x1[2] + x2[1]*x3[2] - x2[1]*x1[2] - x1[1]*x3[2] - x3[1]*x2[2] ) -
-             x1[0] * ( x0[1]*x2[2] + x3[1]*x0[2] + x2[1]*x3[2] - x2[1]*x0[2] - x0[1]*x3[2] - x3[1]*x2[2] ) +
-             x2[0] * ( x0[1]*x1[2] + x3[1]*x0[2] + x1[1]*x3[2] - x1[1]*x0[2] - x0[1]*x3[2] - x3[1]*x1[2] ) -
-             x3[0] * ( x0[1]*x1[2] + x1[1]*x2[2] + x2[1]*x0[2] - x1[1]*x0[2] - x2[1]*x1[2] - x0[1]*x2[2] ) );
+// Formula for volume from http://mathworld.wolfram.com
+  real v = (x0[0]
+      * (x1[1] * x2[2] + x3[1] * x1[2] + x2[1] * x3[2] - x2[1] * x1[2]
+          - x1[1] * x3[2] - x3[1] * x2[2])
+      - x1[0]
+          * (x0[1] * x2[2] + x3[1] * x0[2] + x2[1] * x3[2] - x2[1] * x0[2]
+              - x0[1] * x3[2] - x3[1] * x2[2])
+      + x2[0]
+          * (x0[1] * x1[2] + x3[1] * x0[2] + x1[1] * x3[2] - x1[1] * x0[2]
+              - x0[1] * x3[2] - x3[1] * x1[2])
+      - x3[0]
+          * (x0[1] * x1[2] + x1[1] * x2[2] + x2[1] * x0[2] - x1[1] * x0[2]
+              - x2[1] * x1[2] - x0[1] * x2[2]));
 
   return std::abs(v) / 6.0;
 }
@@ -421,7 +451,7 @@ real TetrahedronCell::diameter(const MeshEntity& tetrahedron) const
   dolfin_assert(tetrahedron.dim() == 3);
   dolfin_assert(tetrahedron.numEntities(0) == 4);
   real hmax = 0.0;
-  MeshEntity * tet = const_cast<MeshEntity *>(&tetrahedron); //FIXME: constness
+  MeshEntity * tet = const_cast<MeshEntity *>(&tetrahedron);  //FIXME: constness
   for (EdgeIterator edge(*tet); !edge.end(); ++edge)
   {
     hmax = std::max(hmax, edge->length());
@@ -431,36 +461,36 @@ real TetrahedronCell::diameter(const MeshEntity& tetrahedron) const
 //-----------------------------------------------------------------------------
 real TetrahedronCell::circumradius(const MeshEntity& tetrahedron) const
 {
-  // Get mesh geometry
+// Get mesh geometry
   const MeshGeometry& geometry = tetrahedron.mesh().geometry();
 
-  // Only know how to compute the volume when embedded in R^3
-  dolfin_assert(geometry.dim() > 2 );
+// Only know how to compute the volume when embedded in R^3
+  dolfin_assert(geometry.dim() > 2);
 
-  // Get the coordinates of the four vertices
-  const uint* vertices = tetrahedron.entities(0);
+// Get the coordinates of the four vertices
+  uint const* vertices = tetrahedron.entities(0);
   Point p0 = geometry.point(vertices[0]);
   Point p1 = geometry.point(vertices[1]);
   Point p2 = geometry.point(vertices[2]);
   Point p3 = geometry.point(vertices[3]);
 
-  // Compute side lengths
-  real a  = p1.distance(p2);
-  real b  = p0.distance(p2);
-  real c  = p0.distance(p1);
+// Compute side lengths
+  real a = p1.distance(p2);
+  real b = p0.distance(p2);
+  real c = p0.distance(p1);
   real aa = p0.distance(p3);
   real bb = p1.distance(p3);
   real cc = p2.distance(p3);
 
-  // Compute "area" of triangle with strange side lengths
-  real la   = a*aa;
-  real lb   = b*bb;
-  real lc   = c*cc;
-  real s    = 0.5*(la+lb+lc);
-  real area = sqrt(s*(s-la)*(s-lb)*(s-lc));
+// Compute "area" of triangle with strange side lengths
+  real la = a * aa;
+  real lb = b * bb;
+  real lc = c * cc;
+  real s = 0.5 * (la + lb + lc);
+  real area = sqrt(s * (s - la) * (s - lb) * (s - lc));
 
-  // Formula for circumradius from http://mathworld.wolfram.com
-  return area / ( 6.0*volume(tetrahedron) );
+// Formula for circumradius from http://mathworld.wolfram.com
+  return area / (6.0 * volume(tetrahedron));
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::normal(const Cell& cell, uint facet, uint i) const
@@ -470,49 +500,48 @@ real TetrahedronCell::normal(const Cell& cell, uint facet, uint i) const
 //-----------------------------------------------------------------------------
 Point TetrahedronCell::normal(const Cell& cell, uint facet) const
 {
-  // This is a trick to be allowed to initialize a facet from the cell
+// This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
 
-  // Create facet from the mesh and local facet number
+// Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(2)[facet]);
 
-  // Get global index of opposite vertex
-  const uint v0 = cell.entities(0)[facet];
+// Get global index of opposite vertex
+  uint const v0 = cell.entities(0)[facet];
 
-  // Get global index of vertices on the facet
+// Get global index of vertices on the facet
   uint v1 = f.entities(0)[0];
   uint v2 = f.entities(0)[1];
   uint v3 = f.entities(0)[2];
 
-  // Get mesh geometry
+// Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
 
-  // Get the coordinates of the four vertices
+// Get the coordinates of the four vertices
   const real* p0 = geometry.x(v0);
   const real* p1 = geometry.x(v1);
   const real* p2 = geometry.x(v2);
   const real* p3 = geometry.x(v3);
 
-  // Create points from vertex coordinates
+// Create points from vertex coordinates
   Point P0(p0[0], p0[1], p0[2]);
   Point P1(p1[0], p1[1], p1[2]);
   Point P2(p2[0], p2[1], p2[2]);
   Point P3(p3[0], p3[1], p3[2]);
 
-  // Create vectors
+// Create vectors
   Point V0 = P0 - P1;
   Point V1 = P2 - P1;
   Point V2 = P3 - P1;
 
-  // Compute normal vector
+// Compute normal vector
   Point n = V1.cross(V2);
 
-  // Normalize
+// Normalize
   n /= n.norm();
 
-  // Flip direction of normal so it points outward
-  if (n.dot(V0) > 0)
-    n *= -1.0;
+// Flip direction of normal so it points outward
+  if (n.dot(V0) > 0) n *= -1.0;
 
   return n;
 }
@@ -522,54 +551,57 @@ dolfin::real TetrahedronCell::facetArea(const Cell& cell, uint facet) const
   dolfin_assert(cell.mesh().topology().dim() == 3);
   dolfin_assert(cell.mesh().geometry().dim() == 3);
 
-  // This is a trick to be allowed to initialize a facet from the cell
+// This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
 
-  // Create facet from the mesh and local facet number
+// Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(2)[facet]);
 
-  // Get mesh geometry
+// Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
 
-  // Get the coordinates of the three vertices
-  const uint* vertices = cell.entities(0);
+// Get the coordinates of the three vertices
+  uint const* vertices = cell.entities(0);
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
   const real* x2 = geometry.x(vertices[2]);
 
-  // Compute area of triangle embedded in R^3
-  real v0 = (x0[1]*x1[2] + x0[2]*x2[1] + x1[1]*x2[2]) - (x2[1]*x1[2] + x2[2]*x0[1] + x1[1]*x0[2]);
-  real v1 = (x0[2]*x1[0] + x0[0]*x2[2] + x1[2]*x2[0]) - (x2[2]*x1[0] + x2[0]*x0[2] + x1[2]*x0[0]);
-  real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
+// Compute area of triangle embedded in R^3
+  real v0 = (x0[1] * x1[2] + x0[2] * x2[1] + x1[1] * x2[2])
+      - (x2[1] * x1[2] + x2[2] * x0[1] + x1[1] * x0[2]);
+  real v1 = (x0[2] * x1[0] + x0[0] * x2[2] + x1[2] * x2[0])
+      - (x2[2] * x1[0] + x2[0] * x0[2] + x1[2] * x0[0]);
+  real v2 = (x0[0] * x1[1] + x0[1] * x2[0] + x1[0] * x2[1])
+      - (x2[0] * x1[1] + x2[1] * x0[0] + x1[0] * x0[1]);
 
-  // Formula for area from http://mathworld.wolfram.com
-  return  0.5 * sqrt(v0*v0 + v1*v1 + v2*v2);
+// Formula for area from http://mathworld.wolfram.com
+  return 0.5 * sqrt(v0 * v0 + v1 * v1 + v2 * v2);
 }
 //-----------------------------------------------------------------------------
 bool TetrahedronCell::intersects(const MeshEntity& tetrahedron,
                                  const Point& p) const
 {
-  // Adapted from gts_point_is_in_triangle from GTS
+// Adapted from gts_point_is_in_triangle from GTS
 
-  // Get mesh geometry
+// Get mesh geometry
   const MeshGeometry& geometry = tetrahedron.mesh().geometry();
 
-  // Get global index of vertices of the tetrahedron
+// Get global index of vertices of the tetrahedron
   uint v0 = tetrahedron.entities(0)[0];
   uint v1 = tetrahedron.entities(0)[1];
   uint v2 = tetrahedron.entities(0)[2];
   uint v3 = tetrahedron.entities(0)[3];
 
-  // Check orientation
-  dolfin::uint vtmp;
-  if(orientation((Cell&)tetrahedron) == 1)
+// Check orientation
+  uint vtmp;
+  if (orientation((Cell&) tetrahedron) == 1)
   {
     vtmp = v3;
     v3 = v2;
     v2 = vtmp;
   }
 
-  // Get the coordinates of the four vertices
+// Get the coordinates of the four vertices
   const real* x0 = geometry.x(v0);
   const real* x1 = geometry.x(v1);
   const real* x2 = geometry.x(v2);
@@ -584,13 +616,13 @@ bool TetrahedronCell::intersects(const MeshEntity& tetrahedron,
 
   real d1, d2, d3, d4;
 
-  // Test orientation of p w.r.t. each face
-  d1 = orient3d((double *)x2, (double *)x1, (double *)x0, x);
-  d2 = orient3d((double *)x0, (double *)x3, (double *)x2, x);
-  d3 = orient3d((double *)x0, (double *)x1, (double *)x3, x);
-  d4 = orient3d((double *)x1, (double *)x2, (double *)x3, x);
+// Test orientation of p w.r.t. each face
+  d1 = orient3d((double *) x2, (double *) x1, (double *) x0, x);
+  d2 = orient3d((double *) x0, (double *) x3, (double *) x2, x);
+  d3 = orient3d((double *) x0, (double *) x1, (double *) x3, x);
+  d4 = orient3d((double *) x1, (double *) x2, (double *) x3, x);
 
-  // FIXME: Need to check the predicates for correctness
+// FIXME: Need to check the predicates for correctness
 //   if(fabs(d1) == DOLFIN_EPS ||
 //      fabs(d2) == DOLFIN_EPS ||
 //      fabs(d3) == DOLFIN_EPS ||
@@ -599,21 +631,18 @@ bool TetrahedronCell::intersects(const MeshEntity& tetrahedron,
 //     return true;
 //   }
   real tol = (real) dolfin_get("Geometrical Tolerance Tetrahedron");
-  if(d1 < (0.0 - tol))
-    return false;
-  if(d2 < (0.0 - tol))
-    return false;
-  if(d3 < (0.0 - tol))
-    return false;
-  if(d4 < (0.0 - tol))
-    return false;
+  if (d1 < (0.0 - tol)) return false;
+  if (d2 < (0.0 - tol)) return false;
+  if (d3 < (0.0 - tol)) return false;
+  if (d4 < (0.0 - tol)) return false;
 
   return true;
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::intersects(const MeshEntity& interval, const Point& p1, const Point& p2) const
+bool TetrahedronCell::intersects(const MeshEntity& interval, const Point& p1,
+                                 const Point& p2) const
 {
-  // FIXME: Not implemented
+// FIXME: Not implemented
   error("TetrahedronCell::intersects() not implemented");
 
   return false;
@@ -625,31 +654,33 @@ std::string TetrahedronCell::description() const
   return s;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint TetrahedronCell::findEdge(uint i, const Cell& cell) const
+uint TetrahedronCell::findEdge(uint i, const Cell& cell) const
 {
-  // Get vertices and edges
-  const uint* v = cell.entities(0);
-  const uint* e = cell.entities(1);
+// Get vertices and edges
+  uint const* v = cell.entities(0);
+  uint const* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
 
-  // Ordering convention for edges (order of non-incident vertices)
-  static uint EV[6][2] = {{0, 1}, {0, 2}, {0, 3}, {1, 2}, {1, 3}, {2, 3}};
+// Ordering convention for edges (order of non-incident vertices)
+  static uint EV[6][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 2 }, { 1, 3 }, {
+      2, 3 } };
 
-  // Look for edge satisfying ordering convention
+// Look for edge satisfying ordering convention
   for (uint j = 0; j < 6; j++)
   {
-    const uint* ev = cell.mesh().topology()(1, 0)(e[j]);
+    uint const* ev = cell.mesh().topology()(1, 0)(e[j]);
     dolfin_assert(ev);
-    const uint v0 = v[EV[i][0]];
-    const uint v1 = v[EV[i][1]];
-    if (ev[0] != v0 && ev[0] != v1 && ev[1] != v0 && ev[1] != v1)
-      return j;
+    uint const v0 = v[EV[i][0]];
+    uint const v1 = v[EV[i][1]];
+    if (ev[0] != v0 && ev[0] != v1 && ev[1] != v0 && ev[1] != v1) return j;
   }
 
-  // We should not reach this
+// We should not reach this
   error("Unable to find edge.");
 
   return 0;
 }
 //-----------------------------------------------------------------------------
+
+}

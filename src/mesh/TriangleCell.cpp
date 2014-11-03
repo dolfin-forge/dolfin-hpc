@@ -23,7 +23,14 @@
 #include <dolfin/mesh/GeometricPredicates.h>
 #include <dolfin/parameter/parameters.h>
 
-using namespace dolfin;
+namespace dolfin
+{
+
+//-----------------------------------------------------------------------------
+TriangleCell::TriangleCell() :
+    CellType(triangle, interval)
+{
+}
 
 //-----------------------------------------------------------------------------
 dolfin::uint TriangleCell::dim() const
@@ -33,14 +40,14 @@ dolfin::uint TriangleCell::dim() const
 //-----------------------------------------------------------------------------
 dolfin::uint TriangleCell::numEntities(uint dim) const
 {
-  switch ( dim )
+  switch (dim)
     {
     case 0:
-      return 3; // vertices
+      return 3;  // vertices
     case 1:
-      return 3; // edges
+      return 3;  // edges
     case 2:
-      return 1; // cells
+      return 1;  // cells
     default:
       error("Illegal topological dimension %d for triangle.", dim);
       break;
@@ -51,14 +58,14 @@ dolfin::uint TriangleCell::numEntities(uint dim) const
 //-----------------------------------------------------------------------------
 dolfin::uint TriangleCell::numVertices(uint dim) const
 {
-  switch ( dim )
+  switch (dim)
     {
     case 0:
-      return 1; // vertices
+      return 1;  // vertices
     case 1:
-      return 2; // edges
+      return 2;  // edges
     case 2:
-      return 3; // cells
+      return 3;  // cells
     default:
       error("Illegal topological dimension %d for triangle.", dim);
       break;
@@ -80,19 +87,22 @@ dolfin::uint TriangleCell::orientation(const Cell& cell) const
   Point p02 = v2.point() - v0.point();
   Point n(-p01.y(), p01.x());
 
-  return ( n.dot(p02) < 0.0 ? 1 : 0 );
+  return (n.dot(p02) < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void TriangleCell::createEntities(uint** e, uint dim, const uint* v) const
+void TriangleCell::createEntities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges
-  if ( dim != 1 )
-    error("Don't know how to create entities of topological dimension %d.", dim);
+  if (dim != 1) error(
+      "Don't know how to create entities of topological dimension %d.", dim);
 
   // Create the three edges
-  e[0][0] = v[1]; e[0][1] = v[2];
-  e[1][0] = v[0]; e[1][1] = v[2];
-  e[2][0] = v[0]; e[2][1] = v[1];
+  e[0][0] = v[1];
+  e[0][1] = v[2];
+  e[1][0] = v[0];
+  e[1][1] = v[2];
+  e[2][0] = v[0];
+  e[2][1] = v[1];
 }
 //-----------------------------------------------------------------------------
 void TriangleCell::orderEntities(Cell& cell) const
@@ -103,90 +113,91 @@ void TriangleCell::orderEntities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if ( topology(1, 0).size() > 0 )
+  if (topology(1, 0).size() > 0)
+  {
+    dolfin_assert(topology(2, 1).size() > 0);
+
+    // Get edges
+    uint* cell_edges = cell.entities(1);
+
+    // Sort vertices on each edge
+    for (uint i = 0; i < 3; i++)
     {
-      dolfin_assert(topology(2, 1).size() > 0);
-
-      // Get edges
-      uint* cell_edges = cell.entities(1);
-
-      // Sort vertices on each edge
-      for (uint i = 0; i < 3; i++)
-      {
-        uint* edge_vertices = topology(1, 0)(cell_edges[i]);
-        std::sort(edge_vertices, edge_vertices + 2);
-      }
+      uint* edge_vertices = topology(1, 0)(cell_edges[i]);
+      std::sort(edge_vertices, edge_vertices + 2);
     }
+  }
 
   // Sort local vertices on cell in ascending order, connectivity 2 - 0
-  if ( topology(2, 0).size() > 0 )
-    {
-      uint* cell_vertices = cell.entities(0);
-      std::sort(cell_vertices, cell_vertices + 3);
-    }
+  if (topology(2, 0).size() > 0)
+  {
+    uint* cell_vertices = cell.entities(0);
+    std::sort(cell_vertices, cell_vertices + 3);
+  }
 
   // Sort local edges on cell after non-incident vertex, connectivity 2 - 1
-  if ( topology(2, 1).size() > 0 )
+  if (topology(2, 1).size() > 0)
+  {
+    dolfin_assert(topology(2, 1).size() > 0);
+
+    // Get cell vertices and edges
+    uint* cell_vertices = cell.entities(0);
+    uint* cell_edges = cell.entities(1);
+
+    // Loop over vertices on cell
+    for (uint i = 0; i < 3; i++)
     {
-      dolfin_assert(topology(2, 1).size() > 0);
-
-      // Get cell vertices and edges
-      uint* cell_vertices = cell.entities(0);
-      uint* cell_edges = cell.entities(1);
-
-      // Loop over vertices on cell
-      for (uint i = 0; i < 3; i++)
+      // Loop over edges on cell
+      for (uint j = i; j < 3; j++)
       {
-        // Loop over edges on cell
-        for (uint j = i; j < 3; j++)
-        {
-          uint* edge_vertices = topology(1, 0)(cell_edges[j]);
+        uint* edge_vertices = topology(1, 0)(cell_edges[j]);
 
-          // Check if the ith vertex of the cell is non-incident with edge j
+        // Check if the ith vertex of the cell is non-incident with edge j
 #if __SUNPRO_CC
-          int n1 = 0;
-          std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
-          if ( n1 == 0)
+        int n1 = 0;
+        std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
+        if ( n1 == 0)
 #else
-            if ( std::count(edge_vertices, edge_vertices + 2, cell_vertices[i]) == 0 )
+        if (std::count(edge_vertices, edge_vertices + 2, cell_vertices[i]) == 0)
 #endif
-            {
-              // Swap edge numbers
-              uint tmp = cell_edges[i];
-              cell_edges[i] = cell_edges[j];
-              cell_edges[j] = tmp;
-              break;
-            }
+        {
+          // Swap edge numbers
+          uint tmp = cell_edges[i];
+          cell_edges[i] = cell_edges[j];
+          cell_edges[j] = tmp;
+          break;
         }
       }
     }
+  }
 }
 //-----------------------------------------------------------------------------
 void TriangleCell::refineCell(Cell& cell, MeshEditor& editor,
                               uint& current_cell) const
 {
   // Get vertices and edges
-  const uint* v = cell.entities(0);
-  const uint* e = cell.entities(1);
+  uint const* v = cell.entities(0);
+  uint const* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
 
   // Get offset for new vertex indices
-  const uint offset = cell.mesh().numVertices();
+  uint const offset = cell.mesh().numVertices();
 
   // Compute indices for the six new vertices
-  const uint v0 = v[0];
-  const uint v1 = v[1];
-  const uint v2 = v[2];
-  const uint e0 = offset + e[findEdge(0, cell)];
-  const uint e1 = offset + e[findEdge(1, cell)];
-  const uint e2 = offset + e[findEdge(2, cell)];
+  uint const v0 = v[0];
+  uint const v1 = v[1];
+  uint const v2 = v[2];
+  uint const e0 = offset + e[findEdge(0, cell)];
+  uint const e1 = offset + e[findEdge(1, cell)];
+  uint const e2 = offset + e[findEdge(2, cell)];
 
   // Add the four new cells
-  editor.addCell(current_cell++, v0, e2, e1);
-  editor.addCell(current_cell++, v1, e0, e2);
-  editor.addCell(current_cell++, v2, e1, e0);
-  editor.addCell(current_cell++, e0, e1, e2);
+  uint connectivity[12] = { v0, e2, e1, v1, e0, e2, v2, e1, e0, e0, e1, e2 };
+  for (uint i = 0; i < 4; ++i)
+  {
+    editor.addCell(current_cell++, &connectivity[i * 3]);
+  }
 }
 //-----------------------------------------------------------------------------
 real TriangleCell::volume(const MeshEntity& triangle) const
@@ -198,32 +209,37 @@ real TriangleCell::volume(const MeshEntity& triangle) const
   const MeshGeometry& geometry = triangle.mesh().geometry();
 
   // Get the coordinates of the three vertices
-  const uint* vertices = triangle.entities(0);
+  uint const* vertices = triangle.entities(0);
   const real* x0 = geometry.x(vertices[0]);
   const real* x1 = geometry.x(vertices[1]);
   const real* x2 = geometry.x(vertices[2]);
 
-  if ( geometry.dim() == 2 )
-    {
-      // Compute area of triangle embedded in R^2
-      real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
+  if (geometry.dim() == 2)
+  {
+    // Compute area of triangle embedded in R^2
+    real v2 = (x0[0] * x1[1] + x0[1] * x2[0] + x1[0] * x2[1])
+        - (x2[0] * x1[1] + x2[1] * x0[0] + x1[0] * x0[1]);
 
-      // Formula for volume from http://mathworld.wolfram.com
-      return v2 = 0.5 * std::abs(v2);
-    }
-  else if ( geometry.dim() == 3 )
-    {
-      // Compute area of triangle embedded in R^3
-      real v0 = (x0[1]*x1[2] + x0[2]*x2[1] + x1[1]*x2[2]) - (x2[1]*x1[2] + x2[2]*x0[1] + x1[1]*x0[2]);
-      real v1 = (x0[2]*x1[0] + x0[0]*x2[2] + x1[2]*x2[0]) - (x2[2]*x1[0] + x2[0]*x0[2] + x1[2]*x0[0]);
-      real v2 = (x0[0]*x1[1] + x0[1]*x2[0] + x1[0]*x2[1]) - (x2[0]*x1[1] + x2[1]*x0[0] + x1[0]*x0[1]);
+    // Formula for volume from http://mathworld.wolfram.com
+    return v2 = 0.5 * std::abs(v2);
+  }
+  else if (geometry.dim() == 3)
+  {
+    // Compute area of triangle embedded in R^3
+    real v0 = (x0[1] * x1[2] + x0[2] * x2[1] + x1[1] * x2[2])
+        - (x2[1] * x1[2] + x2[2] * x0[1] + x1[1] * x0[2]);
+    real v1 = (x0[2] * x1[0] + x0[0] * x2[2] + x1[2] * x2[0])
+        - (x2[2] * x1[0] + x2[0] * x0[2] + x1[2] * x0[0]);
+    real v2 = (x0[0] * x1[1] + x0[1] * x2[0] + x1[0] * x2[1])
+        - (x2[0] * x1[1] + x2[1] * x0[0] + x1[0] * x0[1]);
 
-      // Formula for volume from http://mathworld.wolfram.com
-      return  0.5 * sqrt(v0*v0 + v1*v1 + v2*v2);
-    }
+    // Formula for volume from http://mathworld.wolfram.com
+    return 0.5 * sqrt(v0 * v0 + v1 * v1 + v2 * v2);
+  }
   else
   {
-    error("Only know how to volume (area) of a triangle when embedded in R^2 or R^3.");
+    error(
+        "Only know how to volume (area) of a triangle when embedded in R^2 or R^3.");
   }
 
   return 0.0;
@@ -236,7 +252,7 @@ real TriangleCell::diameter(const MeshEntity& triangle) const
   dolfin_assert(triangle.numEntities(0) == 3);
 
   real hmax = 0.0;
-  MeshEntity * tri = const_cast<MeshEntity *>(&triangle); //FIXME: constness
+  MeshEntity * tri = const_cast<MeshEntity *>(&triangle);  //FIXME: constness
   for (EdgeIterator edge(*tri); !edge.end(); ++edge)
   {
     hmax = std::max(hmax, edge->length());
@@ -256,18 +272,18 @@ real TriangleCell::circumradius(const MeshEntity& triangle) const
   dolfin_assert(geometry.dim() > 1);
 
   // Get the coordinates of the three vertices
-  const uint* vertices = triangle.entities(0);
+  uint const* vertices = triangle.entities(0);
   Point p0 = geometry.point(vertices[0]);
   Point p1 = geometry.point(vertices[1]);
   Point p2 = geometry.point(vertices[2]);
 
   // Compute side lengths
-  real a  = p1.distance(p2);
-  real b  = p0.distance(p2);
-  real c  = p0.distance(p1);
+  real a = p1.distance(p2);
+  real b = p0.distance(p2);
+  real c = p0.distance(p1);
 
   // Formula for circumradius from http://mathworld.wolfram.com
-  return 0.25 * a*b*c / volume(triangle);
+  return 0.25 * a * b * c / volume(triangle);
 }
 //-----------------------------------------------------------------------------
 real TriangleCell::normal(const Cell& cell, uint facet, uint i) const
@@ -285,14 +301,16 @@ Point TriangleCell::normal(const Cell& cell, uint facet) const
 
   // The normal vector is currently only defined for a triangle in R^2
   if (c.mesh().geometry().dim() != 2)
+  {
     error("The normal vector is only defined when the triangle is in R^2");
+  }
 
   // Get global index of opposite vertex
-  const uint v0 = cell.entities(0)[facet];
+  uint const v0 = cell.entities(0)[facet];
 
   // Get global index of vertices on the facet
-  const uint v1 = f.entities(0)[0];
-  const uint v2 = f.entities(0)[1];
+  uint const v1 = f.entities(0)[0];
+  uint const v2 = f.entities(0)[1];
 
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
@@ -308,11 +326,10 @@ Point TriangleCell::normal(const Cell& cell, uint facet) const
   n[1] = -(p2[0] - p1[0]);
 
   // Normalize
-  n /= std::sqrt(n[0]*n[0] + n[1]*n[1]);
+  n /= std::sqrt(n[0] * n[0] + n[1] * n[1]);
 
   // Flip direction of normal so it points outward
-  if ( (n[0]*(p0[0] - p1[0]) + n[1]*(p0[1] - p1[1])) > 0 )
-    n *= -1.0;
+  if ((n[0] * (p0[0] - p1[0]) + n[1] * (p0[1] - p1[1])) > 0) n *= -1.0;
 
   return n;
 }
@@ -326,8 +343,8 @@ dolfin::real TriangleCell::facetArea(const Cell& cell, uint facet) const
   Facet f(c.mesh(), c.entities(1)[facet]);
 
   // Get global index of vertices on the facet
-  const uint v0 = f.entities(0)[0];
-  const uint v1 = f.entities(0)[1];
+  uint const v0 = f.entities(0)[0];
+  uint const v1 = f.entities(0)[1];
 
   // Get mesh geometry
   const MeshGeometry& geometry = cell.mesh().geometry();
@@ -341,7 +358,7 @@ dolfin::real TriangleCell::facetArea(const Cell& cell, uint facet) const
   for (uint i = 0; i < geometry.dim(); i++)
   {
     const real dp = p0[i] - p1[i];
-    d += dp*dp;
+    d += dp * dp;
   }
 
   return std::sqrt(d);
@@ -361,12 +378,12 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
 
   // Check orientation
   dolfin::uint vtmp;
-  if(orientation((Cell&)triangle) == 1)
-    {
-      vtmp = v2;
-      v2 = v1;
-      v1 = vtmp;
-    }
+  if (orientation((Cell&) triangle) == 1)
+  {
+    vtmp = v2;
+    v2 = v1;
+    v1 = vtmp;
+  }
 
   // Get the coordinates of the three vertices
   const real* x0 = geometry.x(v0);
@@ -383,18 +400,15 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   real d1, d2, d3;
 
   // Test orientation of p w.r.t. each edge
-  d1 = orient2d((double *)x0, (double *)x1, x);
-  d2 = orient2d((double *)x1, (double *)x2, x);
-  d3 = orient2d((double *)x2, (double *)x0, x);
+  d1 = orient2d((real *) x0, (real *) x1, x);
+  d2 = orient2d((real *) x1, (real *) x2, x);
+  d3 = orient2d((real *) x2, (real *) x0, x);
 
   // FIXME: Need to check the predicates for correctness
   real tol = DOLFIN_EPS;
-  if(d1 < (0.0-tol))
-    return false;
-  if(d2 < (0.0-tol))
-    return false;
-  if(d3 < (0.0-tol))
-    return false;
+  if (d1 < (0.0 - tol)) return false;
+  if (d2 < (0.0 - tol)) return false;
+  if (d3 < (0.0 - tol)) return false;
 
   return true;
 
@@ -423,7 +437,8 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
 //       return false;
 }
 //-----------------------------------------------------------------------------
-bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point& p2) const
+bool TriangleCell::intersects(const MeshEntity& tri, const Point& p1,
+                              const Point& p2) const
 {
   // Adapted from gts_point_is_in_triangle from GTS
 
@@ -437,12 +452,12 @@ bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point&
 
   // Check orientation
   dolfin::uint vtmp;
-  if(orientation((Cell&)tri) == 1)
-    {
-      vtmp = v2;
-      v2 = v1;
-      v1 = vtmp;
-    }
+  if (orientation((Cell&) tri) == 1)
+  {
+    vtmp = v2;
+    v2 = v1;
+    v1 = vtmp;
+  }
 
   // Get the coordinates of the three vertices
   const real* x0 = geometry.x(v0);
@@ -468,38 +483,33 @@ bool TriangleCell::intersects(const MeshEntity& tri,const Point& p1,const Point&
   real d1, d2, d3;
 
   // Test orientation of each vertex w.r.t. pa-pb
-  d1 = orient2d((double *)pa, (double *)pb, (double*) x0);
-  d2 = orient2d((double *)pa, (double *)pb, (double*) x1);
-  d3 = orient2d((double *)pa, (double *)pb, (double*) x2);
+  d1 = orient2d((real *) pa, (real *) pb, (real*) x0);
+  d2 = orient2d((real *) pa, (real *) pb, (real*) x1);
+  d3 = orient2d((real *) pa, (real *) pb, (real*) x2);
 
-  if( d1<0 && d2<0 && d3<0)
-    return false;
-  if( d1>0 && d2>0 && d3>0)
-    return false;
+  if (d1 < 0 && d2 < 0 && d3 < 0) return false;
+  if (d1 > 0 && d2 > 0 && d3 > 0) return false;
 
   // Line pa-pb intersects triangle but both pa and pb are
   // on the negative side of x0-x1:
-  d1 = orient2d((double*)x0, (double*)x1, (double*) pa);
-  d2 = orient2d((double*)x0, (double*)x1, (double*) pb);
+  d1 = orient2d((real*) x0, (real*) x1, (real*) pa);
+  d2 = orient2d((real*) x0, (real*) x1, (real*) pb);
 
-  if( d1<0 && d2<0)
-    return false;
+  if (d1 < 0 && d2 < 0) return false;
 
   // Line pa-pb intersects triangle but both pa and pb are
   // on the negative side of x1-x2:
-  d1 = orient2d((double*)x1, (double*)x2, (double*) pa);
-  d2 = orient2d((double*)x1, (double*)x2, (double*) pb);
+  d1 = orient2d((real*) x1, (real*) x2, (real*) pa);
+  d2 = orient2d((real*) x1, (real*) x2, (real*) pb);
 
-  if( d1<0 && d2<0)
-    return false;
+  if (d1 < 0 && d2 < 0) return false;
 
   // Line pa-pb intersects triangle but both pa and pb are
   // on the negative side of x2-x0:
-  d1 = orient2d((double*)x2, (double*)x0, (double*) pa);
-  d2 = orient2d((double*)x2, (double*)x0, (double*) pb);
+  d1 = orient2d((real*) x2, (real*) x0, (real*) pa);
+  d2 = orient2d((real*) x2, (real*) x0, (real*) pb);
 
-  if( d1<0 && d2<0)
-    return false;
+  if (d1 < 0 && d2 < 0) return false;
 
   return true;
 }
@@ -513,19 +523,18 @@ std::string TriangleCell::description() const
 dolfin::uint TriangleCell::findEdge(uint i, const Cell& cell) const
 {
   // Get vertices and edges
-  const uint* v = cell.entities(0);
-  const uint* e = cell.entities(1);
+  uint const* v = cell.entities(0);
+  uint const* e = cell.entities(1);
   dolfin_assert(v);
   dolfin_assert(e);
 
   // Look for edge satisfying ordering convention
   for (uint j = 0; j < 3; j++)
-    {
-      const uint* ev = cell.mesh().topology()(1, 0)(e[j]);
-      dolfin_assert(ev);
-      if (ev[0] != v[i] && ev[1] != v[i])
-        return j;
-    }
+  {
+    uint const* ev = cell.mesh().topology()(1, 0)(e[j]);
+    dolfin_assert(ev);
+    if (ev[0] != v[i] && ev[1] != v[i]) return j;
+  }
 
   // We should not reach this
   error("Unable to find edge.");
@@ -533,3 +542,5 @@ dolfin::uint TriangleCell::findEdge(uint i, const Cell& cell) const
   return 0;
 }
 //-----------------------------------------------------------------------------
+
+}

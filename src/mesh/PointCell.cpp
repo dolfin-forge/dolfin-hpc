@@ -14,43 +14,49 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/GeometricPredicates.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-dolfin::uint PointCell::dim() const
+PointCell::PointCell() :
+    CellType(point, point)
+{
+}
+//-----------------------------------------------------------------------------
+uint PointCell::dim() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PointCell::numEntities(uint dim) const
-{
-  switch (dim)
-  {
-  case 0:
-    return 1; // vertices
-  default:
-    error("Illegal topological dimension %d for point.", dim);
-    break;
-  }
-
-  return 0;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint PointCell::numVertices(uint dim) const
+uint PointCell::numEntities(uint dim) const
 {
   switch (dim)
-  {
-  case 0:
-    return 1; // vertices
-  default:
-    error("Illegal topological dimension %d for point.", dim);
-    break;
-  }
+    {
+    case 0:
+      return 1;  // vertices
+    default:
+      error("Illegal topological dimension %d for point.", dim);
+      break;
+    }
 
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PointCell::orientation(const Cell& cell) const
+uint PointCell::numVertices(uint dim) const
+{
+  switch (dim)
+    {
+    case 0:
+      return 1;  // vertices
+    default:
+      error("Illegal topological dimension %d for point.", dim);
+      break;
+    }
+
+  return 0;
+}
+//-----------------------------------------------------------------------------
+uint PointCell::orientation(const Cell& cell) const
 {
   error("PointCell::orientation() not defined.");
   return 0;
@@ -58,7 +64,8 @@ dolfin::uint PointCell::orientation(const Cell& cell) const
 //-----------------------------------------------------------------------------
 void PointCell::createEntities(uint** e, uint dim, const uint* v) const
 {
-  error("PointCell::createEntities() don't know how to create entities on a point.");
+  error(
+      "PointCell::createEntities() don't know how to create entities on a point.");
 }
 //-----------------------------------------------------------------------------
 void PointCell::orderEntities(Cell& cell) const
@@ -67,7 +74,7 @@ void PointCell::orderEntities(Cell& cell) const
 }
 //-----------------------------------------------------------------------------
 void PointCell::refineCell(Cell& cell, MeshEditor& editor,
-                          uint& current_cell) const
+                           uint& current_cell) const
 {
   error("PointCell::refineCell() not defined.");
 }
@@ -115,7 +122,8 @@ bool PointCell::intersects(const MeshEntity& triangle, const Point& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool PointCell::intersects(const MeshEntity& triangle, const Point& p1, const Point& p2) const
+bool PointCell::intersects(const MeshEntity& triangle, const Point& p1,
+                           const Point& p2) const
 {
   error("PointCell::intersects() not implemented.");
   return true;
@@ -127,9 +135,12 @@ std::string PointCell::description() const
   return s;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PointCell::findEdge(uint i, const Cell& cell) const
+uint PointCell::findEdge(uint i, const Cell& cell) const
 {
   error("PointCell::findEdge() not defined.");
   return 0;
 }
 //-----------------------------------------------------------------------------
+
+}
+

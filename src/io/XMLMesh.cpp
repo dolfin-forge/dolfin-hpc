@@ -15,7 +15,8 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/io/XMLMesh.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 XMLMesh::XMLMesh(Mesh& mesh) :
@@ -115,7 +116,7 @@ void XMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
       break;
 
     default:
-      ;
+      break;
     }
 }
 //-----------------------------------------------------------------------------
@@ -179,7 +180,7 @@ void XMLMesh::endElement(const xmlChar *name)
       break;
 
     default:
-      ;
+      break;
     }
 }
 //-----------------------------------------------------------------------------
@@ -198,18 +199,15 @@ void XMLMesh::readMesh(const xmlChar *name, const xmlChar **attrs)
   // Parse values
   std::string type = parseString(name, attrs, "celltype");
   uint gdim = parseUnsignedInt(name, attrs, "dim");
-  
-  // Create cell type to get topological dimension
-  CellType* cell_type = CellType::create(type);
-  uint tdim = cell_type->dim();
-  delete cell_type;
 
   // Open mesh for editing
-  if(editor_ != NULL)
+  if (editor_ != NULL)
   {
     error("In XMLMesh, mesh editor is already open.");
   }
-  editor_ = new MeshEditor(mesh_, CellType::string2type(type), tdim, gdim);
+  CellType * cell_type = CellType::create(type);
+  editor_ = new MeshEditor(mesh_, cell_type->cellType(), gdim);
+  delete cell_type;
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
@@ -234,85 +232,83 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 {
   // Read index
   uint v = parseUnsignedInt(name, attrs, "index");
-  
+
   // Handle differently depending on geometric dimension
+  // Handle differently depending on geometric dimension
+  real x[Point::max_size];
   switch (mesh_.geometry().dim())
     {
-    case 1:
-      {
-        real x = parseReal(name, attrs, "x");
-        editor_->addVertex(v, x);
-      }
-      break;
-    case 2:
-      {
-        real x = parseReal(name, attrs, "x");
-        real y = parseReal(name, attrs, "y");
-        editor_->addVertex(v, x, y);
-      }
-      break;
     case 3:
-      {
-        real x = parseReal(name, attrs, "x");
-        real y = parseReal(name, attrs, "y");
-        real z = parseReal(name, attrs, "z");
-        editor_->addVertex(v, x, y, z);
-      }
+      x[2] = parseReal(name, attrs, "z");
+    case 2:
+      x[1] = parseReal(name, attrs, "y");
+    case 1:
+      x[0] = parseReal(name, attrs, "x");
       break;
     default:
       error("Dimension of mesh must be 1, 2 or 3.");
     }
+  editor_->addVertex(v, &x[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readInterval(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 1) error(
-      "Mesh entity (interval) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 1)
+  {
+    error("Mesh entity (interval) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
   // Parse values
   uint c = parseUnsignedInt(name, attrs, "index");
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  
+  uint v[2];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
+
   // Add cell
-  editor_->addCell(c, v0, v1);
+  editor_->addCell(c, &v[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readTriangle(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 2) error(
-      "Mesh entity (triangle) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 2)
+  {
+    error("Mesh entity (triangle) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
   // Parse values
   uint c = parseUnsignedInt(name, attrs, "index");
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  uint v2 = parseUnsignedInt(name, attrs, "v2");
-  
+  uint v[3];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
+  v[2] = parseUnsignedInt(name, attrs, "v2");
+
   // Add cell
-  editor_->addCell(c, v0, v1, v2);
+  editor_->addCell(c, &v[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readTetrahedron(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 3) error(
-      "Mesh entity (tetrahedron) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 3)
+  {
+    error("Mesh entity (tetrahedron) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
   // Parse values
   uint c = parseUnsignedInt(name, attrs, "index");
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  uint v2 = parseUnsignedInt(name, attrs, "v2");
-  uint v3 = parseUnsignedInt(name, attrs, "v3");
-  
+  uint v[4];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
+  v[2] = parseUnsignedInt(name, attrs, "v2");
+  v[3] = parseUnsignedInt(name, attrs, "v3");
+
   // Add cell
-  editor_->addCell(c, v0, v1, v2, v3);
+  editor_->addCell(c, &v[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readMeshFunction(const xmlChar* name, const xmlChar** attrs)
@@ -324,14 +320,18 @@ void XMLMesh::readMeshFunction(const xmlChar* name, const xmlChar** attrs)
   const uint size = parseUnsignedInt(name, attrs, "size");
 
   // Only uint supported at this point
-  if (strcmp(type.c_str(), "uint") != 0) error(
-      "Only uint-valued mesh data is currently supported.");
+  if (strcmp(type.c_str(), "uint") != 0)
+  {
+    error("Only uint-valued mesh data is currently supported.");
+  }
 
   // Check size
   mesh_.init(dim);
-  if (mesh_.size(dim) != size) error(
-      "Wrong number of values for MeshFunction, expecting %d.",
-      mesh_.size(dim));
+  if (mesh_.size(dim) != size)
+  {
+    error("Wrong number of values for MeshFunction, expecting %d.",
+          mesh_.size(dim));
+  }
 
   // Register data
   f_ = mesh_.data().createMeshFunction(id);
@@ -350,8 +350,10 @@ void XMLMesh::readArray(const xmlChar* name, const xmlChar** attrs)
   const uint size = parseUnsignedInt(name, attrs, "size");
 
   // Only uint supported at this point
-  if (strcmp(type.c_str(), "uint") != 0) error(
-      "Only uint-valued mesh data is currently supported.");
+  if (strcmp(type.c_str(), "uint") != 0)
+  {
+    error("Only uint-valued mesh data is currently supported.");
+  }
 
   // Register data
   a_ = mesh_.data().createArray(id, size);
@@ -364,7 +366,8 @@ void XMLMesh::readMeshEntity(const xmlChar* name, const xmlChar** attrs)
   const uint index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
-  dolfin_assert(f_); dolfin_assert(index < f_->size());
+  dolfin_assert(f_);
+  dolfin_assert(index < f_->size());
   const uint value = parseUnsignedInt(name, attrs, "value");
   f_->set(index, value);
 }
@@ -375,7 +378,8 @@ void XMLMesh::readArrayElement(const xmlChar* name, const xmlChar** attrs)
   const uint index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
-  dolfin_assert(a_); dolfin_assert(index < a_->size());
+  dolfin_assert(a_);
+  dolfin_assert(index < a_->size());
   const uint value = parseUnsignedInt(name, attrs, "value");
   (*a_)[index] = value;
 }
@@ -389,3 +393,6 @@ void XMLMesh::closeMesh()
 //-----------------------------------------------------------------------------
 
 #endif
+
+}
+

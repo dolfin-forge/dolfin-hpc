@@ -67,7 +67,7 @@ void OFFFile::operator>>(Mesh& mesh)
     get_next_line(off, line);
     std::vector<real> coords;
     split_line(line, coords);
-    editor.addVertex(v, coords[0], coords[1], coords[2]);
+    editor.addVertex(v, &coords[0]);
   }
 
   // Get face connectivities
@@ -82,7 +82,7 @@ void OFFFile::operator>>(Mesh& mesh)
     switch(v[0])
     {
       case 3: // Only treat triangles
-        editor.addCell(c, v[1], v[2], v[3]);
+        editor.addCell(c, &v[1]);
         break;
       default:
         break;

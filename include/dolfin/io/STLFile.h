@@ -26,18 +26,19 @@ private:
 
   struct stl_vertex
   {
-    double v1, v2, v3;
+    double v[3];
     dolfin::uint index;
 
-    bool operator <(const stl_vertex& v) const
+    bool operator <(const stl_vertex& other) const
     {
-      return (v1 < v.v1
-          || (v1 == v.v1 && (v2 < v.v2 || (v2 == v.v2 && v3 < v.v3))));
+      return ((v[0] < other.v[0])
+          || (v[0] == other.v[0]
+              && (v[1] < other.v[1] || (v[1] == other.v[1] && v[2] < other.v[2]))));
     }
 
-    bool operator ==(const stl_vertex& v) const
+    bool operator ==(const stl_vertex& other) const
     {
-      return (v1 == v.v1 && v2 == v.v2 && v3 == v.v3);
+      return (v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2]);
     }
   };
 

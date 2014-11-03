@@ -34,6 +34,8 @@ PXMLMesh::PXMLMesh(Mesh& mesh) :
     editor_(NULL),
     f_(NULL),
     a_(NULL),
+    numParsedVertices_(0),
+    numParsedCells_(0),
     startIndex_vert_(0),
     endIndex_vert_(0),
     startIndex_cell_(0),
@@ -147,7 +149,7 @@ void PXMLMesh::startElement(const xmlChar *name, const xmlChar **attrs)
       break;
 
     default:
-      ;
+      break;
     }
 }
 //-----------------------------------------------------------------------------
@@ -211,7 +213,7 @@ void PXMLMesh::endElement(const xmlChar *name)
       break;
 
     default:
-      ;
+      break;
     }
 }
 //-----------------------------------------------------------------------------
@@ -231,17 +233,14 @@ void PXMLMesh::readMesh(const xmlChar *name, const xmlChar **attrs)
   std::string type = parseString(name, attrs, "celltype");
   uint gdim = parseUnsignedInt(name, attrs, "dim");
 
-  // Create cell type to get topological dimension
-  CellType* cell_type = CellType::create(type);
-  uint tdim = cell_type->dim();
-  delete cell_type;
-
+  // Open mesh for editing
   if (editor_ != NULL)
   {
     error("In PXMLMesh, mesh editor is already created.");
   }
-  // Open mesh for editing
-  editor_ = new MeshEditor(mesh_, CellType::string2type(type), tdim, gdim);
+  CellType * cell_type = CellType::create(type);
+  editor_ = new MeshEditor(mesh_, cell_type->cellType(), gdim);
+  delete cell_type;
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
@@ -299,130 +298,156 @@ void PXMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   mesh_.distdata().set_map(numParsedVertices_, v, 0);
 
   // Handle differently depending on geometric dimension
+  real x[Point::max_size];
   switch (mesh_.geometry().dim())
     {
-    case 1:
-      {
-        real x = parseReal(name, attrs, "x");
-        editor_->addVertex(numParsedVertices_, x);
-      }
-      break;
-    case 2:
-      {
-        real x = parseReal(name, attrs, "x");
-        real y = parseReal(name, attrs, "y");
-        editor_->addVertex(numParsedVertices_, x, y);
-      }
-      break;
     case 3:
-      {
-        real x = parseReal(name, attrs, "x");
-        real y = parseReal(name, attrs, "y");
-        real z = parseReal(name, attrs, "z");
-        editor_->addVertex(numParsedVertices_, x, y, z);
-      }
+      x[2] = parseReal(name, attrs, "z");
+    case 2:
+      x[1] = parseReal(name, attrs, "y");
+    case 1:
+      x[0] = parseReal(name, attrs, "x");
       break;
     default:
       error("Dimension of mesh must be 1, 2 or 3.");
     }
+  editor_->addVertex(numParsedVertices_, &x[0]);
   numParsedVertices_++;
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readInterval(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 1) error(
-      "Mesh entity (interval) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 1)
+  {
+    error("Mesh entity (interval) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
-  // Parse values
-  uint c = parseUnsignedInt(name, attrs, "index");
+  // Ignore index
+  uint v[2];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
 
-  if (c < startIndex_cell_ || c > endIndex_cell_) return;
-  c = numParsedCells_++;
+  // Return if no vertices are local
+  if (!(own_vertex_[v[1]] || own_vertex_[v[0]]) || !own_vertex_[v[0]])
+  {
+    return;
+  }
 
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  // Add cell
-  editor_->addCell(c, v0, v1);
+  used_vertex_[mesh_.distdata().get_vertex_local(v[0])] = true;
+  if (own_vertex_[v[1]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[1])] = true;
+  }
+
+  // Add shared vertices to shared list
+  if (!(own_vertex_[v[1]] && own_vertex_[v[0]]))
+  {
+    if (!own_vertex_[v[1]]) shared_buffer_[v[1]] = true;
+  }
+
+  // Add cell to cell buffer
+  cell_buffer_.push_back(v[0]);
+  cell_buffer_.push_back(v[1]);
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readTriangle(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 2) error(
-      "Mesh entity (triangle) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 2)
+  {
+    error("Mesh entity (triangle) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
-// Parse values
-//  uint c  = parseUnsignedInt(name, attrs, "index");
-
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  uint v2 = parseUnsignedInt(name, attrs, "v2");
+  // Ignore index
+  uint v[3];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
+  v[2] = parseUnsignedInt(name, attrs, "v2");
 
   // Return if no vertices are local
-  if (!(own_vertex_[v1] || own_vertex_[v2] || own_vertex_[v0])
-      || !own_vertex_[v0]) return;
+  if (!(own_vertex_[v[1]] || own_vertex_[v[2]] || own_vertex_[v[0]])
+      || !own_vertex_[v[0]])
+  {
+    return;
+  }
 
-  used_vertex_[mesh_.distdata().get_vertex_local(v0)] = true;
-  if (own_vertex_[v1]) used_vertex_[mesh_.distdata().get_vertex_local(v1)] =
-      true;
-  if (own_vertex_[v2]) used_vertex_[mesh_.distdata().get_vertex_local(v2)] =
-      true;
+  used_vertex_[mesh_.distdata().get_vertex_local(v[0])] = true;
+  if (own_vertex_[v[1]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[1])] = true;
+  }
+  if (own_vertex_[v[2]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[2])] = true;
+  }
 
   // Add shared vertices to shared list
-  if (!(own_vertex_[v1] && own_vertex_[v2] && own_vertex_[v0]))
+  if (!(own_vertex_[v[1]] && own_vertex_[v[2]] && own_vertex_[v[0]]))
   {
-    if (!own_vertex_[v1]) shared_buffer_[v1] = true;
-    if (!own_vertex_[v2]) shared_buffer_[v2] = true;
+    if (!own_vertex_[v[1]]) shared_buffer_[v[1]] = true;
+    if (!own_vertex_[v[2]]) shared_buffer_[v[2]] = true;
   }
 
   // Add cell to cell buffer
-  cell_buffer_.push_back(v0);
-  cell_buffer_.push_back(v1);
-  cell_buffer_.push_back(v2);
+  cell_buffer_.push_back(v[0]);
+  cell_buffer_.push_back(v[1]);
+  cell_buffer_.push_back(v[2]);
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readTetrahedron(const xmlChar *name, const xmlChar **attrs)
 {
   // Check dimension
-  if (mesh_.topology().dim() != 3) error(
-      "Mesh entity (tetrahedron) does not match dimension of mesh (%d).",
-      mesh_.topology().dim());
+  if (mesh_.topology().dim() != 3)
+  {
+    error("Mesh entity (tetrahedron) does not match dimension of mesh (%d).",
+          mesh_.topology().dim());
+  }
 
-  // Parse values
-  uint c = parseUnsignedInt(name, attrs, "index");
-  c = 0;
-  uint v0 = parseUnsignedInt(name, attrs, "v0");
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  uint v2 = parseUnsignedInt(name, attrs, "v2");
-  uint v3 = parseUnsignedInt(name, attrs, "v3");
+  // Ignore index
+  uint v[4];
+  v[0] = parseUnsignedInt(name, attrs, "v0");
+  v[1] = parseUnsignedInt(name, attrs, "v1");
+  v[2] = parseUnsignedInt(name, attrs, "v2");
+  v[3] = parseUnsignedInt(name, attrs, "v3");
 
   // Return if no vertices are local
-  if (!(own_vertex_[v1] || own_vertex_[v2] || own_vertex_[v0] || own_vertex_[v3])
-      || !own_vertex_[v0]) return;
-
-  used_vertex_[mesh_.distdata().get_vertex_local(v0)] = true;
-  if (own_vertex_[v1]) used_vertex_[mesh_.distdata().get_vertex_local(v1)] =
-      true;
-  if (own_vertex_[v2]) used_vertex_[mesh_.distdata().get_vertex_local(v2)] =
-      true;
-  if (own_vertex_[v3]) used_vertex_[mesh_.distdata().get_vertex_local(v3)] =
-      true;
-  // Add shared vertices to shared list
-  if (!(own_vertex_[v1] && own_vertex_[v2] && own_vertex_[v0] && own_vertex_[v3]))
+  if (!(own_vertex_[v[1]] || own_vertex_[v[2]] || own_vertex_[v[0]]
+      || own_vertex_[v[3]]) || !own_vertex_[v[0]])
   {
-    if (!own_vertex_[v1]) shared_buffer_[v1] = true;
-    if (!own_vertex_[v2]) shared_buffer_[v2] = true;
-    if (!own_vertex_[v3]) shared_buffer_[v3] = true;
+    return;
+  }
+
+  used_vertex_[mesh_.distdata().get_vertex_local(v[0])] = true;
+  if (own_vertex_[v[1]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[1])] = true;
+  }
+  if (own_vertex_[v[2]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[2])] = true;
+  }
+  if (own_vertex_[v[3]])
+  {
+    used_vertex_[mesh_.distdata().get_vertex_local(v[3])] = true;
+  }
+
+  // Add shared vertices to shared list
+  if (!(own_vertex_[v[1]] && own_vertex_[v[2]] && own_vertex_[v[0]]
+      && own_vertex_[v[3]]))
+  {
+    if (!own_vertex_[v[1]]) shared_buffer_[v[1]] = true;
+    if (!own_vertex_[v[2]]) shared_buffer_[v[2]] = true;
+    if (!own_vertex_[v[3]]) shared_buffer_[v[3]] = true;
   }
 
   // Add cell to cell buffer
-  cell_buffer_.push_back(v0);
-  cell_buffer_.push_back(v1);
-  cell_buffer_.push_back(v2);
-  cell_buffer_.push_back(v3);
+  cell_buffer_.push_back(v[0]);
+  cell_buffer_.push_back(v[1]);
+  cell_buffer_.push_back(v[2]);
+  cell_buffer_.push_back(v[3]);
 
 }
 //-----------------------------------------------------------------------------
@@ -474,7 +499,8 @@ void PXMLMesh::readMeshEntity(const xmlChar* name, const xmlChar** attrs)
   const uint index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
-  dolfin_assert(f_);dolfin_assert(index < f_->size());
+  dolfin_assert(f_);
+  dolfin_assert(index < f_->size());
   const uint value = parseUnsignedInt(name, attrs, "value");
   f_->set(index, value);
 }
@@ -485,7 +511,8 @@ void PXMLMesh::readArrayElement(const xmlChar* name, const xmlChar** attrs)
   const uint index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
-  dolfin_assert(a_);dolfin_assert(index < a_->size());
+  dolfin_assert(a_);
+  dolfin_assert(index < a_->size());
   const uint value = parseUnsignedInt(name, attrs, "value");
   (*a_)[index] = value;
 }
@@ -621,52 +648,28 @@ void PXMLMesh::closeMesh()
   {
     new_mesh.distdata().set_map(v, shared_indices[i], 0);
     if (shared_orphans[i] < pe_size)
-    { // Why...ugly hack to set ghost owner
+    {  // Why...ugly hack to set ghost owner
       new_mesh.distdata().set_ghost(v, 0);
       new_mesh.distdata().set_ghost_owner(v, shared_orphans[i], 0);
     }
-    switch (gdim)
-      {
-      case 2:
-        editor_->addVertex(v++, shared_coords[ci], shared_coords[ci + 1]);
-        break;
-      case 3:
-        editor_->addVertex(v++, shared_coords[ci], shared_coords[ci + 1],
-                           shared_coords[ci + 2]);
-        break;
-
-      }
+    editor_->addVertex(v++, &shared_coords[ci]);
     ci += gdim;
   }
 
   uint ndims = mesh_.type().numVertices(mesh_.topology().dim());
   editor_->initCells(cell_buffer_.size() / ndims);
   uint c = 0;
+  uint * connectivity = new uint[ndims];
   for (uint i = 0; i < cell_buffer_.size(); i += ndims)
   {
-    switch (ndims)
-      {
-      case 2:
-        editor_->addCell(
-            c++, new_mesh.distdata().get_vertex_local(cell_buffer_[i]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 1]));
-        break;
-      case 3:
-        editor_->addCell(
-            c++, new_mesh.distdata().get_vertex_local(cell_buffer_[i]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 1]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 2]));
-        break;
-      case 4:
-        editor_->addCell(
-            c++, new_mesh.distdata().get_vertex_local(cell_buffer_[i]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 1]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 2]),
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + 3]));
-        break;
-      }
+    for (uint n = 0; n < ndims; ++n)
+    {
+      connectivity[n] = new_mesh.distdata().get_vertex_local(
+          cell_buffer_[i + n]);
+    }
+    editor_->addCell(c++, &connectivity[0]);
   }
-
+  delete[] connectivity;
   editor_->close();
   mesh_ = new_mesh;
 

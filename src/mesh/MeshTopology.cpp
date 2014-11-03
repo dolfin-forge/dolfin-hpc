@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2006-05-08
-// Last changed: 2006-11-01
+// Last changed: 2014-11-03
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/MeshConnectivity.h>
@@ -50,7 +50,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& topology)
   dim_ = topology.dim_;
   num_entities_ = new uint[dim_ + 1];
   connectivity_ = new MeshConnectivity*[dim_ + 1];
-  for (uint d = 0; d <= dim_; d++)
+  for (uint d = 0; d <= dim_; ++d)
   {
     connectivity_[d] = new MeshConnectivity[dim_ + 1];
   }

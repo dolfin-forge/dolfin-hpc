@@ -166,9 +166,14 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
         // Transfer Cell marker  (mesh refinement)
         if (cell_marker)
         {
-          if (old_cell_marker->get(*c)) send_list_cells[target_proc].push_back(
-              1);
-          else send_list_cells[target_proc].push_back(0);
+          if (old_cell_marker->get(*c))
+          {
+            send_list_cells[target_proc].push_back(1);
+          }
+          else
+          {
+            send_list_cells[target_proc].push_back(0);
+          }
         }
       }
       else
@@ -200,7 +205,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
                  MPI::DOLFIN_COMM);
     }
   }
-  else error("Distribution defined on unkown mesh entity");
+  else
+  {
+    error("Distribution defined on unkown mesh entity");
+  }
 
   // Exchange the processed entities
   recv_count = 0;
@@ -295,7 +303,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
             distdata.set_ghost(vi++, 0);
             shared_buffer.push_back(glb_index);
           }
-          else cl.push_back(distdata.get_vertex_local(glb_index));
+          else
+          {
+            cl.push_back(distdata.get_vertex_local(glb_index));
+          }
         }
 
         // Mark cell for refinement
@@ -314,8 +325,10 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
       }
       else
       {
-        if (distdata.has_global(recv_buff_cell[i], 0)) cl.push_back(
-            distdata.get_vertex_local(recv_buff_cell[i]));
+        if (distdata.has_global(recv_buff_cell[i], 0))
+        {
+          cl.push_back(distdata.get_vertex_local(recv_buff_cell[i]));
+        }
         else
         {
           cl.push_back(vi);
@@ -459,7 +472,9 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     dolfin_assert(cm.size() == mesh.numCells());
     cell_marker->init(mesh, mesh.topology().dim());
     for (uint i = 0; i < cm.size(); i++)
+    {
       cell_marker->set(i, cm[i]);
+    }
     cm.clear();
   }
 }
@@ -807,7 +822,10 @@ void MPIMeshCommunicator::distributeCommon(
             }
           }
           // own vertex
-          else cl.push_back(distdata.get_vertex_local(glb_index));
+          else
+          {
+            cl.push_back(distdata.get_vertex_local(glb_index));
+          }
         }
 
         // Conserve function values
@@ -957,7 +975,9 @@ void MPIMeshCommunicator::distributeCommon(
       send_size -= recv_size;
 
       for (int k = 0; k < recv_size; k++)
+      {
         recv_source.push_back(status.MPI_SOURCE);
+      }
 
       send_buff.clear();
       send_buff_indices.clear();

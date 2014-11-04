@@ -15,57 +15,60 @@
 
 namespace dolfin
 {
-  class Mesh;
-  class MPI;
+class Mesh;
+class MPI;
 
-  /// The class facilitates the transfer of a mesh between processes using MPI
+/// The class facilitates the transfer of a mesh between processes using MPI
 
-  class MPIMeshCommunicator
-  {
-  public:
+class MPIMeshCommunicator
+{
+public:
 
-    /// Constructor
-    MPIMeshCommunicator();
+  /// Constructor
+  MPIMeshCommunicator();
 
-    /// Destructor
-    ~MPIMeshCommunicator();
+  /// Destructor
+  ~MPIMeshCommunicator();
 
-    /// Distribute mesh according to a mesh function
-    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution);
+  /// Distribute mesh according to a mesh function
+  static void distribute(Mesh& mesh, MeshFunction<uint>& distribution);
 
-    /// Distribute mesh according to mesh function and preserve cell markers
-    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-                           MeshFunction<bool>& old_cell_marker,
-                           MeshFunction<bool>& cell_marker);
+  /// Distribute mesh according to mesh function and preserve cell markers
+  static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
+                         MeshFunction<bool>& old_cell_marker,
+                         MeshFunction<bool>& cell_marker);
 
-    /// Distribute mesh according to mesh function and preserve cell-based functions
-    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-                           Array< std::pair< MeshFunction<uint> *,
-                           MeshFunction<uint> * > >& cell_functions);
+  /// Distribute mesh according to mesh function and preserve cell-based functions
+  static void distribute(
+      Mesh& mesh,
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
 
-    /// Distribute mesh according to mesh function and preserve vertex-based functions
-    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions);
+  /// Distribute mesh according to mesh function and preserve vertex-based functions
+  static void distribute(
+      Mesh& mesh,
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
-    /// Distribute mesh according to mesh function and preserve cell- and vertex-
-    /// based functions
-    static void distribute(Mesh& mesh, MeshFunction<uint>& distribution,
-                           Array< std::pair< MeshFunction<uint> *,
-                           MeshFunction<uint> * > >& cell_functions,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions);
-  private:
-    static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
-                                 MeshFunction<bool> *old_cell_marker,
-                                 MeshFunction<bool> *cell_marker);
+  /// Distribute mesh according to mesh function and preserve cell- and vertex-
+  /// based functions
+  static void distribute(
+      Mesh& mesh,
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+private:
+  static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
+                               MeshFunction<bool> *old_cell_marker,
+                               MeshFunction<bool> *cell_marker);
 
-    static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
-                                 Array< std::pair< MeshFunction<uint> *,
-                                 MeshFunction<uint> * > > *cell_functions,
-                                 Array< std::pair< MeshFunction<double> *,
-                                 MeshFunction<double> * > > *vertex_functions);
-  };
+  static void distributeCommon(
+      Mesh& mesh,
+      MeshFunction<uint>& distribution,
+      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> > *cell_functions,
+      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > *vertex_functions);
+};
+
 }
 
 #endif

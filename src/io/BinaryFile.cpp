@@ -29,14 +29,16 @@ namespace dolfin
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile(filename),
-    t_(0)
+    t_(0),
+    version_(0)
 {
   type = "Binary";
 }
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real &t) :
     GenericFile(filename),
-    t_(&t)
+    t_(&t),
+    version_(0)
 {
   type = "Binary";
 }
@@ -632,7 +634,8 @@ void BinaryFile::operator>>(Mesh& mesh)
         all_vertices.begin(), all_vertices.end(), owned_vertices.begin(),
         owned_vertices.end(),
         std::inserter(orphaned_vertices, orphaned_vertices.end()));
-    uint const num_local_vertices = all_vertices.size() + ghosted_entities.size();
+    uint const num_local_vertices = all_vertices.size()
+        + ghosted_entities.size();
 
     // Open mesh for editing
     MeshEditor editor(mesh, ctype, gdim);
@@ -754,7 +757,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     for (std::vector<atomic_cell>::iterator it = cells.begin();
         it != cells.end(); ++local_cell_index, ++it)
     {
-      for(uint n = 0; n < it->size; ++n)
+      for (uint n = 0; n < it->size; ++n)
       {
         connectivity[n] = distdata.get_vertex_local(it->v[n]);
       }
@@ -997,7 +1000,9 @@ template<typename T>
       byte_offset += sizeof(uint);
 
       for (CellIterator c(mesh); !c.end(); ++c)
+      {
         *(vp++) = (real) meshfunction.get(c->index());
+      }
 
       local_size = mesh.numCells();
     }
@@ -1009,13 +1014,20 @@ template<typename T>
       byte_offset += sizeof(uint);
 
       for (VertexIterator v(mesh); !v.end(); ++v)
-        if (!mesh.distdata().is_ghost(v->index(), 0)) *(vp++) =
-            (real) meshfunction.get(v->index());
+      {
+        if (!mesh.distdata().is_ghost(v->index(), 0))
+        {
+          *(vp++) = (real) meshfunction.get(v->index());
+        }
+      }
 
-      local_size = mesh.numVertices() - mesh.distdata().num_ghost(0);
+      local_size = mesh.topology().num_owned(0);
     }
-    else error(
-        "Binary output of mesh functions is implemented for cell/vertex-based functions only.");
+    else
+    {
+      error("Binary output of mesh functions is implemented "
+            "for cell/vertex-based functions only.");
+    }
 
     uint offset = 0;
 #if ( MPI_VERSION > 1 )
@@ -1092,8 +1104,10 @@ template<typename T>
     byte_offset += sizeof(uint);
 
     if ((mfunc_type == 0 && meshfunction.dim() != mesh.topology().dim())
-        || (mfunc_type == 1 && meshfunction.dim() != 0)) error(
-        "Meshfunction does not match data in file");
+        || (mfunc_type == 1 && meshfunction.dim() != 0))
+    {
+      error("Meshfunction does not match data in file");
+    }
 
     uint local_size = (
         mfunc_type > 0 ?

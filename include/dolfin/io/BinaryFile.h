@@ -16,7 +16,9 @@
 #include <cstring>
 #include <list>
 
-#define BINARY_MAGIC 0xBABE
+#define BINARY_MAGIC_V1 0xBABE
+#define BINARY_MAGIC_V2 0xB4B3
+#define BINARY_MAGIC    BINARY_MAGIC_V2
 #define FNAME_LENGTH 256
 
 namespace dolfin
@@ -124,8 +126,10 @@ private:
 
   void hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size);
 
-  ///
+  /// Returns binary file cell type identifier for given DOLFIN cell type
   uint cell_type(CellType::Type const type);
+
+  /// Returns DOLFIN cell type for given binary file cell type identifier
   CellType::Type cell_type(uint const type);
 
   // Function filename
@@ -133,6 +137,9 @@ private:
 
   // Current time
   real* t_;
+
+  // Version number of the binary file
+  uint version_;
 
 };
 
@@ -148,9 +155,19 @@ inline uint BinaryFile::vertex_owner(uint L, uint R, uint i)
 inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
                                   uint pe_size)
 {
-  if (hdr.magic != BINARY_MAGIC)
+  if (hdr.magic == BINARY_MAGIC_V2)
   {
-    error("Corrupt header");
+    message(1, "Loading Binary File format version 2");
+    version_ = 2;
+  }
+  else if (hdr.magic == BINARY_MAGIC_V1)
+  {
+    message(1, "Loading Binary File format version 1");
+    version_ = 1;
+  }
+  else
+  {
+    error("Corrupt header: invalid magic number");
   }
 
 #ifdef HAVE_BIG_ENDIAN
@@ -181,22 +198,44 @@ inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
 //-----------------------------------------------------------------------------
 inline uint BinaryFile::cell_type(CellType::Type const type)
 {
-  switch (type)
+  switch (version_)
     {
-    case CellType::point:
-      return 0;
+    case 2:
+      switch (type)
+        {
+        case CellType::point:
+          return 0;
+          break;
+        case CellType::interval:
+          return 1;
+          break;
+        case CellType::triangle:
+          return 2;
+          break;
+        case CellType::tetrahedron:
+          return 3;
+          break;
+        default:
+          error("Unsupported mesh cell type in BinaryFile V2.");
+          break;
+        }
       break;
-    case CellType::interval:
-      return 1;
-      break;
-    case CellType::triangle:
-      return 2;
-      break;
-    case CellType::tetrahedron:
-      return 3;
+    case 1:
+      switch (type)
+        {
+        case CellType::triangle:
+          return 0;
+          break;
+        case CellType::tetrahedron:
+          return 1;
+          break;
+        default:
+          error("Unsupported mesh cell type in BinaryFile V1.");
+          break;
+        }
       break;
     default:
-      error("Unsupported mesh cell type in BinaryFile.");
+      error("Invalid version compatibility number for cell type detection.");
       break;
     }
   return 0;
@@ -205,22 +244,44 @@ inline uint BinaryFile::cell_type(CellType::Type const type)
 //-----------------------------------------------------------------------------
 inline CellType::Type BinaryFile::cell_type(uint const type)
 {
-  switch (type)
+  switch (version_)
     {
-    case 0:
-      return CellType::point;
+    case 2:
+      switch (type)
+        {
+        case 0:
+          return CellType::point;
+          break;
+        case 1:
+          return CellType::interval;
+          break;
+        case 2:
+          return CellType::triangle;
+          break;
+        case 3:
+          return CellType::tetrahedron;
+          break;
+        default:
+          error("Unsupported binary cell type in BinaryFile V2.");
+          break;
+        }
       break;
     case 1:
-      return CellType::interval;
-      break;
-    case 2:
-      return CellType::triangle;
-      break;
-    case 3:
-      return CellType::tetrahedron;
+      switch (type)
+        {
+        case 0:
+          return CellType::triangle;
+          break;
+        case 1:
+          return CellType::tetrahedron;
+          break;
+        default:
+          error("Unsupported binary cell type in BinaryFile V1.");
+          break;
+        }
       break;
     default:
-      error("Unsupported binary cell type in BinaryFile.");
+      error("Invalid version compatibility number for cell type detection.");
       break;
     }
   return CellType::point;

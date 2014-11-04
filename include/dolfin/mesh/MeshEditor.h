@@ -38,13 +38,13 @@ public:
   /// Specify number of cells
   void initCells(uint num_cells);
 
-  /// Add vertex v at given point p
+  /// Add vertex v at given point p [TODO: Deprecate]
   void addVertex(uint v, Point const& p);
 
   /// Add vertex v at given coordinates x
   void addVertex(uint v, real const * x);
 
-  /// Add cell with given vertices
+  /// Add cell with given vertices [TODO: Deprecate]
   void addCell(uint c, Array<uint> const& v);
 
   /// Add cell with given vertices

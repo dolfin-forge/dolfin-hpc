@@ -464,14 +464,15 @@ Array<ufc::dofmap const *> const& DofMap::flatten() const
 
 //-----------------------------------------------------------------------------
 void DofMap::flatten(ufc::dofmap const * dofmap,
-                     Array<ufc::dofmap const *>& stack) const
+                     Array<ufc::dofmap const *>& stack, uint maxlevel) const
 {
-  // Single root dofmap
-  if (dofmap->num_sub_dofmaps() == 0)
+  // Single root element or max level is set to zero, return immediately
+  if (dofmap->num_sub_dofmaps() == 0 || maxlevel == 0)
   {
     stack.push_back(dofmap->create());
     return;
   }
+  // Go one level down
   for (uint s = 0; s < dofmap->num_sub_dofmaps(); ++s)
   {
     ufc::dofmap const * sub = dofmap->create_sub_dofmap(s);
@@ -483,7 +484,7 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
     else
     {
       // Branch
-      flatten(sub, stack);
+      flatten(sub, stack, maxlevel - 1);
     }
   }
 }

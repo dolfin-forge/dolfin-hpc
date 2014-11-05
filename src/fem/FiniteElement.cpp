@@ -217,14 +217,16 @@ Array<ufc::finite_element const *> const& FiniteElement::flatten() const
 
 //-----------------------------------------------------------------------------
 void FiniteElement::flatten(ufc::finite_element const * element,
-                            Array<ufc::finite_element const *>& stack) const
+                            Array<ufc::finite_element const *>& stack,
+                            uint maxlevel) const
 {
-  // Single root element
-  if (element->num_sub_elements() == 0)
+  // Single root element or max level is set to zero, return immediately
+  if (element->num_sub_elements() == 0 || maxlevel == 0)
   {
     stack.push_back(element->create());
     return;
   }
+  // Go one level down
   for (uint s = 0; s < element->num_sub_elements(); ++s)
   {
     ufc::finite_element const * sub = element->create_sub_element(s);
@@ -236,7 +238,7 @@ void FiniteElement::flatten(ufc::finite_element const * element,
     else
     {
       // Branch
-      flatten(sub, stack);
+      flatten(sub, stack, maxlevel - 1);
     }
   }
 }

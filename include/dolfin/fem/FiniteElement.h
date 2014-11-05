@@ -202,7 +202,7 @@ public:
 
   /// Create flatten representation finite element (append sub elements)
   void flatten(ufc::finite_element const * element,
-               Array<ufc::finite_element const *>& stack) const;
+               Array<ufc::finite_element const *>& stack, uint maxlevel = -1) const;
 
   //---
 

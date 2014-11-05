@@ -83,10 +83,13 @@ public:
 
   //--- Instantiation using the dofmap cache
 
+  /// Acquire dofmap from cache for i-th function of the form.
   static DofMap& acquire(Mesh& mesh, Form const& form, uint const i);
 
+  /// Acquire dofmap from cache for the given UFC dofmap.
   static DofMap& acquire(Mesh& mesh, ufc::dofmap& dofmap, bool owner);
 
+  /// Release a token for the given dofmap
   static void release(DofMap& dofmap);
 
   //--- INTERFACE -------------------------------------------------------------
@@ -205,7 +208,7 @@ public:
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
   void flatten(ufc::dofmap const * dofmap,
-               Array<ufc::dofmap const *>& stack) const;
+               Array<ufc::dofmap const *>& stack, uint maxlevel = -1) const;
 
   /// Unique identifier
   std::string const& hash() const;

@@ -16,11 +16,25 @@
 namespace dolfin
 {
 
-/// This class represents the affine map from the reference element to
-/// the current element.
+/// This class represents the affine map from regular simplices to the current
+/// element.
 ///
-/// The 2D reference element is given by (0,0)-(1,0)-(0,1).
-/// The 3D reference element is given by (0,0,0)-(1,0,0)-(0,1,0)-(0,0,1).
+/// In 2D, the equilateral triangle is given by:
+///
+///   {
+///     ( 0         , 0   ),
+///     ( sqrt(3)/2 , 0.5 ),
+///     ( 0         , 1   )
+///   }
+///
+/// In 3D, the regular tetrahedron is given by:
+///
+///   {
+///     ( 0         , 0   , 0         ),
+///     ( sqrt(3)/2 , 0.5 , 0         ),
+///     ( 0         , 1   , 0         ),
+///     ( sqrt(3)/6 , 0.5 , sqrt(2/3) )
+///   }
 ///
 /// The dimension d of the map is automatically determined from the
 /// arguments used when calling the map.

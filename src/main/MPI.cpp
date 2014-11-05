@@ -20,7 +20,8 @@
 #ifdef HAVE_MPI
 dolfin::uint dolfin::MPI::processNumber()
 {
-  if(!_this_process) {
+  if (!_this_process)
+  {
     SubSystemsManager::initMPI();
     initComm();
     MPI_Comm_rank(MPI::DOLFIN_COMM, &this_process);
@@ -32,7 +33,8 @@ dolfin::uint dolfin::MPI::processNumber()
 //-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::numProcesses()
 {
-  if(!_num_processes) {
+  if (!_num_processes)
+  {
     SubSystemsManager::initMPI();
     initComm();
     MPI_Comm_size(MPI::DOLFIN_COMM, &num_processes);
@@ -68,8 +70,7 @@ dolfin::real dolfin::MPI::stopTimer(real& stime)
 //-----------------------------------------------------------------------------
 void dolfin::MPI::initComm()
 {
-  if(_dolfin_comm)
-    return;
+  if (_dolfin_comm) return;
 
   MPI_Comm_dup(MPI_COMM_WORLD, &DOLFIN_COMM);
   _dolfin_comm = true;
@@ -95,10 +96,10 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   for (uint i = 1; i < numProcesses(); i++)
   {
     src = (processNumber() - i + numProcesses()) % numProcesses();
-    dest = (processNumber() + i ) % numProcesses();
+    dest = (processNumber() + i) % numProcesses();
 
-    MPI_Sendrecv(&neigh[dest], 1, MPI_SHORT, dest, 0,
-		 &recv, 1, MPI_SHORT, src, 0,  DOLFIN_COMM, &status);
+    MPI_Sendrecv(&neigh[dest], 1, MPI_SHORT, dest, 0, &recv, 1, MPI_SHORT, src,
+                 0, DOLFIN_COMM, &status);
     neigh[src] |= recv;
   }
 
@@ -114,14 +115,13 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   int *edges = new int[nedges];
 
   int j = (int) (processNumber() > 0 ? index[processNumber() - 1] : 0);
-  for(int i = 0; i < nnodes; i++)
+  for (int i = 0; i < nnodes; i++)
   {
-    if (neigh[i])
-      edges[j++] = i ;
-    if( j >= index[processNumber()] ) break;
+    if (neigh[i]) edges[j++] = i;
+    if (j >= index[processNumber()]) break;
   }
 
-  int *displs =  new int[nnodes];
+  int *displs = new int[nnodes];
   offset -= degree;
   MPI_Allgather(&offset, 1, MPI_INT, displs, 1, MPI_INT, DOLFIN_COMM);
 
@@ -131,15 +131,12 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
     recvcount[i] = index[i] - index[i - 1];
 
   MPI_Allgatherv(&edges[(processNumber() > 0 ? index[processNumber() - 1] : 0)],
-		 recvcount[processNumber()], MPI_INT,
-		 edges, recvcount, displs, MPI_INT, DOLFIN_COMM);
+                 recvcount[processNumber()], MPI_INT, edges, recvcount, displs,
+                 MPI_INT, DOLFIN_COMM);
 
   MPI_Comm TMP_COMM;
-  if(_dolfin_comm)
-    MPI_Comm_dup(DOLFIN_COMM, &TMP_COMM);
-  else
-    MPI_Comm_dup(MPI_COMM_WORLD, &TMP_COMM);
-
+  if (_dolfin_comm) MPI_Comm_dup(DOLFIN_COMM, &TMP_COMM);
+  else MPI_Comm_dup(MPI_COMM_WORLD, &TMP_COMM);
 
   MPI_Graph_create(TMP_COMM, nnodes, index, edges, 1, &DOLFIN_COMM);
 
@@ -155,22 +152,21 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
 
   int *process_map = new int[nnodes];
   process_map[old_rank] = this_process;
-  MPI_Allgather(&process_map[old_rank], 1, MPI_INT,process_map , 1, MPI_INT, TMP_COMM);
+  MPI_Allgather(&process_map[old_rank], 1, MPI_INT, process_map, 1, MPI_INT,
+                TMP_COMM);
 
   for (int i = 0; i < nnodes; i++)
   {
     if (process_map[i] != i)
     {
       message("Communicator changed, rebuilding mesh structure");
-      mesh.distdata().remap_owner(process_map);
+      mesh.distdata().remap_ownership(process_map);
       break;
     }
   }
   delete[] process_map;
 
   MPI_Comm_free(&TMP_COMM);
-
-
 
 }
 //-----------------------------------------------------------------------------

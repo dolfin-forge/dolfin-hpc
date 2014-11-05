@@ -235,7 +235,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 
   // Handle differently depending on geometric dimension
   // Handle differently depending on geometric dimension
-  real x[Point::max_size];
+  real x[Point::MAX_SIZE];
   switch (mesh_.geometry().dim())
     {
     case 3:

@@ -30,7 +30,7 @@ namespace dolfin
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile(filename),
     t_(0),
-    version_(0)
+    version_(2)
 {
   type = "Binary";
 }
@@ -38,7 +38,7 @@ BinaryFile::BinaryFile(const std::string filename) :
 BinaryFile::BinaryFile(const std::string filename, real &t) :
     GenericFile(filename),
     t_(&t),
-    version_(0)
+    version_(2)
 {
   type = "Binary";
 }

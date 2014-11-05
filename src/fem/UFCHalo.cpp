@@ -87,7 +87,7 @@ void UFCHalo::init()
   u_packet_size_ = 1 + dofs_data_size;
 
   // Allocate data structures
-  _set<uint> const& adj = distdata.get_adj(facet_dim);
+  _set<uint> const& adj = distdata.get_adj_ranks(facet_dim);
   uint const num_shared_facets = distdata.num_shared(facet_dim);
   uint const num_ghost_facets = distdata.num_ghost(facet_dim);
 

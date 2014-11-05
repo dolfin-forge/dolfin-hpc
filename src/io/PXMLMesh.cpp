@@ -298,7 +298,7 @@ void PXMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   mesh_.distdata().set_map(numParsedVertices_, v, 0);
 
   // Handle differently depending on geometric dimension
-  real x[Point::max_size];
+  real x[Point::MAX_SIZE];
   switch (mesh_.geometry().dim())
     {
     case 3:
@@ -458,18 +458,22 @@ void PXMLMesh::readMeshFunction(const xmlChar* name, const xmlChar** attrs)
   // Parse values
   const std::string id = parseString(name, attrs, "name");
   const std::string type = parseString(name, attrs, "type");
-  const uint dim = parseUnsignedInt(name, attrs, "dim");
-  const uint size = parseUnsignedInt(name, attrs, "size");
+  uint const dim = parseUnsignedInt(name, attrs, "dim");
+  uint const size = parseUnsignedInt(name, attrs, "size");
 
   // Only uint supported at this point
-  if (strcmp(type.c_str(), "uint") != 0) error(
-      "Only uint-valued mesh data is currently supported.");
+  if (strcmp(type.c_str(), "uint") != 0)
+  {
+    error("Only uint-valued mesh data is currently supported.");
+  }
 
   // Check size
   mesh_.init(dim);
-  if (mesh_.size(dim) != size) error(
-      "Wrong number of values for MeshFunction, expecting %d.",
-      mesh_.size(dim));
+  if (mesh_.size(dim) != size)
+  {
+    error("Wrong number of values for MeshFunction, expecting %d.",
+          mesh_.size(dim));
+  }
 
   // Register data
   f_ = mesh_.data().createMeshFunction(id);
@@ -479,16 +483,19 @@ void PXMLMesh::readMeshFunction(const xmlChar* name, const xmlChar** attrs)
   // Set all values to zero
   *f_ = 0;
 }
+//-----------------------------------------------------------------------------
 void PXMLMesh::readArray(const xmlChar* name, const xmlChar** attrs)
 {
   // Parse values
   const std::string id = parseString(name, attrs, "name");
   const std::string type = parseString(name, attrs, "type");
-  const uint size = parseUnsignedInt(name, attrs, "size");
+  uint const size = parseUnsignedInt(name, attrs, "size");
 
   // Only uint supported at this point
-  if (strcmp(type.c_str(), "uint") != 0) error(
-      "Only uint-valued mesh data is currently supported.");
+  if (strcmp(type.c_str(), "uint") != 0)
+  {
+    error("Only uint-valued mesh data is currently supported.");
+  }
 
   // Register data
   a_ = mesh_.data().createArray(id, size);
@@ -498,24 +505,24 @@ void PXMLMesh::readArray(const xmlChar* name, const xmlChar** attrs)
 void PXMLMesh::readMeshEntity(const xmlChar* name, const xmlChar** attrs)
 {
   // Read index
-  const uint index = parseUnsignedInt(name, attrs, "index");
+  uint const index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
   dolfin_assert(f_);
   dolfin_assert(index < f_->size());
-  const uint value = parseUnsignedInt(name, attrs, "value");
+  uint const value = parseUnsignedInt(name, attrs, "value");
   f_->set(index, value);
 }
 //-----------------------------------------------------------------------------
 void PXMLMesh::readArrayElement(const xmlChar* name, const xmlChar** attrs)
 {
   // Read index
-  const uint index = parseUnsignedInt(name, attrs, "index");
+  uint const index = parseUnsignedInt(name, attrs, "index");
 
   // Read and set value
   dolfin_assert(a_);
   dolfin_assert(index < a_->size());
-  const uint value = parseUnsignedInt(name, attrs, "value");
+  uint const value = parseUnsignedInt(name, attrs, "value");
   (*a_)[index] = value;
 }
 //-----------------------------------------------------------------------------
@@ -639,7 +646,10 @@ void PXMLMesh::closeMesh()
     {
       editor_->addVertex(v, vertex->point());
       new_mesh.distdata().set_map(v, mesh_.distdata().get_global(*vertex), 0);
-      if (ghost_vertex[vertex->index()]) new_mesh.distdata().set_shared(v, 0);
+      if (ghost_vertex[vertex->index()])
+      {
+        new_mesh.distdata().set_shared(v, 0);
+      }
       v++;
     }
   }

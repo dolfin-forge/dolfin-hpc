@@ -63,7 +63,7 @@ private:
   void updateTetrahedron(Cell& cell);
 
   //
-  static uint const d_ = Point::max_size;
+  static uint const d_ = Point::MAX_SIZE;
   uint const gdim_;
 
   // Vertices of current cell

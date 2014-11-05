@@ -184,6 +184,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/DVertex.h\
 				mesh/Edge.h\
 				mesh/EquiAffineMapping.h \
+				mesh/EuclideanSpace.h \
 				mesh/Face.h\
 				mesh/Facet.h\
 				mesh/GeometricPredicates.h\

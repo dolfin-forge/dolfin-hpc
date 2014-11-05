@@ -5,6 +5,8 @@
 #define __MESH_RENUMBER_H
 
 #include <dolfin/common/Array.h>
+#include <dolfin/config/dolfin_config.h>
+
 #include <set>
 
 namespace dolfin
@@ -44,6 +46,7 @@ public:
 
 private:
 
+#ifdef HAVE_MPI
   /// An edge contains a pair of vertices
   typedef std::pair<uint, uint> EdgeKey;
 
@@ -59,6 +62,7 @@ private:
   static void send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f);
 
   static void remap_shared_entities(Mesh& mesh, uint const dim);
+#endif
 
 };
 

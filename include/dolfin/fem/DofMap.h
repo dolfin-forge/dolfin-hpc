@@ -289,6 +289,9 @@ private:
   mutable Array<ufc::dofmap const *> flattened_;
 
   //
+  uint num_leaf_spaces_;
+
+  //
   uint local_size_;
 
   // Vertex ordering map used for tabulation of vector Lagrange P1
@@ -301,7 +304,7 @@ private:
   // Provide easy access to map for testing
   std::map<uint, uint> map_;
 
-  // Set of ghosts used for debugging
+  // Set of ghost dofs
   _set<uint> ghosts_;
 
 };

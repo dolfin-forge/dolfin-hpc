@@ -263,7 +263,7 @@ void Mesh::order()
   }
 }
 //-----------------------------------------------------------------------------
-bool Mesh::ordered() const
+bool Mesh::is_ordered() const
 {
   return topology_.is_ordered();
 }

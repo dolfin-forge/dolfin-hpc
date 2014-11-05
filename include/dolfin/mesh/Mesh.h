@@ -192,7 +192,7 @@ public:
   void order();
 
   /// Return true iff topology is ordered according to the UFC numbering
-  bool ordered() const;
+  bool is_ordered() const;
 
   /// Refine mesh uniformly
   void refine();
@@ -269,6 +269,7 @@ public:
       Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
 
   /// Return whether the mesh is distributed
+  /// The mesh is distributed iff the topology is distributed
   bool is_distributed() const;
 
   /// Renumber mesh global numbering
@@ -409,7 +410,7 @@ inline const CellType& Mesh::type() const
 //-----------------------------------------------------------------------------
 inline bool Mesh::is_distributed() const
 {
-  return !topology().distdata().empty();
+  return topology().is_distributed();
 }
 
 }

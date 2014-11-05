@@ -8,6 +8,7 @@
 #define __GAUSS_QUADRATURE_RULE_H
 
 #include <dolfin/quadrature/QuadratureRule.h>
+#include <dolfin/quadrature/GaussQuadrature.h>
 
 #include <dolfin/config/dolfin_config.h>
 

@@ -1,8 +1,10 @@
 // Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2014.
+//
 // First  added: 2009
-// Last changed: 2012-06-12
+// Last changed: 2014-11-05
 
 #ifndef __BINARY_FILE_H
 #define __BINARY_FILE_H

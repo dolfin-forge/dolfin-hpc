@@ -1,8 +1,10 @@
 // Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2014.
+//
 // First  added: 2009
-// Last changed: 2012-09-13
+// Last changed: 2014-11-05
 
 #include <dolfin/common/types.h>
 #include <dolfin/function/Function.h>
@@ -186,7 +188,7 @@ void BinaryFile::operator>>(Function & f)
     if (f_hdr.dim == f.value_size())
     {
 
-      uint size = f.value_size() * f.mesh().topology().num_owned(0);
+      uint size = f.value_size() * f.mesh().distdata().num_owned(0);
       real *values = new real[size];
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -253,7 +255,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
       error("Dimension of file and function set does not match");
     }
 
-    uint size = u->value_size() * u->mesh().topology().num_owned(0);
+    uint size = u->value_size() * u->mesh().distdata().num_owned(0);
     real *values = new real[size];
     MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
                          values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -322,11 +324,6 @@ void BinaryFile::write_function(
     Function* u = it->first;
 
     std::string& name = it->second;
-    const uint rank = u->rank();
-    if (rank > 1)
-    {
-      error("Only scalar and vectors functions can be saved in Binary.");
-    }
 
     // Get number of components
     uint const value_dim = u->value_size();
@@ -336,7 +333,7 @@ void BinaryFile::write_function(
     real *values = new real[size];
     uint offset = u->vector().offset();
 
-    if ((u->vector().local_size() / value_dim) != mesh.topology().num_owned(0))
+    if ((u->vector().local_size() / value_dim) != mesh.distdata().num_owned(0))
     {
       real *interp_values = new real[size];
 
@@ -357,7 +354,7 @@ void BinaryFile::write_function(
       delete[] interp_values;
 
       // Compute new vertex based offset
-      uint num_values = value_dim * mesh.topology().num_owned(0);
+      uint num_values = value_dim * mesh.distdata().num_owned(0);
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                  MPI::DOLFIN_COMM);
@@ -373,7 +370,7 @@ void BinaryFile::write_function(
       u->vector().get(values);
     }
 
-    size = value_dim * mesh.topology().num_owned(0);
+    size = value_dim * mesh.distdata().num_owned(0);
 
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = value_dim;
@@ -858,7 +855,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     // Write vertices
     uint vertex_offset = 0;
-    uint vertex_buffer_size = gdim * mesh.topology().num_owned(0);
+    uint vertex_buffer_size = gdim * mesh.distdata().num_owned(0);
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
@@ -1021,7 +1018,7 @@ template<typename T>
         }
       }
 
-      local_size = mesh.topology().num_owned(0);
+      local_size = mesh.distdata().num_owned(0);
     }
     else
     {

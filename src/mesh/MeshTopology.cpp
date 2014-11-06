@@ -8,6 +8,8 @@
 #include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshTopology.h>
 
+#include <ctime>
+
 namespace dolfin
 {
 

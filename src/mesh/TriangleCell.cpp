@@ -74,27 +74,26 @@ dolfin::uint TriangleCell::numVertices(uint dim) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint TriangleCell::orientation(const Cell& cell) const
+dolfin::uint TriangleCell::orientation(Cell const& cell) const
 {
-  // This is a trick to be allowed to initialize mesh entities from cell
-  Cell& c = const_cast<Cell&>(cell);
-
-  Vertex v0(c.mesh(), c.entities(0)[0]);
-  Vertex v1(c.mesh(), c.entities(0)[1]);
-  Vertex v2(c.mesh(), c.entities(0)[2]);
-
-  Point p01 = v1.point() - v0.point();
-  Point p02 = v2.point() - v0.point();
-  Point n(-p01.y(), p01.x());
-
-  return (n.dot(p02) < 0.0 ? 1 : 0);
+  uint const * entities = cell.entities(0);
+  MeshGeometry const& geometry = cell.mesh().geometry();
+  real const * v0 = geometry.x(entities[0]);
+  real const * v1 = geometry.x(entities[1]);
+  real const * v2 = geometry.x(entities[2]);
+  real const ret = - (v1[1] - v0[1])*(v2[0] - v0[0])
+                   + (v1[0] - v0[0])*(v2[1] - v0[1]);
+  return (ret < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
 void TriangleCell::createEntities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges
-  if (dim != 1) error(
-      "Don't know how to create entities of topological dimension %d.", dim);
+  if (dim != 1)
+  {
+    error("Don't know how to create entities of topological dimension %d.",
+          dim);
+  }
 
   // Create the three edges
   e[0][0] = v[1];
@@ -210,9 +209,9 @@ real TriangleCell::volume(const MeshEntity& triangle) const
 
   // Get the coordinates of the three vertices
   uint const* vertices = triangle.entities(0);
-  const real* x0 = geometry.x(vertices[0]);
-  const real* x1 = geometry.x(vertices[1]);
-  const real* x2 = geometry.x(vertices[2]);
+  real const* x0 = geometry.x(vertices[0]);
+  real const* x1 = geometry.x(vertices[1]);
+  real const* x2 = geometry.x(vertices[2]);
 
   if (geometry.dim() == 2)
   {
@@ -316,9 +315,9 @@ Point TriangleCell::normal(const Cell& cell, uint facet) const
   const MeshGeometry& geometry = cell.mesh().geometry();
 
   // Get the coordinates of the three vertices
-  const real* p0 = geometry.x(v0);
-  const real* p1 = geometry.x(v1);
-  const real* p2 = geometry.x(v2);
+  real const* p0 = geometry.x(v0);
+  real const* p1 = geometry.x(v1);
+  real const* p2 = geometry.x(v2);
 
   // Vector normal to facet
   Point n;
@@ -350,8 +349,8 @@ dolfin::real TriangleCell::facetArea(const Cell& cell, uint facet) const
   const MeshGeometry& geometry = cell.mesh().geometry();
 
   // Get the coordinates of the two vertices
-  const real* p0 = geometry.x(v0);
-  const real* p1 = geometry.x(v1);
+  real const* p0 = geometry.x(v0);
+  real const* p1 = geometry.x(v1);
 
   // Compute distance between vertices
   real d = 0.0;
@@ -386,9 +385,9 @@ bool TriangleCell::intersects(const MeshEntity& triangle, const Point& p) const
   }
 
   // Get the coordinates of the three vertices
-  const real* x0 = geometry.x(v0);
-  const real* x1 = geometry.x(v1);
-  const real* x2 = geometry.x(v2);
+  real const* x0 = geometry.x(v0);
+  real const* x1 = geometry.x(v1);
+  real const* x2 = geometry.x(v2);
 
   real xcoordinates[3];
   real* x = xcoordinates;
@@ -460,9 +459,9 @@ bool TriangleCell::intersects(const MeshEntity& tri, const Point& p1,
   }
 
   // Get the coordinates of the three vertices
-  const real* x0 = geometry.x(v0);
-  const real* x1 = geometry.x(v1);
-  const real* x2 = geometry.x(v2);
+  real const* x0 = geometry.x(v0);
+  real const* x1 = geometry.x(v1);
+  real const* x2 = geometry.x(v2);
 
   // point a
   real p1coordinates[3];

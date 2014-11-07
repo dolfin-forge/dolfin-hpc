@@ -4,10 +4,13 @@
 // First added:  2006-05-19
 // Last changed: 2006-10-19
 
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/MeshGeometry.h>
 
+#include <dolfin/common/constants.h>
+#include <dolfin/log/dolfin_log.h>
+
 #include <cstring>
+#include <ctime>
 
 namespace dolfin
 {
@@ -17,16 +20,16 @@ MeshGeometry::MeshGeometry() :
     dim_(0),
     size_(0),
     coordinates_(0),
-    timestamp_(time(0))
+    timestamp_(std::time(0))
 {
-  // Do nothing
+  std::memset(abs_tol_,0,sizeof(abs_tol_));
 }
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
     dim_(0),
     size_(0),
     coordinates_(0),
-    timestamp_(time(0))
+    timestamp_(std::time(0))
 {
   *this = geometry;
 }
@@ -44,13 +47,19 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& geometry)
   // Allocate data
   dim_ = geometry.dim_;
   size_ = geometry.size_;
-  const uint n = dim_ * size_;
+  uint const n = dim_ * size_;
   coordinates_ = new real[n];
 
   // Copy data
   for (uint i = 0; i < n; ++i)
   {
     coordinates_[i] = geometry.coordinates_[i];
+  }
+
+  // Copy tolerances
+  for (uint i = 0; i <= dim_; ++i)
+  {
+    abs_tol_[i] = geometry.abs_tol_[i];
   }
 
   timestamp_ = geometry.timestamp_;
@@ -60,15 +69,8 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& geometry)
 //-----------------------------------------------------------------------------
 Point MeshGeometry::point(uint n) const
 {
-  real _x = 0.0;
-  real _y = 0.0;
-  real _z = 0.0;
-
-  if (dim_ > 0) _x = x(n, 0);
-  if (dim_ > 1) _y = x(n, 1);
-  if (dim_ > 2) _z = x(n, 2);
-
-  Point p(_x, _y, _z);
+  Point p;
+  std::memcpy(&p[0], &coordinates_[n * dim_], dim_*sizeof(real));
   return p;
 }
 //-----------------------------------------------------------------------------
@@ -77,6 +79,7 @@ void MeshGeometry::clear()
   dim_ = 0;
   size_ = 0;
   delete[] coordinates_;
+  std::memset(abs_tol_,0,sizeof(abs_tol_));
   coordinates_ = NULL;
 }
 //-----------------------------------------------------------------------------
@@ -91,7 +94,20 @@ void MeshGeometry::init(uint gdim, uint size)
   // Save dimension and size
   dim_ = gdim;
   size_ = size;
-  timestamp_ = time(0);
+
+  // Initialize tolerances
+  for(uint i = 0; i <= dim_; ++i)
+  {
+    abs_tol_[i] = DOLFIN_EPS;
+  }
+
+  timestamp_ = std::time(0);
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::set_abs_tolerance(uint dim, real atol)
+{
+  dolfin_assert(dim <= dim_);
+  abs_tol_[dim] = std::fabs(atol);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::set(uint n, uint i, real x)

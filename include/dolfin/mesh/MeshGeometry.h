@@ -10,6 +10,7 @@
 #include "Point.h"
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 
 namespace dolfin
 {
@@ -40,6 +41,9 @@ public:
   /// Return number of coordinates
   uint size() const;
 
+  /// Return absolute geometric tolerance for given topological dimension
+  real abs_tolerance(uint dim) const;
+
   /// Return value of coordinate n in direction i
   real& x(uint n, uint i);
 
@@ -67,6 +71,10 @@ public:
   /// Initialize coordinate list to given geometrical dimension and size
   void init(uint gdim, uint size);
 
+  /// Set absolute geometric tolerance for given topological dimension
+  /// The absolute value of the parameter is set as tolerance.
+  void set_abs_tolerance(uint dim, real atol);
+
   /// Set value of coordinate n in direction i
   void set(uint n, uint i, real x);
 
@@ -87,6 +95,9 @@ private:
   // Number of coordinates
   uint size_;
 
+  // Absolute tolerances
+  real abs_tol_[EuclideanSpace::MAX_DIMENSION+1];
+
   // Coordinates for all vertices stored as a contiguous array
   real * coordinates_;
 
@@ -106,6 +117,13 @@ inline uint MeshGeometry::dim() const
 inline uint MeshGeometry::size() const
 {
   return size_;
+}
+
+//-----------------------------------------------------------------------------
+inline real MeshGeometry::abs_tolerance(uint dim) const
+{
+  dolfin_assert(dim <= dim_);
+  return abs_tol_[dim];
 }
 
 //-----------------------------------------------------------------------------

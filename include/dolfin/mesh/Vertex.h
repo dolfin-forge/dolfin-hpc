@@ -30,16 +30,16 @@ namespace dolfin
     ~Vertex() {}
 
     /// Return value of vertex coordinate i
-    inline real x(uint i) const { return _mesh.geometry().x(_index, i); }
+    inline real x(uint i) const { return mesh_.geometry().x(index_, i); }
 
     /// Return vertex coordinates as a 3D point value
-    inline Point point() const { return _mesh.geometry().point(_index); }
+    inline Point point() const { return mesh_.geometry().point(index_); }
 
     /// Return array of vertex coordinates
-    inline real* x() { return _mesh.geometry().x(_index); }
+    inline real* x() { return mesh_.geometry().x(index_); }
 
     /// Return array of vertex coordinates
-    inline const real* x() const { return _mesh.geometry().x(_index); }
+    inline const real* x() const { return mesh_.geometry().x(index_); }
     
   };
 

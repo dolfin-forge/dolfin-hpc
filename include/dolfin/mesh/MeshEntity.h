@@ -9,75 +9,119 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
 
-  /// A MeshEntity represents a mesh entity associated with
-  /// a specific topological dimension of some mesh.
+/// A MeshEntity represents a mesh entity associated with
+/// a specific topological dimension of some mesh.
 
-  class MeshEntity
-  {
-  public:
+class MeshEntity
+{
+public:
 
-    /// Constructor
-    MeshEntity(Mesh& mesh, uint dim, uint index) : _mesh(mesh), _dim(dim), _index(index) {}
+  /// Constructor
+  MeshEntity(Mesh& mesh, uint dim, uint index);
 
-    /// Destructor
-    ~MeshEntity() {}
+  /// Destructor
+  ~MeshEntity();
 
-    /// Return mesh associated with mesh entity
-    inline Mesh& mesh() { return _mesh; }
+  /// Return mesh associated with mesh entity
+  Mesh& mesh();
 
-    /// Return mesh associated with mesh entity
-    inline const Mesh& mesh() const { return _mesh; }
+  /// Return mesh associated with mesh entity
+  Mesh const& mesh() const;
 
-    /// Return topological dimension
-    inline uint dim() const { return _dim; }
+  /// Return topological dimension
+  uint dim() const;
 
-    /// Return index of mesh entity
-    inline uint index() const { return _index; }
+  /// Return index of mesh entity
+  uint index() const;
 
-    /// Return number of incident mesh entities of given topological dimension
-    inline uint numEntities(uint dim) const { return _mesh.topology()(_dim, dim).size(_index); }
+  /// Return number of incident mesh entities of given topological dimension
+  uint numEntities(uint dim) const;
 
-    /// Return array of indices for incident mesh entitites of given topological dimension
-    inline uint* entities(uint dim) { return _mesh.topology()(_dim, dim)(_index); }
+  /// Return array of indices for incident mesh entities of given topological dimension
+  uint * entities(uint dim);
 
-    /// Return array of indices for incident mesh entitites of given topological dimension
-    inline const uint* entities(uint dim) const { return _mesh.topology()(_dim, dim)(_index); }
+  /// Return array of indices for incident mesh entities of given topological dimension
+  uint const * entities(uint dim) const;
 
-    /// Check if given entity is incident
-    bool incident(const MeshEntity& entity) const;
+  /// Check if given entity is incident
+  bool incident(MeshEntity const& entity) const;
 
-    /// Compute local index of given incident entity (error if not found)
-    uint index(const MeshEntity& entity) const;
+  /// Compute local index of given incident entity (error if not found)
+  uint index(MeshEntity const& entity) const;
 
-    ///
-    bool is_shared() const;
+  /// Return if the mesh entity is shared
+  bool is_shared() const;
 
-    ///
-    bool is_ghost() const;
+  /// Return if the mesh entity is ghosted
+  bool is_ghost() const;
 
-    /// Output
-    friend LogStream& operator<< (LogStream& stream, const MeshEntity& entity);
+  /// Output
+  friend LogStream& operator<<(LogStream& stream, MeshEntity const& entity);
 
-  protected:
+protected:
 
-    // Friends
-    friend class MeshEntityIterator;
+  // Friends
+  friend class MeshEntityIterator;
 
-    // The mesh
-    Mesh& _mesh;
+  // The mesh
+  Mesh& mesh_;
 
-    // Topological dimension
-    uint _dim;
+  // Topological dimension
+  uint const dim_;
 
-    // Index of entity within topological dimension
-    uint _index;
+  // Index of entity within topological dimension
+  uint index_;
 
-  };
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline Mesh& MeshEntity::mesh()
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline Mesh const& MeshEntity::mesh() const
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshEntity::dim() const
+{
+  return dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshEntity::index() const
+{
+  return index_;
+}
+
+//-----------------------------------------------------------------------------
+inline uint MeshEntity::numEntities(uint dim) const
+{
+  return mesh_.topology()(dim_, dim).size(index_);
+}
+
+//-----------------------------------------------------------------------------
+inline uint * MeshEntity::entities(uint dim)
+{
+  return mesh_.topology()(dim_, dim)(index_);
+}
+
+//-----------------------------------------------------------------------------
+inline uint const * MeshEntity::entities(uint dim) const
+{
+  return mesh_.topology()(dim_, dim)(index_);
+}
 
 }
 

@@ -4,45 +4,62 @@
 // First added:  2006-05-11
 // Last changed: 2006-10-20
 
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/MeshEntity.h>
 
-using namespace dolfin;
+#include <dolfin/log/dolfin_log.h>
 
+namespace dolfin
+{
+
+//-----------------------------------------------------------------------------
+MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
+    mesh_(mesh),
+    dim_(dim),
+    index_(index)
+{
+}
+//-----------------------------------------------------------------------------
+MeshEntity::~MeshEntity()
+{
+}
 //-----------------------------------------------------------------------------
 bool MeshEntity::incident(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
-  if ( &_mesh != &entity._mesh )
-    return false;
+  if (&mesh_ != &entity.mesh_) return false;
 
   // Get list of entities for given topological dimension
-  const uint* entities = _mesh.topology()(_dim, entity._dim)(_index);
-  const uint num_entities = _mesh.topology()(_dim, entity._dim).size(_index);
+  uint const * entities = mesh_.topology()(dim_, entity.dim_)(index_);
+  uint const num_entities = mesh_.topology()(dim_, entity.dim_).size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
-    if ( entities[i] == entity._index )
-      return true;
+  {
+    if (entities[i] == entity.index_) return true;
+  }
 
   // Entity was not found
   return false;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint MeshEntity::index(MeshEntity const& entity) const
+uint MeshEntity::index(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
-  if ( &_mesh != &entity._mesh )
-    error("Unable to compute index of given entity defined on a different mesh.");
+  if (&mesh_ != &entity.mesh_)
+  {
+    error("Unable to compute index of given entity defined on a different "
+          "mesh.");
+  }
 
   // Get list of entities for given topological dimension
-  const uint* entities = _mesh.topology()(_dim, entity._dim)(_index);
-  const uint num_entities = _mesh.topology()(_dim, entity._dim).size(_index);
+  uint const * entities = mesh_.topology()(dim_, entity.dim_)(index_);
+  uint const num_entities = mesh_.topology()(dim_, entity.dim_).size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
-    if ( entities[i] == entity._index )
-      return i;
+  {
+    if (entities[i] == entity.index_) return i;
+  }
 
   // Entity was not found
   error("Unable to compute index of given entity (not found).");
@@ -52,19 +69,20 @@ dolfin::uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return _mesh.distdata().is_shared(_index, _dim);
+  return mesh_.distdata().is_shared(index_, dim_);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return _mesh.distdata().is_ghost(_index, _dim);
+  return mesh_.distdata().is_ghost(index_, dim_);
 }
 //-----------------------------------------------------------------------------
-dolfin::LogStream& dolfin::operator<< (LogStream& stream,
-				       const MeshEntity& entity)
+LogStream& operator<<(LogStream& stream, MeshEntity const& entity)
 {
-  stream << "[ Mesh entity " << entity.index()
-	 << " of topological dimension " << entity.dim() << " ]";
+  stream << "[ Mesh entity " << entity.index() << " of topological dimension "
+         << entity.dim() << " ]";
   return stream;
 }
 //-----------------------------------------------------------------------------
+
+}

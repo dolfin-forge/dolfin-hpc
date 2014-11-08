@@ -74,7 +74,7 @@ uint TetrahedronCell::numVertices(uint dim) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint TetrahedronCell::orientation(const Cell& cell) const
+uint TetrahedronCell::orientation(Cell const& cell) const
 {
   // Check that we get a tetrahedron
   dolfin_assert(cell.dim() == 3);
@@ -572,12 +572,12 @@ real TetrahedronCell::circumradius(MeshEntity const& tetrahedron) const
   return area / (6.0 * V);
 }
 //-----------------------------------------------------------------------------
-real TetrahedronCell::normal(const Cell& cell, uint facet, uint i) const
+real TetrahedronCell::normal(Cell const& cell, uint facet, uint i) const
 {
   return normal(cell, facet)[i];
 }
 //-----------------------------------------------------------------------------
-Point TetrahedronCell::normal(const Cell& cell, uint facet) const
+Point TetrahedronCell::normal(Cell const& cell, uint facet) const
 {
   // This is a trick to be allowed to initialize a facet from the cell
   Cell& c = const_cast<Cell&>(cell);
@@ -625,7 +625,7 @@ Point TetrahedronCell::normal(const Cell& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-dolfin::real TetrahedronCell::facetArea(const Cell& cell, uint facet) const
+dolfin::real TetrahedronCell::facetArea(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.mesh().topology().dim() == 3);
   dolfin_assert(cell.mesh().geometry().dim() == 3);
@@ -715,7 +715,7 @@ std::string TetrahedronCell::description() const
   return s;
 }
 //-----------------------------------------------------------------------------
-uint TetrahedronCell::findEdge(uint i, const Cell& cell) const
+uint TetrahedronCell::findEdge(uint i, Cell const& cell) const
 {
   // Get vertices and edges
   uint const* v = cell.entities(0);

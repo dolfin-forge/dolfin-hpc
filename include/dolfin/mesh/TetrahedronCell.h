@@ -36,10 +36,10 @@ public:
   uint numVertices(uint dim) const;
 
   /// Return orientation of the cell
-  uint orientation(const Cell& cell) const;
+  uint orientation(Cell const& cell) const;
 
   /// Create entities e of given topological dimension from vertices v
-  void createEntities(uint** e, uint dim, const uint* v) const;
+  void createEntities(uint** e, uint dim, uint const* v) const;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1, 3-0, 3-1, 3-2)
   void orderEntities(Cell& cell) const;
@@ -52,29 +52,29 @@ public:
                            uint refinement_rule, uint* marked_edges) const;
 
   /// Compute volume of tetrahedron
-  real volume(const MeshEntity& tetrahedron) const;
+  real volume(MeshEntity const& tetrahedron) const;
 
   /// Compute diameter of tetrahedron
-  real diameter(const MeshEntity& tetrahedron) const;
+  real diameter(MeshEntity const& tetrahedron) const;
 
   /// Compute circumradius of tetrahedron
-  real circumradius(const MeshEntity& tetrahedron) const;
+  real circumradius(MeshEntity const& tetrahedron) const;
 
   /// Compute component i of normal of given facet with respect to the cell
-  real normal(const Cell& cell, uint facet, uint i) const;
+  real normal(Cell const& cell, uint facet, uint i) const;
 
   /// Compute of given facet with respect to the cell
-  Point normal(const Cell& cell, uint facet) const;
+  Point normal(Cell const& cell, uint facet) const;
 
   /// Compute the area/length of given facet with respect to the cell
-  real facetArea(const Cell& cell, uint facet) const;
+  real facetArea(Cell const& cell, uint facet) const;
 
   /// Check if point p intersects the cell
-  bool intersects(const MeshEntity& entity, const Point& p) const;
+  bool intersects(MeshEntity const& entity, Point const& p) const;
 
   /// Check if points line connecting p1 and p2 cuts the cell
-  bool intersects(const MeshEntity& entity, const Point& p1,
-                  const Point& p2) const;
+  bool intersects(MeshEntity const& entity, Point const& p1,
+                  Point const& p2) const;
 
   /// Return description of cell type
   std::string description() const;
@@ -82,7 +82,7 @@ public:
 private:
 
   // Find local index of edge i according to ordering convention
-  uint findEdge(uint i, const Cell& cell) const;
+  uint findEdge(uint i, Cell const& cell) const;
 
 };
 

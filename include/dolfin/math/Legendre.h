@@ -9,41 +9,71 @@
 
 #include <dolfin/common/types.h>
 
-namespace dolfin {
+namespace dolfin
+{
 
-  /// Legendre polynomial of given degree n on the interval [-1,1].
+/// Legendre polynomial of given degree n on the interval [-1,1].
+///
+///   P0(x) = 1
+///   P1(x) = x
+///   P2(x) = (3x^2 - 1) / 2
+///   ...
+///
+/// The function values and derivatives are computed using
+/// three-term recurrence formulas.
+
+class Legendre
+{
+
+public:
+
   ///
-  ///   P0(x) = 1
-  ///   P1(x) = x
-  ///   P2(x) = (3x^2 - 1) / 2
-  ///   ...
+  Legendre(uint n);
+
   ///
-  /// The function values and derivatives are computed using
-  /// three-term recurrence formulas.
+  ~Legendre();
 
-  class Legendre {
-  public:
+  /// Evaluation at given point
+  real operator()(real x);
 
-    Legendre(int n);
+  /// Evaluation of derivative at given point
+  real ddx(real x);
 
-    /// Evaluation at given point
-    real operator() (real x);
-    
-    /// Evaluation of derivative at given point
-    real ddx(real x);
+  /// Evaluation of second derivative at given point
+  real d2dx(real x);
 
-    /// Evaluation of second derivative at given point
-    real d2dx(real x);
+  /// Evaluation at given point
+  static real eval(uint n, real x);
 
-  private:
-    
-    real eval (int n, real x);
-    real ddx  (int n, real x);
-    real d2dx (int n, real x);
+  /// Evaluation of derivative at given point
+  static real ddx(uint n, real x);
 
-    int n;
+  /// Evaluation of second derivative at given point
+  static real d2dx(uint n, real x);
 
-  };
+private:
+
+  uint const n_;
+
+};
+
+//--- INLINES -----------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+inline real Legendre::operator()(real x)
+{
+  return eval(n_, x);
+}
+//-----------------------------------------------------------------------------
+inline real Legendre::ddx(real x)
+{
+  return ddx(n_, x);
+}
+//-----------------------------------------------------------------------------
+inline real Legendre::d2dx(real x)
+{
+  return d2dx(n_, x);
+}
 
 }
 

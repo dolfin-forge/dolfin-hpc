@@ -8,6 +8,7 @@
 
 #include <dolfin/fem/Form.h>
 
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 
@@ -77,9 +78,10 @@ FiniteElementSpace * Form::create_space(uint i) const
 }
 
 //----------------------------------------------------------------------------
-FiniteElementSpace * Form::create_coefficient_space(std::string const& name) const
+FiniteElementSpace * Form::create_coefficient_space(
+    std::string const& name) const
 {
-  return this->create_space(this->rank()+this->coefficient_number(name));
+  return this->create_space(this->rank() + this->coefficient_number(name));
 }
 
 //-----------------------------------------------------------------------------
@@ -167,6 +169,25 @@ bool Form::check_index(uint i) const
           num_arguments);
   }
   return true;
+}
+
+//-----------------------------------------------------------------------------
+void Form::assign_coefficients(CoefficientMap const& coefficient_map,
+                               Array<dolfin::Function *>& form_coefficients)
+{
+  form_coefficients.clear();
+  for (uint i = 0; i < this->num_coefficients(); ++i)
+  {
+    std::string name = this->coefficient_name(i);
+    if(coefficient_map.has(name))
+    {
+      form_coefficients.push_back(coefficient_map.get(name));
+    }
+    else
+    {
+      error("Missing coefficient named '%s' in CoefficientMap.", name.c_str());
+    }
+  }
 }
 
 }

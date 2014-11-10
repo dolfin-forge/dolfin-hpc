@@ -8,6 +8,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/math/Jacobi.h>
 
 #include <cmath>
 
@@ -32,10 +33,8 @@ real Legendre::eval(uint n, real x)
   // Special case n = 1
   if (n == 1) return x;
 
-  // Recurrence, BETA page 254
-  real nn = real(n);
-  return ((2.0 * nn - 1.0) * x * eval(n - 1, x) - (nn - 1.0) * eval(n - 2, x))
-      / nn;
+  // Use Jacobi with a = b =0 to evaluate Legendre
+  return Jacobi::eval(n, 0.0, 0.0, x);
 }
 //-----------------------------------------------------------------------------
 real Legendre::ddx(uint n, real x)

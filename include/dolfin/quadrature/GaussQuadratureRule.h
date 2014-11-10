@@ -588,10 +588,13 @@ inline GaussQuadratureRule::GaussQuadratureRule(unsigned int dim,
       }
     default:
       error("Gauss quadrature only implemented in dimensions 1-3.");
+      break;
     }
 
   for (unsigned int i = 0; i < weights.size(); ++i)
+  {
     m += weights[i];
+  }
 }
 
 }

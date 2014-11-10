@@ -43,6 +43,12 @@ DofMapSet& Form::dofmaps() const
 }
 
 //-----------------------------------------------------------------------------
+uint Form::coefficient_index(std::string const& name) const
+{
+  return this->coefficient_number(name);
+}
+
+//-----------------------------------------------------------------------------
 uint Form::coefficient_number(std::string const& name) const
 {
   error("Not implemented without UFL support: \n"
@@ -68,6 +74,12 @@ FiniteElementSpace * Form::create_space(uint i) const
   Mesh& mesh = (
       i < this->rank() ? this->mesh() : this->coefficients()[i]->mesh());
   return new FiniteElementSpace(mesh, *test_f, *test_d, true);
+}
+
+//----------------------------------------------------------------------------
+FiniteElementSpace * Form::create_coefficient_space(std::string const& name) const
+{
+  return this->create_space(this->rank()+this->coefficient_number(name));
 }
 
 //-----------------------------------------------------------------------------

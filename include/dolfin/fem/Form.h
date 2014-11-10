@@ -38,8 +38,11 @@ public:
   /// Return array of coefficients
   virtual Array<Function*> const& coefficients() const = 0;
 
-  /// Return number of argument associated with the given name
-  virtual uint coefficient_number(const std::string& name) const;
+  /// Return index of argument associated with the given name
+  virtual uint coefficient_index(std::string const& name) const;
+
+  /// Return index of argument associated with the given name [Deprecated]
+  virtual uint coefficient_number(std::string const& name) const;
 
   /// Return name of argument associated with the given number
   virtual std::string coefficient_name(dolfin::uint i) const;
@@ -90,8 +93,11 @@ public:
 
   //--- EXTENSION OF INTERFACE ------------------------------------------------
 
-  ///
+  /// Create function space for i-th function (arguments + coefficients)
   FiniteElementSpace * create_space(uint i) const;
+
+  /// Create function space for given coefficient
+  FiniteElementSpace * create_coefficient_space(std::string const& name) const;
 
   /// Check dimension and rank of coefficients
   bool check_coefficients(Array<Function*> const& coefficients) const;

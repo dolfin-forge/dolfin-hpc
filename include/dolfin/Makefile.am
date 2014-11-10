@@ -167,6 +167,8 @@ nobase_pkginclude_HEADERS = \
 				main/SubSystemsManager.h\
 				math/basic.h\
 				math/dolfin_math.h\
+				math/Chebyshev1.h\
+				math/Chebyshev2.h\
 				math/Jacobi.h\
 				math/Lagrange.h\
 				math/Legendre.h\

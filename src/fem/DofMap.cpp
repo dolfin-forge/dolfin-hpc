@@ -538,13 +538,12 @@ void DofMap::pretabulateAllDofs() const
   pretabulated_dofmap_ = new uint[pretabulated_dofmap_size_];
   uint *ip = &pretabulated_dofmap_[0];
   uint const local_dim = this->local_dimension();
-  MeshDistributedData& distdata = mesh().distdata();
   CellIterator cell(mesh());
   UFCCell ufc_cell(*cell);
   for (; !cell.end(); ++cell)
   {
     // cell indices for real valued function
-    ufc_cell.update(*cell, distdata);
+    ufc_cell.update(*cell);
     this->tabulate_dofs(ip, ufc_cell, *cell);
     ip += local_dim;
   }

@@ -381,40 +381,47 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function const& function,
   real dof_value;
   CellIterator c(mesh);
   UFCCell ufc_cell(*c);
-  for (; !c.end(); ++c)
+  if ((function.space().family() == ufl::Family::CG)
+      && (function.space().degree() == 1))
   {
-
-    ufc_cell.update(*c, mesh.distdata());
-
-    //FIXME: Only P1 friendly.
-    for (VertexIterator v(*c); !v.end(); ++v)
+    for (; !c.end(); ++c)
     {
+      ufc_cell.update(*c, mesh.distdata());
 
-      uint *cvi = c->entities(0);
-      uint ci = 0;
-      for (ci = 0; ci < c->numEntities(0); ci++)
-      {
-        if (cvi[ci] == v->index())
-        {
-          break;
-        }
-      }
-
-      if (!mesh.distdata().is_ghost(v->index(), 0) && !marked.get(*v))
+      //FIXME: Only P1 friendly.
+      for (VertexIterator v(*c); !v.end(); ++v)
       {
 
-        new_index = mesh.distdata().get_vertex_global(v->index());
-        for (uint i = 0; i < subfunctions.size(); ++i)
+        uint *cvi = c->entities(0);
+        uint ci = 0;
+        for (ci = 0; ci < c->numEntities(0); ci++)
         {
-          function.vector().get(&dof_value, 1, &indices[ci]);
-          subfunctions[i]->vector().set(&dof_value, 1, &new_index);
+          if (cvi[ci] == v->index())
+          {
+            break;
+          }
         }
 
-        marked.set(*v, true);
-        continue;
+        if (!mesh.distdata().is_ghost(v->index(), 0) && !marked.get(*v))
+        {
 
+          new_index = mesh.distdata().get_vertex_global(v->index());
+          for (uint i = 0; i < subfunctions.size(); ++i)
+          {
+            function.vector().get(&dof_value, 1, &indices[ci]);
+            subfunctions[i]->vector().set(&dof_value, 1, &new_index);
+          }
+
+          marked.set(*v, true);
+          continue;
+
+        }
       }
     }
+  }
+  else
+  {
+    error("AdaptiveRefinement::decompose_func only implemented for P1");
   }
   for (uint i = 0; i < subfunctions.size(); ++i)
   {
@@ -448,86 +455,94 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
   dolfin_set("Geometrical Tolerance Tetrahedron", 1e-8);
   CellIterator c(new_mesh);
   UFCCell ufccell(*c);
-  for (; !c.end(); ++c)
+  if ((projected.space().family() == ufl::Family::CG)
+      && (projected.space().degree() == 1))
   {
-
-    ufccell.update(*c, new_mesh.distdata());
-    projected.dofmap().tabulate_dofs(local_indices, ufccell, c->index());
-
-    //FIXME: Only P1 friendly.
-    for (VertexIterator v(*c); !v.end(); ++v)
+    for (; !c.end(); ++c)
     {
 
-      uint *cvi = c->entities(0);
-      uint ci = 0;
-      for (ci = 0; ci < c->numEntities(0); ci++)
+      ufccell.update(*c, new_mesh.distdata());
+      projected.dofmap().tabulate_dofs(local_indices, ufccell, c->index());
+
+      //FIXME: Only P1 friendly.
+      for (VertexIterator v(*c); !v.end(); ++v)
       {
-        if (cvi[ci] == v->index())
+
+        uint *cvi = c->entities(0);
+        uint ci = 0;
+        for (ci = 0; ci < c->numEntities(0); ci++)
         {
-          break;
-        }
-      }
-
-      if (new_mesh.distdata().is_ghost(v->index(), 0) || processed.get(*v))
-      {
-        continue;
-      }
-      processed.set(*v, true);
-
-      Vertex *v_e = 0;
-
-      x[0] = v->x()[0];
-      x[1] = v->x()[1];
-      x[2] = v->x()[2];
-      f_post[0]->eval(&test_value, &x[0]);
-      if (test_value == std::numeric_limits<real>::infinity())
-      {
-        for (EdgeIterator e(*v); !e.end(); ++e)
-        {
-          uint const *edge_v = e->entities(0);
-
-          if (edge_v[0] != v->index())
-          {
-            v_e = new Vertex(new_mesh, edge_v[0]);
-          }
-          else
-          {
-            v_e = new Vertex(new_mesh, edge_v[1]);
-          }
-
-          x[0] = v_e->x()[0];
-          x[1] = v_e->x()[1];
-          x[2] = v_e->x()[2];
-          f_post[0]->eval(&test_value, &x[0]);
-
-          if (test_value != std::numeric_limits<real>::infinity())
+          if (cvi[ci] == v->index())
           {
             break;
           }
-
         }
 
+        if (new_mesh.distdata().is_ghost(v->index(), 0) || processed.get(*v))
+        {
+          continue;
+        }
+        processed.set(*v, true);
+
+        Vertex *v_e = 0;
+
+        x[0] = v->x()[0];
+        x[1] = v->x()[1];
+        x[2] = v->x()[2];
+        f_post[0]->eval(&test_value, &x[0]);
         if (test_value == std::numeric_limits<real>::infinity())
         {
-          error("Couldn't find any suitable projection point");
+          for (EdgeIterator e(*v); !e.end(); ++e)
+          {
+            uint const *edge_v = e->entities(0);
+
+            if (edge_v[0] != v->index())
+            {
+              v_e = new Vertex(new_mesh, edge_v[0]);
+            }
+            else
+            {
+              v_e = new Vertex(new_mesh, edge_v[1]);
+            }
+
+            x[0] = v_e->x()[0];
+            x[1] = v_e->x()[1];
+            x[2] = v_e->x()[2];
+            f_post[0]->eval(&test_value, &x[0]);
+
+            if (test_value != std::numeric_limits<real>::infinity())
+            {
+              break;
+            }
+
+          }
+
+          if (test_value == std::numeric_limits<real>::infinity())
+          {
+            error("Couldn't find any suitable projection point");
+          }
         }
-      }
 
-      vv[i] = test_value;
-      indices[i++] = local_indices[ci];
+        vv[i] = test_value;
+        indices[i++] = local_indices[ci];
 
-      for (uint d = 1; d < f_post.size(); ++d)
-      {
-        f_post[d]->eval(&test_value, &x[0]);
-        if (test_value != std::numeric_limits<real>::infinity())
+        for (uint d = 1; d < f_post.size(); ++d)
         {
-          vv[i] = test_value;
-          indices[i++] = local_indices[ci + d * c->numEntities(0)];
+          f_post[d]->eval(&test_value, &x[0]);
+          if (test_value != std::numeric_limits<real>::infinity())
+          {
+            vv[i] = test_value;
+            indices[i++] = local_indices[ci + d * c->numEntities(0)];
+          }
         }
-      }
 
-      delete v_e;
+        delete v_e;
+      }
     }
+  }
+  else
+  {
+    error("AdaptiveRefinement::project only implemented for P1");
   }
   dolfin_set("GTS Tolerance", gts_tol);
   dolfin_set("Geometrical Tolerance Tetrahedron", geom_tol);

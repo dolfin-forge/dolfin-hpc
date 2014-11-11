@@ -204,6 +204,9 @@ public:
   void flatten(ufc::finite_element const * element,
                Array<ufc::finite_element const *>& stack, uint maxlevel = -1) const;
 
+  /// Check if the element can be seen as a vector element
+  bool is_vectorizable() const;
+
   //---
 
   void disp() const;

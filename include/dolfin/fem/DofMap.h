@@ -210,6 +210,9 @@ public:
   void flatten(ufc::dofmap const * dofmap,
                Array<ufc::dofmap const *>& stack, uint maxlevel = -1) const;
 
+  /// Return if the dofmap can be seen as a vector element dofmap
+  bool is_vectorizable() const;
+
   /// Unique identifier
   std::string const& hash() const;
 

@@ -492,6 +492,22 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
 }
 
 //-----------------------------------------------------------------------------
+bool DofMap::is_vectorizable() const
+{
+  bool ret = true;
+  Array<ufc::dofmap const*> const& flt = this->flatten();
+  for (uint s = 1; s < flt.size(); ++s)
+  {
+    if (std::strcmp(flt[0]->signature(), flt[s]->signature()) != 0)
+    {
+      ret = false;
+      break;
+    }
+  }
+  return ret;
+}
+
+//-----------------------------------------------------------------------------
 Array<uint> const& DofMap::sub_dofmaps_dimensions() const
 {
   return sub_dofmaps_dims_;
@@ -554,7 +570,7 @@ void DofMap::pretabulateAllDofs() const
 void DofMap::build()
 {
 
-  // Cleanup dofmap structures and set dimension of pretabulated array
+// Cleanup dofmap structures and set dimension of pretabulated array
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = NULL;
   pretabulated_dofmap_size_ = this->local_dimension() * mesh().numCells();
@@ -570,18 +586,8 @@ void DofMap::build()
     uint rank = MPI::processNumber();
 
     // Determine type of dofmap numbering and build
-    Array<ufc::dofmap const *> const& flt = this->flatten();
-    num_leaf_spaces_ = flt.size();
-    bool can_vectorize = (num_leaf_spaces_ == 1) ? false : true;
-    char const * dm0 = flt[0]->signature();
-    for (uint i = 1; i < num_leaf_spaces_; ++i)
-    {
-      if (std::strcmp(dm0, flt[i]->signature()) != 0)
-      {
-        can_vectorize = false;
-        break;
-      }
-    }
+    num_leaf_spaces_ = this->flatten().size();
+    bool can_vectorize = (num_leaf_spaces_ == 1) ? false : this->is_vectorizable();
 
     // Build
     if (ufc_dofmap_->global_dimension() == ufc_dofmap_->local_dimension())
@@ -920,10 +926,10 @@ void DofMap::disp() const
   cout << "DofMap" << endl;
   cout << "------" << endl;
 
-  // Begin indentation
+// Begin indentation
   begin("");
 
-  // Display UFC dofmap information
+// Display UFC dofmap information
   cout << "ufc::dofmap info" << endl;
   cout << "-----------------" << endl;
   begin("");
@@ -1012,7 +1018,7 @@ void DofMap::disp() const
   end();
 #endif
 
-  // End indentation
+// End indentation
   end();
 }
 //-----------------------------------------------------------------------------

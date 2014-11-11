@@ -244,6 +244,22 @@ void FiniteElement::flatten(ufc::finite_element const * element,
 }
 
 //-----------------------------------------------------------------------------
+bool FiniteElement::is_vectorizable() const
+{
+  bool ret = true;
+  Array<ufc::finite_element const*> const& flt = this->flatten();
+  for (uint s = 1; s < flt.size(); ++s)
+  {
+    if (std::strcmp(flt[0]->signature(), flt[s]->signature()) != 0)
+    {
+      ret = false;
+      break;
+    }
+  }
+  return ret;
+}
+
+//-----------------------------------------------------------------------------
 void FiniteElement::disp() const
 {
   cout << "FiniteElement" << endl;

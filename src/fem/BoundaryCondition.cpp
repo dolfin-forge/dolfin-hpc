@@ -19,8 +19,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition(std::string const& type,
-                                     Mesh& mesh,
+BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
                                      SubDomain const& sub_domain) :
     type_(type),
     mesh_(mesh),
@@ -49,8 +48,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-BoundaryCondition::BoundaryCondition(std::string const& type,
-                                     Mesh& mesh,
+BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
                                      SubDomain const& sub_domain,
                                      SubSystem const sub_system) :
     type_(type),
@@ -83,7 +81,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
 //-----------------------------------------------------------------------------
 BoundaryCondition::~BoundaryCondition()
 {
-  if(local_sub_domain_markers_)
+  if (local_sub_domain_markers_)
   {
     delete sub_domain_markers_;
   }
@@ -107,5 +105,26 @@ void BoundaryCondition::init_markers(uint const entity_dim)
   geometrical_sub_domain_->mark(*sub_domain_markers_, 0);
 }
 //-----------------------------------------------------------------------------
-
+void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
+                              const BilinearForm& form,
+                              SubSystem const sub_system)
+{
+  SubSystem defined = this->sub_system_;
+  SubSystem enforced(sub_system, this->sub_system_);
+  this->sub_system_ = enforced;
+  apply(A, b, form);
+  this->sub_system_ = defined;
+}
+//-----------------------------------------------------------------------------
+void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
+                              const GenericVector& x, const BilinearForm& form,
+                              SubSystem const sub_system)
+{
+  SubSystem defined = this->sub_system_;
+  SubSystem enforced(sub_system, this->sub_system_);
+  this->sub_system_ = enforced;
+  apply(A, b, x, form);
+  this->sub_system_ = defined;
+}
+//-----------------------------------------------------------------------------
 }

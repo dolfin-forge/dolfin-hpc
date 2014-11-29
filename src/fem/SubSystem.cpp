@@ -35,6 +35,16 @@ SubSystem::SubSystem(Array<uint> const& sub_system) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+SubSystem::SubSystem(SubSystem const& sub_system,
+                     SubSystem const& sub_sub_system)
+{
+  this->sub_system = sub_system.sub_system;
+  for (uint i = 0; i < sub_sub_system.depth(); ++i)
+  {
+    this->sub_system.push_back(sub_sub_system.array()[i]);
+  }
+}
+//-----------------------------------------------------------------------------
 SubSystem::SubSystem(SubSystem const& sub_system)
 {
   this->sub_system = sub_system.sub_system;

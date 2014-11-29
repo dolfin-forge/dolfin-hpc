@@ -40,6 +40,9 @@ namespace dolfin
     /// Create sub system for given array (n levels)
     SubSystem(Array<uint> const& sub_system);
 
+    /// Create given sub and sub sub system (two levels)
+    SubSystem(SubSystem const& sub_system, SubSystem const& sub_sub_system);
+
     /// Copy constructor
     SubSystem(SubSystem const& sub_system);
 

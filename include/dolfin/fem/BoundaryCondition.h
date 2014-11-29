@@ -60,6 +60,20 @@ public:
   virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
                      const BilinearForm& form) = 0;
 
+  /// Apply boundary condition to a subsystem of the linear system
+  /// Implemented as changing the subsystem temporarily
+  /// NOTE: the implementation of the boundary condition should not cache any
+  ///       data structure assuming the subsystem is left unchanged
+  virtual void apply(GenericMatrix& A, GenericVector& b,
+                     const BilinearForm& form, SubSystem const sub_system);
+
+  /// Apply boundary condition to a subsystem of the linear system for a nonlinear problem
+  /// Implemented as changing the subsystem temporarily
+  /// NOTE: the implementation of the boundary condition should not cache any
+  ///       data structure assuming the subsystem is left unchanged
+  virtual void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
+                     const BilinearForm& form, SubSystem const sub_system);
+
   ///
   std::string const& type() const;
 
@@ -114,7 +128,7 @@ private:
   bool const local_sub_domain_markers_;
 
   // Sub system
-  SubSystem const sub_system_;
+  SubSystem sub_system_;
 
 };
 

@@ -286,11 +286,19 @@ inline void Function::evaluate(real* values, const real* coordinates,
 //-----------------------------------------------------------------------------
 inline uint Function::rank() const
 {
+  if (type_ == Function::user)
+  {
+    error("uint UserFunction::rank() const should be overloaded");
+  }
   return f_->rank();
 }
 //-----------------------------------------------------------------------------
 inline uint Function::dim(unsigned int i) const
 {
+  if (type_ == Function::user)
+  {
+    error("uint UserFunction::dim(uint i) const should be overloaded");
+  }
   return f_->dim(i);
 }
 //-----------------------------------------------------------------------------
@@ -305,8 +313,8 @@ inline void Function::interpolate_vertex_values(real* values) const
 }
 //-----------------------------------------------------------------------------
 inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
-                           const ufc::finite_element& finite_element,
-                           Cell& cell, int facet) const
+                                  const ufc::finite_element& finite_element,
+                                  Cell& cell, int facet) const
 {
   // Make current cell and facet are available to user-defined function
   cell_ = &cell;

@@ -34,15 +34,13 @@ UserFunction::~UserFunction()
 //-----------------------------------------------------------------------------
 uint UserFunction::rank() const
 {
-  error("uint UserFunction::rank() const should be overloaded");
-  return 0;
+  return f_->rank();
 }
 
 //-----------------------------------------------------------------------------
 uint UserFunction::dim(uint i) const
 {
-  error("uint UserFunction::dim(uint i) const should be overloaded");
-  return 1;
+  return f_->dim(i);
 }
 
 //-----------------------------------------------------------------------------

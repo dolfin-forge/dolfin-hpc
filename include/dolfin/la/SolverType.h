@@ -35,9 +35,45 @@ namespace dolfin
     else
     {
       warning("Undefined solver type            "
-              "Fallback to default krylov method");
+              "Fallback to default Krylov method");
       return default_solver;
     }
+  }
+
+  //---------------------------------------------------------------------------
+  static SolverType solver_type(std::string type, bool fallback = false)
+  {
+    if (type == "lu")
+    {
+      return lu;
+    }
+    else if (type == "cg")
+    {
+      return cg;
+    }
+    else if (type == "gmres")
+    {
+      return gmres;
+    }
+    else if (type == "bicgstab")
+    {
+      return bicgstab;
+    }
+    else if (type == "default")
+    {
+      return default_solver;
+    }
+    else
+    {
+      if(fallback)
+      {
+        warning("Undefined solver type: "
+                "Fallback to default Krylov method");
+        return default_solver;
+      }
+    }
+    error("Undefined solver type.");
+    return default_solver;
   }
 
 }

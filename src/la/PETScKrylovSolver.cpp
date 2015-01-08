@@ -84,12 +84,15 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, cons
   // Read parameters if not done
   if ( !parameters_read )
     readParameters();
-
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
+    KSPSetOperators(ksp, A.mat(), A.mat());
+#else
   // Solve linear system
   if (get("Krylov keep PC"))
     KSPSetOperators(ksp, A.mat(), A.mat(), SAME_PRECONDITIONER);
   else
     KSPSetOperators(ksp, A.mat(), A.mat(), SAME_NONZERO_PATTERN);
+#endif
 
   // FIXME: Preconditioner being set here to avoid PETSc bug with Hypre.
   //        See explanation inside PETScKrylovSolver:init().
@@ -148,7 +151,11 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A, PETScVector& x
   }
 
   // Solve linear system
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
+  KSPSetOperators(ksp, A.mat(), A.mat());
+#else
   KSPSetOperators(ksp, A.mat(), A.mat(), DIFFERENT_NONZERO_PATTERN);
+#endif
   KSPSolve(ksp, b.vec(), x.vec());  
 
   // Check if the solution converged

@@ -128,7 +128,11 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
             A.size(0), A.size(1), mat_type);
 
   // Solve linear system
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
+  KSPSetOperators(ksp, A.mat(), A.mat());
+#else
   KSPSetOperators(ksp, A.mat(), A.mat(), DIFFERENT_NONZERO_PATTERN);
+#endif
   KSPSolve(ksp, b.vec(), x.vec());
   
 #if PETSC_VERSION_MAJOR > 2
@@ -178,7 +182,11 @@ dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
 		A.size(0), A.size(1));
 
   // Solve linear system
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
+  KSPSetOperators(ksp, B, B);
+#else
   KSPSetOperators(ksp, B, B, DIFFERENT_NONZERO_PATTERN);
+#endif
   KSPSolve(ksp, b.vec(), x.vec());
 
   // Estimate condition number for l1 norm

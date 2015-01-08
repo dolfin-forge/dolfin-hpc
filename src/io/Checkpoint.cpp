@@ -401,7 +401,8 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
 #else
   out.write((char *)&hdr_, sizeof(chkp_mesh_hdr));
-  out.write((char *)mesh.coordinates(), hdr_.num_coords * sizeof(real));
+  out.write((char *)mesh.geometry().coordinates(), 
+	    hdr_.num_coords * sizeof(real));
   out.write((char *)mesh.cells(), hdr_.num_centities * sizeof(uint));
 #endif
 

@@ -230,6 +230,7 @@ void VertexNormal::ComputeSimpleNormal(Mesh& mesh)
 
           // Compute the scalar product with the reference normal
           cosalpha = 0.0;
+#pragma _CRI novector
           for (uint d = 0; d < nsdim; ++d)
           {
             cosalpha += normals[nsdim * ref_facet + d]

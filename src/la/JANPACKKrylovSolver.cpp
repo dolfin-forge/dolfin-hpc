@@ -23,7 +23,11 @@ using namespace dolfin;
 JANPACKKrylovSolver::JANPACKKrylovSolver(SolverType method, 
 					 PreconditionerType pc) :
   method(method), pc_janpack(pc), ksp_init(false)
+#ifdef HAVE_JANPACK_MPI
+  , ksp(&_ksp)
+#endif
 {
+
 }
 //-----------------------------------------------------------------------------
 JANPACKKrylovSolver::~JANPACKKrylovSolver()
@@ -65,8 +69,16 @@ dolfin::uint JANPACKKrylovSolver::solve(const JANPACKMat& A, JANPACKVec& x,
     pc_type = JP_PC_ILU;
   else if(pc_janpack == dilu)
     pc_type = JP_PC_DILU;
-  else if(pc_janpack == amg)
+  else if(pc_janpack == amg) 
+  {
+#ifndef HAVE_JANPACK_MPI    
     pc_type = JP_PC_AMG;
+#else
+    warning("The algebraic multigrid preconditioner is "
+	    "only available in the UPC version of JANPACK");
+    pc_type = JP_PC_NONE;
+#endif
+  }
   else
     pc_type = JP_PC_NONE;
 

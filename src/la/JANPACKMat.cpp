@@ -30,8 +30,10 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat():
-    Variable("A", "JANPACK matrix"),
-    is_view(false)
+    Variable("A", "JANPACK matrix"), is_view(false)
+#ifdef HAVE_JANPACK_MPI
+    , A(&AA)
+#endif
 {
   // TODO: call JANPACK_Init or something?
 }
@@ -100,13 +102,13 @@ dolfin::uint JANPACKMat::size(uint dim) const
   dolfin_assert(A); 
   uint32_t M = 0;
   uint32_t N = 0;
-  jp_mat_size(const_cast<char *>(A), &M, &N);
+  jp_mat_size(const_cast<jp_mat_type *>(A), &M, &N);
   return (dim == 0 ? M : N);
 }
 //-----------------------------------------------------------------------------
 dolfin::uint JANPACKMat::nz() const
 {
-  return jp_mat_nz(const_cast<char *>(A), 1);
+  return jp_mat_nz(const_cast<jp_mat_type *>(A), 1);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::get(real* block,
@@ -169,7 +171,9 @@ void JANPACKMat::apply(FinalizeType finaltype)
 //-----------------------------------------------------------------------------
 void JANPACKMat::disp(uint precision) const
 {
-  jp_mat_print(const_cast<char *>(A));
+#ifndef HAVE_JANPACK_MPI
+  jp_mat_print(const_cast<jp_mat_type *>(A));
+#endif
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::ident(uint m, const uint* rows)
@@ -201,7 +205,7 @@ void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed)
   else
     yy.init(xx.local_size());
   
-  jp_spmv(const_cast<char *>(A), xx.vec(), yy.vec());  
+  jp_spmv(const_cast<jp_mat_type *>(A), xx.vec(), yy.vec());  
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
@@ -213,7 +217,7 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
   c = new uint[size(0)];
   v = new real[size(0)];
 
-  jp_mat_getrow(const_cast<char *>(A), row, c, v, &n);
+  jp_mat_getrow(const_cast<jp_mat_type *>(A), row, c, v, &n);
 
   for (uint i = 0; i < n; i++)
   {
@@ -236,9 +240,9 @@ LinearAlgebraFactory& JANPACKMat::factory() const
   return JANPACKFactory::instance();
 }
 //-----------------------------------------------------------------------------
-char* JANPACKMat::mat() const
+jp_mat_type* JANPACKMat::mat() const
 {
-  return const_cast<char *>(A);
+  return const_cast<jp_mat_type *>(A);
 }
 //-----------------------------------------------------------------------------
 const JANPACKMat& JANPACKMat::operator*= (real a)
@@ -267,7 +271,7 @@ void JANPACKMat::dup(const JANPACKMat& A)
   uint range[2];
   uint m;
 
-  jp_mat_range(const_cast<char *>(A.mat()), &range[0], &range[1]);
+  jp_mat_range(const_cast<jp_mat_type *>(A.mat()), &range[0], &range[1]);
   m = range[1] - range[0];
   init(m, m);
   //  error("Not implemented.");

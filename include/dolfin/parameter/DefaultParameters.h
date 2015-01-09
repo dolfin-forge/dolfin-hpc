@@ -8,8 +8,10 @@
 //--- Linear algebra ---
 #ifdef HAVE_PETSC
 add("linear algebra backend", "PETSc");
+#elif HAVE_JANPACK
+add("linear algebra backend", "JANPACK");
 #else
-add("linear algebra backend", "uBLAS");
+add("linear algebra backend", "none");
 #endif
 
 //--- JIT compiler ---
@@ -124,7 +126,7 @@ add("AMG keep levels", false);
 add("LU report", true);
 
 //--- Parameter for PDE solver ---
-add("PDE linear solver", "direct");
+add("PDE linear solver", "iterative");
 
 //--- Mesh partitioning ---
 add("report edge cut", false);

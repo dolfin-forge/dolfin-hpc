@@ -9,6 +9,12 @@
 
 #ifdef HAVE_JANPACK
 
+#ifdef HAVE_JANPACK_MPI
+#define jp_mat_type jp_mat_t
+#else
+#define jp_mat_type char
+#endif
+
 #include <janpack/mat.h>
 #include <dolfin/common/Variable.h>
 #include "GenericMatrix.h"
@@ -104,7 +110,7 @@ namespace dolfin
     //--- Special JANPACK functions ---
 
     /// Return JANPACK jp_mat_t pointer;
-    char *mat() const;
+    jp_mat_type *mat() const;
 
     /// Assignment operator
     const JANPACKMat& operator= (const JANPACKMat& x)
@@ -116,7 +122,12 @@ namespace dolfin
   private:
 
     // JANPACK Matrix pointer
+#ifdef HAVE_JANPACK_MPI
+    jp_mat_t AA;
+    jp_mat_t *A;
+#else
     char A[216];
+#endif
     
     // True if we don't own the matrix A points to
     bool is_view;

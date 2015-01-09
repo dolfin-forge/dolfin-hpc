@@ -48,7 +48,12 @@ namespace dolfin
     bool ksp_init;
 
     // JANPACK ksp data
+#ifdef HAVE_JANPACK_MPI
+    jp_ksp_t _ksp;
+    jp_ksp_t *ksp;
+#else
     char ksp[240];
+#endif
     
   };
 }

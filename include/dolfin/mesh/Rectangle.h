@@ -12,25 +12,28 @@
 namespace dolfin
 {
 
-  /// Triangular mesh of the 2D rectangle (a,b) x (c,d). 
-  /// Given the number of cells (nx, ny) in each direction,
-  /// the total number of triangles will be 2*nx*ny and the
-  /// total number of vertices will be (nx + 1)*(ny + 1).
+/// Triangular mesh of the 2D rectangle (a,b) x (c,d).
+/// Given the number of cells (nx, ny) in each direction,
+/// the total number of triangles will be 2*nx*ny and the
+/// total number of vertices will be (nx + 1)*(ny + 1).
 
-  /// The Type is an enumerater taking values in {left, right or
-  /// crisscross} indicating the direction of the diagonals for
-  /// left/right or both == crisscross. The default is right.
+/// The Type is an enumerater taking values in {left, right or
+/// crisscross} indicating the direction of the diagonals for
+/// left/right or both == crisscross. The default is right.
 
-  class Rectangle : public Mesh
+class Rectangle : public Mesh
+{
+public:
+
+  enum Type
   {
-  public:
-
-    enum Type {right, left, crisscross};
-    
-    Rectangle(real a, real b, real c, real d, uint nx, uint ny, 
-              Type type = crisscross);
+    right, left, crisscross
   };
-  
+
+  Rectangle(real a, real b, real c, real d, uint nx, uint ny, Type type =
+                crisscross);
+};
+
 }
 
 #endif

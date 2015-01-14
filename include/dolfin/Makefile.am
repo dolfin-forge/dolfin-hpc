@@ -233,8 +233,8 @@ nobase_pkginclude_HEADERS = \
 				mesh/TopologyComputation.h\
 				mesh/TriangleCell.h\
 				mesh/UniformMeshRefinement.h\
-				mesh/UnitCircle.h\
 				mesh/UnitCube.h\
+				mesh/UnitDisk.h\
 				mesh/UnitInterval.h\
 				mesh/UnitSphere.h\
 				mesh/UnitSquare.h\

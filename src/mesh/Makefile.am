@@ -56,8 +56,8 @@ libdolfin_mesh_la_SOURCES = \
 			TopologyComputation.cpp\
 			TriangleCell.cpp\
 			UniformMeshRefinement.cpp\
-			UnitCircle.cpp\
 			UnitCube.cpp\
+			UnitDisk.cpp\
 			UnitInterval.cpp\
 			UnitSphere.cpp\
 			UnitSquare.cpp\

@@ -30,7 +30,8 @@ public:
   UFCCell() :
       ufc::cell(),
       cell(NULL),
-      num_vertices_(0)
+      num_vertices_(0),
+      distributed_mesh_(false)
   {
   }
 
@@ -38,7 +39,8 @@ public:
   UFCCell(Cell& dolfin_cell) :
       ufc::cell(),
       cell(&dolfin_cell),
-      num_vertices_(0)
+      num_vertices_(0),
+      distributed_mesh_(false)
   {
     init(dolfin_cell);
   }
@@ -66,6 +68,9 @@ private:
 
   // Number of cell vertices
   uint num_vertices_;
+
+  // Mesh is distributed
+  bool distributed_mesh_;
 
 };
 
@@ -113,28 +118,36 @@ inline void UFCCell::init(Cell& cell)
   index = entity_indices[topological_dimension][0];
 
   // Two different cases
-  if (MPI::numProcesses() == 1)
-  {
-    // Single process, pointer to mesh topological data
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-  }
-  else
+  if (cell.mesh().is_distributed())
   {
     // Parallel case, store topological data in object
     for (uint d = 0; d < topological_dimension; ++d)
     {
       entity_indices[d] = new uint[cell.numEntities(d)];
       for (uint i = 0; i < cell.numEntities(d); ++i)
+      {
         entity_indices[d][i] = (cell.entities(d))[i];
+      }
     }
+    distributed_mesh_ = true;
+  }
+  else
+  {
+    // Single process, pointer to mesh topological data
+    for (uint d = 0; d < topological_dimension; ++d)
+    {
+      entity_indices[d] = cell.entities(d);
+    }
+    distributed_mesh_ = false;
   }
 
   /// Set vertex coordinates
   uint* vertices = cell.entities(0);
   coordinates = new real*[num_vertices_];
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -142,10 +155,12 @@ inline void UFCCell::clear()
 {
   if (entity_indices)
   {
-    if (MPI::numProcesses() > 1)
+    if (distributed_mesh_)
     {
       for (uint i = 0; i < (topological_dimension + 1); ++i)
+      {
         delete[] entity_indices[i];
+      }
       delete[] entity_indices;
     }
     else
@@ -171,34 +186,46 @@ inline void UFCCell::update(Cell& cell)
   this->cell = &cell;
 
   // Set entity indices
-  if (MPI::numProcesses() == 1)
+  if(distributed_mesh_)
   {
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-    entity_indices[topological_dimension][0] = cell.index();
-  }
-  else
-  {
+    dolfin_assert(cell.mesh().is_distributed());
     MeshDistributedData& distdata = cell.mesh().distdata();
 #if ENABLE_P1_OPTIMIZATIONS
     for(uint i = 0; i < cell.numEntities(0); ++i)
+    {
       entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
+    }
 #else
     for (uint d = 0; d < topological_dimension; ++d)
+    {
       for (uint i = 0; i < cell.numEntities(d); ++i)
+      {
         entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+      }
+    }
 #endif
     entity_indices[topological_dimension][0] = distdata.get_cell_global(
         cell.index());
+  }
+  else
+  {
+    dolfin_assert(!cell.mesh().is_distributed());
+    for (uint d = 0; d < topological_dimension; ++d)
+    {
+      entity_indices[d] = cell.entities(d);
+    }
+    entity_indices[topological_dimension][0] = cell.index();
   }
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
-  const uint* vertices = cell.entities(0);
+  uint const * vertices = cell.entities(0);
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -208,33 +235,43 @@ inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
   this->cell = &cell;
 
   // Set entity indices
-  if (MPI::numProcesses() == 1)
-  {
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-    entity_indices[topological_dimension][0] = cell.index();
-  }
-  else
+  if(cell.mesh().is_distributed())
   {
 #if ENABLE_P1_OPTIMIZATIONS
     for(uint i = 0; i < cell.numEntities(0); ++i)
+    {
       entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
+    }
 #else
     for (uint d = 0; d < topological_dimension; ++d)
+    {
       for (uint i = 0; i < cell.numEntities(d); ++i)
+      {
         entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+      }
+    }
 #endif
     entity_indices[topological_dimension][0] = distdata.get_cell_global(
         cell.index());
+  }
+  else
+  {
+    for (uint d = 0; d < topological_dimension; ++d)
+    {
+      entity_indices[d] = cell.entities(d);
+    }
+    entity_indices[topological_dimension][0] = cell.index();
   }
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
-  const uint* vertices = cell.entities(0);
+  uint const * vertices = cell.entities(0);
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------

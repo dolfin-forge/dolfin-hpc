@@ -11,6 +11,7 @@
 // Last changed: 2014-02-06
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -30,6 +31,7 @@
 #include <iomanip>
 #include <limits>
 #include <set>
+#include <cmath>
 
 namespace dolfin
 {
@@ -402,14 +404,9 @@ void DiscreteFunction::eval(real* values, const real* x) const
   mesh_.intersector().overlap(p, cells);
   if (cells.size() < 1)
   {
-    if (MPI::numProcesses() == 1)
-    {
-      error("Unable to evaluate function at given point (not inside domain).");
-    }
-
     for (uint j = 0; j < scratch.size; j++)
     {
-      values[j] = 1e50;  // FIXME: Document default value.
+      values[j] = dolfin::DOLFIN_REAL_MAX;
     }
     return;
   }

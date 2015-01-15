@@ -30,7 +30,8 @@ Class::Class() :
 //-----------------------------------------------------------------------------
 Class::Class(std::string const& name) :
     prefixed_name_(name,""),
-    cpp_proto_(std::make_pair(name, ""), std::vector<Object const *>()),
+    cpp_proto_(std::make_pair(name, std::string("")),
+	       std::vector<Object const *>()),
     args_repr_()
 {
 }

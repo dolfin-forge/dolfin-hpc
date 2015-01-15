@@ -58,7 +58,11 @@ namespace ufl
 
       ///
       static MeasureData::Type const repr_type(repr_t const& repr);
+#ifdef __SUNPRO_CC
+      typedef std::map<repr_t, MeasureData::Type> MappingReprToType;
+#else
       typedef std::map<repr_t const, MeasureData::Type> MappingReprToType;
+#endif
       typedef std::map<MeasureData::Type, repr_t const> MappingTypeToRepr;
       typedef std::pair<repr_t const, MeasureData::Type> MappingReprToTypeItem;
       typedef std::pair<MeasureData::Type, repr_t const> MappingTypeToReprItem;
@@ -130,7 +134,11 @@ namespace ufl
     private:
       ///
       static MeasureDomain::Type const repr_type(repr_t const& repr);
+#ifdef __SUNPRO_CC
+      typedef std::map<repr_t, MeasureDomain::Type> MappingReprToType;
+#else
       typedef std::map<repr_t const, MeasureDomain::Type> MappingReprToType;
+#endif
       typedef std::map<MeasureDomain::Type, repr_t const> MappingTypeToRepr;
       typedef std::pair<repr_t const, MeasureDomain::Type> MappingReprToTypeItem;
       typedef std::pair<MeasureDomain::Type, repr_t const> MappingTypeToReprItem;

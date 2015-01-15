@@ -249,7 +249,11 @@ template <class KEY, class VALUE> std::vector<std::pair<KEY const *, VALUE const
         Object::repr_t second(str.substr(scpos+delimiter.length()));
 //        KEY const * key = KEY::create(first);
 //        VALUE const * val = new VALUE(second);
+#ifdef __SUNPRO_CC
+        std::pair<KEY const *, VALUE const*> new_item = std::make_pair(KEY::create(first), new const VALUE(second));
+#else
         std::pair<KEY const *, VALUE const*> new_item = std::make_pair(KEY::create(first), new VALUE(second));
+#endif
         map[i] = new_item;
         currpos = scpos + 1;
       }

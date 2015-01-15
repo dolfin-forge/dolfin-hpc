@@ -50,7 +50,11 @@ public:
 
 private:
 
+#ifdef __SUNPRO_CC
+  std::map<std::string, dolfin::Function *> map_;
+#else
   std::map<std::string const, dolfin::Function *> map_;
+#endif
 
 };
 

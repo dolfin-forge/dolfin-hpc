@@ -46,8 +46,13 @@ bool CoefficientMap::has(std::string const& label) const
 //-----------------------------------------------------------------------------
 Function * CoefficientMap::get(std::string const& label) const
 {
+#ifdef __SUNPRO_CC
+  std::map<std::string, dolfin::Function *>::const_iterator it =
+      map_.find(label);
+#else
   std::map<std::string const, dolfin::Function *>::const_iterator it =
       map_.find(label);
+#endif
   if (it == map_.end())
   {
     error("Coefficient label does not exist in map.");
@@ -65,8 +70,13 @@ bool CoefficientMap::size() const
 void CoefficientMap::set(std::string const& label,
                          dolfin::Function& coefficient)
 {
+#ifdef __SUNPRO_CC
+  std::map<std::string, dolfin::Function *>::iterator it = map_.find(
+      label);
+#else
   std::map<std::string const, dolfin::Function *>::iterator it = map_.find(
       label);
+#endif
   if (it != map_.end())
   {
     error("Coefficient label is already assigned to a function.");
@@ -84,12 +94,21 @@ void CoefficientMap::display() const
   begin("");
   cout << "Number of coefficients      :" << this->size() << endl;
   uint ii = 0;
+#ifdef __SUNPRO_CC
+  for (std::map<std::string, dolfin::Function *>::const_iterator it =
+      map_.begin(); it != map_.end(); ++it)
+  {
+    cout << ii << " : " << it->first << endl;
+    ++ii;
+  }
+#else
   for (std::map<std::string const, dolfin::Function *>::const_iterator it =
       map_.begin(); it != map_.end(); ++it)
   {
     cout << ii << " : " << it->first << endl;
     ++ii;
   }
+#endif
   end();
 }
 

@@ -110,7 +110,7 @@ std::map<dolfin::uint, dolfin::uint> const FiniteElement::symmetry() const
 std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, dolfin::uint>();
+  return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------

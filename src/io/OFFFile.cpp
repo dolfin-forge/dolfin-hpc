@@ -40,7 +40,7 @@ void OFFFile::operator>>(Mesh& mesh)
 
   // First line is OFF1 file type
   get_next_line(off, line);
-  line.erase(remove_if(line.begin(), line.end(), isspace), line.end());
+  line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
   if (line != "OFF1")
   {
     dolfin::error("File format is not Geomview Object File Version 1.");

@@ -189,8 +189,9 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
         equal_number_open_close = false;
 
     open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
-    dolfin::uint index = distance(open_delimiter_positions.begin(), std::find(open_delimiter_positions.begin(),
-          open_delimiter_positions.end(), open_pos));
+    dolfin::uint index = std::distance(open_delimiter_positions.begin(), 
+				       std::find(open_delimiter_positions.begin(),
+						 open_delimiter_positions.end(), open_pos));
     close_pos = close_delimiter_positions[index];
 
     // Take into account of

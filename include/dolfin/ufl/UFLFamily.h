@@ -172,8 +172,13 @@ private:
 
   ///
   static Family::Type const repr_type(repr_t const& repr);
+#ifdef __SUNPRO_CC
+  typedef std::map<repr_t, Family::Type> MappingList;
+  typedef std::pair<repr_t, Family::Type> MappingItem;
+#else
   typedef std::map<repr_t const, Family::Type> MappingList;
   typedef std::pair<repr_t const, Family::Type> MappingItem;
+#endif
   static MappingList const Mapping()
   {
     static MappingList const mapping = __init_mapping();

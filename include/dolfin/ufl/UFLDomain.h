@@ -119,8 +119,13 @@ private:
 
   ///
   static Domain::Type const repr_type(repr_t const& repr);
+#ifdef __SUNPRO_CC
+  typedef std::map<repr_t, Domain::Type> MappingList;
+  typedef std::pair<repr_t, Domain::Type> MappingItem;
+#else
   typedef std::map<repr_t const, Domain::Type> MappingList;
   typedef std::pair<repr_t const, Domain::Type> MappingItem;
+#endif
   static MappingList const Mapping()
   {
     static MappingList const Mapping = __init_mapping();

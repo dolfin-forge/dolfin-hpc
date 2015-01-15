@@ -357,9 +357,10 @@ void DiscreteFunction::eval(real* values, const real* x) const
       error("Unable to evaluate function at given point (not inside domain).");
     }
 
-    values[0] = 1e50;
-    values[1] = 1e50;
-    values[2] = 1e50;
+    for (uint j = 0; j < scratch.size; j++)
+    {
+      values[j] = 1e50; // FIXME: Document default value.
+    }
     return;
   }
 

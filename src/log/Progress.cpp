@@ -59,6 +59,8 @@ Progress& Progress::operator++()
     ++i;
 
   update(static_cast<real>(i) / static_cast<real>(n));
+
+  return *this;
 }
 //-----------------------------------------------------------------------------
 void Progress::operator++(int)

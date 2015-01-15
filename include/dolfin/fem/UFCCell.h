@@ -22,7 +22,7 @@ namespace dolfin
 /// This class is simple wrapper for a UFC cell and provides
 /// a layer between a DOLFIN cell and a UFC cell.
 
-class UFCCell: public ufc::cell
+class UFCCell : public ufc::cell
 {
 public:
 
@@ -30,8 +30,7 @@ public:
   UFCCell() :
       ufc::cell(),
       cell(NULL),
-      num_vertices_(0),
-      distributed_mesh_(false)
+      num_vertices_(0)
   {
   }
 
@@ -39,8 +38,7 @@ public:
   UFCCell(Cell& dolfin_cell) :
       ufc::cell(),
       cell(&dolfin_cell),
-      num_vertices_(0),
-      distributed_mesh_(false)
+      num_vertices_(0)
   {
     init(dolfin_cell);
   }
@@ -62,15 +60,12 @@ public:
 
   // Update cell entities to global indices and coordinates
   void update(Cell& cell);
-  void update(Cell& cell, MeshDistributedData& distdata); // Obsolete
+  void update(Cell& cell, MeshDistributedData& distdata);  // Obsolete
 
 private:
 
   // Number of cell vertices
   uint num_vertices_;
-
-  // Mesh is distributed
-  bool distributed_mesh_;
 
 };
 
@@ -87,7 +82,7 @@ inline void UFCCell::init(Cell& cell)
 
   // Set cell shape
   switch (cell.type())
-  {
+    {
     case CellType::interval:
       cell_shape = ufc::interval;
       break;
@@ -100,7 +95,7 @@ inline void UFCCell::init(Cell& cell)
     default:
       error("Unknown cell type.");
       break;
-  }
+    }
   num_vertices_ = cell.numEntities(0);
 
   // Set topological dimension
@@ -117,28 +112,14 @@ inline void UFCCell::init(Cell& cell)
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-  // Two different cases
-  if (cell.mesh().is_distributed())
+  // In any case store topological data in object
+  for (uint d = 0; d < topological_dimension; ++d)
   {
-    // Parallel case, store topological data in object
-    for (uint d = 0; d < topological_dimension; ++d)
+    entity_indices[d] = new uint[cell.numEntities(d)];
+    for (uint i = 0; i < cell.numEntities(d); ++i)
     {
-      entity_indices[d] = new uint[cell.numEntities(d)];
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-      {
-        entity_indices[d][i] = (cell.entities(d))[i];
-      }
+      entity_indices[d][i] = (cell.entities(d))[i];
     }
-    distributed_mesh_ = true;
-  }
-  else
-  {
-    // Single process, pointer to mesh topological data
-    for (uint d = 0; d < topological_dimension; ++d)
-    {
-      entity_indices[d] = cell.entities(d);
-    }
-    distributed_mesh_ = false;
   }
 
   /// Set vertex coordinates
@@ -155,19 +136,11 @@ inline void UFCCell::clear()
 {
   if (entity_indices)
   {
-    if (distributed_mesh_)
+    for (uint i = 0; i < (topological_dimension + 1); ++i)
     {
-      for (uint i = 0; i < (topological_dimension + 1); ++i)
-      {
-        delete[] entity_indices[i];
-      }
-      delete[] entity_indices;
+      delete[] entity_indices[i];
     }
-    else
-    {
-      delete[] entity_indices[topological_dimension];
-      delete[] entity_indices;
-    }
+    delete[] entity_indices;
   }
   entity_indices = 0;
 
@@ -186,36 +159,23 @@ inline void UFCCell::update(Cell& cell)
   this->cell = &cell;
 
   // Set entity indices
-  if(distributed_mesh_)
-  {
-    dolfin_assert(cell.mesh().is_distributed());
-    MeshDistributedData& distdata = cell.mesh().distdata();
+  MeshDistributedData& distdata = cell.mesh().distdata();
 #if ENABLE_P1_OPTIMIZATIONS
-    for(uint i = 0; i < cell.numEntities(0); ++i)
-    {
-      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
-    }
-#else
-    for (uint d = 0; d < topological_dimension; ++d)
-    {
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-      {
-        entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
-      }
-    }
-#endif
-    entity_indices[topological_dimension][0] = distdata.get_cell_global(
-        cell.index());
-  }
-  else
+  for(uint i = 0; i < cell.numEntities(0); ++i)
   {
-    dolfin_assert(!cell.mesh().is_distributed());
-    for (uint d = 0; d < topological_dimension; ++d)
-    {
-      entity_indices[d] = cell.entities(d);
-    }
-    entity_indices[topological_dimension][0] = cell.index();
+    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
+#else
+  for (uint d = 0; d < topological_dimension; ++d)
+  {
+    for (uint i = 0; i < cell.numEntities(d); ++i)
+    {
+      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+    }
+  }
+#endif
+  entity_indices[topological_dimension][0] = distdata.get_cell_global(
+      cell.index());
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
@@ -235,33 +195,22 @@ inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
   this->cell = &cell;
 
   // Set entity indices
-  if(cell.mesh().is_distributed())
-  {
 #if ENABLE_P1_OPTIMIZATIONS
-    for(uint i = 0; i < cell.numEntities(0); ++i)
-    {
-      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
-    }
-#else
-    for (uint d = 0; d < topological_dimension; ++d)
-    {
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-      {
-        entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
-      }
-    }
-#endif
-    entity_indices[topological_dimension][0] = distdata.get_cell_global(
-        cell.index());
-  }
-  else
+  for(uint i = 0; i < cell.numEntities(0); ++i)
   {
-    for (uint d = 0; d < topological_dimension; ++d)
-    {
-      entity_indices[d] = cell.entities(d);
-    }
-    entity_indices[topological_dimension][0] = cell.index();
+    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
+#else
+  for (uint d = 0; d < topological_dimension; ++d)
+  {
+    for (uint i = 0; i < cell.numEntities(d); ++i)
+    {
+      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+    }
+  }
+#endif
+  entity_indices[topological_dimension][0] = distdata.get_cell_global(
+      cell.index());
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];

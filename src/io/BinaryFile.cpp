@@ -849,8 +849,8 @@ void BinaryFile::operator<<(Mesh& mesh)
     // Write Header
     MPI_File_write_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                        MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
-    MPI_File_write_all(fh, &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, (void *) &gdim, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, (void *) &type, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
     byte_offset = sizeof(BinaryFileHeader) + 2 * sizeof(uint);
 
     // Write vertices
@@ -873,7 +873,7 @@ void BinaryFile::operator<<(Mesh& mesh)
         vptr += gdim;
       }
     }
-    MPI_File_write_all(fh, &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+    MPI_File_write_all(fh, (void *) &num_vertices, 1, MPI_UNSIGNED, MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
     MPI_File_write_at_all(fh, byte_offset + vertex_offset * sizeof(real),
                           vertex_buffer, vertex_buffer_size, MPI_DOUBLE,
@@ -901,7 +901,7 @@ void BinaryFile::operator<<(Mesh& mesh)
         *(cp++) = mesh.distdata().get_vertex_global(c->entities(0)[i]);
       }
     }
-    MPI_File_write_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
+    MPI_File_write_at_all(fh, byte_offset, (void *) &num_cells, 1, MPI_UNSIGNED,
                           MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
     MPI_File_write_at_all(fh, byte_offset + cell_offset * sizeof(uint),

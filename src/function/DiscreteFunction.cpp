@@ -404,6 +404,11 @@ void DiscreteFunction::eval(real* values, const real* x) const
   mesh_.intersector().overlap(p, cells);
   if (cells.size() < 1)
   {
+    if (!mesh_.is_distributed())
+    {
+      error("Unable to evaluate function at given point (not inside domain).");
+    }
+
     for (uint j = 0; j < scratch.size; j++)
     {
       values[j] = dolfin::DOLFIN_REAL_MAX;
@@ -569,20 +574,11 @@ void DiscreteFunction::InitializeVector()
 {
   if (X_->size() != dofmap_.global_dimension())
   {
-    if (MPI::numProcesses() > 1)
-    {
-      X_->init(dofmap_.local_size());
-    }
-    else
-    {
-      X_->init(dofmap_.global_dimension());
-    }
+    // Specific case in serial local_size == global_dimension
+    X_->init(dofmap_.local_size());
   }
 
-  if (MPI::numProcesses() > 1)
-  {
-    InitializeGhosts();
-  }
+  InitializeGhosts();
 
   X_->zero();
   X_->apply();
@@ -593,6 +589,8 @@ void DiscreteFunction::InitializeVector()
 //-----------------------------------------------------------------------------
 void DiscreteFunction::InitializeGhosts()
 {
+  if(!mesh_.is_distributed()) return;
+
   std::set<uint> indices;
 
   MeshDistributedData& distdata = mesh_.distdata();
@@ -655,9 +653,9 @@ void DiscreteFunction::disp() const
 void DiscreteFunction::sync_ghosts()
 {
 
-  if (MPI::numProcesses() == 1) return;
+  if(!mesh_.is_distributed()) return;
 
-  if (dofmap_.renumbered() && !renumbered_ && MPI::numProcesses() > 1)
+  if (dofmap_.renumbered() && !renumbered_)
   {
     InitializeGhosts();
     renumbered_ = true;

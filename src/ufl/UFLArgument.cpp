@@ -111,7 +111,11 @@ namespace ufl
       const double * const * coordinates) const
   {
     std::cout << "Argument::evaluate " << n << std::endl;
+#ifdef __OPEN64__
+    ufc::finite_element* fe = new dolfin::FiniteElement(element());
+#else
     ufc::finite_element* fe = new typename dolfin::FiniteElement(element());
+#endif
 
     std::cout << "value_rank " << fe->value_rank() << std::endl;
     std::cout << "space_dimension " << fe->space_dimension() << std::endl;

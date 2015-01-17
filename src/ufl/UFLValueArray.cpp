@@ -5,6 +5,7 @@
 // Last changed: 2014-01-21
 
 #include <dolfin/ufl/UFLValueArray.h>
+#include <sstream>
 
 namespace ufl
 {

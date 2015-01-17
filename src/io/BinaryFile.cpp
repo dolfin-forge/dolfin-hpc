@@ -494,10 +494,10 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_Exscan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_data[0], &offset[0], 2, MPI_UNSIGNED, MPI_SUM,
-        MPI::DOLFIN_COMM);
-    offset[0] -= vertex_data[0];
-    offset[1] -= vertex_data[1];
+    MPI_Scan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
+	     MPI::DOLFIN_COMM);
+    vertex_offset[0] -= vertex_data[0];
+    vertex_offset[1] -= vertex_data[1];
 #endif
 
     real * vertex_buffer = new real[vertex_data[1]];
@@ -519,9 +519,9 @@ void BinaryFile::operator>>(Mesh& mesh)
     MPI_Exscan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&cell_data, &offset[1], 1, MPI_UNSIGNED, MPI_SUM,
-        MPI::DOLFIN_COMM);
-    offset[1] -= cell_data;
+    MPI_Scan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
+	     MPI::DOLFIN_COMM);
+    cell_offset -= cell_data;
 #endif
 
     uint * cell_buffer = new uint[cell_data];
@@ -860,8 +860,9 @@ void BinaryFile::operator<<(Mesh& mesh)
     MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_buffer_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= vertex_buffer_size;
+    MPI_Scan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM, 
+	     MPI::DOLFIN_COMM);
+    vertex_offset -= vertex_buffer_size;
 #endif
     real * vertex_buffer = new real[vertex_buffer_size];
     real * vptr = &vertex_buffer[0];
@@ -888,9 +889,9 @@ void BinaryFile::operator<<(Mesh& mesh)
     MPI_Exscan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&cell_buffer_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-        MPI::DOLFIN_COMM);
-    offset -= cell_buffer_size;
+    MPI_Scan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
+	     MPI::DOLFIN_COMM);
+    cell_offset -= cell_buffer_size;
 #endif
     uint * cell_buffer = new uint[cell_buffer_size];
     uint * cp = &cell_buffer[0];
@@ -1031,7 +1032,8 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, 
+	     MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 
@@ -1115,7 +1117,8 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, 
+	     MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 

@@ -31,12 +31,12 @@ void MeshSize::eval(real * values, real const * x) const
   values[0] = cell().diameter();
 }
 //-----------------------------------------------------------------------------
-uint MeshSize::rank() const
+dolfin::uint MeshSize::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint MeshSize::dim(uint i) const
+dolfin::uint MeshSize::dim(uint i) const
 {
   return 1;
 }
@@ -90,12 +90,12 @@ void InvMeshSize::eval(real * values, real const * x) const
   values[0] = 1.0 / cell().diameter();
 }
 //-----------------------------------------------------------------------------
-uint InvMeshSize::rank() const
+dolfin::uint InvMeshSize::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint InvMeshSize::dim(uint i) const
+dolfin::uint InvMeshSize::dim(uint i) const
 {
   return 1;
 }
@@ -111,12 +111,12 @@ void CellVolume::eval(real * values, real const * x) const
   values[0] = cell().volume();
 }
 //-----------------------------------------------------------------------------
-uint CellVolume::rank() const
+dolfin::uint CellVolume::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint CellVolume::dim(uint i) const
+dolfin::uint CellVolume::dim(uint i) const
 {
   return 1;
 }
@@ -170,12 +170,12 @@ void InvCellVolume::eval(real * values, real const * x) const
   values[0] = 1.0 / cell().volume();
 }
 //-----------------------------------------------------------------------------
-uint InvCellVolume::rank() const
+dolfin::uint InvCellVolume::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint InvCellVolume::dim(uint i) const
+dolfin::uint InvCellVolume::dim(uint i) const
 {
   return 1;
 }
@@ -213,12 +213,12 @@ void AvgMeshSize::eval(real * values, real const * x) const
   }
 }
 //-----------------------------------------------------------------------------
-uint AvgMeshSize::rank() const
+dolfin::uint AvgMeshSize::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint AvgMeshSize::dim(uint i) const
+dolfin::uint AvgMeshSize::dim(uint i) const
 {
   return 1;
 }
@@ -243,12 +243,12 @@ void FacetNormal::eval(real * values, real const * x) const
   }
 }
 //-----------------------------------------------------------------------------
-uint FacetNormal::rank() const
+dolfin::uint FacetNormal::rank() const
 {
   return 1;
 }
 //-----------------------------------------------------------------------------
-uint FacetNormal::dim(uint i) const
+dolfin::uint FacetNormal::dim(uint i) const
 {
   if (i > 0)
     error("Invalid dimension %d in FacetNormal::dim.", i);
@@ -269,12 +269,12 @@ void FacetArea::eval(real * values, real const * x) const
     values[0] = 0.0;
 }
 //-----------------------------------------------------------------------------
-uint FacetArea::rank() const
+dolfin::uint FacetArea::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint FacetArea::dim(uint i) const
+dolfin::uint FacetArea::dim(uint i) const
 {
   return 1;
 }
@@ -293,12 +293,12 @@ void InvFacetArea::eval(real * values, real const * x) const
     values[0] = 0.0;
 }
 //-----------------------------------------------------------------------------
-uint InvFacetArea::rank() const
+dolfin::uint InvFacetArea::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint InvFacetArea::dim(uint i) const
+dolfin::uint InvFacetArea::dim(uint i) const
 {
   return 1;
 }
@@ -366,12 +366,12 @@ void OutflowFacet::eval(real * values, real const * x) const
   }
 }
 //-----------------------------------------------------------------------------
-uint OutflowFacet::rank() const
+dolfin::uint OutflowFacet::rank() const
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint OutflowFacet::dim(uint i) const
+dolfin::uint OutflowFacet::dim(uint i) const
 {
   return 1;
 }

@@ -95,7 +95,7 @@ std::map<dolfin::uint, dolfin::uint> const TensorElement::symmetry() const
 std::pair<ValueArray, ValueArray> const TensorElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, dolfin::uint>();
+  return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------

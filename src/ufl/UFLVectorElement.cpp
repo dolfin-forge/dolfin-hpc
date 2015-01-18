@@ -99,7 +99,7 @@ std::map<dolfin::uint, dolfin::uint> const VectorElement::symmetry() const
 std::pair<ValueArray, ValueArray> const VectorElement::extract_subelement_component(
     ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, dolfin::uint>();
+  return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------

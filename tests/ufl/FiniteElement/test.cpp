@@ -36,7 +36,7 @@ START_TEST( test_init )
   {
     int init_failed = 0;
 
-    uint const deg_max = 2;
+    dolfin::uint const deg_max = 2;
     std::vector<Family::Type> v;
     v.push_back(Family::DG);
     v.push_back(Family::CG);
@@ -45,8 +45,8 @@ START_TEST( test_init )
         it != v.end(); ++it)
     {
       Family f(*it);
-      uint d_min = f.degree_min();
-      uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
+      dolfin::uint d_min = f.degree_min();
+      dolfin::uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
       ufl::Domain::Set domains = f.domains();
 
       for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
@@ -54,7 +54,7 @@ START_TEST( test_init )
       {
         Domain dom(*dom_it);
         ufl::Cell cell(dom);
-        for (uint d = d_min; d <= d_max; ++d)
+        for (dolfin::uint d = d_min; d <= d_max; ++d)
         {
           begin("Creating UFLFiniteElement:");
           ufl::FiniteElement uflfem(*it, cell, d);

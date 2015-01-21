@@ -39,7 +39,7 @@ START_TEST( test_geometric_create )
 {
   int init_failed = 0;
 
-  uint const N = 16;
+  dolfin::uint const N = 16;
   UnitSquare mesh(N, N);
   //init_failed = test_create(sd);
 

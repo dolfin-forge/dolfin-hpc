@@ -50,7 +50,7 @@ real MeshSize::min() const
 
 #ifdef HAVE_MPI
   // Compute the global minimum
-  if (MPI::numProcesses() > 1)
+  if (mesh().is_distributed())
   {
     real hmin_tmp = hmin;
     MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
@@ -69,7 +69,7 @@ real MeshSize::max() const
 
 #ifdef HAVE_MPI
   // Compute the global maximum
-  if (MPI::numProcesses() > 1)
+  if (mesh().is_distributed())
   {
     real hmax_tmp = hmax;
     MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
@@ -130,7 +130,7 @@ real CellVolume::min() const
 
 #ifdef HAVE_MPI
   // Compute the global minimum
-  if (MPI::numProcesses() > 1)
+  if (mesh().is_distributed())
   {
     real hmin_tmp = hmin;
     MPI_Allreduce(&hmin_tmp, &hmin, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
@@ -149,7 +149,7 @@ real CellVolume::max() const
 
 #ifdef HAVE_MPI
   // Compute the global maximum
-  if (MPI::numProcesses() > 1)
+  if (mesh().is_distributed())
   {
     real hmax_tmp = hmax;
     MPI_Allreduce(&hmax_tmp, &hmax, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
@@ -195,7 +195,7 @@ void AvgMeshSize::eval(real * values, real const * x) const
   {
     // Create facet from the global facet number
     Facet facet0(mesh(),
-		 cell().entities(cell().mesh().topology().dim() - 1)[facet()]);
+                 cell().entities(cell().mesh().topology().dim() - 1)[facet()]);
 
     // If there are two cells connected to the facet
     if (facet0.numEntities(cell().mesh().topology().dim()) == 2)
@@ -310,13 +310,17 @@ OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) :
 {
   // Some simple sanity checks on form
   if (!(form.rank() == 0 && form.num_coefficients() == 2))
+  {
     error("Invalid form: rank = %d, number of coefficients = %d."
-	  "Must be rank 0 form with 2 coefficients.",
-	  form.rank(), form.num_coefficients());
+          "Must be rank 0 form with 2 coefficients.",
+          form.rank(), form.num_coefficients());
+  }
   if (!(form.num_cell_integrals() == 0
-	&& form.num_exterior_facet_integrals() == 1
-	&& form.num_interior_facet_integrals() == 0))
+      && form.num_exterior_facet_integrals() == 1
+      && form.num_interior_facet_integrals() == 0))
+  {
     error("Invalid form: Must have exactly 1 exterior facet integral");
+  }
 
   form.update_dofmaps();
   ufc = new UFC(form, mesh, form.dofmaps());
@@ -342,9 +346,11 @@ void OutflowFacet::eval(real * values, real const * x) const
 
     // Interpolate coefficients on cell and current facet
     for (dolfin::uint i = 0; i < form.coefficients().size(); i++)
+    {
       form.coefficients()[i]->interpolate(ufc->w[i], ufc->cell,
-					  *ufc->coefficient_elements[i],
-					  cell0, facet());
+                                          *ufc->coefficient_elements[i],
+                                          cell0, facet());
+    }
 
     // Get exterior facet integral (we need to be able to tabulate ALL facets
     // of a given cell)

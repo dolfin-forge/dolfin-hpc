@@ -110,6 +110,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
   bool on_boundary = false;
 
   // Compute sub domain markers
+  bool const is_distributed = mesh.is_distributed();
   for (MeshEntityIterator entity(mesh, dim); !entity.end(); ++entity)
   {
     on_boundary = false;
@@ -122,11 +123,6 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     {
       for (FacetIterator fi(*entity); !fi.end(); ++fi)
       {
-        /*
-         if( fi->numEntities(D) == 1 ||
-         (MPI::numProcesses() > 1 && facetmap.globalFacet(*fi) &&
-         fi->numEntities(D) == 1))
-         */
         if (fi->numEntities(D) && facetmap.globalFacet(*fi))
         {
           on_boundary = true;
@@ -139,11 +135,13 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     if (entity->dim() > 0)
     {
 
-      if (MPI::numProcesses() > 1)
+      if (is_distributed)
       {
         Facet f(mesh, entity->index());
         if (!facetmap.globalFacet(f))
+        {
           on_boundary = false;
+        }
       }
 
       for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
@@ -189,7 +187,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
   dolfin_set("Geometrical Tolerance Tetrahedron", geom_tet_tol);
 
 #ifdef HAVE_MPI
-  if (MPI::numProcesses() > 1)
+  if (is_distributed)
   {
     if (dim == 0)
     {

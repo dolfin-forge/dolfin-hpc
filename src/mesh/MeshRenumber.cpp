@@ -50,7 +50,7 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
-  if (mddata.has_valid_numbering(0) || MPI::numProcesses() == 1)
+  if (mddata.has_valid_numbering(0) || ! mesh.is_distributed())
   {
     return false;
   }
@@ -144,7 +144,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if (mesh.topology().dim() < 2 || mddata.has_valid_numbering(1)
-        || MPI::numProcesses() == 1)
+        || ! mesh.is_distributed())
   {
     return false;
   }
@@ -328,7 +328,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if (mesh.topology().dim() < 3 || mddata.has_valid_numbering(2)
-        || MPI::numProcesses() == 1)
+        || ! mesh.is_distributed())
   {
     return false;
   }
@@ -530,7 +530,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
   mddata.init(tdim);
-  if (mddata.has_valid_numbering(tdim) || MPI::numProcesses() == 1)
+  if (mddata.has_valid_numbering(tdim) || ! mesh.is_distributed())
   {
     return false;
   }
@@ -557,7 +557,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
 bool MeshRenumber::remap_facets(Mesh& mesh)
 {
   uint const facetdim = mesh.topology().dim() - 1;
-  if (mesh.distdata().has_valid_mapping(facetdim) || MPI::numProcesses() == 1)
+  if (mesh.distdata().has_valid_mapping(facetdim) || ! mesh.is_distributed())
   {
     return false;
   }

@@ -129,7 +129,7 @@ void VertexNormal::ComputeSimpleNormal(Mesh& mesh)
   MeshFunction<uint>* vertex_map = boundary.data().meshFunction("vertex map");
 
   //
-  if (dolfin::MPI::numProcesses() > 1)
+  if (mesh.is_distributed())
   {
     CacheSharedArea(mesh, boundary);
   }
@@ -156,7 +156,7 @@ void VertexNormal::ComputeSimpleNormal(Mesh& mesh)
       //--- Get number of neighbouring facets ---------------------------------
       //message("Get number of neighbouring facets");
       uint NbNeighCells = 0;
-      if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
+      if (vertex_is_shared)
       {
         NbNeighCells = num_neigh_cells_[global_id];
       }
@@ -176,7 +176,7 @@ void VertexNormal::ComputeSimpleNormal(Mesh& mesh)
                          weights);
 
       // Add neighbouring facet contributions from other processes
-      if (dolfin::MPI::numProcesses() > 1 && vertex_is_shared)
+      if (vertex_is_shared)
       {
         Array<real>& shared_weights = shared_facetweights_block_[global_id];
         weights.insert(weights.end(), shared_weights.begin(),
@@ -418,7 +418,7 @@ void VertexNormal::ComputeSimpleNormal(Mesh& mesh)
   }
 
   // Synchronize basis vectors, vertex_types across processes
-  if (dolfin::MPI::numProcesses() > 1)
+  if (mesh.is_distributed())
   {
 #ifdef HAVE_MPI
     MPI_Status status;
@@ -566,6 +566,11 @@ void VertexNormal::GetLocalFacetsData(uint const& gdim, Vertex& vertex,
 //-----------------------------------------------------------------------------
 void VertexNormal::CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary)
 {
+  if(!mesh.is_distributed())
+  {
+    return;
+  }
+
 #ifdef HAVE_MPI
   uint const nsdim = mesh.geometry().dim();
 
@@ -789,24 +794,30 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
   real *ns2_block = 0;
   real *area_block = 0;
 
-  if (MPI::numProcesses() > 1) CacheSharedArea(mesh, boundary);
+  if (mesh.is_distributed())
+  {
+    CacheSharedArea(mesh, boundary);
+  }
 
   // Computation of normals to the boundary vertices
   if (boundary.numCells() > 0)
   {
     for (VertexIterator n(boundary); !n.end(); ++n)
     {
-
       int id = vertex_map->get(*n);
 
       int Nrow = 0;
       for (CellIterator boundary_cell(*n); !boundary_cell.end();
           ++boundary_cell)
+      {
         Nrow++;
+      }
 
       // Add storage for shared vertices cell normals
-      if (MPI::numProcesses() > 1) if (mesh.distdata().is_shared(id, 0)) Nrow =
-          num_neigh_cells_[mesh.distdata().get_global(id, 0)];
+      if (mesh.distdata().is_shared(id, 0))
+      {
+        Nrow = num_neigh_cells_[mesh.distdata().get_global(id, 0)];
+      }
 
       int Ncol = 3;
 
@@ -859,7 +870,7 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
         irow++;
       }
 
-      if (MPI::numProcesses() > 1) if (mesh.distdata().is_shared(id, 0))
+      if (mesh.distdata().is_shared(id, 0))
       {
         uint glb_index = mesh.distdata().get_global(id, 0);
         //    sum_area += shared_area[glb_index];
@@ -1226,7 +1237,7 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
   }
 
 #ifdef HAVE_MPI
-  if (MPI::numProcesses() > 1)
+  if (mesh.is_distributed())
   {
     MPI_Status status;
     uint src, dest;

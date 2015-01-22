@@ -53,6 +53,10 @@ AC_ARG_ENABLE(check, AC_HELP_STRING([--enable-check],
               [Compile with support for unit testing, requires libcheck]),
               [enable_check=${enableval}],[enable_check=no])
 
+AC_ARG_ENABLE(python, AC_HELP_STRING([--enable-python], 
+              [Install Python modules, requires a Python interpreter]),
+              [enable_python=${enableval}],[enable_python=no])
+
 # Optional packages
 AC_ARG_WITH(xml, AC_HELP_STRING([--with-xml],
             [Compile with support for reading/writing XML data]),
@@ -132,12 +136,10 @@ AC_CHECK_HEADERS([float.h stdlib.h string.h])
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
 
+# UFL is now default
 PKG_CHECK_MODULES([UFC],[ufc-1 = 2.1.3])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
 AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.3])
-# Add variable for automake to select generated source to be compiled
-AM_CONDITIONAL([ENABLE_UFL], [test "x${enable_ufl}" == xyes])
-
 
 if test "x${need_boost}" = xyes; then
    AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))
@@ -276,7 +278,7 @@ if test "x${enable_check}" = xyes; then
    fi
 fi
 # Add variable for automake to compile tests
-AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" == xyes])
+AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" = xyes])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
@@ -294,6 +296,15 @@ fi
 AC_FUNC_ERROR_AT_LINE
 AC_CHECK_FUNCS([floor memset pow sqrt])
 
+# Checks for Python
+AM_PATH_PYTHON([2.6])
+if test "x${enable_python}" = xyes; then
+    if ! ${HAVE_PYTHON}; then
+        AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
+    fi
+fi
+# Add variable for installation of Python modules
+AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])
 
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
@@ -384,6 +395,11 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/ufl/VectorElement/Makefile])
 fi
 
+# Python
+if test "x${enable_python}" = xyes; then
+    AC_CONFIG_FILES([site-packages/Makefile])
+fi
+
 AC_OUTPUT
 
 # Display help text
@@ -411,11 +427,21 @@ Package features:
   Progress bar: ${enable_progressbar}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
-  UFL support: ${enable_ufl}
   CHECK support: ${enable_check}
-
 
 ---------------------------------------------------------
 "
+if test "x${enable_python}" = xyes; then
+echo \
+"  Python modules will be installed in:
+
+        ${pythondir}
+        
+  with \${prefix} = ${prefix} .
+  
+  Do not forget to set the PYTHONPATH variable.
+---------------------------------------------------------
+"
+fi
 
 

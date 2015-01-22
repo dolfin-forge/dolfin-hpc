@@ -369,9 +369,9 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
   // Tabulate dofs
   dofmap_.tabulate_dofs(scratch.dofs, cell, dolfin_cell);
 
-  // Pick values from global vector
+  // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
-  if (MPI::numProcesses() > 1)
+  if (!cache_mapping_.empty())
   {
     for (uint i = 0; i < scratch.local_dimension; i++)
     {

@@ -57,6 +57,10 @@ void VTKFile::operator<<(Mesh& mesh)
 
     if (MPI::numProcesses() > 1)
     {
+      if(!mesh.is_distributed())
+      {
+        error("Saving a serial mesh in a parallel run is unsupported");
+      }
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
 
@@ -143,7 +147,12 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
     pvdFileWrite(counter);
   }
 
+  //FIXME: This only writes the first mesh encountered
   Mesh& mesh = f[0].first->mesh();
+  if(MPI::numProcesses() > 1 && !mesh.is_distributed())
+  {
+    error("Saving functions on a serial mesh in a parallel run is unsupported");
+  }
 
   // Write headers
   VTKHeaderOpen(mesh);

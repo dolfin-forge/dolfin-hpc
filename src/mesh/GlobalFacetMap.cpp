@@ -285,6 +285,9 @@ bool GlobalFacetMap::globalFacet(Facet& facet)
   const uint index = facet.index();
 
   // If the facet is in the map, it might be a local facet
+  // COMMENT: if the mesh is serial then global_facet is empty then the second
+  // test is never evaluated. Conversely the first assertion implies the second
+  // as building the global_facet map relies on the shared entities iterator.
   if(global_facet.count(index) > 0 && MPI::numProcesses() > 1)
   {
     return global_facet[index];

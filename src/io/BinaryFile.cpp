@@ -15,6 +15,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/parameter/parameters.h>
 #include <typeinfo>
 
 #ifdef ENABLE_MPIIO
@@ -408,8 +409,13 @@ void BinaryFile::operator>>(Mesh& mesh)
   uint pe_size = MPI::numProcesses();
   uint pe_rank = MPI::processNumber();
 
-  if (MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1 || dolfin_get("Mesh read in serial"))
   {
+    if(MPI::processNumber() > 0)
+    {
+      error("Reading serial mesh in parallel not implemented");
+    }
+
     std::ifstream fp(filename.c_str(), std::ifstream::binary);
 
     uint type = 0;
@@ -805,8 +811,13 @@ void BinaryFile::operator<<(Mesh& mesh)
   hdr.bendian = 0;
 #endif
 
-  if (MPI::numProcesses() == 1)
+  if (MPI::numProcesses() == 1 || ! mesh.is_distributed())
   {
+    if(MPI::processNumber() > 0)
+    {
+      error("Writing serial mesh in parallel not implemented");
+    }
+
     std::ofstream fp(filename.c_str(), std::ofstream::binary);
 
     // Write Header

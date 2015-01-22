@@ -5,6 +5,10 @@ if ENABLE_CHECK
 SUBDIRS += tests data
 endif
 
+if ENABLE_PYTHON_MODULES
+SUBDIRS += site-packages
+endif
+
 dist_data_DATA = regen.sh
 
 EXTRA_DIST = data/meshes/aneurysm.xml.gz\

@@ -55,7 +55,7 @@ void MeshSmoothData::prepare_mesh()
     }
   }
 
-  if (MPI::numProcesses() == 1)
+  if (! _mesh.is_distributed())
   {
     return;
   }
@@ -203,7 +203,7 @@ void MeshSmoothData::sum_contribution(double*& recv_buff, int& mod,
                                       double& stopper, uint& src)
 {
 
-  if (MPI::numProcesses() == 1)
+  if (! _mesh.is_distributed())
   {
     return;
   }

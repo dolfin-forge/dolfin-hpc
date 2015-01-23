@@ -13,13 +13,8 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/CahnHilliard2D.h"
-#include "ufc2/CahnHilliard3D.h"
-#else
-#include "ufc1/CahnHilliard2D.h"
-#include "ufc1/CahnHilliard3D.h"
-#endif
+#include "CahnHilliard2D.h"
+#include "CahnHilliard3D.h"
 
 using namespace dolfin;
 

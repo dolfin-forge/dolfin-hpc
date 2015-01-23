@@ -58,7 +58,7 @@ uint Form::coefficient_number(std::string const& name) const
 }
 
 //-----------------------------------------------------------------------------
-std::string Form::coefficient_name(uint const i) const
+std::string Form::coefficient_name(uint i) const
 {
   error("Not implemented without UFL support: \n"
         "std::string Form::coefficient_name(dolfin::uint i) const");

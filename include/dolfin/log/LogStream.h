@@ -9,14 +9,13 @@
 #ifndef __LOG_STREAM_H
 #define __LOG_STREAM_H
 
-#include <ostream>
 #include <string>
 #include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
-  class LogStream : public std::ostream
+  class LogStream
   {
   public:
 
@@ -40,7 +39,7 @@ namespace dolfin
     void add(const char* msg);
 
     Type type;
-    char* buffer;
+    char * buffer;
     int current;
 
   };

@@ -198,7 +198,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   fprintf(fp, "<Cells>  \n");
   fprintf(
       fp,
-      "<DataArray  type=\"Int32\"  Name=\"connectivity\"  format=\"binary\"> \n");
+      "<DataArray  type=\"UInt32\"  Name=\"connectivity\"  format=\"binary\"> \n");
   std::vector<uint32_t> c_data(cell_verts_block_size);
   std::vector<uint32_t>::iterator c_entry = c_data.begin();
   for (CellIterator c(mesh); !c.end(); ++c)
@@ -218,7 +218,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Write offset into connectivity array for the end of each cell
   fprintf(
       fp,
-      "<DataArray  type=\"Int32\"  Name=\"offsets\"  format=\"binary\">  \n");
+      "<DataArray  type=\"UInt32\"  Name=\"offsets\"  format=\"binary\">  \n");
   std::vector<uint32_t>::iterator cc_entry = c_data.begin();
 
   for (uint offsets = 1; offsets <= num_mesh_cells; ++offsets)

@@ -47,7 +47,7 @@ namespace ufl
       static Sum const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -124,7 +124,7 @@ namespace ufl
       static Product const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -201,7 +201,7 @@ namespace ufl
       static Division const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -278,7 +278,7 @@ namespace ufl
       static Power const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -354,7 +354,7 @@ namespace ufl
       static Abs const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;

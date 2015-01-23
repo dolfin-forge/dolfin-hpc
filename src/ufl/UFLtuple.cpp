@@ -1,94 +1,73 @@
-// Copyright (C) 2014 Aurélien Larcher.
+// Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-28
-// Last changed: 2014-01-28
+// First added:  
+// Last changed: 
 
-#include <dolfin/ufl/UFLData.h>
-#include <dolfin/ufl/UFLExpression.h>
-#include <dolfin/ufl/UFLIndex.h>
-#include <dolfin/ufl/UFLIntegral.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFLTuple.h>
 
 namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-  template <class T> tuple<T>::tuple(T const& obj) :
-    Class("(", ")"),
-    objects_(std::vector<T const *>(1,&obj)),
-    repr_(*this, objects_),
-    str_("")
+  Tuple::Tuple(tuple<Expression> const& t) :
+    Expression("Tuple"),
+    t_(t)
   {
+    // Create string representation
+    std::stringstream ssrepr;
+    std::stringstream ssstr;
+    ssrepr << "Tuple(*" << t_.repr() << ")";
+    ssstr << "Tuple(*" << t_.str() << ")";
+
+    repr_ = ssrepr.str();
+    str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> tuple<T>::tuple(std::vector<T const *> const& objs) :
-    Class("(", ")"),
-    objects_(objs),
-    repr_(*this, objects_),
-    str_("")
+  Tuple::Tuple(repr_t const & repr) :
+    Expression("Tuple", repr),
+    t_(arg(0))
   {
+    // Create string representation
+    std::stringstream ssrepr;
+    std::stringstream ssstr;
+    ssrepr << "Tuple(*" << t_.repr() << ")";
+    ssstr << "Tuple(*" << t_.str() << ")";
+
+    repr_ = ssrepr.str();
+    str_ = ssstr.str();
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> tuple<T>::tuple(tuple<T> const& other_tuple) :
-    Class("(", ")"),
-    objects_(other_tuple.objects()),
-    repr_(*this, objects_),
-    str_("")
-  {
-//    std::cout << "other objs= " << other_tuple.objects().size() << std::endl;
-//    std::cout << "objs= " << objects_.size() << std::endl;
-  }
-
-//-----------------------------------------------------------------------------
-  template <class T> tuple<T>::tuple(repr_t const& repr) :
-    Class("(", ")", repr),
-    objects_(fill_objects(args())),
-    repr_(*this, objects_),
-    str_("")
-  {
-  }
-
-//-----------------------------------------------------------------------------
-  template <class T> tuple<T>::tuple() :
-    Class(),
-    objects_(),
-    repr_(*this, objects_),
-    str_("")
-  {
-  }
-
-//-----------------------------------------------------------------------------
-  template <class T> tuple<T>::~tuple()
+  Tuple::~Tuple()
   {
   }
   
 //-----------------------------------------------------------------------------
-  template <class T> std::vector<Class const*> const tuple<T>::operands(std::string const& name) const
+  std::vector<Class const*> const Tuple::operands(std::string const& name) const
   {
-    std::vector<Class const*> obj0;
-    for(dolfin::uint i=0; i<objects_.size(); ++i)
+    std::vector<Class const*> expr0;
+    for(dolfin::uint i=0; i<operands().size(); ++i)
     {
-      std::vector<Class const*> obj1 = objects_[i]->operands(name);
-      obj0.insert(obj0.end(), obj1.begin(), obj1.end());
+     std::vector<Class const*> expr1 = operands()[i]->operands(name);
+     expr0.insert(expr0.end(), expr1.begin(), expr1.end());
     }
-//    if(name == this->name())
-//      obj0.push_back(this);
-    return obj0;
+    if(name == this->name())
+      expr0.push_back(this);
+    return expr0;
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> std::vector<std::vector<Class const*> > const tuple<T>::level_operands(
-      std::vector<std::vector<Class const*> > const& operands) const
+  std::vector<std::vector<Class const*> > const Tuple::level_operands(
+      std::vector<std::vector<Class const*> > const& ops) const
   {
-    std::vector<std::vector<std::vector<Class const*> > > new_operands(objects_.size());
+    std::vector<std::vector<std::vector<Class const*> > > new_operands(operands().size());
 
     dolfin::uint size = 0;
-    for(dolfin::uint i=0; i<objects_.size(); ++i)
+    for(dolfin::uint i=0; i<operands().size(); ++i)
     {
-      new_operands[i] = objects_[i]->level_operands(operands);
+      new_operands[i] = operands()[i]->level_operands(ops);
       size = std::max(size, (dolfin::uint)new_operands[i].size());
     }
 
@@ -114,60 +93,64 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> dolfin::uint const tuple<T>::size() const
-  {
-    dolfin::uint size = objects_.size();
-    return size;
-  }
-
-//-----------------------------------------------------------------------------
-  template <class T> std::vector<T const *> const& tuple<T>::operands() const
-  {
-    return objects_;
-  }
-
-//-----------------------------------------------------------------------------
-  template <class T> Object::repr_t const tuple<T>::repr() const
+  Object::repr_t const Tuple::repr() const
   {
     return repr_;
   }
 
-//-----------------------------------------------------------------------------
-  template <class T> std::string const tuple<T>::str() const
+  //-----------------------------------------------------------------------------
+  std::string const Tuple::str() const
   {
     return str_;
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> void tuple<T>::display() const
+  void Tuple::display() const
   {
-    std::cout << "tuple of " << std::endl;
-    std::cout << ".str : " << this->str() << std::endl;
-    std::cout << ".repr: " << this->repr() << std::endl;
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> std::vector<T const *> const tuple<T>::fill_objects(std::vector<repr_t> const& reprs)
+  Tuple const* Tuple::create(Object::repr_t const& repr) const
   {
-    std::vector<T const *> objs;
-    for(dolfin::uint i=0; i<reprs.size(); ++i)
-      objs.push_back(T::create(reprs[i]));
+      return new Tuple(repr);
+  }
   
-    return objs;
+//-----------------------------------------------------------------------------
+  std::vector<Expression const *> const Tuple::operands() const
+  {
+    return t_.operands();  
   }
 
 //-----------------------------------------------------------------------------
-  template <class T> std::vector<T const *> const& tuple<T>::objects() const
+  ValueArray const Tuple::shape() const
   {
-    return objects_;
+    return ValueArray();
   }
 
-//----------------------------INSTANTIATIONS-----------------------------------
-  template class tuple<Index>;
-  template class tuple<IndexBase>;
-  template class tuple<FixedIndex>;
-  template class tuple<Data>;
-  template class tuple<Expression>;
-  template class tuple<Measure>;
-  template class tuple<Integral>;
-} /* namespace ufl */
+//-----------------------------------------------------------------------------
+  tuple<Index> const Tuple::free_indices() const
+  {
+    return tuple<Index>();
+  }
+
+//-----------------------------------------------------------------------------
+  dict<IndexBase, type<dolfin::uint> > const Tuple::index_dimensions() const
+  {
+    return dict<IndexBase, type<dolfin::uint> >();
+  }
+
+//-----------------------------------------------------------------------------
+  std::vector<std::vector<std::vector<dolfin::real> > > const Tuple::evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, 
+      std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const
+  {
+    for(dolfin::uint i=0; i<operands().size(); ++i)
+      operands()[i]->evaluate(n, tensor, ref_cell, q_points, coordinates);
+    std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
+    return new_vals0;
+  }
+
+}

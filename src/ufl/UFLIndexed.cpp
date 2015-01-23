@@ -105,8 +105,10 @@ namespace ufl
   }
     
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Indexed::operands() const
+  std::vector<Expression const *> const Indexed::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

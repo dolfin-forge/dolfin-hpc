@@ -61,7 +61,7 @@ namespace ufl
       static CoefficientDerivative const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -149,7 +149,7 @@ namespace ufl
       static SpatialDerivative const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -231,7 +231,7 @@ namespace ufl
       static VariableDerivative const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -312,7 +312,7 @@ namespace ufl
       static Grad const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -391,7 +391,7 @@ namespace ufl
       static Div const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -471,7 +471,7 @@ namespace ufl
       static NablaGrad const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -550,7 +550,7 @@ namespace ufl
       static NablaDiv const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -629,7 +629,7 @@ namespace ufl
       static Curl const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;

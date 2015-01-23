@@ -62,8 +62,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Label::operands() const
+  std::vector<Expression const *> const Label::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -210,8 +212,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Variable::operands() const
+  std::vector<Expression const *> const Variable::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

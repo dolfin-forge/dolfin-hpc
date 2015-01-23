@@ -97,9 +97,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& CoefficientBase::operands() const
+  std::vector<Expression const *> const CoefficientBase::operands() const
   {
-    std::vector<Expression const *> expressions_;
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

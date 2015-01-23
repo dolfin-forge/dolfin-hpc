@@ -63,7 +63,7 @@ namespace ufl
       dolfin::uint const dimension() const;
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;

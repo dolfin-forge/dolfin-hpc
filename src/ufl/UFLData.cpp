@@ -75,8 +75,10 @@ using dolfin::error;
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Data::operands() const
+  std::vector<Expression const *> const Data::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

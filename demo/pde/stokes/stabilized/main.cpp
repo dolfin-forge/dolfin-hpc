@@ -12,100 +12,76 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/Stokes.h"
-#else
-#include "ufc1/Stokes.h"
-#endif
+#include "../Stokes2D.h"
+#include "Stokes.h"
 
 using namespace dolfin;
 
-int main()
+int main(int argc, char* argv[])
 {
-  // Function for no-slip boundary condition for velocity
-  class Noslip : public VectorExpression
-  {
-  public:
+  dolfin_init(argc, argv);
 
-    Noslip() : VectorExpression(2) {}
+	{
+		// Read mesh and sub domain markers
+		Mesh mesh("../../../../data/meshes/dolfin-2.xml.gz");
 
-    void eval(real* values, const real* x) const
-    {
-      values[0] = 0.0;
-      values[1] = 0.0;
-    }
-  };
+		// Create functions for boundary conditions
+		NoSlip nslip;
+		Function noslip(mesh, nslip);
+		Inflow in;
+		Function inflow(mesh, in);
+		Function zero(mesh, 0.0);
 
-  // Function for inflow boundary condition for velocity
-  class Inflow : public VectorExpression
-  {
-  public:
+		// Define sub systems for boundary conditions
+		SubSystem velocity(0);
+		SubSystem pressure(1);
 
-    Inflow() : VectorExpression(2) {}
+		// No-slip boundary condition for velocity
+		NoSlipBoundary nsb;
+		DirichletBC bc0(noslip, mesh, nsb, velocity);
 
-    void eval(real* values, const real* x) const
-    {
-      values[0] = -sin(x[1]*DOLFIN_PI);
-      values[1] = 0.0;
-    }
+		// Inflow boundary condition for velocity
+		RightBoundary rb;
+		DirichletBC bc1(inflow, mesh, rb, velocity);
 
-  };
+		// Boundary condition for pressure at outflow
+		LeftBoundary lb;
+		DirichletBC bc2(zero, mesh, lb, pressure);
 
-  // Read mesh and sub domain markers
-  Mesh mesh("../../../../data/meshes/dolfin-2.xml.gz");
-  MeshFunction<unsigned int> sub_domains(mesh, "subdomains.xml.gz");
+		// Collect boundary conditions
+		Array <BoundaryCondition*> bcs;
+		bcs.push_back(&bc0);
+  	bcs.push_back(&bc1);
+	  bcs.push_back(&bc2);
 
-  // Create functions for boundary conditions
-  Noslip nslip;
-  Function noslip(mesh, nslip);
-  Inflow in;
-  Function inflow(mesh, in);
-  Function zero(mesh, 0.0);
+		// Set up PDE
+		MeshSize h(mesh);
+		Function f(mesh, 2, 0.0);
+		StokesBilinearForm a(h);
+		StokesLinearForm L(f, h);
+		LinearPDE pde(a, L, mesh, bcs);
 
-  // Define sub systems for boundary conditions
-  SubSystem velocity(0);
-  SubSystem pressure(1);
+		// Solve PDE
+		Function u(mesh);
+		Function p(mesh);
+		pde.set("PDE linear solver", "direct");
+		pde.solve(u, p);
 
-  // No-slip boundary condition for velocity
-  DirichletBC bc0(noslip, sub_domains, 0, velocity);
+		// Save solution
+		File ufile("velocity.xml");
+		ufile << u;
+		File pfile("pressure.xml");
+		pfile << p;
 
-  // Inflow boundary condition for velocity
-  DirichletBC bc1(inflow, sub_domains, 1, velocity);
+		// Save solution in VTK format
+		File ufile_pvd("velocity.pvd");
+		ufile_pvd << u;
+		File pfile_pvd("pressure.pvd");
+		pfile_pvd << p;
 
-  // Boundary condition for pressure at outflow
-  DirichletBC bc2(zero, sub_domains, 2, pressure);
+		File x_file("x.xml");
+		x_file << u.vector();
+	}
 
-  // Collect boundary conditions
-  Array <BoundaryCondition*> bcs(&bc0, &bc1, &bc2);
-
-  // Set up PDE
-  MeshSize h(mesh);
-  Function f(mesh, 2, 0.0);
-  StokesBilinearForm a(h);
-  StokesLinearForm L(f, h);
-  LinearPDE pde(a, L, mesh, bcs);
-
-  // Solve PDE
-  Function u(mesh);
-  Function p(mesh);
-  pde.set("PDE linear solver", "direct");
-  pde.solve(u, p);
-
-
-  // Save solution
-  File ufile("velocity.xml");
-  ufile << u;
-  File pfile("pressure.xml");
-  pfile << p;
-
-  // Save solution in VTK format
-  File ufile_pvd("velocity.pvd");
-  ufile_pvd << u;
-  File pfile_pvd("pressure.pvd");
-  pfile_pvd << p;
-
-  File x_file("x.xml");
-  x_file << u.vector();
-
-
+	dolfin_finalize();
 }

@@ -20,7 +20,7 @@ NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     a(a),
     L(L),
     mesh(mesh),
-    assembler(mesh),
+    assembler(),
     reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
@@ -35,7 +35,7 @@ NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     L(L),
     mesh(mesh),
     bcs(bcs),
-    assembler(mesh),
+    assembler(),
     reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());

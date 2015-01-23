@@ -23,7 +23,7 @@ LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh) :
     a(a),
     L(L),
     mesh(mesh),
-    assembler(mesh),
+    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE.");
@@ -34,7 +34,7 @@ LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     a(a),
     L(L),
     mesh(mesh),
-    assembler(mesh),
+    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE with one boundary condition.");
@@ -46,7 +46,7 @@ LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
     a(a),
     L(L),
     mesh(mesh),
-    assembler(mesh),
+    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE with %d boundary condition(s).", bcs.size());

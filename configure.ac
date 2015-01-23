@@ -329,6 +329,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  include/Makefile\
                  include/dolfin/Makefile\
                  demo/Makefile\
+                 demo/fem/Makefile\
                  demo/mesh/Makefile\
                  demo/nls/Makefile\
                  demo/pde/Makefile\

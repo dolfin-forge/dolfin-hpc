@@ -29,7 +29,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(const Type type):
+PETScMatrix::PETScMatrix(Type type):
     Variable("A", "a sparse matrix"),
     A(0), is_view(false), _type(type), sub(false), block_size(0)
 {

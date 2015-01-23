@@ -44,7 +44,7 @@ public:
   virtual void map(real const * x, real* y) const;
 
   /// Set sub domain markers for given sub domain
-  void mark(MeshFunction<uint>& sub_domains, uint const sub_domain) const;
+  void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
 
 private:
 

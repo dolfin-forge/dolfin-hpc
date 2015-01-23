@@ -7,12 +7,7 @@
 // Testing evaluation at arbitrary points
 
 #include <dolfin.h>
-
-#ifdef ENABLE_UFL
-#include "ufc2/Projection.h"
-#else 
-#include "ufc2/Projection.h"
-#endif
+#include "Projection.h"
 
 using namespace dolfin;
 

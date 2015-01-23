@@ -43,7 +43,9 @@ AC_DEFUN([AX_ZOLTAN],[
 	fi
 			
 	AC_CHECK_HEADER([zoltan.h],[have_zoltan_h=yes],[have_zoltan_h=no])
-	AC_CHECK_LIB(zoltan, Zoltan_LB_Partition, [have_zoltan=yes;ZOLTAN_LIBS="-lzoltan"],[have_zoltan=no])
+	AC_CHECK_LIB(zoltan, Zoltan_LB_Partition, 
+			     [have_zoltan=yes;ZOLTAN_LIBS="-lzoltan"],
+			     [have_zoltan=no])
 	AC_SUBST(ZOLTAN_LIBS)
 	if test x"${have_zoltan}" = xyes; then
 	   AC_DEFINE(HAVE_ZOLTAN,1,[Define if you have the Zoltan library.])

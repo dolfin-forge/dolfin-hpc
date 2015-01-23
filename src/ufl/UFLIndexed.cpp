@@ -146,7 +146,7 @@ namespace ufl
 
     for(dolfin::uint i=0; i<free_indices.size(); ++i)
       for(dolfin::uint s=0; s<expr_shape.size(); ++s)
-        map.push_back(std::make_pair(free_indices[i], new type<dolfin::uint>(expr_shape[s])));
+	map.push_back(std::pair<IndexBase const *, type<dolfin::uint> const *>(free_indices[i], new type<dolfin::uint>(expr_shape[s])));
 
     return dict<IndexBase, type<dolfin::uint> >(map);
   }

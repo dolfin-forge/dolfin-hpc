@@ -153,7 +153,7 @@ namespace ufl
     std::vector<std::pair<IndexBase const *, type<dolfin::uint> const*> > map;
 
    for(dolfin::uint i=0; i<f_indices.size(); ++i)
-     map.push_back(std::make_pair(f_indices[i],dims[i].second));
+     map.push_back(std::pair<IndexBase const *, type<dolfin::uint> const*>(f_indices[i], dims[i].second));
 
     return dict<IndexBase, type<dolfin::uint> >(map);
   }

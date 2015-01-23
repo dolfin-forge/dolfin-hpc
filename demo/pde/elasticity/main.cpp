@@ -12,11 +12,7 @@
 
 #include <dolfin.h>
 #include <dolfin/config/dolfin_config.h>
-#ifdef ENABLE_UFL 
-#include "ufc2/Elasticity.h"
-#else
-#include "ufc1/Elasticity.h"
-#endif
+#include "Elasticity.h"
 
 using namespace dolfin;
 

@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   // defined on a 64x64 unit square mesh and a quadratic vector Lagrange element
   UnitSquare mesh(64, 64);
   Function velocity(mesh);
-#ifdef ENABLE_UFL 
+#ifdef ENABLE_UFL
   File vel("ufc2/velocity.xml.gz");
   vel >> velocity;
 #else

@@ -19,11 +19,7 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/Poisson.h"
-#else
-#include "ufc1/Poisson.h"
-#endif
+#include "Poisson.h"
   
 using namespace dolfin;
 
@@ -52,6 +48,8 @@ public:
 
 int main()
 {
+  error("Dirichlet BC gives an error in 1D");
+
   // Create mesh
   UnitInterval mesh(50);
 
@@ -76,7 +74,6 @@ int main()
   // Save solution to file
   File file_u("poisson.pvd");
   file_u << u;
-
 
   return 0;
 }

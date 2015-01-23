@@ -27,11 +27,7 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/NonlinearPoisson.h"
-#else
-#include "ufc1/NonlinearPoisson.h"
-#endif
+#include "NonlinearPoisson.h"
   
 using namespace dolfin;
 

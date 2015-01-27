@@ -79,8 +79,6 @@ void GlobalFacetMap::findGlobal2D()
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Facet f(_mesh, iter->first);
-    //TODO: Remove assertion when enabling hex meshes.
-    dolfin_assert(f.numEntities(0) == tdim);
     uint num_shared = 0;
 
     for (VertexIterator v(f); !v.end(); ++v)
@@ -116,8 +114,6 @@ void GlobalFacetMap::findGlobal3D()
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Facet f(_mesh, iter->first);
-    //TODO: Remove assertion when enabling hex meshes.
-    dolfin_assert(f.numEntities(0) == tdim);
     uint num_shared = 0;
 
     for (VertexIterator v(f); !v.end(); ++v)
@@ -149,8 +145,6 @@ void GlobalFacetMap::findGlobal3D()
   //FIXME: Cannot work as it is with heterogeneous mesh since the data packing
   //       is not constant, maybe use the maximum
   uint const num_facet_vertices = _mesh.type().numVertices(tdim - 1);
-  //TODO: Remove assertion valid only in the simplicial case when hex arrives
-  dolfin_assert(num_facet_vertices == tdim);
   int res_size = sh_count / num_facet_vertices;
   int recv_size = 0;
   int recv_count = 0;

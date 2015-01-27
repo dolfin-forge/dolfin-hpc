@@ -58,6 +58,9 @@ void GlobalFacetMap::init()
 
   switch(tdim)
   {
+  case 1:
+    findGlobal1D();
+    break;
   case 2:
     findGlobal2D();
     break;
@@ -68,6 +71,25 @@ void GlobalFacetMap::init()
     error("Could not handle local to global map with facet of dim %d", tdim);
     break;
   }
+}
+//-----------------------------------------------------------------------------
+void GlobalFacetMap::findGlobal1D()
+{
+  uint const tdim = _mesh.topology().dim();
+  MeshDistributedData const& mddata = _mesh.distdata();
+
+  _map<uint,bool>::iterator iter;
+  for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
+  {
+    Vertex v(_mesh, iter->first);
+
+    // Mark as an exterior facet
+    if ( v.numEntities(tdim) == 1 && mddata.is_shared(v.index(), 0) )
+    {
+      global_facet[v.index()] = true;
+    }
+  }
+
 }
 //-----------------------------------------------------------------------------
 void GlobalFacetMap::findGlobal2D()

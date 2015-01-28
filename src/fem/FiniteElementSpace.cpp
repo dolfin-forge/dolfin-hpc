@@ -213,6 +213,13 @@ bool FiniteElementSpace::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
+bool FiniteElementSpace::is_vertex_based() const
+{
+  //FIXME: Only a particular case.
+  return (this->family() == ufl::Family::CG) && (this->degree() == 1);
+}
+
+//-----------------------------------------------------------------------------
 
 }
 /* namespace icorne */

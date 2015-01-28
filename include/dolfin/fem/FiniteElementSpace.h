@@ -106,6 +106,9 @@ public:
   /// Return whether the discrete space is piecewise constant
   bool is_cellwise_constant() const;
 
+  /// Return whether the discrete space is defined at the vertices only
+  bool is_vertex_based() const;
+
   //--- UFL INTERFACE ---------------------------------------------------------
 
   /// Returns the family of the finite element

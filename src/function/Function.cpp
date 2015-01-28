@@ -430,27 +430,6 @@ FiniteElementSpace const& Function::space() const
   return (static_cast<DiscreteFunction*>(f_))->space();
 }
 //-----------------------------------------------------------------------------
-FiniteElement const& Function::finite_element() const
-{
-  if (type_ != discrete)
-  {
-    error("The finite element space can only be extracted from discrete "
-          "functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->finite_element();
-}
-//-----------------------------------------------------------------------------
-DofMap const& Function::dofmap() const
-{
-  if (type_ != discrete)
-  {
-    error("The dofmap can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->dofmap();
-}
-//-----------------------------------------------------------------------------
 std::string const Function::signature() const
 {
   if (type_ != discrete)

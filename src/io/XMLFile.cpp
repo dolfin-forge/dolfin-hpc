@@ -469,12 +469,12 @@ void XMLFile::operator<<(Function& f)
   // Write the finite element
   fp = openFile();
   fprintf(fp, "  <finiteelement signature=\"%s\"/>\n",
-          f.finite_element().signature());
+          f.space().element().signature());
   closeFile(fp);
 
   // Write the dof map
   fp = openFile();
-  fprintf(fp, "  <dofmap signature=\"%s\"/>\n", f.dofmap().signature());
+  fprintf(fp, "  <dofmap signature=\"%s\"/>\n", f.space().dofmap().signature());
   closeFile(fp);
 
   // End function

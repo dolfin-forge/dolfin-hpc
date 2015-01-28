@@ -443,7 +443,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
   real x[3];
   real *vv = new real[x_proj.local_size()];
   uint *indices = new uint[x_proj.local_size()];
-  uint *local_indices = new uint[projected.dofmap().local_dimension()];
+  uint *local_indices = new uint[projected.space().dofmap().local_dimension()];
   uint i = 0;
   MeshFunction<bool> processed(new_mesh, 0);
   processed = false;
@@ -465,7 +465,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
     {
 
       ufccell.update(*c, new_mesh.distdata());
-      projected.dofmap().tabulate_dofs(local_indices, ufccell, c->index());
+      projected.space().dofmap().tabulate_dofs(local_indices, ufccell, c->index());
 
       //FIXME: Only P1 friendly.
       for (VertexIterator v(*c); !v.end(); ++v)

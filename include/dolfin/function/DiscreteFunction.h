@@ -125,16 +125,10 @@ public:
   /// Return the discrete space
   FiniteElementSpace const& space() const;
 
-  /// Return finite element
-  FiniteElement const& finite_element() const;
-
-  /// Return dof map
-  DofMap const& dofmap() const;
-
   /// Return signature
   std::string const signature() const;
 
-  /// Return the number of sub functions
+  /// Return the number of sub functions i.e number of subspaces
   uint const num_sub_functions() const;
 
   /// Interpolate values from the given Function
@@ -162,6 +156,8 @@ private:
 
   /// Discrete space
   FiniteElementSpace discrete_space_;
+  FiniteElement const& element_;
+  DofMap const& dofmap_;
   mutable ScratchSpace scratch;
 
   /// Set to true if local data is owned

@@ -217,12 +217,6 @@ public:
   /// Return the discrete space of a DiscreteFunction
   FiniteElementSpace const& space() const;
 
-  /// Return the finite element space of a DiscreteFunction [TODO: Deprecate]
-  FiniteElement const& finite_element() const;
-
-  /// Return the dofmap of a DiscreteFunction [TODO: Deprecate]
-  DofMap const& dofmap() const;
-
   /// Return the signature of a DiscreteFunction
   std::string const signature() const;
 

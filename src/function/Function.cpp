@@ -23,6 +23,7 @@
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/function/ExpressionFunction.h>
 #include <dolfin/function/UserFunction.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -234,8 +235,10 @@ Function const& Function::operator=(Function& f)
 {
 
   // FIXME: Handle other assignments
-  if (f.type_ != discrete) error(
-      "Can only handle assignment from discrete functions (for now).");
+  if (f.type_ != discrete)
+  {
+    error("Can only handle assignment from discrete functions (for now).");
+  }
 
   // Either create or copy discrete function
   if (type_ == discrete)
@@ -503,18 +506,98 @@ void Function::add_block(real *& values)
 //-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)
 {
-  if (type_ != discrete) error(
-      "Sub functions can only be extracted from discrete functions.");
+  if (type_ != discrete)
+  {
+    error("Sub functions can only be extracted from discrete functions.");
+  }
 
   SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
   return sub_function;
 }
+
+//-----------------------------------------------------------------------------
+Array<Function *> Function::decompose()
+{
+  if (type_ != discrete)
+  {
+    error("Only discrete functions can be decomposed with decompose().");
+  }
+
+  Array<Function *> leaf_functions;
+
+  //TODO: This implementation should belong to DiscreteFunction: let us consider
+  //      that things are acceptable as long as high-level functions are OK.
+  FiniteElementSpace const& space = this->space();
+  DofMap const& dm = space.dofmap();
+
+  Array<FiniteElementSpace *> spaces = space.flatten();
+  for (uint s = 0; s < spaces.size(); ++s)
+  {
+    leaf_functions.push_back(new Function(*(spaces[s])));
+  }
+
+  if (space.is_vertex_based())
+  {
+    //NOTE: This implementation is based on the assumption that the dofmap for
+    //      a CG1 function is indexed by the global indices of vertices.
+    Mesh& mesh = this->mesh();
+    MeshFunction<bool> marked(mesh, 0);
+    real dof_value;
+    uint * indices = new uint[dm.local_dimension()];
+    CellIterator c(mesh);
+    UFCCell ufc_cell(*c);
+    for (; !c.end(); ++c)
+    {
+      ufc_cell.update(*c);
+
+      for (VertexIterator v(*c); !v.end(); ++v)
+      {
+
+        uint * cvi = c->entities(0);
+        uint ci = 0;
+        for (ci = 0; ci < c->numEntities(0); ++ci)
+        {
+          if (cvi[ci] == v->index())
+          {
+            break;
+          }
+        }
+        if (!v->is_ghost() && !marked.get(*v))
+        {
+          uint new_index = mesh.distdata().get_vertex_global(v->index());
+          for (uint i = 0; i < leaf_functions.size(); ++i)
+          {
+            this->vector().get(&dof_value, 1, &indices[ci]);
+            leaf_functions[i]->vector().set(&dof_value, 1, &new_index);
+          }
+
+          marked.set(*v, true);
+          continue;
+
+        }
+      }
+    }
+  }
+  else
+  {
+    error("Function decomposition is only implemented for vertex-based spaces");
+  }
+
+  for (uint i = 0; i < leaf_functions.size(); ++i)
+  {
+    leaf_functions[i]->sync_ghosts();
+  }
+  return leaf_functions;
+}
+
 //--- PROTECTED ---------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Cell const& Function::cell() const
 {
-  if (!cell_) error(
-      "Current cell is unknown (only available during assembly).");
+  if (!cell_)
+  {
+    error("Current cell is unknown (only available during assembly).");
+  }
   return *cell_;
 }
 //-----------------------------------------------------------------------------

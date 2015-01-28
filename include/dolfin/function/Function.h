@@ -243,6 +243,9 @@ public:
 
   //---------------------------------------------------------------------------
 
+  /// Decompose discrete function into scalar functions
+  Array<Function *> decompose();
+
 protected:
 
   /// Create user-defined function (evaluation operator must be overloaded)

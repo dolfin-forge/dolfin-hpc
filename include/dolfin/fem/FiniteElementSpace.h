@@ -92,6 +92,9 @@ public:
   /// Return the dofmap
   DofMap const& dofmap() const;
 
+  /// Returns a flattened representation of the space
+  Array<FiniteElementSpace *> flatten() const;
+
   /// Display basic information
   void disp() const;
 

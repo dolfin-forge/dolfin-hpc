@@ -90,8 +90,8 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     cell_(space.cell()),
     finite_element_(space.element(), sub),
     dof_map_(
-        DofMap::acquire(space.mesh(),
-                        *space.dofmap().create_sub_dofmap(sub), true)),
+        DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(sub),
+                        true)),
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
@@ -164,6 +164,23 @@ FiniteElement const& FiniteElementSpace::element() const
 DofMap const& FiniteElementSpace::dofmap() const
 {
   return dof_map_;
+}
+
+//-----------------------------------------------------------------------------
+Array<FiniteElementSpace *> FiniteElementSpace::flatten() const
+{
+  Array<FiniteElementSpace *> flt;
+  Array<ufc::finite_element const*> flt_fe = finite_element_.flatten();
+  Array<ufc::dofmap const*> flt_dm = dof_map_.flatten();
+
+  dolfin_assert(flt_fe.size() == flt_dm.size());
+  for (uint s = 0; s < flt_fe.size(); ++s)
+  {
+    flt.push_back(
+        new FiniteElementSpace(mesh_, *flt_fe[s]->create(),
+                               *flt_dm[s]->create(), true));
+  }
+  return flt;
 }
 
 //-----------------------------------------------------------------------------

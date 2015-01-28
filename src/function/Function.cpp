@@ -52,7 +52,6 @@ std::string Function::type2string(Function::Type type)
 //-----------------------------------------------------------------------------
 Function::Function() :
     Variable("*no name*", "empty function"),
-    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -63,7 +62,6 @@ Function::Function() :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
     Variable("*no name*", "empty function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(user),
     cell_(0),
@@ -74,7 +72,6 @@ Function::Function(Mesh& mesh) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -85,7 +82,6 @@ Function::Function(Mesh& mesh, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, uint size, real value) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -96,7 +92,6 @@ Function::Function(Mesh& mesh, uint size, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<real>& values) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -108,7 +103,6 @@ Function::Function(Mesh& mesh, const Array<real>& values) :
 Function::Function(Mesh& mesh, const Array<uint>& shape,
                    const Array<real>& values) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -117,9 +111,18 @@ Function::Function(Mesh& mesh, const Array<uint>& shape,
   f_ = new ConstantFunction(mesh, shape, values);
 }
 //-----------------------------------------------------------------------------
+Function::Function(GenericVector& x, Form& form, uint i) :
+    Variable("*no name*", "discrete function"),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new DiscreteFunction(x, form, i);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -128,9 +131,18 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
   f_ = new DiscreteFunction(mesh, x, form, i);
 }
 //-----------------------------------------------------------------------------
+Function::Function(Form& form, uint i) :
+    Variable("*no name*", "discrete function"),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new DiscreteFunction(form, i);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -141,7 +153,6 @@ Function::Function(Mesh& mesh, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(GenericVector& x, FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -152,7 +163,6 @@ Function::Function(GenericVector& x, FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 Function::Function(FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -163,7 +173,6 @@ Function::Function(FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -175,7 +184,6 @@ Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
 Function::Function(Mesh& mesh, std::string const& element,
                    std::string const& dofmap) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -189,7 +197,6 @@ Function::Function(Mesh& mesh, std::string const& element,
 ////-----------------------------------------------------------------------------
 Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
-    mesh_(&sub_function.function().mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -215,7 +222,6 @@ Function const& Function::operator=(SubFunction sub_function)
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
     Variable("*no name*", "expression function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(expression),
     cell_(0),
@@ -249,7 +255,6 @@ Function const& Function::operator=(Function& f)
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
     Variable("*no name*", "discrete function from data file"),
-    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -257,11 +262,9 @@ Function::Function(const std::string filename) :
 {
   File file(filename);
   file >> *this;
-  mesh_ = &f_->mesh();
 }
 //-----------------------------------------------------------------------------
 Function::Function(Function const& f) :
-    mesh_(f.mesh_),
     f_(NULL),
     type_(f.type()),
     cell_(0),

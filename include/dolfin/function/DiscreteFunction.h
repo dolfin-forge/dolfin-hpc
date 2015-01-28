@@ -52,9 +52,19 @@ class DiscreteFunction : public GenericFunction
 public:
 
   /// Create discrete function for argument function i of form
+  /// The discrete space is defined on the i-th coefficient mesh.
+  DiscreteFunction(GenericVector& x, Form& form, uint i);
+
+  /// Create discrete function for argument function i of form
+  /// The discrete space is defined on the mesh provided as argument.
   DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
   /// Create discrete function for argument function i of form which owns the vector
+  /// The discrete space is defined on the i-th coefficient mesh.
+  DiscreteFunction(Form& form, uint i);
+
+  /// Create discrete function for argument function i of form which owns the vector
+  /// The discrete space is defined on the mesh provided as argument.
   DiscreteFunction(Mesh& mesh, Form& form, uint i);
 
   /// Create discrete function from given discrete space

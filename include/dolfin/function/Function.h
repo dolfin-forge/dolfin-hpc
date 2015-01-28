@@ -88,9 +88,15 @@ public:
                     const Array<real>& values);
 
   /// Create discrete function for argument function i of form
+  explicit Function(GenericVector& x, Form& form, uint i);
+
+  /// Create discrete function for argument function i of form [TODO: Obsolete]
   explicit Function(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
   /// Create discrete function for argument function i of form
+  explicit Function(Form& form, uint i);
+
+  /// Create discrete function for argument function i of form [TODO: Obsolete]
   explicit Function(Mesh& mesh, Form& form, uint i);
 
   /// Create discrete function on given discrete space
@@ -135,9 +141,15 @@ public:
   void init(Mesh& mesh, uint i, real value);
 
   /// Initialize discrete function for argument function i of form
+  void init(GenericVector& x, Form& form, uint i);
+
+  /// Initialize discrete function for argument function i of form [TODO: Obsolete]
   void init(Mesh& mesh, GenericVector& x, Form& form, uint i);
 
   /// Initialize discrete function for argument function i of form
+  void init(Form& form, uint i);
+
+  /// Initialize discrete function for argument function i of form [TODO: Obsolete]
   void init(Mesh& mesh, Form& form, uint i);
 
   /// Initialize discrete function on given discrete space
@@ -256,9 +268,6 @@ protected:
 
 private:
 
-  // Mesh
-  Mesh * mesh_;
-
   // Pointer to current implementation (letter base class)
   GenericFunction* f_;
 
@@ -359,7 +368,7 @@ inline Mesh& Function::mesh() const
 {
   if(f_ == NULL)
   {
-    error("Trying to get the mesh from an empty function.");
+    error("Function is not initialized, mesh() cannot be called.");
   }
   return f_->mesh();
 }

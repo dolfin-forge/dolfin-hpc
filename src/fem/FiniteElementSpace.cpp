@@ -16,6 +16,18 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(Form& form, uint const i) :
+    mesh_(form.mesh(i)),
+    cell_(mesh_, 0),
+    finite_element_(mesh_.type(), form, i),
+    dof_map_(DofMap::acquire(mesh_, form, i)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
+{
+}
+
+//-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     mesh_(mesh),
     cell_(mesh, 0),

@@ -57,6 +57,9 @@ public:
   /// Return mesh
   Mesh& mesh() const;
 
+  /// Return mesh for i-th function
+  Mesh& mesh(uint i) const;
+
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
   const char* signature() const;
@@ -131,6 +134,12 @@ private:
 inline Mesh& Form::mesh() const
 {
   return mesh_;
+}
+
+//-----------------------------------------------------------------------------
+inline Mesh& Form::mesh(uint i) const
+{
+  return dof_map_set_[i].mesh();
 }
 
 //-----------------------------------------------------------------------------

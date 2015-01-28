@@ -47,6 +47,10 @@ class FiniteElementSpace
 public:
 
   /// Create space from i-th coefficient space of given form
+  FiniteElementSpace(Form& form, uint const i);
+
+  /// Create space from i-th coefficient element of given form but on the mesh
+  /// provided as argument
   FiniteElementSpace(Mesh& mesh, Form& form, uint const i);
 
   /// Create space from UFC finite element

@@ -35,6 +35,22 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+DiscreteFunction::DiscreteFunction(GenericVector& x, Form& form, uint i) :
+    GenericFunction(form.mesh(i)),
+    discrete_space_(form, i),
+    scratch(discrete_space_),
+    local_vector_(false),
+    X_(&x),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
+{
+  // Initialise function
+  InitializeVector();
+}
+
+//-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
                                    uint i) :
     GenericFunction(mesh),
@@ -42,6 +58,22 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
     scratch(discrete_space_),
     local_vector_(false),
     X_(&x),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL)
+{
+  // Initialise function
+  InitializeVector();
+}
+
+//-----------------------------------------------------------------------------
+DiscreteFunction::DiscreteFunction(Form& form, uint i) :
+    GenericFunction(form.mesh(i)),
+    discrete_space_(form, i),
+    scratch(discrete_space_),
+    local_vector_(true),
+    X_(new Vector()),
     renumbered_(false),
     cache_size_(0),
     indices_(NULL),

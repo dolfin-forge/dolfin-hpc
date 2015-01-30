@@ -14,7 +14,7 @@
 #include <dolfin/mesh/Cell.h>
 
 
-#ifdef HAVE_PARMETIS
+#ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>
 #endif
 
@@ -35,12 +35,23 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   zz_->Set_Obj_List_Fn(partitionZoltanObjList, &mesh);  
   
   /* TODO */
+
+  delete zz_;
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionGeomZoltan(Mesh& mesh, 
 					MeshFunction<uint>& partitions)
 {
+
+  zz_ = new Zoltan(MPI::DOLFIN_COMM);
+
+  // General query functions
+  zz_->Set_Num_Obj_Fn(partitionZoltanNumObj, &mesh);
+  zz_->Set_Obj_List_Fn(partitionZoltanObjList, &mesh);  
+
   /* TODO */
+
+  delete zz_;
 }
 //-----------------------------------------------------------------------------
 int ZoltanInterface::partitionZoltanNumObj(void *data, int *ierr) 

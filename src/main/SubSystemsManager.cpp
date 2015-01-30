@@ -25,7 +25,7 @@
 #endif
 
 #ifdef HAVE_ZOLTAN
-#include <zoltan.h>
+#include <zoltan_cpp.h>
 #endif
 
 using namespace dolfin;

@@ -1225,6 +1225,7 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
     }
   }
 
+#ifdef HAVE_MPI
   if (MPI::numProcesses() > 1)
   {
     MPI_Status status;
@@ -1320,8 +1321,8 @@ void VertexNormal::ComputeNormal(Mesh& mesh)
 
   shared_facetnormals_block_.clear();
   shared_facetweights_block_.clear();
+#endif // HAVE_MPI
 }
-
 //-----------------------------------------------------------------------------
 
 }

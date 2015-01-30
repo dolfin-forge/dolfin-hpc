@@ -365,9 +365,9 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
   {
     error("Trying to set global number of entities for invalid dimension.");
   }
+#if HAVE_MPI
   if (MPI::numProcesses() > 1)
   {
-#if HAVE_MPI
     offset = 0;
     uint num_owned = this->num_owned(dim);
 

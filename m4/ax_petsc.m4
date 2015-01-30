@@ -9,8 +9,8 @@
 
 AC_DEFUN([AX_PETSC],[
 	AC_MSG_CHECKING(for PETSc)
-	AC_ARG_WITH([petsc-dir],
-	AS_HELP_STRING([--with-petsc-dir=DIR],
+	AC_ARG_WITH([petsc],
+	AS_HELP_STRING([--with-petsc=DIR],
 	[Directory for petsc]),
 	[	   
 	if test -d "$withval"; then

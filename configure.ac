@@ -199,12 +199,14 @@ if test "x${with_petsc}" != xno; then
    if test "x${is_cray}" = xyes; then
       AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
       found_la_backend="yes"
+      with_petsc="yes"
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then
          found_la_backend="yes"
+	 with_petsc="yes"
       else
-         with_petsc="no"
+	 with_petsc="no"
       fi
    fi
 fi

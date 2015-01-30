@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg, 2008.
+// Modified by Niclas Jansson 2009-2015.
 //
 // First added:  2008-01-07
-// Last changed: 2008-02-15
+// Last changed: 2015-01-30
 
 
 #include <dolfin/common/constants.h>
@@ -23,6 +24,10 @@
 #include <mpi.h>
 #endif
 
+#ifdef HAVE_ZOLTAN
+#include <zoltan.h>
+#endif
+
 using namespace dolfin;
 
 // Initialise static data
@@ -30,7 +35,8 @@ dolfin::SubSystemsManager dolfin::SubSystemsManager::sub_systems_manager;
 
 //-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager() : petsc_initialized(false),
-                                         petsc_controls_mpi(false)
+                                         petsc_controls_mpi(false),
+					 zoltan_initialized(false)
 {
   // Do nothing
 }
@@ -110,6 +116,47 @@ void SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
     sub_systems_manager.petsc_controls_mpi = true;
 #else
   error("DOLFIN has not been configured for PETSc.");
+#endif
+}
+//-----------------------------------------------------------------------------
+void SubSystemsManager::initZoltan()
+{
+#ifdef HAVE_ZOLTAN
+  if ( sub_systems_manager.zoltan_initialized )
+    return;
+
+  message(1, "Initializing Zoltan (ignoring command-line arguments).");
+
+  int argc = 0;
+  char** argv = NULL;
+  float version;
+
+  Zoltan_Initialize(argc, argv, &version);
+
+  sub_systems_manager.zoltan_initialized = true;
+
+#else
+  error("DOLFIN has not been configured with Zoltan.");
+#endif
+}
+//-----------------------------------------------------------------------------
+void SubSystemsManager::initZoltan(int argc, char* argv[])
+{
+#ifdef HAVE_ZOLTAN
+  if ( sub_systems_manager.zoltan_initialized )
+    return;
+
+  message(1, "Initializing Zoltan with given command-line arguments.");
+
+  float version;
+
+  // Initialize Zoltan
+  Zoltan_Initialize(argc, argv, &version);
+
+  sub_systems_manager.petsc_initialized = true;
+
+#else
+  error("DOLFIN has not been configured with Zoltan .");
 #endif
 }
 //-----------------------------------------------------------------------------

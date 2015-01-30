@@ -1,10 +1,10 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson 2009.
+// Modified by Niclas Jansson 2009-2015.
 //
 // First added:  2008-01-07
-// Last changed: 2009-04-22
+// Last changed: 2015-01-30
 
 #ifndef __SUB_SYSTEMS_MANAGER_H
 #define __SUB_SYSTEMS_MANAGER_H
@@ -27,6 +27,12 @@ namespace dolfin
 
     /// Initialize PETSc with command-line arguments
     static void initPETSc(int argc, char* argv[], bool cmd_line_args = true);
+
+    /// Initialize Zoltan without command-line arguments
+    static void initZoltan();
+
+    /// Initialize Zoltan without command-line arguments
+    static void initZoltan(int argc, char* argv[]);
 
     /// Finalize MPI
     static void finalizeMPI();
@@ -55,6 +61,7 @@ namespace dolfin
     // State variables
     bool petsc_initialized;
     bool petsc_controls_mpi;
+    bool zoltan_initialized;
 
   };
 

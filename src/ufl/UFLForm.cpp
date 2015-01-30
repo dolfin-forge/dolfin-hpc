@@ -65,9 +65,17 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  Cell const& Form::cell() const
+  Cell const& Form::cell() const //Does this function make sense?
   {
-//    return integral_.integrand().cell();  
+    std::vector<Integral const *> ints = cell_integrals().operands();
+    for(uint i = 0; i < ints.size(); ++i)
+    {
+      std::vector<Expression const *> integrands = ints[i]->integrand();
+      for(uint j = 0; j < integrands.size(); ++j)
+        return integrands[j]->cell();
+    }
+
+    error("No cell found in an integrand.");
   }
 
 //-----------------------------------------------------------------------------

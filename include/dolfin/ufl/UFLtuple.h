@@ -1,65 +1,71 @@
-// Copyright (C) 2014 Aurélien Larcher.
+// Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2014-01-27
-// Last changed: 2014-01-27
+// First added:
+// Last changed:
 
-#ifndef __UFL_TUPLE_H_
-#define __UFL_TUPLE_H_
+#ifndef __UFL__TUPLE_H
+#define __UFL__TUPLE_H
 
-#include <dolfin/ufl/UFLClass.h>
-
-#include <iostream>
-#include <sstream>
-#include <string>
+#include <dolfin/ufl/UFLExpression.h>
+#include <dolfin/ufl/UFLtuple.h>
 
 namespace ufl
 {
-  class Expression;
 
 /**
  *  DOCUMENTATION:
  *
- *  @class  tuple
+ *  @class  Tuple
  *
- *  @brief  Provides an interface complying with python tuple.
+ *  @brief  Provides an interface complying with Tuple.
  */
 
-  template <class T> class tuple : public Class
+  class Tuple : public Expression
   {
-
     public:
 
-      /// Constructor with default representation for given type
-      tuple(T const& obj);
-
-      /// Constructor with default representation for given type
-      tuple(std::vector<T const *> const& objs);
-
-      /// Constructor with default representation for given type
-      tuple(tuple<T> const& other_tuple);
+      ///
+      Tuple(tuple<Expression> const& t);
 
       ///
-      tuple (repr_t const & repr);
-
-      /// Create an empty tuple
-      tuple ();
+      Tuple (repr_t const & repr);
 
       ///
-      ~tuple();
+      ~Tuple();
 
       ///
-      std::vector<Class const *> const operands(std::string const& name) const;
+      virtual std::vector<Class const* > const operands (std::string const& name) const;
 
       ///
-      std::vector<std::vector<Class const *> > const level_operands (
+      virtual std::vector<std::vector<Class const *> > const level_operands (
           std::vector<std::vector<Class const *> > const& operands) const;
 
-      ///
-      dolfin::uint const size() const;
+      //--- INTERFACE inherited from UFLClass -------------------------------------
 
       ///
-      std::vector<T const *> const& operands() const;
+      virtual Tuple const * create(Object::repr_t const& repr) const;
+
+      ///
+      std::vector<Expression const *> const operands() const;
+
+      ///Return the tensor shape of the expression.
+      virtual ValueArray const shape() const;
+
+      ///Return a tuple with the free indices (unassigned) of the expression.
+      virtual tuple<Index> const free_indices() const;
+
+      ///Return a dict with the free or repeated indices in the expression
+      ///as keys and the dimensions of those indices as values.
+      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+
+      ///Evaluate the expression tree at the given quadrature_points
+      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+          dolfin::uint n,
+          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+          ufc::cell const& ref_cell, 
+          std::vector<dolfin::real*> const& q_points,
+          const double * const * coordinates) const; 
 
       /// __repr__
       repr_t const repr() const;
@@ -70,19 +76,16 @@ namespace ufl
       ///
       void display() const;
 
-    protected:
-
     private:
 
-      std::vector<T const *> const fill_objects(std::vector<repr_t> const& reprs);
-      std::vector<T const *> const& objects() const;
+//      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
 
-      std::vector<T const *> const objects_;
+//      std::vector<Expression const *> const expressions_;
+      tuple<Expression> const t_;
 
       mutable repr_t repr_;
       mutable std::string str_;
-
   };
 
 } /* namespace ufl */
-#endif /* __UFL_TUPLE_H_ */
+#endif /* __UFL__TUPLE_H */

@@ -55,7 +55,7 @@ namespace ufl
 
       //--- INTERFACE -------------------------------------------------------------
 
-      virtual std::vector<Expression const *> const& operands() const = 0;
+      virtual std::vector<Expression const *> const operands() const = 0;
       
       /// UFL: Return the tensor shape of the expression
       virtual ValueArray const shape() const = 0;

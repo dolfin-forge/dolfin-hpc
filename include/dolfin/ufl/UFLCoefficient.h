@@ -38,7 +38,7 @@ namespace ufl
       static CoefficientBase const * create(Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       /// Return a reference to the FiniteElementBase of this Coefficient
       FiniteElementBase const& element() const;

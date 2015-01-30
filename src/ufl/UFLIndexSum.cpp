@@ -122,8 +122,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& IndexSum::operands() const
+  std::vector<Expression const *> const IndexSum::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

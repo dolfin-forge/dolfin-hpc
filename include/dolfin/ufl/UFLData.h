@@ -46,7 +46,7 @@ namespace ufl
       static Data const * create (Object::repr_t const& repr);
 
       ///
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
       
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;

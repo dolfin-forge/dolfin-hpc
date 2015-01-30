@@ -94,9 +94,11 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& IndexBase::operands() const
+  std::vector<Expression const *> const IndexBase::operands() const
   {
-    return std::vector<Expression const *>();  
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
+    return expressions_;  
   }
 
 //-----------------------------------------------------------------------------
@@ -461,9 +463,11 @@ namespace ufl
 //  }
 
 //-----------------------------------------------------------------------------
- std::vector<Expression const *> const& MultiIndex::operands() const
+ std::vector<Expression const *> const MultiIndex::operands() const
   {
-    return std::vector<Expression const *> ();
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
+    return expressions_;  
   }
 
 }

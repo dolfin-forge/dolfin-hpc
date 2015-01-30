@@ -106,8 +106,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& CoefficientDerivative::operands() const
+  std::vector<Expression const *> const CoefficientDerivative::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -263,8 +265,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& SpatialDerivative::operands() const
+  std::vector<Expression const *> const SpatialDerivative::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -429,8 +433,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& VariableDerivative::operands() const
+  std::vector<Expression const *> const VariableDerivative::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
   
@@ -586,9 +592,11 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Grad::operands() const
+  std::vector<Expression const *> const Grad::operands() const
   {
-    return expressions_;
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
+    return expressions_;  
   }
 
 //-----------------------------------------------------------------------------
@@ -722,9 +730,11 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Div::operands() const
+  std::vector<Expression const *> const Div::operands() const
   {
-    return expressions_;
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
+    return expressions_;  
   }
 
 //-----------------------------------------------------------------------------
@@ -858,8 +868,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& NablaGrad::operands() const
+  std::vector<Expression const *> const NablaGrad::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;
   }
 
@@ -995,8 +1007,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& NablaDiv::operands() const
+  std::vector<Expression const *> const NablaDiv::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;
   }
 
@@ -1132,8 +1146,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Curl::operands() const
+  std::vector<Expression const *> const Curl::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;
   }
 

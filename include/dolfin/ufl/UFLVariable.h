@@ -46,7 +46,7 @@ namespace ufl
 
       virtual Label const * create(Object::repr_t const& repr) const;
 
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
 
       ///Return the tensor shape of the expression.
       virtual ValueArray const shape() const;
@@ -123,7 +123,7 @@ namespace ufl
 
       virtual Variable const * create(Object::repr_t const& repr) const;
 
-      std::vector<Expression const *> const& operands() const;
+      std::vector<Expression const *> const operands() const;
       
       ///
       virtual Cell const cell() const;

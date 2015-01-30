@@ -66,10 +66,11 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Argument::operands() const
+  std::vector<Expression const *> const Argument::operands() const
   {
-    std::vector<Expression const *> expr;
-    return expr;
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
+    return expressions_;  
   }
   
 //-----------------------------------------------------------------------------

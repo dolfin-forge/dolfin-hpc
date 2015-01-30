@@ -17,11 +17,11 @@ using namespace dolfin;
 int main()
 {
   // Load reference mesh (just a simple tetrahedron)
-  Mesh mesh("../tetrahedron.xml.gz");
+  Mesh mesh("./tetrahedron.xml.gz");
 
   // Create stiffness and mass matrices
-  StiffnessMatrix A(mesh);
-  MassMatrix M(mesh);
+//  StiffnessMatrix A(mesh);
+//  MassMatrix M(mesh);
 
   // Create reference matrices
   real A0_array[4][4];
@@ -48,18 +48,18 @@ int main()
   M0.apply(); 
 
   // Display matrices
-  cout << endl;
-  cout << "Assembled stiffness matrix:" << endl;
-  A.disp();
-  cout << endl;
+//  cout << endl;
+//  cout << "Assembled stiffness matrix:" << endl;
+//  A.disp();
+//  cout << endl;
 
   cout << "Reference stiffness matrix:" << endl;
   A0.disp();
   cout << endl;
 
-  cout << "Assembled mass matrix:" << endl;
-  M.disp();
-  cout << endl;
+//  cout << "Assembled mass matrix:" << endl;
+//  M.disp();
+//  cout << endl;
 
   cout << "Reference mass matrix:" << endl;
   M0.disp();

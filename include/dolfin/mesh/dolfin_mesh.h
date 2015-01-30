@@ -26,7 +26,6 @@
 #include <dolfin/mesh/DomainBoundary.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/UnitCube.h>
-#include <dolfin/mesh/UnitDisk.h>
 #include <dolfin/mesh/UnitInterval.h>
 #include <dolfin/mesh/UnitSquare.h>
 #include <dolfin/mesh/Box.h>

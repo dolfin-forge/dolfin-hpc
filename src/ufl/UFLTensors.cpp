@@ -105,8 +105,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& ComponentTensor::operands() const
+  std::vector<Expression const *> const ComponentTensor::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

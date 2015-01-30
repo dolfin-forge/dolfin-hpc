@@ -1,5 +1,6 @@
-SUBDIRS = ale meshfunction refinement subdomains
-TESTS = ale/exe\
-	meshfunction/exe\
-	refinement/exe\
-	subdomains/exe
+SUBDIRS = ale meshfunction partitioning refinement subdomains
+TESTS = ale/demo\
+	meshfunction/demo\
+	partitioning/demo\
+	refinement/demo\
+	subdomains/demo

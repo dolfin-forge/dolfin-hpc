@@ -86,8 +86,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Sum::operands() const
+  std::vector<Expression const *> const Sum::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -233,8 +235,10 @@ namespace ufl
   }
   
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Product::operands() const
+  std::vector<Expression const *> const Product::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -422,8 +426,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Division::operands() const
+  std::vector<Expression const *> const Division::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -568,8 +574,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Power::operands() const
+  std::vector<Expression const *> const Power::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 
@@ -704,8 +712,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  std::vector<Expression const *> const& Abs::operands() const
+  std::vector<Expression const *> const Abs::operands() const
   {
+    error("Not yet implemented.");
+    std::vector<Expression const*>  expressions_;
     return expressions_;  
   }
 

@@ -25,23 +25,24 @@ using namespace dolfin;
 
 int main()
 {
-#ifndef HAS_SCOTCH
-  message("Sorry, this demo requires SCOTCH.");
-  return 0;
-#endif
+//#ifndef HAS_SCOTCH
+//  message("Sorry, this demo requires SCOTCH.");
+//  return 0;
+//#endif
 
   // Create mesh and form
   UnitCube mesh(20, 20, 20);
-  ReactionDiffusionBilinearForm a; 
+  ReactionDiffusionBilinearForm a(mesh); 
 
+  // This is from an old demo 
   // Partition mesh
-  MeshFunction<dolfin::uint> partitions(mesh);
-  mesh.partition(partitions);
+//  MeshFunction<dolfin::uint> partitions(mesh);
+//  mesh.partition(partitions);
 
-  // Assemble matrix using parallel assembler
+  // Assemble matrix
   Matrix A;
-  pAssembler assembler(mesh, partitions);
-  assembler.assemble(A, a);
+  Assembler assembler;
+  assembler.assemble(A, a, true);
  
   return 0;
 }

@@ -230,6 +230,7 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
   }
 
+#ifdef HAVE_MPI
   //--- Exchange data for exterior facets with shared entities
   if (mesh.is_distributed())
   {
@@ -361,6 +362,7 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     delete[] r_recvbuf;
     delete[] u_recvbuf;
   }
+#endif // HAVE_MPI
 
   //--- Determine node type from facet normals and compute surface normals
   real cosalpha_max = std::cos(alpha_max_);

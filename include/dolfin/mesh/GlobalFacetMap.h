@@ -33,6 +33,9 @@ private:
   void init();
 
   ///
+  void findGlobal1D();
+
+  ///
   void findGlobal2D();
 
   ///

@@ -779,11 +779,6 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
   return true;
 }
 //-----------------------------------------------------------------------------
-bool MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
-{
-  return true;
-}
-//-----------------------------------------------------------------------------
 #endif
 
 }

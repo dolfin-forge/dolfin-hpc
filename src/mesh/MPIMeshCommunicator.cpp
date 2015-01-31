@@ -3,11 +3,11 @@
 //
 // Modified by Magnus Vikstrøm, 2007.
 // Modified by Anders Logg, 2007.
-// Modified by Niclas Jansson, 2008.
+// Modified by Niclas Jansson, 2008-2015.
 // Modified by Balthasar Reuter, 2013.
 //
 // First added:  2007-05-30
-// Last changed: 2013-03-22
+// Last changed: 2015-01-31
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
@@ -1132,6 +1132,22 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
     MeshFunction<uint>& distribution,
     Array< std::pair< MeshFunction<uint> *,
     MeshFunction<uint> * > >& cell_functions)
+{
+  error("Cannot distribute mesh without MPI.");
+}
+//-----------------------------------------------------------------------------
+void MPIMeshCommunicator::distribute(
+    Mesh& mesh,
+    MeshFunction<uint>& distribution,
+    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+{
+}
+//-----------------------------------------------------------------------------
+void MPIMeshCommunicator::distribute(
+    Mesh& mesh,
+    MeshFunction<uint>& distribution,
+    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
+    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
 {
   error("Cannot distribute mesh without MPI.");
 }

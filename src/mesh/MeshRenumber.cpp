@@ -779,6 +779,11 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
   return true;
 }
 //-----------------------------------------------------------------------------
+bool MeshRenumber::remap_facets(Mesh& mesh)
+{
+  return true;
+}
+//-----------------------------------------------------------------------------
 #endif
 
 }

@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <iomanip>
-
+#include <cstdio>
 using namespace dolfin;
 
 #ifdef HAVE_CHECK
@@ -72,6 +72,7 @@ Suite * test_suite()
 
 int main(void)
 {
+#ifdef HAVE_XML
   int number_failed;
   Suite* s = test_suite();
   SRunner* sr = srunner_create(s);
@@ -81,13 +82,18 @@ int main(void)
   srunner_free(sr);
 
   return (number_failed == 0) ? 0 : 1;
+
+#else
+  fprintf(stderr, "*** Test disabled: DOLFIN is not built with XML support ***\n");
+  return 0;
+#endif
 }
 
 #else
 
 int main(void)
 {
-  fprintf(stderr, "*** Check is required for dolfin/data tests ***\n");
+  fprintf(stderr, "*** Check is required for dolfin/mesh tests ***\n");
   return 0;
 }
 

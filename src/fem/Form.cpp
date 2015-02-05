@@ -104,6 +104,12 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
             this->coefficient_name(i).c_str());
     }
 
+    if (coefficients[i]->type() == Function::empty)
+    {
+      error("Got empty Function as coefficient %d labeled as '%s'.", i,
+            this->coefficient_name(i).c_str());
+    }
+
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());
     uint coef_rank = coefficients[i]->rank();
     uint fe_rank = fe->value_rank();

@@ -45,12 +45,48 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
 
   zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
+  ZOLTAN_ID_PTR import_global_ids, import_local_ids;
+  ZOLTAN_ID_PTR export_global_ids, export_local_ids;
+
+  int changes, num_gid_entries, num_lid_entries;
+  int num_import, num_export;
+
+  int *import_procs, *import_to_part;
+  int *export_procs, *export_to_part;
+
+
   // General query functions
-  zz_->Set_Num_Obj_Fn(partitionZoltanNumObj, &mesh);
-  zz_->Set_Obj_List_Fn(partitionZoltanObjList, &mesh);  
+  zz_->Set_Num_Obj_Fn(partitionZoltanNumObj_geom, &mesh);
+  zz_->Set_Obj_List_Fn(partitionZoltanObjList_geom, &mesh);  
+  zz_->Set_Num_Geom_Fn(partitionZoltanNumGeom, &mesh);  
+  zz_->Set_Geom_Multi_Fn(partitionZoltanGeomCoords, &mesh);  
 
-  /* TODO */
+  // Use a Hilbert Space-Filling Curve
+  zz_->Set_Param( "LB_METHOD", "HSFC"); 
 
+  if (zz_->LB_Partition(changes, num_gid_entries, num_lid_entries, num_import,
+			import_global_ids, import_local_ids,
+			import_procs, import_to_part, num_export,
+			export_global_ids, export_local_ids, 
+			export_procs, export_to_part) != ZOLTAN_OK)
+  {
+    error("Zoltan failed to partition the mesh using a HSFC");
+  }
+
+  // Create meshfunction from partitions
+  partitions.init(mesh, 0);
+  partitions = MPI::processNumber();
+
+  for (uint i = 0; i < num_export; i++)
+  {
+    partitions.set(export_local_ids[i], export_procs[i]);
+  }
+  
+  Zoltan::LB_Free_Part(&import_global_ids, &import_local_ids, 
+		       &import_procs, &import_to_part);
+
+  Zoltan::LB_Free_Part(&export_global_ids, &export_local_ids, 
+		       &export_procs, &export_to_part);
   delete zz_;
 }
 //-----------------------------------------------------------------------------
@@ -64,20 +100,53 @@ int ZoltanInterface::partitionZoltanNumObj(void *data, int *ierr)
 
 }
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionZoltanObjList(void *data, int num_gid_entries, 
-					   int num_lid_entries, 
-					   ZOLTAN_ID_PTR global_ids, 
-					   ZOLTAN_ID_PTR local_ids, 
-					   int wgt_dim, float *obj_wgts,
-					   int *ierr) 
+int ZoltanInterface::partitionZoltanNumObj_geom(void *data, int *ierr) 
 {
+
   Mesh *mesh = (Mesh *) data;
   *ierr = ZOLTAN_OK;
+
+  return mesh->numVertices();
+
+}
+//-----------------------------------------------------------------------------
+void ZoltanInterface::partitionZoltanObjList(void *data, int num_gid_entries, 
+					     int num_lid_entries, 
+					     ZOLTAN_ID_PTR global_ids, 
+					     ZOLTAN_ID_PTR local_ids, 
+					     int wgt_dim, float *obj_wgts,
+					     int *ierr) 
+{
+  Mesh *mesh = (Mesh *) data; 
+  *ierr = ZOLTAN_OK;
   
-  for (uint i = 0; i < mesh->numCells(); i++) 
+  uint i = 0;
+  for (CellIterator cell(*mesh); !cell.end(); ++cell)
   {
-    global_ids[i] = mesh->distdata().get_global(i, 0);
-    local_ids[i] = i;
+    global_ids[i] = mesh->distdata().get_global(*cell);
+    local_ids[i++] = cell->index();
+  }
+
+  return;
+
+}
+//-----------------------------------------------------------------------------
+void ZoltanInterface::partitionZoltanObjList_geom(void *data, 
+						  int num_gid_entries,
+						  int num_lid_entries, 
+						  ZOLTAN_ID_PTR global_ids, 
+						  ZOLTAN_ID_PTR local_ids, 
+						  int wgt_dim, float *obj_wgts,
+						  int *ierr) 
+{
+  Mesh *mesh = (Mesh *) data; 
+  *ierr = ZOLTAN_OK;
+  
+  uint i = 0;
+  for (VertexIterator vertex(*mesh); !vertex.end(); ++vertex)
+  {
+    global_ids[i] = mesh->distdata().get_global(*vertex);
+    local_ids[i++] = vertex->index();
   }
 
   return;
@@ -100,7 +169,25 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
 					      int num_dim, double *geom_vec, 
 					      int *ierr) 
 {
-  /* TODO */
+
+  Mesh *mesh = (Mesh *) data;
+
+  if (num_obj != mesh->numVertices()) 
+  {
+    *ierr = ZOLTAN_FATAL; 
+    return;
+  }
+  
+  uint i = 0;
+  for (VertexIterator vertex(*mesh); !vertex.end(); ++vertex)
+  {
+    geom_vec[i] = vertex->point().x();
+    geom_vec[i + 1] = vertex->point().y();
+    if (num_dim > 2)
+      geom_vec[i + 2] = vertex->point().z();
+  }
+
+  *ierr = ZOLTAN_OK;
 }
 //-----------------------------------------------------------------------------
 #else

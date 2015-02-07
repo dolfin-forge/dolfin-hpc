@@ -39,6 +39,7 @@ namespace dolfin
 
     // Generall functions
     static int partitionZoltanNumObj(void *data, int *ierr);
+    static int partitionZoltanNumObj_geom(void *data, int *ierr);
 
     static void partitionZoltanObjList(void *data, 
 				       int num_gid_entries, 
@@ -49,6 +50,15 @@ namespace dolfin
 				       float *obj_wgts, 
 				       int *ierr);
 
+    static void partitionZoltanObjList_geom(void *data, 
+					    int num_gid_entries, 
+					    int num_lid_entries, 
+					    ZOLTAN_ID_PTR global_ids, 
+					    ZOLTAN_ID_PTR local_ids, 
+					    int wgt_dim, 
+					    float *obj_wgts, 
+					    int *ierr);
+    
     // Geometry based functions
     static int partitionZoltanNumGeom(void *data, int *ierr);
 

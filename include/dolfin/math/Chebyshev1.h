@@ -1,37 +1,36 @@
-// Copyright (C) 2003-2005 Anders Logg.
+// Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2003-06-03
-// Last changed: 2005
+// First added:  2014-11-08
+// Last changed: 2014-12-08
 
-#ifndef __LEGENDRE_H
-#define __LEGENDRE_H
+#ifndef __CHEBYSHEV_FIRST_H
+#define __CHEBYSHEV_FIRST_H
 
+#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
+#include <dolfin/math/Jacobi.h>
 
 namespace dolfin
 {
 
-/// Legendre polynomial of given degree n on the interval [-1,1].
-///
-///   P0(x) = 1
-///   P1(x) = x
-///   P2(x) = (3x^2 - 1) / 2
-///   ...
-///
-/// The function values and derivatives are computed using
-/// three-term recurrence formulas.
+/// Chebyshev polynomials of the first kind
 
-class Legendre
+class Chebyshev1
 {
 
 public:
 
-  ///
-  Legendre(uint n);
+  /// Constructor
+  Chebyshev1(uint n) :
+      n_(n)
+  {
+  }
 
-  ///
-  ~Legendre();
+  /// Destructor
+  ~Chebyshev1()
+   {
+   }
 
   /// Evaluation at given point
   real operator()(real x);
@@ -39,17 +38,11 @@ public:
   /// Evaluation of derivative at given point
   real ddx(real x);
 
-  /// Evaluation of second derivative at given point
-  real d2dx(real x);
-
   /// Evaluation at given point
   static real eval(uint n, real x);
 
   /// Evaluation of derivative at given point
   static real ddx(uint n, real x);
-
-  /// Evaluation of second derivative at given point
-  static real d2dx(uint n, real x);
 
 private:
 
@@ -60,19 +53,26 @@ private:
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline real Legendre::operator()(real x)
+inline real Chebyshev1::operator()(real x)
 {
   return eval(n_, x);
 }
 //-----------------------------------------------------------------------------
-inline real Legendre::ddx(real x)
+inline real Chebyshev1::ddx(real x)
 {
   return ddx(n_, x);
 }
+
 //-----------------------------------------------------------------------------
-inline real Legendre::d2dx(real x)
+inline real eval(uint n, real x)
 {
-  return d2dx(n_, x);
+  return Jacobi::eval(n, -0.5, -0.5, x);
+}
+
+//-----------------------------------------------------------------------------
+inline real ddx(uint n, real x)
+{
+  return Jacobi::ddx(n, -0.5, -0.5, x);
 }
 
 }

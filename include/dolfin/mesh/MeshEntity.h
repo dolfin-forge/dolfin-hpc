@@ -72,7 +72,10 @@ protected:
   Mesh& mesh_;
 
   // Topological dimension
-  uint const dim_;
+  uint const tdim_;
+
+  // Geometric dimension
+  uint const gdim_;
 
   // Index of entity within topological dimension
   uint index_;
@@ -96,7 +99,7 @@ inline Mesh const& MeshEntity::mesh() const
 //-----------------------------------------------------------------------------
 inline uint MeshEntity::dim() const
 {
-  return dim_;
+  return tdim_;
 }
 
 //-----------------------------------------------------------------------------
@@ -108,19 +111,19 @@ inline uint MeshEntity::index() const
 //-----------------------------------------------------------------------------
 inline uint MeshEntity::numEntities(uint dim) const
 {
-  return mesh_.topology()(dim_, dim).size(index_);
+  return mesh_.topology()(tdim_, dim).size(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint * MeshEntity::entities(uint dim)
 {
-  return mesh_.topology()(dim_, dim)(index_);
+  return mesh_.topology()(tdim_, dim)(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint const * MeshEntity::entities(uint dim) const
 {
-  return mesh_.topology()(dim_, dim)(index_);
+  return mesh_.topology()(tdim_, dim)(index_);
 }
 
 }

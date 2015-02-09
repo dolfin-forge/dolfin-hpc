@@ -337,7 +337,10 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  demo/nls/Makefile\
                  demo/pde/Makefile\
                  demo/pde/dg/Makefile\
-                 demo/pde/stokes/Makefile])
+                 demo/pde/stokes/Makefile\
+                 bench/Makefile\
+                 bench/fem/Makefile\
+                 bench/mesh/Makefile])
 
 # Tests
 if test "x${enable_check}" = xyes; then

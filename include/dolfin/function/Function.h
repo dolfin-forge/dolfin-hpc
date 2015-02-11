@@ -357,6 +357,10 @@ inline void Function::disp() const
 //-----------------------------------------------------------------------------
 inline Mesh& Function::mesh() const
 {
+  if(f_ == NULL)
+  {
+    error("Trying to get the mesh from an empty function.");
+  }
   return f_->mesh();
 }
 //-----------------------------------------------------------------------------

@@ -103,7 +103,7 @@ UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
         uint const v2 = v0 + (nx + 1);
         uint const v3 = v1 + (nx + 1);
 
-        uint const connectivity[12] = { v0, v1, v2, v1, v2, v3 };
+        uint const connectivity[6] = { v0, v1, v2, v1, v2, v3 };
 
         editor.addCell(cell++, &connectivity[0]);
         editor.addCell(cell++, &connectivity[3]);
@@ -121,7 +121,7 @@ UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
         uint const v2 = v0 + (nx + 1);
         uint const v3 = v1 + (nx + 1);
 
-        uint const connectivity[12] = { v0, v1, v3, v0, v2, v3 };
+        uint const connectivity[6] = { v0, v1, v3, v0, v2, v3 };
 
         editor.addCell(cell++, &connectivity[0]);
         editor.addCell(cell++, &connectivity[3]);

@@ -30,11 +30,17 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   
   zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
-  // General query functions
-  zz_->Set_Num_Obj_Fn(partitionZoltanNumObj, &mesh);
-  zz_->Set_Obj_List_Fn(partitionZoltanObjList, &mesh);  
+  // Setup query functions for graph based partitioning
+  zz_->Set_Num_Obj_Fn(partitionZoltanNumCells, &mesh);
+  zz_->Set_Obj_List_Fn(partitionZoltanCellList, &mesh);  
   
-  /* TODO */
+  // Use Zoltan's Parallel Hypergraph and Graph partitioner
+  zz_->Set_Param( "LB_METHOD", "GRAPH");
+
+  partitions.init(mesh, mesh.topology().dim());
+  partitions = MPI::processNumber();
+
+  partitionZoltanInternal(mesh, partitions);
 
   delete zz_;
 }
@@ -45,24 +51,35 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
 
   zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
-  ZOLTAN_ID_PTR import_global_ids, import_local_ids;
-  ZOLTAN_ID_PTR export_global_ids, export_local_ids;
-
-  int changes, num_gid_entries, num_lid_entries;
-  int num_import, num_export;
-
-  int *import_procs, *import_to_part;
-  int *export_procs, *export_to_part;
-
-
-  // General query functions
-  zz_->Set_Num_Obj_Fn(partitionZoltanNumObj_geom, &mesh);
-  zz_->Set_Obj_List_Fn(partitionZoltanObjList_geom, &mesh);  
+  // Setup query functions for geometry based partitioning
+  zz_->Set_Num_Obj_Fn(partitionZoltanNumVertices, &mesh);
+  zz_->Set_Obj_List_Fn(partitionZoltanVertexList, &mesh);  
   zz_->Set_Num_Geom_Fn(partitionZoltanNumGeom, &mesh);  
   zz_->Set_Geom_Multi_Fn(partitionZoltanGeomCoords, &mesh);  
 
   // Use a Hilbert Space-Filling Curve
   zz_->Set_Param( "LB_METHOD", "HSFC"); 
+
+  partitions.init(mesh, 0);
+  partitions = MPI::processNumber();
+
+  partitionZoltanInternal(mesh, partitions);
+
+  delete zz_;
+}
+//-----------------------------------------------------------------------------
+void ZoltanInterface::partitionZoltanInternal(Mesh& mesh,
+					      MeshFunction<uint>& partitions)
+{
+  ZOLTAN_ID_PTR import_global_ids, import_local_ids;
+  ZOLTAN_ID_PTR export_global_ids, export_local_ids;
+  
+  int changes, num_gid_entries, num_lid_entries;
+  int num_import, num_export;
+  
+  int *import_procs, *import_to_part;
+  int *export_procs, *export_to_part;
+
 
   if (zz_->LB_Partition(changes, num_gid_entries, num_lid_entries, num_import,
 			import_global_ids, import_local_ids,
@@ -70,13 +87,10 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
 			export_global_ids, export_local_ids, 
 			export_procs, export_to_part) != ZOLTAN_OK)
   {
-    error("Zoltan failed to partition the mesh using a HSFC");
+    error("Zoltan failed to partition the mesh");
   }
 
-  // Create meshfunction from partitions
-  partitions.init(mesh, 0);
-  partitions = MPI::processNumber();
-
+  // Fill meshfunction from partitions
   for (uint i = 0; i < num_export; i++)
   {
     partitions.set(export_local_ids[i], export_procs[i]);
@@ -87,10 +101,10 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
 
   Zoltan::LB_Free_Part(&export_global_ids, &export_local_ids, 
 		       &export_procs, &export_to_part);
-  delete zz_;
+
 }
 //-----------------------------------------------------------------------------
-int ZoltanInterface::partitionZoltanNumObj(void *data, int *ierr) 
+int ZoltanInterface::partitionZoltanNumCells(void *data, int *ierr) 
 {
 
   Mesh *mesh = (Mesh *) data;
@@ -100,7 +114,7 @@ int ZoltanInterface::partitionZoltanNumObj(void *data, int *ierr)
 
 }
 //-----------------------------------------------------------------------------
-int ZoltanInterface::partitionZoltanNumObj_geom(void *data, int *ierr) 
+int ZoltanInterface::partitionZoltanNumVertices(void *data, int *ierr) 
 {
 
   Mesh *mesh = (Mesh *) data;
@@ -110,7 +124,7 @@ int ZoltanInterface::partitionZoltanNumObj_geom(void *data, int *ierr)
 
 }
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionZoltanObjList(void *data, int num_gid_entries, 
+void ZoltanInterface::partitionZoltanCellList(void *data, int num_gid_entries, 
 					     int num_lid_entries, 
 					     ZOLTAN_ID_PTR global_ids, 
 					     ZOLTAN_ID_PTR local_ids, 
@@ -131,7 +145,7 @@ void ZoltanInterface::partitionZoltanObjList(void *data, int num_gid_entries,
 
 }
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionZoltanObjList_geom(void *data, 
+void ZoltanInterface::partitionZoltanVertexList(void *data, 
 						  int num_gid_entries,
 						  int num_lid_entries, 
 						  ZOLTAN_ID_PTR global_ids, 

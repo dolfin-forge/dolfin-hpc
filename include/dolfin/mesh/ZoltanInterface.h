@@ -33,15 +33,17 @@ namespace dolfin
 
 #ifdef HAVE_ZOLTAN
 
+  private:
+
     static Zoltan *zz_;
 
     /// Zoltan callbacks
 
     // Generall functions
-    static int partitionZoltanNumObj(void *data, int *ierr);
-    static int partitionZoltanNumObj_geom(void *data, int *ierr);
+    static int partitionZoltanNumCells(void *data, int *ierr);
+    static int partitionZoltanNumVertices(void *data, int *ierr);
 
-    static void partitionZoltanObjList(void *data, 
+    static void partitionZoltanCellList(void *data, 
 				       int num_gid_entries, 
 				       int num_lid_entries, 
 				       ZOLTAN_ID_PTR global_ids, 
@@ -50,14 +52,14 @@ namespace dolfin
 				       float *obj_wgts, 
 				       int *ierr);
 
-    static void partitionZoltanObjList_geom(void *data, 
-					    int num_gid_entries, 
-					    int num_lid_entries, 
-					    ZOLTAN_ID_PTR global_ids, 
-					    ZOLTAN_ID_PTR local_ids, 
-					    int wgt_dim, 
-					    float *obj_wgts, 
-					    int *ierr);
+    static void partitionZoltanVertexList(void *data, 
+					  int num_gid_entries, 
+					  int num_lid_entries, 
+					  ZOLTAN_ID_PTR global_ids, 
+					  ZOLTAN_ID_PTR local_ids, 
+					  int wgt_dim, 
+					  float *obj_wgts, 
+					  int *ierr);
     
     // Geometry based functions
     static int partitionZoltanNumGeom(void *data, int *ierr);
@@ -71,6 +73,12 @@ namespace dolfin
 					  int num_dim, 
 					  double *geom_vec, 
 					  int *ierr);
+
+
+    // Internal common partition function
+    static void partitionZoltanInternal(Mesh& mesh, 
+					MeshFunction<uint>& partitions);
+
 #endif
     
   };

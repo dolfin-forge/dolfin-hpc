@@ -354,10 +354,10 @@ void TetrahedronCell::refineCell(Cell& cell, MeshEditor& editor,
   uint const e5 = offset + e[findEdge(5, cell)];
 
   // Regular refinement: 8 new cells
-  uint connectivity[40] = { v0, e3, e4, e5, v1, e1, e2, e5, v2, e0, e2, e4, v3,
+  uint connectivity[32] = { v0, e3, e4, e5, v1, e1, e2, e5, v2, e0, e2, e4, v3,
                             e0, e1, e3, e0, e1, e2, e5, e0, e1, e3, e5, e0, e2,
                             e4, e5, e0, e3, e4, e5 };
-  for (uint i = 0; i < 10; ++i)
+  for (uint i = 0; i < 8; ++i)
   {
     editor.addCell(current_cell++, &connectivity[i * 4]);
   }

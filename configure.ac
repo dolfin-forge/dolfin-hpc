@@ -357,6 +357,7 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/mesh/Makefile\
                  tests/mesh/SubDomain/Makefile\
                  tests/mesh/VertexNormal/Makefile\
+                 tests/mesh/UnitMeshes/Makefile\
                  tests/ufl/Makefile\
                  tests/ufl/Algebra/Makefile\
                  tests/ufl/Argument/Makefile\

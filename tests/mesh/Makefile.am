@@ -1,2 +1,3 @@
 SUBDIRS = SubDomain \
+          UnitMeshes \
           VertexNormal

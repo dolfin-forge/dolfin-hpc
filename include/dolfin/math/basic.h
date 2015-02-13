@@ -89,6 +89,55 @@ inline uint ipow(uint a, uint n)
   return p;
 }
 
+/// Return factorial of a
+inline int fact(int a, int acc = 1)
+{
+  // error condition
+  if (acc < 0)
+  {
+    return -1;
+  }
+
+  // termination condition
+  if (a == 0||a == 1)
+    return acc;
+
+  // Tail recursive call
+  return fact(a - 1, acc * a);
+}
+
+/// Gamma function from PELICANS
+inline real gamma(double const x)
+{
+  int n = x < 1.5 ? -((int) (2.5 - x)) : (int) (x - 1.5);
+  double w = x - (n + 2);
+  double y = ((((((((((((-1.99542863674e-7 * w + 1.337767384067e-6) * w
+      - 2.591225267689e-6) * w - 1.7545539395205e-5) * w + 1.45596568617526e-4)
+      * w - 3.60837876648255e-4) * w - 8.04329819255744e-4) * w
+      + 0.008023273027855346) * w - 0.017645244547851414) * w
+      - 0.024552490005641278) * w + 0.19109110138763841) * w
+      - 0.233093736421782878) * w - 0.422784335098466784) * w
+      + 0.99999999999999999;
+  if (n > 0)
+  {
+    w = x - 1;
+    for (int k = 2; k <= n; k++)
+    {
+      w *= x - k;
+    }
+  }
+  else
+  {
+    w = 1;
+    for (int k = 0; k > n; k--)
+    {
+      y *= x - k;
+    }
+  }
+  double result = w / y;
+  return (result);
+}
+
 /// Seed only first time
 static bool rand_seeded = false;
 

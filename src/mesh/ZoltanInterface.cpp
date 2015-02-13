@@ -28,7 +28,7 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
 					 MeshFunction<uint>* weight)
 {
   
-  zz_ = new Zoltan(MPI::DOLFIN_COMM);
+  Zoltan *zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
   // Setup query functions for graph based partitioning
   zz_->Set_Num_Obj_Fn(partitionZoltanNumCells, &mesh);
@@ -40,16 +40,16 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   partitions.init(mesh, mesh.topology().dim());
   partitions = MPI::processNumber();
 
-  partitionZoltanInternal(mesh, partitions);
+  partitionZoltanInternal(mesh, partitions, zz_);
 
   delete zz_;
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionGeomZoltan(Mesh& mesh, 
-					MeshFunction<uint>& partitions)
+					  MeshFunction<uint>& partitions)
 {
 
-  zz_ = new Zoltan(MPI::DOLFIN_COMM);
+  Zoltan *zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
   // Setup query functions for geometry based partitioning
   zz_->Set_Num_Obj_Fn(partitionZoltanNumVertices, &mesh);
@@ -63,13 +63,14 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
   partitions.init(mesh, 0);
   partitions = MPI::processNumber();
 
-  partitionZoltanInternal(mesh, partitions);
+  partitionZoltanInternal(mesh, partitions, zz_);
 
   delete zz_;
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionZoltanInternal(Mesh& mesh,
-					      MeshFunction<uint>& partitions)
+					      MeshFunction<uint>& partitions,
+					      Zoltan *zz_)
 {
   ZOLTAN_ID_PTR import_global_ids, import_local_ids;
   ZOLTAN_ID_PTR export_global_ids, export_local_ids;

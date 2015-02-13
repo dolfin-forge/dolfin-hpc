@@ -29,7 +29,7 @@ real PKDO::eval(uint i, uint j, real r, real s)
   dolfin_assert(r + s <= 0.0);
   real cij = std::sqrt(0.5 * (2 * i + 1) * (i + j + 1));
   real rQ = (2 * r + s + 1) / (1 - s);
-  return cij * Jacobi::eval(i, 0, 0, rQ) * std::pow(0.5 * (1 - s), i)
+  return cij * Jacobi::eval(i, 0, 0, rQ) * std::pow(0.5 * (1 - s), (real) i)
       * Jacobi::eval(j, 2 * i + 1, 0, s);
 }
 //-----------------------------------------------------------------------------

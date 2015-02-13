@@ -18,7 +18,7 @@ namespace dolfin
 UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
     Mesh()
 {
-  warning("UnitCircle is Experimental: It may be of poor quality.");
+  warning("UnitDisk is Experimental: It may be of poor quality.");
 
   uint ny = nx;
 

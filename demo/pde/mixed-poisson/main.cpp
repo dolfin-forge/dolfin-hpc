@@ -32,13 +32,8 @@
 #include <dolfin/mesh/UnitSquare.h>
 #include <dolfin/pde/LinearPDE.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/MixedPoisson.h"
-#include "ufc2/P1Projection.h"
-#else
-#include "ufc1/MixedPoisson.h"
-#include "ufc1/P1Projection.h"
-#endif
+#include "MixedPoisson.h"
+#include "P1Projection.h"
 
 using namespace dolfin;
 

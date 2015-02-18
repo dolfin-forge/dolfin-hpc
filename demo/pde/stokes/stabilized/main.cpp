@@ -61,7 +61,7 @@ int main()
   Inflow in;
   Function inflow(mesh, in);
   Function zero(mesh, 0.0);
-  
+
   // Define sub systems for boundary conditions
   SubSystem velocity(0);
   SubSystem pressure(1);

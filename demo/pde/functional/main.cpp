@@ -16,11 +16,7 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/EnergyNorm.h"
-#else
-#include "ufc1/EnergyNorm.h"
-#endif
+#include "EnergyNorm.h"
 
 using namespace dolfin;
 

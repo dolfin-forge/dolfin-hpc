@@ -21,13 +21,8 @@
 
 #include <dolfin.h>
 
-#ifdef ENABLE_UFL
-#include "ufc2/Poisson.h"
-#include "ufc2/P1Projection.h"
-#else
-#include "ufc1/Poisson.h"
-#include "ufc1/P1Projection.h"
-#endif
+#include "Poisson.h"
+#include "P1Projection.h"
 
 using namespace dolfin;
 

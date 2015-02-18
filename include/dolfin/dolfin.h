@@ -19,5 +19,6 @@
 #include <dolfin/nls/dolfin_nls.h>
 #include <dolfin/pde/dolfin_pde.h>
 #include <dolfin/quadrature/dolfin_quadrature.h>
+#include <dolfin/ufl/dolfin_ufl.h>
 
 #endif

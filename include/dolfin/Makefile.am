@@ -269,6 +269,7 @@ nobase_pkginclude_HEADERS = \
 				quadrature/RadauQuadrature.h\
 				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
+				ufl/dolfin_ufl.h\
 				ufl/UFLarray.h\
 				ufl/UFLdict.h\
 				ufl/UFLrepr.h\

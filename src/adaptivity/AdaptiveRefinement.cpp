@@ -41,8 +41,11 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
 
 {
   message("Adaptive refinement");
-  message("  - cells before: %d", mesh.global_numCells());
-  message("  - vertices before: %d", mesh.global_numVertices());
+
+  uint const numcellsbefore = mesh.global_numCells();
+  uint const numvertsbefore = mesh.global_numVertices();
+  message("  - cells    before: %d", numcellsbefore);
+  message("  - vertices before: %d", numvertsbefore);
 
   std::ostringstream marked_filename;
   marked_filename << "marked";
@@ -72,8 +75,13 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
     dolfin::error("Unknown refinement algorithm");
   }
 
-  message("  - cells after: %d", mesh.global_numCells());
-  message("  - vertices after: %d", mesh.global_numVertices());
+  uint const numcellsafter = mesh.global_numCells();
+  dolfin_assert(numcellsafter >= numcellsbefore);
+  uint const numvertsafter = mesh.global_numVertices();
+  dolfin_assert(numvertsafter >= numvertsbefore);
+  message("  - cells    after: %d", numcellsafter);
+  message("  - vertices after: %d", numvertsafter);
+  skip();
 }
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine_and_project(Mesh& mesh,
@@ -83,7 +91,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   dolfin_set("Load balancer redistribute", false);
   message("Adaptive refinement (with projection)");
-  message("  - cells before: %d", mesh.global_numCells());
+  message("  - cells    before: %d", mesh.global_numCells());
   message("  - vertices before: %d", mesh.global_numVertices());
 
   std::string const refine_type = dolfin_get("adapt_algorithm");
@@ -359,8 +367,7 @@ void AdaptiveRefinement::decompose_func(Mesh& mesh, Function const& function,
   DofMap const& dm = function.space().dofmap();
   Array<ufc::dofmap const*> flt_dm = dm.flatten();
 
-  dolfin_assert(flt_fe.size() == flt_dm.size());
-  dolfin_assert(atomized.empty());
+  dolfin_assert(flt_fe.size() == flt_dm.size()); dolfin_assert(atomized.empty());
   for (uint s = 0; s < flt_fe.size(); ++s)
   {
     FiniteElementSpace leaf(mesh, *flt_fe[s]->create(), *flt_dm[s]->create(),

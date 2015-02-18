@@ -1,1 +1,1 @@
-SUBDIRS = mesh fem
+SUBDIRS = mesh fem adaptivity

@@ -339,6 +339,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  demo/pde/dg/Makefile\
                  demo/pde/stokes/Makefile\
                  bench/Makefile\
+                 bench/adaptivity/Makefile\
                  bench/fem/Makefile\
                  bench/mesh/Makefile])
 

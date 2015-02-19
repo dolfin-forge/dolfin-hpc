@@ -120,11 +120,7 @@ void DMesh::imp(Mesh& mesh)
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  uint max_index = mesh.global_numVertices();
-#ifdef HAVE_MPI
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX,
-                MPI::DOLFIN_COMM);
-#endif
+  glb_max = mesh.global_numVertices();
 
   Cell c(mesh, 0);
   _salt = c.numEntities(0) * mesh.global_numCells();
@@ -434,6 +430,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
   bool delete_vertices_array(!old2new_vertices);
 
+  //FIXME: Overallocation as the comment for glb_max was incorrect.
   if (old2new_vertices)
   dolfin_assert(old2new_vertices->size() >= vertices.size());
   else old2new_vertices = new Array<int>(glb_max);

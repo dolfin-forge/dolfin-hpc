@@ -177,7 +177,8 @@ public:
   /// Dimension of MeshTopology
   uint d;
 
-  /// Maximum number of vertices in one process
+  /// Maximum global index of vertices
+  /// Implemented as number of vertices in the *global* mesh
   uint glb_max;
 
   /// enumeration salt for bisect

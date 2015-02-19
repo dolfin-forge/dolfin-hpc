@@ -303,19 +303,26 @@ void DMesh::exp(Mesh& mesh)
   // Add old vertices
   uint current_vertex = 0;
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it)
+      ++it, ++current_vertex)
   {
     DVertex* dv = *it;
     dolfin_assert(!dv->deleted);
 
     editor.addVertex(current_vertex, dv->p);
-    if (dv->ghosted)
+
+    if(_is_distributed)
     {
-      mesh.distdata().set_ghost(current_vertex, 0);
-      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      if (dv->ghosted)
+      {
+        mesh.distdata().set_ghost(current_vertex, 0);
+        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      }
+      else if (dv->shared)
+      {
+        mesh.distdata().set_shared(current_vertex, 0);
+      }
+      mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
     }
-    else if (dv->shared) mesh.distdata().set_shared(current_vertex, 0);
-    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
   }
 
   Array<uint> cell_vertices(_cell_type->numEntities(0));
@@ -369,7 +376,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   // Add old vertices
   uint current_vertex = 0;
   for(std::set<DVertex* >::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
+      it != vertices.end(); ++it, ++current_vertex)
   {
     DVertex* dv = *it;
     editor.addVertex(current_vertex, dv->p);
@@ -377,14 +384,20 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 
     bnd_u.set(current_vertex, dv->u);
     bnd_v.set(current_vertex, dv->v);
-    if(dv->ghosted)
+
+    if(_is_distributed)
     {
-      mesh.distdata().set_ghost(current_vertex, 0);
-      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      if(dv->ghosted)
+      {
+        mesh.distdata().set_ghost(current_vertex, 0);
+        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      }
+      else if(dv->shared)
+      {
+        mesh.distdata().set_shared(current_vertex, 0);
+      }
+      mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
     }
-    else if(dv->shared)
-    mesh.distdata().set_shared(current_vertex, 0);
-    mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
   }
 
   Array<uint> cell_vertices(_cell_type->numEntities(0));
@@ -459,18 +472,20 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
     editor.addVertex(current_vertex, dv->p);
 
-    if (dv->ghosted)
+    if(_is_distributed)
     {
-      mesh.distdata().set_ghost(current_vertex, 0);
-      mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      if (dv->ghosted)
+      {
+        mesh.distdata().set_ghost(current_vertex, 0);
+        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+      }
+      else if (dv->shared)
+      {
+        mesh.distdata().set_shared(current_vertex, 0);
+        mesh.distdata().setall_shared_adj(current_vertex, dv->shared_adj, 0);
+      }
+      mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
     }
-    else if (dv->shared)
-    {
-      mesh.distdata().set_shared(current_vertex, 0);
-      mesh.distdata().setall_shared_adj(current_vertex, dv->shared_adj, 0);
-    }
-
-    mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
   }
 
   Array<uint> cell_vertices(_cell_type->numEntities(0));

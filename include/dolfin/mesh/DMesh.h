@@ -186,9 +186,6 @@ public:
   /// Start offset for new global id
   uint _start_offset;
 
-  /// Global maximum start offset
-  uint _max;
-
   /// Propagation buffer
   std::vector<Propagation> propagate;
 

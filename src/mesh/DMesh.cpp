@@ -141,9 +141,6 @@ void DMesh::imp(Mesh& mesh)
   _start_offset -= num_new;
 #endif
   _start_offset += glb_max;
-
-  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX,
-                MPI::DOLFIN_COMM);
 #endif
 
   // Copy vertices

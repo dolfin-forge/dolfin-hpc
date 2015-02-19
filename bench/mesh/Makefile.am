@@ -1,2 +1,3 @@
 SUBDIRS = Edge \
+          Mesh \
           MeshEditor

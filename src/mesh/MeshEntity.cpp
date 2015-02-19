@@ -14,7 +14,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
     mesh_(mesh),
-    dim_(dim),
+    tdim_(dim),
+    gdim_(mesh.geometry().dim()),
     index_(index)
 {
 }
@@ -29,8 +30,8 @@ bool MeshEntity::incident(MeshEntity const& entity) const
   if (&mesh_ != &entity.mesh_) return false;
 
   // Get list of entities for given topological dimension
-  uint const * entities = mesh_.topology()(dim_, entity.dim_)(index_);
-  uint const num_entities = mesh_.topology()(dim_, entity.dim_).size(index_);
+  uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
+  uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
@@ -52,8 +53,8 @@ uint MeshEntity::index(MeshEntity const& entity) const
   }
 
   // Get list of entities for given topological dimension
-  uint const * entities = mesh_.topology()(dim_, entity.dim_)(index_);
-  uint const num_entities = mesh_.topology()(dim_, entity.dim_).size(index_);
+  uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
+  uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
@@ -69,12 +70,12 @@ uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return mesh_.distdata().is_shared(index_, dim_);
+  return mesh_.distdata().is_shared(index_, tdim_);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return mesh_.distdata().is_ghost(index_, dim_);
+  return mesh_.distdata().is_ghost(index_, tdim_);
 }
 //-----------------------------------------------------------------------------
 LogStream& operator<<(LogStream& stream, MeshEntity const& entity)

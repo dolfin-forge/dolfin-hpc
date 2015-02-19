@@ -72,74 +72,104 @@ static bool checkCellDeleted(DCell * cell)
   return cell->deleted;
 }
 //-----------------------------------------------------------------------------
-//DMesh::DMesh() : vertices(0), cells(0)
 DMesh::DMesh() :
-    cells(0)
+    vertices(),
+    cells(),
+    _is_distributed(false),
+    _cell_type(NULL),
+    _tdim(0),
+    _gdim(0),
+    _glb_max(0),
+    _salt(0),
+    _start_offset(0)
 {
+}
+//-----------------------------------------------------------------------------
+DMesh::DMesh(Mesh& mesh) :
+    vertices(),
+    cells(),
+    _is_distributed(false),
+    _cell_type(NULL),
+    _tdim(0),
+    _gdim(0),
+    _glb_max(0),
+    _salt(0),
+    _start_offset(0)
+{
+  imp(mesh);
 }
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
-  if (_cell_type) delete _cell_type;
+  clear();
+}
+//-----------------------------------------------------------------------------
+void DMesh::clear()
+{
+  delete _cell_type;
+
+  // Delete allocated DCells
+  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
+  {
+    delete *it;
+  }
+  cells.clear();
 
   // Delete allocated DVertices
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
       ++it)
+  {
     delete *it;
-
-  // Delete allocated DCells
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
-    delete *it;
-
+  }
+  vertices.clear();
 }
 //-----------------------------------------------------------------------------
-void DMesh::imp(Mesh& mesh)
+void DMesh::init(Mesh& mesh)
 {
-  _is_distributed = mesh.is_distributed();
-  _cell_type = CellType::create(mesh.type().cellType());
+  if (_cell_type != NULL)
+  {
+    error("Dynamic mesh already initialized on a mesh.");
+  }
 
+  // Cleanup before new allocation
+  clear();
+
+  _cell_type = CellType::create(mesh.type().cellType());
+  _is_distributed = mesh.is_distributed();
   _tdim = mesh.topology().dim();
   _gdim = mesh.geometry().dim();
 
-  // Delete allocated DVertices
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it)
-    delete *it;
-
-  // Delete allocated DCells
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
-    delete *it;
-
-  vertices.clear();
-  cells.clear();
-
-  //MeshRenumber::renumber_vertices(mesh);
-
-  std::vector<DVertex *> vertexvec;
-
-  // Assume uniform refinement
-  uint num_new = mesh.size(1);
-
   // Since the mesh is linear numbered, the maximum global index assigned is
-  // the number of vertices in the mesh
-  _glb_max = mesh.global_numVertices();
+  // the number of vertices in the *global* mesh
+  _glb_max = mesh.topology().num_global(0);
+  dolfin_assert(_glb_max > 0);
+  _salt = _cell_type->numEntities(0) * mesh.topology().num_global(_tdim);
+  dolfin_assert(_salt > 0);
 
-  Cell c(mesh, 0);
-  _salt = c.numEntities(0) * mesh.global_numCells();
-
-  // Assign a safe range for each processor
+  // Assign a safe range for each processor:
+  // Shifting original index range by global number of vertices ensures that
+  // there is no overlap with current numbering.
   _start_offset = 0;
+  // Assume uniform refinement
+  uint num_new = mesh.topology().size(1);
 #ifdef HAVE_MPI
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_new, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
              MPI::DOLFIN_COMM);
 #else
-  MPI_Scan(&num_new, &_start_offset, 1,
-      MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI_Scan(&num_new, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
+      MPI::DOLFIN_COMM);
   _start_offset -= num_new;
 #endif
   _start_offset += _glb_max;
 #endif
+}
+//-----------------------------------------------------------------------------
+void DMesh::imp(Mesh& mesh)
+{
+  init(mesh);
+
+  std::vector<DVertex *> vertexvec;
 
   // Copy vertices
   uint counter = 1;
@@ -193,53 +223,11 @@ void DMesh::imp(Mesh& mesh)
 void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
-  _is_distributed = mesh.is_distributed();
-  _cell_type = CellType::create(mesh.type().cellType());
-
-  _tdim = mesh.topology().dim();
-  _gdim = mesh.geometry().dim();
-
-  // Delete allocated DVertices
-  for(std::set<DVertex* >::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
-  delete *it;
-
-  // Delete allocated DCells
-  for(std::list<DCell* >::iterator it = cells.begin();
-      it != cells.end(); ++it)
-  delete *it;
-
-  vertices.clear();
-  cells.clear();
-
-  //MeshRenumber::renumber_vertices(mesh);
+  init(mesh);
 
   std::vector<DVertex *> vertexvec;
 
-  // Assume uniform refinement
-  uint num_new = mesh.size(1);
-
-  // Since the mesh is linear numbered, the maximum global index assigned is
-  // the number of vertices in the mesh
-  _glb_max = mesh.global_numVertices();
-
-  Cell c(mesh, 0);
-  _salt = c.numEntities(0) * mesh.distdata().global_numCells();
-
-  // Assign a safe range for each processor
-  _start_offset = 0;
-#ifdef HAVE_MPI
-#if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_new, &_start_offset, 1,
-      MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-#else
-  MPI_Scan(&num_new, &_start_offset, 1,
-      MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  _start_offset -= num_new;
-#endif
-  _start_offset += _glb_max;
-#endif
-
+  // Copy vertices
   uint counter = 1;
   for (VertexIterator vi(mesh); !vi.end(); ++vi)
   {
@@ -267,6 +255,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     counter++;
   }
 
+  // Copy cells
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     DCell* dc = new DCell;

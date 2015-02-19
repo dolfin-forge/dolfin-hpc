@@ -42,7 +42,14 @@ class CellType;
 class DMesh
 {
 public:
+
+  /// Default constructor
   DMesh();
+
+  /// Constructor on a mesh (preferred)
+  DMesh(Mesh& mesh);
+
+  /// Destructor
   ~DMesh();
 
   /// Edge Identifier containing ids of end vertices
@@ -209,6 +216,12 @@ public:
   }
 
 private:
+
+  /// Common initialization code
+  void init(Mesh& mesh);
+
+  /// Clear
+  void clear();
 
   /// Distributed mesh flag
   bool _is_distributed;

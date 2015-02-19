@@ -220,14 +220,10 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
-#ifdef HAVE_MPI
-  MPI_Allreduce(&max_index, &_glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
-#endif
+  _glb_max = mesh.global_numVertices();
 
   Cell c(mesh, 0);
-  _salt = c.numEntities(0) *
-  (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numCells() : mesh.numCells());
+  _salt = c.numEntities(0) * mesh.distdata().global_numCells();
 
   // Assign a safe range for each processor
   _start_offset = 0;
@@ -241,8 +237,6 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   _start_offset -= num_new;
 #endif
   _start_offset += _glb_max;
-
-  MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
 
   uint counter = 1;

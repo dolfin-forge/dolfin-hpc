@@ -210,6 +210,9 @@ public:
 
 private:
 
+  /// Distributed mesh flag
+  bool _is_distributed;
+
   /// CellType of mesh
   CellType * _cell_type;
 

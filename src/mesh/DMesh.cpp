@@ -95,8 +95,9 @@ DMesh::~DMesh()
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)
 {
+  _is_distributed = mesh.is_distributed();
   _cell_type = CellType::create(mesh.type().cellType());
-  //cell_type = &(mesh.type());
+
   _tdim = mesh.topology().dim();
   _gdim = mesh.geometry().dim();
 
@@ -192,7 +193,7 @@ void DMesh::imp(Mesh& mesh)
 void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
-
+  _is_distributed = mesh.is_distributed();
   _cell_type = CellType::create(mesh.type().cellType());
 
   _tdim = mesh.topology().dim();

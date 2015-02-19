@@ -80,7 +80,7 @@ DMesh::DMesh() :
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
-  if (cell_type) delete cell_type;
+  if (_cell_type) delete _cell_type;
 
   // Delete allocated DVertices
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
@@ -95,9 +95,9 @@ DMesh::~DMesh()
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)
 {
-  cell_type = CellType::create(mesh.type().cellType());
+  _cell_type = CellType::create(mesh.type().cellType());
   //cell_type = &(mesh.type());
-  d = mesh.topology().dim();
+  _tdim = mesh.topology().dim();
 
   // Delete allocated DVertices
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
@@ -120,7 +120,7 @@ void DMesh::imp(Mesh& mesh)
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the mesh
-  glb_max = mesh.global_numVertices();
+  _glb_max = mesh.global_numVertices();
 
   Cell c(mesh, 0);
   _salt = c.numEntities(0) * mesh.global_numCells();
@@ -136,7 +136,7 @@ void DMesh::imp(Mesh& mesh)
       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   _start_offset -= num_new;
 #endif
-  _start_offset += glb_max;
+  _start_offset += _glb_max;
 #endif
 
   // Copy vertices
@@ -192,9 +192,9 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
 {
 
-  cell_type = CellType::create(mesh.type().cellType());
+  _cell_type = CellType::create(mesh.type().cellType());
 
-  d = mesh.topology().dim();
+  _tdim = mesh.topology().dim();
 
   // Delete allocated DVertices
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -220,7 +220,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   // the number of vertices in the mesh
   uint max_index = (dolfin::MPI::numProcesses() > 1 ? mesh.distdata().global_numVertices() : mesh.numVertices());
 #ifdef HAVE_MPI
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+  MPI_Allreduce(&max_index, &_glb_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
 
   Cell c(mesh, 0);
@@ -238,7 +238,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
       MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
   _start_offset -= num_new;
 #endif
-  _start_offset += glb_max;
+  _start_offset += _glb_max;
 
   MPI_Allreduce(&_start_offset, &_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
 #endif
@@ -298,7 +298,7 @@ void DMesh::exp(Mesh& mesh)
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor(mesh, cell_type->cellType(), d, d);
+  MeshEditor editor(mesh, _cell_type->cellType(), _tdim, _tdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -321,7 +321,7 @@ void DMesh::exp(Mesh& mesh)
     mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
   }
 
-  Array<uint> cell_vertices(cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->numEntities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -357,7 +357,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   number();
 
   MeshEditor editor;
-  editor.open(mesh, cell_type->cellType(), d, d);
+  editor.open(mesh, _cell_type->cellType(), _tdim, _tdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -391,7 +391,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     mesh.distdata().set_map(current_vertex++, dv->glb_id, 0);
   }
 
-  Array<uint> cell_vertices(cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->numEntities(0));
   uint current_cell = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
       it != cells.end(); ++it)
@@ -433,7 +433,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   //FIXME: Overallocation as the comment for glb_max was incorrect.
   if (old2new_vertices)
   dolfin_assert(old2new_vertices->size() >= vertices.size());
-  else old2new_vertices = new Array<int>(glb_max);
+  else old2new_vertices = new Array<int>(_glb_max);
   *old2new_vertices = -1;
 
   if (old2new_cells)
@@ -442,7 +442,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     *old2new_cells = -1;
   }
 
-  MeshEditor editor(mesh, cell_type->cellType(), d, d);
+  MeshEditor editor(mesh, _cell_type->cellType(), _tdim, _tdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -477,7 +477,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
   }
 
-  Array<uint> cell_vertices(cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->numEntities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end();
       ++it, ++current_cell)
@@ -632,8 +632,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv = new DVertex;
     addVertex(mv);
     if (v0->glb_id < v1->glb_id) mv->glb_id = (((v0->glb_id * _salt)
-        + (v1->glb_id))) + glb_max;
-    else mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
+        + (v1->glb_id))) + _glb_max;
+    else mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
@@ -778,9 +778,9 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
     mv->v = -1;
     addVertex(mv);
     if( v0->glb_id < v1->glb_id )
-    mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + glb_max;
+    mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + _glb_max;
     else
-    mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + glb_max;
+    mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
 
     //use the regular mitpoint rule when both neighbor vertices are not on the geometry
     if(dcell->vertices[ii]->patch_id < 0 || dcell->vertices[jj]->patch_id < 0)

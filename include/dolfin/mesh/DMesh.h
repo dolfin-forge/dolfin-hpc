@@ -171,22 +171,6 @@ public:
   /// Cells contained in the mesh
   std::list<DCell *> cells;
 
-  /// CellType of mesh
-  CellType* cell_type;
-
-  /// Dimension of MeshTopology
-  uint d;
-
-  /// Maximum global index of vertices
-  /// Implemented as number of vertices in the *global* mesh
-  uint glb_max;
-
-  /// enumeration salt for bisect
-  uint _salt;
-
-  /// Start offset for new global id
-  uint _start_offset;
-
   /// Propagation buffer
   std::vector<Propagation> propagate;
 
@@ -223,6 +207,24 @@ public:
       return key;
     }
   }
+
+private:
+
+  /// CellType of mesh
+  CellType * _cell_type;
+
+  /// Topological dimension
+  uint _tdim;
+
+  /// Maximum global index of vertices
+  /// Implemented as number of vertices in the *global* mesh
+  uint _glb_max;
+
+  /// enumeration salt for bisect
+  uint _salt;
+
+  /// Start offset for new global id
+  uint _start_offset;
 
 };}
 

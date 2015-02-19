@@ -12,6 +12,7 @@ nobase_pkginclude_HEADERS = \
 				common/unittest.h\
 				common/Array.h\
 				common/List.h\
+				common/Test.h\
 				common/Timer.h\
 				common/TimeDependent.h\
 				common/TimeSeries.h\

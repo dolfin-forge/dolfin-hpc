@@ -176,8 +176,7 @@ void DMesh::imp(Mesh& mesh)
     dv->p = vi->point();
     dv->id = vi->index();
     dv->glb_id = mesh.distdata().get_vertex_global(vi->index());
-    dv->on_boundary = MPI::numProcesses() > 1
-        && mesh.distdata().is_shared(vi->index(), 0);
+    dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
     dv->shared = mesh.distdata().is_shared(vi->index(), 0);
     dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
     if (dv->ghosted) dv->owner = mesh.distdata().get_owner(*vi);
@@ -326,7 +325,7 @@ void DMesh::exp(Mesh& mesh)
   }
   editor.close();
 
-  if (MPI::numProcesses() > 1)
+  if (_is_distributed)
   {
     mesh.distdata().set_invalid_numbering();
     mesh.distdata().set_invalid_ownership();
@@ -401,7 +400,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   }
   editor.close();
 
-  if (MPI::numProcesses() > 1)
+  if (_is_distributed)
   {
     mesh.distdata().set_invalid_numbering();
     mesh.distdata().set_invalid_ownership();

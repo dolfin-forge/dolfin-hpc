@@ -98,6 +98,7 @@ void DMesh::imp(Mesh& mesh)
   _cell_type = CellType::create(mesh.type().cellType());
   //cell_type = &(mesh.type());
   _tdim = mesh.topology().dim();
+  _gdim = mesh.geometry().dim();
 
   // Delete allocated DVertices
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
@@ -195,6 +196,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   _cell_type = CellType::create(mesh.type().cellType());
 
   _tdim = mesh.topology().dim();
+  _gdim = mesh.geometry().dim();
 
   // Delete allocated DVertices
   for(std::set<DVertex* >::iterator it = vertices.begin();
@@ -298,7 +300,7 @@ void DMesh::exp(Mesh& mesh)
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor(mesh, _cell_type->cellType(), _tdim, _tdim);
+  MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -356,8 +358,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor;
-  editor.open(mesh, _cell_type->cellType(), _tdim, _tdim);
+  MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());
@@ -442,7 +443,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     *old2new_cells = -1;
   }
 
-  MeshEditor editor(mesh, _cell_type->cellType(), _tdim, _tdim);
+  MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
   editor.initVertices(vertices.size());
   editor.initCells(cells.size());

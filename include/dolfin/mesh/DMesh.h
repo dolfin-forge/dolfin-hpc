@@ -216,6 +216,9 @@ private:
   /// Topological dimension
   uint _tdim;
 
+  /// Geometric dimension
+  uint _gdim;
+
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh
   uint _glb_max;

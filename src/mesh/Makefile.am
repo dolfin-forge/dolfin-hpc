@@ -25,6 +25,7 @@ libdolfin_mesh_la_SOURCES = \
 			LocalMeshCoarsening.cpp\
 			LocalMeshRefinement.cpp\
 			MPIMeshCommunicator.cpp\
+			MappedManifold.cpp\
 			Mesh.cpp\
 			MeshConnectivity.cpp\
 			MeshData.cpp\

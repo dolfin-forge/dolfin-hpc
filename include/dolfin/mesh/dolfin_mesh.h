@@ -34,5 +34,6 @@
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/AffineMapping.h>
+#include <dolfin/mesh/MappedManifold.h>
 
 #endif

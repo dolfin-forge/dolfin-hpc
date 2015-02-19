@@ -143,8 +143,8 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
-  if (mddata.has_valid_numbering(1) || MPI::numProcesses() == 1
-      || mesh.topology().dim() < 2)
+  if (mesh.topology().dim() < 2 || mddata.has_valid_numbering(1)
+        || MPI::numProcesses() == 1)
   {
     return false;
   }
@@ -327,8 +327,8 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
-  if (mddata.has_valid_numbering(2) || MPI::numProcesses() == 1
-      || mesh.topology().dim() < 3)
+  if (mesh.topology().dim() < 3 || mddata.has_valid_numbering(2)
+        || MPI::numProcesses() == 1)
   {
     return false;
   }
@@ -562,6 +562,7 @@ bool MeshRenumber::remap_facets(Mesh& mesh)
     return false;
   }
   remap_shared_entities(mesh, facetdim);
+  return true;
 }
 //-----------------------------------------------------------------------------
 std::pair<uint, uint> MeshRenumber::edge_key(uint id1, uint id2)
@@ -716,7 +717,7 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
     Array<uint>& ghost_mapping1 = distdata.get_ghost_mapping_from(src, dim);
     ghost_mapping1.resize(ghost_idx[src].size());
     uint ghost_entity = 0;
-    for (uint entity = 0; entity < num_recv_entities; ++entity)
+    for (uint entity = 0; entity < (uint) num_recv_entities; ++entity)
     {
       uint glb = recvbuf[entity];
       //
@@ -735,7 +736,8 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
       {
         //
         dolfin_assert(distdata.is_ghost(distdata.get_local(glb, dim), dim)
-            && (distdata.get_owner(distdata.get_local(glb, dim), dim) == src));
+            && (distdata.get_owner(distdata.get_local(glb, dim), dim)
+                == (uint) src));
 
         // Fill the ghost mapping between local ghost iterator ordering and the
         // ordering of corresponding *shared* entities for the owner rank.

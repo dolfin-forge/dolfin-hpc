@@ -66,12 +66,6 @@ private:
   int id;
 };
 //-----------------------------------------------------------------------------
-/// Helper function for eraseRemovedEntities method
-static bool checkCellDeleted(DCell * cell)
-{
-  return cell->deleted;
-}
-//-----------------------------------------------------------------------------
 DMesh::DMesh() :
     vertices(),
     cells(),

@@ -3,6 +3,7 @@
 //
 // Modified by Niclas Jansson, 2009-2013.
 // Modified by Balthasar Reuter, 2013
+// Modified by Aurelien Larcher, 2015
 //
 
 #ifndef __D_MESH_H

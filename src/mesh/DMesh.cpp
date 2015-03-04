@@ -3,6 +3,7 @@
 //
 // Modified by Niclas Jansson, 2009-2013.
 // Modified by Balthasar Reuter, 2013
+// Modified by Aurelien Larcher, 2015
 //
 
 #include <dolfin/config/dolfin_config.h>
@@ -140,9 +141,8 @@ void DMesh::init(Mesh& mesh)
   _salt = _cell_type->numEntities(0) * mesh.topology().num_global(_tdim);
   dolfin_assert(_salt > 0);
 
-  // Assign a safe range for each processor:
-  // Shifting original index range by global number of vertices ensures that
-  // there is no overlap with current numbering.
+  // Assign a safe range for each rank for the numbering of new entities i.e
+  // such that there is no overlap with existing numbered entities.
   _start_offset = 0;
   // Assume uniform refinement
   uint num_new = mesh.topology().size(1);

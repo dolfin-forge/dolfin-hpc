@@ -8,6 +8,7 @@
 #include <dolfin/common/timing.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/List.h>
+#include <dolfin/common/Test.h>
 #include <dolfin/common/Timer.h>
 #include <dolfin/common/TimeDependent.h>
 #include <dolfin/common/TimeSeries.h>

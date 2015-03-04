@@ -9,8 +9,6 @@
 
 #include <dolfin.h>
 
-#include <mpi.h>
-
 #include <cassert>
 #include <iostream>
 

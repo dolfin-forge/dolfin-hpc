@@ -28,7 +28,7 @@ namespace dolfin
   class MeshData
   {
   public:
-    
+
     /// Constructor
     MeshData(Mesh& mesh);
 
@@ -39,16 +39,16 @@ namespace dolfin
     void clear();
 
     /// Create MeshFunction with given name (uninitialized)
-    MeshFunction<uint>* createMeshFunction(std::string name);
+    MeshFunction<uint> * createMeshFunction(std::string name);
 
     /// Create Array with given name and size
-    Array<uint>* createArray(std::string name, uint size);
-    
-    /// Return MeshFunction with given name (returning zero if data is not available)
-    MeshFunction<uint>* meshFunction(std::string name);
+    Array<uint> * createArray(std::string name, uint size);
 
-    /// Return Array with given name (returning zero if data is not available)
-    Array<uint>* array(std::string name);
+    /// Return MeshFunction with given name: fails if does not exist.
+    MeshFunction<uint> * meshFunction(std::string name);
+
+    /// Return Array with given name: fails if does not exist.
+    Array<uint> * array(std::string name);
 
     /// Display data
     void disp() const;

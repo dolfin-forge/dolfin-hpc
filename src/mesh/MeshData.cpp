@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2008-05-19
-// Last changed: 2008-05-28
+// Last changed: 2015-03-03
 
 #include <dolfin/mesh/MeshData.h>
 
@@ -87,20 +87,36 @@ Array<dolfin::uint>* MeshData::createArray(std::string name, uint size)
 //-----------------------------------------------------------------------------
 MeshFunction<dolfin::uint>* MeshData::meshFunction(std::string name)
 {
+  MeshFunction<dolfin::uint>* ret = NULL;
   // Check if data exists
   mf_iterator it = meshfunctions_.find(name);
-  if (it == meshfunctions_.end()) return 0;
-
-  return it->second;
+  if (it != meshfunctions_.end())
+  {
+    ret = it->second;
+  }
+  else
+  {
+    warning("Mesh data does not contain the requested mesh function.");
+  }
+  dolfin_assert(ret != NULL);
+  return ret;
 }
 //-----------------------------------------------------------------------------
 Array<dolfin::uint>* MeshData::array(std::string name)
 {
+  Array<dolfin::uint>* ret = NULL;
   // Check if data exists
   a_iterator it = arrays_.find(name);
-  if (it == arrays_.end()) return 0;
-
-  return it->second;
+  if (it != arrays_.end())
+  {
+    ret = it->second;
+  }
+  else
+  {
+    warning("Mesh data does not contain the requested array.");
+  }
+  dolfin_assert(ret != NULL);
+  return ret;
 }
 //-----------------------------------------------------------------------------
 void MeshData::disp() const

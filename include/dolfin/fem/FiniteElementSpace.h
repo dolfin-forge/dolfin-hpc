@@ -47,6 +47,10 @@ class FiniteElementSpace
 public:
 
   /// Create space from i-th coefficient space of given form
+  FiniteElementSpace(Form& form, uint const i);
+
+  /// Create space from i-th coefficient element of given form but on the mesh
+  /// provided as argument
   FiniteElementSpace(Mesh& mesh, Form& form, uint const i);
 
   /// Create space from UFC finite element
@@ -88,6 +92,9 @@ public:
   /// Return the dofmap
   DofMap const& dofmap() const;
 
+  /// Returns a flattened representation of the space
+  Array<FiniteElementSpace *> flatten() const;
+
   /// Display basic information
   void disp() const;
 
@@ -98,6 +105,9 @@ public:
 
   /// Return whether the discrete space is piecewise constant
   bool is_cellwise_constant() const;
+
+  /// Return whether the discrete space is defined at the vertices only
+  bool is_vertex_based() const;
 
   //--- UFL INTERFACE ---------------------------------------------------------
 

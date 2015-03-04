@@ -16,6 +16,18 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+FiniteElementSpace::FiniteElementSpace(Form& form, uint const i) :
+    mesh_(form.mesh(i)),
+    cell_(mesh_, 0),
+    finite_element_(mesh_.type(), form, i),
+    dof_map_(DofMap::acquire(mesh_, form, i)),
+    ufl_(
+        ufl::FiniteElementBase::create(
+            ufl::Object::repr_t(element().signature())))
+{
+}
+
+//-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     mesh_(mesh),
     cell_(mesh, 0),
@@ -78,8 +90,8 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
     cell_(space.cell()),
     finite_element_(space.element(), sub),
     dof_map_(
-        DofMap::acquire(space.mesh(),
-                        *space.dofmap().create_sub_dofmap(sub), true)),
+        DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(sub),
+                        true)),
     ufl_(
         ufl::FiniteElementBase::create(
             ufl::Object::repr_t(element().signature())))
@@ -155,6 +167,23 @@ DofMap const& FiniteElementSpace::dofmap() const
 }
 
 //-----------------------------------------------------------------------------
+Array<FiniteElementSpace *> FiniteElementSpace::flatten() const
+{
+  Array<FiniteElementSpace *> flt;
+  Array<ufc::finite_element const*> flt_fe = finite_element_.flatten();
+  Array<ufc::dofmap const*> flt_dm = dof_map_.flatten();
+
+  dolfin_assert(flt_fe.size() == flt_dm.size());
+  for (uint s = 0; s < flt_fe.size(); ++s)
+  {
+    flt.push_back(
+        new FiniteElementSpace(mesh_, *flt_fe[s]->create(),
+                               *flt_dm[s]->create(), true));
+  }
+  return flt;
+}
+
+//-----------------------------------------------------------------------------
 void FiniteElementSpace::disp() const
 {
   cout << "FiniteElementSpace" << endl;
@@ -181,6 +210,13 @@ bool FiniteElementSpace::is_cellwise_constant() const
 {
   return is_cellwise_defined()
       && (dof_map_.local_dimension() == finite_element_.value_dimension(0));
+}
+
+//-----------------------------------------------------------------------------
+bool FiniteElementSpace::is_vertex_based() const
+{
+  //FIXME: Only a particular case.
+  return (this->family() == ufl::Family::CG) && (this->degree() == 1);
 }
 
 //-----------------------------------------------------------------------------

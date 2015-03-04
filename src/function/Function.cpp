@@ -23,6 +23,7 @@
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/function/ExpressionFunction.h>
 #include <dolfin/function/UserFunction.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -52,7 +53,6 @@ std::string Function::type2string(Function::Type type)
 //-----------------------------------------------------------------------------
 Function::Function() :
     Variable("*no name*", "empty function"),
-    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -63,7 +63,6 @@ Function::Function() :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
     Variable("*no name*", "empty function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(user),
     cell_(0),
@@ -74,7 +73,6 @@ Function::Function(Mesh& mesh) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, real value) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -85,7 +83,6 @@ Function::Function(Mesh& mesh, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, uint size, real value) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -96,7 +93,6 @@ Function::Function(Mesh& mesh, uint size, real value) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, const Array<real>& values) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -108,7 +104,6 @@ Function::Function(Mesh& mesh, const Array<real>& values) :
 Function::Function(Mesh& mesh, const Array<uint>& shape,
                    const Array<real>& values) :
     Variable("*no name*", "constant function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(constant),
     cell_(0),
@@ -117,9 +112,18 @@ Function::Function(Mesh& mesh, const Array<uint>& shape,
   f_ = new ConstantFunction(mesh, shape, values);
 }
 //-----------------------------------------------------------------------------
+Function::Function(GenericVector& x, Form& form, uint i) :
+    Variable("*no name*", "discrete function"),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new DiscreteFunction(x, form, i);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -128,9 +132,18 @@ Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
   f_ = new DiscreteFunction(mesh, x, form, i);
 }
 //-----------------------------------------------------------------------------
+Function::Function(Form& form, uint i) :
+    Variable("*no name*", "discrete function"),
+    f_(NULL),
+    type_(discrete),
+    cell_(0),
+    facet_(-1)
+{
+  f_ = new DiscreteFunction(form, i);
+}
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Form& form, uint i) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -141,7 +154,6 @@ Function::Function(Mesh& mesh, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(GenericVector& x, FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -152,7 +164,6 @@ Function::Function(GenericVector& x, FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 Function::Function(FiniteElementSpace const& space) :
     Variable("*no name*", "discrete function"),
-    mesh_(&space.mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -163,7 +174,6 @@ Function::Function(FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -175,7 +185,6 @@ Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
 Function::Function(Mesh& mesh, std::string const& element,
                    std::string const& dofmap) :
     Variable("*no name*", "discrete function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -189,7 +198,6 @@ Function::Function(Mesh& mesh, std::string const& element,
 ////-----------------------------------------------------------------------------
 Function::Function(SubFunction sub_function) :
     Variable("*no name*", "discrete function"),
-    mesh_(&sub_function.function().mesh()),
     f_(NULL),
     type_(discrete),
     cell_(0),
@@ -215,7 +223,6 @@ Function const& Function::operator=(SubFunction sub_function)
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, Expression const& expr) :
     Variable("*no name*", "expression function"),
-    mesh_(&mesh),
     f_(NULL),
     type_(expression),
     cell_(0),
@@ -228,8 +235,10 @@ Function const& Function::operator=(Function& f)
 {
 
   // FIXME: Handle other assignments
-  if (f.type_ != discrete) error(
-      "Can only handle assignment from discrete functions (for now).");
+  if (f.type_ != discrete)
+  {
+    error("Can only handle assignment from discrete functions (for now).");
+  }
 
   // Either create or copy discrete function
   if (type_ == discrete)
@@ -249,7 +258,6 @@ Function const& Function::operator=(Function& f)
 //-----------------------------------------------------------------------------
 Function::Function(const std::string filename) :
     Variable("*no name*", "discrete function from data file"),
-    mesh_(NULL),
     f_(NULL),
     type_(empty),
     cell_(0),
@@ -257,11 +265,9 @@ Function::Function(const std::string filename) :
 {
   File file(filename);
   file >> *this;
-  mesh_ = &f_->mesh();
 }
 //-----------------------------------------------------------------------------
 Function::Function(Function const& f) :
-    mesh_(f.mesh_),
     f_(NULL),
     type_(f.type()),
     cell_(0),
@@ -427,27 +433,6 @@ FiniteElementSpace const& Function::space() const
   return (static_cast<DiscreteFunction*>(f_))->space();
 }
 //-----------------------------------------------------------------------------
-FiniteElement const& Function::finite_element() const
-{
-  if (type_ != discrete)
-  {
-    error("The finite element space can only be extracted from discrete "
-          "functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->finite_element();
-}
-//-----------------------------------------------------------------------------
-DofMap const& Function::dofmap() const
-{
-  if (type_ != discrete)
-  {
-    error("The dofmap can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->dofmap();
-}
-//-----------------------------------------------------------------------------
 std::string const Function::signature() const
 {
   if (type_ != discrete)
@@ -521,18 +506,98 @@ void Function::add_block(real *& values)
 //-----------------------------------------------------------------------------
 SubFunction Function::operator[](uint i)
 {
-  if (type_ != discrete) error(
-      "Sub functions can only be extracted from discrete functions.");
+  if (type_ != discrete)
+  {
+    error("Sub functions can only be extracted from discrete functions.");
+  }
 
   SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
   return sub_function;
 }
+
+//-----------------------------------------------------------------------------
+Array<Function *> Function::decompose()
+{
+  if (type_ != discrete)
+  {
+    error("Only discrete functions can be decomposed with decompose().");
+  }
+
+  Array<Function *> leaf_functions;
+
+  //TODO: This implementation should belong to DiscreteFunction: let us consider
+  //      that things are acceptable as long as high-level functions are OK.
+  FiniteElementSpace const& space = this->space();
+  DofMap const& dm = space.dofmap();
+
+  Array<FiniteElementSpace *> spaces = space.flatten();
+  for (uint s = 0; s < spaces.size(); ++s)
+  {
+    leaf_functions.push_back(new Function(*(spaces[s])));
+  }
+
+  if (space.is_vertex_based())
+  {
+    //NOTE: This implementation is based on the assumption that the dofmap for
+    //      a CG1 function is indexed by the global indices of vertices.
+    Mesh& mesh = this->mesh();
+    MeshFunction<bool> marked(mesh, 0);
+    real dof_value;
+    uint * indices = new uint[dm.local_dimension()];
+    CellIterator c(mesh);
+    UFCCell ufc_cell(*c);
+    for (; !c.end(); ++c)
+    {
+      ufc_cell.update(*c);
+
+      for (VertexIterator v(*c); !v.end(); ++v)
+      {
+
+        uint * cvi = c->entities(0);
+        uint ci = 0;
+        for (ci = 0; ci < c->numEntities(0); ++ci)
+        {
+          if (cvi[ci] == v->index())
+          {
+            break;
+          }
+        }
+        if (!v->is_ghost() && !marked.get(*v))
+        {
+          uint new_index = mesh.distdata().get_vertex_global(v->index());
+          for (uint i = 0; i < leaf_functions.size(); ++i)
+          {
+            this->vector().get(&dof_value, 1, &indices[ci]);
+            leaf_functions[i]->vector().set(&dof_value, 1, &new_index);
+          }
+
+          marked.set(*v, true);
+          continue;
+
+        }
+      }
+    }
+  }
+  else
+  {
+    error("Function decomposition is only implemented for vertex-based spaces");
+  }
+
+  for (uint i = 0; i < leaf_functions.size(); ++i)
+  {
+    leaf_functions[i]->sync_ghosts();
+  }
+  return leaf_functions;
+}
+
 //--- PROTECTED ---------------------------------------------------------------
 //-----------------------------------------------------------------------------
 Cell const& Function::cell() const
 {
-  if (!cell_) error(
-      "Current cell is unknown (only available during assembly).");
+  if (!cell_)
+  {
+    error("Current cell is unknown (only available during assembly).");
+  }
   return *cell_;
 }
 //-----------------------------------------------------------------------------

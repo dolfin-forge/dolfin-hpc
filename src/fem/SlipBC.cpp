@@ -226,7 +226,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 
     // If any, to get the node id
     bool const same_space = (sub_system().depth() == 0);
-    DofMap const& Ndofmap = node_normal->basis()[0].dofmap();
+    DofMap const& Ndofmap = node_normal->basis()[0].space().dofmap();
 
     Array<uint> node_Udofs;
     Array<uint> node_Ndofs;
@@ -314,7 +314,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
 
     // If any, to get the node id defined as the dof of the first normal comp.
     bool const same_space = (sub_system().depth() == 0);
-    DofMap const& Ndofmap = node_normal->basis()[0].dofmap();
+    DofMap const& Ndofmap = node_normal->basis()[0].space().dofmap();
 
     //
     Array<uint> node_Udofs;

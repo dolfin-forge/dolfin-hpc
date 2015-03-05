@@ -7,10 +7,11 @@
 #ifndef __TEST_H
 #define __TEST_H
 
-#include <dolfin.h>
+#include <dolfin/common/types.h>
 
 #include <cassert>
 #include <iostream>
+#include <string>
 
 namespace dolfin
 {

@@ -6,8 +6,10 @@
 
 #include <dolfin/common/Test.h>
 
+#include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>
 #include <dolfin/log/LogManager.h>
+#include <dolfin/main/init.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
 

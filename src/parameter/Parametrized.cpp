@@ -45,7 +45,7 @@ void Parametrized::set(std::string key, const Parametrized& parent)
 
   // Check if we already have a parent
   if ( this->parent )
-    error("Local paramater database can only have one parent.");
+    error("Local parameter database can only have one parent.");
 
   // Check that parent is not itself
   if ( this == &parent )

@@ -25,30 +25,40 @@
 #include <dolfin/la/PETScKrylovMatrix.h>
 #include <dolfin/main/MPI.h>
 
-using namespace dolfin;
-
-// Monitor function
 namespace dolfin
 {
-  int monitor(KSP ksp, int iteration, real rnorm, void *mctx)
-  {
-    message("Iteration %d: residual = %g", iteration, rnorm);
-    return 0;
-  }
+
+// Monitor function
+int monitor(KSP ksp, int iteration, real rnorm, void *mctx)
+{
+  message("Iteration %d: residual = %g", iteration, rnorm);
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
-PETScKrylovSolver::PETScKrylovSolver(SolverType method, PreconditionerType pc)
-  : method(method), pc_petsc(pc), pc_dolfin(0),
-    ksp(0), M(0), N(0), parameters_read(false), pc_set(false)
+PETScKrylovSolver::PETScKrylovSolver(SolverType method, PreconditionerType pc) :
+    method(method),
+    pc_petsc(pc),
+    pc_dolfin(0),
+    ksp(0),
+    M(0),
+    N(0),
+    parameters_read(false),
+    pc_set(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScKrylovSolver::PETScKrylovSolver(SolverType method,
-				     PETScPreconditioner& preconditioner)
-  : method(method), pc_petsc(default_pc), pc_dolfin(&preconditioner),
-    ksp(0), M(0), N(0), parameters_read(false), pc_set(false)
+                                     PETScPreconditioner& preconditioner) :
+    method(method),
+    pc_petsc(default_pc),
+    pc_dolfin(&preconditioner),
+    ksp(0),
+    M(0),
+    N(0),
+    parameters_read(false),
+    pc_set(false)
 {
   // Do nothing
 }
@@ -57,23 +67,28 @@ PETScKrylovSolver::~PETScKrylovSolver()
 {
   // Destroy solver environment.
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  if ( ksp ) KSPDestroy(&ksp);
+  if (ksp) KSPDestroy(&ksp);
 #else
-  if ( ksp ) KSPDestroy(ksp);
+  if (ksp) KSPDestroy(ksp);
 #endif
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b)
+dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
+                                      const PETScVector& b)
 {
   // Check dimensions
   uint M = A.size(0);
   uint N = A.size(1);
-  if ( N != b.size() )
+  if (N != b.size())
+  {
     error("Non-matching dimensions for linear system.");
+  }
 
   // Write a message
-  if ( get("Krylov report") )
+  if (get("Krylov report"))
+  {
     message("Solving linear system of size %d x %d (Krylov solver).", M, N);
+  }
 
   // Reinitialize KSP solver if necessary
   init(M, N);
@@ -82,24 +97,27 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, cons
   x.init(b.local_size());
 
   // Read parameters if not done
-  if ( !parameters_read )
-    readParameters();
+  if (!parameters_read) readParameters();
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
-    KSPSetOperators(ksp, A.mat(), A.mat());
+  KSPSetOperators(ksp, A.mat(), A.mat());
 #else
   // Solve linear system
   if (get("Krylov keep PC"))
+  {
     KSPSetOperators(ksp, A.mat(), A.mat(), SAME_PRECONDITIONER);
+  }
   else
+  {
     KSPSetOperators(ksp, A.mat(), A.mat(), SAME_NONZERO_PATTERN);
+  }
 #endif
 
   // FIXME: Preconditioner being set here to avoid PETSc bug with Hypre.
   //        See explanation inside PETScKrylovSolver:init().
-  if( !pc_set )
-  { 
+  if (!pc_set)
+  {
     setPETScPreconditioner();
-    pc_set = true;   
+    pc_set = true;
   }
 
   KSPSolve(ksp, b.vec(), x.vec());
@@ -107,8 +125,7 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, cons
   // Check if the solution converged
   KSPConvergedReason reason;
   KSPGetConvergedReason(ksp, &reason);
-  if ( reason < 0 )
-    error("Krylov solver did not converge.");
+  if (reason < 0) error("Krylov solver did not converge.");
 
   // Get the number of iterations
   int num_iterations = 0;
@@ -120,18 +137,24 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x, cons
   return num_iterations;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b)
+dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A,
+                                      PETScVector& x, const PETScVector& b)
 {
   // Check dimensions
   uint M = A.size(0);
   uint N = A.size(1);
-  if ( N != b.size() )
+  if (N != b.size())
+  {
     error("Non-matching dimensions for linear system.");
-  
+  }
+
   // Write a message
-  if ( get("Krylov report") )
-    message("Solving virtual linear system of size %d x %d (Krylov solver).", M, N);
- 
+  if (get("Krylov report"))
+  {
+    message("Solving virtual linear system of size %d x %d (Krylov solver).",
+            M, N);
+  }
+
   // Reinitialize KSP solver if necessary
   init(M, N);
 
@@ -139,11 +162,10 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A, PETScVector& x
   x.init(b.local_size());
 
   // Read parameters if not done
-  if ( !parameters_read )
-    readParameters();
+  if (!parameters_read) readParameters();
 
   // Don't use preconditioner that can't handle virtual (shell) matrix
-  if ( !pc_dolfin )
+  if (!pc_dolfin)
   {
     PC pc;
     KSPGetPC(ksp, &pc);
@@ -156,18 +178,27 @@ dolfin::uint PETScKrylovSolver::solve(const PETScKrylovMatrix& A, PETScVector& x
 #else
   KSPSetOperators(ksp, A.mat(), A.mat(), DIFFERENT_NONZERO_PATTERN);
 #endif
-  KSPSolve(ksp, b.vec(), x.vec());  
+  KSPSolve(ksp, b.vec(), x.vec());
 
   // Check if the solution converged
   KSPConvergedReason reason;
   KSPGetConvergedReason(ksp, &reason);
-  if ( reason < 0 )
-    error("Krylov solver did not converge.");
+  if (reason < 0)
+  {
+    if(get("Krylov error on nonconvergence"))
+    {
+      error("Krylov solver did not converge.");
+    }
+    else
+    {
+      warning("Krylov solver did not converge.");
+    }
+  }
 
   // Get the number of iterations
   int num_iterations = 0;
   KSPGetIterationNumber(ksp, &num_iterations);
-  
+
   // Report results
   writeReport(num_iterations);
 
@@ -182,31 +213,28 @@ void PETScKrylovSolver::disp() const
 void PETScKrylovSolver::init(uint M, uint N)
 {
   // Check if we need to reinitialize
-  if ( ksp != 0 && M == this->M && N == this->N )
-    return;
+  if (ksp != 0 && M == this->M && N == this->N) return;
 
   // Save size of system
   this->M = M;
   this->N = N;
 
   // Destroy old solver environment if necessary
-  if ( ksp != 0 )
+  if (ksp != 0)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    KSPDestroy(&ksp);
+  KSPDestroy(&ksp);
 #else
-    KSPDestroy(ksp);
+  KSPDestroy(ksp);
 #endif
 
   // Set up solver environment
 #ifdef HAVE_MPI
-  if(MPI::numProcesses() > 1)
-    KSPCreate(MPI::DOLFIN_COMM, &ksp);
-  else
-    KSPCreate(PETSC_COMM_SELF, &ksp);
+  if (MPI::numProcesses() > 1) KSPCreate(MPI::DOLFIN_COMM, &ksp);
+  else KSPCreate(PETSC_COMM_SELF, &ksp);
 #else
-    KSPCreate(PETSC_COMM_SELF, &ksp);
+  KSPCreate(PETSC_COMM_SELF, &ksp);
 #endif
-  KSPSetFromOptions(ksp);  
+  KSPSetFromOptions(ksp);
   KSPSetInitialGuessNonzero(ksp, PETSC_TRUE);
 
   // Set solver
@@ -223,15 +251,14 @@ void PETScKrylovSolver::init(uint M, uint N)
 void PETScKrylovSolver::readParameters()
 {
   // Don't do anything if not initialized
-  if ( !ksp )
-    return;
+  if (!ksp) return;
 
   // Set monitor
-  if ( get("Krylov monitor convergence") )
+  if (get("Krylov monitor convergence"))
   {
 #if(PETSC_VERSION_MAJOR > 2)
     KSPMonitorSet(ksp, KSPMonitorTrueResidualNorm, 0, 0);
-#else    
+#else
     //FIXME: Decide on supported version of PETSc
 #if(PETSC_VERSION_SUBMINOR > 2)
     //KSPMonitorSet(ksp, monitor, 0, 0);
@@ -244,14 +271,13 @@ void PETScKrylovSolver::readParameters()
   }
 
   // Set tolerances
-  KSPSetTolerances(ksp,
-		   get("Krylov relative tolerance"),
-		   get("Krylov absolute tolerance"),
-		   get("Krylov divergence limit"),
-		   get("Krylov maximum iterations"));
+  KSPSetTolerances(ksp, get("Krylov relative tolerance"),
+                   get("Krylov absolute tolerance"),
+                   get("Krylov divergence limit"),
+                   get("Krylov maximum iterations"));
 
   // Set nonzero shift for preconditioner
-  if ( !pc_dolfin )
+  if (!pc_dolfin)
   {
     PC pc;
     KSPGetPC(ksp, &pc);
@@ -259,7 +285,7 @@ void PETScKrylovSolver::readParameters()
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     PCFactorSetShiftType(pc, MAT_SHIFT_NONZERO);
     PCFactorSetShiftAmount(pc, get("Krylov shift nonzero"));
-#else    
+#else
     PCFactorSetShiftNonzero(pc, get("Krylov shift nonzero"));
 #endif
   }
@@ -271,9 +297,8 @@ void PETScKrylovSolver::readParameters()
 void PETScKrylovSolver::setSolver()
 {
   // Don't do anything for default method
-  if (method == default_solver)
-    return;
-  
+  if (method == default_solver) return;
+
   // Set PETSc Krylov solver
   KSPType ksp_type = getType(method);
   KSPSetType(ksp, ksp_type);
@@ -282,15 +307,14 @@ void PETScKrylovSolver::setSolver()
 void PETScKrylovSolver::setPETScPreconditioner()
 {
   // Treat special case DOLFIN user-defined preconditioner
-  if ( pc_dolfin )
+  if (pc_dolfin)
   {
     PETScPreconditioner::setup(ksp, *pc_dolfin);
     return;
   }
 
   // Treat special case default preconditioner (do nothing)
-  if (pc_petsc == default_pc)
-    return;
+  if (pc_petsc == default_pc) return;
 
   // Get PETSc PC pointer
   PC pc;
@@ -300,8 +324,8 @@ void PETScKrylovSolver::setPETScPreconditioner()
   PCSetFromOptions(pc);
 
   // Treat special case Hypre AMG preconditioner
-  if ( pc_petsc == amg )
-  {  
+  if (pc_petsc == amg)
+  {
 #if PETSC_HAVE_HYPRE
     //PCSetFromOptions(pc);
     //pc->ops->setfromoptions(pc);
@@ -314,9 +338,9 @@ void PETScKrylovSolver::setPETScPreconditioner()
     //PCHYPRESetFromOptions(pc);
 #else
     warning("PETSc has not been compiled with the HYPRE library for   "
-                   "algerbraic multigrid. Default PETSc solver will be used. "
-                   "For performance, installation of HYPRE is recommended.   "
-                   "See the DOLFIN user manual for more information.");
+            "algerbraic multigrid. Default PETSc solver will be used. "
+            "For performance, installation of HYPRE is recommended.   "
+            "See the DOLFIN user manual for more information.");
 #endif
     return;
   }
@@ -329,10 +353,9 @@ void PETScKrylovSolver::writeReport(int num_iterations)
 {
   // Check if we should write the report
   bool report = get("Krylov report");
-  if ( !report )
-    return;
-    
-#if PETSC_VERSION_MAJOR > 2 
+  if (!report) return;
+
+#if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MINOR > 3
   KSPType ksp_type;
   PCType pc_type;
@@ -345,7 +368,6 @@ void PETScKrylovSolver::writeReport(int num_iterations)
   PCType pc_type;
 #endif
 
-
   // Get name of solver
   KSPGetType(ksp, &ksp_type);
 
@@ -355,27 +377,29 @@ void PETScKrylovSolver::writeReport(int num_iterations)
   PCGetType(pc, &pc_type);
 
   // Report number of iterations and solver type
-  message("Krylov solver (%s, %s) converged in %d iterations.",
-	      ksp_type, pc_type, num_iterations);
+  message("Krylov solver (%s, %s) converged in %d iterations.", ksp_type,
+          pc_type, num_iterations);
 }
 //-----------------------------------------------------------------------------
 KSPType PETScKrylovSolver::getType(SolverType method) const
 {
   switch (method)
-  {
-  case bicgstab:
-    return KSPBCGS;
-  case cg:
-    return KSPCG;
-  case default_solver:
-    return "default";
-  case gmres:
-    return KSPGMRES;
-  default:
-    warning("Requested Krylov method unknown. Using GMRES.");
-    return KSPGMRES;
-  }
+    {
+    case bicgstab:
+      return KSPBCGS;
+    case cg:
+      return KSPCG;
+    case default_solver:
+      return "default";
+    case gmres:
+      return KSPGMRES;
+    default:
+      warning("Requested Krylov method unknown. Using GMRES.");
+      return KSPGMRES;
+    }
 }
 //-----------------------------------------------------------------------------
 
 #endif
+
+}

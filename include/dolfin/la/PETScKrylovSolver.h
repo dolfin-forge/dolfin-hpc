@@ -17,88 +17,90 @@
 #ifdef HAVE_PETSC
 
 #include <dolfin/common/types.h>
+#include <dolfin/la/PETScPreconditioner.h>
+#include <dolfin/la/PreconditionerType.h>
+#include <dolfin/la/SolverType.h>
 #include <dolfin/parameter/Parametrized.h>
-#include "SolverType.h"
-#include "PreconditionerType.h"
-#include "PETScPreconditioner.h"
 
 namespace dolfin
 {
 
-  /// Forward declarations
-  class PETScMatrix;
-  class PETScVector;
-  class PETScKrylovMatrix;
+/// Forward declarations
+class PETScMatrix;
+class PETScVector;
+class PETScKrylovMatrix;
 
-  /// This class implements Krylov methods for linear systems
-  /// of the form Ax = b. It is a wrapper for the Krylov solvers
-  /// of PETSc.
-  
-  class PETScKrylovSolver : public Parametrized
-  {
-  public:
+/// This class implements Krylov methods for linear systems
+/// of the form Ax = b. It is a wrapper for the Krylov solvers
+/// of PETSc.
 
-    /// Create Krylov solver for a particular method and preconditioner
-    PETScKrylovSolver(SolverType method=default_solver, PreconditionerType pc=default_pc);
+class PETScKrylovSolver : public Parametrized
+{
+public:
 
-    /// Create Krylov solver for a particular method and PETScPreconditioner
-    PETScKrylovSolver(SolverType method, PETScPreconditioner& PETScPreconditioner);
+  /// Create Krylov solver for a particular method and preconditioner
+  PETScKrylovSolver(SolverType method = default_solver,
+                    PreconditionerType pc = default_pc);
 
-    /// Destructor
-    ~PETScKrylovSolver();
+  /// Create Krylov solver for a particular method and PETScPreconditioner
+  PETScKrylovSolver(SolverType method,
+                    PETScPreconditioner& PETScPreconditioner);
 
-    /// Solve linear system Ax = b and return number of iterations
-    uint solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b);
-          
-    /// Solve linear system Ax = b and return number of iterations
-    uint solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b);
-    
-    /// Display solver data
-    void disp() const;
-     
-  private:
+  /// Destructor
+  ~PETScKrylovSolver();
 
-    /// Initialize KSP solver
-    void init(uint M, uint N);
+  /// Solve linear system Ax = b and return number of iterations
+  uint solve(const PETScMatrix& A, PETScVector& x, const PETScVector& b);
 
-    /// Read parameters from database
-    void readParameters();
-    
-    /// Set solver
-    void setSolver();
+  /// Solve linear system Ax = b and return number of iterations
+  uint solve(const PETScKrylovMatrix& A, PETScVector& x, const PETScVector& b);
 
-    /// Set PETScPreconditioner
-    void setPETScPreconditioner();
-    
-    /// Report the number of iterations
-    void writeReport(int num_iterations);
+  /// Display solver data
+  void disp() const;
 
-    /// Get PETSc method identifier 
-    KSPType getType(SolverType method) const;
+private:
 
-    /// Krylov method
-    SolverType method;
+  /// Initialize KSP solver
+  void init(uint M, uint N);
 
-    /// PETSc PETScPreconditioner
-    PreconditionerType pc_petsc;
+  /// Read parameters from database
+  void readParameters();
 
-    /// DOLFIN PETScPreconditioner
-    PETScPreconditioner* pc_dolfin;
+  /// Set solver
+  void setSolver();
 
-    /// PETSc solver pointer
-    KSP ksp;
+  /// Set PETScPreconditioner
+  void setPETScPreconditioner();
 
-    /// Size of old system (need to reinitialize when changing)
-    uint M;
-    uint N;
+  /// Report the number of iterations
+  void writeReport(int num_iterations);
 
-    /// True if we have read parameters
-    bool parameters_read;
-    
-    // FIXME: Required to avoid PETSc bug with Hypre. See explanation inside 
-    //        PETScKrylovSolver:init(). Can be removed when PETSc is patched.
-    bool pc_set;
-  };
+  /// Get PETSc method identifier
+  KSPType getType(SolverType method) const;
+
+  /// Krylov method
+  SolverType method;
+
+  /// PETSc PETScPreconditioner
+  PreconditionerType pc_petsc;
+
+  /// DOLFIN PETScPreconditioner
+  PETScPreconditioner* pc_dolfin;
+
+  /// PETSc solver pointer
+  KSP ksp;
+
+  /// Size of old system (need to reinitialize when changing)
+  uint M;
+  uint N;
+
+  /// True if we have read parameters
+  bool parameters_read;
+
+  // FIXME: Required to avoid PETSc bug with Hypre. See explanation inside
+  //        PETScKrylovSolver:init(). Can be removed when PETSc is patched.
+  bool pc_set;
+};
 
 }
 

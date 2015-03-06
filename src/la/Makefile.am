@@ -7,6 +7,7 @@ libdolfin_la_la_SOURCES = \
 			JANPACKAMGSolver.cpp\
 			JANPACKMat.cpp\
 			JANPACKVec.cpp\
+			KrylovSolver.cpp\
 			LinearSolver.cpp\
 			LAPACKMatrix.cpp\
 			LAPACKVector.cpp\

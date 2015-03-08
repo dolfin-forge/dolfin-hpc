@@ -326,6 +326,18 @@ void Function::init(Mesh& mesh, uint i, real value)
   type_ = constant;
 }
 //-----------------------------------------------------------------------------
+void Function::init(GenericVector& x, Form& form, uint i)
+{
+  if (f_)
+  {
+    delete f_;
+  }
+
+  //FIXME: Assumes one mesh per form
+  f_ = new DiscreteFunction(form.mesh(), x, form, i);
+  type_ = discrete;
+}
+//-----------------------------------------------------------------------------
 void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
 {
   if (f_)
@@ -334,6 +346,18 @@ void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
   }
 
   f_ = new DiscreteFunction(mesh, x, form, i);
+  type_ = discrete;
+}
+//-----------------------------------------------------------------------------
+void Function::init(Form& form, uint i)
+{
+  if (f_)
+  {
+    delete f_;
+  }
+
+  //FIXME: Assumes one mesh per form
+  f_ = new DiscreteFunction(form.mesh(), form, i);
   type_ = discrete;
 }
 //-----------------------------------------------------------------------------

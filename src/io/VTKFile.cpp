@@ -34,7 +34,7 @@ VTKFile::VTKFile(const std::string filename) :
   type = "VTK";
 }
 //----------------------------------------------------------------------------
-VTKFile::VTKFile(const std::string filename, real& t) :
+VTKFile::VTKFile(const std::string filename, real const& t) :
     GenericFile(filename),
     _t(&t)
 {

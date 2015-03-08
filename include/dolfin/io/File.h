@@ -46,8 +46,8 @@ namespace dolfin
     /// Create a file with given name and type (format)
     File(const std::string& filename, Type type);
 
-    /// Create a filw with given name, at time t
-    File(const std::string& filename, real& t);
+    /// Create a file with given name, at time t
+    File(const std::string& filename, real const& t);
 
     /// Destructor
     ~File();

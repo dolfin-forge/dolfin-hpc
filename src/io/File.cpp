@@ -97,7 +97,7 @@ File::File(const std::string& filename, Type type)
   }
 }
 //-----------------------------------------------------------------------------
-File::File(const std::string& filename, real& t)
+File::File(const std::string& filename, real const& t)
 {
 
   if ( filename.rfind(".pvd") != filename.npos )

@@ -35,7 +35,7 @@ public:
   BinaryFile(const std::string filename);
 
   ///
-  BinaryFile(const std::string filename, real& t);
+  BinaryFile(const std::string filename, real const& t);
 
   ///
   ~BinaryFile();
@@ -152,7 +152,7 @@ private:
   std::string bin_filename_;
 
   // Current time
-  real* t_;
+  real const * const t_;
 
   // Version number of the binary file
   uint version_;

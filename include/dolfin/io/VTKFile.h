@@ -34,7 +34,7 @@ public:
   VTKFile(const std::string filename);
 
   ///
-  VTKFile(const std::string filename, real& t);
+  VTKFile(const std::string filename, real const& t);
 
   ///
   ~VTKFile();
@@ -105,7 +105,7 @@ private:
   std::string pvtu_filename;
 
   // Current time
-  real* _t;
+  real const * const _t;
 
 };
 

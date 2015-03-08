@@ -37,7 +37,7 @@ BinaryFile::BinaryFile(const std::string filename) :
   type = "Binary";
 }
 //----------------------------------------------------------------------------
-BinaryFile::BinaryFile(const std::string filename, real &t) :
+BinaryFile::BinaryFile(const std::string filename, real const& t) :
     GenericFile(filename),
     t_(&t),
     version_(2)
@@ -860,7 +860,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM, 
+    MPI_Scan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
 	     MPI::DOLFIN_COMM);
     vertex_offset -= vertex_buffer_size;
 #endif
@@ -1032,7 +1032,7 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, 
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
 	     MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
@@ -1117,7 +1117,7 @@ template<typename T>
     MPI_Exscan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM, 
+    MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
 	     MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif

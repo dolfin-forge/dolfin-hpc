@@ -41,9 +41,9 @@ START_TEST( test_create )
 {
   int init_failed = 0;
 
-  uint const Nx = 2;
-  uint const Ny = 4;
-  uint const Nz = 8;
+  dolfin::uint const Nx = 2;
+  dolfin::uint const Ny = 4;
+  dolfin::uint const Nz = 8;
 
   // Interval
   begin("Create UnitInterval");
@@ -61,7 +61,7 @@ START_TEST( test_create )
     types.push_back(UnitSquare::right);
     types.push_back(UnitSquare::left);
     types.push_back(UnitSquare::crisscross);
-    for(uint tp = 0; tp < types.size(); ++tp)
+    for(dolfin::uint tp = 0; tp < types.size(); ++tp)
     {
       UnitSquare mesh(Nx, Ny, types[tp]);
       init_failed += test_mesh(mesh);
@@ -105,9 +105,9 @@ START_TEST( test_create )
     trans.push_back(UnitDisk::maxn);
     trans.push_back(UnitDisk::sumn);
     trans.push_back(UnitDisk::rotsumn);
-    for(uint tp = 0; tp < types.size(); ++tp)
+    for(dolfin::uint tp = 0; tp < types.size(); ++tp)
     {
-      for(uint tr = 0; tr < trans.size(); ++tr)
+      for(dolfin::uint tr = 0; tr < trans.size(); ++tr)
       {
         UnitDisk mesh(Nx, types[tp], trans[tr]);
         init_failed += test_mesh(mesh);

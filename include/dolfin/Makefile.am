@@ -73,6 +73,7 @@ nobase_pkginclude_HEADERS = \
 				fem/UFCHalo.h\
 				fem/UFCMesh.h\
 				function/dolfin_function.h\
+				function/Constant.h\
 				function/ConstantFunction.h\
 				function/DiscreteFunction.h\
 				function/Expression.h\

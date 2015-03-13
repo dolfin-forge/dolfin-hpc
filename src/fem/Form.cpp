@@ -46,15 +46,15 @@ DofMapSet& Form::dofmaps() const
 //-----------------------------------------------------------------------------
 uint Form::coefficient_index(std::string const& name) const
 {
-  return this->coefficient_number(name);
+  error("Not implemented without UFL support: \n"
+          "uint Form::coefficient_index(const std::string& name) const");
+  return 0;
 }
 
 //-----------------------------------------------------------------------------
 uint Form::coefficient_number(std::string const& name) const
 {
-  error("Not implemented without UFL support: \n"
-        "uint Form::coefficient_number(const std::string& name) const");
-  return 0;
+  return this->coefficient_index(name);
 }
 
 //-----------------------------------------------------------------------------
@@ -73,7 +73,7 @@ FiniteElementSpace * Form::create_space(uint i) const
   // For an argument the mesh is the one passed to the form and for coefficient
   // the mesh passed to the function.
   Mesh& mesh = (
-      i < this->rank() ? this->mesh() : this->coefficients()[i]->mesh());
+      i < this->rank() ? this->mesh() : this->coefficients()[i - this->rank()]->mesh());
   return new FiniteElementSpace(mesh, *test_f, *test_d, true);
 }
 
@@ -81,7 +81,7 @@ FiniteElementSpace * Form::create_space(uint i) const
 FiniteElementSpace * Form::create_coefficient_space(
     std::string const& name) const
 {
-  return this->create_space(this->rank() + this->coefficient_number(name));
+  return this->create_space(this->rank() + this->coefficient_index(name));
 }
 
 //-----------------------------------------------------------------------------

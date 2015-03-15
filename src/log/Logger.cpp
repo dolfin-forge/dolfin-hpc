@@ -115,10 +115,6 @@ void Logger::progress(std::string title, real p)
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::string destination)
 {
-  if (dolfin::MPI::processNumber() > 0)
-  {
-    return;
-  }
 
   // Choose output destination
   if (destination == "terminal")

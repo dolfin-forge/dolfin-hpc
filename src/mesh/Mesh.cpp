@@ -80,7 +80,8 @@ Mesh::Mesh(std::string filename) :
   File file(filename);
   file >> *this;
 
-  if (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"))
+  const bool serial_mesh = dolfin_get("Mesh read in serial");
+  if (MPI::numProcesses() > 1 && !serial_mesh)
   {
     MeshFunction<uint> partitions;
     partition(partitions);

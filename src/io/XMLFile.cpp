@@ -91,8 +91,8 @@ void XMLFile::operator>>(Mesh& mesh)
 
   if (xmlObject) delete xmlObject;
 
-  if (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial")) xmlObject =
-      new PXMLMesh(mesh);
+  const bool serial_mesh = dolfin_get("Mesh read in serial");
+  if (MPI::numProcesses() > 1 && !serial_mesh) xmlObject = new PXMLMesh(mesh);
   else xmlObject = new XMLMesh(mesh);
   parseFile();
 }

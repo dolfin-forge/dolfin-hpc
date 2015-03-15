@@ -69,7 +69,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("Load imbalance %0.2f percent, below threshold.",
             (imbalance - 1.0) * 100);
 
-    if (!dolfin_get("Load balancer redistribute"))
+    const bool redistribute = dolfin_get("Load balancer redistribute");
+    if (!redistribute)
     {
       MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
       part->init(mesh, mesh.topology().dim());
@@ -177,7 +178,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("Load imbalance %0.2f percent, below threshold.",
             (imbalance - 1.0) * 100);
 
-    if (!dolfin_get("Load balancer redistribute"))
+    const bool redistribute = dolfin_get("Load balancer redistribute");
+    if (!redistribute)
     {
       MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
       part->init(mesh, mesh.topology().dim());
@@ -296,7 +298,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("Load imbalance %0.2f percent, below threshold.",
             (imbalance - 1.0) * 100);
 
-    if (!dolfin_get("Load balancer redistribute"))
+    const bool redistribute = dolfin_get("Load balancer redistribute");
+    if (!redistribute)
     {
       MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
       part->init(mesh, mesh.topology().dim());
@@ -412,7 +415,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("Load imbalance %0.2f percent, below threshold.",
             (imbalance - 1.0) * 100);
 
-    if (!dolfin_get("Load balancer redistribute"))
+    const bool redistribute = dolfin_get("Load balancer redistribute");
+    if (!redistribute)
     {
       MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
       part->init(mesh, mesh.topology().dim());

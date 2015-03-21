@@ -41,7 +41,7 @@ namespace dolfin
     virtual GenericVector* copy() const = 0;
 
     /// Return tensor rank (number of dimensions)
-    virtual uint rank() const
+    uint rank() const
     { return 1; }
 
     /// Return size of given dimension

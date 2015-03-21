@@ -231,7 +231,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, -0.577350269189626, -0.666666666666666};
+      {0.471404520791032, -0.577350269189626, -0.666666666666667};
       
       static const double coefficients1[3] = \
       {0.471404520791032, 0.0, 0.333333333333333};
@@ -310,7 +310,7 @@ public:
       {-0.471404520791032, -0.288675134594813, 0.166666666666667};
       
       static const double coefficients1[3] = \
-      {-0.471404520791032, 0.866025403784439, 0.166666666666667};
+      {-0.471404520791032, 0.866025403784438, 0.166666666666667};
       
       // Compute value(s).
       for (unsigned int r = 0; r < 3; r++)
@@ -345,7 +345,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.942809041582064, 0.577350269189626, -0.333333333333334};
+      {0.942809041582063, 0.577350269189626, -0.333333333333334};
       
       static const double coefficients1[3] = \
       {-0.471404520791032, -0.866025403784439, 0.166666666666667};
@@ -819,7 +819,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, -0.577350269189626, -0.666666666666666};
+      {0.471404520791032, -0.577350269189626, -0.666666666666667};
       
       static const double coefficients1[3] = \
       {0.471404520791032, 0.0, 0.333333333333333};
@@ -1136,7 +1136,7 @@ public:
       {-0.471404520791032, -0.288675134594813, 0.166666666666667};
       
       static const double coefficients1[3] = \
-      {-0.471404520791032, 0.866025403784439, 0.166666666666667};
+      {-0.471404520791032, 0.866025403784438, 0.166666666666667};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
@@ -1290,7 +1290,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.942809041582064, 0.577350269189626, -0.333333333333334};
+      {0.942809041582063, 0.577350269189626, -0.333333333333334};
       
       static const double coefficients1[3] = \
       {-0.471404520791032, -0.866025403784439, 0.166666666666667};
@@ -1786,7 +1786,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.471404520791032, -0.577350269189626, -0.666666666666666};
+      {0.471404520791032, -0.577350269189626, -0.666666666666667};
       
       static const double coefficients1[3] = \
       {0.471404520791032, 0.0, 0.333333333333333};
@@ -2053,7 +2053,7 @@ public:
       {-0.471404520791032, -0.288675134594813, 0.166666666666667};
       
       static const double coefficients1[3] = \
-      {-0.471404520791032, 0.866025403784439, 0.166666666666667};
+      {-0.471404520791032, 0.866025403784438, 0.166666666666667};
       
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
@@ -2182,7 +2182,7 @@ public:
       
       // Table(s) of coefficients.
       static const double coefficients0[3] = \
-      {0.942809041582064, 0.577350269189626, -0.333333333333334};
+      {0.942809041582063, 0.577350269189626, -0.333333333333334};
       
       static const double coefficients1[3] = \
       {-0.471404520791032, -0.866025403784439, 0.166666666666667};
@@ -7289,12 +7289,12 @@ public:
     const double G0_1_5_1 = 1.0 / (detJ)*det*w[0][5]*J_11*(1.0);
     
     // Compute element tensor
-    A[0] = 0.0833333333333333*G0_0_0_0 - 0.0416666666666667*G0_0_0_1 - 0.0416666666666667*G0_0_1_0 + 0.0833333333333333*G0_0_1_1 + 0.125*G0_0_2_0 + 0.0416666666666667*G0_0_2_1 - 0.0833333333333333*G0_0_3_1 - 0.0416666666666667*G0_0_4_0 - 0.125*G0_0_4_1 + 0.0833333333333334*G0_0_5_0;
+    A[0] = 0.0833333333333333*G0_0_0_0 - 0.0416666666666667*G0_0_0_1 - 0.0416666666666667*G0_0_1_0 + 0.0833333333333333*G0_0_1_1 + 0.125*G0_0_2_0 + 0.0416666666666667*G0_0_2_1 - 0.0833333333333333*G0_0_3_1 - 0.0416666666666667*G0_0_4_0 - 0.125*G0_0_4_1 + 0.0833333333333333*G0_0_5_0;
     A[1] = 0.166666666666667*G0_0_0_0 - 0.0416666666666666*G0_0_0_1 - 0.0833333333333333*G0_0_1_0 + 0.0833333333333333*G0_0_1_1 + 0.0416666666666667*G0_0_2_0 + 0.0416666666666666*G0_0_2_1 + 0.0416666666666666*G0_0_3_0 - 0.0833333333333333*G0_0_3_1 - 0.0833333333333333*G0_0_4_0 + 0.166666666666667*G0_0_5_0 - 0.125*G0_0_5_1;
-    A[2] = 0.0833333333333333*G0_0_0_0 - 0.0833333333333333*G0_0_0_1 - 0.0416666666666666*G0_0_1_0 + 0.166666666666667*G0_0_1_1 + 0.0833333333333333*G0_0_2_1 + 0.125*G0_0_3_0 - 0.166666666666667*G0_0_3_1 - 0.0416666666666667*G0_0_4_0 - 0.0416666666666667*G0_0_4_1 + 0.0833333333333333*G0_0_5_0 - 0.0416666666666666*G0_0_5_1;
-    A[3] = 0.0833333333333333*G0_1_0_0 - 0.0416666666666667*G0_1_0_1 - 0.0416666666666667*G0_1_1_0 + 0.0833333333333333*G0_1_1_1 + 0.125*G0_1_2_0 + 0.0416666666666667*G0_1_2_1 - 0.0833333333333333*G0_1_3_1 - 0.0416666666666667*G0_1_4_0 - 0.125*G0_1_4_1 + 0.0833333333333334*G0_1_5_0;
+    A[2] = 0.0833333333333333*G0_0_0_0 - 0.0833333333333333*G0_0_0_1 - 0.0416666666666666*G0_0_1_0 + 0.166666666666667*G0_0_1_1 + 0.0833333333333333*G0_0_2_1 + 0.125*G0_0_3_0 - 0.166666666666667*G0_0_3_1 - 0.0416666666666666*G0_0_4_0 - 0.0416666666666667*G0_0_4_1 + 0.0833333333333333*G0_0_5_0 - 0.0416666666666666*G0_0_5_1;
+    A[3] = 0.0833333333333333*G0_1_0_0 - 0.0416666666666667*G0_1_0_1 - 0.0416666666666667*G0_1_1_0 + 0.0833333333333333*G0_1_1_1 + 0.125*G0_1_2_0 + 0.0416666666666667*G0_1_2_1 - 0.0833333333333333*G0_1_3_1 - 0.0416666666666667*G0_1_4_0 - 0.125*G0_1_4_1 + 0.0833333333333333*G0_1_5_0;
     A[4] = 0.166666666666667*G0_1_0_0 - 0.0416666666666666*G0_1_0_1 - 0.0833333333333333*G0_1_1_0 + 0.0833333333333333*G0_1_1_1 + 0.0416666666666667*G0_1_2_0 + 0.0416666666666666*G0_1_2_1 + 0.0416666666666666*G0_1_3_0 - 0.0833333333333333*G0_1_3_1 - 0.0833333333333333*G0_1_4_0 + 0.166666666666667*G0_1_5_0 - 0.125*G0_1_5_1;
-    A[5] = 0.0833333333333333*G0_1_0_0 - 0.0833333333333333*G0_1_0_1 - 0.0416666666666666*G0_1_1_0 + 0.166666666666667*G0_1_1_1 + 0.0833333333333333*G0_1_2_1 + 0.125*G0_1_3_0 - 0.166666666666667*G0_1_3_1 - 0.0416666666666667*G0_1_4_0 - 0.0416666666666667*G0_1_4_1 + 0.0833333333333333*G0_1_5_0 - 0.0416666666666666*G0_1_5_1;
+    A[5] = 0.0833333333333333*G0_1_0_0 - 0.0833333333333333*G0_1_0_1 - 0.0416666666666666*G0_1_1_0 + 0.166666666666667*G0_1_1_1 + 0.0833333333333333*G0_1_2_1 + 0.125*G0_1_3_0 - 0.166666666666667*G0_1_3_1 - 0.0416666666666666*G0_1_4_0 - 0.0416666666666667*G0_1_4_1 + 0.0833333333333333*G0_1_5_0 - 0.0416666666666666*G0_1_5_1;
   }
  #ifndef UFC_BACKWARD_COMPATIBILITY 
   /// Tabulate the tensor for the contribution from a local cell
@@ -7627,369 +7627,10 @@ public:
 
 };
 
-#ifndef UFC_BACKWARD_COMPATIBILITY 
-
-// DOLFIN wrappers
-
-// Standard library includes
-#include <string>
-
-// DOLFIN includes
-#include <dolfin/common/NoDeleter.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/Form.h>
-#include <dolfin/function/FunctionSpace.h>
-#include <dolfin/function/GenericFunction.h>
-#include <dolfin/function/CoefficientAssigner.h>
-#include <dolfin/adaptivity/ErrorControl.h>
-#include <dolfin/adaptivity/GoalFunctional.h>
-
-namespace P1Projection
-{
-
-class CoefficientSpace_f: public dolfin::FunctionSpace
-{
-public:
-
-  CoefficientSpace_f(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_0()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new p1projection_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_f(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new p1projection_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_f(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  CoefficientSpace_f(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new p1projection_finite_element_0()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~CoefficientSpace_f()
-  {
-  }
-
-};
-
-class Form_0_FunctionSpace_0: public dolfin::FunctionSpace
-{
-public:
-
-  Form_0_FunctionSpace_0(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new p1projection_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_0_FunctionSpace_0()
-  {
-  }
-
-};
-
-class Form_0_FunctionSpace_1: public dolfin::FunctionSpace
-{
-public:
-
-  Form_0_FunctionSpace_1(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new p1projection_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_0_FunctionSpace_1()
-  {
-  }
-
-};
-
-class Form_0: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_0(const dolfin::FunctionSpace& V1, const dolfin::FunctionSpace& V0):
-    dolfin::Form(2, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-    _function_spaces[1] = reference_to_no_delete_pointer(V1);
-
-    _ufc_form = const ufc::form* (new p1projection_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::FunctionSpace> V1, boost::shared_ptr<const dolfin::FunctionSpace> V0):
-    dolfin::Form(2, 0)
-  {
-    _function_spaces[0] = V0;
-    _function_spaces[1] = V1;
-
-    _ufc_form = const ufc::form* (new p1projection_form_0());
-  }
-
-  // Destructor
-  ~Form_0()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "There are no coefficients");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "There are no coefficients");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_0_FunctionSpace_0 TestSpace;
-  typedef Form_0_FunctionSpace_1 TrialSpace;
-
-  // Coefficients
-};
-
-class Form_1_FunctionSpace_0: public dolfin::FunctionSpace
-{
-public:
-
-  Form_1_FunctionSpace_0(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new p1projection_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new p1projection_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new p1projection_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new p1projection_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_1_FunctionSpace_0()
-  {
-  }
-
-};
-
-typedef CoefficientSpace_f Form_1_FunctionSpace_1;
-
-class Form_1: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0, const dolfin::GenericFunction& f):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    this->f = f;
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0, boost::shared_ptr<const dolfin::GenericFunction> f):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    this->f = *f;
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = V0;
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0, const dolfin::GenericFunction& f):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = V0;
-
-    this->f = f;
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0, boost::shared_ptr<const dolfin::GenericFunction> f):
-    dolfin::Form(1, 1), f(*this, 0)
-  {
-    _function_spaces[0] = V0;
-
-    this->f = *f;
-
-    _ufc_form = const ufc::form* (new p1projection_form_1());
-  }
-
-  // Destructor
-  ~Form_1()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-    if (name == "f")
-      return 0;
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-    switch (i)
-    {
-    case 0:
-      return "f";
-    }
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_1_FunctionSpace_0 TestSpace;
-  typedef Form_1_FunctionSpace_1 CoefficientSpace_f;
-
-  // Coefficients
-  dolfin::CoefficientAssigner f;
-};
-
-// Class typedefs
-typedef Form_0 BilinearForm;
-typedef Form_0 JacobianForm;
-typedef Form_1 LinearForm;
-typedef Form_1 ResidualForm;
-typedef Form_0::TestSpace FunctionSpace;
-
-}
-#else 
-
+/// Code generated with DOLFIN-HPC 0.9.0 wrappers.
 // DOLFIN wrappers
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <map>
 #include <string>
@@ -8003,29 +7644,26 @@ public:
 
   }
 
-  P1ProjectionBilinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::BilinearForm(mesh)
+  P1ProjectionBilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::BilinearForm(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
 
     dolfin::error("Generated code for class Form: accessing coefficient data."
@@ -8045,13 +7683,14 @@ public:
 private:
 
   // UFC form
-  p1projection_form_0 __form;
+  p1projection_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/LinearForm.h>
 #include <map>
 #include <string>
@@ -8062,32 +7701,29 @@ public:
 
   P1ProjectionLinearForm(dolfin::Function& w0) : dolfin::LinearForm(w0.mesh())
   {
-    __coefficients.push_back(&w0);
+    coefficients_.push_back(&w0);
   }
 
-  P1ProjectionLinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::LinearForm(mesh)
+  P1ProjectionLinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::LinearForm(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
     if (name == "f")
       return 0;
@@ -8114,15 +7750,13 @@ public:
 private:
 
   // UFC form
-  p1projection_form_1 __form;
+  p1projection_form_1 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
-
-#endif 
 
 
 #endif

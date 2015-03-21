@@ -1974,177 +1974,10 @@ public:
 
 };
 
-#ifndef UFC_BACKWARD_COMPATIBILITY 
-
-// DOLFIN wrappers
-
-// Standard library includes
-#include <string>
-
-// DOLFIN includes
-#include <dolfin/common/NoDeleter.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/Form.h>
-#include <dolfin/function/FunctionSpace.h>
-#include <dolfin/function/GenericFunction.h>
-#include <dolfin/function/CoefficientAssigner.h>
-#include <dolfin/adaptivity/ErrorControl.h>
-#include <dolfin/adaptivity/GoalFunctional.h>
-
-namespace Lift
-{
-
-class CoefficientSpace_p: public dolfin::FunctionSpace
-{
-public:
-
-  CoefficientSpace_p(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new lift_finite_element_0()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new lift_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_p(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new lift_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new lift_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_p(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new lift_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new lift_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  CoefficientSpace_p(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new lift_finite_element_0()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new lift_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~CoefficientSpace_p()
-  {
-  }
-
-};
-
-typedef CoefficientSpace_p Form_0_FunctionSpace_0;
-
-class Form_0: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh, const dolfin::GenericFunction& p):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    this->p = p;
-
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh, boost::shared_ptr<const dolfin::GenericFunction> p):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    this->p = *p;
-
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = mesh;
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh, const dolfin::GenericFunction& p):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = mesh;
-    this->p = p;
-
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh, boost::shared_ptr<const dolfin::GenericFunction> p):
-    dolfin::Form(0, 1), p(*this, 0)
-  {
-    _mesh = mesh;
-    this->p = *p;
-
-    _ufc_form = const ufc::form* (new lift_form_0());
-  }
-
-  // Destructor
-  ~Form_0()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-    if (name == "p")
-      return 0;
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-    switch (i)
-    {
-    case 0:
-      return "p";
-    }
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_0_FunctionSpace_0 CoefficientSpace_p;
-
-  // Coefficients
-  dolfin::CoefficientAssigner p;
-};
-
-// Class typedefs
-typedef Form_0 Functional;
-
-}
-#else 
-
+/// Code generated with DOLFIN-HPC 0.9.0 wrappers.
 // DOLFIN wrappers
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/Functional.h>
 #include <map>
 #include <string>
@@ -2155,32 +1988,29 @@ public:
 
   LiftFunctional(dolfin::Function& w0) : dolfin::Functional(w0.mesh())
   {
-    __coefficients.push_back(&w0);
+    coefficients_.push_back(&w0);
   }
 
-  LiftFunctional(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::Functional(mesh)
+  LiftFunctional(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::Functional(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
     if (name == "p")
       return 0;
@@ -2207,15 +2037,13 @@ public:
 private:
 
   // UFC form
-  lift_form_0 __form;
+  lift_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
-
-#endif 
 
 
 #endif

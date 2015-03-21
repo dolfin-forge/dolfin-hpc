@@ -7915,8 +7915,8 @@ public:
     // Value of basis functions at quadrature points.
     static const double FE0[3][3] = \
     {{0.666666666666667, 0.166666666666667, 0.166666666666667},
-    {0.166666666666667, 0.166666666666667, 0.666666666666666},
-    {0.166666666666667, 0.666666666666666, 0.166666666666667}};
+    {0.166666666666667, 0.166666666666667, 0.666666666666667},
+    {0.166666666666667, 0.666666666666667, 0.166666666666667}};
     
     static const double FE1_C0_D01[3][9] = \
     {{-1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
@@ -7940,8 +7940,8 @@ public:
     
     static const double FE1_C2[3][9] = \
     {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.666666666666667, 0.166666666666667, 0.166666666666667},
-    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.166666666666667, 0.166666666666667, 0.666666666666666},
-    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.166666666666667, 0.666666666666666, 0.166666666666667}};
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.166666666666667, 0.166666666666667, 0.666666666666667},
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.166666666666667, 0.666666666666667, 0.166666666666667}};
     
     static const double FE1_C2_D01[3][9] = \
     {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0},
@@ -8507,482 +8507,10 @@ public:
 
 };
 
-#ifndef UFC_BACKWARD_COMPATIBILITY 
-
-// DOLFIN wrappers
-
-// Standard library includes
-#include <string>
-
-// DOLFIN includes
-#include <dolfin/common/NoDeleter.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/Form.h>
-#include <dolfin/function/FunctionSpace.h>
-#include <dolfin/function/GenericFunction.h>
-#include <dolfin/function/CoefficientAssigner.h>
-#include <dolfin/adaptivity/ErrorControl.h>
-#include <dolfin/adaptivity/GoalFunctional.h>
-
-namespace Stokes
-{
-
-class CoefficientSpace_f: public dolfin::FunctionSpace
-{
-public:
-
-  CoefficientSpace_f(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_1()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new stokes_dofmap_1()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_f(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_1()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new stokes_dofmap_1()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_f(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_1()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_1()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  CoefficientSpace_f(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new stokes_finite_element_1()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_1()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~CoefficientSpace_f()
-  {
-  }
-
-};
-
-class CoefficientSpace_h: public dolfin::FunctionSpace
-{
-public:
-
-  CoefficientSpace_h(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_0()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new stokes_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_h(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new stokes_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_h(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  CoefficientSpace_h(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new stokes_finite_element_0()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~CoefficientSpace_h()
-  {
-  }
-
-};
-
-class Form_0_FunctionSpace_0: public dolfin::FunctionSpace
-{
-public:
-
-  Form_0_FunctionSpace_0(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_0_FunctionSpace_0(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new stokes_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_0_FunctionSpace_0()
-  {
-  }
-
-};
-
-class Form_0_FunctionSpace_1: public dolfin::FunctionSpace
-{
-public:
-
-  Form_0_FunctionSpace_1(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_0_FunctionSpace_1(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new stokes_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_0_FunctionSpace_1()
-  {
-  }
-
-};
-
-typedef CoefficientSpace_h Form_0_FunctionSpace_2;
-
-class Form_0: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_0(const dolfin::FunctionSpace& V1, const dolfin::FunctionSpace& V0):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-    _function_spaces[1] = reference_to_no_delete_pointer(V1);
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::FunctionSpace& V1, const dolfin::FunctionSpace& V0, const dolfin::GenericFunction& h):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-    _function_spaces[1] = reference_to_no_delete_pointer(V1);
-
-    this->h = h;
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::FunctionSpace& V1, const dolfin::FunctionSpace& V0, boost::shared_ptr<const dolfin::GenericFunction> h):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-    _function_spaces[1] = reference_to_no_delete_pointer(V1);
-
-    this->h = *h;
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::FunctionSpace> V1, boost::shared_ptr<const dolfin::FunctionSpace> V0):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = V0;
-    _function_spaces[1] = V1;
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::FunctionSpace> V1, boost::shared_ptr<const dolfin::FunctionSpace> V0, const dolfin::GenericFunction& h):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = V0;
-    _function_spaces[1] = V1;
-
-    this->h = h;
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::FunctionSpace> V1, boost::shared_ptr<const dolfin::FunctionSpace> V0, boost::shared_ptr<const dolfin::GenericFunction> h):
-    dolfin::Form(2, 1), h(*this, 0)
-  {
-    _function_spaces[0] = V0;
-    _function_spaces[1] = V1;
-
-    this->h = *h;
-
-    _ufc_form = const ufc::form* (new stokes_form_0());
-  }
-
-  // Destructor
-  ~Form_0()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-    if (name == "h")
-      return 0;
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-    switch (i)
-    {
-    case 0:
-      return "h";
-    }
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_0_FunctionSpace_0 TestSpace;
-  typedef Form_0_FunctionSpace_1 TrialSpace;
-  typedef Form_0_FunctionSpace_2 CoefficientSpace_h;
-
-  // Coefficients
-  dolfin::CoefficientAssigner h;
-};
-
-class Form_1_FunctionSpace_0: public dolfin::FunctionSpace
-{
-public:
-
-  Form_1_FunctionSpace_0(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new stokes_dofmap_2()), mesh)))
-  {
-    // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new stokes_finite_element_2()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  Form_1_FunctionSpace_0(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new stokes_finite_element_2()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new stokes_dofmap_2()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~Form_1_FunctionSpace_0()
-  {
-  }
-
-};
-
-typedef CoefficientSpace_f Form_1_FunctionSpace_1;
-
-typedef CoefficientSpace_h Form_1_FunctionSpace_2;
-
-class Form_1: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0, const dolfin::GenericFunction& f, const dolfin::GenericFunction& h):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    this->f = f;
-    this->h = h;
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Constructor
-  Form_1(const dolfin::FunctionSpace& V0, boost::shared_ptr<const dolfin::GenericFunction> f, boost::shared_ptr<const dolfin::GenericFunction> h):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = reference_to_no_delete_pointer(V0);
-
-    this->f = *f;
-    this->h = *h;
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = V0;
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0, const dolfin::GenericFunction& f, const dolfin::GenericFunction& h):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = V0;
-
-    this->f = f;
-    this->h = h;
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Constructor
-  Form_1(boost::shared_ptr<const dolfin::FunctionSpace> V0, boost::shared_ptr<const dolfin::GenericFunction> f, boost::shared_ptr<const dolfin::GenericFunction> h):
-    dolfin::Form(1, 2), f(*this, 0), h(*this, 1)
-  {
-    _function_spaces[0] = V0;
-
-    this->f = *f;
-    this->h = *h;
-
-    _ufc_form = const ufc::form* (new stokes_form_1());
-  }
-
-  // Destructor
-  ~Form_1()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-    if (name == "f")
-      return 0;
-    else if (name == "h")
-      return 1;
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-    switch (i)
-    {
-    case 0:
-      return "f";
-    case 1:
-      return "h";
-    }
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_1_FunctionSpace_0 TestSpace;
-  typedef Form_1_FunctionSpace_1 CoefficientSpace_f;
-  typedef Form_1_FunctionSpace_2 CoefficientSpace_h;
-
-  // Coefficients
-  dolfin::CoefficientAssigner f;
-  dolfin::CoefficientAssigner h;
-};
-
-// Class typedefs
-typedef Form_0 BilinearForm;
-typedef Form_0 JacobianForm;
-typedef Form_1 LinearForm;
-typedef Form_1 ResidualForm;
-typedef Form_0::TestSpace FunctionSpace;
-
-}
-#else 
-
+/// Code generated with DOLFIN-HPC 0.9.0 wrappers.
 // DOLFIN wrappers
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <map>
 #include <string>
@@ -8993,32 +8521,29 @@ public:
 
   StokesBilinearForm(dolfin::Function& w0) : dolfin::BilinearForm(w0.mesh())
   {
-    __coefficients.push_back(&w0);
+    coefficients_.push_back(&w0);
   }
 
-  StokesBilinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::BilinearForm(mesh)
+  StokesBilinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::BilinearForm(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
     if (name == "h")
       return 0;
@@ -9045,13 +8570,14 @@ public:
 private:
 
   // UFC form
-  stokes_form_0 __form;
+  stokes_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/LinearForm.h>
 #include <map>
 #include <string>
@@ -9062,33 +8588,30 @@ public:
 
   StokesLinearForm(dolfin::Function& w0, dolfin::Function& w1) : dolfin::LinearForm(w0.mesh())
   {
-    __coefficients.push_back(&w0);
-    __coefficients.push_back(&w1);
+    coefficients_.push_back(&w0);
+    coefficients_.push_back(&w1);
   }
 
-  StokesLinearForm(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::LinearForm(mesh)
+  StokesLinearForm(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::LinearForm(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
     if (name == "f")
       return 0;
@@ -9119,15 +8642,13 @@ public:
 private:
 
   // UFC form
-  stokes_form_1 __form;
+  stokes_form_1 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
-
-#endif 
 
 
 #endif

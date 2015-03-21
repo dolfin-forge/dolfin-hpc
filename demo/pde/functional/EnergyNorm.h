@@ -493,7 +493,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -504,7 +504,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -659,7 +659,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -670,7 +670,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -825,7 +825,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -836,7 +836,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -991,7 +991,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1002,7 +1002,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1157,7 +1157,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1168,7 +1168,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1323,7 +1323,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1334,7 +1334,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1564,7 +1564,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1575,7 +1575,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1706,7 +1706,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1717,7 +1717,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1848,7 +1848,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -1859,7 +1859,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -1990,7 +1990,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -2001,7 +2001,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -2132,7 +2132,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -2143,7 +2143,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -2274,7 +2274,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[6][6] = \
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-      {4.89897948556636, 0.0, 0.0, 0.0, 0.0, 0.0},
+      {4.89897948556635, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
       {0.0, 9.48683298050514, 0.0, 0.0, 0.0, 0.0},
       {4, 0.0, 7.07106781186548, 0.0, 0.0, 0.0},
@@ -2285,7 +2285,7 @@ public:
       {2.44948974278318, 0.0, 0.0, 0.0, 0.0, 0.0},
       {4.24264068711928, 0.0, 0.0, 0.0, 0.0, 0.0},
       {2.58198889747161, 4.74341649025257, -0.912870929175278, 0.0, 0.0, 0.0},
-      {2, 6.12372435695794, 3.53553390593274, 0.0, 0.0, 0.0},
+      {2.0, 6.12372435695795, 3.53553390593274, 0.0, 0.0, 0.0},
       {-2.3094010767585, 0.0, 8.16496580927726, 0.0, 0.0, 0.0}};
       
       // Compute reference derivatives.
@@ -2969,30 +2969,30 @@ public:
     // Facet Area.
     
     // Array of quadrature weights.
-    static const double W6[6] = {0.054975871827661, 0.054975871827661, 0.054975871827661, 0.111690794839006, 0.111690794839006, 0.111690794839006};
+    static const double W6[6] = {0.054975871827661, 0.054975871827661, 0.054975871827661, 0.111690794839005, 0.111690794839005, 0.111690794839005};
     // Quadrature points on the UFC reference element: (0.816847572980459, 0.091576213509771), (0.091576213509771, 0.816847572980459), (0.091576213509771, 0.091576213509771), (0.10810301816807, 0.445948490915965), (0.445948490915965, 0.10810301816807), (0.445948490915965, 0.445948490915965)
     
     // Value of basis functions at quadrature points.
     static const double FE0[6][6] = \
-    {{-0.0748038077481961, 0.517632341987673, -0.0748038077481966, 0.299215230992787, 0.0335448115231483, 0.299215230992784},
-    {-0.074803807748196, -0.0748038077481967, 0.517632341987674, 0.299215230992787, 0.299215230992784, 0.0335448115231484},
-    {0.517632341987671, -0.0748038077481967, -0.0748038077481967, 0.0335448115231487, 0.299215230992787, 0.299215230992787},
-    {-0.0482083778155119, -0.0847304930939779, -0.048208377815512, 0.192833511262048, 0.795480226200906, 0.192833511262048},
-    {-0.048208377815512, -0.048208377815512, -0.0847304930939778, 0.192833511262048, 0.192833511262048, 0.795480226200906},
-    {-0.0847304930939778, -0.0482083778155121, -0.0482083778155119, 0.795480226200906, 0.192833511262048, 0.192833511262048}};
+    {{-0.074803807748196, 0.517632341987673, -0.0748038077481966, 0.299215230992787, 0.0335448115231483, 0.299215230992784},
+    {-0.074803807748196, -0.0748038077481966, 0.517632341987674, 0.299215230992787, 0.299215230992784, 0.0335448115231483},
+    {0.517632341987671, -0.0748038077481966, -0.0748038077481966, 0.0335448115231487, 0.299215230992787, 0.299215230992787},
+    {-0.0482083778155119, -0.0847304930939778, -0.0482083778155119, 0.192833511262048, 0.795480226200906, 0.192833511262048},
+    {-0.0482083778155119, -0.048208377815512, -0.0847304930939778, 0.192833511262048, 0.192833511262048, 0.795480226200906},
+    {-0.0847304930939778, -0.048208377815512, -0.0482083778155119, 0.795480226200906, 0.192833511262048, 0.192833511262048}};
     
     static const double FE0_D01[6][6] = \
-    {{0.63369514596092, 0.0, -0.633695145960916, 3.26739029192184, 0.0, -3.26739029192184},
-    {0.633695145960919, 0.0, 2.26739029192184, 0.366304854039083, -2.90108543788275, -0.366304854039084},
-    {-2.26739029192183, 0.0, -0.633695145960916, 0.366304854039084, 2.90108543788275, -0.366304854039084},
-    {-0.78379396366386, 0.0, 0.78379396366386, 0.43241207267228, 0.0, -0.43241207267228},
-    {-0.78379396366386, 0.0, -0.56758792732772, 1.78379396366386, 1.35138189099158, -1.78379396366386},
-    {0.56758792732772, 0.0, 0.78379396366386, 1.78379396366386, -1.35138189099158, -1.78379396366386}};
+    {{0.633695145960921, 0.0, -0.633695145960916, 3.26739029192183, 0.0, -3.26739029192184},
+    {0.63369514596092, 0.0, 2.26739029192184, 0.366304854039083, -2.90108543788276, -0.366304854039083},
+    {-2.26739029192183, 0.0, -0.633695145960916, 0.366304854039083, 2.90108543788275, -0.366304854039083},
+    {-0.78379396366386, 0.0, 0.78379396366386, 0.432412072672279, 0.0, -0.432412072672279},
+    {-0.783793963663859, 0.0, -0.567587927327719, 1.78379396366386, 1.35138189099158, -1.78379396366386},
+    {0.567587927327721, 0.0, 0.78379396366386, 1.78379396366386, -1.35138189099158, -1.78379396366386}};
     
     static const double FE0_D10[6][6] = \
     {{0.63369514596092, 2.26739029192184, 0.0, 0.366304854039083, -0.366304854039083, -2.90108543788276},
-    {0.63369514596092, -0.633695145960917, 0.0, 3.26739029192183, -3.26739029192183, 0.0},
-    {-2.26739029192183, -0.633695145960917, 0.0, 0.366304854039084, -0.366304854039084, 2.90108543788275},
+    {0.633695145960921, -0.633695145960916, 0.0, 3.26739029192183, -3.26739029192183, 0.0},
+    {-2.26739029192183, -0.633695145960916, 0.0, 0.366304854039083, -0.366304854039083, 2.90108543788275},
     {-0.78379396366386, -0.56758792732772, 0.0, 1.78379396366386, -1.78379396366386, 1.35138189099158},
     {-0.78379396366386, 0.78379396366386, 0.0, 0.432412072672279, -0.432412072672279, 0.0},
     {0.56758792732772, 0.78379396366386, 0.0, 1.78379396366386, -1.78379396366386, -1.35138189099158}};
@@ -3189,177 +3189,10 @@ public:
 
 };
 
-#ifndef UFC_BACKWARD_COMPATIBILITY 
-
-// DOLFIN wrappers
-
-// Standard library includes
-#include <string>
-
-// DOLFIN includes
-#include <dolfin/common/NoDeleter.h>
-#include <dolfin/fem/FiniteElement.h>
-#include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/Form.h>
-#include <dolfin/function/FunctionSpace.h>
-#include <dolfin/function/GenericFunction.h>
-#include <dolfin/function/CoefficientAssigner.h>
-#include <dolfin/adaptivity/ErrorControl.h>
-#include <dolfin/adaptivity/GoalFunctional.h>
-
-namespace EnergyNorm
-{
-
-class CoefficientSpace_v: public dolfin::FunctionSpace
-{
-public:
-
-  CoefficientSpace_v(const dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new energynorm_finite_element_0()))),
-                          const dolfin::DofMap *(new dolfin::DofMap(ufc::dofmap* (new energynorm_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_v(dolfin::Mesh& mesh):
-    dolfin::FunctionSpace(dolfin::reference_to_no_delete_pointer(mesh),
-                          const dolfin::FiniteElement* (new dolfin::FiniteElement(ufc::finite_element* (new energynorm_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap *(new energynorm_dofmap_0()), mesh)))
-  {
-    // Do nothing
-  }
-
-  CoefficientSpace_v(dolfin::Mesh*  mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element* (new energynorm_finite_element_0()))),
-                          const dolfin::DofMap* (new dolfin::DofMap(ufc::dofmap*(new energynorm_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  CoefficientSpace_v(const dolfin::Mesh* mesh):
-    dolfin::FunctionSpace(mesh,
-                          const dolfin::FiniteElement *(new dolfin::FiniteElement(ufc::finite_element*(new energynorm_finite_element_0()))),
-                          const dolfin::DofMap*(new dolfin::DofMap(ufc::dofmap*(new energynorm_dofmap_0()), *mesh)))
-  {
-      // Do nothing
-  }
-
-  ~CoefficientSpace_v()
-  {
-  }
-
-};
-
-typedef CoefficientSpace_v Form_0_FunctionSpace_0;
-
-class Form_0: public dolfin::Form
-{
-public:
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh, const dolfin::GenericFunction& v):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    this->v = v;
-
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Constructor
-  Form_0(const dolfin::Mesh& mesh, boost::shared_ptr<const dolfin::GenericFunction> v):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = reference_to_no_delete_pointer(mesh);
-    this->v = *v;
-
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = mesh;
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh, const dolfin::GenericFunction& v):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = mesh;
-    this->v = v;
-
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Constructor
-  Form_0(boost::shared_ptr<const dolfin::Mesh> mesh, boost::shared_ptr<const dolfin::GenericFunction> v):
-    dolfin::Form(0, 1), v(*this, 0)
-  {
-    _mesh = mesh;
-    this->v = *v;
-
-    _ufc_form = const ufc::form* (new energynorm_form_0());
-  }
-
-  // Destructor
-  ~Form_0()
-  {}
-
-  /// Return the number of the coefficient with this name
-  virtual dolfin::uint coefficient_number(const std::string& name) const
-  {
-    if (name == "v")
-      return 0;
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return 0;
-  }
-
-  /// Return the name of the coefficient with this number
-  virtual std::string coefficient_name(dolfin::uint i) const
-  {
-    switch (i)
-    {
-    case 0:
-      return "v";
-    }
-
-    dolfin::dolfin_error("generated code for class Form",
-                         "access coeficient data",
-                         "Invalid coeficient");
-    return "unnamed";
-  }
-
-  // Typedefs
-  typedef Form_0_FunctionSpace_0 CoefficientSpace_v;
-
-  // Coefficients
-  dolfin::CoefficientAssigner v;
-};
-
-// Class typedefs
-typedef Form_0 Functional;
-
-}
-#else 
-
+/// Code generated with DOLFIN-HPC 0.9.0 wrappers.
 // DOLFIN wrappers
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/Functional.h>
 #include <map>
 #include <string>
@@ -3370,32 +3203,29 @@ public:
 
   EnergyNormFunctional(dolfin::Function& w0) : dolfin::Functional(w0.mesh())
   {
-    __coefficients.push_back(&w0);
+    coefficients_.push_back(&w0);
   }
 
-  EnergyNormFunctional(dolfin::Mesh& mesh, std::map<std::string const, dolfin::Function *> const& coefficient_map) : dolfin::Functional(mesh)
+  EnergyNormFunctional(dolfin::Mesh& mesh, dolfin::CoefficientMap const& coefficient_map) : dolfin::Functional(mesh)
   {
-    for(dolfin::uint i = 0; i < this->num_coefficients(); ++i)
-    {
-      __coefficients.push_back(coefficient_map.find(this->coefficient_name(i))->second);
-    }
+    Form::assign_coefficients(coefficient_map, coefficients_);
 
   }
 
   /// Return UFC form
   const ufc::form& form() const
   {
-    return __form;
+    return form_;
   }
   
   /// Return array of coefficients
   const dolfin::Array<dolfin::Function*>& coefficients() const
   {
-    return __coefficients;
+    return coefficients_;
   }
 
   /// Return the number of the coefficient with this name
-  dolfin::uint coefficient_number(std::string const& name) const
+  dolfin::uint coefficient_index(std::string const& name) const
   {
     if (name == "v")
       return 0;
@@ -3422,15 +3252,13 @@ public:
 private:
 
   // UFC form
-  energynorm_form_0 __form;
+  energynorm_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> __coefficients;
+  dolfin::Array<dolfin::Function*> coefficients_;
 
 };
 
-
-#endif 
 
 
 #endif

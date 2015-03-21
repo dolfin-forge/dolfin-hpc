@@ -353,7 +353,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -499,7 +499,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -645,7 +645,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -866,7 +866,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -988,7 +988,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -1110,7 +1110,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -1723,11 +1723,11 @@ public:
     const double G0_1_1 = det*(K_10*K_10 + K_11*K_11);
     
     // Compute element tensor
-    A[0] = 0.499999999999999*G0_0_0 + 0.5*G0_0_1 + 0.5*G0_1_0 + 0.5*G0_1_1;
-    A[1] = -0.499999999999999*G0_0_0 - 0.5*G0_1_0;
+    A[0] = 0.5*G0_0_0 + 0.5*G0_0_1 + 0.5*G0_1_0 + 0.5*G0_1_1;
+    A[1] = -0.5*G0_0_0 - 0.5*G0_1_0;
     A[2] = -0.5*G0_0_1 - 0.5*G0_1_1;
-    A[3] = -0.499999999999999*G0_0_0 - 0.5*G0_0_1;
-    A[4] = 0.499999999999999*G0_0_0;
+    A[3] = -0.5*G0_0_0 - 0.5*G0_0_1;
+    A[4] = 0.5*G0_0_0;
     A[5] = 0.5*G0_0_1;
     A[6] = -0.5*G0_1_0 - 0.5*G0_1_1;
     A[7] = 0.5*G0_1_0;

@@ -353,7 +353,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -499,7 +499,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -645,7 +645,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -866,7 +866,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -988,7 +988,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -1110,7 +1110,7 @@ public:
       // Tables of derivatives of the polynomial base (transpose).
       static const double dmats0[3][3] = \
       {{0.0, 0.0, 0.0},
-      {4.89897948556635, 0.0, 0.0},
+      {4.89897948556636, 0.0, 0.0},
       {0.0, 0.0, 0.0}};
       
       static const double dmats1[3][3] = \
@@ -1734,9 +1734,9 @@ public:
     {-1.0, 0.0, 1.0}};
     
     static const double FE0_D10[3][3] = \
-    {{-0.999999999999999, 0.999999999999999, 0.0},
-    {-0.999999999999999, 0.999999999999999, 0.0},
-    {-0.999999999999999, 0.999999999999999, 0.0}};
+    {{-1.0, 1.0, 0.0},
+    {-1.0, 1.0, 0.0},
+    {-1.0, 1.0, 0.0}};
     
     // Reset values in the element tensor.
     for (unsigned int r = 0; r < 9; r++)
@@ -1860,9 +1860,9 @@ public:
     {-1.0, 0.0, 1.0}};
     
     static const double FE0_D10[3][3] = \
-    {{-0.999999999999999, 0.999999999999999, 0.0},
-    {-0.999999999999999, 0.999999999999999, 0.0},
-    {-0.999999999999999, 0.999999999999999, 0.0}};
+    {{-1.0, 1.0, 0.0},
+    {-1.0, 1.0, 0.0},
+    {-1.0, 1.0, 0.0}};
     
     // Reset values in the element tensor.
     for (unsigned int r = 0; r < 3; r++)

@@ -301,7 +301,7 @@ uint PETScVector::offset() const
   return static_cast<uint>(low);
 }
 //-----------------------------------------------------------------------------
-const GenericVector& PETScVector::operator= (const GenericVector& v)
+const PETScVector& PETScVector::operator= (const GenericVector& v)
 {
   *this = v.down_cast<PETScVector>();
   return *this;
@@ -309,11 +309,12 @@ const GenericVector& PETScVector::operator= (const GenericVector& v)
 //-----------------------------------------------------------------------------
 const PETScVector& PETScVector::operator= (const PETScVector& v)
 {
-  dolfin_assert(v.x);
-
-  init(v.local_size());
-  VecCopy(v.x, x);
-
+  if(&v != this)
+  {
+    dolfin_assert(v.x);
+    init(v.local_size());
+    VecCopy(v.x, x);
+  }
   return *this;
 }
 //-----------------------------------------------------------------------------

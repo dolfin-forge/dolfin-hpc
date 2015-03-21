@@ -630,7 +630,10 @@ const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
 {
   //  (*this).down_cast<PETScMatrix>() =  A.down_cast<PETScMatrix>();
   //MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
-  MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
+  if (&A != this)
+  {
+    MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
+  }
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -638,7 +641,10 @@ const PETScMatrix& PETScMatrix::operator= (const PETScMatrix& A)
 {
 
   //MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
-  MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
+  if (&A != this)
+  {
+    MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
+  }
   return *this;
 }
 //-----------------------------------------------------------------------------

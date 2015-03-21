@@ -38,7 +38,7 @@ void MeshQualityFunction::eval(real* values, const real* x) const
   //FIXME: should we have to cast?
   Cell& c = const_cast<Cell&>(cell());
   real const qK = mqual_.mean_ratio(c);
-  values[0] = 1.0 / std::pow(qK, p_);
+  values[0] = 1.0 / std::pow(qK, static_cast<real>(p_));
 }
 
 }

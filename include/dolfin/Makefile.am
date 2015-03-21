@@ -19,32 +19,6 @@ nobase_pkginclude_HEADERS = \
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
-				elements/ffc_Brezzi_Douglas_Marini_1_2d.h\
-				elements/ffc_Discontinuous_Lagrange_0_1d.h\
-				elements/ffc_Discontinuous_Lagrange_0_2d.h\
-				elements/ffc_Discontinuous_Lagrange_0_2dVector.h\
-				elements/ffc_Discontinuous_Lagrange_0_3d.h\
-				elements/ffc_Discontinuous_Lagrange_0_3dVector.h\
-				elements/ffc_Discontinuous_Lagrange_1_1d.h\
-				elements/ffc_Discontinuous_Lagrange_1_2d.h\
-				elements/ffc_Discontinuous_Lagrange_1_2dVector.h\
-				elements/ffc_Discontinuous_Lagrange_1_3d.h\
-				elements/ffc_Discontinuous_Lagrange_1_3dVector.h\
-				elements/ffc_Discontinuous_Lagrange_2_1d.h\
-				elements/ffc_Discontinuous_Lagrange_2_2d.h\
-				elements/ffc_Discontinuous_Lagrange_2_2dVector.h\
-				elements/ffc_Discontinuous_Lagrange_2_3d.h\
-				elements/ffc_Discontinuous_Lagrange_2_3dVector.h\
-				elements/ffc_Lagrange_1_1d.h\
-				elements/ffc_Lagrange_1_2d.h\
-				elements/ffc_Lagrange_1_2dVector.h\
-				elements/ffc_Lagrange_1_3d.h\
-				elements/ffc_Lagrange_1_3dVector.h\
-				elements/ffc_Lagrange_2_1d.h\
-				elements/ffc_Lagrange_2_2d.h\
-				elements/ffc_Lagrange_2_2dVector.h\
-				elements/ffc_Lagrange_2_3d.h\
-				elements/ffc_Lagrange_2_3dVector.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\

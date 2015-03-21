@@ -17,6 +17,7 @@ print "Generating Finite Element with FFC version " + FFC_VERSION
 
 # *Do* generate all functions
 OPTIONS = FFC_PARAMETERS.copy()
+OPTIONS["split"] = True
 OPTIONS["no-evaluate_basis"] = False
 OPTIONS["no-evaluate_basis_derivatives"] = False
 
@@ -56,7 +57,7 @@ file.write("\n")
 file.write("#include <cstring>\n")
 file.write("\n")
 for (name, element_signature, dof_map_signature, index) in signatures:
-    file.write("#include <dolfin/elements/%s.h>\n" % name)
+    file.write("#include \"%s.h\"\n" % name)
 file.write("\n")
 file.write("#include <dolfin/elements/ElementLibrary.h>\n")
 file.write("\n")

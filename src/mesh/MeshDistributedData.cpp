@@ -28,7 +28,7 @@ MeshDistributedData::MeshDistributedData(MeshTopology& topology) :
     facet_dim_(0),
     max_global_index_(0)
 {
-  for(uint i = 0; i < MAX_SIZE; ++i)
+  for (uint i = 0; i < MAX_SIZE; ++i)
   {
     cached_global_indices_[i] = NULL;
   }
@@ -156,7 +156,7 @@ void MeshDistributedData::flush_numbering_cache(uint dim)
 {
   dolfin_assert(dim < MAX_SIZE);
   cached_global_size_[dim] = 0;
-  if(cached_global_indices_[dim] != NULL)
+  if (cached_global_indices_[dim] != NULL)
   {
     dolfin_assert(finalized_[dim]);
     delete[] cached_global_indices_[dim];
@@ -192,7 +192,7 @@ void MeshDistributedData::finalize(uint dim)
   {
     return;
   }
-  if(finalized_[dim] == true)
+  if (finalized_[dim] == true)
   {
     error("Finalizing already finalized numbering for dimension %d", dim);
   }
@@ -255,8 +255,7 @@ uint MeshDistributedData::num_global(uint dim) const
 bool MeshDistributedData::has_global(uint i, uint dim) const
 {
   return (
-      MPI::numProcesses() > 1 ?
-          (local_indices_[dim].count(i) > 0) : (i < topology_.size(dim)));
+      empty() ? (i < topology_.size(dim)) : (local_indices_[dim].count(i) > 0));
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_global(MeshEntity const& entity) const
@@ -267,7 +266,7 @@ bool MeshDistributedData::has_global(MeshEntity const& entity) const
 uint MeshDistributedData::get_global(uint i, uint dim) const
 {
   dolfin_assert(dim <= cell_dim_);
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -291,7 +290,7 @@ uint MeshDistributedData::get_global(MeshEntity const& e) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_global(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -310,7 +309,7 @@ uint MeshDistributedData::get_vertex_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_global(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -329,7 +328,7 @@ uint MeshDistributedData::get_facet_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_global(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -366,7 +365,12 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
     error("Trying to set global number of entities for invalid dimension.");
   }
 #if HAVE_MPI
-  if (MPI::numProcesses() > 1)
+  if (empty())
+  {
+    offset = 0;
+    num_global_[dim] = topology_.size(dim);
+  }
+  else
   {
     offset = 0;
     uint num_owned = this->num_owned(dim);
@@ -382,12 +386,7 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
     MPI_Allreduce(&num_owned, &num_glb, 1, MPI_UNSIGNED, MPI_SUM,
                   MPI::DOLFIN_COMM);
     num_global_[dim] = num_glb;
-  }
 #endif
-  else
-  {
-    offset = 0;
-    num_global_[dim] = topology_.size(dim);
   }
 }
 //-----------------------------------------------------------------------------
@@ -395,8 +394,7 @@ bool MeshDistributedData::has_local(uint i, uint dim) const
 {
   dolfin_assert(dim <= cell_dim_);
   return (
-      MPI::numProcesses() > 1 ?
-          (global_indices_[dim].count(i) > 0) : (i < topology_.size(dim)));
+      empty() ? (i < topology_.size(dim)) : (global_indices_[dim].count(i) > 0));
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_local(MeshEntity const& entity) const
@@ -406,7 +404,7 @@ bool MeshDistributedData::has_local(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_local(uint i, uint dim) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -422,7 +420,7 @@ uint MeshDistributedData::get_local(MeshEntity const& e) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_local(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -432,7 +430,7 @@ uint MeshDistributedData::get_vertex_local(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_local(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -443,7 +441,7 @@ uint MeshDistributedData::get_facet_local(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_local(uint i) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return i;
   }
@@ -508,7 +506,7 @@ void MeshDistributedData::remap_ownership(int const* mapping)
 bool MeshDistributedData::is_shared(uint i, uint dim) const
 {
   dolfin_assert(dim <= cell_dim_);
-  return (MPI::numProcesses() > 1 ? (shared_[dim].count(i) > 0) : false);
+  return (empty() ? false : (shared_[dim].count(i) > 0));
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_shared(MeshEntity const& entity) const
@@ -538,12 +536,13 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_to(uint rank,
 {
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
-  dolfin_assert(shared_mapping_[dim].find(rank)->second.first.size()
-                    == shared_mapping_[dim].find(rank)->second.second.size());
+  dolfin_assert(
+      shared_mapping_[dim].find(rank)->second.first.size()
+          == shared_mapping_[dim].find(rank)->second.second.size());
   AdjacentMapping::const_iterator it = shared_mapping_[dim].find(rank);
   if (it == shared_mapping_[dim].end())
   {
-    if(adjacent_ranks_[dim].count(rank) > 0)
+    if (adjacent_ranks_[dim].count(rank) > 0)
     {
       error("Shared mapping does not exists for adjacent rank %d", rank);
     }
@@ -558,7 +557,7 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_to(uint rank,
 Array<uint>& MeshDistributedData::get_shared_mapping_to(uint rank, uint dim)
 {
   dolfin_assert(dim <= cell_dim_);
-  if(adjacent_ranks_[dim].count(rank) == 0)
+  if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting shared mapping from non-adjacent rank %d", rank);
   }
@@ -570,12 +569,13 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_from(uint rank,
 {
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
-  dolfin_assert(shared_mapping_[dim].find(rank)->second.first.size()
-                  == shared_mapping_[dim].find(rank)->second.second.size());
+  dolfin_assert(
+      shared_mapping_[dim].find(rank)->second.first.size()
+          == shared_mapping_[dim].find(rank)->second.second.size());
   AdjacentMapping::const_iterator it = shared_mapping_[dim].find(rank);
   if (it == shared_mapping_[dim].end())
   {
-    if(adjacent_ranks_[dim].count(rank) > 0)
+    if (adjacent_ranks_[dim].count(rank) > 0)
     {
       error("Shared mapping does not exists for adjacent rank %d", rank);
     }
@@ -590,7 +590,7 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_from(uint rank,
 Array<uint>& MeshDistributedData::get_shared_mapping_from(uint rank, uint dim)
 {
   dolfin_assert(dim <= cell_dim_);
-  if(adjacent_ranks_[dim].count(rank) == 0)
+  if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting shared mapping from non-adjacent rank %d", rank);
   }
@@ -655,14 +655,14 @@ uint dim)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::setall_shared_adj(MeshEntity const& m,
                                             _set<uint> const& ranks)
-{
-  setall_shared_adj(m.index(), ranks, m.dim());
+                                            {
+                                              setall_shared_adj(m.index(), ranks, m.dim());
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_ghost(uint i, uint dim) const
 {
   dolfin_assert(dim <= cell_dim_);
-  return (MPI::numProcesses() > 1 ? (ghost_[dim].count(i) > 0) : false);
+  return (empty() ? false : (ghost_[dim].count(i) > 0));
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_ghost(MeshEntity const& entity) const
@@ -695,7 +695,7 @@ uint MeshDistributedData::num_ghost_from(uint rank, uint dim) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_owner(uint local_index, uint dim) const
 {
-  if (MPI::numProcesses() == 1)
+  if (empty())
   {
     return 0;
   }
@@ -714,12 +714,13 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_to(uint rank,
 {
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
-  dolfin_assert(ghost_mapping_[dim].find(rank)->second.first.size()
-                  == ghost_mapping_[dim].find(rank)->second.second.size());
+  dolfin_assert(
+      ghost_mapping_[dim].find(rank)->second.first.size()
+          == ghost_mapping_[dim].find(rank)->second.second.size());
   AdjacentMapping::const_iterator it = ghost_mapping_[dim].find(rank);
   if (it == ghost_mapping_[dim].end())
   {
-    if(adjacent_ranks_[dim].count(rank) > 0)
+    if (adjacent_ranks_[dim].count(rank) > 0)
     {
       error("Ghost mapping does not exists for adjacent rank %d", rank);
     }
@@ -734,7 +735,7 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_to(uint rank,
 Array<uint>& MeshDistributedData::get_ghost_mapping_to(uint rank, uint dim)
 {
   dolfin_assert(dim <= cell_dim_);
-  if(adjacent_ranks_[dim].count(rank) == 0)
+  if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting ghost mapping from non-adjacent rank %d", rank);
   }
@@ -746,12 +747,13 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_from(uint rank,
 {
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
-  dolfin_assert(ghost_mapping_[dim].find(rank)->second.first.size()
-                == ghost_mapping_[dim].find(rank)->second.second.size());
+  dolfin_assert(
+      ghost_mapping_[dim].find(rank)->second.first.size()
+          == ghost_mapping_[dim].find(rank)->second.second.size());
   AdjacentMapping::const_iterator it = ghost_mapping_[dim].find(rank);
   if (it == ghost_mapping_[dim].end())
   {
-    if(adjacent_ranks_[dim].count(rank) > 0)
+    if (adjacent_ranks_[dim].count(rank) > 0)
     {
       error("Ghost mapping does not exists for adjacent rank %d", rank);
     }
@@ -766,7 +768,7 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_from(uint rank,
 Array<uint>& MeshDistributedData::get_ghost_mapping_from(uint rank, uint dim)
 {
   dolfin_assert(dim <= cell_dim_);
-  if(adjacent_ranks_[dim].count(rank) == 0)
+  if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting ghost mapping from non-adjacent rank %d", rank);
   }

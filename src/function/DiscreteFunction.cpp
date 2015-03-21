@@ -11,6 +11,7 @@
 // Last changed: 2014-02-06
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -30,6 +31,7 @@
 #include <iomanip>
 #include <limits>
 #include <set>
+#include <cmath>
 
 namespace dolfin
 {
@@ -367,9 +369,9 @@ void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
   // Tabulate dofs
   dofmap_.tabulate_dofs(scratch.dofs, cell, dolfin_cell);
 
-  // Pick values from global vector
+  // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
-  if (MPI::numProcesses() > 1)
+  if (!cache_mapping_.empty())
   {
     for (uint i = 0; i < scratch.local_dimension; i++)
     {
@@ -402,14 +404,14 @@ void DiscreteFunction::eval(real* values, const real* x) const
   mesh_.intersector().overlap(p, cells);
   if (cells.size() < 1)
   {
-    if (MPI::numProcesses() == 1)
+    if (!mesh_.is_distributed())
     {
       error("Unable to evaluate function at given point (not inside domain).");
     }
 
     for (uint j = 0; j < scratch.size; j++)
     {
-      values[j] = 1e50;  // FIXME: Document default value.
+      values[j] = dolfin::DOLFIN_REAL_MAX;
     }
     return;
   }
@@ -572,20 +574,11 @@ void DiscreteFunction::InitializeVector()
 {
   if (X_->size() != dofmap_.global_dimension())
   {
-    if (MPI::numProcesses() > 1)
-    {
-      X_->init(dofmap_.local_size());
-    }
-    else
-    {
-      X_->init(dofmap_.global_dimension());
-    }
+    // Specific case in serial local_size == global_dimension
+    X_->init(dofmap_.local_size());
   }
 
-  if (MPI::numProcesses() > 1)
-  {
-    InitializeGhosts();
-  }
+  InitializeGhosts();
 
   X_->zero();
   X_->apply();
@@ -596,6 +589,8 @@ void DiscreteFunction::InitializeVector()
 //-----------------------------------------------------------------------------
 void DiscreteFunction::InitializeGhosts()
 {
+  if(!mesh_.is_distributed()) return;
+
   std::set<uint> indices;
 
   MeshDistributedData& distdata = mesh_.distdata();
@@ -658,9 +653,9 @@ void DiscreteFunction::disp() const
 void DiscreteFunction::sync_ghosts()
 {
 
-  if (MPI::numProcesses() == 1) return;
+  if(!mesh_.is_distributed()) return;
 
-  if (dofmap_.renumbered() && !renumbered_ && MPI::numProcesses() > 1)
+  if (dofmap_.renumbered() && !renumbered_)
   {
     InitializeGhosts();
     renumbered_ = true;

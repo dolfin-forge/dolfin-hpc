@@ -241,7 +241,7 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
   // Special case
   if (facets_.size() == 0)
   {
-    if(dolfin::MPI::numProcesses() == 1)
+    if(!space.mesh().is_distributed())
     {
       warning("Found no facets matching domain for boundary condition.");
     }
@@ -296,7 +296,7 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
   // Special case
   if (facets_.size() == 0)
   {
-    if(dolfin::MPI::numProcesses() == 1)
+    if(!space.mesh().is_distributed())
     {
       warning("Found no facets matching domain for boundary condition.");
     }

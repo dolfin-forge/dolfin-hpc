@@ -83,6 +83,12 @@ Mesh::Mesh(std::string filename) :
   const bool serial_mesh = dolfin_get("Mesh read in serial");
   if (MPI::numProcesses() > 1 && !serial_mesh)
   {
+    // COMMENT: At this point the distributed data cannot be empty as the file
+    //          format is supposed to fill it.
+    if(!topology().is_distributed())
+    {
+      error("The topology of a mesh read in parallel should be distributed.");
+    }
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);

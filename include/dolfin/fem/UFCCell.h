@@ -22,7 +22,7 @@ namespace dolfin
 /// This class is simple wrapper for a UFC cell and provides
 /// a layer between a DOLFIN cell and a UFC cell.
 
-class UFCCell: public ufc::cell
+class UFCCell : public ufc::cell
 {
 public:
 
@@ -60,7 +60,7 @@ public:
 
   // Update cell entities to global indices and coordinates
   void update(Cell& cell);
-  void update(Cell& cell, MeshDistributedData& distdata); // Obsolete
+  void update(Cell& cell, MeshDistributedData& distdata);  // Obsolete
 
 private:
 
@@ -82,7 +82,7 @@ inline void UFCCell::init(Cell& cell)
 
   // Set cell shape
   switch (cell.type())
-  {
+    {
     case CellType::interval:
       cell_shape = ufc::interval;
       break;
@@ -95,7 +95,7 @@ inline void UFCCell::init(Cell& cell)
     default:
       error("Unknown cell type.");
       break;
-  }
+    }
   num_vertices_ = cell.numEntities(0);
 
   // Set topological dimension
@@ -112,21 +112,13 @@ inline void UFCCell::init(Cell& cell)
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
-  // Two different cases
-  if (MPI::numProcesses() == 1)
+  // In any case store topological data in object
+  for (uint d = 0; d < topological_dimension; ++d)
   {
-    // Single process, pointer to mesh topological data
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-  }
-  else
-  {
-    // Parallel case, store topological data in object
-    for (uint d = 0; d < topological_dimension; ++d)
+    entity_indices[d] = new uint[cell.numEntities(d)];
+    for (uint i = 0; i < cell.numEntities(d); ++i)
     {
-      entity_indices[d] = new uint[cell.numEntities(d)];
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-        entity_indices[d][i] = (cell.entities(d))[i];
+      entity_indices[d][i] = (cell.entities(d))[i];
     }
   }
 
@@ -134,7 +126,9 @@ inline void UFCCell::init(Cell& cell)
   uint* vertices = cell.entities(0);
   coordinates = new real*[num_vertices_];
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -142,17 +136,11 @@ inline void UFCCell::clear()
 {
   if (entity_indices)
   {
-    if (MPI::numProcesses() > 1)
+    for (uint i = 0; i < (topological_dimension + 1); ++i)
     {
-      for (uint i = 0; i < (topological_dimension + 1); ++i)
-        delete[] entity_indices[i];
-      delete[] entity_indices;
+      delete[] entity_indices[i];
     }
-    else
-    {
-      delete[] entity_indices[topological_dimension];
-      delete[] entity_indices;
-    }
+    delete[] entity_indices;
   }
   entity_indices = 0;
 
@@ -171,34 +159,33 @@ inline void UFCCell::update(Cell& cell)
   this->cell = &cell;
 
   // Set entity indices
-  if (MPI::numProcesses() == 1)
-  {
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-    entity_indices[topological_dimension][0] = cell.index();
-  }
-  else
-  {
-    MeshDistributedData& distdata = cell.mesh().distdata();
+  MeshDistributedData& distdata = cell.mesh().distdata();
 #if ENABLE_P1_OPTIMIZATIONS
-    for(uint i = 0; i < cell.numEntities(0); ++i)
-      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
-#else
-    for (uint d = 0; d < topological_dimension; ++d)
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-        entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
-#endif
-    entity_indices[topological_dimension][0] = distdata.get_cell_global(
-        cell.index());
+  for(uint i = 0; i < cell.numEntities(0); ++i)
+  {
+    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
+#else
+  for (uint d = 0; d < topological_dimension; ++d)
+  {
+    for (uint i = 0; i < cell.numEntities(d); ++i)
+    {
+      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+    }
+  }
+#endif
+  entity_indices[topological_dimension][0] = distdata.get_cell_global(
+      cell.index());
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
-  const uint* vertices = cell.entities(0);
+  uint const * vertices = cell.entities(0);
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -208,33 +195,32 @@ inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
   this->cell = &cell;
 
   // Set entity indices
-  if (MPI::numProcesses() == 1)
-  {
-    for (uint d = 0; d < topological_dimension; ++d)
-      entity_indices[d] = cell.entities(d);
-    entity_indices[topological_dimension][0] = cell.index();
-  }
-  else
-  {
 #if ENABLE_P1_OPTIMIZATIONS
-    for(uint i = 0; i < cell.numEntities(0); ++i)
-      entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
-#else
-    for (uint d = 0; d < topological_dimension; ++d)
-      for (uint i = 0; i < cell.numEntities(d); ++i)
-        entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
-#endif
-    entity_indices[topological_dimension][0] = distdata.get_cell_global(
-        cell.index());
+  for(uint i = 0; i < cell.numEntities(0); ++i)
+  {
+    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
+#else
+  for (uint d = 0; d < topological_dimension; ++d)
+  {
+    for (uint i = 0; i < cell.numEntities(d); ++i)
+    {
+      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+    }
+  }
+#endif
+  entity_indices[topological_dimension][0] = distdata.get_cell_global(
+      cell.index());
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])
   index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
-  const uint* vertices = cell.entities(0);
+  uint const * vertices = cell.entities(0);
   for (uint i = 0; i < num_vertices_; ++i)
+  {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------

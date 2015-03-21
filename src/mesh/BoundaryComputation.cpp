@@ -104,7 +104,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   // Return if no boundary is found
   if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1)
   {
-    if(interior_boundary)
+    if(interior_boundary && mesh.is_distributed())
     {
       error("No interior boundary found for the mesh partition.");
     }

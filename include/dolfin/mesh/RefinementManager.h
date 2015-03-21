@@ -108,33 +108,33 @@ private:
 //-----------------------------------------------------------------------------
 inline void RefinementManager::addVertex(uint vertex, Mesh& mesh)
 {
-  if (MPI::numProcesses() > 1)
+  if (mesh.is_distributed())
     add_new_vertex(0, vertex, mesh, false);
 }
 
 //-----------------------------------------------------------------------------
 inline void RefinementManager::addVertex(uint* edge, uint vertex, Mesh& mesh)
 {
-  if (MPI::numProcesses() > 1)
+  if (mesh.is_distributed())
     add_new_vertex(edge, vertex, mesh, true);
 }
 
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::on_boundary(Edge& edge)
 {
-  return (MPI::numProcesses() > 1 ? boundary_edge.get(edge) : false);
+  return (edge.mesh().is_distributed() ? boundary_edge.get(edge) : false);
 }
 
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_cell(Cell& cell)
 {
-  return (MPI::numProcesses() > 1 ? cell_forbidden.get(cell) : false);
+  return (cell.mesh().is_distributed() ? cell_forbidden.get(cell) : false);
 }
 
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_edge(Edge& edge)
 {
-  return (MPI::numProcesses() > 1 ? edge_forbidden.get(edge) : false);
+  return (edge.mesh().is_distributed() ? edge_forbidden.get(edge) : false);
 }
 
 //-----------------------------------------------------------------------------

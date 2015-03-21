@@ -3,7 +3,7 @@
 //
 // Modified by Kristian Oelgaard, 2007
 // Modified by Martin Sandve Alnes, 2008
-// Modified by Niclas Jansson, 2008
+// Modified by Niclas Jansson, 2008-2015
 // Modified by Aurélien Larcher, 2014
 //
 // First added:  2007-04-10
@@ -156,8 +156,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
     delete[] x_values;
   }
 
-  message("Applying boundary conditions to linear system: (%d dofs).",
-          boundary_values.size());
+  message("Applying boundary conditions to linear system");
 
   // Modify RHS vector (b[i] = value)
   b.set(values, boundary_values.size(), dofs);

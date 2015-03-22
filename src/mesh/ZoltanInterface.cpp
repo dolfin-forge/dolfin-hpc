@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2015-01-30
-// Last changed: 2015-01-30
+// Last changed: 2015-03-22
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/MeshFunction.h>
@@ -12,6 +12,7 @@
 
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Facet.h>
 
 
 #ifdef HAVE_ZOLTAN
@@ -33,7 +34,10 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
 
   // Setup query functions for graph based partitioning
   zz_->Set_Num_Obj_Fn(partitionZoltanNumCells, &mesh);
+  zz_->Set_Num_Edges_Multi_Fn(partitionZoltanNumEdges, &mesh);
   zz_->Set_Obj_List_Fn(partitionZoltanCellList, &mesh);
+  zz_->Set_Edge_List_Multi_Fn(partitionZoltanEdgeList, &mesh);
+
 
   // Use Zoltan's Parallel Hypergraph and Graph partitioner
   zz_->Set_Param( "LB_METHOD", "GRAPH");
@@ -46,7 +50,7 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   delete zz_;
 
 #else
-  error("Zoltan's graph partitioner needs shared face connectivity");
+  error("Zoltan's graph partitioner needs shared facet connectivity");
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -173,6 +177,158 @@ void ZoltanInterface::partitionZoltanVertexList(void *data,
 
 }
 //-----------------------------------------------------------------------------
+void ZoltanInterface::partitionZoltanNumEdges(void *data,
+					      int num_gid_entries,
+					      int num_lid_entries,
+					      int num_obj,
+					      ZOLTAN_ID_PTR global_ids,
+					      ZOLTAN_ID_PTR local_ids,
+					      int *num_edges,
+					      int *ierr)
+{
+  Mesh *mesh = (Mesh *) data;
+  uint const facet_dim = mesh->topology().dim();
+  if (num_obj != mesh->numCells() || num_gid_entries > 1)
+  {
+    *ierr = ZOLTAN_FATAL;
+    return;
+  }
+
+  // Count number of dual graph edges
+  uint i = 0;
+  for (CellIterator c(*mesh); !c.end(); i++, ++c) 
+  {
+    num_edges[i] = 0;
+    for (FacetIterator f(*c); !f.end(); ++f)
+    {
+      // Filter out non-shared boundary facets
+      if (f->numEntities(facet_dim) == 1 &&
+	  !mesh->distdata().is_shared(*f))
+      {
+	continue;
+      }
+      num_edges[i]++;
+    }
+  }
+  
+
+  *ierr = ZOLTAN_OK;
+}
+//-----------------------------------------------------------------------------
+void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
+					      int num_lid_entries, int num_obj,
+					      ZOLTAN_ID_PTR global_ids,
+					      ZOLTAN_ID_PTR local_ids,
+					      int *num_edges,
+					      ZOLTAN_ID_PTR nbor_global_id,
+					      int *nbor_procs, int wgt_dim,
+					      float *ewgts, int *ierr)
+{
+
+  Mesh *mesh = (Mesh *) data;
+  uint const facet_dim = mesh->topology().dim();
+  uint const dim = mesh->geometry().dim();
+  if (num_obj != mesh->numCells() || num_gid_entries > 1)
+  {
+    *ierr = ZOLTAN_FATAL;
+    return;
+  }
+
+  // Map between global facet index and neigh. Cell (global index)
+  _map<uint, uint> facet_cell_map;
+
+  uint rank = MPI::processNumber();
+  uint pe_size = MPI::numProcesses();
+  
+  Array<uint> *glb_facet = new Array<uint>[pe_size];  
+  for (MeshSharedIterator f(mesh->distdata(), facet_dim); !f.end(); ++f)
+  {
+    uint const adj_rank = 
+      *(mesh->distdata().get_shared_adj(f.index(), facet_dim)).begin();
+    glb_facet[adj_rank].push_back(mesh->distdata().get_global(f.index(), facet_dim));
+  }  
+
+  uint max_recv = 0;  
+  for (int i = 0; i < pe_size; i++)
+  {
+    max_recv = std::max(max_recv, (uint) glb_facet[i].size());
+  }
+  uint *recv_buff = new uint[max_recv];
+  uint *send_buff = new uint[max_recv];
+
+  MPI_Status status;
+  int src = 0;
+  int dest = 0;
+  int recv_count;
+  for (int j = 1; j < (int) pe_size; ++j)
+  {
+    src = (rank - j + pe_size) % pe_size;
+    dest = (rank + j) % pe_size;
+
+    // Exchange global facet index    
+    MPI_Sendrecv(&glb_facet[dest][0], glb_facet[dest].size(), MPI_UNSIGNED,
+                 dest, 1, recv_buff, max_recv, MPI_UNSIGNED, src, 1,
+                 MPI::DOLFIN_COMM, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    
+    for (uint k = 0; k < recv_count; k++)
+    {
+      Facet f(*mesh, mesh->distdata().get_local(recv_buff[k], facet_dim));
+      send_buff[k] = 
+	mesh->distdata().get_global(f.entities(facet_dim)[0], dim); 
+    }
+
+    // Send back corresponding global cell index
+    MPI_Sendrecv(&send_buff[0], recv_count, MPI_UNSIGNED, src, 2,
+                 recv_buff, max_recv, MPI_UNSIGNED, dest, 2, MPI::DOLFIN_COMM,
+                 &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+    for (uint k = 0; k < recv_count; k++) 
+    {
+      facet_cell_map[glb_facet[dest][k]] = recv_buff[k];
+    }
+  }
+
+
+  uint neigh_idx= 0;
+  uint i = 0;
+
+  // Construct dual graph
+  for (CellIterator c(*mesh); !c.end(); i++, ++c) 
+  {
+    for (FacetIterator f(*c); !f.end(); ++f)
+    {
+      // Filter out non-shared boundary facets
+      if (f->numEntities(facet_dim) == 1 &&
+	  !mesh->distdata().is_shared(*f))
+      {
+	continue;
+      }
+      else if (!mesh->distdata().is_shared(*f))
+      {
+	nbor_global_id[i] = facet_cell_map[mesh->distdata().get_global(*f)];
+      }
+      else
+      {
+	if (f->entities(facet_dim)[0] != c->index())
+	{
+	  neigh_idx = 0;
+	}
+	else if (f->entities(facet_dim)[1] != c->index())
+	{
+	  neigh_idx = 1;
+	}
+
+	Cell neig_cell(*mesh, f->entities(facet_dim)[0]);	
+	nbor_global_id[i] = mesh->distdata().get_global(neig_cell);
+      }
+    }
+  }
+
+  *ierr = ZOLTAN_OK;
+}
+//-----------------------------------------------------------------------------
 int ZoltanInterface::partitionZoltanNumGeom(void *data, int *ierr)
 {
   Mesh *mesh = (Mesh *) data;
@@ -199,7 +355,7 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
   }
 
   uint i = 0;
-  for (VertexIterator vertex(*mesh); !vertex.end(); ++vertex)
+  for (VertexIterator vertex(*mesh); !vertex.end(); i++, ++vertex)
   {
     geom_vec[i] = vertex->point().x();
     geom_vec[i + 1] = vertex->point().y();

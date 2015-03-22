@@ -72,6 +72,11 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 }
 //-----------------------------------------------------------------------------
 #else
+void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
+{
+  error("Mesh partitioning requires MPI");
+}
+//-----------------------------------------------------------------------------
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
 			      MeshFunction<uint>& weight)
 {

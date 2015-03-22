@@ -290,6 +290,8 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     }
   }
 
+  delete[] recv_buff;
+  delete[] send_buff;
 
   uint neigh_idx= 0;
   uint i = 0;
@@ -305,7 +307,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
       {
 	continue;
       }
-      else if (!mesh->distdata().is_shared(*f))
+      else if (mesh->distdata().is_shared(*f))
       {
 	nbor_global_id[i] = facet_cell_map[mesh->distdata().get_global(*f)];
       }

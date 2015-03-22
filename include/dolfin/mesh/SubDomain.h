@@ -41,7 +41,7 @@ public:
 
   /// Map coordinate x in domain H to coordinate y in domain G
   /// (used for periodic boundary conditions)
-  virtual void map(real const * x, real* y) const;
+  virtual void map(real const * xH, real* xG) const;
 
   /// Set sub domain markers for given sub domain
   void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;

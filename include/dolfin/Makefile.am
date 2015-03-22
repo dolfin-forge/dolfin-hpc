@@ -178,6 +178,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/LocalMeshCoarsening.h\
 				mesh/LocalMeshRefinement.h\
 				mesh/Mapping.h \
+				mesh/MappedManifold.h \
 				mesh/Mesh.h\
 				mesh/MeshDependent.h\
 				mesh/MeshConnectivity.h\
@@ -203,6 +204,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
 				mesh/MPIMeshCommunicator.h\
+				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\
 				mesh/PointCell.h\
 				mesh/predicates_init.h\

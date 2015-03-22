@@ -192,6 +192,8 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshHierarchy.h\
 				mesh/MeshHierarchyAlgorithms.h\
 				mesh/MeshOrdering.h\
+				mesh/MetisInterface.h\
+				mesh/ZoltanInterface.h\
 				mesh/MeshPartition.h\
 				mesh/MeshQuality.h\
 				mesh/MeshQualityFunction.h\

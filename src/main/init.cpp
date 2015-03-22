@@ -26,6 +26,9 @@ void dolfin::dolfin_init(int argc, char* argv[])
   SubSystemsManager::initPETSc(argc, argv);
 #endif
 
+#ifdef HAVE_ZOLTAN
+  SubSystemsManager::initZoltan(argc, argv);
+#endif
 
 }
 //-----------------------------------------------------------------------------

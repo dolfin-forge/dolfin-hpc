@@ -132,6 +132,7 @@ add("PDE linear solver", "iterative");
 //--- Mesh partitioning ---
 add("report edge cut", false);
 add("Mesh read in serial", false);
+add("Mesh partitioner", "parmetis");
 
 //--- Load balancing ---
 add("Load balancer report", false);

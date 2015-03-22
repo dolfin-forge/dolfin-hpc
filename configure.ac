@@ -77,6 +77,14 @@ AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom],
             [Compile with support for LIBGEOM]),
             [with_libgeom=${withval}],[with_libgeom=no])
 
+AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis], 
+		     [Compile with support for ParMETIS]),
+		     [with_parmetis=${withval}],[with_parmetis=no])
+
+AC_ARG_WITH(zoltan, AC_HELP_STRING([--with-zoltan], 
+		     [Compile with support for Zoltan]),
+		     [with_zoltan=${withval}],[with_zoltan=no])
+
 
 if test "x${enable_function_cache}" = xyes; then
    AC_DEFINE(ENABLE_FUNCTION_CACHE, [1], 
@@ -172,15 +180,37 @@ fi
 AX_CRAY
 
 if test "x${enable_mpi}" != xno; then
+
+found_domain_decomp="no"
+
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
       AC_DEFINE(HAVE_PARMETIS,1,[Define if you have the ParMETIS library])
    else
-      AX_PARMETIS
-      if test "${PARMETIS_LIBS}"; then     
-          LIBS="$PARMETIS_LIBS $LIBS"
-      else
-    AC_MSG_ERROR([Required library ParMetis not found])
+      if test "x${with_parmetis}" != xno; then
+         AX_PARMETIS
+         if test "${PARMETIS_LIBS}"; then     
+            LIBS="$PARMETIS_LIBS $LIBS"
+	    found_domain_decomp="yes"
+	    with_parmetis="yes"
+         fi
+      fi
+      
+      if test "x${with_zoltan}" != xno; then
+      	 if test "x${enable_optimize_p1}" != xno; then
+	    AC_MSG_ERROR([Zoltan requires facet connectivity])
+	 fi
+
+         AX_ZOLTAN
+         if test "${ZOLTAN_LIBS}"; then     
+            LIBS="$ZOLTAN_LIBS $LIBS"
+	    found_domain_decomp="yes"
+	    with_zoltan="yes"
+         fi
+      fi
+
+      if test "x${found_domain_decomp}" != xyes; then
+         AC_MSG_ERROR([Required partitioning library not found])
       fi
    fi
 fi
@@ -431,6 +461,8 @@ Package features:
   JANPACK: ${with_janpack}
   GTS: ${with_gts}
   LIBGEOM: ${with_libgeom}
+  ParMETIS: ${with_parmetis}
+  Zoltan: ${with_zoltan}
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}

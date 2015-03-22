@@ -27,8 +27,8 @@ using namespace dolfin;
 #ifdef HAVE_PARMETIS
 //-----------------------------------------------------------------------------
 void MetisInterface::partitionCommonMetis(Mesh& mesh, 
-					 MeshFunction<uint>& partitions,
-					 MeshFunction<uint>* weight)
+					  MeshFunction<uint>& partitions,
+					  MeshFunction<uint>* weight)
 {
 
   // Metis assumes vertices numbered from process 0
@@ -46,19 +46,19 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   int wgtflag, ncon;
 #endif
   if (weight)
-  {
-    wgtflag = 2;    // Weights on vertices only
-    ncon = 1;       // One weight per vertex
-  }
+    {
+      wgtflag = 2;    // Weights on vertices only
+      ncon = 1;       // One weight per vertex
+    }
   else
-  {
-    wgtflag = 0;    // Turn off graph weights
+    {
+      wgtflag = 0;    // Turn off graph weights
 #if PARMETIS_MAJOR_VERSION > 3
-    ncon = 1;       // No weights on vertices
+      ncon = 1;       // No weights on vertices
 #else
-    ncon = 0;       // No weights on vertices
+      ncon = 0;       // No weights on vertices
 #endif
-  }
+    }
 
   // Duplicate MPI communicator
   MPI_Comm comm;
@@ -78,9 +78,9 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   int ncells = mesh.numCells();
 
   if (ncells == 0)
-  {
-    dolfin::error("One mesh partition contains zero cells.");
-  }
+    {
+      dolfin::error("One mesh partition contains zero cells.");
+    }
   
   elmdist[rank] = ncells;
   MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 
@@ -102,7 +102,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 #if PARMETIS_MAJOR_VERSION > 3
       elmwgt[c->index()] = static_cast<idx_t>(weight->get(*c));
 #else
-      elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
+    elmwgt[c->index()] = static_cast<idxtype>(weight->get(*c));
 #endif
   }
 
@@ -110,11 +110,11 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   int tmp_elm;
   elmdist[0] = 0;
   for (int i = 1; i < size + 1; i++)
-  {
-    tmp_elm = elmdist[i];
-    elmdist[i] = sum_elm;
-    sum_elm = tmp_elm + sum_elm;
-  }
+    {
+      tmp_elm = elmdist[i];
+      elmdist[i] = sum_elm;
+      sum_elm = tmp_elm + sum_elm;
+    }
 
   int nvertices = mesh.type().numVertices(mesh.topology().dim());
   int ncnodes = nvertices - 1;
@@ -153,7 +153,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 #if PARMETIS_MAJOR_VERSION > 3
     tpwgts[i] = 1.0 / (real_t) (size);
 #else
-    tpwgts[i] = 1.0 / (float) (size);
+  tpwgts[i] = 1.0 / (float) (size);
 #endif
 
   // default options
@@ -186,7 +186,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void MetisInterface::partitionGeomMetis(Mesh& mesh, 
-				       MeshFunction<uint>& partitions)
+					MeshFunction<uint>& partitions)
 {
   // Duplicate MPI communicator
   MPI_Comm comm;
@@ -221,11 +221,11 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 #endif
   vtxdist[0] = 0;
   for (i = 1; i < size + 1; i++)
-  {
-    tmp = vtxdist[i];
-    vtxdist[i] = sum;
-    sum = tmp + sum;
-  }
+    {
+      tmp = vtxdist[i];
+      vtxdist[i] = sum;
+      sum = tmp + sum;
+    }
 
 #if PARMETIS_MAJOR_VERSION > 3
   idx_t *part = new idx_t[mesh.numVertices()];
@@ -240,20 +240,20 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 
   i = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
-  {
+    {
 #if PARMETIS_MAJOR_VERSION > 3
-    xdy[i] = static_cast<real_t>(vertex->point().x());
-    xdy[i + 1] = static_cast<real_t>(vertex->point().y());
-    if (gdim > 2)
-      xdy[i + 2] = static_cast<real_t>(vertex->point().z());
+      xdy[i] = static_cast<real_t>(vertex->point().x());
+      xdy[i + 1] = static_cast<real_t>(vertex->point().y());
+      if (gdim > 2)
+	xdy[i + 2] = static_cast<real_t>(vertex->point().z());
 #else
-    xdy[i] = static_cast<float>(vertex->point().x());
-    xdy[i + 1] = static_cast<float>(vertex->point().y());
-    if (gdim > 2)
-      xdy[i + 2] = static_cast<float>(vertex->point().z());
+      xdy[i] = static_cast<float>(vertex->point().x());
+      xdy[i + 1] = static_cast<float>(vertex->point().y());
+      if (gdim > 2)
+	xdy[i + 2] = static_cast<float>(vertex->point().z());
 #endif
-    i += gdim;
-  }
+      i += gdim;
+    }
 
   ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);
 
@@ -271,14 +271,14 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 #else
 //-----------------------------------------------------------------------------
 void MetisInterface::partitionCommonMetis(Mesh& mesh, 
-					 MeshFunction<uint>& partitions,
-					 MeshFunction<uint>* weight)
+					  MeshFunction<uint>& partitions,
+					  MeshFunction<uint>* weight)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }
 //-----------------------------------------------------------------------------
 void MetisInterface::partitionGeomMetis(Mesh& mesh, 
-				       MeshFunction<uint>& partitions)
+					MeshFunction<uint>& partitions)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }

@@ -28,6 +28,7 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
 					    MeshFunction<uint>* weight)
 {
 
+#ifndef ENABLE_P1_OPTIMIZATIONS
   Zoltan *zz_ = new Zoltan(MPI::DOLFIN_COMM);
 
   // Setup query functions for graph based partitioning
@@ -43,6 +44,10 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   partitionZoltanInternal(mesh, partitions, zz_);
 
   delete zz_;
+
+#else
+  error("Zoltan's graph partitioner needs shared face connectivity");
+#endif
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,

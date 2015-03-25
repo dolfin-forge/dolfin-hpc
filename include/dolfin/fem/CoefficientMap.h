@@ -45,6 +45,9 @@ public:
   /// Set coefficient label to map to the given function
   void set(std::string const& label, dolfin::Function& coefficient);
 
+  /// Clear coefficient map
+  void clear();
+
   /// Display information
   void display() const;
 

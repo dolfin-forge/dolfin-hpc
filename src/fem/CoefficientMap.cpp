@@ -50,7 +50,7 @@ Function * CoefficientMap::get(std::string const& label) const
       map_.find(label);
   if (it == map_.end())
   {
-    error("Coefficient label does not exist in map.");
+    error("Coefficient label '%s' does not exist in map.", label.c_str());
   }
   return it->second;
 }
@@ -69,9 +69,16 @@ void CoefficientMap::set(std::string const& label,
       label);
   if (it != map_.end())
   {
-    error("Coefficient label is already assigned to a function.");
+    error("Coefficient label '%s' is already assigned to a function.",
+          label.c_str());
   }
   map_[label] = &coefficient;
+}
+
+//-----------------------------------------------------------------------------
+void CoefficientMap::clear()
+{
+  map_.clear();
 }
 
 //-----------------------------------------------------------------------------

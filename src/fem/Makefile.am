@@ -12,6 +12,7 @@ libdolfin_fem_la_SOURCES = \
 			DofMapSet.cpp\
 			FiniteElement.cpp\
 			FiniteElementSpace.cpp\
+			FunctionSpaceMap.cpp\
 			Form.cpp\
 			Functional.cpp\
 			LinearForm.cpp\

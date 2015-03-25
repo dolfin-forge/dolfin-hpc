@@ -34,6 +34,7 @@ nobase_pkginclude_HEADERS = \
 				fem/Form.h\
 				fem/FormExpansion.h\
 				fem/Functional.h\
+				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\

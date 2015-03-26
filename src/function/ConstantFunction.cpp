@@ -19,7 +19,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(const ConstantFunction& f) :
-    GenericFunction(f.mesh()),
+    GenericFunction(),
+    mesh_(f.mesh()),
     values(0),
     value_rank(f.value_rank),
     shape(0),
@@ -39,7 +40,8 @@ ConstantFunction::ConstantFunction(const ConstantFunction& f) :
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, real value) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     values(0),
     value_rank(0),
     shape(0),
@@ -53,7 +55,8 @@ ConstantFunction::ConstantFunction(Mesh& mesh, real value) :
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     values(0),
     value_rank((size > 1 ? 1 : 0)),
     shape(0),
@@ -70,7 +73,8 @@ ConstantFunction::ConstantFunction(Mesh& mesh, uint size, real value) :
 
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& some_values) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     values(0),
     value_rank((some_values.size() > 1 ? 1 : 0)),
     shape(0),
@@ -92,7 +96,8 @@ ConstantFunction::ConstantFunction(Mesh& mesh, const Array<real>& some_values) :
 //-----------------------------------------------------------------------------
 ConstantFunction::ConstantFunction(Mesh& mesh, const Array<uint>& some_shape,
                                    const Array<real>& some_values) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     values(0),
     value_rank(0),
     shape(0),
@@ -130,6 +135,12 @@ ConstantFunction::~ConstantFunction()
 {
   delete[] shape;
   delete[] values;
+}
+
+//-----------------------------------------------------------------------------
+Mesh& ConstantFunction::mesh() const
+{
+  return mesh_;
 }
 
 //-----------------------------------------------------------------------------

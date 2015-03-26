@@ -40,6 +40,11 @@ namespace dolfin
     /// Destructor
     ~ConstantFunction();
 
+    //--- INTERFACE -----------------------------------------------------------
+
+    /// Return the mesh
+    Mesh& mesh() const;
+
     /// Return the rank of the value space
     uint rank() const;
 
@@ -70,6 +75,9 @@ namespace dolfin
     void sync_ghosts() { return; }
 
   private:
+
+    // Mesh
+    Mesh& mesh_;
 
     // Values of constant function
     real* values;

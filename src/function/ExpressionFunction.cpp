@@ -16,7 +16,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 ExpressionFunction::ExpressionFunction(Mesh& mesh, Expression const& expr) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     e(expr)
 {
   // Do nothing
@@ -26,6 +27,12 @@ ExpressionFunction::ExpressionFunction(Mesh& mesh, Expression const& expr) :
 ExpressionFunction::~ExpressionFunction()
 {
   // Do nothing
+}
+
+//-----------------------------------------------------------------------------
+Mesh& ExpressionFunction::mesh() const
+{
+  return mesh_;
 }
 
 //-----------------------------------------------------------------------------

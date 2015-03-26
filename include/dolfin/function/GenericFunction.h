@@ -28,20 +28,13 @@ class GenericFunction : public ufc::function
 public:
 
   /// Constructor
-  GenericFunction(Mesh& mesh) :
-      mesh_(mesh)
+  GenericFunction()
   {
   }
 
   /// Destructor
   virtual ~GenericFunction()
   {
-  }
-
-  ///
-  inline Mesh& mesh() const
-  {
-    return mesh_;
   }
 
   //--- UFC INTERFACE ---------------------------------------------------------
@@ -51,6 +44,9 @@ public:
                         const ufc::cell& cell) const = 0;
 
   //--- INTERFACE -------------------------------------------------------------
+
+  /// Return the mesh
+  virtual Mesh& mesh() const = 0;
 
   /// Return the rank of the value space
   virtual uint rank() const = 0;
@@ -79,13 +75,6 @@ public:
 
   uint value_size() const;
 
-protected:
-
-  /// The mesh
-  Mesh& mesh_;
-
-private:
-
 };
 
 //-----------------------------------------------------------------------------
@@ -99,7 +88,7 @@ inline void GenericFunction::disp() const
   cout << "Value rank            : " << this->rank() << endl;
   cout << "Value dimension       : " << this->dim(0) << endl;
   cout << "Evaluate at cell 0    : ";
-  Cell cell(mesh_, 0);
+  Cell cell(this->mesh(), 0);
   Point p = cell.midpoint();
   real x[3] = { p[0], p[1], p[2] };
   real * v = new real[this->dim(0)];

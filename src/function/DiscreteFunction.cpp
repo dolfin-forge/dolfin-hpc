@@ -38,7 +38,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(GenericVector& x, Form& form, uint i) :
-    GenericFunction(form.mesh(i)),
+    GenericFunction(),
+    mesh_(form.mesh(i)),
     discrete_space_(form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -57,7 +58,8 @@ DiscreteFunction::DiscreteFunction(GenericVector& x, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
                                    uint i) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     discrete_space_(mesh, form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -75,7 +77,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Form& form, uint i) :
-    GenericFunction(form.mesh(i)),
+    GenericFunction(),
+    mesh_(form.mesh(i)),
     discrete_space_(form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -93,7 +96,8 @@ DiscreteFunction::DiscreteFunction(Form& form, uint i) :
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     discrete_space_(mesh, form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -112,7 +116,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, Form& form, uint i) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(GenericVector& x,
                                    FiniteElementSpace const& space) :
-    GenericFunction(space.mesh()),
+    GenericFunction(),
+    mesh_(space.mesh()),
     discrete_space_(space),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -130,7 +135,8 @@ DiscreteFunction::DiscreteFunction(GenericVector& x,
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(FiniteElementSpace const& space) :
-    GenericFunction(space.mesh()),
+    GenericFunction(),
+    mesh_(space.mesh()),
     discrete_space_(space),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -149,7 +155,8 @@ DiscreteFunction::DiscreteFunction(FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Mesh& mesh,
                                    ufl::FiniteElementBase const& finite_element) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     discrete_space_(mesh, finite_element),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -167,7 +174,8 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh,
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(SubFunction const& sub_function) :
-    GenericFunction(sub_function.function().mesh()),
+    GenericFunction(),
+    mesh_(sub_function.function().mesh()),
     discrete_space_(sub_function.function().space(), sub_function.index()),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -213,7 +221,8 @@ DiscreteFunction::DiscreteFunction(SubFunction const& sub_function) :
 
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(DiscreteFunction const& f) :
-    GenericFunction(f.mesh()),
+    GenericFunction(),
+    mesh_(f.mesh()),
     discrete_space_(f.space()),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -291,6 +300,11 @@ void DiscreteFunction::evaluate(real* values, const real* x,
 }
 
 //--- GenericFunction ---------------------------------------------------------
+Mesh& DiscreteFunction::mesh() const
+{
+  return mesh_;
+}
+
 //-----------------------------------------------------------------------------
 uint DiscreteFunction::rank() const
 {

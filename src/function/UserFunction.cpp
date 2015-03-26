@@ -19,7 +19,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UserFunction::UserFunction(Mesh& mesh, Function* f) :
-    GenericFunction(mesh),
+    GenericFunction(),
+    mesh_(mesh),
     f_(f)
 {
   // Do nothing
@@ -29,6 +30,12 @@ UserFunction::UserFunction(Mesh& mesh, Function* f) :
 UserFunction::~UserFunction()
 {
   // Do nothing
+}
+
+//-----------------------------------------------------------------------------
+Mesh& UserFunction::mesh() const
+{
+  return mesh_;
 }
 
 //-----------------------------------------------------------------------------

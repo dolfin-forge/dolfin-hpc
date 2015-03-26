@@ -93,7 +93,11 @@ public:
   void evaluate(real* values, const real* coordinates,
                 const ufc::cell& cell) const;
 
-  //--- GenericFunction -------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
+
+  /// Return the mesh
+  Mesh& mesh() const;
+
   /// Return the rank of the value space
   uint rank() const;
 
@@ -153,6 +157,9 @@ private:
 
   /// Initialize ghost pattern
   void InitializeGhosts();
+
+  /// Mesh
+  Mesh& mesh_;
 
   /// Discrete space
   FiniteElementSpace discrete_space_;

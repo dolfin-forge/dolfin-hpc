@@ -55,7 +55,7 @@ class Mesh;
  *          function (pointer) that returns the value of the function.
  */
 
-class Function : public Variable, public ufc::function
+class Function : public Variable, public GenericFunction
 {
 public:
 
@@ -170,10 +170,13 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  void evaluate(real* values, const real* coordinates,
-                const ufc::cell& cell) const;
+  virtual void evaluate(real* values, const real* coordinates,
+                        const ufc::cell& cell) const;
 
   //--- COMPOSITION GenericFunction -------------------------------------------
+
+  /// Return the mesh
+  Mesh& mesh() const;
 
   /// Return the rank of the value space
   virtual uint rank() const;
@@ -182,29 +185,31 @@ public:
   virtual uint dim(uint i) const;
 
   /// Return the value size
-  virtual uint value_size() const;
+  uint value_size() const;
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const;
 
   /// Interpolate function to finite element space on cell
   void interpolate(real* coefficients, const ufc::cell& ufc_cell,
-                   const ufc::finite_element& finite_element, Cell& cell,
-                   int facet = -1) const;
+                   const ufc::finite_element& finite_element,
+                   const Cell& cell) const;
 
   /// Evaluate function at given point (overload for user-defined function)
   virtual void eval(real* values, const real* x) const;
 
   /// Display basic information
-  void disp() const;
+  virtual void disp() const;
 
   /// Synchronize ghosted entries across processes
   void sync_ghosts();
 
-  /// Return the mesh
-  Mesh& mesh() const;
-
   //---------------------------------------------------------------------------
+
+  /// Interpolate function to finite element space on cell
+  void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+                   const ufc::finite_element& finite_element, const Cell& cell,
+                   int facet) const;
 
   /// Return the type of function
   Type type() const;
@@ -272,7 +277,7 @@ private:
   Type type_;
 
   // Pointer to current cell (if any, otherwise 0)
-  mutable Cell* cell_;
+  mutable Cell const* cell_;
 
   // Current facet (if any, otherwise -1)
   mutable int facet_;
@@ -289,6 +294,14 @@ inline void Function::evaluate(real* values, const real* coordinates,
   f_->evaluate(values, coordinates, cell);
 }
 //--- COMPOSITION GenericFunction ---------------------------------------------
+inline Mesh& Function::mesh() const
+{
+  if (f_ == NULL)
+  {
+    error("Function is not initialized, mesh() cannot be called.");
+  }
+  return f_->mesh();
+}
 //-----------------------------------------------------------------------------
 inline uint Function::rank() const
 {
@@ -320,7 +333,21 @@ inline void Function::interpolate_vertex_values(real* values) const
 //-----------------------------------------------------------------------------
 inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
                                   const ufc::finite_element& finite_element,
-                                  Cell& cell, int facet) const
+                                  const Cell& cell) const
+{
+  // Make current cell available to user-defined function
+  cell_ = &cell;
+
+  // Interpolate function
+  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
+
+  // Make cell unavailable
+  cell_ = NULL;
+}
+//-----------------------------------------------------------------------------
+inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
+                                  const ufc::finite_element& finite_element,
+                                  const Cell& cell, int facet) const
 {
   // Make current cell and facet are available to user-defined function
   cell_ = &cell;
@@ -330,7 +357,7 @@ inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
   f_->interpolate(coefficients, ufc_cell, finite_element, cell);
 
   // Make cell and facet unavailable
-  cell_ = 0;
+  cell_ = NULL;
   facet_ = -1;
 }
 //-----------------------------------------------------------------------------
@@ -359,15 +386,6 @@ inline void Function::disp() const
   }
   // End indentation
   end();
-}
-//-----------------------------------------------------------------------------
-inline Mesh& Function::mesh() const
-{
-  if(f_ == NULL)
-  {
-    error("Function is not initialized, mesh() cannot be called.");
-  }
-  return f_->mesh();
 }
 //-----------------------------------------------------------------------------
 

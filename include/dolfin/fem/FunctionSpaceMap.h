@@ -7,6 +7,7 @@
 #ifndef __FUNCTION_SPACE_MAP_H_
 #define __FUNCTION_SPACE_MAP_H_
 
+#include <dolfin/common/types.h>
 #include <dolfin/ufl/UFLrepr.h>
 
 #include <map>

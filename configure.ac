@@ -383,6 +383,7 @@ AC_CONFIG_FILES([data/tests/Makefile\
                  tests/fem/FiniteElement/Makefile\
                  tests/fem/FiniteElementSpace/Makefile\
                  tests/function/Makefile\
+                 tests/function/Constant/Makefile\
                  tests/function/DiscreteFunction/Makefile\
                  tests/io/Makefile\
                  tests/mesh/Makefile\

@@ -23,9 +23,8 @@ public:
 
   ///
   ~Constant();
-
-  ///
-  void eval(real* values, const real* x) const;
+  
+  //--- INTERFACE -------------------------------------------------------------
 
   /// Return the rank of the value space
   uint rank() const;
@@ -33,6 +32,11 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const;
 
+  /// Evaluate function at given point
+  void eval(real* values, const real* x) const;
+
+  //---------------------------------------------------------------------------
+  
   /// Assign constant real value (to all the components)
   Constant& operator= (real const& val);
 
@@ -57,6 +61,7 @@ inline Constant::~Constant()
 //-----------------------------------------------------------------------------
 inline void Constant::eval(real* values, const real* x) const
 {
+  values[0] = value_[0];
 }
 
 //-----------------------------------------------------------------------------
@@ -74,7 +79,7 @@ inline uint Constant::dim(uint i) const
 //-----------------------------------------------------------------------------
 inline Constant& Constant::operator= (real const& val)
 {
-  value_ = val;
+  std::fill(value_.begin(), value_.end(), val);
   return *this;
 }
 

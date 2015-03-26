@@ -1,1 +1,1 @@
-SUBDIRS = DiscreteFunction
+SUBDIRS = Constant DiscreteFunction

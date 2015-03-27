@@ -32,13 +32,13 @@ Mesh& MeshDependent::mesh() const
 //---------------------------------------------------------------------------
 bool MeshDependent::invalid_mesh_topology() const
 {
-  return topology_token_ == mesh_.topology().token();
+  return topology_token_ != mesh_.topology().token();
 }
 
 //---------------------------------------------------------------------------
 bool MeshDependent::invalid_mesh_geometry() const
 {
-  return geometry_token_ == mesh_.geometry().token();
+  return geometry_token_ != mesh_.geometry().token();
 }
 
 //---------------------------------------------------------------------------

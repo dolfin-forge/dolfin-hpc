@@ -120,10 +120,11 @@ private:
              const BilinearForm& form);
 
   // Initialize sub domain markers from sub domain
-  void initFromSubDomain(const SubDomain& sub_domain);
+  void initFromSubDomain(SubDomain const& sub_domain);
 
   // Initialize sub domain markers from MeshFunction
-  void initFromMeshFunction(MeshFunction<uint>& sub_domains, uint sub_domain);
+  void initFromMeshFunction(MeshFunction<uint> const& sub_domains,
+                            uint sub_domain);
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,

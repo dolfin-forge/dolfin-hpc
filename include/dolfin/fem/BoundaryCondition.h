@@ -15,6 +15,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/SubSystem.h>
+#include <dolfin/mesh/MeshDependent.h>
 
 #include <ufc.h>
 
@@ -30,7 +31,7 @@ class BilinearForm;
 
 /// Common base class for boundary conditions
 
-class BoundaryCondition
+class BoundaryCondition : public MeshDependent
 {
 public:
 

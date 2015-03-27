@@ -21,6 +21,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
                                      SubDomain const& sub_domain) :
+    MeshDependent(mesh),
     type_(type),
     mesh_(mesh),
     sub_domain_index_(0),
@@ -36,6 +37,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
 BoundaryCondition::BoundaryCondition(std::string const& type,
                                      MeshFunction<uint>& sub_domains,
                                      uint sub_domain) :
+    MeshDependent(sub_domains.mesh()),
     type_(type),
     mesh_(sub_domains.mesh()),
     sub_domain_index_(sub_domain),
@@ -51,6 +53,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
 BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
                                      SubDomain const& sub_domain,
                                      SubSystem const sub_system) :
+    MeshDependent(mesh),
     type_(type),
     mesh_(mesh),
     sub_domain_index_(0),
@@ -67,6 +70,7 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
                                      MeshFunction<uint>& sub_domains,
                                      uint sub_domain,
                                      SubSystem const sub_system) :
+    MeshDependent(sub_domains.mesh()),
     type_(type),
     mesh_(sub_domains.mesh()),
     sub_domain_index_(sub_domain),

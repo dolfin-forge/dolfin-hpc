@@ -98,6 +98,23 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
     error("DirichletBC is implemented only for identical test and trial space");
   }
 
+  if(this->invalid_mesh())
+  {
+    warning("Mesh topology and geometry have changed");
+    facets_.clear();
+    if(this->has_geometrical_sub_domain())
+    {
+      initFromSubDomain(this->sub_domain());
+    }
+    else
+    {
+      initFromMeshFunction(this->sub_domain_markers(),
+                           this->sub_domain_index());
+    }
+    this->update_mesh_dependency();
+    message("Facet map for Dirichlet boundary condition recomputed");
+  }
+
   // Simple check
   form.check(A,b);
 
@@ -175,7 +192,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   b.apply();
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
+void DirichletBC::initFromSubDomain(SubDomain const& sub_domain)
 {
   dolfin_assert(facets_.size() == 0);
 
@@ -202,7 +219,7 @@ void DirichletBC::initFromSubDomain(const SubDomain& sub_domain)
   initFromMeshFunction(sub_domains, 0);
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::initFromMeshFunction(MeshFunction<uint>& sub_domains,
+void DirichletBC::initFromMeshFunction(MeshFunction<uint> const& sub_domains,
                                        uint sub_domain)
 {
   dolfin_assert(facets_.size() == 0);

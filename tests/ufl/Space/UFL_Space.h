@@ -13,7 +13,7 @@ START_TEST( test_UFL_Space )
 {
   int init_failed = 0;
   
-  for (uint d = 0; d < 4; ++d)
+  for (dolfin::uint d = 0; d < 4; ++d)
   {
     Space s(d);
     s.display();

@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 SUBDIRS = src include
 
 if ENABLE_CHECK 
-SUBDIRS += tests data
+SUBDIRS += tests
 endif
 
 if ENABLE_PYTHON_MODULES

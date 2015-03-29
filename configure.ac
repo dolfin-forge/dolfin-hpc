@@ -375,6 +375,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 
 # Tests
 AC_CONFIG_FILES([tests/Makefile\
+		 tests/la/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
                  tests/function/Constant/Makefile\

@@ -5,6 +5,7 @@
 #define MAT_SIZE 100
 
 using namespace dolfin;
+
 //-----------------------------------------------------------------------------
 START_TEST( test_init_mat )
 {

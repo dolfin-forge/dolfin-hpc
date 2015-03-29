@@ -1,7 +1,7 @@
 SUBDIRS = ufl \
 	  la \
 	  fem \
-	  mesh #function
+	  mesh
 
 TESTS = ufl/exe \
 	la/exe \

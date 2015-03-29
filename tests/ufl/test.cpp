@@ -72,8 +72,8 @@ Suite *ufl_suite()
 
   s = suite_create("UFL");
 
-  tcase_add_test(tc, test_UFL_Algebra); 
   tc = tcase_create("UFL Algebra"); 
+  tcase_add_test(tc, test_UFL_Algebra); 
   suite_add_tcase (s, tc);
   tcase_add_checked_fixture (tc, setup, teardown);
 

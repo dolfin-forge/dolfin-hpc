@@ -65,188 +65,224 @@ void teardown()
   //  dolfin_finalize();
 }
 
-void add_case_to_suite(Suite *s, TCase *tc) 
-{
-  suite_add_tcase (s, tc);
-  tcase_add_checked_fixture (tc, setup, teardown);
-}
-
 Suite *ufl_suite()
 {
   TCase *tc;
   Suite *s;
 
   s = suite_create("UFL");
-  tcase_add_test(tc, test_UFL_Algebra); 
 
+  tcase_add_test(tc, test_UFL_Algebra); 
   tc = tcase_create("UFL Algebra"); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);
 
   tc = tcase_create("UFL Argument"); 
   tcase_add_test(tc, test_UFL_Argument);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);
  
   tc = tcase_create("UFL array"); 
   tcase_add_test(tc, test_UFL_array);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);
 
   tc = tcase_create("UFL Cell"); 
   tcase_add_test(tc, test_UFL_Cell);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);
 
   tc = tcase_create("UFL Cell Surface area"); 
   tcase_add_test(tc, test_UFL_CellSurfaceArea);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);
 
   tc = tcase_create("UFL Cell Volume"); 
   tcase_add_test(tc, test_UFL_CellVolume);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Circumradius"); 
   tcase_add_test(tc, test_UFL_Circumradius);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Class");
   tcase_add_test(tc, test_UFL_Class);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Coefficient");
   tcase_add_test(tc, test_UFL_Coefficient);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
   
   tc = tcase_create("UFL Conditional");
   tcase_add_test(tc, test_UFL_Conditional);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Differentiation");
   tcase_add_test(tc, test_UFL_Differentiation);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Domain");
   tcase_add_test(tc, test_UFL_Domain);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL ElementList");
   tcase_add_test(tc, test_UFL_ElementList);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL EnrichedElement");
   tcase_add_test(tc, test_UFL_EnrichedElement); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Equation");
   tcase_add_test(tc, test_UFL_Equation); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Expression");
   tcase_add_test(tc, test_UFL_Expression); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL FacetArea");
   tcase_add_test(tc, test_UFL_FacetArea); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL FacetNormal");
   tcase_add_test(tc, test_UFL_FacetNormal); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Family");
   tcase_add_test(tc, test_UFL_Family); 
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL FiniteElement");
   tcase_add_test(tc, test_UFL_FiniteElement);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL FiniteElementBase");
   tcase_add_test(tc, test_UFL_FiniteElementBase);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Form");
   tcase_add_test(tc, test_UFL_Form);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL GeometricQuantity");
   tcase_add_test(tc, test_UFL_GeometricQuantity);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Index");
   tcase_add_test(tc, test_UFL_Index);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Indexed");
   tcase_add_test(tc, test_UFL_Indexed);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL IndexSum");
   tcase_add_test(tc, test_UFL_IndexSum);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Integral");
   tcase_add_test(tc, test_UFL_Integral);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
   
   tc = tcase_create("UFL List");
   tcase_add_test(tc, test_UFL_List);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc =  tcase_create("UFL MixedElement");
   tcase_add_test(tc, test_UFL_MixedElement);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Object");
   tcase_add_test(tc, test_UFL_Object);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
   
   tc = tcase_create("UFL QuadratureScheme");
   tcase_add_test(tc, test_UFL_QuadratureScheme);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL repr");
   tcase_add_test(tc, test_UFL_repr);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL RestrictedElement");
   tcase_add_test(tc, test_UFL_RestrictedElement);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Space");
   tcase_add_test(tc, test_UFL_Space);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL SpatialCoordinate");
   tcase_add_test(tc, test_UFL_SpatialCoordinate);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL TensorElement");
   tcase_add_test(tc, test_UFL_TensorElement);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Tensors");
   tcase_add_test(tc, test_UFL_Tensors);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL tuple");
   tcase_add_test(tc, test_UFL_tuple);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL Tuple");
   tcase_add_test(tc, test_UFL_Tuple);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   tc = tcase_create("UFL type");
   tcase_add_test(tc, test_UFL_type_int);
   tcase_add_test(tc, test_UFL_type_real);
   tcase_add_test(tc, test_UFL_type_string);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
   
   tc = tcase_create("UFL Variable");
   tcase_add_test(tc, test_UFL_Variable);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
   
   tc = tcase_create("UFL VectorElement");
   tcase_add_test(tc, test_UFL_VectorElement);
-  add_case_to_suite(s, tc);
+  suite_add_tcase (s, tc);
+  tcase_add_checked_fixture (tc, setup, teardown);;
 
   return s;
 }

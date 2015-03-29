@@ -374,7 +374,6 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  bench/mesh/Makefile])
 
 # Tests
-if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\
@@ -383,12 +382,9 @@ AC_CONFIG_FILES([tests/Makefile\
                  tests/io/Makefile\
                  tests/mesh/Makefile\
                  tests/ufl/Makefile])
-fi
 
 # Python
-if test "x${enable_python}" = xyes; then
-    AC_CONFIG_FILES([site-packages/Makefile])
-fi
+AC_CONFIG_FILES([site-packages/Makefile])
 
 AC_OUTPUT
 

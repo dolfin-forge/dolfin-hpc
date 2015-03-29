@@ -1,9 +1,9 @@
-SUBDIRS = ufl\
-	  la\
-          fem\
-          mesh #function 
+SUBDIRS = ufl \
+	  la \
+	  fem \
+	  mesh #function
 
-TESTS =	ufl/exe \
+TESTS = ufl/exe \
 	la/exe \
 	fem/exe \
 	mesh/exe

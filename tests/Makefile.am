@@ -3,7 +3,5 @@ SUBDIRS = ufl\
           mesh #function 
 
 TESTS =	ufl/exe \
-	fem/FiniteElement/exe \
-	fem/FiniteElementSpace/exe \
-	fem/BoundaryNormal/exe \
+	fem/exe \
 	mesh/exe

@@ -17,18 +17,11 @@ char **argv;
 int main(void)
 {
 
-  Suite* s;
   SRunner *sr;
   int number_failed;
 
-  s = test_suite_vec();
-  sr = srunner_create(s);
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
-
-  s = test_suite_mat();
-  sr = srunner_create(s);
+  sr = srunner_create(test_suite_vec());
+  srunner_add_suite(sr, test_suite_mat());
   srunner_run_all(sr, CK_NORMAL);
   number_failed = srunner_ntests_failed(sr);
   srunner_free(sr);

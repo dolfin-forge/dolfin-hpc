@@ -377,17 +377,11 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 if test "x${enable_check}" = xyes; then
 AC_CONFIG_FILES([tests/Makefile\
                  tests/fem/Makefile\
-                 tests/fem/BoundaryNormal/Makefile\
-                 tests/fem/FiniteElement/Makefile\
-                 tests/fem/FiniteElementSpace/Makefile\
                  tests/function/Makefile\
                  tests/function/Constant/Makefile\
                  tests/function/DiscreteFunction/Makefile\
                  tests/io/Makefile\
                  tests/mesh/Makefile\
-                 tests/mesh/SubDomain/Makefile\
-                 tests/mesh/VertexNormal/Makefile\
-                 tests/mesh/UnitMeshes/Makefile\
                  tests/ufl/Makefile])
 fi
 

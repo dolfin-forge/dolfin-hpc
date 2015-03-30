@@ -25,7 +25,7 @@
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
-#include "ffc_Lagrange_1_2dVector.h"
+#include <dolfin/elements/ffc_Lagrange_1_2dVector.h>
 
 /// Constructor
 ffc_lagrange_1_2dvector_finite_element_0::ffc_lagrange_1_2dvector_finite_element_0() : ufc::finite_element()

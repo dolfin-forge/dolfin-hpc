@@ -25,7 +25,7 @@
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
-#include "ffc_Brezzi_Douglas_Marini_1_2d.h"
+#include <dolfin/elements/ffc_Brezzi_Douglas_Marini_1_2d.h>
 
 /// Constructor
 ffc_brezzi_douglas_marini_1_2d_finite_element_0::ffc_brezzi_douglas_marini_1_2d_finite_element_0() : ufc::finite_element()

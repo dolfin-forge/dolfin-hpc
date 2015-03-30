@@ -359,28 +359,12 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/ufl/Makefile\
                  src/dolfin.pc\
                  include/Makefile\
-                 include/dolfin/Makefile\
-                 demo/Makefile\
-                 demo/fem/Makefile\
-                 demo/la/Makefile\
-                 demo/mesh/Makefile\
-                 demo/nls/Makefile\
-                 demo/pde/Makefile\
-                 demo/pde/dg/Makefile\
-                 demo/pde/stokes/Makefile\
-                 bench/Makefile\
-                 bench/adaptivity/Makefile\
-                 bench/fem/Makefile\
-                 bench/mesh/Makefile])
+                 include/dolfin/Makefile])
 
 # Tests
 AC_CONFIG_FILES([tests/Makefile\
 		 tests/la/Makefile\
                  tests/fem/Makefile\
-                 tests/function/Makefile\
-                 tests/function/Constant/Makefile\
-                 tests/function/DiscreteFunction/Makefile\
-                 tests/io/Makefile\
                  tests/mesh/Makefile\
                  tests/ufl/Makefile])
 

@@ -1,1 +1,0 @@
-SUBDIRS = stabilized taylor-hood

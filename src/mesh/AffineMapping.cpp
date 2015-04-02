@@ -112,12 +112,13 @@ void AffineMapping::updateInterval(Cell& cell)
   std::fill(&J[0], &J[d_ * d_], 0.0);
   std::fill(&K[0], &K[d_ * d_], 0.0);
   std::fill(&p[0][0], &p[0][d_], 0.0);
+  std::fill(&p[1][0], &p[1][d_], 0.0);
 
   // Get coordinates
   uint const * vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::copy(&geom.x(vertices[0])[0], &geom.x(vertices[0])[0] + gdim_, &p[0][0]);
-
+  std::copy(&geom.x(vertices[1])[0], &geom.x(vertices[1])[0] + gdim_, &p[1][0]);
 }
 
 //-----------------------------------------------------------------------------

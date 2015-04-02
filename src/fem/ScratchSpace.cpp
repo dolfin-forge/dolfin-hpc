@@ -11,6 +11,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/EuclideanSpace.h>
 
 namespace dolfin
 {
@@ -44,7 +45,7 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
     cell(space.cell()),
     offset(0),
     finite_element(space.element().create_sub_element(sub_system.array())),
-    dof_map(space.dofmap().create_sub_dofmap(sub_system.array(),offset)),
+    dof_map(space.dofmap().create_sub_dofmap(sub_system.array(), offset)),
     size(value_size(*finite_element)),
     space_dimension(finite_element->space_dimension()),
     local_dimension(dof_map->local_dimension()),
@@ -72,7 +73,7 @@ ScratchSpace::~ScratchSpace()
   delete[] coefficients;
   delete[] facet_dofs;
   delete[] dofs;
-  if(owner_)
+  if (owner_)
   {
     delete dof_map;
     delete finite_element;
@@ -99,10 +100,10 @@ void ScratchSpace::init()
   // Initialize local array for dof coordinates
   for (uint i = 0; i < local_dimension; ++i)
   {
-    coordinates[i] = new real[3]; // Internally Point is implemented for d = 3
-		coordinates[i][0] = 0.0;
-		coordinates[i][1] = 0.0;
-		coordinates[i][2] = 0.0;
+    // Using same storage size as a Point
+    coordinates[i] = new real[EuclideanSpace::MAX_DIMENSION];
+    std::memset(&coordinates[i][0], 0.0,
+                EuclideanSpace::MAX_DIMENSION * sizeof(real));
   }
 }
 

@@ -135,9 +135,6 @@ public:
   /// Return the number of sub functions i.e number of subspaces
   uint const num_sub_functions() const;
 
-  /// Interpolate values from the given Function
-  void interpolate(Function const& other_func);
-
   /// Create a cell tabulated block array
   real * create_block() const;
 

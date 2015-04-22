@@ -5,6 +5,7 @@ libdolfin_function_la_SOURCES = \
 				DiscreteFunction.cpp\
 				ExpressionFunction.cpp\
 				Function.cpp\
+				FunctionInterpolation.cpp\
 				SpecialFunctions.cpp\
 				SubFunction.cpp\
 				UserFunction.cpp

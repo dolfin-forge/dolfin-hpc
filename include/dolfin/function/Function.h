@@ -228,9 +228,6 @@ public:
   /// Return the number of sub functions of a DiscreteFunction
   uint const num_sub_functions() const;
 
-  /// Interpolate values from the given Function
-  void interpolate(const Function& other_func);
-
   /// Create a cell tabulated block array
   real * create_block() const;
 
@@ -247,6 +244,9 @@ public:
   SubFunction operator[](uint i);
 
   //---------------------------------------------------------------------------
+
+  /// Interpolate values to the discrete function from the given function
+  void interpolate(const Function& other);
 
   /// Decompose discrete function into scalar functions
   Array<Function *> decompose();

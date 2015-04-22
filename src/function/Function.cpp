@@ -22,6 +22,7 @@
 #include <dolfin/function/ConstantFunction.h>
 #include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/function/ExpressionFunction.h>
+#include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/UserFunction.h>
 #include <dolfin/mesh/Vertex.h>
 
@@ -474,20 +475,6 @@ uint const Function::num_sub_functions() const
   return static_cast<DiscreteFunction*>(f_)->num_sub_functions();
 }
 //-----------------------------------------------------------------------------
-void Function::interpolate(Function const& other_func)
-{
-  if (type_ == discrete)
-  {
-    static_cast<DiscreteFunction *>(f_)->interpolate(other_func);
-  }
-  else
-  {
-    dolfin::error("Function::interpolate(Function const&) can only be called "
-                  "on discrete Function");
-  }
-
-}
-//-----------------------------------------------------------------------------
 real * Function::create_block() const
 {
   if (type_ != discrete)
@@ -538,7 +525,26 @@ SubFunction Function::operator[](uint i)
   SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
   return sub_function;
 }
+//-----------------------------------------------------------------------------
+void Function::interpolate(Function const& other)
+{
+  if (type_ == discrete)
+  {
+    // FIXME:
+    // The second argument should actually be a DiscreteFunction but since the
+    // encapsulation using Function is inconsistent this defeats logic.
+    // For now let us just keep interpolate() at the Function level and when
+    // possible rework the Function interface to avoid indirections.
+    FunctionInterpolation I(other, *this);
+    I.compute();
+  }
+  else
+  {
+    dolfin::error("Function::interpolate(Function const&) can only be called "
+                  "on discrete Function");
+  }
 
+}
 //-----------------------------------------------------------------------------
 Array<Function *> Function::decompose()
 {

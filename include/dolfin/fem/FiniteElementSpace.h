@@ -109,6 +109,9 @@ public:
   /// Return whether the discrete space is defined at the vertices only
   bool is_vertex_based() const;
 
+  /// Return whether the discrete space can be flattened to scalar elements
+  bool is_flattenable() const;
+
   //--- UFL INTERFACE ---------------------------------------------------------
 
   /// Returns the family of the finite element

@@ -220,6 +220,18 @@ bool FiniteElementSpace::is_vertex_based() const
 }
 
 //-----------------------------------------------------------------------------
+bool FiniteElementSpace::is_flattenable() const
+{
+  //FIXME: Only a particular case.
+  uint value_size = 1;
+  for(uint i = 0; i < this->element().value_rank(); ++i)
+  {
+    value_size *= this->element().value_dimension(i);
+  }
+  return (this->element().flatten().size() == value_size);
+}
+
+//-----------------------------------------------------------------------------
 
 }
 /* namespace icorne */

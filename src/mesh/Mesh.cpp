@@ -185,6 +185,7 @@ BoundaryMesh& Mesh::exterior_boundary()
   if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
     delete exterior_boundary_;
+    warning("Recomputing mesh exterior boundary");
     exterior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::exterior);
   }
   return *exterior_boundary_;
@@ -196,6 +197,7 @@ BoundaryMesh& Mesh::interior_boundary()
   if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
     delete interior_boundary_;
+    warning("Recomputing mesh interior boundary");
     interior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::interior);
   }
   return *interior_boundary_;
@@ -207,6 +209,7 @@ IntersectionDetector& Mesh::intersector()
   if (intersection_detector_ == NULL)
   {
     delete intersection_detector_;
+    warning("Recreating mesh intersection detector");
     intersection_detector_ = new IntersectionDetector(*this);
   }
   return *intersection_detector_;

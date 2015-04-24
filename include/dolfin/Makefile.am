@@ -57,7 +57,6 @@ nobase_pkginclude_HEADERS = \
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
 				function/GenericFunction.h\
-				function/ProjectL2.h\
 				function/SpecialFunctions.h\
 				function/SubFunction.h\
 				function/UserFunction.h\

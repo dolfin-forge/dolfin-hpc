@@ -39,10 +39,6 @@ private:
                                 uint **rp, uint& m,
                                 MeshFunction<uint>& distribution);
 
-  /// Decompose the function into scalar functions (living on leaf spaces)
-  static void decompose_func(Mesh& mesh, Function const& function,
-                             Array<Function *>& subfunctions);
-
   /// Project function on new mesh i.e. interpolation on non-matching meshes.
   static void project(Mesh& new_mesh, Array<Function *>& f_post,
                       Function& projected);

@@ -16,6 +16,7 @@
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
@@ -137,7 +138,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     {
       error("Projection only implemented for discrete functions");
     }
-    Array<Function *> coarse;
+
     FiniteElementSpace const& space = func_to_project.space();
     uint const num_sub = space.element().num_sub_elements();
 
@@ -146,7 +147,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       continue;
     }
 
-    AdaptiveRefinement::decompose_func(mesh, func_to_project, coarse);
+    Array<Function *> coarse = FunctionDecomposition::compute(func_to_project);
 
     for (uint i = 0; i < num_sub; ++i)
     {
@@ -352,86 +353,6 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   m = local_size;
 
 #endif
-
-}
-//-----------------------------------------------------------------------------
-void AdaptiveRefinement::decompose_func(Mesh& mesh, Function const& function,
-                                        Array<Function *>& subfunctions)
-{
-  Array<Function *> atomized;
-
-  // Move to DiscreteFunction
-  FiniteElement const& fe = function.space().element();
-  Array<ufc::finite_element const*> flt_fe = fe.flatten();
-
-  DofMap const& dm = function.space().dofmap();
-  Array<ufc::dofmap const*> flt_dm = dm.flatten();
-
-  dolfin_assert(flt_fe.size() == flt_dm.size()); dolfin_assert(atomized.empty());
-  for (uint s = 0; s < flt_fe.size(); ++s)
-  {
-    FiniteElementSpace leaf(mesh, *flt_fe[s]->create(), *flt_dm[s]->create(),
-                            true);
-    atomized.push_back(new Function(leaf));
-  }
-
-  uint local_dim = dm.local_dimension();
-  uint *indices = new uint[local_dim];
-  uint new_index;
-  MeshFunction<bool> marked(mesh, 0);
-  marked = false;
-
-  real dof_value;
-  CellIterator c(mesh);
-  UFCCell ufc_cell(*c);
-  if ((function.space().family() == ufl::Family::CG)
-      && (function.space().degree() == 1))
-  {
-    for (; !c.end(); ++c)
-    {
-      ufc_cell.update(*c, mesh.distdata());
-
-      //FIXME: Only P1 friendly.
-      for (VertexIterator v(*c); !v.end(); ++v)
-      {
-
-        uint *cvi = c->entities(0);
-        uint ci = 0;
-        for (ci = 0; ci < c->numEntities(0); ci++)
-        {
-          if (cvi[ci] == v->index())
-          {
-            break;
-          }
-        }
-
-        if (!mesh.distdata().is_ghost(v->index(), 0) && !marked.get(*v))
-        {
-
-          new_index = mesh.distdata().get_vertex_global(v->index());
-          for (uint i = 0; i < subfunctions.size(); ++i)
-          {
-            function.vector().get(&dof_value, 1, &indices[ci]);
-            subfunctions[i]->vector().set(&dof_value, 1, &new_index);
-          }
-
-          marked.set(*v, true);
-          continue;
-
-        }
-      }
-    }
-  }
-  else
-  {
-    error("AdaptiveRefinement::decompose_func only implemented for P1");
-  }
-  for (uint i = 0; i < subfunctions.size(); ++i)
-  {
-    subfunctions[i]->sync_ghosts();
-  }
-
-  delete[] indices;
 
 }
 //-----------------------------------------------------------------------------

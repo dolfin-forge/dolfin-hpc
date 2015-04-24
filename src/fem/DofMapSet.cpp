@@ -37,7 +37,7 @@ DofMapSet::~DofMapSet()
 void DofMapSet::update(Form const& form, Mesh& mesh)
 {
   // Consistency checking
-#ifdef DEBUG
+#if DEBUG
   Check(form, mesh);
 #endif
 

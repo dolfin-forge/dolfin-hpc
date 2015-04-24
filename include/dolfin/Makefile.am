@@ -54,6 +54,7 @@ nobase_pkginclude_HEADERS = \
 				function/Expression.h\
 				function/ExpressionFunction.h\
 				function/Function.h\
+				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
 				function/GenericFunction.h\
 				function/ProjectL2.h\

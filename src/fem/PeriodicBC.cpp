@@ -72,6 +72,9 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 {
   message("Applying periodic boundary conditions to linear system.");
 
+  PeriodicSubDomain const& subdomain =
+      static_cast<PeriodicSubDomain const&>(this->sub_domain());
+
   // FIXME: Make this work for non-scalar subsystems, like vector-valued
   // FIXME: Lagrange where more than one per element is associated with
   // FIXME: each coordinate. Note that globally there may very well be
@@ -124,21 +127,22 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
     for (uint i = 0; i < scratch.dof_map->num_facet_dofs(); ++i)
     {
       // Get dof and coordinate of dof
-      uint const local_dof = scratch.facet_dofs[i];
-      int const global_dof = static_cast<int>(scratch.offset
-          + scratch.dofs[local_dof]);
-      real *& x = scratch.coordinates[local_dof];
+      uint const dof = scratch.offset + scratch.facet_dofs[i];
+      int const global_dof = static_cast<int>(scratch.dofs[dof]);
+      real *& x = scratch.coordinates[scratch.facet_dofs[i]];
 
       // Map coordinate from H to G
       for (uint j = 0; j < gdim; j++)
       {
         y[j] = x[j];
       }
-      sub_domain().map(x, y);
+      subdomain.map(x, y);
 
       // Check if coordinate is inside the domain G or in H
       const bool on_boundary = facet->numEntities(tdim) == 1;
-      if (sub_domain().inside(x, on_boundary))
+
+      // G dof
+      if (subdomain.inside(x, on_boundary))
       {
         // Copy coordinate to std::vector
         for (uint j = 0; j < gdim; j++)
@@ -171,7 +175,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
           coordinate_dofs[xx] = dofs;
         }
       }
-      else if (sub_domain().inside(y, on_boundary))
+      // H dof
+      else if (subdomain.inside(y, on_boundary))
       {
         // y = F(x) is in G, so coordinate x is in H
 
@@ -210,11 +215,15 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 #endif
   }
 
-  // Insert 1 at (dof0, dof1)
+  // Given pairs <dofG, dofH>
+
+  // Insert 1 at (dof0, dof0)
   uint* rows = new uint[coordinate_dofs.size()];
   uint i = 0;
   for (iterator it = coordinate_dofs.begin(); it != coordinate_dofs.end(); ++it)
+  {
     rows[i++] = static_cast<uint>(it->second.first);
+  }
   A.ident(coordinate_dofs.size(), rows);
 
   // Insert -1 at (dof0, dof1) and 0 on right-hand side

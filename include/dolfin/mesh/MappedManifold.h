@@ -41,7 +41,7 @@ public:
   /// Return periodic domain that generated the instance
   PeriodicSubDomain const& subdomain() const
   {
-    return sub_domain_;
+    return subdomainG_;
   }
 
   /// Return facets contained in G
@@ -62,15 +62,22 @@ public:
     return facetsI_;
   }
 
+  /// Return H facets for which image overlaps with one local G facet
+  _set<uint> const& Lfacets() const
+  {
+    return facetsL_;
+  }
+
 private:
 
   void init();
 
-  PeriodicSubDomain const& sub_domain_;
+  PeriodicSubDomain const& subdomainG_;
 
   _set<uint> facetsG_;
   _set<uint> facetsH_;
   _set<uint> facetsI_; // Intersection of G and H
+  _set<uint> facetsL_; // H facet with local G facet
 
 };
 

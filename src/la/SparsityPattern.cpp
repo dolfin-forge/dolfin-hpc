@@ -23,7 +23,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern(uint M, uint N) :
-    range(0),
+    range(NULL),
     blocked(false)
 {
   uint dims[2];
@@ -33,7 +33,7 @@ SparsityPattern::SparsityPattern(uint M, uint N) :
 }
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern(uint M) :
-    range(0),
+    range(NULL),
     blocked(false)
 {
   uint dims[2];
@@ -43,7 +43,8 @@ SparsityPattern::SparsityPattern(uint M) :
 }
 //-----------------------------------------------------------------------------
 SparsityPattern::SparsityPattern() :
-    range(0)
+    range(NULL),
+    blocked(false)
 {
   dim[0] = 0;
   dim[1] = 0;
@@ -53,7 +54,7 @@ SparsityPattern::SparsityPattern() :
 //-----------------------------------------------------------------------------
 SparsityPattern::~SparsityPattern()
 {
-  if (range) delete[] range;
+  delete[] range;
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::init(uint rank, const uint* dims)
@@ -98,7 +99,7 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
 {
   uint process = dolfin::MPI::processNumber();
 
-  for (unsigned int i = 0; i < num_rows[0]; ++i)
+  for (uint i = 0; i < num_rows[0]; ++i)
   {
     const uint global_row = rows[0][i];
     // If not in a row "owned" by this processor
@@ -115,7 +116,7 @@ void SparsityPattern::pinsert(const uint* num_rows, const uint * const * rows)
       continue;
     }
 
-    for (unsigned int j = 0; j < num_rows[1]; ++j)
+    for (uint j = 0; j < num_rows[1]; ++j)
     {
       const uint global_col = rows[1][j];
       // On the off-diagonal

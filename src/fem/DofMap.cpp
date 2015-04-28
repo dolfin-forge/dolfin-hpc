@@ -15,6 +15,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/fem/DofMapCache.h>
+#include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/common/Array.h>
@@ -54,7 +55,8 @@ DofMap::DofMap(Mesh& mesh, ufc::form const& form, uint const i) :
     local_size_(0),
     vertex_map_(NULL),
     pretabulated_dofmap_(NULL),
-    pretabulated_dofmap_size_(0)
+    pretabulated_dofmap_size_(0),
+    periodic_dofmap_(NULL)
 {
   init();
 }
@@ -70,7 +72,8 @@ DofMap::DofMap(Mesh& mesh, ufc::dofmap& dofmap, bool const owner) :
     local_size_(0),
     vertex_map_(NULL),
     pretabulated_dofmap_(NULL),
-    pretabulated_dofmap_size_(0)
+    pretabulated_dofmap_size_(0),
+    periodic_dofmap_(NULL)
 {
   init();
 }
@@ -86,7 +89,8 @@ DofMap::DofMap(DofMap const& dofmap, uint i) :
     local_size_(0),
     vertex_map_(NULL),
     pretabulated_dofmap_(NULL),
-    pretabulated_dofmap_size_(0)
+    pretabulated_dofmap_size_(0),
+    periodic_dofmap_(NULL)
 {
   message(1, "Extracted dof map for subspace: %s", ufc_dofmap_->signature());
 
@@ -105,7 +109,8 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& sub_system,
     local_size_(0),
     vertex_map_(NULL),
     pretabulated_dofmap_(NULL),
-    pretabulated_dofmap_size_(0)
+    pretabulated_dofmap_size_(0),
+    periodic_dofmap_(NULL)
 {
   // Check that dof map has not be re-ordered
   offset = offset_;
@@ -120,6 +125,7 @@ DofMap::DofMap(DofMap const& dofmap, Array<uint> const& sub_system,
 //-----------------------------------------------------------------------------
 DofMap::~DofMap()
 {
+  delete periodic_dofmap_;
   delete[] pretabulated_dofmap_;
   delete[] vertex_map_;
   while (!flattened_.empty())
@@ -548,6 +554,16 @@ uint DofMap::dofsmapping_size() const
 }
 
 //--------------------------------------------------------------------------
+PeriodicDofsMapping const& DofMap::periodic_mapping() const
+{
+  if(periodic_dofmap_ == NULL)
+  {
+    periodic_dofmap_ = new PeriodicDofsMapping(*this);
+  }
+  return *periodic_dofmap_;
+}
+
+//--------------------------------------------------------------------------
 void DofMap::pretabulateAllDofs() const
 {
   delete[] pretabulated_dofmap_;
@@ -900,6 +916,7 @@ void DofMap::build()
     offset_ = 0;
     local_size_ = global_dimension();
   }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1242,4 +1259,5 @@ void DofMap::distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
   delete[] dofs;
 }
 //-----------------------------------------------------------------------------
-    }
+
+}

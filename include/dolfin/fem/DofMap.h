@@ -27,6 +27,7 @@ namespace dolfin
 {
 
 class Form;
+class PeriodicDofsMapping;
 class SubSytem;
 class UFC;
 
@@ -227,6 +228,11 @@ public:
   /// Return the size of the local to global mapping
   uint dofsmapping_size() const;
 
+  //--- Management of periodic dofs mapping
+
+  /// Return local to global mapping
+  PeriodicDofsMapping const& periodic_mapping() const;
+
   //--- Debugging
 
   /// Return renumbering (used for testing)
@@ -303,6 +309,9 @@ private:
   // Pretabulated parallel dof map
   mutable uint * pretabulated_dofmap_;
   uint pretabulated_dofmap_size_;
+
+  // Periodic dofs mapping
+  mutable PeriodicDofsMapping * periodic_dofmap_;
 
   // Provide easy access to map for testing
   std::map<uint, uint> map_;

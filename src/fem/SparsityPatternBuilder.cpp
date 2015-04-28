@@ -8,6 +8,7 @@
 // Last changed: 2008-02-15
 
 #include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Mesh.h>
@@ -115,6 +116,47 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
 
       // Fill sparsity pattern.
       sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
+    }
+  }
+
+  // Build sparsity pattern for periodic facets
+  // Only for square systems
+  if(mesh.has_periodic_constraint())
+  {
+    bool has_facet_dofs = (dof_map_set[0].num_facet_dofs() > 0);
+    bool is_square = true;
+    for (uint i = 1; i < ufc.form.rank(); ++i)
+    {
+      has_facet_dofs |= (dof_map_set[i].num_facet_dofs() > 0);
+      is_square &= (dof_map_set[i] == dof_map_set[i - 1]);
+    }
+
+    if(has_facet_dofs)
+    {
+      PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
+      uint local_dim[2];
+      local_dim[0] = 1;
+      local_dim[1] = pdm.max_local_dimension();
+      uint ** dofs = new uint*[2];
+      dofs[0] = new uint[1];
+      dofs[1] = new uint[pdm.max_local_dimension()];
+      for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+      {
+        pdm.tabulate_dofs(i, dofs[0], dofs[1], local_dim[1]);
+
+        // Fill sparsity pattern.
+        if(mesh.is_distributed())
+        {
+          sparsity_pattern.pinsert(local_dim, dofs);
+        }
+        else
+        {
+          sparsity_pattern.insert(local_dim, dofs);
+        }
+      }
+      delete [] dofs[1];
+      delete [] dofs[0];
+      delete [] dofs;
     }
   }
 

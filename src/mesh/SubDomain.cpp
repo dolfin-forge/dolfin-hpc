@@ -25,14 +25,16 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 SubDomain::SubDomain() :
-    intersection_detector(NULL)
+    intersection_detector(NULL),
+    BMARG(1.0e-6)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain(Mesh& mesh)
+SubDomain::SubDomain(Mesh& mesh) :
+    intersection_detector(new IntersectionDetector(mesh)),
+    BMARG(1.0e-6)
 {
-  intersection_detector = new IntersectionDetector(mesh);
 }
 //-----------------------------------------------------------------------------
 SubDomain::~SubDomain()
@@ -47,10 +49,9 @@ bool SubDomain::inside(real const * x, bool const on_boundary) const
   return false;
 }
 //-----------------------------------------------------------------------------
-void SubDomain::map(real const * xH, real* xG) const
+bool SubDomain::close(real x, real const xref) const
 {
-  error("Mapping between subdomains missing for periodic boundary conditions, "
-        "function map() not implemented by user.");
+  return (std::fabs(x - xref) < BMARG);
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::intersect(real const * x, uint const dim,

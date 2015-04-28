@@ -38,6 +38,7 @@ nobase_pkginclude_HEADERS = \
 				fem/LinearForm.h\
 				fem/NodeNormal.h\
 				fem/PeriodicBC.h\
+				fem/PeriodicDofsMapping.h\
 				fem/ScratchSpace.h\
 				fem/SlipBC.h\
 				fem/SlipFrictionBC.h\

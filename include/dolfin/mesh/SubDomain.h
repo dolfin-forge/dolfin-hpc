@@ -39,12 +39,13 @@ public:
   /// Return true for points inside the sub domain
   virtual bool inside(real const * x, bool const on_boundary) const;
 
-  /// Map coordinate x in domain H to coordinate y in domain G
-  /// (used for periodic boundary conditions)
-  virtual void map(real const * xH, real* xG) const;
-
   /// Set sub domain markers for given sub domain
   void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
+
+protected:
+
+  /// Return if the coordinate is close given internal tolerance
+  bool close(real x, real const xref) const;
 
 private:
 
@@ -56,6 +57,9 @@ private:
 
   /// Intersection detector
   mutable IntersectionDetector* intersection_detector;
+
+  ///
+  real BMARG;
 
 };
 

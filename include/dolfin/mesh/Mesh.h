@@ -36,8 +36,9 @@ namespace dolfin
 
 class BoundaryMesh;
 class IntersectionDetector;
-template<class T>
-  class MeshFunction;
+class MappedManifold;
+template<class T> class MeshFunction;
+class PeriodicSubDomain;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
 ///
@@ -272,6 +273,19 @@ public:
   /// The mesh is distributed iff the topology is distributed
   bool is_distributed() const;
 
+  //--- Periodic constraints
+
+  /// Return whether the mesh has periodic subdomain
+  bool has_periodic_constraint() const;
+
+  /// Add a periodic subdomain
+  void add_periodic_constraint(PeriodicSubDomain const& periodic);
+
+  /// Return the list of periodic mappings
+  MappedManifold& periodic_mapping() const;
+
+  //---
+
   /// Renumber mesh global numbering
   void renumber();
 
@@ -309,6 +323,9 @@ private:
 
   /// Intersection detector
   mutable IntersectionDetector * intersection_detector_;
+
+  /// Periodic constraints
+  mutable MappedManifold * periodic_mapping_;
 
   int timestamp_;
 

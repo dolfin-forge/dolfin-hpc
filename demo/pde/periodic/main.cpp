@@ -13,7 +13,7 @@
 
 #include <dolfin.h>
 #include "Poisson.h"
-  
+
 using namespace dolfin;
 
 int main()
@@ -22,7 +22,7 @@ int main()
   class Source : public Expression
   {
   public:
-    
+
     Source() : Expression() {}
 
     void eval(real* values, const real* x) const
@@ -60,10 +60,10 @@ int main()
       return x[0] < DOLFIN_EPS && x[0] > -DOLFIN_EPS && on_boundary;
     }
 
-    void map(const real* x, real* y) const
+    void map(const real* xH, real* xG) const
     {
-      y[0] = x[0] - 1.0;
-      y[1] = x[1];
+      xG[0] = xH[0] - 1.0;
+      xG[1] = xH[1];
     }
   };
 
@@ -78,7 +78,7 @@ int main()
   Function u0(mesh, 0.0);
   DirichletBoundary dirichlet_boundary;
   DirichletBC bc0(u0, mesh, dirichlet_boundary);
-  
+
   // Create periodic boundary condition
   PeriodicBoundary periodic_boundary;
   PeriodicBC bc1(mesh, periodic_boundary);

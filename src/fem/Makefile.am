@@ -18,6 +18,7 @@ libdolfin_fem_la_SOURCES = \
 			LinearForm.cpp\
 			NodeNormal.cpp\
 			PeriodicBC.cpp\
+			PeriodicDofsMapping.cpp\
 			ScratchSpace.cpp\
 			SlipBC.cpp\
 			SlipFrictionBC.cpp\

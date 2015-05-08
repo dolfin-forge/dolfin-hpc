@@ -30,7 +30,7 @@ public:
 
   /// Build sparsity pattern
   static void build(GenericSparsityPattern& sparsity_pattern, Mesh& mesh,
-                    UFC& ufc, const DofMapSet& dof_map_set);
+                    UFC& ufc, DofMapSet const& dof_map_set);
 
 };
 

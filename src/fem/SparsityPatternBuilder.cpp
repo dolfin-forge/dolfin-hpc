@@ -22,21 +22,20 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
-                                   Mesh& mesh, UFC& ufc, const DofMapSet& dof_map_set)
+                                   Mesh& mesh, UFC& ufc,
+                                   DofMapSet const& dof_map_set)
 {
   // Initialise sparsity pattern
-  if(mesh.is_distributed())
+  bool is_distributed = mesh.is_distributed();
+
+  if(is_distributed)
   {
     sparsity_pattern.pinit(ufc.form.rank(), ufc.global_dimensions);
+    sparsity_pattern.initRange(dof_map_set[0].local_size());
   }
   else
   {
     sparsity_pattern.init(ufc.form.rank(), ufc.global_dimensions);
-  }
-
-  if(mesh.is_distributed())
-  {
-    sparsity_pattern.initRange(dof_map_set[0].local_size());
   }
 
   // Only build for rank >= 2 (matrices and higher order tensors)
@@ -67,7 +66,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       }
 
       // Fill sparsity pattern.
-      if(mesh.is_distributed())
+      if(is_distributed)
       {
         sparsity_pattern.pinsert(ufc.local_dimensions, ufc.dofs);
       }
@@ -115,7 +114,14 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       }
 
       // Fill sparsity pattern.
-      sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
+      if(is_distributed)
+      {
+        sparsity_pattern.pinsert(ufc.macro_local_dimensions, ufc.macro_dofs);
+      }
+      else
+      {
+        sparsity_pattern.insert(ufc.macro_local_dimensions, ufc.macro_dofs);
+      }
     }
   }
 
@@ -145,7 +151,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
         pdm.tabulate_dofs(i, dofs[0], dofs[1], local_dim[1]);
 
         // Fill sparsity pattern.
-        if(mesh.is_distributed())
+        if(is_distributed)
         {
           sparsity_pattern.pinsert(local_dim, dofs);
         }

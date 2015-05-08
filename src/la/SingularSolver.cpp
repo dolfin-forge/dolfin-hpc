@@ -10,6 +10,7 @@
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/SingularSolver.h>
+#include <dolfin/main/MPI.h>
 
 using namespace dolfin;
 
@@ -41,7 +42,7 @@ dolfin::uint SingularSolver::solve(const GenericMatrix& A,
 
   // Create extended system
   create(A, b, 0);
-  
+
   // Solve extended system
   const uint num_iterations = linear_solver.solve(*B, *y, *c);
 
@@ -101,40 +102,64 @@ void SingularSolver::init(const GenericMatrix& A)
   delete c;
 
   // Create sparsity pattern for B
-  SparsityPattern s(N + 1, N + 1);
+  uint dims[2] = { N + 1, N + 1};
+  bool is_distributed = MPI::numProcesses() > 1;
+  SparsityPattern s(2, dims, is_distributed);
 
   // Copy sparsity pattern for A and last column
   Array<uint> columns;
   Array<real> dummy;
-  for (uint i = 0; i < N; i++)
+  uint num_rows[2] = { 1, 0};
+  uint * rows[2];
+  rows[0] = new uint[1];
+  rows[0][0] = 0;
+  rows[1] = new uint[A.size(0)+1];
+  std::fill_n(rows[1], A.size(0)+1, 0.0);
+  for (rows[0][0] = 0; rows[0][0] < N; ++rows[0][0])
   {
     // Get row
-    A.getrow(i, columns, dummy);
+    A.getrow(rows[0][0], columns, dummy);
 
     // Copy columns to array
-    const uint num_cols = columns.size() + 1;
-    uint* cols = new uint[num_cols];
-    for (uint j = 0; j < columns.size(); j++)
-      cols[j] = columns[j];
+    num_rows[1] = columns.size() + 1;
+    for (uint j = 0; j < columns.size(); ++j)
+    {
+      rows[1][j] = columns[j];
+    }
 
     // Add last entry
-    cols[num_cols - 1] = N;
+    rows[1][num_rows[1] - 1] = N;
 
     // Insert into sparsity pattern
-    s.insert(1, &i, num_cols, cols);
-
-    // Delete temporary array
-    delete [] cols;
+    if(is_distributed)
+    {
+      s.insert(num_rows, rows);
+    }
+    else
+    {
+      s.pinsert(num_rows, rows);
+    }
   }
 
   // Add last row
-  const uint num_cols = N;
-  uint* cols = new uint[num_cols];
-  for (uint j = 0; j < num_cols; j++)
-    cols[j] = j;
-  const uint row = N;
-  s.insert(1, &row, num_cols, cols);
-  delete [] cols;
+  rows[0][0] = N;
+  num_rows[1] = N;
+  for (uint j = 0; j < num_rows[1]; ++j)
+  {
+    rows[1][j] = j;
+  }
+  // Insert into sparsity pattern
+  if(is_distributed)
+  {
+    s.insert(num_rows, rows);
+  }
+  else
+  {
+    s.pinsert(num_rows, rows);
+  }
+
+  delete rows[0];
+  delete rows[1];
 
   // Create matrix and vector
   B = A.factory().createMatrix();

@@ -94,21 +94,28 @@ private:
   // Assemble over cells
   void assembleCells(GenericTensor& A,
                      const Array<Function*>& coefficients,
-                     const DofMapSet& dof_set_map,
+                     const DofMapSet& dof_map_set,
                      UFC& data,
                      const MeshFunction<uint>* domains) const;
 
   // Assemble over exterior facets
   void assembleExteriorFacets(GenericTensor& A,
                               const Array<Function*>& coefficients,
-                              const DofMapSet& dof_set_map,
+                              const DofMapSet& dof_map_set,
                               UFC& data,
                               const MeshFunction<uint>* domains) const;
 
   // Assemble over interior facets
   void assembleInteriorFacets(GenericTensor& A,
                               const Array<Function*>& coefficients,
-                              const DofMapSet& dof_set_map,
+                              const DofMapSet& dof_map_set,
+                              UFC& data,
+                              const MeshFunction<uint>* domains) const;
+
+  // Bogus-assemble periodic contributions
+  void initializePeriodicDofs(GenericTensor& A,
+                              const Array<Function*>& coefficients,
+                              const DofMapSet& dof_map_set,
                               UFC& data,
                               const MeshFunction<uint>* domains) const;
 

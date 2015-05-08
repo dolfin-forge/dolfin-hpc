@@ -13,8 +13,10 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/la/GenericTensor.h>
+#include <dolfin/la/Matrix.h>
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/SparsityPattern.h>
+#include <dolfin/la/Vector.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
@@ -29,6 +31,7 @@
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/PeriodicDofsMapping.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
@@ -37,7 +40,6 @@
 #include <mpi.h>
 #endif
 
-#include <algorithm> //TODO: for facets, remove after refactoring
 #include <map>
 
 namespace dolfin
@@ -186,6 +188,9 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
 
   // Assemble over interior facets
   assembleInteriorFacets(A, coefficients, dof_map_set, ufc, interior_facet_domains);
+
+  // Bogus-assemble periodic dofs
+  initializePeriodicDofs(A, coefficients, dof_map_set, ufc, exterior_facet_domains);
 
   // Finalise assembly of global tensor
 #pragma omp master
@@ -465,13 +470,48 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 
 }
 //-----------------------------------------------------------------------------
+void Assembler::initializePeriodicDofs(GenericTensor& A,
+                                       const Array<Function*>& coefficients,
+                                       const DofMapSet& dof_map_set,
+                                       UFC& data,
+                                       const MeshFunction<uint>* domains) const
+{
+  if(!dof_map_set[0].mesh().has_periodic_constraint())
+  {
+    return;
+  }
+
+  // Add zero at periodic dofs to allocate entries
+  //FIXME: This could be fixed by a modification of the assembler's behaviour
+  if(A.rank() == 2)
+  {
+    //
+    Matrix& matA = static_cast<Matrix&>(A);
+    PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
+    real * block = new real[pdm.max_local_dimension() + 1];
+    std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);
+    uint irow = 0;
+    uint * jcols = new uint[pdm.max_local_dimension() + 1];
+    std::fill_n(jcols, pdm.max_local_dimension() + 1, 0.0);
+    uint ncols = 0;
+    for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+    {
+      pdm.tabulate_dofs(i, &irow, jcols, ncols);
+      jcols[ncols] = irow;
+      matA.add(block, 1, &irow, ncols, jcols);
+    }
+    delete[] jcols;
+    delete[] block;
+  }
+}
+//-----------------------------------------------------------------------------
 void Assembler::initGlobalTensor(GenericTensor& A, const DofMapSet& dof_map_set,
                                  UFC& ufc, bool reset_tensor) const
 {
 
   if (reset_tensor || A.size(0) == 0)
   {
-    GenericSparsityPattern* sparsity_pattern = A.factory().createPattern();
+    GenericSparsityPattern * sparsity_pattern = A.factory().createPattern();
     SparsityPatternBuilder::build(*sparsity_pattern, dof_map_set[0].mesh(), ufc,
                                   dof_map_set);
     A.init(*sparsity_pattern);

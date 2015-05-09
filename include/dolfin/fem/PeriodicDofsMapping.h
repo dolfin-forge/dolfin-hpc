@@ -50,6 +50,12 @@ public:
   void tabulate_dofs(uint i, uint * Gdof, uint * Hdofs, uint& count) const;
 
   ///
+  void tabulate_coordinates(uint Gdof, uint ** Hcoords , uint& count) const;
+
+  //
+  void tabulate_coordinates(uint i, uint * Gdof, uint ** Hcoords, uint& count) const;
+
+  ///
   void disp() const;
 
 private:

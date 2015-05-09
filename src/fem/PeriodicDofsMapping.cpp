@@ -580,6 +580,43 @@ void PeriodicDofsMapping::tabulate_dofs(uint i, uint * Gdof, uint * Hdofs,
 }
 
 //-----------------------------------------------------------------------------
+void PeriodicDofsMapping::tabulate_coordinates(uint Gdof, uint ** Hcoords,
+                                               uint& count) const
+{
+  OffsetMap::const_iterator it = Goffsets_.find(Gdof);
+  if (it == Goffsets_.end())
+  {
+    error("Requested dof is not periodic");
+  }
+  else
+  {
+    count = Hcount_[it->second];
+    for(uint dof = 0 ; dof < count; ++dof)
+    {
+      std::memcpy(&Hcoords[dof],
+                  &Hxcoords_[Hoffsets_[it->second] + dof * EuclideanSpace::MAX_DIMENSION],
+                  EuclideanSpace::MAX_DIMENSION * sizeof(uint));
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+void PeriodicDofsMapping::tabulate_coordinates(uint i, uint * Gdof,
+                                               uint ** Hcoords,
+                                               uint& count) const
+{
+  dolfin_assert(i < Goffsets_.size());
+  count = Hcount_[i];
+  *Gdof = Gindices_[i];
+  for(uint dof = 0 ; dof < count; ++dof)
+  {
+    std::memcpy(&Hcoords[dof],
+                &Hxcoords_[Hoffsets_[i] + dof * EuclideanSpace::MAX_DIMENSION],
+                EuclideanSpace::MAX_DIMENSION * sizeof(uint));
+  }
+}
+
+//-----------------------------------------------------------------------------
 void PeriodicDofsMapping::disp() const
 {
   cout << "PeriodicDofsMapping" << endl;

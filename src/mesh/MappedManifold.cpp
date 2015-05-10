@@ -76,13 +76,18 @@ void MappedManifold::init()
     //
     bool is_Gfacet = false;
     bool is_Hfacet = false;
+    uint Hfound = 0;
     for (VertexIterator v(*bcell); !v.end(); ++v)
     {
       is_Gfacet |= subdomainG_.inside(v->x(), true);
       subdomainG_.map(v->x(), &x1[0]);
-      is_Hfacet |= subdomainG_.inside(&x1[0], true);
-      dolfin_assert(v->point().distance(x1) > DOLFIN_EPS)
+      if(subdomainG_.inside(&x1[0], true))
+      {
+        ++Hfound;
+      }
     }
+    //is_Hfacet = (Hfound == facet.numEntities(0));
+    is_Hfacet = (Hfound > 0);
 
     if (is_Gfacet)
     {
@@ -125,20 +130,24 @@ void MappedManifold::init()
   }
 
   //
-  message("Mapped manifold created with %d cells and %d vertices",
-          mm_cell_count, mm_vertex_count);
   editor.initVertices(mm_vertex_count);
   editor.initCells(mm_cell_count);
 
   // Initialize mapping from vertices in boundary to vertices in mesh
   MeshFunction<uint> * vertex_map = this->data().createMeshFunction("vertex map");
   dolfin_assert(vertex_map);
-  vertex_map->init(*this, 0, mm_vertex_count);
+  if(mm_vertex_count > 0)
+  {
+    vertex_map->init(*this, 0, mm_vertex_count);
+  }
 
   // Initialize mapping from cells in boundary to facets in mesh
   MeshFunction<uint> * cell_map = this->data().createMeshFunction("cell map");
   dolfin_assert(cell_map);
-  cell_map->init(*this, this->topology().dim(), mm_cell_count);
+  if(mm_cell_count > 0)
+  {
+    cell_map->init(*this, this->topology().dim(), mm_cell_count);
+  }
 
   // Create vertices
   for (uint v = 0; v < mm_vertices.size(); ++v)

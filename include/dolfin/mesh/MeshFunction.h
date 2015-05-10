@@ -172,6 +172,11 @@ template<class T>
       mesh.init(dim);
       dolfin_assert(mesh.size(dim) == size);
       
+      if (size == 0)
+      {
+        error("Trying to initialize a mesh function of zero size");
+      }
+
       // Initialize data
       mesh_ = &mesh;
       dim_ = dim;
@@ -194,7 +199,8 @@ template<class T>
     /// Get value at given entity
     inline T get(uint index) const
     {
-      dolfin_assert(values_); dolfin_assert(index < size_);
+      dolfin_assert(values_);
+      dolfin_assert(index < size_);
       return values_[index];
     }
 

@@ -50,6 +50,16 @@ BinaryFile::~BinaryFile()
 {
   // Do nothing
 }
+//-----------------------------------------------------------------------------
+void BinaryFile::read()
+{
+  opened_read = true;
+}
+//-----------------------------------------------------------------------------
+void BinaryFile::write()
+{
+  opened_write = true;
+}
 //----------------------------------------------------------------------------
 void BinaryFile::operator>>(GenericVector& x)
 {

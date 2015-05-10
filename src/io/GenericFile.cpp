@@ -150,23 +150,11 @@ void GenericFile::read()
 //-----------------------------------------------------------------------------
 void GenericFile::write()
 {
-
-
-  if ( !opened_write && type != "Binary") {
-    //FIXME: temporary fix, only rank == 0 is allowed to clear the file
-    if(type == "VTK" ) {
-      if(MPI::processNumber() == 0) {
-	// Clear file
-	FILE* fp = fopen(filename.c_str(), "w");
-	fclose(fp);
-      }
-    }
-    else {
+  if (!opened_write)
+  {
       FILE* fp = fopen(filename.c_str(), "w");
       fclose(fp);
-    }
   }
-  
   opened_write = true;
 }
 //-----------------------------------------------------------------------------

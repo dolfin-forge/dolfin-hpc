@@ -52,20 +52,25 @@ void VTKFile::operator<<(Mesh& mesh)
   vtuNameUpdate(counter);
 
   // Only the root updates the pvd file
-  if (MPI::processNumber() == 0)
+  if (mesh.is_distributed())
   {
-
-    if (MPI::numProcesses() > 1)
+    if(MPI::processNumber() == 0)
     {
-      if(!mesh.is_distributed())
-      {
-        error("Saving a serial mesh in a parallel run is unsupported");
-      }
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
 
       // Write pvtu file
       pvtuFileWrite(false, 0);
+
+      // Write pvd file
+      pvdFileWrite(counter);
+    }
+  }
+  else
+  {
+    if(MPI::numProcesses() > 1)
+    {
+      warning("Writing serial mesh in a parallel run");
     }
 
     // Write pvd file
@@ -119,6 +124,25 @@ void VTKFile::operator<<(Function& u)
 void VTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f)
 {
   write_dataset(f);
+}
+//----------------------------------------------------------------------------
+void VTKFile::read()
+{
+  opened_read = true;
+}
+//----------------------------------------------------------------------------
+void VTKFile::write()
+{
+  if (!opened_write)
+  {
+    if(MPI::processNumber() == 0)
+    {
+      // Clear file
+      FILE* fp = fopen(filename.c_str(), "w");
+      fclose(fp);
+    }
+  }
+  opened_write = true;
 }
 //----------------------------------------------------------------------------
 void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)

@@ -60,6 +60,10 @@ public:
   void operator<<(MeshFunction<unsigned int>& meshfunction);
   void operator<<(MeshFunction<double>& meshfunction);
 
+  /// Overload GenericFile
+  void read();
+  void write();
+
   enum Binary_data_t
   {
     BINARY_MESH_DATA,

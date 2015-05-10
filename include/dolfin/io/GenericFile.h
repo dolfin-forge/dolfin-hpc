@@ -61,8 +61,8 @@ namespace dolfin
     
     void set_counter(uint value);
 
-    void read();
-    void write();
+    virtual void read();
+    virtual void write();
     
   protected:
     

@@ -60,7 +60,8 @@ public:
   /// Write list of functions
   void operator<<(std::vector<std::pair<Function*, std::string> >& f);
 
-  /// Write list of functions
+  /// Overload GenericFile
+  void read();
   void write();
 
   /// Compute base64 encoded stream for VTK

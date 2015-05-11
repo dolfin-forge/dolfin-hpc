@@ -105,10 +105,10 @@ void PETScMatrix::init(uint M, uint N)
 #ifdef HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+                 M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+                    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #endif
 #endif
   }
@@ -152,10 +152,10 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
     MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+                 M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-		    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+                    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #endif
 #endif
     //MatSetFromOptions(A);
@@ -222,7 +222,7 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 
   //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-		  //		  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  //                  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 #ifdef HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
   MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
@@ -323,21 +323,23 @@ void PETScMatrix::set(const real* block,
 
 
   if (block_size)
-
+  {
     MatSetValuesBlocked(A,
-			static_cast<int>(m) / block_size,
-			reinterpret_cast<int*>(const_cast<uint*>(rows)),
-			static_cast<int>(n) / block_size,
-			reinterpret_cast<int*>(const_cast<uint*>(cols)),
-			block, INSERT_VALUES);
-
+                        static_cast<int>(m) / block_size,
+                        reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                        static_cast<int>(n) / block_size,
+                        reinterpret_cast<int*>(const_cast<uint*>(cols)),
+                        block, INSERT_VALUES);
+  }
   else
-
+  {
     MatSetValues(A,
-		 static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		 static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
-		 block, INSERT_VALUES);
-
+                 static_cast<int>(m),
+                 reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                 static_cast<int>(n),
+                 reinterpret_cast<int*>(const_cast<uint*>(cols)),
+                 block, INSERT_VALUES);
+  }
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::add(const real* block,
@@ -347,30 +349,40 @@ void PETScMatrix::add(const real* block,
   dolfin_assert(A);
 
   if ( block_size )
+  {
     MatSetValuesBlocked(A,
-			static_cast<int>(m) / block_size,
-			reinterpret_cast<int*>(const_cast<uint*>(rows)),
-			static_cast<int>(n) / block_size,
-			reinterpret_cast<int*>(const_cast<uint*>(cols)),
-			block, ADD_VALUES);
-
+                        static_cast<int>(m) / block_size,
+                        reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                        static_cast<int>(n) / block_size,
+                        reinterpret_cast<int*>(const_cast<uint*>(cols)),
+                        block, ADD_VALUES);
+  }
   else
-
+  {
     MatSetValues(A,
-		 static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		 static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
-		 block, ADD_VALUES);
+                 static_cast<int>(m),
+                 reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                 static_cast<int>(n),
+                 reinterpret_cast<int*>(const_cast<uint*>(cols)),
+                 block, ADD_VALUES);
+  }
 }
 //-----------------------------------------------------------------------------
 real PETScMatrix::norm(std::string norm_type) const
 {
   real norm;
   if (norm_type == "l1")
+  {
     MatNorm(A, NORM_1, &norm);
+  }
   else if (norm_type == "linf")
+  {
     MatNorm(A, NORM_INFINITY, &norm);
+  }
   else if (norm_type == "frobenius")
+  {
     MatNorm(A, NORM_FROBENIUS, &norm);
+  }
   else
   {
     error("Unknown norm type in uPETScMatrix.");
@@ -397,7 +409,7 @@ void PETScMatrix::getrow(uint row,
 
     // Assign values to Arrays
     columns.assign(reinterpret_cast<uint *>(const_cast<int*>(cols)),
-		   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
+                   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
     values.assign(vals, vals+ncols);
 
     MatRestoreRow(A, row, &ncols, &cols, &vals);
@@ -414,7 +426,7 @@ void PETScMatrix::getrow(uint row,
 #endif
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
     columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)),
-		   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
+                   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
     values.assign(vals, vals+ncols);
     MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
   }
@@ -513,11 +525,11 @@ void PETScMatrix::zero(uint m, const uint* rows)
   IS is = 0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-		  reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		  PETSC_COPY_VALUES, &is);
+                  reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                  PETSC_COPY_VALUES, &is);
 #else
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+                  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar null = 0.0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -534,11 +546,11 @@ void PETScMatrix::ident(uint m, const uint* rows)
   IS is = 0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-		  reinterpret_cast<int*>(const_cast<uint*>(rows)),
-		  PETSC_COPY_VALUES, &is);
+                  reinterpret_cast<int*>(const_cast<uint*>(rows)),
+                  PETSC_COPY_VALUES, &is);
 #else
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-		  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+                  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar one = 1.0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -584,16 +596,20 @@ real PETScMatrix::norm(const Norm type) const
     break;
   default:
     error("Unknown norm type.");
+    break;
   }
   return value;
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::apply(FinalizeType finaltype)
 {
-  if (finaltype == FINALIZE or finaltype == PETSC_HACK) {
+  if (finaltype == FINALIZE)
+  {
     MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
-  } else if ( finaltype == FLUSH ) {
+  }
+  else if ( finaltype == FLUSH )
+  {
     MatAssemblyBegin(A, MAT_FLUSH_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FLUSH_ASSEMBLY);
   }
@@ -696,7 +712,7 @@ void PETScMatrix::disp(uint precision) const
       MatGetRow(A, i, &ncols, &cols, &vals);
       for (int pos = 0; pos < ncols; pos++)
       {
-	       line << " (" << i << ", " << cols[pos] << ", " << vals[pos] << ")";
+         line << " (" << i << ", " << cols[pos] << ", " << vals[pos] << ")";
       }
       MatRestoreRow(A, i, &ncols, &cols, &vals);
     }

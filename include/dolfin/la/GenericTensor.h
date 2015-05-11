@@ -14,10 +14,9 @@
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 
-enum FinalizeType { 
-  FINALIZE, 
-  FLUSH, 
-  PETSC_HACK
+enum FinalizeType {
+  FINALIZE,
+  FLUSH
 };
 
 

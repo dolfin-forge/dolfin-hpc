@@ -265,6 +265,41 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   // Apply changes
   A.apply();
   b.apply();
+
+  /*
+  //FIXME: For the moment just test preallocation
+  if(A.rank() == 2)
+  {
+    //
+    Matrix& matA = static_cast<Matrix&>(A);
+    PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
+    real * block = new real[pdm.max_local_dimension() + 1];
+    std::fill_n(block, pdm.max_local_dimension() + 1, 0.0);
+    uint irow = 0;
+    uint * jcols = new uint[pdm.max_local_dimension() + 1];
+    std::fill_n(jcols, pdm.max_local_dimension() + 1, 0.0);
+    uint ncols = 0;
+    for (uint i = 0; i < pdm.num_Gdofs(); ++i)
+    {
+      pdm.tabulate_dofs(i, &irow, jcols, ncols);
+      jcols[ncols] = irow;
+      matA.add(block, 1, &irow, ncols, jcols);
+    }
+    delete[] jcols;
+    delete[] block;
+  }
+  else if(A.rank() == 1)
+  {
+    //
+    PeriodicDofsMapping const& pdm = dof_map_set[0].periodic_mapping();
+    Vector& vecA = static_cast<Vector&>(A);
+    uint const num_rows = pdm.num_Gdofs();
+    real * block = new real[num_rows];
+    std::memset(&block[0], 0, num_rows);
+    vecA.set(&block[0], num_rows, pdm.get_Gindices());
+    delete [] block;
+  }
+  */
 }
 //-----------------------------------------------------------------------------
 void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,

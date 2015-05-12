@@ -58,6 +58,8 @@ private:
   /// Intersection detector
   mutable IntersectionDetector* intersection_detector;
 
+protected:
+
   ///
   real BMARG;
 

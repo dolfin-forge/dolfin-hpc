@@ -2,7 +2,7 @@
 
 #define DEBUG 1
 
-#include <dolfin/math/basic.h>
+#include <dolfin/common/Test.h>
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/PeriodicDofsMapping.h>
@@ -14,16 +14,21 @@
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/mesh/UnitCube.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <mpi.h>
+
+#include <cstring>
 
 using namespace dolfin;
 
@@ -35,7 +40,7 @@ real const ZMIN = 0.0;
 real const ZMAX = 1.0;
 
 //-----------------------------------------------------------------------------
-class LeftToRight : public PeriodicSubDomain
+class LeftToRight2D : public PeriodicSubDomain
 {
 
 public:
@@ -43,7 +48,7 @@ public:
   /// Defines subdomain G which is the left side of the unit square
   bool inside(real const * x, bool const on_boundary) const
   {
-    return on_boundary && abscmp(x[0], XMIN, 1.0e-6);
+    return on_boundary && close(x[0], XMIN);
   }
 
   /// Defines the mapping from the right side (H) to the left side (G)
@@ -56,7 +61,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-class PeriodicSquare : public PeriodicSubDomain
+class LeftToRight3D : public PeriodicSubDomain
 {
 
 public:
@@ -64,253 +69,525 @@ public:
   /// Defines subdomain G which is the left side of the unit square
   bool inside(real const * x, bool const on_boundary) const
   {
-    return on_boundary && abscmp(x[0], XMIN, 1.0e-6);
-  }
-
-  /// Defines the mapping from the right side (H) to the left side (G)
-  void map(real const * xH, real* xG) const
-  {
-    if(close(xH[0], 1.0))
-    {
-      xG[0] = xH[0] - XMAX;
-    }
-    if(close(xH[1], 1.0))
-    {
-      xG[1] = xH[1] - YMAX;
-    }
-  }
-
-};
-
-//-----------------------------------------------------------------------------
-class PeriodicCube : public PeriodicSubDomain
-{
-
-public:
-
-  /// Defines subdomain G which is the left side of the unit square
-  bool inside(real const * x, bool const on_boundary) const
-  {
-    return on_boundary && abscmp(x[0], XMIN, 1.0e-6);
+    return on_boundary && close(x[0], XMIN);
   }
 
   /// Defines the mapping from the right side (H) to the left side (G)
   void map(real const * xH, real* xG) const
   {
     xG[0] = xH[0] - XMAX;
-    xG[1] = xH[1] - YMAX;
-    xG[2] = xH[2] - ZMAX;
+    xG[1] = xH[1];
+    xG[2] = xH[2];
   }
 
 };
 
 //-----------------------------------------------------------------------------
-struct MappedDof
+class PeriodicSquareX : public PeriodicSubDomain
 {
-  uint global_index;
-  uint facet_index;
-  real coordinates[EuclideanSpace::MAX_DIMENSION];
 
-  MappedDof() :
-      global_index(0),
-      facet_index(0),
-      coordinates()
+public:
+
+  /// Defines subdomain G which is the left side of the unit square
+  bool inside(real const * x, bool const on_boundary) const
   {
+    bool on_faceX0 = (close(x[0], XMIN)
+                      && x[1] >= (YMIN - BMARG) && x[1] <= (YMAX + BMARG));
+    return on_boundary && (on_faceX0);
   }
 
+  /// Defines the mapping from the right side (H) to the left side (G)
+  void map(real const * xH, real* xG) const
+  {
+    xG[0] = xH[0] - XMAX;
+    xG[1] = xH[1];
+  }
 };
+
+//-----------------------------------------------------------------------------
+class PeriodicSquareY : public PeriodicSubDomain
+{
+
+public:
+
+  /// Defines subdomain G which is the left side of the unit square
+  bool inside(real const * x, bool const on_boundary) const
+  {
+    bool on_faceY0 = (close(x[1], YMIN)
+                      && x[0] >= (XMIN - BMARG) && x[0] <= (XMAX + BMARG));
+    return on_boundary && (on_faceY0);
+  }
+
+  /// Defines the mapping from the right side (H) to the left side (G)
+  void map(real const * xH, real* xG) const
+  {
+    xG[0] = xH[0];
+    xG[1] = xH[1] - YMAX;
+  }
+};
+
+//-----------------------------------------------------------------------------
+class PeriodicCubeX : public PeriodicSubDomain
+{
+
+public:
+
+  ///
+  bool inside(real const * x, bool const on_boundary) const
+  {
+    bool on_faceX0 = (close(x[0], XMIN)
+        && x[1] >= (YMIN - BMARG) && x[1] <= (YMAX + BMARG)
+        && x[2] >= (ZMIN - BMARG) && x[2] <= (ZMAX + BMARG));
+    return on_boundary && (on_faceX0);
+  }
+
+  /// Defines the mapping from the right side (H) to the left side (G)
+  void map(real const * xH, real* xG) const
+  {
+      xG[0] = xH[0] - XMAX;
+      xG[1] = xH[1];
+      xG[2] = xH[2];
+  }
+};
+
+//-----------------------------------------------------------------------------
+class PeriodicCubeY : public PeriodicSubDomain
+{
+
+public:
+
+  ///
+  bool inside(real const * x, bool const on_boundary) const
+  {
+    bool on_faceY0 = (close(x[1], YMIN) && x[2] >= (ZMIN - BMARG)
+        && x[2] <= (ZMAX + BMARG) && x[0] >= (XMIN - BMARG)
+        && x[0] <= (XMAX + BMARG));
+    return on_boundary && (on_faceY0);
+  }
+
+  /// Defines the mapping from the right side (H) to the left side (G)
+  void map(real const * xH, real* xG) const
+  {
+      xG[0] = xH[0];
+      xG[1] = xH[1] - YMAX;
+      xG[2] = xH[2];
+  }
+};
+
+//-----------------------------------------------------------------------------
+class PeriodicCubeZ : public PeriodicSubDomain
+{
+
+public:
+
+  ///
+  bool inside(real const * x, bool const on_boundary) const
+  {
+    bool on_faceZ0 = (close(x[2], ZMIN) && x[0] >= (XMIN - BMARG)
+        && x[0] <= (XMAX + BMARG) && x[1] >= (YMIN - BMARG)
+        && x[1] <= (YMAX + BMARG));
+    return on_boundary && (on_faceZ0);
+  }
+
+  /// Defines the mapping from the right side (H) to the left side (G)
+  void map(real const * xH, real* xG) const
+  {
+    xG[0] = xH[0];
+    xG[1] = xH[1];
+    xG[2] = xH[2] - ZMAX;
+  }
+};
+
+//-----------------------------------------------------------------------------
+void write_facets(std::string name, Mesh& mesh, std::string set,
+                  _set<uint> const& S)
+{
+  message("Number of " + set + " facets = %d", S.size());
+  std::stringstream ss;
+  ss << name << "_" + set + "facets" << dolfin::MPI::numProcesses() << "P.pvd";
+  MeshFunction<bool> mf(mesh, 0);
+  mesh.init(mesh.topology().dim() - 1, 0);
+  for(_set<uint>::const_iterator it = S.begin(); it != S.end(); ++it)
+  {
+    Facet f(mesh, *it);
+    for(VertexIterator v(f); ! v.end(); ++v)
+    {
+      mf.set(*v, true);
+    }
+  }
+  File f(ss.str());
+  f << mf;
+}
+
+//-----------------------------------------------------------------------------
+void write_mesh(std::string name, Mesh& mesh)
+{
+  std::stringstream ss0;
+  ss0 << name << "_mesh_" << dolfin::MPI::numProcesses() << "P.pvd";
+  File f0(ss0.str());
+  f0 << mesh;
+
+  for(uint i = 0; i < mesh.periodic_mappings().size(); ++i)
+  {
+    std::stringstream ssi;
+    ssi << i;
+    write_facets(name, mesh, "G"+ssi.str(), mesh.periodic_mappings()[i]->Gfacets());
+    write_facets(name, mesh, "H"+ssi.str(), mesh.periodic_mappings()[i]->Hfacets());
+    write_facets(name, mesh, "I"+ssi.str(), mesh.periodic_mappings()[i]->Ifacets());
+
+    std::stringstream ss1;
+    ss1 << name << "_Gmesh" << ssi.str() << "_" << dolfin::MPI::numProcesses()
+        << "P_" << dolfin::MPI::processNumber() << ".pvd";
+    File f1(ss1.str());
+    f1 << *mesh.periodic_mappings()[i];
+  }
+}
+
+//-----------------------------------------------------------------------------
+void write_Gdofs(std::string name, FiniteElementSpace const& space)
+{
+  message("Write Gdofs for test %s", name.c_str());
+  Function G(space);
+  PeriodicDofsMapping const& pdm = G.space().dofmap().periodic_mapping();
+  //pdm.disp();
+  real * blockG = new real[pdm.num_Gdofs()];
+  message("Number of G dofs = %d", pdm.num_Gdofs());
+  uint count = 0;
+  uint Gdof = 0;
+  uint * Hdofs = new uint[pdm.max_local_dimension()];
+  for(uint ii = 0; ii < pdm.num_Gdofs(); ++ii)
+  {
+    pdm.tabulate_dofs(ii, &Gdof, Hdofs, count);
+    blockG[ii] = count;
+  }
+  delete[] Hdofs;
+  G.vector() = 0.0;
+  G.vector().set(blockG, pdm.num_Gdofs(), pdm.get_Gindices());
+  G.sync_ghosts();
+  delete[] blockG;
+  std::stringstream ss;
+  ss << name << "_G_" << dolfin::MPI::numProcesses() << "P.pvd";
+  File fG(ss.str());
+  fG << G;
+  message("Done");
+}
+
+//-----------------------------------------------------------------------------
+bool onEntity(real* coordinates, MeshEntity& entity)
+{
+  // Check if the coordinates are on the same line as the line segment
+  if ( entity.dim() == 1 )
+  {
+    // Create points
+    Point p(coordinates[0], coordinates[1]);
+    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
+    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
+
+    // Create vectors
+    Point v01 = v1 - v0;
+    Point vp0 = v0 - p;
+    Point vp1 = v1 - p;
+
+    // Check if the length of the sum of the two line segments vp0 and vp1 is
+    // equal to the total length of the entity
+    if ( std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  // Check if the coordinates are in the same plane as the triangular entity
+  else if ( entity.dim() == 2 )
+  {
+    // Create points
+    Point p(coordinates[0], coordinates[1], coordinates[2]);
+    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
+    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
+    Point v2 = Vertex(entity.mesh(), entity.entities(0)[2]).point();
+
+    // Create vectors
+    Point v01 = v1 - v0;
+    Point v02 = v2 - v0;
+    Point vp0 = v0 - p;
+    Point vp1 = v1 - p;
+    Point vp2 = v2 - p;
+
+    // Check if the sum of the area of the sub triangles is equal to the total
+    // area of the entity
+    if ( std::abs(v01.cross(v02).norm() - vp0.cross(vp1).norm() - vp1.cross(vp2).norm()
+        - vp2.cross(vp0).norm()) < DOLFIN_EPS )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  error("Unable to determine if given point is on entity (not implemented for given facet dimension).");
+
+  return false;
+}
+
+//-----------------------------------------------------------------------------
+void check_matching_facets(MappedManifold& mm, Point& p)
+{
+  Array<uint> matching;
+  mm.intersector().overlap(p, matching);
+  message("Matching with point of plane : %d", matching.size());
+  std::set<uint> matching_set;
+  matching_set.insert(matching.begin(), matching.end());
+  message("Unique   with point of plane : %d", matching_set.size());
+  for(std::set<uint>::const_iterator it = matching_set.begin();
+      it != matching_set.end(); ++it)
+  {
+    Cell f(mm, *it);
+    Point fp = f.midpoint();
+    message("Facet midpoint : %8f, %8f, %8f", fp[0], fp[1], fp[2]);
+    if(onEntity(&p[0], f))
+    {
+      message("On entity");
+    }
+    else
+    {
+      message("Not on entity");
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
+  Test t(argc, argv);
+  bool test_id = false;
+  bool test_2d = true;
+  bool test_3d = true;
+
+  if (test_id)
   {
-    Mesh mesh("cube10R.xml.gz");
-    LeftToRight subdomain;
+    if (dolfin::MPI::numProcesses() == 1)
+    {
+      Mesh mesh("../../data/meshes/squareN128R.xml.gz");
+
+      PeriodicSquareX subdomainX;
+      MappedManifold mmX(mesh, subdomainX);
+      Point pX(0.0, 0.5, 0.0);
+      check_matching_facets(mmX, pX);
+
+      PeriodicSquareY subdomainY;
+      MappedManifold mmY(mesh, subdomainY);
+      Point pY(0.5, 0.0, 0.0);
+      check_matching_facets(mmY, pY);
+    }
+
+    if (dolfin::MPI::numProcesses() == 1)
+    {
+      Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+
+      PeriodicCubeX subdomainX;
+      MappedManifold mmX(mesh, subdomainX);
+      Point pX(0.0, 0.5, 0.5);
+      check_matching_facets(mmX, pX);
+
+      PeriodicCubeY subdomainY;
+      MappedManifold mmY(mesh, subdomainY);
+      Point pY(0.5, 0.0, 0.5);
+      check_matching_facets(mmY, pY);
+
+      PeriodicCubeZ subdomainZ;
+      MappedManifold mmZ(mesh, subdomainZ);
+      Point pZ(0.5, 0.5, 0.0);
+      check_matching_facets(mmZ, pZ);
+    }
+  }
+
+  if (test_2d)
+  {
+    std::string name("LeftToRight2D");
+    message("Square : " + name);
+    Mesh mesh("../../data/meshes/squareN128R.xml.gz");
+    LeftToRight2D subdomain;
+    mesh.add_periodic_constraint(subdomain);
+    ufl::FiniteElement cg1_2d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_2d);
+    PeriodicDofsMapping const& pdm = spaceU.dofmap().periodic_mapping();
+
+    LeftToRight2D bc_subdomain;
+
+    //
+    uint Gdof = 0;
+    Point G;
+    real ** Hcoords = new real *[pdm.max_local_dimension()];
+    for(uint c = 0; c < pdm.max_local_dimension(); ++c)
+    {
+      Hcoords[c] = new real[EuclideanSpace::MAX_DIMENSION];
+    }
+    uint count = 0;
+    for(uint i = 0; i < pdm.num_Gdofs(); ++i)
+    {
+      pdm.tabulate_coordinates(i, &Gdof, &G[0], Hcoords, count);
+      if(bc_subdomain.inside(&G[0], true))
+      {
+
+      }
+    }
+
+    //
+    for(uint c = 0; c < pdm.max_local_dimension(); ++c)
+    {
+      delete[] Hcoords[c];
+    }
+    delete[] Hcoords;
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  return 0;
+
+  if (test_2d)
+  {
+    std::string name("PeriodicSquare");
+    message("Square : " + name);
+    Mesh mesh("../../data/meshes/squareN128R.xml.gz");
+    PeriodicSquareX subdomainX;
+    mesh.add_periodic_constraint(subdomainX);
+    PeriodicSquareY subdomainY;
+    mesh.add_periodic_constraint(subdomainY);
+    ufl::FiniteElement cg1_2d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_2d);
+    PeriodicDofsMapping const& pdm = spaceU.dofmap().periodic_mapping();
+    //pdm.disp();
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  if (test_3d)
+  {
+    std::string name("LeftToRight3D");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    LeftToRight3D subdomain;
     mesh.add_periodic_constraint(subdomain);
     ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
     FiniteElementSpace spaceU(mesh, cg1_3d);
-    PeriodicDofsMapping const& pdm = spaceU.dofmap().periodic_mapping();
-    pdm.disp();
-  }
 
-  if(false)
-  {
-    Mesh mesh("square100R.xml.gz");
-    LeftToRight subdomain;
-    mesh.add_periodic_constraint(subdomain);
-
-  //
-  bool do_test0 = true;
-
-  //
-  if(do_test0)
-  {
-    Matrix Aas;
-    as.assemble(Aas, a, true);
-    Array<uint> columns;
-    Array<real> values;
-    Mat matAas = reinterpret_cast<PETScMatrix *>(Aas.instance())->mat();
-
-    for (uint i = 0; i < pdm.num_Gdofs(); ++i)
-    {
-      uint row = pdm.get_Gindices()[i];
-      if (!dmU.is_ghost(row))
-      {
-        Aas.getrow(row, columns, values);
-        message("Row %d with %d entries.", row, columns.size());
-      }
-    }
-  }
-
-  return 0;
-  //
-  /*
-
-
-  //
-  Mat matAin = reinterpret_cast<PETScMatrix *>(Ain.instance())->mat();
-  real * block = new real[pdm.max_local_dimension()];
-  for (uint i = 0; i < A.size(0); ++i)
-  {
-   const int *cols = 0;
-   const double *vals = 0;
-   int ncols = 0;
-   MatGetRow(matA, i, &ncols, &cols, &vals);
-   message("%8d : %8d", i, ncols);
-   MatRestoreRow(matA, i, &ncols, &cols, &vals);
-  }
-  delete[] block;
-
-  return 0;
-  */
-
-  //A.apply();
-  //spattern.disp();
-  /*
-  if (dolfin::MPI::numProcesses() > 1)
-  {
-    uint p = dolfin::MPI::processNumber();
-
-    uint local_size = spattern.numLocalRows(p);
-    uint* d_nzrow = new uint[local_size];
-    uint* o_nzrow = new uint[local_size];
-    spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);
-    uint spattern_size_0 = spattern.size(0);
-    uint spattern_size_1 = spattern.size(1);
-    //const_cast<SparsityPattern&>(spattern).clear();
     //
-    delete[] d_nzrow;
-    delete[] o_nzrow;
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
   }
-  else
+
+  if (test_3d)
   {
-    uint* nzrow = new uint[spattern.size(0)];
-      spattern.numNonZeroPerRow(nzrow);
-    std::memset(block, 1, pdm.max_local_dimension()*sizeof(real) );
-    A.ident(pdm.num_Gdofs(), pdm.get_Gindices());
-    A.apply();
+    std::string name("PeriodicCubeX");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeX subdomainX;
+    mesh.add_periodic_constraint(subdomainX);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
 
-
-    //A.zero();
-    message("Reassemble");
-    //as.assemble(A, a, false);
-    for (uint i = 0; i < A.size(0); ++i)
-    {
-      const int *cols = 0;
-      const double *vals = 0;
-      int ncols = 0;
-      MatGetRow(matA, i, &ncols, &cols, &vals);
-      message("%8d : %8d", i, ncols);
-      MatRestoreRow(matA, i, &ncols, &cols, &vals);
-    }
-
-    delete[] nzrow;
-
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
   }
-  */
 
-  //
+  if (test_3d)
+  {
+    std::string name("PeriodicCubeY");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeY subdomainY;
+    mesh.add_periodic_constraint(subdomainY);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
 
-  //return 0;
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  if (test_3d)
+  {
+    std::string name("PeriodicCubeZ");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeZ subdomainZ;
+    mesh.add_periodic_constraint(subdomainZ);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  if (test_3d)
+  {
+    std::string name("PeriodicCubeXYZ");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeX subdomainX;
+    mesh.add_periodic_constraint(subdomainX);
+    PeriodicCubeY subdomainY;
+    mesh.add_periodic_constraint(subdomainY);
+    PeriodicCubeZ subdomainZ;
+    mesh.add_periodic_constraint(subdomainZ);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  if (test_3d)
+  {
+    std::string name("PeriodicCubeYZX");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeY subdomainY;
+    mesh.add_periodic_constraint(subdomainY);
+    PeriodicCubeZ subdomainZ;
+    mesh.add_periodic_constraint(subdomainZ);
+    PeriodicCubeX subdomainX;
+    mesh.add_periodic_constraint(subdomainX);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  if (test_3d)
+  {
+    std::string name("PeriodicCubeZXY");
+    message("Cube : " + name);
+    Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+    PeriodicCubeZ subdomainZ;
+    mesh.add_periodic_constraint(subdomainZ);
+    PeriodicCubeX subdomainX;
+    mesh.add_periodic_constraint(subdomainX);
+    PeriodicCubeY subdomainY;
+    mesh.add_periodic_constraint(subdomainY);
+    ufl::FiniteElement cg1_3d(ufl::Family::CG, mesh.type(), 1);
+    FiniteElementSpace spaceU(mesh, cg1_3d);
+
+    //
+    write_Gdofs(name, spaceU);
+    write_mesh(name, mesh);
+  }
+
+  message("Finished tests");
+
+  return 0;
 }
-
-/*
- // Below is PeriodicBC
-
- //--- Apply homogeneous Dirichlet BC for all G and I dofs -----------------
- message("Apply homogeneous Dirichlet BC for all G and I dofs");
- uint * GIrows = new uint[Gdofs.size() + Idofs.size()];
- real * GIzeros = new real[Gdofs.size() + Idofs.size()];
- uint GIii = 0;
- for (_set<uint>::const_iterator it = Gdofs.begin(); it != Gdofs.end(); ++it)
- {
- GIrows[GIii] = *it;
- GIzeros[GIii] = 0.0;
- ++GIii;
- }
- for (_set<uint>::const_iterator it = Idofs.begin(); it != Idofs.end(); ++it)
- {
- GIrows[GIii] = *it;
- GIzeros[GIii] = 0.0;
- ++GIii;
- }
- // Apply at I dofs
- A.ident(GIii, GIrows);
- b.set(GIzeros, GIii, GIrows);
- delete[] GIzeros;
- delete[] GIrows;
-
- //--- Local expansion coefficients ---------------------------------------
- uint const ldofsH_size = ldofsH.size();
- uint const ldofsG_size = ldofsG.size();
- uint coefsii = 0;
- for(uint ii = 0; ii < ldofsH_size; ++ii)
- {
- A.set(&coefsG[ii], 1, &ldofsH[ii*num_facet_dofsU], num_facet_dofsU, &ldofsG[ii*num_facet_dofsU]);
- }
- b.set(&coefsG[0], ldofsG.size(), &ldofsG[0]);
-
- //--- Compute expansion coefficients for G dofs --------------------------
- message("Compute expansions coefficients for G dofs in terms of H dofs");
- real * Ufacetcount = new real[Gdofs2facets_.size()];
- uint * Ufacetdofs = new uint[Gdofs2facets_.size()];
- uint ii = 0;
- for (_map<uint, Array<uint> >::const_iterator it = Gdofs2facets_.begin();
- it != Gdofs2facets_.end(); ++it)
- {
- uint const dof = it->first;
- Array<uint> const& facets = it->second;
- Ufacetcount[ii] = facets.size();
- Ufacetdofs[ii] = dof;
- ++ii;
- //for (Array<uint>::const_iterator f = facets.begin(); f != facets.end();
- //     ++f)
- //{
- //  Facet facet(mesh, *f);
- //  Cell(mesh, facet.entities(tdim)[0]);
-
- //}
- }
- FacetCount.vector().set(Ufacetcount, Gdofs2facets_.size(), Ufacetdofs);
- FacetCount.vector().apply();
- File facetcount("facetcount.pvd");
- facetcount << FacetCount;
- delete[] Ufacetcount;
- delete[] Ufacetdofs;
-
- //
- delete[] facetdofs_value;
- delete[] Gdofsx;
- delete[] Gdofsi;
-
- // Apply changes
- A.apply();
- b.apply();
-
- File fB("RHS.pvd");
- fB << B;
-
- }
-
- return 0;
- }
- */

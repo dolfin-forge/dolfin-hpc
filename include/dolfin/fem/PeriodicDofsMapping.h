@@ -15,6 +15,8 @@ namespace dolfin
 {
 
 class DofMap;
+class MeshEntity;
+class Point;
 
 class PeriodicDofsMapping
 {
@@ -50,10 +52,10 @@ public:
   void tabulate_dofs(uint i, uint * Gdof, uint * Hdofs, uint& count) const;
 
   ///
-  void tabulate_coordinates(uint Gdof, uint ** Hcoords , uint& count) const;
+  void tabulate_coordinates(uint Gdof, real * Gcoords, real ** Hcoords , uint& count) const;
 
   //
-  void tabulate_coordinates(uint i, uint * Gdof, uint ** Hcoords, uint& count) const;
+  void tabulate_coordinates(uint i, uint * Gdof, real * Gcoords, real ** Hcoords, uint& count) const;
 
   ///
   void disp() const;
@@ -65,6 +67,9 @@ private:
 
   ///
   void clear();
+
+  ///
+  bool onEntity(Point& p, MeshEntity& entity);
 
   DofMap const& dofmap_;
 

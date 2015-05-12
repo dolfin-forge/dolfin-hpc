@@ -48,7 +48,6 @@ Mesh::Mesh() :
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
-    periodic_mapping_(NULL),
     timestamp_(time(0))
 {
   // Do nothing
@@ -63,7 +62,6 @@ Mesh::Mesh(Mesh const& mesh) :
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
-    periodic_mapping_(NULL),
     timestamp_(time(0))
 {
   *this = mesh;
@@ -78,7 +76,6 @@ Mesh::Mesh(std::string filename) :
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
-    periodic_mapping_(NULL),
     timestamp_(time(0))
 {
   File file(filename);
@@ -120,10 +117,11 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
   geometry_ = mesh.geometry_;
   timestamp_ = mesh.timestamp_;
 
-  if(mesh.periodic_mapping_ != NULL)
+  for(Array<MappedManifold *>::iterator it = mesh.periodic_mappings_.begin();
+      it != periodic_mappings_.end(); ++it)
   {
-    PeriodicSubDomain const& p = mesh.periodic_mapping().subdomain();
-    periodic_mapping_ = new MappedManifold(*this, p);
+    PeriodicSubDomain const& p = (*it)->subdomain();
+    periodic_mappings_ .push_back(new MappedManifold(*this, p));
   }
 
   return *this;
@@ -269,8 +267,11 @@ void Mesh::clear()
   interior_boundary_ = NULL;
   delete intersection_detector_;
   intersection_detector_ = NULL;
-  delete periodic_mapping_;
-  periodic_mapping_ = NULL;
+  while(!periodic_mappings_.empty())
+  {
+    delete periodic_mappings_.back();
+    periodic_mappings_.pop_back();
+  }
 }
 //-----------------------------------------------------------------------------
 void Mesh::order()
@@ -410,33 +411,29 @@ void Mesh::distribute(
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const
 {
-  return (periodic_mapping_ != NULL);
+  return (!periodic_mappings_.empty());
 }
 //-----------------------------------------------------------------------------
 void Mesh::add_periodic_constraint(PeriodicSubDomain const& periodic)
 {
-  if(periodic_mapping_ != NULL)
-  {
-    error("Mesh only supports one periodic mapping for the moment.");
-  }
-  periodic_mapping_ = new MappedManifold(*this, periodic);
+  periodic_mappings_.push_back(new MappedManifold(*this, periodic));
 }
 //-----------------------------------------------------------------------------
-MappedManifold& Mesh::periodic_mapping() const
+Array<MappedManifold *> const& Mesh::periodic_mappings() const
 {
-  if(periodic_mapping_ == NULL)
+  for(Array<MappedManifold *>::iterator it = periodic_mappings_.begin();
+      it != periodic_mappings_.end(); ++it)
   {
-    error("Mesh does not possess any periodic constraint.");
+    if((*it)->invalid_mesh())
+    {
+      PeriodicSubDomain const * p = &(*it)->subdomain();
+      delete (*it);
+      warning("Recreating mesh periodic mapping");
+      Mesh& mesh = const_cast<Mesh&>(*this);
+      (*it) = new MappedManifold(mesh, *p);
+    }
   }
-  if(periodic_mapping_->invalid_mesh())
-  {
-    PeriodicSubDomain const * p = &periodic_mapping_->subdomain();
-    delete periodic_mapping_;
-    warning("Recreating mesh periodic mapping");
-    Mesh& mesh = const_cast<Mesh&>(*this);
-    periodic_mapping_ = new MappedManifold(mesh, *p);
-  }
-  return * periodic_mapping_;
+  return periodic_mappings_;
 }
 //-----------------------------------------------------------------------------
 void Mesh::renumber()

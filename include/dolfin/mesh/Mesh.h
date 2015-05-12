@@ -282,7 +282,7 @@ public:
   void add_periodic_constraint(PeriodicSubDomain const& periodic);
 
   /// Return the list of periodic mappings
-  MappedManifold& periodic_mapping() const;
+  Array<MappedManifold *> const& periodic_mappings() const;
 
   //---
 
@@ -325,7 +325,7 @@ private:
   mutable IntersectionDetector * intersection_detector_;
 
   /// Periodic constraints
-  mutable MappedManifold * periodic_mapping_;
+  mutable Array<MappedManifold *> periodic_mappings_;
 
   int timestamp_;
 

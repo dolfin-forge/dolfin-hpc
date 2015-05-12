@@ -451,6 +451,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   }
 
   // Finalize data structures
+  dolfin_assert(Gcount == Gdofs_map.size());
   Gindices_ = new uint[Gcount];
   std::memset(Gindices_, 0, Gcount * sizeof(uint));
   Gxcoords_ = new real[Gcount * maxgdim];

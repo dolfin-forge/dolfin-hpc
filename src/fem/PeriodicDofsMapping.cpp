@@ -63,6 +63,41 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   mesh.init(tdim, tdim - 1);
   mesh.init(tdim - 1, tdim);
 
+  // Collect facets with one vertex inside the subdomain
+  BoundaryMesh& boundary = mesh.exterior_boundary();
+  boundary.init(0, tdim);
+
+  Array<MappedManifold *> const& manifold_list = mesh.periodic_mappings();
+  uint totalcardGnI = 0;
+  for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
+      it != manifold_list.end(); ++it)
+  {
+   MappedManifold& manifold = *(*it);
+   _set<uint> const& setG = manifold.Gfacets();
+   _set<uint> const& setI = manifold.Ifacets();
+   totalcardGnI += setG.size() - setI.size();
+  }
+
+  //--- Setup data structures -----------------------------------------------
+  std::map<uint, uint> Gdofs_map;
+  uint const num_facet_dofs = dofmap.num_facet_dofs();
+  uint const max_numGdofs = num_facet_dofs * totalcardGnI;
+  uint Gcount = 0;
+  uint Hcount = 0;
+  //dolfin_assert(max_numGdofs > 0);
+  uint * Gdofs_indices = NULL;
+  real * Gdofs_xcoords = NULL;
+  Array<uint> * Hdofs_indices = NULL;
+  Array<real> * Hdofs_xcoords = NULL;
+  // Avoid allocating zero size array
+  if(max_numGdofs > 0)
+  {
+    Gdofs_indices = new uint[max_numGdofs];
+    Gdofs_xcoords = new real[max_numGdofs * gdim];
+    Hdofs_indices = new Array<uint> [max_numGdofs];
+    Hdofs_xcoords = new Array<real> [max_numGdofs];
+  }
+
   // UFC dofmap data structures
   UFCCell ufc_cell0(c0);
   UFCCell ufc_cell1(c0);
@@ -79,33 +114,8 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     std::memset(&coordinatesG[i][0], 0, maxgdim * sizeof(real));
     std::memset(&coordinatesH[i][0], 0, maxgdim * sizeof(real));
   }
-  uint const num_facet_dofs = dofmap.num_facet_dofs();
   uint * facet_dofsG = new uint[num_facet_dofs];
   uint * facet_dofsH = new uint[num_facet_dofs];
-
-  // Collect facets with one vertex inside the subdomain
-  BoundaryMesh& boundary = mesh.exterior_boundary();
-  boundary.init(0, tdim);
-
-  Array<MappedManifold *> const& manifold_list = mesh.periodic_mappings();
-  uint totalcardGnI = 0;
-  for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
-       it != manifold_list.end(); ++it)
-  {
-    MappedManifold& manifold = *(*it);
-    _set<uint> const& setG = manifold.Gfacets();
-    _set<uint> const& setI = manifold.Ifacets();
-    totalcardGnI += setG.size() - setI.size();
-  }
-  //--- Setup data structures -----------------------------------------------
-  std::map<uint, uint> Gdofs_map;
-  uint const max_numGdofs = num_facet_dofs * totalcardGnI;
-  uint Gcount = 0;
-  uint Hcount = 0;
-  uint * Gdofs_indices = new uint[max_numGdofs];
-  real * Gdofs_xcoords = new real[max_numGdofs * gdim];
-  Array<uint> * Hdofs_indices = new Array<uint> [max_numGdofs];
-  Array<real> * Hdofs_xcoords = new Array<real> [max_numGdofs];
 
   for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
        it != manifold_list.end(); ++it)

@@ -90,7 +90,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   Array<MappedManifold *> const& manifold_list = mesh.periodic_mappings();
   uint totalcardGnI = 0;
   for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
-      it != manifold_list.end(); ++it)
+       it != manifold_list.end(); ++it)
   {
     MappedManifold& manifold = *(*it);
     _set<uint> const& setG = manifold.Gfacets();
@@ -108,7 +108,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   Array<real> * Hdofs_xcoords = new Array<real> [max_numGdofs];
 
   for (Array<MappedManifold *>::const_iterator it = manifold_list.begin();
-      it != manifold_list.end(); ++it)
+       it != manifold_list.end(); ++it)
   {
     MappedManifold& manifold = *(*it);
     PeriodicSubDomain const& mapped = manifold.subdomain();
@@ -219,7 +219,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
             Hdofs_.insert(dofH);
             //message("dofH %8d : %1d facets", dofH, matching_facets.size() );
             for (Array<uint>::iterator it = matching_facets.begin();
-            it != matching_facets.end(); ++it)
+                 it != matching_facets.end(); ++it)
             {
               Cell cbG(boundary, *it);
               //FIXME: Bug in intersect functions.
@@ -321,7 +321,6 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
           for (uint ii = 0; ii < (uint) u_count; ++ii)
           {
             uint const dofG = u_recvbuff[ii];
-            ;
             std::memcpy(&xG[0], &r_recvbuff[ii * gdim], gdim * sizeof(real));
 
             Array<uint> matching_facets;
@@ -333,7 +332,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
 
               _set<uint> matching;
               for (Array<uint>::iterator it = matching_facets.begin();
-                  it != matching_facets.end(); ++it)
+                   it != matching_facets.end(); ++it)
               {
                 Cell cm(manifold, *it);
                 //FIXME: Bug in intersect functions.
@@ -367,7 +366,8 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
                     }
                   }
                 }
-              }dolfin_assert(*(u_sendbuff.rbegin() + matching.size()) == 0);
+              }
+              dolfin_assert(*(u_sendbuff.rbegin() + matching.size()) == 0);
               *(u_sendbuff.rbegin() + matching.size()) = matching.size();
             }
           }

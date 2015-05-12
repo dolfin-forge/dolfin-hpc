@@ -89,8 +89,8 @@ void VTKFile::operator<<(Mesh& mesh)
   // Increase the number of times we have saved the mesh
   ++counter;
 
-//  dolfin_debug(message(1, "Saved mesh %s (%s) to file %s in VTK format.",
-//          mesh.name().c_str(), mesh.label().c_str(), filename.c_str());)
+  message("Saved mesh %s (%s) to file %s in VTK format.",
+          mesh.name().c_str(), mesh.label().c_str(), filename.c_str());
 }
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(MeshFunction<int>& meshfunction)
@@ -192,6 +192,9 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
 
   // Increase the number of times we have saved the function
   ++counter;
+
+  message("Saved %d functions to file %s in VTK format.", f.size(),
+          filename.c_str());
 
 }
 //----------------------------------------------------------------------------
@@ -942,7 +945,7 @@ template<class T>
     // Increase the number of times we have saved the mesh function
     ++counter;
 
-    message("saved mesh function %d times.", counter);
+    message("Saved mesh function %d times.", counter);
     message("Saved mesh function ( %s ) to file %s in VTK format.",
             mesh.label().c_str(), filename.c_str());
   }

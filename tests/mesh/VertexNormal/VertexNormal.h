@@ -31,7 +31,6 @@ START_TEST( test_init_weight_none )
   
   // NOTE the test is initiated from @top_srcdir@/tests
   std::string const relpath = "../data/meshes/";
-  test_vertex_normal(relpath+"square16.bin", VertexNormal::none);
 #ifdef HAVE_XML
   test_vertex_normal(relpath+"cylinder.xml.gz", VertexNormal::none);
   test_vertex_normal(relpath+"aneurysm.xml.gz", VertexNormal::none);

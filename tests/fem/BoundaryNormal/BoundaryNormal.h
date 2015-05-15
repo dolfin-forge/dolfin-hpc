@@ -46,7 +46,6 @@ START_TEST( test_nodenormal_create )
   int init_failed = 0;
   
   std::string const relpath = "../data/meshes/";
-  test_node_normal(relpath+"square16.bin");
 #ifdef HAVE_XML
   test_node_normal(relpath+"cylinder.xml.gz");
   test_node_normal(relpath+"aneurysm.xml.gz");

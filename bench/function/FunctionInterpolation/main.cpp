@@ -1,8 +1,8 @@
 #include <dolfin.h>
 
-#include "IthCoordinate.h"
-#include "Coordinates.h"
-#include "MPIRank.h"
+#include <IthCoordinate.h>
+#include <Coordinates.h>
+#include <MPIRank.h>
 
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/FunctionInterpolation.h>
@@ -28,8 +28,8 @@ int main(int argc, char** argv)
   //fsqL << usqL;
   //return 0;
 
-  Mesh sqR("square100R.xml.gz");
-  Mesh sqL("square100L.xml.gz");
+  Mesh sqR("../../data/meshes/squareN100R.xml.gz");
+  Mesh sqL("../../data/meshes/squareN100L.xml.gz");
 
   message("Scalar elements");
   {

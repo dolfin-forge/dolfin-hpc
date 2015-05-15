@@ -31,8 +31,9 @@ void assemble_a(Form& a, uint n)
 
 int main(int argc, char** argv)
 {
-  UnitSquare mesh2D(128, 128);
-  UnitCube mesh3D(32, 32, 32);
+  dolfin_init(argc, argv);
+  Mesh mesh2D("../../data/meshes/squareN100R.xml.gz");
+  Mesh mesh3D("../../data/meshes/cubeN10R.xml.gz");
   uint n = 1;
 
   //---------------------------------------------------------------------------
@@ -103,6 +104,7 @@ int main(int argc, char** argv)
 
   }
 
+  dolfin_finalize();
   return 0;
 }
 

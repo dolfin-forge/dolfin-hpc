@@ -103,10 +103,6 @@ namespace dolfin
     virtual GenericTensor* instance()
     { return this; }
 
-    /// Assignment (must be overloaded by subclass)
-    virtual const GenericTensor& operator= (const GenericTensor& x)
-    { error("Assignment operator not implemented by subclass"); return *this; }
-
   };
 
 }

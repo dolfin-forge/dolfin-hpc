@@ -57,105 +57,105 @@ namespace dolfin
     explicit PETScVector(Vec x);
 
     /// Destructor
-    virtual ~PETScVector();
+    ~PETScVector();
 
     //--- Implementation of the GenericTensor interface ---
 
     /// Return copy of tensor
-    virtual PETScVector* copy() const;
+    PETScVector* copy() const;
 
     /// Set all entries to zero and keep any sparse structure
-    virtual void zero();
+    void zero();
 
     /// Finalize assembly of tensor
-    virtual void apply(FinalizeType finaltype=FINALIZE);
+    void apply(FinalizeType finaltype=FINALIZE);
 
     /// Display tensor
-    virtual void disp(uint precision=2) const;
+    void disp(uint precision=2) const;
 
     //--- Implementation of the GenericVector interface ---
 
     /// Initialize vector of size N
-    virtual void init(uint N);
+    void init(uint N);
 
-    virtual void init_ghosted(uint n, std::set<uint>& indices,
+    void init_ghosted(uint n, std::set<uint>& indices,
                               std::map<uint, uint>& map);
 
     /// Return size of vector
-    virtual uint size() const;
+    uint size() const;
 
     /// Return local size of vector
-    virtual uint local_size() const;
+    uint local_size() const;
 
     /// Return rank's offset into vector
-    virtual uint offset() const;
+    uint offset() const;
 
     /// Get block of values
-    virtual void get(real* block, uint m, const uint* rows) const;
+    void get(real* block, uint m, const uint* rows) const;
 
     /// Set block of values
-    virtual void set(const real* block, uint m, const uint* rows);
+    void set(const real* block, uint m, const uint* rows);
 
     /// Add block of values
-    virtual void add(const real* block, uint m, const uint* rows);
+    void add(const real* block, uint m, const uint* rows);
 
     /// Get all values
-    virtual void get(real* values) const;
+    void get(real* values) const;
 
     /// Set all values
-    virtual void set(real* values);
+    void set(real* values);
 
     /// Add values to each entry
-    virtual void add(real* values);
+    void add(real* values);
 
     /// Add multiple of given vector (AXPY operation)
-    virtual void axpy(real a, const GenericVector& x);
+    void axpy(real a, const GenericVector& x);
 
     /// Return inner product with given vector
-    virtual real inner(const GenericVector& v) const;
+    real inner(const GenericVector& v) const;
 
     /// Return norm of vector
-    virtual real norm(VectorNormType type=l2) const;
+    real norm(VectorNormType type=l2) const;
 
     /// Return minimum value of vector
-    virtual real min() const;
+    real min() const;
 
     /// Return maximum value of vector
-    virtual real max() const;
+    real max() const;
 
     /// Multiply vector by given number
-    virtual const PETScVector& operator*= (real a);
+    const PETScVector& operator*= (real a);
 
     /// Multiply vector by given vector componentwise
-    virtual const PETScVector& operator*= (const GenericVector& x);
+    const PETScVector& operator*= (const GenericVector& x);
 
     /// Divide vector by given number
-    virtual const PETScVector& operator/= (real a);
+    const PETScVector& operator/= (real a);
 
     /// Add given vector
-    virtual const PETScVector& operator+= (const GenericVector& x);
+    const PETScVector& operator+= (const GenericVector& x);
 
     /// Subtract given vector
-    virtual const PETScVector& operator-= (const GenericVector& x);
+    const PETScVector& operator-= (const GenericVector& x);
 
     /// Assignment operator
-    virtual const GenericVector& operator= (const GenericVector& x);
+    const PETScVector& operator= (const GenericVector& x);
 
     /// Assignment operator
-    virtual const PETScVector& operator= (real a);
+    const PETScVector& operator= (real a);
 
     //--- Special functions ---
 
     /// Return linear algebra backend factory
-    virtual LinearAlgebraFactory& factory() const;
+    LinearAlgebraFactory& factory() const;
 
     //--- Special PETSc functions ---
 
-    /// Return PETSc Vec pointer
-    Vec vec() const;
-
     /// Assignment operator
     const PETScVector& operator= (const PETScVector& x);
+
+    /// Return PETSc Vec pointer
+    Vec vec() const;
 
     friend class PETScMatrix;
 

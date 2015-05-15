@@ -44,7 +44,7 @@ private:
 int main(int argc, char *argv[])
 {
   dolfin_init(argc, argv);
-  Mesh mesh("../../../data/meshes/square16.bin");
+  Mesh mesh("../../data/meshes/squareN100R.xml.gz");
   //---------------------------------------------------------------------------
   bool const save_file = false;
 

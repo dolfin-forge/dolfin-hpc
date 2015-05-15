@@ -1,7 +1,7 @@
 #include <dolfin.h>
 
-#include "IthCoordinate.h"
-#include "Coordinates.h"
+#include <IthCoordinate.h>
+#include <Coordinates.h>
 
 #include <dolfin/function/FunctionDecomposition.h>
 
@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   //---------------------------------------------------------------------------
   Test t(argc, argv);
 
-  Mesh sqR("square100R.xml.gz");
+  Mesh sqR("../../data/meshes/squareN100R.xml.gz");
 
   message("Function decomposition");
   {

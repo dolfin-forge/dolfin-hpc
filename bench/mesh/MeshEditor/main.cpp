@@ -4,6 +4,7 @@ using namespace dolfin;
 
 int main(int argc, char** argv)
 {
+  dolfin_init(argc, argv);
   //---------------------------------------------------------------------------
   Mesh mesh;
   Array<CellType::Type> types;
@@ -78,6 +79,7 @@ int main(int argc, char** argv)
     celltype = NULL;
   }
 
+  dolfin_finalize();
   return 0;
 }
 

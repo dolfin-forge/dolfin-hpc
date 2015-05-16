@@ -24,7 +24,6 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              data/meshes/snake.xml.gz\
              data/meshes/tetmesh-1.xml.gz\
              data/meshes/sphere.xml.gz\
-             data/meshes/square16.bin\
              data/meshes/tetmesh_24_8_8.xml.gz\
              data/meshes/tetmesh-16.xml.gz\
              data/meshes/tetmesh-4.xml.gz\

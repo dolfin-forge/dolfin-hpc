@@ -482,6 +482,12 @@ uint const DiscreteFunction::num_sub_functions() const
 }
 
 //-----------------------------------------------------------------------------
+uidx DiscreteFunction::block_size() const
+{
+  return dofmap_.dofsmapping_size();
+}
+
+//-----------------------------------------------------------------------------
 real * DiscreteFunction::create_block() const
 {
   return new real[dofmap_.dofsmapping_size()];

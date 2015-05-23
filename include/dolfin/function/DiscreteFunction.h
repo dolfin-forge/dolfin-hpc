@@ -135,6 +135,9 @@ public:
   /// Return the number of sub functions i.e number of subspaces
   uint const num_sub_functions() const;
 
+  /// Get the size of tabulated block array
+  uidx block_size() const;
+
   /// Create a cell tabulated block array
   real * create_block() const;
 

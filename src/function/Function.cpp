@@ -476,6 +476,16 @@ uint const Function::num_sub_functions() const
   return static_cast<DiscreteFunction*>(f_)->num_sub_functions();
 }
 //-----------------------------------------------------------------------------
+uidx Function::block_size() const
+{
+  if (type_ != discrete)
+  {
+    error("Block array can be created only from discrete functions.");
+  }
+
+  return (static_cast<DiscreteFunction*>(f_))->block_size();
+}
+//-----------------------------------------------------------------------------
 real * Function::create_block() const
 {
   if (type_ != discrete)

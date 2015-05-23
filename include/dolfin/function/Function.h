@@ -228,6 +228,9 @@ public:
   /// Return the number of sub functions of a DiscreteFunction
   uint const num_sub_functions() const;
 
+  /// Get the size of the block
+  uidx block_size() const;
+
   /// Create a cell tabulated block array
   real * create_block() const;
 

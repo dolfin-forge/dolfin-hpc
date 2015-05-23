@@ -184,6 +184,9 @@ public:
 
   //--- EXTENSION OF UFC INTERFACE --------------------------------------------
 
+  /// Return the value size
+  uint value_size() const;
+
   /// Recursively extract sub finite element
   static ufc::finite_element* create_sub_element(
       ufc::finite_element const& finite_element, Array<uint> const& sub_system);

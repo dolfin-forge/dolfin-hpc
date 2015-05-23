@@ -139,6 +139,17 @@ void FiniteElement::Initialize()
 }
 
 //-----------------------------------------------------------------------------
+uint FiniteElement::value_size() const
+{
+  uint size = 1;
+  for (uint i = 0; i < ufc_finite_element_->value_rank(); ++i)
+  {
+    size *= ufc_finite_element_->value_dimension(i);
+  }
+  return size;
+}
+
+//-----------------------------------------------------------------------------
 ufc::finite_element*
 FiniteElement::create_sub_element(Array<uint> const& sub_system) const
 {

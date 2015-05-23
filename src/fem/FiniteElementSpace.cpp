@@ -209,7 +209,7 @@ bool FiniteElementSpace::is_cellwise_defined() const
 bool FiniteElementSpace::is_cellwise_constant() const
 {
   return is_cellwise_defined()
-      && (dof_map_.local_dimension() == finite_element_.value_dimension(0));
+      && (dof_map_.local_dimension() == finite_element_.value_size());
 }
 
 //-----------------------------------------------------------------------------

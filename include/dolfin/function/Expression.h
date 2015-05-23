@@ -130,6 +130,52 @@ private:
 
 };
 
+class TensorExpression : public Expression
+{
+public:
+
+  /// Create user-defined function for 2nd order tensor
+  TensorExpression(uint dim0, uint dim1) :
+      Expression(),
+      value_shape_(2)
+  {
+    value_shape_[0] = dim0;
+    value_shape_[1] = dim1;
+  }
+
+  /// Create user-defined function for general tensor
+  TensorExpression(Array<uint> value_shape) :
+      Expression(),
+      value_shape_(value_shape)
+  {
+  }
+
+  /// Destructor
+  ~TensorExpression()
+  {
+  }
+
+  /// Return the rank of the value space
+  uint rank() const
+  {
+    return value_shape_.size();
+  }
+
+  /// Return the dimension of the value space for axis i
+  uint dim(uint i) const
+  {
+    return value_shape_.at(i);
+  }
+
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
+
+private:
+
+  Array<uint> value_shape_;
+
+};
+
 class RealReference : public ScalarExpression
 {
 public:

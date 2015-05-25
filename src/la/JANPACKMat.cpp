@@ -58,7 +58,7 @@ JANPACKMat::~JANPACKMat()
 {
   // Free memory of matrix
   //  if(A)
-    jp_mat_free(A);  
+    jp_mat_free(A);
 
   //  if (!is_view) delete A;
 }
@@ -76,14 +76,19 @@ void JANPACKMat::init(uint M, uint N)
   //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
 //-----------------------------------------------------------------------------
+void JANPACKMat::init(uint M, uint N, bool distributed)
+{
+  init(M, N);
+}
+//-----------------------------------------------------------------------------
 void JANPACKMat::init(const GenericSparsityPattern& sparsity_pattern)
 {
 
-  const SparsityPattern& spattern = 
+  const SparsityPattern& spattern =
     reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
-  
+
   init(spattern.size(0), spattern.size(1));
-  
+
   // error("Not implemented.  (init)");
 }
 //-----------------------------------------------------------------------------
@@ -91,15 +96,15 @@ JANPACKMat* JANPACKMat::copy() const
 {
 
   error("JANPACKMat::copy not yet implemented.");
-  
+
   JANPACKMat *mcopy = new JANPACKMat();
- 
+
   return mcopy;
 }
 //-----------------------------------------------------------------------------
 dolfin::uint JANPACKMat::size(uint dim) const
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
   uint32_t M = 0;
   uint32_t N = 0;
   jp_mat_size(const_cast<jp_mat_type *>(A), &M, &N);
@@ -115,7 +120,7 @@ void JANPACKMat::get(real* block,
 		       uint m, const uint* rows,
 		       uint n, const uint* cols) const
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
   // for each row in rows
   //A->ExtractGlobalRowCopy(...)
 
@@ -127,14 +132,14 @@ void JANPACKMat::set(const real* block,
 		       uint m, const uint* rows,
 		       uint n, const uint* cols)
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
 
 
   const real *bp = &block[0];
   for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++) 
+    for(uint j = 0; j < n; j++)
       jp_mat_set(A, rows[i], cols[j], *(bp++));
-    
+
 
 }
 //-----------------------------------------------------------------------------
@@ -142,11 +147,11 @@ void JANPACKMat::add(const real* block,
 		       uint m, const uint* rows,
 		       uint n, const uint* cols)
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
 
-  jp_mat_add_block(A, 
+  jp_mat_add_block(A,
 	       m, const_cast<uint*>(rows),
-	       n, const_cast<uint*>(cols), 
+	       n, const_cast<uint*>(cols),
 	       const_cast<real*>(block));
 }
 //-----------------------------------------------------------------------------
@@ -158,7 +163,7 @@ real JANPACKMat::norm(std::string norm_type) const
 //-----------------------------------------------------------------------------
 void JANPACKMat::zero()
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
   jp_mat_zero(A);
 }
 //-----------------------------------------------------------------------------
@@ -178,7 +183,7 @@ void JANPACKMat::disp(uint precision) const
 //-----------------------------------------------------------------------------
 void JANPACKMat::ident(uint m, const uint* rows)
 {
-  dolfin_assert(A); 
+  dolfin_assert(A);
 
   for(uint i = 0; i < m; i ++) {
     //jp_mat_ident(A, rows[i]);
@@ -189,23 +194,23 @@ void JANPACKMat::ident(uint m, const uint* rows)
 //-----------------------------------------------------------------------------
 void JANPACKMat::zero(uint m, const uint* rows)
 {
-  dolfin_assert(A); 
-  
+  dolfin_assert(A);
+
   for (uint i = 0; i < m; i++)
     jp_mat_zero_row(A,rows[i]);
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::mult(const GenericVector& x, GenericVector& y, bool transposed) const
 {
-  dolfin_assert(A); 
-  const JANPACKVec& xx = x.down_cast<JANPACKVec>();  
+  dolfin_assert(A);
+  const JANPACKVec& xx = x.down_cast<JANPACKVec>();
   JANPACKVec& yy = y.down_cast<JANPACKVec>();
   if (transposed)
     yy.init(xx.local_size());
   else
     yy.init(xx.local_size());
-  
-  jp_spmv(const_cast<jp_mat_type *>(A), xx.vec(), yy.vec());  
+
+  jp_spmv(const_cast<jp_mat_type *>(A), xx.vec(), yy.vec());
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) const
@@ -213,7 +218,7 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
   uint  n, *c = 0;
   real *v = 0;
- 
+
   c = new uint[size(0)];
   v = new real[size(0)];
 
@@ -266,7 +271,7 @@ const GenericMatrix& JANPACKMat::operator= (const GenericMatrix& A)
   return *this;
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::dup(const JANPACKMat& A) 
+void JANPACKMat::dup(const JANPACKMat& A)
 {
   uint range[2];
   uint m;

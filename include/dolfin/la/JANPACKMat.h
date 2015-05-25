@@ -64,6 +64,9 @@ namespace dolfin
     /// Initialize M x N matrix
     virtual void init(uint M, uint N);
 
+    /// Initialize vector of size N and distribute if specified
+    virtual void init(uint N, bool distributed);
+
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const;
 
@@ -100,8 +103,8 @@ namespace dolfin
     /// Assignment operator
     virtual const GenericMatrix& operator= (const GenericMatrix& x);
 
-    /// Get number of non-zeros in the matrix 
-    virtual uint nz() const;    
+    /// Get number of non-zeros in the matrix
+    virtual uint nz() const;
     //--- Special functions ---
 
     /// Return linear algebra backend factory
@@ -117,7 +120,7 @@ namespace dolfin
     { error("Not implemented."); return *this; }
 
     /// Duplicate matrix
-    void dup(const JANPACKMat& A); 
+    void dup(const JANPACKMat& A);
 
   private:
 
@@ -128,10 +131,10 @@ namespace dolfin
 #else
     char A[216];
 #endif
-    
+
     // True if we don't own the matrix A points to
     bool is_view;
-    
+
   };
 
 

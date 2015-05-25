@@ -29,7 +29,7 @@ namespace dolfin
 
     /// Destructor
     virtual ~GenericMatrix() {}
-    
+
     //--- Implementation of the GenericTensor interface ---
 
     /// Initialize zero tensor using sparsity pattern
@@ -70,6 +70,9 @@ namespace dolfin
 
     /// Initialize M x N matrix
     virtual void init(uint M, uint N) = 0;
+
+    /// Initialize M x N matrix
+    virtual void init(uint M, uint N, bool distributed) = 0;
 
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const = 0;
@@ -113,11 +116,11 @@ namespace dolfin
 
     //--- Convenience functions ---
 
-    /// Get value of given entry 
+    /// Get value of given entry
     virtual real operator() (uint i, uint j) const
     { real value(0); get(&value, 1, &i, 1, &j); return value; }
 
-    /// Get value of given entry 
+    /// Get value of given entry
     virtual real getitem(std::pair<uint, uint> ij) const
     { real value(0); get(&value, 1, &ij.first, 1, &ij.second); return value; }
 

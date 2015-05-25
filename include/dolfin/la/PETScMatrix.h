@@ -55,7 +55,7 @@ namespace dolfin
     explicit PETScMatrix(Type type=default_matrix);
 
     /// Create M x N matrix
-    PETScMatrix(uint M, uint N, Type type=default_matrix);
+    PETScMatrix(uint M, uint N, Type type=default_matrix, bool distributed = true);
 
     /// Copy constructor
     explicit PETScMatrix(const PETScMatrix& A);
@@ -88,8 +88,11 @@ namespace dolfin
 
     //--- Implementation of the GenericMatrix interface --
 
-    /// Initialize M x N matrix
+    /// Initialize M x N matrix and distribute by default
     void init(uint M, uint N);
+
+    /// Initialize M x N matrix and distribute if specified
+    void init(uint M, uint N, bool distributed);
 
     /// Get block of values
     void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const;
@@ -99,7 +102,7 @@ namespace dolfin
 
     /// Add block of values
     void add(const real* block, uint m, const uint* rows, uint n, const uint* cols);
-    
+
     /// Return norm of matrix
     real norm(std::string norm_type = "frobenius") const;
 
@@ -116,7 +119,7 @@ namespace dolfin
     void ident(uint m, const uint* rows);
 
     /// Duplicate matrix
-    void dup(GenericMatrix& A); 
+    void dup(GenericMatrix& A);
 
     // Matrix-vector product, y = Ax
     void mult(const GenericVector& x, GenericVector& y, bool transposed=false) const;
@@ -130,7 +133,7 @@ namespace dolfin
     /// Assignment operator
     const GenericMatrix& operator= (const GenericMatrix& A);
 
-    /// Get number of non-zeros in the matrix 
+    /// Get number of non-zeros in the matrix
     uint nz() const;
 
     //--- Special functions ---
@@ -143,7 +146,7 @@ namespace dolfin
     /// Return PETSc Mat pointer
     Mat mat() const;
 
-    /// Return PETSc matrix type 
+    /// Return PETSc matrix type
     Type type() const;
 
     /// Return norm of matrix
@@ -178,15 +181,18 @@ namespace dolfin
     // PETSc Mat pointer
     Mat A;
 
-    // True if we don't own the matrix A points to
+    // True if we do not own the matrix A points to
     bool is_view;
+
+    // True if the matrix is distributed
+    bool is_distributed;
 
     // PETSc matrix type
     Type _type;
 
     Mat A_sub;
     bool sub;
-    
+
     Mat *AA_sub;
 
     int block_size;

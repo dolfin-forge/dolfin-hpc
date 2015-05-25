@@ -31,7 +31,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(Type type):
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), _type(type), sub(false), block_size(0)
+    A(0), is_view(false), is_distributed(false), _type(type), sub(false), block_size(0)
 {
   // Check type
   checkType();
@@ -39,21 +39,21 @@ PETScMatrix::PETScMatrix(Type type):
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(Mat A):
     Variable("A", "a sparse matrix"),
-    A(A), is_view(true), _type(default_matrix), block_size(0)
+    A(A), is_view(true), is_distributed(false), _type(default_matrix), block_size(0)
 {
   // FIXME: get PETSc matrix type and set
   _type = default_matrix;
 }
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(uint M, uint N, Type type):
+PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed):
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), _type(type), block_size(0)
+    A(0), is_view(false), is_distributed(false), _type(type), block_size(0)
 {
   // Check type
   checkType();
 
   // Create PETSc matrix
-  init(M, N);
+  init(M, N, distributed);
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A):
@@ -84,6 +84,11 @@ PETScMatrix::~PETScMatrix()
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N)
 {
+  init(M, N, true);
+}
+//-----------------------------------------------------------------------------
+void PETScMatrix::init(uint M, uint N, bool distributed)
+{
   // Free previously allocated memory if necessary
   if ( A )
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -96,8 +101,9 @@ void PETScMatrix::init(uint M, uint N)
   // FIXME: it should definitely be a parameter
 
   // Create a sparse matrix in compressed row format
-  if (dolfin::MPI::numProcesses() > 1)
+  if (dolfin::MPI::numProcesses() > 1 && distributed)
   {
+    is_distributed = true;
     // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
@@ -142,7 +148,7 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 #endif
 
   // Create a sparse matrix in compressed row format
-  if (dolfin::MPI::numProcesses() > 1)
+  if (is_distributed)
   {
     // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
     // and number of off-diagonal non-zeroes (50 in this case).
@@ -250,9 +256,9 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 {
-
-  if (dolfin::MPI::numProcesses() > 1)
+  if (sparsity_pattern.is_distributed())
   {
+    is_distributed = true;
     uint p = dolfin::MPI::processNumber();
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
     uint local_size = spattern.numLocalRows(p);
@@ -436,8 +442,10 @@ void PETScMatrix::getrow(uint row,
 void PETScMatrix::getrows_offproc(std::set<uint> rows)
 {
 
-  if(dolfin::MPI::numProcesses() == 1)
+  if(!is_distributed)
+  {
     return;
+  }
 
   int *_cols = new int[size(0)];
   int *_rows = new int[rows.size()];
@@ -678,7 +686,7 @@ PETScMatrix::Type PETScMatrix::type() const
 void PETScMatrix::disp(uint precision) const
 {
   // FIXME: Maybe this could be an option?
-  if(MPI::numProcesses() > 1)
+  if(is_distributed)
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
   else {
     PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
@@ -776,6 +784,7 @@ void PETScMatrix::checkType()
   default:
     warning("Requested matrix type unknown. Using default.");
     _type = default_matrix;
+    break;
   }
 }
 //-----------------------------------------------------------------------------
@@ -784,7 +793,7 @@ MatType PETScMatrix::getPETScType() const
   switch ( _type )
   {
   case default_matrix:
-    if (MPI::numProcesses() > 1)
+    if (is_distributed)
       return MATMPIAIJ;
     else
       return MATSEQAIJ;

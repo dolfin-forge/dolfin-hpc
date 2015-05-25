@@ -28,84 +28,93 @@ namespace dolfin
   class Matrix : public GenericMatrix, public Variable
   {
   public:
-    
+
     /// Create empty matrix
     Matrix() : Variable("A", "DOLFIN matrix"), matrix(0)
     { DefaultFactory factory; matrix = factory.createMatrix(); }
-    
-    /// Create M x N matrix
+
+    /// Create M x N matrix distributed by default
     Matrix(uint M, uint N) : Variable("A", "DOLFIN matrix"), matrix(0)
     { DefaultFactory factory; matrix = factory.createMatrix(); matrix->init(M, N); }
-    
+
+    /// Create M x N matrix distributed if specified
+    Matrix(uint M, uint N, bool distributed) : Variable("A", "DOLFIN matrix"), matrix(0)
+    { DefaultFactory factory; matrix = factory.createMatrix(); matrix->init(M, N, distributed); }
+
     /// Copy constructor
     explicit Matrix(const Matrix& A) : Variable("A", "DOLFIN matrix"),
                                        matrix(A.matrix->copy())
     {}
-    
+
     /// Destructor
     ~Matrix()
     { delete matrix; }
-    
+
     //--- Implementation of the GenericTensor interface ---
-    
+
     /// Initialize zero tensor using sparsity pattern
+    /// The tensor is distributed if the sparsity pattern is distributed
     void init(const GenericSparsityPattern& sparsity_pattern)
     { matrix->init(sparsity_pattern); }
-    
+
     /// Return copy of tensor
     Matrix* copy() const
     { Matrix* A = new Matrix(); delete A->matrix; A->matrix = matrix->copy(); return A; }
-    
+
     /// Return size of given dimension
     uint size(uint dim) const
     { return matrix->size(dim); }
-    
+
     /// Set all entries to zero and keep any sparse structure
     void zero()
     { matrix->zero(); }
-    
+
     /// Finalize assembly of tensor
     void apply(FinalizeType finaltype=FINALIZE)
     { matrix->apply(finaltype); }
-    
+
     /// Display tensor
     void disp(uint precision=2) const
     { matrix->disp(precision); }
-    
+
     //--- Implementation of the GenericMatrix interface ---
-    
-    /// Initialize M x N matrix
+
+    /// Initialize M x N matrix and distribute by default
     void init(uint M, uint N)
     { matrix->init(M, N); }
-    
+
+    /// Initialize M x N matrix and distribute if specified
+    void init(uint M, uint N, bool distributed)
+    { matrix->init(M, N, distributed); }
+
     /// Get block of values
     void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const
     { matrix->get(block, m, rows, n, cols); }
-    
+
     /// Set block of values
     void set(const real* block, uint m, const uint* rows, uint n, const uint* cols)
     { matrix->set(block, m, rows, n, cols); }
-    
+
     /// Add block of values
     void add(const real* block, uint m, const uint* rows, uint n, const uint* cols)
     { matrix->add(block, m, rows, n, cols); }
-    
+
     /// Return norm of matrix
     double norm(std::string norm_type = "frobenius") const
-    { return matrix->norm(norm_type); }    
-    
+    { return matrix->norm(norm_type); }
+
     /// Get non-zero values of given row
     void getrow(uint row, Array<uint>& columns, Array<real>& values) const
     { matrix->getrow(row, columns, values); }
-    
+
     /// Set values for given row
     void setrow(uint row, const Array<uint>& columns, const Array<real>& values)
     { matrix->setrow(row, columns, values); }
-    
+
     /// Set given rows to zero
     void zero(uint m, const uint* rows)
     { matrix->zero(m, rows); }
-    
+
     /// Set given rows to identity matrix
     void ident(uint m, const uint* rows)
     { matrix->ident(m, rows); }

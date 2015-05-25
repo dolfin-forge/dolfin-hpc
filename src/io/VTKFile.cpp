@@ -307,6 +307,7 @@ void VTKFile::ResultsWrite(
     //
     uint const value_rank = u->rank();
     uint const value_dim = u->dim(0);
+    uint const value_size = u->value_size();
 
     // Write function data at mesh vertices
     std::string& name = it->second;
@@ -325,18 +326,16 @@ void VTKFile::ResultsWrite(
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
-        error("Only scalar and vectors functions can be saved in VTK format.");
+        fprintf(
+            fp,
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            name.c_str(), value_size);
         break;
       }
 
     // Allocate memory for function values at vertices
     uint const num_verts = mesh.numVertices();
-    uint size = 1;
-    for (uint i = 0; i < value_rank; i++)
-    {
-      size *= u->dim(i);
-    }
-    real* values = new real[size * num_verts];
+    real* values = new real[value_size * num_verts];
 
     // Get function values at vertices
     u->interpolate_vertex_values(values);
@@ -345,7 +344,7 @@ void VTKFile::ResultsWrite(
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3|n)^1 = (2|3|n) so ...
     std::vector<float> data;
 
-    switch (value_dim)
+    switch (value_size)
       {
       case 1:
         data.resize(num_verts);
@@ -382,12 +381,12 @@ void VTKFile::ResultsWrite(
         }
         break;
       default:
-        data.resize(value_dim * num_verts);
+        data.resize(value_size * num_verts);
         {
           std::vector<float>::iterator entry = data.begin();
           for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
           {
-            for (uint d = 0; d < value_dim; ++d)
+            for (uint d = 0; d < value_size; ++d)
             {
               *entry++ = values[vertex->index() + d * num_verts];
             }
@@ -425,6 +424,7 @@ void VTKFile::ResultsWrite(
     //
     uint const value_rank = u->rank();
     uint const value_dim = u->dim(0);
+    uint const value_size = u->value_size();
 
     // Write function data in cell
     std::string& name = it->second;
@@ -444,7 +444,10 @@ void VTKFile::ResultsWrite(
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
-        error("Only scalar and vectors functions can be saved in VTK format.");
+        fprintf(
+            fp,
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            name.c_str(), value_size);
         break;
       }
 
@@ -452,7 +455,7 @@ void VTKFile::ResultsWrite(
     // Should be value_dim^value_rank but 1^0 = 1 and (2|3|n)^1 = (2|3|n) so ...
     real * values = NULL;
     u->get_block(values);
-    switch (value_dim)
+    switch (value_size)
       {
       case 1:
         data.resize(mesh.numCells());
@@ -492,13 +495,13 @@ void VTKFile::ResultsWrite(
         }
         break;
       default:
-        data.resize(value_dim * mesh.numCells());
+        data.resize(value_size * mesh.numCells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
           for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
           {
-            for (uint d = 0; d < value_dim; ++d)
+            for (uint d = 0; d < value_size; ++d)
             {
               *entry++ = values[ii++];
             }

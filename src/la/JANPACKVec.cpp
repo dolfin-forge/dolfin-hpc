@@ -31,7 +31,7 @@ JANPACKVec::JANPACKVec():
 }
 //-----------------------------------------------------------------------------
 JANPACKVec::JANPACKVec(uint N):
-    Variable("x", "a sparse vector"), 
+    Variable("x", "a sparse vector"),
     is_view(false), is_ghosted(false), is_init(false)
 {
   // Create PETSc vector
@@ -53,27 +53,27 @@ JANPACKVec::~JANPACKVec()
 //-----------------------------------------------------------------------------
 void JANPACKVec::init(uint N)
 {
-  
+
   // Two cases:
   //
   //   1. Already allocated and dimension changes -> reallocate
   //   2. Not allocated -> allocate
   //
   // Otherwise do nothing
-  
+
 
   if ((is_init && this->size() == N ) || (is_init && this->local_size() == N))
   {
     jp_vec_zero(x);
-    return;      
+    return;
   }
   else
   {
-    if (is_init && !is_view) 
+    if (is_init && !is_view)
     {
       jp_vec_free(x);
     }
-    
+
   }
 
   // Create vector
@@ -84,10 +84,15 @@ void JANPACKVec::init(uint N)
 
 }
 //-----------------------------------------------------------------------------
+void JANPACKVec::init(uint N, bool distributed)
+{
+  init(N);
+}
+//-----------------------------------------------------------------------------
 JANPACKVec* JANPACKVec::copy() const
 {
-  JANPACKVec* v = new JANPACKVec(*this); 
-  return v; 
+  JANPACKVec* v = new JANPACKVec(*this);
+  return v;
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::get(real* values) const
@@ -107,7 +112,7 @@ void JANPACKVec::set(real* values)
 void JANPACKVec::add(real* values)
 {
   dolfin_assert(x);
-  
+
   error("Not implemented.");
 
   /*  int m = static_cast<int>(size());
@@ -124,14 +129,14 @@ void JANPACKVec::add(real* values)
 void JANPACKVec::get(real* block, uint m, const uint* rows) const
 {
   dolfin_assert(x);
-  jp_vec_get_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block), 
+  jp_vec_get_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block),
 		   reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
 void JANPACKVec::set(const real* block, uint m, const uint* rows)
 {
   dolfin_assert(x);
-  jp_vec_set_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block), 
+  jp_vec_set_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block),
 		   reinterpret_cast<uint*>(const_cast<uint*>(rows)) , m);
 }
 //-----------------------------------------------------------------------------
@@ -141,7 +146,7 @@ void JANPACKVec::add(const real* block, uint m, const uint* rows)
 
   jp_vec_add_block(const_cast<jp_vec_type *>(x), const_cast<double*>(block),
 		   reinterpret_cast<uint*>(const_cast<uint*>(rows)), m);
-  
+
   //  error("Not implemented.");
 }
 //-----------------------------------------------------------------------------
@@ -188,7 +193,7 @@ dolfin::uint JANPACKVec::offset() const
 const GenericVector& JANPACKVec::operator= (const GenericVector& v)
 {
   *this = v.down_cast<JANPACKVec>();
-  return *this; 
+  return *this;
 }
 //-----------------------------------------------------------------------------
 const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
@@ -197,8 +202,8 @@ const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
 
   init(v.local_size());
   //jp_vec_copy(x, v.x);
-  jp_vec_copy(const_cast<jp_vec_type *>(v.x), const_cast<jp_vec_type *>(x));  
-  return *this; 
+  jp_vec_copy(const_cast<jp_vec_type *>(v.x), const_cast<jp_vec_type *>(x));
+  return *this;
 }
 //-----------------------------------------------------------------------------
 const JANPACKVec& JANPACKVec::operator= (real a)
@@ -207,18 +212,18 @@ const JANPACKVec& JANPACKVec::operator= (real a)
   // VecSet(x, a);
   //  error("Not implemented");
   message("....");
-  return *this; 
+  return *this;
 }
 //-----------------------------------------------------------------------------
 const JANPACKVec& JANPACKVec::operator+= (const GenericVector& x)
 {
-  this->axpy(1.0, x); 
+  this->axpy(1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
 const JANPACKVec& JANPACKVec::operator-= (const GenericVector& x)
 {
-  this->axpy(-1.0, x); 
+  this->axpy(-1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -226,7 +231,7 @@ const JANPACKVec& JANPACKVec::operator*= (const real a)
 {
   dolfin_assert(x);
   jp_vec_scal(a, x);
-  
+
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -234,10 +239,10 @@ const JANPACKVec& JANPACKVec::operator/= (const real a)
 {
   dolfin_assert(x);
   dolfin_assert(a != 0.0);
-  
+
   const real b = 1.0 / a;
   jp_vec_scal(b, x);
-  
+
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -254,7 +259,7 @@ real JANPACKVec::inner(const GenericVector& y) const
   return a;
 }
 //-----------------------------------------------------------------------------
-void JANPACKVec::axpy(real a, const GenericVector& y) 
+void JANPACKVec::axpy(real a, const GenericVector& y)
 {
   dolfin_assert(x);
 
@@ -285,19 +290,19 @@ void JANPACKVec::disp(uint precision) const
 {
   jp_vec_print(const_cast<jp_vec_type *>(x));
 }
-//-----------------------------------------------------------------------------  
+//-----------------------------------------------------------------------------
 jp_vec_type *JANPACKVec::vec() const
 {
   return const_cast<jp_vec_type *>(x);
 }
-//-----------------------------------------------------------------------------  
+//-----------------------------------------------------------------------------
 void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
 			       std::map<uint, uint>& map)
 {
 
   if ( is_ghosted )
     apply();
-  
+
   uint32_t range[2];
   jp_vec_range(x, range);
 
@@ -310,7 +315,7 @@ void JANPACKVec::init_ghosted(uint n, std::set<uint>& indices,
   }
 
   jp_vec_init_ghosts(x, &ghost_indices[0], ghost_indices.size());
-  
+
   is_ghosted = true;
   apply();
 

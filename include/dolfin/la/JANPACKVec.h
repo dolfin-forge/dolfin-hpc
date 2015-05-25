@@ -63,8 +63,12 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N);
 
+    /// Initialize vector of size N and distribute if specified
+    virtual void init(uint N, bool distributed);
+
+    ///
     virtual void init_ghosted(uint n, std::set<uint>& indices,
-			      std::map<uint, uint>& map);
+                              std::map<uint, uint>& map);
 
     /// Return size of vector
     virtual uint size() const;
@@ -94,7 +98,7 @@ namespace dolfin
     virtual void add(real* values);
 
     /// Add multiple of given vector (AXPY operation)
-    virtual void axpy(real a, const GenericVector& x); 
+    virtual void axpy(real a, const GenericVector& x);
 
     /// Return inner product with given vector
     virtual real inner(const GenericVector& v) const;
@@ -151,7 +155,7 @@ namespace dolfin
 #else
     char x[160];
 #endif
-       
+
     // True if we don't own the vector x points to
     bool is_view;
 
@@ -161,7 +165,7 @@ namespace dolfin
     bool is_init;
 
     //    Array<int> ghost_indices;
-#if (sun || __sun)    
+#if (sun || __sun)
     std::map<int, int> mapping;
 #else
     std::map<const int, int> mapping;
@@ -169,7 +173,7 @@ namespace dolfin
 
 
   };
-  
+
 }
 
 #endif

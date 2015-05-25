@@ -33,29 +33,29 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector():
     Variable("x", "a sparse vector"),
-    x(0), is_view(false), is_ghosted(false)
+    x(0), is_view(false), is_distributed(false), is_ghosted(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-PETScVector::PETScVector(uint N):
+PETScVector::PETScVector(uint N, bool distributed):
     Variable("x", "a sparse vector"),
-    x(0), is_view(false), is_ghosted(false)
+    x(0), is_view(false), is_distributed(false), is_ghosted(false)
 {
   // Create PETSc vector
-  init(N);
+  init(N, distributed);
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(Vec x):
     Variable("x", "a vector"),
-    x(x), is_view(true), is_ghosted(false)
+    x(x), is_view(true), is_distributed(false), is_ghosted(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(const PETScVector& v):
     Variable("x", "a vector"),
-    x(0), is_view(false), is_ghosted(false)
+    x(0), is_view(false), is_distributed(false), is_ghosted(false)
 {
   *this = v;
 }
@@ -71,6 +71,11 @@ PETScVector::~PETScVector()
 }
 //-----------------------------------------------------------------------------
 void PETScVector::init(uint N)
+{
+  init(N, true);
+}
+//-----------------------------------------------------------------------------
+void PETScVector::init(uint N, bool distributed)
 {
   // Two cases:
   //
@@ -97,8 +102,9 @@ void PETScVector::init(uint N)
   }
 
   // Create vector
-  if (MPI::numProcesses() > 1)
+  if (MPI::numProcesses() > 1 && distributed)
   {
+    is_distributed = true;
     //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
 #ifdef HAVE_MPI
     VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x);
@@ -312,7 +318,7 @@ const PETScVector& PETScVector::operator= (const PETScVector& v)
   if(&v != this)
   {
     dolfin_assert(v.x);
-    init(v.local_size());
+    init(v.local_size(), v.is_distributed);
     VecCopy(v.x, x);
   }
   return *this;
@@ -442,10 +448,14 @@ real PETScVector::max() const
 //-----------------------------------------------------------------------------
 void PETScVector::disp(uint precision) const
 {
-  if(MPI::numProcesses() > 1)
+  if(MPI::numProcesses() > 1 && is_distributed)
+  {
     VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+  }
   else
+  {
     VecView(x, PETSC_VIEWER_STDOUT_SELF);
+  }
 }
 //-----------------------------------------------------------------------------
 Vec PETScVector::vec() const
@@ -456,6 +466,10 @@ Vec PETScVector::vec() const
 void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
                                std::map<uint, uint>& map)
 {
+  if(!is_distributed)
+  {
+    return;
+  }
 
   if( is_ghosted )
   {

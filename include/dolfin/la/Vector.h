@@ -33,9 +33,13 @@ namespace dolfin
     Vector() : Variable("x", "DOLFIN vector"), vector(0)
     { DefaultFactory factory; vector = factory.createVector(); }
 
-    /// Create vector of size N
+    /// Create vector of size N distributed by default
     explicit Vector(uint N) : Variable("x", "DOLFIN vector"), vector(0)
     { DefaultFactory factory; vector = factory.createVector(); vector->init(N); }
+
+    /// Create vector of size N distributed if specified
+    explicit Vector(uint N, bool distributed) : Variable("x", "DOLFIN vector"), vector(0)
+    { DefaultFactory factory; vector = factory.createVector(); vector->init(N, distributed); }
 
     /// Copy constructor
     explicit Vector(const Vector& x) : Variable("x", "DOLFIN vector"),
@@ -69,6 +73,10 @@ namespace dolfin
     /// Initialize vector of size N
     void init(uint N)
     { vector->init(N); }
+
+    /// Initialize vector of size N and distribute if specified
+    void init(uint N, bool distributed)
+    { vector->init(N, distributed); }
 
     void init_ghosted(uint n, std::set<uint>& indices,
                               std::map<uint, uint>& map)

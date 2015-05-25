@@ -35,7 +35,7 @@ namespace dolfin
 
     /// Initialize zero tensor using sparsity pattern
     inline void init(const GenericSparsityPattern& sparsity_pattern)
-    { init(sparsity_pattern.size(0)); }
+    { init(sparsity_pattern.size(0), sparsity_pattern.is_distributed()); }
 
     /// Return copy of tensor
     virtual GenericVector* copy() const = 0;
@@ -74,6 +74,10 @@ namespace dolfin
     /// Initialize vector of size N
     virtual void init(uint N) = 0;
 
+    /// Initialize vector of size N and distribute if specified
+    virtual void init(uint N, bool distributed) = 0;
+
+    /// Initialize ghost entries
     virtual void init_ghosted(uint n, std::set<uint>& indices,
                               std::map<uint, uint>& map) = 0;
 

@@ -48,7 +48,7 @@ namespace dolfin
     PETScVector();
 
     /// Create vector of size N
-    explicit PETScVector(uint N);
+    explicit PETScVector(uint N, bool distributed = true);
 
     /// Copy constructor
     explicit PETScVector(const PETScVector& x);
@@ -75,9 +75,13 @@ namespace dolfin
 
     //--- Implementation of the GenericVector interface ---
 
-    /// Initialize vector of size N
+    /// Initialize vector of size N, distribute by default
     void init(uint N);
 
+    /// Initialize vector of size N, distribute if specified
+    void init(uint N, bool distributed);
+
+    /// Initialize ghost entries
     void init_ghosted(uint n, std::set<uint>& indices,
                               std::map<uint, uint>& map);
 
@@ -168,6 +172,9 @@ namespace dolfin
 
     // True if we don't own the vector x points to
     bool is_view;
+
+    // True if the vector is distributed
+    bool is_distributed;
 
     // True if the vector has ghost points
     bool is_ghosted;

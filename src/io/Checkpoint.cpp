@@ -315,6 +315,12 @@ void Checkpoint::load(std::vector<Function *> func)
 #else
     in_.read((char *)&local_size, sizeof(uint));
 #endif
+    if(local_size != (*it)->vector().local_size())
+    {
+      error("Size mismatch while reloading vectors from checkpoint:\n"
+            "\tExpected : %d\n"
+            "\tRead     : %d\n", (*it)->vector().local_size(), local_size);
+    }
     real *values = new real[local_size];
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in_, byte_offset_ + vector_offset[0] * sizeof(real),
@@ -356,6 +362,12 @@ void Checkpoint::load(std::vector<Vector *> vec)
 #else
     in_.read((char *)&local_size, sizeof(uint));
 #endif
+    if(local_size != (*it)->local_size())
+    {
+      error("Size mismatch while reloading vectors from checkpoint:\n"
+            "\tExpected : %d\n"
+            "\tRead     : %d\n", (*it)->local_size(), local_size);
+    }
     real *values = new real[local_size];
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in_, byte_offset_ + vector_offset[0] * sizeof(real),
@@ -401,8 +413,8 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
 #else
   out.write((char *)&hdr_, sizeof(chkp_mesh_hdr));
-  out.write((char *)mesh.geometry().coordinates(), 
-	    hdr_.num_coords * sizeof(real));
+  out.write((char *)mesh.geometry().coordinates(),
+            hdr_.num_coords * sizeof(real));
   out.write((char *)mesh.cells(), hdr_.num_centities * sizeof(uint));
 #endif
 

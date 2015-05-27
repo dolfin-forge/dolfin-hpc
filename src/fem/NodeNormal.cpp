@@ -18,6 +18,9 @@
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/VertexNormal.h>
+
+#define DEBUG 1
 
 #include <map>
 
@@ -31,7 +34,7 @@ NodeNormal::NodeNormal(Mesh& mesh, Type w, real alpha) :
     subdomain_(NULL),
     no_subdomain_(true),
     alpha_max_(alpha),
-    weighting_(w)
+    type_(w)
 {
 }
 
@@ -43,7 +46,7 @@ NodeNormal::NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w,
     subdomain_(&subdomain),
     no_subdomain_(false),
     alpha_max_(alpha),
-    weighting_(w)
+    type_(w)
 {
 }
 
@@ -56,46 +59,119 @@ NodeNormal::~NodeNormal()
 //-----------------------------------------------------------------------------
 void NodeNormal::Clear()
 {
-  // Cleanup facet and node data
-  for (_map<uint, FacetData *>::iterator it = facets_.begin();
-  it != facets_.end(); ++it)
-  {
-    delete it->second;
-  }
-  facets_.clear();
-  for (_map<uint, NodeData *>::iterator it = nodes_.begin();
-      it != nodes_.end(); ++it)
-  {
-    delete it->second;
-  }
-  nodes_.clear();
+  node_type_.clear();
 }
 
 //-----------------------------------------------------------------------------
 void NodeNormal::compute()
 {
-  Compute(mesh_, basis());
+  uint const gdim = mesh_.geometry().dim();
+  if (basis().size() < gdim)
+  {
+    error("Invalid size of storage vector for basis functions in NodeNormal");
+  }
+  for (uint d = 0; d < gdim; ++d)
+  {
+    if (basis()[d].type() != Function::discrete)
+    {
+      error("All basis functions in NodeNormal should be discrete");
+    }
+  }
+  if (basis()[0].space().is_vertex_based())
+  {
+    //Allow the possibility to switch implementation
+    //ComputeP1(mesh_, basis());
+    ComputePk(mesh_, basis());
+  }
+  else
+  {
+    ComputePk(mesh_, basis());
+  }
 }
 
 //-----------------------------------------------------------------------------
 uint NodeNormal::node_type(uint node_id) const
 {
-  dolfin_assert(nodes_.size() > 0);
-  _map<uint, NodeData *>::const_iterator it = nodes_.find(node_id);
-  dolfin_assert(it != nodes_.end());
-  return it->second->node_type;
+  dolfin_assert(node_type_.size() > 0);
+  _map<uint, uint>::const_iterator it = node_type_.find(node_id);
+  if (it == node_type_.end())
+  {
+    error("Invalid node id requested for node type");
+  }
+  return it->second;
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
+void NodeNormal::ComputeP1(Mesh& mesh, Array<Function>& functions)
 {
+  message("Compute P1 node normal");
   Clear();
-
-  BoundaryMesh& boundary = mesh.exterior_boundary();
-  if (!boundary.numCells() > 0)
+  VertexNormal::Type vtype = VertexNormal::none;
+  switch (type_)
   {
-    return;
+    case NodeNormal::none:
+      vtype = VertexNormal::none;
+      break;
+    case NodeNormal::unit:
+      vtype = VertexNormal::unit;
+      break;
+    case NodeNormal::facet:
+      vtype = VertexNormal::facet;
+      break;
+    default:
+      break;
   }
+  VertexNormal * vn = NULL;
+  if (no_subdomain_)
+  {
+    vn = new VertexNormal(mesh, vtype);
+  }
+  else
+  {
+    vn = new VertexNormal(mesh, *subdomain_, vtype);
+  }
+  uint const gdim = mesh.geometry().dim();
+  real * block[EuclideanSpace::MAX_DIMENSION];
+  for (uint e = 0; e < gdim; ++e)
+  {
+    block[e] = functions[e].create_block();
+  }
+  uint const * dofs = functions[0].space().dofmap().dofsmapping();
+  uint ii = 0;
+  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  {
+    for (VertexIterator v(*cell); !v.end(); ++v)
+    {
+      uint const glob_id = dofs[ii + v.pos()];
+      node_type_[glob_id] = vn->vertex_type().get(v->index());
+    }
+    for (uint d = 0; d < gdim; ++d)
+    {
+      for (VertexIterator v(*cell); !v.end(); ++v)
+      {
+        for (uint e = 0; e < gdim; ++e)
+        {
+          block[e][ii] = vn->basis()[e][d].get(*v);
+        }
+        ++ii;
+      }
+    }
+  }
+  for (uint e = 0; e < gdim; ++e)
+  {
+    functions[e].set_block(block[e]);
+    functions[e].sync_ghosts();
+    delete[] block[e];
+  }
+  delete vn;
+}
+
+//-----------------------------------------------------------------------------
+void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
+{
+  message("Compute Pk node normal");
+  Clear();
+  BoundaryMesh& boundary = mesh.exterior_boundary();
 
   //---------------------------------------------------------------------------
   MeshDistributedData & distdata = mesh.distdata();
@@ -104,34 +180,36 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
   uint const gdim = mesh.geometry().dim();
 
   //
-  if (functions.size() < gdim)
-  {
-    error("Invalid size of storage vector for basis functions in NodeNormal");
-  }
-  for (uint d = 0; d < gdim; ++d)
-  {
-    if (functions[d].type() != Function::discrete)
-    {
-      error("All basis functions in NodeNormal should be discrete");
-    }
-  }
-  FiniteElementSpace const& space = functions[0].space();
-  DofMap const& dofmap = space.dofmap();
-  ScratchSpace scratch(space);
-  uint const value_dim = space.element().value_dimension(0);
-  dolfin_assert(value_dim == gdim);
-  uint const num_facet_dofs = dofmap.num_facet_dofs();
-  uint const num_facet_nodes = num_facet_dofs / value_dim;
-  uint const num_restricted_facet_dofs = dofmap.num_entity_dofs(facet_dim);
+  int rank = dolfin::MPI::processNumber();
+  int pe_size = dolfin::MPI::numProcesses();
+  // Maps facet global index to (weight, normal)
+  _map<uint, FacetData *> facets_data;
+  // Maps dofs to facet global indices
+  _map<uint, NodeData *> nodes_data;
+  //[facet, nb_nodes, [node indices]]
+  Array<uint> * u_sendbuf = new Array<uint>[pe_size];
+  //[weight, normal]
+  Array<real> * r_sendbuf = new Array<real>[pe_size];
+
+  FiniteElementSpace const& spaceN = functions[0].space();
+  DofMap const& dofmapN = spaceN.dofmap();
+  ScratchSpace scratchN(spaceN);
+  uint const value_size = spaceN.element().value_size();
+  dolfin_assert(value_size == gdim);
+  uint const num_facet_dofs = dofmapN.num_facet_dofs();
+  uint const num_facet_nodes = num_facet_dofs / value_size;
+  uint const num_restricted_facet_dofs = dofmapN.num_entity_dofs(facet_dim);
 
   // The implementation works only for dofs located on the exterior boundary
   bool const on_boundary = true;
 
   //--- Create facet data
   // Mark facets in the subdomain based on dofs, naive implementation
-  for (CellIterator b_cell(boundary); !b_cell.end(); ++b_cell)
+  node_type_.clear();
+  _set<uint> used_ghost_nodes;
+  for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
   {
-    Facet facet(mesh, boundary.facet_index(*b_cell));
+    Facet facet(mesh, boundary.facet_index(*bcell));
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint local_facet = cell.index(facet);
 
@@ -140,11 +218,11 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     // is in the subdomain.
     // Skip the facet if it does not satifies one of these conditions.
     if (no_subdomain_
-        || subdomain_->inside(&(b_cell->midpoint())[0], on_boundary))
+        || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {
       // Update cell data and tabulate the coordinates
-      scratch.cell.update(cell, distdata);
-      dofmap.tabulate_coordinates(scratch.coordinates, scratch.cell);
+      scratchN.cell.update(cell, distdata);
+      dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
     }
     else
     {
@@ -152,13 +230,13 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
       if (num_restricted_facet_dofs > 0)
       {
         // Tabulate dofs on facet restriction
-        scratch.cell.update(cell, distdata);
-        dofmap.tabulate_coordinates(scratch.coordinates, scratch.cell);
-        dofmap.tabulate_entity_dofs(scratch.facet_dofs, facet_dim, local_facet);
+        scratchN.cell.update(cell, distdata);
+        dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+        dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, facet_dim, local_facet);
         for (uint i = 0; i < num_restricted_facet_dofs; ++i)
         {
-          uint loc_dof = scratch.facet_dofs[i];
-          if (subdomain_->inside(scratch.coordinates[loc_dof], on_boundary))
+          uint loc_dof = scratchN.facet_dofs[i];
+          if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
           {
             invalid = false;
             break;
@@ -175,16 +253,14 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     // Add facet to the list with facet weight and normal
     FacetData * data = new FacetData();
     data->global_index = distdata.get_facet_global(facet.index());
-    switch (weighting_)
+    switch (type_)
     {
-      case NodeNormal::none: // unit
+      case NodeNormal::none:  // no weight
+      case NodeNormal::unit:  // unit per facet
         data->weight = 1.0;
         break;
-      case NodeNormal::facet: // facet area
-        data->weight = b_cell->volume();
-        break;
-      case NodeNormal::cell: // adjacent cell volume
-        data->weight = cell.volume();
+      case NodeNormal::facet:  // facet area
+        data->weight = bcell->volume();
         break;
       default:
         break;
@@ -192,280 +268,251 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
     data->normal = cell.normal(local_facet);
 
     // Set valid dofs within the current facet
-    dofmap.tabulate_dofs(scratch.dofs, scratch.cell, cell.index());
-    dofmap.tabulate_facet_dofs(scratch.facet_dofs, local_facet);
+    std::set<uint> ghost_nodes;
+    dofmapN.tabulate_dofs(scratchN.dofs, scratchN.cell, cell.index());
+    dofmapN.tabulate_facet_dofs(scratchN.facet_dofs, local_facet);
     for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
     {
-      uint dof0 = scratch.facet_dofs[f_n];
+      uint dof0 = scratchN.facet_dofs[f_n];
       if (no_subdomain_
-          || subdomain_->inside(scratch.coordinates[dof0], on_boundary))
+          || subdomain_->inside(scratchN.coordinates[dof0], on_boundary))
       {
         // Take global dof index of the first component as node id
-        uint node_id = scratch.dofs[dof0];
+        uint node_id = scratchN.dofs[dof0];
         data->nodes.insert(node_id);
-
-        // Trigger creation of node data if the entry does not exist
-        _map<uint, NodeData *>::iterator it = nodes_.find(node_id);
-        if (it == nodes_.end())
+        node_type_[node_id] = 0;
+        if (!dofmapN.is_ghost(node_id))
         {
-          NodeData * n_data = new NodeData();
-          for (uint d = 0; d < value_dim; ++d)
+          // Trigger creation of owned node data if the entry does not exist
+          _map<uint, NodeData *>::iterator it = nodes_data.find(node_id);
+          if (it == nodes_data.end())
           {
-            uint local_dof = scratch.facet_dofs[d * num_facet_nodes + f_n];
-            n_data->dofs.push_back(scratch.dofs[local_dof]);
-            dolfin_assert(no_subdomain_
-                || subdomain_->inside(scratch.coordinates[local_dof],
-                    on_boundary));
+            NodeData * n_data = new NodeData();
+            for (uint d = 0; d < value_size; ++d)
+            {
+              uint local_dof = scratchN.facet_dofs[d * num_facet_nodes + f_n];
+              n_data->dofs.push_back(scratchN.dofs[local_dof]);
+            }
+            n_data->facets.push_back(data);
+            nodes_data[node_id] = n_data;
           }
-          n_data->facets.push_back(data);
-          nodes_[node_id] = n_data;
+          else
+          {
+            it->second->facets.push_back(data);
+          }
         }
-        else
+        // Add to the set of ghosted dofs for sending data
+        else if(used_ghost_nodes.count(node_id) == 0)
         {
-          it->second->facets.push_back(data);
+          ghost_nodes.insert(node_id);
         }
       }
     }
     dolfin_assert(!data->nodes.empty());
-    facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
+    dolfin_assert(data->nodes.size() == num_facet_nodes);
+    facets_data.insert(std::pair<uint, FacetData *>(data->global_index, data));
+
+    // Collect to send ghosted data to the adjacent ranks
+    //FIXME: Dirty hack, send to all adjacents, not optimal but good enough
+    if (!ghost_nodes.empty())
+    {
+      _set<uint> adjs;
+      for (VertexIterator v(facet); !v.end(); ++v)
+      {
+        if(v->is_shared())
+        {
+          _set<uint> const& a = mesh.distdata().get_shared_adj(*v);
+          adjs.insert(a.begin(), a.end());
+        }
+      }
+      for(_set<uint>::const_iterator ai = adjs.begin(); ai != adjs.end(); ++ai)
+      {
+        // dofs
+        dolfin_assert(ghost_nodes.size() <= num_facet_nodes);
+        u_sendbuf[*ai].push_back(ghost_nodes.size());
+        u_sendbuf[*ai].insert(u_sendbuf[*ai].end(), ghost_nodes.begin(),
+                              ghost_nodes.end());
+        // global index
+        u_sendbuf[*ai].push_back(data->global_index);
+        // weight
+        r_sendbuf[*ai].push_back(data->weight);
+        // normal
+        for (uint d = 0; d < gdim; ++d)
+        {
+          dolfin_assert(std::fabs(data->normal[d]) < 1.0 + DOLFIN_EPS);
+          r_sendbuf[*ai].push_back(data->normal[d]);
+        }
+      }
+      used_ghost_nodes.insert(ghost_nodes.begin(), ghost_nodes.end());
+    }
   }
 
-#ifdef HAVE_MPI
   //--- Exchange data for exterior facets with shared entities
   if (mesh.is_distributed())
   {
-    // Since an entity is shared is shared iff all it lower dimensional entities
+#ifdef HAVE_MPI
+    // Since an entity is shared is shared if all it lower dimensional entities
     // are shared we can loop over shared vertices and stack facets.
     // If non-matching facet are send they will be eventually discarded.
     // This does not hold if the subdomain has a hole in the interior of the
     // facet.
-    uint rank = dolfin::MPI::processNumber();
-    uint pe_size = dolfin::MPI::numProcesses();
-    Array<uint> u_sendbuf;    //[facet, nb_nodes, [node indices]]
-    Array<real> r_sendbuf;    //[weight, normal]
-    uint const r_packet_size = 1 + gdim;
-    _set<uint> used_adj_facets;
-    for (VertexIterator boundary_vertex(boundary); !boundary_vertex.end();
-        ++boundary_vertex)
-    {
-      uint vertex_idx = boundary.vertex_index(*boundary_vertex);
-      if (!mesh.distdata().is_shared(vertex_idx, 0))
-      {
-        continue;
-      }
-
-      Vertex v(mesh, vertex_idx);
-      uint const num_adj_facets = v.numEntities(facet_dim);
-      dolfin_assert(num_adj_facets > 0);
-      uint * adj_facets_idx = v.entities(facet_dim);
-      for (uint f = 0; f < num_adj_facets; ++f)
-      {
-        uint const f_local = adj_facets_idx[f];
-
-        // Avoid sending the same facet twice
-        if (used_adj_facets.count(f_local) > 0)
-        {
-          continue;
-        }
-        used_adj_facets.insert(f_local);
-
-        // Pack data to send buffer
-        uint const f_global = distdata.get_facet_global(f_local);
-        _map<uint, FacetData *>::iterator it = facets_.find(f_global);
-        if (it != facets_.end())
-        {
-          // Append data as the facet shares a dof
-          FacetData * data = it->second;
-          // global index
-          u_sendbuf.push_back(data->global_index);
-          // dofs
-          dolfin_assert(data->nodes.size() > 0);
-          u_sendbuf.push_back(data->nodes.size());
-          for (_set<uint>::const_iterator d_it = data->nodes.begin();
-          d_it != data->nodes.end(); ++d_it)
-          {
-            u_sendbuf.push_back(*d_it);
-          }
-          // weight
-          r_sendbuf.push_back(data->weight);
-          // normal
-          for (uint d = 0; d < gdim; ++d)
-          {
-            r_sendbuf.push_back(data->normal[d]);
-          }
-        }
-      }
-    }
 
     // Exchange values
     MPI_Status status;
     uint src;
     uint dest;
-    MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
 
-    int  u_sendcount = u_sendbuf.size();
+    int u_sendcount = 0;
+    int u_maxsendcount = 0;
     int u_maxrecvcount = 0;
-    int u_recvcount = 0;
-    MPI_Allreduce(&u_sendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
-    uint * u_recvbuf = new uint[u_maxrecvcount];
-
-    int r_sendcount = r_sendbuf.size();
+    int r_sendcount = 0;
+    int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
-    int r_recvcount = 0;
-    MPI_Allreduce(&r_sendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
+    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+    {
+      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
+      r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuf[*it].size()));
+    }
+    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
                   dolfin::MPI::DOLFIN_COMM);
+    dolfin_assert(u_maxrecvcount > 0);
+    MPI_Allreduce(&r_maxsendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
+                  dolfin::MPI::DOLFIN_COMM);
+    dolfin_assert(r_maxrecvcount > 0);
+    uint * u_recvbuf = new uint[u_maxrecvcount];
+    int u_recvcount = 0;
     real * r_recvbuf = new real[r_maxrecvcount];
 
-    for (int proc = 1; proc < pe_size; ++proc)
+    for (int j = 1; j < pe_size; ++j)
     {
-      src = (rank - proc + pe_size) % pe_size;
-      dest = (rank + proc) % pe_size;
+      src = (rank - j + pe_size) % pe_size;
+      dest = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&u_sendbuf[0], u_sendcount, MPI_UNSIGNED, src, 1, u_recvbuf,
-                   u_maxrecvcount, MPI_UNSIGNED, dest, 1,
+      u_sendcount = u_sendbuf[dest].size();
+      MPI_Sendrecv(&u_sendbuf[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
+                   &u_recvbuf[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
                    dolfin::MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
-      MPI_Sendrecv(&r_sendbuf[0], r_sendcount, MPI_DOUBLE, src, 1, r_recvbuf,
-                   r_maxrecvcount, MPI_DOUBLE, dest, 1,
+      r_sendcount = r_sendbuf[dest].size();
+      MPI_Sendrecv(&r_sendbuf[dest][0], r_sendcount, MPI_DOUBLE, dest, 1,
+                   &r_recvbuf[0], r_maxrecvcount, MPI_DOUBLE, src, 1,
                    dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &r_recvcount);
 
-      uint i_r = 0;
-      for (uint i_u = 0; i_u < u_recvcount;)
+      uint iir = 0;
+      for (uint iiu = 0; iiu < uint(u_recvcount);)
       {
-        // Add adjacent process facet data
-        FacetData * data = new FacetData();
-        data->global_index = u_recvbuf[i_u++];
-        uint nb_nodes = u_recvbuf[i_u++];
-        dolfin_assert(nb_nodes > 0);dolfin_assert(nb_nodes <= num_facet_nodes);
-        data->nodes.insert(&u_recvbuf[i_u], &u_recvbuf[i_u + nb_nodes]);
-        i_u += nb_nodes;
-        data->weight = r_recvbuf[i_r++];
-        std::copy(&r_recvbuf[i_r], &r_recvbuf[i_r + gdim], &data->normal[0]);
-        i_r += gdim;
-        facets_.insert(std::pair<uint, FacetData *>(data->global_index, data));
-
-        // Add facet to the nodes' list of adjacent facets
-        for (_set<uint>::const_iterator d_it = data->nodes.begin();
-        d_it != data->nodes.end(); ++d_it)
+        Array<_map<uint, NodeData *>::iterator> valid;
+        uint nb_nodes = u_recvbuf[iiu++];
+        dolfin_assert(nb_nodes <= num_facet_nodes);
+        // Check if one node is owned
+        for (uint n = 0; n < nb_nodes; ++n)
         {
-          // If the node exists on the partition then add the facet
-          _map<uint, NodeData *>::iterator it = nodes_.find(*d_it);
-          if(it != nodes_.end())
+          _map<uint, NodeData *>::iterator it = nodes_data.find(u_recvbuf[iiu++]);
+          if (it != nodes_data.end())
           {
-            it->second->facets.push_back(data);
+            // Process owns the node
+            valid.push_back(it);
+            dolfin_assert(!dofmapN.is_ghost(it->first));
           }
         }
+        uint global_index = u_recvbuf[iiu++];
+
+        if(!valid.empty())
+        {
+          dolfin_assert(mesh.distdata().get_adj_ranks(0).count(src) > 0);
+          // Add facet to adjacent process
+          FacetData * data = new FacetData();
+          data->global_index = global_index;
+          data->weight = r_recvbuf[iir];
+          std::copy(&r_recvbuf[iir+1], &r_recvbuf[iir+1] + gdim, &data->normal[0]);
+
+          // Add facet to the nodes' list of adjacent facets
+          for(uint n = 0; n < valid.size(); ++n)
+          {
+            data->nodes.insert(valid[n]->first);
+            valid[n]->second->facets.push_back(data);
+            valid[n]->second->adjs.push_back(status.MPI_SOURCE);
+          }
+
+          // Add facet
+          facets_data.insert(std::pair<uint, FacetData *>(data->global_index, data));
+        }
+        iir += gdim + 1;
+        dolfin_assert(iiu <= uint(u_recvcount));
       }
+
+      // Clear for reuse
+      u_sendbuf[dest].clear();
+      r_sendbuf[dest].clear();
     }
     delete[] r_recvbuf;
     delete[] u_recvbuf;
-  }
 #endif // HAVE_MPI
+  }
 
   //--- Determine node type from facet normals and compute surface normals
-  real cosalpha_max = std::cos(alpha_max_);
-  real cosalpha = 0.0;
-  uint const num_boundary_dofs = gdim * nodes_.size();
-  uint * dofs = new uint[num_boundary_dofs]; // dof indices
+  real cosalpha = std::cos(alpha_max_);
+  bool const weighted = (type_ != NodeNormal::none);
+  uint const num_boundary_dofs = gdim * nodes_data.size();
+  uint * dofs = new uint[num_boundary_dofs];  // dof indices
   uint * node_dofs = &dofs[0];
-  real * block = new real[gdim * num_boundary_dofs]; // ( n, tau_1, tau_2 )
+  real * block = new real[gdim * num_boundary_dofs];  // ( n, tau_1, tau_2 )
   real * offset = &block[0];
-  Point basis[3]; //TODO: Remove Point
-  for (_map<uint, NodeData *>::iterator it = nodes_.begin();
-  it != nodes_.end(); ++it, node_dofs+=gdim, offset+=gdim)
+  // Initialize cartesian basis
+  Point B[EuclideanSpace::MAX_DIMENSION];
+  for (uint d = 0; d < EuclideanSpace::MAX_DIMENSION; ++d)
   {
+    B[d][d] = 1.0;
+  }
+  // Contains only owned nodes
+  for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
+       it != nodes_data.end(); ++it, node_dofs+=gdim, offset+=gdim)
+  {
+    uint const node_id = it->first;
     NodeData * n_data = it->second;
-    // Copy dof indices to array for vector block set.
-    std::copy(n_data->dofs.begin(),n_data->dofs.end(),node_dofs);
+    dolfin_assert(!dofmapN.is_ghost(node_id));
 
-    //
-    Array<std::pair<real, Point> > surfaces;
-    Array<FacetData *>const & n_facets = n_data->facets;
-    uint const num_facets = n_facets.size();
-
-    uint num_remaining_facets = num_facets;
-    FacetData ** remaining_facets = new FacetData*[num_remaining_facets];
-    std::copy(n_facets.begin(), n_facets.end(), remaining_facets);
-    while(num_remaining_facets > 0)
+    // Collect facets data
+    Array<real> N;
+    Array<real> W;
+    for(uint i = 0; i < n_data->facets.size(); ++i)
     {
-      // Set reference normal as the last of the remaining facet normal
-      // and initialize new surface.
-      Point& reference_normal = remaining_facets[0]->normal;
-      real s_weight = remaining_facets[0]->weight;
-      Point s_normal(reference_normal);
-      uint num_eliminated_facets = 1;
-
-      //
-      uint entry_to_update = 0;
-      for(uint f = 1; f < num_remaining_facets; ++f)
-      {
-        FacetData * curr_facet = remaining_facets[f];
-        cosalpha = curr_facet->normal.dot(reference_normal);
-        if (cosalpha > cosalpha_max)
-        {
-          // Add facet to current surface
-          s_weight += curr_facet->weight;
-          s_normal += curr_facet->weight * curr_facet->normal;
-          ++num_eliminated_facets;
-        }
-        else
-        {
-          // Update current cursor with the facet for next loop
-          remaining_facets[entry_to_update] = curr_facet;
-          ++entry_to_update;
-        }
-      }
-      s_weight /= num_eliminated_facets;
-      s_normal /= s_normal.norm();
-      surfaces.push_back(std::pair<real, Point>(s_weight, s_normal));
-      num_remaining_facets -= num_eliminated_facets;
-
+      FacetData * f_data = n_data->facets[i];
+      // Ghosted facets data only contains ghosted nodes
+      dolfin_assert(f_data->nodes.size() <= num_facet_nodes);
+      N.insert(N.end(), &f_data->normal[0], &f_data->normal[0] + gdim);
+      W.push_back(f_data->weight);
     }
-    // Update node type with the number of discriminated surfaces
-    n_data->node_type = surfaces.size();
+
+    // Compute basis and node type
+    uint numS = VertexNormal::computeBasis(gdim, B, N, W, cosalpha, weighted);
+    uint const node_type = std::min(tdim, numS);
+
+    // Set node type
+    node_type_[node_id] = node_type;
+    n_data->node_type = node_type; // Useless if node data is not reused
     dolfin_assert(n_data->node_type > 0);
-
-    //--- Compute node normals for piecewise linear boundary
-    basis[0] = 0;
-    for(Array<std::pair<real, Point> >::const_iterator s_it = surfaces.begin();
-    s_it != surfaces.end(); ++s_it)
+    // If the node is shared, prepare for synchronization with adjacents
+    for(Array<uint>::const_iterator ait = n_data->adjs.begin();
+        ait != n_data->adjs.end(); ++ait)
     {
-      basis[0] += s_it->first * s_it->second;
-    }
-    basis[0] /= basis[0].norm();
-
-    // Compute tangential vectors
-    switch(gdim)
-    {
-      case 2:
-      ComputeTangents2D(basis);
-      break;
-      case 3:
-      if(n_data->node_type == 1)
-      {
-        ComputeTangents3DSurface(basis);
-      }
-      else
-      {
-        ComputeTangents3D(basis, surfaces.rbegin()->second);
-      }
-      break;
-      default:
-      break;
+      u_sendbuf[*ait].push_back(node_id);
+      u_sendbuf[*ait].push_back(node_type);
     }
 
-    // Copy data to block array, FIXME: avoid copy by removing Points
+    // Copy dof indices to array for vector block set.
+    std::copy(n_data->dofs.begin(),n_data->dofs.end(), node_dofs);
+
+    // Copy data to block array
     for(uint d = 0; d< gdim; ++d)
     {
-      dolfin_assert(std::fabs(basis[d].norm() - 1.0) < DOLFIN_EPS);
-      dolfin_assert(std::fabs(basis[d].dot(basis[(d+1)%(gdim)])) < DOLFIN_EPS);
-
-      std::copy(&basis[d][0], &basis[d][0]+gdim, offset + d*num_boundary_dofs);
+      std::copy(&B[d][0], &B[d][0] + gdim, offset + d*num_boundary_dofs);
     }
+
   }
 
+  // Set vectors, values are synchronized
   for (uint d = 0; d < gdim; ++d)
   {
     GenericVector& v = functions[d].vector();
@@ -474,63 +521,74 @@ void NodeNormal::Compute(Mesh& mesh, Array<Function>& functions)
   }
   delete[] dofs;
   delete[] block;
-}
 
-//-----------------------------------------------------------------------------
-void NodeNormal::ComputeTangents2D(Point (&basis)[3])
-{
-  basis[1][0] = -basis[0][1];
-  basis[1][1] = +basis[0][0];
-}
-
-//-----------------------------------------------------------------------------
-void NodeNormal::ComputeTangents3DSurface(Point (&basis)[3])
-{
-  real norm_inv = 0.0;
-  if (std::fabs(basis[0][0]) >= 0.5 || std::fabs(basis[0][1]) >= 0.5)
+  // Cleanup facets and nodes data
+  for (_map<uint, FacetData *>::iterator it = facets_data.begin();
+       it != facets_data.end(); ++it)
   {
-    norm_inv = 1.
-        / std::sqrt(basis[0][0] * basis[0][0] + basis[0][1] * basis[0][1]);
-    // t11 = n2/n
-    basis[1][0] = basis[0][1] * norm_inv;
-    // t12 = -n1/n
-    basis[1][1] = -basis[0][0] * norm_inv;
-    // t13 = 0
-    basis[1][2] = 0.0;
-    // t21 = -t12*n3
-    basis[2][0] = -basis[1][1] * basis[0][2];
-    // t22 = t11*n3
-    basis[2][1] = basis[1][0] * basis[0][2];
-    // t23 = t12*n1 - t11*n2
-    basis[2][2] = basis[1][1] * basis[0][0] - basis[1][0] * basis[0][1];
+    delete it->second;
   }
-  else
+  facets_data.clear();
+  for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
+       it != nodes_data.end(); ++it)
   {
-    norm_inv = 1.
-        / std::sqrt(basis[0][1] * basis[0][1] + basis[0][2] * basis[0][2]);
-    // t11 = 0
-    basis[1][0] = 0.0;
-    // t12 = -n3/n
-    basis[1][1] = -basis[0][2] * norm_inv;
-    // t13 = n2/n
-    basis[1][2] = basis[0][1] * norm_inv;
-    // t21 = t13*n2 - t12*n3
-    basis[2][0] = basis[1][2] * basis[0][1] - basis[1][1] * basis[0][2];
-    // t22 = -t13*n1
-    basis[2][1] = -basis[1][2] * basis[0][0];
-    // t23 = t12*n1
-    basis[2][2] = basis[1][1] * basis[0][0];
+    delete it->second;
   }
+  nodes_data.clear();
+
+  // Synchronize node type
+  if(mesh.is_distributed())
+  {
+#if HAVE_MPI
+    MPI_Status status;
+    uint src;
+    uint dest;
+    uint const u_size = 2;
+    int u_recvcount = 0;
+    int u_sendcount = 0;
+    int u_maxsendcount = 0;
+    int u_maxrecvcount = 0;
+    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+    {
+      u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
+    }
+    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
+                  dolfin::MPI::DOLFIN_COMM);
+    dolfin_assert(u_maxrecvcount > 0);
+
+    // For each process
+    uint * u_recvbuf = new uint[u_maxrecvcount];
+    for (int j = 1; j < pe_size; ++j)
+    {
+      src = (rank - j + pe_size) % pe_size;
+      dest = (rank + j) % pe_size;
+
+      u_sendcount = u_sendbuf[dest].size();
+      MPI_Sendrecv(&u_sendbuf[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
+                   &u_recvbuf[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
+                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
+
+      // Add node type to the map
+      for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
+      {
+        uint const id = u_recvbuf[iiu];
+        dolfin_assert(node_type_[id] == 0); // Should be sent once
+        dolfin_assert(dofmapN.is_ghost(id));
+        uint const nt = u_recvbuf[iiu + 1];
+        dolfin_assert(nt > 0);
+        node_type_[id] = nt;
+      }
+    }
+    delete[] u_recvbuf;
+#endif
+  }
+
+  delete[] u_sendbuf;
+  delete[] r_sendbuf;
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::ComputeTangents3D(Point (&basis)[3], Point& surface)
-{
-  basis[2] = basis[0].cross(surface);
-  basis[2] /= basis[2].norm();
-  basis[1] = basis[2].cross(basis[0]);
-}
-//-----------------------------------------------------------------------------
 
 }
-

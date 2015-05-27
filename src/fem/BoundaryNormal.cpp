@@ -16,7 +16,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(3, Function(mesh, 0.0)),
+    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh, 0.0)),
     node_type_(mesh)
 {
 }
@@ -26,7 +26,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary.mesh()),
     boundary_(&boundary),
     local_boundary_(false),
-    basis_(3, Function(mesh_, 0.0)),
+    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh_, 0.0)),
     node_type_(mesh_)
 {
 }
@@ -68,7 +68,7 @@ Function& BoundaryNormal::node_type()
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
   uint gdim = space.cell().dim();
-  for (uint i = 0; i < 3; ++i)
+  for (uint i = 0; i < EuclideanSpace::MAX_DIMENSION; ++i)
   {
     basis_[i].init(space);
   }
@@ -88,7 +88,7 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 void BoundaryNormal::write(std::string const& filename)
 {
     std::vector<std::pair<Function *, std::string> > fields;
-    for(uint i = 0 ; i < 3 ; ++i)
+    for(uint i = 0 ; i < EuclideanSpace::MAX_DIMENSION; ++i)
     {
       std::stringstream ss;
       ss << "E" << i;

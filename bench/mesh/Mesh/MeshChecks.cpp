@@ -45,6 +45,7 @@ bool shared_entity_check(MeshEntity& e, bool throw_error)
 {
   bool ret = true;
   uint const index = e.index();
+  uint const dim = e.dim();
   MeshDistributedData const& distdata = e.mesh().distdata();
 
   // A shared entity is... well... shared...
@@ -53,7 +54,7 @@ bool shared_entity_check(MeshEntity& e, bool throw_error)
     ret = false;
     if (throw_error)
     {
-      error("Entity with index %d is not shared.", index);
+      error("Entity of dim %d with index %d is not shared.", dim, index);
     }
   }
 
@@ -138,6 +139,7 @@ bool interior_boundary_entities_check(Mesh& mesh, uint dim, bool throw_error)
   std::vector<uint> * shared_entities = new std::vector<uint>[pe_size];
 
   Array<uint> invalid;
+  mesh.init(boundary.topology().dim() ,dim);
   if (dim == boundary.topology().dim())
   {
     for (CellIterator bcell(boundary); !bcell.end(); ++bcell)

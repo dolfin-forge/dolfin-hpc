@@ -1,4 +1,5 @@
 CFLAGS  = `pkg-config --cflags dolfin`
+CFLAGS += -O3
 LIBS    = `pkg-config --libs dolfin`
 CXX     = `pkg-config --variable=compiler dolfin`
 

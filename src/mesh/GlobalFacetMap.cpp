@@ -62,10 +62,8 @@ void GlobalFacetMap::init()
     findGlobal1D();
     break;
   case 2:
-    findGlobal2D();
-    break;
   case 3:
-    findGlobal3D();
+    findGlobalND();
     break;
   default:
     error("Could not handle local to global map with facet of dim %d", tdim);
@@ -79,6 +77,7 @@ void GlobalFacetMap::findGlobal1D()
   MeshDistributedData const& mddata = _mesh.distdata();
 
   _map<uint,bool>::iterator iter;
+  _mesh.init(tdim - 1, 0);
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Vertex v(_mesh, iter->first);
@@ -92,35 +91,7 @@ void GlobalFacetMap::findGlobal1D()
 
 }
 //-----------------------------------------------------------------------------
-void GlobalFacetMap::findGlobal2D()
-{
-  uint const tdim = _mesh.topology().dim();
-  MeshDistributedData const& mddata = _mesh.distdata();
-
-  _map<uint,bool>::iterator iter;
-  for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
-  {
-    Facet f(_mesh, iter->first);
-    uint num_shared = 0;
-
-    for (VertexIterator v(f); !v.end(); ++v)
-    {
-      if( mddata.is_shared(v->index(), 0) )
-      {
-        ++num_shared;
-      }
-    }
-
-    // Mark as an exterior facet
-    if ( f.numEntities(tdim) == 1 && num_shared < f.numEntities(0) )
-    {
-      global_facet[f.index()] = true;
-    }
-  }
-
-}
-//-----------------------------------------------------------------------------
-void GlobalFacetMap::findGlobal3D()
+void GlobalFacetMap::findGlobalND()
 {
 
   Array<uint> send_buff;
@@ -132,7 +103,7 @@ void GlobalFacetMap::findGlobal3D()
   _map<uint, uint> unassigned;
 
   uint num_un = 0;
-
+  _mesh.init(tdim - 1, 0);
   for(iter = global_facet.begin(); iter != global_facet.end(); ++iter)
   {
     Facet f(_mesh, iter->first);
@@ -146,8 +117,7 @@ void GlobalFacetMap::findGlobal3D()
       }
     }
 
-    if ( f.numEntities(tdim) == 1
-        && num_shared < f.numEntities(0) )
+    if ( f.numEntities(tdim) == 1 && num_shared < f.numEntities(0) )
     {
       global_facet[f.index()] = true;
     }
@@ -270,11 +240,11 @@ void GlobalFacetMap::init()
 {
 }
 //-----------------------------------------------------------------------------
-void GlobalFacetMap::findGlobal2D()
+void GlobalFacetMap::findGlobal1D()
 {
 }
 //-----------------------------------------------------------------------------
-void GlobalFacetMap::findGlobal3D()
+void GlobalFacetMap::findGlobalND()
 {
 }
 //-----------------------------------------------------------------------------

@@ -36,10 +36,7 @@ private:
   void findGlobal1D();
 
   ///
-  void findGlobal2D();
-
-  ///
-  void findGlobal3D();
+  void findGlobalND();
 
   // Map of processor global facets,
   // stores only the facets with shared vertices

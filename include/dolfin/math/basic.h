@@ -162,6 +162,16 @@ inline void seed(unsigned int s)
   rand_seeded = true;
 }
 
+/// Check if Not-a-Number if C99 is not used
+#if __STDC_VERSION__ < 199901L
+#ifndef isnan
+inline bool isnan(real x)
+{
+  return x != x;
+}
+#endif
+#endif
+
 }
 
 #endif

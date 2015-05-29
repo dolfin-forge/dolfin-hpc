@@ -21,19 +21,13 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-bool ghosted_entity_check(MeshEntity& e, bool throw_error);
-
-//-----------------------------------------------------------------------------
-bool shared_entity_check(MeshEntity& e, bool throw_error);
-
-//-----------------------------------------------------------------------------
-bool ghosted_entities_check(Mesh& boundary, uint dim, bool throw_error);
-
-//-----------------------------------------------------------------------------
-bool shared_entities_check(Mesh& boundary, uint dim, bool throw_error);
+void append_shared_adj(MeshEntity const& e, std::vector<uint> shared_entities[]);
 
 //-----------------------------------------------------------------------------
 bool interior_boundary_entities_check(Mesh& mesh, uint dim, bool throw_error);
+
+//-----------------------------------------------------------------------------
+bool exterior_boundary_entities_check(Mesh& mesh, uint dim, bool throw_error);
 
 }
 

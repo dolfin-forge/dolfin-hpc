@@ -40,7 +40,7 @@ dolfin::SubSystemsManager dolfin::SubSystemsManager::sub_systems_manager;
 //-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager() : petsc_initialized(false),
                                          petsc_controls_mpi(false),
-					 zoltan_initialized(false)
+                                         zoltan_initialized(false)
 {
   // Do nothing
 }
@@ -51,7 +51,7 @@ SubSystemsManager::SubSystemsManager(const SubSystemsManager& sub_sys_manager)
 }
 //-----------------------------------------------------------------------------
 SubSystemsManager::~SubSystemsManager()
-{  
+{
 }
 //-----------------------------------------------------------------------------
 void SubSystemsManager::initMPI(int argc, char* argv[])
@@ -197,7 +197,7 @@ void SubSystemsManager::finalizePETSc()
  if ( sub_systems_manager.petsc_initialized )
   {
     PetscFinalize();
- 
+
     #ifdef HAVE_SLEPC
     SlepcFinalize();
     #endif
@@ -209,7 +209,7 @@ void SubSystemsManager::finalizePETSc()
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::MPIinitialized()
 {
-  // This function not affected if MPI_Finalize has been called. It returns 
+  // This function not affected if MPI_Finalize has been called. It returns
   // true if MPI_Init has been called at any point, even if MPI_Finalize has
   // been called.
 

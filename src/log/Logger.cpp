@@ -29,11 +29,7 @@ Logger::Logger() :
     logstream_(&std::cout)
 {
   // Do nothing
-  if (dolfin::MPI::processNumber() > 0)
-  {
-    this->destination_ = silent;
-    std::cout.clear(std::iostream::badbit);
-  }
+  // Do not call MPI function as Logger is a singleton
 }
 //-----------------------------------------------------------------------------
 Logger::~Logger()
@@ -141,6 +137,21 @@ void Logger::setOutputDestination(std::string destination)
     logstream_ = &std::cout;
     message("Unknown output destination, using plain text.");
   }
+}
+//-----------------------------------------------------------------------------
+void Logger::silence()
+{
+  this->destination_ = silent;
+  std::cout.clear(std::iostream::badbit);
+  logstream_ = &std::cout;
+}
+//-----------------------------------------------------------------------------
+void Logger::verbose(uint level)
+{
+  this->destination_ = terminal;
+  std::cout.clear(std::iostream::goodbit);
+  logstream_ = &std::cout;
+  this->debug_level_ = level;
 }
 //-----------------------------------------------------------------------------
 void Logger::setOutputDestination(std::ostream& ostream)

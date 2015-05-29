@@ -52,6 +52,12 @@ public:
   /// Draw progress bar
   void progress (std::string title, real p);
 
+  /// Set silent output
+  void silence();
+
+  /// Set verbose ouput
+  void verbose(uint level = 0);
+
   /// Set output destination ("terminal" or "silent")
   void setOutputDestination(std::string destination);
 

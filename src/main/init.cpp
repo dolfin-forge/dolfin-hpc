@@ -6,23 +6,35 @@
 // First added:  2005-02-13
 // Last changed: 2009-04-22
 
-#include <dolfin/common/constants.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/main/SubSystemsManager.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/main/init.h>
+
+#include <dolfin/common/constants.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/log/log.h>
+#include <dolfin/log/LogManager.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/main/SubSystemsManager.h>
 
 //-----------------------------------------------------------------------------
 void dolfin::dolfin_init(int argc, char* argv[])
 {
-  message("Initializing DOLFIN version %s.", DOLFIN_VERSION);
-  
 #ifdef HAVE_MPI
   SubSystemsManager::initMPI(argc, argv);
-  MPI::initComm();
 #endif
 
-#ifdef HAVE_PETSC 
+  // Cannot use MPI functions before initComm
+  if(MPI::processNumber() > 0)
+  {
+    dolfin::LogManager::logger().silence();
+  }
+  message("Initializing DOLFIN version %s : "
+          "running on %d/%d %s in group %d/%d.\n", DOLFIN_VERSION,
+          dolfin::MPI::numProcesses(),
+          dolfin::MPI::numGlobalProcesses(),
+          (dolfin::MPI::numProcesses() > 1 ? "procs" : "proc"),
+          dolfin::MPI::groupNumber() + 1, dolfin::MPI::numGroups());
+
+#ifdef HAVE_PETSC
   SubSystemsManager::initPETSc(argc, argv);
 #endif
 

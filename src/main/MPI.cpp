@@ -20,12 +20,9 @@
 #ifdef HAVE_MPI
 dolfin::uint dolfin::MPI::processNumber()
 {
-  if (!_this_process)
+  if (!_dolfin_comm)
   {
     SubSystemsManager::initMPI();
-    initComm();
-    MPI_Comm_rank(MPI::DOLFIN_COMM, &this_process);
-    _this_process = true;
   }
 
   return static_cast<uint>(this_process);
@@ -33,15 +30,52 @@ dolfin::uint dolfin::MPI::processNumber()
 //-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::numProcesses()
 {
-  if (!_num_processes)
+  if (!_dolfin_comm)
   {
     SubSystemsManager::initMPI();
-    initComm();
-    MPI_Comm_size(MPI::DOLFIN_COMM, &num_processes);
-    _num_processes = true;
   }
 
   return static_cast<uint>(num_processes);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::groupNumber()
+{
+  if (!_dolfin_comm)
+  {
+    SubSystemsManager::initMPI();
+  }
+
+  return static_cast<uint>(this_group);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGroups()
+{
+  if (!_dolfin_comm)
+  {
+    SubSystemsManager::initMPI();
+  }
+
+  return static_cast<uint>(num_groups);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::processGlobalNumber()
+{
+  if (!_dolfin_comm)
+  {
+    SubSystemsManager::initMPI();
+  }
+
+  return static_cast<uint>(this_process_world);
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGlobalProcesses()
+{
+  if (!_dolfin_comm)
+  {
+    SubSystemsManager::initMPI();
+  }
+
+  return static_cast<uint>(num_processes_world);
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::startTimer()
@@ -68,12 +102,59 @@ dolfin::real dolfin::MPI::stopTimer(real& stime)
   return (MPI_Wtime() - stime);
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::initComm()
+void dolfin::MPI::initComm(int n)
 {
-  if (_dolfin_comm) return;
+  if (_dolfin_comm)
+  {
+    return;
+  }
 
-  MPI_Comm_dup(MPI_COMM_WORLD, &DOLFIN_COMM);
-  _dolfin_comm = true;
+  // Initialize world
+  MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD);
+  MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &this_process_world);
+  MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &num_processes_world);
+  this_seed = std::time(0) + this_process_world;
+
+  // Initialize group(s)
+  int glob_numprocs;
+  MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &glob_numprocs);
+  if ((n > 1) && (glob_numprocs >= n))
+  {
+    MPI_Group glb_group;
+    MPI_Comm_group(MPI::DOLFIN_COMM_WORLD, &glb_group);
+    int rank;
+    MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &rank);
+
+    int const p = glob_numprocs / n;
+    int const k = rank / (glob_numprocs % n ? p + 1 : p);
+    int numprocs = (rank < (p + 1) * (glob_numprocs % n) ? p + 1 : p);
+    int offset = k * p + std::min(k, glob_numprocs % n);
+
+    // Check consistency
+    //int totalprocs;
+    //int value = (rank == offset ? numprocs : 0);
+    //MPI_Allreduce(&value, &totalprocs, 1, MPI_INT, MPI_SUM, MPI::DOLFIN_COMM_WORLD );
+
+    MPI_Group sub_group;
+    int range[3] = { offset, offset + numprocs - 1, 1 };
+    MPI_Group_range_incl(glb_group, 1, &range, &sub_group);
+    MPI_Comm_create(MPI::DOLFIN_COMM_WORLD, sub_group, &MPI::DOLFIN_COMM);
+    MPI_Group_rank(sub_group, &this_process);
+    MPI_Group_size(sub_group, &num_processes);
+    this_group = k;
+    num_groups = n;
+    _dolfin_comm = true;
+  }
+  else
+  {
+    MPI_Comm_dup(MPI::DOLFIN_COMM_WORLD, &MPI::DOLFIN_COMM);
+    MPI_Comm_rank(MPI::DOLFIN_COMM, &this_process);
+    MPI_Comm_size(MPI::DOLFIN_COMM, &num_processes);
+    this_group = 0;
+    num_groups = 1;
+    _dolfin_comm = true;
+  }
+
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::reorderComm(Mesh& mesh)
@@ -171,10 +252,15 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::start_time = 0.0;
-int dolfin::MPI::this_process, dolfin::MPI::num_processes;
-bool dolfin::MPI::_this_process = false;
-bool dolfin::MPI::_num_processes = false;
+int dolfin::MPI::this_process_world = 0;
+int dolfin::MPI::num_processes_world = 0;
+int dolfin::MPI::this_group = 0;
+int dolfin::MPI::num_groups = 0;
+int dolfin::MPI::this_process = 0;
+int dolfin::MPI::num_processes = 0;
+int dolfin::MPI::this_seed = 0;
 bool dolfin::MPI::_dolfin_comm = false;
+MPI_Comm dolfin::MPI::DOLFIN_COMM_WORLD;
 MPI_Comm dolfin::MPI::DOLFIN_COMM;
 #else
 
@@ -189,12 +275,37 @@ dolfin::uint dolfin::MPI::numProcesses()
   return 1;
 }
 //-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::groupNumber()
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGroups()
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::processGlobalNumber()
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGlobalProcesses()
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
 
 #endif
 //-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::seed()
 {
-  static dolfin::uint s = std::time(0) + dolfin::MPI::processNumber();
-  return s;
+  return this_seed;
 }
+//-----------------------------------------------------------------------------
+bool dolfin::MPI::is_valid_rank(uint rank)
+{
+  return rank < static_cast<uint>(num_processes);
+}
+//-----------------------------------------------------------------------------
 

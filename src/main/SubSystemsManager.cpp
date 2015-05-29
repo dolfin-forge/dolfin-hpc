@@ -10,6 +10,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/main/SubSystemsManager.h>
 
 #ifdef HAVE_PETSC
@@ -27,6 +28,9 @@
 #ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>
 #endif
+
+#include <stdlib.h>
+#include <unistd.h>
 
 using namespace dolfin;
 
@@ -62,6 +66,22 @@ void SubSystemsManager::initMPI(int argc, char* argv[])
 #else
   MPI_Init(&argc, &argv);
 #endif
+
+  int n = 1;
+  int c;
+  while( -1 != (c = getopt(argc,argv,"n:")))
+  {
+    switch(c)
+    {
+    case 'n':
+      n = atoi(optarg);
+      break;
+    default:
+      break;
+    }
+  }
+  MPI::initComm(n);
+
 #else
   // Do nothing
 #endif

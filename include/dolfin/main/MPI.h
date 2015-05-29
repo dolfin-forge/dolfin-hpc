@@ -29,11 +29,23 @@ namespace dolfin
   {
   public:
 
-    /// Return proccess number
+    /// Return process number
     static uint processNumber();
 
     /// Return number of processes
     static uint numProcesses();
+
+    /// Return group number
+    static uint groupNumber();
+
+    /// Return number of groups
+    static uint numGroups();
+
+    /// Return process number in world
+    static uint processGlobalNumber();
+
+    /// Return number of processes in world
+    static uint numGlobalProcesses();
 
     /// Start MPI timer
     static void startTimer();
@@ -48,25 +60,35 @@ namespace dolfin
     static real stopTimer(dolfin::real& stime);
 
     /// Setup DOLFIN_COMM MPI communicator
-    static void initComm();
+    static void initComm(int n = 0);
 
     /// Reorder MPI communicator
     static void reorderComm(Mesh& mesh);
 
 #ifdef HAVE_MPI
+    static MPI_Comm DOLFIN_COMM_WORLD;
     static MPI_Comm DOLFIN_COMM;
 #else
+    static int DOLFIN_COMM_WORLD;
     static int DOLFIN_COMM;
 #endif
 
     /// Return seed value for current rank
     static uint seed();
 
+    /// Return if the given rank is valid
+    static bool is_valid_rank(uint rank);
+
   private:
 
     static dolfin::real start_time;
-    static int this_process, num_processes;
-    static bool _this_process, _num_processes;
+    static int this_process_world;
+    static int num_processes_world;
+    static int this_group;
+    static int num_groups;
+    static int this_process;
+    static int num_processes;
+    static int this_seed;
     static bool _dolfin_comm;
   };
 }

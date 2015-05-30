@@ -64,12 +64,22 @@ void dolfin::dolfin_init(int argc, char * argv[])
   {
     dolfin::LogManager::logger().silence();
   }
-  message("Initializing DOLFIN version %s : "
-          "running on %d/%d %s in group %d/%d.\n",
-          DOLFIN_VERSION, dolfin::MPI::numProcesses(),
-          dolfin::MPI::numGlobalProcesses(),
-          (dolfin::MPI::numProcesses() > 1 ? "procs" : "proc"),
-          dolfin::MPI::groupNumber() + 1, dolfin::MPI::numGroups());
+  if (MPI::processGlobalNumber() == 0)
+  {
+    message("Initializing DOLFIN version %s : running on %d %s.\n",
+            DOLFIN_VERSION, dolfin::MPI::numGlobalProcesses(),
+            (dolfin::MPI::numGlobalProcesses() > 1 ? "processes" : "process"));
+  }
+  if (MPI::numGroups() > 1)
+  {
+    message("Group %d/%d : %d %s", dolfin::MPI::groupNumber() + 1,
+            dolfin::MPI::numGroups(), dolfin::MPI::numProcesses(),
+            (dolfin::MPI::numProcesses() > 1 ? "processes" : "process"));
+    if (MPI::groupNumber() > 0)
+    {
+      dolfin::LogManager::logger().silence();
+    }
+  }
 
 #ifdef HAVE_PETSC
   SubSystemsManager::initPETSc(argc, argv);

@@ -15,21 +15,58 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/SubSystemsManager.h>
 
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 //-----------------------------------------------------------------------------
-void dolfin::dolfin_init(int argc, char* argv[])
+void dolfin::dolfin_init(int argc, char * argv[])
 {
+  //--- Process arguments
+  uint const maxopt = 1;
+  uint curopt = 0;
+  int n = 1;
+  char const * const * roargv = argv;
+  for (int i = 0; i < argc; ++i)
+  {
+    if(argv[i] == NULL)
+    {
+      break;
+    }
+    if(strlen(argv[i]) == 2 && roargv[i][0] == '-')
+    {
+      int c = argv[i][1];
+      char const * argi = roargv[++i];
+      switch (c)
+        {
+        case 'n':
+          n = atoi(argi);
+          ++curopt;
+          break;
+        default:
+          break;
+        }
+    }
+    if(curopt == maxopt)
+    {
+      break;
+    }
+  }
+
+  //--- Initialize subsystems
+
 #ifdef HAVE_MPI
-  SubSystemsManager::initMPI(argc, argv);
+  SubSystemsManager::initMPI(argc, argv, n);
 #endif
 
   // Cannot use MPI functions before initComm
-  if(MPI::processNumber() > 0)
+  if (MPI::processNumber() > 0)
   {
     dolfin::LogManager::logger().silence();
   }
   message("Initializing DOLFIN version %s : "
-          "running on %d/%d %s in group %d/%d.\n", DOLFIN_VERSION,
-          dolfin::MPI::numProcesses(),
+          "running on %d/%d %s in group %d/%d.\n",
+          DOLFIN_VERSION, dolfin::MPI::numProcesses(),
           dolfin::MPI::numGlobalProcesses(),
           (dolfin::MPI::numProcesses() > 1 ? "procs" : "proc"),
           dolfin::MPI::groupNumber() + 1, dolfin::MPI::numGroups());

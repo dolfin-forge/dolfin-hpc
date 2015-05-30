@@ -30,7 +30,8 @@ Test::Test(int argc, char *argv[])
   }
 
   int flag;
-  while (-1 != (flag = getopt(argc, argv, "d:m:b")))
+  int i = 0;
+  while (-1 != (flag = getopt(argc, argv, ":d:m:b")))
   {
     switch (flag)
       {
@@ -38,15 +39,17 @@ Test::Test(int argc, char *argv[])
         args.benchmark = true;
         break;
       case 'd':
-        LogManager::logger().setDebugLevel(std::atoi(optarg));
+        args.debug_level = std::atoi(optarg);
+        LogManager::logger().setDebugLevel(args.debug_level);
         break;
       case 'm':
         args.mesh_file = optarg;
         break;
       default:
-        message("Unknown or missing argument");
-        dolfin_finalize();
-        std::exit(1);
+        if(i < argc && (getopt(argc, argv, ":d:m:b") == -1))
+        {
+          ++optind;
+        }
         break;
       }
   }
@@ -62,7 +65,9 @@ void Test::print_args()
 {
   if (dolfin::MPI::processNumber() == 0)
   {
-    std::cout << "mesh : " << args.mesh_file << std::endl;
+    message("benchmark   : %s", args.benchmark);
+    message("debug level : %u", args.debug_level);
+    message("mesh        : %u", args.mesh_file.c_str());
   }
 }
 

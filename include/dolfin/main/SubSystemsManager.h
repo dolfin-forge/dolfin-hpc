@@ -11,8 +11,8 @@
 
 namespace dolfin
 {
-  
-  /// This is a singleton class which manages the initialisation and 
+
+  /// This is a singleton class which manages the initialisation and
   /// finalisation of various sub systems, such as MPI and PETSc.
 
   class SubSystemsManager
@@ -20,7 +20,7 @@ namespace dolfin
   public:
 
     /// Initialise MPI
-    static void initMPI(int argc = 0, char* argv[] = 0);
+    static void initMPI(int argc = 0, char* argv[] = 0, uint n = 0);
 
     /// Initialize PETSc without command-line arguments
     static void initPETSc();
@@ -51,8 +51,8 @@ namespace dolfin
     // Destructor
     ~SubSystemsManager();
 
-    // Check if MPI has been initialised (returns true if MPI has been 
-    //   initialised, even if it is later finalised) 
+    // Check if MPI has been initialised (returns true if MPI has been
+    //   initialised, even if it is later finalised)
     static bool MPIinitialized();
 
     // Singleton instance

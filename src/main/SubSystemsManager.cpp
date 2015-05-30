@@ -29,9 +29,6 @@
 #include <zoltan_cpp.h>
 #endif
 
-#include <stdlib.h>
-#include <unistd.h>
-
 using namespace dolfin;
 
 // Initialise static data
@@ -54,7 +51,7 @@ SubSystemsManager::~SubSystemsManager()
 {
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initMPI(int argc, char* argv[])
+void SubSystemsManager::initMPI(int argc, char* argv[], uint n)
 {
 #ifdef HAVE_MPI
   if( MPIinitialized() )
@@ -67,19 +64,6 @@ void SubSystemsManager::initMPI(int argc, char* argv[])
   MPI_Init(&argc, &argv);
 #endif
 
-  int n = 1;
-  int c;
-  while( -1 != (c = getopt(argc,argv,"n:")))
-  {
-    switch(c)
-    {
-    case 'n':
-      n = atoi(optarg);
-      break;
-    default:
-      break;
-    }
-  }
   MPI::initComm(n);
 
 #else

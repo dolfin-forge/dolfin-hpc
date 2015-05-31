@@ -4,6 +4,7 @@
 // Modified by Garth N. Wells, 2007, 2008.
 // Modified by Anders Logg, 2007.
 // Modified by Niclas Jansson, 2009-2010.
+// Modified by Aurelien Larcher, 2015.
 //
 // First added:  2007-11-30
 // Last changed: 2010-01-13
@@ -17,7 +18,20 @@
 #include <ctime>
 
 //-----------------------------------------------------------------------------
+dolfin::real dolfin::MPI::start_time = 0.0;
+int dolfin::MPI::this_process_world = 0;
+int dolfin::MPI::num_processes_world = 0;
+int dolfin::MPI::this_group = 0;
+int dolfin::MPI::num_groups = 0;
+int dolfin::MPI::this_process = 0;
+int dolfin::MPI::num_processes = 0;
+int dolfin::MPI::this_seed = 0;
+bool dolfin::MPI::_dolfin_comm = false;
+//-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
+MPI_Comm dolfin::MPI::DOLFIN_COMM_WORLD;
+MPI_Comm dolfin::MPI::DOLFIN_COMM;
+//-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::processNumber()
 {
   if (!_dolfin_comm)
@@ -77,29 +91,80 @@ dolfin::uint dolfin::MPI::numGlobalProcesses()
 
   return static_cast<uint>(num_processes_world);
 }
+#else
+
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::processNumber()
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numProcesses()
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::groupNumber()
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGroups()
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::processGlobalNumber()
+{
+  return 0;
+}
+//-----------------------------------------------------------------------------
+dolfin::uint dolfin::MPI::numGlobalProcesses()
+{
+  return 1;
+}
+//-----------------------------------------------------------------------------
+
+#endif
 //-----------------------------------------------------------------------------
 void dolfin::MPI::startTimer()
 {
+#ifdef HAVE_MPI
   MPI_Barrier(MPI::DOLFIN_COMM);
   start_time = MPI_Wtime();
+#else
+  error("Unimplemented without MPI support");
+#endif
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::stopTimer()
 {
+#ifdef HAVE_MPI
   MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - start_time);
+#else
+  error("Unimplemented without MPI support");
+#endif
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::startTimer(real& stime)
 {
+#ifdef HAVE_MPI
   MPI_Barrier(MPI::DOLFIN_COMM);
   stime = MPI_Wtime();
+#else
+  error("Unimplemented without MPI support");
+#endif
 }
 //-----------------------------------------------------------------------------
 dolfin::real dolfin::MPI::stopTimer(real& stime)
 {
+#ifdef HAVE_MPI
   MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - stime);
+#else
+  error("Unimplemented without MPI support");
+#endif
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::initComm(int n)
@@ -108,7 +173,7 @@ void dolfin::MPI::initComm(int n)
   {
     return;
   }
-
+#ifdef HAVE_MPI
   // Initialize world
   MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD);
   MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &this_process_world);
@@ -143,7 +208,6 @@ void dolfin::MPI::initComm(int n)
     MPI_Group_size(sub_group, &num_processes);
     this_group = k;
     num_groups = n;
-    _dolfin_comm = true;
   }
   else
   {
@@ -152,16 +216,16 @@ void dolfin::MPI::initComm(int n)
     MPI_Comm_size(MPI::DOLFIN_COMM, &num_processes);
     this_group = 0;
     num_groups = 1;
-    _dolfin_comm = true;
   }
-
+#endif
+  _dolfin_comm = true;
 }
 //-----------------------------------------------------------------------------
 void dolfin::MPI::reorderComm(Mesh& mesh)
 {
 
   message("Reordering MPI Comm");
-
+#ifdef HAVE_MPI
   int nnodes = (int) numProcesses();
   int *index = new int[nnodes];
   short *neigh = new short[nnodes];
@@ -248,55 +312,8 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   delete[] process_map;
 
   MPI_Comm_free(&TMP_COMM);
-
-}
-//-----------------------------------------------------------------------------
-dolfin::real dolfin::MPI::start_time = 0.0;
-int dolfin::MPI::this_process_world = 0;
-int dolfin::MPI::num_processes_world = 0;
-int dolfin::MPI::this_group = 0;
-int dolfin::MPI::num_groups = 0;
-int dolfin::MPI::this_process = 0;
-int dolfin::MPI::num_processes = 0;
-int dolfin::MPI::this_seed = 0;
-bool dolfin::MPI::_dolfin_comm = false;
-MPI_Comm dolfin::MPI::DOLFIN_COMM_WORLD;
-MPI_Comm dolfin::MPI::DOLFIN_COMM;
-#else
-
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processNumber()
-{
-  return 0;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numProcesses()
-{
-  return 1;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::groupNumber()
-{
-  return 0;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numGroups()
-{
-  return 1;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processGlobalNumber()
-{
-  return 0;
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numGlobalProcesses()
-{
-  return 1;
-}
-//-----------------------------------------------------------------------------
-
 #endif
+}
 //-----------------------------------------------------------------------------
 dolfin::uint dolfin::MPI::seed()
 {
@@ -308,4 +325,3 @@ bool dolfin::MPI::is_valid_rank(uint rank)
   return rank < static_cast<uint>(num_processes);
 }
 //-----------------------------------------------------------------------------
-

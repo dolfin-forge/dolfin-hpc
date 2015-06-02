@@ -355,9 +355,6 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
-  BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
-  MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
-
   FaceKey facekey;
   std::map<FaceKey, uint> face_map;
   std::map<FaceKey, uint> face_id;
@@ -370,9 +367,10 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   _set<uint> used_face;
 
   srand((uint) time(0) + rank);
+  BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
   for (CellIterator bf(local_boundary); !bf.end(); ++bf)
   {
-    Face f(mesh, cell_map->get(*bf));
+    Face f(mesh, local_boundary.facet_index(*bf));
     send_buffer_face(send_buff, mesh, f);
     facekey = face_key(f);
     face_map[facekey] = f.index();

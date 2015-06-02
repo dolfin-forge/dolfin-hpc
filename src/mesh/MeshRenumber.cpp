@@ -50,7 +50,7 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
-  if (mddata.has_valid_numbering(0) || ! mesh.is_distributed())
+  if (mddata.has_valid_numbering(0) || !mesh.is_distributed())
   {
     return false;
   }
@@ -73,12 +73,14 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
     }
   }
 
+  // Collect ghosted entities per owner
   Array<uint> *ghost_buff = new Array<uint> [pe_size];
   for (MeshGhostIterator iter(mddata, 0); !iter.end(); ++iter)
   {
     ghost_buff[iter.owner()].push_back(mddata.get_vertex_global(iter.index()));
   }
 
+  // Exchange data and set numbering
   MPI_Status status;
   Array<uint> send_buff;
   uint src, dest;
@@ -144,7 +146,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if (mesh.topology().dim() < 2 || mddata.has_valid_numbering(1)
-        || ! mesh.is_distributed())
+      || !mesh.is_distributed())
   {
     return false;
   }
@@ -154,12 +156,19 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
-  std::map<EdgeKey, uint> edge_map, edge_id;
-  EdgeKey key;
-  Array<uint> send_buff, send_buff_id;
+  EdgeKey edgekey;
+  std::map<EdgeKey, uint> edge_map;
+  std::map<EdgeKey, uint> edge_id;
+  std::set<EdgeKey> ghosted_edges;
+
+  Array<uint> send_buff;
+  Array<uint> send_buff_id;
   _map<uint,uint> send_mapping;
   _set<uint> used_edge;
 
+  // Collect all potential edges satisfying the necessary condition:
+  // all the vertices are shared with a common adjacent.
+  // Here we just send edges with all shared vertices.
   srand((uint) time(0) + rank);
   for (MeshSharedIterator sv(mddata, 0); !sv.end(); ++sv)
   {
@@ -170,14 +179,15 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
       {
         const uint *edge_v = e->entities(0);
         uint w = (sv.index() == edge_v[0] ? edge_v[1] : edge_v[0]);
+        // Send only if both vertices are shared
         if (mddata.is_shared(w, 0))
         {
-          key = edge_key(edge_v[0], edge_v[1]);
-          edge_map[key] = e->index();
-          edge_id[key] = (uint) rand();
+          edgekey = edge_key(edge_v[0], edge_v[1]);
+          edge_map[edgekey] = e->index();
+          edge_id[edgekey] = (uint) rand();
           send_buff.push_back(mddata.get_vertex_global(edge_v[0]));
           send_buff.push_back(mddata.get_vertex_global(edge_v[1]));
-          send_buff_id.push_back(edge_id[key]);
+          send_buff_id.push_back(edge_id[edgekey]);
         }
         used_edge.insert(e->index());
       }
@@ -217,26 +227,28 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
       {
 
         // Generate edge key
-        key = edge_key(mddata.get_vertex_local(recv_buff[i]),
+        edgekey = edge_key(mddata.get_vertex_local(recv_buff[i]),
                        mddata.get_vertex_local(recv_buff[i + 1]));
 
         // Check if I have the corresponding edge
-        if (edge_id.count(key))
+        if (edge_id.count(edgekey))
         {
-          if (recv_buff_id[i >> 1] < edge_id[key]
-              || (recv_buff_id[i >> 1] == edge_id[key]
+          // Set entity as ghosted based on voting process and remove from map
+          if (recv_buff_id[i >> 1] < edge_id[edgekey]
+              || (recv_buff_id[i >> 1] == edge_id[edgekey]
                   && status.MPI_SOURCE < rank))
           {
-            edge_id.erase(key);
-            mddata.set_ghost(edge_map[key], 1);
+            edge_id.erase(edgekey);
+            mddata.set_ghost(edge_map[edgekey], 1);
+            ghosted_edges.insert(edgekey);
             ++num_ghost;
           }
         }
       }
     }
   }
-
   dolfin_assert(num_ghost == mddata.num_ghost(1));
+  dolfin_assert(num_ghost == ghosted_edges.size());
 
   // Update global number of edges and get offset of local numbering
   uint offset = 0;
@@ -284,15 +296,20 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
       {
 
         // Generate edge key
-        key = edge_key(mddata.get_vertex_local(recv_buff[i]),
+        edgekey = edge_key(mddata.get_vertex_local(recv_buff[i]),
                        mddata.get_vertex_local(recv_buff[i + 1]));
 
-        if (edge_id.count(key))
+        // Set entity as shared and add adjacents
+        if (edge_id.count(edgekey))
         {
           global_buff.push_back(i >> 1);
-          global_buff.push_back(new_global[edge_map[key]]);
-          mddata.set_shared(edge_map[key], 1);
-          mddata.set_shared_adj(edge_map[key], src, 1);
+          global_buff.push_back(new_global[edge_map[edgekey]]);
+          mddata.set_shared(edge_map[edgekey], 1);
+          mddata.set_shared_adj(edge_map[edgekey], status.MPI_SOURCE, 1);
+        }
+        else if (ghosted_edges.count(edgekey))
+        {
+          mddata.set_shared_adj(edge_map[edgekey], status.MPI_SOURCE, 1);
         }
       }
     }
@@ -328,7 +345,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   mddata.init(mesh.topology().dim());
   if (mesh.topology().dim() < 3 || mddata.has_valid_numbering(2)
-        || ! mesh.is_distributed())
+      || !mesh.is_distributed())
   {
     return false;
   }
@@ -341,14 +358,18 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
   MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
 
-  Array<uint> send_buff, send_buff_id;
-  std::map<FaceKey, uint> face_map, face_id;
-  std::map<uint, uint> send_mapping;
   FaceKey facekey;
+  std::map<FaceKey, uint> face_map;
+  std::map<FaceKey, uint> face_id;
+  std::set<FaceKey> ghosted_faces;
+
+  Array<uint> send_buff;
+  Array<uint> send_buff_id;
+  std::map<uint, uint> send_mapping;
+
   _set<uint> used_face;
 
   srand((uint) time(0) + rank);
-
   for (CellIterator bf(local_boundary); !bf.end(); ++bf)
   {
     Face f(mesh, cell_map->get(*bf));
@@ -422,13 +443,14 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
         {
           face_id.erase(facekey);
           mddata.set_ghost(face_map[facekey], 2);
+          ghosted_faces.insert(facekey);
           ++num_ghost;
         }
       }
     }
   }
-
-  dolfin_assert( num_ghost == mddata.num_ghost(2));
+  dolfin_assert(num_ghost == mddata.num_ghost(2));
+  dolfin_assert(num_ghost == ghosted_faces.size());
 
   // Update global number of faces and get offset of local numbering
   uint offset = 0;
@@ -482,7 +504,6 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 
           facekey.insert(key);
           ++num_ok;
-
         }
       }
       if (num_ok < f.numEntities(0))
@@ -496,6 +517,10 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
         global_buff.push_back(new_global[face_map[facekey]]);
         mddata.set_shared(face_map[facekey], 2);
         mddata.set_shared_adj(face_map[facekey], src, 2);
+      }
+      else if (ghosted_faces.count(facekey))
+      {
+        mddata.set_shared_adj(face_map[facekey], status.MPI_SOURCE, 1);
       }
     }
 
@@ -530,7 +555,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
   MeshDistributedData& mddata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
   mddata.init(tdim);
-  if (mddata.has_valid_numbering(tdim) || ! mesh.is_distributed())
+  if (mddata.has_valid_numbering(tdim) || !mesh.is_distributed())
   {
     return false;
   }
@@ -557,7 +582,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
 bool MeshRenumber::remap_facets(Mesh& mesh)
 {
   uint const facetdim = mesh.topology().dim() - 1;
-  if (mesh.distdata().has_valid_mapping(facetdim) || ! mesh.is_distributed())
+  if (mesh.distdata().has_valid_mapping(facetdim) || !mesh.is_distributed())
   {
     return false;
   }
@@ -699,13 +724,13 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
                  dolfin::MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
-    if(recv_count != num_recv_entities)
+    if (recv_count != num_recv_entities)
     {
       error("Mismatch between the number of sent and received entities.");
     }
 
     // Skip non-adjacent ranks
-    if(distdata.get_adj_ranks(dim).count(src) == 0) continue;
+    if (distdata.get_adj_ranks(dim).count(src) == 0) continue;
 
     // Shared and ghost mappings
     Array<uint>& shared_mapping0 = distdata.get_shared_mapping_to(src, dim);
@@ -728,21 +753,22 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
       // Fill shared_mappings between local and adjacent shared ordering
       // Anytime facets are send/received from a given rank, they are ordered
       // according to the given arrays.
-      shared_mapping0[sit->second] = entity; // send (local to adjacent)
-      shared_mapping1[entity] = sit->second; // recv (adjcent to local)
+      shared_mapping0[sit->second] = entity;  // send (local to adjacent)
+      shared_mapping1[entity] = sit->second;  // recv (adjcent to local)
 
       _map<uint, uint>::const_iterator git = ghost_idx[src].find(glb);
       if (git != ghost_idx[src].end())
       {
         //
-        dolfin_assert(distdata.is_ghost(distdata.get_local(glb, dim), dim)
-            && (distdata.get_owner(distdata.get_local(glb, dim), dim)
-                == (uint) src));
+        dolfin_assert(
+            distdata.is_ghost(distdata.get_local(glb, dim), dim)
+                && (distdata.get_owner(distdata.get_local(glb, dim), dim)
+                    == (uint ) src));
 
         // Fill the ghost mapping between local ghost iterator ordering and the
         // ordering of corresponding *shared* entities for the owner rank.
-        ghost_mapping0[git->second] = ghost_entity; // send
-        ghost_mapping1[ghost_entity] = git->second; // recv
+        ghost_mapping0[git->second] = ghost_entity;  // send
+        ghost_mapping1[ghost_entity] = git->second;  // recv
         ++ghost_entity;
       }
 

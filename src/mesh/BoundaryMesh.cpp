@@ -21,25 +21,26 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     Mesh(),
-    MeshDependent(mesh)
+    MeshDependent(mesh),
+    type_(type)
 {
   switch (type)
   {
-  case BoundaryMesh::exterior:
-    // Exterior boundary i.e facets at the domain boundary
-    BoundaryComputation::computeBoundary(mesh, *this);
-    break;
-  case BoundaryMesh::interior:
-    // Interior boundary i.e facets between processors
-    BoundaryComputation::computeInteriorBoundary(mesh, *this);
-    break;
-  case BoundaryMesh::full:
-    // Full boundary incl. facets between processors
-    BoundaryComputation::computeLocalBoundary(mesh, *this);
-    break;
-  default:
-    error("Unknown boundary mesh type.");
-    break;
+    case BoundaryMesh::exterior:
+      // Exterior boundary i.e facets at the domain boundary
+      BoundaryComputation::computeBoundary(mesh, *this);
+      break;
+    case BoundaryMesh::interior:
+      // Interior boundary i.e facets between processors
+      BoundaryComputation::computeInteriorBoundary(mesh, *this);
+      break;
+    case BoundaryMesh::full:
+      // Full boundary incl. facets between processors
+      BoundaryComputation::computeLocalBoundary(mesh, *this);
+      break;
+    default:
+      error("Unknown boundary mesh type.");
+      break;
   }
 }
 
@@ -60,5 +61,13 @@ uint BoundaryMesh::vertex_index(Vertex const& boundary_vertex)
 {
   return this->data().meshFunction("vertex map")->get(boundary_vertex);
 }
+
+//-----------------------------------------------------------------------------
+BoundaryMesh::Type BoundaryMesh::boundary_type() const
+{
+  return type_;
+}
+
+//-----------------------------------------------------------------------------
 
 }

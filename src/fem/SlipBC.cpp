@@ -69,7 +69,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
                SubSystem const& sub_system) :
     BoundaryCondition("SlipBC", mesh, sub_domain, sub_system),
     mesh(mesh),
-    node_normal(new NodeNormal(mesh)),
+    node_normal(new NodeNormal(mesh, sub_domain)),
     node_normal_local(true),
     As(NULL)
 {
@@ -106,7 +106,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   // Optimize loops if the space is linear Lagrange: the space dimension is
   // the number of vertices times the number of components
   bool const is_P1 = (scratch.space_dimension
-      == mesh.type().numEntities(0) * scratch.size);
+                        == mesh.type().numEntities(0) * scratch.size);
 
   if (As == NULL || As->size(0) != A.size(0) || As->size(1) != A.size(1))
   {
@@ -357,7 +357,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
         uint const ni_Udof0 = fulldofs[scratch.offset + ni_celldof0];
 
         // Skip the node if it has already been encountered
-        if (visited_nodes.find(ni_Udof0) != visited_nodes.end())
+        if (visited_nodes.count(ni_Udof0))
         {
           continue;
         }
@@ -402,7 +402,6 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
           {
             uint ii = scratch.dofs[voff + ni_celldof0];
             node_Ndofs.push_back(ii);
-            dolfin_assert(!Ndofmap.is_ghost(ii));
           }
           uint node_id = node_Ndofs[0];
           applyNodeBC(A, b, mesh, node_id, node_Udofs, node_Ndofs);
@@ -452,7 +451,7 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
     As->set(&a_slip_row[i][0], 1, &Udofs[i], nb_cols, &a_col_indices[i][0]);
 
     // Fill component i-th basis vector
-    real (&v)[3] = basis_[i];
+    real (&v)[EuclideanSpace::MAX_DIMENSION] = basis_[i];
     basis_functions[i].vector().get(&v[0], gdim, &Ndofs[0]);
 
     // Determine maximum component (to be simplified)

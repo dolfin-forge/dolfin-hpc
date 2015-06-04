@@ -238,14 +238,22 @@ public:
   /// Return renumbering (used for testing)
   std::map<uint, uint> getMap() const;
 
-  /// Return is the dof is ghosted (used for testing)
+  /// Return is the dof is ghosted, return false if the index is not known (!)
   bool is_ghost(uint i) const;
+
+  /// Return is the dof is shared, return false if the index is not known (!)
+  bool is_shared(uint i) const;
 
   /// Display mapping
   void disp() const;
 
   /// Return if the dof map has been renumbered
   bool renumbered() const;
+
+  //--- Debugging
+
+  /// Check consistency of ghosted entities
+  bool check(bool throw_error = false);
 
 private:
 
@@ -306,6 +314,9 @@ private:
   // Vertex ordering map used for tabulation of vector Lagrange P1
   uint * vertex_map_;
 
+  //
+  bool distributed_by_entities_;
+
   // Pretabulated parallel dof map
   mutable uint * pretabulated_dofmap_;
   uint pretabulated_dofmap_size_;
@@ -315,6 +326,9 @@ private:
 
   // Provide easy access to map for testing
   std::map<uint, uint> map_;
+
+  // Set of shared dofs
+  _set<uint> shared_;
 
   // Set of ghost dofs
   _set<uint> ghosts_;

@@ -53,6 +53,9 @@ public:
   /// Return if the distributed data is empty
   bool empty() const;
 
+  /// Return topological dimension of the distributed data
+  uint dim() const;
+
   /// Return if the distributed data is finalized for the given dimension
   bool is_finalized(uint dim) const;
 
@@ -282,6 +285,51 @@ public:
   /// Display basic information
   void disp() const;
 
+  //--- Debugging
+
+  ///
+  bool check(bool throw_error = false) const;
+
+  ///
+  inline bool check_shared(uint local_index, uint dim, bool error = false) const
+  {
+    bool ret = true;
+    // A shared entity is (wait for it) ... shared *dong*
+    ret &= this->is_shared(local_index, dim);
+    // Check adjacency
+    _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+    // A shared entity should have adjacents
+    ret &= (!ai.empty());
+    // Check that all adjacents have a valid rank and listed as adjacent
+    _set<uint> const& aa = this->get_adj_ranks(dim);
+    for(_set<uint>::const_iterator it = ai.begin(); it != ai.end(); ++it)
+    {
+      ret &= MPI::is_valid_rank(*it);
+      ret &= (aa.count(*it) > 0);
+    }
+    //
+    return ret;
+  }
+
+  ///
+  inline bool check_ghost(uint local_index, uint dim, bool error = false) const
+  {
+    bool ret = true;
+    // Check shared assertions
+    ret &= this->check_shared(local_index, dim, error);
+    // A ghost entity is (wait for it) ... ghost *dong*
+    ret &= this->is_ghost(local_index, dim);
+    // Check ownership
+    uint const owner = this->get_owner(local_index, dim);
+    // The owner is not self
+    ret &= (owner != MPI::processNumber());
+    // The owner is adjacent
+    _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+    ret &= (ai.count(owner) >0);
+    //
+    return ret;
+  }
+
 protected:
 
 private:
@@ -371,6 +419,18 @@ public:
     return iter_ == distdata_.ghost_[dim_].end();
   }
 
+  inline _set<uint> const& adj() const
+  {
+    return distdata_.shared_adj_[dim_][*iter_];
+  }
+
+  //--- Debugging ---
+
+  inline bool check() const
+  {
+    return distdata_.check_ghost(*iter_, dim_);
+  }
+
 private:
 
   MeshDistributedData& distdata_;
@@ -395,6 +455,7 @@ public:
       distdata_(distdata),
       dim_(i)
   {
+    dolfin_assert(i <= distdata.dim());
     iter_ = distdata_.shared_[i].begin();
   }
 
@@ -421,6 +482,13 @@ public:
   inline _set<uint> const& adj() const
   {
     return distdata_.shared_adj_[dim_][*iter_];
+  }
+
+  //--- Debugging ---
+
+  inline bool check() const
+  {
+    return distdata_.check_shared(*iter_, dim_);
   }
 
 private:

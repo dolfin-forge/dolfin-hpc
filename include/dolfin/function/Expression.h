@@ -69,11 +69,7 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const
   {
-    if (i > 0)
-    {
-      return 0;
-    }
-    return 1;
+    return ( i > 0 ? 0 : 1 );
   }
 
   /// Evaluate function at given point

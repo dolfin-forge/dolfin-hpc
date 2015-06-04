@@ -2,13 +2,13 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2009.
-// Modified by Aurélien Larcher, 2012-13. (partial rewrite)
+// Modified by Aurélien Larcher, 2012-15. (partial rewrite... then rewrite)
 //
 // First added:  2007-05-01
-// Last changed: 2009-03-17
+// Last changed: 2015-05-27
 
-#ifndef __VERTEXNORMAL_H
-#define __VERTEXNORMAL_H
+#ifndef __VERTEX_NORMAL_H
+#define __VERTEX_NORMAL_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
@@ -20,6 +20,7 @@ namespace dolfin
 
 class BoundaryMesh;
 class Mesh;
+class SubDomain;
 
 /**
  *  DOCUMENTATION:
@@ -33,11 +34,12 @@ class Mesh;
 
 class VertexNormal
 {
+
 public:
 
   enum Type
   {
-    none, facet, cell
+    none, unit, facet
   };
 
   /// Copy constructor
@@ -45,6 +47,9 @@ public:
 
   /// Create normal, tangents for the boundary of mesh
   VertexNormal(Mesh& mesh, Type weight);
+
+  /// Create normal, tangents for the boundary of mesh given a subdomain
+  VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight);
 
   /// Destructor
   ~VertexNormal();
@@ -56,37 +61,34 @@ public:
   Mesh& mesh();
 
   ///
-  Array<MeshFunction<real> *> const& basis() const;
+  Array<MeshFunction<real> *>& basis();
 
   ///
-  MeshFunction<uint> const& vertex_type() const;
+  MeshFunction<uint>& vertex_type();
+
+  ///
+  static uint computeBasis(uint gdim, Point B[], Array<real> N, Array<real> W,
+                           real cosalpha_max, bool weighted);
 
 private:
 
   // Cleanup
-  void Clear();
+  void clear();
 
   // Compute normals to the boundary nodes
-  void ComputeSimpleNormal(Mesh& mesh);
+  void computeNormal(Mesh& mesh);
 
-  // Compute normals to the boundary nodes
-  void ComputeNormal(Mesh& mesh);
-
-  ///
-  void CacheSharedArea(Mesh& mesh, BoundaryMesh& boundary);
-
-  /// Implemented as a 3D vector.
-  void NormalizeVector(real (&v)[3]);
-
-  ///
-  void GetLocalFacetsData(uint const& gdim, Vertex& vertex,
-                          MeshFunction<uint>& cell_map, uint& nb_neigh,
-                          Array<real>& normals, Array<real>& weights);
+  //
+  void getFacetData(VertexNormal::Type type, Mesh& mesh, BoundaryMesh& boundary,
+                    Vertex& bvertex, Array<real>& normals,
+                    Array<real>& weights);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
   // Global mesh
   Mesh& mesh_;
+
+  SubDomain const * const subdomain_;
 
   //
   Array<MeshFunction<real> *> basis_;
@@ -94,27 +96,10 @@ private:
   // Define vertex type: 1 surface, 2 edge, 3 surface
   MeshFunction<uint> vertex_type_;
 
-  //
-  Array<real> shared_normal;
-  std::map<uint, Array<real> > shared_facetnormals_block_;
-  std::map<uint, Array<real> > shared_facetweights_block_;
-
-  // Number of boundary mesh cells (facets for global) neighbouring a boundary
-  // vertex
-  std::map<uint, uint> num_neigh_cells_;
-  std::map<uint, uint> shared_offsetidx_;
-  uint vertex_offset_;
-  uint facetnormals_offset_;
-  uint facetweights_offset_;
-
-  // Should be set to the size of the offset information stored for each vertex
-  // Padding = 3: (NbNeighbouringCells, FacetNormalOffset, FacetWeightOffset)
-  static uint const offsetidx_padding_ = 3;
-
   // Maximum absolute angle between two neighbouring facets
   real const alpha_max_;
 
-  Type weighting_;
+  Type type_;
 
 };
 
@@ -125,25 +110,15 @@ inline Mesh& VertexNormal::mesh()
 }
 
 //-----------------------------------------------------------------------------
-inline Array<MeshFunction<real> *> const& VertexNormal::basis() const
+inline Array<MeshFunction<real> *>& VertexNormal::basis()
 {
   return basis_;
 }
 
 //-----------------------------------------------------------------------------
-inline MeshFunction<uint> const& VertexNormal::vertex_type() const
+inline MeshFunction<uint>& VertexNormal::vertex_type()
 {
   return vertex_type_;
-}
-
-//-----------------------------------------------------------------------------
-inline void VertexNormal::NormalizeVector(real (&v)[3])
-{
-  real nrm = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-  dolfin_assert(nrm > 0);
-  v[0] /= nrm;
-  v[1] /= nrm;
-  v[2] /= nrm;
 }
 
 }

@@ -40,8 +40,12 @@ public:
   /// Return vertex index in the mesh associated with the boundary vertex
   uint vertex_index(Vertex const& boundary_vertex);
 
+  /// Return type
+  Type boundary_type() const;
+
 private:
 
+  Type type_;
 
 };
 

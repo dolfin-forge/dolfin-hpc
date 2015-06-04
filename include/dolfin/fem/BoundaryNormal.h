@@ -43,9 +43,6 @@ public:
   /// Return the basis (n, tau, 0) in 2d or (n, tau1, tau2) in 3d
   Array<Function>& basis();
 
-  /// Return the node type
-  Function& node_type();
-
   /// Initialization of basis functions and node type for given space
   void init(FiniteElementSpace const& space);
 

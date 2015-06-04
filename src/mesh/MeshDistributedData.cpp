@@ -104,6 +104,12 @@ bool MeshDistributedData::empty() const
           (cached_global_size_[0] == 0) : (global_indices_[0].size() == 0));
 }
 //-----------------------------------------------------------------------------
+uint MeshDistributedData::dim() const
+{
+  dolfin_assert(topological_dim_ <= EuclideanSpace::MAX_DIMENSION);
+  return topological_dim_;
+}
+//-----------------------------------------------------------------------------
 bool MeshDistributedData::is_finalized(uint dim) const
 {
   dolfin_assert(dim <= cell_dim_);
@@ -388,6 +394,15 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
     offset = 0;
     num_global_[dim] = topology_.size(dim);
   }
+}
+//-----------------------------------------------------------------------------
+uint MeshDistributedData::num_local(uint dim) const
+{
+  if (dim > cell_dim_)
+  {
+    error("Trying to get local number of entities for invalid dimension.");
+  }
+  return (empty() ? topology_.size(dim) : global_indices_[dim].size());
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_local(uint i, uint dim) const
@@ -839,6 +854,57 @@ void MeshDistributedData::disp() const
   }
   end();
 }
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::check(bool throw_error) const
+{
+  bool ret = true;
+  MeshDistributedData& disdata = const_cast<MeshDistributedData&>(*this);
+
+  //
+  _set<uint> vertex_adj = disdata.get_adj_ranks(0);
+  for (uint d = 0; d <= topological_dim_; ++d)
+  {
+    // Check consistency of count
+    ret &= disdata.num_owned(d) <= disdata.num_ghost(d);
+    ret &= disdata.num_ghost(d) <= disdata.num_shared(d);
+    ret &= disdata.num_shared(d) <= disdata.num_local(d);
+    ret &= disdata.num_local(d) <= disdata.num_global(d);
+
+    // Check consistency of local to global numbering
+    uint const num_local = disdata.num_local(d);
+    uint const num_global = disdata.num_global(d);
+    for (uint i = 0; i < num_local; ++i)
+    {
+      uint const g = disdata.get_global(i, d);
+      ret &= disdata.has_global(g, d);
+      ret &= (g < num_global);
+      ret &= (i == disdata.get_local(g, d));
+    }
+
+    // Check shared entities
+    for (MeshSharedIterator s(disdata, d); !s.end(); ++s)
+    {
+      ret &= s.check();
+    }
+    // Check ghost entities
+    for (MeshGhostIterator g(disdata, d); !g.end(); ++g)
+    {
+      ret &= g.check();
+    }
+
+    // Check consistency of adjacent ranks
+    if(d > 0)
+    {
+      for (_set<uint>::const_iterator a = vertex_adj.begin();
+           a != vertex_adj.end(); ++a)
+      {
+        ret &= (vertex_adj.count(*a) > 0);
+      }
+    }
+  }
+  return ret;
+}
+//-----------------------------------------------------------------------------
 
 }
 

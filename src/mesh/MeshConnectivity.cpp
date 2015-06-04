@@ -43,7 +43,10 @@ MeshConnectivity const& MeshConnectivity::operator=(
   // Allocate data
   size_ = other.size_;
   num_entities_ = other.num_entities_;
-  connections_ = new uint[size_];
+  if(size_ > 0)
+  {
+    connections_ = new uint[size_];
+  }
   offsets_ = new uint[num_entities_ + 1];
 
   // Copy data
@@ -81,18 +84,21 @@ void MeshConnectivity::init(uint num_entities, uint num_connections)
   size_ = num_entities * num_connections;
   this->num_entities_ = num_entities;
 
-  // Allocate data
-  connections_ = new uint[size_];
+  // Initialize offsets
   offsets_ = new uint[num_entities + 1];
-
-  // Initialize data
-  for (uint i = 0; i < size_; ++i)
-  {
-    connections_[i] = 0;
-  }
   for (uint e = 0; e <= num_entities; ++e)
   {
     offsets_[e] = e * num_connections;
+  }
+
+  // Initialize connections
+  if (size_ > 0)
+  {
+    connections_ = new uint[size_];
+    for (uint i = 0; i < size_; ++i)
+    {
+      connections_[i] = 0;
+    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -113,10 +119,13 @@ void MeshConnectivity::init(Array<uint> const& num_connections)
   offsets_[num_entities_] = size_;
 
   // Initialize connections
-  connections_ = new uint[size_];
-  for (uint i = 0; i < size_; ++i)
+  if (size_ > 0)
   {
-    connections_[i] = 0;
+    connections_ = new uint[size_];
+    for (uint i = 0; i < size_; ++i)
+    {
+      connections_[i] = 0;
+    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -170,12 +179,15 @@ void MeshConnectivity::set(const Array<Array<uint> >& connections)
   offsets_[num_entities_] = size_;
 
   // Initialize connections
-  this->connections_ = new uint[size_];
-  for (uint e = 0; e < num_entities_; ++e)
+  if(size_ > 0)
   {
-    for (uint i = 0; i < connections[e].size(); ++i)
+    this->connections_ = new uint[size_];
+    for (uint e = 0; e < num_entities_; ++e)
     {
-      this->connections_[offsets_[e] + i] = connections[e][i];
+      for (uint i = 0; i < connections[e].size(); ++i)
+      {
+        this->connections_[offsets_[e] + i] = connections[e][i];
+      }
     }
   }
 }

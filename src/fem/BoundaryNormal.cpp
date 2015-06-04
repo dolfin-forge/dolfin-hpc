@@ -16,7 +16,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(3, Function(mesh, 0.0)),
+    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh, 0.0)),
     node_type_(mesh)
 {
 }
@@ -26,7 +26,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary.mesh()),
     boundary_(&boundary),
     local_boundary_(false),
-    basis_(3, Function(mesh_, 0.0)),
+    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh_, 0.0)),
     node_type_(mesh_)
 {
 }
@@ -59,16 +59,10 @@ Array<Function>& BoundaryNormal::basis()
 }
 
 //-----------------------------------------------------------------------------
-Function& BoundaryNormal::node_type()
-{
-  return node_type_;
-}
-
-//-----------------------------------------------------------------------------
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
   uint gdim = space.cell().dim();
-  for (uint i = 0; i < 3; ++i)
+  for (uint i = 0; i < EuclideanSpace::MAX_DIMENSION; ++i)
   {
     basis_[i].init(space);
   }
@@ -87,16 +81,23 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 //-----------------------------------------------------------------------------
 void BoundaryNormal::write(std::string const& filename)
 {
-    std::vector<std::pair<Function *, std::string> > fields;
-    for(uint i = 0 ; i < 3 ; ++i)
-    {
-      std::stringstream ss;
-      ss << "E" << i;
-      fields.push_back(std::pair<Function *, std::string>(&this->basis()[i],ss.str()));
-    }
-    fields.push_back(std::pair<Function *, std::string>(&this->node_type(),"TYPE"));
-    File f(filename);
-    f << fields;
+  if(this->basis()[0].type() != Function::discrete)
+  {
+    error("Boundary normal is not initialized on a discrete space.");
+  }
+  std::vector<std::pair<Function *, std::string> > fields;
+  for (uint i = 0; i < EuclideanSpace::MAX_DIMENSION; ++i)
+  {
+    std::stringstream ss;
+    ss << "E" << i;
+    fields.push_back(
+        std::pair<Function *, std::string>(&basis_[i], ss.str()));
+  }
+  fields.push_back(
+      std::pair<Function *, std::string>(&node_type_, "TYPE"));
+  File f(filename);
+  f << fields;
+  message("Saved node normal basis and node type in %s.", filename.c_str());
 }
 
 }

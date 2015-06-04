@@ -34,7 +34,7 @@ public:
 
   enum Type
   {
-    none, facet, cell
+    none, unit, facet
   };
 
   /// Create normal, tangents for the boundary of mesh
@@ -62,12 +62,8 @@ private:
   void Clear();
 
   /// Compute boundary normal basis
-  void Compute(Mesh& mesh, Array<Function>& basis);
-
-  /// Compute tangential vectors
-  void ComputeTangents2D(Point (& basis)[3]);
-  void ComputeTangents3DSurface(Point (& basis)[3]);
-  void ComputeTangents3D(Point (& basis)[3], Point& surface);
+  void ComputeP1(Mesh& mesh, Array<Function>& basis);
+  void ComputePk(Mesh& mesh, Array<Function>& basis);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
@@ -80,14 +76,18 @@ private:
   /// as belonging to different hyperplanes.
   real const alpha_max_;
 
-  /// Weighting use to computing the node normal from facet normals.
-  Type const weighting_;
+  /// Type of weight used for computing the node normal from facet normals.
+  Type const type_;
+
+  ///
+  _map<uint, uint> node_type_;
 
   struct FacetData
   {
-    uint global_index;_set<uint> nodes;
+    uint global_index;
     real weight;
     Point normal;
+    _set<uint> nodes;
 
     void disp() const
     {
@@ -107,13 +107,11 @@ private:
     }
   };
 
-  // Maps facet global index to (weight, normal)
-  _map<uint, FacetData *> facets_;
-
   struct NodeData
   {
     uint node_type;
     Array<uint> dofs;
+    Array<uint> adjs;
     Array<FacetData *> facets;
 
     void disp() const
@@ -124,15 +122,13 @@ private:
       begin("");
       cout << "node_type    : " << node_type << endl;
       cout << "dofs         : " << (uint) dofs.size() << endl;
+      cout << "adjs         : " << (uint) adjs.size() << endl;
       cout << "facets       : " << (uint) facets.size() << endl;
       // End indentation
       end();
       cout << endl;
     }
   };
-
-  // Maps dofs to facet global indices
-  _map<uint, NodeData *> nodes_;
 
 };
 

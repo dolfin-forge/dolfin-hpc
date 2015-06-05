@@ -409,14 +409,59 @@ bool TriangleCell::intersects(MeshEntity const& triangle, Point const& p) const
   real const * x1 = geometry.x(v1);
   real const * x2 = geometry.x(v2);
 
-  // Test orientation of p w.r.t. each edge
+  // The return value of orient2d is defined as twice the signed measure of
+  // the triangle defined by the points given as arguments.
   real tol = geometry.abs_tolerance(2);
-  real d1 = orient2d( x0, x1, &p[0]);
-  if (d1 < (-tol)) return false;
-  real d2 = orient2d( x1, x2, &p[0]);
-  if (d2 < (-tol)) return false;
-  real d3 = orient2d( x2, x0, &p[0]);
-  if (d3 < (-tol)) return false;
+  real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
+                        + (x1[1] - x0[1])*(x1[1] - x0[1]));
+  real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
+                        + (x2[1] - x1[1])*(x2[1] - x1[1]));
+  real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
+                        + (x0[1] - x2[1])*(x0[1] - x2[1]));
+
+  if (geometry.dim() == 2)
+  {
+    // Test orientation of p w.r.t. each edge
+    real d1 = orient2d( x0, x1, &p[0]);
+    if (d1 < (- 2.0  * tol * l0)) return false;
+    real d2 = orient2d( x1, x2, &p[0]);
+    if (d2 < (- 2.0  * tol * l1)) return false;
+    real d3 = orient2d( x2, x0, &p[0]);
+    if (d3 < (- 2.0  * tol * l2)) return false;
+  }
+  else if  (geometry.dim() == 3)
+  {
+    real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
+    real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
+    real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
+    real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
+
+    // Check direction of the normal to the triangle; |n.ez|/||n|| >= sqrt(2)/2
+    if(zz >= 0.5)
+    {
+      // Test orientation of p w.r.t. each edge in (x,y) plane
+      real d1 = orient2d( &x0[0], &x1[0], &p[0]);
+      if (d1 < (- 2.0  * tol * l0)) return false;
+      real d2 = orient2d( &x1[0], &x2[0], &p[0]);
+      if (d2 < (- 2.0  * tol * l1)) return false;
+      real d3 = orient2d( &x2[0], &x0[0], &p[0]);
+      if (d3 < (- 2.0  * tol * l2)) return false;
+    }
+    else
+    {
+      // Test orientation of p w.r.t. each edge in (y,z) plane
+      real d1 = orient2d( &x0[1], &x1[1], &p[1]);
+      if (d1 < (- 2.0  * tol * l0)) return false;
+      real d2 = orient2d( &x1[1], &x2[1], &p[1]);
+      if (d2 < (- 2.0  * tol * l1)) return false;
+      real d3 = orient2d( &x2[1], &x0[1], &p[1]);
+      if (d3 < (- 2.0  * tol * l2)) return false;
+    }
+  }
+  else
+  {
+    error("Collision of triangle with point only implemented in R^2 and R^3");
+  }
 
   return true;
 }
@@ -450,34 +495,41 @@ bool TriangleCell::intersects(MeshEntity const& tri, Point const& p1,
 
   real d1, d2, d3;
 
-  // Test orientation of each vertex w.r.t. p1-p2
-  d1 = orient2d(&p1[0], &p2[0], x0);
-  d2 = orient2d(&p1[0], &p2[0], x1);
-  d3 = orient2d(&p1[0], &p2[0], x2);
+  if (geometry.dim() == 2)
+  {
+    // Test orientation of each vertex w.r.t. p1-p2
+    d1 = orient2d(&p1[0], &p2[0], x0);
+    d2 = orient2d(&p1[0], &p2[0], x1);
+    d3 = orient2d(&p1[0], &p2[0], x2);
 
-  if (d1 < 0 && d2 < 0 && d3 < 0) return false;
-  if (d1 > 0 && d2 > 0 && d3 > 0) return false;
+    if (d1 < 0 && d2 < 0 && d3 < 0) return false;
+    if (d1 > 0 && d2 > 0 && d3 > 0) return false;
 
-  // Line p1-p2 intersects triangle but both p1 and p2 are
-  // on the negative side of x0-x1:
-  d1 = orient2d(x0, x1, &p1[0]);
-  d2 = orient2d(x0, x1, &p2[0]);
+    // Line p1-p2 intersects triangle but both p1 and p2 are
+    // on the negative side of x0-x1:
+    d1 = orient2d(x0, x1, &p1[0]);
+    d2 = orient2d(x0, x1, &p2[0]);
 
-  if (d1 < 0 && d2 < 0) return false;
+    if (d1 < 0 && d2 < 0) return false;
 
-  // Line p1-p2 intersects triangle but both p1 and p2 are
-  // on the negative side of x1-x2:
-  d1 = orient2d(x1, x2, &p1[0]);
-  d2 = orient2d(x1, x2, &p2[0]);
+    // Line p1-p2 intersects triangle but both p1 and p2 are
+    // on the negative side of x1-x2:
+    d1 = orient2d(x1, x2, &p1[0]);
+    d2 = orient2d(x1, x2, &p2[0]);
 
-  if (d1 < 0 && d2 < 0) return false;
+    if (d1 < 0 && d2 < 0) return false;
 
-  // Line p1-p2 intersects triangle but both p1 and p2 are
-  // on the negative side of x2-x0:
-  d1 = orient2d(x2, x0, &p1[0]);
-  d2 = orient2d(x2, x0, &p2[0]);
+    // Line p1-p2 intersects triangle but both p1 and p2 are
+    // on the negative side of x2-x0:
+    d1 = orient2d(x2, x0, &p1[0]);
+    d2 = orient2d(x2, x0, &p2[0]);
 
-  if (d1 < 0 && d2 < 0) return false;
+    if (d1 < 0 && d2 < 0) return false;
+  }
+  else
+  {
+    error("Collision of triangle with segment only implemented in R^2");
+  }
 
   return true;
 }
@@ -498,7 +550,7 @@ uint TriangleCell::findEdge(uint i, Cell const& cell) const
 
   // Look for edge satisfying ordering convention
   MeshTopology const& topology = cell.mesh().topology();
-  for (uint j = 0; j < 3; ++j)
+  for (uint j = 0; j < EuclideanSpace::MAX_DIMENSION; ++j)
   {
     uint const * ev = topology(1, 0)(e[j]);
     dolfin_assert(ev);

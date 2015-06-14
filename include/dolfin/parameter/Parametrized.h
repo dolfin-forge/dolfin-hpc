@@ -7,8 +7,8 @@
 #ifndef __PARAMETRIZED_H
 #define __PARAMETRIZED_H
 
-#include "Parameter.h"
-#include "ParameterList.h"
+#include <dolfin/parameter/Parameter.h>
+#include <dolfin/parameter/ParameterList.h>
 
 namespace dolfin
 {
@@ -28,9 +28,10 @@ namespace dolfin
   /// function, in any given object, takes the value specified for the
   /// parent, whereas any parameter value that has been specified
   /// locally overrides the value specified for the parent.
-  
+
   class Parametrized
   {
+
   public:
 
     /// Constructor
@@ -41,7 +42,7 @@ namespace dolfin
 
     /// Add local parameter
     void add(std::string key, Parameter value);
-    
+
     /// Set value of local parameter
     void set(std::string key, Parameter value);
 
@@ -60,10 +61,10 @@ namespace dolfin
   private:
 
     // Local database of parameters
-    ParameterList parameters;
+    ParameterList parameters_;
 
     // Pointer to parent
-    const Parametrized* parent;
+    Parametrized const * parent_;
 
   };
 

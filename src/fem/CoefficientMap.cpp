@@ -56,7 +56,7 @@ Function * CoefficientMap::get(std::string const& label) const
 }
 
 //-----------------------------------------------------------------------------
-bool CoefficientMap::size() const
+uint CoefficientMap::size() const
 {
   return this->map_.size();
 }
@@ -82,7 +82,7 @@ void CoefficientMap::clear()
 }
 
 //-----------------------------------------------------------------------------
-void CoefficientMap::display() const
+void CoefficientMap::disp() const
 {
   cout << "CoefficientMap" << endl;
   cout << "--------------" << endl;

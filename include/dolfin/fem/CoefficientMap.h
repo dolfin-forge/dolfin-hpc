@@ -40,7 +40,7 @@ public:
   Function * get(std::string const& label) const;
 
   /// Return the size of the coefficient map
-  bool size() const;
+  uint size() const;
 
   /// Set coefficient label to map to the given function
   void set(std::string const& label, dolfin::Function& coefficient);
@@ -49,7 +49,7 @@ public:
   void clear();
 
   /// Display information
-  void display() const;
+  void disp() const;
 
 private:
 

@@ -498,6 +498,33 @@ void DofMap::flatten(ufc::dofmap const * dofmap,
 }
 
 //-----------------------------------------------------------------------------
+void DofMap::flatten(ufc::dofmap const * dofmap,
+                     Array<ufc::dofmap const *>& stack) const
+{
+  // Single root element or max level is set to zero, return immediately
+  if (dofmap->num_sub_dofmaps())
+  {
+    stack.push_back(dofmap->create());
+    return;
+  }
+  // Go one level down
+  for (uint s = 0; s < dofmap->num_sub_dofmaps(); ++s)
+  {
+    ufc::dofmap const * sub = dofmap->create_sub_dofmap(s);
+    if (sub->num_sub_dofmaps() == 0)
+    {
+      // Leaf dofmap
+      stack.push_back(sub);
+    }
+    else
+    {
+      // Branch
+      flatten(sub, stack);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 bool DofMap::is_vectorizable() const
 {
   bool ret = true;

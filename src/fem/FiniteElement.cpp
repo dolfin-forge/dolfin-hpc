@@ -255,6 +255,33 @@ void FiniteElement::flatten(ufc::finite_element const * element,
 }
 
 //-----------------------------------------------------------------------------
+void FiniteElement::flatten(ufc::finite_element const * element,
+                            Array<ufc::finite_element const *>& stack) const
+{
+  // Single root element or max level is set to zero, return immediately
+  if (element->num_sub_elements() == 0)
+  {
+    stack.push_back(element->create());
+    return;
+  }
+  // Go one level down
+  for (uint s = 0; s < element->num_sub_elements(); ++s)
+  {
+    ufc::finite_element const * sub = element->create_sub_element(s);
+    if (sub->num_sub_elements() == 0)
+    {
+      // Leaf element
+      stack.push_back(sub);
+    }
+    else
+    {
+      // Branch
+      flatten(sub, stack);
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
 bool FiniteElement::is_vectorizable() const
 {
   bool ret = true;

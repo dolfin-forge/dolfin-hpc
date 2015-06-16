@@ -93,8 +93,8 @@ protected:
   Family const family_;
   FiniteElement const sub_element_;
   type<dolfin::uint> const dim_;
-  ValueArray const value_shape_; // Not implemented
-  std::map<dolfin::uint, dolfin::uint> const symmetry_; // Not implemented
+  ValueArray const value_shape_;  // Not implemented
+  std::map<dolfin::uint, dolfin::uint> const symmetry_;  // Not implemented
 
   List const sub_elements_;
 

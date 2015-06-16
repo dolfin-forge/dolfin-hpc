@@ -15,10 +15,9 @@ TensorElement::TensorElement(Family::Type family, Cell const& cell,
     FiniteElementBase("TensorElement"),
     family_(Family::Tensor),
     sub_element_(family, cell, degree),
-    value_shape_(
-        ValueArray(2, dim) + sub_element_.value_shape()),
+    value_shape_(ValueArray(2, dim) + sub_element_.value_shape()),
     symmetry_(),
-    sub_elements_(dim*dim, &sub_element_)
+    sub_elements_(dim * dim, &sub_element_)
 {
   createReprStr();
 }
@@ -30,10 +29,10 @@ TensorElement::TensorElement(repr_t const& repr) :
     sub_element_(Family(arg(0)).type(), Cell(arg(1)),
                  type<dolfin::uint>(arg(2))),
     value_shape_(
-        ValueArray(2, type<dolfin::uint>(arg(3)))
-            + sub_element_.value_shape()),
+        ValueArray(2, type<dolfin::uint>(arg(3))) + sub_element_.value_shape()),
     symmetry_(),
-    sub_elements_(type<dolfin::uint>(arg(3))*type<dolfin::uint>(arg(3)), &sub_element_)
+    sub_elements_(type<dolfin::uint>(arg(3)) * type<dolfin::uint>(arg(3)),
+                  &sub_element_)
 {
   createReprStr();
 }
@@ -135,13 +134,13 @@ void TensorElement::createReprStr()
   // Create string representation
   std::stringstream ssrepr;
   ssrepr << "TensorElement(" << this->family().repr() << ", " << cell().repr()
-      << ", " << this->degree() << ", " << quadrature_scheme().repr() << ")";
+         << ", " << this->degree() << ", " << quadrature_scheme().repr() << ")";
   repr_ = ssrepr.str();
-
+  
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << " vector element of degree "
-      << this->degree() << " on a " << cell().str() << ": "
-      << sub_elements_.size() << " x " << sub_element_.str() << ">";
+        << this->degree() << " on a " << cell().str() << ": "
+        << sub_elements_.size() << " x " << sub_element_.str() << ">";
   str_ = ssstr.str();
 }
 

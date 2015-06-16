@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #ifndef __UFL_CONDITIONAL_H_
 #define __UFL_CONDITIONAL_H_
@@ -13,27 +13,26 @@
 namespace ufl
 {
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  Condition
-   *
-   *  @brief  Provides an interface complying with UFL Condition.
-   */
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Condition
+ *
+ *  @brief  Provides an interface complying with UFL Condition.
+ */
 
-  class Condition : public Class
-  {
+class Condition : public Class
+{
 
-    public:
-      
-      ///
-      ~Condition();
+public:
 
-      ///
-      static Condition const * create(Object::repr_t const& repr);
+  ///
+  ~Condition();
 
+  ///
+  static Condition const * create(Object::repr_t const& repr);
 
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
 //      ///
 //      free_indices() const;
@@ -47,8 +46,8 @@ namespace ufl
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
+//--- INTERFACE inherited from UFLClass -------------------------------------
+
 //      /// __repr__
 //      repr_t const& repr() const;
 //
@@ -58,363 +57,356 @@ namespace ufl
 //      ///
 //      void display() const;
 
-    protected:
+protected:
 
-      ///
-      Condition(std::string const& name);
+  ///
+  Condition(std::string const& name);
 
-      ///
-      Condition(std::string const& name, repr_t const& repr);
+  ///
+  Condition(std::string const& name, repr_t const& repr);
 
 //      repr_t const repr_;
 //      std::string const str_;
-  };
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  BinaryCondition
+ *
+ *  @brief  Provides an interface complying with UFL BinaryCondition.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  BinaryCondition
-   *
-   *  @brief  Provides an interface complying with UFL BinaryCondition.
-   */
+class BinaryCondition : public Condition
+{
 
-  class BinaryCondition : public Condition
-  {
+public:
 
-    public:
+  ///
+  BinaryCondition(std::string const& name, Expression const& left_expression,
+                  Expression const& right_expression);
 
-      ///
-      BinaryCondition(std::string const& name,
-          Expression const& left_expression, Expression const& right_expression);
+  ///
+  BinaryCondition(std::string const& name, repr_t const& repr);
 
-      ///
-      BinaryCondition(std::string const& name, repr_t const& repr);
+  ///
+  ~BinaryCondition();
 
-      ///
-      ~BinaryCondition();
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const& repr() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-      /// __str__
-      std::string const& str() const;
+  /// __str__
+  std::string const& str() const;
 
-      ///
-      void display() const;
+  ///
+  void display() const;
 
-    private:
+private:
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e1, Expression const& e2);
-      std::vector<Expression const *> const expressions_;
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e1,
+                                                         Expression const& e2);
+  std::vector<Expression const *> const expressions_;
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  repr_t const repr_;
+  std::string const str_;
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  EQ
+ *
+ *  @brief  Provides an interface complying with UFL EQ.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  EQ
-   *
-   *  @brief  Provides an interface complying with UFL EQ.
-   */
+class EQ : public BinaryCondition
+{
 
-  class EQ : public BinaryCondition
-  {
+public:
 
-    public:
+  ///
+  EQ(Expression const& left_expression, Expression const& right_expression);
 
-      ///
-      EQ(Expression const& left_expression, Expression const& right_expression);
+  ///
+  EQ(repr_t const& repr);
 
-      ///
-      EQ(repr_t const& repr);
-
-      ///
-      ~EQ();
-
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
-
-  };
-
-
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  NE
-   *
-   *  @brief  Provides an interface complying with UFL NE.
-   */
-
-  class NE : public BinaryCondition
-  {
-
-    public:
-
-      ///
-      NE(Expression const& left_expression, Expression const& right_expression);
-
-      ///
-      NE(repr_t const& repr);
-
-      ///
-      ~NE();
+  ///
+  ~EQ();
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-  };
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  NE
+ *
+ *  @brief  Provides an interface complying with UFL NE.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  LE
-   *
-   *  @brief  Provides an interface complying with UFL LE.
-   */
+class NE : public BinaryCondition
+{
 
-  class LE : public BinaryCondition
-  {
+public:
 
-    public:
+  ///
+  NE(Expression const& left_expression, Expression const& right_expression);
 
-      ///
-      LE(Expression const& left_expression, Expression const& right_expression);
+  ///
+  NE(repr_t const& repr);
 
-      ///
-      LE(repr_t const& repr);
-
-      ///
-      ~LE();
-
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
-
-  };
-
-
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  GE
-   *
-   *  @brief  Provides an interface complying with UFL GE.
-   */
-
-  class GE : public BinaryCondition
-  {
-
-    public:
-
-      ///
-      GE(Expression const& left_expression, Expression const& right_expression);
-
-      ///
-      GE(repr_t const& repr);
-
-      ///
-      ~GE();
+  ///
+  ~NE();
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-  };
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  LE
+ *
+ *  @brief  Provides an interface complying with UFL LE.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  LT
-   *
-   *  @brief  Provides an interface complying with UFL LT.
-   */
+class LE : public BinaryCondition
+{
 
-  class LT : public BinaryCondition
-  {
+public:
 
-    public:
+  ///
+  LE(Expression const& left_expression, Expression const& right_expression);
 
-      ///
-      LT(Expression const& left_expression, Expression const& right_expression);
+  ///
+  LE(repr_t const& repr);
 
-      ///
-      LT(repr_t const& repr);
-
-      ///
-      ~LT();
-
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
-
-  };
-
-
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  GT
-   *
-   *  @brief  Provides an interface complying with UFL GT.
-   */
-
-  class GT : public BinaryCondition
-  {
-
-    public:
-
-      ///
-      GT(Expression const& left_expression, Expression const& right_expression);
-
-      ///
-      GT(repr_t const& repr);
-
-      ///
-      ~GT();
+  ///
+  ~LE();
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-  };
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  GE
+ *
+ *  @brief  Provides an interface complying with UFL GE.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  AndCondition
-   *
-   *  @brief  Provides an interface complying with UFL AndCondition.
-   */
+class GE : public BinaryCondition
+{
 
-  class AndCondition : public BinaryCondition
-  {
+public:
 
-    public:
+  ///
+  GE(Expression const& left_expression, Expression const& right_expression);
 
-      ///
-      AndCondition(Expression const& left_expression, Expression const& right_expression);
+  ///
+  GE(repr_t const& repr);
 
-      ///
-      AndCondition(repr_t const& repr);
-
-      ///
-      ~AndCondition();
-
-//      ///
-//      evaluate(self, x, mapping, component, index_values):
-
-  };
-
-
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  OrCondition
-   *
-   *  @brief  Provides an interface complying with UFL OrCondition.
-   */
-
-  class OrCondition : public BinaryCondition
-  {
-
-    public:
-
-      ///
-      OrCondition(Expression const& left_expression, Expression const& right_expression);
-
-      ///
-      OrCondition(repr_t const& repr);
-
-      ///
-      ~OrCondition();
+  ///
+  ~GE();
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-  };
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  LT
+ *
+ *  @brief  Provides an interface complying with UFL LT.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  NotCondition
-   *
-   *  @brief  Provides an interface complying with UFL NotCondition.
-   */
+class LT : public BinaryCondition
+{
 
-  class NotCondition : public Condition
-  {
+public:
 
-    public:
+  ///
+  LT(Expression const& left_expression, Expression const& right_expression);
 
-      ///
-      NotCondition(Expression const& e);
+  ///
+  LT(repr_t const& repr);
 
-      ///
-      NotCondition(repr_t const& repr);
-
-      ///
-      ~NotCondition();
+  ///
+  ~LT();
 
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const& repr() const;
+};
 
-      /// __str__
-      std::string const& str() const;
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  GT
+ *
+ *  @brief  Provides an interface complying with UFL GT.
+ */
 
-      ///
-      void display() const;
+class GT : public BinaryCondition
+{
 
-    private:
+public:
+
+  ///
+  GT(Expression const& left_expression, Expression const& right_expression);
+
+  ///
+  GT(repr_t const& repr);
+
+  ///
+  ~GT();
+
+//      ///
+//      evaluate(self, x, mapping, component, index_values):
+
+};
+
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  AndCondition
+ *
+ *  @brief  Provides an interface complying with UFL AndCondition.
+ */
+
+class AndCondition : public BinaryCondition
+{
+
+public:
+
+  ///
+  AndCondition(Expression const& left_expression,
+               Expression const& right_expression);
+
+  ///
+  AndCondition(repr_t const& repr);
+
+  ///
+  ~AndCondition();
+
+//      ///
+//      evaluate(self, x, mapping, component, index_values):
+
+};
+
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  OrCondition
+ *
+ *  @brief  Provides an interface complying with UFL OrCondition.
+ */
+
+class OrCondition : public BinaryCondition
+{
+
+public:
+
+  ///
+  OrCondition(Expression const& left_expression,
+              Expression const& right_expression);
+
+  ///
+  OrCondition(repr_t const& repr);
+
+  ///
+  ~OrCondition();
+
+//      ///
+//      evaluate(self, x, mapping, component, index_values):
+
+};
+
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  NotCondition
+ *
+ *  @brief  Provides an interface complying with UFL NotCondition.
+ */
+
+class NotCondition : public Condition
+{
+
+public:
+
+  ///
+  NotCondition(Expression const& e);
+
+  ///
+  NotCondition(repr_t const& repr);
+
+  ///
+  ~NotCondition();
+
+//      ///
+//      evaluate(self, x, mapping, component, index_values):
+
+//--- INTERFACE inherited from UFLClass -------------------------------------
+
+  /// __repr__
+  repr_t const& repr() const;
+
+  /// __str__
+  std::string const& str() const;
+
+  ///
+  void display() const;
+
+private:
 
 //      Expression const expression_;
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e);
-      std::vector<Expression const *> const expressions_;
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e);
+  std::vector<Expression const *> const expressions_;
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  repr_t const repr_;
+  std::string const str_;
+};
 
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Conditional
+ *
+ *  @brief  Provides an interface complying with UFL Conditional.
+ */
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  Conditional
-   *
-   *  @brief  Provides an interface complying with UFL Conditional.
-   */
+class Conditional : public Class
+{
 
-  class Conditional : public Class
-  {
+public:
 
-    public:
+  ///
+  Conditional(Condition const& c, Expression const& s1, Expression const& s2);
 
-      ///
-      Conditional(Condition const& c, Expression const& s1, Expression const& s2);
+  ///
+  Conditional(repr_t const& repr);
 
-      ///
-      Conditional(repr_t const& repr);
+  ///
+  ~Conditional();
 
-      ///
-      ~Conditional();
-
-
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
 //      ///
-      std::vector<Expression const *> const& operands() const;
+  std::vector<Expression const *> const& operands() const;
 
 //      ///
 //      free_indices() const;
@@ -428,29 +420,31 @@ namespace ufl
 //      ///
 //      evaluate(self, x, mapping, component, index_values):
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const& repr() const;
+//--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __str__
-      std::string const& str() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-      ///
-      void display() const;
+  /// __str__
+  std::string const& str() const;
 
-    private:
+  ///
+  void display() const;
 
-      Condition const * c_;
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e1, Expression const& e2);
-      std::vector<Expression const *> const expressions_;
+private:
+
+  Condition const * c_;
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e1,
+                                                         Expression const& e2);
+  std::vector<Expression const *> const expressions_;
 //      Expression const e1_;
 //      Expression const e2_;
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  repr_t const repr_;
+  std::string const str_;
+};
 
 } /* namespace ufl */
 #endif /* __UFL_CONDITIONAL_H_ */

@@ -18,7 +18,8 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
     family_(family),
     cell_(cell),
     degree_(degree),
-    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
+    value_shape_(family_.value_rank(),
+                 family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(*this, this->family(), cell, this->degree(),
@@ -29,10 +30,10 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
   {
     error("The finite element definition is not valid.");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree
-      << quadrature_scheme().str() << " on a " << cell.str() << ">";
+        << quadrature_scheme().str() << " on a " << cell.str() << ">";
   str_ = ssstr.str();
 }
 
@@ -42,7 +43,8 @@ FiniteElement::FiniteElement(repr_t const& repr) :
     family_(arg(0)),
     cell_(arg(1)),
     degree_(arg(2)),
-    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
+    value_shape_(family_.value_rank(),
+                 family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(repr)
@@ -52,10 +54,10 @@ FiniteElement::FiniteElement(repr_t const& repr) :
   {
     error("The finite element definition is not valid.");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree()
-      << quadrature_scheme().str() << " on a " << cell().str() << ">";
+        << quadrature_scheme().str() << " on a " << cell().str() << ">";
   str_ = ssstr.str();
 }
 

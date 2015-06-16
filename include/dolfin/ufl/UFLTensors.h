@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #ifndef __UFL_TENSORS_H_
 #define __UFL_TENSORS_H_
@@ -14,174 +14,178 @@
 namespace ufl
 {
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  ListTensor
-   *
-   *  @brief  Provides an interface complying with UFL ListTensor.
-   *  UFL operator type: Wraps a list of expressions into a tensor 
-   *  valued expression of one higher rank.
-   */
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  ListTensor
+ *
+ *  @brief  Provides an interface complying with UFL ListTensor.
+ *  UFL operator type: Wraps a list of expressions into a tensor
+ *  valued expression of one higher rank.
+ */
 
-  /*
-  class ListTensor : public Expression
-  {
+/*
+ class ListTensor : public Expression
+ {
 
-    public:
+ public:
 
-      ///
-      ListTensor(Expression const& expression);
+ ///
+ ListTensor(Expression const& expression);
 
-      ///
-      ListTensor(repr_t const & repr);
+ ///
+ ListTensor(repr_t const & repr);
 
-      ///
-      ~ListTensor();
+ ///
+ ~ListTensor();
 
-      //--- INTERFACE -------------------------------------------------------------
+ //--- INTERFACE -------------------------------------------------------------
 
-      ///
-      std::vector<Expression const *> const operands() const;
+ ///
+ std::vector<Expression const *> const operands() const;
 
-//      ///
-//      free_indices() const;
+ //      ///
+ //      free_indices() const;
 
-//      ///
-//      index_dimensions() const;
+ //      ///
+ //      index_dimensions() const;
 
-//      ///
-//      shape() const;
+ //      ///
+ //      shape() const;
 
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+ ///Return the tensor shape of the expression.
+ virtual ValueArray const shape() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+ ///Return a tuple with the free indices (unassigned) of the expression.
+ virtual tuple<Index> const free_indices() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions();
+ ///Return a dict with the free or repeated indices in the expression
+ ///as keys and the dimensions of those indices as values.
+ virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions();
 
-      /// UFL: Return whether this expression is spatially constant over each cell
-      bool const is_cellwise_constant() const;
+ /// UFL: Return whether this expression is spatially constant over each cell
+ bool const is_cellwise_constant() const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const& repr() const;
+ //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __str__
-      std::string const& str() const;
+ /// __repr__
+ repr_t const& repr() const;
 
-      ///
-      void display() const;
+ /// __str__
+ std::string const& str() const;
 
-    private:
+ ///
+ void display() const;
 
-      ///contains Expression as first and MultiIndex as second
-      std::vector<Expression const *> expressions_;
-//      Expression const expression_;
-//      MultiIndex const index_;
+ private:
 
-      repr_t const repr_;
-      std::string const str_;
+ ///contains Expression as first and MultiIndex as second
+ std::vector<Expression const *> expressions_;
+ //      Expression const expression_;
+ //      MultiIndex const index_;
 
-  };
-  */
+ repr_t const repr_;
+ std::string const str_;
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  ComponentTensor
-   *
-   *  @brief  Provides an interface complying with UFL Tensors.
-   *  UFL operator type: Maps the free indices of a scalar valued 
-   *  expression to tensor axes.
-   */
+ };
+ */
 
-  class ComponentTensor : public Expression
-  {
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  ComponentTensor
+ *
+ *  @brief  Provides an interface complying with UFL Tensors.
+ *  UFL operator type: Maps the free indices of a scalar valued
+ *  expression to tensor axes.
+ */
 
-    public:
+class ComponentTensor : public Expression
+{
 
-      ///
-      ComponentTensor(Expression const& expression, MultiIndex const& multi_index);
+public:
 
-      ///
-      ComponentTensor(Expression const& expression, tuple<IndexBase> const& indices, 
-          dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
+  ///
+  ComponentTensor(Expression const& expression, MultiIndex const& multi_index);
 
-      ///
-      ComponentTensor(Expression const& expression, tuple<FixedIndex> const& indices);
+  ///
+  ComponentTensor(Expression const& expression, tuple<IndexBase> const& indices,
+                  dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
 
-      ///
-      ComponentTensor(repr_t const & repr);
+  ///
+  ComponentTensor(Expression const& expression,
+                  tuple<FixedIndex> const& indices);
 
-      ///
-      ~ComponentTensor();
+  ///
+  ComponentTensor(repr_t const & repr);
 
-      ///
-      virtual std::vector<Class const* > const operands (std::string const& name) const;
+  ///
+  ~ComponentTensor();
 
-      ///
-      virtual std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  virtual std::vector<Class const*> const operands(
+      std::string const& name) const;
 
-      //--- INTERFACE -------------------------------------------------------------
+  ///
+  virtual std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      static ComponentTensor const * create(Object::repr_t const& repr);
+  //--- INTERFACE -------------------------------------------------------------
 
-      ///
-      std::vector<Expression const *> const operands() const;
+  static ComponentTensor const * create(Object::repr_t const& repr);
 
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+  ///
+  std::vector<Expression const *> const operands() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+  ///Return the tensor shape of the expression.
+  virtual ValueArray const shape() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  ///Return a tuple with the free indices (unassigned) of the expression.
+  virtual tuple<Index> const free_indices() const;
 
-      ///Evaluate the expression tree at the given quadrature_points
-      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
-          dolfin::uint n,
-          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
-          std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+  ///Return a dict with the free or repeated indices in the expression
+  ///as keys and the dimensions of those indices as values.
+  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
 
-      /// UFL: Return whether this expression is spatially constant over each cell
-      bool const is_cellwise_constant() const;
+  ///Evaluate the expression tree at the given quadrature_points
+  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const& repr() const;
+  /// UFL: Return whether this expression is spatially constant over each cell
+  bool const is_cellwise_constant() const;
 
-      /// __str__
-      std::string const& str() const;
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      ///
-      void display() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-    private:
+  /// __str__
+  std::string const& str() const;
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, MultiIndex const& i);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, 
-          tuple<IndexBase> const& indices, dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
-//      std::vector<Expression const *> const fill_expressions(Expression const& e, 
+  ///
+  void display() const;
+
+private:
+
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e,
+                                                         MultiIndex const& i);
+  std::vector<Expression const *> const fill_expressions(
+      Expression const& e, tuple<IndexBase> const& indices,
+      dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
+//      std::vector<Expression const *> const fill_expressions(Expression const& e,
 //          tuple<FixedIndex> const& indices);
 
-      ///contains Expression as first and MultiIndex as second
-      std::vector<Expression const *> const expressions_;
+  ///contains Expression as first and MultiIndex as second
+  std::vector<Expression const *> const expressions_;
 
-      repr_t const repr_;
-      std::string const str_;
+  repr_t const repr_;
+  std::string const str_;
 
-  };
+};
 } /* namespace ufl */
 #endif /* __UFL_TENSORS_H_ */

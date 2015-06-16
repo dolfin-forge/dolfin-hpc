@@ -72,7 +72,7 @@ public:
   ~Family();
 
   ///
-  Family::Type const type() const;
+  Family::Type type() const;
 
   ///
   std::string name() const;
@@ -105,7 +105,8 @@ public:
   bool has_valid_degree(dolfin::uint const degree) const;
 
   ///
-  bool has_valid_definition(Domain::Type domain, dolfin::uint const degree) const;
+  bool has_valid_definition(Domain::Type domain,
+                            dolfin::uint const degree) const;
 
 private:
 
@@ -119,12 +120,14 @@ private:
     std::pair<dolfin::uint, dolfin::uint> degree_range;
     Domain::Set domains;
 
-    Definition(std::string a_name, std::string a_short_name, dolfin::uint a_value_rank,
-               dolfin::uint a_degree_min, dolfin::uint a_degree_max, Domain::Set set_of_domains) :
+    Definition(std::string a_name, std::string a_short_name,
+               dolfin::uint a_value_rank, dolfin::uint a_degree_min,
+               dolfin::uint a_degree_max, Domain::Set set_of_domains) :
         name(a_name),
         short_name(a_short_name),
         value_rank(a_value_rank),
-        degree_range(std::pair<dolfin::uint, dolfin::uint>(a_degree_min, a_degree_max)),
+        degree_range(
+            std::pair<dolfin::uint, dolfin::uint>(a_degree_min, a_degree_max)),
         domains(set_of_domains)
     {
     }
@@ -137,9 +140,9 @@ private:
       ss << std::setw(p) << "short_name" << ": " << short_name << std::endl;
       ss << std::setw(p) << "value_rank" << ": " << value_rank << std::endl;
       ss << std::setw(p) << "degree_min" << ": " << degree_range.first
-          << std::endl;
+         << std::endl;
       ss << std::setw(p) << "degree_max" << ": " << degree_range.second
-          << std::endl;
+         << std::endl;
       ss << std::setw(p) << "domains" << ": ";
       for (Domain::Set::const_iterator it = domains.begin();
           it != domains.end(); ++it)
@@ -154,7 +157,7 @@ private:
   Definition const def_;
 
   ///
-  static std::string const type_repr(Family::Type const& t);
+  static std::string type_repr(Family::Type const& t);
   typedef std::map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
   static dolfin::uint const None = dolfin::DOLFIN_UINT_UNDEF;
@@ -167,27 +170,22 @@ private:
 
   static void register_family(DefinitionList& m, Family::Type family,
                               std::string name, std::string short_name,
-                              dolfin::uint value_rank, dolfin::uint degree_min, dolfin::uint degree_max,
-                              Domain::Set domains);
+                              dolfin::uint value_rank, dolfin::uint degree_min,
+                              dolfin::uint degree_max, Domain::Set domains);
 
   ///
-  static Family::Type const repr_type(repr_t const& repr);
-#ifdef __SUNPRO_CC
+  static Family::Type repr_type(repr_t const& repr);
   typedef std::map<repr_t, Family::Type> MappingList;
   typedef std::pair<repr_t, Family::Type> MappingItem;
-#else
-  typedef std::map<repr_t const, Family::Type> MappingList;
-  typedef std::pair<repr_t const, Family::Type> MappingItem;
-#endif
-  static MappingList const Mapping()
+  static MappingList const& Mapping()
   {
     static MappingList const mapping = __init_mapping();
     return mapping;
   }
-  static MappingList const __init_mapping();
+  static MappingList __init_mapping();
 
   ///
-  Family::Definition const element_definition(Family::Type const type) const;
+  Family::Definition element_definition(Family::Type const type) const;
 
 };
 

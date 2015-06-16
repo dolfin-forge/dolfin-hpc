@@ -55,14 +55,17 @@ public:
   //FIXME: Is it really necessary to add the same function also for Expressions?
 //  repr(Expression const& owner, std::vector<Expression const *> const& prototype);
 
-  template <class OBJ>
-  repr(Class const& owner, std::vector<OBJ const *> const& prototype);
+  template<class OBJ>
+    repr(Class const& owner, std::vector<OBJ const *> const& prototype);
 
   ///
   ~repr();
 
   ///
-  operator const char *() { return this->c_str(); }
+  operator const char *()
+  {
+    return this->c_str();
+  }
 
 private:
 

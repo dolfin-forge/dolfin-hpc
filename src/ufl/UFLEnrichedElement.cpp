@@ -11,8 +11,7 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-EnrichedElement::EnrichedElement(
-    List const& elements ) :
+EnrichedElement::EnrichedElement(List const& elements) :
     FiniteElementBase("EnrichedElement"),
     sub_elements_(elements),
     family_(Family::Enriched),
@@ -24,18 +23,18 @@ EnrichedElement::EnrichedElement(
   std::stringstream ssstr;
   ssrepr << "EnrichedElement(";
   ssstr << "<";
-
+  
   List::const_iterator it = sub_elements_.begin();
   dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
-  for ( ++it ; it != sub_elements_.end(); ++it)
+  for (++it; it != sub_elements_.end(); ++it)
   {
     ssrepr << ", " << (*it)->repr();
     ssstr << " + " << (*it)->str();
-
+    
   }
-
+  
   ssrepr << ")";
   ssstr << ">";
   repr_ = ssrepr.str();
@@ -81,8 +80,8 @@ ValueArray const& EnrichedElement::value_shape() const
 bool EnrichedElement::is_cellwise_constant() const
 {
   bool ret = true;
-  for ( List::const_iterator it = sub_elements_.begin();
-        it != sub_elements_.end(); ++it )
+  for (List::const_iterator it = sub_elements_.begin();
+      it != sub_elements_.end(); ++it)
   {
     ret |= (*it)->is_cellwise_constant();
   }
@@ -103,9 +102,11 @@ std::pair<ValueArray, ValueArray> EnrichedElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> EnrichedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const *> EnrichedElement::extract_component(
+    ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, FiniteElementBase const *>( i[0] , sub_elements_[i[0]] );
+  return std::pair<dolfin::uint, FiniteElementBase const *>(i[0],
+                                                            sub_elements_[i[0]]);
 }
 
 //-----------------------------------------------------------------------------

@@ -28,7 +28,8 @@ Domain::MappingList const Domain::__init_mapping()
   m.insert(MappingItem(Object::repr_t("'interval'"), Domain::interval));
   m.insert(MappingItem(Object::repr_t("'triangle'"), Domain::triangle));
   m.insert(MappingItem(Object::repr_t("'tetrahedron'"), Domain::tetrahedron));
-  m.insert(MappingItem(Object::repr_t("'quadrilateral'"), Domain::quadrilateral));
+  m.insert(
+      MappingItem(Object::repr_t("'quadrilateral'"), Domain::quadrilateral));
   m.insert(MappingItem(Object::repr_t("'hexahedron'"), Domain::hexahedron));
   return m;
 }
@@ -148,11 +149,11 @@ void Domain::display() const
 {
   ufl::type<std::string>::display();
   std::cout << std::setw(24) << "dimension" << " = " << this->dim()
-      << std::endl;
-  std::cout << std::setw(24) << "facet" << " = "
-      << Domain(this->facet()).str() << std::endl;
+            << std::endl;
+  std::cout << std::setw(24) << "facet" << " = " << Domain(this->facet()).str()
+            << std::endl;
   std::cout << std::setw(24) << "num_facets" << " = " << this->num_facets()
-      << std::endl;
+            << std::endl;
   std::cout << std::endl;
 }
 

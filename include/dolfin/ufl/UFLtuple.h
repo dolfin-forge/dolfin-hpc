@@ -15,7 +15,7 @@
 
 namespace ufl
 {
-  class Expression;
+class Expression;
 
 /**
  *  DOCUMENTATION:
@@ -25,64 +25,63 @@ namespace ufl
  *  @brief  Provides an interface complying with python tuple.
  */
 
-  template <class T> class tuple : public Class
-  {
+template<class T>
+class tuple : public Class
+{
 
-    public:
+public:
 
-      /// Constructor with default representation for given type
-      tuple(T const& obj);
+  /// Constructor with default representation for given type
+  tuple(T const& obj);
 
-      /// Constructor with default representation for given type
-      tuple(std::vector<T const *> const& objs);
+  /// Constructor with default representation for given type
+  tuple(std::vector<T const *> const& objs);
 
-      /// Constructor with default representation for given type
-      tuple(tuple<T> const& other_tuple);
+  /// Constructor with default representation for given type
+  tuple(tuple<T> const& other_tuple);
 
-      ///
-      tuple (repr_t const & repr);
+  ///
+  tuple(repr_t const & repr);
 
-      /// Create an empty tuple
-      tuple ();
+  /// Create an empty tuple
+  tuple();
 
-      ///
-      ~tuple();
+  ///
+  ~tuple();
 
-      ///
-      std::vector<Class const *> const operands(std::string const& name) const;
+  ///
+  std::vector<Class const *> const operands(std::string const& name) const;
 
-      ///
-      std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      ///
-      dolfin::uint const size() const;
+  ///
+  dolfin::uint size() const;
 
-      ///
-      std::vector<T const *> const& operands() const;
+  ///
+  std::vector<T const *> const& operands() const;
 
-      /// __repr__
-      repr_t const& repr() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-      /// __str__
-      std::string const& str() const;
+  /// __str__
+  std::string const& str() const;
 
-      ///
-      void display() const;
+  ///
+  void display() const;
 
-    protected:
+private:
 
-    private:
+  std::vector<T const *> const fill_objects(std::vector<repr_t> const& reprs);
+  std::vector<T const *> const& objects() const;
 
-      std::vector<T const *> const fill_objects(std::vector<repr_t> const& reprs);
-      std::vector<T const *> const& objects() const;
+  std::vector<T const *> const objects_;
 
-      std::vector<T const *> const objects_;
+  mutable repr_t repr_;
+  mutable std::string str_;
 
-      mutable repr_t repr_;
-      mutable std::string str_;
-
-  };
+};
 
 } /* namespace ufl */
 #endif /* __UFL_TUPLE_H_ */

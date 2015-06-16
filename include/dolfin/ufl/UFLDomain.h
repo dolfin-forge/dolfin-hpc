@@ -97,7 +97,8 @@ private:
     dolfin::uint num_facets;
     std::string str;
 
-    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
+    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets,
+               std::string a_str) :
         dim(a_dim),
         facet(a_facet),
         num_facets(a_num_facets),

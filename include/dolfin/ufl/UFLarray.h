@@ -37,7 +37,7 @@ public:
   void display() const;
 
   ///
-  repr_t const make_repr(std::vector<Object const *> const& prototype) const;
+  repr_t make_repr(std::vector<Object const *> const& prototype) const;
 
   ///
   static Object::repr_t unpack(Object::repr_t const& repr_array);
@@ -48,6 +48,8 @@ private:
 
   Object const& obj_;
   bool const unpack_;
+  mutable repr_t repr_;
+  mutable std::string str_;
 
 };
 

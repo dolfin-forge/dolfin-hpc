@@ -17,8 +17,8 @@ namespace ufl
 Cell::Cell(Domain::Type const& type) :
     Class("Cell"),
     domain_(type),
-    facet_domain_(domain_.facet()),
     space_(domain_.dim()),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -149,7 +149,7 @@ Domain const& Cell::domain() const
 //-----------------------------------------------------------------------------
 Domain const& Cell::facet_domain() const
 {
-  return Domain(domain_.facet());
+  return facet_domain_;
 }
 
 //-----------------------------------------------------------------------------
@@ -186,11 +186,16 @@ std::string const& Cell::str() const
 void Cell::display() const
 {
   Class::display();
-  std::cout << std::setw(24) << "is_undefined" << " = " << this->is_undefined() << std::endl;
-  std::cout << std::setw(24) << "domain" << " = " << this->domain().str() << std::endl;
-  std::cout << std::setw(24) << "facet_domain" << " = " << this->facet_domain().str() << std::endl;
-  std::cout << std::setw(24) << "geometric_dimension" << " = " << this->geometric_dimension() << std::endl;
-  std::cout << std::setw(24) << "topological_dimension" << " = " << this->topological_dimension() << std::endl;
+  std::cout << std::setw(24) << "is_undefined" << " = " << this->is_undefined()
+            << std::endl;
+  std::cout << std::setw(24) << "domain" << " = " << this->domain().str()
+            << std::endl;
+  std::cout << std::setw(24) << "facet_domain" << " = "
+            << this->facet_domain().str() << std::endl;
+  std::cout << std::setw(24) << "geometric_dimension" << " = "
+            << this->geometric_dimension() << std::endl;
+  std::cout << std::setw(24) << "topological_dimension" << " = "
+            << this->topological_dimension() << std::endl;
   std::cout << std::endl;
 }
 

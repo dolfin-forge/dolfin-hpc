@@ -141,12 +141,12 @@ void VectorElement::createStr()
   {
     error("A vector element should contain more than one subelement");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << sub_element_.family().short_name()
-      << " vector element of degree " << this->degree() << " on a "
-      << cell().str() << ": " << sub_elements_.size() << " x "
-      << sub_element_.str() << ">";
+        << " vector element of degree " << this->degree() << " on a "
+        << cell().str() << ": " << sub_elements_.size() << " x "
+        << sub_element_.str() << ">";
   str_ = ssstr.str();
 }
 

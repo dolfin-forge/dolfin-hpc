@@ -459,7 +459,7 @@ FiniteElementSpace const& Function::space() const
   return (static_cast<DiscreteFunction*>(f_))->space();
 }
 //-----------------------------------------------------------------------------
-std::string const Function::signature() const
+std::string Function::signature() const
 {
   if (type_ != discrete)
   {
@@ -469,7 +469,7 @@ std::string const Function::signature() const
   return (static_cast<DiscreteFunction*>(f_))->signature();
 }
 //-----------------------------------------------------------------------------
-uint const Function::num_sub_functions() const
+uint Function::num_sub_functions() const
 {
   if (type_ != discrete) error("Only discrete functions have sub functions.");
 

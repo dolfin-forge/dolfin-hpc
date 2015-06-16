@@ -20,40 +20,41 @@ namespace ufl
  *  @brief  Provides an interface complying with Lists.
  */
 
-  class List : public Class
-  {
-    public:
+class List : public Class
+{
+public:
 
-      ///
-      List(std::vector<Integral const *> const& integrals);
+  ///
+  List(std::vector<Integral const *> const& integrals);
 
-      ///
-      List (repr_t const & repr);
+  ///
+  List(repr_t const & repr);
 
-      ///
-      ~List();
+  ///
+  ~List();
 
-      std::vector<Integral const *> const& get_integrals() const;
+  std::vector<Integral const *> const& get_integrals() const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __repr__
-      repr_t const& repr() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-      /// __str__
-      std::string const& str() const;
+  /// __str__
+  std::string const& str() const;
 
-      ///
-      void display() const;
+  ///
+  void display() const;
 
-    private:
+private:
 
-      std::vector<Integral const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Integral const *> integrals_;
+  std::vector<Integral const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Integral const *> integrals_;
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  repr_t const repr_;
+  std::string const str_;
+};
 
 } /* namespace ufl */
 #endif /* __UFL_LIST_H */

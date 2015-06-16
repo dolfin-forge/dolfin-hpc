@@ -87,7 +87,8 @@ protected:
 
 private:
 
-  FiniteElementBase::List cloneSubElementsList(FiniteElementBase::List const& elements);
+  FiniteElementBase::List cloneSubElementsList(
+      FiniteElementBase::List const& elements);
   FiniteElementBase::List createSubElementsList(repr_t const& repr);
   void createReprStr();
 

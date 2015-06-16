@@ -116,15 +116,15 @@ public:
 
   /// Returns the family of the finite element
   /// UFL + FIAT
-  ufl::Family::Type const family() const;
+  ufl::Family::Type family() const;
 
   /// Returns the degree of the finite element
   /// UFL + FIAT
-  uint const degree() const;
+  uint degree() const;
 
   /// Return the metatype of the finite element
   /// UFL C++ only
-  ufl::Family::Type const metatype() const;
+  ufl::Family::Type metatype() const;
 
   /// Return UFL definition of the discrete space
   operator ufl::FiniteElementBase const&() const
@@ -151,19 +151,19 @@ inline Mesh& FiniteElementSpace::mesh() const
 }
 
 //-----------------------------------------------------------------------------
-inline ufl::Family::Type const FiniteElementSpace::family() const
+inline ufl::Family::Type FiniteElementSpace::family() const
 {
   return ufl_->family().type();
 }
 
 //-----------------------------------------------------------------------------
-inline ufl::Family::Type const FiniteElementSpace::metatype() const
+inline ufl::Family::Type FiniteElementSpace::metatype() const
 {
   return ufl_->metatype();
 }
 
 //-----------------------------------------------------------------------------
-inline uint const FiniteElementSpace::degree() const
+inline uint FiniteElementSpace::degree() const
 {
   return ufl_->degree();
 }

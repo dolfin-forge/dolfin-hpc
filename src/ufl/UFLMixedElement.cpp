@@ -102,7 +102,7 @@ std::pair<ValueArray, ValueArray> MixedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   check_component(i);
-
+  
   ValueArray k;
   ValueArray j;
   /*
@@ -190,13 +190,13 @@ FiniteElementBase::List MixedElement::cloneSubElementsList(
       it != elements.end(); ++it)
   {
     subelms.push_back(FiniteElementBase::create((*it)->repr()));
-  } dolfin_assert(subelms.size() > 1);
+  }
+  dolfin_assert(subelms.size() > 1);
   return subelms;
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List MixedElement::createSubElementsList(
-    repr_t const& repr)
+FiniteElementBase::List MixedElement::createSubElementsList(repr_t const& repr)
 {
   List subelms;
   // Unpack array then split arguments
@@ -206,7 +206,8 @@ FiniteElementBase::List MixedElement::createSubElementsList(
       it != subreprs.end(); ++it)
   {
     subelms.push_back(FiniteElementBase::create(*it));
-  } dolfin_assert(subelms.size() > 1);
+  }
+  dolfin_assert(subelms.size() > 1);
   return subelms;
 }
 
@@ -218,13 +219,13 @@ void MixedElement::createReprStr()
   {
     error("A mixed element should contain more than one subelement");
   }
-
+  
   // Create string representation
   std::stringstream ssrepr;
   std::stringstream ssstr;
   ssrepr << "MixedElement(*[";
   ssstr << "<Mixed element: (";
-
+  
   List::const_iterator it = sub_elements_.begin();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
@@ -232,9 +233,9 @@ void MixedElement::createReprStr()
   {
     ssrepr << ", " << (*it)->repr();
     ssstr << ", " << (*it)->str();
-
+    
   }
-
+  
   ssrepr << "], **{'value_shape': " << value_shape_.str() << " })";
   ssstr << ")>";
   repr_ = ssrepr.str();

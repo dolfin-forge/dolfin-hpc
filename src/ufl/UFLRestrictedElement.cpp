@@ -20,12 +20,12 @@ RestrictedElement::RestrictedElement(FiniteElementBase const& element,
     value_shape_(element.value_shape())
 {
   // Check mixed finite element definition
-
+  
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", " << domain.repr()
-      << ")";
+         << ")";
   repr_ = ssrepr.str();
-
+  
   std::stringstream ssstr;
   ssstr << "<" << element_.str() << ">|_" << domain.str() << ">";
   str_ = ssstr.str();

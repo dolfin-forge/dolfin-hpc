@@ -75,10 +75,11 @@ repr::repr(Class const& owner, std::vector<Object const *> const& prototype) :
 }
 
 //-----------------------------------------------------------------------------
-template <class OBJ> repr::repr(Class const& owner, std::vector<OBJ const *> const& prototype) :
-    std::string(owner.make_repr(prototype))
-{
-}
+template<class OBJ>
+  repr::repr(Class const& owner, std::vector<OBJ const *> const& prototype) :
+      std::string(owner.make_repr(prototype))
+  {
+  }
 
 //-----------------------------------------------------------------------------
 repr::~repr()
@@ -142,13 +143,13 @@ std::string const repr::make_repr(Class const& owner, Object const& arg1,
 }
 
 //----------------------------INSTANTIATIONS-----------------------------------
-template repr::repr(Class const&, std::vector<Data const *> const&); 
-template repr::repr(Class const&, std::vector<Expression const *> const&); 
-template repr::repr(Class const&, std::vector<FixedIndex const *> const&); 
-template repr::repr(Class const&, std::vector<Index const *> const&); 
-template repr::repr(Class const&, std::vector<IndexBase const *> const&); 
-template repr::repr(Class const&, std::vector<Integral const *> const&); 
-template repr::repr(Class const&, std::vector<Measure const *> const&); 
+template repr::repr(Class const&, std::vector<Data const *> const&);
+template repr::repr(Class const&, std::vector<Expression const *> const&);
+template repr::repr(Class const&, std::vector<FixedIndex const *> const&);
+template repr::repr(Class const&, std::vector<Index const *> const&);
+template repr::repr(Class const&, std::vector<IndexBase const *> const&);
+template repr::repr(Class const&, std::vector<Integral const *> const&);
+template repr::repr(Class const&, std::vector<Measure const *> const&);
 //template repr::repr(Class const&, std::vector<Object const *> const&); 
 
 } /* namespace ufl */

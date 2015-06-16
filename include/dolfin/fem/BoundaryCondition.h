@@ -82,7 +82,7 @@ public:
   Mesh& mesh() const;
 
   ///
-  bool const has_geometrical_sub_domain() const;
+  bool has_geometrical_sub_domain() const;
 
   ///
   SubDomain const& sub_domain() const;
@@ -148,7 +148,7 @@ inline Mesh& BoundaryCondition::mesh() const
 }
 
 //-----------------------------------------------------------------------------
-inline bool const BoundaryCondition::has_geometrical_sub_domain() const
+inline bool BoundaryCondition::has_geometrical_sub_domain() const
 {
   return has_geometrical_sub_domain_;
 }

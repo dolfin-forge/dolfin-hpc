@@ -470,13 +470,13 @@ FiniteElementSpace const& DiscreteFunction::space() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const DiscreteFunction::signature() const
+std::string DiscreteFunction::signature() const
 {
   return element_.signature();
 }
 
 //-----------------------------------------------------------------------------
-uint const DiscreteFunction::num_sub_functions() const
+uint DiscreteFunction::num_sub_functions() const
 {
   return element_.num_sub_elements();
 }

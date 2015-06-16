@@ -12,6 +12,9 @@
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 
+using dolfin::begin;
+using dolfin::end;
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -55,7 +58,6 @@ public:
   /// __neq__
   virtual bool operator !=(Object const& other) const;
 
-
 protected:
 
   ///
@@ -97,6 +99,7 @@ inline bool Object::operator !=(Object const& other) const
 //-----------------------------------------------------------------------------
 inline void Object::display() const
 {
+  begin("UFL::Object");
   std::cout << "Object" << std::endl;
   std::cout << ".str : " << this->str() << std::endl;
   std::cout << ".repr: " << this->repr() << std::endl;
@@ -104,20 +107,19 @@ inline void Object::display() const
 
 //-----------------------------------------------------------------------------
 template<class OBJ>
-inline Object::repr_t Object::make_repr(
-    std::vector<OBJ const *> const& args) const
-{
-  std::stringstream ret;
-  if(args.size() == 0)
-    return ret.str();
-  typename std::vector<OBJ const *>::const_iterator arg = args.begin();
-  ret << (*arg)->repr();
-  for (++arg; arg != args.end(); ++arg)
+  inline Object::repr_t Object::make_repr(
+      std::vector<OBJ const *> const& args) const
   {
-    ret << ", " << (*arg)->repr();
+    std::stringstream ret;
+    if (args.size() == 0) return ret.str();
+    typename std::vector<OBJ const *>::const_iterator arg = args.begin();
+    ret << (*arg)->repr();
+    for (++arg; arg != args.end(); ++arg)
+    {
+      ret << ", " << (*arg)->repr();
+    }
+    return ret.str();
   }
-  return ret.str();
-}
 
 //-----------------------------------------------------------------------------
 inline std::vector<Object const *> Object::make_args(
@@ -141,21 +143,20 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
   std::string str = repr;
 
   size_t star_pos = 0;
-  while(star_pos != std::string::npos && star_pos < str.length())
+  while (star_pos != std::string::npos && star_pos < str.length())
   {
     star_pos = str.find("*");
-    if(star_pos != std::string::npos)
-      str.erase(star_pos, 1);
+    if (star_pos != std::string::npos) str.erase(star_pos, 1);
   }
 
   std::string delimiter = ", ";
 
   std::vector<char> open_delimiters;
   std::vector<char> close_delimiters;
-  std::vector<size_t> open_delimiter_positions(3,0);
-  std::vector<size_t> close_delimiter_positions(3,0);
-  std::vector<size_t> n_open_delimiters(3,0);
-  std::vector<size_t> n_close_delimiters(3,0);
+  std::vector<size_t> open_delimiter_positions(3, 0);
+  std::vector<size_t> close_delimiter_positions(3, 0);
+  std::vector<size_t> n_open_delimiters(3, 0);
+  std::vector<size_t> n_close_delimiters(3, 0);
 
   open_delimiters.push_back('(');
   open_delimiters.push_back('[');
@@ -174,8 +175,9 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
   while (scpos != std::string::npos || scpos < str.size())
   {
     scpos = str.find(delimiter, currpos);
-    std::string::iterator it = (scpos == std::string::npos ? str.end() : str.begin() + scpos) ;
-    for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+    std::string::iterator it = (
+        scpos == std::string::npos ? str.end() : str.begin() + scpos);
+    for (dolfin::uint i = 0; i < open_delimiters.size(); ++i)
     {
       open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);
       close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);
@@ -191,20 +193,22 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
     }
 
     bool equal_number_open_close = true;
-    for(dolfin::uint i = 0; i<n_open_delimiters.size(); ++i)
-      if(n_open_delimiters[i] != n_close_delimiters[i])
-        equal_number_open_close = false;
+    for (dolfin::uint i = 0; i < n_open_delimiters.size(); ++i)
+      if (n_open_delimiters[i] != n_close_delimiters[i]) equal_number_open_close =
+          false;
 
-    open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
+    open_pos = *std::min_element(open_delimiter_positions.begin(),
+                                 open_delimiter_positions.end());
 #ifdef __SUNPRO_CC
     dolfin::uint index = 0;
     std::distance(open_delimiter_positions.begin(),
-                  std::find(open_delimiter_positions.begin(),
-                            open_delimiter_positions.end(), open_pos), index);
+        std::find(open_delimiter_positions.begin(),
+            open_delimiter_positions.end(), open_pos), index);
 #else
-    dolfin::uint index = std::distance(open_delimiter_positions.begin(),
-                                       std::find(open_delimiter_positions.begin(),
-                                                 open_delimiter_positions.end(), open_pos));
+    dolfin::uint index = std::distance(
+        open_delimiter_positions.begin(),
+        std::find(open_delimiter_positions.begin(),
+                  open_delimiter_positions.end(), open_pos));
 #endif
     close_pos = close_delimiter_positions[index];
 
@@ -213,19 +217,17 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
     // - class arguments
     // - tuple argument
     // - dict argument
-    if (scpos == std::string::npos //no comma
-        || (open_pos > scpos && equal_number_open_close) //comma is enclosed in a tuple or class
-        || ((open_pos < scpos && close_pos < scpos) && equal_number_open_close)) //comma is after a tuple or a class
+    if (scpos == std::string::npos  //no comma
+    || (open_pos > scpos && equal_number_open_close)  //comma is enclosed in a tuple or class
+        || ((open_pos < scpos && close_pos < scpos) && equal_number_open_close))  //comma is after a tuple or a class
     {
       token = str.substr(0, scpos);
 
-      if(scpos != std::string::npos)
-        str.erase(0, scpos + delimiter.length());
-      else
-        str.erase(0, scpos);
+      if (scpos != std::string::npos) str.erase(0, scpos + delimiter.length());
+      else str.erase(0, scpos);
 
       args.push_back(Object::repr_t(token));
-      for(dolfin::uint i = 0; i<open_delimiters.size(); ++i)
+      for (dolfin::uint i = 0; i < open_delimiters.size(); ++i)
       {
         open_delimiter_positions[i] = str.find(open_delimiters[i], currpos);
         close_delimiter_positions[i] = str.find(close_delimiters[i], currpos);

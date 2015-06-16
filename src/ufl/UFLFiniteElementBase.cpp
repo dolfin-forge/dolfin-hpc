@@ -51,7 +51,7 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
   {
     error("Unknown type of ufl::FiniteElementBase: '" + name + "'");
   }
-
+  
   return NULL;
 }
 
@@ -111,7 +111,7 @@ void FiniteElementBase::check_component(ValueArray const& i) const
 //-----------------------------------------------------------------------------
 Cell FiniteElementBase::get_cell(List const& elements) const
 {
-  if(elements.size() < 1)
+  if (elements.size() < 1)
   {
     error("Invalid element list given as argument to get_cell");
   }
@@ -155,15 +155,15 @@ void FiniteElementBase::display() const
 {
   Class::display();
   std::cout << std::setw(24) << "family" << " = " << this->family().str()
-      << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "cell" << " = " << this->cell().str()
-      << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "degree" << " = " << this->degree()
-                             << std::endl;
+            << std::endl;
   std::cout << std::setw(24) << "value_shape" << " = "
-      << this->value_shape().str() << std::endl;
+            << this->value_shape().str() << std::endl;
   std::cout << std::setw(24) << "quadrature_scheme" << " = "
-      << this->quadrature_scheme().str() << std::endl;
+            << this->quadrature_scheme().str() << std::endl;
   std::cout << std::endl;
 }
 

@@ -14,7 +14,8 @@ namespace ufl
 //-----------------------------------------------------------------------------
 SpatialCoordinate::SpatialCoordinate(Cell const& cell) :
     GeometricQuantity("SpatialCoordinate", cell),
-    shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
+    shape_((cell.geometric_dimension() == 1 ? 0 : 1),
+           cell.geometric_dimension()),
     repr_(*this, cell),
     str_("x")
 {

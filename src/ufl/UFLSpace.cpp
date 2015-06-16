@@ -23,8 +23,8 @@ Space::Space(dolfin::uint const& dim) :
   std::stringstream ssstr;
   ssstr << "R" << dimension_;
   str_ = ssstr.str();
-
-  if(dimension_ > 3)
+  
+  if (dimension_ > 3)
   {
     dolfin::error("Number of space dimension is greater than 3");
   }
@@ -39,8 +39,8 @@ Space::Space(repr_t const& repr) :
   std::stringstream ssstr;
   ssstr << "R" << dimension_;
   str_ = ssstr.str();
-
-  if(dimension_ > 3)
+  
+  if (dimension_ > 3)
   {
     dolfin::error("Number of space dimension is greater than 3");
   }
@@ -74,7 +74,7 @@ void Space::display() const
 {
   Class::display();
   std::cout << std::setw(24) << "dimension" << " = " << this->dimension()
-      << std::endl;
+            << std::endl;
   std::cout << std::endl;
 }
 

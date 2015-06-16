@@ -104,7 +104,7 @@ std::string const& Class::str() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const Class::make_name(repr_t repr)
+std::string Class::make_name(repr_t repr)
 {
   std::string str = repr;
   size_t openpos = str.find("(");
@@ -113,8 +113,7 @@ std::string const Class::make_name(repr_t repr)
 
 //-----------------------------------------------------------------------------
 template<class OBJ>
-Object::repr_t const Class::make_repr(
-    std::vector<OBJ const *> const& args) const
+  Object::repr_t Class::make_repr( std::vector<OBJ const *> const& args) const
 {
   std::stringstream ret;
   if(prefixed_name().second == "")
@@ -151,8 +150,8 @@ Object::repr_t const Class::make_repr(Object const *& arg1,
 }
 
 //-----------------------------------------------------------------------------
-std::vector<Object::repr_t> const Class::make_args_repr(
-    repr_t const& repr, bool const& without_pre_pos) const
+std::vector<Object::repr_t> Class::make_args_repr(repr_t const& repr,
+                                                  bool without_pre_pos) const
 {
   std::string str = repr;
   std::vector<repr_t> args;
@@ -299,12 +298,12 @@ void Class::display() const
 }
 
 //----------------------------INSTANTIATIONS-----------------------------------
-template Object::repr_t const Class::make_repr(std::vector<Data const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<Expression const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<FixedIndex const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<Index const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<IndexBase const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<Integral const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<Measure const *> const&) const;
-template Object::repr_t const Class::make_repr(std::vector<Object const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Data const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Expression const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<FixedIndex const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Index const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<IndexBase const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Integral const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Measure const *> const&) const;
+template Object::repr_t Class::make_repr(std::vector<Object const *> const&) const;
 }

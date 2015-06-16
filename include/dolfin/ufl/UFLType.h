@@ -58,8 +58,7 @@ public:
   virtual void display() const;
 
   ///
-  repr_t const make_repr(
-        std::vector<Object const *> const& prototype) const;
+  repr_t make_repr(std::vector<Object const *> const& prototype) const;
 
   ///
 //  repr_t const make_repr(
@@ -70,21 +69,21 @@ public:
 protected:
 
   ///
-  repr_t const make_repr( T const& val) const;
+  repr_t make_repr( T const& val) const;
 
   ///
-  T const make_val(repr_t const& repr) const;
+  T make_val(repr_t const& repr) const;
 
   ///
-  std::string const make_str( T const& val) const;
+  std::string make_str( T const& val) const;
 
   ///
-  std::vector<Object::repr_t> const make_args_repr(repr_t const& repr,
-      bool const& without_pre_pos = false) const;
+  std::vector<Object::repr_t> make_args_repr(repr_t const& repr,
+                                             bool without_pre_pos = false) const;
 
 private:
 
-  bool const is_string_type(std::string const& val) const;
+  bool is_string_type(std::string const& val) const;
 
   T val_;
   repr_t const repr_;
@@ -120,7 +119,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const type<T>::make_repr(
+  Object::repr_t type<T>::make_repr(
         std::vector<Object const *> const& prototype) const
 {
   return Object::make_repr(prototype);
@@ -128,7 +127,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const type<T>::make_repr(T const& val) const
+  Object::repr_t type<T>::make_repr(T const& val) const
 {
   std::stringstream ret;
   ret << val;
@@ -137,7 +136,7 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-T const type<T>::make_val(repr_t const& repr) const
+  T type<T>::make_val(repr_t const& repr) const
 {
   T val;
   std::stringstream ss;
@@ -148,7 +147,7 @@ T const type<T>::make_val(repr_t const& repr) const
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::string const type<T>::make_str( T const& val) const
+  std::string type<T>::make_str( T const& val) const
 {
   std::stringstream ret;
   ret << val;
@@ -164,15 +163,14 @@ template<typename T>
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::vector<Object::repr_t> const type<T>::make_args_repr(repr_t const& repr,
-      bool const& without_pre_pos) const
+  std::vector<Object::repr_t> type<T>::make_args_repr(repr_t const& repr,
+                                                      bool without_pre_pos) const
 {
   return std::vector<Object::repr_t>();
 }
 
 //-----------------------------------------------------------------------------
-template<typename T>
-  bool const type<T>::is_string_type(std::string const& val) const
+template<typename T> bool type<T>::is_string_type(std::string const& val) const
 {
   return (*val.begin() == '\'' && *val.rbegin() == '\'');
 }

@@ -47,7 +47,7 @@ public:
 
   /// Create representation from a list of argument objects
   template<class OBJ>
-  repr_t const make_repr(std::vector<OBJ const *> const& args) const;
+    repr_t make_repr(std::vector<OBJ const *> const& args) const;
 
 protected:
 
@@ -73,7 +73,7 @@ protected:
   virtual void display() const;
 
   ///
-  static std::string const make_name(repr_t repr);
+  static std::string make_name(repr_t repr);
 
   ///
   repr_t const make_repr(Object const *& arg1) const;
@@ -82,7 +82,7 @@ protected:
   repr_t const make_repr(Object const *& arg1, Object const *& arg2) const;
 
   ///
-  std::vector<repr_t> const make_args_repr(repr_t const& repr, bool const& without_pre_pos = false) const;
+  std::vector<repr_t> make_args_repr(repr_t const& repr, bool without_pre_pos = false) const;
 
   ///
   repr_t const& arg(size_t i);

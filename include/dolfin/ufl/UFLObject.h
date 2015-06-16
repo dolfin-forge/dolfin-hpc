@@ -47,7 +47,7 @@ public:
 
   ///
   template<class OBJ>
-  repr_t const make_repr(std::vector<OBJ const *> const& prototype) const;
+    repr_t make_repr(std::vector<OBJ const *> const& prototype) const;
 
   /// __eq__
   virtual bool operator ==(Object const& other) const;
@@ -72,8 +72,8 @@ protected:
   virtual void display() const = 0;
 
   ///
-  virtual std::vector<repr_t> const make_args_repr(
-      repr_t const& repr, bool const& without_pre_pos = false) const = 0;
+  virtual std::vector<repr_t> make_args_repr(
+      repr_t const& repr, bool without_pre_pos = false) const = 0;
 
   ///
   std::vector<Object const *> make_args(std::vector<repr_t> const& repr) const;
@@ -104,7 +104,7 @@ inline void Object::display() const
 
 //-----------------------------------------------------------------------------
 template<class OBJ>
-inline Object::repr_t const Object::make_repr(
+inline Object::repr_t Object::make_repr(
     std::vector<OBJ const *> const& args) const
 {
   std::stringstream ret;
@@ -133,8 +133,8 @@ inline std::vector<Object const *> Object::make_args(
 }
 
 //-----------------------------------------------------------------------------
-inline std::vector<Object::repr_t> const Object::make_args_repr(
-    repr_t const& repr, bool const& without_pre_pos) const
+inline std::vector<Object::repr_t> Object::make_args_repr(
+    repr_t const& repr, bool without_pre_pos) const
 {
   //assumes repr to be a comma separated list
   std::vector<Object::repr_t> args;
@@ -199,12 +199,12 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
 #ifdef __SUNPRO_CC
     dolfin::uint index = 0;
     std::distance(open_delimiter_positions.begin(),
-		  std::find(open_delimiter_positions.begin(),
-			    open_delimiter_positions.end(), open_pos), index);
+                  std::find(open_delimiter_positions.begin(),
+                            open_delimiter_positions.end(), open_pos), index);
 #else
     dolfin::uint index = std::distance(open_delimiter_positions.begin(),
-				       std::find(open_delimiter_positions.begin(),
-						 open_delimiter_positions.end(), open_pos));
+                                       std::find(open_delimiter_positions.begin(),
+                                                 open_delimiter_positions.end(), open_pos));
 #endif
     close_pos = close_delimiter_positions[index];
 

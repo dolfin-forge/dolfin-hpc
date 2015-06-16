@@ -61,11 +61,11 @@ namespace dolfin
 
     //--- Implementation of the GenericMatrix interface ---
 
-    /// Initialize M x N matrix
+    /// Initialize M x N matrix and distribute by default
     virtual void init(uint M, uint N);
 
-    /// Initialize vector of size N and distribute if specified
-    virtual void init(uint N, bool distributed);
+    /// Initialize M x N matrix and distribute if specified
+    virtual void init(uint M, uint N, bool distributed);
 
     /// Get block of values
     virtual void get(real* block, uint m, const uint* rows, uint n, const uint* cols) const;

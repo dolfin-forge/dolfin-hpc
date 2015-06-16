@@ -37,7 +37,7 @@ public:
   ~SpatialCoordinate();
 
   ///
-  bool const is_cellwise_constant();
+  bool is_cellwise_constant();
 
   ///
   ValueArray const& shape() const;

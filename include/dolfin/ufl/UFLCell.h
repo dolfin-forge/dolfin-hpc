@@ -75,22 +75,22 @@ public:
   //---------------------------------------------------------------------------
 
   /// UFL: Return whether this cell is undefined
-  bool const& is_undefined() const;
+  bool is_undefined() const;
 
   /// UFL: Return the domain of the cell
-  Domain const domain() const;
+  Domain const& domain() const;
 
   /// UFL: Return the domain of the facet of this cell
-  Domain const facet_domain() const;
+  Domain const& facet_domain() const;
 
   /// UFL: Return the number of facets this cell has
-  dolfin::uint const num_facets() const;
+  dolfin::uint num_facets() const;
 
   /// UFL: Return the dimension of the space this cell is embedded in
-  dolfin::uint const geometric_dimension() const;
+  dolfin::uint geometric_dimension() const;
 
   /// UFL: Return the dimension of the topology of this cell
-  dolfin::uint const topological_dimension() const;
+  dolfin::uint topological_dimension() const;
 
   /// The dimension of the cell is only valid is the geometric and topological
   /// dimensions are the same which does not seem to be useful.
@@ -111,6 +111,7 @@ private:
 
   Domain const domain_;
   Space const space_;
+  Domain const facet_domain_;
 
   // Do not put the initialization of these variables at the end as the
   // GeometricalQuantities require the representation string to be valid.

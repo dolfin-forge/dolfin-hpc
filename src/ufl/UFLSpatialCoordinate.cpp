@@ -26,6 +26,12 @@ SpatialCoordinate::~SpatialCoordinate()
 }
 
 //-----------------------------------------------------------------------------
+bool SpatialCoordinate::is_cellwise_constant()
+{
+  return false;
+}
+
+//-----------------------------------------------------------------------------
 ValueArray const& SpatialCoordinate::shape() const
 {
   return shape_;

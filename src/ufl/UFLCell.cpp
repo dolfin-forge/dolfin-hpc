@@ -17,6 +17,7 @@ namespace ufl
 Cell::Cell(Domain::Type const& type) :
     Class("Cell"),
     domain_(type),
+    facet_domain_(domain_.facet()),
     space_(domain_.dim()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
@@ -37,6 +38,7 @@ Cell::Cell(Domain const& domain) :
     Class("Cell"),
     domain_(domain),
     space_(domain_.dim()),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -56,6 +58,7 @@ Cell::Cell(Domain const& domain, Space const& space) :
     Class("Cell"),
     domain_(domain),
     space_(space),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -75,6 +78,7 @@ Cell::Cell(repr_t const& repr) :
     Class("Cell", repr),
     domain_(arg(0)),
     space_(arg(1)),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -131,37 +135,37 @@ CellSurfaceArea const& Cell::surface_area() const
 }
 
 //-----------------------------------------------------------------------------
-bool const& Cell::is_undefined() const
+bool Cell::is_undefined() const
 {
   return invalid_;
 }
 
 //-----------------------------------------------------------------------------
-Domain const Cell::domain() const
+Domain const& Cell::domain() const
 {
   return domain_;
 }
 
 //-----------------------------------------------------------------------------
-Domain const Cell::facet_domain() const
+Domain const& Cell::facet_domain() const
 {
   return Domain(domain_.facet());
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::num_facets() const
+dolfin::uint Cell::num_facets() const
 {
   return domain_.num_facets();
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::geometric_dimension() const
+dolfin::uint Cell::geometric_dimension() const
 {
   return geometric_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::topological_dimension() const
+dolfin::uint Cell::topological_dimension() const
 {
   return topological_dimension_;
 }

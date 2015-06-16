@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLData.h>
 
@@ -12,7 +12,7 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-  Data::Data(Expression const& expr) : 
+  Data::Data(Expression const& expr) :
     Expression("Data"),
     expressions_(std::vector<Expression const *>(1,&expr)),
     repr_(*this, expressions_),
@@ -47,7 +47,7 @@ using dolfin::error;
   std::vector<std::vector<Class const*> > const Data::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -73,13 +73,13 @@ using dolfin::error;
   {
     return new Data(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Data::operands() const
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ using dolfin::error;
   std::vector<std::vector<std::vector<dolfin::real> > > const Data::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -114,13 +114,13 @@ using dolfin::error;
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Data::repr() const
+  Object::repr_t const& Data::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Data::str() const
+  std::string const& Data::str() const
   {
     return str_;
   }

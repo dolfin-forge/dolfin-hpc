@@ -58,13 +58,13 @@ dolfin::uint Space::dimension() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const Space::repr() const
+Object::repr_t const& Space::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Space::str() const
+std::string const& Space::str() const
 {
   return str_;
 }

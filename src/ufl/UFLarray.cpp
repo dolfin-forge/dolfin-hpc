@@ -22,7 +22,7 @@ array::~array()
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const array::repr() const
+Object::repr_t const& array::repr() const
 {
   std::stringstream ss;
   if (unpack_)
@@ -34,7 +34,7 @@ Object::repr_t const array::repr() const
 }
 
 //-----------------------------------------------------------------------------
-std::string const array::str() const
+std::string const& array::str() const
 {
   std::stringstream ss;
   if (unpack_)

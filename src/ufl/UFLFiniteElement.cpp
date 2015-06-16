@@ -134,13 +134,13 @@ FiniteElementBase::List const& FiniteElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const FiniteElement::repr() const
+Object::repr_t const& FiniteElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const FiniteElement::str() const
+std::string const& FiniteElement::str() const
 {
   return str_;
 }

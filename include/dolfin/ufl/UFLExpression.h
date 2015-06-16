@@ -56,22 +56,22 @@ namespace ufl
       //--- INTERFACE -------------------------------------------------------------
 
       virtual std::vector<Expression const *> const operands() const = 0;
-      
+
       /// UFL: Return the tensor shape of the expression
       virtual ValueArray const shape() const = 0;
-      
+
       /// UFL: Return the tensor rank of the expression
       uint const rank() const;
-      
+
       /// UFL: Return the cell this expression is defined on
       virtual Cell const cell() const;
-      
+
       /// UFL: Return the geometric dimension this expression is defined on
       uint const geometric_dimension() const;
-      
+
       /// UFL: Return whether this expression is spatially constant over each cell
       bool const is_cellwise_constant() const;
-      
+
       ///Return a tuple with the free indices (unassigned) of the expression.
       virtual tuple<Index> const free_indices() const = 0;
 
@@ -83,16 +83,16 @@ namespace ufl
       virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
           dolfin::uint n,
           std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
+          ufc::cell const& ref_cell,
           std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const = 0; 
+          const double * const * coordinates) const = 0;
 
       //--- INTERFACE inherited from UFLClass -------------------------------------
       /// __repr__
-      virtual repr_t const repr() const = 0;
+      virtual repr_t const& repr() const = 0;
 
       /// __str__
-      virtual std::string const str() const = 0;
+      virtual std::string const& str() const = 0;
 
       ///
       virtual void display() const = 0;
@@ -113,7 +113,7 @@ namespace ufl
       ~Operator ();
 
       bool const is_cellwise_constant() const;
-    
+
     private:
       Expression const expression_;
   };

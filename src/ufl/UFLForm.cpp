@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLForm.h>
 
@@ -22,8 +22,8 @@ namespace ufl
   {
     std::cout << "in Form" << std::endl;
     std::cout << repr_ << std::endl;
-    std::cout << form_data_->n_cell_elements() << " " 
-      <<  form_data_->n_extf_elements() << " " 
+    std::cout << form_data_->n_cell_elements() << " "
+      <<  form_data_->n_extf_elements() << " "
       <<  form_data_->n_intf_elements() << std::endl;
   }
 
@@ -38,8 +38,8 @@ namespace ufl
   {
     std::cout << "in Form" << std::endl;
     std::cout << repr_ << std::endl;
-    std::cout << form_data_->n_cell_elements() << " " 
-      <<  form_data_->n_extf_elements() << " " 
+    std::cout << form_data_->n_cell_elements() << " "
+      <<  form_data_->n_extf_elements() << " "
       <<  form_data_->n_intf_elements() << std::endl;
   }
 
@@ -54,8 +54,8 @@ namespace ufl
   {
     std::cout << "in Form" << std::endl;
     std::cout << repr_ << std::endl;
-    std::cout << form_data_->n_cell_elements() << " " 
-      <<  form_data_->n_extf_elements() << " " 
+    std::cout << form_data_->n_cell_elements() << " "
+      <<  form_data_->n_extf_elements() << " "
       <<  form_data_->n_intf_elements() << std::endl;
   }
 
@@ -63,7 +63,7 @@ namespace ufl
   Form::~Form()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   Cell const& Form::cell() const //Does this function make sense?
   {
@@ -83,8 +83,8 @@ namespace ufl
       MeasureDomain::Type const& measure_type) const
   {
     //get vector of integrals
-    std::vector<Integral const *> const& integrals = list_.get_integrals(); 
-    std::vector<Integral const *> integrals_to_return; 
+    std::vector<Integral const *> const& integrals = list_.get_integrals();
+    std::vector<Integral const *> integrals_to_return;
 
     for(dolfin::uint i = 0; i<integrals.size(); ++i)
     {
@@ -100,8 +100,8 @@ namespace ufl
       MeasureDomain::Type const& measure_type) const
   {
     //get vector of integrals
-    std::vector<Integral const *> const& integrals = list_.get_integrals(); 
-    std::vector<Measure const *> measures_to_return; 
+    std::vector<Integral const *> const& integrals = list_.get_integrals();
+    std::vector<Measure const *> measures_to_return;
 
     for(dolfin::uint i = 0; i<integrals.size(); ++i)
       if(integrals[i]->measure().measure_type() == measure_type)
@@ -115,7 +115,7 @@ namespace ufl
       MeasureDomain::Type const& measure_type) const
   {
     //get vector of integrals
-    std::vector<Integral const *> const& integrals = list_.get_integrals(); 
+    std::vector<Integral const *> const& integrals = list_.get_integrals();
     std::vector<std::pair<MeasureDomain::Type, dolfin::uint> > domains;
 
     for(dolfin::uint i = 0; i<integrals.size(); ++i)
@@ -158,7 +158,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   FormData const& Form::form_data() const
   {
-    return *form_data_;  
+    return *form_data_;
   }
 
 //-----------------------------------------------------------------------------
@@ -168,13 +168,13 @@ namespace ufl
 //  }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Form::repr() const
+  Object::repr_t const& Form::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Form::str() const
+  std::string const& Form::str() const
   {
     return str_;
   }

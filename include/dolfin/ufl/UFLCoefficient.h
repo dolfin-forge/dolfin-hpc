@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #ifndef __UFL_COEFFICIENT_H
 #define __UFL_COEFFICIENT_H
@@ -25,7 +25,7 @@ namespace ufl
   class CoefficientBase : public Expression
   {
     public:
-  
+
       ///
       virtual std::vector<Class const* > const operands (std::string const& name) const = 0;
 
@@ -64,15 +64,15 @@ namespace ufl
       virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
           dolfin::uint n,
           std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
+          ufc::cell const& ref_cell,
           std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+          const double * const * coordinates) const;
 
       /// __repr__
-      repr_t const repr() const = 0;
+      repr_t const& repr() const = 0;
 
       /// __str__
-      std::string const str() const = 0;
+      std::string const& str() const = 0;
 
       ///
       void display() const = 0;
@@ -87,11 +87,11 @@ namespace ufl
       CoefficientBase(std::string const& name, Cell const& cell, dolfin::uint const& count);
 
       ///
-      CoefficientBase(std::string const& name, Cell const& cell, 
+      CoefficientBase(std::string const& name, Cell const& cell,
           dolfin::uint const& dim, dolfin::uint const& count);
 
       ///
-      CoefficientBase(std::string const& name, Cell const& cell,  ValueArray const& shape, 
+      CoefficientBase(std::string const& name, Cell const& cell,  ValueArray const& shape,
           std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& count);
 
       ///
@@ -128,7 +128,7 @@ namespace ufl
 
       ///
       ~Coefficient();
-  
+
       ///
       virtual std::vector<Class const* > const operands (std::string const& name) const;
 
@@ -141,10 +141,10 @@ namespace ufl
       static Coefficient const * create(Object::repr_t const& repr);
 
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;
@@ -178,7 +178,7 @@ namespace ufl
 
       ///
       ~Constant();
-  
+
       ///
       virtual std::vector<Class const* > const operands (std::string const& name) const;
 
@@ -192,10 +192,10 @@ namespace ufl
       static Constant const * create(Object::repr_t const& repr);
 
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;
@@ -241,12 +241,12 @@ namespace ufl
 
       ///
       static VectorConstant const * create(Object::repr_t const& repr);
-  
+
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;
@@ -272,7 +272,7 @@ namespace ufl
     public:
 
       ///
-      TensorConstant(Cell const& cell, ValueArray const& shape, 
+      TensorConstant(Cell const& cell, ValueArray const& shape,
           std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& count);
 
       ///
@@ -280,7 +280,7 @@ namespace ufl
 
       ///
       ~TensorConstant();
-  
+
       ///
       virtual std::vector<Class const* > const operands (std::string const& name) const;
 
@@ -294,10 +294,10 @@ namespace ufl
       static TensorConstant const * create(Object::repr_t const& repr);
 
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;

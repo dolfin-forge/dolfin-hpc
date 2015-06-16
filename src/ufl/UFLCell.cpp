@@ -167,13 +167,13 @@ dolfin::uint const Cell::topological_dimension() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const Cell::repr() const
+Object::repr_t const& Cell::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Cell::str() const
+std::string const& Cell::str() const
 {
   return str_;
 }

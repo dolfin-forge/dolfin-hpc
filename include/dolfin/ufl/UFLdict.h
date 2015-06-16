@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #ifndef __UFL_DICT_H_
 #define __UFL_DICT_H_
@@ -37,7 +37,7 @@ namespace ufl
       dict(std::pair<KEY const *, VALUE const *> const& map);
 
       /// Constructor with default representation for given type
-      dict(KEY const & key, VALUE const & value);
+      dict(KEY const& key, VALUE const& value);
 
       /// Constructor with default representation for given type
       dict(dict const& other_dict);
@@ -65,10 +65,10 @@ namespace ufl
       std::vector<std::pair<KEY const *, VALUE const *> > const& map() const;
 
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;

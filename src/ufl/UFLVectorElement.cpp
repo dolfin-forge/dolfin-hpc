@@ -122,13 +122,13 @@ FiniteElementBase::List const& VectorElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const VectorElement::repr() const
+Object::repr_t const& VectorElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const VectorElement::str() const
+std::string const& VectorElement::str() const
 {
   return str_;
 }

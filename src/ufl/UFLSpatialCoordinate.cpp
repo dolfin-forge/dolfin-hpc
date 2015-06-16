@@ -32,13 +32,13 @@ ValueArray const& SpatialCoordinate::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const SpatialCoordinate::repr() const
+Object::repr_t const& SpatialCoordinate::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const SpatialCoordinate::str() const
+std::string const& SpatialCoordinate::str() const
 {
   return str_;
 }

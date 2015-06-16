@@ -34,7 +34,7 @@ ValueArray::~ValueArray()
 }
 
 //-----------------------------------------------------------------------------
-std::string const ValueArray::str() const
+std::string const& ValueArray::str() const
 {
   std::stringstream ss;
   ss << "(";

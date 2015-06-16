@@ -33,13 +33,13 @@ ValueArray const& FacetNormal::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const FacetNormal::repr() const
+Object::repr_t const& FacetNormal::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetNormal::str() const
+std::string const& FacetNormal::str() const
 {
   return str_;
 }

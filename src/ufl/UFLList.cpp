@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLList.h>
 
@@ -31,21 +31,21 @@ namespace ufl
   List::~List()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Integral const *> const& List::get_integrals() const
   {
     return integrals_;
-  } 
+  }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const List::repr() const
+  Object::repr_t const& List::repr() const
   {
     return repr_;
   }
 
   //-----------------------------------------------------------------------------
-  std::string const List::str() const
+  std::string const& List::str() const
   {
     return str_;
   }

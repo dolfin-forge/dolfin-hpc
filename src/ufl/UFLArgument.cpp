@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/ufl/UFLArgument.h>
@@ -70,13 +70,13 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
-  
+
 //-----------------------------------------------------------------------------
   FiniteElementBase const& Argument::element() const
   {
-    return finite_element_;  
+    return finite_element_;
   }
 
 //-----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   ValueArray const Argument::shape() const
   {
-    return finite_element_.value_shape();  
+    return finite_element_.value_shape();
   }
 
 //-----------------------------------------------------------------------------
@@ -107,7 +107,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Argument::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -175,7 +175,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Cell const Argument::cell() const
   {
-    return finite_element_.cell();  
+    return finite_element_.cell();
   }
 
 //-----------------------------------------------------------------------------
@@ -183,19 +183,19 @@ namespace ufl
   {
     return false;
   }
- 
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const Argument::repr() const
+  Object::repr_t const& Argument::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Argument::str() const
+  std::string const& Argument::str() const
   {
     return str_;
   }
- 
+
 //-----------------------------------------------------------------------------
   void Argument::display() const
   {

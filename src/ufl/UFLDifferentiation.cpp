@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLDifferentiation.h>
 
@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
   CoefficientDerivative::CoefficientDerivative(type<dolfin::real> const& integrand,
-      Tuple const& coefficients, Tuple const& arguments, 
+      Tuple const& coefficients, Tuple const& arguments,
       dict<Data, type<dolfin::uint> > const& coeff_derivatives) :
     Expression("CoefficientDerivative"),
     integrand_(integrand),
@@ -26,7 +26,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
   CoefficientDerivative::CoefficientDerivative(type<dolfin::real> const& integrand,
-      Tuple const& coefficients, Tuple const& arguments, 
+      Tuple const& coefficients, Tuple const& arguments,
       Data const& coeff_derivatives) :
     Expression("CoefficientDerivative"),
     integrand_(integrand),
@@ -53,7 +53,7 @@ namespace ufl
   CoefficientDerivative::~CoefficientDerivative()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const CoefficientDerivative::operands(std::string const& name) const
   {
@@ -69,9 +69,9 @@ namespace ufl
   std::vector<std::vector<Class const*> > const CoefficientDerivative::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
-    std::vector<std::vector<Class const*> > new_operands1 
+    std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
 
     const dolfin::uint size = std::max(new_operands0.size(), new_operands1.size());
@@ -110,7 +110,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -135,7 +135,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const CoefficientDerivative::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -145,13 +145,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const CoefficientDerivative::repr() const
+  Object::repr_t const& CoefficientDerivative::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const CoefficientDerivative::str() const
+  std::string const& CoefficientDerivative::str() const
   {
     return str_;
   }
@@ -180,10 +180,10 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  SpatialDerivative::SpatialDerivative(Expression const& expression, IndexBase const& index, 
+  SpatialDerivative::SpatialDerivative(Expression const& expression, IndexBase const& index,
       type<dolfin::uint> const& index_dimension) :
     Expression("SpatialDerivative"),
-    expressions_(fill_expressions(expression, 
+    expressions_(fill_expressions(expression,
           MultiIndex(tuple<IndexBase>(index), dict<IndexBase, type<dolfin::uint> > (index, index_dimension)))),
     repr_(*this, expressions_),
     str_("d/dx_" + index.str() + " " + expression.str())
@@ -212,7 +212,7 @@ namespace ufl
   SpatialDerivative::~SpatialDerivative()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const SpatialDerivative::operands(std::string const& name) const
   {
@@ -228,7 +228,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const SpatialDerivative::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
     std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
@@ -269,7 +269,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -294,15 +294,15 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const SpatialDerivative::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
     std::cout << "SpatialDerivative::evaluate " << n << std::endl;
     n++;
-    std::vector<Index const*> const f_indices = 
+    std::vector<Index const*> const f_indices =
       expressions_[1]->free_indices().operands();
-    std::vector<std::pair<IndexBase const *, type<dolfin::uint> const*> > const index_dim = 
+    std::vector<std::pair<IndexBase const *, type<dolfin::uint> const*> > const index_dim =
       expressions_[1]->index_dimensions().map();
 
     for(dolfin::uint i=0; i<f_indices.size(); ++i)
@@ -317,20 +317,20 @@ namespace ufl
     for(dolfin::uint i=0; i<new_vals0.size(); ++i)
       for(dolfin::uint j=0; j<new_vals0[i].size(); ++j)
         for(dolfin::uint k=0; k<new_vals0[i][j].size(); ++k)
-          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals0[i][j][k] << std::endl; 
+          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals0[i][j][k] << std::endl;
 
     std::cout << "SpatialDerivative::evaluate END" << n << std::endl;
     return new_vals0;
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const SpatialDerivative::repr() const
+  Object::repr_t const& SpatialDerivative::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const SpatialDerivative::str() const
+  std::string const& SpatialDerivative::str() const
   {
     return str_;
   }
@@ -380,7 +380,7 @@ namespace ufl
   VariableDerivative::~VariableDerivative()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const VariableDerivative::operands(std::string const& name) const
   {
@@ -396,7 +396,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const VariableDerivative::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
     std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
@@ -437,9 +437,9 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
-  
+
 //-----------------------------------------------------------------------------
   ValueArray const VariableDerivative::shape() const
   {
@@ -486,7 +486,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const VariableDerivative::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -495,13 +495,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const VariableDerivative::repr() const
+  Object::repr_t const& VariableDerivative::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const VariableDerivative::str() const
+  std::string const& VariableDerivative::str() const
   {
     return str_;
   }
@@ -551,7 +551,7 @@ namespace ufl
   Grad::~Grad()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Grad::operands(std::string const& name) const
   {
@@ -565,7 +565,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Grad::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -596,7 +596,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -625,7 +625,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Grad::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -634,13 +634,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Grad::repr() const
+  Object::repr_t const& Grad::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Grad::str() const
+  std::string const& Grad::str() const
   {
     return str_;
   }
@@ -688,7 +688,7 @@ namespace ufl
   Div::~Div()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Div::operands(std::string const& name) const
   {
@@ -702,7 +702,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Div::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -734,7 +734,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -763,7 +763,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Div::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -772,13 +772,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Div::repr() const
+  Object::repr_t const& Div::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Div::str() const
+  std::string const& Div::str() const
   {
     return str_;
   }
@@ -826,7 +826,7 @@ namespace ufl
   NablaGrad::~NablaGrad()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const NablaGrad::operands(std::string const& name) const
   {
@@ -840,7 +840,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const NablaGrad::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -866,7 +866,7 @@ namespace ufl
   {
     return new NablaGrad(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const NablaGrad::operands() const
   {
@@ -902,7 +902,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const NablaGrad::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -911,13 +911,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const NablaGrad::repr() const
+  Object::repr_t const& NablaGrad::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const NablaGrad::str() const
+  std::string const& NablaGrad::str() const
   {
     return str_;
   }
@@ -965,7 +965,7 @@ namespace ufl
   NablaDiv::~NablaDiv()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const NablaDiv::operands(std::string const& name) const
   {
@@ -979,7 +979,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const NablaDiv::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -1005,7 +1005,7 @@ namespace ufl
   {
     return new NablaDiv(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const NablaDiv::operands() const
   {
@@ -1042,7 +1042,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const NablaDiv::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -1051,13 +1051,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const NablaDiv::repr() const
+  Object::repr_t const& NablaDiv::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const NablaDiv::str() const
+  std::string const& NablaDiv::str() const
   {
     return str_;
   }
@@ -1105,7 +1105,7 @@ namespace ufl
   Curl::~Curl()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Curl::operands(std::string const& name) const
   {
@@ -1119,7 +1119,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Curl::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -1144,7 +1144,7 @@ namespace ufl
   {
     return new Curl(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Curl::operands() const
   {
@@ -1175,7 +1175,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Curl::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -1184,13 +1184,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Curl::repr() const
+  Object::repr_t const& Curl::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Curl::str() const
+  std::string const& Curl::str() const
   {
     return str_;
   }

@@ -121,13 +121,13 @@ FiniteElementBase::List const& EnrichedElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const EnrichedElement::repr() const
+Object::repr_t const& EnrichedElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const EnrichedElement::str() const
+std::string const& EnrichedElement::str() const
 {
   return str_;
 }

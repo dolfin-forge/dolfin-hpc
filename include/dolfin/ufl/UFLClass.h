@@ -37,10 +37,10 @@ public:
   std::pair<std::string, std::string> const prefixed_name() const;
 
   /// __repr__
-  virtual repr_t const repr() const = 0;
+  virtual repr_t const& repr() const = 0;
 
   /// __str__
-  virtual std::string const str() const = 0;
+  virtual std::string const& str() const = 0;
 
   /// __eq__
   virtual bool operator ==(Class const& other) const;

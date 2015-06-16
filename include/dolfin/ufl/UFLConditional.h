@@ -50,10 +50,10 @@ namespace ufl
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
 //      /// __repr__
-//      repr_t const repr() const;
+//      repr_t const& repr() const;
 //
 //      /// __str__
-//      std::string const str() const;
+//      std::string const& str() const;
 //
 //      ///
 //      void display() const;
@@ -97,10 +97,10 @@ namespace ufl
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;
@@ -368,10 +368,10 @@ namespace ufl
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;
@@ -431,10 +431,10 @@ namespace ufl
       //--- INTERFACE inherited from UFLClass -------------------------------------
       
       /// __repr__
-      repr_t const repr() const;
+      repr_t const& repr() const;
 
       /// __str__
-      std::string const str() const;
+      std::string const& str() const;
 
       ///
       void display() const;

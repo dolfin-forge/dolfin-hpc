@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLConditional.h>
 
@@ -15,7 +15,7 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-  Condition::Condition(std::string const& name) : 
+  Condition::Condition(std::string const& name) :
     Class(name)
   {
   }
@@ -84,13 +84,13 @@ using dolfin::error;
   }
 
 //-----------------------------------------------------------------------------
-//  Object::repr_t const Condition::repr() const
+//  Object::repr_t const& Condition::repr() const
 //  {
 //    return repr_;
 //  }
 //
 //-----------------------------------------------------------------------------
-//  std::string const Condition::str() const
+//  std::string const& Condition::str() const
 //  {
 //    return str_;
 //  }
@@ -122,15 +122,15 @@ using dolfin::error;
   BinaryCondition::~BinaryCondition()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const BinaryCondition::repr() const
+  Object::repr_t const& BinaryCondition::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const BinaryCondition::str() const
+  std::string const& BinaryCondition::str() const
   {
     return str_;
   }
@@ -175,7 +175,7 @@ using dolfin::error;
   EQ::~EQ()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   NE::NE(Expression const& e1, Expression const& e2) :
     BinaryCondition("!=", e1, e2)
@@ -192,7 +192,7 @@ using dolfin::error;
   NE::~NE()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   LE::LE(Expression const& e1, Expression const& e2) :
     BinaryCondition("<=", e1, e2)
@@ -209,7 +209,7 @@ using dolfin::error;
   LE::~LE()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   GE::GE(Expression const& e1, Expression const& e2) :
     BinaryCondition(">=", e1, e2)
@@ -226,7 +226,7 @@ using dolfin::error;
   GE::~GE()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   LT::LT(Expression const& e1, Expression const& e2) :
     BinaryCondition("<", e1, e2)
@@ -243,7 +243,7 @@ using dolfin::error;
   LT::~LT()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   GT::GT(Expression const& e1, Expression const& e2) :
     BinaryCondition(">", e1, e2)
@@ -260,7 +260,7 @@ using dolfin::error;
   GT::~GT()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   AndCondition::AndCondition(Expression const& e1, Expression const& e2) :
     BinaryCondition("&&", e1, e2)
@@ -277,7 +277,7 @@ using dolfin::error;
   AndCondition::~AndCondition()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   OrCondition::OrCondition(Expression const& e1, Expression const& e2) :
     BinaryCondition("||", e1, e2)
@@ -294,7 +294,7 @@ using dolfin::error;
   OrCondition::~OrCondition()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   NotCondition::NotCondition(Expression const& e) :
     Condition("NotCondition"),
@@ -317,15 +317,15 @@ using dolfin::error;
   NotCondition::~NotCondition()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const NotCondition::repr() const
+  Object::repr_t const& NotCondition::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const NotCondition::str() const
+  std::string const& NotCondition::str() const
   {
     return str_;
   }
@@ -381,15 +381,15 @@ using dolfin::error;
   Conditional::~Conditional()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const Conditional::repr() const
+  Object::repr_t const& Conditional::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Conditional::str() const
+  std::string const& Conditional::str() const
   {
     return str_;
   }

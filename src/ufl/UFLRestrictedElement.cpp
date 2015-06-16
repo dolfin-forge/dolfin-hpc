@@ -111,13 +111,13 @@ FiniteElementBase const& RestrictedElement::element()
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const RestrictedElement::repr() const
+Object::repr_t const& RestrictedElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const RestrictedElement::str() const
+std::string const& RestrictedElement::str() const
 {
   return str_;
 }

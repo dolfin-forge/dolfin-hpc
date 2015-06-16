@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLIndex.h>
 
@@ -31,7 +31,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
   IndexBase::IndexBase(std::string const& name,
-      repr_t const & repr) : 
+      repr_t const & repr) :
     Expression(name, repr),
     count_(arg(0)),
     name_(name)
@@ -89,7 +89,7 @@ namespace ufl
     {
       error("Unknown type of ufl::IndexBase: '" + name + "'");
     }
-  
+
     return NULL;
   }
 
@@ -98,7 +98,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const IndexBase::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -138,7 +138,7 @@ namespace ufl
     str_(count_<10 ? "i_" + count_.str() : "i_{" + count_.str() + "}")
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   Index::Index(repr_t const& repr) :
     IndexBase("Index", repr),
@@ -160,7 +160,7 @@ namespace ufl
       expr0.push_back(this);
     return expr0;
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<std::vector<Class const*> > const Index::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
@@ -183,13 +183,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Index::repr() const
+  Object::repr_t const& Index::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Index::str() const
+  std::string const& Index::str() const
   {
     return str_;
   }
@@ -228,7 +228,7 @@ namespace ufl
       expr0.push_back(this);
     return expr0;
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<std::vector<Class const*> > const FixedIndex::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
@@ -243,7 +243,7 @@ namespace ufl
 
     return new_operands0;
   }
-  
+
 //-----------------------------------------------------------------------------
   FixedIndex const* FixedIndex::create(Object::repr_t const& repr)
   {
@@ -251,13 +251,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const FixedIndex::repr() const
+  Object::repr_t const& FixedIndex::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const FixedIndex::str() const
+  std::string const& FixedIndex::str() const
   {
     return str_;
   }
@@ -348,10 +348,10 @@ namespace ufl
     std::vector<std::vector<Class const*> > new_operands1;
 //      if(fixed_indices_.size()>0)
 //        new_operands1 = fixed_indices_.level_operands(operands);
-    std::vector<std::vector<Class const*> > new_operands2 
+    std::vector<std::vector<Class const*> > new_operands2
       = index_dimensions_.level_operands(operands);
 
-    const dolfin::uint size = std::max(new_operands0.size(), 
+    const dolfin::uint size = std::max(new_operands0.size(),
         std::max(new_operands1.size(), new_operands2.size()));
     std::vector<std::vector<Class const*> > tmp(size+1);
     std::vector<Class const*> obj0;
@@ -388,7 +388,7 @@ namespace ufl
 {
     return new MultiIndex(repr);
 }
-  
+
 //-----------------------------------------------------------------------------
   ValueArray const MultiIndex::shape() const
   {
@@ -419,7 +419,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const MultiIndex::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -428,13 +428,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
- Object::repr_t const MultiIndex::repr() const
+ Object::repr_t const& MultiIndex::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
- std::string const MultiIndex::str() const
+ std::string const& MultiIndex::str() const
   {
     return str_;
   }
@@ -449,7 +449,7 @@ namespace ufl
   {
     if(index_dimensions_.size() > 0)
       return tuple<IndexBase>(repr);
-    
+
     return tuple<IndexBase>();
   }
 
@@ -458,7 +458,7 @@ namespace ufl
 //  {
 //    if(index_dimensions_.size() == 0)
 //      return tuple<FixedIndex>(repr);
-//    
+//
 //    return tuple<FixedIndex>();
 //  }
 
@@ -467,7 +467,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 }

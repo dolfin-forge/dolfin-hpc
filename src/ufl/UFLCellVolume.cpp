@@ -33,13 +33,13 @@ ValueArray const& CellVolume::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const CellVolume::repr() const
+Object::repr_t const& CellVolume::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const CellVolume::str() const
+std::string const& CellVolume::str() const
 {
   return str_;
 }

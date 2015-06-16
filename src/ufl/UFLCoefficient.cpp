@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLCoefficient.h>
 #include <dolfin/ufl/UFLVectorElement.h>
@@ -50,14 +50,14 @@ namespace ufl
   CoefficientBase::CoefficientBase(std::string const& name, repr_t const& repr) :
     Expression(name, repr),
     finite_element_ (name == "Coefficient" ? FiniteElementBase::create(arg(0)) :
-       name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) : 
+       name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) :
        name == "VectorConstant" ? new VectorElement(Family::R, Cell(arg(0)), 0, type<dolfin::uint>(arg(1))) :
        name == "TensorConstant" ? new TensorElement(Family::R, Cell(arg(0)), 0, Cell(arg(0)).geometric_dimension()) :
        FiniteElementBase::create(arg(0))),
     count_(args().back())
   {
 //    finite_element_ = (name == "Coefficient" ? FiniteElementBase::create(arg(0)) :
-//       name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) : 
+//       name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) :
 //       name == "VectorConstant" ? new VectorElement(Family::R, Cell(arg(0)), 0, type<dolfin::uint>(arg(1))) :
 //       name == "TensorConstant" ? new TensorElement(Family::R, Cell(arg(0)), 0, Cell(arg(0)).geometric_dimension()) :
 //       FiniteElementBase::create(arg(0)));
@@ -92,7 +92,7 @@ namespace ufl
     {
       error("Unknown type of ufl::CoefficientBase: '" + name + "'");
     }
-  
+
     return NULL;
   }
 
@@ -101,19 +101,19 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
   FiniteElementBase const& CoefficientBase::element() const
   {
-    return *finite_element_;  
+    return *finite_element_;
   }
 
 //-----------------------------------------------------------------------------
   ValueArray const CoefficientBase::shape() const
   {
-    return finite_element_->value_shape();  
+    return finite_element_->value_shape();
   }
 
 //-----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const CoefficientBase::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -143,7 +143,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   Cell const CoefficientBase::cell() const
   {
-    return finite_element_->cell();  
+    return finite_element_->cell();
   }
 
 //-----------------------------------------------------------------------------
@@ -151,7 +151,7 @@ namespace ufl
   {
     return false;
   }
- 
+
 //-----------------------------------------------------------------------------
   Coefficient::Coefficient(FiniteElementBase const& fe, dolfin::uint const& c) :
     CoefficientBase("Coefficient", fe, c),
@@ -172,7 +172,7 @@ namespace ufl
   Coefficient::~Coefficient()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Coefficient::operands(std::string const& name) const
   {
@@ -181,7 +181,7 @@ namespace ufl
       expr0.push_back(this);
     return expr0;
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<std::vector<Class const*> > const Coefficient::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
@@ -204,17 +204,17 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Coefficient::repr() const
+  Object::repr_t const& Coefficient::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Coefficient::str() const
+  std::string const& Coefficient::str() const
   {
     return str_;
   }
- 
+
 //-----------------------------------------------------------------------------
   void Coefficient::display() const
   {
@@ -240,7 +240,7 @@ namespace ufl
   Constant::~Constant()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Constant::operands(std::string const& name) const
   {
@@ -272,24 +272,24 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Constant::repr() const
+  Object::repr_t const& Constant::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Constant::str() const
+  std::string const& Constant::str() const
   {
     return str_;
   }
- 
+
 //-----------------------------------------------------------------------------
   void Constant::display() const
   {
   }
 
 //-----------------------------------------------------------------------------
-  VectorConstant::VectorConstant(Cell const& cell, 
+  VectorConstant::VectorConstant(Cell const& cell,
       dolfin::uint const& dim, dolfin::uint const& c) :
     CoefficientBase("VectorConstant", cell, dim, c),
 //FIXME fill ValueArray    repr_(*this, cell, type<dolfin::uint>(finite_element_.value_shape()[0]), count_),
@@ -320,7 +320,7 @@ namespace ufl
       expr0.push_back(this);
     return expr0;
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<std::vector<Class const*> > const VectorConstant::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
@@ -341,19 +341,19 @@ namespace ufl
   {
     return new VectorConstant(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const VectorConstant::repr() const
+  Object::repr_t const& VectorConstant::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const VectorConstant::str() const
+  std::string const& VectorConstant::str() const
   {
     return str_;
   }
- 
+
 //-----------------------------------------------------------------------------
   void VectorConstant::display() const
   {
@@ -363,7 +363,7 @@ namespace ufl
   TensorConstant::TensorConstant(Cell const& cell, ValueArray const& shape,
       std::map<dolfin::uint, dolfin::uint> const& symmetry, dolfin::uint const& c) :
     CoefficientBase("TensorConstant", cell, shape, symmetry, c),
-    repr_(*this, finite_element_->cell(), /*finite_element_.value_shape(), 
+    repr_(*this, finite_element_->cell(), /*finite_element_.value_shape(),
         finite_element_.symmetry(),*/ count_),
     str_((count_ < 10 ? "C_" + count_.str() : "C_{" + count_.str() + "}"))
   {
@@ -372,7 +372,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
   TensorConstant::TensorConstant(repr_t const& repr) :
     CoefficientBase("TensorConstant", repr),
-    repr_(*this, finite_element_->cell(), /*finite_element_.value_shape(), 
+    repr_(*this, finite_element_->cell(), /*finite_element_.value_shape(),
         finite_element_.symmetry(),*/ count_),
     str_((count_ < 10 ? "C_" + count_.str() : "C_{" + count_.str() + "}"))
   {
@@ -382,7 +382,7 @@ namespace ufl
   TensorConstant::~TensorConstant()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const TensorConstant::operands(std::string const& name) const
   {
@@ -391,7 +391,7 @@ namespace ufl
       expr0.push_back(this);
     return expr0;
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<std::vector<Class const*> > const TensorConstant::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
@@ -403,7 +403,7 @@ namespace ufl
 
     for(dolfin::uint i=0; i<operands.size(); ++i)
       new_operands0.push_back(operands[i]);
-    
+
     return new_operands0;
   }
 
@@ -412,19 +412,19 @@ namespace ufl
   {
     return new TensorConstant(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
-  Object::repr_t const TensorConstant::repr() const
+  Object::repr_t const& TensorConstant::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const TensorConstant::str() const
+  std::string const& TensorConstant::str() const
   {
     return str_;
   }
- 
+
 //-----------------------------------------------------------------------------
   void TensorConstant::display() const
   {

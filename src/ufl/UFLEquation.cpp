@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLEquation.h>
 
@@ -35,13 +35,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Equation::repr() const
+  Object::repr_t const& Equation::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Equation::str() const
+  std::string const& Equation::str() const
   {
     return str_;
   }

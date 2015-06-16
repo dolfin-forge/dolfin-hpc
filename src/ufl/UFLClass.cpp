@@ -92,13 +92,13 @@ std::pair<std::string, std::string> const Class::prefixed_name() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const Class::repr() const
+Object::repr_t const& Class::repr() const
 {
   return default_repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Class::str() const
+std::string const& Class::str() const
 {
   return default_str_;
 }

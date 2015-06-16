@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLAlgebra.h>
 
@@ -49,7 +49,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Sum::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
     std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
@@ -84,13 +84,13 @@ namespace ufl
   {
     return new Sum(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Sum::operands() const
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Sum::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -126,13 +126,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Sum::repr() const
+  Object::repr_t const& Sum::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Sum::str() const
+  std::string const& Sum::str() const
   {
     return str_;
   }
@@ -198,7 +198,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Product::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
     std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
@@ -233,13 +233,13 @@ namespace ufl
   {
     return new Product(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Product::operands() const
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -282,7 +282,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Product::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -306,24 +306,24 @@ namespace ufl
     for(dolfin::uint i=0; i<new_vals0.size(); ++i)
       for(dolfin::uint j=0; j<new_vals0[i].size(); ++j)
         for(dolfin::uint k=0; k<new_vals0[i][j].size(); ++k)
-          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals0[i][j][k] << std::endl; 
+          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals0[i][j][k] << std::endl;
     std::cout << std::endl;
     for(dolfin::uint i=0; i<new_vals1.size(); ++i)
       for(dolfin::uint j=0; j<new_vals1[i].size(); ++j)
         for(dolfin::uint k=0; k<new_vals1[i][j].size(); ++k)
-          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals1[i][j][k] << std::endl; 
+          std::cout << "(" << i << "," << j << "," << k << ") = " << new_vals1[i][j][k] << std::endl;
     std::cout << "Product::evaluate END" << n << std::endl;
     return result;
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Product::repr() const
+  Object::repr_t const& Product::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Product::str() const
+  std::string const& Product::str() const
   {
     return str_;
   }
@@ -373,7 +373,7 @@ namespace ufl
   Division::~Division()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Division::operands(std::string const& name) const
   {
@@ -389,7 +389,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Division::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
     std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
@@ -430,7 +430,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -455,7 +455,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Division::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -466,13 +466,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Division::repr() const
+  Object::repr_t const& Division::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Division::str() const
+  std::string const& Division::str() const
   {
     return str_;
   }
@@ -522,7 +522,7 @@ namespace ufl
   Power::~Power()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Power::operands(std::string const& name) const
   {
@@ -578,7 +578,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -603,7 +603,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Power::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -614,13 +614,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Power::repr() const
+  Object::repr_t const& Power::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Power::str() const
+  std::string const& Power::str() const
   {
     return str_;
   }
@@ -670,7 +670,7 @@ namespace ufl
   Abs::~Abs()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Abs::operands(std::string const& name) const
   {
@@ -684,7 +684,7 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Abs::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
 
     const dolfin::uint size = new_operands0.size();
@@ -716,7 +716,7 @@ namespace ufl
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -741,7 +741,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Abs::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -751,13 +751,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Abs::repr() const
+  Object::repr_t const& Abs::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Abs::str() const
+  std::string const& Abs::str() const
   {
     return str_;
   }

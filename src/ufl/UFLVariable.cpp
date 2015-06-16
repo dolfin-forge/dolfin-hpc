@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLVariable.h>
 
@@ -30,7 +30,7 @@ namespace ufl
   Label::~Label()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Label::operands(std::string const& name) const
   {
@@ -60,13 +60,13 @@ namespace ufl
   {
     return new Label(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Label::operands() const
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Label::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -102,17 +102,17 @@ namespace ufl
 //-----------------------------------------------------------------------------
   type<dolfin::uint> const& Label::count() const
   {
-    return count_; 
+    return count_;
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Label::repr() const
+  Object::repr_t const& Label::repr() const
   {
     return repr_;
   }
 
   //-----------------------------------------------------------------------------
-  std::string const Label::str() const
+  std::string const& Label::str() const
   {
     return str_;
   }
@@ -159,7 +159,7 @@ namespace ufl
   Variable::~Variable()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Variable::operands(std::string const& name) const
   {
@@ -175,9 +175,9 @@ namespace ufl
   std::vector<std::vector<Class const*> > const Variable::level_operands(
       std::vector<std::vector<Class const*> > const& operands) const
   {
-    std::vector<std::vector<Class const*> > new_operands0 
+    std::vector<std::vector<Class const*> > new_operands0
       = expressions_[0]->level_operands(operands);
-    std::vector<std::vector<Class const*> > new_operands1 
+    std::vector<std::vector<Class const*> > new_operands1
       = expressions_[1]->level_operands(operands);
 
     const dolfin::uint size = std::max(new_operands0.size(), new_operands1.size());
@@ -210,13 +210,13 @@ namespace ufl
   {
     return new Variable(repr);
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Expression const *> const Variable::operands() const
   {
     error("Not yet implemented.");
     std::vector<Expression const*>  expressions_;
-    return expressions_;  
+    return expressions_;
   }
 
 //-----------------------------------------------------------------------------
@@ -241,7 +241,7 @@ namespace ufl
   std::vector<std::vector<std::vector<dolfin::real> > > const Variable::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      ufc::cell const& ref_cell, 
+      ufc::cell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -262,13 +262,13 @@ namespace ufl
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Variable::repr() const
+  Object::repr_t const& Variable::repr() const
   {
     return repr_;
   }
 
   //-----------------------------------------------------------------------------
-  std::string const Variable::str() const
+  std::string const& Variable::str() const
   {
     return str_;
   }

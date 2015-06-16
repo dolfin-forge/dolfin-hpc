@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLData.h>
 #include <dolfin/ufl/UFLdict.h>
@@ -146,7 +146,7 @@ template <class KEY, class VALUE> dict<KEY,VALUE>::~dict()
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> std::vector<Class const*> const 
+template <class KEY, class VALUE> std::vector<Class const*> const
 dict<KEY,VALUE>::operands(std::string const& name) const
 {
   std::vector<Class const*> expr0;
@@ -163,7 +163,7 @@ dict<KEY,VALUE>::operands(std::string const& name) const
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> std::vector<std::vector<Class const*> > const 
+template <class KEY, class VALUE> std::vector<std::vector<Class const*> > const
 dict<KEY,VALUE>::level_operands(std::vector<std::vector<Class const*> > const& operands) const
 {
   std::vector<std::vector<std::vector<Class const*> > > new_operands(size());
@@ -203,19 +203,22 @@ template <class KEY, class VALUE> dolfin::uint const dict<KEY,VALUE>::size() con
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> std::vector<std::pair<KEY const *, VALUE const *> > const& dict<KEY,VALUE>::map() const
+template <class KEY, class VALUE>
+  std::vector<std::pair<KEY const *, VALUE const *> > const& dict<KEY,VALUE>::map() const
 {
   return map_;
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> Object::repr_t const dict<KEY,VALUE>::repr() const
+template <class KEY, class VALUE>
+  Object::repr_t const& dict<KEY,VALUE>::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> std::string const dict<KEY,VALUE>::str() const
+template <class KEY, class VALUE>
+  std::string const& dict<KEY,VALUE>::str() const
 {
   return str_;
 }
@@ -229,7 +232,8 @@ template <class KEY, class VALUE> void dict<KEY,VALUE>::display() const
 }
 
 //-----------------------------------------------------------------------------
-template <class KEY, class VALUE> std::vector<std::pair<KEY const *, VALUE const *> > const dict<KEY,VALUE>::fill_map(std::vector<repr_t> const& reprs)
+template <class KEY, class VALUE>
+  std::vector<std::pair<KEY const *, VALUE const *> > const dict<KEY,VALUE>::fill_map(std::vector<repr_t> const& reprs)
 {
   std::vector<std::pair<KEY const *, VALUE const *> > map(reprs.size());
   for(dolfin::uint i=0; i<reprs.size(); ++i)
@@ -241,7 +245,7 @@ template <class KEY, class VALUE> std::vector<std::pair<KEY const *, VALUE const
     while (scpos != std::string::npos || scpos < str.size())
     {
       scpos = str.find(delimiter, currpos);
-      if(scpos == std::string::npos)//empty, so go to next 
+      if(scpos == std::string::npos)//empty, so go to next
         break;
       else
       {

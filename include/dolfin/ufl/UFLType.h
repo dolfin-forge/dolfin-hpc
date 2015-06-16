@@ -49,10 +49,10 @@ public:
   }
 
   /// __repr__
-  repr_t const repr() const;
+  repr_t const& repr() const;
 
   /// __str__
-  std::string const str() const;
+  std::string const& str() const;
 
   ///
   virtual void display() const;
@@ -94,14 +94,14 @@ private:
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  Object::repr_t const type<T>::repr() const
+  Object::repr_t const& type<T>::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
 template<typename T>
-  std::string const type<T>::str() const
+  std::string const& type<T>::str() const
 {
   std::stringstream ss;
   ss << val_;

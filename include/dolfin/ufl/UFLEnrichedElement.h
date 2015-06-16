@@ -76,10 +76,10 @@ public:
   List const& sub_elements() const;
 
   /// __repr__
-  repr_t const repr() const;
+  repr_t const& repr() const;
 
   /// __str__
-  std::string const str() const;
+  std::string const& str() const;
 
 protected:
 

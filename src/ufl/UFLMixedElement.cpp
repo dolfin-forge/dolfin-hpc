@@ -169,13 +169,13 @@ FiniteElementBase::List const& MixedElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const MixedElement::repr() const
+Object::repr_t const& MixedElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const MixedElement::str() const
+std::string const& MixedElement::str() const
 {
   return str_;
 }

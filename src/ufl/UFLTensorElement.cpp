@@ -118,13 +118,13 @@ FiniteElementBase::List const& TensorElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const TensorElement::repr() const
+Object::repr_t const& TensorElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const TensorElement::str() const
+std::string const& TensorElement::str() const
 {
   return str_;
 }

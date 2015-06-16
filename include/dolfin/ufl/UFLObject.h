@@ -40,10 +40,10 @@ public:
   typedef ufl::repr repr_t;
 
   /// __repr__
-  virtual repr_t const repr() const = 0;
+  virtual repr_t const& repr() const = 0;
 
   /// __str__
-  virtual std::string const str() const = 0;
+  virtual std::string const& str() const = 0;
 
   ///
   template<class OBJ>
@@ -198,11 +198,11 @@ inline std::vector<Object::repr_t> const Object::make_args_repr(
     open_pos = *std::min_element(open_delimiter_positions.begin(), open_delimiter_positions.end());
 #ifdef __SUNPRO_CC
     dolfin::uint index = 0;
-    std::distance(open_delimiter_positions.begin(), 
+    std::distance(open_delimiter_positions.begin(),
 		  std::find(open_delimiter_positions.begin(),
 			    open_delimiter_positions.end(), open_pos), index);
 #else
-    dolfin::uint index = std::distance(open_delimiter_positions.begin(), 
+    dolfin::uint index = std::distance(open_delimiter_positions.begin(),
 				       std::find(open_delimiter_positions.begin(),
 						 open_delimiter_positions.end(), open_pos));
 #endif

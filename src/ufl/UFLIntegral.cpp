@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #include <dolfin/ufl/UFLIntegral.h>
 #include <dolfin/ufl/UFLrepr.h>
@@ -121,13 +121,13 @@ MeasureDomain::~MeasureDomain()
 }
 
 //-----------------------------------------------------------------------------
-std::string const MeasureDomain::type_repr(MeasureDomain::Type const& t) 
+std::string const MeasureDomain::type_repr(MeasureDomain::Type const& t)
 {
   return MappingToRepr().find(t)->second;
 }
 
 //-----------------------------------------------------------------------------
-MeasureDomain::Type const MeasureDomain::repr_type(repr_t const& repr) 
+MeasureDomain::Type const MeasureDomain::repr_type(repr_t const& repr)
 {
   return MappingToType().find(repr)->second;
 }
@@ -154,7 +154,7 @@ void MeasureDomain::display() const
 //-----------------------------------------------------------------------------
   Measure::Measure(MeasureDomain::Type const& measure_type,
       MeasureData const& meta_data,
-      dolfin::uint const& measure_id) : 
+      dolfin::uint const& measure_id) :
     Class("Measure"),
     measure_domain_(measure_type),
     measure_id_(measure_id),
@@ -179,7 +179,7 @@ void MeasureDomain::display() const
   Measure::~Measure()
   {
   }
-  
+
 //-----------------------------------------------------------------------------
   std::vector<Class const*> const Measure::operands(std::string const& name) const
   {
@@ -222,7 +222,7 @@ void MeasureDomain::display() const
   std::vector<std::vector<std::vector<dolfin::real> > > const Measure::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      dolfin::UFCReferenceCell const& ref_cell, 
+      dolfin::UFCReferenceCell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -231,17 +231,17 @@ void MeasureDomain::display() const
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Measure::repr() const
+  Object::repr_t const& Measure::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Measure::str() const
+  std::string const& Measure::str() const
   {
     return str_;
   }
-  
+
 //-----------------------------------------------------------------------------
   void Measure::display() const
   {
@@ -337,7 +337,7 @@ void MeasureDomain::display() const
   std::vector<std::vector<std::vector<dolfin::real> > > const Integral::evaluate(
       dolfin::uint n,
       std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-      dolfin::UFCReferenceCell const& ref_cell, 
+      dolfin::UFCReferenceCell const& ref_cell,
       std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const
   {
@@ -347,13 +347,13 @@ void MeasureDomain::display() const
   }
 
 //-----------------------------------------------------------------------------
-  Object::repr_t const Integral::repr() const
+  Object::repr_t const& Integral::repr() const
   {
     return repr_;
   }
 
 //-----------------------------------------------------------------------------
-  std::string const Integral::str() const
+  std::string const& Integral::str() const
   {
     return str_;
   }

@@ -410,6 +410,8 @@ KSPType PETScKrylovSolver::getType(SolverType method) const
 }
 //-----------------------------------------------------------------------------
 
+}
+
 #endif
 
-}
+

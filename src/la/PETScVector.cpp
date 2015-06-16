@@ -545,7 +545,7 @@ LogStream& operator<< (LogStream& stream, const PETScVector& x)
 }
 //-----------------------------------------------------------------------------
 
-#endif
-
 }
+
+#endif
 

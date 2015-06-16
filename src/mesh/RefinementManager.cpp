@@ -92,7 +92,6 @@ void RefinementManager::init(Mesh& mesh)
 
   // Initialize datastructures for processor boundary
   BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
-  MeshFunction<uint>* cell_map = local_boundary.data().meshFunction("cell map");
 
   cell_forbidden.init(mesh, mesh.topology().dim());
   cell_forbidden = false;
@@ -106,7 +105,7 @@ void RefinementManager::init(Mesh& mesh)
   MeshDistributedData& distdata = mesh.distdata();
   for (CellIterator bf(local_boundary); !bf.end(); ++bf)
   {
-    Facet f(mesh, cell_map->get(*bf));
+    Facet f(mesh, local_boundary.facet_index(*bf));
 
     for (CellIterator c(f); !c.end(); ++c)
     {

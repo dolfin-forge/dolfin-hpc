@@ -78,7 +78,7 @@ ValueArray const& EnrichedElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const EnrichedElement::is_cellwise_constant() const
+bool EnrichedElement::is_cellwise_constant() const
 {
   bool ret = true;
   for ( List::const_iterator it = sub_elements_.begin();
@@ -90,26 +90,26 @@ bool const EnrichedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const EnrichedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& EnrichedElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const EnrichedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> EnrichedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const EnrichedElement::extract_component(ValueArray const& i) const
+std::pair<dolfin::uint, FiniteElementBase const *> EnrichedElement::extract_component(ValueArray const& i) const
 {
   return std::pair<dolfin::uint, FiniteElementBase const *>( i[0] , sub_elements_[i[0]] );
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const EnrichedElement::num_sub_elements() const
+dolfin::uint EnrichedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }

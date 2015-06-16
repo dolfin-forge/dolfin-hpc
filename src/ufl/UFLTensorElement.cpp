@@ -74,7 +74,7 @@ ValueArray const& TensorElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const TensorElement::is_cellwise_constant() const
+bool TensorElement::is_cellwise_constant() const
 {
   bool ret = true;
   for (List::const_iterator it = sub_elements_.begin();
@@ -86,27 +86,27 @@ bool const TensorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const TensorElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& TensorElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const TensorElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> TensorElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const TensorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> TensorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const TensorElement::num_sub_elements() const
+dolfin::uint TensorElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }

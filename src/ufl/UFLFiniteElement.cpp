@@ -95,26 +95,26 @@ ValueArray const& FiniteElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const FiniteElement::is_cellwise_constant() const
+bool FiniteElement::is_cellwise_constant() const
 {
   return (family().type() == Family::R && degree() == 0);
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const FiniteElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> FiniteElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const FiniteElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> FiniteElement::extract_component(
     ValueArray const& i) const
 {
   check_component(i);
@@ -122,7 +122,7 @@ std::pair<dolfin::uint, FiniteElementBase const *> const FiniteElement::extract_
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const FiniteElement::num_sub_elements() const
+dolfin::uint FiniteElement::num_sub_elements() const
 {
   return 0;
 }

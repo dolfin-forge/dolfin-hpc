@@ -67,33 +67,33 @@ ValueArray const& RestrictedElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const RestrictedElement::is_cellwise_constant() const
+bool RestrictedElement::is_cellwise_constant() const
 {
   return element_.is_cellwise_constant();
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const RestrictedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> RestrictedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return element_.extract_subelement_component(i);
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const RestrictedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> RestrictedElement::extract_component(
     ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const RestrictedElement::num_sub_elements() const
+dolfin::uint RestrictedElement::num_sub_elements() const
 {
   return element_.num_sub_elements();
 }

@@ -109,7 +109,7 @@ void FiniteElementBase::check_component(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-Cell const FiniteElementBase::get_cell(List const& elements) const
+Cell FiniteElementBase::get_cell(List const& elements) const
 {
   if(elements.size() < 1)
   {
@@ -128,7 +128,7 @@ Cell const FiniteElementBase::get_cell(List const& elements) const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const FiniteElementBase::get_degree_max(List const& elements) const
+dolfin::uint FiniteElementBase::get_degree_max(List const& elements) const
 {
   dolfin::uint ret = 0;
   for (List::const_iterator it = elements.begin(); it != elements.end(); ++it)

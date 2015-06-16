@@ -78,7 +78,7 @@ ValueArray const& VectorElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const VectorElement::is_cellwise_constant() const
+bool VectorElement::is_cellwise_constant() const
 {
   bool ret = true;
   for (List::const_iterator it = sub_elements_.begin();
@@ -90,27 +90,27 @@ bool const VectorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const VectorElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& VectorElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const VectorElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> VectorElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const VectorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> VectorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const VectorElement::num_sub_elements() const
+dolfin::uint VectorElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }

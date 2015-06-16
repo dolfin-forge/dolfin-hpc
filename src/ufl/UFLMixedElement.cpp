@@ -80,7 +80,7 @@ ValueArray const& MixedElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const MixedElement::is_cellwise_constant() const
+bool MixedElement::is_cellwise_constant() const
 {
   bool ret = true;
   for (List::const_iterator it = sub_elements_.begin();
@@ -92,13 +92,13 @@ bool const MixedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const MixedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& MixedElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> MixedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   check_component(i);
@@ -148,7 +148,7 @@ std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_compone
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const MixedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> MixedElement::extract_component(
     ValueArray const& i) const
 {
   ValueArray subidx;
@@ -157,7 +157,7 @@ std::pair<dolfin::uint, FiniteElementBase const *> const MixedElement::extract_c
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const MixedElement::num_sub_elements() const
+dolfin::uint MixedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
@@ -181,7 +181,7 @@ std::string const& MixedElement::str() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const MixedElement::cloneSubElementsList(
+FiniteElementBase::List MixedElement::cloneSubElementsList(
     FiniteElementBase::List const& elements)
 {
   FiniteElementBase::List subelms;
@@ -195,7 +195,7 @@ FiniteElementBase::List const MixedElement::cloneSubElementsList(
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const MixedElement::createSubElementsList(
+FiniteElementBase::List MixedElement::createSubElementsList(
     repr_t const& repr)
 {
   List subelms;

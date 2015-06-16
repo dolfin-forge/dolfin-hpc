@@ -75,24 +75,24 @@ public:
 
   /// Return whether the basis functions of this element is spatially constant
   /// over each cell
-  virtual bool const is_cellwise_constant() const = 0;
+  virtual bool is_cellwise_constant() const = 0;
 
   /// Return the symmetry dict, which is a mapping c0 -> c1 meaning that
   /// component c0 is represented by component c1
-  virtual std::map<dolfin::uint, dolfin::uint> const symmetry() const = 0;
+  virtual std::map<dolfin::uint, dolfin::uint> const& symmetry() const = 0;
 
   /// Extract direct subelement index and subelement relative component index
   /// for a given component index
-  virtual std::pair<ValueArray, ValueArray> const extract_subelement_component(
+  virtual std::pair<ValueArray, ValueArray> extract_subelement_component(
       ValueArray const& i) const = 0;
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual std::pair<dolfin::uint, FiniteElementBase const *> const extract_component(
+  virtual std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
       ValueArray const& i) const = 0;
 
   /// Return number of sub elements
-  virtual dolfin::uint const num_sub_elements() const = 0;
+  virtual dolfin::uint num_sub_elements() const = 0;
 
   /// Return list of sub elements
   virtual List const& sub_elements() const = 0;
@@ -136,10 +136,10 @@ protected:
   void check_component(ValueArray const& i) const;
 
   ///
-  Cell const get_cell(List const& elements) const;
+  Cell get_cell(List const& elements) const;
 
   ///
-  dolfin::uint const get_degree_max(List const& elements) const;
+  dolfin::uint get_degree_max(List const& elements) const;
 
   /// Get the value size from subelements
   dolfin::uint get_value_size(List const& elements) const;

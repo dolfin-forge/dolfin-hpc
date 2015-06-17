@@ -64,13 +64,13 @@ std::vector<std::vector<Class const*> > const IndexSum::level_operands(
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       expressions_[1]->level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -87,7 +87,7 @@ std::vector<std::vector<Class const*> > const IndexSum::level_operands(
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -104,20 +104,20 @@ MultiIndex const * IndexSum::index() const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const IndexSum::dimension() const
+dolfin::uint IndexSum::dimension() const
 {
   std::vector<Index const *> const& f_indices =
       expressions_[1]->free_indices().operands();
-  
+
   if (f_indices.size() != 1) error("Expecting a single Index only.");
-  
+
   Index const& ind = *f_indices[0];
   std::vector<std::pair<IndexBase const *, type<dolfin::uint> const *> > const& ind_dim =
       index_dimensions().map();
-  
+
   for (dolfin::uint i = 0; i < ind_dim.size(); ++i)
     if (*ind_dim[i].first == ind) return *ind_dim[i].second;
-  
+
   return -1;
 }
 
@@ -140,17 +140,17 @@ tuple<Index> const IndexSum::free_indices() const
 {
   std::vector<Index const *> const& sum_indices =
       expressions_[0]->free_indices().operands();
-  
+
   std::vector<Index const *> const& f_indices =
       expressions_[1]->free_indices().operands();
-  
+
   if (f_indices.size() != 1) error("Expecting a single Index only.");
-  
+
   std::vector<Index const *> new_indices;
-  
+
   for (dolfin::uint i = 0; i < sum_indices.size(); ++i)
     if (sum_indices[i] != f_indices[0]) new_indices.push_back(sum_indices[i]);
-  
+
   return tuple<Index>(new_indices);
 }
 
@@ -171,7 +171,7 @@ std::vector<std::vector<std::vector<dolfin::real> > > const IndexSum::evaluate(
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0 =
       expressions_[0]->evaluate(n, tensor, ref_cell, q_points, coordinates);
   dolfin::uint tensor_rank = expressions_[1]->index_dimensions().size();
-  
+
   std::vector<std::vector<std::vector<dolfin::real> > > result(
       new_vals0.size());
   for (dolfin::uint i = 0; i < new_vals0.size(); ++i)
@@ -184,7 +184,7 @@ std::vector<std::vector<std::vector<dolfin::real> > > const IndexSum::evaluate(
         result[i][j][k] = new_vals0[i][j][k];  //TODO
     }
   }
-  
+
   for (dolfin::uint i = 0; i < new_vals0.size(); ++i)
     for (dolfin::uint j = 0; j < new_vals0[i].size(); ++j)
       for (dolfin::uint k = 0; k < new_vals0[i][j].size(); ++k)

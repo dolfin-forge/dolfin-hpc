@@ -81,7 +81,7 @@ public:
       const double * const * coordinates) const;
 
   /// UFL: Return whether this expression is spatially constant over each cell
-  bool const is_cellwise_constant() const;
+  bool is_cellwise_constant() const;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 

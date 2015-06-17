@@ -45,7 +45,7 @@ public:
   dolfin::uint prod() const;
 
   ///
-  std::string const& str() const;
+  std::string str() const;
 
 private:
 

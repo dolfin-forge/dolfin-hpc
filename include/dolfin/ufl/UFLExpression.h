@@ -110,7 +110,7 @@ private:
  Operator (Expression const& expression);
  ~Operator ();
 
- bool const is_cellwise_constant() const;
+ bool is_cellwise_constant() const;
 
  private:
  Expression const expression_;

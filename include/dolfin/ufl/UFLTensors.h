@@ -64,7 +64,7 @@ namespace ufl
  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions();
 
  /// UFL: Return whether this expression is spatially constant over each cell
- bool const is_cellwise_constant() const;
+ bool is_cellwise_constant() const;
 
  //--- INTERFACE inherited from UFLClass -------------------------------------
 
@@ -155,7 +155,7 @@ public:
       const double * const * coordinates) const;
 
   /// UFL: Return whether this expression is spatially constant over each cell
-  bool const is_cellwise_constant() const;
+  bool is_cellwise_constant() const;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 

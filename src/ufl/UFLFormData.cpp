@@ -46,7 +46,7 @@ dolfin::uint FormData::rank() const
     std::cout << "max count = " << max_count << std::endl;
     return max_count + 1;
   }
-  
+
   std::cout << "extf el = " << extf_arguments_.size() << std::endl;
   if (extf_arguments_.size() != 0)
   {
@@ -57,7 +57,7 @@ dolfin::uint FormData::rank() const
     std::cout << "max count = " << max_count << std::endl;
     return max_count + 1;
   }
-  
+
   std::cout << "intf el = " << intf_arguments_.size() << std::endl;
   if (intf_arguments_.size() != 0)
   {
@@ -68,7 +68,7 @@ dolfin::uint FormData::rank() const
     std::cout << "max count = " << max_count << std::endl;
     return max_count + 1;
   }
-  
+
   return 0;
 }
 
@@ -101,12 +101,13 @@ FiniteElementBase const * FormData::get_element(dolfin::uint i) const
 {
   std::cout << "i= " << i << " size= " << cell_elements_.size() << std::endl;
   if (cell_elements_.size() > i) if (cell_elements_[i] != NULL) return cell_elements_[i];
-  
+
   if (extf_elements_.size() > i) if (extf_elements_[i] != NULL) return extf_elements_[i];
-  
+
   if (intf_elements_.size() > i) if (intf_elements_[i] != NULL) return intf_elements_[i];
-  
+
   dolfin::error("Either no element present or index %d is out of range", i);
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -150,12 +151,13 @@ CoefficientBase const * FormData::get_coefficient(dolfin::uint i) const
   std::cout << "i= " << i << " size= " << cell_coefficients_.size()
             << std::endl;
   if (cell_coefficients_.size() > i) if (cell_coefficients_[i] != NULL) return cell_coefficients_[i];
-  
+
   if (extf_coefficients_.size() > i) if (extf_coefficients_[i] != NULL) return extf_coefficients_[i];
-  
+
   if (intf_coefficients_.size() > i) if (intf_coefficients_[i] != NULL) return intf_coefficients_[i];
-  
+
   dolfin::error("Either no element present or index %d is out of range", i);
+  return NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -186,7 +188,7 @@ void FormData::zero_element_tensor(double* A) const
   std::vector<unsigned int> n_test(tensor_rank);
   for (unsigned int i = 0; i < n_test.size(); ++i)
     n_test[i] = local_finite_element_dimension(i);
-  
+
   for (unsigned int j = 0; j < n_test[0]; j++)
   {
     if (tensor_rank == 2)
@@ -198,7 +200,7 @@ void FormData::zero_element_tensor(double* A) const
     }
     else if (tensor_rank == 1) A[j] = 0;
     else std::cout << "not implemented" << std::endl;
-    
+
   }  // end loop over 'j'
 }
 
@@ -215,7 +217,7 @@ void FormData::compute_element_tensor(double* A,
   {
     new_vals0[i] = cell_integrals_[i]->evaluate(0, new_vals0[i], ref_cell,
                                                 q_point, coordinates);
-    
+
 //        for(dolfin::uint k=0; k<expr[i].size(); ++k)
 //          for(dolfin::uint j=0; j<expr[i][k].size(); ++j)
 //            std::cout << "(" << k << "," << j << ")" << expr[i][k][j]->name() << std::endl;
@@ -287,7 +289,7 @@ std::vector<Expression const *> const FormData::init_cell_integrands() const
     for (dolfin::uint j = 0; j < integrands.size(); ++j)
       cell_integrands.push_back(integrands[j]);
   }
-  
+
   return cell_integrands;
 }
 
@@ -302,7 +304,7 @@ std::vector<Expression const *> const FormData::init_extf_integrands() const
     for (dolfin::uint j = 0; j < integrands.size(); ++j)
       extf_integrands.push_back(integrands[j]);
   }
-  
+
   return extf_integrands;
 }
 
@@ -317,7 +319,7 @@ std::vector<Expression const *> const FormData::init_intf_integrands() const
     for (dolfin::uint j = 0; j < integrands.size(); ++j)
       intf_integrands.push_back(integrands[j]);
   }
-  
+
   return intf_integrands;
 }
 
@@ -332,7 +334,7 @@ std::vector<Argument const *> const FormData::init_cell_arguments() const
     for (dolfin::uint j = 0; j < arguments.size(); ++j)
       cell_arguments.push_back(dynamic_cast<Argument const *>(arguments[j]));
   }
-  
+
   return cell_arguments;
 }
 
@@ -347,7 +349,7 @@ std::vector<Argument const *> const FormData::init_extf_arguments() const
     for (dolfin::uint j = 0; j < arguments.size(); ++j)
       extf_arguments.push_back(dynamic_cast<Argument const *>(arguments[j]));
   }
-  
+
   return extf_arguments;
 }
 
@@ -362,7 +364,7 @@ std::vector<Argument const *> const FormData::init_intf_arguments() const
     for (dolfin::uint j = 0; j < arguments.size(); ++j)
       intf_arguments.push_back(dynamic_cast<Argument const *>(arguments[j]));
   }
-  
+
   return intf_arguments;
 }
 
@@ -372,7 +374,7 @@ std::vector<FiniteElementBase const *> const FormData::init_cell_elements() cons
   std::vector<FiniteElementBase const *> cell_elements;
   for (dolfin::uint i = 0; i < cell_arguments_.size(); ++i)
     cell_elements.push_back(&cell_arguments_[i]->element());
-  
+
   std::cout << "size cell_elements= " << cell_elements.size() << std::endl;
   return cell_elements;
 }
@@ -383,7 +385,7 @@ std::vector<FiniteElementBase const *> const FormData::init_extf_elements() cons
   std::vector<FiniteElementBase const *> extf_elements;
   for (dolfin::uint i = 0; i < extf_arguments_.size(); ++i)
     extf_elements.push_back(&extf_arguments_[i]->element());
-  
+
   return extf_elements;
 }
 
@@ -393,7 +395,7 @@ std::vector<FiniteElementBase const *> const FormData::init_intf_elements() cons
   std::vector<FiniteElementBase const *> intf_elements;
   for (dolfin::uint i = 0; i < intf_arguments_.size(); ++i)
     intf_elements.push_back(&intf_arguments_[i]->element());
-  
+
   return intf_elements;
 }
 
@@ -422,7 +424,7 @@ std::vector<CoefficientBase const *> const FormData::init_cell_coefficients() co
       cell_coefficients.push_back(
           dynamic_cast<TensorConstant const *>(tcnst[j]));
   }
-  
+
   return cell_coefficients;
 }
 
@@ -451,7 +453,7 @@ std::vector<CoefficientBase const *> const FormData::init_extf_coefficients() co
       extf_coefficients.push_back(
           dynamic_cast<TensorConstant const *>(tcnst[j]));
   }
-  
+
   return extf_coefficients;
 }
 
@@ -480,7 +482,7 @@ std::vector<CoefficientBase const *> const FormData::init_intf_coefficients() co
       intf_coefficients.push_back(
           dynamic_cast<TensorConstant const *>(tcnst[j]));
   }
-  
+
   return intf_coefficients;
 }
 
@@ -492,7 +494,7 @@ std::vector<std::vector<std::vector<Class const *> > > const FormData::init_cell
   for (dolfin::uint i = 0; i < cell_integrals_.size(); ++i)
   {
     expr[i] = cell_integrals_[i]->level_operands(expr[i]);
-    
+
 //        for(dolfin::uint k=0; k<expr[i].size(); ++k)
 //          for(dolfin::uint j=0; j<expr[i][k].size(); ++j)
 //            std::cout << "(" << k << "," << j << ")" << expr[i][k][j]->name() << std::endl;
@@ -508,12 +510,12 @@ std::vector<std::vector<std::vector<Class const *> > > const FormData::init_extf
   for (dolfin::uint i = 0; i < extf_integrals_.size(); ++i)
   {
     expr[i] = extf_integrals_[i]->level_operands(expr[i]);
-    
+
 //        for(dolfin::uint k=0; k<expr[i].size(); ++k)
 //          for(dolfin::uint j=0; j<expr[i][k].size(); ++j)
 //            std::cout << "(" << k << "," << j << ")" << expr[i][k][j]->name() << std::endl;
   }
-  
+
   return expr;
 }
 
@@ -525,12 +527,12 @@ std::vector<std::vector<std::vector<Class const *> > > const FormData::init_intf
   for (dolfin::uint i = 0; i < intf_integrals_.size(); ++i)
   {
     expr[i] = intf_integrals_[i]->level_operands(expr[i]);
-    
+
 //        for(dolfin::uint k=0; k<expr[i].size(); ++k)
 //          for(dolfin::uint j=0; j<expr[i][k].size(); ++j)
 //            std::cout << "(" << k << "," << j << ")" << expr[i][k][j]->name() << std::endl;
   }
-  
+
   return expr;
 }
 

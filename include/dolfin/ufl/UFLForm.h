@@ -45,7 +45,7 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   ///Does this function make sense?
-  Cell const& cell() const;
+  Cell cell() const;
 
   tuple<Integral> const integrals(MeasureDomain::Type const& measure_type =
       MeasureDomain::None) const;

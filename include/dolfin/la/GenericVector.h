@@ -45,19 +45,19 @@ namespace dolfin
     { return 1; }
 
     /// Return size of given dimension
-    virtual uint size(uint dim) const
+    inline uint size(uint dim) const
     { dolfin_assert(dim == 0); return size(); }
 
     /// Get block of values
-    virtual void get(real* block, const uint* num_rows, const uint * const * rows) const
+    inline void get(real* block, const uint* num_rows, const uint * const * rows) const
     { get(block, num_rows[0], rows[0]); }
 
     /// Set block of values
-    virtual void set(const real* block, const uint* num_rows, const uint * const * rows)
+    inline void set(const real* block, const uint* num_rows, const uint * const * rows)
     { set(block, num_rows[0], rows[0]); }
 
     /// Add block of values
-    virtual void add(const real* block, const uint* num_rows, const uint * const * rows)
+    inline void add(const real* block, const uint* num_rows, const uint * const * rows)
     { add(block, num_rows[0], rows[0]); }
 
     /// Set all entries to zero and keep any sparse structure

@@ -123,7 +123,9 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     {
       delete As;
       As = new Matrix();
+#if HAVE_PETSC
       (*(As->instance())).down_cast<PETScMatrix>().dup(A);
+#endif
     }
 
     // Initialize ghosts for rhs vector using the full space dofmap

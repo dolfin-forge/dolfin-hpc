@@ -122,14 +122,13 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/pde/poisson/main.cpp\
              demo/pde/poisson/Poisson.ufl\
              demo/pde/poisson/Poisson.h\
+             demo/pde/stokes/Stokes2D.h\
              demo/pde/stokes/stabilized/Makefile\
-             demo/pde/stokes/stabilized/subdomains.xml.gz\
              demo/pde/stokes/stabilized/Stokes.ufl\
              demo/pde/stokes/stabilized/Stokes.h\
              demo/pde/stokes/stabilized/main.cpp\
              demo/pde/stokes/taylor-hood/Makefile\
              demo/pde/stokes/taylor-hood/Stokes.ufl\
-             demo/pde/stokes/taylor-hood/subdomains.xml.gz\
              demo/pde/stokes/taylor-hood/Stokes.h\
              demo/pde/stokes/taylor-hood/main.cpp\
              demo/quadrature/main.cpp\

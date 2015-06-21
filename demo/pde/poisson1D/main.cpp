@@ -48,8 +48,6 @@ public:
 
 int main()
 {
-  error("Dirichlet BC gives an error in 1D");
-
   // Create mesh
   UnitInterval mesh(50);
 

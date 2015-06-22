@@ -20,12 +20,12 @@ RestrictedElement::RestrictedElement(FiniteElementBase const& element,
     value_shape_(element.value_shape())
 {
   // Check mixed finite element definition
-
+  
   std::stringstream ssrepr;
   ssrepr << "RestrictedElement(" << element_.repr() << ", " << domain.repr()
-      << ")";
+         << ")";
   repr_ = ssrepr.str();
-
+  
   std::stringstream ssstr;
   ssstr << "<" << element_.str() << ">|_" << domain.str() << ">";
   str_ = ssstr.str();
@@ -67,33 +67,33 @@ ValueArray const& RestrictedElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const RestrictedElement::is_cellwise_constant() const
+bool RestrictedElement::is_cellwise_constant() const
 {
   return element_.is_cellwise_constant();
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const RestrictedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& RestrictedElement::symmetry() const
 {
   return element_.symmetry();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const RestrictedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> RestrictedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return element_.extract_subelement_component(i);
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const RestrictedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> RestrictedElement::extract_component(
     ValueArray const& i) const
 {
   return element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const RestrictedElement::num_sub_elements() const
+dolfin::uint RestrictedElement::num_sub_elements() const
 {
   return element_.num_sub_elements();
 }
@@ -111,13 +111,13 @@ FiniteElementBase const& RestrictedElement::element()
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const RestrictedElement::repr() const
+Object::repr_t const& RestrictedElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const RestrictedElement::str() const
+std::string const& RestrictedElement::str() const
 {
   return str_;
 }

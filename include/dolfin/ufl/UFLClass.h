@@ -37,17 +37,17 @@ public:
   std::pair<std::string, std::string> const prefixed_name() const;
 
   /// __repr__
-  virtual repr_t const repr() const = 0;
+  virtual repr_t const& repr() const = 0;
 
   /// __str__
-  virtual std::string const str() const = 0;
+  virtual std::string const& str() const = 0;
 
   /// __eq__
   virtual bool operator ==(Class const& other) const;
 
   /// Create representation from a list of argument objects
   template<class OBJ>
-  repr_t const make_repr(std::vector<OBJ const *> const& args) const;
+    repr_t make_repr(std::vector<OBJ const *> const& args) const;
 
 protected:
 
@@ -64,7 +64,8 @@ protected:
   explicit Class(std::string const& name, repr_t const& repr);
 
   ///
-  explicit Class(std::string const& pre, std::string const& pos, repr_t const& repr);
+  explicit Class(std::string const& pre, std::string const& pos,
+                 repr_t const& repr);
 
   ///
   virtual ~Class();
@@ -73,7 +74,7 @@ protected:
   virtual void display() const;
 
   ///
-  static std::string const make_name(repr_t repr);
+  static std::string make_name(repr_t repr);
 
   ///
   repr_t const make_repr(Object const *& arg1) const;
@@ -82,7 +83,8 @@ protected:
   repr_t const make_repr(Object const *& arg1, Object const *& arg2) const;
 
   ///
-  std::vector<repr_t> const make_args_repr(repr_t const& repr, bool const& without_pre_pos = false) const;
+  std::vector<repr_t> make_args_repr(repr_t const& repr, bool without_pre_pos =
+                                         false) const;
 
   ///
   repr_t const& arg(size_t i);
@@ -91,11 +93,13 @@ protected:
   std::vector<repr_t> const& args();
 
   ///
-  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre, std::string& pos) const;
+  void remove_pre_pos(repr_t const& repr, std::string& str, std::string& pre,
+                      std::string& pos) const;
 
 private:
 
-  typedef std::pair<std::pair<std::string, std::string>, std::vector<Object const*> > CppProto;
+  typedef std::pair<std::pair<std::string, std::string>,
+      std::vector<Object const*> > CppProto;
 
   ///
   CppProto make_proto(repr_t repr) const;

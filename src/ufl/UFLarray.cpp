@@ -22,7 +22,7 @@ array::~array()
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const array::repr() const
+Object::repr_t const& array::repr() const
 {
   std::stringstream ss;
   if (unpack_)
@@ -30,11 +30,12 @@ Object::repr_t const array::repr() const
     ss << "*";
   }
   ss << "[" << obj_.repr() << "]";
-  return ss.str();
+  repr_ = repr_t(ss.str());
+  return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const array::str() const
+std::string const& array::str() const
 {
   std::stringstream ss;
   if (unpack_)
@@ -42,7 +43,8 @@ std::string const array::str() const
     ss << "*";
   }
   ss << "[" << obj_.str() << "]";
-  return ss.str();
+  str_ = ss.str();
+  return str_;
 }
 
 //-----------------------------------------------------------------------------
@@ -53,7 +55,7 @@ void array::display() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const array::make_repr(
+Object::repr_t array::make_repr(
     std::vector<Object const *> const& prototype) const
 {
   std::stringstream ss;

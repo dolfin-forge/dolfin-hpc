@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  
-// Last changed: 
+// First added:
+// Last changed:
 
 #ifndef __UFL_INDEX_SUM_H_
 #define __UFL_INDEX_SUM_H_
@@ -19,95 +19,98 @@
 namespace ufl
 {
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  IndexSum
-   *
-   *  @brief  Provides an interface complying with UFL IndexSum.
-   */
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  IndexSum
+ *
+ *  @brief  Provides an interface complying with UFL IndexSum.
+ */
 
-  class IndexSum : public Expression
-  {
+class IndexSum : public Expression
+{
 
-    public:
+public:
 
-      ///
-      IndexSum(Expression const& expression, MultiIndex const& multi_index);
+  ///
+  IndexSum(Expression const& expression, MultiIndex const& multi_index);
 
-      ///
-      IndexSum(Expression const& expression, tuple<IndexBase> const& indices, 
-          dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
+  ///
+  IndexSum(Expression const& expression, tuple<IndexBase> const& indices,
+           dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
 
-      ///
-      IndexSum(repr_t const & repr);
+  ///
+  IndexSum(repr_t const & repr);
 
-      ///
-      ~IndexSum();
+  ///
+  ~IndexSum();
 
-      ///
-      virtual std::vector<Class const* > const operands (std::string const& name) const;
+  ///
+  virtual std::vector<Class const*> const operands(
+      std::string const& name) const;
 
-      ///
-      virtual std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  virtual std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
-      static IndexSum const * create(Object::repr_t const& repr);
+  static IndexSum const * create(Object::repr_t const& repr);
 
-      ///
-      MultiIndex const * index() const;
-      
-      ///
-      dolfin::uint const dimension() const;
+  ///
+  MultiIndex const * index() const;
 
-      ///
-      std::vector<Expression const *> const operands() const;
+  ///
+  dolfin::uint dimension() const;
 
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+  ///
+  std::vector<Expression const *> const operands() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+  ///Return the tensor shape of the expression.
+  virtual ValueArray const shape() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  ///Return a tuple with the free indices (unassigned) of the expression.
+  virtual tuple<Index> const free_indices() const;
 
-      ///Evaluate the expression tree at the given quadrature_points
-      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
-          dolfin::uint n,
-          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
-          std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+  ///Return a dict with the free or repeated indices in the expression
+  ///as keys and the dimensions of those indices as values.
+  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
 
-      /// UFL: Return whether this expression is spatially constant over each cell
-      bool const is_cellwise_constant() const;
+  ///Evaluate the expression tree at the given quadrature_points
+  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      
-      /// __repr__
-      repr_t const repr() const;
+  /// UFL: Return whether this expression is spatially constant over each cell
+  bool is_cellwise_constant() const;
 
-      /// __str__
-      std::string const str() const;
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      ///
-      void display() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-    private:
+  /// __str__
+  std::string const& str() const;
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, MultiIndex const& i);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, 
-          tuple<IndexBase> const& indices, dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
-      std::vector<Expression const *> const expressions_;
+  ///
+  void display() const;
 
-      repr_t const repr_;
-      std::string const str_;
+private:
 
-  };
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e,
+                                                         MultiIndex const& i);
+  std::vector<Expression const *> const fill_expressions(
+      Expression const& e, tuple<IndexBase> const& indices,
+      dict<IndexBase, type<dolfin::uint> > const& index_dimensions);
+  std::vector<Expression const *> const expressions_;
+
+  repr_t const repr_;
+  std::string const str_;
+
+};
 } /* namespace ufl */
 #endif /* __UFL_INDEX_SUM_H_ */

@@ -20,73 +20,74 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL Data.
  */
 
-  class Data : public Expression
-  {
-    public:
+class Data : public Expression
+{
+public:
 
-      ///
-      Data(Expression const& expression);
+  ///
+  Data(Expression const& expression);
 
-      ///
-      Data(repr_t const& repr);
+  ///
+  Data(repr_t const& repr);
 
-      ///
-      ~Data();
+  ///
+  ~Data();
 
-      ///
-      virtual std::vector<Class const* > const operands (std::string const& name) const;
+  ///
+  virtual std::vector<Class const*> const operands(
+      std::string const& name) const;
 
-      ///
-      virtual std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  virtual std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
-      ///
-      static Data const * create (Object::repr_t const& repr);
+  ///
+  static Data const * create(Object::repr_t const& repr);
 
-      ///
-      std::vector<Expression const *> const operands() const;
-      
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+  ///
+  std::vector<Expression const *> const operands() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+  ///Return the tensor shape of the expression.
+  virtual ValueArray const shape() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  ///Return a tuple with the free indices (unassigned) of the expression.
+  virtual tuple<Index> const free_indices() const;
 
-      ///Evaluate the expression tree at the given quadrature_points
-      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
-          dolfin::uint n,
-          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
-          std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+  ///Return a dict with the free or repeated indices in the expression
+  ///as keys and the dimensions of those indices as values.
+  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
-      /// __repr__
-      repr_t const repr() const;
+  ///Evaluate the expression tree at the given quadrature_points
+  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const;
 
-      /// __str__
-      std::string const str() const;
+  //--- INTERFACE inherited from UFLClass -------------------------------------
+  /// __repr__
+  repr_t const& repr() const;
 
-      ///
-      void display() const;
+  /// __str__
+  std::string const& str() const;
 
-    protected:
+  ///
+  void display() const;
 
-    private:
+protected:
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const expressions_;
+private:
 
-      repr_t const repr_;
-      std::string const str_;
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const expressions_;
 
-  };
+  repr_t const repr_;
+  std::string const str_;
+
+};
 
 } /* namespace ufl */
 #endif /* __UFL_DATA_H_ */

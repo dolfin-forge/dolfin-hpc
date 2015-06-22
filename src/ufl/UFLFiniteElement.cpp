@@ -18,7 +18,8 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
     family_(family),
     cell_(cell),
     degree_(degree),
-    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
+    value_shape_(family_.value_rank(),
+                 family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(*this, this->family(), cell, this->degree(),
@@ -29,10 +30,10 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
   {
     error("The finite element definition is not valid.");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree
-      << quadrature_scheme().str() << " on a " << cell.str() << ">";
+        << quadrature_scheme().str() << " on a " << cell.str() << ">";
   str_ = ssstr.str();
 }
 
@@ -42,7 +43,8 @@ FiniteElement::FiniteElement(repr_t const& repr) :
     family_(arg(0)),
     cell_(arg(1)),
     degree_(arg(2)),
-    value_shape_(family_.value_rank(), family_.value_rank() * cell_.geometric_dimension()),
+    value_shape_(family_.value_rank(),
+                 family_.value_rank() * cell_.geometric_dimension()),
     symmetry_(),
     sub_elements_(),
     repr_(repr)
@@ -52,10 +54,10 @@ FiniteElement::FiniteElement(repr_t const& repr) :
   {
     error("The finite element definition is not valid.");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree()
-      << quadrature_scheme().str() << " on a " << cell().str() << ">";
+        << quadrature_scheme().str() << " on a " << cell().str() << ">";
   str_ = ssstr.str();
 }
 
@@ -95,26 +97,26 @@ ValueArray const& FiniteElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const FiniteElement::is_cellwise_constant() const
+bool FiniteElement::is_cellwise_constant() const
 {
   return (family().type() == Family::R && degree() == 0);
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const FiniteElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const FiniteElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> FiniteElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const FiniteElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> FiniteElement::extract_component(
     ValueArray const& i) const
 {
   check_component(i);
@@ -122,7 +124,7 @@ std::pair<dolfin::uint, FiniteElementBase const *> const FiniteElement::extract_
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const FiniteElement::num_sub_elements() const
+dolfin::uint FiniteElement::num_sub_elements() const
 {
   return 0;
 }
@@ -134,13 +136,13 @@ FiniteElementBase::List const& FiniteElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const FiniteElement::repr() const
+Object::repr_t const& FiniteElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const FiniteElement::str() const
+std::string const& FiniteElement::str() const
 {
   return str_;
 }

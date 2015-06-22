@@ -51,6 +51,6 @@ LinearAlgebraFactory& DefaultFactory::factory() const
   }
 
   error("Linear algebra backend \"" + backend + "\" not available.");
-
+  return factory(); // Never reached :P
 }
 //-----------------------------------------------------------------------------

@@ -14,7 +14,8 @@ namespace ufl
 //-----------------------------------------------------------------------------
 FacetNormal::FacetNormal(Cell const& cell) :
     GeometricQuantity("FacetNormal", cell),
-    shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
+    shape_((cell.geometric_dimension() == 1 ? 0 : 1),
+           cell.geometric_dimension()),
     repr_(*this, cell),
     str_("n")
 
@@ -33,13 +34,13 @@ ValueArray const& FacetNormal::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const FacetNormal::repr() const
+Object::repr_t const& FacetNormal::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetNormal::str() const
+std::string const& FacetNormal::str() const
 {
   return str_;
 }

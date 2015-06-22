@@ -223,10 +223,10 @@ public:
   FiniteElementSpace const& space() const;
 
   /// Return the signature of a DiscreteFunction
-  std::string const signature() const;
+  std::string signature() const;
 
   /// Return the number of sub functions of a DiscreteFunction
-  uint const num_sub_functions() const;
+  uint num_sub_functions() const;
 
   /// Get the size of the block
   uidx block_size() const;

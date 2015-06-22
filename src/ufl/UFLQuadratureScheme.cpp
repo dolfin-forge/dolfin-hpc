@@ -25,13 +25,13 @@ QuadratureScheme::~QuadratureScheme()
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const QuadratureScheme::repr() const
+Object::repr_t const& QuadratureScheme::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const QuadratureScheme::str() const
+std::string const& QuadratureScheme::str() const
 {
   return str_;
 }

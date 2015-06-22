@@ -23,36 +23,36 @@ namespace ufl
  *  Form objects.
  */
 
-  class Equation : public Class
-  {
-    public:
+class Equation : public Class
+{
+public:
 
-      ///
-      Equation(Form const& lhs, Form const& rhs);
+  ///
+  Equation(Form const& lhs, Form const& rhs);
 
-      ///
-      Equation(repr_t const& repr);
+  ///
+  Equation(repr_t const& repr);
 
-      ///
-      ~Equation();
+  ///
+  ~Equation();
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      repr_t const repr() const;
+  repr_t const& repr() const;
 
-      /// __str__
-      std::string const str() const;
-      
-      ///
-      void display() const;
+  /// __str__
+  std::string const& str() const;
 
-    private:
-      Form const lhs_;
-      Form const rhs_;
+  ///
+  void display() const;
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+private:
+  Form const lhs_;
+  Form const rhs_;
+
+  repr_t const repr_;
+  std::string const str_;
+};
 
 } /* namespace ufl */
 #endif /* __UFL_EQUATION_H_ */

@@ -16,7 +16,7 @@
 namespace ufl
 {
 
-  class FormData;
+class FormData;
 
 /**
  *  DOCUMENTATION:
@@ -26,72 +26,73 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL Form.
  */
 
-  class Form : public Class
-  {
-    public:
+class Form : public Class
+{
+public:
 
-      ///
-      Form(List const& list);
+  ///
+  Form(List const& list);
 
-      ///
-      Form(repr_t const& repr);
+  ///
+  Form(repr_t const& repr);
 
-      ///
-      Form(ufc::form const& ufc_form);
+  ///
+  Form(ufc::form const& ufc_form);
 
-      ///
-      ~Form();
+  ///
+  ~Form();
 
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
-      ///Does this function make sense?
-      Cell const& cell() const;
+  ///Does this function make sense?
+  Cell cell() const;
 
-      tuple<Integral> const integrals(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+  tuple<Integral> const integrals(MeasureDomain::Type const& measure_type =
+      MeasureDomain::None) const;
 
-      tuple<Measure> const measures(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+  tuple<Measure> const measures(MeasureDomain::Type const& measure_type =
+      MeasureDomain::None) const;
 
-      std::vector<std::pair<MeasureDomain::Type, dolfin::uint> > const domains(MeasureDomain::Type const& measure_type=MeasureDomain::None) const;
+  std::vector<std::pair<MeasureDomain::Type, dolfin::uint> > const domains(
+      MeasureDomain::Type const& measure_type = MeasureDomain::None) const;
 
-      tuple<Integral> const cell_integrals() const;
+  tuple<Integral> const cell_integrals() const;
 
-      tuple<Integral> const exterior_facet_integrals() const;
-      
-      tuple<Integral> const interior_facet_integrals() const;
-      
-      tuple<Integral> const macro_cell_integrals() const;
-      
-      tuple<Integral> const surface_integrals() const;
-      
-      FormData const& form_data() const;
-      
+  tuple<Integral> const exterior_facet_integrals() const;
+
+  tuple<Integral> const interior_facet_integrals() const;
+
+  tuple<Integral> const macro_cell_integrals() const;
+
+  tuple<Integral> const surface_integrals() const;
+
+  FormData const& form_data() const;
+
 //      FormData const& compute_form_data() const;
 
 //      bool const is_preprocessed() const;
-      
-      //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      repr_t const repr() const;
+//--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __str__
-      std::string const str() const;
-      
-      ///
-      void display() const;
+  repr_t const& repr() const;
 
-    private:
+  /// __str__
+  std::string const& str() const;
 
-      List const list_;
+  ///
+  void display() const;
 
-      FormData const * form_data_;
+private:
 
-      repr_t const repr_;
-      std::string const str_;
+  List const list_;
+
+  FormData const * form_data_;
+
+  repr_t const repr_;
+  std::string const str_;
 
 //      bool const is_preprocessed_;
-  };
-  
-  
+};
 
 } /* namespace ufl */
 #endif /* __UFL_FORM_H_ */

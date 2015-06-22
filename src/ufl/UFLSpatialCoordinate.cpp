@@ -14,7 +14,8 @@ namespace ufl
 //-----------------------------------------------------------------------------
 SpatialCoordinate::SpatialCoordinate(Cell const& cell) :
     GeometricQuantity("SpatialCoordinate", cell),
-    shape_((cell.geometric_dimension() == 1 ? 0 : 1),cell.geometric_dimension()),
+    shape_((cell.geometric_dimension() == 1 ? 0 : 1),
+           cell.geometric_dimension()),
     repr_(*this, cell),
     str_("x")
 {
@@ -26,19 +27,25 @@ SpatialCoordinate::~SpatialCoordinate()
 }
 
 //-----------------------------------------------------------------------------
+bool SpatialCoordinate::is_cellwise_constant()
+{
+  return false;
+}
+
+//-----------------------------------------------------------------------------
 ValueArray const& SpatialCoordinate::shape() const
 {
   return shape_;
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const SpatialCoordinate::repr() const
+Object::repr_t const& SpatialCoordinate::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const SpatialCoordinate::str() const
+std::string const& SpatialCoordinate::str() const
 {
   return str_;
 }

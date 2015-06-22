@@ -14,162 +14,166 @@
 namespace ufl
 {
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  Label
-   *
-   *  @brief  Provides an interface complying with UFL Label.
-   */
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Label
+ *
+ *  @brief  Provides an interface complying with UFL Label.
+ */
 
-  class Label : public Expression
-  {
-    public:
+class Label : public Expression
+{
+public:
 
-      ///
-      Label(dolfin::uint const& count);
+  ///
+  Label(dolfin::uint const& count);
 
-      ///
-      Label (repr_t const& repr);
+  ///
+  Label(repr_t const& repr);
 
-      ///
-      ~Label();
+  ///
+  ~Label();
 
-      ///
-      virtual std::vector<Class const* > const operands (std::string const& name) const;
+  ///
+  virtual std::vector<Class const*> const operands(
+      std::string const& name) const;
 
-      ///
-      virtual std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  virtual std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
-      virtual Label const * create(Object::repr_t const& repr) const;
+  virtual Label const * create(Object::repr_t const& repr) const;
 
-      std::vector<Expression const *> const operands() const;
+  std::vector<Expression const *> const operands() const;
 
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+  ///Return the tensor shape of the expression.
+  virtual ValueArray const shape() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+  ///Return a tuple with the free indices (unassigned) of the expression.
+  virtual tuple<Index> const free_indices() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  ///Return a dict with the free or repeated indices in the expression
+  ///as keys and the dimensions of those indices as values.
+  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
 
-      ///Evaluate the expression tree at the given quadrature_points
-      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
-          dolfin::uint n,
-          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
-          std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+  ///Evaluate the expression tree at the given quadrature_points
+  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const;
 
-      type<dolfin::uint> const& count() const;
-      
-      //--- INTERFACE inherited from UFLClass -------------------------------------
+  type<dolfin::uint> const& count() const;
 
-      /// __repr__
-      repr_t const repr() const;
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      /// __str__
-      std::string const str() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-      ///
-      void display() const;
+  /// __str__
+  std::string const& str() const;
 
-    private:
+  ///
+  void display() const;
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(dolfin::uint const& count);
+private:
 
-      std::vector<Expression const *> const expressions_;
-      type<dolfin::uint> count_;
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(
+      dolfin::uint const& count);
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  std::vector<Expression const *> const expressions_;
+  type<dolfin::uint> count_;
 
-  /**
-   *  DOCUMENTATION:
-   *
-   *  @class  Variable
-   *
-   *  @brief  Provides an interface complying with UFL Variable.
-   */
+  repr_t const repr_;
+  std::string const str_;
+};
 
-  class Variable : public Expression
-  {
-    public:
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  Variable
+ *
+ *  @brief  Provides an interface complying with UFL Variable.
+ */
 
-      ///
-      Variable(Expression const& expression, Label const& label);
+class Variable : public Expression
+{
+public:
 
-      ///
-      Variable (repr_t const & repr);
+  ///
+  Variable(Expression const& expression, Label const& label);
 
-      ///
-      ~Variable();
+  ///
+  Variable(repr_t const & repr);
 
-      ///
-      virtual std::vector<Class const* > const operands (std::string const& name) const;
+  ///
+  ~Variable();
 
-      ///
-      virtual std::vector<std::vector<Class const *> > const level_operands (
-          std::vector<std::vector<Class const *> > const& operands) const;
+  ///
+  virtual std::vector<Class const*> const operands(
+      std::string const& name) const;
 
-      //--- INTERFACE -------------------------------------------------------------
+  ///
+  virtual std::vector<std::vector<Class const *> > const level_operands(
+      std::vector<std::vector<Class const *> > const& operands) const;
 
-      virtual Variable const * create(Object::repr_t const& repr) const;
+  //--- INTERFACE -------------------------------------------------------------
 
-      std::vector<Expression const *> const operands() const;
-      
-      ///
-      virtual Cell const cell() const;
+  virtual Variable const * create(Object::repr_t const& repr) const;
 
-      ///Return the tensor shape of the expression.
-      virtual ValueArray const shape() const;
+  std::vector<Expression const *> const operands() const;
 
-      ///Return a tuple with the free indices (unassigned) of the expression.
-      virtual tuple<Index> const free_indices() const;
+  ///
+  virtual Cell const cell() const;
 
-      ///Return a dict with the free or repeated indices in the expression
-      ///as keys and the dimensions of those indices as values.
-      virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
+  ///Return the tensor shape of the expression.
+  virtual ValueArray const shape() const;
 
-      ///Evaluate the expression tree at the given quadrature_points
-      virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
-          dolfin::uint n,
-          std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-          ufc::cell const& ref_cell, 
-          std::vector<dolfin::real*> const& q_points,
-          const double * const * coordinates) const; 
+  ///Return a tuple with the free indices (unassigned) of the expression.
+  virtual tuple<Index> const free_indices() const;
 
-      /// UFL: Return whether this expression is spatially constant over each cell
-      bool const is_cellwise_constant() const;
+  ///Return a dict with the free or repeated indices in the expression
+  ///as keys and the dimensions of those indices as values.
+  virtual dict<IndexBase, type<dolfin::uint> > const index_dimensions() const;
 
-      //--- INTERFACE inherited from UFLClass -------------------------------------
+  ///Evaluate the expression tree at the given quadrature_points
+  virtual std::vector<std::vector<std::vector<dolfin::real> > > const evaluate(
+      dolfin::uint n,
+      std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+      ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
+      const double * const * coordinates) const;
 
-      /// __repr__
-      repr_t const repr() const;
+  /// UFL: Return whether this expression is spatially constant over each cell
+  bool is_cellwise_constant() const;
 
-      /// __str__
-      std::string const str() const;
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
-      ///
-      void display() const;
+  /// __repr__
+  repr_t const& repr() const;
 
-    private:
+  /// __str__
+  std::string const& str() const;
 
-      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
-      std::vector<Expression const *> const fill_expressions(Expression const& e, Label const& l);
+  ///
+  void display() const;
 
-      ///contains Expression as first and Label as second
-      std::vector<Expression const *> const expressions_;
+private:
 
-      repr_t const repr_;
-      std::string const str_;
-  };
+  std::vector<Expression const *> const fill_expressions(
+      std::vector<repr_t> const& reprs);
+  std::vector<Expression const *> const fill_expressions(Expression const& e,
+                                                         Label const& l);
+
+  ///contains Expression as first and Label as second
+  std::vector<Expression const *> const expressions_;
+
+  repr_t const repr_;
+  std::string const str_;
+};
 } /* namespace ufl */
 #endif /* __UFL_VARIABLE_H_ */

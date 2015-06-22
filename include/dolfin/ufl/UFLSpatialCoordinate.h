@@ -9,7 +9,6 @@
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
-
 #include <dolfin/ufl/UFLValueArray.h>
 
 namespace ufl
@@ -37,16 +36,16 @@ public:
   ~SpatialCoordinate();
 
   ///
-  bool const is_cellwise_constant();
+  bool is_cellwise_constant();
 
   ///
   ValueArray const& shape() const;
 
   /// __repr__
-  repr_t const repr() const;
+  repr_t const& repr() const;
 
   /// __str__
-  std::string const str() const;
+  std::string const& str() const;
 
 private:
 

@@ -130,10 +130,10 @@ public:
   FiniteElementSpace const& space() const;
 
   /// Return signature
-  std::string const signature() const;
+  std::string signature() const;
 
   /// Return the number of sub functions i.e number of subspaces
-  uint const num_sub_functions() const;
+  uint num_sub_functions() const;
 
   /// Get the size of tabulated block array
   uidx block_size() const;

@@ -33,13 +33,13 @@ ValueArray const& Circumradius::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const Circumradius::repr() const
+Object::repr_t const& Circumradius::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Circumradius::str() const
+std::string const& Circumradius::str() const
 {
   return str_;
 }

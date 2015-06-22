@@ -58,28 +58,28 @@ public:
   ~Domain();
 
   ///
-  static Type const type_facet(Domain::Type const& t);
+  static Type type_facet(Domain::Type const& t);
 
   ///
-  static dolfin::uint const type_dim(Domain::Type const& t);
+  static dolfin::uint type_dim(Domain::Type const& t);
 
   ///
-  static dolfin::uint const type_num_facets(Domain::Type const& t);
+  static dolfin::uint type_num_facets(Domain::Type const& t);
 
   /// UFL:
-  Type const facet() const;
+  Type facet() const;
 
   /// UFL:
-  dolfin::uint const dim() const;
+  dolfin::uint dim() const;
 
   /// UFL:
-  dolfin::uint const num_facets() const;
+  dolfin::uint num_facets() const;
 
   ///
-  Type const type() const;
+  Type type() const;
 
   ///
-  bool const is_undefined() const;
+  bool is_undefined() const;
 
   ///
   void display() const;
@@ -97,7 +97,8 @@ private:
     dolfin::uint num_facets;
     std::string str;
 
-    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets, std::string a_str) :
+    Definition(dolfin::uint a_dim, Type a_facet, dolfin::uint a_num_facets,
+               std::string a_str) :
         dim(a_dim),
         facet(a_facet),
         num_facets(a_num_facets),
@@ -107,7 +108,7 @@ private:
   };
 
   ///
-  static std::string const type_repr(Domain::Type const& t);
+  static std::string type_repr(Domain::Type const& t);
   typedef std::map<Type, Definition> DefinitionList;
   typedef std::pair<Type, Definition> DefinitionItem;
   static DefinitionList const Definitions()
@@ -118,14 +119,9 @@ private:
   static DefinitionList const __init_definitions();
 
   ///
-  static Domain::Type const repr_type(repr_t const& repr);
-#ifdef __SUNPRO_CC
+  static Domain::Type repr_type(repr_t const& repr);
   typedef std::map<repr_t, Domain::Type> MappingList;
   typedef std::pair<repr_t, Domain::Type> MappingItem;
-#else
-  typedef std::map<repr_t const, Domain::Type> MappingList;
-  typedef std::pair<repr_t const, Domain::Type> MappingItem;
-#endif
   static MappingList const Mapping()
   {
     static MappingList const Mapping = __init_mapping();

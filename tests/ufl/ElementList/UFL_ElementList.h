@@ -2,11 +2,13 @@
 
 #include <check.h>
 
+#include <dolfin/ufl/UFLElementList.h>
+
 //-----------------------------------------------------------------------------
 START_TEST( test_UFL_ElementList )
 {
   int init_failed = 0;
-  
+
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------

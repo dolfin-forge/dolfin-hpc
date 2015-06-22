@@ -28,7 +28,8 @@ Domain::MappingList const Domain::__init_mapping()
   m.insert(MappingItem(Object::repr_t("'interval'"), Domain::interval));
   m.insert(MappingItem(Object::repr_t("'triangle'"), Domain::triangle));
   m.insert(MappingItem(Object::repr_t("'tetrahedron'"), Domain::tetrahedron));
-  m.insert(MappingItem(Object::repr_t("'quadrilateral'"), Domain::quadrilateral));
+  m.insert(
+      MappingItem(Object::repr_t("'quadrilateral'"), Domain::quadrilateral));
   m.insert(MappingItem(Object::repr_t("'hexahedron'"), Domain::hexahedron));
   return m;
 }
@@ -84,61 +85,61 @@ Domain::~Domain()
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const Domain::type_facet(Domain::Type const& t)
+Domain::Type Domain::type_facet(Domain::Type const& t)
 {
   return Definitions().find(t)->second.facet;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Domain::type_dim(Domain::Type const& t)
+dolfin::uint Domain::type_dim(Domain::Type const& t)
 {
   return Definitions().find(t)->second.dim;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Domain::type_num_facets(Type const& t)
+dolfin::uint Domain::type_num_facets(Type const& t)
 {
   return Definitions().find(t)->second.num_facets;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Domain::type_repr(Domain::Type const& t)
+std::string Domain::type_repr(Domain::Type const& t)
 {
   return Definitions().find(t)->second.str;
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const Domain::repr_type(repr_t const& repr)
+Domain::Type Domain::repr_type(repr_t const& repr)
 {
   return Mapping().find(repr)->second;
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const Domain::facet() const
+Domain::Type Domain::facet() const
 {
   return Domain::type_facet(type_);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Domain::dim() const
+dolfin::uint Domain::dim() const
 {
   return Domain::type_dim(type_);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Domain::num_facets() const
+dolfin::uint Domain::num_facets() const
 {
   return Domain::type_num_facets(type_);
 }
 
 //-----------------------------------------------------------------------------
-Domain::Type const Domain::type() const
+Domain::Type Domain::type() const
 {
   return type_;
 }
 
 //-----------------------------------------------------------------------------
-bool const Domain::is_undefined() const
+bool Domain::is_undefined() const
 {
   return (type_ == Domain::None);
 }
@@ -148,11 +149,11 @@ void Domain::display() const
 {
   ufl::type<std::string>::display();
   std::cout << std::setw(24) << "dimension" << " = " << this->dim()
-      << std::endl;
-  std::cout << std::setw(24) << "facet" << " = "
-      << Domain(this->facet()).str() << std::endl;
+            << std::endl;
+  std::cout << std::setw(24) << "facet" << " = " << Domain(this->facet()).str()
+            << std::endl;
   std::cout << std::setw(24) << "num_facets" << " = " << this->num_facets()
-      << std::endl;
+            << std::endl;
   std::cout << std::endl;
 }
 

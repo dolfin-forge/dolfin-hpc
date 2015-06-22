@@ -33,13 +33,13 @@ ValueArray const& FacetArea::shape() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const FacetArea::repr() const
+Object::repr_t const& FacetArea::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const FacetArea::str() const
+std::string const& FacetArea::str() const
 {
   return str_;
 }

@@ -18,6 +18,7 @@ Cell::Cell(Domain::Type const& type) :
     Class("Cell"),
     domain_(type),
     space_(domain_.dim()),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -37,6 +38,7 @@ Cell::Cell(Domain const& domain) :
     Class("Cell"),
     domain_(domain),
     space_(domain_.dim()),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -56,6 +58,7 @@ Cell::Cell(Domain const& domain, Space const& space) :
     Class("Cell"),
     domain_(domain),
     space_(space),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -75,6 +78,7 @@ Cell::Cell(repr_t const& repr) :
     Class("Cell", repr),
     domain_(arg(0)),
     space_(arg(1)),
+    facet_domain_(domain_.facet()),
     repr_(*this, domain_, space_),
     str_("<" + domain_.str() + " cell in " + space_.str() + ">"),
     invalid_(domain_.is_undefined()),
@@ -131,49 +135,49 @@ CellSurfaceArea const& Cell::surface_area() const
 }
 
 //-----------------------------------------------------------------------------
-bool const& Cell::is_undefined() const
+bool Cell::is_undefined() const
 {
   return invalid_;
 }
 
 //-----------------------------------------------------------------------------
-Domain const Cell::domain() const
+Domain const& Cell::domain() const
 {
   return domain_;
 }
 
 //-----------------------------------------------------------------------------
-Domain const Cell::facet_domain() const
+Domain const& Cell::facet_domain() const
 {
-  return Domain(domain_.facet());
+  return facet_domain_;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::num_facets() const
+dolfin::uint Cell::num_facets() const
 {
   return domain_.num_facets();
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::geometric_dimension() const
+dolfin::uint Cell::geometric_dimension() const
 {
   return geometric_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const Cell::topological_dimension() const
+dolfin::uint Cell::topological_dimension() const
 {
   return topological_dimension_;
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const Cell::repr() const
+Object::repr_t const& Cell::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const Cell::str() const
+std::string const& Cell::str() const
 {
   return str_;
 }
@@ -182,11 +186,16 @@ std::string const Cell::str() const
 void Cell::display() const
 {
   Class::display();
-  std::cout << std::setw(24) << "is_undefined" << " = " << this->is_undefined() << std::endl;
-  std::cout << std::setw(24) << "domain" << " = " << this->domain().str() << std::endl;
-  std::cout << std::setw(24) << "facet_domain" << " = " << this->facet_domain().str() << std::endl;
-  std::cout << std::setw(24) << "geometric_dimension" << " = " << this->geometric_dimension() << std::endl;
-  std::cout << std::setw(24) << "topological_dimension" << " = " << this->topological_dimension() << std::endl;
+  std::cout << std::setw(24) << "is_undefined" << " = " << this->is_undefined()
+            << std::endl;
+  std::cout << std::setw(24) << "domain" << " = " << this->domain().str()
+            << std::endl;
+  std::cout << std::setw(24) << "facet_domain" << " = "
+            << this->facet_domain().str() << std::endl;
+  std::cout << std::setw(24) << "geometric_dimension" << " = "
+            << this->geometric_dimension() << std::endl;
+  std::cout << std::setw(24) << "topological_dimension" << " = "
+            << this->topological_dimension() << std::endl;
   std::cout << std::endl;
 }
 

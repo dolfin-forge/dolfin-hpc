@@ -80,7 +80,7 @@ ValueArray const& MixedElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const MixedElement::is_cellwise_constant() const
+bool MixedElement::is_cellwise_constant() const
 {
   bool ret = true;
   for (List::const_iterator it = sub_elements_.begin();
@@ -92,17 +92,17 @@ bool const MixedElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const MixedElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& MixedElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> MixedElement::extract_subelement_component(
     ValueArray const& i) const
 {
   check_component(i);
-
+  
   ValueArray k;
   ValueArray j;
   /*
@@ -148,7 +148,7 @@ std::pair<ValueArray, ValueArray> const MixedElement::extract_subelement_compone
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const MixedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> MixedElement::extract_component(
     ValueArray const& i) const
 {
   ValueArray subidx;
@@ -157,7 +157,7 @@ std::pair<dolfin::uint, FiniteElementBase const *> const MixedElement::extract_c
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const MixedElement::num_sub_elements() const
+dolfin::uint MixedElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
@@ -169,19 +169,19 @@ FiniteElementBase::List const& MixedElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const MixedElement::repr() const
+Object::repr_t const& MixedElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const MixedElement::str() const
+std::string const& MixedElement::str() const
 {
   return str_;
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const MixedElement::cloneSubElementsList(
+FiniteElementBase::List MixedElement::cloneSubElementsList(
     FiniteElementBase::List const& elements)
 {
   FiniteElementBase::List subelms;
@@ -190,13 +190,13 @@ FiniteElementBase::List const MixedElement::cloneSubElementsList(
       it != elements.end(); ++it)
   {
     subelms.push_back(FiniteElementBase::create((*it)->repr()));
-  } dolfin_assert(subelms.size() > 1);
+  }
+  dolfin_assert(subelms.size() > 1);
   return subelms;
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const MixedElement::createSubElementsList(
-    repr_t const& repr)
+FiniteElementBase::List MixedElement::createSubElementsList(repr_t const& repr)
 {
   List subelms;
   // Unpack array then split arguments
@@ -206,7 +206,8 @@ FiniteElementBase::List const MixedElement::createSubElementsList(
       it != subreprs.end(); ++it)
   {
     subelms.push_back(FiniteElementBase::create(*it));
-  } dolfin_assert(subelms.size() > 1);
+  }
+  dolfin_assert(subelms.size() > 1);
   return subelms;
 }
 
@@ -218,13 +219,13 @@ void MixedElement::createReprStr()
   {
     error("A mixed element should contain more than one subelement");
   }
-
+  
   // Create string representation
   std::stringstream ssrepr;
   std::stringstream ssstr;
   ssrepr << "MixedElement(*[";
   ssstr << "<Mixed element: (";
-
+  
   List::const_iterator it = sub_elements_.begin();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
@@ -232,9 +233,9 @@ void MixedElement::createReprStr()
   {
     ssrepr << ", " << (*it)->repr();
     ssstr << ", " << (*it)->str();
-
+    
   }
-
+  
   ssrepr << "], **{'value_shape': " << value_shape_.str() << " })";
   ssstr << ")>";
   repr_ = ssrepr.str();

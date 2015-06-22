@@ -78,7 +78,7 @@ ValueArray const& VectorElement::value_shape() const
 }
 
 //-----------------------------------------------------------------------------
-bool const VectorElement::is_cellwise_constant() const
+bool VectorElement::is_cellwise_constant() const
 {
   bool ret = true;
   for (List::const_iterator it = sub_elements_.begin();
@@ -90,27 +90,27 @@ bool const VectorElement::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-std::map<dolfin::uint, dolfin::uint> const VectorElement::symmetry() const
+std::map<dolfin::uint, dolfin::uint> const& VectorElement::symmetry() const
 {
   return symmetry_;
 }
 
 //-----------------------------------------------------------------------------
-std::pair<ValueArray, ValueArray> const VectorElement::extract_subelement_component(
+std::pair<ValueArray, ValueArray> VectorElement::extract_subelement_component(
     ValueArray const& i) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> const VectorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementBase const *> VectorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const VectorElement::num_sub_elements() const
+dolfin::uint VectorElement::num_sub_elements() const
 {
   return sub_elements_.size();
 }
@@ -122,13 +122,13 @@ FiniteElementBase::List const& VectorElement::sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-Object::repr_t const VectorElement::repr() const
+Object::repr_t const& VectorElement::repr() const
 {
   return repr_;
 }
 
 //-----------------------------------------------------------------------------
-std::string const VectorElement::str() const
+std::string const& VectorElement::str() const
 {
   return str_;
 }
@@ -141,12 +141,12 @@ void VectorElement::createStr()
   {
     error("A vector element should contain more than one subelement");
   }
-
+  
   std::stringstream ssstr;
   ssstr << "<" << sub_element_.family().short_name()
-      << " vector element of degree " << this->degree() << " on a "
-      << cell().str() << ": " << sub_elements_.size() << " x "
-      << sub_element_.str() << ">";
+        << " vector element of degree " << this->degree() << " on a "
+        << cell().str() << ": " << sub_elements_.size() << " x "
+        << sub_element_.str() << ">";
   str_ = ssstr.str();
 }
 

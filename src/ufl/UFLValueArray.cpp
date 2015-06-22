@@ -34,7 +34,7 @@ ValueArray::~ValueArray()
 }
 
 //-----------------------------------------------------------------------------
-std::string const ValueArray::str() const
+std::string ValueArray::str() const
 {
   std::stringstream ss;
   ss << "(";
@@ -49,7 +49,7 @@ std::string const ValueArray::str() const
 //-----------------------------------------------------------------------------
 dolfin::uint ValueArray::prod() const
 {
-  if(this->size() == 0)
+  if (this->size() == 0)
   {
     return 0;
   }

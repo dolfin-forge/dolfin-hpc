@@ -1511,7 +1511,15 @@ bool DofMap::check(bool throw_error)
   }
   else
   {
+#ifdef __SUNPRO_CC
+    for (std::set<uint>::iterator it = shared_owned.begin();
+	 it != shared_owned.end(); ++it)
+    {
+      sendbuf.push_back(*it);
+    }
+#else
     sendbuf.insert(sendbuf.end(), shared_owned.begin(), shared_owned.end());
+#endif
   }
 
   int recv_count = sendbuf.size();

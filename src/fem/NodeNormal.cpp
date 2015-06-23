@@ -330,8 +330,16 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
         // dofs
         dolfin_assert(ghost_nodes.size() <= num_facet_nodes);
         u_sendbuf[*ai].push_back(ghost_nodes.size());
+#ifdef __SUNPRO_CC
+	for (std::set<uint>::iterator it = ghost_nodes.begin();
+	     it != ghost_nodes.end(); ++it) 
+	{
+	  u_sendbuf[*ai].push_back(*it);
+	}
+#else
         u_sendbuf[*ai].insert(u_sendbuf[*ai].end(), ghost_nodes.begin(),
                               ghost_nodes.end());
+#endif
         // global index
         u_sendbuf[*ai].push_back(data->global_index);
         // weight

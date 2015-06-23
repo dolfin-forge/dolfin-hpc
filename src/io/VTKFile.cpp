@@ -193,8 +193,9 @@ void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
   // Increase the number of times we have saved the function
   ++counter;
 
-  message("Saved %d functions to file %s in VTK format.", f.size(),
-          filename.c_str());
+  message("Saved %d %s to file %s in VTK format.", f.size(),
+	  (f.size() > 1 ? "functions" : "function"),
+	  filename.c_str());
 
 }
 //----------------------------------------------------------------------------

@@ -18,7 +18,6 @@
 //     du/dn(x, y) = 25 sin(5 pi y)  for x = 1
 //     du/dn(x, y) = 0               otherwise
 
-#include <dolfin/config/dolfin_config.h>
 #include "Poisson.h"
 
 #include <dolfin/common/constants.h>
@@ -112,7 +111,6 @@ int main()
   // Define PDE
   PoissonBilinearForm a(mesh);
   PoissonLinearForm L(f, g);
-  dolfin_set("PDE linear solver", "iterative");
   LinearPDE pde(a, L, mesh, bc);
 
   // Solve PDE

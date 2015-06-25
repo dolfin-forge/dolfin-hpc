@@ -160,7 +160,12 @@ public:
   /// Return the dimension of the value space for axis i
   uint dim(uint i) const
   {
+#ifdef __sgi
+    dolfin_assert(i < value_shape_.size());
+    return value_shape_[i];
+#else
     return value_shape_.at(i);
+#endif
   }
 
   /// Evaluate function at given point

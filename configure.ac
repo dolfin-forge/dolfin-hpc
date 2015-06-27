@@ -185,7 +185,23 @@ found_domain_decomp="no"
 
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
-      AC_DEFINE(HAVE_PARMETIS,1,[Define if you have the ParMETIS library])
+      if test "x${with_parmetis}" != xno; then
+         AX_CRAY_PARMETIS
+	 if test "x${have_cray_parmetis}" = xyes; then
+	    found_domain_decomp="yes"
+	 else
+	    with_parmetis="no"
+	 fi
+      fi
+
+      if test "x${with_zoltan}" != xno; then
+         AX_CRAY_ZOLTAN
+	 if test "x${have_cray_zoltan}" = xyes; then
+	    found_domain_decomp="yes"
+	 else
+	    with_zoltan="no"
+	 fi
+      fi
    else
       if test "x${with_parmetis}" != xno; then
          AX_PARMETIS
@@ -193,6 +209,8 @@ found_domain_decomp="no"
             LIBS="$PARMETIS_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_parmetis="yes"
+	 else
+	    with_parmetis="no"
          fi
       fi
       
@@ -206,12 +224,14 @@ found_domain_decomp="no"
             LIBS="$ZOLTAN_LIBS $LIBS"
 	    found_domain_decomp="yes"
 	    with_zoltan="yes"
+	 else
+	    with_zoltan="no"
          fi
       fi
+   fi
 
-      if test "x${found_domain_decomp}" != xyes; then
-         AC_MSG_ERROR([Required partitioning library not found])
-      fi
+   if test "x${found_domain_decomp}" != xyes; then
+      AC_MSG_ERROR([Required partitioning library not found])
    fi
 fi
 
@@ -227,9 +247,13 @@ found_la_backend="no"
 if test "x${with_petsc}" != xno; then
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
-      AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
-      found_la_backend="yes"
-      with_petsc="yes"
+      AX_CRAY_PETSC
+      if test "x${have_cray_petsc}" = xyes; then      
+         found_la_backend="yes"
+      	 with_petsc="yes"
+      else
+	 with_petsc="no" 
+      fi
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then

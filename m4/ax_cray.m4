@@ -21,6 +21,22 @@ AC_DEFUN([AX_CRAY],[
 	AC_MSG_RESULT([no])])
 	AC_SUBST(is_cray)])
 
+AC_DEFUN([AX_CRAY_PETSC],[
+	AC_MSG_CHECKING([Cray PETSc])
+	if test "${CRAY_PETSC_VERSION}"; then
+	   have_cray_petsc="yes"
+	else
+	   have_cray_petsc="no"
+	fi
+	AC_SUBST(have_cray_petsc)
+	if test "x${have_cray_petsc}" = xyes; then
+	   AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
+	   AC_MSG_RESULT([yes])
+	else
+	   AC_MSG_RESULT([no])
+	fi
+])
+
 AC_DEFUN([AX_CRAY_PARMETIS],[
 	AC_MSG_CHECKING([Cray ParMETIS])
 	if test "${CRAY_TRILINOS_VERSION}"; then

@@ -247,9 +247,13 @@ found_la_backend="no"
 if test "x${with_petsc}" != xno; then
    # This assumes a modern CRAY, for example XT, XE or XC series systems
    if test "x${is_cray}" = xyes; then
-      AC_DEFINE(HAVE_PETSC,1,[Define if you have the Petsc library.])
-      found_la_backend="yes"
-      with_petsc="yes"
+      AX_CRAY_PETSC
+      if test "x${have_cray_petsc}" = xyes; then      
+         found_la_backend="yes"
+      	 with_petsc="yes"
+      else
+	 with_petsc="no" 
+      fi
    else
       AX_PETSC
       if test "${PETSC_LDFLAGS}"; then

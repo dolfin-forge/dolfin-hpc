@@ -195,6 +195,10 @@ found_domain_decomp="no"
       fi
 
       if test "x${with_zoltan}" != xno; then
+      	 if test "x${enable_optimize_p1}" != xno; then
+	    AC_MSG_ERROR([Zoltan requires facet connectivity])
+	 fi
+
          AX_CRAY_ZOLTAN
 	 if test "x${have_cray_zoltan}" = xyes; then
 	    found_domain_decomp="yes"

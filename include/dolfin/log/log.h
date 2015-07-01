@@ -103,9 +103,9 @@ namespace dolfin
 #endif
 
 // Assertion, only active if DEBUG is defined
-#if DEBUG
+#if (DEBUG && __GNUG__)
 #define dolfin_assert(check) do { if ( !(check) ) { dolfin::__dolfin_assert(__FILE__, __LINE__, __FUNCTION__, "(" #check ")"); } } while (false)
-#else
+#else // __FUNCTION__ is a non-standard GNU extension, disable for all other compilers
 #define dolfin_assert(check)
 #endif
 

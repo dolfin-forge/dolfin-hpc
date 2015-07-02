@@ -2,10 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Ola Skavhaug, 2007.
-// Modified by Niclas Jansson, 2009.
+// Modified by Niclas Jansson, 2009-2015.
 //
 // First added:  2003-03-13
-// Last changed: 2009-05-04
+// Last changed: 2015-07-02
 
 #ifndef __LOG_H
 #define __LOG_H
@@ -14,6 +14,11 @@
 #include <map>
 #include <stdarg.h>
 #include <dolfin/common/types.h>
+
+#if (DEBUG && !(__GNUG__))
+#include <cassert>
+#endif
+
 
 namespace dolfin
 {
@@ -105,7 +110,9 @@ namespace dolfin
 // Assertion, only active if DEBUG is defined
 #if (DEBUG && __GNUG__)
 #define dolfin_assert(check) do { if ( !(check) ) { dolfin::__dolfin_assert(__FILE__, __LINE__, __FUNCTION__, "(" #check ")"); } } while (false)
-#else // __FUNCTION__ is a non-standard GNU extension, disable for all other compilers
+#elif DEBUG // __FUNCTION__ is a non-standard GNU extension, use C89 assert
+#define dolfin_assert(check) assert(check)
+#else 
 #define dolfin_assert(check)
 #endif
 

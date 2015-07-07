@@ -12,6 +12,7 @@
 #include <dolfin/parameter/Parametrized.h>
 #include "MultigridScheme.h"
 
+#include <janpack/hybrid.h>
 #include <janpack/amg_solver.h>
 
 namespace dolfin 
@@ -56,7 +57,7 @@ namespace dolfin
     bool mls_init;
 
     // JANPACK multilevel solver cache
-    char mls[672];
+    char mls[JP_MLS_SIZE_T];
   };
 }
 

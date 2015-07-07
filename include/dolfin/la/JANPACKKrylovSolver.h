@@ -14,6 +14,10 @@
 #include "PreconditionerType.h"
 
 
+#ifndef HAVE_JANPACK_MPI
+#include <janpack/hybrid.h>
+#endif
+
 #include <janpack/krylov_solver.h>
 
 namespace dolfin 
@@ -52,7 +56,7 @@ namespace dolfin
     jp_ksp_t _ksp;
     jp_ksp_t *ksp;
 #else
-    char ksp[240];
+    char ksp[JP_KSP_SIZE_T];
 #endif
     
   };

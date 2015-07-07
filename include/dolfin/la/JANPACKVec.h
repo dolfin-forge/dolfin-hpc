@@ -13,6 +13,7 @@
 #define jp_vec_type jp_vec_t
 #else
 #define jp_vec_type char
+#include <janpack/hybrid.h>
 #endif
 
 #include <janpack/vec.h>
@@ -153,7 +154,7 @@ namespace dolfin
     jp_vec_t _x;
     jp_vec_t *x;
 #else
-    char x[160];
+    char x[JP_VEC_SIZE_T];
 #endif
 
     // True if we don't own the vector x points to

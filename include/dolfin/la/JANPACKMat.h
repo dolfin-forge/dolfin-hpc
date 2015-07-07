@@ -13,6 +13,7 @@
 #define jp_mat_type jp_mat_t
 #else
 #define jp_mat_type char
+#include <janpack/hybrid.h>
 #endif
 
 #include <janpack/mat.h>
@@ -129,7 +130,7 @@ namespace dolfin
     jp_mat_t AA;
     jp_mat_t *A;
 #else
-    char A[216];
+    char A[JP_MAT_SIZE_T];
 #endif
 
     // True if we don't own the matrix A points to

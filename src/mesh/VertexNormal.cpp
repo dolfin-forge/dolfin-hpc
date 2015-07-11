@@ -18,7 +18,6 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 
-#define DEBUG 1
 
 #include <map>
 
@@ -515,7 +514,11 @@ uint VertexNormal::computeBasis(uint gdim, Point B[], Array<real> N,
 
       // Compute the scalar product with the reference normal
       real cosalpha = 0.0;
+#ifdef _CRAYC
+#if _RELEASE_MAJOR == 8 && _RELEASE_MINOR < 3
 #pragma _CRI novector
+#endif
+#endif
       for (uint d = 0; d < gdim; ++d)
       {
         cosalpha += N[gdim * rfacet + d] * N[gdim * cfacet + d];

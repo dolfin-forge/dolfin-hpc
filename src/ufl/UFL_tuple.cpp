@@ -8,7 +8,7 @@
 #include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLIndex.h>
 #include <dolfin/ufl/UFLIntegral.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFL_tuple.h>
 
 namespace ufl
 {

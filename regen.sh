@@ -9,6 +9,7 @@ elif which glibtoolize > /dev/null 2>&1; then
     glibtoolize -i
 else
     echo "No libtoolize found on your system"
+    exit 1
 fi
 
 echo "Running aclocal"

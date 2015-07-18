@@ -18,6 +18,10 @@
 #include <ostream>
 #include <map>
 
+#ifdef __APPLE__
+#undef __assert
+#endif
+
 namespace dolfin
 {
 

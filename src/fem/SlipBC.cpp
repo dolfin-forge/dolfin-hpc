@@ -115,7 +115,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     // Create data structure for local assembly data
     if (la_backend == "JANPACK")
     {
-      As = static_cast<Matrix *>(&A);
+      As = reinterpret_cast<Matrix *>(&A);
     }
     else
     {
@@ -144,16 +144,20 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     b.init_ghosted(rows.size(), rows, mapping);
 
     // Initialize normal field on given space and compute at the boundary
-    if (sub_system().depth() == 0)
+    if (node_normal_local) // FIXME: add test for uninitialized external NodeNormal objects
     {
-      node_normal->init(fullspace);
+      if (sub_system().depth() == 0)
+      {
+	node_normal->init(fullspace);
+      }
+      else
+      {
+	FiniteElementSpace subspace(fullspace, sub_system());
+	node_normal->init(subspace);
+      }
+      node_normal->compute();
     }
-    else
-    {
-      FiniteElementSpace subspace(fullspace, sub_system());
-      node_normal->init(subspace);
-    }
-    node_normal->compute();
+
 
     // Create boundary markers for given topological dimension if the subdomain
     // is defined geometrically.

@@ -232,9 +232,33 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)
+void JANPACKMat::setrow(uint row, const Array<uint>& columns,
+			const Array<real>& values)
 {
-  error("Not implemented.");
+  // Check size of arrays
+  if (columns.size() != values.size())
+    error("Number of columns and values don't match for setrow() operation.");
+
+  // Handle case n = 0
+  const uint n = columns.size();
+  if (n == 0)
+    return;
+
+  // Assign values to arrays
+  uint* cols = new uint[n];
+  real* vals = new real[n];
+  for (uint j = 0; j < n; j++)
+    {
+      cols[j] = columns[j];
+      vals[j] = values[j];
+    }
+
+  // Set values
+  set(vals, 1, &row, n, cols);
+
+  // Free temporary storage
+  delete [] cols;
+  delete [] vals;
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKMat::factory() const

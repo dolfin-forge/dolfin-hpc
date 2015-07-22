@@ -134,13 +134,10 @@ void JANPACKMat::set(const real* block,
 {
   dolfin_assert(A);
 
-
-  const real *bp = &block[0];
-  for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
-      jp_mat_set(A, rows[i], cols[j], *(bp++));
-
-
+  jp_mat_set_block(A,
+	       m, const_cast<uint*>(rows),
+	       n, const_cast<uint*>(cols),
+	       const_cast<real*>(block));
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,

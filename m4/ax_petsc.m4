@@ -54,6 +54,21 @@ EOF
 	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
 	     rm -fr config_petsc
 	     have_petsc="yes"
+	  elif test -d "$ac_petsc_dir/lib/petsc/conf"; then
+	   
+          cat <<EOF >config_petsc
+include $PETSC_DIR/lib/petsc/conf/variables
+
+petsclibs:
+	echo -L$PETSC_DIR/lib/  \$(PETSC_LIB)
+petscinc:
+	echo \$(PETSC_CC_INCLUDES)
+EOF
+	     PETSC_LDFLAGS=`make -s -f config_petsc petsclibs`
+	     PETSC_CPPFLAGS=`make -s -f config_petsc petscinc`
+	     rm -fr config_petsc
+	     have_petsc="yes"
+
 	  fi		
 	fi
 	AC_SUBST(PETSC_LDFLAGS)

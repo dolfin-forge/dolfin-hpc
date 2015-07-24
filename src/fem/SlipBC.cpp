@@ -3,7 +3,7 @@
 //
 // Existing code for Dirichlet BC is used
 //
-// Modified by Niclas Jansson, 2008-2012.
+// Modified by Niclas Jansson, 2008-2015.
 // Modified by Aurélien Larcher, 2013-2014. (rewrite, extension to any element)
 //
 // First added:  2007-05-01
@@ -107,17 +107,15 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   // the number of vertices times the number of components
   bool const is_P1 = (scratch.space_dimension
                         == mesh.type().numEntities(0) * scratch.size);
-
+  
+  const std::string la_backend = dolfin_get("linear algebra backend");
+    
   if (As == NULL || As->size(0) != A.size(0) || As->size(1) != A.size(1))
   {
     // Create data structure for local assembly data
-    const std::string la_backend = dolfin_get("linear algebra backend");
     if (la_backend == "JANPACK")
     {
-      delete As;
-      As = new Matrix(A.size(0), A.size(1));
-      *(As->instance()) = A;
-      //FIXME: ??? (*(As->instance())).down_cast<JANPACKMat>().dup(A);
+      As = reinterpret_cast<Matrix *>(&A);
     }
     else
     {
@@ -146,16 +144,20 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     b.init_ghosted(rows.size(), rows, mapping);
 
     // Initialize normal field on given space and compute at the boundary
-    if (sub_system().depth() == 0)
+    if (node_normal_local) // FIXME: add test for uninitialized external NodeNormal objects
     {
-      node_normal->init(fullspace);
+      if (sub_system().depth() == 0)
+      {
+	node_normal->init(fullspace);
+      }
+      else
+      {
+	FiniteElementSpace subspace(fullspace, sub_system());
+	node_normal->init(subspace);
+      }
+      node_normal->compute();
     }
-    else
-    {
-      FiniteElementSpace subspace(fullspace, sub_system());
-      node_normal->init(subspace);
-    }
-    node_normal->compute();
+
 
     // Create boundary markers for given topological dimension if the subdomain
     // is defined geometrically.
@@ -184,8 +186,12 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     }
   }
 
-  // Copy global stiffness matrix into temporary one
-  *(As->instance()) = A;
+  // Copy global stiffness matrix into temporary one (if needed)
+  if (la_backend != "JANPACK")
+  {
+    *(As->instance()) = A;
+  }
+
 
   // Use legacy vertex-based implementation if Lagrange P1.
   if (is_P1)
@@ -200,8 +206,11 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   // Apply changes in the temporary matrix
   As->apply();
 
-  // Apply changes in the stiffness matrix and load vector
-  A = *(As->instance());
+  // Apply changes in the stiffness matrix and load vector (if needed)
+  if (la_backend != "JANPACK")
+  {
+    A = *(As->instance());
+  }
   b.apply();
 
 }

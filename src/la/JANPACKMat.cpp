@@ -134,13 +134,10 @@ void JANPACKMat::set(const real* block,
 {
   dolfin_assert(A);
 
-
-  const real *bp = &block[0];
-  for(uint i = 0 ; i < m; i++)
-    for(uint j = 0; j < n; j++)
-      jp_mat_set(A, rows[i], cols[j], *(bp++));
-
-
+  jp_mat_set_block(A,
+	       m, const_cast<uint*>(rows),
+	       n, const_cast<uint*>(cols),
+	       const_cast<real*>(block));
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::add(const real* block,
@@ -235,9 +232,33 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
 }
 //-----------------------------------------------------------------------------
-void JANPACKMat::setrow(uint row, const Array<uint>& columns, const Array<real>& values)
+void JANPACKMat::setrow(uint row, const Array<uint>& columns,
+			const Array<real>& values)
 {
-  error("Not implemented.");
+  // Check size of arrays
+  if (columns.size() != values.size())
+    error("Number of columns and values don't match for setrow() operation.");
+
+  // Handle case n = 0
+  const uint n = columns.size();
+  if (n == 0)
+    return;
+
+  // Assign values to arrays
+  uint* cols = new uint[n];
+  real* vals = new real[n];
+  for (uint j = 0; j < n; j++)
+    {
+      cols[j] = columns[j];
+      vals[j] = values[j];
+    }
+
+  // Set values
+  set(vals, 1, &row, n, cols);
+
+  // Free temporary storage
+  delete [] cols;
+  delete [] vals;
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& JANPACKMat::factory() const

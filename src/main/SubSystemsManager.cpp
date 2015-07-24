@@ -57,7 +57,7 @@ void SubSystemsManager::initMPI(int argc, char* argv[], uint n)
   if( MPIinitialized() )
     return;
 
-#ifdef HAVE_JANPACK
+#ifdef HAVE_JANPACK_MPI
   int provided;
   MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
 #else

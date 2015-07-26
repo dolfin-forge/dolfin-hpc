@@ -145,7 +145,11 @@ private:
 
   void write_function(std::vector<std::pair<Function*, std::string> >& f);
 
-  bool hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size);
+  bool hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size);
+
+#ifdef ENABLE_MPIIO
+  void bswap_func_hdr(BinaryFunctionHeader& hdr);
+#endif
 
   /// Returns binary file cell type identifier for given DOLFIN cell type
   uint cell_type(CellType::Type const type);
@@ -173,7 +177,7 @@ inline uint BinaryFile::vertex_owner(uint L, uint R, uint i)
 }
 
 //-----------------------------------------------------------------------------
-inline bool BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
+inline bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
                                   uint pe_size)
 {
 
@@ -214,18 +218,6 @@ inline bool BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
     hdr.type = static_cast<Binary_data_t>(bswap(hdr.type));
   }
 
-#ifdef HAVE_BIG_ENDIAN
-  if (!hdr.bendian && hdr.type != BINARY_MESH_DATA)
-  {
-    error("File written in little endian");
-  }
-#else
-  if (hdr.bendian && hdr.type != BINARY_MESH_DATA)
-  {
-    error("File written in big endian");
-  }
-#endif
-
   if (hdr.type != type)
   {
     error("Invalid data type in file");
@@ -241,6 +233,15 @@ inline bool BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
   return byteswap;
 }
 
+//-----------------------------------------------------------------------------
+#ifdef ENABLE_MPIIO
+inline void BinaryFile::bswap_func_hdr(BinaryFunctionHeader& hdr)
+{
+  hdr.dim = bswap(hdr.dim);
+  hdr.size = bswap(hdr.size);
+  hdr.t = bswap(hdr.t);
+}
+#endif
 //-----------------------------------------------------------------------------
 inline uint BinaryFile::cell_type(CellType::Type const type)
 {

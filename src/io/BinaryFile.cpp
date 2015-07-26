@@ -182,18 +182,20 @@ void BinaryFile::operator>>(Function & f)
   MPI_File fh;
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
+  bool byteswap;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                 MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
   MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                     MPI_STATUS_IGNORE);
 
-  hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
+  byteswap = hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
 
   uint nfunc;
   MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
                        MPI_STATUS_IGNORE);
+  if (byteswap) nfunc = bswap(nfunc);
   byte_offset += sizeof(uint);
   if (nfunc > 1)
   {
@@ -206,6 +208,7 @@ void BinaryFile::operator>>(Function & f)
   {
     MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
                          MPI_BYTE, MPI_STATUS_IGNORE);
+    if (byteswap) bswap_func_hdr(f_hdr);
     byte_offset += sizeof(BinaryFunctionHeader);
 
     /* Load function if dimension match */
@@ -216,6 +219,13 @@ void BinaryFile::operator>>(Function & f)
       real *values = new real[size];
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+      if (byteswap)
+      {
+	for (uint j = 0; j < size; ++j)
+	{
+	  values[j] = bswap(values[j]);
+	}
+      }
       f.vector().set(values);
       delete[] values;
 
@@ -244,18 +254,20 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
   MPI_File fh;
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
+  bool byteswap;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                 MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
   MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                     MPI_STATUS_IGNORE);
 
-  hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
+  byteswap = hdr_check(hdr, BINARY_FUNCTION_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
 
   uint nfunc;
   MPI_File_read_at_all(fh, byte_offset, &nfunc, sizeof(uint), MPI_BYTE,
                        MPI_STATUS_IGNORE);
+  if (byteswap) nfunc = bswap(nfunc);
   byte_offset += sizeof(uint);
 
   if (nfunc != f.size())
@@ -270,6 +282,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 
     MPI_File_read_at_all(fh, byte_offset, &f_hdr, sizeof(BinaryFunctionHeader),
                          MPI_BYTE, MPI_STATUS_IGNORE);
+    if (byteswap) bswap_func_hdr(f_hdr);
     byte_offset += sizeof(BinaryFunctionHeader);
 
     Function * u = it->first;
@@ -283,6 +296,13 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
     real *values = new real[size];
     MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
                          values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
+    if(byteswap)
+    {
+      for (uint i = 0; i < size; ++i)
+      {
+	values[i] = bswap(values[i]);
+      }
+    }
     u->vector().set(values);
     delete[] values;
 
@@ -1170,12 +1190,13 @@ template<typename T>
     MPI_File fh;
     MPI_Offset byte_offset;
     BinaryFileHeader hdr;
+    bool byteswap;
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                   MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
     MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                       MPI_STATUS_IGNORE);
 
-    hdr_check(hdr, BINARY_MESH_FUNCTION_DATA, pe_size);
+    byteswap = hdr_check(hdr, BINARY_MESH_FUNCTION_DATA, pe_size);
 
     byte_offset = sizeof(BinaryFileHeader);
 
@@ -1183,6 +1204,8 @@ template<typename T>
     MPI_File_read_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
                          MPI_STATUS_IGNORE);
     byte_offset += sizeof(uint);
+    if (byteswap) mfunc_type = bswap(mfunc_type);
+
 
     if ((mfunc_type == 0 && meshfunction.dim() != mesh.topology().dim())
         || (mfunc_type == 1 && meshfunction.dim() != 0))
@@ -1207,7 +1230,13 @@ template<typename T>
     MPI_File_read_at_all(fh, byte_offset + offset * sizeof(real), values,
                          local_size * sizeof(real), MPI_BYTE,
                          MPI_STATUS_IGNORE);
-
+    if(byteswap)
+    {
+      for (uint i = 0; i < (local_size * sizeof(real)); ++i)
+      {
+	values[i] = bswap(values[i]);
+      }
+    }
     if (mfunc_type == 0)
     {
       for (uint i = 0; i < meshfunction.size(); ++i)

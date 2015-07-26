@@ -70,20 +70,26 @@ void BinaryFile::operator>>(GenericVector& x)
   uint offset[2];
   uint pe_rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
-
+  
   MPI_File fh;
   MPI_Offset byte_offset;
   BinaryFileHeader hdr;
+  bool byteswap;
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                 MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
   MPI_File_read_all(fh, &hdr, sizeof(BinaryFileHeader), MPI_BYTE,
                     MPI_STATUS_IGNORE);
 
-  hdr_check(hdr, BINARY_VECTOR_DATA, pe_size);
+  byteswap = hdr_check(hdr, BINARY_VECTOR_DATA, pe_size);
 
   byte_offset = sizeof(BinaryFileHeader);
   MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint), &offset[0],
                        2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
+  if (byteswap)
+  {
+    offset[0] = bswap(offset[0]);
+    offset[1] = bswap(offset[1]);
+  }
   size = offset[1];
   byte_offset += pe_size * 2 * sizeof(uint);
 
@@ -97,6 +103,13 @@ void BinaryFile::operator>>(GenericVector& x)
 #ifdef ENABLE_MPIIO
   MPI_File_read_at_all(fh, byte_offset + offset[0] * sizeof(real), values,
                        offset[1], MPI_DOUBLE, MPI_STATUS_IGNORE);
+  if (byteswap)
+  {
+    for(uint i = 0; i < offset[1]; ++i)
+    {
+      values[i] = bswap(values[i]);
+    }
+  }
   MPI_File_close(&fh);
 #else
   fp.read((char *)values, size * sizeof(real));

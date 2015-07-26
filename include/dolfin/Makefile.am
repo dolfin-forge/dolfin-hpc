@@ -7,6 +7,7 @@ nobase_pkginclude_HEADERS = \
 				config/dolfin_config.h\
 				common/constants.h\
 				common/dolfin_common.h\
+				common/byteswap.h\
 				common/timing.h\
 				common/types.h\
 				common/unittest.h\

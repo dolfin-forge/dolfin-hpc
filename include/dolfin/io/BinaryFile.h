@@ -1,16 +1,17 @@
-// Copyright (C) 2009-2012 Niclas Jansson.
+// Copyright (C) 2009-2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Aurelien Larcher, 2014.
 //
 // First  added: 2009
-// Last changed: 2014-11-05
+// Last changed: 2015-07-25
 
 #ifndef __BINARY_FILE_H
 #define __BINARY_FILE_H
 
 #include <stdint.h>
 #include <dolfin/common/types.h>
+#include <dolfin/common/byteswap.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/mesh/CellType.h>
 #include "GenericFile.h"
@@ -144,7 +145,11 @@ private:
 
   void write_function(std::vector<std::pair<Function*, std::string> >& f);
 
-  void hdr_check(BinaryFileHeader hdr, Binary_data_t type, uint pe_size);
+  bool hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size);
+
+#ifdef ENABLE_MPIIO
+  void bswap_func_hdr(BinaryFunctionHeader& hdr);
+#endif
 
   /// Returns binary file cell type identifier for given DOLFIN cell type
   uint cell_type(CellType::Type const type);
@@ -172,9 +177,12 @@ inline uint BinaryFile::vertex_owner(uint L, uint R, uint i)
 }
 
 //-----------------------------------------------------------------------------
-inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
+inline bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
                                   uint pe_size)
 {
+
+  bool byteswap = false;
+
   if (hdr.magic == BINARY_MAGIC_V2)
   {
     message(1, "Loading Binary File format version 2");
@@ -185,22 +193,30 @@ inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
     message(1, "Loading Binary File format version 1");
     version_ = 1;
   }
+  else if (bswap(hdr.magic) == BINARY_MAGIC_V2)
+  {
+    message(1, "Loading Binary File format version 2 (endian conversion)");
+    version_ = 2;
+    byteswap = true;
+  }
+  else if (bswap(hdr.magic) == BINARY_MAGIC_V1)
+  {
+    message(1, "Loading Binary File format version 1 (endian conversion)");
+    version_ = 1;
+    byteswap = true;
+  }
   else
   {
     error("Corrupt header: invalid magic number");
   }
 
-#ifdef HAVE_BIG_ENDIAN
-  if (!hdr.bendian)
+  if (byteswap) 
   {
-    error("File written in little endian");
+    hdr.magic = bswap(hdr.magic);
+    hdr.bendian = bswap(hdr.bendian);
+    hdr.pe_size = bswap(hdr.pe_size);
+    hdr.type = static_cast<Binary_data_t>(bswap(hdr.type));
   }
-#else
-  if (hdr.bendian)
-  {
-    error("File written in big endian");
-  }
-#endif
 
   if (hdr.type != type)
   {
@@ -213,8 +229,19 @@ inline void BinaryFile::hdr_check(BinaryFileHeader hdr, Binary_data_t type,
     error("File stored on %d PEs, currently running on %d PEs", hdr.pe_size,
           pe_size);
   }
+
+  return byteswap;
 }
 
+//-----------------------------------------------------------------------------
+#ifdef ENABLE_MPIIO
+inline void BinaryFile::bswap_func_hdr(BinaryFunctionHeader& hdr)
+{
+  hdr.dim = bswap(hdr.dim);
+  hdr.size = bswap(hdr.size);
+  hdr.t = bswap(hdr.t);
+}
+#endif
 //-----------------------------------------------------------------------------
 inline uint BinaryFile::cell_type(CellType::Type const type)
 {

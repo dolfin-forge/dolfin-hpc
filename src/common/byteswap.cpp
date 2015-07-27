@@ -25,7 +25,7 @@ int dolfin::bswap(int x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-uint dolfin::bswap(uint x)
+dolfin::uint dolfin::bswap(uint x)
 {
   union {
     uint x;

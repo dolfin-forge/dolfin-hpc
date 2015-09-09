@@ -8,7 +8,7 @@
 #
 
 AC_DEFUN([AX_JANPACK],[
-	PKG_CHECK_MODULES([janpack], [janpack >= 0.2.1], 
+	PKG_CHECK_MODULES([janpack], [janpack >= 0.2.3], 
 				     have_janpack=yes, have_janpack=no)
 	if test "x${have_janpack}" = xyes; then 	
 	   CPPFLAGS="$CPPFLAGS $janpack_CFLAGS"
@@ -18,7 +18,7 @@ AC_DEFUN([AX_JANPACK],[
 	fi
 
 	if test "x${have_janpack}" = xno; then 	
-	PKG_CHECK_MODULES([janpack_mpi], [janpack >= mpi-0.2.2], 
+	PKG_CHECK_MODULES([janpack_mpi], [janpack >= mpi-0.2.3], 
 					 have_janpack=yes, have_janpack=no)
 		if test "x${have_janpack}" = xyes; then 	
 		   CPPFLAGS="$CPPFLAGS $janpack_mpi_CFLAGS"

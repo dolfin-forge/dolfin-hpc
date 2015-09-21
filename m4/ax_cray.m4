@@ -73,3 +73,15 @@ AC_DEFUN([AX_CRAY_ZOLTAN],[
 	fi
 ])
 
+AC_DEFUN([AX_CRAY_LIBSCI],[
+	AC_MSG_CHECKING([Cray Scientific Libraries])
+	if test "${CRAY_LIBSCI_VERSION}"; then
+	   AC_MSG_RESULT([yes])
+	   have_cray_libsci="yes"
+	else
+	   AC_MSG_RESULT([no])
+	   have_cray_libsci="no"
+	fi
+	AC_SUBST(have_cray_libsci)
+])
+

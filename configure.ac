@@ -294,7 +294,12 @@ fi
 if test "x${enable_quad}" = xyes; then 
    # This assumes a modern CRAY, for example XT or XE series systems
    if test "x${ax_cv_cxx_compiler_vendor}" = xcray; then
-      have_lapack=yes
+      AX_CRAY_LIBSCI
+      if test $have_cray_libsci = yes; then
+      	 have_lapack=yes	
+      else
+	 have_lapack=no
+      fi
    elif test "x${ax_cv_cxx_compiler_vendor}" = xsgi; then
       AC_CHECK_LIB(scs,dgesv_,[have_lapack=yes, LIBS="$LIBS -lscs"], 
                    have_lapack=no,)

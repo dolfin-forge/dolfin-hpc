@@ -8,8 +8,8 @@
 // First added:  2005-07-05
 // Last changed: 2014-02-08
 
-#ifndef __PVTK_FILE_H
-#define __PVTK_FILE_H
+#ifndef __DOLFIN_PVTK_FILE_H
+#define __DOLFIN_PVTK_FILE_H
 
 #include <fstream>
 #include <string>

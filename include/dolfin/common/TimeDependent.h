@@ -4,8 +4,8 @@
 // First added:  2005-09-02
 // Last changed: 2008-06-23
 
-#ifndef __TIME_DEPENDENT_H
-#define __TIME_DEPENDENT_H
+#ifndef __DOLFIN_TIME_DEPENDENT_H
+#define __DOLFIN_TIME_DEPENDENT_H
 
 #include <dolfin/log/dolfin_log.h>
 

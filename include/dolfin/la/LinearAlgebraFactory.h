@@ -4,8 +4,8 @@
 // First added:  2007-11-30
 // Last changed: 2007-12-06
 
-#ifndef __LINEAR_ALGEBRA_FACTORY_H
-#define __LINEAR_ALGEBRA_FACTORY_H
+#ifndef __DOLFIN_LINEAR_ALGEBRA_FACTORY_H
+#define __DOLFIN_LINEAR_ALGEBRA_FACTORY_H
 
 #include "GenericMatrix.h"
 #include "GenericSparsityPattern.h"

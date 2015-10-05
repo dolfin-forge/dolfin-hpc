@@ -7,8 +7,8 @@
 // First added:  2004-06-19
 // Last changed: 2008-05-10
 
-#ifndef __LINEAR_SOLVER_H
-#define __LINEAR_SOLVER_H
+#ifndef __DOLFIN_LINEAR_SOLVER_H
+#define __DOLFIN_LINEAR_SOLVER_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/parameter/Parametrized.h>

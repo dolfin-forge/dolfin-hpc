@@ -7,8 +7,8 @@
 // First added:  2003-03-13
 // Last changed: 2014-06-01
 
-#ifndef __LOG_MANAGER_H
-#define __LOG_MANAGER_H
+#ifndef __DOLFIN_LOG_MANAGER_H
+#define __DOLFIN_LOG_MANAGER_H
 
 #include "Logger.h"
 

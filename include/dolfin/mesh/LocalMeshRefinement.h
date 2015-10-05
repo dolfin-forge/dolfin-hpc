@@ -3,8 +3,8 @@
 //
 // First added:  2006-11-01
 
-#ifndef __LOCAL_MESH_REFINEMENT_H
-#define __LOCAL_MESH_REFINEMENT_H
+#ifndef __DOLFIN_LOCAL_MESH_REFINEMENT_H
+#define __DOLFIN_LOCAL_MESH_REFINEMENT_H
 
 #include "MeshFunction.h"
 

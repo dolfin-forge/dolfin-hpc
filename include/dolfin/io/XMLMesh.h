@@ -4,8 +4,8 @@
 // First added:  2003-10-21
 // Last changed: 2008-05-21
 
-#ifndef __NEW_XML_MESH_H
-#define __NEW_XML_MESH_H
+#ifndef __DOLFIN_NEW_XML_MESH_H
+#define __DOLFIN_NEW_XML_MESH_H
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>

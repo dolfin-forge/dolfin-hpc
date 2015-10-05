@@ -6,8 +6,8 @@
 // First added:  2005-10-23
 // Last changed: 2008-06-29
 
-#ifndef __NEWTON_SOLVER_H
-#define __NEWTON_SOLVER_H
+#ifndef __DOLFIN_NEWTON_SOLVER_H
+#define __DOLFIN_NEWTON_SOLVER_H
 
 #include <dolfin/la/GenericMatrix.h>
 #include <dolfin/la/GenericVector.h>

@@ -7,8 +7,8 @@
 // First added:  2007-04-24
 // Last changed: 2015-01-05
 
-#ifndef __MESH_PARTITIONING_H
-#define __MESH_PARTITIONING_H
+#ifndef __DOLFIN_MESH_PARTITIONING_H
+#define __DOLFIN_MESH_PARTITIONING_H
 
 #include <dolfin/common/types.h>
 

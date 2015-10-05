@@ -4,8 +4,8 @@
 // First added:  2008-05-17
 // Last changed: 2007-05-17
 
-#ifndef __DEFAULT_FACTORY_H
-#define __DEFAULT_FACTORY_H
+#ifndef __DOLFIN_DEFAULT_FACTORY_H
+#define __DOLFIN_DEFAULT_FACTORY_H
 
 #include "LinearAlgebraFactory.h"
 

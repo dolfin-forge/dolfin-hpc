@@ -4,8 +4,8 @@
 // First added:  2004-03-31
 // Last changed: 2006-05-23
 
-#ifndef __XML_PARAMETER_LIST_H
-#define __XML_PARAMETER_LIST_H
+#ifndef __DOLFIN_XML_PARAMETER_LIST_H
+#define __DOLFIN_XML_PARAMETER_LIST_H
 
 #include "XMLObject.h"
 

@@ -4,8 +4,8 @@
 // First added:  2003-02-06
 // Last changed: 2006-10-23
 
-#ifndef __QUADRATURE_H
-#define __QUADRATURE_H
+#ifndef __DOLFIN_QUADRATURE_H
+#define __DOLFIN_QUADRATURE_H
 
 #include <dolfin/common/types.h>
 

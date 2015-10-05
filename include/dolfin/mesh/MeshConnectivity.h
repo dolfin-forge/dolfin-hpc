@@ -4,8 +4,8 @@
 // First added:  2006-05-09
 // Last changed: 2014-11-03
 
-#ifndef __MESH_CONNECTIVITY_H
-#define __MESH_CONNECTIVITY_H
+#ifndef __DOLFIN_MESH_CONNECTIVITY_H
+#define __DOLFIN_MESH_CONNECTIVITY_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>

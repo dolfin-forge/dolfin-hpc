@@ -4,8 +4,8 @@
 // First added:  2009-12-14
 // Last changed: 2009-12-15
 
-#ifndef __LAPACK_VECTOR_H
-#define __LAPACK_VECTOR_H
+#ifndef __DOLFIN_LAPACK_VECTOR_H
+#define __DOLFIN_LAPACK_VECTOR_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>

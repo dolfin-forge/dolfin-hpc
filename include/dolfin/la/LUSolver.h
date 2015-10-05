@@ -10,8 +10,8 @@
 // First added:  2007-07-03
 // Last changed: 2011-06-10
 
-#ifndef __LU_SOLVER_H
-#define __LU_SOLVER_H
+#ifndef __DOLFIN_LU_SOLVER_H
+#define __DOLFIN_LU_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/parameter/Parametrized.h>

@@ -7,8 +7,8 @@
 // First added:  2007-03-01
 // Last changed: 2014-09-13
 
-#ifndef __DOF_MAP_H
-#define __DOF_MAP_H
+#ifndef __DOLFIN_DOF_MAP_H
+#define __DOLFIN_DOF_MAP_H
 
 #include <dolfin/mesh/MeshDependent.h>
 

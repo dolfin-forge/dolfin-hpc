@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_MESH_H
-#define __DOLFIN_MESH_H
+#ifndef __DOLFIN_HEADER_MESH_H
+#define __DOLFIN_HEADER_MESH_H
 
 // DOLFIN mesh interface
 
@@ -36,4 +36,4 @@
 #include <dolfin/mesh/AffineMapping.h>
 #include <dolfin/mesh/MappedManifold.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_MESH_H */

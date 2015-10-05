@@ -4,8 +4,8 @@
 // First added:  2014-11-08
 // Last changed: 2014-12-08
 
-#ifndef __JACOBI_H
-#define __JACOBI_H
+#ifndef __DOLFIN_JACOBI_H
+#define __DOLFIN_JACOBI_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

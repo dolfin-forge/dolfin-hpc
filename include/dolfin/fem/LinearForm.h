@@ -4,8 +4,8 @@
 // First added:  2014-02-27
 // Last changed: 2014-02-27
 
-#ifndef __LINEAR_FORM_H
-#define __LINEAR_FORM_H
+#ifndef __DOLFIN_LINEAR_FORM_H
+#define __DOLFIN_LINEAR_FORM_H
 
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/FiniteElementSpace.h>

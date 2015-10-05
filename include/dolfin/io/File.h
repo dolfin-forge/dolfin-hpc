@@ -9,8 +9,8 @@
 // First added:  2002-11-12
 // Last changed: 2012-05-11
 
-#ifndef __FILE_H
-#define __FILE_H
+#ifndef __DOLFIN_FILE_H
+#define __DOLFIN_FILE_H
 
 #include <string>
 #include <sstream>

@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __FUNCTION_INTERPOLATION_H_
-#define __FUNCTION_INTERPOLATION_H_
+#ifndef __DOLFIN_FUNCTION_INTERPOLATION_H
+#define __DOLFIN_FUNCTION_INTERPOLATION_H
 
 namespace dolfin
 {
@@ -43,4 +43,4 @@ private:
 
 } /* namespace dolfin */
 
-#endif /* __FUNCTION_INTERPOLATION_H_ */
+#endif /* __DOLFIN_FUNCTION_INTERPOLATION_H */

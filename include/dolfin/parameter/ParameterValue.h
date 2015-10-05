@@ -4,8 +4,8 @@
 // First added:  2005-12-18
 // Last changed: 2005-12-19
 
-#ifndef __PARAMETER_VALUE_H
-#define __PARAMETER_VALUE_H
+#ifndef __DOLFIN_PARAMETER_VALUE_H
+#define __DOLFIN_PARAMETER_VALUE_H
 
 #include <string>
 #include <dolfin/common/types.h>

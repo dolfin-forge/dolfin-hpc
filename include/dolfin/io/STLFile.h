@@ -3,8 +3,8 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef __STL_FILE_H
-#define __STL_FILE_H
+#ifndef __DOLFIN_STL_FILE_H
+#define __DOLFIN_STL_FILE_H
 
 #include <dolfin/common/types.h>
 #include "GenericFile.h"

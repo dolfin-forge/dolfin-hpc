@@ -1,8 +1,8 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 
-#ifndef __MESH_RENUMBER_H
-#define __MESH_RENUMBER_H
+#ifndef __DOLFIN_MESH_RENUMBER_H
+#define __DOLFIN_MESH_RENUMBER_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/config/dolfin_config.h>

@@ -6,8 +6,8 @@
 // First added:  2008-05-29
 
 
-#ifndef __RAW_FILE_H
-#define __RAW_FILE_H
+#ifndef __DOLFIN_RAW_FILE_H
+#define __DOLFIN_RAW_FILE_H
 
 #include <fstream>
 #include "GenericFile.h"

@@ -4,8 +4,8 @@
 // First added:  2014-11-08
 // Last changed: 2014-12-08
 
-#ifndef __PKDO_H
-#define __PKDO_H
+#ifndef __DOLFIN_PKDO_H
+#define __DOLFIN_PKDO_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

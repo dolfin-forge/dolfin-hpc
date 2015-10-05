@@ -4,8 +4,8 @@
 // First added:  2005
 // Last changed: 2006-08-15
 
-#ifndef __PETSC_LU_SOLVER_H
-#define __PETSC_LU_SOLVER_H
+#ifndef __DOLFIN_PETSC_LU_SOLVER_H
+#define __DOLFIN_PETSC_LU_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
 

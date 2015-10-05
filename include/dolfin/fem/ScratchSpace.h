@@ -4,8 +4,8 @@
 // First added:  2014-02-13
 // Last changed: 2014-02-13
 
-#ifndef __SCRATCH_SPACE_H_
-#define __SCRATCH_SPACE_H_
+#ifndef __DOLFIN_SCRATCH_SPACE_H
+#define __DOLFIN_SCRATCH_SPACE_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCMesh.h>
@@ -98,4 +98,4 @@ private:
 };
 
 } /* namespace dolfin */
-#endif /* __SCRATCH_SPACE_H_ */
+#endif /* __DOLFIN_SCRATCH_SPACE_H */

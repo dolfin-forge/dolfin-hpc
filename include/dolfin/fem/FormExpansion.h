@@ -4,8 +4,8 @@
 // First added:  
 // Last changed:
 
-#ifndef __FORM_EXPANSION_H
-#define __FORM_EXPANSION_H
+#ifndef __DOLFIN_FORM_EXPANSION_H
+#define __DOLFIN_FORM_EXPANSION_H
 
 #include <dolfin/quadrature/QuadratureRule.h>
 #include <dolfin/ufl/UFLCell.h>

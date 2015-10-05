@@ -8,8 +8,8 @@
 // First added:  2004
 // Last changed: 2007-12-09
 
-#ifndef __LINEAR_PDE_H
-#define __LINEAR_PDE_H
+#ifndef __DOLFIN_LINEAR_PDE_H
+#define __DOLFIN_LINEAR_PDE_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/fem/Assembler.h>

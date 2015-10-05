@@ -8,8 +8,8 @@
 // First added:  2007-07-03
 // Last changed: 2011-06-10
 
-#ifndef __KRYLOV_SOLVER_H
-#define __KRYLOV_SOLVER_H
+#ifndef __DOLFIN_KRYLOV_SOLVER_H
+#define __DOLFIN_KRYLOV_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
 

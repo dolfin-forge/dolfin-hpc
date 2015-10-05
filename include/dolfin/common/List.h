@@ -3,8 +3,8 @@
 //
 // Modified by Anders Logg, 2005.
 
-#ifndef __LIST_H
-#define __LIST_H
+#ifndef __DOLFIN_LIST_H
+#define __DOLFIN_LIST_H
 
 #include <list>
 #include <iterator>

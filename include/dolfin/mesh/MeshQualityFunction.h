@@ -2,8 +2,8 @@
 //
 //
 
-#ifndef MESH_QUALITY_FUNCTION_H_
-#define MESH_QUALITY_FUNCTION_H_
+#ifndef MESH_QUALITY_FUNCTION_H
+#define MESH_QUALITY_FUNCTION_H
 
 #include <dolfin/function/Function.h>
 
@@ -57,4 +57,4 @@ private:
 
 }
 
-#endif /* MESH_QUALITY_FUNCTION_H_ */
+#endif /* MESH_QUALITY_FUNCTION_H */

@@ -4,8 +4,8 @@
 // First added:  2004-01-03
 // Last changed: 2007-05-14
 
-#ifndef __EVENT_H
-#define __EVENT_H
+#ifndef __DOLFIN_EVENT_H
+#define __DOLFIN_EVENT_H
 
 #include <string>
 

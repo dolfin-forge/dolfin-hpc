@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_TENSORS_H_
-#define __UFL_TENSORS_H_
+#ifndef __DOLFIN_UFL_TENSORS_H
+#define __DOLFIN_UFL_TENSORS_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLExpression.h>
@@ -188,4 +188,4 @@ private:
 
 };
 } /* namespace ufl */
-#endif /* __UFL_TENSORS_H_ */
+#endif /* __DOLFIN_UFL_TENSORS_H */

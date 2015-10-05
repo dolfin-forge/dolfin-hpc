@@ -5,8 +5,8 @@
 //
 // First added:  2008-07-02
 
-#ifndef __XYZ_FILE_H
-#define __XYZ_FILE_H
+#ifndef __DOLFIN_XYZ_FILE_H
+#define __DOLFIN_XYZ_FILE_H
 
 #include <fstream>
 #include "GenericFile.h"

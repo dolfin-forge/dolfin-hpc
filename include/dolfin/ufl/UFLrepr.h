@@ -4,8 +4,8 @@
 // First added:  2014-01-27
 // Last changed: 2014-01-27
 
-#ifndef __UFL_REPR_H_
-#define __UFL_REPR_H_
+#ifndef __DOLFIN_UFL_REPR_H
+#define __DOLFIN_UFL_REPR_H
 
 #include <string>
 #include <vector>
@@ -87,4 +87,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_REPR_H_ */
+#endif /* __DOLFIN_UFL_REPR_H */

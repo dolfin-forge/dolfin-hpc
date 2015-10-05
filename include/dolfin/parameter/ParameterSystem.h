@@ -4,8 +4,8 @@
 // First added:  2005-12-19
 // Last changed: 2006-02-08
 
-#ifndef __PARAMETER_SYSTEM_H
-#define __PARAMETER_SYSTEM_H
+#ifndef __DOLFIN_PARAMETER_SYSTEM_H
+#define __DOLFIN_PARAMETER_SYSTEM_H
 
 #include "ParameterList.h"
 

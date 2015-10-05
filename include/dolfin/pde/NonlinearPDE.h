@@ -6,8 +6,8 @@
 // First added:  2005-10-24
 // Last changed: 2007-05-15
 
-#ifndef __NONLINEAR_PDE_H
-#define __NONLINEAR_PDE_H
+#ifndef __DOLFIN_NONLINEAR_PDE_H
+#define __DOLFIN_NONLINEAR_PDE_H
 
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/BilinearForm.h>

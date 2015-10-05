@@ -4,8 +4,8 @@
 // First added:  2008-05-08
 // Last changed: 2008-05-08
 
-#ifndef __SOLVER_TYPE_H
-#define __SOLVER_TYPE_H
+#ifndef __DOLFIN_SOLVER_TYPE_H
+#define __DOLFIN_SOLVER_TYPE_H
 
 #include <dolfin/log/log.h>
 

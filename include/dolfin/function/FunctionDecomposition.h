@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __FUNCTION_DECOMPOSITION_H_
-#define __FUNCTION_DECOMPOSITION_H_
+#ifndef __DOLFIN_FUNCTION_DECOMPOSITION_H
+#define __DOLFIN_FUNCTION_DECOMPOSITION_H
 
 #include <dolfin/common/Array.h>
 
@@ -34,4 +34,4 @@ private:
 
 } /* namespace dolfin */
 
-#endif /* __FUNCTION_DECOMPOSITION_H_ */
+#endif /* __DOLFIN_FUNCTION_DECOMPOSITION_H */

@@ -7,8 +7,8 @@
 // First added:  2007-05-01
 // Last changed: 2015-05-27
 
-#ifndef __VERTEX_NORMAL_H
-#define __VERTEX_NORMAL_H
+#ifndef __DOLFIN_VERTEX_NORMAL_H
+#define __DOLFIN_VERTEX_NORMAL_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>

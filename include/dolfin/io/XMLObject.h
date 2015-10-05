@@ -4,8 +4,8 @@
 // First added:  2003-07-15
 // Last changed: 2006-05-23
 
-#ifndef __XML_OBJECT_H
-#define __XML_OBJECT_H
+#ifndef __DOLFIN_XML_OBJECT_H
+#define __DOLFIN_XML_OBJECT_H
 
 #include <dolfin/config/dolfin_config.h>
 

@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_INDEX_SUM_H_
-#define __UFL_INDEX_SUM_H_
+#ifndef __DOLFIN_UFL_INDEX_SUM_H
+#define __DOLFIN_UFL_INDEX_SUM_H
 
 //#include <string>
 //#include <vector>
@@ -113,4 +113,4 @@ private:
 
 };
 } /* namespace ufl */
-#endif /* __UFL_INDEX_SUM_H_ */
+#endif /* __DOLFIN_UFL_INDEX_SUM_H */

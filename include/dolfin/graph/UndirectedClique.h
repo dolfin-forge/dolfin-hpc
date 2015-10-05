@@ -4,8 +4,8 @@
 // First added:  2007-03-19
 // Last changed: 2007-03-19
 
-#ifndef __UNDIRECTED_CLIQUE_H
-#define __UNDIRECTED_CLIQUE_H
+#ifndef __DOLFIN_UNDIRECTED_CLIQUE_H
+#define __DOLFIN_UNDIRECTED_CLIQUE_H
 
 #include "Graph.h"
 

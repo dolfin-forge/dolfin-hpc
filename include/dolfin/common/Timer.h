@@ -4,8 +4,8 @@
 // First added:  2008-06-13
 // Last changed: 2008-06-13
 
-#ifndef __TIMER_H
-#define __TIMER_H
+#ifndef __DOLFIN_TIMER_H
+#define __DOLFIN_TIMER_H
 
 #include <dolfin/log/LogManager.h>
 #include "timing.h"

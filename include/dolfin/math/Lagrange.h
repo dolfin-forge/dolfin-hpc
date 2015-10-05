@@ -4,8 +4,8 @@
 // First added:  2003-06-12
 // Last changed: 2005-12-09
 
-#ifndef __LAGRANGE_H
-#define __LAGRANGE_H
+#ifndef __DOLFIN_LAGRANGE_H
+#define __DOLFIN_LAGRANGE_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

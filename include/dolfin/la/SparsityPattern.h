@@ -7,8 +7,8 @@
 // First added:  2007-03-13
 // Last changed: 2008-05-15
 
-#ifndef __SPARSITY_PATTERN_H
-#define __SPARSITY_PATTERN_H
+#ifndef __DOLFIN_SPARSITY_PATTERN_H
+#define __DOLFIN_SPARSITY_PATTERN_H
 
 #include "GenericSparsityPattern.h"
 

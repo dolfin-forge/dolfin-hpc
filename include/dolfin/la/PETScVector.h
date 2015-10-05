@@ -11,8 +11,8 @@
 // Last changed: 2008-10-28
 
 
-#ifndef __PETSC_VECTOR_H
-#define __PETSC_VECTOR_H
+#ifndef __DOLFIN_PETSC_VECTOR_H
+#define __DOLFIN_PETSC_VECTOR_H
 
 #include <dolfin/config/dolfin_config.h>
 

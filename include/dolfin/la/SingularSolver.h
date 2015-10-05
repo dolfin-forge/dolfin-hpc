@@ -4,8 +4,8 @@
 // First added:  2005-09-19
 // Last changed: 2008-05-10
 
-#ifndef __SINGULAR_SOLVER_H
-#define __SINGULAR_SOLVER_H
+#ifndef __DOLFIN_SINGULAR_SOLVER_H
+#define __DOLFIN_SINGULAR_SOLVER_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/parameter/Parametrized.h>

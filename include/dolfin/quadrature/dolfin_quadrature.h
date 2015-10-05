@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_QUADRATURE_H
-#define __DOLFIN_QUADRATURE_H
+#ifndef __DOLFIN_HEADER_QUADRATURE_H
+#define __DOLFIN_HEADER_QUADRATURE_H
 
 // DOLFIN quadrature interface
 
@@ -14,4 +14,4 @@
 #include <dolfin/quadrature/UFCCellIntegral.h>
 #include <dolfin/quadrature/UFCReferenceCell.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_QUADRATURE_H */

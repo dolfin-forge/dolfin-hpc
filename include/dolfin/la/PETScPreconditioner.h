@@ -7,8 +7,8 @@
 // First added:  2005
 // Last changed: 2008-01-07
 
-#ifndef __PETSC_PRECONDITIONER_H
-#define __PETSC_PRECONDITIONER_H
+#ifndef __DOLFIN_PETSC_PRECONDITIONER_H
+#define __DOLFIN_PETSC_PRECONDITIONER_H
 
 #include <dolfin/config/dolfin_config.h>
 

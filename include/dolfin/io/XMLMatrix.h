@@ -4,8 +4,8 @@
 // First added:  2003-07-15
 // Last changed: 2008-06-14
 
-#ifndef __XML_MATRIX_H
-#define __XML_MATRIX_H
+#ifndef __DOLFIN_XML_MATRIX_H
+#define __DOLFIN_XML_MATRIX_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/la/GenericMatrix.h>

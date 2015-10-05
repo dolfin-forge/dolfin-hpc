@@ -4,8 +4,8 @@
 // First added:  2006-
 // Last changed: 2006-10-10
 
-#ifndef __UBLAS_H
-#define __UBLAS_H
+#ifndef __DOLFIN_UBLAS_H
+#define __DOLFIN_UBLAS_H
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>

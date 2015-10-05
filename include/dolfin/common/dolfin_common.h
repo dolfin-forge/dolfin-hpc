@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_COMMON_H
-#define __DOLFIN_COMMON_H
+#ifndef __DOLFIN_HEADER_COMMON_H
+#define __DOLFIN_HEADER_COMMON_H
 
 // DOLFIN common classes
 
@@ -15,4 +15,4 @@
 #include <dolfin/common/TimeSeries.h>
 #include <dolfin/common/Variable.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_COMMON_H */

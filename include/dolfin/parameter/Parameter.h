@@ -4,8 +4,8 @@
 // First added:  2003-05-06
 // Last changed: 2005-03-24
 
-#ifndef __PARAMETER_H
-#define __PARAMETER_H
+#ifndef __DOLFIN_PARAMETER_H
+#define __DOLFIN_PARAMETER_H
 
 #include <dolfin/log/dolfin_log.h>
 

@@ -4,8 +4,8 @@
 // First added:  2003-02-26
 // Last changed: 2006-10-09
 
-#ifndef __VARIABLE_H
-#define __VARIABLE_H
+#ifndef __DOLFIN_VARIABLE_H
+#define __DOLFIN_VARIABLE_H
 
 #include <string>
 

@@ -4,8 +4,8 @@
 // First added:  2006-06-05
 // Last changed: 2008-06-20
 
-#ifndef __INTERVAL_CELL_H
-#define __INTERVAL_CELL_H
+#ifndef __DOLFIN_INTERVAL_CELL_H
+#define __DOLFIN_INTERVAL_CELL_H
 
 #include "CellType.h"
 

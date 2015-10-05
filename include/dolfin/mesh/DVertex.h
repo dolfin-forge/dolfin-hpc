@@ -5,8 +5,8 @@
 // Modified by Balthasar Reuter, 2013
 //
 
-#ifndef __D_VERTEX_H
-#define __D_VERTEX_H
+#ifndef __DOLFIN_D_VERTEX_H
+#define __DOLFIN_D_VERTEX_H
 
 #include <list>
 #include <dolfin/common/types.h>

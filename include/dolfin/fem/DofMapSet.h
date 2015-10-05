@@ -7,8 +7,8 @@
 // First added:  2007-01-17
 // Last changed: 2007-05-24
 
-#ifndef __DOF_MAP_SET_H
-#define __DOF_MAP_SET_H
+#ifndef __DOLFIN_DOF_MAP_SET_H
+#define __DOLFIN_DOF_MAP_SET_H
 
 #include <map>
 #include <vector>

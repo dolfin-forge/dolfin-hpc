@@ -9,8 +9,8 @@
 // First added:  2004-01-01
 // Last changed: 2008-05-15
 
-#ifndef __PETSC_MATRIX_H
-#define __PETSC_MATRIX_H
+#ifndef __DOLFIN_PETSC_MATRIX_H
+#define __DOLFIN_PETSC_MATRIX_H
 
 #include <dolfin/config/dolfin_config.h>
 

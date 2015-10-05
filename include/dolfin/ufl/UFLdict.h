@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_DICT_H_
-#define __UFL_DICT_H_
+#ifndef __DOLFIN_UFL_DICT_H
+#define __DOLFIN_UFL_DICT_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLtype.h>
@@ -87,4 +87,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_DICT_H_ */
+#endif /* __DOLFIN_UFL_DICT_H */

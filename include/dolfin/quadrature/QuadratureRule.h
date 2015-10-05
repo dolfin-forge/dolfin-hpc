@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __QUADRATURE_RULE_H
-#define __QUADRATURE_RULE_H
+#ifndef __DOLFIN_QUADRATURE_RULE_H
+#define __DOLFIN_QUADRATURE_RULE_H
 
 #include <dolfin/common/types.h>
 

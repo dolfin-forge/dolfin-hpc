@@ -6,8 +6,8 @@
 // First added:  2007-04-02
 // Last changed: 2014-02-27
 
-#ifndef __FORM_H
-#define __FORM_H
+#ifndef __DOLFIN_FORM_H
+#define __DOLFIN_FORM_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/fem/DofMapSet.h>

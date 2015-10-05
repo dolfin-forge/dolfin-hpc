@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_EQUATION_H_
-#define __UFL_EQUATION_H_
+#ifndef __DOLFIN_UFL_EQUATION_H
+#define __DOLFIN_UFL_EQUATION_H
 
 #include <dolfin/ufl/UFLForm.h>
 
@@ -55,4 +55,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_EQUATION_H_ */
+#endif /* __DOLFIN_UFL_EQUATION_H */

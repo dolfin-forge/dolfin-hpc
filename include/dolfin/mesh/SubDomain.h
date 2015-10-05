@@ -7,8 +7,8 @@
 // First added:  2007-04-10
 // Last changed: 2014-02-07
 
-#ifndef __SUB_DOMAIN_H
-#define __SUB_DOMAIN_H
+#ifndef __DOLFIN_SUB_DOMAIN_H
+#define __DOLFIN_SUB_DOMAIN_H
 
 #include <dolfin/common/types.h>
 

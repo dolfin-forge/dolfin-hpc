@@ -4,8 +4,8 @@
 // First added:  2006-06-02
 // Last changed: 2007-05-02
 
-#ifndef __FACET_H
-#define __FACET_H
+#ifndef __DOLFIN_FACET_H
+#define __DOLFIN_FACET_H
 
 #include "MeshEntity.h"
 #include "MeshEntityIterator.h"

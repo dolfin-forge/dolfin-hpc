@@ -4,8 +4,8 @@
 // First added:  2008-05-23
 // Last changed: 2008-05-23
 
-#ifndef __NORMALIZATION_TYPE_H
-#define __NORMALIZATION_TYPE_H
+#ifndef __DOLFIN_NORMALIZATION_TYPE_H
+#define __DOLFIN_NORMALIZATION_TYPE_H
 
 namespace dolfin
 {

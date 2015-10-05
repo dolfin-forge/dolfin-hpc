@@ -6,8 +6,8 @@
 // First added:  2007-04-24
 // Last changed: 2008-05-18
 
-#ifndef __SUB_SYSTEM_H
-#define __SUB_SYSTEM_H
+#ifndef __DOLFIN_SUB_SYSTEM_H
+#define __DOLFIN_SUB_SYSTEM_H
 
 #include <ufc.h>
 #include <dolfin/common/Array.h>

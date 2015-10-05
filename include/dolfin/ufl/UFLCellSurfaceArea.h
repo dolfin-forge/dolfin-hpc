@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_CELL_SURFACE_AREA_H_
-#define __UFL_CELL_SURFACE_AREA_H_
+#ifndef __DOLFIN_UFL_CELL_SURFACE_AREA_H
+#define __DOLFIN_UFL_CELL_SURFACE_AREA_H
 
 #include <dolfin/ufl/UFLGeometricQuantity.h>
 
@@ -54,4 +54,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_CELL_SURFACE_AREA_H_ */
+#endif /* __DOLFIN_UFL_CELL_SURFACE_AREA_H */

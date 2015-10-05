@@ -4,8 +4,8 @@
 // First added:  2008-01-21
 // Last changed: 2008-07-23
 
-#ifndef __REFINEMENT_MANAGER_H
-#define __REFINEMENT_MANAGER_H
+#ifndef __DOLFIN_REFINEMENT_MANAGER_H
+#define __DOLFIN_REFINEMENT_MANAGER_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>

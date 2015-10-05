@@ -6,8 +6,8 @@
 // First added:  2009-08-11
 // Last changed: 2011-01-20
 
-#ifndef __ENCODER_H
-#define __ENCODER_H
+#ifndef __DOLFIN_ENCODER_H
+#define __DOLFIN_ENCODER_H
 
 #include <dolfin/config/dolfin_config.h>
 

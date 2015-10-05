@@ -4,8 +4,8 @@
 // First added:  2006-06-07
 // Last changed: 2006-06-16
 
-#ifndef __UNIFORM_MESH_REFINEMENT_H
-#define __UNIFORM_MESH_REFINEMENT_H
+#ifndef __DOLFIN_UNIFORM_MESH_REFINEMENT_H
+#define __DOLFIN_UNIFORM_MESH_REFINEMENT_H
 
 #include <dolfin/common/types.h>
 

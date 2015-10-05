@@ -4,8 +4,8 @@
 // First added:  2006-06-21
 // Last changed: 2008-05-28
 
-#ifndef __BOUNDARY_COMPUTATION_H
-#define __BOUNDARY_COMPUTATION_H
+#ifndef __DOLFIN_BOUNDARY_COMPUTATION_H
+#define __DOLFIN_BOUNDARY_COMPUTATION_H
 
 #include <dolfin/common/types.h>
 #include "MeshFunction.h"

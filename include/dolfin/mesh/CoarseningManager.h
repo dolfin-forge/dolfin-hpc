@@ -4,8 +4,8 @@
 // First added:  2013-03-25
 // Last changed: 2013-04-03
 
-#ifndef __COARSENING_MANAGER_H
-#define __COARSENING_MANAGER_H
+#ifndef __DOLFIN_COARSENING_MANAGER_H
+#define __DOLFIN_COARSENING_MANAGER_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>

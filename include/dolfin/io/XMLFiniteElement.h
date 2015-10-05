@@ -4,8 +4,8 @@
 // First added:  2007-04-13
 // Last changed: 2007-04-13
 
-#ifndef __XML_FINITE_ELEMENT_H
-#define __XML_FINITE_ELEMENT_H
+#ifndef __DOLFIN_XML_FINITE_ELEMENT_H
+#define __DOLFIN_XML_FINITE_ELEMENT_H
 
 #include "XMLObject.h"
 

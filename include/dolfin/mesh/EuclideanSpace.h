@@ -4,8 +4,8 @@
 // First added:  2014-11-05
 // Last changed: 2014-11-05
 
-#ifndef __EUCLIDEAN_SPACE_H_
-#define __EUCLIDEAN_SPACE_H_
+#ifndef __DOLFIN_EUCLIDEAN_SPACE_H
+#define __DOLFIN_EUCLIDEAN_SPACE_H
 
 namespace dolfin
 {
@@ -21,4 +21,4 @@ public:
 
 }
 
-#endif /* EUCLIDEANSPACE_H_ */
+#endif /* EUCLIDEANSPACE_H */

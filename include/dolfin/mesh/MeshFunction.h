@@ -6,8 +6,8 @@
 // First added:  2006-05-22
 // Last changed: 2008-05-21
 
-#ifndef __MESH_FUNCTION_H
-#define __MESH_FUNCTION_H
+#ifndef __DOLFIN_MESH_FUNCTION_H
+#define __DOLFIN_MESH_FUNCTION_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/io/File.h>

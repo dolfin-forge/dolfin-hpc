@@ -4,8 +4,8 @@
 // First added:  2014-10-05
 // Last changed: 2014-10-05
 
-#ifndef __MAPPED_MANIFOLD_H
-#define __MAPPED_MANIFOLD_H
+#ifndef __DOLFIN_MAPPED_MANIFOLD_H
+#define __DOLFIN_MAPPED_MANIFOLD_H
 
 #include <dolfin/common/types.h>
 

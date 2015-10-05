@@ -6,8 +6,8 @@
 // First added:  2003-07-15
 // Last changed: 2012-05-11
 
-#ifndef __GENERIC_FILE_H
-#define __GENERIC_FILE_H
+#ifndef __DOLFIN_GENERIC_FILE_H
+#define __DOLFIN_GENERIC_FILE_H
 
 #include <string>
 #include <vector>

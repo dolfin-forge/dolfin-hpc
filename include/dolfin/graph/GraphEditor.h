@@ -4,8 +4,8 @@
 // First added:  2007-02-12
 // Last changed: 2007-03-09
 
-#ifndef __GRAPH_EDITOR_H
-#define __GRAPH_EDITOR_H
+#ifndef __DOLFIN_GRAPH_EDITOR_H
+#define __DOLFIN_GRAPH_EDITOR_H
 
 #include <dolfin/common/types.h>
 #include "Graph.h"

@@ -9,8 +9,8 @@
 // First added:  2003-11-28
 // Last changed: 2013-06-11
 
-#ifndef __FUNCTION_H
-#define __FUNCTION_H
+#ifndef __DOLFIN_FUNCTION_H
+#define __DOLFIN_FUNCTION_H
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>

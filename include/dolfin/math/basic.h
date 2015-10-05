@@ -4,8 +4,8 @@
 // First added:  2003-02-06
 // Last changed: 2006-06-16
 
-#ifndef __BASIC_H
-#define __BASIC_H
+#ifndef __DOLFIN_BASIC_H
+#define __DOLFIN_BASIC_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>

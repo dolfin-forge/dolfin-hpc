@@ -4,8 +4,8 @@
 // First added:  2015-01-30
 // Last changed: 2015-03-22
 
-#ifndef __ZOLTAN_INTERFACE_H
-#define __ZOLTAN_INTERFACE_H
+#ifndef __DOLFIN_ZOLTAN_INTERFACE_H
+#define __DOLFIN_ZOLTAN_INTERFACE_H
 
 #include <dolfin/common/types.h>
 

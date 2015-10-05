@@ -6,8 +6,8 @@
 // First added:  2007-07-08
 // Last changed: 2007-12-08
 
-#ifndef __PERIODIC_BC_H
-#define __PERIODIC_BC_H
+#ifndef __DOLFIN_PERIODIC_BC_H
+#define __DOLFIN_PERIODIC_BC_H
 
 #include <dolfin/common/types.h>
 #include "SubSystem.h"

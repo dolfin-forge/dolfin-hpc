@@ -7,8 +7,8 @@
 // First added:  2007-03-15
 // Last changed: 2008-04-23
 
-#ifndef __SCALAR_H
-#define __SCALAR_H
+#ifndef __DOLFIN_SCALAR_H
+#define __DOLFIN_SCALAR_H
 
 
 #include <dolfin/config/dolfin_config.h>

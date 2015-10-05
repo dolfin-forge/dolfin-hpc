@@ -4,8 +4,8 @@
 // First added:  2007-11-30
 // Last changed: 2007-12-06
 
-#ifndef __PETSC_FACTORY_H
-#define __PETSC_FACTORY_H
+#ifndef __DOLFIN_PETSC_FACTORY_H
+#define __DOLFIN_PETSC_FACTORY_H
 
 #include <dolfin/config/dolfin_config.h>
 

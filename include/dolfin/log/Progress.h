@@ -4,8 +4,8 @@
 // First added:  2003-03-14
 // Last changed: 2008-03-06
 
-#ifndef __PROGRESS_H
-#define __PROGRESS_H
+#ifndef __DOLFIN_PROGRESS_H
+#define __DOLFIN_PROGRESS_H
 
 #include <string>
 #include <stdarg.h>

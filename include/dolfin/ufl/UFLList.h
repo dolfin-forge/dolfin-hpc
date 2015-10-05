@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_LIST_H
-#define __UFL_LIST_H
+#ifndef __DOLFIN_UFL_LIST_H
+#define __DOLFIN_UFL_LIST_H
 
 #include <dolfin/ufl/UFLIntegral.h>
 
@@ -57,4 +57,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_LIST_H */
+#endif /* __DOLFIN_UFL_LIST_H */

@@ -7,8 +7,8 @@
 // First added:  2003-09-03
 // Last changed: 2007-04-24
 
-#ifndef __ARRAY_H
-#define __ARRAY_H
+#ifndef __DOLFIN_ARRAY_H
+#define __DOLFIN_ARRAY_H
 
 #include <iostream>
 

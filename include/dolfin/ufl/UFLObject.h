@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_OBJECT_H_
-#define __UFL_OBJECT_H_
+#ifndef __DOLFIN_UFL_OBJECT_H
+#define __DOLFIN_UFL_OBJECT_H
 
 #include <dolfin/ufl/UFLrepr.h>
 
@@ -363,4 +363,4 @@ inline Object const* Object::create(repr_t const& repr)
   return NULL;
 }
 } /* namespace ufl */
-#endif /* __UFL_OBJECT_H_ */
+#endif /* __DOLFIN_UFL_OBJECT_H */

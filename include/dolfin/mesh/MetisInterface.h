@@ -4,8 +4,8 @@
 // First added:  2015-01-30
 // Last changed: 2015-01-30
 
-#ifndef __METIS_INTERFACE_H
-#define __METIS_INTERFACE_H
+#ifndef __DOLFIN_METIS_INTERFACE_H
+#define __DOLFIN_METIS_INTERFACE_H
 
 #include <dolfin/common/types.h>
 

@@ -4,8 +4,8 @@
 // First added:  2014-06-16
 // Last changed: 2014-06-16
 
-#ifndef __UFC_HALO_H
-#define __UFC_HALO_H
+#ifndef __DOLFIN_UFC_HALO_H
+#define __DOLFIN_UFC_HALO_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/UFCCell.h>
@@ -105,4 +105,4 @@ private:
 
 }
 
-#endif /* __UFC_HALO_H */
+#endif /* __DOLFIN_UFC_HALO_H */

@@ -5,8 +5,8 @@
 // Modified by Balthasar Reuter, 2013
 //
 
-#ifndef __D_CELL_H
-#define __D_CELL_H
+#ifndef __DOLFIN_D_CELL_H
+#define __DOLFIN_D_CELL_H
 
 #include <dolfin/common/types.h>
 #include <vector>

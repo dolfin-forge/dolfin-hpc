@@ -4,8 +4,8 @@
 // First added:  2006-06-02
 // Last changed: 2007-10-23
 
-#ifndef __FACE_H
-#define __FACE_H
+#ifndef __DOLFIN_FACE_H
+#define __DOLFIN_FACE_H
 
 #include "MeshEntity.h"
 #include "MeshEntityIterator.h"

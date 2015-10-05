@@ -4,8 +4,8 @@
 // First added:  2007-03-01
 // Last changed: 2007-03-13
 
-#ifndef __UFC_CELL_H
-#define __UFC_CELL_H
+#ifndef __DOLFIN_UFC_CELL_H
+#define __DOLFIN_UFC_CELL_H
 
 #include <ufc.h>
 

@@ -6,8 +6,8 @@
 // First added:  2007-04-12
 // Last changed: 2014-09-21
 
-#ifndef __ELEMENT_LIBRARY_H
-#define __ELEMENT_LIBRARY_H
+#ifndef __DOLFIN_ELEMENT_LIBRARY_H
+#define __DOLFIN_ELEMENT_LIBRARY_H
 
 #include <dolfin/ufl/UFLElementList.h>
 

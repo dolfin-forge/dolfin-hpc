@@ -4,8 +4,8 @@
 // First added:  2007-11-23
 // Last changed: 2007-11-23
 
-#ifndef __UNIT_INTERVAL_H
-#define __UNIT_INTERVAL_H
+#ifndef __DOLFIN_UNIT_INTERVAL_H
+#define __DOLFIN_UNIT_INTERVAL_H
 
 #include "Mesh.h"
 

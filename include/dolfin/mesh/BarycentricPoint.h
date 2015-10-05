@@ -4,8 +4,8 @@
 // First added:  2013-05-15
 // Last changed: 2013-05-15
 
-#ifndef __BARYCENTRIC_POINT_H
-#define __BARYCENTRIC_POINT_H
+#ifndef __DOLFIN_BARYCENTRIC_POINT_H
+#define __DOLFIN_BARYCENTRIC_POINT_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

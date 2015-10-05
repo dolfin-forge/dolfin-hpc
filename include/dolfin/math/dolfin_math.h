@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_MATH_H
-#define __DOLFIN_MATH_H
+#ifndef __DOLFIN_HEADER_MATH_H
+#define __DOLFIN_HEADER_MATH_H
 
 // DOLFIN math
 
@@ -7,4 +7,4 @@
 #include <dolfin/math/Lagrange.h>
 #include <dolfin/math/Legendre.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_MATH_H */

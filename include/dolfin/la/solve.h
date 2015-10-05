@@ -6,8 +6,8 @@
 // First added:  2007-04-30
 // Last changed: 2008-05-23
 
-#ifndef __SOLVE_H
-#define __SOLVE_H
+#ifndef __DOLFIN_SOLVE_H
+#define __DOLFIN_SOLVE_H
 
 #include <dolfin/common/types.h>
 #include "SolverType.h"

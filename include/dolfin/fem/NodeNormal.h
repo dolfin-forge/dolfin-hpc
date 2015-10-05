@@ -7,8 +7,8 @@
 // First added:  2007-05-01
 // Last changed: 2014-05-22
 
-#ifndef __NODENORMAL_H
-#define __NODENORMAL_H
+#ifndef __DOLFIN_NODENORMAL_H
+#define __DOLFIN_NODENORMAL_H
 
 #include <dolfin/fem/BoundaryNormal.h>
 #include <dolfin/mesh/Mesh.h>

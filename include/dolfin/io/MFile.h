@@ -6,8 +6,8 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifndef __M_FILE_H
-#define __M_FILE_H
+#ifndef __DOLFIN_M_FILE_H
+#define __DOLFIN_M_FILE_H
 
 #include <dolfin/common/types.h>
 #include "GenericFile.h"

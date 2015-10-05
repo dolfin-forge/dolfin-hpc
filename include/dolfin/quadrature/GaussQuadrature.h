@@ -5,8 +5,8 @@
 // Last changed: 2005-12-09
 
 
-#ifndef __GAUSS_QUADRATURE_H
-#define __GAUSS_QUADRATURE_H
+#ifndef __DOLFIN_GAUSS_QUADRATURE_H
+#define __DOLFIN_GAUSS_QUADRATURE_H
 
 #include <dolfin/log/dolfin_log.h>
 #include "GaussianQuadrature.h"

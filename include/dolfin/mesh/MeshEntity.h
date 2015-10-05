@@ -4,8 +4,8 @@
 // First added:  2006-05-11
 // Last changed: 2006-10-23
 
-#ifndef __MESH_ENTITY_H
-#define __MESH_ENTITY_H
+#ifndef __DOLFIN_MESH_ENTITY_H
+#define __DOLFIN_MESH_ENTITY_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>

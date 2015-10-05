@@ -4,8 +4,8 @@
 // First added:  2006-08-15
 // Last changed: 2008-05-08
 
-#ifndef __PRECONDITIONER_TYPE_H
-#define __PRECONDITIONER_TYPE_H
+#ifndef __DOLFIN_PRECONDITIONER_TYPE_H
+#define __DOLFIN_PRECONDITIONER_TYPE_H
 
 #include <dolfin/log/log.h>
 

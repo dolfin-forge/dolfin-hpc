@@ -4,8 +4,8 @@
 // First added:  2007-04-03
 // Last changed: 2007-04-22
 
-#ifndef __GRAPH_PARTITIONING_H
-#define __GRAPH_PARTITIONING_H
+#ifndef __DOLFIN_GRAPH_PARTITIONING_H
+#define __DOLFIN_GRAPH_PARTITIONING_H
 
 #include <dolfin/common/types.h>
 #include "Graph.h"

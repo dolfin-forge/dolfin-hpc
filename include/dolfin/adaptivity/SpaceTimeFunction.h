@@ -4,8 +4,8 @@
 // First added:  2005-11-26
 // Last changed: 2013-05-17
 
-#ifndef __SPACE_TIME_FUNCTION_H
-#define __SPACE_TIME_FUNCTION_H
+#ifndef __DOLFIN_SPACE_TIME_FUNCTION_H
+#define __DOLFIN_SPACE_TIME_FUNCTION_H
 
 #include <dolfin/function/Function.h>
 

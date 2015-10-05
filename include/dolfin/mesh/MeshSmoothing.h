@@ -5,8 +5,8 @@
 // First added:  2008-07-16
 // Last changed: 2011-06-30
 
-#ifndef __MESH_SMOOTHING_H
-#define __MESH_SMOOTHING_H
+#ifndef __DOLFIN_MESH_SMOOTHING_H
+#define __DOLFIN_MESH_SMOOTHING_H
 
 #include <dolfin/mesh/MeshSmoothData.h>
 #include <map>

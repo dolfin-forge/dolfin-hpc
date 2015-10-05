@@ -6,8 +6,8 @@
 // First added:  2005-01-17
 // Last changed: 2006-05-17
 
-#ifndef __PETSC_KRYLOV_MATRIX_H
-#define __PETSC_KRYLOV_MATRIX_H
+#ifndef __DOLFIN_PETSC_KRYLOV_MATRIX_H
+#define __DOLFIN_PETSC_KRYLOV_MATRIX_H
 
 #include <dolfin/config/dolfin_config.h>
 

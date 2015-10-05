@@ -6,8 +6,8 @@
 // Modified by Aurelien Larcher, 2015
 //
 
-#ifndef __D_MESH_H
-#define __D_MESH_H
+#ifndef __DOLFIN_D_MESH_H
+#define __DOLFIN_D_MESH_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>

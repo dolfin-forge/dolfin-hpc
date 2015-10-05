@@ -4,8 +4,8 @@
 // First added:  2006-02-15
 // Last changed: 2006-05-23
 
-#ifndef __XML_FUNCTION_H
-#define __XML_FUNCTION_H
+#ifndef __DOLFIN_XML_FUNCTION_H
+#define __DOLFIN_XML_FUNCTION_H
 
 #include "XMLObject.h"
 

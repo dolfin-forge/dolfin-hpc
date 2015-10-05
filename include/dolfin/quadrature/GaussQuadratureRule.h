@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __GAUSS_QUADRATURE_RULE_H
-#define __GAUSS_QUADRATURE_RULE_H
+#ifndef __DOLFIN_GAUSS_QUADRATURE_RULE_H
+#define __DOLFIN_GAUSS_QUADRATURE_RULE_H
 
 #include <dolfin/quadrature/QuadratureRule.h>
 #include <dolfin/quadrature/GaussQuadrature.h>

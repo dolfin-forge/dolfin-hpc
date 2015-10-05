@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_EXPRESSION_H_
-#define __UFL_EXPRESSION_H_
+#ifndef __DOLFIN_UFL_EXPRESSION_H
+#define __DOLFIN_UFL_EXPRESSION_H
 
 #include <dolfin/quadrature/UFCReferenceCell.h>
 #include <dolfin/ufl/UFLCell.h>
@@ -117,4 +117,4 @@ private:
  };
  */
 } /* namespace ufl */
-#endif /* __UFL_EXPRESSION_H_ */
+#endif /* __DOLFIN_UFL_EXPRESSION_H */

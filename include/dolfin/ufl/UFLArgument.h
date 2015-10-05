@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_ARGUMENT_H
-#define __UFL_ARGUMENT_H
+#ifndef __DOLFIN_UFL_ARGUMENT_H
+#define __DOLFIN_UFL_ARGUMENT_H
 
 #include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
@@ -101,4 +101,4 @@ protected:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_ARGUMENT_H */
+#endif /* __DOLFIN_UFL_ARGUMENT_H */

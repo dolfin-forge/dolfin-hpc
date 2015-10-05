@@ -7,8 +7,8 @@
 // First added:  2007-01-17
 // Last changed: 2010-03-18
 
-#ifndef __ASSEMBLER_H
-#define __ASSEMBLER_H
+#ifndef __DOLFIN_ASSEMBLER_H
+#define __DOLFIN_ASSEMBLER_H
 
 #include <ufc.h>
 

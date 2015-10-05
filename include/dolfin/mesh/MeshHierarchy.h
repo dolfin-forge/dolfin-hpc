@@ -4,8 +4,8 @@
 // First added:  2006-12-20
 // Last changed: 2006-12-20
 
-#ifndef __MESHHIERARCHY_H
-#define __MESHHIERARCHY_H
+#ifndef __DOLFIN_MESH_HIERARCHY_H
+#define __DOLFIN_MESH_HIERARCHY_H
 
 #include <dolfin/common/types.h>
 #include "MeshFunction.h"

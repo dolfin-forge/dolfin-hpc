@@ -4,8 +4,8 @@
 // First added:  2006-05-08
 // Last changed: 2007-11-30
 
-#ifndef __MESH_GEOMETRY_H
-#define __MESH_GEOMETRY_H
+#ifndef __DOLFIN_MESH_GEOMETRY_H
+#define __DOLFIN_MESH_GEOMETRY_H
 
 #include "Point.h"
 

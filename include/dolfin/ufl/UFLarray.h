@@ -4,8 +4,8 @@
 // First added:  2014-01-27
 // Last changed: 2014-01-27
 
-#ifndef __UFL_ARRAY_H_
-#define __UFL_ARRAY_H_
+#ifndef __DOLFIN_UFL_ARRAY_H
+#define __DOLFIN_UFL_ARRAY_H
 
 #include <dolfin/ufl/UFLObject.h>
 
@@ -54,4 +54,4 @@ private:
 };
 
 } /* namespace icorne */
-#endif /* __UFL_ARRAY_H_ */
+#endif /* __DOLFIN_UFL_ARRAY_H */

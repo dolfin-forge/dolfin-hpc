@@ -4,8 +4,8 @@
 // First added:  2014-03-13
 // Last changed: 2014-03-13
 
-#ifndef __TEST_H
-#define __TEST_H
+#ifndef __DOLFIN_TEST_H
+#define __DOLFIN_TEST_H
 
 #include <dolfin/common/types.h>
 
@@ -59,4 +59,4 @@ public:
 
 }
 
-#endif /* __TEST_H */
+#endif /* __DOLFIN_TEST_H */

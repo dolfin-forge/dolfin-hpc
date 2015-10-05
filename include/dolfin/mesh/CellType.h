@@ -4,8 +4,8 @@
 // First added:  2006-06-05
 // Last changed: 2008-06-20
 
-#ifndef __CELL_TYPE_H
-#define __CELL_TYPE_H
+#ifndef __DOLFIN_CELL_TYPE_H
+#define __DOLFIN_CELL_TYPE_H
 
 #include <string>
 

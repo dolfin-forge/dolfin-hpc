@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_DOMAIN_H_
-#define __UFL_DOMAIN_H_
+#ifndef __DOLFIN_UFL_DOMAIN_H
+#define __DOLFIN_UFL_DOMAIN_H
 
 #include <dolfin/ufl/UFLtype.h>
 
@@ -132,4 +132,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_DOMAIN_H */
+#endif /* __DOLFIN_UFL_DOMAIN_H */

@@ -9,8 +9,8 @@
 // First added:  2007-05-01
 // Last changed: 2014-05-22
 
-#ifndef __SLIPBC_H
-#define __SLIPBC_H
+#ifndef __DOLFIN_SLIPBC_H
+#define __DOLFIN_SLIPBC_H
 
 #include "BoundaryCondition.h"
 #include "NodeNormal.h"

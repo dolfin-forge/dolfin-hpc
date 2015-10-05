@@ -9,8 +9,8 @@
 // First added:  2005-12-02
 // Last changed: 2008-05-08
 
-#ifndef __PETSC_KRYLOV_SOLVER_H
-#define __PETSC_KRYLOV_SOLVER_H
+#ifndef __DOLFIN_PETSC_KRYLOV_SOLVER_H
+#define __DOLFIN_PETSC_KRYLOV_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
 

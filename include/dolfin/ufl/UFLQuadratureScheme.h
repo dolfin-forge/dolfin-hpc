@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_QUADRATURE_SCHEME_H_
-#define __UFL_QUADRATURE_SCHEME_H_
+#ifndef __DOLFIN_UFL_QUADRATURE_SCHEME_H
+#define __DOLFIN_UFL_QUADRATURE_SCHEME_H
 
 #include <dolfin/ufl/UFLClass.h>
 
@@ -45,4 +45,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_QUADRATURE_SCHEME_H_ */
+#endif /* __DOLFIN_UFL_QUADRATURE_SCHEME_H */

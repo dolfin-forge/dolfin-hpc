@@ -4,8 +4,8 @@
 // First added:  
 // Last changed: 
 
-#ifndef __UFC_REFERENCE_CELL_H
-#define __UFC_REFERENCE_CELL_H
+#ifndef __DOLFIN_UFC_REFERENCE_CELL_H
+#define __DOLFIN_UFC_REFERENCE_CELL_H
 
 #include <ufc.h>
 

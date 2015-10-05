@@ -4,8 +4,8 @@
 // First added:  2010-09-13
 // Last changed: 2011-01-18
 
-#ifndef __ADAPTIVEREFINEMENT_H
-#define __ADAPTIVEREFINEMENT_H
+#ifndef __DOLFIN_ADAPTIVE_REFINEMENT_H
+#define __DOLFIN_ADAPTIVE_REFINEMENT_H
 
 #include <dolfin/common/types.h>
 #include <vector>

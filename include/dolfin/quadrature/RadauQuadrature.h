@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 
-#ifndef __RADAU_QUADRATURE_H
-#define __RADAU_QUADRATURE_H
+#ifndef __DOLFIN_RADAU_QUADRATURE_H
+#define __DOLFIN_RADAU_QUADRATURE_H
 
 #include "GaussianQuadrature.h"
 

@@ -4,8 +4,8 @@
 // First added:  2005-12-19
 // Last changed: 2007-04-13
 
-#ifndef __PARAMETRIZED_H
-#define __PARAMETRIZED_H
+#ifndef __DOLFIN_PARAMETRIZED_H
+#define __DOLFIN_PARAMETRIZED_H
 
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterList.h>

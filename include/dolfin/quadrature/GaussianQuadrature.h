@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 
-#ifndef __GAUSSIAN_QUADRATURE_H
-#define __GAUSSIAN_QUADRATURE_H
+#ifndef __DOLFIN_GAUSSIAN_QUADRATURE_H
+#define __DOLFIN_GAUSSIAN_QUADRATURE_H
 
 #include "Quadrature.h"
 

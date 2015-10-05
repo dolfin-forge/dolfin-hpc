@@ -4,8 +4,8 @@
 // First added:  2006-06-21
 // Last changed: 2006-06-22
 
-#ifndef __GTS_INTERFACE_H
-#define __GTS_INTERFACE_H
+#ifndef __DOLFIN_GTS_INTERFACE_H
+#define __DOLFIN_GTS_INTERFACE_H
 
 #include <dolfin/common/types.h>
 

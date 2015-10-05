@@ -4,8 +4,8 @@
 // First added:  2006-05-16
 // Last changed: 2006-11-17
 
-#ifndef __MESH_EDITOR_H
-#define __MESH_EDITOR_H
+#ifndef __DOLFIN_MESH_EDITOR_H
+#define __DOLFIN_MESH_EDITOR_H
 
 #include <dolfin/common/types.h>
 #include "CellType.h"

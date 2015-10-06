@@ -1,62 +1,64 @@
 #include <dolfin/config/dolfin_config.h>
 
-#include <iostream>
-#include <iomanip>
-
 #ifdef HAVE_CHECK
 
-#include <check.h>
-
 #include "SubDomain/SubDomain.h"
+#include "CellTypes/CellTypes.h"
 #include "UnitMeshes/UnitMeshes.h"
 #include "VertexNormal/VertexNormal.h"
 
+#include <check.h>
 
-int argc;
-char **argv;
-
+//-----------------------------------------------------------------------------
 void setup()
 {
-  //  dolfin_init(argc, argv);
 }
-
+//-----------------------------------------------------------------------------
 void teardown()
 {
-  //  dolfin_finalize();
 }
-
+//-----------------------------------------------------------------------------
 Suite *mesh_suite()
 {
   TCase *tc;
   Suite *s;
 
-  s = suite_create("Mesh");
+  s = suite_create("mesh");
 
   tc = tcase_create("SubDomain");
-  tcase_add_test(tc, test_geometric_create);
+  tcase_add_test(tc, test_SubDomain);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc,60);
+
+  tc = tcase_create("CellTypes");
+  tcase_add_test(tc, test_PointCell_create);
+  tcase_add_test(tc, test_IntervalCell_create);
+  tcase_add_test(tc, test_TriangleCell_create);
+  tcase_add_test(tc, test_TetrahedronCell_create);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
   tc = tcase_create("UnitMeshes");
-  tcase_add_test(tc, test_create_interval);
-  tcase_add_test(tc, test_create_square);
-  tcase_add_test(tc, test_create_cube);
-  tcase_add_test(tc, test_create_box);
-  tcase_add_test(tc, test_create_disk);
+  tcase_add_test(tc, test_UnitInterval);
+  tcase_add_test(tc, test_UnitSquare);
+  tcase_add_test(tc, test_UnitCube);
+  tcase_add_test(tc, test_Box);
+  tcase_add_test(tc, test_UnitDisk);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
   tc = tcase_create("VertexNormal");
-  tcase_add_test(tc, test_init_weight_none );
+  tcase_add_test(tc, test_VertexNormal );
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
   return s;
 }
-
+//-----------------------------------------------------------------------------
 int main(void)
 {
 
@@ -71,7 +73,7 @@ int main(void)
   return (number_failed == 0) ? 0 : 1;
 
 }
-
+//-----------------------------------------------------------------------------
 #else
 
 int main(void)

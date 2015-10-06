@@ -5,6 +5,8 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = SubDomain/SubDomain.h\
+EXTRA_DIST = CellTypes/CellTypes.h\
+             SubDomain/SubDomain.h\
              VertexNormal/VertexNormal.h\
              UnitMeshes/UnitMeshes.h
+

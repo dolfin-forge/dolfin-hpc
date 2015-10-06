@@ -1,10 +1,10 @@
+#include <dolfin/config/dolfin_config.h>
+
 #ifdef HAVE_CHECK
 
-#include <check.h>
-
-
-#include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/VertexNormal.h>
+
+#include <check.h>
 
 using namespace dolfin;
 
@@ -25,7 +25,7 @@ void test_vertex_normal(std::string filename, VertexNormal::Type type)
 //  }
 }
 //-----------------------------------------------------------------------------
-START_TEST( test_init_weight_none )
+START_TEST( test_VertexNormal )
 {
   int init_failed = 0;
   

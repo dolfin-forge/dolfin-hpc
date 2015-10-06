@@ -1,8 +1,6 @@
-#ifdef HAVE_CHECK
-
-#include <check.h>
-
 #include <dolfin/config/dolfin_config.h>
+
+#ifdef HAVE_CHECK
 
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/UnitInterval.h>
@@ -11,8 +9,11 @@
 #include <dolfin/mesh/Box.h>
 #include <dolfin/mesh/UnitDisk.h>
 
+#include <check.h>
+
 using namespace dolfin;
 
+//-----------------------------------------------------------------------------
 int test_mesh(Mesh& mesh)
 {
   message("Test mesh");
@@ -20,9 +21,8 @@ int test_mesh(Mesh& mesh)
   mesh.refine();
   return 0;
 }
-
 //-----------------------------------------------------------------------------
-START_TEST( test_create_interval )
+START_TEST( test_UnitInterval )
 {
   dolfin::uint const Nx = 2;
 
@@ -32,7 +32,7 @@ START_TEST( test_create_interval )
 
 }END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_create_square )
+START_TEST( test_UnitSquare )
 { 
   dolfin::uint const Nx = 2;
   dolfin::uint const Ny = 4;
@@ -49,7 +49,7 @@ START_TEST( test_create_square )
   }
 }END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_create_cube )
+START_TEST( test_UnitCube )
 {
   dolfin::uint const Nx = 2;
   dolfin::uint const Ny = 4;
@@ -61,7 +61,7 @@ START_TEST( test_create_cube )
 
 }END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_create_box)
+START_TEST( test_Box)
 {
   // Box
   dolfin::uint const Nx = 2;
@@ -80,7 +80,7 @@ START_TEST( test_create_box)
 
 }END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_create_disk )
+START_TEST( test_UnitDisk )
 {
   // Disk
   dolfin::uint const Nx = 2;

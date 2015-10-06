@@ -93,17 +93,15 @@ void IntervalCell::orderEntities(Cell& cell) const
 void IntervalCell::refineCell(Cell& cell, MeshEditor& editor,
                               uint& current_cell) const
 {
-  // Get vertices and edges
+  // Get vertices
   uint const* v = cell.entities(0);
-  uint const* e = cell.entities(1);
   dolfin_assert(v);
-  dolfin_assert(e);
 
   // Get offset for new vertex indices
   uint const offset = cell.mesh().numVertices();
 
   // Compute indices for the three new vertices
-  uint const e0 = offset + e[0];
+  uint const e0 = offset + cell.index();
   uint c0[2] = { v[0], e0 };
   uint c1[2] = { e0, v[1] };
 

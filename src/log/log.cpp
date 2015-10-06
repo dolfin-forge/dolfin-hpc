@@ -113,6 +113,16 @@ void dolfin::skip()
   LogManager::logger().skip();
 }
 //-----------------------------------------------------------------------------
+void dolfin::header(std::string msg, ...)
+{
+#ifndef __sgi
+  read(buffer, msg);
+#else
+  read_str(buffer, msg);
+#endif
+  LogManager::logger().message("**** "+static_cast<std::string>(buffer));
+}
+//-----------------------------------------------------------------------------
 void dolfin::summary()
 {
   LogManager::logger().summary();

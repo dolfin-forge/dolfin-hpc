@@ -11,7 +11,7 @@ int main(int argc, char** argv)
   Mesh mesh(t.args.mesh_file);
   bool throw_error = true;
 
-  t.begin_test("Interior boundary");
+  t.begin("Interior boundary");
   {
     BoundaryMesh& boundary = mesh.interior_boundary();
 
@@ -51,9 +51,9 @@ int main(int argc, char** argv)
       error("Facets on the interior boundary are not shared: %d", fInvalid);
     }
   }
-  t.end_test();
+  t.end();
 
-  t.begin_test("Exterior boundary");
+  t.begin("Exterior boundary");
   {
     BoundaryMesh& boundary = mesh.exterior_boundary();
     uint invalid = 0;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
       error("Facets on the exterior boundary are shared: %d", invalid);
     }
   }
-  t.end_test();
+  t.end();
 
   return ret;
 }

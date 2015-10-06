@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   Mesh mesh(t.args.mesh_file);
   bool throw_error = true;
 
-  t.begin_test("Global facet map");
+  t.begin("Global facet map");
   {
     uint tdim = mesh.topology().dim();
     GlobalFacetMap GFM(mesh);
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
       }
     }
   }
-  t.end_test();
+  t.end();
 
   return ret;
 }

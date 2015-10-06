@@ -80,6 +80,9 @@ namespace dolfin
   /// Skip line
   void skip();
 
+  /// Write header line
+  void header(std::string msg, ...);
+
   /// Print summary of timings and tasks, clearing stored timings
   void summary();
 

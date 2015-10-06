@@ -72,18 +72,18 @@ void Test::print_args()
 }
 
 //-----------------------------------------------------------------------------
-void Test::begin_test(std::string const& description)
+void Test::begin(std::string const& name)
 {
-  begin("TEST:");
-  message(description);
+  dolfin::begin("TEST:");
+  header(name);
   tic();
 }
 
 //-----------------------------------------------------------------------------
-void Test::end_test()
+void Test::end()
 {
-  message("Completed in %16f s.", toc());
-  end();
+  tocd();
+  dolfin::end();
   skip();
 }
 

@@ -45,10 +45,10 @@ public:
   void print_args();
 
   ///
-  void begin_test(std::string const& description);
+  static void begin(std::string const& name);
 
   ///
-  void end_test();
+  static void end();
 
   ///
   ~Test();

@@ -13,16 +13,16 @@ int main(int argc, char** argv)
   Mesh mesh(t.args.mesh_file);
   bool throw_error = true;
 
-  t.begin_test("Check distributed data");
+  t.begin("Check distributed data");
   {
     if (mesh.distdata().check(throw_error))
     {
       error("Invalid distributed data");
     }
   }
-  t.end_test();
+  t.end();
 
-  t.begin_test("Check common adjacents");
+  t.begin("Check common adjacents");
   {
     // Every shared entity is defined such that lower dimensional entities
     // have a common adjacent
@@ -83,9 +83,9 @@ int main(int argc, char** argv)
       }
     }
   }
-  t.end_test();
+  t.end();
 
-  t.begin_test("Check entities distribution");
+  t.begin("Check entities distribution");
   {
     uint const tdim = mesh.topology().dim();
     for (uint edim = 0; edim < tdim; ++edim)
@@ -238,7 +238,7 @@ int main(int argc, char** argv)
     }
   }
 
-  t.begin_test("Check mesh entities sharedness");
+  t.begin("Check mesh entities sharedness");
   {
     //
     uint const tdim = mesh.topology().dim();
@@ -319,9 +319,9 @@ int main(int argc, char** argv)
       }
     }
   }
-  t.end_test();
+  t.end();
 
-  t.begin_test("Check interior boundary entities");
+  t.begin("Check interior boundary entities");
   {
     uint const tdim = mesh.topology().dim();
     uint failed = 0;
@@ -337,9 +337,9 @@ int main(int argc, char** argv)
     message("Failed : %d", failed);
     ret += failed;
   }
-  t.end_test();
+  t.end();
 
-  t.begin_test("Check exterior boundary entities");
+  t.begin("Check exterior boundary entities");
   {
     uint const tdim = mesh.topology().dim();
     uint failed = 0;
@@ -355,7 +355,7 @@ int main(int argc, char** argv)
     message("Failed : %d", failed);
     ret += failed;
   }
-  t.end_test();
+  t.end();
 
   return ret;
 }

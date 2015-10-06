@@ -124,6 +124,18 @@ void MeshEditor::addCell(uint c, uint const * v)
 //-----------------------------------------------------------------------------
 void MeshEditor::close()
 {
+  // Check consistency of number of vertices
+  if( this->num_vertices_ != mesh_->topology().size(0))
+  {
+    error("Mismatch between number of vertices initialized and added to mesh : "
+          "%d != %d", this->num_vertices_, mesh_->topology().size(0));
+  }
+  // Check consistency of number of cells
+  if( this->num_cells_ != mesh_->topology().size(tdim_))
+  {
+    error("Mismatch between number of cells initialized and added to mesh : "
+          "%d != %d", this->num_cells_, mesh_->topology().size(tdim_));
+  }
   // Clear data
   clear();
 }

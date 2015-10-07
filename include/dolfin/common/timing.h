@@ -4,8 +4,8 @@
 // First added:  2005-12-21
 // Last changed: 2008-03-06
 
-#ifndef __TIMING_H
-#define __TIMING_H
+#ifndef __DOLFIN_TIMING_H
+#define __DOLFIN_TIMING_H
 
 #include <dolfin/common/types.h>
 

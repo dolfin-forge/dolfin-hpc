@@ -8,8 +8,8 @@
 // First added:  2007-05-30
 // Last changed: 2013-03-22
 
-#ifndef __MPI_MESH_COMMUNICATOR_H
-#define __MPI_MESH_COMMUNICATOR_H
+#ifndef __DOLFIN_MPI_MESH_COMMUNICATOR_H
+#define __DOLFIN_MPI_MESH_COMMUNICATOR_H
 
 #include "MeshFunction.h"
 

@@ -4,8 +4,8 @@
 // First added:  2014-08-18
 // Last changed: 2014-08-18
 
-#ifndef __TIME_SERIES_H
-#define __TIME_SERIES_H
+#ifndef __DOLFIN_TIME_SERIES_H
+#define __DOLFIN_TIME_SERIES_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>

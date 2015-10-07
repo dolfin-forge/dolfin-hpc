@@ -4,8 +4,8 @@
 // First added:  2007-02-12
 // Last changed: 2007-03-21
 
-#ifndef __XML_GRAPH_H
-#define __XML_GRAPH_H
+#ifndef __DOLFIN_XML_GRAPH_H
+#define __DOLFIN_XML_GRAPH_H
 
 #include <dolfin/graph/GraphEditor.h>
 #include <dolfin/graph/Graph.h>

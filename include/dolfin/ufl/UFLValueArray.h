@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_VALUE_ARRAY_H
-#define __UFL_VALUE_ARRAY_H
+#ifndef __DOLFIN_UFL_VALUE_ARRAY_H
+#define __DOLFIN_UFL_VALUE_ARRAY_H
 
 #include <string>
 #include <vector>
@@ -56,5 +56,5 @@ ValueArray operator+(ValueArray const&v1, ValueArray const& v2);
 
 } /* namespace ufl */
 
-#endif /* __UFL_VALUE_ARRAY_H */
+#endif /* __DOLFIN_UFL_VALUE_ARRAY_H */
 

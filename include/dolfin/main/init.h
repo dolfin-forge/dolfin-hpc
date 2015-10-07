@@ -4,8 +4,8 @@
 // First added:  2005-02-13
 // Last changed: 2005
 
-#ifndef __INIT_H
-#define __INIT_H
+#ifndef __DOLFIN_INIT_H
+#define __DOLFIN_INIT_H
 
 namespace dolfin
 {

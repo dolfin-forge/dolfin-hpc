@@ -4,8 +4,8 @@
 // First added:  2007-07-03
 // Last changed:
 
-#ifndef __VECTOR_NORM_TYPE_H
-#define __VECTOR_NORM_TYPE_H
+#ifndef __DOLFIN_VECTOR_NORM_TYPE_H
+#define __DOLFIN_VECTOR_NORM_TYPE_H
 
 namespace dolfin
 {

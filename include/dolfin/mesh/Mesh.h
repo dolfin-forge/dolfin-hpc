@@ -10,8 +10,8 @@
 // First added:  2006-05-08
 // Last changed: 2013-03-22
 
-#ifndef __MESH_H
-#define __MESH_H
+#ifndef __DOLFIN_MESH_H
+#define __DOLFIN_MESH_H
 
 #include <string>
 

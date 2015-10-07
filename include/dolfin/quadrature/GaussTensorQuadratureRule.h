@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 
-#ifndef __GAUSS_TENSOR_QUADRATURE_RULE_H
-#define __GAUSS_TENSOR_QUADRATURE_RULE_H
+#ifndef __DOLFIN_GAUSS_TENSOR_QUADRATURE_RULE_H
+#define __DOLFIN_GAUSS_TENSOR_QUADRATURE_RULE_H
 
 //#include "QuadratureRule.h"
 

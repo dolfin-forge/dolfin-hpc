@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 
-#ifndef __MATLAB_FILE_H
-#define __MATLAB_FILE_H
+#ifndef __DOLFIN_MATLAB_FILE_H
+#define __DOLFIN_MATLAB_FILE_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/la/GenericMatrix.h>

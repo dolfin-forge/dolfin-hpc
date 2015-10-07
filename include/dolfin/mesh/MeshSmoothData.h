@@ -4,8 +4,8 @@
 // First added:  2011-06-30
 // Last changed: 2011-06-30
 
-#ifndef __MESH_SMOOTHDATA_H
-#define __MESH_SMOOTHDATA_H
+#ifndef __DOLFIN_MESH_SMOOTHDATA_H
+#define __DOLFIN_MESH_SMOOTHDATA_H
 
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>

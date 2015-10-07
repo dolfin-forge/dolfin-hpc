@@ -4,8 +4,8 @@
 // First added:  2008-05-02
 // Last changed: 2008-05-28
 
-#ifndef __ALE_H
-#define __ALE_H
+#ifndef __DOLFIN_ALE_H
+#define __DOLFIN_ALE_H
 
 #include <dolfin/common/types.h>
 #include "MeshFunction.h"

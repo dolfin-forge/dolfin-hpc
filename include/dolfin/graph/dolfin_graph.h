@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_GRAPH_H
-#define __DOLFIN_GRAPH_H
+#ifndef __DOLFIN_HEADER_GRAPH_H
+#define __DOLFIN_HEADER_GRAPH_H
 
 // DOLFIN graph
 
@@ -9,4 +9,4 @@
 #include <dolfin/graph/UndirectedClique.h>
 #include <dolfin/graph/DirectedClique.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_GRAPH_H */

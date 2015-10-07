@@ -5,8 +5,8 @@
 // First added:  2015-03-12
 // Last changed: 2015-03-12
 
-#ifndef __CONSTANT_H
-#define __CONSTANT_H
+#ifndef __DOLFIN_CONSTANT_H
+#define __DOLFIN_CONSTANT_H
 
 #include "Function.h"
 
@@ -85,4 +85,4 @@ inline Constant& Constant::operator= (real const& val)
 
 }
 
-#endif /* __CONSTANT_H */
+#endif /* __DOLFIN_CONSTANT_H */

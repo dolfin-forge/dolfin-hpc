@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __MAPPING_H
-#define __MAPPING_H
+#ifndef __DOLFIN_MAPPING_H
+#define __DOLFIN_MAPPING_H
 
 #include <dolfin/common/types.h>
 

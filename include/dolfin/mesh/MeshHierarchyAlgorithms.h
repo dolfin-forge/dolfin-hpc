@@ -3,8 +3,8 @@
 //
 // First added:  2007-01-09
 
-#ifndef __MESH_HIERARCHY_ALGORITHMS_H
-#define __MESH_HIERARCHY_ALGORITHMS_H
+#ifndef __DOLFIN_MESH_HIERARCHY_ALGORITHMS_H
+#define __DOLFIN_MESH_HIERARCHY_ALGORITHMS_H
 
 #include <dolfin/common/types.h>
 

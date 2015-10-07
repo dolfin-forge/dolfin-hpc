@@ -6,8 +6,8 @@
 // First added:  2008-01-07
 // Last changed: 2015-01-30
 
-#ifndef __SUB_SYSTEMS_MANAGER_H
-#define __SUB_SYSTEMS_MANAGER_H
+#ifndef __DOLFIN_SUB_SYSTEMS_MANAGER_H
+#define __DOLFIN_SUB_SYSTEMS_MANAGER_H
 
 namespace dolfin
 {

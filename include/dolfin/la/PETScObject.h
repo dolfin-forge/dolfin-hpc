@@ -4,8 +4,8 @@
 // First added:  2008-01-07
 // Last changed:
 
-#ifndef __PETSC_OBJECT_H
-#define __PETSC_OBJECT_H
+#ifndef __DOLFIN_PETSC_OBJECT_H
+#define __DOLFIN_PETSC_OBJECT_H
 
 #include <dolfin/main/SubSystemsManager.h>
 

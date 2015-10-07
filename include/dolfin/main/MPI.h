@@ -7,8 +7,8 @@
 // First added:  2007-11-30
 // Last changed: 2010-06-08
 
-#ifndef __MPI_helper_H
-#define __MPI_helper_H
+#ifndef __DOLFIN_MPI_H
+#define __DOLFIN_MPI_H
 
 #include <dolfin/config/dolfin_config.h>
 

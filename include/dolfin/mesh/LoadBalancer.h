@@ -6,8 +6,8 @@
 // First added:  2008-03-03
 // Last changed: 2013-05-31
 
-#ifndef __LOAD_BALANCER_H
-#define __LOAD_BALANCER_H
+#ifndef __DOLFIN_LOAD_BALANCER_H
+#define __DOLFIN_LOAD_BALANCER_H
 
 #include "MeshFunction.h"
 

@@ -2,8 +2,8 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-#ifndef __JANPACK_VEC_H
-#define __JANPACK_VEC_H
+#ifndef __DOLFIN_JANPACK_VEC_H
+#define __DOLFIN_JANPACK_VEC_H
 
 #include <dolfin/config/dolfin_config.h>
 

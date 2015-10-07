@@ -4,8 +4,8 @@
 // First added:  2005-12-02
 // Last changed: 2006-08-07
 
-#ifndef __RECTANGLE_H
-#define __RECTANGLE_H
+#ifndef __DOLFIN_RECTANGLE_H
+#define __DOLFIN_RECTANGLE_H
 
 #include "Mesh.h"
 

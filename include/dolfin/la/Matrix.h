@@ -8,8 +8,8 @@
 // First added:  2006-05-15
 // Last changed: 2008-05-17
 
-#ifndef __MATRIX_H
-#define __MATRIX_H
+#ifndef __DOLFIN_MATRIX_H
+#define __DOLFIN_MATRIX_H
 
 #include <dolfin/common/Variable.h>
 #include <dolfin/main/MPI.h>

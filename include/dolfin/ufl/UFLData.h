@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_DATA_H_
-#define __UFL_DATA_H_
+#ifndef __DOLFIN_UFL_DATA_H
+#define __DOLFIN_UFL_DATA_H
 
 #include <dolfin/ufl/UFLExpression.h>
 
@@ -90,4 +90,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_DATA_H_ */
+#endif /* __DOLFIN_UFL_DATA_H */

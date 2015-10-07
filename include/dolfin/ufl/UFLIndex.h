@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_INDEX_H_
-#define __UFL_INDEX_H_
+#ifndef __DOLFIN_UFL_INDEX_H
+#define __DOLFIN_UFL_INDEX_H
 
 #include <dolfin/ufl/UFLdict.h>
 #include <dolfin/ufl/UFLExpression.h>
@@ -301,4 +301,4 @@ private:
 
 };
 } /* namespace ufl */
-#endif /* __UFL_INDEX_H_ */
+#endif /* __DOLFIN_UFL_INDEX_H */

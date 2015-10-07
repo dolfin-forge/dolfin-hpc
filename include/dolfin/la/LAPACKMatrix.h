@@ -4,8 +4,8 @@
 // First added:  2009-12-14
 // Last changed: 2009-12-15
 
-#ifndef __LAPACK_MATRIX_H
-#define __LAPACK_MATRIX_H
+#ifndef __DOLFIN_LAPACK_MATRIX_H
+#define __DOLFIN_LAPACK_MATRIX_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>

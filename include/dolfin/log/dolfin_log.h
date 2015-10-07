@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_LOG_H
-#define __DOLFIN_LOG_H
+#ifndef __DOLFIN_HEADER_LOG_H
+#define __DOLFIN_HEADER_LOG_H
 
 /// DOLFIN log interface
 
@@ -8,4 +8,4 @@
 #include <dolfin/log/LogStream.h>
 #include <dolfin/log/Progress.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_LOG_H */

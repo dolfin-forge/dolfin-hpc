@@ -4,8 +4,8 @@
 // First added:  2014-02-03
 // Last changed: 2014-02-03
 
-#ifndef __FINITE_ELEMENT_SPACE_H_
-#define __FINITE_ELEMENT_SPACE_H_
+#ifndef __DOLFIN_FINITE_ELEMENT_SPACE_H
+#define __DOLFIN_FINITE_ELEMENT_SPACE_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/FiniteElement.h>
@@ -170,4 +170,4 @@ inline uint FiniteElementSpace::degree() const
 
 }
 /* namespace icorne */
-#endif /* __FINITE_ELEMENT_SPACE_H_ */
+#endif /* __DOLFIN_FINITE_ELEMENT_SPACE_H */

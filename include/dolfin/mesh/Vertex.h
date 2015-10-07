@@ -4,8 +4,8 @@
 // First added:  2006-06-01
 // Last changed: 2007-05-02
 
-#ifndef __VERTEX_H
-#define __VERTEX_H
+#ifndef __DOLFIN_VERTEX_H
+#define __DOLFIN_VERTEX_H
 
 #include "Point.h"
 #include "MeshEntity.h"

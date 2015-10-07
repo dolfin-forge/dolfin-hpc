@@ -6,8 +6,8 @@
 // First added:  2003-03-13
 // Last changed: 2005-12-09
 
-#ifndef __LOG_STREAM_H
-#define __LOG_STREAM_H
+#ifndef __DOLFIN_LOG_STREAM_H
+#define __DOLFIN_LOG_STREAM_H
 
 #include <string>
 #include <dolfin/common/types.h>

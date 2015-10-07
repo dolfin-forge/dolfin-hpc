@@ -4,8 +4,8 @@
 // First added:  2013-05-25 (merged from branch larcher)
 // Last changed: 2013-05-25
 
-#ifndef __EXPRESSION_FUNCTION_H
-#define __EXPRESSION_FUNCTION_H
+#ifndef __DOLFIN_EXPRESSION_FUNCTION_H
+#define __DOLFIN_EXPRESSION_FUNCTION_H
 
 #include "GenericFunction.h"
 #include "Function.h"

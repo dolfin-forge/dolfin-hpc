@@ -4,8 +4,8 @@
 // First added:  2014-11-08
 // Last changed: 2014-12-08
 
-#ifndef __CHEBYSHEV_FIRST_H
-#define __CHEBYSHEV_FIRST_H
+#ifndef __DOLFIN_CHEBYSHEV_FIRST_H
+#define __DOLFIN_CHEBYSHEV_FIRST_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

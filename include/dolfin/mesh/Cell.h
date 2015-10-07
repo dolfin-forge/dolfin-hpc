@@ -6,8 +6,8 @@
 // First added:  2006-06-01
 // Last changed: 2008-06-20
 
-#ifndef __CELL_H
-#define __CELL_H
+#ifndef __DOLFIN_CELL_H
+#define __DOLFIN_CELL_H
 
 #include "Point.h"
 #include "CellType.h"

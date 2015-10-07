@@ -4,8 +4,8 @@
 // First added:  2005-11-28
 // Last changed: 2008-03-17
 
-#ifndef __GENERIC_FUNCTION_H
-#define __GENERIC_FUNCTION_H
+#ifndef __DOLFIN_GENERIC_FUNCTION_H
+#define __DOLFIN_GENERIC_FUNCTION_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>

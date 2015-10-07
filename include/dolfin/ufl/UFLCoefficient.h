@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_COEFFICIENT_H
-#define __UFL_COEFFICIENT_H
+#ifndef __DOLFIN_UFL_COEFFICIENT_H
+#define __DOLFIN_UFL_COEFFICIENT_H
 
 #include <dolfin/ufl/UFLExpression.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
@@ -315,4 +315,4 @@ protected:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_COEFFICIENT_H */
+#endif /* __DOLFIN_UFL_COEFFICIENT_H */

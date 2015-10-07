@@ -6,8 +6,8 @@
 // First added:  2007-11-30
 // Last changed: 2008-01-24
 
-#ifndef __GENERIC_SPARSITY_PATTERN_H
-#define __GENERIC_SPARSITY_PATTERN_H
+#ifndef __DOLFIN_GENERIC_SPARSITY_PATTERN_H
+#define __DOLFIN_GENERIC_SPARSITY_PATTERN_H
 
 #include <dolfin/common/types.h>
 

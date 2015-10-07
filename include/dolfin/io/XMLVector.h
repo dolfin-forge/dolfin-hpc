@@ -4,8 +4,8 @@
 // First added:  2003-07-15
 // Last changed: 2007-05-15
 
-#ifndef __XML_VECTOR_H
-#define __XML_VECTOR_H
+#ifndef __DOLFIN_XML_VECTOR_H
+#define __DOLFIN_XML_VECTOR_H
 
 #include <dolfin/la/Vector.h>
 #include "XMLObject.h"

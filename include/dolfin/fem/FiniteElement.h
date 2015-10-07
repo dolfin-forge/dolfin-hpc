@@ -4,8 +4,8 @@
 // First added:  2013-09-12 (merged from branch larcher)
 // Last changed: 2014-09-13
 
-#ifndef __FINITE_ELEMENT_H
-#define __FINITE_ELEMENT_H
+#ifndef __DOLFIN_FINITE_ELEMENT_H
+#define __DOLFIN_FINITE_ELEMENT_H
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/fem/Form.h>

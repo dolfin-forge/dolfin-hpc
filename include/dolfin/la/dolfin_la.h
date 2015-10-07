@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_LA_H
-#define __DOLFIN_LA_H
+#ifndef __DOLFIN_HEADER_LA_H
+#define __DOLFIN_HEADER_LA_H
 
 // DOLFIN la interface
 
@@ -32,4 +32,4 @@
 #include <dolfin/la/SingularSolver.h>
 #include <dolfin/la/solve.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_LA_H */

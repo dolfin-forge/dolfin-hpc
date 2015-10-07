@@ -7,8 +7,8 @@
 // First added:  2006-06-12
 // Last changed: 2014-12-01
 
-#ifndef __POINT_H
-#define __POINT_H
+#ifndef __DOLFIN_POINT_H
+#define __DOLFIN_POINT_H
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>

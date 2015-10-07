@@ -4,8 +4,8 @@
 // First added:  2006-06-02
 // Last changed: 2006-06-21
 
-#ifndef __TOPOLOGY_COMPUTATION_H
-#define __TOPOLOGY_COMPUTATION_H
+#ifndef __DOLFIN_TOPOLOGY_COMPUTATION_H
+#define __DOLFIN_TOPOLOGY_COMPUTATION_H
 
 #include <dolfin/common/types.h>
 

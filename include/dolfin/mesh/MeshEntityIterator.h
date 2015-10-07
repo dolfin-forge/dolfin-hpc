@@ -4,8 +4,8 @@
 // First added:  2006-05-09
 // Last changed: 2007-05-02
 
-#ifndef __MESH_ENTITY_ITERATOR_H
-#define __MESH_ENTITY_ITERATOR_H
+#ifndef __DOLFIN_MESH_ENTITY_ITERATOR_H
+#define __DOLFIN_MESH_ENTITY_ITERATOR_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>

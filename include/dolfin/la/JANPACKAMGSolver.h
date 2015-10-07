@@ -2,8 +2,8 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-#ifndef __JANPACK_AMG_SOLVER_H
-#define __JANPACK_AMG_SOLVER_H
+#ifndef __DOLFIN_JANPACK_AMG_SOLVER_H
+#define __DOLFIN_JANPACK_AMG_SOLVER_H
 
 #include <dolfin/config/dolfin_config.h>
 

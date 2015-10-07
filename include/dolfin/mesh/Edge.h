@@ -6,8 +6,8 @@
 // First added:  2006-06-02
 // Last changed: 2007-05-02
 
-#ifndef __EDGE_H
-#define __EDGE_H
+#ifndef __DOLFIN_EDGE_H
+#define __DOLFIN_EDGE_H
 
 #include <dolfin/common/types.h>
 

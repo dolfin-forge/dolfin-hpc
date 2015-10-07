@@ -4,8 +4,8 @@
 // First added:  2008-05-19
 // Last changed: 2008-05-28
 
-#ifndef __MESH_DATA_H
-#define __MESH_DATA_H
+#ifndef __DOLFIN_MESH_DATA_H
+#define __DOLFIN_MESH_DATA_H
 
 #include <dolfin/common/types.h>
 

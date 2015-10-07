@@ -7,8 +7,8 @@
 // First added:  2007-04-02
 // Last changed: 2014-02-06
 
-#ifndef __DISCRETE_FUNCTION_H
-#define __DISCRETE_FUNCTION_H
+#ifndef __DOLFIN_DISCRETE_FUNCTION_H
+#define __DOLFIN_DISCRETE_FUNCTION_H
 
 #include "GenericFunction.h"
 

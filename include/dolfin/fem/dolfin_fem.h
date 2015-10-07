@@ -1,5 +1,5 @@
-#ifndef __DOLFIN_FEM_H
-#define __DOLFIN_FEM_H
+#ifndef __DOLFIN_HEADER_FEM_H
+#define __DOLFIN_HEADER_FEM_H
 
 // DOLFIN fem interface
 
@@ -22,4 +22,4 @@
 #include <dolfin/fem/SlipFrictionBC.h>
 #include <dolfin/fem/SubSystem.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_FEM_H */

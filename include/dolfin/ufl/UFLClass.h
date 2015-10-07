@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_CLASS_H_
-#define __UFL_CLASS_H_
+#ifndef __DOLFIN_UFL_CLASS_H
+#define __DOLFIN_UFL_CLASS_H
 
 #include <string>
 #include <vector>
@@ -120,4 +120,4 @@ inline bool Class::operator ==(Class const& other) const
 }
 
 } /* namespace ufl */
-#endif /* __UFL_CLASS_H */
+#endif /* __DOLFIN_UFL_CLASS_H */

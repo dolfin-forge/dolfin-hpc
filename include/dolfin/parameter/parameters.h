@@ -6,8 +6,8 @@
 // First added:  2005-12-19
 // Last changed: 2008-02-11
 
-#ifndef __PARAMETERS_H
-#define __PARAMETERS_H
+#ifndef __DOLFIN_PARAMETERS_H
+#define __DOLFIN_PARAMETERS_H
 
 #include "Parameter.h"
 #include <ostream>

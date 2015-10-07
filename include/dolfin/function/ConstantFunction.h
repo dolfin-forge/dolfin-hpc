@@ -7,8 +7,8 @@
 // Last changed: 2008-07-07
 
 
-#ifndef __CONSTANT_FUNCTION_H
-#define __CONSTANT_FUNCTION_H
+#ifndef __DOLFIN_CONSTANT_FUNCTION_H
+#define __DOLFIN_CONSTANT_FUNCTION_H
 
 #include "GenericFunction.h"
 

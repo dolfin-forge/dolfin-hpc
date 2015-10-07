@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef  __UFL_ELEMENT_LIST_H_
-#define  __UFL_ELEMENT_LIST_H_
+#ifndef  __UFL_ELEMENT_LIST_H
+#define  __UFL_ELEMENT_LIST_H
 
 #include <dolfin/ufl/UFLObject.h>
 
@@ -75,4 +75,4 @@ private:
 
 }
 
-#endif /* __UFL_ELEMENT_LIST_H_ */
+#endif /* __DOLFIN_UFL_ELEMENT_LIST_H */

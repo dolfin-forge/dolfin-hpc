@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __AFFINE_MAPPING_H
-#define __AFFINE_MAPPING_H
+#ifndef __DOLFIN_AFFINE_MAPPING_H
+#define __DOLFIN_AFFINE_MAPPING_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>

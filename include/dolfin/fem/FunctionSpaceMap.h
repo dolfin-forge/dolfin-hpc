@@ -4,8 +4,8 @@
 // First added:  2015-03-25
 // Last changed: 2015-03-25
 
-#ifndef __FUNCTION_SPACE_MAP_H_
-#define __FUNCTION_SPACE_MAP_H_
+#ifndef __DOLFIN_FUNCTION_SPACE_MAP_H
+#define __DOLFIN_FUNCTION_SPACE_MAP_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/ufl/UFLrepr.h>
@@ -67,4 +67,4 @@ private:
 
 }
 
-#endif /* __FUNCTION_SPACE_MAP_H_ */
+#endif /* __DOLFIN_FUNCTION_SPACE_MAP_H */

@@ -6,8 +6,8 @@
 // First added:  2005-12-02
 // Last changed: 2006-08-19
 
-#ifndef __UNIT_DISK_H
-#define __UNIT_DISK_H
+#ifndef __DOLFIN_UNIT_DISK_H
+#define __DOLFIN_UNIT_DISK_H
 
 #include "Mesh.h"
 

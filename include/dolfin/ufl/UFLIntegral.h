@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_INTEGRAL_H_
-#define __UFL_INTEGRAL_H_
+#ifndef __DOLFIN_UFL_INTEGRAL_H
+#define __DOLFIN_UFL_INTEGRAL_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLExpression.h>
@@ -286,4 +286,4 @@ private:
   std::string const str_;
 };
 } /* namespace ufl */
-#endif /* __UFL_INTEGRAL_H_ */
+#endif /* __DOLFIN_UFL_INTEGRAL_H */

@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFC_CELL_INTEGRAL_H
-#define __UFC_CELL_INTEGRAL_H
+#ifndef __DOLFIN_UFC_CELL_INTEGRAL_H
+#define __DOLFIN_UFC_CELL_INTEGRAL_H
 
 #include <iomanip>
 #include <dolfin/common/types.h>

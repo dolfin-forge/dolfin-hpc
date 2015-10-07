@@ -4,8 +4,8 @@
 // Modified by Niclas Jansson, 2009-2010.
 //
 
-#ifndef __RIVARA_REFINEMENT_H
-#define __RIVARA_REFINEMENT_H
+#ifndef __DOLFIN_RIVARA_REFINEMENT_H
+#define __DOLFIN_RIVARA_REFINEMENT_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshFunction.h>

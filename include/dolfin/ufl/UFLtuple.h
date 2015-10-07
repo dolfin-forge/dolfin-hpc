@@ -4,8 +4,8 @@
 // First added:  2014-01-27
 // Last changed: 2014-01-27
 
-#ifndef __UFL_TUPLE_H_
-#define __UFL_TUPLE_H_
+#ifndef __DOLFIN_UFL_TUPLE_H
+#define __DOLFIN_UFL_TUPLE_H
 
 #include <dolfin/ufl/UFLClass.h>
 
@@ -84,4 +84,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_TUPLE_H_ */
+#endif /* __DOLFIN_UFL_TUPLE_H */

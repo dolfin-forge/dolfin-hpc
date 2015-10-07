@@ -1,8 +1,8 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 
-#ifndef __OFF_FILE_H
-#define __OFF_FILE_H
+#ifndef __DOLFIN_OFF_FILE_H
+#define __DOLFIN_OFF_FILE_H
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>

@@ -4,8 +4,8 @@
 // First added:  2013-07-15 (merged from branch larcher)
 // Last changed: 2013-07-15
 
-#ifndef SLIPFRICTIONBC_H_
-#define SLIPFRICTIONBC_H_
+#ifndef __DOLFIN_SLIP_FRICTION_BC_H
+#define __DOLFIN_SLIP_FRICTION_BC_H
 
 #include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/fem/SlipBC.h>
@@ -96,5 +96,5 @@ inline Function& SlipFrictionBC::friction()
 
 } /* namespace dolfin */
 
-#endif /* SLIPFRICTIONBC_H_ */
+#endif /* __DOLFIN_SLIP_FRICTION_BC_H */
 

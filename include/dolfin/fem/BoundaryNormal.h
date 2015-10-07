@@ -4,8 +4,8 @@
 // First added:  2014-02-13
 // Last changed: 2014-02-13
 
-#ifndef __BOUNDARYNORMAL_H
-#define __BOUNDARYNORMAL_H
+#ifndef __DOLFIN_BOUNDARYNORMAL_H
+#define __DOLFIN_BOUNDARYNORMAL_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>

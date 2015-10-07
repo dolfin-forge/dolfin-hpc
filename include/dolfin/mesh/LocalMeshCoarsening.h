@@ -6,8 +6,8 @@
 // First added:  2006-11-01
 // Last changed: 2013-04-03
 
-#ifndef __LOCAL_MESH_COARSENING_H
-#define __LOCAL_MESH_COARSENING_H
+#ifndef __DOLFIN_LOCAL_MESH_COARSENING_H
+#define __DOLFIN_LOCAL_MESH_COARSENING_H
 
 #include <utility>
 #include <list>

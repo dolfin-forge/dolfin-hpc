@@ -4,8 +4,8 @@
 // First added:  2007-02-12
 // Last changed: 2007-03-21
 
-#ifndef __GRAPH_H
-#define __GRAPH_H
+#ifndef __DOLFIN_GRAPH_H
+#define __DOLFIN_GRAPH_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Variable.h>

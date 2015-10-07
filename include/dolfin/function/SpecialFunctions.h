@@ -8,8 +8,8 @@
 // First added:  2006-02-09
 // Last changed: 2008-07-17
 
-#ifndef __SPECIAL_FUNCTIONS_H
-#define __SPECIAL_FUNCTIONS_H
+#ifndef __DOLFIN_SPECIAL_FUNCTIONS_H
+#define __DOLFIN_SPECIAL_FUNCTIONS_H
 
 #include "Function.h"
 

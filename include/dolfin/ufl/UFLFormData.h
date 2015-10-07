@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_FORM_DATA_H_
-#define __UFL_FORM_DATA_H_
+#ifndef __DOLFIN_UFL_FORM_DATA_H
+#define __DOLFIN_UFL_FORM_DATA_H
 
 #include <dolfin/ufl/UFLArgument.h>
 #include <dolfin/ufl/UFLCoefficient.h>
@@ -128,4 +128,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_FORM_DATA_H_ */
+#endif /* __DOLFIN_UFL_FORM_DATA_H */

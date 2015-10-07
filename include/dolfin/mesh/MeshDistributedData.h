@@ -6,8 +6,8 @@
 // First added:  2008-07-03
 // Last changed: 2014-03-18
 
-#ifndef __MESH_DISTRIBUTED_DATA_H
-#define __MESH_DISTRIBUTED_DATA_H
+#ifndef __DOLFIN_MESH_DISTRIBUTED_DATA_H
+#define __DOLFIN_MESH_DISTRIBUTED_DATA_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>

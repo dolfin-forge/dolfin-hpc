@@ -9,8 +9,8 @@
 // First added:  2006-04-25
 // Last changed: 2008-04-29
 
-#ifndef __GENERIC_VECTOR_H
-#define __GENERIC_VECTOR_H
+#ifndef __DOLFIN_GENERIC_VECTOR_H
+#define __DOLFIN_GENERIC_VECTOR_H
 
 #include "VectorNormType.h"
 #include "GenericSparsityPattern.h"

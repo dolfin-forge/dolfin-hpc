@@ -4,8 +4,8 @@
 // First added:  2007-01-30
 // Last changed: 2007-01-30
 
-#ifndef __MESH_ORDERING_H
-#define __MESH_ORDERING_H
+#ifndef __DOLFIN_MESH_ORDERING_H
+#define __DOLFIN_MESH_ORDERING_H
 
 #include <dolfin/common/types.h>
 

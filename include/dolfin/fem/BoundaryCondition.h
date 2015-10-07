@@ -7,8 +7,8 @@
 // First added:  2008-06-18
 // Last changed: 2014-04-02
 
-#ifndef __BOUNDARY_CONDITION_H
-#define __BOUNDARY_CONDITION_H
+#ifndef __DOLFIN_BOUNDARY_CONDITION_H
+#define __DOLFIN_BOUNDARY_CONDITION_H
 
 #include "UFCMesh.h"
 #include "DofMap.h"

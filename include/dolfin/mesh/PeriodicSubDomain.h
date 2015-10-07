@@ -4,8 +4,8 @@
 // First added:  2007-04-10
 // Last changed: 2014-02-07
 
-#ifndef __PERIODIC_SUB_DOMAIN_H
-#define __PERIODIC_SUB_DOMAIN_H
+#ifndef __DOLFIN_PERIODIC_SUB_DOMAIN_H
+#define __DOLFIN_PERIODIC_SUB_DOMAIN_H
 
 #include <dolfin/common/types.h>
 

@@ -4,8 +4,8 @@
 // First added:  2008-05-23
 // Last changed: 2008-05-23
 
-#ifndef __DOMAIN_BOUNDARY_H
-#define __DOMAIN_BOUNDARY_H
+#ifndef __DOLFIN_DOMAIN_BOUNDARY_H
+#define __DOLFIN_DOMAIN_BOUNDARY_H
 
 #include "SubDomain.h"
 

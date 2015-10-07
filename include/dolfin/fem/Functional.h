@@ -4,8 +4,8 @@
 // First added:  2014-02-27
 // Last changed: 2014-02-27
 
-#ifndef __FUNCTIONAL_H
-#define __FUNCTIONAL_H
+#ifndef __DOLFIN_FUNCTIONAL_H
+#define __DOLFIN_FUNCTIONAL_H
 
 #include <dolfin/fem/Form.h>
 

@@ -6,8 +6,8 @@
 // First added:  2005-05-17
 // Last changed: 2006-12-06
 
-#ifndef __EQUI_AFFINE_MAPPING_H
-#define __EQUI_AFFINE_MAPPING_H
+#ifndef __DOLFIN_EQUI_AFFINE_MAPPING_H
+#define __DOLFIN_EQUI_AFFINE_MAPPING_H
 
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>

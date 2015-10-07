@@ -4,8 +4,8 @@
 // First added:  2013-05-24 (merged from branch larcher)
 // Last changed: 2013-05-24
 
-#ifndef __EXPRESSION_H
-#define __EXPRESSION_H
+#ifndef __DOLFIN_EXPRESSION_H
+#define __DOLFIN_EXPRESSION_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/SubDomain.h>

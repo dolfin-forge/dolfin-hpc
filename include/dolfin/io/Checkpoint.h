@@ -4,8 +4,8 @@
 // First added:  2009-09-08
 // Last changed: 2011-04-19
 
-#ifndef __CHECKPOINT_H
-#define __CHECKPOINT_H
+#ifndef __DOLFIN_CHECKPOINT_H
+#define __DOLFIN_CHECKPOINT_H
 
 #include <fstream>
 #include <string>

@@ -4,8 +4,8 @@
 // First added:  2005-11-26
 // Last changed: 2008-03-17
 
-#ifndef __USER_FUNCTION_H
-#define __USER_FUNCTION_H
+#ifndef __DOLFIN_USER_FUNCTION_H
+#define __DOLFIN_USER_FUNCTION_H
 
 #include "GenericFunction.h"
 

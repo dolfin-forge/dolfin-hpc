@@ -6,8 +6,8 @@
 // First  added: 2009
 // Last changed: 2015-07-25
 
-#ifndef __BINARY_FILE_H
-#define __BINARY_FILE_H
+#ifndef __DOLFIN_BINARY_FILE_H
+#define __DOLFIN_BINARY_FILE_H
 
 #include <stdint.h>
 #include <dolfin/common/types.h>

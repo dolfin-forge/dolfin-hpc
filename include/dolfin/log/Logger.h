@@ -9,8 +9,8 @@
 // First added:  2003-03-13
 // Last changed: 2014-05-29
 
-#ifndef __LOGGER_H
-#define __LOGGER_H
+#ifndef __DOLFIN_LOGGER_H
+#define __DOLFIN_LOGGER_H
 
 #include <dolfin/common/types.h>
 

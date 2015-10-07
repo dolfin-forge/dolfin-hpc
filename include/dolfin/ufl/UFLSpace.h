@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_SPACE_H_
-#define __UFL_SPACE_H_
+#ifndef __DOLFIN_UFL_SPACE_H
+#define __DOLFIN_UFL_SPACE_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLtype.h>
@@ -59,4 +59,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_SPACE_H */
+#endif /* __DOLFIN_UFL_SPACE_H */

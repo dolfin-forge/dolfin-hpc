@@ -4,8 +4,8 @@
 // First added:  2014-03-04
 // Last changed: 2014-03-04
 
-#ifndef MESHDEPENDENT_H_
-#define MESHDEPENDENT_H_
+#ifndef __DOLFIN_MESH_DEPENDENT_H
+#define __DOLFIN_MESH_DEPENDENT_H
 
 #include <string>
 
@@ -51,4 +51,4 @@ private:
 
 }
 
-#endif /* MESHDEPENDENT_H_ */
+#endif /* __DOLFIN_MESH_DEPENDENT_H */

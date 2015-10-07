@@ -4,8 +4,8 @@
 // First added:  2005-10-24
 // Last changed: 2006-09-02
 
-#ifndef __NONLINEAR_PROBLEM_H
-#define __NONLINEAR_PROBLEM_H
+#ifndef __DOLFIN_NONLINEAR_PROBLEM_H
+#define __DOLFIN_NONLINEAR_PROBLEM_H
 
 namespace dolfin
 {

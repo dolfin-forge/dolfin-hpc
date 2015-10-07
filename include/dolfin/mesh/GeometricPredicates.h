@@ -3,8 +3,8 @@
 //
 // Modified by Johan Jansson, 2006.
 
-#ifndef __GEOMETRIC_PREDICATES_H
-#define __GEOMETRIC_PREDICATES_H
+#ifndef __DOLFIN_GEOMETRIC_PREDICATES_H
+#define __DOLFIN_GEOMETRIC_PREDICATES_H
 
 #include <dolfin/common/types.h>
 

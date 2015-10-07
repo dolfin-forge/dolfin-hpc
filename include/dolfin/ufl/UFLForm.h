@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_FORM_H_
-#define __UFL_FORM_H_
+#ifndef __DOLFIN_UFL_FORM_H
+#define __DOLFIN_UFL_FORM_H
 
 #include <dolfin/ufl/UFLFormData.h>
 #include <dolfin/ufl/UFLList.h>
@@ -95,4 +95,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_FORM_H_ */
+#endif /* __DOLFIN_UFL_FORM_H */

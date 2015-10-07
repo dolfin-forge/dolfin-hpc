@@ -10,8 +10,8 @@
 // First added:  2006-04-24
 // Last changed: 2008-05-15
 
-#ifndef __GENERIC_MATRIX_H
-#define __GENERIC_MATRIX_H
+#ifndef __DOLFIN_GENERIC_MATRIX_H
+#define __DOLFIN_GENERIC_MATRIX_H
 
 #include "GenericTensor.h"
 

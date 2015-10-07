@@ -2,8 +2,8 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-#ifndef __JANPACK_FACTORY_H
-#define __JANPACK_FACTORY_H
+#ifndef __DOLFIN_JANPACK_FACTORY_H
+#define __DOLFIN_JANPACK_FACTORY_H
 
 #include "JANPACKMat.h"
 #include "JANPACKVec.h"

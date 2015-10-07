@@ -4,8 +4,8 @@
 // First added:  2007-01-17
 // Last changed: 2008-06-10
 
-#ifndef __UFC_DATA_H
-#define __UFC_DATA_H
+#ifndef __DOLFIN_UFC_DATA_H
+#define __DOLFIN_UFC_DATA_H
 
 #include "UFCMesh.h"
 #include "UFCCell.h"

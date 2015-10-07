@@ -7,8 +7,8 @@
 // Rename of the former Triangle.h
 //
 
-#ifndef __TRIANGLE_CELL_H
-#define __TRIANGLE_CELL_H
+#ifndef __DOLFIN_TRIANGLE_CELL_H
+#define __DOLFIN_TRIANGLE_CELL_H
 
 #include "CellType.h"
 

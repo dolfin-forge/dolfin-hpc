@@ -4,8 +4,8 @@
 // First added:  2015-04-24
 // Last changed: 2015-04-24
 
-#ifndef __PERIODIC_DOFS_MAPPING
-#define __PERIODIC_DOFS_MAPPING
+#ifndef __DOLFIN_PERIODIC_DOFS_MAPPING
+#define __DOLFIN_PERIODIC_DOFS_MAPPING
 
 #include <dolfin/common/types.h>
 
@@ -92,4 +92,4 @@ private:
 
 }
 
-#endif /* __PERIODIC_DOFS_MAPPING */
+#endif /* __DOLFIN_PERIODIC_DOFS_MAPPING */

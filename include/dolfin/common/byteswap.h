@@ -4,8 +4,8 @@
 // First added:  2015-07-25
 // Last changed: 2015-07-25
 
-#ifndef __BYTESWAP_H
-#define __BYTESWAP_H
+#ifndef __DOLFIN_BYTESWAP_H
+#define __DOLFIN_BYTESWAP_H
 
 #include <dolfin/common/types.h>
 

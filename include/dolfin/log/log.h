@@ -7,8 +7,8 @@
 // First added:  2003-03-13
 // Last changed: 2015-07-02
 
-#ifndef __LOG_H
-#define __LOG_H
+#ifndef __DOLFIN_LOG_H
+#define __DOLFIN_LOG_H
 
 #include <string>
 #include <map>

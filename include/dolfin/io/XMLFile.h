@@ -6,8 +6,8 @@
 // First added:  2003-07-15
 // Last changed: 2007-03-21
 
-#ifndef __XML_FILE_H
-#define __XML_FILE_H
+#ifndef __DOLFIN_XML_FILE_H
+#define __DOLFIN_XML_FILE_H
 
 #include <dolfin/config/dolfin_config.h>
 

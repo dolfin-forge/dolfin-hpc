@@ -4,8 +4,8 @@
 // First added:  2003-06-03
 // Last changed: 2005
 
-#ifndef __LEGENDRE_H
-#define __LEGENDRE_H
+#ifndef __DOLFIN_LEGENDRE_H
+#define __DOLFIN_LEGENDRE_H
 
 #include <dolfin/common/types.h>
 

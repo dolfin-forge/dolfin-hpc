@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_DIFFERENTIATION_H_
-#define __UFL_DIFFERENTIATION_H_
+#ifndef __DOLFIN_UFL_DIFFERENTIATION_H
+#define __DOLFIN_UFL_DIFFERENTIATION_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLData.h>
@@ -680,4 +680,4 @@ private:
   std::string const str_;
 };
 } /* namespace ufl */
-#endif /* __UFL_DIFFERENTIATION_H_ */
+#endif /* __DOLFIN_UFL_DIFFERENTIATION_H */

@@ -7,8 +7,8 @@
 // First added:  2007-05-24
 // Last changed: 2008-01-29
 
-#ifndef __SPARSITY_PATTERN_BUILDER_H
-#define __SPARSITY_PATTERN_BUILDER_H
+#ifndef __DOLFIN_SPARSITY_PATTERN_BUILDER_H
+#define __DOLFIN_SPARSITY_PATTERN_BUILDER_H
 
 namespace dolfin
 {

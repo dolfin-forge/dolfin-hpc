@@ -4,8 +4,8 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#ifndef __UFL_FINITE_ELEMENT_BASE_H_
-#define __UFL_FINITE_ELEMENT_BASE_H_
+#ifndef __DOLFIN_UFL_FINITE_ELEMENT_BASE_H
+#define __DOLFIN_UFL_FINITE_ELEMENT_BASE_H
 
 #include <dolfin/ufl/UFLClass.h>
 
@@ -151,4 +151,4 @@ private:
 };
 
 } /* namespace ufl */
-#endif /* __UFL_FINITE_ELEMENT_BASE_H_ */
+#endif /* __DOLFIN_UFL_FINITE_ELEMENT_BASE_H */

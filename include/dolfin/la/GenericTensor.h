@@ -8,8 +8,8 @@
 // First added:  2007-01-17
 // Last changed: 2008-04-23
 
-#ifndef __GENERIC_TENSOR_H
-#define __GENERIC_TENSOR_H
+#ifndef __DOLFIN_GENERIC_TENSOR_H
+#define __DOLFIN_GENERIC_TENSOR_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>

@@ -4,8 +4,8 @@
 // First added:  2007-03-01
 // Last changed: 2007-03-01
 
-#ifndef __UFC_MESH_H
-#define __UFC_MESH_H
+#ifndef __DOLFIN_UFC_MESH_H
+#define __DOLFIN_UFC_MESH_H
 
 #include <ufc.h>
 

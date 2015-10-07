@@ -7,8 +7,8 @@
 #include <dolfin/config/dolfin_config.h>
 
 
-#ifndef __OCTAVE_FILE_H
-#define __OCTAVE_FILE_H
+#ifndef __DOLFIN_OCTAVE_FILE_H
+#define __DOLFIN_OCTAVE_FILE_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/la/Matrix.h>

@@ -4,8 +4,8 @@
 // First added:  2007-04-27
 // Last changed: 2007-04-29
 
-#ifndef __SUB_FUNCTION_H
-#define __SUB_FUNCTION_H
+#ifndef __DOLFIN_SUB_FUNCTION_H
+#define __DOLFIN_SUB_FUNCTION_H
 
 #include <dolfin/common/types.h>
 

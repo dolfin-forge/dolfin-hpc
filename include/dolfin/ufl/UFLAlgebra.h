@@ -4,8 +4,8 @@
 // First added:
 // Last changed:
 
-#ifndef __UFL_ALGEBRA_H_
-#define __UFL_ALGEBRA_H_
+#ifndef __DOLFIN_UFL_ALGEBRA_H
+#define __DOLFIN_UFL_ALGEBRA_H
 
 #include <dolfin/ufl/UFLClass.h>
 #include <dolfin/ufl/UFLExpression.h>
@@ -402,4 +402,4 @@ private:
   std::string const str_;
 };
 } /* namespace ufl */
-#endif /* __UFL_ALGEBRA_H_ */
+#endif /* __DOLFIN_UFL_ALGEBRA_H */

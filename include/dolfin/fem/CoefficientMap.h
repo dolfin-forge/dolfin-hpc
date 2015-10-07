@@ -4,8 +4,8 @@
 // First added:  2014-11-10
 // Last changed: 2014-11-10
 
-#ifndef __COEFFICIENT_MAP_H_
-#define __COEFFICIENT_MAP_H_
+#ifndef __DOLFIN_COEFFICIENT_MAP_H
+#define __DOLFIN_COEFFICIENT_MAP_H
 
 #include <dolfin/common/Array.h>
 #include <dolfin/function/Function.h>
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif /* __COEFFICIENT_MAP_H_ */
+#endif /* __DOLFIN_COEFFICIENT_MAP_H */

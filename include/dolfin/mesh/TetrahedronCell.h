@@ -7,8 +7,8 @@
 // First added:  2006-06-05
 // Last changed: 2008-06-20
 
-#ifndef __TETRAHEDRON_CELL_H
-#define __TETRAHEDRON_CELL_H
+#ifndef __DOLFIN_TETRAHEDRON_CELL_H
+#define __DOLFIN_TETRAHEDRON_CELL_H
 
 #include "CellType.h"
 

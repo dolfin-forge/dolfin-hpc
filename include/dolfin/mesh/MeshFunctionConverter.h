@@ -4,8 +4,8 @@
 // First added:  2013-03-25
 // Last changed: 2013-03-25
 
-#ifndef __MESH_FUNCTION_CONVERTER_H
-#define __MESH_FUNCTION_CONVERTER_H
+#ifndef __DOLFIN_MESH_FUNCTION_CONVERTER_H
+#define __DOLFIN_MESH_FUNCTION_CONVERTER_H
 
 #include "MeshFunction.h"
 #include <algorithm>

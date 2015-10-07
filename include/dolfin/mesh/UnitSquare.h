@@ -4,8 +4,8 @@
 // First added:  2005-12-02
 // Last changed: 2006-08-07
 
-#ifndef __UNIT_SQUARE_H
-#define __UNIT_SQUARE_H
+#ifndef __DOLFIN_UNIT_SQUARE_H
+#define __DOLFIN_UNIT_SQUARE_H
 
 #include "Mesh.h"
 

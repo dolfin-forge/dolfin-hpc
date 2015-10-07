@@ -1,9 +1,9 @@
-#ifndef __DOLFIN_PDE_H
-#define __DOLFIN_PDE_H
+#ifndef __DOLFIN_HEADER_PDE_H
+#define __DOLFIN_HEADER_PDE_H
 
 // DOLFIN pde interface
 
 #include <dolfin/pde/LinearPDE.h>
 #include <dolfin/pde/NonlinearPDE.h>
 
-#endif
+#endif /* __DOLFIN_HEADER_PDE_H */

@@ -2,8 +2,8 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-#ifndef __MULTIGRID_SCHEME_H
-#define __MULTIGRID_SCHEME_H
+#ifndef __DOLFIN_MULTIGRID_SCHEME_H
+#define __DOLFIN_MULTIGRID_SCHEME_H
 
 namespace dolfin
 {

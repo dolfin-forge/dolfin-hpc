@@ -10,8 +10,8 @@
 // FIXME: all data from different representations into a common
 // FIXME: data structure (perhaps an Array<uint> with facet indices).
 
-#ifndef __DIRICHLET_BC_H
-#define __DIRICHLET_BC_H
+#ifndef __DOLFIN_DIRICHLET_BC_H
+#define __DOLFIN_DIRICHLET_BC_H
 
 #include <dolfin/common/types.h>
 #include "SubSystem.h"

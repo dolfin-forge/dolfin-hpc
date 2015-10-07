@@ -4,8 +4,8 @@
 // First added:  2006-06-21
 // Last changed: 2008-02-18
 
-#ifndef __INTERSECTION_DETECTOR_H
-#define __INTERSECTION_DETECTOR_H
+#ifndef __DOLFIN_INTERSECTION_DETECTOR_H
+#define __DOLFIN_INTERSECTION_DETECTOR_H
 
 #include <dolfin/common/types.h>
 

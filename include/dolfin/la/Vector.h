@@ -9,8 +9,8 @@
 // First added:  2007-07-03
 // Last changed: 2008-05-17
 
-#ifndef __VECTOR_H
-#define __VECTOR_H
+#ifndef __DOLFIN_VECTOR_H
+#define __DOLFIN_VECTOR_H
 
 #include <dolfin/common/Variable.h>
 #include "DefaultFactory.h"

@@ -4,8 +4,8 @@
 // First added:  2014-01-27
 // Last changed: 2014-01-27
 
-#ifndef __UFL_TYPE_H_
-#define __UFL_TYPE_H_
+#ifndef __DOLFIN_UFL_TYPE_H
+#define __DOLFIN_UFL_TYPE_H
 
 #include <dolfin/ufl/UFLObject.h>
 
@@ -180,4 +180,4 @@ bool type<T>::is_string_type(std::string const& val) const
 }
 
 } /* namespace ufl */
-#endif /* __UFL_TYPE_H_ */
+#endif /* __DOLFIN_UFL_TYPE_H */

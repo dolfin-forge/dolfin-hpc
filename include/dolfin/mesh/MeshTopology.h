@@ -22,7 +22,7 @@ namespace dolfin
 
 /// MeshTopology stores the topology of a mesh, consisting of mesh entities
 /// and connectivity (incidence relations for the mesh entities). Note that
-/// the mesh entities don't need to be stored, only the number of entities
+/// the mesh entities do not need to be stored, only the number of entities
 /// and the connectivity. Any numbering scheme for the mesh entities is
 /// stored separately in a MeshFunction over the entities.
 ///

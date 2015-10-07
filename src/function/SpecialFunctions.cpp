@@ -233,13 +233,18 @@ void FacetNormal::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
   {
-    for (uint i = 0; i < cell().dim(); i++)
-      values[i] = cell().normal(facet(), i);
+    Point n = cell().normal(facet());
+    for (uint i = 0; i < cell().dim(); ++i)
+    {
+      values[i] = n[i];
+    }
   }
   else
   {
-    for (uint i = 0; i < cell().dim(); i++)
+    for (uint i = 0; i < cell().dim(); ++i)
+    {
       values[i] = 0.0;
+    }
   }
 }
 //-----------------------------------------------------------------------------

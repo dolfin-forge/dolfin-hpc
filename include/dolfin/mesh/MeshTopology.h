@@ -74,7 +74,7 @@ public:
   MeshConnectivity& operator()(uint d0, uint d1);
 
   /// Return connectivity for given pair of topological dimensions
-  const MeshConnectivity& operator()(uint d0, uint d1) const;
+  MeshConnectivity const& operator()(uint d0, uint d1) const;
 
   /// Return mesh distribution data
   MeshDistributedData& distdata();
@@ -163,7 +163,7 @@ inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 }
 
 //-----------------------------------------------------------------------------
-const inline MeshConnectivity& MeshTopology::operator()(uint d0, uint d1) const
+inline MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
 {
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
   return connectivity_[d0][d1];

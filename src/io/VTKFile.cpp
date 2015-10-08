@@ -275,8 +275,14 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   uint8_t typeval = 0;
   switch (mesh.type().cellType())
     {
+    case CellType::hexahedron:
+      typeval = uint8_t(12);
+      break;
     case CellType::tetrahedron:
       typeval = uint8_t(10);
+      break;
+    case CellType::quadrilateral:
+      typeval = uint8_t(9);
       break;
     case CellType::triangle:
       typeval = uint8_t(5);

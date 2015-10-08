@@ -14,6 +14,8 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/EuclideanSpace.h>
 
+#include <cstring>
+
 namespace dolfin
 {
 
@@ -30,11 +32,17 @@ public:
   /// Create a point at (x, y, z)
   Point(const real x = 0.0, const real y = 0.0, const real z = 0.0);
 
+  /// Create a point at x
+  Point(real const * x, uint gdim);
+
   /// Copy constructor
   Point(Point const& p);
 
   /// Destructor
   ~Point();
+
+  /// Set coordinates for given Euclidean space dimension
+  void set(real const* x, uint gdim);
 
   /// Return coordinate in direction i
   real& operator[](uint i);
@@ -85,7 +93,7 @@ public:
   real norm() const;
 
   /// Compute cross product with given vector
-  const Point cross(Point const& p) const;
+  Point cross(Point const& p) const;
 
   /// Compute dot product with given vector
   real dot(Point const& p) const;
@@ -104,6 +112,13 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
+inline void Point::set(real const* x, uint gdim)
+{
+  dolfin_assert(gdim <= Point::MAX_SIZE);
+  std::memcpy(x_, x, gdim*sizeof(real));
+}
+
+//-----------------------------------------------------------------------------
 inline real& Point::operator[](uint i)
 {
   dolfin_assert(i < Point::MAX_SIZE);

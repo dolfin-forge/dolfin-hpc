@@ -22,6 +22,11 @@ Point::Point(const real x, const real y, const real z)
   x_[2] = z;
 }
 //-----------------------------------------------------------------------------
+Point::Point(real const * x, uint gdim)
+{
+  this->set(x, gdim);
+}
+//-----------------------------------------------------------------------------
 Point::Point(Point const& p)
 {
   x_[0] = p.x_[0];
@@ -47,7 +52,7 @@ real Point::norm() const
   return std::sqrt(x_[0] * x_[0] + x_[1] * x_[1] + x_[2] * x_[2]);
 }
 //-----------------------------------------------------------------------------
-const Point Point::cross(Point const& p) const
+Point Point::cross(Point const& p) const
 {
   Point q;
 

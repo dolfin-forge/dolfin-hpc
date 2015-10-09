@@ -9,33 +9,27 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Vertex.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-Point Cell::midpoint()
+Point Cell::midpoint() const
 {
-  uint num_vertices = 0; 
-  
-  real x = 0.0;
-  real y = 0.0;
-  real z = 0.0;
-  
-  for (VertexIterator v(*this); !v.end(); ++v)
+  MeshGeometry const& geometry = this->mesh().geometry();
+  uint const* vertices = this->entities(0);
+  uint const num_vertices = this->numEntities(0);
+  Point p;
+  for (uint v = 0; v < num_vertices; ++v)
   {
-    x += v->point().x();
-    y += v->point().y();
-    z += v->point().z();
-
-    num_vertices++;
+    real const* x = geometry.x(vertices[v]);
+    for (uint i = 0; i < geometry.dim(); ++i)
+    {
+      p[i] += x[i];
+    }
   }
-
-  x /= real(num_vertices);
-  y /= real(num_vertices);
-  z /= real(num_vertices);
-
-  Point p(x, y, z);
+  p /= real(num_vertices);
   return p;
 }
 //-----------------------------------------------------------------------------
 
-
+} /* namespace dolfin */

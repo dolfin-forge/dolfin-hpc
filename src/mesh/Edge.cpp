@@ -15,7 +15,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-real Edge::length()
+real Edge::length() const
 {
   uint const * vertices = entities(0);
   dolfin_assert(vertices);
@@ -30,7 +30,7 @@ real Edge::length()
   return std::sqrt(l);
 }
 //-----------------------------------------------------------------------------
-Point Edge::midpoint()
+Point Edge::midpoint() const
 {
   uint const * vertices = entities(0);
   dolfin_assert(vertices);
@@ -46,4 +46,4 @@ Point Edge::midpoint()
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

@@ -42,10 +42,10 @@ public:
   }
 
   /// Compute Euclidian length of edge
-  real length();
+  real length() const;
 
-  /// Compute coordinates of edge midpoint as a 3D point value
-  Point midpoint();
+  /// Compute coordinates of edge midpoint
+  Point midpoint() const;
 
 };
 

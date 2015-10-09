@@ -25,6 +25,9 @@ namespace dolfin
     /// Destructor
     ~Facet() {}
 
+    /// Compute coordinates of facet midpoint
+    Point midpoint() const;
+
   };
 
   /// A FacetIterator is a MeshEntityIterator of topological codimension 1.

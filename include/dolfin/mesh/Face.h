@@ -25,6 +25,9 @@ namespace dolfin
     /// Destructor
     ~Face() {}
 
+    /// Compute coordinates of face midpoint
+    Point midpoint() const;
+
   };
 
   /// A FaceIterator is a MeshEntityIterator of topological dimension 2.

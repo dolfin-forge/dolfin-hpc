@@ -55,8 +55,8 @@ public:
   /// Compute the area/length of given facet with respect to the cell
   inline real facetArea(uint facet) const { return mesh_.type().facetArea(*this, facet); }
 
-  /// Compute midpoint of cell
-  Point midpoint();
+  /// Compute coordinates of cell midpoint
+  Point midpoint() const;
 
 };
 

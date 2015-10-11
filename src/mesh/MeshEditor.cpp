@@ -15,6 +15,18 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
+    mesh_(&mesh),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0)
+{
+  init(mesh, cell_type, gdim);
+}
+//-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
     mesh_(&mesh),
     tdim_(0),
@@ -24,10 +36,10 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
     vertex_index_(0),
     cell_index_(0)
 {
-  // Do nothing
-  init(mesh, type, gdim);
+  CellType * cell_type = CellType::create(type);
+  init(mesh, *cell_type, gdim);
+  delete cell_type;
 }
-
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim) :
     mesh_(&mesh),
@@ -38,30 +50,28 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim) :
     vertex_index_(0),
     cell_index_(0)
 {
-  CellType * t = CellType::create(type);
-  if (tdim != t->dim())
+  CellType * cell_type = CellType::create(type);
+  if (tdim != cell_type->dim())
   {
     error("In MeshEditor, cell type and topological dimension do not match.");
   }
-  delete t;
-
-  // Do nothing
-  init(mesh, type, gdim);
+  init(mesh, *cell_type, gdim);
+  delete cell_type;
 }
-
 //-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::init(Mesh& mesh, CellType::Type type, uint gdim)
+void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
 {
+
   // Clear old mesh data
   mesh.clear();
 
   // Set cell type
-  mesh.cell_type_ = CellType::create(type);
+  mesh.cell_type_ = type.clone();
 
   // Save mesh and dimension
   this->tdim_ = mesh.cell_type_->dim();

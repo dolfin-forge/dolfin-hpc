@@ -23,11 +23,14 @@ class MeshEditor
 {
 public:
 
-  /// Constructor for meshes with unique type of cell [TODO: Deprecate]
-  MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
+  /// Constructor for meshes with unique type of cell
+  MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim);
 
   /// Constructor for meshes with unique type of cell
   MeshEditor(Mesh& mesh, CellType::Type type, uint gdim);
+
+  /// Constructor for meshes with unique type of cell [TODO: Deprecate]
+  MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim);
 
   /// Destructor
   ~MeshEditor();
@@ -56,7 +59,7 @@ public:
 private:
 
   /// Open mesh of given cell type and geometrical dimension
-  void init(Mesh& mesh, CellType::Type type, uint gdim);
+  void init(Mesh& mesh, CellType const& type, uint gdim);
 
   // Add vertex, common part
   void addVertexCommon(uint v);

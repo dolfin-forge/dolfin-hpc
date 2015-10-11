@@ -54,11 +54,17 @@ public:
   /// Compute local index of given incident entity (error if not found)
   uint index(MeshEntity const& entity) const;
 
+  /// Return global index of mesh entity
+  uint global_index() const;
+
   /// Return if the mesh entity is shared
   bool is_shared() const;
 
   /// Return if the mesh entity is ghosted
   bool is_ghost() const;
+
+  /// Return the owner of the mesh entity
+  bool owner() const;
 
   /// Output
   friend LogStream& operator<<(LogStream& stream, MeshEntity const& entity);

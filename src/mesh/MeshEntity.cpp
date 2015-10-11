@@ -68,6 +68,11 @@ uint MeshEntity::index(MeshEntity const& entity) const
   return 0;
 }
 //-----------------------------------------------------------------------------
+uint MeshEntity::global_index() const
+{
+  return mesh_.distdata().get_global(*this);
+}
+//-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
   return mesh_.distdata().is_shared(index_, tdim_);
@@ -76,6 +81,11 @@ bool MeshEntity::is_shared() const
 bool MeshEntity::is_ghost() const
 {
   return mesh_.distdata().is_ghost(index_, tdim_);
+}
+//-----------------------------------------------------------------------------
+bool MeshEntity::owner() const
+{
+  return mesh_.distdata().get_owner(index_, tdim_);
 }
 //-----------------------------------------------------------------------------
 LogStream& operator<<(LogStream& stream, MeshEntity const& entity)

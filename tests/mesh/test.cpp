@@ -5,6 +5,7 @@
 #include "SubDomain/SubDomain.h"
 #include "CellTypes/CellTypes.h"
 #include "UnitMeshes/UnitMeshes.h"
+#include "StructuredGrid/StructuredGrid.h"
 #include "VertexNormal/VertexNormal.h"
 
 #include <check.h>
@@ -48,6 +49,17 @@ Suite *mesh_suite()
   tcase_add_test(tc, test_UnitCube);
   tcase_add_test(tc, test_Box);
   tcase_add_test(tc, test_UnitDisk);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc,60);
+
+  tc = tcase_create("StructuredGrid");
+  tcase_add_test(tc, test_BoundingBox);
+  tcase_add_test(tc, test_StructuredGrid_interval);
+  tcase_add_test(tc, test_StructuredGrid_triangle);
+  tcase_add_test(tc, test_StructuredGrid_tetrahedron);
+  tcase_add_test(tc, test_StructuredGrid_quadrilateral);
+  tcase_add_test(tc, test_StructuredGrid_hexahedron);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);

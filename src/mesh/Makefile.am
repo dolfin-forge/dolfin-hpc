@@ -56,6 +56,7 @@ libdolfin_mesh_la_SOURCES = \
 			Rectangle.cpp\
 			RefinementManager.cpp\
 			RivaraRefinement.cpp\
+			StructuredGrid.cpp\
 			SubDomain.cpp\
 			TetrahedronCell.cpp\
 			TopologyComputation.cpp\

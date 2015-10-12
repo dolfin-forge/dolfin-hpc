@@ -221,10 +221,10 @@ void BinaryFile::operator>>(Function & f)
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
       if (byteswap)
       {
-	for (uint j = 0; j < size; ++j)
-	{
-	  values[j] = bswap(values[j]);
-	}
+        for (uint j = 0; j < size; ++j)
+        {
+          values[j] = bswap(values[j]);
+        }
       }
       f.vector().set(values);
       delete[] values;
@@ -300,7 +300,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
     {
       for (uint i = 0; i < size; ++i)
       {
-	values[i] = bswap(values[i]);
+        values[i] = bswap(values[i]);
       }
     }
     u->vector().set(values);
@@ -496,10 +496,10 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       if (byteswap)
       {
-	for (uint gi = 0; gi < gdim; ++gi) 
-	{
-	  vertex_data[(v * gdim) + gi] = bswap(vertex_data[(v * gdim) + gi]);
-	}
+        for (uint gi = 0; gi < gdim; ++gi)
+        {
+          vertex_data[(v * gdim) + gi] = bswap(vertex_data[(v * gdim) + gi]);
+        }
       }
       editor.addVertex(v, &vertex_data[v * gdim]);
     }
@@ -517,11 +517,11 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       if (byteswap)
       {
-	for (uint vi = 0; vi < num_cellvertices; ++vi)
-	{
-	  cell_data[(c * num_cellvertices) + vi] = 
-	    bswap(cell_data[(c * num_cellvertices) + vi]);
-	}
+        for (uint vi = 0; vi < num_cellvertices; ++vi)
+        {
+          cell_data[(c * num_cellvertices) + vi] =
+            bswap(cell_data[(c * num_cellvertices) + vi]);
+        }
       }
       editor.addCell(c, &cell_data[c * num_cellvertices]);
     }
@@ -575,7 +575,7 @@ void BinaryFile::operator>>(Mesh& mesh)
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     vertex_offset[0] -= vertex_data[0];
     vertex_offset[1] -= vertex_data[1];
 #endif
@@ -590,7 +590,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       for (uint v = 0; v < vertex_data[1]; ++v)
       {
-	vertex_buffer[v] = bswap(vertex_buffer[v]);
+        vertex_buffer[v] = bswap(vertex_buffer[v]);
       }
     }
 
@@ -609,7 +609,7 @@ void BinaryFile::operator>>(Mesh& mesh)
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     cell_offset -= cell_data;
 #endif
 
@@ -622,7 +622,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       for (uint c = 0; c < cell_data; ++c)
       {
-	cell_buffer[c] = bswap(cell_buffer[c]);
+        cell_buffer[c] = bswap(cell_buffer[c]);
       }
     }
 
@@ -963,7 +963,7 @@ void BinaryFile::operator<<(Mesh& mesh)
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     vertex_offset -= vertex_buffer_size;
 #endif
     real * vertex_buffer = new real[vertex_buffer_size];
@@ -992,7 +992,7 @@ void BinaryFile::operator<<(Mesh& mesh)
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     cell_offset -= cell_buffer_size;
 #endif
     uint * cell_buffer = new uint[cell_buffer_size];
@@ -1135,7 +1135,7 @@ template<typename T>
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 
@@ -1223,7 +1223,7 @@ template<typename T>
                MPI::DOLFIN_COMM);
 #else
     MPI_Scan(&local_size, &offset, 1, MPI_UNSIGNED, MPI_SUM,
-	     MPI::DOLFIN_COMM);
+             MPI::DOLFIN_COMM);
     offset -= local_size;
 #endif
 
@@ -1234,7 +1234,7 @@ template<typename T>
     {
       for (uint i = 0; i < (local_size * sizeof(real)); ++i)
       {
-	values[i] = bswap(values[i]);
+        values[i] = bswap(values[i]);
       }
     }
     if (mfunc_type == 0)

@@ -262,6 +262,12 @@ inline uint BinaryFile::cell_type(CellType::Type const type)
         case CellType::tetrahedron:
           return 3;
           break;
+        case CellType::quadrilateral:
+          return 4;
+          break;
+        case CellType::hexahedron:
+          return 6;
+          break;
         default:
           error("Unsupported mesh cell type in BinaryFile V2.");
           break;
@@ -307,6 +313,12 @@ inline CellType::Type BinaryFile::cell_type(uint const type)
           break;
         case 3:
           return CellType::tetrahedron;
+          break;
+        case 4:
+          return CellType::quadrilateral;
+          break;
+        case 6:
+          return CellType::hexahedron;
           break;
         default:
           error("Unsupported binary cell type in BinaryFile V2.");

@@ -1,7 +1,9 @@
 check_PROGRAMS = exe
 exe_SOURCES = test.cpp
 exe_CPPFLAGS= -I@top_srcdir@/include @CHECK_CFLAGS@ $(CPPFLAGS)
-exe_LDFLAGS = $(top_builddir)/src/.libs/libdolfin.a $(LDFLAGS) $(LIBS) @CHECK_LIBS@
+exe_LDADD = $(top_builddir)/src/libdolfin.la
+exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
+
 
 EXTRA_DIST = Matrix/Matrix.h\
-	     Vector/Vector.h
+      	     Vector/Vector.h

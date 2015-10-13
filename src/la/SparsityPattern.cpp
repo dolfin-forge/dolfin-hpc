@@ -46,7 +46,7 @@ SparsityPattern::SparsityPattern() :
 //-----------------------------------------------------------------------------
 SparsityPattern::~SparsityPattern()
 {
-  delete[] range;
+  clear();
 }
 //-----------------------------------------------------------------------------
 void SparsityPattern::clear()
@@ -318,19 +318,17 @@ void SparsityPattern::initRange(uint num_local)
     uint *local = new uint[num_procs];
     local[dolfin::MPI::processNumber()] = num_local;
 
-  #ifdef HAVE_MPI
+#ifdef HAVE_MPI
     MPI_Allgather(&num_local, 1, MPI_UNSIGNED, local, 1, MPI_UNSIGNED,
                   MPI::DOLFIN_COMM);
-  #endif
+#endif
 
     for (uint p = 0; p < num_procs; ++p)
     {
       range[p + 1] = range[p] + local[p];
     }
 
-  #ifdef HAVE_MPI
     delete[] local;
-  #endif
   }
   else
   {

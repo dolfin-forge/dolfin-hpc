@@ -1,62 +1,54 @@
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/main/init.h>
-
-#include <iostream>
-#include <iomanip>
 
 #ifdef HAVE_CHECK
 
-#include <check.h>
-
-#include <BoundaryNormal/BoundaryNormal.h>
 #include <FiniteElement/FiniteElement.h>
 #include <FiniteElementSpace/FiniteElementSpace.h>
+#include <BoundaryNormal/BoundaryNormal.h>
 
-int argc;
-char **argv;
+#include <check.h>
 
+//-----------------------------------------------------------------------------
 void setup()
 {
-  //  dolfin_init(argc, argv);
 }
-
+//-----------------------------------------------------------------------------
 void teardown()
 {
-  //  dolfin_finalize();
 }
-
-Suite * test_suite()
+//-----------------------------------------------------------------------------
+Suite* fem_suite()
 {
-  TCase *tc;
-  Suite *s;
+  TCase* tc;
+  Suite* s;
 
-  s = suite_create("FEM");
-
-  tc = tcase_create("SubDomain");
-  tcase_add_test(tc, test_nodenormal_create);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
+  s = suite_create("fem");
 
   tc = tcase_create("FiniteElement");
-  tcase_add_test(tc, test_init_element);
+  tcase_add_test(tc, test_FiniteElement);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
+  tcase_set_timeout(tc, 60);
 
   tc = tcase_create("FiniteElementSpace");
-  tcase_add_test(tc, test_init_element_space);
+  tcase_add_test(tc, test_FiniteElementSpace);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
+  tcase_set_timeout(tc, 60);
+
+  tc = tcase_create("BoundaryNormal");
+  tcase_add_test(tc, test_NodeNormal);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc, 60);
 
   return s;
 }
-
+//-----------------------------------------------------------------------------
 int main(void)
 {
   int number_failed;
-  Suite* s = test_suite();
+  Suite* s = fem_suite();
   SRunner* sr = srunner_create(s);
 
   srunner_run_all(sr, CK_NORMAL);
@@ -65,7 +57,7 @@ int main(void)
 
   return (number_failed == 0) ? 0 : 1;
 }
-
+//-----------------------------------------------------------------------------
 #else
 
 int main(void)

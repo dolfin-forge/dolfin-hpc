@@ -112,12 +112,16 @@ namespace dolfin
 
     void set_counter(uint new_value);
 
+    //--- STATIC
+
+    static std::string basename(std::string file);
+
   private:
 
     GenericFile* file;
 
   };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_FILE_H */

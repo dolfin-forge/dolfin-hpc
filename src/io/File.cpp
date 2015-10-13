@@ -27,7 +27,8 @@
 #include <dolfin/io/STLFile.h>
 #include <dolfin/io/XYZFile.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 File::File(const std::string& filename)
@@ -277,3 +278,16 @@ void File::set_counter(uint new_value)
   file->set_counter(new_value);
 }
 //-----------------------------------------------------------------------------
+std::string File::basename(std::string file)
+{
+  size_t beg = file.find_last_of('/');
+  if (beg != std::string::npos)
+  {
+    file.erase(0, beg + 1);
+  }
+  size_t pos = file.find('.');
+  return file.substr(0, pos);
+}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

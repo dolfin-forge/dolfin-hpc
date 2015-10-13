@@ -1,8 +1,6 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Aurelien Larcher, 2015.
-//
 // First added:  2006-06-05
 // Last changed: 2006-10-16
 
@@ -76,6 +74,14 @@ CellType::Type CellType::string2type(std::string type)
   {
     return tetrahedron;
   }
+  else if (type == "quadrilateral")
+  {
+      return quadrilateral;
+  }
+  else if (type == "hexahedron")
+  {
+    return hexahedron;
+  }
   else
   {
     error("Unknown cell type: \"%s\".", type.c_str());
@@ -121,6 +127,10 @@ std::string CellType::type2string(CellType::Type type)
       return "triangle";
     case tetrahedron:
       return "tetrahedron";
+    case quadrilateral:
+      return "quadrilateral";
+    case hexahedron:
+      return "hexahedron";
     default:
       error("Unknown cell type: %d.", type);
       break;
@@ -141,6 +151,10 @@ ufl::Domain::Type CellType::type2ufldomain(CellType::Type type)
       return ufl::Domain::triangle;
     case CellType::tetrahedron:
       return ufl::Domain::tetrahedron;
+    case CellType::quadrilateral:
+      return ufl::Domain::quadrilateral;
+    case CellType::hexahedron:
+      return ufl::Domain::hexahedron;
     default:
       error("Unknown cell type: %d.", type);
       break;

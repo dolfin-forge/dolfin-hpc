@@ -1,19 +1,24 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2015.
+//
 // First added:  2006-06-05
 // Last changed: 2006-10-16
 
 #include <dolfin/mesh/CellType.h>
 
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Vertex.h>
+
 #include <dolfin/mesh/PointCell.h>
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Point.h>
+
+#include <algorithm>
 
 namespace dolfin
 {
@@ -60,13 +65,21 @@ CellType* CellType::create(std::string type)
 CellType::Type CellType::string2type(std::string type)
 {
   if (type == "interval")
+  {
     return interval;
+  }
   else if (type == "triangle")
+  {
     return triangle;
+  }
   else if (type == "tetrahedron")
+  {
     return tetrahedron;
+  }
   else
+  {
     error("Unknown cell type: \"%s\".", type.c_str());
+  }
 
   return interval;
 }
@@ -78,7 +91,9 @@ bool CellType::intersects(MeshEntity& entity, Cell& c) const
     Point p = vi->point();
 
     if (intersects(c, p))
+    {
       return true;
+    }
   }
 
   for (VertexIterator vi(c); !vi.end(); ++vi)
@@ -86,7 +101,9 @@ bool CellType::intersects(MeshEntity& entity, Cell& c) const
     Point p = vi->point();
 
     if (intersects(entity, p))
+    {
       return true;
+    }
   }
 
   return false;
@@ -132,6 +149,67 @@ ufl::Domain::Type CellType::type2ufldomain(CellType::Type type)
   return ufl::Domain::None;
 }
 //-----------------------------------------------------------------------------
+void CellType::check(Cell& cell) const
+{
+  if(cell.type() != this->cellType())
+  {
+    error("CellType::check : mismatch of cell type");
+  }
 
+  // UFC convention: cell -> vertices in ascending order
+  uint const * cell_verts = cell.entities(0);
+  uint const num_cell_verts = this->numVertices(this->dim());
+  if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
+  {
+    error("CellType::check : cell vertices are not in ascending order\n"
+          "=> cell index = %d", cell.index());
+  }
+
+  // UFC convention: edge -> vertices in ascending order
+  if(cell.dim() < 2)
+  {
+    return;
+  }
+  uint const * cell_edges = cell.entities(1);
+  uint const num_cell_edges = this->numEntities(1);
+  uint const num_edge_verts = this->numVertices(1);
+  for (uint e = 0; e < num_cell_edges; ++e)
+  {
+    uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);
+    if (edge_verts[1] < edge_verts[0])
+    {
+      error("CellType::check : edge vertices are not in ascending order");
+    }
+  }
 }
+//-----------------------------------------------------------------------------
+uint const * CellType::is_sorted_until(uint const * begin, uint const * end)
+{
+  if (begin == end)
+  {
+    return begin;
+  }
+  uint const * next = begin;
+  while (++next != end)
+  {
+    if (*next < *begin)
+    {
+      return next;
+    }
+    ++begin;
+  }
+  return end;
+}
+//-----------------------------------------------------------------------------
+bool CellType::is_sorted(uint const * begin, uint const * end)
+{
+  return (is_sorted_until(begin, end) == end);
+}
+//-----------------------------------------------------------------------------
+bool CellType::pattern_applies(Cell& cell)const
+{
+  return (cell.type() == this->cellType());
+}
+//-----------------------------------------------------------------------------
 
+} /* namespace dolfin */

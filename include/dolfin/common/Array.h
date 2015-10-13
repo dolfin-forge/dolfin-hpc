@@ -10,9 +10,9 @@
 #ifndef __DOLFIN_ARRAY_H
 #define __DOLFIN_ARRAY_H
 
-#include <iostream>
-
 #include <dolfin/common/types.h>
+
+#include <iostream>
 #include <vector>
 
 namespace dolfin
@@ -85,6 +85,16 @@ namespace dolfin
 
     /// Destructor
     ~Array() {}
+
+    ///
+    void free()
+    {
+      while(!this->empty())
+      {
+        delete this->back();
+        this->pop_back();
+      }
+    }
 
   };
 

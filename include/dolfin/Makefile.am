@@ -214,6 +214,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/predicates_init.h\
 				mesh/Rectangle.h\
 				mesh/RefinementManager.h\
+				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
 				mesh/SubDomain.h\

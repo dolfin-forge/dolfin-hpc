@@ -176,6 +176,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/GeometricPredicates.h\
 				mesh/GlobalFacetMap.h\
 				mesh/GTSInterface.h\
+				mesh/HexahedronCell.h\
 				mesh/IntersectionDetector.h\
 				mesh/IntervalCell.h\
 				mesh/LoadBalancer.h\
@@ -212,6 +213,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/Point.h\
 				mesh/PointCell.h\
 				mesh/predicates_init.h\
+				mesh/QuadrilateralCell.h\
 				mesh/Rectangle.h\
 				mesh/RefinementManager.h\
 				mesh/RefinementPattern.h\

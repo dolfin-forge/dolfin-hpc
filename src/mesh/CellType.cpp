@@ -15,6 +15,8 @@
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
+#include <dolfin/mesh/QuadrilateralCell.h>
+#include <dolfin/mesh/HexahedronCell.h>
 
 #include <algorithm>
 
@@ -47,6 +49,10 @@ CellType* CellType::create(CellType::Type type)
       return new TriangleCell();
     case tetrahedron:
       return new TetrahedronCell();
+    case quadrilateral:
+      return new QuadrilateralCell();
+    case hexahedron:
+      return new HexahedronCell();
     default:
       error("Unknown cell type: %d.", type);
       break;
@@ -172,6 +178,7 @@ void CellType::check(Cell& cell) const
 
   // UFC convention: cell -> vertices in ascending order
   uint const * cell_verts = cell.entities(0);
+  dolfin_assert(cell_verts);
   uint const num_cell_verts = this->numVertices(this->dim());
   if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
   {
@@ -185,11 +192,13 @@ void CellType::check(Cell& cell) const
     return;
   }
   uint const * cell_edges = cell.entities(1);
+  dolfin_assert(cell_edges);
   uint const num_cell_edges = this->numEntities(1);
   uint const num_edge_verts = this->numVertices(1);
   for (uint e = 0; e < num_cell_edges; ++e)
   {
     uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);
+    dolfin_assert(edge_verts);
     if (edge_verts[1] < edge_verts[0])
     {
       error("CellType::check : edge vertices are not in ascending order");

@@ -11,6 +11,8 @@
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
+#include <dolfin/mesh/QuadrilateralCell.h>
+#include <dolfin/mesh/HexahedronCell.h>
 
 #include <sstream>
 
@@ -165,6 +167,66 @@ START_TEST( test_TetrahedronCell )
     // UFC convention
     Mesh refcell = cell.create_reference_cell();
     check_reference_cell(cell, refcell);
+    //---
+    Test::end();
+    fail_unless( init_failed == 0 );
+  }END_TEST
+//-----------------------------------------------------------------------------
+START_TEST( test_QuadrilateralCell )
+  {
+    int init_failed = 0;
+    Test::begin("test_QuadrilateralCell");
+    //---
+    QuadrilateralCell cell;
+    ck_assert_int_eq(cell.dim(), 2);
+    ck_assert_int_eq(cell.numEntities(0), 4);
+    ck_assert_int_eq(cell.numEntities(1), 4);
+    ck_assert_int_eq(cell.numEntities(2), 1);
+    ck_assert_int_eq(cell.numVertices(0), 1);
+    ck_assert_int_eq(cell.numVertices(1), 2);
+    ck_assert_int_eq(cell.numVertices(2), 4);
+    cell.disp();
+    //
+    CellType * ct0 = CellType::create(CellType::quadrilateral);
+    ck_assert_int_eq(cell.cellType(), ct0->cellType());
+    delete ct0;
+    // UFC convention
+    Mesh refcell = cell.create_reference_cell();
+    Cell c(refcell, 0);
+    refcell.init(1, 0);
+    refcell.init(cell.dim(), 1);
+    cell.check(c);
+    //---
+    Test::end();
+    fail_unless( init_failed == 0 );
+  }END_TEST
+//-----------------------------------------------------------------------------
+START_TEST( test_HexahedronCell )
+  {
+    int init_failed = 0;
+    Test::begin("test_HexahedronCell");
+    //---
+    HexahedronCell cell;
+    ck_assert_int_eq(cell.dim(), 3);
+    ck_assert_int_eq(cell.numEntities(0), 8);
+    ck_assert_int_eq(cell.numEntities(1), 12);
+    ck_assert_int_eq(cell.numEntities(2), 6);
+    ck_assert_int_eq(cell.numEntities(3), 1);
+    ck_assert_int_eq(cell.numVertices(0), 1);
+    ck_assert_int_eq(cell.numVertices(1), 2);
+    ck_assert_int_eq(cell.numVertices(2), 4);
+    ck_assert_int_eq(cell.numVertices(3), 8);
+    cell.disp();
+    // Check cell type enum
+    CellType * ct0 = CellType::create(CellType::hexahedron);
+    delete ct0;
+    // UFC convention
+    Mesh refcell = cell.create_reference_cell();
+    Cell c(refcell, 0);
+    refcell.init(1, 0);
+    refcell.init(2, 0);
+    refcell.init(cell.dim(), 1);
+    cell.check(c);
     //---
     Test::end();
     fail_unless( init_failed == 0 );

@@ -36,6 +36,8 @@ Suite *mesh_suite()
   tcase_add_test(tc, test_IntervalCell);
   tcase_add_test(tc, test_TriangleCell);
   tcase_add_test(tc, test_TetrahedronCell);
+  tcase_add_test(tc, test_QuadrilateralCell);
+  tcase_add_test(tc, test_HexahedronCell);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);

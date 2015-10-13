@@ -19,6 +19,7 @@ libdolfin_mesh_la_SOURCES = \
 			GTSInterface.cpp\
 			GeometricPredicates.cpp\
 			GlobalFacetMap.cpp\
+			HexahedronCell.cpp\
 			IntersectionDetector.cpp\
 			IntervalCell.cpp\
 			LoadBalancer.cpp\
@@ -51,6 +52,7 @@ libdolfin_mesh_la_SOURCES = \
 			MeshTopology.cpp\
 			Point.cpp\
 			PointCell.cpp\
+			QuadrilateralCell.cpp\
 			Rectangle.cpp\
 			RefinementManager.cpp\
 			RivaraRefinement.cpp\

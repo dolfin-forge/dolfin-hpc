@@ -32,10 +32,12 @@ Suite *mesh_suite()
   tcase_set_timeout(tc,60);
 
   tc = tcase_create("CellTypes");
-  tcase_add_test(tc, test_PointCell_create);
-  tcase_add_test(tc, test_IntervalCell_create);
-  tcase_add_test(tc, test_TriangleCell_create);
-  tcase_add_test(tc, test_TetrahedronCell_create);
+  tcase_add_test(tc, test_PointCell);
+  tcase_add_test(tc, test_IntervalCell);
+  tcase_add_test(tc, test_TriangleCell);
+  tcase_add_test(tc, test_TetrahedronCell);
+  tcase_add_test(tc, test_QuadrilateralCell);
+  tcase_add_test(tc, test_HexahedronCell);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);

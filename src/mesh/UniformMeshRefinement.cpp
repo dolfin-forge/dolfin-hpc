@@ -174,7 +174,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
   uint current_cell = 0;
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    cell_type.refineCell(*c, editor, current_cell);
+    cell_type.refine_cell(*c, editor, current_cell);
   }
 
   editor.close();

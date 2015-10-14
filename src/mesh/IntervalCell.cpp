@@ -5,22 +5,45 @@
 // Last changed: 2008-05-09
 //
 // Modified by Kristian Oelgaard, 2007.
+// Modified by Aurelien Larcher, 2015.
+//
+
+#include <dolfin/mesh/IntervalCell.h>
+
+#include <dolfin/common/constants.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
 
 #include <algorithm>
-#include <dolfin/common/constants.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
 
+//--- STATIC ------------------------------------------------------------------
+
+// UFC: Number of Entities
+uint const IntervalCell::NE[2] =
+{ 2, 1 };
+
+// UFC: Number of Vertices (per entity)
+uint const IntervalCell::NV[2] =
+{ 1, 2 };
+
+// UFC: Vertex Coordinates
+real const IntervalCell::VC[2][1] =
+{ { 0.0 }, { 1.0 } };
+
+// UFC: Edge - Incident Vertices
+uint const IntervalCell::EIV[1][2] =
+{ { 0, 1 } };
+
 //-----------------------------------------------------------------------------
 IntervalCell::IntervalCell() :
-    CellType(interval, point)
+    CellType(CellType::interval, CellType::point)
+{
+}
+//-----------------------------------------------------------------------------
+IntervalCell::~IntervalCell()
 {
 }
 //-----------------------------------------------------------------------------
@@ -31,38 +54,19 @@ uint IntervalCell::dim() const
 //-----------------------------------------------------------------------------
 uint IntervalCell::numEntities(uint dim) const
 {
-  switch (dim)
-    {
-    case 0:
-      return 2;  // vertices
-    case 1:
-      return 1;  // cells
-    default:
-      error("Illegal topological dimension %d for interval.", dim);
-      break;
-    }
-
-  return 0;
+  dolfin_assert(dim <= TD);
+  return NE[dim];
 }
 //-----------------------------------------------------------------------------
 uint IntervalCell::numVertices(uint dim) const
 {
-  switch (dim)
-    {
-    case 0:
-      return 1;  // vertices
-    case 1:
-      return 2;  // cells
-    default:
-      error("Illegal topological dimension %d for interval.", dim);
-      break;
-    }
-
-  return 0;
+  dolfin_assert(dim <= TD);
+  return NV[dim];
 }
 //-----------------------------------------------------------------------------
-uint IntervalCell::orientation(const Cell& cell) const
+uint IntervalCell::orientation(Cell const& cell) const
 {
+  dolfin_assert(cell.type() == this->cell_type);
   Point v01 = Point(cell.entities(0)[1]) - Point(cell.entities(0)[0]);
   Point n(-v01.y(), v01.x());
 
@@ -71,16 +75,17 @@ uint IntervalCell::orientation(const Cell& cell) const
 //-----------------------------------------------------------------------------
 void IntervalCell::createEntities(uint** e, uint dim, uint const* v) const
 {
-  // We don't need to create any entities
-  error("Don't know how to create entities of topological dimension %d.", dim);
+  // We do not need to create any entities
+  error("Invalid topological dimension for creation of entities: %d.", dim);
 }
 //-----------------------------------------------------------------------------
 void IntervalCell::orderEntities(Cell& cell) const
 {
   // Sort i - j for i > j: 1 - 0
+  dolfin_assert(cell.type() == this->cell_type);
 
   // Get mesh topology
-  MeshTopology& topology = cell.mesh().topology();
+  MeshTopology const& topology = cell.mesh().topology();
 
   // Sort local vertices in ascending order, connectivity 1 - 0
   if (topology(1, 0).size() > 0)
@@ -90,75 +95,106 @@ void IntervalCell::orderEntities(Cell& cell) const
   }
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::refineCell(Cell& cell, MeshEditor& editor,
+void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
                               uint& current_cell) const
 {
+  dolfin_assert(cell.type() == this->cell_type);
+
   // Get vertices
   uint const* v = cell.entities(0);
   dolfin_assert(v);
 
-  // Get offset for new vertex indices
+  // Add midpoint vertex
   uint const offset = cell.mesh().numVertices();
-
-  // Compute indices for the three new vertices
   uint const e0 = offset + cell.index();
-  uint c0[2] = { v[0], e0 };
-  uint c1[2] = { e0, v[1] };
 
   // Add the two new cells
-  editor.addCell(current_cell++, &c0[0]);
-  editor.addCell(current_cell++, &c1[0]);
+  uint const cv0[2] = { v[0], e0 };
+  editor.addCell(current_cell++, &cv0[0]);
+  uint const cv1[2] = { e0, v[1] };
+  editor.addCell(current_cell++, &cv1[0]);
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::volume(const MeshEntity& interval) const
+uint IntervalCell::num_refined_cells() const
 {
-  // Check that we get an interval
-  dolfin_assert(interval.dim() == 1);
+  return 2;
+}
+//-----------------------------------------------------------------------------
+uint IntervalCell::num_refined_vertices(uint dim) const
+{
+  dolfin_assert(dim <= TD);
+  return 1;
+}
+//-----------------------------------------------------------------------------
+bool IntervalCell::refinement_needs_entities(uint dim) const
+{
+  dolfin_assert(dim <= TD);
+  return true;
+}
+//-----------------------------------------------------------------------------
+real IntervalCell::volume(MeshEntity const& entity) const
+{
+  dolfin_assert(entity.dim() == TD);
+  dolfin_assert(entity.numEntities(0) == NE[0]);
 
   // Get mesh geometry
-  const MeshGeometry& geometry = interval.mesh().geometry();
+  MeshGeometry const& geometry = entity.mesh().geometry();
 
   // Get the coordinates of the two vertices
-  uint const* vertices = interval.entities(0);
-  const real* x0 = geometry.x(vertices[0]);
-  const real* x1 = geometry.x(vertices[1]);
+  uint const* vertices = entity.entities(0);
+  real const* x0 = geometry.x(vertices[0]);
+  real const* x1 = geometry.x(vertices[1]);
 
   // Compute length of interval (line segment)
   real sum = 0.0;
   for (uint i = 0; i < geometry.dim(); ++i)
   {
-    const real dx = x1[i] - x0[i];
-    sum += dx * dx;
+    sum += (x1[i] - x0[i]) * (x1[i] - x0[i]);
   }
 
   return std::sqrt(sum);
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::diameter(const MeshEntity& interval) const
+real IntervalCell::diameter(MeshEntity const& entity) const
 {
   // Diameter is same as volume for interval (line segment)
-  return volume(interval);
+  return volume(entity);
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::circumradius(const MeshEntity& interval) const
+real IntervalCell::circumradius(MeshEntity const& entity) const
 {
   // Circumradius is same as volume for interval (line segment)
-  return volume(interval);
+  return volume(entity);
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::normal(const Cell& cell, uint facet, uint i) const
+Point IntervalCell::midpoint(MeshEntity const& entity) const
 {
-  return normal(cell, facet)[i];
-}
-//-----------------------------------------------------------------------------
-Point IntervalCell::normal(const Cell& cell, uint facet) const
-{
-  // Get mesh geometry
-  const MeshGeometry& geometry = cell.mesh().geometry();
+  dolfin_assert(entity.dim() == TD);
+  dolfin_assert(entity.numEntities(0) == NE[0]);
 
-  // The normal vector is currently only defined for an interval in R^1
-  if (geometry.dim() != 1) error(
-      "The normal vector is only defined when the interval is in R^1");
+  // Get the coordinates of the vertices
+  MeshGeometry const& geometry = entity.mesh().geometry();
+  uint const* vertices = entity.entities(0);
+  real const* x0 = geometry.x(vertices[0]);
+  real const* x1 = geometry.x(vertices[1]);
+  Point p;
+  for (uint i = 0; i < geometry.dim(); ++i)
+  {
+    p[i] = 0.5 * ( x0[i] + x1[i] );
+  }
+  return p;
+}
+//-----------------------------------------------------------------------------
+Point IntervalCell::normal(Cell const& cell, uint facet) const
+{
+  dolfin_assert(cell.type() == this->cell_type);
+
+  // Get mesh geometry
+  MeshGeometry const& geometry = cell.mesh().geometry();
+  if (geometry.dim() != 1)
+  {
+    error("The normal vector is only defined when the interval is in R^1");
+  }
 
   // Get the two vertices as points
   uint const* vertices = cell.entities(0);
@@ -175,18 +211,28 @@ Point IntervalCell::normal(const Cell& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-dolfin::real IntervalCell::facetArea(const Cell& cell, uint facet) const
+real IntervalCell::facetArea(Cell const& cell, uint facet) const
 {
+  dolfin_assert(cell.type() == this->cell_type);
   return 0.0;
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::intersects(const MeshEntity& interval, const Point& p) const
+bool IntervalCell::intersects(MeshEntity const& e, Point const& p) const
 {
-  //FIXME: Due to constness inconsistency in Mesh
-  Mesh * m = const_cast<Mesh *>(&interval.mesh());
+  dolfin_assert(e.dim() == TD);
+  dolfin_assert(e.numEntities(0) == NE[0]);
+
+  // Get the coordinates of the vertices
+  MeshGeometry const& geometry = e.mesh().geometry();
+  uint const* vertices = e.entities(0);
+  real const* x0 = geometry.x(vertices[0]);
+  real const* x1 = geometry.x(vertices[1]);
+
   // Create points
-  Point v0 = Vertex(*m, interval.entities(0)[0]).point();
-  Point v1 = Vertex(*m, interval.entities(0)[1]).point();
+  Point v0;
+  std::memcpy(&v0[0], x0, geometry.dim()*sizeof(real));
+  Point v1;
+  std::memcpy(&v1[0], x1, geometry.dim()*sizeof(real));
 
   // Create vectors
   Point v01 = v1 - v0;
@@ -195,36 +241,60 @@ bool IntervalCell::intersects(const MeshEntity& interval, const Point& p) const
 
   // Check if the length of the sum of the two line segments vp0 and vp1 is
   // equal to the total length of the facet
-  if (std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS)
-  {
-    return true;
-  }
-  else
-  {
-#if DEBUG
-    message(2, "Point does not instersect with IntervalCell: "
-            "epsilon = %f",
-            std::abs(v01.norm() - vp0.norm() - vp1.norm()));
-#endif
-    return false;
-  }
+  return ( std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS );
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::intersects(const MeshEntity& interval, const Point& p1,
-                              const Point& p2) const
+bool IntervalCell::intersects(MeshEntity const& e, Point const& p1,
+                              Point const& p2) const
 {
-  // FIXME: Not implemented
-  error("Interval::intersects() not implemented");
+  dolfin_assert(e.dim() == TD);
+  dolfin_assert(e.numEntities(0) == NE[0]);
+
+  error("Collision of interval with segment not implemented");
 
   return false;
 }
 //-----------------------------------------------------------------------------
 std::string IntervalCell::description() const
 {
-  std::string s = "interval (simplex of topological dimension 1)";
-  return s;
+  return std::string("interval (simplex of topological dimension 1)");
+}
+//-----------------------------------------------------------------------------
+Mesh IntervalCell::create_reference_cell() const
+{
+  Mesh refcell;
+  MeshEditor me(refcell, CellType::interval, 1);
+  me.initVertices(2);
+  me.addVertex(0, VC[0]);
+  me.addVertex(1, VC[1]);
+  me.initCells(1);
+  uint const cv0[2] = { 0, 1 };
+  me.addCell(0, cv0);
+  me.close();
+  return refcell;
+}
+//-----------------------------------------------------------------------------
+void IntervalCell::disp() const
+{
+  message("IntervalCell");
+  begin(  "------------");
+  //---
+  //---
+  end();
+  skip();
+}
+//-----------------------------------------------------------------------------
+void IntervalCell::check(Cell& cell) const
+{
+  CellType::check(cell);
+  // Check that cell vertices are in ascending order (so are edge vertices then)
+  uint* cell_verts = cell.entities(0);
+  dolfin_assert(cell_verts != NULL);
+  if (cell_verts[1] < cell_verts[0])
+  {
+    error("Interval vertices are not in ascending order");
+  }
 }
 //-----------------------------------------------------------------------------
 
-}
-
+} /* namespace dolfin */

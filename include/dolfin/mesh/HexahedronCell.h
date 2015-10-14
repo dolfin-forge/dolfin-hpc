@@ -1,14 +1,10 @@
-// Copyright (C) 2007-2007 Kristian B. Oelgaard.
+// Copyright (C) 2015 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Anders Logg, 2008.
-// Modified by Aurelien Larcher, 2015.
 //
-// First added:  2007-12-12
-// Last changed: 2008-06-20
 
-#ifndef __DOLFIN_POINT_CELL_H
-#define __DOLFIN_POINT_CELL_H
+#ifndef __DOLFIN_HEXAHEDRON_CELL_H
+#define __DOLFIN_HEXAHEDRON_CELL_H
 
 #include <dolfin/mesh/CellType.h>
 
@@ -16,36 +12,48 @@ namespace dolfin
 {
 
 /**
- *  @class  PointCell
+ *  @class  HexahedronCell
  *
- *  @brief  This class implements functionality for point meshes.
+ *  @brief  This class implements functionality for hexahedral meshes.
  *
  */
 
-class PointCell : public CellType
+class HexahedronCell : public CellType
 {
   // UFC: Topological Dimension
-  static uint const TD = 0;
+  static uint const TD = 3;
 
   // UFC: Number of Entities
-  static uint const NE[1];
+  static uint const NE[4];
 
   // UFC: Number of Vertices (per entity)
-  static uint const NV[1];
+  static uint const NV[4];
 
   // UFC: Vertex Coordinates
-  static real const VC[1][1];
+  static real const VC[8][3];
+
+  // UFC: Edge - Incident Vertices
+  static uint const EIV[12][2];
+
+  // UFC: Edge - Non-Incident Vertices
+  static uint const ENV[12][6];
+
+  // UFC: Face - Incident Vertices
+  static uint const FIV[6][4];
+
+  // UFC: Face - Non-Incident Vertices
+  static uint const FNV[6][4];
 
 public:
 
   /// Specify cell type and facet type
-  PointCell();
+  HexahedronCell();
 
   ///
-  ~PointCell();
+  ~HexahedronCell();
 
   /// Clone pattern
-  CellType* clone() const { return new PointCell(*this); }
+  CellType* clone() const { return new HexahedronCell(*this); }
 
   /// Return topological dimension of cell
   uint dim() const;
@@ -65,8 +73,6 @@ public:
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
   void orderEntities(Cell& cell) const;
 
-  //--- REFINEMENT PATTERN ----------------------------------------------------
-
   /// Refine cell uniformly
   void refine_cell(Cell& cell, MeshEditor& editor, uint& current_cell) const;
 
@@ -82,13 +88,13 @@ public:
 
   //---------------------------------------------------------------------------
 
-  /// Compute (generalized) volume (area) of triangle
+  /// Compute (generalized) volume (area) of hexahedron
   real volume(MeshEntity const& entity) const;
 
-  /// Compute diameter of triangle
+  /// Compute diameter of hexahedron
   real diameter(MeshEntity const& entity) const;
 
-  /// Compute circumradius of triangle
+  /// Compute circumradius of hexahedron
   real circumradius(MeshEntity const& entity) const;
 
   /// Compute coordinates of midpoint
@@ -100,10 +106,10 @@ public:
   /// Compute the area/length of given facet with respect to the cell
   real facetArea(Cell const& cell, uint facet) const;
 
-  /// Check if point p intersects the cell
+  /// Check if point p intersects the entity
   bool intersects(MeshEntity const& e, Point const& p) const;
 
-  /// Check if points line connecting p1 and p2 cuts the cell
+  /// Check if points line connecting p1 and p2 cuts the entity
   bool intersects(MeshEntity const& e, Point const& p1, Point const& p2) const;
 
   /// Create a mesh consisting of the reference cell
@@ -120,8 +126,14 @@ public:
 
 private:
 
+  // Find local index of edge i according to ordering convention
+  uint findEdge(uint i, Cell const& cell) const;
+
+  // Find local index of face i according to ordering convention
+  uint findFace(uint i, Cell const& cell) const;
+
 };
 
 } /* namespace dolfin */
 
-#endif /* __DOLFIN_POINT_CELL_H */
+#endif  /* __DOLFIN_HEXAHEDRON_CELL_H */

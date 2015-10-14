@@ -387,7 +387,7 @@ class MeshGhostIterator
 
 public:
 
-  MeshGhostIterator(MeshDistributedData& distdata, uint i) :
+  MeshGhostIterator(MeshDistributedData const& distdata, uint i) :
       distdata_(distdata),
       dim_(i)
   {
@@ -433,8 +433,9 @@ public:
 
 private:
 
-  MeshDistributedData& distdata_;
-  uint const dim_;_set<uint>::iterator iter_;
+  MeshDistributedData const& distdata_;
+  uint const dim_;
+  _set<uint>::const_iterator iter_;
 
 };
 
@@ -451,7 +452,7 @@ class MeshSharedIterator
 
 public:
 
-  MeshSharedIterator(MeshDistributedData& distdata, uint i) :
+  MeshSharedIterator(MeshDistributedData const& distdata, uint i) :
       distdata_(distdata),
       dim_(i)
   {
@@ -493,9 +494,9 @@ public:
 
 private:
 
-  MeshDistributedData& distdata_;
+  MeshDistributedData const& distdata_;
   uint const dim_;
-  _set<uint>::iterator iter_;
+  _set<uint>::const_iterator iter_;
 };
 
 }

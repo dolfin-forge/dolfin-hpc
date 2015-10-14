@@ -192,8 +192,11 @@ BoundaryMesh& Mesh::exterior_boundary()
   ///FIXME: Improve hash logic to regenerate bounday at topology change
   if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
+    if(exterior_boundary_)
+    {
+      warning("Recomputing mesh exterior boundary");
+    }
     delete exterior_boundary_;
-    warning("Recomputing mesh exterior boundary");
     exterior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::exterior);
   }
   return *exterior_boundary_;
@@ -204,8 +207,11 @@ BoundaryMesh& Mesh::interior_boundary()
   ///FIXME: Improve hash logic to regenerate bounday at topology change
   if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
+    if(interior_boundary_)
+    {
+      warning("Recomputing mesh interior boundary");
+    }
     delete interior_boundary_;
-    warning("Recomputing mesh interior boundary");
     interior_boundary_ = new BoundaryMesh(*this, BoundaryMesh::interior);
   }
   return *interior_boundary_;
@@ -216,8 +222,11 @@ IntersectionDetector& Mesh::intersector()
   ///FIXME: Improve hash logic to regenerate detector at topology change
   if (intersection_detector_ == NULL)
   {
+    if(intersection_detector_)
+    {
+      warning("Recreating mesh intersection detector");
+    }
     delete intersection_detector_;
-    warning("Recreating mesh intersection detector");
     intersection_detector_ = new IntersectionDetector(*this);
   }
   return *intersection_detector_;

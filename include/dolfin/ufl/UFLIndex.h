@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLdict.h>
 #include <dolfin/ufl/UFLExpression.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFL_tuple.h>
 #include <dolfin/ufl/UFLtype.h>
 
 #include <dolfin/common/types.h>

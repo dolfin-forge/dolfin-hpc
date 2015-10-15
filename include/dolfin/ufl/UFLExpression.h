@@ -11,7 +11,7 @@
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLIntegral.h>
 #include <dolfin/ufl/UFLdict.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFL_tuple.h>
 
 namespace ufl
 {

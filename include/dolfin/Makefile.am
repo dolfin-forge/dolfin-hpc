@@ -260,7 +260,7 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLarray.h\
 				ufl/UFLdict.h\
 				ufl/UFLrepr.h\
-				ufl/UFLtuple.h\
+				ufl/UFL_tuple.h\
 				ufl/UFLtype.h\
 				ufl/UFLAlgebra.h\
 				ufl/UFLArgument.h\

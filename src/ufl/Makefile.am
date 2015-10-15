@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libdolfin_ufl.la
 libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLdict.cpp\
                            UFLrepr.cpp\
-                           UFLtuple.cpp\
+                           UFL_tuple.cpp\
                            UFLAlgebra.cpp\
                            UFLArgument.cpp\
                            UFLCell.cpp\

@@ -514,11 +514,8 @@ void DiscreteFunction::set_block(real *& values)
 //-----------------------------------------------------------------------------
 void DiscreteFunction::add_block(real *& values)
 {
-  if (!values)
-  {
-    values = new real[dofmap_.dofsmapping_size()];
-  }
   X_->add(values, dofmap_.dofsmapping_size(), dofmap_.dofsmapping());
+  sync_ghosts();
 }
 
 //-----------------------------------------------------------------------------

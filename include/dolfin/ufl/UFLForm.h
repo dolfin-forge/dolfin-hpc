@@ -9,7 +9,7 @@
 
 #include <dolfin/ufl/UFLFormData.h>
 #include <dolfin/ufl/UFLList.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFL_tuple.h>
 
 #include <ufc.h>
 

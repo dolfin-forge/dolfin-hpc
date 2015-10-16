@@ -8,5 +8,6 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 EXTRA_DIST = CellTypes/CellTypes.h\
              SubDomain/SubDomain.h\
              VertexNormal/VertexNormal.h\
+             StructuredGrid/StructuredGrid.h\
              UnitMeshes/UnitMeshes.h
 

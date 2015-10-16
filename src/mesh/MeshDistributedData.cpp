@@ -861,6 +861,22 @@ void MeshDistributedData::disp() const
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::check(bool throw_error) const
 {
+  /**
+   *  CHECK:
+   *
+   *  The distributed data, for each topological dimension, consists of:
+   *  - a mapping between local numbering and global numbering
+   *  - ownership information by mean of sets of shared and ghost entities.
+   *  - adjacency information by mean of sets of ranks sharing entities.
+   *
+   *  Assertions:
+   *  - The number of owned, shared and ghost entities should be consistent.
+   *  - Shared and ghost entities should be valid.
+   *  - The set of adjacent ranks for each topological dimension is a subset of
+   *    adjacent ranks of lower dimensional entities.
+   *
+   */
+
   bool ret = true;
   MeshDistributedData& disdata = const_cast<MeshDistributedData&>(*this);
 
@@ -869,9 +885,9 @@ bool MeshDistributedData::check(bool throw_error) const
   for (uint d = 0; d <= topological_dim_; ++d)
   {
     // Check consistency of count
-    ret &= disdata.num_owned(d) <= disdata.num_ghost(d);
     ret &= disdata.num_ghost(d) <= disdata.num_shared(d);
     ret &= disdata.num_shared(d) <= disdata.num_local(d);
+    ret &= disdata.num_owned(d) <= disdata.num_local(d);
     ret &= disdata.num_local(d) <= disdata.num_global(d);
 
     // Check consistency of local to global numbering
@@ -906,6 +922,71 @@ bool MeshDistributedData::check(bool throw_error) const
       }
     }
   }
+  return ret;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::check_shared(uint local_index, uint dim,
+                                       bool throw_error) const
+{
+  /**
+   *  CHECK:
+   *
+   *  A shared entity is located on the interior boundary.
+   *
+   *  Assertions:
+   *  - A shared entity is marked as shared.
+   *  - A shared entity has at least one adjacent rank.
+   *  - All adjacent ranks should be valid.
+   *
+   */
+
+  bool ret = true;
+  // A shared entity is (wait for it) ... shared *dong*
+  ret &= this->is_shared(local_index, dim);
+  // Check adjacency
+  _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+  // A shared entity should have adjacents
+  ret &= (!ai.empty());
+  // Check that all adjacents have a valid rank and listed as adjacent
+  _set<uint> const& aa = this->get_adj_ranks(dim);
+  for (_set<uint>::const_iterator it = ai.begin(); it != ai.end(); ++it)
+  {
+    ret &= MPI::is_valid_rank(*it);
+    ret &= (aa.count(*it) > 0);
+  }
+  //
+  return ret;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::check_ghost(uint local_index, uint dim,
+                                      bool throw_error) const
+{
+  /**
+   *  CHECK:
+   *
+   *  A ghost entity is shared and is not owned by the process.
+   *
+   *  Assertions:
+   *  - A ghost entity is shared.
+   *  - A ghost entity is marked as ghost
+   *  - A ghost entity is not owned by the process.
+   *  - The owner process is an adjacent rank.
+   *
+   */
+
+  bool ret = true;
+  // Check shared assertions
+  ret &= this->check_shared(local_index, dim, throw_error);
+  // A ghost entity is (wait for it) ... ghost *dong*
+  ret &= this->is_ghost(local_index, dim);
+  // Check ownership
+  uint const owner = this->get_owner(local_index, dim);
+  // The owner is not self
+  ret &= (owner != MPI::processNumber());
+  // The owner is adjacent
+  _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+  ret &= (ai.count(owner) > 0);
+  //
   return ret;
 }
 //-----------------------------------------------------------------------------

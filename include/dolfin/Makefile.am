@@ -160,6 +160,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryComputation.h\
 				mesh/BoundaryMesh.h\
+				mesh/BoundingBox.h\
 				mesh/Box.h\
 				mesh/Cell.h\
 				mesh/CellType.h\
@@ -220,6 +221,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
 				mesh/SubDomain.h\
+				mesh/StructuredGrid.h\
 				mesh/TetrahedronCell.h\
 				mesh/TopologyComputation.h\
 				mesh/TriangleCell.h\

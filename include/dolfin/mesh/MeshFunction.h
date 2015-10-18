@@ -136,6 +136,35 @@ template<class T>
       return *this;
     }
 
+    /// Equality
+    bool operator==(const MeshFunction<T>& other)
+    {
+      if(this == &other)
+      {
+        return true;
+      }
+      if (size_ != other.size_)
+      {
+        return false;
+      }
+      if (size_ == 0)
+      {
+        return true;
+      }
+      bool cmp = true;
+      for (uint i = 0; i < size_; i++)
+      {
+        cmp &= (values_[i] == other.values_[i]);
+      }
+      return cmp;
+    }
+
+    /// Equality
+    bool operator!=(const MeshFunction<T>& other)
+    {
+      return !(*this == other);
+    }
+
     /// Initialize mesh function for given topological dimension
     void init(uint dim)
     {

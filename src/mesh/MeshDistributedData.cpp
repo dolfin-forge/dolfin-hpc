@@ -97,6 +97,69 @@ MeshDistributedData const& MeshDistributedData::operator=(
   return *this;
 }
 //-----------------------------------------------------------------------------
+bool MeshDistributedData::operator==(MeshDistributedData const& other) const
+{
+  if(this == &other)
+  {
+    return true;
+  }
+  //
+  if (topological_dim_ != other.topological_dim_)
+  {
+    return false;
+  }
+  //
+  if (cell_dim_ != other.cell_dim_)
+  {
+    return false;
+  }
+  //
+  if (facet_dim_ != other.facet_dim_)
+  {
+    return false;
+  }
+  //
+  if (max_global_index_ != other.max_global_index_)
+  {
+    return false;
+  }
+  //
+  for (uint i = 0; i < MAX_SIZE; ++i)
+  {
+    bool cmp = true;
+    cmp &= (valid_numbering_[i] == other.valid_numbering_[i] );
+    cmp &= (num_global_[i] == other.num_global_[i] );
+    cmp &= (global_indices_[i] == other.global_indices_[i] );
+    cmp &= (local_indices_[i] == other.local_indices_[i] );
+    cmp &= (finalized_[i] == other.finalized_[i] );
+    cmp &= (cached_global_size_[i] == other.cached_global_size_[i] );
+    for(uint j = 0; j < cached_global_size_[i]; ++j)
+    {
+      cmp &= (cached_global_indices_[i][j] == other.cached_global_indices_[i][j] );
+    }
+    cmp &= (valid_ownership_[i] == other.valid_ownership_[i] );
+    cmp &= (shared_[i] == other.shared_[i] );
+    cmp &= (adjacent_ranks_[i] == other.adjacent_ranks_[i] );
+    cmp &= (shared_adj_[i] == other.shared_adj_[i] );
+    cmp &= (ghost_[i] == other.ghost_[i] );
+    cmp &= (ghost_owner_[i] == other.ghost_owner_[i] );
+    cmp &= (valid_mapping_[i] == other.valid_mapping_[i] );
+    cmp &= (shared_mapping_[i] == other.shared_mapping_[i] );
+    cmp &= (ghost_mapping_[i] == other.ghost_mapping_[i] );
+    if(!cmp)
+    {
+      return false;
+    }
+  }
+  //
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::operator!=(MeshDistributedData const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
 bool MeshDistributedData::empty() const
 {
   return (

@@ -47,6 +47,12 @@ public:
   /// Destructor
   ~MeshDistributedData();
 
+  /// Equality
+  bool operator==(MeshDistributedData const& other) const;
+
+  /// Non-equality
+  bool operator!=(MeshDistributedData const& other) const;
+
   /// Assignment
   MeshDistributedData const& operator=(MeshDistributedData const& other);
 

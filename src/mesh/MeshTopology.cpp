@@ -43,6 +43,53 @@ MeshTopology::~MeshTopology()
   clear();
 }
 //-----------------------------------------------------------------------------
+bool MeshTopology::operator==(MeshTopology const& other) const
+{
+  if (this == &other)
+  {
+    return true;
+  }
+  //
+  if (dim_ != other.dim_)
+  {
+    return false;
+  }
+  //
+  for (uint i = 0; i <= dim_; ++i)
+  {
+    if (this->size(i) != other.size(i))
+    {
+      return false;
+    }
+  }
+  //
+  if (connectivity_)
+  {
+    for (uint d0 = 0; d0 <= dim_; ++d0)
+    {
+      for (uint d1 = 0; d1 <= dim_; ++d1)
+      {
+        if (connectivity_[d0][d1] != other.connectivity_[d0][d1])
+        {
+          return false;
+        }
+      }
+    }
+  }
+  //
+  if (distdata_ != other.distdata_)
+  {
+    return false;
+  }
+  //
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::operator!=(MeshTopology const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
 MeshTopology const& MeshTopology::operator=(MeshTopology const& topology)
 {
   // Clear old data if any

@@ -52,6 +52,12 @@ public:
   /// Assignment
   MeshTopology const& operator=(MeshTopology const& topology);
 
+  /// Equality
+  bool operator==(MeshTopology const& other) const;
+
+  /// Non-equality
+  bool operator!=(MeshTopology const& other) const;
+
   /// Return topological dimension
   uint dim() const;
 

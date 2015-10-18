@@ -65,6 +65,47 @@ MeshConnectivity const& MeshConnectivity::operator=(
   return *this;
 }
 //-----------------------------------------------------------------------------
+bool MeshConnectivity::operator==(MeshConnectivity const& other) const
+{
+  if (this == &other)
+  {
+    return true;
+  }
+  //
+  if (size_ != other.size_)
+  {
+    return false;
+  }
+  //
+  if (num_entities_ != other.num_entities_)
+  {
+    return false;
+  }
+  //
+  for (uint i = 0; i < size_; ++i)
+  {
+    if (connections_[i] != other.connections_[i])
+    {
+      return false;
+    }
+  }
+  //
+  for (uint e = 0; e <= num_entities_; ++e)
+  {
+    if (offsets_[e] != other.offsets_[e])
+    {
+      return false;
+    }
+  }
+  //
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool MeshConnectivity::operator!=(MeshConnectivity const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
 void MeshConnectivity::clear()
 {
   size_ = 0;

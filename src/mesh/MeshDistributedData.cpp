@@ -154,7 +154,7 @@ void MeshDistributedData::flush_numbering_data(uint dim)
   global_indices_[dim].clear();
   local_indices_[dim].clear();
   valid_numbering_[dim] = false;
-
+  num_global_[dim] = 0;
   flush_numbering_cache(dim);
 }
 //-----------------------------------------------------------------------------
@@ -842,16 +842,20 @@ void MeshDistributedData::disp() const
        << endl;
   skip();
   cout << "Number of shared entities : " << endl;
+  begin("");
   for (uint d = 0; d < topological_dim_; ++d)
   {
-    cout << "  - dim " << " : " << (uint) this->num_shared(d) << endl;
+    cout << "dim = " << d << ": " << (uint) this->num_shared(d) << endl;
   }
+  end();
   skip();
   cout << "Number of ghost entities : " << endl;
+  begin("");
   for (uint d = 0; d < topological_dim_; ++d)
   {
-    cout << "  - dim " << " : " << (uint) this->num_ghost(d) << endl;
+    cout << "dim = " << d << ": " << (uint) this->num_ghost(d) << endl;
   }
+  end();
   end();
 }
 //-----------------------------------------------------------------------------

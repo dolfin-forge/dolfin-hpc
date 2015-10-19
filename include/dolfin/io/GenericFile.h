@@ -68,6 +68,8 @@ namespace dolfin
     
     void read_not_impl(const std::string object);
     void write_not_impl(const std::string object);
+    void parallel_read_not_impl(const std::string object);
+    void parallel_write_not_impl(const std::string object);
 
     std::string filename;
     std::string type;

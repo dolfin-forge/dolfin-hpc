@@ -170,6 +170,24 @@ void GenericFile::write_not_impl(const std::string object)
 		object.c_str(), type.c_str());
 }
 //-----------------------------------------------------------------------------
+void GenericFile::parallel_read_not_impl(const std::string object)
+{
+  if(MPI::numProcesses() > 1)
+  {
+    error("Unable to read objects of type %s from %s files in parallel.",
+          object.c_str(), type.c_str());
+  }
+}
+//-----------------------------------------------------------------------------
+void GenericFile::parallel_write_not_impl(const std::string object)
+{
+  if(MPI::numProcesses() > 1)
+  {
+    error("Unable to write objects of type %s to %s files in parallel.",
+          object.c_str(), type.c_str());
+  }
+}
+//-----------------------------------------------------------------------------
 void GenericFile::set_counter(uint value)
 {
   counter = value;

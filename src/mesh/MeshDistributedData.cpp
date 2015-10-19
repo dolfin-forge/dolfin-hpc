@@ -418,11 +418,13 @@ void MeshDistributedData::set_num_global(uint dim, uint const num_global)
 {
   if (dim > cell_dim_)
   {
-    error("Trying to set global number of entities for invalid dimension.");
+    error("Trying to set global number of entities for invalid dimension %d "
+          " for mesh of topological dimension %d", dim, cell_dim_);
   }
   if (num_global < topology_.size(dim))
   {
-    error("Trying to set global number of entities lower than local number.");
+    error("Trying to set global number of entities of dimension %d equal to %d "
+          "lower than local number %d.", dim, num_global, topology_.size(dim));
   }
   num_global_[dim] = num_global;
 }
@@ -438,6 +440,10 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
   {
     offset = 0;
     uint num_owned = this->num_owned(dim);
+    if(num_owned == 0)
+    {
+      error("Mesh entities have not been created for dimension %d", dim);
+    }
 
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);

@@ -118,7 +118,7 @@ namespace dolfin
 
   private:
 
-    GenericFile* file;
+    GenericFile * file_;
 
   };
 

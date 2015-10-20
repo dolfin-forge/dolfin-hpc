@@ -75,6 +75,87 @@ namespace dolfin
 #define _map std::map
 #define _set std::set
 #endif
+
+//-----------------------------------------------------------------------------
+
+/// Equivalence operator for unordered maps to be used for assertion checking
+template<class K, class V> bool operator==(_map<K,V> const& m0,
+                                           _map<K,V> const& m1)
+{
+  // The distance from begin to end should be the same
+  if (m0.size() != m1.size())
+  {
+    return false;
+  }
+  // Both groups returned by equal range have equal size and there exists
+  // a permutation such that the elements are equal two by two.
+  // In this case this is just pair comparison.
+  typename _map<K, V>::const_iterator it1;
+  for (typename _map<K, V>::const_iterator it0 = m0.begin(); it0 != m0.end();
+       ++it0)
+  {
+    it1 = m1.find(it0->first);
+    if(it1 != m1.end())
+    {
+      if(it1->second != it0->second)
+      {
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
+  }
+  // Alrighty
+  return true;
+}
+
+/// !Equivalence operator for unordered maps to be used for assertion checking
+template<class K, class V> bool operator!=(_map<K,V> const& m0,
+                                           _map<K,V> const& m1)
+{
+  return !(m0 == m1);
+}
+
+/// Equivalence operator for unordered maps to be used for assertion checking
+template<class T> bool operator==(_set<T> const& m0, _set<T> const& m1)
+{
+  // The distance from begin to end should be the same
+  if (m0.size() != m1.size())
+  {
+    return false;
+  }
+  // Both groups returned by equal range have equal size and there exists
+  // a permutation such that the elements are equal two by two.
+  // In this case this is just an element comparison.
+  typename _set<T>::const_iterator it1;
+  for (typename _set<T>::const_iterator it0 = m0.begin(); it0 != m0.end();
+       ++it0)
+  {
+    it1 = m1.find(*it0);
+    if(it1 != m1.end())
+    {
+      if(*it1 != *it0)
+      {
+        return false;
+      }
+    }
+    else
+    {
+      return false;
+    }
+  }
+  // Alrighty
+  return true;
+}
+
+/// !Equivalence operator for unordered maps to be used for assertion checking
+template<class T> bool operator!=(_set<T> const& m0, _set<T> const& m1)
+{
+  return !(m0 == m1);
+}
+
 }
 
 #endif

@@ -399,6 +399,7 @@ void BinaryFile::write_function(
 
       // Compute new vertex based offset
       uint num_values = value_dim * mesh.distdata().num_owned(0);
+      offset = 0;
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                  MPI::DOLFIN_COMM);

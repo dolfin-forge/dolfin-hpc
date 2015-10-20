@@ -147,6 +147,7 @@ void DMesh::init(Mesh& mesh)
   // Assume uniform refinement
   uint num_new = mesh.topology().size(1);
 #ifdef HAVE_MPI
+  _start_offset = 0;
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&num_new, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
              MPI::DOLFIN_COMM);

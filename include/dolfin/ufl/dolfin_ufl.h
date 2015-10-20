@@ -6,7 +6,7 @@
 #include <dolfin/ufl/UFLarray.h>
 #include <dolfin/ufl/UFLdict.h>
 #include <dolfin/ufl/UFLrepr.h>
-#include <dolfin/ufl/UFLtuple.h>
+#include <dolfin/ufl/UFL_tuple.h>
 #include <dolfin/ufl/UFLtype.h>
 #include <dolfin/ufl/UFLAlgebra.h>
 #include <dolfin/ufl/UFLArgument.h>

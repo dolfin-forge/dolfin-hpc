@@ -68,6 +68,7 @@ namespace dolfin
     friend void sax_start_element (void *ctx, const xmlChar *name, const xmlChar **attrs);
     friend void sax_end_element   (void *ctx, const xmlChar *name);
     #endif
+
   private:
     
     void parseFile();
@@ -75,7 +76,7 @@ namespace dolfin
 
     FILE* openFile();
     void  closeFile(FILE* fp);
-    
+
     // Implementation for specific class (output)
     XMLObject* xmlObject;
 

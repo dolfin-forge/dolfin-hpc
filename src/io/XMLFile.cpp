@@ -49,6 +49,7 @@
 #include <dolfin/io/XMLGraph.h>
 #include <dolfin/io/XMLFile.h>
 
+
 namespace dolfin
 {
 
@@ -269,80 +270,388 @@ void XMLFile::operator<<(GenericMatrix& A)
 //-----------------------------------------------------------------------------
 void XMLFile::operator<<(Mesh& mesh)
 {
-  // Open file
-  FILE *fp = openFile();
 
-  // Get cell type
-  CellType::Type cell_type = mesh.type().cellType();
-
-  // Write mesh in XML format
-  fprintf(fp, "  <mesh celltype=\"%s\" dim=\"%u\">\n",
-          CellType::type2string(cell_type).c_str(), mesh.geometry().dim());
-
-  fprintf(fp, "    <vertices size=\"%u\">\n", mesh.numVertices());
-
-  for (VertexIterator v(mesh); !v.end(); ++v)
+  if(MPI::numProcesses() == 0)
   {
-    Point p = v->point();
+    this->write();
+
+    // Open file
+    FILE *fp = openFile();
+
+    // Get cell type
+    CellType::Type cell_type = mesh.type().cellType();
+
+    // Write mesh in XML format
+    fprintf(fp, "  <mesh celltype=\"%s\" dim=\"%u\">\n",
+            CellType::type2string(cell_type).c_str(), mesh.geometry().dim());
+
+    fprintf(fp, "    <vertices size=\"%u\">\n", mesh.numVertices());
 
     switch (mesh.geometry().dim())
       {
       case 1:
-        fprintf(fp, "      <vertex index=\"%u\" x=\"%g\"/>\n", v->index(),
-                p.x());
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          fprintf(fp,
+                  "      <vertex index=\"%u\" x=\"%g\"/>\n", v->index(),
+                  v->x(0));
+        }
         break;
       case 2:
-        fprintf(fp, "      <vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
-                v->index(), p.x(), p.y());
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          fprintf(fp,
+                  "      <vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
+                  v->index(), v->x(0), v->x(1));
+        }
         break;
       case 3:
-        fprintf(fp,
-                "      <vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
-                v->index(), p.x(), p.y(), p.z());
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          fprintf(fp,
+                  "      <vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
+                  v->index(), v->x(0), v->x(1), v->x(2));
+        }
         break;
       default:
         error("The XML mesh file format only supports 1D, 2D and 3D meshes.");
         break;
       }
-  }
 
-  fprintf(fp, "    </vertices>\n");
-  fprintf(fp, "    <cells size=\"%u\">\n", mesh.numCells());
-
-  for (CellIterator c(mesh); !c.end(); ++c)
-  {
-    uint* vertices = c->entities(0);
-    dolfin_assert(vertices);
+    fprintf(fp, "    </vertices>\n");
+    fprintf(fp, "    <cells size=\"%u\">\n", mesh.numCells());
 
     switch (cell_type)
       {
       case CellType::interval:
-        fprintf(fp, "      <interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
-                c->index(), vertices[0], vertices[1]);
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          fprintf(fp,
+                  "      <interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
+                  c->index(), vertices[0], vertices[1]);
+        }
         break;
       case CellType::triangle:
-        fprintf(
-            fp,
-            "      <triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
-            c->index(), vertices[0], vertices[1], vertices[2]);
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          fprintf(
+              fp,
+              "      <triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
+              c->index(), vertices[0], vertices[1], vertices[2]);
+        }
         break;
       case CellType::tetrahedron:
-        fprintf(
-            fp,
-            "      <tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
-            c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          fprintf(
+              fp,
+              "      <tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+              c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
+        }
         break;
       default:
         error("Unknown cell type: %u.", cell_type);
         break;
       }
+
+    fprintf(fp, "    </cells>\n");
+    fprintf(fp, "  </mesh>\n");
+
+    // Close file
+    closeFile(fp);
   }
+  else
+  {
+    if(!mesh.is_distributed())
+    {
+      error("Cannot write serial mesh in parallel");
+    }
 
-  fprintf(fp, "    </cells>\n");
-  fprintf(fp, "  </mesh>\n");
+#ifdef ENABLE_MPIIO
 
-  // Close file
-  closeFile(fp);
+    //-------------------------------------------------------------------------
+    // Delete if file exists
+    MPI_File_delete(filename.c_str(), MPI_INFO_NULL );
+
+    // Open file
+    MPI_File fh;
+    MPI_Offset curr_offset;
+    MPI_File_open(dolfin::MPI::DOLFIN_COMM, filename.c_str(),
+                  MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+    MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, "native", MPI_INFO_NULL );
+
+    // Write DOLFIN XML format header
+    std::string const hdr =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+        "<dolfin xmlns:dolfin=\"http://www.fenics.org/dolfin/\">\n";
+    MPI_File_write_all(fh, hdr.c_str(), hdr.size(), MPI_CHAR,
+                       MPI_STATUS_IGNORE);
+    curr_offset += hdr.size();
+    //-------------------------------------------------------------------------
+    // Mesh properties
+    uint const tdim = mesh.topology().dim();
+    uint const gdim = mesh.geometry().dim();
+    CellType::Type cell_type = mesh.type().cellType();
+    std::string const cell_str(CellType::type2string(cell_type));
+    MeshDistributedData const& distdata = mesh.distdata();
+    uint const num_owned_vertices = distdata.num_owned(0);
+    uint const num_global_vertices = distdata.num_global(0);
+    uint const num_owned_cells = distdata.num_owned(tdim);
+    uint const num_global_cells = distdata.num_global(tdim);
+
+    // Open mesh and vertices
+    std::stringstream s0;
+    s0
+    << "<mesh celltype=\"" << cell_str << "\" " << "dim=\"" << gdim << "\">\n"
+    << "<vertices size=\"" << num_global_vertices << "\">\n";
+    MPI_File_write_all(fh, s0.str().c_str(), s0.str().size(), MPI_CHAR,
+                       MPI_STATUS_IGNORE);
+    curr_offset += s0.str().size();
+
+    // Determine maximum size of line to allocate buffer
+    uint const max_digits = 24; // %g takes the shortest.
+    std::stringstream svline;
+    svline << "<vertex index=\"" << num_global_vertices << "\"";
+    for(uint i = 0; i < gdim; ++i)
+    {
+      // Conservative
+      svline << " x=\"" << std::setw(max_digits) << "0" << "\"";
+    }
+    svline << "/>\n";
+
+    // Fill buffer
+    uint vsize = 0;
+    uint vline = 0;
+    uint vline_max = svline.str().size();
+    uint const vsize_max = vline_max * num_owned_vertices;
+    char * vbuffer = new char[vsize_max];
+    switch (gdim)
+      {
+      case 1:
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          if(!v->is_ghost())
+          {
+            vline = sprintf(vbuffer + vsize,
+              "<vertex index=\"%u\" x=\"%g\"/>\n",
+              v->global_index(), v->x(0));
+            dolfin_assert(vline <= vline_max);
+            vsize += vline;
+          }
+        }
+        break;
+      case 2:
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          if(!v->is_ghost())
+          {
+            vline = sprintf(vbuffer + vsize,
+              "<vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
+              v->global_index(), v->x(0), v->x(1));
+            dolfin_assert(vline <= vline_max);
+            vsize += vline;
+          }
+        }
+        break;
+      case 3:
+        for (VertexIterator v(mesh); !v.end(); ++v)
+        {
+          if(!v->is_ghost())
+          {
+            vline = sprintf(vbuffer + vsize,
+              "<vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
+              v->global_index(), v->x(0), v->x(1), v->x(2));
+            dolfin_assert(vline <= vline_max);
+            vsize += vline;
+          }
+        }
+        break;
+      default:
+        error("The XML mesh file format only supports 1D, 2D and 3D meshes.");
+        break;
+      }
+
+    // Write buffer
+    if(vsize > vsize_max)
+    {
+      error("Buffer overflow writing vertices: %d > %d", vsize, vsize_max);
+    }
+    uint voffset = 0;
+#if ( MPI_VERSION > 1 )
+    MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+               dolfin::MPI::DOLFIN_COMM);
+#else
+    MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+               dolfin::MPI::DOLFIN_COMM);
+    voffset -= vsize;
+#endif
+    MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer, vsize, MPI_CHAR,
+                          MPI_STATUS_IGNORE);
+    MPI_Allreduce(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                  dolfin::MPI::DOLFIN_COMM);
+    curr_offset += voffset;
+    delete [] vbuffer;
+
+    // Close vertices and open cells
+    std::stringstream s1;
+    s1
+    << "</vertices>\n"
+    << "<cells size=\"" << num_global_cells << "\">\n";
+    MPI_File_write_at_all(fh, curr_offset, s1.str().c_str(), s1.str().size(),
+                          MPI_CHAR, MPI_STATUS_IGNORE);
+    curr_offset += s1.str().size();
+
+    // Determine maximum size of line to allocate buffer
+    std::stringstream scline;
+    scline << "<" << cell_str << " index=\""<< num_global_cells << "\"";
+    for (uint i = 0; i < mesh.type().numEntities(0); ++i)
+    {
+      scline << "<" << cell_str
+             << " v" << i << "=\""<< num_global_vertices << "\"";
+    }
+    scline << "/>\n";
+
+    // Fill buffer
+    uint csize = 0;
+    uint cline = 0;
+    uint const cline_max = scline.str().size();
+    uint const csize_max = cline_max * num_owned_cells;
+    char * cbuffer = new char[csize_max];
+    switch (cell_type)
+      {
+      case CellType::interval:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          cline = sprintf(cbuffer + csize,
+            "<interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
+            c->global_index(),
+            distdata.get_vertex_global(vertices[0]),
+            distdata.get_vertex_global(vertices[1]));
+          dolfin_assert(cline <= cline_max);
+          csize += cline;
+        }
+        break;
+      case CellType::triangle:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          cline = sprintf(cbuffer + csize,
+            "<triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
+            c->global_index(),
+            distdata.get_vertex_global(vertices[0]),
+            distdata.get_vertex_global(vertices[1]),
+            distdata.get_vertex_global(vertices[2]));
+          dolfin_assert(cline <= cline_max);
+          csize += cline;
+        }
+        break;
+      case CellType::tetrahedron:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          cline = sprintf(cbuffer + csize,
+            "<tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+            c->global_index(),
+            distdata.get_vertex_global(vertices[0]),
+            distdata.get_vertex_global(vertices[1]),
+            distdata.get_vertex_global(vertices[2]),
+            distdata.get_vertex_global(vertices[3]));
+          dolfin_assert(cline <= cline_max);
+          csize += cline;
+        }
+        break;
+
+      case CellType::quadrilateral:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          cline = sprintf(cbuffer + csize,
+            "<quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+            c->global_index(),
+            distdata.get_vertex_global(vertices[0]),
+            distdata.get_vertex_global(vertices[1]),
+            distdata.get_vertex_global(vertices[2]),
+            distdata.get_vertex_global(vertices[3]));
+          dolfin_assert(cline <= cline_max);
+          csize += cline;
+        }
+        break;
+      case CellType::hexahedron:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          cline = sprintf(cbuffer + csize,
+            "<hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",
+            c->global_index(),
+            distdata.get_vertex_global(vertices[0]),
+            distdata.get_vertex_global(vertices[1]),
+            distdata.get_vertex_global(vertices[2]),
+            distdata.get_vertex_global(vertices[3]),
+            distdata.get_vertex_global(vertices[4]),
+            distdata.get_vertex_global(vertices[5]),
+            distdata.get_vertex_global(vertices[6]),
+            distdata.get_vertex_global(vertices[7]));
+          dolfin_assert(cline <= cline_max);
+          csize += cline;
+        }
+        break;
+      default:
+        error("Unknown cell type: %u.", cell_type);
+        break;
+      }
+
+    // Write buffer
+    if(csize > csize_max)
+    {
+      error("Buffer overflow writing cells: %d > %d", csize, csize_max);
+    }
+    uint coffset = 0;
+#if ( MPI_VERSION > 1 )
+    MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+               dolfin::MPI::DOLFIN_COMM);
+#else
+    MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+               dolfin::MPI::DOLFIN_COMM);
+    coffset -= csize;
+#endif
+    MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer, csize, MPI_CHAR,
+                          MPI_STATUS_IGNORE);
+    MPI_Allreduce(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                  dolfin::MPI::DOLFIN_COMM);
+    curr_offset += coffset;
+    delete [] cbuffer;
+
+    // Close cells and mesh
+    std::string const s2("</cells>\n</mesh>\n");
+    MPI_File_write_at_all(fh, curr_offset, s2.c_str(), s2.size(), MPI_CHAR,
+                          MPI_STATUS_IGNORE);
+    curr_offset += s2.size();
+
+    //-------------------------------------------------------------------------
+    // Write DOLFIN XML format footer
+    std::string const ftr("</dolfin>\n");
+    MPI_File_write_at_all(fh, curr_offset, ftr.c_str(), ftr.size(), MPI_CHAR,
+                          MPI_STATUS_IGNORE);
+
+    // Close file
+    MPI_File_close(&fh);
+
+#else
+    parallel_write_not_impl("Mesh");
+#endif
+  }
 
   message(1, "Saved mesh to file %s in DOLFIN XML format.", filename.c_str());
 }
@@ -555,7 +864,10 @@ void XMLFile::operator<<(Graph& graph)
   const uint* edge_weights = graph.edgeWeights();
   const uint* vertex_weights = graph.vertexWeights();
 
-  dolfin_assert(connections); dolfin_assert(offsets); dolfin_assert(edge_weights); dolfin_assert(vertex_weights);
+  dolfin_assert(connections);
+  dolfin_assert(offsets);
+  dolfin_assert(edge_weights);
+  dolfin_assert(vertex_weights);
 
   // Write vertice header
   fprintf(fp, "    <vertices size=\"%u\">\n", graph.numVertices());

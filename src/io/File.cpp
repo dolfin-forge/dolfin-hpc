@@ -31,7 +31,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-File::File(const std::string& filename)
+File::File(const std::string& filename) :
+    file_(NULL)
 {
   // Choose file type base on suffix.
 
@@ -40,33 +41,33 @@ File::File(const std::string& filename)
 
   if ( filename.rfind(".xml") != filename.npos )
 #ifdef HAVE_XML
-    file = new XMLFile(filename);
+    file_ = new XMLFile(filename);
 #else
     error("DOLFIN is not built with XML support");
 #endif
   else if ( filename.rfind(".xml.gz") != filename.npos )
 #ifdef HAVE_XML
-    file = new XMLFile(filename);
+    file_ = new XMLFile(filename);
 #else
     error("DOLFIN is not built with XML support");
 #endif
   else if ( filename.rfind(".bin") != filename.npos)
-    file = new BinaryFile(filename);
+    file_ = new BinaryFile(filename);
   else if ( filename.rfind(".m") != filename.npos )
-    file = new OctaveFile(filename);
+    file_ = new OctaveFile(filename);
   else if ( filename.rfind(".off") != filename.npos )
-    file = new OFFFile(filename);
+    file_ = new OFFFile(filename);
   else if ( filename.rfind(".pvd") != filename.npos )
-    file = new VTKFile(filename);
+    file_ = new VTKFile(filename);
   else if ( filename.rfind(".raw") != filename.npos )
-    file = new RAWFile(filename);
+    file_ = new RAWFile(filename);
   else if ( filename.rfind(".stl") != filename.npos )
-    file = new STLFile(filename);
+    file_ = new STLFile(filename);
   else if ( filename.rfind(".xyz") != filename.npos )
-    file = new XYZFile(filename);
+    file_ = new XYZFile(filename);
   else
   {
-    file = 0;
+    file_ = NULL;
     error("Unknown file type for \"%s\".", filename.c_str());
   }
 }
@@ -76,206 +77,209 @@ File::File(const std::string& filename, Type type)
   switch ( type ) {
 #ifdef HAVE_XML
   case xml:
-    file = new XMLFile(filename);
+    file_ = new XMLFile(filename);
     break;
 #endif
   case binary:
-    file = new BinaryFile(filename);
+    file_ = new BinaryFile(filename);
     break;
   case matlab:
-    file = new MatlabFile(filename);
+    file_ = new MatlabFile(filename);
     break;
   case octave:
-    file = new OctaveFile(filename);
+    file_ = new OctaveFile(filename);
     break;
   case vtk:
-    file = new VTKFile(filename);
+    file_ = new VTKFile(filename);
     break;
   default:
-    file = 0;
+    file_ = NULL;
     error("Unknown file type for \"%s\".", filename.c_str());
     break;
   }
 }
 //-----------------------------------------------------------------------------
-File::File(const std::string& filename, real const& t)
+File::File(const std::string& filename, real const& t) :
+    file_(NULL)
 {
 
   if ( filename.rfind(".pvd") != filename.npos )
-    file = new VTKFile(filename, t);
+  {
+    file_ = new VTKFile(filename, t);
+  }
   else if( filename.rfind(".bin") != filename.npos)
-    file = new BinaryFile(filename , t);
+  {
+    file_ = new BinaryFile(filename , t);
+  }
   else
   {
-    file = 0;
+    file_ = NULL;
     error("Unknown file type for time dependent \"%s\".", filename.c_str());
   }
 }
 //-----------------------------------------------------------------------------
 File::~File()
 {
-  if ( file )
-    delete file;
-  file = 0;
+  delete file_;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(GenericVector& x)
 {
-  file->read();
+  file_->read();
 
-  *file >> x;
+  *file_ >> x;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(GenericMatrix& A)
 {
-  file->read();
+  file_->read();
 
-  *file >> A;
+  *file_ >> A;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Mesh& mesh)
 {
-  file->read();
+  file_->read();
 
-  *file >> mesh;
+  *file_ >> mesh;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<int>& meshfunction)
 {
-  file->read();
+  file_->read();
 
-  *file >> meshfunction;
+  *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<unsigned int>& meshfunction)
 {
-  file->read();
+  file_->read();
 
-  *file >> meshfunction;
+  *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<double>& meshfunction)
 {
-  file->read();
+  file_->read();
 
-  *file >> meshfunction;
+  *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(MeshFunction<bool>& meshfunction)
 {
-  file->read();
+  file_->read();
 
-  *file >> meshfunction;
+  *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Function& f)
 {
-  file->read();
+  file_->read();
 
-  *file >> f;
+  *file_ >> f;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(ParameterList& parameters)
 {
-  file->read();
+  file_->read();
 
-  *file >> parameters;
+  *file_ >> parameters;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(Graph& graph)
 {
-  file->read();
+  file_->read();
 
-  *file >> graph;
+  *file_ >> graph;
 }
 //-----------------------------------------------------------------------------
 void File::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 {
-  file->read();
+  file_->read();
 
-  *file >> f;
+  *file_ >> f;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(GenericVector& x)
 {
-  file->write();
+  file_->write();
 
-  *file << x;
+  *file_ << x;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(GenericMatrix& A)
 {
-  file->write();
+  file_->write();
 
-  *file << A;
+  *file_ << A;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Mesh& mesh)
 {
-  file->write();
+  file_->write();
 
-  *file << mesh;
+  *file_ << mesh;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<int>& meshfunction)
 {
-  file->write();
+  file_->write();
 
-  *file << meshfunction;
+  *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<unsigned int>& meshfunction)
 {
-  file->write();
+  file_->write();
 
-  *file << meshfunction;
+  *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<double>& meshfunction)
 {
-  file->write();
+  file_->write();
 
-  *file << meshfunction;
+  *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(MeshFunction<bool>& meshfunction)
 {
-  file->write();
+  file_->write();
 
-  *file << meshfunction;
+  *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Function& u)
 {
-  file->write();
+  file_->write();
 
-  *file << u;
+  *file_ << u;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(ParameterList& parameters)
 {
-  file->write();
+  file_->write();
 
-  *file << parameters;
+  *file_ << parameters;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(Graph& graph)
 {
-  file->write();
+  file_->write();
 
-  *file << graph;
+  *file_ << graph;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(std::vector<std::pair<Function*, std::string> >& f)
 {
-  file->write();
+  file_->write();
 
-  *file << f;
+  *file_ << f;
 }
 //-----------------------------------------------------------------------------
 void File::set_counter(uint new_value)
 {
-  file->set_counter(new_value);
+  file_->set_counter(new_value);
 }
 //-----------------------------------------------------------------------------
 std::string File::basename(std::string file)

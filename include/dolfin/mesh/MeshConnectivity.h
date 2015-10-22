@@ -38,6 +38,12 @@ public:
   /// Assignment
   MeshConnectivity const& operator=(MeshConnectivity const& other);
 
+  /// Equality
+  bool operator==(MeshConnectivity const& other) const;
+
+  /// Non-equality
+  bool operator!=(MeshConnectivity const& other) const;
+
   /// Return total number of connections
   uint size() const;
 

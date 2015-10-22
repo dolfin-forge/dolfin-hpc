@@ -499,6 +499,251 @@ LogStream& operator<<(LogStream& stream, const Mesh& mesh)
   return stream;
 }
 //-----------------------------------------------------------------------------
+void Mesh::check() const
+{
+  message("Check: mesh");
+
+  /**
+   *  CHECK:
+   *
+   *  Check entities on the interior and exterior boundary.
+   *
+   */
+
+  Mesh& mesh = const_cast<Mesh&>(*this);
+  uint const tdim = mesh.topology().dim();
+  check_entities_ordering();
+  for (uint i = 0; i < tdim; ++i)
+  {
+    check_interior_boundary_entities(i);
+    check_exterior_boundary_entities(i);
+    check_inner_domain_entities(i);
+  }
+}
+//-----------------------------------------------------------------------------
+void Mesh::check_interior_boundary_entities(uint dim) const
+{
+  message("Check: interior boundary entities of dimension %d", dim);
+
+  /**
+   *  CHECK:
+   *
+   *  The interior boundary consists of the facets shared between processes and
+   *  cannot be empty for a parallel run (provided that the domain covered by
+   *  the mesh is made of one piece).
+   *
+   */
+
+  bool throw_error = true;
+  Mesh& mesh = const_cast<Mesh&>(*this);
+  mesh.init(dim);
+  uint const tdim = mesh.topology().dim();
+  BoundaryMesh boundary(mesh, BoundaryMesh::interior);
+  Array<uint> invalid_shared;
+  Array<uint> invalid_neighb;
+
+  //
+  if(boundary.numCells() > 0)
+  {
+    // A bug causes segmentation fault if the boundary is empty
+    boundary.init(dim);
+    uint const bdim = boundary.topology().dim();
+    if (dim > bdim)
+    {
+      error("Interior boundary check only works for facets.");
+    }
+
+    uint const num_shared = mesh.topology().num_shared(dim);
+    uint const num_intbnd = boundary.topology().num_local(dim);
+    if(num_shared != num_intbnd)
+    {
+      error("Inconsistent number of entities: (shared) %d  != %d (boundary)",
+            num_shared, num_intbnd);
+    }
+
+    // Test all the mesh entities at the interior boundary
+    // All the entities should be shared and some are ghosted
+    MeshDistributedData& distdata = mesh.distdata();
+    if (dim == boundary.topology().dim())
+    {
+      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+      {
+        Facet facet(mesh, boundary.facet_index(*bcell));
+        if (!distdata.check_shared(facet.index(), facet.dim(), throw_error))
+        {
+          invalid_shared.push_back(facet.index());
+        }
+        if (facet.numEntities(tdim) != 1)
+        {
+          invalid_neighb.push_back(facet.index());
+        }
+      }
+    }
+    else
+    {
+      mesh.init(boundary.topology().dim(), dim);
+      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+      {
+        Facet facet(mesh, boundary.facet_index(*bcell));
+        for (MeshEntityIterator e(facet, dim); !e.end(); ++e)
+        {
+          if (!distdata.check_shared(e->index(), e->dim(), throw_error))
+          {
+            invalid_shared.push_back(e->index());
+          }
+        }
+      }
+    }
+
+    if (!invalid_shared.empty())
+    {
+      error("Interior boundary entities of dim %d: %d invalid shared data.",
+            dim, invalid_shared.size());
+    }
+    if (!invalid_neighb.empty())
+    {
+      error("Interior boundary entities of dim %d: %d invalid connectivity.",
+            dim, invalid_shared.size());
+    }
+  }
+  else if (mesh.is_distributed())
+  {
+    error("Distributed mesh has an empty interior boundary.");
+  }
+}
+//-----------------------------------------------------------------------------
+void Mesh::check_exterior_boundary_entities(uint dim) const
+{
+  message("Check: exterior boundary entities of dimension %d", dim);
+
+  /**
+   *  CHECK:
+   *
+   *  The exterior boundary consists of the facets located on the boundary of
+   *  the domain and thus not shared between processes.
+   *
+   */
+
+  Mesh& mesh = const_cast<Mesh&>(*this);
+  mesh.init(dim);
+  BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
+  Array<uint> invalid;
+
+  //
+  if(boundary.numCells() > 0)
+  {
+    // A bug causes segmentation fault if the boundary is empty
+    boundary.init(dim);
+
+    // Test all the mesh entities at the interior boundary
+    // All the entities should be shared and some are ghosted
+    if (dim == boundary.topology().dim())
+    {
+      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+      {
+        Facet facet(mesh, boundary.facet_index(*bcell));
+        if(facet.is_shared())
+        {
+          invalid.push_back(facet.index());
+        }
+      }
+    }
+    else
+    {
+      mesh.init(boundary.topology().dim(), dim);
+      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+      {
+        Facet facet(mesh, boundary.facet_index(*bcell));
+      }
+    }
+
+    if (!invalid.empty())
+    {
+      error("Exterior boundary entities of dim %d (%d) are invalid.", dim,
+            invalid.size());
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+void Mesh::check_inner_domain_entities(uint dim) const
+{
+  message("Check: inner domain mesh entities of dimension %d", dim);
+
+  /**
+   *  CHECK:
+   *
+   *  Inner entities cannot be shared.
+   *
+   */
+
+  Mesh& mesh = const_cast<Mesh&>(*this);
+  mesh.init(dim);
+  uint const tdim = mesh.topology().dim();
+  BoundaryMesh boundary(mesh, BoundaryMesh::interior);
+  std::set<uint> shared;
+
+  if(boundary.numCells() > 0)
+  {
+    for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+    {
+      Facet f(mesh, boundary.facet_index(*bcell));
+      if (dim == (tdim - 1))
+      {
+        if (f.is_shared())
+        {
+          shared.insert(f.index());
+        }
+        else
+        {
+          error("Facet %d on the interior boundary is not shared", f.index());
+        }
+      }
+      else
+      {
+        for (MeshEntityIterator e(f, dim); !e.end(); ++e)
+        {
+          if (e->is_shared())
+          {
+            shared.insert(e->index());
+          }
+          else
+          {
+            error("Entity %d of dimension %d on the interior boundary is not "
+                  "shared", e->index(), dim);
+          }
+        }
+      }
+    }
+  }
+  for (MeshEntityIterator eit(mesh, dim); !eit.end(); ++eit)
+  {
+    if(eit->is_shared() && (shared.count(eit->index()) == 0))
+    {
+      error("Inner entity %d of dimension %d is set as shared.", eit->index(),
+            dim);
+    }
+  }
 
 }
+//-----------------------------------------------------------------------------
+void Mesh::check_entities_ordering() const
+{
+  message("Check: ordering of entities on cell");
 
+  /**
+   *  CHECK:
+   *
+   *  Mesh entities connectivities should follow the convention provided by the
+   *  cell type.
+   *
+   */
+
+  Mesh& mesh = const_cast<Mesh&>(*this);
+  for (CellIterator c(mesh); !c.end(); ++c)
+  {
+    mesh.type().check(*c);
+  }
+}
+//-----------------------------------------------------------------------------
+
+}

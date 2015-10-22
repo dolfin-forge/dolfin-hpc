@@ -301,6 +301,23 @@ public:
   /// Output
   friend LogStream& operator<<(LogStream& stream, const Mesh& mesh);
 
+  //--- CHECK ROUTINES --------------------------------------------------------
+
+  /// Check
+  void check() const;
+
+  /// Check consistency of the interior boundary
+  void check_interior_boundary_entities(uint dim) const;
+
+  /// Check consistency of the exterior boundary
+  void check_exterior_boundary_entities(uint dim) const;
+
+  /// Check consistency of the inner entities
+  void check_inner_domain_entities(uint dim) const;
+
+  /// Check that mesh entities are ordered per cell
+  void check_entities_ordering() const;
+
 private:
 
   // Mesh topology

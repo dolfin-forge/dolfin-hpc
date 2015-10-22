@@ -47,6 +47,12 @@ public:
   /// Destructor
   ~MeshDistributedData();
 
+  /// Equality
+  bool operator==(MeshDistributedData const& other) const;
+
+  /// Non-equality
+  bool operator!=(MeshDistributedData const& other) const;
+
   /// Assignment
   MeshDistributedData const& operator=(MeshDistributedData const& other);
 
@@ -291,44 +297,10 @@ public:
   bool check(bool throw_error = false) const;
 
   ///
-  inline bool check_shared(uint local_index, uint dim, bool error = false) const
-  {
-    bool ret = true;
-    // A shared entity is (wait for it) ... shared *dong*
-    ret &= this->is_shared(local_index, dim);
-    // Check adjacency
-    _set<uint> const& ai = this->get_shared_adj(local_index, dim);
-    // A shared entity should have adjacents
-    ret &= (!ai.empty());
-    // Check that all adjacents have a valid rank and listed as adjacent
-    _set<uint> const& aa = this->get_adj_ranks(dim);
-    for(_set<uint>::const_iterator it = ai.begin(); it != ai.end(); ++it)
-    {
-      ret &= MPI::is_valid_rank(*it);
-      ret &= (aa.count(*it) > 0);
-    }
-    //
-    return ret;
-  }
+  bool check_shared(uint local_index, uint dim, bool error = false) const;
 
   ///
-  inline bool check_ghost(uint local_index, uint dim, bool error = false) const
-  {
-    bool ret = true;
-    // Check shared assertions
-    ret &= this->check_shared(local_index, dim, error);
-    // A ghost entity is (wait for it) ... ghost *dong*
-    ret &= this->is_ghost(local_index, dim);
-    // Check ownership
-    uint const owner = this->get_owner(local_index, dim);
-    // The owner is not self
-    ret &= (owner != MPI::processNumber());
-    // The owner is adjacent
-    _set<uint> const& ai = this->get_shared_adj(local_index, dim);
-    ret &= (ai.count(owner) >0);
-    //
-    return ret;
-  }
+  bool check_ghost(uint local_index, uint dim, bool error = false) const;
 
 protected:
 

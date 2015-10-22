@@ -97,6 +97,69 @@ MeshDistributedData const& MeshDistributedData::operator=(
   return *this;
 }
 //-----------------------------------------------------------------------------
+bool MeshDistributedData::operator==(MeshDistributedData const& other) const
+{
+  if(this == &other)
+  {
+    return true;
+  }
+  //
+  if (topological_dim_ != other.topological_dim_)
+  {
+    return false;
+  }
+  //
+  if (cell_dim_ != other.cell_dim_)
+  {
+    return false;
+  }
+  //
+  if (facet_dim_ != other.facet_dim_)
+  {
+    return false;
+  }
+  //
+  if (max_global_index_ != other.max_global_index_)
+  {
+    return false;
+  }
+  //
+  for (uint i = 0; i < MAX_SIZE; ++i)
+  {
+    bool cmp = true;
+    cmp &= (valid_numbering_[i] == other.valid_numbering_[i] );
+    cmp &= (num_global_[i] == other.num_global_[i] );
+    cmp &= (global_indices_[i] == other.global_indices_[i] );
+    cmp &= (local_indices_[i] == other.local_indices_[i] );
+    cmp &= (finalized_[i] == other.finalized_[i] );
+    cmp &= (cached_global_size_[i] == other.cached_global_size_[i] );
+    for(uint j = 0; j < cached_global_size_[i]; ++j)
+    {
+      cmp &= (cached_global_indices_[i][j] == other.cached_global_indices_[i][j] );
+    }
+    cmp &= (valid_ownership_[i] == other.valid_ownership_[i] );
+    cmp &= (shared_[i] == other.shared_[i] );
+    cmp &= (adjacent_ranks_[i] == other.adjacent_ranks_[i] );
+    cmp &= (shared_adj_[i] == other.shared_adj_[i] );
+    cmp &= (ghost_[i] == other.ghost_[i] );
+    cmp &= (ghost_owner_[i] == other.ghost_owner_[i] );
+    cmp &= (valid_mapping_[i] == other.valid_mapping_[i] );
+    cmp &= (shared_mapping_[i] == other.shared_mapping_[i] );
+    cmp &= (ghost_mapping_[i] == other.ghost_mapping_[i] );
+    if(!cmp)
+    {
+      return false;
+    }
+  }
+  //
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::operator!=(MeshDistributedData const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
 bool MeshDistributedData::empty() const
 {
   return (
@@ -154,7 +217,7 @@ void MeshDistributedData::flush_numbering_data(uint dim)
   global_indices_[dim].clear();
   local_indices_[dim].clear();
   valid_numbering_[dim] = false;
-
+  num_global_[dim] = 0;
   flush_numbering_cache(dim);
 }
 //-----------------------------------------------------------------------------
@@ -355,11 +418,13 @@ void MeshDistributedData::set_num_global(uint dim, uint const num_global)
 {
   if (dim > cell_dim_)
   {
-    error("Trying to set global number of entities for invalid dimension.");
+    error("Trying to set global number of entities for invalid dimension %d "
+          " for mesh of topological dimension %d", dim, cell_dim_);
   }
   if (num_global < topology_.size(dim))
   {
-    error("Trying to set global number of entities lower than local number.");
+    error("Trying to set global number of entities of dimension %d equal to %d "
+          "lower than local number %d.", dim, num_global, topology_.size(dim));
   }
   num_global_[dim] = num_global;
 }
@@ -375,6 +440,10 @@ void MeshDistributedData::apply_num_global(uint dim, uint& offset)
   {
     offset = 0;
     uint num_owned = this->num_owned(dim);
+    if(num_owned == 0)
+    {
+      error("Mesh entities have not been created for dimension %d", dim);
+    }
 
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
@@ -842,21 +911,41 @@ void MeshDistributedData::disp() const
        << endl;
   skip();
   cout << "Number of shared entities : " << endl;
+  begin("");
   for (uint d = 0; d < topological_dim_; ++d)
   {
-    cout << "  - dim " << " : " << (uint) this->num_shared(d) << endl;
+    cout << "dim = " << d << ": " << (uint) this->num_shared(d) << endl;
   }
+  end();
   skip();
   cout << "Number of ghost entities : " << endl;
+  begin("");
   for (uint d = 0; d < topological_dim_; ++d)
   {
-    cout << "  - dim " << " : " << (uint) this->num_ghost(d) << endl;
+    cout << "dim = " << d << ": " << (uint) this->num_ghost(d) << endl;
   }
+  end();
   end();
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::check(bool throw_error) const
 {
+  /**
+   *  CHECK:
+   *
+   *  The distributed data, for each topological dimension, consists of:
+   *  - a mapping between local numbering and global numbering
+   *  - ownership information by mean of sets of shared and ghost entities.
+   *  - adjacency information by mean of sets of ranks sharing entities.
+   *
+   *  Assertions:
+   *  - The number of owned, shared and ghost entities should be consistent.
+   *  - Shared and ghost entities should be valid.
+   *  - The set of adjacent ranks for each topological dimension is a subset of
+   *    adjacent ranks of lower dimensional entities.
+   *
+   */
+
   bool ret = true;
   MeshDistributedData& disdata = const_cast<MeshDistributedData&>(*this);
 
@@ -865,9 +954,9 @@ bool MeshDistributedData::check(bool throw_error) const
   for (uint d = 0; d <= topological_dim_; ++d)
   {
     // Check consistency of count
-    ret &= disdata.num_owned(d) <= disdata.num_ghost(d);
     ret &= disdata.num_ghost(d) <= disdata.num_shared(d);
     ret &= disdata.num_shared(d) <= disdata.num_local(d);
+    ret &= disdata.num_owned(d) <= disdata.num_local(d);
     ret &= disdata.num_local(d) <= disdata.num_global(d);
 
     // Check consistency of local to global numbering
@@ -902,6 +991,71 @@ bool MeshDistributedData::check(bool throw_error) const
       }
     }
   }
+  return ret;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::check_shared(uint local_index, uint dim,
+                                       bool throw_error) const
+{
+  /**
+   *  CHECK:
+   *
+   *  A shared entity is located on the interior boundary.
+   *
+   *  Assertions:
+   *  - A shared entity is marked as shared.
+   *  - A shared entity has at least one adjacent rank.
+   *  - All adjacent ranks should be valid.
+   *
+   */
+
+  bool ret = true;
+  // A shared entity is (wait for it) ... shared *dong*
+  ret &= this->is_shared(local_index, dim);
+  // Check adjacency
+  _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+  // A shared entity should have adjacents
+  ret &= (!ai.empty());
+  // Check that all adjacents have a valid rank and listed as adjacent
+  _set<uint> const& aa = this->get_adj_ranks(dim);
+  for (_set<uint>::const_iterator it = ai.begin(); it != ai.end(); ++it)
+  {
+    ret &= MPI::is_valid_rank(*it);
+    ret &= (aa.count(*it) > 0);
+  }
+  //
+  return ret;
+}
+//-----------------------------------------------------------------------------
+bool MeshDistributedData::check_ghost(uint local_index, uint dim,
+                                      bool throw_error) const
+{
+  /**
+   *  CHECK:
+   *
+   *  A ghost entity is shared and is not owned by the process.
+   *
+   *  Assertions:
+   *  - A ghost entity is shared.
+   *  - A ghost entity is marked as ghost
+   *  - A ghost entity is not owned by the process.
+   *  - The owner process is an adjacent rank.
+   *
+   */
+
+  bool ret = true;
+  // Check shared assertions
+  ret &= this->check_shared(local_index, dim, throw_error);
+  // A ghost entity is (wait for it) ... ghost *dong*
+  ret &= this->is_ghost(local_index, dim);
+  // Check ownership
+  uint const owner = this->get_owner(local_index, dim);
+  // The owner is not self
+  ret &= (owner != MPI::processNumber());
+  // The owner is adjacent
+  _set<uint> const& ai = this->get_shared_adj(local_index, dim);
+  ret &= (ai.count(owner) > 0);
+  //
   return ret;
 }
 //-----------------------------------------------------------------------------

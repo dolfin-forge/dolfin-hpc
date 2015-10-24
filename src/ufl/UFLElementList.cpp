@@ -55,12 +55,11 @@ bool ElementList::has(Object::repr_t const& signature) const
 //-----------------------------------------------------------------------------
 FiniteElementBase const * ElementList::first() const
 {
+  it_ = this->begin();
   if (this->empty())
   {
-    it_ == this->end();
     return NULL;
   }
-  it_ = this->begin();
   return it_->second;
 }
 

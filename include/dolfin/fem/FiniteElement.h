@@ -204,12 +204,13 @@ public:
   Array<ufc::finite_element const *> const& flatten() const;
 
   /// Create flatten representation finite element (append sub elements)
-  void flatten(ufc::finite_element const * element,
-               Array<ufc::finite_element const *>& stack, uint maxlevel) const;
+  static void flatten(ufc::finite_element const * element,
+                      Array<ufc::finite_element const *>& stack,
+                      uint maxlevel);
 
   /// Create flatten representation finite element (append sub elements)
-  void flatten(ufc::finite_element const * element,
-               Array<ufc::finite_element const *>& stack) const;
+  static void flatten(ufc::finite_element const * element,
+                      Array<ufc::finite_element const *>& stack);
 
   /// Check if the element can be seen as a vector element
   bool is_vectorizable() const;

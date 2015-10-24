@@ -208,12 +208,12 @@ public:
   Array<ufc::dofmap const *> const& flatten() const;
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
-  void flatten(ufc::dofmap const * dofmap,
-               Array<ufc::dofmap const *>& stack, uint maxlevel) const;
+  static void flatten(ufc::dofmap const * dofmap,
+                      Array<ufc::dofmap const *>& stack, uint maxlevel);
 
   /// Create flatten representation of given dofmap (append sub dofmaps)
-  void flatten(ufc::dofmap const * dofmap,
-               Array<ufc::dofmap const *>& stack) const;
+  static void flatten(ufc::dofmap const * dofmap,
+                      Array<ufc::dofmap const *>& stack);
 
   /// Return if the dofmap can be seen as a vector element dofmap
   bool is_vectorizable() const;

@@ -487,8 +487,8 @@ void XMLFile::operator<<(Mesh& mesh)
     MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
                dolfin::MPI::DOLFIN_COMM);
 #else
-    MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI_Scan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+	     dolfin::MPI::DOLFIN_COMM);
     voffset -= vsize;
 #endif
     MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer, vsize, MPI_CHAR,
@@ -622,8 +622,8 @@ void XMLFile::operator<<(Mesh& mesh)
     MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
                dolfin::MPI::DOLFIN_COMM);
 #else
-    MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI_Scan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+	     dolfin::MPI::DOLFIN_COMM);
     coffset -= csize;
 #endif
     MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer, csize, MPI_CHAR,

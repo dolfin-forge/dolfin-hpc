@@ -6,6 +6,7 @@
 
 #include <dolfin/fem/BoundaryNormal.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/io/File.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
 namespace dolfin

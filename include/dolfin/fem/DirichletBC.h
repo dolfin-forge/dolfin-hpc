@@ -24,7 +24,7 @@ namespace dolfin
 {
 
 class DofMap;
-class Function;
+class Coefficient;
 class Mesh;
 class FiniteElementSpace;
 class Form;
@@ -88,20 +88,21 @@ class DirichletBC: public BoundaryCondition
 public:
 
   /// Create boundary condition for sub domain
-  DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
+  DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               BCMethod method = topological);
 
   /// Create boundary condition for sub domain specified by index
-  DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
-              BCMethod method = topological);
+  DirichletBC(Coefficient& g, MeshFunction<uint>& sub_domains,
+              uint sub_domain, BCMethod method = topological);
 
   /// Create sub system boundary condition for sub domain
-  DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
+  DirichletBC(Coefficient& g, Mesh& mesh, const SubDomain& sub_domain,
               const SubSystem& sub_system, BCMethod method = topological);
 
   /// Create sub system boundary condition for sub domain specified by index
-  DirichletBC(Function& g, MeshFunction<uint>& sub_domains, uint sub_domain,
-              const SubSystem& sub_system, BCMethod method = topological);
+  DirichletBC(Coefficient& g, MeshFunction<uint>& sub_domains,
+              uint sub_domain, const SubSystem& sub_system,
+              BCMethod method = topological);
 
   /// Destructor
   ~DirichletBC();
@@ -142,7 +143,7 @@ private:
                           SubSystem const& sub_system);
 
   // The function
-  Function& g_;
+  Coefficient& g_;
 
   // Search method
   BCMethod method_;

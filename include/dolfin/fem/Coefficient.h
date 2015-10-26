@@ -4,11 +4,13 @@
 // First added:  2005-11-28
 // Last changed: 2008-03-17
 
-#ifndef __DOLFIN_GENERIC_FUNCTION_H
-#define __DOLFIN_GENERIC_FUNCTION_H
+#ifndef __DOLFIN_COEFFICIENT_H
+#define __DOLFIN_COEFFICIENT_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/fem/Coefficient.h>
+#include <dolfin/log/log.h>
+#include <dolfin/log/LogStream.h>
+#include <dolfin/mesh/Cell.h>
 
 #include <ufc.h>
 
@@ -21,17 +23,17 @@ class Cell;
 /// This class serves as a base class/interface for implementations
 /// of specific function representations.
 
-class GenericFunction : public Coefficient
+class Coefficient : public ufc::function
 {
 public:
 
   /// Constructor
-  GenericFunction()
+  Coefficient()
   {
   }
 
   /// Destructor
-  virtual ~GenericFunction()
+  virtual ~Coefficient()
   {
   }
 
@@ -63,10 +65,7 @@ public:
   /// Interpolate function to finite element space on facet
   virtual void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
-  {
-    interpolate(coefficients, cell, finite_element, dolfin_cell);
-  }
+                           const Cell& dolfin_cell, uint facet) const = 0;
 
   /// Evaluate function at given point
   virtual void eval(real* values, const real* x) const = 0;
@@ -74,27 +73,26 @@ public:
   /// Display basic information
   virtual void disp() const = 0;
 
-  /// Synchronize
-  inline void sync() { this->sync_ghosts(); }
-  virtual void sync_ghosts() = 0;
+  /// Synchronize values
+  virtual void sync() = 0;
+
+  //---------------------------------------------------------------------------
+
+  uint value_size() const;
 
 };
 
 //-----------------------------------------------------------------------------
-inline void GenericFunction::disp() const
+inline uint Coefficient::value_size() const
 {
-  cout << "GenericFunction" << endl;
-  cout << "---------------" << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Value rank            : " << this->rank() << endl;
-  cout << "Value dimension       : " << this->dim(0) << endl;
-  // End indentation
-  end();
-  skip();
+  uint size = 1;
+  for (uint i = 0; i < this->rank(); ++i)
+  {
+    size *= this->dim(i);
+  }
+  return size;
 }
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_COEFFICIENT_H */

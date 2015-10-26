@@ -34,8 +34,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
-                         BCMethod method) :
+DirichletBC::DirichletBC(Coefficient& g, Mesh& mesh,
+                         const SubDomain& sub_domain, BCMethod method) :
   BoundaryCondition("Dirichlet", mesh, sub_domain),
   g_(g),
   method_(method)
@@ -43,7 +43,7 @@ DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
   initFromSubDomain(sub_domain);
 }
 //-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, MeshFunction<uint>& sub_domains,
+DirichletBC::DirichletBC(Coefficient& g, MeshFunction<uint>& sub_domains,
                          uint sub_domain, BCMethod method) :
   BoundaryCondition("Dirichlet", sub_domains, sub_domain),
   g_(g),
@@ -52,7 +52,8 @@ DirichletBC::DirichletBC(Function& g, MeshFunction<uint>& sub_domains,
   initFromMeshFunction(sub_domains, sub_domain);
 }
 //-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
+DirichletBC::DirichletBC(Coefficient& g, Mesh& mesh,
+                         const SubDomain& sub_domain,
                          const SubSystem& sub_system, BCMethod method) :
   BoundaryCondition("Dirichlet", mesh, sub_domain, sub_system),
   g_(g),
@@ -61,7 +62,7 @@ DirichletBC::DirichletBC(Function& g, Mesh& mesh, const SubDomain& sub_domain,
   initFromSubDomain(sub_domain);
 }
 //-----------------------------------------------------------------------------
-DirichletBC::DirichletBC(Function& g, MeshFunction<uint>& sub_domains,
+DirichletBC::DirichletBC(Coefficient& g, MeshFunction<uint>& sub_domains,
                          uint sub_domain, const SubSystem& sub_system,
                          BCMethod method) :
   BoundaryCondition("Dirichlet", sub_domains, sub_domain, sub_system),
@@ -196,6 +197,11 @@ void DirichletBC::initFromSubDomain(SubDomain const& sub_domain)
 {
   dolfin_assert(facets_.size() == 0);
 
+  if(mesh().size(0) == 0)
+  {
+    error("Provided mesh is empty");
+  }
+
   // FIXME: This can be made more efficient, we should be able to
   // FIXME: extract the facets without first creating a MeshFunction on
   // FIXME: the entire mesh and then extracting the subset. This is done
@@ -286,7 +292,8 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
     dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell.index());
 
     // Interpolate function on cell
-    g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, cell, facet_number);
+    //FIXME: DISABLED stupid facet thing, breaks FacetNormal !
+    g_.interpolate(scratch.coefficients, scratch.cell, *scratch.finite_element, cell);
 
     // Tabulate which dofs of the subdofmap are on the facet
     scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, facet_number);

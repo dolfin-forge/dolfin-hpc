@@ -20,7 +20,7 @@ namespace dolfin
 
 class DofMapSet;
 class GenericTensor;
-class Function;
+class Coefficient;
 class Form;
 class Mesh;
 class SubDomain;
@@ -82,7 +82,7 @@ public:
   /// or an empty MeshFunction may be used to specify that the tensor should be
   /// assembled over the entire set of cells or facets.
   void assemble(GenericTensor& A, const Form& form,
-                const Array<Function*>& coefficients,
+                const Array<Coefficient*>& coefficients,
                 const DofMapSet& dof_map_set,
                 const MeshFunction<uint>* cell_domains,
                 const MeshFunction<uint>* exterior_facet_domains,
@@ -93,28 +93,28 @@ private:
 
   // Assemble over cells
   void assembleCells(GenericTensor& A,
-                     const Array<Function*>& coefficients,
+                     const Array<Coefficient*>& coefficients,
                      const DofMapSet& dof_map_set,
                      UFC& data,
                      const MeshFunction<uint>* domains) const;
 
   // Assemble over exterior facets
   void assembleExteriorFacets(GenericTensor& A,
-                              const Array<Function*>& coefficients,
+                              const Array<Coefficient*>& coefficients,
                               const DofMapSet& dof_map_set,
                               UFC& data,
                               const MeshFunction<uint>* domains) const;
 
   // Assemble over interior facets
   void assembleInteriorFacets(GenericTensor& A,
-                              const Array<Function*>& coefficients,
+                              const Array<Coefficient*>& coefficients,
                               const DofMapSet& dof_map_set,
                               UFC& data,
                               const MeshFunction<uint>* domains) const;
 
   // Bogus-assemble periodic contributions
   void initializePeriodicDofs(GenericTensor& A,
-                              const Array<Function*>& coefficients,
+                              const Array<Coefficient*>& coefficients,
                               const DofMapSet& dof_map_set,
                               UFC& data,
                               const MeshFunction<uint>* domains) const;

@@ -176,7 +176,7 @@ public:
   //--- COMPOSITION GenericFunction -------------------------------------------
 
   /// Return the mesh
-  Mesh& mesh() const;
+  virtual Mesh& mesh() const;
 
   /// Return the rank of the value space
   virtual uint rank() const;

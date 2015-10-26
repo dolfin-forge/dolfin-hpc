@@ -18,6 +18,7 @@
 #include <dolfin/io/File.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/function/ConstantFunction.h>
 #include <dolfin/function/DiscreteFunction.h>

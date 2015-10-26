@@ -24,7 +24,7 @@
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/function/Function.h>
+#include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
 #include <dolfin/fem/UFCHalo.h>
@@ -146,7 +146,7 @@ dolfin::real Assembler::assemble(Form& form,
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, const Form& form,
-                         Array<Function*> const& coefficients,
+                         Array<Coefficient*> const& coefficients,
                          const DofMapSet& dof_map_set,
                          const MeshFunction<uint>* cell_domains,
                          const MeshFunction<uint>* exterior_facet_domains,
@@ -174,7 +174,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
     // Update all ghost points
     for (uint i = 0; i < coefficients.size(); ++i)
     {
-      coefficients[i]->sync_ghosts();
+      coefficients[i]->sync();
     }
   }
 #pragma omp flush
@@ -199,7 +199,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleCells(GenericTensor& A,
-                              Array<Function*> const& coefficients,
+                              Array<Coefficient*> const& coefficients,
                               const DofMapSet& dof_map_set,
                               UFC& ufc,
                               const MeshFunction<uint>* domains) const
@@ -270,7 +270,7 @@ void Assembler::assembleCells(GenericTensor& A,
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,
-                                       Array<Function*> const& coefficients,
+                                       Array<Coefficient*> const& coefficients,
                                        const DofMapSet& dof_map_set,
                                        UFC& ufc,
                                        const MeshFunction<uint>* domains) const
@@ -357,7 +357,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleInteriorFacets(GenericTensor& A,
-                                       Array<Function*> const& coefficients,
+                                       Array<Coefficient*> const& coefficients,
                                        const DofMapSet& dof_map_set,
                                        UFC& ufc,
                                        const MeshFunction<uint>* domains) const
@@ -471,7 +471,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 }
 //-----------------------------------------------------------------------------
 void Assembler::initializePeriodicDofs(GenericTensor& A,
-                                       const Array<Function*>& coefficients,
+                                       const Array<Coefficient*>& coefficients,
                                        const DofMapSet& dof_map_set,
                                        UFC& data,
                                        const MeshFunction<uint>* domains) const

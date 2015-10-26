@@ -8,7 +8,8 @@
 #define __DOLFIN_FINITE_ELEMENT_H
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/fem/Form.h>
+#include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 
 #include <ufc.h>
 
@@ -17,13 +18,14 @@
 namespace ufl
 {
 
-class FiniteElement;
+class FiniteElementBase;
 
 }
 
 namespace dolfin
 {
 
+class CellType;
 class Form;
 class Mesh;
 

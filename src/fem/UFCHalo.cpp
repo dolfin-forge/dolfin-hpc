@@ -7,10 +7,10 @@
 #include <dolfin/fem/UFCHalo.h>
 
 #include <dolfin/common/Array.h>
+#include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/UFC.h>
-#include <dolfin/function/Function.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
 
@@ -20,7 +20,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-UFCHalo::UFCHalo(UFC& ufc, Array<Function*> const& coefficients,
+UFCHalo::UFCHalo(UFC& ufc, Array<Coefficient*> const& coefficients,
                  DofMapSet const& dof_map_set) :
     cell0(ufc.cell0),
     cell1(ufc.cell1),
@@ -193,7 +193,7 @@ void UFCHalo::update(Facet& facet)
 }
 
 //-----------------------------------------------------------------------------
-void UFCHalo::update(Array<Function*> const& coefficients,
+void UFCHalo::update(Array<Coefficient*> const& coefficients,
                      DofMapSet const& dof_map_set)
 {
   Mesh& mesh = dof_map_set[0].mesh();

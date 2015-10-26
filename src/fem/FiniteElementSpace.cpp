@@ -8,6 +8,7 @@
 
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/fem/SubSystem.h>
 
 #include <cstring>

@@ -10,6 +10,7 @@
 #include <dolfin/function/FunctionDecomposition.h>
 
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/Vertex.h>

@@ -7,6 +7,7 @@
 #include <dolfin/fem/FiniteElement.h>
 
 #include <dolfin/elements/ElementLibrary.h>
+#include <dolfin/fem/Form.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 #include <algorithm>

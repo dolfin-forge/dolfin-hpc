@@ -44,9 +44,9 @@ bool CoefficientMap::has(std::string const& label) const
 }
 
 //-----------------------------------------------------------------------------
-Function * CoefficientMap::get(std::string const& label) const
+Coefficient * CoefficientMap::get(std::string const& label) const
 {
-  std::map<std::string, dolfin::Function *>::const_iterator it =
+  std::map<std::string, dolfin::Coefficient *>::const_iterator it =
       map_.find(label);
   if (it == map_.end())
   {
@@ -63,9 +63,9 @@ uint CoefficientMap::size() const
 
 //-----------------------------------------------------------------------------
 void CoefficientMap::set(std::string const& label,
-                         dolfin::Function& coefficient)
+                         dolfin::Coefficient& coefficient)
 {
-  std::map<std::string, dolfin::Function *>::iterator it = map_.find(
+  std::map<std::string, dolfin::Coefficient *>::iterator it = map_.find(
       label);
   if (it != map_.end())
   {
@@ -91,7 +91,7 @@ void CoefficientMap::disp() const
   begin("");
   cout << "Number of coefficients      :" << this->size() << endl;
   uint ii = 0;
-  for (std::map<std::string, dolfin::Function *>::const_iterator it =
+  for (std::map<std::string, dolfin::Coefficient *>::const_iterator it =
       map_.begin(); it != map_.end(); ++it)
   {
     cout << ii << " : " << it->first << endl;

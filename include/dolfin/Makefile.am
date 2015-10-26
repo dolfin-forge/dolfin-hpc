@@ -25,6 +25,7 @@ nobase_pkginclude_HEADERS = \
 				fem/BilinearForm.h\
 				fem/BoundaryCondition.h\
 				fem/BoundaryNormal.h\
+				fem/Coefficient.h\
 				fem/CoefficientMap.h\
 				fem/DirichletBC.h\
 				fem/DofMap.h\

@@ -7,8 +7,10 @@
 
 #include <dolfin/function/FunctionInterpolation.h>
 
+#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
+#include <dolfin/function/Function.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/Vertex.h>

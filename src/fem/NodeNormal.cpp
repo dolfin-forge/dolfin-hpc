@@ -9,6 +9,7 @@
 
 #include <dolfin/fem/NodeNormal.h>
 
+#include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>

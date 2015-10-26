@@ -11,7 +11,8 @@
 
 #include <dolfin/common/Array.h>
 #include <dolfin/fem/DofMapSet.h>
-#include <dolfin/function/Function.h>
+#include <dolfin/fem/Coefficient.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/mesh/MeshFunction.h>
 
 #include <ufc.h>
@@ -37,7 +38,7 @@ public:
   virtual ~Form();
 
   /// Return array of coefficients
-  virtual Array<Function*> const& coefficients() const = 0;
+  virtual Array<Coefficient*> const& coefficients() const = 0;
 
   /// Return index of argument associated with the given name
   virtual uint coefficient_index(std::string const& name) const;
@@ -104,7 +105,7 @@ public:
   FiniteElementSpace * create_coefficient_space(std::string const& name) const;
 
   /// Check dimension and rank of coefficients
-  bool check_coefficients(Array<Function*> const& coefficients) const;
+  bool check_coefficients(Array<Coefficient*> const& coefficients) const;
 
   /// Check if index is valid
   bool check_index(uint i) const;
@@ -116,7 +117,7 @@ protected:
 
   /// Assign coefficients from map to form coefficients
   void assign_coefficients(CoefficientMap const& coefficient_map,
-                           Array<dolfin::Function *>& form_coefficients);
+                           Array<dolfin::Coefficient *>& form_coefficients);
 
 private:
 

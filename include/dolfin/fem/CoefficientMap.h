@@ -8,7 +8,7 @@
 #define __DOLFIN_COEFFICIENT_MAP_H
 
 #include <dolfin/common/Array.h>
-#include <dolfin/function/Function.h>
+#include <dolfin/fem/Coefficient.h>
 
 #include <map>
 #include <string>
@@ -37,13 +37,13 @@ public:
   bool has(std::string const& label) const;
 
   /// Get coefficient function mapped from the given label
-  Function * get(std::string const& label) const;
+  Coefficient * get(std::string const& label) const;
 
   /// Return the size of the coefficient map
   uint size() const;
 
   /// Set coefficient label to map to the given function
-  void set(std::string const& label, dolfin::Function& coefficient);
+  void set(std::string const& label, dolfin::Coefficient& coefficient);
 
   /// Clear coefficient map
   void clear();
@@ -53,7 +53,7 @@ public:
 
 private:
 
-  std::map<std::string, dolfin::Function *> map_;
+  std::map<std::string, dolfin::Coefficient *> map_;
 
 };
 

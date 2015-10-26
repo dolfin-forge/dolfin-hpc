@@ -16,7 +16,7 @@ namespace dolfin
 template<typename T> class Array;
 class DofMapSet;
 class Facet;
-class Function;
+class Coefficient;
 class Mesh;
 class UFC;
 
@@ -42,7 +42,7 @@ class UFCHalo
 public:
 
   /// Constructor
-  UFCHalo(UFC& ufc, Array<Function*> const& coefficients,
+  UFCHalo(UFC& ufc, Array<Coefficient*> const& coefficients,
               DofMapSet const& dof_map_set);
 
   ///
@@ -69,14 +69,14 @@ private:
   void init();
 
   ///
-  void update(Array<Function*> const& coefficients,
+  void update(Array<Coefficient*> const& coefficients,
               DofMapSet const& dof_map_set);
 
   void clear();
 
   UFC& ufc_;
   Mesh& mesh_;
-  Array<Function*> const& coefficients_;
+  Array<Coefficient*> const& coefficients_;
   DofMapSet const& dof_map_set_;
 
   // Store rank offsets, implemented by accumulating shared facet counts

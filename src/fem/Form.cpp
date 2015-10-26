@@ -85,7 +85,7 @@ FiniteElementSpace * Form::create_coefficient_space(
 }
 
 //-----------------------------------------------------------------------------
-bool Form::check_coefficients(Array<Function*> const& coefficients) const
+bool Form::check_coefficients(Array<Coefficient*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
@@ -100,13 +100,7 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
     message(1, "Checking coefficient %d:", i);
     if (coefficients[i] == NULL)
     {
-      error("Got NULL Function as coefficient %d labeled as '%s'.", i,
-            this->coefficient_name(i).c_str());
-    }
-
-    if (coefficients[i]->type() == Function::empty)
-    {
-      error("Got empty Function as coefficient %d labeled as '%s'.", i,
+      error("Got NULL pointer as coefficient %d labeled as '%s'.", i,
             this->coefficient_name(i).c_str());
     }
 
@@ -117,9 +111,9 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
             coef_rank);
     if (fe_rank != coef_rank)
     {
-      error("Invalid value rank of Function '%s' with index %d:\n"
+      error("Invalid value rank of Coefficient '%s' with index %d:\n"
             "Got %d but expecting %d.\n"
-            "You may need to provide the rank of a user defined Function.",
+            "You may need to provide the rank of a user defined Coefficient.",
             this->coefficient_name(i).c_str(), i, coef_rank, fe_rank);
     }
 
@@ -130,9 +124,9 @@ bool Form::check_coefficients(Array<Function*> const& coefficients) const
       if (dim != fe_dim)
       {
         error(
-            "Invalid value dimension %d of Function '%s' with index %d:\n"
+            "Invalid value dimension %d of Coefficient '%s' with index %d:\n"
             "got %d but expecting %d.\n"
-            "You may need to provide the dimension of a user defined Function.",
+            "You may need to provide the dimension of a user defined Coefficient.",
             j, this->coefficient_name(i).c_str(), i, dim, fe_dim);
       }
     }
@@ -179,7 +173,7 @@ bool Form::check_index(uint i) const
 
 //-----------------------------------------------------------------------------
 void Form::assign_coefficients(CoefficientMap const& coefficient_map,
-                               Array<dolfin::Function *>& form_coefficients)
+                               Array<dolfin::Coefficient *>& form_coefficients)
 {
   form_coefficients.clear();
   for (uint i = 0; i < this->num_coefficients(); ++i)

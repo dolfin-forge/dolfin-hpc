@@ -59,6 +59,8 @@ namespace dolfin
     operator Array<uint>&() { return sub_system; }
     operator Array<uint> const&() const { return sub_system; }
 
+    ///
+    std::string str() const;
 
   private:
 

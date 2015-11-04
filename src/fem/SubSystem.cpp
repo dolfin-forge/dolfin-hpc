@@ -65,5 +65,18 @@ Array<uint> const& SubSystem::array() const
 {
   return sub_system;
 }
+//-----------------------------------------------------------------------------
+std::string SubSystem::str() const
+{
+  std::stringstream ss;
+  ss << "[ ";
+  for (uint i = 0; i < sub_system.size(); ++i)
+  {
+    ss << sub_system[i] << " ";
+  }
+  ss << "]";
+  return ss.str();
+}
+//-----------------------------------------------------------------------------
 
 }

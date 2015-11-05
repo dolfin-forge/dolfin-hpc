@@ -146,6 +146,10 @@ namespace dolfin
     const Vector& operator/= (real a)
     { *this *= 1.0 / a; return *this; }
 
+    /// Multiply vector by given vector component-wise
+    const Vector& operator*= (const GenericVector& x)
+    { *vector *= x; return *this; }
+
     /// Add given vector
     const Vector& operator+= (const GenericVector& x)
     { axpy(1.0, x); return *this; }

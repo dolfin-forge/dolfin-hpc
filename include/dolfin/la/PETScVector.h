@@ -130,11 +130,11 @@ namespace dolfin
     /// Multiply vector by given number
     const PETScVector& operator*= (real a);
 
-    /// Multiply vector by given vector componentwise
-    const PETScVector& operator*= (const GenericVector& x);
-
     /// Divide vector by given number
     const PETScVector& operator/= (real a);
+
+    /// Multiply vector by given vector component-wise
+    const PETScVector& operator*= (const GenericVector& x);
 
     /// Add given vector
     const PETScVector& operator+= (const GenericVector& x);

@@ -215,6 +215,13 @@ const JANPACKVec& JANPACKVec::operator= (real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
+const JANPACKVec& operator*= (const GenericVector& x) = 0
+{
+  dolfin_assert(x);
+  error("Not implemented");
+  return *this;
+}
+//-----------------------------------------------------------------------------
 const JANPACKVec& JANPACKVec::operator+= (const GenericVector& x)
 {
   this->axpy(1.0, x);

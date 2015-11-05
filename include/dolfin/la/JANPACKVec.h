@@ -119,6 +119,9 @@ namespace dolfin
     /// Divide vector by given number
     virtual const JANPACKVec& operator/= (real a);
 
+    /// Multiply vector by given vector component-wise
+    virtual const JANPACKVec& operator*= (const GenericVector& x) = 0;
+
     /// Add given vector
     virtual const JANPACKVec& operator+= (const GenericVector& x);
 

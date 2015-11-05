@@ -331,6 +331,22 @@ const PETScVector& PETScVector::operator= (real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
+const PETScVector& PETScVector::operator*=( const GenericVector& y)
+{
+  dolfin_assert(x);
+  const PETScVector& v = y.down_cast<PETScVector>();
+  dolfin_assert(v.x);
+
+  if (size() != v.size())
+  {
+    error("Vectors must have the same size for componentwise multiplication.");
+  }
+
+  VecPointwiseMult(x, x, v.x);
+
+  return *this;
+}
+//-----------------------------------------------------------------------------
 const PETScVector& PETScVector::operator+= (const GenericVector& x)
 {
   this->axpy(1.0, x);
@@ -347,22 +363,6 @@ const PETScVector& PETScVector::operator*= (const real a)
 {
   dolfin_assert(x);
   VecScale(x, a);
-
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator*=( const GenericVector& y)
-{
-  dolfin_assert(x);
-  const PETScVector& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x);
-
-  if (size() != v.size())
-  {
-    error("Vectors must have the same size for componentwise multiplication.");
-  }
-
-  VecPointwiseMult(x, x, v.x);
 
   return *this;
 }

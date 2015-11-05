@@ -129,6 +129,9 @@ namespace dolfin
     /// Divide vector by given number
     virtual const GenericVector& operator/= (real a) = 0;
 
+    /// Multiply vector by given vector component-wise
+    virtual const GenericVector& operator*= (const GenericVector& x) = 0;
+
     /// Add given vector
     virtual const GenericVector& operator+= (const GenericVector& x) = 0;
 

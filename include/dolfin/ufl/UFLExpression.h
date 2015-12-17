@@ -7,11 +7,14 @@
 #ifndef __DOLFIN_UFL_EXPRESSION_H
 #define __DOLFIN_UFL_EXPRESSION_H
 
+#include <dolfin/common/types.h>
 #include <dolfin/quadrature/UFCReferenceCell.h>
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLIntegral.h>
 #include <dolfin/ufl/UFLdict.h>
 #include <dolfin/ufl/UFL_tuple.h>
+
+using dolfin::uint;
 
 namespace ufl
 {

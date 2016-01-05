@@ -285,11 +285,6 @@ if test "x${found_la_backend}" != xyes; then
    AC_MSG_ERROR([Linear Algebra backend not found])
 fi
 
-if test "x${enable_debug}" != xno; then
-   CXXFLAGS="-g -DDEBUG $CXXFLAGS"
-fi
-
-
 
 if test "x${enable_quad}" = xyes; then 
    # This assumes a modern CRAY, for example XT or XE series systems
@@ -344,6 +339,19 @@ if test "x${enable_check}" = xyes; then
 fi
 # Add variable for automake to compile tests
 AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" = xyes])
+
+if test "x${enable_debug}" != xno; then
+   CXXFLAGS="-g -DDEBUG $CXXFLAGS"
+   case "$host_os" in
+   *solaris*)
+       LIBS="$LIBS -lumem"
+       AC_MSG_RESULT([[Using DEBUG mode on Illumos/Solaris with libumem support]])
+       ;;
+   *)
+   AC_MSG_RESULT([[Using DEBUG mode]])
+       ;;
+   esac
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN

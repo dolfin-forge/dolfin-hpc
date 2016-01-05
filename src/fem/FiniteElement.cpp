@@ -127,6 +127,7 @@ void FiniteElement::Initialize()
       }
       delete sub_fe;
     }
+    delete [] off;
   }
   else
   {

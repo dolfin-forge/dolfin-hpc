@@ -10,10 +10,12 @@
 #ifndef __DOLFIN_LOG_H
 #define __DOLFIN_LOG_H
 
-#include <string>
-#include <map>
-#include <stdarg.h>
 #include <dolfin/common/types.h>
+#include <dolfin/log/LogManager.h>
+
+#include <stdarg.h>
+#include <map>
+#include <string>
 
 #if (DEBUG && !(__GNUG__))
 #include <cassert>
@@ -42,6 +44,7 @@ namespace dolfin
   /// where destination is one of "terminal" (default) or "silent". Setting
   /// the output destination to "silent" means no messages will be printed.
 
+  static Logger& logm = LogManager::logger();
 
 #ifdef __sgi
 #define _msg char*
@@ -83,6 +86,12 @@ namespace dolfin
   /// Write header line
   void header(std::string msg, ...);
 
+  /// Write section opening line
+  void section(std::string msg, ...);
+
+  /// Write time stamp marker
+  void timestamp();
+
   /// Print summary of timings and tasks, clearing stored timings
   void summary();
 
@@ -119,4 +128,4 @@ namespace dolfin
 #define dolfin_assert(check)
 #endif
 
-#endif
+#endif /* __DOLFIN_LOG_H */

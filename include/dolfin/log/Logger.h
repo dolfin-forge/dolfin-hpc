@@ -74,6 +74,9 @@ public:
   /// Set debug level
   inline int getDebugLevel() { return debug_level_; }
 
+  //  Set file logging
+  void file();
+
   /// Register timing (for later summary)
   void timing(std::string task, real elapsed_time);
 
@@ -106,8 +109,9 @@ private:
   // Current indentation level
   int indentation_level_;
 
-  // Optional stream for logging
+  // Stream for logging
   std::ostream * logstream_;
+  std::ofstream * filestream_;
 
   // List of timings for tasks, map from string to (num_timings, total_time)
   timing_map_t timings_;

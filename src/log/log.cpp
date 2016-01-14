@@ -9,16 +9,19 @@
 // First added:  2003-03-13
 // Last changed: 2009-05-04
 
+#include <dolfin/log/log.h>
+
+#include <dolfin/common/constants.h>
+#include <dolfin/log/LogManager.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <signal.h>
+#include <iomanip>
 #include <sstream>
-#include <dolfin/common/types.h>
-#include <dolfin/common/constants.h>
-#include <dolfin/log/LogManager.h>
-#include <dolfin/log/log.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 // Buffers
 static char buffer[DOLFIN_LINELENGTH];
@@ -43,13 +46,13 @@ static char buffer[DOLFIN_LINELENGTH];
   va_end(aptr);
 #endif
 //-----------------------------------------------------------------------------
-void dolfin::message(_msg msg, ...)
+void message(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger().message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::message(int debug_level, _msg msg, ...)
+void message(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
@@ -57,13 +60,13 @@ void dolfin::message(int debug_level, _msg msg, ...)
 //-----------------------------------------------------------------------------
 #if __sgi
 //-----------------------------------------------------------------------------
-void dolfin::message(std::string msg, ...)
+void message(std::string msg, ...)
 {
   read_str(buffer, msg);
   LogManager::logger().message(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::message(int debug_level, std::string msg, ...)
+void message(int debug_level, std::string msg, ...)
 {
   read_str(buffer, msg);
   LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
@@ -71,7 +74,7 @@ void dolfin::message(int debug_level, std::string msg, ...)
 //-----------------------------------------------------------------------------
 #endif
 //-----------------------------------------------------------------------------
-void dolfin::warning(std::string msg, ...)
+void warning(std::string msg, ...)
 {
 #ifndef __sgi
   read(buffer, msg);
@@ -81,7 +84,7 @@ void dolfin::warning(std::string msg, ...)
   LogManager::logger().warning(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::error(std::string msg, ...)
+void error(std::string msg, ...)
 {
 #ifndef __sgi
   read(buffer, msg);
@@ -91,29 +94,29 @@ void dolfin::error(std::string msg, ...)
   LogManager::logger().error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::begin(_msg msg, ...)
+void begin(_msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger().begin(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::begin(int debug_level, _msg msg, ...)
+void begin(int debug_level, _msg msg, ...)
 {
   read(buffer, msg);
   LogManager::logger().begin(static_cast<std::string>(buffer), debug_level);
 }
 //-----------------------------------------------------------------------------
-void dolfin::end()
+void end()
 {
   LogManager::logger().end();
 }
 //-----------------------------------------------------------------------------
-void dolfin::skip()
+void skip()
 {
   LogManager::logger().skip();
 }
 //-----------------------------------------------------------------------------
-void dolfin::header(std::string msg, ...)
+void header(std::string msg, ...)
 {
 #ifndef __sgi
   read(buffer, msg);
@@ -123,18 +126,31 @@ void dolfin::header(std::string msg, ...)
   LogManager::logger().message("**** "+static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void dolfin::summary()
+void section(std::string msg, ...)
+{
+  message(msg);
+  std::stringstream ss;
+  ss << std::setw(msg.size()) << std::setfill('-') << "-";
+  begin(ss.str());
+}
+//-----------------------------------------------------------------------------
+void timestamp()
+{
+  message("[%ul]", time(NULL));
+}
+//-----------------------------------------------------------------------------
+void summary()
 {
   LogManager::logger().summary();
 }
 //-----------------------------------------------------------------------------
-const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& dolfin::timings()
+const std::map<std::string, std::pair<uint, real> >& timings()
 {
   return LogManager::logger().timings();
 }
 //-----------------------------------------------------------------------------
-void dolfin::__debug(std::string file, unsigned long line,
-                     std::string function, _msg format, ...)
+void __debug(std::string file, unsigned long line,
+             std::string function, _msg format, ...)
 {
   read(buffer, format);
   std::ostringstream ost;
@@ -143,8 +159,8 @@ void dolfin::__debug(std::string file, unsigned long line,
   LogManager::logger().__debug(msg);
 }
 //-----------------------------------------------------------------------------
-void dolfin::__dolfin_assert(std::string file, unsigned long line,
-                      std::string function, _msg format, ...)
+void __dolfin_assert(std::string file, unsigned long line,
+                     std::string function, _msg format, ...)
 {
   read(buffer, format);
   std::ostringstream ost;
@@ -153,3 +169,6 @@ void dolfin::__dolfin_assert(std::string file, unsigned long line,
   LogManager::logger().__assert(msg);
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
+

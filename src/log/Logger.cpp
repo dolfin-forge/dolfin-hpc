@@ -8,6 +8,7 @@
 // Last changed: 2014-05-29
 
 #include <string>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -35,6 +36,11 @@ Logger::Logger() :
 Logger::~Logger()
 {
   // Do nothing
+  if(filestream_ != NULL)
+  {
+    filestream_->close();
+  }
+  delete filestream_;
 }
 //-----------------------------------------------------------------------------
 void Logger::message(std::string msg, int debug_level)
@@ -163,6 +169,21 @@ void Logger::setOutputDestination(std::ostream& ostream)
 void Logger::setDebugLevel(int debug_level)
 {
   this->debug_level_ = debug_level;
+}
+//-----------------------------------------------------------------------------
+void Logger::file()
+{
+  this->destination_ = stream;
+  if(filestream_ == NULL)
+  {
+    filestream_ = new std::ofstream();
+    std::stringstream ss;
+    ss << "log." << MPI::processNumber();
+    filestream_->open(ss.str().c_str());
+  }
+  // Sill allow toto babar logging for dummies
+  std::cout.clear(std::iostream::goodbit);
+  logstream_ = filestream_;
 }
 //-----------------------------------------------------------------------------
 void Logger::timing(std::string task, real elapsed_time)

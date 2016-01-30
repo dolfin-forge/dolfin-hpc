@@ -43,11 +43,20 @@ public:
   /// Return type
   Type boundary_type() const;
 
+  /// Return whether the mesh is distributed
+  /// @note This is always true for a boundary mesh
+  bool is_distributed() const;
+
 private:
 
   Type type_;
 
 };
+
+  inline bool BoundaryMesh::is_distributed() const
+  {
+    return true;
+  }
 
 }
 

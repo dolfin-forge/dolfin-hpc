@@ -31,9 +31,9 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
   end();
   refcell.order();
   // Initialize all connectivities
-  for (uint i = 0; i <= refcell.topology().dim(); ++i)
+  for (dolfin::uint i = 0; i <= refcell.topology().dim(); ++i)
   {
-    for (uint j = i; j <= refcell.topology().dim(); ++j)
+    for (dolfin::uint j = i; j <= refcell.topology().dim(); ++j)
     {
       refcell.init(i, j);
     }
@@ -44,11 +44,11 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     cell.check(*c);
   }
   //refcell.disp();
-  uint nc0 = refcell.numCells();
+  dolfin::uint nc0 = refcell.numCells();
   VTKFile vtk0(CellType::type2string(cell.cellType()) + "0m.pvd");
   vtk0 << refcell;
 
-  uint const N = std::pow(2, 5 - cell.dim());
+  dolfin::uint const N = std::pow(2, 5 - cell.dim());
   for (uint l = 1; l <= N; ++l)
   {
     refcell.refine();
@@ -58,7 +58,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     svtk1 << CellType::type2string(cell.cellType()) << l << "m.pvd";
     VTKFile vtk1(svtk1.str());
     vtk1 << refcell;
-    MeshFunction<uint> vi(refcell, 0);
+    MeshFunction<dolfin::uint> vi(refcell, 0);
     for (VertexIterator v(refcell); !v.end(); ++v)
     {
       vi.set(*v, v->index());

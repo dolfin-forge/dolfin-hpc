@@ -17,7 +17,7 @@ START_TEST( test_BoundingBox )
   int init_failed = 0;
   Test::begin("test_BoundingBox");
   //---
-  for (uint i = 0; i <= EuclideanSpace::MAX_DIMENSION; ++i)
+  for (dolfin::uint i = 0; i <= EuclideanSpace::MAX_DIMENSION; ++i)
   {
     BoundingBox bb(i);
     bb.disp();
@@ -42,7 +42,7 @@ START_TEST( test_StructuredGrid_interval )
   int init_failed = 0;
   Test::begin("test_StructuredGrid_interval");
   //---
-  uint N = 8192;
+  dolfin::uint N = 8192;
   StructuredGrid g(IntervalCell(), N);
   dolfin_assert(g.numCells() == N);
   VTKFile vtk("StructuredGrid_interval.pvd");
@@ -59,7 +59,7 @@ START_TEST( test_StructuredGrid_triangle )
   int init_failed = 0;
   Test::begin("test_StructuredGrid_triangle");
   //---
-  uint N = 128;
+  dolfin::uint N = 128;
   StructuredGrid g(TriangleCell(), N);
   dolfin_assert(g.numCells() == N*N*2);
   VTKFile vtk("StructuredGrid_triangle.pvd");
@@ -76,7 +76,7 @@ START_TEST( test_StructuredGrid_tetrahedron )
   int init_failed = 0;
   Test::begin("test_StructuredGrid_tetrahedron");
   //---
-  uint N = 32;
+  dolfin::uint N = 32;
   StructuredGrid g(TetrahedronCell(), N);
   dolfin_assert(g.numCells() == N*N*N*6);
   VTKFile vtk("StructuredGrid_tetrahedron.pvd");
@@ -93,7 +93,7 @@ START_TEST( test_StructuredGrid_quadrilateral )
   int init_failed = 0;
   Test::begin("test_StructuredGrid_quadrilateral");
   //---
-  uint N = 128;
+  dolfin::uint N = 128;
   StructuredGrid g(QuadrilateralCell(), N);
   VTKFile vtk("StructuredGrid_quadrilateral.pvd");
   vtk << g;
@@ -109,7 +109,7 @@ START_TEST( test_StructuredGrid_hexahedron )
   int init_failed = 0;
   Test::begin("test_StructuredGrid_hexahedron");
   //---
-  uint N = 32;
+  dolfin::uint N = 32;
   StructuredGrid g(HexahedronCell(), N);
   dolfin_assert(g.numCells() == N*N*N);
   VTKFile vtk("StructuredGrid_hexahedron.pvd");

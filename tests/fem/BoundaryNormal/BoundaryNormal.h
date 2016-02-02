@@ -7,6 +7,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/ufl/UFLVectorElement.h>
 
+
 using namespace dolfin;
 
 #include <check.h>
@@ -14,7 +15,7 @@ using namespace dolfin;
 void check_NodeNormal_create(std::string file)
 {
   Mesh mesh(file);
-  uint const gdim = mesh.geometry().dim();
+  dolfin::uint const gdim = mesh.geometry().dim();
   ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1, gdim);
   FiniteElementSpace Vh(mesh, space);
   NodeNormal nn(mesh);

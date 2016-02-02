@@ -177,7 +177,7 @@ void MeasureDomain::display() const
 
 //-----------------------------------------------------------------------------
 Measure::Measure(MeasureDomain::Type const& measure_type,
-                 MeasureData const& meta_data, dolfin::uint const& measure_id) :
+                 MeasureData const& meta_data, dolfin::uint& measure_id) :
     Class("Measure"),
     measure_domain_(measure_type),
     measure_id_(measure_id),
@@ -235,7 +235,7 @@ MeasureDomain::Type Measure::measure_type() const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint const& Measure::measure_domain_id() const
+dolfin::uint Measure::measure_domain_id() const
 {
   return measure_id_;
 }

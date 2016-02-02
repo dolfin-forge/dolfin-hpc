@@ -166,7 +166,7 @@ public:
 
   ///
   Measure(MeasureDomain::Type const& measure_type,
-          MeasureData const& measure_data, dolfin::uint const& measure_id);
+          MeasureData const& measure_data, dolfin::uint& measure_id);
 
   ///
   Measure(repr_t const& repr);
@@ -204,7 +204,7 @@ public:
 
   MeasureData const& meta_data() const;
 
-  dolfin::uint const& measure_domain_id() const;
+  dolfin::uint measure_domain_id() const;
 
   //--- INTERFACE inherited from UFLClass -------------------------------------
 

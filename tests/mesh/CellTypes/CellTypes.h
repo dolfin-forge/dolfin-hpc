@@ -48,8 +48,8 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
   VTKFile vtk0(CellType::type2string(cell.cellType()) + "0m.pvd");
   vtk0 << refcell;
 
-  dolfin::uint const N = std::pow(2, 5 - cell.dim());
-  for (uint l = 1; l <= N; ++l)
+  dolfin::uint const N = std::pow(2.0, (int) (5 - cell.dim()));
+  for (dolfin::uint l = 1; l <= N; ++l)
   {
     refcell.refine();
     ck_assert_int_eq(refcell.numCells(), nc0 * cell.num_refined_cells());

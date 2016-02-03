@@ -80,8 +80,8 @@ void NodeNormal::compute()
   if (basis()[0].space().is_vertex_based())
   {
     //Allow the possibility to switch implementation
-    //ComputeP1(mesh_, basis());
-    ComputePk(mesh_, basis());
+    ComputeP1(mesh_, basis());
+    //ComputePk(mesh_, basis());
   }
   else
   {

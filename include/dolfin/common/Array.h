@@ -18,86 +18,68 @@
 namespace dolfin
 {
 
-  /// Array is a container that provides O(1) access time to elements
-  /// and O(1) memory overhead.
-  ///
-  /// It is a wrapper for std::vector, so see the STL manual for further
-  /// details: http://www.sgi.com/tech/stl/
+/// Array is a container that provides O(1) access time to elements
+/// and O(1) memory overhead. => Thank you Captain Obvious!
+///
+/// It is a wrapper for std::vector, so see the STL manual for further
+/// details: http://www.sgi.com/tech/stl/
 
-  template <class T>
-  class Array : public std::vector<T>
+template<class T>
+class Array : public std::vector<T>
+{
+public:
+
+  /// Create empty array
+  Array() :
+      std::vector<T>()
   {
-  public:
+  }
 
-    /// Create empty array
-    Array() : std::vector<T>() {}
+  /// Create array of given size
+  Array(uint n) :
+      std::vector<T>(n)
+  {
+  }
 
-    /// Create array of given size
-    Array(uint n) : std::vector<T>(n) {}
+  /// Create array of given size with default value
+  Array(uint n, T const& t) :
+      std::vector<T>(n, t)
+  {
+  }
 
-    /// Create array of given size with default value
-    Array(uint n, const T& t) : std::vector<T>(n, t) {}
+  /// Copy constructor
+  Array(Array<T> const& x) :
+      std::vector<T>(x)
+  {
+  }
 
-    /// Create array containing two elements
-    Array(const T& t0, const T& t1)
+  /// Assign to all elements in the array
+  Array const& operator=(const T& t)
+  {
+    for (uint i = 0; i < std::vector<T>::size(); ++i)
     {
-      this->push_back(t0);
-      this->push_back(t1);
-    }
-
-    /// Create array containing three elements
-    Array(const T& t0, const T& t1, const T& t2)
-    {
-      this->push_back(t0);
-      this->push_back(t1);
-      this->push_back(t2);
-    }
-
-    /// Create array containing four elements
-    Array(const T& t0, const T& t1, const T& t2, const T& t3)
-    {
-      this->push_back(t0);
-      this->push_back(t1);
-      this->push_back(t2);
-      this->push_back(t3);
-    }
-
-    /// Create array containing five elements
-    Array(const T& t0, const T& t1, const T& t2, const T& t3, const T& t4)
-    {
-      this->push_back(t0);
-      this->push_back(t1);
-      this->push_back(t2);
-      this->push_back(t3);
-      this->push_back(t4);
-    }
-
-    /// Copy constructor
-    Array(const Array<T>& x) : std::vector<T>(x) {}
-
-    /// Assign to all elements in the array
-    const Array& operator=(const T& t)
-    {
-      for (uint i = 0; i < std::vector<T>::size(); ++i)
       (*this)[i] = t;
-      return *this;
     }
+    return *this;
+  }
 
-    /// Destructor
-    ~Array() {}
+  /// Destructor
+  ~Array()
+  {
+  }
 
-    ///
-    void free()
+  /// Cleanup array of allocated objects
+  void free()
+  {
+    while (!this->empty())
     {
-      while(!this->empty())
-      {
-        delete this->back();
-        this->pop_back();
-      }
+      delete this->back();
+      this->pop_back();
     }
+  }
 
-  };
+};
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_ARRAY_H */

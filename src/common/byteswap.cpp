@@ -60,6 +60,21 @@ real dolfin::bswap(real x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
+float dolfin::bswap(float x)
+{
+  union {
+    float x;
+    unsigned char b[4];
+  } ein, eout;
+
+  ein.x = x;
+  eout.b[0] = ein.b[3];
+  eout.b[1] = ein.b[2];
+  eout.b[2] = ein.b[1];
+  eout.b[3] = ein.b[0];
+  return eout.x;
+}
+//-----------------------------------------------------------------------------
 template<typename T> void dolfin::bswap(T x[], uint n)
 {
     for (uint i = 0; i < n; i++)

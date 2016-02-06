@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2015-07-25
-// Last changed: 2015-07-25
+// Last changed: 2016-02-06
 
 #ifndef __DOLFIN_BYTESWAP_H
 #define __DOLFIN_BYTESWAP_H
@@ -20,6 +20,9 @@ namespace dolfin
 
   /// Byteswap double precision floating point data
   real bswap(real x);
+
+  /// Byteswap single precision floating point data
+  float bswap(float x);
 
   /// Byteswap an array
   template<typename T> void bswap(T x[], uint n);

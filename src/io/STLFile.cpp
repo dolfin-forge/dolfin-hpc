@@ -6,6 +6,7 @@
 #include <fstream>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/io/STLFile.h>
+#include <dolfin/common/byteswap.h>
 #include <set>
 
 using namespace dolfin;
@@ -35,6 +36,10 @@ void STLFile::operator>>(Mesh& mesh)
   fp.read((char *) &hdr, 80 * sizeof(char));
   fp.read((char *) &ntri, sizeof(uint));
 
+#ifdef HAVE_BIG_ENDIAN
+  ntri = bswap(ntri);
+#endif
+
   MeshEditor editor(mesh, CellType::triangle, 3);
   editor.initCells(ntri);
 
@@ -49,19 +54,26 @@ void STLFile::operator>>(Mesh& mesh)
     {
       /* Vertex v1 v2 v3 */
       fp.read((char *) &data, 3 * sizeof(float));
+
+#ifdef HAVE_BIG_ENDIAN
+      V.v[0] = (double) bswap(data[0]);
+      V.v[1] = (double) bswap(data[1]);
+      V.v[2] = (double) bswap(data[2]);
+#else
       V.v[0] = (double) data[0];
       V.v[1] = (double) data[1];
       V.v[2] = (double) data[2];
+#endif
 
       if (vertices.find(V) != vertices.end())
       {
-        index[j] = vertices.find(V)->index;
+	index[j] = vertices.find(V)->index;
       }
       else
       {
-        V.index = v_index++;
-        index[j] = V.index;
-        vertices.insert(V);
+	V.index = v_index++;
+	index[j] = V.index;
+	vertices.insert(V);
       }
     }
 
@@ -83,4 +95,3 @@ void STLFile::operator>>(Mesh& mesh)
 
 }
 //-----------------------------------------------------------------------------
-

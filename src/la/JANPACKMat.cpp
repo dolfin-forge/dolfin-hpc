@@ -221,11 +221,10 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 
   jp_mat_getrow(const_cast<jp_mat_type *>(A), row, c, v, &n);
 
-  for (uint i = 0; i < n; i++)
-  {
-    columns.push_back(c[i]);
-    values.push_back(v[i]);
-  }
+  // Assign values to Arrays
+  columns.assign(reinterpret_cast<uint*>(c),
+		 reinterpret_cast<uint*>(c + n));
+  values.assign(v, v + n);
 
   delete c;
   delete v;

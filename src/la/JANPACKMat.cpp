@@ -56,24 +56,14 @@ JANPACKMat::JANPACKMat(const JANPACKMat& A):
 //-----------------------------------------------------------------------------
 JANPACKMat::~JANPACKMat()
 {
-  // Free memory of matrix
-  //  if(A)
-    jp_mat_free(A);
-
-  //  if (!is_view) delete A;
+  jp_mat_free(A);    
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::init(uint M, uint N)
 {
-  // Free previously allocated memory if necessary
-  //  if (A) delete A;
-
-  //  A = &AA;
   jp_mat_init(A, M, N);
 
   //  jp_mat_setopt(A, JP_MAT_SORTED);
-  // Not yet implemented
-  //  error("JANPACKMat::init(uint, unit) not yet implemented.");
 }
 //-----------------------------------------------------------------------------
 void JANPACKMat::init(uint M, uint N, bool distributed)
@@ -89,7 +79,6 @@ void JANPACKMat::init(const GenericSparsityPattern& sparsity_pattern)
 
   init(spattern.size(0), spattern.size(1));
 
-  // error("Not implemented.  (init)");
 }
 //-----------------------------------------------------------------------------
 JANPACKMat* JANPACKMat::copy() const
@@ -121,8 +110,6 @@ void JANPACKMat::get(real* block,
 		       uint n, const uint* cols) const
 {
   dolfin_assert(A);
-  // for each row in rows
-  //A->ExtractGlobalRowCopy(...)
 
   // Not yet implemented
   error("JANPACKMat::get not yet implemented.");
@@ -299,8 +286,6 @@ void JANPACKMat::dup(const JANPACKMat& A)
   jp_mat_range(const_cast<jp_mat_type *>(A.mat()), &range[0], &range[1]);
   m = range[1] - range[0];
   init(m, m);
-  //  error("Not implemented.");
-  //  jp_mat_dup_crs(, this->A);
 }
 //-----------------------------------------------------------------------------
 #endif

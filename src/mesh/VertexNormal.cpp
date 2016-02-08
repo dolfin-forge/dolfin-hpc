@@ -294,18 +294,17 @@ void VertexNormal::computeNormal(Mesh& mesh)
         uint const num_nc = u_recvbuff[iiu + 1];
 
         VertexDataMap::iterator it = vdata.find(glb_id);
-        if (it == vdata.end())
+        if (it != vdata.end())
         {
-          error("Invalid adjacency data: unknown global vertex %d.", glb_id);
-        }
         // Add corresponding facet normals and weights
-        dolfin_assert(it->second != NULL);
-        VertexData * vd = it->second;
-        vd->facet_normals.insert(vd->facet_normals.end(), rptr,
-                                 rptr + gdim * num_nc);
-        rptr += gdim * num_nc;
-        vd->facet_weights.insert(vd->facet_weights.end(), rptr, rptr + num_nc);
-        rptr += num_nc;
+	  dolfin_assert(it->second != NULL);
+	  VertexData * vd = it->second;
+	  vd->facet_normals.insert(vd->facet_normals.end(), rptr,
+				   rptr + gdim * num_nc);
+	  rptr += gdim * num_nc;
+	  vd->facet_weights.insert(vd->facet_weights.end(), rptr, rptr + num_nc);
+	  rptr += num_nc;
+	}
       }
 
       // Clear for reuse

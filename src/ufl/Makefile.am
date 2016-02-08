@@ -45,4 +45,3 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLVariable.cpp\
                            UFLVectorElement.cpp
 
-dist_data_DATA =  

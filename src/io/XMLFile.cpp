@@ -271,7 +271,7 @@ void XMLFile::operator<<(GenericMatrix& A)
 void XMLFile::operator<<(Mesh& mesh)
 {
 
-  if(MPI::numProcesses() == 0)
+  if(MPI::numProcesses() == 1)
   {
     this->write();
 

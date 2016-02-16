@@ -8,6 +8,7 @@ nobase_pkginclude_HEADERS = \
 				common/constants.h\
 				common/dolfin_common.h\
 				common/byteswap.h\
+				common/system.h\
 				common/timing.h\
 				common/types.h\
 				common/unittest.h\

@@ -3,10 +3,11 @@
 
 // DOLFIN common classes
 
-#include <dolfin/common/byteswap.h>
-#include <dolfin/common/types.h>
 #include <dolfin/common/constants.h>
+#include <dolfin/common/byteswap.h>
+#include <dolfin/common/system.h>
 #include <dolfin/common/timing.h>
+#include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/List.h>
 #include <dolfin/common/Test.h>

@@ -153,6 +153,7 @@ nobase_pkginclude_HEADERS = \
 				math/Jacobi.h\
 				math/Lagrange.h\
 				math/Legendre.h\
+				math/LinearDistribution.h\
 				math/PKDO.h\
 				mesh/dolfin_mesh.h\
 				mesh/AffineMapping.h \

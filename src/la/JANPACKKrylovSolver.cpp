@@ -102,6 +102,10 @@ int JANPACKKrylovSolver::getType(SolverType method) const
     return JP_BICGSTAB;
   case cg:
     return JP_CG;
+  case pipecg:
+    return JP_PIPECG;
+  case asyncg:
+    return JP_ASYNCG;
   default:
     warning("Requested Krylov method unknown. Using BICGSTAB.");
     return JP_BICGSTAB;

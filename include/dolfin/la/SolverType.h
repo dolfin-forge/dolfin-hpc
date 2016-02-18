@@ -18,6 +18,8 @@ namespace dolfin
   {
     lu,            // LU factorization
     cg,            // Krylov conjugate gradient method
+    pipecg,        // Pipelined conjugate gradient method
+    asyncg,        // Gropp's asynchronous conjugate gradient method
     gmres,         // Krylov GMRES method
     bicgstab,      // Krylov stabilised biconjugate gradient squared method
     default_solver // Default Krylov solver

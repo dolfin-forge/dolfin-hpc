@@ -78,6 +78,20 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
+/// Facility to compare object through pointers
+template<class T> bool objptrcmp(T const * p0, T const * p1)
+{
+  if (p0 == p1)
+  {
+    return true;
+  }
+  else if ((p0 == NULL && p1 != NULL) || (p0 != NULL && p1 == NULL))
+  {
+    return false;
+  }
+  return (*p0 == *p1);
+}
+
 /// Equivalence operator for unordered maps to be used for assertion checking
 template<class K, class V> bool operator==(_map<K,V> const& m0,
                                            _map<K,V> const& m1)

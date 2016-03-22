@@ -10,7 +10,6 @@ libdolfin_io_la_SOURCES = \
 			MFile.cpp\
 			OctaveFile.cpp\
 			OFFFile.cpp\
-			PXMLMesh.cpp\
 			RAWFile.cpp\
 			VTKFile.cpp\
 			XMLDofMap.cpp\

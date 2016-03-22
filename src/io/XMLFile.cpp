@@ -40,7 +40,7 @@
 #include <dolfin/io/XMLVector.h>
 #include <dolfin/io/XMLMatrix.h>
 #include <dolfin/io/XMLMesh.h>
-#include <dolfin/io/PXMLMesh.h>
+#include <dolfin/io/XMLMesh.h>
 #include <dolfin/io/XMLMeshFunction.h>
 #include <dolfin/io/XMLDofMap.h>
 #include <dolfin/io/XMLFunction.h>
@@ -91,10 +91,7 @@ void XMLFile::operator>>(Mesh& mesh)
   message(1, "Reading mesh from file %s.", filename.c_str());
 
   if (xmlObject) delete xmlObject;
-
-  const bool serial_mesh = dolfin_get("Mesh read in serial");
-  if (MPI::numProcesses() > 1 && !serial_mesh) xmlObject = new PXMLMesh(mesh);
-  else xmlObject = new XMLMesh(mesh);
+  xmlObject = new XMLMesh(mesh);
   parseFile();
 }
 //-----------------------------------------------------------------------------

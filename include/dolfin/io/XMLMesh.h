@@ -1,11 +1,13 @@
 // Copyright (C) 2003-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2008.
+//
 // First added:  2003-10-21
 // Last changed: 2008-05-21
 
-#ifndef __DOLFIN_NEW_XML_MESH_H
-#define __DOLFIN_NEW_XML_MESH_H
+#ifndef __DOLFIN_XML_MESH_H
+#define __DOLFIN_XML_MESH_H
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
@@ -33,36 +35,39 @@ private:
   
   enum ParserState
   {
-    OUTSIDE,
-    INSIDE_MESH,
-    INSIDE_VERTICES,
-    INSIDE_CELLS,
-    INSIDE_DATA,
-    INSIDE_MESH_FUNCTION,
-    INSIDE_ARRAY,
-    DONE
+    ROOT,
+    IN_MESH,
+    IN_VERTICES,
+    IN_CELLS
   };
 
-  void readMesh(const xmlChar* name, const xmlChar** attrs);
+  void beginMesh(const xmlChar* name, const xmlChar** attrs);
   void readVertices(const xmlChar* name, const xmlChar** attrs);
   void readCells(const xmlChar* name, const xmlChar** attrs);
   void readVertex(const xmlChar* name, const xmlChar** attrs);
-  void readInterval(const xmlChar* name, const xmlChar** attrs);
-  void readTriangle(const xmlChar* name, const xmlChar** attrs);
-  void readTetrahedron(const xmlChar* name, const xmlChar** attrs);
-  void readMeshFunction(const xmlChar* name, const xmlChar** attrs);
-  void readArray(const xmlChar* name, const xmlChar** attrs);
-  void readMeshEntity(const xmlChar* name, const xmlChar** attrs);
-  void readArrayElement(const xmlChar* name, const xmlChar** attrs);
-
-  void closeMesh();
+  void readCell(const xmlChar* name, const xmlChar** attrs);
+  void endMesh();
 
   Mesh& mesh_;
   ParserState state_;
   MeshEditor * editor_;
-  MeshFunction<uint>* f_;
-  Array<uint>* a_;
-  
+
+  bool parallel_;
+  uint cell_count_;
+  uint vertex_offset_;
+  uint vertex_range_end_;
+  uint cell_offset_;
+  uint cell_range_end_;
+
+  uint * local_vertices_;
+  uint * shared_vertices_;
+  uint num_local_vertices_;
+  uint num_local_cells_;
+
+  uint * vertex_owner_;
+  Array<uint> cell_buffer_;
+  _set<uint> nonlocal_vertices_;
+
 };
 
 }

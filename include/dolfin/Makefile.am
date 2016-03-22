@@ -80,7 +80,6 @@ nobase_pkginclude_HEADERS = \
 				io/MFile.h\
 				io/OctaveFile.h\
 				io/OFFFile.h\
-				io/PXMLMesh.h\
 				io/RAWFile.h\
 				io/STLFile.h\
 				io/VTKFile.h\

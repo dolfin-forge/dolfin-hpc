@@ -783,6 +783,11 @@ uint MeshDistributedData::get_owner(uint local_index, uint dim) const
   }
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(ghost_owner_[dim].count(local_index));
+  _map<uint, uint>::const_iterator it = ghost_owner_[dim].find(local_index);
+  if(it == ghost_owner_[dim].end())
+  {
+    return MPI::processNumber();
+  }
   return ghost_owner_[dim][local_index];
 }
 //-----------------------------------------------------------------------------

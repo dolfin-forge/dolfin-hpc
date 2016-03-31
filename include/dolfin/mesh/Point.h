@@ -50,6 +50,12 @@ public:
   /// Return coordinate in direction i
   real const& operator[](uint i) const;
 
+  ///
+  operator real*();
+
+  ///
+  operator real const*() const;
+
   /// Return x-coordinate
   real x() const;
 
@@ -130,6 +136,18 @@ inline real const& Point::operator[](uint i) const
 {
   dolfin_assert(i < Point::MAX_SIZE);
   return x_[i];
+}
+
+//-----------------------------------------------------------------------------
+inline Point::operator real*()
+{
+  return &x_[0];
+}
+
+//-----------------------------------------------------------------------------
+inline Point::operator real const*() const
+{
+  return &x_[0];
 }
 
 //-----------------------------------------------------------------------------

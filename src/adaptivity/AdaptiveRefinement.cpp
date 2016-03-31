@@ -394,7 +394,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
 
         uint *cvi = c->entities(0);
         uint ci = 0;
-        for (ci = 0; ci < c->numEntities(0); ci++)
+        for (ci = 0; ci < c->num_entities(0); ci++)
         {
           if (cvi[ci] == v->index())
           {
@@ -456,7 +456,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
           if (test_value != std::numeric_limits<real>::infinity())
           {
             vv[i] = test_value;
-            indices[i++] = local_indices[ci + d * c->numEntities(0)];
+            indices[i++] = local_indices[ci + d * c->num_entities(0)];
           }
         }
 

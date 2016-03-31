@@ -424,7 +424,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       break;
     case vector_p1:
       {
-        uint const num_cellverts = cell.numEntities(0);
+        uint const num_cellverts = cell.num_entities(0);
         for (uint k = 0; k < num_leaf_spaces_; ++k)
         {
           for (uint i = 0; i < num_cellverts; ++i)

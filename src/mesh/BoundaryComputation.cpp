@@ -77,8 +77,8 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   {
     // Boundary facets are connected to exactly one cell
     if((!interior_boundary && facetmap.globalFacet(*f)) ||
-       (local_boundary && f->numEntities(D) == 1) ||
-       (f->numEntities(D) == 1 &&
+       (local_boundary && f->num_entities(D) == 1) ||
+       (f->num_entities(D) == 1 &&
            interior_boundary && !facetmap.globalFacet(*f)))
     {
 
@@ -154,8 +154,8 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     //    if (f->numEntities(D) == 1)
     //        {
     if((!interior_boundary && facetmap.globalFacet(*f)) ||
-       (local_boundary && f->numEntities(D) == 1) ||
-       (f->numEntities(D) == 1 &&
+       (local_boundary && f->num_entities(D) == 1) ||
+       (f->num_entities(D) == 1 &&
            interior_boundary && !facetmap.globalFacet(*f)))
     {
 
@@ -192,11 +192,11 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
   // Get the vertex opposite to the facet (the one we remove)
   uint vertex = 0;
   const Cell cell(mesh, facet.entities(mesh.topology().dim())[0]);
-  for (uint i = 0; i < cell.numEntities(0); i++)
+  for (uint i = 0; i < cell.num_entities(0); i++)
   {
     bool not_in_facet = true;
     vertex = cell.entities(0)[i];
-    for (uint j = 0; j < facet.numEntities(0); j++)
+    for (uint j = 0; j < facet.num_entities(0); j++)
     {
       if (vertex == facet.entities(0)[j])
       {
@@ -219,7 +219,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
     break;
   case CellType::triangle:
     {
-      dolfin_assert(facet.numEntities(0) == 2);
+      dolfin_assert(facet.num_entities(0) == 2);
 
       Point p0 = mesh.geometry().point(facet.entities(0)[0]);
       Point p1 = mesh.geometry().point(facet.entities(0)[1]);
@@ -236,7 +236,7 @@ void BoundaryComputation::reorder(Array<uint>& vertices, Facet& facet)
     break;
   case CellType::tetrahedron:
     {
-      dolfin_assert(facet.numEntities(0) == 3);
+      dolfin_assert(facet.num_entities(0) == 3);
 
       Point p0 = mesh.geometry().point(facet.entities(0)[0]);
       Point p1 = mesh.geometry().point(facet.entities(0)[1]);

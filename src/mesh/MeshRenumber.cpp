@@ -381,7 +381,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 
   uint num_ghost = 0;
   Face f(mesh, 0);
-  uint inc = 2 * f.numEntities(0);
+  uint inc = 2 * f.num_entities(0);
 
   // Assign ownership of shared faces
   MPI_Status status;
@@ -427,7 +427,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
         }
       }
 
-      if (num_ok < f.numEntities(0))
+      if (num_ok < f.num_entities(0))
       {
         continue;
       }
@@ -504,7 +504,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
           ++num_ok;
         }
       }
-      if (num_ok < f.numEntities(0))
+      if (num_ok < f.num_entities(0))
       {
         continue;
       }
@@ -610,7 +610,7 @@ std::set<std::pair<uint, uint> > MeshRenumber::face_key(Face& f)
   fk.insert(edge_key(face_v[0], face_v[1]));
   fk.insert(edge_key(face_v[1], face_v[2]));
 
-  switch (f.numEntities(0))
+  switch (f.num_entities(0))
     {
     case 3:
       fk.insert(edge_key(face_v[2], face_v[0]));
@@ -637,7 +637,7 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
   send_buff.push_back(mddata.get_vertex_global(face_v[1]));
   send_buff.push_back(mddata.get_vertex_global(face_v[2]));
 
-  switch (f.numEntities(0))
+  switch (f.num_entities(0))
     {
     case 3:
       send_buff.push_back(mddata.get_vertex_global(face_v[2]));

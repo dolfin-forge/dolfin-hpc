@@ -392,7 +392,7 @@ bool TetrahedronCell::refinement_needs_entities(uint dim) const
 real TetrahedronCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -422,7 +422,7 @@ real TetrahedronCell::volume(MeshEntity const& entity) const
 real TetrahedronCell::diameter(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -461,7 +461,7 @@ real TetrahedronCell::diameter(MeshEntity const& entity) const
 real TetrahedronCell::circumradius(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -516,7 +516,7 @@ real TetrahedronCell::circumradius(MeshEntity const& entity) const
 Point TetrahedronCell::midpoint(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -610,7 +610,7 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get global index of vertices of the tetrahedron
   uint const ort = orientation((Cell&) e);
@@ -644,7 +644,7 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p1,
                                  Point const& p2) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   error("Collision of tetrahedron with segment not implemented");
   return false;

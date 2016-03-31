@@ -14,7 +14,7 @@ Point Face::midpoint() const
 {
   MeshGeometry const& geometry = this->mesh().geometry();
   uint const* vertices = this->entities(0);
-  uint const num_vertices = this->numEntities(0);
+  uint const num_vertices = this->num_entities(0);
   Point p;
   for (uint v = 0; v < num_vertices; ++v)
   {

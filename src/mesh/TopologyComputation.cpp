@@ -354,7 +354,7 @@ dolfin::uint TopologyComputation::countEntities(Mesh& mesh, MeshEntity& cell,
       if (c->index() >= cell.index()) continue;
 
       // Check for vertices
-      if (contains(c->entities(0), c->numEntities(0), entities[i], n)) goto found;
+      if (contains(c->entities(0), c->num_entities(0), entities[i], n)) goto found;
     }
 
     // Increase counter
@@ -389,13 +389,13 @@ void TopologyComputation::addEntities(Mesh& mesh, MeshEntity& cell,
       if (c->index() >= cell.index()) continue;
 
       // Check all entities of dimension dim in connected cell
-      uint num_other_entities = c->numEntities(dim);
+      uint num_other_entities = c->num_entities(dim);
       uint* other_entities = c->entities(dim);
       for (uint j = 0; j < num_other_entities; j++)
       {
         // Can't use iterators since connectivity has not been computed
         MeshEntity e(mesh, dim, other_entities[j]);
-        if (contains(e.entities(0), e.numEntities(0), entities[i], n))
+        if (contains(e.entities(0), e.num_entities(0), entities[i], n))
         {
           // Entity already exists, so pick the index
           ce.set(cell.index(), e.index(), i);
@@ -419,8 +419,8 @@ void TopologyComputation::addEntities(Mesh& mesh, MeshEntity& cell,
 bool TopologyComputation::contains(MeshEntity& e0, MeshEntity& e1)
 {
   // Check vertices
-  return contains(e0.entities(0), e0.numEntities(0), e1.entities(0),
-                  e1.numEntities(0));
+  return contains(e0.entities(0), e0.num_entities(0), e1.entities(0),
+                  e1.num_entities(0));
 }
 //----------------------------------------------------------------------------
 bool TopologyComputation::contains(uint* v0, uint n0, uint* v1, uint n1)

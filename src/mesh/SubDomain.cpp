@@ -118,13 +118,13 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     // Check if entity is on the boundary if entity is a facet
     if (dim == D - 1)
     {
-      on_boundary = entity->numEntities(D) == 1;
+      on_boundary = entity->num_entities(D) == 1;
     }
     else if (dim == 0)
     {
       for (FacetIterator fi(*entity); !fi.end(); ++fi)
       {
-        if (fi->numEntities(D) && facetmap.globalFacet(*fi))
+        if (fi->num_entities(D) && facetmap.globalFacet(*fi))
         {
           on_boundary = true;
         }

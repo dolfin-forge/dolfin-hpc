@@ -195,7 +195,7 @@ void DMesh::imp(Mesh& mesh)
   {
     DCell* dc = new DCell;
 
-    std::vector<DVertex*> vs(ci->numEntities(0));
+    std::vector<DVertex*> vs(ci->num_entities(0));
     uint i = 0;
     for (VertexIterator vi(*ci); !vi.end(); ++vi)
     {

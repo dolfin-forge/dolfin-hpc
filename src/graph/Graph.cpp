@@ -157,7 +157,7 @@ void Graph::createNodal(Mesh& mesh)
   {
     vertices[i++] = j;
     uint* entities = vertex->entities(0);
-    for (uint k=0; k<vertex->numEntities(0); k++)
+    for (uint k=0; k<vertex->num_entities(0); k++)
     {
       edges[j++] = entities[k];
     }

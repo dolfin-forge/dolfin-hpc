@@ -1000,7 +1000,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     uint * cp = &cell_buffer[0];
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      for (uint i = 0; i < c->numEntities(0); ++i)
+      for (uint i = 0; i < c->num_entities(0); ++i)
       {
         *(cp++) = mesh.distdata().get_vertex_global(c->entities(0)[i]);
       }

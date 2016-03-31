@@ -46,7 +46,7 @@ AffineMapping::~AffineMapping()
 //-----------------------------------------------------------------------------
 void AffineMapping::update(Cell& cell)
 {
-  dolfin_assert(n_ >= cell.numEntities(0));
+  dolfin_assert(n_ >= cell.num_entities(0));
   switch (cell.type())
     {
     case CellType::tetrahedron:

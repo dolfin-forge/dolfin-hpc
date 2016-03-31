@@ -51,7 +51,7 @@ bool MeshSmoother::onBoundary(Cell& cell)
 
   for (FacetIterator f(cell); !f.end(); ++f)
   {
-    if (f->numEntities(d) == 1)
+    if (f->num_entities(d) == 1)
     {
       return true;
     }

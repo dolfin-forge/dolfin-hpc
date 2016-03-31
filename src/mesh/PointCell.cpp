@@ -118,7 +118,7 @@ Point PointCell::midpoint(MeshEntity const& entity) const
 {
   // Check that we get a point
   dolfin_assert(entity.dim() == 0);
-  dolfin_assert(entity.numEntities(0) == 1);
+  dolfin_assert(entity.num_entities(0) == 1);
 
   return Point();
 }

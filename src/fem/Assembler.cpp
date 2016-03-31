@@ -322,7 +322,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     }
 
     // Get mesh cell to which mesh facet belongs (pick first, there is only one)
-    dolfin_assert(mesh_facet.numEntities(tdim) == 1);
+    dolfin_assert(mesh_facet.num_entities(tdim) == 1);
     Cell mesh_cell(mesh, mesh_facet.entities(tdim)[0]);
 
     // Get local index of facet with respect to the cell
@@ -394,7 +394,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   for (FacetIterator facet(mesh); !facet.end(); ++facet)
   {
     // Check if we have an interior facet
-    if (facet->numEntities(tdim) != 2)
+    if (facet->num_entities(tdim) != 2)
     {
 #ifndef NO_PROGRESS_BAR
       p++;

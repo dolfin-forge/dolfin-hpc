@@ -143,7 +143,7 @@ void VertexNormal::getFacetData(VertexNormal::Type type, Mesh& mesh,
     {
       continue;
     }
-    dolfin_assert(facet.numEntities(tdim) == 1);
+    dolfin_assert(facet.num_entities(tdim) == 1);
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint local_facet = cell.index(facet);
     Point n = cell.normal(local_facet);

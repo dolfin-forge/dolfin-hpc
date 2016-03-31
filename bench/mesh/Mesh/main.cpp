@@ -312,7 +312,7 @@ int main(int argc, char** argv)
               }
             }
             // If an entity is shared then all the lower dimensional entities are
-            ret &= (num_shared == e1->numEntities(e1->dim() - 1));
+            ret &= (num_shared == e1->num_entities(e1->dim() - 1));
             // ! An entity if shared only if they share a common adjacent !
           }
         }

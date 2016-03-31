@@ -198,7 +198,7 @@ void AvgMeshSize::eval(real * values, real const * x) const
                  cell().entities(cell().mesh().topology().dim() - 1)[facet()]);
 
     // If there are two cells connected to the facet
-    if (facet0.numEntities(cell().mesh().topology().dim()) == 2)
+    if (facet0.num_entities(cell().mesh().topology().dim()) == 2)
     {
       // Create the two connected cells and return the average of their diameter
       Cell cell0(mesh(), facet0.entities(cell().mesh().topology().dim())[0]);

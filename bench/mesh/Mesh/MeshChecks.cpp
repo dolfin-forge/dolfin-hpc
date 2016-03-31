@@ -59,7 +59,7 @@ bool interior_boundary_entities_check(Mesh& mesh, uint dim, bool throw_error)
         {
           invalid_shared.push_back(facet.index());
         }
-        if (facet.numEntities(tdim) != 1)
+        if (facet.num_entities(tdim) != 1)
         {
           invalid_neighb.push_back(facet.index());
         }

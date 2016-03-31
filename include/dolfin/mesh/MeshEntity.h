@@ -40,7 +40,7 @@ public:
   uint index() const;
 
   /// Return number of incident mesh entities of given topological dimension
-  uint numEntities(uint dim) const;
+  uint num_entities(uint dim) const;
 
   /// Return array of indices for incident mesh entities of given topological dimension
   uint * entities(uint dim);
@@ -115,7 +115,7 @@ inline uint MeshEntity::index() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshEntity::numEntities(uint dim) const
+inline uint MeshEntity::num_entities(uint dim) const
 {
   return mesh_.topology()(tdim_, dim).size(index_);
 }

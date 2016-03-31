@@ -93,7 +93,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     for (FacetIterator facet(mesh); !facet.end(); ++facet)
     {
       // Check if we have an interior facet
-      if (facet->numEntities(tdim) != 2)
+      if (facet->num_entities(tdim) != 2)
       {
         continue;
       }

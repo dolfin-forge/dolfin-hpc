@@ -573,7 +573,7 @@ void Mesh::check_interior_boundary_entities(uint dim) const
         {
           invalid_shared.push_back(facet.index());
         }
-        if (facet.numEntities(tdim) != 1)
+        if (facet.num_entities(tdim) != 1)
         {
           invalid_neighb.push_back(facet.index());
         }

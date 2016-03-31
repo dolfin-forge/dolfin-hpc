@@ -96,8 +96,8 @@ public:
       // Parallel case, store topological data in object
       for (uint d = 0; d < topological_dimension; d++)
       {
-        entity_indices[d] = new uint[cell.numEntities(d)];
-        for (uint i = 0; i < cell.numEntities(d); i++)
+        entity_indices[d] = new uint[cell.num_entities(d)];
+        for (uint i = 0; i < cell.num_entities(d); i++)
           entity_indices[d][i] = (cell.entities(d))[i];
       }
     }

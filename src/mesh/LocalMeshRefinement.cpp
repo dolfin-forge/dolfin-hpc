@@ -370,8 +370,8 @@ void LocalMeshRefinement::bisectEdgeOfSimplexCell(Cell& cell, Edge& edge,
                                                   uint& current_cell)
 {
   // Init cell vertices
-  Array<uint> cell1_vertices(cell.numEntities(0));
-  Array<uint> cell2_vertices(cell.numEntities(0));
+  Array<uint> cell1_vertices(cell.num_entities(0));
+  Array<uint> cell2_vertices(cell.num_entities(0));
 
   // Get edge vertices
   const uint* edge_vert = edge.entities(0);

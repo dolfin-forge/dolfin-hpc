@@ -45,7 +45,7 @@ void GlobalFacetMap::init()
     Vertex v(_mesh, sv.index());
     for(FacetIterator f(v); !f.end(); ++f)
     {
-      if (f->numEntities(tdim) == 1)
+      if (f->num_entities(tdim) == 1)
       {
         // Mark all facets as local facets
         if(global_facet.count(f->index()) == 0)
@@ -83,7 +83,7 @@ void GlobalFacetMap::findGlobal1D()
     Vertex v(_mesh, iter->first);
 
     // Mark as an exterior facet
-    if ( v.numEntities(tdim) == 1 && mddata.is_shared(v.index(), 0) )
+    if ( v.num_entities(tdim) == 1 && mddata.is_shared(v.index(), 0) )
     {
       global_facet[v.index()] = true;
     }
@@ -117,7 +117,7 @@ void GlobalFacetMap::findGlobalND()
       }
     }
 
-    if ( f.numEntities(tdim) == 1 && num_shared < f.numEntities(0) )
+    if ( f.num_entities(tdim) == 1 && num_shared < f.num_entities(0) )
     {
       global_facet[f.index()] = true;
     }
@@ -186,7 +186,7 @@ void GlobalFacetMap::findGlobalND()
         num_own = 0;
 
         // Only consider facets connected to one cell
-        if ( f->numEntities(tdim) != 1)
+        if ( f->num_entities(tdim) != 1)
         {
           continue;
         }
@@ -264,7 +264,7 @@ bool GlobalFacetMap::globalFacet(Facet& facet)
   }
   else
   {
-    return (facet.numEntities(_mesh.topology().dim()) == 1);
+    return (facet.num_entities(_mesh.topology().dim()) == 1);
   }
 }
 //-----------------------------------------------------------------------------

@@ -96,7 +96,7 @@ inline void UFCCell::init(Cell& cell)
       error("Unknown cell type.");
       break;
     }
-  num_vertices_ = cell.numEntities(0);
+  num_vertices_ = cell.num_entities(0);
 
   // Set topological dimension
   topological_dimension = cell.mesh().topology().dim();
@@ -115,8 +115,8 @@ inline void UFCCell::init(Cell& cell)
   // In any case store topological data in object
   for (uint d = 0; d < topological_dimension; ++d)
   {
-    entity_indices[d] = new uint[cell.numEntities(d)];
-    for (uint i = 0; i < cell.numEntities(d); ++i)
+    entity_indices[d] = new uint[cell.num_entities(d)];
+    for (uint i = 0; i < cell.num_entities(d); ++i)
     {
       entity_indices[d][i] = (cell.entities(d))[i];
     }
@@ -161,14 +161,14 @@ inline void UFCCell::update(Cell& cell)
   // Set entity indices
   MeshDistributedData& distdata = cell.mesh().distdata();
 #if ENABLE_P1_OPTIMIZATIONS
-  for(uint i = 0; i < cell.numEntities(0); ++i)
+  for(uint i = 0; i < cell.num_entities(0); ++i)
   {
     entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
 #else
   for (uint d = 0; d < topological_dimension; ++d)
   {
-    for (uint i = 0; i < cell.numEntities(d); ++i)
+    for (uint i = 0; i < cell.num_entities(d); ++i)
     {
       entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
     }
@@ -196,14 +196,14 @@ inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
 
   // Set entity indices
 #if ENABLE_P1_OPTIMIZATIONS
-  for(uint i = 0; i < cell.numEntities(0); ++i)
+  for(uint i = 0; i < cell.num_entities(0); ++i)
   {
     entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
   }
 #else
   for (uint d = 0; d < topological_dimension; ++d)
   {
-    for (uint i = 0; i < cell.numEntities(d); ++i)
+    for (uint i = 0; i < cell.num_entities(d); ++i)
     {
       entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
     }

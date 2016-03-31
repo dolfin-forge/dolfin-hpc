@@ -135,7 +135,7 @@ bool IntervalCell::refinement_needs_entities(uint dim) const
 real IntervalCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get mesh geometry
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -170,7 +170,7 @@ real IntervalCell::circumradius(MeshEntity const& entity) const
 Point IntervalCell::midpoint(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -220,7 +220,7 @@ real IntervalCell::facet_area(Cell const& cell, uint facet) const
 bool IntervalCell::intersects(MeshEntity const& e, Point const& p) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = e.mesh().geometry();
@@ -248,7 +248,7 @@ bool IntervalCell::intersects(MeshEntity const& e, Point const& p1,
                               Point const& p2) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   error("Collision of interval with segment not implemented");
 

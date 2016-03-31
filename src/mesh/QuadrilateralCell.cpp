@@ -233,7 +233,7 @@ bool QuadrilateralCell::refinement_needs_entities(uint dim) const
 real QuadrilateralCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -268,7 +268,7 @@ real QuadrilateralCell::volume(MeshEntity const& entity) const
 real QuadrilateralCell::diameter(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -292,7 +292,7 @@ real QuadrilateralCell::diameter(MeshEntity const& entity) const
 real QuadrilateralCell::circumradius(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -328,7 +328,7 @@ real QuadrilateralCell::circumradius(MeshEntity const& entity) const
 Point QuadrilateralCell::midpoint(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.numEntities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -417,7 +417,7 @@ real QuadrilateralCell::facet_area(Cell const& cell, uint facet) const
 bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = e.mesh().geometry();
@@ -436,7 +436,7 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p1,
                                    Point const& p2) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.numEntities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = e.mesh().geometry();

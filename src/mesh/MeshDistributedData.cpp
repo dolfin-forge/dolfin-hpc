@@ -348,7 +348,7 @@ uint MeshDistributedData::get_global(uint i, uint dim) const
   else
   {
     dolfin_assert(global_indices_[dim].count(i));
-    return global_indices_[dim][i];
+    return global_indices_[dim].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
@@ -372,7 +372,7 @@ uint MeshDistributedData::get_vertex_global(uint i) const
   else
   {
     dolfin_assert(global_indices_[0].count(i));
-    return global_indices_[0][i];
+    return global_indices_[0].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
@@ -391,7 +391,7 @@ uint MeshDistributedData::get_facet_global(uint i) const
   else
   {
     dolfin_assert(global_indices_[facet_dim_].count(i));
-    return global_indices_[facet_dim_][i];
+    return global_indices_[facet_dim_].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
@@ -410,7 +410,7 @@ uint MeshDistributedData::get_cell_global(uint i) const
   else
   {
     dolfin_assert(global_indices_[cell_dim_].count(i));
-    return global_indices_[cell_dim_][i];
+    return global_indices_[cell_dim_].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
@@ -494,7 +494,7 @@ uint MeshDistributedData::get_local(uint i, uint dim) const
   }
   dolfin_assert(dim <= cell_dim_);
   dolfin_assert(local_indices_[dim].count(i));
-  return local_indices_[dim][i];
+  return local_indices_[dim].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_local(MeshEntity const& e) const
@@ -509,7 +509,7 @@ uint MeshDistributedData::get_vertex_local(uint i) const
     return i;
   }
   dolfin_assert(local_indices_[0].count(i));
-  return local_indices_[0][i];
+  return local_indices_[0].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_local(uint i) const
@@ -520,7 +520,7 @@ uint MeshDistributedData::get_facet_local(uint i) const
   }
 
   dolfin_assert(local_indices_[facet_dim_].count(i));
-  return local_indices_[facet_dim_][i];
+  return local_indices_[facet_dim_].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_local(uint i) const
@@ -531,7 +531,7 @@ uint MeshDistributedData::get_cell_local(uint i) const
   }
 
   dolfin_assert(local_indices_[cell_dim_].count(i));
-  return local_indices_[cell_dim_][i];
+  return local_indices_[cell_dim_].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 // Distributed entities ownership
@@ -711,7 +711,7 @@ _set<uint> const& MeshDistributedData::get_shared_adj(uint local_index,
     uint dim) const
 {
   dolfin_assert(is_shared(local_index, dim));
-  return shared_adj_[dim][local_index];
+  return shared_adj_[dim].find(local_index)->second;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_shared_adj(MeshEntity const& m, uint rank)
@@ -788,7 +788,7 @@ uint MeshDistributedData::get_owner(uint local_index, uint dim) const
   {
     return MPI::processNumber();
   }
-  return ghost_owner_[dim][local_index];
+  return ghost_owner_[dim].find(local_index)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_owner(MeshEntity const& e) const

@@ -319,8 +319,8 @@ private:
   // Numbering for entities of topological dimension
   bool valid_numbering_[MAX_SIZE];
   uint num_global_[MAX_SIZE];
-  mutable _map<uint, uint> global_indices_[MAX_SIZE];
-  mutable _map<uint, uint> local_indices_[MAX_SIZE];
+  _map<uint, uint> global_indices_[MAX_SIZE];
+  _map<uint, uint> local_indices_[MAX_SIZE];
   uint max_global_index_;
 
   // Array caching of numbering
@@ -334,9 +334,9 @@ private:
   bool valid_ownership_[MAX_SIZE];
   _set<uint> shared_[MAX_SIZE];
   _set<uint> adjacent_ranks_[MAX_SIZE];
-  mutable _map<uint, _set<uint> > shared_adj_[MAX_SIZE];
+  _map<uint, _set<uint> > shared_adj_[MAX_SIZE];
   _set<uint> ghost_[MAX_SIZE];
-  mutable _map<uint, uint> ghost_owner_[MAX_SIZE];
+  _map<uint, uint> ghost_owner_[MAX_SIZE];
 
   // Adjacent mappings and reverse mappings
   bool valid_mapping_[MAX_SIZE];
@@ -393,7 +393,7 @@ public:
 
   inline _set<uint> const& adj() const
   {
-    return distdata_.shared_adj_[dim_][*iter_];
+    return distdata_.shared_adj_[dim_].find(*iter_)->second;
   }
 
   //--- Debugging ---
@@ -454,7 +454,7 @@ public:
 
   inline _set<uint> const& adj() const
   {
-    return distdata_.shared_adj_[dim_][*iter_];
+    return distdata_.shared_adj_[dim_].find(*iter_)->second;
   }
 
   //--- Debugging ---
@@ -469,8 +469,9 @@ private:
   MeshDistributedData const& distdata_;
   uint const dim_;
   _set<uint>::const_iterator iter_;
+
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MESH_DISTRIBUTED_DATA_H */

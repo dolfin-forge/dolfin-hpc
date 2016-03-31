@@ -18,7 +18,6 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 
-
 #include <map>
 
 namespace dolfin
@@ -296,15 +295,15 @@ void VertexNormal::computeNormal(Mesh& mesh)
         VertexDataMap::iterator it = vdata.find(glb_id);
         if (it != vdata.end())
         {
-        // Add corresponding facet normals and weights
-	  dolfin_assert(it->second != NULL);
-	  VertexData * vd = it->second;
-	  vd->facet_normals.insert(vd->facet_normals.end(), rptr,
-				   rptr + gdim * num_nc);
-	  rptr += gdim * num_nc;
-	  vd->facet_weights.insert(vd->facet_weights.end(), rptr, rptr + num_nc);
-	  rptr += num_nc;
-	}
+          // Add corresponding facet normals and weights
+          dolfin_assert(it->second != NULL);
+          VertexData * vd = it->second;
+          vd->facet_normals.insert(vd->facet_normals.end(), rptr,
+                 rptr + gdim * num_nc);
+          rptr += gdim * num_nc;
+          vd->facet_weights.insert(vd->facet_weights.end(), rptr, rptr + num_nc);
+          rptr += num_nc;
+        }
       }
 
       // Clear for reuse

@@ -3,7 +3,6 @@ noinst_LTLIBRARIES = libdolfin_mesh.la
 libdolfin_mesh_la_SOURCES = \
 			ALE.cpp\
 			AffineMapping.cpp\
-			BoundaryComputation.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
 			Cell.cpp\

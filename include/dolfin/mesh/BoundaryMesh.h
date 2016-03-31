@@ -7,10 +7,10 @@
 #ifndef __DOLFIN_BOUNDARY_MESH_H
 #define __DOLFIN_BOUNDARY_MESH_H
 
-#include <dolfin/common/types.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshDependent.h>
 
-#include "Mesh.h"
-#include "MeshDependent.h"
+#include <dolfin/common/Array.h>
 
 namespace dolfin
 {
@@ -35,28 +35,43 @@ public:
   ~BoundaryMesh();
 
   /// Return facet index in the mesh associated with the boundary cell
-  uint facet_index(Cell const& boundary_cell);
+  uint facet_index(Cell const& boundary_cell) const;
+
+  /// Return facet index in the mesh associated with the boundary cell
+  uint facet_index(uint boundary_cell_index) const;
 
   /// Return vertex index in the mesh associated with the boundary vertex
-  uint vertex_index(Vertex const& boundary_vertex);
+  uint vertex_index(Vertex const& boundary_vertex) const;
+
+  /// Return vertex index in the mesh associated with the boundary vertex
+  uint vertex_index(uint boundary_vertex_index) const;
 
   /// Return type
   Type boundary_type() const;
 
-  /// Return whether the mesh is distributed
-  /// @note This is always true for a boundary mesh
-  bool is_distributed() const;
+  //--- CHECK ROUTINES --------------------------------------------------------
+
+  /// Check
+  void check() const;
 
 private:
 
+  ///
+  void compute(Mesh& mesh, bool exterior, bool interior);
+
+  /// Check consistency of the interior boundary
+  void check_interior(uint dim) const;
+
+  /// Check consistency of the exterior boundary
+  void check_exterior(uint dim) const;
+
   Type type_;
 
-};
+  ///
+  Array<uint> cell_map_;
+  Array<uint> vertex_map_;
 
-  inline bool BoundaryMesh::is_distributed() const
-  {
-    return true;
-  }
+};
 
 }
 

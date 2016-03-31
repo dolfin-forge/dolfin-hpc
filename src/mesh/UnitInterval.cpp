@@ -29,7 +29,7 @@ UnitInterval::UnitInterval(uint nx) :
   for (uint ix = 0; ix <= nx; ++ix)
   {
     real const x = static_cast<real>(ix) / static_cast<real>(nx);
-    editor.add_vertex(ix, x);
+    editor.add_vertex(ix, &x);
   }
 
   // Create intervals

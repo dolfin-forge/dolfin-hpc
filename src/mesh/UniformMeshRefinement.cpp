@@ -125,7 +125,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
         refined_distdata.set_shared(vertex, 0);
       }
 
-      editor.add_vertex(vertex++, v->point());
+      editor.add_vertex(vertex++, v->x());
     }
 
     for (EdgeIterator e(mesh); !e.end(); ++e)
@@ -149,7 +149,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
         refman.add_vertex(vertex, refined_mesh);
       }
 
-      editor.add_vertex(vertex++, e->midpoint());
+      editor.add_vertex(vertex++, &e->midpoint()[0]);
     }
 
   }
@@ -159,13 +159,13 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      editor.add_vertex(vertex++, v->point());
+      editor.add_vertex(vertex++, v->x());
     }
 
     // Add new vertices
     for (EdgeIterator e(mesh); !e.end(); ++e)
     {
-      editor.add_vertex(vertex++, e->midpoint());
+      editor.add_vertex(vertex++, &e->midpoint()[0]);
     }
 
   }

@@ -182,7 +182,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     if (included)
     {
       old2new_vertex.set(vertex.index(), current_vertex);
-      editor.add_vertex(current_vertex, vertex.point());
+      editor.add_vertex(current_vertex, vertex.x());
       distdata.set_map(current_vertex,
                        mesh.distdata().get_global(vertex.index(), 0), 0);
       if (mesh.distdata().is_ghost(vertex.index(), 0))

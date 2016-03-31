@@ -141,7 +141,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
         vertex_map->set(vertex_index, v->index());
 
       // Add vertex
-      editor.add_vertex(vertex_index, v->point());
+      editor.add_vertex(vertex_index, v->x());
     }
   }
 

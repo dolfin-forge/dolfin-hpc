@@ -291,7 +291,7 @@ void DMesh::exp(Mesh& mesh)
     DVertex* dv = *it;
     dolfin_assert(!dv->deleted);
 
-    editor.add_vertex(current_vertex, dv->p);
+    editor.add_vertex(current_vertex, &dv->p[0]);
 
     if(_is_distributed)
     {
@@ -453,7 +453,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     old2new_vertices->at(dv->id) = current_vertex;
 #endif
 
-    editor.add_vertex(current_vertex, dv->p);
+    editor.add_vertex(current_vertex, &dv->p[0]);
 
     if(_is_distributed)
     {

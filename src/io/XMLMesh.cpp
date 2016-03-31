@@ -360,7 +360,7 @@ void XMLMesh::endMesh()
       {
         new_mesh.distdata().set_map(vertex_count,
                                     mesh_.distdata().get_global(*vertex), 0);
-        editor_->add_vertex(vertex_count, vertex->point());
+        editor_->add_vertex(vertex_count, vertex->x());
         ++vertex_count;
       }
     }

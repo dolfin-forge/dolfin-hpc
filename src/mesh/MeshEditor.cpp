@@ -78,22 +78,18 @@ void MeshEditor::init_cells(uint num_cells)
   mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().numVertices(tdim_));
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::add_vertex(uint v, Point const& p)
-{
-  // Add vertex
-  add_vertexCommon(v);
-
-  // Set coordinate
-  mesh_->geometry_.set(v, &p[0]);
-}
-//-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)
 {
-  // Add vertex
-  add_vertexCommon(v);
-
-  // Set coordinate
+  if (v >= num_vertices_)
+  {
+    error("Vertex index (%d) out of range [0, %d].", v, num_vertices_ - 1);
+  }
+  if (vertex_index_ >= num_vertices_)
+  {
+    error("Vertex list is full, %d vertices already specified.", num_vertices_);
+  }
   mesh_->geometry_.set(v, x);
+  ++vertex_index_;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_cell(uint c, const Array<uint>& v)
@@ -130,24 +126,6 @@ void MeshEditor::close()
   }
   // Clear data
   clear();
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::add_vertexCommon(uint v)
-{
-  // Check value of vertex index
-  if (v >= num_vertices_)
-  {
-    error("Vertex index (%d) out of range [0, %d].", v, num_vertices_ - 1);
-  }
-
-  // Check if there is room for more vertices
-  if (vertex_index_ >= num_vertices_)
-  {
-    error("Vertex list is full, %d vertices already specified.", num_vertices_);
-  }
-
-  // Step to next vertex
-  ++vertex_index_;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_cellCommon(uint c)

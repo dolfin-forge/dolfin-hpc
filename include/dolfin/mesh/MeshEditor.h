@@ -38,9 +38,6 @@ public:
   /// Specify number of cells
   void init_cells(uint num_cells);
 
-  /// Add vertex v at given point p [TODO: Deprecate]
-  void add_vertex(uint v, Point const& p);
-
   /// Add vertex v at given coordinates x
   void add_vertex(uint v, real const * x);
 
@@ -63,9 +60,6 @@ private:
 
   /// Open mesh of given cell type and geometrical dimension
   void init(Mesh& mesh, CellType const& type, uint gdim);
-
-  // Add vertex, common part
-  void add_vertexCommon(uint v);
 
   // Add cell, common part
   void add_cellCommon(uint v);

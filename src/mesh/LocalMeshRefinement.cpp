@@ -219,7 +219,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
         refined_mesh.distdata().set_shared(current_vertex, 0);
     }
 
-    editor.add_vertex(current_vertex++, v->point());
+    editor.add_vertex(current_vertex++, v->x());
   }
 
   // Add old unrefined cells
@@ -279,7 +279,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
           shared_edge.push_back(current_vertex);
 
           refman.add_vertex(edge_vert, current_vertex, refined_mesh);
-          editor.add_vertex(current_vertex++, e.midpoint());
+          editor.add_vertex(current_vertex++, &e.midpoint()[0]);
           dolfin_assert( !cell_forbidden.get(*c) );
 
           for (CellIterator cn(e); !cn.end(); ++cn)
@@ -330,7 +330,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
         refman.add_vertex(current_vertex, refined_mesh);
 
         // Add new vertex
-        editor.add_vertex(current_vertex++, longest_edge.midpoint());
+        editor.add_vertex(current_vertex++, &longest_edge.midpoint()[0]);
 
         for (CellIterator cn(longest_edge); !cn.end(); ++cn)
         {

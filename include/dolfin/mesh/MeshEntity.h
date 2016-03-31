@@ -8,14 +8,20 @@
 #define __DOLFIN_MESH_ENTITY_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
 
-/// A MeshEntity represents a mesh entity associated with
-/// a specific topological dimension of some mesh.
+/**
+ *  DOCUMENTATION:
+ *
+ *  @class  MeshEntity
+ *
+ *  @brief  A MeshEntity represents a mesh entity associated with a specific
+ *          topological dimension of some mesh.
+ *
+ */
 
 class MeshEntity
 {
@@ -42,10 +48,12 @@ public:
   /// Return number of incident mesh entities of given topological dimension
   uint num_entities(uint dim) const;
 
-  /// Return array of indices for incident mesh entities of given topological dimension
+  /// Return array of indices for incident mesh entities of given topological
+  /// dimension
   uint * entities(uint dim);
 
-  /// Return array of indices for incident mesh entities of given topological dimension
+  /// Return array of indices for incident mesh entities of given topological
+  /// dimension
   uint const * entities(uint dim) const;
 
   /// Check if given entity is incident
@@ -57,6 +65,9 @@ public:
   /// Return global index of mesh entity
   uint global_index() const;
 
+  /// Return if the mesh entity is owned
+  bool is_owned() const;
+
   /// Return if the mesh entity is shared
   bool is_shared() const;
 
@@ -64,10 +75,18 @@ public:
   bool is_ghost() const;
 
   /// Return the owner of the mesh entity
-  bool owner() const;
+  uint owner() const;
 
-  /// Output
-  friend LogStream& operator<<(LogStream& stream, MeshEntity const& entity);
+  /// Return if the mesh entity has all vertices shared
+  bool has_all_vertices_shared() const;
+
+  ///
+  void disp() const;
+
+  //--- CHECK ROUTINES --------------------------------------------------------
+
+  /// Check
+  void check() const;
 
 protected:
 
@@ -90,7 +109,6 @@ protected:
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline Mesh& MeshEntity::mesh()
 {
   return mesh_;
@@ -132,6 +150,8 @@ inline uint const * MeshEntity::entities(uint dim) const
   return mesh_.topology()(tdim_, dim)(index_);
 }
 
-}
+//-----------------------------------------------------------------------------
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_MESH_ENTITY_H */

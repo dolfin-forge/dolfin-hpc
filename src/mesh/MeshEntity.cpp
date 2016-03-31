@@ -70,30 +70,106 @@ uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const
 {
-  return mesh_.distdata().get_global(*this);
+  return (mesh_.is_distributed() ? mesh_.distdata().get_global(index_, tdim_)
+                                 : index_);
+}
+//-----------------------------------------------------------------------------
+bool MeshEntity::is_owned() const
+{
+  return (mesh_.is_distributed() ?
+          !mesh_.distdata().is_ghost(index_, tdim_) : true);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return mesh_.distdata().is_shared(index_, tdim_);
+  return (mesh_.is_distributed() ?
+          mesh_.distdata().is_shared(index_, tdim_) : false);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return mesh_.distdata().is_ghost(index_, tdim_);
+  return (mesh_.is_distributed() ?
+          mesh_.distdata().is_ghost(index_, tdim_) : false);
 }
 //-----------------------------------------------------------------------------
-bool MeshEntity::owner() const
+uint MeshEntity::owner() const
 {
-  return mesh_.distdata().get_owner(index_, tdim_);
+  return (mesh_.is_distributed() ?
+          mesh_.distdata().get_owner(index_, tdim_) : MPI::processNumber());
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream, MeshEntity const& entity)
+bool MeshEntity::has_all_vertices_shared() const
 {
-  stream << "[ Mesh entity " << entity.index() << " of topological dimension "
-         << entity.dim() << " ]";
-  return stream;
+  if(mesh_.is_distributed())
+  {
+    if (tdim_ == 0)
+    {
+      return mesh_.distdata().is_shared(index_, tdim_);
+    }
+    else
+    {
+      MeshConnectivity const& c = mesh_.topology()(tdim_, 0);
+      for (uint v = 0; v < c.size(index_); ++v)
+      {
+        if (!mesh_.distdata().is_shared(c(index_)[v], 0))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+  else
+  {
+    return false;
+  }
+}
+//-----------------------------------------------------------------------------
+void MeshEntity::disp() const
+{
+  section("MeshEntity");
+  message("topological dimension : ", tdim_);
+  message("geometric dimension   : ", gdim_);
+  message("index                 : ", index_);
+  begin(  "connectivities        : ");
+  for (uint d =0; d < tdim_; ++d)
+  {
+    cout << d << ": ";
+    if(mesh_.topology().is_computed(tdim_, d))
+    {
+      uint const * entities = mesh_.topology()(tdim_, d)(index_);
+      uint const size = mesh_.topology()(tdim_, d).size(index_);
+      for (uint i = 0; i < size; ++i)
+      {
+        cout << "\n\t" << entities[i];
+        if(d == 0)
+        {
+          continue;
+        }
+        uint const * verts = mesh_.topology()(d, 0)(entities[i]);
+        uint const vsize = mesh_.topology()(d, 0).size(entities[i]);
+        cout << " ( ";
+        for (uint v = 0; v < vsize; ++v)
+        {
+          cout << verts[v] << ", ";
+        }
+        cout << ")";
+      }
+      cout << endl;
+    }
+    else
+    {
+      cout << "not computed";
+    }
+    cout << endl;
+  }
+  end();
+  end();
+}
+//-----------------------------------------------------------------------------
+void MeshEntity::check() const
+{
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

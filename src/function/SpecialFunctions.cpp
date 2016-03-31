@@ -269,7 +269,7 @@ FacetArea::FacetArea(Mesh& mesh) :
 void FacetArea::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
-    values[0] = cell().facetArea(facet());
+    values[0] = cell().facet_area(facet());
   else
     values[0] = 0.0;
 }
@@ -293,7 +293,7 @@ InvFacetArea::InvFacetArea(Mesh& mesh) :
 void InvFacetArea::eval(real * values, real const * x) const
 {
   if (facet() >= 0)
-    values[0] = 1.0 / cell().facetArea(facet());
+    values[0] = 1.0 / cell().facet_area(facet());
   else
     values[0] = 0.0;
 }

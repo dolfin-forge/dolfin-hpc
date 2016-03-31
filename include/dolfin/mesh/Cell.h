@@ -53,7 +53,7 @@ public:
   inline Point normal(uint facet) const { return mesh_.type().normal(*this, facet); }
 
   /// Compute the area/length of given facet with respect to the cell
-  inline real facetArea(uint facet) const { return mesh_.type().facet_area(*this, facet); }
+  inline real facet_area(uint facet) const { return mesh_.type().facet_area(*this, facet); }
 
   /// Compute coordinates of cell midpoint
   Point midpoint() const;

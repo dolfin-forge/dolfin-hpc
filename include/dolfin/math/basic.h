@@ -9,6 +9,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 
 #include <time.h>
 #include <cstdlib>
@@ -24,21 +25,21 @@ namespace dolfin
 
 /// Return absolute real comparison for ~ O(1) with default epsilon:
 /// | x - y | < eps
-inline bool abscmp(real x, real y)
+static inline bool abscmp(real x, real y)
 {
   return std::fabs(x - y) < DOLFIN_EPS;
 }
 
 /// Return absolute real comparison for ~ O(1) with given epsilon:
 /// | x - y | < eps
-inline bool abscmp(real x, real y, real eps)
+static inline bool abscmp(real x, real y, real eps)
 {
   return std::fabs(x - y) < std::fabs(eps);
 }
 
 /// Return weak relative real comparison:
 /// ( |(x - y) / x| < eps ) || ( |(x - y) / y| < eps )
-inline bool wrelcmp(real x, real y, real eps)
+static inline bool wrelcmp(real x, real y, real eps)
 {
   real const d = std::fabs(x - y);
   real const m = std::max(std::fabs(x), std::fabs(y));
@@ -57,7 +58,7 @@ inline bool wrelcmp(real x, real y, real eps)
 
 /// Return strong relative real comparison:
 /// ( |(x - y) / x| < eps ) && ( |(x - y) / y| < eps )
-inline bool srelcmp(real x, real y, real eps)
+static inline bool srelcmp(real x, real y, real eps)
 {
   real const d = std::fabs(x - y);
   real const m = std::min(std::fabs(x), std::fabs(y));
@@ -75,13 +76,13 @@ inline bool srelcmp(real x, real y, real eps)
 }
 
 /// Return the square of x
-inline real sqr(real x)
+static inline real sqr(real x)
 {
   return x * x;
 }
 
 /// Return a to the power n
-inline uint ipow(uint a, uint n)
+static inline uint ipow(uint a, uint n)
 {
   uint p = a;
   for (uint i = 1; i < n; i++)
@@ -90,7 +91,7 @@ inline uint ipow(uint a, uint n)
 }
 
 /// Return factorial of a
-inline int fact(int a, int acc = 1)
+static inline int fact(int a, int acc = 1)
 {
   // error condition
   if (acc < 0)
@@ -107,7 +108,7 @@ inline int fact(int a, int acc = 1)
 }
 
 /// Gamma function from PELICANS
-inline real gamma(double const x)
+static inline real gamma(double const x)
 {
   int n = x < 1.5 ? -((int) (2.5 - x)) : (int) (x - 1.5);
   double w = x - (n + 2);
@@ -143,7 +144,7 @@ static bool rand_seeded = false;
 
 /// Return a random number, uniformly distributed between [0.0, 1.0)
 /// !!! Not quite, the implementation does not ensure that strongly.
-inline real rand()
+static inline real rand()
 {
   if (!rand_seeded)
   {
@@ -156,16 +157,70 @@ inline real rand()
 }
 
 /// Seed random number generator
-inline void seed(unsigned int s)
+static inline void seed(unsigned int s)
 {
   std::srand(s);
   rand_seeded = true;
 }
 
+///
+static inline real percent(uint n, uint d)
+{
+  return (100.0 * real(n) / real(d));
+}
+
+/// Return sequence of natural numbers ranging from begin to (excluding) end
+static inline Array<uint> range(uint begin, uint end, uint step = 1)
+{
+  uint const N = std::floor(std::abs(end - begin) / real(step)) ;
+  if (N == 0)
+  {
+    Array<uint> ret;
+    return ret;
+  }
+  else
+  {
+    Array<uint> ret(N);
+    ret[0] = begin;
+    for (uint i = 1; i < N; ++i)
+    {
+      ret[i] = ret[i - 1] + step;
+    }
+    return ret;
+  }
+}
+
+/// e0 contains e1
+static inline bool contains(uint const* e0, uint n0, uint const* e1, uint n1)
+{
+  for (uint i1 = 0; i1 < n1; ++i1)
+  {
+    bool found = false;
+    for (uint i0 = 0; i0 < n0; ++i0)
+    {
+      if (e0[i0] == e1[i1])
+      {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return false;
+  }
+  return true;
+}
+
+/// Return rank within linear distribution
+static inline uint rank(uint L, uint R, uint i)
+{
+  return static_cast<uint>(std::max(
+      std::floor((double) i / (double) (L + 1)),
+      std::floor((double) ((double) i - (double) R) / (double) L)));
+}
+
 /// Check if Not-a-Number if C99 is not used
 #if __STDC_VERSION__ < 199901L
 #ifndef isnan
-inline bool isnan(real x)
+static inline bool isnan(real x)
 {
   return x != x;
 }

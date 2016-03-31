@@ -24,10 +24,12 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-CellType::CellType(CellType::Type cell_type, CellType::Type facet_type) :
+CellType::CellType(std::string const& name, CellType::Type cell_type,
+                   CellType::Type facet_type) :
+    name_(name),
     cell_type(cell_type),
     facet_type(facet_type),
-    ufl_(CellType::type2ufldomain(cell_type))
+    ufl_(CellType::ufldomain(cell_type))
 {
   // Do nothing
 }
@@ -35,6 +37,35 @@ CellType::CellType(CellType::Type cell_type, CellType::Type facet_type) :
 CellType::~CellType()
 {
   // Do nothing
+}
+//-----------------------------------------------------------------------------
+Array<CellType*> CellType::create_all()
+{
+  Array<CellType *> ret;
+  ret.push_back(CellType::create(CellType::interval));
+  ret.push_back(CellType::create(CellType::triangle));
+  ret.push_back(CellType::create(CellType::tetrahedron));
+  ret.push_back(CellType::create(CellType::quadrilateral));
+  ret.push_back(CellType::create(CellType::hexahedron));
+  return ret;
+}
+//-----------------------------------------------------------------------------
+Array<CellType*> CellType::create_simplex()
+{
+  Array<CellType *> ret;
+  ret.push_back(CellType::create(CellType::interval));
+  ret.push_back(CellType::create(CellType::triangle));
+  ret.push_back(CellType::create(CellType::tetrahedron));
+  return ret;
+}
+//-----------------------------------------------------------------------------
+Array<CellType*> CellType::create_hypercube()
+{
+  Array<CellType *> ret;
+  ret.push_back(CellType::create(CellType::interval));
+  ret.push_back(CellType::create(CellType::quadrilateral));
+  ret.push_back(CellType::create(CellType::hexahedron));
+  return ret;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(CellType::Type type)
@@ -58,42 +89,65 @@ CellType* CellType::create(CellType::Type type)
       break;
     }
 
-  return 0;
+  return NULL;
 }
 //-----------------------------------------------------------------------------
-CellType* CellType::create(std::string type)
+CellType* CellType::create(std::string const& type)
 {
-  return create(string2type(type));
-}
-//-----------------------------------------------------------------------------
-CellType::Type CellType::string2type(std::string type)
-{
+  if (type == "point")
+  {
+    return new PointCell();
+  }
   if (type == "interval")
   {
-    return interval;
+    return new IntervalCell();
   }
   else if (type == "triangle")
   {
-    return triangle;
+    return new TriangleCell();
   }
   else if (type == "tetrahedron")
   {
-    return tetrahedron;
+    return new TetrahedronCell();
   }
   else if (type == "quadrilateral")
   {
-      return quadrilateral;
+    return new QuadrilateralCell();
   }
   else if (type == "hexahedron")
   {
-    return hexahedron;
+    return new HexahedronCell();
   }
   else
   {
     error("Unknown cell type: \"%s\".", type.c_str());
   }
 
-  return interval;
+  return NULL;
+}
+//-----------------------------------------------------------------------------
+CellType* CellType::create(ufl::Cell const& cell)
+{
+  switch (cell.domain().type())
+    {
+    case ufl::Domain::vertex:
+      return new PointCell();
+    case ufl::Domain::interval:
+      return new IntervalCell();
+    case ufl::Domain::triangle:
+      return new TriangleCell();
+    case ufl::Domain::tetrahedron:
+      return new TetrahedronCell();
+    case ufl::Domain::quadrilateral:
+      return new QuadrilateralCell();
+    case ufl::Domain::hexahedron:
+      return new HexahedronCell();
+    default:
+      error("Unknown UFL domain type: %d.", type);
+      break;
+    }
+
+  return NULL;
 }
 //-----------------------------------------------------------------------------
 bool CellType::intersects(MeshEntity& entity, Cell& c) const
@@ -121,7 +175,41 @@ bool CellType::intersects(MeshEntity& entity, Cell& c) const
   return false;
 }
 //-----------------------------------------------------------------------------
-std::string CellType::type2string(CellType::Type type)
+CellType::Type CellType::type(std::string const& type)
+{
+  if (type == "point")
+  {
+    return point;
+  }
+  if (type == "interval")
+  {
+    return interval;
+  }
+  else if (type == "triangle")
+  {
+    return triangle;
+  }
+  else if (type == "tetrahedron")
+  {
+    return tetrahedron;
+  }
+  else if (type == "quadrilateral")
+  {
+    return quadrilateral;
+  }
+  else if (type == "hexahedron")
+  {
+    return hexahedron;
+  }
+  else
+  {
+    error("Unknown cell type: \"%s\".", type.c_str());
+  }
+
+  return point;
+}
+//-----------------------------------------------------------------------------
+std::string CellType::str(CellType::Type type)
 {
   switch (type)
     {
@@ -145,7 +233,12 @@ std::string CellType::type2string(CellType::Type type)
   return "";
 }
 //-----------------------------------------------------------------------------
-ufl::Domain::Type CellType::type2ufldomain(CellType::Type type)
+std::string const& CellType::str() const
+{
+  return name_;
+}
+//-----------------------------------------------------------------------------
+ufl::Domain::Type CellType::ufldomain(CellType::Type type)
 {
   switch (type)
     {
@@ -176,32 +269,24 @@ void CellType::check(Cell& cell) const
     error("CellType::check : mismatch of cell type");
   }
 
-  // UFC convention: cell -> vertices in ascending order
-  uint const * cell_verts = cell.entities(0);
-  dolfin_assert(cell_verts);
-  uint const num_cell_verts = this->num_vertices(this->dim());
-  if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
-  {
-    error("CellType::check : cell vertices are not in ascending order\n"
-          "=> cell index = %d", cell.index());
-  }
-
   // UFC convention: edge -> vertices in ascending order
   if(cell.dim() < 2)
   {
     return;
   }
-  uint const * cell_edges = cell.entities(1);
-  dolfin_assert(cell_edges);
-  uint const num_cell_edges = this->num_entities(1);
-  uint const num_edge_verts = this->num_vertices(1);
-  for (uint e = 0; e < num_cell_edges; ++e)
+  if (cell.mesh().topology().is_computed(1, 0))
   {
-    uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);
-    dolfin_assert(edge_verts);
-    if (edge_verts[1] < edge_verts[0])
+    uint const * cell_edges = cell.entities(1);
+    dolfin_assert(cell_edges);
+    uint const num_cell_edges = this->num_entities(1);
+    for (uint e = 0; e < num_cell_edges; ++e)
     {
-      error("CellType::check : edge vertices are not in ascending order");
+      uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);
+      dolfin_assert(edge_verts);
+      if (edge_verts[1] < edge_verts[0])
+      {
+        error("CellType::check : edge vertices are not in ascending order");
+      }
     }
   }
 }

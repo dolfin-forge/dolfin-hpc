@@ -31,7 +31,7 @@ real const PointCell::VC[1][1] =
 
 //-----------------------------------------------------------------------------
 PointCell::PointCell() :
-    CellType(CellType::point, CellType::point)
+    CellType("point", CellType::point, CellType::point)
 {
 }
 //-----------------------------------------------------------------------------
@@ -69,7 +69,17 @@ void PointCell::create_entities(uint** e, uint dim, uint const* v) const
 //-----------------------------------------------------------------------------
 void PointCell::order_entities(Cell& cell) const
 {
-  error("PointCell::orderEntities() undefined.");
+  // do nothing
+}
+//-----------------------------------------------------------------------------
+void PointCell::order_facet(uint vertices[], Facet& facet) const
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+void PointCell::initialize_connectivities(Mesh& mesh) const
+{
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
 void PointCell::refine_cell(Cell& cell, MeshEditor& editor,
@@ -131,7 +141,7 @@ Point PointCell::normal(Cell const& cell, uint facet) const
 //-----------------------------------------------------------------------------
 real PointCell::facet_area(Cell const& cell, uint facet) const
 {
-  error("PointCell::facetAread() undefined.");
+  error("PointCell::facet_aread() undefined.");
   return 0.0;
 }
 //-----------------------------------------------------------------------------
@@ -159,6 +169,11 @@ Mesh PointCell::create_reference_cell() const
   me.add_cell(0, cv0);
   me.close();
   return refcell;
+}
+//-----------------------------------------------------------------------------
+real const * PointCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
 }
 //-----------------------------------------------------------------------------
 std::string PointCell::description() const

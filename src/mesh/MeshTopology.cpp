@@ -197,6 +197,11 @@ void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
   TopologyComputation::computeConnectivity(mesh, d0, d1);
 }
 //-----------------------------------------------------------------------------
+bool MeshTopology::is_computed(uint d0, uint d1) const
+{
+  return connectivity_[d0][d1].size() > 0;
+}
+//-----------------------------------------------------------------------------
 int MeshTopology::token() const
 {
   return timestamp_ + size(0) + size(dim_); // FIXME

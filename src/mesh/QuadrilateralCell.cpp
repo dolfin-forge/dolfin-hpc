@@ -39,7 +39,7 @@ uint const QuadrilateralCell::ENV[4][2] =
 
 //-----------------------------------------------------------------------------
 QuadrilateralCell::QuadrilateralCell() :
-    CellType(CellType::quadrilateral, CellType::interval)
+    CellType("quadrilateral", CellType::quadrilateral, CellType::interval)
 {
 }
 //-----------------------------------------------------------------------------
@@ -109,9 +109,9 @@ void QuadrilateralCell::order_entities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology(1, 0).size() > 0)
+  if (topology.is_computed(1, 0))
   {
-    dolfin_assert(topology(2, 1).size() > 0);
+    dolfin_assert(topology.is_computed(2, 1));
 
     // Get edges
     uint* cell_edges = cell.entities(1);
@@ -124,17 +124,13 @@ void QuadrilateralCell::order_entities(Cell& cell) const
     }
   }
 
-  // Sort local vertices on cell in ascending order, connectivity 2 - 0
-  if (topology(2, 0).size() > 0)
-  {
-    uint* cell_vertices = cell.entities(0);
-    std::sort(cell_vertices, cell_vertices + 4);
-  }
+  // Vertices are supposed to have be ordered appropriately to obtain a
+  // conforming quadrilateral
 
   // Sort local edges on cell after non-incident vertex, connectivity 2 - 1
-  if (topology(2, 1).size() > 0)
+  if (topology.is_computed(2, 1))
   {
-    dolfin_assert(topology(2, 1).size() > 0);
+    dolfin_assert(topology.is_computed(2, 1));
 
     // Get cell vertices and edges
     uint* cell_vertices = cell.entities(0);
@@ -145,8 +141,8 @@ void QuadrilateralCell::order_entities(Cell& cell) const
     uint m = 0;
     for (uint t = 0; t < 4; ++t)
     {
-      uint i = ENV[t][0];
-      uint j = ENV[t][1];
+      uint v0 = ENV[t][0];
+      uint v1 = ENV[t][1];
 
       // Loop on edges
       for (uint k = m; k < 4; ++k)
@@ -162,20 +158,65 @@ void QuadrilateralCell::order_entities(Cell& cell) const
         std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
         if (!n1 && !n2 )
 #else
-        if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[i])
-            && !std::count(edge_vertices, edge_vertices + 2, cell_vertices[j]))
+        if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0])
+         && !std::count(edge_vertices, edge_vertices + 2, cell_vertices[v1]))
 #endif
         {
           // Swap edge numbers
           uint tmp = cell_edges[m];
           cell_edges[m] = cell_edges[k];
           cell_edges[k] = tmp;
-          m++;
+          ++m;
           break;
         }
       }
     }
   }
+}
+//-----------------------------------------------------------------------------
+void QuadrilateralCell::order_facet(uint vertices[], Facet& facet) const
+{
+  // Get mesh
+  Mesh& mesh = facet.mesh();
+
+  // Get the vertex opposite to the facet (the one we remove)
+  uint vertex = 0;
+  const Cell cell(mesh, facet.entities(mesh.topology().dim())[0]);
+  for (uint i = 0; i < cell.num_entities(0); i++)
+  {
+    bool not_in_facet = true;
+    vertex = cell.entities(0)[i];
+    for (uint j = 0; j < facet.num_entities(0); j++)
+    {
+      if (vertex == facet.entities(0)[j])
+      {
+        not_in_facet = false;
+        break;
+      }
+    }
+    if (not_in_facet)
+    {
+      break;
+    }
+  }
+
+  // Order
+  Point const p = mesh.geometry().point(vertex);
+  Point p0 = mesh.geometry().point(facet.entities(0)[0]);
+  Point p1 = mesh.geometry().point(facet.entities(0)[1]);
+  Point v = p1 - p0;
+  Point n(v.y(), -v.x());
+  if (n.dot(p0 - p) < 0.0)
+  {
+    std::swap(vertices[0], vertices[1]);
+  }
+}
+//-----------------------------------------------------------------------------
+void QuadrilateralCell::initialize_connectivities(Mesh& mesh) const
+{
+  mesh.init(1, 0);
+  mesh.init(2, 0);
+  mesh.init(2, 1);
 }
 //-----------------------------------------------------------------------------
 void QuadrilateralCell::refine_cell(Cell& cell, MeshEditor& editor,
@@ -194,22 +235,22 @@ void QuadrilateralCell::refine_cell(Cell& cell, MeshEditor& editor,
   uint const v1 = v[1];
   uint const v2 = v[2];
   uint const v3 = v[3];
-  uint const eoffset = cell.mesh().numVertices();
+  uint const eoffset = cell.mesh().size(0);
   uint const e0 = eoffset + e[findEdge(0, cell)];
   uint const e1 = eoffset + e[findEdge(1, cell)];
   uint const e2 = eoffset + e[findEdge(2, cell)];
   uint const e3 = eoffset + e[findEdge(3, cell)];
-  uint const coffset = eoffset + cell.mesh().numEdges();
+  uint const coffset = eoffset + cell.mesh().size(1);
   uint const c0 = coffset + cell.index();
 
   // Add the four new cells
   uint cv0[4] = { v0, e3, c0, e2 };
   editor.add_cell(current_cell++, &cv0[0]);
-  uint cv1[4] = { v1, e1, c0, e3 };
+  uint cv1[4] = { e3, v1, e1, c0};
   editor.add_cell(current_cell++, &cv1[0]);
-  uint cv2[4] = { v2, e0, c0, e1 };
+  uint cv2[4] = { c0, e1, v2, e0 };
   editor.add_cell(current_cell++, &cv2[0]);
-  uint cv3[4] = { v3, e2, c0, e0 };
+  uint cv3[4] = { e2, c0, e0, v3 };
   editor.add_cell(current_cell++, &cv3[0]);
 }
 //-----------------------------------------------------------------------------
@@ -420,12 +461,14 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p) const
   dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
+  /*
   MeshGeometry const& geometry = e.mesh().geometry();
   uint const* vertices = e.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   real const * x2 = geometry.x(vertices[2]);
   real const * x3 = geometry.x(vertices[3]);
+   */
 
   error("Collision of quadrilateral with point no implemented.");
 
@@ -439,12 +482,14 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p1,
   dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
+  /*
   MeshGeometry const& geometry = e.mesh().geometry();
   uint const* vertices = e.entities(0);
   real const * x0 = geometry.x(vertices[0]);
   real const * x1 = geometry.x(vertices[1]);
   real const * x2 = geometry.x(vertices[2]);
   real const * x3 = geometry.x(vertices[3]);
+   */
 
   error("Collision of quadrilateral with segment not implemented");
 
@@ -472,6 +517,11 @@ Mesh QuadrilateralCell::create_reference_cell() const
   return refcell;
 }
 //-----------------------------------------------------------------------------
+real const * QuadrilateralCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
+}
+//-----------------------------------------------------------------------------
 void QuadrilateralCell::disp() const
 {
   message("QuadrilateralCell");
@@ -487,20 +537,24 @@ void QuadrilateralCell::check(Cell& cell) const
   CellType::check(cell);
 
   // Check edge -> incident vertices mapping
-  uint const* v = cell.entities(0);
-  dolfin_assert(v);
-  uint const* e = cell.entities(1);
-  dolfin_assert(e);
-  MeshTopology const& topology = cell.mesh().topology();
-  for (uint i = 0; i < 4; ++i)
+  if (cell.mesh().topology().is_computed(1, 0))
   {
-    uint const * ev = topology(1, 0)(e[i]);
-    dolfin_assert(ev);
-    for (uint j = 0; j < 2; ++j)
+    uint const* v = cell.entities(0);
+    dolfin_assert(v);
+    uint const* e = cell.entities(1);
+    dolfin_assert(e);
+    MeshTopology const& topology = cell.mesh().topology();
+    for (uint i = 0; i < 4; ++i)
     {
-      if (ev[j] != v[EIV[i][j]])
+      uint const * ev = topology(1, 0)(e[i]);
+      dolfin_assert(ev);
+      for (uint j = 0; j < 2; ++j)
       {
-        error("CellType::check : invalid edge -> incident vertices mapping");
+        if (ev[j] != v[EIV[i][0]] && ev[j] != v[EIV[i][1]])
+        {
+          error("CellType::check : invalid edge -> incident vertices mapping\n"
+                "e[%u] = (v%u, v%u)", i, ev[0], ev[1]);
+        }
       }
     }
   }

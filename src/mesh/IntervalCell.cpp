@@ -39,7 +39,7 @@ uint const IntervalCell::EIV[1][2] =
 
 //-----------------------------------------------------------------------------
 IntervalCell::IntervalCell() :
-    CellType(CellType::interval, CellType::point)
+    CellType("interval", CellType::interval, CellType::point)
 {
 }
 //-----------------------------------------------------------------------------
@@ -76,7 +76,16 @@ uint IntervalCell::orientation(Cell const& cell) const
 void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We do not need to create any entities
-  error("Invalid topological dimension for creation of entities: %d.", dim);
+  switch(dim)
+  {
+    case 0: /* Create facets */
+      e[0][0] = v[0];
+      e[1][0] = v[1];
+      break;
+    default:
+      error("Invalid topological dimension for creation of entities: %d.", dim);
+      break;
+  }
 }
 //-----------------------------------------------------------------------------
 void IntervalCell::order_entities(Cell& cell) const
@@ -88,11 +97,21 @@ void IntervalCell::order_entities(Cell& cell) const
   MeshTopology const& topology = cell.mesh().topology();
 
   // Sort local vertices in ascending order, connectivity 1 - 0
-  if (topology(1, 0).size() > 0)
+  if (topology.is_computed(1, 0))
   {
     uint* cell_vertices = cell.entities(0);
     std::sort(cell_vertices, cell_vertices + 2);
   }
+}
+//-----------------------------------------------------------------------------
+void IntervalCell::order_facet(uint vertices[], Facet& facet) const
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
+void IntervalCell::initialize_connectivities(Mesh& mesh) const
+{
+  mesh.init(1, 0);
 }
 //-----------------------------------------------------------------------------
 void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
@@ -105,7 +124,7 @@ void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
   dolfin_assert(v);
 
   // Add midpoint vertex
-  uint const offset = cell.mesh().numVertices();
+  uint const offset = cell.mesh().size(0);
   uint const e0 = offset + cell.index();
 
   // Add the two new cells
@@ -274,6 +293,11 @@ Mesh IntervalCell::create_reference_cell() const
   return refcell;
 }
 //-----------------------------------------------------------------------------
+real const * IntervalCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
+}
+//-----------------------------------------------------------------------------
 void IntervalCell::disp() const
 {
   message("IntervalCell");
@@ -287,12 +311,16 @@ void IntervalCell::disp() const
 void IntervalCell::check(Cell& cell) const
 {
   CellType::check(cell);
+
   // Check that cell vertices are in ascending order (so are edge vertices then)
-  uint* cell_verts = cell.entities(0);
-  dolfin_assert(cell_verts != NULL);
-  if (cell_verts[1] < cell_verts[0])
+  if (cell.mesh().topology().is_computed(1, 0))
   {
-    error("Interval vertices are not in ascending order");
+    uint* cell_verts = cell.entities(0);
+    dolfin_assert(cell_verts);
+    if (cell_verts[1] < cell_verts[0])
+    {
+      error("Interval vertices are not in ascending order");
+    }
   }
 }
 //-----------------------------------------------------------------------------

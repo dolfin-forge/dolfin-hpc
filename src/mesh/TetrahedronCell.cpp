@@ -56,7 +56,7 @@ uint const TetrahedronCell::FNV[6][1] =
 
 //-----------------------------------------------------------------------------
 TetrahedronCell::TetrahedronCell() :
-    CellType(CellType::tetrahedron, CellType::triangle)
+    CellType("tetrahedron", CellType::tetrahedron, CellType::triangle)
 {
 }
 //-----------------------------------------------------------------------------
@@ -153,9 +153,9 @@ void TetrahedronCell::order_entities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology(1, 0).size() > 0)
+  if (topology.is_computed(1, 0))
   {
-    dolfin_assert(topology(3, 1).size() > 0);
+    dolfin_assert(topology.is_computed(3, 1));
 
     // Get edges
     uint* cell_edges = cell.entities(1);
@@ -169,9 +169,9 @@ void TetrahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local vertices on facets in ascending order, connectivity 2 - 0
-  if (topology(2, 0).size() > 0)
+  if (topology.is_computed(2, 0))
   {
-    dolfin_assert(topology(3, 2).size() > 0);
+    dolfin_assert(topology.is_computed(3, 2));
 
     // Get facets
     uint* cell_facets = cell.entities(2);
@@ -185,11 +185,11 @@ void TetrahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local edges on local facets after non-incident vertex, connectivity 2 - 1
-  if (topology(2, 1).size() > 0)
+  if (topology.is_computed(2, 1))
   {
-    dolfin_assert(topology(3, 2).size() > 0);
-    dolfin_assert(topology(2, 0).size() > 0);
-    dolfin_assert(topology(1, 0).size() > 0);
+    dolfin_assert(topology.is_computed(3, 2));
+    dolfin_assert(topology.is_computed(2, 0));
+    dolfin_assert(topology.is_computed(1, 0));
 
     // Get facet numbers
     uint* cell_facets = cell.entities(2);
@@ -235,16 +235,16 @@ void TetrahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local vertices on cell in ascending order, connectivity 3 - 0
-  if (topology(3, 0).size() > 0)
+  if (topology.is_computed(3, 0))
   {
     uint* cell_vertices = cell.entities(0);
     std::sort(cell_vertices, cell_vertices + 4);
   }
 
   // Sort local edges on cell after non-incident vertex tuple, connectivity 3 - 1
-  if (topology(3, 1).size() > 0)
+  if (topology.is_computed(3, 1))
   {
-    dolfin_assert(topology(1, 0).size() > 0);
+    dolfin_assert(topology.is_computed(1, 0));
 
     // Get cell vertices and edge numbers
     uint* cell_vertices = cell.entities(0);
@@ -289,9 +289,9 @@ void TetrahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local facets on cell after non-incident vertex, connectivity 3 - 2
-  if (topology(3, 2).size() > 0)
+  if (topology.is_computed(3, 2))
   {
-    dolfin_assert(topology(2, 0).size() > 0);
+    dolfin_assert(topology.is_computed(2, 0));
 
     // Get cell vertices and facet numbers
     uint* cell_vertices = cell.entities(0);
@@ -325,6 +325,56 @@ void TetrahedronCell::order_entities(Cell& cell) const
   }
 }
 //-----------------------------------------------------------------------------
+void TetrahedronCell::order_facet(uint vertices[], Facet& facet) const
+{
+  // Get mesh
+  Mesh& mesh = facet.mesh();
+
+  // Get the vertex opposite to the facet (the one we remove)
+  uint vertex = 0;
+  const Cell cell(mesh, facet.entities(mesh.topology().dim())[0]);
+  for (uint i = 0; i < cell.num_entities(0); i++)
+  {
+    bool not_in_facet = true;
+    vertex = cell.entities(0)[i];
+    for (uint j = 0; j < facet.num_entities(0); j++)
+    {
+      if (vertex == facet.entities(0)[j])
+      {
+        not_in_facet = false;
+        break;
+      }
+    }
+    if (not_in_facet)
+    {
+      break;
+    }
+  }
+
+  // Order
+  Point const p = mesh.geometry().point(vertex);
+  Point p0 = mesh.geometry().point(facet.entities(0)[0]);
+  Point p1 = mesh.geometry().point(facet.entities(0)[1]);
+  Point p2 = mesh.geometry().point(facet.entities(0)[2]);
+  Point v1 = p1 - p0;
+  Point v2 = p2 - p0;
+  Point n = v1.cross(v2);
+
+  if (n.dot(p0 - p) < 0.0)
+  {
+    std::swap(vertices[0], vertices[1]);
+  }
+}
+//-----------------------------------------------------------------------------
+void TetrahedronCell::initialize_connectivities(Mesh& mesh) const
+{
+  mesh.init(1, 0);
+  mesh.init(2, 1);
+  mesh.init(3, 0);
+  mesh.init(3, 1);
+  mesh.init(3, 2);
+}
+//-----------------------------------------------------------------------------
 void TetrahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
                                  uint& current_cell) const
 {
@@ -341,7 +391,7 @@ void TetrahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
   uint const v1 = v[1];
   uint const v2 = v[2];
   uint const v3 = v[3];
-  uint const offset = cell.mesh().numVertices();
+  uint const offset = cell.mesh().size(0);
   uint const e0 = offset + e[findEdge(0, cell)];
   uint const e1 = offset + e[findEdge(1, cell)];
   uint const e2 = offset + e[findEdge(2, cell)];
@@ -666,6 +716,11 @@ Mesh TetrahedronCell::create_reference_cell() const
   return refcell;
 }
 //-----------------------------------------------------------------------------
+real const * TetrahedronCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
+}
+//-----------------------------------------------------------------------------
 std::string TetrahedronCell::description() const
 {
   return std::string("tetrahedron (simplex of topological dimension 3)");
@@ -685,39 +740,57 @@ void TetrahedronCell::check(Cell& cell) const
 {
   CellType::check(cell);
 
+  // UFC convention: cell -> vertices in ascending order
+  // These connectivities should always exist, catching assertion if it is not
+  // the case is the right behaviour
+  uint const * cell_verts = cell.entities(0);
+  dolfin_assert(cell_verts);
+  uint const num_cell_verts = this->num_vertices(this->dim());
+  if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
+  {
+    error("CellType::check : cell vertices are not in ascending order\n"
+          "=> cell index = %d", cell.index());
+  }
+
   //
   MeshTopology const& topology = cell.mesh().topology();
   uint const* v = cell.entities(0);
   dolfin_assert(v);
 
   // Check edge -> incident vertices mapping
-  uint const* e = cell.entities(1);
-  dolfin_assert(e);
-  for (uint i = 0; i < 6; ++i)
+  if (topology.is_computed(1, 0))
   {
-    uint const * ev = topology(1, 0)(e[i]);
-    dolfin_assert(ev);
-    for (uint j = 0; j < 2; ++j)
+    uint const* e = cell.entities(1);
+    dolfin_assert(e);
+    for (uint i = 0; i < 6; ++i)
     {
-      if (ev[j] != v[EIV[i][j]])
+      uint const * ev = topology(1, 0)(e[i]);
+      dolfin_assert(ev);
+      for (uint j = 0; j < 2; ++j)
       {
-        error("CellType::check : invalid edge -> incident vertices mapping");
+        if (ev[j] != v[EIV[i][j]])
+        {
+          error("CellType::check : invalid edge -> incident vertices mapping");
+        }
       }
     }
   }
 
   // Check face -> incident vertices mapping
-  uint const* f = cell.entities(2);
-  dolfin_assert(f);
-  for (uint i = 0; i < 4; ++i)
+  if (topology.is_computed(2, 0))
   {
-    uint const * fv = topology(2, 0)(f[i]);
-    dolfin_assert(fv);
-    for (uint j = 0; j < 3; ++j)
+    uint const* f = cell.entities(2);
+    dolfin_assert(f);
+    for (uint i = 0; i < 4; ++i)
     {
-      if (fv[j] != v[FIV[i][j]])
+      uint const * fv = topology(2, 0)(f[i]);
+      dolfin_assert(fv);
+      for (uint j = 0; j < 3; ++j)
       {
-        error("CellType::check : invalid face -> incident vertices mapping");
+        if (fv[j] != v[FIV[i][j]])
+        {
+          error("CellType::check : invalid face -> incident vertices mapping");
+        }
       }
     }
   }

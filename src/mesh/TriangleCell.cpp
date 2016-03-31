@@ -48,7 +48,7 @@ uint const TriangleCell::ENV[3][1] =
 
 //-----------------------------------------------------------------------------
 TriangleCell::TriangleCell() :
-    CellType(CellType::triangle, CellType::interval)
+    CellType("triangle", CellType::triangle, CellType::interval)
 {
 }
 //-----------------------------------------------------------------------------
@@ -114,9 +114,9 @@ void TriangleCell::order_entities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology(1, 0).size() > 0)
+  if (topology.is_computed(1, 0))
   {
-    dolfin_assert(topology(2, 1).size() > 0);
+    dolfin_assert(topology.is_computed(2, 1));
 
     // Get edges
     uint* cell_edges = cell.entities(1);
@@ -130,16 +130,16 @@ void TriangleCell::order_entities(Cell& cell) const
   }
 
   // Sort local vertices on cell in ascending order, connectivity 2 - 0
-  if (topology(2, 0).size() > 0)
+  if (topology.is_computed(2, 0))
   {
     uint* cell_vertices = cell.entities(0);
     std::sort(cell_vertices, cell_vertices + 3);
   }
 
   // Sort local edges on cell after non-incident vertex, connectivity 2 - 1
-  if (topology(2, 1).size() > 0)
+  if (topology.is_computed(2, 1))
   {
-    dolfin_assert(topology(2, 1).size() > 0);
+    dolfin_assert(topology.is_computed(2, 1));
 
     // Get cell vertices and edges
     uint* cell_vertices = cell.entities(0);
@@ -173,8 +173,53 @@ void TriangleCell::order_entities(Cell& cell) const
   }
 }
 //-----------------------------------------------------------------------------
+void TriangleCell::order_facet(uint vertices[], Facet& facet) const
+{
+  // Get mesh
+  Mesh& mesh = facet.mesh();
+
+  // Get the vertex opposite to the facet (the one we remove)
+  uint vertex = 0;
+  const Cell cell(mesh, facet.entities(mesh.topology().dim())[0]);
+  for (uint i = 0; i < cell.num_entities(0); i++)
+  {
+    bool not_in_facet = true;
+    vertex = cell.entities(0)[i];
+    for (uint j = 0; j < facet.num_entities(0); j++)
+    {
+      if (vertex == facet.entities(0)[j])
+      {
+        not_in_facet = false;
+        break;
+      }
+    }
+    if (not_in_facet)
+    {
+      break;
+    }
+  }
+
+  // Order
+  Point const p = mesh.geometry().point(vertex);
+  Point p0 = mesh.geometry().point(facet.entities(0)[0]);
+  Point p1 = mesh.geometry().point(facet.entities(0)[1]);
+  Point v = p1 - p0;
+  Point n(v.y(), -v.x());
+  if (n.dot(p0 - p) < 0.0)
+  {
+    std::swap(vertices[0], vertices[1]);
+  }
+}
+//-----------------------------------------------------------------------------
+void TriangleCell::initialize_connectivities(Mesh& mesh) const
+{
+  mesh.init(1, 0);
+  mesh.init(2, 0);
+  mesh.init(2, 1);
+}
+//-----------------------------------------------------------------------------
 void TriangleCell::refine_cell(Cell& cell, MeshEditor& editor,
-                              uint& current_cell) const
+                               uint& current_cell) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
@@ -188,7 +233,7 @@ void TriangleCell::refine_cell(Cell& cell, MeshEditor& editor,
   uint const v0 = v[0];
   uint const v1 = v[1];
   uint const v2 = v[2];
-  uint const offset = cell.mesh().numVertices();
+  uint const offset = cell.mesh().size(0);
   uint const e0 = offset + e[findEdge(0, cell)];
   uint const e1 = offset + e[findEdge(1, cell)];
   uint const e2 = offset + e[findEdge(2, cell)];
@@ -561,6 +606,11 @@ Mesh TriangleCell::create_reference_cell() const
   return refcell;
 }
 //-----------------------------------------------------------------------------
+real const * TriangleCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
+}
+//-----------------------------------------------------------------------------
 std::string TriangleCell::description() const
 {
   return std::string("triangle (simplex of topological dimension 2)");
@@ -608,21 +658,36 @@ void TriangleCell::check(Cell& cell) const
 {
   CellType::check(cell);
 
-  // Check edge -> incident vertices mapping
-  uint const* v = cell.entities(0);
-  dolfin_assert(v);
-  uint const* e = cell.entities(1);
-  dolfin_assert(e);
-  MeshTopology const& topology = cell.mesh().topology();
-  for (uint i = 0; i < 3; ++i)
+  // UFC convention: cell -> vertices in ascending order
+  // These connectivities should always exist, catching assertion if it is not
+  // the case is the right behaviour
+  uint const * cell_verts = cell.entities(0);
+  dolfin_assert(cell_verts);
+  uint const num_cell_verts = this->num_vertices(this->dim());
+  if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
   {
-    uint const * ev = topology(1, 0)(e[i]);
-    dolfin_assert(ev);
-    for (uint j = 0; j < 2; ++j)
+    error("CellType::check : cell vertices are not in ascending order\n"
+          "=> cell index = %d", cell.index());
+  }
+
+  // Check edge -> incident vertices mapping
+  if (cell.mesh().topology().is_computed(1, 0))
+  {
+    uint const* v = cell.entities(0);
+    dolfin_assert(v);
+    uint const* e = cell.entities(1);
+    dolfin_assert(e);
+    MeshTopology const& topology = cell.mesh().topology();
+    for (uint i = 0; i < 3; ++i)
     {
-      if (ev[j] != v[EIV[i][j]])
+      uint const * ev = topology(1, 0)(e[i]);
+      dolfin_assert(ev);
+      for (uint j = 0; j < 2; ++j)
       {
-        error("CellType::check : invalid edge -> incident vertices mapping");
+        if (ev[j] != v[EIV[i][j]])
+        {
+          error("CellType::check : invalid edge -> incident vertices mapping");
+        }
       }
     }
   }

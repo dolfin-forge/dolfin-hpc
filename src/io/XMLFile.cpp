@@ -280,7 +280,7 @@ void XMLFile::operator<<(Mesh& mesh)
 
     // Write mesh in XML format
     fprintf(fp, "  <mesh celltype=\"%s\" dim=\"%u\">\n",
-            CellType::type2string(cell_type).c_str(), mesh.geometry().dim());
+            mesh.type().str().c_str(), mesh.geometry().dim());
 
     fprintf(fp, "    <vertices size=\"%u\">\n", mesh.numVertices());
 
@@ -395,7 +395,7 @@ void XMLFile::operator<<(Mesh& mesh)
     uint const tdim = mesh.topology().dim();
     uint const gdim = mesh.geometry().dim();
     CellType::Type cell_type = mesh.type().cellType();
-    std::string const cell_str(CellType::type2string(cell_type));
+    std::string const cell_str(mesh.type().str());
     MeshDistributedData const& distdata = mesh.distdata();
     uint const num_owned_vertices = distdata.num_owned(0);
     uint const num_global_vertices = distdata.num_global(0);

@@ -45,7 +45,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
   }
   //refcell.disp();
   dolfin::uint nc0 = refcell.numCells();
-  VTKFile vtk0(CellType::type2string(cell.cellType()) + "0m.pvd");
+  VTKFile vtk0(refcell.type().str() + "0m.pvd");
   vtk0 << refcell;
 
   dolfin::uint const N = std::pow(2.0, (int) (5 - cell.dim()));
@@ -55,7 +55,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     ck_assert_int_eq(refcell.numCells(), nc0 * cell.num_refined_cells());
     nc0 = refcell.numCells();
     std::stringstream svtk1;
-    svtk1 << CellType::type2string(cell.cellType()) << l << "m.pvd";
+    svtk1 << refcell.type().str() << l << "m.pvd";
     VTKFile vtk1(svtk1.str());
     vtk1 << refcell;
     MeshFunction<dolfin::uint> vi(refcell, 0);
@@ -64,7 +64,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
       vi.set(*v, v->index());
     }
     std::stringstream svtkv;
-    svtkv << CellType::type2string(cell.cellType()) << l << "v.pvd";
+    svtkv << refcell.type().str() << l << "v.pvd";
     VTKFile vtkv(svtkv.str());
     vtkv << vi;
   }

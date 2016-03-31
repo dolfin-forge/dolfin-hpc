@@ -8,7 +8,7 @@
 #define __DOLFIN_CELL_TYPE_H
 
 #include <dolfin/common/types.h>
-
+#include <dolfin/common/Array.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/RefinementPattern.h>
 #include <dolfin/ufl/UFLCell.h>
@@ -19,6 +19,7 @@ namespace dolfin
 {
 
 class Cell;
+class Facet;
 class Mesh;
 class MeshEditor;
 class MeshEntity;
@@ -36,6 +37,7 @@ class Point;
 
 class CellType : public RefinementPattern
 {
+
 public:
 
   /// Enum for different cell types
@@ -49,7 +51,7 @@ public:
               hexahedron    = 6 };
 
   /// Constructor
-  CellType(CellType::Type cell_type, CellType::Type facet_type);
+  CellType(std::string const& name, CellType::Type cell_type, CellType::Type facet_type);
 
   /// Destructor
   virtual ~CellType();
@@ -57,26 +59,14 @@ public:
   /// Clone pattern
   virtual CellType* clone() const = 0;
 
-  /// Create cell type from type (factory function)
-  static CellType* create(CellType::Type type);
-
-  /// Create cell type from string (factory function)
-  static CellType* create(std::string type);
-
-  /// Convert from string to cell type
-  static CellType::Type string2type(std::string type);
-
-  /// Convert from cell type to string
-  static std::string type2string(CellType::Type type);
-
-  /// Convert from cell type to UFL cell type
-  static ufl::Domain::Type type2ufldomain(CellType::Type type);
-
   /// Return type of cell
   inline CellType::Type cellType() const { return cell_type; }
 
   /// Return type of cell for facets
   inline CellType::Type facetType() const { return facet_type; }
+
+  /// Return string of cell type
+  virtual std::string const& str() const;
 
   /// Return topological dimension of cell
   virtual uint dim() const = 0;
@@ -95,6 +85,12 @@ public:
 
   /// Order entities locally
   virtual void order_entities(Cell& cell) const = 0;
+
+  /// Order vertices such that the facet is right-oriented w.r.t. facet normal
+  virtual void order_facet(uint vertices[], Facet& facet) const = 0;
+
+  /// Initialize mesh connectivities required by ordering
+  virtual void initialize_connectivities(Mesh& mesh) const = 0;
 
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
@@ -143,8 +139,15 @@ public:
   /// Check if cell c intersects the cell
   virtual bool intersects(MeshEntity& entity, Cell& c) const;
 
+  //--- REFERENCE CELL --------------------------------------------------------
+
   /// Create a mesh consisting of the reference cell
   virtual Mesh create_reference_cell() const = 0;
+
+  /// Return coordinates of vertices in the reference cell
+  virtual real const * reference_vertex(uint i) const = 0;
+
+  //---------------------------------------------------------------------------
 
   /// Return description of cell type
   virtual std::string description() const = 0;
@@ -160,18 +163,48 @@ public:
   /// UFL binding
   operator ufl::Cell const&() const { return ufl_; }
 
+  //---------------------------------------------------------------------------
+
+  /// Create cell type from type (factory function)
+  static CellType* create(CellType::Type type);
+
+  /// Create cell type from string (factory function)
+  static CellType* create(std::string const& type);
+
+  /// Create cell type from UFL type (factory function)
+  static CellType* create(ufl::Cell const& cell);
+
+  /// Create cell types
+  static Array<CellType*> create_all();
+
+  /// Create cell types
+  static Array<CellType*> create_simplex();
+
+  /// Create cell types
+  static Array<CellType*> create_hypercube();
+
 protected:
 
-  CellType::Type cell_type;
-  CellType::Type facet_type;
+  /// Convert from string to cell type
+  static CellType::Type type(std::string const& type);
 
-private:
+  /// Convert from cell type to string
+  static std::string str(CellType::Type type);
+
+  /// Convert from cell type to UFL cell type
+  static ufl::Domain::Type ufldomain(CellType::Type type);
+
+  std::string const name_;
+  CellType::Type const cell_type;
+  CellType::Type const facet_type;
 
   /// Implementation detail after C++11 <algorithm>
   static uint const * is_sorted_until(uint const * begin, uint const * end);
 
   /// Implementation detail after C++11 <algorithm>
   static bool is_sorted(uint const * begin, uint const * end);
+
+private:
 
   ufl::Cell ufl_;
 

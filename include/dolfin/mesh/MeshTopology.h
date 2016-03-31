@@ -98,6 +98,9 @@ public:
   ///
   void order(Mesh& mesh);
 
+  /// Return if connectivity for given pair is computed
+  bool is_computed(uint d0, uint d1) const;
+
   ///
   bool is_ordered() const;
 

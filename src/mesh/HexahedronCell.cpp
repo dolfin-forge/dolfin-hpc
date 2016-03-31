@@ -54,7 +54,7 @@ uint const HexahedronCell::FNV[6][4] =
 
 //-----------------------------------------------------------------------------
 HexahedronCell::HexahedronCell() :
-    CellType(CellType::hexahedron, CellType::quadrilateral)
+    CellType("hexahedron", CellType::hexahedron, CellType::quadrilateral)
 {
 }
 //-----------------------------------------------------------------------------
@@ -142,24 +142,24 @@ void HexahedronCell::create_entities(uint** e, uint dim, uint const* v) const
       e[0][3] = v[7];
       e[1][0] = v[2];
       e[1][1] = v[3];
-      e[1][2] = v[6];
-      e[1][3] = v[7];
+      e[1][2] = v[7];
+      e[1][3] = v[6];
       e[2][0] = v[1];
       e[2][1] = v[2];
-      e[2][2] = v[5];
-      e[2][3] = v[6];
+      e[2][2] = v[6];
+      e[2][3] = v[5];
       e[3][0] = v[0];
-      e[3][1] = v[3];
-      e[3][2] = v[4];
-      e[3][3] = v[7];
+      e[3][1] = v[4];
+      e[3][2] = v[7];
+      e[3][3] = v[3];
       e[4][0] = v[0];
       e[4][1] = v[1];
-      e[4][2] = v[4];
-      e[4][3] = v[5];
+      e[4][2] = v[5];
+      e[4][3] = v[4];
       e[5][0] = v[0];
-      e[5][1] = v[1];
+      e[5][1] = v[3];
       e[5][2] = v[2];
-      e[5][3] = v[3];
+      e[5][3] = v[1];
       break;
     default:
       error("Invalid topological dimension for creation of entities: %d.", dim);
@@ -176,9 +176,9 @@ void HexahedronCell::order_entities(Cell& cell) const
   MeshTopology& topology = cell.mesh().topology();
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology(1, 0).size() > 0)
+  if (topology.is_computed(1, 0))
   {
-    dolfin_assert(topology(3, 1).size() > 0);
+    dolfin_assert(topology.is_computed(3, 1));
 
     // Get edges
     uint* cell_edges = cell.entities(1);
@@ -192,9 +192,9 @@ void HexahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local vertices on facets in ascending order, connectivity 2 - 0
-  if (topology(2, 0).size() > 0)
+  if (topology.is_computed(2, 0))
   {
-    dolfin_assert(topology(3, 2).size() > 0);
+    dolfin_assert(topology.is_computed(3, 2));
 
     // Get facets
     uint* cell_facets = cell.entities(2);
@@ -208,11 +208,11 @@ void HexahedronCell::order_entities(Cell& cell) const
   }
 
   // Sort local edges on local facets after non-incident vertex, connectivity 2 - 1
-  if (topology(2, 1).size() > 0)
+  if (topology.is_computed(2, 1))
   {
-    dolfin_assert(topology(3, 2).size() > 0);
-    dolfin_assert(topology(2, 0).size() > 0);
-    dolfin_assert(topology(1, 0).size() > 0);
+    dolfin_assert(topology.is_computed(3, 2));
+    dolfin_assert(topology.is_computed(2, 0));
+    dolfin_assert(topology.is_computed(1, 0));
 
     // Get facet numbers
     uint* cell_facets = cell.entities(2);
@@ -221,6 +221,7 @@ void HexahedronCell::order_entities(Cell& cell) const
     for (uint i = 0; i < 6; ++i)
     {
       // For each facet number get the global vertex numbers
+      // Facet
       uint* facet_vertices = topology(2, 0)(cell_facets[i]);
 
       // For each facet number get the global edge number
@@ -257,95 +258,180 @@ void HexahedronCell::order_entities(Cell& cell) const
     }
   }
 
-  // Sort local vertices on cell in ascending order, connectivity 3 - 0
-  if (topology(3, 0).size() > 0)
-  {
-    uint* cell_vertices = cell.entities(0);
-    std::sort(cell_vertices, cell_vertices + 8);
-  }
+  // Vertices are supposed to have been ordered appropriately
 
   // Sort local edges on cell after non-incident vertex tuple, connectivity 3-1
-  if (topology(3, 1).size() > 0)
+  if (topology.is_computed(3, 1))
   {
-    dolfin_assert(topology(1, 0).size() > 0);
+    dolfin_assert(topology.is_computed(1, 0));
 
     // Get cell vertices and edge numbers
     uint* cell_vertices = cell.entities(0);
     uint* cell_edges = cell.entities(1);
 
     // Loop two vertices on cell as a lexicographical tuple
-    // (i, j): (0,1) (0,2) (0,3) (1,2) (1,3) (2,3)
     uint m = 0;
-    for (uint i = 0; i < 3; ++i)
+    for (uint t = 0; t < 12; ++t)
     {
-      for (uint j = i + 1; j < 4; ++j)
+      uint v0 = ENV[t][0];
+      uint v1 = ENV[t][1];
+      // Loop edge numbers
+      for (uint k = m; k < 12; ++k)
       {
-        // Loop edge numbers
-        for (uint k = m; k < 6; ++k)
-        {
-          // Get local vertices on edge
-          uint* edge_vertices = topology(1, 0)(cell_edges[k]);
+        // Get local vertices on edge
+        uint* edge_vertices = topology(1, 0)(cell_edges[k]);
 
-          // Check if the ith and jth vertex of the cell are non-incident on edge k
+        // Check if the ith and jth vertex of the cell are non-incident on edge k
 #if __SUNPRO_CC
-          int n1 = 0;
-          int n2 = 0;
-          std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
-          std::count(edge_vertices, edge_vertices + 2, cell_vertices[j], n2);
-          if (!n1 && !n2 )
+        int n1 = 0;
+        int n2 = 0;
+        std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
+        std::count(edge_vertices, edge_vertices + 2, cell_vertices[j], n2);
+        if (!n1 && !n2 )
 #else
-          if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[i])
-              && !std::count(edge_vertices, edge_vertices + 2,
-                             cell_vertices[j]))
+        if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0])
+         && !std::count(edge_vertices, edge_vertices + 2, cell_vertices[v1]))
 #endif
-          {
-            // Swap edge numbers
-            uint tmp = cell_edges[m];
-            cell_edges[m] = cell_edges[k];
-            cell_edges[k] = tmp;
-            m++;
-            break;
-          }
+        {
+          // Swap edge numbers
+          uint tmp = cell_edges[m];
+          cell_edges[m] = cell_edges[k];
+          cell_edges[k] = tmp;
+          ++m;
+          break;
         }
       }
     }
   }
 
   // Sort local facets on cell after non-incident vertex, connectivity 3 - 2
-  if (topology(3, 2).size() > 0)
+  if (topology.is_computed(3, 2))
   {
-    dolfin_assert(topology(2, 0).size() > 0);
+    dolfin_assert(topology.is_computed(2, 0));
 
     // Get cell vertices and facet numbers
     uint* cell_vertices = cell.entities(0);
     uint* cell_facets = cell.entities(2);
 
-    // Loop vertices on cell
-    for (uint i = 0; i < 4; ++i)
+    //
+    uint m = 0;
+    for (uint t = 0; t < 6; ++t)
     {
+      uint v0 = FNV[t][0];
+      uint v1 = FNV[t][1];
+      uint v2 = FNV[t][2];
+      uint v3 = FNV[t][3];
+
       // Loop facets on cell
-      for (uint j = i; j < 4; ++j)
+      for (uint k = m; k < 6; ++k)
       {
-        uint* facet_vertices = topology(2, 0)(cell_facets[j]);
+        uint* facet_vertices = topology(2, 0)(cell_facets[k]);
 
         // Check if the ith vertex of the cell is non-incident on facet j
 #if __SUNPRO_CC
         int n1 = 0;
+        int n2 = 0;
+        int n3 = 0;
+        int n4 = 0;
         std::count(facet_vertices, facet_vertices + 4, cell_vertices[i], n1);
-        if (!n1)
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[j], n2);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[k], n3);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[l], n4);
+        if (!n1 && !n2 && !n3 && !n4)
 #else
-        if (!std::count(facet_vertices, facet_vertices + 4, cell_vertices[i]))
+        if (!std::count(facet_vertices, facet_vertices + 4, cell_vertices[v0])
+         && !std::count(facet_vertices, facet_vertices + 4, cell_vertices[v1])
+         && !std::count(facet_vertices, facet_vertices + 4, cell_vertices[v2])
+         && !std::count(facet_vertices, facet_vertices + 4, cell_vertices[v3]))
 #endif
         {
           // Swap facet numbers
-          uint tmp = cell_facets[i];
-          cell_facets[i] = cell_facets[j];
-          cell_facets[j] = tmp;
+          uint tmp = cell_facets[m];
+          cell_facets[m] = cell_facets[k];
+          cell_facets[k] = tmp;
+          ++m;
           break;
         }
       }
     }
   }
+}
+//-----------------------------------------------------------------------------
+void HexahedronCell::order_facet(uint vertices[], Facet& facet) const
+{
+  static uint e[4] = { 0 };
+  Mesh& mesh = facet.mesh();
+  Cell const cell(mesh, facet.entities(TD)[0]);
+
+  // Find facet, it is outward oriented by definition.
+  //NOTE: Keep consistency with create_entities.
+  uint facet_index = cell.index(facet);
+  uint const * v = cell.entities(0);
+  switch(facet_index)
+  {
+    case 0:
+      e[0] = v[4];
+      e[1] = v[5];
+      e[2] = v[6];
+      e[3] = v[7];
+      break;
+    case 1:
+      e[0] = v[2];
+      e[1] = v[3];
+      e[2] = v[7];
+      e[3] = v[6];
+      break;
+    case 2:
+      e[0] = v[1];
+      e[1] = v[2];
+      e[2] = v[6];
+      e[3] = v[5];
+      break;
+    case 3:
+      e[0] = v[0];
+      e[1] = v[4];
+      e[2] = v[7];
+      e[3] = v[3];
+      break;
+    case 4:
+      e[0] = v[0];
+      e[1] = v[1];
+      e[2] = v[5];
+      e[3] = v[4];
+      break;
+    case 5:
+      e[0] = v[0];
+      e[1] = v[3];
+      e[2] = v[2];
+      e[3] = v[1];
+      break;
+    default:
+      error("HexahedronCell : invalid local facet index %u", facet_index);
+      break;
+  }
+
+  // Reorder facet vertices
+  for (uint i = 0; i < 4; ++i)
+  {
+    for (uint j = 0; j < 4; ++j)
+    {
+      if(e[i] == facet.entities(0)[j])
+      {
+        e[i] = vertices[j];
+        break;
+      }
+    }
+  }
+  std::memcpy(&vertices[0], &e[0], 4 * sizeof(uint));
+}
+//-----------------------------------------------------------------------------
+void HexahedronCell::initialize_connectivities(Mesh& mesh) const
+{
+  mesh.init(1, 0);
+  mesh.init(2, 1);
+  mesh.init(3, 0);
+  mesh.init(3, 1);
+  mesh.init(3, 2);
 }
 //-----------------------------------------------------------------------------
 void HexahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
@@ -370,7 +456,7 @@ void HexahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
   uint const v05 = v[5];
   uint const v06 = v[6];
   uint const v07 = v[7];
-  uint const eoffset = cell.mesh().numVertices();
+  uint const eoffset = cell.mesh().size(0);
   uint const e00 = eoffset + e[findEdge(0, cell)];
   uint const e01 = eoffset + e[findEdge(1, cell)];
   uint const e02 = eoffset + e[findEdge(2, cell)];
@@ -383,32 +469,32 @@ void HexahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
   uint const e09 = eoffset + e[findEdge(9, cell)];
   uint const e10 = eoffset + e[findEdge(10, cell)];
   uint const e11 = eoffset + e[findEdge(11, cell)];
-  uint const foffset = eoffset + cell.mesh().numEdges();
+  uint const foffset = eoffset + cell.mesh().size(1);
   uint const f00 = foffset + f[findFace(0, cell)];
   uint const f01 = foffset + f[findFace(1, cell)];
   uint const f02 = foffset + f[findFace(2, cell)];
   uint const f03 = foffset + f[findFace(3, cell)];
   uint const f04 = foffset + f[findFace(4, cell)];
   uint const f05 = foffset + f[findFace(5, cell)];
-  uint const coffset = foffset + cell.mesh().numFaces();
+  uint const coffset = foffset + cell.mesh().size(2);
   uint const c00 = coffset + cell.index();
 
   // Add the eight new cells
   uint const cv0[8] = { v00, e11, f05, e10, e09, f04, c00, f03 };
   editor.add_cell(current_cell++, &cv0[0]);
-  uint const cv1[8] = { v01, e08, f05, e11, e07, f02, c00, f04 };
+  uint const cv1[8] = { e11, v01, e08, f05, f04, e07, f02, c00 };
   editor.add_cell(current_cell++, &cv1[0]);
-  uint const cv2[8] = { v02, e06, f05, e08, e05, f01, c00, f02 };
+  uint const cv2[8] = { f05, e08, v02, e06, c00, f02, e05, f01 };
   editor.add_cell(current_cell++, &cv2[0]);
-  uint const cv3[8] = { v03, e10, f05, e06, e04, f03, c00, f01 };
+  uint const cv3[8] = { e10, f05, e06, v03, f03, c00, f01, e04 };
   editor.add_cell(current_cell++, &cv3[0]);
-  uint const cv4[8] = { v04, e03, f00, e02, e09, f04, c00, f03 };
+  uint const cv4[8] = { e09, f04, c00, f03, v04, e03, f00, e02 };
   editor.add_cell(current_cell++, &cv4[0]);
-  uint const cv5[8] = { v05, e01, f00, e03, e07, f02, c00, f04 };
+  uint const cv5[8] = { f04, e07, f02, c00, e03, v05, e01, f00 };
   editor.add_cell(current_cell++, &cv5[0]);
-  uint const cv6[8] = { v06, e00, f00, e01, e05, f01, c00, f02 };
+  uint const cv6[8] = { c00, f02, e05, f01, f00, e01, v06, e00 };
   editor.add_cell(current_cell++, &cv6[0]);
-  uint const cv7[8] = { v07, e02, f00, e00, e04, f03, c00, f01 };
+  uint const cv7[8] = { f03, c00, f01, e04, e02, f00, e00, v07 };
   editor.add_cell(current_cell++, &cv7[0]);
 }
 //-----------------------------------------------------------------------------
@@ -564,18 +650,12 @@ real HexahedronCell::facet_area(Cell const& cell, uint facet) const
   Cell& c = const_cast<Cell&>(cell);
   Facet f(c.mesh(), c.entities(1)[facet]);
 
-  // Get global index of vertices on the facet
-  uint const v0 = f.entities(0)[FIV[facet][0]];
-  uint const v1 = f.entities(0)[FIV[facet][1]];
-  uint const v2 = f.entities(0)[FIV[facet][2]];
-  uint const v3 = f.entities(0)[FIV[facet][3]];
-
   // Get the coordinates of the two vertices
   MeshGeometry const& geometry = cell.mesh().geometry();
-  real const * p = geometry.x(v0);
-  real const * q = geometry.x(v1);
-  real const * r = geometry.x(v0);
-  real const * s = geometry.x(v1);
+  real const * p = geometry.x(f.entities(0)[FIV[facet][0]]);
+  real const * q = geometry.x(f.entities(0)[FIV[facet][1]]);
+  real const * r = geometry.x(f.entities(0)[FIV[facet][2]]);
+  real const * s = geometry.x(f.entities(0)[FIV[facet][3]]);
 
   // Compute the area with diagonal formula
   real c0 = (r[1] - p[1]) * (s[2] - q[2]) - (r[2] - p[2]) * (s[1] - q[1]);
@@ -590,6 +670,7 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p) const
   dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
+  /*
   MeshGeometry const& geometry = e.mesh().geometry();
   uint const* vertices = e.entities(0);
   real const * x0 = geometry.x(vertices[0]);
@@ -600,6 +681,7 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p) const
   real const * x5 = geometry.x(vertices[5]);
   real const * x6 = geometry.x(vertices[6]);
   real const * x7 = geometry.x(vertices[7]);
+   */
 
   error("Collision of hexahedron with point not implemented.");
 
@@ -613,6 +695,7 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p1,
   dolfin_assert(e.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
+  /*
   MeshGeometry const& geometry = e.mesh().geometry();
   uint const* vertices = e.entities(0);
   real const * x0 = geometry.x(vertices[0]);
@@ -623,6 +706,7 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p1,
   real const * x5 = geometry.x(vertices[5]);
   real const * x6 = geometry.x(vertices[6]);
   real const * x7 = geometry.x(vertices[7]);
+   */
 
   error("Collision of hexahedron with segment not implemented.");
 
@@ -647,6 +731,11 @@ Mesh HexahedronCell::create_reference_cell() const
   me.add_cell(0, cv0);
   me.close();
   return refcell;
+}
+//-----------------------------------------------------------------------------
+real const * HexahedronCell::reference_vertex(uint i) const
+{
+  return &VC[i][0];
 }
 //-----------------------------------------------------------------------------
 std::string HexahedronCell::description() const
@@ -674,33 +763,42 @@ void HexahedronCell::check(Cell& cell) const
   dolfin_assert(v);
 
   // Check edge -> incident vertices mapping
-  uint const* e = cell.entities(1);
-  dolfin_assert(e);
-  for (uint i = 0; i < 12; ++i)
+  if (cell.mesh().topology().is_computed(1, 0))
   {
-    uint const * ev = topology(1, 0)(e[i]);
-    dolfin_assert(ev);
-    for (uint j = 0; j < 2; ++j)
+    uint const* e = cell.entities(1);
+    dolfin_assert(e);
+    for (uint i = 0; i < 12; ++i)
     {
-      if (ev[j] != v[EIV[i][j]])
+      uint const * ev = topology(1, 0)(e[i]);
+      dolfin_assert(ev);
+      for (uint j = 0; j < 2; ++j)
       {
-        error("CellType::check : invalid edge -> incident vertices mapping");
+        if (ev[j] != v[EIV[i][0]] && ev[j] != v[EIV[i][1]])
+        {
+          error("CellType::check : invalid edge -> incident vertices mapping\n"
+                "e[%u] = (v%u, v%u)", i, ev[0], ev[1]);
+        }
       }
     }
   }
 
   // Check face -> incident vertices mapping
-  uint const* f = cell.entities(2);
-  dolfin_assert(f);
-  for (uint i = 0; i < 6; ++i)
+  if (cell.mesh().topology().is_computed(2, 0))
   {
-    uint const * fv = topology(2, 0)(f[i]);
-    dolfin_assert(fv);
-    for (uint j = 0; j < 4; ++j)
+    uint const* f = cell.entities(2);
+    dolfin_assert(f);
+    for (uint i = 0; i < 6; ++i)
     {
-      if (fv[j] != v[FIV[i][j]])
+      uint const * fv = topology(2, 0)(f[i]);
+      dolfin_assert(fv);
+      for (uint j = 0; j < 4; ++j)
       {
-        error("CellType::check : invalid face -> incident vertices mapping");
+        if (fv[j] != v[FIV[i][0]] && fv[j] != v[FIV[i][1]] &&
+            fv[j] != v[FIV[i][2]] && fv[j] != v[FIV[i][3]])
+        {
+          error("CellType::check : invalid face -> incident vertices mapping\n"
+                "f[%u] = (v%u, v%u, v%u, v%u)", i, fv[0], fv[1], fv[2], fv[3]);
+        }
       }
     }
   }

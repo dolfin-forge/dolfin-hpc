@@ -65,6 +65,12 @@ public:
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
   void order_entities(Cell& cell) const;
 
+  /// Order vertices such that the facet is right-oriented w.r.t. facet normal
+  void order_facet(uint vertices[], Facet& facet) const;
+
+  /// Initialize mesh connectivities required by ordering
+  void initialize_connectivities(Mesh& mesh) const;
+
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
   /// Refine cell uniformly
@@ -106,8 +112,15 @@ public:
   /// Check if points line connecting p1 and p2 cuts the cell
   bool intersects(MeshEntity const& e, Point const& p1, Point const& p2) const;
 
+  //--- REFERENCE CELL --------------------------------------------------------
+
   /// Create a mesh consisting of the reference cell
   Mesh create_reference_cell() const;
+
+  /// Return coordinates of vertices in the reference cell
+  real const * reference_vertex(uint i) const;
+
+  //---------------------------------------------------------------------------
 
   /// Return description of cell type
   std::string description() const;

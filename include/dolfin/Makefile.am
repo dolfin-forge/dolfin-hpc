@@ -172,10 +172,12 @@ nobase_pkginclude_HEADERS = \
 				mesh/DomainBoundary.h\
 				mesh/DVertex.h\
 				mesh/Edge.h\
+				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanSpace.h \
 				mesh/Face.h\
+				mesh/FaceKey.h\
 				mesh/Facet.h\
 				mesh/GeometricPredicates.h\
 				mesh/GlobalFacetMap.h\

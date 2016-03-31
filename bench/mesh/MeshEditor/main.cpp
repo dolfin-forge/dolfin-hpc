@@ -58,8 +58,8 @@ int main(int argc, char** argv)
 
       // Connectivities
       uint cellid = 0;
-      uint * connectivities = new uint[celltype->numEntities(0)];
-      message("Adding connectivities: %d per cell.", celltype->numEntities(0));
+      uint * connectivities = new uint[celltype->num_entities(0)];
+      message("Adding connectivities: %d per cell.", celltype->num_entities(0));
       for (uint c = 0; c < ncells; ++c)
       {
         editor.add_cell(cellid++, &connectivities[0]);

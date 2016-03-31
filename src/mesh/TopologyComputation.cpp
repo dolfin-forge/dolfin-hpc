@@ -75,8 +75,8 @@ dolfin::uint TopologyComputation::computeEntities(Mesh& mesh, uint dim)
   const CellType& cell_type = mesh.type();
 
   // Initialize local array of entities
-  const uint m = cell_type.numEntities(dim);
-  const uint n = cell_type.numVertices(dim);
+  const uint m = cell_type.num_entities(dim);
+  const uint n = cell_type.num_vertices(dim);
   uint** entities = new uint*[m];
   for (uint i = 0; i < m; i++)
   {
@@ -94,7 +94,7 @@ dolfin::uint TopologyComputation::computeEntities(Mesh& mesh, uint dim)
     dolfin_assert(vertices);
 
     // Create entities
-    cell_type.createEntities(entities, dim, vertices);
+    cell_type.create_entities(entities, dim, vertices);
 
     // Count new entities
     num_entities += countEntities(mesh, *c, entities, m, n, dim);
@@ -114,7 +114,7 @@ dolfin::uint TopologyComputation::computeEntities(Mesh& mesh, uint dim)
     dolfin_assert(vertices);
 
     // Create entities
-    cell_type.createEntities(entities, dim, vertices);
+    cell_type.create_entities(entities, dim, vertices);
 
     // Add new entities to the mesh
     addEntities(mesh, *c, entities, m, n, dim, ce, ev, current_entity);

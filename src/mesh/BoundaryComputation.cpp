@@ -146,7 +146,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   }
 
   // Create cells (facets)
-  Array<uint> cell(boundary.type().numVertices(boundary.topology().dim()));
+  Array<uint> cell(boundary.type().num_vertices(boundary.topology().dim()));
   uint current_cell = 0;
   for (FacetIterator f(mesh); !f.end(); ++f)
   {

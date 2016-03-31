@@ -136,7 +136,7 @@ void GlobalFacetMap::findGlobalND()
   int sh_count = send_buff.size();
   //FIXME: Cannot work as it is with heterogeneous mesh since the data packing
   //       is not constant, maybe use the maximum
-  uint const num_facet_vertices = _mesh.type().numVertices(tdim - 1);
+  uint const num_facet_vertices = _mesh.type().num_vertices(tdim - 1);
   int res_size = sh_count / num_facet_vertices;
   int recv_size = 0;
   int recv_count = 0;

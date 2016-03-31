@@ -44,13 +44,13 @@ uint PointCell::dim() const
   return 0;
 }
 //-----------------------------------------------------------------------------
-uint PointCell::numEntities(uint dim) const
+uint PointCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return 1;
 }
 //-----------------------------------------------------------------------------
-uint PointCell::numVertices(uint dim) const
+uint PointCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return 1;
@@ -62,12 +62,12 @@ uint PointCell::orientation(Cell const& cell) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-void PointCell::createEntities(uint** e, uint dim, uint const* v) const
+void PointCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   error("PointCell::createEntities() undefined.");
 }
 //-----------------------------------------------------------------------------
-void PointCell::orderEntities(Cell& cell) const
+void PointCell::order_entities(Cell& cell) const
 {
   error("PointCell::orderEntities() undefined.");
 }
@@ -129,7 +129,7 @@ Point PointCell::normal(Cell const& cell, uint facet) const
   return Point();
 }
 //-----------------------------------------------------------------------------
-real PointCell::facetArea(Cell const& cell, uint facet) const
+real PointCell::facet_area(Cell const& cell, uint facet) const
 {
   error("PointCell::facetAread() undefined.");
   return 0.0;

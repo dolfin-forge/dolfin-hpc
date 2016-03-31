@@ -106,7 +106,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   // Optimize loops if the space is linear Lagrange: the space dimension is
   // the number of vertices times the number of components
   bool const is_P1 = (scratch.space_dimension
-                        == mesh.type().numEntities(0) * scratch.size);
+                        == mesh.type().num_entities(0) * scratch.size);
   
   const std::string la_backend = dolfin_get("linear algebra backend");
     
@@ -242,7 +242,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
     Array<uint> node_Udofs;
     Array<uint> node_Ndofs;
     uint const gdim = mesh.type().dim();
-    uint const vdim = mesh.type().numEntities(0); // number of nodes = vertices
+    uint const vdim = mesh.type().num_entities(0); // number of nodes = vertices
 
     for (VertexIterator v(boundary); !v.end(); ++v)
     {

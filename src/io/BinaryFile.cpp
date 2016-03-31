@@ -479,7 +479,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     // Create cell type to get topological dimension and number of vertices
     CellType::Type ctype = BinaryFile::cell_type(type);
     CellType* cell_type = CellType::create(ctype);
-    uint const num_cellvertices = cell_type->numEntities(0);
+    uint const num_cellvertices = cell_type->num_entities(0);
     delete cell_type;
 
     // Open mesh for editing
@@ -561,7 +561,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     // Create cell type to get topological dimension and number of vertices
     CellType::Type ctype = BinaryFile::cell_type(type);
     CellType * cell_type = CellType::create(ctype);
-    uint const num_cellvertices = cell_type->numEntities(0);
+    uint const num_cellvertices = cell_type->num_entities(0);
     delete cell_type;
 
     //
@@ -891,7 +891,7 @@ void BinaryFile::operator<<(Mesh& mesh)
   uint const type = BinaryFile::cell_type(mesh.type().cellType());
   uint const num_vertices = mesh.global_numVertices();
   uint const num_cells = mesh.global_numCells();
-  uint const num_cellvertices = mesh.type().numEntities(0);
+  uint const num_cellvertices = mesh.type().num_entities(0);
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;

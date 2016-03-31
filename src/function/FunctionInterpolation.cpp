@@ -171,7 +171,7 @@ void FunctionInterpolation::interpolateNonMatchingMeshes(Function const& F0,
     // This implementation assumes a scalar or vector-valued function which has
     // dofs only located at vertices.
     // (u, r) : (dof indices located at vertex, vertex coordinates)
-    uint const num_cellverts = M1.type().numEntities(0);
+    uint const num_cellverts = M1.type().num_entities(0);
     M1.init(0, tdim1);
     for (VertexIterator v1(M1); !v1.end(); ++v1)
     {

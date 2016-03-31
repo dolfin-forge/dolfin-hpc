@@ -89,7 +89,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint gdim = mesh.geometry().dim();
-  uint ndims = mesh.type().numVertices(mesh.topology().dim());
+  uint ndims = mesh.type().num_vertices(mesh.topology().dim());
 
   Array<real> *send_list_vertices = new Array<real> [pe_size];
   Array<uint> *send_list_mappings = new Array<uint> [pe_size];
@@ -494,7 +494,7 @@ void MPIMeshCommunicator::distributeCommon(
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint gdim = mesh.geometry().dim();
-  uint ndims = mesh.type().numVertices(mesh.topology().dim());
+  uint ndims = mesh.type().num_vertices(mesh.topology().dim());
   uint ncfunctions = (cell_functions) ? cell_functions->size() : 0;
   uint nvfunctions = (vertex_functions) ? vertex_functions->size() : 0;
 

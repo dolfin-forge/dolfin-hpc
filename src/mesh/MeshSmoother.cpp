@@ -200,7 +200,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     }
   }
 
-  Array<unsigned int> cell_vertices(cell_type.numEntities(0));
+  Array<unsigned int> cell_vertices(cell_type.num_entities(0));
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     Cell& cell = *c;

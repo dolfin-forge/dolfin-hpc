@@ -75,7 +75,7 @@ void MeshEditor::init_cells(uint num_cells)
   // Initialize mesh data
   this->num_cells_ = num_cells;
   mesh_->topology_.init(tdim_, num_cells);
-  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().numVertices(tdim_));
+  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().num_vertices(tdim_));
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)

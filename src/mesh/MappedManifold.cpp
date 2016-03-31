@@ -58,7 +58,7 @@ void MappedManifold::init()
   uint const invalid_vertex_index = mm_vertices.size();
   mm_vertices = invalid_vertex_index;
   Array<real> mm_coordinates(gdim * mm_vertices.size());
-  uint const num_cell_vertices = boundary.type().numEntities(0);
+  uint const num_cell_vertices = boundary.type().num_entities(0);
   Array<uint> mm_cells(boundary.numCells());
   Array<uint> mm_cell_vertices(boundary.numCells() * num_cell_vertices);
 

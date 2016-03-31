@@ -239,7 +239,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     uint const rank = MPI::processNumber();
     vertex_owner_[mesh_.distdata().get_vertex_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
-    for (uint i = 1; i < mesh_.type().numEntities(0); ++i)
+    for (uint i = 1; i < mesh_.type().num_entities(0); ++i)
     {
       v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
       if (mesh_.distdata().has_global(v[i], 0))
@@ -255,7 +255,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   }
   else
   {
-    for (uint i = 0; i < mesh_.type().numEntities(0); ++i)
+    for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
     {
       v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
     }
@@ -380,7 +380,7 @@ void XMLMesh::endMesh()
       ++vertex_count;
     }
 
-    uint ndims = mesh_.type().numVertices(mesh_.topology().dim());
+    uint ndims = mesh_.type().num_vertices(mesh_.topology().dim());
     editor_->init_cells(cell_buffer_.size() / ndims);
     uint c = 0;
     uint * connectivity = new uint[ndims];

@@ -47,7 +47,7 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
   if (!hdr_initialized_ || !static_mesh)
   {
     hdr_.num_coords = mesh.numVertices() * mesh.geometry().dim();
-    hdr_.num_entities = mesh.type().numEntities(0);
+    hdr_.num_entities = mesh.type().num_entities(0);
     hdr_.num_centities = mesh.numCells() * hdr_.num_entities;
     hdr_.type = mesh.type().cellType();
     hdr_.tdim = mesh.topology().dim();

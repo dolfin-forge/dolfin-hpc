@@ -52,13 +52,13 @@ uint IntervalCell::dim() const
   return 1;
 }
 //-----------------------------------------------------------------------------
-uint IntervalCell::numEntities(uint dim) const
+uint IntervalCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NE[dim];
 }
 //-----------------------------------------------------------------------------
-uint IntervalCell::numVertices(uint dim) const
+uint IntervalCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NV[dim];
@@ -73,13 +73,13 @@ uint IntervalCell::orientation(Cell const& cell) const
   return (n.dot(v01) < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::createEntities(uint** e, uint dim, uint const* v) const
+void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We do not need to create any entities
   error("Invalid topological dimension for creation of entities: %d.", dim);
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::orderEntities(Cell& cell) const
+void IntervalCell::order_entities(Cell& cell) const
 {
   // Sort i - j for i > j: 1 - 0
   dolfin_assert(cell.type() == this->cell_type);
@@ -211,7 +211,7 @@ Point IntervalCell::normal(Cell const& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::facetArea(Cell const& cell, uint facet) const
+real IntervalCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
   return 0.0;

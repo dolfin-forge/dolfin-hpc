@@ -77,8 +77,8 @@ START_TEST( test_PointCell )
     //---
     PointCell cell;
     ck_assert_int_eq(cell.dim(), 0);
-    ck_assert_int_eq(cell.numEntities(0), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
+    ck_assert_int_eq(cell.num_entities(0), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
     cell.disp();
     //
     CellType * ct0 = CellType::create(CellType::point);
@@ -101,10 +101,10 @@ START_TEST( test_IntervalCell )
     //---
     IntervalCell cell;
     ck_assert_int_eq(cell.dim(), 1);
-    ck_assert_int_eq(cell.numEntities(0), 2);
-    ck_assert_int_eq(cell.numEntities(1), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
-    ck_assert_int_eq(cell.numVertices(1), 2);
+    ck_assert_int_eq(cell.num_entities(0), 2);
+    ck_assert_int_eq(cell.num_entities(1), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_vertices(1), 2);
     cell.disp();
     //
     CellType * ct0 = CellType::create(CellType::interval);
@@ -125,12 +125,12 @@ START_TEST( test_TriangleCell )
     //---
     TriangleCell cell;
     ck_assert_int_eq(cell.dim(), 2);
-    ck_assert_int_eq(cell.numEntities(0), 3);
-    ck_assert_int_eq(cell.numEntities(1), 3);
-    ck_assert_int_eq(cell.numEntities(2), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
-    ck_assert_int_eq(cell.numVertices(1), 2);
-    ck_assert_int_eq(cell.numVertices(2), 3);
+    ck_assert_int_eq(cell.num_entities(0), 3);
+    ck_assert_int_eq(cell.num_entities(1), 3);
+    ck_assert_int_eq(cell.num_entities(2), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_vertices(1), 2);
+    ck_assert_int_eq(cell.num_vertices(2), 3);
     cell.disp();
     //
     CellType * ct0 = CellType::create(CellType::triangle);
@@ -151,14 +151,14 @@ START_TEST( test_TetrahedronCell )
     //---
     TetrahedronCell cell;
     ck_assert_int_eq(cell.dim(), 3);
-    ck_assert_int_eq(cell.numEntities(0), 4);
-    ck_assert_int_eq(cell.numEntities(1), 6);
-    ck_assert_int_eq(cell.numEntities(2), 4);
-    ck_assert_int_eq(cell.numEntities(3), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
-    ck_assert_int_eq(cell.numVertices(1), 2);
-    ck_assert_int_eq(cell.numVertices(2), 3);
-    ck_assert_int_eq(cell.numVertices(3), 4);
+    ck_assert_int_eq(cell.num_entities(0), 4);
+    ck_assert_int_eq(cell.num_entities(1), 6);
+    ck_assert_int_eq(cell.num_entities(2), 4);
+    ck_assert_int_eq(cell.num_entities(3), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_vertices(1), 2);
+    ck_assert_int_eq(cell.num_vertices(2), 3);
+    ck_assert_int_eq(cell.num_vertices(3), 4);
     cell.disp();
     //
     CellType * ct0 = CellType::create(CellType::tetrahedron);
@@ -179,12 +179,12 @@ START_TEST( test_QuadrilateralCell )
     //---
     QuadrilateralCell cell;
     ck_assert_int_eq(cell.dim(), 2);
-    ck_assert_int_eq(cell.numEntities(0), 4);
-    ck_assert_int_eq(cell.numEntities(1), 4);
-    ck_assert_int_eq(cell.numEntities(2), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
-    ck_assert_int_eq(cell.numVertices(1), 2);
-    ck_assert_int_eq(cell.numVertices(2), 4);
+    ck_assert_int_eq(cell.num_entities(0), 4);
+    ck_assert_int_eq(cell.num_entities(1), 4);
+    ck_assert_int_eq(cell.num_entities(2), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_vertices(1), 2);
+    ck_assert_int_eq(cell.num_vertices(2), 4);
     cell.disp();
     //
     CellType * ct0 = CellType::create(CellType::quadrilateral);
@@ -208,14 +208,14 @@ START_TEST( test_HexahedronCell )
     //---
     HexahedronCell cell;
     ck_assert_int_eq(cell.dim(), 3);
-    ck_assert_int_eq(cell.numEntities(0), 8);
-    ck_assert_int_eq(cell.numEntities(1), 12);
-    ck_assert_int_eq(cell.numEntities(2), 6);
-    ck_assert_int_eq(cell.numEntities(3), 1);
-    ck_assert_int_eq(cell.numVertices(0), 1);
-    ck_assert_int_eq(cell.numVertices(1), 2);
-    ck_assert_int_eq(cell.numVertices(2), 4);
-    ck_assert_int_eq(cell.numVertices(3), 8);
+    ck_assert_int_eq(cell.num_entities(0), 8);
+    ck_assert_int_eq(cell.num_entities(1), 12);
+    ck_assert_int_eq(cell.num_entities(2), 6);
+    ck_assert_int_eq(cell.num_entities(3), 1);
+    ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_vertices(1), 2);
+    ck_assert_int_eq(cell.num_vertices(2), 4);
+    ck_assert_int_eq(cell.num_vertices(3), 8);
     cell.disp();
     // Check cell type enum
     CellType * ct0 = CellType::create(CellType::hexahedron);

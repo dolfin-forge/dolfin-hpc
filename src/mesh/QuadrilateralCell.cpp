@@ -52,13 +52,13 @@ uint QuadrilateralCell::dim() const
   return 2;
 }
 //-----------------------------------------------------------------------------
-uint QuadrilateralCell::numEntities(uint dim) const
+uint QuadrilateralCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NE[dim];
 }
 //-----------------------------------------------------------------------------
-uint QuadrilateralCell::numVertices(uint dim) const
+uint QuadrilateralCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NV[dim];
@@ -81,7 +81,7 @@ uint QuadrilateralCell::orientation(Cell const& cell) const
           < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void QuadrilateralCell::createEntities(uint** e, uint dim, uint const* v) const
+void QuadrilateralCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges
   if (dim != 1)
@@ -100,7 +100,7 @@ void QuadrilateralCell::createEntities(uint** e, uint dim, uint const* v) const
   e[3][1] = v[1];
 }
 //-----------------------------------------------------------------------------
-void QuadrilateralCell::orderEntities(Cell& cell) const
+void QuadrilateralCell::order_entities(Cell& cell) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1
   dolfin_assert(cell.type() == this->cell_type);
@@ -386,7 +386,7 @@ Point QuadrilateralCell::normal(Cell const& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-real QuadrilateralCell::facetArea(Cell const& cell, uint facet) const
+real QuadrilateralCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 

@@ -179,7 +179,7 @@ void CellType::check(Cell& cell) const
   // UFC convention: cell -> vertices in ascending order
   uint const * cell_verts = cell.entities(0);
   dolfin_assert(cell_verts);
-  uint const num_cell_verts = this->numVertices(this->dim());
+  uint const num_cell_verts = this->num_vertices(this->dim());
   if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
   {
     error("CellType::check : cell vertices are not in ascending order\n"
@@ -193,8 +193,8 @@ void CellType::check(Cell& cell) const
   }
   uint const * cell_edges = cell.entities(1);
   dolfin_assert(cell_edges);
-  uint const num_cell_edges = this->numEntities(1);
-  uint const num_edge_verts = this->numVertices(1);
+  uint const num_cell_edges = this->num_entities(1);
+  uint const num_edge_verts = this->num_vertices(1);
   for (uint e = 0; e < num_cell_edges; ++e)
   {
     uint const * edge_verts = cell.mesh().topology()(1, 0)(cell_edges[e]);

@@ -138,7 +138,7 @@ void DMesh::init(Mesh& mesh)
   // the number of vertices in the *global* mesh
   _glb_max = mesh.topology().num_global(0);
   dolfin_assert(_glb_max > 0);
-  _salt = _cell_type->numEntities(0) * mesh.topology().num_global(_tdim);
+  _salt = _cell_type->num_entities(0) * mesh.topology().num_global(_tdim);
   dolfin_assert(_salt > 0);
 
   // Assign a safe range for each rank for the numbering of new entities i.e
@@ -254,7 +254,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   {
     DCell* dc = new DCell;
 
-    std::vector<DVertex*> vs(ci->numEntities(0));
+    std::vector<DVertex*> vs(ci->num_entities(0));
     uint i = 0;
     for (VertexIterator vi(*ci); !vi.end(); ++vi)
     {
@@ -308,7 +308,7 @@ void DMesh::exp(Mesh& mesh)
     }
   }
 
-  Array<uint> cell_vertices(_cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->num_entities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -383,7 +383,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
     }
   }
 
-  Array<uint> cell_vertices(_cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->num_entities(0));
   uint current_cell = 0;
   for(std::list<DCell* >::iterator it = cells.begin();
       it != cells.end(); ++it)
@@ -471,7 +471,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     }
   }
 
-  Array<uint> cell_vertices(_cell_type->numEntities(0));
+  Array<uint> cell_vertices(_cell_type->num_entities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end();
       ++it, ++current_cell)

@@ -56,19 +56,19 @@ public:
   uint dim() const;
 
   /// Return number of entitites of given topological dimension
-  uint numEntities(uint dim) const;
+  uint num_entities(uint dim) const;
 
   /// Return number of vertices for entity of given topological dimension
-  uint numVertices(uint dim) const;
+  uint num_vertices(uint dim) const;
 
   /// Return orientation of the cell
   uint orientation(Cell const& cell) const;
 
   /// Create entities e of given topological dimension from vertices v
-  void createEntities(uint** e, uint dim, uint const* v) const;
+  void create_entities(uint** e, uint dim, uint const* v) const;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
-  void orderEntities(Cell& cell) const;
+  void order_entities(Cell& cell) const;
 
   //--- REFINEMENT PATTERN ----------------------------------------------------
 
@@ -103,7 +103,7 @@ public:
   Point normal(Cell const& cell, uint facet) const;
 
   /// Compute the area/length of given facet with respect to the cell
-  real facetArea(Cell const& cell, uint facet) const;
+  real facet_area(Cell const& cell, uint facet) const;
 
   /// Check if point p intersects the entity
   bool intersects(MeshEntity const& e, Point const& p) const;

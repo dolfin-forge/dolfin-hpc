@@ -337,7 +337,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
   }
   else
   {
-    uint const num_cell_vertices = mesh_.type().numVertices(tdim);
+    uint const num_cell_vertices = mesh_.type().num_vertices(tdim);
     real* vertex_values = new real[scratch.size * num_cell_vertices];
     MeshDistributedData& distdata = mesh_.distdata();
     for (CellIterator cell(mesh_); !cell.end(); ++cell)

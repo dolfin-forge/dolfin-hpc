@@ -69,13 +69,13 @@ uint TetrahedronCell::dim() const
   return 3;
 }
 //-----------------------------------------------------------------------------
-uint TetrahedronCell::numEntities(uint dim) const
+uint TetrahedronCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NE[dim];
 }
 //-----------------------------------------------------------------------------
-uint TetrahedronCell::numVertices(uint dim) const
+uint TetrahedronCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NV[dim];
@@ -103,7 +103,7 @@ uint TetrahedronCell::orientation(Cell const& cell) const
   return (a < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void TetrahedronCell::createEntities(uint** e, uint dim, uint const* v) const
+void TetrahedronCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges and faces
   switch (dim)
@@ -144,7 +144,7 @@ void TetrahedronCell::createEntities(uint** e, uint dim, uint const* v) const
     }
 }
 //-----------------------------------------------------------------------------
-void TetrahedronCell::orderEntities(Cell& cell) const
+void TetrahedronCell::order_entities(Cell& cell) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1, 3 - 0, 3 - 1, 3 - 2
   dolfin_assert(cell.type() == this->cell_type);
@@ -579,7 +579,7 @@ Point TetrahedronCell::normal(Cell const& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-dolfin::real TetrahedronCell::facetArea(Cell const& cell, uint facet) const
+dolfin::real TetrahedronCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 

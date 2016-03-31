@@ -224,7 +224,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
 
   // Add old unrefined cells
   uint current_cell = 0;
-  Array<uint> cell_vertices(cell_type.numEntities(0));
+  Array<uint> cell_vertices(cell_type.num_entities(0));
   for (CellIterator c(mesh); !c.end(); ++c)
   {
 

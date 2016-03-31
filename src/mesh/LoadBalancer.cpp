@@ -707,7 +707,7 @@ bool LoadBalancer::computational_gain(Mesh& mesh,
   MPI_Allreduce(&tmp, &max_sendrecv, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   message("**** %d - %d = %d  w_nmax / w_omax = %f maxsr = %d ****", w_oldmax, w_newmax, w_oldmax - w_newmax, (real) w_newmax/ (real) w_oldmax, max_sendrecv);
 
-  real ndims =  (real) mesh.type().numVertices(mesh.topology().dim());
+  real ndims =  (real) mesh.type().num_vertices(mesh.topology().dim());
   real comp_cost = tf * ((ndims * ndims) * ( (real) (w_oldmax - w_newmax)));
   //  comp_cost +=  ts + tb *((real) (w_oldmax - w_newmax));
   real comm_cost = ts + tb * (ndims * (real) max_sendrecv);

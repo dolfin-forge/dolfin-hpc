@@ -67,7 +67,7 @@ void UFCHalo::init()
   uint const facet_dim = tdim - 1;
 
   //
-  uint const num_cell_vertices = mesh_.type().numEntities(0);
+  uint const num_cell_vertices = mesh_.type().num_entities(0);
   uint const coordinates_data_size = num_cell_vertices * tdim;
   uint coefficients_data_size = 0;
   for (uint i = 0; i < ufc_.form.num_coefficients(); ++i)
@@ -153,7 +153,7 @@ void UFCHalo::update(Facet& facet)
 
   // Update pointers to coordinates
   uint const tdim = mesh_.topology().dim();
-  for (uint i = 0; i < mesh_.type().numEntities(0); ++i)
+  for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
   {
     cell0.coordinates[i] = r0;
     r0 += tdim;
@@ -226,7 +226,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   uint pe_size = dolfin::MPI::numProcesses();
 
   // Loop over shared facets to collect data following shared iterator ordering
-  uint const num_cell_vertices = mesh_.type().numEntities(0);
+  uint const num_cell_vertices = mesh_.type().num_entities(0);
   for (FacetMap::const_iterator it = facet_map_.begin(); it != facet_map_.end();
       ++it)
   {

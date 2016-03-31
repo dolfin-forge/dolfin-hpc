@@ -116,7 +116,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
       sum_elm = tmp_elm + sum_elm;
     }
 
-  int nvertices = mesh.type().numVertices(mesh.topology().dim());
+  int nvertices = mesh.type().num_vertices(mesh.topology().dim());
   int ncnodes = nvertices - 1;
 
 #if PARMETIS_MAJOR_VERSION > 3
@@ -204,7 +204,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   idx_t local_vertices = vtxdist[rank];
 #else
   idxtype *vtxdist = new idxtype[size+1];  
-  vtxdist[rank] = static_cast<idxtype> (mesh.numVertices());
+  vtxdist[rank] = static_cast<idxtype> (mesh.num_vertices());
   idxtype local_vertices = vtxdist[rank];
 #endif
 
@@ -232,9 +232,9 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   idx_t gdim =  static_cast<idx_t>( mesh.geometry().dim() );
   real_t *xdy = new real_t[gdim * mesh.numVertices()];
 #else
-  idxtype *part = new idxtype[mesh.numVertices()];
+  idxtype *part = new idxtype[mesh.num_vertices()];
   idxtype gdim =  static_cast<idxtype>( mesh.geometry().dim() );
-  float *xdy = new float[gdim * mesh.numVertices()];
+  float *xdy = new float[gdim * mesh.num_vertices()];
 #endif
 
 

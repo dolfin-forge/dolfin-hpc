@@ -67,13 +67,13 @@ uint HexahedronCell::dim() const
   return 3;
 }
 //-----------------------------------------------------------------------------
-uint HexahedronCell::numEntities(uint dim) const
+uint HexahedronCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NE[dim];
 }
 //-----------------------------------------------------------------------------
-uint HexahedronCell::numVertices(uint dim) const
+uint HexahedronCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
   return NV[dim];
@@ -102,7 +102,7 @@ uint HexahedronCell::orientation(Cell const& cell) const
   return (S < 0.0 ? 1 : 0);
 }
 //-----------------------------------------------------------------------------
-void HexahedronCell::createEntities(uint** e, uint dim, uint const* v) const
+void HexahedronCell::create_entities(uint** e, uint dim, uint const* v) const
 {
   // We only need to know how to create edges and faces
   switch (dim)
@@ -167,7 +167,7 @@ void HexahedronCell::createEntities(uint** e, uint dim, uint const* v) const
     }
 }
 //-----------------------------------------------------------------------------
-void HexahedronCell::orderEntities(Cell& cell) const
+void HexahedronCell::order_entities(Cell& cell) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1, 3 - 0, 3 - 1, 3 - 2
   dolfin_assert(cell.type() == this->cell_type);
@@ -556,7 +556,7 @@ Point HexahedronCell::normal(Cell const& cell, uint facet) const
   return n;
 }
 //-----------------------------------------------------------------------------
-real HexahedronCell::facetArea(Cell const& cell, uint facet) const
+real HexahedronCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 

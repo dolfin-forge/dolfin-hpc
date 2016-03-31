@@ -206,7 +206,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 
   uint const num_mesh_verts = mesh.numVertices();
   uint const num_mesh_cells = mesh.numCells();
-  uint const num_cell_verts = mesh.type().numEntities(0);
+  uint const num_cell_verts = mesh.type().num_entities(0);
   uint const cell_verts_block_size = num_cell_verts * num_mesh_cells;
 
   // Write vertex positions

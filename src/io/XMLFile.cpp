@@ -507,7 +507,7 @@ void XMLFile::operator<<(Mesh& mesh)
     // Determine maximum size of line to allocate buffer
     std::stringstream scline;
     scline << "<" << cell_str << " index=\""<< num_global_cells << "\"";
-    for (uint i = 0; i < mesh.type().numEntities(0); ++i)
+    for (uint i = 0; i < mesh.type().num_entities(0); ++i)
     {
       scline << "<" << cell_str
              << " v" << i << "=\""<< num_global_vertices << "\"";

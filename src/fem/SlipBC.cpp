@@ -133,7 +133,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     uint * celldofs = new uint[fulldofmap.local_dimension()];
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      scratch.cell.update(*c, mesh.distdata());
+      scratch.cell.update(*c);
       fulldofmap.tabulate_dofs(celldofs, scratch.cell, *c);
       for (uint j = 0; j < fulldofmap.local_dimension(); ++j)
       {
@@ -258,7 +258,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
       if (!mesh.distdata().is_ghost(node, 0))
       {
         Cell cell(mesh, (vertex.entities(gdim))[0]);
-        scratch.cell.update(cell, mesh.distdata());
+        scratch.cell.update(cell);
 
         // Find the vertex position in the cell
         uint *cvi = cell.entities(0);
@@ -347,7 +347,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
       //
       Cell cell(mesh, facet.entities(gdim)[0]);
       uint const local_facet = cell.index(facet);
-      scratch.cell.update(cell, mesh.distdata());
+      scratch.cell.update(cell);
       scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
       // Attention, local-to-local mapping.
       scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);

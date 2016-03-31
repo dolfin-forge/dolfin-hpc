@@ -235,7 +235,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     // Create cell
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint cell_facet = cell.index(facet);
-    ufc_.cell.update(cell, distdata);
+    ufc_.cell.update(cell);
 
     // Set arrays offset
     real * r_entry = &r_data0_[it->second.first * r_packet_size_];

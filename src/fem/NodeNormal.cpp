@@ -222,7 +222,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
         || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {
       // Update cell data and tabulate the coordinates
-      scratchN.cell.update(cell, distdata);
+      scratchN.cell.update(cell);
       dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
     }
     else
@@ -231,7 +231,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
       if (num_restricted_facet_dofs > 0)
       {
         // Tabulate dofs on facet restriction
-        scratchN.cell.update(cell, distdata);
+        scratchN.cell.update(cell);
         dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
         dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, facet_dim, local_facet);
         for (uint i = 0; i < num_restricted_facet_dofs; ++i)

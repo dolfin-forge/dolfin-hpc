@@ -286,7 +286,7 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
 
     // Create cell
     Cell cell(mesh(), cell_number);
-    scratch.cell.update(cell, mesh().distdata());
+    scratch.cell.update(cell);
 
     // Tabulate dofs on cell for the full space dofmap
     dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell.index());
@@ -358,7 +358,7 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
       // Loop the cells associated with the vertex
       for (CellIterator c(*vertex); !c.end(); ++c)
       {
-        scratch.cell.update(*c, mesh().distdata());
+        scratch.cell.update(*c);
         bool interpolated = false;
 
         // Tabulate dofs on cell for the full space dofmap
@@ -411,7 +411,7 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
   ScratchSpace scratch(space, sub_system);
   for (CellIterator cell(mesh()); !cell.end(); ++cell)
   {
-    scratch.cell.update(*cell, mesh().distdata());
+    scratch.cell.update(*cell);
 
     // Tabulate dofs on cell
     dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell->index());

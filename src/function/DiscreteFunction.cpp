@@ -343,7 +343,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
     for (CellIterator cell(mesh_); !cell.end(); ++cell)
     {
       // Update to current cell
-      scratch.cell.update(*cell, distdata);
+      scratch.cell.update(*cell);
 
       // Tabulate dofs
       dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
@@ -433,7 +433,7 @@ void DiscreteFunction::eval(real* values, const real* x) const
   Cell cell(mesh_, cells[0]);
 
   // Change to global numbering
-  scratch.cell.update(cell, mesh_.distdata());
+  scratch.cell.update(cell);
 
   // Get expansion coefficients on cell
   dofmap_.tabulate_dofs(scratch.dofs, scratch.cell);
@@ -546,7 +546,7 @@ void DiscreteFunction::InitializeGhosts()
   for (CellIterator cell(mesh_); !cell.end(); ++cell)
   {
     // Update to current cell
-    scratch.cell.update(*cell, distdata);
+    scratch.cell.update(*cell);
 
     // Tabulate dofs
     dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());

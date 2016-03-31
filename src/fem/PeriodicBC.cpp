@@ -109,7 +109,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   {
     // Get cell to which facet belongs (there may be two, but pick first)
     Cell cell(mesh(), facet->entities(tdim)[0]);
-    scratch.cell.update(cell, mesh().distdata());
+    scratch.cell.update(cell);
 
     // Get local index of facet with respect to the cell
     const uint local_facet = cell.index(*facet);

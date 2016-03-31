@@ -342,7 +342,7 @@ void DofMap::initUFC(UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell, mesh->distdata());
+      ufc_cell.update(*cell);
       ufc_dofmap.init_cell(ufc_mesh, ufc_cell);
     }
     ufc_dofmap.init_cell_finalize();
@@ -1035,7 +1035,7 @@ void DofMap::disp() const
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell, dolfin_mesh.distdata());
+      ufc_cell.update(*cell);
 
       ufc_dofmap_->tabulate_dofs(dofs, ufc_mesh_, ufc_cell);
 
@@ -1068,7 +1068,7 @@ void DofMap::disp() const
     UFCCell ufc_cell(*cell);
     for (; !cell.end(); ++cell)
     {
-      ufc_cell.update(*cell, dolfin_mesh.distdata());
+      ufc_cell.update(*cell);
 
       ufc_dofmap_->tabulate_coordinates(coordinates, ufc_cell);
 
@@ -1146,7 +1146,7 @@ void DofMap::distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
 
     uint local_facet = c.index(f);
 
-    ufc_cell.update(c, mesh.distdata());
+    ufc_cell.update(c);
     ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
     ufc_dofmap->tabulate_facet_dofs(facet_dofs, local_facet);
 
@@ -1202,7 +1202,7 @@ void DofMap::distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
   // Mark all non forbidden dofs as owned by the processes
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    ufc_cell.update(*c, mesh.distdata());
+    ufc_cell.update(*c);
     ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
     for (uint i = 0; i < local_dim; ++i)
     {
@@ -1271,7 +1271,7 @@ void DofMap::distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
   uint ii = 0;
   for (; !cell.end(); ++cell)
   {
-    ufc_cell.update(*cell, mesh.distdata());
+    ufc_cell.update(*cell);
     ufc_dofmap->tabulate_dofs(dofs, ufc_mesh, ufc_cell);
 
     // Create mapping from dof to dofmap offset

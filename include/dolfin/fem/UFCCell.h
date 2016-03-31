@@ -60,7 +60,6 @@ public:
 
   // Update cell entities to global indices and coordinates
   void update(Cell& cell);
-  void update(Cell& cell, MeshDistributedData& distdata);  // Obsolete
 
 private:
 
@@ -71,7 +70,6 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline void UFCCell::init(Cell& cell)
 {
   // Clear old data
@@ -189,42 +187,7 @@ inline void UFCCell::update(Cell& cell)
 }
 
 //-----------------------------------------------------------------------------
-inline void UFCCell::update(Cell& cell, MeshDistributedData& distdata)
-{
-  // Update dolfin cell pointer
-  this->cell = &cell;
 
-  // Set entity indices
-#if ENABLE_P1_OPTIMIZATIONS
-  for(uint i = 0; i < cell.num_entities(0); ++i)
-  {
-    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
-  }
-#else
-  for (uint d = 0; d < topological_dimension; ++d)
-  {
-    for (uint i = 0; i < cell.num_entities(d); ++i)
-    {
-      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
-    }
-  }
-#endif
-  entity_indices[topological_dimension][0] = distdata.get_cell_global(
-      cell.index());
+} /* namespace dolfin */
 
-  // Cell index (short-cut for entity_indices[topological_dimension][0])
-  index = entity_indices[topological_dimension][0];
-
-  /// Set vertex coordinates
-  uint const * vertices = cell.entities(0);
-  for (uint i = 0; i < num_vertices_; ++i)
-  {
-    coordinates[i] = cell.mesh().geometry().x(vertices[i]);
-  }
-}
-
-//-----------------------------------------------------------------------------
-
-}
-
-#endif
+#endif /* __DOLFIN_UFC_CELL_H */

@@ -554,7 +554,7 @@ void Mesh::check_interior_boundary_entities(uint dim) const
     }
 
     uint const num_shared = mesh.topology().num_shared(dim);
-    uint const num_intbnd = boundary.topology().num_local(dim);
+    uint const num_intbnd = boundary.topology().size(dim);
     if(num_shared != num_intbnd)
     {
       error("Inconsistent number of entities: (shared) %d  != %d (boundary)",

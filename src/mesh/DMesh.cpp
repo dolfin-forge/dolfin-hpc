@@ -136,9 +136,9 @@ void DMesh::init(Mesh& mesh)
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the *global* mesh
-  _glb_max = mesh.topology().num_global(0);
+  _glb_max = mesh.topology().global_size(0);
   dolfin_assert(_glb_max > 0);
-  _salt = _cell_type->num_entities(0) * mesh.topology().num_global(_tdim);
+  _salt = _cell_type->num_entities(0) * mesh.topology().global_size(_tdim);
   dolfin_assert(_salt > 0);
 
   // Assign a safe range for each rank for the numbering of new entities i.e

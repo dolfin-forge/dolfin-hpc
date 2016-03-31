@@ -358,7 +358,7 @@ inline uint Mesh::numVertices() const
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numVertices() const
 {
-  return topology_.num_global(0);
+  return topology_.global_size(0);
 }
 
 //-----------------------------------------------------------------------------
@@ -370,7 +370,7 @@ inline uint Mesh::numEdges() const
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numEdges() const
 {
-  return  topology_.num_global(1);
+  return  topology_.global_size(1);
 }
 
 //-----------------------------------------------------------------------------
@@ -382,7 +382,7 @@ inline uint Mesh::numFaces() const
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numFaces() const
 {
-  return topology_.num_global(2);
+  return topology_.global_size(2);
 }
 
 //-----------------------------------------------------------------------------
@@ -394,7 +394,7 @@ inline uint Mesh::numFacets() const
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numFacets() const
 {
-  return topology_.num_global(topology_.dim() - 1);
+  return topology_.global_size(topology_.dim() - 1);
 }
 
 //-----------------------------------------------------------------------------
@@ -406,7 +406,7 @@ inline uint Mesh::numCells() const
 //-----------------------------------------------------------------------------
 inline uint Mesh::global_numCells() const
 {
-  return topology_.num_global(topology_.dim());
+  return topology_.global_size(topology_.dim());
 }
 
 //-----------------------------------------------------------------------------

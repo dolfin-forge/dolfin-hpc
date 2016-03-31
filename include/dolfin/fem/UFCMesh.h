@@ -79,7 +79,7 @@ inline void UFCMesh::init(Mesh const& mesh)
   num_entities = new uint[tdim + 1];
   for(uint d = 0; d < tdim + 1; ++d)
   {
-    num_entities[d] = mesh.topology().num_global(d);
+    num_entities[d] = mesh.topology().global_size(d);
   }
 }
 

@@ -64,6 +64,9 @@ public:
   /// Return number of entities in the local topology for given dimension
   uint size(uint dim) const;
 
+  /// Return number of entities in the global topology for given dimension
+  uint global_size(uint dim) const;
+
   /// Clear all data
   void clear();
 
@@ -89,8 +92,6 @@ public:
   MeshDistributedData const& distdata() const;
 
   /// Return number of given entities
-  uint num_local(uint dim) const;
-  uint num_global(uint dim) const;
   uint num_shared(uint dim) const;
   uint num_ghosts(uint dim) const;
   uint num_owned(uint dim) const;
@@ -191,13 +192,7 @@ inline MeshDistributedData const& MeshTopology::distdata() const
 }
 
 //-----------------------------------------------------------------------------
-inline uint MeshTopology::num_local(uint dim) const
-{
-  return this->size(dim);
-}
-
-//-----------------------------------------------------------------------------
-inline uint MeshTopology::num_global(uint dim) const
+inline uint MeshTopology::global_size(uint dim) const
 {
   return (is_distributed() ? distdata().num_global(dim) : this->size(dim));
 }
@@ -250,6 +245,8 @@ inline void MeshTopology::renumber(Mesh& mesh)
   }
 }
 
-}
+//-----------------------------------------------------------------------------
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_MESH_TOPOLOGY_H */

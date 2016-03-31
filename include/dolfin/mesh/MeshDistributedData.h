@@ -178,7 +178,7 @@ public:
   void apply_ownership(uint dim);
 
   /// Remap ghosted mesh entities' owner identities
-  void remap_ownership(int const* mapping);
+  void remap_ownership(Array<uint> const& mapping);
 
   //--- Sharedness ---
 

@@ -20,77 +20,89 @@
 
 namespace dolfin
 {
-  /// This class provides utility functions for easy access of the number of
-  /// processes and current process number.
+/// This class provides utility functions for easy access of the number of
+/// processes and current process number.
 
-  class Mesh;
+class Mesh;
 
-  class MPI
-  {
-  public:
+class MPI
+{
+public:
 
-    /// Return process number
-    static uint processNumber();
+  /// Return process number
+  static uint processNumber();
 
-    /// Return number of processes
-    static uint numProcesses();
+  /// Return number of processes
+  static uint numProcesses();
 
-    /// Return group number
-    static uint groupNumber();
+  /// Return group number
+  static uint groupNumber();
 
-    /// Return number of groups
-    static uint numGroups();
+  /// Return number of groups
+  static uint numGroups();
 
-    /// Return process number in world
-    static uint processGlobalNumber();
+  /// Return process number in world
+  static uint processGlobalNumber();
 
-    /// Return number of processes in world
-    static uint numGlobalProcesses();
+  /// Return number of processes in world
+  static uint numGlobalProcesses();
 
-    /// Start MPI timer
-    static void startTimer();
+  /// Return if the given rank is valid
+  static bool processIsValid(uint rank);
 
-    /// Start MPI timer with external counter;
-    static void startTimer(dolfin::real& stime);
+  /// Return seed value for current rank
+  static uint processRandomSeed();
 
-    /// Stop MPI timer
-    static real stopTimer();
+  /// Get process offset given number of local elements
+  static void processOffset(uint local, uint& offset);
 
-    /// Stop MPI timer
-    static real stopTimer(dolfin::real& stime);
+  ///
+  static void numGlobalSum(uint local, uint& global);
 
-    /// Setup DOLFIN_COMM MPI communicator
-    static void initComm(int n = 0);
+  ///
+  static void numGlobalMin(uint local, uint& global);
 
-    /// Reorder MPI communicator
-    static void reorderComm(Mesh& mesh);
+  ///
+  static void numGlobalMax(uint local, uint& global);
+
+  /// Start MPI timer
+  static void startTimer();
+
+  /// Start MPI timer with external counter;
+  static void startTimer(dolfin::real& stime);
+
+  /// Stop MPI timer
+  static real stopTimer();
+
+  /// Stop MPI timer
+  static real stopTimer(dolfin::real& stime);
+
+  /// Setup DOLFIN_COMM MPI communicator
+  static void initComm(int n = 0);
+
+  /// Reorder MPI communicator
+  static void reorderComm(Mesh& mesh);
 
 #ifdef HAVE_MPI
-    static MPI_Comm DOLFIN_COMM_WORLD;
-    static MPI_Comm DOLFIN_COMM;
+  static MPI_Comm DOLFIN_COMM_WORLD;
+  static MPI_Comm DOLFIN_COMM;
 #else
-    static int DOLFIN_COMM_WORLD;
-    static int DOLFIN_COMM;
+  static int DOLFIN_COMM_WORLD;
+  static int DOLFIN_COMM;
 #endif
 
-    /// Return seed value for current rank
-    static uint seed();
+private:
 
-    /// Return if the given rank is valid
-    static bool is_valid_rank(uint rank);
-
-  private:
-
-    static dolfin::real start_time;
-    static int this_process_world;
-    static int num_processes_world;
-    static int this_group;
-    static int num_groups;
-    static int this_process;
-    static int num_processes;
-    static int this_seed;
-    static bool _dolfin_comm;
-  };
+  static dolfin::real start_time;
+  static int this_process_world;
+  static int num_processes_world;
+  static int this_group;
+  static int num_groups;
+  static int this_process;
+  static int num_processes;
+  static int this_seed;
+  static bool _dolfin_comm;
+};
 }
 
 #endif

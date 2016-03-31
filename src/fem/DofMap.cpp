@@ -1134,7 +1134,7 @@ void DofMap::distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
   // - different local size which leads to crash
   // We have to remove the randomness until a better solution is found.
   // srand((uint)time(0) + MPI::processNumber());
-  srand(MPI::seed());
+  srand(MPI::processRandomSeed());
 
   // List shared dofs and assign vote
   std::vector<uint> send_buffer;

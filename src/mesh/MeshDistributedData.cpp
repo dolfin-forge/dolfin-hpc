@@ -562,7 +562,7 @@ void MeshDistributedData::apply_ownership(uint dim)
   valid_ownership_[dim] = true;
 }
 //-----------------------------------------------------------------------------
-void MeshDistributedData::remap_ownership(int const* mapping)
+void MeshDistributedData::remap_ownership(Array<uint> const& mapping)
 {
   for (uint i = 0; i < cell_dim_; ++i)
   {
@@ -1020,7 +1020,7 @@ bool MeshDistributedData::check_shared(uint local_index, uint dim,
   _set<uint> const& aa = this->get_adj_ranks(dim);
   for (_set<uint>::const_iterator it = ai.begin(); it != ai.end(); ++it)
   {
-    ret &= MPI::is_valid_rank(*it);
+    ret &= MPI::processIsValid(*it);
     ret &= (aa.count(*it) > 0);
   }
   //

@@ -39,7 +39,7 @@ public:
   MeshConnectivity();
 
   /// Copy constructor
-  MeshConnectivity(const MeshConnectivity& other);
+  MeshConnectivity(MeshConnectivity const& other);
 
   /// Destructor
   ~MeshConnectivity();
@@ -116,9 +116,7 @@ public:
 
 private:
 
-  friend class MPIMeshCommunicator;
-
-  /// Return if
+  /// Return if initialized
   bool is_initialized_;
 
   /// Number of entities

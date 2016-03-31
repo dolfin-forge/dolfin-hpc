@@ -4,18 +4,20 @@
 // First added:  2008-02-25
 // Last changed: 2008-02-25
 
-#ifndef _GLOBAL_FACET_MAP_H
-#define _GLOBAL_FACET_MAP_H
+#ifndef __DOLFIN_GLOBAL_FACET_MAP_H
+#define __DOLFIN_GLOBAL_FACET_MAP_H
 
-#include "Mesh.h"
-#include "Facet.h"
-#include <map>
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
+class Facet;
+class Mesh;
+
 class GlobalFacetMap
 {
+
 public:
 
   ///
@@ -25,27 +27,30 @@ public:
   ~GlobalFacetMap();
 
   ///
-  bool globalFacet(Facet& facet);
+  bool is_global(Facet& facet);
+
+  ///
+  bool is_shared(Facet& facet);
+
+  ///
+  void disp() const;
 
 private:
 
   ///
   void init();
 
-  ///
-  void findGlobal1D();
-
-  ///
-  void findGlobalND();
-
-  // Map of processor global facets,
-  // stores only the facets with shared vertices
-  _map<uint, bool> global_facet;
+  //
+  Mesh& mesh_;
 
   //
-  Mesh& _mesh;
+  uint const tdim_;
+
+  // Shared facets on local boundary
+  _set<uint> shared_facets_;
 
 };
 
-}
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_GLOBAL_FACET_MAP_H */

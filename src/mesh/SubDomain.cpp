@@ -124,7 +124,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
     {
       for (FacetIterator fi(*entity); !fi.end(); ++fi)
       {
-        if (fi->num_entities(D) && facetmap.globalFacet(*fi))
+        if (fi->num_entities(D) && facetmap.is_global(*fi))
         {
           on_boundary = true;
         }
@@ -139,7 +139,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
       if (is_distributed)
       {
         Facet f(mesh, entity->index());
-        if (!facetmap.globalFacet(f))
+        if (!facetmap.is_global(f))
         {
           on_boundary = false;
         }

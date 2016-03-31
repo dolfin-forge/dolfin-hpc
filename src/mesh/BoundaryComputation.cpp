@@ -76,10 +76,10 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   for (FacetIterator f(mesh); !f.end(); ++f)
   {
     // Boundary facets are connected to exactly one cell
-    if((!interior_boundary && facetmap.globalFacet(*f)) ||
+    if((!interior_boundary && facetmap.is_global(*f)) ||
        (local_boundary && f->num_entities(D) == 1) ||
        (f->num_entities(D) == 1 &&
-           interior_boundary && !facetmap.globalFacet(*f)))
+           interior_boundary && !facetmap.is_global(*f)))
     {
 
       // Count boundary vertices and assign indices
@@ -153,10 +153,10 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
     // Boundary facets are connected to exactly one cell
     //    if (f->numEntities(D) == 1)
     //        {
-    if((!interior_boundary && facetmap.globalFacet(*f)) ||
+    if((!interior_boundary && facetmap.is_global(*f)) ||
        (local_boundary && f->num_entities(D) == 1) ||
        (f->num_entities(D) == 1 &&
-           interior_boundary && !facetmap.globalFacet(*f)))
+           interior_boundary && !facetmap.is_global(*f)))
     {
 
       // Compute new vertex numbers for cell

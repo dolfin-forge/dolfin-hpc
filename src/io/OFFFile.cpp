@@ -30,7 +30,7 @@ OFFFile::~OFFFile()
 //-----------------------------------------------------------------------------
 void OFFFile::operator>>(Mesh& mesh)
 {
-  std::ifstream off("2O2BWXQL_001_timewise_ip4msct.off");
+  std::ifstream off(filename.c_str());
   if (!off.is_open())
   {
     dolfin::error("Unable to open file.");

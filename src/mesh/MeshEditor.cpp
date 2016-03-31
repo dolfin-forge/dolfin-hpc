@@ -40,24 +40,6 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
   delete cell_type;
 }
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint tdim, uint gdim) :
-    mesh_(&mesh),
-    tdim_(0),
-    gdim_(0),
-    num_vertices_(0),
-    num_cells_(0),
-    vertex_index_(0),
-    cell_index_(0)
-{
-  CellType * cell_type = CellType::create(type);
-  if (tdim != cell_type->dim())
-  {
-    error("In MeshEditor, cell type and topological dimension do not match.");
-  }
-  init(mesh, *cell_type, gdim);
-  delete cell_type;
-}
-//-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
 {
   // Do nothing

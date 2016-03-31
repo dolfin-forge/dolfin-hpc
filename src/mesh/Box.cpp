@@ -27,7 +27,7 @@ Box::Box(real a, real b, real c, real d, real e, real f, uint nx, uint ny,
   rename("mesh", "Mesh of the cuboid (a,b) x (c,d) x (e,f)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3, 3);
+  MeshEditor editor(*this, CellType::tetrahedron, 3);
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));

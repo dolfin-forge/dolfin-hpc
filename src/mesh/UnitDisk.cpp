@@ -28,7 +28,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
   rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::triangle, 2, 2);
+  MeshEditor editor(*this, CellType::triangle, 2);
 
   // Create vertices and cells:
   if (type == crisscross)

@@ -26,7 +26,7 @@ UnitCube::UnitCube(uint nx, uint ny, uint nz) :
   rename("mesh", "Mesh of the unit cube (0,1) x (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3, 3);
+  MeshEditor editor(*this, CellType::tetrahedron, 3);
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));

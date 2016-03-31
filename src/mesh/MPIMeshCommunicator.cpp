@@ -432,8 +432,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
 
   // Construct new mesh and add all buffered entities
   Mesh new_mesh;
-  MeshEditor editor(new_mesh, mesh.type().cellType(), mesh.topology().dim(),
-                    mesh.geometry().dim());
+  MeshEditor editor(new_mesh, mesh.type(), mesh.geometry().dim());
 
   for (uint d = 0; d < mesh.topology().dim(); ++d)
   {
@@ -1024,8 +1023,7 @@ void MPIMeshCommunicator::distributeCommon(
 
   // Construct new mesh and add all buffered entities
   Mesh new_mesh;
-  MeshEditor editor(new_mesh, mesh.type().cellType(), mesh.topology().dim(),
-                    mesh.geometry().dim());
+  MeshEditor editor(new_mesh, mesh.type(), mesh.geometry().dim());
 
   for (uint d = 0; d < mesh.topology().dim(); ++d)
   {

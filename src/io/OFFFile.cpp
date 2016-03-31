@@ -57,7 +57,7 @@ void OFFFile::operator>>(Mesh& mesh)
   // Create mesh editor
   // Since this is a surface mesh the topology dimension is 2
   // while the geometric dimension is 3
-  MeshEditor editor(mesh, CellType::triangle, 2, 3);
+  MeshEditor editor(mesh, CellType::triangle, 3);
   editor.init_vertices(num_entities[0]);
   editor.init_cells(num_entities[1]);
 

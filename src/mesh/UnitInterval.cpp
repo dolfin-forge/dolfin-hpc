@@ -19,7 +19,7 @@ UnitInterval::UnitInterval(uint nx) :
   rename("mesh", "Mesh of the unit interval (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::interval, 1, 1);
+  MeshEditor editor(*this, CellType::interval, 1);
 
   // Create vertices and cells:
   editor.init_vertices((nx + 1));

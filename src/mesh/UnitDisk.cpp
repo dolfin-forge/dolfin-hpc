@@ -33,13 +33,13 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
   // Create vertices and cells:
   if (type == crisscross)
   {
-    editor.initVertices((nx + 1) * (ny + 1) + nx * ny);
-    editor.initCells(4 * nx * ny);
+    editor.init_vertices((nx + 1) * (ny + 1) + nx * ny);
+    editor.init_cells(4 * nx * ny);
   }
   else
   {
-    editor.initVertices((nx + 1) * (ny + 1));
-    editor.initCells(2 * nx * ny);
+    editor.init_vertices((nx + 1) * (ny + 1));
+    editor.init_cells(2 * nx * ny);
   }
 
   // Create main vertices:
@@ -54,7 +54,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
       const real x = -1. + static_cast<real>(ix) * 2.0 / static_cast<real>(nx);
       trns_x[0] = transformx(x, y, transformation);
       trns_x[1] = transformy(x, y, transformation);
-      editor.addVertex(vertex++, trns_x);
+      editor.add_vertex(vertex++, trns_x);
     }
   }
 
@@ -71,7 +71,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
             + (static_cast<real>(ix) + 0.5) * 2.0 / static_cast<real>(nx);
         trns_x[0] = transformx(x, y, transformation);
         trns_x[1] = transformy(x, y, transformation);
-        editor.addVertex(vertex++, trns_x);
+        editor.add_vertex(vertex++, trns_x);
       }
     }
   }
@@ -95,10 +95,10 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
         uint const connectivity[12] = { v0, v1, vmid, v0, v2, vmid, v1, v3,
                                         vmid, v2, v3, vmid };
 
-        editor.addCell(cell++, &connectivity[0]);
-        editor.addCell(cell++, &connectivity[3]);
-        editor.addCell(cell++, &connectivity[6]);
-        editor.addCell(cell++, &connectivity[9]);
+        editor.add_cell(cell++, &connectivity[0]);
+        editor.add_cell(cell++, &connectivity[3]);
+        editor.add_cell(cell++, &connectivity[6]);
+        editor.add_cell(cell++, &connectivity[9]);
       }
     }
   }
@@ -115,8 +115,8 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
 
         uint const connectivity[12] = { v0, v1, v2, v1, v2, v3 };
 
-        editor.addCell(cell++, &connectivity[0]);
-        editor.addCell(cell++, &connectivity[3]);
+        editor.add_cell(cell++, &connectivity[0]);
+        editor.add_cell(cell++, &connectivity[3]);
       }
     }
   }
@@ -133,8 +133,8 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
 
         uint const connectivity[12] = { v0, v1, v3, v0, v2, v3 };
 
-        editor.addCell(cell++, &connectivity[0]);
-        editor.addCell(cell++, &connectivity[3]);
+        editor.add_cell(cell++, &connectivity[0]);
+        editor.add_cell(cell++, &connectivity[3]);
       }
     }
   }

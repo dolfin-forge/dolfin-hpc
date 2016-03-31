@@ -130,8 +130,8 @@ void MappedManifold::init()
   }
 
   //
-  editor.initVertices(mm_vertex_count);
-  editor.initCells(mm_cell_count);
+  editor.init_vertices(mm_vertex_count);
+  editor.init_cells(mm_cell_count);
 
   // Initialize mapping from vertices in boundary to vertices in mesh
   MeshFunction<uint> * vertex_map = this->data().createMeshFunction("vertex map");
@@ -159,7 +159,7 @@ void MappedManifold::init()
       vertex_map->set(vertex_index, v);
 
       // Add vertex with coordinates expressed in reference manifold
-      editor.addVertex(vertex_index, &mm_coordinates[vertex_index * gdim]);
+      editor.add_vertex(vertex_index, &mm_coordinates[vertex_index * gdim]);
     }
   }
 
@@ -171,7 +171,7 @@ void MappedManifold::init()
     cell_map->set(c, mm_cells[c]);
 
     // Add cell
-    editor.addCell(c, &mm_cell_vertices[c * num_cell_vertices]);
+    editor.add_cell(c, &mm_cell_vertices[c * num_cell_vertices]);
   }
   editor.close();
 

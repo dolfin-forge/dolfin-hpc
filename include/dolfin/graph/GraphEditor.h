@@ -34,13 +34,13 @@ namespace dolfin
     void open(Graph& graph, std::string type);
 
     /// Specify number of vertices
-    void initVertices(uint num_vertices);
+    void init_vertices(uint num_vertices);
     
     /// Specify number of edges
     void initEdges(uint num_edges);
 
     /// Add vertex v
-    void addVertex(uint u, uint num_edges);
+    void add_vertex(uint u, uint num_edges);
 
     /// Add edge from vertex u to vertex v
     void addEdge(uint u, uint v);

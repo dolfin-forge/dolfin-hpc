@@ -440,13 +440,13 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
     distdata.set_num_global(d, mesh.distdata().num_global(d));
   }
 
-  editor.initVertices(num_vertices);
-  editor.initCells(num_cells);
+  editor.init_vertices(num_vertices);
+  editor.init_cells(num_cells);
 
   vi = 0;
   for (uint i = 0; i < coords.size(); i += gdim)
   {
-    editor.addVertex(vi++, &coords[i]);
+    editor.add_vertex(vi++, &coords[i]);
   }
   coords.clear();
 
@@ -454,7 +454,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   uint ci = 0;
   for (uint i = 0; i < cl.size(); i += ndims)
   {
-    editor.addCell(ci++, &cl[i]);
+    editor.add_cell(ci++, &cl[i]);
   }
   cl.clear();
   editor.close();
@@ -1032,14 +1032,14 @@ void MPIMeshCommunicator::distributeCommon(
     distdata.set_num_global(d, mesh.distdata().num_global(d));
   }
 
-  editor.initVertices(num_vertices);
-  editor.initCells(num_cells);
+  editor.init_vertices(num_vertices);
+  editor.init_cells(num_cells);
 
   // Add vertices
   vi = 0;
   for (uint i = 0; i < coords.size(); i += gdim)
   {
-    editor.addVertex(vi++, &coords[i]);
+    editor.add_vertex(vi++, &coords[i]);
   }
   coords.clear();
 
@@ -1048,7 +1048,7 @@ void MPIMeshCommunicator::distributeCommon(
   uint ci = 0;
   for (uint i = 0; i < cl.size(); i += ndims)
   {
-    editor.addCell(ci++, &cl[i]);
+    editor.add_cell(ci++, &cl[i]);
   }
   cl.clear();
   editor.close();

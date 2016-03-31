@@ -160,8 +160,8 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   MeshEditor editor(sub, cell_type.cellType(), mesh.geometry().dim());
 
   // Specify number of vertices and cells
-  editor.initVertices(nvertices);
-  editor.initCells(ncells);
+  editor.init_vertices(nvertices);
+  editor.init_cells(ncells);
 
   for (VertexIterator n(mesh); !n.end(); ++n)
   {
@@ -182,7 +182,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     if (included)
     {
       old2new_vertex.set(vertex.index(), current_vertex);
-      editor.addVertex(current_vertex, vertex.point());
+      editor.add_vertex(current_vertex, vertex.point());
       distdata.set_map(current_vertex,
                        mesh.distdata().get_global(vertex.index(), 0), 0);
       if (mesh.distdata().is_ghost(vertex.index(), 0))
@@ -221,7 +221,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
       old2new_cell.set(cell.index(), current_cell);
       distdata.set_map(current_cell,
                        mesh.distdata().get_cell_global(cell.index()), 3);
-      editor.addCell(current_cell++, cell_vertices);
+      editor.add_cell(current_cell++, cell_vertices);
 
     }
     else

@@ -58,10 +58,10 @@ public:
                             Mesh& newmesh, Array<uint>& new_edge);
 
   // Add a new nonshared vertex
-  void addVertex(uint vertex, Mesh& mesh);
+  void add_vertex(uint vertex, Mesh& mesh);
 
   // Add a new vertex on a shared edge
-  void addVertex(uint* edge, uint vertex, Mesh& mesh);
+  void add_vertex(uint* edge, uint vertex, Mesh& mesh);
 
   // Check if the edge lies between processors
   bool on_boundary(Edge& edge);
@@ -106,14 +106,14 @@ private:
 //--- INLINES -----------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-inline void RefinementManager::addVertex(uint vertex, Mesh& mesh)
+inline void RefinementManager::add_vertex(uint vertex, Mesh& mesh)
 {
   if (mesh.is_distributed())
     add_new_vertex(0, vertex, mesh, false);
 }
 
 //-----------------------------------------------------------------------------
-inline void RefinementManager::addVertex(uint* edge, uint vertex, Mesh& mesh)
+inline void RefinementManager::add_vertex(uint* edge, uint vertex, Mesh& mesh)
 {
   if (mesh.is_distributed())
     add_new_vertex(edge, vertex, mesh, true);

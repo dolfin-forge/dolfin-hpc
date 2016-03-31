@@ -98,8 +98,8 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
   uint const num_cells = mesh.size(tdim);
 
   // Specify number of vertices and cells
-  editor.initVertices(num_vertices + num_edges);
-  editor.initCells(ipow(2, tdim) * num_cells);
+  editor.init_vertices(num_vertices + num_edges);
+  editor.init_cells(ipow(2, tdim) * num_cells);
 
   uint* edge_vert;
   Array<uint> shared_edge;
@@ -125,7 +125,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
         refined_distdata.set_shared(vertex, 0);
       }
 
-      editor.addVertex(vertex++, v->point());
+      editor.add_vertex(vertex++, v->point());
     }
 
     for (EdgeIterator e(mesh); !e.end(); ++e)
@@ -137,7 +137,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
       {
 
         // Add the new vertex inside the refinement manager
-        refman.addVertex(edge_vert, vertex, refined_mesh);
+        refman.add_vertex(edge_vert, vertex, refined_mesh);
 
         // Buffer edge information for mapping phase
         shared_edge.push_back(edge_vert[0]);
@@ -146,10 +146,10 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
       }
       else
       {
-        refman.addVertex(vertex, refined_mesh);
+        refman.add_vertex(vertex, refined_mesh);
       }
 
-      editor.addVertex(vertex++, e->midpoint());
+      editor.add_vertex(vertex++, e->midpoint());
     }
 
   }
@@ -159,13 +159,13 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      editor.addVertex(vertex++, v->point());
+      editor.add_vertex(vertex++, v->point());
     }
 
     // Add new vertices
     for (EdgeIterator e(mesh); !e.end(); ++e)
     {
-      editor.addVertex(vertex++, e->midpoint());
+      editor.add_vertex(vertex++, e->midpoint());
     }
 
   }
@@ -228,8 +228,8 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
   uint const num_cells = mesh.size(tdim);
 
   // Specify number of vertices and cells
-  editor.initVertices(num_vertices + num_edges);
-  editor.initCells(ipow(2, tdim)*num_cells);
+  editor.init_vertices(num_vertices + num_edges);
+  editor.init_cells(ipow(2, tdim)*num_cells);
 
   //create the Meshfunctions for the refined mesh
   MeshFunction<int> refined_patch_id_list(refined_mesh);
@@ -266,7 +266,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         refined_distdata.set_shared(vertex, 0);
       }
 
-      editor.addVertex(vertex, v->point());
+      editor.add_vertex(vertex, v->point());
 
       refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
       refined_bnd_u.set(vertex, bnd_u.get(v->index()));
@@ -291,7 +291,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         if( refman.on_boundary(*e) )
         {
           // Add the new vertex inside the refinement manager
-          refman.addVertex(edge_vert, vertex, refined_mesh);
+          refman.add_vertex(edge_vert, vertex, refined_mesh);
 
           // Buffer edge information for mapping phase
           shared_edge.push_back(edge_vert[0]);
@@ -300,10 +300,10 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         }
         else
         {
-          refman.addVertex(vertex, refined_mesh);
+          refman.add_vertex(vertex, refined_mesh);
         }
 
-        editor.addVertex(vertex, e->midpoint());
+        editor.add_vertex(vertex, e->midpoint());
 
         refined_patch_id_list.set(vertex, -1);
         refined_bnd_u.set(vertex, -1);
@@ -318,7 +318,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         {
 
           // Add the new vertex inside the refinement manager
-          refman.addVertex(edge_vert, vertex, refined_mesh);
+          refman.add_vertex(edge_vert, vertex, refined_mesh);
 
           // Buffer edge information for mapping phase
           shared_edge.push_back(edge_vert[0]);
@@ -327,7 +327,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
         }
         else
         {
-          refman.addVertex(vertex, refined_mesh);
+          refman.add_vertex(vertex, refined_mesh);
         }
 
         if(patch_id_vertex0 == patch_id_vertex1)
@@ -347,7 +347,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
               bnd_v.get(edge_vert[0]), bnd_u.get(edge_vert[1]),
               bnd_v.get(edge_vert[1]), u , v , pt);
 
-          editor.addVertex(vertex, Point(pt[0],pt[1],pt[2]));
+          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
           refined_patch_id_list.set(vertex, patch_id_vertex0);
           refined_bnd_u.set(vertex, u);
           refined_bnd_v.set(vertex, v);
@@ -369,7 +369,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
               5, 5,
               0.00001, 0.00002, 100);
 
-          editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
+          editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
           refined_patch_id_list.set(vertex, pid_tmp);
           refined_bnd_u.set(vertex, u1);
           refined_bnd_v.set(vertex, v1);
@@ -384,7 +384,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      editor.addVertex(vertex, v->point());
+      editor.add_vertex(vertex, v->point());
       refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
       refined_bnd_u.set(vertex, bnd_u.get(v->index()));
       refined_bnd_v.set(vertex, bnd_v.get(v->index()));
@@ -404,7 +404,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
       int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
       if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
       {
-        editor.addVertex(vertex, e->midpoint());
+        editor.add_vertex(vertex, e->midpoint());
         refined_patch_id_list.set(vertex, -1);
         refined_bnd_u.set(vertex, -1);
         refined_bnd_v.set(vertex, -1);
@@ -425,7 +425,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
               bnd_u.get(edge_vert[1]),
               bnd_v.get(edge_vert[1]), u , v , pt);
 
-          editor.addVertex(vertex, Point(pt[0],pt[1],pt[2]));
+          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
           refined_patch_id_list.set(vertex, patch_id_vertex0);
           refined_bnd_u.set(vertex, u);
           refined_bnd_v.set(vertex, v);
@@ -445,7 +445,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
               5, 5,
               0.00001, 0.00002, 100);
 
-          editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z()));
+          editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z()));
           refined_patch_id_list.set(vertex, pid_tmp);
           refined_bnd_u.set(vertex, u1);
           refined_bnd_v.set(vertex, v1);
@@ -525,8 +525,8 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
   uint const num_cells = mesh.size(tdim);
 
   // Specify number of vertices and cells
-  editor.initVertices(num_vertices + num_edges);
-  editor.initCells(ipow(2, tdim)*num_cells);
+  editor.init_vertices(num_vertices + num_edges);
+  editor.init_cells(ipow(2, tdim)*num_cells);
 
   //create the Meshfunctions for the refined mesh
   MeshFunction<int> refined_patch_id_list(refined_mesh);
@@ -558,7 +558,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
       {
         refined_distdata.set_shared(vertex, 0);
       }
-      editor.addVertex(vertex, v->point());
+      editor.add_vertex(vertex, v->point());
 
       refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
       refined_bnd_u.set(vertex, bnd_u.get(v->index()));
@@ -583,7 +583,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
         {
 
           // Add the new vertex inside the refinement manager
-          refman.addVertex(edge_vert, vertex, refined_mesh);
+          refman.add_vertex(edge_vert, vertex, refined_mesh);
 
           // Buffer edge information for mapping phase
           shared_edge.push_back(edge_vert[0]);
@@ -592,10 +592,10 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
         }
         else
         {
-          refman.addVertex(vertex, refined_mesh);
+          refman.add_vertex(vertex, refined_mesh);
         }
 
-        editor.addVertex(vertex, e->midpoint());
+        editor.add_vertex(vertex, e->midpoint());
 
         refined_patch_id_list.set(vertex, -1);
         refined_bnd_u.set(vertex, -1);
@@ -608,7 +608,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
         if( refman.on_boundary(*e) )
         {
           // Add the new vertex inside the refinement manager
-          refman.addVertex(edge_vert, vertex, refined_mesh);
+          refman.add_vertex(edge_vert, vertex, refined_mesh);
 
           // Buffer edge information for mapping phase
           shared_edge.push_back(edge_vert[0]);
@@ -617,7 +617,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
         }
         else
         {
-          refman.addVertex(vertex, refined_mesh);
+          refman.add_vertex(vertex, refined_mesh);
         }
 
         //this is the point where I assume there is only one patch I
@@ -631,7 +631,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
           geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
               bnd_u.get(edge_vert[1]), u , pt);
 
-          editor.addVertex(vertex, Point(pt[0],pt[1],pt[2]));
+          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
           refined_patch_id_list.set(vertex, patch_id_vertex0);
           refined_bnd_u.set(vertex, u);
           ++vertex;
@@ -649,14 +649,14 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
               r1, u1, patch_id_vertex1);
           if(dist0 < dist1)
           {
-            editor.addVertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
+            editor.add_vertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
             refined_patch_id_list.set(vertex, patch_id_vertex0);
             refined_bnd_u.set(vertex, u0);
             ++vertex;
           }
           else
           {
-            editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
+            editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
             refined_patch_id_list.set(vertex, patch_id_vertex1);
             refined_bnd_u.set(vertex, u1);
             ++vertex;
@@ -671,7 +671,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      editor.addVertex(vertex, v->point());
+      editor.add_vertex(vertex, v->point());
       refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
       refined_bnd_u.set(vertex, bnd_u.get(v->index()));
       ++vertex;
@@ -690,7 +690,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
       int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
       if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
       {
-        editor.addVertex(vertex, e->midpoint());
+        editor.add_vertex(vertex, e->midpoint());
         refined_patch_id_list.set(vertex, -1);
         refined_bnd_u.set(vertex, -1);
         ++vertex;
@@ -704,7 +704,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
           geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
               bnd_u.get(edge_vert[1]), u , pt);
 
-          editor.addVertex(vertex, Point(pt[0],pt[1],pt[2]));
+          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
           refined_patch_id_list.set(vertex, patch_id_vertex0);
           refined_bnd_u.set(vertex, u);
           ++vertex;
@@ -721,14 +721,14 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
               r1, u1, patch_id_vertex1);
           if(dist0 < dist1)
           {
-            editor.addVertex(vertex, Point(r0.x(), r0.y(), r0.z()));
+            editor.add_vertex(vertex, Point(r0.x(), r0.y(), r0.z()));
             refined_patch_id_list.set(vertex, patch_id_vertex0);
             refined_bnd_u.set(vertex, u0);
             ++vertex;
           }
           else
           {
-            editor.addVertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
+            editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
             refined_patch_id_list.set(vertex, patch_id_vertex1);
             refined_bnd_u.set(vertex, u1);
             ++vertex;

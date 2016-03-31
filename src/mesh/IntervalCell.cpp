@@ -110,9 +110,9 @@ void IntervalCell::refine_cell(Cell& cell, MeshEditor& editor,
 
   // Add the two new cells
   uint const cv0[2] = { v[0], e0 };
-  editor.addCell(current_cell++, &cv0[0]);
+  editor.add_cell(current_cell++, &cv0[0]);
   uint const cv1[2] = { e0, v[1] };
-  editor.addCell(current_cell++, &cv1[0]);
+  editor.add_cell(current_cell++, &cv1[0]);
 }
 //-----------------------------------------------------------------------------
 uint IntervalCell::num_refined_cells() const
@@ -264,12 +264,12 @@ Mesh IntervalCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::interval, 1);
-  me.initVertices(2);
-  me.addVertex(0, VC[0]);
-  me.addVertex(1, VC[1]);
-  me.initCells(1);
+  me.init_vertices(2);
+  me.add_vertex(0, VC[0]);
+  me.add_vertex(1, VC[1]);
+  me.init_cells(1);
   uint const cv0[2] = { 0, 1 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

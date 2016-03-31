@@ -130,7 +130,7 @@ void XMLGraph::readGraph(const xmlChar *name, const xmlChar **attrs)
 void XMLGraph::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
   uint num_vertices = parseUnsignedInt(name, attrs, "size");
-  editor.initVertices(num_vertices);
+  editor.init_vertices(num_vertices);
 }
 //-----------------------------------------------------------------------------
 void XMLGraph::readEdges(const xmlChar *name, const xmlChar **attrs)
@@ -150,7 +150,7 @@ void XMLGraph::readVertex(const xmlChar *name, const xmlChar **attrs)
   // Vertex weights not yet implemented
   //uint w = parseUnsignedInt(name, attrs, "weight");
   
-  editor.addVertex(currentVertex, num_edges);
+  editor.add_vertex(currentVertex, num_edges);
 }
 //-----------------------------------------------------------------------------
 void XMLGraph::readEdge(const xmlChar *name, const xmlChar **attrs)

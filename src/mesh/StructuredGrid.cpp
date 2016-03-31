@@ -61,10 +61,10 @@ void StructuredGrid::init(CellType const& type)
     h[d] = 1.0 / static_cast<real>(n[d]);
     x[d] = bbox_[0][d];
   }
-  editor.initVertices(num_verts);
+  editor.init_vertices(num_verts);
   while (vertex < num_verts)
   {
-    editor.addVertex(vertex++, x);
+    editor.add_vertex(vertex++, x);
     x[0] = bbox_[0][0] + (vertex % m[0]) * h[0];
     for (uint d = 1; d < dim; ++d)
     {
@@ -91,10 +91,10 @@ void StructuredGrid::init(CellType const& type)
     case CellType::interval:
       {
         uint cv[2] = { v0, v1 };
-        editor.initCells(num_bricks);
+        editor.init_cells(num_bricks);
         for (uint i = 0; i < n[0]; ++i)
         {
-          editor.addCell(cell++, &cv[0]);
+          editor.add_cell(cell++, &cv[0]);
           ++cv[0];
           ++cv[1];
         }
@@ -104,7 +104,7 @@ void StructuredGrid::init(CellType const& type)
       {
         uint const co[4] = { v0, v1, v3, v2 };
         uint cv[4] = { 0 };
-        editor.initCells(num_bricks);
+        editor.init_cells(num_bricks);
         for (uint j = 0; j < n[1]; ++j)
         {
           for (uint i = 0; i < n[0]; ++i)
@@ -113,7 +113,7 @@ void StructuredGrid::init(CellType const& type)
             cv[1] = cv[0] + co[1];
             cv[2] = cv[0] + co[2];
             cv[3] = cv[0] + co[3];
-            editor.addCell(cell++, &cv[0]);
+            editor.add_cell(cell++, &cv[0]);
           }
         }
       }
@@ -122,7 +122,7 @@ void StructuredGrid::init(CellType const& type)
       {
         uint const co[8] = { v0, v1, v3, v2, v4, v5, v7, v6 };
         uint cv[8] = { 0 };
-        editor.initCells(num_bricks);
+        editor.init_cells(num_bricks);
         for (uint k = 0; k < n[2]; ++k)
         {
           for (uint j = 0; j < n[1]; ++j)
@@ -137,7 +137,7 @@ void StructuredGrid::init(CellType const& type)
               cv[5] = cv[0] + co[5];
               cv[6] = cv[0] + co[6];
               cv[7] = cv[0] + co[7];
-              editor.addCell(cell++, &cv[0]);
+              editor.add_cell(cell++, &cv[0]);
             }
           }
         }
@@ -147,7 +147,7 @@ void StructuredGrid::init(CellType const& type)
       {
         uint const co[6] = { v0, v1, v3, v0, v2, v3 };
         uint cv[6] = { 0 };
-        editor.initCells(2 * num_bricks);
+        editor.init_cells(2 * num_bricks);
         for (uint j = 0; j < n[1]; ++j)
         {
           for (uint i = 0; i < n[0]; ++i)
@@ -158,8 +158,8 @@ void StructuredGrid::init(CellType const& type)
             cv[3] = cv[0] + co[3];
             cv[4] = cv[0] + co[4];
             cv[5] = cv[0] + co[5];
-            editor.addCell(cell++, &cv[0]);
-            editor.addCell(cell++, &cv[3]);
+            editor.add_cell(cell++, &cv[0]);
+            editor.add_cell(cell++, &cv[3]);
           }
         }
       }
@@ -173,7 +173,7 @@ void StructuredGrid::init(CellType const& type)
                               v0, v6, v4, v7,
                               v0, v2, v6, v7 };
         uint cv[24] = { 0 };
-        editor.initCells(6 * num_bricks);
+        editor.init_cells(6 * num_bricks);
         for (uint k = 0; k < n[2]; ++k)
         {
           for (uint j = 0; j < n[1]; ++j)
@@ -185,12 +185,12 @@ void StructuredGrid::init(CellType const& type)
               {
                 cv[c] = cv[0] + co[c];
               }
-              editor.addCell(cell++, &cv[0]);
-              editor.addCell(cell++, &cv[4]);
-              editor.addCell(cell++, &cv[8]);
-              editor.addCell(cell++, &cv[12]);
-              editor.addCell(cell++, &cv[16]);
-              editor.addCell(cell++, &cv[20]);
+              editor.add_cell(cell++, &cv[0]);
+              editor.add_cell(cell++, &cv[4]);
+              editor.add_cell(cell++, &cv[8]);
+              editor.add_cell(cell++, &cv[12]);
+              editor.add_cell(cell++, &cv[16]);
+              editor.add_cell(cell++, &cv[20]);
             }
           }
         }

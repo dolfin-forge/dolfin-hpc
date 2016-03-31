@@ -351,21 +351,21 @@ void TetrahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
 
   // Regular refinement: 8 new cells
   uint const cv0[4] = { v0, e3, e4, e5 };
-  editor.addCell(current_cell++, &cv0[0]);
+  editor.add_cell(current_cell++, &cv0[0]);
   uint const cv1[4] = { v1, e1, e2, e5 };
-  editor.addCell(current_cell++, &cv1[0]);
+  editor.add_cell(current_cell++, &cv1[0]);
   uint const cv2[4] = { v2, e0, e2, e4 };
-  editor.addCell(current_cell++, &cv2[0]);
+  editor.add_cell(current_cell++, &cv2[0]);
   uint const cv3[4] = { v3, e0, e1, e3 };
-  editor.addCell(current_cell++, &cv3[0]);
+  editor.add_cell(current_cell++, &cv3[0]);
   uint const cv4[4] = { e0, e1, e2, e5 };
-  editor.addCell(current_cell++, &cv4[0]);
+  editor.add_cell(current_cell++, &cv4[0]);
   uint const cv5[4] = { e0, e1, e3, e5 };
-  editor.addCell(current_cell++, &cv5[0]);
+  editor.add_cell(current_cell++, &cv5[0]);
   uint const cv6[4] = { e0, e2, e4, e5 };
-  editor.addCell(current_cell++, &cv6[0]);
+  editor.add_cell(current_cell++, &cv6[0]);
   uint const cv7[4] = { e0, e3, e4, e5 };
-  editor.addCell(current_cell++, &cv7[0]);
+  editor.add_cell(current_cell++, &cv7[0]);
 }
 //-----------------------------------------------------------------------------
 uint TetrahedronCell::num_refined_cells() const
@@ -654,14 +654,14 @@ Mesh TetrahedronCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::tetrahedron, 3);
-  me.initVertices(4);
-  me.addVertex(0, VC[0]);
-  me.addVertex(1, VC[1]);
-  me.addVertex(2, VC[2]);
-  me.addVertex(3, VC[3]);
-  me.initCells(1);
+  me.init_vertices(4);
+  me.add_vertex(0, VC[0]);
+  me.add_vertex(1, VC[1]);
+  me.add_vertex(2, VC[2]);
+  me.add_vertex(3, VC[3]);
+  me.init_cells(1);
   uint const cv0[4] = { 0, 1, 2, 3 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

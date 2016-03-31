@@ -152,11 +152,11 @@ Mesh PointCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::point, 1);
-  me.initVertices(1);
-  me.addVertex(0, VC[0]);
-  me.initCells(1);
+  me.init_vertices(1);
+  me.add_vertex(0, VC[0]);
+  me.init_cells(1);
   uint const cv0[1] = { 0 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

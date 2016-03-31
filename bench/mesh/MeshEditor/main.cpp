@@ -31,11 +31,11 @@ int main(int argc, char** argv)
 
       uint const nvertices = (tdim == 0 ? 1 : std::pow(N + 1, tdim));
       message("Initialize vertices : %d", nvertices);
-      editor.initVertices(nvertices);
+      editor.init_vertices(nvertices);
 
       uint const ncells = (tdim == 0 ? 1 : fact(tdim) * std::pow(N, tdim));
       message("Initialize cells    : %d", ncells);
-      editor.initCells(ncells);
+      editor.init_cells(ncells);
 
       // Vertex coordinates
       real * coords = new real[nvertices*gdim];
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
       message("Adding vertices.");
       for (uint v = 0; v < nvertices; ++v)
       {
-        editor.addVertex(vertexid++, &coords[v * gdim]);
+        editor.add_vertex(vertexid++, &coords[v * gdim]);
       }
       delete[] coords;
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
       message("Adding connectivities: %d per cell.", celltype->numEntities(0));
       for (uint c = 0; c < ncells; ++c)
       {
-        editor.addCell(cellid++, &connectivities[0]);
+        editor.add_cell(cellid++, &connectivities[0]);
       }
       delete[] connectivities;
 

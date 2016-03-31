@@ -41,7 +41,7 @@ void STLFile::operator>>(Mesh& mesh)
 #endif
 
   MeshEditor editor(mesh, CellType::triangle, 3);
-  editor.initCells(ntri);
+  editor.init_cells(ntri);
 
   uint v_index = 0;
   uint c_index = 0;
@@ -77,17 +77,17 @@ void STLFile::operator>>(Mesh& mesh)
       }
     }
 
-    editor.addCell(c_index++, &index[0]);
+    editor.add_cell(c_index++, &index[0]);
 
     /* Aux data */
     fp.read((char *) &hdr, 2 * sizeof(char));
   }
 
-  editor.initVertices(vertices.size());
+  editor.init_vertices(vertices.size());
   for (std::set<stl_vertex>::iterator it = vertices.begin();
       it != vertices.end(); ++it)
   {
-    editor.addVertex(it->index, &it->v[0]);
+    editor.add_vertex(it->index, &it->v[0]);
   }
 
   fp.close();

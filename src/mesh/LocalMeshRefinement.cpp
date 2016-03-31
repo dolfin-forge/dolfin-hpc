@@ -191,13 +191,13 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   // Specify number of vertices and cells
   if (MPI::numProcesses() > 1)
   {
-    editor.initVertices(num_vertices + num_new_vertices + num_pvertices);
-    editor.initCells(num_cells + num_new_cells + num_pcells);
+    editor.init_vertices(num_vertices + num_new_vertices + num_pvertices);
+    editor.init_cells(num_cells + num_new_cells + num_pcells);
   }
   else
   {
-    editor.initVertices(num_vertices + num_new_vertices);
-    editor.initCells(num_cells + num_new_cells);
+    editor.init_vertices(num_vertices + num_new_vertices);
+    editor.init_cells(num_cells + num_new_cells);
   }
 
   // Add old vertices
@@ -220,7 +220,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
         refined_mesh.distdata().set_shared(current_vertex, 0);
     }
 
-    editor.addVertex(current_vertex++, v->point());
+    editor.add_vertex(current_vertex++, v->point());
   }
 
   // Add old unrefined cells
@@ -239,7 +239,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
       uint cv = 0;
       for (VertexIterator v(*c); !v.end(); ++v)
         cell_vertices[cv++] = v->index();
-      editor.addCell(current_cell++, cell_vertices);
+      editor.add_cell(current_cell++, cell_vertices);
     }
 
   }
@@ -279,8 +279,8 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
           shared_edge.push_back(edge_vert[1]);
           shared_edge.push_back(current_vertex);
 
-          refman.addVertex(edge_vert, current_vertex, refined_mesh);
-          editor.addVertex(current_vertex++, e.midpoint());
+          refman.add_vertex(edge_vert, current_vertex, refined_mesh);
+          editor.add_vertex(current_vertex++, e.midpoint());
           dolfin_assert( !cell_forbidden.get(*c) );
 
           for (CellIterator cn(e); !cn.end(); ++cn)
@@ -328,10 +328,10 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
       if (lmax > 0.0)
       {
         dolfin_assert( !refman.on_boundary(longest_edge) );
-        refman.addVertex(current_vertex, refined_mesh);
+        refman.add_vertex(current_vertex, refined_mesh);
 
         // Add new vertex
-        editor.addVertex(current_vertex++, longest_edge.midpoint());
+        editor.add_vertex(current_vertex++, longest_edge.midpoint());
 
         for (CellIterator cn(longest_edge); !cn.end(); ++cn)
         {
@@ -395,8 +395,8 @@ void LocalMeshRefinement::bisectEdgeOfSimplexCell(Cell& cell, Edge& edge,
   cell1_vertices[vc1++] = edge_vert[0];
   cell2_vertices[vc2++] = edge_vert[1];
 
-  editor.addCell(current_cell++, cell1_vertices);
-  editor.addCell(current_cell++, cell2_vertices);
+  editor.add_cell(current_cell++, cell1_vertices);
+  editor.add_cell(current_cell++, cell2_vertices);
 
 }
 //-----------------------------------------------------------------------------

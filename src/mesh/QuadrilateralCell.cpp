@@ -204,13 +204,13 @@ void QuadrilateralCell::refine_cell(Cell& cell, MeshEditor& editor,
 
   // Add the four new cells
   uint cv0[4] = { v0, e3, c0, e2 };
-  editor.addCell(current_cell++, &cv0[0]);
+  editor.add_cell(current_cell++, &cv0[0]);
   uint cv1[4] = { v1, e1, c0, e3 };
-  editor.addCell(current_cell++, &cv1[0]);
+  editor.add_cell(current_cell++, &cv1[0]);
   uint cv2[4] = { v2, e0, c0, e1 };
-  editor.addCell(current_cell++, &cv2[0]);
+  editor.add_cell(current_cell++, &cv2[0]);
   uint cv3[4] = { v3, e2, c0, e0 };
-  editor.addCell(current_cell++, &cv3[0]);
+  editor.add_cell(current_cell++, &cv3[0]);
 }
 //-----------------------------------------------------------------------------
 uint QuadrilateralCell::num_refined_cells() const
@@ -460,14 +460,14 @@ Mesh QuadrilateralCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::quadrilateral, 2);
-  me.initVertices(4);
-  me.addVertex(0, VC[0]);
-  me.addVertex(1, VC[1]);
-  me.addVertex(2, VC[2]);
-  me.addVertex(3, VC[3]);
-  me.initCells(1);
+  me.init_vertices(4);
+  me.add_vertex(0, VC[0]);
+  me.add_vertex(1, VC[1]);
+  me.add_vertex(2, VC[2]);
+  me.add_vertex(3, VC[3]);
+  me.init_cells(1);
   uint const cv0[4] = { 0, 1, 2, 3 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

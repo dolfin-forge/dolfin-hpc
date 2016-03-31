@@ -29,7 +29,7 @@ UnitCube::UnitCube(uint nx, uint ny, uint nz) :
   MeshEditor editor(*this, CellType::tetrahedron, 3, 3);
 
   // Create vertices
-  editor.initVertices((nx + 1) * (ny + 1) * (nz + 1));
+  editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));
   uint vertex = 0;
   real x[3] = { 0.0 };
   for (uint iz = 0; iz <= nz; iz++)
@@ -41,13 +41,13 @@ UnitCube::UnitCube(uint nx, uint ny, uint nz) :
       for (uint ix = 0; ix <= nx; ix++)
       {
         x[0] = static_cast<real>(ix) / static_cast<real>(nx);
-        editor.addVertex(vertex++, x);
+        editor.add_vertex(vertex++, x);
       }
     }
   }
 
   // Create tetrahedra
-  editor.initCells(6 * nx * ny * nz);
+  editor.init_cells(6 * nx * ny * nz);
   uint cell = 0;
   for (uint iz = 0; iz < nz; iz++)
   {
@@ -68,12 +68,12 @@ UnitCube::UnitCube(uint nx, uint ny, uint nz) :
                                         v7, v4, v0, v3, v2, v7, v0, v6, v4, v7,
                                         v0, v2, v6, v7 };
 
-        editor.addCell(cell++, &connectivity[0]);
-        editor.addCell(cell++, &connectivity[4]);
-        editor.addCell(cell++, &connectivity[8]);
-        editor.addCell(cell++, &connectivity[12]);
-        editor.addCell(cell++, &connectivity[16]);
-        editor.addCell(cell++, &connectivity[20]);
+        editor.add_cell(cell++, &connectivity[0]);
+        editor.add_cell(cell++, &connectivity[4]);
+        editor.add_cell(cell++, &connectivity[8]);
+        editor.add_cell(cell++, &connectivity[12]);
+        editor.add_cell(cell++, &connectivity[16]);
+        editor.add_cell(cell++, &connectivity[20]);
       }
     }
   }

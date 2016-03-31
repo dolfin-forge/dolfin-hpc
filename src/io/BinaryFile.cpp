@@ -489,7 +489,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint num_vertices = 0;
     fp.read((char *) &num_vertices, sizeof(uint));
     if (byteswap) num_vertices = bswap(num_vertices);
-    editor.initVertices(num_vertices);
+    editor.init_vertices(num_vertices);
     uint const vertex_data_size = num_vertices * gdim;
     real * vertex_data = new real[vertex_data_size];
     fp.read((char *) vertex_data, vertex_data_size * sizeof(real));
@@ -502,7 +502,7 @@ void BinaryFile::operator>>(Mesh& mesh)
           vertex_data[(v * gdim) + gi] = bswap(vertex_data[(v * gdim) + gi]);
         }
       }
-      editor.addVertex(v, &vertex_data[v * gdim]);
+      editor.add_vertex(v, &vertex_data[v * gdim]);
     }
     delete[] vertex_data;
 
@@ -510,7 +510,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint num_cells = 0;
     fp.read((char *) &num_cells, sizeof(uint));
     if(byteswap) num_cells = bswap(num_cells);
-    editor.initCells(num_cells);
+    editor.init_cells(num_cells);
     uint const cell_data_size = num_cells * num_cellvertices;
     uint * cell_data = new uint[cell_data_size];
     fp.read((char *) cell_data, cell_data_size * sizeof(uint));
@@ -524,7 +524,7 @@ void BinaryFile::operator>>(Mesh& mesh)
             bswap(cell_data[(c * num_cellvertices) + vi]);
         }
       }
-      editor.addCell(c, &cell_data[c * num_cellvertices]);
+      editor.add_cell(c, &cell_data[c * num_cellvertices]);
     }
     delete[] cell_data;
     editor.close();
@@ -734,8 +734,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     // Open mesh for editing
     MeshEditor editor(mesh, ctype, gdim);
-    editor.initVertices(num_local_vertices);
-    editor.initCells(cells.size());
+    editor.init_vertices(num_local_vertices);
+    editor.init_cells(cells.size());
 
     MeshDistributedData distdata(mesh.topology());
 
@@ -755,7 +755,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       v_index = *it - vertex_offset[0];
       distdata.set_map(local_vertex_index, *it, 0);
-      editor.addVertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
+      editor.add_vertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
     }
 
     _map<uint, uint> new_owner;
@@ -843,7 +843,7 @@ void BinaryFile::operator>>(Mesh& mesh)
           distdata.set_ghost(local_vertex_index, 0);
           distdata.set_ghost_owner(local_vertex_index, recv_new_owner[g_i], 0);
         }
-        editor.addVertex(local_vertex_index, &recv_buffer_coords[k]);
+        editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
       }
     }
 
@@ -856,7 +856,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       {
         connectivity[n] = distdata.get_vertex_local(it->v[n]);
       }
-      editor.addCell(local_cell_index, &connectivity[0]);
+      editor.add_cell(local_cell_index, &connectivity[0]);
     }
     delete[] connectivity;
 

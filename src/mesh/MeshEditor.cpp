@@ -6,10 +6,9 @@
 
 #include <dolfin/mesh/MeshEditor.h>
 
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
-#include <dolfin/parameter/parameters.h>
 
 namespace dolfin
 {
@@ -81,7 +80,7 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   mesh.topology_.init(tdim_);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::initVertices(uint num_vertices)
+void MeshEditor::init_vertices(uint num_vertices)
 {
   // Initialize mesh data
   this->num_vertices_ = num_vertices;
@@ -89,7 +88,7 @@ void MeshEditor::initVertices(uint num_vertices)
   mesh_->geometry_.init(gdim_, num_vertices);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::initCells(uint num_cells)
+void MeshEditor::init_cells(uint num_cells)
 {
   // Initialize mesh data
   this->num_cells_ = num_cells;
@@ -97,37 +96,37 @@ void MeshEditor::initCells(uint num_cells)
   mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().numVertices(tdim_));
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addVertex(uint v, Point const& p)
+void MeshEditor::add_vertex(uint v, Point const& p)
 {
   // Add vertex
-  addVertexCommon(v);
+  add_vertexCommon(v);
 
   // Set coordinate
   mesh_->geometry_.set(v, &p[0]);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addVertex(uint v, real const * x)
+void MeshEditor::add_vertex(uint v, real const * x)
 {
   // Add vertex
-  addVertexCommon(v);
+  add_vertexCommon(v);
 
   // Set coordinate
   mesh_->geometry_.set(v, x);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addCell(uint c, const Array<uint>& v)
+void MeshEditor::add_cell(uint c, const Array<uint>& v)
 {
   // Add cell
-  addCellCommon(c);
+  add_cellCommon(c);
 
   // Set data
   mesh_->topology_(tdim_, 0).set(c, v);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addCell(uint c, uint const * v)
+void MeshEditor::add_cell(uint c, uint const * v)
 {
   // Add cell
-  addCellCommon(c);
+  add_cellCommon(c);
 
   // Set data
   mesh_->topology_(tdim_, 0).set(c, v);
@@ -151,7 +150,7 @@ void MeshEditor::close()
   clear();
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addVertexCommon(uint v)
+void MeshEditor::add_vertexCommon(uint v)
 {
   // Check value of vertex index
   if (v >= num_vertices_)
@@ -169,7 +168,7 @@ void MeshEditor::addVertexCommon(uint v)
   ++vertex_index_;
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::addCellCommon(uint c)
+void MeshEditor::add_cellCommon(uint c)
 {
   // Check value of cell index
   if (c >= num_cells_)
@@ -197,6 +196,15 @@ void MeshEditor::clear()
   cell_index_ = 0;
 }
 //-----------------------------------------------------------------------------
-
+uint MeshEditor::current_vertex() const
+{
+  return vertex_index_;
 }
+//-----------------------------------------------------------------------------
+uint MeshEditor::current_cell() const
+{
+  return cell_index_;
+}
+//-----------------------------------------------------------------------------
 
+} /* namespace dolfin */

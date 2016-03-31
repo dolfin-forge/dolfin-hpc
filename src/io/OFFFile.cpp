@@ -58,8 +58,8 @@ void OFFFile::operator>>(Mesh& mesh)
   // Since this is a surface mesh the topology dimension is 2
   // while the geometric dimension is 3
   MeshEditor editor(mesh, CellType::triangle, 2, 3);
-  editor.initVertices(num_entities[0]);
-  editor.initCells(num_entities[1]);
+  editor.init_vertices(num_entities[0]);
+  editor.init_cells(num_entities[1]);
 
   // Get vertices
   for (uint v = 0; v < num_entities[0]; ++v)
@@ -67,7 +67,7 @@ void OFFFile::operator>>(Mesh& mesh)
     get_next_line(off, line);
     std::vector<real> coords;
     split_line(line, coords);
-    editor.addVertex(v, &coords[0]);
+    editor.add_vertex(v, &coords[0]);
   }
 
   // Get face connectivities
@@ -82,7 +82,7 @@ void OFFFile::operator>>(Mesh& mesh)
     switch(v[0])
     {
       case 3: // Only treat triangles
-        editor.addCell(c, &v[1]);
+        editor.add_cell(c, &v[1]);
         break;
       default:
         break;

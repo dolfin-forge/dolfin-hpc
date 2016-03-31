@@ -202,17 +202,17 @@ void Checkpoint::load(Mesh& mesh)
 
   Mesh _mesh;
   MeshEditor editor(_mesh, hdr_.type, hdr_.tdim, hdr_.gdim);
-  editor.initVertices(hdr_.num_vertices);
+  editor.init_vertices(hdr_.num_vertices);
 
   uint vi = 0;
   for (uint i = 0; i < hdr_.num_coords; i += hdr_.gdim)
   {
-    editor.addVertex(vi++, &coords[i]);
+    editor.add_vertex(vi++, &coords[i]);
   }
 
   delete[] coords;
 
-  editor.initCells(hdr_.num_cells);
+  editor.init_cells(hdr_.num_cells);
 
   uint *cells = new uint[hdr_.num_centities];
 #ifdef ENABLE_MPIIO
@@ -232,7 +232,7 @@ void Checkpoint::load(Mesh& mesh)
     {
       v.push_back(cells[i + j]);
     }
-    editor.addCell(ci++, v);
+    editor.add_cell(ci++, v);
   }
   editor.close();
   delete[] cells;

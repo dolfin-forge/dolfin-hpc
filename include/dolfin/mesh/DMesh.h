@@ -69,10 +69,10 @@ public:
   typedef std::pair<uint, prop_edge> Propagation;
 
   /// Add a new vertex
-  void addVertex(DVertex* v);
+  void add_vertex(DVertex* v);
 
   /// Add a new cell with vertices vs and inside existing cell parent_id
-  void addCell(DCell* c, std::vector<DVertex*> vs, int parent_id);
+  void add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id);
 
   /// Remove a vertex
   ///

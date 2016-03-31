@@ -98,8 +98,8 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
   }
 
   // Specify number of vertices and cells
-  editor.initVertices(num_boundary_vertices);
-  editor.initCells(num_boundary_cells);
+  editor.init_vertices(num_boundary_vertices);
+  editor.init_cells(num_boundary_cells);
 
   // Return if no boundary is found
   if(!num_boundary_vertices && !num_boundary_cells && MPI::numProcesses() > 1)
@@ -141,7 +141,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
         vertex_map->set(vertex_index, v->index());
 
       // Add vertex
-      editor.addVertex(vertex_index, v->point());
+      editor.add_vertex(vertex_index, v->point());
     }
   }
 
@@ -176,7 +176,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
       }
 
       // Add cell
-      editor.addCell(current_cell++, cell);
+      editor.add_cell(current_cell++, cell);
     }
   }
 

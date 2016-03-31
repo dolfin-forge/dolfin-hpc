@@ -45,7 +45,7 @@ void GraphEditor::open(Graph& graph, std::string type)
     error("Unknown graph type \"%s\".", type.c_str());
 }
 //-----------------------------------------------------------------------------
-void GraphEditor::initVertices(uint num_vertices)
+void GraphEditor::init_vertices(uint num_vertices)
 {
   // Check if we are currently editing a graph
   if ( !graph )
@@ -93,7 +93,7 @@ void GraphEditor::initEdges(uint num_edges)
   graph->vertices[graph->numVertices()] = graph->numArches();
 }
 //-----------------------------------------------------------------------------
-void GraphEditor::addVertex(uint u, uint num_edges)
+void GraphEditor::add_vertex(uint u, uint num_edges)
 {
   // Check if we are currently editing a graph
   if ( !graph )
@@ -109,7 +109,7 @@ void GraphEditor::addVertex(uint u, uint num_edges)
     error("Next vertex that can be added is %d.", next_vertex);
   
   // Set offset and step to next vertex
-  //dolfin_debug2("addVertex(%d, %d)", u, num_edges);
+  //dolfin_debug2("add_vertex(%d, %d)", u, num_edges);
   //dolfin_debug1("adding num_edges: %d", num_edges);
   graph->vertices[next_vertex++] = next_arch;
   next_arch += num_edges;

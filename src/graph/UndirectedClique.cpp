@@ -24,10 +24,10 @@ UndirectedClique::UndirectedClique(uint num_vertices) : Graph()
   editor.open(*this, Graph::undirected);
 
   // Create vertices
-  editor.initVertices(num_vertices);
+  editor.init_vertices(num_vertices);
   for (uint i = 0; i < num_vertices; ++i)
   {
-    editor.addVertex(i, num_vertices - 1);
+    editor.add_vertex(i, num_vertices - 1);
   }
 
   // Create edges

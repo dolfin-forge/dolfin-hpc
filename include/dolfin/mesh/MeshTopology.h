@@ -115,8 +115,8 @@ public:
 
 protected:
 
-  friend void MeshEditor::initVertices(uint num_vertices);
-  friend void MeshEditor::initCells(uint num_cells);
+  friend void MeshEditor::init_vertices(uint num_vertices);
+  friend void MeshEditor::init_cells(uint num_cells);
 
   /// Set number of entities (size) for given topological dimension
   void init(uint dim, uint size);

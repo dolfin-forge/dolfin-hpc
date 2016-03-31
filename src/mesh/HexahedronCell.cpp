@@ -395,21 +395,21 @@ void HexahedronCell::refine_cell(Cell& cell, MeshEditor& editor,
 
   // Add the eight new cells
   uint const cv0[8] = { v00, e11, f05, e10, e09, f04, c00, f03 };
-  editor.addCell(current_cell++, &cv0[0]);
+  editor.add_cell(current_cell++, &cv0[0]);
   uint const cv1[8] = { v01, e08, f05, e11, e07, f02, c00, f04 };
-  editor.addCell(current_cell++, &cv1[0]);
+  editor.add_cell(current_cell++, &cv1[0]);
   uint const cv2[8] = { v02, e06, f05, e08, e05, f01, c00, f02 };
-  editor.addCell(current_cell++, &cv2[0]);
+  editor.add_cell(current_cell++, &cv2[0]);
   uint const cv3[8] = { v03, e10, f05, e06, e04, f03, c00, f01 };
-  editor.addCell(current_cell++, &cv3[0]);
+  editor.add_cell(current_cell++, &cv3[0]);
   uint const cv4[8] = { v04, e03, f00, e02, e09, f04, c00, f03 };
-  editor.addCell(current_cell++, &cv4[0]);
+  editor.add_cell(current_cell++, &cv4[0]);
   uint const cv5[8] = { v05, e01, f00, e03, e07, f02, c00, f04 };
-  editor.addCell(current_cell++, &cv5[0]);
+  editor.add_cell(current_cell++, &cv5[0]);
   uint const cv6[8] = { v06, e00, f00, e01, e05, f01, c00, f02 };
-  editor.addCell(current_cell++, &cv6[0]);
+  editor.add_cell(current_cell++, &cv6[0]);
   uint const cv7[8] = { v07, e02, f00, e00, e04, f03, c00, f01 };
-  editor.addCell(current_cell++, &cv7[0]);
+  editor.add_cell(current_cell++, &cv7[0]);
 }
 //-----------------------------------------------------------------------------
 uint HexahedronCell::num_refined_cells() const
@@ -633,18 +633,18 @@ Mesh HexahedronCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::hexahedron, 3);
-  me.initVertices(8);
-  me.addVertex(0, VC[0]);
-  me.addVertex(1, VC[1]);
-  me.addVertex(2, VC[2]);
-  me.addVertex(3, VC[3]);
-  me.addVertex(4, VC[4]);
-  me.addVertex(5, VC[5]);
-  me.addVertex(6, VC[6]);
-  me.addVertex(7, VC[7]);
-  me.initCells(1);
+  me.init_vertices(8);
+  me.add_vertex(0, VC[0]);
+  me.add_vertex(1, VC[1]);
+  me.add_vertex(2, VC[2]);
+  me.add_vertex(3, VC[3]);
+  me.add_vertex(4, VC[4]);
+  me.add_vertex(5, VC[5]);
+  me.add_vertex(6, VC[6]);
+  me.add_vertex(7, VC[7]);
+  me.init_cells(1);
   uint const cv0[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

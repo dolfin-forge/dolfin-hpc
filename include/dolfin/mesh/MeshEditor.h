@@ -8,8 +8,8 @@
 #define __DOLFIN_MESH_EDITOR_H
 
 #include <dolfin/common/types.h>
-#include "CellType.h"
 #include <dolfin/common/Array.h>
+#include <dolfin/mesh/CellType.h>
 
 namespace dolfin
 {
@@ -36,25 +36,31 @@ public:
   ~MeshEditor();
 
   /// Specify number of vertices
-  void initVertices(uint num_vertices);
+  void init_vertices(uint num_vertices);
 
   /// Specify number of cells
-  void initCells(uint num_cells);
+  void init_cells(uint num_cells);
 
   /// Add vertex v at given point p [TODO: Deprecate]
-  void addVertex(uint v, Point const& p);
+  void add_vertex(uint v, Point const& p);
 
   /// Add vertex v at given coordinates x
-  void addVertex(uint v, real const * x);
+  void add_vertex(uint v, real const * x);
 
   /// Add cell with given vertices [TODO: Deprecate]
-  void addCell(uint c, Array<uint> const& v);
+  void add_cell(uint c, Array<uint> const& v);
 
   /// Add cell with given vertices
-  void addCell(uint c, uint const * v);
+  void add_cell(uint c, uint const * v);
 
   /// Close mesh, finish editing
   void close();
+
+  /// Return current vertex count
+  uint current_vertex() const;
+
+  /// Return current cell count
+  uint current_cell() const;
 
 private:
 
@@ -62,10 +68,10 @@ private:
   void init(Mesh& mesh, CellType const& type, uint gdim);
 
   // Add vertex, common part
-  void addVertexCommon(uint v);
+  void add_vertexCommon(uint v);
 
   // Add cell, common part
-  void addCellCommon(uint v);
+  void add_cellCommon(uint v);
 
   // Clear all data
   void clear();
@@ -93,6 +99,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MESH_EDITOR_H */

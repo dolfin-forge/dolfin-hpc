@@ -162,7 +162,7 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
   vertex_offset_ = rank * L + std::min(rank, R);
   vertex_range_end_ = vertex_offset_ + (num_local_vertices_ - 1);
   // Set number of vertices
-  editor_->initVertices(num_local_vertices_);
+  editor_->init_vertices(num_local_vertices_);
 
   if (parallel_)
   {
@@ -177,7 +177,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   cell_count_ = 0;
   if(parallel_)
   {
-    editor_->initCells(1);
+    editor_->init_cells(1);
     editor_->close();
 //    MeshFunction<uint> pre_partition;
 //    mesh_.partition_geom(pre_partition);
@@ -187,7 +187,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   }
   else
   {
-    editor_->initCells(num_cells);
+    editor_->init_cells(num_cells);
   }
 }
 //-----------------------------------------------------------------------------
@@ -214,7 +214,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
           mesh_.geometry().dim());
     break;
   }
-  editor_->addVertex(v - vertex_offset_, &x[0]);
+  editor_->add_vertex(v - vertex_offset_, &x[0]);
   if (parallel_)
   {
     mesh_.distdata().set_map(v - vertex_offset_, v, 0);
@@ -259,7 +259,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     {
       v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
     }
-    editor_->addCell(c, &v[0]);
+    editor_->add_cell(c, &v[0]);
   }
 }
 //-----------------------------------------------------------------------------
@@ -350,7 +350,7 @@ void XMLMesh::endMesh()
     delete[] sendbuf_idx;
 
     // Init new mesh
-    editor_->initVertices(mesh_.numVertices() + shared - orphan);
+    editor_->init_vertices(mesh_.numVertices() + shared - orphan);
     new_mesh.distdata().set_num_global(0, mesh_.global_numVertices());
 
     uint vertex_count = 0;
@@ -360,7 +360,7 @@ void XMLMesh::endMesh()
       {
         new_mesh.distdata().set_map(vertex_count,
                                     mesh_.distdata().get_global(*vertex), 0);
-        editor_->addVertex(vertex_count, vertex->point());
+        editor_->add_vertex(vertex_count, vertex->point());
         ++vertex_count;
       }
     }
@@ -376,12 +376,12 @@ void XMLMesh::endMesh()
         new_mesh.distdata().set_ghost(vertex_count, 0);
         new_mesh.distdata().set_ghost_owner(vertex_count, idxbuf[ii + 1], 0);
       }
-      editor_->addVertex(vertex_count, &crdbuf[ci]);
+      editor_->add_vertex(vertex_count, &crdbuf[ci]);
       ++vertex_count;
     }
 
     uint ndims = mesh_.type().numVertices(mesh_.topology().dim());
-    editor_->initCells(cell_buffer_.size() / ndims);
+    editor_->init_cells(cell_buffer_.size() / ndims);
     uint c = 0;
     uint * connectivity = new uint[ndims];
     for (uint i = 0; i < cell_buffer_.size(); i += ndims)
@@ -391,7 +391,7 @@ void XMLMesh::endMesh()
         connectivity[n] =
             new_mesh.distdata().get_vertex_local(cell_buffer_[i + n]);
       }
-      editor_->addCell(c++, &connectivity[0]);
+      editor_->add_cell(c++, &connectivity[0]);
     }
     delete[] connectivity;
     editor_->close();

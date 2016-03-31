@@ -22,21 +22,21 @@ UnitInterval::UnitInterval(uint nx) :
   MeshEditor editor(*this, CellType::interval, 1, 1);
 
   // Create vertices and cells:
-  editor.initVertices((nx + 1));
-  editor.initCells(nx);
+  editor.init_vertices((nx + 1));
+  editor.init_cells(nx);
 
   // Create main vertices:
   for (uint ix = 0; ix <= nx; ++ix)
   {
     real const x = static_cast<real>(ix) / static_cast<real>(nx);
-    editor.addVertex(ix, x);
+    editor.add_vertex(ix, x);
   }
 
   // Create intervals
   for (uint ix = 0; ix < nx; ++ix)
   {
     uint const connectivity[2] = { ix, ix + 1 };
-    editor.addCell(ix, &connectivity[0]);
+    editor.add_cell(ix, &connectivity[0]);
   }
 
   // Close mesh editor

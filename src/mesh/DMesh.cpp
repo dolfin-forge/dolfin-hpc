@@ -205,7 +205,7 @@ void DMesh::imp(Mesh& mesh)
       i++;
     }
 
-    addCell(dc, vs, ci->index());
+    add_cell(dc, vs, ci->index());
     // Define the same cell numbering
     dc->id = ci->index();
 
@@ -264,7 +264,7 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
       i++;
     }
 
-    addCell(dc, vs, ci->index());
+    add_cell(dc, vs, ci->index());
 
     // Define the same cell numbering
     dc->id = ci->index();
@@ -280,8 +280,8 @@ void DMesh::exp(Mesh& mesh)
 
   MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
-  editor.initVertices(vertices.size());
-  editor.initCells(cells.size());
+  editor.init_vertices(vertices.size());
+  editor.init_cells(cells.size());
 
   // Add old vertices
   uint current_vertex = 0;
@@ -291,7 +291,7 @@ void DMesh::exp(Mesh& mesh)
     DVertex* dv = *it;
     dolfin_assert(!dv->deleted);
 
-    editor.addVertex(current_vertex, dv->p);
+    editor.add_vertex(current_vertex, dv->p);
 
     if(_is_distributed)
     {
@@ -320,7 +320,7 @@ void DMesh::exp(Mesh& mesh)
       DVertex* dv = dc->vertices[j];
       cell_vertices[j] = dv->id;
     }
-    editor.addCell(current_cell, cell_vertices);
+    editor.add_cell(current_cell, cell_vertices);
 
     current_cell++;
   }
@@ -345,8 +345,8 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
 
   MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
-  editor.initVertices(vertices.size());
-  editor.initCells(cells.size());
+  editor.init_vertices(vertices.size());
+  editor.init_cells(cells.size());
 
   //initialize Meshfunctions for refined mesh
   patch_id_list.init(0);
@@ -362,7 +362,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
       it != vertices.end(); ++it, ++current_vertex)
   {
     DVertex* dv = *it;
-    editor.addVertex(current_vertex, dv->p);
+    editor.add_vertex(current_vertex, dv->p);
     patch_id_list.set(current_vertex, dv->patch_id);
 
     bnd_u.set(current_vertex, dv->u);
@@ -395,7 +395,7 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
       DVertex* dv = dc->vertices[j];
       cell_vertices[j] = dv->id;
     }
-    editor.addCell(current_cell, cell_vertices);
+    editor.add_cell(current_cell, cell_vertices);
 
     current_cell++;
   }
@@ -436,8 +436,8 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
   MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
 
-  editor.initVertices(vertices.size());
-  editor.initCells(cells.size());
+  editor.init_vertices(vertices.size());
+  editor.init_cells(cells.size());
 
   // Add old vertices
   uint current_vertex = 0;
@@ -453,7 +453,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     old2new_vertices->at(dv->id) = current_vertex;
 #endif
 
-    editor.addVertex(current_vertex, dv->p);
+    editor.add_vertex(current_vertex, dv->p);
 
     if(_is_distributed)
     {
@@ -497,7 +497,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
       cell_vertices[j] = old2new_vertices->at(dv->id);
 #endif
     }
-    editor.addCell(current_cell, cell_vertices);
+    editor.add_cell(current_cell, cell_vertices);
   }
   editor.close();
 
@@ -624,7 +624,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   else
   {
     mv = new DVertex;
-    addVertex(mv);
+    add_vertex(mv);
     if (v0->glb_id < v1->glb_id) mv->glb_id = (((v0->glb_id * _salt)
         + (v1->glb_id))) + _glb_max;
     else mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
@@ -668,8 +668,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   vs0.push_back(mv);
   vs1.push_back(mv);
 
-  addCell(c0, vs0, dcell->parent_id);
-  addCell(c1, vs1, dcell->parent_id);
+  add_cell(c0, vs0, dcell->parent_id);
+  add_cell(c1, vs1, dcell->parent_id);
 
   removeCell(dcell);
 
@@ -770,7 +770,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
     mv->patch_id = -1;
     mv->u = -1;
     mv->v = -1;
-    addVertex(mv);
+    add_vertex(mv);
     if( v0->glb_id < v1->glb_id )
     mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + _glb_max;
     else
@@ -847,8 +847,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
   vs0.push_back(mv);
   vs1.push_back(mv);
 
-  addCell(c0, vs0, dcell->parent_id);
-  addCell(c1, vs1, dcell->parent_id);
+  add_cell(c0, vs0, dcell->parent_id);
+  add_cell(c1, vs1, dcell->parent_id);
 
   removeCell(dcell);
 
@@ -910,12 +910,12 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
   return 0;
 }
 //-----------------------------------------------------------------------------
-void DMesh::addVertex(DVertex* v)
+void DMesh::add_vertex(DVertex* v)
 {
   vertices.insert(v);
 }
 //-----------------------------------------------------------------------------
-void DMesh::addCell(DCell* c, std::vector<DVertex*> vs, int parent_id)
+void DMesh::add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id)
 {
   for (uint i = 0; i < vs.size(); i++)
   {

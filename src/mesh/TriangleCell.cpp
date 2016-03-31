@@ -195,13 +195,13 @@ void TriangleCell::refine_cell(Cell& cell, MeshEditor& editor,
 
   // Add the four new cells
   uint cv0[3] = { v0, e2, e1 };
-  editor.addCell(current_cell++, &cv0[0]);
+  editor.add_cell(current_cell++, &cv0[0]);
   uint cv1[3] = { v1, e0, e2 };
-  editor.addCell(current_cell++, &cv1[0]);
+  editor.add_cell(current_cell++, &cv1[0]);
   uint cv2[3] = { v2, e1, e0 };
-  editor.addCell(current_cell++, &cv2[0]);
+  editor.add_cell(current_cell++, &cv2[0]);
   uint cv3[3] = { e0, e1, e2 };
-  editor.addCell(current_cell++, &cv3[0]);
+  editor.add_cell(current_cell++, &cv3[0]);
 }
 //-----------------------------------------------------------------------------
 uint TriangleCell::num_refined_cells() const
@@ -550,13 +550,13 @@ Mesh TriangleCell::create_reference_cell() const
 {
   Mesh refcell;
   MeshEditor me(refcell, CellType::triangle, 2);
-  me.initVertices(3);
-  me.addVertex(0, VC[0]);
-  me.addVertex(1, VC[1]);
-  me.addVertex(2, VC[2]);
-  me.initCells(1);
+  me.init_vertices(3);
+  me.add_vertex(0, VC[0]);
+  me.add_vertex(1, VC[1]);
+  me.add_vertex(2, VC[2]);
+  me.init_cells(1);
   uint const cv0[3] = { 0, 1, 2 };
-  me.addCell(0, cv0);
+  me.add_cell(0, cv0);
   me.close();
   return refcell;
 }

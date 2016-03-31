@@ -41,9 +41,6 @@ public:
   /// Add vertex v at given coordinates x
   void add_vertex(uint v, real const * x);
 
-  /// Add cell with given vertices [TODO: Deprecate]
-  void add_cell(uint c, Array<uint> const& v);
-
   /// Add cell with given vertices
   void add_cell(uint c, uint const * v);
 
@@ -60,9 +57,6 @@ private:
 
   /// Open mesh of given cell type and geometrical dimension
   void init(Mesh& mesh, CellType const& type, uint gdim);
-
-  // Add cell, common part
-  void add_cellCommon(uint v);
 
   // Clear all data
   void clear();

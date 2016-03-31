@@ -238,7 +238,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
       uint cv = 0;
       for (VertexIterator v(*c); !v.end(); ++v)
         cell_vertices[cv++] = v->index();
-      editor.add_cell(current_cell++, cell_vertices);
+      editor.add_cell(current_cell++, &cell_vertices[0]);
     }
 
   }
@@ -394,8 +394,8 @@ void LocalMeshRefinement::bisectEdgeOfSimplexCell(Cell& cell, Edge& edge,
   cell1_vertices[vc1++] = edge_vert[0];
   cell2_vertices[vc2++] = edge_vert[1];
 
-  editor.add_cell(current_cell++, cell1_vertices);
-  editor.add_cell(current_cell++, cell2_vertices);
+  editor.add_cell(current_cell++, &cell1_vertices[0]);
+  editor.add_cell(current_cell++, &cell2_vertices[0]);
 
 }
 //-----------------------------------------------------------------------------

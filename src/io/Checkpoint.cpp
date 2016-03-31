@@ -232,7 +232,7 @@ void Checkpoint::load(Mesh& mesh)
     {
       v.push_back(cells[i + j]);
     }
-    editor.add_cell(ci++, v);
+    editor.add_cell(ci++, &v[0]);
   }
   editor.close();
   delete[] cells;

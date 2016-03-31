@@ -221,7 +221,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
       old2new_cell.set(cell.index(), current_cell);
       distdata.set_map(current_cell,
                        mesh.distdata().get_cell_global(cell.index()), 3);
-      editor.add_cell(current_cell++, cell_vertices);
+      editor.add_cell(current_cell++, &cell_vertices[0]);
 
     }
     else

@@ -92,22 +92,18 @@ void MeshEditor::add_vertex(uint v, real const * x)
   ++vertex_index_;
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::add_cell(uint c, const Array<uint>& v)
-{
-  // Add cell
-  add_cellCommon(c);
-
-  // Set data
-  mesh_->topology_(tdim_, 0).set(c, v);
-}
-//-----------------------------------------------------------------------------
 void MeshEditor::add_cell(uint c, uint const * v)
 {
-  // Add cell
-  add_cellCommon(c);
-
-  // Set data
+  if (c >= num_cells_)
+  {
+   error("Cell index (%d) out of range [0, %d].", c, num_cells_ - 1);
+  }
+  if (cell_index_ >= num_cells_)
+  {
+   error("Cell list is full, %d cells already specified.", num_cells_);
+  }
   mesh_->topology_(tdim_, 0).set(c, v);
+  ++cell_index_;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::close()
@@ -126,24 +122,6 @@ void MeshEditor::close()
   }
   // Clear data
   clear();
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::add_cellCommon(uint c)
-{
-  // Check value of cell index
-  if (c >= num_cells_)
-  {
-    error("Cell index (%d) out of range [0, %d].", c, num_cells_ - 1);
-  }
-
-  // Check if there is room for more cells
-  if (cell_index_ >= num_cells_)
-  {
-    error("Cell list is full, %d cells already specified.", num_cells_);
-  }
-
-  // Step to next cell
-  ++cell_index_;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::clear()

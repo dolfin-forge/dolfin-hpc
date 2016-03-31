@@ -176,7 +176,7 @@ void BoundaryComputation::computeBoundaryCommon(Mesh& mesh,
       }
 
       // Add cell
-      editor.add_cell(current_cell++, cell);
+      editor.add_cell(current_cell++, &cell[0]);
     }
   }
 

@@ -320,7 +320,7 @@ void DMesh::exp(Mesh& mesh)
       DVertex* dv = dc->vertices[j];
       cell_vertices[j] = dv->id;
     }
-    editor.add_cell(current_cell, cell_vertices);
+    editor.add_cell(current_cell, &cell_vertices[0]);
 
     current_cell++;
   }
@@ -497,7 +497,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
       cell_vertices[j] = old2new_vertices->at(dv->id);
 #endif
     }
-    editor.add_cell(current_cell, cell_vertices);
+    editor.add_cell(current_cell, &cell_vertices[0]);
   }
   editor.close();
 

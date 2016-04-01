@@ -40,7 +40,6 @@ libdolfin_mesh_la_SOURCES = \
 			MeshHierarchyAlgorithms.cpp\
 			MeshQuality.cpp\
 			MeshQualityFunction.cpp\
-			MeshOrdering.cpp\
 			MetisInterface.cpp\
 			ZoltanInterface.cpp\
 			MeshPartition.cpp\

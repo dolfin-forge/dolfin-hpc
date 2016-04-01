@@ -13,7 +13,6 @@
 #include "MeshConnectivity.h"
 #include "MeshDistributedData.h"
 #include "MeshEditor.h"
-#include "MeshOrdering.h"
 #include "MeshRenumber.h"
 #include "TopologyComputation.h"
 
@@ -33,7 +32,6 @@ namespace dolfin
 class MeshTopology
 {
 
-  friend class MeshOrdering;
   friend class MeshRenumber;
   friend class MPIMeshCommunicator;
   friend class TopologyComputation;
@@ -215,13 +213,6 @@ inline uint MeshTopology::num_owned(uint dim) const
   return (
       is_distributed() ?
           this->size(dim) - distdata().num_ghost(dim) : this->size(dim));
-}
-
-//-----------------------------------------------------------------------------
-inline void MeshTopology::order(Mesh& mesh)
-{
-  MeshOrdering::order(mesh);
-  ordered_ = true;
 }
 
 //-----------------------------------------------------------------------------

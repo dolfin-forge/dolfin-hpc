@@ -4,9 +4,11 @@
 // First added:  2006-05-08
 // Last changed: 2014-11-03
 
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshTopology.h>
+
+#include <dolfin/log/dolfin_log.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshConnectivity.h>
 
 #include <ctime>
 
@@ -195,6 +197,17 @@ uint MeshTopology::compute_entities(Mesh& mesh, uint dim) const
 void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
 {
   TopologyComputation::computeConnectivity(mesh, d0, d1);
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::order(Mesh& mesh)
+{
+  message(1, "Ordering mesh entities...");
+  CellType const& cell_type = mesh.type();
+  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  {
+    cell_type.order_entities(*cell);
+  }
+  ordered_ = true;
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_computed(uint d0, uint d1) const

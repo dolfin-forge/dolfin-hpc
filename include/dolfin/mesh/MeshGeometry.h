@@ -7,24 +7,30 @@
 #ifndef __DOLFIN_MESH_GEOMETRY_H
 #define __DOLFIN_MESH_GEOMETRY_H
 
-#include "Point.h"
+#include <dolfin/common/Tokenized.h>
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/EuclideanSpace.h>
+#include <dolfin/mesh/Point.h>
 
 namespace dolfin
 {
+
+template<class T> class Array;
 
 /// MeshGeometry stores the geometry imposed on a mesh. Currently,
 /// the geometry is represented by the set of coordinates for the
 /// vertices of a mesh, but other representations are possible.
 
-class MeshGeometry
+class MeshGeometry : public Tokenized
 {
 public:
 
   /// Create empty set of coordinates
   MeshGeometry();
+
+  /// Create set of coordinates given geometric dimension and size
+  MeshGeometry(uint gdim, uint size);
 
   /// Copy constructor
   MeshGeometry(MeshGeometry const& geometry);
@@ -68,6 +74,9 @@ public:
   /// Clear all data
   void clear();
 
+  ///
+  void finalize();
+
   /// Initialize coordinate list to given geometrical dimension and size
   void init(uint gdim, uint size);
 
@@ -81,11 +90,31 @@ public:
   /// Set value of coordinates n
   void set(uint n, real const * x);
 
-  /// Return token identifying the internal state of mesh geometry
-  int token() const;
+  /// Remap coordinates from old to new ordering
+  /// The mapping should have the same size as the number of coordinates
+  void remap(Array<uint> const& map);
 
   /// Display data
   void disp() const;
+
+  //--- CHECK ROUTINES --------------------------------------------------------
+
+  /// Check
+  void check() const;
+
+  //--- TOKENIZED -------------------------------------------------------------
+
+public:
+
+  /// Return token identifying the internal state of mesh geometry
+  int token() const;
+
+private:
+
+  /// Update token value
+  void update_token();
+
+  //---------------------------------------------------------------------------
 
 private:
 
@@ -108,25 +137,6 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline uint MeshGeometry::dim() const
-{
-  return dim_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint MeshGeometry::size() const
-{
-  return size_;
-}
-
-//-----------------------------------------------------------------------------
-inline real MeshGeometry::abs_tolerance(uint dim) const
-{
-  dolfin_assert(dim <= dim_);
-  return abs_tol_[dim];
-}
-
-//-----------------------------------------------------------------------------
 inline real& MeshGeometry::x(uint n, uint i)
 {
   dolfin_assert(n < size_ && i < dim_);
@@ -153,17 +163,7 @@ inline real const * MeshGeometry::x(uint n) const
 }
 
 //-----------------------------------------------------------------------------
-inline real* MeshGeometry::coordinates()
-{
-  return coordinates_;
-}
 
-//-----------------------------------------------------------------------------
-inline real const * MeshGeometry::coordinates() const
-{
-  return coordinates_;
-}
+} /* namespace dolfin */
 
-}
-
-#endif
+#endif /* __DOLFIN_MESH_GEOMETRY_H */

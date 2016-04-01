@@ -7,6 +7,7 @@
 #include <dolfin/mesh/MeshGeometry.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/log/dolfin_log.h>
 
 #include <cstring>
@@ -19,17 +20,27 @@ namespace dolfin
 MeshGeometry::MeshGeometry() :
     dim_(0),
     size_(0),
-    coordinates_(0),
-    timestamp_(std::time(0))
+    coordinates_(NULL),
+    timestamp_(std::time(NULL))
 {
   std::memset(abs_tol_,0,sizeof(abs_tol_));
+}
+//-----------------------------------------------------------------------------
+MeshGeometry::MeshGeometry(uint gdim, uint size) :
+    dim_(gdim),
+    size_(size),
+    coordinates_(NULL),
+    timestamp_(std::time(NULL))
+{
+  std::memset(abs_tol_, 0, sizeof(abs_tol_));
+  init(gdim, size);
 }
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
     dim_(0),
     size_(0),
-    coordinates_(0),
-    timestamp_(std::time(0))
+    coordinates_(NULL),
+    timestamp_(std::time(NULL))
 {
   *this = geometry;
 }
@@ -67,11 +78,37 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& geometry)
   return *this;
 }
 //-----------------------------------------------------------------------------
+uint MeshGeometry::dim() const
+{
+  return dim_;
+}
+//-----------------------------------------------------------------------------
+uint MeshGeometry::size() const
+{
+  return size_;
+}
+//-----------------------------------------------------------------------------
+real MeshGeometry::abs_tolerance(uint dim) const
+{
+  dolfin_assert(dim <= dim_);
+  return abs_tol_[dim];
+}
+//-----------------------------------------------------------------------------
 Point MeshGeometry::point(uint n) const
 {
   Point p;
   std::memcpy(&p[0], &coordinates_[n * dim_], dim_*sizeof(real));
   return p;
+}
+//-----------------------------------------------------------------------------
+real * MeshGeometry::coordinates()
+{
+  return coordinates_;
+}
+//-----------------------------------------------------------------------------
+real const * MeshGeometry::coordinates() const
+{
+  return coordinates_;
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::clear()
@@ -83,6 +120,11 @@ void MeshGeometry::clear()
   coordinates_ = NULL;
 }
 //-----------------------------------------------------------------------------
+void MeshGeometry::finalize()
+{
+  dolfin_assert(coordinates_ != NULL);
+}
+//-----------------------------------------------------------------------------
 void MeshGeometry::init(uint gdim, uint size)
 {
   // Delete old data if any
@@ -90,6 +132,7 @@ void MeshGeometry::init(uint gdim, uint size)
 
   // Allocate new data
   coordinates_ = new real[gdim * size];
+  std::memset(coordinates_, 0.0, gdim * size * sizeof(real));
 
   // Save dimension and size
   dim_ = gdim;
@@ -101,7 +144,8 @@ void MeshGeometry::init(uint gdim, uint size)
     abs_tol_[i] = DOLFIN_EPS;
   }
 
-  timestamp_ = std::time(0);
+  // Initialize token
+  update_token();
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::set_abs_tolerance(uint dim, real atol)
@@ -120,9 +164,29 @@ void MeshGeometry::set(uint n, real const * x)
   std::memcpy(&coordinates_[n * dim_], x, dim_*sizeof(real));
 }
 //-----------------------------------------------------------------------------
+void MeshGeometry::remap(Array<uint> const& map)
+{
+  real * xcpy = new real[size_ * dim_];
+  for (uint i = 0; i < size_; ++i)
+  {
+    std::memcpy(&xcpy[map[i] * dim_], &coordinates_[i * dim_],
+                dim_ * sizeof(real));
+  }
+  delete[] coordinates_;
+  coordinates_ = xcpy;
+
+  // Invalidate dependencies
+  update_token();
+}
+//-----------------------------------------------------------------------------
 int MeshGeometry::token() const
 {
   return timestamp_ + size(); // FIXME
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::update_token()
+{
+  timestamp_ = std::time(NULL);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::disp() const
@@ -156,6 +220,11 @@ void MeshGeometry::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-
+void MeshGeometry::check() const
+{
+  //FIXME
 }
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
 

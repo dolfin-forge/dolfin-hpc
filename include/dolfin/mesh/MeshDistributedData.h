@@ -42,7 +42,7 @@ class MeshDistributedData
 public:
 
   /// Constructor
-  MeshDistributedData(MeshTopology& topology);
+  MeshDistributedData(uint dim);
 
   /// Destructor
   ~MeshDistributedData();
@@ -56,17 +56,11 @@ public:
   /// Assignment
   MeshDistributedData const& operator=(MeshDistributedData const& other);
 
-  /// Return if the distributed data is empty
-  bool empty() const;
-
   /// Return topological dimension of the distributed data
   uint dim() const;
 
   /// Return if the distributed data is finalized for the given dimension
   bool is_finalized(uint dim) const;
-
-  /// Initialize the distributed data for given topological dimension
-  void init(uint dim);
 
   /// Clear the distributed data
   void clear();
@@ -302,19 +296,14 @@ public:
   ///
   bool check_ghost(uint local_index, uint dim, bool error = false) const;
 
-protected:
-
 private:
 
   friend class MeshGhostIterator;
   friend class MeshSharedIterator;
 
-  MeshTopology& topology_;
-
   // Topological dimensions
-  uint topological_dim_;
-  mutable uint cell_dim_;
-  mutable uint facet_dim_;
+  uint cdim_;
+  uint fdim_;
 
   // Numbering for entities of topological dimension
   bool valid_numbering_[MAX_SIZE];
@@ -359,11 +348,11 @@ class MeshGhostIterator
 
 public:
 
-  MeshGhostIterator(MeshDistributedData const& distdata, uint i) :
+  MeshGhostIterator(MeshDistributedData const& distdata, uint dim) :
       distdata_(distdata),
-      dim_(i)
+      dim_(dim)
   {
-    iter_ = distdata_.ghost_[i].begin();
+    iter_ = distdata_.ghost_[dim].begin();
   }
 
   ~MeshGhostIterator()
@@ -424,12 +413,12 @@ class MeshSharedIterator
 
 public:
 
-  MeshSharedIterator(MeshDistributedData const& distdata, uint i) :
+  MeshSharedIterator(MeshDistributedData const& distdata, uint dim) :
       distdata_(distdata),
-      dim_(i)
+      dim_(dim)
   {
-    dolfin_assert(i <= distdata.dim());
-    iter_ = distdata_.shared_[i].begin();
+    dolfin_assert(dim <= distdata.dim());
+    iter_ = distdata_.shared_[dim].begin();
   }
 
   ~MeshSharedIterator()

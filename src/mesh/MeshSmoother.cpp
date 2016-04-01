@@ -156,7 +156,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   unsigned int current_cell = 0;
 
 
-  MeshDistributedData distdata(sub.topology());
+  MeshDistributedData distdata(sub.topology().dim());
   MeshEditor editor(sub, cell_type.cellType(), mesh.geometry().dim());
 
   // Specify number of vertices and cells

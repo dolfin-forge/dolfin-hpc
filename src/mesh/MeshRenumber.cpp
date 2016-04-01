@@ -48,13 +48,13 @@ bool MeshRenumber::renumber(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber_vertices(Mesh& mesh)
 {
-  MeshDistributedData& mddata = mesh.distdata();
-  mddata.init(mesh.topology().dim());
-  if (mddata.has_valid_numbering(0) || !mesh.is_distributed())
+  if (mesh.topology().dim() < 1 || !mesh.is_distributed()
+      || mesh.distdata().has_valid_numbering(0))
   {
     return false;
   }
 
+  MeshDistributedData& mddata = mesh.distdata();
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
@@ -143,13 +143,12 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber_edges(Mesh& mesh)
 {
-  MeshDistributedData& mddata = mesh.distdata();
-  mddata.init(mesh.topology().dim());
-  if (mesh.topology().dim() < 2 || mddata.has_valid_numbering(1)
-      || !mesh.is_distributed())
+  if (mesh.topology().dim() < 2 || !mesh.is_distributed()
+      || mesh.distdata().has_valid_numbering(1))
   {
     return false;
   }
+  MeshDistributedData& mddata = mesh.distdata();
   mddata.flush_numbering_data(1);
   mddata.flush_ownership_data(1);
 
@@ -342,13 +341,12 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber_faces(Mesh& mesh)
 {
-  MeshDistributedData& mddata = mesh.distdata();
-  mddata.init(mesh.topology().dim());
-  if (mesh.topology().dim() < 3 || mddata.has_valid_numbering(2)
-      || !mesh.is_distributed())
+  if (mesh.topology().dim() < 3 || !mesh.is_distributed()
+      || mesh.distdata().has_valid_numbering(2))
   {
     return false;
   }
+  MeshDistributedData& mddata = mesh.distdata();
   mddata.flush_numbering_data(2);
   mddata.flush_ownership_data(2);
 
@@ -550,14 +548,13 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber_cells(Mesh& mesh)
 {
-  MeshDistributedData& mddata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
-  mddata.init(tdim);
-  if (mddata.has_valid_numbering(tdim) || !mesh.is_distributed())
+  if (!mesh.is_distributed() || mesh.distdata().has_valid_numbering(tdim))
   {
     return false;
   }
 
+  MeshDistributedData& mddata = mesh.distdata();
   uint offset = 0;
   mddata.apply_num_global(tdim, offset);
 
@@ -580,7 +577,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
 bool MeshRenumber::remap_facets(Mesh& mesh)
 {
   uint const facetdim = mesh.topology().dim() - 1;
-  if (mesh.distdata().has_valid_mapping(facetdim) || !mesh.is_distributed())
+  if (!mesh.is_distributed() || mesh.distdata().has_valid_mapping(facetdim))
   {
     return false;
   }
@@ -658,6 +655,10 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
 //-----------------------------------------------------------------------------
 void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
 {
+  if(!mesh.is_distributed())
+  {
+    return;
+  }
   MeshDistributedData& distdata = mesh.distdata();
   mesh.distdata().flush_mapping(dim);
 

@@ -21,11 +21,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshDistributedData::MeshDistributedData(MeshTopology& topology) :
-    topology_(topology),
-    topological_dim_(0),
-    cell_dim_(0),
-    facet_dim_(0),
+MeshDistributedData::MeshDistributedData(uint dim) :
+    cdim_(0),
+    fdim_(0),
     max_global_index_(0)
 {
   for (uint i = 0; i < MAX_SIZE; ++i)
@@ -35,7 +33,6 @@ MeshDistributedData::MeshDistributedData(MeshTopology& topology) :
   set_invalid_numbering();
   set_invalid_ownership();
   clear();
-  init(topology.dim());  // Set to zero is the mesh topology is uninitialized
 }
 //-----------------------------------------------------------------------------
 MeshDistributedData::~MeshDistributedData()
@@ -49,13 +46,12 @@ MeshDistributedData const& MeshDistributedData::operator=(
   clear();
 
   // Topological dimensions
-  topological_dim_ = other.topological_dim_;
-  cell_dim_ = other.cell_dim_;
-  facet_dim_ = other.facet_dim_;
+  cdim_ = other.cdim_;
+  fdim_ = other.fdim_;
 
   //
   max_global_index_ = other.max_global_index_;
-  for (uint i = 0; i <= cell_dim_; ++i)
+  for (uint i = 0; i <= cdim_; ++i)
   {
     // Numbering
     valid_numbering_[i] = other.valid_numbering_[i];
@@ -104,17 +100,12 @@ bool MeshDistributedData::operator==(MeshDistributedData const& other) const
     return true;
   }
   //
-  if (topological_dim_ != other.topological_dim_)
+  if (cdim_ != other.cdim_)
   {
     return false;
   }
   //
-  if (cell_dim_ != other.cell_dim_)
-  {
-    return false;
-  }
-  //
-  if (facet_dim_ != other.facet_dim_)
+  if (fdim_ != other.fdim_)
   {
     return false;
   }
@@ -160,38 +151,16 @@ bool MeshDistributedData::operator!=(MeshDistributedData const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-bool MeshDistributedData::empty() const
-{
-  return (
-      finalized_[0] ?
-          (cached_global_size_[0] == 0) : (global_indices_[0].size() == 0));
-}
-//-----------------------------------------------------------------------------
 uint MeshDistributedData::dim() const
 {
-  dolfin_assert(topological_dim_ <= EuclideanSpace::MAX_DIMENSION);
-  return topological_dim_;
+  dolfin_assert(cdim_ <= EuclideanSpace::MAX_DIMENSION);
+  return cdim_;
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_finalized(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return finalized_[dim];
-}
-//-----------------------------------------------------------------------------
-void MeshDistributedData::init(uint dim)
-{
-  // Do not initialize at construction and if the mesh is a point cell
-  if (dim > 0 && topological_dim_ == 0)
-  {
-    topological_dim_ = dim;
-    cell_dim_ = topological_dim_;
-    facet_dim_ = topological_dim_ - 1;
-  }
-  else if (dim != topological_dim_)
-  {
-    error("Setting a different topological dimension in distributed data.");
-  }
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::clear()
@@ -206,9 +175,8 @@ void MeshDistributedData::clear()
     flush_ownership_data(i);
   }
   max_global_index_ = 0;
-  topological_dim_ = 0;
-  cell_dim_ = 0;
-  facet_dim_ = 0;
+  cdim_ = 0;
+  fdim_ = 0;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::flush_numbering_data(uint dim)
@@ -257,7 +225,7 @@ void MeshDistributedData::flush_mapping(uint dim)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::finalize(uint dim)
 {
-  if (dim > cell_dim_ || global_indices_[dim].size() == 0)
+  if (dim > cdim_ || global_indices_[dim].size() == 0)
   {
     return;
   }
@@ -282,13 +250,13 @@ void MeshDistributedData::finalize(uint dim)
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_valid_numbering(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return valid_numbering_[dim];
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_invalid_numbering()
 {
-  for (uint i = 0; i <= cell_dim_; ++i)
+  for (uint i = 0; i <= cdim_; ++i)
   {
     valid_numbering_[i] = false;
     finalized_[i] = false;
@@ -297,7 +265,7 @@ void MeshDistributedData::set_invalid_numbering()
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   global_indices_[dim][local_index] = global_index;
   local_indices_[dim][global_index] = local_index;
 }
@@ -305,7 +273,7 @@ void MeshDistributedData::set_map(uint local_index, uint global_index, uint dim)
 void MeshDistributedData::apply_numbering(uint dim, _map<uint, uint> const& local,
                                         _map<uint, uint> const& global)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   local_indices_[dim] = local;
   global_indices_[dim] = global;
   max_global_index_ = std::max(max_global_index_, num_global_[dim]);
@@ -314,7 +282,7 @@ void MeshDistributedData::apply_numbering(uint dim, _map<uint, uint> const& loca
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_global(uint dim) const
 {
-  if (dim > cell_dim_)
+  if (dim > cdim_)
   {
     error("Trying to get global number of entities for invalid dimension.");
   }
@@ -323,8 +291,7 @@ uint MeshDistributedData::num_global(uint dim) const
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_global(uint i, uint dim) const
 {
-  return (
-      empty() ? (i < topology_.size(dim)) : (local_indices_[dim].count(i) > 0));
+  return (local_indices_[dim].count(i) > 0);
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_global(MeshEntity const& entity) const
@@ -334,12 +301,8 @@ bool MeshDistributedData::has_global(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_global(uint i, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
-  if (empty())
-  {
-    return i;
-  }
-  else if (finalized_[dim])
+  dolfin_assert(dim <= cdim_);
+  if (finalized_[dim])
   {
     dolfin_assert(cached_global_indices_[dim] != NULL);
     dolfin_assert(i < cached_global_size_[dim]);
@@ -359,11 +322,7 @@ uint MeshDistributedData::get_global(MeshEntity const& e) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_global(uint i) const
 {
-  if (empty())
-  {
-    return i;
-  }
-  else if (finalized_[0])
+  if (finalized_[0])
   {
     dolfin_assert(cached_global_indices_[0] != NULL);
     dolfin_assert(i < cached_global_size_[0]);
@@ -378,107 +337,82 @@ uint MeshDistributedData::get_vertex_global(uint i) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_global(uint i) const
 {
-  if (empty())
+  if (finalized_[fdim_])
   {
-    return i;
-  }
-  else if (finalized_[facet_dim_])
-  {
-    dolfin_assert(cached_global_indices_[facet_dim_] != NULL);
-    dolfin_assert(i < cached_global_size_[facet_dim_]);
-    return cached_global_indices_[facet_dim_][i];
+    dolfin_assert(cached_global_indices_[fdim_] != NULL);
+    dolfin_assert(i < cached_global_size_[fdim_]);
+    return cached_global_indices_[fdim_][i];
   }
   else
   {
-    dolfin_assert(global_indices_[facet_dim_].count(i));
-    return global_indices_[facet_dim_].find(i)->second;
+    dolfin_assert(global_indices_[fdim_].count(i));
+    return global_indices_[fdim_].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_global(uint i) const
 {
-  if (empty())
+  if (finalized_[cdim_])
   {
-    return i;
-  }
-  else if (finalized_[cell_dim_])
-  {
-    dolfin_assert(cached_global_indices_[cell_dim_] != NULL);
-    dolfin_assert(i < cached_global_size_[cell_dim_]);
-    return cached_global_indices_[cell_dim_][i];
+    dolfin_assert(cached_global_indices_[cdim_] != NULL);
+    dolfin_assert(i < cached_global_size_[cdim_]);
+    return cached_global_indices_[cdim_][i];
   }
   else
   {
-    dolfin_assert(global_indices_[cell_dim_].count(i));
-    return global_indices_[cell_dim_].find(i)->second;
+    dolfin_assert(global_indices_[cdim_].count(i));
+    return global_indices_[cdim_].find(i)->second;
   }
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_num_global(uint dim, uint const num_global)
 {
-  if (dim > cell_dim_)
+  if (dim > cdim_)
   {
     error("Trying to set global number of entities for invalid dimension %d "
-          " for mesh of topological dimension %d", dim, cell_dim_);
-  }
-  if (num_global < topology_.size(dim))
-  {
-    error("Trying to set global number of entities of dimension %d equal to %d "
-          "lower than local number %d.", dim, num_global, topology_.size(dim));
+          " for mesh of topological dimension %d", dim, cdim_);
   }
   num_global_[dim] = num_global;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::apply_num_global(uint dim, uint& offset)
 {
-  if (dim > cell_dim_)
+  if (dim > cdim_)
   {
     error("Trying to set global number of entities for invalid dimension.");
   }
 #if HAVE_MPI
-  if (!empty())
+  offset = 0;
+  uint num_owned = this->num_owned(dim);
+  if(num_owned == 0)
   {
-    offset = 0;
-    uint num_owned = this->num_owned(dim);
-    if(num_owned == 0)
-    {
-      error("Mesh entities have not been created for dimension %d", dim);
-    }
+    error("Mesh entities have not been created for dimension %d", dim);
+  }
 
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI_Exscan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-    offset -= num_owned;
+  MPI_Scan(&num_owned, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  offset -= num_owned;
 #endif
 
-    uint num_glb;
-    MPI_Allreduce(&num_owned, &num_glb, 1, MPI_UNSIGNED, MPI_SUM,
-                  MPI::DOLFIN_COMM);
-    num_global_[dim] = num_glb;
-  }
+  uint num_glb;
+  MPI_Allreduce(&num_owned, &num_glb, 1, MPI_UNSIGNED, MPI_SUM,
+                MPI::DOLFIN_COMM);
+  num_global_[dim] = num_glb;
 #endif
-  else
-  {
-    offset = 0;
-    num_global_[dim] = topology_.size(dim);
-  }
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_local(uint dim) const
 {
-  if (dim > cell_dim_)
-  {
-    error("Trying to get local number of entities for invalid dimension.");
-  }
-  return (empty() ? topology_.size(dim) : global_indices_[dim].size());
+  dolfin_assert(dim <= cdim_);
+  return (global_indices_[dim].size());
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_local(uint i, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
-  return (
-      empty() ? (i < topology_.size(dim)) : (global_indices_[dim].count(i) > 0));
+  dolfin_assert(dim <= cdim_);
+  return (global_indices_[dim].count(i) > 0);
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_local(MeshEntity const& entity) const
@@ -488,11 +422,7 @@ bool MeshDistributedData::has_local(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_local(uint i, uint dim) const
 {
-  if (empty())
-  {
-    return i;
-  }
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(local_indices_[dim].count(i));
   return local_indices_[dim].find(i)->second;
 }
@@ -504,53 +434,39 @@ uint MeshDistributedData::get_local(MeshEntity const& e) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_vertex_local(uint i) const
 {
-  if (empty())
-  {
-    return i;
-  }
   dolfin_assert(local_indices_[0].count(i));
   return local_indices_[0].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_facet_local(uint i) const
 {
-  if (empty())
-  {
-    return i;
-  }
-
-  dolfin_assert(local_indices_[facet_dim_].count(i));
-  return local_indices_[facet_dim_].find(i)->second;
+  dolfin_assert(local_indices_[fdim_].count(i));
+  return local_indices_[fdim_].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_cell_local(uint i) const
 {
-  if (empty())
-  {
-    return i;
-  }
-
-  dolfin_assert(local_indices_[cell_dim_].count(i));
-  return local_indices_[cell_dim_].find(i)->second;
+  dolfin_assert(local_indices_[cdim_].count(i));
+  return local_indices_[cdim_].find(i)->second;
 }
 //-----------------------------------------------------------------------------
 // Distributed entities ownership
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_valid_ownership(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return valid_ownership_[dim];
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::has_valid_mapping(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return valid_mapping_[dim];
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_invalid_ownership()
 {
-  for (uint i = 0; i < cell_dim_; ++i)
+  for (uint i = 0; i < cdim_; ++i)
   {
     valid_ownership_[i] = false;
   }
@@ -558,13 +474,13 @@ void MeshDistributedData::set_invalid_ownership()
 //-----------------------------------------------------------------------------
 void MeshDistributedData::apply_ownership(uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   valid_ownership_[dim] = true;
 }
 //-----------------------------------------------------------------------------
 void MeshDistributedData::remap_ownership(Array<uint> const& mapping)
 {
-  for (uint i = 0; i < cell_dim_; ++i)
+  for (uint i = 0; i < cdim_; ++i)
   {
     for (MeshGhostIterator it(*this, i); !it.end(); ++it)
     {
@@ -589,8 +505,8 @@ void MeshDistributedData::remap_ownership(Array<uint> const& mapping)
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_shared(uint i, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
-  return (empty() ? false : (shared_[dim].count(i) > 0));
+  dolfin_assert(dim <= cdim_);
+  return (shared_[dim].count(i) > 0);
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_shared(MeshEntity const& entity) const
@@ -600,13 +516,13 @@ bool MeshDistributedData::is_shared(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_shared(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return shared_[dim].size();
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_shared_with(uint rank, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   AdjacentMapping::const_iterator it = shared_mapping_[dim].find(rank);
   if (it != shared_mapping_[dim].end())
   {
@@ -618,7 +534,7 @@ uint MeshDistributedData::num_shared_with(uint rank, uint dim) const
 Array<uint> const& MeshDistributedData::get_shared_mapping_to(uint rank,
                                                               uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
   dolfin_assert(shared_mapping_[dim].find(rank)->second.first.size()
                   == shared_mapping_[dim].find(rank)->second.second.size());
@@ -639,7 +555,7 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_to(uint rank,
 //-----------------------------------------------------------------------------
 Array<uint>& MeshDistributedData::get_shared_mapping_to(uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting shared mapping from non-adjacent rank %d", rank);
@@ -650,7 +566,7 @@ Array<uint>& MeshDistributedData::get_shared_mapping_to(uint rank, uint dim)
 Array<uint> const& MeshDistributedData::get_shared_mapping_from(uint rank,
                                                                 uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
   dolfin_assert(shared_mapping_[dim].find(rank)->second.first.size()
                   == shared_mapping_[dim].find(rank)->second.second.size());
@@ -671,7 +587,7 @@ Array<uint> const& MeshDistributedData::get_shared_mapping_from(uint rank,
 //-----------------------------------------------------------------------------
 Array<uint>& MeshDistributedData::get_shared_mapping_from(uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting shared mapping from non-adjacent rank %d", rank);
@@ -686,19 +602,19 @@ void MeshDistributedData::set_shared(MeshEntity const& m)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_shared(uint local_index, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   shared_[dim].insert(local_index);
 }
 //-----------------------------------------------------------------------------
 _set<uint> const& MeshDistributedData::get_adj_ranks(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return adjacent_ranks_[dim];
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_adj_ranks(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return adjacent_ranks_[dim].size();
 }
 //-----------------------------------------------------------------------------
@@ -721,7 +637,7 @@ void MeshDistributedData::set_shared_adj(MeshEntity const& m, uint rank)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   shared_adj_[dim][i].insert(rank);
   adjacent_ranks_[dim].insert(rank);
 }
@@ -729,7 +645,7 @@ void MeshDistributedData::set_shared_adj(uint i, uint rank, uint dim)
 void MeshDistributedData::setall_shared_adj(uint i, _set<uint> const& ranks,
                                             uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   shared_adj_[dim][i].clear();
   shared_adj_[dim][i].insert(ranks.begin(), ranks.end());
   adjacent_ranks_[dim].insert(ranks.begin(), ranks.end());
@@ -743,8 +659,8 @@ void MeshDistributedData::setall_shared_adj(MeshEntity const& m,
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_ghost(uint i, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
-  return (empty() ? false : (ghost_[dim].count(i) > 0));
+  dolfin_assert(dim <= cdim_);
+  return (ghost_[dim].count(i) > 0);
 }
 //-----------------------------------------------------------------------------
 bool MeshDistributedData::is_ghost(MeshEntity const& entity) const
@@ -754,19 +670,19 @@ bool MeshDistributedData::is_ghost(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_owned(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
-  return topology_.size(dim) - ghost_[dim].size();
+  dolfin_assert(dim <= cdim_);
+  return local_indices_[dim].size() - ghost_[dim].size();
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_ghost(uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   return ghost_[dim].size();
 }
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::num_ghost_from(uint rank, uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   AdjacentMapping::const_iterator it = ghost_mapping_[dim].find(rank);
   if (it != ghost_mapping_[dim].end())
   {
@@ -777,11 +693,7 @@ uint MeshDistributedData::num_ghost_from(uint rank, uint dim) const
 //-----------------------------------------------------------------------------
 uint MeshDistributedData::get_owner(uint local_index, uint dim) const
 {
-  if (empty())
-  {
-    return 0;
-  }
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(ghost_owner_[dim].count(local_index));
   _map<uint, uint>::const_iterator it = ghost_owner_[dim].find(local_index);
   if(it == ghost_owner_[dim].end())
@@ -799,7 +711,7 @@ uint MeshDistributedData::get_owner(MeshEntity const& e) const
 Array<uint> const& MeshDistributedData::get_ghost_mapping_to(uint rank,
                                                              uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
   dolfin_assert(ghost_mapping_[dim].find(rank)->second.first.size()
                   == ghost_mapping_[dim].find(rank)->second.second.size());
@@ -820,7 +732,7 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_to(uint rank,
 //-----------------------------------------------------------------------------
 Array<uint>& MeshDistributedData::get_ghost_mapping_to(uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting ghost mapping from non-adjacent rank %d", rank);
@@ -831,7 +743,7 @@ Array<uint>& MeshDistributedData::get_ghost_mapping_to(uint rank, uint dim)
 Array<uint> const& MeshDistributedData::get_ghost_mapping_from(uint rank,
                                                                uint dim) const
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   dolfin_assert(adjacent_ranks_[dim].count(rank) > 0);
   dolfin_assert(
       ghost_mapping_[dim].find(rank)->second.first.size()
@@ -853,7 +765,7 @@ Array<uint> const& MeshDistributedData::get_ghost_mapping_from(uint rank,
 //-----------------------------------------------------------------------------
 Array<uint>& MeshDistributedData::get_ghost_mapping_from(uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   if (adjacent_ranks_[dim].count(rank) == 0)
   {
     error("Requesting ghost mapping from non-adjacent rank %d", rank);
@@ -868,7 +780,7 @@ void MeshDistributedData::set_ghost(MeshEntity const& m)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost(uint local_index, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   set_shared(local_index, dim);
   ghost_[dim].insert(local_index);
 }
@@ -880,7 +792,7 @@ void MeshDistributedData::set_ghost_owner(MeshEntity const& m, uint rank)
 //-----------------------------------------------------------------------------
 void MeshDistributedData::set_ghost_owner(uint i, uint rank, uint dim)
 {
-  dolfin_assert(dim <= cell_dim_);
+  dolfin_assert(dim <= cdim_);
   set_shared_adj(i, rank, dim);
   ghost_owner_[dim][i] = rank;
 }
@@ -891,33 +803,33 @@ void MeshDistributedData::disp() const
   cout << "-------------------" << endl;
 
   begin("");
-  cout << "Topological dimension     : " << (uint) topological_dim_ << endl;
-  cout << "Cell dimension            : " << (uint) cell_dim_ << endl;
-  cout << "Facet dimension           : " << (uint) facet_dim_ << endl;
+  cout << "Topological dimension     : " << (uint) cdim_ << endl;
+  cout << "Cell dimension            : " << (uint) cdim_ << endl;
+  cout << "Facet dimension           : " << (uint) fdim_ << endl;
   skip();
   cout << "Maximum global index      : " << (uint) max_global_index_ << endl;
   cout << "Number of global vertices : " << (uint) num_global_[0] << endl;
   cout << "Valid vertex numbering    : " << (bool) valid_numbering_[0] << endl;
-  if (topological_dim_ > 1)
+  if (cdim_ > 1)
   {
     cout << "Number of global edges    : " << (uint) num_global_[1] << endl;
     cout << "Valid edge   numbering    : " << (bool) valid_numbering_[1]
          << endl;
   }
-  if (topological_dim_ > 2)
+  if (cdim_ > 2)
   {
     cout << "Number of global faces    : " << (uint) num_global_[2] << endl;
     cout << "Valid face   numbering    : " << (bool) valid_numbering_[2]
          << endl;
   }
-  cout << "Number of global cells    : " << (uint) num_global_[cell_dim_]
+  cout << "Number of global cells    : " << (uint) num_global_[cdim_]
        << endl;
-  cout << "Valid cell   numbering    : " << (bool) valid_numbering_[cell_dim_]
+  cout << "Valid cell   numbering    : " << (bool) valid_numbering_[cdim_]
        << endl;
   skip();
   cout << "Number of shared entities : " << endl;
   begin("");
-  for (uint d = 0; d < topological_dim_; ++d)
+  for (uint d = 0; d < cdim_; ++d)
   {
     cout << "dim = " << d << ": " << (uint) this->num_shared(d) << endl;
   }
@@ -925,7 +837,7 @@ void MeshDistributedData::disp() const
   skip();
   cout << "Number of ghost entities : " << endl;
   begin("");
-  for (uint d = 0; d < topological_dim_; ++d)
+  for (uint d = 0; d < cdim_; ++d)
   {
     cout << "dim = " << d << ": " << (uint) this->num_ghost(d) << endl;
   }
@@ -956,7 +868,7 @@ bool MeshDistributedData::check(bool throw_error) const
 
   //
   _set<uint> vertex_adj = disdata.get_adj_ranks(0);
-  for (uint d = 0; d <= topological_dim_; ++d)
+  for (uint d = 0; d <= cdim_; ++d)
   {
     // Check consistency of count
     ret &= disdata.num_ghost(d) <= disdata.num_shared(d);
@@ -1065,5 +977,5 @@ bool MeshDistributedData::check_ghost(uint local_index, uint dim,
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */
 

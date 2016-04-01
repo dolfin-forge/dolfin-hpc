@@ -737,7 +737,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     editor.init_vertices(num_local_vertices);
     editor.init_cells(cells.size());
 
-    MeshDistributedData distdata(mesh.topology());
+    MeshDistributedData distdata(mesh.topology().dim());
 
     /* Add local indices
      * Use start_index for global number

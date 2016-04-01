@@ -31,9 +31,6 @@ namespace dolfin
 
 class MeshTopology
 {
-
-  friend class MeshRenumber;
-  friend class MPIMeshCommunicator;
   friend class TopologyComputation;
 
 public:
@@ -135,7 +132,7 @@ private:
   MeshConnectivity ** connectivity_;
 
   /// Distributed mesh topology data
-  MeshDistributedData distdata_;
+  MeshDistributedData * distdata_;
 
   /// Return true iff topology is ordered according to the UFC numbering
   bool ordered_;
@@ -180,13 +177,15 @@ inline MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
 //-----------------------------------------------------------------------------
 inline MeshDistributedData& MeshTopology::distdata()
 {
-  return distdata_;
+  dolfin_assert(distdata_ != NULL);
+  return *distdata_;
 }
 
 //-----------------------------------------------------------------------------
 inline MeshDistributedData const& MeshTopology::distdata() const
 {
-  return distdata_;
+  dolfin_assert(distdata_ != NULL);
+  return *distdata_;
 }
 
 //-----------------------------------------------------------------------------
@@ -222,7 +221,7 @@ inline bool MeshTopology::is_ordered() const
 //-----------------------------------------------------------------------------
 inline bool MeshTopology::is_distributed() const
 {
-  return !distdata_.empty();
+  return (distdata_ != NULL);
 }
 
 //-----------------------------------------------------------------------------

@@ -20,7 +20,7 @@ MeshTopology::MeshTopology() :
     dim_(0),
     num_entities_(NULL),
     connectivity_(NULL),
-    distdata_(*this),
+    distdata_(NULL),
     ordered_(false),
     timestamp_(std::time(NULL)),
     renumbering_count_(0)
@@ -32,7 +32,7 @@ MeshTopology::MeshTopology(MeshTopology const& topology) :
     dim_(0),
     num_entities_(NULL),
     connectivity_(NULL),
-    distdata_(*this),
+    distdata_(NULL),
     ordered_(false),
     timestamp_(std::time(NULL)),
     renumbering_count_(0)
@@ -79,7 +79,7 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     }
   }
   //
-  if (distdata_ != other.distdata_)
+  if (!objptrcmp(distdata_,other.distdata_))
   {
     return false;
   }
@@ -121,7 +121,10 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& topology)
       }
     }
   }
-  distdata_ = topology.distdata_;
+  if(topology.distdata_)
+  {
+    distdata_ = new MeshDistributedData(*topology.distdata_);
+  }
   ordered_ = topology.ordered_;
   timestamp_ = topology.timestamp_;
   renumbering_count_ = topology.renumbering_count_;
@@ -132,7 +135,8 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& topology)
 void MeshTopology::clear()
 {
   // Clear parallel data structures
-  distdata_.clear();
+  delete distdata_;
+  distdata_ = NULL;
 
   // Delete number of mesh entities
   delete[] num_entities_;
@@ -179,7 +183,10 @@ void MeshTopology::init(uint dim)
 
   // Save dimension
   dim_ = dim;
-  distdata_.init(dim_);
+  if(MPI::numProcesses() > 1)
+  {
+    distdata_ = new MeshDistributedData(dim_);
+  }
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint size)

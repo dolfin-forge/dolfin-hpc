@@ -85,7 +85,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
                                            MeshFunction<bool> *cell_marker)
 {
 
-  MeshDistributedData distdata(mesh.topology());
+  MeshDistributedData distdata(mesh.topology().dim());
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint gdim = mesh.geometry().dim();
@@ -459,7 +459,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   editor.close();
 
   // Overwrite old mesh with new, and invalidate numbering
-  new_mesh.topology_.distdata_ = distdata;
+  new_mesh.topology().distdata() = distdata;
   mesh = new_mesh;
   dolfin_assert(mesh.is_distributed());
   mesh.distdata().set_invalid_numbering();
@@ -488,7 +488,7 @@ void MPIMeshCommunicator::distributeCommon(
   typedef Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > VertexFunctionArrayType;
 
   // new local distdata
-  MeshDistributedData distdata(mesh.topology());
+  MeshDistributedData distdata(mesh.topology().dim());
 
   // sizes and numbers
   uint rank = MPI::processNumber();
@@ -1052,7 +1052,7 @@ void MPIMeshCommunicator::distributeCommon(
   editor.close();
 
   // Overwrite old mesh with new, and invalidate numbering
-  new_mesh.topology_.distdata_ = distdata;
+  new_mesh.topology().distdata() = distdata;
   mesh = new_mesh;
   dolfin_assert(mesh.is_distributed());
   mesh.distdata().set_invalid_numbering();

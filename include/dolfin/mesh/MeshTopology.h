@@ -36,7 +36,7 @@ class MeshTopology
 public:
 
   /// Create empty mesh topology
-  MeshTopology();
+  MeshTopology(Mesh& mesh);
 
   /// Copy constructor
   MeshTopology(MeshTopology const& topology);
@@ -121,6 +121,9 @@ protected:
   void init(uint dim, uint size);
 
 private:
+
+  ///
+  Mesh& mesh_;
 
   /// Topological dimension
   uint dim_;

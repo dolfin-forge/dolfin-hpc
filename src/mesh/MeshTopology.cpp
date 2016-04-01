@@ -16,7 +16,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology() :
+MeshTopology::MeshTopology(Mesh& mesh) :
+    mesh_(mesh),
     dim_(0),
     num_entities_(NULL),
     connectivity_(NULL),
@@ -28,7 +29,8 @@ MeshTopology::MeshTopology() :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology(MeshTopology const& topology) :
+MeshTopology::MeshTopology(MeshTopology const& other) :
+    mesh_(other.mesh_),
     dim_(0),
     num_entities_(NULL),
     connectivity_(NULL),
@@ -37,7 +39,7 @@ MeshTopology::MeshTopology(MeshTopology const& topology) :
     timestamp_(std::time(NULL)),
     renumbering_count_(0)
 {
-  *this = topology;
+  *this = other;
 }
 //-----------------------------------------------------------------------------
 MeshTopology::~MeshTopology()

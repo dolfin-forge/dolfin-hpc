@@ -210,9 +210,7 @@ inline uint MeshTopology::num_ghosts(uint dim) const
 //-----------------------------------------------------------------------------
 inline uint MeshTopology::num_owned(uint dim) const
 {
-  return (
-      is_distributed() ?
-          this->size(dim) - distdata().num_ghost(dim) : this->size(dim));
+  return (this->size(dim) - this->num_ghosts(dim));
 }
 
 //-----------------------------------------------------------------------------

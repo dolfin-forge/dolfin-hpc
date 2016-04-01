@@ -198,21 +198,21 @@ void MeshTopology::init(uint dim, uint size)
   num_entities_[dim] = size;
 }
 //-----------------------------------------------------------------------------
-uint MeshTopology::compute_entities(Mesh& mesh, uint dim) const
+uint MeshTopology::compute_entities(uint dim) const
 {
-  return TopologyComputation::computeEntities(mesh, dim);
+  return TopologyComputation::computeEntities(mesh_, dim);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::compute_connectivity(Mesh& mesh, uint d0, uint d1) const
+void MeshTopology::compute_connectivity(uint d0, uint d1) const
 {
-  TopologyComputation::computeConnectivity(mesh, d0, d1);
+  TopologyComputation::computeConnectivity(mesh_, d0, d1);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::order(Mesh& mesh)
+void MeshTopology::order()
 {
   message(1, "Ordering mesh entities...");
-  CellType const& cell_type = mesh.type();
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  CellType const& cell_type = mesh_.type();
+  for (CellIterator cell(mesh_); !cell.end(); ++cell)
   {
     cell_type.order_entities(*cell);
   }

@@ -235,13 +235,13 @@ IntersectionDetector& Mesh::intersector()
 dolfin::uint Mesh::init(uint dim) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  return topology_.compute_entities(*mesh, dim);
+  return topology_.compute_entities(dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
   Mesh* mesh = const_cast<Mesh*>(this);
-  topology_.compute_connectivity(*mesh, d0, d1);
+  topology_.compute_connectivity(d0, d1);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -291,7 +291,7 @@ void Mesh::order()
   }
   else
   {
-    topology_.order(*this);
+    topology_.order();
   }
 }
 //-----------------------------------------------------------------------------

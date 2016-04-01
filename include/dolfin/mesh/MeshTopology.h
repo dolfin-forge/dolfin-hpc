@@ -69,10 +69,10 @@ public:
   void init(uint dim);
 
   /// Compute mesh entities of given topological dimension
-  uint compute_entities(Mesh& mesh, uint dim) const;
+  uint compute_entities(uint dim) const;
 
   /// Compute connectivity for given pair of topological dimensions
-  void compute_connectivity(Mesh& mesh, uint d0, uint d1) const;
+  void compute_connectivity(uint d0, uint d1) const;
 
   /// Return connectivity for given pair of topological dimensions
   MeshConnectivity& operator()(uint d0, uint d1);
@@ -92,7 +92,7 @@ public:
   uint num_owned(uint dim) const;
 
   ///
-  void order(Mesh& mesh);
+  void order();
 
   /// Return if connectivity for given pair is computed
   bool is_computed(uint d0, uint d1) const;
@@ -104,7 +104,7 @@ public:
   bool is_distributed() const;
 
   ///
-  void renumber(Mesh& mesh);
+  void renumber();
 
   /// Return token identifying the internal state of mesh topology
   int token() const;
@@ -228,9 +228,9 @@ inline bool MeshTopology::is_distributed() const
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshTopology::renumber(Mesh& mesh)
+inline void MeshTopology::renumber()
 {
-  if (MeshRenumber::renumber(mesh))
+  if (MeshRenumber::renumber(mesh_))
   {
     ++renumbering_count_;
   }

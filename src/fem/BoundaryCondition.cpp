@@ -93,9 +93,6 @@ BoundaryCondition::~BoundaryCondition()
 //-----------------------------------------------------------------------------
 void BoundaryCondition::init_markers(uint const entity_dim)
 {
-  // Make sure the mesh has been ordered
-  mesh().order();
-
   // Create mesh function for sub domain markers on facets
   dolfin_assert(entity_dim < mesh().topology().dim());
   mesh().init(entity_dim);

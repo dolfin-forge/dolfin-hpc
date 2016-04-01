@@ -57,7 +57,6 @@ libdolfin_mesh_la_SOURCES = \
 			StructuredGrid.cpp\
 			SubDomain.cpp\
 			TetrahedronCell.cpp\
-			TopologyComputation.cpp\
 			TriangleCell.cpp\
 			UniformMeshRefinement.cpp\
 			UnitCube.cpp\

@@ -226,7 +226,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/SubDomain.h\
 				mesh/StructuredGrid.h\
 				mesh/TetrahedronCell.h\
-				mesh/TopologyComputation.h\
 				mesh/TriangleCell.h\
 				mesh/UniformMeshRefinement.h\
 				mesh/UnitCube.h\

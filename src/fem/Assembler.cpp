@@ -378,7 +378,6 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   uint const facet_dim = tdim - 1;
   mesh.init(facet_dim);
   mesh.init(facet_dim, tdim);
-  mesh.order();
 
   // Assemble over interior facets (the facets of the mesh)
 #ifndef NO_PROGRESS_BAR

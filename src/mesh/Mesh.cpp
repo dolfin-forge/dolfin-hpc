@@ -232,16 +232,14 @@ IntersectionDetector& Mesh::intersector()
   return *intersection_detector_;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint Mesh::init(uint dim) const
+uint Mesh::init(uint dim) const
 {
-  Mesh* mesh = const_cast<Mesh*>(this);
-  return topology_.compute_entities(dim);
+  return topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
-  Mesh* mesh = const_cast<Mesh*>(this);
-  topology_.compute_connectivity(d0, d1);
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -280,18 +278,6 @@ void Mesh::clear()
   {
     delete periodic_mappings_.back();
     periodic_mappings_.pop_back();
-  }
-}
-//-----------------------------------------------------------------------------
-void Mesh::order()
-{
-  if (topology_.is_ordered())
-  {
-    message(1, "Mesh has already been ordered, no need to reorder entities.");
-  }
-  else
-  {
-    topology_.order();
   }
 }
 //-----------------------------------------------------------------------------

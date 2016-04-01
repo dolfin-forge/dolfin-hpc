@@ -57,16 +57,13 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   // Save mesh and dimension
   this->tdim_ = mesh.cell_type_->dim();
   this->gdim_ = gdim;
-
-  // Initialize topological dimension
-  mesh.topology_.init(tdim_);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_vertices(uint num_vertices)
 {
   // Initialize mesh data
   this->num_vertices_ = num_vertices;
-  mesh_->topology_.init(0, num_vertices);
+  mesh_->topology_.init(tdim_, num_vertices);
   mesh_->geometry_.init(gdim_, num_vertices);
 }
 //-----------------------------------------------------------------------------
@@ -74,7 +71,6 @@ void MeshEditor::init_cells(uint num_cells)
 {
   // Initialize mesh data
   this->num_cells_ = num_cells;
-  mesh_->topology_.init(tdim_, num_cells);
   mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().num_vertices(tdim_));
 }
 //-----------------------------------------------------------------------------

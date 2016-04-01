@@ -319,9 +319,6 @@ void DofMap::initUFC(UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)
                   "topological dimension of the mesh.");
   }
 
-  // Order vertices, so entities will be created correctly according to convention
-  mesh->order();
-
   // Initialize mesh entities used by dof map
   for (uint d = 0; d <= mesh->topology().dim(); d++)
   {
@@ -1251,7 +1248,6 @@ void DofMap::distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
   // Compute facets and facet - cell connectivity if not already computed
   mesh.init(tdim - 1);
   mesh.init(tdim - 1, tdim);
-  mesh.order();
 
   // Cache number of dofs per mesh entity
   uint * num_entity_dofs = new uint[tdim + 1];

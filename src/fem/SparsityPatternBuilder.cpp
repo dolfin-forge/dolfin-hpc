@@ -88,7 +88,6 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     // Compute facets and facet - cell connectivity if not already computed
     mesh.init(tdim - 1);
     mesh.init(tdim - 1, tdim);
-    mesh.order();
 
     for (FacetIterator facet(mesh); !facet.end(); ++facet)
     {

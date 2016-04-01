@@ -189,9 +189,6 @@ public:
   /// Clear all mesh data
   void clear();
 
-  /// Order all mesh entities (not needed if "mesh order entities" is set)
-  void order();
-
   /// Return true iff topology is ordered according to the UFC numbering
   bool is_ordered() const;
 

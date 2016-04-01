@@ -207,9 +207,6 @@ void DirichletBC::initFromSubDomain(SubDomain const& sub_domain)
   // FIXME: the entire mesh and then extracting the subset. This is done
   // FIXME: mainly for convenience (we may reuse mark() in SubDomain).
 
-  // Make sure the mesh has been ordered
-  mesh().order();
-
   // Create mesh function for sub domain markers on facets
   const uint dim = mesh().topology().dim();
   mesh().init(dim - 1);
@@ -233,9 +230,6 @@ void DirichletBC::initFromMeshFunction(MeshFunction<uint> const& sub_domains,
   // Make sure we have the facet - cell connectivity
   uint const dim = mesh().topology().dim();
   mesh().init(dim - 1, dim);
-
-  // Make sure the mesh has been ordered
-  mesh().order();
 
   // Build set of boundary facets
   for (FacetIterator facet(mesh()); !facet.end(); ++facet)

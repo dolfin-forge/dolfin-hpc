@@ -7,30 +7,43 @@
 #ifndef __DOLFIN_DOMAIN_BOUNDARY_H
 #define __DOLFIN_DOMAIN_BOUNDARY_H
 
-#include "SubDomain.h"
+#include <dolfin/mesh/SubDomain.h>
 
 namespace dolfin
 {
 
-  /// This class provides a SubDomain which picks out the boundary of
-  /// a mesh, and provides a convenient way to specify boundary
-  /// conditions on the entire boundary of a mesh.
+/**
+ *  @class  DomainBoundary
+ *
+ *  @brief  This class provides a SubDomain which picks out the boundary of a
+ *          mesh, and provides a convenient way to specify boundary conditions
+ *          on the entire boundary of a mesh.
+ */
 
-  class DomainBoundary : public SubDomain
+class DomainBoundary : public SubDomain
+{
+
+public:
+
+  /// Constructor
+  DomainBoundary() :
+    SubDomain()
   {
-  public:
+  }
 
-    /// Constructor
-    DomainBoundary() {};
+  /// Destructor
+  ~DomainBoundary()
+  {
+  }
 
-    /// Destructor
-    virtual ~DomainBoundary() {}
+  /// Return true for points on the boundary
+  bool inside(const real* x, bool on_boundary) const
+  {
+    return on_boundary;
+  }
 
-    /// Return true for points on the boundary
-    virtual bool inside(const real* x, bool on_boundary) const { return on_boundary; }
+};
 
-  };
+} /* namespace dolfin */
 
-}
-
-#endif
+#endif /* __DOLFIN_DOMAIN_BOUNDARY_H */

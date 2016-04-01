@@ -135,18 +135,21 @@ inline uint MeshEntity::index() const
 //-----------------------------------------------------------------------------
 inline uint MeshEntity::num_entities(uint dim) const
 {
+  dolfin_assert(mesh_.topology()(tdim_, dim).size() > 0);
   return mesh_.topology()(tdim_, dim).size(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint * MeshEntity::entities(uint dim)
 {
+  dolfin_assert(mesh_.topology()(tdim_, dim).size() > 0);
   return mesh_.topology()(tdim_, dim)(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint const * MeshEntity::entities(uint dim) const
 {
+  dolfin_assert(mesh_.topology()(tdim_, dim).size() > 0);
   return mesh_.topology()(tdim_, dim)(index_);
 }
 

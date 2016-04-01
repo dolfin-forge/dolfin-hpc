@@ -30,6 +30,7 @@ bool MeshEntity::incident(MeshEntity const& entity) const
   if (&mesh_ != &entity.mesh_) return false;
 
   // Get list of entities for given topological dimension
+  dolfin_assert(mesh_.topology()(tdim_, entity.tdim_).size() > 0);
   uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
   uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
 
@@ -53,6 +54,7 @@ uint MeshEntity::index(MeshEntity const& entity) const
   }
 
   // Get list of entities for given topological dimension
+  dolfin_assert(mesh_.topology()(tdim_, entity.tdim_).size() > 0);
   uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
   uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
 
@@ -109,6 +111,7 @@ bool MeshEntity::has_all_vertices_shared() const
     else
     {
       MeshConnectivity const& c = mesh_.topology()(tdim_, 0);
+      dolfin_assert(c.size() > 0);
       for (uint v = 0; v < c.size(index_); ++v)
       {
         if (!mesh_.distdata().is_shared(c(index_)[v], 0))

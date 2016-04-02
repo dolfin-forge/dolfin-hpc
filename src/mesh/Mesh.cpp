@@ -64,7 +64,7 @@ Mesh::Mesh(Mesh const& mesh) :
   *this = mesh;
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(std::string filename) :
+Mesh::Mesh(std::string const& filename) :
     Variable("mesh", "DOLFIN mesh"),
     topology_(*this),
     geometry_(),

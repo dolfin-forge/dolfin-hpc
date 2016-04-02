@@ -86,7 +86,7 @@ public:
   Mesh(Mesh const& mesh);
 
   /// Create mesh from data file
-  Mesh(std::string filename);
+  Mesh(std::string const& filename);
 
   /// Destructor
   ~Mesh();
@@ -332,7 +332,6 @@ private:
 };
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline uint Mesh::numVertices() const
 {
   return topology_.size(0);

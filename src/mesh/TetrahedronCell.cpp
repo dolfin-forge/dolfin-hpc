@@ -366,9 +366,16 @@ void TetrahedronCell::order_facet(uint vertices[], Facet& facet) const
   }
 }
 //-----------------------------------------------------------------------------
+bool TetrahedronCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  return (d0 > 0 && d0 > d1);
+}
+//-----------------------------------------------------------------------------
 void TetrahedronCell::initialize_connectivities(Mesh& mesh) const
 {
   mesh.init(1, 0);
+  mesh.init(2, 0);
   mesh.init(2, 1);
   mesh.init(3, 0);
   mesh.init(3, 1);

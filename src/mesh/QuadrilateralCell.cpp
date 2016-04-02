@@ -212,6 +212,13 @@ void QuadrilateralCell::order_facet(uint vertices[], Facet& facet) const
   }
 }
 //-----------------------------------------------------------------------------
+bool QuadrilateralCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  // Do not order cell - vertices connectivities
+  return (d0 > 0 && d0 > d1) && !(d0 == TD && d1 == 0);
+}
+//-----------------------------------------------------------------------------
 void QuadrilateralCell::initialize_connectivities(Mesh& mesh) const
 {
   mesh.init(1, 0);
@@ -591,4 +598,4 @@ uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

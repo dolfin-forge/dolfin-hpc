@@ -425,9 +425,17 @@ void HexahedronCell::order_facet(uint vertices[], Facet& facet) const
   std::memcpy(&vertices[0], &e[0], 4 * sizeof(uint));
 }
 //-----------------------------------------------------------------------------
+bool HexahedronCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  // Do not order cell - vertices connectivities
+  return (d0 > 0 && d0 > d1) && !(d0 == TD && d1 == 0);
+}
+//-----------------------------------------------------------------------------
 void HexahedronCell::initialize_connectivities(Mesh& mesh) const
 {
   mesh.init(1, 0);
+  mesh.init(2, 0);
   mesh.init(2, 1);
   mesh.init(3, 0);
   mesh.init(3, 1);

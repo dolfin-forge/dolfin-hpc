@@ -89,6 +89,9 @@ public:
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
   virtual void order_facet(uint vertices[], Facet& facet) const = 0;
 
+  /// Return if mesh connectivities require ordering
+  virtual bool connectivity_needs_ordering(uint d0, uint d1) const = 0;
+
   /// Initialize mesh connectivities required by ordering
   virtual void initialize_connectivities(Mesh& mesh) const = 0;
 

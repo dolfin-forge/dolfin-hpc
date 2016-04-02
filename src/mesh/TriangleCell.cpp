@@ -211,6 +211,12 @@ void TriangleCell::order_facet(uint vertices[], Facet& facet) const
   }
 }
 //-----------------------------------------------------------------------------
+bool TriangleCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  return (d0 > 0 && d0 > d1);
+}
+//-----------------------------------------------------------------------------
 void TriangleCell::initialize_connectivities(Mesh& mesh) const
 {
   mesh.init(1, 0);

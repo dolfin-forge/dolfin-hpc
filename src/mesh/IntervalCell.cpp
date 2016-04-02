@@ -109,6 +109,12 @@ void IntervalCell::order_facet(uint vertices[], Facet& facet) const
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+bool IntervalCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  return (d0 == TD && d1 == 0);
+}
+//-----------------------------------------------------------------------------
 void IntervalCell::initialize_connectivities(Mesh& mesh) const
 {
   mesh.init(1, 0);

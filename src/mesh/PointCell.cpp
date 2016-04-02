@@ -77,6 +77,12 @@ void PointCell::order_facet(uint vertices[], Facet& facet) const
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+bool PointCell::connectivity_needs_ordering(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD && d1 <= TD);
+  return false;
+}
+//-----------------------------------------------------------------------------
 void PointCell::initialize_connectivities(Mesh& mesh) const
 {
   // Do nothing

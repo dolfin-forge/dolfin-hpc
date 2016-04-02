@@ -67,9 +67,6 @@ public:
   /// Member access operator
   MeshEntity* operator->();
 
-  /// Output
-  friend LogStream& operator<<(LogStream& stream, MeshEntityIterator const& it);
-
 private:
 
   /// Copy constructor is private to disallow usage. If it were public (or not
@@ -81,7 +78,7 @@ private:
   ///
   /// c1 looks to be an iterator over the entities around c0 when it is in
   /// fact a copy of c0.
-  MeshEntityIterator(MeshEntityIterator& entity);
+  MeshEntityIterator(MeshEntityIterator& other);
 
   // Mesh entity
   MeshEntity entity_;
@@ -90,16 +87,15 @@ private:
   uint pos_;
 
   // End position
-  uint pos_end_;
+  uint const pos_end_;
 
   // Mapping from pos to index (if any)
-  uint * index_;
+  uint const * index_;
   
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline MeshEntityIterator& MeshEntityIterator::operator++()
 {
   ++pos_;

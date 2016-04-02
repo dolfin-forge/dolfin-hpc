@@ -190,9 +190,6 @@ public:
   /// Clear all mesh data
   void clear();
 
-  /// Return true iff topology is ordered according to the UFC numbering
-  bool is_ordered() const;
-
   /// Refine mesh uniformly
   void refine();
 

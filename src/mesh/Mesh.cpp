@@ -278,11 +278,6 @@ void Mesh::clear()
   }
 }
 //-----------------------------------------------------------------------------
-bool Mesh::is_ordered() const
-{
-  return topology_.is_ordered();
-}
-//-----------------------------------------------------------------------------
 void Mesh::refine()
 {
   message("No cells marked for refinement, assuming uniform mesh refinement.");

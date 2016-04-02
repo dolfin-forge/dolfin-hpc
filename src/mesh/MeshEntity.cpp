@@ -131,10 +131,11 @@ bool MeshEntity::has_all_vertices_shared() const
 void MeshEntity::disp() const
 {
   section("MeshEntity");
-  message("topological dimension : ", tdim_);
-  message("geometric dimension   : ", gdim_);
-  message("index                 : ", index_);
-  begin(  "connectivities        : ");
+  //---
+  message("topological dimension : %u", tdim_);
+  message("geometric dimension   : %u", gdim_);
+  message("index                 : %u", index_);
+  begin(  "connectivities        : %u");
   for (uint d =0; d < tdim_; ++d)
   {
     cout << d << ": ";
@@ -167,6 +168,7 @@ void MeshEntity::disp() const
     cout << endl;
   }
   end();
+  //---
   end();
 }
 //-----------------------------------------------------------------------------

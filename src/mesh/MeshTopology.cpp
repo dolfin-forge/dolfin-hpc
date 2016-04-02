@@ -26,8 +26,8 @@ MeshTopology::MeshTopology(Mesh& mesh) :
     connectivity_(NULL),
     distdata_(NULL),
     is_ordered_(false),
-    timestamp_(0),
-    renumbering_count_(0)
+    is_numbered_(false),
+    timestamp_(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -38,8 +38,8 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     connectivity_(NULL),
     distdata_(NULL),
     is_ordered_(false),
-    timestamp_(0),
-    renumbering_count_(0)
+    is_numbered_(false),
+    timestamp_(0)
 {
   *this = other;
 }
@@ -69,8 +69,8 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
     distdata_ = new MeshDistributedData(*other.distdata_);
   }
   is_ordered_ = other.is_ordered_;
+  is_numbered_ = other.is_numbered_;
   timestamp_ = other.timestamp_;
-  renumbering_count_ = other.renumbering_count_;
 
   return *this;
 }
@@ -166,8 +166,8 @@ void MeshTopology::clear()
   }
   connectivity_ = NULL;
   is_ordered_ = false;
+  is_numbered_ = false;
   timestamp_ = 0;
-  renumbering_count_ = 0;
   num_vertices_ = 0;
   dim_ = 0;
 }
@@ -178,13 +178,19 @@ void MeshTopology::finalize()
   {
     error("MeshTopology : cell -> vertices connectivity does not exist");
   }
-  order();
-  renumber();
+  if(!is_ordered_)
+  {
+    reorder();
+  }
+  if(!is_numbered_)
+  {
+    renumber();
+  }
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::order()
+void MeshTopology::reorder() const
 {
-  message(1, "Ordering mesh entities...");
+  message(1, "MeshTopology : order");
   CellType const& cell_type = mesh_.type();
   for (CellIterator cell(mesh_); !cell.end(); ++cell)
   {
@@ -193,12 +199,19 @@ void MeshTopology::order()
   is_ordered_ = true;
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::renumber()
+void MeshTopology::renumber() const
 {
-  if (MeshRenumber::renumber(mesh_))
+  if (distdata_ == NULL)
   {
-    ++renumbering_count_;
+    return;
   }
+
+  message(1, "MeshTopology : renumber");
+  if(!MeshRenumber::renumber(mesh_))
+  {
+    error("Triggered mesh renumbering for nothing");
+  }
+  is_numbered_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& map)
@@ -221,11 +234,11 @@ void MeshTopology::remap(uint dim, Array<uint> const& map)
         is_ordered_ = false;
       }
     }
-  }
 
-  if (this->is_distributed())
-  {
-    error("MeshTopology : remapping entities in parallel is not allowed.");
+    if (distdata_ != NULL)
+    {
+      error("MeshTopology : remapping entities in parallel is not allowed.");
+    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -235,7 +248,6 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
   if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
-
   }
   return connectivity_[d0][d1];
 }
@@ -580,6 +592,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
   {
     is_ordered_ = false;
   }
+
+  message(1, "MeshTopology : computed connectivity (%u, %u)", d0, d1);
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const

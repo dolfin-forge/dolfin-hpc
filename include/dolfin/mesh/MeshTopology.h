@@ -69,11 +69,8 @@ public:
   /// Clear all data
   void clear();
 
-  /// Finalize
+  /// Finalize: check, reorder, renumber
   void finalize();
-
-  /// Renumber mesh topology entities
-  void renumber();
 
   /// Remap local entities of given dimension
   void remap(uint dim,  Array<uint> const& map);
@@ -144,8 +141,11 @@ private:
   /// Compute connectivity for given pair of topological dimensions
   void compute_connectivity(uint d0, uint d1) const;
 
-  ///
-  void order();
+  /// Force renumbering of mesh topology entities
+  void renumber() const;
+
+  /// Force reordering of mesh topology connectivities
+  void reorder() const;
 
   ///
   Mesh& mesh_;
@@ -165,11 +165,11 @@ private:
   /// Return true iff topology is ordered according to the UFC numbering
   mutable bool is_ordered_;
 
-  //
-  int timestamp_;
+  /// Return true iff entities are numbered
+  mutable bool is_numbered_;
 
   //
-  uint renumbering_count_;
+  int timestamp_;
 
 };
 

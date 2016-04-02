@@ -174,6 +174,10 @@ void MeshTopology::clear()
 //-----------------------------------------------------------------------------
 void MeshTopology::finalize()
 {
+  if(!connectivity_[dim_][0].is_initialized())
+  {
+    error("MeshTopology : cell -> vertices connectivity does not exist");
+  }
   order();
   renumber();
 }
@@ -230,8 +234,8 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
   if(!connectivity_[d0][d1].is_initialized())
   {
-    error("MeshTopology : connectivity (%u, %u) does not exist", d0, d1);
     compute_connectivity(d0, d1);
+
   }
   return connectivity_[d0][d1];
 }
@@ -241,7 +245,6 @@ MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
   if(!connectivity_[d0][d1].is_initialized())
   {
-    error("MeshTopology : connectivity (%u, %u) does not exist", d0, d1);
     compute_connectivity(d0, d1);
   }
   return connectivity_[d0][d1];
@@ -249,7 +252,7 @@ MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
 //-----------------------------------------------------------------------------
 MeshDistributedData& MeshTopology::distdata()
 {
-  if ((distdata_ == NULL))
+  if (distdata_ == NULL)
   {
     error("MeshDistributedData : returning distributed data of serial mesh");
   }
@@ -258,7 +261,7 @@ MeshDistributedData& MeshTopology::distdata()
 //-----------------------------------------------------------------------------
 MeshDistributedData const& MeshTopology::distdata() const
 {
-  if ((distdata_ == NULL))
+  if (distdata_ == NULL)
   {
     error("MeshDistributedData : returning distributed data of serial mesh");
   }
@@ -308,25 +311,25 @@ bool MeshTopology::entities_exist(uint d) const
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
 {
-  if (connectivity_[d0][d1].is_initialized())
-  {
-    return;
-  }
-
-  if ((d0 == dim_ || d1 == dim_) && !connectivity_[dim_][0].is_initialized())
-  {
-    error("MeshTopology : trying to initialize cell-based connectivity but "
-          "the mesh was not provided with cells - vertices connectivity.");
-  }
-
-  if ((d0 == dim_ && d1 == 0))
+  if ((d0 == dim_ && d1 == 0) || connectivity_[d0][d1].is_initialized())
   {
     /*
-     *  Cell -> vertices connectivities are not computed and if they are not
-     *  available
+     *  Return if connectivity exists or if cell -> vertices connectivity, which
+     *  is supposed to be provided, is the one called.
      *
      */
+
     return;
+  }
+  else if ((d0 == dim_ || d1 == dim_) && !connectivity_[dim_][0].is_initialized())
+  {
+    /*
+     *  For these connectivities, cell -> vertices connectivities should exist
+     *
+     */
+
+    error("MeshTopology : trying to initialize cell-based connectivity but "
+          "the mesh was not provided with cells - vertices connectivity.");
   }
   else if ((d0 > 0 && d1 == 0) || (d0 == dim_ && d1 > 0 && d1 < dim_))
   {
@@ -568,7 +571,11 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     dolfin_assert(c01.num_entities() == this->size(d0));
   }
 
-  // If the created connectivity needs ordering then reset the flag
+  /*
+   * If the created connectivity needs ordering then reset the flag to trigger
+   * reordering
+   */
+
   if(mesh_.type().connectivity_needs_ordering(d0, d1))
   {
     is_ordered_ = false;

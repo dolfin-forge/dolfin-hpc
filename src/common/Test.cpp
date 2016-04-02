@@ -20,7 +20,10 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Test::Test(int argc, char *argv[])
+Test::Test(int argc, char *argv[]) :
+    btest_(false),
+    total_(0.0),
+    padding_(0)
 {
   dolfin_init(argc, argv);
   if (dolfin::MPI::processNumber() == 0)
@@ -56,7 +59,10 @@ Test::Test(int argc, char *argv[])
 }
 
 //-----------------------------------------------------------------------------
-Test::Test()
+Test::Test() :
+    btest_(false),
+    total_(0.0),
+    padding_(0)
 {
 }
 
@@ -74,23 +80,42 @@ void Test::print_args()
 //-----------------------------------------------------------------------------
 void Test::begin(std::string const& name)
 {
-  dolfin::begin("TEST:");
-  header(name);
+  if(btest_)
+  {
+    error("Test : missing end directive for preceding test");
+  }
+  btest_ = true;
+  timings_.push_back(std::pair<std::string, real >(name, 0.0));
+  padding_ = std::max(padding_, (uint) name.size());
+  std::stringstream ss;
+  ss << "Test " << timings_.size() << " : " << name;
+  message(ss.str());
+  skip();
   tic();
 }
 
 //-----------------------------------------------------------------------------
 void Test::end()
 {
-  tocd();
-  dolfin::end();
+  if(!btest_)
+  {
+    error("Test : missing end directive for preceding test");
+  }
+  btest_ = false;
+  real elapsed_time = toc();
+  cout << "Elapsed time: " << elapsed_time << " seconds" << endl;
+  timings_.back().second = elapsed_time;
+  total_ += elapsed_time;
   skip();
 }
 
 //-----------------------------------------------------------------------------
 Test::~Test()
 {
+  cout << "Total time: " << total_ << " seconds" << endl;
   dolfin_finalize();
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

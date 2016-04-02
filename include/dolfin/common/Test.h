@@ -8,8 +8,8 @@
 #define __DOLFIN_TEST_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 
-#include <cassert>
 #include <iostream>
 #include <string>
 
@@ -45,18 +45,25 @@ public:
   void print_args();
 
   ///
-  static void begin(std::string const& name);
+  void begin(std::string const& name);
 
   ///
-  static void end();
+  void end();
 
   ///
   ~Test();
 
   Args args;
 
+private:
+
+  bool btest_;
+  Array<std::pair<std::string, real> > timings_;
+  real total_;
+  uint padding_;
+
 };
 
-}
+} /* namespace dolfin */
 
 #endif /* __DOLFIN_TEST_H */

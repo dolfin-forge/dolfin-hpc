@@ -130,7 +130,7 @@ void section(std::string msg, ...)
 {
   message(msg);
   std::stringstream ss;
-  ss << std::setw(msg.size()) << std::setfill('-') << "-";
+  ss << std::setw(msg.size()) << std::setfill('-') << "-" << std::endl;
   begin(ss.str());
 }
 //-----------------------------------------------------------------------------

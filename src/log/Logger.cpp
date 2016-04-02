@@ -70,7 +70,7 @@ void Logger::begin(std::string msg, int debug_level)
 //-----------------------------------------------------------------------------
 void Logger::skip()
 {
-  message("\n", debug_level_);
+  message("", debug_level_);
 }
 //-----------------------------------------------------------------------------
 void Logger::end()

@@ -26,7 +26,7 @@ MeshTopology::MeshTopology(Mesh& mesh) :
     connectivity_(NULL),
     distdata_(NULL),
     is_ordered_(false),
-    timestamp_(std::time(NULL)),
+    timestamp_(0),
     renumbering_count_(0)
 {
   // Do nothing
@@ -39,7 +39,7 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     connectivity_(NULL),
     distdata_(NULL),
     is_ordered_(false),
-    timestamp_(std::time(NULL)),
+    timestamp_(0),
     renumbering_count_(0)
 {
   *this = other;
@@ -67,7 +67,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
       connectivity_[d0][d1] = other.connectivity_[d0][d1];
     }
   }
-  if(other.distdata_)
+  if (other.distdata_)
   {
     distdata_ = new MeshDistributedData(*other.distdata_);
   }
@@ -112,7 +112,7 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     }
   }
   //
-  if (!objptrcmp(distdata_,other.distdata_))
+  if (!objptrcmp(distdata_, other.distdata_))
   {
     return false;
   }
@@ -127,21 +127,29 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
 //-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint num_vertices)
 {
-  // Clear old data if any
-  clear();
-  //
+  if (connectivity_ != NULL)
+  {
+    error("MeshTopology : clear instance before reinitializing");
+  }
+  if (dim_ == 0 && num_vertices > 1)
+  {
+    error("MeshTopology : more than one vertex for a mesh of dimension zero");
+  }
+
   dim_ = dim;
   num_vertices_ = num_vertices;
-  timestamp_ = std::time(NULL); // Reset token
   connectivity_ = new MeshConnectivity*[dim + 1];
   for (uint d = 0; d <= dim; ++d)
   {
     connectivity_[d] = new MeshConnectivity[dim + 1];
   }
-  if(MPI::numProcesses() > 1)
+  if (MPI::numProcesses() > 1)
   {
     distdata_ = new MeshDistributedData(dim_);
   }
+
+  //
+  update_token();
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::clear()
@@ -298,14 +306,14 @@ bool MeshTopology::is_ordered() const
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
 {
-  if(connectivity_[d0][d1].is_initialized())
+  if (connectivity_[d0][d1].is_initialized())
   {
     return;
   }
 
   begin(1, "MeshTopology : compute_connectivity (%u,%u)", d0, d1);
 
-  if((d0 == dim_ || d1 == dim_) && !connectivity_[dim_][0].is_initialized())
+  if ((d0 == dim_ || d1 == dim_) && !connectivity_[dim_][0].is_initialized())
   {
     error("MeshTopology : trying to initialize cell-based connectivity but "
           "the mesh was not provided with cells - vertices connectivity.");
@@ -317,8 +325,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     // available
     return;
   }
-  else if ((d0 > 0 && d1 == 0) ||
-           (d0 == this->dim() && d1 > 0 && d1 < this->dim()))
+  else if ((d0 > 0 && d1 == 0)
+      || (d0 == this->dim() && d1 > 0 && d1 < this->dim()))
   {
     /*
      *  Compute entities to obtain (tdim, d) and (d, 0) connectivities
@@ -377,8 +385,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
           entities_list.push_back(new EntityKey(n, entities[e], key.idx));
         }
 
-        add_entity:
-        for (uint v = 0; v < n; ++v)
+        add_entity: for (uint v = 0; v < n; ++v)
         {
           vertex_entities[entities[e][v]].push_back(key.idx);
         }
@@ -488,8 +495,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
         }
       }
       uint pos = 0;
-      for (std::set<uint>::iterator it = entities.begin();
-           it != entities.end(); ++it, ++pos)
+      for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
+          ++it, ++pos)
       {
         c01.set(e0, *it, pos);
       }
@@ -550,8 +557,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       }
       // Add the connected entities
       uint pos = 0;
-      for (std::set<uint>::iterator it = entities.begin();
-           it != entities.end(); ++it, ++pos)
+      for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
+          ++it, ++pos)
       {
         c01.set(e0, *it, pos);
       }
@@ -570,29 +577,29 @@ void MeshTopology::disp() const
 {
   section("Mesh topology");
 
-  // Check if empty
-  if (dim_ == 0)
-  {
-    cout << "empty" << endl << endl;
-    end();
-    return;
-  }
-
   // Display topological dimension
   cout << "Topological dimension: " << dim_ << endl << endl;
 
   // Display number of entities for each topological dimension
-  begin("Number of entities:");
-  cout << "0: " << num_vertices_ << endl;
-  for (uint d = 1; d <= dim_; ++d)
+  if (num_vertices_ == 0)
   {
-    if(connectivity_[d][0].is_initialized())
+    cout << "empty" << endl << endl;
+    ;
+  }
+  else
+  {
+    begin("Number of entities:");
+    cout << "0: " << num_vertices_ << endl;
+    for (uint d = 1; d <= dim_; ++d)
     {
-      cout << d << ": " << connectivity_[d][0].num_entities() << endl;
-    }
-    else
-    {
-      cout << d << ": " << "not computed" << endl;
+      if (connectivity_[d][0].is_initialized())
+      {
+        cout << d << ": " << connectivity_[d][0].num_entities() << endl;
+      }
+      else
+      {
+        cout << d << ": " << "not computed" << endl;
+      }
     }
   }
   end();
@@ -636,7 +643,7 @@ void MeshTopology::update_token()
 //-----------------------------------------------------------------------------
 int MeshTopology::token() const
 {
-  return timestamp_ + size(0) + size(dim_); // FIXME
+  return timestamp_ ^ size(0) ^ size(dim_);
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::check() const
@@ -653,11 +660,11 @@ void MeshTopology::check() const
 
   message("MeshTopology: check connectivities");
 
-  for(uint d0 = 0; d0 <= dim_; ++d0)
+  for (uint d0 = 0; d0 <= dim_; ++d0)
   {
     for (uint d1 = 0; d1 <= dim_; ++d1)
     {
-      if(this->is_computed(d0, d1))
+      if (this->is_computed(d0, d1))
       {
         message("(%u,%u)", d0, d1);
         connectivity_[d0][d1].check();
@@ -665,7 +672,7 @@ void MeshTopology::check() const
     }
   }
 
-  if(!this->is_ordered())
+  if (!this->is_ordered())
   {
     error("MeshTopology : topology is not set as ordered");
   }
@@ -677,7 +684,7 @@ void MeshTopology::check() const
     mesh.type().check(*c);
   }
 
-  if(this->is_distributed())
+  if (this->is_distributed())
   {
     message("MeshTopology: check distributed data");
     //distdata_->check();
@@ -685,4 +692,4 @@ void MeshTopology::check() const
 }
 //-----------------------------------------------------------------------------
 
-}  /* namespace dolfin */
+} /* namespace dolfin */

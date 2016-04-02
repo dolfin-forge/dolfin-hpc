@@ -10,7 +10,6 @@
 #include <dolfin/common/Tokenized.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/EuclideanSpace.h>
 #include <dolfin/mesh/Point.h>
 
 namespace dolfin
@@ -18,12 +17,17 @@ namespace dolfin
 
 template<class T> class Array;
 
-/// MeshGeometry stores the geometry imposed on a mesh. Currently,
-/// the geometry is represented by the set of coordinates for the
-/// vertices of a mesh, but other representations are possible.
+/**
+ *  @class  MeshGeometry
+ *
+ *  @brief  Stores the geometry imposed on a mesh, represented by the set of
+ *          coordinates for the vertices of a mesh.
+ *
+ */
 
 class MeshGeometry : public Tokenized
 {
+
 public:
 
   /// Create empty set of coordinates
@@ -71,23 +75,23 @@ public:
   /// Return coordinate n as a 3D point value
   Point point(uint n) const;
 
+  /// Initialize coordinate list to given geometrical dimension and size
+  void init(uint gdim, uint size);
+
   /// Clear all data
   void clear();
 
   ///
   void finalize();
 
-  /// Initialize coordinate list to given geometrical dimension and size
-  void init(uint gdim, uint size);
-
   /// Set absolute geometric tolerance for given topological dimension
   /// The absolute value of the parameter is set as tolerance.
   void set_abs_tolerance(uint dim, real atol);
 
-  /// Set value of coordinate n in direction i
+  /// Set value of i-th coordinate of point n
   void set(uint n, uint i, real x);
 
-  /// Set value of coordinates n
+  /// Set value of coordinates of point n
   void set(uint n, real const * x);
 
   /// Remap coordinates from old to new ordering
@@ -124,11 +128,11 @@ private:
   // Number of coordinates
   uint size_;
 
-  // Absolute tolerances
-  real abs_tol_[EuclideanSpace::MAX_DIMENSION+1];
-
   // Coordinates for all vertices stored as a contiguous array
   real * coordinates_;
+
+  // Absolute tolerances
+  real * abs_tol_;
 
   //
   int timestamp_;
@@ -153,12 +157,14 @@ inline real MeshGeometry::x(uint n, uint i) const
 //-----------------------------------------------------------------------------
 inline real* MeshGeometry::x(uint n)
 {
+  dolfin_assert(n < size_);
   return coordinates_ + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
 inline real const * MeshGeometry::x(uint n) const
 {
+  dolfin_assert(n < size_);
   return coordinates_ + n * dim_;
 }
 

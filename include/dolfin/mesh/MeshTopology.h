@@ -117,9 +117,6 @@ public:
   bool entities_exist(uint d) const;
 
   ///
-  bool is_ordered() const;
-
-  ///
   bool is_distributed() const;
 
   //---------------------------------------------------------------------------
@@ -133,8 +130,6 @@ public:
   void check() const;
 
   //--- TOKENIZED -------------------------------------------------------------
-
-public:
 
   /// Return token identifying the internal state of mesh topology
   int token() const;
@@ -168,7 +163,7 @@ private:
   MeshDistributedData * distdata_;
 
   /// Return true iff topology is ordered according to the UFC numbering
-  bool is_ordered_;
+  mutable bool is_ordered_;
 
   //
   int timestamp_;

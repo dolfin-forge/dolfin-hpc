@@ -188,32 +188,6 @@ void MeshTopology::finalize()
   }
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::reorder() const
-{
-  message(1, "MeshTopology : order");
-  CellType const& cell_type = mesh_.type();
-  for (CellIterator cell(mesh_); !cell.end(); ++cell)
-  {
-    cell_type.order_entities(*cell);
-  }
-  is_ordered_ = true;
-}
-//-----------------------------------------------------------------------------
-void MeshTopology::renumber() const
-{
-  if (distdata_ == NULL)
-  {
-    return;
-  }
-
-  message(1, "MeshTopology : renumber");
-  if(!MeshRenumber::renumber(mesh_))
-  {
-    error("Triggered mesh renumbering for nothing");
-  }
-  is_numbered_ = true;
-}
-//-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& map)
 {
   if (connectivity_)
@@ -319,6 +293,11 @@ bool MeshTopology::is_computed(uint d0, uint d1) const
 bool MeshTopology::entities_exist(uint d) const
 {
   return (d == 0 ? num_vertices_ > 0 : connectivity_[d][0].is_initialized());
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::is_distributed() const
+{
+  return (distdata_ != NULL);
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
@@ -586,6 +565,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
   /*
    * If the created connectivity needs ordering then reset the flag to trigger
    * reordering
+   *
    */
 
   if(mesh_.type().connectivity_needs_ordering(d0, d1))
@@ -596,9 +576,85 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
   message(1, "MeshTopology : computed connectivity (%u, %u)", d0, d1);
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::is_distributed() const
+void MeshTopology::reorder() const
 {
-  return (distdata_ != NULL);
+  message(1, "MeshTopology : order");
+
+  CellType const& cell_type = mesh_.type();
+  for (CellIterator cell(mesh_); !cell.end(); ++cell)
+  {
+    cell_type.order_entities(*cell);
+  }
+
+  is_ordered_ = true;
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::renumber() const
+{
+  if (distdata_ == NULL)
+  {
+    return;
+  }
+
+  message(1, "MeshTopology : renumber");
+
+  if(!MeshRenumber::renumber(mesh_))
+  {
+    error("Triggered mesh renumbering for nothing");
+  }
+
+  return;
+
+  uint const rank = MPI::processNumber();
+  uint const pe_size = MPI::numProcesses();
+
+  /*
+   * Renumber vertices
+   *
+   */
+  if(this->entities_exist(0))
+  {
+  }
+
+  /*
+   * Renumber edges/faces/cells
+   *
+   */
+  for (uint d = 1; d < dim_; ++d)
+  {
+    if (this->entities_exist(d))
+    {
+    }
+  }
+
+  /*
+   * Renumber cells:
+   *
+   * - Set offset for process and global size
+   * - Map local to global
+   * - Set numbering as valid
+   * - Set ownership as valid
+   *
+   */
+  if (dim_ > 0 && this->entities_exist(dim_))
+  {
+    uint offset = 0;
+    distdata_->apply_num_global(dim_, offset);
+
+    _map<uint,uint> new_local;
+    _map<uint,uint> new_global;
+    for (uint i = 0; i < this->size(dim_); ++i)
+    {
+      new_global[i] = offset++;
+      new_local[new_global[i]] = i;
+    }
+    distdata_->apply_numbering(dim_, new_local, new_global);
+    distdata_->apply_ownership(dim_);
+    distdata_->finalize(dim_);
+  }
+
+  // Set the topology as numbered
+  is_numbered_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::disp() const

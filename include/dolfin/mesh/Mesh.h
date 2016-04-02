@@ -13,16 +13,17 @@
 #ifndef __DOLFIN_MESH_H
 #define __DOLFIN_MESH_H
 
-#include <string>
+#include <dolfin/common/Variable.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/common/Variable.h>
-#include "ALEType.h"
-#include "MeshDistributedData.h"
-#include "MeshGeometry.h"
-#include "MeshTopology.h"
-#include "MeshData.h"
-#include "CellType.h"
+#include <dolfin/mesh/ALEType.h>
+#include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshGeometry.h>
+#include <dolfin/mesh/MeshTopology.h>
+
+#include <string>
 
 #ifdef HAVE_LIBGEOM
 namespace libgeom
@@ -302,18 +303,6 @@ public:
 
   /// Check
   void check() const;
-
-  /// Check consistency of the interior boundary
-  void check_interior_boundary_entities(uint dim) const;
-
-  /// Check consistency of the exterior boundary
-  void check_exterior_boundary_entities(uint dim) const;
-
-  /// Check consistency of the inner entities
-  void check_inner_domain_entities(uint dim) const;
-
-  /// Check that mesh entities are ordered per cell
-  void check_entities_ordering() const;
 
 private:
 

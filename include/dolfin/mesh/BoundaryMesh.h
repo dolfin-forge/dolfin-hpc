@@ -15,6 +15,9 @@
 namespace dolfin
 {
 
+class Cell;
+class Vertex;
+
 /**
  *  @class  BoundaryMesh
  *

@@ -429,6 +429,8 @@ inline bool Mesh::is_distributed() const
   return topology().is_distributed();
 }
 
-}
+//-----------------------------------------------------------------------------
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_MESH_H */

@@ -113,16 +113,15 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
     // Add old vertices
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      refined_distdata.set_map(vertex, distdata.get_global(*v), 0);
+      refined_distdata[0].set_map(vertex, v->global_index());
 
-      if (distdata.is_ghost(v->index(), 0))
+      if (v->is_ghost())
       {
-        refined_distdata.set_ghost(vertex, 0);
-        refined_distdata.set_ghost_owner(vertex, distdata.get_owner(*v), 0);
+        refined_distdata[0].set_ghost(vertex, v->owner());
       }
-      else if (distdata.is_shared(v->index(), 0))
+      else if (v->is_shared())
       {
-        refined_distdata.set_shared(vertex, 0);
+        refined_distdata[0].set_shared(vertex);
       }
 
       editor.add_vertex(vertex++, v->x());
@@ -187,7 +186,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-  mesh.distdata().set_invalid_numbering();
+//  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
 }
@@ -255,13 +254,13 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh,
     {
       refined_distdata.set_map(vertex, mesh.distdata().get_global(*v), 0);
 
-      if( mesh.distdata().is_ghost(v->index(), 0) )
+      if( v->is_ghost() )
       {
         refined_distdata.set_ghost(vertex, 0);
-        refined_distdata.set_ghost_owner(vertex,
+        refined_distdata.set_ghost(vertex,
             mesh.distdata().get_owner(*v), 0);
       }
-      else if(mesh.distdata().is_shared(v->index(), 0))
+      else if(mesh.distdata()[0].is_shared(v->index()))
       {
         refined_distdata.set_shared(vertex, 0);
       }
@@ -548,13 +547,13 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
     {
       refined_distdata.set_map(vertex, mesh.distdata().get_global(*v), 0);
 
-      if( mesh.distdata().is_ghost(v->index(), 0) )
+      if( v->is_ghost() )
       {
         refined_distdata.set_ghost(vertex, 0);
-        refined_distdata.set_ghost_owner(vertex,
+        refined_distdata.set_ghost(vertex,
             mesh.distdata().get_owner(*v), 0);
       }
-      else if(mesh.distdata().is_shared(v->index(), 0))
+      else if(mesh.distdata()[0].is_shared(v->index()))
       {
         refined_distdata.set_shared(vertex, 0);
       }

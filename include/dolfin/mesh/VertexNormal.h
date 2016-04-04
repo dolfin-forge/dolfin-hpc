@@ -21,6 +21,7 @@ namespace dolfin
 class BoundaryMesh;
 class Mesh;
 class SubDomain;
+class Vertex;
 
 /**
  *  DOCUMENTATION:

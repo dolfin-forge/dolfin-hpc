@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     mesh.init(tdim - 1, 0);
     for (FacetIterator f(mesh); !f.end(); ++f)
     {
-      bool global = GFM.globalFacet(*f);
+      bool global = GFM.is_global(*f);
       if (global && f->is_shared())
       {
         error("A global facet is marked as shared.");
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
         if(v->is_shared())
         {
           ++shared_vertex;
-          _set<uint> const& adjs = mesh.distdata().get_shared_adj(*v);
+          _set<uint> const& adjs = mesh.distdata()[0].get_shared_adj(v->index());
           if (adjs.empty())
           {
             error("A shared entity should have adjacents.");

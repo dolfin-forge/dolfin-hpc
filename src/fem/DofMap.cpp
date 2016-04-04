@@ -408,7 +408,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
         for (uint i = 0; i < local_dimension(); ++i)
         {
           dofs[i] = ufc_cell.entity_indices[0][i];
-          dolfin_assert(mesh().distdata().has_global(dofs[i], 0));
+          dolfin_assert(mesh().distdata()[0].has_global(dofs[i]));
         }
       }
       break;
@@ -416,7 +416,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       {
         dofs[0] = ufc_cell.index;
         dolfin_assert(
-            mesh().distdata().has_global(dofs[0], mesh().topology().dim()));
+            mesh().distdata()[ufc_cell.topological_dimension].has_global(dofs[0]));
       }
       break;
     case vector_p1:
@@ -642,18 +642,18 @@ void DofMap::build()
     {
       // Scalar Lagrange P1
       type_ = scalar_p1;
-      local_size_ = thismesh.distdata().num_owned(0);
+      local_size_ = thismesh.distdata()[0].num_owned();
 
       //DEBUG: Create ghosts list
       distributed_by_entities_ = true;
       MeshDistributedData& distdata = thismesh.distdata();
-      for (MeshSharedIterator it(distdata, 0); !it.end(); ++it)
+      for (SharedIterator it(distdata[0]); !it.end(); ++it)
       {
-        shared_.insert(distdata.get_vertex_global(it.index()));
+        shared_.insert(it.global_index());
       }
-      for (MeshGhostIterator it(distdata, 0); !it.end(); ++it)
+      for (GhostIterator it(distdata[0]); !it.end(); ++it)
       {
-        ghosts_.insert(distdata.get_vertex_global(it.index()));
+        ghosts_.insert(it.global_index());
       }
     }
     else if (ufc_dofmap_->global_dimension() == thismesh.global_numCells())
@@ -671,7 +671,7 @@ void DofMap::build()
       // Vector Lagrange P1
       type_ = vector_p1;
       uint vdim = num_leaf_spaces_;
-      uint num_local = thismesh.distdata().num_owned(0);
+      uint num_local = thismesh.distdata()[0].num_owned();
       uint num_dofs = vdim * num_local;
       uint offset = 0;
 
@@ -688,22 +688,22 @@ void DofMap::build()
       {
         if (!v->is_ghost())
         {
-          v_offset[thismesh.distdata().get_global(*v)] = offset;
+          v_offset[v->global_index()] = offset;
           offset += vdim;
         }
       }
 
       Array<uint> *ghost_buff = new Array<uint> [pe_size];
-      for (MeshGhostIterator iter(thismesh.distdata(), 0); !iter.end(); ++iter)
+      for (GhostIterator iter(thismesh.distdata()[0]); !iter.end(); ++iter)
       {
         ghost_buff[iter.owner()].push_back(
-            thismesh.distdata().get_vertex_global(iter.index()));
+            thismesh.distdata()[0].get_global(iter.index()));
       }
 
       MPI_Status status;
       Array<uint> send_buff;
       uint src, dest;
-      uint recv_size = thismesh.distdata().num_ghost(0);
+      uint recv_size = thismesh.distdata()[0].num_ghost();
       int recv_count, recv_size_gh, send_size;
 
       for (uint i = 0; i < pe_size; i++)
@@ -754,7 +754,7 @@ void DofMap::build()
       for (VertexIterator v(thismesh); !v.end(); ++v)
       {
         vertex_map_[v->index()] =
-            v_offset[thismesh.distdata().get_vertex_global(v->index())];
+            v_offset[thismesh.distdata()[0].get_global(v->index())];
       }
 
       v_offset.clear();
@@ -770,7 +770,7 @@ void DofMap::build()
       //DEBUG: Create ghosts list
       distributed_by_entities_ = true;
       MeshDistributedData& distdata = thismesh.distdata();
-      for (MeshSharedIterator it(distdata, 0); !it.end(); ++it)
+      for (SharedIterator it(distdata[0]); !it.end(); ++it)
       {
         uint nindex = vertex_map_[it.index()];
         for (uint k = 0; k < vdim; ++k)
@@ -778,7 +778,7 @@ void DofMap::build()
           shared_.insert(nindex + k);
         }
       }
-      for (MeshGhostIterator it(distdata, 0); !it.end(); ++it)
+      for (GhostIterator it(distdata[0]); !it.end(); ++it)
       {
         uint nindex = vertex_map_[it.index()];
         for (uint k = 0; k < vdim; ++k)
@@ -1424,12 +1424,12 @@ bool DofMap::check(bool throw_error)
       {
         if(distributed_by_entities_)
         {
-          if(distdata.is_ghost(f))
+          if(f.is_ghost())
           {
             error("Non-ghosted dof's facet is ghosted");
           }
           shared_owned_entities[cell_dofs[loc_entity_dofs[dof]]]
-            = std::pair<uint, uint>(distdata.get_global(f), f.dim());
+            = std::pair<uint, uint>(f.global_index(), f.dim());
         }
         shared_owned.insert(cell_dofs[loc_entity_dofs[dof]]);
       }
@@ -1444,7 +1444,7 @@ bool DofMap::check(bool throw_error)
         // Get the dof indices for the entity
         uint local_index = cell.index(*m);
         MeshEntity e(mesh, d, cell.entities(d)[local_index]);
-        if(!distdata.is_shared(e))
+        if(!e.is_shared())
         {
           error("Entity of dim %u in shared facet is not shared", d);
         }
@@ -1468,12 +1468,12 @@ bool DofMap::check(bool throw_error)
           {
             if(distributed_by_entities_)
             {
-              if(distdata.is_ghost(*m))
+              if(m->is_ghost())
               {
                 error("Non-ghosted dof's entity of dim %u is ghosted", d);
               }
               shared_owned_entities[gdof]
-                = std::pair<uint, uint>(distdata.get_global(*m), m->dim());
+                = std::pair<uint, uint>(m->global_index(), m->dim());
             }
             shared_owned.insert(gdof);
           }
@@ -1542,10 +1542,10 @@ bool DofMap::check(bool throw_error)
       {
         uint const idx = recvbuf[i++];
         uint const dim = recvbuf[i++];
-        if(distdata.has_global(idx, dim))
+        if(distdata[dim].has_global(idx))
         {
-          uint loc_id = distdata.get_local(idx, dim);
-          if(!distdata.is_ghost(loc_id, dim))
+          uint local_index = distdata[dim].get_local(idx);
+          if(!distdata[dim].is_ghost(local_index))
           {
             if(throw_error)
             {

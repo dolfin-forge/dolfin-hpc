@@ -54,8 +54,8 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
     hdr_.gdim = mesh.geometry().dim();
     hdr_.num_vertices = mesh.numVertices();
     hdr_.num_cells = mesh.numCells();
-    hdr_.num_ghosts = mesh.distdata().num_ghost(0);
-    hdr_.num_shared = mesh.distdata().num_shared(0);
+    hdr_.num_ghosts = mesh.distdata()[0].num_ghost();
+    hdr_.num_shared = mesh.distdata()[0].num_shared();
 
 #ifdef ENABLE_MPIIO
     uint local_data[5] = { hdr_.num_coords, hdr_.num_centities, hdr_.num_vertices,
@@ -249,7 +249,7 @@ void Checkpoint::load(Mesh& mesh)
     in_.read((char *)mapping, hdr_.num_vertices * sizeof(uint));
 #endif
     for (VertexIterator v(_mesh); !v.end(); ++v)
-      _mesh.distdata().set_map(v->index(), mapping[v->index()], 0);
+      _mesh.distdata()[0].set_map(v->index(), mapping[v->index()]);
     delete[] mapping;
 
     uint *ghosts = new uint[2 * hdr_.num_ghosts];
@@ -263,8 +263,7 @@ void Checkpoint::load(Mesh& mesh)
 #endif
     for (uint i = 0; i < 2 * hdr_.num_ghosts; i += 2)
     {
-      _mesh.distdata().set_ghost(ghosts[i], 0);
-      _mesh.distdata().set_ghost_owner(ghosts[i], ghosts[i + 1], 0);
+      _mesh.distdata()[0].set_ghost(ghosts[i], ghosts[i + 1]);
     }
     delete[] ghosts;
 
@@ -279,13 +278,13 @@ void Checkpoint::load(Mesh& mesh)
 #endif
     for (uint i = 0; i < hdr_.num_shared; i++)
     {
-      _mesh.distdata().set_shared(shared[i], 0);
+      _mesh.distdata()[0].set_shared(shared[i]);
     }
     delete[] shared;
   }
 
   mesh = _mesh;
-  mesh.distdata().set_invalid_numbering();
+//  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
   restart_state_ = FUNC;
@@ -422,7 +421,9 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
   {
     uint *mapping = new uint[mesh.numVertices()];
     for (VertexIterator v(mesh); !v.end(); ++v)
-      mapping[v->index()] = mesh.distdata().get_global(*v);
+    {
+      mapping[v->index()] = v->global_index();
+    }
 #ifdef ENABLE_MPIIO
     MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[2] * sizeof(uint),
                           mapping, hdr_.num_vertices, MPI_UNSIGNED,
@@ -435,7 +436,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
     uint *ghosts = new uint[2 * hdr_.num_ghosts];
     uint *gp = &ghosts[0];
-    for (MeshGhostIterator g(mesh.distdata(), 0); !g.end(); ++g)
+    for (GhostIterator g(mesh.distdata()[0]); !g.end(); ++g)
     {
       *gp++ = g.index();
       *gp++ = g.owner();
@@ -452,7 +453,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
     uint *shared = new uint[hdr_.num_shared];
     uint *sp = &shared[0];
-    for (MeshSharedIterator s(mesh.distdata(), 0); !s.end(); ++s)
+    for (SharedIterator s(mesh.distdata()[0]); !s.end(); ++s)
       *sp++ = s.index();
 #ifdef ENABLE_MPIIO
     MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[4] * sizeof(uint),

@@ -49,42 +49,41 @@ bool MeshRenumber::renumber(Mesh& mesh)
 bool MeshRenumber::renumber_vertices(Mesh& mesh)
 {
   if (mesh.topology().dim() < 1 || !mesh.is_distributed()
-      || mesh.distdata().has_valid_numbering(0))
+      || mesh.distdata()[0].valid_numbering)
   {
     return false;
   }
 
-  MeshDistributedData& mddata = mesh.distdata();
+  DistributedData& distdata0 = mesh.distdata()[0];
+//  dolfin_assert(distdata0.is_finalized());
+
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
 
   // Update global number of vertices and get offset of local numbering
-  uint offset = 0;
-  mddata.apply_num_global(0, offset);
+  uint offset = distdata0.offset();
 
-  _map<uint,uint> new_local;
-  _map<uint,uint> new_global;
+  DistributedData distdata1;
   for (uint i = 0; i < mesh.numVertices(); ++i)
   {
-    if (!mddata.is_ghost(i, 0))
+    if (distdata0.is_owned(i))
     {
-      new_global[i] = offset++;
-      new_local[new_global[i]] = i;
+      distdata1.set_map(i, offset++);
     }
   }
 
   // Collect ghosted entities per owner
   Array<uint> *ghost_buff = new Array<uint> [pe_size];
-  for (MeshGhostIterator iter(mddata, 0); !iter.end(); ++iter)
+  for (GhostIterator iter(distdata0); !iter.end(); ++iter)
   {
-    ghost_buff[iter.owner()].push_back(mddata.get_vertex_global(iter.index()));
+    ghost_buff[iter.owner()].push_back(iter.global_index());
   }
 
   // Exchange data and set numbering
   MPI_Status status;
   Array<uint> send_buff;
   uint src, dest;
-  uint recv_size = mddata.num_ghost(0);
+  uint recv_size = distdata0.num_ghost();
   int recv_count, recv_size_gh, send_size;
 
   for (int i = 0; i < pe_size; ++i)
@@ -109,7 +108,9 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 
     for (int k = 0; k < recv_count; ++k)
     {
-      send_buff.push_back(new_global[mddata.get_vertex_local(recv_ghost[k])]);
+      uint const local_index = distdata0.get_local(recv_ghost[k]);
+      uint const new_global = distdata1.get_global(local_index);
+      send_buff.push_back(new_global);
     }
 
     MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_UNSIGNED, src, 2,
@@ -119,16 +120,15 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 
     for (int j = 0; j < recv_count; ++j)
     {
-      new_global[mddata.get_vertex_local(ghost_buff[dest][j])] = recv_buff[j];
-      new_local[recv_buff[j]] = mddata.get_vertex_local(ghost_buff[dest][j]);
+      distdata1.set_map(distdata0.get_local(ghost_buff[dest][j]), recv_buff[j]);
     }
     send_buff.clear();
   }
 
   // Use new numbering
-  mddata.apply_numbering(0, new_local, new_global);
-  mddata.apply_ownership(0);
-  mddata.finalize(0);
+//  distdata0.apply_numbering(0, new_local, new_global);
+//  mddata.apply_ownership(0);
+//  distdata0[0].finalize();
 
   delete[] recv_buff;
   delete[] recv_ghost;
@@ -144,13 +144,13 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
 bool MeshRenumber::renumber_edges(Mesh& mesh)
 {
   if (mesh.topology().dim() < 2 || !mesh.is_distributed()
-      || mesh.distdata().has_valid_numbering(1))
+      || mesh.distdata()[1].valid_numbering)
   {
     return false;
   }
   MeshDistributedData& mddata = mesh.distdata();
-  mddata.flush_numbering_data(1);
-  mddata.flush_ownership_data(1);
+//  mddata.flush_numbering_data(1);
+//  mddata.flush_ownership_data(1);
 
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
@@ -169,7 +169,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   // all the vertices are shared with a common adjacent.
   // Here we just send edges with all shared vertices.
   srand((uint) time(0) + rank);
-  for (MeshSharedIterator sv(mddata, 0); !sv.end(); ++sv)
+  for (SharedIterator sv(mddata[0]); !sv.end(); ++sv)
   {
     Vertex v(mesh, sv.index());
     for (MeshEntityIterator e(v, 1); !e.end(); ++e)
@@ -179,13 +179,13 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
         const uint *edge_v = e->entities(0);
         uint w = (sv.index() == edge_v[0] ? edge_v[1] : edge_v[0]);
         // Send only if both vertices are shared
-        if (mddata.is_shared(w, 0))
+        if (mddata[0].is_shared(w))
         {
           edgekey = edge_key(edge_v[0], edge_v[1]);
           edge_map[edgekey] = e->index();
           edge_id[edgekey] = (uint) rand();
-          send_buff.push_back(mddata.get_vertex_global(edge_v[0]));
-          send_buff.push_back(mddata.get_vertex_global(edge_v[1]));
+          send_buff.push_back(mddata[0].get_global(edge_v[0]));
+          send_buff.push_back(mddata[0].get_global(edge_v[1]));
           send_buff_id.push_back(edge_id[edgekey]);
         }
         used_edge.insert(e->index());
@@ -221,13 +221,13 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       // Check if I have the vertices
-      if (mddata.has_global(recv_buff[i], 0)
-          && mddata.has_global(recv_buff[i + 1], 0))
+      if (mddata[0].has_global(recv_buff[i])
+          && mddata[0].has_global(recv_buff[i + 1]))
       {
 
         // Generate edge key
-        edgekey = edge_key(mddata.get_vertex_local(recv_buff[i]),
-                       mddata.get_vertex_local(recv_buff[i + 1]));
+        edgekey = edge_key(mddata[0].get_local(recv_buff[i]),
+                       mddata[0].get_local(recv_buff[i + 1]));
 
         // Check if I have the corresponding edge
         if (edge_id.count(edgekey))
@@ -235,10 +235,10 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
           // Set entity as ghosted based on voting process and remove from map
           if (recv_buff_id[i >> 1] < edge_id[edgekey]
               || (recv_buff_id[i >> 1] == edge_id[edgekey]
-                  && status.MPI_SOURCE < rank))
+                  && src < rank))
           {
             edge_id.erase(edgekey);
-            mddata.set_ghost(edge_map[edgekey], 1);
+            mddata[1].set_ghost(edge_map[edgekey], src);
             ghosted_edges.insert(edgekey);
             ++num_ghost;
           }
@@ -246,12 +246,10 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
       }
     }
   }
-  dolfin_assert(num_ghost == mddata.num_ghost(1));
   dolfin_assert(num_ghost == ghosted_edges.size());
 
   // Update global number of edges and get offset of local numbering
-  uint offset = 0;
-  mddata.apply_num_global(1, offset);
+  uint offset = mddata[1].offset();
 
   send_buff.clear();
 
@@ -259,7 +257,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
   _map<uint,uint> new_local,new_global;
   for (uint i = 0; i < mesh.numEdges(); ++i)
   {
-    if (!mddata.is_ghost(i, 1))
+    if (!mddata[1].is_ghost(i))
     {
       new_global[i] = offset++;
       new_local[new_global[i]] = i;
@@ -268,8 +266,8 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
     {
       Edge e(mesh, i);
       const uint *edge_v = e.entities(0);
-      send_buff.push_back(mddata.get_vertex_global(edge_v[0]));
-      send_buff.push_back(mddata.get_vertex_global(edge_v[1]));
+      send_buff.push_back(mddata[0].get_global(edge_v[0]));
+      send_buff.push_back(mddata[0].get_global(edge_v[1]));
       send_mapping[num++] = e.index();
     }
   }
@@ -290,25 +288,25 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
     for (int i = 0; i < recv_count; i += 2)
     {
       // Check if I have the vertices
-      if (mddata.has_global(recv_buff[i], 0)
-          && mddata.has_global(recv_buff[i + 1], 0))
+      if (mddata[0].has_global(recv_buff[i])
+          && mddata[0].has_global(recv_buff[i + 1]))
       {
 
         // Generate edge key
-        edgekey = edge_key(mddata.get_vertex_local(recv_buff[i]),
-                       mddata.get_vertex_local(recv_buff[i + 1]));
+        edgekey = edge_key(mddata[0].get_local(recv_buff[i]),
+                       mddata[0].get_local(recv_buff[i + 1]));
 
         // Set entity as shared and add adjacents
         if (edge_id.count(edgekey))
         {
           global_buff.push_back(i >> 1);
           global_buff.push_back(new_global[edge_map[edgekey]]);
-          mddata.set_shared(edge_map[edgekey], 1);
-          mddata.set_shared_adj(edge_map[edgekey], status.MPI_SOURCE, 1);
+          mddata[1].set_shared(edge_map[edgekey]);
+          mddata[1].set_shared_adj(edge_map[edgekey], status.MPI_SOURCE);
         }
         else if (ghosted_edges.count(edgekey))
         {
-          mddata.set_shared_adj(edge_map[edgekey], status.MPI_SOURCE, 1);
+          mddata[1].set_shared_adj(edge_map[edgekey], status.MPI_SOURCE);
         }
       }
     }
@@ -322,16 +320,15 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
     {
       new_global[send_mapping[recv_buff[i]]] = recv_buff[i + 1];
       new_local[recv_buff[i + 1]] = send_mapping[recv_buff[i]];
-      mddata.set_ghost_owner(send_mapping[recv_buff[i]], status.MPI_SOURCE, 1);
+      mddata[1].set_ghost(send_mapping[recv_buff[i]], status.MPI_SOURCE);
     }
     global_buff.clear();
   }
 
   // Use new numbering
-  dolfin_assert(mddata.num_shared(1) > 0);
-  mddata.apply_numbering(1, new_local, new_global);
-  mddata.apply_ownership(1);
-  mddata.finalize(1);
+//  mddata.apply_numbering(1, new_local, new_global);
+//  mddata.apply_ownership(1);
+  mddata[1].finalize();
 
   delete[] recv_buff;
   delete[] recv_buff_id;
@@ -342,13 +339,13 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
 bool MeshRenumber::renumber_faces(Mesh& mesh)
 {
   if (mesh.topology().dim() < 3 || !mesh.is_distributed()
-      || mesh.distdata().has_valid_numbering(2))
+      || mesh.distdata()[2].valid_numbering)
   {
     return false;
   }
   MeshDistributedData& mddata = mesh.distdata();
-  mddata.flush_numbering_data(2);
-  mddata.flush_ownership_data(2);
+//  mddata.flush_numbering_data(2);
+//  mddata.flush_ownership_data(2);
 
   int const rank = MPI::processNumber();
   int const pe_size = MPI::numProcesses();
@@ -374,7 +371,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
     face_map[facekey] = f.index();
     face_id[facekey] = (uint) rand();
     send_buff_id.push_back(face_id[facekey]);
-    mddata.set_shared(f);
+    mddata[2].set_shared(f.index());
   }
 
   uint num_ghost = 0;
@@ -414,12 +411,12 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
       for (uint k = 0; k < inc; k += 2)
       {
         // Check if I have the vertices
-        if (mddata.has_global(recv_buff[i + k], 0)
-            && mddata.has_global(recv_buff[i + k + 1], 0))
+        if (mddata[0].has_global(recv_buff[i + k])
+            && mddata[0].has_global(recv_buff[i + k + 1]))
         {
           // Generate edge key
-          key = edge_key(mddata.get_vertex_local(recv_buff[i + k]),
-                         mddata.get_vertex_local(recv_buff[i + k + 1]));
+          key = edge_key(mddata[0].get_local(recv_buff[i + k]),
+                         mddata[0].get_local(recv_buff[i + k + 1]));
           facekey.insert(key);
           ++num_ok;
         }
@@ -435,22 +432,20 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
       {
         dolfin_assert(face_id.count(facekey));
         if (recv_buff_id[ii] < face_id[facekey]
-            || (recv_buff_id[ii] == face_id[facekey] && status.MPI_SOURCE < rank))
+            || (recv_buff_id[ii] == face_id[facekey] && src < rank))
         {
           face_id.erase(facekey);
-          mddata.set_ghost(face_map[facekey], 2);
+          mddata[2].set_ghost(face_map[facekey], src);
           ghosted_faces.insert(facekey);
           ++num_ghost;
         }
       }
     }
   }
-  dolfin_assert(num_ghost == mddata.num_ghost(2));
   dolfin_assert(num_ghost == ghosted_faces.size());
 
   // Update global number of faces and get offset of local numbering
-  uint offset = 0;
-  mddata.apply_num_global(2, offset);
+  uint offset = mddata[2].offset();
 
   send_buff.clear();
 
@@ -458,7 +453,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
   _map<uint,uint> new_local,new_global;
   for (uint i = 0; i < mesh.numFaces(); ++i)
   {
-    if (!mddata.is_ghost(i, 2))
+    if (!mddata[2].is_ghost(i))
     {
       new_global[i] = offset++;
       new_local[new_global[i]] = i;
@@ -491,12 +486,12 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
       uint num_ok = 0;
       for (uint k = 0; k < inc; k += 2)
       {
-        if (mddata.has_global(recv_buff[i + k], 0)
-            && mddata.has_global(recv_buff[i + k + 1], 0))
+        if (mddata[0].has_global(recv_buff[i + k])
+            && mddata[0].has_global(recv_buff[i + k + 1]))
         {
           // Generate edge key
-          key = edge_key(mddata.get_vertex_local(recv_buff[i + k]),
-                         mddata.get_vertex_local(recv_buff[i + k + 1]));
+          key = edge_key(mddata[0].get_local(recv_buff[i + k]),
+                         mddata[0].get_local(recv_buff[i + k + 1]));
 
           facekey.insert(key);
           ++num_ok;
@@ -511,12 +506,12 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
       {
         global_buff.push_back(ii);
         global_buff.push_back(new_global[face_map[facekey]]);
-        mddata.set_shared(face_map[facekey], 2);
-        mddata.set_shared_adj(face_map[facekey], src, 2);
+        mddata[2].set_shared(face_map[facekey]);
+        mddata[2].set_shared_adj(face_map[facekey], src);
       }
       else if (ghosted_faces.count(facekey))
       {
-        mddata.set_shared_adj(face_map[facekey], status.MPI_SOURCE, 1);
+        mddata[2].set_shared_adj(face_map[facekey], status.MPI_SOURCE);
       }
     }
 
@@ -529,16 +524,15 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
     {
       new_global[send_mapping[recv_buff[i]]] = recv_buff[i + 1];
       new_local[recv_buff[i + 1]] = send_mapping[recv_buff[i]];
-      mddata.set_ghost_owner(send_mapping[recv_buff[i]], status.MPI_SOURCE, 2);
+      mddata[2].set_ghost(send_mapping[recv_buff[i]], status.MPI_SOURCE);
     }
     global_buff.clear();
   }
 
   // Use new numbering
-  dolfin_assert(mddata.num_shared(2) > 0);
-  mddata.apply_numbering(2, new_local, new_global);
-  mddata.apply_ownership(2);
-  mddata.finalize(2);
+//  mddata.apply_numbering(2, new_local, new_global);
+//  mddata.apply_ownership(2);
+  mddata[2].finalize();
 
   delete[] recv_buff;
   delete[] recv_buff_id;
@@ -549,14 +543,13 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 bool MeshRenumber::renumber_cells(Mesh& mesh)
 {
   uint const tdim = mesh.topology().dim();
-  if (!mesh.is_distributed() || mesh.distdata().has_valid_numbering(tdim))
+  if (!mesh.is_distributed() || mesh.distdata()[tdim].valid_numbering)
   {
     return false;
   }
 
   MeshDistributedData& mddata = mesh.distdata();
-  uint offset = 0;
-  mddata.apply_num_global(tdim, offset);
+  uint offset = mddata[tdim].offset();
 
   _map<uint,uint> new_local;
   _map<uint,uint> new_global;
@@ -567,9 +560,9 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
   }
 
   // Use new numbering
-  mddata.apply_numbering(tdim, new_local, new_global);
-  mddata.apply_ownership(tdim);
-  mddata.finalize(tdim);
+//  mddata.apply_numbering(tdim, new_local, new_global);
+//  mddata.apply_ownership(tdim);
+  mddata[tdim].finalize();
 
   return true;
 }
@@ -577,7 +570,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
 bool MeshRenumber::remap_facets(Mesh& mesh)
 {
   uint const facetdim = mesh.topology().dim() - 1;
-  if (!mesh.is_distributed() || mesh.distdata().has_valid_mapping(facetdim))
+  if (!mesh.is_distributed())// || mesh.distdata().has_valid_mapping(facetdim))
   {
     return false;
   }
@@ -628,24 +621,24 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
 {
   MeshDistributedData& mddata = mesh.distdata();
   const uint *face_v = f.entities(0);
-  send_buff.push_back(mddata.get_vertex_global(face_v[0]));
-  send_buff.push_back(mddata.get_vertex_global(face_v[1]));
+  send_buff.push_back(mddata[0].get_global(face_v[0]));
+  send_buff.push_back(mddata[0].get_global(face_v[1]));
 
-  send_buff.push_back(mddata.get_vertex_global(face_v[1]));
-  send_buff.push_back(mddata.get_vertex_global(face_v[2]));
+  send_buff.push_back(mddata[0].get_global(face_v[1]));
+  send_buff.push_back(mddata[0].get_global(face_v[2]));
 
   switch (f.num_entities(0))
     {
     case 3:
-      send_buff.push_back(mddata.get_vertex_global(face_v[2]));
-      send_buff.push_back(mddata.get_vertex_global(face_v[0]));
+      send_buff.push_back(mddata[0].get_global(face_v[2]));
+      send_buff.push_back(mddata[0].get_global(face_v[0]));
       break;
     case 4:
-      send_buff.push_back(mddata.get_vertex_global(face_v[2]));
-      send_buff.push_back(mddata.get_vertex_global(face_v[3]));
+      send_buff.push_back(mddata[0].get_global(face_v[2]));
+      send_buff.push_back(mddata[0].get_global(face_v[3]));
 
-      send_buff.push_back(mddata.get_vertex_global(face_v[3]));
-      send_buff.push_back(mddata.get_vertex_global(face_v[0]));
+      send_buff.push_back(mddata[0].get_global(face_v[3]));
+      send_buff.push_back(mddata[0].get_global(face_v[0]));
       break;
     default:
       error("Unkown entity");
@@ -655,12 +648,13 @@ void MeshRenumber::send_buffer_face(Array<uint>& send_buff, Mesh& mesh, Face& f)
 //-----------------------------------------------------------------------------
 void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
 {
+  /*
   if(!mesh.is_distributed())
   {
     return;
   }
   MeshDistributedData& distdata = mesh.distdata();
-  mesh.distdata().flush_mapping(dim);
+//  mesh.distdata().flush_mapping(dim);
 
   //
   uint rank = dolfin::MPI::processNumber();
@@ -675,10 +669,10 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
   // Group shared entities by adjacent rank
   _map<uint,uint> * shared_idx = new _map<uint,uint> [pe_size];
   std::fill_n(idx, pe_size, 0);
-  for (MeshSharedIterator sh(distdata, dim); !sh.end(); ++sh)
+  for (SharedIterator sh(distdata[dim]); !sh.end(); ++sh)
   {
-    uint const glb = distdata.get_global(sh.index(), dim);
-    _set<uint> const& adj = distdata.get_shared_adj(sh.index(), dim);
+    uint const glb = distdata[dim].get_global(sh.index());
+    _set<uint> const& adj = distdata[dim].get_shared_adj(sh.index());
     for (_set<uint>::const_iterator it = adj.begin(); it != adj.end(); ++it)
     {
       sendbuf[*it].push_back(glb);
@@ -689,10 +683,10 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
   // Group ghost entities by owner
   _map<uint,uint> * ghost_idx = new _map<uint,uint> [pe_size];
   std::fill_n(idx, pe_size, 0);
-  for (MeshGhostIterator gh(distdata, dim); !gh.end(); ++gh)
+  for (GhostIterator gh(distdata[dim]); !gh.end(); ++gh)
   {
-    uint const glb = distdata.get_global(gh.index(), dim);
-    uint owner = distdata.get_owner(gh.index(), dim);
+    uint const glb = distdata[dim].get_global(gh.index());
+    uint owner = distdata[dim].get_owner(gh.index());
     ghost_idx[owner].insert(std::pair<uint, uint>(glb, idx[owner]++));
   }
 
@@ -709,7 +703,7 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
 
   // Exchange global indices to know ordering of adjacent rank
   // Set recv buffer size to number of shared entities to avoid reallocation
-  uint * recvbuf = new uint[mesh.distdata().num_shared(dim)];
+  uint * recvbuf = new uint[mesh.distdata()[dim].num_shared()];
   for (int j = 1; j < (int) pe_size; ++j)
   {
     src = (rank - j + pe_size) % pe_size;
@@ -729,7 +723,7 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
     }
 
     // Skip non-adjacent ranks
-    if (distdata.get_adj_ranks(dim).count(src) == 0) continue;
+    if (distdata[dim].get_adj_ranks().count(src) == 0) continue;
 
     // Shared and ghost mappings
     Array<uint>& shared_mapping0 = distdata.get_shared_mapping_to(src, dim);
@@ -745,7 +739,7 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
     {
       uint glb = recvbuf[entity];
       //
-      dolfin_assert(distdata.has_global(glb, dim));
+      dolfin_assert(distdata[dim].has_global(glb));
       _map<uint, uint>::const_iterator sit = shared_idx[src].find(glb);
       dolfin_assert(sit != shared_idx[src].end());
 
@@ -760,8 +754,8 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
       {
         //
         dolfin_assert(
-            distdata.is_ghost(distdata.get_local(glb, dim), dim)
-                && (distdata.get_owner(distdata.get_local(glb, dim), dim)
+            distdata[dim].is_ghost(distdata[dim].get_local(glb))
+                && (distdata[dim].get_owner(distdata[dim].get_local(glb))
                     == (uint ) src));
 
         // Fill the ghost mapping between local ghost iterator ordering and the
@@ -782,6 +776,7 @@ void MeshRenumber::remap_shared_entities(Mesh& mesh, uint const dim)
   delete[] ghost_idx;
   delete[] shared_idx;
   delete[] sendbuf;
+  */
 }
 //-----------------------------------------------------------------------------
 #else

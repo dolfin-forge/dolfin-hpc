@@ -205,18 +205,16 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   {
     if (MPI::numProcesses() > 1)
     {
-      refined_mesh.distdata().set_map(current_vertex,
-                                      mesh.distdata().get_global(*v), 0);
+      refined_mesh.distdata()[0].set_map(current_vertex, v->global_index());
 
-      if (mesh.distdata().is_ghost(v->index(), 0))
+      if (v->is_ghost())
       {
-        refined_mesh.distdata().set_ghost(current_vertex, 0);
-        refined_mesh.distdata().set_ghost_owner(current_vertex,
-                                                mesh.distdata().get_owner(*v),
-                                                0);
+        refined_mesh.distdata()[0].set_ghost(current_vertex, v->owner());
       }
-      else if (mesh.distdata().is_shared(v->index(), 0))
-        refined_mesh.distdata().set_shared(current_vertex, 0);
+      else if (v->is_shared())
+      {
+        refined_mesh.distdata()[0].set_shared(current_vertex);
+      }
     }
 
     editor.add_vertex(current_vertex++, v->x());
@@ -358,7 +356,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   // Overwrite old mesh with refined mesh
   editor.close();
   mesh = refined_mesh;
-  mesh.distdata().set_invalid_numbering();
+//  mesh.distdata().set_invalid_numbering();
   mesh.renumber();
 
   end();

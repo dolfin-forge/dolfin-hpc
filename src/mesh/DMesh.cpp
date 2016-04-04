@@ -176,12 +176,18 @@ void DMesh::imp(Mesh& mesh)
     DVertex* dv = new DVertex;
     dv->p = vi->point();
     dv->id = vi->index();
-    dv->glb_id = mesh.distdata().get_vertex_global(vi->index());
-    dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
-    dv->shared = mesh.distdata().is_shared(vi->index(), 0);
-    dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
-    if (dv->ghosted) dv->owner = mesh.distdata().get_owner(*vi);
-    else if (dv->shared) dv->shared_adj = mesh.distdata().get_shared_adj(*vi);
+    dv->glb_id = mesh.distdata()[0].get_global(vi->index());
+    dv->on_boundary = mesh.distdata()[0].is_shared(vi->index());
+    dv->shared = mesh.distdata()[0].is_shared(vi->index());
+    dv->ghosted = mesh.distdata()[0].is_ghost(vi->index());
+    if (dv->ghosted)
+    {
+      dv->owner = mesh.distdata()[0].get_owner(vi->index());
+    }
+    else if (dv->shared)
+    {
+      dv->shared_adj = mesh.distdata()[0].get_shared_adj(vi->index());
+    }
 
     if (dv->on_boundary) bc_dvs[dv->glb_id] = dv;
 
@@ -227,9 +233,9 @@ void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
   {
     DVertex* dv = new DVertex;
     dv->p = vi->point();
-    dv->glb_id = mesh.distdata().get_vertex_global(vi->index());
-    dv->on_boundary = mesh.distdata().is_shared(vi->index(), 0);
-    dv->shared = mesh.distdata().is_shared(vi->index(), 0);
+    dv->glb_id = mesh.distdata()[0].get_global(vi->index());
+    dv->on_boundary = mesh.distdata()[0].is_shared(vi->index());
+    dv->shared = mesh.distdata()[0].is_shared(vi->index());
     dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
 
     dv->patch_id = patch_id_list.get(vi->index());
@@ -297,14 +303,13 @@ void DMesh::exp(Mesh& mesh)
     {
       if (dv->ghosted)
       {
-        mesh.distdata().set_ghost(current_vertex, 0);
-        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+        mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
       }
       else if (dv->shared)
       {
-        mesh.distdata().set_shared(current_vertex, 0);
+        mesh.distdata()[0].set_shared(current_vertex);
       }
-      mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
+      mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
     }
   }
 
@@ -328,8 +333,8 @@ void DMesh::exp(Mesh& mesh)
 
   if (_is_distributed)
   {
-    mesh.distdata().set_invalid_numbering();
-    mesh.distdata().set_invalid_ownership();
+//    mesh.distdata().set_invalid_numbering();
+//    mesh.distdata().set_invalid_ownership();
     mesh.renumber();
   }
 }
@@ -373,11 +378,11 @@ void DMesh::exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
       if(dv->ghosted)
       {
         mesh.distdata().set_ghost(current_vertex, 0);
-        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+        mesh.distdata().set_ghost(current_vertex, dv->owner, 0);
       }
       else if(dv->shared)
       {
-        mesh.distdata().set_shared(current_vertex, 0);
+        mesh.distdata()[0].set_shared(current_vertex);
       }
       mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
     }
@@ -459,15 +464,14 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     {
       if (dv->ghosted)
       {
-        mesh.distdata().set_ghost(current_vertex, 0);
-        mesh.distdata().set_ghost_owner(current_vertex, dv->owner, 0);
+        mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
       }
       else if (dv->shared)
       {
-        mesh.distdata().set_shared(current_vertex, 0);
-        mesh.distdata().setall_shared_adj(current_vertex, dv->shared_adj, 0);
+        mesh.distdata()[0].set_shared(current_vertex);
+        mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
       }
-      mesh.distdata().set_map(current_vertex, dv->glb_id, 0);
+      mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
     }
   }
 

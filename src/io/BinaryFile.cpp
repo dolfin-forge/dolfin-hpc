@@ -215,7 +215,7 @@ void BinaryFile::operator>>(Function & f)
     if (f_hdr.dim == f.value_size())
     {
 
-      uint size = f.value_size() * f.mesh().distdata().num_owned(0);
+      uint size = f.value_size() * f.mesh().distdata()[0].num_owned();
       real *values = new real[size];
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -292,7 +292,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
       error("Dimension of file and function set does not match");
     }
 
-    uint size = u->value_size() * u->mesh().distdata().num_owned(0);
+    uint size = u->value_size() * u->mesh().distdata()[0].num_owned();
     real *values = new real[size];
     MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
                          values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -377,7 +377,7 @@ void BinaryFile::write_function(
     real *values = new real[size];
     uint offset = u->vector().offset();
 
-    if ((u->vector().local_size() / value_dim) != mesh.distdata().num_owned(0))
+    if ((u->vector().local_size() / value_dim) != mesh.distdata()[0].num_owned())
     {
       real *interp_values = new real[size];
 
@@ -398,7 +398,7 @@ void BinaryFile::write_function(
       delete[] interp_values;
 
       // Compute new vertex based offset
-      uint num_values = value_dim * mesh.distdata().num_owned(0);
+      uint num_values = value_dim * mesh.distdata()[0].num_owned();
       offset = 0;
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
@@ -415,7 +415,7 @@ void BinaryFile::write_function(
       u->vector().get(values);
     }
 
-    size = value_dim * mesh.distdata().num_owned(0);
+    size = value_dim * mesh.distdata()[0].num_owned();
 
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = value_dim;
@@ -754,7 +754,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
       v_index = *it - vertex_offset[0];
-      distdata.set_map(local_vertex_index, *it, 0);
+      distdata[0].set_map(local_vertex_index, *it);
       editor.add_vertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
     }
 
@@ -837,11 +837,10 @@ void BinaryFile::operator>>(Mesh& mesh)
       int g_i = 0;
       for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
       {
-        distdata.set_map(local_vertex_index, ghosts[dest][g_i], 0);
+        distdata[0].set_map(local_vertex_index, ghosts[dest][g_i]);
         if (recv_new_owner[g_i] != pe_rank)
         {
-          distdata.set_ghost(local_vertex_index, 0);
-          distdata.set_ghost_owner(local_vertex_index, recv_new_owner[g_i], 0);
+          distdata[0].set_ghost(local_vertex_index, recv_new_owner[g_i]);
         }
         editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
       }
@@ -854,7 +853,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       for (uint n = 0; n < it->size; ++n)
       {
-        connectivity[n] = distdata.get_vertex_local(it->v[n]);
+        connectivity[n] = distdata[0].get_local(it->v[n]);
       }
       editor.add_cell(local_cell_index, &connectivity[0]);
     }
@@ -958,7 +957,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     // Write vertices
     uint vertex_offset = 0;
-    uint vertex_buffer_size = gdim * mesh.distdata().num_owned(0);
+    uint vertex_buffer_size = gdim * mesh.distdata()[0].num_owned();
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
@@ -1002,7 +1001,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     {
       for (uint i = 0; i < c->num_entities(0); ++i)
       {
-        *(cp++) = mesh.distdata().get_vertex_global(c->entities(0)[i]);
+        *(cp++) = mesh.distdata()[0].get_global(c->entities(0)[i]);
       }
     }
     MPI_File_write_at_all(fh, byte_offset, (void *) &num_cells, 1, MPI_UNSIGNED,
@@ -1116,13 +1115,13 @@ template<typename T>
 
       for (VertexIterator v(mesh); !v.end(); ++v)
       {
-        if (!mesh.distdata().is_ghost(v->index(), 0))
+        if (!v->is_ghost())
         {
           *(vp++) = (real) meshfunction.get(v->index());
         }
       }
 
-      local_size = mesh.distdata().num_owned(0);
+      local_size = mesh.distdata()[0].num_owned();
     }
     else
     {
@@ -1216,7 +1215,7 @@ template<typename T>
 
     uint local_size = (
         mfunc_type > 0 ?
-            mesh.numVertices() - mesh.distdata().num_ghost(0) : mesh.numCells());
+            mesh.numVertices() - mesh.distdata()[0].num_ghost() : mesh.numCells());
 
     uint offset = 0;
 #if ( MPI_VERSION > 1 )
@@ -1253,14 +1252,15 @@ template<typename T>
       }
 
       std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
-      for (MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it)
-        ghost_buff[it.owner()].push_back(
-            mesh.distdata().get_vertex_global(it.index()));
+      for (GhostIterator it(mesh.distdata()[0]); !it.end(); ++it)
+      {
+        ghost_buff[it.owner()].push_back(it.global_index());
+      }
 
       MPI_Status status;
       std::vector<real> send_buff;
       uint src, dest;
-      uint recv_size = mesh.distdata().num_ghost(0);
+      uint recv_size = mesh.distdata()[0].num_ghost();
       int recv_count, recv_size_gh, send_size;
 
       for (uint i = 0; i < pe_size; ++i)
@@ -1285,7 +1285,7 @@ template<typename T>
         for (int k = 0; k < recv_count; ++k)
           send_buff.push_back(
               meshfunction.get(
-                  mesh.distdata().get_vertex_local(recv_ghost[k])));
+                  mesh.distdata()[0].get_local(recv_ghost[k])));
 
         MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
                      recv_buff, recv_size, MPI_DOUBLE, dest, 2,
@@ -1295,7 +1295,7 @@ template<typename T>
         for (int j = 0; j < recv_count; j++)
         {
           meshfunction.set(
-              mesh.distdata().get_vertex_local(ghost_buff[dest][j]),
+              mesh.distdata()[0].get_local(ghost_buff[dest][j]),
               static_cast<T>(recv_buff[j]));
         }
 

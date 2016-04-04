@@ -82,22 +82,22 @@ void MeshSmoothData::prepare_mesh()
     Vertex on_mesh(_mesh, vertex_map->get(*vertex));
     //Building owner tree:
     //The process number which owns the vertex is saved as key
-    if (distdata.is_ghost(on_mesh.index(), 0))
+    if (distdata[0].is_ghost(on_mesh.index()))
     {
-      owner_iterator = owner_tree.find(distdata.get_owner(on_mesh.index(), 0));
+      owner_iterator = owner_tree.find(distdata[0].get_owner(on_mesh.index()));
       if (owner_iterator != owner_tree.end())
       {
         (owner_iterator->second).push_back(
-            double(distdata.get_vertex_global(on_mesh.index())));
+            double(distdata[0].get_global(on_mesh.index())));
       }
       else
       {
         std::vector<double> vertices_to_send;
         vertices_to_send.push_back(
-            double(distdata.get_vertex_global(on_mesh.index())));
+            double(distdata[0].get_global(on_mesh.index())));
         owner_tree.insert(
             std::pair<uint, std::vector<double> >(
-                distdata.get_owner(on_mesh.index(), 0), vertices_to_send));
+                distdata[0].get_owner(on_mesh.index()), vertices_to_send));
       }
 
       std::vector<double> vertex_info;
@@ -133,7 +133,7 @@ void MeshSmoothData::prepare_mesh()
       }
       send_inner.insert(
           std::pair<uint, std::vector<double> >(
-              double(distdata.get_vertex_global(on_mesh.index())),
+              double(distdata[0].get_global(on_mesh.index())),
               vertex_info));
       delete[] sum;
     }
@@ -141,8 +141,7 @@ void MeshSmoothData::prepare_mesh()
     //building recv_sum
     else
     {
-      _set<uint> NeighboringProcessor = distdata.get_shared_adj(on_mesh.index(),
-                                                                0);
+      _set<uint> NeighboringProcessor = distdata[0].get_shared_adj(on_mesh.index());
       for (_set<uint>::iterator it = NeighboringProcessor.begin();
           it!= NeighboringProcessor.end();++it)
       {
@@ -150,13 +149,13 @@ void MeshSmoothData::prepare_mesh()
         if(ghost_iterator!=ghost_tree.end())
         {
           (ghost_iterator->second).push_back(
-              distdata.get_vertex_global(on_mesh.index()));
+              distdata[0].get_global(on_mesh.index()));
         }
         else
         {
           std::vector<uint> vertices_to_send;
           vertices_to_send.push_back(
-              distdata.get_vertex_global(on_mesh.index()));
+              distdata[0].get_global(on_mesh.index()));
           ghost_tree.insert(
               std::pair<uint,std::vector<uint> >(*it, vertices_to_send));
         }
@@ -193,7 +192,7 @@ void MeshSmoothData::prepare_mesh()
       }
       recv_sum.insert(
           std::pair<uint,std::vector<double> >(
-              distdata.get_vertex_global(on_mesh.index()), vertex_info));
+              distdata[0].get_global(on_mesh.index()), vertex_info));
       delete[] sum;
     }
   }

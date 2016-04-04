@@ -116,7 +116,7 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
       for ( VertexIterator v_it(boundary) ; !v_it.end() ; ++v_it )
       {
         _forbidden_vertices.at(bnd_vertex_map->get(v_it->index())) = true;
-        if ( !mesh.distdata().is_ghost(bnd_vertex_map->get(v_it->index()),0) )
+        if ( !mesh.distdata()[0].is_ghost(bnd_vertex_map->get(v_it->index())) )
           ++num_independent_vertices;
       }
     }
@@ -129,7 +129,7 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
     {
       bool independent = isIndependentVertex(*v_it);
       _forbidden_vertices.at(v_it->index()) = independent;
-      if ( independent && !mesh.distdata().is_ghost(v_it->index(),0) )
+      if ( independent && !mesh.distdata()[0].is_ghost(v_it->index()) )
         ++num_independent_vertices;
     }
   }
@@ -282,12 +282,12 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
         it != _vertices_to_request.end() ; ++it )
   {
     dolfin_assert( old2new_vertices[*it] >= 0 );
-    uint global_index = mesh.distdata().get_vertex_global(old2new_vertices[*it]);
+    uint global_index = mesh.distdata()[0].get_global(old2new_vertices[*it]);
 
     // vertex belongs to other process: request has to be distributed by owner
-    if ( mesh.distdata().is_ghost(old2new_vertices[*it], 0) )
+    if ( mesh.distdata()[0].is_ghost(old2new_vertices[*it]) )
     {
-      uint owner = mesh.distdata().get_owner(old2new_vertices[*it], 0);
+      uint owner = mesh.distdata()[0].get_owner(old2new_vertices[*it]);
       send_list_requests[owner].push_back(global_index);
     }
     // vertex belongs to this process: put request into map
@@ -345,11 +345,11 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   for ( std::map<uint,uint>::iterator m_it(requested_vertices.begin()) ;
         m_it != requested_vertices.end() ; ++m_it )
   {
-    uint local_index = mesh.distdata().get_vertex_local(m_it->first);
+    uint local_index = mesh.distdata()[0].get_local(m_it->first);
     uint pe = m_it->second;
 
     // set of processes that share this vertex
-    _set<uint> shared_adj = mesh.distdata().get_shared_adj(local_index, 0);
+    _set<uint> shared_adj = mesh.distdata()[0].get_shared_adj(local_index);
     for ( _set<uint>::iterator s_it(shared_adj.begin()) ;
           s_it != shared_adj.end() ; ++s_it )
     {
@@ -390,7 +390,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     // process received requests and marks cells accordingly
     for ( uint i(0) ; i < recv_size ; i += 2 )
     {
-      uint local_index = mesh.distdata().get_vertex_local(recv_buff_requests[i]);
+      uint local_index = mesh.distdata()[0].get_local(recv_buff_requests[i]);
       Vertex v(mesh, local_index);
 
       // select lowest process index for all cells around requested vertex

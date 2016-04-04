@@ -255,7 +255,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
       }
 
       uint node = vertex.index();
-      if (!mesh.distdata().is_ghost(node, 0))
+      if (vertex.is_owned())
       {
         Cell cell(mesh, (vertex.entities(gdim))[0]);
         scratch.cell.update(cell);

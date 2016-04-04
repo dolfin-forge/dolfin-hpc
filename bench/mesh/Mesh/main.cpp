@@ -36,14 +36,14 @@ int main(int argc, char** argv)
       {
         MeshEntity e0(mesh, e0dim, se.index());
         MeshEntityIterator e1(e0, e1dim);
-        _set<uint> cmn_adjs = distdata.get_shared_adj(e1->index(), e1dim);
+        _set<uint> cmn_adjs = distdata[e1dim].get_shared_adj(e1->index());
         if (cmn_adjs.empty())
         {
           error("First sub-entity of shared entity has zero adjacents");
         }
         for (++e1; !e1.end(); ++e1)
         {
-          _set<uint> const& ae1 = distdata.get_shared_adj(e1->index(), e1dim);
+          _set<uint> const& ae1 = distdata[e1dim].get_shared_adj(e1->index());
           for(_set<uint>::const_iterator ai = cmn_adjs.begin();
               ai != cmn_adjs.end(); ++ai )
           {
@@ -96,12 +96,12 @@ int main(int argc, char** argv)
       MeshDistributedData& distdata = mesh.distdata();
 
       // Shared
-      uint const num_shared = distdata.num_shared(edim);
+      uint const num_shared = distdata[edim].num_shared();
       Array<uint> * sharedbuf = new Array<uint> [pe_size];
       for (MeshSharedIterator se(distdata, edim); !se.end(); ++se)
       {
         _set<uint> const& adjs = se.adj();
-        uint glb_id = distdata.get_global(se.index(), edim);
+        uint glb_id = distdata[edim].get_global(se.index());
         for(_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
         {
           sharedbuf[*it].push_back(glb_id);
@@ -110,13 +110,13 @@ int main(int argc, char** argv)
       }
 
       // Ghosts
-      uint const num_ghost = distdata.num_ghost(edim);
-      uint const num_shared_owned = distdata.num_shared(edim) - num_ghost;
+      uint const num_ghost = distdata[edim].num_ghosts();
+      uint const num_shared_owned = distdata[edim].num_shared() - num_ghost;
       Array<uint> * ghostdbuf = new Array<uint> [pe_size];
       for (MeshGhostIterator ge(distdata, edim); !ge.end(); ++ge)
       {
         uint const owner = ge.owner();
-        uint glb_id = distdata.get_global(ge.index(), edim);
+        uint glb_id = distdata[edim].get_global(ge.index());
         ghostdbuf[owner].push_back(glb_id);
         dolfin_assert(ghostdbuf[owner].size() <= num_ghost);
       }
@@ -157,21 +157,21 @@ int main(int argc, char** argv)
         {
           uint glb_id = srecv_buff[ii];
           // Check if rank has the entity
-          if (!distdata.has_global(glb_id, edim))
+          if (!distdata[edim].has_global(glb_id))
           {
             error("Unknown shared entity %u received from %d", glb_id, src);
           }
           shared_recv.insert(glb_id);
           // Check if the entity is shared
-          uint loc_id = distdata.get_local(glb_id, edim);
-          if (!distdata.is_shared(loc_id, edim))
+          uint loc_id = distdata[edim].get_local(glb_id);
+          if (!distdata[edim].is_shared(loc_id))
           {
             error("Entity %u is not marked as shared", glb_id);
           }
           // Check if the rank is listed as adjacent
-          if (distdata.get_shared_adj(loc_id, edim).count(src) == 0)
+          if (distdata[edim].get_shared_adj(loc_id).count(src) == 0)
           {
-            if (distdata.is_ghost(loc_id, edim))
+            if (distdata[edim].is_ghost(loc_id))
             {
               error("Ghosted entity %u is not shared with %u", glb_id, src);
             }
@@ -210,17 +210,17 @@ int main(int argc, char** argv)
         {
           uint glb_id = grecv_buff[ii];
           // Check if it has the vertex
-          if (!distdata.has_global(glb_id, edim))
+          if (!distdata[edim].has_global(glb_id))
           {
             error("Unknown owned entity %u", glb_id);
           }
           owned_recv.insert(glb_id);
-          uint loc_id = distdata.get_local(glb_id, edim);
-          if (distdata.is_ghost(loc_id, edim))
+          uint loc_id = distdata[edim].get_local(glb_id);
+          if (distdata[edim].is_ghost(loc_id))
           {
             error("Entity %u is not marked as owned", glb_id);
           }
-          if (distdata.get_shared_adj(loc_id, edim).count(src) == 0)
+          if (distdata[edim].get_shared_adj(loc_id).count(src) == 0)
           {
             error("Owned entity %u is not shared with %u", glb_id, src);
           }

@@ -210,15 +210,15 @@ void VertexNormal::computeNormal(Mesh& mesh)
       {
         uint const loc_id = boundary.vertex_index(*bvertex);
         //
-        if (mesh.distdata().is_shared(loc_id, 0))
+        if (mesh.distdata()[0].is_shared(loc_id))
         {
-          if (mesh.distdata().is_ghost(loc_id, 0))
+          if (mesh.distdata()[0].is_ghost(loc_id))
           {
             Array<real> normals;
             Array<real> weights;
             getFacetData(type_, mesh, boundary, *bvertex, normals, weights);
-            uint const glob_id = mesh.distdata().get_vertex_global(loc_id);
-            uint const owner = mesh.distdata().get_owner(loc_id, 0);
+            uint const glob_id = mesh.distdata()[0].get_global(loc_id);
+            uint const owner = mesh.distdata()[0].get_owner(loc_id);
             u_sendbuff[owner].push_back(glob_id);
             u_sendbuff[owner].push_back(weights.size());
             r_sendbuff[owner].insert(r_sendbuff[owner].end(), normals.begin(),
@@ -228,7 +228,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
           }
           else
           {
-            uint const glb_id = mesh.distdata().get_vertex_global(loc_id);
+            uint const glb_id = mesh.distdata()[0].get_global(loc_id);
             dolfin_assert(glb_id < mesh.global_numVertices());
             VertexData * data = new VertexData();
             // Do not fill to avoid copy
@@ -252,13 +252,13 @@ void VertexNormal::computeNormal(Mesh& mesh)
     int u_maxrecvcount = 0;
     int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
-    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
     }
-    dolfin_assert(u_maxsendcount <= u_size * mesh.topology().num_ghosts(0));
+    dolfin_assert(u_maxsendcount <= u_size * mesh.topology().num_ghost(0));
     MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
                   dolfin::MPI::DOLFIN_COMM);
     dolfin_assert(u_maxrecvcount > 0);
@@ -331,7 +331,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
     for (VertexIterator bvertex(boundary); !bvertex.end(); ++bvertex)
     {
       uint const loc_id = boundary.vertex_index(*bvertex);
-      if (mesh.distdata().is_ghost(loc_id, 0))
+      if (mesh.distdata()[0].is_ghost(loc_id))
       {
         continue;
       }
@@ -340,8 +340,8 @@ void VertexNormal::computeNormal(Mesh& mesh)
       Array<real> N;
       Array<real> W;
       getFacetData(type_, mesh, boundary, *bvertex, N, W);
-      bool const is_shared = mesh.distdata().is_shared(loc_id, 0);
-      uint const glb_id = mesh.distdata().get_vertex_global(loc_id);
+      bool const is_shared = mesh.distdata()[0].is_shared(loc_id);
+      uint const glb_id = mesh.distdata()[0].get_global(loc_id);
       if (is_shared)
       {
         VertexDataMap::iterator it = vdata.find(glb_id);
@@ -368,7 +368,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
 
       if (is_shared)
       {
-        _set<uint> const& adjs = mesh.distdata().get_shared_adj(loc_id, 0);
+        _set<uint> const& adjs = mesh.distdata()[0].get_shared_adj(loc_id);
         for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end();
              ++it)
         {
@@ -401,7 +401,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
     int u_maxrecvcount = 0;
     int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
-    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
@@ -437,9 +437,9 @@ void VertexNormal::computeNormal(Mesh& mesh)
       uint iir = 0;
       for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
       {
-        dolfin_assert(mesh.distdata().has_global(u_recvbuff[iiu], 0));
-        uint loc_id = mesh.distdata().get_vertex_local(u_recvbuff[iiu]);
-        dolfin_assert(mesh.distdata().is_ghost(loc_id, 0));
+        dolfin_assert(mesh.distdata()[0].has_global(u_recvbuff[iiu]));
+        uint loc_id = mesh.distdata()[0].get_local(u_recvbuff[iiu]);
+        dolfin_assert(mesh.distdata()[0].is_ghost(loc_id));
         vertex_type_.set(loc_id, u_recvbuff[iiu + 1]);
         for (uint e = 0; e < gdim; ++e)
         {

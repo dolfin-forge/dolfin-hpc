@@ -183,13 +183,11 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     {
       old2new_vertex.set(vertex.index(), current_vertex);
       editor.add_vertex(current_vertex, vertex.x());
-      distdata.set_map(current_vertex,
-                       mesh.distdata().get_global(vertex.index(), 0), 0);
-      if (mesh.distdata().is_ghost(vertex.index(), 0))
+      distdata[0].set_map(current_vertex,
+                       mesh.distdata()[0].get_global(vertex.index()));
+      if (mesh.distdata()[0].is_ghost(vertex.index()))
       {
-        distdata.set_ghost(current_vertex, 0);
-        distdata.set_ghost_owner(current_vertex,
-                                 mesh.distdata().get_owner(vertex), 0);
+        distdata[0].set_ghost(current_vertex, vertex.owner());
       }
 
       current_vertex++;
@@ -219,8 +217,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
       }
 
       old2new_cell.set(cell.index(), current_cell);
-      distdata.set_map(current_cell,
-                       mesh.distdata().get_cell_global(cell.index()), 3);
+      distdata[c->dim()].set_map(current_cell, c->global_index());
       editor.add_cell(current_cell++, &cell_vertices[0]);
 
     }
@@ -232,7 +229,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
 
   editor.close();
   sub.distdata() = distdata;
-  sub.distdata().set_invalid_numbering();
+//  sub.distdata().set_invalid_numbering();
   sub.renumber();
 }
 

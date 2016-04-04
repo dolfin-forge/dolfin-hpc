@@ -54,6 +54,8 @@ UFCHalo::~UFCHalo()
 //-----------------------------------------------------------------------------
 void UFCHalo::init()
 {
+  error("");
+  /*
   // Early exit as nothing has to be done.
   if (!mesh_.is_distributed())
   {
@@ -87,25 +89,27 @@ void UFCHalo::init()
   u_packet_size_ = 1 + dofs_data_size;
 
   // Allocate data structures
-  _set<uint> const& adj = distdata.get_adj_ranks(facet_dim);
-  uint const num_shared_facets = distdata.num_shared(facet_dim);
-  uint const num_ghost_facets = distdata.num_ghost(facet_dim);
+  _set<uint> const& adj = distdata[facet_dim].get_adj_ranks();
+  uint const num_shared_facets = distdata[facet_dim].num_shared();
+  uint const num_ghost_facets = distdata[facet_dim].num_ghost();
 
   // Pack by adjacent rank
   uint offset = 0;
   for (_set<uint>::const_iterator it = adj.begin(); it != adj.end(); ++it)
   {
     rank_offsets_.insert(FacetOffsets(*it, offset));
-    offset += distdata.num_shared_with(*it, facet_dim);
+    //FIXME!!!!
+    error("UFCHalo");
+//    offset += distdata.num_shared_with(*it, facet_dim);
   }
   //
   dolfin_assert(offset == num_shared_facets);
 
   // Cache association of local facet index to offset in halo data
   _map<uint, uint> facet_offsets;
-  for (MeshSharedIterator sh(distdata, facet_dim); !sh.end(); ++sh)
+  for (SharedIterator sh(distdata[facet_dim]); !sh.end(); ++sh)
   {
-    uint const ark = *(distdata.get_shared_adj(sh.index(), facet_dim).begin());
+    uint const ark = *(distdata[facet_dim].get_shared_adj(sh.index()).begin());
     uint rank_offset = rank_offsets_[ark];
 
     // Maps local shared ordering to adjacent shared ordering
@@ -128,6 +132,7 @@ void UFCHalo::init()
 
   // Fill data structures
   this->update(coefficients_, dof_map_set_);
+  */
 }
 
 //-----------------------------------------------------------------------------
@@ -209,7 +214,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   uint const facet_dim = tdim - 1;
 
   // Exchange of data for contribution of halo macro elements
-  if (distdata.num_shared(facet_dim) == 0)
+  if (distdata[facet_dim].num_shared() == 0)
   {
     return;
   }
@@ -279,8 +284,10 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     src = (rank - j + pe_size) % pe_size;
     dest = (rank + j) % pe_size;
 
-    uint num_send_facets = distdata.num_shared_with(dest, facet_dim);
-    uint num_recv_facets = distdata.num_shared_with(src, facet_dim);
+    //FIXME!!!!
+    error("UFCHalo");
+    uint num_send_facets = 0;//distdata.num_shared_with(dest, facet_dim);
+    uint num_recv_facets = 0;//distdata.num_shared_with(src, facet_dim);
     uint send_offset = rank_offsets_[dest];
     uint recv_offset = rank_offsets_[src];
 

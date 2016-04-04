@@ -166,7 +166,8 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 
   if (parallel_)
   {
-    mesh_.distdata().set_num_global(0, num_vertices);
+    //FIXME!!!
+//    mesh_.distdata().set_num_global(0, num_vertices);
   }
 }
 //-----------------------------------------------------------------------------
@@ -217,7 +218,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   editor_->add_vertex(v - vertex_offset_, &x[0]);
   if (parallel_)
   {
-    mesh_.distdata().set_map(v - vertex_offset_, v, 0);
+    mesh_.distdata()[0].set_map(v - vertex_offset_, v);
   }
 }
 //-----------------------------------------------------------------------------
@@ -232,19 +233,19 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   if (parallel_)
   {
     v[0] = parseUnsignedInt(name, attrs, vertex_attr[0]);
-    if (!mesh_.distdata().has_global(v[0], 0))
+    if (!mesh_.distdata()[0].has_global(v[0]))
     {
      return;
     }
     uint const rank = MPI::processNumber();
-    vertex_owner_[mesh_.distdata().get_vertex_local(v[0])] = rank;
+    vertex_owner_[mesh_.distdata()[0].get_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
     for (uint i = 1; i < mesh_.type().num_entities(0); ++i)
     {
       v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
-      if (mesh_.distdata().has_global(v[i], 0))
+      if (mesh_.distdata()[0].has_global(v[i]))
       {
-        vertex_owner_[mesh_.distdata().get_vertex_local(v[i])] = rank;
+        vertex_owner_[mesh_.distdata()[0].get_local(v[i])] = rank;
       }
       else
       {
@@ -310,9 +311,9 @@ void XMLMesh::endMesh()
       uint count = 0;
       for (int k = 0; k < recvcount; ++k)
       {
-        if (mesh_.distdata().has_global(recvbuf[k], 0))
+        if (mesh_.distdata()[0].has_global(recvbuf[k]))
         {
-          uint const index = mesh_.distdata().get_vertex_local(recvbuf[k]);
+          uint const index = mesh_.distdata()[0].get_local(recvbuf[k]);
           sendbuf_idx[2*count] = recvbuf[k];
           if (vertex_owner_[index] == pe_size)
           {
@@ -351,15 +352,15 @@ void XMLMesh::endMesh()
 
     // Init new mesh
     editor_->init_vertices(mesh_.numVertices() + shared - orphan);
-    new_mesh.distdata().set_num_global(0, mesh_.global_numVertices());
+    //FIXME!
+//    new_mesh.distdata().set_num_global(0, mesh_.global_numVertices());
 
     uint vertex_count = 0;
     for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
     {
       if (vertex_owner_[vertex->index()] == rank)
       {
-        new_mesh.distdata().set_map(vertex_count,
-                                    mesh_.distdata().get_global(*vertex), 0);
+        new_mesh.distdata()[0].set_map(vertex_count, vertex->global_index());
         editor_->add_vertex(vertex_count, vertex->x());
         ++vertex_count;
       }
@@ -370,11 +371,10 @@ void XMLMesh::endMesh()
     uint ci = 0;
     for (uint i = 0; i < shared; ++i, ii+=2, ci += gdim)
     {
-      new_mesh.distdata().set_map(vertex_count, idxbuf[ii], 0);
+      new_mesh.distdata()[0].set_map(vertex_count, idxbuf[ii]);
       if (idxbuf[ii + 1] != rank)
       {
-        new_mesh.distdata().set_ghost(vertex_count, 0);
-        new_mesh.distdata().set_ghost_owner(vertex_count, idxbuf[ii + 1], 0);
+        new_mesh.distdata()[0].set_ghost(vertex_count, idxbuf[ii + 1]);
       }
       editor_->add_vertex(vertex_count, &crdbuf[ci]);
       ++vertex_count;
@@ -389,7 +389,7 @@ void XMLMesh::endMesh()
       for (uint n = 0; n < ndims; ++n)
       {
         connectivity[n] =
-            new_mesh.distdata().get_vertex_local(cell_buffer_[i + n]);
+            new_mesh.distdata()[0].get_local(cell_buffer_[i + n]);
       }
       editor_->add_cell(c++, &connectivity[0]);
     }

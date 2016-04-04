@@ -236,6 +236,32 @@ MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
   return connectivity_[d0][d1];
 }
 //-----------------------------------------------------------------------------
+uint MeshTopology::dim() const
+{
+  return dim_;
+}
+//-----------------------------------------------------------------------------
+uint MeshTopology::size(uint dim) const
+{
+  dolfin_assert(dim <= dim_);
+  return (dim == 0 ? num_vertices_ : (*this)(dim, 0).num_entities());
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::is_computed(uint d0, uint d1) const
+{
+  return connectivity_[d0][d1].is_initialized();
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::entities_exist(uint d) const
+{
+  return (d == 0 ? num_vertices_ > 0 : connectivity_[d][0].is_initialized());
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::is_distributed() const
+{
+  return (distdata_ != NULL);
+}
+//-----------------------------------------------------------------------------
 MeshDistributedData& MeshTopology::distdata()
 {
   if (distdata_ == NULL)
@@ -254,50 +280,69 @@ MeshDistributedData const& MeshTopology::distdata() const
   return *distdata_;
 }
 //-----------------------------------------------------------------------------
-uint MeshTopology::dim() const
-{
-  return dim_;
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::size(uint dim) const
-{
-  dolfin_assert(dim <= dim_);
-  return (dim == 0 ? num_vertices_ : (*this)(dim, 0).num_entities());
-}
-//-----------------------------------------------------------------------------
 uint MeshTopology::global_size(uint dim) const
 {
-  return (distdata_ ? distdata_->num_global(dim) : this->size(dim));
+  return (distdata_ ? (*distdata_)[dim].global_size() : this->size(dim));
 }
 //-----------------------------------------------------------------------------
 uint MeshTopology::num_owned(uint dim) const
 {
-  return (distdata_ ? distdata_->num_owned(dim) : this->size(dim));
+  return (distdata_ ? (*distdata_)[dim].num_owned() : this->size(dim));
 }
 //-----------------------------------------------------------------------------
 uint MeshTopology::num_shared(uint dim) const
 {
-  return (distdata_ ? distdata_->num_shared(dim) : 0);
+  return (distdata_ ? (*distdata_)[dim].num_shared() : 0);
 }
 //-----------------------------------------------------------------------------
-uint MeshTopology::num_ghosts(uint dim) const
+uint MeshTopology::num_ghost(uint dim) const
 {
-  return (distdata_ ? distdata_->num_ghost(dim) : 0);
+  return (distdata_ ? (*distdata_)[dim].num_ghost() : 0);
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::is_computed(uint d0, uint d1) const
+uint MeshTopology::get_global(MeshEntity const& entity) const
 {
-  return connectivity_[d0][d1].is_initialized();
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].get_global(entity.index()) :
+            entity.index());
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::entities_exist(uint d) const
+uint MeshTopology::get_local(MeshEntity const& entity) const
 {
-  return (d == 0 ? num_vertices_ > 0 : connectivity_[d][0].is_initialized());
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].get_local(entity.global_index()) :
+            entity.index());
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::is_distributed() const
+bool MeshTopology::is_owned(MeshEntity const& entity) const
 {
-  return (distdata_ != NULL);
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].is_owned(entity.index()) : true);
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::is_ghost(MeshEntity const& entity) const
+{
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].is_ghost(entity.index()) : false);
+}
+//-----------------------------------------------------------------------------
+bool MeshTopology::is_shared(MeshEntity const& entity) const
+{
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].is_shared(entity.index()) : false);
+}
+//-----------------------------------------------------------------------------
+uint MeshTopology::get_owner(MeshEntity const& entity) const
+{
+  dolfin_assert(&mesh_ == &entity.mesh());
+  return (distdata_ ?
+            (*distdata_)[entity.dim()].get_owner(entity.index()) :
+            MPI::processNumber());
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
@@ -639,7 +684,7 @@ void MeshTopology::renumber() const
   if (dim_ > 0 && this->entities_exist(dim_))
   {
     uint offset = 0;
-    distdata_->apply_num_global(dim_, offset);
+//    distdata_->get_offset(dim_, offset);
 
     _map<uint,uint> new_local;
     _map<uint,uint> new_global;
@@ -648,9 +693,9 @@ void MeshTopology::renumber() const
       new_global[i] = offset++;
       new_local[new_global[i]] = i;
     }
-    distdata_->apply_numbering(dim_, new_local, new_global);
-    distdata_->apply_ownership(dim_);
-    distdata_->finalize(dim_);
+//    distdata_->apply_numbering(dim_, new_local, new_global);
+//    distdata_->apply_ownership(dim_);
+//    distdata_->finalize(dim_);
   }
 
   // Set the topology as numbered

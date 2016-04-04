@@ -170,7 +170,7 @@ namespace dolfin
 
     //--- Special functions, intended for library use only ---
 
-    /// Return concrete instance / unwrap (const version)
+    /// Return concrete instance / unwrap (const)
     const GenericVector* instance() const
     { return vector; }
 

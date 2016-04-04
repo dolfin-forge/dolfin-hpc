@@ -101,31 +101,31 @@ public:
   /// Return mesh topology (non-const version)
   MeshTopology& topology();
 
-  /// Return mesh topology (const version)
+  /// Return mesh topology (const)
   MeshTopology const& topology() const;
 
   /// Return mesh geometry (non-const version)
   MeshGeometry& geometry();
 
-  /// Return mesh geometry (const version)
+  /// Return mesh geometry (const)
   MeshGeometry const& geometry() const;
 
   /// Return mesh distribution data (non-const version)
   MeshDistributedData& distdata();
 
-  /// Return mesh distribution data (const version)
+  /// Return mesh distribution data (const)
   MeshDistributedData const& distdata() const;
 
   /// Return mesh data (non-const version)
   MeshData& data();
 
-  /// Return mesh data (const version)
+  /// Return mesh data (const)
   MeshData const& data() const;
 
   /// Return mesh cell type (non-const version)
   CellType& type();
 
-  /// Return mesh cell type (const version)
+  /// Return mesh cell type (const)
   CellType const& type() const;
 
   //--- TOPOLOGY --------------------------------------------------------------

@@ -75,25 +75,36 @@ public:
   /// Remap local entities of given dimension
   void remap(uint dim,  Array<uint> const& map);
 
+  //--- Connectivity ----------------------------------------------------------
+
   /// Return connectivity for given pair of topological dimensions
   MeshConnectivity& operator()(uint d0, uint d1);
 
   /// Return connectivity for given pair of topological dimensions
   MeshConnectivity const& operator()(uint d0, uint d1) const;
 
-  /// Return mesh distribution data
-  MeshDistributedData& distdata();
-
-  /// Return mesh distribution data (const version)
-  MeshDistributedData const& distdata() const;
-
-  //---------------------------------------------------------------------------
-
   /// Return topological dimension
   uint dim() const;
 
   /// Return number of entities in the local topology for given dimension
   uint size(uint dim) const;
+
+  /// Return if connectivity for given pair is computed
+  bool is_computed(uint d0, uint d1) const;
+
+  /// Return if entities exist
+  bool entities_exist(uint d) const;
+
+  //--- Distributed data ------------------------------------------------------
+
+  /// Return if the topology is distributed
+  bool is_distributed() const;
+
+  /// Return mesh distribution data if the topology is distributed
+  MeshDistributedData& distdata();
+
+  /// Return mesh distribution data if the topology is distributed (const)
+  MeshDistributedData const& distdata() const;
 
   /// Return number of entities in the global topology for given dimension
   uint global_size(uint dim) const;
@@ -105,16 +116,26 @@ public:
   uint num_shared(uint dim) const;
 
   /// Return number of given entities
-  uint num_ghosts(uint dim) const;
+  uint num_ghost(uint dim) const;
 
-  /// Return if connectivity for given pair is computed
-  bool is_computed(uint d0, uint d1) const;
+  /// Return global index of mesh entity
+  uint get_global(MeshEntity const& entity) const;
 
-  /// Return if entities exist
-  bool entities_exist(uint d) const;
+  /// Return local index of mesh entity: local-to-global then global-to-local
+  /// Can be used for checking bijectivity of mappings
+  uint get_local(MeshEntity const& entity) const;
 
-  ///
-  bool is_distributed() const;
+  /// Return if the given mesh entity is shared
+  bool is_owned(MeshEntity const& entity) const;
+
+  /// Return if the given mesh entity is shared
+  bool is_shared(MeshEntity const& entity) const;
+
+  /// Return if the given mesh entity is ghosted
+  bool is_ghost(MeshEntity const& entity) const;
+
+  /// Return owner of the entity
+  uint get_owner(MeshEntity const& entity) const;
 
   //---------------------------------------------------------------------------
 

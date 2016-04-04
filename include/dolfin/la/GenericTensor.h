@@ -72,7 +72,7 @@ namespace dolfin
     /// Return linear algebra backend factory
     virtual LinearAlgebraFactory& factory() const = 0;
 
-    /// Cast a GenericTensor to its derived class (const version)
+    /// Cast a GenericTensor to its derived class (const)
     template<class T> const T& down_cast() const
     {
       const T* t = dynamic_cast<const T*>(instance());
@@ -94,7 +94,7 @@ namespace dolfin
 
     //--- Special functions, intended for library use only ---
 
-    /// Return concrete instance / unwrap (const version)
+    /// Return concrete instance / unwrap (const)
     virtual const GenericTensor* instance() const
     { return this; }
 

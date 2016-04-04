@@ -114,11 +114,11 @@ void RefinementManager::init(Mesh& mesh)
       for (EdgeIterator e(*c); !e.end(); ++e)
       {
         const uint *edge_v = e->entities(0);
-        if (distdata.is_shared(edge_v[0], 0)
-            && distdata.is_shared(edge_v[1], 0))
+        if (distdata[0].is_shared(edge_v[0])
+            && distdata[0].is_shared(edge_v[1]))
         {
-          EdgeKey key = edge_key(distdata.get_vertex_global(edge_v[0]),
-                                 distdata.get_vertex_global(edge_v[1]));
+          EdgeKey key = edge_key(distdata[0].get_global(edge_v[0]),
+                                 distdata[0].get_global(edge_v[1]));
           refined_edge[key] = false;
           edge_cell_map[key] = e->index();
           boundary_edge.set(*e, true);
@@ -135,10 +135,10 @@ void RefinementManager::add_new_vertex(uint* edge, uint vertex, Mesh& mesh,
                                        bool shared)
 {
   // Invalidate global numbering
-  mesh.distdata().set_invalid_numbering();
+//  mesh.distdata().set_invalid_numbering();
 
   // Invalidate mesh entity ownership
-  mesh.distdata().set_invalid_ownership();
+//  mesh.distdata().set_invalid_ownership();
 
   // Store edge key in shared list
   if (shared)
@@ -149,7 +149,7 @@ void RefinementManager::add_new_vertex(uint* edge, uint vertex, Mesh& mesh,
   }
 
   // Assign a new unique global number
-  mesh.distdata().set_map(vertex, _start_offset++, 0);
+  mesh.distdata()[0].set_map(vertex, _start_offset++);
 }
 //-----------------------------------------------------------------------------
 void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
@@ -158,8 +158,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
   MeshDistributedData& olddistdata = oldmesh.distdata();
   MeshDistributedData& newdistdata = newmesh.distdata();
 
-  newdistdata.set_invalid_numbering();
-  newdistdata.set_invalid_ownership();
+//  newdistdata.set_invalid_numbering();
+//  newdistdata.set_invalid_ownership();
 
   if (!_refm_init)
   {
@@ -183,9 +183,9 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     edge_id[key] = (uint) rand() + (uint) rand() + (uint) rank;
     owns_edge[key] = true;
 
-    send_buff.push_back(olddistdata.get_vertex_global(shared_edge[i]));
+    send_buff.push_back(olddistdata[0].get_global(shared_edge[i]));
     send_buff.push_back(
-        olddistdata.get_vertex_global(shared_edge[i + 1]));
+        olddistdata[0].get_global(shared_edge[i + 1]));
     send_buff_id.push_back(edge_id[key]);
   }
 
@@ -215,13 +215,13 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       // Check if I have the vertices
-      if (olddistdata.has_global(recv_buff[i], 0)
-          && olddistdata.has_global(recv_buff[i + 1], 0))
+      if (olddistdata[0].has_global(recv_buff[i])
+          && olddistdata[0].has_global(recv_buff[i + 1]))
       {
 
         // Generate edge key
-        key = edge_key(olddistdata.get_vertex_local(recv_buff[i]),
-                       olddistdata.get_vertex_local(recv_buff[i + 1]));
+        key = edge_key(olddistdata[0].get_local(recv_buff[i]),
+                       olddistdata[0].get_local(recv_buff[i + 1]));
 
         // Check if I have the corresponding edge
         if (edge_id.count(key))
@@ -255,18 +255,18 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
 
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
-      if (olddistdata.has_global(recv_buff[i], 0)
-          && olddistdata.has_global(recv_buff[i + 1], 0))
+      if (olddistdata[0].has_global(recv_buff[i])
+          && olddistdata[0].has_global(recv_buff[i + 1]))
       {
 
-        key = edge_key(olddistdata.get_vertex_local(recv_buff[i]),
-                       olddistdata.get_vertex_local(recv_buff[i + 1]));
+        key = edge_key(olddistdata[0].get_local(recv_buff[i]),
+                       olddistdata[0].get_local(recv_buff[i + 1]));
 
         if (owns_edge[key])
         {
           global_buff.push_back(i);
           global_buff.push_back(new_global[key]);
-          newdistdata.set_shared(new_vertex[key], 0);
+          newdistdata[0].set_shared(new_vertex[key]);
         }
       }
     }
@@ -279,20 +279,19 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       index = shared_edge[(recv_buff[i] >> 1) * 3 + 2];
-      newdistdata.set_map(index, recv_buff[i + 1], 0);
-      newdistdata.set_ghost(index, 0);
-      newdistdata.set_ghost_owner(index, status.MPI_SOURCE, 0);
+      newdistdata[0].set_map(index, recv_buff[i + 1]);
+      newdistdata[0].set_ghost(index, src);
       num_unass--;
     }
     global_buff.clear();
   }
 
   // MPI aliasing
-  uint tmp = newmesh.numVertices() - newdistdata.num_ghost(0);
+  uint tmp = newmesh.numVertices() - newdistdata[0].num_ghost();
   uint num_glb;
   MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  newdistdata.set_num_global(0, num_glb);
+//  newdistdata.set_num_global(0, num_glb);
 
   delete[] recv_buff;
   delete[] recv_buff_id;
@@ -359,8 +358,8 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
         {
           const uint *edge_v = longest_edge.entities(0);
           edge_vote[longest_edge.index()] = (uint) rand();
-          send_buff.push_back(olddistdata.get_vertex_global(edge_v[0]));
-          send_buff.push_back(olddistdata.get_vertex_global(edge_v[1]));
+          send_buff.push_back(olddistdata[0].get_global(edge_v[0]));
+          send_buff.push_back(olddistdata[0].get_global(edge_v[1]));
           send_buff.push_back(edge_vote[longest_edge.index()]);
           for (CellIterator nc(longest_edge); !nc.end(); ++nc)
           {
@@ -436,8 +435,8 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
         if (on_boundary(longest_edge))
         {
           const uint *edge_v = longest_edge.entities(0);
-          edge[0] = olddistdata.get_vertex_global(edge_v[0]);
-          edge[1] = olddistdata.get_vertex_global(edge_v[1]);
+          edge[0] = olddistdata[0].get_global(edge_v[0]);
+          edge[1] = olddistdata[0].get_global(edge_v[1]);
           key = edge_key(edge[0], edge[1]);
           refined_edge[key] = true;
           num_new_vertices++;

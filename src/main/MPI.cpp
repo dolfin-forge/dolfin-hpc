@@ -231,7 +231,7 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
   short *neigh = new short[nnodes];
 
   memset(neigh, 0, nnodes * sizeof(short));
-  for (MeshGhostIterator it(mesh.distdata(), 0); !it.end(); ++it)
+  for (GhostIterator it(mesh.distdata()[0]); !it.end(); ++it)
     neigh[it.owner()] = 1;
 
   MPI_Status status;
@@ -305,7 +305,9 @@ void dolfin::MPI::reorderComm(Mesh& mesh)
     if (process_map[i] != i)
     {
       message("Communicator changed, rebuilding mesh structure");
-      mesh.distdata().remap_ownership(process_map);
+      error("Changes in progress");
+      //FIXME!!!
+      //mesh.distdata().remap_ownership(process_map);
       break;
     }
   }

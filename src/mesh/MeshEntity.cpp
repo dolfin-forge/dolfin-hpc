@@ -72,32 +72,32 @@ uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const
 {
-  return (mesh_.is_distributed() ? mesh_.distdata().get_global(index_, tdim_)
+  return (mesh_.is_distributed() ? mesh_.distdata()[tdim_].get_global(index_)
                                  : index_);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_owned() const
 {
   return (mesh_.is_distributed() ?
-          !mesh_.distdata().is_ghost(index_, tdim_) : true);
+          !mesh_.distdata()[tdim_].is_ghost(index_) : true);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
   return (mesh_.is_distributed() ?
-          mesh_.distdata().is_shared(index_, tdim_) : false);
+          mesh_.distdata()[tdim_].is_shared(index_) : false);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
   return (mesh_.is_distributed() ?
-          mesh_.distdata().is_ghost(index_, tdim_) : false);
+          mesh_.distdata()[tdim_].is_ghost(index_) : false);
 }
 //-----------------------------------------------------------------------------
 uint MeshEntity::owner() const
 {
   return (mesh_.is_distributed() ?
-          mesh_.distdata().get_owner(index_, tdim_) : MPI::processNumber());
+          mesh_.distdata()[tdim_].get_owner(index_) : MPI::processNumber());
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
@@ -106,7 +106,7 @@ bool MeshEntity::has_all_vertices_shared() const
   {
     if (tdim_ == 0)
     {
-      return mesh_.distdata().is_shared(index_, tdim_);
+      return mesh_.distdata()[tdim_].is_shared(index_);
     }
     else
     {
@@ -114,7 +114,7 @@ bool MeshEntity::has_all_vertices_shared() const
       dolfin_assert(c.size() > 0);
       for (uint v = 0; v < c.size(index_); ++v)
       {
-        if (!mesh_.distdata().is_shared(c(index_)[v], 0))
+        if (!mesh_.distdata()[0].is_shared(c(index_)[v]))
         {
           return false;
         }

@@ -112,7 +112,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
     if(smooth_data.on_boundary_global()(*v))
       continue;
     else if(smooth_data.on_boundary()(*v) && pe_size > 1){
-      receive_iterator=smooth_data.recv_sum.find(mesh.distdata().get_vertex_global(v->index()));
+      receive_iterator=smooth_data.recv_sum.find(mesh.distdata()[0].get_global(v->index()));
       if(receive_iterator!=smooth_data.recv_sum.end()){
 	for (int i = 0; i < d; i++) xx[i] = 0.0;
 	num_neighbors = (receive_iterator->second)[0];
@@ -214,7 +214,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
 	{
 	  send_buff.push_back(*iter_vector);// global vertex index
 	  std::vector<double> to_send_info;
-	  Vertex on_mesh(mesh, mesh.distdata().get_vertex_local((*iter_vector)));
+	  Vertex on_mesh(mesh, mesh.distdata()[0].get_local((*iter_vector)));
 	  for(int i=0;i<d;i++){
 	    send_buff.push_back(on_mesh.x(i));//send x, y, z
 	  }
@@ -226,7 +226,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
 
     int l=0;
     while(recv_buff[l]!=stopper){
-      Vertex on_mesh(mesh, mesh.distdata().get_vertex_local(recv_buff[l]));
+      Vertex on_mesh(mesh, mesh.distdata()[0].get_local(recv_buff[l]));
       // Get coordinates of vertex
       real* x = on_mesh.x();
       for(int j=0; j<d;j++){

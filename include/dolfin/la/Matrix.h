@@ -147,7 +147,7 @@ namespace dolfin
 
     //--- Special functions, intended for library use only ---
 
-    /// Return concrete instance / unwrap (const version)
+    /// Return concrete instance / unwrap (const)
     const GenericMatrix* instance() const
     { return matrix; }
 

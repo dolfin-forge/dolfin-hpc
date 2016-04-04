@@ -267,10 +267,10 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
     for (VertexIterator v(*c); !v.end(); ++v)
     {
 
-      global_index = mesh.distdata().get_vertex_global(v->index());
+      global_index = mesh.distdata()[0].get_global(v->index());
       f.vector().get(&value, 1, &global_index);
 
-      if (target_proc == pe_rank && !mesh.distdata().is_ghost(v->index(), 0)
+      if (target_proc == pe_rank && !v->is_ghost()
           && !marked.get(*v))
       {
 
@@ -280,7 +280,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
         continue;
       }
 
-      if (!mesh.distdata().is_ghost(v->index(), 0) && !marked.get(*v))
+      if (!v->is_ghost() && !marked.get(*v))
       {
 
         send_buffer[target_proc].push_back(value);
@@ -402,7 +402,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
           }
         }
 
-        if (new_mesh.distdata().is_ghost(v->index(), 0) || processed.get(*v))
+        if (v->is_ghost() || processed.get(*v))
         {
           continue;
         }

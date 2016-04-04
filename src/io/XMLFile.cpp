@@ -397,10 +397,10 @@ void XMLFile::operator<<(Mesh& mesh)
     CellType::Type cell_type = mesh.type().cellType();
     std::string const cell_str(mesh.type().str());
     MeshDistributedData const& distdata = mesh.distdata();
-    uint const num_owned_vertices = distdata.num_owned(0);
-    uint const num_global_vertices = distdata.num_global(0);
-    uint const num_owned_cells = distdata.num_owned(tdim);
-    uint const num_global_cells = distdata.num_global(tdim);
+    uint const num_owned_vertices = distdata[0].num_owned();
+    uint const num_global_vertices = distdata[0].global_size();
+    uint const num_owned_cells = distdata[tdim].num_owned();
+    uint const num_global_cells = distdata[tdim].global_size();
 
     // Open mesh and vertices
     std::stringstream s0;
@@ -530,8 +530,8 @@ void XMLFile::operator<<(Mesh& mesh)
           cline = sprintf(cbuffer + csize,
             "<interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
             c->global_index(),
-            distdata.get_vertex_global(vertices[0]),
-            distdata.get_vertex_global(vertices[1]));
+            distdata[0].get_global(vertices[0]),
+            distdata[0].get_global(vertices[1]));
           dolfin_assert(cline <= cline_max);
           csize += cline;
         }
@@ -544,9 +544,9 @@ void XMLFile::operator<<(Mesh& mesh)
           cline = sprintf(cbuffer + csize,
             "<triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
             c->global_index(),
-            distdata.get_vertex_global(vertices[0]),
-            distdata.get_vertex_global(vertices[1]),
-            distdata.get_vertex_global(vertices[2]));
+            distdata[0].get_global(vertices[0]),
+            distdata[0].get_global(vertices[1]),
+            distdata[0].get_global(vertices[2]));
           dolfin_assert(cline <= cline_max);
           csize += cline;
         }
@@ -559,10 +559,10 @@ void XMLFile::operator<<(Mesh& mesh)
           cline = sprintf(cbuffer + csize,
             "<tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
             c->global_index(),
-            distdata.get_vertex_global(vertices[0]),
-            distdata.get_vertex_global(vertices[1]),
-            distdata.get_vertex_global(vertices[2]),
-            distdata.get_vertex_global(vertices[3]));
+            distdata[0].get_global(vertices[0]),
+            distdata[0].get_global(vertices[1]),
+            distdata[0].get_global(vertices[2]),
+            distdata[0].get_global(vertices[3]));
           dolfin_assert(cline <= cline_max);
           csize += cline;
         }
@@ -576,10 +576,10 @@ void XMLFile::operator<<(Mesh& mesh)
           cline = sprintf(cbuffer + csize,
             "<quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
             c->global_index(),
-            distdata.get_vertex_global(vertices[0]),
-            distdata.get_vertex_global(vertices[1]),
-            distdata.get_vertex_global(vertices[2]),
-            distdata.get_vertex_global(vertices[3]));
+            distdata[0].get_global(vertices[0]),
+            distdata[0].get_global(vertices[1]),
+            distdata[0].get_global(vertices[2]),
+            distdata[0].get_global(vertices[3]));
           dolfin_assert(cline <= cline_max);
           csize += cline;
         }
@@ -592,14 +592,14 @@ void XMLFile::operator<<(Mesh& mesh)
           cline = sprintf(cbuffer + csize,
             "<hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",
             c->global_index(),
-            distdata.get_vertex_global(vertices[0]),
-            distdata.get_vertex_global(vertices[1]),
-            distdata.get_vertex_global(vertices[2]),
-            distdata.get_vertex_global(vertices[3]),
-            distdata.get_vertex_global(vertices[4]),
-            distdata.get_vertex_global(vertices[5]),
-            distdata.get_vertex_global(vertices[6]),
-            distdata.get_vertex_global(vertices[7]));
+            distdata[0].get_global(vertices[0]),
+            distdata[0].get_global(vertices[1]),
+            distdata[0].get_global(vertices[2]),
+            distdata[0].get_global(vertices[3]),
+            distdata[0].get_global(vertices[4]),
+            distdata[0].get_global(vertices[5]),
+            distdata[0].get_global(vertices[6]),
+            distdata[0].get_global(vertices[7]));
           dolfin_assert(cline <= cline_max);
           csize += cline;
         }

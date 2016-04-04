@@ -41,7 +41,7 @@ void GlobalFacetMap::init()
 
   if (tdim_ == 1)
   {
-    for (MeshSharedIterator it(distdata, 0); !it.end(); ++it)
+    for (SharedIterator it(distdata[0]); !it.end(); ++it)
     {
       shared_facets_.insert(it.index());
     }
@@ -50,7 +50,7 @@ void GlobalFacetMap::init()
   {
     // Iterate over all facets connected to the shared vertices to collect
     // facets on the interprocess boundary and their neighbours
-    for (MeshSharedIterator it(distdata, 0); !it.end(); ++it)
+    for (SharedIterator it(distdata[0]); !it.end(); ++it)
     {
       Vertex v(mesh_, it.index());
       for (FacetIterator f(v); !f.end(); ++f)
@@ -80,10 +80,10 @@ void GlobalFacetMap::init()
 
       if (f.has_all_vertices_shared())
       {
-        adj = distdata.get_shared_adj(f.entities(0)[0], 0);
+        adj = distdata[0].get_shared_adj(f.entities(0)[0]);
         for (uint v = 1; v < f.num_entities(0); ++v)
         {
-          _set<uint> const& adjx = distdata.get_shared_adj(f.entities(0)[v], 0);
+          _set<uint> const& adjx = distdata[0].get_shared_adj(f.entities(0)[v]);
           for(_set<uint>::iterator it = adj.begin(); it != adj.end();)
           {
             if(adjx.count(*it) == 0)
@@ -101,7 +101,7 @@ void GlobalFacetMap::init()
         {
           for (uint v = 0; v < f.num_entities(0); ++v)
           {
-            sendbuf_vertices[*it].push_back(distdata.get_global(f.entities(0)[v], 0));
+            sendbuf_vertices[*it].push_back(distdata[0].get_global(f.entities(0)[v]));
           }
           sendbuf_facets[*it].push_back(f.index());
         }
@@ -147,8 +147,8 @@ void GlobalFacetMap::init()
         // check if there exists a facet composed of these vertices.
         for (uint v = 0; v < num_facet_vertices; ++v)
         {
-          dolfin_assert(distdata.has_global(recvbuf_facets[k + v], 0));
-          facet_vertices[v] = distdata.get_local(recvbuf_facets[k + v], 0);
+          dolfin_assert(distdata[0].has_global(recvbuf_facets[k + v]));
+          facet_vertices[v] = distdata[0].get_local(recvbuf_facets[k + v]);
         }
         // Pick first vertex and check if one facet matches
         Vertex v0(mesh_, facet_vertices[0]);

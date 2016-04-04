@@ -158,25 +158,27 @@ inline void UFCCell::update(Cell& cell)
 
   // Set entity indices
   MeshDistributedData& distdata = cell.mesh().distdata();
+
+  // Cell index (short-cut for entity_indices[topological_dimension][0])
+  index = distdata[topological_dimension].get_global(cell.index());
+
 #if ENABLE_P1_OPTIMIZATIONS
   for(uint i = 0; i < cell.num_entities(0); ++i)
   {
-    entity_indices[0][i] = distdata.get_vertex_global((cell.entities(0))[i]);
+    entity_indices[0][i] = distdata[0].get_global((cell.entities(0))[i]);
   }
 #else
   for (uint d = 0; d < topological_dimension; ++d)
   {
     for (uint i = 0; i < cell.num_entities(d); ++i)
     {
-      entity_indices[d][i] = distdata.get_global((cell.entities(d))[i], d);
+      entity_indices[d][i] = distdata[d].get_global((cell.entities(d))[i]);
     }
   }
 #endif
-  entity_indices[topological_dimension][0] = distdata.get_cell_global(
-      cell.index());
+  entity_indices[topological_dimension][0] = index;
 
-  // Cell index (short-cut for entity_indices[topological_dimension][0])
-  index = entity_indices[topological_dimension][0];
+
 
   /// Set vertex coordinates
   uint const * vertices = cell.entities(0);

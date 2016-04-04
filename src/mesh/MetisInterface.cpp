@@ -129,7 +129,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   {
     for (VertexIterator v(*c); !v.end(); ++v)
     {
-      eind[i++] = mesh.distdata().get_global(*v);
+      eind[i++] = v->global_index();
     }
   }
 
@@ -170,7 +170,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   MPI::numGlobalSum(lreassigned, greassigned);
   message("Metis : PartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(tdim)),
-          percent(greassigned, mesh.distdata().num_global(tdim)));
+          percent(greassigned, mesh.distdata()[tdim].global_size()));
   tocd();
 
   delete[] part;
@@ -244,7 +244,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   MPI::numGlobalSum(lreassigned, greassigned);
   message("Metis : PartGeom reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(0)),
-          percent(greassigned, mesh.distdata().num_global(0)));
+          percent(greassigned, mesh.distdata()[0].global_size()));
   tocd();
 
   delete[] xdy;

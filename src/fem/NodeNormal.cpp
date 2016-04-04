@@ -253,7 +253,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
     // Add facet to the list with facet weight and normal
     FacetData * data = new FacetData();
-    data->global_index = distdata.get_facet_global(facet.index());
+    data->global_index = distdata[facet_dim].get_global(facet.index());
     switch (type_)
     {
       case NodeNormal::none:  // no weight
@@ -322,7 +322,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
       {
         if(v->is_shared())
         {
-          _set<uint> const& a = mesh.distdata().get_shared_adj(*v);
+          _set<uint> const& a = mesh.distdata()[0].get_shared_adj(v->index());
           adjs.insert(a.begin(), a.end());
         }
       }
@@ -377,7 +377,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
     int r_sendcount = 0;
     int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
-    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
@@ -429,7 +429,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
         if(!valid.empty())
         {
-          dolfin_assert(mesh.distdata().get_adj_ranks(0).count(src) > 0);
+          dolfin_assert(mesh.distdata()[0].get_adj_ranks().count(src) > 0);
           // Add facet to adjacent process
           FacetData * data = new FacetData();
           data->global_index = global_index;
@@ -557,7 +557,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
     int u_sendcount = 0;
     int u_maxsendcount = 0;
     int u_maxrecvcount = 0;
-    _set<uint> const& adjs = mesh.distdata().get_adj_ranks(0);
+    _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));

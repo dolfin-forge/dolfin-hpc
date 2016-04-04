@@ -16,6 +16,7 @@ namespace dolfin
 {
 
 class PeriodicSubDomain;
+class Vertex;
 
 /**
  *  @class  MappedManifold

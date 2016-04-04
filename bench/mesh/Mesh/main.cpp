@@ -32,7 +32,7 @@ int main(int argc, char** argv)
       message("Check shared entities adjacents for dim %d", e0dim);
       MeshDistributedData& distdata = mesh.distdata();
       uint const e1dim = e0dim - 1;
-      for (MeshSharedIterator se(distdata, e0dim); !se.end(); ++se)
+      for (SharedIterator se(distdata[e0dim]); !se.end(); ++se)
       {
         MeshEntity e0(mesh, e0dim, se.index());
         MeshEntityIterator e1(e0, e1dim);
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
       // Shared
       uint const num_shared = distdata[edim].num_shared();
       Array<uint> * sharedbuf = new Array<uint> [pe_size];
-      for (MeshSharedIterator se(distdata, edim); !se.end(); ++se)
+      for (SharedIterator se(distdata[edim]); !se.end(); ++se)
       {
         _set<uint> const& adjs = se.adj();
         uint glb_id = distdata[edim].get_global(se.index());
@@ -110,10 +110,10 @@ int main(int argc, char** argv)
       }
 
       // Ghosts
-      uint const num_ghost = distdata[edim].num_ghosts();
+      uint const num_ghost = distdata[edim].num_ghost();
       uint const num_shared_owned = distdata[edim].num_shared() - num_ghost;
       Array<uint> * ghostdbuf = new Array<uint> [pe_size];
-      for (MeshGhostIterator ge(distdata, edim); !ge.end(); ++ge)
+      for (GhostIterator ge(distdata[edim]); !ge.end(); ++ge)
       {
         uint const owner = ge.owner();
         uint glb_id = distdata[edim].get_global(ge.index());

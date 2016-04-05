@@ -69,12 +69,13 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     message("Load imbalance %0.2f percent, below threshold.",
             (imbalance - 1.0) * 100);
 
+    error("Fix the shit");
     const bool redistribute = dolfin_get("Load balancer redistribute");
     if (!redistribute)
     {
-      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-      part->init(mesh, mesh.topology().dim());
-      *part = MPI::processNumber();
+//      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//      part->init(mesh, mesh.topology().dim());
+//      *part = MPI::processNumber();
     }
 
     return;
@@ -107,10 +108,10 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   }
   else
   {
-    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-    part->init(mesh, mesh.topology().dim());
-    for(CellIterator c(mesh); !c.end(); ++c)
-      part->set(*c, partitions.get(*c));
+//    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//    part->init(mesh, mesh.topology().dim());
+//    for(CellIterator c(mesh); !c.end(); ++c)
+//      part->set(*c, partitions.get(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -181,9 +182,9 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     const bool redistribute = dolfin_get("Load balancer redistribute");
     if (!redistribute)
     {
-      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-      part->init(mesh, mesh.topology().dim());
-      *part = MPI::processNumber();
+//      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//      part->init(mesh, mesh.topology().dim());
+//      *part = MPI::processNumber();
     }
 
     return;
@@ -220,10 +221,10 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     }
   else
   {
-    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-    part->init(mesh, mesh.topology().dim());
-    for(CellIterator c(mesh); !c.end(); ++c)
-      part->set(*c, partitions.get(*c));
+//    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//    part->init(mesh, mesh.topology().dim());
+//    for(CellIterator c(mesh); !c.end(); ++c)
+//      part->set(*c, partitions.get(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -301,9 +302,9 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     const bool redistribute = dolfin_get("Load balancer redistribute");
     if (!redistribute)
     {
-      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-      part->init(mesh, mesh.topology().dim());
-      *part = MPI::processNumber();
+//      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//      part->init(mesh, mesh.topology().dim());
+//      *part = MPI::processNumber();
     }
 
     return;
@@ -344,10 +345,10 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   }
   else
   {
-    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-    part->init(mesh, mesh.topology().dim());
-    for(CellIterator c(mesh); !c.end(); ++c)
-      part->set(*c, partitions.get(*c));
+//    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//    part->init(mesh, mesh.topology().dim());
+//    for(CellIterator c(mesh); !c.end(); ++c)
+//      part->set(*c, partitions.get(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -418,9 +419,9 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     const bool redistribute = dolfin_get("Load balancer redistribute");
     if (!redistribute)
     {
-      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-      part->init(mesh, mesh.topology().dim());
-      *part = MPI::processNumber();
+//      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//      part->init(mesh, mesh.topology().dim());
+//      *part = MPI::processNumber();
     }
 
     return;
@@ -461,10 +462,10 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   }
   else
   {
-    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
-    part->init(mesh, mesh.topology().dim());
-    for(CellIterator c(mesh); !c.end(); ++c)
-      part->set(*c, partitions.get(*c));
+//    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
+//    part->init(mesh, mesh.topology().dim());
+//    for(CellIterator c(mesh); !c.end(); ++c)
+//      part->set(*c, partitions.get(*c));
   }
 
   if (dolfin_get("Load balancer report"))

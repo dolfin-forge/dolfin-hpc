@@ -123,7 +123,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   File refinefile(marked_filename.str());
   refinefile << cell_marker;
 
-  MeshFunction<uint> *partitions = mesh.data().meshFunction("partitions");
+  error("Fix the shit");
+  MeshFunction<uint> *partitions = NULL;// mesh.data().meshFunction("partitions");
 
   uint const maxvecsize = 3;
   real * x_values[maxvecsize];

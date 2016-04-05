@@ -65,7 +65,7 @@ void MPIMeshCommunicator::distribute(
 void MPIMeshCommunicator::distribute(
     Mesh& mesh,
     MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
   distributeCommon(mesh, distribution, 0, &vertex_functions);
 }
@@ -74,7 +74,7 @@ void MPIMeshCommunicator::distribute(
     Mesh& mesh,
     MeshFunction<uint>& distribution,
     Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
   distributeCommon(mesh, distribution, &cell_functions, &vertex_functions);
 }
@@ -481,10 +481,10 @@ void MPIMeshCommunicator::distributeCommon(
     Mesh& mesh,
     MeshFunction<uint>& distribution,
     Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> > *cell_functions,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > *vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> > *vertex_functions)
 {
   typedef Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> > CellFunctionArrayType;
-  typedef Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > VertexFunctionArrayType;
+  typedef Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> > VertexFunctionArrayType;
 
   // new local distdata
   MeshDistributedData distdata(mesh.topology().dim());
@@ -1135,7 +1135,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 void MPIMeshCommunicator::distribute(
     Mesh& mesh,
     MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1143,7 +1143,7 @@ void MPIMeshCommunicator::distribute(
     Mesh& mesh,
     MeshFunction<uint>& distribution,
     Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
   error("Cannot distribute mesh without MPI.");
 }

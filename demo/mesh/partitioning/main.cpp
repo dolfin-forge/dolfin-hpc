@@ -14,7 +14,7 @@ int main()
   UnitCube mesh(16, 16, 16);
 
   // Partition mesh
-  MeshFunction<unsigned int> partitions;
+  MeshFunction<uint> partitions;
   mesh.partition(partitions, 20);
 
   // Plot mesh partition

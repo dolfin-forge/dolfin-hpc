@@ -38,6 +38,7 @@ namespace dolfin
 template<class T>
 class MeshFunction
 {
+
 public:
 
   /// Create empty mesh function
@@ -45,18 +46,7 @@ public:
       values_(NULL),
       mesh_(0),
       dim_(0),
-      size_(0),
-      value_size_(0)
-  {
-  }
-
-  /// Create empty mesh function on given mesh
-  MeshFunction(Mesh& mesh) :
-      values_(NULL),
-      mesh_(&mesh),
-      dim_(0),
-      size_(0),
-      value_size_(0)
+      size_(0)
   {
   }
 
@@ -65,8 +55,7 @@ public:
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0),
-      value_size_(0)
+      size_(0)
   {
     init(dim);
   }
@@ -76,8 +65,7 @@ public:
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0),
-      value_size_(0)
+      size_(0)
   {
     init(dim, value_size);
   }
@@ -87,8 +75,7 @@ public:
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0),
-      value_size_(0)
+      size_(0)
   {
     File file(filename);
     file >> *this;
@@ -117,12 +104,6 @@ public:
   inline uint size() const
   {
     return size_;
-  }
-
-  /// Return topological dimension
-  inline uint value_size() const
-  {
-    return value_size_;
   }
 
   /// Return array of values
@@ -195,28 +176,6 @@ public:
   bool operator!=(const MeshFunction<T>& other)
   {
     return !(*this == other);
-  }
-
-  /// Initialize mesh function for given topological dimension
-  void init(uint dim)
-  {
-    if (!mesh_)
-    {
-      error("Mesh undefined, unable to initialize mesh function.");
-    }
-    mesh_->init(dim);
-    init(*mesh_, dim, mesh_->size(dim));
-  }
-
-  /// Initialize mesh function for given topological dimension of given size
-  void init(uint dim, uint size)
-  {
-    if (!mesh_)
-    {
-      error("Mesh undefined, unable to initialize mesh function.");
-    }
-    mesh_->init(dim);
-    init(*mesh_, dim, size);
   }
 
   /// Initialize mesh function for given topological dimension
@@ -299,20 +258,39 @@ public:
 
 private:
 
+  /// Initialize mesh function for given topological dimension
+  void init(uint dim)
+  {
+    if (!mesh_)
+    {
+      error("Mesh undefined, unable to initialize mesh function.");
+    }
+    mesh_->init(dim);
+    init(*mesh_, dim, mesh_->size(dim));
+  }
+
+  /// Initialize mesh function for given topological dimension of given size
+  void init(uint dim, uint size)
+  {
+    if (!mesh_)
+    {
+      error("Mesh undefined, unable to initialize mesh function.");
+    }
+    mesh_->init(dim);
+    init(*mesh_, dim, size);
+  }
+
   /// Values at the set of mesh entities
   T * values_;
 
   /// The mesh
-  Mesh* mesh_;
+  Mesh * mesh_;
 
   /// Topological dimension
   uint dim_;
 
   /// Number of mesh entities
   uint size_;
-
-  /// Value dimension
-  uint value_size_;
 
 };
 

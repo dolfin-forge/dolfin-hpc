@@ -10,7 +10,7 @@ namespace dolfin
 {
 //-----------------------------------------------------------------------------
 template<>
-void MeshFunctionConverter::cast<double, uint>(MeshFunction<double>& source_function,
+void MeshFunctionConverter::cast<double, uint>(MeshFunction<real>& source_function,
                                                MeshFunction<uint>& target_function)
 {
   castRealToIntegerWithRounding(source_function, target_function);
@@ -24,7 +24,7 @@ void MeshFunctionConverter::cast<float, uint>(MeshFunction<float>& source_functi
 }
 //-----------------------------------------------------------------------------
 template<>
-void MeshFunctionConverter::cast<double, int>(MeshFunction<double>& source_function,
+void MeshFunctionConverter::cast<double, int>(MeshFunction<real>& source_function,
                                                MeshFunction<int>& target_function)
 {
   castRealToIntegerWithRounding(source_function, target_function);
@@ -38,7 +38,7 @@ void MeshFunctionConverter::cast<float, int>(MeshFunction<float>& source_functio
 }
 //-----------------------------------------------------------------------------
 template<>
-void MeshFunctionConverter::cast<double, bool>(MeshFunction<double>& source_function,
+void MeshFunctionConverter::cast<double, bool>(MeshFunction<real>& source_function,
                                                MeshFunction<bool>& target_function)
 {
   castRealToIntegerWithRounding(source_function, target_function);

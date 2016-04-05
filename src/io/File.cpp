@@ -151,14 +151,14 @@ void File::operator>>(MeshFunction<int>& meshfunction)
   *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(MeshFunction<unsigned int>& meshfunction)
+void File::operator>>(MeshFunction<uint>& meshfunction)
 {
   file_->read();
 
   *file_ >> meshfunction;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(MeshFunction<double>& meshfunction)
+void File::operator>>(MeshFunction<real>& meshfunction)
 {
   file_->read();
 
@@ -228,14 +228,14 @@ void File::operator<<(MeshFunction<int>& meshfunction)
   *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(MeshFunction<unsigned int>& meshfunction)
+void File::operator<<(MeshFunction<uint>& meshfunction)
 {
   file_->write();
 
   *file_ << meshfunction;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(MeshFunction<double>& meshfunction)
+void File::operator<<(MeshFunction<real>& meshfunction)
 {
   file_->write();
 

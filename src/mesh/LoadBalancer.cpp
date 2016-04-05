@@ -128,7 +128,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 }
 
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > >& vertex_functions)
+void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, Array< std::pair< MeshFunction<real> *, MeshFunction<real> * > >& vertex_functions)
 {
   begin("Load balancing");
 
@@ -147,16 +147,16 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, Array< std::p
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions,
+                           Array< std::pair< MeshFunction<real> *,
+                           MeshFunction<real> * > >& vertex_functions,
                            Type type)
 {
   balance(mesh, cell_marker, vertex_functions, 0.0, 0.0, 0.0, type);
 }
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions,
+                           Array< std::pair< MeshFunction<real> *,
+                           MeshFunction<real> * > >& vertex_functions,
                            real tf, real tb, real ts, Type type)
 {
 
@@ -244,8 +244,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
                            Array< std::pair< MeshFunction<uint> *,
                            MeshFunction<uint> * > >& cell_functions,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions)
+                           Array< std::pair< MeshFunction<real> *,
+                           MeshFunction<real> * > >& vertex_functions)
 {
   begin("Load balancing");
 
@@ -266,8 +266,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
                            Array< std::pair< MeshFunction<uint> *,
                            MeshFunction<uint> * > >& cell_functions,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions,
+                           Array< std::pair< MeshFunction<real> *,
+                           MeshFunction<real> * > >& vertex_functions,
                            Type type)
 {
   balance(mesh, cell_marker,cell_functions, vertex_functions, 0.0, 0.0, 0.0, type);
@@ -276,8 +276,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
                            Array< std::pair< MeshFunction<uint> *,
                            MeshFunction<uint> * > >& cell_functions,
-                           Array< std::pair< MeshFunction<double> *,
-                           MeshFunction<double> * > >& vertex_functions,
+                           Array< std::pair< MeshFunction<real> *,
+                           MeshFunction<real> * > >& vertex_functions,
                            real tf, real tb, real ts, Type type)
 {
   // Construct weight function

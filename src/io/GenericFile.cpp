@@ -53,14 +53,14 @@ void GenericFile::operator>>(MeshFunction<int>& meshfunction)
   read_not_impl("MeshFunction<int>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<unsigned int>& meshfunction)
+void GenericFile::operator>>(MeshFunction<uint>& meshfunction)
 {
-  read_not_impl("MeshFunction<unsigned int>");
+  read_not_impl("MeshFunction<uint>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>>(MeshFunction<double>& meshfunction)
+void GenericFile::operator>>(MeshFunction<real>& meshfunction)
 {
-  read_not_impl("MeshFunction<double>");
+  read_not_impl("MeshFunction<real>");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator>>(MeshFunction<bool>& meshfunction)
@@ -108,14 +108,14 @@ void GenericFile::operator<<(MeshFunction<int>& meshfunction)
   write_not_impl("MeshFunction<int>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void GenericFile::operator<<(MeshFunction<uint>& meshfunction)
 {
-  write_not_impl("MeshFunction<unsigned int>");
+  write_not_impl("MeshFunction<uint>");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<<(MeshFunction<double>& meshfunction)
+void GenericFile::operator<<(MeshFunction<real>& meshfunction)
 {
-  write_not_impl("MeshFunction<double>");
+  write_not_impl("MeshFunction<real>");
 }
 //-----------------------------------------------------------------------------
 void GenericFile::operator<<(MeshFunction<bool>& meshfunction)

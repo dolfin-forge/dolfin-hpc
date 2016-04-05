@@ -98,19 +98,19 @@ void RivaraRefinement::refine(Mesh& mesh,
   // Start Loadbalancer
   if(MPI::numProcesses() > 1 && balance)
   {
-    MeshFunction<double> patch_id_double(mesh);
-    MeshFunction<double> u_double(mesh);
-    MeshFunction<double> v_double(mesh);
+    MeshFunction<real> patch_id_double(mesh);
+    MeshFunction<real> u_double(mesh);
+    MeshFunction<real> v_double(mesh);
 
-    MeshFunction<double> new_patch_id_double(mesh);
-    MeshFunction<double> new_u_double(mesh);
-    MeshFunction<double> new_v_double(mesh);
+    MeshFunction<real> new_patch_id_double(mesh);
+    MeshFunction<real> new_u_double(mesh);
+    MeshFunction<real> new_v_double(mesh);
 
     MeshFunctionConverter::cast(patch_id_list, patch_id_double);
     MeshFunctionConverter::cast(bnd_u, u_double);
     MeshFunctionConverter::cast(bnd_v, v_double);
 
-    Array< std::pair< MeshFunction<double> *, MeshFunction<double> * > > vertex_functions;
+    Array< std::pair< MeshFunction<real> *, MeshFunction<real> * > > vertex_functions;
 
     vertex_functions.push_back( std::make_pair(&patch_id_double, &new_patch_id_double) );
     vertex_functions.push_back( std::make_pair(&u_double, &new_u_double) );

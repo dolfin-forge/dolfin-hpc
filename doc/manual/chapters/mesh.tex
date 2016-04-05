@@ -151,8 +151,8 @@ vertices of the boundary mesh to the corresponding vertices in the
 original mesh, and from the cells of the boundary mesh to the
 corresponding facets of the original mesh:
 \begin{code}
-MeshFunction<unsigned int> vertex_map,
-MeshFunction<unsigned int> cell_map;
+MeshFunction<uint> vertex_map,
+MeshFunction<uint> cell_map;
 BoundaryMesh boundary(mesh, vertex_map, cell_map);
 \end{code}
 

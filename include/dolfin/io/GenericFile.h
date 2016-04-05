@@ -37,8 +37,8 @@ namespace dolfin
     virtual void operator>> (GenericMatrix& A);
     virtual void operator>> (Mesh& mesh);
     virtual void operator>> (MeshFunction<int>& meshfunction);
-    virtual void operator>> (MeshFunction<unsigned int>& meshfunction);
-    virtual void operator>> (MeshFunction<double>& meshfunction);
+    virtual void operator>> (MeshFunction<uint>& meshfunction);
+    virtual void operator>> (MeshFunction<real>& meshfunction);
     virtual void operator>> (MeshFunction<bool>& meshfunction);
     virtual void operator>> (Function& mesh);
     virtual void operator>> (ParameterList& parameters);
@@ -51,8 +51,8 @@ namespace dolfin
     virtual void operator<< (GenericMatrix& A);
     virtual void operator<< (Mesh& mesh);
     virtual void operator<< (MeshFunction<int>& meshfunction);
-    virtual void operator<< (MeshFunction<unsigned int>& meshfunction);
-    virtual void operator<< (MeshFunction<double>& meshfunction);
+    virtual void operator<< (MeshFunction<uint>& meshfunction);
+    virtual void operator<< (MeshFunction<real>& meshfunction);
     virtual void operator<< (MeshFunction<bool>& meshfunction);
     virtual void operator<< (Function& u);
     virtual void operator<< (ParameterList& parameters);

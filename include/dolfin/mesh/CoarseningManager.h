@@ -172,16 +172,16 @@ private:
       Array<int>& old2new_cells,
       Array<int>& old2new_vertices,
       Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-      Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions);
+      Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions);
 
   /// Cleanup the MeshFunction-Arrays after the distribution
   void cleanupMFArrays(
       Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-      Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions);
+      Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions);
 
   /// Update the independent set with the received values
   void updateIndependentSet(Mesh& mesh,
-                            MeshFunction<double>& forbidden_vertices_new);
+                            MeshFunction<real>& forbidden_vertices_new);
 
   /// exchange requests for vertices
   void exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,

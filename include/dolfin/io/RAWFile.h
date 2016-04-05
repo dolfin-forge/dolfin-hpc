@@ -28,8 +28,8 @@ namespace dolfin
       
       
       void operator<< (MeshFunction<int>& meshfunction);
-      void operator<< (MeshFunction<unsigned int>& meshfunction);
-      void operator<< (MeshFunction<double>& meshfunction);
+      void operator<< (MeshFunction<uint>& meshfunction);
+      void operator<< (MeshFunction<real>& meshfunction);
       void operator<< (Function& u);
       
     private:

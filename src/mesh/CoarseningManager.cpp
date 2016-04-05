@@ -179,10 +179,10 @@ void CoarseningManager::buildMFArrays(
     Array<int>& old2new_cells,
     Array<int>& old2new_vertices,
     Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-    Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions)
+    Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions)
 {
-  MeshFunction<double> * forbidden_vertices = new MeshFunction<double>();
-  MeshFunction<double> * forbidden_vertices_new = new MeshFunction<double>();
+  MeshFunction<real> * forbidden_vertices = new MeshFunction<real>();
+  MeshFunction<real> * forbidden_vertices_new = new MeshFunction<real>();
   MeshFunction<uint> * attempts = new MeshFunction<uint>();
   MeshFunction<uint> * attempts_new = new MeshFunction<uint>();
 
@@ -219,7 +219,7 @@ void CoarseningManager::buildMFArrays(
 //-----------------------------------------------------------------------------
 void CoarseningManager::cleanupMFArrays(
     Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-    Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions)
+    Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions)
 {
   for (Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >::iterator it(
       cell_functions.begin()); it != cell_functions.end(); ++it)
@@ -228,7 +228,7 @@ void CoarseningManager::cleanupMFArrays(
     delete it->second;
   }
 
-  for (Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >::iterator it(
+  for (Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >::iterator it(
       vertex_functions.begin()); it != vertex_functions.end(); ++it)
   {
     delete it->first;
@@ -237,7 +237,7 @@ void CoarseningManager::cleanupMFArrays(
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::updateIndependentSet(
-    Mesh& mesh, MeshFunction<double>& forbidden_vertices_new)
+    Mesh& mesh, MeshFunction<real>& forbidden_vertices_new)
 {
   forbidden_vertices_.resize(mesh.numVertices());
   forbidden_vertices_ = false;
@@ -462,7 +462,7 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   // Lists of MeshFunctions for exchange
   Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> > cell_functions;
-  Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > vertex_functions;
+  Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> > vertex_functions;
 
   buildMFArrays(omesh, old2new_cells, old2new_vertices, cell_functions,
                 vertex_functions);

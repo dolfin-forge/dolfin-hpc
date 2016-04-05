@@ -48,7 +48,7 @@ public:
   static void distribute(
       Mesh& mesh,
       MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 
   /// Distribute mesh according to mesh function and preserve cell- and vertex-
   /// based functions
@@ -56,7 +56,7 @@ public:
       Mesh& mesh,
       MeshFunction<uint>& distribution,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 private:
   static void distributeCommon(Mesh& mesh, MeshFunction<uint>& distribution,
                                MeshFunction<bool> *old_cell_marker,
@@ -66,7 +66,7 @@ private:
       Mesh& mesh,
       MeshFunction<uint>& distribution,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> > *cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> > *vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> > *vertex_functions);
 };
 
 }

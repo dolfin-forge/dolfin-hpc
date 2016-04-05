@@ -16,9 +16,7 @@ int main()
   Mesh mesh("mesh2D.xml.gz");
   
   // Read mesh function from file
-  File in("meshfunction.xml");
-  MeshFunction<double> f(mesh);
-  in >> f;
+  MeshFunction<real> f(mesh, "meshfunction.xml");
 
   // Write mesh function to file
   File out("meshfunction_out.pvd");

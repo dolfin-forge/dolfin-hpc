@@ -48,8 +48,8 @@ public:
   void operator>>(std::vector<std::pair<Function*, std::string> >& f);
   void operator>>(MeshFunction<bool>& meshfunction);
   void operator>>(MeshFunction<int>& meshfunction);
-  void operator>>(MeshFunction<unsigned int>& meshfunction);
-  void operator>>(MeshFunction<double>& meshfunction);
+  void operator>>(MeshFunction<uint>& meshfunction);
+  void operator>>(MeshFunction<real>& meshfunction);
 
   /// Output
   void operator<<(GenericVector& x);
@@ -58,8 +58,8 @@ public:
   void operator<<(std::vector<std::pair<Function*, std::string> >& f);
   void operator<<(MeshFunction<bool>& meshfunction);
   void operator<<(MeshFunction<int>& meshfunction);
-  void operator<<(MeshFunction<unsigned int>& meshfunction);
-  void operator<<(MeshFunction<double>& meshfunction);
+  void operator<<(MeshFunction<uint>& meshfunction);
+  void operator<<(MeshFunction<real>& meshfunction);
 
   /// Overload GenericFile
   void read();

@@ -46,10 +46,10 @@ public:
   void operator<<(MeshFunction<int>& meshfunction);
 
   /// Write mesh function containing unsigned integers
-  void operator<<(MeshFunction<unsigned int>& meshfunction);
+  void operator<<(MeshFunction<uint>& meshfunction);
 
   /// Write mesh function containing doubles
-  void operator<<(MeshFunction<double>& meshfunction);
+  void operator<<(MeshFunction<real>& meshfunction);
 
   /// Write mesh function containing booleans
   void operator<<(MeshFunction<bool>& meshfunction);

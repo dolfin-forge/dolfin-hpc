@@ -32,12 +32,12 @@ void RAWFile::operator<<(MeshFunction<int>& meshfunction)
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void RAWFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void RAWFile::operator<<(MeshFunction<uint>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void RAWFile::operator<<(MeshFunction<double>& meshfunction)
+void RAWFile::operator<<(MeshFunction<real>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }

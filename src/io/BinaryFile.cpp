@@ -1051,12 +1051,12 @@ void BinaryFile::operator<<(MeshFunction<int>& meshfunction)
   write_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void BinaryFile::operator<<(MeshFunction<uint>& meshfunction)
 {
   write_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator<<(MeshFunction<double>& meshfunction)
+void BinaryFile::operator<<(MeshFunction<real>& meshfunction)
 {
   write_meshfunction(meshfunction);
 }
@@ -1165,12 +1165,12 @@ void BinaryFile::operator>>(MeshFunction<int>& meshfunction)
   read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator>>(MeshFunction<unsigned int>& meshfunction)
+void BinaryFile::operator>>(MeshFunction<uint>& meshfunction)
 {
   read_meshfunction(meshfunction);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator>>(MeshFunction<double>& meshfunction)
+void BinaryFile::operator>>(MeshFunction<real>& meshfunction)
 {
   read_meshfunction(meshfunction);
 }

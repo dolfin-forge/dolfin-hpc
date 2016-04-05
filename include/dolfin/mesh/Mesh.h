@@ -244,7 +244,7 @@ public:
   /// vertex_functions contains pairs as <old_function,new_function>
   void distribute(
       MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 
   /// Distribute a mesh according to a mesh function and transfer cell and
   /// vertex functions
@@ -255,7 +255,7 @@ public:
   void distribute(
       MeshFunction<uint>& distribution,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 
   /// Return whether the mesh is distributed
   /// The mesh is distributed iff the topology is distributed

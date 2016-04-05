@@ -50,14 +50,14 @@ public:
   static void balance(
       Mesh& mesh,
       MeshFunction<uint>& weight,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 
   /// Balance mesh according to marked cells,
   /// new_cell_marker marks cells in cell_marker for new mesh and  preserve mesh functions
   static void balance(
       Mesh& mesh,
       MeshFunction<bool>& cell_marker,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions,
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions,
       Type type = Default);
 
   /// Balance mesh according to marked cells, tune loadbalancer
@@ -68,7 +68,7 @@ public:
   static void balance(
       Mesh& mesh,
       MeshFunction<bool>& cell_marker,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions,
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions,
       real tf, real tb, real ts, Type type = Default);
 
   /// Balanace mesh according to predefined weight function and preserve mesh functions (vertex and cell)
@@ -76,7 +76,7 @@ public:
       Mesh& mesh,
       MeshFunction<uint>& weight,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions);
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
 
   /// Balance mesh according to marked cells,
   /// new_cell_marker marks cells in cell_marker for new mesh and  preserve mesh functions(vertex and cell)
@@ -84,7 +84,7 @@ public:
       Mesh& mesh,
       MeshFunction<bool>& cell_marker,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions,
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions,
       Type type = Default);
 
   /// Balance mesh according to marked cells, tune loadbalancer
@@ -96,7 +96,7 @@ public:
       Mesh& mesh,
       MeshFunction<bool>& cell_marker,
       Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions,
+      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions,
       real tf, real tb, real ts, Type type = Default);
 
   /// Balanace mesh according to predefined weight function and preserve mesh functions (cell)

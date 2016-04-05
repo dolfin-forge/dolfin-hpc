@@ -358,7 +358,7 @@ void Mesh::distribute(
 //-----------------------------------------------------------------------------
 void Mesh::distribute(
     MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
 }
@@ -366,7 +366,7 @@ void Mesh::distribute(
 void Mesh::distribute(
     MeshFunction<uint>& distribution,
     Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-    Array<std::pair<MeshFunction<double> *, MeshFunction<double> *> >& vertex_functions)
+    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
 {
   MPIMeshCommunicator::distribute(*this, distribution, cell_functions,
                                   vertex_functions);

@@ -98,12 +98,12 @@ void VTKFile::operator<<(MeshFunction<int>& meshfunction)
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void VTKFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void VTKFile::operator<<(MeshFunction<uint>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
 //----------------------------------------------------------------------------
-void VTKFile::operator<<(MeshFunction<double>& meshfunction)
+void VTKFile::operator<<(MeshFunction<real>& meshfunction)
 {
   MeshFunctionWrite(meshfunction);
 }
@@ -877,10 +877,8 @@ template<class T>
       // Write mesh
       MeshWrite(mesh);
 
-      std::vector<float> data;
-      data.resize(mesh.numCells());
+      std::vector<float> data(mesh.numCells());
       std::vector<float>::iterator entry = data.begin();
-
       for (CellIterator cell(mesh); !cell.end(); ++cell)
       {
         *entry++ = static_cast<float>(meshfunction.get(cell->index()));

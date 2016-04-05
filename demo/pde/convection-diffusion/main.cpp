@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   dolfin_init(argc, argv);
   // Read mesh and sub domain markers
   Mesh mesh("../../../data/meshes/dolfin-2.xml.gz");
-  MeshFunction<unsigned int> sub_domains(mesh, "subdomains.xml.gz");
+  MeshFunction<uint> sub_domains(mesh, "subdomains.xml.gz");
 
   // Convection velocity, source term and initial condition
   Function velocity(mesh);

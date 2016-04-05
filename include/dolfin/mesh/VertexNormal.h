@@ -13,7 +13,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshFunction.h>
-
 #include <map>
 
 namespace dolfin
@@ -68,10 +67,6 @@ public:
   ///
   MeshFunction<uint>& vertex_type();
 
-  ///
-  static uint computeBasis(uint gdim, Point B[], Array<real> N, Array<real> W,
-                           real cosalpha_max, bool weighted);
-
 private:
 
   // Cleanup
@@ -123,8 +118,5 @@ inline MeshFunction<uint>& VertexNormal::vertex_type()
   return vertex_type_;
 }
 
-//-----------------------------------------------------------------------------
-
-} /* namespace dolfin */
-
-#endif /* __DOLFIN_VERTEX_NORMAL_H */
+}
+#endif

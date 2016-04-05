@@ -14,8 +14,10 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/math/basic.h>
+#include <dolfin/mesh/EuclideanBasis.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexNormal.h>
@@ -69,13 +71,6 @@ void NodeNormal::compute()
   if (basis().size() < gdim)
   {
     error("Invalid size of storage vector for basis functions in NodeNormal");
-  }
-  for (uint d = 0; d < gdim; ++d)
-  {
-    if (basis()[d].type() != Function::discrete)
-    {
-      error("All basis functions in NodeNormal should be discrete");
-    }
   }
   if (basis()[0].space().is_vertex_based())
   {
@@ -252,7 +247,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
     // Add facet to the list with facet weight and normal
     FacetData * data = new FacetData();
-    data->global_index = distdata[facet_dim].get_global(facet.index());
+    data->global_index = facet.global_index();
     switch (type_)
     {
       case NodeNormal::none:  // no weight
@@ -494,7 +489,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
     }
 
     // Compute basis and node type
-    uint numS = VertexNormal::computeBasis(gdim, B, N, W, cosalpha, weighted);
+    uint numS = EuclideanBasis::compute(gdim, B, N, W, cosalpha, weighted);
     uint const node_type = std::min(tdim, numS);
 
     // Set node type

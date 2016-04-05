@@ -77,6 +77,26 @@ uint MeshEntity::global_index() const
   return mesh_.topology().get_global(*this);
 }
 //-----------------------------------------------------------------------------
+void MeshEntity::global_entities(uint dim, uint * indices) const
+{
+  // Get list of entities for given topological dimension
+  MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
+  dolfin_assert(mc.size() > 0);
+  uint const * entities = mc(index_);
+  uint const num_entities = mc.size(index_);
+  if (mesh_.topology().is_distributed())
+  {
+    for (uint i = 0; i < num_entities; ++i)
+    {
+      indices[i] = mesh_.distdata()[dim].get_global(entities[i]);
+    }
+  }
+  else
+  {
+    std::memcpy(indices, entities, num_entities*sizeof(uint));
+  }
+}
+//-----------------------------------------------------------------------------
 bool MeshEntity::is_owned() const
 {
   return mesh_.topology().is_owned(*this);

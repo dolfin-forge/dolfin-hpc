@@ -83,6 +83,9 @@ public:
   /// Return global index of mesh entity
   uint global_index() const;
 
+  /// Copy global indices of mesh entities to array
+  void global_entities(uint dim, uint * indices) const;
+
   /// Return if the mesh entity is owned
   bool is_owned() const;
 

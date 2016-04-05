@@ -34,13 +34,15 @@ MappedManifold::~MappedManifold()
 //-----------------------------------------------------------------------------
 uint MappedManifold::facet_index(Cell const& boundary_cell)
 {
-  return this->data().meshFunction("cell map")->get(boundary_cell);
+  dolfin_assert(&boundary_cell.mesh() == this);
+  return cell_map_[boundary_cell.index()];
 }
 
 //-----------------------------------------------------------------------------
 uint MappedManifold::vertex_index(Vertex const& boundary_vertex)
 {
-  return this->data().meshFunction("vertex map")->get(boundary_vertex);
+  dolfin_assert(&boundary_vertex.mesh() == this);
+  return vertex_map_[boundary_vertex.index()];
 }
 
 //-----------------------------------------------------------------------------
@@ -59,7 +61,6 @@ void MappedManifold::init()
   mm_vertices = invalid_vertex_index;
   Array<real> mm_coordinates(gdim * mm_vertices.size());
   uint const num_cell_vertices = boundary.type().num_entities(0);
-  Array<uint> mm_cells(boundary.numCells());
   Array<uint> mm_cell_vertices(boundary.numCells() * num_cell_vertices);
 
   Array<uint> localGH;
@@ -68,6 +69,7 @@ void MappedManifold::init()
   uint mm_cell_count = 0;
   uint mm_vertex_count = 0;
   Point x1;
+  cell_map_.clear();
   for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
   {
     Facet facet(globalmesh, boundary.facet_index(*bcell));
@@ -99,7 +101,7 @@ void MappedManifold::init()
       facetsH_.insert(facet.index());
 
       // Add cell (boundary facet)
-      mm_cells[mm_cell_count] = facet.index();
+      cell_map_.push_back(facet.index());
       // Add vertices expressed in the reference manifold coordinates
       for (VertexIterator v(*bcell); !v.end(); ++v)
       {
@@ -131,23 +133,11 @@ void MappedManifold::init()
 
   //
   editor.init_vertices(mm_vertex_count);
+  dolfin_assert(cell_map_.size() == mm_cell_count);
   editor.init_cells(mm_cell_count);
 
   // Initialize mapping from vertices in boundary to vertices in mesh
-  MeshFunction<uint> * vertex_map = this->data().createMeshFunction("vertex map");
-  dolfin_assert(vertex_map);
-  if(mm_vertex_count > 0)
-  {
-    vertex_map->init(*this, 0, mm_vertex_count);
-  }
-
-  // Initialize mapping from cells in boundary to facets in mesh
-  MeshFunction<uint> * cell_map = this->data().createMeshFunction("cell map");
-  dolfin_assert(cell_map);
-  if(mm_cell_count > 0)
-  {
-    cell_map->init(*this, this->topology().dim(), mm_cell_count);
-  }
+  vertex_map_.resize(mm_vertex_count);
 
   // Create vertices
   for (uint v = 0; v < mm_vertices.size(); ++v)
@@ -156,7 +146,7 @@ void MappedManifold::init()
     if (vertex_index != invalid_vertex_index)
     {
       // Create mapping from boundary vertex to mesh vertex
-      vertex_map->set(vertex_index, v);
+      vertex_map_[vertex_index] = v;
 
       // Add vertex with coordinates expressed in reference manifold
       editor.add_vertex(vertex_index, &mm_coordinates[vertex_index * gdim]);
@@ -167,9 +157,6 @@ void MappedManifold::init()
   Array<uint> cell_vertices(num_cell_vertices);
   for (uint c = 0; c < mm_cell_count; ++c)
   {
-    // Create mapping from boundary cell to mesh facet
-    cell_map->set(c, mm_cells[c]);
-
     // Add cell
     editor.add_cell(c, &mm_cell_vertices[c * num_cell_vertices]);
   }
@@ -183,5 +170,4 @@ void MappedManifold::init()
 }
 //-----------------------------------------------------------------------------
 
-}
-
+} /* namespace dolfin */

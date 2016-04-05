@@ -16,7 +16,6 @@ namespace dolfin
 {
 
 class PeriodicSubDomain;
-class Vertex;
 
 /**
  *  @class  MappedManifold
@@ -80,8 +79,11 @@ private:
   _set<uint> facetsI_; // Intersection of G and H
   _set<uint> facetsL_; // H facet with local G facet
 
+  Array<uint> vertex_map_;
+  Array<uint> cell_map_;
+
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MAPPED_MANIFOLD_H */

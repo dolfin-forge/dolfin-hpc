@@ -45,7 +45,8 @@ public:
       values_(NULL),
       mesh_(0),
       dim_(0),
-      size_(0)
+      size_(0),
+      value_size_(0)
   {
   }
 
@@ -54,18 +55,31 @@ public:
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0)
+      size_(0),
+      value_size_(0)
   {
   }
 
-  /// Create mesh function on given mesh of given dimension
+  /// Create scalar mesh function on given mesh of given dimension
   MeshFunction(Mesh& mesh, uint dim) :
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0)
+      size_(0),
+      value_size_(0)
   {
     init(dim);
+  }
+
+  /// Create mesh function on given mesh of given dimension and value size
+  MeshFunction(Mesh& mesh, uint dim, uint value_size) :
+      values_(NULL),
+      mesh_(&mesh),
+      dim_(0),
+      size_(0),
+      value_size_(0)
+  {
+    init(dim, value_size);
   }
 
   /// Create function from data file
@@ -73,7 +87,8 @@ public:
       values_(NULL),
       mesh_(&mesh),
       dim_(0),
-      size_(0)
+      size_(0),
+      value_size_(0)
   {
     File file(filename);
     file >> *this;
@@ -102,6 +117,12 @@ public:
   inline uint size() const
   {
     return size_;
+  }
+
+  /// Return topological dimension
+  inline uint value_size() const
+  {
+    return value_size_;
   }
 
   /// Return array of values
@@ -289,6 +310,10 @@ private:
 
   /// Number of mesh entities
   uint size_;
+
+  /// Value dimension
+  uint value_size_;
+
 };
 
 } /* namespace dolfin */

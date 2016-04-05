@@ -60,19 +60,19 @@ XMLFile::XMLFile(const std::string filename) :
     mark(0)
 {
   type = "XML";
-  xmlObject = 0;
+  xmlObject = NULL;
 }
 //-----------------------------------------------------------------------------
 XMLFile::~XMLFile()
 {
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
 }
 //-----------------------------------------------------------------------------
 void XMLFile::operator>>(GenericVector& x)
 {
   message(1, "Reading vector from file %s.", filename.c_str());
 
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLVector(x);
   parseFile();
 }
@@ -81,7 +81,7 @@ void XMLFile::operator>>(GenericMatrix& A)
 {
   message(1, "Reading matrix from file %s.", filename.c_str());
 
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLMatrix(A);
   parseFile();
 }
@@ -90,7 +90,7 @@ void XMLFile::operator>>(Mesh& mesh)
 {
   message(1, "Reading mesh from file %s.", filename.c_str());
 
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLMesh(mesh);
   parseFile();
 }
@@ -100,28 +100,28 @@ void XMLFile::operator>>(MeshFunction<int>& meshfunction)
   message(1, "Reading int-valued mesh function from file %s.",
           filename.c_str());
 
-  if (xmlObject) delete xmlObject;
-  xmlObject = new XMLMeshFunction(meshfunction);
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction<int>(meshfunction);
   parseFile();
 }
 //-----------------------------------------------------------------------------
-void XMLFile::operator>>(MeshFunction<unsigned int>& meshfunction)
+void XMLFile::operator>>(MeshFunction<uint>& meshfunction)
 {
   message(1, "Reading uint-valued mesh function from file %s.",
           filename.c_str());
 
-  if (xmlObject) delete xmlObject;
-  xmlObject = new XMLMeshFunction(meshfunction);
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction<uint>(meshfunction);
   parseFile();
 }
 //-----------------------------------------------------------------------------
-void XMLFile::operator>>(MeshFunction<double>& meshfunction)
+void XMLFile::operator>>(MeshFunction<real>& meshfunction)
 {
   message(1, "Reading real-valued mesh function from file %s.",
           filename.c_str());
 
-  if (xmlObject) delete xmlObject;
-  xmlObject = new XMLMeshFunction(meshfunction);
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction<real>(meshfunction);
   parseFile();
 }
 //-----------------------------------------------------------------------------
@@ -130,8 +130,8 @@ void XMLFile::operator>>(MeshFunction<bool>& meshfunction)
   message(1, "Reading bool-valued mesh function from file %s.",
           filename.c_str());
 
-  if (xmlObject) delete xmlObject;
-  xmlObject = new XMLMeshFunction(meshfunction);
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction<bool>(meshfunction);
   parseFile();
 }
 //-----------------------------------------------------------------------------
@@ -150,18 +150,18 @@ void XMLFile::operator>>(Function& f)
 
   // Read the finite element specification
   std::string finite_element_signature;
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLFiniteElement(finite_element_signature);
   parseFile();
 
   // Read the dof map specification
   std::string dof_map_signature;
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLDofMap(dof_map_signature);
   parseFile();
 
   // Read the function
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLFunction(f);
   parseFile();
 
@@ -188,7 +188,7 @@ void XMLFile::operator>>(ParameterList& parameters)
 {
   message(1, "Reading parameter list from file %s.", filename.c_str());
 
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLParameterList(parameters);
   parseFile();
 }
@@ -197,7 +197,7 @@ void XMLFile::operator>>(Graph& graph)
 {
   message(1, "Reading graph from file %s.", filename.c_str());
 
-  if (xmlObject) delete xmlObject;
+  delete xmlObject;
   xmlObject = new XMLGraph(graph);
   parseFile();
 }
@@ -678,7 +678,7 @@ void XMLFile::operator<<(MeshFunction<int>& meshfunction)
           filename.c_str());
 }
 //-----------------------------------------------------------------------------
-void XMLFile::operator<<(MeshFunction<unsigned int>& meshfunction)
+void XMLFile::operator<<(MeshFunction<uint>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();
@@ -703,7 +703,7 @@ void XMLFile::operator<<(MeshFunction<unsigned int>& meshfunction)
           filename.c_str());
 }
 //-----------------------------------------------------------------------------
-void XMLFile::operator<<(MeshFunction<double>& meshfunction)
+void XMLFile::operator<<(MeshFunction<real>& meshfunction)
 {
   // Open file
   FILE *fp = openFile();

@@ -76,9 +76,9 @@ bool XMLParameterList::close()
 void XMLParameterList::readParameter(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  std::string pname  = parseString(name, attrs, "name");
-  std::string ptype  = parseString(name, attrs, "type");
-  std::string pvalue = parseString(name, attrs, "value");
+  std::string pname  = parse<std::string>(name, attrs, "name");
+  std::string ptype  = parse<std::string>(name, attrs, "type");
+  std::string pvalue = parse<std::string>(name, attrs, "value");
 
   // Set parameter
   if ( ptype == "real" )

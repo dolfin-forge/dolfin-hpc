@@ -61,7 +61,7 @@ void XMLFiniteElement::readFiniteElement(const xmlChar* name,
                                          const xmlChar** attrs)
 {
   // Parse values
-  signature = parseString(name, attrs, "signature");
+  signature = parse<std::string>(name, attrs, "signature");
 }
 //-----------------------------------------------------------------------------
 #endif

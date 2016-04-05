@@ -70,7 +70,7 @@ void XMLVector::endElement(const xmlChar *name)
 void XMLVector::startVector(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse size of vector
-  size = parseUnsignedInt(name, attrs, "size");
+  size = parse<uint>(name, attrs, "size");
   
   // Initialize vector
   if (values)
@@ -91,8 +91,8 @@ void XMLVector::endVector()
 void XMLVector::readEntry(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  uint row   = parseUnsignedInt(name, attrs, "row");
-  real value = parseReal(name, attrs, "value");
+  uint row   = parse<uint>(name, attrs, "row");
+  real value = parse<real>(name, attrs, "value");
   
   // Check values
   if (row >= size)

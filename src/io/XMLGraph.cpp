@@ -121,7 +121,7 @@ bool XMLGraph::close()
 void XMLGraph::readGraph(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  std::string type = parseString(name, attrs, "type");
+  std::string type = parse<std::string>(name, attrs, "type");
   
   // Open graph for editing
   editor.open(_graph, type);
@@ -129,26 +129,26 @@ void XMLGraph::readGraph(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLGraph::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_vertices = parseUnsignedInt(name, attrs, "size");
+  uint num_vertices = parse<uint>(name, attrs, "size");
   editor.init_vertices(num_vertices);
 }
 //-----------------------------------------------------------------------------
 void XMLGraph::readEdges(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_edges = parseUnsignedInt(name, attrs, "size");
+  uint num_edges = parse<uint>(name, attrs, "size");
   editor.initEdges(num_edges);
 }
 //-----------------------------------------------------------------------------
 void XMLGraph::readVertex(const xmlChar *name, const xmlChar **attrs)
 {
   // Read index
-  currentVertex = parseUnsignedInt(name, attrs, "index");
+  currentVertex = parse<uint>(name, attrs, "index");
 
   // Read number of incident edges
-  uint num_edges = parseUnsignedInt(name, attrs, "num_edges");
+  uint num_edges = parse<uint>(name, attrs, "num_edges");
   
   // Vertex weights not yet implemented
-  //uint w = parseUnsignedInt(name, attrs, "weight");
+  //uint w = parse<uint>(name, attrs, "weight");
   
   editor.add_vertex(currentVertex, num_edges);
 }
@@ -156,13 +156,13 @@ void XMLGraph::readVertex(const xmlChar *name, const xmlChar **attrs)
 void XMLGraph::readEdge(const xmlChar *name, const xmlChar **attrs)
 {
   // Read index
-  uint v1 = parseUnsignedInt(name, attrs, "v1");
-  uint v2 = parseUnsignedInt(name, attrs, "v2");
+  uint v1 = parse<uint>(name, attrs, "v1");
+  uint v2 = parse<uint>(name, attrs, "v2");
 
   //dolfin_debug2("readEdge, v1 = %d, v2 = %d", v1, v2);
   
   // Edge weights not yet implemented
-  //uint w = parseUnsignedInt(name, attrs, "weight");
+  //uint w = parse<uint>(name, attrs, "weight");
   editor.addEdge(v1, v2);
 }
 //-----------------------------------------------------------------------------

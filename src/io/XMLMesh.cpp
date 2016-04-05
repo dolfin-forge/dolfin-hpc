@@ -129,8 +129,8 @@ bool XMLMesh::close()
 void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  std::string type = parseString(name, attrs, "celltype");
-  uint gdim = parseUnsignedInt(name, attrs, "dim");
+  std::string type = parse<std::string>(name, attrs, "celltype");
+  uint gdim = parse<uint>(name, attrs, "dim");
   if (editor_ != NULL)
   {
     error("XMLMesh : mesh editor is already created.");
@@ -149,7 +149,7 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_vertices = parseUnsignedInt(name, attrs, "size");
+  uint num_vertices = parse<uint>(name, attrs, "size");
   //
   cell_count_ = 0;
   uint pe_size = MPI::numProcesses();
@@ -172,7 +172,7 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_cells = parseUnsignedInt(name, attrs, "size");
+  uint num_cells = parse<uint>(name, attrs, "size");
   //
   cell_count_ = 0;
   if(parallel_)
@@ -194,7 +194,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
 void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 {
   // Read index
-  uint v = parseUnsignedInt(name, attrs, "index");
+  uint v = parse<uint>(name, attrs, "index");
 
   if (v < vertex_offset_ || v > vertex_range_end_) return;
 
@@ -203,11 +203,11 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   switch (mesh_.geometry().dim())
   {
   case 3:
-    x[2] = parseReal(name, attrs, "z");
+    x[2] = parse<real>(name, attrs, "z");
   case 2:
-    x[1] = parseReal(name, attrs, "y");
+    x[1] = parse<real>(name, attrs, "y");
   case 1:
-    x[0] = parseReal(name, attrs, "x");
+    x[0] = parse<real>(name, attrs, "x");
     break;
   default:
     error("Dimension of mesh must be 1, 2 or 3: provided %d.",
@@ -227,11 +227,11 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
       { "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7" };
   static uint v[8] = { 0 };
   //
-  uint c = parseUnsignedInt(name, attrs, "index");
+  uint c = parse<uint>(name, attrs, "index");
 
   if (parallel_)
   {
-    v[0] = parseUnsignedInt(name, attrs, vertex_attr[0]);
+    v[0] = parse<uint>(name, attrs, vertex_attr[0]);
     if (!mesh_.distdata()[0].has_global(v[0]))
     {
      return;
@@ -241,7 +241,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     cell_buffer_.push_back(v[0]);
     for (uint i = 1; i < mesh_.type().num_entities(0); ++i)
     {
-      v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
+      v[i] = parse<uint>(name, attrs, vertex_attr[i]);
       if (mesh_.distdata()[0].has_global(v[i]))
       {
         vertex_owner_[mesh_.distdata()[0].get_local(v[i])] = rank;
@@ -257,7 +257,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   {
     for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
     {
-      v[i] = parseUnsignedInt(name, attrs, vertex_attr[i]);
+      v[i] = parse<uint>(name, attrs, vertex_attr[i]);
     }
     editor_->add_cell(c, &v[0]);
   }

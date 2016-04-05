@@ -89,8 +89,8 @@ void XMLMatrix::endElement(const xmlChar *name)
 void XMLMatrix::readMatrix(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  uint M = parseInt(name, attrs, "rows");
-  uint N = parseInt(name, attrs, "columns");
+  uint M = parse<int>(name, attrs, "rows");
+  uint N = parse<int>(name, attrs, "columns");
 
   // Set values
   A.init(M, N);
@@ -99,8 +99,8 @@ void XMLMatrix::readMatrix(const xmlChar *name, const xmlChar **attrs)
 void XMLMatrix::readRow(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  row = parseUnsignedInt(name, attrs, "row");
-  const uint size = parseUnsignedInt(name, attrs, "size");
+  row = parse<uint>(name, attrs, "row");
+  const uint size = parse<uint>(name, attrs, "size");
 
   // Reset data for row
   columns.clear();
@@ -112,8 +112,8 @@ void XMLMatrix::readRow(const xmlChar *name, const xmlChar **attrs)
 void XMLMatrix::readEntry(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  const uint column = parseUnsignedInt(name, attrs, "column");
-  const real value  = parseReal(name, attrs, "value");
+  const uint column = parse<uint>(name, attrs, "column");
+  const real value  = parse<real>(name, attrs, "value");
   
   // Set values
   columns.push_back(column);

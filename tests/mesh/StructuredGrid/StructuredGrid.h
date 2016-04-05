@@ -15,7 +15,7 @@ using namespace dolfin;
 START_TEST( test_BoundingBox )
 {
   int init_failed = 0;
-  Test::begin("test_BoundingBox");
+  begin("test_BoundingBox");
   //---
   for (dolfin::uint i = 0; i <= EuclideanSpace::MAX_DIMENSION; ++i)
   {
@@ -33,14 +33,14 @@ START_TEST( test_BoundingBox )
     bb.disp();
   }
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_interval )
 {
   int init_failed = 0;
-  Test::begin("test_StructuredGrid_interval");
+  begin("test_StructuredGrid_interval");
   //---
   dolfin::uint N = 8192;
   StructuredGrid g(IntervalCell(), N);
@@ -50,14 +50,14 @@ START_TEST( test_StructuredGrid_interval )
   BinaryFile bin("StructuredGrid_interval.bin");
   bin << g;
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_triangle )
 {
   int init_failed = 0;
-  Test::begin("test_StructuredGrid_triangle");
+  begin("test_StructuredGrid_triangle");
   //---
   dolfin::uint N = 128;
   StructuredGrid g(TriangleCell(), N);
@@ -67,14 +67,14 @@ START_TEST( test_StructuredGrid_triangle )
   BinaryFile bin("StructuredGrid_triangle.bin");
   bin << g;
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_tetrahedron )
 {
   int init_failed = 0;
-  Test::begin("test_StructuredGrid_tetrahedron");
+  begin("test_StructuredGrid_tetrahedron");
   //---
   dolfin::uint N = 32;
   StructuredGrid g(TetrahedronCell(), N);
@@ -84,14 +84,14 @@ START_TEST( test_StructuredGrid_tetrahedron )
   BinaryFile bin("StructuredGrid_tetrahedron.bin");
   bin << g;
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_quadrilateral )
 {
   int init_failed = 0;
-  Test::begin("test_StructuredGrid_quadrilateral");
+  begin("test_StructuredGrid_quadrilateral");
   //---
   dolfin::uint N = 128;
   StructuredGrid g(QuadrilateralCell(), N);
@@ -100,14 +100,14 @@ START_TEST( test_StructuredGrid_quadrilateral )
   BinaryFile bin("StructuredGrid_quadrilateral.bin");
   bin << g;
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_hexahedron )
 {
   int init_failed = 0;
-  Test::begin("test_StructuredGrid_hexahedron");
+  begin("test_StructuredGrid_hexahedron");
   //---
   dolfin::uint N = 32;
   StructuredGrid g(HexahedronCell(), N);
@@ -117,7 +117,7 @@ START_TEST( test_StructuredGrid_hexahedron )
   BinaryFile bin("StructuredGrid_hexahedron.bin");
   bin << g;
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------

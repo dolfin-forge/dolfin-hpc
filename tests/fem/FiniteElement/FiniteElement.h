@@ -1,5 +1,6 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/Test.h>
+#include <dolfin/log/log.h>
 
 #ifdef HAVE_CHECK
 
@@ -13,11 +14,11 @@ using namespace dolfin;
 START_TEST( test_FiniteElement )
 {
   int init_failed = 0;
-  Test::begin("test_FiniteElement");
+  begin("test_FiniteElement");
   //---
 
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------

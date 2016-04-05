@@ -29,7 +29,6 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
   message("Diameter     : %+e", cell.diameter(c));
   message("Circumradius : %+e", cell.circumradius(c));
   end();
-  refcell.order();
   // Initialize all connectivities
   for (dolfin::uint i = 0; i <= refcell.topology().dim(); ++i)
   {
@@ -73,7 +72,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
 START_TEST( test_PointCell )
   {
     int init_failed = 0;
-    Test::begin("test_PointCell");
+    begin("test_PointCell");
     //---
     PointCell cell;
     ck_assert_int_eq(cell.dim(), 0);
@@ -89,7 +88,7 @@ START_TEST( test_PointCell )
     // Most member functions are undefined
     //check_reference_cell(cell, refcell);
     //---
-    Test::end();
+    end();
     skip();
     fail_unless( init_failed == 0 );
   }END_TEST
@@ -97,7 +96,7 @@ START_TEST( test_PointCell )
 START_TEST( test_IntervalCell )
   {
     int init_failed = 0;
-    Test::begin("test_IntervalCell");
+    begin("test_IntervalCell");
     //---
     IntervalCell cell;
     ck_assert_int_eq(cell.dim(), 1);
@@ -114,14 +113,14 @@ START_TEST( test_IntervalCell )
     Mesh refcell = cell.create_reference_cell();
     check_reference_cell(cell, refcell);
     //---
-    Test::end();
+    end();
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_TriangleCell )
   {
     int init_failed = 0;
-    Test::begin("test_TriangleCell");
+    begin("test_TriangleCell");
     //---
     TriangleCell cell;
     ck_assert_int_eq(cell.dim(), 2);
@@ -140,14 +139,14 @@ START_TEST( test_TriangleCell )
     Mesh refcell = cell.create_reference_cell();
     check_reference_cell(cell, refcell);
     //---
-    Test::end();
+    end();
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_TetrahedronCell )
   {
     int init_failed = 0;
-    Test::begin("test_TetrahedronCell");
+    begin("test_TetrahedronCell");
     //---
     TetrahedronCell cell;
     ck_assert_int_eq(cell.dim(), 3);
@@ -168,14 +167,14 @@ START_TEST( test_TetrahedronCell )
     Mesh refcell = cell.create_reference_cell();
     check_reference_cell(cell, refcell);
     //---
-    Test::end();
+    end();
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_QuadrilateralCell )
   {
     int init_failed = 0;
-    Test::begin("test_QuadrilateralCell");
+    begin("test_QuadrilateralCell");
     //---
     QuadrilateralCell cell;
     ck_assert_int_eq(cell.dim(), 2);
@@ -197,14 +196,14 @@ START_TEST( test_QuadrilateralCell )
     refcell.init(cell.dim(), 1);
     cell.check(c);
     //---
-    Test::end();
+    end();
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_HexahedronCell )
   {
     int init_failed = 0;
-    Test::begin("test_HexahedronCell");
+    begin("test_HexahedronCell");
     //---
     HexahedronCell cell;
     ck_assert_int_eq(cell.dim(), 3);
@@ -228,7 +227,7 @@ START_TEST( test_HexahedronCell )
     refcell.init(cell.dim(), 1);
     cell.check(c);
     //---
-    Test::end();
+    end();
     fail_unless( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------

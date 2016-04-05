@@ -29,7 +29,7 @@ using ufl::Space;
 START_TEST( test_FiniteElementSpace )
 {
   int init_failed = 0;
-  Test::begin("test_FiniteElementSpace");
+  begin("test_FiniteElementSpace");
   //---
   dolfin::uint const deg_max = 2;
   std::vector<Family::Type> v;
@@ -127,7 +127,7 @@ START_TEST( test_FiniteElementSpace )
     }
   }
   //---
-  Test::end();
+  end();
   fail_unless( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------

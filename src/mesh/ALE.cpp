@@ -18,22 +18,18 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void ALE::move(Mesh& mesh, Mesh& new_boundary, ALEType method)
 {
+  error("ALE is implemented like shit");
+
+  /*
   // Only implemented in 2D and 3D so far
   if (mesh.topology().dim() < 2 || mesh.topology().dim() > 3 )
     error("Mesh interpolation only implemented in 2D and 3D so far.");
 
-  // Get vertex and cell maps
-  const MeshFunction<uint>* vertex_map = new_boundary.data().meshFunction("vertex map");
-  const MeshFunction<uint>* cell_map   = new_boundary.data().meshFunction("cell map");
-  dolfin_assert(vertex_map);
-  dolfin_assert(cell_map);
-
   // Extract old coordinates
   const uint dim = mesh.geometry().dim();
-  const uint size = mesh.numVertices()*dim;
+  const uint size = mesh.size(0)*dim;
   real* new_x = new real[size];
-  real ** ghat = new real * [new_boundary.numVertices()];;
-
+  real ** ghat = new real * [new_boundary.size(0)];;
   // If hermite, create dgdn
   if (method == hermite)
   {
@@ -52,9 +48,10 @@ void ALE::move(Mesh& mesh, Mesh& new_boundary, ALEType method)
   
   delete [] new_x;
   if (method==hermite)
-    for (uint i=0; i<new_boundary.numVertices(); i++) 
+    for (uint i=0; i<new_boundary.size(0); i++) 
       delete [] ghat[i];
   delete [] ghat;
+  */
 }
 //-----------------------------------------------------------------------------
 void ALE::meanValue(real* new_x, uint dim, Mesh& new_boundary,
@@ -71,7 +68,7 @@ void ALE::meanValue(real* new_x, uint dim, Mesh& new_boundary,
     }
   }
 
-  const uint size = new_boundary.numVertices();
+  const uint size = new_boundary.size(0);
   real * d = new real[size];
   real ** u = new real * [size];
 
@@ -231,7 +228,7 @@ void ALE::hermiteFunction(real ** ghat, uint dim, Mesh& new_boundary,
 			  Mesh& mesh, const MeshFunction<uint>& vertex_map, 
 			  const MeshFunction<uint>& cell_map)
 {
-  real ** dfdn = new real * [new_boundary.numVertices()];
+  real ** dfdn = new real * [new_boundary.size(0)];
   normals(dfdn, dim, new_boundary,
 	  mesh, vertex_map, cell_map);
 
@@ -249,7 +246,7 @@ void ALE::hermiteFunction(real ** ghat, uint dim, Mesh& new_boundary,
     for (uint i=0; i<dim;i++) 
       ghat[v->index()][i]=c*dfdn[v->index()][i]-ghat[v->index()][i];
   }
-  for (uint i=0; i<new_boundary.numVertices(); i++)
+  for (uint i=0; i<new_boundary.size(0); i++)
     delete [] dfdn[i];
   delete [] dfdn;
 }
@@ -299,7 +296,7 @@ void ALE::integral(real* new_x, uint dim, Mesh& new_boundary,
                     Mesh& mesh, const MeshFunction<uint>& vertex_map,
                     Vertex& vertex)
 {
-  const uint size = new_boundary.numVertices();
+  const uint size = new_boundary.size(0);
   real * d = new real[size];
   real ** u = new real * [size];
 

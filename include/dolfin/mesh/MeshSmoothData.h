@@ -41,8 +41,7 @@ public:
    other process. In the map "ghost_tree" the source will be saved
    to able to send information back.
    */
-  void sum_contribution(double*& recv_buff, int& mod, double& stopper,
-                        uint& src);
+  void sum_contribution(real*& recv_buff, int& mod, real& stopper, uint& src);
 
   ///
   BoundaryMesh& boundary();
@@ -54,39 +53,41 @@ public:
   MeshFunction<bool>& on_boundary_global();
 
   ///
-  _map<uint,std::vector<double> > owner_tree;
+  _map<uint,std::vector<real> > owner_tree;
   _map<uint,std::vector<uint> > ghost_tree;
-  _map<uint,std::vector<double> > send_inner;
-  _map<uint,std::vector<double> > recv_sum;
+  _map<uint,std::vector<real> > send_inner;
+  _map<uint,std::vector<real> > recv_sum;
 
 private:
 
-  Mesh& _mesh;
-  BoundaryMesh * _boundary;
+  Mesh& mesh_;
+  BoundaryMesh * boundary_;
 
-  MeshFunction<bool> _on_boundary;
-  MeshFunction<bool> _on_boundary_global;
+  MeshFunction<bool> on_boundary_;
+  MeshFunction<bool> on_boundary_global_;
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline BoundaryMesh& MeshSmoothData::boundary()
 {
-  return *_boundary;
+  return *boundary_;
 }
 
 //-----------------------------------------------------------------------------
 inline MeshFunction<bool>& MeshSmoothData::on_boundary()
 {
-  return _on_boundary;
+  return on_boundary_;
 }
 
 //-----------------------------------------------------------------------------
 inline MeshFunction<bool>& MeshSmoothData::on_boundary_global()
 {
-  return _on_boundary_global;
+  return on_boundary_global_;
 }
 
-}
-#endif
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_MESH_SMOOTHDATA_H */

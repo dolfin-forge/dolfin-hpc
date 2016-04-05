@@ -101,8 +101,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   Array<int> old2new_vertex(mesh.numVertices());
 
   // Initialise forbidden edges
-  MeshFunction<bool> edge_forbidden(mesh);
-  edge_forbidden.init(1);
+  MeshFunction<bool> edge_forbidden(mesh, 1);
   for (EdgeIterator e(mesh); !e.end(); ++e)
     edge_forbidden.set(e->index(), false);
 
@@ -117,8 +116,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   }
 
   // Initialise forbidden cells
-  MeshFunction<bool> cell_forbidden(mesh);
-  cell_forbidden.init(mesh.topology().dim());
+  MeshFunction<bool> cell_forbidden(mesh, mesh.topology().dim());
   for (CellIterator c(mesh); !c.end(); ++c)
     cell_forbidden.set(c->index(), false);
 

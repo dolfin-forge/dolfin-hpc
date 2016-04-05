@@ -287,9 +287,6 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
 
   BoundaryMesh& exterior_boundary = mesh.exterior_boundary();
   if(exterior_boundary.numCells()  == 0) return;
-  MeshFunction<uint>* cell_map = exterior_boundary.data().meshFunction("cell map");
-
-  dolfin_assert(cell_map);
 
   // Assemble over exterior facets (the cells of the boundary)
 #ifndef NO_PROGRESS_BAR
@@ -305,7 +302,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   for (uint i = 0; i < ext_num_cells; i++)
   {
     // Get mesh facet corresponding to boundary cell
-    Facet mesh_facet(mesh, (*cell_map).get(i));
+    Facet mesh_facet(mesh, exterior_boundary.facet_index(i));
 
     // Get integral for sub domain (if any)
     if (domains && domains->size() > 0)

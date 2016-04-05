@@ -14,157 +14,181 @@
 
 namespace dolfin
 {
-  class Mesh;
-  class Vertex;
-  class DMesh;
-  class DCell;
 
-  /// Assists LocalMeshCoarsening by providing relevant information about mesh
-  /// entities. 
-  class CoarseningManager
+class Mesh;
+class Vertex;
+class DMesh;
+class DCell;
+
+/// Assists LocalMeshCoarsening by providing relevant information about mesh
+/// entities.
+
+class CoarseningManager
+{
+
+public:
+
+  class IndexMap;
+
+  /// Create an empty instance, initialize it by calling init()
+  CoarseningManager();
+
+  /// Create a new instance and initialize it.
+  explicit CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker,
+                             bool coarsen_boundary = false);
+
+  ~CoarseningManager();
+
+  /// Initialize the coarsening manager: build independent set, list of cells
+  /// that are marked for coarsening and boundary information
+  void init(Mesh& mesh, MeshFunction<bool>& cell_marker, bool coarsen_boundary =
+                false);
+
+  /// Check if a vertex is forbidden, i. e. part of the independent set
+  inline bool isForbiddenVertex(uint index)
   {
-  public:
-    class IndexMap;
+    return forbidden_vertices_.at(index);
+  }
 
-    /// Create an empty instance, initialize it by calling init()
-    CoarseningManager();
+  /// Gives access to the dynamic mesh
+  inline DMesh * dmesh()
+  {
+    return dmesh_;
+  }
 
-    /// Create a new instance and initialize it.
-    explicit CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker, 
-                               bool coarsen_boundary = false);
+  /// Gives access to the dynamic mesh
+  inline DMesh const * dmesh() const
+  {
+    return dmesh_;
+  }
 
-    ~CoarseningManager();
+  /// Gives access to the list of cells for coarsening
+  inline List<std::pair<DCell *, uint> >& cells_to_coarsen()
+  {
+    return cells_to_coarsen_;
+  }
 
-    /// Initialize the coarsening manager: build independent set, list of cells
-    /// that are marked for coarsening and boundary information
-    void init(Mesh& mesh, MeshFunction<bool>& cell_marker, 
-              bool coarsen_boundary = false);
+  /// Gives access to the list of cells for coarsening
+  inline List<std::pair<DCell *, uint> > const & cells_to_coarsen() const
+  {
+    return cells_to_coarsen_;
+  }
 
-    /// Check if a vertex is forbidden, i. e. part of the independent set
-    inline bool isForbiddenVertex(uint index)
-    { return _forbidden_vertices.at(index); }
+  /// Gives access to the list of cells that have been attempted to be
+  /// coarsened but failed because of missing data from other processes
+  inline List<uint>& cells_to_request()
+  {
+    return cells_to_request_;
+  }
 
-    /// Gives access to the dynamic mesh
-    inline DMesh * dmesh()
-    { return _dmesh; }
+  /// Gives access to the list of cells that have been attempted to be
+  /// coarsened but failed because of missing data from other processes
+  inline List<uint> const & cells_to_request() const
+  {
+    return cells_to_request_;
+  }
 
-    /// Gives access to the dynamic mesh
-    inline DMesh const * dmesh() const
-    { return _dmesh; }
+  /// Gives access to the list of vertices that have been attempted to be
+  /// deleted but failed because of missing data from other processes
+  inline List<uint>& vertices_to_request()
+  {
+    return vertices_to_request_;
+  }
 
-    /// Gives access to the list of cells for coarsening
-    inline List< std::pair<DCell *, uint> >& cells_to_coarsen()
-    { return _cells_to_coarsen; }
+  /// Gives access to the list of vertices that have been attempted to be
+  /// deleted but failed because of missing data from other processes
+  inline List<uint> const & vertices_to_request() const
+  {
+    return vertices_to_request_;
+  }
 
-    /// Gives access to the list of cells for coarsening
-    inline List< std::pair<DCell *, uint> > const & cells_to_coarsen() const
-    { return _cells_to_coarsen; }
+  /// Migrates cells according to request list
+  bool migrate(uint num_cells_coarsened);
 
-    /// Gives access to the list of cells that have been attempted to be 
-    /// coarsened but failed because of missing data from other processes
-    inline List<uint>& cells_to_request()
-    { return _cells_to_request; }
+  /// Returns the acceptable mesh quality threshold
+  real qualityThreshold() const
+  {
+    return quality_threshold_;
+  }
 
-    /// Gives access to the list of cells that have been attempted to be 
-    /// coarsened but failed because of missing data from other processes
-    inline List<uint> const & cells_to_request() const
-    { return _cells_to_request; }
+private:
 
-    /// Gives access to the list of vertices that have been attempted to be 
-    /// deleted but failed because of missing data from other processes
-    inline List<uint>& vertices_to_request()
-    { return _vertices_to_request; }
+  /// Dynamic mesh used instead of the regular mesh object during coarsening
+  DMesh* dmesh_;
 
-    /// Gives access to the list of vertices that have been attempted to be 
-    /// deleted but failed because of missing data from other processes
-    inline List<uint> const & vertices_to_request() const
-    { return _vertices_to_request; }
+  /// Indicator for independent set of vertices
+  Array<bool> forbidden_vertices_;
 
-    /// Migrates cells according to request list
-    bool migrate(uint num_cells_coarsened);
+  /// List of cells to coarsen
+  List<std::pair<DCell *, uint> > cells_to_coarsen_;
 
-    /// Returns the acceptable mesh quality threshold
-    real qualityThreshold() const
-    { return _quality_threshold; }
+  /// Original number of cells in the mesh
+  uint orig_num_cells_;
 
-  private:
-    /// Dynamic mesh used instead of the regular mesh object during coarsening
-    DMesh* _dmesh;
+  /// Original number of vertices in the mesh
+  uint orig_num_vertices_;
 
-    /// Indicator for independent set of vertices
-    Array<bool> _forbidden_vertices;
+  /// List of cells that need neighboring cells from other processes
+  List<uint> cells_to_request_;
 
-    /// List of cells to coarsen
-    List< std::pair<DCell *, uint> > _cells_to_coarsen;
+  /// List of vertices that need neighboring cells from other processes
+  List<uint> vertices_to_request_;
 
-    /// Original number of cells in the mesh
-    uint _orig_num_cells;
+  /// Number of cells that have been migrated away by this process in the
+  /// previous migration
+  uint num_migrated_cells_;
 
-    /// Original number of vertices in the mesh
-    uint _orig_num_vertices;
+  /// Quality threshold for the checkMesh routine
+  real quality_threshold_;
 
-    /// List of cells that need neighboring cells from other processes
-    List<uint> _cells_to_request;
+  /// performs part of the initialization which is also used by migrate().
+  ///
+  /// attempt count gives the number of precious attempts, with the number
+  /// being one larger than the actual number of attempts. This way
+  /// 0 corresponds to not being marked for coarsening, 1 being marked for
+  /// coarsening without prior attempts and >1 marked for coarsening with
+  /// the value being the number of prior attempts minus one.
+  void initCommon(Mesh& mesh, MeshFunction<uint> * attempt_count);
 
-    /// List of vertices that need neighboring cells from other processes
-    List<uint> _vertices_to_request;
+  /// Extracts an independent set of vertices by a greedy algorithm and
+  /// stores it in _forbidden_vertices
+  void findIndependentSet(Mesh& mesh, bool coarsen_boundary);
 
-    /// Number of cells that have been migrated away by this process in the
-    /// previous migration
-    uint _num_migrated_cells;
+  /// Checks if the given vertex has neighbours that are part of the
+  /// independent set and returns false in that case, otherwise true.
+  bool isIndependentVertex(Vertex& v);
 
-    /// Quality threshold for the checkMesh routine
-    real _quality_threshold;
+  /// Find all cells that are marked for coarsening and put them into a list
+  /// together with the number of previous attempts
+  void findCellsToCoarsen(MeshFunction<uint> * attempt_count);
 
-    /// performs part of the initialization which is also used by migrate().
-    ///
-    /// attempt count gives the number of precious attempts, with the number
-    /// being one larger than the actual number of attempts. This way 
-    /// 0 corresponds to not being marked for coarsening, 1 being marked for
-    /// coarsening without prior attempts and >1 marked for coarsening with 
-    /// the value being the number of prior attempts minus one.
-    void initCommon(Mesh& mesh, MeshFunction<uint> * attempt_count );
+  /// Remove erased cells from the coarsening list
+  void removeErasedCellsFromCoarseningList();
 
-    /// Extracts an independent set of vertices by a greedy algorithm and
-    /// stores it in _forbidden_vertices
-    void findIndependentSet(Mesh& mesh, bool coarsen_boundary);
+  /// Build Arrays of MeshFunctions that are required for the distribution
+  /// step
+  void buildMFArrays(
+      Mesh& mesh,
+      Array<int>& old2new_cells,
+      Array<int>& old2new_vertices,
+      Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
+      Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions);
 
-    /// Checks if the given vertex has neighbours that are part of the
-    /// independent set and returns false in that case, otherwise true.
-    bool isIndependentVertex(Vertex& v);
+  /// Cleanup the MeshFunction-Arrays after the distribution
+  void cleanupMFArrays(
+      Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
+      Array<std::pair<MeshFunction<double>*, MeshFunction<double>*> >& vertex_functions);
 
-    /// Find all cells that are marked for coarsening and put them into a list
-    /// together with the number of previous attempts
-    void findCellsToCoarsen(MeshFunction<uint> * attempt_count);
+  /// Update the independent set with the received values
+  void updateIndependentSet(Mesh& mesh,
+                            MeshFunction<double>& forbidden_vertices_new);
 
-    /// Remove erased cells from the coarsening list
-    void removeErasedCellsFromCoarseningList();
-
-    /// Build Arrays of MeshFunctions that are required for the distribution
-    /// step
-    void buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
-                       Array<int>& old2new_vertices,
-                       Array< std::pair< MeshFunction<uint>*, 
-                       MeshFunction<uint>* > >& cell_functions,
-                       Array< std::pair< MeshFunction<double>*,
-                       MeshFunction<double>*> >& vertex_functions);
-
-    /// Cleanup the MeshFunction-Arrays after the distribution
-    void cleanupMFArrays(Array< std::pair< MeshFunction<uint>*, 
-                         MeshFunction<uint>* > >& cell_functions,
-                         Array< std::pair< MeshFunction<double>*,
-                         MeshFunction<double>*> >& vertex_functions);
-
-    /// Update the independent set with the received values
-    void updateIndependentSet(Mesh& mesh, 
-                              MeshFunction<double>& forbidden_vertices_new);
-
-    /// exchange requests for vertices
-    void exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
-                          Array<int>& old2new_vertices,
-                          uint max_num_requested_vertices,
-                          MeshFunction<uint> *& partitions);
-  };
+  /// exchange requests for vertices
+  void exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
+                        Array<int>& old2new_vertices,
+                        uint max_num_requested_vertices,
+                        MeshFunction<uint> *& partitions);
+};
 }
 
 #endif 

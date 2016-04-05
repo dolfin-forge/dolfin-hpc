@@ -16,8 +16,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MeshSmoothData::MeshSmoothData(Mesh& mesh) :
-    _mesh(mesh),
-    _boundary(NULL)
+    mesh_(mesh),
+    boundary_(NULL)
 {
 }
 
@@ -29,57 +29,44 @@ MeshSmoothData::~MeshSmoothData()
 //-----------------------------------------------------------------------------
 void MeshSmoothData::prepare_mesh()
 {
-  if (_boundary != NULL)
+  if (boundary_ != NULL)
   {
     error("In MeshSmoothData, calling prepare_mesh() twice.");
   }
 
   //mapping for different boundaries
-  _on_boundary.init(_mesh, 0);
-  _on_boundary = false;
-
-  _on_boundary_global.init(_mesh, 0);
-  _on_boundary_global = false;
 
   //global boundary
-  BoundaryMesh boundary_global(_mesh, BoundaryMesh::exterior);
-  MeshFunction<uint>* vertex_map_global = boundary_global.data().meshFunction(
-      "vertex map");
-  dolfin_assert(vertex_map_global);
-  _on_boundary_global = false;
-  if (boundary_global.numVertices() != 0)
+  BoundaryMesh& boundary_global = mesh_.exterior_boundary();
+  on_boundary_global_.init(mesh_, 0);
+  for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex)
   {
-    for (VertexIterator vertex(boundary_global); !vertex.end(); ++vertex)
-    {
-      _on_boundary_global.set((*vertex_map_global)(*vertex), true);
-    }
+    on_boundary_global_.set(boundary_global.vertex_index(*vertex), true);
   }
 
-  if (! _mesh.is_distributed())
+  if (!mesh_.is_distributed())
   {
     return;
   }
 
   //Build interior boundary
-  _boundary = new BoundaryMesh(_mesh, BoundaryMesh::interior);
-  MeshFunction<uint>* vertex_map = _boundary->data().meshFunction("vertex map");
-  dolfin_assert(vertex_map);
-
-  for (VertexIterator vertex(*_boundary); !vertex.end(); ++vertex)
+  boundary_ = new BoundaryMesh(mesh_, BoundaryMesh::interior);
+  on_boundary_.init(mesh_, 0);
+  for (VertexIterator vertex(*boundary_); !vertex.end(); ++vertex)
   {
-    _on_boundary.set((*vertex_map)(*vertex), true);
+    on_boundary_.set(boundary_->vertex_index(*vertex), true);
   }
 
   //
-  uint gdim = _mesh.geometry().dim();
-  MeshDistributedData& distdata = _mesh.distdata();
+  uint gdim = mesh_.geometry().dim();
+  MeshDistributedData& distdata = mesh_.distdata();
 
   _map<uint,std::vector<double> >::iterator owner_iterator=owner_tree.begin();
   _map<uint,std::vector<uint> >::iterator ghost_iterator=ghost_tree.begin();
 
-  for (VertexIterator vertex(*_boundary); !vertex.end(); ++vertex)
+  for (VertexIterator vertex(*boundary_); !vertex.end(); ++vertex)
   {
-    Vertex on_mesh(_mesh, vertex_map->get(*vertex));
+    Vertex on_mesh(mesh_, boundary_->vertex_index(*vertex));
     //Building owner tree:
     //The process number which owns the vertex is saved as key
     if (distdata[0].is_ghost(on_mesh.index()))
@@ -133,8 +120,7 @@ void MeshSmoothData::prepare_mesh()
       }
       send_inner.insert(
           std::pair<uint, std::vector<double> >(
-              double(distdata[0].get_global(on_mesh.index())),
-              vertex_info));
+              double(distdata[0].get_global(on_mesh.index())), vertex_info));
       delete[] sum;
     }
 
@@ -202,7 +188,7 @@ void MeshSmoothData::sum_contribution(double*& recv_buff, int& mod,
                                       double& stopper, uint& src)
 {
 
-  if (! _mesh.is_distributed())
+  if (!mesh_.is_distributed())
   {
     return;
   }

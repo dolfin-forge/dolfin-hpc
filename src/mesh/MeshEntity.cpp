@@ -30,9 +30,10 @@ bool MeshEntity::incident(MeshEntity const& entity) const
   if (&mesh_ != &entity.mesh_) return false;
 
   // Get list of entities for given topological dimension
-  dolfin_assert(mesh_.topology()(tdim_, entity.tdim_).size() > 0);
-  uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
-  uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
+  MeshConnectivity const& mc = mesh_.topology()(tdim_, entity.tdim_);
+  dolfin_assert(mc.size() > 0);
+  uint const * entities = mc(index_);
+  uint const num_entities = mc.size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
@@ -54,9 +55,10 @@ uint MeshEntity::index(MeshEntity const& entity) const
   }
 
   // Get list of entities for given topological dimension
-  dolfin_assert(mesh_.topology()(tdim_, entity.tdim_).size() > 0);
-  uint const * entities = mesh_.topology()(tdim_, entity.tdim_)(index_);
-  uint const num_entities = mesh_.topology()(tdim_, entity.tdim_).size(index_);
+  MeshConnectivity const& mc = mesh_.topology()(tdim_, entity.tdim_);
+  dolfin_assert(mc.size() > 0);
+  uint const * entities = mc(index_);
+  uint const num_entities = mc.size(index_);
 
   // Check if any entity matches
   for (uint i = 0; i < num_entities; ++i)
@@ -72,32 +74,27 @@ uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const
 {
-  return (mesh_.is_distributed() ? mesh_.distdata()[tdim_].get_global(index_)
-                                 : index_);
+  return mesh_.topology().get_global(*this);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_owned() const
 {
-  return (mesh_.is_distributed() ?
-          !mesh_.distdata()[tdim_].is_ghost(index_) : true);
+  return mesh_.topology().is_owned(*this);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return (mesh_.is_distributed() ?
-          mesh_.distdata()[tdim_].is_shared(index_) : false);
+  return mesh_.topology().is_shared(*this);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return (mesh_.is_distributed() ?
-          mesh_.distdata()[tdim_].is_ghost(index_) : false);
+  return mesh_.topology().is_ghost(*this);
 }
 //-----------------------------------------------------------------------------
 uint MeshEntity::owner() const
 {
-  return (mesh_.is_distributed() ?
-          mesh_.distdata()[tdim_].get_owner(index_) : MPI::processNumber());
+  return mesh_.topology().get_owner(*this);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
@@ -136,13 +133,14 @@ void MeshEntity::disp() const
   message("geometric dimension   : %u", gdim_);
   message("index                 : %u", index_);
   begin(  "connectivities        : %u");
+  MeshTopology const& topology = mesh_.topology();
   for (uint d =0; d < tdim_; ++d)
   {
     cout << d << ": ";
-    if(mesh_.topology().is_computed(tdim_, d))
+    if(topology.is_computed(tdim_, d))
     {
-      uint const * entities = mesh_.topology()(tdim_, d)(index_);
-      uint const size = mesh_.topology()(tdim_, d).size(index_);
+      uint const * entities = topology(tdim_, d)(index_);
+      uint const size = topology(tdim_, d).size(index_);
       for (uint i = 0; i < size; ++i)
       {
         cout << "\n\t" << entities[i];
@@ -150,8 +148,8 @@ void MeshEntity::disp() const
         {
           continue;
         }
-        uint const * verts = mesh_.topology()(d, 0)(entities[i]);
-        uint const vsize = mesh_.topology()(d, 0).size(entities[i]);
+        uint const * verts = topology(d, 0)(entities[i]);
+        uint const vsize = topology(d, 0).size(entities[i]);
         cout << " ( ";
         for (uint v = 0; v < vsize; ++v)
         {

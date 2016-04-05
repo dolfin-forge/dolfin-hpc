@@ -97,7 +97,7 @@ inline void UFCCell::init(Cell& cell)
   num_vertices_ = cell.num_entities(0);
 
   // Set topological dimension
-  topological_dimension = cell.mesh().topology().dim();
+  topological_dimension = cell.dim();
 
   // Set geometric dimension
   geometric_dimension = cell.mesh().geometry().dim();

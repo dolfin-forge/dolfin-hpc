@@ -74,7 +74,7 @@ public:
     }
 
     // Set topological dimension
-    topological_dimension = cell.mesh().topology().dim();
+    topological_dimension = cell.dim();
 
     // Set geometric dimension
     geometric_dimension = cell.mesh().geometry().dim();

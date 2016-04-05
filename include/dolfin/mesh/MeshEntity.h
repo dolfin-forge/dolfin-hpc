@@ -39,6 +39,8 @@ public:
   /// Return mesh associated with mesh entity
   Mesh const& mesh() const;
 
+  //--- Topology --------------------------------------------------------------
+
   /// Return topological dimension
   uint dim() const;
 
@@ -62,6 +64,22 @@ public:
   /// Compute local index of given incident entity (error if not found)
   uint index(MeshEntity const& entity) const;
 
+  //--- Geometry --------------------------------------------------------------
+
+  /*
+   * TBD: add convenience function for accessing vertex coordinates
+   *
+   */
+
+  //---------------------------------------------------------------------------
+
+  /*
+   * Convenience functions which can be called in serial and parallel.
+   * For code portions within which the mesh is known to be distributed, calling
+   * functions from the mesh distributed data is recommended.
+   *
+   */
+
   /// Return global index of mesh entity
   uint global_index() const;
 
@@ -80,6 +98,8 @@ public:
   /// Return if the mesh entity has all vertices shared
   bool has_all_vertices_shared() const;
 
+  //---------------------------------------------------------------------------
+
   ///
   void disp() const;
 
@@ -93,7 +113,7 @@ protected:
   // Friends
   friend class MeshEntityIterator;
 
-  // The mesh
+  // Mesh
   Mesh& mesh_;
 
   // Topological dimension

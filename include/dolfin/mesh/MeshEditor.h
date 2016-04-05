@@ -26,7 +26,7 @@ public:
   /// Constructor for meshes with unique type of cell
   MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim);
 
-  /// Constructor for meshes with unique type of cell
+  /// Constructor for meshes with unique type of cell from factory function
   MeshEditor(Mesh& mesh, CellType::Type type, uint gdim);
 
   /// Destructor

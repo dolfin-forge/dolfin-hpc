@@ -58,7 +58,7 @@ bool MeshQuality::is_inverted(uint& first)
 //-----------------------------------------------------------------------------
 real MeshQuality::mean_ratio(Cell& cell) const
 {
-  uint const d = cell.mesh().topology().dim();
+  uint const d = cell.dim();
   mapping_.update(cell);
 
   // Compute the square of the Frobenius norm;

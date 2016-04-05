@@ -47,7 +47,7 @@ void MeshSmoother::maph0(Mesh& mesh, Mesh& sub, MeshFunction<int>& cell_map,
 //-----------------------------------------------------------------------------
 bool MeshSmoother::onBoundary(Cell& cell)
 {
-  int d = cell.mesh().topology().dim();
+  int d = cell.dim();
 
   for (FacetIterator f(cell); !f.end(); ++f)
   {

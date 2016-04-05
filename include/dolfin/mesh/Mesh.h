@@ -18,7 +18,6 @@
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/ALEType.h>
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshTopology.h>
@@ -115,12 +114,6 @@ public:
 
   /// Return mesh distribution data (const)
   MeshDistributedData const& distdata() const;
-
-  /// Return mesh data (non-const version)
-  MeshData& data();
-
-  /// Return mesh data (const)
-  MeshData const& data() const;
 
   /// Return mesh cell type (non-const version)
   CellType& type();
@@ -308,9 +301,6 @@ private:
 
   // Mesh geometry
   MeshGeometry geometry_;
-
-  // Auxiliary mesh data
-  MeshData data_;
 
   // Cell type
   CellType * cell_type_;

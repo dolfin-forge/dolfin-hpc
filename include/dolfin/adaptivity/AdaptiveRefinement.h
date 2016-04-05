@@ -16,7 +16,6 @@ namespace dolfin
 template<class T> class Array;
 class Function;
 class Mesh;
-class MeshData;
 template<class T> class MeshFunction;
 class Function;
 class Vector;

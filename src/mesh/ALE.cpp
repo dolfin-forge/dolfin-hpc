@@ -8,7 +8,6 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/ALE.h>

@@ -5,7 +5,6 @@
 // Last changed: 2011-01-18
 
 #include <cstring>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>

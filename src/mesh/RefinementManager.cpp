@@ -14,7 +14,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
 #include <cstdlib>

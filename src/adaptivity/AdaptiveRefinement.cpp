@@ -22,7 +22,6 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/Vertex.h>

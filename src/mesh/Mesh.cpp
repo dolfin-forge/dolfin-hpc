@@ -40,8 +40,7 @@ Mesh::Mesh() :
     Variable("mesh", "DOLFIN mesh"),
     topology_(*this),
     geometry_(),
-    data_(*this),
-    cell_type_(0),
+    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -54,8 +53,7 @@ Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
     topology_(*this),
     geometry_(),
-    data_(*this),
-    cell_type_(0),
+    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -68,8 +66,7 @@ Mesh::Mesh(std::string const& filename) :
     Variable("mesh", "DOLFIN mesh"),
     topology_(*this),
     geometry_(),
-    data_(*this),
-    cell_type_(0),
+    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -123,65 +120,45 @@ const Mesh& Mesh::operator=(const Mesh& mesh)
 
   return *this;
 }
-
 //-----------------------------------------------------------------------------
 bool Mesh::operator ==(Mesh const& other) const
 {
   return this->hash() == other.hash();
 }
-
 //-----------------------------------------------------------------------------
 bool Mesh::operator !=(Mesh const& other) const
 {
   return this->hash() != other.hash();
 }
-
 //-----------------------------------------------------------------------------
 MeshTopology& Mesh::topology()
 {
   return topology_;
 }
-
 //-----------------------------------------------------------------------------
 MeshTopology const& Mesh::topology() const
 {
   return topology_;
 }
-
 //-----------------------------------------------------------------------------
 MeshGeometry& Mesh::geometry()
 {
   return geometry_;
 }
-
 //-----------------------------------------------------------------------------
 MeshGeometry const& Mesh::geometry() const
 {
   return geometry_;
 }
-
 //-----------------------------------------------------------------------------
 MeshDistributedData& Mesh::distdata()
 {
   return topology().distdata();
 }
-
 //-----------------------------------------------------------------------------
 MeshDistributedData const& Mesh::distdata() const
 {
   return topology().distdata();
-}
-
-//-----------------------------------------------------------------------------
-MeshData& Mesh::data()
-{
-  return data_;
-}
-
-//-----------------------------------------------------------------------------
-MeshData const& Mesh::data() const
-{
-  return data_;
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
@@ -262,7 +239,6 @@ void Mesh::clear()
   timestamp_ = 0;
   topology_.clear();
   geometry_.clear();
-  data_.clear();
   delete cell_type_;
   cell_type_ = NULL;
   delete exterior_boundary_;
@@ -457,7 +433,6 @@ void Mesh::disp() const
   end();
 
   cout << endl;
-  data_.disp();
 
   // End indentation
   end();

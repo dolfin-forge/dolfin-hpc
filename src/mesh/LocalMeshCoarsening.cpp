@@ -15,7 +15,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/CoarseningManager.h>
@@ -23,7 +22,6 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DCell.h>

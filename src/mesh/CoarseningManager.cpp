@@ -6,7 +6,6 @@
 
 #include <dolfin/mesh/CoarseningManager.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/LoadBalancer.h>

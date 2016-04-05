@@ -11,7 +11,6 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 
 namespace dolfin

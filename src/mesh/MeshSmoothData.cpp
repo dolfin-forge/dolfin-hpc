@@ -7,7 +7,6 @@
 // Last changed: 2011-06-30
 
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/MeshSmoothData.h>
 

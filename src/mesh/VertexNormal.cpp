@@ -468,5 +468,5 @@ void VertexNormal::computeNormal(Mesh& mesh)
 
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */
 

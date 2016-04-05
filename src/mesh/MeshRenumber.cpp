@@ -8,7 +8,6 @@
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Face.h>

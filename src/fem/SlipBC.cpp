@@ -18,7 +18,6 @@
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>

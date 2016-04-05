@@ -13,6 +13,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/MeshFunction.h>
+
 #include <map>
 
 namespace dolfin
@@ -122,5 +123,8 @@ inline MeshFunction<uint>& VertexNormal::vertex_type()
   return vertex_type_;
 }
 
-}
-#endif
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_VERTEX_NORMAL_H */

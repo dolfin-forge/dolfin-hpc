@@ -25,7 +25,6 @@
 
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <cstring>
 #include <cstdlib>

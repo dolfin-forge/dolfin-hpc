@@ -15,7 +15,6 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/io/XMLMesh.h>
 #include <dolfin/parameter/parameters.h>

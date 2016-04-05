@@ -29,7 +29,6 @@ libdolfin_mesh_la_SOURCES = \
 			MappedManifold.cpp\
 			Mesh.cpp\
 			MeshConnectivity.cpp\
-			MeshData.cpp\
 			MeshDependent.cpp\
 			MeshDistributedData.cpp\
 			MeshEditor.cpp\

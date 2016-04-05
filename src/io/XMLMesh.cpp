@@ -116,7 +116,7 @@ void XMLMesh::endElement(const xmlChar *name)
   }
 }
 //-----------------------------------------------------------------------------
-void XMLMesh::open(std::string filename)
+void XMLMesh::open(std::string const& filename)
 {
   // Do nothing
 }

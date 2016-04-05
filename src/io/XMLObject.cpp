@@ -25,7 +25,7 @@ XMLObject::~XMLObject()
 }
 
 //-----------------------------------------------------------------------------
-void XMLObject::open(std::string filename)
+void XMLObject::open(std::string const& filename)
 {
   // Do nothing
 }

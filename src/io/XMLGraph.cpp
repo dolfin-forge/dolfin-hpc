@@ -108,7 +108,7 @@ void XMLGraph::endElement(const xmlChar *name)
   }
 }
 //-----------------------------------------------------------------------------
-void XMLGraph::open(std::string filename)
+void XMLGraph::open(std::string const& filename)
 {
   // Do nothing
 }

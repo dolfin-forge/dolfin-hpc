@@ -20,15 +20,24 @@ class Mesh;
 
 class XMLMesh : public XMLObject
 {
+
 public:
   
+  ///
   XMLMesh(Mesh& mesh);
+
+  ///
   ~XMLMesh();
 
+  ///
   void startElement(const xmlChar* name, const xmlChar** attrs);
+
+  ///
   void endElement(const xmlChar* name);
 
-  void open(std::string filename);
+  void open(std::string const& filename);
+
+  ///
   bool close();
 
 private:

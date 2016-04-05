@@ -103,7 +103,7 @@ public:
   }
 
   ///
-  void open(std::string filename)
+  void open(std::string const& filename)
   {
     message(1, "Reading mesh from file \"%s\".", filename.c_str());
   }

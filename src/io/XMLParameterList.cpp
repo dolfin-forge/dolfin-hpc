@@ -63,7 +63,7 @@ void XMLParameterList::endElement(const xmlChar *name)
   }
 }
 //-----------------------------------------------------------------------------
-void XMLParameterList::open(std::string filename)
+void XMLParameterList::open(std::string const& filename)
 {
   // Do nothing
 }

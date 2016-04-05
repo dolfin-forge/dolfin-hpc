@@ -40,7 +40,7 @@ public:
   virtual void endElement(const xmlChar* name) = 0;
 
   /// Callback for start of XML file (optional)
-  virtual void open(std::string filename);
+  virtual void open(std::string const& filename);
 
   /// Callback for end of XML file, should return true iff data is ok (optional)
   virtual bool close();

@@ -175,6 +175,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
+				mesh/EuclideanBasis.h \
 				mesh/EuclideanSpace.h \
 				mesh/Face.h\
 				mesh/FaceKey.h\

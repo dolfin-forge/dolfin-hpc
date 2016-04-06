@@ -7,16 +7,17 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/EntityKey.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-bool MeshRenumber::renumber(Mesh& mesh)
+bool MeshRenumber::renumber(MeshTopology& topology)
 {
-  if (!mesh.is_distributed())
+  if (!topology.is_distributed())
   {
     return false;
   }
@@ -25,7 +26,6 @@ bool MeshRenumber::renumber(Mesh& mesh)
 
 #ifdef HAVE_MPI
 
-  MeshTopology& topology = mesh.topology();
   MeshDistributedData& distdata = topology.distdata();
 
   uint const tdim = topology.dim();
@@ -64,7 +64,7 @@ bool MeshRenumber::renumber(Mesh& mesh)
     MeshConnectivity const& cev = topology(d, 0);
 
     //
-    uint const num_entity_vertices = mesh.type().num_vertices(d);
+    uint const num_entity_vertices = cev.max_connections();
     EntityKey key(num_entity_vertices);
     _map<EntityKey, uint> entity_map;
     Array<uint> * sendbuf = new Array<uint> [pe_size];
@@ -273,4 +273,3 @@ bool MeshRenumber::renumber(Mesh& mesh)
 }
 
 } /* namespace dolfin */
-

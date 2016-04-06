@@ -1,5 +1,6 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
+//
 
 #ifndef __DOLFIN_MESH_RENUMBER_H
 #define __DOLFIN_MESH_RENUMBER_H
@@ -9,12 +10,12 @@
 namespace dolfin
 {
 
-class Mesh;
+class MeshTopology;
 
 /**
  *  @class  MeshRenumber
  *
- *  @brief  Provides algorithms to renumber mesh entities
+ *  @brief  Provides algorithms to renumber the mesh topology.
  *  .
  */
 
@@ -24,7 +25,7 @@ class MeshRenumber
 public:
 
   /// Renumber all mesh entities
-  static bool renumber(Mesh& mesh);
+  static bool renumber(MeshTopology& topology);
 
 };
 

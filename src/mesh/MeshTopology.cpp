@@ -645,59 +645,10 @@ void MeshTopology::renumber() const
 
   message(1, "MeshTopology : renumber");
 
-  if(!MeshRenumber::renumber(mesh_))
+  MeshTopology& topology = const_cast<MeshTopology&>(*this);
+  if(!MeshRenumber::renumber(topology))
   {
     error("Triggered mesh renumbering for nothing");
-  }
-
-  return;
-
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
-
-  /*
-   * Renumber vertices
-   *
-   */
-  if(this->entities_exist(0))
-  {
-  }
-
-  /*
-   * Renumber edges/faces/cells
-   *
-   */
-  for (uint d = 1; d < dim_; ++d)
-  {
-    if (this->entities_exist(d))
-    {
-    }
-  }
-
-  /*
-   * Renumber cells:
-   *
-   * - Set offset for process and global size
-   * - Map local to global
-   * - Set numbering as valid
-   * - Set ownership as valid
-   *
-   */
-  if (dim_ > 0 && this->entities_exist(dim_))
-  {
-    uint offset = 0;
-//    distdata_->get_offset(dim_, offset);
-
-    _map<uint,uint> new_local;
-    _map<uint,uint> new_global;
-    for (uint i = 0; i < this->size(dim_); ++i)
-    {
-      new_global[i] = offset++;
-      new_local[new_global[i]] = i;
-    }
-//    distdata_->apply_numbering(dim_, new_local, new_global);
-//    distdata_->apply_ownership(dim_);
-//    distdata_->finalize(dim_);
   }
 
   // Set the topology as numbered

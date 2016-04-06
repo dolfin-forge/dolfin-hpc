@@ -1,5 +1,5 @@
-//
-//
+// Copyright (C) 2016 Aurelien Larcher.
+// Licensed under the GNU LGPL Version 2.1.
 //
 
 #ifndef __DOLFIN_DISTRIBUTED_DATA_H

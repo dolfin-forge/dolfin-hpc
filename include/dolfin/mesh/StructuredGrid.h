@@ -38,6 +38,7 @@ private:
   void init(CellType const& type);
 
   //--- ATTRIBUTES ------------------------------------------------------------
+
   BoundingBox bbox_;
   uint const n_;
 

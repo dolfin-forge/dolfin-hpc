@@ -32,16 +32,19 @@ void StructuredGrid::init(CellType const& type)
   type.disp();
 
   //
-  uint n[EuclideanSpace::MAX_DIMENSION];
-  uint m[EuclideanSpace::MAX_DIMENSION] = { 0 };
-  n[0] = (type.dim() > 0 ? n_ : 0);
-  n[1] = (type.dim() > 1 ? n_ : 0);
-  n[2] = (type.dim() > 2 ? n_ : 0);
   uint const dim = type.dim();
   MeshEditor editor(*this, type, dim);
+  // Number of cells in each direction
+  uint n[EuclideanSpace::MAX_DIMENSION] = { 0 };
+  for (uint i = 0; i < dim; ++i)
+  {
+    n[i] = n_; // isotropic
+  }
+  // Number of vertices in each direction
+  uint m[EuclideanSpace::MAX_DIMENSION] = { 0 };
   uint num_verts = 1;
   uint num_bricks = 1;
-  for (uint i = 0; i < type.dim(); ++i)
+  for (uint i = 0; i < dim; ++i)
   {
     num_verts *= (n[i] + 1);
     num_bricks *= n[i];
@@ -55,7 +58,7 @@ void StructuredGrid::init(CellType const& type)
 
   // Create vertices
   uint vertex = 0;
-  for (uint d = 0; d < type.dim(); ++d)
+  for (uint d = 0; d < dim; ++d)
   {
     i[d] = 0;
     h[d] = 1.0 / static_cast<real>(n[d]);

@@ -19,18 +19,21 @@ MeshConnectivity::MeshConnectivity() :
     is_initialized_(false),
     num_entities_(0),
     size_(0),
-    connections_(NULL),
-    offsets_(NULL)
+    min_connections_(0),
+    max_connections_(0),
+    offsets_(NULL),
+    connections_(NULL)
 {
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 MeshConnectivity::MeshConnectivity(MeshConnectivity const& other) :
     is_initialized_(false),
     num_entities_(0),
     size_(0),
-    connections_(NULL),
-    offsets_(NULL)
+    min_connections_(0),
+    max_connections_(0),
+    offsets_(NULL),
+    connections_(NULL)
 {
   *this = other;
 }
@@ -43,32 +46,27 @@ MeshConnectivity::~MeshConnectivity()
 MeshConnectivity const& MeshConnectivity::operator=(
     MeshConnectivity const& other)
 {
-  // Clear old data if any
-  clear();
-
-  // Allocate data
-  is_initialized_ = other.is_initialized_;
-  num_entities_ = other.num_entities_;
-  size_ = other.size_;
-  if(size_ > 0)
+  if(&other != this)
   {
-    connections_ = new uint[size_];
-  }
-  offsets_ = new uint[num_entities_ + 1];
-
-  // Copy data
-  for (uint i = 0; i < size_; ++i)
-  {
-    connections_[i] = other.connections_[i];
-  }
-  if (num_entities_ > 0)
-  {
+    clear();
+    //
+    is_initialized_ = other.is_initialized_;
+    num_entities_ = other.num_entities_;
+    size_ = other.size_;
+    offsets_ = new uint[num_entities_ + 1];
     for (uint e = 0; e <= num_entities_; ++e)
     {
       offsets_[e] = other.offsets_[e];
     }
+    if (size_ > 0)
+    {
+      connections_ = new uint[size_];
+      for (uint i = 0; i < size_; ++i)
+      {
+        connections_[i] = other.connections_[i];
+      }
+    }
   }
-
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -94,14 +92,6 @@ bool MeshConnectivity::operator==(MeshConnectivity const& other) const
     return false;
   }
   //
-  for (uint i = 0; i < size_; ++i)
-  {
-    if (connections_[i] != other.connections_[i])
-    {
-      return false;
-    }
-  }
-  //
   for (uint e = 0; e <= num_entities_; ++e)
   {
     if (offsets_[e] != other.offsets_[e])
@@ -110,6 +100,13 @@ bool MeshConnectivity::operator==(MeshConnectivity const& other) const
     }
   }
   //
+  for (uint i = 0; i < size_; ++i)
+  {
+    if (connections_[i] != other.connections_[i])
+    {
+      return false;
+    }
+  }
   return true;
 }
 //-----------------------------------------------------------------------------
@@ -125,6 +122,8 @@ void MeshConnectivity::init(uint num_entities, uint num_connections)
   is_initialized_= true;
   num_entities_ = num_entities;
   size_ = num_entities * num_connections;
+  min_connections_ = num_connections;
+  max_connections_ = num_connections;
   offsets_ = new uint[num_entities + 1];
   for (uint e = 0; e <= num_entities; ++e)
   {
@@ -147,15 +146,23 @@ void MeshConnectivity::init(Array<uint> const& num_connections)
   is_initialized_= true;
   num_entities_ = num_connections.size();
   size_ = 0;
+  min_connections_ = 0;
+  max_connections_ = 0;
   offsets_ = new uint[num_entities_ + 1];
-  for (uint e = 0; e < num_entities_; ++e)
+  offsets_[0] = 0;
+  if (num_entities_ > 0)
   {
-    offsets_[e] = size_;
-    size_ += num_connections[e];
-  }
-  offsets_[num_entities_] = size_;
-  if (size_ > 0)
-  {
+    size_ = num_connections[0];
+    min_connections_ = num_connections[0];
+    max_connections_ = num_connections[0];
+    for (uint e = 1; e < num_entities_; ++e)
+    {
+      offsets_[e] = size_;
+      size_ += num_connections[e];
+      min_connections_ = std::min(min_connections_, num_connections[e]);
+      max_connections_ = std::max(max_connections_, num_connections[e]);
+    }
+    offsets_[num_entities_] = size_;
     connections_ = new uint[size_];
     for (uint i = 0; i < size_; ++i)
     {
@@ -169,10 +176,12 @@ void MeshConnectivity::clear()
   is_initialized_= false;
   num_entities_ = 0;
   size_ = 0;
-  delete[] connections_;
-  connections_ = NULL;
+  min_connections_ = 0;
+  max_connections_ = 0;
   delete[] offsets_;
   offsets_ = NULL;
+  delete[] connections_;
+  connections_ = NULL;
 }
 //-----------------------------------------------------------------------------
 uint * MeshConnectivity::operator()()
@@ -200,11 +209,20 @@ uint MeshConnectivity::size() const
   return size_;
 }
 //-----------------------------------------------------------------------------
+uint MeshConnectivity::min_connections() const
+{
+  return min_connections_;
+}
+//-----------------------------------------------------------------------------
+uint MeshConnectivity::max_connections() const
+{
+  return max_connections_;
+}
+//-----------------------------------------------------------------------------
 void MeshConnectivity::set(uint entity, uint connection, uint pos)
 {
   dolfin_assert(entity < num_entities_);
   dolfin_assert(pos < offsets_[entity + 1] - offsets_[entity]);
-
   connections_[offsets_[entity] + pos] = connection;
 }
 //-----------------------------------------------------------------------------
@@ -212,11 +230,9 @@ void MeshConnectivity::set(uint entity, Array<uint> const& connections)
 {
   dolfin_assert(entity < num_entities_);
   dolfin_assert(connections.size() == offsets_[entity + 1] - offsets_[entity]);
-
-  // Copy data
   for (uint i = 0; i < connections.size(); ++i)
   {
-    this->connections_[offsets_[entity] + i] = connections[i];
+    connections_[offsets_[entity] + i] = connections[i];
   }
 }
 //-----------------------------------------------------------------------------
@@ -224,45 +240,47 @@ void MeshConnectivity::set(uint entity, uint const * connections)
 {
   dolfin_assert(entity < num_entities_);
   dolfin_assert(connections_);
-
-  // Copy data
-  uint const num_connections = offsets_[entity + 1] - offsets_[entity];
-  for (uint i = 0; i < num_connections; ++i)
+  for (uint i = 0; i < offsets_[entity + 1] - offsets_[entity]; ++i)
   {
-    this->connections_[offsets_[entity] + i] = connections[i];
+    connections_[offsets_[entity] + i] = connections[i];
   }
 }
 //-----------------------------------------------------------------------------
 void MeshConnectivity::set(Array<Array<uint> > const& connections)
 {
-  // Clear old data if any
   clear();
-
-  // Initialize offsets and compute total size
+  //
+  is_initialized_= true;
   num_entities_ = connections.size();
   size_ = 0;
+  min_connections_ = 0;
+  max_connections_ = 0;
   offsets_ = new uint[num_entities_ + 1];
-  for (uint e = 0; e < num_entities_; ++e)
+  offsets_[0] = 0;
+  if (num_entities_ > 0)
   {
-    offsets_[e] = size_;
-    size_ += connections[e].size();
-  }
-  offsets_[num_entities_] = size_;
-
-  // Initialize connections
-  if(size_ > 0)
-  {
-    this->connections_ = new uint[size_];
+    size_ = connections[0].size();
+    min_connections_ = size_;
+    max_connections_ = size_;
+    for (uint e = 1; e < num_entities_; ++e)
+    {
+      offsets_[e] = size_;
+      uint const s = connections[e].size();
+      size_ += s;
+      min_connections_ = std::min(min_connections_, s);
+      max_connections_ = std::max(max_connections_, s);
+    }
+    offsets_[num_entities_] = size_;
+    connections_ = new uint[size_];
     for (uint e = 0; e < num_entities_; ++e)
     {
       for (uint i = 0; i < connections[e].size(); ++i)
       {
-        this->connections_[offsets_[e] + i] = connections[e][i];
+        connections_[offsets_[e] + i] = connections[e][i];
       }
     }
   }
 }
-
 //-----------------------------------------------------------------------------
 void MeshConnectivity::remap_left(Array<uint> const& map)
 {

@@ -85,6 +85,14 @@ public:
   /// Return total number of connections
   uint size() const;
 
+  /// Return minimum number of connections
+  uint min_connections() const;
+
+  /// Return maximum number of connections
+  uint max_connections() const;
+
+  /// Return minimum number of connections
+
   /// Return number of connections for given entity
   uint size(uint entity) const;
 
@@ -125,11 +133,17 @@ private:
   /// Total number of connections
   uint size_;
 
-  /// Connections for all entities stored as a contiguous array
-  uint * connections_;
+  /// Minimum number of connections
+  uint min_connections_;
+
+  /// Maximum number of connections
+  uint max_connections_;
 
   /// Offset for first connection for each entity
   uint * offsets_;
+
+  /// Connections for all entities stored as a contiguous array
+  uint * connections_;
 
 };
 

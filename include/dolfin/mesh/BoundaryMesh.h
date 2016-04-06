@@ -76,6 +76,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_BOUNDARY_MESH_H */

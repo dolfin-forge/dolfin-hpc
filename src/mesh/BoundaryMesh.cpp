@@ -188,11 +188,12 @@ void BoundaryMesh::check() const
 {
   Mesh& mesh = const_cast<Mesh&>(this->mesh());
   uint const mdim = mesh.topology().dim();
+  uint const fdim = (mdim > 0 ? mdim - 1 : 0);
   uint const bdim = this->topology().dim();
-  if (bdim != (mdim - 1))
+  if (bdim != fdim)
   {
     error("BoundaryMesh : invalid dimension %u for boundary mesh, expected %u.",
-          bdim, mdim - 1);
+          bdim, fdim);
   }
 
   // Check interior entities

@@ -88,22 +88,22 @@ Mesh::~Mesh()
   clear();
 }
 //-----------------------------------------------------------------------------
-Mesh const& Mesh::operator=(Mesh const& mesh)
+Mesh const& Mesh::operator=(Mesh const& other)
 {
   clear();
 
-  rename(mesh.name(), mesh.label());
+  rename(other.name(), other.label());
 
-  if (mesh.cell_type_)
+  if (other.cell_type_)
   {
-    cell_type_ = CellType::create(mesh.cell_type_->cellType());
+    cell_type_ = other.cell_type_->clone();
   }
 
-  topology_ = mesh.topology_;
-  geometry_ = mesh.geometry_;
-  timestamp_ = mesh.timestamp_;
+  topology_ = other.topology_;
+  geometry_ = other.geometry_;
+  timestamp_ = other.timestamp_;
 
-  for(Array<MappedManifold *>::iterator it = mesh.periodic_mappings_.begin();
+  for(Array<MappedManifold *>::iterator it = other.periodic_mappings_.begin();
       it != periodic_mappings_.end(); ++it)
   {
     PeriodicSubDomain const& p = (*it)->subdomain();

@@ -15,7 +15,6 @@
 #include <dolfin/mesh/EuclideanBasis.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 

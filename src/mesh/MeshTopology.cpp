@@ -252,9 +252,11 @@ bool MeshTopology::is_computed(uint d0, uint d1) const
   return connectivity_[d0][d1].is_initialized();
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::entities_exist(uint d) const
+bool MeshTopology::entities_exist(uint dim) const
 {
-  return (d == 0 ? num_vertices_ > 0 : connectivity_[d][0].is_initialized());
+  dolfin_assert(dim <= dim_);
+  return (dim == 0 ?
+            (num_vertices_ > 0) : connectivity_[dim][0].is_initialized());
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const

@@ -93,7 +93,7 @@ public:
   bool is_computed(uint d0, uint d1) const;
 
   /// Return if entities exist
-  bool entities_exist(uint d) const;
+  bool entities_exist(uint dim) const;
 
   //--- Distributed data ------------------------------------------------------
 

@@ -194,6 +194,11 @@ uint DistributedData::capacity() const
   return local_.size();
 }
 //-----------------------------------------------------------------------------
+bool DistributedData::is_finalized() const
+{
+  return finalized_;
+}
+//-----------------------------------------------------------------------------
 uint DistributedData::offset() const
 {
   return offset_;

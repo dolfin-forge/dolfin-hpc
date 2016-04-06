@@ -56,6 +56,9 @@ public:
   /// Return the storage capacity of mappings
   uint capacity() const;
 
+  /// Return whether the data is finalized
+  bool is_finalized() const;
+
   //--- Data bounds -----------------------------------------------------------
 
   /// Return the offset of the process range

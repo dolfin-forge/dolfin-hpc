@@ -70,11 +70,7 @@ class PeriodicSubDomain;
 class Mesh : public Variable
 {
 
-  // Friends
   friend class MeshEditor;
-  friend class MeshTopology;
-  friend class MeshGeometry;
-  friend class MPIMeshCommunicator;
 
 public:
 

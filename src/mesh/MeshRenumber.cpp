@@ -95,6 +95,7 @@ bool MeshRenumber::renumber(Mesh& mesh)
         // Append to send buffer for each adjacent
         if(all_shared)
         {
+          //FIXME: randomness may be harmful
           uint const vote = std::rand();
           vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)

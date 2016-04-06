@@ -75,15 +75,6 @@ public:
 
   //--- Numbering -------------------------------------------------------------
 
-  /// Set local-to-global mapping
-  void set_map(uint local_index, uint global_index);
-
-  /// Re-map numbering with given mapping
-  void remap(Array<uint> const& mapping);
-
-  /// Re-index global indices to have contiguous numbering of owned entities
-  void renumber_global();
-
   /// Return if the index is a local index
   uint has_local(uint local_index) const;
 
@@ -95,6 +86,15 @@ public:
 
   /// Return the local index given a global index
   uint get_local(uint global_index) const;
+
+  /// Set local-to-global mapping
+  void set_map(uint local_index, uint global_index);
+
+  /// Re-map numbering with given mapping
+  void remap_numbering(Array<uint> const& mapping);
+
+  /// Re-index global indices to have contiguous numbering of owned entities
+  void renumber_global();
 
   //--- Adjacency -------------------------------------------------------------
 
@@ -129,6 +129,9 @@ public:
 
   /// Return the number of ghost entities
   uint num_ghost() const;
+
+  /// Re-map ownership with given mapping
+  void remap_ownership(Array<uint> const& mapping);
 
   //--- Shared ---
 
@@ -165,25 +168,17 @@ private:
   bool finalized_;
 
   ///
-  _map<uint, uint> global_indices_;
-  _map<uint, uint> local_indices_;
-
-  ///
-  uint * cached_global_indices_;
-
-  ///
-  Array<uint> ownership_;
+  _map<uint, uint> global_;
+  _map<uint, uint> local_;
 
   //
   _set<uint> adjacents_;
+  _map<uint, _set<uint> > shared_;
+  _map<uint, uint> ghost_;
 
-  // Shared
-  _set<uint> shared_;
-  _map<uint, _set<uint> > shared_adj_;
-
-  // Ghosts
-  _set<uint> ghosts_;
-  _map<uint, uint> ghost_owner_;
+  ///
+  uint * cached_numbering_;
+  uint * cached_ownership_;
 
 };
 
@@ -220,13 +215,13 @@ public:
   ///
   inline uint index() const
   {
-    return *iter_;
+    return iter_->first;
   }
 
   ///
   inline uint global_index() const
   {
-    return distdata_.get_global(*iter_);
+    return distdata_.get_global(iter_->first);
   }
 
   ///
@@ -238,13 +233,13 @@ public:
   ///
   inline _set<uint> const& adj() const
   {
-    return distdata_.shared_adj_.find(*iter_)->second;
+    return iter_->second;
   }
 
 private:
 
   DistributedData const& distdata_;
-  _set<uint>::const_iterator iter_;
+  _map<uint, _set<uint> >::const_iterator iter_;
 
 };
 
@@ -262,7 +257,7 @@ public:
   ///
   GhostIterator(DistributedData const& distdata) :
       distdata_(distdata),
-      iter_(distdata_.ghosts_.begin())
+      iter_(distdata_.ghost_.begin())
   {
   }
 
@@ -281,37 +276,37 @@ public:
   ///
   inline uint index() const
   {
-    return *iter_;
+    return iter_->first;
   }
 
   ///
   inline uint global_index() const
   {
-    return distdata_.get_global(*iter_);
+    return distdata_.get_global(iter_->first);
   }
 
   ///
   inline uint owner() const
   {
-    return distdata_.ghost_owner_.find(*iter_)->second;
+    return iter_->second;
   }
 
   ///
   inline bool end() const
   {
-    return iter_ == distdata_.ghosts_.end();
+    return iter_ == distdata_.ghost_.end();
   }
 
   ///
   inline _set<uint> const& adj() const
   {
-    return distdata_.shared_adj_.find(*iter_)->second;
+    return distdata_.shared_.find(iter_->first)->second;
   }
 
 private:
 
   DistributedData const& distdata_;
-  _set<uint>::const_iterator iter_;
+  _map<uint, uint>::const_iterator iter_;
 
 };
 

@@ -16,20 +16,12 @@
 #include <dolfin/common/Variable.h>
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/ALEType.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshTopology.h>
 
 #include <string>
-
-#ifdef HAVE_LIBGEOM
-namespace libgeom
-{
-  class Geometry;
-}
-#endif
 
 namespace dolfin
 {
@@ -182,31 +174,9 @@ public:
   /// Refine mesh uniformly
   void refine();
 
-#ifdef HAVE_LIBGEOM
-  /// Refine mesh uniformly including geometry informations -surfaces
-  void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-      MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v);
-
-  /// Refine mesh uniformly including geometry informations -curves
-  void refine(libgeom::Geometry& geom, MeshFunction<int>& patch_id_list,
-      MeshFunction<float>& bnd_u);
-#endif
-
   /// Refine mesh according to cells marked for refinement
   void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
               bool load_balance = true);
-
-  /// Coarsen mesh uniformly
-  void coarsen();
-
-  /// Coarsen mesh according to cells marked for coarsening
-  void coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary = false);
-
-  /// Move coordinates of mesh according to new boundary coordinates
-  void move(Mesh& boundary, ALEType method = lagrange);
-
-  /// Smooth mesh using Lagrangian mesh smoothing
-  void smooth();
 
   /// Partition mesh into num_processes partitions
   void partition(MeshFunction<uint>& partitions);

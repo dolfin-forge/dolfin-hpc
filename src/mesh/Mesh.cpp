@@ -163,7 +163,7 @@ MeshDistributedData const& Mesh::distdata() const
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate bounday at topology change
+  ///FIXME: Improve hash logic to regenerate boundary at topology change
   if (exterior_boundary_ == NULL || exterior_boundary_->invalid_mesh_topology())
   {
     if(exterior_boundary_)
@@ -178,7 +178,7 @@ BoundaryMesh& Mesh::exterior_boundary()
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::interior_boundary()
 {
-  ///FIXME: Improve hash logic to regenerate bounday at topology change
+  ///FIXME: Improve hash logic to regenerate boundary at topology change
   if (interior_boundary_ == NULL || interior_boundary_->invalid_mesh_topology())
   {
     if(interior_boundary_)
@@ -260,59 +260,11 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
-void Mesh::refine(libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u,
-    MeshFunction<float>& bnd_v)
-{
-  message("No cells marked for refinement, "
-      "assuming uniform mesh refinement with geometry informations.");
-  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u, bnd_v);
-}
-//-----------------------------------------------------------------------------
-void Mesh::refine(libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list, MeshFunction<float>& bnd_u)
-{
-  message("No cells marked for refinement, "
-      "assuming uniform mesh refinement with geometry informations.");
-  UniformMeshRefinement::refine(*this, geom, patch_id_list, bnd_u);
-}
-//-----------------------------------------------------------------------------
-#endif // HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
 void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
                   bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
                                                  refine_boundary, load_balance);
-}
-//-----------------------------------------------------------------------------
-void Mesh::coarsen()
-{
-  // FIXME: Move implementation to separate class and just call function here
-  message("No cells marked for coarsening, assuming uniform mesh coarsening.");
-  MeshFunction<bool> cell_marker(*this, this->topology().dim());
-  cell_marker = true;
-
-  LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_marker);
-}
-//-----------------------------------------------------------------------------
-void Mesh::coarsen(MeshFunction<bool>& cell_markers, bool coarsen_boundary)
-{
-  LocalMeshCoarsening::coarsenMeshByEdgeCollapse(*this, cell_markers,
-                                                 coarsen_boundary);
-}
-//-----------------------------------------------------------------------------
-void Mesh::move(Mesh& boundary, ALEType method)
-{
-  ALE::move(*this, boundary, method);
-}
-//-----------------------------------------------------------------------------
-void Mesh::smooth()
-{
-  MeshSmoothing::smooth(*this);
 }
 //-----------------------------------------------------------------------------
 void Mesh::partition(MeshFunction<uint>& partitions)

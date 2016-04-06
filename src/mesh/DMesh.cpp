@@ -329,13 +329,6 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-
-  if (_is_distributed)
-  {
-//    mesh.distdata().set_invalid_numbering();
-//    mesh.distdata().set_invalid_ownership();
-    mesh.renumber();
-  }
 }
 //-----------------------------------------------------------------------------
 #ifdef HAVE_LIBGEOM

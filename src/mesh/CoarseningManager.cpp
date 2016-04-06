@@ -473,7 +473,6 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
 
   // distribute partitioning and MeshFunctions
   omesh.distribute(*partitions, cell_functions, vertex_functions);
-  omesh.renumber();
 
   // Re-initialize
   initCommon(omesh, cell_functions[0].second);

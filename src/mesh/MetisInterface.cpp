@@ -50,7 +50,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
     return;
   }
 
-  mesh.renumber();
+  mesh.distdata()[0].renumber_global();
   tic();
 
   pm_real_t ubvec = 1.05;

@@ -148,9 +148,6 @@ public:
   /// Return number of cells of global mesh
   uint num_global_cells() const;
 
-  /// Renumber mesh global numbering
-  void renumber();
-
   //--- GEOMETRY --------------------------------------------------------------
 
   /// Return mesh geometry (non-const version)

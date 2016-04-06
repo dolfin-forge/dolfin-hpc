@@ -622,7 +622,6 @@ void DofMap::build()
   {
 #ifdef HAVE_MPI
     Mesh& thismesh = this->mesh();
-    thismesh.renumber();
 
     uint pe_size = MPI::numProcesses();
     uint rank = MPI::processNumber();

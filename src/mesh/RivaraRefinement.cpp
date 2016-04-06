@@ -56,8 +56,6 @@ void RivaraRefinement::refine(Mesh& mesh,
     end();
   }
 
-  if (MPI::numProcesses() > 1) mesh.renumber();
-
   DMesh dmesh;
   dmesh.imp(mesh);
 

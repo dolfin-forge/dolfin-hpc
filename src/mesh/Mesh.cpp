@@ -80,7 +80,6 @@ Mesh::Mesh(std::string const& filename) :
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);
-    renumber();
   }
 }
 //-----------------------------------------------------------------------------
@@ -260,11 +259,6 @@ uint Mesh::global_size(uint dim) const
 uint Mesh::num_global_cells() const
 {
   return topology_.global_size(topology_.dim());
-}
-//-----------------------------------------------------------------------------
-void Mesh::renumber()
-{
-  MeshRenumber::renumber(*this);
 }
 //-----------------------------------------------------------------------------
 MeshGeometry& Mesh::geometry()

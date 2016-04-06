@@ -167,7 +167,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
-  new_mesh.renumber();
 
   if (MPI::processNumber() == 0)
   {
@@ -227,7 +226,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   }
 
   mesh = new_mesh;
-  mesh.renumber();
 
 }
 //-----------------------------------------------------------------------------

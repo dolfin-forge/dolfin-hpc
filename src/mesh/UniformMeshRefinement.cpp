@@ -186,9 +186,6 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-//  mesh.distdata().set_invalid_numbering();
-  mesh.renumber();
-
 }
 //-----------------------------------------------------------------------------
 #ifdef HAVE_LIBGEOM

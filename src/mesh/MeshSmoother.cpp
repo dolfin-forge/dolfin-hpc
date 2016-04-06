@@ -229,8 +229,6 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
 
   editor.close();
   sub.distdata() = distdata;
-//  sub.distdata().set_invalid_numbering();
-  sub.renumber();
 }
 
 }

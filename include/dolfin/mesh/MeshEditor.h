@@ -82,6 +82,9 @@ private:
   // Next available cell
   uint cell_index_;
 
+  //
+  bool open_;
+
 };
 
 } /* namespace dolfin */

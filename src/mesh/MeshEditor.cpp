@@ -21,7 +21,8 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
     num_vertices_(0),
     num_cells_(0),
     vertex_index_(0),
-    cell_index_(0)
+    cell_index_(0),
+    open_(false)
 {
   init(mesh, cell_type, gdim);
 }
@@ -33,7 +34,8 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
     num_vertices_(0),
     num_cells_(0),
     vertex_index_(0),
-    cell_index_(0)
+    cell_index_(0),
+    open_(false)
 {
   CellType * cell_type = CellType::create(type);
   init(mesh, *cell_type, gdim);
@@ -42,7 +44,10 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
 //-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
 {
-  // Do nothing
+  if(open_)
+  {
+    error("MeshEditor : editor has not been closed before destruction");
+  }
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
@@ -57,6 +62,8 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   // Save mesh and dimension
   this->tdim_ = mesh.cell_type_->dim();
   this->gdim_ = gdim;
+
+  open_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_vertices(uint num_vertices)
@@ -71,7 +78,7 @@ void MeshEditor::init_cells(uint num_cells)
 {
   // Initialize mesh data
   this->num_cells_ = num_cells;
-  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().num_vertices(tdim_));
+  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().num_entities(0));
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)
@@ -128,6 +135,7 @@ void MeshEditor::clear()
   num_cells_ = 0;
   vertex_index_ = 0;
   cell_index_ = 0;
+  open_ = false;
 }
 //-----------------------------------------------------------------------------
 uint MeshEditor::current_vertex() const

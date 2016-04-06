@@ -453,7 +453,7 @@ _set<uint> const& DistributedData::get_shared_adj(uint local_index) const
   return shared_.find(local_index)->second;
 }
 //-----------------------------------------------------------------------------
-void DistributedData::get_common_adj(uint n, uint const * indices,
+void DistributedData::get_common_adj(uint n, uint const indices[],
                                      _set<uint>& adjs) const
 {
   if(n == 0)

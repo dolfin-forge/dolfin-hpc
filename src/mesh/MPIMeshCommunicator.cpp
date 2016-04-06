@@ -377,7 +377,6 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
               send_buff.push_back(coords[offset + d]);
             }
             send_buff_indices.push_back(shared[j]);
-            distdata[0].set_shared(distdata[0].get_local(shared[j]));
           }
           distdata[0].set_shared_adj(distdata[0].get_local(shared[j]), src);
         }
@@ -945,7 +944,6 @@ void MPIMeshCommunicator::distributeCommon(
             }
 
             send_buff_indices.push_back(shared[j]);
-            distdata[0].set_shared(distdata[0].get_local(shared[j]));
           }
           distdata[0].set_shared_adj(distdata[0].get_local(shared[j]), src);
         }

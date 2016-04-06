@@ -467,7 +467,6 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
       }
       else if (dv->shared)
       {
-        mesh.distdata()[0].set_shared(current_vertex);
         mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
       }
       mesh.distdata()[0].set_map(current_vertex, dv->glb_id);

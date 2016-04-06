@@ -28,6 +28,7 @@ public:
   ///
   bool valid_numbering;
   bool valid_ownership;
+  bool valid_adjacency;
 
   ///
   DistributedData();
@@ -140,6 +141,9 @@ public:
 
   /// Return the adjacent set of a shared entity
   _set<uint> const& get_shared_adj(uint local_index) const;
+
+  /// Return the common adjacent set to an array of shared entities
+  void get_common_adj(uint n, uint const * indices, _set<uint>& adjs) const;
 
   /// Set the entity as shared, the adjacent set is not created.
   /// If the entity is ghost then it stays that way

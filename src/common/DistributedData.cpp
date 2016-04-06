@@ -5,7 +5,6 @@
 #include <dolfin/common/DistributedData.h>
 
 #include <dolfin/log/log.h>
-#include <dolfin/log/LogStream.h>
 #include <dolfin/main/MPI.h>
 
 #include <cstring>
@@ -17,6 +16,7 @@ namespace dolfin
 DistributedData::DistributedData() :
     valid_numbering(false),
     valid_ownership(false),
+    valid_adjacency(false),
     rank_(MPI::processNumber()),
     pe_size_(MPI::numProcesses()),
     offset_(0),
@@ -117,6 +117,7 @@ void DistributedData::clear()
   //
   valid_numbering = false;
   valid_ownership = false;
+  valid_adjacency = false;
 }
 //-----------------------------------------------------------------------------
 void DistributedData::finalize()
@@ -178,8 +179,8 @@ void DistributedData::finalize()
     }
 
     // Update ownership for ghost entities
-    for (_map<uint, uint>::const_iterator it = ghost_.begin(); it != ghost_.end();
-         ++it)
+    for (_map<uint, uint>::const_iterator it = ghost_.begin();
+         it != ghost_.end(); ++it)
     {
       cached_ownership_[it->first] = it->second;
     }
@@ -305,8 +306,12 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
 //-----------------------------------------------------------------------------
 void DistributedData::renumber_global()
 {
-  dolfin_assert(finalized_);
-  error("DistributedData::renumber_global TBD");
+  if(!finalized_)
+  {
+    error("DistributedData : global renumbering requires finalized data");
+  }
+
+  //
 }
 //-----------------------------------------------------------------------------
 bool DistributedData::has_adj_rank(uint rank) const
@@ -448,12 +453,43 @@ _set<uint> const& DistributedData::get_shared_adj(uint local_index) const
   return shared_.find(local_index)->second;
 }
 //-----------------------------------------------------------------------------
+void DistributedData::get_common_adj(uint n, uint const * indices,
+                                     _set<uint>& adjs) const
+{
+  if(n == 0)
+  {
+    adjs.clear();
+    return;
+  }
+  dolfin_assert(shared_.count(indices[0]) > 0);
+  adjs = shared_.find(indices[0])->second;
+  for (uint i = 1; (adjs.size()> 0)&&(i < n); ++i)
+  {
+    dolfin_assert(shared_.count(indices[i]) > 0);
+    _set<uint> const& adjx = shared_.find(indices[i])->second;
+    for(_set<uint>::iterator it = adjs.begin(); it != adjs.end();)
+    {
+      if(adjx.count(*it) == 0)
+      {
+        adjs.erase(it++);
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+}
+//-----------------------------------------------------------------------------
 void DistributedData::set_shared(uint local_index)
 {
   dolfin_assert(!finalized_);
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(shared_.count(local_index) == 0);
-  _set<uint> adj = shared_[local_index];
+  if(shared_[local_index].size() > 0)
+  {
+    error("DistributedData : cannot set_shared on entities with adjacents");
+  }
 }
 //-----------------------------------------------------------------------------
 void DistributedData::set_shared_adj(uint local_index, uint adj)
@@ -486,6 +522,7 @@ void DistributedData::set_ghost(uint local_index, uint owner)
 void DistributedData::disp() const
 {
   section("DistributedData");
+  end();
 }
 //-----------------------------------------------------------------------------
 

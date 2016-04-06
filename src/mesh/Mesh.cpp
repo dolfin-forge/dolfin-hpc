@@ -22,10 +22,6 @@
 #include <dolfin/mesh/UniformMeshRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
-#ifdef HAVE_LIBGEOM
-#include <Geometry.h>
-#endif
-
 #include <fstream>
 #include <sstream>
 

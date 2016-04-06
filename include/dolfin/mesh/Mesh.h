@@ -213,9 +213,6 @@ public:
   /// Display mesh data
   void disp() const;
 
-  /// Return a short descriptive string
-  std::string str() const;
-
   //--- CHECK ROUTINES --------------------------------------------------------
 
   /// Check

@@ -373,14 +373,6 @@ void Mesh::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
-std::string Mesh::str() const
-{
-  std::ostringstream stream;
-  stream << "[Mesh of topological dimension " << topology().dim() << " with "
-      << size(0) << " and " << num_cells() << " cells]";
-  return stream.str();
-}
-//-----------------------------------------------------------------------------
 void Mesh::check() const
 {
   message("Check: mesh");

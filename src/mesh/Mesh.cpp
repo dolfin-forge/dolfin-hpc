@@ -31,9 +31,9 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
     Variable("mesh", "DOLFIN mesh"),
+    cell_type_(NULL),
     topology_(*this),
     geometry_(),
-    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -44,9 +44,9 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
+    cell_type_(NULL),
     topology_(*this),
     geometry_(),
-    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -57,9 +57,9 @@ Mesh::Mesh(Mesh const& mesh) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable("mesh", "DOLFIN mesh"),
+    cell_type_(NULL),
     topology_(*this),
     geometry_(),
-    cell_type_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -126,10 +126,10 @@ bool Mesh::operator !=(Mesh const& other) const
 void Mesh::clear()
 {
   timestamp_ = 0;
-  topology_.clear();
-  geometry_.clear();
   delete cell_type_;
   cell_type_ = NULL;
+  topology_.clear();
+  geometry_.clear();
   delete exterior_boundary_;
   exterior_boundary_ = NULL;
   delete interior_boundary_;
@@ -304,37 +304,6 @@ void Mesh::partition_geom(MeshFunction<uint>& partitions)
 void Mesh::distribute(MeshFunction<uint>& distribution)
 {
   MPIMeshCommunicator::distribute(*this, distribution);
-}
-//-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution,
-                      MeshFunction<bool>& cell_markers,
-                      MeshFunction<bool>& new_cell_markers)
-{
-  MPIMeshCommunicator::distribute(*this, distribution, cell_markers,
-                                  new_cell_markers);
-}
-//-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions)
-{
-  MPIMeshCommunicator::distribute(*this, distribution, cell_functions);
-}
-//-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
-{
-  MPIMeshCommunicator::distribute(*this, distribution, vertex_functions);
-}
-//-----------------------------------------------------------------------------
-void Mesh::distribute(
-    MeshFunction<uint>& distribution,
-    Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-    Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions)
-{
-  MPIMeshCommunicator::distribute(*this, distribution, cell_functions,
-                                  vertex_functions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine()

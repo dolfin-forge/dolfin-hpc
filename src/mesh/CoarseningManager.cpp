@@ -472,7 +472,8 @@ bool CoarseningManager::migrate(uint num_cells_coarsened)
                    max_num_requested_vertices, partitions);
 
   // distribute partitioning and MeshFunctions
-  omesh.distribute(*partitions, cell_functions, vertex_functions);
+  error("This is garbage");
+//  omesh.distribute(*partitions, cell_functions, vertex_functions);
 
   // Re-initialize
   initCommon(omesh, cell_functions[0].second);

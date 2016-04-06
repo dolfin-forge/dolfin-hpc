@@ -194,36 +194,6 @@ public:
   /// Distribute a mesh according to a mesh function
   void distribute(MeshFunction<uint>& distribution);
 
-  /// Distribute a mesh according to a mesh function and transfer marked cells
-  void distribute(MeshFunction<uint>& distribution,
-                  MeshFunction<bool>& cell_markers,
-                  MeshFunction<bool>& new_cell_markers);
-
-  /// Distribute a mesh according to a mesh function and transfer cell functions
-  ///
-  /// cell_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions);
-
-  /// Distribute a mesh according to a mesh function and transfer vertex functions
-  ///
-  /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
-
-  /// Distribute a mesh according to a mesh function and transfer cell and
-  /// vertex functions
-  ///
-  /// cell_functions contains pairs as <old_function,new_function>
-  ///
-  /// vertex_functions contains pairs as <old_function,new_function>
-  void distribute(
-      MeshFunction<uint>& distribution,
-      Array<std::pair<MeshFunction<uint> *, MeshFunction<uint> *> >& cell_functions,
-      Array<std::pair<MeshFunction<real> *, MeshFunction<real> *> >& vertex_functions);
-
   /*
    *  Mesh refinement routines
    */
@@ -253,14 +223,14 @@ public:
 
 private:
 
+  // Cell type
+  CellType * cell_type_;
+
   // Mesh topology
   MeshTopology topology_;
 
   // Mesh geometry
   MeshGeometry geometry_;
-
-  // Cell type
-  CellType * cell_type_;
 
   /// Exterior boundary mesh
   mutable BoundaryMesh * exterior_boundary_;

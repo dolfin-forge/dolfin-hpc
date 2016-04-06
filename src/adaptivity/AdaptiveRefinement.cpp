@@ -162,8 +162,9 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
   }
 
+  error("This is garbage");
   MeshFunction<bool> new_cell_marker;
-  mesh.distribute(*partitions, cell_marker, new_cell_marker);
+//FIXME:  mesh.distribute(*partitions, cell_marker, new_cell_marker);
 
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);

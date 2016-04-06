@@ -99,8 +99,9 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
+    error("This is garbage");
     MeshFunction<bool> new_cell_marker;
-    mesh.distribute(partitions, cell_marker, new_cell_marker);
+//    mesh.distribute(partitions, cell_marker, new_cell_marker);
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)
       cell_marker.set(*c, new_cell_marker.get(*c));
@@ -141,7 +142,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight, Array< std::p
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  mesh.distribute(partitions, vertex_functions);
+  error("This is garbage");
+//  mesh.distribute(partitions, vertex_functions);
 
   end();
 }
@@ -214,7 +216,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
       Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
       cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
 
-      mesh.distribute(partitions, cell_functions, vertex_functions);
+      error("Garbage");
+//      mesh.distribute(partitions, cell_functions, vertex_functions);
 
       MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
     }
@@ -258,7 +261,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  mesh.distribute(partitions,cell_functions, vertex_functions);
+  error("Garbage");
+//  mesh.distribute(partitions,cell_functions, vertex_functions);
 
   end();
 }
@@ -332,8 +336,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MeshFunction<uint> cell_marker_uint;
     MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
     cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
-
-    mesh.distribute(partitions, cell_functions, vertex_functions);
+    error("Garbage");
+//    mesh.distribute(partitions, cell_functions, vertex_functions);
 
     MeshFunction<bool> new_cell_marker;
     MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
@@ -379,7 +383,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<uint>& weight,
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  mesh.distribute(partitions,cell_functions);
+  error("This is garbage");
+//  mesh.distribute(partitions,cell_functions);
 
   end();
 }
@@ -450,7 +455,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
     cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
 
-    mesh.distribute(partitions, cell_functions);
+    error("Garbage");
+//    mesh.distribute(partitions, cell_functions);
 
     MeshFunction<bool> new_cell_marker;
     MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);

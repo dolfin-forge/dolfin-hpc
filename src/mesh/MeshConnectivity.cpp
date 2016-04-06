@@ -53,12 +53,15 @@ MeshConnectivity const& MeshConnectivity::operator=(
     is_initialized_ = other.is_initialized_;
     num_entities_ = other.num_entities_;
     size_ = other.size_;
-    offsets_ = new uint[num_entities_ + 1];
-    for (uint e = 0; e <= num_entities_; ++e)
+    if(other.offsets_ != NULL)
     {
-      offsets_[e] = other.offsets_[e];
+      offsets_ = new uint[num_entities_ + 1];
+      for (uint e = 0; e <= num_entities_; ++e)
+      {
+        offsets_[e] = other.offsets_[e];
+      }
     }
-    if (size_ > 0)
+    if (other.connections_ != NULL)
     {
       connections_ = new uint[size_];
       for (uint i = 0; i < size_; ++i)

@@ -124,8 +124,8 @@ void MeshQuality::compute()
     }
   }
 
-  mu_avg = mu_sum / m.numCells();
-  h_avg = h_sum / m.numCells();
+  mu_avg = mu_sum / m.num_cells();
+  h_avg = h_sum / m.num_cells();
 
   if (m.is_distributed())
   {

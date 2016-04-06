@@ -225,7 +225,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                             BilinearForm const& form, ScratchSpace& scratch)
 {
   BoundaryMesh& boundary = mesh.exterior_boundary();
-  if (boundary.numCells())
+  if (boundary.num_cells())
   {
     MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
     uint sub_domain_idx = this->sub_domain_index();
@@ -314,7 +314,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
   dolfin_assert(scratch.size == gdim);
 
   BoundaryMesh& boundary = mesh.exterior_boundary();
-  if (boundary.numCells())
+  if (boundary.num_cells())
   {
     MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
     uint const sub_domain_idx = this->sub_domain_index();

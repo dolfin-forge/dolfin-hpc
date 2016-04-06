@@ -46,14 +46,14 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
 
   if (!hdr_initialized_ || !static_mesh)
   {
-    hdr_.num_coords = mesh.numVertices() * mesh.geometry().dim();
+    hdr_.num_coords = mesh.size(0) * mesh.geometry().dim();
     hdr_.num_entities = mesh.type().num_entities(0);
-    hdr_.num_centities = mesh.numCells() * hdr_.num_entities;
+    hdr_.num_centities = mesh.num_cells() * hdr_.num_entities;
     hdr_.type = mesh.type().cellType();
     hdr_.tdim = mesh.topology().dim();
     hdr_.gdim = mesh.geometry().dim();
-    hdr_.num_vertices = mesh.numVertices();
-    hdr_.num_cells = mesh.numCells();
+    hdr_.num_vertices = mesh.size(0);
+    hdr_.num_cells = mesh.num_cells();
     hdr_.num_ghosts = mesh.distdata()[0].num_ghost();
     hdr_.num_shared = mesh.distdata()[0].num_shared();
 
@@ -239,7 +239,7 @@ void Checkpoint::load(Mesh& mesh)
 
   if (MPI::numProcesses() > 1)
   {
-    uint *mapping = new uint[_mesh.numVertices()];
+    uint *mapping = new uint[_mesh.size(0)];
 #ifdef ENABLE_MPIIO
     MPI_File_read_at_all(in_, byte_offset_ + hdr_.offsets[2] * sizeof(uint),
                          mapping, hdr_.num_vertices, MPI_UNSIGNED,
@@ -419,7 +419,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
   if (MPI::numProcesses() > 1)
   {
-    uint *mapping = new uint[mesh.numVertices()];
+    uint *mapping = new uint[mesh.size(0)];
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
       mapping[v->index()] = v->global_index();

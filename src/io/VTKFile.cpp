@@ -204,8 +204,8 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Open file
   FILE* fp = fopen(vtu_filename.c_str(), "a");
 
-  uint const num_mesh_verts = mesh.numVertices();
-  uint const num_mesh_cells = mesh.numCells();
+  uint const num_mesh_verts = mesh.size(0);
+  uint const num_mesh_cells = mesh.num_cells();
   uint const num_cell_verts = mesh.type().num_entities(0);
   uint const cell_verts_block_size = num_cell_verts * num_mesh_cells;
 
@@ -368,7 +368,7 @@ void VTKFile::ResultsWrite(
       }
 
     // Allocate memory for function values at vertices
-    uint const num_verts = mesh.numVertices();
+    uint const num_verts = mesh.size(0);
     real* values = new real[value_size * num_verts];
 
     // Get function values at vertices
@@ -492,7 +492,7 @@ void VTKFile::ResultsWrite(
     switch (value_size)
       {
       case 1:
-        data.resize(mesh.numCells());
+        data.resize(mesh.num_cells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
@@ -503,7 +503,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 2:
-        data.resize(3 * mesh.numCells());
+        data.resize(3 * mesh.num_cells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
@@ -516,7 +516,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       case 3:
-        data.resize(3 * mesh.numCells());
+        data.resize(3 * mesh.num_cells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
@@ -529,7 +529,7 @@ void VTKFile::ResultsWrite(
         }
         break;
       default:
-        data.resize(value_size * mesh.numCells());
+        data.resize(value_size * mesh.num_cells());
         {
           std::vector<float>::iterator entry = data.begin();
           uint ii = 0;
@@ -793,7 +793,7 @@ void VTKFile::VTKHeaderOpen(Mesh& mesh) const
           endianness.c_str(), compressor.c_str());
   fprintf(fp, "<UnstructuredGrid>  \n");
   fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">  \n",
-          mesh.numVertices(), mesh.numCells());
+          mesh.size(0), mesh.num_cells());
 
   // Close file
   fclose(fp);
@@ -877,7 +877,7 @@ template<class T>
       // Write mesh
       MeshWrite(mesh);
 
-      std::vector<float> data(mesh.numCells());
+      std::vector<float> data(mesh.num_cells());
       std::vector<float>::iterator entry = data.begin();
       for (CellIterator cell(mesh); !cell.end(); ++cell)
       {
@@ -913,7 +913,7 @@ template<class T>
       MeshWrite(mesh);
 
       std::vector<float> data;
-      data.resize(mesh.numVertices());
+      data.resize(mesh.size(0));
       std::vector<float>::iterator entry = data.begin();
 
       for (VertexIterator v(mesh); !v.end(); ++v)

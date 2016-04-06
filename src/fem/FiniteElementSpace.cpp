@@ -202,7 +202,7 @@ void FiniteElementSpace::disp() const
 //-----------------------------------------------------------------------------
 bool FiniteElementSpace::is_cellwise_defined() const
 {
-  return (mesh_.global_numCells() * dof_map_.local_dimension())
+  return (mesh_.num_global_cells() * dof_map_.local_dimension())
       == dof_map_.global_dimension();
 }
 

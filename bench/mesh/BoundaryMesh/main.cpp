@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     }
 
     uint const facet_dim = boundary.topology().dim();
-    uint const numBoundaryFacets = boundary.numCells();
+    uint const numBoundaryFacets = boundary.num_cells();
     uint const numMDSharedFacets = mesh.topology().num_shared(facet_dim);
     if (numBoundaryFacets != numMDSharedFacets)
     {

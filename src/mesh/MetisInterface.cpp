@@ -80,7 +80,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
   uint const tdim = mesh.topology().dim();
-  int ncells = mesh.numCells();
+  int ncells = mesh.num_cells();
 
   if (ncells == 0)
   {
@@ -117,7 +117,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t *eptr = new pm_idx_t[ncells + 1];
 
   eptr[0] = 0;
-  for(uint i=1;i < (mesh.numCells() + 1);i++)
+  for(uint i=1;i < (mesh.num_cells() + 1);i++)
   {
     eptr[i] = eptr[i-1] + nvertices;
   }
@@ -198,7 +198,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 
   // Gather number of locally stored vertices for each processor
   pm_idx_t *vtxdist = new pm_idx_t[size+1];
-  vtxdist[rank] = static_cast<pm_idx_t> (mesh.numVertices());
+  vtxdist[rank] = static_cast<pm_idx_t> (mesh.size(0));
   pm_idx_t local_vertices = vtxdist[rank];
 
   MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, 
@@ -215,9 +215,9 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
     sum = tmp + sum;
   }
 
-  pm_idx_t *part = new pm_idx_t[mesh.numVertices()];
+  pm_idx_t *part = new pm_idx_t[mesh.size(0)];
   pm_idx_t gdim =  static_cast<pm_idx_t>( mesh.geometry().dim() );
-  pm_real_t *xdy = new pm_real_t[gdim * mesh.numVertices()];
+  pm_real_t *xdy = new pm_real_t[gdim * mesh.size(0)];
 
   i = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)

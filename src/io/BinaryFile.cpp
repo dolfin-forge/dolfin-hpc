@@ -235,7 +235,7 @@ void BinaryFile::operator>>(Function & f)
     }
 
     /* Otherwise continue searching*/
-    byte_offset += f_hdr.dim * f.mesh().global_numVertices() * sizeof(real);
+    byte_offset += f_hdr.dim * f.mesh().global_size(0) * sizeof(real);
   }
 
   MPI_File_close(&fh);
@@ -306,7 +306,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
     u->vector().set(values);
     delete[] values;
 
-    byte_offset += f_hdr.dim * u->mesh().global_numVertices() * sizeof(real);
+    byte_offset += f_hdr.dim * u->mesh().global_size(0) * sizeof(real);
   }
 
   MPI_File_close(&fh);
@@ -373,7 +373,7 @@ void BinaryFile::write_function(
     uint const value_dim = u->value_size();
 
     // Allocate memory for function values at vertices
-    uint size = mesh.numVertices() * u->value_size();
+    uint size = mesh.size(0) * u->value_size();
     real *values = new real[size];
     uint offset = u->vector().offset();
 
@@ -391,7 +391,7 @@ void BinaryFile::write_function(
         {
           for (uint i = 0; i < value_dim; ++i)
           {
-            values[ii++] = interp_values[v->index() + i * mesh.numVertices()];
+            values[ii++] = interp_values[v->index() + i * mesh.size(0)];
           }
         }
       }
@@ -419,7 +419,7 @@ void BinaryFile::write_function(
 
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = value_dim;
-    f_hdr.size = value_dim * mesh.global_numVertices();
+    f_hdr.size = value_dim * mesh.global_size(0);
     if (name.length() > FNAME_LENGTH) error("Function name too long.");
     strcpy(&f_hdr.name[0], name.c_str());
     if (t_)
@@ -433,7 +433,7 @@ void BinaryFile::write_function(
 
     MPI_File_write_at_all(fh, byte_offset + offset * sizeof(real), values, size,
                           MPI_DOUBLE, MPI_STATUS_IGNORE);
-    byte_offset += value_dim * (mesh.global_numVertices() * sizeof(real));
+    byte_offset += value_dim * (mesh.global_size(0) * sizeof(real));
 
     delete[] values;
   }
@@ -888,8 +888,8 @@ void BinaryFile::operator<<(Mesh& mesh)
 {
   uint const gdim = mesh.geometry().dim();
   uint const type = BinaryFile::cell_type(mesh.type().cellType());
-  uint const num_vertices = mesh.global_numVertices();
-  uint const num_cells = mesh.global_numCells();
+  uint const num_vertices = mesh.global_size(0);
+  uint const num_cells = mesh.num_global_cells();
   uint const num_cellvertices = mesh.type().num_entities(0);
 
   BinaryFileHeader hdr;
@@ -986,7 +986,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     // Write Cells
     uint cell_offset = 0;
-    uint cell_buffer_size = num_cellvertices * mesh.numCells();
+    uint cell_buffer_size = num_cellvertices * mesh.num_cells();
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
@@ -1104,7 +1104,7 @@ template<typename T>
         *(vp++) = (real) meshfunction.get(c->index());
       }
 
-      local_size = mesh.numCells();
+      local_size = mesh.num_cells();
     }
     else if (meshfunction.dim() == 0)
     {
@@ -1215,7 +1215,7 @@ template<typename T>
 
     uint local_size = (
         mfunc_type > 0 ?
-            mesh.numVertices() - mesh.distdata()[0].num_ghost() : mesh.numCells());
+            mesh.size(0) - mesh.distdata()[0].num_ghost() : mesh.num_cells());
 
     uint offset = 0;
 #if ( MPI_VERSION > 1 )

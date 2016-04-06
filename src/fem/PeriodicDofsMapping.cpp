@@ -326,7 +326,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
         // If the local mesh contains H facets find matching G facets
         u_offsets[src] = u_sendbuff.size();
         r_offsets[src] = r_sendbuff.size();
-        if (manifold.numCells() > 0)
+        if (manifold.num_cells() > 0)
         {
           for (uint ii = 0; ii < (uint) u_count; ++ii)
           {

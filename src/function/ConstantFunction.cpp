@@ -165,7 +165,7 @@ void ConstantFunction::interpolate_vertex_values(real* v) const
   dolfin_assert(v);
 
   // Set all vertex values to the constant tensor value
-  uint const num_verts = mesh_.numVertices();
+  uint const num_verts = mesh_.size(0);
   for (uint i = 0; i < num_verts; ++i)
   {
     for (uint j = 0; j < size; ++j)

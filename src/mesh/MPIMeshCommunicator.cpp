@@ -467,7 +467,7 @@ void MPIMeshCommunicator::distributeCommon(Mesh& mesh,
   // Mark new cells for refinement
   if (cell_marker)
   {
-    dolfin_assert(cm.size() == mesh.numCells());
+    dolfin_assert(cm.size() == mesh.num_cells());
     cell_marker->init(mesh, mesh.topology().dim());
     for (uint i = 0; i < cm.size(); i++)
     {
@@ -1057,13 +1057,13 @@ void MPIMeshCommunicator::distributeCommon(
 //  mesh.distdata().set_invalid_ownership();
 
   // Fill new cell functions
-  if (cell_functions && mesh.numCells() > 0)
+  if (cell_functions && mesh.num_cells() > 0)
   {
     uint f_id(0);
     for (CellFunctionArrayType::iterator f_it(cell_functions->begin());
         f_it != cell_functions->end(); ++f_it, ++f_id)
     {
-      dolfin_assert(cfunctions[f_id].size() == mesh.numCells());
+      dolfin_assert(cfunctions[f_id].size() == mesh.num_cells());
       f_it->second->init(mesh, mesh.topology().dim());
       for (uint i(0); i < cfunctions[f_id].size(); ++i)
       {
@@ -1074,13 +1074,13 @@ void MPIMeshCommunicator::distributeCommon(
   }
 
   // Fill new vertex functions
-  if (vertex_functions && mesh.numVertices() > 0)
+  if (vertex_functions && mesh.size(0) > 0)
   {
     uint f_id(0);
     for (VertexFunctionArrayType::iterator f_it(vertex_functions->begin());
         f_it != vertex_functions->end(); ++f_it, ++f_id)
     {
-      dolfin_assert(vfunctions[f_id].size() == mesh.numVertices());
+      dolfin_assert(vfunctions[f_id].size() == mesh.size(0));
       f_it->second->init(mesh, 0);
       for (uint i(0); i < vfunctions[f_id].size(); ++i)
       {

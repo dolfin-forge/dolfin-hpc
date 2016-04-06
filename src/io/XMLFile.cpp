@@ -282,7 +282,7 @@ void XMLFile::operator<<(Mesh& mesh)
     fprintf(fp, "  <mesh celltype=\"%s\" dim=\"%u\">\n",
             mesh.type().str().c_str(), mesh.geometry().dim());
 
-    fprintf(fp, "    <vertices size=\"%u\">\n", mesh.numVertices());
+    fprintf(fp, "    <vertices size=\"%u\">\n", mesh.size(0));
 
     switch (mesh.geometry().dim())
       {
@@ -316,7 +316,7 @@ void XMLFile::operator<<(Mesh& mesh)
       }
 
     fprintf(fp, "    </vertices>\n");
-    fprintf(fp, "    <cells size=\"%u\">\n", mesh.numCells());
+    fprintf(fp, "    <cells size=\"%u\">\n", mesh.num_cells());
 
     switch (cell_type)
       {

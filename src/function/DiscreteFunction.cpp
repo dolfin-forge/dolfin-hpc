@@ -322,7 +322,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
 {
   // Local data for interpolation on each cell
   uint const tdim = mesh_.topology().dim();
-  uint const num_verts = mesh_.numVertices();
+  uint const num_verts = mesh_.size(0);
 
   // Make sure vector's ghost values are updated)
   X_->apply();

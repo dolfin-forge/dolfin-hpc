@@ -42,8 +42,8 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
 {
   message("Adaptive refinement");
 
-  uint const numcellsbefore = mesh.global_numCells();
-  uint const numvertsbefore = mesh.global_numVertices();
+  uint const numcellsbefore = mesh.num_global_cells();
+  uint const numvertsbefore = mesh.global_size(0);
   message("  - cells    before: %d", numcellsbefore);
   message("  - vertices before: %d", numvertsbefore);
 
@@ -75,9 +75,9 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
     dolfin::error("Unknown refinement algorithm");
   }
 
-  uint const numcellsafter = mesh.global_numCells();
+  uint const numcellsafter = mesh.num_global_cells();
   dolfin_assert(numcellsafter >= numcellsbefore);
-  uint const numvertsafter = mesh.global_numVertices();
+  uint const numvertsafter = mesh.global_size(0);
   dolfin_assert(numvertsafter >= numvertsbefore);
   message("  - cells    after: %d", numcellsafter);
   message("  - vertices after: %d", numvertsafter);
@@ -91,8 +91,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   dolfin_set("Load balancer redistribute", false);
   message("Adaptive refinement (with projection)");
-  message("  - cells    before: %d", mesh.global_numCells());
-  message("  - vertices before: %d", mesh.global_numVertices());
+  message("  - cells    before: %d", mesh.num_global_cells());
+  message("  - vertices before: %d", mesh.global_size(0));
 
   std::string const refine_type = dolfin_get("adapt_algorithm");
   if (refine_type == "simple")

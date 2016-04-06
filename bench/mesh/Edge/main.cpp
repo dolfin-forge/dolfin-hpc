@@ -77,8 +77,8 @@ int main(int argc, char** argv)
   message("Initialize vertex-edge connectivities");
   mesh.init(0, 1);
 
-  message("Number of cells in the mesh: %d.", mesh.global_numCells());
-  message("Number of edges in the mesh: %d.", mesh.global_numEdges());
+  message("Number of cells in the mesh: %d.", mesh.num_global_cells());
+  message("Number of edges in the mesh: %d.", mesh.global_size(1));
 
   uint const N = 1e2;
   message("Repeating %d times.", N);
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 
   //---------------------------------------------------------------------------
 
-  real * Alength = new real[mesh.numEdges()];
+  real * Alength = new real[mesh.size(1)];
 
   message("EdgeIterator: compute length (class)");
   tic();
@@ -202,7 +202,7 @@ int main(int argc, char** argv)
 
   //---------------------------------------------------------------------------
 
-  Point * Amidpnt = new Point[mesh.numEdges()];
+  Point * Amidpnt = new Point[mesh.size(1)];
 
   message("EdgeIterator: compute midpoint (class)");
   tic();

@@ -32,7 +32,7 @@ namespace dolfin
   public:
     
     /// Create mesh hierarcy with initial mesh 
-    MeshHierarchy(const Mesh& mesh);
+    MeshHierarchy(Mesh const& mesh);
 
     /// Create empty mesh hierarcy
     MeshHierarchy();
@@ -41,7 +41,7 @@ namespace dolfin
     ~MeshHierarchy();
 
     /// Initialize mesh hierarchy 
-    void init(const Mesh& mesh); 
+    void init(Mesh const& mesh); 
 
     /// Clear mesh hierarchy 
     void clear(); 
@@ -50,7 +50,7 @@ namespace dolfin
     int size();
 
     /// Add (finest) mesh to mesh hierarchy 
-    void add(const Mesh& mesh); 
+    void add(Mesh const& mesh); 
 
     /// Remove (finest) mesh from mesh hierarchy 
     void remove(); 

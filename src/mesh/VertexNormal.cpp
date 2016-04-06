@@ -205,7 +205,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
     // Send buffer for :
     // - facets normals associated with shared vertices
     // - weights of facets normals
-    if (boundary.numCells() > 0)
+    if (boundary.num_cells() > 0)
     {
       for (VertexIterator bvertex(boundary); !bvertex.end(); ++bvertex)
       {
@@ -229,7 +229,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
           else
           {
             uint const glb_id = ddv.get_global(loc_id);
-            dolfin_assert(glb_id < mesh.global_numVertices());
+            dolfin_assert(glb_id < mesh.global_size(0));
             VertexData * data = new VertexData();
             // Do not fill to avoid copy
             // getFacetData(weighting_, mesh, boundary, *bvertex,
@@ -289,7 +289,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
       for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
       {
         uint const glb_id = u_recvbuff[iiu];
-        dolfin_assert(glb_id < mesh.global_numVertices());
+        dolfin_assert(glb_id < mesh.global_size(0));
         uint const num_nc = u_recvbuff[iiu + 1];
 
         VertexDataMap::iterator it = vdmap.find(glb_id);
@@ -318,7 +318,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
 
   //--- Compute normals -------------------------------------------------------
   real const cosalpha = std::cos(alpha_max_);
-  if (boundary.numCells() > 0)
+  if (boundary.num_cells() > 0)
   {
     // Initialize cartesian basis
     Point B[EuclideanSpace::MAX_DIMENSION];

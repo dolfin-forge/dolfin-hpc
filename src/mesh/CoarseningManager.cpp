@@ -68,7 +68,7 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   // find independent set
   findIndependentSet(mesh, coarsen_boundary);
 
-  dolfin_assert(forbidden_vertices_.size() == cell_marker.mesh().numVertices());
+  dolfin_assert(forbidden_vertices_.size() == cell_marker.mesh().size(0));
 }
 //-----------------------------------------------------------------------------
 void CoarseningManager::initCommon(Mesh& mesh,
@@ -81,8 +81,8 @@ void CoarseningManager::initCommon(Mesh& mesh,
   dmesh_ = new DMesh;
   dmesh_->imp(mesh);
 
-  orig_num_cells_ = mesh.numCells();
-  orig_num_vertices_ = mesh.numVertices();
+  orig_num_cells_ = mesh.num_cells();
+  orig_num_vertices_ = mesh.size(0);
 
   // build list of cells to coarsen
   findCellsToCoarsen(attempt_count);
@@ -95,7 +95,7 @@ void CoarseningManager::initCommon(Mesh& mesh,
 void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
 {
   // set to false on whole domain
-  forbidden_vertices_.resize(mesh.numVertices());
+  forbidden_vertices_.resize(mesh.size(0));
   forbidden_vertices_ = false;
 
   uint num_independent_vertices(0);
@@ -104,7 +104,7 @@ void CoarseningManager::findIndependentSet(Mesh& mesh, bool coarsen_boundary)
   {
     BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
 
-    if (boundary.numVertices() > 0)
+    if (boundary.size(0) > 0)
     {
       // add boundary vertices to set
       for (VertexIterator v_it(boundary); !v_it.end(); ++v_it)
@@ -186,7 +186,7 @@ void CoarseningManager::buildMFArrays(
   MeshFunction<uint> * attempts = new MeshFunction<uint>();
   MeshFunction<uint> * attempts_new = new MeshFunction<uint>();
 
-  if (mesh.numCells() != 0)
+  if (mesh.num_cells() != 0)
   {
     // Prepare forbidden vertices for exchange
     forbidden_vertices->init(mesh, 0);
@@ -239,7 +239,7 @@ void CoarseningManager::cleanupMFArrays(
 void CoarseningManager::updateIndependentSet(
     Mesh& mesh, MeshFunction<real>& forbidden_vertices_new)
 {
-  forbidden_vertices_.resize(mesh.numVertices());
+  forbidden_vertices_.resize(mesh.size(0));
   forbidden_vertices_ = false;
   for (VertexIterator v_it(mesh); !v_it.end(); ++v_it)
     if (forbidden_vertices_new.get(v_it->index()) > 0.5) forbidden_vertices_[v_it->index()] =
@@ -392,7 +392,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   }
 
   // Check that at least one cell resides here
-  if (num_send_cells >= mesh.numCells())
+  if (num_send_cells >= mesh.num_cells())
   {
     partitions->set(0, rank);
     --num_send_cells;

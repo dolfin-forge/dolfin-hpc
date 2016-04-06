@@ -41,12 +41,12 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
   uint dest, src;
-  uint global_num_vertex = mesh.global_numVertices();
+  uint global_num_vertex = mesh.global_size(0);
   double stopper = double(global_num_vertex + 1);
 
   smooth_data.prepare_mesh();
   // Create an local boundary mesh
-  int boundary_number = (pe_size > 1 ? smooth_data.boundary().numVertices() : 0);
+  int boundary_number = (pe_size > 1 ? smooth_data.boundary().size(0) : 0);
   const int d = mesh.geometry().dim();
   int module = d + 2; //number of saved information, vertex index, number of neighbors, sum_x, sum_y, sum_z
 

@@ -10,7 +10,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-MeshHierarchy::MeshHierarchy(const Mesh& mesh) :
+MeshHierarchy::MeshHierarchy(Mesh const& mesh) :
     meshes(0),
     num_meshes(0)
 {
@@ -34,7 +34,7 @@ MeshHierarchy::~MeshHierarchy()
   clear();
 }
 //-----------------------------------------------------------------------------
-void MeshHierarchy::init(const Mesh& mesh)
+void MeshHierarchy::init(Mesh const& mesh)
 {
   // Clear old data if any
   clear();
@@ -65,7 +65,7 @@ int MeshHierarchy::size()
   return int(num_meshes);
 }
 //-----------------------------------------------------------------------------
-void MeshHierarchy::add(const Mesh& mesh)
+void MeshHierarchy::add(Mesh const& mesh)
 {
   // Add mesh to mesh hierarchy if non empty
   if ( num_meshes > 0 )

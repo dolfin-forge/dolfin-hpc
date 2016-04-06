@@ -12,14 +12,11 @@
 #include <dolfin/mesh/Mesh.h>
 
 #include <dolfin/io/File.h>
-#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LocalMeshRefinement.h>
-#include <dolfin/mesh/LocalMeshCoarsening.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/MeshSmoothing.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/UniformMeshRefinement.h>
@@ -96,7 +93,7 @@ Mesh::~Mesh()
   clear();
 }
 //-----------------------------------------------------------------------------
-const Mesh& Mesh::operator=(const Mesh& mesh)
+Mesh const& Mesh::operator=(Mesh const& mesh)
 {
   clear();
 
@@ -131,6 +128,38 @@ bool Mesh::operator !=(Mesh const& other) const
   return this->hash() != other.hash();
 }
 //-----------------------------------------------------------------------------
+void Mesh::clear()
+{
+  timestamp_ = 0;
+  topology_.clear();
+  geometry_.clear();
+  delete cell_type_;
+  cell_type_ = NULL;
+  delete exterior_boundary_;
+  exterior_boundary_ = NULL;
+  delete interior_boundary_;
+  interior_boundary_ = NULL;
+  delete intersection_detector_;
+  intersection_detector_ = NULL;
+  while(!periodic_mappings_.empty())
+  {
+    delete periodic_mappings_.back();
+    periodic_mappings_.pop_back();
+  }
+}
+//-----------------------------------------------------------------------------
+CellType& Mesh::type()
+{
+  dolfin_assert(cell_type_);
+  return *cell_type_;
+}
+//-----------------------------------------------------------------------------
+CellType const& Mesh::type() const
+{
+  dolfin_assert(cell_type_);
+  return *cell_type_;
+}
+//-----------------------------------------------------------------------------
 MeshTopology& Mesh::topology()
 {
   return topology_;
@@ -141,24 +170,45 @@ MeshTopology const& Mesh::topology() const
   return topology_;
 }
 //-----------------------------------------------------------------------------
-MeshGeometry& Mesh::geometry()
+uint Mesh::size(uint dim) const
 {
-  return geometry_;
+  return topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
-MeshGeometry const& Mesh::geometry() const
+uint Mesh::num_cells() const
 {
-  return geometry_;
+  return topology_.size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
-MeshDistributedData& Mesh::distdata()
+uint* Mesh::cells()
 {
-  return topology().distdata();
+  return topology_(topology_.dim(), 0)();
 }
 //-----------------------------------------------------------------------------
-MeshDistributedData const& Mesh::distdata() const
+uint const * Mesh::cells() const
 {
-  return topology().distdata();
+  return topology_(topology_.dim(), 0)();
+}
+//-----------------------------------------------------------------------------
+void Mesh::init(uint dim) const
+{
+  uint size = topology_.size(dim);
+}
+//-----------------------------------------------------------------------------
+void Mesh::init(uint d0, uint d1) const
+{
+  uint size = topology_(d0, d1).size();
+}
+//-----------------------------------------------------------------------------
+void Mesh::init() const
+{
+  for (uint d0 = 0; d0 <= topology().dim(); ++d0)
+  {
+    for (uint d1 = 0; d1 <= topology().dim(); ++d1)
+    {
+      init(d0, d1);
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh& Mesh::exterior_boundary()
@@ -191,6 +241,46 @@ BoundaryMesh& Mesh::interior_boundary()
   return *interior_boundary_;
 }
 //-----------------------------------------------------------------------------
+bool Mesh::is_distributed() const
+{
+  return topology().is_distributed();
+}
+//-----------------------------------------------------------------------------
+MeshDistributedData& Mesh::distdata()
+{
+  return topology().distdata();
+}
+//-----------------------------------------------------------------------------
+MeshDistributedData const& Mesh::distdata() const
+{
+  return topology().distdata();
+}
+//-----------------------------------------------------------------------------
+uint Mesh::global_size(uint dim) const
+{
+  return topology_.global_size(dim);
+}
+//-----------------------------------------------------------------------------
+uint Mesh::num_global_cells() const
+{
+  return topology_.global_size(topology_.dim());
+}
+//-----------------------------------------------------------------------------
+void Mesh::renumber()
+{
+  MeshRenumber::renumber(*this);
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& Mesh::geometry()
+{
+  return geometry_;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry const& Mesh::geometry() const
+{
+  return geometry_;
+}
+//-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
 {
   ///FIXME: Improve hash logic to regenerate detector at topology change
@@ -206,67 +296,6 @@ IntersectionDetector& Mesh::intersector()
   return *intersection_detector_;
 }
 //-----------------------------------------------------------------------------
-uint Mesh::init(uint dim) const
-{
-  return topology_.size(dim);
-}
-//-----------------------------------------------------------------------------
-void Mesh::init(uint d0, uint d1) const
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-void Mesh::init() const
-{
-  // Compute all entities
-  for (uint d = 0; d <= topology().dim(); ++d)
-  {
-    init(d);
-  }
-
-  // Compute all connectivity
-  for (uint d0 = 0; d0 <= topology().dim(); ++d0)
-  {
-    for (uint d1 = 0; d1 <= topology().dim(); ++d1)
-    {
-      init(d0, d1);
-    }
-  }
-}
-//-----------------------------------------------------------------------------
-void Mesh::clear()
-{
-  timestamp_ = 0;
-  topology_.clear();
-  geometry_.clear();
-  delete cell_type_;
-  cell_type_ = NULL;
-  delete exterior_boundary_;
-  exterior_boundary_ = NULL;
-  delete interior_boundary_;
-  interior_boundary_ = NULL;
-  delete intersection_detector_;
-  intersection_detector_ = NULL;
-  while(!periodic_mappings_.empty())
-  {
-    delete periodic_mappings_.back();
-    periodic_mappings_.pop_back();
-  }
-}
-//-----------------------------------------------------------------------------
-void Mesh::refine()
-{
-  message("No cells marked for refinement, assuming uniform mesh refinement.");
-  UniformMeshRefinement::refine(*this);
-}
-//-----------------------------------------------------------------------------
-void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
-                  bool load_balance)
-{
-  LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-                                                 refine_boundary, load_balance);
-}
-//-----------------------------------------------------------------------------
 void Mesh::partition(MeshFunction<uint>& partitions)
 {
   MeshPartition::partition(*this, partitions);
@@ -275,12 +304,6 @@ void Mesh::partition(MeshFunction<uint>& partitions)
 void Mesh::partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight)
 {
   MeshPartition::partition(*this, partitions, weight);
-}
-//-----------------------------------------------------------------------------
-void Mesh::partition(MeshFunction<uint>& partitions, uint num_partitions)
-{
-  // Partition mesh
-  MeshPartition::partition(*this, partitions, num_partitions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::partition_geom(MeshFunction<uint>& partitions)
@@ -324,6 +347,19 @@ void Mesh::distribute(
                                   vertex_functions);
 }
 //-----------------------------------------------------------------------------
+void Mesh::refine()
+{
+  message("No cells marked for refinement, assuming uniform mesh refinement.");
+  UniformMeshRefinement::refine(*this);
+}
+//-----------------------------------------------------------------------------
+void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
+                  bool load_balance)
+{
+  LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
+                                                 refine_boundary, load_balance);
+}
+//-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const
 {
   return (!periodic_mappings_.empty());
@@ -351,11 +387,6 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
   return periodic_mappings_;
 }
 //-----------------------------------------------------------------------------
-void Mesh::renumber()
-{
-  MeshRenumber::renumber(*this);
-}
-//-----------------------------------------------------------------------------
 std::string const Mesh::hash() const
 {
   std::stringstream ss;
@@ -367,26 +398,19 @@ std::string const Mesh::hash() const
 //-----------------------------------------------------------------------------
 void Mesh::disp() const
 {
-  // Begin indentation
-  cout << "Mesh data" << endl;
-  begin("---------");
-  cout << endl;
-
-  // Display topology and geometry
+  section("Mesh");
   topology_.disp();
   geometry_.disp();
-
-  // Display cell type
-  cout << "Cell type" << endl;
-  cout << "---------" << endl;
-  begin("");
-  if (cell_type_) cout << cell_type_->description() << endl;
-  else cout << "undefined" << endl;
+  begin("Cell type");
+  if (cell_type_)
+  {
+    cout << cell_type_->description() << endl;
+  }
+  else
+  {
+    cout << "undefined" << endl;
+  }
   end();
-
-  cout << endl;
-
-  // End indentation
   end();
 }
 //-----------------------------------------------------------------------------
@@ -394,14 +418,8 @@ std::string Mesh::str() const
 {
   std::ostringstream stream;
   stream << "[Mesh of topological dimension " << topology().dim() << " with "
-      << numVertices() << " and " << numCells() << " cells]";
+      << size(0) << " and " << num_cells() << " cells]";
   return stream.str();
-}
-//-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream, const Mesh& mesh)
-{
-  stream << mesh.str();
-  return stream;
 }
 //-----------------------------------------------------------------------------
 void Mesh::check() const

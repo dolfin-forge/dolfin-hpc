@@ -58,7 +58,7 @@ void RefinementManager::init(Mesh& mesh)
     return;
   }
 
-  uint max_index = mesh.global_numVertices();
+  uint max_index = mesh.global_size(0);
 
   // Assume uniform refinement
   uint num_new_vertices = mesh.size(1);
@@ -286,7 +286,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
   }
 
   // MPI aliasing
-  uint tmp = newmesh.numVertices() - newdistdata[0].num_ghost();
+  uint tmp = newmesh.size(0) - newdistdata[0].num_ghost();
   uint num_glb;
   MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 

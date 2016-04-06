@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 
   // Randomly perturbed intitial conditions
   dolfin::seed(2);
-  dolfin::uint size = mesh.numVertices();
+  dolfin::uint size = mesh.size(0);
   real* x_init = new real[size];
   unsigned int* x_pos = new unsigned int[size];
   for(dolfin::uint i=0; i < size; ++i)

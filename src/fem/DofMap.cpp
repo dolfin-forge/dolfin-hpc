@@ -434,7 +434,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
       {
         for (uint i = 0; i < num_leaf_spaces_; ++i)
         {
-          dofs[i] = (cell.index() + i * mesh().numCells()) + offset_;
+          dofs[i] = (cell.index() + i * mesh().num_cells()) + offset_;
         }
       }
       break;
@@ -612,7 +612,7 @@ void DofMap::build()
 // Cleanup dofmap structures and set dimension of pretabulated array
   delete[] pretabulated_dofmap_;
   pretabulated_dofmap_ = NULL;
-  pretabulated_dofmap_size_ = this->local_dimension() * mesh().numCells();
+  pretabulated_dofmap_size_ = this->local_dimension() * mesh().num_cells();
   shared_.clear();
   ghosts_.clear();
   map_.clear();
@@ -637,7 +637,7 @@ void DofMap::build()
       type_ = real_space;
       local_size_ = ufc_dofmap_->local_dimension();
     }
-    else if (ufc_dofmap_->global_dimension() == thismesh.global_numVertices())
+    else if (ufc_dofmap_->global_dimension() == thismesh.global_size(0))
     {
       // Scalar Lagrange P1
       type_ = scalar_p1;
@@ -655,17 +655,17 @@ void DofMap::build()
         ghosts_.insert(it.global_index());
       }
     }
-    else if (ufc_dofmap_->global_dimension() == thismesh.global_numCells())
+    else if (ufc_dofmap_->global_dimension() == thismesh.num_global_cells())
     {
       // Scalar Discontinuous Lagrange P0
       type_ = scalar_dg0;
-      local_size_ = thismesh.numCells();
+      local_size_ = thismesh.num_cells();
 
       // No ghosted dofs
     }
     else if (can_vectorize
         && (ufc_dofmap_->global_dimension()
-            == num_leaf_spaces_ * thismesh.global_numVertices()))
+            == num_leaf_spaces_ * thismesh.global_size(0)))
     {
       // Vector Lagrange P1
       type_ = vector_p1;
@@ -749,7 +749,7 @@ void DofMap::build()
       delete[] vertex_map_;
       vertex_map_ = NULL;
 
-      vertex_map_ = new uint[thismesh.numVertices()];
+      vertex_map_ = new uint[thismesh.size(0)];
       for (VertexIterator v(thismesh); !v.end(); ++v)
       {
         vertex_map_[v->index()] =
@@ -788,12 +788,12 @@ void DofMap::build()
     }
     else if (can_vectorize
         && (ufc_dofmap_->global_dimension()
-            == num_leaf_spaces_ * thismesh.global_numCells()))
+            == num_leaf_spaces_ * thismesh.num_global_cells()))
     {
       // Vector Discontinuous Lagrange P0
       type_ = vector_dg0;
       uint vdim = num_leaf_spaces_;
-      uint num_dofs = vdim * thismesh.numCells();
+      uint num_dofs = vdim * thismesh.num_cells();
       uint offset = 0;
 
 #if ( MPI_VERSION > 1 )
@@ -804,7 +804,7 @@ void DofMap::build()
       offset -= num_dofs;
 #endif
       offset_ = offset;
-      local_size_ = vdim * thismesh.numCells();
+      local_size_ = vdim * thismesh.num_cells();
 
       // No ghosted dofs
     }

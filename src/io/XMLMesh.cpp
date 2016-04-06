@@ -350,9 +350,9 @@ void XMLMesh::endMesh()
     delete[] sendbuf_idx;
 
     // Init new mesh
-    editor_->init_vertices(mesh_.numVertices() + shared - orphan);
+    editor_->init_vertices(mesh_.size(0) + shared - orphan);
     //FIXME!
-//    new_mesh.distdata().set_num_global(0, mesh_.global_numVertices());
+//    new_mesh.distdata().set_num_global(0, mesh_.global_size(0));
 
     uint vertex_count = 0;
     for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)

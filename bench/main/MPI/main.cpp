@@ -25,7 +25,7 @@ int main(int argc, char** argv)
       mesh.refine();
     }
     message("Mesh in MPI Group %d has %d cells", dolfin::MPI::groupNumber(),
-            mesh.global_numCells());
+            mesh.num_global_cells());
     File fmesh(ss.str() + ".pvd");
     fmesh << mesh;
 

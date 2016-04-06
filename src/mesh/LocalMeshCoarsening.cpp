@@ -45,7 +45,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
   begin("Coarsening simplicial mesh by edge collapse.");
 
   // check size of cell_marker
-  if ( cell_marker.size() != mesh.numCells() )
+  if ( cell_marker.size() != mesh.num_cells() )
     error( "Wrong dimension of cell_marker" );
 
   // Instantiate coarsening manager

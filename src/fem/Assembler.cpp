@@ -214,11 +214,11 @@ void Assembler::assembleCells(GenericTensor& A,
 
   // Assemble over cells
 #ifndef NO_PROGRESS_BAR
-  Progress p(progressMessage(A.rank(), "cells"), mesh.numCells());
+  Progress p(progressMessage(A.rank(), "cells"), mesh.num_cells());
 #endif
   //  for (CellIterator cell(mesh); !cell.end(); ++cell)
 #pragma omp for
-  uint const num_cells = mesh.numCells();
+  uint const num_cells = mesh.num_cells();
   uint const coef_size = coefficients.size();
   uint const form_rank = ufc.form.rank();
   MeshDistributedData& distdata = mesh.distdata();
@@ -285,16 +285,16 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   ufc::exterior_facet_integral* integral = ufc.exterior_facet_integrals[0];
 
   BoundaryMesh& exterior_boundary = mesh.exterior_boundary();
-  if(exterior_boundary.numCells()  == 0) return;
+  if(exterior_boundary.num_cells()  == 0) return;
 
   // Assemble over exterior facets (the cells of the boundary)
 #ifndef NO_PROGRESS_BAR
-  dolfin_assert(exterior_boundary.numCells());
-  Progress p(progressMessage(A.rank(), "exterior facets"), exterior_boundary.numCells());
+  dolfin_assert(exterior_boundary.num_cells());
+  Progress p(progressMessage(A.rank(), "exterior facets"), exterior_boundary.num_cells());
 #endif
   //  for (CellIterator boundary_cell(*boundary); !boundary_cell.end(); ++boundary_cell)
 #pragma omp for
-  uint const ext_num_cells = exterior_boundary.numCells();
+  uint const ext_num_cells = exterior_boundary.num_cells();
   uint const coef_size = coefficients.size();
   uint const form_rank = ufc.form.rank();
   MeshDistributedData& distdata = mesh.distdata();
@@ -377,8 +377,8 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 
   // Assemble over interior facets (the facets of the mesh)
 #ifndef NO_PROGRESS_BAR
-  dolfin_assert(mesh.numFacets());
-  Progress p(progressMessage(A.rank(), "interior facets"), mesh.numFacets());
+  dolfin_assert(mesh.size(tdim - 1));
+  Progress p(progressMessage(A.rank(), "interior facets"), mesh.size(tdim - 1));
 #endif
 
   // The halo data structure caches macro element coefficients and dofs for each

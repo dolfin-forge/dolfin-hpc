@@ -397,7 +397,7 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
 {
   // Iterate over cells
 #ifndef NO_PROGRESS_BAR
-  Progress p("Computing Dirichlet boundary values, pointwise search", mesh().numCells());
+  Progress p("Computing Dirichlet boundary values, pointwise search", mesh().num_cells());
 #endif
   DofMap const& dof_map = space.dofmap();
   uint * cell_dofs = new uint[dof_map.local_dimension()];

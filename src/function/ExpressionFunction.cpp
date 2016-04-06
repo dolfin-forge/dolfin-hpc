@@ -61,7 +61,7 @@ void ExpressionFunction::interpolate_vertex_values(real* values) const
 
   // Call overloaded eval function at each vertex
   real * local_values = new real[size];
-  uint const num_verts = mesh_.numVertices();
+  uint const num_verts = mesh_.size(0);
   for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
   {
     // Evaluate at function at vertex

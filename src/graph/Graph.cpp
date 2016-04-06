@@ -143,8 +143,8 @@ void Graph::clear()
 void Graph::createNodal(Mesh& mesh)
 {
   mesh.init();
-  num_vertices = mesh.numVertices();
-  num_edges = mesh.numEdges();
+  num_vertices = mesh.size(0);
+  num_edges = mesh.size(1);
   num_arches = num_edges * 2;
 
   edges = new uint[num_arches];
@@ -175,7 +175,7 @@ void Graph::createNodal(Mesh& mesh)
 //-----------------------------------------------------------------------------
 void Graph::createDual(Mesh& mesh)
 {
-  num_vertices = mesh.numCells();
+  num_vertices = mesh.num_cells();
 
   // Get number of arches
   uint D = mesh.topology().dim();

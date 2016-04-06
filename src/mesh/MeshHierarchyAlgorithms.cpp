@@ -36,7 +36,7 @@ void MeshHierarchyAlgorithms::refineTetMesh(MeshHierarchy& mesh_hierarchy)
 
   for (uint k = 0; k < num_meshes; k++)
   {
-    if ( mesh_hierarchy(k).numCells() > 0 )
+    if ( mesh_hierarchy(k).num_cells() > 0 )
     {
       /*
       if ( k > 0 ) closeMesh(mesh_hierarchy(k));

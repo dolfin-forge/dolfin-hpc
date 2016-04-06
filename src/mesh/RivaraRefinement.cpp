@@ -61,7 +61,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   DMesh dmesh;
   dmesh.imp(mesh);
 
-  std::vector<bool> dmarked(mesh.numCells());
+  std::vector<bool> dmarked(mesh.num_cells());
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     if(cell_marker.get(ci->index()) == true)
@@ -147,7 +147,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   DMesh dmesh;
   dmesh.imp(mesh, patch_id_list, bnd_u , bnd_v);
 
-  std::vector<bool> dmarked(mesh.numCells());
+  std::vector<bool> dmarked(mesh.num_cells());
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
     if(cell_marker.get(*ci) == true)

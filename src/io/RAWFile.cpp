@@ -75,7 +75,7 @@ void RAWFile::ResultsWrite(Function& u) const
   Mesh& mesh = u.mesh();
 
   // Allocate memory for function values at vertices
-  uint size = mesh.numVertices();
+  uint size = mesh.size(0);
   for (uint i = 0; i < u.rank(); i++)
     size *= u.dim(i);
   real* values = new real[size];
@@ -90,18 +90,18 @@ void RAWFile::ResultsWrite(Function& u) const
   if ( dim > 3 )
     warning("Cannot handle RAW file with number of components > 3. Writing first three components only");
 
-  fprintf(fp,"%d \n",mesh.numVertices());
+  fprintf(fp,"%d \n",mesh.size(0));
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
     if ( rank == 0 )
       fprintf(fp," %e ", values[ vertex->index() ] );
     else if ( u.dim(0) == 2 )
       fprintf(fp," %e %e", values[ vertex->index() ],
-                                values[ vertex->index() + mesh.numVertices() ] );
+                                values[ vertex->index() + mesh.size(0) ] );
     else
       fprintf(fp," %e  %e  %e", values[ vertex->index() ],
-                               values[ vertex->index() +   mesh.numVertices() ],
-                               values[ vertex->index() + 2*mesh.numVertices() ] );
+                               values[ vertex->index() +   mesh.size(0) ],
+                               values[ vertex->index() + 2*mesh.size(0) ] );
 
     fprintf(fp,"\n");
   }
@@ -150,7 +150,7 @@ void RAWFile::MeshFunctionWrite(T& meshfunction)
   // Open file
   std::ofstream fp(raw_filename.c_str(), std::ios_base::app);
 
-  fp<<mesh.numCells( ) <<std::endl;
+  fp<<mesh.num_cells( ) <<std::endl;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
     fp << meshfunction.get( cell->index() )  << std::endl;
 

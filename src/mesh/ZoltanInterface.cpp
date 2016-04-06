@@ -130,7 +130,7 @@ int ZoltanInterface::partitionZoltanNumVertices(void *data, int *ierr)
   Mesh *mesh = (Mesh *) data;
   *ierr = ZOLTAN_OK;
 
-  return mesh->numVertices();
+  return mesh->size(0);
 
 }
 //-----------------------------------------------------------------------------
@@ -350,7 +350,7 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
 
   Mesh *mesh = (Mesh *) data;
 
-  if (num_obj != mesh->numVertices())
+  if (num_obj != mesh->size(0))
   {
     *ierr = ZOLTAN_FATAL;
     return;

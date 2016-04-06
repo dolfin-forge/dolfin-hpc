@@ -97,8 +97,8 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   MeshEditor editor(refined_mesh, cell_type, mesh.geometry().dim());
 
   // Initialize mappings
-  Array<int> old2new_cell(mesh.numCells());
-  Array<int> old2new_vertex(mesh.numVertices());
+  Array<int> old2new_cell(mesh.num_cells());
+  Array<int> old2new_vertex(mesh.size(0));
 
   // Initialise forbidden edges
   MeshFunction<bool> edge_forbidden(mesh, 1);

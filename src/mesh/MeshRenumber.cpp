@@ -63,7 +63,7 @@ bool MeshRenumber::renumber_vertices(Mesh& mesh)
   uint offset = distdata0.offset();
 
   DistributedData distdata1;
-  for (uint i = 0; i < mesh.numVertices(); ++i)
+  for (uint i = 0; i < mesh.size(0); ++i)
   {
     if (distdata0.is_owned(i))
     {
@@ -254,7 +254,7 @@ bool MeshRenumber::renumber_edges(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;
-  for (uint i = 0; i < mesh.numEdges(); ++i)
+  for (uint i = 0; i < mesh.size(1); ++i)
   {
     if (!mddata[1].is_ghost(i))
     {
@@ -450,7 +450,7 @@ bool MeshRenumber::renumber_faces(Mesh& mesh)
 
   uint num = 0;
   _map<uint,uint> new_local,new_global;
-  for (uint i = 0; i < mesh.numFaces(); ++i)
+  for (uint i = 0; i < mesh.size(2); ++i)
   {
     if (!mddata[2].is_ghost(i))
     {
@@ -552,7 +552,7 @@ bool MeshRenumber::renumber_cells(Mesh& mesh)
 
   _map<uint,uint> new_local;
   _map<uint,uint> new_global;
-  for (uint i = 0; i < mesh.numCells(); ++i)
+  for (uint i = 0; i < mesh.num_cells(); ++i)
   {
     new_global[i] = offset++;
     new_local[new_global[i]] = i;

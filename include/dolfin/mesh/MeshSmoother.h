@@ -73,18 +73,6 @@ public:
 
 protected:
 
-  // Sub domain for Dirichlet boundary condition
-  class DirichletBoundary : public SubDomain
-  {
-
-  public:
-
-    bool inside(const real* x, bool on_boundary) const
-    {
-      return on_boundary;
-    }
-  };
-
   /// Constructor
   MeshSmoother(Mesh& mesh);
 

@@ -9,9 +9,10 @@
 #ifndef __DOLFIN_XML_MESH_H
 #define __DOLFIN_XML_MESH_H
 
+#include <dolfin/io/XMLObject.h>
+
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include "XMLObject.h"
 
 namespace dolfin
 {

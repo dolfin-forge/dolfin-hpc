@@ -151,7 +151,6 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
   uint num_vertices = parse<uint>(name, attrs, "size");
   //
-  cell_count_ = 0;
   uint pe_size = MPI::numProcesses();
   uint rank = MPI::processNumber();
   // Calculate a linear data distribution
@@ -162,12 +161,6 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
   vertex_range_end_ = vertex_offset_ + (num_local_vertices_ - 1);
   // Set number of vertices
   editor_->init_vertices(num_local_vertices_);
-
-  if (parallel_)
-  {
-    //FIXME!!!
-//    mesh_.distdata().set_num_global(0, num_vertices);
-  }
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
@@ -177,8 +170,9 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   cell_count_ = 0;
   if(parallel_)
   {
-    editor_->init_cells(1);
+    editor_->init_cells(0);
     editor_->close();
+//    The following section requires process range and global size to be set
 //    MeshFunction<uint> pre_partition;
 //    mesh_.partition_geom(pre_partition);
 //    mesh_.distribute(pre_partition);
@@ -252,6 +246,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
       }
       cell_buffer_.push_back(v[i]);
     }
+    ++cell_count_;
   }
   else
   {
@@ -260,6 +255,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
       v[i] = parse<uint>(name, attrs, vertex_attr[i]);
     }
     editor_->add_cell(c, &v[0]);
+    ++cell_count_;
   }
 }
 //-----------------------------------------------------------------------------
@@ -296,6 +292,7 @@ void XMLMesh::endMesh()
     real *crdbuf = new real[crdbuf_size];
     real *crdptr = &crdbuf[0];
     // Exchange ghost points
+    DistributedData& vdata0 = mesh_.distdata()[0];
     for (uint j = 1; j < pe_size; ++j)
     {
 
@@ -310,9 +307,9 @@ void XMLMesh::endMesh()
       uint count = 0;
       for (int k = 0; k < recvcount; ++k)
       {
-        if (mesh_.distdata()[0].has_global(recvbuf[k]))
+        if (vdata0.has_global(recvbuf[k]))
         {
-          uint const index = mesh_.distdata()[0].get_local(recvbuf[k]);
+          uint const index = vdata0.get_local(recvbuf[k]);
           sendbuf_idx[2*count] = recvbuf[k];
           if (vertex_owner_[index] == pe_size)
           {
@@ -349,46 +346,48 @@ void XMLMesh::endMesh()
     delete[] sendbuf_crd;
     delete[] sendbuf_idx;
 
-    // Init new mesh
+    // Add vertices
     editor_->init_vertices(mesh_.size(0) + shared - orphan);
-    //FIXME!
-//    new_mesh.distdata().set_num_global(0, mesh_.global_size(0));
+    DistributedData& vdata1 = new_mesh.distdata()[0];
 
     uint vertex_count = 0;
     for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
     {
       if (vertex_owner_[vertex->index()] == rank)
       {
-        new_mesh.distdata()[0].set_map(vertex_count, vertex->global_index());
+        vdata1.set_map(vertex_count, vertex->global_index());
         editor_->add_vertex(vertex_count, vertex->x());
         ++vertex_count;
       }
     }
 
-    //Add shared ghost vertices
+    // Add shared ghost vertices
     uint ii = 0;
     uint ci = 0;
     for (uint i = 0; i < shared; ++i, ii+=2, ci += gdim)
     {
-      new_mesh.distdata()[0].set_map(vertex_count, idxbuf[ii]);
+      vdata1.set_map(vertex_count, idxbuf[ii]);
       if (idxbuf[ii + 1] != rank)
       {
-        new_mesh.distdata()[0].set_ghost(vertex_count, idxbuf[ii + 1]);
+        vdata1.set_ghost(vertex_count, idxbuf[ii + 1]);
       }
       editor_->add_vertex(vertex_count, &crdbuf[ci]);
       ++vertex_count;
     }
 
-    uint ndims = mesh_.type().num_vertices(mesh_.topology().dim());
-    editor_->init_cells(cell_buffer_.size() / ndims);
+
+    // Add cells
+    // This code is only valid for homogeneous meshes
+    editor_->init_cells(cell_count_);
     uint c = 0;
-    uint * connectivity = new uint[ndims];
-    for (uint i = 0; i < cell_buffer_.size(); i += ndims)
+    uint num_cell_vertices = mesh_.type().num_entities(0);
+    uint * connectivity = new uint[num_cell_vertices];
+    for (uint i = 0; i < cell_buffer_.size(); i += num_cell_vertices)
     {
-      for (uint n = 0; n < ndims; ++n)
+      for (uint n = 0; n < num_cell_vertices; ++n)
       {
         connectivity[n] =
-            new_mesh.distdata()[0].get_local(cell_buffer_[i + n]);
+            vdata1.get_local(cell_buffer_[i + n]);
       }
       editor_->add_cell(c++, &connectivity[0]);
     }
@@ -398,6 +397,7 @@ void XMLMesh::endMesh()
 
     nonlocal_vertices_.clear();
     sendbuf.clear();
+    cell_count_ = 0;
     cell_buffer_.clear();
     delete[] idxbuf;
     delete[] crdbuf;

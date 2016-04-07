@@ -271,4 +271,3 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 #endif
 
 } /* namespace dolfin */
-

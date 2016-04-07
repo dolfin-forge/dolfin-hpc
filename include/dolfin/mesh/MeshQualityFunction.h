@@ -34,8 +34,8 @@ class MeshQualityFunction : public Function
 
 public:
 
-  //
-  MeshQualityFunction(Mesh& mesh, uint p = 2);
+  // The default value for p ought to be 2
+  MeshQualityFunction(Mesh& mesh, uint p);
 
   //
   ~MeshQualityFunction();

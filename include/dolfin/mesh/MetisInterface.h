@@ -11,20 +11,26 @@
 
 namespace dolfin
 {
-  /// This class provides an interface to ParMETIS 
+
+/**
+ *  @class  MetisInterface
+ *
+ *  @brief   This class provides an interface to ParMETIS
+ *
+ */
+
+class MetisInterface
+{
+
+public:
   
-  class MetisInterface
-  {
-  public:
-    
-    static void partitionCommonMetis(Mesh& mesh,
-				     MeshFunction<uint>& partitions,
-				     MeshFunction<uint>* weight);
-   
-    static void partitionGeomMetis(Mesh& mesh, 
-				   MeshFunction<uint>& partitions);
-  };
+  static void partitionCommonMetis(Mesh& mesh, MeshFunction<uint>& partitions,
+                                   MeshFunction<uint>* weight);
 
-}
+  static void partitionGeomMetis(Mesh& mesh, MeshFunction<uint>& partitions);
 
-#endif
+};
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_METIS_INTERFACE_H */

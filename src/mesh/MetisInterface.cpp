@@ -84,7 +84,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   if (ncells == 0)
   {
-    dolfin::error("MetisInterface : mesh partition contains zero cells.");
+    dolfin::warning("MetisInterface : mesh partition contains zero cells.");
   }
   
   elmdist[rank] = ncells;

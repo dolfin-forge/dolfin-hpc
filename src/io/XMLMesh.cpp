@@ -279,8 +279,8 @@ void XMLMesh::endMesh()
     //
     MPI_Status status;
     uint src, dst;
-    int recvmax;
-    MPI_Allreduce(&shared, &recvmax, 1, MPI_INT, MPI_MAX, MPI::DOLFIN_COMM);
+    uint recvmax;
+    MPI::numGlobalSum(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
     int recvcount;
     uint * sendbuf_idx = new uint[2*recvmax];

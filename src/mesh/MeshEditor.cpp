@@ -117,11 +117,31 @@ void MeshEditor::close()
     error("Mismatch between number of vertices initialized and added to mesh : "
           "%d != %d", this->num_vertices_, mesh_->topology().size(0));
   }
+  if(mesh_->is_distributed())
+  {
+    mesh_->distdata()[0].finalize();
+    if(mesh_->size(0) != mesh_->distdata()[0].local_size())
+    {
+      warning("MeshEditor : vertex size mismatch between topology '%u' and "
+              "distributed data '%u'", mesh_->size(0),
+              mesh_->distdata()[0].local_size());
+    }
+  }
   // Check consistency of number of cells
   if( this->num_cells_ != mesh_->topology().size(tdim_))
   {
     error("Mismatch between number of cells initialized and added to mesh : "
           "%d != %d", this->num_cells_, mesh_->topology().size(tdim_));
+  }
+  if(mesh_->is_distributed())
+  {
+    mesh_->distdata()[tdim_].finalize();
+    if(mesh_->size(tdim_) != mesh_->distdata()[tdim_].local_size())
+    {
+      warning("MeshEditor : cell size mismatch between topology '%u' and "
+              "distributed data '%u'", mesh_->size(tdim_),
+              mesh_->distdata()[tdim_].local_size());
+    }
   }
   // Clear data
   clear();

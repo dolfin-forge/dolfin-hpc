@@ -22,6 +22,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     return false;
   }
 
+  message("MeshRenumber : renumber");
   bool renumbered = false;
 
 #ifdef HAVE_MPI
@@ -40,8 +41,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
   if (topology.entities_exist(0) && !distdata[0].valid_numbering)
   {
     DistributedData& vdata = distdata[0];
-    vdata.finalize();
+    dolfin_assert(vdata.local_size() == topology.size(0));
     vdata.renumber_global();
+    dolfin_assert(vdata.local_size() == topology.size(0));
     vdata.valid_numbering = true;
   }
 
@@ -251,6 +253,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
     //
     edata.finalize();
+    dolfin_assert(edata.local_size() == topology.size(d));
     edata.valid_numbering = true;
   }
 
@@ -262,8 +265,18 @@ bool MeshRenumber::renumber(MeshTopology& topology)
   if (topology.entities_exist(tdim) && !distdata[tdim].valid_numbering)
   {
     DistributedData& cdata = distdata[tdim];
-    cdata.finalize();
-    cdata.renumber_global();
+    // Cell numbering is not applied automatically
+    if(cdata.local_size() == 0)
+    {
+      cdata.clear();
+      cdata.set_bounds(topology.size(tdim));
+      cdata.finalize();
+    }
+    else
+    {
+      cdata.renumber_global();
+    }
+    dolfin_assert(cdata.local_size() == topology.size(tdim));
     cdata.valid_numbering = true;
   }
 

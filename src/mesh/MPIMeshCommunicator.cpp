@@ -9,17 +9,16 @@
 // First added:  2007-05-30
 // Last changed: 2015-01-31
 
+#include <dolfin/mesh/MPIMeshCommunicator.h>
+
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-
-#include <map>
 
 namespace dolfin
 {
@@ -45,6 +44,9 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
 
 #if HAVE_MPI
 
+  message("MPIMeshCommunicator::distribute");
+  mesh.distdata()[0].disp();
+
   MeshDistributedData distdata(mesh.topology().dim());
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
@@ -62,11 +64,13 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   int recv_size, recv_size_cell, send_size;
   int recv_count, recv_count_vertices, recv_count_cells;
 
+  message("Process mesh entities");
   // Process mesh entities according to distribution
   uint vi = 0;
   // Distribution defined per vertex
   if (distribution.dim() == 0)
   {
+    message(1, "MPIMeshCommunicator : vertex distribution");
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
       if (v->is_owned())
@@ -95,7 +99,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   // Distribution defined per cell
   else if (distribution.dim() == mesh.topology().dim())
   {
-
+    message(1, "MPIMeshCommunicator : cell distribution");
     MeshFunction<bool> vertex_used(mesh, 0);
     vertex_used = false;
 
@@ -155,6 +159,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
     error("Distribution defined on unknown mesh entity");
   }
 
+  message("Exchange the processed entities");
   // Exchange the processed entities
   recv_count = 0;
   for (uint i = 0; i < pe_size; i++)
@@ -232,7 +237,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   // Process new and old cells if distribution is defined on cells
   if (distribution.dim() == mesh.topology().dim())
   {
-
+    message("Process new and old cells");
     // Add old cells
     for (CellIterator c(mesh); !c.end(); ++c)
     {
@@ -249,6 +254,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
               coords.push_back(0.0);
             }
             distdata[0].set_map(vi, glb_index);
+            message("%8u owned by %8u",vi, distribution.get(*c));
             distdata[0].set_ghost(vi++, distribution.get(*c));
             shared_buffer.push_back(glb_index);
           }
@@ -276,8 +282,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
           coords.push_back(0.0);
         }
         distdata[0].set_map(vi, recv_buff_cell[i]);
-        //FIXME: fix garbage
-        //distdata.set_ghost(vi++, 0);
+        distdata[0].set_ghost(vi++, pe_size);
         shared_buffer.push_back(recv_buff_cell[i]);
       }
       cell_n++;
@@ -370,6 +375,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   num_cells = cl.size() / ndims;
 
   // Construct new mesh and add all buffered entities
+  message("Construct new mesh");
   Mesh new_mesh;
   MeshEditor editor(new_mesh, mesh.type(), mesh.geometry().dim());
 
@@ -396,6 +402,8 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   new_mesh.topology().distdata() = distdata;
   mesh = new_mesh;
   dolfin_assert(mesh.is_distributed());
+
+  message("MPIMeshCommunicator::done");
 
 #endif
 }

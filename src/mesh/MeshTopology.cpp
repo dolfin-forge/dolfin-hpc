@@ -124,6 +124,7 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
 //-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint num_vertices)
 {
+  bool distribute = true;
   if (connectivity_ != NULL)
   {
     error("MeshTopology : clear instance before reinitializing");
@@ -140,7 +141,7 @@ void MeshTopology::init(uint dim, uint num_vertices)
   {
     connectivity_[d] = new MeshConnectivity[dim + 1];
   }
-  if (MPI::numProcesses() > 1)
+  if (MPI::numProcesses() > 1 && distribute)
   {
     distdata_ = new MeshDistributedData(dim_);
   }

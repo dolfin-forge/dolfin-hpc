@@ -11,10 +11,11 @@
 #ifndef __DOLFIN_MPI_MESH_COMMUNICATOR_H
 #define __DOLFIN_MPI_MESH_COMMUNICATOR_H
 
-#include "MeshFunction.h"
+#include <dolfin/mesh/MeshFunction.h>
 
 namespace dolfin
 {
+
 class Mesh;
 class MPI;
 
@@ -35,6 +36,6 @@ public:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MPI_MESH_COMMUNICATOR_H */

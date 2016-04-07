@@ -199,7 +199,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshEntity.h\
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunction.h\
-				mesh/MeshFunctionConverter.h\
 				mesh/MeshGeometry.h\
 				mesh/MeshHierarchy.h\
 				mesh/MeshHierarchyAlgorithms.h\

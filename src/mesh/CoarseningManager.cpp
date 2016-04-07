@@ -10,7 +10,6 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/parameter/parameters.h>
-#include <dolfin/mesh/MeshFunctionConverter.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DCell.h>
@@ -61,7 +60,8 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
   // attempt count is for sake of simplicity in the migration phase always one
   // larger than the number of actually performed attempts
   MeshFunction<uint> attempt_count;
-  MeshFunctionConverter::cast(cell_marker, attempt_count);
+  error("Garbage");
+//  MeshFunctionConverter::cast(cell_marker, attempt_count);
 
   initCommon(mesh, &attempt_count);
 

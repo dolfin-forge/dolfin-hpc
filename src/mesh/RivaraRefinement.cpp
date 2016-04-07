@@ -16,7 +16,6 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/RivaraRefinement.h>
-#include <dolfin/mesh/MeshFunctionConverter.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DVertex.h>

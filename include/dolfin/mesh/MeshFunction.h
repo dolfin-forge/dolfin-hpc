@@ -14,6 +14,8 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEntity.h>
 
+#include <algorithm>
+
 namespace dolfin
 {
 
@@ -43,48 +45,103 @@ public:
 
   /// Create empty mesh function
   MeshFunction() :
-      values_(NULL),
       mesh_(0),
       dim_(0),
-      size_(0)
+      size_(0),
+      values_(NULL)
   {
   }
 
   /// Create scalar mesh function on given mesh of given dimension
   MeshFunction(Mesh& mesh, uint dim) :
-      values_(NULL),
-      mesh_(&mesh),
+      mesh_(0),
       dim_(0),
-      size_(0)
+      size_(0),
+      values_(NULL)
   {
-    init(dim);
-  }
-
-  /// Create mesh function on given mesh of given dimension and value size
-  MeshFunction(Mesh& mesh, uint dim, uint value_size) :
-      values_(NULL),
-      mesh_(&mesh),
-      dim_(0),
-      size_(0)
-  {
-    init(dim, value_size);
+    init(&mesh, dim, mesh.size(dim));
+    std::fill_n(values_, size_, static_cast<T>(0));
   }
 
   /// Create function from data file
-  MeshFunction(Mesh& mesh, const std::string filename) :
-      values_(NULL),
+  MeshFunction(Mesh& mesh, std::string const& filename) :
       mesh_(&mesh),
       dim_(0),
-      size_(0)
+      size_(0),
+      values_(NULL)
   {
     File file(filename);
     file >> *this;
+  }
+
+  /// Copy constructor
+  explicit
+  MeshFunction(MeshFunction<T> const& other) :
+      mesh_(0),
+      dim_(0),
+      size_(0),
+      values_(NULL)
+  {
+    *this = other;
   }
 
   /// Destructor
   ~MeshFunction()
   {
     delete[] values_;
+  }
+
+  /// Assignment operator
+  MeshFunction<T>& operator=(MeshFunction<T> const& other)
+  {
+    if(this != &other)
+    {
+      init(other.mesh_, other.dim_, other.size_);
+      std::copy(other.values_, other.values_ + size_, values_);
+    }
+    return *this;
+  }
+
+  /// Equality
+  bool operator==(MeshFunction<T> const& other)
+  {
+    if(this == &other)
+    {
+      return true;
+    }
+    if (dim_ != other.dim_)
+    {
+      return false;
+    }
+    if (size_ != other.size_)
+    {
+      return false;
+    }
+    if (size_ == 0)
+    {
+      return true;
+    }
+    for (uint i = 0; i < size_; i++)
+    {
+      if (values_[i] != other.values_[i])
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Equality
+  bool operator!=(MeshFunction<T> const& other)
+  {
+    return !(*this == other);
+  }
+
+  /// Initialize mesh function for given topological dimension
+  void init(Mesh& mesh, uint dim)
+  {
+    init(&mesh, dim, mesh.size(dim));
+    std::fill_n(values_, size_, static_cast<T>(0));
   }
 
   /// Return mesh associated with mesh function
@@ -106,16 +163,20 @@ public:
     return size_;
   }
 
-  /// Return array of values
-  inline const T* values() const
+  /// Access value at given index
+  inline T& operator[](uidx index)
   {
-    return values_;
+    dolfin_assert(values_);
+    dolfin_assert(index < size_);
+    return values_[index];
   }
 
-  /// Return array of values
-  inline T* values()
+  /// Access value at given index (const)
+  inline T const& operator[](uidx index) const
   {
-    return values_;
+    dolfin_assert(values_);
+    dolfin_assert(index < size_);
+    return values_[index];
   }
 
   /// Return value at given entity
@@ -129,81 +190,13 @@ public:
   }
 
   /// Return value at given entity
-  inline const T& operator()(MeshEntity& entity) const
+  inline T const& operator()(MeshEntity& entity) const
   {
     dolfin_assert(values_);
     dolfin_assert(&entity.mesh() == mesh_);
     dolfin_assert(entity.dim() == dim_);
     dolfin_assert(entity.index() < size_);
     return values_[entity.index()];
-  }
-
-  /// Set all values to given value
-  const MeshFunction<T>& operator=(const T& value)
-  {
-    dolfin_assert(values_);
-    for (uint i = 0; i < size_; ++i)
-    {
-      values_[i] = value;
-    }
-    return *this;
-  }
-
-  /// Equality
-  bool operator==(const MeshFunction<T>& other)
-  {
-    if(this == &other)
-    {
-      return true;
-    }
-    if (size_ != other.size_)
-    {
-      return false;
-    }
-    if (size_ == 0)
-    {
-      return true;
-    }
-    bool cmp = true;
-    for (uint i = 0; i < size_; i++)
-    {
-      cmp &= (values_[i] == other.values_[i]);
-    }
-    return cmp;
-  }
-
-  /// Equality
-  bool operator!=(const MeshFunction<T>& other)
-  {
-    return !(*this == other);
-  }
-
-  /// Initialize mesh function for given topological dimension
-  void init(Mesh& mesh, uint dim)
-  {
-    mesh.init(dim);
-    init(mesh, dim, mesh.size(dim));
-  }
-
-  /// Initialize mesh function for given topological dimension of given size
-  void init(Mesh& mesh, uint dim, uint size)
-  {
-    // Initialize mesh for entities of given dimension
-    mesh.init(dim);
-    dolfin_assert(mesh.size(dim) == size);
-
-    // Initialize data
-    mesh_ = &mesh;
-    dim_ = dim;
-    size_ = size;
-    delete[] values_;
-    values_ = NULL;
-
-    if(size_ > 0)
-    {
-      values_ = new T[size];
-      std::fill(values_, values_ + size, static_cast<T>(0));
-    }
   }
 
   /// Get value at given entity
@@ -225,7 +218,7 @@ public:
   }
 
   /// Set value at given entity
-  inline void set(const MeshEntity& entity, const T& value)
+  inline void set(const MeshEntity& entity, T const& value)
   {
     dolfin_assert(values_);
     dolfin_assert(&entity.mesh() == mesh_);
@@ -235,11 +228,38 @@ public:
   }
 
   /// Set value at given entity
-  inline void set(uint index, const T& value)
+  inline void set(uint index, T const& value)
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
     values_[index] = value;
+  }
+
+  /// Assignment function
+  MeshFunction<T>& assign(MeshFunction<T> const& other)
+  {
+    *this = other;
+    return *this;
+  }
+
+  /// Assignment function
+  template <class V>
+  MeshFunction<T>& assign(MeshFunction<V> const& other)
+  {
+    if (this != &other)
+    {
+      init(other.mesh_, other.dim_, other.size_);
+      std::transform(other.values_, other.values_ + size_, values_, cast<T> );
+    }
+    return *this;
+  }
+
+  /// Set all values to given value
+  MeshFunction<T>& operator=(T const& value)
+  {
+    dolfin_assert(values_);
+    std::fill_n(values_, size_, value);
+    return *this;
   }
 
   /// Display mesh function data
@@ -258,30 +278,27 @@ public:
 
 private:
 
-  /// Initialize mesh function for given topological dimension
-  void init(uint dim)
-  {
-    if (!mesh_)
-    {
-      error("Mesh undefined, unable to initialize mesh function.");
-    }
-    mesh_->init(dim);
-    init(*mesh_, dim, mesh_->size(dim));
-  }
-
   /// Initialize mesh function for given topological dimension of given size
-  void init(uint dim, uint size)
+  void init(Mesh * mesh, uint dim, uint size)
   {
-    if (!mesh_)
+    mesh_ = mesh;
+    dim_ = dim;
+    size_ = size;
+    delete[] values_;
+    values_ = NULL;
+    if(size_ > 0)
     {
-      error("Mesh undefined, unable to initialize mesh function.");
+      values_ = new T[size];
     }
-    mesh_->init(dim);
-    init(*mesh_, dim, size);
   }
 
-  /// Values at the set of mesh entities
-  T * values_;
+  ///
+  ///FIXME: real rounding: (value > 0) ? floor(value + 0.5) : ceil(value - 0.5)
+  template<class V>
+  inline T cast(V const& x)
+  {
+    return static_cast<T>(x);
+  }
 
   /// The mesh
   Mesh * mesh_;
@@ -292,7 +309,13 @@ private:
   /// Number of mesh entities
   uint size_;
 
+  /// Values at the set of mesh entities
+  T * values_;
+
 };
+
+//--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
+
 
 } /* namespace dolfin */
 

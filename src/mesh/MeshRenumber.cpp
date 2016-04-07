@@ -1,5 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson.
-// Copyright (C) 2016 Aurelien Larcher (rewrite).
+// Copyright (C) 2016 Aurelien Larcher (full rewrite).
 // Licensed under the GNU LGPL Version 2.1.
 //
 

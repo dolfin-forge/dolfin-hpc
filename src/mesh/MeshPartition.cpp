@@ -26,11 +26,11 @@ void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
 {
   partitions.init(mesh, mesh.topology().dim());
   Graph graph(mesh);
-  GraphPartition::partition(graph, num_partitions, partitions.values());
+  GraphPartition::partition(graph, num_partitions, &partitions[0]);
   
   bool report_edge_cut = dolfin_get("report edge cut");
   if (report_edge_cut)
-    GraphPartition::edgecut(graph, num_partitions, partitions.values());
+    GraphPartition::edgecut(graph, num_partitions, &partitions[0]);
 }
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI

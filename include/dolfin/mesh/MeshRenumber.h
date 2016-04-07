@@ -15,8 +15,13 @@ class MeshTopology;
 /**
  *  @class  MeshRenumber
  *
- *  @brief  Provides algorithms to renumber the mesh topology.
- *  .
+ *  @brief  Provides algorithms to renumber the mesh topology:
+ *          - vertices and cells exist and are only renumbered with indices
+ *            contiguous per rank i.e. within the process range:
+ *              [offset, offset + range size [
+ *          - edges and facets need to be assigned to a rank and then numbered
+ *            contiguously per rank.
+ *
  */
 
 class MeshRenumber

@@ -14,7 +14,6 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/mesh/LoadBalancer.h>
-#include <dolfin/mesh/MeshFunctionConverter.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -212,14 +211,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     {
       MeshFunction<uint> new_cell_marker_uint;
       MeshFunction<uint> cell_marker_uint;
-      MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+      //FIXME: Garbage
+//      MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
       Array< std::pair< MeshFunction<uint> *, MeshFunction<uint> * > > cell_functions;
       cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
 
       error("Garbage");
 //      mesh.distribute(partitions, cell_functions, vertex_functions);
-
-      MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
+//      MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
     }
   else
   {
@@ -334,13 +333,15 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   {
     MeshFunction<uint> new_cell_marker_uint;
     MeshFunction<uint> cell_marker_uint;
-    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+    //FIXME: Garbage
+//    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
     cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
     error("Garbage");
 //    mesh.distribute(partitions, cell_functions, vertex_functions);
 
     MeshFunction<bool> new_cell_marker;
-    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
+    //FIXME: Garbage
+//    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
 
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)
@@ -452,14 +453,16 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   {
     MeshFunction<uint> new_cell_marker_uint;
     MeshFunction<uint> cell_marker_uint;
-    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
+    //FIXME: Garbage
+//    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
     cell_functions.push_back( std::make_pair(&cell_marker_uint, &new_cell_marker_uint) );
 
     error("Garbage");
 //    mesh.distribute(partitions, cell_functions);
 
     MeshFunction<bool> new_cell_marker;
-    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
+    //FIXME: Garbage
+//    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
 
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)

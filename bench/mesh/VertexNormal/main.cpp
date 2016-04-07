@@ -50,6 +50,8 @@ void test(std::string name, VertexNormal& vn)
 int main(int argc, char** argv)
 {
   dolfin_init(argc, argv);
+  logm.setDebugLevel(1);
+  logm.file();
   //---------------------------------------------------------------------------
   {
     {

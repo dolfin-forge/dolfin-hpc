@@ -65,7 +65,7 @@ public:
   /// Return the offset of the process range
   uint offset() const;
 
-  /// Return the local data size
+  /// Return the process range size
   uint range_size() const;
 
   /// Return if the global index is in the process range
@@ -76,6 +76,11 @@ public:
 
   /// Return the global data size i.e the global sum of number of owned entities
   uint global_size() const;
+
+  /// Set the process range and the global size: if the second is not provided
+  /// it is computed by summing the number of owned entities.
+  /// Setting bounds is only possible to an empty distributed data.
+  void set_bounds(uint num_owned, uint num_global = 0);
 
   //--- Numbering -------------------------------------------------------------
 

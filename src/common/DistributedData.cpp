@@ -447,19 +447,8 @@ void DistributedData::renumber_global()
     {
       message("index = %u", recvbuf[k]);
       dolfin_assert(local_.count(recvbuf[k]) > 0);
-      sendbck[k] = cached_numbering_[local_.find(recvbuf[k])->second];
-    }
-
-    MPI_Sendrecv(&sendbck[0], recvcount, MPI_UNSIGNED, src, 2,
-                 &recvbck[0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 2,
-                 MPI::DOLFIN_COMM, &status);
-
-    for (uint k = 0; k < sendbuf[dst].size(); ++k)
-    {
-      uint local_index = local_.find(sendbuf[dst][k])->second;
-      dolfin_assert(local_mapping.count(recvbck[k]) == 0);
-      cached_numbering_[local_index] = recvbck[k];
-      local_mapping[recvbck[k]] = local_index;
+      uint const local_index = local_.find(recvbuf[k])->second;
+      sendbck[k] = cached_numbering_[local_index];
 
       // Entity is not marked as shared: invalidate ownership
       if(cached_ownership_[local_index] == pe_size_)
@@ -468,8 +457,20 @@ void DistributedData::renumber_global()
       }
       else if(cached_ownership_[local_index] != rank_)
       {
-        error("DistributedData : entity %u should by owned but set as ghost");
+        error("DistributedData : entity %u should be owned but is set ghost");
       }
+    }
+
+    MPI_Sendrecv(&sendbck[0], recvcount, MPI_UNSIGNED, src, 2,
+                 &recvbck[0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 2,
+                 MPI::DOLFIN_COMM, &status);
+
+    for (uint k = 0; k < sendbuf[dst].size(); ++k)
+    {
+      uint const local_index = local_.find(sendbuf[dst][k])->second;
+      dolfin_assert(local_mapping.count(recvbck[k]) == 0);
+      cached_numbering_[local_index] = recvbck[k];
+      local_mapping[recvbck[k]] = local_index;
     }
   }
 

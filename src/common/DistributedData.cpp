@@ -264,7 +264,11 @@ void DistributedData::set_map(uint local_index, uint global_index)
 //-----------------------------------------------------------------------------
 void DistributedData::remap_numbering(Array<uint> const& mapping)
 {
-  dolfin_assert(finalized_);
+  if(!finalized_)
+  {
+    error("DistributedData : re-mapping numbering requires finalized data");
+  }
+
   if(mapping.size() != MPI::numProcesses())
   {
     error("DistributedData : numbering re-mapping array has invalid size");
@@ -311,7 +315,80 @@ void DistributedData::renumber_global()
     error("DistributedData : global renumbering requires finalized data");
   }
 
-  //
+#if HAVE_MPI
+
+  _map<uint, uint> local_mapping;
+  Array<uint> * sendbuf = new Array<uint> [pe_size_];
+
+  // Re-index owned entities and collect ghosted entities per owner
+  uint index = offset_;
+  for (uint i = 0; i < local_.size(); ++i)
+  {
+    if (cached_ownership_[i] == pe_size_)
+    {
+      cached_numbering_[i] = index;
+      local_mapping[index] = i;
+      ++index;
+    }
+    else
+    {
+      sendbuf[cached_ownership_[i]].push_back(cached_numbering_[i]);
+    }
+  }
+
+  // Exchange data and set numbering
+  MPI_Status status;
+  uint src;
+  uint dst;
+
+  // Maximum number of received entities is the number of owned shared
+  int recvcount;
+  // Over-allocate but avoid reduce
+  uint const num_shared = shared_.size();
+  uint const num_ghost = ghost_.size();
+  int recvsize = num_shared - num_ghost;
+  uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
+  uint * sendbck = (recvsize == 0 ? NULL : new uint[recvsize]);
+  uint * recvbck = (num_ghost == 0 ? NULL : new uint[num_ghost]);
+  for (uint j = 1; j < pe_size_; ++j)
+  {
+    src = (rank_ - j + pe_size_) % pe_size_;
+    dst = (rank_ + j) % pe_size_;
+
+    MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
+                 &recvbuf[0], recvsize, MPI_UNSIGNED, src, 1,
+                 MPI::DOLFIN_COMM, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+
+    for (int k = 0; k < recvcount; ++k)
+    {
+      dolfin_assert(local_.count(recvbuf[k]) > 0);
+      sendbck[k] = cached_numbering_[local_.find(recvbuf[k])->second];
+    }
+
+    MPI_Sendrecv(&sendbck[0], recvcount, MPI_UNSIGNED, src, 2,
+                 &recvbck[0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 2,
+                 MPI::DOLFIN_COMM, &status);
+
+    for (uint k = 0; k < sendbuf[dst].size(); ++k)
+    {
+      dolfin_assert(local_.count(recvbuf[k]) > 0);
+      uint local_index = local_.find(sendbuf[dst][k])->second;
+      dolfin_assert(local_mapping.count(recvbck[k]) == 0);
+      cached_numbering_[local_index] = recvbck[k];
+      local_mapping[recvbck[k]] = local_index;
+    }
+  }
+
+  delete[] recvbck;
+  delete[] sendbck;
+  delete[] recvbuf;
+  delete[] sendbuf;
+
+  local_ = local_mapping;
+
+#endif /* HAVE_MPI */
+
 }
 //-----------------------------------------------------------------------------
 bool DistributedData::has_adj_rank(uint rank) const

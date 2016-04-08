@@ -168,7 +168,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   }
   uint greassigned = 0;
   MPI::numGlobalSum(lreassigned, greassigned);
-  message("Metis : PartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
+  message(1, "METISPartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(tdim)),
           percent(greassigned, mesh.distdata()[tdim].global_size()));
   tocd();
@@ -242,7 +242,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   }
   uint greassigned = 0;
   MPI::numGlobalSum(lreassigned, greassigned);
-  message("Metis : PartGeom reassigned local = %2.2f %%, global = %2.2f %%",
+  message(1, "METISPartGeom reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(0)),
           percent(greassigned, mesh.distdata()[0].global_size()));
   tocd();

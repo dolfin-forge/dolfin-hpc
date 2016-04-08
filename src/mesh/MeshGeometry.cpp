@@ -10,6 +10,7 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/log/log.h>
 
+#include <algorithm>
 #include <cstring>
 #include <ctime>
 
@@ -50,20 +51,21 @@ MeshGeometry::~MeshGeometry()
   clear();
 }
 //-----------------------------------------------------------------------------
-MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& geometry)
+MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& other)
 {
   clear();
 
-  dim_ = geometry.dim_;
-  size_ = geometry.size_;
-  if(dim_*size_ > 0)
+  dim_ = other.dim_;
+  size_ = other.size_;
+  uint const n = dim_ * size_;
+  if (n > 0)
   {
-    coordinates_ = new real[dim_*size_];
-    std::memcpy(coordinates_, geometry.coordinates_, dim_*size_*sizeof(real));
+    coordinates_ = new real[n];
+    std::copy(other.coordinates_, other.coordinates_ + n, coordinates_);
   }
   abs_tol_  = new real[dim_+1];
-  std::memcpy(abs_tol_, geometry.abs_tol_, (dim_+1)*sizeof(real));
-  timestamp_ = geometry.timestamp_;
+  std::copy(other.abs_tol_, other.abs_tol_ + (dim_ + 1), abs_tol_);
+  timestamp_ = other.timestamp_;
 
   return *this;
 }
@@ -116,13 +118,13 @@ void MeshGeometry::init(uint gdim, uint size)
 
   dim_ = gdim;
   size_ = size;
-  if(dim_*size_ > 0)
+  if (dim_ * size_ > 0)
   {
-    coordinates_ = new real[dim_*size_];
-    std::memset(coordinates_, 0.0, dim_* size_*sizeof(real));
+    coordinates_ = new real[dim_ * size_];
+    std::fill_n(coordinates_, dim_ * size_, 0.0);
   }
-  abs_tol_  = new real[dim_+1];
-  std::memset(abs_tol_, DOLFIN_EPS, (dim_+1)*sizeof(real));
+  abs_tol_ = new real[dim_ + 1];
+  std::fill_n(abs_tol_, (dim_ + 1), DOLFIN_EPS);
 
   // Initialize token
   update_token();
@@ -169,7 +171,16 @@ void MeshGeometry::set(uint n, uint i, real x)
 void MeshGeometry::set(uint n, real const * x)
 {
   dolfin_assert(n < size_);
-  std::memcpy(&coordinates_[n * dim_], x, dim_*sizeof(real));
+  std::copy(x, x + dim_, coordinates_ + n * dim_);
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::set(Array<real> const& coords)
+{
+  if(coords.size() != dim_ * size_)
+  {
+    error("MeshGeometry : size mismatch in coordinates assignment");
+  }
+  std::copy(coords.begin(), coords.end() + dim_ * size_, coordinates_);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::remap(Array<uint> const& map)
@@ -182,8 +193,8 @@ void MeshGeometry::remap(Array<uint> const& map)
   real * xcpy = new real[dim_*size_];
   for (uint i = 0; i < size_; ++i)
   {
-    std::memcpy(&xcpy[map[i] * dim_], &coordinates_[i * dim_],
-                dim_ * sizeof(real));
+    std::copy(coordinates_ + i * dim_, coordinates_ + (i + 1) * dim_,
+              xcpy + map[i] * dim_);
   }
   delete[] coordinates_;
   coordinates_ = xcpy;

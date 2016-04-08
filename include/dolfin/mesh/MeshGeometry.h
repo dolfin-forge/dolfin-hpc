@@ -94,6 +94,9 @@ public:
   /// Set value of coordinates of point n
   void set(uint n, real const * x);
 
+  /// Set values of coordinates from array, size of input should match
+  void set(Array<real> const& coords);
+
   /// Remap coordinates from old to new ordering
   /// The mapping should have the same size as the number of coordinates
   void remap(Array<uint> const& map);

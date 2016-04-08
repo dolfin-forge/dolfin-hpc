@@ -34,6 +34,11 @@ public:
   /// Distribute mesh according to a mesh function
   static void distribute(Mesh& mesh, MeshFunction<uint>& distribution);
 
+private:
+
+  /// Distribute mesh according to a vertex-based distribution
+  static void distributeVertices(Mesh& mesh, MeshFunction<uint>& distribution);
+
 };
 
 } /* namespace dolfin */

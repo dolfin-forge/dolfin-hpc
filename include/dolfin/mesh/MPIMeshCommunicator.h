@@ -39,6 +39,9 @@ private:
   /// Distribute mesh according to a vertex-based distribution
   static void distributeVertices(Mesh& mesh, MeshFunction<uint>& distribution);
 
+  /// Distribute mesh according to a cell-based distribution
+  static void distributeCells(Mesh& mesh, MeshFunction<uint>& distribution);
+
 };
 
 } /* namespace dolfin */

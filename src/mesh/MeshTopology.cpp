@@ -134,7 +134,7 @@ void MeshTopology::init(uint dim, bool distribute /* = true */)
   {
     connectivity_[d] = new MeshConnectivity[dim + 1];
   }
-  if (MPI::numProcesses() > 1 && distribute)
+  if (distribute)
   {
     distdata_ = new MeshDistributedData(dim_);
   }
@@ -142,7 +142,7 @@ void MeshTopology::init(uint dim, bool distribute /* = true */)
   update_token();
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, uint num_entities)
+void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
 {
   if (connectivity_ == NULL)
   {
@@ -150,16 +150,36 @@ void MeshTopology::init(uint dim, uint num_entities)
   }
   if(dim == 0)
   {
-    if (dim_ == 0 && num_entities > 1)
+    if (dim_ == 0 && num_local > 1)
     {
       error("MeshTopology : more than one vertex for a mesh of dimension zero");
     }
-    num_vertices_ = num_entities;
+    num_vertices_ = num_local;
   }
   else
   {
-
+    if(num_local > 0 && num_vertices_ == 0)
+    {
+      error("MeshTopology : initializing non-zero number of entities on a "
+            "topology with zero vertices");
+    }
+    // Well Well Well *erm* *erm* *erm* OOP gone wrong
+    connectivity_[dim_][0].init(num_local, mesh_.type().num_vertices(dim));
   }
+  if (distdata_ != NULL)
+  {
+    if (num_global > 0 && num_global < num_local)
+    {
+      error("MeshTopology : number of global entities lower than number of "
+            " local entities %u < %u", num_local, num_global);
+    }
+    this->distdata()[dim].set_size(num_local, num_global);
+  }
+  else if ((num_global > 0) && (num_local != num_global))
+  {
+    error("MeshTopology : invalid number of global entities set in serial");
+  }
+
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::clear()
@@ -169,7 +189,7 @@ void MeshTopology::clear()
   distdata_ = NULL;
 
   // Delete mesh connectivity
-  if (connectivity_)
+  if (connectivity_ != NULL)
   {
     for (uint d = 0; d <= dim_; ++d)
     {
@@ -191,28 +211,29 @@ void MeshTopology::finalize()
   {
     error("MeshTopology : cell -> vertices connectivity does not exist");
   }
-  for (uint d = 0; d < dim_; ++d)
+  for (uint d = 0; d <= dim_; ++d)
   {
     if(this->entities_exist(d))
     {
-      if (this->size(d) != this->distdata()[d].local_size())
+      DistributedData& ddata = this->distdata()[d];
+      if(!ddata.is_finalized())
       {
-        warning("MeshEditor : vertex size mismatch between topology '%u' and "
-                "distributed data '%u'", this->size(d),
-                this->distdata()[d].local_size());
+        ddata.finalize();
       }
-      if(!this->distdata()[d].is_finalized())
+      if (this->size(d) != ddata.local_size())
       {
-        this->distdata()[d].finalize();
+        error("MeshEditor : vertex size mismatch between topology '%u' and "
+              "distributed data '%u'", this->size(d), ddata.local_size());
       }
     }
   }
-  // Do not renumber because
+  // Do not renumber automatically !
+  // This would cause issues for boundary meshes and some mesh algorithms.
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& map)
 {
-  if (connectivity_)
+  if (connectivity_ != NULL)
   {
     uint d0 = dim;
     for (uint d1 = 0; d1 <= dim_; ++d1)

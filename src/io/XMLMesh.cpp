@@ -34,14 +34,7 @@ XMLMesh::XMLMesh(Mesh& mesh) :
     editor_(NULL),
     parallel_(false),
     cell_count_(0),
-    vertex_offset_(0),
-    vertex_range_end_(0),
-    cell_offset_(0),
-    cell_range_end_(0),
-    local_vertices_(NULL),
-    shared_vertices_(NULL),
-    num_local_vertices_(0),
-    num_local_cells_(0),
+    vertex_dist_(NULL),
     vertex_owner_(NULL)
 {
 }
@@ -129,14 +122,14 @@ bool XMLMesh::close()
 void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
-  std::string type = parse<std::string>(name, attrs, "celltype");
-  uint gdim = parse<uint>(name, attrs, "dim");
+  std::string celltype = parse<std::string>(name, attrs, "celltype");
+  uint dim = parse<uint>(name, attrs, "dim");
   if (editor_ != NULL)
   {
     error("XMLMesh : mesh editor is already created.");
   }
-  CellType * cell_type = CellType::create(type);
-  editor_ = new MeshEditor(mesh_, cell_type->cellType(), gdim);
+  CellType * cell_type = CellType::create(celltype);
+  editor_ = new MeshEditor(mesh_, cell_type->cellType(), dim);
   delete cell_type;
   parallel_ = (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"));
   if(parallel_)
@@ -149,18 +142,18 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_vertices = parse<uint>(name, attrs, "size");
-  //
-  uint pe_size = MPI::numProcesses();
-  uint rank = MPI::processNumber();
+  uint size = parse<uint>(name, attrs, "size");
   // Calculate a linear data distribution
-  uint L = std::floor((real) num_vertices / (real) pe_size);
-  uint R = num_vertices % pe_size;
-  num_local_vertices_ = (num_vertices + pe_size - rank - 1) / pe_size;
-  vertex_offset_ = rank * L + std::min(rank, R);
-  vertex_range_end_ = vertex_offset_ + (num_local_vertices_ - 1);
+  dolfin_assert(vertex_dist_ == NULL);
+  vertex_dist_ = new LinearDistribution(size, MPI::numProcesses());
   // Set number of vertices
-  editor_->init_vertices(num_local_vertices_);
+  editor_->init_vertices(vertex_dist_->size, size);
+  if(parallel_)
+  {
+    // Set process range for vertices as they are just collected contiguously
+    // prior to distribution.
+    mesh_.topology().distdata()[0].set_range(vertex_dist_->size, size);
+  }
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
@@ -190,7 +183,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   // Read index
   uint v = parse<uint>(name, attrs, "index");
 
-  if (v < vertex_offset_ || v > vertex_range_end_) return;
+  if (!vertex_dist_->in_range(v)) return;
 
   // Handle differently depending on geometric dimension
   real x[Point::MAX_SIZE];
@@ -208,11 +201,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
           mesh_.geometry().dim());
     break;
   }
-  editor_->add_vertex(v - vertex_offset_, &x[0]);
-  if (parallel_)
-  {
-    mesh_.distdata()[0].set_map(v - vertex_offset_, v);
-  }
+  editor_->add_vertex(v - vertex_dist_->offset, &x[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)

@@ -55,6 +55,9 @@ public:
   /// Finalize the data: validate and set process range + global size
   void finalize();
 
+  /// Return if the distributed data is empty
+  bool empty() const;
+
   /// Return the storage capacity of mappings
   uint capacity() const;
 
@@ -80,8 +83,14 @@ public:
 
   /// Set the process range and the global size: if the second is not provided
   /// it is computed by summing the number of owned entities.
-  /// Setting bounds is only possible to an empty distributed data.
-  void set_bounds(uint num_owned, uint num_global = 0);
+  /// Setting range is only possible to an empty distributed data.
+  void set_range(uint num_owned, uint num_global = 0);
+
+  /// Set the process local and global size: if the second is not provided
+  /// it is computed by summing the number of owned entities.
+  /// Setting size is only possible to an empty distributed data and triggers
+  /// the creation of cached data structure to avoid use of maps.
+  void set_size(uint num_local, uint num_global = 0);
 
   //--- Numbering -------------------------------------------------------------
 
@@ -190,6 +199,7 @@ private:
   _map<uint, uint> ghost_;
 
   ///
+  uint cache_size_;
   uint * cached_numbering_;
   uint * cached_ownership_;
 

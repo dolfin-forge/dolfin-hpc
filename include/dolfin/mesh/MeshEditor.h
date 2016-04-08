@@ -34,29 +34,44 @@ public:
   /// Destructor
   ~MeshEditor();
 
-  /// Specify number of vertices
-  void init_vertices(uint num_vertices);
+  //--- VERTICES --------------------------------------------------------------
 
-  /// Specify number of cells
-  void init_cells(uint num_cells);
+  /// Specify number of vertices
+  /// Optionally specify the global number of vertices for a distributed mesh.
+  /// If the topology is not distributed, any value different than zero or the
+  /// number of local vertices will trigger an error.
+  void init_vertices(uint num_local, uint num_global = 0);
 
   /// Add vertex v at given coordinates x
   void add_vertex(uint v, real const * x);
+
+  /// Return current vertex count
+  uint current_vertex() const;
+
+  //--- CELLS -----------------------------------------------------------------
+
+  /// Specify number of cells
+  /// Optionally specify the global number of cells for a distributed mesh.
+  /// If the topology is not distributed, any value different than zero or the
+  /// number of local cells will trigger an error.
+  void init_cells(uint num_local, uint num_global = 0);
 
   /// Add cell with given vertices
   void add_cell(uint c, uint const * v);
 
   /// Set cells with given connectivities
-  void add_cells(Array<Array<uint> > const& connectivity);
-
-  /// Close mesh, finish editing
-  void close();
-
-  /// Return current vertex count
-  uint current_vertex() const;
+  /// Optionally specify the global number of cells for a distributed mesh.
+  /// If the topology is not distributed, any value different than zero or the
+  /// number of local cells will trigger an error.
+  void add_cells(Array<Array<uint> > const& connectivity, uint num_global = 0);
 
   /// Return current cell count
   uint current_cell() const;
+
+  //---------------------------------------------------------------------------
+
+  /// Close mesh, finish editing
+  void close();
 
 private:
 

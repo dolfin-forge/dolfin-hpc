@@ -65,7 +65,7 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   this->gdim_ = gdim;
 
   // Initialize the topology to the given topological dimension
-  mesh_->topology_.init(tdim_);
+  mesh_->topology_.init(tdim_, MPI::numProcesses() > 1);
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation
@@ -74,30 +74,31 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   open_ = true;
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::init_vertices(uint num_vertices)
+void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
 {
   if(cell_vertices_ == NULL)
   {
     error("MeshEditor : initializing vertices on empty editor");
   }
   // Initialize mesh data
-  this->num_vertices_ = num_vertices;
-  mesh_->topology_.init(0    , num_vertices);
-  mesh_->geometry_.init(gdim_, num_vertices);
+  this->num_vertices_ = num_local;
+  mesh_->topology_.init(0    , num_local, num_global);
+  mesh_->geometry_.init(gdim_, num_local);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::init_cells(uint num_cells)
+void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
 {
   if(cell_vertices_ == NULL)
   {
     error("MeshEditor : initializing cells on empty editor");
   }
   // Initialize mesh data
-  this->num_cells_ = num_cells;
-  cell_vertices_->init(num_cells, mesh_->type().num_entities(0));
+  this->num_cells_ = num_local;
+  mesh_->topology_.init(tdim_, num_local, num_global);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::add_cells(Array<Array<uint> > const& connectivity)
+void MeshEditor::add_cells(Array<Array<uint> > const& connectivity,
+                           uint num_global /* = 0 */)
 {
   // Initialize mesh data
   this->num_cells_ = connectivity.size();

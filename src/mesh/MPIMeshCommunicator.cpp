@@ -44,7 +44,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   }
   else if (ddim == mesh.topology().dim())
   {
-
+    distributeCells(mesh, distribution);
   }
   else
   {
@@ -71,6 +71,10 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   uint const tdim = topology.dim();
   MeshGeometry& geometry = mesh.geometry();
   uint const gdim = geometry.dim();
+
+  // Save global num vertices to check consistency
+  dolfin_assert(topology.distdata()[0].is_finalized());
+  uint const num_global_vertices = topology.global_size(0);
 
   //
   dolfin_assert(topology.entities_exist(0));
@@ -175,13 +179,50 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   topology.init(0 , num_local_vertices);
   topology.distdata()[0] = distdata1;
   topology.finalize();
+  if(num_global_vertices == topology.global_size(0))
+  {
+    error("MPIMeshCommunicator : invalid global number of vertices after "
+          "distribution by vertices produced an invalid %u != %u",
+          num_global_vertices, topology.global_size(0));
+  }
   geometry.init(gdim, num_local_vertices);
   geometry.set(coords);
   geometry.finalize();
 
-  message("MPIMeshCommunicator::done");
+  //
+  tocd(1);
 
-#endif
+#endif /* HAVE_MPI */
+
+}
+//-----------------------------------------------------------------------------
+void MPIMeshCommunicator::distributeCells(Mesh& mesh,
+                                          MeshFunction<uint>& distribution)
+{
+  if (!mesh.is_distributed())
+  {
+    return;
+  }
+
+#if HAVE_MPI
+
+  message(1, "MPIMeshCommunicator : distribute cells");
+  tic();
+
+  error("Unimplemented");
+
+  uint const rank = MPI::processNumber();
+  uint const pe_size = MPI::numProcesses();
+  MeshTopology& topology = mesh.topology();
+  uint const tdim = topology.dim();
+  MeshGeometry& geometry = mesh.geometry();
+  uint const gdim = geometry.dim();
+
+
+  //
+  tocd(1);
+
+#endif /* HAVE_MPI */
 
 }
 //-----------------------------------------------------------------------------

@@ -68,7 +68,10 @@ public:
   void init(uint dim, bool distribute = true);
 
   /// Initialize topology entities for given maximum dimension
-  void init(uint dim, uint num_entities);
+  /// Optionally specify the global number of entities for a distributed mesh.
+  /// If the topology is not distributed, any value different than zero or the
+  /// number of local entities will trigger an error.
+  void init(uint dim, uint num_local, uint num_global = 0);
 
   /// Clear all data
   void clear();

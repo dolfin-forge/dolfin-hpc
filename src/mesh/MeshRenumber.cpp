@@ -269,7 +269,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     if(cdata.local_size() == 0)
     {
       cdata.clear();
-      cdata.set_bounds(topology.size(tdim));
+      cdata.set_range(topology.size(tdim));
       cdata.finalize();
     }
     else

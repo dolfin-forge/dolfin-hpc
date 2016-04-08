@@ -30,11 +30,11 @@ real dolfin::toc()
   return elapsed_time;
 }
 //-----------------------------------------------------------------------------
-real dolfin::tocd()
+real dolfin::tocd(uint level)
 {
   real elapsed_time = toc();
   
-  cout << "Elapsed time: " << elapsed_time << " seconds" << endl;
+  message(level, "Elapsed time: %g seconds", elapsed_time);
 
   return elapsed_time;
 }

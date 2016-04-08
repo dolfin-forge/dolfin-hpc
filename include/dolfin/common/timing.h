@@ -18,8 +18,8 @@ namespace dolfin
   /// Return elapsed CPU time
   real toc();
 
-  /// Return and display elapsed CPU time
-  real tocd();
+  /// Return and display elapsed CPU time at given verbose level
+  real tocd(uint level = 0);
 
   /// Return current CPU time used by process
   real time();

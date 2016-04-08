@@ -63,8 +63,12 @@ public:
   /// Non-equality
   bool operator!=(MeshTopology const& other) const;
 
-  /// Initialize topology of given maximum dimension
-  void init(uint dim, uint num_vertices);
+  /// Initialize topology of given maximum dimension and optionally set a flag
+  /// to not distribute the topology
+  void init(uint dim, bool distribute = true);
+
+  /// Initialize topology entities for given maximum dimension
+  void init(uint dim, uint num_entities);
 
   /// Clear all data
   void clear();

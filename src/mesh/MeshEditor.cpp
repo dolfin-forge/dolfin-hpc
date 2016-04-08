@@ -16,6 +16,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
     mesh_(&mesh),
+    cell_vertices_(NULL),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -29,6 +30,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
     mesh_(&mesh),
+    cell_vertices_(NULL),
     tdim_(0),
     gdim_(0),
     num_vertices_(0),
@@ -52,7 +54,6 @@ MeshEditor::~MeshEditor()
 //-----------------------------------------------------------------------------
 void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
 {
-
   // Clear old mesh data
   mesh.clear();
 
@@ -63,22 +64,44 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   this->tdim_ = mesh.cell_type_->dim();
   this->gdim_ = gdim;
 
+  // Initialize the topology to the given topological dimension
+  mesh_->topology_.init(tdim_);
+
+  // Create a shortcut to cell vertices connectivity to avoid checking its
+  // existence at every cell creation
+  this->cell_vertices_ = &mesh_->topology_(tdim_, 0);
+
   open_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_vertices(uint num_vertices)
 {
+  if(cell_vertices_ == NULL)
+  {
+    error("MeshEditor : initializing vertices on empty editor");
+  }
   // Initialize mesh data
   this->num_vertices_ = num_vertices;
-  mesh_->topology_.init(tdim_, num_vertices);
+  mesh_->topology_.init(0    , num_vertices);
   mesh_->geometry_.init(gdim_, num_vertices);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_cells(uint num_cells)
 {
+  if(cell_vertices_ == NULL)
+  {
+    error("MeshEditor : initializing cells on empty editor");
+  }
   // Initialize mesh data
   this->num_cells_ = num_cells;
-  mesh_->topology_(tdim_, 0).init(num_cells, mesh_->type().num_entities(0));
+  cell_vertices_->init(num_cells, mesh_->type().num_entities(0));
+}
+//-----------------------------------------------------------------------------
+void MeshEditor::add_cells(Array<Array<uint> > const& connectivity)
+{
+  // Initialize mesh data
+  this->num_cells_ = connectivity.size();
+  cell_vertices_->set(connectivity);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)
@@ -89,7 +112,7 @@ void MeshEditor::add_vertex(uint v, real const * x)
   }
   if (vertex_index_ >= num_vertices_)
   {
-    error("Vertex list is full, %d vertices already specified.", num_vertices_);
+    error("MeshEditor : vertex list full, %d vertices added.", num_vertices_);
   }
   mesh_->geometry_.set(v, x);
   ++vertex_index_;
@@ -103,7 +126,7 @@ void MeshEditor::add_cell(uint c, uint const * v)
   }
   if (cell_index_ >= num_cells_)
   {
-   error("Cell list is full, %d cells already specified.", num_cells_);
+   error("MeshEditor : cell list full, %d cells added.", num_cells_);
   }
   mesh_->topology_(tdim_, 0).set(c, v);
   ++cell_index_;
@@ -117,32 +140,15 @@ void MeshEditor::close()
     error("Mismatch between number of vertices initialized and added to mesh : "
           "%d != %d", this->num_vertices_, mesh_->topology().size(0));
   }
-  if(mesh_->is_distributed())
-  {
-    mesh_->distdata()[0].finalize();
-    if(mesh_->size(0) != mesh_->distdata()[0].local_size())
-    {
-      warning("MeshEditor : vertex size mismatch between topology '%u' and "
-              "distributed data '%u'", mesh_->size(0),
-              mesh_->distdata()[0].local_size());
-    }
-  }
   // Check consistency of number of cells
   if( this->num_cells_ != mesh_->topology().size(tdim_))
   {
     error("Mismatch between number of cells initialized and added to mesh : "
           "%d != %d", this->num_cells_, mesh_->topology().size(tdim_));
   }
-  if(mesh_->is_distributed())
-  {
-    mesh_->distdata()[tdim_].finalize();
-    if(mesh_->size(tdim_) != mesh_->distdata()[tdim_].local_size())
-    {
-      warning("MeshEditor : cell size mismatch between topology '%u' and "
-              "distributed data '%u'", mesh_->size(tdim_),
-              mesh_->distdata()[tdim_].local_size());
-    }
-  }
+  // Finalize topology and geometry
+  mesh_->topology_.finalize();
+  mesh_->geometry_.finalize();
   // Clear data
   clear();
 }

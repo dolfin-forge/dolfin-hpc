@@ -15,12 +15,14 @@ namespace dolfin
 {
 
 class Mesh;
+class MeshConnectivity;
 class Point;
 
 /// A simple mesh editor for creating simplicial meshes in 1D, 2D and 3D.
 
 class MeshEditor
 {
+
 public:
 
   /// Constructor for meshes with unique type of cell
@@ -44,6 +46,9 @@ public:
   /// Add cell with given vertices
   void add_cell(uint c, uint const * v);
 
+  /// Set cells with given connectivities
+  void add_cells(Array<Array<uint> > const& connectivity);
+
   /// Close mesh, finish editing
   void close();
 
@@ -61,8 +66,11 @@ private:
   // Clear all data
   void clear();
 
-  // The mesh
+  // Mesh
   Mesh * const mesh_;
+
+  // Cell connectivity to vertices
+  MeshConnectivity * cell_vertices_;
 
   // Topological dimension
   uint tdim_;

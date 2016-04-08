@@ -122,20 +122,13 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, uint num_vertices)
+void MeshTopology::init(uint dim, bool distribute /* = true */)
 {
-  bool distribute = true;
   if (connectivity_ != NULL)
   {
     error("MeshTopology : clear instance before reinitializing");
   }
-  if (dim == 0 && num_vertices > 1)
-  {
-    error("MeshTopology : more than one vertex for a mesh of dimension zero");
-  }
-
   dim_ = dim;
-  num_vertices_ = num_vertices;
   connectivity_ = new MeshConnectivity*[dim + 1];
   for (uint d = 0; d <= dim; ++d)
   {
@@ -145,9 +138,28 @@ void MeshTopology::init(uint dim, uint num_vertices)
   {
     distdata_ = new MeshDistributedData(dim_);
   }
-
   //
   update_token();
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::init(uint dim, uint num_entities)
+{
+  if (connectivity_ == NULL)
+  {
+    error("MeshTopology : initialize topology before setting entities");
+  }
+  if(dim == 0)
+  {
+    if (dim_ == 0 && num_entities > 1)
+    {
+      error("MeshTopology : more than one vertex for a mesh of dimension zero");
+    }
+    num_vertices_ = num_entities;
+  }
+  else
+  {
+
+  }
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::clear()
@@ -179,14 +191,23 @@ void MeshTopology::finalize()
   {
     error("MeshTopology : cell -> vertices connectivity does not exist");
   }
-  if(!is_ordered_)
+  for (uint d = 0; d < dim_; ++d)
   {
-    reorder();
+    if(this->entities_exist(d))
+    {
+      if (this->size(d) != this->distdata()[d].local_size())
+      {
+        warning("MeshEditor : vertex size mismatch between topology '%u' and "
+                "distributed data '%u'", this->size(d),
+                this->distdata()[d].local_size());
+      }
+      if(!this->distdata()[d].is_finalized())
+      {
+        this->distdata()[d].finalize();
+      }
+    }
   }
-  if(!is_numbered_)
-  {
-    renumber();
-  }
+  // Do not renumber because
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& map)
@@ -626,14 +647,18 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 //-----------------------------------------------------------------------------
 void MeshTopology::reorder() const
 {
-  message(1, "MeshTopology : order");
-
+  //FIXME: this test ensures that boundary meshes are not reordered
   CellType const& cell_type = mesh_.type();
-  for (CellIterator cell(mesh_); !cell.end(); ++cell)
+  if (cell_type.dim() == dim_ && !is_ordered_)
   {
-    cell_type.order_entities(*cell);
+    message(1, "MeshTopology : order");
+    for (CellIterator cell(mesh_); !cell.end(); ++cell)
+    {
+      cell_type.order_entities(*cell);
+    }
   }
-
+  // Set internal flag so that reordering is only triggered when a connectivity
+  // which requires reordering is created
   is_ordered_ = true;
 }
 //-----------------------------------------------------------------------------

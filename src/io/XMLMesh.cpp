@@ -33,8 +33,10 @@ XMLMesh::XMLMesh(Mesh& mesh) :
     state_(ROOT),
     editor_(NULL),
     parallel_(false),
-    cell_count_(0),
+    cell_type_(NULL),
     vertex_dist_(NULL),
+    cell_dist_(NULL),
+    cell_count_(0),
     vertex_owner_(NULL)
 {
 }
@@ -119,18 +121,41 @@ bool XMLMesh::close()
   return state_ == ROOT;
 }
 //-----------------------------------------------------------------------------
+void XMLMesh::clear()
+{
+  state_ = ROOT;
+  delete editor_;
+  editor_ = NULL;
+  parallel_ = false;
+  delete cell_type_;
+  cell_type_ = NULL;
+  delete vertex_dist_;
+  vertex_dist_ = NULL;
+  delete cell_dist_;
+  cell_dist_ = NULL;
+  cell_count_ = 0;
+  delete [] vertex_owner_;
+  vertex_owner_ = NULL;
+  nonlocal_vertices_.clear();
+  cell_buffer_.clear();
+}
+//-----------------------------------------------------------------------------
 void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
 {
   // Parse values
   std::string celltype = parse<std::string>(name, attrs, "celltype");
+  if (cell_type_ != NULL)
+  {
+    error("XMLMesh : cell type is already created.");
+  }
+  cell_type_ = CellType::create(celltype);
   uint dim = parse<uint>(name, attrs, "dim");
   if (editor_ != NULL)
   {
     error("XMLMesh : mesh editor is already created.");
   }
-  CellType * cell_type = CellType::create(celltype);
-  editor_ = new MeshEditor(mesh_, cell_type->cellType(), dim);
-  delete cell_type;
+  dolfin_assert(cell_type_ != NULL);
+  editor_ = new MeshEditor(mesh_, *cell_type_, dim);
   parallel_ = (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"));
   if(parallel_)
   {
@@ -144,7 +169,10 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 {
   uint size = parse<uint>(name, attrs, "size");
   // Calculate a linear data distribution
-  dolfin_assert(vertex_dist_ == NULL);
+  if (vertex_dist_ != NULL)
+  {
+    error("XMLMesh : vertex distribution is already created.");
+  }
   vertex_dist_ = new LinearDistribution(size, MPI::numProcesses());
   // Set number of vertices
   editor_->init_vertices(vertex_dist_->size, size);
@@ -160,6 +188,10 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
 {
   uint num_cells = parse<uint>(name, attrs, "size");
   //
+  if (cell_dist_ != NULL)
+  {
+    error("XMLMesh : cell distribution is already created.");
+  }
   cell_count_ = 0;
   if(parallel_)
   {
@@ -169,6 +201,10 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
 //    MeshFunction<uint> pre_partition;
 //    mesh_.partition_geom(pre_partition);
 //    mesh_.distribute(pre_partition);
+    if (vertex_owner_ != NULL)
+    {
+      error("XMLMesh : vertex ownership array is already created.");
+    }
     vertex_owner_ = new uint[mesh_.size(0)];
     std::fill_n(&vertex_owner_[0], mesh_.size(0), MPI::numProcesses());
   }
@@ -209,6 +245,24 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   static const char * const vertex_attr[8] =
       { "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7" };
   static uint v[8] = { 0 };
+  dolfin_assert(cell_type_ != NULL);
+  /*
+  ///FIXME: Assume only one cell type for now
+  if (xmlStrcmp(name, (xmlChar *) cell_type_->str().c_str()))
+  {
+    error("XMLMesh : invalid cell element <%s>, expected <%s>",
+          (const char *) name, cell_type_->str().c_str());
+    if (supported_celltypes_.count(current_cell_.first) == 0)
+    {
+      error("XMLMesh : invalid cell element <%s>", (const char *) name);
+    }
+    celltype_.second = checkCellElement(name);
+    if (current_cell_.second < 0)
+    {
+      error("XMLMesh : unknown cell element <%s>", (const char *) name);
+    }
+  }
+  */
   //
   uint c = parse<uint>(name, attrs, "index");
 
@@ -222,7 +276,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     uint const rank = MPI::processNumber();
     vertex_owner_[mesh_.distdata()[0].get_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
-    for (uint i = 1; i < mesh_.type().num_entities(0); ++i)
+    for (uint i = 1; i < cell_type_->num_entities(0); ++i)
     {
       v[i] = parse<uint>(name, attrs, vertex_attr[i]);
       if (mesh_.distdata()[0].has_global(v[i]))
@@ -239,7 +293,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   }
   else
   {
-    for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
+    for (uint i = 0; i < cell_type_->num_entities(0); ++i)
     {
       v[i] = parse<uint>(name, attrs, vertex_attr[i]);
     }
@@ -255,7 +309,7 @@ void XMLMesh::endMesh()
     Mesh new_mesh;
     delete editor_;
     uint const gdim = mesh_.geometry().dim();
-    editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
+    editor_ = new MeshEditor(new_mesh, mesh_.type(), gdim);
 
     uint const rank = MPI::processNumber();
     uint const pe_size = MPI::numProcesses();
@@ -384,23 +438,16 @@ void XMLMesh::endMesh()
     editor_->close();
     mesh_ = new_mesh;
 
-    nonlocal_vertices_.clear();
     sendbuf.clear();
-    cell_count_ = 0;
-    cell_buffer_.clear();
     delete[] idxbuf;
     delete[] crdbuf;
     delete[] recvbuf;
-    delete[] vertex_owner_;
-    delete editor_;
-    editor_ = NULL;
   }
   else
   {
     editor_->close();
-    delete editor_;
-    editor_ = NULL;
   }
+  clear();
   message("XMLMesh : loading took %g s.", toc());
 }
 //-----------------------------------------------------------------------------

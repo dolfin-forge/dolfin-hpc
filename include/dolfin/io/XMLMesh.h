@@ -11,12 +11,14 @@
 
 #include <dolfin/io/XMLObject.h>
 
+#include <dolfin/math/LinearDistribution.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
 
 namespace dolfin
 {
 
+class CellType;
 class Mesh;
 
 class XMLMesh : public XMLObject
@@ -51,6 +53,10 @@ private:
     IN_CELLS
   };
 
+  ///
+  void clear();
+
+  /// Parsing function
   void beginMesh(const xmlChar* name, const xmlChar** attrs);
   void readVertices(const xmlChar* name, const xmlChar** attrs);
   void readCells(const xmlChar* name, const xmlChar** attrs);
@@ -63,16 +69,10 @@ private:
   MeshEditor * editor_;
 
   bool parallel_;
+  CellType * cell_type_;
+  LinearDistribution * vertex_dist_;
+  LinearDistribution * cell_dist_;
   uint cell_count_;
-  uint vertex_offset_;
-  uint vertex_range_end_;
-  uint cell_offset_;
-  uint cell_range_end_;
-
-  uint * local_vertices_;
-  uint * shared_vertices_;
-  uint num_local_vertices_;
-  uint num_local_cells_;
 
   uint * vertex_owner_;
   Array<uint> cell_buffer_;

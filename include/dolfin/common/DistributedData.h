@@ -22,6 +22,7 @@ class DistributedData
 
   friend class SharedIterator;
   friend class GhostIterator;
+  friend class OwnedIterator;
 
 public:
 
@@ -319,6 +320,85 @@ private:
 
   DistributedData const& distdata_;
   _map<uint, uint>::const_iterator iter_;
+
+};
+
+
+
+/**
+ *  @class  OwnedIterator
+ *
+ *  @brief  Implements an iterator on owned entities for finalized distributed
+ *          data only.
+ */
+
+class OwnedIterator
+{
+
+public:
+
+  ///
+  OwnedIterator(DistributedData const& distdata) :
+      distdata_(distdata),
+      owner_(distdata.cached_ownership_),
+      begin_(distdata.cached_numbering_),
+      end_(distdata.cached_numbering_ + distdata_.local_size()),
+      iter_(begin_)
+  {
+    if(!distdata.is_finalized())
+    {
+      error("OwnedIterator : distributed data is not finalized");
+    }
+  }
+
+  ///
+  ~OwnedIterator()
+  {
+  }
+
+  ///
+  OwnedIterator& operator++()
+  {
+    while ((iter_ < end_)
+           && (owner_[iter_ - begin_] != distdata_.pe_size_)
+           && (owner_[iter_ - begin_] != distdata_.rank_))
+    {
+      ++iter_;
+    }
+    return *this;
+  }
+
+  ///
+  inline uint index() const
+  {
+    return iter_ - begin_;
+  }
+
+  ///
+  inline uint global_index() const
+  {
+    return *iter_;
+  }
+
+  ///
+  inline uint is_shared() const
+  {
+    return (owner_[iter_ - begin_] == distdata_.rank_);
+  }
+
+  ///
+  inline bool end() const
+  {
+    return iter_ == end_;
+  }
+
+private:
+
+  DistributedData const& distdata_;
+  uint * const owner_;
+  uint * const begin_;
+  uint * const end_;
+  uint * iter_;
 
 };
 

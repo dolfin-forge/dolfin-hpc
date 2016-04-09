@@ -54,8 +54,9 @@ MeshEditor::~MeshEditor()
 //-----------------------------------------------------------------------------
 void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
 {
-  // Clear old mesh data
-  mesh.clear();
+  // Clear old mesh topology and geometry
+  mesh.topology().clear();
+  mesh.geometry().clear();
 
   // Set cell type
   mesh.cell_type_ = type.clone();
@@ -102,6 +103,7 @@ void MeshEditor::add_cells(Array<Array<uint> > const& connectivity,
 {
   // Initialize mesh data
   this->num_cells_ = connectivity.size();
+  mesh_->topology_.init(tdim_, connectivity.size(), num_global);
   cell_vertices_->set(connectivity);
 }
 //-----------------------------------------------------------------------------

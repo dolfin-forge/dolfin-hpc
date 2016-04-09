@@ -146,26 +146,45 @@ void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
 {
   if (connectivity_ == NULL)
   {
-    error("MeshTopology : initialize topology before setting entities");
+    error("MeshTopology : initializing entities of dimension %u but topology "
+          "dimension is initialized", dim);
   }
+  // NOTE: cases have to be split that way to handle point meshes for which the
+  //       cell dimension is equal to the vertex dimension
+  // Vertices
   if(dim == 0)
   {
-    if (dim_ == 0 && num_local > 1)
-    {
-      error("MeshTopology : more than one vertex for a mesh of dimension zero");
-    }
     num_vertices_ = num_local;
   }
-  else
+  // Edges/Faces
+  if (dim < 0 && dim < dim_)
   {
     if(num_local > 0 && num_vertices_ == 0)
     {
-      error("MeshTopology : initializing non-zero number of entities on a "
-            "topology with zero vertices");
+      error("MeshTopology : initializing non-zero number of entities of "
+            "dimension %u but topology containes zero vertices", dim);
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
     connectivity_[dim_][0].init(num_local, mesh_.type().num_vertices(dim));
   }
+  // Cells
+  if (dim_ == dim)
+  {
+    if(num_local > 0 && num_vertices_ == 0)
+    {
+      error("MeshTopology : initializing non-zero number of cells but topology "
+            "contains zero vertices");
+    }
+    // Well Well Well *erm* *erm* *erm* OOP gone wrong
+    connectivity_[dim_][0].init(num_local, mesh_.type().num_vertices(dim));
+  }
+  // Overflow
+  if (dim_ < dim)
+  {
+    error("MeshTopology : initializing entities of dimension %u but topology"
+          "dimension is %u", dim, dim_);
+  }
+  // Set size of distributed data
   if (distdata_ != NULL)
   {
     if (num_global > 0 && num_global < num_local)
@@ -175,9 +194,14 @@ void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
     }
     this->distdata()[dim].set_size(num_local, num_global);
   }
-  else if ((num_global > 0) && (num_local != num_global))
+  else
   {
-    error("MeshTopology : invalid number of global entities set in serial");
+    // In serial, require that the number of global entities is not initialized
+    // of is equal to the number of local entities
+    if ((num_global > 0) && (num_local != num_global))
+    {
+      error("MeshTopology : invalid number of global entities set in serial");
+    }
   }
 
 }
@@ -215,15 +239,18 @@ void MeshTopology::finalize()
   {
     if(this->entities_exist(d))
     {
-      DistributedData& ddata = this->distdata()[d];
-      if(!ddata.is_finalized())
+      if(distdata_ != NULL)
       {
-        ddata.finalize();
-      }
-      if (this->size(d) != ddata.local_size())
-      {
-        error("MeshEditor : vertex size mismatch between topology '%u' and "
-              "distributed data '%u'", this->size(d), ddata.local_size());
+        DistributedData& ddata = this->distdata()[d];
+        if(!ddata.is_finalized())
+        {
+          ddata.finalize();
+        }
+        if (this->size(d) != ddata.local_size())
+        {
+          error("MeshEditor : vertex size mismatch between topology '%u' and "
+                "distributed data '%u'", this->size(d), ddata.local_size());
+        }
       }
     }
   }

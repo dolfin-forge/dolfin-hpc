@@ -541,7 +541,6 @@ void DiscreteFunction::InitializeGhosts()
 
   std::set<uint> indices;
 
-  MeshDistributedData& distdata = mesh_.distdata();
   for (CellIterator cell(mesh_); !cell.end(); ++cell)
   {
     // Update to current cell

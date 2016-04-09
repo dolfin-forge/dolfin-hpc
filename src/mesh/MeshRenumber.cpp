@@ -1,6 +1,8 @@
 // Copyright (C) 2008 Niclas Jansson.
-// Copyright (C) 2016 Aurelien Larcher (full rewrite).
 // Licensed under the GNU LGPL Version 2.1.
+//
+// Modified by Aurelien Larcher, 2016.
+// Rewritten to fix distribution bugs and use distributed data class.
 //
 
 #include <dolfin/mesh/MeshRenumber.h>

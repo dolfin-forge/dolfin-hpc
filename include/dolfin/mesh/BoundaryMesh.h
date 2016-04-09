@@ -1,6 +1,9 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2016.
+// Rewritten to support hypercube cells.
+//
 // First added:  2006-06-21
 // Last changed: 2008-05-28
 

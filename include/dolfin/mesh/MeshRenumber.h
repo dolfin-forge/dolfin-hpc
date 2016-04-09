@@ -1,6 +1,8 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2016.
+//
 
 #ifndef __DOLFIN_MESH_RENUMBER_H
 #define __DOLFIN_MESH_RENUMBER_H

@@ -1,6 +1,8 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2016.
+//
 // First added:  2006-05-08
 // Last changed: 2007-11-30
 

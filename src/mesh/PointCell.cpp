@@ -11,6 +11,7 @@
 
 #include <dolfin/mesh/MeshEntity.h>
 #include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/Cell.h>
 
 namespace dolfin
 {
@@ -58,13 +59,16 @@ uint PointCell::num_vertices(uint dim) const
 //-----------------------------------------------------------------------------
 uint PointCell::orientation(Cell const& cell) const
 {
-  error("PointCell::orientation() undefined.");
   return 0;
 }
 //-----------------------------------------------------------------------------
 void PointCell::create_entities(uint** e, uint dim, uint const* v) const
 {
-  error("PointCell::createEntities() undefined.");
+  if(dim > 0)
+  {
+    error("Invalid topological dimension for creation of entities: %d.", dim);
+  }
+  e[0][0] = v[0];
 }
 //-----------------------------------------------------------------------------
 void PointCell::order_entities(Cell& cell) const
@@ -91,42 +95,37 @@ void PointCell::initialize_connectivities(Mesh& mesh) const
 void PointCell::refine_cell(Cell& cell, MeshEditor& editor,
                            uint& current_cell) const
 {
-  error("PointCell::refine_cell() undefined.");
+  editor.add_cell(current_cell++, cell.entities(0));
 }
 //-----------------------------------------------------------------------------
 uint PointCell::num_refined_cells() const
 {
-  error("PointCell::num_refined_cells() undefined.");
-  return 0;
+  return 1;
 }
 //-----------------------------------------------------------------------------
 uint PointCell::num_refined_vertices(uint dim) const
 {
-  error("PointCell::num_refined_vertices() undefined.");
-  return 0;
+  return 1;
 }
 //-----------------------------------------------------------------------------
 bool PointCell::refinement_needs_entities(uint dim) const
 {
-  error("PointCell::needs_entity_refined() undefined.");
-  return false;
+  dolfin_assert(dim == 0);
+  return true;
 }
 //-----------------------------------------------------------------------------
 real PointCell::volume(MeshEntity const& entity) const
 {
-  error("PointCell::volume() undefined.");
   return 0.0;
 }
 //-----------------------------------------------------------------------------
 real PointCell::diameter(MeshEntity const& entity) const
 {
-  error("PointCell::diameter() undefined.");
   return 0.0;
 }
 //-----------------------------------------------------------------------------
 real PointCell::circumradius(MeshEntity const& entity) const
 {
-  error("PointCell::circumradius() undefined.");
   return 0.0;
 }
 //-----------------------------------------------------------------------------
@@ -141,13 +140,11 @@ Point PointCell::midpoint(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 Point PointCell::normal(Cell const& cell, uint facet) const
 {
-  error("PointCell::normal() undefined.");
   return Point();
 }
 //-----------------------------------------------------------------------------
 real PointCell::facet_area(Cell const& cell, uint facet) const
 {
-  error("PointCell::facet_aread() undefined.");
   return 0.0;
 }
 //-----------------------------------------------------------------------------

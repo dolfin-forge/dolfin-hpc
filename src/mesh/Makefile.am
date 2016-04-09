@@ -35,8 +35,6 @@ libdolfin_mesh_la_SOURCES = \
 			MeshEntity.cpp\
 			MeshEntityIterator.cpp\
 			MeshGeometry.cpp\
-			MeshHierarchy.cpp\
-			MeshHierarchyAlgorithms.cpp\
 			MeshQuality.cpp\
 			MeshQualityFunction.cpp\
 			MetisInterface.cpp\

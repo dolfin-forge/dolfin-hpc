@@ -319,7 +319,7 @@ void XMLMesh::endMesh()
     uint const shared = nonlocal_vertices_.size();
     uint orphan = 0;
 
-    //
+    // Exchange ghost points
     MPI_Status status;
     uint src, dst;
     uint recvmax;
@@ -334,7 +334,6 @@ void XMLMesh::endMesh()
     uint crdbuf_size = gdim*shared;
     real *crdbuf = new real[crdbuf_size];
     real *crdptr = &crdbuf[0];
-    // Exchange ghost points
     DistributedData& vdata0 = mesh_.distdata()[0];
     for (uint j = 1; j < pe_size; ++j)
     {

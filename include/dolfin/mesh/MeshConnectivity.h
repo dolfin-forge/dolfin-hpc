@@ -106,6 +106,9 @@ public:
   void set(uint entity, uint const * connections);
 
   /// Set all connections for all entities
+  void set(Array<uint> const& connectivity);
+
+  /// Set all connections for all entities
   void set(Array<Array<uint> > const& connectivity);
 
   /// Remap entities connectivities from old to new ordering, left operator

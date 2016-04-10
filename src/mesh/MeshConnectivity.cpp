@@ -9,6 +9,7 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/log/LogStream.h>
 
+#include <algorithm>
 #include <cstring>
 
 namespace dolfin
@@ -247,6 +248,16 @@ void MeshConnectivity::set(uint entity, uint const * connections)
   {
     connections_[offsets_[entity] + i] = connections[i];
   }
+}
+//-----------------------------------------------------------------------------
+void MeshConnectivity::set(Array<uint> const& connectivity)
+{
+  if (connectivity.size() != size_)
+  {
+    error("MeshConnectivity : provided connectivity size %u does no match",
+          connectivity.size());
+  }
+  std::copy(connectivity.begin(), connectivity.end(), connections_);
 }
 //-----------------------------------------------------------------------------
 void MeshConnectivity::set(Array<Array<uint> > const& connections)

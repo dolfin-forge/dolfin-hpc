@@ -132,44 +132,59 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   MPI_Status status;
   uint src;
   uint dst;
-  uint sendmax_v = sendbuf_v[0].size();
+  uint send_size;
+  uint recvmax_v;
+  uint recvmax_x;
   for (uint j = 1; j < pe_size; ++j)
   {
-    sendmax_v = std::max(sendmax_v, (uint) sendbuf_v[j].size());
+    send_size = sendbuf_v[j].size();
+    MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_MAX, j,
+               MPI::DOLFIN_COMM);
+    send_size = sendbuf_x[j].size();
+    MPI_Reduce(&send_size, &recvmax_x, 1, MPI_UNSIGNED, MPI_SUM, j,
+               MPI::DOLFIN_COMM);
   }
-  uint recvmax_v = 0;
-  MPI::numGlobalSum(sendmax_v, recvmax_v);
+  // Allocate vertex indices buffer
   uint * recvbuf_v = new uint[recvmax_v];
-  uint recvmax_x = recvmax_v * gdim;
-  real * recvbuf_x = new real[recvmax_x];
+  // Resize vertex coordinates array to fit new cells
+  uint const coords_size = coords.size();
+  coords.resize(coords_size + recvmax_x);
+  real * recvbuf_x = &coords[coords_size];
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
     src = (rank - j + pe_size) % pe_size;
     dst = (rank + j) % pe_size;
 
+    // Vertices
     MPI_Sendrecv(&sendbuf_v[dst][0], sendbuf_v[dst].size(), MPI_UNSIGNED,
                  dst, 0, &recvbuf_v[0], recvmax_v, MPI_UNSIGNED, src, 0,
                  MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
-    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 1,
-                 &recvbuf_x[0], recv_count * gdim, MPI_DOUBLE, src, 1,
-                 MPI::DOLFIN_COMM, &status);
-
     for (int k = 0; k < recv_count; ++k)
     {
-      distdata1.set_map(vindex, recvbuf_v[k]);
-      ++vindex;
-      for (uint d = 0; d < gdim; ++d)
+      uint const global_index = recvbuf_v[k];
+      if(distdata1.has_global(global_index))
       {
-        coords.push_back(recvbuf_x[k * gdim + d]);
+        error("MPIMeshCommunicator : receiving global vertex %u twice",
+              global_index);
       }
+      distdata1.set_map(vindex, global_index);
+      ++vindex;
     }
+
+    // Coordinates
+    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 1,
+                 recvbuf_x, recvmax_x, MPI_DOUBLE, src, 1, MPI::DOLFIN_COMM,
+                 &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recvbuf_x += recv_count;
+    recvmax_x -= recv_count;
+
   }
 
   // Cleanup and finalize distributed data
-  delete[] recvbuf_x;
   delete[] recvbuf_v;
   delete[] sendbuf_x;
   delete[] sendbuf_v;
@@ -256,6 +271,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
         cells.push_back(v->global_index());
         if (!vertex_used[v->index()] && v->is_owned())
         {
+          message("vertex owned %u", v->global_index());
           vertex_used[v->index()] = true;
           distdata1.set_map(vindex, v->global_index());
           ++vindex;
@@ -273,6 +289,8 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
         sendbuf_c[owner].push_back(v->global_index());
         if (!vertex_used[v->index()] && v->is_owned())
         {
+          message("vertex send  %u", v->global_index());
+          vertex_used[v->index()] = true;
           sendbuf_v[owner].push_back(v->global_index());
           for (uint d = 0; d < gdim; ++d)
           {
@@ -295,6 +313,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   uint send_size;
   uint recvmax_c;
   uint recvmax_v;
+  uint recvmax_x;
   for (uint j = 0; j < pe_size; ++j)
   {
     send_size = sendbuf_c[j].size();
@@ -303,14 +322,20 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
     send_size = sendbuf_v[j].size();
     MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_MAX, j,
                MPI::DOLFIN_COMM);
+    send_size = sendbuf_x[j].size();
+    MPI_Reduce(&send_size, &recvmax_x, 1, MPI_UNSIGNED, MPI_SUM, j,
+               MPI::DOLFIN_COMM);
   }
-  uint recvsize_x = recvmax_v * gdim;
   // Resize cell vertices array to fit new cells
-  uint const num_owned_cells = cells.size();
-  cells.resize(num_owned_cells + recvmax_c);
-  uint * recvbuf_c = &cells[num_owned_cells];
+  uint const cells_size = cells.size();
+  cells.resize(cells_size + recvmax_c);
+  uint * recvbuf_c = &cells[cells_size];
+  // Allocate vertex indices buffer
   uint * recvbuf_v = new uint[recvmax_v];
-  real * recvbuf_x = new real[recvsize_x];
+  // Resize vertex coordinates array to fit new cells
+  uint const coords_size = coords.size();
+  coords.resize(coords_size + recvmax_x);
+  real * recvbuf_x = &coords[coords_size];
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
@@ -330,16 +355,11 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
                  1, recvbuf_v, recvmax_v, MPI_UNSIGNED, src, 1,
                  MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-    recvbuf_v += recv_count;
-    recvmax_v -= recv_count;
-
-    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 2,
-                 recvbuf_x, recvsize_x, MPI_DOUBLE, src, 2, MPI::DOLFIN_COMM,
-                 &status);
 
     for (int k = 0; k < recv_count; ++k)
     {
       uint const global_index = recvbuf_v[k];
+      message("received %u", global_index);
       if(distdata1.has_global(global_index))
       {
         error("MPIMeshCommunicator : receiving global vertex %u twice",
@@ -347,15 +367,19 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
       }
       distdata1.set_map(vindex, global_index);
       ++vindex;
-      for (uint d = 0; d < gdim; ++d)
-      {
-        coords.push_back(recvbuf_x[k * gdim + d]);
-      }
     }
+
+    // Coordinates
+    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 2,
+                 recvbuf_x, recvmax_x, MPI_DOUBLE, src, 2, MPI::DOLFIN_COMM,
+                 &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recvbuf_x += recv_count;
+    recvmax_x -= recv_count;
+
   }
 
   // Cleanup buffers
-  delete[] recvbuf_x;
   delete[] recvbuf_v;
   delete[] sendbuf_x;
   delete[] sendbuf_v;

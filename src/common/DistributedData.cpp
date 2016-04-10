@@ -66,7 +66,7 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
       // Avoid copy of global-to-local unordered map
       cache_size_ = other.cache_size_;
       dolfin_assert(other.cache_size_ == other.local_.size());
-      if(cache_size_ >  0)
+      if (cache_size_ >  0)
       {
         dolfin_assert(other.cached_numbering_ !=  NULL);
         dolfin_assert(other.cached_ownership_ !=  NULL);
@@ -162,7 +162,6 @@ void DistributedData::finalize()
   else
   {
     message(1, "DistributedData : finalize");
-    this->disp();
 
     // Check consistency
     if (shared_.size() > local_.size())
@@ -222,7 +221,7 @@ void DistributedData::finalize()
 
     // No mapping provided but a process range can be set.
     // Generate a linear mapping from process range: entities are not ghosted.
-    if (local_.size() == 0 && (range_size_ > 0 || cache_size_ > 0))
+    if ((local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0))
     {
       if (shared_.size() > 0)
       {
@@ -235,7 +234,7 @@ void DistributedData::finalize()
       // Either local size or the range can be used
       if (cache_size_ > 0)
       {
-        if((range_size_ > 0) && (range_size_ != cache_size_))
+        if ((range_size_ > 0) && (range_size_ != cache_size_))
         {
           error("DistributedData : size mismatch between local size and range");
         }
@@ -270,12 +269,12 @@ void DistributedData::finalize()
 
     // Set data range if needed
     uint owned_size = local_.size() - ghost_.size();
-    if(range_size_ == 0)
+    if (range_size_ == 0)
     {
       range_size_ = owned_size;
       MPI::processOffset(range_size_, offset_);
     }
-    else if(range_size_ != owned_size)
+    else if (range_size_ != owned_size)
     {
       error("DistributedData : data range does not match provided range");
     }
@@ -285,7 +284,7 @@ void DistributedData::finalize()
     MPI::numGlobalSum(range_size_, range_sum);
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
-    if(global_size_ == 0)
+    if (global_size_ == 0)
     {
       global_size_ = range_sum;
     }
@@ -339,7 +338,7 @@ uint DistributedData::local_size() const
 //-----------------------------------------------------------------------------
 uint DistributedData::global_size() const
 {
-  if(global_size_ < local_.size())
+  if (global_size_ < local_.size())
   {
     error("DistributedData : global size has not been set or is invalid");
   }
@@ -348,22 +347,22 @@ uint DistributedData::global_size() const
 //-----------------------------------------------------------------------------
 void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
 {
-  if(finalized_)
+  if (finalized_)
   {
     error("DistributedData : setting range to a finalized data");
   }
   // Check if there exists a mapping already
-  if(!this->empty())
+  if (!this->empty())
   {
     error("DistributedData : setting range to a non-empty data");
   }
   // Check if any existing global size matches the provided value
-  if(range_size_ > 0 && range_size_ != num_owned)
+  if ((range_size_ > 0) && (range_size_ != num_owned))
   {
     error("DistributedData : setting different range than existing");
   }
   // Check if the provided range size is consistent with local size
-  if(num_owned < cache_size_)
+  if (num_owned < cache_size_)
   {
     error("DistributedData : provided range is smaller than local size ");
   }
@@ -371,10 +370,10 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   range_size_ = num_owned;
   MPI::processOffset(range_size_, offset_);
   // Set the global size if provided otherwise compute it
-  if(num_global > 0)
+  if (num_global > 0)
   {
     // Check if any existing global size matches the provided value
-    if(global_size_ > 0 && global_size_ != num_global)
+    if ((global_size_ > 0) && (global_size_ != num_global))
     {
       error("DistributedData : setting different global size than existing");
     }
@@ -386,7 +385,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
     MPI::numGlobalSum(range_size_, range_sum);
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
-    if(global_size_ > 0 && global_size_ != range_sum)
+    if ((global_size_ > 0) && (global_size_ != range_sum))
     {
       error("DistributedData : sum of range not equal to global size");
     }
@@ -395,29 +394,29 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
 //-----------------------------------------------------------------------------
 void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
 {
-  if(finalized_)
+  if (finalized_)
   {
     error("DistributedData : setting size to a finalized data");
   }
   // Do not allow setting the size of of a non-empty distributed data
-  if(!this->empty())
+  if (!this->empty())
   {
     error("DistributedData : setting size to a non-empty data");
   }
   // Do not allow resetting the size of data
-  if((cached_numbering_ != NULL) && (cache_size_ != num_local))
+  if ((cached_numbering_ != NULL) && (cache_size_ != num_local))
   {
     error("DistributedData : setting different size to data");
   }
   // If range is known check consistency, range is zero by default
-  if(num_local < range_size_)
+  if (num_local < range_size_)
   {
     error("DistributedData : setting smaller local size than existing range");
   }
   // Set the global size if provided
-  if(num_global > 0)
+  if (num_global > 0)
   {
-    if(global_size_ > 0 && global_size_ != num_global)
+    if ((global_size_ > 0) && (global_size_ != num_global))
     {
       error("DistributedData : setting different global size than existing");
     }
@@ -426,13 +425,13 @@ void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
   // Use caching already as the data size is known and save on map lookups
   cache_size_ = num_local;
   // Create arrays if they do not exist
-  if(cached_numbering_ == NULL & cache_size_ > 0)
+  if ((cached_numbering_ == NULL) & (cache_size_ > 0))
   {
     cached_numbering_ = new uint[cache_size_];
     // Set to an undefined value
     std::fill_n(cached_numbering_, cache_size_, DOLFIN_UINT_UNDEF);
   }
-  if(cached_ownership_ == NULL & num_local > 0)
+  if ((cached_ownership_ == NULL) & (num_local > 0))
   {
     cached_ownership_ = new uint[cache_size_];
     // Set initial ownership to owner
@@ -442,7 +441,7 @@ void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
 //-----------------------------------------------------------------------------
 uint DistributedData::has_local(uint local_index) const
 {
-  if(cached_numbering_ != NULL)
+  if (cached_numbering_ != NULL)
   {
     dolfin_assert(local_index < cache_size_);
     return cached_numbering_[local_index] != DOLFIN_UINT_UNDEF;
@@ -452,7 +451,7 @@ uint DistributedData::has_local(uint local_index) const
 //-----------------------------------------------------------------------------
 uint DistributedData::get_global(uint local_index) const
 {
-  if(cached_numbering_ != NULL)
+  if (cached_numbering_ != NULL)
   {
     dolfin_assert(local_index < cache_size_);
     dolfin_assert(cached_numbering_[local_index] != DOLFIN_UINT_UNDEF);
@@ -478,7 +477,7 @@ void DistributedData::set_map(uint local_index, uint global_index)
   dolfin_assert(!finalized_);
   dolfin_assert(local_.count(global_index) == 0);
   local_.insert(std::pair<uint, uint>(global_index, local_index));
-  if(cached_numbering_ != NULL)
+  if (cached_numbering_ != NULL)
   {
     dolfin_assert(local_index < cache_size_);
     cached_numbering_[local_index] = global_index;
@@ -492,12 +491,12 @@ void DistributedData::set_map(uint local_index, uint global_index)
 //-----------------------------------------------------------------------------
 void DistributedData::remap_numbering(Array<uint> const& mapping)
 {
-  if(!finalized_)
+  if (!finalized_)
   {
     error("DistributedData : re-mapping numbering requires finalized data");
   }
 
-  if(mapping.size() != MPI::numProcesses())
+  if (mapping.size() != MPI::numProcesses())
   {
     error("DistributedData : numbering re-mapping array has invalid size");
   }
@@ -537,7 +536,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
 //-----------------------------------------------------------------------------
 void DistributedData::renumber_global()
 {
-  if(!finalized_)
+  if (!finalized_)
   {
     error("DistributedData : global renumbering requires finalized data");
   }
@@ -605,11 +604,11 @@ void DistributedData::renumber_global()
       sendbck[k] = cached_numbering_[local_index];
 
       // Entity is not marked as shared: invalidate ownership
-      if(cached_ownership_[local_index] == pe_size_)
+      if (cached_ownership_[local_index] == pe_size_)
       {
         valid_ownership = false;
       }
-      else if(cached_ownership_[local_index] != rank_)
+      else if (cached_ownership_[local_index] != rank_)
       {
         error("DistributedData : entity %u should be owned but is set ghost");
       }
@@ -721,7 +720,7 @@ uint DistributedData::num_ghost() const
 void DistributedData::remap_ownership(Array<uint> const& mapping)
 {
   dolfin_assert(finalized_);
-  if(mapping.size() != MPI::numProcesses())
+  if (mapping.size() != MPI::numProcesses())
   {
     error("DistributedData : ownership re-mapping array has invalid size");
   }
@@ -752,7 +751,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
     it->second = adj;
 
     // Update cached owner
-    if(cached_ownership_ != NULL)
+    if (cached_ownership_ != NULL)
     {
       cached_ownership_[it->first] = rank_;
     }
@@ -766,7 +765,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
     it->second = mapping[it->second];
 
     // Update cached owner
-    if(cached_ownership_ != NULL)
+    if (cached_ownership_ != NULL)
     {
       cached_ownership_[it->first] = mapping[it->second];
     }
@@ -782,7 +781,7 @@ _set<uint> const& DistributedData::get_shared_adj(uint local_index) const
 void DistributedData::get_common_adj(uint n, uint const indices[],
                                      _set<uint>& adjs) const
 {
-  if(n == 0)
+  if (n == 0)
   {
     adjs.clear();
     return;
@@ -795,7 +794,7 @@ void DistributedData::get_common_adj(uint n, uint const indices[],
     _set<uint> const& adjx = shared_.find(indices[i])->second;
     for(_set<uint>::iterator it = adjs.begin(); it != adjs.end();)
     {
-      if(adjx.count(*it) == 0)
+      if (adjx.count(*it) == 0)
       {
         adjs.erase(it++);
       }
@@ -812,7 +811,7 @@ void DistributedData::set_shared(uint local_index)
   dolfin_assert(!finalized_);
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(shared_.count(local_index) == 0);
-  if(shared_[local_index].size() > 0)
+  if (shared_[local_index].size() > 0)
   {
     error("DistributedData : cannot set_shared on entities with adjacents");
   }
@@ -858,7 +857,7 @@ void DistributedData::disp() const
   message("global size : %8u", global_size_);
   message("finalized   : %8u", finalized_);
   /*
-  if(finalized_)
+  if (finalized_)
   {
     section("entities    :");
     for (uint i = 0; i < this->local_size(); ++i)

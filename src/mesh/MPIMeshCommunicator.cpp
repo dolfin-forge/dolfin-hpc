@@ -178,7 +178,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
     MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 1,
                  recvbuf_x, recvmax_x, MPI_DOUBLE, src, 1, MPI::DOLFIN_COMM,
                  &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
     recvbuf_x += recv_count;
     recvmax_x -= recv_count;
 
@@ -271,7 +271,6 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
         cells.push_back(v->global_index());
         if (!vertex_used[v->index()] && v->is_owned())
         {
-          message("vertex owned %u", v->global_index());
           vertex_used[v->index()] = true;
           distdata1.set_map(vindex, v->global_index());
           ++vindex;
@@ -289,7 +288,6 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
         sendbuf_c[owner].push_back(v->global_index());
         if (!vertex_used[v->index()] && v->is_owned())
         {
-          message("vertex send  %u", v->global_index());
           vertex_used[v->index()] = true;
           sendbuf_v[owner].push_back(v->global_index());
           for (uint d = 0; d < gdim; ++d)
@@ -359,7 +357,6 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
     for (int k = 0; k < recv_count; ++k)
     {
       uint const global_index = recvbuf_v[k];
-      message("received %u", global_index);
       if(distdata1.has_global(global_index))
       {
         error("MPIMeshCommunicator : receiving global vertex %u twice",
@@ -373,7 +370,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
     MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 2,
                  recvbuf_x, recvmax_x, MPI_DOUBLE, src, 2, MPI::DOLFIN_COMM,
                  &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
     recvbuf_x += recv_count;
     recvmax_x -= recv_count;
 
@@ -387,12 +384,12 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
 
   // NOTE: This implementation only works for homogeneous topologies
   //       Check cell data size just in case.
-  uint cindex = cells.size();
-  if ((cindex % mesh.type().num_entities(0) > 0))
+  if ((cells.size() % mesh.type().num_entities(0)) > 0)
   {
     error("MPIMeshCommunicator : inconsistent size of cell buffer '%u'",
-          cindex);
+          cells.size());
   }
+  uint cindex = cells.size() / mesh.type().num_entities(0);
 
   // Loop over cells as a list of global vertices and determine if vertices are
   // local or not: overwrite the array with local indices to avoid copy.

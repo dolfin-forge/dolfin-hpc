@@ -555,6 +555,69 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   ghost_ = ghost;
 }
 //-----------------------------------------------------------------------------
+void DistributedData::assign_numbering(DistributedData const& other,
+                                       Array<uint> const& mapping)
+{
+  if (mapping.size() != this->local_size())
+  {
+    error("DistributedData : assignment of numbering requires mapping size "
+          "equal to the local size of distributed data");
+  }
+  if (mapping.size() > other.local_size())
+  {
+    error("DistributedData : assignment of numbering requires mapping size "
+          "lower than or equal to the local size of other distributed data");
+  }
+  if (other.local_size() == 0)
+  {
+    return;
+  }
+  if(other.cached_numbering_ != NULL)
+  {
+    if(cached_numbering_ != NULL)
+    {
+      for(uint i = 0; i < mapping.size(); ++i)
+      {
+        dolfin_assert(mapping[i] < other.cache_size_);
+        uint const global = other.cached_numbering_[mapping[i]];
+        cached_numbering_[i] = global;
+        local_[global] = i;
+      }
+    }
+    else
+    {
+      for(uint i = 0; i < mapping.size(); ++i)
+      {
+        uint const global = other.cached_numbering_[mapping[i]];
+        global_[i] = global;
+        local_[global] = i;
+      }
+    }
+  }
+  else
+  {
+    _map<uint, uint>::const_iterator it;
+    if(cached_numbering_ != NULL)
+    {
+      for(uint i = 0; i < mapping.size(); ++i)
+      {
+        it = other.global_.find(mapping[i]);
+        cached_numbering_[i] = it->second;
+        local_[it->second] = i;
+      }
+    }
+    else
+    {
+      for(uint i = 0; i < mapping.size(); ++i)
+      {
+        it = other.global_.find(mapping[i]);
+        global_[i] = it->second;
+        local_[it->second] = i;
+      }
+    }
+  }
+}
+//-----------------------------------------------------------------------------
 void DistributedData::renumber_global()
 {
   if (!finalized_)
@@ -806,8 +869,20 @@ void DistributedData::assign_ownership(DistributedData const& other,
 {
   if (mapping.size() != this->local_size())
   {
-    error("DistributedData : assignment of ownership requires mapping size to "
-          "be the same as the local size of distributed data");
+    if (this->local_size() == 0)
+    {
+      error("DistributedData : assignment of ownership to empty data");
+    }
+    else
+    {
+      error("DistributedData : assignment of ownership requires mapping size "
+            "equal to the local size of distributed data");
+    }
+  }
+  if (mapping.size() > other.local_size())
+  {
+    error("DistributedData : assignment of ownership requires mapping size "
+          "lower than or equal to the local size of other distributed data");
   }
   // Clear existing data
   adjacents_.clear();
@@ -821,7 +896,7 @@ void DistributedData::assign_ownership(DistributedData const& other,
     _map<uint, uint>::const_iterator itg;
     for (uint i = 0; i < mapping.size(); ++i)
     {
-      dolfin_assert(mapping[i] < other.local_size());
+      dolfin_assert(mapping[i] < other.cache_size_);
       uint const owner = other.cached_ownership_[mapping[i]];
 
       // Copy to cache if it exists
@@ -855,8 +930,6 @@ void DistributedData::assign_ownership(DistributedData const& other,
     _map<uint, uint>::const_iterator itg;
     for (uint i = 0; i < mapping.size(); ++i)
     {
-      dolfin_assert(mapping[i] < other.local_size());
-
       // Entity is shared: copy adjacents
       its = other.shared_.find(mapping[i]);
       if(its != other.shared_.end())

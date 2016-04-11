@@ -115,6 +115,10 @@ public:
   /// Re-map numbering with given mapping
   void remap_numbering(Array<uint> const& mapping);
 
+  /// Assign numbering from given data and given mapping from self to other
+  /// between entities
+  void assign_numbering(DistributedData const& other, Array<uint> const& mapping);
+
   /// Re-index global indices to have contiguous numbering of owned entities
   void renumber_global();
 

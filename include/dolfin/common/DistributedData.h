@@ -152,6 +152,10 @@ public:
   /// Re-map ownership with given mapping
   void remap_ownership(Array<uint> const& mapping);
 
+  /// Assign ownership data from given data and given mapping from self to other
+  /// between entities
+  void assign_ownership(DistributedData const& other, Array<uint> const& mapping);
+
   //--- Shared ---
 
   /// Return the adjacent set of a shared entity
@@ -174,6 +178,8 @@ public:
 
   /// Set the given entity as ghost
   void set_ghost(uint local_index, uint owner);
+
+  //---------------------------------------------------------------------------
 
   //
   void disp() const;

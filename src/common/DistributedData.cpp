@@ -61,51 +61,30 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
     global_size_ = other.global_size_;
 
     finalized_ = other.finalized_;
-
-    if (finalized_)
-    {
-      // Avoid copy of global-to-local unordered map
-      cache_size_ = other.cache_size_;
-      dolfin_assert(other.cache_size_ == other.local_.size());
-      if (cache_size_ >  0)
-      {
-        dolfin_assert(other.cached_numbering_ !=  NULL);
-        dolfin_assert(other.cached_ownership_ !=  NULL);
-        cached_numbering_ = new uint[cache_size_];
-        cached_ownership_ = new uint[cache_size_];
-        for (uint i = 0; i < other.local_.size(); ++i)
-        {
-          cached_numbering_[i] = other.cached_numbering_[i];
-          local_[cached_numbering_[i]] = i;
-          cached_ownership_[i] = other.cached_ownership_[i];
-        }
-        dolfin_assert(local_.size() == other.local_.size());
-      }
-    }
-    else
-    {
-      cache_size_ = other.cache_size_;
-      if (other.cached_numbering_ != NULL)
-      {
-        dolfin_assert(cache_size_ > 0);
-        cached_numbering_ = new uint[cache_size_];
-        std::copy(other.cached_numbering_,
-                  other.cached_numbering_ + cache_size_, cached_numbering_);
-      }
-      if (other.cached_ownership_ != NULL)
-      {
-        dolfin_assert(cache_size_ > 0);
-        cached_ownership_ = new uint[cache_size_];
-        std::copy(other.cached_ownership_,
-                  other.cached_ownership_ + cache_size_, cached_ownership_);
-      }
-      global_ = other.global_;
-      local_ = other.local_;
-    }
+    global_ = other.global_;
+    local_ = other.local_;
 
     adjacents_ = other.adjacents_;
     shared_ = other.shared_;
     ghost_ = other.ghost_;
+
+    // Copy caching
+    cache_size_ = other.cache_size_;
+    if (other.cached_numbering_ !=  NULL)
+    {
+      dolfin_assert(cache_size_ >  0);
+      cached_numbering_ = new uint[cache_size_];
+      std::copy(other.cached_numbering_, other.cached_numbering_ + cache_size_,
+                cached_numbering_);
+
+    }
+    if (other.cached_ownership_ !=  NULL)
+    {
+      dolfin_assert(cache_size_ >  0);
+      cached_ownership_ = new uint[cache_size_];
+      std::copy(other.cached_ownership_, other.cached_ownership_ + cache_size_,
+                cached_ownership_);
+    }
   }
   return *this;
 }
@@ -773,6 +752,92 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
     if (cached_ownership_ != NULL)
     {
       cached_ownership_[it->first] = mapping[it->second];
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+void DistributedData::assign_ownership(DistributedData const& other,
+                                       Array<uint> const& mapping)
+{
+  if (mapping.size() != this->local_size())
+  {
+    error("DistributedData : assignment of ownership requires mapping size to "
+          "be the same as the local size of distributed data");
+  }
+  // Clear existing data
+  adjacents_.clear();
+  shared_.clear();
+  ghost_.clear();
+  // Copy ownership: cached data avoids map lookups
+  if(other.cached_ownership_ != NULL)
+  {
+    // Cached ownership exists for other
+    _map<uint, _set<uint> >::const_iterator its;
+    _map<uint, uint>::const_iterator itg;
+    for (uint i = 0; i < mapping.size(); ++i)
+    {
+      dolfin_assert(mapping[i] < other.local_size());
+      uint const owner = other.cached_ownership_[mapping[i]];
+
+      // Copy to cache if it exists
+      if (cached_ownership_ != NULL)
+      {
+        cached_ownership_[i] = other.cached_ownership_[mapping[i]];
+      }
+
+      // Entity is shared: copy adjacents
+      if (owner < pe_size_)
+      {
+        its = other.shared_.find(mapping[i]);
+        dolfin_assert(its != other.shared_.end());
+        shared_[i] = its->second;
+        adjacents_.insert(its->second.begin(), its->second.end());
+
+        // Entity is ghost: copy owner
+        if (owner != rank_)
+        {
+          itg = other.ghost_.find(mapping[i]);
+          dolfin_assert(itg != other.ghost_.end());
+          ghost_[i] = itg->second;
+        }
+      }
+    }
+  }
+  else
+  {
+    // Cached ownership does not exist for other: build data from maps
+    _map<uint, _set<uint> >::const_iterator its;
+    _map<uint, uint>::const_iterator itg;
+    for (uint i = 0; i < mapping.size(); ++i)
+    {
+      dolfin_assert(mapping[i] < other.local_size());
+
+      // Entity is shared: copy adjacents
+      its = other.shared_.find(mapping[i]);
+      if(its != other.shared_.end())
+      {
+        shared_[i] = its->second;
+        adjacents_.insert(shared_[i].begin(), shared_[i].end());
+
+        // Entity is ghost: copy owner
+        itg = other.ghost_.find(mapping[i]);
+        if(itg != other.ghost_.end())
+        {
+          ghost_[i] = itg->second;
+          if (cached_ownership_ != NULL)
+          {
+            cached_ownership_[i] = itg->second;
+          }
+        }
+        else if (cached_ownership_ != NULL)
+        {
+          cached_ownership_[i] = rank_;
+        }
+      }
+      else if (cached_ownership_ != NULL)
+      {
+        cached_ownership_[i] = pe_size_;
+      }
     }
   }
 }

@@ -295,6 +295,10 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
   if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
+    if(!is_numbered_)
+    {
+      renumber();
+    }
   }
   return connectivity_[d0][d1];
 }
@@ -305,6 +309,10 @@ MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
   if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
+    if(!is_numbered_)
+    {
+      renumber();
+    }
   }
   return connectivity_[d0][d1];
 }
@@ -322,6 +330,8 @@ uint MeshTopology::size(uint dim) const
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_computed(uint d0, uint d1) const
 {
+  dolfin_assert(d0 <= dim_);
+  dolfin_assert(d1 <= dim_);
   return connectivity_[d0][d1].is_initialized();
 }
 //-----------------------------------------------------------------------------
@@ -524,6 +534,9 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     }
     delete[] entities;
     delete[] vertex_entities;
+
+    // New entities have been computed: trigger renumbering
+    is_numbered_ = false;
   }
   else if (d0 < d1)
   {
@@ -690,7 +703,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 
   if(mesh_.type().connectivity_needs_ordering(d0, d1))
   {
-    is_ordered_ = false;
+    reorder();
   }
 
   message(1, "MeshTopology : computed connectivity (%u, %u)", d0, d1);
@@ -725,7 +738,7 @@ void MeshTopology::renumber() const
   MeshTopology& topology = const_cast<MeshTopology&>(*this);
   if(!MeshRenumber::renumber(topology))
   {
-    error("Triggered mesh renumbering for nothing");
+    warning("MeshTopology: triggered mesh renumbering for nothing");
   }
 
   // Set the topology as numbered

@@ -26,10 +26,6 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     cell_map_(),
     vertex_map_()
 {
-  //FIXME:
-  // this->enforce_serial();
-
-  //
   switch (type)
     {
     case BoundaryMesh::exterior:
@@ -120,6 +116,11 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       editor.add_vertex(i, geom.x(vertex_map_[i]));
       editor.add_cell(i, &vertex_map_[i]);
     }
+    // If the mesh is distributed, set global numbering and copy the ownership
+    if(mesh.is_distributed())
+    {
+      this->distdata()[0].assign(mesh.distdata()[0], vertex_map_);
+    }
     editor.close();
   }
   else
@@ -154,13 +155,13 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     // Create boundary vertices and cells
     MeshEditor editor(*this, mesh.type().facetType(), gdim);
     editor.init_vertices(vertex_map_.size());
-    MeshGeometry const& geom = mesh.geometry();
     for (uint i = 0; i < vertex_map_.size(); ++i)
     {
-      editor.add_vertex(i, geom.x(vertex_map_[i]));
+      editor.add_vertex(i, mesh.geometry().x(vertex_map_[i]));
     }
     editor.init_cells(cell_map_.size());;
-    uint const num_facet_vertices = mesh.type().num_vertices(tdim - 1);
+    uint const d = tdim - 1;
+    uint const num_facet_vertices = mesh.type().num_vertices(d);
     uint * facet_vertices = new uint[num_facet_vertices];
     CellType const& celltype = mesh.type();
     for (uint i = 0; i < cell_map_.size(); ++i)
@@ -175,13 +176,19 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       editor.add_cell(i, &facet_vertices[0]);
     }
     delete [] facet_vertices;
+    // If the mesh is distributed, set global numbering and copy the ownership
+    if(mesh.is_distributed())
+    {
+      message("Boundary mesh");
+      this->distdata()[0].assign(mesh.distdata()[0], vertex_map_);
+      this->distdata()[d].assign(mesh.distdata()[d], cell_map_);
+    }
     editor.close();
     boundary_vertices.clear();
   }
 
   message(1, "BoundaryMesh : number of cells = %u, number of vertices %u",
           cell_map_.size(), vertex_map_.size());
-  dolfin_assert(!this->is_distributed());
 }
 //-----------------------------------------------------------------------------
 void BoundaryMesh::check() const

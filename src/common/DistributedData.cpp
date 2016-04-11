@@ -4,6 +4,7 @@
 
 #include <dolfin/common/DistributedData.h>
 
+#include <dolfin/common/timing.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
@@ -546,6 +547,7 @@ void DistributedData::renumber_global()
 #if HAVE_MPI
 
   message(1, "DistributedData : renumber global");
+  tic();
 
   _map<uint, uint> local_mapping;
   Array<uint> * sendbuf = new Array<uint> [pe_size_];
@@ -636,7 +638,8 @@ void DistributedData::renumber_global()
 
   local_ = local_mapping;
 
-  message("Done");
+  tocd(1);
+
 #endif /* HAVE_MPI */
 
 }

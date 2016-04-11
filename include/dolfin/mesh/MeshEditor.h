@@ -31,6 +31,9 @@ public:
   /// Constructor for meshes with unique type of cell from factory function
   MeshEditor(Mesh& mesh, CellType::Type type, uint gdim);
 
+  /// Constructor using already initialized mesh.
+  MeshEditor(Mesh& mesh);
+
   /// Destructor
   ~MeshEditor();
 

@@ -44,6 +44,24 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
   delete cell_type;
 }
 //-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh) :
+    mesh_(&mesh),
+    cell_vertices_(NULL),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0),
+    open_(false)
+{
+  if (mesh.cell_type_ == NULL)
+  {
+    error("MeshEditor : provided mesh is empty");
+  }
+  init(mesh, mesh.type(), mesh.geometry().dim());
+}
+//-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
 {
   if(open_)

@@ -55,6 +55,10 @@ public:
   /// Finalize the data: validate and set process range + global size
   void finalize();
 
+  /// Assign using other data given mapping from self to other between entities.
+  /// Data is finalized.
+  void assign(DistributedData const& other, Array<uint> const& mapping);
+
   /// Return if the distributed data is empty
   bool empty() const;
 
@@ -112,12 +116,8 @@ public:
   /// Set local-to-global mapping
   void set_map(Array<uint> const& mapping);
 
-  /// Re-map numbering with given mapping
+  /// Re-map numbering with given mapping for new local entities numbering
   void remap_numbering(Array<uint> const& mapping);
-
-  /// Assign numbering from given data and given mapping from self to other
-  /// between entities
-  void assign_numbering(DistributedData const& other, Array<uint> const& mapping);
 
   /// Re-index global indices to have contiguous numbering of owned entities
   void renumber_global();
@@ -156,12 +156,8 @@ public:
   /// Return the number of ghost entities
   uint num_ghost() const;
 
-  /// Re-map ownership with given mapping
+  /// Re-map ownership with given mapping for process ranks
   void remap_ownership(Array<uint> const& mapping);
-
-  /// Assign ownership data from given data and given mapping from self to other
-  /// between entities
-  void assign_ownership(DistributedData const& other, Array<uint> const& mapping);
 
   //--- Shared ---
 

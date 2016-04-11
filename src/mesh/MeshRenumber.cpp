@@ -42,6 +42,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   if (topology.entities_exist(0) && !distdata[0].valid_numbering)
   {
+    message("MeshRenumber : renumber vertices");
     DistributedData& vdata = distdata[0];
     dolfin_assert(vdata.local_size() == topology.size(0));
     vdata.renumber_global();
@@ -61,6 +62,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
       continue;
     }
 
+    message("MeshRenumber : renumber entities of dimension %u", d);
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
     edata.clear();
@@ -266,6 +268,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   if (topology.entities_exist(tdim) && !distdata[tdim].valid_numbering)
   {
+    message("MeshRenumber : renumber cells");
     DistributedData& cdata = distdata[tdim];
     // Cell numbering is not applied automatically
     if(cdata.local_size() == 0)

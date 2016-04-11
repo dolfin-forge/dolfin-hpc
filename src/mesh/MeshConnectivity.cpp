@@ -254,8 +254,12 @@ void MeshConnectivity::set(Array<uint> const& connectivity)
 {
   if (connectivity.size() != size_)
   {
-    error("MeshConnectivity : provided connectivity size %u does no match",
-          connectivity.size());
+    error("MeshConnectivity : provided connectivity size %u does no match %u",
+          connectivity.size(), size_);
+  }
+  if (connections_ == NULL)
+  {
+    error("MeshConnectivity : connectivity is not initialized");
   }
   std::copy(connectivity.begin(), connectivity.end(), connections_);
 }

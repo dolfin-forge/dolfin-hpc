@@ -179,7 +179,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     boundary_vertices.clear();
   }
 
-  message("BoundaryMesh : number of cells = %u and vertices %u",
+  message(1, "BoundaryMesh : number of cells = %u, number of vertices %u",
           cell_map_.size(), vertex_map_.size());
   dolfin_assert(!this->is_distributed());
 }

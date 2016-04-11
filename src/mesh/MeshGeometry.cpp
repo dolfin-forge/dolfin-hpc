@@ -174,18 +174,18 @@ void MeshGeometry::set(uint n, real const * x)
   std::copy(x, x + dim_, coordinates_ + n * dim_);
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::set(Array<real> const& coords)
+void MeshGeometry::set(Array<real> const& coordinates)
 {
-  if(coords.size() != dim_ * size_)
+  if(coordinates.size() != dim_ * size_)
   {
     error("MeshGeometry : size mismatch in coordinates assignment");
   }
-  std::copy(coords.begin(), coords.end(), coordinates_);
+  std::copy(coordinates.begin(), coordinates.end(), coordinates_);
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::remap(Array<uint> const& map)
+void MeshGeometry::remap(Array<uint> const& mapping)
 {
-  if (map.size() != size_)
+  if (mapping.size() != size_)
   {
     error("MeshGeometry : size mismatch for remapping of coordinates ");
   }
@@ -194,13 +194,34 @@ void MeshGeometry::remap(Array<uint> const& map)
   for (uint i = 0; i < size_; ++i)
   {
     std::copy(coordinates_ + i * dim_, coordinates_ + (i + 1) * dim_,
-              xcpy + map[i] * dim_);
+              xcpy + mapping[i] * dim_);
   }
   delete[] coordinates_;
   coordinates_ = xcpy;
 
   // Invalidate dependencies
   update_token();
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::assign(MeshGeometry const& other, Array<uint> const& mapping)
+{
+  if (this == &other)
+  {
+    error("MeshGeometry : assignment of coordinates to self");
+  }
+  if (other.dim() != dim_)
+  {
+    error("MeshGeometry : dimension mismatch for assignment of coordinates ");
+  }
+  if (mapping.size() != size_)
+  {
+    error("MeshGeometry : size mismatch for assignment of coordinates ");
+  }
+  for (uint i = 0; i < mapping.size(); ++i)
+  {
+    std::copy(other.x(mapping[i]), other.x(mapping[i]) + dim_,
+              coordinates_ + i * dim_);
+  }
 }
 //-----------------------------------------------------------------------------
 int MeshGeometry::token() const

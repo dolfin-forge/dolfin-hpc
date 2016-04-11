@@ -95,11 +95,14 @@ public:
   void set(uint n, real const * x);
 
   /// Set values of coordinates from array, size of input should match
-  void set(Array<real> const& coords);
+  void set(Array<real> const& coordinates);
 
   /// Remap coordinates from old to new ordering
   /// The mapping should have the same size as the number of coordinates
-  void remap(Array<uint> const& map);
+  void remap(Array<uint> const& mapping);
+
+  /// Assign coordinates from given mesh geometry and mapping from self to other
+  void assign(MeshGeometry const& other, Array<uint> const& mapping);
 
   /// Display data
   void disp() const;

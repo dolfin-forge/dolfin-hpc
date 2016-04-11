@@ -676,7 +676,7 @@ void DistributedData::renumber_global()
 
 #if HAVE_MPI
 
-  message(1, "DistributedData : renumber global");
+  message(1, "DistributedData : renumber global, local size = %u", cache_size_);
   tic();
 
   _map<uint, uint> local_mapping;

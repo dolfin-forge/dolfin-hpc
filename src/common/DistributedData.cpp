@@ -153,37 +153,92 @@ void DistributedData::finalize()
       error("DistributedData : ghost size is greater than shared size");
     }
 
-    // Cache provided mapping for numbering and ownership
+    // Local-to-global mapping was provided and should be cached
     if (global_.size() > 0)
     {
-      // Generate caching for existing mapping
+      // Generate cache for existing mapping
       if (cached_numbering_ != NULL)
       {
         error("DistributedData : data not finalized but numbering is cached");
       }
-      if (cached_ownership_ != NULL)
-      {
-        error("DistributedData : data not finalized but ownership is cached");
-      }
-
-      message(1, "DistributedData : cache mapping of size %u", global_.size());
       if (global_.size() != local_.size())
       {
         error("DistributedData : size mismatch between index mappings %u != %u",
               global_.size(), local_.size());
       }
 
-      // Cache numbering and ownership
+      // Cache numbering
       cache_size_ = global_.size();
       cached_numbering_ = new uint[cache_size_];
-      cached_ownership_ = new uint[cache_size_];
       for (_map<uint, uint>::iterator it = global_.begin();
            it != global_.end(); ++it)
       {
         cached_numbering_[it->first] = it->second;
-        cached_ownership_[it->first] = pe_size_;
       }
       global_.clear();
+
+      message(1, "DistributedData : cached local-to-global mapping");
+    }
+    // No mapping provided but a process range may have been provided or can be
+    // inferred from the local size.
+    // If *no* entities were marked as shared generate a linear mapping using
+    // the process range, otherwise throw an error.
+    // This allows automatic numbering of non-ghosted entities like cells.
+    else if ((local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0))
+    {
+      if (shared_.size() > 0)
+      {
+        error("DistributedData : no mapping was provided and some entities set "
+              "as shared: impossible to devise a linear numbering.");
+      }
+
+      // Either local size or the range can be used but if both are provided
+      // check consistency
+      if (cache_size_ > 0)
+      {
+        if ((range_size_ > 0) && (range_size_ != cache_size_))
+        {
+          error("DistributedData : size mismatch between local size and range");
+        }
+        range_size_ = cache_size_;
+      }
+      else
+      {
+        cache_size_ = range_size_;
+      }
+
+      // Numbering incrementally and set all as owned
+      MPI::processOffset(range_size_, offset_);
+      uint global = offset_;
+      if(cached_numbering_ == NULL)
+      {
+        cached_numbering_ = new uint[range_size_];
+      }
+      for (uint local = 0; local < range_size_; ++local, ++global)
+      {
+        cached_numbering_[local] = global;
+        local_[global] = local;
+      }
+      // Global renumbering is not necessary
+      valid_numbering = true;
+
+      message(1, "DistributedData : generated linear mapping in range [%u, %u[",
+              offset_, offset_+range_size_);
+    }
+
+    // At this point mappings exist and local-to-global is cached.
+    // For the sake of completeness let us check the consistency
+    if (local_.size() != cache_size_)
+    {
+      error("DistributedData : size mismatch between local-to-global (%u) and "
+            "and global-to-local (%u) mappings", cache_size_, local_.size());
+    }
+
+    // Cache ownership if needed
+    if(cached_ownership_ == NULL)
+    {
+      cached_ownership_ = new uint[cache_size_];
+      std::fill_n(cached_ownership_, cache_size_, pe_size_);
 
       // Update ownership for shared entities
       for (_map<uint, _set<uint> >::const_iterator it = shared_.begin();
@@ -198,55 +253,6 @@ void DistributedData::finalize()
       {
         cached_ownership_[it->first] = it->second;
       }
-    }
-
-    // No mapping provided but a process range can be set.
-    // Generate a linear mapping from process range: entities are not ghosted.
-    if ((local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0))
-    {
-      if (shared_.size() > 0)
-      {
-        error("DistributedData : no mapping but entities set as shared");
-      }
-
-      // Either local size or the range can be used
-      if (cache_size_ > 0)
-      {
-        if ((range_size_ > 0) && (range_size_ != cache_size_))
-        {
-          error("DistributedData : size mismatch between local size and range");
-        }
-        range_size_ = cache_size_;
-      }
-      else
-      {
-        cache_size_ = range_size_;
-        cached_numbering_ = new uint[range_size_];
-        cached_ownership_ = new uint[range_size_];
-      }
-
-      // Numbering incrementally and set all as owned
-      MPI::processOffset(range_size_, offset_);
-      uint global = offset_;
-      for (uint local = 0; local < range_size_; ++local, ++global)
-      {
-        cached_numbering_[local] = global;
-        local_[global] = local;
-      }
-      std::fill_n(cached_ownership_, range_size_, pe_size_);
-      // Global renumbering is not necessary
-      valid_numbering = true;
-
-      message(1, "DistributedData : generated linear mapping in range [%u, %u[",
-              offset_, offset_+range_size_);
-    }
-
-    // At this point mappings exist and are cached.
-    // For the sake of completeness let us check the consistency
-    if (local_.size() != cache_size_)
-    {
-      error("DistributedData : size mismatch between local-to-global (%u) and "
-            "and global-to-local (%u) mappings", cache_size_, local_.size());
     }
 
     // Set data range if needed
@@ -315,6 +321,7 @@ bool DistributedData::in_range(uint global_index) const
 //-----------------------------------------------------------------------------
 uint DistributedData::local_size() const
 {
+  dolfin_assert(finalized_);
   return local_.size();
 }
 //-----------------------------------------------------------------------------
@@ -471,6 +478,38 @@ void DistributedData::set_map(uint local_index, uint global_index)
   }
 }
 //-----------------------------------------------------------------------------
+void DistributedData::set_map(Array<uint> const& mapping)
+{
+  if (finalized_)
+  {
+    error("DistributedData : setting numbering requires non-finalized data");
+  }
+  if (cached_numbering_ != NULL)
+  {
+    if (mapping.size() != cache_size_)
+    {
+      error("DistributedData : local-to-global mapping array has invalid size");
+    }
+  }
+  else
+  {
+    if (mapping.size() != global_.size())
+    {
+      error("DistributedData : local-to-global mapping array has invalid size");
+    }
+    global_.clear();
+    cache_size_ = mapping.size();
+    cached_numbering_ = new uint[mapping.size()];
+  }
+
+  local_.clear();
+  for (uint i = 0; i < cache_size_; ++i)
+  {
+    cached_numbering_[i] = mapping[i];
+    local_[mapping[i]] = i;
+  }
+}
+//-----------------------------------------------------------------------------
 void DistributedData::remap_numbering(Array<uint> const& mapping)
 {
   if (!finalized_)
@@ -523,6 +562,11 @@ void DistributedData::renumber_global()
     error("DistributedData : global renumbering requires finalized data");
   }
 
+  /*
+   * The following code assumes that numbering and ownership are finalized !
+   *
+   */
+
 #if HAVE_MPI
 
   message(1, "DistributedData : renumber global");
@@ -532,13 +576,14 @@ void DistributedData::renumber_global()
   Array<uint> * sendbuf = new Array<uint> [pe_size_];
 
   // Re-index owned entities and collect ghosted entities per owner
+  dolfin_assert(local_.size() == cache_size_);
   dolfin_assert(!(local_.size() > 0 && cached_numbering_ == NULL));
   dolfin_assert(!(local_.size() > 0 && cached_ownership_ == NULL));
   uint index = offset_;
-  for (uint i = 0; i < local_.size(); ++i)
+  for (uint i = 0; i < cache_size_; ++i)
   {
     dolfin_assert(cached_ownership_[i] <= pe_size_);
-    if (cached_ownership_[i] == pe_size_)
+    if (cached_ownership_[i] == pe_size_ || cached_ownership_[i] == rank_)
     {
       cached_numbering_[i] = index;
       local_mapping[index] = i;

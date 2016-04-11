@@ -109,6 +109,9 @@ public:
   /// Set local-to-global mapping
   void set_map(uint local_index, uint global_index);
 
+  /// Set local-to-global mapping
+  void set_map(Array<uint> const& mapping);
+
   /// Re-map numbering with given mapping
   void remap_numbering(Array<uint> const& mapping);
 

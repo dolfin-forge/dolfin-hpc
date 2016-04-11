@@ -194,8 +194,9 @@ void DistributedData::finalize()
       }
 
       // Cache numbering and ownership
-      cached_numbering_ = new uint[global_.size()];
-      cached_ownership_ = new uint[global_.size()];
+      cache_size_ = global_.size();
+      cached_numbering_ = new uint[cache_size_];
+      cached_ownership_ = new uint[cache_size_];
       for (_map<uint, uint>::iterator it = global_.begin();
            it != global_.end(); ++it)
       {
@@ -228,9 +229,6 @@ void DistributedData::finalize()
         error("DistributedData : no mapping but entities set as shared");
       }
 
-      message(1, "DistributedData : generate linear mapping in range [%u, %u[",
-              offset_, offset_+range_size_);
-
       // Either local size or the range can be used
       if (cache_size_ > 0)
       {
@@ -248,6 +246,7 @@ void DistributedData::finalize()
       }
 
       // Numbering incrementally and set all as owned
+      MPI::processOffset(range_size_, offset_);
       uint global = offset_;
       for (uint local = 0; local < range_size_; ++local, ++global)
       {
@@ -257,14 +256,17 @@ void DistributedData::finalize()
       std::fill_n(cached_ownership_, range_size_, pe_size_);
       // Global renumbering is not necessary
       valid_numbering = true;
+
+      message(1, "DistributedData : generated linear mapping in range [%u, %u[",
+              offset_, offset_+range_size_);
     }
 
     // At this point mappings exist and are cached.
     // For the sake of completeness let us check the consistency
     if (local_.size() != cache_size_)
     {
-      error("DistributedData : size mismatch of numbering mappings %u != %u",
-            cache_size_, local_.size());
+      error("DistributedData : size mismatch between local-to-global (%u) and "
+            "and global-to-local (%u) mappings", cache_size_, local_.size());
     }
 
     // Set data range if needed
@@ -811,6 +813,14 @@ void DistributedData::set_shared(uint local_index)
   dolfin_assert(!finalized_);
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(shared_.count(local_index) == 0);
+  if ((cached_ownership_ != NULL)
+      && (cached_ownership_[local_index] == pe_size_))
+  {
+    cached_ownership_[local_index] = rank_;
+  }
+  // As explained we allow setting an entity as shared without adjacent only if
+  // the entity is not shared already.
+  dolfin_assert(global_.count(local_index) > 0);
   if (shared_[local_index].size() > 0)
   {
     error("DistributedData : cannot set_shared on entities with adjacents");
@@ -823,6 +833,11 @@ void DistributedData::set_shared_adj(uint local_index, uint adj)
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(adj != rank_);
   dolfin_assert(adj < pe_size_);
+  if ((cached_ownership_ != NULL)
+      && (cached_ownership_[local_index] == pe_size_))
+  {
+    cached_ownership_[local_index] = rank_;
+  }
   shared_[local_index].insert(adj);
   adjacents_.insert(adj);
 }
@@ -832,6 +847,11 @@ void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs
   dolfin_assert(!finalized_);
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(adjs.count(rank_) == 0);
+  if ((cached_ownership_ != NULL)
+      && (cached_ownership_[local_index] == pe_size_))
+  {
+    cached_ownership_[local_index] = rank_;
+  }
   shared_[local_index] = adjs;
   adjacents_.insert(adjs.begin(), adjs.end());
 }
@@ -842,6 +862,10 @@ void DistributedData::set_ghost(uint local_index, uint owner)
   dolfin_assert(this->has_local(local_index));
   dolfin_assert(owner != rank_);
   dolfin_assert(owner < pe_size_);
+  if (cached_ownership_ != NULL)
+  {
+    cached_ownership_[local_index] = owner;
+  }
   shared_[local_index].insert(owner);
   ghost_[local_index] = owner;
   adjacents_.insert(owner);

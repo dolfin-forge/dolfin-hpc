@@ -156,7 +156,7 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
   }
   dolfin_assert(cell_type_ != NULL);
   editor_ = new MeshEditor(mesh_, *cell_type_, dim);
-  parallel_ = (MPI::numProcesses() > 1 && !dolfin_get("Mesh read in serial"));
+  parallel_ = mesh_.topology().is_distributed();
   if(parallel_)
   {
     warning("Reading DOLFIN xml meshes in parallel is deprecated.\n"
@@ -186,7 +186,7 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
 //-----------------------------------------------------------------------------
 void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
 {
-  uint num_cells = parse<uint>(name, attrs, "size");
+  uint size = parse<uint>(name, attrs, "size");
   //
   if (cell_dist_ != NULL)
   {
@@ -197,6 +197,8 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   {
     editor_->init_cells(0);
     editor_->close();
+    dolfin_assert(mesh_.topology().size(0) == vertex_dist_->size);
+    dolfin_assert(mesh_.distdata()[0].local_size() == vertex_dist_->size);
 //    The following section requires process range and global size to be set
 //    MeshFunction<uint> pre_partition;
 //    mesh_.partition_geom(pre_partition);
@@ -210,16 +212,16 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
   }
   else
   {
-    editor_->init_cells(num_cells);
+    editor_->init_cells(size);
   }
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 {
   // Read index
-  uint v = parse<uint>(name, attrs, "index");
+  uint index = parse<uint>(name, attrs, "index");
 
-  if (!vertex_dist_->in_range(v)) return;
+  if (!vertex_dist_->in_range(index)) return;
 
   // Handle differently depending on geometric dimension
   real x[Point::MAX_SIZE];
@@ -237,7 +239,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
           mesh_.geometry().dim());
     break;
   }
-  editor_->add_vertex(v - vertex_dist_->offset, &x[0]);
+  editor_->add_vertex(index - vertex_dist_->offset, &x[0]);
 }
 //-----------------------------------------------------------------------------
 void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
@@ -264,7 +266,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
   }
   */
   //
-  uint c = parse<uint>(name, attrs, "index");
+  uint index = parse<uint>(name, attrs, "index");
 
   if (parallel_)
   {
@@ -297,7 +299,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     {
       v[i] = parse<uint>(name, attrs, vertex_attr[i]);
     }
-    editor_->add_cell(c, &v[0]);
+    editor_->add_cell(index, &v[0]);
     ++cell_count_;
   }
 }
@@ -306,14 +308,9 @@ void XMLMesh::endMesh()
 {
   if (parallel_)
   {
-    Mesh new_mesh;
-    delete editor_;
-    uint const gdim = mesh_.geometry().dim();
-    editor_ = new MeshEditor(new_mesh, mesh_.type(), gdim);
-
     uint const rank = MPI::processNumber();
     uint const pe_size = MPI::numProcesses();
-
+    uint const gdim = mesh_.geometry().dim();
     Array<uint> sendbuf(nonlocal_vertices_.size());
     sendbuf.assign(nonlocal_vertices_.begin(), nonlocal_vertices_.end());
     uint const shared = nonlocal_vertices_.size();
@@ -321,29 +318,28 @@ void XMLMesh::endMesh()
 
     // Exchange ghost points
     MPI_Status status;
-    uint src, dst;
+    uint src;
+    uint dst;
     uint recvmax;
     MPI::numGlobalSum(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
     int recvcount;
-    uint * sendbuf_idx = new uint[2*recvmax];
-    real * sendbuf_crd = new real[gdim*recvmax];
-    uint idxbuf_size = 2*shared;
-    uint *idxbuf = new uint[idxbuf_size];
-    uint *idxptr = &idxbuf[0];
-    uint crdbuf_size = gdim*shared;
-    real *crdbuf = new real[crdbuf_size];
-    real *crdptr = &crdbuf[0];
+    uint * sendbuf_v = new uint[2*recvmax];
+    real * sendbuf_x = new real[gdim*recvmax];
+    uint recvcnt_v = 2*shared;
+    uint * recvbuf_v = new uint[recvcnt_v];
+    uint * recvptr_v = &recvbuf_v[0];
+    uint recvcnt_x = gdim*shared;
+    real * recvbuf_x = new real[recvcnt_x];
+    real * recvptr_x = &recvbuf_x[0];
     DistributedData& vdata0 = mesh_.distdata()[0];
     for (uint j = 1; j < pe_size; ++j)
     {
-
       src = (rank - j + pe_size) % pe_size;
       dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 1,
-                   recvbuf, recvmax, MPI_UNSIGNED, src, 1,
-                   MPI::DOLFIN_COMM, &status);
+      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 1, recvbuf,
+                   recvmax, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
 
       uint count = 0;
@@ -352,54 +348,61 @@ void XMLMesh::endMesh()
         if (vdata0.has_global(recvbuf[k]))
         {
           uint const index = vdata0.get_local(recvbuf[k]);
-          sendbuf_idx[2*count] = recvbuf[k];
+          sendbuf_v[2*count] = recvbuf[k];
           if (vertex_owner_[index] == pe_size)
           {
             ++orphan;
             vertex_owner_[index] = src;
-            sendbuf_idx[2*count+1] = src;
+            sendbuf_v[2*count+1] = src;
           }
           else
           {
-            sendbuf_idx[2*count+1] = vertex_owner_[index];
+            sendbuf_v[2*count+1] = vertex_owner_[index];
           }
           for (uint d = 0; d < gdim; ++d)
           {
-            sendbuf_crd[gdim*count+d] = mesh_.geometry().x(index)[d];
+            sendbuf_x[gdim*count+d] = mesh_.geometry().x(index)[d];
           }
           ++count;
         }
       }
 
-      MPI_Sendrecv(&sendbuf_idx[0], 2*count, MPI_UNSIGNED, src, 1, idxptr,
-                   idxbuf_size, MPI_UNSIGNED, dst, 1, MPI::DOLFIN_COMM,
-                   &status);
+      MPI_Sendrecv(&sendbuf_v[0], 2 * count, MPI_UNSIGNED, src, 1, recvptr_v,
+                   recvcnt_v, MPI_UNSIGNED, dst, 1, MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
-      idxbuf_size -= recvcount;
-      idxptr += recvcount;
+      recvcnt_v -= recvcount;
+      recvptr_v += recvcount;
 
-      MPI_Sendrecv(&sendbuf_crd[0], gdim*count, MPI_DOUBLE, src, 2,
-                   crdptr, crdbuf_size, MPI_DOUBLE, dst, 2, MPI::DOLFIN_COMM,
-                   &status);
+      MPI_Sendrecv(&sendbuf_x[0], gdim * count, MPI_DOUBLE, src, 2, recvptr_x,
+                   recvcnt_x, MPI_DOUBLE, dst, 2, MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
-      crdbuf_size -= recvcount;
-      crdptr += recvcount;
+      recvcnt_x -= recvcount;
+      recvptr_x += recvcount;
     }
-    delete[] sendbuf_crd;
-    delete[] sendbuf_idx;
+    delete[] sendbuf_x;
+    delete[] sendbuf_v;
+
+    // Create mesh editor
+    Mesh new_mesh;
+    delete editor_;
+    editor_ = new MeshEditor(new_mesh, mesh_.type(), gdim);
 
     // Add vertices
     editor_->init_vertices(mesh_.size(0) + shared - orphan);
-    DistributedData& vdata1 = new_mesh.distdata()[0];
+    DistributedData& new_distdata0 = new_mesh.distdata()[0];
 
     uint vertex_count = 0;
     for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
     {
       if (vertex_owner_[vertex->index()] == rank)
       {
-        vdata1.set_map(vertex_count, vertex->global_index());
+        new_distdata0.set_map(vertex_count, vertex->global_index());
         editor_->add_vertex(vertex_count, vertex->x());
         ++vertex_count;
+      }
+      else if (vertex_owner_[vertex->index()] == pe_size)
+      {
+        error("XMLMesh : vertex %u is unassigned");
       }
     }
 
@@ -408,15 +411,16 @@ void XMLMesh::endMesh()
     uint ci = 0;
     for (uint i = 0; i < shared; ++i, ii+=2, ci += gdim)
     {
-      vdata1.set_map(vertex_count, idxbuf[ii]);
-      if (idxbuf[ii + 1] != rank)
+      new_distdata0.set_map(vertex_count, recvbuf_v[ii]);
+      if (recvbuf_v[ii + 1] != rank)
       {
-        vdata1.set_ghost(vertex_count, idxbuf[ii + 1]);
+        new_distdata0.set_ghost(vertex_count, recvbuf_v[ii + 1]);
+        dolfin_assert(new_distdata0.is_ghost(vertex_count));
+        dolfin_assert(new_distdata0.get_owner(vertex_count) == recvbuf_v[ii + 1]);
       }
-      editor_->add_vertex(vertex_count, &crdbuf[ci]);
+      editor_->add_vertex(vertex_count, &recvbuf_x[ci]);
       ++vertex_count;
     }
-
 
     // Add cells
     // This code is only valid for homogeneous meshes
@@ -428,8 +432,7 @@ void XMLMesh::endMesh()
     {
       for (uint n = 0; n < num_cell_vertices; ++n)
       {
-        connectivity[n] =
-            vdata1.get_local(cell_buffer_[i + n]);
+        connectivity[n] = new_distdata0.get_local(cell_buffer_[i + n]);
       }
       editor_->add_cell(c++, &connectivity[0]);
     }
@@ -438,8 +441,8 @@ void XMLMesh::endMesh()
     mesh_ = new_mesh;
 
     sendbuf.clear();
-    delete[] idxbuf;
-    delete[] crdbuf;
+    delete[] recvbuf_v;
+    delete[] recvbuf_x;
     delete[] recvbuf;
   }
   else
@@ -447,7 +450,7 @@ void XMLMesh::endMesh()
     editor_->close();
   }
   clear();
-  message("XMLMesh : loading took %g s.", toc());
+  message("XMLMesh : loading time %g s.", toc());
 }
 //-----------------------------------------------------------------------------
 

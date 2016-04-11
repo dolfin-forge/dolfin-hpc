@@ -180,7 +180,7 @@ void MeshGeometry::set(Array<real> const& coords)
   {
     error("MeshGeometry : size mismatch in coordinates assignment");
   }
-  std::copy(coords.begin(), coords.end() + dim_ * size_, coordinates_);
+  std::copy(coords.begin(), coords.end(), coordinates_);
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::remap(Array<uint> const& map)

@@ -261,7 +261,7 @@ void MeshTopology::finalize()
   // This would cause issues for boundary meshes and some mesh algorithms.
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::remap(uint dim, Array<uint> const& map)
+void MeshTopology::remap(uint dim, Array<uint> const& mapping)
 {
   if (connectivity_ != NULL)
   {
@@ -270,21 +270,21 @@ void MeshTopology::remap(uint dim, Array<uint> const& map)
     {
       if (connectivity_[d0][d1].size() > 0)
       {
-        connectivity_[d0][d1].remap_left(map);
+        connectivity_[d0][d1].remap_left(mapping);
         update_token();
         is_ordered_ = false;
       }
       if (connectivity_[d1][d0].size() > 0)
       {
-        connectivity_[d1][d0].remap_right(map);
+        connectivity_[d1][d0].remap_right(mapping);
         update_token();
         is_ordered_ = false;
       }
     }
-
+    // Remap distributed data
     if (distdata_ != NULL)
     {
-      error("MeshTopology : remapping entities in parallel is not allowed.");
+      (*distdata_)[d0].remap_numbering(mapping);
     }
   }
 }

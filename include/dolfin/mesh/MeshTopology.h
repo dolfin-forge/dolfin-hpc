@@ -82,7 +82,7 @@ public:
   void finalize();
 
   /// Remap local entities of given dimension
-  void remap(uint dim,  Array<uint> const& map);
+  void remap(uint dim,  Array<uint> const& mapping);
 
   //--- Connectivity ----------------------------------------------------------
 

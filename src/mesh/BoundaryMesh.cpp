@@ -179,7 +179,6 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     // If the mesh is distributed, set global numbering and copy the ownership
     if(mesh.is_distributed())
     {
-      message("Boundary mesh");
       this->distdata()[0].assign(mesh.distdata()[0], vertex_map_);
       this->distdata()[d].assign(mesh.distdata()[d], cell_map_);
     }

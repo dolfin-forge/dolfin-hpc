@@ -65,7 +65,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     message("MeshRenumber : renumber entities of dimension %u", d);
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
-    edata.clear();
+    // Distributed data size is known: cache arrays are used.
+    dolfin_assert(edata.empty());
+    edata.set_size(topology.size(d));
     MeshConnectivity const& cve = topology(0, d);
     MeshConnectivity const& cev = topology(d, 0);
 
@@ -113,7 +115,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           if (adjs.size() > 0)
           {
             key.idx = entity_index;
-            message("entity index %8u; adj %u", entity_index, adjs.size());
             for (uint v = 0; v < num_entity_vertices; ++v)
             {
               key.indices[v] = vdata.get_global(vertices[v]);
@@ -136,7 +137,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     delete [] used_entities;
 
     // Exchange data to mark which entities are shared
-    _set<uint> shared;
     _map<uint,uint> recvmap;
 
     MPI_Status status;
@@ -170,6 +170,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         // still not be shared, beware camembert !
         if (it != entity_map.end())
         {
+          //FIXME: Hash collision possible ?
           uint const local_index = it->first.idx;
           message("local index %u", local_index);
           uint const vote0 = it->second;
@@ -182,15 +183,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
             dolfin_assert(key.idx == recvbuf[k + 1]);
             edata.set_ghost(local_index, src);
           }
-          else
-          {
-            edata.set_shared_adj(local_index, src);
-          }
-          shared.insert(local_index);
+          edata.set_shared_adj(local_index, src);
         }
       }
     }
-    dolfin_assert(edata.capacity() == cev.num_entities());
 
     // Cleanup
     delete[] recvbuf;
@@ -200,15 +196,13 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     // Exchange ghost entities
     sendbuf = new Array<uint>[pe_size];
     Array<uint> * ghostid = new Array<uint>[pe_size];
-    uint const num_owned = cev.num_entities() - edata.num_ghost();
-    uint offset = 0;
-    MPI::processOffset(num_owned, offset);
-    uint current_index = 0;
+    edata.set_range(cev.num_entities() - edata.num_ghost());
+    uint current_index = edata.offset();
     for(uint i = 0; i < cev.num_entities(); ++i)
     {
       if(edata.is_owned(i))
       {
-        edata.set_map(i, offset + current_index);
+        edata.set_map(i, current_index);
         ++current_index;
       }
       else
@@ -216,6 +210,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         // Enqueue to query global index
         uint const owner = edata.get_owner(i);
         dolfin_assert(owner != rank);
+        dolfin_assert(owner < pe_size);
         dolfin_assert(recvmap.count(i) > 0);
         sendbuf[owner].push_back(recvmap[i]);
         ghostid[owner].push_back(i);
@@ -240,7 +235,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
       for (int k = 0; k < recvcount; ++k)
       {
-        dolfin_assert(shared.count(recvbuf[k]));
         dolfin_assert(edata.is_owned(recvbuf[k]));
         dolfin_assert(edata.is_shared(recvbuf[k]));
         dolfin_assert(edata.get_shared_adj(recvbuf[k]).count(src) > 0);

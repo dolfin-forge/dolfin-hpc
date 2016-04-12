@@ -448,19 +448,19 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
     error("DistributedData : setting range to a finalized data");
   }
   // Check if there exists a mapping already
-  if (!this->empty())
+  if (local_.size() > 0 && local_.size() < num_owned)
   {
-    error("DistributedData : setting range to a non-empty data");
+    error("DistributedData : provided range is greater than local size ");
   }
   // Check if any existing global size matches the provided value
   if ((range_size_ > 0) && (range_size_ != num_owned))
   {
     error("DistributedData : setting different range than existing");
   }
-  // Check if the provided range size is consistent with local size
-  if (num_owned < cache_size_)
+  // Check if the provided range size is consistent with cache size if any
+  if (cache_size_ > 0 && cache_size_ < num_owned)
   {
-    error("DistributedData : provided range is smaller than local size ");
+    error("DistributedData : provided range is greater than cache size ");
   }
   // Set range in any case
   range_size_ = num_owned;
@@ -792,9 +792,9 @@ _set<uint> const& DistributedData::get_adj_ranks() const
 //-----------------------------------------------------------------------------
 uint DistributedData::get_owner(uint local_index) const
 {
-  dolfin_assert(this->has_local(local_index));
   if (cached_ownership_ != NULL)
   {
+    dolfin_assert(local_index < cache_size_);
     return (cached_ownership_[local_index] == pe_size_ ?
               rank_ : cached_ownership_[local_index]);
   }
@@ -808,9 +808,9 @@ uint DistributedData::get_owner(uint local_index) const
 //-----------------------------------------------------------------------------
 bool DistributedData::is_owned(uint local_index) const
 {
-  dolfin_assert(this->has_local(local_index));
   if (cached_ownership_ != NULL)
   {
+    dolfin_assert(local_index < cache_size_);
     return (cached_ownership_[local_index] == pe_size_ ||
             cached_ownership_[local_index] == rank_);
   }
@@ -819,19 +819,19 @@ bool DistributedData::is_owned(uint local_index) const
 //-----------------------------------------------------------------------------
 bool DistributedData::is_shared(uint local_index) const
 {
-  dolfin_assert(this->has_local(local_index));
   if (cached_ownership_ != NULL)
   {
+    dolfin_assert(local_index < cache_size_);
     return (cached_ownership_[local_index] < pe_size_);
   }
-  return (shared_.count(local_index) == 0);
+  return (shared_.count(local_index) > 0);
 }
 //-----------------------------------------------------------------------------
 bool DistributedData::is_ghost(uint local_index) const
 {
-  dolfin_assert(this->has_local(local_index));
   if (cached_ownership_ != NULL)
   {
+    dolfin_assert(local_index < cache_size_);
     return (cached_ownership_[local_index] < pe_size_ &&
             cached_ownership_[local_index] != rank_);
   }
@@ -840,6 +840,7 @@ bool DistributedData::is_ghost(uint local_index) const
 //-----------------------------------------------------------------------------
 uint DistributedData::num_owned() const
 {
+  dolfin_assert(local_.size() > ghost_.size());
   return (local_.size() - ghost_.size());
 }
 //-----------------------------------------------------------------------------
@@ -945,8 +946,8 @@ void DistributedData::get_common_adj(uint n, uint const indices[],
 void DistributedData::set_shared(uint local_index)
 {
   dolfin_assert(!finalized_);
-  dolfin_assert(this->has_local(local_index));
   dolfin_assert(shared_.count(local_index) == 0);
+  dolfin_assert(!((cached_ownership_ != NULL)&&(local_index >= cache_size_)));
   if ((cached_ownership_ != NULL)
       && (cached_ownership_[local_index] == pe_size_))
   {
@@ -964,9 +965,9 @@ void DistributedData::set_shared(uint local_index)
 void DistributedData::set_shared_adj(uint local_index, uint adj)
 {
   dolfin_assert(!finalized_);
-  dolfin_assert(this->has_local(local_index));
   dolfin_assert(adj != rank_);
   dolfin_assert(adj < pe_size_);
+  dolfin_assert(!((cached_ownership_ != NULL)&&(local_index >= cache_size_)));
   if ((cached_ownership_ != NULL)
       && (cached_ownership_[local_index] == pe_size_))
   {
@@ -979,8 +980,8 @@ void DistributedData::set_shared_adj(uint local_index, uint adj)
 void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs)
 {
   dolfin_assert(!finalized_);
-  dolfin_assert(this->has_local(local_index));
   dolfin_assert(adjs.count(rank_) == 0);
+  dolfin_assert(!((cached_ownership_ != NULL)&&(local_index >= cache_size_)));
   if ((cached_ownership_ != NULL)
       && (cached_ownership_[local_index] == pe_size_))
   {
@@ -993,11 +994,11 @@ void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs
 void DistributedData::set_ghost(uint local_index, uint owner)
 {
   dolfin_assert(!finalized_);
-  dolfin_assert(this->has_local(local_index));
   dolfin_assert(owner != rank_);
   dolfin_assert(owner < pe_size_);
   if (cached_ownership_ != NULL)
   {
+    dolfin_assert(local_index < cache_size_);
     cached_ownership_[local_index] = owner;
   }
   shared_[local_index].insert(owner);

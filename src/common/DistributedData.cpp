@@ -557,6 +557,28 @@ uint DistributedData::get_global(uint local_index) const
   return global_.find(local_index)->second;
 }
 //-----------------------------------------------------------------------------
+void DistributedData::get_global(uint n, uint const * local_indices,
+                                 uint * global_indices) const
+{
+  if (cached_numbering_ != NULL)
+  {
+    for(uint i = 0; i < n; ++i)
+    {
+      dolfin_assert(local_indices[i] < cache_size_);
+      dolfin_assert(cached_numbering_[local_indices[i]] != DOLFIN_UINT_UNDEF);
+      global_indices[i] = cached_numbering_[local_indices[i]];
+    }
+  }
+  else
+  {
+    for(uint i = 0; i < n; ++i)
+    {
+      dolfin_assert(global_.count(local_indices[i]) > 0);
+      global_indices[i] = global_.find(local_indices[i])->second;
+    }
+  }
+}
+//-----------------------------------------------------------------------------
 uint DistributedData::has_global(uint global_index) const
 {
   return (local_.count(global_index) > 0);
@@ -567,7 +589,17 @@ uint DistributedData::get_local(uint global_index) const
   dolfin_assert(local_.count(global_index) > 0);
   return local_.find(global_index)->second;
 }
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void DistributedData::get_local(uint n, uint const * global_indices,
+                                uint * local_indices) const
+{
+  for(uint i = 0; i < n; ++i)
+  {
+    dolfin_assert(local_.count(global_indices[i]) > 0);
+    local_indices[i] =  local_.find(global_indices[i])->second;
+  }
+}
+//-----------------------------------------------------------------------------
 void DistributedData::set_map(uint local_index, uint global_index)
 {
   dolfin_assert(!finalized_);

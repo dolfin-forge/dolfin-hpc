@@ -87,7 +87,9 @@ public:
 
   /// Set the process range and the global size: if the second is not provided
   /// it is computed by summing the number of owned entities.
-  /// Setting range is only possible to an empty distributed data.
+  /// Setting range is only possible to a non-finalized distributed data.
+  /// If the data is not empty then provided arguments are checked to be
+  /// consistent.
   void set_range(uint num_owned, uint num_global = 0);
 
   /// Set the process local and global size: if the second is not provided
@@ -104,11 +106,17 @@ public:
   /// Return the global index given a local index
   uint get_global(uint local_index) const;
 
+  /// Return the global indices given an array of n local indices
+  void get_global(uint n, uint const * local_indices, uint * global_indices) const;
+
   /// Return if the index is a global index
   uint has_global(uint global_index) const;
 
   /// Return the local index given a global index
   uint get_local(uint global_index) const;
+
+  /// Return the global indices given an array of n local indices
+  void get_local(uint n, uint const * global_indices, uint * local_indices) const;
 
   /// Set local-to-global mapping
   void set_map(uint local_index, uint global_index);

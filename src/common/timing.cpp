@@ -4,44 +4,49 @@
 // First added:  2003-12-21
 // Last changed: 2008-06-20
 
-#include <ctime>
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/timing.h>
+#include <dolfin/log/dolfin_log.h>
+#include <ctime>
 
 namespace dolfin
 {
-  clock_t __tic_time;
-}
 
-using namespace dolfin;
+#define DOLFIN_MAX_TIMER 256
+clock_t _dolfin_timer_[DOLFIN_MAX_TIMER];
+uint _dolfin_id_ = 0;
 
 //-----------------------------------------------------------------------------
-void dolfin::tic()
+void tic()
 {
-  dolfin::__tic_time = clock();
+  if((_dolfin_id_ + 1) == DOLFIN_MAX_TIMER)
+  {
+    error("timing : maximum of %u timers has been reached", DOLFIN_MAX_TIMER);
+  }
+  _dolfin_timer_[_dolfin_id_] = clock();
+  ++_dolfin_id_;
 }
 //-----------------------------------------------------------------------------
-real dolfin::toc()
+real toc()
 {
-  clock_t __toc_time = clock();
-
-  real elapsed_time = ((real) (__toc_time - __tic_time)) / CLOCKS_PER_SEC;
-
-  return elapsed_time;
+  if(_dolfin_id_ == 0)
+  {
+    error("timing : returning timer without any prior tic");
+  }
+  --_dolfin_id_;
+  return ((real) (clock() - _dolfin_timer_[_dolfin_id_])) / CLOCKS_PER_SEC;
 }
 //-----------------------------------------------------------------------------
-real dolfin::tocd(uint level)
+real tocd(uint level)
 {
-  real elapsed_time = toc();
-  
+  real const elapsed_time = toc();
   message(level, "Elapsed time: %g seconds", elapsed_time);
-
   return elapsed_time;
 }
 //-----------------------------------------------------------------------------
-real dolfin::time()
+real time()
 {
-  clock_t __toc_time = clock();
-  return ((real) (__toc_time)) / CLOCKS_PER_SEC;
+  return ((real) (clock())) / CLOCKS_PER_SEC;
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

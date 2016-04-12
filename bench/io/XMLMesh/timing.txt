@@ -1,0 +1,3 @@
+mergei		XMLMesh : loading took 0.105588 s.
+own_vertex	XMLMesh : loading took 0.102901 s.
+used_vertex	XMLMesh : loading took 0.091115 s.

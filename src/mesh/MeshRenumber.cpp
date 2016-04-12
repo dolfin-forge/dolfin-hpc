@@ -77,7 +77,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
     // Collect entities with a common adjacent to shared vertices
     _set<uint> adjs;
-    _set<uint> used_entities;
+    bool * used_entities = new bool[topology.size(d)];
+    std::fill_n(used_entities, topology.size(d), false);
     for (SharedIterator it(vdata); !it.end(); ++it)
     {
       dolfin_assert(it.index() < cve.num_entities());
@@ -85,6 +86,11 @@ bool MeshRenumber::renumber(MeshTopology& topology)
       for (uint e = 0; e < cve.size(it.index()); ++e)
       {
         uint const entity_index = v_entities[e];
+        if (used_entities[entity_index] == true)
+        {
+          continue;
+        }
+        used_entities[entity_index] = true;
 
         // Skip entities with a non-shared vertex
         uint const * vertices = cev(entity_index);
@@ -107,6 +113,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           if (adjs.size() > 0)
           {
             key.idx = entity_index;
+            message("entity index %8u; adj %u", entity_index, adjs.size());
             for (uint v = 0; v < num_entity_vertices; ++v)
             {
               key.indices[v] = vdata.get_global(vertices[v]);
@@ -126,7 +133,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         }
       }
     }
-    used_entities.clear();
+    delete [] used_entities;
 
     // Exchange data to mark which entities are shared
     _set<uint> shared;
@@ -164,6 +171,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         if (it != entity_map.end())
         {
           uint const local_index = it->first.idx;
+          message("local index %u", local_index);
           uint const vote0 = it->second;
           // Give ownership to the minimum vote amongst adjacent ranks
           if ((vote1 < vote0) || (vote1 == vote0 && src < rank))

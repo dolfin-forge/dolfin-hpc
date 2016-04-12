@@ -24,7 +24,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     return false;
   }
 
-  message("MeshRenumber : renumber");
   bool renumbered = false;
 
 #ifdef HAVE_MPI
@@ -42,7 +41,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   if (topology.entities_exist(0) && !distdata[0].valid_numbering)
   {
-    message("MeshRenumber : renumber vertices");
+    message(1, "MeshRenumber : renumber vertices");
     DistributedData& vdata = distdata[0];
     dolfin_assert(vdata.local_size() == topology.size(0));
     vdata.renumber_global();
@@ -62,7 +61,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
       continue;
     }
 
-    message("MeshRenumber : renumber entities of dimension %u", d);
+    message(1, "MeshRenumber : renumber entities of dimension %u", d);
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
     // Distributed data size is known: cache arrays are used.
@@ -96,6 +95,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
         // Skip entities with a non-shared vertex
         uint const * vertices = cev(entity_index);
+        dolfin_assert(vertices[0] != vertices[1]);
         bool all_shared = true;
         for (uint v = 0; v < num_entity_vertices; ++v)
         {
@@ -114,11 +114,11 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           vdata.get_common_adj(num_entity_vertices, vertices, adjs);
           if (adjs.size() > 0)
           {
-            key.idx = entity_index;
-            for (uint v = 0; v < num_entity_vertices; ++v)
-            {
-              key.indices[v] = vdata.get_global(vertices[v]);
-            }
+            vdata.get_global(num_entity_vertices, vertices, key.indices);
+            // NOTE: it is important to use set to copy global indices as sort
+            //       is called to store indices in increasing order.
+            key.set(key.indices, entity_index);
+            dolfin_assert(key.indices[0] < key.indices[1]);
             entity_map[key] = vote;
             for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end();
                  ++a)
@@ -142,8 +142,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     MPI_Status status;
     uint src;
     uint dst;
-    uint sendmax = 0;
-    for (uint j = 0; j < pe_size; ++j)
+    uint sendmax = sendbuf[0].size();
+    for (uint j = 1; j < pe_size; ++j)
     {
       sendmax = std::max(sendmax, (uint) sendbuf[j].size());
     }
@@ -163,27 +163,47 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
       for (int k = 0; k < recvcount; k+=(2 + num_entity_vertices))
       {
+        // Data is received in the following order:
+        // [ vote, local index, sorted global vertex indices ]
         uint const vote1 = recvbuf[k];
-        key.set(&recvbuf[k + 2], recvbuf[k + 1]);
-        _map<EntityKey, uint>::iterator it = entity_map.find(key);
+        key.idx = recvbuf[k + 1];
+        // Entities are already sorted, just copy them to save sort computation
+        std::copy(&recvbuf[k + 2], &recvbuf[k + 2] + num_entity_vertices,
+                  key.indices);
+        message("%8u < %8u", key.indices[0], key.indices[1]);
+        //dolfin_assert(key.indices[0] < key.indices[1]);
+
+        // Beware camembert !
         // Even if the rank is adjacent for all the vertices, the entity may
-        // still not be shared, beware camembert !
+        // still not be shared: the main bug of the original implementation was
+        // that entities with all vertices shared were marked as shared although
+        // the condition is only necessary, not sufficient.
+        _map<EntityKey, uint>::iterator it = entity_map.find(key);
         if (it != entity_map.end())
         {
           //FIXME: Hash collision possible ?
           uint const local_index = it->first.idx;
-          message("local index %u", local_index);
           uint const vote0 = it->second;
+          message("e0|%8u: %8u, %8u", it->first.idx, it->first.indices[0], it->first.indices[1]);
+          message("e1|%8u: %8u, %8u", key.idx, key.indices[0], key.indices[1]);
+
           // Give ownership to the minimum vote amongst adjacent ranks
-          if ((vote1 < vote0) || (vote1 == vote0 && src < rank))
+          message("vote0 = %8u, vote1 = %8u, src = %8u, rank = %8u", vote0, vote1, src, rank);
+          if ((vote1 < vote0) ||
+              (vote1 == vote0 && src < edata.get_owner(local_index)))
           {
             // Update vote, map local index and set owner
             it->second = vote1;
+            dolfin_assert(it->second == vote1);
             recvmap[local_index] = key.idx;
             dolfin_assert(key.idx == recvbuf[k + 1]);
             edata.set_ghost(local_index, src);
+            dolfin_assert(edata.is_ghost(local_index));
+            dolfin_assert(edata.get_owner(local_index) == src);
+            dolfin_assert(edata.is_shared(local_index));
           }
           edata.set_shared_adj(local_index, src);
+          dolfin_assert(edata.is_shared(local_index));
         }
       }
     }
@@ -212,7 +232,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         dolfin_assert(owner != rank);
         dolfin_assert(owner < pe_size);
         dolfin_assert(recvmap.count(i) > 0);
-        sendbuf[owner].push_back(recvmap[i]);
+        sendbuf[owner].push_back(recvmap.find(i)->second);
         ghostid[owner].push_back(i);
       }
     }
@@ -235,8 +255,18 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
       for (int k = 0; k < recvcount; ++k)
       {
-        dolfin_assert(edata.is_owned(recvbuf[k]));
-        dolfin_assert(edata.is_shared(recvbuf[k]));
+        ///FIXME: convert to assertion once we make sure consistency of data is
+        ///       ensured before renumbering.
+        if(!edata.is_shared(recvbuf[k]))
+        {
+          error("MeshRenumber : received entity %u is not marked as shared",
+                recvbuf[k]);
+        }
+        if(!edata.is_owned(recvbuf[k]))
+        {
+          error("MeshRenumber : received entity %u is not marked as owned",
+                recvbuf[k]);
+        }
         dolfin_assert(edata.get_shared_adj(recvbuf[k]).count(src) > 0);
         sendbuf_back[k] = edata.get_global(recvbuf[k]);
       }
@@ -270,19 +300,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   if (topology.entities_exist(tdim) && !distdata[tdim].valid_numbering)
   {
-    message("MeshRenumber : renumber cells");
+    message(1, "MeshRenumber : renumber cells");
     DistributedData& cdata = distdata[tdim];
-    // Cell numbering is not applied automatically
-    if(cdata.local_size() == 0)
-    {
-      cdata.clear();
-      cdata.set_range(topology.size(tdim));
-      cdata.finalize();
-    }
-    else
-    {
-      cdata.renumber_global();
-    }
+    // Cell numbering is applied automatically at finalized call
+    cdata.renumber_global();
     dolfin_assert(cdata.local_size() == topology.size(tdim));
     cdata.valid_numbering = true;
   }

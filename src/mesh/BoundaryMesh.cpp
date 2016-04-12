@@ -10,7 +10,6 @@
 
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/GlobalFacetMap.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Vertex.h>
@@ -129,14 +128,12 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
-    GlobalFacetMap * const facetmap = (full ? NULL : new GlobalFacetMap(mesh));
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)
     {
       // Boundary facets are connected to exactly one cell
-      if ((full && (f->num_entities(tdim) == 1)) ||
-          (!full&& ((interior && facetmap->is_shared(*f)) ||
-                    (exterior && facetmap->is_global(*f)))))
+      if ((f->num_entities(tdim) == 1) &&
+          (full || ((interior && f->is_shared()) || (exterior && !f->is_shared()))))
       {
         cell_map_.push_back(f->index());
         for (VertexIterator v(*f); !v.end(); ++v)
@@ -150,7 +147,6 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
         }
       }
     }
-    delete facetmap;
 
     // Create boundary vertices and cells
     MeshEditor editor(*this, mesh.type().facetType(), gdim);

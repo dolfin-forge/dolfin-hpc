@@ -220,11 +220,12 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   pm_real_t *xdy = new pm_real_t[gdim * mesh.size(0)];
 
   i = 0;
-  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex, i += gdim)
   {
-    std::memcpy(&xdy[i], static_cast<pm_real_t *>(vertex->x()),
-                gdim * sizeof(real));
-    i += gdim;
+    for (int d = 0; d < gdim; ++d)
+    {
+      xdy[i + d] = static_cast<pm_real_t>(vertex->x()[d]);
+    }
   }
 
   ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);

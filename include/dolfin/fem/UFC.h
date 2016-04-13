@@ -40,12 +40,6 @@ public:
   /// Destructor
   ~UFC();
 
-  /// Update current cell
-  void update(Cell& cell, MeshDistributedData& distdata);
-
-  /// Update current pair of cells for macro element, global numbering
-  void update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata);
-
   // Array of finite elements for primary arguments
   ufc::finite_element** finite_elements;
 

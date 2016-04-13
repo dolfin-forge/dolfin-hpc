@@ -202,17 +202,4 @@ UFC::~UFC()
   delete [] macro_w;
 }
 //-----------------------------------------------------------------------------
-void UFC::update(Cell& cell, MeshDistributedData& distdata)
-{
-  // Update UFC cell to global numbering
-  this->cell.update(cell);
-}
-//-----------------------------------------------------------------------------
-void UFC::update(Cell& cell0, Cell& cell1, MeshDistributedData& distdata)
-{
-  // Update UFC cells to global numbering
-  this->cell0.update(cell0);
-  this->cell1.update(cell1);
-}
-//-----------------------------------------------------------------------------
 }

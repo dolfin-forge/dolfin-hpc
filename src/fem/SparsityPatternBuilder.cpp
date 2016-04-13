@@ -57,7 +57,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
     for (CellIterator cell(mesh); !cell.end(); ++cell)
     {
       // Update to current cell
-      ufc.update(*cell, mesh.distdata());
+      ufc.cell.update(*cell);
 
       // Tabulate dofs for each dimension
       for (uint i = 0; i < ufc.form.rank(); ++i)
@@ -102,7 +102,8 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
       Cell cell1(mesh, facet->entities(tdim)[1]);
 
       // Update to current pair of cells
-      ufc.update(cell0, cell1, mesh.distdata());
+      ufc.cell0.update(cell0);
+      ufc.cell1.update(cell1);
 
       // Tabulate dofs for each dimension on macro element
       for (uint i = 0; i < ufc.form.rank(); ++i)

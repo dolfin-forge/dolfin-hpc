@@ -60,6 +60,8 @@ void UFCHalo::init()
     return;
   }
 
+  /*
+
   // Clear data structures and define data padding
   clear();
   MeshDistributedData& distdata = mesh_.distdata();
@@ -129,6 +131,8 @@ void UFCHalo::init()
 
   // Fill data structures
   this->update(coefficients_, dof_map_set_);
+
+  */
 }
 
 //-----------------------------------------------------------------------------
@@ -203,6 +207,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   {
     return;
   }
+
+  /*
 
 #ifdef HAVE_MPI
 
@@ -303,6 +309,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   }
 
 #endif
+
+  */
 }
 
 //-----------------------------------------------------------------------------

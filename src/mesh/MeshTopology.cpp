@@ -28,8 +28,6 @@ MeshTopology::MeshTopology(Mesh& mesh) :
     num_vertices_(0),
     connectivity_(NULL),
     distdata_(NULL),
-    is_ordered_(false),
-    is_numbered_(false),
     timestamp_(0)
 {
 }
@@ -40,8 +38,6 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     num_vertices_(0),
     connectivity_(NULL),
     distdata_(NULL),
-    is_ordered_(false),
-    is_numbered_(false),
     timestamp_(0)
 {
   *this = other;
@@ -71,8 +67,6 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
   {
     distdata_ = new MeshDistributedData(*other.distdata_);
   }
-  is_ordered_ = other.is_ordered_;
-  is_numbered_ = other.is_numbered_;
   timestamp_ = other.timestamp_;
 
   return *this;
@@ -225,8 +219,6 @@ void MeshTopology::clear()
     delete[] connectivity_;
   }
   connectivity_ = NULL;
-  is_ordered_ = false;
-  is_numbered_ = false;
   timestamp_ = 0;
   num_vertices_ = 0;
   dim_ = 0;
@@ -272,15 +264,14 @@ void MeshTopology::remap(uint dim, Array<uint> const& mapping)
       {
         connectivity_[d0][d1].remap_left(mapping);
         update_token();
-        is_ordered_ = false;
       }
       if (connectivity_[d1][d0].size() > 0)
       {
         connectivity_[d1][d0].remap_right(mapping);
         update_token();
-        is_ordered_ = false;
       }
     }
+    reorder();
     // Remap distributed data
     if (distdata_ != NULL)
     {
@@ -295,10 +286,6 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
   if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
-    if(!is_numbered_)
-    {
-      renumber();
-    }
   }
   return connectivity_[d0][d1];
 }
@@ -309,10 +296,6 @@ MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
   if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
-    if(!is_numbered_)
-    {
-      renumber();
-    }
   }
   return connectivity_[d0][d1];
 }
@@ -536,7 +519,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     delete[] vertex_entities;
 
     // New entities have been computed: trigger renumbering
-    is_numbered_ = false;
+    renumber();
   }
   else if (d0 < d1)
   {
@@ -712,18 +695,15 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 void MeshTopology::reorder() const
 {
   //FIXME: this test ensures that boundary meshes are not reordered
-  CellType const& cell_type = mesh_.type();
-  if (cell_type.dim() == dim_ && !is_ordered_)
+  if (mesh_.geometry().dim() == dim_)
   {
     message(1, "MeshTopology : order");
+    CellType const& cell_type = mesh_.type();
     for (CellIterator cell(mesh_); !cell.end(); ++cell)
     {
       cell_type.order_entities(*cell);
     }
   }
-  // Set internal flag so that reordering is only triggered when a connectivity
-  // which requires reordering is created
-  is_ordered_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::renumber() const
@@ -740,9 +720,6 @@ void MeshTopology::renumber() const
   {
     warning("MeshTopology: triggered mesh renumbering for nothing");
   }
-
-  // Set the topology as numbered
-  is_numbered_ = true;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::disp() const

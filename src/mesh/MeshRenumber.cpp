@@ -64,10 +64,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     message(1, "MeshRenumber : renumber entities of dimension %u", d);
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
-    //FIXME: Set valid numbering now to avoid recursive calls when getting the
-    //       connectivities (d, 0): if this function was called in MeshTopology
-    //       or was friend no problem would occur.
-    edata.valid_numbering = true;
     MeshConnectivity const& cve = topology(0, d);
     MeshConnectivity const& cev = topology(d, 0);
 

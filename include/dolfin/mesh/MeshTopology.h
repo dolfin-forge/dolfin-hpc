@@ -202,12 +202,6 @@ private:
   /// Distributed mesh topology data
   MeshDistributedData * distdata_;
 
-  /// Return true iff topology is ordered according to the UFC numbering
-  mutable bool is_ordered_;
-
-  /// Return true iff entities are numbered
-  mutable bool is_numbered_;
-
   //
   int timestamp_;
 

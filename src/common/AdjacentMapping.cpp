@@ -84,7 +84,6 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   }
 
   // Mappings contain global indices, map back to local
-  message("Map back to local");
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
        it != mappings_.end(); ++it)
   {

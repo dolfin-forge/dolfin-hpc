@@ -1365,7 +1365,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -1373,7 +1373,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -3670,7 +3670,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -3678,7 +3678,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -6918,7 +6918,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -6926,7 +6926,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -7151,7 +7151,7 @@ public:
   {
     if (d > 2)
     {
-    throw std::runtime_error("d is larger than dimension (2)");
+    throw std::runtime_error(std::string("d is larger than dimension (2)"));
     }
     
     switch (d)
@@ -7160,7 +7160,7 @@ public:
       {
         if (i > 2)
       {
-      throw std::runtime_error("i is larger than number of entities (2)");
+      throw std::runtime_error(std::string("i is larger than number of entities (2)"));
       }
       
       switch (i)
@@ -7430,7 +7430,7 @@ public:
   {
     if (d > 2)
     {
-    throw std::runtime_error("d is larger than dimension (2)");
+    throw std::runtime_error(std::string("d is larger than dimension (2)"));
     }
     
     switch (d)
@@ -7439,7 +7439,7 @@ public:
       {
         if (i > 2)
       {
-      throw std::runtime_error("i is larger than number of entities (2)");
+      throw std::runtime_error(std::string("i is larger than number of entities (2)"));
       }
       
       switch (i)
@@ -7742,7 +7742,7 @@ public:
   {
     if (d > 2)
     {
-    throw std::runtime_error("d is larger than dimension (2)");
+    throw std::runtime_error(std::string("d is larger than dimension (2)"));
     }
     
     switch (d)
@@ -7751,7 +7751,7 @@ public:
       {
         if (i > 2)
       {
-      throw std::runtime_error("i is larger than number of entities (2)");
+      throw std::runtime_error(std::string("i is larger than number of entities (2)"));
       }
       
       switch (i)
@@ -7997,7 +7997,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0)."));
   }
 #endif
 };
@@ -8182,7 +8182,7 @@ class StabStokes2DBilinearForm : public dolfin::BilinearForm
 {
 public:
 
-  StabStokes2DBilinearForm(dolfin::Function& w0) : dolfin::BilinearForm(w0.mesh())
+  StabStokes2DBilinearForm(dolfin::Coefficient& w0) : dolfin::BilinearForm(w0.mesh())
   {
     coefficients_.push_back(&w0);
   }
@@ -8200,7 +8200,7 @@ public:
   }
   
   /// Return array of coefficients
-  const dolfin::Array<dolfin::Function*>& coefficients() const
+  const dolfin::Array<dolfin::Coefficient*>& coefficients() const
   {
     return coefficients_;
   }
@@ -8236,7 +8236,7 @@ private:
   stabstokes2d_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> coefficients_;
+  dolfin::Array<dolfin::Coefficient*> coefficients_;
 
 };
 

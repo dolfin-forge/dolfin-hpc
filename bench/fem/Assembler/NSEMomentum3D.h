@@ -677,7 +677,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -685,7 +685,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -2076,7 +2076,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -2084,7 +2084,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -4054,7 +4054,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -4062,7 +4062,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -8949,7 +8949,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -8957,7 +8957,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -9197,7 +9197,7 @@ public:
   {
     if (d > 3)
     {
-    throw std::runtime_error("d is larger than dimension (3)");
+    throw std::runtime_error(std::string("d is larger than dimension (3)"));
     }
     
     switch (d)
@@ -9221,7 +9221,7 @@ public:
       {
         if (i > 0)
       {
-      throw std::runtime_error("i is larger than number of entities (0)");
+      throw std::runtime_error(std::string("i is larger than number of entities (0)"));
       }
       
       dofs[0] = 0;
@@ -9464,7 +9464,7 @@ public:
   {
     if (d > 3)
     {
-    throw std::runtime_error("d is larger than dimension (3)");
+    throw std::runtime_error(std::string("d is larger than dimension (3)"));
     }
     
     switch (d)
@@ -9488,7 +9488,7 @@ public:
       {
         if (i > 0)
       {
-      throw std::runtime_error("i is larger than number of entities (0)");
+      throw std::runtime_error(std::string("i is larger than number of entities (0)"));
       }
       
       dofs[0] = 0;
@@ -9763,7 +9763,7 @@ public:
   {
     if (d > 3)
     {
-    throw std::runtime_error("d is larger than dimension (3)");
+    throw std::runtime_error(std::string("d is larger than dimension (3)"));
     }
     
     switch (d)
@@ -9772,7 +9772,7 @@ public:
       {
         if (i > 3)
       {
-      throw std::runtime_error("i is larger than number of entities (3)");
+      throw std::runtime_error(std::string("i is larger than number of entities (3)"));
       }
       
       switch (i)
@@ -10103,7 +10103,7 @@ public:
   {
     if (d > 3)
     {
-    throw std::runtime_error("d is larger than dimension (3)");
+    throw std::runtime_error(std::string("d is larger than dimension (3)"));
     }
     
     switch (d)
@@ -10112,7 +10112,7 @@ public:
       {
         if (i > 3)
       {
-      throw std::runtime_error("i is larger than number of entities (3)");
+      throw std::runtime_error(std::string("i is larger than number of entities (3)"));
       }
       
       switch (i)
@@ -10487,7 +10487,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0)."));
   }
 #endif
 };
@@ -10712,7 +10712,7 @@ class NSEMomentum3DBilinearForm : public dolfin::BilinearForm
 {
 public:
 
-  NSEMomentum3DBilinearForm(dolfin::Function& w0, dolfin::Function& w1, dolfin::Function& w2, dolfin::Function& w3, dolfin::Function& w4) : dolfin::BilinearForm(w0.mesh())
+  NSEMomentum3DBilinearForm(dolfin::Coefficient& w0, dolfin::Coefficient& w1, dolfin::Coefficient& w2, dolfin::Coefficient& w3, dolfin::Coefficient& w4) : dolfin::BilinearForm(w0.mesh())
   {
     coefficients_.push_back(&w0);
     coefficients_.push_back(&w1);
@@ -10734,7 +10734,7 @@ public:
   }
   
   /// Return array of coefficients
-  const dolfin::Array<dolfin::Function*>& coefficients() const
+  const dolfin::Array<dolfin::Coefficient*>& coefficients() const
   {
     return coefficients_;
   }
@@ -10786,7 +10786,7 @@ private:
   nsemomentum3d_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> coefficients_;
+  dolfin::Array<dolfin::Coefficient*> coefficients_;
 
 };
 

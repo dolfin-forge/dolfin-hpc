@@ -3,6 +3,8 @@
 //
 // Modified by Magnus Vikstrom 2007.
 //
+// This class is still an abstraction nightmare and the code could be sexier...
+//
 // First added:  2003-07-15
 // Last changed: 2007-03-21
 

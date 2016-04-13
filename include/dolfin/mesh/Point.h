@@ -4,6 +4,9 @@
 // Modified by Garth N. Wells, 2006.
 // Modified by Aurélien Larcher, 2014.
 //
+// This class specifies now a MAX_SIZE public attribute to avoid the madness of
+// half of the classes having 2 or 3 hard-coded as dimension.
+//
 // First added:  2006-06-12
 // Last changed: 2014-12-01
 

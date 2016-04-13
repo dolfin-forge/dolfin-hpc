@@ -3,6 +3,20 @@
 //
 // Modified by Aurelien Larcher, 2016.
 //
+// This class was fully rewritten as topology renumbering and eliminate the mesh
+// layer as much as possible due to a flawed original abstraction.
+// Most of the code dealing with entity distribution was consolidated in the
+// from of DistributedData class.
+//
+// This reimplementation fixes several issues:
+// - computation of boundary meshes for the distribution of faces.
+// - invalid distribution of edges and faces due to invalid logical assumptions.
+// - duplication of code for edges/faces.
+// - inconsistency of the adjacency data.
+//
+// Fixes to the original implementation for the correctness of the edges/faces
+// distribution were written 2013.
+//
 
 #ifndef __DOLFIN_MESH_RENUMBER_H
 #define __DOLFIN_MESH_RENUMBER_H

@@ -14,7 +14,7 @@ int main(int argc, char * argv[])
   dolfin_init(argc, argv);
   //---
   logm.verbose(1);
-//  logm.file();
+  logm.file();
 //std::string filename("square");
   std::string filename("aneurysm");
   std::stringstream ss;
@@ -27,7 +27,7 @@ int main(int argc, char * argv[])
   File f(ss.str()+"_partitions.pvd");
   f << p;
 
-  mesh.init();
+//  mesh.init();
 
   BoundaryMesh& eb = mesh.exterior_boundary();
   File feb(filename+"_extboundary.pvd");

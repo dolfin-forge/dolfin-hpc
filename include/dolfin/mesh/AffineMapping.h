@@ -1,6 +1,10 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
 //
+// This version fixes several issues compared to the original:
+// - assumption that topological dimension is equal to geometric dimension.
+// - duplication of code.
+//
 // First added:
 // Last changed:
 

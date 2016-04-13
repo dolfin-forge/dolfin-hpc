@@ -1,6 +1,9 @@
 // Copyright (C) 2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
+// This class was initially mixed-up with SubDomain in an attempt to violate
+// object-oriented principles.
+//
 // First added:  2007-04-10
 // Last changed: 2014-02-07
 

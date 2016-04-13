@@ -1,25 +1,29 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher, 2015.
+//
 // First added:  2008-01-21
 // Last changed: 2008-08-12
 
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/RefinementManager.h>
 
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/types.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
-
-#include <dolfin/mesh/RefinementManager.h>
-#include <dolfin/main/MPI.h>
-#include <dolfin/common/types.h>
 #include <dolfin/mesh/MeshFunction.h>
-#include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/RefinementPattern.h>
 
 #include <cstdlib>
-#include <time.h>
 #include <map>
 #include <set>
+
+#include <time.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
@@ -29,18 +33,27 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-RefinementManager::RefinementManager() :
-    _start_offset(0),
-    _refm_init(false)
+RefinementManager::RefinementManager(Mesh& mesh, Mesh& refined_mesh) :
+    mesh_(mesh),
+    refined_mesh_(refined_mesh),
+    is_distributed_(mesh_.is_distributed()),
+    pattern_(&mesh.type()),
+    start_offset_(0)
 {
-
+  // Initialize internal data structures
+  init();
 }
 //-----------------------------------------------------------------------------
-RefinementManager::RefinementManager(Mesh& mesh) :
-    _start_offset(0),
-    _refm_init(false)
+RefinementManager::RefinementManager(Mesh& mesh, Mesh& refined_mesh,
+                                     RefinementPattern const& pattern) :
+    mesh_(mesh),
+    refined_mesh_(refined_mesh),
+    is_distributed_(mesh_.is_distributed()),
+    pattern_(&pattern),
+    start_offset_(0)
 {
-  init(mesh);
+  // Initialize internal data structures
+  init();
 }
 //-----------------------------------------------------------------------------
 RefinementManager::~RefinementManager()
@@ -48,122 +61,131 @@ RefinementManager::~RefinementManager()
 
 }
 //-----------------------------------------------------------------------------
+void RefinementManager::apply()
+{
+  map_new_vertices(shared_edge_);
+}
+//-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void RefinementManager::init(Mesh& mesh)
+void RefinementManager::init()
 {
-  uint pe_size = MPI::numProcesses();
-  if (pe_size == 1)
+  uint const tdim = mesh_.topology().dim();
+
+  // Generate entity - vertex connectivity if not generated
+  for (uint i = 1; i < tdim; ++i)
+  {
+    if (pattern_->refinement_needs_entities(i))
+    {
+      mesh_.init(i, 0);
+    }
+  }
+
+  // Generate facet - cell connectivity if not generated
+  mesh_.init(tdim - 1, tdim);
+
+  // Invalidate global numbering
+//  refined_mesh_.distdata().set_invalid_numbering();
+
+  // Invalidate mesh entity ownership
+//  refined_mesh_.distdata().set_invalid_ownership();
+
+  // No further step is required in serial
+  if (!is_distributed_)
   {
     return;
   }
 
-  uint max_index = mesh.global_size(0);
-
-  // Assume uniform refinement
-  uint num_new_vertices = mesh.size(1);
-
-  // Find out maximum global index assigned
-  uint glb_max;
-  MPI_Allreduce(&max_index, &glb_max, 1, MPI_UNSIGNED, MPI_MAX,
-                MPI::DOLFIN_COMM);
+  // Get number of new vertices from uniform refinement pattern
+  uint num_new_vertices = 0;
+  for (uint i = 1; i <= tdim; ++i)
+  {
+    num_new_vertices += mesh_.topology().size(i)
+                          * pattern_->num_refined_vertices(i);
+  }
 
   // Assign a safe range for each processor
-  _start_offset = 0;
-#if ( MPI_VERSION > 1)
-  MPI_Exscan(&num_new_vertices, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-#else
-  MPI_Scan(&num_new_vertices, &_start_offset, 1,
-      MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  _start_offset -= num_new_vertices;
-#endif
-  _start_offset += glb_max;
+  uint glb_max = mesh_.topology().global_size(0);
+  start_offset_ = 0;
+  MPI::processOffset(num_new_vertices, start_offset_);
+  start_offset_ += glb_max;
 
-  // Generate cell - edge connectivity if not generated
-  mesh.init(mesh.topology().dim(), 1);
+  // Initialize data structures for interprocess boundary
+  BoundaryMesh local_boundary = mesh_.interior_boundary();
 
-  // Generate edge - vertex connectivity if not generated
-  mesh.init(1, 0);
+  cell_forbidden_.init(mesh_, tdim);
 
-  // Generate facet - cell connectivity if not generated
-  mesh.init(mesh.topology().dim() - 1, mesh.topology().dim());
+  edge_forbidden_.init(mesh_, 1);
 
-  // Initialize datastructures for processor boundary
-  BoundaryMesh local_boundary(mesh, BoundaryMesh::interior);
+  boundary_edge_.init(mesh_, 1);
 
-  cell_forbidden.init(mesh, mesh.topology().dim());
-  cell_forbidden = false;
-
-  edge_forbidden.init(mesh, 1);
-  edge_forbidden = false;
-
-  boundary_edge.init(mesh, 1);
-  boundary_edge = false;
-
-  MeshDistributedData& distdata = mesh.distdata();
+  DistributedData& distdata = mesh_.distdata()[0];
   for (CellIterator bf(local_boundary); !bf.end(); ++bf)
   {
-    Facet f(mesh, local_boundary.facet_index(*bf));
+    Facet f(mesh_, local_boundary.facet_index(*bf));
+    boundary_cells_.insert(f.entities(tdim)[0]);
 
-    for (CellIterator c(f); !c.end(); ++c)
+    for (EdgeIterator e(f); !e.end(); ++e)
     {
-      boundary_set.insert(c->index());
+      uint const * edge_v = e->entities(0);
+      EdgeKey key(distdata.get_global(edge_v[0]),
+                  distdata.get_global(edge_v[1]));
+      refined_edge_[key] = false;
+      edge_keymap_[key] = e->index();
+      boundary_edge_.set(*e, true);
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+void RefinementManager::map_new_vertices(Array<uint> shared_edge)
+{
+  dolfin_assert(refined_mesh_.size(0) == refined_mesh_.geometry().size());
 
-      for (EdgeIterator e(*c); !e.end(); ++e)
+  if(!is_distributed_)
+  {
+    // Remap local vertices contiguously instead of by supporting entity type.
+    // In parallel this is already taken care of by the global renumbering.
+    uint const num_local_vertices = refined_mesh_.topology().size(0);
+    message(1, "RefinementManager : map %d new vertices in serial",
+            num_local_vertices);
+    Array<uint> vertex_map(num_local_vertices);
+    vertex_map = num_local_vertices;
+    uint vertex_count = 0;
+    for (CellIterator c(refined_mesh_); !c.end(); ++c)
+    {
+      for (VertexIterator v(*c); !v.end(); ++v)
       {
-        const uint *edge_v = e->entities(0);
-        if (distdata[0].is_shared(edge_v[0])
-            && distdata[0].is_shared(edge_v[1]))
+        dolfin_assert(v->index() < num_local_vertices);
+        if (vertex_map[v->index()] == num_local_vertices)
         {
-          EdgeKey key = edge_key(distdata[0].get_global(edge_v[0]),
-                                 distdata[0].get_global(edge_v[1]));
-          refined_edge[key] = false;
-          edge_cell_map[key] = e->index();
-          boundary_edge.set(*e, true);
+          vertex_map[v->index()] = vertex_count;
+          ++vertex_count;
         }
       }
     }
+
+    if(vertex_count != refined_mesh_.size(0))
+    {
+      error("RefinementManager : invalid count of vertices '%u' instead of %u",
+            vertex_count, refined_mesh_.size(0));
+    }
+
+    // Reorder geometry
+    dolfin_assert(vertex_count == refined_mesh_.geometry().size());
+    refined_mesh_.geometry().remap(vertex_map);
+
+    // Reorder connectivities
+    dolfin_assert(vertex_count == refined_mesh_.topology().size(0));
+    refined_mesh_.topology().remap(0, vertex_map);
+
+    return;
   }
 
-  _refm_init = true;
-
-}
-//-----------------------------------------------------------------------------
-void RefinementManager::add_new_vertex(uint* edge, uint vertex, Mesh& mesh,
-                                       bool shared)
-{
-  // Invalidate global numbering
-//  mesh.distdata().set_invalid_numbering();
-
-  // Invalidate mesh entity ownership
-//  mesh.distdata().set_invalid_ownership();
-
-  // Store edge key in shared list
-  if (shared)
-  {
-    EdgeKey key = edge_key(edge[0], edge[1]);
-    new_global[key] = _start_offset;
-    new_vertex[key] = vertex;
-  }
-
-  // Assign a new unique global number
-  mesh.distdata()[0].set_map(vertex, _start_offset++);
-}
-//-----------------------------------------------------------------------------
-void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
-                                         Mesh& newmesh)
-{
-  MeshDistributedData& olddistdata = oldmesh.distdata();
-  MeshDistributedData& newdistdata = newmesh.distdata();
+  DistributedData& olddistdata = mesh_.distdata()[0];
+  DistributedData& newdistdata = refined_mesh_.distdata()[0];
 
 //  newdistdata.set_invalid_numbering();
 //  newdistdata.set_invalid_ownership();
-
-  if (!_refm_init)
-  {
-    error("RefinementManager not initialized");
-  }
 
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
@@ -177,14 +199,13 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
   for (uint i = 0; i < shared_edge.size(); i += 3)
   {
 
-    key = edge_key(shared_edge[i], shared_edge[i + 1]);
+    EdgeKey key(shared_edge[i], shared_edge[i + 1]);
     dolfin_assert(edge_id.count(key) == 0);
     edge_id[key] = (uint) rand() + (uint) rand() + (uint) rank;
     owns_edge[key] = true;
 
-    send_buff.push_back(olddistdata[0].get_global(shared_edge[i]));
-    send_buff.push_back(
-        olddistdata[0].get_global(shared_edge[i + 1]));
+    send_buff.push_back(olddistdata.get_global(shared_edge[i]));
+    send_buff.push_back(olddistdata.get_global(shared_edge[i + 1]));
     send_buff_id.push_back(edge_id[key]);
   }
 
@@ -214,13 +235,13 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       // Check if I have the vertices
-      if (olddistdata[0].has_global(recv_buff[i])
-          && olddistdata[0].has_global(recv_buff[i + 1]))
+      if (olddistdata.has_global(recv_buff[i])
+          && olddistdata.has_global(recv_buff[i + 1]))
       {
 
         // Generate edge key
-        key = edge_key(olddistdata[0].get_local(recv_buff[i]),
-                       olddistdata[0].get_local(recv_buff[i + 1]));
+        EdgeKey key(olddistdata.get_local(recv_buff[i]),
+                    olddistdata.get_local(recv_buff[i + 1]));
 
         // Check if I have the corresponding edge
         if (edge_id.count(key))
@@ -230,7 +251,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
                   && status.MPI_SOURCE < rank))
           {
             owns_edge[key] = false;
-            new_global.erase(key);
+            new_edge_global_.erase(key);
             edge_id.erase(key);
             num_unass++;
           }
@@ -254,18 +275,18 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
 
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
-      if (olddistdata[0].has_global(recv_buff[i])
-          && olddistdata[0].has_global(recv_buff[i + 1]))
+      if (olddistdata.has_global(recv_buff[i])
+          && olddistdata.has_global(recv_buff[i + 1]))
       {
 
-        key = edge_key(olddistdata[0].get_local(recv_buff[i]),
-                       olddistdata[0].get_local(recv_buff[i + 1]));
+        EdgeKey key(olddistdata.get_local(recv_buff[i]),
+                    olddistdata.get_local(recv_buff[i + 1]));
 
         if (owns_edge[key])
         {
           global_buff.push_back(i);
-          global_buff.push_back(new_global[key]);
-          newdistdata[0].set_shared(new_vertex[key]);
+          global_buff.push_back(new_edge_global_[key]);
+          newdistdata.set_shared(new_edge_vertex_[key]);
         }
       }
     }
@@ -278,33 +299,28 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge, Mesh& oldmesh,
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       index = shared_edge[(recv_buff[i] >> 1) * 3 + 2];
-      newdistdata[0].set_map(index, recv_buff[i + 1]);
-      newdistdata[0].set_ghost(index, src);
+      newdistdata.set_map(index, recv_buff[i + 1]);
+      newdistdata.set_ghost(index, status.MPI_SOURCE);
       num_unass--;
     }
     global_buff.clear();
   }
 
   // MPI aliasing
-  uint tmp = newmesh.size(0) - newdistdata[0].num_ghost();
+  uint tmp = refined_mesh_.distdata()[0].num_owned();
   uint num_glb;
   MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-
 //  newdistdata.set_num_global(0, num_glb);
 
   delete[] recv_buff;
   delete[] recv_buff_id;
 }
 //-----------------------------------------------------------------------------
-void RefinementManager::mark_localboundary(Mesh& oldmesh,
-                                           MeshFunction<bool>& cell_marker,
+void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
                                            uint& num_new_vertices,
                                            uint& num_new_cells)
 {
-  MeshDistributedData& olddistdata = oldmesh.distdata();
-
-  if (!_refm_init)
-    error("RefinementManager not initialized");
+  DistributedData& olddistdata = mesh_.distdata()[0];
 
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
@@ -328,18 +344,18 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   _set<uint>::iterator bc;
 
   // Reset forbidden edges and cells
-  edge_forbidden = false;
-  cell_forbidden = false;
+  edge_forbidden_ = false;
+  cell_forbidden_ = false;
 
-  for (bc = boundary_set.begin(); bc != boundary_set.end(); bc++)
+  for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
-    Cell c(oldmesh, *bc);
-    if (cell_marker.get(c) && !cell_forbidden.get(c))
+    Cell c(mesh_, *bc);
+    if (cell_marker.get(c) && !cell_forbidden_.get(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)
       {
-        if (edge_forbidden.get(*e))
+        if (edge_forbidden_.get(*e))
           continue;
         edge_vote[e->index()] = 0;
         l = e->length();
@@ -352,20 +368,20 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
       if (max > 0.0)
       {
-        Edge longest_edge(oldmesh, index);
+        Edge longest_edge(mesh_, index);
         if (on_boundary(longest_edge))
         {
           const uint *edge_v = longest_edge.entities(0);
           edge_vote[longest_edge.index()] = (uint) rand();
-          send_buff.push_back(olddistdata[0].get_global(edge_v[0]));
-          send_buff.push_back(olddistdata[0].get_global(edge_v[1]));
+          send_buff.push_back(olddistdata.get_global(edge_v[0]));
+          send_buff.push_back(olddistdata.get_global(edge_v[1]));
           send_buff.push_back(edge_vote[longest_edge.index()]);
           for (CellIterator nc(longest_edge); !nc.end(); ++nc)
           {
-            cell_forbidden.set(*nc, true);
+            cell_forbidden_.set(*nc, true);
             for (EdgeIterator e(*nc); !e.end(); ++e)
             {
-              edge_forbidden.set(*e, true);
+              edge_forbidden_.set(*e, true);
             }
           }
         }
@@ -395,30 +411,30 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     for (int i = 0; i < recv_count; i += 3)
     {
-      key = edge_key(recv_buff[i], recv_buff[i + 1]);
+      EdgeKey key(recv_buff[i], recv_buff[i + 1]);
 
       // If rank has edge
-      if (edge_cell_map.count(key))
+      if (edge_keymap_.count(key))
       {
-        Edge e(oldmesh, edge_cell_map[key]);
+        Edge e(mesh_, edge_keymap_[key]);
         edge_vote[e.index()] += recv_buff[i + 2];
       }
     }
   }
 
   send_buff.clear();
-  cell_forbidden = false;
-  edge_forbidden = false;
+  cell_forbidden_ = false;
+  edge_forbidden_ = false;
 
-  for (bc = boundary_set.begin(); bc != boundary_set.end(); bc++)
+  for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
-    Cell c(oldmesh, *bc);
-    if (cell_marker.get(c) && !cell_forbidden.get(c))
+    Cell c(mesh_, *bc);
+    if (cell_marker.get(c) && !cell_forbidden_.get(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)
       {
-        if (edge_forbidden.get(*e))
+        if (edge_forbidden_.get(*e))
           continue;
         l = (real) edge_vote[e->index()];
         if (max < l)
@@ -430,27 +446,27 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
       if (max > 0.0)
       {
-        Edge longest_edge(oldmesh, index);
+        Edge longest_edge(mesh_, index);
         if (on_boundary(longest_edge))
         {
           const uint *edge_v = longest_edge.entities(0);
-          edge[0] = olddistdata[0].get_global(edge_v[0]);
-          edge[1] = olddistdata[0].get_global(edge_v[1]);
-          key = edge_key(edge[0], edge[1]);
-          refined_edge[key] = true;
+          edge[0] = olddistdata.get_global(edge_v[0]);
+          edge[1] = olddistdata.get_global(edge_v[1]);
+          EdgeKey key(edge[0], edge[1]);
+          refined_edge_[key] = true;
           num_new_vertices++;
           send_buff.push_back(edge[0]);
           send_buff.push_back(edge[1]);
 
           for (CellIterator nc(longest_edge); !nc.end(); ++nc)
           {
-            cell_forbidden.set(*nc, true);
+            cell_forbidden_.set(*nc, true);
             num_ref[key]++;
             num_new_cells++;
-            cell_refedge[nc->index()] = longest_edge.index();
+            cell_refedge_[nc->index()] = longest_edge.index();
             for (EdgeIterator e(*nc); !e.end(); ++e)
             {
-              edge_forbidden.set(*e, true);
+              edge_forbidden_.set(*e, true);
               cell_forbidden_edges.insert(e->index());
             }
           }
@@ -478,26 +494,26 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     for (int i = 0; i < recv_count; i += 2)
     {
-      key = edge_key(recv_buff[i], recv_buff[i + 1]);
+      EdgeKey key(recv_buff[i], recv_buff[i + 1]);
       // If rank has edge
-      if (edge_cell_map.count(key))
+      if (edge_keymap_.count(key))
       {
-        if (!refined_edge[key])
+        if (!refined_edge_[key])
         {
-          Edge e(oldmesh, edge_cell_map[key]);
+          Edge e(mesh_, edge_keymap_[key]);
           if (cell_forbidden_edges.count(e.index()) == 0)
           {
             num_new_vertices++;
-            refined_edge[key] = true;
+            refined_edge_[key] = true;
             for (CellIterator c(e); !c.end(); ++c)
             {
               num_new_cells++;
               num_ref[key]++;
-              cell_forbidden.set(*c, true);
-              cell_refedge[c->index()] = e.index();
+              cell_forbidden_.set(*c, true);
+              cell_refedge_[c->index()] = e.index();
               for (EdgeIterator ce(*c); !ce.end(); ++ce)
               {
-                edge_forbidden.set(*ce, true);
+                edge_forbidden_.set(*ce, true);
                 cell_forbidden_edges.insert(ce->index());
               }
             }
@@ -517,18 +533,18 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     for (int i = 0; i < recv_count; i += 2)
     {
-      key = edge_key(recv_buff[i], recv_buff[i + 1]);
+      EdgeKey key(recv_buff[i], recv_buff[i + 1]);
       if (removed.count(key) == 0)
       {
         num_new_vertices--;
         removed[key] = 1;
-        Edge e(oldmesh, edge_cell_map[key]);
+        Edge e(mesh_, edge_keymap_[key]);
         for (CellIterator c(e); !c.end(); ++c)
         {
-          if (cell_forbidden.get(*c))
+          if (cell_forbidden_.get(*c))
             num_new_cells--;
-          cell_forbidden.set(*c, false);
-          cell_refedge.erase(c->index());
+          cell_forbidden_.set(*c, false);
+          cell_refedge_.erase(c->index());
         }
         terminated.push_back(recv_buff[i]);
         terminated.push_back(recv_buff[i + 1]);
@@ -555,26 +571,26 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 
     for (int i = 0; i < recv_count; i += 2)
     {
-      key = edge_key(recv_buff[i], recv_buff[i + 1]);
+      EdgeKey key(recv_buff[i], recv_buff[i + 1]);
       // If rank has edge
-      if (edge_cell_map.count(key))
+      if (edge_keymap_.count(key))
       {
-        // Remove refinement if edge is refined with terminated refinment
-        if (refined_edge[key])
+        // Remove refinement if edge is refined with terminated refinement
+        if (refined_edge_[key])
         {
           if (removed.count(key) == 0)
           {
             num_new_vertices--;
             removed[key] = 1;
-            Edge e(oldmesh, edge_cell_map[key]);
+            Edge e(mesh_, edge_keymap_[key]);
             for (CellIterator c(e); !c.end(); ++c)
             {
-              if (cell_forbidden.get(*c))
+              if (cell_forbidden_.get(*c))
                 num_new_cells--;
-              cell_forbidden.set(*c, false);
-              cell_refedge.erase(c->index());
+              cell_forbidden_.set(*c, false);
+              cell_refedge_.erase(c->index());
             }
-            refined_edge.erase(key);
+            refined_edge_.erase(key);
           }
         }
       }
@@ -582,29 +598,29 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
   }
 
   // Mark unrefined cells shared edges as forbidden
-  for (bc = boundary_set.begin(); bc != boundary_set.end(); bc++)
+  for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
-    Cell c(oldmesh, *bc);
-    if (!cell_forbidden.get(c))
+    Cell c(mesh_, *bc);
+    if (!cell_forbidden_.get(c))
     {
-      cell_refedge.erase(c.index());
+      cell_refedge_.erase(c.index());
       for (EdgeIterator e(c); !e.end(); ++e)
       {
         if (on_boundary(*e))
-          edge_forbidden.set(*e, true);
+          edge_forbidden_.set(*e, true);
         else
         {
           bool ok_to_remove = true;
           for (CellIterator ec(*e); !ec.end(); ++ec)
           {
-            if (cell_forbidden.get(*ec))
+            if (cell_forbidden_.get(*ec))
             {
               ok_to_remove = false;
               break;
             }
           }
           if (ok_to_remove)
-            edge_forbidden.set(*e, false);
+            edge_forbidden_.set(*e, false);
         }
       }
     }
@@ -614,44 +630,22 @@ void RefinementManager::mark_localboundary(Mesh& oldmesh,
 }
 //-----------------------------------------------------------------------------
 #else
-void RefinementManager::init(Mesh& mesh)
+void RefinementManager::init()
 {
 }
 //-----------------------------------------------------------------------------
-void RefinementManager::mark_localboundary(Mesh& oldmesh,
-    MeshFunction<bool>& cell_marker,
-    uint& num_new_vertices,
-    uint& num_new_cells)
+void RefinementManager::mark_localboundary( MeshFunction<bool>& cell_marker,
+                                            uint& num_new_vertices,
+                                            uint& num_new_cells)
 {
 }
 //-----------------------------------------------------------------------------
-void RefinementManager::map_new_vertices(Array<uint> shared_edge,
-    Mesh& oldmesh, Mesh& newmesh)
-{
-}
-//-----------------------------------------------------------------------------
-void RefinementManager::add_new_vertex(uint* edge,uint vertex,
-    Mesh& mesh, bool shared)
+void RefinementManager::map_new_vertices(Array<uint> shared_edge)
 {
 }
 //-----------------------------------------------------------------------------
 #endif
-//-----------------------------------------------------------------------------
-std::pair<dolfin::uint, dolfin::uint> RefinementManager::edge_key(uint id1,
-                                                                  uint id2)
-{
-  if (id2 < id1)
-  {
-    EdgeKey key(id2, id1);
-    return key;
-  }
-  else
-  {
-    EdgeKey key(id1, id2);
-    return key;
-  }
 
-}
 //-----------------------------------------------------------------------------
 
 }

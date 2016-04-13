@@ -34,41 +34,22 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refine(Mesh& mesh)
 {
-  // Only know how to refine simplicial meshes
-  refineSimplex(mesh);
+  switch (mesh.type().cellType())
+    {
+    case CellType::interval:
+    case CellType::triangle:
+    case CellType::tetrahedron:
+      refineSimplex(mesh);
+      break;
+    case CellType::quadrilateral:
+    case CellType::hexahedron:
+      refineHypercube(mesh);
+      break;
+    default:
+      error("Uniform mesh refinement not implemented for given mesh type.");
+      break;
+    }
 }
-//-----------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
-void UniformMeshRefinement::refine(Mesh& mesh, libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u,
-    MeshFunction<float>& bnd_v )
-{
-  // Only know how to refine simplicial meshes
-  if(mesh.geometry().dim()==3)
-  {
-    refineSimplex(mesh, geom, patch_id_list, bnd_u, bnd_v );
-  }
-  else if(mesh.geometry().dim()==2)
-  {
-    refineSimplex(mesh, geom, patch_id_list, bnd_u);
-  }
-  else
-  {
-    error("This is not implemented for the dimension of you geometry.");
-  }
-}
-//-----------------------------------------------------------------------------
-void UniformMeshRefinement::refine(Mesh& mesh, libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u )
-{
-  // Only know how to refine simplicial meshes
-  refineSimplex(mesh, geom, patch_id_list, bnd_u );
-}
-//-----------------------------------------------------------------------------
-#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 {
@@ -76,698 +57,122 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   uint const tdim = mesh.topology().dim();
 
-  // Get cell type
-  CellType const& cell_type = mesh.type();
-
-  // Generate cell - edge connectivity if not generated
-  mesh.init(tdim, 1);
-
-  // Generate edge - vertex connectivity if not generated
-  mesh.init(1, 0);
-
-  // Create a new refinement manager  FIXME:remove for the serial case
-  RefinementManager refman(mesh);
-
-  // Create new mesh and open for editing
+  // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh;
+  CellType const& cell_type = mesh.type();
   MeshEditor editor(refined_mesh, cell_type.cellType(), mesh.geometry().dim());
-
-  // Get size of mesh
-  uint const num_vertices = mesh.size(0);
-  uint const num_edges = mesh.size(1);
-  uint const num_cells = mesh.size(tdim);
+  RefinementManager refman(mesh, refined_mesh);
+  RefinementPattern const& pattern = refman.pattern();
 
   // Specify number of vertices and cells
-  editor.init_vertices(num_vertices + num_edges);
-  editor.init_cells(ipow(2, tdim) * num_cells);
+  editor.init_vertices(mesh.size(0) + mesh.size(1));
+  editor.init_cells(pattern.num_refined_cells() * mesh.size(tdim));
 
-  uint* edge_vert;
-  Array<uint> shared_edge;
-
+  // Current vertex index
   uint vertex = 0;
-  if (MPI::numProcesses() > 1)
+
+  // Add old vertices
+  for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    MeshDistributedData& distdata = mesh.distdata();
-    MeshDistributedData& refined_distdata = refined_mesh.distdata();
-
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      refined_distdata[0].set_map(vertex, v->global_index());
-
-      if (v->is_ghost())
-      {
-        refined_distdata[0].set_ghost(vertex, v->owner());
-      }
-      else if (v->is_shared())
-      {
-        refined_distdata[0].set_shared(vertex);
-      }
-
-      editor.add_vertex(vertex++, v->x());
-    }
-
-    for (EdgeIterator e(mesh); !e.end(); ++e)
-    {
-      edge_vert = e->entities(0);
-      // If the edge is shared and lies between processes
-      // process new vertex inside refinement manager
-      if (refman.on_boundary(*e))
-      {
-
-        // Add the new vertex inside the refinement manager
-        refman.add_vertex(edge_vert, vertex, refined_mesh);
-
-        // Buffer edge information for mapping phase
-        shared_edge.push_back(edge_vert[0]);
-        shared_edge.push_back(edge_vert[1]);
-        shared_edge.push_back(vertex);
-      }
-      else
-      {
-        refman.add_vertex(vertex, refined_mesh);
-      }
-
-      editor.add_vertex(vertex++, &e->midpoint()[0]);
-    }
-
+    refman.add(*v, vertex);
+    editor.add_vertex(vertex++, v->point());
   }
-  else
+
+  // Add edge-based vertices
+  for (EdgeIterator e(mesh); !e.end(); ++e)
   {
-
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      editor.add_vertex(vertex++, v->x());
-    }
-
-    // Add new vertices
-    for (EdgeIterator e(mesh); !e.end(); ++e)
-    {
-      editor.add_vertex(vertex++, &e->midpoint()[0]);
-    }
-
+    refman.add(*e, vertex);
+    editor.add_vertex(vertex++, e->midpoint());
   }
 
   // Add cells
   uint current_cell = 0;
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    cell_type.refine_cell(*c, editor, current_cell);
+    pattern.refine_cell(*c, editor, current_cell);
   }
 
+  // Apply numbering of new entities and close edition
+  refman.apply();
   editor.close();
-
-  // Map global numbers to unassigned shared vertices
-  if (MPI::numProcesses() > 1)
-  {
-    refman.map_new_vertices(shared_edge, mesh, refined_mesh);
-  }
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
+  //mesh.renumber();
 }
 //-----------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
-void UniformMeshRefinement::refineSimplex(Mesh& mesh,
-    libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u,
-    MeshFunction<float>& bnd_v )
+void UniformMeshRefinement::refineHypercube(Mesh& mesh)
 {
-  message(1, "Refining simplicial mesh uniformly with added boundary smoothing.");
+  message(1, "Refining n-cube mesh uniformly.");
 
   uint const tdim = mesh.topology().dim();
 
-  // Generate cell - edge connectivity if not generated
-  mesh.init(tdim, 1);
-
-  // Generate edge - vertex connectivity if not generated
-  mesh.init(1, 0);
-
-  // Get cell type
-  CellType const& cell_type = mesh.type();
-
-  // Create a new refinement manager  FIXME:remove for the serial case
-  RefinementManager refman(mesh);
-
-  // Create new mesh and open for editing
+  // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh;
-  MeshEditor editor;
-  editor.open(refined_mesh, cell_type.cellType(),
-      tdim, mesh.geometry().dim());
+  CellType const& cell_type = mesh.type();
+  MeshEditor editor(refined_mesh, cell_type.cellType(), mesh.geometry().dim());
+  RefinementManager refman(mesh, refined_mesh);
+  RefinementPattern const& pattern = refman.pattern();
 
-  // Get size of mesh
-  uint const num_vertices = mesh.size(0);
-  uint const num_edges = mesh.size(1);
-  uint const num_cells = mesh.size(tdim);
+  // Refinement pattern creates one new vertex per entity of each dimension
+  uint num_refined_vertices = mesh.topology().size(0);
+  for (uint i = 1; i <= tdim; ++i)
+  {
+    dolfin_assert(mesh.topology().size(i) > 0);
+    num_refined_vertices += mesh.topology().size(i);
+  }
+  editor.init_vertices(num_refined_vertices);
 
-  // Specify number of vertices and cells
-  editor.init_vertices(num_vertices + num_edges);
-  editor.init_cells(ipow(2, tdim)*num_cells);
+  // Refinement pattern provides the number of new cells
+  uint num_refined_cells = cell_type.num_refined_cells() * mesh.num_cells();
+  editor.init_cells(num_refined_cells);
 
-  //create the Meshfunctions for the refined mesh
-  MeshFunction<int> refined_patch_id_list(refined_mesh);
-  MeshFunction<float> refined_bnd_u(refined_mesh);
-  MeshFunction<float> refined_bnd_v(refined_mesh);
-
-  //initialize the new Meshfunctions
-  refined_patch_id_list.init(0);
-  refined_bnd_u.init(0);
-  refined_bnd_v.init(0);
-
-  uint* edge_vert;
-  Array<uint> shared_edge;
-
+  // Current vertex index
   uint vertex = 0;
-  if(MPI::numProcesses() > 1)
-  {
-    MeshDistributedData& distdata = mesh.distdata();
-    MeshDistributedData& refined_distdata = refined_mesh.distdata();
 
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      refined_distdata.set_map(vertex, mesh.distdata().get_global(*v), 0);
-
-      if( v->is_ghost() )
-      {
-        refined_distdata.set_ghost(vertex, 0);
-        refined_distdata.set_ghost(vertex,
-            mesh.distdata().get_owner(*v), 0);
-      }
-      else if(mesh.distdata()[0].is_shared(v->index()))
-      {
-        refined_distdata.set_shared(vertex, 0);
-      }
-
-      editor.add_vertex(vertex, v->point());
-
-      refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
-      refined_bnd_u.set(vertex, bnd_u.get(v->index()));
-      refined_bnd_v.set(vertex, bnd_v.get(v->index()));
-      ++vertex;
-    }
-
-    for (EdgeIterator e(mesh); !e.end(); ++e)
-    {
-      edge_vert = e->entities(0);
-      int patch_id_vertex0 = patch_id_list.get(edge_vert[0]);
-      int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
-      //don't in general add the mitpoint. add midpoint if only one or
-      //no vertex of the edge is on the boundary. In the case that all
-      //the vertices ly on the boundary one needs to adjust the point
-      //so that it is also on the geometry.
-
-      if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
-      {
-        // If the edge is shared and lies between processes process
-        // new vertex inside refinement manager
-        if( refman.on_boundary(*e) )
-        {
-          // Add the new vertex inside the refinement manager
-          refman.add_vertex(edge_vert, vertex, refined_mesh);
-
-          // Buffer edge information for mapping phase
-          shared_edge.push_back(edge_vert[0]);
-          shared_edge.push_back(edge_vert[1]);
-          shared_edge.push_back(vertex);
-        }
-        else
-        {
-          refman.add_vertex(vertex, refined_mesh);
-        }
-
-        editor.add_vertex(vertex, e->midpoint());
-
-        refined_patch_id_list.set(vertex, -1);
-        refined_bnd_u.set(vertex, -1);
-        refined_bnd_v.set(vertex, -1);
-        ++vertex;
-      }
-      else
-      {
-        // If the edge is shared and lies between processes
-        // process new vertex inside refinement manager
-        if( refman.on_boundary(*e) )
-        {
-
-          // Add the new vertex inside the refinement manager
-          refman.add_vertex(edge_vert, vertex, refined_mesh);
-
-          // Buffer edge information for mapping phase
-          shared_edge.push_back(edge_vert[0]);
-          shared_edge.push_back(edge_vert[1]);
-          shared_edge.push_back(vertex);
-        }
-        else
-        {
-          refman.add_vertex(vertex, refined_mesh);
-        }
-
-        if(patch_id_vertex0 == patch_id_vertex1)
-        {
-
-          warning("Midpoint computation gives wrong results for varying "
-                  "weights on different controll points.");
-          //THIS is an optimization which is only true if the weights
-          //(NURBS representation) of all the control points are the
-          //same. In most cases this is true. Tests showed that the
-          //error is not significant even if the the weight are not
-          //the same. It can occur that the cells will be inverted. In
-          //this case one has to use the else path for all cases.
-          float u,v;
-          std::vector<float> pt;
-          geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
-              bnd_v.get(edge_vert[0]), bnd_u.get(edge_vert[1]),
-              bnd_v.get(edge_vert[1]), u , v , pt);
-
-          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
-          refined_patch_id_list.set(vertex, patch_id_vertex0);
-          refined_bnd_u.set(vertex, u);
-          refined_bnd_v.set(vertex, v);
-          ++vertex;
-        }
-        else
-        {
-
-          libgeom::Point3D midpoint_lib(e->midpoint().x(),
-              e->midpoint().y(), e->midpoint().z());
-          libgeom::Point3D r1;
-          float u1, v1;
-          int pid_tmp;
-          real distance;
-
-          distance = geom.find_closest_point_all_patches(midpoint_lib, r1, u1,
-              v1, pid_tmp,
-              100, 100,
-              5, 5,
-              0.00001, 0.00002, 100);
-
-          editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
-          refined_patch_id_list.set(vertex, pid_tmp);
-          refined_bnd_u.set(vertex, u1);
-          refined_bnd_v.set(vertex, v1);
-          ++vertex;
-        }
-      }
-    }
-
-  }          //serial version
-  else
-  {
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      editor.add_vertex(vertex, v->point());
-      refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
-      refined_bnd_u.set(vertex, bnd_u.get(v->index()));
-      refined_bnd_v.set(vertex, bnd_v.get(v->index()));
-      ++vertex;
-    }
-    // Add new vertices
-
-    for (EdgeIterator e(mesh); !e.end(); ++e)
-    {
-      //don't in general add the mitpoint. add midpoint if only one or
-      //no vertex of the edge is on the boundary. In the case that all
-      //the vertices ly on the boundary one needs to adjust the point
-      //so that it is also on the geometry.
-      edge_vert = e->entities(0);
-
-      int patch_id_vertex0 = patch_id_list.get(edge_vert[0]);
-      int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
-      if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
-      {
-        editor.add_vertex(vertex, e->midpoint());
-        refined_patch_id_list.set(vertex, -1);
-        refined_bnd_u.set(vertex, -1);
-        refined_bnd_v.set(vertex, -1);
-        ++vertex;
-      }
-      else
-      {
-
-        if(patch_id_vertex0 == patch_id_vertex1)
-        {
-
-          warning("Midpoint computation gives wrong results for varying "
-                  "weights on different controll points.");
-          float u,v;
-          std::vector<float> pt;
-          geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
-              bnd_v.get(edge_vert[0]),
-              bnd_u.get(edge_vert[1]),
-              bnd_v.get(edge_vert[1]), u , v , pt);
-
-          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
-          refined_patch_id_list.set(vertex, patch_id_vertex0);
-          refined_bnd_u.set(vertex, u);
-          refined_bnd_v.set(vertex, v);
-          ++vertex;
-        }
-        else
-        {
-
-          libgeom::Point3D midpoint_lib(e->midpoint().x(), e->midpoint().y(), e->midpoint().z());
-	  libgeom::Point3D r1;
-          float u1, v1;
-          int pid_tmp;
-          real distance;
-
-          distance = geom.find_closest_point_all_patches(midpoint_lib, r1, u1,
-              v1, pid_tmp, 100, 100,
-              5, 5,
-              0.00001, 0.00002, 100);
-
-          editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z()));
-          refined_patch_id_list.set(vertex, pid_tmp);
-          refined_bnd_u.set(vertex, u1);
-          refined_bnd_v.set(vertex, v1);
-          ++vertex;
-        }
-      }
-    }
-
-  }
-
-  // Add cells
-  uint current_cell = 0;
-  for (CellIterator c(mesh); !c.end(); ++c)
-  {
-    cell_type.refineCell(*c, editor, current_cell);
-  }
-
-  editor.close();
-
-  // Map global numbers to unassigned shared vertices
-  if(MPI::numProcesses() > 1)
-  {
-    refman.map_new_vertices(shared_edge, mesh, refined_mesh);
-  }
-
-  // Overwrite old mesh with refined mesh
-
-  std::swap(mesh, refined_mesh);
-  bnd_u = MeshFunction<float>(mesh);
-  bnd_u.init(0);
-  bnd_v = MeshFunction<float>(mesh);
-  bnd_v.init(0);
-  patch_id_list =MeshFunction<int>(mesh);
-  patch_id_list.init(0);
-
-  //TODO easiest but not fastest way.
+  // Add vertices for each topological dimension
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    bnd_u.set(v->index(), refined_bnd_u.get(v->index()));
-    bnd_v.set(v->index(), refined_bnd_v.get(v->index()));
-    patch_id_list.set(v->index(), refined_patch_id_list.get(v->index()));
+    refman.add(*v, vertex);
+    editor.add_vertex(vertex++, v->point());
   }
 
-  mesh.distdata().set_invalid_numbering();
-  mesh.renumber();
-
-}
-//-----------------------------------------------------------------------------
-void UniformMeshRefinement::refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
-    MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u )
-{
-  message(1, "Refining simplicial mesh uniformly with added boundary smoothing.");
-
-  uint const tdim = mesh.topology().dim();
-
-  // Generate cell - edge connectivity if not generated
-  mesh.init(tdim, 1);
-
-  // Generate edge - vertex connectivity if not generated
-  mesh.init(1, 0);
-  // Get cell type
-  CellType const& cell_type = mesh.type();
-
-  // Create a new refinement manager  FIXME:remove for the serial case
-  RefinementManager refman(mesh);
-
-  // Create new mesh and open for editing
-  Mesh refined_mesh;
-  MeshEditor editor;
-  editor.open(refined_mesh, cell_type.cellType(),
-      tdim, mesh.geometry().dim());
-
-  // Get size of mesh
-  uint const num_vertices = mesh.size(0);
-  uint const num_edges = mesh.size(1);
-  uint const num_cells = mesh.size(tdim);
-
-  // Specify number of vertices and cells
-  editor.init_vertices(num_vertices + num_edges);
-  editor.init_cells(ipow(2, tdim)*num_cells);
-
-  //create the Meshfunctions for the refined mesh
-  MeshFunction<int> refined_patch_id_list(refined_mesh);
-  MeshFunction<float> refined_bnd_u(refined_mesh);
-
-  //initialize the new Meshfunctions
-  refined_patch_id_list.init(0);
-  refined_bnd_u.init(0);
-
-  uint* edge_vert;
-  Array<uint> shared_edge;
-
-  uint vertex = 0;
-  //parallel version
-  if(MPI::numProcesses() > 1)
+  // Add edge-based vertices
+  if (tdim > 1)
   {
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      refined_distdata.set_map(vertex, mesh.distdata().get_global(*v), 0);
-
-      if( v->is_ghost() )
-      {
-        refined_distdata.set_ghost(vertex, 0);
-        refined_distdata.set_ghost(vertex,
-            mesh.distdata().get_owner(*v), 0);
-      }
-      else if(mesh.distdata()[0].is_shared(v->index()))
-      {
-        refined_distdata.set_shared(vertex, 0);
-      }
-      editor.add_vertex(vertex, v->point());
-
-      refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
-      refined_bnd_u.set(vertex, bnd_u.get(v->index()));
-      ++vertex;
-    }
-
     for (EdgeIterator e(mesh); !e.end(); ++e)
     {
-      edge_vert = e->entities(0);
-      int patch_id_vertex0 = patch_id_list.get(edge_vert[0]);
-      int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
-      //don't in general add the mitpoint. add midpoint if only one
-      //or no vertex of the edge is on the boundary. In the case that
-      //all the vertices ly on the boundary one needs to adjust the
-      //point so that it is also on the geometry.
-
-      if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
-      {
-        // If the edge is shared and lies between processes
-        // process new vertex inside refinement manager
-        if( refman.on_boundary(*e) )
-        {
-
-          // Add the new vertex inside the refinement manager
-          refman.add_vertex(edge_vert, vertex, refined_mesh);
-
-          // Buffer edge information for mapping phase
-          shared_edge.push_back(edge_vert[0]);
-          shared_edge.push_back(edge_vert[1]);
-          shared_edge.push_back(vertex);
-        }
-        else
-        {
-          refman.add_vertex(vertex, refined_mesh);
-        }
-
-        editor.add_vertex(vertex, e->midpoint());
-
-        refined_patch_id_list.set(vertex, -1);
-        refined_bnd_u.set(vertex, -1);
-        ++vertex;
-      }
-      else
-      {
-        // If the edge is shared and lies between processes
-        // process new vertex inside refinement manager
-        if( refman.on_boundary(*e) )
-        {
-          // Add the new vertex inside the refinement manager
-          refman.add_vertex(edge_vert, vertex, refined_mesh);
-
-          // Buffer edge information for mapping phase
-          shared_edge.push_back(edge_vert[0]);
-          shared_edge.push_back(edge_vert[1]);
-          shared_edge.push_back(vertex);
-        }
-        else
-        {
-          refman.add_vertex(vertex, refined_mesh);
-        }
-
-        //this is the point where I assume there is only one patch I
-        //only use patch id of vertex 0 TODO fix it to multiple
-        //patches
-
-        if(patch_id_vertex0 == patch_id_vertex1)
-        {
-          float u;
-          std::vector<float> pt;
-          geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
-              bnd_u.get(edge_vert[1]), u , pt);
-
-          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
-          refined_patch_id_list.set(vertex, patch_id_vertex0);
-          refined_bnd_u.set(vertex, u);
-          ++vertex;
-        }
-        else
-        {
-
-          libgeom::Point3D midpoint(e->midpoint().x(),
-              e->midpoint().y(), e->midpoint().z());
-          libgeom::Point3D r0,r1;
-          libgeom::REAL u0, u1;
-          real dist0 = geom.find_closest_point_curve(midpoint,
-              r0, u0, patch_id_vertex0);
-          real dist1 = geom.find_closest_point_curve(midpoint,
-              r1, u1, patch_id_vertex1);
-          if(dist0 < dist1)
-          {
-            editor.add_vertex(vertex, Point( r0.x(), r0.y(), r0.z() ) );
-            refined_patch_id_list.set(vertex, patch_id_vertex0);
-            refined_bnd_u.set(vertex, u0);
-            ++vertex;
-          }
-          else
-          {
-            editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
-            refined_patch_id_list.set(vertex, patch_id_vertex1);
-            refined_bnd_u.set(vertex, u1);
-            ++vertex;
-          }
-        }
-      }
-    }
-
-  }	//serial version
-  else
-  {
-    // Add old vertices
-    for (VertexIterator v(mesh); !v.end(); ++v)
-    {
-      editor.add_vertex(vertex, v->point());
-      refined_patch_id_list.set(vertex, patch_id_list.get(v->index()));
-      refined_bnd_u.set(vertex, bnd_u.get(v->index()));
-      ++vertex;
-    }
-    // Add new vertices
-    // right now I assume single patch geometries... TODO fix to multiple patches
-    for (EdgeIterator e(mesh); !e.end(); ++e)
-    {
-      //don't in general add the midpoint. add midpoint if only one or
-      //no vertex of the edge is on the boundary. In the case that all
-      //the vertices ly on the boundary one needs to adjust the point
-      //so that it is also on the geometry.
-      edge_vert = e->entities(0);
-
-      int patch_id_vertex0 = patch_id_list.get(edge_vert[0]);
-      int patch_id_vertex1 = patch_id_list.get(edge_vert[1]);
-      if(patch_id_vertex0 < 0 || patch_id_vertex1 < 0)
-      {
-        editor.add_vertex(vertex, e->midpoint());
-        refined_patch_id_list.set(vertex, -1);
-        refined_bnd_u.set(vertex, -1);
-        ++vertex;
-      }
-      else
-      {
-        if(patch_id_vertex0 == patch_id_vertex1)
-        {
-          float u;
-          std::vector<float> pt;
-          geom.get_midpoint(patch_id_vertex0, bnd_u.get(edge_vert[0]),
-              bnd_u.get(edge_vert[1]), u , pt);
-
-          editor.add_vertex(vertex, Point(pt[0],pt[1],pt[2]));
-          refined_patch_id_list.set(vertex, patch_id_vertex0);
-          refined_bnd_u.set(vertex, u);
-          ++vertex;
-        }
-        else
-        {
-          libgeom::Point3D midpoint(e->midpoint().x(),
-              e->midpoint().y(), e->midpoint().z());
-          libgeom::Point3D r0,r1;
-          float u0, u1;
-          real dist0 = geom.find_closest_point_curve(midpoint,
-              r0, u0, patch_id_vertex0);
-          real dist1 = geom.find_closest_point_curve(midpoint,
-              r1, u1, patch_id_vertex1);
-          if(dist0 < dist1)
-          {
-            editor.add_vertex(vertex, Point(r0.x(), r0.y(), r0.z()));
-            refined_patch_id_list.set(vertex, patch_id_vertex0);
-            refined_bnd_u.set(vertex, u0);
-            ++vertex;
-          }
-          else
-          {
-            editor.add_vertex(vertex, Point( r1.x(), r1.y(), r1.z() ) );
-            refined_patch_id_list.set(vertex, patch_id_vertex1);
-            refined_bnd_u.set(vertex, u1);
-            ++vertex;
-          }
-        }
-      }
+      refman.add(*e, vertex);
+      editor.add_vertex(vertex++, e->midpoint());
     }
   }
 
-  // Add cells
-  uint current_cell = 0;
+  // Add face-based vertices
+  if (tdim > 2)
+  {
+    for (FaceIterator f(mesh); !f.end(); ++f)
+    {
+      refman.add(*f, vertex);
+      editor.add_vertex(vertex++, f->midpoint());
+    }
+  }
+
+  // Add cell-based vertices and cells
+  uint cell = 0;
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    cell_type.refineCell(*c, editor, current_cell);
+    editor.add_vertex(vertex++, c->midpoint());
+    pattern.refine_cell(*c, editor, cell);
   }
 
+  // Apply numbering of new entities and close edition
+  refman.apply();
   editor.close();
 
-  // Map global numbers to unassigned shared vertices
-  if(MPI::numProcesses() > 1)
-  {
-    refman.map_new_vertices(shared_edge, mesh, refined_mesh);
-  }
-
   // Overwrite old mesh with refined mesh
-  std::swap(mesh, refined_mesh);
-  bnd_u = MeshFunction<float>(mesh);
-  bnd_u.init(0);
-  patch_id_list =MeshFunction<int>(mesh);
-  patch_id_list.init(0);
-
-  //TODO easiest but not fastest way.
-  for (VertexIterator v(mesh); !v.end(); ++v)
-  {
-    bnd_u.set(v->index(), refined_bnd_u.get(v->index()));
-    patch_id_list.set(v->index(), refined_patch_id_list.get(v->index()));
-  }
-
-  mesh.distdata().set_invalid_numbering();
-  mesh.renumber();
+  mesh = refined_mesh;
+  //mesh.renumber();
 }
-//-----------------------------------------------------------------------------
-#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 
 }

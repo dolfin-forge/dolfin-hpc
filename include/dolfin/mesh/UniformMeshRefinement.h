@@ -9,16 +9,6 @@
 
 #include <dolfin/common/types.h>
 
-#include <dolfin/mesh/MeshFunction.h>
-
-
-#ifdef HAVE_LIBGEOM
-namespace libgeom
-{
-	class Geometry;
-}
-#endif
-
 namespace dolfin
 {
 
@@ -28,41 +18,22 @@ class Mesh;
 
 class UniformMeshRefinement
 {
+
 public:
 
   /// Refine mesh uniformly according to mesh type
   static void refine(Mesh& mesh);
 
-#ifdef HAVE_LIBGEOM
-  /// Refine mesh uniformly according to mesh type overloaded method to include geometry informations surfaces
-  static void refine(Mesh& mesh, libgeom::Geometry& geom,
-                     MeshFunction<int>& patch_id_list,
-                     MeshFunction<float>& bnd_u,
-                     MeshFunction<float>& bnd_v );
-
-  /// Refine mesh uniformly according to mesh type overloaded method to include geometry informations curves
-  static void refine(Mesh& mesh, libgeom::Geometry& geom,
-                     MeshFunction<int>& patch_id_list,
-                     MeshFunction<float>& bnd_u);
-#endif
+private:
 
   /// Refine simplicial mesh uniformly
   static void refineSimplex(Mesh& mesh);
 
-#ifdef HAVE_LIBGEOM
-  /// Refine simplicial mesh uniformly overloaded method to include geometry informations surfaces
-  static void refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
-                            MeshFunction<int>& patch_id_list,
-                            MeshFunction<float>& bnd_u,
-                            MeshFunction<float>& bnd_v );
+  /// Refine hypercubic mesh uniformly
+  static void refineHypercube(Mesh& mesh);
 
-  /// Refine simplicial mesh uniformly overloaded method to include geometry informations curves
-  static void refineSimplex(Mesh& mesh, libgeom::Geometry& geom,
-                            MeshFunction<int>& patch_id_list,
-                            MeshFunction<float>& bnd_u );
-#endif
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_UNIFORM_MESH_REFINEMENT_H */

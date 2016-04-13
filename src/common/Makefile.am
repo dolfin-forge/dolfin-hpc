@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libdolfin_common.la
 libdolfin_common_la_SOURCES = byteswap.cpp\
                               timing.cpp \
                               system.cpp \
+                              AdjacentMapping.cpp \
                               DistributedData.cpp \
                               Test.cpp \
                               TimeDependent.cpp \

@@ -6,6 +6,7 @@
 
 #include <dolfin/fem/UFCHalo.h>
 
+#include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/DofMapSet.h>
@@ -60,14 +61,12 @@ void UFCHalo::init()
     return;
   }
 
-  /*
-
   // Clear data structures and define data padding
   clear();
-  MeshDistributedData& distdata = mesh_.distdata();
   uint const tdim = mesh_.topology().dim();
   uint const gdim = mesh_.geometry().dim();
   uint const facet_dim = tdim - 1;
+  DistributedData& distdata = mesh_.distdata()[facet_dim];
 
   //
   uint const num_cell_vertices = mesh_.type().num_entities(0);
@@ -90,29 +89,28 @@ void UFCHalo::init()
   u_packet_size_ = 1 + dofs_data_size;
 
   // Allocate data structures
-  _set<uint> const& adj = distdata[facet_dim].get_adj_ranks();
-  uint const num_shared_facets = distdata[facet_dim].num_shared();
-  uint const num_ghost_facets = distdata[facet_dim].num_ghost();
+  _set<uint> const& adj = distdata.get_adj_ranks();
+  uint const num_shared_facets = distdata.num_shared();
 
   // Pack by adjacent rank
   uint offset = 0;
   for (_set<uint>::const_iterator it = adj.begin(); it != adj.end(); ++it)
   {
     rank_offsets_.insert(FacetOffsets(*it, offset));
-    offset += distdata.num_shared_with(*it, facet_dim);
+    offset += distdata.shared_mapping().to(*it).size();
   }
   //
   dolfin_assert(offset == num_shared_facets);
 
   // Cache association of local facet index to offset in halo data
   _map<uint, uint> facet_offsets;
-  for (SharedIterator sh(distdata[facet_dim]); !sh.end(); ++sh)
+  for (SharedIterator sh(distdata); !sh.end(); ++sh)
   {
-    uint const ark = *(distdata[facet_dim].get_shared_adj(sh.index()).begin());
+    uint const ark = *(distdata.get_shared_adj(sh.index()).begin());
     uint rank_offset = rank_offsets_[ark];
 
     // Maps local shared ordering to adjacent shared ordering
-    Array<uint> const& adjmap = distdata.get_shared_mapping_to(ark, facet_dim);
+    Array<uint> const& adjmap = distdata.shared_mapping().to(ark);
 
     uint off0 = rank_offset + facet_offsets[ark];
     uint off1 = rank_offset + adjmap[facet_offsets[ark]];
@@ -131,8 +129,6 @@ void UFCHalo::init()
 
   // Fill data structures
   this->update(coefficients_, dof_map_set_);
-
-  */
 }
 
 //-----------------------------------------------------------------------------
@@ -208,14 +204,12 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     return;
   }
 
-  /*
-
 #ifdef HAVE_MPI
 
-  MeshDistributedData& distdata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
   uint const gdim = mesh.geometry().dim();
   uint const facet_dim = tdim - 1;
+  DistributedData& distdata = mesh.distdata()[facet_dim];
 
   // Exchange of data for contribution of halo macro elements
 
@@ -285,8 +279,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     src = (rank - j + pe_size) % pe_size;
     dst = (rank + j) % pe_size;
 
-    uint num_send_facets = distdata.num_shared_with(dst, facet_dim);
-    uint num_recv_facets = distdata.num_shared_with(src, facet_dim);
+    uint num_send_facets = distdata.shared_mapping().to(dst).size();
+    uint num_recv_facets = distdata.shared_mapping().from(src).size();
     uint send_offset = rank_offsets_[dst];
     uint recv_offset = rank_offsets_[src];
 
@@ -309,8 +303,6 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   }
 
 #endif
-
-  */
 }
 
 //-----------------------------------------------------------------------------

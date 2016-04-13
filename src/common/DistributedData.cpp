@@ -5,6 +5,7 @@
 #include <dolfin/common/DistributedData.h>
 
 #include <dolfin/common/timing.h>
+#include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
@@ -31,7 +32,8 @@ DistributedData::DistributedData() :
     ghost_(),
     cache_size_(0),
     cached_numbering_(NULL),
-    cached_ownership_(NULL)
+    cached_ownership_(NULL),
+    shared_mapping_(NULL)
 {
 }
 //-----------------------------------------------------------------------------
@@ -85,6 +87,13 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
       std::copy(other.cached_ownership_, other.cached_ownership_ + cache_size_,
                 cached_ownership_);
     }
+
+    // Copy mappings
+    if (other.shared_mapping_ != NULL)
+    {
+      shared_mapping_ = new SharedMapping(*other.shared_mapping_);
+    }
+
   }
   return *this;
 }
@@ -101,8 +110,12 @@ bool DistributedData::operator!=(DistributedData const& other) const
 //-----------------------------------------------------------------------------
 void DistributedData::clear()
 {
+  delete shared_mapping_;
+  shared_mapping_ = NULL;
   delete [] cached_ownership_;
+  cached_ownership_ = NULL;
   delete [] cached_numbering_;
+  cached_numbering_ = NULL;
   cache_size_ = 0;
   ghost_.clear();
   shared_.clear();
@@ -692,6 +705,10 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     cached_ownership_[mapping[it->first]] = it->second;
   }
   ghost_ = ghost;
+
+  // Clear mappings
+  delete [] shared_mapping_;
+  shared_mapping_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void DistributedData::renumber_global()
@@ -939,6 +956,11 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
       cached_ownership_[it->first] = mapping[it->second];
     }
   }
+
+  // Clear mappings
+  // TODO: implement rank re-mapping in adjacent mappings
+  delete [] shared_mapping_;
+  shared_mapping_ = NULL;
 }
 //-----------------------------------------------------------------------------
 _set<uint> const& DistributedData::get_shared_adj(uint local_index) const
@@ -1021,6 +1043,15 @@ void DistributedData::setall_shared_adj(uint local_index, _set<uint> const& adjs
   }
   shared_[local_index] = adjs;
   adjacents_.insert(adjs.begin(), adjs.end());
+}
+//-----------------------------------------------------------------------------
+SharedMapping const& DistributedData::shared_mapping() const
+{
+  if(shared_mapping_ == NULL)
+  {
+    shared_mapping_ = new SharedMapping(*this);
+  }
+  return *shared_mapping_;
 }
 //-----------------------------------------------------------------------------
 void DistributedData::set_ghost(uint local_index, uint owner)

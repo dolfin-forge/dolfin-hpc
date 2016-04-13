@@ -13,6 +13,8 @@
 namespace dolfin
 {
 
+class SharedMapping;
+
 /*
  *  @class  DistributedData
  */
@@ -185,6 +187,9 @@ public:
   /// Set the adjacent set for the given shared entity, this cannot contain self
   void setall_shared_adj(uint local_index, _set<uint> const& adjs);
 
+  /// Return shared entities mapping, only on finalized data
+  SharedMapping const& shared_mapping() const;
+
   //--- Ghosts ---
 
   /// Set the given entity as ghost
@@ -219,6 +224,9 @@ private:
   uint cache_size_;
   uint * cached_numbering_;
   uint * cached_ownership_;
+
+  /// Mapping created on-demand
+  mutable SharedMapping * shared_mapping_;
 
 };
 

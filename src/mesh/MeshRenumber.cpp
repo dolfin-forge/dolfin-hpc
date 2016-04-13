@@ -54,9 +54,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
    *
    */
 
-  for (uint d = 0; d < tdim; ++d)
+  for (uint d = 1; d < tdim; ++d)
   {
-    if (!topology.entities_exist(d) || distdata[d].valid_numbering)
+    if (!(topology.entities_exist(d) && !distdata[d].valid_numbering))
     {
       continue;
     }
@@ -64,11 +64,17 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     message(1, "MeshRenumber : renumber entities of dimension %u", d);
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
-    // Distributed data size is known: cache arrays are used.
-    dolfin_assert(edata.empty());
-    edata.set_size(topology.size(d));
+    //FIXME: Set valid numbering now to avoid recursive calls when getting the
+    //       connectivities (d, 0): if this function was called in MeshTopology
+    //       or was friend no problem would occur.
+    edata.valid_numbering = true;
     MeshConnectivity const& cve = topology(0, d);
     MeshConnectivity const& cev = topology(d, 0);
+
+    // Distributed data size is known: cache arrays are used.
+    dolfin_assert(edata.empty());
+    dolfin_assert(!edata.is_finalized());
+    edata.set_size(topology.size(d));
 
     //
     uint const num_entity_vertices = cev.max_connections();

@@ -54,8 +54,6 @@ UFCHalo::~UFCHalo()
 //-----------------------------------------------------------------------------
 void UFCHalo::init()
 {
-  error("");
-  /*
   // Early exit as nothing has to be done.
   if (!mesh_.is_distributed())
   {
@@ -66,11 +64,12 @@ void UFCHalo::init()
   clear();
   MeshDistributedData& distdata = mesh_.distdata();
   uint const tdim = mesh_.topology().dim();
+  uint const gdim = mesh_.geometry().dim();
   uint const facet_dim = tdim - 1;
 
   //
   uint const num_cell_vertices = mesh_.type().num_entities(0);
-  uint const coordinates_data_size = num_cell_vertices * tdim;
+  uint const coordinates_data_size = num_cell_vertices * gdim;
   uint coefficients_data_size = 0;
   for (uint i = 0; i < ufc_.form.num_coefficients(); ++i)
   {
@@ -98,9 +97,7 @@ void UFCHalo::init()
   for (_set<uint>::const_iterator it = adj.begin(); it != adj.end(); ++it)
   {
     rank_offsets_.insert(FacetOffsets(*it, offset));
-    //FIXME!!!!
-    error("UFCHalo");
-//    offset += distdata.num_shared_with(*it, facet_dim);
+    offset += distdata.num_shared_with(*it, facet_dim);
   }
   //
   dolfin_assert(offset == num_shared_facets);
@@ -132,7 +129,6 @@ void UFCHalo::init()
 
   // Fill data structures
   this->update(coefficients_, dof_map_set_);
-  */
 }
 
 //-----------------------------------------------------------------------------
@@ -157,22 +153,22 @@ void UFCHalo::update(Facet& facet)
   real * r1 = &r_data1_[r_packet_size_ * it->second.second];
 
   // Update pointers to coordinates
-  uint const tdim = mesh_.topology().dim();
+  uint const gdim = mesh_.geometry().dim();
   for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
   {
     cell0.coordinates[i] = r0;
-    r0 += tdim;
+    r0 += gdim;
     cell1.coordinates[i] = r1;
-    r1 += tdim;
+    r1 += gdim;
   }
 
   // Update UFC expansion coefficients, needs copy for the moment
   for (uint i = 0; i < ufc_.form.num_coefficients(); ++i)
   {
     uint const spacedim = ufc_.coefficient_elements[i]->space_dimension();
-    std::memcpy(macro_w[i], r0, spacedim * sizeof(real));
+    std::copy(r0, r0 + spacedim, macro_w[i]);
     r0 += spacedim;
-    std::memcpy(macro_w[i] + spacedim, r1, spacedim * sizeof(real));
+    std::copy(r1, r1 + spacedim, macro_w[i] + spacedim);
     r1 += spacedim;
   }
 
@@ -190,9 +186,9 @@ void UFCHalo::update(Facet& facet)
   for (uint i = 0; i < ufc_.form.rank(); ++i)
   {
     uint const localdim = ufc_.local_dimensions[i];
-    std::memcpy(macro_dofs[i], u0, localdim * sizeof(uint));
+    std::copy(u0, u0 + localdim, macro_dofs[i]);
     u0 += localdim;
-    std::memcpy(macro_dofs[i] + localdim, u1, localdim * sizeof(uint));
+    std::copy(u1, u1 + localdim, macro_dofs[i] + localdim);
     u1 += localdim;
   }
 }
@@ -209,15 +205,13 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   }
 
 #ifdef HAVE_MPI
+
   MeshDistributedData& distdata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
+  uint const gdim = mesh.geometry().dim();
   uint const facet_dim = tdim - 1;
 
   // Exchange of data for contribution of halo macro elements
-  if (distdata[facet_dim].num_shared() == 0)
-  {
-    return;
-  }
 
   if (coefficients.size() != ufc_.form.num_coefficients())
   {
@@ -250,7 +244,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     // TODO: implement proper serialization functions
     for (uint i = 0; i < num_cell_vertices; ++i)
     {
-      std::memcpy(r_entry, ufc_.cell.coordinates[i], tdim * sizeof(real));
+      std::copy(ufc_.cell.coordinates[i], ufc_.cell.coordinates[i] + gdim,
+                r_entry);
       r_entry += tdim;
     }
 
@@ -278,24 +273,22 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   // Exchange data to fill halo data arrays: facet blocks are written directly
   MPI_Status status;
   int src = 0;
-  int dest = 0;
+  int dst = 0;
   for (int j = 1; j < (int) pe_size; ++j)
   {
     src = (rank - j + pe_size) % pe_size;
-    dest = (rank + j) % pe_size;
+    dst = (rank + j) % pe_size;
 
-    //FIXME!!!!
-    error("UFCHalo");
-    uint num_send_facets = 0;//distdata.num_shared_with(dest, facet_dim);
-    uint num_recv_facets = 0;//distdata.num_shared_with(src, facet_dim);
-    uint send_offset = rank_offsets_[dest];
+    uint num_send_facets = distdata.num_shared_with(dst, facet_dim);
+    uint num_recv_facets = distdata.num_shared_with(src, facet_dim);
+    uint send_offset = rank_offsets_[dst];
     uint recv_offset = rank_offsets_[src];
 
     real * r_sendbuf = &r_data0_[send_offset * r_packet_size_];
     real * r_recvbuf = &r_data1_[recv_offset * r_packet_size_];
     int r_sendcount = num_send_facets * r_packet_size_;
     int r_recvcount = num_recv_facets * r_packet_size_;
-    MPI_Sendrecv(&r_sendbuf[0], r_sendcount, MPI_DOUBLE, dest, 1, &r_recvbuf[0],
+    MPI_Sendrecv(&r_sendbuf[0], r_sendcount, MPI_DOUBLE, dst, 1, &r_recvbuf[0],
                  r_recvcount, MPI_DOUBLE, src, 1, dolfin::MPI::DOLFIN_COMM,
                  &status);
 
@@ -303,7 +296,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     uint * u_recvbuf = &u_data1_[recv_offset * u_packet_size_];
     int u_sendcount = num_send_facets * u_packet_size_;
     int u_recvcount = num_recv_facets * u_packet_size_;
-    MPI_Sendrecv(&u_sendbuf[0], u_sendcount, MPI_UNSIGNED, dest, 1,
+    MPI_Sendrecv(&u_sendbuf[0], u_sendcount, MPI_UNSIGNED, dst, 1,
                  &u_recvbuf[0], u_recvcount, MPI_UNSIGNED, src, 1,
                  dolfin::MPI::DOLFIN_COMM, &status);
 
@@ -323,7 +316,7 @@ void UFCHalo::disp() const
   cout << "Rank offsets             : " << (uint) rank_offsets_.size()
        << " adjacent ranks" << endl;
   for (_map<uint, uint>::const_iterator it = rank_offsets_.begin();
-  it != rank_offsets_.end(); ++it)
+       it != rank_offsets_.end(); ++it)
   {
     cout << "\tproc " << it->first << " : " << it->second << endl;
   }
@@ -347,4 +340,4 @@ void UFCHalo::clear()
   u_data1_ = NULL;
 }
 
-}
+} /* namespace dolfin */

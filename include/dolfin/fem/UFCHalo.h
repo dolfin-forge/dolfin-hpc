@@ -1,6 +1,9 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// This class is the first implementation allowing assembly of halo facets
+// contributions like jumps.
+//
 // First added:  2014-06-16
 // Last changed: 2014-06-16
 
@@ -103,6 +106,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
 #endif /* __DOLFIN_UFC_HALO_H */

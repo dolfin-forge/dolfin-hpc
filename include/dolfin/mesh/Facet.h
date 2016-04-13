@@ -39,8 +39,9 @@ namespace dolfin
     FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.topology().dim() - 1) {}
     FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().topology().dim() - 1) {}
 
-    inline Facet& operator*() { return *operator->(); }
     inline Facet* operator->() { return static_cast<Facet*>(MeshEntityIterator::operator->()); }
+    inline Facet& operator*() { return *operator->(); }
+    inline Facet& operator[](uint i) { return static_cast<Facet&>(MeshEntityIterator::operator[](i)); }
 
   };    
 

@@ -62,17 +62,23 @@ public:
   /// Step to next mesh entity (prefix increment)
   MeshEntityIterator& operator++();
 
+  /// Set position explicitly relative to begin
+  void set(uint i);
+
   /// Return current position
   uint pos() const;
 
   /// Check if iterator has reached the end
   bool end() const;
 
+  /// Member access operator
+  MeshEntity* operator->();
+
   /// Dereference operator
   MeshEntity& operator*();
 
-  /// Member access operator
-  MeshEntity* operator->();
+  /// Access operator at position relative to begin
+  MeshEntity& operator[](uint i);
 
 private:
 
@@ -94,7 +100,7 @@ private:
   uint pos_;
 
   // End position
-  uint const pos_end_;
+  uint const end_;
 
   // Mapping from pos to index (if any)
   uint const * index_;
@@ -110,6 +116,13 @@ inline MeshEntityIterator& MeshEntityIterator::operator++()
 }
 
 //-----------------------------------------------------------------------------
+inline void MeshEntityIterator::set(uint i)
+{
+  dolfin_assert(i < end_);
+  pos_ = i;
+}
+
+//-----------------------------------------------------------------------------
 inline uint MeshEntityIterator::pos() const
 {
   return pos_;
@@ -118,13 +131,7 @@ inline uint MeshEntityIterator::pos() const
 //-----------------------------------------------------------------------------
 inline bool MeshEntityIterator::end() const
 {
-  return pos_ >= pos_end_;
-}
-
-//-----------------------------------------------------------------------------
-inline MeshEntity& MeshEntityIterator::operator*()
-{
-  return *operator->();
+  return pos_ >= end_;
 }
 
 //-----------------------------------------------------------------------------
@@ -132,6 +139,22 @@ inline MeshEntity* MeshEntityIterator::operator->()
 {
   entity_.index_ = (index_ ? index_[pos_] : pos_);
   return &entity_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshEntity& MeshEntityIterator::operator*()
+{
+  entity_.index_ = (index_ ? index_[pos_] : pos_);
+  return entity_;
+}
+
+//-----------------------------------------------------------------------------
+inline MeshEntity& MeshEntityIterator::operator[](uint i)
+{
+  dolfin_assert(i < end_);
+  pos_ = i;
+  entity_.index_ = (index_ ? index_[pos_] : pos_);
+  return entity_;
 }
 
 //-----------------------------------------------------------------------------

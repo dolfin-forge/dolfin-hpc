@@ -53,24 +53,32 @@ public:
 
 class EdgeIterator : public MeshEntityIterator
 {
+
 public:
 
   EdgeIterator(Mesh& mesh) :
       MeshEntityIterator(mesh, 1)
   {
   }
+
   EdgeIterator(MeshEntity& entity) :
       MeshEntityIterator(entity, 1)
   {
+  }
+
+  inline Edge* operator->()
+  {
+    return static_cast<Edge*>(MeshEntityIterator::operator->());
   }
 
   inline Edge& operator*()
   {
     return *operator->();
   }
-  inline Edge* operator->()
+
+  inline Edge& operator[](uint i)
   {
-    return static_cast<Edge*>(MeshEntityIterator::operator->());
+    return static_cast<Edge&>(MeshEntityIterator::operator[](i));
   }
 
 };

@@ -505,6 +505,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
     {
       error("DistributedData : sum of range not equal to global size");
     }
+    global_size_ = range_sum;
   }
 }
 //-----------------------------------------------------------------------------
@@ -541,13 +542,13 @@ void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )
   // Use caching already as the data size is known and save on map lookups
   cache_size_ = num_local;
   // Create arrays if they do not exist
-  if ((cached_numbering_ == NULL) & (cache_size_ > 0))
+  if ((cached_numbering_ == NULL) && (cache_size_ > 0))
   {
     cached_numbering_ = new uint[cache_size_];
     // Set to an undefined value
     std::fill_n(cached_numbering_, cache_size_, DOLFIN_UINT_UNDEF);
   }
-  if ((cached_ownership_ == NULL) & (cache_size_ > 0))
+  if ((cached_ownership_ == NULL) && (cache_size_ > 0))
   {
     cached_ownership_ = new uint[cache_size_];
     // Set initial ownership to owner

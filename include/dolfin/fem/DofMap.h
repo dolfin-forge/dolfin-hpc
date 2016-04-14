@@ -12,12 +12,8 @@
 
 #include <dolfin/mesh/MeshDependent.h>
 
-#include "UFCCell.h"
-#include "UFCMesh.h"
-
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/common/Array.h>
 
 #include <ufc.h>
 
@@ -26,10 +22,14 @@
 namespace dolfin
 {
 
+class Cell;
+class DofNumbering;
 class Form;
 class PeriodicDofsMapping;
+class Mesh;
 class SubSytem;
-class UFC;
+class UFCCell;
+class UFCMesh;
 
 /// This class handles the mapping of degrees of freedom.
 /// It wraps a ufc::dofmap on a specific mesh and provides
@@ -39,26 +39,8 @@ class DofMap : public ufc::dofmap, public MeshDependent
 {
 
   static std::string const SIGN_PREFIX;
-  enum Type
-  {
-    real_space, scalar_p1, scalar_dg0, vector_p1, vector_dg0, generic, ufc_default
-  };
 
 public:
-
-  /// Returns the dofmap signature corresponding to a given finite element
-  static std::string const dofmap_signature(std::string const& fe_signature);
-
-  /// Returns the finite element signature corresponding to a given dofmap
-  static std::string const finite_element_signature(
-      std::string const& dofmap_signature);
-
-  /// Create unique string identifiers for dofmap from signature
-  static std::string const make_hash(std::string const& dofmap_signature,
-                                     Mesh& mesh);
-
-  /// Create unique string identifiers for dofmap from UFC dofmap
-  static std::string const make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap);
 
   /// Create dof map on mesh for i-th coefficient of given form
   DofMap(Mesh& mesh, ufc::form const& form, uint const i);
@@ -175,11 +157,10 @@ public:
   uint macro_local_dimension() const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
-                     Cell const& cell) const;
+  void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const;
 
-  /// Tabulate the local-to-global mapping of dofs on a cell [TODO: Obsolete]
-  void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell, uint i = 0) const;
+  /// Tabulate the local-to-global mapping of dofs on a cell
+  void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell) const;
 
   /// Extract sub dof map
   ufc::dofmap* create_sub_dofmap(Array<uint> const& sub_system) const;
@@ -191,12 +172,6 @@ public:
   static ufc::dofmap* create_sub_dofmap(ufc::dofmap const& dofmap,
                                         Array<uint> const& sub_system,
                                         uint& local_offset);
-
-  /// Extract sub dof map and compute the global offset for the given mesh
-  static ufc::dofmap* create_sub_dofmap(UFCMesh& ufc_mesh,
-                                        ufc::dofmap const& dofmap,
-                                        Array<uint> const& sub_system,
-                                        uint& global_offset);
 
   /// Get sub dof maps offset (for a mixed element)
   Array<uint> const& sub_dofmaps_dimensions() const;
@@ -218,10 +193,13 @@ public:
   /// Return if the dofmap can be seen as a vector element dofmap
   bool is_vectorizable() const;
 
+  /// Return if the list of dofmap can be seen as a vector element
+  static bool can_vectorize(Array<ufc::dofmap const *> flattened);
+
   /// Unique identifier
   std::string const& hash() const;
 
-  /// Return the dofmap size on the mesh partition
+  /// Return the dofmap local size i.e the process range (only owned dofs)
   uint local_size() const;
 
   //--- Management of local-to-global mapping
@@ -237,22 +215,36 @@ public:
   /// Return local to global mapping
   PeriodicDofsMapping const& periodic_mapping() const;
 
+  //--- Dof ownership
+
+  /// Return is the dof is shared, return false if the index is not known (!)
+  bool is_shared(uint index) const;
+
+  /// Return is the dof is ghosted, return false if the index is not known (!)
+  bool is_ghost(uint index) const;
+
   //--- Debugging
 
   /// Return renumbering (used for testing)
-  std::map<uint, uint> getMap() const;
-
-  /// Return is the dof is ghosted, return false if the index is not known (!)
-  bool is_ghost(uint i) const;
-
-  /// Return is the dof is shared, return false if the index is not known (!)
-  bool is_shared(uint i) const;
+  std::map<uint, uint> get_map() const;
 
   /// Display mapping
   void disp() const;
 
   /// Return if the dof map has been renumbered
   bool renumbered() const;
+
+  //---
+
+  /// Returns the dofmap signature corresponding to a given finite element
+  static std::string const dofmap_signature(std::string const& fe_signature);
+
+  /// Create unique string identifiers for dofmap from signature
+  static std::string const make_hash(std::string const& dofmap_signature,
+                                     Mesh& mesh);
+
+  /// Create unique string identifiers for dofmap from UFC dofmap
+  static std::string const make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap);
 
   //--- Debugging
 
@@ -261,41 +253,20 @@ public:
 
 private:
 
-  /// Initialise DofMap
+  /// Initialize
   void init();
 
-  /// Initialise UFC data structures: used to determine the global dimension
-  static void initUFC(UFCMesh& ufc_mesh, ufc::dofmap& dofmap);
-
-  /// Build parallel dof map
+  /// Build dof numbering
   void build();
-
-  /// Attribute ownership based on voting system
-  void distributeByVote(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
-                        _set<uint>& owned_dofs, _set<uint>& shared_dofs,
-                        _set<uint>& ghost_dofs,
-                        _map<uint, std::vector<uint> >& dof2index);
-
-  /// Attribute ownership based on mesh distribution
-  void distributeByEntities(UFCMesh& ufc_mesh, ufc::dofmap * ufc_dofmap,
-                            _set<uint>& owned_dofs, _set<uint>& shared_dofs,
-                            _set<uint>& ghost_dofs,
-                            _map<uint, std::vector<uint> >& dof2index);
-
-  ///
-  void pretabulateAllDofs() const;
-
-  // UFC mesh, should be declared as mutable as deferred initialization occurs
-  mutable UFCMesh ufc_mesh_;
-
-  // Use type to allow optimization of dof map ordering
-  mutable Type type_;
 
   // Forward declaration of offset to be update at creation of ufc::dofmap
   uint offset_;
 
   // UFC dof map
   ufc::dofmap * const ufc_dofmap_;
+
+  // Use type to allow optimization of dof map ordering
+  DofNumbering * const numbering_;
 
   // Dofmap hash
   std::string const hash_;
@@ -312,68 +283,16 @@ private:
   //
   uint num_leaf_spaces_;
 
-  //
-  uint local_size_;
-
-  // Vertex ordering map used for tabulation of vector Lagrange P1
-  uint * vertex_map_;
-
-  //
-  bool distributed_by_entities_;
-
-  // Pretabulated parallel dof map
-  mutable uint * pretabulated_dofmap_;
-  uint pretabulated_dofmap_size_;
-
   // Periodic dofs mapping
   mutable PeriodicDofsMapping * periodic_dofmap_;
 
   // Provide easy access to map for testing
   std::map<uint, uint> map_;
 
-  // Set of shared dofs
-  _set<uint> shared_;
-
-  // Set of ghost dofs
-  _set<uint> ghosts_;
-
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::dofmap_signature(
-    std::string const& fe_signature)
-{
-  return SIGN_PREFIX + fe_signature;
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::finite_element_signature(
-    std::string const& dofmap_signature)
-{
-  std::string s(dofmap_signature);
-  s.erase(0, SIGN_PREFIX.size());
-  return s;
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(std::string const& dofmap_signature,
-                                           Mesh& mesh)
-{
-  std::stringstream ss;
-  ss << dofmap_signature << "+" << mesh.hash();
-  return ss.str();
-}
-
-//-----------------------------------------------------------------------------
-inline std::string const DofMap::make_hash(Mesh& mesh,
-                                           ufc::dofmap const& ufc_dofmap)
-{
-  return make_hash(ufc_dofmap.signature(), mesh);
-}
-
-//-----------------------------------------------------------------------------
 inline char const * DofMap::signature() const
 {
   return ufc_dofmap_->signature();
@@ -486,8 +405,10 @@ inline ufc::dofmap* DofMap::create() const
 //-----------------------------------------------------------------------------
 inline uint DofMap::macro_local_dimension() const
 {
-  return 2*ufc_dofmap_->local_dimension();
+  return 2 * ufc_dofmap_->local_dimension();
 }
+
+//-----------------------------------------------------------------------------
 
 }
 

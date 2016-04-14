@@ -282,7 +282,7 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
     scratch.cell.update(cell);
 
     // Tabulate dofs on cell for the full space dofmap
-    dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell.index());
+    dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell);
 
     // Interpolate function on cell
     //FIXME: DISABLED stupid facet thing, breaks FacetNormal !
@@ -355,7 +355,7 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
         bool interpolated = false;
 
         // Tabulate dofs on cell for the full space dofmap
-        dof_map.tabulate_dofs(cell_dofs, scratch.cell, c->index());
+        dof_map.tabulate_dofs(cell_dofs, scratch.cell, *c);
 
         // Tabulate coordinates of dofs on cell
         scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);
@@ -407,7 +407,7 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
     scratch.cell.update(*cell);
 
     // Tabulate dofs on cell
-    dof_map.tabulate_dofs(cell_dofs, scratch.cell, cell->index());
+    dof_map.tabulate_dofs(cell_dofs, scratch.cell, *cell);
 
     // Tabulate coordinates of dofs on cell
     scratch.dof_map->tabulate_coordinates(scratch.coordinates, scratch.cell);

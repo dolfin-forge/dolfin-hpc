@@ -265,7 +265,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     // Tabulate dofs for each dimension on macro element
     for (uint i = 0; i < ufc_.form.rank(); ++i)
     {
-      dof_map_set[i].tabulate_dofs(u_entry, ufc_.cell, cell.index());
+      dof_map_set[i].tabulate_dofs(u_entry, ufc_.cell, cell);
       u_entry += ufc_.local_dimensions[i];
     }
   }

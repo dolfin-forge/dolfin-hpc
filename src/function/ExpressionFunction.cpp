@@ -7,6 +7,7 @@
 #include <dolfin/function/ExpressionFunction.h>
 
 #include <dolfin/function/Function.h>
+#include <dolfin/fem/UFCCell.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -77,7 +78,7 @@ void ExpressionFunction::interpolate_vertex_values(real* values) const
 }
 
 //-----------------------------------------------------------------------------
-void ExpressionFunction::interpolate(real* coefficients, const ufc::cell& cell,
+void ExpressionFunction::interpolate(real* coefficients, const UFCCell& cell,
                                      const ufc::finite_element& finite_element,
                                      const Cell& dolfin_cell) const
 {

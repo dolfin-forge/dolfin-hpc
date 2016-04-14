@@ -29,6 +29,7 @@ class SubSystem;
 
 class Form : public ufc::form
 {
+
 public:
 
   /// Constructor
@@ -52,14 +53,11 @@ public:
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
 
-  /// Return DofMapSet
-  DofMapSet& dofmaps() const;
-
   /// Return mesh
   Mesh& mesh() const;
 
-  /// Return mesh for i-th function
-  Mesh& mesh(uint i) const;
+  /// Return DofMapSet
+  DofMapSet& dofmaps() const;
 
   //--- UFC INTERFACE ---------------------------------------------------------
   /// Return a string identifying the form
@@ -90,8 +88,7 @@ public:
   ufc::cell_integral* create_cell_integral(uint i) const;
 
   /// Create a new exterior facet integral on sub domain i
-  ufc::exterior_facet_integral*
-  create_exterior_facet_integral(uint i) const;
+  ufc::exterior_facet_integral* create_exterior_facet_integral(uint i) const;
 
   /// Create a new interior facet integral on sub domain i
   ufc::interior_facet_integral* create_interior_facet_integral(uint i) const;
@@ -131,19 +128,6 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-inline Mesh& Form::mesh() const
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-inline Mesh& Form::mesh(uint i) const
-{
-  return dof_map_set_[i].mesh();
-}
-
-//-----------------------------------------------------------------------------
 inline const char* Form::signature() const
 {
   return form().signature();
@@ -211,6 +195,8 @@ Form::create_interior_facet_integral(uint i) const
   return form().create_interior_facet_integral(i);
 }
 
-}
+//-----------------------------------------------------------------------------
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_FORM_H */

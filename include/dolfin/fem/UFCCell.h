@@ -7,14 +7,14 @@
 #ifndef __DOLFIN_UFC_CELL_H
 #define __DOLFIN_UFC_CELL_H
 
-#include <ufc.h>
-
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/main/MPI.h>
+
+#include <ufc.h>
 
 namespace dolfin
 {
@@ -24,13 +24,14 @@ namespace dolfin
 
 class UFCCell : public ufc::cell
 {
+
 public:
 
-  /// Create emtpy UFC cell
+  /// Create empty UFC cell
   UFCCell() :
       ufc::cell(),
       cell(NULL),
-      num_vertices_(0)
+      num_vertices(0)
   {
   }
 
@@ -38,7 +39,7 @@ public:
   UFCCell(Cell& dolfin_cell) :
       ufc::cell(),
       cell(&dolfin_cell),
-      num_vertices_(0)
+      num_vertices(0)
   {
     init(dolfin_cell);
   }
@@ -52,19 +53,19 @@ public:
   //
   Cell const * cell;
 
+  // Number of cell vertices
+  uint num_vertices;
+
   // Initialize UFC cell data
   void init(Cell& cell);
-
-  // Clear UFC cell data
-  void clear();
 
   // Update cell entities to global indices and coordinates
   void update(Cell& cell);
 
 private:
 
-  // Number of cell vertices
-  uint num_vertices_;
+  // Clear UFC cell data
+  void clear();
 
 };
 
@@ -94,7 +95,7 @@ inline void UFCCell::init(Cell& cell)
       error("Unknown cell type.");
       break;
     }
-  num_vertices_ = cell.num_entities(0);
+  num_vertices = cell.num_entities(0);
 
   // Set topological dimension
   topological_dimension = cell.dim();
@@ -136,8 +137,8 @@ inline void UFCCell::init(Cell& cell)
 
   /// Set vertex coordinates
   uint* vertices = cell.entities(0);
-  coordinates = new real*[num_vertices_];
-  for (uint i = 0; i < num_vertices_; ++i)
+  coordinates = new real*[num_vertices];
+  for (uint i = 0; i < num_vertices; ++i)
   {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
   }
@@ -185,7 +186,7 @@ inline void UFCCell::update(Cell& cell)
 
   /// Set vertex coordinates
   uint const * vertices = cell.entities(0);
-  for (uint i = 0; i < num_vertices_; ++i)
+  for (uint i = 0; i < num_vertices; ++i)
   {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);
   }

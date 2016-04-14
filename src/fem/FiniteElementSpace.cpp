@@ -18,7 +18,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Form& form, uint const i) :
-    mesh_(form.mesh(i)),
+    mesh_(form.dofmaps()[i].mesh()),
     cell_(mesh_, 0),
     finite_element_(mesh_.type(), form, i),
     dof_map_(DofMap::acquire(mesh_, form, i)),

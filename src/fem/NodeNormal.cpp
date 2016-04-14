@@ -263,7 +263,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
     // Set valid dofs within the current facet
     std::set<uint> ghost_nodes;
-    dofmapN.tabulate_dofs(scratchN.dofs, scratchN.cell, cell.index());
+    dofmapN.tabulate_dofs(scratchN.dofs, scratchN.cell, cell);
     dofmapN.tabulate_facet_dofs(scratchN.facet_dofs, local_facet);
     for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
     {

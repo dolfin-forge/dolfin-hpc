@@ -191,7 +191,7 @@ public:
   void interpolate_vertex_values(real* values) const;
 
   /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+  void interpolate(real* coefficients, const UFCCell& ufc_cell,
                    const ufc::finite_element& finite_element,
                    const Cell& cell) const;
 
@@ -207,7 +207,7 @@ public:
   //---------------------------------------------------------------------------
 
   /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const ufc::cell& ufc_cell,
+  void interpolate(real* coefficients, const UFCCell& ufc_cell,
                    const ufc::finite_element& finite_element, const Cell& cell,
                    int facet) const;
 
@@ -334,7 +334,7 @@ inline void Function::interpolate_vertex_values(real* values) const
   f_->interpolate_vertex_values(values);
 }
 //-----------------------------------------------------------------------------
-inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
+inline void Function::interpolate(real* coefficients, const UFCCell& ufc_cell,
                                   const ufc::finite_element& finite_element,
                                   const Cell& cell) const
 {
@@ -348,7 +348,7 @@ inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
   cell_ = NULL;
 }
 //-----------------------------------------------------------------------------
-inline void Function::interpolate(real* coefficients, const ufc::cell& ufc_cell,
+inline void Function::interpolate(real* coefficients, const UFCCell& ufc_cell,
                                   const ufc::finite_element& finite_element,
                                   const Cell& cell, int facet) const
 {

@@ -10,7 +10,7 @@
 #ifndef __DOLFIN_CONSTANT_FUNCTION_H
 #define __DOLFIN_CONSTANT_FUNCTION_H
 
-#include "GenericFunction.h"
+#include <dolfin/function/GenericFunction.h>
 
 namespace dolfin
 {
@@ -56,7 +56,7 @@ namespace dolfin
 
     /// Interpolate function to finite element space on cell
     void interpolate(real* coefficients,
-                     const ufc::cell& cell,
+                     const UFCCell& cell,
                      const ufc::finite_element& finite_element,
                      const Cell& dolfin_cell) const;
 

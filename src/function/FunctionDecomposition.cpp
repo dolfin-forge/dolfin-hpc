@@ -14,6 +14,7 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/MeshFunction.h>
 
 namespace dolfin
 {
@@ -162,12 +163,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   }
 
   // Cleanup
-  while (!spaces.empty())
-  {
-    delete spaces.back();
-    spaces.pop_back();
-  }
-  spaces.clear();
+  spaces.free();
 
   return Si;
 }

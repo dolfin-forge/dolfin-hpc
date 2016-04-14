@@ -37,6 +37,12 @@ void Form::update_dofmaps() const
 }
 
 //-----------------------------------------------------------------------------
+Mesh& Form::mesh() const
+{
+  return mesh_;
+}
+
+//-----------------------------------------------------------------------------
 DofMapSet& Form::dofmaps() const
 {
   this->update_dofmaps();

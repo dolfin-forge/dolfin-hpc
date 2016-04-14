@@ -327,8 +327,7 @@ OutflowFacet::OutflowFacet(Mesh& mesh, Form& form) :
     error("Invalid form: Must have exactly 1 exterior facet integral");
   }
 
-  form.update_dofmaps();
-  ufc = new UFC(form, mesh, form.dofmaps());
+  ufc = new UFC(form);
 }
 //-----------------------------------------------------------------------------
 OutflowFacet::~OutflowFacet()

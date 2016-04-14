@@ -10,7 +10,6 @@
 #include <ufc.h>
 
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -20,106 +19,44 @@ namespace dolfin
 
 class UFCMesh : public ufc::mesh
 {
-public:
 
-  /// Create emtpy UFC mesh
-  UFCMesh() :
-      ufc::mesh(),
-      mesh(NULL)
-  {
-  }
+public:
 
   /// Create UFC mesh from DOLFIN mesh
   UFCMesh(Mesh& dolfin_mesh) :
       ufc::mesh(),
       mesh(&dolfin_mesh)
   {
-    init(dolfin_mesh);
+    update();
   }
 
   /// Destructor
   ~UFCMesh()
   {
-    clear();
+    delete[] num_entities;
+    num_entities = NULL;
   }
 
-  Mesh const * mesh;
+  ///
+  Mesh const * const mesh;
 
-  /// Initialize UFC mesh data
-  void init(Mesh const& mesh);
-
-  /// Display info
-  void disp() const;
-
-private:
-
-  // Clear UFC cell data
-  void clear();
+  ///
+  void update()
+  {
+    topological_dimension = mesh->topology().dim();
+    geometric_dimension = mesh->geometry().dim();
+    num_entities = new uint[topological_dimension + 1];
+    for (uint d = 0; d <= topological_dimension; ++d)
+    {
+      if (mesh->topology().entities_exist(d))
+      {
+        num_entities[d] = mesh->topology().global_size(d);
+      }
+    }
+  }
 
 };
 
-//--- INLINES -----------------------------------------------------------------
+} /* namespace dolfin */
 
-//-----------------------------------------------------------------------------
-inline void UFCMesh::init(Mesh const& mesh)
-{
-  clear();
-
-  // Update pointer to current mesh
-  this->mesh = &mesh;
-
-  // Set topological dimension
-  uint const tdim = mesh.topology().dim();
-  topological_dimension = tdim;
-
-  // Set geometric dimension
-  geometric_dimension = mesh.geometry().dim();
-
-  // Set number of entities for each topological dimension
-  num_entities = new uint[tdim + 1];
-  for(uint d = 0; d < tdim + 1; ++d)
-  {
-    num_entities[d] = mesh.topology().global_size(d);
-  }
-}
-
-//-----------------------------------------------------------------------------
-inline void UFCMesh::clear()
-{
-  mesh = NULL;
-  topological_dimension = 0;
-  geometric_dimension = 0;
-  delete[] num_entities;
-  num_entities = NULL;
-}
-
-//-----------------------------------------------------------------------------
-inline void UFCMesh::disp() const
-{
-  cout << "UFCMesh" << endl;
-  cout << "-------" << endl;
-
-  // Begin indentation
-  begin("");
-
-  // Display UFC dofmap information
-  cout << "ufc::mesh info" << endl;
-  cout << "--------------" << endl;
-  begin("");
-  cout << "Topological dimension : " << topological_dimension << endl;
-  cout << "Geometric dimension   : " << geometric_dimension << endl;
-  for (uint d = 0; d <= topological_dimension; ++d)
-  {
-    cout << "Number of entities of dim(" << d << ") : " << num_entities[d]
-         << endl;
-  }
-  cout << endl;
-  end();
-
-  // End indentation
-  end();
-}
-
-}
-
-#endif
+#endif /* __DOLFIN_UFC_MESH_H */

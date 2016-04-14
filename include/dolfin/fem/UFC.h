@@ -7,8 +7,9 @@
 #ifndef __DOLFIN_UFC_DATA_H
 #define __DOLFIN_UFC_DATA_H
 
-#include "UFCMesh.h"
-#include "UFCCell.h"
+#include <dolfin/common/types.h>
+#include <dolfin/fem/UFCCell.h>
+#include <dolfin/fem/UFCMesh.h>
 
 #include <ufc.h>
 
@@ -29,13 +30,11 @@ class MeshDistributedData;
 
 class UFC
 {
+
 public:
 
   /// Constructor
   UFC(Form const& form);
-
-  /// Constructor
-  UFC(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set);
 
   /// Destructor
   ~UFC();
@@ -108,6 +107,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_UFC_DATA_H */

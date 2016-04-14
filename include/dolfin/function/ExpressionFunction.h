@@ -43,7 +43,7 @@ namespace dolfin
 
     /// Interpolate function to finite element space on cell
     void interpolate(real coefficients[],
-                     const ufc::cell& cell,
+                     const UFCCell& cell,
                      const ufc::finite_element& finite_element,
                      const Cell& dolfin_cell) const;
 

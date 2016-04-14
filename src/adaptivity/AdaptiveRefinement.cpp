@@ -385,7 +385,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
     {
 
       ufccell.update(*c);
-      projected.space().dofmap().tabulate_dofs(local_indices, ufccell, c->index());
+      projected.space().dofmap().tabulate_dofs(local_indices, ufccell, *c);
 
       //FIXME: Only P1 friendly.
       for (VertexIterator v(*c); !v.end(); ++v)

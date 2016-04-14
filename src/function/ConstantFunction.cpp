@@ -7,10 +7,11 @@
 // First added:  2006-02-09
 // Last changed: 2008-07-08
 
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/Cell.h>
 #include <dolfin/function/ConstantFunction.h>
+
+#include <dolfin/log/dolfin_log.h>
+#include <dolfin/fem/UFCCell.h>
+#include <dolfin/mesh/Mesh.h>
 
 #include <cstring>
 
@@ -177,7 +178,7 @@ void ConstantFunction::interpolate_vertex_values(real* v) const
 }
 
 //-----------------------------------------------------------------------------
-void ConstantFunction::interpolate(real* coefficients, const ufc::cell& cell,
+void ConstantFunction::interpolate(real* coefficients, const UFCCell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {

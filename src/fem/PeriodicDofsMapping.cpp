@@ -8,8 +8,10 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/fem/DofMap.h>
+#include <dolfin/fem/UFCCell.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/BoundaryMesh.h>
+#include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
@@ -143,7 +145,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       Cell cell(mesh, facet.entities(tdim)[0]);
       uint facet_posI = cell.index(facet);
       ufc_cell0.update(cell);
-      dofmap.tabulate_dofs(dofsG, ufc_cell0, cell);
+      dofmap.tabulate_dofs(dofsG, ufc_cell0);
       dofmap.tabulate_facet_dofs(facet_dofsG, facet_posI);
       dofmap.tabulate_coordinates(coordinatesG, ufc_cell0);
 
@@ -167,7 +169,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       Cell cell(mesh, facet.entities(tdim)[0]);
       uint facet_posG = cell.index(facet);
       ufc_cell0.update(cell);
-      dofmap.tabulate_dofs(dofsG, ufc_cell0, cell);
+      dofmap.tabulate_dofs(dofsG, ufc_cell0);
       dofmap.tabulate_facet_dofs(facet_dofsG, facet_posG);
       dofmap.tabulate_coordinates(coordinatesG, ufc_cell0);
 
@@ -183,7 +185,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
           {
             Gdofs_map[dofG] = Gcount;
             Gdofs_indices[Gcount] = dofG;
-            std::memcpy(&Gdofs_xcoords[Gcount*gdim], xG, gdim * sizeof(real));
+            std::copy(xG, xG + gdim, &Gdofs_xcoords[Gcount*gdim]);
             ++Gcount;
           }
         }
@@ -206,7 +208,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
       Cell cellH(mesh, facetH.entities(tdim)[0]);
       uint facet_posH = cellH.index(facetH);
       ufc_cell1.update(cellH);
-      dofmap.tabulate_dofs(dofsH, ufc_cell1, cellH);
+      dofmap.tabulate_dofs(dofsH, ufc_cell1);
       dofmap.tabulate_facet_dofs(facet_dofsH, facet_posH);
       dofmap.tabulate_coordinates(coordinatesH, ufc_cell1);
 
@@ -216,7 +218,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
         real const * xH = coordinatesH[facet_dofsH[ii]];
 
         // In case the subdomain is not well implemented
-        std::memcpy(&xG[0], xH, gdim * sizeof(real));
+        std::copy(xH, xH + gdim, &xG[0]);
         // Find if H facet dof has a local corresponding local G dof
         mapped.map(xH, &xG[0]);
         if (mapped.inside(&xG[0], true) && (Hdofs_.count(dofH) == 0)
@@ -242,7 +244,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
               Cell cellG(mesh, facetG.entities(tdim)[0]);
               uint facet_posG = cellG.index(facetG);
               ufc_cell0.update(cellG);
-              dofmap.tabulate_dofs(dofsG, ufc_cell0, cellG);
+              dofmap.tabulate_dofs(dofsG, ufc_cell0);
               dofmap.tabulate_facet_dofs(facet_dofsG, facet_posG);
 
               for (uint jj = 0; jj < num_facet_dofs; ++jj)
@@ -331,7 +333,8 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
           for (uint ii = 0; ii < (uint) u_count; ++ii)
           {
             uint const dofG = u_recvbuff[ii];
-            std::memcpy(&xG[0], &r_recvbuff[ii * gdim], gdim * sizeof(real));
+            std::copy(&r_recvbuff[ii * gdim], &r_recvbuff[ii * gdim] + gdim,
+                      &xG[0]);
 
             Array<uint> matching_facets;
             manifold.intersector().overlap(xG, matching_facets);
@@ -355,7 +358,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
                 Cell cell(mesh, facet.entities(tdim)[0]);
                 uint facet_posH = cell.index(facet);
                 ufc_cell1.update(cell);
-                dofmap.tabulate_dofs(dofsH, ufc_cell1, cell);
+                dofmap.tabulate_dofs(dofsH, ufc_cell1);
                 dofmap.tabulate_facet_dofs(facet_dofsH, facet_posH);
                 dofmap.tabulate_coordinates(coordinatesH, ufc_cell1);
 
@@ -363,7 +366,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
                 {
                   uint dofH = dofsH[facet_dofsH[jj]];
                   real const * xH = coordinatesH[facet_dofsH[jj]];
-                  std::memcpy(&xG[0], xH, gdim * sizeof(real));
+                  std::copy(xH, xH + gdim, &xG[0]);
                   mapped.map(xH, &xG[0]);
                   if (mapped.inside(&xG[0], true)
                       && (matching.count(dofH) == 0))
@@ -483,19 +486,19 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
 
     //
     Gindices_[ii] = Gdofs_indices[ii];
-    std::memcpy(&Gxcoords_[ii * maxgdim], &Gdofs_indices[ii * gdim],
-                gdim * sizeof(real));
+    std::copy(&Gdofs_indices[ii * gdim], &Gdofs_indices[ii * gdim] + gdim,
+              &Gxcoords_[ii * maxgdim]);
     //
     Array<uint> const& Hidx = Hdofs_indices[iG];
     uint const num_Hdofs = Hidx.size();
     Hcount_[ii] = num_Hdofs;
-    std::memcpy(&Hindices_[offset], &Hidx[0], num_Hdofs * sizeof(uint));
+    std::copy(&Hidx[0], &Hidx[0] + num_Hdofs, &Hindices_[offset]);
     Array<real> const& Hxcs = Hdofs_xcoords[iG];
     dolfin_assert(Hxcs.size() == gdim * Hidx.size());
     for (uint jj = 0; jj < num_Hdofs; ++jj)
     {
-      std::memcpy(&Hxcoords_[(offset + jj) * maxgdim], &Hxcs[jj * gdim],
-                  gdim * sizeof(real));
+      std::copy(&Hxcs[jj * gdim], &Hxcs[jj * gdim] + gdim,
+                &Hxcoords_[(offset + jj) * maxgdim]);
     }
 
     //
@@ -589,18 +592,18 @@ void PeriodicDofsMapping::clear()
 {
   max_local_dimension_ = 0;
   Goffsets_.clear();
-  delete Gindices_;
+  delete[] Gindices_;
   Gindices_ = NULL;
-  delete Gxcoords_;
+  delete[] Gxcoords_;
   Gxcoords_ = NULL;
   Hdofs_.clear();
-  delete Hcount_;
+  delete[] Hcount_;
   Hcount_ = NULL;
-  delete Hoffsets_;
+  delete[] Hoffsets_;
   Hoffsets_ = NULL;
-  delete Hindices_;
+  delete[] Hindices_;
   Hindices_ = NULL;
-  delete Hxcoords_;
+  delete[] Hxcoords_;
   Hxcoords_ = NULL;
   Idofs_.clear();
 }

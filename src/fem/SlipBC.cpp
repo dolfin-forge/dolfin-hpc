@@ -133,7 +133,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       scratch.cell.update(*c);
-      fulldofmap.tabulate_dofs(celldofs, scratch.cell, *c);
+      fulldofmap.tabulate_dofs(celldofs, scratch.cell);
       for (uint j = 0; j < fulldofmap.local_dimension(); ++j)
       {
         rows.insert(celldofs[j]);
@@ -270,7 +270,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
 
         // Get the component dofs of U for the given node
         uint voff = 0;
-        Udofmap.tabulate_dofs(fulldofs, scratch.cell, cell);
+        Udofmap.tabulate_dofs(fulldofs, scratch.cell);
         for (uint i = 0; i < scratch.size; ++i, voff += vdim)
         {
           node_Udofs.push_back(fulldofs[scratch.offset + voff + vindex]);
@@ -288,7 +288,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
         {
           // Get the component dofs of N for the given node
           uint voff = 0;
-          Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell, cell);
+          Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell);
           for (uint i = 0; i < scratch.size; ++i, voff += vdim)
           {
             node_Ndofs.push_back(scratch.dofs[voff + vindex]);
@@ -352,10 +352,10 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
       scratch.dof_map->tabulate_facet_dofs(scratch.facet_dofs, local_facet);
 
       // Tabulate full space and nodenormal space if needed
-      Udofmap.tabulate_dofs(fulldofs, scratch.cell, cell);
+      Udofmap.tabulate_dofs(fulldofs, scratch.cell);
       if (!same_space)
       {
-        Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell, cell);
+        Ndofmap.tabulate_dofs(scratch.dofs, scratch.cell);
       }
 
       // Apply slipbc on each non ghosted facet dof node of the subspace

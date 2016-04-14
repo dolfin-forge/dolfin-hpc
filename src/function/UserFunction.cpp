@@ -13,6 +13,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/function/UserFunction.h>
+#include <dolfin/fem/UFCCell.h>
 
 namespace dolfin
 {
@@ -77,7 +78,7 @@ void UserFunction::interpolate_vertex_values(real* values) const
 }
 
 //-----------------------------------------------------------------------------
-void UserFunction::interpolate(real* coefficients, const ufc::cell& cell,
+void UserFunction::interpolate(real* coefficients, const UFCCell& cell,
                                const ufc::finite_element& finite_element,
                                const Cell& dolfin_cell) const
 {

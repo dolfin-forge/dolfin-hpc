@@ -39,7 +39,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(GenericVector& x, Form& form, uint i) :
     GenericFunction(),
-    mesh_(form.mesh(i)),
+    mesh_(form.dofmaps()[i].mesh()),
     discrete_space_(form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -78,7 +78,7 @@ DiscreteFunction::DiscreteFunction(Mesh& mesh, GenericVector& x, Form& form,
 //-----------------------------------------------------------------------------
 DiscreteFunction::DiscreteFunction(Form& form, uint i) :
     GenericFunction(),
-    mesh_(form.mesh(i)),
+    mesh_(form.dofmaps()[i].mesh()),
     discrete_space_(form, i),
     element_(discrete_space_.element()),
     dofmap_(discrete_space_.dofmap()),
@@ -345,7 +345,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
       scratch.cell.update(*cell);
 
       // Tabulate dofs
-      dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
+      dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, *cell);
 
       // Pick values from global vector
       X_->get(scratch.coefficients, scratch.local_dimension, scratch.dofs);
@@ -372,7 +372,7 @@ void DiscreteFunction::interpolate_vertex_values(real* values) const
 }
 
 //-----------------------------------------------------------------------------
-void DiscreteFunction::interpolate(real* coefficients, const ufc::cell& cell,
+void DiscreteFunction::interpolate(real* coefficients, const UFCCell& cell,
                                    const ufc::finite_element& finite_element,
                                    const Cell& dolfin_cell) const
 {
@@ -547,7 +547,7 @@ void DiscreteFunction::InitializeGhosts()
     scratch.cell.update(*cell);
 
     // Tabulate dofs
-    dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, cell->index());
+    dofmap_.tabulate_dofs(scratch.dofs, scratch.cell, *cell);
 
     for (uint j = 0; j < element_.space_dimension(); ++j)
     {
@@ -555,7 +555,7 @@ void DiscreteFunction::InitializeGhosts()
     }
 
   }
-  std::map<uint, uint> map = dofmap_.getMap();
+  std::map<uint, uint> map = dofmap_.get_map();
   dolfin_assert(map.size() == 0);
 
   X_->init_ghosted(indices.size(), indices, map);

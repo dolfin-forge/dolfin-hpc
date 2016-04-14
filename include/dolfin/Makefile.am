@@ -34,6 +34,7 @@ nobase_pkginclude_HEADERS = \
 				fem/DofMap.h\
 				fem/DofMapCache.h\
 				fem/DofMapSet.h\
+				fem/DofNumbering.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\

@@ -8,6 +8,7 @@
 #define __DOLFIN_GENERIC_FUNCTION_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/fem/Coefficient.h>
 
 #include <ufc.h>
@@ -17,6 +18,7 @@ namespace dolfin
 
 class Mesh;
 class Cell;
+class UFCCell;
 
 /// This class serves as a base class/interface for implementations
 /// of specific function representations.
@@ -56,12 +58,12 @@ public:
   virtual void interpolate_vertex_values(real* values) const = 0;
 
   /// Interpolate function to finite element space on cell
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
+  virtual void interpolate(real* coefficients, const UFCCell& cell,
                            const ufc::finite_element& finite_element,
                            const Cell& dolfin_cell) const = 0;
 
   /// Interpolate function to finite element space on facet
-  virtual void interpolate(real* coefficients, const ufc::cell& cell,
+  virtual void interpolate(real* coefficients, const UFCCell& cell,
                            const ufc::finite_element& finite_element,
                            const Cell& dolfin_cell, uint facet) const
   {

@@ -30,6 +30,7 @@ class GenericVector;
 class SubDomain;
 class Mesh;
 class BilinearForm;
+template<class T> class MeshFunction;
 
 /// Common base class for boundary conditions
 
@@ -119,10 +120,10 @@ private:
   uint const sub_domain_index_;
 
   // Is the subdomain geometrical
-  bool const has_geometrical_sub_domain_;
+  bool const has_geometric_sub_domain_;
 
   // Sub domain
-  SubDomain const * geometrical_sub_domain_;
+  SubDomain const * geometric_sub_domain_;
 
   // Sub domain markers
   MeshFunction<uint> * sub_domain_markers_;
@@ -135,52 +136,6 @@ private:
 
 };
 
-//--- INLINE ------------------------------------------------------------------
+} /* namespace dolfin */
 
-inline std::string const& BoundaryCondition::type() const
-{
-  return type_;
-}
-
-//-----------------------------------------------------------------------------
-inline Mesh& BoundaryCondition::mesh() const
-{
-  return mesh_;
-}
-
-//-----------------------------------------------------------------------------
-inline bool BoundaryCondition::has_geometrical_sub_domain() const
-{
-  return has_geometrical_sub_domain_;
-}
-
-//-----------------------------------------------------------------------------
-inline SubDomain const& BoundaryCondition::sub_domain() const
-{
-  return *geometrical_sub_domain_;
-}
-
-//-----------------------------------------------------------------------------
-inline uint const& BoundaryCondition::sub_domain_index() const
-{
-  return sub_domain_index_;
-}
-
-//-----------------------------------------------------------------------------
-inline MeshFunction<uint> const& BoundaryCondition::sub_domain_markers() const
-{
-  dolfin_assert(sub_domain_markers_);
-  return *sub_domain_markers_;
-}
-
-//-----------------------------------------------------------------------------
-inline SubSystem const& BoundaryCondition::sub_system() const
-{
-  return sub_system_;
-}
-
-//-----------------------------------------------------------------------------
-
-}
-
-#endif
+#endif /* __DOLFIN_BOUNDARY_CONDITION_H */

@@ -7,13 +7,15 @@
 // First added:  2008-06-18
 // Last changed: 2013-09-13
 
+#include <dolfin/fem/BoundaryCondition.h>
+
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/fem/BoundaryCondition.h>
 
 namespace dolfin
 {
@@ -25,8 +27,8 @@ BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
     type_(type),
     mesh_(mesh),
     sub_domain_index_(0),
-    has_geometrical_sub_domain_(true),
-    geometrical_sub_domain_(&sub_domain),
+    has_geometric_sub_domain_(true),
+    geometric_sub_domain_(&sub_domain),
     sub_domain_markers_(NULL),
     local_sub_domain_markers_(true),
     sub_system_()
@@ -41,8 +43,8 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
     type_(type),
     mesh_(sub_domains.mesh()),
     sub_domain_index_(sub_domain),
-    has_geometrical_sub_domain_(false),
-    geometrical_sub_domain_(NULL),
+    has_geometric_sub_domain_(false),
+    geometric_sub_domain_(NULL),
     sub_domain_markers_(&sub_domains),
     local_sub_domain_markers_(false),
     sub_system_()
@@ -57,8 +59,8 @@ BoundaryCondition::BoundaryCondition(std::string const& type, Mesh& mesh,
     type_(type),
     mesh_(mesh),
     sub_domain_index_(0),
-    has_geometrical_sub_domain_(true),
-    geometrical_sub_domain_(&sub_domain),
+    has_geometric_sub_domain_(true),
+    geometric_sub_domain_(&sub_domain),
     sub_domain_markers_(NULL),
     local_sub_domain_markers_(true),
     sub_system_(sub_system)
@@ -74,8 +76,8 @@ BoundaryCondition::BoundaryCondition(std::string const& type,
     type_(type),
     mesh_(sub_domains.mesh()),
     sub_domain_index_(sub_domain),
-    has_geometrical_sub_domain_(false),
-    geometrical_sub_domain_(NULL),
+    has_geometric_sub_domain_(false),
+    geometric_sub_domain_(NULL),
     sub_domain_markers_(&sub_domains),
     local_sub_domain_markers_(false),
     sub_system_(sub_system)
@@ -103,7 +105,7 @@ void BoundaryCondition::init_markers(uint const entity_dim)
   (*sub_domain_markers_) = 1;
 
   // Mark the sub domain as sub domain 0
-  geometrical_sub_domain_->mark(*sub_domain_markers_, 0);
+  geometric_sub_domain_->mark(*sub_domain_markers_, 0);
 }
 //-----------------------------------------------------------------------------
 void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
@@ -128,4 +130,49 @@ void BoundaryCondition::apply(GenericMatrix& A, GenericVector& b,
   this->sub_system_ = defined;
 }
 //-----------------------------------------------------------------------------
+std::string const& BoundaryCondition::type() const
+{
+  return type_;
 }
+//-----------------------------------------------------------------------------
+Mesh& BoundaryCondition::mesh() const
+{
+  return mesh_;
+}
+//-----------------------------------------------------------------------------
+bool BoundaryCondition::has_geometrical_sub_domain() const
+{
+  return has_geometric_sub_domain_;
+}
+//-----------------------------------------------------------------------------
+SubDomain const& BoundaryCondition::sub_domain() const
+{
+  if (geometric_sub_domain_)
+  {
+    error("BoundaryCondition : no geometric subdomain defined");
+  }
+  return *geometric_sub_domain_;
+}
+
+//-----------------------------------------------------------------------------
+uint const& BoundaryCondition::sub_domain_index() const
+{
+  return sub_domain_index_;
+}
+//-----------------------------------------------------------------------------
+MeshFunction<uint> const& BoundaryCondition::sub_domain_markers() const
+{
+  if (sub_domain_markers_)
+  {
+    error("BoundaryCondition : no subdomain marker defined");
+  }
+  return *sub_domain_markers_;
+}
+//-----------------------------------------------------------------------------
+SubSystem const& BoundaryCondition::sub_system() const
+{
+  return sub_system_;
+}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

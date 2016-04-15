@@ -14,12 +14,10 @@
 #ifndef __DOLFIN_BOUNDARY_CONDITION_H
 #define __DOLFIN_BOUNDARY_CONDITION_H
 
-#include "UFCMesh.h"
-#include "DofMap.h"
+#include <dolfin/mesh/MeshDependent.h>
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/SubSystem.h>
-#include <dolfin/mesh/MeshDependent.h>
 
 #include <ufc.h>
 
@@ -139,7 +137,6 @@ private:
 
 //--- INLINE ------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline std::string const& BoundaryCondition::type() const
 {
   return type_;
@@ -181,6 +178,8 @@ inline SubSystem const& BoundaryCondition::sub_system() const
 {
   return sub_system_;
 }
+
+//-----------------------------------------------------------------------------
 
 }
 

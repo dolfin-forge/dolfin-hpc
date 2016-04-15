@@ -12,19 +12,20 @@
 
 #include <ufc.h>
 
-#include <dolfin/common/Array.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {
 
-class DofMapSet;
-class GenericTensor;
 class Coefficient;
+class DofMapSet;
 class Form;
+class GenericTensor;
 class Mesh;
 class SubDomain;
 class UFC;
+template<class T> class Array;
+template<class T> class MeshFunction;
 
 /**
  *  @class Assembler
@@ -65,9 +66,9 @@ private:
   /// end up calling this function.
   ///
   /// The MeshFunction arguments can be used to specify assembly over subdomains
-  /// of the mesh cells, exterior facets and interior facets. Either a null pointer
-  /// or an empty MeshFunction may be used to specify that the tensor should be
-  /// assembled over the entire set of cells or facets.
+  /// of the mesh cells, exterior facets and interior facets.
+  /// Either a null pointer or an empty MeshFunction may be used to specify that
+  /// the tensor should be assembled over the entire set of cells or facets.
   void assemble(GenericTensor& A, const Form& form,
                 Array<Coefficient*> const& coefficients,
                 DofMapSet const& dofmaps,

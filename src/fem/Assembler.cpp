@@ -126,7 +126,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
   }
 
   // Create data structure for local assembly data
-  UFC ufc(form, form.mesh(), dofmaps);
+  UFC ufc(form);
 
   // Initialize global tensor
 #pragma omp master
@@ -210,7 +210,7 @@ void Assembler::assembleCells(GenericTensor& A,
     // Tabulate dofs for each dimension
     for (uint d = 0; d < form_rank; ++d)
     {
-      dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell, cell);
+      dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell);
     }
 
     // Tabulate cell tensor
@@ -285,7 +285,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     // Tabulate dofs for each dimension
     for (uint d = 0; d < form_rank; ++d)
     {
-      dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell, cell);
+      dofmaps[d].tabulate_dofs(ufc.dofs[d], ufc.cell);
     }
 
     // Tabulate exterior facet tensor
@@ -362,9 +362,9 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       // Tabulate dofs for each dimension on cell1
       for (uint d = 0; d < form_rank; ++d)
       {
-        dofmaps[d].tabulate_dofs(ufc.macro_dofs[d], ufc.cell0, cell0);
+        dofmaps[d].tabulate_dofs(ufc.macro_dofs[d], ufc.cell0);
         uint const offset = ufc.local_dimensions[d];
-        dofmaps[d].tabulate_dofs(ufc.macro_dofs[d] + offset, ufc.cell1, cell1);
+        dofmaps[d].tabulate_dofs(ufc.macro_dofs[d] + offset, ufc.cell1);
       }
 
       integral->tabulate_tensor(ufc.macro_A, ufc.macro_w, ufc.cell0, ufc.cell1,
@@ -373,6 +373,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       // Add entries to global tensor
       A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
     }
+    // Interprocess facet
     else if (facet.is_shared())
     {
       // Contributions from cell0 are restored from the halo data while

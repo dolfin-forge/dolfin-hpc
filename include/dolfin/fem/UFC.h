@@ -84,6 +84,9 @@ public:
   // Array of local dimensions of macro element for primary arguments
   uint* macro_local_dimensions;
 
+  // Array of local dofmap sizes
+  uint* local_sizes;
+
   // Array of global dimensions for primary arguments
   uint* global_dimensions;
 

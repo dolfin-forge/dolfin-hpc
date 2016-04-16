@@ -95,6 +95,13 @@ void UFC::init(ufc::form const& form, Mesh& mesh, DofMapSet const& dof_map_set)
   for (uint i = 0; i < form.rank(); i++)
     macro_local_dimensions[i] = 2*dof_map_set[i].local_dimension();
 
+  // Initialize local sizes
+  local_sizes = new uint[form.rank()];
+  for (uint i = 0; i < form.rank(); ++i)
+  {
+    local_sizes[i] = dofmaps[i].local_size();
+  }
+
   // Initialize global dimensions
   global_dimensions = new uint[form.rank()];
   for (uint i = 0; i < form.rank(); i++)
@@ -174,6 +181,9 @@ UFC::~UFC()
 
   // Delete local dimensions
   delete [] local_dimensions;
+
+  // Delete local sizes
+  delete[] local_sizes;
 
   // Delete global dimensions
   delete [] global_dimensions;

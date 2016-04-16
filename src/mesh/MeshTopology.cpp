@@ -230,14 +230,19 @@ void MeshTopology::finalize()
   {
     error("MeshTopology : cell -> vertices connectivity does not exist");
   }
-  for (uint d = 0; d <= dim_; ++d)
+
+  // Reorder cell according to UFC convention
+  reorder();
+
+  // Finalize distributed data
+  if (distdata_ != NULL)
   {
-    if(this->entities_exist(d))
+    for (uint d = 0; d <= dim_; ++d)
     {
-      if(distdata_ != NULL)
+      if (this->entities_exist(d))
       {
         DistributedData& ddata = this->distdata()[d];
-        if(!ddata.is_finalized())
+        if (!ddata.is_finalized())
         {
           ddata.finalize();
         }
@@ -351,6 +356,11 @@ MeshDistributedData const& MeshTopology::distdata() const
 uint MeshTopology::global_size(uint dim) const
 {
   return (distdata_ ? (*distdata_)[dim].global_size() : this->size(dim));
+}
+//-----------------------------------------------------------------------------
+uint MeshTopology::offset(uint dim) const
+{
+  return (distdata_ ? (*distdata_)[dim].offset() : 0);
 }
 //-----------------------------------------------------------------------------
 uint MeshTopology::num_owned(uint dim) const

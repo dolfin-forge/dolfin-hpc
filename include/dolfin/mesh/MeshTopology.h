@@ -128,6 +128,9 @@ public:
   /// Return number of entities in the global topology for given dimension
   uint global_size(uint dim) const;
 
+  /// Return offset of global indices on current rank
+  uint offset(uint dim) const;
+
   /// Return number of given entities
   uint num_owned(uint dim) const;
 

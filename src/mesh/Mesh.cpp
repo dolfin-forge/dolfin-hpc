@@ -80,6 +80,8 @@ Mesh::Mesh(std::string const& filename) :
     MeshFunction<uint> partitions;
     partition(partitions);
     distribute(partitions);
+    //FIXME: following the legacy behaviour entities are always renumbered
+    topology().renumber();
   }
 }
 //-----------------------------------------------------------------------------

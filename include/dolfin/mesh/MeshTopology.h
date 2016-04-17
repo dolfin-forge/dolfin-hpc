@@ -184,8 +184,13 @@ private:
   /// Compute connectivity for given pair of topological dimensions
   void compute_connectivity(uint d0, uint d1) const;
 
+public:
+
   /// Force renumbering of mesh topology entities
+  ///FIXME: public for the moment but this just legacy of bad design
   void renumber() const;
+
+private:
 
   /// Force reordering of mesh topology connectivities
   void reorder() const;

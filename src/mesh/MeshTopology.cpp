@@ -231,7 +231,7 @@ void MeshTopology::finalize()
     error("MeshTopology : cell -> vertices connectivity does not exist");
   }
 
-  // Reorder cell according to UFC convention
+  // Reorder cells according to UFC convention
   reorder();
 
   // Finalize distributed data

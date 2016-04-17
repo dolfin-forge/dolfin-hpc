@@ -26,6 +26,7 @@ class UFC;
 
 class SparsityPatternBuilder
 {
+
 public:
 
   /// Build sparsity pattern
@@ -34,6 +35,6 @@ public:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_SPARSITY_PATTERN_BUILDER_H */

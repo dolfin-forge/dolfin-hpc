@@ -2,15 +2,13 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Anders Logg, 2007-2008.
-// Modified by Aurélien Larcher, 2015.
+// Modified by Aurélien Larcher, 2015-2016.
 //
-// First added:  2007-03-13
-// Last changed: 2008-05-15
 
 #ifndef __DOLFIN_SPARSITY_PATTERN_H
 #define __DOLFIN_SPARSITY_PATTERN_H
 
-#include "GenericSparsityPattern.h"
+#include <dolfin/la/GenericSparsityPattern.h>
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
@@ -32,43 +30,30 @@ public:
   /// Create empty sparsity pattern
   SparsityPattern();
 
-  /// Create sparsity pattern for tensor of given dimensions
-  SparsityPattern(uint rank, uint const * dims, bool distributed);
+  /// Create sparsity pattern for given global dimensions and local ranges.
+  /// If range is a NULL pointer the pattern is assumed to be serial.
+  SparsityPattern(uint rank, uint const * dim, uint const * range = NULL);
 
   /// Destructor
   ~SparsityPattern();
 
   //--- INTERFACE -------------------------------------------------------------
 
-  /// Initialise sparsity pattern for a matrix with total number of rows and
-  /// columns and set if it is distributed
-  void init(uint rank, uint const * dims, bool distributed);
-
-  /// Initialise sparsity pattern for a matrix with total number of rows and
-  /// columns
-  void init(uint rank, uint const * dims);
-
-  /// Initialise sparsity pattern for a parallel matrix with total number of
-  /// rows and columns
-  void pinit(uint rank, uint const * dims);
-
-  /// Insert non-zero entries
-  void insert(uint const * num_rows, uint const * const * rows);
-
-  /// Insert non-zero entry for parallel matrices
-  void pinsert(uint const * num_rows, uint const * const * rows);
-
-  /// Return local size
-  uint size(uint n) const;
-
-  /// Finalize sparsity pattern (needed by most parallel la backends)
-  void apply();
-
-  /// Return underlying sparsity pattern after apply has been called
-  Array< _set<int> > const& pattern() const;
+  /// Initialize with given tensor rank, global dimensions and local ranges.
+  /// If range is a NULL pointer the pattern is assumed to be serial
+  void init(uint rank, uint const * dim, uint const * range = NULL);
 
   /// Clear
   void clear();
+
+  /// Insert non-zero entries
+  void insert(uint const * num, uint const * const * idx);
+
+  /// Return local size for given dimension
+  uint size(uint i) const;
+
+  /// Finalize sparsity pattern (needed by most parallel la backends)
+  void apply();
 
   /// Is blocked
   bool is_blocked() const;
@@ -76,16 +61,13 @@ public:
   /// Is distributed
   bool is_distributed() const;
 
-  /// Initialize process range
- void initRange(uint num_local);
-
-  /// Return array with number of non-zeroes per row
+  /// Return array with number of non-zeroes per local row
   void numNonZeroPerRow(uint nzrow[]) const;
 
-  /// Return array with number of non-zeroes per row diagonal and offdiagonal
-  /// for process_number
-  void numNonZeroPerRow(uint process_number, uint d_nzrow[],
-                        uint o_nzrow[]) const;
+  /// Return array with number of non-zeroes per row for the given process rank
+  /// and split between entries in the diagonal and off-diagonal portion of the
+  /// matrix
+  void numNonZeroPerRow(uint p_rank, uint d_nzrow[], uint o_nzrow[]) const;
 
   /// Return total number of non-zeroes
   uint numNonZero() const;
@@ -95,72 +77,55 @@ public:
 
   //---------------------------------------------------------------------------
 
-  /// Return array with row range for process_number
-  void processRange(uint process_number, uint local_range[]);
+  /// Return array with row range for process rank
+  void get_range(uint p_rank, uint range[]);
 
-  /// Return number of local rows for process_number
-  uint numLocalRows(uint process_number) const;
+  /// Return number of local rows for process rank
+  uint range_size(uint p_rank) const;
 
   ///
   void set_blocked();
 
 private:
 
-  /// Sparsity pattern represented as an vector of sets. Each set corresponds
-  /// to a row, and the set contains the column positions of nonzero entries
-  /// When run in parallel this vector contains diagonal non-zeroes
-#if __SUNPRO_CC
-  std::map<uint,  std::set<int> > sparsity_pattern;
-#else
-  std::map<uint const,  std::set<int> > sparsity_pattern;
-#endif
+  /// Tensor rank
+  uint rank_;
 
-  /// Sparsity pattern for off diagonal represented as vector of sets. Each
-  /// set corresponds to a row, and the set contains the column positions of nonzero entries
-#if __SUNPRO_CC
-  std::map<uint,  std::set<int> > o_sparsity_pattern;
-#else
-  std::map<uint const,  std::set<int> > o_sparsity_pattern;
-#endif
+  /// Dimensions
+  uint * dim_;
 
-  // Dimensions
-  uint dim[2];
+  /// Range -array of size + 1 where size is numProcesses + 1:
+  ///    range[rank], range[rank+1] is the range for processor
+  uint ** range_;
 
-  //range -array of size + 1 where size is numProcesses + 1.
-  //range[rank], range[rank+1] is the range for processor
-  uint * range;
+  /// Direct access to local range
+  uint ** local_range_;
 
-  std::vector<int> off_processor;
-
+  /// Flags
   bool initialized_;
   bool finalized_;
   bool blocked_;
   bool distributed_;
 
-  // Dummy return value
-  Array< _set<int> > pattern_;
+  /// Sparsity pattern represented as an array of sets.
+  /// Each set corresponds to a row in the local range and contains the column
+  /// positions of nonzero entries.
+
+  /// Diagonal portion: submatrix such that row and column
+  /// indices are in-range
+  std::set<uint> * d_entries_;
+  uint d_count_;
+
+  /// Off-diagonal portion: entries such that only column indices are off-range
+  std::set<uint> * o_entries_;
+  uint o_count_;
+
+  /// Additionally provide data structure to store remote entries i,e such that
+  /// row indices are not in-range
+  std::map<uint, std::set<uint> > r_entries_;
+
 };
 
-//--- INLINES -----------------------------------------------------------------
+} /* namespace dolfin */
 
-inline void SparsityPattern::set_blocked()
-{
-  blocked_ = true;
-}
-
-//-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_blocked() const
-{
-  return blocked_;
-}
-
-//-----------------------------------------------------------------------------
-inline bool SparsityPattern::is_distributed() const
-{
-  return distributed_;
-}
-
-//-----------------------------------------------------------------------------
-
-}
-#endif
+#endif /* __DOLFIN_SPARSITY_PATTERN_H */

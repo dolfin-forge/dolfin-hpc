@@ -134,7 +134,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
     initGlobalTensor(A, dofmaps, ufc, reset_tensor);
 
 
-    // Update all ghost points
+    // Update all ghost degrees of freedom
     for (uint i = 0; i < coefficients.size(); ++i)
     {
       coefficients[i]->sync();
@@ -440,10 +440,10 @@ void Assembler::initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
   }
   else
   {
-    if((A.rank() > 0 && A.size(0) != ufc.global_dimensions[0])
-        || (A.rank() > 1 && A.size(1) != ufc.global_dimensions[1]))
+    if((A.rank() > 0 && A.size(0) != ufc.global_dimensions[0]) ||
+       (A.rank() > 1 && A.size(1) != ufc.global_dimensions[1]))
     {
-      error("Dimensions of linear system do not match discrete spaces.");
+      error("Assembler : dimensions of linear system do not match spaces.");
     }
     A.zero();
   }

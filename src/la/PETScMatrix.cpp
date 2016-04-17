@@ -261,7 +261,7 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     is_distributed = true;
     uint p = dolfin::MPI::processNumber();
     const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
-    uint local_size = spattern.numLocalRows(p);
+    uint local_size = spattern.range_size(p);
     uint* d_nzrow = new uint[local_size];
     uint* o_nzrow = new uint[local_size];
     spattern.numNonZeroPerRow(p, d_nzrow, o_nzrow);

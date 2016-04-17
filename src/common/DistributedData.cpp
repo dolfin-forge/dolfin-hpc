@@ -439,6 +439,13 @@ bool DistributedData::in_range(uint global_index) const
   return (offset_ <= global_index && global_index < offset_+ range_size_);
 }
 //-----------------------------------------------------------------------------
+bool DistributedData::off_range(uint global_index) const
+{
+  dolfin_assert(global_size_ > 0);
+  dolfin_assert(offset_+ range_size_ <= global_size_);
+  return (global_index < offset_ || offset_+ range_size_ <= global_index);
+}
+//-----------------------------------------------------------------------------
 uint DistributedData::local_size() const
 {
   // If local size is not known, return current size, otherwise return

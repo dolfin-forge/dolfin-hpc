@@ -81,6 +81,9 @@ public:
   /// Return if the global index is in the process range
   bool in_range(uint global_index) const;
 
+  /// Return if the global index is off the process range
+  bool off_range(uint global_index) const;
+
   /// Return the local data size
   uint local_size() const;
 

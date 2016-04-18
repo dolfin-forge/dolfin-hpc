@@ -62,6 +62,33 @@ public:
   // Update cell entities to global indices and coordinates
   void update(Cell& cell);
 
+  ///
+  static ufc::shape shape(CellType::Type type)
+  {
+    switch (type)
+      {
+      case CellType::interval:
+        return ufc::interval;
+        break;
+      case CellType::triangle:
+        return ufc::triangle;
+        break;
+      case CellType::tetrahedron:
+        return ufc::tetrahedron;
+        break;
+      case CellType::quadrilateral:
+        return ufc::quadrilateral;
+        break;
+      case CellType::hexahedron:
+        return ufc::hexahedron;
+        break;
+      default:
+        error("UFCCell : unknown cell type.");
+        break;
+      }
+    return ufc::interval;
+  }
+
 private:
 
   // Clear UFC cell data
@@ -80,21 +107,9 @@ inline void UFCCell::init(Cell& cell)
   this->cell = &cell;
 
   // Set cell shape
-  switch (cell.type())
-    {
-    case CellType::interval:
-      cell_shape = ufc::interval;
-      break;
-    case CellType::triangle:
-      cell_shape = ufc::triangle;
-      break;
-    case CellType::tetrahedron:
-      cell_shape = ufc::tetrahedron;
-      break;
-    default:
-      error("Unknown cell type.");
-      break;
-    }
+  cell_shape = shape(cell.type());
+
+  //
   num_vertices = cell.num_entities(0);
 
   // Set topological dimension
@@ -171,18 +186,14 @@ inline void UFCCell::update(Cell& cell)
   // Update dolfin cell pointer
   this->cell = &cell;
 
-  // Cell index (short-cut for entity_indices[topological_dimension][0])
-  index = cell.global_index();
-
 #if ENABLE_P1_OPTIMIZATIONS
   cell.global_entities(0, entity_indices[0]);
 #else
-  for (uint d = 0; d < topological_dimension; ++d)
-  {
-    cell.global_entities(d, entity_indices[d]);
-  }
+  cell.global_entities(entity_indices);
 #endif
-  entity_indices[topological_dimension][0] = index;
+
+  // Cell index (short-cut for entity_indices[topological_dimension][0])
+  index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
   uint const * vertices = cell.entities(0);

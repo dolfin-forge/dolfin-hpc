@@ -16,6 +16,7 @@ MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
     mesh_(mesh),
     tdim_(dim),
     gdim_(mesh.geometry().dim()),
+    distdata_(mesh.is_distributed() ? &mesh.distdata() : NULL),
     index_(index)
 {
 }
@@ -80,20 +81,38 @@ uint MeshEntity::global_index() const
 void MeshEntity::global_entities(uint dim, uint * indices) const
 {
   // Get list of entities for given topological dimension
-  MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
-  dolfin_assert(mc.size() > 0);
-  uint const * entities = mc(index_);
-  uint const num_entities = mc.size(index_);
-  if (mesh_.topology().is_distributed())
+  if (distdata_ != NULL)
   {
-    for (uint i = 0; i < num_entities; ++i)
-    {
-      indices[i] = mesh_.distdata()[dim].get_global(entities[i]);
-    }
+    MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
+    (*distdata_)[dim].get_global(mc.size(index_), mc(index_), indices);
   }
   else
   {
-    std::memcpy(indices, entities, num_entities*sizeof(uint));
+    MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
+    std::copy(mc(index_), mc(index_) + mc.size(index_), indices);
+  }
+}
+//-----------------------------------------------------------------------------
+void MeshEntity::global_entities(uint ** indices) const
+{
+  // Get list of entities for given topological dimension
+  if (distdata_ != NULL)
+  {
+    for (uint d = 0; d < tdim_; ++d)
+    {
+      MeshConnectivity const& mc = mesh_.topology()(tdim_, d);
+      (*distdata_)[d].get_global(mc.size(index_), mc(index_), indices[d]);
+    }
+    indices[tdim_][0] = (*distdata_)[tdim_].get_global(index_);
+  }
+  else
+  {
+    for (uint d = 0; d < tdim_; ++d)
+    {
+      MeshConnectivity const& mc = mesh_.topology()(tdim_, d);
+      std::copy(mc(index_), mc(index_) + mc.size(index_), indices[d]);
+    }
+    indices[tdim_][0] = index_;
   }
 }
 //-----------------------------------------------------------------------------
@@ -119,11 +138,11 @@ uint MeshEntity::owner() const
 //-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
 {
-  if(mesh_.is_distributed())
+  if(distdata_ != NULL)
   {
     if (tdim_ == 0)
     {
-      return mesh_.distdata()[tdim_].is_shared(index_);
+      return (*distdata_)[tdim_].is_shared(index_);
     }
     else
     {
@@ -131,7 +150,7 @@ bool MeshEntity::has_all_vertices_shared() const
       dolfin_assert(c.size() > 0);
       for (uint v = 0; v < c.size(index_); ++v)
       {
-        if (!mesh_.distdata()[0].is_shared(c(index_)[v]))
+        if (!(*distdata_)[0].is_shared(c(index_)[v]))
         {
           return false;
         }

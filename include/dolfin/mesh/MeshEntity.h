@@ -86,6 +86,9 @@ public:
   /// Copy global indices of mesh entities to array
   void global_entities(uint dim, uint * indices) const;
 
+  /// Copy global indices of mesh entities to array
+  void global_entities(uint ** indices) const;
+
   /// Return if the mesh entity is owned
   bool is_owned() const;
 
@@ -124,6 +127,9 @@ protected:
 
   // Geometric dimension
   uint const gdim_;
+
+  // Pointer to mesh distributed data if applicable
+  MeshDistributedData const * const distdata_;
 
   // Index of entity within topological dimension
   uint index_;

@@ -39,7 +39,7 @@ real toc()
 real tocd(uint level)
 {
   real const elapsed_time = toc();
-  message(level, "Elapsed time: %g seconds", elapsed_time);
+  message(level, "Elapsed time: %8e seconds", elapsed_time);
   return elapsed_time;
 }
 //-----------------------------------------------------------------------------

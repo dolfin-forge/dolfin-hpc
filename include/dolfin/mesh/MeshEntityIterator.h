@@ -62,9 +62,6 @@ public:
   /// Step to next mesh entity (prefix increment)
   MeshEntityIterator& operator++();
 
-  /// Set position explicitly relative to begin
-  void set(uint i);
-
   /// Return current position
   uint pos() const;
 
@@ -116,13 +113,6 @@ inline MeshEntityIterator& MeshEntityIterator::operator++()
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshEntityIterator::set(uint i)
-{
-  dolfin_assert(i < end_);
-  pos_ = i;
-}
-
-//-----------------------------------------------------------------------------
 inline uint MeshEntityIterator::pos() const
 {
   return pos_;
@@ -137,6 +127,7 @@ inline bool MeshEntityIterator::end() const
 //-----------------------------------------------------------------------------
 inline MeshEntity* MeshEntityIterator::operator->()
 {
+  // WARNING: index is only updated if iterator is dereferenced
   entity_.index_ = (index_ ? index_[pos_] : pos_);
   return &entity_;
 }
@@ -144,6 +135,7 @@ inline MeshEntity* MeshEntityIterator::operator->()
 //-----------------------------------------------------------------------------
 inline MeshEntity& MeshEntityIterator::operator*()
 {
+  // WARNING: index is only updated if iterator is dereferenced
   entity_.index_ = (index_ ? index_[pos_] : pos_);
   return entity_;
 }

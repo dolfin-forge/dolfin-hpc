@@ -52,6 +52,7 @@ nobase_pkginclude_HEADERS = \
 				fem/SubSystem.h\
 				fem/UFC.h\
 				fem/UFCCell.h\
+				fem/UFCCellIterator.h\
 				fem/UFCHalo.h\
 				fem/UFCMesh.h\
 				function/dolfin_function.h\

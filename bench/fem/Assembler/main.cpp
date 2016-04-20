@@ -51,6 +51,35 @@ void test_sparsity(Form& a)
   sp.apply();
 }
 //-----------------------------------------------------------------------------
+void test_caching(Form& a)
+{
+  message("test_caching");
+  ufc::dofmap * ufc_dofmap = a.create_dofmap(0);
+  DofNumbering * dn = DofNumbering::create(a.mesh(), *ufc_dofmap);
+  dn->build();
+  uint const * block = dn->block();
+  if (dn->block_size() != a.mesh().num_cells() * ufc_dofmap->local_dimension())
+  {
+    error("Block size mismatch");
+  }
+  uint * dofs = new uint[ufc_dofmap->local_dimension()];
+  for (UFCCellIterator cell(a.mesh()); !cell.end(); ++cell)
+  {
+    dn->tabulate_dofs(dofs, cell);
+    uint const * cached_dofs = &block[cell->index() * ufc_dofmap->local_dimension()];
+    for (uint i = 0; i < ufc_dofmap->local_dimension(); ++i)
+    {
+      if (dofs[i] != cached_dofs[i])
+      {
+        error("Invalid cached dof");
+      }
+    }
+  }
+  delete[] dofs;
+  delete dn;
+  delete ufc_dofmap;
+}
+//-----------------------------------------------------------------------------
 void assemble_a(Form& a, uint n)
 {
   Assembler assembler;

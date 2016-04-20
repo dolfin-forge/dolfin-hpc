@@ -76,7 +76,7 @@ void RefinementManager::init()
   {
     if (pattern_->refinement_needs_entities(i))
     {
-      mesh_.init(i, 0);
+      mesh_.init(i);
     }
   }
 
@@ -285,7 +285,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
         {
           global_buff.push_back(i);
           global_buff.push_back(new_edge_global_[key]);
-          newdistdata.set_shared(new_edge_vertex_[key]);
+          newdistdata.set_shared_adj(new_edge_vertex_[key], src);
         }
       }
     }

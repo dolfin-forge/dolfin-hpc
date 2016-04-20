@@ -17,18 +17,18 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh, 0.0)),
+    basis_(mesh.geometry().dim(), Function(mesh, 0.0)),
     node_type_(mesh)
 {
 }
 
 //-----------------------------------------------------------------------------
 BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
-    mesh_(boundary.mesh()),
-    boundary_(&boundary),
+    mesh_(boundary),
+    boundary_(&boundary.exterior_boundary()),
     local_boundary_(false),
-    basis_(EuclideanSpace::MAX_DIMENSION, Function(mesh_, 0.0)),
-    node_type_(mesh_)
+    basis_(boundary.geometry().dim(), Function(boundary, 0.0)),
+    node_type_(boundary)
 {
 }
 
@@ -62,8 +62,8 @@ Array<Function>& BoundaryNormal::basis()
 //-----------------------------------------------------------------------------
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
-  uint gdim = space.cell().dim();
-  for (uint i = 0; i < EuclideanSpace::MAX_DIMENSION; ++i)
+  uint gdim = space.mesh().geometry().dim();
+  for (uint i = 0; i < gdim; ++i)
   {
     basis_[i].init(space);
   }
@@ -87,7 +87,7 @@ void BoundaryNormal::write(std::string const& filename)
     error("Boundary normal is not initialized on a discrete space.");
   }
   std::vector<std::pair<Function *, std::string> > fields;
-  for (uint i = 0; i < EuclideanSpace::MAX_DIMENSION; ++i)
+  for (uint i = 0; i < mesh_.geometry().dim(); ++i)
   {
     std::stringstream ss;
     ss << "E" << i;

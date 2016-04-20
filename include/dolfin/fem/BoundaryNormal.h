@@ -29,6 +29,7 @@ class Mesh;
 
 class BoundaryNormal
 {
+
 public:
 
   /// Return boundary mesh
@@ -65,8 +66,8 @@ private:
   Mesh& mesh_;
   BoundaryMesh * const boundary_;
   bool const local_boundary_;
-  mutable Array<Function> basis_;
-  mutable Function node_type_;
+  Array<Function> basis_;
+  Function node_type_;
 
 };
 

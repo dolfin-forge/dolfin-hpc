@@ -98,7 +98,7 @@ void UniformMeshRefinement::refineSimplex(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-  //mesh.renumber();
+  mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refineHypercube(Mesh& mesh)
@@ -171,7 +171,7 @@ void UniformMeshRefinement::refineHypercube(Mesh& mesh)
 
   // Overwrite old mesh with refined mesh
   mesh = refined_mesh;
-  //mesh.renumber();
+  mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------
 

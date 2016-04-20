@@ -64,18 +64,16 @@ public:
 private:
 
   /// Cleanup
-  void Clear();
+  void clear();
 
   /// Compute boundary normal basis
-  void ComputeP1(Mesh& mesh, Array<Function>& basis);
-  void ComputePk(Mesh& mesh, Array<Function>& basis);
+  void compute(Mesh& mesh, Array<Function>& basis);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
   Mesh& mesh_;
 
   SubDomain const * const subdomain_;
-  bool const no_subdomain_;
 
   /// Maximum absolute angle between two neighbouring facets to be discriminated
   /// as belonging to different hyperplanes.

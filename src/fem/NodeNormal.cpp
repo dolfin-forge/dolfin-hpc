@@ -33,7 +33,6 @@ NodeNormal::NodeNormal(Mesh& mesh, Type w, real alpha) :
     BoundaryNormal(mesh),
     mesh_(mesh),
     subdomain_(NULL),
-    no_subdomain_(true),
     alpha_max_(alpha),
     type_(w)
 {
@@ -45,7 +44,6 @@ NodeNormal::NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w,
     BoundaryNormal(mesh),
     mesh_(mesh),
     subdomain_(&subdomain),
-    no_subdomain_(false),
     alpha_max_(alpha),
     type_(w)
 {
@@ -54,11 +52,11 @@ NodeNormal::NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w,
 //-----------------------------------------------------------------------------
 NodeNormal::~NodeNormal()
 {
-  Clear();
+  clear();
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::Clear()
+void NodeNormal::clear()
 {
   node_type_.clear();
 }
@@ -71,16 +69,7 @@ void NodeNormal::compute()
   {
     error("Invalid size of storage vector for basis functions in NodeNormal");
   }
-  if (basis()[0].space().is_vertex_based())
-  {
-    //Allow the possibility to switch implementation
-    ComputeP1(mesh_, basis());
-    //ComputePk(mesh_, basis());
-  }
-  else
-  {
-    ComputePk(mesh_, basis());
-  }
+  compute(mesh_, basis());
 }
 
 //-----------------------------------------------------------------------------
@@ -96,103 +85,36 @@ uint NodeNormal::node_type(uint node_id) const
 }
 
 //-----------------------------------------------------------------------------
-void NodeNormal::ComputeP1(Mesh& mesh, Array<Function>& functions)
+void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 {
-  message("Compute P1 node normal");
-  Clear();
-  VertexNormal::Type vtype = VertexNormal::none;
-  switch (type_)
-  {
-    case NodeNormal::none:
-      vtype = VertexNormal::none;
-      break;
-    case NodeNormal::unit:
-      vtype = VertexNormal::unit;
-      break;
-    case NodeNormal::facet:
-      vtype = VertexNormal::facet;
-      break;
-    default:
-      break;
-  }
-  VertexNormal * vn = NULL;
-  if (no_subdomain_)
-  {
-    vn = new VertexNormal(mesh, vtype);
-  }
-  else
-  {
-    vn = new VertexNormal(mesh, *subdomain_, vtype);
-  }
-  uint const gdim = mesh.geometry().dim();
-  real * block[EuclideanSpace::MAX_DIMENSION];
-  for (uint e = 0; e < gdim; ++e)
-  {
-    block[e] = functions[e].create_block();
-  }
-  uint const * dofs = functions[0].space().dofmap().dofsmapping();
-  uint ii = 0;
-  for (CellIterator cell(mesh); !cell.end(); ++cell)
-  {
-    for (VertexIterator v(*cell); !v.end(); ++v)
-    {
-      uint const glob_id = dofs[ii + v.pos()];
-      node_type_[glob_id] = vn->vertex_type().get(v->index());
-    }
-    for (uint d = 0; d < gdim; ++d)
-    {
-      for (VertexIterator v(*cell); !v.end(); ++v)
-      {
-        for (uint e = 0; e < gdim; ++e)
-        {
-          block[e][ii] = vn->basis()[e][d].get(*v);
-        }
-        ++ii;
-      }
-    }
-  }
-  for (uint e = 0; e < gdim; ++e)
-  {
-    functions[e].set_block(block[e]);
-    functions[e].sync_ghosts();
-    delete[] block[e];
-  }
-  delete vn;
-}
-
-//-----------------------------------------------------------------------------
-void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
-{
-  message("Compute Pk node normal");
-  Clear();
+  message(1, "NodeNormal : compute P%u node normal", basis[0].space().degree());
+  clear();
   BoundaryMesh& boundary = mesh.exterior_boundary();
 
   //---------------------------------------------------------------------------
-  MeshDistributedData & distdata = mesh.distdata();
   uint const tdim = mesh.topology().dim();
-  uint const facet_dim = tdim - 1;
+  uint const fdim = tdim - 1;
   uint const gdim = mesh.geometry().dim();
+  uint const rank = dolfin::MPI::processNumber();
+  uint const pe_size = dolfin::MPI::numProcesses();
 
-  //
-  int rank = dolfin::MPI::processNumber();
-  int pe_size = dolfin::MPI::numProcesses();
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;
   // Maps dofs to facet global indices
   _map<uint, NodeData *> nodes_data;
   //[facet, nb_nodes, [node indices]]
-  Array<uint> * u_sendbuf = new Array<uint>[pe_size];
+  Array<uint> * u_sendbuf = new Array<uint> [pe_size];
   //[weight, normal]
-  Array<real> * r_sendbuf = new Array<real>[pe_size];
+  Array<real> * r_sendbuf = new Array<real> [pe_size];
 
-  FiniteElementSpace const& spaceN = functions[0].space();
+  FiniteElementSpace const& spaceN = basis[0].space();
   DofMap const& dofmapN = spaceN.dofmap();
   ScratchSpace scratchN(spaceN);
   uint const value_size = spaceN.element().value_size();
   dolfin_assert(value_size == gdim);
   uint const num_facet_dofs = dofmapN.num_facet_dofs();
   uint const num_facet_nodes = num_facet_dofs / value_size;
-  uint const num_restricted_facet_dofs = dofmapN.num_entity_dofs(facet_dim);
+  uint const num_restricted_facet_dofs = dofmapN.num_entity_dofs(fdim);
 
   // The implementation works only for dofs located on the exterior boundary
   bool const on_boundary = true;
@@ -201,40 +123,33 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
   // Mark facets in the subdomain based on dofs, naive implementation
   node_type_.clear();
   _set<uint> used_ghost_nodes;
+  message("Collect facets");
   for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
   {
     Facet facet(mesh, boundary.facet_index(*bcell));
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint local_facet = cell.index(facet);
 
+    scratchN.cell.update(cell);
+    dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+
     // An exterior facet should be included in the subdomain if at least one
     // of the dofs on the facet restriction (if any) or if the facet midpoint
     // is in the subdomain.
     // Skip the facet if it does not satifies one of these conditions.
-    if (no_subdomain_
-        || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
-    {
-      // Update cell data and tabulate the coordinates
-      scratchN.cell.update(cell);
-      dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
-    }
-    else
+    if ((subdomain_ != NULL) && (num_restricted_facet_dofs > 0)
+        && !subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {
       bool invalid = true;
-      if (num_restricted_facet_dofs > 0)
+      // Tabulate dofs on facet restriction
+      dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, fdim, local_facet);
+      for (uint i = 0; i < num_restricted_facet_dofs; ++i)
       {
-        // Tabulate dofs on facet restriction
-        scratchN.cell.update(cell);
-        dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
-        dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, facet_dim, local_facet);
-        for (uint i = 0; i < num_restricted_facet_dofs; ++i)
+        uint loc_dof = scratchN.facet_dofs[i];
+        if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
         {
-          uint loc_dof = scratchN.facet_dofs[i];
-          if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
-          {
-            invalid = false;
-            break;
-          }
+          invalid = false;
+          break;
         }
       }
       if (invalid)
@@ -248,18 +163,18 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
     FacetData * data = new FacetData();
     data->global_index = facet.global_index();
     switch (type_)
-    {
-      case NodeNormal::none:  // no weight
-      case NodeNormal::unit:  // unit per facet
-        data->weight = 1.0;
-        break;
+      {
       case NodeNormal::facet:  // facet area
         data->weight = bcell->volume();
         break;
+      case NodeNormal::none:  // no weight
+      case NodeNormal::unit:  // unit per facet
       default:
+        data->weight = 1.0;
         break;
-    }
+      }
     data->normal = cell.normal(local_facet);
+    dolfin_assert(abscmp(data->normal.norm(), 1.0));
 
     // Set valid dofs within the current facet
     std::set<uint> ghost_nodes;
@@ -268,11 +183,11 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
     for (uint f_n = 0; f_n < num_facet_nodes; ++f_n)
     {
       uint dof0 = scratchN.facet_dofs[f_n];
-      if (no_subdomain_
+      if ((subdomain_ == NULL)
           || subdomain_->inside(scratchN.coordinates[dof0], on_boundary))
       {
         // Take global dof index of the first component as node id
-        uint node_id = scratchN.dofs[dof0];
+        uint const node_id = scratchN.dofs[dof0];
         data->nodes.insert(node_id);
         node_type_[node_id] = 0;
         if (!dofmapN.is_ghost(node_id))
@@ -325,14 +240,14 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
         dolfin_assert(ghost_nodes.size() <= num_facet_nodes);
         u_sendbuf[*ai].push_back(ghost_nodes.size());
 #ifdef __SUNPRO_CC
-	for (std::set<uint>::iterator it = ghost_nodes.begin();
-	     it != ghost_nodes.end(); ++it) 
-	{
-	  u_sendbuf[*ai].push_back(*it);
-	}
+        for (std::set<uint>::iterator it = ghost_nodes.begin();
+            it != ghost_nodes.end(); ++it)
+        {
+          u_sendbuf[*ai].push_back(*it);
+        }
 #else
         u_sendbuf[*ai].insert(u_sendbuf[*ai].end(), ghost_nodes.begin(),
-                              ghost_nodes.end());
+            ghost_nodes.end());
 #endif
         // global index
         u_sendbuf[*ai].push_back(data->global_index);
@@ -469,7 +384,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
   }
   // Contains only owned nodes
   for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
-       it != nodes_data.end(); ++it, node_dofs+=gdim, offset+=gdim)
+  it != nodes_data.end(); ++it, node_dofs+=gdim, offset+=gdim)
   {
     uint const node_id = it->first;
     NodeData * n_data = it->second;
@@ -493,11 +408,11 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
     // Set node type
     node_type_[node_id] = node_type;
-    n_data->node_type = node_type; // Useless if node data is not reused
+    n_data->node_type = node_type;// Useless if node data is not reused
     dolfin_assert(n_data->node_type > 0);
     // If the node is shared, prepare for synchronization with adjacents
     for(Array<uint>::const_iterator ait = n_data->adjs.begin();
-        ait != n_data->adjs.end(); ++ait)
+    ait != n_data->adjs.end(); ++ait)
     {
       u_sendbuf[*ait].push_back(node_id);
       u_sendbuf[*ait].push_back(node_type);
@@ -517,7 +432,7 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
   // Set vectors, values are synchronized
   for (uint d = 0; d < gdim; ++d)
   {
-    GenericVector& v = functions[d].vector();
+    GenericVector& v = basis[d].vector();
     v.set(block + d * num_boundary_dofs, num_boundary_dofs, dofs);
     v.apply();
   }
@@ -526,20 +441,20 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
   // Cleanup facets and nodes data
   for (_map<uint, FacetData *>::iterator it = facets_data.begin();
-       it != facets_data.end(); ++it)
+  it != facets_data.end(); ++it)
   {
     delete it->second;
   }
   facets_data.clear();
   for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
-       it != nodes_data.end(); ++it)
+  it != nodes_data.end(); ++it)
   {
     delete it->second;
   }
   nodes_data.clear();
 
   // Synchronize node type
-  if(mesh.is_distributed())
+  if (mesh.is_distributed())
   {
 #if HAVE_MPI
     MPI_Status status;
@@ -589,6 +504,11 @@ void NodeNormal::ComputePk(Mesh& mesh, Array<Function>& functions)
 
   delete[] u_sendbuf;
   delete[] r_sendbuf;
+
+  for (uint e = 0; e < gdim; ++e)
+  {
+    basis[e].sync_ghosts();
+  }
 }
 
 //-----------------------------------------------------------------------------

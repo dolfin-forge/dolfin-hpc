@@ -1,14 +1,10 @@
-// Copyright (C) 2007 Murtazo Nazarov
+// Copyright (C) 2014-2016 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2008-2009.
-// Modified by Aurélien Larcher, 2012-14. (rewrite, extension to any element)
-//
-// First added:  2007-05-01
-// Last changed: 2014-05-22
 
 #include <dolfin/fem/NodeNormal.h>
 
+#include <dolfin/common/timing.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
@@ -20,8 +16,6 @@
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexNormal.h>
-
-#define DEBUG 1
 
 #include <map>
 
@@ -91,6 +85,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   clear();
   BoundaryMesh& boundary = mesh.exterior_boundary();
 
+  tic();
   //---------------------------------------------------------------------------
   uint const tdim = mesh.topology().dim();
   uint const fdim = tdim - 1;
@@ -123,33 +118,39 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   // Mark facets in the subdomain based on dofs, naive implementation
   node_type_.clear();
   _set<uint> used_ghost_nodes;
-  message("Collect facets");
   for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
   {
     Facet facet(mesh, boundary.facet_index(*bcell));
     Cell cell(mesh, facet.entities(tdim)[0]);
     uint local_facet = cell.index(facet);
 
-    scratchN.cell.update(cell);
-    dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
-
     // An exterior facet should be included in the subdomain if at least one
     // of the dofs on the facet restriction (if any) or if the facet midpoint
     // is in the subdomain.
     // Skip the facet if it does not satifies one of these conditions.
-    if ((subdomain_ != NULL) && (num_restricted_facet_dofs > 0)
-        && !subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
+    if ((subdomain_ == NULL)
+        || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
+    {
+      scratchN.cell.update(cell);
+      dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+    }
+    else
     {
       bool invalid = true;
-      // Tabulate dofs on facet restriction
-      dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, fdim, local_facet);
-      for (uint i = 0; i < num_restricted_facet_dofs; ++i)
+      if (num_restricted_facet_dofs > 0)
       {
-        uint loc_dof = scratchN.facet_dofs[i];
-        if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
+        // Tabulate dofs on facet restriction
+        scratchN.cell.update(cell);
+        dofmapN.tabulate_coordinates(scratchN.coordinates, scratchN.cell);
+        dofmapN.tabulate_entity_dofs(scratchN.facet_dofs, fdim, local_facet);
+        for (uint i = 0; i < num_restricted_facet_dofs; ++i)
         {
-          invalid = false;
-          break;
+          uint loc_dof = scratchN.facet_dofs[i];
+          if (subdomain_->inside(scratchN.coordinates[loc_dof], on_boundary))
+          {
+            invalid = false;
+            break;
+          }
         }
       }
       if (invalid)
@@ -504,6 +505,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
   delete[] u_sendbuf;
   delete[] r_sendbuf;
+
+  tocd(1);
 
   for (uint e = 0; e < gdim; ++e)
   {

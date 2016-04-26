@@ -6,46 +6,43 @@
 // First added:  2004
 // Last changed: 2007-12-28
 
-#include <dolfin/la/Matrix.h>
-#include <dolfin/fem/BoundaryCondition.h>
+
+#include <dolfin/pde/LinearPDE.h>
+
 #include <dolfin/fem/Assembler.h>
+#include <dolfin/fem/BilinearForm.h>
+#include <dolfin/fem/LinearForm.h>
+#include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/io/dolfin_io.h>
 #include <dolfin/la/LUSolver.h>
+#include <dolfin/la/Matrix.h>
 #include <dolfin/la/KrylovSolver.h>
-#include <dolfin/pde/LinearPDE.h>
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh) :
+LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L) :
     a(a),
     L(L),
-    mesh(mesh),
-    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE.");
 }
 //-----------------------------------------------------------------------------
-LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
-                     BoundaryCondition& bc) :
+LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, BoundaryCondition& bc) :
     a(a),
     L(L),
-    mesh(mesh),
-    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE with one boundary condition.");
   bcs.push_back(&bc);
 }
 //-----------------------------------------------------------------------------
-LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+LinearPDE::LinearPDE(BilinearForm& a, LinearForm& L,
                      Array<BoundaryCondition*>& bcs) :
     a(a),
     L(L),
-    mesh(mesh),
-    assembler(),
     not_assembled(true)
 {
   message("Creating linear PDE with %d boundary condition(s).", bcs.size());
@@ -67,10 +64,9 @@ void LinearPDE::solve(Function& u)
   // Create matrix and vector for assembly
   Matrix A;
   Vector b;
-  Vector* x = new Vector();
-  u.init(mesh, *x, a, 1);
 
   // Assemble linear system
+  Assembler assembler;
   assembler.assemble(A, a, not_assembled);
   assembler.assemble(b, L, not_assembled);
   not_assembled = false;
@@ -85,17 +81,17 @@ void LinearPDE::solve(Function& u)
   const std::string solver_type = get("PDE linear solver");
   if (solver_type == "direct")
   {
-    if (u.mesh().is_distributed())
-	error("Direct Solvers don't work in parallel please use iterative solvers in parallel with dolfin_set(\"PDE linear solver\", \"iterative\"); or run in serial");
+    if (u.mesh().is_distributed()) error(
+        "Direct Solvers don't work in parallel please use iterative solvers in parallel with dolfin_set(\"PDE linear solver\", \"iterative\"); or run in serial");
     LUSolver solver;
     solver.set("parent", *this);
-    solver.solve(A, *x, b);
+    solver.solve(A, u.vector(), b);
   }
   else if (solver_type == "iterative")
   {
     KrylovSolver solver(gmres);
     solver.set("parent", *this);
-    solver.solve(A, *x, b);
+    solver.solve(A, u.vector(), b);
   }
   else
   {
@@ -103,28 +99,5 @@ void LinearPDE::solve(Function& u)
   }
 
   end();
-}
-//-----------------------------------------------------------------------------
-void LinearPDE::solve(Function& u0, Function& u1)
-{
-  // Solve system
-  Function u(mesh);
-  solve(u);
-
-  // Extract sub functions
-  u0 = u[0];
-  u1 = u[1];
-}
-//-----------------------------------------------------------------------------
-void LinearPDE::solve(Function& u0, Function& u1, Function& u2)
-{
-  // Solve system
-  Function u(mesh);
-  solve(u);
-
-  // Extract sub functions
-  u0 = u[0];
-  u1 = u[1];
-  u2 = u[2];
 }
 //-----------------------------------------------------------------------------

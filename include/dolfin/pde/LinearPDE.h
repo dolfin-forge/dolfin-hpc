@@ -11,16 +11,15 @@
 #ifndef __DOLFIN_LINEAR_PDE_H
 #define __DOLFIN_LINEAR_PDE_H
 
-#include <dolfin/common/Array.h>
-#include <dolfin/fem/Assembler.h>
-#include <dolfin/fem/BilinearForm.h>
-#include <dolfin/fem/LinearForm.h>
-#include <dolfin/la/Vector.h>
 #include <dolfin/parameter/Parametrized.h>
+
+#include <dolfin/common/Array.h>
 
 namespace dolfin
 {
 
+class BilinearForm;
+class LinearForm;
 class Form;
 class Mesh;
 class BoundaryCondition;
@@ -42,26 +41,19 @@ class LinearPDE : public Parametrized
 public:
 
   /// Define a linear PDE with natural boundary conditions
-  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh);
+  LinearPDE(BilinearForm& a, LinearForm& L);
 
   /// Define a linear PDE with a single Dirichlet boundary condition
-  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh, BoundaryCondition& bc);
+  LinearPDE(BilinearForm& a, LinearForm& L, BoundaryCondition& bc);
 
   /// Define a linear PDE with a set of Dirichlet boundary conditions
-  LinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
-            Array<BoundaryCondition*>& bcs);
+  LinearPDE(BilinearForm& a, LinearForm& L, Array<BoundaryCondition*>& bcs);
 
   /// Destructor
   ~LinearPDE();
 
   /// Solve PDE system
   void solve(Function& u);
-
-  /// Solve PDE system and extract sub functions
-  void solve(Function& u0, Function& u1);
-
-  /// Solve PDE system and extract sub functions
-  void solve(Function& u0, Function& u1, Function& u2);
 
 private:
 
@@ -70,12 +62,6 @@ private:
 
   // The linear form
   LinearForm& L;
-
-  // The mesh
-  Mesh& mesh;
-
-  // The assembler
-  Assembler assembler;
 
   // The boundary conditions
   Array<BoundaryCondition*> bcs;

@@ -25,11 +25,11 @@ class NonlinearPDE : public NonlinearProblem, public Parametrized
 public:
 
   /// Constructor
-  NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+  NonlinearPDE(BilinearForm& a, LinearForm& L,
                BoundaryCondition& bc);
 
   /// Constructor
-  NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+  NonlinearPDE(BilinearForm& a, LinearForm& L,
                Array<BoundaryCondition*>& bcs);
 
   /// Destructor
@@ -53,14 +53,8 @@ private:
   // The linear form
   LinearForm& L;
 
-  // The mesh
-  Mesh& mesh;
-
   // The boundary conditions
   Array<BoundaryCondition*> bcs;
-
-  // The solution vector
-  Vector x;
 
   // Assembler
   Assembler assembler;

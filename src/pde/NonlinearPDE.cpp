@@ -15,12 +15,10 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L,
                            BoundaryCondition& bc) :
     a(a),
     L(L),
-    mesh(mesh),
-    assembler(),
     reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
@@ -29,13 +27,11 @@ NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
   bcs.push_back(&bc);
 }
 //-----------------------------------------------------------------------------
-NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L, Mesh& mesh,
+NonlinearPDE::NonlinearPDE(BilinearForm& a, LinearForm& L,
                            Array<BoundaryCondition*>& bcs) :
     a(a),
     L(L),
-    mesh(mesh),
     bcs(bcs),
-    assembler(),
     reset(true)
 {
   message("Creating nonlinear PDE with %d boundary condition(s).", bcs.size());
@@ -55,6 +51,7 @@ void NonlinearPDE::form(GenericMatrix& A, GenericVector& b,
                         GenericVector const& x)
 {
   // Assemble
+  Assembler assembler;
   assembler.assemble(A, a, reset);
   assembler.assemble(b, L, reset);
 
@@ -70,14 +67,11 @@ void NonlinearPDE::solve(Function& u, real& t, real const& T, real const& dt)
 {
   begin("Solving nonlinear PDE.");
 
-  // Initialise function
-  u.init(mesh, x, a, 1);
-
   // Solve
   while (t < T)
   {
     t += dt;
-    newton_solver.solve(*this, x);
+    newton_solver.solve(*this, u.vector());
   }
 
   end();

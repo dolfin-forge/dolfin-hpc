@@ -10,6 +10,7 @@
 #define __DOLFIN_FORM_H
 
 #include <dolfin/common/Array.h>
+#include <dolfin/fem/Assembler.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/FiniteElementSpace.h>
@@ -107,6 +108,9 @@ public:
   /// Check if index is valid
   bool check_index(uint i) const;
 
+  /// Assemble form
+  void assemble(GenericTensor& T, bool reset_tensor);
+
 protected:
 
   /// Return UFC form
@@ -117,6 +121,9 @@ protected:
                            Array<dolfin::Coefficient *>& form_coefficients);
 
 private:
+
+  //
+  static Assembler ASSEMBLER;
 
   // Mesh
   Mesh& mesh_;

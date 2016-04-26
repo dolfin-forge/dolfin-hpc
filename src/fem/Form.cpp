@@ -16,6 +16,9 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+Assembler Form::ASSEMBLER;
+
+//-----------------------------------------------------------------------------
 Form::Form(Mesh& mesh) :
     mesh_(mesh),
     dof_map_set_(*this, mesh)
@@ -173,6 +176,12 @@ bool Form::check_index(uint i) const
           num_arguments);
   }
   return true;
+}
+
+//----------------------------------------------------------------------------
+void Form::assemble(GenericTensor& T, bool reset_tensor)
+{
+  ASSEMBLER.assemble(T, *this, reset_tensor);
 }
 
 //-----------------------------------------------------------------------------

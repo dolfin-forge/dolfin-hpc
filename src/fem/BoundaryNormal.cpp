@@ -17,7 +17,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(mesh.geometry().dim(), Function(mesh, 0.0)),
+    basis_(mesh.geometry().dim(), Function(mesh)),
     node_type_(mesh)
 {
 }
@@ -27,7 +27,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary),
     boundary_(&boundary.exterior_boundary()),
     local_boundary_(false),
-    basis_(boundary.geometry().dim(), Function(boundary, 0.0)),
+    basis_(boundary.geometry().dim(), Function(boundary)),
     node_type_(boundary)
 {
 }
@@ -82,10 +82,6 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 //-----------------------------------------------------------------------------
 void BoundaryNormal::write(std::string const& filename)
 {
-  if(this->basis()[0].type() != Function::discrete)
-  {
-    error("Boundary normal is not initialized on a discrete space.");
-  }
   std::vector<std::pair<Function *, std::string> > fields;
   for (uint i = 0; i < mesh_.geometry().dim(); ++i)
   {

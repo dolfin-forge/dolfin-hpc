@@ -332,7 +332,7 @@ void VTKFile::ResultsWrite(
     Function* u = it->first;
 
     // Check type of function space
-    if (u->type() == Function::discrete && u->space().is_cellwise_constant())
+    if (u->space().is_cellwise_constant())
     {
       // These are cell based function and will be written as CellData
       continue;
@@ -449,7 +449,7 @@ void VTKFile::ResultsWrite(
     Function* u = it->first;
 
     // Check type of function space
-    if (u->type() != Function::discrete || !u->space().is_cellwise_constant())
+    if (!u->space().is_cellwise_constant())
     {
       // These are not cell based functions and will be written as PointData
       continue;
@@ -691,7 +691,7 @@ void VTKFile::pvtuFileWriteFunction(
     std::string& name = it->second;
 
     // Check type of function space
-    if (u->type() == Function::discrete && u->space().is_cellwise_constant())
+    if (u->space().is_cellwise_constant())
     {
       // These are cell based function and will be written as CellData
       continue;
@@ -735,7 +735,7 @@ void VTKFile::pvtuFileWriteFunction(
     std::string& name = it->second;
 
     // Check type of function space
-    if (u->type() != Function::discrete || !u->space().is_cellwise_constant())
+    if (!u->space().is_cellwise_constant())
     {
       // These are not cell based functions and will be written as PointData
       continue;

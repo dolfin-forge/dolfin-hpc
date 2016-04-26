@@ -134,10 +134,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       it != functions.end(); ++it)
   {
     Function const& func_to_project = **it;
-    if (func_to_project.type() != Function::discrete)
-    {
-      error("Projection only implemented for discrete functions");
-    }
 
     FiniteElementSpace const& space = func_to_project.space();
     uint const num_sub = space.element().num_sub_elements();
@@ -182,10 +178,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       it != functions.end(); ++it)
   {
     Function const& func_to_project = **it;
-    if (func_to_project.type() != Function::discrete)
-    {
-      error("Projection only implemented for discrete functions");
-    }
 
     Array<Function *> post;
     FiniteElementSpace const& space = func_to_project.space();

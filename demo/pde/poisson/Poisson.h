@@ -21,7 +21,7 @@
 //   precision:                      15
 //   quadrature_degree:              'auto'
 //   quadrature_rule:                'auto'
-//   representation:                 'auto'
+//   representation:                 'quadrature'
 //   split:                          False
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
@@ -1365,7 +1365,7 @@ public:
                                        const double* xhat,
                                        const ufc::cell& c) const
   {
-    throw std::runtime_error("map_from_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_from_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
@@ -1373,7 +1373,7 @@ public:
                                      const double* x,
                                      const ufc::cell& c) const
   {
-    throw std::runtime_error("map_to_reference_cell not yet implemented (introduced in UFC 2.0).");
+    throw std::runtime_error(std::string("map_to_reference_cell not yet implemented (introduced in UFC 2.0)."));
   }
 
 #endif
@@ -1584,7 +1584,7 @@ public:
   {
     if (d > 2)
     {
-    throw std::runtime_error("d is larger than dimension (2)");
+    throw std::runtime_error(std::string("d is larger than dimension (2)"));
     }
     
     switch (d)
@@ -1593,7 +1593,7 @@ public:
       {
         if (i > 2)
       {
-      throw std::runtime_error("i is larger than number of entities (2)");
+      throw std::runtime_error(std::string("i is larger than number of entities (2)"));
       }
       
       switch (i)
@@ -1690,11 +1690,6 @@ public:
                                const double * const * w,
                                const ufc::cell& c) const
   {
-    // Number of operations (multiply-add pairs) for Jacobian data:      11
-    // Number of operations (multiply-add pairs) for geometry tensor:    8
-    // Number of operations (multiply-add pairs) for tensor contraction: 11
-    // Total number of operations (multiply-add pairs):                  30
-    
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
     
@@ -1716,22 +1711,46 @@ public:
     // Set scale factor
     const double det = std::abs(detJ);
     
-    // Compute geometry tensor
-    const double G0_0_0 = det*(K_00*K_00 + K_01*K_01);
-    const double G0_0_1 = det*(K_00*K_10 + K_01*K_11);
-    const double G0_1_0 = det*(K_10*K_00 + K_11*K_01);
-    const double G0_1_1 = det*(K_10*K_10 + K_11*K_11);
+    // Cell Volume.
     
-    // Compute element tensor
-    A[0] = 0.5*G0_0_0 + 0.5*G0_0_1 + 0.5*G0_1_0 + 0.5*G0_1_1;
-    A[1] = -0.5*G0_0_0 - 0.5*G0_1_0;
-    A[2] = -0.5*G0_0_1 - 0.5*G0_1_1;
-    A[3] = -0.5*G0_0_0 - 0.5*G0_0_1;
-    A[4] = 0.5*G0_0_0;
-    A[5] = 0.5*G0_0_1;
-    A[6] = -0.5*G0_1_0 - 0.5*G0_1_1;
-    A[7] = 0.5*G0_1_0;
-    A[8] = 0.5*G0_1_1;
+    // Compute circumradius, assuming triangle is embedded in 2D.
+    
+    
+    // Facet Area.
+    
+    // Array of quadrature weights.
+    static const double W1 = 0.5;
+    // Quadrature points on the UFC reference element: (0.333333333333333, 0.333333333333333)
+    
+    // Value of basis functions at quadrature points.
+    static const double FE0_D01[1][3] = \
+    {{-1.0, 0.0, 1.0}};
+    
+    static const double FE0_D10[1][3] = \
+    {{-1.0, 1.0, 0.0}};
+    
+    // Reset values in the element tensor.
+    for (unsigned int r = 0; r < 9; r++)
+    {
+      A[r] = 0.0;
+    }// end loop over 'r'
+    
+    // Compute element tensor using UFL quadrature representation
+    // Optimisations: ('eliminate zeros', False), ('ignore ones', False), ('ignore zero tables', False), ('optimisation', False), ('remove zero terms', False)
+    
+    // Loop quadrature points for integral.
+    // Number of operations to compute element tensor for following IP loop = 162
+    // Only 1 integration point, omitting IP loop.
+    
+    // Number of operations for primary indices: 162
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      for (unsigned int k = 0; k < 3; k++)
+      {
+        // Number of operations to compute entry: 18
+        A[j*3 + k] += (((K_00*FE0_D10[0][j] + K_10*FE0_D01[0][j]))*((K_00*FE0_D10[0][k] + K_10*FE0_D01[0][k])) + ((K_01*FE0_D10[0][j] + K_11*FE0_D01[0][j]))*((K_01*FE0_D10[0][k] + K_11*FE0_D01[0][k])))*W1*det;
+      }// end loop over 'k'
+    }// end loop over 'j'
   }
  #ifndef UFC_BACKWARD_COMPATIBILITY 
   /// Tabulate the tensor for the contribution from a local cell
@@ -1743,7 +1762,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error("Quadrature version of tabulate_tensor not available when using the FFC tensor representation.");
+    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0)."));
   }
 #endif
 };
@@ -1773,11 +1792,6 @@ public:
                                const double * const * w,
                                const ufc::cell& c) const
   {
-    // Number of operations (multiply-add pairs) for Jacobian data:      9
-    // Number of operations (multiply-add pairs) for geometry tensor:    3
-    // Number of operations (multiply-add pairs) for tensor contraction: 7
-    // Total number of operations (multiply-add pairs):                  19
-    
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
     
@@ -1795,15 +1809,53 @@ public:
     // Set scale factor
     const double det = std::abs(detJ);
     
-    // Compute geometry tensor
-    const double G0_0 = det*w[0][0]*(1.0);
-    const double G0_1 = det*w[0][1]*(1.0);
-    const double G0_2 = det*w[0][2]*(1.0);
+    // Cell Volume.
     
-    // Compute element tensor
-    A[0] = 0.0833333333333334*G0_0 + 0.0416666666666667*G0_1 + 0.0416666666666667*G0_2;
-    A[1] = 0.0416666666666667*G0_0 + 0.0833333333333333*G0_1 + 0.0416666666666666*G0_2;
-    A[2] = 0.0416666666666667*G0_0 + 0.0416666666666666*G0_1 + 0.0833333333333333*G0_2;
+    // Compute circumradius, assuming triangle is embedded in 2D.
+    
+    
+    // Facet Area.
+    
+    // Array of quadrature weights.
+    static const double W3[3] = {0.166666666666667, 0.166666666666667, 0.166666666666667};
+    // Quadrature points on the UFC reference element: (0.166666666666667, 0.166666666666667), (0.166666666666667, 0.666666666666667), (0.666666666666667, 0.166666666666667)
+    
+    // Value of basis functions at quadrature points.
+    static const double FE0[3][3] = \
+    {{0.666666666666667, 0.166666666666667, 0.166666666666667},
+    {0.166666666666667, 0.166666666666667, 0.666666666666667},
+    {0.166666666666667, 0.666666666666667, 0.166666666666667}};
+    
+    // Reset values in the element tensor.
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      A[r] = 0.0;
+    }// end loop over 'r'
+    
+    // Compute element tensor using UFL quadrature representation
+    // Optimisations: ('eliminate zeros', False), ('ignore ones', False), ('ignore zero tables', False), ('optimisation', False), ('remove zero terms', False)
+    
+    // Loop quadrature points for integral.
+    // Number of operations to compute element tensor for following IP loop = 54
+    for (unsigned int ip = 0; ip < 3; ip++)
+    {
+      
+      // Coefficient declarations.
+      double F0 = 0.0;
+      
+      // Total number of operations to compute function values = 6
+      for (unsigned int r = 0; r < 3; r++)
+      {
+        F0 += FE0[ip][r]*w[0][r];
+      }// end loop over 'r'
+      
+      // Number of operations for primary indices: 12
+      for (unsigned int j = 0; j < 3; j++)
+      {
+        // Number of operations to compute entry: 4
+        A[j] += FE0[ip][j]*F0*W3[ip]*det;
+      }// end loop over 'j'
+    }// end loop over 'ip'
   }
  #ifndef UFC_BACKWARD_COMPATIBILITY 
   /// Tabulate the tensor for the contribution from a local cell
@@ -1815,7 +1867,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error("Quadrature version of tabulate_tensor not available when using the FFC tensor representation.");
+    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0)."));
   }
 #endif
 };
@@ -1846,11 +1898,6 @@ public:
                                const ufc::cell& c,
                                unsigned int facet) const
   {
-    // Number of operations (multiply-add pairs) for Jacobian data:      9
-    // Number of operations (multiply-add pairs) for geometry tensor:    3
-    // Number of operations (multiply-add pairs) for tensor contraction: 9
-    // Total number of operations (multiply-add pairs):                  21
-    
     // Extract vertex coordinates
     const double * const * x = c.coordinates;
     
@@ -1870,33 +1917,120 @@ public:
     const double dx1 = x[v1][1] - x[v0][1];
     const double det = std::sqrt(dx0*dx0 + dx1*dx1);
     
-    // Compute geometry tensor
-    const double G0_0 = det*w[1][0]*(1.0);
-    const double G0_1 = det*w[1][1]*(1.0);
-    const double G0_2 = det*w[1][2]*(1.0);
     
-    // Compute element tensor
+    // Cell Volume.
+    
+    // Compute circumradius, assuming triangle is embedded in 2D.
+    
+    
+    // Facet Area.
+    
+    // Array of quadrature weights.
+    static const double W2[2] = {0.5, 0.5};
+    // Quadrature points on the UFC reference element: (0.211324865405187), (0.788675134594813)
+    
+    // Value of basis functions at quadrature points.
+    static const double FE0_f0[2][3] = \
+    {{0.0, 0.788675134594813, 0.211324865405187},
+    {0.0, 0.211324865405187, 0.788675134594813}};
+    
+    static const double FE0_f1[2][3] = \
+    {{0.788675134594813, 0.0, 0.211324865405187},
+    {0.211324865405187, 0.0, 0.788675134594813}};
+    
+    static const double FE0_f2[2][3] = \
+    {{0.788675134594813, 0.211324865405187, 0.0},
+    {0.211324865405187, 0.788675134594813, 0.0}};
+    
+    // Reset values in the element tensor.
+    for (unsigned int r = 0; r < 3; r++)
+    {
+      A[r] = 0.0;
+    }// end loop over 'r'
+    
+    // Compute element tensor using UFL quadrature representation
+    // Optimisations: ('eliminate zeros', False), ('ignore ones', False), ('ignore zero tables', False), ('optimisation', False), ('remove zero terms', False)
     switch (facet)
     {
     case 0:
       {
-        A[0] = 0.0;
-      A[1] = 0.333333333333333*G0_1 + 0.166666666666667*G0_2;
-      A[2] = 0.166666666666667*G0_1 + 0.333333333333333*G0_2;
+        // Total number of operations to compute element tensor (from this point): 36
+      
+      // Loop quadrature points for integral.
+      // Number of operations to compute element tensor for following IP loop = 36
+      for (unsigned int ip = 0; ip < 2; ip++)
+      {
+        
+        // Coefficient declarations.
+        double F0 = 0.0;
+        
+        // Total number of operations to compute function values = 6
+        for (unsigned int r = 0; r < 3; r++)
+        {
+          F0 += FE0_f0[ip][r]*w[1][r];
+        }// end loop over 'r'
+        
+        // Number of operations for primary indices: 12
+        for (unsigned int j = 0; j < 3; j++)
+        {
+          // Number of operations to compute entry: 4
+          A[j] += FE0_f0[ip][j]*F0*W2[ip]*det;
+        }// end loop over 'j'
+      }// end loop over 'ip'
         break;
       }
     case 1:
       {
-        A[0] = 0.333333333333333*G0_0 + 0.166666666666667*G0_2;
-      A[1] = 0.0;
-      A[2] = 0.166666666666667*G0_0 + 0.333333333333333*G0_2;
+        // Total number of operations to compute element tensor (from this point): 36
+      
+      // Loop quadrature points for integral.
+      // Number of operations to compute element tensor for following IP loop = 36
+      for (unsigned int ip = 0; ip < 2; ip++)
+      {
+        
+        // Coefficient declarations.
+        double F0 = 0.0;
+        
+        // Total number of operations to compute function values = 6
+        for (unsigned int r = 0; r < 3; r++)
+        {
+          F0 += FE0_f1[ip][r]*w[1][r];
+        }// end loop over 'r'
+        
+        // Number of operations for primary indices: 12
+        for (unsigned int j = 0; j < 3; j++)
+        {
+          // Number of operations to compute entry: 4
+          A[j] += FE0_f1[ip][j]*F0*W2[ip]*det;
+        }// end loop over 'j'
+      }// end loop over 'ip'
         break;
       }
     case 2:
       {
-        A[0] = 0.333333333333333*G0_0 + 0.166666666666667*G0_1;
-      A[1] = 0.166666666666667*G0_0 + 0.333333333333333*G0_1;
-      A[2] = 0.0;
+        // Total number of operations to compute element tensor (from this point): 36
+      
+      // Loop quadrature points for integral.
+      // Number of operations to compute element tensor for following IP loop = 36
+      for (unsigned int ip = 0; ip < 2; ip++)
+      {
+        
+        // Coefficient declarations.
+        double F0 = 0.0;
+        
+        // Total number of operations to compute function values = 6
+        for (unsigned int r = 0; r < 3; r++)
+        {
+          F0 += FE0_f2[ip][r]*w[1][r];
+        }// end loop over 'r'
+        
+        // Number of operations for primary indices: 12
+        for (unsigned int j = 0; j < 3; j++)
+        {
+          // Number of operations to compute entry: 4
+          A[j] += FE0_f2[ip][j]*F0*W2[ip]*det;
+        }// end loop over 'j'
+      }// end loop over 'ip'
         break;
       }
     }
@@ -1913,7 +2047,7 @@ public:
                                const double * const * quadrature_points,
                                const double* quadrature_weights) const
   {
-    throw std::runtime_error("Quadrature version of tabulate_tensor not available when using the FFC tensor representation.");
+    throw std::runtime_error(std::string("Quadrature version of tabulate_tensor not yet implemented (introduced in UFC 2.0)."));
   }
 #endif
 };
@@ -2283,7 +2417,7 @@ public:
   }
   
   /// Return array of coefficients
-  const dolfin::Array<dolfin::Function*>& coefficients() const
+  const dolfin::Array<dolfin::Coefficient*>& coefficients() const
   {
     return coefficients_;
   }
@@ -2312,7 +2446,7 @@ private:
   poisson_form_0 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> coefficients_;
+  dolfin::Array<dolfin::Coefficient*> coefficients_;
 
 };
 
@@ -2325,7 +2459,7 @@ class PoissonLinearForm : public dolfin::LinearForm
 {
 public:
 
-  PoissonLinearForm(dolfin::Function& w0, dolfin::Function& w1) : dolfin::LinearForm(w0.mesh())
+  PoissonLinearForm(dolfin::Coefficient& w0, dolfin::Coefficient& w1) : dolfin::LinearForm(w0.mesh())
   {
     coefficients_.push_back(&w0);
     coefficients_.push_back(&w1);
@@ -2344,7 +2478,7 @@ public:
   }
   
   /// Return array of coefficients
-  const dolfin::Array<dolfin::Function*>& coefficients() const
+  const dolfin::Array<dolfin::Coefficient*>& coefficients() const
   {
     return coefficients_;
   }
@@ -2384,7 +2518,7 @@ private:
   poisson_form_1 form_;
 
   /// Array of coefficients
-  dolfin::Array<dolfin::Function*> coefficients_;
+  dolfin::Array<dolfin::Coefficient*> coefficients_;
 
 };
 

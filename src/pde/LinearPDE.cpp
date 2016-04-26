@@ -10,7 +10,6 @@
 #include <dolfin/fem/BoundaryCondition.h>
 #include <dolfin/fem/Assembler.h>
 #include <dolfin/function/Function.h>
-#include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/io/dolfin_io.h>
 #include <dolfin/la/LUSolver.h>
 #include <dolfin/la/KrylovSolver.h>

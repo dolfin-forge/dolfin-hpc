@@ -474,10 +474,6 @@ void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
   uint max_size = 0;
   for (it = func.begin(); it != func.end(); ++it)
   {
-    if ((*it)->type() != Function::discrete)
-    {
-      error("Checkpoint restart only implemented for discrete functions");
-    }
     max_size = std::max(max_size, (*it)->vector().local_size());
   }
 

@@ -13,8 +13,9 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/la/GenericVector.h>
 #include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
 {
@@ -30,12 +31,6 @@ FunctionDecomposition::FunctionDecomposition(Function const& F,
 //-----------------------------------------------------------------------------
 Array<Function *> FunctionDecomposition::compute(Function const& F)
 {
-  if (F.type() != Function::discrete)
-  {
-    error("Function decomposition can only be applied to discrete functions");
-  }
-  message("Function decomposition with discrete space:\n %s\n",
-          F.space().element().signature());
   Mesh& mesh = const_cast<Mesh&>(F.mesh());
 
   //TODO:
@@ -92,9 +87,10 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     uint dof_index = 0;
     real * block = F.create_block();
     F.get_block(block);
+    uint const tdim = mesh.topology().dim();
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      dof_index = c->global_index();
+      dof_index = mesh.distdata()[tdim].get_global(c->index());
       for (uint i = 0; i < Si.size(); ++i)
       {
         Si[i]->vector().set(&block[dofii], 1, &dof_index);
@@ -163,7 +159,12 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   }
 
   // Cleanup
-  spaces.free();
+  while (!spaces.empty())
+  {
+    delete spaces.back();
+    spaces.pop_back();
+  }
+  spaces.clear();
 
   return Si;
 }

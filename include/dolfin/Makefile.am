@@ -56,18 +56,19 @@ nobase_pkginclude_HEADERS = \
 				fem/UFCHalo.h\
 				fem/UFCMesh.h\
 				function/dolfin_function.h\
+				function/Analytic.h\
 				function/Constant.h\
-				function/ConstantFunction.h\
-				function/DiscreteFunction.h\
 				function/Expression.h\
-				function/ExpressionFunction.h\
 				function/Function.h\
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
 				function/GenericFunction.h\
-				function/SpecialFunctions.h\
+				function/Real.h\
 				function/SubFunction.h\
-				function/UserFunction.h\
+				function/UFCFunction.h\
+				function/Value.h\
+				function/ValueSpace.h\
+				function/impl/CellDiameter.h\
 				graph/dolfin_graph.h\
 				graph/DirectedClique.h\
 				graph/Graph.h\

@@ -13,7 +13,7 @@ void test(std::string name, VertexNormal& vn)
   Mesh& mesh = vn.mesh();
   uint gdim = mesh.geometry().dim();
   for (uint e = 0; e < gdim; ++e)
-  {
+ {
     for (uint d = 0; d < gdim; ++d)
     {
       std::stringstream ssb;
@@ -50,8 +50,6 @@ void test(std::string name, VertexNormal& vn)
 int main(int argc, char** argv)
 {
   dolfin_init(argc, argv);
-  logm.setDebugLevel(1);
-  logm.file();
   //---------------------------------------------------------------------------
   {
     {

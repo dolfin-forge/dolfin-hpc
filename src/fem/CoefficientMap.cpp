@@ -6,6 +6,8 @@
 
 #include <dolfin/fem/CoefficientMap.h>
 
+#include <dolfin/log/log.h>
+
 namespace dolfin
 {
 
@@ -84,19 +86,18 @@ void CoefficientMap::clear()
 //-----------------------------------------------------------------------------
 void CoefficientMap::disp() const
 {
-  cout << "CoefficientMap" << endl;
-  cout << "--------------" << endl;
-
+  section("CoefficientMap");
   // Begin indentation
-  begin("");
-  cout << "Number of coefficients      :" << this->size() << endl;
+  message("Number of coefficients : %u", this->size());
   uint ii = 0;
+  begin("");
   for (std::map<std::string, dolfin::Coefficient *>::const_iterator it =
       map_.begin(); it != map_.end(); ++it)
   {
-    cout << ii << " : " << it->first << endl;
+    message("%8u : %s", ii, it->first.c_str());
     ++ii;
   }
+  end();
   end();
 }
 

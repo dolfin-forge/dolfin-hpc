@@ -7,9 +7,8 @@
 #ifndef __DOLFIN_GENERIC_FUNCTION_H
 #define __DOLFIN_GENERIC_FUNCTION_H
 
-#include <dolfin/common/types.h>
-#include <dolfin/common/Array.h>
 #include <dolfin/fem/Coefficient.h>
+#include <dolfin/common/Variable.h>
 
 #include <ufc.h>
 
@@ -18,24 +17,24 @@ namespace dolfin
 
 class Mesh;
 class Cell;
-class UFCCell;
 
-/// This class serves as a base class/interface for implementations
-/// of specific function representations.
+/**
+ *  @class  GenericFunction
+ *
+ *  @brief  This class serves as a base class/interface for implementations of
+ *          specific function representations.
+ */
 
-class GenericFunction : public Coefficient
+class GenericFunction : public Coefficient, public Variable
 {
+
 public:
 
   /// Constructor
-  GenericFunction()
-  {
-  }
+  GenericFunction() {}
 
   /// Destructor
-  virtual ~GenericFunction()
-  {
-  }
+  virtual ~GenericFunction() {}
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
@@ -45,8 +44,8 @@ public:
 
   //--- INTERFACE -------------------------------------------------------------
 
-  /// Return the mesh
-  virtual Mesh& mesh() const = 0;
+  /// Evaluate function at given point
+  virtual void eval(real* values, const real* x) const = 0;
 
   /// Return the rank of the value space
   virtual uint rank() const = 0;
@@ -54,49 +53,35 @@ public:
   /// Return the dimension of the value space for axis i
   virtual uint dim(uint i) const = 0;
 
+  // Return the value size
+  virtual uint value_size() const = 0;
+
   /// Interpolate function to vertices of mesh
   virtual void interpolate_vertex_values(real* values) const = 0;
 
   /// Interpolate function to finite element space on cell
-  virtual void interpolate(real* coefficients, const UFCCell& cell,
+  virtual void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
                            const Cell& dolfin_cell) const = 0;
 
   /// Interpolate function to finite element space on facet
-  virtual void interpolate(real* coefficients, const UFCCell& cell,
+  virtual void interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
-  {
-    interpolate(coefficients, cell, finite_element, dolfin_cell);
-  }
+                           const Cell& dolfin_cell, uint facet) const = 0;
 
-  /// Evaluate function at given point
-  virtual void eval(real* values, const real* x) const = 0;
+  /// Synchronize
+  virtual void sync() = 0;
 
   /// Display basic information
   virtual void disp() const = 0;
 
-  /// Synchronize
-  inline void sync() { this->sync_ghosts(); }
-  virtual void sync_ghosts() = 0;
+  //---------------------------------------------------------------------------
+
+  /// Return the mesh
+  virtual Mesh& mesh() const = 0;
 
 };
 
-//-----------------------------------------------------------------------------
-inline void GenericFunction::disp() const
-{
-  cout << "GenericFunction" << endl;
-  cout << "---------------" << endl;
+} /* namespace dolfin */
 
-  // Begin indentation
-  begin("");
-  cout << "Value rank            : " << this->rank() << endl;
-  cout << "Value dimension       : " << this->dim(0) << endl;
-  // End indentation
-  end();
-  skip();
-}
-
-}
-
-#endif
+#endif /* __DOLFIN_GENERIC_FUNCTION_H */

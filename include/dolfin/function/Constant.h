@@ -1,88 +1,166 @@
-// Copyright (C) 2015 Aurelien Larcher.
-// Licensed under the GNU LGPL Version 2.1.
-//
-//
-// First added:  2015-03-12
-// Last changed: 2015-03-12
+#ifndef __DOLFIN_CONSTANT_H_
+#define __DOLFIN_CONSTANT_H_
 
-#ifndef __DOLFIN_CONSTANT_H
-#define __DOLFIN_CONSTANT_H
+#include <dolfin/fem/Coefficient.h>
 
-#include "Function.h"
+#include <dolfin/log/log.h>
 
 namespace dolfin
 {
 
-class Constant : public Function
+class Constant : public Coefficient
 {
 
 public:
 
-  /// Create constant real function on given mesh
-  Constant(Mesh& mesh, real val);
+  /// Constructor
+  Constant() :
+    value_(0.0)
+  {
+  }
+
+  /// Constructor
+  Constant(real value) :
+    value_(value)
+  {
+  }
+
+  /// Destructor
+  ~Constant()
+  {
+  }
+
+  /// Assignment
+  Constant& operator=(real const& value)
+  {
+    value_ = value;
+    return *this;
+  }
+
+  /// Equality
+  bool operator==(Constant const& other)
+  {
+    if(value_ == other.value_)
+    {
+      return true;
+    }
+    return false;
+  }
+
+  /// Multiply by constant real number
+  inline Constant& operator+=(real const& value)
+  {
+    value_ += value;
+    return *this;
+  }
+
+  /// Add a constant real number
+  inline Constant& operator-=(real const& value)
+  {
+    value_ -= value;
+    return *this;
+  }
+
+  /// Substract a constant real number
+  inline Constant& operator*=(real const& value)
+  {
+    value_ *= value;
+    return *this;
+  }
+
+  /// Divide by constant real number
+  inline Constant& operator/=(real const& value)
+  {
+    value_ /= value;
+    return *this;
+  }
 
   ///
-  ~Constant();
-  
+  operator real() const
+  {
+    return value_;
+  }
+
+  //--- UFC INTERFACE ---------------------------------------------------------
+
+  /// Evaluate function at given point in cell
+  inline void evaluate(real* values, const real* coordinates,
+                       const ufc::cell& cell) const
+  {
+    values[0] = value_;
+  }
+
   //--- INTERFACE -------------------------------------------------------------
 
+  /// Evaluate function at given point
+  inline void eval(real* values, const real* x) const
+  {
+    values[0] = value_;
+  }
+
   /// Return the rank of the value space
-  uint rank() const;
+  inline uint rank() const
+  {
+    return 0;
+  }
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const;
+  inline uint dim(uint i) const
+  {
+    return 1;
+  }
 
-  /// Evaluate function at given point
-  void eval(real* values, const real* x) const;
+  /// Value size
+  inline uint value_size() const
+  {
+    return 1;
+  }
 
-  //---------------------------------------------------------------------------
-  
-  /// Assign constant real value (to all the components)
-  Constant& operator= (real const& val);
+  /// Interpolate function to finite element space on cell
+  inline void interpolate(real* coefficients, const ufc::cell& cell,
+                          const ufc::finite_element& finite_element,
+                          const Cell& dolfin_cell) const
+  {
+    dolfin_assert(coefficients);
+    for (uint i = 0; i < finite_element.space_dimension(); ++i)
+    {
+      coefficients[i] = value_;
+    }
+  }
+
+  /// Interpolate function to finite element space on facet
+  inline void interpolate(real* coefficients, const ufc::cell& cell,
+                          const ufc::finite_element& finite_element,
+                          const Cell& dolfin_cell, uint facet) const
+  {
+    dolfin_assert(coefficients);
+    for (uint i = 0; i < finite_element.space_dimension(); ++i)
+    {
+      coefficients[i] = value_;
+    }
+  }
+
+  /// Synchronize
+  inline void sync()
+  {
+    // Do nothing
+  }
+
+  /// Display basic information
+  inline void disp() const
+  {
+    section("Constant");
+    message("Value : %f", value_);
+    end();
+    skip();
+  }
 
 private:
 
-  Array<real> value_;
+  real value_;
 
 };
 
-//-----------------------------------------------------------------------------
-inline Constant::Constant(Mesh& mesh, real val) :
-    Function(mesh),
-    value_(static_cast<uint>(1), static_cast<real>(val))
-{
-}
+} /* namespace licorne */
 
-//-----------------------------------------------------------------------------
-inline Constant::~Constant()
-{
-}
-
-//-----------------------------------------------------------------------------
-inline void Constant::eval(real* values, const real* x) const
-{
-  values[0] = value_[0];
-}
-
-//-----------------------------------------------------------------------------
-inline uint Constant::rank() const
-{
-  return 0;
-}
-
-//-----------------------------------------------------------------------------
-inline uint Constant::dim(uint i) const
-{
-  return 1;
-}
-
-//-----------------------------------------------------------------------------
-inline Constant& Constant::operator= (real const& val)
-{
-  std::fill(value_.begin(), value_.end(), val);
-  return *this;
-}
-
-}
-
-#endif /* __DOLFIN_CONSTANT_H */
+#endif /* __DOLFIN_CONSTANT_H_ */

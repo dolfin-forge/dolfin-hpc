@@ -8,9 +8,8 @@
 #define __DOLFIN_SLIP_FRICTION_BC_H
 
 #include <dolfin/fem/BoundaryCondition.h>
+#include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/SlipBC.h>
-#include <dolfin/function/Expression.h>
-#include <dolfin/function/Function.h>
 
 #include <ufc.h>
 
@@ -22,53 +21,52 @@ class Function;
 class GenericMatrix;
 class SubDomain;
 
-class SlipFrictionBC: public BoundaryCondition
+class SlipFrictionBC : public BoundaryCondition
 {
 public:
-  /// Create boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain, real beta);
 
-  /// Create sub system boundary condition for sub domain
-  SlipFrictionBC(Mesh& mesh, SubDomain const& sub_domain,
-                 SubSystem const& sub_system, real beta);
+  /// Create boundary condition for sub domain
+  SlipFrictionBC(Coefficient& beta, Mesh& mesh, SubDomain const& sub_domain);
 
   /// Create boundary condition for sub domain specified by index
-//  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain, real beta);
+  SlipFrictionBC(Coefficient& beta, MeshFunction<uint>& sub_domains,
+                 uint sub_domain);
+
+  /// Create sub system boundary condition for sub domain
+  SlipFrictionBC(Coefficient& beta, Mesh& mesh, SubDomain const& sub_domain,
+                 SubSystem const& sub_system);
 
   /// Create sub system boundary condition for sub domain specified by index
-//  SlipFrictionBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-//                 SubSystem const& sub_system, real beta);
+  SlipFrictionBC(Coefficient& beta, MeshFunction<uint>& sub_domains,
+                 uint sub_domain, SubSystem const& sub_system);
 
-/// Destructor
+  /// Destructor
   ~SlipFrictionBC();
 
+  ///
   BoundaryNormal& normal();
+
+  ///
+  Coefficient& friction() const;
 
   //--- INTERFACE -------------------------------------------------------------
 
   /// Apply boundary condition to linear system
-  void apply(GenericMatrix& A, GenericVector& b, const BilinearForm& form);
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form);
 
   /// Apply boundary condition to linear system for a nonlinear problem
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector& x,
-             const BilinearForm& form);
-
-  real beta() const;
-
-  Function& friction();
+  void apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
+             BilinearForm const& form);
 
 private:
 
   SlipBC slipbc_;
+  Coefficient& beta_;
 
-  real beta_;
-  IndicatorExpression expr_;
-  Function Fbeta_;
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
                                   BilinearForm const& form)
 {
@@ -77,22 +75,19 @@ inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
 
 //-----------------------------------------------------------------------------
 inline void SlipFrictionBC::apply(GenericMatrix& A, GenericVector& b,
-                                  const GenericVector& x, BilinearForm const& form)
+                                  GenericVector const& x,
+                                  BilinearForm const& form)
 {
   slipbc_.apply(A, b, x, form);
 }
 
 //-----------------------------------------------------------------------------
-inline real SlipFrictionBC::beta() const
+inline Coefficient& SlipFrictionBC::friction() const
 {
   return beta_;
 }
 
 //-----------------------------------------------------------------------------
-inline Function& SlipFrictionBC::friction()
-{
-  return Fbeta_;
-}
 
 } /* namespace dolfin */
 

@@ -12,25 +12,30 @@
 namespace dolfin
 {
 
-class DiscreteFunction;
+class Function;
 
-/// This class represents a sub function (view) of a (discrete function).
-/// It's purpose is to enable expressions like
-///
-///    Function w;
-///    Function u = w[0];
-///    Function p = w[1];
-///
-/// without needing to create and destroy temporaries. No data is created
-/// until a Function is assigned to a SubFunction, at which point the data
-/// needed to represent the sub function is created.
+/**
+ *  @class  SubFunction
+ *
+ *  @brief  This class represents a sub function of a (discrete function) to
+ *          enable expressions like:
+ *
+ *            Function w;
+ *            Function u = w[0];
+ *            Function p = w[1];
+ *
+ *          without needing to create and destroy temporaries.
+ *          No data is created until a Function is assigned to a SubFunction, at
+ *          which point the data needed to represent the subfunction is created.
+ */
 
 class SubFunction
 {
+
 public:
 
   /// Create sub function
-  SubFunction(DiscreteFunction& f, uint i) :
+  SubFunction(Function& f, uint i) :
       f_(&f),
       i_(i)
   {
@@ -42,7 +47,7 @@ public:
   }
 
   /// Return global function
-  DiscreteFunction& function() const;
+  Function& function() const;
 
   /// Return index of the sub function
   uint index() const;
@@ -60,25 +65,13 @@ private:
   }
 
   // Pointer to discrete function
-  DiscreteFunction * const f_;
+  Function * const f_;
 
   // Sub function index
   uint const i_;
 
 };
 
-//-----------------------------------------------------------------------------
-inline DiscreteFunction& SubFunction::function() const
-{
-  return *f_;
-}
+} /* namespace dolfin */
 
-//-----------------------------------------------------------------------------
-inline uint SubFunction::index() const
-{
-  return i_;
-}
-
-}
-
-#endif
+#endif /* __DOLFIN_SUB_FUNCTION_H */

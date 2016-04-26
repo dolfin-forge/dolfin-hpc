@@ -1,28 +1,18 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Garth N. Wells 2005-2007.
-// Modified by Kristian B. Oelgaard, 2007.
-// Modified by Martin Sandve Alnes, 2008.
-// Modified by Aurélien Larcher 2013. (extension)
+// Modified by Garth N. Wells, 2007.
+// Modified by Aurélien Larcher 2013-2014.
 //
-// First added:  2003-11-28
-// Last changed: 2013-06-11
+// First added:  2007-04-02
+// Last changed: 2014-02-06
 
 #ifndef __DOLFIN_FUNCTION_H
 #define __DOLFIN_FUNCTION_H
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/types.h>
 #include <dolfin/function/GenericFunction.h>
-#include <dolfin/la/Vector.h>
-#include <dolfin/mesh/Point.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/common/Variable.h>
 
-#include "SubFunction.h"
-
-#include <ufc.h>
+#include <dolfin/common/Array.h>
 
 namespace ufl
 {
@@ -34,364 +24,216 @@ class FiniteElementBase;
 namespace dolfin
 {
 
+class Mesh;
+class Cell;
+class Form;
 class DofMap;
-class Expression;
 class FiniteElement;
 class FiniteElementSpace;
-class Form;
 class GenericVector;
-class Mesh;
+class ScratchSpace;
+class SubFunction;
 
 /**
- *  @class  Function
+ *  @class  DiscreteFunction
  *
- *  @brief  This class represents a function that can be evaluated on a mesh.
- *          The actual representation of the function can vary, but the typical
- *          representation is in terms of a mesh, a vector of degrees of
- *          freedom, a finite element and a dof map that determines the
- *          distribution of degrees of freedom on the mesh.
- *          It is also possible to have user-defined functions, either by
- *          overloading the eval function of this class or by giving a
- *          function (pointer) that returns the value of the function.
+ *  @brief  This class implements the functionality for discrete functions.
+ *          A discrete function is defined in terms of a mesh, a vector of
+ *          degrees of freedom, a finite element and a dof map. The finite
+ *          element determines how the function is defined locally on each
+ *          cell of the mesh in terms of the local degrees of freedom, and
+ *          the dof map determines how the degrees of freedom are
+ *          distributed on the mesh.
  */
 
-class Function : public Variable, public GenericFunction
+class Function : public GenericFunction
 {
 public:
 
-  /// Function types
-  enum Type
-  {
-    empty = 0, constant, discrete, expression, user
-  };
-
-  /// Convert from function type to string
-  static std::string type2string(Function::Type type);
-
-  /// Default constructor [Obsolete]
-  Function();
-
-  /// Create empty function
-  explicit Function(Mesh& mesh);
-
-  /// Create constant scalar function from given value
-  explicit Function(Mesh& mesh, real value);
-
-  /// Create constant vector function from given size and value
-  explicit Function(Mesh& mesh, uint size, real value);
-
-  /// Create constant vector function from given size and values
-  explicit Function(Mesh& mesh, const Array<real>& values);
-
-  /// Create constant tensor function from given shape and values
-  explicit Function(Mesh& mesh, const Array<uint>& shape,
-                    const Array<real>& values);
-
   /// Create discrete function for argument function i of form
-  explicit Function(GenericVector& x, Form& form, uint i);
+  /// The discrete space is defined on the i-th coefficient mesh.
+  Function(Form& form, uint i);
 
-  /// Create discrete function for argument function i of form [TODO: Obsolete]
-  explicit Function(Mesh& mesh, GenericVector& x, Form& form, uint i);
-
-  /// Create discrete function for argument function i of form
-  explicit Function(Form& form, uint i);
-
-  /// Create discrete function for argument function i of form [TODO: Obsolete]
-  explicit Function(Mesh& mesh, Form& form, uint i);
-
-  /// Create discrete function on given discrete space
-  Function(GenericVector& x, FiniteElementSpace const& space);
-
-  /// Create discrete function on given discrete space
+  /// Create discrete function from given  discrete space
   Function(FiniteElementSpace const& space);
 
-  /// Create discrete function from UFL Finite Element
+  /// Create discrete function from given pre-generated UFL Finite Element
   Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
 
-  /// Create discrete function on given discrete space [UFC1 compatible]
-  Function(Mesh& mesh, std::string const& element, std::string const& dofmap);
-
   /// Create discrete function from sub function
-  explicit Function(SubFunction sub_function);
-
-  /// Assign sub function/slice to discrete function
-  Function const& operator=(SubFunction sub_function);
-
-  /// Create expression function
-  explicit Function(Mesh& mesh, Expression const& expr);
-
-  /// Assign function
-  Function const& operator=(Function& f);
-
-  /// Create function from data file
-  explicit Function(const std::string filename);
+  Function(SubFunction const& sub_function);
 
   /// Copy constructor
-  Function(const Function& f);
+  Function(Function const& other);
 
   /// Destructor
-  virtual ~Function();
+  ~Function();
 
   //--- DEFERRED INITIALIZATION -----------------------------------------------
+  // NOTE: Beware, camembert !
 
-  /// Initialize constant function
-  void init(Mesh& mesh, real value);
+  /// Create an empty discrete function
+  Function(Mesh& mesh);
 
-  /// Initialize constant vector-valued function
-  void init(Mesh& mesh, uint i, real value);
-
-  /// Initialize discrete function for argument function i of form
-  void init(GenericVector& x, Form& form, uint i);
-
-  /// Initialize discrete function for argument function i of form [TODO: Obsolete]
-  void init(Mesh& mesh, GenericVector& x, Form& form, uint i);
+  /// Return whether the function is empty
+  bool empty() const;
 
   /// Initialize discrete function for argument function i of form
   void init(Form& form, uint i);
 
-  /// Initialize discrete function for argument function i of form [TODO: Obsolete]
-  void init(Mesh& mesh, Form& form, uint i);
-
   /// Initialize discrete function on given discrete space
   void init(FiniteElementSpace const& space);
 
-  /// Initialize discrete function on given discrete space
-  void init(GenericVector& x, FiniteElementSpace const& space);
-
-  /// Initialize discrete function from UFL Finite Element
-  void init(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
-
-  /// Initialize discrete function on given discrete space [UFC1 compatible]
-  void init(Mesh& mesh, std::string const& element, std::string const& dofmap);
-
-  /// Initialize expression function
-  void init(Mesh& mesh, Expression const& expr);
+  /// Clear attributes, function becomes empty
+  void clear();
 
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  virtual void evaluate(real* values, const real* coordinates,
-                        const ufc::cell& cell) const;
+  void evaluate(real* values, const real* coordinates,
+                const ufc::cell& cell) const;
 
-  //--- COMPOSITION GenericFunction -------------------------------------------
+  //--- INTERFACE -------------------------------------------------------------
 
-  /// Return the mesh
-  virtual Mesh& mesh() const;
+  /// Evaluate function at given point
+  void eval(real* values, const real* x) const;
 
   /// Return the rank of the value space
-  virtual uint rank() const;
+  uint rank() const;
 
   /// Return the dimension of the value space for axis i
-  virtual uint dim(uint i) const;
+  uint dim(uint i) const;
 
-  /// Return the value size
+  // Return the value size
   uint value_size() const;
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const;
 
   /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const UFCCell& ufc_cell,
+  void interpolate(real* coefficients, const ufc::cell& cell,
                    const ufc::finite_element& finite_element,
-                   const Cell& cell) const;
+                   const Cell& dolfin_cell) const;
 
-  /// Evaluate function at given point (overload for user-defined function)
-  virtual void eval(real* values, const real* x) const;
+  /// Interpolate function to finite element space on facet
+  void interpolate(real* coefficients, const ufc::cell& cell,
+                   const ufc::finite_element& finite_element,
+                   const Cell& dolfin_cell, uint facet) const;
+
+  /// Synchronize values
+  inline void sync() { this->sync_ghosts(); }
 
   /// Display basic information
-  virtual void disp() const;
-
-  /// Synchronize ghosted entries across processes
-  void sync_ghosts();
+  void disp() const;
 
   //---------------------------------------------------------------------------
 
-  /// Interpolate function to finite element space on cell
-  void interpolate(real* coefficients, const UFCCell& ufc_cell,
-                   const ufc::finite_element& finite_element, const Cell& cell,
-                   int facet) const;
+  /// Return the mesh
+  Mesh& mesh() const;
 
-  /// Return the type of function
-  Type type() const;
+  //---------------------------------------------------------------------------
 
-  //--- Wrapper Facade for DiscreteFunction -----------------------------------
-
-  /// Return the vector associated with a DiscreteFunction
-  GenericVector& vector() const;
-
-  /// Return the discrete space of a DiscreteFunction
+  /// Return the discrete space
   FiniteElementSpace const& space() const;
 
-  /// Return the signature of a DiscreteFunction
-  std::string signature() const;
+  /// Return vector
+  GenericVector& vector() const;
 
-  /// Return the number of sub functions of a DiscreteFunction
+  /// Compute interpolation of given function to discrete function
+  void interpolate(GenericFunction const& other);
+
+  /// Compute function decomposition into scalar component functions
+  Array<Function *> decompose();
+
+  /// Return the number of sub functions i.e number of subspaces
   uint num_sub_functions() const;
 
-  /// Get the size of the block
+  /// Get the size of tabulated block array
   uidx block_size() const;
 
   /// Create a cell tabulated block array
   real * create_block() const;
 
-  /// Get values of a DiscreteFunction from cell tabulated block array
+  /// Get values to cell tabulated block array
   void get_block(real *& values) const;
 
-  /// Set values to a DiscreteFunction from cell tabulated block array
+  /// Set values from cell tabulated block array
   void set_block(real *& values);
 
-  /// Add values to a DiscreteFunction from cell tabulated block array
+  /// Add values from cell tabulated block array
   void add_block(real *& values);
 
-  /// Extract sub function/slice from a DiscreteFunction
-  SubFunction operator[](uint i);
+  /// Swap functions
+  Function& swap(Function& other);
 
-  //---------------------------------------------------------------------------
+  //--- OPERATORS -------------------------------------------------------------
+  // NOTE: A sequence of operations on Functions must be finalized with a sync.
 
-  /// Interpolate values to the discrete function from the given function
-  void interpolate(const Function& other);
+  /// Assignment, fill the function if empty, error if space mismatch
+  Function& operator=(Function const& other);
 
-  /// Decompose discrete function into scalar functions
-  Array<Function *> decompose();
+  /// Addition, error if empty or space mismatch
+  Function& operator+=(Function const& other);
 
-protected:
+  /// Subtraction, error if empty or space mismatch
+  Function& operator-=(Function const& other);
 
-  /// Create user-defined function (evaluation operator must be overloaded)
-  explicit Function(Mesh& mesh, uint const& rank, uint const& dim);
+  /// Component-wise multiplication, error if empty or space mismatch
+  Function& operator*=(Function const& other);
 
-  /// Access current cell
-  /// (available during assembly for user-defined function)
-  Cell const& cell() const;
+  /// AXPY
+  Function& axpy(real value, Function const& other);
 
-  /// Access current facet normal
-  /// (available during assembly for user-defined function)
-  Point normal() const;
+  /// Assignment to a real value, error if empty
+  Function& operator=(real value);
 
-  /// Access current facet
-  /// (available during assembly for user-defined functions)
-  int facet() const;
+  /// Addition to a real number, error if empty [Not implemented]
+  Function& operator+=(real value);
+
+  /// Subtraction of a real number, error if empty [Not implemented]
+  Function& operator-=(real value);
+
+  /// Multiplication with a real number, error if empty
+  Function& operator*=(real value);
+
+  /// Division by a real number, error if empty
+  Function& operator/=(real value);
+
+  /// Zero the vector
+  Function& zero();
+
+  /// Update values
+  void sync_ghosts();
 
 private:
 
-  // Pointer to current implementation (letter base class)
-  GenericFunction* f_;
+  /// Initialize Vector
+  void InitializeVector();
 
-  // Type of function
-  Type type_;
+  /// Initialize ghost pattern
+  void InitializeGhosts();
 
-  // Pointer to current cell (if any, otherwise 0)
-  mutable Cell const* cell_;
+  /// Mesh, only allow modification by swap
+  Mesh * const mesh_;
 
-  // Current facet (if any, otherwise -1)
-  mutable int facet_;
+  /// Discrete space
+  FiniteElementSpace * discrete_space_;
+  FiniteElement const * element_;
+  DofMap const * dofmap_;
+  ScratchSpace * scratch;
+
+  /// Vector of dofs
+  GenericVector * X_;
+
+  /// Renumbered dof_map;
+  bool renumbered_;
+  uint cache_size_;
+  uint * indices_;
+  real * data_cache_;
+  _map<uint, uint> * cache_mapping_;
 
 };
 
-//--- INLINES -----------------------------------------------------------------
+} /* namespace dolfin */
 
-//--- UFC INTERFACE -----------------------------------------------------------
-//-----------------------------------------------------------------------------
-inline void Function::evaluate(real* values, const real* coordinates,
-                               const ufc::cell& cell) const
-{
-  f_->evaluate(values, coordinates, cell);
-}
-//--- COMPOSITION GenericFunction ---------------------------------------------
-inline Mesh& Function::mesh() const
-{
-  if (f_ == NULL)
-  {
-    error("Function is not initialized, mesh() cannot be called.");
-  }
-  return f_->mesh();
-}
-//-----------------------------------------------------------------------------
-inline uint Function::rank() const
-{
-  if (type_ == Function::user)
-  {
-    error("uint UserFunction::rank() const should be overloaded");
-  }
-  return f_->rank();
-}
-//-----------------------------------------------------------------------------
-inline uint Function::dim(unsigned int i) const
-{
-  if (type_ == Function::user)
-  {
-    error("uint UserFunction::dim(uint i) const should be overloaded");
-  }
-  return f_->dim(i);
-}
-//-----------------------------------------------------------------------------
-inline uint Function::value_size() const
-{
-  return f_->value_size();
-}
-//-----------------------------------------------------------------------------
-inline void Function::interpolate_vertex_values(real* values) const
-{
-  f_->interpolate_vertex_values(values);
-}
-//-----------------------------------------------------------------------------
-inline void Function::interpolate(real* coefficients, const UFCCell& ufc_cell,
-                                  const ufc::finite_element& finite_element,
-                                  const Cell& cell) const
-{
-  // Make current cell available to user-defined function
-  cell_ = &cell;
-
-  // Interpolate function
-  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
-
-  // Make cell unavailable
-  cell_ = NULL;
-}
-//-----------------------------------------------------------------------------
-inline void Function::interpolate(real* coefficients, const UFCCell& ufc_cell,
-                                  const ufc::finite_element& finite_element,
-                                  const Cell& cell, int facet) const
-{
-  // Make current cell and facet are available to user-defined function
-  cell_ = &cell;
-  facet_ = facet;
-
-  // Interpolate function
-  f_->interpolate(coefficients, ufc_cell, finite_element, cell);
-
-  // Make cell and facet unavailable
-  cell_ = NULL;
-  facet_ = -1;
-}
-//-----------------------------------------------------------------------------
-inline void Function::eval(real* values, const real* x) const
-{
-  f_->eval(values, x);
-}
-//-----------------------------------------------------------------------------
-inline void Function::sync_ghosts()
-{
-  f_->sync_ghosts();
-}
-//-----------------------------------------------------------------------------
-inline void Function::disp() const
-{
-  cout << "Function" << endl;
-  cout << "------- " << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Type: " << this->type() << " ("
-       << Function::type2string(this->type()) << ")" << endl;
-  if (f_ != NULL)
-  {
-    f_->disp();
-  }
-  // End indentation
-  end();
-}
-//-----------------------------------------------------------------------------
-
-}
-
-#endif
+#endif /* DOLFIN_FUNCTION_H */

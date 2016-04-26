@@ -11,6 +11,7 @@ namespace dolfin
 {
 
 class Function;
+class GenericFunction;
 
 class FunctionInterpolation
 {
@@ -18,7 +19,7 @@ class FunctionInterpolation
 public:
 
   ///
-  FunctionInterpolation(Function const& F0, Function& F1);
+  explicit FunctionInterpolation(GenericFunction const& F0, Function& F1);
 
   ///
   ~FunctionInterpolation();
@@ -29,14 +30,14 @@ public:
 private:
 
   ///
-  void interpolateSameMesh(Function const& F0, Function& F1);
+  void interpolateSM(GenericFunction const& F0, Function& F1);
 
   ///
-  void interpolateNonMatchingMeshes(Function const& F0, Function& F1);
+  void interpolateNM(GenericFunction const& F0, Function& F1);
 
   //--- ATTRIBUTES ------------------------------------------------------------
 
-  Function const& F0_;
+  GenericFunction const& F0_;
   Function& F1_;
 
 };

@@ -2,11 +2,11 @@
 
 #ifdef HAVE_CHECK
 
-#include "SubDomain/SubDomain.h"
-#include "CellTypes/CellTypes.h"
-#include "UnitMeshes/UnitMeshes.h"
-#include "StructuredGrid/StructuredGrid.h"
-#include "VertexNormal/VertexNormal.h"
+#include "Constant/Constant.h"
+#include "Expression/Expression.h"
+#include "Real/Real.h"
+#include "Value/Value.h"
+#include "UFCFunction/UFCFunction.h"
 
 #include <check.h>
 
@@ -24,48 +24,34 @@ Suite *suite()
   TCase *tc;
   Suite *s;
 
-  s = suite_create("mesh");
+  s = suite_create("function");
 
-  tc = tcase_create("SubDomain");
-  tcase_add_test(tc, test_SubDomain);
+  tc = tcase_create("Constant");
+  tcase_add_test(tc, test_Constant);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
-  tc = tcase_create("CellTypes");
-  tcase_add_test(tc, test_PointCell);
-  tcase_add_test(tc, test_IntervalCell);
-  tcase_add_test(tc, test_TriangleCell);
-  tcase_add_test(tc, test_TetrahedronCell);
-  tcase_add_test(tc, test_QuadrilateralCell);
-  tcase_add_test(tc, test_HexahedronCell);
+  tc = tcase_create("Expression");
+  tcase_add_test(tc, test_Expression);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
-  tc = tcase_create("UnitMeshes");
-  tcase_add_test(tc, test_UnitInterval);
-  tcase_add_test(tc, test_UnitSquare);
-  tcase_add_test(tc, test_UnitCube);
-  tcase_add_test(tc, test_Box);
-  tcase_add_test(tc, test_UnitDisk);
+  tc = tcase_create("Value");
+  tcase_add_test(tc, test_Value);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
-  tc = tcase_create("StructuredGrid");
-  tcase_add_test(tc, test_BoundingBox);
-  tcase_add_test(tc, test_StructuredGrid_interval);
-  tcase_add_test(tc, test_StructuredGrid_triangle);
-  tcase_add_test(tc, test_StructuredGrid_tetrahedron);
-  tcase_add_test(tc, test_StructuredGrid_quadrilateral);
-  tcase_add_test(tc, test_StructuredGrid_hexahedron);
+  tc = tcase_create("Real");
+  tcase_add_test(tc, test_Real);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
 
-  tc = tcase_create("VertexNormal");
-  tcase_add_test(tc, test_VertexNormal );
+  tc = tcase_create("UFCFunction");
+  tcase_add_test(tc, test_UFCFunction);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);
@@ -92,7 +78,7 @@ int main(void)
 
 int main(void)
 {
-  fprintf(stderr, "*** Check is required for dolfin/mesh tests ***\n");
+  fprintf(stderr, "*** Check is required for dolfin/function tests ***\n");
   return 0;
 }
 

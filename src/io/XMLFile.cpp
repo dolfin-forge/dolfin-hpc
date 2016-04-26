@@ -28,9 +28,8 @@
 #include <dolfin/graph/Graph.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/function/Function.h>
-#include <dolfin/function/DiscreteFunction.h>
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/parameter/Parameter.h>
 #include <dolfin/parameter/ParameterList.h>
@@ -166,20 +165,12 @@ void XMLFile::operator>>(Function& f)
   parseFile();
 
   // Create the function (we're all friends here) (friends my ass).
-  if (f.type() == Function::discrete)
+  if ((std::strcmp(f.space().element().signature(),
+                   finite_element_signature.c_str()) != 0)
+      || (std::strcmp(f.space().dofmap().signature(),
+                      dof_map_signature.c_str()) != 0))
   {
-    if ((std::strcmp(f.space().element().signature(),
-                     finite_element_signature.c_str()) != 0)
-        || (std::strcmp(f.space().dofmap().signature(),
-                        dof_map_signature.c_str()) != 0))
-    {
-      error(
-          "Reading from XML, stored function does not match with provided space");
-    }
-  }
-  else
-  {
-    f.init(*mesh, finite_element_signature, dof_map_signature);
+    error("Reading from XML, stored function does not match provided space");
   }
   *this >> f.vector();
 }
@@ -757,10 +748,6 @@ void XMLFile::operator<<(MeshFunction<bool>& meshfunction)
 //-----------------------------------------------------------------------------
 void XMLFile::operator<<(Function& f)
 {
-  // Can only save discrete functions
-  if (f.type() != Function::discrete) error(
-      "Only discrete functions can be saved in XML format.");
-
   // Begin function
   FILE *fp = openFile();
   fprintf(fp, "  <function> \n");

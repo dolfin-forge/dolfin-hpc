@@ -11,6 +11,7 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/Vertex.h>
@@ -19,7 +20,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-FunctionInterpolation::FunctionInterpolation(Function const& F0, Function& F1) :
+FunctionInterpolation::FunctionInterpolation(GenericFunction const& F0,
+                                             Function& F1) :
     F0_(F0),
     F1_(F1)
 {
@@ -37,29 +39,33 @@ void FunctionInterpolation::compute()
   if ((F0_.rank() != F1_.rank()) || (F0_.value_size() != F1_.value_size())
       || (F0_.dim(0) != F0_.dim(0)))
   {
-    error("Interpolation between functions with different value shape");
+    error("Interpolation between functions with different value shape:n"
+          "F0: rank = %d, value_size = %d, dim(0) = %d\n"
+          "F1: rank = %d, value_size = %d, dim(0) = %d\n",
+          F0_.rank(), F0_.value_size(), F0_.dim(0), F1_.rank(),
+          F1_.value_size(), F1_.dim(0));
   }
 
-  //FIXME: make sure that non-discrete function implies no mesh dependency
-  if (F0_.type() != Function::discrete || F0_.mesh() == F1_.mesh())
+  //
+  if (&F0_.mesh() == &F1_.mesh())
   {
-    interpolateSameMesh(F0_, F1_);
+    interpolateSM(F0_, F1_);
   }
   else
   {
-    interpolateNonMatchingMeshes(F0_, F1_);
+    interpolateNM(F0_, F1_);
   }
 }
 
 //-----------------------------------------------------------------------------
-void FunctionInterpolation::interpolateSameMesh(Function const& F0,
-                                                Function& F1)
+void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
+                                          Function& F1)
 {
   message(1, "Function interpolation on same mesh");
-  dolfin_assert(F0_.type() != Function::discrete || F0_.mesh() == F1_.mesh());
+  dolfin_assert(F0_.mesh() == F1_.mesh());
 
   //
-  if ((F0.type() != Function::discrete) || F1_.space().is_flattenable())
+  if (F1_.space().is_flattenable())
   {
     // Analytical expression and flattened space (naive implementation)
     Array<ufc::finite_element const*> const& Sflt =
@@ -107,8 +113,8 @@ void FunctionInterpolation::interpolateSameMesh(Function const& F0,
 }
 
 //-----------------------------------------------------------------------------
-void FunctionInterpolation::interpolateNonMatchingMeshes(Function const& F0,
-                                                         Function& F1)
+void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
+                                          Function& F1)
 {
   message(1, "Function interpolation on non-matching meshes");
   dolfin_assert(F0.mesh() != F1.mesh());

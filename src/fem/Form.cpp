@@ -78,9 +78,7 @@ FiniteElementSpace * Form::create_space(uint i) const
   ufc::dofmap * test_d = this->form().create_dofmap(i);
   // For an argument the mesh is the one passed to the form and for coefficient
   // the mesh passed to the function.
-  Mesh& mesh = (
-      i < this->rank() ? this->mesh() : this->coefficients()[i - this->rank()]->mesh());
-  return new FiniteElementSpace(mesh, *test_f, *test_d, true);
+  return new FiniteElementSpace(dofmaps()[i].mesh(), *test_f, *test_d, true);
 }
 
 //----------------------------------------------------------------------------

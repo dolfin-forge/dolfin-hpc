@@ -65,7 +65,7 @@ void teardown()
   //  dolfin_finalize();
 }
 
-Suite *ufl_suite()
+Suite *suite()
 {
   TCase *tc;
   Suite *s;
@@ -290,7 +290,7 @@ Suite *ufl_suite()
 int main(void)
 {
   int number_failed;
-  Suite* s = ufl_suite();
+  Suite* s = suite();
   SRunner* sr = srunner_create(s);
 
   srunner_run_all(sr, CK_NORMAL);

@@ -174,6 +174,10 @@ int main(int argc, char** argv)
 
     {
       Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
+      File file("cube.pvd");
+      MeshFunction<uint> partitions(mesh, mesh.topology().dim());
+      partitions = dolfin::MPI::processNumber();
+      file << partitions;
       NodeNormal vn(mesh, NodeNormal::facet);
       test("cube_facet", vn);
     }

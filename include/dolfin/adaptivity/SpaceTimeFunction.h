@@ -12,6 +12,7 @@
 #include <ufc.h>
 
 #include <stdint.h>
+#include <map>
 
 namespace dolfin
 {

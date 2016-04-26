@@ -1,593 +1,767 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Garth N. Wells 2005-2007.
-// Modified by Martin Sandve Alnes 2008.
-// Modified by Aurélien Larcher 2013-2014. (extension and partial rewrite)
+// Modified by Garth N. Wells, 2007.
+// Modified by Dag Lindbo, 2008.
+// Modified by Kristen Kaasbjerg, 2008.
+// Modified by Niclas Jansson, 2008-2010.
+// Modified by Aurélien Larcher 2013-2014.
 //
-// First added:  2003-11-28
+// First added:  2007-04-02
 // Last changed: 2014-02-06
-//
-// The class Function serves as the envelope class and holds a pointer
-// to a letter class that is a subclass of GenericFunction. All the
-// functionality is handled by the specific implementation (subclass).
 
 #include <dolfin/function/Function.h>
 
-#include <dolfin/elements/ElementLibrary.h>
-#include <dolfin/io/File.h>
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/types.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/Form.h>
+#include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
-#include <dolfin/function/ConstantFunction.h>
-#include <dolfin/function/DiscreteFunction.h>
-#include <dolfin/function/ExpressionFunction.h>
 #include <dolfin/function/FunctionDecomposition.h>
 #include <dolfin/function/FunctionInterpolation.h>
-#include <dolfin/function/UserFunction.h>
-#include <dolfin/mesh/Vertex.h>
+#include <dolfin/function/SubFunction.h>
+#include <dolfin/la/Vector.h>
+
+#include <algorithm>
+#include <set>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-std::string Function::type2string(Function::Type type)
-{
-  switch (type)
-    {
-    case empty:
-      return "empty";
-    case constant:
-      return "constant";
-    case discrete:
-      return "discrete";
-    case expression:
-      return "expression";
-    case user:
-      return "user";
-    default:
-      error("Unknown function type: %d.", type);
-      break;
-    }
-
-  return "";
-}
-//-----------------------------------------------------------------------------
-Function::Function() :
-    Variable("*no name*", "empty function"),
-    f_(NULL),
-    type_(empty),
-    cell_(0),
-    facet_(-1)
+Function::Function(Mesh& mesh) :
+    GenericFunction(),
+    mesh_(&mesh),
+    discrete_space_(NULL),
+    element_(NULL),
+    dofmap_(NULL),
+    scratch(NULL),
+    X_(NULL),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
   // Do nothing
 }
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh) :
-    Variable("*no name*", "empty function"),
-    f_(NULL),
-    type_(user),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new UserFunction(mesh, this);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, real value) :
-    Variable("*no name*", "constant function"),
-    f_(NULL),
-    type_(constant),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new ConstantFunction(mesh, value);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, uint size, real value) :
-    Variable("*no name*", "constant function"),
-    f_(NULL),
-    type_(constant),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new ConstantFunction(mesh, size, value);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, const Array<real>& values) :
-    Variable("*no name*", "constant function"),
-    f_(NULL),
-    type_(constant),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new ConstantFunction(mesh, values);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, const Array<uint>& shape,
-                   const Array<real>& values) :
-    Variable("*no name*", "constant function"),
-    f_(NULL),
-    type_(constant),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new ConstantFunction(mesh, shape, values);
-}
-//-----------------------------------------------------------------------------
-Function::Function(GenericVector& x, Form& form, uint i) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(x, form, i);
-}
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, GenericVector& x, Form& form, uint i) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(mesh, x, form, i);
-}
+
 //-----------------------------------------------------------------------------
 Function::Function(Form& form, uint i) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
+    GenericFunction(),
+    mesh_(&form.dofmaps()[i].mesh()),
+    discrete_space_(new FiniteElementSpace(form, i)),
+    element_(&discrete_space_->element()),
+    dofmap_(&discrete_space_->dofmap()),
+    scratch(new ScratchSpace(*discrete_space_)),
+    X_(new Vector()),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
-  f_ = new DiscreteFunction(form, i);
+  // Initialise function
+  InitializeVector();
 }
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, Form& form, uint i) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(mesh, form, i);
-}
-//-----------------------------------------------------------------------------
-Function::Function(GenericVector& x, FiniteElementSpace const& space) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  f_ = new DiscreteFunction(x, space);
-}
+
 //-----------------------------------------------------------------------------
 Function::Function(FiniteElementSpace const& space) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
+    GenericFunction(),
+    mesh_(&space.mesh()),
+    discrete_space_(new FiniteElementSpace(space)),
+    element_(&discrete_space_->element()),
+    dofmap_(&discrete_space_->dofmap()),
+    scratch(new ScratchSpace(*discrete_space_)),
+    X_(new Vector()),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
-  f_ = new DiscreteFunction(space);
+  // Initialise function
+  InitializeVector();
 }
+
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
+    GenericFunction(),
+    mesh_(&mesh),
+    discrete_space_(new FiniteElementSpace(mesh, finite_element)),
+    element_(&discrete_space_->element()),
+    dofmap_(&discrete_space_->dofmap()),
+    scratch(new ScratchSpace(*discrete_space_)),
+    X_(new Vector()),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
-  f_ = new DiscreteFunction(mesh, finite_element);
+  // Initialise function
+  InitializeVector();
 }
-//-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, std::string const& element,
-                   std::string const& dofmap) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  ufc::finite_element * f = ElementLibrary::create_finite_element(element);
-  ufc::dofmap * d = ElementLibrary::create_dof_map(dofmap);
-  FiniteElementSpace space(mesh, *f, *d, true);
-  f_ = new DiscreteFunction(space);
-}
-////-----------------------------------------------------------------------------
-Function::Function(SubFunction sub_function) :
-    Variable("*no name*", "discrete function"),
-    f_(NULL),
-    type_(discrete),
-    cell_(0),
-    facet_(-1)
-{
-  this->f_ = new DiscreteFunction(sub_function);
-}
-//-----------------------------------------------------------------------------
-Function const& Function::operator=(SubFunction sub_function)
-{
-  if (f_)
-  {
-    delete f_;
-  }
 
-  f_ = new DiscreteFunction(sub_function);
-
-  rename("*no name*", "discrete function");
-  type_ = discrete;
-
-  return *this;
-}
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, Expression const& expr) :
-    Variable("*no name*", "expression function"),
-    f_(NULL),
-    type_(expression),
-    cell_(0),
-    facet_(-1)
+Function::Function(SubFunction const& sub_function) :
+    GenericFunction(),
+    mesh_(&sub_function.function().mesh()),
+    discrete_space_(new FiniteElementSpace(sub_function.function().space(),
+                                           sub_function.index())),
+    element_(&discrete_space_->element()),
+    dofmap_(&discrete_space_->dofmap()),
+    scratch(new ScratchSpace(*discrete_space_)),
+    X_(new Vector()),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
-  f_ = new ExpressionFunction(mesh, expr);
-}
-//-----------------------------------------------------------------------------
-Function const& Function::operator=(Function& f)
-{
+  // Initialize vector, scratch space and ghosts
+  InitializeVector();
 
-  // FIXME: Handle other assignments
-  if (f.type_ != discrete)
-  {
-    error("Can only handle assignment from discrete functions (for now).");
-  }
+  // Copy subvector, naive implementation
+  Function& gFunc = sub_function.function();
+  DofMap const& gDm = gFunc.space().dofmap();
+  uint const gLocalDim = gDm.local_dimension();
+  uint const gDmOffset = gDm.sub_dofmaps_offsets()[sub_function.index()];
+  uint const thisLocalDim = scratch->local_dimension;
 
-  // Either create or copy discrete function
-  if (type_ == discrete)
+  // Sync ghosts before getting the block
+  real * gblock = gFunc.create_block();
+  gFunc.sync_ghosts();
+  gFunc.get_block(gblock);
+
+  // Loop baby, loop...
+  uint gBlockOffset = 0;
+  uint ii = 0;
+  real * this_block = this->create_block();
+  for (CellIterator cell(*mesh_); !cell.end(); ++cell, gBlockOffset += gLocalDim)
   {
-    *static_cast<DiscreteFunction*>(this->f_) =
-        *static_cast<DiscreteFunction*>(f.f_);
+    for (uint dof = 0; dof < thisLocalDim; ++dof)
+    {
+      this_block[ii++] = gblock[gBlockOffset + gDmOffset + dof];
+    }
   }
-  else
-  {
-    delete this->f_;
-    this->f_ = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f_));
-    type_ = discrete;
-    rename(f.name(), "discrete function");
-  }
-  return *this;
+  this->set_block(this_block);
+
+  delete[] this_block;
+  delete[] gblock;
 }
+
 //-----------------------------------------------------------------------------
-Function::Function(const std::string filename) :
-    Variable("*no name*", "discrete function from data file"),
-    f_(NULL),
-    type_(empty),
-    cell_(0),
-    facet_(-1)
+Function::Function(Function const& other) :
+    GenericFunction(),
+    mesh_(&other.mesh()),
+    discrete_space_(NULL),
+    element_(NULL),
+    dofmap_(NULL),
+    scratch(NULL),
+    X_(NULL),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
 {
-  File file(filename);
-  file >> *this;
-}
-//-----------------------------------------------------------------------------
-Function::Function(Function const& f) :
-    f_(NULL),
-    type_(f.type()),
-    cell_(0),
-    facet_(-1)
-{
-  if (f.type() == discrete)
+  if(!other.empty())
   {
-    this->f_ = new DiscreteFunction(*static_cast<DiscreteFunction*>(f.f_));
-    rename(f.name(), "discrete function");
-  }
-  else if (f.type() == constant)
-  {
-    this->f_ = new ConstantFunction(*static_cast<ConstantFunction*>(f.f_));
-    rename(f.name(), "constant function");
-  }
-  else if (f.type() == user)
-  {
-    this->f_ = new UserFunction(*static_cast<UserFunction*>(f.f_));
-    rename(f.name(), "user function");
-  }
-  else if (f.type() == empty)
-  {
-    rename(f.name(), "empty function");
-  }
-  else
-  {
-    error("Copy constructor works for discrete,"
-          "constant and empty functions only (so far).");
+    *this = other;
+    this->sync_ghosts();
   }
 }
+
 //-----------------------------------------------------------------------------
 Function::~Function()
 {
-  delete f_;
+  clear();
 }
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, real value)
-{
-  if (f_)
-  {
-    delete f_;
-  }
 
-  f_ = new ConstantFunction(mesh, value);
-  type_ = constant;
-}
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, uint i, real value)
+bool Function::empty() const
 {
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new ConstantFunction(mesh, i, value);
-  type_ = constant;
+  return (discrete_space_ == NULL);
 }
-//-----------------------------------------------------------------------------
-void Function::init(GenericVector& x, Form& form, uint i)
-{
-  if (f_)
-  {
-    delete f_;
-  }
 
-  //FIXME: Assumes one mesh per form
-  f_ = new DiscreteFunction(form.mesh(), x, form, i);
-  type_ = discrete;
-}
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, GenericVector& x, Form& form, uint i)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new DiscreteFunction(mesh, x, form, i);
-  type_ = discrete;
-}
 //-----------------------------------------------------------------------------
 void Function::init(Form& form, uint i)
 {
-  if (f_)
+  if(mesh_ != &form.dofmaps()[i].mesh())
   {
-    delete f_;
+    error("Function : mesh mismatch between function and coefficient %d", i);
   }
+  //
+  clear();
+  discrete_space_ = new FiniteElementSpace(form, i);
+  element_ = &discrete_space_->element();
+  dofmap_ = &discrete_space_->dofmap();
+  scratch = new ScratchSpace(*discrete_space_);
+  X_ = new Vector();
+  //
+  InitializeVector();
+}
 
-  //FIXME: Assumes one mesh per form
-  f_ = new DiscreteFunction(form.mesh(), form, i);
-  type_ = discrete;
-}
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, Form& form, uint i)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-
-  f_ = new DiscreteFunction(mesh, form, i);
-  type_ = discrete;
-}
-//-----------------------------------------------------------------------------
-void Function::init(GenericVector& x, FiniteElementSpace const& space)
-{
-  if (f_)
-  {
-    delete f_;
-  }
-  //TODO: Check mesh consistency
-  f_ = new DiscreteFunction(x, space);
-  type_ = discrete;
-}
 //-----------------------------------------------------------------------------
 void Function::init(FiniteElementSpace const& space)
 {
-  if (f_)
+  if(mesh_ != &space.mesh())
   {
-    delete f_;
+    error("Function : mesh mismatch between function and space");
   }
-  //TODO: Check mesh consistency
-  f_ = new DiscreteFunction(space);
-  type_ = discrete;
+  //
+  clear();
+  discrete_space_ = new FiniteElementSpace(space);
+  element_ = &discrete_space_->element();
+  dofmap_ = &discrete_space_->dofmap();
+  scratch = new ScratchSpace(*discrete_space_);
+  X_ = new Vector();
+  //
+  InitializeVector();
 }
+
 //-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, ufl::FiniteElementBase const& finite_element)
+void Function::clear()
 {
-  if (f_)
+  delete X_;
+  X_ = NULL;
+  delete discrete_space_;
+  discrete_space_ = NULL;
+  element_ = NULL;
+  dofmap_ = NULL;
+  delete scratch;
+  scratch = NULL;
+  delete[] indices_;
+  indices_ = NULL;
+  delete[] data_cache_;
+  data_cache_ = NULL;
+  delete cache_mapping_;
+  cache_mapping_ = NULL;
+  renumbered_ = true;
+}
+
+//--- UFC INTERFACE -----------------------------------------------------------
+void Function::evaluate(real* values, const real* x,
+                        const ufc::cell& cell) const
+{
+  UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
+
+  // Get expansion coefficients on cell
+  dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
+  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+
+  // Compute linear combination
+  for (uint j = 0; j < scratch->size; ++j)
   {
-    delete f_;
+    values[j] = 0.0;
   }
-
-  f_ = new DiscreteFunction(mesh, finite_element);
-  type_ = discrete;
-}
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, std::string const& element,
-                    std::string const& dofmap)
-{
-  if (f_)
+  for (uint i = 0; i < element_->space_dimension(); ++i)
   {
-    delete f_;
+    element_->evaluate_basis(i, scratch->values, x, *ufc_cell);
+    for (uint j = 0; j < scratch->size; ++j)
+    {
+      values[j] += scratch->coefficients[i] * scratch->values[j];
+    }
   }
-
-  ufc::finite_element * f = ElementLibrary::create_finite_element(element);
-  ufc::dofmap * d = ElementLibrary::create_dof_map(dofmap);
-  FiniteElementSpace space(mesh, *f, *d, true);
-  f_ = new DiscreteFunction(space);
-  type_ = discrete;
 }
-//-----------------------------------------------------------------------------
-void Function::init(Mesh& mesh, Expression const& expr)
+
+//--- GenericFunction ---------------------------------------------------------
+Mesh& Function::mesh() const
 {
-  if (f_)
+  return (*mesh_);
+}
+
+//-----------------------------------------------------------------------------
+void Function::eval(real* values, const real* x) const
+{
+  // Find the cell that contains x
+  Point p(x, mesh_->geometry().dim());
+  Array<uint> cells;
+  mesh_->intersector().overlap(p, cells);
+  if (cells.size() < 1)
   {
-    delete f_;
-  }
+    if (!mesh_->is_distributed())
+    {
+      error("Unable to evaluate function at given point (not inside domain).");
+    }
 
-  f_ = new ExpressionFunction(mesh, expr);
-  type_ = expression;
-}
-//-----------------------------------------------------------------------------
-Function::Type Function::type() const
-{
-  return type_;
-}
-//--- Wrapper Facade for DiscreteFunction -------------------------------------
-//-----------------------------------------------------------------------------
-GenericVector& Function::vector() const
-{
-  if (type_ != discrete)
-  {
-    error("A vector can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->vector();
-}
-//-----------------------------------------------------------------------------
-FiniteElementSpace const& Function::space() const
-{
-  if (type_ != discrete)
-  {
-    error("The dofmap can only be extracted from discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->space();
-}
-//-----------------------------------------------------------------------------
-std::string Function::signature() const
-{
-  if (type_ != discrete)
-  {
-    error("A signature can only be returned by discrete functions.");
-  }
-
-  return (static_cast<DiscreteFunction*>(f_))->signature();
-}
-//-----------------------------------------------------------------------------
-uint Function::num_sub_functions() const
-{
-  if (type_ != discrete) error("Only discrete functions have sub functions.");
-
-  return static_cast<DiscreteFunction*>(f_)->num_sub_functions();
-}
-//-----------------------------------------------------------------------------
-uidx Function::block_size() const
-{
-  if (type_ != discrete)
-  {
-    error("Block array can be created only from discrete functions.");
+    for (uint j = 0; j < scratch->size; ++j)
+    {
+      values[j] = dolfin::DOLFIN_REAL_MAX;
+    }
+    return;
   }
 
-  return (static_cast<DiscreteFunction*>(f_))->block_size();
-}
-//-----------------------------------------------------------------------------
-real * Function::create_block() const
-{
-  if (type_ != discrete)
-  {
-    error("Block array can be created only from discrete functions.");
-  }
+  Cell cell(*mesh_, cells[0]);
 
-  return (static_cast<DiscreteFunction*>(f_))->create_block();
-}
-//-----------------------------------------------------------------------------
-void Function::get_block(real *& values) const
-{
-  if (type_ != discrete)
-  {
-    error("Values can be retrieved only from discrete functions.");
-  }
+  // Change to global numbering
+  scratch->cell.update(cell);
 
-  return (static_cast<DiscreteFunction*>(f_))->get_block(values);
-}
-//-----------------------------------------------------------------------------
-void Function::set_block(real *& values)
-{
-  if (type_ != discrete)
-  {
-    error("Values can be set only to discrete functions.");
-  }
+  // Get expansion coefficients on cell
+  dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
 
-  return (static_cast<DiscreteFunction*>(f_))->set_block(values);
-}
-//-----------------------------------------------------------------------------
-void Function::add_block(real *& values)
-{
-  if (type_ != discrete)
+  // Compute linear combination
+  for (uint j = 0; j < scratch->size; ++j)
   {
-    error("Values can be set only to discrete functions.");
+    values[j] = 0.0;
   }
-
-  return (static_cast<DiscreteFunction*>(f_))->add_block(values);
-}
-//-----------------------------------------------------------------------------
-SubFunction Function::operator[](uint i)
-{
-  if (type_ != discrete)
+  for (uint i = 0; i < element_->space_dimension(); ++i)
   {
-    error("Sub functions can only be extracted from discrete functions.");
+    element_->evaluate_basis(i, scratch->values, x, scratch->cell);
+    for (uint j = 0; j < scratch->size; ++j)
+    {
+      values[j] += scratch->coefficients[i] * scratch->values[j];
+      // Check that values are not NaN
+      dolfin_assert(values[j] == values[j]);
+    }
   }
-
-  SubFunction sub_function(*static_cast<DiscreteFunction*>(f_), i);
-  return sub_function;
 }
+
 //-----------------------------------------------------------------------------
-void Function::interpolate(Function const& other)
+uint Function::rank() const
 {
-  if (type_ == discrete)
+  dolfin_assert(element_);
+  return element_->value_rank();
+}
+
+//-----------------------------------------------------------------------------
+uint Function::dim(uint i) const
+{
+  dolfin_assert(element_);
+  return element_->value_dimension(i);
+}
+
+//-----------------------------------------------------------------------------
+uint Function::value_size() const
+{
+  dolfin_assert(scratch);
+  return scratch->size;
+}
+
+//-----------------------------------------------------------------------------
+void Function::interpolate_vertex_values(real* values) const
+{
+  // Local data for interpolation on each cell
+  uint const num_verts = mesh_->size(0);
+
+  // Make sure vector's ghost values are updated)
+  X_->apply();
+
+  // Interpolate vertex values on each cell and pick the last value
+  // if two or more cells disagree on the vertex values
+  //FIXME: Well... discontinuous approximations might disagree
+  if (this->space().is_cellwise_defined())
   {
-    // FIXME:
-    // The second argument should actually be a DiscreteFunction but since the
-    // encapsulation using Function is inconsistent this defeats logic.
-    // For now let us just keep interpolate() at the Function level and when
-    // possible rework the Function interface to avoid indirections.
-    FunctionInterpolation I(other, *this);
-    I.compute();
+    error("Interpolation to vertex values is implemented incorrectly for"
+          "discontinuous approximations");
   }
   else
   {
-    dolfin::error("Function::interpolate(Function const&) can only be called "
-                  "on discrete Function");
+    uint const num_cell_vertices = mesh_->type().num_entities(0);
+    real* vertex_values = new real[scratch->size * num_cell_vertices];
+    for (CellIterator cell(*mesh_); !cell.end(); ++cell)
+    {
+      // Update to current cell
+      scratch->cell.update(*cell);
+
+      // Tabulate dofs
+      dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+
+      // Pick values from global vector
+      X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+
+      // Interpolate values at the vertices
+      // Values are packed by vertex and not by subspace (if any)
+      element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
+                                         scratch->cell);
+
+      // Copy values to array of vertex values
+      for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
+      {
+        for (uint i = 0; i < scratch->size; ++i)
+        {
+          values[i * num_verts + vertex->index()] = vertex_values[vertex.pos()
+              * scratch->size + i];
+        }
+      }
+    }
+    // Delete local data
+    delete[] vertex_values;
   }
 
 }
+
+//-----------------------------------------------------------------------------
+void Function::interpolate(real* coefficients, const ufc::cell& cell,
+                           const ufc::finite_element& finite_element,
+                           const Cell& dolfin_cell) const
+{
+  // Check dimension
+  dolfin_assert(finite_element.space_dimension() == scratch->local_dimension);
+
+  // Tabulate dofs
+  dofmap_->tabulate_dofs(scratch->dofs, cell, dolfin_cell);
+
+  // Pick values from global vector if cache mapping is not empty
+#ifdef ENABLE_FUNCTION_CACHE
+  if (!cache_mapping_->empty())
+  {
+    for (uint i = 0; i < scratch->local_dimension; ++i)
+    {
+      _map<uint, uint>::const_iterator it = cache_mapping_->find(scratch->dofs[i]);
+      coefficients[i] = data_cache_[it->second];
+    }
+  }
+  else
+#endif
+  X_->get(coefficients, scratch->local_dimension, scratch->dofs);
+}
+
+//-----------------------------------------------------------------------------
+void Function::interpolate(real* coefficients, const ufc::cell& cell,
+                           const ufc::finite_element& finite_element,
+                           const Cell& dolfin_cell, uint facet) const
+{
+  interpolate(coefficients, cell, finite_element, dolfin_cell);
+}
+
+//-----------------------------------------------------------------------------
+GenericVector& Function::vector() const
+{
+  dolfin_assert(X_);
+  return *X_;
+}
+
+//-----------------------------------------------------------------------------
+FiniteElementSpace const& Function::space() const
+{
+  dolfin_assert(discrete_space_);
+  return *discrete_space_;
+}
+
+//-----------------------------------------------------------------------------
+void Function::interpolate(GenericFunction const& other)
+{
+
+  FunctionInterpolation I(other, *this);
+  I.compute();
+}
+
 //-----------------------------------------------------------------------------
 Array<Function *> Function::decompose()
 {
-  if (type_ != discrete)
-  {
-    error("Only discrete functions can be decomposed with decompose().");
-  }
-
   return FunctionDecomposition::compute(*this);
 }
 
-//--- PROTECTED ---------------------------------------------------------------
 //-----------------------------------------------------------------------------
-Cell const& Function::cell() const
+uint Function::num_sub_functions() const
 {
-  if (!cell_)
+  dolfin_assert(element_);
+  return element_->num_sub_elements();
+}
+
+//-----------------------------------------------------------------------------
+uidx Function::block_size() const
+{
+  dolfin_assert(dofmap_);
+  return dofmap_->dofsmapping_size();
+}
+
+//-----------------------------------------------------------------------------
+real * Function::create_block() const
+{
+  dolfin_assert(dofmap_);
+  return new real[dofmap_->dofsmapping_size()];
+}
+
+//-----------------------------------------------------------------------------
+void Function::get_block(real *& values) const
+{
+  dolfin_assert(X_);
+  dolfin_assert(dofmap_);
+  if (!values)
   {
-    error("Current cell is unknown (only available during assembly).");
+    values = new real[dofmap_->dofsmapping_size()];
   }
-  return *cell_;
+  X_->apply();
+  X_->get(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
 }
+
 //-----------------------------------------------------------------------------
-Point Function::normal() const
+void Function::set_block(real *& values)
 {
-  return cell().normal(facet_);
+  dolfin_assert(X_);
+  dolfin_assert(dofmap_);
+  X_->set(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
+  sync_ghosts();
 }
+
 //-----------------------------------------------------------------------------
-int Function::facet() const
+void Function::add_block(real *& values)
 {
-  return facet_;
+  dolfin_assert(X_);
+  dolfin_assert(dofmap_);
+  X_->add(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
+  sync_ghosts();
 }
+
+//-----------------------------------------------------------------------------
+void Function::InitializeVector()
+{
+  if (X_->size() != dofmap_->global_dimension())
+  {
+    // Specific case in serial local_size == global_dimension
+    X_->init(dofmap_->local_size());
+  }
+
+  InitializeGhosts();
+
+  X_->zero();
+  X_->apply();
+
+  renumbered_ = false;
+}
+
+//-----------------------------------------------------------------------------
+void Function::InitializeGhosts()
+{
+  if(!mesh_->is_distributed()) return;
+
+  std::set<uint> indices;
+
+  for (CellIterator cell(*mesh_); !cell.end(); ++cell)
+  {
+    // Update to current cell
+    scratch->cell.update(*cell);
+
+    // Tabulate dofs
+    dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+
+    for (uint j = 0; j < element_->space_dimension(); ++j)
+    {
+      indices.insert(scratch->dofs[j]);
+    }
+
+  }
+  std::map<uint, uint> map = dofmap_->get_map();
+  dolfin_assert(map.size() == 0);
+
+  X_->init_ghosted(indices.size(), indices, map);
+
+#ifdef ENABLE_FUNCTION_CACHE
+  delete[] indices_;
+  delete[] data_cache_;
+  delete cache_mapping_;
+  cache_mapping_ = new _map<uint, uint>;
+
+  indices_ = new uint[indices.size()];
+  data_cache_ = new real[indices.size()];
+
+  uint i = 0;
+  std::set<uint>::iterator it;
+  for (it = indices.begin(); it != indices.end(); it++)
+  {
+    indices_[i] = *it;
+    (*cache_mapping_)[*it] = i++;
+  }
+
+  cache_size_ = indices.size();
+#endif
+}
+
+//-----------------------------------------------------------------------------
+void Function::disp() const
+{
+  cout << "Function" << endl;
+  cout << "--------" << endl;
+
+  // Begin indentation
+  begin("");
+  if(this->empty())
+  {
+    message("Empty");
+  }
+  else
+  {
+    this->space().disp();
+  }
+  // End indentation
+  end();
+  skip();
+}
+
+//-----------------------------------------------------------------------------
+void Function::sync_ghosts()
+{
+
+  if(!mesh_->is_distributed()) return;
+
+  if (dofmap_->renumbered() && !renumbered_)
+  {
+    InitializeGhosts();
+    renumbered_ = true;
+  }
+
+  X_->apply();
+
+#ifdef ENABLE_FUNCTION_CACHE
+  if (indices_)
+  {
+    X_->get(data_cache_, cache_size_, indices_);
+  }
+#endif
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator=(Function const& other)
+{
+  if(this == &other)
+  {
+    return *this;
+  }
+
+  if(this->empty())
+  {
+    discrete_space_ = new FiniteElementSpace(*other.discrete_space_);
+    element_ = &discrete_space_->element();
+    dofmap_ = &discrete_space_->dofmap();
+    scratch = new ScratchSpace(*discrete_space_);
+    X_ = new Vector();
+    renumbered_ = false;
+    cache_size_ = 0;
+    indices_ = NULL;
+    data_cache_ = NULL;
+    //
+    InitializeVector();
+  }
+  else if(this->space() != other.space())
+  {
+    error("Function : attempt to assign function with different space");
+  }
+
+  // Copy vector
+  *X_ = *other.X_;
+
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator+=(Function const& other)
+{
+  dolfin_assert(!this->empty());
+  dolfin_assert(!other.empty());
+  dolfin_assert(this->space() == other.space());
+  this->vector() += other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator-=(Function const& other)
+{
+  dolfin_assert(!this->empty());
+  dolfin_assert(!other.empty());
+  dolfin_assert(this->space() == other.space());
+  this->vector() -= other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator*=(Function const& other)
+{
+  dolfin_assert(!this->empty());
+  dolfin_assert(!other.empty());
+  dolfin_assert(this->space() == other.space());
+  this->vector() *= other.vector();
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::axpy(real value, Function const& other)
+{
+  dolfin_assert(!this->empty());
+  dolfin_assert(!other.empty());
+  dolfin_assert(this->space() == other.space());
+  this->vector().axpy(value, other.vector());
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::swap(Function& other)
+{
+  std::swap(const_cast<Mesh *&>(this->mesh_), const_cast<Mesh *&>(other.mesh_));
+  std::swap(this->discrete_space_, other.discrete_space_);
+  std::swap(this->element_, other.element_);
+  std::swap(this->dofmap_, other.dofmap_);
+  std::swap(this->scratch, other.scratch);
+  std::swap(this->X_, other.X_);
+  std::swap(this->renumbered_, other.renumbered_);
+#ifdef ENABLE_FUNCTION_CACHE
+  std::swap(this->cache_size_, other.cache_size_);
+  std::swap(this->indices_, other.indices_);
+  std::swap(this->data_cache_, other.data_cache_);
+  std::swap(this->cache_mapping_, other.cache_mapping_);
+#endif
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator=(real value)
+{
+  dolfin_assert(!this->empty());
+  this->vector() = value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator+=(real value)
+{
+  dolfin_assert(!this->empty());
+  error("Not implemented");
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator-=(real value)
+{
+  dolfin_assert(!this->empty());
+  error("Not implemented");
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator*=(real value)
+{
+  dolfin_assert(!this->empty());
+  this->vector() *= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::operator/=(real value)
+{
+  dolfin_assert(!this->empty());
+  this->vector() /= value;
+  return *this;
+}
+
+//-----------------------------------------------------------------------------
+Function& Function::zero()
+{
+  dolfin_assert(!this->empty());
+  this->vector().zero();
+  return *this;
+}
+
 //-----------------------------------------------------------------------------
 
-}
+} /* *namespace dolfin */
+

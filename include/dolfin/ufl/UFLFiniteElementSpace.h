@@ -27,23 +27,23 @@ namespace ufl
  *
  *  @class  UFLFiniteElement
  *
- *  @brief  Provides an interface complying with UFL FiniteElementBase.
+ *  @brief  Provides an interface complying with UFL FiniteElementSpace.
  *
  */
 
-class FiniteElementBase : public Class
+class FiniteElementSpace : public Class
 {
 
 public:
 
   //
-  typedef std::vector<FiniteElementBase const *> List;
+  typedef std::vector<FiniteElementSpace const *> List;
 
   /// Stupid factory function
-  static FiniteElementBase * create(Object::repr_t const repr);
+  static FiniteElementSpace * create(Object::repr_t const repr);
 
   ///
-  virtual ~FiniteElementBase();
+  virtual ~FiniteElementSpace();
 
   /// Return quadrature scheme of finite element
   QuadratureScheme const& quadrature_scheme() const;
@@ -88,7 +88,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  virtual std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
+  virtual std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
       ValueArray const& i) const = 0;
 
   /// Return number of sub elements
@@ -123,11 +123,11 @@ public:
 protected:
 
   /// Base constructor for finite element definition
-  FiniteElementBase(std::string const& name, QuadratureScheme quad_scheme =
+  FiniteElementSpace(std::string const& name, QuadratureScheme quad_scheme =
                         QuadratureScheme());
 
   /// Representation-based constructor
-  FiniteElementBase(std::string const& name, repr_t repr);
+  FiniteElementSpace(std::string const& name, repr_t repr);
 
   ///
   bool component_is_valid(ValueArray const& i) const;

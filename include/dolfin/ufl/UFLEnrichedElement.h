@@ -7,7 +7,7 @@
 #ifndef __DOLFIN_UFL_ENRICHED_ELEMENT_H
 #define __DOLFIN_UFL_ENRICHED_ELEMENT_H
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 #include <dolfin/ufl/UFLCell.h>
 
 namespace ufl
@@ -21,7 +21,7 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class EnrichedElement : public FiniteElementBase
+class EnrichedElement : public FiniteElementSpace
 {
 
 public:
@@ -66,7 +66,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
+  std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
       ValueArray const& i) const;
 
   /// Return number of sub elements
@@ -83,7 +83,7 @@ public:
 
 protected:
 
-  FiniteElementBase::List const sub_elements_;
+  FiniteElementSpace::List const sub_elements_;
   Family const family_;
   Cell const cell_;
   type<dolfin::uint> const degree_;

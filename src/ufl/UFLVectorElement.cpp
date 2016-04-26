@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(Family::Type family, Cell const& cell,
                              dolfin::uint const degree, dolfin::uint const dim) :
-    FiniteElementBase("VectorElement"),
+    FiniteElementSpace("VectorElement"),
     family_(Family::Vector),
     sub_element_(family, cell, degree),
     dim_(dim),
@@ -29,7 +29,7 @@ VectorElement::VectorElement(Family::Type family, Cell const& cell,
 
 //-----------------------------------------------------------------------------
 VectorElement::VectorElement(repr_t const& repr) :
-    FiniteElementBase("VectorElement", repr),
+    FiniteElementSpace("VectorElement", repr),
     family_(Family::Vector),
     sub_element_(Family(arg(0)).type(), Cell(arg(1)),
                  type<dolfin::uint>(arg(2))),
@@ -103,7 +103,7 @@ std::pair<ValueArray, ValueArray> VectorElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> VectorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> VectorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
@@ -116,7 +116,7 @@ dolfin::uint VectorElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& VectorElement::sub_elements() const
+FiniteElementSpace::List const& VectorElement::sub_elements() const
 {
   return sub_elements_;
 }

@@ -12,7 +12,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 EnrichedElement::EnrichedElement(List const& elements) :
-    FiniteElementBase("EnrichedElement"),
+    FiniteElementSpace("EnrichedElement"),
     sub_elements_(elements),
     family_(Family::Enriched),
     cell_(get_cell(elements)),
@@ -102,10 +102,10 @@ std::pair<ValueArray, ValueArray> EnrichedElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> EnrichedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> EnrichedElement::extract_component(
     ValueArray const& i) const
 {
-  return std::pair<dolfin::uint, FiniteElementBase const *>(i[0],
+  return std::pair<dolfin::uint, FiniteElementSpace const *>(i[0],
                                                             sub_elements_[i[0]]);
 }
 
@@ -116,7 +116,7 @@ dolfin::uint EnrichedElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& EnrichedElement::sub_elements() const
+FiniteElementSpace::List const& EnrichedElement::sub_elements() const
 {
   return sub_elements_;
 }

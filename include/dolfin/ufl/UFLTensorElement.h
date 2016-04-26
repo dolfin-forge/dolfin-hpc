@@ -7,7 +7,7 @@
 #ifndef __DOLFIN_UFL_TENSOR_ELEMENT_H
 #define __DOLFIN_UFL_TENSOR_ELEMENT_H
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
 namespace ufl
@@ -21,7 +21,7 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL TensorElement.
  */
 
-class TensorElement : public FiniteElementBase
+class TensorElement : public FiniteElementSpace
 {
 
 public:
@@ -70,7 +70,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
+  std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
       ValueArray const& i) const;
 
   /// Return number of sub elements

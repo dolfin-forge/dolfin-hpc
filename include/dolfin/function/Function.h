@@ -17,7 +17,7 @@
 namespace ufl
 {
 
-class FiniteElementBase;
+class FiniteElementSpace;
 
 }
 
@@ -58,7 +58,7 @@ public:
   Function(FiniteElementSpace const& space);
 
   /// Create discrete function from given pre-generated UFL Finite Element
-  Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element);
+  Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element);
 
   /// Create discrete function from sub function
   Function(SubFunction const& sub_function);

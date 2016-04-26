@@ -288,7 +288,7 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLFacetNormal.h\
 				ufl/UFLFamily.h\
 				ufl/UFLFiniteElement.h\
-				ufl/UFLFiniteElementBase.h\
+				ufl/UFLFiniteElementSpace.h\
 				ufl/UFLForm.h\
 				ufl/UFLFormData.h\
 				ufl/UFLGeometricQuantity.h\

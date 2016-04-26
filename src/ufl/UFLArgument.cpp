@@ -11,7 +11,7 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-Argument::Argument(FiniteElementBase const& fe, dolfin::uint const& c) :
+Argument::Argument(FiniteElementSpace const& fe, dolfin::uint const& c) :
     Expression("Argument"),
     finite_element_(fe),
     count_(c),
@@ -23,7 +23,7 @@ Argument::Argument(FiniteElementBase const& fe, dolfin::uint const& c) :
 //-----------------------------------------------------------------------------
 Argument::Argument(repr_t const& repr) :
     Expression("Argument", repr),
-    finite_element_(*FiniteElementBase::create(arg(0))),
+    finite_element_(*FiniteElementSpace::create(arg(0))),
     count_(arg(1)),
     repr_(*this, finite_element_, count_),
     str_((count_ < 10 ? "v_" + count_.str() : "v_{" + count_.str() + "}"))
@@ -74,7 +74,7 @@ std::vector<Expression const *> const Argument::operands() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const& Argument::element() const
+FiniteElementSpace const& Argument::element() const
 {
   return finite_element_;
 }

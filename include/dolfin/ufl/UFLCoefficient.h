@@ -41,10 +41,10 @@ public:
   ///
   std::vector<Expression const *> const operands() const;
 
-  /// Return a reference to the FiniteElementBase of this Coefficient
-  FiniteElementBase const& element() const;
+  /// Return a reference to the FiniteElementSpace of this Coefficient
+  FiniteElementSpace const& element() const;
 
-  /// Return a reference to the cell of the FiniteElementBase of this Coefficient
+  /// Return a reference to the cell of the FiniteElementSpace of this Coefficient
   Cell const cell() const;
 
   /// Return whether the basis functions of this element is spatially constant
@@ -81,7 +81,7 @@ protected:
 
   ///
   CoefficientBase(std::string const& name,
-                  FiniteElementBase const& finite_element,
+                  FiniteElementSpace const& finite_element,
                   dolfin::uint const& count);
 
   ///
@@ -104,7 +104,7 @@ protected:
   ///
   ~CoefficientBase();
 
-  FiniteElementBase const* finite_element_;
+  FiniteElementSpace const* finite_element_;
   type<dolfin::uint> const count_;
 
 //      std::vector<Expression const *> const expressions_;
@@ -124,7 +124,7 @@ class Coefficient : public CoefficientBase
 public:
 
   ///
-  Coefficient(FiniteElementBase const& finite_element,
+  Coefficient(FiniteElementSpace const& finite_element,
               dolfin::uint const& count);
 
   ///

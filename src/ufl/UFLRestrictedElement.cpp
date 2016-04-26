@@ -10,9 +10,9 @@ namespace ufl
 {
 
 //-----------------------------------------------------------------------------
-RestrictedElement::RestrictedElement(FiniteElementBase const& element,
+RestrictedElement::RestrictedElement(FiniteElementSpace const& element,
                                      Domain const& domain) :
-    FiniteElementBase("RestrictedElement", element.quadrature_scheme()),
+    FiniteElementSpace("RestrictedElement", element.quadrature_scheme()),
     element_(element),
     family_(Family::Mixed),
     cell_(element.cell()),
@@ -86,7 +86,7 @@ std::pair<ValueArray, ValueArray> RestrictedElement::extract_subelement_componen
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> RestrictedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> RestrictedElement::extract_component(
     ValueArray const& i) const
 {
   return element_.extract_component(i);
@@ -99,13 +99,13 @@ dolfin::uint RestrictedElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& RestrictedElement::sub_elements() const
+FiniteElementSpace::List const& RestrictedElement::sub_elements() const
 {
   return element_.sub_elements();
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const& RestrictedElement::element()
+FiniteElementSpace const& RestrictedElement::element()
 {
   return element_;
 }

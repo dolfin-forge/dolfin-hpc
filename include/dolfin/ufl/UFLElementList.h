@@ -27,12 +27,12 @@ namespace ufl
  *
  */
 
-class FiniteElementBase;
+class FiniteElementSpace;
 
-class ElementList : protected std::map<Object::repr_t, FiniteElementBase *>
+class ElementList : protected std::map<Object::repr_t, FiniteElementSpace *>
 {
 
-  typedef std::pair<ufl::Object::repr_t, FiniteElementBase *> ElementItem;
+  typedef std::pair<ufl::Object::repr_t, FiniteElementSpace *> ElementItem;
 
 public:
 
@@ -53,10 +53,10 @@ public:
 
   /// Set the iterator to the begin of the list and return first element
   /// If the list is empty a null pointer is returned.
-  FiniteElementBase const * first() const;
+  FiniteElementSpace const * first() const;
 
   /// Set the iterator to the next element
-  FiniteElementBase const * next() const;
+  FiniteElementSpace const * next() const;
 
   /// Check if the end of the list is reached
   bool valid() const;

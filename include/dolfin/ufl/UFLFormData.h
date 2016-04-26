@@ -39,7 +39,7 @@ public:
   dolfin::uint n_extf_elements() const;
   dolfin::uint n_intf_elements() const;
 
-  FiniteElementBase const * get_element(dolfin::uint i) const;
+  FiniteElementSpace const * get_element(dolfin::uint i) const;
 
   dolfin::uint local_finite_element_dimension(dolfin::uint i) const;
 
@@ -71,9 +71,9 @@ protected:
   std::vector<Argument const *> const get_extf_arguments() const;
   std::vector<Argument const *> const get_intf_arguments() const;
 
-  std::vector<FiniteElementBase const *> const get_cell_elements() const;
-  std::vector<FiniteElementBase const *> const get_extf_elements() const;
-  std::vector<FiniteElementBase const *> const get_intf_elements() const;
+  std::vector<FiniteElementSpace const *> const get_cell_elements() const;
+  std::vector<FiniteElementSpace const *> const get_extf_elements() const;
+  std::vector<FiniteElementSpace const *> const get_intf_elements() const;
 
   std::vector<CoefficientBase const *> const get_cell_coefficients() const;
   std::vector<CoefficientBase const *> const get_extf_coefficients() const;
@@ -94,9 +94,9 @@ private:
   std::vector<Argument const *> const extf_arguments_;
   std::vector<Argument const *> const intf_arguments_;
 
-  std::vector<FiniteElementBase const *> const cell_elements_;
-  std::vector<FiniteElementBase const *> const extf_elements_;
-  std::vector<FiniteElementBase const *> const intf_elements_;
+  std::vector<FiniteElementSpace const *> const cell_elements_;
+  std::vector<FiniteElementSpace const *> const extf_elements_;
+  std::vector<FiniteElementSpace const *> const intf_elements_;
 
   std::vector<CoefficientBase const *> const cell_coefficients_;
   std::vector<CoefficientBase const *> const extf_coefficients_;
@@ -114,9 +114,9 @@ private:
   std::vector<Argument const *> const init_extf_arguments() const;
   std::vector<Argument const *> const init_intf_arguments() const;
 
-  std::vector<FiniteElementBase const *> const init_cell_elements() const;
-  std::vector<FiniteElementBase const *> const init_extf_elements() const;
-  std::vector<FiniteElementBase const *> const init_intf_elements() const;
+  std::vector<FiniteElementSpace const *> const init_cell_elements() const;
+  std::vector<FiniteElementSpace const *> const init_extf_elements() const;
+  std::vector<FiniteElementSpace const *> const init_intf_elements() const;
 
   std::vector<CoefficientBase const *> const init_cell_coefficients() const;
   std::vector<CoefficientBase const *> const init_extf_coefficients() const;

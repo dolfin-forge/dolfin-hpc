@@ -62,7 +62,7 @@ FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(ufl::FiniteElementBase const& element) :
+FiniteElement::FiniteElement(ufl::FiniteElementSpace const& element) :
     ufc_finite_element_(ElementLibrary::create_finite_element(element.repr())),
     sub_value_dims_(NULL)
 {

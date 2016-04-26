@@ -14,8 +14,8 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-MixedElement::MixedElement(FiniteElementBase::List const& elements) :
-    FiniteElementBase("MixedElement"),
+MixedElement::MixedElement(FiniteElementSpace::List const& elements) :
+    FiniteElementSpace("MixedElement"),
     sub_elements_(cloneSubElementsList(elements)),
     family_(Family::Mixed),
     cell_(get_cell(elements)),
@@ -27,7 +27,7 @@ MixedElement::MixedElement(FiniteElementBase::List const& elements) :
 
 //-----------------------------------------------------------------------------
 MixedElement::MixedElement(repr_t const& repr) :
-    FiniteElementBase("MixedElement", repr),
+    FiniteElementSpace("MixedElement", repr),
     sub_elements_(createSubElementsList(repr)),
     family_(Family::Mixed),
     cell_(get_cell(sub_elements_)),
@@ -42,7 +42,7 @@ MixedElement::~MixedElement()
 {
   // Cleanup sub elements which were either cloned or created from the
   // representation string
-  for (FiniteElementBase::List::const_iterator it = sub_elements_.begin();
+  for (FiniteElementSpace::List::const_iterator it = sub_elements_.begin();
       it != sub_elements_.end(); ++it)
   {
     delete (*it);
@@ -148,7 +148,7 @@ std::pair<ValueArray, ValueArray> MixedElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> MixedElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> MixedElement::extract_component(
     ValueArray const& i) const
 {
   ValueArray subidx;
@@ -163,7 +163,7 @@ dolfin::uint MixedElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& MixedElement::sub_elements() const
+FiniteElementSpace::List const& MixedElement::sub_elements() const
 {
   return sub_elements_;
 }
@@ -181,22 +181,22 @@ std::string const& MixedElement::str() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List MixedElement::cloneSubElementsList(
-    FiniteElementBase::List const& elements)
+FiniteElementSpace::List MixedElement::cloneSubElementsList(
+    FiniteElementSpace::List const& elements)
 {
-  FiniteElementBase::List subelms;
+  FiniteElementSpace::List subelms;
   //FIXME: Improve performance by implementing a cloning method.
-  for (FiniteElementBase::List::const_iterator it = elements.begin();
+  for (FiniteElementSpace::List::const_iterator it = elements.begin();
       it != elements.end(); ++it)
   {
-    subelms.push_back(FiniteElementBase::create((*it)->repr()));
+    subelms.push_back(FiniteElementSpace::create((*it)->repr()));
   }
   dolfin_assert(subelms.size() > 1);
   return subelms;
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List MixedElement::createSubElementsList(repr_t const& repr)
+FiniteElementSpace::List MixedElement::createSubElementsList(repr_t const& repr)
 {
   List subelms;
   // Unpack array then split arguments
@@ -205,7 +205,7 @@ FiniteElementBase::List MixedElement::createSubElementsList(repr_t const& repr)
   for (std::vector<Object::repr_t>::const_iterator it = subreprs.begin();
       it != subreprs.end(); ++it)
   {
-    subelms.push_back(FiniteElementBase::create(*it));
+    subelms.push_back(FiniteElementSpace::create(*it));
   }
   dolfin_assert(subelms.size() > 1);
   return subelms;

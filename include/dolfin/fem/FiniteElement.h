@@ -18,7 +18,7 @@
 namespace ufl
 {
 
-class FiniteElementBase;
+class FiniteElementSpace;
 
 }
 
@@ -61,7 +61,7 @@ public:
   FiniteElement(ufc::finite_element const& element, Array<uint> const& sub_system);
 
   /// Create finite element from UFL object from pregenerated element (testing)
-  explicit FiniteElement(ufl::FiniteElementBase const& finite_element);
+  explicit FiniteElement(ufl::FiniteElementSpace const& finite_element);
 
   /// Copy constructor
   explicit FiniteElement(FiniteElement const& other);

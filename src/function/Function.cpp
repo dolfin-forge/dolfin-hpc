@@ -92,7 +92,7 @@ Function::Function(FiniteElementSpace const& space) :
 }
 
 //-----------------------------------------------------------------------------
-Function::Function(Mesh& mesh, ufl::FiniteElementBase const& finite_element) :
+Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
     GenericFunction(),
     mesh_(&mesh),
     discrete_space_(new FiniteElementSpace(mesh, finite_element)),

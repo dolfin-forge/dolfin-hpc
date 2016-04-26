@@ -13,7 +13,7 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 CoefficientBase::CoefficientBase(std::string const& name,
-                                 FiniteElementBase const& fe,
+                                 FiniteElementSpace const& fe,
                                  dolfin::uint const& c) :
     Expression(name),
     finite_element_(&fe),
@@ -54,7 +54,7 @@ CoefficientBase::CoefficientBase(
 CoefficientBase::CoefficientBase(std::string const& name, repr_t const& repr) :
     Expression(name, repr),
     finite_element_(
-        name == "Coefficient" ? FiniteElementBase::create(arg(0)) :
+        name == "Coefficient" ? FiniteElementSpace::create(arg(0)) :
         name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) :
         name == "VectorConstant" ?
             new VectorElement(Family::R, Cell(arg(0)), 0,
@@ -62,14 +62,14 @@ CoefficientBase::CoefficientBase(std::string const& name, repr_t const& repr) :
         name == "TensorConstant" ?
             new TensorElement(Family::R, Cell(arg(0)), 0,
                               Cell(arg(0)).geometric_dimension()) :
-            FiniteElementBase::create(arg(0))),
+            FiniteElementSpace::create(arg(0))),
     count_(args().back())
 {
-//    finite_element_ = (name == "Coefficient" ? FiniteElementBase::create(arg(0)) :
+//    finite_element_ = (name == "Coefficient" ? FiniteElementSpace::create(arg(0)) :
 //       name == "Constant" ? new FiniteElement(Family::R, Cell(arg(0)), 0) :
 //       name == "VectorConstant" ? new VectorElement(Family::R, Cell(arg(0)), 0, type<dolfin::uint>(arg(1))) :
 //       name == "TensorConstant" ? new TensorElement(Family::R, Cell(arg(0)), 0, Cell(arg(0)).geometric_dimension()) :
-//       FiniteElementBase::create(arg(0)));
+//       FiniteElementSpace::create(arg(0)));
 }
 
 //-----------------------------------------------------------------------------
@@ -114,7 +114,7 @@ std::vector<Expression const *> const CoefficientBase::operands() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const& CoefficientBase::element() const
+FiniteElementSpace const& CoefficientBase::element() const
 {
   return *finite_element_;
 }
@@ -161,7 +161,7 @@ bool CoefficientBase::is_cellwise_constant() const
 }
 
 //-----------------------------------------------------------------------------
-Coefficient::Coefficient(FiniteElementBase const& fe, dolfin::uint const& c) :
+Coefficient::Coefficient(FiniteElementSpace const& fe, dolfin::uint const& c) :
     CoefficientBase("Coefficient", fe, c),
     repr_(*this, *finite_element_, count_),
     str_((count_ < 10 ? "w_" + count_.str() : "w_{" + count_.str() + "}"))

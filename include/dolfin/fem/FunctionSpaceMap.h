@@ -16,7 +16,7 @@
 namespace ufl
 {
 
-  class FiniteElementBase;
+  class FiniteElementSpace;
 
 }
 
@@ -54,7 +54,7 @@ public:
   uint size() const;
 
   ///
-  void add(std::string const& label, ufl::FiniteElementBase const& space);
+  void add(std::string const& label, ufl::FiniteElementSpace const& space);
 
   ///
   void clear();

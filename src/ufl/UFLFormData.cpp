@@ -97,7 +97,7 @@ dolfin::uint FormData::n_intf_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const * FormData::get_element(dolfin::uint i) const
+FiniteElementSpace const * FormData::get_element(dolfin::uint i) const
 {
   std::cout << "i= " << i << " size= " << cell_elements_.size() << std::endl;
   if (cell_elements_.size() > i) if (cell_elements_[i] != NULL) return cell_elements_[i];
@@ -243,19 +243,19 @@ std::vector<Argument const *> const FormData::get_intf_arguments() const
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::get_cell_elements() const
+std::vector<FiniteElementSpace const *> const FormData::get_cell_elements() const
 {
   return cell_elements_;
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::get_extf_elements() const
+std::vector<FiniteElementSpace const *> const FormData::get_extf_elements() const
 {
   return extf_elements_;
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::get_intf_elements() const
+std::vector<FiniteElementSpace const *> const FormData::get_intf_elements() const
 {
   return intf_elements_;
 }
@@ -369,9 +369,9 @@ std::vector<Argument const *> const FormData::init_intf_arguments() const
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::init_cell_elements() const
+std::vector<FiniteElementSpace const *> const FormData::init_cell_elements() const
 {
-  std::vector<FiniteElementBase const *> cell_elements;
+  std::vector<FiniteElementSpace const *> cell_elements;
   for (dolfin::uint i = 0; i < cell_arguments_.size(); ++i)
     cell_elements.push_back(&cell_arguments_[i]->element());
 
@@ -380,9 +380,9 @@ std::vector<FiniteElementBase const *> const FormData::init_cell_elements() cons
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::init_extf_elements() const
+std::vector<FiniteElementSpace const *> const FormData::init_extf_elements() const
 {
-  std::vector<FiniteElementBase const *> extf_elements;
+  std::vector<FiniteElementSpace const *> extf_elements;
   for (dolfin::uint i = 0; i < extf_arguments_.size(); ++i)
     extf_elements.push_back(&extf_arguments_[i]->element());
 
@@ -390,9 +390,9 @@ std::vector<FiniteElementBase const *> const FormData::init_extf_elements() cons
 }
 
 //-----------------------------------------------------------------------------
-std::vector<FiniteElementBase const *> const FormData::init_intf_elements() const
+std::vector<FiniteElementSpace const *> const FormData::init_intf_elements() const
 {
-  std::vector<FiniteElementBase const *> intf_elements;
+  std::vector<FiniteElementSpace const *> intf_elements;
   for (dolfin::uint i = 0; i < intf_arguments_.size(); ++i)
     intf_elements.push_back(&intf_arguments_[i]->element());
 

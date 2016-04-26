@@ -3,7 +3,7 @@
 #include <check.h>
 
 //-----------------------------------------------------------------------------
-START_TEST( test_UFL_FiniteElementBase )
+START_TEST( test_UFL_FiniteElementSpace )
 {
   int init_failed = 0;
   

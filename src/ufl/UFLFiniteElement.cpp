@@ -14,7 +14,7 @@ using dolfin::error;
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
                              dolfin::uint const degree) :
-    FiniteElementBase("FiniteElement"),
+    FiniteElementSpace("FiniteElement"),
     family_(family),
     cell_(cell),
     degree_(degree),
@@ -39,7 +39,7 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
 
 //-----------------------------------------------------------------------------
 FiniteElement::FiniteElement(repr_t const& repr) :
-    FiniteElementBase("FiniteElement", repr),
+    FiniteElementSpace("FiniteElement", repr),
     family_(arg(0)),
     cell_(arg(1)),
     degree_(arg(2)),
@@ -116,11 +116,11 @@ std::pair<ValueArray, ValueArray> FiniteElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> FiniteElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> FiniteElement::extract_component(
     ValueArray const& i) const
 {
   check_component(i);
-  return std::pair<dolfin::uint, FiniteElementBase const *>(i[0], this);
+  return std::pair<dolfin::uint, FiniteElementSpace const *>(i[0], this);
 }
 
 //-----------------------------------------------------------------------------
@@ -130,7 +130,7 @@ dolfin::uint FiniteElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& FiniteElement::sub_elements() const
+FiniteElementSpace::List const& FiniteElement::sub_elements() const
 {
   return sub_elements_;
 }

@@ -24,7 +24,7 @@ libdolfin_ufl_la_SOURCES = UFLarray.cpp\
                            UFLFacetNormal.cpp\
                            UFLFamily.cpp\
                            UFLFiniteElement.cpp\
-                           UFLFiniteElementBase.cpp\
+                           UFLFiniteElementSpace.cpp\
                            UFLForm.cpp\
                            UFLFormData.cpp\
                            UFLGeometricQuantity.cpp\

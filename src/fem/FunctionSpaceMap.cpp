@@ -6,7 +6,7 @@
 
 #include <dolfin/fem/FunctionSpaceMap.h>
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 namespace dolfin
 {
@@ -46,7 +46,7 @@ uint FunctionSpaceMap::size() const
 
 //-----------------------------------------------------------------------------
 void FunctionSpaceMap::add(std::string const& label,
-                           ufl::FiniteElementBase const& space)
+                           ufl::FiniteElementSpace const& space)
 {
   if (this->has(label))
   {

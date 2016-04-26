@@ -23,7 +23,7 @@ FiniteElementSpace::FiniteElementSpace(Form& form, uint const i) :
     finite_element_(mesh_.type(), form, i),
     dof_map_(DofMap::acquire(mesh_, form, i)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 {
 }
@@ -35,7 +35,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, Form& form, uint const i) :
     finite_element_(mesh.type(), form, i),
     dof_map_(DofMap::acquire(mesh, form, i)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 {
 }
@@ -48,14 +48,14 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh, ufc::finite_element& element,
     finite_element_(element, owner),
     dof_map_(DofMap::acquire(mesh, dofmap, owner)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(finite_element_.signature())))
 {
 }
 
 //-----------------------------------------------------------------------------
 FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
-                                       ufl::FiniteElementBase const& element) :
+                                       ufl::FiniteElementSpace const& element) :
     mesh_(mesh),
     cell_(mesh, 0),
     finite_element_(element),
@@ -65,7 +65,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
             *ElementLibrary::create_dof_map(
                 DofMap::make_signature(finite_element_.signature())),
             true)),
-    ufl_(ufl::FiniteElementBase::create(element.repr()))
+    ufl_(ufl::FiniteElementSpace::create(element.repr()))
 {
 }
 
@@ -79,7 +79,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
         DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(i),
                         true)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 {
 }
@@ -94,7 +94,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& space,
         DofMap::acquire(space.mesh(), *space.dofmap().create_sub_dofmap(sub),
                         true)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 {
 }
@@ -107,7 +107,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& other_mesh,
     finite_element_(space.element()),
     dof_map_(DofMap::acquire(other_mesh, *space.dofmap().create(), true)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 
 {
@@ -124,7 +124,7 @@ FiniteElementSpace::FiniteElementSpace(FiniteElementSpace const& other) :
     finite_element_(other.element()),
     dof_map_(DofMap::acquire(other.mesh(), *other.dofmap().create(), true)),
     ufl_(
-        ufl::FiniteElementBase::create(
+        ufl::FiniteElementSpace::create(
             ufl::Object::repr_t(element().signature())))
 {
 }

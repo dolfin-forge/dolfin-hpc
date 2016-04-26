@@ -10,7 +10,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 #include <ufc.h>
 
@@ -59,7 +59,7 @@ public:
 
   /// Create space from UFL space definition for pre-generated elements
   explicit FiniteElementSpace(Mesh& mesh,
-                              ufl::FiniteElementBase const& element);
+                              ufl::FiniteElementSpace const& element);
 
   /// Create a finite element space from ith subspace of given space
   FiniteElementSpace(FiniteElementSpace const& space, uint const i);
@@ -127,7 +127,7 @@ public:
   ufl::Family::Type metatype() const;
 
   /// Return UFL definition of the discrete space
-  operator ufl::FiniteElementBase const&() const
+  operator ufl::FiniteElementSpace const&() const
   {
     return *ufl_;
   }
@@ -140,7 +140,7 @@ private:
   DofMap& dof_map_; // The dof map is owned by the DofMapCache instance.
 
   // UFL binding
-  ufl::FiniteElementBase const * const ufl_;
+  ufl::FiniteElementSpace const * const ufl_;
 
 };
 

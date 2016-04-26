@@ -4,7 +4,7 @@
 // First added:  2014-01-21
 // Last changed: 2014-01-21
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 #include <dolfin/ufl/UFLVectorElement.h>
 #include <dolfin/ufl/UFLMixedElement.h>
@@ -18,7 +18,7 @@ namespace ufl
 using dolfin::error;
 
 //-----------------------------------------------------------------------------
-FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
+FiniteElementSpace * FiniteElementSpace::create(Object::repr_t const repr)
 {
   std::string name = Class::make_name(repr);
   if (name == "FiniteElement")
@@ -49,14 +49,14 @@ FiniteElementBase * FiniteElementBase::create(Object::repr_t const repr)
   }
   else
   {
-    error("Unknown type of ufl::FiniteElementBase: '" + name + "'");
+    error("Unknown type of ufl::FiniteElementSpace: '" + name + "'");
   }
   
   return NULL;
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBase(std::string const& name,
+FiniteElementSpace::FiniteElementSpace(std::string const& name,
                                      QuadratureScheme quad_scheme) :
     Class(name),
     quad_scheme_(quad_scheme)
@@ -64,31 +64,31 @@ FiniteElementBase::FiniteElementBase(std::string const& name,
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::FiniteElementBase(std::string const& name, repr_t repr) :
+FiniteElementSpace::FiniteElementSpace(std::string const& name, repr_t repr) :
     Class(name, repr),
     quad_scheme_()
 {
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::~FiniteElementBase()
+FiniteElementSpace::~FiniteElementSpace()
 {
 }
 
 //-----------------------------------------------------------------------------
-QuadratureScheme const& FiniteElementBase::quadrature_scheme() const
+QuadratureScheme const& FiniteElementSpace::quadrature_scheme() const
 {
   return quad_scheme_;
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint FiniteElementBase::value_size() const
+dolfin::uint FiniteElementSpace::value_size() const
 {
   return std::max(this->value_shape().prod(), (dolfin::uint) 1);
 }
 
 //-----------------------------------------------------------------------------
-bool FiniteElementBase::component_is_valid(ValueArray const& i) const
+bool FiniteElementSpace::component_is_valid(ValueArray const& i) const
 {
   dolfin::uint r = this->value_shape().size();
   bool range_ok = true;
@@ -100,7 +100,7 @@ bool FiniteElementBase::component_is_valid(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-void FiniteElementBase::check_component(ValueArray const& i) const
+void FiniteElementSpace::check_component(ValueArray const& i) const
 {
   if (!component_is_valid(i))
   {
@@ -109,7 +109,7 @@ void FiniteElementBase::check_component(ValueArray const& i) const
 }
 
 //-----------------------------------------------------------------------------
-Cell FiniteElementBase::get_cell(List const& elements) const
+Cell FiniteElementSpace::get_cell(List const& elements) const
 {
   if (elements.size() < 1)
   {
@@ -128,7 +128,7 @@ Cell FiniteElementBase::get_cell(List const& elements) const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint FiniteElementBase::get_degree_max(List const& elements) const
+dolfin::uint FiniteElementSpace::get_degree_max(List const& elements) const
 {
   dolfin::uint ret = 0;
   for (List::const_iterator it = elements.begin(); it != elements.end(); ++it)
@@ -139,7 +139,7 @@ dolfin::uint FiniteElementBase::get_degree_max(List const& elements) const
 }
 
 //-----------------------------------------------------------------------------
-dolfin::uint FiniteElementBase::get_value_size(List const& elements) const
+dolfin::uint FiniteElementSpace::get_value_size(List const& elements) const
 {
   // Compute value size
   dolfin::uint ret = 0;
@@ -151,7 +151,7 @@ dolfin::uint FiniteElementBase::get_value_size(List const& elements) const
 }
 
 //-----------------------------------------------------------------------------
-void FiniteElementBase::display() const
+void FiniteElementSpace::display() const
 {
   Class::display();
   std::cout << std::setw(24) << "family" << " = " << this->family().str()

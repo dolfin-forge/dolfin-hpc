@@ -28,7 +28,7 @@
 #include <dolfin/ufl/UFLFacetNormal.h>
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 #include <dolfin/ufl/UFLForm.h>
 #include <dolfin/ufl/UFLFormData.h>
 #include <dolfin/ufl/UFLGeometricQuantity.h>

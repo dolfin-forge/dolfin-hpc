@@ -28,7 +28,7 @@
 #include "FacetArea/UFL_FacetArea.h"
 #include "FacetNormal/UFL_FacetNormal.h"
 #include "Family/UFL_Family.h"
-#include "FiniteElementBase/UFL_FiniteElementBase.h"
+#include "FiniteElementSpace/UFL_FiniteElementSpace.h"
 #include "FiniteElement/UFL_FiniteElement.h"
 #include "Form/UFL_Form.h"
 #include "GeometricQuantity/UFL_GeometricQuantitiy.h"
@@ -172,8 +172,8 @@ Suite *suite()
   suite_add_tcase (s, tc);
   tcase_add_checked_fixture (tc, setup, teardown);
 
-  tc = tcase_create("UFL FiniteElementBase");
-  tcase_add_test(tc, test_UFL_FiniteElementBase);
+  tc = tcase_create("UFL FiniteElementSpace");
+  tcase_add_test(tc, test_UFL_FiniteElementSpace);
   suite_add_tcase (s, tc);
   tcase_add_checked_fixture (tc, setup, teardown);
 

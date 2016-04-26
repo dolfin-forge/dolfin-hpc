@@ -26,7 +26,7 @@ class Argument : public Expression
 public:
 
   ///
-  Argument(FiniteElementBase const& finite_element, dolfin::uint const& count);
+  Argument(FiniteElementSpace const& finite_element, dolfin::uint const& count);
 
   ///
   Argument(repr_t const& repr);
@@ -49,13 +49,13 @@ public:
   ///
   std::vector<Expression const *> const operands() const;
 
-  /// Return a reference to the FiniteElementBase of this Argument
-  FiniteElementBase const& element() const;
+  /// Return a reference to the FiniteElementSpace of this Argument
+  FiniteElementSpace const& element() const;
 
   /// Return the count of this Argument
   type<dolfin::uint> const& count() const;
 
-  /// Return a reference to the cell of the FiniteElementBase of this Argument
+  /// Return a reference to the cell of the FiniteElementSpace of this Argument
   Cell const cell() const;
 
   /// Return whether the basis functions of this element is spatially constant
@@ -90,7 +90,7 @@ public:
 
 protected:
 
-  FiniteElementBase const& finite_element_;
+  FiniteElementSpace const& finite_element_;
   type<dolfin::uint> const count_;
 
 //      std::vector<Expression const *> const expressions_;

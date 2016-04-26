@@ -22,7 +22,7 @@ START_TEST( test_UFL_MixedElement )
   ufl::FiniteElement Pspace(ufl::Family::CG, mesh.type(), 1);
   Pspace.display();
 
-  ufl::FiniteElementBase::List spaces;
+  ufl::FiniteElementSpace::List spaces;
   spaces.push_back(&Uspace);
   spaces.push_back(&Pspace);
 

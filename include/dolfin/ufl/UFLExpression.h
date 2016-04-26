@@ -20,7 +20,7 @@ namespace ufl
 {
 class Argument;
 class CoefficientBase;
-class FiniteElementBase;
+class FiniteElementSpace;
 class Index;
 class IndexBase;
 class UFCReferenceCell;

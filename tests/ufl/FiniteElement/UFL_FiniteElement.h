@@ -50,7 +50,7 @@ START_TEST( test_UFL_FiniteElement )
 	skip();
 	
 	begin("Creating UFLFiniteElement from factory function:");
-	ufl::FiniteElementBase * factuflfem = ufl::FiniteElementBase::create(uflfem.repr());
+	ufl::FiniteElementSpace * factuflfem = ufl::FiniteElementSpace::create(uflfem.repr());
 	message(factuflfem->repr());
 	factuflfem->display();
 	if(*factuflfem != uflfem)

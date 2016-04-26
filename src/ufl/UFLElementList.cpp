@@ -7,7 +7,7 @@
 #include <dolfin/ufl/UFLElementList.h>
 
 #include <dolfin/log/log.h>
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 namespace ufl
 {
@@ -42,7 +42,7 @@ void ElementList::add(Object::repr_t const& signature)
 {
   if (this->find(signature) == this->end())
   {
-    this->insert(ElementItem(signature, FiniteElementBase::create(signature)));
+    this->insert(ElementItem(signature, FiniteElementSpace::create(signature)));
   }
 }
 
@@ -53,7 +53,7 @@ bool ElementList::has(Object::repr_t const& signature) const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const * ElementList::first() const
+FiniteElementSpace const * ElementList::first() const
 {
   it_ = this->begin();
   if (this->empty())
@@ -64,7 +64,7 @@ FiniteElementBase const * ElementList::first() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase const * ElementList::next() const
+FiniteElementSpace const * ElementList::next() const
 {
   if (it_ != this->end())
   {

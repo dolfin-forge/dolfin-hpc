@@ -24,7 +24,7 @@ EXTRA_DIST = Algebra/UFL_Algebra.h\
              FacetNormal/UFL_FacetNormal.h\
              Family/UFL_Family.h\
              FiniteElement/UFL_FiniteElement.h\
-	           FiniteElementBase/UFL_FiniteElementBase.h\
+	           FiniteElementSpace/UFL_FiniteElementSpace.h\
              Form/UFL_Form.h\
              GeometricQuantity/UFL_GeometricQuantitiy.h\
 	           Index/UFL_Index.h\

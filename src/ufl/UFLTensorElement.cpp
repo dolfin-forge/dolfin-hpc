@@ -12,7 +12,7 @@ namespace ufl
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(Family::Type family, Cell const& cell,
                              dolfin::uint const degree, dolfin::uint const dim) :
-    FiniteElementBase("TensorElement"),
+    FiniteElementSpace("TensorElement"),
     family_(Family::Tensor),
     sub_element_(family, cell, degree),
     value_shape_(ValueArray(2, dim) + sub_element_.value_shape()),
@@ -24,7 +24,7 @@ TensorElement::TensorElement(Family::Type family, Cell const& cell,
 
 //-----------------------------------------------------------------------------
 TensorElement::TensorElement(repr_t const& repr) :
-    FiniteElementBase("TensorElement", repr),
+    FiniteElementSpace("TensorElement", repr),
     family_(Family::Tensor),
     sub_element_(Family(arg(0)).type(), Cell(arg(1)),
                  type<dolfin::uint>(arg(2))),
@@ -98,7 +98,7 @@ std::pair<ValueArray, ValueArray> TensorElement::extract_subelement_component(
 }
 
 //-----------------------------------------------------------------------------
-std::pair<dolfin::uint, FiniteElementBase const *> TensorElement::extract_component(
+std::pair<dolfin::uint, FiniteElementSpace const *> TensorElement::extract_component(
     ValueArray const& i) const
 {
   return sub_element_.extract_component(i);
@@ -111,7 +111,7 @@ dolfin::uint TensorElement::num_sub_elements() const
 }
 
 //-----------------------------------------------------------------------------
-FiniteElementBase::List const& TensorElement::sub_elements() const
+FiniteElementSpace::List const& TensorElement::sub_elements() const
 {
   return sub_elements_;
 }

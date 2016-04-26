@@ -7,7 +7,7 @@
 #ifndef __DOLFIN_UFL_RESTRICTED_ELEMENT_H
 #define __DOLFIN_UFL_RESTRICTED_ELEMENT_H
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 namespace ufl
 {
@@ -20,13 +20,13 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL RestrictedElement.
  */
 
-class RestrictedElement : public FiniteElementBase
+class RestrictedElement : public FiniteElementSpace
 {
 
 public:
 
   ///
-  RestrictedElement(FiniteElementBase const& element, Domain const& domain);
+  RestrictedElement(FiniteElementSpace const& element, Domain const& domain);
 
   ///
   ~RestrictedElement();
@@ -65,7 +65,7 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
+  std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
       ValueArray const& i) const;
 
   /// Return number of sub elements
@@ -77,7 +77,7 @@ public:
   //---------------------------------------------------------------------------
 
   ///
-  FiniteElementBase const& element();
+  FiniteElementSpace const& element();
 
   /// __repr__
   repr_t const& repr() const;
@@ -87,7 +87,7 @@ public:
 
 protected:
 
-  FiniteElementBase const& element_;
+  FiniteElementSpace const& element_;
   Family const family_;
   Cell const cell_;
   type<dolfin::uint> const degree_;

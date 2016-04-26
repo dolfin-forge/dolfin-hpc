@@ -7,7 +7,7 @@
 #ifndef __DOLFIN_UFL_MIXED_ELEMENT_H
 #define __DOLFIN_UFL_MIXED_ELEMENT_H
 
-#include <dolfin/ufl/UFLFiniteElementBase.h>
+#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 namespace ufl
 {
@@ -20,13 +20,13 @@ namespace ufl
  *  @brief  Provides an interface complying with UFL FiniteElement.
  */
 
-class MixedElement : public FiniteElementBase
+class MixedElement : public FiniteElementSpace
 {
 
 public:
 
   ///
-  MixedElement(FiniteElementBase::List const& elements);
+  MixedElement(FiniteElementSpace::List const& elements);
 
   ///
   explicit MixedElement(repr_t const& repr);
@@ -68,14 +68,14 @@ public:
 
   /// Recursively extract component index relative to a (simple) element and
   /// that element for given value component index
-  std::pair<dolfin::uint, FiniteElementBase const *> extract_component(
+  std::pair<dolfin::uint, FiniteElementSpace const *> extract_component(
       ValueArray const& i) const;
 
   /// Return number of sub elements
   dolfin::uint num_sub_elements() const;
 
   /// Return list of sub elements
-  FiniteElementBase::List const& sub_elements() const;
+  FiniteElementSpace::List const& sub_elements() const;
 
   /// __repr__
   repr_t const& repr() const;
@@ -87,12 +87,12 @@ protected:
 
 private:
 
-  FiniteElementBase::List cloneSubElementsList(
-      FiniteElementBase::List const& elements);
-  FiniteElementBase::List createSubElementsList(repr_t const& repr);
+  FiniteElementSpace::List cloneSubElementsList(
+      FiniteElementSpace::List const& elements);
+  FiniteElementSpace::List createSubElementsList(repr_t const& repr);
   void createReprStr();
 
-  FiniteElementBase::List const sub_elements_;
+  FiniteElementSpace::List const sub_elements_;
   Family const family_;
   Cell const cell_;
   type<dolfin::uint> const degree_;

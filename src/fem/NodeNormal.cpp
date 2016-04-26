@@ -302,7 +302,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     int u_recvcount = 0;
     real * r_recvbuf = new real[r_maxrecvcount];
 
-    for (int j = 1; j < pe_size; ++j)
+    for (uint j = 1; j < pe_size; ++j)
     {
       src = (rank - j + pe_size) % pe_size;
       dest = (rank + j) % pe_size;
@@ -477,7 +477,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
     // For each process
     uint * u_recvbuf = new uint[u_maxrecvcount];
-    for (int j = 1; j < pe_size; ++j)
+    for (uint j = 1; j < pe_size; ++j)
     {
       src = (rank - j + pe_size) % pe_size;
       dest = (rank + j) % pe_size;

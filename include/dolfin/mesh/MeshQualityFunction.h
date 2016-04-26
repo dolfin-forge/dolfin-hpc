@@ -53,7 +53,7 @@ public:
   uint dim(uint i) const;
 
   //
-  void eval(real* values, const real* x) const;
+  void evaluate(real* values, const real* x, const ufc::cell& cell) const;
 
 private:
 

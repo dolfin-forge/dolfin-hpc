@@ -26,6 +26,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 EquiAffineMapping::EquiAffineMapping(Mesh const& mesh) :
+    Mapping(),
     J(0),
     K(0),
     gdim_(mesh.geometry().dim())
@@ -49,7 +50,7 @@ EquiAffineMapping::~EquiAffineMapping()
   delete[] K;
 }
 //-----------------------------------------------------------------------------
-void EquiAffineMapping::update(Cell& cell)
+void EquiAffineMapping::update(Cell const& cell)
 {
   switch (cell.type())
     {
@@ -91,7 +92,7 @@ void EquiAffineMapping::map_to_reference_cell(real const * x, real * xref) const
   }
 }
 //-----------------------------------------------------------------------------
-void EquiAffineMapping::updateTriangle(Cell& cell)
+void EquiAffineMapping::updateTriangle(Cell const& cell)
 {
 
   dolfin_assert(cell.dim() == 2);
@@ -143,7 +144,7 @@ void EquiAffineMapping::updateTriangle(Cell& cell)
   det = fabs(det);
 }
 //-----------------------------------------------------------------------------
-void EquiAffineMapping::updateTetrahedron(Cell& cell)
+void EquiAffineMapping::updateTetrahedron(Cell const& cell)
 {
   dolfin_assert(cell.dim() == 3);
 

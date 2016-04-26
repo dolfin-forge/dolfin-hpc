@@ -24,6 +24,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 AffineMapping::AffineMapping(Mesh const& mesh) :
+    Mapping(),
     det(0.0),
     J(new real[d_ * d_]),
     K(new real[d_ * d_]),
@@ -44,7 +45,7 @@ AffineMapping::~AffineMapping()
   delete[] K;
 }
 //-----------------------------------------------------------------------------
-void AffineMapping::update(Cell& cell)
+void AffineMapping::update(Cell const& cell)
 {
   dolfin_assert(n_ >= cell.num_entities(0));
   switch (cell.type())
@@ -106,7 +107,7 @@ void AffineMapping::map_to_reference_cell(real const * x, real * xref) const
 }
 
 //-----------------------------------------------------------------------------
-void AffineMapping::updateInterval(Cell& cell)
+void AffineMapping::updateInterval(Cell const& cell)
 {
   dolfin_assert(cell.dim() == 1);
   std::fill(&J[0], &J[d_ * d_], 0.0);
@@ -122,7 +123,7 @@ void AffineMapping::updateInterval(Cell& cell)
 }
 
 //-----------------------------------------------------------------------------
-void AffineMapping::updateTriangle(Cell& cell)
+void AffineMapping::updateTriangle(Cell const& cell)
 {
   dolfin_assert(cell.dim() == 2);
   std::fill(&J[0], &J[d_ * d_], 0.0);
@@ -139,7 +140,7 @@ void AffineMapping::updateTriangle(Cell& cell)
   std::copy(&geom.x(vertices[2])[0], &geom.x(vertices[2])[0] + gdim_, &p[2][0]);
 }
 //-----------------------------------------------------------------------------
-void AffineMapping::updateTetrahedron(Cell& cell)
+void AffineMapping::updateTetrahedron(Cell const& cell)
 {
   dolfin_assert(cell.dim() == 3);
   std::fill(&J[0], &J[d_ * d_], 0.0);

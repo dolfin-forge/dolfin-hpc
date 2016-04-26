@@ -27,7 +27,7 @@ public:
   bool is_inverted(uint& first);
 
   /// Cell quality based on mean-ratio metric
-  real mean_ratio(Cell& cell) const;
+  real mean_ratio(Cell const& cell) const;
 
   ///
   void compute();

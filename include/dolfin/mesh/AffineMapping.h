@@ -11,6 +11,8 @@
 #ifndef __DOLFIN_AFFINE_MAPPING_H
 #define __DOLFIN_AFFINE_MAPPING_H
 
+#include <dolfin/mesh/Mapping.h>
+
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
@@ -27,7 +29,7 @@ namespace dolfin
 /// The dimension d of the map is automatically determined from the
 /// arguments used when calling the map.
 
-class AffineMapping
+class AffineMapping : public Mapping
 {
 
 public:
@@ -39,7 +41,7 @@ public:
   ~AffineMapping();
 
   /// Update map for current element
-  void update(Cell& cell);
+  void update(Cell const& cell);
 
   /// Map given point from the reference element
   void map_from_reference_cell(real const * xref, real * x) const;
@@ -59,13 +61,13 @@ public:
 private:
 
   // Update affine map from reference interval
-  void updateInterval(Cell& cell);
+  void updateInterval(Cell const& cell);
 
   // Update affine map from reference triangle
-  void updateTriangle(Cell& cell);
+  void updateTriangle(Cell const& cell);
 
   // Update affine map from reference tetrahedron
-  void updateTetrahedron(Cell& cell);
+  void updateTetrahedron(Cell const& cell);
 
   // Update
   void updateR1();

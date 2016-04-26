@@ -4,6 +4,8 @@
 
 #include <dolfin/mesh/MeshQualityFunction.h>
 
+#include <dolfin/fem/UFCCell.h>
+
 namespace dolfin
 {
 
@@ -33,13 +35,15 @@ uint MeshQualityFunction::dim(uint i) const
 }
 
 //-----------------------------------------------------------------------------
-void MeshQualityFunction::eval(real* values, const real* x) const
+void MeshQualityFunction::evaluate(real* values, const real* x,
+                                   const ufc::cell& cell) const
 {
-  //FIXME: should we have to cast?
-  Cell& c = const_cast<Cell&>(cell());
-  real const qK = mqual_.mean_ratio(c);
+  UFCCell const& ufc_cell = static_cast<UFCCell const&>(cell);
+  real const qK = mqual_.mean_ratio(*(ufc_cell.cell));
   values[0] = 1.0 / std::pow(qK, static_cast<real>(p_));
 }
+
+//-----------------------------------------------------------------------------
 
 }
 

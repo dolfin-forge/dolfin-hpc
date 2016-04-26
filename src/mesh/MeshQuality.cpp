@@ -56,7 +56,7 @@ bool MeshQuality::is_inverted(uint& first)
 }
 
 //-----------------------------------------------------------------------------
-real MeshQuality::mean_ratio(Cell& cell) const
+real MeshQuality::mean_ratio(Cell const& cell) const
 {
   uint const d = cell.dim();
   mapping_.update(cell);

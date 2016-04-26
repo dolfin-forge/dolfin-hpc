@@ -12,6 +12,8 @@
 namespace dolfin
 {
 
+class Cell;
+
 /**
  *  DOCUMENTATION:
  *
@@ -26,13 +28,13 @@ class Mapping
 public:
 
   /// Update map for current element
-  void update(Cell& cell) = 0;
+  virtual void update(Cell const& cell) = 0;
 
   /// Map given point from the reference element
-  void map_from_reference_cell(real const * xref, real * x) const = 0;
+  virtual void map_from_reference_cell(real const * xref, real * x) const = 0;
 
   /// Map given point to the reference element
-  void map_to_reference_cell(real const * x, real * xref) const = 0;
+  virtual void map_to_reference_cell(real const * x, real * xref) const = 0;
 
 protected:
 
@@ -48,6 +50,6 @@ protected:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MAPPING_H */

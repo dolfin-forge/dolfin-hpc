@@ -170,14 +170,6 @@ uint DofNumbering::block_size() const
   return array_size;
 }
 //-----------------------------------------------------------------------------
-void DofNumbering::disp() const
-{
-  section("DofNumbering");
-  message("Dofmap : %s", ufc_dofmap.signature());
-  message("Type   : %s", this->description().c_str());
-  end();
-}
-//-----------------------------------------------------------------------------
 void DofNumbering::init()
 {
   DofNumbering::clear();
@@ -214,6 +206,19 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
     ufc_cell.update(*cell);
     tabulate_dofs(&array[array_size], ufc_cell, *cell);
   }
+}
+//-----------------------------------------------------------------------------
+void DofNumbering::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell)
+{
+  this->tabulate_dofs(dofs, ufc_cell, *ufc_cell.cell);
+}
+//-----------------------------------------------------------------------------
+void DofNumbering::disp() const
+{
+  section("DofNumbering");
+  message("Dofmap : %s", ufc_dofmap.signature());
+  message("Type   : %s", this->description().c_str());
+  end();
 }
 //-----------------------------------------------------------------------------
 void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)

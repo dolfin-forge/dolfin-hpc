@@ -74,6 +74,9 @@ public:
 
   //---------------------------------------------------------------------------
 
+  /// Compatibility function
+  void tabulate_dofs(uint* dofs, UFCCell const& ufc_cell);
+
   /// Display information
   void disp() const;
 

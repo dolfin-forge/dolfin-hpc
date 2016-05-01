@@ -164,6 +164,7 @@ fi
 # Checks for libraries.
 if test "x${with_xml}" != xno; then
    AM_PATH_XML2(,,AC_MSG_ERROR([libxml2 not found]))
+   CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
    LIBS="$XML_LIBS $LIBS"
    AC_DEFINE(HAVE_XML, 1, [Compile with support for reading/writing XML data])
 fi

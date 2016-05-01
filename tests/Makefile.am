@@ -1,5 +1,6 @@
 SUBDIRS = ufl \
 	  la \
+	  elements \
 	  fem \
 	  function \
 	  io \
@@ -7,6 +8,7 @@ SUBDIRS = ufl \
 
 TESTS = ufl/exe \
 	la/exe \
+	elements/exe \
 	fem/exe \
 	function/exe \
 	io/exe \

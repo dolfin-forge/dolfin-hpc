@@ -25,6 +25,21 @@ Test::Test(int argc, char *argv[]) :
     total_(0.0),
     padding_(0)
 {
+  init(argc, argv);
+}
+
+//-----------------------------------------------------------------------------
+Test::Test() :
+    btest_(false),
+    total_(0.0),
+    padding_(0)
+{
+  init(0, NULL);
+}
+
+//-----------------------------------------------------------------------------
+void Test::init(int argc, char *argv[])
+{
   dolfin_init(argc, argv);
   if (dolfin::MPI::processNumber() == 0)
   {
@@ -49,21 +64,13 @@ Test::Test(int argc, char *argv[]) :
         args.mesh_file = optarg;
         break;
       default:
-        if(i < argc && (getopt(argc, argv, ":d:m:b") == -1))
+        if (i < argc && (getopt(argc, argv, ":d:m:b") == -1))
         {
           ++optind;
         }
         break;
       }
   }
-}
-
-//-----------------------------------------------------------------------------
-Test::Test() :
-    btest_(false),
-    total_(0.0),
-    padding_(0)
-{
 }
 
 //-----------------------------------------------------------------------------

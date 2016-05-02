@@ -57,6 +57,11 @@ public:
 
 private:
 
+  ///
+  void init(int argc, char *argv[]);
+
+  //--- ATTRIBUTES ------------------------------------------------------------
+
   bool btest_;
   Array<std::pair<std::string, real> > timings_;
   real total_;

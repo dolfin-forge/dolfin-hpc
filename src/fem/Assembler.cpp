@@ -172,6 +172,9 @@ void Assembler::assembleCells(GenericTensor& A,
     return;
   }
 
+  message(1,"Assembler : cells");
+  tic();
+
   Mesh& mesh = dofmaps[0].mesh();
   uint const N = mesh.num_cells();
   uint const form_rank = ufc.form.rank();
@@ -220,6 +223,7 @@ void Assembler::assembleCells(GenericTensor& A,
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
   }
 
+  tocd(1);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleExteriorFacets(GenericTensor& A,
@@ -232,6 +236,9 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   {
     return;
   }
+
+  message(1,"Assembler : exterior facets");
+  tic();
 
   Mesh& mesh = dofmaps[0].mesh();
   uint const tdim = mesh.topology().dim();
@@ -294,6 +301,8 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
     // Add entries to global tensor
     A.add(ufc.A, ufc.local_dimensions, ufc.dofs);
   }
+
+  tocd(1);
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleInteriorFacets(GenericTensor& A,
@@ -306,6 +315,9 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   {
     return;
   }
+
+  message(1,"Assembler : interior facets");
+  tic();
 
   Mesh& mesh = dofmaps[0].mesh();
   uint const tdim = mesh.topology().dim();
@@ -389,6 +401,8 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
       A.add(ufc.macro_A, ufc.macro_local_dimensions, ufc.macro_dofs);
     }
   }
+
+  tocd(1);
 }
 //-----------------------------------------------------------------------------
 void Assembler::initializePeriodicDofs(GenericTensor& A,

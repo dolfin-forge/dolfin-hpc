@@ -10712,7 +10712,7 @@ class NSEMomentum3DBilinearForm : public dolfin::BilinearForm
 {
 public:
 
-  NSEMomentum3DBilinearForm(dolfin::Coefficient& w0, dolfin::Coefficient& w1, dolfin::Coefficient& w2, dolfin::Coefficient& w3, dolfin::Coefficient& w4) : dolfin::BilinearForm(w0.mesh())
+  NSEMomentum3DBilinearForm(dolfin::Mesh& mesh, dolfin::Coefficient& w0, dolfin::Coefficient& w1, dolfin::Coefficient& w2, dolfin::Coefficient& w3, dolfin::Coefficient& w4) : dolfin::BilinearForm(mesh)
   {
     coefficients_.push_back(&w0);
     coefficients_.push_back(&w1);

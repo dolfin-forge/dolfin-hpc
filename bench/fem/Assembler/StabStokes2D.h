@@ -8182,7 +8182,7 @@ class StabStokes2DBilinearForm : public dolfin::BilinearForm
 {
 public:
 
-  StabStokes2DBilinearForm(dolfin::Coefficient& w0) : dolfin::BilinearForm(w0.mesh())
+  StabStokes2DBilinearForm(dolfin::Mesh& mesh, dolfin::Coefficient& w0) : dolfin::BilinearForm(mesh)
   {
     coefficients_.push_back(&w0);
   }

@@ -105,11 +105,11 @@ START_TEST( test_FiniteElementSpace )
         begin("Creating corresponding DofMap:");
         ufc::dofmap * ufcdm =
             ElementLibrary::create_dof_map(
-                DofMap::dofmap_signature(fem.signature()));
+                DofMap::make_signature(fem.signature()));
         dolfin::DofMap dm(*m, *ufcdm, true);
         message(dm.signature());
         fail_unless(dm.signature() ==
-            dolfin::DofMap::dofmap_signature(uflfem.repr()));
+            dolfin::DofMap::make_signature(uflfem.repr()));
         skip();
         dm.disp();
         end();

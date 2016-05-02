@@ -29,13 +29,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-#if UFC_VERSION_MAJOR == 1
-std::string const DofMap::SIGN_PREFIX = "FFC dof map for ";
-#elif UFC_VERSION_MAJOR == 2
-std::string const DofMap::SIGN_PREFIX = "FFC dofmap for ";
-#endif
-
-//-----------------------------------------------------------------------------
 DofMap::DofMap(Mesh& mesh, ufc::form const& form, uint const i) :
     MeshDependent(mesh),
     offset_(0),
@@ -677,24 +670,15 @@ bool DofMap::check(bool throw_error)
 }
 
 //-----------------------------------------------------------------------------
-std::string const DofMap::dofmap_signature(std::string const& fe_signature)
+std::string const DofMap::make_signature(std::string const& finite_element)
 {
-  return SIGN_PREFIX + fe_signature;
-}
-
-//-----------------------------------------------------------------------------
-std::string const DofMap::make_hash(std::string const& dofmap_signature,
-                                    Mesh& mesh)
-{
-  std::stringstream ss;
-  ss << dofmap_signature << "+" << mesh.hash();
-  return ss.str();
+  return "FFC dofmap for " + finite_element;
 }
 
 //-----------------------------------------------------------------------------
 std::string const DofMap::make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap)
 {
-  return make_hash(ufc_dofmap.signature(), mesh);
+  return std::string(ufc_dofmap.signature()) + mesh.hash();
 }
 
 //-----------------------------------------------------------------------------

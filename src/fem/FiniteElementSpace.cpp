@@ -63,7 +63,7 @@ FiniteElementSpace::FiniteElementSpace(Mesh& mesh,
         DofMap::acquire(
             mesh,
             *ElementLibrary::create_dof_map(
-                DofMap::dofmap_signature(finite_element_.signature())),
+                DofMap::make_signature(finite_element_.signature())),
             true)),
     ufl_(ufl::FiniteElementBase::create(element.repr()))
 {

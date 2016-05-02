@@ -38,8 +38,6 @@ class UFCMesh;
 class DofMap : public ufc::dofmap, public MeshDependent
 {
 
-  static std::string const SIGN_PREFIX;
-
 public:
 
   /// Create dof map on mesh for i-th coefficient of given form
@@ -237,11 +235,7 @@ public:
   //---
 
   /// Returns the dofmap signature corresponding to a given finite element
-  static std::string const dofmap_signature(std::string const& fe_signature);
-
-  /// Create unique string identifiers for dofmap from signature
-  static std::string const make_hash(std::string const& dofmap_signature,
-                                     Mesh& mesh);
+  static std::string const make_signature(std::string const& finite_element);
 
   /// Create unique string identifiers for dofmap from UFC dofmap
   static std::string const make_hash(Mesh& mesh, ufc::dofmap const& ufc_dofmap);

@@ -5,7 +5,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/elements/ElementLibrary.h>
-#include <dolfin/fem/FiniteElement.h>
+#include <dolfin/fem/DofNumbering.h>
 #include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 #include <check.h>
@@ -13,12 +13,12 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_FiniteElement )
+START_TEST( test_DofNumbering )
 {
   int init_failed = 0;
   Test T;
   //---
-  T.begin("test_FiniteElement");
+  T.begin("test_DofNumbering");
   {
     ufl::ElementList const& list = ElementLibrary::elements();
     for (ufl::FiniteElementSpace const * it = list.first(); list.valid();
@@ -26,8 +26,6 @@ START_TEST( test_FiniteElement )
     {
       begin("%s", it->str().c_str());
       //---
-
-      FiniteElement e(*ElementLibrary::create_finite_element(it->repr()), true);
 
       //---
       end();

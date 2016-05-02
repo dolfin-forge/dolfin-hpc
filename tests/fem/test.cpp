@@ -2,9 +2,12 @@
 
 #ifdef HAVE_CHECK
 
-#include <FiniteElement/FiniteElement.h>
-#include <FiniteElementSpace/FiniteElementSpace.h>
-#include <BoundaryNormal/BoundaryNormal.h>
+#include "FiniteElement/FiniteElement.h"
+#include "DofNumbering/DofNumbering.h"
+#include "DofMap/DofMap.h"
+#include "FiniteElementSpace/FiniteElementSpace.h"
+#include "Form/Form.h"
+#include "BoundaryNormal/BoundaryNormal.h"
 
 #include <check.h>
 
@@ -30,8 +33,28 @@ Suite* fem_suite()
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc, 60);
 
+  tc = tcase_create("DofNumbering");
+  tcase_add_test(tc, test_DofNumbering);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc, 60);
+
+  tc = tcase_create("DofMap");
+  tcase_add_test(tc, test_DofMap);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc, 60);
+
   tc = tcase_create("FiniteElementSpace");
   tcase_add_test(tc, test_FiniteElementSpace);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc, 60);
+
+  tc = tcase_create("Form");
+  tcase_add_test(tc, test_Functional);
+  tcase_add_test(tc, test_LinearForm);
+  tcase_add_test(tc, test_BilinearForm);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc, 60);

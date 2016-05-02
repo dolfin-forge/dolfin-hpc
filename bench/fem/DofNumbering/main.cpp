@@ -13,7 +13,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 std::string dofmap_of(ufl::FiniteElementSpace& e)
 {
-  return DofMap::dofmap_signature(e.repr());
+  return DofMap::make_signature(e.repr());
 }
 //-----------------------------------------------------------------------------
 void test(DofNumbering& dofnum, UFCMesh& ufc_mesh, ufc::dofmap& ufc_dofmap)

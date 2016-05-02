@@ -182,6 +182,28 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     boundary_vertices.clear();
   }
 
+  if(mesh.is_distributed())
+  {
+#if HAVE_MPI
+    _set<uint> adjs = mesh.distdata()[0].get_adj_ranks();
+    MPI_Status status;
+    uint sendbuf = cell_map_.size();
+    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+    {
+      uint recvbuf;
+      MPI_Sendrecv(&sendbuf, 1, MPI_UNSIGNED, *it, 0,
+                   &recvbuf, 1, MPI_UNSIGNED, *it, 0,
+                   MPI::DOLFIN_COMM, &status);
+      if (recvbuf == 0)
+      {
+        error("BoundaryMesh : adjacent rank %u has no cell, case unimplemented",
+              *it);
+      }
+    }
+#endif /* HAVE_MPI */
+
+  }
+
   message(1, "BoundaryMesh : number of cells = %u, number of vertices %u",
           cell_map_.size(), vertex_map_.size());
 }

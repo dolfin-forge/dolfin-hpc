@@ -17,13 +17,6 @@
 #include <set>
 #include <map>
 
-#ifdef HAVE_LIBGEOM
-namespace libgeom
-{
-  class Geometry;
-}
-#endif
-
 namespace dolfin
 {
 class Mesh;
@@ -102,22 +95,8 @@ public:
   /// adopted in the DMesh
   void imp(Mesh& mesh);
 
-#ifdef HAVE_LIBGEOM
-  /// Import an existing mesh along with geometric parameters
-  void imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-      MeshFunction<float>& bnd_u,
-      MeshFunction<float>& bnd_v);
-#endif
-
   /// Export to a regular mesh
   void exp(Mesh& mesh);
-
-#ifdef HAVE_LIBGEOM
-  /// Export to a regular mesh along with geometric parameters
-  void exp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-      MeshFunction<float>& bnd_u,
-      MeshFunction<float>& bnd_v);
-#endif
 
   /// Export to a regular mesh but keep numbering in the DMesh
   ///
@@ -139,19 +118,8 @@ public:
   /// hanging node of the opposite cell
   void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
 
-#ifdef HAVE_LIBGEOM
-  /// Bisect cell dcell with respect to geometry
-  void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1,
-      libgeom::Geometry& geom);
-#endif
-
   /// Bisect marked cells
   void bisectMarked(std::vector<bool> marked_ids);
-
-#ifdef HAVE_LIBGEOM
-  /// Bisect marked cells with respect to geometry
-  void bisectMarked(std::vector<bool> marked_ids, libgeom::Geometry& geom);
-#endif
 
   /// Get opposite cell with respect to vertices v1 and v2
   DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);

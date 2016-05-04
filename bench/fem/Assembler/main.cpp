@@ -4,15 +4,15 @@
 #include <dolfin/fem/UFCCellIterator.h>
 
 // 2D
-//#include "PoissonP1.h"
-//#include "PoissonP2.h"
+#include "PoissonP1.h"
+#include "PoissonP2.h"
 #include "PoissonP3.h"
-//#include "StabStokes2D.h"
-//#include "THStokes2D.h"
+#include "StabStokes2D.h"
+#include "THStokes2D.h"
 
 // 3D
-//#include "Elasticity3D.h"
-//#include "NSEMomentum3D.h"
+#include "Elasticity3D.h"
+#include "NSEMomentum3D.h"
 
 using namespace dolfin;
 
@@ -82,12 +82,13 @@ void test_caching(Form& a)
 //-----------------------------------------------------------------------------
 void assemble_a(Form& a, uint n)
 {
-  Assembler assembler;
   Matrix matA;
   tic();
-  for (uint i = 0; i < n; ++i)
+  a.assemble(matA, true);
+  for (uint i = 1; i < n; ++i)
   {
-    assembler.assemble(matA, a, true);
+    message("Assemble %u", i);
+    a.assemble(matA, false);
   }
   uint const N = a.dofmaps()[0].global_dimension();
   message("Assembly done with %u degrees of freedom", N);
@@ -97,7 +98,7 @@ void assemble_a(Form& a, uint n)
 int main(int argc, char** argv)
 {
   dolfin_init(argc, argv);
-  uint const n = 10;
+  uint const n = 100;
   logm.verbose(1);
 
   {
@@ -105,24 +106,20 @@ int main(int argc, char** argv)
 
     //-------------------------------------------------------------------------
     {
-      /*
       message("PoissonP1");
       PoissonP1BilinearForm a(mesh);
       test_numbering(a);
       test_sparsity(a);
       assemble_a(a, n);
-      */
     }
 
     //-------------------------------------------------------------------------
     {
-      /*
       message("PoissonP2");
       PoissonP2BilinearForm a(mesh);
       test_numbering(a);
       test_sparsity(a);
       assemble_a(a, n);
-      */
     }
 
     //-------------------------------------------------------------------------
@@ -136,25 +133,21 @@ int main(int argc, char** argv)
 
     //-------------------------------------------------------------------------
     {
-      /*
       message("StabStokes2D");
       UFCFunction<CellDiameter> h(mesh);
       StabStokes2DBilinearForm a(mesh, h);
       test_numbering(a);
       test_sparsity(a);
       assemble_a(a, n);
-      */
     }
 
     //-------------------------------------------------------------------------
     {
-      /*
       message("THStokes2D");
       THStokes2DBilinearForm a(mesh);
       test_numbering(a);
       test_sparsity(a);
       assemble_a(a, n);
-      */
     }
   }
 
@@ -162,18 +155,15 @@ int main(int argc, char** argv)
     Mesh mesh("../../data/meshes/cubeN10R.xml.gz");
     //-------------------------------------------------------------------------
     {
-      /*
       message("Elasticity3D");
       Elasticity3DBilinearForm a(mesh);
       test_numbering(a);
       test_sparsity(a);
       assemble_a(a, n);
-      */
     }
 
     //-------------------------------------------------------------------------
     {
-      /*
       message("NSEMomentum3D");
       begin("");
       message("- Create functions.");
@@ -196,7 +186,6 @@ int main(int argc, char** argv)
       message("- Assemble.");
       assemble_a(a, n);
       end();
-      */
     }
   }
 

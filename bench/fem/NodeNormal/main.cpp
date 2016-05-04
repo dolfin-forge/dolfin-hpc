@@ -8,6 +8,11 @@ using namespace dolfin;
 
 void test_boundary_facets(Mesh& mesh)
 {
+  if (!mesh.is_distributed())
+  {
+    return;
+  }
+
   BoundaryMesh& exterior = mesh.exterior_boundary();
   uint const rank = dolfin::MPI::processNumber();
   uint const pe_size = dolfin::MPI::numProcesses();

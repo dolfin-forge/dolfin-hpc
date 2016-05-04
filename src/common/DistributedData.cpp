@@ -1085,6 +1085,7 @@ void DistributedData::disp() const
   message("range size  : %8u", range_size_);
   message("local  size : %8u", local_.size());
   message("global size : %8u", global_size_);
+  message("cached      : %8u", (cached_numbering_ != NULL));
   message("finalized   : %8u", finalized_);
   /*
   if (finalized_)

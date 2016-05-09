@@ -733,11 +733,10 @@ void BinaryFile::operator>>(Mesh& mesh)
         + ghosted_entities.size();
 
     // Open mesh for editing
+    message("open editor");
     MeshEditor editor(mesh, ctype, gdim);
     editor.init_vertices(num_local_vertices);
     editor.init_cells(cells.size());
-
-    MeshDistributedData distdata(mesh.topology().dim());
 
     /* Add local indices
      * Use start_index for global number
@@ -754,7 +753,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
       v_index = *it - vertex_offset[0];
-      distdata[0].set_map(local_vertex_index, *it);
+      mesh.distdata()[0].set_map(local_vertex_index, *it);
       editor.add_vertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
     }
 
@@ -837,10 +836,10 @@ void BinaryFile::operator>>(Mesh& mesh)
       int g_i = 0;
       for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
       {
-        distdata[0].set_map(local_vertex_index, ghosts[dest][g_i]);
+        mesh.distdata()[0].set_map(local_vertex_index, ghosts[dest][g_i]);
         if (recv_new_owner[g_i] != pe_rank)
         {
-          distdata[0].set_ghost(local_vertex_index, recv_new_owner[g_i]);
+          mesh.distdata()[0].set_ghost(local_vertex_index, recv_new_owner[g_i]);
         }
         editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
       }
@@ -853,14 +852,13 @@ void BinaryFile::operator>>(Mesh& mesh)
     {
       for (uint n = 0; n < it->size; ++n)
       {
-        connectivity[n] = distdata[0].get_local(it->v[n]);
+        connectivity[n] = mesh.distdata()[0].get_local(it->v[n]);
       }
       editor.add_cell(local_cell_index, &connectivity[0]);
     }
     delete[] connectivity;
 
     editor.close();
-    mesh.distdata() = distdata;
 
     delete[] recv_buffer;
     delete[] vertex_buffer;

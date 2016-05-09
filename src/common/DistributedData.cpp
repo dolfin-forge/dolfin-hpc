@@ -621,20 +621,39 @@ void DistributedData::get_local(uint n, uint const * global_indices,
   }
 }
 //-----------------------------------------------------------------------------
-void DistributedData::set_map(uint local_index, uint global_index)
+void DistributedData::set_map(uint local_index, uint global_index,
+                              bool allow_remap /* = false */)
 {
   dolfin_assert(!finalized_);
   dolfin_assert(local_.count(global_index) == 0);
-  local_.insert(std::pair<uint, uint>(global_index, local_index));
   if (cached_numbering_ != NULL)
   {
     dolfin_assert(local_index < cache_size_);
+    /* Do not allow remapping by default */
+    if(allow_remap && cached_numbering_[local_index] != DOLFIN_UINT_UNDEF &&
+       cached_numbering_[local_index] != global_index)
+    {
+      //warning("DistributedData : remap %u", local_index);
+      local_.erase(cached_numbering_[local_index]);
+    }
+    local_.insert(std::pair<uint, uint>(global_index, local_index));
     cached_numbering_[local_index] = global_index;
   }
   else
   {
+    /* Do not allow remapping by default */
+    if (allow_remap)
+    {
+      _map<uint, uint>::iterator it = global_.find(local_index);
+      if (it != global_.end())
+      {
+        //warning("DistributedData : remap %u", local_index);
+        local_.erase(it->second);
+      }
+    }
+    local_.insert(std::pair<uint, uint>(global_index, local_index));
     dolfin_assert(global_.count(local_index) == 0);
-    global_.insert(std::pair<uint, uint>(local_index, global_index));
+    global_[local_index] = global_index;
   }
 }
 //-----------------------------------------------------------------------------
@@ -755,6 +774,7 @@ void DistributedData::renumber_global()
     }
     else
     {
+      dolfin_assert(cached_ownership_[i] < pe_size_);
       sendbuf[cached_ownership_[i]].push_back(cached_numbering_[i]);
     }
   }
@@ -798,6 +818,7 @@ void DistributedData::renumber_global()
       // Entity is not marked as shared: invalidate ownership
       if (cached_ownership_[local_index] == pe_size_)
       {
+        //error("Entity %u is not marked as shared", local_index);
         valid_ownership = false;
       }
       else if (cached_ownership_[local_index] != rank_)

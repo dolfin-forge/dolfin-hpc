@@ -124,7 +124,7 @@ public:
   void get_local(uint n, uint const * global_indices, uint * local_indices) const;
 
   /// Set local-to-global mapping
-  void set_map(uint local_index, uint global_index);
+  void set_map(uint local_index, uint global_index, bool allow_remap = false);
 
   /// Set local-to-global mapping
   void set_map(Array<uint> const& mapping);

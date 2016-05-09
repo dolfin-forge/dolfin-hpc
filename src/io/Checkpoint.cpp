@@ -54,8 +54,8 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
     hdr_.gdim = mesh.geometry().dim();
     hdr_.num_vertices = mesh.size(0);
     hdr_.num_cells = mesh.num_cells();
-    hdr_.num_ghosts = mesh.distdata()[0].num_ghost();
-    hdr_.num_shared = mesh.distdata()[0].num_shared();
+    hdr_.num_ghosts = mesh.topology().num_ghost(0);
+    hdr_.num_shared = mesh.topology().num_shared(0);
 
 #ifdef ENABLE_MPIIO
     uint local_data[5] = { hdr_.num_coords, hdr_.num_centities, hdr_.num_vertices,

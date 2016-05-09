@@ -4,6 +4,7 @@
 
 #include "Constant/Constant.h"
 #include "Expression/Expression.h"
+#include "Function/Function.h"
 #include "Real/Real.h"
 #include "Value/Value.h"
 #include "UFCFunction/UFCFunction.h"
@@ -52,6 +53,12 @@ Suite *suite()
 
   tc = tcase_create("UFCFunction");
   tcase_add_test(tc, test_UFCFunction);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc,60);
+
+  tc = tcase_create("Function");
+  tcase_add_test(tc, test_Function);
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);

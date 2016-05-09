@@ -7,5 +7,6 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 EXTRA_DIST = 	Constant/Constant.h \
 							Expression/Expression.h \
+							Function/Function.h \
 							Real/Real.h \
 							Value/Value.h

@@ -13,6 +13,7 @@
 
 #include <dolfin/la/Vector.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/mesh/CellType.h>
 
 #ifdef ENABLE_MPIIO
 #include <mpi.h>

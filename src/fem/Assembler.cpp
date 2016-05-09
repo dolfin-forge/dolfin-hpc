@@ -443,6 +443,10 @@ void Assembler::initializePeriodicDofs(GenericTensor& A,
 void Assembler::initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps,
                                  UFC& ufc, bool reset_tensor) const
 {
+  if (A.rank() == 0)
+  {
+    return;
+  }
 
   if (reset_tensor || A.size(0) == 0)
   {

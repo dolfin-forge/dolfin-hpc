@@ -27,7 +27,7 @@ public:
   ///
   void eval(real * values, real const * x) const
   {
-    std::memcpy(values, x, gdim_ * sizeof(real));
+    std::copy(x, x + gdim_, values);
   }
 
   ///

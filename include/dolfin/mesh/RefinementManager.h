@@ -104,13 +104,11 @@ private:
   uint start_offset_;
 
   // Edge vertices
-  MeshFunction<bool> boundary_edge_;
   Array<uint> shared_edge_;
   std::map< EdgeKey, uint> new_edge_global_;
   std::map< EdgeKey, uint> new_edge_vertex_;
 
   // Face vertices
-  MeshFunction<bool> boundary_face_;
   Array<uint> shared_face_;
   std::map< FaceKey, uint> new_face_global_;
   std::map< FaceKey, uint> new_face_vertex_;
@@ -130,7 +128,6 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline RefinementPattern const& RefinementManager::pattern() const
 {
   return (*pattern_);
@@ -197,12 +194,12 @@ inline void RefinementManager::add(Face& f, uint index)
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::on_boundary(Edge& e)
 {
-  return (is_distributed_ ? boundary_edge_.get(e) : false);
+  return e.is_shared();
 }
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::on_boundary(Face& f)
 {
-  return (is_distributed_ ? boundary_face_.get(f) : false);
+  return f.is_shared();
 }
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_cell(Cell& cell)

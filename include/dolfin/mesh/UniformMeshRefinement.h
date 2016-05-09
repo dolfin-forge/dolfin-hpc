@@ -24,14 +24,6 @@ public:
   /// Refine mesh uniformly according to mesh type
   static void refine(Mesh& mesh);
 
-private:
-
-  /// Refine simplicial mesh uniformly
-  static void refineSimplex(Mesh& mesh);
-
-  /// Refine hypercubic mesh uniformly
-  static void refineHypercube(Mesh& mesh);
-
 };
 
 } /* namespace dolfin */

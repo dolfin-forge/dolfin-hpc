@@ -10,6 +10,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
+#include <dolfin/common/timing.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
@@ -23,10 +24,6 @@
 #include <set>
 
 #include <time.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 namespace dolfin
 {
@@ -72,22 +69,16 @@ void RefinementManager::init()
   uint const tdim = mesh_.topology().dim();
 
   // Generate entity - vertex connectivity if not generated
-  for (uint i = 1; i < tdim; ++i)
+  for (uint d = 1; d < tdim; ++d)
   {
-    if (pattern_->refinement_needs_entities(i))
+    if (pattern_->refinement_needs_entities(d))
     {
-      mesh_.init(i);
+      mesh_.init(d);
     }
   }
 
   // Generate facet - cell connectivity if not generated
   mesh_.init(tdim - 1, tdim);
-
-  // Invalidate global numbering
-//  refined_mesh_.distdata().set_invalid_numbering();
-
-  // Invalidate mesh entity ownership
-//  refined_mesh_.distdata().set_invalid_ownership();
 
   // No further step is required in serial
   if (!is_distributed_)
@@ -110,30 +101,35 @@ void RefinementManager::init()
   start_offset_ += glb_max;
 
   // Initialize data structures for interprocess boundary
-  BoundaryMesh local_boundary = mesh_.interior_boundary();
 
   cell_forbidden_.init(mesh_, tdim);
 
   edge_forbidden_.init(mesh_, 1);
 
-  boundary_edge_.init(mesh_, 1);
-
   DistributedData& distdata = mesh_.distdata()[0];
-  for (CellIterator bf(local_boundary); !bf.end(); ++bf)
+  for (SharedIterator it(mesh_.distdata()[tdim - 1]); !it.end(); ++it)
   {
-    Facet f(mesh_, local_boundary.facet_index(*bf));
+    Facet f(mesh_, it.index());
     boundary_cells_.insert(f.entities(tdim)[0]);
+  }
 
-    for (EdgeIterator e(f); !e.end(); ++e)
+  //--- ONLY EDGE BISECTION ---------------------------------------------------
+
+  if (tdim > 1 && pattern_->refinement_needs_entities(1))
+  {
+    for (SharedIterator it(mesh_.distdata()[1]); !it.end(); ++it)
     {
-      uint const * edge_v = e->entities(0);
+      Edge e(mesh_, it.index());
+      uint const * edge_v = e.entities(0);
       EdgeKey key(distdata.get_global(edge_v[0]),
                   distdata.get_global(edge_v[1]));
       refined_edge_[key] = false;
-      edge_keymap_[key] = e->index();
-      boundary_edge_.set(*e, true);
+      edge_keymap_[key] = e.index();
     }
   }
+
+  //--- ONLY EDGE BISECTION ---------------------------------------------------
+
 }
 //-----------------------------------------------------------------------------
 void RefinementManager::map_new_vertices(Array<uint> shared_edge)
@@ -180,17 +176,22 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
     return;
   }
 
+  message(1, "Map new vertices %u");
+  tic();
+
   DistributedData& olddistdata = mesh_.distdata()[0];
+
+  olddistdata.disp();
+
   DistributedData& newdistdata = refined_mesh_.distdata()[0];
 
-//  newdistdata.set_invalid_numbering();
-//  newdistdata.set_invalid_ownership();
+  newdistdata.disp();
 
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
 
   uint num_unass = 0;
-  srand((uint) time(0) + rank);
+  srand((uint) ::time(0) + rank);
   Array<uint> send_buff, send_buff_id;
   std::map<EdgeKey, uint> edge_id;
   std::map<EdgeKey, bool> owns_edge;
@@ -200,7 +201,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
 
     EdgeKey key(shared_edge[i], shared_edge[i + 1]);
     dolfin_assert(edge_id.count(key) == 0);
-    edge_id[key] = (uint) rand() + (uint) rand() + (uint) rank;
+    edge_id[key] = (uint) std::rand() + (uint) std::rand() + (uint) rank;
     owns_edge[key] = true;
 
     send_buff.push_back(olddistdata.get_global(shared_edge[i]));
@@ -245,6 +246,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
         // Check if I have the corresponding edge
         if (edge_id.count(key))
         {
+          newdistdata.set_shared_adj(new_edge_vertex_[key], src);
           if (recv_buff_id[i >> 1] < edge_id[key]
               || (recv_buff_id[i >> 1] == edge_id[key]
                   && status.MPI_SOURCE < rank))
@@ -258,6 +260,9 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
       }
     }
   }
+
+  message("Number of owned edges : %u", new_edge_global_.size());
+  message("Number of ghost edges : %u", num_unass);
 
   //Exchange assigned global numbers
   Array<uint> global_buff;
@@ -285,7 +290,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
         {
           global_buff.push_back(i);
           global_buff.push_back(new_edge_global_[key]);
-          newdistdata.set_shared_adj(new_edge_vertex_[key], src);
+          //newdistdata.set_shared_adj(new_edge_vertex_[key], src);
         }
       }
     }
@@ -298,21 +303,35 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
     for (uint i = 0; i < (uint) recv_count; i += 2)
     {
       index = shared_edge[(recv_buff[i] >> 1) * 3 + 2];
-      newdistdata.set_map(index, recv_buff[i + 1]);
+      newdistdata.set_map(index, recv_buff[i + 1], true);
       newdistdata.set_ghost(index, status.MPI_SOURCE);
       num_unass--;
     }
     global_buff.clear();
   }
 
-  // MPI aliasing
-  uint tmp = refined_mesh_.distdata()[0].num_owned();
-  uint num_glb;
-  MPI_Allreduce(&tmp, &num_glb, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-//  newdistdata.set_num_global(0, num_glb);
+  dolfin_assert(num_unass == 0);
+
+  message("Done remapping");
+
+  newdistdata.disp();
 
   delete[] recv_buff;
   delete[] recv_buff_id;
+
+  // Finalize and renumber globally so that vertices are indexed correctly after
+  // apply the refinement
+  newdistdata.finalize();
+
+  uint num_shared_edges = 0;
+  MPI::numGlobalSum(mesh_.topology().num_shared(1), num_shared_edges);
+
+  dolfin_assert(newdistdata.global_size() == mesh_.global_size(0) + num_shared_edges);
+
+  newdistdata.disp();
+  newdistdata.renumber_global();
+
+  tocd(1);
 }
 //-----------------------------------------------------------------------------
 void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
@@ -323,7 +342,7 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
 
   uint rank = MPI::processNumber();
   uint pe_size = MPI::numProcesses();
-  srand((uint) time(0) + rank);
+  srand((uint) ::time(0) + rank);
 
   Array<uint> send_buff;
   uint edge[2];
@@ -371,7 +390,7 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
         if (on_boundary(longest_edge))
         {
           const uint *edge_v = longest_edge.entities(0);
-          edge_vote[longest_edge.index()] = (uint) rand();
+          edge_vote[longest_edge.index()] = (uint) std::rand();
           send_buff.push_back(olddistdata.get_global(edge_v[0]));
           send_buff.push_back(olddistdata.get_global(edge_v[1]));
           send_buff.push_back(edge_vote[longest_edge.index()]);

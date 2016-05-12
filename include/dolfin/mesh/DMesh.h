@@ -37,9 +37,6 @@ class DMesh
 {
 public:
 
-  /// Default constructor
-  DMesh();
-
   /// Constructor on a mesh (preferred)
   DMesh(Mesh& mesh);
 

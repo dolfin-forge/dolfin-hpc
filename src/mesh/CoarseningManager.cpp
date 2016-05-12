@@ -78,8 +78,7 @@ void CoarseningManager::initCommon(Mesh& mesh,
 
   /// Delete old dmesh and import new mesh into dmesh
   delete dmesh_;
-  dmesh_ = new DMesh;
-  dmesh_->imp(mesh);
+  dmesh_ = new DMesh(mesh);
 
   orig_num_cells_ = mesh.num_cells();
   orig_num_vertices_ = mesh.size(0);

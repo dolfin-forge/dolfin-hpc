@@ -62,19 +62,6 @@ private:
   int id;
 };
 //-----------------------------------------------------------------------------
-DMesh::DMesh() :
-    vertices(),
-    cells(),
-    _is_distributed(false),
-    _cell_type(NULL),
-    _tdim(0),
-    _gdim(0),
-    _glb_max(0),
-    _salt(0),
-    _start_offset(0)
-{
-}
-//-----------------------------------------------------------------------------
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),

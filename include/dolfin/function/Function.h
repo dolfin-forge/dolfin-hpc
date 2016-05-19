@@ -202,6 +202,12 @@ public:
   /// Zero the vector
   Function& zero();
 
+  /// Return the minimum value
+  real min() const;
+
+  /// Return the maximum value
+  real max() const;
+
   /// Update values
   void sync_ghosts();
 

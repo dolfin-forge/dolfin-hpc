@@ -593,6 +593,8 @@ void Function::disp() const
   else
   {
     this->space().disp();
+    message("min : %g", this->min());
+    message("max : %g", this->max());
   }
   // End indentation
   end();
@@ -759,6 +761,20 @@ Function& Function::zero()
   dolfin_assert(!this->empty());
   this->vector().zero();
   return *this;
+}
+
+//-----------------------------------------------------------------------------
+real Function::min() const
+{
+  dolfin_assert(!this->empty());
+  return this->vector().min();
+}
+
+//-----------------------------------------------------------------------------
+real Function::max() const
+{
+  dolfin_assert(!this->empty());
+  return this->vector().max();
 }
 
 //-----------------------------------------------------------------------------

@@ -258,7 +258,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
     for (VertexIterator v(*c); !v.end(); ++v)
     {
 
-      global_index = mesh.distdata()[0].get_global(v->index());
+      global_index = v->global_index();
       f.vector().get(&value, 1, &global_index);
 
       if (target_proc == pe_rank && !v->is_ghost()

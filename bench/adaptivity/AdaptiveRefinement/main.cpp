@@ -3,12 +3,11 @@
 using namespace dolfin;
 
 //
-class CheckerBoard : public ScalarExpression
+class CheckerBoard : public Value<CheckerBoard>
 {
 public:
 
   CheckerBoard(uint dim, uint& level, uint cycle, bool cyclic_flip) :
-      ScalarExpression(),
       dim_(dim),
       level_(level),
       cycle_(cycle),
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     uint const LMAX = 8;
     uint level = 0;
     CheckerBoard cb(mesh.topology().dim(), level, 4, true);
-    Function em(mesh, cb);
+    Analytic<CheckerBoard> em(mesh, cb);
     ufl::FiniteElement cg1(ufl::Family::CG, mesh.type(), 1);
 
     real th = 0.5;
@@ -68,13 +67,13 @@ int main(int argc, char *argv[])
       Function up0(mesh, cg1);
       up0.interpolate(em);
 
-      if (save_file)
-      {
-        std::stringstream ss0;
-        ss0 << "em" << level << ".pvd";
-        File f0(ss0.str());
-        f0 << em;
-      }
+//      if (save_file)
+//      {
+//        std::stringstream ss0;
+//        ss0 << "em" << level << ".pvd";
+//        File f0(ss0.str());
+//        f0 << em;
+//      }
 
       MeshFunction<bool> mrkr(mesh, mesh.topology().dim());
       real v;

@@ -13,6 +13,7 @@ nobase_pkginclude_HEADERS = \
 				common/types.h\
 				common/Array.h\
 				common/AdjacentMapping.h\
+				common/Check.h\
 				common/DistributedData.h\
 				common/List.h\
 				common/Test.h\

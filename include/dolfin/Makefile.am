@@ -59,6 +59,7 @@ nobase_pkginclude_HEADERS = \
 				function/Analytic.h\
 				function/Constant.h\
 				function/Expression.h\
+				function/Field.h\
 				function/Function.h\
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\

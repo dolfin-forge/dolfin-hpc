@@ -11,6 +11,7 @@
 #include <dolfin/function/FunctionInterpolation.h>
 #include <dolfin/function/Real.h>
 #include <dolfin/function/UFCFunction.h>
+#include <dolfin/function/Field.h>
 
 //
 

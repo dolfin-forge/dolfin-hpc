@@ -81,6 +81,28 @@ static inline real sqr(real x)
   return x * x;
 }
 
+/// Return the euclidian norm
+static inline real norm1(uint n, real * x)
+{
+  real val = 0.0;
+  for (uint i = 0; i < n; ++i)
+  {
+    val += std::fabs(x[i]);
+  }
+  return val;
+}
+
+/// Return the euclidian norm
+static inline real norm2(uint n, real * x)
+{
+  real val = 0.0;
+  for (uint i = 0; i < n; ++i)
+  {
+    val += x[i]*x[i];
+  }
+  return std::sqrt(val);
+}
+
 /// Return a to the power n
 static inline uint ipow(uint a, uint n)
 {

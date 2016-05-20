@@ -83,11 +83,13 @@ public:
     /// Is the iterator valid ?
     virtual bool is_valid() const = 0;
 
+    /// Iteration count
+    virtual uint count() const = 0;
+
     /// Display information
     virtual void disp() const = 0;
 
-    /// Iteration count
-    virtual uint count() const = 0;
+
 
     //-------------------------------------------------------------------------
 

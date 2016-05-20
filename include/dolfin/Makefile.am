@@ -36,6 +36,7 @@ nobase_pkginclude_HEADERS = \
 				fem/DofMapCache.h\
 				fem/DofMapSet.h\
 				fem/DofNumbering.h\
+				fem/Equation.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
@@ -47,6 +48,7 @@ nobase_pkginclude_HEADERS = \
 				fem/PeriodicBC.h\
 				fem/PeriodicDofsMapping.h\
 				fem/ScratchSpace.h\
+				fem/SetOfBCs.h\
 				fem/SlipBC.h\
 				fem/SlipFrictionBC.h\
 				fem/SparsityPatternBuilder.h\

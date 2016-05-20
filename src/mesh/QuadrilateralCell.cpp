@@ -342,7 +342,7 @@ real QuadrilateralCell::circumradius(MeshEntity const& entity) const
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[0]);
 
-  // Get the coordinates of the three vertices
+  // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
   uint const * vertices = entity.entities(0);
   real const * x0 = geometry.x(vertices[0]);
@@ -371,6 +371,49 @@ real QuadrilateralCell::circumradius(MeshEntity const& entity) const
   real const s = 0.5 * (a + b + c + d);
   return 0.25 *
       std::sqrt((a*c+b*d)*(a*d+b*c)*(a*b+c*d)/((s-a)*(s-b)*(s-c)*(s-d)));
+}
+//-----------------------------------------------------------------------------
+real QuadrilateralCell::inradius(MeshEntity const& entity) const
+{
+  dolfin_assert(entity.dim() == TD);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
+
+  // Get the coordinates of the four vertices
+  MeshGeometry const& geometry = entity.mesh().geometry();
+  uint const * vertices = entity.entities(0);
+  real const * x0 = geometry.x(vertices[0]);
+  real const * x1 = geometry.x(vertices[1]);
+  real const * x2 = geometry.x(vertices[2]);
+  real const * x3 = geometry.x(vertices[3]);
+
+  // Compute inradius assuming that the quadrilateral is tangent
+  real a = 0.0;
+  real b = 0.0;
+  real c = 0.0;
+  real d = 0.0;
+  real p = 0.0;
+  real q = 0.0;
+  for (uint i = 0; i < geometry.dim(); ++i)
+  {
+    a += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+    b += (x2[i] - x1[i]) * (x2[i] - x1[i]);
+    c += (x3[i] - x2[i]) * (x3[i] - x2[i]);
+    d += (x0[i] - x3[i]) * (x0[i] - x3[i]);
+    p += (x2[i] - x0[i]) * (x2[i] - x0[i]);
+    q += (x3[i] - x1[i]) * (x3[i] - x1[i]);
+  }
+  a = std::sqrt(a);
+  b = std::sqrt(b);
+  c = std::sqrt(c);
+  d = std::sqrt(d);
+  p = std::sqrt(p);
+  q = std::sqrt(q);
+
+  return 0.5
+      * std::sqrt(
+          4.0 * p * p * q * q
+              - (a * a - b * b + c * c - d * d)
+                  * (a * a - b * b + c * c - d * d)) / (a + b + c + d);
 }
 //-----------------------------------------------------------------------------
 Point QuadrilateralCell::midpoint(MeshEntity const& entity) const

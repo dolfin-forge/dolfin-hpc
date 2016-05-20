@@ -124,6 +124,9 @@ public:
   /// Compute circumradius of mesh entity
   virtual real circumradius(MeshEntity const& entity) const = 0;
 
+  /// Compute inradius of mesh entity
+  virtual real inradius(MeshEntity const& entity) const = 0;
+
   /// Compute coordinates of midpoint
   virtual Point midpoint(MeshEntity const& entity) const = 0;
 

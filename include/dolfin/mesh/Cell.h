@@ -70,6 +70,12 @@ public:
     return mesh_.type().circumradius(*this);
   }
 
+  /// Compute circumradius of cell
+  inline real inradius() const
+  {
+    return mesh_.type().inradius(*this);
+  }
+
   /// Compute normal of given facet with respect to the cell
   inline Point normal(uint facet) const
   {

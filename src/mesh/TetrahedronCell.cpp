@@ -570,6 +570,11 @@ real TetrahedronCell::circumradius(MeshEntity const& entity) const
   return area / (6.0 * V);
 }
 //-----------------------------------------------------------------------------
+real TetrahedronCell::inradius(MeshEntity const& entity) const
+{
+  return circumradius(entity) / 3.0;
+}
+//-----------------------------------------------------------------------------
 Point TetrahedronCell::midpoint(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

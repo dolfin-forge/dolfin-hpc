@@ -129,6 +129,11 @@ real PointCell::circumradius(MeshEntity const& entity) const
   return 0.0;
 }
 //-----------------------------------------------------------------------------
+real PointCell::inradius(MeshEntity const& entity) const
+{
+  return 0.0;
+}
+//-----------------------------------------------------------------------------
 Point PointCell::midpoint(MeshEntity const& entity) const
 {
   // Check that we get a point

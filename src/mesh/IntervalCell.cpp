@@ -192,6 +192,12 @@ real IntervalCell::circumradius(MeshEntity const& entity) const
   return volume(entity);
 }
 //-----------------------------------------------------------------------------
+real IntervalCell::inradius(MeshEntity const& entity) const
+{
+  // Inradius is same as volume for interval (line segment)
+  return volume(entity);
+}
+//-----------------------------------------------------------------------------
 Point IntervalCell::midpoint(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

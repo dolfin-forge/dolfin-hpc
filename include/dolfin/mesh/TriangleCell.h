@@ -105,6 +105,9 @@ public:
   /// Compute circumradius of triangle
   real circumradius(MeshEntity const& entity) const;
 
+  /// Compute inradius of interval
+  real inradius(MeshEntity const& entity) const;
+
   /// Compute coordinates of midpoint
   Point midpoint(MeshEntity const& entity) const;
 

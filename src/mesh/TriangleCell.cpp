@@ -364,8 +364,38 @@ real TriangleCell::circumradius(MeshEntity const& entity) const
   e1 = std::sqrt(e1);
   e2 = std::sqrt(e2);
 
-  // Formula for circumradius from http://mathworld.wolfram.com
-  // Using Heron's formula for the volume instead of calling volume()
+  //
+  return 0.5
+      * std::sqrt(
+          (e0 + e1 - e2) * (e2 + e0 - e1) * (e1 + e2 - e0) / (e0 + e1 + e2));
+}
+//-----------------------------------------------------------------------------
+real TriangleCell::inradius(MeshEntity const& entity) const
+{
+  dolfin_assert(entity.dim() == TD);
+  dolfin_assert(entity.num_entities(0) == NE[0]);
+
+  // Get the coordinates of the three vertices
+  MeshGeometry const& geometry = entity.mesh().geometry();
+  uint const * vertices = entity.entities(0);
+  real const * x0 = geometry.x(vertices[0]);
+  real const * x1 = geometry.x(vertices[1]);
+  real const * x2 = geometry.x(vertices[2]);
+  real e0 = 0.0;
+  real e1 = 0.0;
+  real e2 = 0.0;
+  for (uint i = 0; i < geometry.dim(); ++i)
+  {
+    e0 += (x1[i] - x0[i]) * (x1[i] - x0[i]);
+    e1 += (x2[i] - x1[i]) * (x2[i] - x1[i]);
+    e2 += (x0[i] - x2[i]) * (x0[i] - x2[i]);
+  }
+  e0 = std::sqrt(e0);
+  e1 = std::sqrt(e1);
+  e2 = std::sqrt(e2);
+
+// Formula for circumradius from http://mathworld.wolfram.com
+// Using Heron's formula for the volume instead of calling volume()
   real const s = 0.5 * (e0 + e1 + e2);
   return 0.25 * e0 * e1 * e2 / std::sqrt(s * (s - e0) * (s - e1) * (s - e2));
 }

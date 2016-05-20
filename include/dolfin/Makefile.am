@@ -25,6 +25,7 @@ nobase_pkginclude_HEADERS = \
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				evolution/Time.h\
+				evolution/TimeStepping.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\

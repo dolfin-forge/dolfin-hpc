@@ -23,6 +23,7 @@ nobase_pkginclude_HEADERS = \
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
+				evolution/Time.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\

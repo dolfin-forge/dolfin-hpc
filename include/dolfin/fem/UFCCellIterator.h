@@ -12,43 +12,44 @@
 namespace dolfin
 {
 
-class UFCCellIterator : public UFCCell
+class UFCCellIterator
 {
 
 public:
 
   ///
   UFCCellIterator(Mesh& mesh) :
-      UFCCell(),
+      ufc_cell_(),
       it_(mesh),
       geometry_(mesh.geometry())
   {
-    cell = &(*it_);
-    cell_shape = UFCCell::shape(mesh.type().cellType());
-    num_vertices = mesh.type().num_entities(0);
-    topological_dimension = mesh.topology().dim();
-    geometric_dimension = mesh.geometry().dim();
+    ufc_cell_.cell = &(*it_);
+    ufc_cell_.cell_shape = UFCCell::shape(mesh.type().cellType());
+    ufc_cell_.num_vertices = mesh.type().num_entities(0);
+    ufc_cell_.topological_dimension = mesh.topology().dim();
+    ufc_cell_.geometric_dimension = mesh.geometry().dim();
     // Entities
-    entity_indices = new uint*[topological_dimension + 1];
-    entity_indices[topological_dimension] = new uint[1];
-    for (uint d = 0; d < topological_dimension; ++d)
+    ufc_cell_.entity_indices = new uint*[ufc_cell_.topological_dimension + 1];
+    ufc_cell_.entity_indices[ufc_cell_.topological_dimension] = new uint[1];
+    for (uint d = 0; d < ufc_cell_.topological_dimension; ++d)
     {
-      entity_indices[d] = new uint[mesh.type().num_entities(d)];
+      ufc_cell_.entity_indices[d] = new uint[mesh.type().num_entities(d)];
     }
     // Coordinates
-    coordinates = new real*[num_vertices];
+    ufc_cell_.coordinates = new real*[ufc_cell_.num_vertices];
 
     //
 #if ENABLE_P1_OPTIMIZATIONS
-    cell->global_entities(0, entity_indices[0]);
+    ufc_cell_.cell->global_entities(0, entity_indices[0]);
 #else
-    cell->global_entities(entity_indices);
+    ufc_cell_.cell->global_entities(ufc_cell_.entity_indices);
 #endif
-    index = entity_indices[topological_dimension][0];
-    uint const * vertices = cell->entities(0);
-    for (uint i = 0; i < num_vertices; ++i)
+    ufc_cell_.index =
+        ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
+    uint const * vertices = ufc_cell_.cell->entities(0);
+    for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
     {
-      coordinates[i] = geometry_.x(vertices[i]);
+      ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);
     }
   }
 
@@ -65,15 +66,16 @@ public:
       // the underlying mesh entity is only updated when dereferenced from
       // iterator.
 #if ENABLE_P1_OPTIMIZATIONS
-      it_->global_entities(0, entity_indices[0]);
+      it_->global_entities(0, ufc_cell_.entity_indices[0]);
 #else
-      it_->global_entities(entity_indices);
+      it_->global_entities(ufc_cell_.entity_indices);
 #endif
-      index = entity_indices[topological_dimension][0];
-      uint const * vertices = cell->entities(0);
-      for (uint i = 0; i < num_vertices; ++i)
+      ufc_cell_.index =
+          ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
+      uint const * vertices = ufc_cell_.cell->entities(0);
+      for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
       {
-        coordinates[i] = geometry_.x(vertices[i]);
+        ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);
       }
     }
     return *this;
@@ -86,13 +88,19 @@ public:
   }
 
   ///
-  inline Cell* operator->()
+  inline UFCCell* operator->()
   {
-    return &(*it_);
+    return &(ufc_cell_);
   }
 
   ///
-  inline Cell& operator*()
+  inline UFCCell& operator*()
+  {
+    return (ufc_cell_);
+  }
+
+  ///
+  inline Cell& cell()
   {
     return (*it_);
   }
@@ -100,6 +108,7 @@ public:
 private:
 
   //
+  UFCCell ufc_cell_;
   CellIterator it_;
 
   //

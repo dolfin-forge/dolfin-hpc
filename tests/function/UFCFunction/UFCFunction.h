@@ -42,9 +42,9 @@ START_TEST( test_UFCFunction )
       real value;
       for (UFCCellIterator c(refcell); !c.end(); ++c)
       {
-        for (VertexIterator v(*c); !v.end(); ++v)
+        for (VertexIterator v(c.cell()); !v.end(); ++v)
         {
-          f.evaluate(&value, v->x(), c);
+          f.evaluate(&value, v->x(), *c);
           message("Distance from vertex %d to midpoint : %g", v.pos(), value);
         }
       }
@@ -66,9 +66,9 @@ START_TEST( test_UFCFunction )
       real value;
       for (UFCCellIterator c(refcell); !c.end(); ++c)
       {
-        for (VertexIterator v(*c); !v.end(); ++v)
+        for (VertexIterator v(c.cell()); !v.end(); ++v)
         {
-          f.evaluate(&value, v->x(), c);
+          f.evaluate(&value, v->x(), *c);
           message("Cell diameter : %g", v.pos(), value);
         }
       }

@@ -7,6 +7,7 @@
 #include "UnitMeshes/UnitMeshes.h"
 #include "StructuredGrid/StructuredGrid.h"
 #include "VertexNormal/VertexNormal.h"
+#include "algorithm/algorithm.h"
 
 #include <check.h>
 
@@ -66,6 +67,12 @@ Suite *suite()
 
   tc = tcase_create("VertexNormal");
   tcase_add_test(tc, test_VertexNormal );
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, setup, teardown);
+  tcase_set_timeout(tc,60);
+
+  tc = tcase_create("algorithm");
+  tcase_add_test(tc, test_algorithm );
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, setup, teardown);
   tcase_set_timeout(tc,60);

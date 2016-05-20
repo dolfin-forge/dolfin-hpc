@@ -167,6 +167,7 @@ nobase_pkginclude_HEADERS = \
 				math/LinearDistribution.h\
 				math/PKDO.h\
 				mesh/dolfin_mesh.h\
+				mesh/algorithm.h \
 				mesh/AffineMapping.h \
 				mesh/ALE.h\
 				mesh/ALEType.h\

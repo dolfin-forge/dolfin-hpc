@@ -5,7 +5,8 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = CellTypes/CellTypes.h\
+EXTRA_DIST = algorithm/algorithm.h\
+             CellTypes/CellTypes.h\
              SubDomain/SubDomain.h\
              VertexNormal/VertexNormal.h\
              StructuredGrid/StructuredGrid.h\

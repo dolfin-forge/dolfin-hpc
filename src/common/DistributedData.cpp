@@ -304,11 +304,6 @@ void DistributedData::assign(DistributedData const& other,
 {
   clear();
 
-  if (mapping.size() == 0)
-  {
-    return;
-  }
-
   if (mapping.size() > other.local_size())
   {
     error("DistributedData : assignment requires mapping size (%u) lower than "

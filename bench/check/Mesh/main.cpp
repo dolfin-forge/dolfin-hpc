@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   Test t(argc, argv);
   {
     Mesh mesh(t.args.mesh_file);
-//    logm.file();
+    logm.file();
 
     if (mesh.is_distributed())
     {

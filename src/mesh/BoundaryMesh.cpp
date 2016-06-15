@@ -128,6 +128,9 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
+    uint const rank = MPI::processNumber();
+    uint const pe_size = MPI::numProcesses();
+    Array<uint> * ghosts = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)
     {
@@ -143,10 +146,75 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
           {
             boundary_vertices[vertex_index] = vertex_map_.size();
             vertex_map_.push_back(vertex_index);
+            // Collect ghost vertices per owner
+            if (v->is_ghost())
+            {
+              ghosts[v->owner()].push_back(v->global_index());
+            }
           }
         }
       }
     }
+
+    // The mesh distribution is not constrained: non-owner of exterior facets
+    // may own lower-dimensional entities on the exterior boundary.
+    if(mesh.is_distributed())
+    {
+#if HAVE_MPI
+      MPI_Status status;
+      DistributedData& distdata = mesh.distdata()[0];
+      std::set<uint> owned_single;
+      _set<uint> const& vadjs = distdata.get_adj_ranks();
+      uint recvmax = ghosts[0].size();
+      for (uint j = 1; j < pe_size; ++j)
+      {
+        recvmax = std::max(recvmax, (uint) ghosts[j].size());
+      }
+      MPI::numGlobalMax(recvmax, recvmax);
+      uint * recvbuf = new uint[recvmax];
+      int recvcount;
+
+      // If one adjacent rank has no boundary cell but the current rank has
+      // ghost entities owned by this rank then any algorithm based on mesh
+      // facets is bound to fail.
+      // Naive implementation for now, just send all the ghost vertices
+      for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
+           ++adj)
+      {
+        MPI_Send(&ghosts[(*adj)][0], ghosts[(*adj)].size(), MPI_UNSIGNED,
+                 (*adj), 0, MPI::DOLFIN_COMM);
+      }
+      for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
+           ++adj)
+      {
+        MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
+                 MPI::DOLFIN_COMM, &status);
+        MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+        if (cell_map_.size() == 0)
+        {
+          warning("%u ghost vertices from %u", recvcount, (*adj));
+          for(uint k = 0; k < recvcount; ++k)
+          {
+            dolfin_assert(distdata.has_global(recvbuf[k]));
+            owned_single.insert(distdata.get_local(recvbuf[k]));
+          }
+        }
+      }
+      //
+      delete [] recvbuf;
+
+      message("Number of single vertices : %u", owned_single.size());
+      for (std::set<uint>::const_iterator it = owned_single.begin(); 
+           it != owned_single.end(); ++it)
+      {
+        // Boundary vertices which are ghost on adjacent ranks
+        vertex_map_.push_back(*it);
+      }
+
+#endif /* HAVE_MPI */
+    }
+
+    delete [] ghosts;
 
     // Create boundary vertices and cells
     MeshEditor editor(*this, mesh.type().facetType(), gdim);
@@ -172,6 +240,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       editor.add_cell(i, &facet_vertices[0]);
     }
     delete [] facet_vertices;
+
     // If the mesh is distributed, set global numbering and copy the ownership
     if(mesh.is_distributed())
     {
@@ -180,28 +249,6 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     }
     editor.close();
     boundary_vertices.clear();
-  }
-
-  if(mesh.is_distributed())
-  {
-#if HAVE_MPI
-    _set<uint> adjs = mesh.distdata()[0].get_adj_ranks();
-    MPI_Status status;
-    uint sendbuf = cell_map_.size();
-    for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
-    {
-      uint recvbuf;
-      MPI_Sendrecv(&sendbuf, 1, MPI_UNSIGNED, *it, 0,
-                   &recvbuf, 1, MPI_UNSIGNED, *it, 0,
-                   MPI::DOLFIN_COMM, &status);
-      if (recvbuf == 0)
-      {
-        error("BoundaryMesh : adjacent rank %u has no cell, case unimplemented",
-              *it);
-      }
-    }
-#endif /* HAVE_MPI */
-
   }
 
   message(1, "BoundaryMesh : number of cells = %u, number of vertices %u",

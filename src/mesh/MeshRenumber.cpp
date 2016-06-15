@@ -172,7 +172,6 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         // Entities are already sorted, just copy them to save sort computation
         std::copy(&recvbuf[k + 2], &recvbuf[k + 2] + num_entity_vertices,
                   key.indices);
-        message("%8u < %8u", key.indices[0], key.indices[1]);
         //dolfin_assert(key.indices[0] < key.indices[1]);
 
         // Beware camembert !
@@ -186,11 +185,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
           //FIXME: Hash collision possible ?
           uint const local_index = it->first.idx;
           uint const vote0 = it->second;
-          message("e0|%8u: %8u, %8u", it->first.idx, it->first.indices[0], it->first.indices[1]);
-          message("e1|%8u: %8u, %8u", key.idx, key.indices[0], key.indices[1]);
 
           // Give ownership to the minimum vote amongst adjacent ranks
-          message("vote0 = %8u, vote1 = %8u, src = %8u, rank = %8u", vote0, vote1, src, rank);
           if ((vote1 < vote0) ||
               (vote1 == vote0 && src < edata.get_owner(local_index)))
           {
@@ -257,8 +253,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
       for (int k = 0; k < recvcount; ++k)
       {
-        ///FIXME: convert to assertion once we make sure consistency of data is
-        ///       ensured before renumbering.
+        ///Throw hard error to make sure consistency of data is ensured before
+        // renumbering.
         if(!edata.is_shared(recvbuf[k]))
         {
           error("MeshRenumber : received entity %u is not marked as shared",

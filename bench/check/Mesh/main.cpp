@@ -15,6 +15,13 @@ int main(int argc, char** argv)
     Mesh mesh(T.args.mesh_file);
     logm.file();
 
+    {
+      MeshFunction<uint> p(mesh, mesh.topology().dim());
+      p = MPI::processNumber();
+      File fp("partitions.pvd");
+      fp << p;
+    }
+
     if (mesh.is_distributed())
     {
 
@@ -95,13 +102,14 @@ int main(int argc, char** argv)
 
       }
 
+/*
       //
       T.begin("GlobalFacetMap");
       {
         GlobalFacetMap gfm(mesh);
       }
       T.end();
-
+*/
       //
       T.begin("BoundaryMesh exterior");
       {
@@ -111,6 +119,8 @@ int main(int argc, char** argv)
       }
       T.end();
 
+/*
+			//
       T.begin("BoundaryMesh interior");
       {
         BoundaryMesh bm(mesh, BoundaryMesh::interior);
@@ -118,7 +128,7 @@ int main(int argc, char** argv)
         f << bm;
       }
       T.end();
-
+*/
       //
       //message("NodeNormal");
       //NodeNormal nn(mesh);

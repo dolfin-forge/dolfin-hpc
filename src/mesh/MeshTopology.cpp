@@ -26,6 +26,7 @@ MeshTopology::MeshTopology(Mesh& mesh) :
     mesh_(mesh),
     dim_(0),
     num_vertices_(0),
+    ini_vertices_(false),
     connectivity_(NULL),
     distdata_(NULL),
     timestamp_(0)
@@ -36,6 +37,7 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     mesh_(other.mesh_),
     dim_(0),
     num_vertices_(0),
+    ini_vertices_(false),
     connectivity_(NULL),
     distdata_(NULL),
     timestamp_(0)
@@ -54,6 +56,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
 
   dim_ = other.dim_;
   num_vertices_ = other.num_vertices_;
+  ini_vertices_ = other.ini_vertices_;
   connectivity_ = new MeshConnectivity*[dim_ + 1];
   for (uint d0 = 0; d0 <= dim_; ++d0)
   {
@@ -152,6 +155,7 @@ void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
   if(dim == 0)
   {
     num_vertices_ = num_local;
+    ini_vertices_ = true;
   }
   // Edges/Faces
   if (dim < 0 && dim < dim_)
@@ -221,6 +225,7 @@ void MeshTopology::clear()
   connectivity_ = NULL;
   timestamp_ = 0;
   num_vertices_ = 0;
+  ini_vertices_ = false;
   dim_ = 0;
 }
 //-----------------------------------------------------------------------------
@@ -327,7 +332,7 @@ bool MeshTopology::entities_exist(uint dim) const
 {
   dolfin_assert(dim <= dim_);
   return (dim == 0 ?
-            (num_vertices_ > 0) : connectivity_[dim][0].is_initialized());
+            (ini_vertices_ == true) : connectivity_[dim][0].is_initialized());
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const
@@ -462,8 +467,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     CellType const& cell_type = mesh_.type();
     uint const m = cell_type.num_entities(dim);
     uint const n = cell_type.num_vertices(dim);
-    dolfin_assert(this->size(0) > 0);
-    Array<uint> * vertex_entities = new Array<uint> [this->size(0)];
+    Array<uint> * vertex_entities = (this->size(0) == 0 ?
+                                      NULL : new Array<uint> [this->size(0)]);
     uint ** entities = new uint*[m];
     for (uint e = 0; e < m; ++e)
     {
@@ -544,7 +549,6 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 
     // Compute from transpose
     Array<uint> conn(this->size(d0), 0);
-    dolfin_assert(c10.num_entities() > 0);
     for (uint e1 = 0; e1 < c10.num_entities(); ++e1)
     {
       for (uint e0 = 0; e0 < c10.size(e1); ++e0)

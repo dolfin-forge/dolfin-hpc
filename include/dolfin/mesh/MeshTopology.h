@@ -203,6 +203,7 @@ private:
 
   /// Number of mesh vertices
   uint num_vertices_;
+  bool ini_vertices_;
 
   /// Connectivity for pairs of topological dimensions
   MeshConnectivity ** connectivity_;

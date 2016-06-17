@@ -127,7 +127,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // An exterior facet should be included in the subdomain if at least one
     // of the dofs on the facet restriction (if any) or if the facet midpoint
     // is in the subdomain.
-    // Skip the facet if it does not satifies one of these conditions.
+    // Skip the facet if it does not satisfy one of these conditions.
     if ((subdomain_ == NULL)
         || subdomain_->inside(&(bcell->midpoint())[0], on_boundary))
     {

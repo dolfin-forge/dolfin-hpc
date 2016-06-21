@@ -23,10 +23,7 @@ SharedMapping::SharedMapping(DistributedData const& data) :
 
 #if HAVE_MPI
 
-  uint const rank = dolfin::MPI::processNumber();
-  uint const pe_size = dolfin::MPI::numProcesses();
-
-  //
+  // Collect entities by adjacent rank
   for (SharedIterator it(data); !it.end(); ++it)
   {
     _set<uint> const& adjs = it.adj();
@@ -38,58 +35,50 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   dolfin_assert(mappings_.size() == data.get_adj_ranks().size());
   send_max_ = 0;
   send_min_ = data.num_shared();
+
+  //
+  uint const rank = dolfin::MPI::processNumber();
+  uint const pe_size = dolfin::MPI::numProcesses();
+  MPI_Request * request = new MPI_Request[mappings_.size()];
+  MPI_Status status;
+  int recvcount;
+  uint i = 0;
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
-       it != mappings_.end(); ++it)
+       it != mappings_.end(); ++it, ++i)
   {
     dolfin_assert(it->first != rank);
     // Update bounds
     send_max_ = std::max(send_max_, (uint) it->second.send.size());
     send_min_ = std::min(send_min_, (uint) it->second.send.size());
+    //
+    MPI_Isend(&it->second.send[0], it->second.send.size(), MPI_UNSIGNED,
+              it->first, 0, MPI::DOLFIN_COMM, &request[i]);
     // Resize buffer
     it->second.recv.resize(it->second.send.size());
+    MPI_Irecv(&it->second.recv[0], it->second.recv.size(), MPI_UNSIGNED,
+              it->first, 0, MPI::DOLFIN_COMM, &request[i]);
   }
-
-  // Exchange lists of global indices
-  MPI_Status status;
-  uint dst;
-  uint src;
-  int recv_count;
-  for (int j = 1; j < (int) pe_size; ++j)
-  {
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
-
-    uint * senddst = NULL;
-    uint sendcnt = 0;
-    _map<uint, AdjacentMapping>::iterator adjdst = mappings_.find(dst);
-    if (adjdst != mappings_.end())
-    {
-      senddst = &adjdst->second.send[0];
-      sendcnt = adjdst->second.send.size();
-    }
-
-    uint * recvbuf = NULL;
-    uint recvcnt = 0;
-    _map<uint, AdjacentMapping>::iterator adjsrc = mappings_.find(src);
-    if (adjsrc != mappings_.end())
-    {
-      recvbuf = &adjsrc->second.recv[0];
-      recvcnt = adjsrc->second.recv.size();
-    }
-
-    MPI_Sendrecv(&senddst[0], sendcnt, MPI_UNSIGNED, dst, 1, &recvbuf[0],
-                 recvcnt, MPI_UNSIGNED, src, 1, dolfin::MPI::DOLFIN_COMM,
-                 &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-  }
-
-  // Mappings contain global indices, map back to local
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
-       it != mappings_.end(); ++it)
+       it != mappings_.end(); ++it, ++i)
   {
-    data_.get_local(it->second.send.size(), &it->second.send[0], &it->second.send[0]);
-    data_.get_local(it->second.recv.size(), &it->second.recv[0], &it->second.recv[0]);
+    data_.get_local(it->second.send.size(), &it->second.send[0],
+                    &it->second.send[0]);
   }
+  i = 0;
+  for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
+       it != mappings_.end(); ++it, ++i)
+  {
+    MPI_Wait(&request[i],&status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+    if(recvcount != it->second.recv.size())
+    {
+      error("AdjacentMapping : inconsistent count %u from rank %u: expected %u",
+            rank, recvcount, it->second.recv.size());
+    }
+    data_.get_local(it->second.recv.size(), &it->second.recv[0],
+                    &it->second.recv[0]);
+  }
+  delete [] request;
 
 #endif /* HAVE_MPI */
 

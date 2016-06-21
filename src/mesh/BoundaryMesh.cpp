@@ -130,7 +130,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 
     uint const rank = MPI::processNumber();
     uint const pe_size = MPI::numProcesses();
-    Array<uint> * ghosts = new Array<uint>[pe_size];
+    Array<uint> * shared_vertices = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)
     {
@@ -146,10 +146,16 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
           {
             boundary_vertices[vertex_index] = vertex_map_.size();
             vertex_map_.push_back(vertex_index);
-            // Collect ghost vertices per owner
-            if (v->is_ghost())
+            // Collect shared vertices per adjacent ranks
+            if (v->is_shared())
             {
-              ghosts[v->owner()].push_back(v->global_index());
+              _set<uint> const& adjs = mesh.distdata()[0].get_shared_adj(vertex_index);
+              for (_set<uint>::const_iterator adj = adjs.begin(); adj != adjs.end();
+                   ++adj)
+              {
+                dolfin_assert(mesh.distdata()[0].get_adj_ranks().count(*adj));
+                shared_vertices[*adj].push_back(v->global_index());
+              }
             }
           }
         }
@@ -162,17 +168,18 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     {
 #if HAVE_MPI
       MPI_Status status;
-      DistributedData& distdata = mesh.distdata()[0];
-      std::set<uint> owned_single;
+      DistributedData const& distdata = mesh.distdata()[0];
       _set<uint> const& vadjs = distdata.get_adj_ranks();
-      uint recvmax = ghosts[0].size();
+      uint recvmax = shared_vertices[0].size();
       for (uint j = 1; j < pe_size; ++j)
       {
-        recvmax = std::max(recvmax, (uint) ghosts[j].size());
+        recvmax = std::max(recvmax, (uint) shared_vertices[j].size());
       }
       MPI::numGlobalMax(recvmax, recvmax);
       uint * recvbuf = new uint[recvmax];
       int recvcount;
+
+      _set<uint> added_vertices(vertex_map_.begin(), vertex_map_.end());
 
       // If one adjacent rank has no boundary cell but the current rank has
       // ghost entities owned by this rank then any algorithm based on mesh
@@ -181,8 +188,8 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI_Send(&ghosts[(*adj)][0], ghosts[(*adj)].size(), MPI_UNSIGNED,
-                 (*adj), 0, MPI::DOLFIN_COMM);
+        MPI_Send(&shared_vertices[(*adj)][0], shared_vertices[(*adj)].size(),
+                 MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM);
       }
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
@@ -190,31 +197,25 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
         MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
                  MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
-        if (cell_map_.size() == 0)
+        for(uint k = 0; k < recvcount; ++k)
         {
-          warning("%u ghost vertices from %u", recvcount, (*adj));
-          for(uint k = 0; k < recvcount; ++k)
+          dolfin_assert(distdata.has_global(recvbuf[k]));
+          message("%u, global index %u", distdata.get_local(recvbuf[k]), recvbuf[k]);
+          uint const local_index = distdata.get_local(recvbuf[k]);
+          if(added_vertices.count(local_index) == 0)
           {
-            dolfin_assert(distdata.has_global(recvbuf[k]));
-            owned_single.insert(distdata.get_local(recvbuf[k]));
+            vertex_map_.push_back(local_index);
+            added_vertices.insert(local_index);
           }
         }
       }
       //
       delete [] recvbuf;
 
-      message("Number of single vertices : %u", owned_single.size());
-      for (std::set<uint>::const_iterator it = owned_single.begin(); 
-           it != owned_single.end(); ++it)
-      {
-        // Boundary vertices which are ghost on adjacent ranks
-        vertex_map_.push_back(*it);
-      }
-
 #endif /* HAVE_MPI */
     }
 
-    delete [] ghosts;
+    delete [] shared_vertices;
 
     // Create boundary vertices and cells
     MeshEditor editor(*this, mesh.type().facetType(), gdim);

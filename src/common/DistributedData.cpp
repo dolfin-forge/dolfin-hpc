@@ -155,6 +155,7 @@ void DistributedData::finalize()
   else
   {
     message(1, "DistributedData : finalize");
+    tic();
 
     // Check consistency
     if (shared_.size() > local_.size())
@@ -169,6 +170,7 @@ void DistributedData::finalize()
     // Local-to-global mapping was provided and should be cached
     if (global_.size() > 0)
     {
+      message(1, "1) global_.size() > 0");
       // Generate cache for existing mapping
       if (cached_numbering_ != NULL)
       {
@@ -199,6 +201,7 @@ void DistributedData::finalize()
     // This allows automatic numbering of non-ghosted entities like cells.
     else if ((local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0))
     {
+      message(1, "2) (local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0)");
       if (shared_.size() > 0)
       {
         error("DistributedData : no mapping was provided and some entities set "
@@ -270,15 +273,12 @@ void DistributedData::finalize()
 
     // Set data range if needed
     uint owned_size = local_.size() - ghost_.size();
-    if (range_size_ == 0)
-    {
-      range_size_ = owned_size;
-      MPI::processOffset(range_size_, offset_);
-    }
-    else if (range_size_ != owned_size)
+    if (range_size_ > 0 && (range_size_ != owned_size))
     {
       error("DistributedData : data range does not match provided range");
     }
+    range_size_ = owned_size;
+    MPI::processOffset(range_size_, offset_);
 
     // Check global size anyway
     uint range_sum;
@@ -296,6 +296,8 @@ void DistributedData::finalize()
 
     //
     finalized_ = true;
+
+    tocd(1);
   }
 }
 //-----------------------------------------------------------------------------

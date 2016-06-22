@@ -232,6 +232,36 @@ int main(int argc, char** argv)
       }
     }
     T.end();
+    //
+    T.begin("Compute interior of BoundaryMesh exterior");
+    {
+      BoundaryMesh boundary0(mesh, BoundaryMesh::exterior);
+      BoundaryMesh boundary1(boundary0, BoundaryMesh::interior);
+      boundary1.disp();
+      File f("bmei.pvd");
+      f << boundary1;
+    }
+    T.end();
+    //
+    T.begin("Compute normal of BoundaryMesh exterior");
+    {
+      BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
+
+      message("Collect facets");
+      uint const tdim = mesh.topology().dim();
+      Array<uint> * entities = new Array<uint>[tdim - 1];
+      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+      {
+        Facet facet(mesh, boundary.facet_index(*bcell));
+        Cell cell(mesh, facet.entities(tdim)[0]);
+        uint local_facet = cell.index(facet);
+
+        for (M)
+
+      }
+      delete [] entities;
+    }
+    T.end();
   }
   //---------------------------------------------------------------------------
   return 0;

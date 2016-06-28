@@ -2,9 +2,24 @@
 
 #include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/mesh/GlobalFacetMap.h>
+#include <dolfin/mesh/SubDomain.h>
 
 using namespace dolfin;
 
+//-----------------------------------------------------------------------------
+class Hole : public SubDomain
+{
+
+public:
+
+  bool inside(real const * x, bool const on_boundary) const
+  {
+
+    return (on_boundary
+        && ((x[0] - 0.5) * (x[0] - 0.5) + (x[1] - 0.0) * (x[1] - 0.0)) > 0.1);
+  }
+
+};
 //-----------------------------------------------------------------------------
 void check(Mesh& mesh)
 {
@@ -108,16 +123,16 @@ void check(Mesh& mesh)
         uint * recvbuf = new uint[recvmax];
 
         for (_set<uint>::const_iterator adj = adjs.begin(); adj != adjs.end();
-             ++adj)
+            ++adj)
         {
           MPI_Send(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, (*adj), 0,
-                   MPI::DOLFIN_COMM);
+              MPI::DOLFIN_COMM);
         }
         for (_set<uint>::const_iterator adj = adjs.begin(); adj != adjs.end();
-             ++adj)
+            ++adj)
         {
           MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
-                   MPI::DOLFIN_COMM, &status);
+              MPI::DOLFIN_COMM, &status);
           int recvcount;
           MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
           bool found = false;
@@ -233,6 +248,25 @@ int main(int argc, char** argv)
     }
     T.end();
     //
+    T.begin("Compute BoundaryMesh interior/exterior with Hole");
+    {
+      Hole h;
+      BoundaryMesh bint(mesh, h, BoundaryMesh::interior);
+      File fi("bmhi.pvd");
+      fi << bint;
+      BoundaryMesh bext(mesh, h, BoundaryMesh::exterior);
+      File fe("bmhe.pvd");
+      fe << bext;
+
+      BoundaryMesh bint1(bext, BoundaryMesh::interior);
+      File fei("bmhei.pvd");
+      fei << bint1;
+      BoundaryMesh bext1(bext, BoundaryMesh::exterior);
+      File fee("bmhee.pvd");
+      fee << bext1;
+    }
+    T.end();
+    //
     T.begin("Compute interior of BoundaryMesh exterior");
     {
       BoundaryMesh boundary0(mesh, BoundaryMesh::exterior);
@@ -245,21 +279,66 @@ int main(int argc, char** argv)
     //
     T.begin("Compute normal of BoundaryMesh exterior");
     {
+      uint const rank = MPI::processNumber();
+      uint const pe_size = MPI::numProcesses();
       BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
 
-      message("Collect facets");
       uint const tdim = mesh.topology().dim();
-      Array<uint> * entities = new Array<uint>[tdim - 1];
+      uint const gdim = mesh.geometry().dim();
+
+      //
+      real * facet_weights = new real[boundary.num_cells()];
+      real * facet_normals = new real[gdim * boundary.num_cells()];
       for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
       {
         Facet facet(mesh, boundary.facet_index(*bcell));
         Cell cell(mesh, facet.entities(tdim)[0]);
-        uint local_facet = cell.index(facet);
-
-        for (M)
+        uint const local_facet = cell.index(facet);
 
       }
-      delete [] entities;
+      delete[] facet_normals;
+      delete[] facet_weights;
+
+      if (mesh.is_distributed())
+      {
+        message("Collect facets per vertices");
+        Array<uint> * sendbuf_u = new Array<uint> [pe_size];
+        for (GhostIterator it(boundary.distdata()[0]); !it.end(); ++it)
+        {
+          sendbuf_u[it.owner()].push_back(it.global_index());
+          //
+
+        }
+        delete[] sendbuf_u;
+
+        /*
+         for (uint d = 0; d <= tdim - 1; ++d)
+         {
+         // Initialize topological dimension
+         boundary.init(d);
+         Array<uint> * ghost_entities = new Array<uint> [pe_size];
+         for (GhostIterator it(boundary.distdata()[d]); !it.end(); ++it)
+         {
+
+         }
+
+         for (MeshEntityIterator it(boundary, d); !it.end(); ++it)
+         {
+         if (it->is_owned())
+         {
+
+         }
+         else
+         {
+         //            ghost_entities[it->owner()].push_back()
+         }
+         }
+         delete[] ghost_entities;
+         }
+         */
+
+      }
+
     }
     T.end();
   }

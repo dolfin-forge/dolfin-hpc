@@ -651,7 +651,7 @@ dolfin::real TetrahedronCell::facet_area(Cell const& cell, uint facet) const
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = cell.mesh().geometry();
-  uint const* vertices = cell.entities(0);
+  uint const* vertices = f.entities(0);
   real const* x0 = geometry.x(vertices[0]);
   real const* x1 = geometry.x(vertices[1]);
   real const* x2 = geometry.x(vertices[2]);

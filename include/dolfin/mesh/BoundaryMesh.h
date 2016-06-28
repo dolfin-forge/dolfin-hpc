@@ -25,6 +25,7 @@ namespace dolfin
 {
 
 class Cell;
+class SubDomain;
 class Vertex;
 
 /**
@@ -36,12 +37,16 @@ class Vertex;
 
 class BoundaryMesh : public Mesh, public MeshDependent
 {
+
 public:
 
   enum Type { full, interior, exterior };
 
   /// Create boundary mesh from given mesh
   BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type);
+
+  /// Create boundary mesh from given mesh
+  BoundaryMesh(Mesh& mesh, SubDomain const& subdomain, BoundaryMesh::Type type);
 
   /// Destructor
   ~BoundaryMesh();
@@ -82,6 +87,9 @@ private:
   ///
   Array<uint> cell_map_;
   Array<uint> vertex_map_;
+
+  ///
+  SubDomain const * subdomain_;
 
 };
 

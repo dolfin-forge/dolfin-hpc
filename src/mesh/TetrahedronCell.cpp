@@ -575,73 +575,56 @@ real TetrahedronCell::inradius(MeshEntity const& entity) const
   return circumradius(entity) / 3.0;
 }
 //-----------------------------------------------------------------------------
-Point TetrahedronCell::midpoint(MeshEntity const& entity) const
+void TetrahedronCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const* vertices = entity.entities(0);
-  real const* x0 = geometry.x(vertices[0]);
-  real const* x1 = geometry.x(vertices[1]);
-  real const* x2 = geometry.x(vertices[2]);
-  real const* x3 = geometry.x(vertices[3]);
-  Point p;
-  for (uint i = 0; i < geometry.dim(); ++i)
+  uint const * vertices = entity.entities(0);
+  real const * x0 = geometry.x(vertices[0]);
+  real const * x1 = geometry.x(vertices[1]);
+  real const * x2 = geometry.x(vertices[2]);
+  real const * x3 = geometry.x(vertices[3]);
+  uint const gdim = geometry.dim();
+  for (uint d = 0; d < gdim; ++d)
   {
-    p[i] = 0.25 * ( x0[i] + x1[i] + x2[i] + x3[i] );
+    p[d] = 0.25 * ( x0[d] + x1[d] + x2[d] + x3[d] );
   }
-  return p;
 }
 //-----------------------------------------------------------------------------
-Point TetrahedronCell::normal(Cell const& cell, uint facet) const
+void TetrahedronCell::normal(Cell const& cell, uint facet, real * n) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
   // Create facet from the mesh and local facet number
   Cell& c = const_cast<Cell&>(cell);
   Facet f(c.mesh(), c.entities(2)[facet]);
-
-  // Get global index of opposite vertex
-  uint const v0 = cell.entities(0)[facet];
-
-  // Get global index of vertices on the facet
-  uint v1 = f.entities(0)[0];
-  uint v2 = f.entities(0)[1];
-  uint v3 = f.entities(0)[2];
-
-  // Get the coordinates of the four vertices
   MeshGeometry const& geometry = cell.mesh().geometry();
-  real const* x0 = geometry.x(v0);
-  real const* x1 = geometry.x(v1);
-  real const* x2 = geometry.x(v2);
-  real const* x3 = geometry.x(v3);
-
-  // Create vectors
-  Point e0;
-  Point e1;
-  Point e2;
-  for (uint i = 0; i < geometry.dim(); ++i)
+  // Get coordinates of opposite vertex
+  real const * p0 = geometry.x(cell.entities(0)[facet]);
+  // Get coordinates of facet vertices
+  uint const * vertices = f.entities(0);
+  real const* p1 = geometry.x(vertices[0]);
+  real const* p2 = geometry.x(vertices[1]);
+  real const* p3 = geometry.x(vertices[2]);
+  // n = e1 ^ e2
+  n[0] = (p2[1] - p1[1])*(p3[2] - p1[2]) - (p2[2] - p1[2])*(p3[1] - p1[1]);
+  n[1] = (p2[2] - p1[2])*(p3[0] - p1[0]) - (p2[0] - p1[0])*(p3[2] - p1[2]);
+  n[2] = (p2[0] - p1[0])*(p3[1] - p1[1]) - (p2[1] - p1[1])*(p3[0] - p1[0]);
+  real const nn = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+  //
+  if (n[0] * (p1[0] - p0[0]) + n[1] * (p1[1] - p0[1]) + n[2] * (p1[2] - p0[2])
+      < 0.0)
   {
-    e0[i] = (x0[i] - x1[i]);
-    e1[i] = (x2[i] - x1[i]);
-    e2[i] = (x3[i] - x1[i]);
+    n[0] *= - 1.0;
+    n[1] *= - 1.0;
+    n[2] *= - 1.0;
   }
-
-  // Compute normal vector
-  Point n = e1.cross(e2);
-
-  // Normalize
-  n /= n.norm();
-
-  // Flip direction of normal so it points outward
-  if (n.dot(e0) > 0) n *= -1.0;
-
-  return n;
 }
 //-----------------------------------------------------------------------------
-dolfin::real TetrahedronCell::facet_area(Cell const& cell, uint facet) const
+real TetrahedronCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 

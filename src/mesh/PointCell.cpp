@@ -9,6 +9,7 @@
 
 #include <dolfin/mesh/PointCell.h>
 
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/MeshEntity.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
@@ -134,18 +135,18 @@ real PointCell::inradius(MeshEntity const& entity) const
   return 0.0;
 }
 //-----------------------------------------------------------------------------
-Point PointCell::midpoint(MeshEntity const& entity) const
+void PointCell::midpoint(MeshEntity const& entity, real * p) const
 {
   // Check that we get a point
   dolfin_assert(entity.dim() == 0);
   dolfin_assert(entity.num_entities(0) == 1);
-
-  return Point();
+  real const * p0 = entity.mesh().geometry().x(entity.index());
+  std::copy(p0, p0 + entity.mesh().geometry().dim(), p);
 }
 //-----------------------------------------------------------------------------
-Point PointCell::normal(Cell const& cell, uint facet) const
+void PointCell::normal(Cell const& cell, uint facet, real * n) const
 {
-  return Point();
+  error("PointCell::normal() is undefined");
 }
 //-----------------------------------------------------------------------------
 real PointCell::facet_area(Cell const& cell, uint facet) const
@@ -155,8 +156,7 @@ real PointCell::facet_area(Cell const& cell, uint facet) const
 //-----------------------------------------------------------------------------
 bool PointCell::intersects(MeshEntity const& e, Point const& p) const
 {
-  error("PointCell::intersects() not implemented.");
-  return true;
+  return abscmp(p.distance(e.mesh().geometry().point(e.index())), 0.0);
 }
 //-----------------------------------------------------------------------------
 bool PointCell::intersects(MeshEntity const& e, Point const& p1,

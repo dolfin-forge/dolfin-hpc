@@ -416,93 +416,98 @@ real QuadrilateralCell::inradius(MeshEntity const& entity) const
                   * (a * a - b * b + c * c - d * d)) / (a + b + c + d);
 }
 //-----------------------------------------------------------------------------
-Point QuadrilateralCell::midpoint(MeshEntity const& entity) const
+void QuadrilateralCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[0]);
 
-  // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
   uint const* vertices = entity.entities(0);
   real const* x0 = geometry.x(vertices[0]);
   real const* x1 = geometry.x(vertices[1]);
   real const* x2 = geometry.x(vertices[2]);
   real const* x3 = geometry.x(vertices[3]);
-  Point p;
-  for (uint i = 0; i < geometry.dim(); ++i)
+  uint const gdim = geometry.dim();
+  for (uint d = 0; d < gdim; ++d)
   {
-    p[i] = 0.25 * (x0[i] + x1[i] + x2[i] + x3[i]);
+    p[d] = 0.25 * (x0[d] + x1[d] + x2[d] + x3[d]);
   }
-  return p;
 }
 //-----------------------------------------------------------------------------
-Point QuadrilateralCell::normal(Cell const& cell, uint facet) const
+void QuadrilateralCell::normal(Cell const& cell, uint facet, real * n) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
-  // Get geometry
   Cell& c = const_cast<Cell&>(cell);
-  MeshGeometry const& geometry = c.mesh().geometry();
-
-  // The normal vector is currently only defined for a quadrilateral in R^2
-  if (geometry.dim() != 2)
-  {
-    error("The normal vector is only defined when the quadrilateral is in R^2");
-  }
-
-  // Create facet from the mesh and local facet number
   Facet f(c.mesh(), c.entities(1)[facet]);
-
-  // Get global index of first non-incident vertex
-  uint const v0 = c.entities(0)[ENV[facet][0]];
-
-  // Get global index of vertices on the facet
-  uint const v1 = f.entities(0)[0];
-  uint const v2 = f.entities(0)[1];
-
-  // Get the coordinates of the three vertices
-  real const * p0 = geometry.x(v0);
-  real const * p1 = geometry.x(v1);
-  real const * p2 = geometry.x(v2);
-
-  // Vector normal to facet
-  Point n(p2[1] - p1[1], p1[0] - p2[0]);
-
-  // Normalize
-  n /= std::sqrt(n[0] * n[0] + n[1] * n[1]);
-
-  // Flip direction of normal so it points outward
-  if ((n[0] * (p0[0] - p1[0]) + n[1] * (p0[1] - p1[1])) > 0) n *= -1.0;
-
-  return n;
+  MeshGeometry const& geometry = cell.mesh().geometry();
+  // Get coordinates of first non-incident vertex
+  real const * p0 = geometry.x(c.entities(0)[ENV[facet][0]]);
+  // Get coordinates of edge vertices
+  uint const * vertices = f.entities(0);
+  real const * p1 = geometry.x(vertices[0]);
+  real const * p2 = geometry.x(vertices[1]);
+  uint const gdim = geometry.dim();
+  switch (gdim)
+  {
+    case 2:
+      {
+        n[0] = p2[1] - p1[1];
+        n[1] = p1[0] - p2[0];
+        real const nn = std::sqrt(n[0] * n[0] + n[1] * n[1]);
+        n[0] /= nn;
+        n[1] /= nn;
+        // Flip direction of normal so it points outward
+        if ((n[0] * (p1[0] - p0[0]) + n[1] * (p1[1] - p0[1])) < 0.0)
+        {
+          n[0] *= -1.0;
+          n[1] *= -1.0;
+        }
+      }
+      break;
+    case 3:
+      {
+        real ac = (p2[0] - p1[0]) * (p2[0] - p0[0])
+            + (p2[1] - p1[1]) * (p2[1] - p0[1])
+            + (p2[2] - p1[2]) * (p2[2] - p0[2]);
+        real ab = (p2[0] - p1[0]) * (p1[0] - p0[0])
+            + (p2[1] - p1[1]) * (p1[1] - p0[1])
+            + (p2[2] - p1[2]) * (p1[2] - p0[2]);
+        n[0] = (p1[0] - p0[0]) * ac - (p2[0] - p0[0]) * ab;
+        n[1] = (p1[1] - p0[1]) * ac - (p2[1] - p0[1]) * ab;
+        n[2] = (p1[2] - p0[2]) * ac - (p2[2] - p0[2]) * ab;
+        real nn = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        n[0] /= nn;
+        n[1] /= nn;
+        n[2] /= nn;
+        dolfin_assert((n[0] * (p1[0] - p0[0]) + n[1] * (p1[1] - p0[1])
+                        + n[2] * (p1[2] - p0[2])) > 0.0);
+      }
+      break;
+    default:
+      error("QuadrilateralCell : facet normal not implemented in R^%u", gdim);
+      break;
+  }
 }
 //-----------------------------------------------------------------------------
 real QuadrilateralCell::facet_area(Cell const& cell, uint facet) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
-  // Create facet from the mesh and local facet number
   Cell& c = const_cast<Cell&>(cell);
   Facet f(c.mesh(), c.entities(1)[facet]);
-
-  // Get global index of vertices on the facet
-  uint const v0 = f.entities(0)[0];
-  uint const v1 = f.entities(0)[1];
-
-  // Get mesh geometry
   MeshGeometry const& geometry = cell.mesh().geometry();
-
-  // Get the coordinates of the two vertices
-  real const * p0 = geometry.x(v0);
-  real const * p1 = geometry.x(v1);
-
+  uint const * vertices = f.entities(0);
+  real const * p0 = geometry.x(vertices[0]);
+  real const * p1 = geometry.x(vertices[1]);
   // Compute distance between vertices
-  real d = 0.0;
-  for (uint i = 0; i < geometry.dim(); ++i)
+  real meas = 0.0;
+  uint const gdim = geometry.dim();
+  for (uint d = 0; d < gdim; ++d)
   {
-    d += (p0[i] - p1[i]) * (p0[i] - p1[i]);
+    meas += (p1[d] - p0[d]) * (p1[d] - p0[d]);
   }
-  return std::sqrt(d);
+  return std::sqrt(meas);
 }
 //-----------------------------------------------------------------------------
 bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p) const

@@ -79,7 +79,9 @@ public:
   /// Compute normal of given facet with respect to the cell
   inline Point normal(uint facet) const
   {
-    return mesh_.type().normal(*this, facet);
+    Point n;
+    mesh_.type().normal(*this, facet, &n[0]);
+    return n;
   }
 
   /// Compute the area/length of given facet with respect to the cell

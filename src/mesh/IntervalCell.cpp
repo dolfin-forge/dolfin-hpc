@@ -198,48 +198,42 @@ real IntervalCell::inradius(MeshEntity const& entity) const
   return volume(entity);
 }
 //-----------------------------------------------------------------------------
-Point IntervalCell::midpoint(MeshEntity const& entity) const
+void IntervalCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[0]);
 
-  // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
-  uint const* vertices = entity.entities(0);
-  real const* x0 = geometry.x(vertices[0]);
-  real const* x1 = geometry.x(vertices[1]);
-  Point p;
-  for (uint i = 0; i < geometry.dim(); ++i)
+  uint const * vertices = entity.entities(0);
+  real const * x0 = geometry.x(vertices[0]);
+  real const * x1 = geometry.x(vertices[1]);
+  uint const gdim = geometry.dim();
+  for (uint d = 0; d < gdim; ++d)
   {
-    p[i] = 0.5 * ( x0[i] + x1[i] );
+    p[d] = 0.5 * ( x0[d] + x1[d] );
   }
-  return p;
 }
 //-----------------------------------------------------------------------------
-Point IntervalCell::normal(Cell const& cell, uint facet) const
+void IntervalCell::normal(Cell const& cell, uint facet, real * n) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
-  // Get mesh geometry
   MeshGeometry const& geometry = cell.mesh().geometry();
-  if (geometry.dim() != 1)
+  uint const * vertices = cell.entities(0);
+  real const * p0 = geometry.x(vertices[facet]);
+  real const * p1 = geometry.x(vertices[(facet + 1) % 2]);
+  uint const gdim = geometry.dim();
+  uint nn = 0.0;
+  for (uint d = 0; d < gdim; ++d)
   {
-    error("The normal vector is only defined when the interval is in R^1");
+    n[d] = p0[d] - p1[d];
+    nn += n[d] * n[d];
   }
-
-  // Get the two vertices as points
-  uint const* vertices = cell.entities(0);
-  Point p0 = geometry.point(vertices[0]);
-  Point p1 = geometry.point(vertices[1]);
-
-  // Compute normal
-  Point n = p0 - p1;
-  if (facet == 1) n *= -1.0;
-
-  // Normalize
-  n /= n.norm();
-
-  return n;
+  nn = std::sqrt(nn);
+  for (uint d = 0; d < gdim; ++d)
+  {
+    n[d] /= nn;
+  }
 }
 //-----------------------------------------------------------------------------
 real IntervalCell::facet_area(Cell const& cell, uint facet) const

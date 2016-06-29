@@ -112,10 +112,10 @@ public:
   real inradius(MeshEntity const& entity) const;
 
   /// Compute coordinates of midpoint
-  Point midpoint(MeshEntity const& entity) const;
+  void midpoint(MeshEntity const& entity, real * p) const;
 
   /// Compute of given facet with respect to the cell
-  Point normal(Cell const& cell, uint facet) const;
+  void normal(Cell const& cell, uint facet, real * n) const;
 
   /// Compute the area/length of given facet with respect to the cell
   real facet_area(Cell const& cell, uint facet) const;

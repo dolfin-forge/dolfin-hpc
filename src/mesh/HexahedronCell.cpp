@@ -591,7 +591,7 @@ real HexahedronCell::inradius(MeshEntity const& entity) const
   return 0.5*this->diameter(entity);
 }
 //-----------------------------------------------------------------------------
-Point HexahedronCell::midpoint(MeshEntity const& entity) const
+void HexahedronCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
   dolfin_assert(entity.num_entities(0) == NE[0]);
@@ -607,16 +607,14 @@ Point HexahedronCell::midpoint(MeshEntity const& entity) const
   real const * x5 = geometry.x(vertices[5]);
   real const * x6 = geometry.x(vertices[6]);
   real const * x7 = geometry.x(vertices[7]);
-  Point p;
   for (uint i = 0; i < geometry.dim(); ++i)
   {
     p[i] = 0.125
         * (x0[i] + x1[i] + x2[i] + x3[i] + x4[i] + x5[i] + x6[i] + x7[i]);
   }
-  return p;
 }
 //-----------------------------------------------------------------------------
-Point HexahedronCell::normal(Cell const& cell, uint facet) const
+void HexahedronCell::normal(Cell const& cell, uint facet, real * n) const
 {
   dolfin_assert(cell.type() == this->cell_type);
 
@@ -629,32 +627,30 @@ Point HexahedronCell::normal(Cell const& cell, uint facet) const
   real const * vf = geometry.x(c.entities(0)[FNV[facet][0]]);
 
   // vertices on the facet
-  real const * v0 = geometry.x(f.entities(0)[FIV[facet][0]]);
-  real const * v1 = geometry.x(f.entities(0)[FIV[facet][1]]);
-  real const * v3 = geometry.x(f.entities(0)[FIV[facet][3]]);
+  uint const * vertices = f.entities(0);
+  real const * v0 = geometry.x(vertices[FIV[facet][0]]);
+  real const * v1 = geometry.x(vertices[FIV[facet][1]]);
+  real const * v3 = geometry.x(vertices[FIV[facet][3]]);
 
   // Vector normal to facet
-  real nx = + (v1[1] - v0[1]) * (v3[2] - v0[2])
-            - (v1[2] - v0[2]) * (v3[1] - v0[1]);
-  real ny = + (v1[2] - v0[2]) * (v3[0] - v0[0])
-            - (v1[0] - v0[0]) * (v3[2] - v0[2]);
-  real nz = + (v1[0] - v0[0]) * (v3[1] - v0[1])
-            - (v1[1] - v0[1]) * (v3[0] - v0[0]);
-  real const nn = std::sqrt(nx * nx + ny * ny + nz * nz);
-  nx /= nn;
-  ny /= nn;
-  nz /= nn;
-  Point n(nx, ny, nz);
+  n[0] = + (v1[1] - v0[1]) * (v3[2] - v0[2])
+         - (v1[2] - v0[2]) * (v3[1] - v0[1]);
+  n[1] = + (v1[2] - v0[2]) * (v3[0] - v0[0])
+         - (v1[0] - v0[0]) * (v3[2] - v0[2]);
+  n[2] = + (v1[0] - v0[0]) * (v3[1] - v0[1])
+         - (v1[1] - v0[1]) * (v3[0] - v0[0]);
+  real const nn = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+  n[0] /= nn;
+  n[1] /= nn;
+  n[2] /= nn;
 
   // Flip direction of normal so it points outward
-  real ps = + n[0] * (vf[0] - v0[0])
-            + n[1] * (vf[1] - v0[1])
-            + n[2] * (vf[2] - v0[2]);
-  if (ps > 0)
+  if (+ n[0]*(vf[0]-v0[0]) + n[1]*(vf[1]-v0[1]) + n[2]*(vf[2] - v0[2]) > 0.0)
   {
-    n *= -1.0;
+    n[0] *= -1.0;
+    n[1] *= -1.0;
+    n[2] *= -1.0;
   }
-  return n;
 }
 //-----------------------------------------------------------------------------
 real HexahedronCell::facet_area(Cell const& cell, uint facet) const

@@ -128,10 +128,10 @@ public:
   virtual real inradius(MeshEntity const& entity) const = 0;
 
   /// Compute coordinates of midpoint
-  virtual Point midpoint(MeshEntity const& entity) const = 0;
+  virtual void midpoint(MeshEntity const& entity, real * p) const = 0;
 
   /// Compute of given facet with respect to the cell
-  virtual Point normal(Cell const& cell, uint facet) const = 0;
+  virtual void normal(Cell const& cell, uint facet, real * n) const = 0;
 
   /// Compute the area/length of given facet with respect to the cell
   virtual real facet_area(Cell const& cell, uint facet) const = 0;

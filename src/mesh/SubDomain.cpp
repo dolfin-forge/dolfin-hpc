@@ -49,6 +49,19 @@ bool SubDomain::inside(real const * x, bool const on_boundary) const
   return false;
 }
 //-----------------------------------------------------------------------------
+bool SubDomain::inside(MeshEntity& entity, bool const on_boundary) const
+{
+  uint ret = entity.num_entities(0);
+  for (VertexIterator v(entity); !v.end(); ++v)
+  {
+    if (this->inside(v->x(), on_boundary))
+    {
+      --ret;
+    }
+  }
+  return (ret == 0);
+}
+//-----------------------------------------------------------------------------
 bool SubDomain::close(real x, real const xref) const
 {
   return (std::fabs(x - xref) < BMARG);

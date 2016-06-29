@@ -39,6 +39,9 @@ public:
   /// Return true for points inside the sub domain
   virtual bool inside(real const * x, bool const on_boundary) const;
 
+  /// Return true if all vertices are inside the subdomain
+  bool inside(MeshEntity& entity, bool const on_boundary) const;
+
   /// Set sub domain markers for given sub domain
   void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
 

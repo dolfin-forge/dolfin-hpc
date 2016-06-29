@@ -176,106 +176,106 @@ int main(int argc, char** argv)
     logm.verbose(1);
     logm.file();
 
-    //
-    T.begin("Save partitions");
-    {
-      MeshFunction<uint> p(mesh, mesh.topology().dim());
-      p = MPI::processNumber();
-      File fp("partitions.pvd");
-      fp << p;
-    }
-    T.end();
-    //
-    T.begin("Initialize all connectivities");
-    {
-      mesh.init();
-    }
-    T.end();
-    //
-    T.begin("Check");
-    {
-      check(mesh);
-    }
-    T.end();
-    //
-    T.begin("BoundaryMesh exterior");
-    {
-      BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
-      File f("bme.pvd");
-      f << boundary;
-
-      message("Initialize all boundary connectivities");
-      boundary.init();
-
-      message("Check boundary mesh");
-      check(boundary);
-
-      //
-      message("Loop on facets");
-      uint const tdim = mesh.topology().dim();
-      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
-      {
-        Facet facet(mesh, boundary.facet_index(*bcell));
-        Cell cell(mesh, facet.entities(tdim)[0]);
-        uint local_facet = cell.index(facet);
-
-      }
-    }
-    T.end();
-    //
-    T.begin("BoundaryMesh interior");
-    {
-      BoundaryMesh boundary(mesh, BoundaryMesh::interior);
-      File f("bmi.pvd");
-      f << boundary;
-
-      message("Initialize all boundary connectivities");
-      boundary.init();
-
-      message("Check boundary mesh");
-      check(boundary);
-
-      //
-      message("Loop on facets");
-      uint const tdim = mesh.topology().dim();
-      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
-      {
-        Facet facet(mesh, boundary.facet_index(*bcell));
-        Cell cell(mesh, facet.entities(tdim)[0]);
-        uint local_facet = cell.index(facet);
-
-      }
-    }
-    T.end();
-    //
-    T.begin("Compute BoundaryMesh interior/exterior with Hole");
-    {
-      Hole h;
-      BoundaryMesh bint(mesh, h, BoundaryMesh::interior);
-      File fi("bmhi.pvd");
-      fi << bint;
-      BoundaryMesh bext(mesh, h, BoundaryMesh::exterior);
-      File fe("bmhe.pvd");
-      fe << bext;
-
-      BoundaryMesh bint1(bext, BoundaryMesh::interior);
-      File fei("bmhei.pvd");
-      fei << bint1;
-      BoundaryMesh bext1(bext, BoundaryMesh::exterior);
-      File fee("bmhee.pvd");
-      fee << bext1;
-    }
-    T.end();
-    //
-    T.begin("Compute interior of BoundaryMesh exterior");
-    {
-      BoundaryMesh boundary0(mesh, BoundaryMesh::exterior);
-      BoundaryMesh boundary1(boundary0, BoundaryMesh::interior);
-      boundary1.disp();
-      File f("bmei.pvd");
-      f << boundary1;
-    }
-    T.end();
+//    //
+//    T.begin("Save partitions");
+//    {
+//      MeshFunction<uint> p(mesh, mesh.topology().dim());
+//      p = MPI::processNumber();
+//      File fp("partitions.pvd");
+//      fp << p;
+//    }
+//    T.end();
+//    //
+//    T.begin("Initialize all connectivities");
+//    {
+//      mesh.init();
+//    }
+//    T.end();
+//    //
+//    T.begin("Check");
+//    {
+//      check(mesh);
+//    }
+//    T.end();
+//    //
+//    T.begin("BoundaryMesh exterior");
+//    {
+//      BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
+//      File f("bme.pvd");
+//      f << boundary;
+//
+//      message("Initialize all boundary connectivities");
+//      boundary.init();
+//
+//      message("Check boundary mesh");
+//      check(boundary);
+//
+//      //
+//      message("Loop on facets");
+//      uint const tdim = mesh.topology().dim();
+//      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+//      {
+//        Facet facet(mesh, boundary.facet_index(*bcell));
+//        Cell cell(mesh, facet.entities(tdim)[0]);
+//        uint local_facet = cell.index(facet);
+//
+//      }
+//    }
+//    T.end();
+//    //
+//    T.begin("BoundaryMesh interior");
+//    {
+//      BoundaryMesh boundary(mesh, BoundaryMesh::interior);
+//      File f("bmi.pvd");
+//      f << boundary;
+//
+//      message("Initialize all boundary connectivities");
+//      boundary.init();
+//
+//      message("Check boundary mesh");
+//      check(boundary);
+//
+//      //
+//      message("Loop on facets");
+//      uint const tdim = mesh.topology().dim();
+//      for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+//      {
+//        Facet facet(mesh, boundary.facet_index(*bcell));
+//        Cell cell(mesh, facet.entities(tdim)[0]);
+//        uint local_facet = cell.index(facet);
+//
+//      }
+//    }
+//    T.end();
+//    //
+//    T.begin("Compute BoundaryMesh interior/exterior with Hole");
+//    {
+//      Hole h;
+//      BoundaryMesh bint(mesh, h, BoundaryMesh::interior);
+//      File fi("bmhi.pvd");
+//      fi << bint;
+//      BoundaryMesh bext(mesh, h, BoundaryMesh::exterior);
+//      File fe("bmhe.pvd");
+//      fe << bext;
+//
+//      BoundaryMesh bint1(bext, BoundaryMesh::interior);
+//      File fei("bmhei.pvd");
+//      fei << bint1;
+//      BoundaryMesh bext1(bext, BoundaryMesh::exterior);
+//      File fee("bmhee.pvd");
+//      fee << bext1;
+//    }
+//    T.end();
+//    //
+//    T.begin("Compute interior of BoundaryMesh exterior");
+//    {
+//      BoundaryMesh boundary0(mesh, BoundaryMesh::exterior);
+//      BoundaryMesh boundary1(boundary0, BoundaryMesh::interior);
+//      boundary1.disp();
+//      File f("bmei.pvd");
+//      f << boundary1;
+//    }
+//    T.end();
     //
     T.begin("Compute normal of BoundaryMesh exterior");
     {
@@ -294,6 +294,32 @@ int main(int argc, char** argv)
         Facet facet(mesh, boundary.facet_index(*bcell));
         Cell cell(mesh, facet.entities(tdim)[0]);
         uint const local_facet = cell.index(facet);
+        facet_weights[bcell->index()] = cell.facet_area(local_facet);
+        cell.normal(bcell->index())
+        std::copy(  facet_weights[gdim*bcell->index()]);
+        //
+        if(cell.entities(tdim - 1)[local_facet] != boundary.facet_index(*bcell))
+        {
+          error("%u != %u", cell.entities(tdim - 1)[local_facet], boundary.facet_index(*bcell));
+        }
+        //
+        if(!abscmp(bcell->volume(), cell.facet_area(local_facet)))
+        {
+          message("%f == %f", bcell->volume(), cell.facet_area(local_facet));
+          error("Inconsistent facet computation");
+        }
+        //
+        for (VertexIterator v(*bcell); !v.end(); ++v)
+        {
+          message("%u:", boundary.vertex_index(v->index()));
+          v->point().disp();
+        }
+        for (VertexIterator v(facet); !v.end(); ++v)
+        {
+          message("%u", v->index());
+          v->point().disp();
+        }
+        skip();
 
       }
       delete[] facet_normals;

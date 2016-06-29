@@ -84,6 +84,12 @@ public:
     return n;
   }
 
+  /// Compute normal of given facet with respect to the cell
+  inline void normal(uint facet, real * n) const
+  {
+    mesh_.type().normal(*this, facet, n);
+  }
+
   /// Compute the area/length of given facet with respect to the cell
   inline real facet_area(uint facet) const
   {
@@ -91,7 +97,18 @@ public:
   }
 
   /// Compute coordinates of cell midpoint
-  Point midpoint() const;
+  inline Point midpoint() const
+  {
+    Point p;
+    mesh_.type().midpoint(*this, &p[0]);
+    return p;
+  }
+
+  /// Compute coordinates of cell midpoint
+  inline void midpoint(real * p) const
+  {
+    mesh_.type().midpoint(*this, p);
+  }
 
 };
 

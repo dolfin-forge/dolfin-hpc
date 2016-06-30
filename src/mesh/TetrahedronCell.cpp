@@ -614,6 +614,9 @@ void TetrahedronCell::normal(Cell const& cell, uint facet, real * n) const
   n[1] = (p2[2] - p1[2])*(p3[0] - p1[0]) - (p2[0] - p1[0])*(p3[2] - p1[2]);
   n[2] = (p2[0] - p1[0])*(p3[1] - p1[1]) - (p2[1] - p1[1])*(p3[0] - p1[0]);
   real const nn = std::sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+  n[0] /= nn;
+  n[1] /= nn;
+  n[2] /= nn;
   //
   if (n[0] * (p1[0] - p0[0]) + n[1] * (p1[1] - p0[1]) + n[2] * (p1[2] - p0[2])
       < 0.0)
@@ -622,6 +625,7 @@ void TetrahedronCell::normal(Cell const& cell, uint facet, real * n) const
     n[1] *= - 1.0;
     n[2] *= - 1.0;
   }
+  dolfin_assert(abscmp(std::sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]), 1.0));
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::facet_area(Cell const& cell, uint facet) const

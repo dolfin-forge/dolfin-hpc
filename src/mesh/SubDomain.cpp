@@ -51,6 +51,10 @@ bool SubDomain::inside(real const * x, bool const on_boundary) const
 //-----------------------------------------------------------------------------
 bool SubDomain::inside(MeshEntity& entity, bool const on_boundary) const
 {
+  if (entity.dim() == 0)
+  {
+    return inside(entity.mesh().geometry().x(entity.index()), on_boundary);
+  }
   uint ret = entity.num_entities(0);
   for (VertexIterator v(entity); !v.end(); ++v)
   {
@@ -60,6 +64,24 @@ bool SubDomain::inside(MeshEntity& entity, bool const on_boundary) const
     }
   }
   return (ret == 0);
+}
+//-----------------------------------------------------------------------------
+bool SubDomain::overlap(MeshEntity& entity, bool const on_boundary) const
+{
+  if (entity.dim() == 0)
+  {
+    return inside(entity.mesh().geometry().x(entity.index()), on_boundary);
+  }
+  uint ret = false;
+  for (VertexIterator v(entity); !v.end(); ++v)
+  {
+    if (this->inside(v->x(), on_boundary))
+    {
+      ret = true;
+      break;
+    }
+  }
+  return ret;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::close(real x, real const xref) const

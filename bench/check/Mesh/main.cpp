@@ -286,84 +286,118 @@ int main(int argc, char** argv)
       uint const tdim = mesh.topology().dim();
       uint const gdim = mesh.geometry().dim();
 
-      //
-      real * facet_weights = new real[boundary.num_cells()];
-      real * facet_normals = new real[gdim * boundary.num_cells()];
+      // Collect facet data and entities inside the subdomain
+      Array<uint> * entities = new Array<uint>[tdim];
+      bool * facet_select = new bool[boundary.num_cells()];
+      std::fill_n(facet_select, boundary.num_cells(), false);
+      real * facet_weight = new real[boundary.num_cells()];
+      real * facet_normal = new real[gdim * boundary.num_cells()];
+      uint facet_count = 0;
       for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
       {
         Facet facet(mesh, boundary.facet_index(*bcell));
         Cell cell(mesh, facet.entities(tdim)[0]);
         uint const local_facet = cell.index(facet);
-        facet_weights[bcell->index()] = cell.facet_area(local_facet);
-        cell.normal(bcell->index())
-        std::copy(  facet_weights[gdim*bcell->index()]);
-        //
-        if(cell.entities(tdim - 1)[local_facet] != boundary.facet_index(*bcell))
-        {
-          error("%u != %u", cell.entities(tdim - 1)[local_facet], boundary.facet_index(*bcell));
-        }
-        //
-        if(!abscmp(bcell->volume(), cell.facet_area(local_facet)))
-        {
-          message("%f == %f", bcell->volume(), cell.facet_area(local_facet));
-          error("Inconsistent facet computation");
-        }
-        //
-        for (VertexIterator v(*bcell); !v.end(); ++v)
-        {
-          message("%u:", boundary.vertex_index(v->index()));
-          v->point().disp();
-        }
-        for (VertexIterator v(facet); !v.end(); ++v)
-        {
-          message("%u", v->index());
-          v->point().disp();
-        }
-        skip();
+        dolfin_assert(cell.entities(tdim - 1)[local_facet] == boundary.facet_index(*bcell));
+        dolfin_assert(abscmp(bcell->volume(), cell.facet_area(local_facet)));
 
+        //
+        bool in_subdomain = true;
+        if(in_subdomain)
+        {
+          facet_select[bcell->index()] = true;
+          ++facet_count;
+          facet_weight[bcell->index()] = cell.facet_area(local_facet);
+          cell.normal(local_facet , &facet_normal[gdim * bcell->index()]);
+        }
+        //
       }
-      delete[] facet_normals;
-      delete[] facet_weights;
+      message("Selected %u facets.", facet_count);
 
-      if (mesh.is_distributed())
+      if (boundary.is_distributed())
       {
         message("Collect facets per vertices");
         Array<uint> * sendbuf_u = new Array<uint> [pe_size];
+        Array<real> * sendbuf_r = new Array<real> [pe_size];
         for (GhostIterator it(boundary.distdata()[0]); !it.end(); ++it)
         {
-          sendbuf_u[it.owner()].push_back(it.global_index());
-          //
-
+          uint const owner = it.owner();
+          Vertex v(boundary, it.index());
+          uint facets = 0;
+          for (CellIterator c(v); !c.end(); ++c)
+          {
+            if (facet_select[c->index()])
+            {
+              ++facets;
+              // Collect vertex facets
+              sendbuf_r[owner].push_back(facet_weight[it.index()]);
+              for (uint d = 0; d < gdim; ++d)
+              {
+                sendbuf_r[owner].push_back(facet_normal[gdim*it.index() + d]);
+              }
+            }
+          }
+          if(facets > 0)
+          {
+            sendbuf_u[owner].push_back(it.global_index());
+            sendbuf_u[owner].push_back(facets);
+          }
         }
+
+        uint recvmax_u = 0;
+        uint recvmax_r = 0;
+        _set<uint> const& adjs = boundary.distdata()[0].get_adj_ranks();
+        for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+        {
+          MPI_Send(&sendbuf_u[*it][0], sendbuf_u[*it].size(), MPI_UNSIGNED, *it,
+                   0, MPI::DOLFIN_COMM);
+          recvmax_u = std::max(recvmax_u, (uint) sendbuf_u[*it].size());
+          MPI_Send(&sendbuf_r[*it][0], sendbuf_r[*it].size(), MPI_DOUBLE, *it,
+                   1, MPI::DOLFIN_COMM);
+          recvmax_r = std::max(recvmax_r, (uint) sendbuf_r[*it].size());
+        }
+        MPI::numGlobalMax(recvmax_u, recvmax_u);
+        message("recvmax_u = %u", recvmax_u);
+        MPI::numGlobalMax(recvmax_r, recvmax_r);
+        message("recvmax_r = %u", recvmax_r);
+        uint * recvbuf_u = new uint[recvmax_u];
+        real * recvbuf_r = new real[recvmax_r];
+        for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
+        {
+          MPI_Status status;
+          int recvcount;
+          MPI_Recv(&recvbuf_u[0], recvmax_u, MPI_UNSIGNED, *it, 0,
+                   MPI::DOLFIN_COMM, &status);
+          MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+          MPI_Recv(&recvbuf_r[0], recvmax_r, MPI_UNSIGNED, *it, 1,
+                   MPI::DOLFIN_COMM, &status);
+
+          real * dataptr = &recvbuf_r[0];
+          for (uint k = 0; k < recvcount; k+=2)
+          {
+            message("recv facet data for %u", recvbuf_u[k]);
+            for (uint l = 0; l < recvbuf_u[k + 1]; ++l)
+            {
+              message("facet weight = %f", *dataptr);
+              ++dataptr;
+              for (uint d = 0; d < gdim; ++d, ++dataptr)
+              {
+                message("n_%u = %f", d, *dataptr);
+              }
+            }
+          }
+        }
+
+        delete[] recvbuf_r;
+        delete[] recvbuf_u;
+        delete[] sendbuf_r;
         delete[] sendbuf_u;
-
-        /*
-         for (uint d = 0; d <= tdim - 1; ++d)
-         {
-         // Initialize topological dimension
-         boundary.init(d);
-         Array<uint> * ghost_entities = new Array<uint> [pe_size];
-         for (GhostIterator it(boundary.distdata()[d]); !it.end(); ++it)
-         {
-
-         }
-
-         for (MeshEntityIterator it(boundary, d); !it.end(); ++it)
-         {
-         if (it->is_owned())
-         {
-
-         }
-         else
-         {
-         //            ghost_entities[it->owner()].push_back()
-         }
-         }
-         delete[] ghost_entities;
-         }
-         */
-
       }
+
+      delete [] facet_normal;
+      delete [] facet_weight;
+      delete [] facet_select;
+      delete [] entities;
 
     }
     T.end();

@@ -48,6 +48,9 @@ public:
   /// Create boundary mesh from given mesh
   BoundaryMesh(Mesh& mesh, SubDomain const& subdomain, BoundaryMesh::Type type);
 
+  /// Create boundary mesh from subdomain of given boundary mesh
+  BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain, bool inside);
+
   /// Destructor
   ~BoundaryMesh();
 

@@ -76,6 +76,111 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
     }
 }
 //-----------------------------------------------------------------------------
+BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
+                           bool inside) :
+    Mesh(),
+    MeshDependent(boundary.mesh()),
+    type_(boundary.type_),
+    cell_map_(),
+    vertex_map_(),
+    subdomain_(&subdomain)
+{
+  bool exterior = (type_ == BoundaryMesh::exterior
+      || type_ == BoundaryMesh::full);
+  bool interior = (type_ == BoundaryMesh::interior
+      || type_ == BoundaryMesh::full);
+
+  Mesh& mesh = boundary.mesh();
+  uint const gdim = mesh.geometry().dim();
+  uint const tdim = mesh.topology().dim();
+
+  if (tdim == 1)
+  {
+    vertex_map_.clear();
+    for (VertexIterator v(boundary); !v.end(); ++v)
+    {
+      if (subdomain_->inside(v->x(), !v->is_shared()))
+      {
+        vertex_map_.push_back(boundary.vertex_map_[v->index()]);
+      }
+    }
+    cell_map_ = vertex_map_;
+
+    // Create boundary vertices and cells
+    MeshEditor editor(*this, mesh.type().facetType(), gdim);
+    editor.init_vertices(vertex_map_.size());
+    editor.init_cells(cell_map_.size());
+    MeshGeometry const& geom = mesh.geometry();
+    for (uint i = 0; i < vertex_map_.size(); ++i)
+    {
+      editor.add_vertex(i, geom.x(vertex_map_[i]));
+      editor.add_cell(i, &vertex_map_[i]);
+    }
+    // If the mesh is distributed, set global numbering and copy the ownership
+    if (mesh.is_distributed())
+    {
+      this->distdata()[0].assign(mesh.distdata()[0], vertex_map_);
+    }
+    editor.close();
+  }
+  else
+  {
+
+    uint const num_verts = boundary.vertex_map_.size();
+    Array<uint> boundary_vertices(num_verts, num_verts);
+    for (CellIterator c(boundary); !c.end(); ++c)
+    {
+      bool const on_boundary = !c->is_shared();
+      if ((inside && subdomain_->inside(*c, on_boundary))
+          || (!inside && subdomain_->overlap(*c, on_boundary)))
+      {
+        cell_map_.push_back(c->index());
+        for (VertexIterator v(*c); !v.end(); ++v)
+        {
+          uint const vertex_index = v->index();
+          if (boundary_vertices[v->index()] == num_verts)
+          {
+            boundary_vertices[vertex_index] = vertex_map_.size();
+            vertex_map_.push_back(boundary.vertex_map_[vertex_index]);
+          }
+        }
+      }
+    }
+
+    // Create boundary vertices and cells
+    MeshEditor editor(*this, mesh.type().facetType(), gdim);
+    editor.init_vertices(vertex_map_.size());
+    for (uint i = 0; i < vertex_map_.size(); ++i)
+    {
+      editor.add_vertex(i, mesh.geometry().x(vertex_map_[i]));
+    }
+    editor.init_cells(cell_map_.size());
+    //
+    uint const d = tdim - 1;
+    uint const num_facet_vertices = mesh.type().num_vertices(d);
+    uint * facet_vertices = new uint[num_facet_vertices];
+    for (uint i = 0; i < cell_map_.size(); ++i)
+    {
+      Cell c(boundary, cell_map_[i]);
+      cell_map_[i] = boundary.cell_map_[cell_map_[i]];
+      for (VertexIterator v(c); !v.end(); ++v)
+      {
+        facet_vertices[v.pos()] = boundary_vertices[v->index()];
+      }
+      editor.add_cell(i, &facet_vertices[0]);
+    }
+    delete[] facet_vertices;
+
+    // If the mesh is distributed, set global numbering and copy the ownership
+    if (mesh.is_distributed())
+    {
+      this->distdata()[0].assign(mesh.distdata()[0], vertex_map_);
+      this->distdata()[d].assign(mesh.distdata()[d], cell_map_);
+    }
+    editor.close();
+  }
+}
+//-----------------------------------------------------------------------------
 BoundaryMesh::~BoundaryMesh()
 {
   // Do nothing
@@ -242,17 +347,12 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       {
         MPI_Send(&shared_vertices[(*adj)][0], shared_vertices[(*adj)].size(),
                  MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM);
-      }
-      for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
-           ++adj)
-      {
         MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
                  MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
         for(uint k = 0; k < recvcount; ++k)
         {
           dolfin_assert(distdata.has_global(recvbuf[k]));
-          message("%u, global index %u", distdata.get_local(recvbuf[k]), recvbuf[k]);
           uint const local_index = distdata.get_local(recvbuf[k]);
           if(added_vertices.count(local_index) == 0)
           {
@@ -276,7 +376,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     {
       editor.add_vertex(i, mesh.geometry().x(vertex_map_[i]));
     }
-    editor.init_cells(cell_map_.size());;
+    editor.init_cells(cell_map_.size());
     uint const d = tdim - 1;
     uint const num_facet_vertices = mesh.type().num_vertices(d);
     uint * facet_vertices = new uint[num_facet_vertices];
@@ -301,7 +401,6 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       this->distdata()[d].assign(mesh.distdata()[d], cell_map_);
     }
     editor.close();
-    boundary_vertices.clear();
   }
 
   message(1, "BoundaryMesh : number of cells = %u, number of vertices %u",

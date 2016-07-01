@@ -267,8 +267,13 @@ void PETScKrylovSolver::readParameters()
   if (get("Krylov monitor convergence"))
   {
 #if(PETSC_VERSION_MAJOR > 2)
-    KSPMonitorSet(ksp, KSPMonitorTrueResidualNorm, 0, 0);
+#if(PETSC_VERSION_MINOR > 2)
+    KSPMonitorSet(ksp, (PetscErrorCode (*)(KSP,PetscInt,PetscReal,void*))
+		  KSPMonitorTrueResidualNorm, PETSC_VIEWER_STDOUT_WORLD, NULL); 
 #else
+    KSPMonitorSet(ksp, KSPMonitorTrueResidualNorm, 0, 0);
+#endif
+#else    
     //FIXME: Decide on supported version of PETSc
 #if(PETSC_VERSION_SUBMINOR > 2)
     //KSPMonitorSet(ksp, monitor, 0, 0);

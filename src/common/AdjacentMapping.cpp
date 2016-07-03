@@ -39,8 +39,9 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   //
   uint const rank = dolfin::MPI::processNumber();
   uint const pe_size = dolfin::MPI::numProcesses();
-  MPI_Request * request = new MPI_Request[mappings_.size()];
-  MPI_Status status;
+  MPI_Request * sendreq = new MPI_Request[mappings_.size()];
+  MPI_Request * recvreq = new MPI_Request[mappings_.size()];
+  MPI_Status  * status = new MPI_Status[mappings_.size()];
   int recvcount;
   uint i = 0;
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
@@ -52,24 +53,26 @@ SharedMapping::SharedMapping(DistributedData const& data) :
     send_min_ = std::min(send_min_, (uint) it->second.send.size());
     //
     MPI_Isend(&it->second.send[0], it->second.send.size(), MPI_UNSIGNED,
-              it->first, 0, MPI::DOLFIN_COMM, &request[i]);
+              it->first, 0, MPI::DOLFIN_COMM, &sendreq[i]);
     // Resize buffer
     it->second.recv.resize(it->second.send.size());
     MPI_Irecv(&it->second.recv[0], it->second.recv.size(), MPI_UNSIGNED,
-              it->first, 0, MPI::DOLFIN_COMM, &request[i]);
+              it->first, 0, MPI::DOLFIN_COMM, &recvreq[i]);
   }
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
-       it != mappings_.end(); ++it, ++i)
+       it != mappings_.end(); ++it)
   {
     data_.get_local(it->second.send.size(), &it->second.send[0],
                     &it->second.send[0]);
   }
+
+  MPI_Waitall(mappings_.size(), &sendreq[0],&status[0]);
   i = 0;
   for (_map<uint, AdjacentMapping>::iterator it = mappings_.begin();
        it != mappings_.end(); ++it, ++i)
   {
-    MPI_Wait(&request[i],&status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+    MPI_Wait(&recvreq[i],&status[i]);
+    MPI_Get_count(&status[i], MPI_UNSIGNED, &recvcount);
     if(recvcount != it->second.recv.size())
     {
       error("AdjacentMapping : inconsistent count %u from rank %u: expected %u",
@@ -78,7 +81,8 @@ SharedMapping::SharedMapping(DistributedData const& data) :
     data_.get_local(it->second.recv.size(), &it->second.recv[0],
                     &it->second.recv[0]);
   }
-  delete [] request;
+  delete [] recvreq;
+  delete [] sendreq;
 
 #endif /* HAVE_MPI */
 

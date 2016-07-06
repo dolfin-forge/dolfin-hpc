@@ -13,6 +13,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>

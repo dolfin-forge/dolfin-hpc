@@ -314,102 +314,101 @@ int main(int argc, char** argv)
 
       // Collect facet data and entities inside the subdomain i.e with all
       // vertices contained in the subdomain
-      bool * facet_select = new bool[boundary.num_cells()];
-      std::fill_n(facet_select, boundary.num_cells(), false);
-      real * facet_weight = new real[boundary.num_cells()];
-      real * facet_normal = new real[gdim * boundary.num_cells()];
+      bool * facet_computed = new bool[boundary.num_cells()];
+      std::fill_n(facet_computed, boundary.num_cells(), false);
+      uint const facet_data_size = gdim + 1;
+      real * facet_data = new real[facet_data_size * boundary.num_cells()];
       uint facet_count = 0;
 
       if (boundary.is_distributed())
       {
-        message("Collect shared vertex facets by adjacent ranks");
         _set<uint> const& adjs = boundary.distdata()[0].get_adj_ranks();
         uint * adjranks = new uint[adjs.size()];
         std::copy(adjs.begin(), adjs.end(), adjranks);
 
+        // Collect shared vertex facets by adjacent ranks and order sending
+        message("Collect shared vertex facets by adjacent ranks and order sending");
+        tic();
         Array<uint> * sendbuf_u = new Array<uint> [pe_size];
-        _map<uint, _set<uint> > facet_queue;
-        uint * vertex_facets =
-            new uint[boundary.topology()(0, tdim - 1).max_connections()];
+        _map<uint, uint> * facet_sendmap = new _map<uint, uint>[pe_size];
+        uint * vfacets = new uint[boundary.topology()(0, tdim-1).max_connections()];
         for (SharedIterator it(boundary.distdata()[0]); !it.end(); ++it)
         {
           Vertex v(boundary, it.index());
-          if ((subdomain != NULL) && (!subdomain->inside(v.x(), on_boundary)))
+          if ((subdomain != NULL) && !subdomain->inside(v.x(), on_boundary))
           {
             continue;
           }
           uint num_facets = 0;
           for (CellIterator bcell(v); !bcell.end(); ++bcell)
           {
-            if (!facet_select[bcell->index()] &&
-                ((subdomain == NULL) || (subdomain->inside(*bcell, on_boundary))))
+            if ((subdomain == NULL) || subdomain->inside(*bcell, on_boundary))
             {
-              uint const bcell_index = bcell->index();
-              facet_select[bcell_index] = true;
-              Facet facet(mesh, boundary.facet_index(*bcell));
-              Cell cell(mesh, facet.entities(tdim)[0]);
-              uint const local_facet = cell.index(facet);
-              facet_weight[bcell_index] = cell.facet_area(local_facet);
-              cell.normal(local_facet , &facet_normal[gdim * bcell_index]);
-              ++facet_count;
+              uint const id = bcell->index();
+              if(!facet_computed[bcell->index()])
+              {
+                facet_computed[id] = true;
+                Facet facet(mesh, boundary.facet_index(*bcell));
+                Cell cell(mesh, facet.entities(tdim)[0]);
+                uint const local_facet = cell.index(facet);
+                facet_data[facet_data_size * id] = cell.facet_area(local_facet);
+                cell.normal(local_facet , &facet_data[facet_data_size * id + 1]);
+                ++facet_count;
+              }
               //
-              vertex_facets[num_facets] = bcell_index;
-              ++num_facets;
+              vfacets[num_facets++] = id;
             }
           }
           if (num_facets > 0)
           {
+            //message("v%8u: num facets = %8u", it.global_index(), num_facets);
             _set<uint> const& vadjs = it.adj();
             for (_set<uint>::const_iterator a = vadjs.begin(); a != vadjs.end();
                  ++a)
             {
               sendbuf_u[*a].push_back(it.global_index());
               sendbuf_u[*a].push_back(num_facets);
+              //message("\tadj%8u:", *a);
               for (uint i = 0; i < num_facets; ++i)
               {
-                sendbuf_u[*a].push_back(vertex_facets[i]);
-                facet_queue[*a].insert(vertex_facets[i]);
+                uint const id = vfacets[i];
+                _map<uint, uint>::const_iterator it = facet_sendmap[*a].find(id);
+                if (it == facet_sendmap[*a].end())
+                {
+                  uint const count = facet_sendmap[*a].size();
+                  sendbuf_u[*a].push_back(count);
+                  facet_sendmap[*a][id] = count;
+                  //message("\t\tadd facet %8u as %8u (new)", id, count);
+                }
+                else
+                {
+                  sendbuf_u[*a].push_back(it->second);
+                  //message("\t\tadd facet %8u as %8u (use)", id, it->second);
+                }
               }
             }
           }
         }
-        facet_queue.clear();
-        delete [] vertex_facets;
-        message("Number of selected %u facets.", facet_count);
+        delete [] vfacets;
+        tocd();
 
-        //
-        Array<real> * sendbuf_r = new Array<real>[adjs.size()];
+        // Create MPI variables
+        message("Create MPI variables");
         MPI_Status  * status = new MPI_Status[adjs.size()];
         MPI_Request * sendreq_u = new MPI_Request[adjs.size()];
         uint * sendsize_u = new uint[adjs.size()];
-        MPI_Request * sendreq_r = new MPI_Request[adjs.size()];
-        uint * sendsize_r = new uint[adjs.size()];
         MPI_Request * recvreq_u = new MPI_Request[adjs.size()];
         uint * recvsize_u = new uint[adjs.size()];
+        MPI_Request * sendreq_r = new MPI_Request[adjs.size()];
+        uint * sendsize_r = new uint[adjs.size()];
         MPI_Request * recvreq_r = new MPI_Request[adjs.size()];
         uint * recvsize_r = new uint[adjs.size()];
 
-        //
-        message("Collect facet data by adjacent ranks");
+        // Exchange buffer sizes
+        message("Exchange buffer sizes");
         for (uint i = 0; i < adjs.size(); ++i)
         {
           uint const a = adjranks[i];
-
-          // Pack data by adjacent rank
-          // U: foreach vertex [global index, num facets, facets local indices]
-          //    + [ all facet local indices ] + number of facets
-          // R: foreach facet  [weight, normal components]
-          for (_set<uint>::const_iterator it = facet_queue[a].begin();
-               it != facet_queue[a].end(); ++it)
-          {
-            sendbuf_u[a].push_back(*it);
-            sendbuf_r[i].push_back(facet_weight[*it]);
-            for (uint d = 0; d < gdim; ++d)
-            {
-              sendbuf_r[i].push_back(facet_normal[gdim*(*it) + d]);
-            }
-          }
-          sendbuf_u[a].push_back(facet_queue[a].size());
 
           // Exchange buffer sizes
           sendsize_u[i] = sendbuf_u[a].size();
@@ -417,7 +416,8 @@ int main(int argc, char** argv)
                     &sendreq_u[i]);
           MPI_Irecv(&recvsize_u[i], 1, MPI_UNSIGNED, a, 0, MPI::DOLFIN_COMM,
                     &recvreq_u[i]);
-          sendsize_r[i] = sendbuf_r[i].size();
+
+          sendsize_r[i] = facet_sendmap[a].size() * facet_data_size;
           MPI_Isend(&sendsize_r[i], 1, MPI_UNSIGNED, a, 1, MPI::DOLFIN_COMM,
                     &sendreq_r[i]);
           MPI_Irecv(&recvsize_r[i], 1, MPI_UNSIGNED, a, 1, MPI::DOLFIN_COMM,
@@ -425,95 +425,194 @@ int main(int argc, char** argv)
         }
         MPI_Waitall(adjs.size(), &sendreq_u[0],&status[0]);
         MPI_Waitall(adjs.size(), &recvreq_u[0],&status[0]);
-        MPI_Waitall(adjs.size(), &sendreq_r[0],&status[0]);
-        MPI_Waitall(adjs.size(), &recvreq_r[0],&status[0]);
 
-        //
-        Array<uint> * recvbuf_u = new Array<uint>[adjs.size()];
-        Array<real> * recvbuf_r = new Array<real>[adjs.size()];
+        // Start exchange of vertex - facets connectivities
+        // U: foreach vertex [global index, num facets, facets send indices]
+        message("Start exchange of vertex - facets connectivities");
+        uint * offsets_u = new uint[adjs.size() + 1];
+        offsets_u[0] = 0;
+        for (uint i = 0; i < adjs.size(); ++i)
+        {
+          offsets_u[i + 1] = offsets_u[i] + recvsize_u[i];
+        }
+        uint * recvbuf_u = new uint[offsets_u[adjs.size()]];
         for (uint i = 0; i < adjs.size(); ++i)
         {
           uint const a = adjranks[i];
           MPI_Isend(&sendbuf_u[a][0], sendsize_u[i], MPI_UNSIGNED, a, 0,
                     MPI::DOLFIN_COMM, &sendreq_u[i]);
-          recvbuf_u[i].resize(recvsize_u[i]);
-          MPI_Irecv(&recvbuf_u[i][0], recvsize_u[i], MPI_UNSIGNED, a, 0,
+          MPI_Irecv(&recvbuf_u[offsets_u[i]], recvsize_u[i], MPI_UNSIGNED, a, 0,
                     MPI::DOLFIN_COMM, &recvreq_u[i]);
+        }
+
+        // Collect facet data by adjacent ranks in order of addition
+        message("Collect facet data by adjacent ranks in order of addition");
+        tic();
+        Array<real> * sendbuf_r = new Array<real>[adjs.size()];
+        for (uint i = 0; i < adjs.size(); ++i)
+        {
+          uint const a = adjranks[i];
+
+          // Pack data by adjacent rank
+          // R: foreach facet  [weight, normal components]
+          sendbuf_r[i].resize(facet_sendmap[a].size() * facet_data_size);
+          dolfin_assert(sendsize_r[i] == sendbuf_r[i].size());
+          for (_map<uint, uint>::const_iterator it = facet_sendmap[a].begin();
+               it != facet_sendmap[a].end(); ++it)
+          {
+            dolfin_assert(it->second < sendsize_u[i]);
+            std::copy(&facet_data[facet_data_size*it->first],
+                      &facet_data[facet_data_size*it->first] + facet_data_size,
+                      &sendbuf_r[i][it->second*facet_data_size]);
+          }
+        }
+        delete [] facet_sendmap;
+        tocd();
+
+        // Wait for reception of facet data buffer sizes
+        message("Wait for reception of facet data buffer sizes");
+        MPI_Waitall(adjs.size(), &sendreq_r[0],&status[0]);
+        MPI_Waitall(adjs.size(), &recvreq_r[0],&status[0]);
+
+        // Exchange facet data
+        message("Exchange facet data");
+        uint * offsets_r = new uint[adjs.size() + 1];
+        offsets_r[0] = 0;
+        for (uint i = 0; i < adjs.size(); ++i)
+        {
+          offsets_r[i + 1] = offsets_r[i] + recvsize_r[i];
+        }
+        real * recvbuf_r = new real[offsets_r[adjs.size()]];
+        for (uint i = 0; i < adjs.size(); ++i)
+        {
+          uint const a = adjranks[i];
           MPI_Isend(&sendbuf_r[i][0], sendsize_r[i], MPI_DOUBLE, a, 1,
                     MPI::DOLFIN_COMM, &sendreq_r[i]);
-          recvbuf_r[i].resize(recvsize_r[i]);
-          MPI_Irecv(&recvbuf_r[i][0], recvsize_r[i], MPI_DOUBLE, a, 1,
+          MPI_Irecv(&recvbuf_r[offsets_r[i]], recvsize_r[i], MPI_DOUBLE, a, 1,
                     MPI::DOLFIN_COMM, &recvreq_r[i]);
         }
 
         // Compute vertex normal for inner vertices
+        message("Compute vertex normal for inner vertices");
         for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
         {
-          if (!facet_select[bcell->index()] &&
-              ((subdomain == NULL) || (subdomain->inside(*bcell, on_boundary))))
+          if (!facet_computed[bcell->index()] &&
+              ((subdomain == NULL) || subdomain->inside(*bcell, on_boundary)))
           {
-            uint const bcell_index = bcell->index();
-            facet_select[bcell_index] = true;
+            uint const id = bcell->index();
+            facet_computed[id] = true;
             Facet facet(mesh, boundary.facet_index(*bcell));
             Cell cell(mesh, facet.entities(tdim)[0]);
             uint const local_facet = cell.index(facet);
-            facet_weight[bcell_index] = cell.facet_area(local_facet);
-            cell.normal(local_facet , &facet_normal[gdim * bcell_index]);
+            facet_data[facet_data_size * id] = cell.facet_area(local_facet);
+            cell.normal(local_facet , &facet_data[facet_data_size * id + 1]);
             ++facet_count;
           }
-          //
         }
         message("Number of selected %u facets.", facet_count);
-        //
 
+        // Wait for completion of transfer and cleanup unneeded data
+        message("Wait for completion of transfer and cleanup unneeded data");
         MPI_Waitall(adjs.size(), &sendreq_u[0],&status[0]);
+        delete[] sendbuf_u;
+        delete[] sendsize_u;
+        delete[] sendreq_u;
         MPI_Waitall(adjs.size(), &recvreq_u[0],&status[0]);
-        MPI_Waitall(adjs.size(), &sendreq_r[0],&status[0]);
-        MPI_Waitall(adjs.size(), &recvreq_r[0],&status[0]);
+        delete[] recvreq_u;
 
-        //
+        // Construct vertex - facets map from adjacent rank data
+        message("Construct vertex - facets map from adjacent rank data");
+        tic();
+        _map<uint, Array<real *> > vertex_facets;
         for (uint i = 0; i < adjs.size(); ++i)
         {
           uint const a = adjranks[i];
           uint const size = recvsize_u[i];
-          uint const fdata_size = recvbuf_u[i][size - 1];
-          uint const vdata_size = size - 1 - fdata_size;
-          dolfin_assert(fdata_size * (gdim + 1) == recvsize_r[i]);
-          uint const * facet_data = &recvbuf_u[i][vdata_size];
-          // Construct map for facet data
-          _map<uint, real *> fmap;
-          for (uint k = 0; k < fdata_size; ++k)
+          //message("adj%8u: size = %u", a, size);
+          uint * const ubuffer = &recvbuf_u[offsets_u[i]];
+          real * const rbuffer = &recvbuf_r[offsets_r[i]];
+          for (uint k = 0; k < size; k += (2 + ubuffer[k + 1]))
           {
-            fmap.insert(std::pair<uint, real *>(facet_data[k],
-                                                &recvbuf_r[i][k*(gdim + 1)]));
-          }
-          // Add vertex facets
-          uint const * vertex_data = &recvbuf_u[i][0];
-          for (uint k = 0; k < vdata_size; k += (2+vertex_data[k + 1]))
-          {
-            for (uint f = 1; f <= vertex_data[k + 1]; ++f)
+            //message("\tv%8u:", ubuffer[k]);
+            for (uint f = 1; f <= ubuffer[k + 1]; ++f)
             {
-              uint const facet_index = vertex_data[k + 1 + f];
-              real const * wn = &fmap[facet_index][0];
+              uint const ii = ubuffer[k + 1 + f] * facet_data_size;
+              dolfin_assert(ii < recvsize_r[i]);
+              //message("\t\tf%8u:", ubuffer[k + 1 + f]);
+              vertex_facets[ubuffer[k]].push_back(rbuffer + ii);
             }
           }
         }
-
-        delete[] recvbuf_r;
         delete[] recvbuf_u;
-        delete[] recvsize_r;
-        delete[] recvreq_r;
+        delete[] offsets_u;
         delete[] recvsize_u;
-        delete[] recvreq_u;
+        tocd();
+
+        // Wait for completion of transfer and cleanup unneeded data
+        message("Wait for completion of transfer and cleanup unneeded data");
+        MPI_Waitall(adjs.size(), &sendreq_r[0],&status[0]);
+        delete[] sendbuf_r;
         delete[] sendsize_r;
         delete[] sendreq_r;
-        delete[] sendsize_u;
-        delete[] sendreq_u;
-        delete[] status;
+        MPI_Waitall(adjs.size(), &recvreq_r[0],&status[0]);
+        delete[] recvreq_r;
 
-        delete[] sendbuf_r;
-        delete[] sendbuf_u;
+        //
+        message("Compute vertex normals");
+        tic();
+
+        for (_map<uint, Array<real *> >::const_iterator v_it = vertex_facets.begin();
+             v_it != vertex_facets.end(); ++v_it)
+        {
+          //message("v%8u", v_it->first);
+          real w = 0.0;
+          real n[3] = { 0.0 };
+          for (Array<real *>::const_iterator f_it = v_it->second.begin();
+               f_it != v_it->second.end(); ++f_it)
+          {
+            real * const data = (*f_it);
+
+            /*
+             * Compute normal
+             */
+
+            //message("\tw : %+8f @%p", data[0], data);
+            for (uint d = 1; d <= gdim; ++d)
+            {
+            //  message("\tn%u: %+8f", d, data[d]);
+              w += data[0];
+              n[d] += data[0] * data[d];
+            }
+            dolfin_assert(w > 0.0);
+          }
+        }
+        tocd();
+        delete[] recvbuf_r;
+        delete[] offsets_r;
+        delete[] recvsize_r;
+
+        //
+        delete[] status;
         delete[] adjranks;
+      }
+      else
+      {
+        // Compute vertex normal for inner vertices
+        for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
+        {
+          if ((subdomain == NULL) || (subdomain->inside(*bcell, on_boundary)))
+          {
+            uint const id = bcell->index();
+            Facet facet(mesh, boundary.facet_index(*bcell));
+            Cell cell(mesh, facet.entities(tdim)[0]);
+            uint const local_facet = cell.index(facet);
+            facet_data[facet_data_size * id] = cell.facet_area(local_facet);
+            cell.normal(local_facet , &facet_data[facet_data_size * id + 1]);
+            ++facet_count;
+          }
+          //
+        }
+      }
 
         /*
         Array<uint> * sendbuf_u = new Array<uint> [pe_size];
@@ -609,11 +708,9 @@ int main(int argc, char** argv)
         delete[] request_r;
         delete[] request_u;
         */
-      }
 
-      delete [] facet_normal;
-      delete [] facet_weight;
-      delete [] facet_select;
+      delete [] facet_data;
+      delete [] facet_computed;
 
     }
     T.end();

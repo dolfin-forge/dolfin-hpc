@@ -626,7 +626,6 @@ void TetrahedronCell::normal(Cell const& cell, uint facet, real * n) const
     n[1] *= - 1.0;
     n[2] *= - 1.0;
   }
-  dolfin_assert(abscmp(std::sqrt(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]), 1.0));
 }
 //-----------------------------------------------------------------------------
 real TetrahedronCell::facet_area(Cell const& cell, uint facet) const

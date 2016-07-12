@@ -247,7 +247,8 @@ public:
   ///
   SharedIterator(DistributedData const& distdata) :
       distdata_(distdata),
-      iter_(distdata_.shared_.begin())
+      iter_(distdata_.shared_.begin()),
+      pos_(0)
   {
   }
 
@@ -260,6 +261,7 @@ public:
   SharedIterator& operator++()
   {
     ++iter_;
+    ++pos_;
     return *this;
   }
 
@@ -267,6 +269,12 @@ public:
   inline uint index() const
   {
     return iter_->first;
+  }
+
+  ///
+  inline uint pos() const
+  {
+    return pos_;
   }
 
   ///
@@ -291,6 +299,7 @@ private:
 
   DistributedData const& distdata_;
   _map<uint, _set<uint> >::const_iterator iter_;
+  uint pos_;
 
 };
 
@@ -308,7 +317,8 @@ public:
   ///
   GhostIterator(DistributedData const& distdata) :
       distdata_(distdata),
-      iter_(distdata_.ghost_.begin())
+      iter_(distdata_.ghost_.begin()),
+      pos_(0)
   {
   }
 
@@ -321,6 +331,7 @@ public:
   GhostIterator& operator++()
   {
     ++iter_;
+    ++pos_;
     return *this;
   }
 
@@ -328,6 +339,12 @@ public:
   inline uint index() const
   {
     return iter_->first;
+  }
+
+  ///
+  inline uint pos() const
+  {
+    return pos_;
   }
 
   ///
@@ -358,6 +375,7 @@ private:
 
   DistributedData const& distdata_;
   _map<uint, uint>::const_iterator iter_;
+  uint pos_;
 
 };
 
@@ -408,6 +426,12 @@ public:
 
   ///
   inline uint index() const
+  {
+    return iter_ - begin_;
+  }
+
+  /// Position is equal to index for owned entities
+  inline uint pos() const
   {
     return iter_ - begin_;
   }

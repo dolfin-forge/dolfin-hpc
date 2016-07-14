@@ -76,12 +76,6 @@ nobase_pkginclude_HEADERS = \
 				function/Value.h\
 				function/ValueSpace.h\
 				function/impl/CellDiameter.h\
-				graph/dolfin_graph.h\
-				graph/DirectedClique.h\
-				graph/Graph.h\
-				graph/GraphEditor.h\
-				graph/GraphPartition.h\
-				graph/UndirectedClique.h\
 				io/base64.h\
 				io/dolfin_io.h\
 				io/BinaryFile.h\
@@ -100,7 +94,6 @@ nobase_pkginclude_HEADERS = \
 				io/XMLFile.h\
 				io/XMLFiniteElement.h\
 				io/XMLFunction.h\
-				io/XMLGraph.h\
 				io/XMLMatrix.h\
 				io/XMLMesh.h\
 				io/XMLMeshFunction.h\

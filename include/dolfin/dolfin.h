@@ -11,7 +11,6 @@
 #include <dolfin/elements/dolfin_elements.h>
 #include <dolfin/evolution/dolfin_evolution.h>
 #include <dolfin/function/dolfin_function.h>
-#include <dolfin/graph/dolfin_graph.h>
 #include <dolfin/io/dolfin_io.h>
 #include <dolfin/main/dolfin_main.h>
 #include <dolfin/math/dolfin_math.h>

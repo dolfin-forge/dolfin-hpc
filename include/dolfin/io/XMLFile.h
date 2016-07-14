@@ -26,7 +26,6 @@ namespace dolfin
 {
   
   class Mesh;
-  class Graph;
   template <class T> class MeshFunction;
   class ParameterList;
   class XMLObject;
@@ -49,14 +48,12 @@ namespace dolfin
     void operator>> (MeshFunction<bool>& meshfunction);
     void operator>> (Function& f);
     void operator>> (ParameterList& parameters);
-    void operator>> (Graph& graph);    
     
     // Output
     
     void operator<< (GenericVector& x);
     void operator<< (GenericMatrix& A);
     void operator<< (Mesh& mesh);
-    void operator<< (Graph& graph);
 // Todo:
     void operator<< (MeshFunction<int>& mesh);
     void operator<< (MeshFunction<uint>& mesh);

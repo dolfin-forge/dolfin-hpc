@@ -186,13 +186,6 @@ void File::operator>>(ParameterList& parameters)
   *file_ >> parameters;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(Graph& graph)
-{
-  file_->read();
-
-  *file_ >> graph;
-}
-//-----------------------------------------------------------------------------
 void File::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 {
   file_->read();
@@ -261,13 +254,6 @@ void File::operator<<(ParameterList& parameters)
   file_->write();
 
   *file_ << parameters;
-}
-//-----------------------------------------------------------------------------
-void File::operator<<(Graph& graph)
-{
-  file_->write();
-
-  *file_ << graph;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(std::vector<std::pair<Function*, std::string> >& f)

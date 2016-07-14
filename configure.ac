@@ -388,7 +388,6 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/evolution/Makefile\
                  src/fem/Makefile\
                  src/function/Makefile\
-                 src/graph/Makefile\
                  src/io/Makefile\
                  src/la/Makefile\
                  src/log/Makefile\

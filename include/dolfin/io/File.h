@@ -23,7 +23,6 @@ namespace dolfin
 {
 
   class Mesh;
-  class Graph;
   template <class T> class MeshFunction;
   class Function;
   class ParameterList;
@@ -75,9 +74,6 @@ namespace dolfin
     /// Read parameter list from file
     void operator>> (ParameterList& parameters);
 
-    /// Read graph from file
-    void operator>> (Graph& graph);
-
     /// Read a collection of funtion to file
     void operator>> (std::vector<std::pair<Function*, std::string> >& f);
 
@@ -103,9 +99,6 @@ namespace dolfin
 
     /// Write parameter list to file
     void operator<< (ParameterList& parameters);
-
-    /// Write graph to file
-    void operator<< (Graph& graph);
 
     /// Write a collection of functions to file
     void operator<< (std::vector<std::pair<Function*, std::string> >& f);

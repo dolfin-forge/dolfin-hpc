@@ -16,7 +16,6 @@ libdolfin_io_la_SOURCES = \
 			XMLFile.cpp\
 			XMLFiniteElement.cpp\
 			XMLFunction.cpp\
-			XMLGraph.cpp\
 			XMLMatrix.cpp\
 			XMLMesh.cpp\
 			XMLMeshFunction.cpp\

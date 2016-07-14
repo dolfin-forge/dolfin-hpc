@@ -1,5 +1,5 @@
 LDFLAGS = $(XML_LDFLAGS)
-SUBDIRS = adaptivity common elements evolution fem function graph io\
+SUBDIRS = adaptivity common elements evolution fem function io\
 	la log main math mesh nls parameter pde quadrature ufl
 
 pkgconfigdir = $(libdir)/pkgconfig
@@ -14,7 +14,6 @@ libdolfin_la_LIBADD = \
 		evolution/libdolfin_evolution.la\
 		fem/libdolfin_fem.la\
 		function/libdolfin_function.la\
-		graph/libdolfin_graph.la\
 		io/libdolfin_io.la\
 		la/libdolfin_la.la\
 		log/libdolfin_log.la\

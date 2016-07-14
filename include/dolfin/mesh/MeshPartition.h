@@ -12,34 +12,32 @@
 
 #include <dolfin/common/types.h>
 
-
 namespace dolfin
 {
-  /// This class provides a set of functions to partition a Mesh
+
+class Mesh;
+template<class T> class MeshFunction;
+
+/// This class provides a set of functions to partition a Mesh
+
+class MeshPartition
+{
+
+public:
+
+  /// Partition a mesh into pe_size partitions in parallel
+  static void partition(Mesh& mesh, MeshFunction<uint>& partitions);
+
+  /// Partition a mesh into pe_size partitions in parallel with
+  /// weights on vertices
+  static void partition(Mesh& mesh, MeshFunction<uint>& partitions,
+                        MeshFunction<uint>& weight);
+
+  /// Partition a mesh based on coordinates
+  static void partition_geom(Mesh& mesh, MeshFunction<uint>& partitions);
   
-  class MeshPartition
-  {
-  public:
-    
-    /// Partition a mesh into num_part partitions
-    static void partition(Mesh& mesh, MeshFunction<uint>& partitions, 
-			  uint num_partitions);
-    
-    
-    /// Partition a mesh into pe_size partitions in parallel
-    static void partition(Mesh& mesh, MeshFunction<uint>& partitions);
-    
-    /// Partition a mesh into pe_size partitions in parallel with
-    /// weights on vertices
-    static void partition(Mesh& mesh,
-			  MeshFunction<uint>& partitions,
-			  MeshFunction<uint>& weight);
-    
-    /// Partition a mesh based on coordinates
-    static void partition_geom(Mesh& mesh, MeshFunction<uint>& partitions);
-    
-  };
+};
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_MESH_PARTITIONING_H */

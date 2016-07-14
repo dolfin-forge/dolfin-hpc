@@ -25,7 +25,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/graph/Graph.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/fem/DofMap.h>
@@ -45,7 +44,6 @@
 #include <dolfin/io/XMLFunction.h>
 #include <dolfin/io/XMLFiniteElement.h>
 #include <dolfin/io/XMLParameterList.h>
-#include <dolfin/io/XMLGraph.h>
 #include <dolfin/io/XMLFile.h>
 
 
@@ -181,15 +179,6 @@ void XMLFile::operator>>(ParameterList& parameters)
 
   delete xmlObject;
   xmlObject = new XMLParameterList(parameters);
-  parseFile();
-}
-//-----------------------------------------------------------------------------
-void XMLFile::operator>>(Graph& graph)
-{
-  message(1, "Reading graph from file %s.", filename.c_str());
-
-  delete xmlObject;
-  xmlObject = new XMLGraph(graph);
   parseFile();
 }
 //-----------------------------------------------------------------------------
@@ -829,62 +818,6 @@ void XMLFile::operator<<(ParameterList& parameters)
 
   message(1, "Saved parameters to file %s in DOLFIN XML format.",
           filename.c_str());
-}
-//-----------------------------------------------------------------------------
-void XMLFile::operator<<(Graph& graph)
-{
-  // Open file
-  FILE *fp = openFile();
-
-  // Get graph type and number of vertices, edges and arches
-  uint num_vertices = graph.numVertices();
-
-  // Write graph in XML format
-  fprintf(fp, "  <graph type=\"%s\">\n", graph.typestr().c_str());
-
-  // Get connections (outgoing edges), offsets and weigts
-  const uint* connections = graph.connectivity();
-  const uint* offsets = graph.offsets();
-  const uint* edge_weights = graph.edgeWeights();
-  const uint* vertex_weights = graph.vertexWeights();
-
-  dolfin_assert(connections);
-  dolfin_assert(offsets);
-  dolfin_assert(edge_weights);
-  dolfin_assert(vertex_weights);
-
-  // Write vertice header
-  fprintf(fp, "    <vertices size=\"%u\">\n", graph.numVertices());
-
-  // Vertices
-  for (uint i = 0; i < num_vertices; ++i)
-  {
-    fprintf(fp, "      <vertex index=\"%u\" num_edges=\"%u\" weight=\"%u\"/>\n",
-            i, graph.numEdges(i), vertex_weights[i]);
-
-  }
-  fprintf(fp, "    </vertices>\n");
-
-  fprintf(fp, "    <edges size=\"%u\">\n", graph.numEdges());
-  // Edges
-  for (uint i = 0; i < num_vertices; ++i)
-  {
-    for (uint j = offsets[i]; j < offsets[i] + graph.numEdges(i); ++j)
-    {
-      // In undirected graphs an edge (v1, v2) is the same as edge (v2, v1)
-      // and should not be stored twice
-      if (graph.type() == Graph::directed || i < connections[j]) fprintf(
-          fp, "      <edge v1=\"%u\" v2=\"%u\" weight=\"%u\"/>\n", i,
-          connections[j], edge_weights[j]);
-    }
-  }
-  fprintf(fp, "    </edges>\n");
-  fprintf(fp, "  </graph>\n");
-
-  // Close file
-  closeFile(fp);
-
-  message(1, "Saved graph to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
 FILE* XMLFile::openFile()

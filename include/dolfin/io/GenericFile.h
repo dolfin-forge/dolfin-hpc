@@ -19,7 +19,6 @@ namespace dolfin
 {
   
   class Mesh;
-  class Graph;
   template <class T> class MeshFunction;
   class Function;
   class ParameterList;
@@ -42,7 +41,6 @@ namespace dolfin
     virtual void operator>> (MeshFunction<bool>& meshfunction);
     virtual void operator>> (Function& mesh);
     virtual void operator>> (ParameterList& parameters);
-    virtual void operator>> (Graph& graph);
     virtual void operator>> (std::vector<std::pair<Function*, std::string> >& f);
     
     // Output
@@ -56,7 +54,6 @@ namespace dolfin
     virtual void operator<< (MeshFunction<bool>& meshfunction);
     virtual void operator<< (Function& u);
     virtual void operator<< (ParameterList& parameters);
-    virtual void operator<< (Graph& graph);
     virtual void operator<< (std::vector<std::pair<Function*, std::string> >& f);
     
     void set_counter(uint value);

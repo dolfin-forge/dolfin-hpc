@@ -8,30 +8,19 @@
 // First added:  2007-04-03
 // Last changed: 2015-01-05
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/graph/Graph.h>
-#include <dolfin/graph/GraphPartition.h>
 #include <dolfin/mesh/MeshPartition.h>
+
+#include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
 #include <dolfin/mesh/ZoltanInterface.h>
 #include <dolfin/parameter/parameters.h>
 
-using namespace dolfin;
-
-//-----------------------------------------------------------------------------
-void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-			      uint num_partitions)
+namespace dolfin
 {
-  partitions.init(mesh, mesh.topology().dim());
-  Graph graph(mesh);
-  GraphPartition::partition(graph, num_partitions, &partitions[0]);
-  
-  bool report_edge_cut = dolfin_get("report edge cut");
-  if (report_edge_cut)
-    GraphPartition::edgecut(graph, num_partitions, &partitions[0]);
-}
+
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
@@ -90,4 +79,4 @@ void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
 #endif
 //-----------------------------------------------------------------------------
 
-
+} /* namespace dolfin */

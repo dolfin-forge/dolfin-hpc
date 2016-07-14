@@ -10,6 +10,7 @@
 #include <dolfin/fem/DirichletBC.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofMapSet.h>
+#include <dolfin/fem/Equation.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/Form.h>

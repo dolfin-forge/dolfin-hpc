@@ -731,6 +731,8 @@ void BinaryFile::operator>>(Mesh& mesh)
         std::inserter(orphaned_vertices, orphaned_vertices.end()));
     uint const num_local_vertices = all_vertices.size()
         + ghosted_entities.size();
+    message("all_vertices size     : %u", all_vertices.size());
+    message("orphaned_vertices size: %u", orphaned_vertices.size());
 
     // Open mesh for editing
     message("open editor");

@@ -12,6 +12,8 @@
 namespace dolfin
 {
 
+class Time;
+
 /// Associates an object with time t
 
 class TimeDependent
@@ -20,29 +22,24 @@ class TimeDependent
 public:
 
   /// Constructors
-  TimeDependent();
-  TimeDependent(const real* t);
+  TimeDependent(Time const& time);
+
+  /// Constructors
+  TimeDependent(real const& t);
 
   /// Destructor
   ~TimeDependent();
 
-  /// Associate object with time t
-  void sync(const real* t);
-
   /// Return the current time t
-  real time() const
-  {
-    if (!t) error("Time has not been associated with object.");
-    return *t;
-  }
+  inline real time() const { return t_; }
 
 private:
 
   // Pointer to the current time
-  const real* t;
+  real const& t_;
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_TIME_DEPENDENT_H */

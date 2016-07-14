@@ -19,12 +19,13 @@ nobase_pkginclude_HEADERS = \
 				common/Test.h\
 				common/Tokenized.h\
 				common/Timer.h\
-				common/TimeDependent.h\
-				common/TimeSeries.h\
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
+        evolution/dolfin_evolution.h\
 				evolution/Time.h\
+        evolution/TimeDependent.h\
+        evolution/TimeSeries.h\
 				evolution/TimeStepping.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\

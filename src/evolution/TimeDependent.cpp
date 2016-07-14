@@ -4,28 +4,30 @@
 // First added:  2005-09-02
 // Last changed: 2008-06-23
 
-#include <dolfin/common/TimeDependent.h>
+#include <dolfin/evolution/TimeDependent.h>
 
-using namespace dolfin;
+#include <dolfin/evolution/Time.h>
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-TimeDependent::TimeDependent() : t(0)
+TimeDependent::TimeDependent(Time const& time) :
+    t_(time.clock())
 {
- // Do nothing
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
-TimeDependent::TimeDependent(const real* t) : t(t)
+TimeDependent::TimeDependent(real const& t) :
+    t_(t)
 {
- // Do nothing
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
-TimeDependent::~TimeDependent() 
+TimeDependent::~TimeDependent()
 {
- // Do nothing
+  // Do nothing
 }
 //-----------------------------------------------------------------------------
-void TimeDependent::sync(const real* t)
-{
-  this->t  = t;
-}
-//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

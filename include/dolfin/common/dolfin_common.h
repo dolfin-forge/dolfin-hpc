@@ -12,8 +12,6 @@
 #include <dolfin/common/List.h>
 #include <dolfin/common/Test.h>
 #include <dolfin/common/Timer.h>
-#include <dolfin/common/TimeDependent.h>
-#include <dolfin/common/TimeSeries.h>
 #include <dolfin/common/Variable.h>
 
 #endif /* __DOLFIN_HEADER_COMMON_H */

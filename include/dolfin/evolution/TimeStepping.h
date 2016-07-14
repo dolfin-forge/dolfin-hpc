@@ -17,7 +17,7 @@
 #ifndef DOLFIN_TIME_STEPPING_H_
 #define DOLFIN_TIME_STEPPING_H_
 
-#include <licorne/common/types.h>
+#include <dolfin/common/types.h>
 
 namespace dolfin
 {

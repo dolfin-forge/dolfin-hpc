@@ -4,7 +4,7 @@
 // First added:  2014-08-18
 // Last changed: 2014-08-18
 
-#include <dolfin/common/TimeSeries.h>
+#include <dolfin/evolution/TimeSeries.h>
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
@@ -305,4 +305,4 @@ void TimeSeries::addPoint(real t)
 
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

@@ -9,6 +9,7 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/dolfin_la.h>
 #include <dolfin/elements/dolfin_elements.h>
+#include <dolfin/evolution/dolfin_evolution.h>
 #include <dolfin/function/dolfin_function.h>
 #include <dolfin/graph/dolfin_graph.h>
 #include <dolfin/io/dolfin_io.h>

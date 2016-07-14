@@ -86,6 +86,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif  /* __DOLFIN_TIME_SERIES_H */

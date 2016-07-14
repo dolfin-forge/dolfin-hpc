@@ -6,6 +6,4 @@ libdolfin_common_la_SOURCES = byteswap.cpp\
                               AdjacentMapping.cpp \
                               DistributedData.cpp \
                               Test.cpp \
-                              TimeDependent.cpp \
-                              TimeSeries.cpp \
                               Variable.cpp

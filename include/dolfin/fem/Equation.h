@@ -25,6 +25,9 @@
 namespace dolfin
 {
 
+class Matrix;
+class Vector;
+
 struct Equation
 {
 
@@ -43,6 +46,9 @@ struct Equation
 
   //
   virtual ~Equation();
+
+  //
+  void assemble(Matrix& A, Vector& b, bool reset_tensor);
 
   //
   bool is_initialized() const;

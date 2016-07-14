@@ -16,6 +16,8 @@
 
 #include <dolfin/fem/Equation.h>
 
+#include <dolfin/la/Matrix.h>
+#include <dolfin/la/Vector.h>
 #include <dolfin/log/log.h>
 
 namespace dolfin
@@ -31,6 +33,15 @@ Equation::Equation() :
 //-----------------------------------------------------------------------------
 Equation::~Equation()
 {
+}
+
+//-----------------------------------------------------------------------------
+void Equation::assemble(Matrix& A, Vector& b, bool reset_tensor)
+{
+  dolfin_assert(a != NULL);
+  a->assemble(A, reset_tensor);
+  dolfin_assert(L != NULL);
+  L->assemble(b, reset_tensor);
 }
 
 //-----------------------------------------------------------------------------

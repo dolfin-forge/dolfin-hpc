@@ -496,6 +496,7 @@ int main(int argc, char** argv)
         message("Compute vertex normal for inner vertices");
         for (CellIterator bcell(boundary); !bcell.end(); ++bcell)
         {
+          // Do not recompute weight and normal
           if (!facet_computed[bcell->index()] &&
               ((subdomain == NULL) || subdomain->inside(*bcell, on_boundary)))
           {
@@ -613,101 +614,6 @@ int main(int argc, char** argv)
           //
         }
       }
-
-        /*
-        Array<uint> * sendbuf_u = new Array<uint> [pe_size];
-        Array<real> * sendbuf_r = new Array<real> [pe_size];
-        for (GhostIterator it(boundary.distdata()[0]); !it.end(); ++it)
-        {
-          uint const owner = it.owner();
-          Vertex v(boundary, it.index());
-          uint facets = 0;
-          for (CellIterator c(v); !c.end(); ++c)
-          {
-            if (facet_select[c->index()])
-            {
-              ++facets;
-              // Collect vertex facets
-              sendbuf_r[owner].push_back(facet_weight[it.index()]);
-              for (uint d = 0; d < gdim; ++d)
-              {
-                sendbuf_r[owner].push_back(facet_normal[gdim*it.index() + d]);
-              }
-            }
-          }
-          if(facets > 0)
-          {
-            sendbuf_u[owner].push_back(it.global_index());
-            sendbuf_u[owner].push_back(facets);
-          }
-        }
-
-        //
-        _set<uint> const& adjs = boundary.distdata()[0].get_adj_ranks();
-        MPI_Status status;
-        MPI_Request * request_u = new MPI_Request[adjs.size()];
-        MPI_Request * request_r = new MPI_Request[adjs.size()];
-        uint recvmax_u = 0;
-        uint recvmax_r = 0;
-        for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
-        {
-          recvmax_u = std::max(recvmax_u, (uint) sendbuf_u[*it].size());
-          recvmax_r = std::max(recvmax_r, (uint) sendbuf_r[*it].size());
-        }
-        MPI::numGlobalMax(recvmax_u, recvmax_u);
-        message("recvmax_u = %u", recvmax_u);
-        MPI::numGlobalMax(recvmax_r, recvmax_r);
-        message("recvmax_r = %u", recvmax_r);
-        uint * recvbuf_u = new uint[recvmax_u];
-        real * recvbuf_r = new real[recvmax_r];
-        //
-        uint i = 0;
-        for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it, ++i)
-        {
-          MPI_Isend(&sendbuf_u[*it][0], sendbuf_u[*it].size(), MPI_UNSIGNED, *it,
-                    0, MPI::DOLFIN_COMM, &request_u[i]);
-          MPI_Irecv(&recvbuf_u[0], recvmax_u, MPI_UNSIGNED, *it, 0,
-                    MPI::DOLFIN_COMM, &request_u[i]);
-          MPI_Isend(&sendbuf_r[*it][0], sendbuf_r[*it].size(), MPI_DOUBLE, *it,
-                    1, MPI::DOLFIN_COMM, &request_r[i]);
-          MPI_Irecv(&recvbuf_r[0], recvmax_r, MPI_UNSIGNED, *it, 1,
-                    MPI::DOLFIN_COMM, &request_r[i]);
-        }
-
-        //
-
-
-        // Collect facet data from other ranks
-        i = 0;
-        for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it, ++i)
-        {
-          int recvcount;
-          MPI_Wait(&request_u[i],&status);
-          MPI_Wait(&request_r[i],&status);
-          MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
-          real * dataptr = &recvbuf_r[0];
-          for (uint k = 0; k < recvcount; k+=2)
-          {
-            message("recv facet data for %u", recvbuf_u[k]);
-            for (uint l = 0; l < recvbuf_u[k + 1]; ++l)
-            {
-              message("facet weight = %f", *dataptr);
-              ++dataptr;
-              for (uint d = 0; d < gdim; ++d, ++dataptr)
-              {
-                message("n_%u = %f", d, *dataptr);
-              }
-            }
-          }
-        }
-
-        delete[] recvbuf_r;
-        delete[] recvbuf_u;
-        delete[] sendbuf_r;
-        delete[] sendbuf_u;
-        delete[] request_r;
-        delete[] request_u;
-        */
 
       delete [] facet_data;
       delete [] facet_computed;

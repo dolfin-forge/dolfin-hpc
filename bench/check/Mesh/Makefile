@@ -4,7 +4,7 @@ LIBS    = `pkg-config --libs dolfin`
 CXX     = `pkg-config --variable=compiler dolfin`
 
 DEST    = demo
-OBJECTS = main.o
+OBJECTS = VertexNormal.o main.o
 
 all: $(DEST)
 

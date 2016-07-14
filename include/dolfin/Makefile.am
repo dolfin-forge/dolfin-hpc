@@ -238,9 +238,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
 				mesh/VertexNormal.h\
-				nls/dolfin_nls.h\
-				nls/NewtonSolver.h\
-				nls/NonlinearProblem.h\
 				parameter/dolfin_parameter.h\
 				parameter/DefaultParameters.h\
 				parameter/Parameter.h\
@@ -249,9 +246,6 @@ nobase_pkginclude_HEADERS = \
 				parameter/ParameterSystem.h\
 				parameter/ParameterValue.h\
 				parameter/Parametrized.h\
-				pde/dolfin_pde.h\
-				pde/LinearPDE.h\
-				pde/NonlinearPDE.h\
 				quadrature/dolfin_quadrature.h\
 				quadrature/GaussianQuadrature.h\
 				quadrature/GaussQuadrature.h\

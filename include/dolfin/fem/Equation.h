@@ -50,6 +50,9 @@ struct Equation
   //
   void disp() const;
 
+  //
+  void clear();
+
 };
 
 } /* namespace dolfin */

@@ -43,6 +43,9 @@ public:
   /// Clock
   real const& clock() const;
 
+  /// Clock [Fragile]
+  real & clock();
+
   /// Elapsed time
   real elapsed() const;
 

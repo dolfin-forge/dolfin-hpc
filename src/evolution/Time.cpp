@@ -6,6 +6,7 @@
 #include <dolfin/evolution/Time.h>
 
 #include <dolfin/log/log.h>
+#include <dolfin/math/basic.h>
 
 namespace dolfin
 {
@@ -74,7 +75,7 @@ real Time::remaining() const
 }//-----------------------------------------------------------------------------
 void Time::show() const
 {
-  real p = 100.0 * elapsed() / (sign_ == 0 ? 1.0 : measure());
+  real const p = percent(elapsed(),(sign_ == 0 ? 1.0 : measure()));
   message("----------------------------------------------------------------");
   message("t = %-49.10f [ %6.2f ]", t_, p);
   message("----------------------------------------------------------------");

@@ -4,15 +4,20 @@
 // First added:  2008-05-10
 // Last changed: 2008-05-10
 
-#include <dolfin/la/LUSolver.h>
-#include <dolfin/la/KrylovSolver.h>
+
 #include <dolfin/la/LinearSolver.h>
 
-using namespace dolfin;
+#include <dolfin/la/KrylovSolver.h>
+#include <dolfin/la/LUSolver.h>
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-LinearSolver::LinearSolver(SolverType solver_type, PreconditionerType pc_type)
-  : Parametrized(), lu_solver(0), krylov_solver(0)
+LinearSolver::LinearSolver(SolverType solver_type, PreconditionerType pc_type) :
+    Parametrized(),
+    lu_solver(NULL),
+    krylov_solver(NULL)
 {
   if (solver_type == lu)
   {
@@ -32,14 +37,19 @@ LinearSolver::~LinearSolver()
   delete krylov_solver;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint LinearSolver::solve(const GenericMatrix& A, GenericVector& x,
-                                 const GenericVector& b)
+uint LinearSolver::solve(GenericMatrix const& A, GenericVector& x,
+                         GenericVector const& b)
 {
   dolfin_assert(lu_solver || krylov_solver);
-  
   if (lu_solver)
+  {
     return lu_solver->solve(A, x, b);
+  }
   else
+  {
     return krylov_solver->solve(A, x, b);
+  }
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

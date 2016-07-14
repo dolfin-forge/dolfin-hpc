@@ -10,46 +10,47 @@
 #ifndef __DOLFIN_LINEAR_SOLVER_H
 #define __DOLFIN_LINEAR_SOLVER_H
 
-#include <dolfin/common/types.h>
 #include <dolfin/parameter/Parametrized.h>
-#include "SolverType.h"
-#include "PreconditionerType.h"
+
+#include <dolfin/la/SolverType.h>
+#include <dolfin/la/PreconditionerType.h>
 
 namespace dolfin
 {
 
-  class GenericMatrix;
-  class GenericVector;
-  class LUSolver;
-  class KrylovSolver;
+class GenericMatrix;
+class GenericVector;
+class KrylovSolver;
+class LUSolver;
 
-  /// This class provides a general solver for linear systems Ax = b.
-  /// Available methods are defined in SolverType.h and available
-  /// preconditioners are defined in PreconditionerType.h.
+/// This class provides a general solver for linear systems Ax = b.
+/// Available methods are defined in SolverType.h and available
+/// preconditioners are defined in PreconditionerType.h.
 
-  class LinearSolver : public Parametrized
-  {
-  public:
+class LinearSolver : public Parametrized
+{
 
-    /// Create linear solver
-    LinearSolver(SolverType solver_type=lu, PreconditionerType pc_type=ilu);
+public:
 
-    /// Destructor
-    ~LinearSolver();
+  /// Create linear solver
+  LinearSolver(SolverType solver_type = lu, PreconditionerType pc_type = ilu);
 
-    /// Solve linear system Ax = b
-    uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b);
+  /// Destructor
+  ~LinearSolver();
 
-  private:
+  /// Solve linear system Ax = b
+  uint solve(const GenericMatrix& A, GenericVector& x, const GenericVector& b);
 
-    // LU solver
-    LUSolver* lu_solver;
+private:
 
-    // Krylov solver
-    KrylovSolver* krylov_solver;
+  // LU solver
+  LUSolver * lu_solver;
 
-  };
+  // Krylov solver
+  KrylovSolver * krylov_solver;
 
-}
+};
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_LINEAR_SOLVER_H */

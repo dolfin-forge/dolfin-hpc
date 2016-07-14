@@ -40,7 +40,7 @@ class Vertex;
 /**
  *  DOCUMENTATION:
  *
- *  @class  NodeNormal
+ *  @class  VertexNormal
  *
  *  @brief  Provides an orthonormal basis at each vertex located on an exterior
  *          facet of the mesh, defining an outward normal vector and two

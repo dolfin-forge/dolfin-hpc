@@ -72,6 +72,9 @@ public:
   //--- DEFERRED INITIALIZATION -----------------------------------------------
   // NOTE: Beware, camembert !
 
+  /// Create an empty discrete function without any mesh assignment
+  Function();
+
   /// Create an empty discrete function
   Function(Mesh& mesh);
 

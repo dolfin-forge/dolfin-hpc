@@ -36,6 +36,24 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+Function::Function() :
+    GenericFunction(),
+    mesh_(NULL),
+    discrete_space_(NULL),
+    element_(NULL),
+    dofmap_(NULL),
+    scratch(NULL),
+    X_(NULL),
+    renumbered_(false),
+    cache_size_(0),
+    indices_(NULL),
+    data_cache_(NULL),
+    cache_mapping_(NULL)
+{
+  // Do nothing
+}
+
+//-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
     GenericFunction(),
     mesh_(&mesh),

@@ -263,7 +263,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
     ufc_dofmap.init_cell_finalize();
   }
 
-  message("DofNumbering : initialized UFC dofmap with global dimension %u",
+  message(1, "DofNumbering : initialized UFC dofmap with global dimension %u",
           ufc_dofmap.global_dimension());
 }
 //-----------------------------------------------------------------------------

@@ -75,7 +75,7 @@ real Time::remaining() const
 }//-----------------------------------------------------------------------------
 void Time::show() const
 {
-  real const p = percent(elapsed(),(sign_ == 0 ? 1.0 : measure()));
+  real const p = 100.0 * this->elapsed() / (sign_ == 0 ? 1.0 : this->measure());
   message("----------------------------------------------------------------");
   message("t = %-49.10f [ %6.2f ]", t_, p);
   message("----------------------------------------------------------------");

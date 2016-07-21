@@ -108,6 +108,9 @@ public:
   /// Check if index is valid
   bool check_index(uint i) const;
 
+  /// Auto-initialize coefficients
+  void auto_init();
+
   /// Assemble form
   void assemble(GenericTensor& T, bool reset_tensor);
 

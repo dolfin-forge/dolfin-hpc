@@ -11,6 +11,7 @@
 #include <dolfin/fem/CoefficientMap.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/function/Function.h>
 
 namespace dolfin
 {
@@ -176,6 +177,26 @@ bool Form::check_index(uint i) const
           num_arguments);
   }
   return true;
+}
+
+
+//----------------------------------------------------------------------------
+void Form::auto_init()
+{
+  for (uint i = 0; i < this->num_coefficients(); ++i)
+  {
+    Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
+    if (fptr != NULL)
+    {
+      if (fptr->empty())
+      {
+        message("Coefficient %2u: auto_init %s", i,
+                this->coefficient_name(i).c_str());
+        fptr->init(*this, this->rank() + i);
+        dolfin_assert(!fptr->empty());
+      }
+    }
+  }
 }
 
 //----------------------------------------------------------------------------

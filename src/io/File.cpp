@@ -19,8 +19,6 @@
 #include <dolfin/io/GenericFile.h>
 #include <dolfin/io/XMLFile.h>
 #include <dolfin/io/BinaryFile.h>
-#include <dolfin/io/MatlabFile.h>
-#include <dolfin/io/OctaveFile.h>
 #include <dolfin/io/VTKFile.h>
 #include <dolfin/io/RAWFile.h>
 #include <dolfin/io/OFFFile.h>
@@ -53,8 +51,6 @@ File::File(const std::string& filename) :
 #endif
   else if ( filename.rfind(".bin") != filename.npos)
     file_ = new BinaryFile(filename);
-  else if ( filename.rfind(".m") != filename.npos )
-    file_ = new OctaveFile(filename);
   else if ( filename.rfind(".off") != filename.npos )
     file_ = new OFFFile(filename);
   else if ( filename.rfind(".pvd") != filename.npos )
@@ -82,12 +78,6 @@ File::File(const std::string& filename, Type type)
 #endif
   case binary:
     file_ = new BinaryFile(filename);
-    break;
-  case matlab:
-    file_ = new MatlabFile(filename);
-    break;
-  case octave:
-    file_ = new OctaveFile(filename);
     break;
   case vtk:
     file_ = new VTKFile(filename);

@@ -37,7 +37,7 @@ namespace dolfin
   public:
 
     /// File formats
-    enum Type {xml, matlab, octave, opendx, vtk, binary, off ,raw, stl, xyz};
+    enum Type {xml, vtk, binary, off ,raw, stl, xyz};
 
     /// Create a file with given name
     File(const std::string& filename);
@@ -94,7 +94,7 @@ namespace dolfin
     void operator<< (MeshFunction<real>& meshfunction);
     void operator<< (MeshFunction<bool>& meshfunction);
 
-    /// Write function to file
+    /// Write any generic function to file
     void operator<< (Function& u);
 
     /// Write parameter list to file

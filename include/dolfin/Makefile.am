@@ -83,9 +83,6 @@ nobase_pkginclude_HEADERS = \
 				io/Encoder.h\
 				io/File.h\
 				io/GenericFile.h\
-				io/MatlabFile.h\
-				io/MFile.h\
-				io/OctaveFile.h\
 				io/OFFFile.h\
 				io/RAWFile.h\
 				io/STLFile.h\

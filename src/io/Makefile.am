@@ -6,9 +6,6 @@ libdolfin_io_la_SOURCES = \
 			Checkpoint.cpp\
 			File.cpp\
 			GenericFile.cpp\
-			MatlabFile.cpp\
-			MFile.cpp\
-			OctaveFile.cpp\
 			OFFFile.cpp\
 			RAWFile.cpp\
 			VTKFile.cpp\

@@ -213,6 +213,10 @@ bool Function::empty() const
 //-----------------------------------------------------------------------------
 void Function::init(Form& form, uint i)
 {
+  if(mesh_ == NULL)
+  {
+    const_cast<Mesh *&>(mesh_) = &form.dofmaps()[i].mesh();
+  }
   if(mesh_ != &form.dofmaps()[i].mesh())
   {
     error("Function : mesh mismatch between function and coefficient %d", i);
@@ -231,6 +235,10 @@ void Function::init(Form& form, uint i)
 //-----------------------------------------------------------------------------
 void Function::init(FiniteElementSpace const& space)
 {
+  if(mesh_ == NULL)
+  {
+    const_cast<Mesh *&>(mesh_) = &space.mesh();
+  }
   if(mesh_ != &space.mesh())
   {
     error("Function : mesh mismatch between function and space");

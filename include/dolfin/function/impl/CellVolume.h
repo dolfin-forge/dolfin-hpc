@@ -15,6 +15,12 @@ struct CellVolume : public ValueSpace<>
   {
     values[0] = cell.cell->volume();
   }
+
+  ///
+  real operator()(Cell& cell)
+  {
+    return cell.volume();
+  }
 };
 
 //-----------------------------------------------------------------------------

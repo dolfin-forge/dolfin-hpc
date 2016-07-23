@@ -15,6 +15,12 @@ struct CellDiameter : public ValueSpace<>
   {
     values[0] = cell.cell->circumradius();
   }
+
+  ///
+  real operator()(Cell& cell)
+  {
+    return cell.circumradius();
+  }
 };
 
 //-----------------------------------------------------------------------------

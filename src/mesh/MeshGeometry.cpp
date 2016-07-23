@@ -63,8 +63,11 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& other)
     coordinates_ = new real[n];
     std::copy(other.coordinates_, other.coordinates_ + n, coordinates_);
   }
-  abs_tol_  = new real[dim_+1];
-  std::copy(other.abs_tol_, other.abs_tol_ + (dim_ + 1), abs_tol_);
+  if (other.abs_tol_ != NULL)
+  {
+    abs_tol_  = new real[dim_+1];
+    std::copy(other.abs_tol_, other.abs_tol_ + (dim_ + 1), abs_tol_);
+  }
   timestamp_ = other.timestamp_;
 
   return *this;

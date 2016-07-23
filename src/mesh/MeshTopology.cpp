@@ -57,13 +57,16 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
   dim_ = other.dim_;
   num_vertices_ = other.num_vertices_;
   ini_vertices_ = other.ini_vertices_;
-  connectivity_ = new MeshConnectivity*[dim_ + 1];
-  for (uint d0 = 0; d0 <= dim_; ++d0)
+  if (other.connectivity_ != NULL)
   {
-    connectivity_[d0] = new MeshConnectivity[dim_ + 1];
-    for (uint d1 = 0; d1 <= dim_; ++d1)
+    connectivity_ = new MeshConnectivity*[dim_ + 1];
+    for (uint d0 = 0; d0 <= dim_; ++d0)
     {
-      connectivity_[d0][d1] = other.connectivity_[d0][d1];
+      connectivity_[d0] = new MeshConnectivity[dim_ + 1];
+      for (uint d1 = 0; d1 <= dim_; ++d1)
+      {
+        connectivity_[d0][d1] = other.connectivity_[d0][d1];
+      }
     }
   }
   if (other.distdata_ != NULL)
@@ -95,7 +98,7 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     }
   }
   //
-  if (connectivity_)
+  if (connectivity_ != NULL)
   {
     for (uint d0 = 0; d0 <= dim_; ++d0)
     {
@@ -293,7 +296,7 @@ void MeshTopology::remap(uint dim, Array<uint> const& mapping)
 MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 {
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(!connectivity_[d0][d1].is_initialized())
+  if(connectivity_ != NULL && !connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
   }
@@ -303,7 +306,7 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
 {
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(!connectivity_[d0][d1].is_initialized())
+  if(connectivity_ != NULL && !connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
   }
@@ -430,6 +433,11 @@ uint MeshTopology::get_owner(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
 {
+  if (connectivity_ == NULL)
+  {
+    error("MeshTopology : connectivity array does not exist");
+  }
+
   if ((d0 == dim_ && d1 == 0) || connectivity_[d0][d1].is_initialized())
   {
     /*
@@ -752,6 +760,7 @@ void MeshTopology::disp() const
     cout << "0: " << num_vertices_ << endl;
     for (uint d = 1; d <= dim_; ++d)
     {
+      dolfin_assert(connectivity_ != NULL);
       if (connectivity_[d][0].is_initialized())
       {
         cout << d << ": " << connectivity_[d][0].num_entities() << endl;
@@ -765,29 +774,36 @@ void MeshTopology::disp() const
   end();
   skip();
   begin("Connectivity:");
-  cout << " ";
-  for (uint d1 = 0; d1 <= dim_; ++d1)
+  if (connectivity_ == NULL)
   {
-    cout << " " << d1;
+    cout << "empty" << endl;
   }
-  cout << endl;
-  for (uint d0 = 0; d0 <= dim_; ++d0)
+  else
   {
-    cout << d0;
+    cout << " ";
     for (uint d1 = 0; d1 <= dim_; ++d1)
     {
-      if (connectivity_[d0][d1].size() > 0)
+      cout << " " << d1;
+    }
+    cout << endl;
+    for (uint d0 = 0; d0 <= dim_; ++d0)
+    {
+      cout << d0;
+      for (uint d1 = 0; d1 <= dim_; ++d1)
       {
-        cout << " x";
+        if (connectivity_[d0][d1].size() > 0)
+        {
+          cout << " x";
+        }
+        else
+        {
+          cout << " -";
+        }
       }
-      else
-      {
-        cout << " -";
-      }
+      cout << endl;
     }
     cout << endl;
   }
-  cout << endl;
   end();
   //---
   end();

@@ -20,6 +20,8 @@ public:
 
   Time(real T0, real T1);
 
+  Time(Time const& other);
+
   ~Time();
 
   /// Return time interval as a pair of real numbers

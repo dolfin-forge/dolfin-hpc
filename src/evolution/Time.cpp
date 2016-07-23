@@ -19,6 +19,13 @@ Time::Time(real T0, real T1) :
 {
 }
 //-----------------------------------------------------------------------------
+Time::Time(Time const& other) :
+    T_(other.T_),
+    sign_((T_.first < T_.second) - (T_.second < T_.first)),
+    t_(T_.first)
+{
+}
+//-----------------------------------------------------------------------------
 Time::~Time()
 {
 }
@@ -92,8 +99,7 @@ void Time::disp() const
   message("measure   : %f", this->measure());
   message("elapsed   : %f", this->elapsed());
   message("remaining : %f", this->remaining());
-  end();
-  skip();
+  endblock();
 }
 //-----------------------------------------------------------------------------
 

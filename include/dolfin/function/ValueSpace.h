@@ -22,19 +22,19 @@ public:
   }
 
   /// Return the rank of the value space
-  uint rank() const
+  inline uint rank() const
   {
     return RANK;
   }
 
   /// Return the dimension of the value space for axis i
-  uint dim(uint i) const
+  inline uint dim(uint i) const
   {
     return (i < RANK ? DIM[i] : 1);
   }
 
   /// Return value size
-  uint value_size() const
+  inline uint value_size() const
   {
     return SIZE;
   }

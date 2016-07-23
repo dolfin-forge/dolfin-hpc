@@ -65,6 +65,15 @@ public:
   ///
   static void numGlobalMax(uint local, uint& global);
 
+  ///
+  static void AllReduceSum(real local, real& global);
+
+  ///
+  static void AllReduceMin(real local, real& global);
+
+  ///
+  static void AllReduceMax(real local, real& global);
+
   /// Start MPI timer
   static void startTimer();
 

@@ -359,3 +359,25 @@ void dolfin::MPI::numGlobalMax(uint local, uint& global)
 #endif
 }
 //-----------------------------------------------------------------------------
+void dolfin::MPI::AllReduceSum(real local, real& global)
+{
+#if HAVE_MPI
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, MPI::DOLFIN_COMM);
+#endif
+}
+//-----------------------------------------------------------------------------
+void dolfin::MPI::AllReduceMin(real local, real& global)
+{
+#if HAVE_MPI
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
+#endif
+}
+//-----------------------------------------------------------------------------
+void dolfin::MPI::AllReduceMax(real local, real& global)
+{
+#if HAVE_MPI
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
+#endif
+}
+//-----------------------------------------------------------------------------
+

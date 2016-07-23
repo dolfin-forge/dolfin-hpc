@@ -80,6 +80,9 @@ namespace dolfin
   /// End task (decrease indentation level)
   void end();
 
+  /// End task (decrease indentation level) and skip a line
+  void endblock();
+
   /// Skip line
   void skip();
 

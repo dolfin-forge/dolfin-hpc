@@ -111,6 +111,12 @@ void end()
   LogManager::logger().end();
 }
 //-----------------------------------------------------------------------------
+void endblock()
+{
+  LogManager::logger().end();
+  LogManager::logger().skip();
+}
+//-----------------------------------------------------------------------------
 void skip()
 {
   LogManager::logger().skip();

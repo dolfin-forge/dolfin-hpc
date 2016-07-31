@@ -39,15 +39,8 @@ public:
   /// Create boundary condition for sub domain given normals
   SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals);
 
-  /// Create boundary condition for sub domain specified by index
-  SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain);
-
   /// Create sub system boundary condition for sub domain
   SlipBC(Mesh& mesh, SubDomain const& sub_domain, SubSystem const& sub_system);
-
-  /// Create sub system boundary condition for sub domain specified by index
-  SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-         SubSystem const& sub_system);
 
   /// Destructor
   ~SlipBC();
@@ -102,6 +95,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_SLIPBC_H */

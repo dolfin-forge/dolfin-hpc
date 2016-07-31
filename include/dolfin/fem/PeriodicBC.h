@@ -66,6 +66,6 @@ private:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_PERIODIC_BC_H */

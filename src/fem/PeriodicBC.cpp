@@ -309,5 +309,5 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */
 

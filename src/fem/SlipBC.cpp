@@ -54,33 +54,11 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain, NodeNormal& normals) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain) :
-    BoundaryCondition("SlipBC", sub_domains, sub_domain),
-    mesh(sub_domains.mesh()),
-    node_normal(new NodeNormal(mesh)),
-    node_normal_local(true),
-    As(NULL)
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
                SubSystem const& sub_system) :
     BoundaryCondition("SlipBC", mesh, sub_domain, sub_system),
     mesh(mesh),
     node_normal(new NodeNormal(mesh, sub_domain)),
-    node_normal_local(true),
-    As(NULL)
-{
-  // Do nothing
-}
-
-//-----------------------------------------------------------------------------
-SlipBC::SlipBC(MeshFunction<uint>& sub_domains, uint sub_domain,
-               SubSystem const& sub_system) :
-    BoundaryCondition("SlipBC", sub_domains, sub_domain, sub_system),
-    mesh(sub_domains.mesh()),
-    node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(NULL)
 {
@@ -160,19 +138,20 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
 
     // Create boundary markers for given topological dimension if the subdomain
     // is defined geometrically.
-    if (this->has_geometrical_sub_domain())
-    {
-      if (is_P1)
-      {
-        // Markers are vertex-based
-        BoundaryCondition::init_markers(0);
-      }
-      else
-      {
-        // Markers are facet based
-        BoundaryCondition::init_markers(mesh.topology().dim() - 1);
-      }
-    }
+    error("WIP: markers");
+//    if (this->has_geometrical_sub_domain())
+//    {
+//      if (is_P1)
+//      {
+//        // Markers are vertex-based
+//        BoundaryCondition::init_markers(0);
+//      }
+//      else
+//      {
+//        // Markers are facet based
+//        BoundaryCondition::init_markers(mesh.topology().dim() - 1);
+//      }
+//    }
 
     // Initialize local data structures
     std::set<uint>::iterator it = row_indices.begin();
@@ -227,9 +206,6 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
   BoundaryMesh& boundary = mesh.exterior_boundary();
   if (boundary.num_cells())
   {
-    MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
-    uint sub_domain_idx = this->sub_domain_index();
-
     // Used to get the global dof indices
     DofMap const& Udofmap = form.test_space().dofmap();
     uint * fulldofs = new uint[Udofmap.local_dimension()];
@@ -248,7 +224,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
       Vertex vertex(mesh, boundary.vertex_index(*v));
 
       // Skip vertices not inside the sub domain
-      if (sub_domains(vertex) != sub_domain_idx)
+      if (!this->sub_domain().inside(v->x(), true))
       {
         continue;
       }
@@ -316,9 +292,6 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
   BoundaryMesh& boundary = mesh.exterior_boundary();
   if (boundary.num_cells())
   {
-    MeshFunction<uint> const& sub_domains = this->sub_domain_markers();
-    uint const sub_domain_idx = this->sub_domain_index();
-
     DofMap const& Udofmap = form.test_space().dofmap();
     uint * fulldofs = new uint[Udofmap.local_dimension()];
 
@@ -338,7 +311,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
       Facet facet(mesh, boundary.facet_index(*c));
 
       // Skip facets outside the sub domain
-      if (sub_domains(facet) != sub_domain_idx)
+      if (!this->sub_domain().overlap(facet, true))
       {
         continue;
       }
@@ -381,8 +354,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
           continue;
         }
         // Skip the node if the subdomain is defined geometrically
-        if (this->has_geometrical_sub_domain()
-            && !sub_domain().inside(scratch.coordinates[ni_celldof0], true))
+        if (!sub_domain().inside(scratch.coordinates[ni_celldof0], true))
         {
           continue;
         }
@@ -580,5 +552,5 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */
 

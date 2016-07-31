@@ -16,7 +16,6 @@
 
 #include <dolfin/mesh/MeshDependent.h>
 
-#include <dolfin/common/types.h>
 #include <dolfin/fem/SubSystem.h>
 
 #include <ufc.h>
@@ -24,38 +23,18 @@
 namespace dolfin
 {
 
-class DofMap;
+class BilinearForm;
 class GenericMatrix;
 class GenericVector;
-class SubDomain;
 class Mesh;
-class BilinearForm;
-template<class T> class MeshFunction;
+class SubDomain;
 
 /// Common base class for boundary conditions
 
 class BoundaryCondition : public MeshDependent
 {
+
 public:
-
-  /// Constructor based on a geometrical subdomain
-  BoundaryCondition(std::string const& type, Mesh& mesh,
-                    SubDomain const& sub_domain);
-
-  /// Constructor based on boundary sub domain markers
-  BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
-                    uint sub_domain);
-
-  /// Constructor on a geometrical subdomain for a given subspace
-  BoundaryCondition(std::string const& type, Mesh& mesh,
-                    SubDomain const& sub_domain, SubSystem const sub_system);
-
-  /// Constructor on boundary sub domain markers for a given subspace
-  BoundaryCondition(std::string const& type, MeshFunction<uint>& sub_domains,
-                    uint sub_domain, SubSystem const sub_system);
-
-  /// Destructor
-  virtual ~BoundaryCondition();
 
   /// Apply boundary condition to linear system
   virtual void apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form) = 0;
@@ -84,26 +63,26 @@ public:
   ///
   Mesh& mesh() const;
 
+  // Sub domain
+  SubDomain const& sub_domain() const;
+
   ///
   SubSystem const& sub_system() const;
 
 protected:
 
-  ///
-  bool has_geometrical_sub_domain() const;
+  /// Constructor based on a geometrical subdomain
+  BoundaryCondition(std::string const& type, Mesh& mesh,
+                    SubDomain const& sub_domain);
 
-  ///
-  SubDomain const& sub_domain() const;
+  /// Constructor on a geometrical subdomain for a given subspace
+  BoundaryCondition(std::string const& type, Mesh& mesh,
+                    SubDomain const& sub_domain, SubSystem const sub_system);
 
-  ///
-  uint const& sub_domain_index() const;
+public:
 
-  ///
-  MeshFunction<uint> const& sub_domain_markers() const;
-
-  /// Mark sub domain with mesh function defined for given mesh entity type
-  /// Convention: 0 for matching entities, 1 elsewhere
-  void init_markers(uint const entity_dim);
+  /// Destructor
+  virtual ~BoundaryCondition();
 
 private:
 
@@ -116,20 +95,8 @@ private:
   // Mesh
   Mesh& mesh_;
 
-  // Sub domain index
-  uint const sub_domain_index_;
-
-  // Is the subdomain geometrical
-  bool const has_geometric_sub_domain_;
-
   // Sub domain
-  SubDomain const * geometric_sub_domain_;
-
-  // Sub domain markers
-  MeshFunction<uint> * sub_domain_markers_;
-
-  // True if sub domain markers are created locally
-  bool const local_sub_domain_markers_;
+  SubDomain const& sub_domain_;
 
   // Sub system
   SubSystem sub_system_;

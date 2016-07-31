@@ -28,17 +28,9 @@ public:
   /// Create boundary condition for sub domain
   SlipFrictionBC(Coefficient& beta, Mesh& mesh, SubDomain const& sub_domain);
 
-  /// Create boundary condition for sub domain specified by index
-  SlipFrictionBC(Coefficient& beta, MeshFunction<uint>& sub_domains,
-                 uint sub_domain);
-
   /// Create sub system boundary condition for sub domain
   SlipFrictionBC(Coefficient& beta, Mesh& mesh, SubDomain const& sub_domain,
                  SubSystem const& sub_system);
-
-  /// Create sub system boundary condition for sub domain specified by index
-  SlipFrictionBC(Coefficient& beta, MeshFunction<uint>& sub_domains,
-                 uint sub_domain, SubSystem const& sub_system);
 
   /// Destructor
   ~SlipFrictionBC();

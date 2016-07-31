@@ -85,6 +85,11 @@ public:
   Mesh& mesh() const;
 
   ///
+  SubSystem const& sub_system() const;
+
+protected:
+
+  ///
   bool has_geometrical_sub_domain() const;
 
   ///
@@ -92,11 +97,6 @@ public:
 
   ///
   uint const& sub_domain_index() const;
-
-  ///
-  SubSystem const& sub_system() const;
-
-protected:
 
   ///
   MeshFunction<uint> const& sub_domain_markers() const;

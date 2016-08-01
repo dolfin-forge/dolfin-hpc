@@ -8,15 +8,16 @@
 // First added:  2006-06-21
 // Last changed: 2008-02-18
 
-#include <algorithm>
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/mesh/IntersectionDetector.h>
+
 #include <dolfin/common/Array.h>
+#include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/GTSInterface.h>
-#include <dolfin/mesh/IntersectionDetector.h>
+
+#include <algorithm>
 
 namespace dolfin
 {
@@ -31,27 +32,27 @@ IntersectionDetector::~IntersectionDetector()
 {
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Cell& c, Array<uint>& cells)
+void IntersectionDetector::overlap(Cell& c, Array<uint>& cells) const
 {
   cells.clear();
   gts.overlap(c, cells);
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Point const& p, Array<uint>& cells)
+void IntersectionDetector::overlap(Point const& p, Array<uint>& cells) const
 {
   cells.clear();
   gts.overlap(p, cells);
 }
 //-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Point const& p1, Point const& p2,
-                                   Array<uint>& cells)
+                                   Array<uint>& cells) const
 {
   cells.clear();
   gts.overlap(p1, p2, cells);
 }
 //-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Array<Point> const& points,
-                                   Array<uint>& cells)
+                                   Array<uint>& cells) const
 {
   // Intersect each segment with mesh
   Array<uint> cc;
@@ -65,7 +66,6 @@ void IntersectionDetector::overlap(Array<Point> const& points,
 
   // remove repeated cells
   cells.clear();
-  //uint k = 0;
   cells.push_back(cc[0]);
   uint k = cc[0];
   for (uint i = 1; i < cc.size(); i++)
@@ -79,5 +79,5 @@ void IntersectionDetector::overlap(Array<Point> const& points,
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */
 

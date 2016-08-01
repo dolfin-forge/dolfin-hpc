@@ -7,9 +7,7 @@
 #ifndef __DOLFIN_INTERSECTION_DETECTOR_H
 #define __DOLFIN_INTERSECTION_DETECTOR_H
 
-#include <dolfin/common/types.h>
-
-#include "GTSInterface.h"
+#include <dolfin/mesh/GTSInterface.h>
 
 namespace dolfin
 {
@@ -22,6 +20,7 @@ template<class T> class Array;
 
 class IntersectionDetector
 {
+
 public:
 
   /// Constructor
@@ -31,21 +30,22 @@ public:
   ~IntersectionDetector();
 
   /// Compute overlap with mesh
-  void overlap(Cell& c, Array<uint>& overlap);
+  void overlap(Cell& c, Array<uint>& overlap) const;
 
   /// Compute overlap with point
-  void overlap(Point const& p, Array<uint>& overlap);
+  void overlap(Point const& p, Array<uint>& overlap) const;
 
   /// Compute overlap with bounding box
-  void overlap(Point const& p1, Point const& p2, Array<uint>& overlap);
+  void overlap(Point const& p1, Point const& p2, Array<uint>& overlap) const;
 
   /// Compute which cells are intersected by a polygon (defined by points)
-  void overlap(Array<Point> const& points, Array<uint>& overlap);
+  void overlap(Array<Point> const& points, Array<uint>& overlap) const;
 
 private:
 
   GTSInterface gts;
 };
-}
 
-#endif
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_INTERSECTION_DETECTOR_H */

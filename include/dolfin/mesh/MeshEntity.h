@@ -104,6 +104,9 @@ public:
   /// Return if the mesh entity has all vertices shared
   bool has_all_vertices_shared() const;
 
+  /// Return if the mesh entity is located on the global mesh boundary
+  bool on_boundary() const;
+
   //---------------------------------------------------------------------------
 
   ///

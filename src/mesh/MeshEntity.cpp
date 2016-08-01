@@ -164,6 +164,57 @@ bool MeshEntity::has_all_vertices_shared() const
   }
 }
 //-----------------------------------------------------------------------------
+bool MeshEntity::on_boundary() const
+{
+  uint const mdim = mesh_.topology().dim();
+  if(distdata_ != NULL)
+  {
+    if (tdim_ ==  mdim - 1)
+    {
+      // Facet has one adjacent cell and is not shared, thus is global
+      return (this->num_entities(mdim) == 1)
+          && !(*distdata_)[tdim_].is_shared(index_);
+    }
+    else
+    {
+      MeshConnectivity const& cef = mesh_.topology()(tdim_, mdim - 1);
+      MeshConnectivity const& cfc = mesh_.topology()(mdim - 1, mdim);
+      for (uint f = 0; f < cef.size(index_); ++f)
+      {
+        uint const fidx = cef(index_)[f];
+        if ((cfc.size(fidx) == 1) && !(*distdata_)[mdim - 1].is_shared(fidx))
+        {
+          // Facet has one adjacent cell and is not shared, thus is global
+          return true;
+        }
+      }
+    }
+  }
+  else
+  {
+    if (tdim_ == mdim - 1)
+    {
+      // Facet has one adjacent cell only, thus is global
+      return (this->num_entities(mdim) == 1);
+    }
+    else
+    {
+      MeshConnectivity const& cef = mesh_.topology()(tdim_, mdim - 1);
+      MeshConnectivity const& cfc = mesh_.topology()(mdim - 1, mdim);
+      for (uint f = 0; f < cef.size(index_); ++f)
+      {
+        uint const fidx = cef(index_)[f];
+        if ((cfc.size(fidx) == 1))
+        {
+          // Facet has one adjacent cell only
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+//-----------------------------------------------------------------------------
 void MeshEntity::disp() const
 {
   section("MeshEntity");

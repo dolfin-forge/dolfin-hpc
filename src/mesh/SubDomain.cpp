@@ -2,50 +2,38 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson, 2008.
+// Modified by Aurelien Larcher, 2016.
 //
 // First added:  2007-04-24
 // Last changed: 2007-07-21
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/log/log.h>
-#include <dolfin/mesh/MeshEntityIterator.h>
-#include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/SubDomain.h>
-#include <dolfin/mesh/GlobalFacetMap.h>
-#include <dolfin/mesh/IntersectionDetector.h>
+
+#include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Facet.h>
+#include <dolfin/mesh/MeshEntityIterator.h>
+#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 SubDomain::SubDomain() :
-    intersection_detector(NULL),
-    BMARG(1.0e-6)
+    abstol_(1.0e-6)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SubDomain::SubDomain(Mesh& mesh) :
-    intersection_detector(new IntersectionDetector(mesh)),
-    BMARG(1.0e-6)
-{
-}
-//-----------------------------------------------------------------------------
 SubDomain::~SubDomain()
 {
-  delete intersection_detector;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::inside(real const * x, bool const on_boundary) const
 {
-  error("Unable to determine if point is inside subdomain, function inside() "
-        "not implemented by user.");
+  error("SubDomain : inside() not unimplemented.");
   return false;
 }
 //-----------------------------------------------------------------------------
@@ -84,195 +72,105 @@ bool SubDomain::overlap(MeshEntity& entity, bool const on_boundary) const
   return ret;
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::close(real x, real const xref) const
+bool SubDomain::close(real const x, real const xref, real const abstol) const
 {
-  return (std::fabs(x - xref) < BMARG);
+  return (std::fabs(x - xref) < abstol);
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::intersect(real const * x, uint const dim,
-                          bool const on_boundary) const
+bool SubDomain::close(real const x, real const xref) const
 {
-  Point p;
-  for (uint i = 0; i < dim; i++)
-    p[i] = x[i];
-
-  return intersect(p, on_boundary);
+  return (std::fabs(x - xref) < abstol_);
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::intersect(Point const& p, bool const on_boundary) const
+void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
 {
+  /*
+   message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
+   error("WIP");
+   */
 
-  Array<uint> cells;
-  intersection_detector->overlap(p, cells);
-  if (dolfin_get("SubDomain Intersect Boundary"))
-    return (cells.size() > 0) && on_boundary;
-  else
-    return (cells.size() > 0);
-}
-//-----------------------------------------------------------------------------
-void SubDomain::mark(MeshFunction<uint>& sub_domains, uint sub_domain) const
-{
-  message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
-
-  // Save GTS tolerances
-  real gts_tol = dolfin_get("GTS Tolerance");
-  real geom_tri_tol = dolfin_get("Geometrical Tolerance Triangle");
-  real geom_tet_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
-
-  if (intersection_detector)
-  {
-    dolfin_set("GTS Tolerance", 1e-6);
-    dolfin_set("Geometrical Tolerance Triangle",
-               dolfin_get("SubDomain Geometrical Tolerance"));
-    dolfin_set("Geometrical Tolerance Tetrahedron",
-               dolfin_get("SubDomain Geometrical Tolerance"));
-  }
-
-  // Get the dimension of the entities we are marking
-  const uint dim = sub_domains.dim();
-
-  // Compute facet - cell connectivity if necessary
   Mesh& mesh = sub_domains.mesh();
-  const uint D = mesh.topology().dim();
-  if (dim == D - 1)
-  {
-    mesh.init(D - 1);
-    mesh.init(D - 1, D);
-  }
-
-  GlobalFacetMap facetmap(mesh);
-
-  // Always false when not marking facets
-  bool on_boundary = false;
+  uint const tdim = mesh.topology().dim();
+  uint const edim = sub_domains.dim();
 
   // Compute sub domain markers
   bool const is_distributed = mesh.is_distributed();
-  for (MeshEntityIterator entity(mesh, dim); !entity.end(); ++entity)
+  for (MeshEntityIterator entity(mesh, edim); !entity.end(); ++entity)
   {
-    on_boundary = false;
-    // Check if entity is on the boundary if entity is a facet
-    if (dim == D - 1)
+    // Check if entity is on the boundary
+    bool on_boundary = false;
+    if (edim == tdim - 1)
     {
-      on_boundary = entity->num_entities(D) == 1;
+      on_boundary = (entity->num_entities(tdim) == 1) && !entity->is_shared();
     }
-    else if (dim == 0)
+    else if (edim == 0)
     {
       for (FacetIterator fi(*entity); !fi.end(); ++fi)
       {
-        if (fi->num_entities(D) && facetmap.is_global(*fi))
+        if ((fi->num_entities(tdim) == 1) && !fi->is_shared())
         {
           on_boundary = true;
-        }
-      }
-    }
-
-    bool all_vertices_inside = true;
-    // Dimension of facet > 0, check incident vertices
-    if (entity->dim() > 0)
-    {
-
-      if (is_distributed)
-      {
-        Facet f(mesh, entity->index());
-        if (!facetmap.is_global(f))
-        {
-          on_boundary = false;
-        }
-      }
-
-      for (VertexIterator vertex(*entity); !vertex.end(); ++vertex)
-      {
-        if (intersection_detector)
-        {
-          if (!intersect(vertex->point(), on_boundary))
-          {
-            all_vertices_inside = false;
-            break;
-          }
-        }
-        else if (!inside(vertex->x(), on_boundary))
-        {
-          all_vertices_inside = false;
           break;
         }
       }
     }
-    // Dimension of facet == 0, so just check the vertex itself
-    else
+    //
+    if (this->inside(*entity, on_boundary))
     {
-      real * x = mesh.geometry().x(entity->index());
-      if (intersection_detector)
-      {
-        if (!intersect(x, mesh.geometry().dim(), on_boundary))
-          all_vertices_inside = false;
-      }
-      else if (!inside(x, on_boundary))
-      {
-        all_vertices_inside = false;
-      }
+      sub_domains(*entity) = index;
     }
-
-    // Mark entity with all vertices inside
-    if (all_vertices_inside)
-      sub_domains(*entity) = sub_domain;
   }
 
-  // Reset GTS tolerances
-  dolfin_set("GTS Tolerance", gts_tol);
-  dolfin_set("Geometrical Tolerance Triangle", geom_tri_tol);
-  dolfin_set("Geometrical Tolerance Tetrahedron", geom_tet_tol);
-
 #ifdef HAVE_MPI
-  if (is_distributed)
+  if (mesh.is_distributed())
   {
-    if (dim == 0)
+    uint const pe_size = MPI::numProcesses();
+    uint const rank = MPI::processNumber();
+
+    Array<uint> * sendbuf = new Array<uint> [pe_size];
+    for (GhostIterator it(mesh.distdata()[edim]); !it.end(); ++it)
     {
-      uint pe_size = MPI::numProcesses();
-      uint rank = MPI::processNumber();
-
-      Array<uint> *ghost_buff = new Array<uint> [pe_size];
-      for (GhostIterator iter(mesh.distdata()[0]); !iter.end(); ++iter)
-        if (sub_domains.get(iter.index()) == sub_domain)
-          ghost_buff[iter.owner()].push_back(
-              mesh.distdata()[0].get_global(iter.index()));
-
-      int recv_size, recv_count, send_size;
-      for (uint i = 0; i < pe_size; i++)
+      if (sub_domains.get(it.index()) == index)
       {
-        send_size = ghost_buff[i].size();
-        MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, i,
-                   MPI::DOLFIN_COMM);
+        sendbuf[it.owner()].push_back(it.global_index());
       }
-      uint *recv_buff = new uint[recv_size];
-
-      MPI_Status status;
-      uint src, dest;
-
-      for (uint j = 1; j < pe_size; j++)
-      {
-
-        src = (rank - j + pe_size) % pe_size;
-        dest = (rank + j) % pe_size;
-
-        MPI_Sendrecv(&ghost_buff[dest][0], ghost_buff[dest].size(),
-                     MPI_UNSIGNED, dest, 1, recv_buff, recv_size, MPI_UNSIGNED,
-                     src, 1, MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-        for (int i = 0; i < recv_count; i++)
-          sub_domains.set(mesh.distdata()[0].get_local(recv_buff[i]),
-                          sub_domain);
-
-      }
-      delete[] recv_buff;
-
-      for (uint i = 0; i < pe_size; i++)
-        ghost_buff[i].clear();
-      delete[] ghost_buff;
-
     }
+
+    //
+    MPI_Status status;
+    uint src;
+    uint dst;
+    int send_size;
+    int recv_size;
+    int recv_count;
+    for (uint j = 0; j < pe_size; ++j)
+    {
+      send_size = sendbuf[j].size();
+      MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, j,
+                 MPI::DOLFIN_COMM);
+    }
+    uint * recvbuf = new uint[recv_size];
+    for (uint j = 1; j < pe_size; ++j)
+    {
+      src = (rank - j + pe_size) % pe_size;
+      dst = (rank + j) % pe_size;
+
+      MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
+                   &recvbuf[0], recv_size, MPI_UNSIGNED, src, 1,
+                   MPI::DOLFIN_COMM, &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+      for (int k = 0; k < recv_count; ++k)
+      {
+        sub_domains.set(mesh.distdata()[edim].get_local(recvbuf[k]), index);
+      }
+    }
+    delete[] recvbuf;
+    delete[] sendbuf;
   }
 #endif
 
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

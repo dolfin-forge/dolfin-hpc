@@ -12,65 +12,56 @@
 
 #include <dolfin/common/types.h>
 
-#include "MeshFunction.h"
-
 namespace dolfin
 {
 
-class IntersectionDetector;
+class Mesh;
+class MeshEntity;
+template<class T> class MeshFunction;
 
 /// This class defines the interface for definition of sub domains.
-/// Alternatively, sub domains may be defined by a Mesh and a
-/// MeshFunction<uint> over the mesh.
 
 class SubDomain
 {
+
 public:
 
   /// Constructor
   SubDomain();
 
-  ///
-  SubDomain(Mesh& mesh);
-
   /// Destructor
   virtual ~SubDomain();
 
+  //--- INTERFACE -------------------------------------------------------------
+
   /// Return true for points inside the sub domain
-  virtual bool inside(real const * x, bool const on_boundary) const;
+  virtual bool inside(real const * x, bool const on_boundary) const = 0;
+
+  //---------------------------------------------------------------------------
 
   /// Return true if all vertices of given entity are inside the subdomain
-  bool inside(MeshEntity& entity, bool const on_boundary) const;
+  virtual bool inside(MeshEntity& entity, bool const on_boundary) const;
 
   /// Return true if one vertex of given entity is inside the subdomain
-  bool overlap(MeshEntity& entity, bool const on_boundary) const;
+  virtual bool overlap(MeshEntity& entity, bool const on_boundary) const;
 
   /// Set sub domain markers for given sub domain
-  void mark(MeshFunction<uint>& sub_domains, uint sub_domain) const;
+  virtual void mark(MeshFunction<uint>& sub_domains, uint index) const;
 
 protected:
 
+  /// Return if the coordinate is close given provided tolerance
+  bool close(real const x, real const xref, real const abstol) const;
+
   /// Return if the coordinate is close given internal tolerance
-  bool close(real x, real const xref) const;
+  bool close(real const x, real const xref) const;
 
 private:
 
-  ///
-  bool intersect(real const * x, uint const dim, bool const on_boundary) const;
-
-  ///
-  bool intersect(Point const& p, bool const on_boundary) const;
-
-  /// Intersection detector
-  mutable IntersectionDetector* intersection_detector;
-
-protected:
-
-  ///
-  real BMARG;
+  real abstol_;
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_SUB_DOMAIN_H */

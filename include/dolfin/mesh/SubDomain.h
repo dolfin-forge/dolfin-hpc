@@ -48,6 +48,11 @@ public:
   /// Set sub domain markers for given sub domain
   virtual void mark(MeshFunction<uint>& sub_domains, uint index) const;
 
+  //---------------------------------------------------------------------------
+
+  /// Set geometric absolute tolerance
+  inline void set_tolerance(real abstol) { abstol_ = std::fabs(abstol); }
+
 protected:
 
   /// Return if the coordinate is close given provided tolerance

@@ -8,8 +8,14 @@
 #include <dolfin/common/system.h>
 
 #include <dolfin/log/log.h>
+#include <dolfin/main/MPI.h>
 
+#include <limits.h>
+#include <stdlib.h>
 #include <glob.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/time.h>
 
 namespace dolfin
 {
@@ -29,12 +35,109 @@ std::string basename(std::string file)
 void glob(std::string const& pattern, Array<std::string>& matches)
 {
   glob_t match;
-  glob(pattern.c_str(), GLOB_ERR, NULL, &match);
+  ::glob(pattern.c_str(), GLOB_ERR, NULL, &match);
   for (unsigned int i = 0; i < match.gl_pathc; ++i)
   {
     matches.push_back(std::string(match.gl_pathv[i]));
   }
-  globfree(&match);
+  ::globfree(&match);
+}
+//-----------------------------------------------------------------------------
+void mkdir(std::string const& dirpath)
+{
+  struct stat sb;
+  if (::stat(dirpath.c_str(), &sb) < 0)
+  {
+    if (dolfin::MPI::processNumber() == 0)
+    {
+      if (::mkdir(dirpath.c_str(), S_IRWXU) < 0)
+      {
+        error("Unable to create directory: '%s'", dirpath.c_str());
+      }
+    }
+  }
+#if HAVE_MPI
+  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+#endif
+}
+//-----------------------------------------------------------------------------
+std::string getcwd()
+{
+  char curpath[PATH_MAX] = { 0 };
+  if (::getcwd(curpath, sizeof(curpath)) == NULL)
+  {
+    message("Cannot get current working directory");
+  }
+  return std::string(curpath);
+}
+//-----------------------------------------------------------------------------
+void pwd()
+{
+  message("%s", getcwd().c_str());
+}
+//-----------------------------------------------------------------------------
+void cd(std::string const& dirpath)
+{
+  if (::chdir(dirpath.c_str()) < 0)
+  {
+    error("Unable to enter directory: '%s'", dirpath.c_str());
+  }
+#if HAVE_MPI
+  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+#endif
+}
+//-----------------------------------------------------------------------------
+void mkdircd(std::string const& dirpath)
+{
+  mkdir(dirpath);
+  cd(dirpath);
+}
+//-----------------------------------------------------------------------------
+void pushd(std::string const& dirpath)
+{
+  mkdir(dirpath);
+  char abspath[PATH_MAX] = { 0 };
+  ::realpath(dirpath.c_str(), abspath);
+  dirstack().push_back(abspath);
+  cd(dirpath);
+}
+//-----------------------------------------------------------------------------
+void popd()
+{
+  if(dirstack().size() == 0)
+  {
+    error("Trying to popd with empty dirstack");
+  }
+  dirstack().pop_back();
+  cd(dirstack().back());
+}
+//-----------------------------------------------------------------------------
+void dirs(int n, std::string& dirname)
+{
+  // Get directory from top of the stack
+  if(n >= 0)
+  {
+    if(dirstack().size() <= n)
+    {
+      error("Invalid access to directory stack");
+    }
+    dirname = *(dirstack().end() - n - 1);
+  }
+  // Get directory from bottom of the stack
+  else
+  {
+    if(dirstack().size() < n)
+    {
+      error("Invalid access to directory stack");
+    }
+    dirname = *(dirstack().begin() - n - 1);
+  }
+}
+//-----------------------------------------------------------------------------
+Array<std::string>& dirstack()
+{
+  static Array<std::string> dirstack_(1, getcwd());
+  return dirstack_;
 }
 //-----------------------------------------------------------------------------
 

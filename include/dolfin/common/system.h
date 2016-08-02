@@ -21,6 +21,33 @@ std::string basename(std::string file);
 ///
 void glob(std::string const& pattern, Array<std::string>& matches);
 
+///
+void mkdir(std::string const& dir);
+
+///
+std::string getcwd();
+
+///
+void pwd();
+
+///
+void cd(std::string const& dir);
+
+///
+void mkdircd(std::string const& dir);
+
+///
+void pushd(std::string const& dir);
+
+///
+void popd();
+
+///
+void dirs(int n, std::string const& dir);
+
+///
+Array<std::string>& dirstack();
+
 
 } /* namespace dolfin */
 

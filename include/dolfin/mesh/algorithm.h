@@ -36,6 +36,16 @@ void foreach(Mesh& mesh, Operator evaluator, Transform transform, Value& value)
 }
 
 //-----------------------------------------------------------------------------
+template<class Iterator, class Operator, class Value>
+void accumulate(Mesh& mesh, Operator& evaluator, Value& value)
+{
+  for (Iterator it(mesh); !it.end(); ++it)
+  {
+    value += evaluator(*it);
+  }
+}
+
+//-----------------------------------------------------------------------------
 
 }
 

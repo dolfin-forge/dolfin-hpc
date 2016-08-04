@@ -30,8 +30,9 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space) :
     topological_dimension(finite_element->topological_dimension()),
     dofs(new uint[space_dimension]),
     facet_dofs(new uint[dof_map->num_facet_dofs()]),
-    coefficients(new real[space_dimension]),
     values(new real[size]),
+    coefficients(new real[space_dimension]),
+    basis_values(new real[space_dimension]),
     coordinates(new real*[local_dimension]),
     owner_(false)
 {
@@ -53,8 +54,9 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
     topological_dimension(finite_element->topological_dimension()),
     dofs(new uint[space_dimension]),
     facet_dofs(new uint[dof_map->num_facet_dofs()]),
-    coefficients(new real[space_dimension]),
     values(new real[size]),
+    coefficients(new real[space_dimension]),
+    basis_values(new real[space_dimension]),
     coordinates(new real*[local_dimension]),
     owner_(true)
 {
@@ -69,8 +71,9 @@ ScratchSpace::~ScratchSpace()
     delete[] coordinates[i];
   }
   delete[] coordinates;
-  delete[] values;
+  delete[] basis_values;
   delete[] coefficients;
+  delete[] values;
   delete[] facet_dofs;
   delete[] dofs;
   if (owner_)
@@ -102,8 +105,7 @@ void ScratchSpace::init()
   {
     // Using same storage size as a Point
     coordinates[i] = new real[EuclideanSpace::MAX_DIMENSION];
-    std::memset(&coordinates[i][0], 0.0,
-                EuclideanSpace::MAX_DIMENSION * sizeof(real));
+    std::fill_n(coordinates[i],  EuclideanSpace::MAX_DIMENSION, 0.0);
   }
 }
 

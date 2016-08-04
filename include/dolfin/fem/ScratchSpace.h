@@ -78,11 +78,14 @@ public:
   // Local array for mapping of facet dofs
   uint * const facet_dofs;
 
+  // Local array for values
+  real * const values;
+
   // Local array for expansion coefficients
   real * const coefficients;
 
-  // Local array for values
-  real * const values;
+  // Local array for basis values
+  real * const basis_values;
 
   // Local array for coordinates
   real** const coordinates;

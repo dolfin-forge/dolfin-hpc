@@ -289,10 +289,10 @@ void Function::evaluate(real* values, const real* x,
   for (uint i = 0; i < element_->space_dimension(); ++i)
   {
     //FIXME: Idiotic
-    element_->evaluate_basis(i, scratch->values, x, *ufc_cell);
+    element_->evaluate_basis(i, scratch->basis_values, x, *ufc_cell);
     for (uint j = 0; j < scratch->size; ++j)
     {
-      values[j] += scratch->coefficients[i] * scratch->values[j];
+      values[j] += scratch->coefficients[i] * scratch->basis_values[j];
     }
   }
 }
@@ -335,7 +335,7 @@ void Function::eval(real* values, const real* x) const
   Point p(x, mesh_->geometry().dim());
   Array<uint> cells;
   mesh_->intersector().overlap(p, cells);
-  if (cells.size() < 1)
+  if (cells.size() == 0)
   {
     if (!mesh_->is_distributed())
     {
@@ -348,28 +348,9 @@ void Function::eval(real* values, const real* x) const
     }
     return;
   }
-
   Cell cell(*mesh_, cells[0]);
-
-  // Change to global numbering
   scratch->cell.update(cell);
-
-  // Get expansion coefficients on cell
-  dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
-  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
-
-  // Compute linear combination
-  std::fill_n(values, scratch->size, 0.0);
-  for (uint i = 0; i < element_->space_dimension(); ++i)
-  {
-    element_->evaluate_basis(i, scratch->values, x, scratch->cell);
-    for (uint j = 0; j < scratch->size; ++j)
-    {
-      values[j] += scratch->coefficients[i] * scratch->values[j];
-      // Check that values are not NaN
-      dolfin_assert(values[j] == values[j]);
-    }
-  }
+  evaluate(values, x, scratch->cell);
 }
 
 //-----------------------------------------------------------------------------

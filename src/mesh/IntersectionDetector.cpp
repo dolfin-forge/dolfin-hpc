@@ -32,25 +32,6 @@ IntersectionDetector::~IntersectionDetector()
 {
 }
 //-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Cell& c, Array<uint>& cells) const
-{
-  cells.clear();
-  gts.overlap(c, cells);
-}
-//-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Point const& p, Array<uint>& cells) const
-{
-  cells.clear();
-  gts.overlap(p, cells);
-}
-//-----------------------------------------------------------------------------
-void IntersectionDetector::overlap(Point const& p1, Point const& p2,
-                                   Array<uint>& cells) const
-{
-  cells.clear();
-  gts.overlap(p1, p2, cells);
-}
-//-----------------------------------------------------------------------------
 void IntersectionDetector::overlap(Array<Point> const& points,
                                    Array<uint>& cells) const
 {

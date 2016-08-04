@@ -30,13 +30,22 @@ public:
   ~IntersectionDetector();
 
   /// Compute overlap with mesh
-  void overlap(Cell& c, Array<uint>& overlap) const;
+  inline void overlap(Cell& c, Array<uint>& cells) const
+  {
+    gts.overlap(c, cells);
+  }
 
   /// Compute overlap with point
-  void overlap(Point const& p, Array<uint>& overlap) const;
+  inline void overlap(Point const& p, Array<uint>& cells) const
+  {
+    gts.overlap(p, cells);
+  }
 
   /// Compute overlap with bounding box
-  void overlap(Point const& p1, Point const& p2, Array<uint>& overlap) const;
+  inline void overlap(Point const& p1, Point const& p2, Array<uint>& cells) const
+  {
+    gts.overlap(p1, p2, cells);
+  }
 
   /// Compute which cells are intersected by a polygon (defined by points)
   void overlap(Array<Point> const& points, Array<uint>& overlap) const;

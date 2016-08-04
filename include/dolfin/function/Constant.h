@@ -92,6 +92,13 @@ public:
 
   //--- INTERFACE -------------------------------------------------------------
 
+  /// Evaluate function at given point in cell
+  inline void evaluate(uint n, real* values, const real* coordinates,
+                       const ufc::cell& cell) const
+  {
+    std::fill_n(values, n, value_);
+  }
+
   /// Evaluate function at given point
   inline void eval(real* values, const real* x) const
   {

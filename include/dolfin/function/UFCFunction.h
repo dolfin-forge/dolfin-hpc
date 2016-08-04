@@ -67,6 +67,18 @@ public:
     return mesh_;
   }
 
+  ///
+  inline void evaluate(uint n, real* values, const real* coordinates,
+                       const ufc::cell& cell) const
+  {
+    for (uint i = 0; i < n; ++i)
+    {
+      evaluant_.eval(&values[i * value_size()],
+                     &coordinates[i * cell.geometric_dimension],
+                     static_cast<UFCCell const&>(cell));
+    }
+  }
+
   /// Evaluate function at given point coordinate, cell is searched for
   void eval(real* values, const real* x) const
   {

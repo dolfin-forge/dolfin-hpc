@@ -58,6 +58,17 @@ public:
 
   //--- Expression INTERFACE --------------------------------------------------
 
+  ///
+  inline void evaluate(uint n, real* values, const real* coordinates,
+                       const ufc::cell& cell) const
+  {
+    for (uint i = 0; i < n; ++i)
+    {
+      evaluant_.eval(&values[i * value_size()],
+                     &coordinates[i * cell.geometric_dimension]);
+    }
+  }
+
   /// Evaluate function at given point
   inline void eval(real* values, const real* x) const
   {

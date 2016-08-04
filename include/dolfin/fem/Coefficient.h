@@ -42,6 +42,10 @@ public:
 
   //--- INTERFACE -------------------------------------------------------------
 
+  /// Evaluate function at given points in cell
+  virtual void evaluate(uint n, real* values, const real* coordinates,
+                        const ufc::cell& cell) const = 0;
+
   /// Evaluate function at given point
   virtual void eval(real* values, const real* x) const = 0;
 

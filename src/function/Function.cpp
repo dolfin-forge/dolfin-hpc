@@ -285,12 +285,10 @@ void Function::evaluate(real* values, const real* x,
   X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
 
   // Compute linear combination
-  for (uint j = 0; j < scratch->size; ++j)
-  {
-    values[j] = 0.0;
-  }
+  std::fill_n(values, scratch->size, 0.0);
   for (uint i = 0; i < element_->space_dimension(); ++i)
   {
+    //FIXME: Idiotic
     element_->evaluate_basis(i, scratch->values, x, *ufc_cell);
     for (uint j = 0; j < scratch->size; ++j)
     {
@@ -303,6 +301,31 @@ void Function::evaluate(real* values, const real* x,
 Mesh& Function::mesh() const
 {
   return (*mesh_);
+}
+
+//-----------------------------------------------------------------------------
+void Function::evaluate(uint n, real* values, const real* x,
+                        const ufc::cell& cell) const
+{
+  UFCCell const * ufc_cell = static_cast<UFCCell const *>(&cell);
+
+  // Get expansion coefficients on cell
+  dofmap_->tabulate_dofs(scratch->dofs, *ufc_cell);
+  X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+  std::fill_n(values, n * scratch->size, 0.0);
+  for (uint q = 0; q < n; ++q, values+=scratch->size, x+=cell.geometric_dimension)
+  {
+    // Compute linear combination
+    for (uint i = 0; i < element_->space_dimension(); ++i)
+    {
+      //FIXME: Idiotic
+      element_->evaluate_basis(i, scratch->basis_values, x, *ufc_cell);
+      for (uint j = 0; j < scratch->size; ++j)
+      {
+        values[j] += scratch->coefficients[i] * scratch->basis_values[j];
+      }
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -336,10 +359,7 @@ void Function::eval(real* values, const real* x) const
   X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
 
   // Compute linear combination
-  for (uint j = 0; j < scratch->size; ++j)
-  {
-    values[j] = 0.0;
-  }
+  std::fill_n(values, scratch->size, 0.0);
   for (uint i = 0; i < element_->space_dimension(); ++i)
   {
     element_->evaluate_basis(i, scratch->values, x, scratch->cell);

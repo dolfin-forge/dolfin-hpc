@@ -162,7 +162,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/algorithm.h \
 				mesh/AffineMapping.h \
 				mesh/ALE.h\
-				mesh/ALEType.h\
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\

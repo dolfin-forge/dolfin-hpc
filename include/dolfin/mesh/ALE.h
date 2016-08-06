@@ -10,7 +10,6 @@
 #include <dolfin/common/types.h>
 #include "MeshFunction.h"
 #include "Facet.h"
-#include "ALEType.h"
 
 namespace dolfin
 {
@@ -25,18 +24,22 @@ namespace dolfin
 
   class ALE
   {
+
   public:
+
+    /// List of available methods for ALE mesh movement
+    enum Type {lagrange, hermite, harmonic, elastic};
 
     /// Move coordinates of mesh according to new boundary coordinates
     static void move(Mesh& mesh, Mesh& new_boundary,
-                     ALEType type=lagrange);
+                     ALE::Type type=lagrange);
     
   private:
     
     // Transfinite meanvalue interpolation
     static void meanValue(real* new_x, uint dim, Mesh& new_boundary,
                           Mesh& mesh, const MeshFunction<uint>& vertex_map,
-                          Vertex& vertex, real** ghat, ALEType type);
+                          Vertex& vertex, real** ghat, ALE::Type type);
 
     // Compute weights for transfinite meanvalue interpolation
     static void computeWeights2D(real* w, real** u, real* d,

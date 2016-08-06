@@ -15,7 +15,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void ALE::move(Mesh& mesh, Mesh& new_boundary, ALEType method)
+void ALE::move(Mesh& mesh, Mesh& new_boundary, ALE::Type method)
 {
   error("ALE is implemented like shit");
 
@@ -55,7 +55,7 @@ void ALE::move(Mesh& mesh, Mesh& new_boundary, ALEType method)
 //-----------------------------------------------------------------------------
 void ALE::meanValue(real* new_x, uint dim, Mesh& new_boundary,
                     Mesh& mesh, const MeshFunction<uint>& vertex_map,
-                    Vertex& vertex, real** ghat, ALEType method)
+                    Vertex& vertex, real** ghat, ALE::Type method)
 {
   // Check if the point is on the boundary (no need to compute new coordinate)
   for (VertexIterator v(new_boundary); !v.end(); ++v)

@@ -43,6 +43,7 @@ void SetOfBCs::apply(GenericMatrix& AA, GenericVector& bb,
 {
   for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
   {
+    message("Apply %s boundary condition", (*it)->type().c_str());
     (*it)->apply(AA, bb, form);
   }
 }
@@ -53,6 +54,8 @@ void SetOfBCs::apply(GenericMatrix& AA, GenericVector& bb,
 {
   for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
   {
+    message("Apply %s boundary condition to subsystem %s",
+            (*it)->type().c_str(), sub.str().c_str());
     (*it)->apply(AA, bb, form, sub);
   }
 }

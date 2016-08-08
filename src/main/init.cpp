@@ -91,10 +91,15 @@ void dolfin::dolfin_init(int argc, char * argv[])
 
 }
 //-----------------------------------------------------------------------------
-void dolfin::dolfin_finalize()
+void dolfin::dolfin_fini()
 {
   // Finalize subsystems in the correct order
   SubSystemsManager::finalizePETSc();
   SubSystemsManager::finalizeMPI();
+}
+//-----------------------------------------------------------------------------
+void dolfin::dolfin_finalize()
+{
+  dolfin_fini();
 }
 //-----------------------------------------------------------------------------

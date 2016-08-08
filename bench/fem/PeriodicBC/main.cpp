@@ -263,7 +263,7 @@ void write_Gdofs(std::string name, FiniteElementSpace const& space)
   delete[] Hdofs;
   G.vector() = 0.0;
   G.vector().set(blockG, pdm.num_Gdofs(), pdm.get_Gindices());
-  G.sync_ghosts();
+  G.sync();
   delete[] blockG;
   std::stringstream ss;
   ss << name << "_G_" << dolfin::MPI::numProcesses() << "P.pvd";

@@ -594,7 +594,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
   // Set foreign dofs values
   F1.vector().set(&dofs_cvaluesF[0], num_dofsF, &dofs_indicesF[0]);
-  F1.sync_ghosts();
+  F1.sync();
 
   // Cleanup
   delete[] dof1sendcount;

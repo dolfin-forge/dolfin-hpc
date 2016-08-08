@@ -51,7 +51,7 @@ int main(int argc, char** argv)
       {
         Fi.interpolate(*Xi[i]);
         Fi.vector() -= Si[i]->vector();
-        Fi.sync_ghosts();
+        Fi.sync();
         real l2err = Fi.vector().norm(dolfin::l2);
         message("F[%d] - S[%d] l2 error = %16f", i, i, l2err);
       }

@@ -189,7 +189,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       FiniteElementSpace subspace(space, i);
       post.push_back(new Function(subspace));
       post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
-      post.back()->sync_ghosts();
+      post.back()->sync();
     }
 
     for (uint i = 0; i < num_sub; ++i)
@@ -361,7 +361,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
   processed = false;
 
   projected.vector().zero();
-  projected.sync_ghosts();
+  projected.sync();
 
   real gts_tol = dolfin_get("GTS Tolerance");
   real geom_tol = dolfin_get("Geometrical Tolerance Tetrahedron");
@@ -467,7 +467,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
     x_proj.set(vv, i, indices);
     x_proj.apply();
   }
-  projected.sync_ghosts();
+  projected.sync();
 
   delete[] vv;
   delete[] indices;

@@ -510,7 +510,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
   for (uint e = 0; e < gdim; ++e)
   {
-    basis[e].sync_ghosts();
+    basis[e].sync();
   }
 }
 

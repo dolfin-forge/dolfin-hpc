@@ -156,7 +156,7 @@ Function::Function(SubFunction const& sub_function) :
 
   // Sync ghosts before getting the block
   real * gblock = gFunc.create_block();
-  gFunc.sync_ghosts();
+  gFunc.sync();
   gFunc.get_block(gblock);
 
   // Loop baby, loop...
@@ -194,7 +194,6 @@ Function::Function(Function const& other) :
   if(!other.empty())
   {
     *this = other;
-    this->sync_ghosts();
   }
 }
 
@@ -529,7 +528,7 @@ void Function::set_block(real *& values)
   dolfin_assert(X_);
   dolfin_assert(dofmap_);
   X_->set(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync_ghosts();
+  sync();
 }
 
 //-----------------------------------------------------------------------------
@@ -538,7 +537,7 @@ void Function::add_block(real *& values)
   dolfin_assert(X_);
   dolfin_assert(dofmap_);
   X_->add(values, dofmap_->dofsmapping_size(), dofmap_->dofsmapping());
-  sync_ghosts();
+  sync();
 }
 
 //-----------------------------------------------------------------------------
@@ -629,7 +628,7 @@ void Function::disp() const
 }
 
 //-----------------------------------------------------------------------------
-void Function::sync_ghosts()
+void Function::sync()
 {
 
   if(!mesh_->is_distributed()) return;

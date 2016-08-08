@@ -128,7 +128,7 @@ public:
                    const Cell& dolfin_cell, uint facet) const;
 
   /// Synchronize values
-  inline void sync() { this->sync_ghosts(); }
+  void sync();
 
   /// Display basic information
   void disp() const;
@@ -214,9 +214,6 @@ public:
 
   /// Return the maximum value
   real max() const;
-
-  /// Update values
-  void sync_ghosts();
 
 private:
 

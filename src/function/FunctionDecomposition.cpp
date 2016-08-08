@@ -155,7 +155,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   // Synchronize leaf functions
   for (uint s = 0; s < Si.size(); ++s)
   {
-    Si[s]->sync_ghosts();
+    Si[s]->sync();
   }
 
   // Cleanup

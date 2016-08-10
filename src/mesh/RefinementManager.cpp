@@ -180,12 +180,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
   tic();
 
   DistributedData& olddistdata = mesh_.distdata()[0];
-
-  olddistdata.disp();
-
   DistributedData& newdistdata = refined_mesh_.distdata()[0];
-
-  newdistdata.disp();
 
   int rank = MPI::processNumber();
   int pe_size = MPI::numProcesses();
@@ -261,9 +256,6 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
     }
   }
 
-  message("Number of owned edges : %u", new_edge_global_.size());
-  message("Number of ghost edges : %u", num_unass);
-
   //Exchange assigned global numbers
   Array<uint> global_buff;
   uint index;
@@ -312,10 +304,6 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
 
   dolfin_assert(num_unass == 0);
 
-  message("Done remapping");
-
-  newdistdata.disp();
-
   delete[] recv_buff;
   delete[] recv_buff_id;
 
@@ -328,7 +316,6 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
 
   dolfin_assert(newdistdata.global_size() == mesh_.global_size(0) + num_shared_edges);
 
-  newdistdata.disp();
   newdistdata.renumber_global();
 
   tocd(1);

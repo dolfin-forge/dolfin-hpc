@@ -55,10 +55,10 @@ public:
   void add(BoundaryCondition& bc);
 
   /// Apply all boundary conditions to the given system
-  void apply(GenericMatrix& AA, GenericVector& bb, BilinearForm& form) const;
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm& a) const;
 
   /// Apply all boundary conditions to the given subsystem
-  void apply(GenericMatrix& AA, GenericVector& bb, BilinearForm& form,
+  void apply(GenericMatrix& A, GenericVector& b, BilinearForm& a,
              SubSystem const sub) const;
 
   /// Return if the given boundary condition type exists

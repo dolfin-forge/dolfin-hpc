@@ -82,7 +82,6 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   {
     if ((method_ == topological) || (method_ == geometric))
     {
-      message("DirichletBC : compute facet list");
       delete entities_;
       entities_ = new Array<uint>();
 
@@ -126,15 +125,12 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   switch (method_)
     {
     case topological:
-      message("DirichletBC : topological");
       computeBCTopological(boundary_values, space, this->sub_system());
       break;
     case geometric:
-      message("DirichletBC : geometric");
       computeBCGeometric(boundary_values, space, this->sub_system());
       break;
     case pointwise:
-      message("DirichletBC : pointwise");
       computeBCPointwise(boundary_values, space, this->sub_system());
       break;
     default:

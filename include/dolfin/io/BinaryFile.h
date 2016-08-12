@@ -96,7 +96,7 @@ private:
   typedef struct atomic_cell
   {
     uint const size;
-    uint * v;
+    uint * const v;
 
     //-----------------------------------
     atomic_cell(uint d) :
@@ -109,7 +109,7 @@ private:
         size(other.size),
         v(new uint[size])
     {
-      std::memcpy(&v[0], &other.v[0], size * sizeof(uint));
+      std::copy(other.v, other.v + size, v);
     }
     //-----------------------------------
     atomic_cell& operator=(atomic_cell const& other)
@@ -122,14 +122,13 @@ private:
       {
         error("Size of atomic_cells in assignment do not match");
       }
-      std::memcpy(&v[0], &other.v[0], size * sizeof(uint));
+      std::copy(other.v, other.v + size, v);
       return *this;
     }
     //-----------------------------------
     ~atomic_cell()
     {
-      delete v;
-      v = NULL;
+      delete[] v;
     }
   } atomic_cell;
 

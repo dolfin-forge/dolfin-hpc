@@ -213,8 +213,8 @@ void JANPACKMat::getrow(uint row, Array<uint>& columns, Array<real>& values) con
 		 reinterpret_cast<uint*>(c + n));
   values.assign(v, v + n);
 
-  delete c;
-  delete v;
+  delete[] c;
+  delete[] v;
 
 }
 //-----------------------------------------------------------------------------

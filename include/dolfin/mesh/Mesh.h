@@ -192,6 +192,9 @@ public:
    */
 
   /// Distribute a mesh according to a mesh function
+  void distribute();
+
+  /// Distribute a mesh according to a mesh function
   void distribute(MeshFunction<uint>& distribution);
 
   /*

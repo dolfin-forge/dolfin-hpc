@@ -184,6 +184,10 @@ void DistributedData::finalize()
 
       // Cache numbering
       cache_size_ = global_.size();
+      if(cached_numbering_ != NULL)
+      {
+        error("DistributedData : in finalized, numbering is already cached");
+      }
       cached_numbering_ = new uint[cache_size_];
       for (_map<uint, uint>::iterator it = global_.begin();
            it != global_.end(); ++it)

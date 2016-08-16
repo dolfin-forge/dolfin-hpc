@@ -62,7 +62,7 @@ struct LinearDistribution
     message("size           : %u", size);
     message("quotient size  : %u", L);
     message("remain         : %u", R);
-    end();
+    endblock();
   }
 
 };

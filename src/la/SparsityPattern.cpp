@@ -123,7 +123,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
       // Collect all the range size in the array then sum to compute offsets
       // Previous code created a temporary array, why not do it in-place.
 #ifdef HAVE_MPI
-      MPI_Allgather(&range[i], 1, MPI_UNSIGNED, &range_[i][1], 1, MPI_UNSIGNED,
+      MPI_Allgather((real *) &range[i], 1, MPI_UNSIGNED, &range_[i][1], 1, MPI_UNSIGNED,
                     MPI::DOLFIN_COMM);
 #endif
       range_[i][0] = 0;

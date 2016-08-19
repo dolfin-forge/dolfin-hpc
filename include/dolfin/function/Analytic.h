@@ -93,6 +93,13 @@ public:
     return evaluant_.value_size();
   }
 
+  ///
+  Analytic& operator()(Time const& t)
+  {
+    evaluant_(t);
+    return *this;
+  }
+
   //--- GenericFunction INTERFACE ---------------------------------------------
 
   /// Return the mesh

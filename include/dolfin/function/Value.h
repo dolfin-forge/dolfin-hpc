@@ -3,6 +3,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
+#include <dolfin/evolution/Time.h>
 #include <dolfin/function/Expression.h>
 #include <dolfin/function/ValueSpace.h>
 
@@ -20,7 +21,8 @@ public:
 
   ///
   Value() :
-      Expression()
+      Expression(),
+      t_(0.0)
   {
   }
 
@@ -49,6 +51,16 @@ public:
   }
 
   ///
+  Value<T, I,J>& operator()(Time const& t)
+  {
+    t_ = t.clock();
+    return *this;
+  }
+
+  ///
+  inline real time() const { return t_; }
+
+  ///
   virtual void disp() const
   {
     section("Value");
@@ -65,6 +77,10 @@ public:
     end();
     skip();
   }
+
+private:
+
+  real t_;
 
 };
 

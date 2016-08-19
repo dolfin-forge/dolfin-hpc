@@ -17,6 +17,7 @@ namespace dolfin
 
 class Mesh;
 class Cell;
+class Time;
 
 /**
  *  @class  UFCFunction
@@ -99,6 +100,13 @@ public:
 
   // Return the value size
   uint value_size() const { return Coefficient::value_size(); }
+
+  ///
+  inline UFCFunction<T> const& operator()(Time const& t) const
+  {
+    evaluant_(t);
+    return *this;
+  }
 
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const

@@ -51,9 +51,17 @@ public:
   }
 
   ///
-  Value<T, I,J>& operator()(Time const& t)
+  inline Value<T, I,J> const& operator()(Time const& t) const
   {
     t_ = t.clock();
+    return *this;
+  }
+
+  ///
+  inline Value<T, I,J> const& operator()(Time const& t, real* values, real const* x) const
+  {
+    t_ = t.clock();
+    eval(values, x);
     return *this;
   }
 
@@ -80,7 +88,7 @@ public:
 
 private:
 
-  real t_;
+  mutable real t_;
 
 };
 

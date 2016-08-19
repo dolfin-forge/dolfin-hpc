@@ -7,11 +7,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 
-using dolfin::GenericFunction;
-using dolfin::Cell;
-using dolfin::Mesh;
-using dolfin::VertexIterator;
-
 namespace dolfin
 {
 
@@ -94,9 +89,16 @@ public:
   }
 
   ///
-  Analytic& operator()(Time const& t)
+  Analytic<T> const& operator()(Time const& t) const
   {
     evaluant_(t);
+    return *this;
+  }
+
+  ///
+  inline Analytic<T> const& operator()(Time const& t, real* values, real const* x) const
+  {
+    evaluant_(t, values, x);
     return *this;
   }
 

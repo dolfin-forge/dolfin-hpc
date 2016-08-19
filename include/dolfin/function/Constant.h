@@ -2,11 +2,12 @@
 #define __DOLFIN_CONSTANT_H_
 
 #include <dolfin/fem/Coefficient.h>
-
 #include <dolfin/log/log.h>
 
 namespace dolfin
 {
+
+class Time;
 
 class Constant : public Coefficient
 {
@@ -121,6 +122,13 @@ public:
   inline uint value_size() const
   {
     return 1;
+  }
+
+  ///
+  inline Constant const& operator()(Time const& t) const
+  {
+    // No-op
+    return *this;
   }
 
   /// Interpolate function to finite element space on cell

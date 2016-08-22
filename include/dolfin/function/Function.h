@@ -217,6 +217,8 @@ public:
 
 private:
 
+  void sync(Time const& t) { /* No-op */ }
+
   /// Initialize Vector
   void InitializeVector();
 

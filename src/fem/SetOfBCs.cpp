@@ -22,7 +22,8 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-SetOfBCs::SetOfBCs()
+SetOfBCs::SetOfBCs() :
+  t_(NULL)
 {
 }
 
@@ -40,10 +41,21 @@ void SetOfBCs::add(BoundaryCondition& bc)
 //-----------------------------------------------------------------------------
 void SetOfBCs::apply(GenericMatrix& A, GenericVector& b, BilinearForm& a) const
 {
-  for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+  if(t_ == NULL)
   {
-    message("Apply %s boundary condition", (*it)->type().c_str());
-    (*it)->apply(A, b, a);
+    for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+      message("Apply %s boundary condition", (*it)->type().c_str());
+      (*it)->apply(A, b, a);
+    }
+  }
+  else
+  {
+    for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+      message("Apply %s boundary condition at t=%e", (*it)->type().c_str(), t_->clock());
+      (**it)(*t_).apply(A, b, a);
+    }
   }
 }
 
@@ -51,11 +63,23 @@ void SetOfBCs::apply(GenericMatrix& A, GenericVector& b, BilinearForm& a) const
 void SetOfBCs::apply(GenericMatrix& A, GenericVector& b, BilinearForm& a,
                      SubSystem const sub) const
 {
-  for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+  if(t_ == NULL)
   {
-    message("Apply %s boundary condition to subsystem %s",
-            (*it)->type().c_str(), sub.str().c_str());
-    (*it)->apply(A, b, a, sub);
+    for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+      message("Apply %s boundary condition to subsystem %s",
+              (*it)->type().c_str(), sub.str().c_str());
+      (*it)->apply(A, b, a, sub);
+    }
+  }
+  else
+  {
+    for (SetOfBCs::const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+      message("Apply %s boundary condition to subsystem %s at t= %e",
+              (*it)->type().c_str(), sub.str().c_str(), t_->clock());
+      (**it)(*t_).apply(A, b, a, sub);
+    }
   }
 }
 

@@ -70,6 +70,13 @@ public:
   ///
   uint size() const;
 
+  ///
+  SetOfBCs& operator()(Time const& t)
+  {
+    t_ = &t;
+    return *this;
+  }
+
   /// Display the list of boundary conditions
   void disp() const;
 
@@ -77,6 +84,9 @@ private:
 
   ///
   void clear();
+
+  ///
+  Time const * t_;
 
 };
 

@@ -167,7 +167,9 @@ public:
     // Do nothing
   }
 
-public:
+private:
+
+  void sync(Time const& t) { evaluant_(t); }
 
   Mesh& mesh_;
   T evaluant_;

@@ -52,6 +52,8 @@ public:
 
 private:
 
+  inline void sync(Time const& t) {  beta_(t); slipbc_(t); }
+
   SlipBC slipbc_;
   Coefficient& beta_;
 

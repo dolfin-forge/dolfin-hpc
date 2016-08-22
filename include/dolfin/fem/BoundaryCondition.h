@@ -16,6 +16,7 @@
 
 #include <dolfin/mesh/MeshDependent.h>
 
+#include <dolfin/evolution/Time.h>
 #include <dolfin/fem/SubSystem.h>
 
 #include <ufc.h>
@@ -58,6 +59,13 @@ public:
                      BilinearForm const& form, SubSystem const sub_system);
 
   ///
+  BoundaryCondition& operator()(Time const& t)
+  {
+    this->sync(t);
+    return *this;
+  }
+
+  ///
   std::string const& type() const;
 
   ///
@@ -78,6 +86,9 @@ protected:
   /// Constructor on a geometrical subdomain for a given subspace
   BoundaryCondition(std::string const& type, Mesh& mesh,
                     SubDomain const& sub_domain, SubSystem const sub_system);
+
+  ///
+  virtual void sync(Time const& t) = 0;
 
 public:
 

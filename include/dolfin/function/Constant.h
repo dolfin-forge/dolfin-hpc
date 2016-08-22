@@ -172,6 +172,8 @@ public:
 
 private:
 
+  void sync(Time const& t) { /* No-op */ }
+
   real value_;
 
 };

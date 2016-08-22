@@ -77,8 +77,19 @@ public:
 
   //---------------------------------------------------------------------------
 
+  GenericFunction& operator()(Time const& t)
+  {
+    this->sync(t);
+    return *this;
+  }
+
   /// Return the mesh
   virtual Mesh& mesh() const = 0;
+
+private:
+
+  ///
+  virtual void sync(Time const& t) = 0;
 
 };
 

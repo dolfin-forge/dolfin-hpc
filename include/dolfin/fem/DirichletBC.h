@@ -14,6 +14,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/fem/SubSystem.h>
+#include <dolfin/fem/Coefficient.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/SubDomain.h>
 
@@ -21,7 +22,6 @@ namespace dolfin
 {
 
 class DofMap;
-class Coefficient;
 class Mesh;
 class FiniteElementSpace;
 class Form;
@@ -74,6 +74,7 @@ enum BCMethod
 
 class DirichletBC: public BoundaryCondition
 {
+
 public:
 
   /// Create boundary condition for sub domain
@@ -99,6 +100,9 @@ private:
   /// Apply boundary conditions
   void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
              BilinearForm const& form);
+
+  ///
+  inline void sync(Time const& t) { g_(t); }
 
   // Compute boundary values for facet (topological approach)
   void computeBCTopological(_map<uint, real>& boundary_values,

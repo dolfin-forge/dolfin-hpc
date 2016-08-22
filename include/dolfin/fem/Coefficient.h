@@ -8,6 +8,7 @@
 #define __DOLFIN_COEFFICIENT_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/evolution/Time.h>
 
 #include <ufc.h>
 
@@ -75,6 +76,17 @@ public:
   virtual void disp() const = 0;
 
   //---------------------------------------------------------------------------
+
+  Coefficient& operator()(Time const& t)
+  {
+    this->sync(t);
+    return *this;
+  }
+
+private:
+
+  ///
+  virtual void sync(Time const& t) = 0;
 
 };
 

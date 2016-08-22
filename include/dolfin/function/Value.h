@@ -88,6 +88,8 @@ public:
 
 private:
 
+  void sync(Time const& t) { t_ = t.clock(); }
+
   mutable real t_;
 
 };

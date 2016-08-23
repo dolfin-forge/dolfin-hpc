@@ -18,7 +18,7 @@ class Time
 
 public:
 
-  Time(real T0, real T1);
+  Time(real T0 = 0.0, real T1 = 0.0);
 
   Time(Time const& other);
 

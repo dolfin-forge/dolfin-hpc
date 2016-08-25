@@ -25,8 +25,8 @@
 //   swig_binary:                    'swig'
 //   swig_path:                      ''
 
-#ifndef __FFC_LAGRANGE_1_2DVECTOR_H
-#define __FFC_LAGRANGE_1_2DVECTOR_H
+#ifndef __FFC_DISCONTINUOUS_LAGRANGE_0_2DVECTOR_H
+#define __FFC_DISCONTINUOUS_LAGRANGE_0_2DVECTOR_H
 
 #include <cmath>
 #include <stdexcept>
@@ -35,224 +35,194 @@
 
 /// This class defines the interface for a finite element.
 
-class ffc_lagrange_1_2dvector_finite_element_0: public ufc::finite_element
+class ffc_discontinuous_lagrange_0_2dvector_finite_element_0: public ufc::finite_element
 {
 public:
 
   /// Constructor
-  ffc_lagrange_1_2dvector_finite_element_0();
+  ffc_discontinuous_lagrange_0_2dvector_finite_element_0();
 
   /// Destructor
-  virtual ~ffc_lagrange_1_2dvector_finite_element_0();
+  ~ffc_discontinuous_lagrange_0_2dvector_finite_element_0();
 
   /// Return a string identifying the finite element
-  virtual const char* signature() const;
+  const char* signature() const;
 
   /// Return the cell shape
-  virtual ufc::shape cell_shape() const;
+  ufc::shape cell_shape() const;
 
   /// Return the topological dimension of the cell shape
-  virtual unsigned int topological_dimension() const;
+  unsigned int topological_dimension() const;
 
   /// Return the geometric dimension of the cell shape
-  virtual unsigned int geometric_dimension() const;
+  unsigned int geometric_dimension() const;
 
   /// Return the dimension of the finite element function space
-  virtual unsigned int space_dimension() const;
+  unsigned int space_dimension() const;
 
   /// Return the rank of the value space
-  virtual unsigned int value_rank() const;
+  unsigned int value_rank() const;
 
   /// Return the dimension of the value space for axis i
-  virtual unsigned int value_dimension(unsigned int i) const;
+  unsigned int value_dimension(unsigned int i) const;
 
   /// Evaluate basis function i at given point in cell
-  virtual void evaluate_basis(unsigned int i,
+  void evaluate_basis(unsigned int i,
                               double* values,
                               const double* coordinates,
                               const ufc::cell& c) const;
 
   /// Evaluate all basis functions at given point in cell
-  virtual void evaluate_basis_all(double* values,
+  void evaluate_basis_all(double* values,
                                   const double* coordinates,
                                   const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of basis function i at given point in cell
-  virtual void evaluate_basis_derivatives(unsigned int i,
-                                          unsigned int n,
-                                          double* values,
-                                          const double* coordinates,
-                                          const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of basis function i at given point in dolfin reference cell
-  virtual void evaluate_reference_basis_derivatives(unsigned int i,
+  void evaluate_basis_derivatives(unsigned int i,
                                           unsigned int n,
                                           double* values,
                                           const double* coordinates,
                                           const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
-  virtual void evaluate_basis_derivatives_all(unsigned int n,
-                                              double* values,
-                                              const double* coordinates,
-                                              const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of all basis functions at given point in dolfin reference cell
-  virtual void evaluate_reference_basis_derivatives_all(unsigned int n,
+  void evaluate_basis_derivatives_all(unsigned int n,
                                               double* values,
                                               const double* coordinates,
                                               const ufc::cell& c) const;
 
   /// Evaluate linear functional for dof i on the function f
-  virtual double evaluate_dof(unsigned int i,
+  double evaluate_dof(unsigned int i,
                               const ufc::function& f,
                               const ufc::cell& c) const;
 
   /// Evaluate linear functionals for all dofs on the function f
-  virtual void evaluate_dofs(double* values,
+  void evaluate_dofs(double* values,
                              const ufc::function& f,
                              const ufc::cell& c) const;
 
   /// Interpolate vertex values from dof values
-  virtual void interpolate_vertex_values(double* vertex_values,
+  void interpolate_vertex_values(double* vertex_values,
                                          const double* dof_values,
                                          const ufc::cell& c) const;
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Map coordinate xhat from reference cell to coordinate x in cell
-  virtual void map_from_reference_cell(double* x,
+  void map_from_reference_cell(double* x,
                                        const double* xhat,
                                        const ufc::cell& c) const;
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
-  virtual void map_to_reference_cell(double* xhat,
+  void map_to_reference_cell(double* xhat,
                                      const double* x,
                                      const ufc::cell& c) const;
-#endif
 
   /// Return the number of sub elements (for a mixed element)
-  virtual unsigned int num_sub_elements() const;
+  unsigned int num_sub_elements() const;
 
   /// Create a new finite element for sub element i (for a mixed element)
-  virtual ufc::finite_element* create_sub_element(unsigned int i) const;
+  ufc::finite_element* create_sub_element(unsigned int i) const;
 
   /// Create a new class instance
-  virtual ufc::finite_element* create() const;
+  ufc::finite_element* create() const;
 
 };
 
 /// This class defines the interface for a finite element.
 
-class ffc_lagrange_1_2dvector_finite_element_1: public ufc::finite_element
+class ffc_discontinuous_lagrange_0_2dvector_finite_element_1: public ufc::finite_element
 {
 public:
 
   /// Constructor
-  ffc_lagrange_1_2dvector_finite_element_1();
+  ffc_discontinuous_lagrange_0_2dvector_finite_element_1();
 
   /// Destructor
-  virtual ~ffc_lagrange_1_2dvector_finite_element_1();
+  ~ffc_discontinuous_lagrange_0_2dvector_finite_element_1();
 
   /// Return a string identifying the finite element
-  virtual const char* signature() const;
+  const char* signature() const;
 
   /// Return the cell shape
-  virtual ufc::shape cell_shape() const;
+  ufc::shape cell_shape() const;
 
   /// Return the topological dimension of the cell shape
-  virtual unsigned int topological_dimension() const;
+  unsigned int topological_dimension() const;
 
   /// Return the geometric dimension of the cell shape
-  virtual unsigned int geometric_dimension() const;
+  unsigned int geometric_dimension() const;
 
   /// Return the dimension of the finite element function space
-  virtual unsigned int space_dimension() const;
+  unsigned int space_dimension() const;
 
   /// Return the rank of the value space
-  virtual unsigned int value_rank() const;
+  unsigned int value_rank() const;
 
   /// Return the dimension of the value space for axis i
-  virtual unsigned int value_dimension(unsigned int i) const;
+  unsigned int value_dimension(unsigned int i) const;
 
   /// Evaluate basis function i at given point in cell
-  virtual void evaluate_basis(unsigned int i,
+  void evaluate_basis(unsigned int i,
                               double* values,
                               const double* coordinates,
                               const ufc::cell& c) const;
 
   /// Evaluate all basis functions at given point in cell
-  virtual void evaluate_basis_all(double* values,
+  void evaluate_basis_all(double* values,
                                   const double* coordinates,
                                   const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of basis function i at given point in cell
-  virtual void evaluate_basis_derivatives(unsigned int i,
-                                          unsigned int n,
-                                          double* values,
-                                          const double* coordinates,
-                                          const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of basis function i at given point in dolfin reference cell
-  virtual void evaluate_reference_basis_derivatives(unsigned int i,
+  void evaluate_basis_derivatives(unsigned int i,
                                           unsigned int n,
                                           double* values,
                                           const double* coordinates,
                                           const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
-  virtual void evaluate_basis_derivatives_all(unsigned int n,
-                                              double* values,
-                                              const double* coordinates,
-                                              const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of all basis functions at given point in dolfin reference cell
-  virtual void evaluate_reference_basis_derivatives_all(unsigned int n,
+  void evaluate_basis_derivatives_all(unsigned int n,
                                               double* values,
                                               const double* coordinates,
                                               const ufc::cell& c) const;
 
   /// Evaluate linear functional for dof i on the function f
-  virtual double evaluate_dof(unsigned int i,
+  double evaluate_dof(unsigned int i,
                               const ufc::function& f,
                               const ufc::cell& c) const;
 
   /// Evaluate linear functionals for all dofs on the function f
-  virtual void evaluate_dofs(double* values,
+  void evaluate_dofs(double* values,
                              const ufc::function& f,
                              const ufc::cell& c) const;
 
   /// Interpolate vertex values from dof values
-  virtual void interpolate_vertex_values(double* vertex_values,
+  void interpolate_vertex_values(double* vertex_values,
                                          const double* dof_values,
                                          const ufc::cell& c) const;
 
-#ifndef UFC_BACKWARD_COMPATIBILITY
   /// Map coordinate xhat from reference cell to coordinate x in cell
-  virtual void map_from_reference_cell(double* x,
+  void map_from_reference_cell(double* x,
                                        const double* xhat,
                                        const ufc::cell& c) const;
 
   /// Map from coordinate x in cell to coordinate xhat in reference cell
-  virtual void map_to_reference_cell(double* xhat,
+  void map_to_reference_cell(double* xhat,
                                      const double* x,
                                      const ufc::cell& c) const;
-#endif
 
   /// Return the number of sub elements (for a mixed element)
-  virtual unsigned int num_sub_elements() const;
+  unsigned int num_sub_elements() const;
 
   /// Create a new finite element for sub element i (for a mixed element)
-  virtual ufc::finite_element* create_sub_element(unsigned int i) const;
+  ufc::finite_element* create_sub_element(unsigned int i) const;
 
   /// Create a new class instance
-  virtual ufc::finite_element* create() const;
+  ufc::finite_element* create() const;
 
 };
 
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class ffc_lagrange_1_2dvector_dofmap_0: public ufc::dofmap
+class ffc_discontinuous_lagrange_0_2dvector_dofmap_0: public ufc::dofmap
 {
 private:
 
@@ -260,85 +230,85 @@ private:
 public:
 
   /// Constructor
-  ffc_lagrange_1_2dvector_dofmap_0();
+  ffc_discontinuous_lagrange_0_2dvector_dofmap_0();
 
   /// Destructor
-  virtual ~ffc_lagrange_1_2dvector_dofmap_0();
+  ~ffc_discontinuous_lagrange_0_2dvector_dofmap_0();
 
   /// Return a string identifying the dofmap
-  virtual const char* signature() const;
+  const char* signature() const;
 
   /// Return true iff mesh entities of topological dimension d are needed
-  virtual bool needs_mesh_entities(unsigned int d) const;
+  bool needs_mesh_entities(unsigned int d) const;
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-  virtual bool init_mesh(const ufc::mesh& m);
+  bool init_mesh(const ufc::mesh& m);
 
   /// Initialize dofmap for given cell
-  virtual void init_cell(const ufc::mesh& m,
+  void init_cell(const ufc::mesh& m,
                          const ufc::cell& c);
 
   /// Finish initialization of dofmap for cells
-  virtual void init_cell_finalize();
+  void init_cell_finalize();
 
   /// Return the topological dimension of the associated cell shape
-  virtual unsigned int topological_dimension() const;
+  unsigned int topological_dimension() const;
 
   /// Return the geometric dimension of the associated cell shape
-  virtual unsigned int geometric_dimension() const;
+  unsigned int geometric_dimension() const;
 
   /// Return the dimension of the global finite element function space
-  virtual unsigned int global_dimension() const;
+  unsigned int global_dimension() const;
 
 #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the dimension of the local finite element function space for a cell
-  virtual unsigned int local_dimension(const ufc::cell& c) const;
+  unsigned int local_dimension(const ufc::cell& c) const;
 
   /// Return the maximum dimension of the local finite element function space
-  virtual unsigned int max_local_dimension() const;
+  unsigned int max_local_dimension() const;
 #else
   /// Return the dimension of the local finite element function space for a cell
-  virtual unsigned int local_dimension() const;
+  unsigned int local_dimension() const;
 #endif
 
   /// Return the number of dofs on each cell facet
-  virtual unsigned int num_facet_dofs() const;
+  unsigned int num_facet_dofs() const;
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  virtual unsigned int num_entity_dofs(unsigned int d) const;
+  unsigned int num_entity_dofs(unsigned int d) const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  virtual void tabulate_dofs(unsigned int* dofs,
+  void tabulate_dofs(unsigned int* dofs,
                              const ufc::mesh& m,
                              const ufc::cell& c) const;
 
   /// Tabulate the local-to-local mapping from facet dofs to cell dofs
-  virtual void tabulate_facet_dofs(unsigned int* dofs,
+  void tabulate_facet_dofs(unsigned int* dofs,
                                    unsigned int facet) const;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
-  virtual void tabulate_entity_dofs(unsigned int* dofs,
+  void tabulate_entity_dofs(unsigned int* dofs,
                                     unsigned int d, unsigned int i) const;
 
   /// Tabulate the coordinates of all dofs on a cell
-  virtual void tabulate_coordinates(double** coordinates,
+  void tabulate_coordinates(double** coordinates,
                                     const ufc::cell& c) const;
 
   /// Return the number of sub dofmaps (for a mixed element)
-  virtual unsigned int num_sub_dofmaps() const;
+  unsigned int num_sub_dofmaps() const;
 
   /// Create a new dofmap for sub dofmap i (for a mixed element)
-  virtual ufc::dofmap* create_sub_dofmap(unsigned int i) const;
+  ufc::dofmap* create_sub_dofmap(unsigned int i) const;
 
   /// Create a new class instance
-  virtual ufc::dofmap* create() const;
+  ufc::dofmap* create() const;
 
 };
 
 /// This class defines the interface for a local-to-global mapping of
 /// degrees of freedom (dofs).
 
-class ffc_lagrange_1_2dvector_dofmap_1: public ufc::dofmap
+class ffc_discontinuous_lagrange_0_2dvector_dofmap_1: public ufc::dofmap
 {
 private:
 
@@ -346,78 +316,78 @@ private:
 public:
 
   /// Constructor
-  ffc_lagrange_1_2dvector_dofmap_1();
+  ffc_discontinuous_lagrange_0_2dvector_dofmap_1();
 
   /// Destructor
-  virtual ~ffc_lagrange_1_2dvector_dofmap_1();
+  ~ffc_discontinuous_lagrange_0_2dvector_dofmap_1();
 
   /// Return a string identifying the dofmap
-  virtual const char* signature() const;
+  const char* signature() const;
 
   /// Return true iff mesh entities of topological dimension d are needed
-  virtual bool needs_mesh_entities(unsigned int d) const;
+  bool needs_mesh_entities(unsigned int d) const;
 
   /// Initialize dofmap for mesh (return true iff init_cell() is needed)
-  virtual bool init_mesh(const ufc::mesh& m);
+  bool init_mesh(const ufc::mesh& m);
 
   /// Initialize dofmap for given cell
-  virtual void init_cell(const ufc::mesh& m,
+  void init_cell(const ufc::mesh& m,
                          const ufc::cell& c);
 
   /// Finish initialization of dofmap for cells
-  virtual void init_cell_finalize();
+  void init_cell_finalize();
 
   /// Return the topological dimension of the associated cell shape
-  virtual unsigned int topological_dimension() const;
+  unsigned int topological_dimension() const;
 
   /// Return the geometric dimension of the associated cell shape
-  virtual unsigned int geometric_dimension() const;
+  unsigned int geometric_dimension() const;
 
   /// Return the dimension of the global finite element function space
-  virtual unsigned int global_dimension() const;
+  unsigned int global_dimension() const;
 
 #ifndef UFC_BACKWARD_COMPATIBILITY
   /// Return the dimension of the local finite element function space for a cell
-  virtual unsigned int local_dimension(const ufc::cell& c) const;
+  unsigned int local_dimension(const ufc::cell& c) const;
 
   /// Return the maximum dimension of the local finite element function space
-  virtual unsigned int max_local_dimension() const;
+  unsigned int max_local_dimension() const;
 #else
   /// Return the dimension of the local finite element function space for a cell
-  virtual unsigned int local_dimension() const;
+  unsigned int local_dimension() const;
 #endif
 
   /// Return the number of dofs on each cell facet
-  virtual unsigned int num_facet_dofs() const;
+  unsigned int num_facet_dofs() const;
 
   /// Return the number of dofs associated with each cell entity of dimension d
-  virtual unsigned int num_entity_dofs(unsigned int d) const;
+  unsigned int num_entity_dofs(unsigned int d) const;
 
   /// Tabulate the local-to-global mapping of dofs on a cell
-  virtual void tabulate_dofs(unsigned int* dofs,
+  void tabulate_dofs(unsigned int* dofs,
                              const ufc::mesh& m,
                              const ufc::cell& c) const;
 
   /// Tabulate the local-to-local mapping from facet dofs to cell dofs
-  virtual void tabulate_facet_dofs(unsigned int* dofs,
+  void tabulate_facet_dofs(unsigned int* dofs,
                                    unsigned int facet) const;
 
   /// Tabulate the local-to-local mapping of dofs on entity (d, i)
-  virtual void tabulate_entity_dofs(unsigned int* dofs,
+  void tabulate_entity_dofs(unsigned int* dofs,
                                     unsigned int d, unsigned int i) const;
 
   /// Tabulate the coordinates of all dofs on a cell
-  virtual void tabulate_coordinates(double** coordinates,
+  void tabulate_coordinates(double** coordinates,
                                     const ufc::cell& c) const;
 
   /// Return the number of sub dofmaps (for a mixed element)
-  virtual unsigned int num_sub_dofmaps() const;
+  unsigned int num_sub_dofmaps() const;
 
   /// Create a new dofmap for sub dofmap i (for a mixed element)
-  virtual ufc::dofmap* create_sub_dofmap(unsigned int i) const;
+  ufc::dofmap* create_sub_dofmap(unsigned int i) const;
 
   /// Create a new class instance
-  virtual ufc::dofmap* create() const;
+  ufc::dofmap* create() const;
 
 };
 

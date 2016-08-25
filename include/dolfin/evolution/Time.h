@@ -27,7 +27,7 @@ public:
   /// Return time interval as a pair of real numbers
   std::pair<real, real> const& interval() const;
 
-  /// Return time interval as a pair of real numbers
+  /// Return time sign function
   int sign() const;
 
   /// Is the current time in the time interval

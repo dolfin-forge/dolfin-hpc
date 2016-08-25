@@ -4,8 +4,11 @@
 // First added:  2007-11-23
 // Last changed: 2007-11-23
 
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitInterval.h>
+
+#include <dolfin/math/LinearDistribution.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
 {
@@ -21,28 +24,48 @@ UnitInterval::UnitInterval(uint nx) :
   // Open mesh for editing
   MeshEditor editor(*this, CellType::interval, 1);
 
+  //
+  uint const rank = MPI::processNumber();
+  uint const pe_size = MPI::numProcesses();
+  LinearDistribution cdist(nx, pe_size);
+
   // Create vertices and cells:
-  editor.init_vertices((nx + 1));
-  editor.init_cells(nx);
+  editor.init_vertices(cdist.size + 1, cdist.global_size + 1);
+  editor.init_cells(cdist.size, cdist.global_size);
 
   // Create main vertices:
-  for (uint ix = 0; ix <= nx; ++ix)
+  for (uint ix = 0; ix <= cdist.size; ++ix)
   {
-    real const x = static_cast<real>(ix) / static_cast<real>(nx);
+    real const x = real(cdist.offset + ix) / real(cdist.global_size);
     editor.add_vertex(ix, &x);
   }
 
   // Create intervals
-  for (uint ix = 0; ix < nx; ++ix)
+  for (uint ix = 0; ix < cdist.size; ++ix)
   {
-    uint const connectivity[2] = { ix, ix + 1 };
+    uint const connectivity[2] = { cdist.offset + ix, cdist.offset + ix + 1 };
     editor.add_cell(ix, &connectivity[0]);
+  }
+
+  if (is_distributed())
+  {
+    for (uint ix = 0; ix <= cdist.size; ++ix)
+    {
+      distdata()[0].set_map(ix, cdist.offset + ix);
+    }
+    if (rank > 0)
+    {
+      distdata()[0].set_ghost(cdist.offset, rank - 1);
+    }
+    if (rank < pe_size - 1)
+    {
+      distdata()[0].set_shared_adj(cdist.offset + cdist.size, rank + 1);
+    }
   }
 
   // Close mesh editor
   editor.close();
-
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

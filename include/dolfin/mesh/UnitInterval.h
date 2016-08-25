@@ -7,7 +7,7 @@
 #ifndef __DOLFIN_UNIT_INTERVAL_H
 #define __DOLFIN_UNIT_INTERVAL_H
 
-#include "Mesh.h"
+#include <dolfin/mesh/Mesh.h>
 
 namespace dolfin
 {
@@ -19,12 +19,13 @@ namespace dolfin
 
 class UnitInterval : public Mesh
 {
+
 public:
 
   UnitInterval(uint nx);
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_UNIT_INTERVAL_H */

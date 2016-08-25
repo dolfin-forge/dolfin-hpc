@@ -35,7 +35,7 @@ inline GaussQuadratureRule::GaussQuadratureRule(unsigned int dim,
     {
     case 1:
       {
-        GaussQuadrature* q = new GaussQuadrature(degree);
+        GaussQuadrature* q = new GaussQuadrature((degree + 2)/ 2);
         unsigned int n = q->size();
         points.resize(n);
         weights.resize(n);

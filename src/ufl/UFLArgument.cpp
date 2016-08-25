@@ -146,7 +146,8 @@ std::vector<std::vector<std::vector<dolfin::real> > > const Argument::evaluate(
         }
         fe->evaluate_basis_derivatives(s, n, &grads[s][qp][0], q_points[qp],
                                        ref_cell);
-        fe->evaluate_reference_basis_derivatives(s, n, &ref_grads[s][qp][0],
+        error("W");
+        fe->evaluate_basis_derivatives(s, n, &ref_grads[s][qp][0],
                                                  q_points[qp], ref_cell);
         
         for (dolfin::uint i = 0; i < num_derivatives; ++i)

@@ -141,7 +141,7 @@ inline void UFCCellIntegral::tabulate_tensor(
         phi_grads[i][j][qp] = new real[dim];
         ufc.finite_elements[i]->evaluate_basis(j, phi_values[i][j][qp],
                                                q_points[qp], ref_cell);
-        ufc.finite_elements[i]->evaluate_reference_basis_derivatives(
+        ufc.finite_elements[i]->evaluate_basis_derivatives(
             j, 1, phi_grads[i][j][qp], q_points[qp], ref_cell);
       }
     }
@@ -163,7 +163,7 @@ inline void UFCCellIntegral::tabulate_tensor(
         ref_phi_grads[i][j][qp] = new real[dim];
         ufc.finite_elements[i]->evaluate_basis(j, ref_phi_values[i][j][qp],
                                                ref_points[qp], ref_cell);
-        ufc.finite_elements[i]->evaluate_reference_basis_derivatives(
+        ufc.finite_elements[i]->evaluate_basis_derivatives(
             j, 1, ref_phi_grads[i][j][qp], ref_points[qp], ref_cell);
       }
     }

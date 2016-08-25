@@ -121,23 +121,10 @@ public:
                                   const ufc::cell& c) const;
 
   /// Evaluate order n derivatives of all basis functions at given point in cell
-  /// UFC @since 2.1.2-hpc
-  void evaluate_reference_basis_derivatives(unsigned int i, unsigned int n,
-                                            double* values,
-                                            const double* coordinates,
-                                            const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of all basis functions at given point in cell
   /// UFC @since 1.1 but not implemented
   void evaluate_basis_derivatives_all(uint n, double* values,
                                       const double* coordinates,
                                       const ufc::cell& c) const;
-
-  /// Evaluate order n derivatives of all basis functions at given point in cell
-  /// UFC @since 2.1.2-hpc
-  void evaluate_reference_basis_derivatives_all(unsigned int n, double* values,
-                                                const double* coordinates,
-                                                const ufc::cell& c) const;
 
   /// Evaluate linear functional for dof i on the function f
   /// UFC @since 1.1
@@ -154,9 +141,6 @@ public:
                                  const double* dof_values,
                                  const ufc::cell& c) const;
 
-#if UFC_VERSION_MAJOR >= 2
-#ifndef UFC_BACKWARD_COMPATIBILITY
-  // omitted for backward compatibility code -------------
 
   /// Map coordinate xhat from reference cell to coordinate x in cell
   /// UFC @since 2.1.1
@@ -167,10 +151,6 @@ public:
   /// UFC @since 2.1.1
   void map_to_reference_cell(double* xhat, const double* x,
                              const ufc::cell& c) const;
-
-  // end omit ---------------------------------------------
-#endif
-#endif
 
   /// Return the number of sub elements (for a mixed element)
   /// UFC @since 1.1 + FIAT + UFL
@@ -307,28 +287,11 @@ inline void FiniteElement::evaluate_basis_derivatives(uint i, uint n,
 }
 
 //-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_reference_basis_derivatives(
-    uint i, uint n, double* values, const double* coordinates,
-    const ufc::cell& c) const
-{
-  ufc_finite_element_->evaluate_reference_basis_derivatives(i, n, values,
-                                                            coordinates, c);
-}
-
-//-----------------------------------------------------------------------------
 inline void FiniteElement::evaluate_basis_derivatives_all(
     uint n, double* values, const double* coordinates, const ufc::cell& c) const
 {
   ufc_finite_element_->evaluate_basis_derivatives_all(n, values, coordinates,
                                                       c);
-}
-
-//-----------------------------------------------------------------------------
-inline void FiniteElement::evaluate_reference_basis_derivatives_all(
-    uint n, double* values, const double* coordinates, const ufc::cell& c) const
-{
-  ufc_finite_element_->evaluate_reference_basis_derivatives_all(n, values,
-                                                                coordinates, c);
 }
 
 //-----------------------------------------------------------------------------
@@ -353,10 +316,6 @@ inline void FiniteElement::interpolate_vertex_values(double* vertex_values,
   ufc_finite_element_->interpolate_vertex_values(vertex_values, dof_values, c);
 }
 
-#if UFC_VERSION_MAJOR >= 2
-#ifndef UFC_BACKWARD_COMPATIBILITY
-// omitted for backward compatibility code -------------
-
 //-----------------------------------------------------------------------------
 inline void FiniteElement::map_from_reference_cell(double* x,
                                                    const double* xhat,
@@ -371,10 +330,6 @@ inline void FiniteElement::map_to_reference_cell(double* xhat, const double* x,
 {
   ufc_finite_element_->map_to_reference_cell(xhat, x, c);
 }
-
-// end omit ---------------------------------------------
-#endif
-#endif
 
 //-----------------------------------------------------------------------------
 inline uint FiniteElement::num_sub_elements() const

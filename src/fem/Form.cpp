@@ -56,15 +56,15 @@ DofMapSet& Form::dofmaps() const
 //-----------------------------------------------------------------------------
 uint Form::coefficient_index(std::string const& name) const
 {
-  error("Not implemented without UFL support: \n"
-          "uint Form::coefficient_index(const std::string& name) const");
+  for (uint i = 0; i < this->num_coefficients(); ++i)
+  {
+    if (this->coefficient_name(0) == name)
+    {
+      return i;
+    }
+  }
+  error("Form : coefficient name was not found");
   return 0;
-}
-
-//-----------------------------------------------------------------------------
-uint Form::coefficient_number(std::string const& name) const
-{
-  return this->coefficient_index(name);
 }
 
 //-----------------------------------------------------------------------------

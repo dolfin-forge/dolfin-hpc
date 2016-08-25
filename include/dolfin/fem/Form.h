@@ -45,9 +45,6 @@ public:
   /// Return index of argument associated with the given name
   virtual uint coefficient_index(std::string const& name) const;
 
-  /// Return index of argument associated with the given name [Deprecated]
-  virtual uint coefficient_number(std::string const& name) const;
-
   /// Return name of argument associated with the given number
   virtual std::string coefficient_name(dolfin::uint i) const;
 

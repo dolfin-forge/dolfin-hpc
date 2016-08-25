@@ -59,6 +59,8 @@ public:
 
 private:
 
+  inline void sync(Time const& t) { /* No-op */ }
+
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                       BilinearForm const& form, ScratchSpace& scratch);
 

@@ -77,6 +77,7 @@ public:
 
   //---------------------------------------------------------------------------
 
+  /// Delegate time dependence
   Coefficient& operator()(Time const& t)
   {
     this->sync(t);
@@ -85,7 +86,7 @@ public:
 
 private:
 
-  ///
+  /// Time dependency hook
   virtual void sync(Time const& t) = 0;
 
 };

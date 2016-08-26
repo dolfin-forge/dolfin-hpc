@@ -77,18 +77,23 @@ public:
 
   //---------------------------------------------------------------------------
 
+  /// Return the mesh
+  virtual Mesh& mesh() const = 0;
+
+  //---------------------------------------------------------------------------
+
+  /// Delegate time dependency
   GenericFunction& operator()(Time const& t)
   {
     this->sync(t);
     return *this;
   }
 
-  /// Return the mesh
-  virtual Mesh& mesh() const = 0;
+  //---------------------------------------------------------------------------
 
 private:
 
-  ///
+  /// Time dependency hook
   virtual void sync(Time const& t) = 0;
 
 };

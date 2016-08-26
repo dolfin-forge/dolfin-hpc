@@ -8,6 +8,7 @@
 #define __DOLFIN_UFC_FUNCTION_H
 
 #include <dolfin/function/GenericFunction.h>
+#include <dolfin/evolution/TimeDependent.h>
 
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/log/log.h>
@@ -17,7 +18,6 @@ namespace dolfin
 
 class Mesh;
 class Cell;
-class Time;
 
 /**
  *  @class  UFCFunction
@@ -27,7 +27,7 @@ class Time;
  */
 
 template<class T>
-class UFCFunction : public GenericFunction
+class UFCFunction : public GenericFunction, public TimeDependent
 {
 
 public:
@@ -101,13 +101,6 @@ public:
   // Return the value size
   uint value_size() const { return Coefficient::value_size(); }
 
-  ///
-  inline UFCFunction<T> const& operator()(Time const& t) const
-  {
-    evaluant_(t);
-    return *this;
-  }
-
   /// Interpolate function to vertices of mesh
   void interpolate_vertex_values(real* values) const
   {
@@ -134,6 +127,17 @@ public:
     this->facet_ = -1;
   }
 
+  //---------------------------------------------------------------------------
+
+  /// UFCFunction implements the time dependency
+  inline UFCFunction<T> const& operator()(Time const& t) const
+  {
+    TimeDependent::operator ()(t);
+    return *this;
+  }
+
+  //---------------------------------------------------------------------------
+
   /// Display basic information
   void disp() const
   {
@@ -142,13 +146,16 @@ public:
   }
 
   /// Synchronize
-  void sync() { /* No-op */ }
+  virtual void sync() { /* No-op */ }
 
 protected:
 
   inline int facet() const { return facet_; }
 
 private:
+
+  /// Time synchronization hook
+  inline void sync(Time const& t) { TimeDependent::operator ()(t); }
 
   Mesh& mesh_;
   T evaluant_;

@@ -38,6 +38,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Function::Function() :
     GenericFunction(),
+    TimeDependent(),
     mesh_(NULL),
     discrete_space_(NULL),
     element_(NULL),
@@ -56,6 +57,7 @@ Function::Function() :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh) :
     GenericFunction(),
+    TimeDependent(),
     mesh_(&mesh),
     discrete_space_(NULL),
     element_(NULL),
@@ -74,6 +76,7 @@ Function::Function(Mesh& mesh) :
 //-----------------------------------------------------------------------------
 Function::Function(Form& form, uint i) :
     GenericFunction(),
+    TimeDependent(),
     mesh_(&form.dofmaps()[i].mesh()),
     discrete_space_(new FiniteElementSpace(form, i)),
     element_(&discrete_space_->element()),
@@ -93,6 +96,7 @@ Function::Function(Form& form, uint i) :
 //-----------------------------------------------------------------------------
 Function::Function(FiniteElementSpace const& space) :
     GenericFunction(),
+    TimeDependent(),
     mesh_(&space.mesh()),
     discrete_space_(new FiniteElementSpace(space)),
     element_(&discrete_space_->element()),
@@ -112,6 +116,7 @@ Function::Function(FiniteElementSpace const& space) :
 //-----------------------------------------------------------------------------
 Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
     GenericFunction(),
+    TimeDependent(),
     mesh_(&mesh),
     discrete_space_(new FiniteElementSpace(mesh, finite_element)),
     element_(&discrete_space_->element()),
@@ -131,6 +136,7 @@ Function::Function(Mesh& mesh, ufl::FiniteElementSpace const& finite_element) :
 //-----------------------------------------------------------------------------
 Function::Function(SubFunction const& sub_function) :
     GenericFunction(),
+    TimeDependent(sub_function.function()),
     mesh_(&sub_function.function().mesh()),
     discrete_space_(new FiniteElementSpace(sub_function.function().space(),
                                            sub_function.index())),
@@ -179,6 +185,7 @@ Function::Function(SubFunction const& sub_function) :
 //-----------------------------------------------------------------------------
 Function::Function(Function const& other) :
     GenericFunction(),
+    TimeDependent(other),
     mesh_(&other.mesh()),
     discrete_space_(NULL),
     element_(NULL),
@@ -725,6 +732,7 @@ Function& Function::axpy(real value, Function const& other)
 //-----------------------------------------------------------------------------
 Function& Function::swap(Function& other)
 {
+  TimeDependent::swap(other);
   std::swap(const_cast<Mesh *&>(this->mesh_), const_cast<Mesh *&>(other.mesh_));
   std::swap(this->discrete_space_, other.discrete_space_);
   std::swap(this->element_, other.element_);

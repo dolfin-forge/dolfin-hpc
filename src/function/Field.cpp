@@ -131,8 +131,8 @@ void Field::disp() const
     }
     else
     {
-      message("%2d. min = %g, max = %g", i, storage_[i].min(),
-              storage_[i].max());
+      message("%2d. t = %e; min = %g, max = %g", storage_[i].time(), i,
+              storage_[i].min(), storage_[i].max());
     }
   }
   end();

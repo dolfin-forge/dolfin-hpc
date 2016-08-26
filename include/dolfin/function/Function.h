@@ -11,6 +11,7 @@
 #define __DOLFIN_FUNCTION_H
 
 #include <dolfin/function/GenericFunction.h>
+#include <dolfin/evolution/TimeDependent.h>
 
 #include <dolfin/common/Array.h>
 
@@ -46,7 +47,7 @@ class SubFunction;
  *          distributed on the mesh.
  */
 
-class Function : public GenericFunction
+class Function : public GenericFunction, public TimeDependent
 {
 public:
 
@@ -215,9 +216,19 @@ public:
   /// Return the maximum value
   real max() const;
 
+  //---------------------------------------------------------------------------
+
+  /// Time dependency
+  Function& operator()(Time const& t)
+  {
+    TimeDependent::operator ()(t);
+    return *this;
+  }
+
 private:
 
-  void sync(Time const& t) { /* No-op */ }
+  /// Time synchronization hook
+  inline void sync(Time const& t) { TimeDependent::operator ()(t); }
 
   /// Initialize Vector
   void InitializeVector();

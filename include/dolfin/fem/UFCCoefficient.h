@@ -114,6 +114,9 @@ protected:
 
 private:
 
+  /// Default time dependency hook
+  virtual void sync(Time const& t) { /* No-op */ }
+
   mutable int facet_;
 
 };

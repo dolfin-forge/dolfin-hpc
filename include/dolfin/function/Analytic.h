@@ -88,20 +88,6 @@ public:
     return evaluant_.value_size();
   }
 
-  ///
-  Analytic<T> const& operator()(Time const& t) const
-  {
-    evaluant_(t);
-    return *this;
-  }
-
-  ///
-  inline Analytic<T> const& operator()(Time const& t, real* values, real const* x) const
-  {
-    evaluant_(t, values, x);
-    return *this;
-  }
-
   //--- GenericFunction INTERFACE ---------------------------------------------
 
   /// Return the mesh
@@ -167,8 +153,18 @@ public:
     // Do nothing
   }
 
+  //---------------------------------------------------------------------------
+
+  /// Delegate time dependency
+  Analytic<T> const& operator()(Time const& t) const
+  {
+    evaluant_(t);
+    return *this;
+  }
+
 private:
 
+  /// Evaluant implements time dependency
   void sync(Time const& t) { evaluant_(t); }
 
   Mesh& mesh_;

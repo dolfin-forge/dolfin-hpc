@@ -1,10 +1,11 @@
 #ifndef __LICORNE_FUNCTION_VALUE_H_
 #define __LICORNE_FUNCTION_VALUE_H_
 
+#include <dolfin/function/Expression.h>
+#include <dolfin/evolution/TimeDependent.h>
+
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
-#include <dolfin/evolution/Time.h>
-#include <dolfin/function/Expression.h>
 #include <dolfin/function/ValueSpace.h>
 
 namespace dolfin
@@ -13,7 +14,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 
 template<class T, uint I = 1, uint J = 1>
-class Value : public Expression
+class Value : public Expression, public TimeDependent
 {
   static ValueSpace<I, J> const VS_;
 
@@ -22,7 +23,7 @@ public:
   ///
   Value() :
       Expression(),
-      t_(0.0)
+      TimeDependent()
   {
   }
 
@@ -50,23 +51,16 @@ public:
     return VS_.value_size();
   }
 
-  ///
+  //---------------------------------------------------------------------------
+
+  /// Value implements the time dependency
   inline Value<T, I,J> const& operator()(Time const& t) const
   {
-    t_ = t.clock();
+    TimeDependent::operator ()(t);
     return *this;
   }
 
-  ///
-  inline Value<T, I,J> const& operator()(Time const& t, real* values, real const* x) const
-  {
-    t_ = t.clock();
-    eval(values, x);
-    return *this;
-  }
-
-  ///
-  inline real time() const { return t_; }
+  //---------------------------------------------------------------------------
 
   ///
   virtual void disp() const
@@ -85,12 +79,6 @@ public:
     end();
     skip();
   }
-
-private:
-
-  void sync(Time const& t) { t_ = t.clock(); }
-
-  mutable real t_;
 
 };
 

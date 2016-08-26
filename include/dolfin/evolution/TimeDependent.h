@@ -7,12 +7,11 @@
 #ifndef __DOLFIN_TIME_DEPENDENT_H
 #define __DOLFIN_TIME_DEPENDENT_H
 
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/log/log.h>
+#include <dolfin/evolution/Time.h>
 
 namespace dolfin
 {
-
-class Time;
 
 /// Associates an object with time t
 
@@ -21,22 +20,47 @@ class TimeDependent
 
 public:
 
-  /// Constructors
+  /// Constructors with internal clock
+  TimeDependent();
+
+  /// Constructors with synchronized clock
   TimeDependent(Time const& time);
 
-  /// Constructors
-  TimeDependent(real const& t);
+  /// Copy constructor
+  TimeDependent(TimeDependent const& other);
 
   /// Destructor
   ~TimeDependent();
 
-  /// Return the current time t
-  inline real time() const { return t_; }
+  ///
+  TimeDependent& swap(TimeDependent& other);
+
+  /// With internal clock the current time is synchronized at each call
+  /// With a synchronized clock the current time is always fetched from the
+  /// associated time instance
+  inline TimeDependent const& operator()(Time const& time) const
+  {
+    if(t_ == NULL)
+    {
+      clock_ = time.clock();
+    }
+    else if(t_ != &time)
+    {
+      error("TimeDependent : re-associating with another time instance");
+    }
+    return *this;
+  }
+
+  /// Return the time associated with the instance
+  inline real time() const { return (t_ == NULL ? clock_ : t_->clock()); }
 
 private:
 
+  // Internal clock
+  mutable real clock_;
+
   // Pointer to the current time
-  real const& t_;
+  Time const * t_;
 
 };
 

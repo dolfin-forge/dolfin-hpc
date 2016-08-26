@@ -561,6 +561,7 @@ uint DistributedData::has_local(uint local_index) const
 {
   if (cached_numbering_ != NULL)
   {
+    dolfin_assert(global_.size() == 0);
     dolfin_assert(local_index < cache_size_);
     return cached_numbering_[local_index] != DOLFIN_UINT_UNDEF;
   }
@@ -571,6 +572,7 @@ uint DistributedData::get_global(uint local_index) const
 {
   if (cached_numbering_ != NULL)
   {
+    dolfin_assert(global_.size() == 0);
     dolfin_assert(local_index < cache_size_);
     dolfin_assert(cached_numbering_[local_index] != DOLFIN_UINT_UNDEF);
     return cached_numbering_[local_index];
@@ -584,6 +586,7 @@ void DistributedData::get_global(uint n, uint const * local_indices,
 {
   if (cached_numbering_ != NULL)
   {
+    dolfin_assert(global_.size() == 0);
     for(uint i = 0; i < n; ++i)
     {
       dolfin_assert(local_indices[i] < cache_size_);

@@ -71,7 +71,7 @@ uint Form::coefficient_index(std::string const& name) const
 std::string Form::coefficient_name(uint i) const
 {
   error("Not implemented without UFL support: \n"
-        "std::string Form::coefficient_name(dolfin::uint i) const");
+        "std::string Form::coefficient_name(uint i) const");
   return "";
 }
 
@@ -93,7 +93,7 @@ FiniteElementSpace * Form::create_coefficient_space(
 }
 
 //-----------------------------------------------------------------------------
-bool Form::check_coefficients(Array<Coefficient*> const& coefficients) const
+bool Form::check(Array<Coefficient*> const& coefficients) const
 {
   // Check that we get the correct number of coefficients
   if (coefficients.size() != this->num_coefficients())
@@ -167,7 +167,7 @@ bool Form::check_coefficients(Array<Coefficient*> const& coefficients) const
 }
 
 //-----------------------------------------------------------------------------
-bool Form::check_index(uint i) const
+bool Form::is_valid_index(uint i) const
 {
   // Check argument
   uint const num_arguments = form().rank() + form().num_coefficients();
@@ -179,26 +179,6 @@ bool Form::check_index(uint i) const
   return true;
 }
 
-
-//----------------------------------------------------------------------------
-void Form::auto_init()
-{
-  for (uint i = 0; i < this->num_coefficients(); ++i)
-  {
-    Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
-    if (fptr != NULL)
-    {
-      if (fptr->empty())
-      {
-        message("Coefficient %2u: auto_init %s", i,
-                this->coefficient_name(i).c_str());
-        fptr->init(*this, this->rank() + i);
-        dolfin_assert(!fptr->empty());
-      }
-    }
-  }
-}
-
 //----------------------------------------------------------------------------
 void Form::assemble(GenericTensor& T, bool reset_tensor)
 {
@@ -206,22 +186,43 @@ void Form::assemble(GenericTensor& T, bool reset_tensor)
 }
 
 //-----------------------------------------------------------------------------
-void Form::assign_coefficients(CoefficientMap const& coefficient_map,
-                               Array<dolfin::Coefficient *>& form_coefficients)
+void Form::init(Array<Coefficient *>& coefficients, CoefficientMap const& map)
 {
-  form_coefficients.clear();
+  coefficients.clear();
   for (uint i = 0; i < this->num_coefficients(); ++i)
   {
     std::string name = this->coefficient_name(i);
-    if(coefficient_map.has(name))
+    if(map.has(name))
     {
-      form_coefficients.push_back(coefficient_map.get(name));
+      coefficients.push_back(map.get(name));
     }
     else
     {
       error("Missing coefficient named '%s' in CoefficientMap.", name.c_str());
     }
   }
+  Form::init(coefficients);
 }
+
+//----------------------------------------------------------------------------
+void Form::init(Array<Coefficient *>& coefficients)
+{
+  if(coefficients.size() != this->num_coefficients())
+  {
+    error("Form : invalid number of coefficients");
+  }
+  for (uint i = 0; i < this->num_coefficients(); ++i)
+  {
+    Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
+    if (fptr != NULL && fptr->empty())
+    {
+      fptr->init(*this, this->rank() + i);
+      dolfin_assert(!fptr->empty());
+    }
+  }
+  Form::check(coefficients);
+}
+
+//----------------------------------------------------------------------------
 
 }

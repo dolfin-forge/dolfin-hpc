@@ -46,7 +46,7 @@ public:
   virtual uint coefficient_index(std::string const& name) const;
 
   /// Return name of argument associated with the given number
-  virtual std::string coefficient_name(dolfin::uint i) const;
+  virtual std::string coefficient_name(uint i) const;
 
   /// Update degree of freedom maps if needed
   void update_dofmaps() const;
@@ -100,13 +100,10 @@ public:
   FiniteElementSpace * create_coefficient_space(std::string const& name) const;
 
   /// Check dimension and rank of coefficients
-  bool check_coefficients(Array<Coefficient*> const& coefficients) const;
+  bool check(Array<Coefficient*> const& coefficients) const;
 
   /// Check if index is valid
-  bool check_index(uint i) const;
-
-  /// Auto-initialize coefficients
-  void auto_init();
+  bool is_valid_index(uint i) const;
 
   /// Assemble form
   void assemble(GenericTensor& T, bool reset_tensor);
@@ -117,8 +114,10 @@ protected:
   virtual ufc::form const& form() const = 0;
 
   /// Assign coefficients from map to form coefficients
-  void assign_coefficients(CoefficientMap const& coefficient_map,
-                           Array<dolfin::Coefficient *>& form_coefficients);
+  void init(Array<Coefficient *>& coefficients);
+
+  /// Assign coefficients from map to form coefficients
+  void init(Array<Coefficient *>& coefficients, CoefficientMap const& map);
 
 private:
 

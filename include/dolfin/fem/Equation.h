@@ -54,9 +54,6 @@ struct Equation
   bool is_initialized() const;
 
   //
-  void auto_init();
-
-  //
   void disp() const;
 
   //

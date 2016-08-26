@@ -51,21 +51,6 @@ bool Equation::is_initialized() const
 }
 
 //-----------------------------------------------------------------------------
-void Equation::auto_init()
-{
-  if (a != NULL)
-  {
-    message("a|");
-    a->auto_init();
-  }
-  if (L != NULL)
-  {
-    message("L|");
-    L->auto_init();
-  }
-}
-
-//-----------------------------------------------------------------------------
 void Equation::disp() const
 {
   section("Equation");

@@ -11,7 +11,7 @@ namespace dolfin
 struct CellDiameter : public ValueSpace<>
 {
   ///
-  void eval(real* values, const real* x, const UFCCell& cell) const
+  void evaluate(real* values, const real* x, const UFCCell& cell) const
   {
     values[0] = cell.cell->diameter();
   }

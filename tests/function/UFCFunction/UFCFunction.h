@@ -17,7 +17,7 @@ using namespace dolfin;
 struct MidpointDistance : public ValueSpace<>
 {
   ///
-  void eval(real* values, const real* x, const UFCCell& cell) const
+  void evaluate(real* values, const real* x, const UFCCell& cell) const
   {
     values[0] = cell.cell->midpoint().distance(Point(x, cell.geometric_dimension));
   }

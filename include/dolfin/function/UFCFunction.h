@@ -40,6 +40,15 @@ public:
   {
   }
 
+  /// Constructor
+  UFCFunction(Mesh& mesh, T& evaluant) :
+  GenericFunction(),
+  mesh_(mesh),
+  evaluant_(evaluant),
+  facet_(-1)
+  {
+  }
+
   /// Destructor
   ~UFCFunction()
   {

@@ -46,18 +46,12 @@ public:
 
   }
 
-  /// Evaluate function at given point coordinate in UFC cell
-  inline void eval(real* values, const real* x, UFCCell const& cell) const
-  {
-    evaluant_.eval(values, x, cell);
-  }
-
   //--- UFC INTERFACE ---------------------------------------------------------
 
   ///
   inline void evaluate(real* values, const real* coordinates, const ufc::cell& cell) const
   {
-    evaluant_.eval(values, coordinates, static_cast<UFCCell const&>(cell));
+    evaluant_.evaluate(values, coordinates, static_cast<UFCCell const&>(cell));
   }
 
   //--- GenericFunction INTERFACE ---------------------------------------------
@@ -74,9 +68,9 @@ public:
   {
     for (uint i = 0; i < n; ++i)
     {
-      evaluant_.eval(&values[i * value_size()],
-                     &coordinates[i * cell.geometric_dimension],
-                     static_cast<UFCCell const&>(cell));
+      evaluant_.evaluate(&values[i * value_size()],
+                         &coordinates[i * cell.geometric_dimension],
+                         static_cast<UFCCell const&>(cell));
     }
   }
 

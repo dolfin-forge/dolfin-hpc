@@ -52,7 +52,7 @@ public:
   }
 
   /// Return the time associated with the instance
-  inline real time() const { return (t_ == NULL ? clock_ : t_->clock()); }
+  inline real clock() const { return (t_ == NULL ? clock_ : t_->clock()); }
 
 private:
 

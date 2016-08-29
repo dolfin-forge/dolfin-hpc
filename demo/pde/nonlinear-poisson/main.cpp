@@ -40,7 +40,7 @@ class Source : public ScalarExpression, public TimeDependent
 
     void eval(real* values, const real* x) const
     {
-      values[0] = time()*x[0]*sin(x[1]);
+      values[0] = clock()*x[0]*sin(x[1]);
     }
 };
 
@@ -52,7 +52,7 @@ class DirichletBoundaryCondition : public ScalarExpression, public TimeDependent
 
     void eval(real* values, const real* x) const
     {
-      values[0] =  1.0*time();
+      values[0] =  1.0*clock();
     }
 };
 

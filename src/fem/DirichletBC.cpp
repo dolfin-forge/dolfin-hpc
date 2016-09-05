@@ -196,9 +196,6 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
   }
 
   // Iterate over facets
-#ifndef NO_PROGRESS_BAR
-  Progress p("Computing Dirichlet boundary values, topological search", entities_.size());
-#endif
   DofMap const& dof_map = space.dofmap();
   uint * cell_dofs = new uint[dof_map.local_dimension()];
   ScratchSpace scratch(space, sub_system);
@@ -230,10 +227,6 @@ void DirichletBC::computeBCTopological(_map<uint, real>& boundary_values,
       real const value = scratch.coefficients[scratch.facet_dofs[i]];
       boundary_values[dof] = value;
     }
-
-#ifndef NO_PROGRESS_BAR
-    p++;
-#endif
   }
   delete [] cell_dofs;
 }
@@ -258,9 +251,6 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
   uint const facet_dim = tdim - 1;
 
   // Iterate over facets
-#ifndef NO_PROGRESS_BAR
-  Progress p("Computing Dirichlet boundary values, geometric search", entities_.size());
-#endif
   DofMap const& dof_map = space.dofmap();
   uint * cell_dofs = new uint[dof_map.local_dimension()];
   ScratchSpace scratch(space, sub_system);
@@ -328,9 +318,6 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
                                      SubSystem const& sub_system)
 {
   // Iterate over cells
-#ifndef NO_PROGRESS_BAR
-  Progress p("Computing Dirichlet boundary values, pointwise search", mesh().num_cells());
-#endif
   DofMap const& dof_map = space.dofmap();
   uint * cell_dofs = new uint[dof_map.local_dimension()];
   ScratchSpace scratch(space, sub_system);
@@ -368,10 +355,6 @@ void DirichletBC::computeBCPointwise(_map<uint, real>& boundary_values,
       real const value = scratch.coefficients[i];
       boundary_values[dof] = value;
     }
-
-#ifndef NO_PROGRESS_BAR
-    p++;
-#endif
   }
   delete [] cell_dofs;
 }

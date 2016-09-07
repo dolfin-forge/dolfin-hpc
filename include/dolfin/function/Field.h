@@ -58,6 +58,9 @@ public:
   ///
   void init(FiniteElementSpace const& space);
 
+  /// Circular shift at given time
+  void shift(Time const& t);
+
   /// Circular shift
   void shift();
 

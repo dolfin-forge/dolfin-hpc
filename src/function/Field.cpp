@@ -71,6 +71,13 @@ void Field::init(FiniteElementSpace const& space)
   }
 }
 //-----------------------------------------------------------------------------
+void Field::shift(Time const& t)
+{
+  // Shift and update time stamp of current level
+  this->shift();
+  storage_[0](t);
+}
+//-----------------------------------------------------------------------------
 void Field::shift()
 {
   for (uint i = this->depth(); i > 0; --i)

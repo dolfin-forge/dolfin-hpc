@@ -113,29 +113,45 @@ bool Form::check(Array<Coefficient*> const& coefficients) const
     }
 
     ufc::finite_element * fe = this->create_finite_element(i + this->rank());
-    uint coef_rank = coefficients[i]->rank();
-    uint fe_rank = fe->value_rank();
-    message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank,
-            coef_rank);
-    if (fe_rank != coef_rank)
+    Function * fptr = dynamic_cast<Function *>(this->coefficients()[i]);
+    if (fptr != NULL)
     {
-      error("Invalid value rank of Coefficient '%s' with index %d:\n"
-            "Got %d but expecting %d.\n"
-            "You may need to provide the rank of a user defined Coefficient.",
-            this->coefficient_name(i).c_str(), i, coef_rank, fe_rank);
+      if(fptr->empty())
+      {
+        error("Coefficient %i is empty", i);
+      }
+      else if(strcmp(fptr->space().element().signature(), fe->signature() ) != 0)
+      {
+        error("Mismatch of discrete space for Coefficient %i", i);
+      }
     }
-
-    for (uint j = 0; j < coef_rank; ++j)
+    else
     {
-      uint dim = coefficients[i]->dim(j);
-      uint fe_dim = fe->value_dimension(j);
-      if (dim != fe_dim)
+      uint coef_rank = coefficients[i]->rank();
+      uint fe_rank = fe->value_rank();
+      message(1, "Coefficient rank: expected  = %d, provided = %d, ", fe_rank,
+              coef_rank);
+      if (fe_rank != coef_rank)
       {
         error(
-            "Invalid value dimension %d of Coefficient '%s' with index %d:\n"
-            "got %d but expecting %d.\n"
-            "You may need to provide the dimension of a user defined Coefficient.",
-            j, this->coefficient_name(i).c_str(), i, dim, fe_dim);
+        "Invalid value rank of Coefficient '%s' with index %d:\n"
+        "Got %d but expecting %d.\n"
+        "You may need to provide the rank of a user defined Coefficient.",
+        this->coefficient_name(i).c_str(), i, coef_rank, fe_rank);
+      }
+
+      for (uint j = 0; j < coef_rank; ++j)
+      {
+        uint dim = coefficients[i]->dim(j);
+        uint fe_dim = fe->value_dimension(j);
+        if (dim != fe_dim)
+        {
+          error(
+          "Invalid value dimension %d of Coefficient '%s' with index %d:\n"
+          "got %d but expecting %d.\n"
+          "You may need to provide the dimension of a user defined Coefficient.",
+          j, this->coefficient_name(i).c_str(), i, dim, fe_dim);
+        }
       }
     }
     delete fe;

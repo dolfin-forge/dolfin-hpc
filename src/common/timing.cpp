@@ -11,7 +11,7 @@
 namespace dolfin
 {
 
-#define DOLFIN_MAX_TIMER 256
+#define DOLFIN_MAX_TIMER 4096
 clock_t _dolfin_timer_[DOLFIN_MAX_TIMER];
 uint _dolfin_id_ = 0;
 

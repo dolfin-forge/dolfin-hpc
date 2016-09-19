@@ -194,7 +194,7 @@ static inline real percent(uint n, uint d)
 /// Return sequence of natural numbers ranging from begin to (excluding) end
 static inline Array<uint> range(uint begin, uint end, uint step = 1)
 {
-  uint const N = std::floor(std::abs(end - begin) / real(step)) ;
+  uint const N = std::floor(std::fabs(end - begin) / real(step)) ;
   if (N == 0)
   {
     Array<uint> ret;

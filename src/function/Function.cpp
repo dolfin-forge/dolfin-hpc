@@ -446,16 +446,17 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 
   // Pick values from global vector if cache mapping is not empty
 #ifdef ENABLE_FUNCTION_CACHE
-  if (!cache_mapping_->empty())
+  if (cache_mapping_ != NULL)
   {
     for (uint i = 0; i < scratch->local_dimension; ++i)
     {
       _map<uint, uint>::const_iterator it = cache_mapping_->find(scratch->dofs[i]);
       coefficients[i] = data_cache_[it->second];
     }
+    return;
   }
-  else
 #endif
+
   X_->get(coefficients, scratch->local_dimension, scratch->dofs);
 }
 

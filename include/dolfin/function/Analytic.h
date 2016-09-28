@@ -42,6 +42,18 @@ public:
   {
   }
 
+  ///
+  operator T&()
+  {
+    return static_cast<T&>(evaluant_);
+  }
+
+  ///
+  operator T const&() const
+  {
+    return static_cast<T const&>(evaluant_);
+  }
+
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell

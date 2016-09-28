@@ -5,6 +5,7 @@
 // Modified by Kent-Andre Mardal, 2008.
 // Modified by Ola Skavhaug, 2008.
 // Modified by Martin Sandve Alnes, 2008.
+// Modified by Aurélien Larcher, 2016.
 //
 // First added:  2007-07-03
 // Last changed: 2008-05-17
@@ -12,189 +13,269 @@
 #ifndef __DOLFIN_VECTOR_H
 #define __DOLFIN_VECTOR_H
 
-#include <dolfin/common/Variable.h>
-#include "DefaultFactory.h"
-#include "GenericVector.h"
+#include <dolfin/la/GenericVector.h>
 
-#include <set>
-#include <map>
+#include <dolfin/la/DefaultFactory.h>
 
 namespace dolfin
 {
 
-  /// This class provides the default DOLFIN vector class,
-  /// based on the default DOLFIN linear algebra backend.
+/// This class provides the default DOLFIN vector class,
+/// based on the default DOLFIN linear algebra backend.
 
-  class Vector : public GenericVector, public Variable
+class Vector : public GenericVector
+{
+
+public:
+
+  /// Create empty vector
+  Vector() :
+      vector_(DefaultFactory::factory().createVector())
   {
-  public:
+  }
 
-    /// Create empty vector
-    Vector() : Variable("x", "DOLFIN vector"), vector(0)
-    { DefaultFactory factory; vector = factory.createVector(); }
+  /// Create vector of size N distributed by default
+  explicit Vector(uint N) :
+      vector_(DefaultFactory::factory().createVector())
+  {
+    vector_->init(N);
+  }
 
-    /// Create vector of size N distributed by default
-    explicit Vector(uint N) : Variable("x", "DOLFIN vector"), vector(0)
-    { DefaultFactory factory; vector = factory.createVector(); vector->init(N); }
+  /// Create vector of size N distributed if specified
+  explicit Vector(uint N, bool distributed) :
+      vector_(DefaultFactory::factory().createVector())
+  {
+    vector_->init(N, distributed);
+  }
 
-    /// Create vector of size N distributed if specified
-    explicit Vector(uint N, bool distributed) : Variable("x", "DOLFIN vector"), vector(0)
-    { DefaultFactory factory; vector = factory.createVector(); vector->init(N, distributed); }
+  /// Copy constructor
+  explicit Vector(Vector const& x) :
+      vector_(x.vector_->copy())
+  {
+  }
 
-    /// Copy constructor
-    explicit Vector(const Vector& x) : Variable("x", "DOLFIN vector"),
-                                       vector(x.vector->copy())
-    {}
+  /// Destructor
+  ~Vector()
+  {
+    delete vector_;
+  }
 
-    /// Destructor
-    ~Vector()
-    { delete vector; }
+  //--- Implementation of the GenericTensor interface ---
 
-    //--- Implementation of the GenericTensor interface ---
+  /// Return copy of tensor
+  Vector* copy() const
+  {
+    return new Vector(*this);
+  }
 
-    /// Return copy of tensor
-    Vector* copy() const
-    { Vector* x = new Vector(); delete x->vector; x->vector = vector->copy(); return x; }
+  /// Set all entries to zero and keep any sparse structure
+  void zero()
+  {
+    vector_->zero();
+  }
 
-    /// Set all entries to zero and keep any sparse structure
-    void zero()
-    { vector->zero(); }
+  /// Finalize assembly of tensor
+  void apply(FinalizeType finaltype = FINALIZE)
+  {
+    vector_->apply(finaltype);
+  }
 
-    /// Finalize assembly of tensor
-    void apply(FinalizeType finaltype=FINALIZE)
-    { vector->apply(finaltype); }
+  /// Display tensor
+  void disp(uint precision = 2) const
+  {
+    vector_->disp(precision);
+  }
 
-    /// Display tensor
-    void disp(uint precision=2) const
-    { vector->disp(precision); }
+  //--- Implementation of the GenericVector interface ---
 
-    //--- Implementation of the GenericVector interface ---
+  /// Initialize vector of size N
+  void init(uint N)
+  {
+    vector_->init(N);
+  }
 
-    /// Initialize vector of size N
-    void init(uint N)
-    { vector->init(N); }
+  /// Initialize vector of size N and distribute if specified
+  void init(uint N, bool distributed)
+  {
+    vector_->init(N, distributed);
+  }
 
-    /// Initialize vector of size N and distribute if specified
-    void init(uint N, bool distributed)
-    { vector->init(N, distributed); }
+  void init_ghosted(uint n, std::set<uint>& indices, std::map<uint, uint>& map)
+  {
+    vector_->init_ghosted(n, indices, map);
+  }
 
-    void init_ghosted(uint n, std::set<uint>& indices,
-                              std::map<uint, uint>& map)
-    { vector->init_ghosted(n, indices, map); }
+  /// Return size of vector
+  uint size() const
+  {
+    return vector_->size();
+  }
 
-    /// Return size of vector
-    uint size() const
-    { return vector->size(); }
+  /// Return local size of vector
+  uint local_size() const
+  {
+    return vector_->local_size();
+  }
 
-    /// Return local size of vector
-    uint local_size() const
-    { return vector->local_size(); }
+  /// Return rank's offset into vector
+  uint offset() const
+  {
+    return vector_->offset();
+  }
 
-    /// Return rank's offset into vector
-    uint offset() const
-    { return vector->offset(); }
+  /// Get block of values
+  void get(real* block, uint m, const uint* rows) const
+  {
+    vector_->get(block, m, rows);
+  }
 
-    /// Get block of values
-    void get(real* block, uint m, const uint* rows) const
-    { vector->get(block, m, rows); }
+  /// Set block of values
+  void set(const real* block, uint m, const uint* rows)
+  {
+    vector_->set(block, m, rows);
+  }
 
-    /// Set block of values
-    void set(const real* block, uint m, const uint* rows)
-    { vector->set(block, m, rows); }
+  /// Add block of values
+  void add(const real* block, uint m, const uint* rows)
+  {
+    vector_->add(block, m, rows);
+  }
 
-    /// Add block of values
-    void add(const real* block, uint m, const uint* rows)
-    { vector->add(block, m, rows); }
+  /// Get all values
+  void get(real* values) const
+  {
+    vector_->get(values);
+  }
 
-    /// Get all values
-    void get(real* values) const
-    { vector->get(values); }
+  /// Set all values
+  void set(real* values)
+  {
+    vector_->set(values);
+  }
 
-    /// Set all values
-    void set(real* values)
-    { vector->set(values); }
+  /// Add values to each entry
+  void add(real* values)
+  {
+    vector_->add(values);
+  }
 
-    /// Add values to each entry
-    void add(real* values)
-    { vector->add(values); }
+  /// Add multiple of given vector (AXPY operation)
+  void axpy(real a, const GenericVector& x)
+  {
+    vector_->axpy(a, x);
+  }
 
-    /// Add multiple of given vector (AXPY operation)
-    void axpy(real a, const GenericVector& x)
-    { vector->axpy(a, x); }
+  /// Return inner product with given vector
+  real inner(const GenericVector& x) const
+  {
+    return vector_->inner(x);
+  }
 
-    /// Return inner product with given vector
-    real inner(const GenericVector& x) const
-    { return vector->inner(x); }
+  /// Return norm of vector
+  real norm(VectorNormType type = l2) const
+  {
+    return vector_->norm(type);
+  }
 
-    /// Return norm of vector
-    real norm(VectorNormType type=l2) const
-    { return vector->norm(type); }
+  /// Return minimum value of vector
+  real min() const
+  {
+    return vector_->min();
+  }
 
-    /// Return minimum value of vector
-    real min() const
-    { return vector->min(); }
+  /// Return maximum value of vector
+  real max() const
+  {
+    return vector_->max();
+  }
 
-    /// Return maximum value of vector
-    real max() const
-    { return vector->max(); }
+  /// Multiply vector by given number
+  Vector& operator*=(real a)
+  {
+    *vector_ *= a;
+    return *this;
+  }
 
-    /// Multiply vector by given number
-    const Vector& operator*= (real a)
-    { *vector *= a; return *this; }
+  /// Divide vector by given number
+  Vector& operator/=(real a)
+  {
+    *this *= 1.0 / a;
+    return *this;
+  }
 
-    /// Divide vector by given number
-    const Vector& operator/= (real a)
-    { *this *= 1.0 / a; return *this; }
+  /// Multiply vector by given vector component-wise
+  Vector& operator*=(const GenericVector& x)
+  {
+    *vector_ *= x;
+    return *this;
+  }
 
-    /// Multiply vector by given vector component-wise
-    const Vector& operator*= (const GenericVector& x)
-    { *vector *= x; return *this; }
+  /// Add given vector
+  Vector& operator+=(const GenericVector& x)
+  {
+    axpy(1.0, x);
+    return *this;
+  }
 
-    /// Add given vector
-    const Vector& operator+= (const GenericVector& x)
-    { axpy(1.0, x); return *this; }
+  /// Subtract given vector
+  Vector& operator-=(const GenericVector& x)
+  {
+    axpy(-1.0, x);
+    return *this;
+  }
 
-    /// Subtract given vector
-    const Vector& operator-= (const GenericVector& x)
-    { axpy(-1.0, x); return *this; }
+  /// Assignment operator
+  GenericVector& operator=(const GenericVector& x)
+  {
+    *vector_ = x;
+    return *this;
+  }
 
-    /// Assignment operator
-    const GenericVector& operator= (const GenericVector& x)
-    { *vector = x; return *this; }
+  /// Assignment operator
+  Vector& operator=(real a)
+  {
+    *vector_ = a;
+    return *this;
+  }
 
-    /// Assignment operator
-    const Vector& operator= (real a)
-    { *vector = a; return *this; }
+  //--- Special functions ---
 
-    //--- Special functions ---
+  /// Return linear algebra backend factory
+  LinearAlgebraFactory& factory() const
+  {
+    return vector_->factory();
+  }
 
-    /// Return linear algebra backend factory
-    LinearAlgebraFactory& factory() const
-    { return vector->factory(); }
+  //--- Special functions, intended for library use only ---
 
-    //--- Special functions, intended for library use only ---
+  /// Return concrete instance / unwrap (const)
+  GenericVector const* instance() const
+  {
+    return vector_;
+  }
 
-    /// Return concrete instance / unwrap (const)
-    const GenericVector* instance() const
-    { return vector; }
+  /// Return concrete instance / unwrap (non-const version)
+  GenericVector* instance()
+  {
+    return vector_;
+  }
 
-    /// Return concrete instance / unwrap (non-const version)
-    GenericVector* instance()
-    { return vector; }
+  //--- Special Vector functions ---
 
-    //--- Special Vector functions ---
+  /// Assignment operator
+  Vector& operator=(Vector const& x)
+  {
+    *vector_ = *x.vector_;
+    return *this;
+  }
 
-    /// Assignment operator
-    const Vector& operator= (const Vector& x)
-    { *vector = *x.vector; return *this; }
+private:
 
-  private:
+  // Pointer to concrete implementation
+  GenericVector * const vector_;
 
-    // Pointer to concrete implementation
-    GenericVector* vector;
+};
 
-  };
+} /* namespace dolfin */
 
-}
-
-#endif
+#endif /* __DOLFIN_VECTOR_H */

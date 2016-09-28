@@ -6,14 +6,15 @@
 // First added:  2008-05-17
 // Last changed: 2011-06-10
 
+#include <dolfin/la/DefaultFactory.h>
+
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/la/PETScFactory.h>
 #include <dolfin/la/JANPACKFactory.h>
-#include <dolfin/la/DefaultFactory.h>
 
-
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 GenericMatrix* DefaultFactory::createMatrix() const
@@ -31,26 +32,29 @@ GenericSparsityPattern * DefaultFactory::createPattern() const
   return factory().createPattern();
 }
 //-----------------------------------------------------------------------------
-LinearAlgebraFactory& DefaultFactory::factory() const
+LinearAlgebraFactory& DefaultFactory::factory()
 {
 
   // Get backend from parameter system
   std::string backend = dolfin_get("linear algebra backend");
 
+#ifdef HAVE_PETSC
   if (backend == "PETSc")
   {
-#ifdef HAVE_PETSC
     return PETScFactory::instance();
-#endif
   }
-  else if (backend == "JANPACK")
-  {
+#endif
+
 #ifdef HAVE_JANPACK
+  if (backend == "JANPACK")
+  {
     return JANPACKFactory::instance();
-#endif
   }
+#endif
 
   error("Linear algebra backend \"" + backend + "\" not available.");
   return factory(); // Never reached :P
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

@@ -30,6 +30,12 @@ static inline bool abscmp(real x, real y)
   return std::fabs(x - y) < DOLFIN_EPS;
 }
 
+/// Convenient function
+static inline bool small(real x, real eps = DOLFIN_EPS)
+{
+  return std::fabs(x) < eps;
+}
+
 /// Return absolute real comparison for ~ O(1) with given epsilon:
 /// | x - y | < eps
 static inline bool abscmp(real x, real y, real eps)

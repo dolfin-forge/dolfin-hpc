@@ -104,6 +104,18 @@ public:
   /// Assign coordinates from given mesh geometry and mapping from self to other
   void assign(MeshGeometry const& other, Array<uint> const& mapping);
 
+  /// Scale geometry
+  MeshGeometry& operator*=(real const a);
+  MeshGeometry& operator/=(real const a);
+
+  /// Offset geometry
+  MeshGeometry& operator+=(real const a);
+  MeshGeometry& operator-=(real const a);
+
+  /// Translate geometry
+  MeshGeometry& operator+=(Point const& p);
+  MeshGeometry& operator-=(Point const& p);
+
   /// Display data
   void disp() const;
 

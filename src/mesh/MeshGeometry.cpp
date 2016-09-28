@@ -8,6 +8,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/log/log.h>
 
 #include <algorithm>
@@ -225,6 +226,75 @@ void MeshGeometry::assign(MeshGeometry const& other, Array<uint> const& mapping)
     std::copy(other.x(mapping[i]), other.x(mapping[i]) + dim_,
               coordinates_ + i * dim_);
   }
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator*=(real const a)
+{
+  real * it  = coordinates_;
+  real const * const end = coordinates_ + dim_ * size_;
+  while (it != end)
+  {
+    (*it++) *= a;
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator/=(real const a)
+{
+  real * it  = coordinates_;
+  real const * const end = coordinates_ + dim_ * size_;
+  if(small(a))
+  {
+    error("MeshGeometry : dividing coordinates by zero");
+  }
+  real const b = 1.0/a;
+  while (it != end)
+  {
+    (*it++) *= b;
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator+=(real const a)
+{
+  real * it  = coordinates_;
+  real const * const end = coordinates_ + dim_ * size_;
+  while (it != end)
+  {
+    (*it++) += a;
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator-=(real const a)
+{
+  real * it  = coordinates_;
+  real const * const end = coordinates_ + dim_ * size_;
+  while (it != end)
+  {
+    (*it++) -= a;
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator+=(Point const& p)
+{
+  real const N = dim_ * size_;
+  for (uint i = 0; i < N; ++i)
+  {
+    coordinates_[i] += p[i % dim_];
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+MeshGeometry& MeshGeometry::operator-=(Point const& p)
+{
+  real const N = dim_ * size_;
+  for (uint i = 0; i < N; ++i)
+  {
+    coordinates_[i] -= p[i % dim_];
+  }
+  return *this;
 }
 //-----------------------------------------------------------------------------
 int MeshGeometry::token() const

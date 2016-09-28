@@ -128,25 +128,25 @@ namespace dolfin
     real max() const;
 
     /// Multiply vector by given number
-    const PETScVector& operator*= (real a);
+    PETScVector& operator*= (real a);
 
     /// Divide vector by given number
-    const PETScVector& operator/= (real a);
+    PETScVector& operator/= (real a);
 
     /// Multiply vector by given vector component-wise
-    const PETScVector& operator*= (const GenericVector& x);
+    PETScVector& operator*= (const GenericVector& x);
 
     /// Add given vector
-    const PETScVector& operator+= (const GenericVector& x);
+    PETScVector& operator+= (const GenericVector& x);
 
     /// Subtract given vector
-    const PETScVector& operator-= (const GenericVector& x);
+    PETScVector& operator-= (const GenericVector& x);
 
     /// Assignment operator
-    const PETScVector& operator= (const GenericVector& x);
+    PETScVector& operator= (const GenericVector& x);
 
     /// Assignment operator
-    const PETScVector& operator= (real a);
+    PETScVector& operator= (real a);
 
     //--- Special functions ---
 
@@ -156,7 +156,7 @@ namespace dolfin
     //--- Special PETSc functions ---
 
     /// Assignment operator
-    const PETScVector& operator= (const PETScVector& x);
+    PETScVector& operator= (PETScVector const& x);
 
     /// Return PETSc Vec pointer
     Vec vec() const;
@@ -193,6 +193,6 @@ namespace dolfin
 
 }
 
-#endif
+#endif /* HAVE_PETSC */
 
-#endif
+#endif /* __DOLFIN_PETSC_VECTOR_H */

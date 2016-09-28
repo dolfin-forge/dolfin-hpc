@@ -9,20 +9,17 @@
 // First added:  2004
 // Last changed: 2008-10-28
 
-// FIXME: Insert dolfin_assert() where appropriate
-
 #include <dolfin/config/dolfin_config.h>
 
 #ifdef HAVE_PETSC
 
-#include <cmath>
-#include <dolfin/math/basic.h>
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/la/PETScVector.h>
-#include <dolfin/la/PETScFactory.h>
-#include <dolfin/main/MPI.h>
 
 #include <dolfin/common/Array.h>
+#include <dolfin/log/log.h>
+#include <dolfin/la/PETScFactory.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/math/basic.h>
 
 #include <set>
 #include <map>
@@ -53,7 +50,7 @@ PETScVector::PETScVector(Vec x):
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-PETScVector::PETScVector(const PETScVector& v):
+PETScVector::PETScVector(PETScVector const& v):
     Variable("x", "a vector"),
     x(0), is_view(false), is_distributed(false), is_ghosted(false)
 {
@@ -307,13 +304,13 @@ uint PETScVector::offset() const
   return static_cast<uint>(low);
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator= (const GenericVector& v)
+PETScVector& PETScVector::operator= (const GenericVector& v)
 {
   *this = v.down_cast<PETScVector>();
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator= (const PETScVector& v)
+PETScVector& PETScVector::operator= (PETScVector const& v)
 {
   if(&v != this)
   {
@@ -324,17 +321,17 @@ const PETScVector& PETScVector::operator= (const PETScVector& v)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator= (real a)
+PETScVector& PETScVector::operator= (real a)
 {
   dolfin_assert(x);
   VecSet(x, a);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator*=( const GenericVector& y)
+PETScVector& PETScVector::operator*=( const GenericVector& y)
 {
   dolfin_assert(x);
-  const PETScVector& v = y.down_cast<PETScVector>();
+  PETScVector const& v = y.down_cast<PETScVector>();
   dolfin_assert(v.x);
 
   if (size() != v.size())
@@ -347,19 +344,19 @@ const PETScVector& PETScVector::operator*=( const GenericVector& y)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator+= (const GenericVector& x)
+PETScVector& PETScVector::operator+= (const GenericVector& x)
 {
   this->axpy(1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator-= (const GenericVector& x)
+PETScVector& PETScVector::operator-= (const GenericVector& x)
 {
   this->axpy(-1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator*= (const real a)
+PETScVector& PETScVector::operator*= (const real a)
 {
   dolfin_assert(x);
   VecScale(x, a);
@@ -367,7 +364,7 @@ const PETScVector& PETScVector::operator*= (const real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScVector& PETScVector::operator/= (const real a)
+PETScVector& PETScVector::operator/= (const real a)
 {
   dolfin_assert(x);
   dolfin_assert(a != 0.0);
@@ -382,7 +379,7 @@ real PETScVector::inner(const GenericVector& y) const
 {
   dolfin_assert(x);
 
-  const PETScVector& v = y.down_cast<PETScVector>();
+  PETScVector const& v = y.down_cast<PETScVector>();
   dolfin_assert(v.x);
 
   real a;
@@ -395,7 +392,7 @@ void PETScVector::axpy(real a, const GenericVector& y)
 {
   dolfin_assert(x);
 
-  const PETScVector& v = y.down_cast<PETScVector>();
+  PETScVector const& v = y.down_cast<PETScVector>();
   dolfin_assert(v.x);
 
   if (size() != v.size())
@@ -538,7 +535,7 @@ LinearAlgebraFactory& PETScVector::factory() const
   return PETScFactory::instance();
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<< (LogStream& stream, const PETScVector& x)
+LogStream& operator<< (LogStream& stream, PETScVector const& x)
 {
   stream << "[ PETSc vector of size " << x.size() << " ]";
   return stream;

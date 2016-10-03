@@ -25,10 +25,10 @@ struct LinearDistribution
   uint const size;
 
   ///
-  LinearDistribution(uint global_size, uint card) :
+  LinearDistribution(uint global_size, uint card, uint rank) :
       global_size(global_size),
       card(card),
-      rank(MPI::processNumber()),
+      rank(rank),
       L(std::floor((real) global_size / (real) card)),
       R(global_size % card),
       offset(rank * L + std::min(rank,R)),

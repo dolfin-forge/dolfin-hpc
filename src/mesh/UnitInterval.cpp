@@ -27,7 +27,7 @@ UnitInterval::UnitInterval(uint nx) :
   //
   uint const rank = MPI::processNumber();
   uint const pe_size = MPI::numProcesses();
-  LinearDistribution cdist(nx, pe_size);
+  LinearDistribution cdist(nx, pe_size, rank);
 
   // Create vertices and cells:
   editor.init_vertices(cdist.size + 1, cdist.global_size + 1);

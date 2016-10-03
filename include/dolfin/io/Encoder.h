@@ -34,6 +34,7 @@ namespace dolfin
 
   /// We cheating in some functions by relying on std::vector data being 
   /// contiguous in memory. This will be part of the upcoming C++ standard.
+  /// COMMENT: Only if 2009 happened before the C++2003 Addendum.
 
   namespace Encoder
   {

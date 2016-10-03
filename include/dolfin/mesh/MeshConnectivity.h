@@ -56,8 +56,14 @@ public:
   /// Initialize number of entities and number of connections (equal for all)
   void init(uint num_entities, uint num_connections);
 
+  /// Initialize number of entities and number of connections (equal for all)
+  void init(uint * connectivity, uint num_entities, uint num_connections);
+
   /// Initialize number of entities and number of connections (individually)
   void init(Array<uint> const& num_connections);
+
+  /// Initialize number of entities and number of connections (individually)
+  void init(uint * connectivity, Array<uint> const& num_connections);
 
   /// Clear all data
   void clear();

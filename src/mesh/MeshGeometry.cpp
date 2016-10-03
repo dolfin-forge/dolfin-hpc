@@ -107,6 +107,11 @@ real const * MeshGeometry::coordinates() const
 //-----------------------------------------------------------------------------
 void MeshGeometry::init(uint gdim, uint size)
 {
+  init(NULL, gdim, size);
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::init(real * coordinates, uint gdim, uint size)
+{
   if (coordinates_ != NULL)
   {
     error("MeshGeometry : clear instance before reinitializing");
@@ -122,7 +127,11 @@ void MeshGeometry::init(uint gdim, uint size)
 
   dim_ = gdim;
   size_ = size;
-  if (dim_ * size_ > 0)
+  if (coordinates != NULL)
+  {
+    coordinates_ = coordinates;
+  }
+  else if (dim_ * size_ > 0)
   {
     coordinates_ = new real[dim_ * size_];
     std::fill_n(coordinates_, dim_ * size_, 0.0);

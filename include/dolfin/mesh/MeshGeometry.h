@@ -78,6 +78,9 @@ public:
   /// Initialize coordinate list to given geometrical dimension and size
   void init(uint gdim, uint size);
 
+  /// Initialize coordinate list, assign array
+  void init(real * coordinates, uint gdim, uint size);
+
   /// Clear all data
   void clear();
 

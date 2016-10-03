@@ -85,6 +85,9 @@ public:
   /// number of local entities will trigger an error.
   void init(uint dim, uint num_local, uint num_global = 0);
 
+  ///
+  void init(uint * connectivity, uint dim, uint num_local, uint num_global = 0);
+
   /// Clear all data
   void clear();
 

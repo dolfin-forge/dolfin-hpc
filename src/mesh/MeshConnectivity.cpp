@@ -121,6 +121,12 @@ bool MeshConnectivity::operator!=(MeshConnectivity const& other) const
 //-----------------------------------------------------------------------------
 void MeshConnectivity::init(uint num_entities, uint num_connections)
 {
+  init(NULL, num_entities, num_connections);
+}
+//-----------------------------------------------------------------------------
+void MeshConnectivity::init(uint * connectivity, uint num_entities,
+                            uint num_connections)
+{
   clear();
   //
   is_initialized_= true;
@@ -133,7 +139,11 @@ void MeshConnectivity::init(uint num_entities, uint num_connections)
   {
     offsets_[e] = e * num_connections;
   }
-  if (size_ > 0)
+  if (connectivity != NULL)
+  {
+    connections_ = connectivity;
+  }
+  else if (size_ > 0)
   {
     connections_ = new uint[size_];
     for (uint i = 0; i < size_; ++i)
@@ -144,6 +154,11 @@ void MeshConnectivity::init(uint num_entities, uint num_connections)
 }
 //-----------------------------------------------------------------------------
 void MeshConnectivity::init(Array<uint> const& num_connections)
+{
+  init(NULL, num_connections);
+}
+//-----------------------------------------------------------------------------
+void MeshConnectivity::init(uint * connectivity, Array<uint> const& num_connections)
 {
   clear();
   //
@@ -167,11 +182,20 @@ void MeshConnectivity::init(Array<uint> const& num_connections)
       max_connections_ = std::max(max_connections_, num_connections[e]);
     }
     offsets_[num_entities_] = size_;
-    connections_ = new uint[size_];
-    for (uint i = 0; i < size_; ++i)
+
+    if (connectivity != NULL)
     {
-      connections_[i] = 0;
+      connections_ = connectivity;
     }
+    else
+    {
+      connections_ = new uint[size_];
+      std::fill_n(connections_, size_, 0);
+    }
+  }
+  else if (connectivity != NULL)
+  {
+    error("MeshConnectivity : assigning empty connectivity with non-zero pointer");
   }
 }
 //-----------------------------------------------------------------------------

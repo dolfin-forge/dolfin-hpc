@@ -147,6 +147,12 @@ void MeshTopology::init(uint dim, bool distribute /* = true */)
 //-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
 {
+  init(NULL, dim, num_local, num_global);
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
+                        uint num_global /* = 0 */)
+{
   if (connectivity_ == NULL)
   {
     error("MeshTopology : initializing entities of dimension %u but topology "
@@ -169,7 +175,8 @@ void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
             "dimension %u but topology containes zero vertices", dim);
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(num_local, mesh_.type().num_vertices(dim));
+    connectivity_[dim_][0].init(connectivity, num_local,
+                                mesh_.type().num_vertices(dim));
   }
   // Cells
   if (dim_ == dim)
@@ -180,7 +187,8 @@ void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
             "contains zero vertices");
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(num_local, mesh_.type().num_vertices(dim));
+    connectivity_[dim_][0].init(connectivity, num_local,
+                                mesh_.type().num_vertices(dim));
   }
   // Overflow
   if (dim_ < dim)

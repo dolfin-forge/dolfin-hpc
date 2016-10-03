@@ -223,6 +223,16 @@ BoundaryMesh& Mesh::interior_boundary()
   return *interior_boundary_;
 }
 //-----------------------------------------------------------------------------
+bool Mesh::serial_io() const
+{
+  return (MPI::numProcesses() == 1) || dolfin_get("Mesh read in serial");
+}
+//-----------------------------------------------------------------------------
+bool Mesh::parallel_io() const
+{
+  return !this->serial_io();
+}
+//-----------------------------------------------------------------------------
 bool Mesh::is_distributed() const
 {
   return topology().is_distributed();
@@ -290,8 +300,7 @@ void Mesh::partition_geom(MeshFunction<uint>& partitions)
 //-----------------------------------------------------------------------------
 void Mesh::distribute()
 {
-  bool const serial_mesh = dolfin_get("Mesh read in serial");
-  if (MPI::numProcesses() > 1 && !serial_mesh)
+  if (this->parallel_io())
   {
     // COMMENT: At this point the distributed data cannot be empty as the file
     //          format is supposed to fill it.

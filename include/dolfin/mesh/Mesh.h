@@ -133,6 +133,12 @@ public:
 
   //---
 
+  //// Return if the mesh should be read/written in serial
+  bool serial_io() const;
+
+  //// Return if the mesh should be read/written in parallel
+  bool parallel_io() const;
+
   /// Return whether the mesh is distributed i.e iff the topology is distributed
   bool is_distributed() const;
 

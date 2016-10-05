@@ -193,11 +193,11 @@ void XMLFile::operator<<(GenericVector& x)
   x.get(values);
 
   // Write vector in XML format
-  fprintf(fp, "  <vector size=\"%u\"> \n", x.local_size());
+  fprintf(fp, "<vector size=\"%u\"> \n", x.local_size());
   for (unsigned int i = 0; i < x.local_size(); i++)
   {
-    fprintf(fp, "    <entry row=\"%u\" value=\"%.15g\"/>\n", i, values[i]);
-    if (i == (x.local_size() - 1)) fprintf(fp, "  </vector>\n");
+    fprintf(fp, "<entry row=\"%u\" value=\"%.15g\"/>\n", i, values[i]);
+    if (i == (x.local_size() - 1)) fprintf(fp, "</vector>\n");
   }
 
   // Delete vector values
@@ -219,7 +219,7 @@ void XMLFile::operator<<(GenericMatrix& A)
   FILE *fp = openFile();
 
   // Write matrix in XML format
-  fprintf(fp, "  <matrix rows=\"%u\" columns=\"%u\">\n", A.size(0), A.size(1));
+  fprintf(fp, "<matrix rows=\"%u\" columns=\"%u\">\n", A.size(0), A.size(1));
 
   Array<uint> columns;
   Array<real> values;
@@ -227,17 +227,17 @@ void XMLFile::operator<<(GenericMatrix& A)
   for (unsigned int i = 0; i < A.size(0); i++)
   {
     A.getrow(i, columns, values);
-    if (columns.size() > 0) fprintf(fp, "    <row row=\"%u\" size=\"%d\">\n", i,
+    if (columns.size() > 0) fprintf(fp, "<row row=\"%u\" size=\"%d\">\n", i,
                                     (int) columns.size());
     for (uint pos = 0; pos < columns.size(); pos++)
     {
       unsigned int j = columns[pos];
       real aij = values[pos];
-      fprintf(fp, "      <entry column=\"%u\" value=\"%.15g\"/>\n", j, aij);
+      fprintf(fp, "<entry column=\"%u\" value=\"%.15g\"/>\n", j, aij);
     }
-    if (columns.size() > 0) fprintf(fp, "    </row>\n");
+    if (columns.size() > 0) fprintf(fp, "</row>\n");
   }
-  fprintf(fp, "  </matrix>\n");
+  fprintf(fp, "</matrix>\n");
 
   // Close file
   closeFile(fp);
@@ -259,10 +259,10 @@ void XMLFile::operator<<(Mesh& mesh)
     CellType::Type cell_type = mesh.type().cellType();
 
     // Write mesh in XML format
-    fprintf(fp, "  <mesh celltype=\"%s\" dim=\"%u\">\n",
+    fprintf(fp, "<mesh celltype=\"%s\" dim=\"%u\">\n",
             mesh.type().str().c_str(), mesh.geometry().dim());
 
-    fprintf(fp, "    <vertices size=\"%u\">\n", mesh.size(0));
+    fprintf(fp, "<vertices size=\"%u\">\n", mesh.size(0));
 
     switch (mesh.geometry().dim())
       {
@@ -270,7 +270,7 @@ void XMLFile::operator<<(Mesh& mesh)
         for (VertexIterator v(mesh); !v.end(); ++v)
         {
           fprintf(fp,
-                  "      <vertex index=\"%u\" x=\"%g\"/>\n", v->index(),
+                  "<vertex index=\"%u\" x=\"%g\"/>\n", v->index(),
                   v->x(0));
         }
         break;
@@ -278,7 +278,7 @@ void XMLFile::operator<<(Mesh& mesh)
         for (VertexIterator v(mesh); !v.end(); ++v)
         {
           fprintf(fp,
-                  "      <vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
+                  "<vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
                   v->index(), v->x(0), v->x(1));
         }
         break;
@@ -286,7 +286,7 @@ void XMLFile::operator<<(Mesh& mesh)
         for (VertexIterator v(mesh); !v.end(); ++v)
         {
           fprintf(fp,
-                  "      <vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
+                  "<vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
                   v->index(), v->x(0), v->x(1), v->x(2));
         }
         break;
@@ -295,8 +295,8 @@ void XMLFile::operator<<(Mesh& mesh)
         break;
       }
 
-    fprintf(fp, "    </vertices>\n");
-    fprintf(fp, "    <cells size=\"%u\">\n", mesh.num_cells());
+    fprintf(fp, "</vertices>\n");
+    fprintf(fp, "<cells size=\"%u\">\n", mesh.num_cells());
 
     switch (cell_type)
       {
@@ -306,7 +306,7 @@ void XMLFile::operator<<(Mesh& mesh)
           uint* vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(fp,
-                  "      <interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
+                  "<interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
                   c->index(), vertices[0], vertices[1]);
         }
         break;
@@ -317,7 +317,7 @@ void XMLFile::operator<<(Mesh& mesh)
           dolfin_assert(vertices);
           fprintf(
               fp,
-              "      <triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
+              "<triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
               c->index(), vertices[0], vertices[1], vertices[2]);
         }
         break;
@@ -328,7 +328,7 @@ void XMLFile::operator<<(Mesh& mesh)
           dolfin_assert(vertices);
           fprintf(
               fp,
-              "      <tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+              "<tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
               c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
         }
         break;
@@ -339,7 +339,7 @@ void XMLFile::operator<<(Mesh& mesh)
           dolfin_assert(vertices);
           fprintf(
               fp,
-              "      <quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+              "<quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
               c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
         }
         break;
@@ -350,7 +350,7 @@ void XMLFile::operator<<(Mesh& mesh)
           dolfin_assert(vertices);
           fprintf(
               fp,
-              "      <hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",
+              "<hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",
               c->index(), vertices[0], vertices[1], vertices[2], vertices[3],
                           vertices[4], vertices[5], vertices[6], vertices[7]);
         }
@@ -360,8 +360,8 @@ void XMLFile::operator<<(Mesh& mesh)
         break;
       }
 
-    fprintf(fp, "    </cells>\n");
-    fprintf(fp, "  </mesh>\n");
+    fprintf(fp, "</cells>\n");
+    fprintf(fp, "</mesh>\n");
 
     // Close file
     closeFile(fp);
@@ -662,17 +662,17 @@ void XMLFile::operator<<(MeshFunction<int>& meshfunction)
   FILE *fp = openFile();
 
   // Write mesh in XML format
-  fprintf(fp, "  <meshfunction type=\"int\" dim=\"%u\" size=\"%u\">\n",
+  fprintf(fp, "<meshfunction type=\"int\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
 
   Mesh& mesh = meshfunction.mesh();
   for (MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
-    fprintf(fp, "    <entity index=\"%u\" value=\"%d\"/>\n", e->index(),
+    fprintf(fp, "<entity index=\"%u\" value=\"%d\"/>\n", e->index(),
             meshfunction(*e));
   }
 
-  fprintf(fp, "  </meshfunction>\n");
+  fprintf(fp, "</meshfunction>\n");
 
   // Close file
   closeFile(fp);
@@ -687,17 +687,17 @@ void XMLFile::operator<<(MeshFunction<uint>& meshfunction)
   FILE *fp = openFile();
 
   // Write mesh in XML format
-  fprintf(fp, "  <meshfunction type=\"uint\" dim=\"%u\" size=\"%u\">\n",
+  fprintf(fp, "<meshfunction type=\"uint\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
 
   Mesh& mesh = meshfunction.mesh();
   for (MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
-    fprintf(fp, "    <entity index=\"%u\" value=\"%d\"/>\n", e->index(),
+    fprintf(fp, "<entity index=\"%u\" value=\"%d\"/>\n", e->index(),
             meshfunction(*e));
   }
 
-  fprintf(fp, "  </meshfunction>\n");
+  fprintf(fp, "</meshfunction>\n");
 
   // Close file
   closeFile(fp);
@@ -712,17 +712,17 @@ void XMLFile::operator<<(MeshFunction<real>& meshfunction)
   FILE *fp = openFile();
 
   // Write mesh in XML format
-  fprintf(fp, "  <meshfunction type=\"double\" dim=\"%u\" size=\"%u\">\n",
+  fprintf(fp, "<meshfunction type=\"double\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
 
   Mesh& mesh = meshfunction.mesh();
   for (MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
-    fprintf(fp, "    <entity index=\"%u\" value=\"%g\"/>\n", e->index(),
+    fprintf(fp, "<entity index=\"%u\" value=\"%g\"/>\n", e->index(),
             meshfunction(*e));
   }
 
-  fprintf(fp, "  </meshfunction>\n");
+  fprintf(fp, "</meshfunction>\n");
 
   // Close file
   closeFile(fp);
@@ -737,7 +737,7 @@ void XMLFile::operator<<(MeshFunction<bool>& meshfunction)
   FILE *fp = openFile();
 
   // Write mesh in XML format
-  fprintf(fp, "  <meshfunction type=\"bool\" dim=\"%u\" size=\"%u\">\n",
+  fprintf(fp, "<meshfunction type=\"bool\" dim=\"%u\" size=\"%u\">\n",
           meshfunction.dim(), meshfunction.size());
 
   Mesh& mesh = meshfunction.mesh();
@@ -745,11 +745,11 @@ void XMLFile::operator<<(MeshFunction<bool>& meshfunction)
   for (MeshEntityIterator e(mesh, meshfunction.dim()); !e.end(); ++e)
   {
     value = (meshfunction(*e) ? "true" : "false");
-    fprintf(fp, "    <entity index=\"%u\" value=\"%s\"/>\n", e->index(),
+    fprintf(fp, "<entity index=\"%u\" value=\"%s\"/>\n", e->index(),
             value.c_str());
   }
 
-  fprintf(fp, "  </meshfunction>\n");
+  fprintf(fp, "</meshfunction>\n");
 
   // Close file
   closeFile(fp);
@@ -762,7 +762,7 @@ void XMLFile::operator<<(Function& f)
 {
   // Begin function
   FILE *fp = openFile();
-  fprintf(fp, "  <function> \n");
+  fprintf(fp, "<function> \n");
   closeFile(fp);
 
   // Write the mesh
@@ -773,18 +773,18 @@ void XMLFile::operator<<(Function& f)
 
   // Write the finite element
   fp = openFile();
-  fprintf(fp, "  <finiteelement signature=\"%s\"/>\n",
+  fprintf(fp, "<finiteelement signature=\"%s\"/>\n",
           f.space().element().signature());
   closeFile(fp);
 
   // Write the dof map
   fp = openFile();
-  fprintf(fp, "  <dofmap signature=\"%s\"/>\n", f.space().dofmap().signature());
+  fprintf(fp, "<dofmap signature=\"%s\"/>\n", f.space().dofmap().signature());
   closeFile(fp);
 
   // End function
   fp = openFile();
-  fprintf(fp, "  </function> \n");
+  fprintf(fp, "</function> \n");
   closeFile(fp);
 
   message(1, "Saved function to file %s in DOLFIN XML format.",
@@ -797,7 +797,7 @@ void XMLFile::operator<<(ParameterList& parameters)
   FILE *fp = openFile();
 
   // Write parameter list in XML format
-  fprintf(fp, "  <parameters>\n");
+  fprintf(fp, "<parameters>\n");
 
   for (ParameterList::const_iterator it = parameters.parameters.begin();
       it != parameters.parameters.end(); ++it)
@@ -807,25 +807,25 @@ void XMLFile::operator<<(ParameterList& parameters)
     switch (parameter.type())
       {
       case Parameter::type_int:
-        fprintf(fp, "    <parameter name=\"%s\" type=\"int\" value=\"%d\"/>\n",
+        fprintf(fp, "<parameter name=\"%s\" type=\"int\" value=\"%d\"/>\n",
                 it->first.c_str(), static_cast<int>(parameter));
         break;
       case Parameter::type_real:
         fprintf(fp,
-                "    <parameter name=\"%s\" type=\"real\" value=\"%.16e\"/>\n",
+                "<parameter name=\"%s\" type=\"real\" value=\"%.16e\"/>\n",
                 it->first.c_str(), static_cast<real>(parameter));
         break;
       case Parameter::type_bool:
         if (static_cast<bool>(parameter)) fprintf(
-            fp, "    <parameter name=\"%s\" type=\"bool\" value=\"true\"/>\n",
+            fp, "<parameter name=\"%s\" type=\"bool\" value=\"true\"/>\n",
             it->first.c_str());
         else fprintf(
-            fp, "    <parameter name=\"%s\" type=\"bool\" value=\"false\"/>\n",
+            fp, "<parameter name=\"%s\" type=\"bool\" value=\"false\"/>\n",
             it->first.c_str());
         break;
       case Parameter::type_string:
         fprintf(fp,
-                "    <parameter name=\"%s\" type=\"string\" value=\"%s\"/>\n",
+                "<parameter name=\"%s\" type=\"string\" value=\"%s\"/>\n",
                 it->first.c_str(), static_cast<std::string>(parameter).c_str());
         break;
       default:
@@ -834,7 +834,7 @@ void XMLFile::operator<<(ParameterList& parameters)
 
   }
 
-  fprintf(fp, "  </parameters>\n");
+  fprintf(fp, "</parameters>\n");
 
   // Close file
   closeFile(fp);

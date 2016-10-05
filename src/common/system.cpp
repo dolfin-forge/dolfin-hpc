@@ -61,6 +61,12 @@ void mkdir(std::string const& dirpath)
 #endif
 }
 //-----------------------------------------------------------------------------
+bool stat(std::string const& dirpath)
+{
+  struct stat sb;
+  return !(::stat(dirpath.c_str(), &sb) < 0);
+}
+//-----------------------------------------------------------------------------
 std::string getcwd()
 {
   char curpath[PATH_MAX] = { 0 };

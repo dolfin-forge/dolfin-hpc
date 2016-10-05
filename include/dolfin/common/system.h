@@ -25,6 +25,9 @@ void glob(std::string const& pattern, Array<std::string>& matches);
 void mkdir(std::string const& dir);
 
 ///
+bool stat(std::string const& file);
+
+///
 std::string getcwd();
 
 ///

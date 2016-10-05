@@ -332,6 +332,29 @@ void XMLFile::operator<<(Mesh& mesh)
               c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
         }
         break;
+      case CellType::quadrilateral:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          fprintf(
+              fp,
+              "      <quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
+              c->index(), vertices[0], vertices[1], vertices[2], vertices[3]);
+        }
+        break;
+      case CellType::hexahedron:
+        for (CellIterator c(mesh); !c.end(); ++c)
+        {
+          uint* vertices = c->entities(0);
+          dolfin_assert(vertices);
+          fprintf(
+              fp,
+              "      <hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",
+              c->index(), vertices[0], vertices[1], vertices[2], vertices[3],
+                          vertices[4], vertices[5], vertices[6], vertices[7]);
+        }
+        break;
       default:
         error("Unknown cell type: %u.", cell_type);
         break;

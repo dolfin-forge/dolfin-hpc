@@ -22,7 +22,7 @@
 #define BINARY_MAGIC_V1 0xBABE
 #define BINARY_MAGIC_V2 0xB4B3
 #define BINARY_MAGIC    BINARY_MAGIC_V2
-#define FNAME_LENGTH 256
+#define FNAME_LENGTH    256
 
 namespace dolfin
 {
@@ -206,7 +206,7 @@ inline bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
   }
   else
   {
-    error("Corrupt header: invalid magic number");
+    error("Corrupt header: invalid magic number (%0x)", hdr.magic);
   }
 
   if (byteswap) 

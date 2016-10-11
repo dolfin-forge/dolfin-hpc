@@ -157,6 +157,11 @@ uint Mesh::size(uint dim) const
   return topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
+uint Mesh::num_vertices() const
+{
+  return topology_.size(0);
+}
+//-----------------------------------------------------------------------------
 uint Mesh::num_cells() const
 {
   return topology_.size(topology_.dim());

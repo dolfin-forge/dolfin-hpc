@@ -105,6 +105,9 @@ public:
   /// Return number of entities of given topological dimension
   uint size(uint dim) const;
 
+  /// Return number of vertices of mesh partition
+  uint num_vertices() const;
+
   /// Return number of cells of mesh partition
   uint num_cells() const;
 
@@ -150,6 +153,9 @@ public:
 
   /// Return global number of entities of given topological dimension
   uint global_size(uint dim) const;
+
+  /// Return number of vertices of global mesh
+  uint num_global_vertices() const;
 
   /// Return number of cells of global mesh
   uint num_global_cells() const;

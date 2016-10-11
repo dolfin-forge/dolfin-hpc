@@ -71,6 +71,9 @@ public:
   /// Return topological dimension of cell
   virtual uint dim() const = 0;
 
+  /// Return topological dimension of facet
+  inline uint facet_dim() const { return (this->dim() ? this->dim() - 1 : 0); };
+
   /// Return number of entitites of given topological dimension
   virtual uint num_entities(uint dim) const = 0;
 

@@ -159,8 +159,6 @@ namespace dolfin
     /// Matrix axpy, Y = a X+ Y
     const PETScMatrix& operator+= (const PETScMatrix& A);
 
-    void getrows_offproc(std::set<uint> rows);
-
   private:
 
     // Initialize M x N matrix with a given number of nonzeros per row
@@ -168,6 +166,9 @@ namespace dolfin
 
     // Initialize M x N matrix with a given number of nonzeros per row diagonal and off-diagonal
     void init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow);
+
+    ///
+    void getrows_offproc(std::set<uint> const& rows);
 
     // Set PETSc matrix type
     void setType();
@@ -185,34 +186,29 @@ namespace dolfin
     Mat A;
 
     // True if we do not own the matrix A points to
-    bool is_view;
+    bool is_view_;
 
     // True if the matrix is distributed
-    bool is_distributed;
+    bool is_distributed_;
 
     // PETSc matrix type
-    Type _type;
+    Type type_;
 
     Mat A_sub;
-    bool sub;
+    bool has_sub_;
 
     Mat *AA_sub;
 
-    int block_size;
+    PetscInt rstart_;
+    PetscInt rend_;
+    PetscInt block_size_;
 
-#if __SUNPRO_CC
-    std::map<int, int> mapping;
-#else
-    std::map<const int, int> mapping;
-#endif
+    std::map<int, int> mapping_;
 
   };
 
-  /// Output of PETScMatrix
-  LogStream& operator<< (LogStream& stream, const PETScMatrix& A);
-
 }
 
-#endif
+#endif /* HAVE_PETSC */
 
-#endif
+#endif /* __DOLFIN_PETSC_MATRIX_H */

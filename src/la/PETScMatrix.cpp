@@ -14,10 +14,6 @@
 
 #ifdef HAVE_PETSC
 
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/system.h>
 #include <dolfin/la/PETScVector.h>
@@ -25,60 +21,88 @@
 #include <dolfin/la/GenericSparsityPattern.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/PETScFactory.h>
+#include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
-using namespace dolfin;
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(Type type):
+PETScMatrix::PETScMatrix(Type type) :
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), is_distributed(false), _type(type), sub(false), block_size(0)
+    A(0),
+    is_view_(false),
+    is_distributed_(false),
+    type_(type),
+    has_sub_(false),
+    rstart_(0),
+    rend_(0),
+    block_size_(0)
 {
-  // Check type
   checkType();
 }
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(Mat A):
+PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
-    A(A), is_view(true), is_distributed(false), _type(default_matrix), block_size(0)
+    A(A),
+    is_view_(true),
+    is_distributed_(false),
+    type_(default_matrix),
+    rstart_(0),
+    rend_(0),
+    block_size_(0)
 {
   // FIXME: get PETSc matrix type and set
-  _type = default_matrix;
+  type_ = default_matrix;
 }
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed):
+PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed) :
     Variable("A", "a sparse matrix"),
-    A(0), is_view(false), is_distributed(false), _type(type), block_size(0)
+    A(0),
+    is_view_(false),
+    is_distributed_(false),
+    type_(type),
+    rstart_(0),
+    rend_(0),
+    block_size_(0)
 {
-  // Check type
   checkType();
-
-  // Create PETSc matrix
   init(M, N, distributed);
 }
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(const PETScMatrix& A):
-  Variable("A", "PETSc matrix"),
-  A(0), is_view(false), _type(A._type), block_size(0)
+PETScMatrix::PETScMatrix(const PETScMatrix& A) :
+    Variable("A", "PETSc matrix"),
+    A(0),
+    is_view_(false),
+    type_(A.type_),
+    block_size_(0)
 {
   *this = A;
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::~PETScMatrix()
 {
-  if (A && !is_view)
+  if (A && !is_view_)
+  {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
 #endif
+  }
 
-  if(sub)
+  if (has_sub_)
+  {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&AA_sub[0]);
 #else
     MatDestroy(AA_sub[0]);
 #endif
+  }
 
   // FIXME destroy sub
 }
@@ -91,31 +115,32 @@ void PETScMatrix::init(uint M, uint N)
 void PETScMatrix::init(uint M, uint N, bool distributed)
 {
   // Free previously allocated memory if necessary
-  if ( A )
+  if (A)
+  {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);
 #else
     MatDestroy(A);
 #endif
+  }
 
-  // FIXME: maybe 50 should be a parameter?
-  // FIXME: it should definitely be a parameter
+  // FIXME: add number of diagonal as parameter
 
   // Create a sparse matrix in compressed row format
   if (dolfin::MPI::numProcesses() > 1 && distributed)
   {
-    is_distributed = true;
+    is_distributed_ = true;
     // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
     // and number of off-diagonal non-zeroes (50 in this case).
     // Note that guessing too high leads to excessive memory usage.
     // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
-    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-                 M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, M, N,
+                 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-                    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+        M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #endif
 #endif
   }
@@ -125,6 +150,7 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
     MatCreateSeqAIJ(PETSC_COMM_SELF, M, N, 50, PETSC_NULL, &A);
 
     setType();
+
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
@@ -136,20 +162,22 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
 #endif
     MatSetFromOptions(A);
   }
+
+  MatGetOwnershipRange(A, &rstart_, &rend_);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::init(uint M, uint N, const uint* nz)
+void PETScMatrix::init(uint M, uint N, uint const* nz)
 {
   // Free previously allocated memory if necessary
-  if ( A )
+  if (A)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    MatDestroy(&A);
+  MatDestroy(&A);
 #else
-    MatDestroy(A);
+  MatDestroy(A);
 #endif
 
   // Create a sparse matrix in compressed row format
-  if (is_distributed)
+  if (is_distributed_)
   {
     // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
     // and number of off-diagonal non-zeroes (50 in this case).
@@ -158,25 +186,20 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 #ifdef HAVE_MPI
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
-    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-                 M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, M, N,
+                 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
     MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
                     M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #endif
 #endif
-    //MatSetFromOptions(A);
-    //MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
-    //MatZeroEntries(A);
   }
   else
   {
-    //    MatCreateSeqBAIJ(MPI_Comm comm,PetscInt bs,PetscInt m,PetscInt n,PetscInt nz,const PetscInt nnz[],Mat *A);
-
-
-    if ( block_size )
+    if (block_size_)
     {
-      MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size, (int) M, (int) N, 1, PETSC_NULL, &A);
+      MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size_, (int) M, (int) N, 1,
+                       PETSC_NULL, &A);
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
       MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
@@ -190,13 +213,11 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
 #endif
       MatSetFromOptions(A);
       MatZeroEntries(A);
-      //    MatCreateSeqBAIJ(PETSC_COMM_SELF, 1, (int) M, (int) N, 5, PETSC_NULL, &A);
-      // Create PETSc sequential matrix with a guess for number of non-zeroes (50 in thise case)
     }
     else
     {
       MatCreate(PETSC_COMM_SELF, &A);
-      MatSetSizes(A,  PETSC_DECIDE,  PETSC_DECIDE, M, N);
+      MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, M, N);
       setType();
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
@@ -208,44 +229,44 @@ void PETScMatrix::init(uint M, uint N, const uint* nz)
       MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif
       MatSetFromOptions(A);
-      MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*)nz);
+      MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*) nz);
       MatZeroEntries(A);
-      }
+    }
   }
+
+  MatGetOwnershipRange(A, &rstart_, &rend_);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
+void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
 {
   // Free previously allocated memory if necessary
-  if ( A )
+  if (A)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    MatDestroy(&A);
+  MatDestroy(&A);
 #else
-    MatDestroy(A);
+  MatDestroy(A);
 #endif
   // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
   // and number of off-diagonal non-zeroes (50 in this case).
   // Note that guessing too high leads to excessive memory usage.
   // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-
-  //  MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-  //                  M, N, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
 #ifdef HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
-  MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  MatCreateAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE,
+               PETSC_DETERMINE, (PetscInt*) d_nzrow, PETSC_DETERMINE, (PetscInt*) o_nzrow,
+               &A);
 #else
-  MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE, PETSC_NULL, (int*)d_nzrow, PETSC_NULL, (int*)o_nzrow, &A);
+  MatCreateMPIAIJ(MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE, PETSC_DETERMINE,
+                  PETSC_DETERMINE, (int*)d_nzrow, PETSC_DETERMINE,
+                  (PetscInt*)o_nzrow, &A);
 #endif
 #endif
-  //MatCreateMPIAIJ(MPI::DOLFIN_COMM, (int) M, (int) N, PETSC_DETERMINE, PETSC_DETERMINE, 90, PETSC_NULL, 90, PETSC_NULL, &A);
 
-
-  //MatSetOption(A, MAT_COLUMNS_SORTED); // assert("it's going to be ok");
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
-    MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+  MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
-    MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #endif
 #else
   MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
@@ -253,15 +274,17 @@ void PETScMatrix::init(uint M, uint N, const uint* d_nzrow, const uint* o_nzrow)
   MatSetFromOptions(A);
   MatZeroEntries(A);
 
+  MatGetOwnershipRange(A, &rstart_, &rend_);
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
 {
   if (sparsity_pattern.is_distributed())
   {
-    is_distributed = true;
+    is_distributed_ = true;
     uint p = dolfin::MPI::processNumber();
-    const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
+    SparsityPattern const& spattern =
+        reinterpret_cast<SparsityPattern const&>(sparsity_pattern);
     uint local_size = spattern.range_size(p);
     uint* d_nzrow = new uint[local_size];
     uint* o_nzrow = new uint[local_size];
@@ -270,25 +293,23 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
     uint spattern_size_1 = spattern.size(1);
     const_cast<SparsityPattern&>(spattern).clear();
     init(spattern_size_0, spattern_size_1, d_nzrow, o_nzrow);
-    delete [] d_nzrow;
-    delete [] o_nzrow;
+    delete[] d_nzrow;
+    delete[] o_nzrow;
   }
   else
   {
-
-    const SparsityPattern& spattern = reinterpret_cast<const SparsityPattern&>(sparsity_pattern);
+    SparsityPattern const& spattern =
+        reinterpret_cast<SparsityPattern const&>(sparsity_pattern);
     uint* nzrow = new uint[spattern.size(0)];
     spattern.numNonZeroPerRow(nzrow);
     init(spattern.size(0), spattern.size(1), nzrow);
-    delete [] nzrow;
+    delete[] nzrow;
   }
 }
 //-----------------------------------------------------------------------------
 PETScMatrix* PETScMatrix::copy() const
 {
-
   PETScMatrix* mcopy = new PETScMatrix();
-
   MatDuplicate(A, MAT_COPY_VALUES, &(mcopy->A));
 
   return mcopy;
@@ -305,73 +326,64 @@ dolfin::uint PETScMatrix::size(uint dim) const
 dolfin::uint PETScMatrix::nz() const
 {
   MatInfo info;
-  MatGetInfo(A,MAT_GLOBAL_SUM, &info);
+  MatGetInfo(A, MAT_GLOBAL_SUM, &info);
 
   return info.nz_used;
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::get(real* block,
-                      uint m, const uint* rows,
-                      uint n, const uint* cols) const
+void PETScMatrix::get(real* block, uint m, uint const* rows, uint n,
+                      uint const* cols) const
 {
   dolfin_assert(A);
-  MatGetValues(A,
-               static_cast<int>(m), reinterpret_cast<int*>(const_cast<uint*>(rows)),
-               static_cast<int>(n), reinterpret_cast<int*>(const_cast<uint*>(cols)),
-               block);
+  MatGetValues(A, static_cast<int>(m),
+               reinterpret_cast<int*>(const_cast<uint*>(rows)),
+               static_cast<int>(n),
+               reinterpret_cast<int*>(const_cast<uint*>(cols)), block);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::set(const real* block,
-                      uint m, const uint* rows,
-                      uint n, const uint* cols)
+void PETScMatrix::set(real const* block, uint m, uint const* rows, uint n,
+                      uint const* cols)
 {
   dolfin_assert(A);
 
-
-
-  if (block_size)
+  if (block_size_)
   {
-    MatSetValuesBlocked(A,
-                        static_cast<int>(m) / block_size,
+    MatSetValuesBlocked(A, static_cast<int>(m) / block_size_,
                         reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                        static_cast<int>(n) / block_size,
-                        reinterpret_cast<int*>(const_cast<uint*>(cols)),
-                        block, INSERT_VALUES);
+                        static_cast<int>(n) / block_size_,
+                        reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+                        INSERT_VALUES);
   }
   else
   {
-    MatSetValues(A,
-                 static_cast<int>(m),
+    MatSetValues(A, static_cast<int>(m),
                  reinterpret_cast<int*>(const_cast<uint*>(rows)),
                  static_cast<int>(n),
-                 reinterpret_cast<int*>(const_cast<uint*>(cols)),
-                 block, INSERT_VALUES);
+                 reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+                 INSERT_VALUES);
   }
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::add(const real* block,
-                      uint m, const uint* rows,
-                      uint n, const uint* cols)
+void PETScMatrix::add(real const* block, uint m, uint const* rows, uint n,
+                      uint const* cols)
 {
   dolfin_assert(A);
 
-  if ( block_size )
+  if (block_size_)
   {
-    MatSetValuesBlocked(A,
-                        static_cast<int>(m) / block_size,
+    MatSetValuesBlocked(A, static_cast<int>(m) / block_size_,
                         reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                        static_cast<int>(n) / block_size,
-                        reinterpret_cast<int*>(const_cast<uint*>(cols)),
-                        block, ADD_VALUES);
+                        static_cast<int>(n) / block_size_,
+                        reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+                        ADD_VALUES);
   }
   else
   {
-    MatSetValues(A,
-                 static_cast<int>(m),
+    MatSetValues(A, static_cast<int>(m),
                  reinterpret_cast<int*>(const_cast<uint*>(rows)),
                  static_cast<int>(n),
-                 reinterpret_cast<int*>(const_cast<uint*>(cols)),
-                 block, ADD_VALUES);
+                 reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+                 ADD_VALUES);
   }
 }
 //-----------------------------------------------------------------------------
@@ -398,52 +410,43 @@ real PETScMatrix::norm(std::string norm_type) const
   return norm;
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::getrow(uint row,
-                         Array<uint>& columns,
+void PETScMatrix::getrow(uint row, Array<uint>& columns,
                          Array<real>& values) const
 {
-  const int *cols = 0;
-  const double *vals = 0;
-  int ncols = 0;
-
-  int m, n;
-  MatGetOwnershipRange(A, &m, &n);
-
-  // Two different cases, local and non local rows.
-  if( row >= (uint) m && row < (uint) n) {
-
+  const PetscInt *cols = NULL;
+  const PetscScalar *vals = NULL;
+  PetscInt ncols = 0;
+  if (row >= static_cast<uint>(rstart_) && row < static_cast<uint>(rend_))
+  {
+    // Local row
     MatGetRow(A, row, &ncols, &cols, &vals);
-
-    // Assign values to Arrays
-    columns.assign(reinterpret_cast<uint *>(const_cast<int*>(cols)),
-                   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
-    values.assign(vals, vals+ncols);
-
+    columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)),
+                   reinterpret_cast<uint*>(const_cast<int*>(cols + ncols)));
+    values.assign(vals, vals + ncols);
     MatRestoreRow(A, row, &ncols, &cols, &vals);
-
   }
-  else {
-    if(!sub)
+  else
+  {
+    // Non-local row
+    if (!has_sub_)
+    {
       error("Trying to get ghosted row %d but no SubMatrices defined.\n"
-            "Ownership range %d, %d", row, m, n);
-#if __SUNPRO_CC
-    std::map<int, int>::const_iterator it = mapping.find(row);
-#else
-    std::map<const int, int>::const_iterator it = mapping.find(row);
-#endif
+            "Ownership range %d, %d",
+            row, rstart_, rend_);
+    }
+
+    std::map<int, int>::const_iterator it = mapping_.find(row);
     MatGetRow(AA_sub[0], it->second, &ncols, &cols, &vals);
     columns.assign(reinterpret_cast<uint*>(const_cast<int*>(cols)),
-                   reinterpret_cast<uint*>(const_cast<int*>(cols+ncols)));
-    values.assign(vals, vals+ncols);
+                   reinterpret_cast<uint*>(const_cast<int*>(cols + ncols)));
+    values.assign(vals, vals + ncols);
     MatRestoreRow(AA_sub[0], it->second, &ncols, &cols, &vals);
   }
-
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::getrows_offproc(std::set<uint> rows)
+void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
 {
-
-  if(!is_distributed)
+  if (!is_distributed_)
   {
     return;
   }
@@ -451,24 +454,22 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   int *_cols = new int[size(0)];
   int *_rows = new int[rows.size()];
 
-  int m, n;
-  MatGetOwnershipRange(A, &m, &n);
-
-  std::set<uint>::iterator it;
-
-  mapping.clear();
+  mapping_.clear();
 
   uint i = 0;
-  for(it = rows.begin(); it != rows.end(); it++) {
-    if( !(*it >= (uint) m && *it < (uint) n)) {
+  for (std::set<uint>::const_iterator it = rows.begin(); it != rows.end(); ++it)
+  {
+    if (*it < static_cast<uint>(rstart_) && *it >= static_cast<uint>(rend_))
+    {
       _rows[i] = *it;
-      mapping[*it] = i++;
+      mapping_[*it] = i++;
     }
   }
 
-  for(uint j = 0; j < size(0); j++)
+  for (uint j = 0; j < size(0); ++j)
+  {
     _cols[j] = j;
-
+  }
 
   IS irow, icol;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -479,12 +480,16 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
 #endif
 
-  if(!sub)
+  if (!has_sub_)
+  {
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
+  }
   else
+  {
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);
+  }
 
-  sub = true;
+  has_sub_ = true;
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISDestroy(&irow);
@@ -499,37 +504,13 @@ void PETScMatrix::getrows_offproc(std::set<uint> rows)
 
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::setrow(uint row,
-                         const Array<uint>& columns,
+void PETScMatrix::setrow(uint row, const Array<uint>& columns,
                          const Array<real>& values)
 {
-  // Check size of arrays
-  if (columns.size() != values.size())
-    error("Number of columns and values don't match for setrow() operation.");
-
-  // Handle case n = 0
-  const uint n = columns.size();
-  if (n == 0)
-    return;
-
-  // Assign values to arrays
-  uint* cols = new uint[n];
-  real* vals = new real[n];
-  for (uint j = 0; j < n; j++)
-  {
-    cols[j] = columns[j];
-    vals[j] = values[j];
-  }
-
-  // Set values
-  set(vals, 1, &row, n, cols);
-
-  // Free temporary storage
-  delete [] cols;
-  delete [] vals;
+  set(&values[0], 1, &row, columns.size(), &columns[0]);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::zero(uint m, const uint* rows)
+void PETScMatrix::zero(uint m, uint const* rows)
 {
   IS is = 0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -538,7 +519,7 @@ void PETScMatrix::zero(uint m, const uint* rows)
                   PETSC_COPY_VALUES, &is);
 #else
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-                  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+      reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar null = 0.0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -550,7 +531,7 @@ void PETScMatrix::zero(uint m, const uint* rows)
 #endif
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::ident(uint m, const uint* rows)
+void PETScMatrix::ident(uint m, uint const* rows)
 {
   IS is = 0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -559,7 +540,7 @@ void PETScMatrix::ident(uint m, const uint* rows)
                   PETSC_COPY_VALUES, &is);
 #else
   ISCreateGeneral(PETSC_COMM_SELF, static_cast<int>(m),
-                  reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
+      reinterpret_cast<int*>(const_cast<uint*>(rows)), &is);
 #endif
   PetscScalar one = 1.0;
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -571,7 +552,8 @@ void PETScMatrix::ident(uint m, const uint* rows)
 #endif
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed) const
+void PETScMatrix::mult(const GenericVector& x, GenericVector& y,
+                       bool transposed) const
 {
   const PETScVector& xx = x.down_cast<PETScVector>();
   PETScVector& yy = y.down_cast<PETScVector>();
@@ -585,7 +567,8 @@ void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed
     yy.init(xx.local_size());
     MatMultTranspose(A, xx.vec(), yy.vec());
   }
-  else {
+  else
+  {
     if (size(1) != xx.size())
     {
       error("Matrix and vector dimensions mismatch for matrix-vector product.");
@@ -598,21 +581,21 @@ void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed
 real PETScMatrix::norm(const Norm type) const
 {
   real value = 0.0;
-  switch ( type )
-  {
-  case l1:
-    MatNorm(A, NORM_1, &value);
-    break;
-  case linf:
-    MatNorm(A, NORM_INFINITY, &value);
-    break;
-  case frobenius:
-    MatNorm(A, NORM_FROBENIUS, &value);
-    break;
-  default:
-    error("Unknown norm type.");
-    break;
-  }
+  switch (type)
+    {
+    case l1:
+      MatNorm(A, NORM_1, &value);
+      break;
+    case linf:
+      MatNorm(A, NORM_INFINITY, &value);
+      break;
+    case frobenius:
+      MatNorm(A, NORM_FROBENIUS, &value);
+      break;
+    default:
+      error("Unknown norm type.");
+      break;
+    }
   return value;
 }
 //-----------------------------------------------------------------------------
@@ -623,7 +606,7 @@ void PETScMatrix::apply(FinalizeType finaltype)
     MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY);
   }
-  else if ( finaltype == FLUSH )
+  else if (finaltype == FLUSH)
   {
     MatAssemblyBegin(A, MAT_FLUSH_ASSEMBLY);
     MatAssemblyEnd(A, MAT_FLUSH_ASSEMBLY);
@@ -636,31 +619,29 @@ void PETScMatrix::zero()
   MatZeroEntries(A);
 }
 //-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator+= (const PETScMatrix& A)
+const PETScMatrix& PETScMatrix::operator+=(const PETScMatrix& A)
 {
   dolfin_assert(this->A);
   MatAXPY(this->A, 1.0, A.A, SAME_NONZERO_PATTERN);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator*= (real a)
+const PETScMatrix& PETScMatrix::operator*=(real a)
 {
   dolfin_assert(A);
   MatScale(A, a);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator/= (real a)
+const PETScMatrix& PETScMatrix::operator/=(real a)
 {
   dolfin_assert(A);
   MatScale(A, 1.0 / a);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
+const GenericMatrix& PETScMatrix::operator=(const GenericMatrix& A)
 {
-  //  (*this).down_cast<PETScMatrix>() =  A.down_cast<PETScMatrix>();
-  //MatCopy(A.down_cast<PETScMatrix>().A, this->A, DIFFERENT_NONZERO_PATTERN);
   if (&A != this)
   {
     MatCopy(A.down_cast<PETScMatrix>().A, this->A, SAME_NONZERO_PATTERN);
@@ -668,10 +649,8 @@ const GenericMatrix& PETScMatrix::operator= (const GenericMatrix& A)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const PETScMatrix& PETScMatrix::operator= (const PETScMatrix& A)
+const PETScMatrix& PETScMatrix::operator=(const PETScMatrix& A)
 {
-
-  //MatCopy(A.A, (this->A), DIFFERENT_NONZERO_PATTERN);
   if (&A != this)
   {
     MatCopy(A.A, (this->A), SAME_NONZERO_PATTERN);
@@ -687,7 +666,7 @@ void PETScMatrix::dup(GenericMatrix& A)
 //-----------------------------------------------------------------------------
 PETScMatrix::Type PETScMatrix::type() const
 {
-  return _type;
+  return type_;
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::disp(uint precision) const
@@ -701,7 +680,7 @@ void PETScMatrix::disp(uint precision) const
   endblock();
   skip();
 
-  if (is_distributed)
+  if (is_distributed_)
   {
     section("Global");
     MatGetInfo(A, MAT_GLOBAL_SUM, &info);
@@ -715,7 +694,7 @@ void PETScMatrix::disp(uint precision) const
     return;
   }
 
-  if(is_distributed)
+  if (is_distributed_)
   {
 
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
@@ -751,79 +730,79 @@ void PETScMatrix::setType()
 //-----------------------------------------------------------------------------
 void PETScMatrix::checkType()
 {
-  switch ( _type )
-  {
-  case default_matrix:
-    return;
-  case spooles:
-    #if !PETSC_HAVE_SPOOLES
-      warning("PETSc has not been complied with Spooles. Using default matrix type");
-      _type = default_matrix;
-    #endif
-    return;
-  case superlu:
-    #if !PETSC_HAVE_SUPERLU
+  switch (type_)
+    {
+    case default_matrix:
+      return;
+    case spooles:
+#if !PETSC_HAVE_SPOOLES
+      warning(
+          "PETSc has not been complied with Spooles. Using default matrix type");
+      type_ = default_matrix;
+#endif
+      return;
+    case superlu:
+#if !PETSC_HAVE_SUPERLU
       warning("PETSc has not been complied with Super LU. Using default matrix type");
-      _type = default_matrix;
-    #endif
-    return;
-  case umfpack:
-    #if !PETSC_HAVE_UMFPACK
-      warning("PETSc has not been complied with UMFPACK. Using default matrix type");
-      _type = default_matrix;
-    #endif
-    return;
-  default:
-    warning("Requested matrix type unknown. Using default.");
-    _type = default_matrix;
-    break;
-  }
+      type_ = default_matrix;
+#endif
+      return;
+    case umfpack:
+#if !PETSC_HAVE_UMFPACK
+      warning(
+          "PETSc has not been complied with UMFPACK. Using default matrix type");
+      type_ = default_matrix;
+#endif
+      return;
+    default:
+      warning("Requested matrix type unknown. Using default.");
+      type_ = default_matrix;
+      break;
+    }
 }
 //-----------------------------------------------------------------------------
 MatType PETScMatrix::getPETScType() const
 {
-  switch ( _type )
-  {
-  case default_matrix:
-    if (is_distributed)
-      return MATMPIAIJ;
-    else
-      return MATSEQAIJ;
+  switch (type_)
+    {
+    case default_matrix:
+      if (is_distributed_) return MATMPIAIJ;
+      else return MATSEQAIJ;
 #if PETSC_VERSION_MAJOR > 2
-  case spooles:
+    case spooles:
 #if PETSC_VERSION_MINOR > 3
-    warning("Spooles interface has been removed in PETSc 3.4");
-    return "default";
+      warning("Spooles interface has been removed in PETSc 3.4");
+      return "default";
 #elif PETSC_VERSION_MINOR > 1
       return MATSOLVERSPOOLES;
 #else
       return MAT_SOLVER_SPOOLES;
 #endif
-  case superlu:
+    case superlu:
 #if PETSC_VERSION_MINOR > 1
       return MATSOLVERSUPERLU;
 #else
       return MAT_SOLVER_SUPERLU;
 #endif
-  case umfpack:
+    case umfpack:
 #if PETSC_VERSION_MINOR > 1
       return MATSOLVERUMFPACK;
 #else
       return MAT_SOLVER_UMFPACK;
 #endif
-  default:
-    return "default";
+    default:
+      return "default";
 #else
-  case spooles:
+      case spooles:
       return MATSEQAIJSPOOLES;
-  case superlu:
+      case superlu:
       return MATSUPERLU;
-  case umfpack:
+      case umfpack:
       return MATUMFPACK;
-  default:
-    return "default";
+      default:
+      return "default";
 #endif
-  }
+    }
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::print(MatInfo const& info) const
@@ -832,7 +811,7 @@ void PETScMatrix::print(MatInfo const& info) const
   message("%24s : %lu", "nz_allocated", uidx(info.nz_allocated));
   message("%24s : %lu", "nz_used", uidx(info.nz_used));
   message("%24s : %lu", "nz_unneeded", uidx(info.nz_unneeded));
-  message("%24s : %s" , "memory", human_readable(info.memory).c_str());
+  message("%24s : %s", "memory", human_readable(info.memory).c_str());
   message("%24s : %lu", "assemblies", uidx(info.assemblies));
   message("%24s : %lu", "mallocs", uidx(info.mallocs));
   message("%24s : %lu", "fill_ratio_given", uidx(info.fill_ratio_given));
@@ -840,11 +819,7 @@ void PETScMatrix::print(MatInfo const& info) const
   message("%24s : %lu", "factor_mallocs", uidx(info.factor_mallocs));
 }
 //-----------------------------------------------------------------------------
-LogStream& dolfin::operator<< (LogStream& stream, const PETScMatrix& A)
-{
-  stream << "[ PETSc matrix of size " << A.size(0) << " x " << A.size(1) << " ]";
-  return stream;
-}
-//-----------------------------------------------------------------------------
 
-#endif
+} /* namespace dolfin */
+
+#endif /* HAVE_PETSC */

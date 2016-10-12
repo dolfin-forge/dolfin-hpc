@@ -701,13 +701,23 @@ void PETScMatrix::disp(uint precision) const
   endblock();
   skip();
 
-  if(is_distributed)
+  if (is_distributed)
   {
     section("Global");
     MatGetInfo(A, MAT_GLOBAL_SUM, &info);
     print(info);
     endblock();
     skip();
+  }
+
+  if (logm.getDebugLevel() == 0)
+  {
+    return;
+  }
+
+  if(is_distributed)
+  {
+
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
   }
   else

@@ -445,6 +445,7 @@ real PETScVector::max() const
 //-----------------------------------------------------------------------------
 void PETScVector::disp(uint precision) const
 {
+  section("PETScVector");
   if(MPI::numProcesses() > 1 && is_distributed)
   {
     VecView(x, PETSC_VIEWER_STDOUT_WORLD);
@@ -453,6 +454,7 @@ void PETScVector::disp(uint precision) const
   {
     VecView(x, PETSC_VIEWER_STDOUT_SELF);
   }
+  endblock();
 }
 //-----------------------------------------------------------------------------
 Vec PETScVector::vec() const

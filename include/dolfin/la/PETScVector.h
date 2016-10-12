@@ -71,7 +71,7 @@ namespace dolfin
     void apply(FinalizeType finaltype=FINALIZE);
 
     /// Display tensor
-    void disp(uint precision=2) const;
+    void disp(uint precision=0) const;
 
     //--- Implementation of the GenericVector interface ---
 

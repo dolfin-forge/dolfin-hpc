@@ -84,7 +84,7 @@ namespace dolfin
     void apply(FinalizeType final=FINALIZE);
 
     /// Display tensor
-    void disp(uint precision=2) const;
+    void disp(uint precision=0) const;
 
     //--- Implementation of the GenericMatrix interface --
 
@@ -177,6 +177,9 @@ namespace dolfin
 
     // Check that requested type has been compiled into PETSc
     void checkType();
+
+    // Print info
+    void print(MatInfo const& info) const;
 
     // PETSc Mat pointer
     Mat A;

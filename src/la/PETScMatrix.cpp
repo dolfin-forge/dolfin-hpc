@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/common/system.h>
 #include <dolfin/la/PETScVector.h>
 #include <dolfin/la/PETScMatrix.h>
 #include <dolfin/la/GenericSparsityPattern.h>
@@ -577,12 +578,18 @@ void PETScMatrix::mult(const GenericVector& x, GenericVector& y, bool transposed
 
   if (transposed)
   {
-    if (size(0) != xx.size()) error("Matrix and vector dimensions don't match for matrix-vector product.");
+    if (size(0) != xx.size())
+    {
+      error("Matrix and vector dimensions mismatch for matrix-vector product.");
+    }
     yy.init(xx.local_size());
     MatMultTranspose(A, xx.vec(), yy.vec());
   }
   else {
-    if (size(1) != xx.size()) error("Matrix and vector dimensions don't match for matrix-vector product.");
+    if (size(1) != xx.size())
+    {
+      error("Matrix and vector dimensions mismatch for matrix-vector product.");
+    }
     yy.init(xx.local_size());
     MatMult(A, xx.vec(), yy.vec());
   }
@@ -685,10 +692,26 @@ PETScMatrix::Type PETScMatrix::type() const
 //-----------------------------------------------------------------------------
 void PETScMatrix::disp(uint precision) const
 {
-  // FIXME: Maybe this could be an option?
+  section("PETScMatrix");
+  MatInfo info;
+
+  section("Local");
+  MatGetInfo(A, MAT_LOCAL, &info);
+  print(info);
+  endblock();
+  skip();
+
   if(is_distributed)
+  {
+    section("Global");
+    MatGetInfo(A, MAT_GLOBAL_SUM, &info);
+    print(info);
+    endblock();
+    skip();
     MatView(A, PETSC_VIEWER_STDOUT_WORLD);
-  else {
+  }
+  else
+  {
     PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
 #ifdef BLOCKED
     PetscObjectSetName((PetscObject) A, " Ab");
@@ -697,48 +720,7 @@ void PETScMatrix::disp(uint precision) const
 #endif
     MatView(A, PETSC_VIEWER_STDOUT_SELF);
   }
-
-
-/*
-  const uint M = size(0);
-  const uint N = size(1);
-
-  // Sparse output
-  for (uint i = 0; i < M; i++)
-  {
-    std::stringstream line;
-    line << std::setiosflags(std::ios::scientific);
-    line << std::setprecision(precision);
-
-    line << "|";
-
-    if ( sparse )
-    {
-      int ncols = 0;
-      const int* cols = 0;
-      const double* vals = 0;
-      MatGetRow(A, i, &ncols, &cols, &vals);
-      for (int pos = 0; pos < ncols; pos++)
-      {
-         line << " (" << i << ", " << cols[pos] << ", " << vals[pos] << ")";
-      }
-      MatRestoreRow(A, i, &ncols, &cols, &vals);
-    }
-    else
-    {
-      for (uint j = 0; j < N; j++)
-      {
-        real value = get(i, j);
-        if ( fabs(value) < DOLFIN_EPS )
-        value = 0.0;
-        line << " " << value;
-      }
-    }
-
-    line << "|";
-    cout << line.str().c_str() << endl;
-  }
-*/
+  endblock();
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& PETScMatrix::factory() const
@@ -832,6 +814,20 @@ MatType PETScMatrix::getPETScType() const
     return "default";
 #endif
   }
+}
+//-----------------------------------------------------------------------------
+void PETScMatrix::print(MatInfo const& info) const
+{
+  message("%24s : %lu", "block_size", uidx(info.block_size));
+  message("%24s : %lu", "nz_allocated", uidx(info.nz_allocated));
+  message("%24s : %lu", "nz_used", uidx(info.nz_used));
+  message("%24s : %lu", "nz_unneeded", uidx(info.nz_unneeded));
+  message("%24s : %s" , "memory", human_readable(info.memory).c_str());
+  message("%24s : %lu", "assemblies", uidx(info.assemblies));
+  message("%24s : %lu", "mallocs", uidx(info.mallocs));
+  message("%24s : %lu", "fill_ratio_given", uidx(info.fill_ratio_given));
+  message("%24s : %lu", "fill_ratio_needed", uidx(info.fill_ratio_needed));
+  message("%24s : %lu", "factor_mallocs", uidx(info.factor_mallocs));
 }
 //-----------------------------------------------------------------------------
 LogStream& dolfin::operator<< (LogStream& stream, const PETScMatrix& A)

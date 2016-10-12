@@ -51,6 +51,26 @@ void dirs(int n, std::string const& dir);
 ///
 Array<std::string>& dirstack();
 
+///
+template<class T>
+std::string human_readable(T value)
+{
+  // Use IEC units
+  static std::string const _unit[] =
+    { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" };
+
+  uint i = 0;
+  std::size_t x(value);
+  while (x >> 10)
+  {
+    ++i;
+    x = x >> 10;
+  }
+  std::stringstream ss;
+  ss << x << _unit[i];
+  return ss.str();
+}
+
 
 } /* namespace dolfin */
 

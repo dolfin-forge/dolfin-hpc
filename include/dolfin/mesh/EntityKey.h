@@ -15,6 +15,12 @@
 namespace dolfin
 {
 
+/*
+ * Use index array as key.
+ * The tag idx is to carry information and not used for comparison.
+ *
+ */
+
 struct EntityKey
 {
 

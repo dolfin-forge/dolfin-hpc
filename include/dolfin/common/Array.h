@@ -56,10 +56,7 @@ public:
   /// Assign to all elements in the array
   Array const& operator=(const T& t)
   {
-    for (uint i = 0; i < std::vector<T>::size(); ++i)
-    {
-      (*this)[i] = t;
-    }
+    std::fill(this->begin(), this->end(), t);
     return *this;
   }
 

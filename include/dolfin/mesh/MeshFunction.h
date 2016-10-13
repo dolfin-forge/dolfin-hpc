@@ -263,7 +263,7 @@ public:
   /// Set all values to given value
   MeshFunction<T>& operator=(T const& value)
   {
-    dolfin_assert(values_);
+    dolfin_assert(!((values_ == NULL) && (size_>0)));
     std::fill_n(values_, size_, value);
     return *this;
   }

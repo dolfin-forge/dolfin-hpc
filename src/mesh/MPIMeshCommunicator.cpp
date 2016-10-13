@@ -145,6 +145,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
     MPI_Reduce(&send_size, &recvmax_x, 1, MPI_UNSIGNED, MPI_SUM, j,
                MPI::DOLFIN_COMM);
   }
+  dolfin_assert(recvmax_v > 0);
   // Allocate vertex indices buffer
   uint * recvbuf_v = new uint[recvmax_v];
   // Resize vertex coordinates array to fit new cells
@@ -330,6 +331,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   cells.resize(cells_size + recvmax_c);
   uint * recvbuf_c = &cells[cells_size];
   // Allocate vertex indices buffer
+  dolfin_assert(recvmax_v > 0);
   uint * recvbuf_v = new uint[recvmax_v];
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
@@ -425,6 +427,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   uint sendcnt_gv = sendbuf_gv.size();
   uint sendmax_gv = 0;
   MPI::numGlobalSum(sendcnt_gv, sendmax_gv);
+  dolfin_assert(sendmax_gv > 0);
   uint * sendbck_gv = new uint[sendmax_gv];
   real * sendbck_gx = new real[sendmax_gv * gdim];
   uint * recvbuf_gv = new uint[sendcnt_gv];

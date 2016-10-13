@@ -82,9 +82,14 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   uint const tdim = mesh.topology().dim();
   int ncells = mesh.num_cells();
 
+  /*
+   * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-NULL
+   * which forbids empty partitions.
+   *
+   */
   if (ncells == 0)
   {
-    dolfin::warning("MetisInterface : mesh partition contains zero cells.");
+    dolfin::error("MetisInterface : mesh partition contains zero cells.");
   }
   
   elmdist[rank] = ncells;

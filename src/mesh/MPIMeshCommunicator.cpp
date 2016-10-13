@@ -86,7 +86,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   }
   for (uint d = 1; d <= tdim; ++d)
   {
-    if (topology.entities_exist(d))
+    if (topology.entities_exist(d) && (topology.size(d) > 0))
     {
       error("MPIMeshCommunicator : distribution by vertices but entities of "
             "dimension %u exist", d);
@@ -136,7 +136,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   uint send_size;
   uint recvmax_v;
   uint recvmax_x;
-  for (uint j = 1; j < pe_size; ++j)
+  for (uint j = 0; j < pe_size; ++j)
   {
     send_size = sendbuf_v[j].size();
     MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_MAX, j,

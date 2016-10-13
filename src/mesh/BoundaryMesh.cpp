@@ -347,6 +347,10 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       {
         MPI_Send(&shared_vertices[(*adj)][0], shared_vertices[(*adj)].size(),
                  MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM);
+      }
+      for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
+           ++adj)
+      {
         MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
                  MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);

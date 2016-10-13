@@ -1,10 +1,10 @@
 CFLAGS  = `pkg-config --cflags dolfin`
-CFLAGS += -g -O3
+CFLAGS += -O3
 LIBS    = `pkg-config --libs dolfin`
 CXX     = `pkg-config --variable=compiler dolfin`
 
 DEST    = demo
-OBJECTS = VertexNormal.o main.o
+OBJECTS = main.o
 
 all: $(DEST)
 

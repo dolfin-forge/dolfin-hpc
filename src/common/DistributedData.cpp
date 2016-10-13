@@ -21,6 +21,7 @@ DistributedData::DistributedData() :
     valid_adjacency(false),
     rank_(MPI::processNumber()),
     pe_size_(MPI::numProcesses()),
+    range_is_set_(false),
     offset_(0),
     range_size_(0),
     global_size_(0),
@@ -58,6 +59,7 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
 
     rank_ = other.rank_;
     pe_size_ = other.pe_size_;
+    range_is_set_ = other.range_is_set_;
     offset_ = other.offset_;
     range_size_ = other.range_size_;
     global_size_ = other.global_size_;
@@ -126,6 +128,7 @@ void DistributedData::clear()
   global_size_ = 0;
   range_size_ = 0;
   offset_ = 0;
+  range_is_set_ = false;
   pe_size_ = MPI::numProcesses();
   rank_ = MPI::processNumber();
   //
@@ -154,7 +157,7 @@ void DistributedData::finalize()
   }
   else
   {
-    message(1, "DistributedData : finalize");
+    //message(1, "DistributedData : finalize");
     tic();
 
     // Check consistency
@@ -167,15 +170,15 @@ void DistributedData::finalize()
       error("DistributedData : ghost size is greater than shared size");
     }
 
-    // Local-to-global mapping was provided and should be cached
-    if (global_.size() > 0)
+    /*
+     *  Local-to-global mapping was provided and should be cached
+     *
+     */
+    if (cached_numbering_ == NULL)
     {
-      message(1, "1) global_.size() > 0");
+      message(1, "DistributedData : cache local-to-global mapping (%u)", rank_);
+
       // Generate cache for existing mapping
-      if (cached_numbering_ != NULL)
-      {
-        error("DistributedData : data not finalized but numbering is cached");
-      }
       if (global_.size() != local_.size())
       {
         error("DistributedData : size mismatch between index mappings %u != %u",
@@ -183,29 +186,47 @@ void DistributedData::finalize()
       }
 
       // Cache numbering
-      cache_size_ = global_.size();
-      if(cached_numbering_ != NULL)
+      if (global_.size() > 0)
       {
-        error("DistributedData : in finalized, numbering is already cached");
+        cache_size_ = global_.size();
+        cached_numbering_ = new uint[cache_size_];
+        for (_map<uint, uint>::iterator it = global_.begin();
+        it != global_.end(); ++it)
+        {
+          cached_numbering_[it->first] = it->second;
+        }
+        global_.clear();
       }
-      cached_numbering_ = new uint[cache_size_];
-      for (_map<uint, uint>::iterator it = global_.begin();
-           it != global_.end(); ++it)
-      {
-        cached_numbering_[it->first] = it->second;
-      }
-      global_.clear();
-
-      message(1, "DistributedData : cached local-to-global mapping");
     }
-    // No mapping provided but a process range may have been provided or can be
-    // inferred from the local size.
-    // If *no* entities were marked as shared generate a linear mapping using
-    // the process range, otherwise throw an error.
-    // This allows automatic numbering of non-ghosted entities like cells.
-    else if ((local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0))
+
+    /*
+     *  Set range and global size
+     *
+     */
+    if(!range_is_set_)
     {
-      message(1, "2) (local_.size() == 0) && (range_size_ > 0 || cache_size_ > 0)");
+      if (local_.size() < ghost_.size())
+      {
+        error("DistributedData : range not provided and empty mapping");
+      }
+
+      // If the size has been provided initially then cache size was set,
+      // otherwise the local-to-global mapping was just cached.
+      uint owned_size = cache_size_ - ghost_.size();
+
+      // Set range, not recomputed if it is consistent
+      set_range(owned_size, global_size_);
+    }
+
+    /*
+     * No mapping provided but a process range may have been provided or can be
+     * inferred from the local size.
+     * If *no* entities were marked as shared generate a linear mapping using
+     * the process range, otherwise throw an error.
+     * This allows automatic numbering of non-ghosted entities like cells.
+     */
+    if (local_.size() == 0)
+    {
       if (shared_.size() > 0)
       {
         error("DistributedData : no mapping was provided and some entities set "
@@ -214,36 +235,25 @@ void DistributedData::finalize()
 
       // Either local size or the range can be used but if both are provided
       // check consistency
-      if (cache_size_ > 0)
+      if (range_size_ != cache_size_)
       {
-        if ((range_size_ > 0) && (range_size_ != cache_size_))
-        {
-          error("DistributedData : size mismatch between local size and range");
-        }
-        range_size_ = cache_size_;
-      }
-      else
-      {
-        cache_size_ = range_size_;
+        error("DistributedData : size mismatch between local size and range \n"
+              " (local size) %u != %u (range)", cache_size_, range_size_);
       }
 
       // Numbering incrementally and set all as owned
-      MPI::processOffset(range_size_, offset_);
       uint global = offset_;
-      if(cached_numbering_ == NULL)
-      {
-        cached_numbering_ = new uint[range_size_];
-      }
       for (uint local = 0; local < range_size_; ++local, ++global)
       {
         cached_numbering_[local] = global;
         local_[global] = local;
       }
+
       // Global renumbering is not necessary
       valid_numbering = true;
 
-      message(1, "DistributedData : generated linear mapping in range [%u, %u[",
-              offset_, offset_+range_size_);
+      message(1, "DistributedData : generated linear mapping in range [%u, %u[ "
+              "for rank %u", offset_, offset_ + range_size_, rank_);
     }
 
     // At this point mappings exist and local-to-global is cached.
@@ -275,32 +285,8 @@ void DistributedData::finalize()
       }
     }
 
-    // Set data range if needed
-    uint owned_size = local_.size() - ghost_.size();
-    if (range_size_ > 0 && (range_size_ != owned_size))
-    {
-      error("DistributedData : data range does not match provided range");
-    }
-    range_size_ = owned_size;
-    MPI::processOffset(range_size_, offset_);
-
-    // Check global size anyway
-    uint range_sum;
-    MPI::numGlobalSum(range_size_, range_sum);
-    // Check that computed value matches the former value such that the sum of
-    // ranges is indeed equal to the previously set global size
-    if (global_size_ == 0)
-    {
-      global_size_ = range_sum;
-    }
-    else if (global_size_ != range_sum)
-    {
-      error("DistributedData : sum of range not equal to global size");
-    }
-
     //
     finalized_ = true;
-
     tocd(1);
   }
 }
@@ -433,6 +419,11 @@ uint DistributedData::range_size() const
   return range_size_;
 }
 //-----------------------------------------------------------------------------
+bool DistributedData::range_is_set() const
+{
+  return range_is_set_;
+}
+//-----------------------------------------------------------------------------
 bool DistributedData::in_range(uint global_index) const
 {
   dolfin_assert(global_size_ > 0);
@@ -473,19 +464,24 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   {
     error("DistributedData : provided range is greater than local size ");
   }
-  // Check if any existing global size matches the provided value
-  if ((range_size_ > 0) && (range_size_ != num_owned))
-  {
-    error("DistributedData : setting different range than existing");
-  }
   // Check if the provided range size is consistent with cache size if any
-  if (cache_size_ > 0 && cache_size_ < num_owned)
+  if ((cached_numbering_ != NULL) && cache_size_ < num_owned)
   {
     error("DistributedData : provided range is greater than cache size ");
   }
-  // Set range in any case
-  range_size_ = num_owned;
-  MPI::processOffset(range_size_, offset_);
+  // Check range if already set otherwise set it and compute offset
+  if (range_is_set_)
+  {
+    if (range_size_ != num_owned)
+    {
+      error("DistributedData : setting different range than existing");
+    }
+  }
+  else
+  {
+    range_size_ = num_owned;
+    MPI::processOffset(range_size_, offset_);
+  }
   // Set the global size if provided otherwise compute it
   if (num_global > 0)
   {
@@ -508,6 +504,9 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
     }
     global_size_ = range_sum;
   }
+
+  ///
+  range_is_set_ = true;
 }
 //-----------------------------------------------------------------------------
 void DistributedData::set_size(uint num_local, uint num_global /* = 0 */ )

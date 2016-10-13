@@ -78,6 +78,9 @@ public:
   /// Return the process range size
   uint range_size() const;
 
+  /// Return if the process range is set
+  bool range_is_set() const;
+
   /// Return if the global index is in the process range
   bool in_range(uint global_index) const;
 
@@ -207,8 +210,13 @@ private:
 
   uint rank_;
   uint pe_size_;
+
+  //
+  bool range_is_set_;
   uint offset_;
   uint range_size_;
+
+  //
   uint global_size_;
 
   //

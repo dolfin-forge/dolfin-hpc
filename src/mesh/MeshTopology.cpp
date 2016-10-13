@@ -244,7 +244,7 @@ void MeshTopology::finalize()
 {
   if(!connectivity_[dim_][0].is_initialized())
   {
-    error("MeshTopology : cell -> vertices connectivity does not exist");
+    warning("MeshTopology : cell -> vertices connectivity does not exist");
   }
 
   // Reorder cells according to UFC convention

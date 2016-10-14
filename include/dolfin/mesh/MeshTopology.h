@@ -167,11 +167,6 @@ public:
   /// Display data
   void disp() const;
 
-  //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
-  void check() const;
-
   //--- TOKENIZED -------------------------------------------------------------
 
   /// Return token identifying the internal state of mesh topology

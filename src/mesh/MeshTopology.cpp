@@ -828,45 +828,5 @@ int MeshTopology::token() const
   return timestamp_ ^ size(0) ^ size(dim_);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::check() const
-{
-  message("MeshTopology: check");
-
-  /**
-   *  CHECK:
-   *
-   *  Mesh entities connectivities should follow the convention provided by the
-   *  cell type.
-   *
-   */
-
-  message("MeshTopology: check connectivities");
-
-  for (uint d0 = 0; d0 <= dim_; ++d0)
-  {
-    for (uint d1 = 0; d1 <= dim_; ++d1)
-    {
-      if (this->is_computed(d0, d1))
-      {
-        message("(%u,%u)", d0, d1);
-        connectivity_[d0][d1].check();
-      }
-    }
-  }
-
-  message("MeshTopology: check ordering of entities on cells");
-  Mesh& mesh = const_cast<Mesh&>(mesh_);
-  for (CellIterator c(mesh); !c.end(); ++c)
-  {
-    mesh.type().check(*c);
-  }
-
-  if (this->is_distributed())
-  {
-    message("MeshTopology: check distributed data");
-    //distdata_->check();
-  }
-}
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

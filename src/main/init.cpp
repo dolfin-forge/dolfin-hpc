@@ -55,22 +55,24 @@ void dolfin::dolfin_init(int argc, char * argv[])
 
   //--- Initialize subsystems
 
+  bool const first_init_call = !SubSystemsManager::MPIinitialized();
+
 #ifdef HAVE_MPI
   SubSystemsManager::initMPI(argc, argv, n);
 #endif
 
   // Cannot use MPI functions before initComm
-  if (MPI::processNumber() > 0)
+  if (first_init_call && MPI::processNumber() > 0)
   {
     dolfin::LogManager::logger().silence();
   }
-  if (MPI::processGlobalNumber() == 0)
+  if (first_init_call && MPI::processGlobalNumber() == 0)
   {
     message("Initializing DOLFIN version %s : running on %d %s.\n",
             DOLFIN_VERSION, dolfin::MPI::numGlobalProcesses(),
             (dolfin::MPI::numGlobalProcesses() > 1 ? "processes" : "process"));
   }
-  if (MPI::numGroups() > 1)
+  if (first_init_call && MPI::numGroups() > 1)
   {
     message("Group %d/%d : %d %s", dolfin::MPI::groupNumber() + 1,
             dolfin::MPI::numGroups(), dolfin::MPI::numProcesses(),

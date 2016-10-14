@@ -33,6 +33,7 @@ XMLMesh::XMLMesh(Mesh& mesh) :
     state_(ROOT),
     editor_(NULL),
     parallel_(false),
+    pre_partitioning_(true),
     cell_type_(NULL),
     vertex_dist_(NULL),
     cell_dist_(NULL),
@@ -127,6 +128,7 @@ void XMLMesh::clear()
   delete editor_;
   editor_ = NULL;
   parallel_ = false;
+  pre_partitioning_ = false;
   delete cell_type_;
   cell_type_ = NULL;
   delete vertex_dist_;
@@ -200,9 +202,12 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
     dolfin_assert(mesh_.topology().size(0) == vertex_dist_->size);
     dolfin_assert(mesh_.distdata()[0].local_size() == vertex_dist_->size);
     // The following section requires process range and global size to be set
-    MeshFunction<uint> pre_partition;
-    mesh_.partition_geom(pre_partition);
-    mesh_.distribute(pre_partition);
+    if (pre_partitioning_)
+    {
+      MeshFunction<uint> pre_partition;
+      mesh_.partition_geom(pre_partition);
+      mesh_.distribute(pre_partition);
+    }
     if (vertex_owner_ != NULL)
     {
       error("XMLMesh : vertex ownership array is already created.");

@@ -73,6 +73,7 @@ private:
   MeshEditor * editor_;
 
   bool parallel_;
+  bool pre_partitioning_;
   CellType * cell_type_;
   LinearDistribution * vertex_dist_;
   LinearDistribution * cell_dist_;

@@ -19,20 +19,20 @@ namespace dolfin
   {
   public:
 
-    /// Initialise MPI
-    static void initMPI(int argc = 0, char* argv[] = 0, uint n = 0);
+    /// Initialise MPI and return if initialization
+    static bool initMPI(int argc = 0, char* argv[] = 0, uint n = 0);
 
     /// Initialize PETSc without command-line arguments
-    static void initPETSc();
+    static bool initPETSc();
 
     /// Initialize PETSc with command-line arguments
-    static void initPETSc(int argc, char* argv[], bool cmd_line_args = true);
+    static bool initPETSc(int argc, char* argv[], bool cmd_line_args = true);
 
     /// Initialize Zoltan without command-line arguments
-    static void initZoltan();
+    static bool initZoltan();
 
     /// Initialize Zoltan without command-line arguments
-    static void initZoltan(int argc, char* argv[]);
+    static bool initZoltan(int argc, char* argv[]);
 
     /// Finalize MPI
     static void finalizeMPI();
@@ -57,6 +57,9 @@ namespace dolfin
 
     // Singleton instance
     static SubSystemsManager sub_systems_manager;
+
+    // Static state variables
+    static uint mpi_init_sema_;
 
     // State variables
     bool petsc_initialized;

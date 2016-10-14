@@ -34,6 +34,8 @@ using namespace dolfin;
 // Initialise static data
 dolfin::SubSystemsManager dolfin::SubSystemsManager::sub_systems_manager;
 
+dolfin::uint dolfin::SubSystemsManager::mpi_init_sema_ = 0;
+
 //-----------------------------------------------------------------------------
 SubSystemsManager::SubSystemsManager() : petsc_initialized(false),
                                          petsc_controls_mpi(false),
@@ -51,11 +53,15 @@ SubSystemsManager::~SubSystemsManager()
 {
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initMPI(int argc, char* argv[], uint n)
+bool SubSystemsManager::initMPI(int argc, char* argv[], uint n)
 {
+  ++mpi_init_sema_;
+
 #ifdef HAVE_MPI
   if( MPIinitialized() )
-    return;
+  {
+    return false;
+  }
 
 #ifdef HAVE_JANPACK_MPI
   int provided;
@@ -69,13 +75,17 @@ void SubSystemsManager::initMPI(int argc, char* argv[], uint n)
 #else
   // Do nothing
 #endif
+
+  return true;
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initPETSc()
+bool SubSystemsManager::initPETSc()
 {
 #ifdef HAVE_PETSC
   if ( sub_systems_manager.petsc_initialized )
-    return;
+  {
+    return false;
+  }
 
   message(1, "Initializing PETSc (ignoring command-line arguments).");
 
@@ -85,25 +95,31 @@ void SubSystemsManager::initPETSc()
   char** argv = NULL;
 
   // Initialize PETSc
-  initPETSc(argc, argv, false);
+  return initPETSc(argc, argv, false);
 
 #else
   error("DOLFIN has not been configured for PETSc.");
+  return true;
+
 #endif
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
+bool SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
 {
 #ifdef HAVE_PETSC
   if ( sub_systems_manager.petsc_initialized )
-    return;
+  {
+    return false;
+  }
 
   // Get status of MPI before PETSc initialisation
   const bool mpi_init_status = MPIinitialized();
 
   // FIXME: What does this do?
   if(cmd_line_args)
+  {
     message(1, "Initializing PETSc with given command-line arguments.");
+  }
 
   // Initialize PETSc
   PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
@@ -117,17 +133,24 @@ void SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
 
   // Determine if PETSc initialised MPI and is then responsible for MPI finalization
   if(!mpi_init_status && MPIinitialized())
+  {
     sub_systems_manager.petsc_controls_mpi = true;
+  }
+
 #else
   error("DOLFIN has not been configured for PETSc.");
 #endif
+
+  return true;
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initZoltan()
+bool SubSystemsManager::initZoltan()
 {
 #ifdef HAVE_ZOLTAN
   if ( sub_systems_manager.zoltan_initialized )
-    return;
+  {
+    return false;
+  }
 
   message(1, "Initializing Zoltan (ignoring command-line arguments).");
 
@@ -142,13 +165,17 @@ void SubSystemsManager::initZoltan()
 #else
   error("DOLFIN has not been configured with Zoltan.");
 #endif
+
+  return true;
 }
 //-----------------------------------------------------------------------------
-void SubSystemsManager::initZoltan(int argc, char* argv[])
+bool SubSystemsManager::initZoltan(int argc, char* argv[])
 {
 #ifdef HAVE_ZOLTAN
   if ( sub_systems_manager.zoltan_initialized )
-    return;
+  {
+    return false;
+  }
 
   message(1, "Initializing Zoltan with given command-line arguments.");
 
@@ -162,14 +189,23 @@ void SubSystemsManager::initZoltan(int argc, char* argv[])
 #else
   error("DOLFIN has not been configured with Zoltan .");
 #endif
+
+  return true;
 }
 //-----------------------------------------------------------------------------
 void SubSystemsManager::finalizeMPI()
 {
 #ifdef HAVE_MPI
-  //Finalise MPI if required
-  if ( MPIinitialized() && !sub_systems_manager.petsc_controls_mpi )
+  if(sub_systems_manager.petsc_controls_mpi)
+  {
+    return;
+  }
+
+  // Finalise MPI if required
+  if ( MPIinitialized() && !(--mpi_init_sema_) )
+  {
     MPI_Finalize();
+  }
 #else
   // Do nothing
 #endif

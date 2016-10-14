@@ -35,7 +35,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
     Mesh(),
     MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
-    boundary_of_boundary_(false),
+    boundary_of_boundary_(true),
     cell_map_(),
     vertex_map_(),
     subdomain_(NULL)

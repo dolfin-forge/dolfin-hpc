@@ -69,22 +69,12 @@ public:
   /// Return type
   Type boundary_type() const;
 
-  //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
-  void check() const;
-
 private:
 
   ///
   void compute(Mesh& mesh, bool exterior, bool interior);
 
-  /// Check consistency of the interior boundary
-  void check_interior(uint dim) const;
-
-  /// Check consistency of the exterior boundary
-  void check_exterior(uint dim) const;
-
+  ///
   Type type_;
 
   ///

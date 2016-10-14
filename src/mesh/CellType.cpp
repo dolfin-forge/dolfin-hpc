@@ -262,8 +262,9 @@ ufl::Domain::Type CellType::ufldomain(CellType::Type type)
   return ufl::Domain::None;
 }
 //-----------------------------------------------------------------------------
-void CellType::check(Cell& cell) const
+bool CellType::check(Cell& cell) const
 {
+  // Throw a hard error
   if(cell.type() != this->cellType())
   {
     error("CellType::check : mismatch of cell type");
@@ -272,8 +273,9 @@ void CellType::check(Cell& cell) const
   // UFC convention: edge -> vertices in ascending order
   if(cell.dim() < 2)
   {
-    return;
+    return true;
   }
+  bool ret = true;
   if (cell.mesh().topology().is_computed(1, 0))
   {
     uint const * cell_edges = cell.entities(1);
@@ -285,10 +287,13 @@ void CellType::check(Cell& cell) const
       dolfin_assert(edge_verts);
       if (edge_verts[1] < edge_verts[0])
       {
-        error("CellType::check : edge vertices are not in ascending order");
+        ret = false;
+        warning("CellType::check : edge vertices are not in ascending order");
       }
     }
   }
+
+  return ret;
 }
 //-----------------------------------------------------------------------------
 uint const * CellType::is_sorted_until(uint const * begin, uint const * end)

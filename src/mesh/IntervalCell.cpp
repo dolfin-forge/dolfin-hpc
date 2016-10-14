@@ -314,9 +314,9 @@ void IntervalCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::check(Cell& cell) const
+bool IntervalCell::check(Cell& cell) const
 {
-  CellType::check(cell);
+  bool ret = CellType::check(cell);
 
   // Check that cell vertices are in ascending order (so are edge vertices then)
   if (cell.mesh().topology().is_computed(1, 0))
@@ -325,9 +325,12 @@ void IntervalCell::check(Cell& cell) const
     dolfin_assert(cell_verts);
     if (cell_verts[1] < cell_verts[0])
     {
-      error("Interval vertices are not in ascending order");
+      ret = false;
+      warning("Interval vertices are not in ascending order");
     }
   }
+
+  return ret;
 }
 //-----------------------------------------------------------------------------
 

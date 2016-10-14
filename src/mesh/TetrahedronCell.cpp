@@ -727,17 +727,16 @@ std::string TetrahedronCell::description() const
 //-----------------------------------------------------------------------------
 void TetrahedronCell::disp() const
 {
-  message("TetrahedronCell");
-  begin(  "---------------");
+  section("TetrahedronCell");
   //---
   //---
   end();
   skip();
 }
 //-----------------------------------------------------------------------------
-void TetrahedronCell::check(Cell& cell) const
+bool TetrahedronCell::check(Cell& cell) const
 {
-  CellType::check(cell);
+  bool ret = CellType::check(cell);
 
   // UFC convention: cell -> vertices in ascending order
   // These connectivities should always exist, catching assertion if it is not
@@ -747,8 +746,9 @@ void TetrahedronCell::check(Cell& cell) const
   uint const num_cell_verts = this->num_vertices(this->dim());
   if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
   {
-    error("CellType::check : cell vertices are not in ascending order\n"
-          "=> cell index = %d", cell.index());
+    ret = false;
+    warning("CellType : cell vertices are not in ascending order\n"
+            "=> cell index = %d", cell.index());
   }
 
   //
@@ -769,7 +769,8 @@ void TetrahedronCell::check(Cell& cell) const
       {
         if (ev[j] != v[EIV[i][j]])
         {
-          error("CellType::check : invalid edge -> incident vertices mapping");
+          ret = false;
+          warning("CellType : invalid edge -> incident vertices mapping");
         }
       }
     }
@@ -788,11 +789,14 @@ void TetrahedronCell::check(Cell& cell) const
       {
         if (fv[j] != v[FIV[i][j]])
         {
-          error("CellType::check : invalid face -> incident vertices mapping");
+          ret = false;
+          warning("CellType : invalid face -> incident vertices mapping");
         }
       }
     }
   }
+
+  return ret;
 }
 //-----------------------------------------------------------------------------
 uint TetrahedronCell::findEdge(uint i, Cell const& cell) const

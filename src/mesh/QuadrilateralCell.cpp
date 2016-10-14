@@ -587,9 +587,9 @@ void QuadrilateralCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-void QuadrilateralCell::check(Cell& cell) const
+bool QuadrilateralCell::check(Cell& cell) const
 {
-  CellType::check(cell);
+  bool ret = CellType::check(cell);
 
   // Check edge -> incident vertices mapping
   if (cell.mesh().topology().is_computed(1, 0))
@@ -607,12 +607,15 @@ void QuadrilateralCell::check(Cell& cell) const
       {
         if (ev[j] != v[EIV[i][0]] && ev[j] != v[EIV[i][1]])
         {
-          error("CellType::check : invalid edge -> incident vertices mapping\n"
+          ret = false;
+          warning("CellType : invalid edge -> incident vertices mapping\n"
                 "e[%u] = (v%u, v%u)", i, ev[0], ev[1]);
         }
       }
     }
   }
+
+  return ret;
 }
 //-----------------------------------------------------------------------------
 uint QuadrilateralCell::findEdge(uint i, Cell const& cell) const

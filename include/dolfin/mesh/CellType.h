@@ -167,7 +167,7 @@ public:
   /// Common cell type check
   /// ASSERTION: cell vertices in ascending order
   /// ASSERTION: edge vertices in ascending order
-  virtual void check(Cell& cell) const = 0;
+  virtual bool check(Cell& cell) const = 0;
 
   /// UFL binding
   operator ufl::Cell const&() const { return ufl_; }

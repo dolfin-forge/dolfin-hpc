@@ -695,9 +695,9 @@ uint TriangleCell::findEdge(uint i, Cell const& cell) const
   return 0;
 }
 //-----------------------------------------------------------------------------
-void TriangleCell::check(Cell& cell) const
+bool TriangleCell::check(Cell& cell) const
 {
-  CellType::check(cell);
+  bool ret = CellType::check(cell);
 
   // UFC convention: cell -> vertices in ascending order
   // These connectivities should always exist, catching assertion if it is not
@@ -707,8 +707,9 @@ void TriangleCell::check(Cell& cell) const
   uint const num_cell_verts = this->num_vertices(this->dim());
   if(!is_sorted(cell_verts, cell_verts + num_cell_verts))
   {
-    error("CellType::check : cell vertices are not in ascending order\n"
-          "=> cell index = %d", cell.index());
+    ret = false;
+    warning("CellType::check : cell vertices are not in ascending order\n"
+            "=> cell index = %d", cell.index());
   }
 
   // Check edge -> incident vertices mapping
@@ -727,11 +728,14 @@ void TriangleCell::check(Cell& cell) const
       {
         if (ev[j] != v[EIV[i][j]])
         {
-          error("CellType::check : invalid edge -> incident vertices mapping");
+          ret = false;
+          warning("CellType : invalid edge -> incident vertices mapping");
         }
       }
     }
   }
+
+  return ret;
 }
 //-----------------------------------------------------------------------------
 

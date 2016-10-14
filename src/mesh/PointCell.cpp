@@ -199,9 +199,9 @@ void PointCell::disp() const
   skip();
 }
 //-----------------------------------------------------------------------------
-void PointCell::check(Cell& cell) const
+bool PointCell::check(Cell& cell) const
 {
-  CellType::check(cell);
+  return CellType::check(cell);
 }
 //-----------------------------------------------------------------------------
 

@@ -143,7 +143,7 @@ public:
   void disp() const;
 
   /// Check
-  void check(Cell& cell) const;
+  bool check(Cell& cell) const;
 
 private:
 

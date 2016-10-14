@@ -46,7 +46,7 @@ namespace dolfin
     SubSystemsManager();
 
     // Copy construtor
-    SubSystemsManager(const SubSystemsManager& sub_sys_manager);
+    SubSystemsManager(SubSystemsManager const& sub_sys_manager);
 
     // Destructor
     ~SubSystemsManager();

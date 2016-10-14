@@ -7,7 +7,6 @@
 // First added:  2008-01-07
 // Last changed: 2015-01-30
 
-
 #include <dolfin/common/constants.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/MPI.h>
@@ -29,22 +28,23 @@
 #include <zoltan_cpp.h>
 #endif
 
-using namespace dolfin;
+namespace dolfin
+{
 
 // Initialise static data
-dolfin::SubSystemsManager dolfin::SubSystemsManager::sub_systems_manager;
-
-dolfin::uint dolfin::SubSystemsManager::mpi_init_sema_ = 0;
+SubSystemsManager SubSystemsManager::sub_systems_manager;
+uint SubSystemsManager::mpi_init_sema_ = 0;
 
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager() : petsc_initialized(false),
-                                         petsc_controls_mpi(false),
-                                         zoltan_initialized(false)
+SubSystemsManager::SubSystemsManager() :
+    petsc_initialized(false),
+    petsc_controls_mpi(false),
+    zoltan_initialized(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager(const SubSystemsManager& sub_sys_manager)
+SubSystemsManager::SubSystemsManager(SubSystemsManager const& sub_sys_manager)
 {
   error("Should not be using copy constructor of SubSystemsManager.");
 }
@@ -58,7 +58,7 @@ bool SubSystemsManager::initMPI(int argc, char* argv[], uint n)
   ++mpi_init_sema_;
 
 #ifdef HAVE_MPI
-  if( MPIinitialized() )
+  if (MPIinitialized())
   {
     return false;
   }
@@ -82,7 +82,7 @@ bool SubSystemsManager::initMPI(int argc, char* argv[], uint n)
 bool SubSystemsManager::initPETSc()
 {
 #ifdef HAVE_PETSC
-  if ( sub_systems_manager.petsc_initialized )
+  if (sub_systems_manager.petsc_initialized)
   {
     return false;
   }
@@ -107,7 +107,7 @@ bool SubSystemsManager::initPETSc()
 bool SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
 {
 #ifdef HAVE_PETSC
-  if ( sub_systems_manager.petsc_initialized )
+  if (sub_systems_manager.petsc_initialized)
   {
     return false;
   }
@@ -116,7 +116,7 @@ bool SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
   const bool mpi_init_status = MPIinitialized();
 
   // FIXME: What does this do?
-  if(cmd_line_args)
+  if (cmd_line_args)
   {
     message(1, "Initializing PETSc with given command-line arguments.");
   }
@@ -132,7 +132,7 @@ bool SubSystemsManager::initPETSc(int argc, char* argv[], bool cmd_line_args)
   sub_systems_manager.petsc_initialized = true;
 
   // Determine if PETSc initialised MPI and is then responsible for MPI finalization
-  if(!mpi_init_status && MPIinitialized())
+  if (!mpi_init_status && MPIinitialized())
   {
     sub_systems_manager.petsc_controls_mpi = true;
   }
@@ -196,13 +196,13 @@ bool SubSystemsManager::initZoltan(int argc, char* argv[])
 void SubSystemsManager::finalizeMPI()
 {
 #ifdef HAVE_MPI
-  if(sub_systems_manager.petsc_controls_mpi)
+  if (sub_systems_manager.petsc_controls_mpi)
   {
     return;
   }
 
   // Finalise MPI if required
-  if ( MPIinitialized() && !(--mpi_init_sema_) )
+  if (MPIinitialized() && !(--mpi_init_sema_))
   {
     MPI_Finalize();
   }
@@ -213,14 +213,19 @@ void SubSystemsManager::finalizeMPI()
 //-----------------------------------------------------------------------------
 void SubSystemsManager::finalizePETSc()
 {
+  if (!sub_systems_manager.petsc_controls_mpi && mpi_init_sema_ > 1)
+  {
+    return;
+  }
+
 #ifdef HAVE_PETSC
- if ( sub_systems_manager.petsc_initialized )
+  if (sub_systems_manager.petsc_initialized)
   {
     PetscFinalize();
 
-    #ifdef HAVE_SLEPC
+#ifdef HAVE_SLEPC
     SlepcFinalize();
-    #endif
+#endif
   }
 #else
   // Do nothing
@@ -237,10 +242,8 @@ bool SubSystemsManager::MPIinitialized()
   int initialized;
   MPI_Initialized(&initialized);
 
-  if (initialized)
-    return true;
-  else if (!initialized)
-    return false;
+  if (initialized) return true;
+  else if (!initialized) return false;
   else
   {
     error("MPI_Initialized has returned an unknown initialization status");
@@ -252,3 +255,5 @@ bool SubSystemsManager::MPIinitialized()
 #endif
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

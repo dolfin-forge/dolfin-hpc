@@ -45,6 +45,9 @@ public:
   /// Create boundary mesh from given mesh
   BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type);
 
+  /// Create boundary mesh from given boundary mesh
+  explicit BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type);
+
   /// Create boundary mesh from given mesh
   BoundaryMesh(Mesh& mesh, SubDomain const& subdomain, BoundaryMesh::Type type);
 
@@ -69,13 +72,22 @@ public:
   /// Return type
   Type boundary_type() const;
 
+  /// Return whether it is the boundary of a boundary mesh
+  bool is_boundary_of_boundary() const;
+
 private:
+
+  ///
+  void init(Mesh& mesh, BoundaryMesh::Type type);
 
   ///
   void compute(Mesh& mesh, bool exterior, bool interior);
 
   ///
   Type type_;
+
+  ///
+  bool const boundary_of_boundary_;
 
   ///
   Array<uint> cell_map_;

@@ -21,30 +21,26 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
     Mesh(),
-    MeshDependent(mesh),
+    MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
+    boundary_of_boundary_(false),
     cell_map_(),
     vertex_map_(),
     subdomain_(NULL)
 {
-  switch (type)
-    {
-    case BoundaryMesh::exterior:
-      // Exterior boundary i.e facets at the domain boundary
-      compute(mesh, true, false);
-      break;
-    case BoundaryMesh::interior:
-      // Interior boundary i.e facets between processors
-      compute(mesh, false, true);
-      break;
-    case BoundaryMesh::full:
-      // Full boundary including facets between processors
-      compute(mesh, true, true);
-      break;
-    default:
-      error("Unknown boundary mesh type.");
-      break;
-    }
+  init(mesh, type);
+}
+//-----------------------------------------------------------------------------
+BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
+    Mesh(),
+    MeshDependent(static_cast<Mesh&>(mesh)),
+    type_(type),
+    boundary_of_boundary_(false),
+    cell_map_(),
+    vertex_map_(),
+    subdomain_(NULL)
+{
+  init(mesh, type);
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
@@ -52,9 +48,15 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
     Mesh(),
     MeshDependent(mesh),
     type_(type),
+    boundary_of_boundary_(false),
     cell_map_(),
     vertex_map_(),
     subdomain_(&subdomain)
+{
+  init(mesh, type);
+}
+//-----------------------------------------------------------------------------
+void BoundaryMesh::init(Mesh& mesh, BoundaryMesh::Type type)
 {
   switch (type)
     {
@@ -81,6 +83,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
     Mesh(),
     MeshDependent(boundary.mesh()),
     type_(boundary.type_),
+    boundary_of_boundary_(true),
     cell_map_(),
     vertex_map_(),
     subdomain_(&subdomain)
@@ -213,6 +216,11 @@ uint BoundaryMesh::vertex_index(uint boundary_vertex_index) const
 BoundaryMesh::Type BoundaryMesh::boundary_type() const
 {
   return type_;
+}
+//-----------------------------------------------------------------------------
+bool BoundaryMesh::is_boundary_of_boundary() const
+{
+  return boundary_of_boundary_;
 }
 //-----------------------------------------------------------------------------
 void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)

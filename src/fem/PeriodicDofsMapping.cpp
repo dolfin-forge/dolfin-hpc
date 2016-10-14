@@ -67,7 +67,6 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
 
   // Collect facets with one vertex inside the subdomain
   BoundaryMesh& boundary = mesh.exterior_boundary();
-  boundary.init(0, tdim);
 
   Array<MappedManifold *> const& manifold_list = mesh.periodic_mappings();
   uint totalcardGnI = 0;

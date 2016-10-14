@@ -16,10 +16,11 @@ class Mesh;
 
 class MeshDependent
 {
+
 public:
 
   ///
-  MeshDependent(Mesh& mesh);
+  explicit MeshDependent(Mesh& mesh);
 
   ///
   virtual Mesh& mesh() const;
@@ -43,7 +44,10 @@ protected:
 
 private:
 
-  Mesh& mesh_;
+  ///
+  MeshDependent(MeshDependent const& other);
+
+  Mesh * const mesh_;
   int topology_token_;
   int geometry_token_;
 

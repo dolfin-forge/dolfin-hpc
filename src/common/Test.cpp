@@ -41,11 +41,6 @@ Test::Test() :
 void Test::init(int argc, char *argv[])
 {
   dolfin_init(argc, argv);
-  if (dolfin::MPI::processNumber() == 0)
-  {
-    message("Running on %d %s", dolfin::MPI::numProcesses(),
-            (dolfin::MPI::numProcesses() > 1 ? "nodes" : "node"));
-  }
 
   int flag;
   int i = 0;

@@ -286,6 +286,12 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       bool const bndr = (f->num_entities(tdim) == 1);
       // Interior facets are shared while exterior facets are not
       bool const shrd = f->is_shared();
+#if DEBUG
+      if(shrd && !f->has_all_vertices_shared())
+      {
+        error("Shared facets have not all vertices shared");
+      }
+#endif
       if (bndr && (full || (interior && shrd) || (exterior && !shrd)))
       {
         if (subdomain_ != NULL)

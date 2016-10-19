@@ -76,7 +76,7 @@ public:
   Mesh(std::string const& filename);
 
   /// Destructor
-  ~Mesh();
+  virtual ~Mesh();
 
   /// Assignment
   Mesh const& operator=(Mesh const& mesh);

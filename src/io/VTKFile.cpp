@@ -290,6 +290,9 @@ void VTKFile::MeshWrite(Mesh& mesh) const
     case CellType::interval:
       typeval = uint8_t(3);
       break;
+    case CellType::point:
+      typeval = uint8_t(1);
+      break;
     default:
       error("Provided mesh type is not supported");
       break;

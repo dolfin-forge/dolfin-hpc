@@ -72,6 +72,9 @@ public:
   // Topological dimension
   uint const topological_dimension;
 
+  // Geometric dimension
+  uint const geometric_dimension;
+
   // Local array for mapping of dofs
   uint * const dofs;
 

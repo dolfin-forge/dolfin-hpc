@@ -189,8 +189,14 @@ public:
   /// Create cell types
   static Array<CellType*> create_simplex();
 
+  /// Create simplicial cell types
+  static CellType* create_simplex(uint dim);
+
   /// Create cell types
   static Array<CellType*> create_hypercube();
+
+  /// Create hypercube cell types
+  static CellType* create_hypercube(uint dim);
 
 protected:
 

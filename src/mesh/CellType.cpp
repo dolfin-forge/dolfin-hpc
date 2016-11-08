@@ -59,6 +59,26 @@ Array<CellType*> CellType::create_simplex()
   return ret;
 }
 //-----------------------------------------------------------------------------
+CellType* CellType::create_simplex(uint dim)
+{
+  switch (dim)
+    {
+    case 1:
+      return CellType::create(CellType::interval);
+      break;
+    case 2:
+      return CellType::create(CellType::triangle);
+      break;
+    case 3:
+      return CellType::create(CellType::tetrahedron);
+      break;
+    default:
+      error("Unknown simplex type for dimension: %d.", dim);
+      break;
+    }
+  return NULL;
+}
+//-----------------------------------------------------------------------------
 Array<CellType*> CellType::create_hypercube()
 {
   Array<CellType *> ret;
@@ -66,6 +86,26 @@ Array<CellType*> CellType::create_hypercube()
   ret.push_back(CellType::create(CellType::quadrilateral));
   ret.push_back(CellType::create(CellType::hexahedron));
   return ret;
+}
+//-----------------------------------------------------------------------------
+CellType* CellType::create_hypercube(uint dim)
+{
+  switch (dim)
+    {
+    case 1:
+      return CellType::create(CellType::interval);
+      break;
+    case 2:
+      return CellType::create(CellType::quadrilateral);
+      break;
+    case 3:
+      return CellType::create(CellType::hexahedron);
+      break;
+    default:
+      error("Unknown hypercube type for dimension: %d.", dim);
+      break;
+    }
+  return NULL;
 }
 //-----------------------------------------------------------------------------
 CellType* CellType::create(CellType::Type type)

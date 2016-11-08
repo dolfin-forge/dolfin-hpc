@@ -124,7 +124,7 @@ private:
 inline void Point::set(real const* x, uint gdim)
 {
   dolfin_assert(gdim <= Point::MAX_SIZE);
-  std::memcpy(x_, x, gdim*sizeof(real));
+  std::copy(x, x + gdim, x_);
 }
 
 //-----------------------------------------------------------------------------

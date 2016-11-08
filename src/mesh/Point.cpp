@@ -24,7 +24,8 @@ Point::Point(const real x, const real y, const real z)
 //-----------------------------------------------------------------------------
 Point::Point(real const * x, uint gdim)
 {
-  this->set(x, gdim);
+  std::fill(x_, x_ + Point::MAX_SIZE, 0.0);
+  std::copy(x, x + gdim, x_);
 }
 //-----------------------------------------------------------------------------
 Point::Point(Point const& p)
@@ -40,11 +41,9 @@ Point::~Point()
 //-----------------------------------------------------------------------------
 real Point::distance(Point const& p) const
 {
-  const real dx = p.x_[0] - x_[0];
-  const real dy = p.x_[1] - x_[1];
-  const real dz = p.x_[2] - x_[2];
-
-  return std::sqrt(dx * dx + dy * dy + dz * dz);
+  return std::sqrt((p.x_[0] - x_[0]) * (p.x_[0] - x_[0]) +
+                   (p.x_[1] - x_[1]) * (p.x_[1] - x_[1]) +
+                   (p.x_[2] - x_[2]) * (p.x_[2] - x_[2]));
 }
 //-----------------------------------------------------------------------------
 real Point::norm() const
@@ -54,13 +53,9 @@ real Point::norm() const
 //-----------------------------------------------------------------------------
 Point Point::cross(Point const& p) const
 {
-  Point q;
-
-  q.x_[0] = x_[1] * p.x_[2] - x_[2] * p.x_[1];
-  q.x_[1] = x_[2] * p.x_[0] - x_[0] * p.x_[2];
-  q.x_[2] = x_[0] * p.x_[1] - x_[1] * p.x_[0];
-
-  return q;
+  return Point(x_[1] * p.x_[2] - x_[2] * p.x_[1],
+               x_[2] * p.x_[0] - x_[0] * p.x_[2],
+               x_[0] * p.x_[1] - x_[1] * p.x_[0]);
 }
 //-----------------------------------------------------------------------------
 real Point::dot(Point const& p) const
@@ -68,22 +63,18 @@ real Point::dot(Point const& p) const
   return x_[0] * p.x_[0] + x_[1] * p.x_[1] + x_[2] * p.x_[2];
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream, Point const& p)
+LogStream& operator<<(LogStream& ss, Point const& p)
 {
-  stream << "[ Point x = " << p.x() << " y = " << p.y() << " z = " << p.z()
-         << " ]";
-  return stream;
+  ss << "[ Point x = " << p.x() << " y = " << p.y() << " z = " << p.z() << " ]";
+  return ss;
 }
 //-----------------------------------------------------------------------------
 void Point::disp() const
 {
-  // Begin indentation
-  cout << "Point" << endl;
-  begin("-----");
-  cout << "( " << x_[0] << ", " << x_[1] << ", " << x_[2] << " )" << endl;
-  // End indentation
-  end();
+  section("Point");
+  message("( %+e, %+e, %+e )", x_[0], x_[1], x_[2]);
+  endblock();
 }
 //-----------------------------------------------------------------------------
 
-}
+} /* namespace dolfin */

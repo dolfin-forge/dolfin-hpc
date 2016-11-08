@@ -69,10 +69,10 @@ public:
   inline void evaluate(uint n, real* values, const real* coordinates,
                        const ufc::cell& cell) const
   {
-    for (uint i = 0; i < n; ++i)
+    for (uint i = 0; i < n; ++i, values+=this->value_size(),
+         coordinates+=cell.geometric_dimension)
     {
-      evaluant_.eval(&values[i * value_size()],
-                     &coordinates[i * cell.geometric_dimension]);
+      evaluant_.eval(values, coordinates);
     }
   }
 

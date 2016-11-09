@@ -16,7 +16,6 @@ namespace dolfin
 template<class T, uint I = 1, uint J = 1>
 class Value : public Expression, public TimeDependent
 {
-  static ValueSpace<I, J> const VS_;
 
 public:
 
@@ -36,19 +35,19 @@ public:
   /// Return the rank of the value space
   inline uint rank() const
   {
-    return VS_.rank();
+    return ValueSpace<I, J>::rank();
   }
 
   /// Return the dimension of the value space for axis i
   inline uint dim(uint i) const
   {
-    return VS_.dim(i);
+    return ValueSpace<I, J>::dim(i);
   }
 
   /// Return value size (allow overloading to avoid recomputation)
   inline uint value_size() const
   {
-    return VS_.value_size();
+    return ValueSpace<I, J>::value_size();
   }
 
   //---------------------------------------------------------------------------
@@ -81,10 +80,6 @@ public:
   }
 
 };
-
-//
-template<class T, uint I, uint J>
-ValueSpace<I, J> const Value<T, I,J>::VS_ = ValueSpace<I, J>();
 
 } /* namespace licorne */
 

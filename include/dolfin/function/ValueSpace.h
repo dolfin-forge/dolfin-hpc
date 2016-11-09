@@ -10,41 +10,43 @@ template<uint I = 1, uint J = 1>
 class ValueSpace
 {
 
-  static uint const SIZE = I * J;
-
 public:
 
-  ValueSpace() :
-    RANK((I > 1 ? (J > 1 ? 2 : 1) : 0))
+  ValueSpace()
   {
-    DIM[0] = (RANK > 0 ? I : 1);
-    DIM[1] = (RANK > 1 ? J : 1);
   }
 
   /// Return the rank of the value space
-  inline uint rank() const
+  static inline uint rank()
   {
     return RANK;
   }
 
   /// Return the dimension of the value space for axis i
-  inline uint dim(uint i) const
+  static inline uint dim(uint i)
   {
     return (i < RANK ? DIM[i] : 1);
   }
 
   /// Return value size
-  inline uint value_size() const
+  static inline uint value_size()
   {
     return SIZE;
   }
 
 private:
 
-  uint DIM[2];
-  uint const RANK;
+  static uint const SIZE = I * J;
+  static uint const DIM[2];
+  static uint const RANK;
 
 };
+
+template<uint I, uint J>
+uint const ValueSpace<I, J>::DIM[2] = { I, J };
+
+template<uint I, uint J>
+uint const ValueSpace<I, J>::RANK   = (I > 1 ? (J > 1 ? 2 : 1) : 0);
 
 } /* namespace licorne */
 

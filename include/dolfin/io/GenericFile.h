@@ -78,8 +78,6 @@ namespace dolfin
 
     // Counters for the number of times various data has been written
     uint counter;
-    uint counter1;
-    uint counter2;
 
   };
   

@@ -21,9 +21,7 @@ GenericFile::GenericFile(const std::string filename) :
   opened_read(false),
   opened_write(false),
   check_header(false),
-  counter(0),
-  counter1(0),
-  counter2(0)
+  counter(0)
 {
   // Do nothing
 }

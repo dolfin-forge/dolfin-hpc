@@ -54,6 +54,12 @@ public:
   /// Remaining time
   real remaining() const;
 
+  /// Elapsed normalized time
+  real elapsed_normalized() const;
+
+  /// Remaining normalized time
+  real remaining_normalized() const;
+
   /// Display current time
   void show() const;
 

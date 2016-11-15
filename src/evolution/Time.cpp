@@ -79,7 +79,26 @@ real Time::elapsed() const
 real Time::remaining() const
 {
   return std::fabs(T_.second - t_);
-}//-----------------------------------------------------------------------------
+}
+//-----------------------------------------------------------------------------
+real Time::elapsed_normalized() const
+{
+  if(abscmp(T_.second, T_.first))
+  {
+    return 0.0;
+  }
+  return std::fabs(t_ - T_.first)/std::fabs(T_.second - T_.first);
+}
+//-----------------------------------------------------------------------------
+real Time::remaining_normalized() const
+{
+  if(abscmp(T_.second, T_.first))
+  {
+    return 0.0;
+  }
+  return std::fabs(T_.second - t_)/std::fabs(T_.second - T_.first);
+}
+//-----------------------------------------------------------------------------
 void Time::show() const
 {
   real const p = 100.0 * this->elapsed() / (sign_ == 0 ? 1.0 : this->measure());

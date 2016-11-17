@@ -31,6 +31,7 @@
 
 #include <climits>
 #include <cfloat>
+#include <stdint.h>
 
 namespace dolfin
 {

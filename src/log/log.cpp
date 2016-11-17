@@ -134,6 +134,7 @@ void header(std::string msg, ...)
 //-----------------------------------------------------------------------------
 void section(std::string msg, ...)
 {
+  skip();
   message(msg);
   std::stringstream ss;
   ss << std::setw(msg.size()) << std::setfill('-') << "-" << std::endl;

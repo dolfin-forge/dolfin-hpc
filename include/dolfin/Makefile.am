@@ -130,11 +130,8 @@ nobase_pkginclude_HEADERS = \
 				la/PETScVector.h\
 				la/PreconditionerType.h\
 				la/Scalar.h\
-				la/SingularSolver.h\
-				la/solve.h\
 				la/SolverType.h\
 				la/SparsityPattern.h\
-				la/ublas.h\
 				la/Vector.h\
 				la/VectorNormType.h\
 				log/dolfin_log.h\

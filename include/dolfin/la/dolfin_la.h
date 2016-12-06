@@ -29,7 +29,5 @@
 #include <dolfin/la/KrylovSolver.h>
 #include <dolfin/la/AMGSolver.h>
 #include <dolfin/la/LUSolver.h>
-#include <dolfin/la/SingularSolver.h>
-#include <dolfin/la/solve.h>
 
 #endif /* __DOLFIN_HEADER_LA_H */

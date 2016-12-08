@@ -15,6 +15,7 @@ nobase_pkginclude_HEADERS = \
 				common/AdjacentMapping.h\
 				common/Check.h\
 				common/DistributedData.h\
+				common/Label.h\
 				common/List.h\
 				common/Test.h\
 				common/Tokenized.h\

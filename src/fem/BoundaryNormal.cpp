@@ -82,16 +82,14 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 //-----------------------------------------------------------------------------
 void BoundaryNormal::write(std::string const& filename)
 {
-  std::vector<std::pair<Function *, std::string> > fields;
+  LabelList<Function> fields;
   for (uint i = 0; i < mesh_.geometry().dim(); ++i)
   {
     std::stringstream ss;
     ss << "E" << i;
-    fields.push_back(
-        std::pair<Function *, std::string>(&basis_[i], ss.str()));
+    fields.push_back(Label<Function>(basis_[i], ss.str()));
   }
-  fields.push_back(
-      std::pair<Function *, std::string>(&node_type_, "TYPE"));
+  fields.push_back(Label<Function>(node_type_, "TYPE"));
   File f(filename);
   f << fields;
   message("Saved node normal basis and node type in %s.", filename.c_str());

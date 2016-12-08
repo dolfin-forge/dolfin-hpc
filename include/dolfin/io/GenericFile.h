@@ -9,18 +9,18 @@
 #ifndef __DOLFIN_GENERIC_FILE_H
 #define __DOLFIN_GENERIC_FILE_H
 
-#include <string>
-#include <vector>
+#include <dolfin/common/Label.h>
 
-#include <dolfin/la/GenericVector.h>
-#include <dolfin/la/GenericMatrix.h>
+#include <vector>
 
 namespace dolfin
 {
   
+  class Function;
+  class GenericMatrix;
+  class GenericVector;
   class Mesh;
   template <class T> class MeshFunction;
-  class Function;
   class ParameterList;
    
   class GenericFile
@@ -41,7 +41,7 @@ namespace dolfin
     virtual void operator>> (MeshFunction<bool>& meshfunction);
     virtual void operator>> (Function& mesh);
     virtual void operator>> (ParameterList& parameters);
-    virtual void operator>> (std::vector<std::pair<Function*, std::string> >& f);
+    virtual void operator>> (LabelList<Function>& list);
     
     // Output
     
@@ -54,7 +54,7 @@ namespace dolfin
     virtual void operator<< (MeshFunction<bool>& meshfunction);
     virtual void operator<< (Function& u);
     virtual void operator<< (ParameterList& parameters);
-    virtual void operator<< (std::vector<std::pair<Function*, std::string> >& f);
+    virtual void operator<< (LabelList<Function>& f);
     
     void set_counter(uint value);
 

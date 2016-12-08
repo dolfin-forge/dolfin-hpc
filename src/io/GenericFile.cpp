@@ -76,7 +76,7 @@ void GenericFile::operator>>(ParameterList& parameters)
   read_not_impl("ParameterList");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator>> (std::vector<std::pair<Function*, std::string> >& f)
+void GenericFile::operator>> (LabelList<Function>& f)
 {
   read_not_impl("Function");
 }
@@ -126,7 +126,7 @@ void GenericFile::operator<<(ParameterList& parameters)
   write_not_impl("ParameterList");
 }
 //-----------------------------------------------------------------------------
-void GenericFile::operator<< (std::vector<std::pair<Function*, std::string> >& f)
+void GenericFile::operator<< (LabelList<Function>& f)
 {
   write_not_impl("Function");
 }

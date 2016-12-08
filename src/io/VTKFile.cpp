@@ -115,15 +115,13 @@ void VTKFile::operator<<(MeshFunction<bool>& meshfunction)
 //----------------------------------------------------------------------------
 void VTKFile::operator<<(Function& u)
 {
-  std::pair<Function*, std::string> f(&u, u.name());
-  std::vector<std::pair<Function*, std::string> > tmp;
-  tmp.push_back(f);
+  LabelList<Function> tmp(1, Label<Function>(u, "U"));
   write_dataset(tmp);
 }
 //----------------------------------------------------------------------------
-void VTKFile::operator<<(std::vector<std::pair<Function*, std::string> >& f)
+void VTKFile::operator<<(LabelList<Function>& list)
 {
-  write_dataset(f);
+  write_dataset(list);
 }
 //----------------------------------------------------------------------------
 void VTKFile::read()
@@ -145,7 +143,7 @@ void VTKFile::write()
   opened_write = true;
 }
 //----------------------------------------------------------------------------
-void VTKFile::write_dataset(std::vector<std::pair<Function*, std::string> >& f)
+void VTKFile::write_dataset(LabelList<Function>& f)
 {
   dolfin_assert(f.size() > 0);
 
@@ -311,14 +309,14 @@ void VTKFile::MeshWrite(Mesh& mesh) const
 }
 //----------------------------------------------------------------------------
 void VTKFile::ResultsWrite(
-    std::vector<std::pair<Function*, std::string> > f) const
+    LabelList<Function> f) const
 {
   // Open file
   FILE *fp = fopen(vtu_filename.c_str(), "a");
 
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     if (it->first->mesh() != mesh)
@@ -329,7 +327,7 @@ void VTKFile::ResultsWrite(
 
   //--- Interpolation to vertices for general functions-----------------------
   fprintf(fp, "<PointData> \n");
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     Function* u = it->first;
@@ -446,7 +444,7 @@ void VTKFile::ResultsWrite(
 
   //--- Cellwise functions----------------------------------------------------
   fprintf(fp, "<CellData> \n");
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     Function* u = it->first;
@@ -674,7 +672,7 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
 
 } //----------------------------------------------------------------------------
 void VTKFile::pvtuFileWriteFunction(
-    std::vector<std::pair<Function*, std::string> > f)
+    LabelList<Function> f)
 {
   std::fstream pvtuFile;
 
@@ -687,7 +685,7 @@ void VTKFile::pvtuFileWriteFunction(
   pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
 
   pvtuFile << "<PPointData>" << std::endl;
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     Function* u = it->first;
@@ -731,7 +729,7 @@ void VTKFile::pvtuFileWriteFunction(
 
   //
   pvtuFile << "<PCellData>" << std::endl;
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     Function* u = it->first;

@@ -12,21 +12,20 @@
 #ifndef __DOLFIN_FILE_H
 #define __DOLFIN_FILE_H
 
-#include <string>
-#include <sstream>
-#include <vector>
+#include <dolfin/common/Label.h>
 
-#include <dolfin/la/GenericVector.h>
-#include <dolfin/la/GenericMatrix.h>
+#include <sstream>
 
 namespace dolfin
 {
 
+  class Function;
   class Mesh;
   template <class T> class MeshFunction;
-  class Function;
   class ParameterList;
   class GenericFile;
+  class GenericMatrix;
+  class GenericVector;
 
   /// A File represents a data file for reading and writing objects.
   /// Unless specified explicitly, the format is determined by the
@@ -75,7 +74,7 @@ namespace dolfin
     void operator>> (ParameterList& parameters);
 
     /// Read a collection of funtion to file
-    void operator>> (std::vector<std::pair<Function*, std::string> >& f);
+    void operator>> (LabelList<Function>& list);
 
     //--- Output ---
 
@@ -101,7 +100,7 @@ namespace dolfin
     void operator<< (ParameterList& parameters);
 
     /// Write a collection of functions to file
-    void operator<< (std::vector<std::pair<Function*, std::string> >& f);
+    void operator<< (LabelList<Function>& f);
 
     void set_counter(uint new_value);
 

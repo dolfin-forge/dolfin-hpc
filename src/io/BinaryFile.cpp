@@ -246,7 +246,7 @@ void BinaryFile::operator>>(Function & f)
 #endif
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
+void BinaryFile::operator>>(LabelList<Function>& f)
 {
 #ifdef ENABLE_MPIIO
   uint pe_size = MPI::numProcesses();
@@ -276,7 +276,7 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
   }
 
   BinaryFunctionHeader f_hdr;
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
 
@@ -318,19 +318,17 @@ void BinaryFile::operator>>(std::vector<std::pair<Function*, std::string> >& f)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Function & u)
 {
-  std::pair<Function*, std::string> f(&u, "U");
-  std::vector<std::pair<Function*, std::string> > tmp;
-  tmp.push_back(f);
+  LabelList<Function> tmp(1, Label<Function>(u, "U"));
   write_function(tmp);
 }
 //----------------------------------------------------------------------------
-void BinaryFile::operator<<(std::vector<std::pair<Function*, std::string> >& f)
+void BinaryFile::operator<<(LabelList<Function>& list)
 {
-  write_function(f);
+  write_function(list);
 }
 //----------------------------------------------------------------------------
 void BinaryFile::write_function(
-    std::vector<std::pair<Function*, std::string> >& f)
+    LabelList<Function>& f)
 {
 
 #ifdef ENABLE_MPIIO
@@ -362,7 +360,7 @@ void BinaryFile::write_function(
   // Assume same mesh for all data arrays
   Mesh& mesh = f[0].first->mesh();
 
-  for (std::vector<std::pair<Function*, std::string> >::iterator it = f.begin();
+  for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
     Function* u = it->first;

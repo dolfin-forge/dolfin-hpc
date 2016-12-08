@@ -45,7 +45,7 @@ public:
   void operator>>(GenericVector& x);
   void operator>>(Mesh& mesh);
   void operator>>(Function& f);
-  void operator>>(std::vector<std::pair<Function*, std::string> >& f);
+  void operator>>(LabelList<Function>& f);
   void operator>>(MeshFunction<bool>& meshfunction);
   void operator>>(MeshFunction<int>& meshfunction);
   void operator>>(MeshFunction<uint>& meshfunction);
@@ -55,7 +55,7 @@ public:
   void operator<<(GenericVector& x);
   void operator<<(Mesh& mesh);
   void operator<<(Function& u);
-  void operator<<(std::vector<std::pair<Function*, std::string> >& f);
+  void operator<<(LabelList<Function>& f);
   void operator<<(MeshFunction<bool>& meshfunction);
   void operator<<(MeshFunction<int>& meshfunction);
   void operator<<(MeshFunction<uint>& meshfunction);
@@ -142,7 +142,7 @@ private:
 
   void nameUpdate(const int counter);
 
-  void write_function(std::vector<std::pair<Function*, std::string> >& f);
+  void write_function(LabelList<Function>& f);
 
   bool hdr_check(BinaryFileHeader& hdr, Binary_data_t type, uint pe_size);
 

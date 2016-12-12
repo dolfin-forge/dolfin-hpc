@@ -58,7 +58,7 @@ public:
   void operator<<(Function& u);
 
   /// Write list of functions
-  void operator<<(std::vector<std::pair<Function*, std::string> >& f);
+  void operator<<(LabelList<Function>& f);
 
   /// Overload GenericFile
   void read();
@@ -71,7 +71,7 @@ public:
 
 private:
 
-  void write_dataset(std::vector<std::pair<Function*, std::string> >& f);
+  void write_dataset(LabelList<Function>& f);
 
   // Compute base64 encoded stream for VTK
   template<typename T>
@@ -84,10 +84,10 @@ private:
                                          const std::vector<T>& data) const;
 
   void MeshWrite(Mesh& mesh) const;
-  void ResultsWrite(std::vector<std::pair<Function*, std::string> > f) const;
+  void ResultsWrite(LabelList<Function> f) const;
   void pvdFileWrite(uint u);
   void pvtuFileWrite(bool mesh_function, uint const dim);
-  void pvtuFileWriteFunction(std::vector<std::pair<Function*, std::string> > f);
+  void pvtuFileWriteFunction(LabelList<Function> f);
   void VTKHeaderOpen(Mesh& mesh) const;
   void VTKHeaderClose() const;
   void vtuNameUpdate(const int counter);

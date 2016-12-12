@@ -12,8 +12,9 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#include <string>
-#include <dolfin/log/dolfin_log.h>
+#include <dolfin/log/log.h>
+#include <dolfin/la/GenericMatrix.h>
+#include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/io/File.h>
 #include <dolfin/io/GenericFile.h>
@@ -176,11 +177,11 @@ void File::operator>>(ParameterList& parameters)
   *file_ >> parameters;
 }
 //-----------------------------------------------------------------------------
-void File::operator>>(std::vector<std::pair<Function*, std::string> >& f)
+void File::operator>>(LabelList<Function>& list)
 {
   file_->read();
 
-  *file_ >> f;
+  *file_ >> list;
 }
 //-----------------------------------------------------------------------------
 void File::operator<<(GenericVector& x)
@@ -246,11 +247,11 @@ void File::operator<<(ParameterList& parameters)
   *file_ << parameters;
 }
 //-----------------------------------------------------------------------------
-void File::operator<<(std::vector<std::pair<Function*, std::string> >& f)
+void File::operator<<(LabelList<Function>& list)
 {
   file_->write();
 
-  *file_ << f;
+  *file_ << list;
 }
 //-----------------------------------------------------------------------------
 void File::set_counter(uint new_value)

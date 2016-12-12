@@ -6,6 +6,9 @@
 
 #include <dolfin/fem/BilinearForm.h>
 
+#include <dolfin/la/GenericMatrix.h>
+#include <dolfin/la/GenericVector.h>
+
 namespace dolfin
 {
 

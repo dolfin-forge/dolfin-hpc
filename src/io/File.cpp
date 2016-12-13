@@ -21,10 +21,8 @@
 #include <dolfin/io/XMLFile.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/io/VTKFile.h>
-#include <dolfin/io/RAWFile.h>
 #include <dolfin/io/OFFFile.h>
 #include <dolfin/io/STLFile.h>
-#include <dolfin/io/XYZFile.h>
 
 namespace dolfin
 {
@@ -56,12 +54,8 @@ File::File(const std::string& filename) :
     file_ = new OFFFile(filename);
   else if ( filename.rfind(".pvd") != filename.npos )
     file_ = new VTKFile(filename);
-  else if ( filename.rfind(".raw") != filename.npos )
-    file_ = new RAWFile(filename);
   else if ( filename.rfind(".stl") != filename.npos )
     file_ = new STLFile(filename);
-  else if ( filename.rfind(".xyz") != filename.npos )
-    file_ = new XYZFile(filename);
   else
   {
     file_ = NULL;

@@ -7,70 +7,54 @@
 #ifndef __DOLFIN_PARAMETER_LIST_H
 #define __DOLFIN_PARAMETER_LIST_H
 
-#include <dolfin/common/types.h>
-#include "Parameter.h"
-
-
+#include <dolfin/parameter/Parameter.h>
 
 namespace dolfin
 {
+
+/// This class represents a database of parameters, where each
+/// parameter is uniquely identified by a string.
+
+class ParameterList
+{
+  typedef _map<std::string, Parameter> Container;
+  typedef std::pair<std::string, Parameter> Item;
+
+public:
+
+  /// Constructor
+  ParameterList();
+
+  /// Destructor
+  ~ParameterList();
+
+  /// Add parameter
+  void add(std::string key, Parameter value);
+
+  /// Set value of parameter
+  void set(std::string key, Parameter value);
+
+  /// Get value of parameter with given key
+  Parameter get(std::string const& key) const;
+
+  /// Check if parameter with given key has been defined
+  bool defined(std::string const& key) const;
+
+  //--- ITERATORS -----------------------------------------------------------
   
-  /// This class represents a database of parameters, where each
-  /// parameter is uniquely identified by a string.
-  
-  class ParameterList
-  {
-  public:
+  typedef Container::iterator       iterator;
+  typedef Container::const_iterator const_iterator;
 
-    /// Constructor
-    ParameterList();
+  inline iterator begin() { return storage_.begin();}
+  inline iterator end()   { return storage_.end();}
 
-    /// Destructor
-    ~ParameterList();
-	 
-    /// Add parameter
-    void add(std::string key, Parameter value);
-    
-    /// Set value of parameter
-    void set(std::string key, Parameter value);
+private:
 
-    /// Get value of parameter with given key
-    Parameter get(std::string key) const;
+  // Parameters storage
+  Container storage_;
 
-    /// Check if parameter with given key has been defined
-    bool defined(std::string key) const;
+};
 
-    /// Friends
-    friend class XMLFile;
-    friend LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
-    
-  private:
+} /* namespace dolfin */
 
-#ifndef ENABLE_BOOST_TR1
-    // Parameters stored as an STL map
-    _map<std::string, Parameter> parameters;
-
-    // Typedef of iterators for convenience
-    typedef _map<std::string, Parameter>::iterator iterator;
-    typedef _map<std::string, Parameter>::const_iterator const_iterator;
-
-#else
-
-    // Parameters stored as an STL map
-    std::map<std::string, Parameter> parameters;
-
-    // Typedef of iterators for convenience
-    typedef std::map<std::string, Parameter>::iterator iterator;
-    typedef std::map<std::string, Parameter>::const_iterator const_iterator;
-
-#endif
-    
-    // Typedef of pair for convenience
-    typedef std::pair<std::string, Parameter> pair;
-    
-  };
-  
-  LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
-}
-
-#endif
+#endif /* __DOLFIN_PARAMETER_LIST_H */

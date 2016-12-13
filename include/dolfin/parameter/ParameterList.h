@@ -48,6 +48,9 @@ public:
   inline iterator begin() { return storage_.begin();}
   inline iterator end()   { return storage_.end();}
 
+  inline const_iterator begin() const { return storage_.begin();}
+  inline const_iterator end() const   { return storage_.end();}
+
 private:
 
   // Parameters storage

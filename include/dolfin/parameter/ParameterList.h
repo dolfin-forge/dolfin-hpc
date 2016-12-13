@@ -7,10 +7,7 @@
 #ifndef __DOLFIN_PARAMETER_LIST_H
 #define __DOLFIN_PARAMETER_LIST_H
 
-#include <dolfin/common/types.h>
-#include "Parameter.h"
-
-
+#include <dolfin/parameter/Parameter.h>
 
 namespace dolfin
 {
@@ -20,6 +17,9 @@ namespace dolfin
   
   class ParameterList
   {
+    typedef _map<std::string, Parameter> Container;
+    typedef std::pair<std::string, Parameter> Item;
+
   public:
 
     /// Constructor
@@ -40,37 +40,25 @@ namespace dolfin
     /// Check if parameter with given key has been defined
     bool defined(std::string key) const;
 
+    //--- ITERATORS -----------------------------------------------------------
+
+    typedef Container::iterator       iterator;
+    typedef Container::const_iterator const_iterator;
+
+    inline iterator begin() { return storage_.begin(); }
+    inline iterator end()   { return storage_.end(); }
+
     /// Friends
     friend class XMLFile;
     friend LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
     
   private:
 
-#ifndef ENABLE_BOOST_TR1
-    // Parameters stored as an STL map
-    _map<std::string, Parameter> parameters;
-
-    // Typedef of iterators for convenience
-    typedef _map<std::string, Parameter>::iterator iterator;
-    typedef _map<std::string, Parameter>::const_iterator const_iterator;
-
-#else
-
-    // Parameters stored as an STL map
-    std::map<std::string, Parameter> parameters;
-
-    // Typedef of iterators for convenience
-    typedef std::map<std::string, Parameter>::iterator iterator;
-    typedef std::map<std::string, Parameter>::const_iterator const_iterator;
-
-#endif
-    
-    // Typedef of pair for convenience
-    typedef std::pair<std::string, Parameter> pair;
+    // Parameters storage
+    Container storage_;
     
   };
   
-  LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_PARAMETER_LIST_H */

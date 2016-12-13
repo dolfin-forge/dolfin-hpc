@@ -47,10 +47,6 @@ namespace dolfin
 
     inline iterator begin() { return storage_.begin(); }
     inline iterator end()   { return storage_.end(); }
-
-    /// Friends
-    friend class XMLFile;
-    friend LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list);
     
   private:
 

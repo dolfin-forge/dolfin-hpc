@@ -799,8 +799,8 @@ void XMLFile::operator<<(ParameterList& parameters)
   // Write parameter list in XML format
   fprintf(fp, "<parameters>\n");
 
-  for (ParameterList::const_iterator it = parameters.storage_.begin();
-      it != parameters.storage_.end(); ++it)
+  for (ParameterList::const_iterator it = parameters.begin();
+       it != parameters.end(); ++it)
   {
     const Parameter parameter = it->second;
 

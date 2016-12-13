@@ -58,16 +58,5 @@ bool ParameterList::defined(std::string key) const
   return storage_.find(key) != storage_.end();
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<< (LogStream& stream, const ParameterList& parameter_list)
-{
-  stream << "Parameters: \n";
-  for ( ParameterList::const_iterator it(parameter_list.storage_.begin());
-        it != parameter_list.storage_.end(); ++it )
-  {
-    stream << it->first << ": " << it->second << "\n";
-  }
-  return stream;
-}
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

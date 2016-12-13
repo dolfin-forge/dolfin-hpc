@@ -26,9 +26,10 @@ ParameterList::~ParameterList()
 //-----------------------------------------------------------------------------
 void ParameterList::add(std::string key, Parameter value)
 {
-  if ( defined(key) )
-    error("Unable to add parameter \"%s\" (already defined).",
-		  key.c_str());
+  if (defined(key))
+  {
+    error("Unable to add parameter \"%s\" (already defined).", key.c_str());
+  }
 
   storage_.insert(Item(key, value));
 }
@@ -37,25 +38,29 @@ void ParameterList::set(std::string key, Parameter value)
 {
   iterator p = storage_.find(key);
 
-  if ( p == storage_.end() )
+  if (p == storage_.end())
+  {
     error("Unknown parameter \"%s\".", key.c_str());
+  }
 
   p->second = value;
 }
 //-----------------------------------------------------------------------------
-Parameter ParameterList::get(std::string key) const
+Parameter ParameterList::get(std::string const& key) const
 {
   const_iterator p = storage_.find(key);
 
-  if ( p == storage_.end() )
+  if (p == storage_.end())
+  {
     error("Unknown parameter \"%s\".", key.c_str());
+  }
   
   return p->second;
 }
 //-----------------------------------------------------------------------------
-bool ParameterList::defined(std::string key) const
+bool ParameterList::defined(std::string const& key) const
 {
-  return storage_.find(key) != storage_.end();
+  return (storage_.find(key) != storage_.end());
 }
 //-----------------------------------------------------------------------------
 

@@ -208,10 +208,8 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   uint const cell_verts_block_size = num_cell_verts * num_mesh_cells;
 
   // Write vertex positions
-  fprintf(fp, "<Points>  \n");
-  fprintf(
-      fp,
-      "<DataArray  type=\"Float32\"  NumberOfComponents=\"3\"  format=\"binary\"> \n");
+  fprintf(fp, "<Points>\n");
+  fprintf(fp, "<DataArray  type=\"Float32\"  NumberOfComponents=\"3\"  format=\"binary\">\n");
   std::vector<float> v_data(3 * num_mesh_verts);
   std::vector<float>::iterator entry = v_data.begin();
   for (VertexIterator v(mesh); !v.end(); ++v)
@@ -226,14 +224,12 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   std::stringstream base64_stream;
   encode_stream(base64_stream, v_data);
   fprintf(fp, "%s\n", base64_stream.str().c_str());
-  fprintf(fp, "</DataArray>  \n");
-  fprintf(fp, "</Points>  \n");
+  fprintf(fp, "</DataArray>\n");
+  fprintf(fp, "</Points>\n");
 
   // Write cell connectivity
-  fprintf(fp, "<Cells>  \n");
-  fprintf(
-      fp,
-      "<DataArray  type=\"UInt32\"  Name=\"connectivity\"  format=\"binary\"> \n");
+  fprintf(fp, "<Cells>\n");
+  fprintf(fp, "<DataArray  type=\"UInt32\"  Name=\"connectivity\"  format=\"binary\">\n");
   std::vector<uint32_t> c_data(cell_verts_block_size);
   std::vector<uint32_t>::iterator c_entry = c_data.begin();
   for (CellIterator c(mesh); !c.end(); ++c)
@@ -248,12 +244,10 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   std::stringstream base64_c_stream;
   encode_stream(base64_c_stream, c_data);
   fprintf(fp, "%s\n", base64_c_stream.str().c_str());
-  fprintf(fp, "</DataArray> \n");
+  fprintf(fp, "</DataArray>\n");
 
   // Write offset into connectivity array for the end of each cell
-  fprintf(
-      fp,
-      "<DataArray  type=\"UInt32\"  Name=\"offsets\"  format=\"binary\">  \n");
+  fprintf(fp, "<DataArray  type=\"UInt32\"  Name=\"offsets\"  format=\"binary\">\n");
   std::vector<uint32_t>::iterator cc_entry = c_data.begin();
 
   for (uint offsets = 1; offsets <= num_mesh_cells; ++offsets)
@@ -264,11 +258,10 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   std::stringstream base64_cc_stream;
   encode_stream(base64_cc_stream, c_data);
   fprintf(fp, "%s\n", base64_cc_stream.str().c_str());
-  fprintf(fp, "</DataArray> \n");
+  fprintf(fp, "</DataArray>\n");
 
   //Write cell type
-  fprintf(fp,
-          "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">  \n");
+  fprintf(fp, "<DataArray  type=\"UInt8\"  Name=\"types\"  format=\"binary\">\n");
 
   uint8_t typeval = 0;
   switch (mesh.type().cellType())
@@ -301,8 +294,8 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   std::stringstream base64_t_stream;
   encode_stream(base64_t_stream, t_data);
   fprintf(fp, "%s\n", base64_t_stream.str().c_str());
-  fprintf(fp, "</DataArray> \n");
-  fprintf(fp, "</Cells> \n");
+  fprintf(fp, "</DataArray>\n");
+  fprintf(fp, "</Cells>\n");
 
   // Close file
   fclose(fp);
@@ -326,7 +319,7 @@ void VTKFile::ResultsWrite(
   }
 
   //--- Interpolation to vertices for general functions-----------------------
-  fprintf(fp, "<PointData> \n");
+  fprintf(fp, "<PointData>\n");
   for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
@@ -351,19 +344,19 @@ void VTKFile::ResultsWrite(
       case 0:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">\n",
             name.c_str());
         break;
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -437,13 +430,13 @@ void VTKFile::ResultsWrite(
     std::stringstream base64_stream;
     encode_stream(base64_stream, data);
     fprintf(fp, "%s\n", base64_stream.str().c_str());
-    fprintf(fp, "</DataArray> \n");
+    fprintf(fp, "</DataArray>\n");
 
   }
-  fprintf(fp, "</PointData> \n");
+  fprintf(fp, "</PointData>\n");
 
   //--- Cellwise functions----------------------------------------------------
-  fprintf(fp, "<CellData> \n");
+  fprintf(fp, "<CellData>\n");
   for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
@@ -469,19 +462,19 @@ void VTKFile::ResultsWrite(
       case 0:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  format=\"binary\">\n",
             name.c_str());
         break;
       case 1:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), std::max(value_dim,(uint)3));
         break;
       default:
         fprintf(
             fp,
-            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\"> \n",
+            "<DataArray  type=\"Float32\"  Name=\"%s\"  NumberOfComponents=\"%d\" format=\"binary\">\n",
             name.c_str(), value_size);
         break;
       }
@@ -552,9 +545,9 @@ void VTKFile::ResultsWrite(
     std::stringstream base64_stream;
     encode_stream(base64_stream, data);
     fprintf(fp, "%s\n", base64_stream.str().c_str());
-    fprintf(fp, "</DataArray> \n");
+    fprintf(fp, "</DataArray>\n");
   }
-  fprintf(fp, "</CellData> \n");
+  fprintf(fp, "</CellData>\n");
 
   // Close file
   fclose(fp);
@@ -570,9 +563,9 @@ void VTKFile::pvdFileWrite(uint num)
     // Open pvd file
     pvdFile.open(filename.c_str(), std::ios::out | std::ios::trunc);
     // Write header
-    pvdFile << "<?xml version=\"1.0\"?> " << std::endl;
-    pvdFile << "<VTKFile type=\"Collection\" version=\"0.1\" > " << std::endl;
-    pvdFile << "<Collection> " << std::endl;
+    pvdFile << "<?xml version=\"1.0\"?>\n"
+            << "<VTKFile type=\"Collection\" version=\"0.1\" >\n"
+            << "<Collection>\n";
   }
   else
   {
@@ -598,18 +591,18 @@ void VTKFile::pvdFileWrite(uint num)
   if (_t)
   {
     pvdFile << "<DataSet timestep=\"" << *_t << "\" part=\"0\"" << " file=\""
-            << fname << "\"/>" << std::endl;
+            << fname << "\"/>\n";
   }
   else
   {
     pvdFile << "<DataSet timestep=\"" << num << "\" part=\"0\"" << " file=\""
-            << fname << "\"/>" << std::endl;
+            << fname << "\"/>\n";
   }
   mark = pvdFile.tellp();
 
   // Close headers
-  pvdFile << "</Collection> " << std::endl;
-  pvdFile << "</VTKFile> " << std::endl;
+  pvdFile << "</Collection>\n";
+  pvdFile << "</VTKFile>\n";
 
   // Close file
   pvdFile.close();
@@ -623,37 +616,33 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
   // Open pvtu file
   pvtuFile.open(pvtu_filename.c_str(), std::ios::out | std::ios::trunc);
   // Write header
-  pvtuFile << "<?xml version=\"1.0\"?> " << std::endl;
-  pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">"
-           << std::endl;
-  pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
-  pvtuFile << "<PCellData>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\" />"
-           << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />" << std::endl;
-  pvtuFile << "</PCellData>" << std::endl;
-
-  pvtuFile << "<PPoints>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />"
-           << std::endl;
-  pvtuFile << "</PPoints>" << std::endl;
+  pvtuFile << "<?xml version=\"1.0\"?>\n"
+           << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">\n"
+           << "<PUnstructuredGrid GhostLevel=\"0\">\n"
+           << "<PCellData>\n"
+           << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\" />\n"
+           << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
+           << "</PCellData>\n"
+           << "<PPoints>\n"
+           << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />\n"
+           << "</PPoints>\n";
 
   if (mesh_function)
   {
     if (dim > 0)
     {
       // Cell-based mesh function
-      pvtuFile << "<PCellData Scalars=\"U\">" << std::endl;
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
-      pvtuFile << "</PCellData>" << std::endl;
+      pvtuFile << "<PCellData Scalars=\"U\">\n"
+               << "<PDataArray  type=\"Float32\"  Name=\"U\" />\n"
+               << "</PCellData>\n";
     }
     else
     {
       // Vertex-based mesh function
-      pvtuFile << "<PPointData Scalars=\"U\">" << std::endl;
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"U\" />" << std::endl;
-      pvtuFile << "</PPointData>" << std::endl;
+      pvtuFile << "<PPointData Scalars=\"U\">\n"
+               << "<PDataArray  type=\"Float32\"  Name=\"U\" />\n"
+               << "</PPointData>\n";
     }
   }
 
@@ -663,11 +652,11 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
                vtu_filename.size() - 5);
   for (uint i = 0; i < MPI::numProcesses(); i++)
   {
-    pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>" << std::endl;
+    pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
   }
 
-  pvtuFile << "</PUnstructuredGrid>" << std::endl;
-  pvtuFile << "</VTKFile>" << std::endl;
+  pvtuFile << "</PUnstructuredGrid>\n"
+           << "</VTKFile>\n";
   pvtuFile.close();
 
 } //----------------------------------------------------------------------------
@@ -679,12 +668,10 @@ void VTKFile::pvtuFileWriteFunction(
   // Open pvtu file
   pvtuFile.open(pvtu_filename.c_str(), std::ios::out | std::ios::trunc);
   // Write header
-  pvtuFile << "<?xml version=\"1.0\"?> " << std::endl;
-  pvtuFile << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">"
-           << std::endl;
-  pvtuFile << "<PUnstructuredGrid GhostLevel=\"0\">" << std::endl;
-
-  pvtuFile << "<PPointData>" << std::endl;
+  pvtuFile << "<?xml version=\"1.0\"?>\n"
+           << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\">\n"
+           << "<PUnstructuredGrid GhostLevel=\"0\">\n"
+           << "<PPointData>\n";
   for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
@@ -700,35 +687,32 @@ void VTKFile::pvtuFileWriteFunction(
 
     if (u->rank() == 0)
     {
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />"
-               << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />\n";
     }
     else
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
                << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
-               << "\" />" << std::endl;
+               << "\" />\n";
     }
   }
-  pvtuFile << "</PPointData>" << std::endl;
+  pvtuFile << "</PPointData>\n";
 
   //
-  pvtuFile << "<PCellData>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />"
-           << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />" << std::endl;
-  pvtuFile << "<PDataArray  type=\"UInt8\"  Name=\"types\" />" << std::endl;
-  pvtuFile << "</PCellData>" << std::endl;
+  pvtuFile << "<PCellData>\n"
+           << "<PDataArray  type=\"UInt32\"  Name=\"connectivity\"  />\n"
+           << "<PDataArray  type=\"UInt32\"  Name=\"offsets\" />\n"
+           << "<PDataArray  type=\"UInt8\"  Name=\"types\" />\n"
+           << "</PCellData>\n";
 
   //
-  pvtuFile << "<PPoints>" << std::endl;
-  pvtuFile << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />"
-           << std::endl;
-  pvtuFile << "</PPoints>" << std::endl;
+  pvtuFile << "<PPoints>\n"
+           << "<PDataArray  type=\"Float32\"  NumberOfComponents=\"3\" />\n"
+           << "</PPoints>\n";
 
   //
-  pvtuFile << "<PCellData>" << std::endl;
+  pvtuFile << "<PCellData>\n";
   for (LabelList<Function>::iterator it = f.begin();
       it != f.end(); it++)
   {
@@ -744,18 +728,17 @@ void VTKFile::pvtuFileWriteFunction(
 
     if (u->rank() == 0)
     {
-      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />"
-               << std::endl;
+      pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name << "\" />\n";
     }
     else
     {
       // Get number of components
       pvtuFile << "<PDataArray  type=\"Float32\"  Name=\"" << name
                << "\"  NumberOfComponents=\"" << std::max(u->dim(0),(uint)3)
-               << "\" />" << std::endl;
+               << "\" />\n";
     }
   }
-  pvtuFile << "</PCellData>" << std::endl;
+  pvtuFile << "</PCellData>\n";
 
   std::string fname;
 
@@ -763,10 +746,10 @@ void VTKFile::pvtuFileWriteFunction(
   fname.assign(vtu_filename, filename.find_last_of("/") + 1,
                vtu_filename.size() - 5);
   for (uint i = 0; i < MPI::numProcesses(); i++)
-    pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>" << std::endl;
+    pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
-  pvtuFile << "</PUnstructuredGrid>" << std::endl;
-  pvtuFile << "</VTKFile>" << std::endl;
+  pvtuFile << "</PUnstructuredGrid>\n"
+           << "</VTKFile>\n";
   pvtuFile.close();
 
 }
@@ -792,8 +775,8 @@ void VTKFile::VTKHeaderOpen(Mesh& mesh) const
   // Write headers
   fprintf(fp, "<VTKFile type=\"UnstructuredGrid\"  version=\"0.1\" %s %s>\n",
           endianness.c_str(), compressor.c_str());
-  fprintf(fp, "<UnstructuredGrid>  \n");
-  fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">  \n",
+  fprintf(fp, "<UnstructuredGrid>\n");
+  fprintf(fp, "<Piece  NumberOfPoints=\" %8u\"  NumberOfCells=\" %8u\">\n",
           mesh.size(0), mesh.num_cells());
 
   // Close file
@@ -806,7 +789,7 @@ void VTKFile::VTKHeaderClose() const
   FILE *fp = fopen(vtu_filename.c_str(), "a");
 
   // Close headers
-  fprintf(fp, "</Piece> \n </UnstructuredGrid> \n </VTKFile>");
+  fprintf(fp, "</Piece>\n </UnstructuredGrid>\n </VTKFile>");
 
   // Close file
   fclose(fp);
@@ -888,14 +871,12 @@ template<class T>
       // Open file
       FILE *fp = fopen(vtu_filename.c_str(), "a");
       fprintf(fp, "<CellData  Scalars=\"U\">\n");
-      fprintf(fp,
-              "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
 
       // Create encoded stream
       std::stringstream base64_stream;
       encode_stream(base64_stream, data);
       fprintf(fp, "%s\n", base64_stream.str().c_str());
-
       fprintf(fp, "</DataArray>\n");
       fprintf(fp, "</CellData>\n");
 
@@ -925,14 +906,12 @@ template<class T>
       // Open file
       FILE *fp = fopen(vtu_filename.c_str(), "a");
       fprintf(fp, "<PointData  Scalars=\"U\">\n");
-      fprintf(fp,
-              "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
+      fprintf(fp, "<DataArray  type=\"Float32\"  Name=\"U\"  format=\"binary\">\n");
 
       // Create encoded stream
       std::stringstream base64_stream;
       encode_stream(base64_stream, data);
       fprintf(fp, "%s\n", base64_stream.str().c_str());
-
       fprintf(fp, "</DataArray>\n");
       fprintf(fp, "</PointData>\n");
 

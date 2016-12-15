@@ -51,6 +51,20 @@ public:
     return *this;
   }
 
+  /// Synchronize with another time dependent object, do not expose details.
+  inline TimeDependent const& operator()(TimeDependent const& other) const
+  {
+    if(t_ == NULL)
+    {
+      clock_ = other.clock_;
+    }
+    else if(t_ != other.t_)
+    {
+      error("TimeDependent : re-associating with another time instance");
+    }
+    return *this;
+  }
+
   /// Return the time associated with the instance
   inline real clock() const { return (t_ == NULL ? clock_ : t_->clock()); }
 

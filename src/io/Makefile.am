@@ -7,7 +7,6 @@ libdolfin_io_la_SOURCES = \
 			File.cpp\
 			GenericFile.cpp\
 			OFFFile.cpp\
-			RAWFile.cpp\
 			VTKFile.cpp\
 			XMLDofMap.cpp\
 			XMLFile.cpp\
@@ -19,5 +18,4 @@ libdolfin_io_la_SOURCES = \
 			XMLObject.cpp\
 			XMLParameterList.cpp\
 			XMLVector.cpp\
-			STLFile.cpp\
-			XYZFile.cpp
+			STLFile.cpp

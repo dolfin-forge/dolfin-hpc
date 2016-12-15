@@ -40,6 +40,9 @@ public:
   /// Check if parameter with given key has been defined
   bool defined(std::string const& key) const;
 
+  /// Return if empty
+  inline bool empty() const { return storage_.empty(); }
+
   //--- ITERATORS -----------------------------------------------------------
   
   typedef Container::iterator       iterator;

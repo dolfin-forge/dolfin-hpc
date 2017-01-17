@@ -423,6 +423,11 @@ public:
   ///
   OwnedIterator& operator++()
   {
+    if (iter_ == end_)
+    {
+      return *this;
+    }
+    ++iter_;
     while ((iter_ < end_)
            && (owner_[iter_ - begin_] != distdata_.pe_size_)
            && (owner_[iter_ - begin_] != distdata_.rank_))

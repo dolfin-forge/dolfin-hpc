@@ -237,7 +237,8 @@ void DistributedData::finalize()
       // check consistency
       if (range_size_ != cache_size_)
       {
-        error("DistributedData : size mismatch between local size and range \n"
+        error("DistributedData : no ghost entries defined while size of local"
+            "  size and range are not equal\n"
               " (local size) %u != %u (range)", cache_size_, range_size_);
       }
 
@@ -1107,8 +1108,8 @@ void DistributedData::disp() const
   message("rank        : %8u", rank_);
   message("offset      : %8u", offset_);
   message("range size  : %8u", range_size_);
-  message("local  size : %8u", local_.size());
-  message("global size : %8u", global_size_);
+  message("local  size : %8u", this->local_size());
+  message("global size : %8u", this->global_size());
   message("cached      : %8u", (cached_numbering_ != NULL));
   message("finalized   : %8u", finalized_);
   /*

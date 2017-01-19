@@ -10,6 +10,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
+#include <dolfin/fem/UFCExpression.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
@@ -20,40 +21,69 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-FunctionInterpolation::FunctionInterpolation(GenericFunction const& F0,
-                                             Function& F1) :
-    F0_(F0),
-    F1_(F1)
+void FunctionInterpolation::compute(GenericFunction const& F0, Function& F1)
 {
-}
-
-//-----------------------------------------------------------------------------
-FunctionInterpolation::~FunctionInterpolation()
-{
-}
-
-//-----------------------------------------------------------------------------
-void FunctionInterpolation::compute()
-{
-  // Check value shape compatibility
-  if ((F0_.rank() != F1_.rank()) || (F0_.value_size() != F1_.value_size())
-      || (F0_.dim(0) != F0_.dim(0)))
+  if (!F1.compatible(F0))
   {
-    error("Interpolation between functions with different value shape:n"
-          "F0: rank = %d, value_size = %d, dim(0) = %d\n"
-          "F1: rank = %d, value_size = %d, dim(0) = %d\n",
-          F0_.rank(), F0_.value_size(), F0_.dim(0), F1_.rank(),
-          F1_.value_size(), F1_.dim(0));
+    error("Interpolation between functions with different value shape");
   }
-
-  //
-  if (&F0_.mesh() == &F1_.mesh())
+  else if (&F0.mesh() == &F1.mesh())
   {
-    interpolateSM(F0_, F1_);
+    interpolateSM(F0, F1);
   }
   else
   {
-    interpolateNM(F0_, F1_);
+    interpolateNM(F0, F1);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void FunctionInterpolation::compute(Expression const& F0, Function& F1)
+{
+  if (!F1.compatible(F0))
+  {
+    error("Interpolation between functions with different value shape");
+  }
+  else
+  {
+    // Just assume that the coefficient can be evaluated on a ufc::cell
+    ScratchSpace S1(F1.space());
+    UFCExpression UE(F0);
+    uint dof = 0;
+    real * block1 = F1.create_block();
+    for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
+    {
+      S1.cell.update(*cell);
+      F1.space().element().evaluate_dofs(&block1[dof], UE, S1.cell);
+      dof += S1.local_dimension;
+    }
+    F1.set_block(block1);
+    delete[] block1;
+  }
+}
+
+//-----------------------------------------------------------------------------
+void FunctionInterpolation::compute(Coefficient const& F0, Function& F1)
+{
+  if (!F1.compatible(F0))
+  {
+    error("Interpolation between functions with different value shape");
+  }
+  else
+  {
+    // Just assume that the coefficient can be evaluated on a ufc::cell
+    ScratchSpace S1(F1.space());
+
+    uint dof = 0;
+    real * block1 = F1.create_block();
+    for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
+    {
+      S1.cell.update(*cell);
+      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
+      dof += S1.local_dimension;
+    }
+    F1.set_block(block1);
+    delete[] block1;
   }
 }
 
@@ -62,10 +92,10 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
                                           Function& F1)
 {
   message(1, "Function interpolation on same mesh");
-  dolfin_assert(F0_.mesh() == F1_.mesh());
+  dolfin_assert(F0.mesh() == F1.mesh());
 
   //
-  if (F1_.space().is_flattenable())
+  if (F1.space().is_flattenable())
   {
     // Analytical expression and flattened space (naive implementation)
     Array<ufc::finite_element const*> const& Sflt =
@@ -104,7 +134,7 @@ void FunctionInterpolation::interpolateSM(GenericFunction const& F0,
     for (CellIterator cell(F1.mesh()); !cell.end(); ++cell)
     {
       S1.cell.update(*cell);
-      F1.space().element().evaluate_dofs(&block1[dof], F0_, S1.cell);
+      F1.space().element().evaluate_dofs(&block1[dof], F0, S1.cell);
       dof += S1.local_dimension;
     }
     F1.set_block(block1);

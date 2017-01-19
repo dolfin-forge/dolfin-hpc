@@ -10,6 +10,8 @@
 namespace dolfin
 {
 
+class Coefficient;
+class Expression;
 class Function;
 class GenericFunction;
 
@@ -19,26 +21,24 @@ class FunctionInterpolation
 public:
 
   ///
-  explicit FunctionInterpolation(GenericFunction const& F0, Function& F1);
+  static void compute(Expression const& F0, Function& F1);
+
+  ///
+  static void compute(Coefficient const& F0, Function& F1);
+
+  ///
+  static void compute(GenericFunction const& F0, Function& F1);
 
   ///
   ~FunctionInterpolation();
 
-  ///
-  void compute();
-
 private:
 
   ///
-  void interpolateSM(GenericFunction const& F0, Function& F1);
+  static void interpolateSM(GenericFunction const& F0, Function& F1);
 
   ///
-  void interpolateNM(GenericFunction const& F0, Function& F1);
-
-  //--- ATTRIBUTES ------------------------------------------------------------
-
-  GenericFunction const& F0_;
-  Function& F1_;
+  static void interpolateNM(GenericFunction const& F0, Function& F1);
 
 };
 

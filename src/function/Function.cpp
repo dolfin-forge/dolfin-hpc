@@ -592,11 +592,21 @@ FiniteElementSpace const& Function::space() const
 }
 
 //-----------------------------------------------------------------------------
-void Function::interpolate(GenericFunction const& other)
+void Function::operator<<(Expression const& other)
 {
+  FunctionInterpolation::compute(other, *this);
+}
 
-  FunctionInterpolation I(other, *this);
-  I.compute();
+//-----------------------------------------------------------------------------
+void Function::operator<<(Coefficient const& other)
+{
+  FunctionInterpolation::compute(other, *this);
+}
+
+//-----------------------------------------------------------------------------
+void Function::operator<<(GenericFunction const& other)
+{
+  FunctionInterpolation::compute(other, *this);
 }
 
 //-----------------------------------------------------------------------------

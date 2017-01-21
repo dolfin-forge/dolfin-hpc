@@ -724,10 +724,9 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p1,
   return true;
 }
 //-----------------------------------------------------------------------------
-Mesh HexahedronCell::create_reference_cell() const
+void HexahedronCell::create_reference_cell(Mesh& mesh) const
 {
-  Mesh refcell;
-  MeshEditor me(refcell, CellType::hexahedron, 3);
+  MeshEditor me(mesh, CellType::hexahedron, 3);
   me.init_vertices(8);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);
@@ -741,7 +740,6 @@ Mesh HexahedronCell::create_reference_cell() const
   uint const cv0[8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
   me.add_cell(0, cv0);
   me.close();
-  return refcell;
 }
 //-----------------------------------------------------------------------------
 real const * HexahedronCell::reference_vertex(uint i) const

@@ -166,17 +166,15 @@ bool PointCell::intersects(MeshEntity const& e, Point const& p1,
   return true;
 }
 //-----------------------------------------------------------------------------
-Mesh PointCell::create_reference_cell() const
+void PointCell::create_reference_cell(Mesh& mesh) const
 {
-  Mesh refcell;
-  MeshEditor me(refcell, CellType::point, 1);
+  MeshEditor me(mesh, CellType::point, 1);
   me.init_vertices(1);
   me.add_vertex(0, VC[0]);
   me.init_cells(1);
   uint const cv0[1] = { 0 };
   me.add_cell(0, cv0);
   me.close();
-  return refcell;
 }
 //-----------------------------------------------------------------------------
 real const * PointCell::reference_vertex(uint i) const

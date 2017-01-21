@@ -36,7 +36,8 @@ START_TEST( test_UFCFunction )
     for (Array<CellType *>::const_iterator it = cells.begin();
           it != cells.end(); ++it)
     {
-      Mesh refcell = (*it)->create_reference_cell();
+      Mesh refcell;
+      (*it)->create_reference_cell(refcell);
       begin("Reference cell: %s", (*it)->str().c_str());
       UFCFunction<MidpointDistance> f(refcell);
       real value;
@@ -60,7 +61,8 @@ START_TEST( test_UFCFunction )
     for (Array<CellType *>::const_iterator it = cells.begin();
         it != cells.end(); ++it)
     {
-      Mesh refcell = (*it)->create_reference_cell();
+      Mesh refcell;
+      (*it)->create_reference_cell(refcell);
       begin("Reference cell: %s", (*it)->str().c_str());
       UFCFunction<CellDiameter> f(refcell);
       real value;

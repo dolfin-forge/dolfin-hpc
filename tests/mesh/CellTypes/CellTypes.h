@@ -72,7 +72,8 @@ START_TEST( test_PointCell )
     ck_assert_int_eq(cell.cellType(), ct0->cellType());
     delete ct0;
     //
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     // Most member functions are undefined
     //check_reference_cell(cell, refcell);
     //---
@@ -98,7 +99,8 @@ START_TEST( test_IntervalCell )
     ck_assert_int_eq(cell.cellType(), ct0->cellType());
     delete ct0;
     // UFC convention
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     check_reference_cell(cell, refcell);
     //---
     end();
@@ -124,7 +126,8 @@ START_TEST( test_TriangleCell )
     ck_assert_int_eq(cell.cellType(), ct0->cellType());
     delete ct0;
     // UFC convention
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     check_reference_cell(cell, refcell);
     //---
     end();
@@ -152,7 +155,8 @@ START_TEST( test_TetrahedronCell )
     ck_assert_int_eq(cell.cellType(), ct0->cellType());
     delete ct0;
     // UFC convention
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     check_reference_cell(cell, refcell);
     //---
     end();
@@ -178,7 +182,8 @@ START_TEST( test_QuadrilateralCell )
     ck_assert_int_eq(cell.cellType(), ct0->cellType());
     delete ct0;
     // UFC convention
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     Cell c(refcell, 0);
     refcell.init(1, 0);
     refcell.init(cell.dim(), 1);
@@ -208,7 +213,8 @@ START_TEST( test_HexahedronCell )
     CellType * ct0 = CellType::create(CellType::hexahedron);
     delete ct0;
     // UFC convention
-    Mesh refcell = cell.create_reference_cell();
+    Mesh refcell;
+    cell.create_reference_cell(refcell);
     Cell c(refcell, 0);
     refcell.init(1, 0);
     refcell.init(2, 0);

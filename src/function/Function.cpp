@@ -14,6 +14,7 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
+#include <dolfin/common/AdjacentMapping.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
@@ -383,6 +384,8 @@ uint Function::value_size() const
 //-----------------------------------------------------------------------------
 void Function::interpolate_vertex_values(real* values) const
 {
+  uint const tdim = mesh_->topology().dim();
+
   // Local data for interpolation on each cell
   uint const num_verts = mesh_->size(0);
 
@@ -392,10 +395,116 @@ void Function::interpolate_vertex_values(real* values) const
   // Interpolate vertex values on each cell and pick the last value
   // if two or more cells disagree on the vertex values
   //FIXME: Well... discontinuous approximations might disagree
-  if (this->space().is_cellwise_defined())
+  if (mesh_->num_global_cells() > 1 && this->space().is_cellwise_defined())
   {
-    error("Interpolation to vertex values is implemented incorrectly for"
-          "discontinuous approximations");
+    //FIXME: imported from naive 2013ish code before mappings existed.
+    uint const num_cell_vertices = mesh_->type().num_entities(0);
+    std::fill(values, values + scratch->size * mesh_->num_vertices(), 0.0);
+    real* vertex_sumwghts = new real[mesh_->num_vertices()];
+    std::fill(vertex_sumwghts, vertex_sumwghts + mesh_->num_vertices(), 0.0);
+    real* vertex_values = new real[scratch->size * num_cell_vertices];
+    for (CellIterator cell(*mesh_); !cell.end(); ++cell)
+    {
+      // Update to current cell
+      scratch->cell.update(*cell);
+
+      // Tabulate dofs
+      dofmap_->tabulate_dofs(scratch->dofs, scratch->cell);
+
+      // Pick values from global vector
+      X_->get(scratch->coefficients, scratch->local_dimension, scratch->dofs);
+
+      // Interpolate values at the vertices
+      // Values are packed by vertex and not by subspace (if any)
+      element_->interpolate_vertex_values(vertex_values, scratch->coefficients,
+                                         scratch->cell);
+
+      // Sum values to array of vertex values
+      for (VertexIterator vertex(*cell); !vertex.end(); ++vertex)
+      {
+        static real const w = 1.0;  // plan for other weights
+        vertex_sumwghts[vertex->index()] += w;
+        for (uint i = 0; i < scratch->size; ++i)
+        {
+          values[i * num_verts + vertex->index()] +=
+              w * vertex_values[vertex.pos() * scratch->size + i];
+        }
+      }
+    }
+
+    //
+    delete[] vertex_values;
+
+    if (mesh_->is_distributed())
+    {
+      uint const rank = dolfin::MPI::processNumber();
+      uint const pe_size = dolfin::MPI::numProcesses();
+      DistributedData const& dist0 = mesh_->distdata()[0];
+      Array<real> * sendbuf = new Array<real> [pe_size];
+      // Send sum of local weights
+      for (SharedIterator it(dist0); !it.end(); ++it)
+      {
+        _set<uint> const& adjs = it.adj();
+        for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)
+        {
+          sendbuf[*a].push_back(vertex_sumwghts[it.index()]);
+          for (uint i = 0; i < scratch->size; ++i)
+          {
+            sendbuf[*a].push_back(values[i * num_verts + it.index()]);
+          }
+        }
+      }
+
+      // Exchange data
+      MPI_Status status;
+      uint src;
+      uint dst;
+
+      //FIXME: Overallocate
+      uint recvsize = dist0.num_shared();
+      uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
+      int recvcount;
+      for (uint j = 1; j < pe_size; ++j)
+      {
+        src = (rank - j + pe_size) % pe_size;
+        dst = (rank + j) % pe_size;
+
+        MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
+                     &recvbuf[0], recvsize, MPI_DOUBLE, src, 1,
+                     MPI::DOLFIN_COMM, &status);
+        MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
+
+        // Add contributions, just simplified this part with mappings
+        Array<uint> recvmapping = dist0.shared_mapping().from(src);
+        dolfin_assert(recvmapping.size() == (uint) recvcount);
+        for (int k = 0; k < recvcount; k += (1 + scratch->size))
+        {
+          dolfin_assert(dist0.has_local(recvmapping[k]) > 0);
+          vertex_sumwghts[recvmapping[k]] +=  recvbuf[k];
+          for (uint i = 1; i <= scratch->size; ++i)
+          {
+            values[i * num_verts + recvmapping[k]] += recvbuf[k + i];
+          }
+        }
+      }
+
+      //
+      delete[] recvbuf;
+      delete[] sendbuf;
+    }
+
+    // Average
+    for (uint vindex = 0; vindex < num_verts; ++vindex)
+    {
+      for (uint i = 0; i < scratch->size; ++i)
+      {
+        values[i * num_verts + vindex] /= vertex_sumwghts[vindex];
+      }
+    }
+
+    // Delete local data
+    delete[] vertex_sumwghts;
+
   }
   else
   {

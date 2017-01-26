@@ -285,10 +285,9 @@ std::string IntervalCell::description() const
   return std::string("interval (simplex of topological dimension 1)");
 }
 //-----------------------------------------------------------------------------
-Mesh IntervalCell::create_reference_cell() const
+void IntervalCell::create_reference_cell(Mesh& mesh) const
 {
-  Mesh refcell;
-  MeshEditor me(refcell, CellType::interval, 1);
+  MeshEditor me(mesh, CellType::interval, 1);
   me.init_vertices(2);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);
@@ -296,7 +295,6 @@ Mesh IntervalCell::create_reference_cell() const
   uint const cv0[2] = { 0, 1 };
   me.add_cell(0, cv0);
   me.close();
-  return refcell;
 }
 //-----------------------------------------------------------------------------
 real const * IntervalCell::reference_vertex(uint i) const

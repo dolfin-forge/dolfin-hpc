@@ -556,10 +556,9 @@ std::string QuadrilateralCell::description() const
   return std::string("quadrilateral (hypercube of topological dimension 2)");
 }
 //-----------------------------------------------------------------------------
-Mesh QuadrilateralCell::create_reference_cell() const
+void QuadrilateralCell::create_reference_cell(Mesh& mesh) const
 {
-  Mesh refcell;
-  MeshEditor me(refcell, CellType::quadrilateral, 2);
+  MeshEditor me(mesh, CellType::quadrilateral, 2);
   me.init_vertices(4);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);
@@ -569,7 +568,6 @@ Mesh QuadrilateralCell::create_reference_cell() const
   uint const cv0[4] = { 0, 1, 2, 3 };
   me.add_cell(0, cv0);
   me.close();
-  return refcell;
 }
 //-----------------------------------------------------------------------------
 real const * QuadrilateralCell::reference_vertex(uint i) const

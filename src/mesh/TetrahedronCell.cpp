@@ -699,10 +699,9 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p1,
   return false;
 }
 //-----------------------------------------------------------------------------
-Mesh TetrahedronCell::create_reference_cell() const
+void TetrahedronCell::create_reference_cell(Mesh& mesh) const
 {
-  Mesh refcell;
-  MeshEditor me(refcell, CellType::tetrahedron, 3);
+  MeshEditor me(mesh, CellType::tetrahedron, 3);
   me.init_vertices(4);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);
@@ -712,7 +711,6 @@ Mesh TetrahedronCell::create_reference_cell() const
   uint const cv0[4] = { 0, 1, 2, 3 };
   me.add_cell(0, cv0);
   me.close();
-  return refcell;
 }
 //-----------------------------------------------------------------------------
 real const * TetrahedronCell::reference_vertex(uint i) const

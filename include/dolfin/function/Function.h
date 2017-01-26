@@ -25,13 +25,14 @@ class FiniteElementSpace;
 namespace dolfin
 {
 
-class Mesh;
 class Cell;
-class Form;
 class DofMap;
+class Expression;
 class FiniteElement;
 class FiniteElementSpace;
+class Form;
 class GenericVector;
+class Mesh;
 class ScratchSpace;
 class SubFunction;
 
@@ -147,8 +148,14 @@ public:
   /// Return vector
   GenericVector& vector() const;
 
-  /// Compute interpolation of given function to discrete function
-  void interpolate(GenericFunction const& other);
+  /// Interpolate from an expression
+  void operator<<(Expression const& other);
+
+  /// Interpolate from a coefficient
+  void operator<<(Coefficient const& other);
+
+  /// Interpolate from a generic function
+  void operator<<(GenericFunction const& other);
 
   /// Compute function decomposition into scalar component functions
   Array<Function *> decompose();

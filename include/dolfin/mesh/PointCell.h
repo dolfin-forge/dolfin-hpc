@@ -121,7 +121,7 @@ public:
   //--- REFERENCE CELL --------------------------------------------------------
 
   /// Create a mesh consisting of the reference cell
-  Mesh create_reference_cell() const;
+  void create_reference_cell(Mesh& mesh) const;
 
   /// Return coordinates of vertices in the reference cell
   real const * reference_vertex(uint i) const;

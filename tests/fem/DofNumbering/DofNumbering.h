@@ -31,7 +31,8 @@ START_TEST( test_DofNumbering )
       CellType * cell = CellType::create(it->cell());
       ufc::dofmap * ufc_dofmap = ElementLibrary::create_dof_map(DofMap::make_signature(it->repr()));
 
-      Mesh refcell = cell->create_reference_cell();
+      Mesh refcell;
+      cell->create_reference_cell(refcell);
       DofNumbering * numbering = DofNumbering::create(refcell, *ufc_dofmap);
       numbering->disp();
       delete numbering;

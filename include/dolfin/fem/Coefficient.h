@@ -84,6 +84,34 @@ public:
     return *this;
   }
 
+  ///
+  template<class T>
+  bool compatible(T const& other)
+  {
+    return compatible(*this, other);
+  }
+
+  ///
+  template<class T>
+  static bool compatible(Coefficient const& a, T const& b)
+  {
+    // Check value shape compatibility
+    if (a.rank() != b.rank())
+    {
+      warning("Coefficient: rank mismatch %u != %u", a.rank(), b.rank());
+      return false;
+    }
+    for (uint i = 0; i < a.rank(); ++i)
+    {
+      if (a.dim(i) != b.dim(i))
+      {
+        warning("Coefficient: dim(%u) mismatch %u != %u", i, a.dim(i), b.dim(i));
+        return false;
+      }
+    }
+    return true;
+  }
+
 private:
 
   /// Time dependency hook

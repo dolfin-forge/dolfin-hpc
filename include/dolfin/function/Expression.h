@@ -32,6 +32,17 @@ public:
   /// Return the dimension of the value space for axis i
   virtual uint dim(uint i) const = 0;
 
+  // Return the value size
+  inline uint value_size() const
+  {
+    uint size = 1;
+    for (uint i = 0; i < this->rank(); ++i)
+    {
+      size *= this->dim(i);
+    }
+    return size;
+  }
+
 protected:
 
   /// Create user-defined function

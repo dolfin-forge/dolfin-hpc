@@ -97,6 +97,12 @@ public:
     delete[] values_;
   }
 
+  ///
+  bool empty() const
+  {
+    return (values_ == NULL);
+  }
+
   /// Assignment operator
   MeshFunction<T>& operator=(MeshFunction<T> const& other)
   {

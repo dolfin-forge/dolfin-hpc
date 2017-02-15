@@ -165,7 +165,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
 
-  if (MPI::processNumber() == 0)
+  if (MPI::rank() == 0)
   {
     if (mkdir("../scratch", S_IRWXU) < 0)
     {
@@ -212,7 +212,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 #ifdef ENABLE_MPIIO
     p_filename << "../scratch/projected_" << p_count++ << ".bin" << std::ends;
 #else
-    p_filename << "../scratch/projected_" << p_count++ << "_" << MPI::processNumber() << ".bin" << std::ends;
+    p_filename << "../scratch/projected_" << p_count++ << "_" << MPI::rank() << ".bin" << std::ends;
 #endif
     File p_file(p_filename.str());
     p_file << proj.vector();
@@ -228,8 +228,8 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
 {
 
 #ifdef HAVE_MPI
-  uint pe_rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint target_proc, src, dest, recv_size, local_size;
 
   MPI_Status status;

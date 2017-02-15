@@ -68,8 +68,8 @@ void BinaryFile::operator>>(GenericVector& x)
 
 #ifdef ENABLE_MPIIO
   uint offset[2];
-  uint pe_rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::rank();
+  uint pe_size = MPI::size();
   
   MPI_File fh;
   MPI_Offset byte_offset;
@@ -136,9 +136,9 @@ void BinaryFile::operator<<(GenericVector& x)
 
 #ifdef ENABLE_MPIIO
   BinaryFileHeader hdr;
-  uint pe_rank = MPI::processNumber();
+  uint pe_rank = MPI::rank();
   hdr.magic = BINARY_MAGIC;
-  hdr.pe_size = MPI::numProcesses();
+  hdr.pe_size = MPI::size();
   hdr.type = BINARY_VECTOR_DATA;
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
@@ -177,7 +177,7 @@ void BinaryFile::operator>>(Function & f)
 {
 
 #ifdef ENABLE_MPIIO
-  uint pe_size = MPI::numProcesses();
+  uint pe_size = MPI::size();
 
   MPI_File fh;
   MPI_Offset byte_offset;
@@ -249,7 +249,7 @@ void BinaryFile::operator>>(Function & f)
 void BinaryFile::operator>>(LabelList<Function>& f)
 {
 #ifdef ENABLE_MPIIO
-  uint pe_size = MPI::numProcesses();
+  uint pe_size = MPI::size();
 
   MPI_File fh;
   MPI_Offset byte_offset;
@@ -337,7 +337,7 @@ void BinaryFile::write_function(
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;
-  hdr.pe_size = MPI::numProcesses();
+  hdr.pe_size = MPI::size();
   hdr.type = BINARY_FUNCTION_DATA;
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
@@ -449,12 +449,12 @@ void BinaryFile::operator>>(Mesh& mesh)
 
   bool byteswap;
   BinaryFileHeader hdr;
-  uint pe_size = MPI::numProcesses();
-  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
 
-  if (MPI::numProcesses() == 1 || dolfin_get("Mesh read in serial"))
+  if (MPI::size() == 1 || dolfin_get("Mesh read in serial"))
   {
-    if(MPI::processNumber() > 0)
+    if(MPI::rank() > 0)
     {
       error("Reading serial mesh in parallel not implemented");
     }
@@ -892,7 +892,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;
-  hdr.pe_size = MPI::numProcesses();
+  hdr.pe_size = MPI::size();
   hdr.type = BINARY_MESH_DATA;
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
@@ -900,9 +900,9 @@ void BinaryFile::operator<<(Mesh& mesh)
   hdr.bendian = 0;
 #endif
 
-  if (MPI::numProcesses() == 1 || ! mesh.is_distributed())
+  if (MPI::size() == 1 || ! mesh.is_distributed())
   {
-    if(MPI::processNumber() > 0)
+    if(MPI::rank() > 0)
     {
       error("Writing serial mesh in parallel not implemented");
     }
@@ -1072,7 +1072,7 @@ template<typename T>
 
     BinaryFileHeader hdr;
     hdr.magic = BINARY_MAGIC;
-    hdr.pe_size = MPI::numProcesses();
+    hdr.pe_size = MPI::size();
     hdr.type = BINARY_MESH_FUNCTION_DATA;
 #ifdef HAVE_BIG_ENDIAN
     hdr.bendian = 1;
@@ -1182,8 +1182,8 @@ template<typename T>
     Mesh& mesh = meshfunction.mesh();
     real *values = new real[meshfunction.size()];
 
-    uint pe_rank = MPI::processNumber();
-    uint pe_size = MPI::numProcesses();
+    uint pe_rank = MPI::rank();
+    uint pe_size = MPI::size();
     message("load func %s", filename.c_str());
     MPI_File fh;
     MPI_Offset byte_offset;

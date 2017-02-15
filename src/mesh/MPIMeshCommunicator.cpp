@@ -68,8 +68,8 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   message(1, "MPIMeshCommunicator : distribute vertices");
   tic();
 
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
+  uint const rank = MPI::rank();
+  uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();
   uint const tdim = topology.dim();
   MeshGeometry& geometry = mesh.geometry();
@@ -232,8 +232,8 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   message(1, "MPIMeshCommunicator : distribute cells");
   tic();
 
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
+  uint const rank = MPI::rank();
+  uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();
   uint const tdim = topology.dim();
   MeshGeometry& geometry = mesh.geometry();
@@ -426,7 +426,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   // Exchange ghost vertices
   uint sendcnt_gv = sendbuf_gv.size();
   uint sendmax_gv = 0;
-  MPI::numGlobalSum(sendcnt_gv, sendmax_gv);
+  MPI::allReduceSum(sendcnt_gv, sendmax_gv);
   dolfin_assert(sendmax_gv > 0);
   uint * sendbck_gv = new uint[sendmax_gv];
   real * sendbck_gx = new real[sendmax_gv * gdim];

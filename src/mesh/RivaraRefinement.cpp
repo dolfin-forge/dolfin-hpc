@@ -32,7 +32,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   message("Refining simplicial mesh by recursive Rivara bisection without boundary smoothing.");
 
   // Start Loadbalancer
-  if(MPI::numProcesses() > 1 && balance)
+  if(MPI::size() > 1 && balance)
   {
     begin("Load balancing");
     // Tune loadbalancer using machine specific parameters, if available

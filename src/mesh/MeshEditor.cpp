@@ -84,7 +84,7 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   this->gdim_ = gdim;
 
   // Initialize the topology to the given topological dimension
-  mesh_->topology_.init(tdim_, MPI::numProcesses() > 1);
+  mesh_->topology_.init(tdim_, MPI::size() > 1);
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation

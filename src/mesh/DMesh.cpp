@@ -538,7 +538,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       node.mv = mv->glb_id;
       node.v1 = v0->glb_id;
       node.v2 = v1->glb_id;
-      node.owner = MPI::processNumber();
+      node.owner = MPI::rank();
       std::pair<uint, prop_edge> _prop_(dcell->nref, node);
       propagate.push_back(_prop_);
       dcell->nref++;
@@ -546,7 +546,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->on_boundary = true;
       mv->shared = true;
       mv->ghosted = false;
-      mv->owner = MPI::processNumber();
+      mv->owner = MPI::rank();
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
 
@@ -726,7 +726,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
   while (!empty)
   {
 
-    if (MPI::processNumber() == 0 && propagate.size() > 0) begin(
+    if (MPI::rank() == 0 && propagate.size() > 0) begin(
         "Propagate refinement...");
 
     propagate_refinement(propagated, empty);
@@ -790,10 +790,10 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
               mv->glb_id = it->second.mv;
               vertices.insert(mv);
 
-              if (MPI::processNumber() < it->second.owner)
+              if (MPI::rank() < it->second.owner)
               {
                 mv->ghosted = false;
-                mv->owner = MPI::processNumber();
+                mv->owner = MPI::rank();
                 prop_edge node;
                 node.mv = mv->glb_id;
                 node.v1 = it->second.v1;
@@ -826,7 +826,7 @@ void DMesh::bisectMarked(std::vector<bool> marked_ids)
       propagated.push_back(*it);
     leftovers.clear();
 
-    if (MPI::processNumber() == 0) end();
+    if (MPI::rank() == 0) end();
 
   }
 }
@@ -856,8 +856,8 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
   }
 
   MPI_Status status;
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint dest, src;
 
   empty = true;
@@ -927,8 +927,8 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   }
 
   MPI_Status status;
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint dest;
   uint D = 1;
 #if  (__sgi || __FreeBSD__)

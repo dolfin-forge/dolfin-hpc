@@ -54,7 +54,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
   message("%d cells selected on process %d",
-	  num_cells_to_coarsen, MPI::processNumber());
+	  num_cells_to_coarsen, MPI::rank());
 
   // Coarsen until nothing happens anymore
   uint prev_num_cells_coarsened, num_cells_coarsened(0);

@@ -19,8 +19,8 @@ DistributedData::DistributedData() :
     valid_numbering(false),
     valid_ownership(false),
     valid_adjacency(false),
-    rank_(MPI::processNumber()),
-    pe_size_(MPI::numProcesses()),
+    rank_(MPI::rank()),
+    pe_size_(MPI::size()),
     range_is_set_(false),
     offset_(0),
     range_size_(0),
@@ -129,8 +129,8 @@ void DistributedData::clear()
   range_size_ = 0;
   offset_ = 0;
   range_is_set_ = false;
-  pe_size_ = MPI::numProcesses();
-  rank_ = MPI::processNumber();
+  pe_size_ = MPI::size();
+  rank_ = MPI::rank();
   //
   valid_numbering = false;
   valid_ownership = false;
@@ -387,8 +387,8 @@ void DistributedData::assign(DistributedData const& other,
 
   ///
   range_size_ = cache_size_ - ghost_.size();
-  MPI::processOffset(range_size_, offset_);
-  MPI::numGlobalSum(range_size_, global_size_);
+  MPI::offset(range_size_, offset_);
+  MPI::allReduceSum(range_size_, global_size_);
 
   ///
   finalized_ = true;
@@ -481,7 +481,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   else
   {
     range_size_ = num_owned;
-    MPI::processOffset(range_size_, offset_);
+    MPI::offset(range_size_, offset_);
   }
   // Set the global size if provided otherwise compute it
   if (num_global > 0)
@@ -496,7 +496,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   else
   {
     uint range_sum;
-    MPI::numGlobalSum(range_size_, range_sum);
+    MPI::allReduceSum(range_size_, range_sum);
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
     if ((global_size_ > 0) && (global_size_ != range_sum))
@@ -700,7 +700,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     error("DistributedData : re-mapping numbering requires finalized data");
   }
 
-  if (mapping.size() != MPI::numProcesses())
+  if (mapping.size() != MPI::size())
   {
     error("DistributedData : numbering re-mapping array has invalid size");
   }
@@ -796,7 +796,7 @@ void DistributedData::renumber_global()
   {
     recvsize = std::max(recvsize, (uint) sendbuf[i].size());
   }
-  MPI::numGlobalMax(recvsize, recvsize);
+  MPI::allReduceMax(recvsize, recvsize);
   uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint * sendbck = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint const num_ghost = ghost_.size();
@@ -939,7 +939,7 @@ uint DistributedData::num_ghost() const
 void DistributedData::remap_ownership(Array<uint> const& mapping)
 {
   dolfin_assert(finalized_);
-  if (mapping.size() != MPI::numProcesses())
+  if (mapping.size() != MPI::size())
   {
     error("DistributedData : ownership re-mapping array has invalid size");
   }

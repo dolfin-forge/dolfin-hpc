@@ -38,8 +38,8 @@ void MeshSmoothing::smooth(Mesh& mesh, MeshSmoothData& smooth_data)
 void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
 {
   //starting MPI
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint dest, src;
   uint global_num_vertex = mesh.global_size(0);
   double stopper = double(global_num_vertex + 1);

@@ -20,6 +20,7 @@
 
 namespace dolfin
 {
+
 /// This class provides utility functions for easy access of the number of
 /// processes and current process number.
 
@@ -27,13 +28,34 @@ class Mesh;
 
 class MPI
 {
+
 public:
 
-  /// Return process number
-  static uint processNumber();
+  /*
+   *  Local communicator
+   */
 
-  /// Return number of processes
-  static uint numProcesses();
+  /// Return process rank in local communicator
+  static uint rank();
+
+  /// Return local communicator size
+  static uint size();
+
+  /// Return if the given rank is valid
+  static bool is_valid_rank(uint rank);
+
+  /// Return if the current process is the master process
+  static bool is_root();
+
+  /*
+   *  Global communicator
+   */
+
+  /// Return process rank in global communicator
+  static uint global_rank();
+
+  /// Return global communicator size
+  static uint global_size();
 
   /// Return group number
   static uint groupNumber();
@@ -41,38 +63,33 @@ public:
   /// Return number of groups
   static uint numGroups();
 
-  /// Return process number in world
-  static uint processGlobalNumber();
+  /*
+   *  Global communicator
+   */
 
-  /// Return number of processes in world
-  static uint numGlobalProcesses();
-
-  /// Return if the given rank is valid
-  static bool processIsValid(uint rank);
-
-  /// Return seed value for current rank
-  static uint processRandomSeed();
+  /// Return seed value for current process
+  static uint seed();
 
   /// Get process offset given number of local elements
-  static void processOffset(uint local, uint& offset);
+  static void offset(uint local, uint& offset, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void numGlobalSum(uint local, uint& global);
+  static void allReduceSum(uint local, uint& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void numGlobalMin(uint local, uint& global);
+  static void allReduceMin(uint local, uint& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void numGlobalMax(uint local, uint& global);
+  static void allReduceMax(uint local, uint& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceSum(real local, real& global);
+  static void allReduceSum(real local, real& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceMin(real local, real& global);
+  static void allReduceMin(real local, real& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceMax(real local, real& global);
+  static void allReduceMax(real local, real& global, MPI_Comm& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
   static void startTimer();
@@ -88,9 +105,6 @@ public:
 
   /// Setup DOLFIN_COMM MPI communicator
   static void initComm(int n = 0);
-
-  /// Reorder MPI communicator
-  static void reorderComm(Mesh& mesh);
 
 #ifdef HAVE_MPI
   static MPI_Comm DOLFIN_COMM_WORLD;
@@ -112,6 +126,7 @@ private:
   static int this_seed;
   static bool _dolfin_comm;
 };
+
 }
 
 #endif

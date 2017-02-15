@@ -186,8 +186,8 @@ void VertexNormal::computeNormal(Mesh& mesh)
   BoundaryMesh& boundary = mesh.exterior_boundary();
 
   VertexDataMap vdmap;
-  int rank = dolfin::MPI::processNumber();
-  int pe_size = dolfin::MPI::numProcesses();
+  int rank = dolfin::MPI::rank();
+  int pe_size = dolfin::MPI::size();
   Array<uint> * u_sendbuff = new Array<uint> [pe_size];
   Array<real> * r_sendbuff = new Array<real> [pe_size];
 

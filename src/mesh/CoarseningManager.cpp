@@ -54,7 +54,7 @@ void CoarseningManager::init(Mesh& mesh, MeshFunction<bool>& cell_marker,
       dolfin_get("coarsening quality threshold");
   else quality_threshold_ = 1e-3;
 
-  if (MPI::processNumber() == 0) message("Quality threshold: %d",
+  if (MPI::rank() == 0) message("Quality threshold: %d",
                                          quality_threshold_);
 
   // attempt count is for sake of simplicity in the migration phase always one
@@ -251,8 +251,8 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
                                          MeshFunction<uint> *& partitions)
 {
 #ifdef HAVE_MPI
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
 
   // List of vertices to request from owner
   Array<uint> *send_list_requests = new Array<uint> [pe_size];
@@ -412,8 +412,8 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
 bool CoarseningManager::migrate(uint num_cells_coarsened)
 {
 #ifdef HAVE_MPI
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
 
   if (rank == 0) message("Starting migration.");
 

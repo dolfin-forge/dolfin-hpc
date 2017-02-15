@@ -43,7 +43,7 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   zz_->Set_Param( "LB_METHOD", "GRAPH");
 
   partitions.init(mesh, mesh.topology().dim());
-  partitions = MPI::processNumber();
+  partitions = MPI::rank();
 
   partitionZoltanInternal(mesh, partitions, zz_);
 
@@ -70,7 +70,7 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
   zz_->Set_Param( "LB_METHOD", "HSFC");
 
   partitions.init(mesh, 0);
-  partitions = MPI::processNumber();
+  partitions = MPI::rank();
 
   partitionZoltanInternal(mesh, partitions, zz_);
 
@@ -237,8 +237,8 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   // Map between global facet index and neigh. Cell (global index)
   _map<uint, uint> facet_cell_map;
 
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
   
   Array<uint> *glb_facet = new Array<uint>[pe_size];  
   for (MeshSharedIterator f(mesh->distdata(), facet_dim); !f.end(); ++f)

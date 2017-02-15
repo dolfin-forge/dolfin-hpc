@@ -64,8 +64,8 @@ void GlobalFacetMap::init()
 
 #ifdef HAVE_MPI
     // Collect facets for which all vertices are shared
-    uint const pe_size = MPI::numProcesses();
-    uint const rank = MPI::processNumber();
+    uint const pe_size = MPI::size();
+    uint const rank = MPI::rank();
     Array<uint> * sendbuf_facets = new Array<uint> [pe_size];
     Array<uint> * sendbuf_vertices = new Array<uint> [pe_size];
     //FIXME: Cannot work with heterogeneous mesh since the data packing is not
@@ -122,10 +122,10 @@ void GlobalFacetMap::init()
       max_rvalsize = std::max(max_rvalsize, (uint) sendbuf_facets[j].size());
     }
     uint max_recvcount;
-    MPI::numGlobalMax(max_sendsize, max_recvcount);
+    MPI::allReduceMax(max_sendsize, max_recvcount);
     uint *recvbuf_facets = new uint[max_recvcount];
     uint max_rvalcount;
-    MPI::numGlobalMax(max_rvalsize, max_rvalcount);
+    MPI::allReduceMax(max_rvalsize, max_rvalcount);
     uint *sendbuf_rval = new uint[max_rvalcount];
     uint *recvbuf_rval = new uint[max_rvalcount];
     int recv_count = 0;

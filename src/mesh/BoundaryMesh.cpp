@@ -276,8 +276,8 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
-    uint const rank = MPI::processNumber();
-    uint const pe_size = MPI::numProcesses();
+    uint const rank = MPI::rank();
+    uint const pe_size = MPI::size();
     Array<uint> * shared_vertices = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)
@@ -346,7 +346,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       {
         recvmax = std::max(recvmax, (uint) shared_vertices[j].size());
       }
-      MPI::numGlobalMax(recvmax, recvmax);
+      MPI::allReduceMax(recvmax, recvmax);
       uint * recvbuf = new uint[recvmax];
       int recvcount;
 

@@ -436,7 +436,7 @@ uint MeshTopology::get_owner(MeshEntity const& entity) const
   dolfin_assert(&mesh_ == &entity.mesh());
   return (distdata_ ?
             (*distdata_)[entity.dim()].get_owner(entity.index()) :
-            MPI::processNumber());
+            MPI::rank());
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const

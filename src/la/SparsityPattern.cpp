@@ -112,8 +112,8 @@ void SparsityPattern::init(uint rank, uint const * dim,
   distributed_ = (range != NULL) && (!std::equal(dim, dim + rank, range));
   if (distributed_)
   {
-    uint pe_size = dolfin::MPI::numProcesses();
-    uint pe_rank = dolfin::MPI::processNumber();
+    uint pe_size = dolfin::MPI::size();
+    uint pe_rank = dolfin::MPI::rank();
     range_ = new uint*[rank];
     local_range_ = new uint*[rank];
     for (uint i = 0; i < rank; ++i)
@@ -257,7 +257,7 @@ void SparsityPattern::numNonZeroPerRow(uint p_rank, uint d_nzrow[],
   }
 
   /// All information is in the local range
-  if (p_rank == MPI::processNumber())
+  if (p_rank == MPI::rank())
   {
     uint const num_rows = this->size(0);
     for (uint i = 0; i < num_rows; ++i)
@@ -356,8 +356,8 @@ void SparsityPattern::apply()
   tic();
 
   /// Collect entries per owner
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
+  uint const rank = MPI::rank();
+  uint const pe_size = MPI::size();
   Array<uint> * sendbuf = new Array<uint>[pe_size];
   uint owner = 0;
   uint sendmax = 0;
@@ -384,7 +384,7 @@ void SparsityPattern::apply()
   }
   sendmax = std::max(sendmax, (uint) sendbuf[owner].size());
   uint recvmax = 0;
-  MPI::numGlobalMax(sendmax, recvmax);
+  MPI::allReduceMax(sendmax, recvmax);
   if (recvmax == 0)
   {
     return;

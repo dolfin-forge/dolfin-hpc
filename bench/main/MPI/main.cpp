@@ -18,7 +18,7 @@ int main(int argc, char** argv)
     ss << "mesh";
     ss << sg.str();
     message("Group %2d : Rank %2d\n", dolfin::MPI::groupNumber(),
-            dolfin::MPI::processNumber());
+            dolfin::MPI::rank());
 
     for (uint i = 1; i < dolfin::MPI::groupNumber(); ++i)
     {

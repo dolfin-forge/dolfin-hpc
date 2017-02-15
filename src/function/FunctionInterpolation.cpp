@@ -163,8 +163,8 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   ScratchSpace S1(Vh1);
 
   //
-  uint rank = dolfin::MPI::processNumber();
-  uint pe_size = dolfin::MPI::numProcesses();
+  uint rank = dolfin::MPI::rank();
+  uint pe_size = dolfin::MPI::size();
 
   // On-proc for M0 and M1
   Array<uint> dofs_indices0;

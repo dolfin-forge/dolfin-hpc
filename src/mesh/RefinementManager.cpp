@@ -97,7 +97,7 @@ void RefinementManager::init()
   // Assign a safe range for each processor
   uint glb_max = mesh_.topology().global_size(0);
   start_offset_ = 0;
-  MPI::processOffset(num_new_vertices, start_offset_);
+  MPI::offset(num_new_vertices, start_offset_);
   start_offset_ += glb_max;
 
   // Initialize data structures for interprocess boundary
@@ -182,8 +182,8 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
   DistributedData& olddistdata = mesh_.distdata()[0];
   DistributedData& newdistdata = refined_mesh_.distdata()[0];
 
-  int rank = MPI::processNumber();
-  int pe_size = MPI::numProcesses();
+  int rank = MPI::rank();
+  int pe_size = MPI::size();
 
   uint num_unass = 0;
   srand((uint) ::time(0) + rank);
@@ -312,7 +312,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
   newdistdata.finalize();
 
   uint num_shared_edges = 0;
-  MPI::numGlobalSum(mesh_.topology().num_shared(1), num_shared_edges);
+  MPI::allReduceSum(mesh_.topology().num_shared(1), num_shared_edges);
 
   dolfin_assert(newdistdata.global_size() == mesh_.global_size(0) + num_shared_edges);
 
@@ -327,8 +327,8 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
 {
   DistributedData& olddistdata = mesh_.distdata()[0];
 
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
   srand((uint) ::time(0) + rank);
 
   Array<uint> send_buff;

@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
       if (save_file)
       {
         MeshFunction<uint> rank(mesh, mesh.topology().dim());
-        rank = dolfin::MPI::processNumber();
+        rank = dolfin::MPI::rank();
         std::stringstream ss2;
         ss2 << "rank" << level << ".pvd";
         File f2(ss2.str());

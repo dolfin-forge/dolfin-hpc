@@ -32,7 +32,7 @@ bool dolfin::MPI::_dolfin_comm = false;
 MPI_Comm dolfin::MPI::DOLFIN_COMM_WORLD;
 MPI_Comm dolfin::MPI::DOLFIN_COMM;
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processNumber()
+dolfin::uint dolfin::MPI::rank()
 {
   if (!_dolfin_comm)
   {
@@ -42,7 +42,7 @@ dolfin::uint dolfin::MPI::processNumber()
   return static_cast<uint>(this_process);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numProcesses()
+dolfin::uint dolfin::MPI::size()
 {
   if (!_dolfin_comm)
   {
@@ -72,7 +72,7 @@ dolfin::uint dolfin::MPI::numGroups()
   return static_cast<uint>(num_groups);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processGlobalNumber()
+dolfin::uint dolfin::MPI::global_rank()
 {
   if (!_dolfin_comm)
   {
@@ -82,7 +82,7 @@ dolfin::uint dolfin::MPI::processGlobalNumber()
   return static_cast<uint>(this_process_world);
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numGlobalProcesses()
+dolfin::uint dolfin::MPI::global_size()
 {
   if (!_dolfin_comm)
   {
@@ -94,12 +94,12 @@ dolfin::uint dolfin::MPI::numGlobalProcesses()
 #else
 
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processNumber()
+dolfin::uint dolfin::MPI::rank()
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numProcesses()
+dolfin::uint dolfin::MPI::size()
 {
   return 1;
 }
@@ -114,12 +114,12 @@ dolfin::uint dolfin::MPI::numGroups()
   return 1;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processGlobalNumber()
+dolfin::uint dolfin::MPI::global_rank()
 {
   return 0;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::numGlobalProcesses()
+dolfin::uint dolfin::MPI::global_size()
 {
   return 1;
 }
@@ -221,162 +221,72 @@ void dolfin::MPI::initComm(int n)
   _dolfin_comm = true;
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::reorderComm(Mesh& mesh)
-{
-
-  error("Reordering MPI Comm");
-#ifdef HAVE_MPI
-  int nnodes = (int) numProcesses();
-  int *index = new int[nnodes];
-  short *neigh = new short[nnodes];
-
-  memset(neigh, 0, nnodes * sizeof(short));
-  for (GhostIterator it(mesh.distdata()[0]); !it.end(); ++it)
-    neigh[it.owner()] = 1;
-
-  MPI_Status status;
-  uint src, dest;
-  short recv;
-
-  for (uint i = 1; i < numProcesses(); i++)
-  {
-    src = (processNumber() - i + numProcesses()) % numProcesses();
-    dest = (processNumber() + i) % numProcesses();
-
-    MPI_Sendrecv(&neigh[dest], 1, MPI_SHORT, dest, 0, &recv, 1, MPI_SHORT, src,
-                 0, DOLFIN_COMM, &status);
-    neigh[src] |= recv;
-  }
-
-  int degree = 0;
-  for (int i = 0; i < nnodes; i++)
-    degree += neigh[i];
-  dolfin_assert(degree < (nnodes - 1));
-  int offset;
-  MPI_Scan(&degree, &offset, 1, MPI_INT, MPI_SUM, DOLFIN_COMM);
-  MPI_Allgather(&offset, 1, MPI_INT, index, 1, MPI_INT, DOLFIN_COMM);
-  int nedges = 0;
-  MPI_Allreduce(&degree, &nedges, 1, MPI_INT, MPI_SUM, DOLFIN_COMM);
-  int *edges = new int[nedges];
-
-  int j = (int) (processNumber() > 0 ? index[processNumber() - 1] : 0);
-  for (int i = 0; i < nnodes; i++)
-  {
-    if (neigh[i]) edges[j++] = i;
-    if (j >= index[processNumber()]) break;
-  }
-
-  int *displs = new int[nnodes];
-  offset -= degree;
-  MPI_Allgather(&offset, 1, MPI_INT, displs, 1, MPI_INT, DOLFIN_COMM);
-
-  int *recvcount = new int[nnodes];
-  recvcount[0] = index[0];
-  for (int i = 1; i < nnodes; i++)
-    recvcount[i] = index[i] - index[i - 1];
-
-  MPI_Allgatherv(&edges[(processNumber() > 0 ? index[processNumber() - 1] : 0)],
-                 recvcount[processNumber()], MPI_INT, edges, recvcount, displs,
-                 MPI_INT, DOLFIN_COMM);
-
-  MPI_Comm TMP_COMM;
-  if (_dolfin_comm) MPI_Comm_dup(DOLFIN_COMM, &TMP_COMM);
-  else MPI_Comm_dup(MPI_COMM_WORLD, &TMP_COMM);
-
-  MPI_Graph_create(TMP_COMM, nnodes, index, edges, 1, &DOLFIN_COMM);
-
-  delete[] recvcount;
-  delete[] displs;
-  delete[] edges;
-  delete[] neigh;
-  delete[] index;
-
-  int old_rank;
-  MPI_Comm_rank(TMP_COMM, &old_rank);
-  MPI_Comm_rank(DOLFIN_COMM, &this_process);
-
-  Array<uint> process_map(nnodes);
-  process_map[old_rank] = this_process;
-  MPI_Allgather(&process_map[old_rank], 1, MPI_UNSIGNED, &process_map[0], 1,
-                MPI_UNSIGNED, TMP_COMM);
-
-  for (int i = 0; i < nnodes; i++)
-  {
-    if (process_map[i] != i)
-    {
-      message("Communicator changed, rebuilding mesh structure");
-      error("Changes in progress");
-      //FIXME!!!
-      //mesh.distdata().remap_ownership(process_map);
-      break;
-    }
-  }
-
-  MPI_Comm_free(&TMP_COMM);
-#endif
-}
-//-----------------------------------------------------------------------------
-dolfin::uint dolfin::MPI::processRandomSeed()
+dolfin::uint dolfin::MPI::seed()
 {
   return this_seed;
 }
 //-----------------------------------------------------------------------------
-bool dolfin::MPI::processIsValid(uint rank)
+bool dolfin::MPI::is_valid_rank(uint rank)
 {
   return rank < static_cast<uint>(num_processes);
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::processOffset(uint local, uint& offset)
+bool dolfin::MPI::is_root()
+{
+  return (this_process == 0);
+}
+//-----------------------------------------------------------------------------
+void dolfin::MPI::offset(uint local, uint& offset, MPI_Comm& comm)
 {
   // Fool-proof as the value for rank 0 is undefined according to MPI specs
   offset = 0;
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&num_local, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Scan(&num_local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm);
     offset -= local;
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::numGlobalSum(uint local, uint& global)
+void dolfin::MPI::allReduceSum(uint local, uint& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_SUM, comm);
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::numGlobalMin(uint local, uint& global)
+void dolfin::MPI::allReduceMin(uint local, uint& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MIN, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MIN, comm);
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::numGlobalMax(uint local, uint& global)
+void dolfin::MPI::allReduceMax(uint local, uint& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MAX, comm);
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::AllReduceSum(real local, real& global)
+void dolfin::MPI::allReduceSum(real local, real& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm);
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::AllReduceMin(real local, real& global)
+void dolfin::MPI::allReduceMin(real local, real& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, comm);
 #endif
 }
 //-----------------------------------------------------------------------------
-void dolfin::MPI::AllReduceMax(real local, real& global)
+void dolfin::MPI::allReduceMax(real local, real& global, MPI_Comm& comm)
 {
 #if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MAX, MPI::DOLFIN_COMM);
+    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MAX, comm);
 #endif
 }
 //-----------------------------------------------------------------------------

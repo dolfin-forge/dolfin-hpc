@@ -288,8 +288,8 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     {
 #if HAVE_MPI
       //--- Exchange data -----------------------------------------------------
-      uint rank = dolfin::MPI::processNumber();
-      uint pe_size = dolfin::MPI::numProcesses();
+      uint rank = dolfin::MPI::rank();
+      uint pe_size = dolfin::MPI::size();
       MPI_Status status;
       uint src = 0;
       uint dst = 0;

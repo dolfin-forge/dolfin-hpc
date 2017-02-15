@@ -124,8 +124,8 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
 #ifdef HAVE_MPI
   if (mesh.is_distributed())
   {
-    uint const pe_size = MPI::numProcesses();
-    uint const rank = MPI::processNumber();
+    uint const pe_size = MPI::size();
+    uint const rank = MPI::rank();
 
     Array<uint> * sendbuf = new Array<uint> [pe_size];
     for (GhostIterator it(mesh.distdata()[edim]); !it.end(); ++it)

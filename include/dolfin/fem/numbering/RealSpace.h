@@ -40,7 +40,7 @@ public:
     DofNumbering::init();
 
     //---
-    uint offset = ufc_dofmap.local_dimension() * MPI::processNumber();
+    uint offset = ufc_dofmap.local_dimension() * MPI::rank();
     set_range(offset, ufc_dofmap.local_dimension());
     delete [] dofs_;
     dofs_ = new uint[ufc_dofmap.local_dimension()];

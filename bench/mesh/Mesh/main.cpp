@@ -91,8 +91,8 @@ int main(int argc, char** argv)
     for (uint edim = 0; edim < tdim; ++edim)
     {
       message("Check shared and ghost entities distribution for dim %d", edim);
-      uint rank = dolfin::MPI::processNumber();
-      uint pe_size = dolfin::MPI::numProcesses();
+      uint rank = dolfin::MPI::rank();
+      uint pe_size = dolfin::MPI::size();
       MeshDistributedData& distdata = mesh.distdata();
 
       // Shared

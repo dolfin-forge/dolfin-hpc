@@ -14,8 +14,8 @@ void test_boundary_facets(Mesh& mesh)
   }
 
   BoundaryMesh& exterior = mesh.exterior_boundary();
-  uint const rank = dolfin::MPI::processNumber();
-  uint const pe_size = dolfin::MPI::numProcesses();
+  uint const rank = dolfin::MPI::rank();
+  uint const pe_size = dolfin::MPI::size();
   uint * sendbuf = new uint[pe_size];
   std::fill_n(sendbuf, pe_size, 0);
   _set<uint> const& adjs = exterior.distdata()[0].get_adj_ranks();
@@ -181,7 +181,7 @@ int main(int argc, char** argv)
       Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
       File file("cube.pvd");
       MeshFunction<uint> partitions(mesh, mesh.topology().dim());
-      partitions = dolfin::MPI::processNumber();
+      partitions = dolfin::MPI::rank();
       file << partitions;
       NodeNormal vn(mesh, NodeNormal::facet);
       test("cube_facet", vn);

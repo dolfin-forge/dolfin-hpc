@@ -178,7 +178,7 @@ void Logger::file()
   {
     filestream_ = new std::ofstream();
     std::stringstream ss;
-    ss << "log." << MPI::processNumber();
+    ss << "log." << MPI::rank();
     filestream_->open(ss.str().c_str());
   }
   // Sill allow toto babar logging for dummies

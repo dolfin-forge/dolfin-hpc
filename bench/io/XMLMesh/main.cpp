@@ -18,12 +18,12 @@ int main(int argc, char * argv[])
 //std::string filename("square");
   std::string filename("aneurysm");
   std::stringstream ss;
-  ss << filename << dolfin::MPI::numProcesses();
+  ss << filename << dolfin::MPI::size();
 
   ///
   Mesh mesh(filename+".xml");
   MeshFunction<uint> p(mesh, mesh.topology().dim());
-  p = dolfin::MPI::processNumber();
+  p = dolfin::MPI::rank();
   File f(ss.str()+"_partitions.pvd");
   f << p;
 

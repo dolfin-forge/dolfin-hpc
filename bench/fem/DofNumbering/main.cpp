@@ -56,7 +56,7 @@ int main(int argc, char** argv)
   {
 
     // 1D: broken in parallel
-		if(MPI::numProcesses() == 1)
+		if(MPI::size() == 1)
     {
       begin("1D");
       Mesh mesh("../../data/meshes/intervalm.bin");

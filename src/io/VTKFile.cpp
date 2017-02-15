@@ -54,7 +54,7 @@ void VTKFile::operator<<(Mesh& mesh)
   // Only the root updates the pvd file
   if (mesh.is_distributed())
   {
-    if(MPI::processNumber() == 0)
+    if(MPI::rank() == 0)
     {
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
@@ -68,7 +68,7 @@ void VTKFile::operator<<(Mesh& mesh)
   }
   else
   {
-    if(MPI::numProcesses() > 1)
+    if(MPI::size() > 1)
     {
       warning("Writing serial mesh in a parallel run");
     }
@@ -133,7 +133,7 @@ void VTKFile::write()
 {
   if (!opened_write)
   {
-    if(MPI::processNumber() == 0)
+    if(MPI::rank() == 0)
     {
       // Clear file
       FILE* fp = fopen(filename.c_str(), "w");
@@ -153,10 +153,10 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Write pvd file
 
   // Only the root updates the pvd file
-  if (MPI::processNumber() == 0)
+  if (MPI::rank() == 0)
   {
 
-    if (MPI::numProcesses() > 1)
+    if (MPI::size() > 1)
     {
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
@@ -171,7 +171,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
 
   //FIXME: This only writes the first mesh encountered
   Mesh& mesh = f[0].first->mesh();
-  if(MPI::numProcesses() > 1 && !mesh.is_distributed())
+  if(MPI::size() > 1 && !mesh.is_distributed())
   {
     error("Saving functions on a serial mesh in a parallel run is unsupported");
   }
@@ -576,7 +576,7 @@ void VTKFile::pvdFileWrite(uint num)
 
   // Remove directory path from name for pvd file
   std::string fname;
-  if (MPI::numProcesses() > 1)
+  if (MPI::size() > 1)
   {
     fname.assign(pvtu_filename, filename.find_last_of("/") + 1,
                  pvtu_filename.size());
@@ -650,7 +650,7 @@ void VTKFile::pvtuFileWrite(bool mesh_function, uint const dim)
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1,
                vtu_filename.size() - 5);
-  for (uint i = 0; i < MPI::numProcesses(); i++)
+  for (uint i = 0; i < MPI::size(); i++)
   {
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
   }
@@ -745,7 +745,7 @@ void VTKFile::pvtuFileWriteFunction(
   // Remove rank from vtu filename ( <rank>.vtu)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1,
                vtu_filename.size() - 5);
-  for (uint i = 0; i < MPI::numProcesses(); i++)
+  for (uint i = 0; i < MPI::size(); i++)
     pvtuFile << "<Piece Source=\"" << fname << i << ".vtu\"/>\n";
 
   pvtuFile << "</PUnstructuredGrid>\n"
@@ -807,7 +807,7 @@ void VTKFile::vtuNameUpdate(const int counter)
   extension.assign(filename, filename.find("."), filename.size());
 
   fileid << counter;
-  newfilename << filestart << fileid.str() << "_" << MPI::processNumber()
+  newfilename << filestart << fileid.str() << "_" << MPI::rank()
               << ".vtu";
   vtu_filename = newfilename.str();
 
@@ -844,7 +844,7 @@ template<class T>
     vtuNameUpdate(counter);
 
     // Write pvd file
-    if (MPI::processNumber() == 0)
+    if (MPI::rank() == 0)
     {
       pvtuNameUpdate(counter);
       pvdFileWrite(counter);

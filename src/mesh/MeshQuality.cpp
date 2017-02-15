@@ -166,12 +166,12 @@ real MeshQuality::reduceAvgReal(real val)
   MPI_Allreduce(&val_tmp, &val, 1, MPI_DOUBLE, MPI_SUM,
                 dolfin::MPI::DOLFIN_COMM);
 #endif
-  return val / dolfin::MPI::numProcesses();
+  return val / dolfin::MPI::size();
 }
 //-----------------------------------------------------------------------------
 void MeshQuality::disp()
 {
-  cout << "Mesh quality rank " << dolfin::MPI::processNumber() << ":" << endl;
+  cout << "Mesh quality rank " << dolfin::MPI::rank() << ":" << endl;
   cout << "mu_min: " << mu_min << endl;
   cout << "mu_max: " << mu_max << endl;
   cout << "mu_avg: " << mu_avg << endl;

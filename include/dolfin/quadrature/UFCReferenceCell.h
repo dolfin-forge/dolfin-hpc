@@ -85,7 +85,7 @@ public:
     entity_indices[topological_dimension][0] = cell.index();
 
     // Two different cases
-    if (MPI::numProcesses() == 1)
+    if (MPI::size() == 1)
     {
       // Single process, pointer to mesh topological data
       for (uint d = 0; d < topological_dimension; d++)
@@ -149,7 +149,7 @@ public:
   {
     if (entity_indices)
     {
-      if (MPI::numProcesses() > 1)
+      if (MPI::size() > 1)
       {
         for (uint i = 0; i < (topological_dimension + 1); i++)
           delete[] entity_indices[i];

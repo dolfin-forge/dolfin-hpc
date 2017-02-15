@@ -71,7 +71,7 @@ void Test::init(int argc, char *argv[])
 //-----------------------------------------------------------------------------
 void Test::print_args()
 {
-  if (dolfin::MPI::processNumber() == 0)
+  if (dolfin::MPI::rank() == 0)
   {
     message("benchmark   : %s", args.benchmark);
     message("debug level : %u", args.debug_level);

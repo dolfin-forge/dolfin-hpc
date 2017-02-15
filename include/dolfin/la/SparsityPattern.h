@@ -94,7 +94,7 @@ private:
   /// Dimensions
   uint * dim_;
 
-  /// Range -array of size + 1 where size is numProcesses + 1:
+  /// Range -array of size + 1 where size is size + 1:
   ///    range[rank], range[rank+1] is the range for processor
   uint ** range_;
 

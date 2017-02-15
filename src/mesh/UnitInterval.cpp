@@ -25,8 +25,8 @@ UnitInterval::UnitInterval(uint nx) :
   MeshEditor editor(*this, CellType::interval, 1);
 
   //
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
+  uint const rank = MPI::rank();
+  uint const pe_size = MPI::size();
   LinearDistribution cdist(nx, pe_size, rank);
 
   // Create vertices and cells:

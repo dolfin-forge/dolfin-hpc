@@ -258,6 +258,11 @@ uint Mesh::global_size(uint dim) const
   return topology_.global_size(dim);
 }
 //-----------------------------------------------------------------------------
+uint Mesh::num_global_vertices() const
+{
+  return topology_.global_size(0);
+}
+//-----------------------------------------------------------------------------
 uint Mesh::num_global_cells() const
 {
   return topology_.global_size(topology_.dim());

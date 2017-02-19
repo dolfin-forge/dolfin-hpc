@@ -123,6 +123,7 @@ public:
   static void initComm(int ngroups = 0);
 
   static Communicator DOLFIN_COMM_WORLD;
+  static Communicator DOLFIN_COMM_SELF;
   static Communicator DOLFIN_COMM;
 
 private:

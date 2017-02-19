@@ -22,6 +22,7 @@ namespace dolfin
 
 //--- STATIC ------------------------------------------------------------------
 MPI::Communicator MPI::DOLFIN_COMM_WORLD;
+MPI::Communicator MPI::DOLFIN_COMM_SELF;
 MPI::Communicator MPI::DOLFIN_COMM;
 
 real MPI::time_ = 0.0;
@@ -123,6 +124,7 @@ void MPI::initComm(int ngroups)
   MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD);
   MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &ctx_.global_rank);
   MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &ctx_.global_size);
+  MPI_Comm_dup(MPI_COMM_SELF, &MPI::DOLFIN_COMM_SELF);
   ctx_.seed = std::time(0) + ctx_.global_rank;
 
   // Initialize group(s)

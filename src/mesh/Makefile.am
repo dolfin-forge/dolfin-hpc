@@ -50,6 +50,7 @@ libdolfin_mesh_la_SOURCES = \
 			QuadrilateralCell.cpp\
 			Rectangle.cpp\
 			RefinementManager.cpp\
+			RefinementPattern.cpp\
 			RivaraRefinement.cpp\
 			StructuredGrid.cpp\
 			SubDomain.cpp\

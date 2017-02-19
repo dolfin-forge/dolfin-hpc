@@ -35,19 +35,11 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   RefinementManager refman(mesh, refined_mesh);
   RefinementPattern const& pattern = refman.pattern();
 
-  // Compute number of vertices based on the pattern
-  uint num_refined_vertices = mesh.topology().size(0);
-  for (uint i = 1; i <= tdim; ++i)
-  {
-    dolfin_assert(mesh.topology().size(i) > 0);
-    num_refined_vertices += pattern.num_refined_vertices(i)
-        * mesh.topology().size(i);
-  }
-  editor.init_vertices(num_refined_vertices);
+  // Refinement pattern provides the number of refined vertices
+  editor.init_vertices(pattern.num_refined_vertices(mesh));
 
-  // Refinement pattern provides the number of new cells
-  uint num_refined_cells = pattern.num_refined_cells() * mesh.num_cells();
-  editor.init_cells(num_refined_cells);
+  // Refinement pattern provides the number of refined cells
+  editor.init_cells(pattern.num_refined_cells(mesh));
 
   // Current vertex index
   uint current_vertex = 0;
@@ -80,7 +72,7 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   }
 
   // Add cell-based vertices
-  if (pattern.refinement_needs_entities(tdim))
+  if (tdim > 0 && pattern.refinement_needs_entities(tdim))
   {
     for (CellIterator c(mesh); !c.end(); ++c)
     {

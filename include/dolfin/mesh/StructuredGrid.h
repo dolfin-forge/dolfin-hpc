@@ -29,6 +29,9 @@ public:
   /// Create unit structured grid
   StructuredGrid(CellType const& type, uint N);
 
+  /// Create unit structured grid with a given bounding box
+  StructuredGrid(CellType const& type, uint N, BoundingBox bbox);
+
   /// Destructor
   ~StructuredGrid();
 

@@ -25,10 +25,21 @@ class BoundingBox
 
 public:
 
-  /// Create unit bounding box
-  BoundingBox(uint d) :
+  /// Create unit bounding box in R^d
+  BoundingBox(uint d = dolfin::EuclideanSpace::MAX_DIMENSION) :
     D_(d),
-    BOX_(new Point[d+1])
+    BOX_(new Point[D_+1])
+  {
+    for (uint i = 1; i <= D_; ++i)
+    {
+      BOX_[i][i - 1] = 1.0;
+    }
+  };
+
+  /// Copy constructor
+  BoundingBox(BoundingBox const& other) :
+    D_(other.D_),
+    BOX_(new Point[D_+1])
   {
     for (uint i = 1; i <= D_; ++i)
     {
@@ -61,6 +72,10 @@ public:
   {
     if(this != &other)
     {
+      if (this->D_ != other.D_)
+      {
+        error("BoundingBox : trying to assign with different dimensions");
+      }
       for (uint i = 0; i <= D_; ++i)
       {
         BOX_[i] = other.BOX_[i];
@@ -114,7 +129,7 @@ public:
     return *this;
   }
 
-  /// Access i-the point
+  /// Return bounding box centroid
   Point centroid() const
   {
     Point c(BOX_[0]);
@@ -128,20 +143,18 @@ public:
   // Display information
   void disp() const
   {
-    message("BoundingBox");
-    begin(  "-----------");
+    section("BoundingBox");
     message("Dimension : %d", D_);
-    begin(  "Points    :");
+    section("Points");
     for (uint i = 0; i <= D_; ++i)
     {
       cout << BOX_[i] << endl;
     }
-    end();
-    begin(  "Centroid  :");
+    endblock();
+    section("Centroid");
     cout << this->centroid() << endl;
-    end();
-    end();
-    skip();
+    endblock();
+    endblock();
   }
 
 private:

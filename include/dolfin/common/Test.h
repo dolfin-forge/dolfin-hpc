@@ -39,7 +39,7 @@ public:
   Test(int argc, char *argv[]);
 
   ///
-  Test();
+  Test(std::string const& dir = "");
 
   ///
   void print_args();
@@ -63,6 +63,7 @@ private:
   //--- ATTRIBUTES ------------------------------------------------------------
 
   bool btest_;
+  std::string const dir_;
   Array<std::pair<std::string, real> > timings_;
   real total_;
   uint padding_;

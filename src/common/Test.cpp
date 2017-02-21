@@ -7,6 +7,7 @@
 #include <dolfin/common/Test.h>
 
 #include <dolfin/common/timing.h>
+#include <dolfin/common/system.h>
 #include <dolfin/log/log.h>
 #include <dolfin/log/LogManager.h>
 #include <dolfin/main/init.h>
@@ -22,6 +23,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Test::Test(int argc, char *argv[]) :
     btest_(false),
+    dir_(""),
     total_(0.0),
     padding_(0)
 {
@@ -29,12 +31,17 @@ Test::Test(int argc, char *argv[]) :
 }
 
 //-----------------------------------------------------------------------------
-Test::Test() :
+Test::Test(std::string const& dir) :
     btest_(false),
+    dir_(dir),
     total_(0.0),
     padding_(0)
 {
   init(0, NULL);
+  if(!dir_.empty())
+  {
+    pushd(dir_);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -115,6 +122,10 @@ void Test::end()
 Test::~Test()
 {
   cout << "Total time: " << total_ << " seconds" << endl;
+  if(!dir_.empty())
+  {
+    popd();
+  }
   dolfin_finalize();
 }
 

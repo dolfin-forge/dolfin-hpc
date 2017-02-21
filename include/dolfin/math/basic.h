@@ -198,23 +198,22 @@ static inline real percent(uint n, uint d)
 }
 
 /// Return sequence of natural numbers ranging from begin to (excluding) end
-static inline Array<uint> range(uint begin, uint end, uint step = 1)
+template<class Iterator, class T>
+static inline void range(Iterator begin, Iterator end, T v = T(), int s = 1)
 {
-  uint const N = std::floor(std::fabs(end - begin) / real(step)) ;
-  if (N == 0)
+  while (begin != end)
   {
-    Array<uint> ret;
-    return ret;
+    *begin++ = v;
+    for (int i = 0; i < s; ++i) ++v;
   }
-  else
+}
+template<class T>
+static inline void range(T* begin, T* end, T v = T(), int s = 1)
+{
+  while (begin != end)
   {
-    Array<uint> ret(N);
-    ret[0] = begin;
-    for (uint i = 1; i < N; ++i)
-    {
-      ret[i] = ret[i - 1] + step;
-    }
-    return ret;
+    *begin++ = v;
+    for (int i = 0; i < s; ++i) ++v;
   }
 }
 

@@ -78,7 +78,7 @@ void RefinementManager::init()
   }
 
   // Generate facet - cell connectivity if not generated
-  mesh_.init(tdim - 1, tdim);
+  if (tdim > 0) mesh_.init(mesh_.type().facet_dim(), tdim);
 
   // No further step is required in serial
   if (!is_distributed_)

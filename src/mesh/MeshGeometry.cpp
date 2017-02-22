@@ -42,6 +42,7 @@ MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
     dim_(0),
     size_(0),
     coordinates_(NULL),
+    abs_tol_(NULL),
     timestamp_(0)
 {
   *this = geometry;

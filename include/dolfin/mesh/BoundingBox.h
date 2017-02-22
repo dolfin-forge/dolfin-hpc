@@ -115,6 +115,16 @@ public:
     return *this;
   }
 
+  /// Scaling along axis
+  BoundingBox& scale(uint axis, real const a)
+  {
+    for (uint i = 0; i <= D_; ++i)
+    {
+      BOX_[i][axis] *= a;
+    }
+    return *this;
+  }
+
   /// Dilatation
   BoundingBox& operator*=(Point const& p)
   {

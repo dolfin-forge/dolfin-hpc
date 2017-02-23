@@ -17,6 +17,16 @@ StructuredGrid::StructuredGrid(CellType const& type, uint N) :
 }
 
 //-----------------------------------------------------------------------------
+StructuredGrid::StructuredGrid(CellType const& type, uint N, BoundingBox bbox) :
+    Mesh(),
+    bbox_(bbox),
+    n_(N)
+
+{
+  init(type);
+}
+
+//-----------------------------------------------------------------------------
 StructuredGrid::~StructuredGrid()
 {
 }
@@ -32,19 +42,18 @@ void StructuredGrid::init(CellType const& type)
   type.disp();
 
   //
-  uint const dim = type.dim();
-  MeshEditor editor(*this, type, dim);
+  uint const tdim = type.dim();
+  uint const gdim = type.space_dim();
+  MeshEditor editor(*this, type, gdim);
   // Number of cells in each direction
-  uint n[EuclideanSpace::MAX_DIMENSION] = { 0 };
-  for (uint i = 0; i < dim; ++i)
-  {
-    n[i] = n_; // isotropic
-  }
+  uint n[EuclideanSpace::MAX_DIMENSION] = { 1 };
+  for (uint i = 0; i < tdim; ++i) { n[i] = n_; } // isotropic
+
   // Number of vertices in each direction
-  uint m[EuclideanSpace::MAX_DIMENSION] = { 0 };
+  uint m[EuclideanSpace::MAX_DIMENSION] = { 1 };
   uint num_verts = 1;
   uint num_bricks = 1;
-  for (uint i = 0; i < dim; ++i)
+  for (uint i = 0; i < tdim; ++i)
   {
     num_verts *= (n[i] + 1);
     num_bricks *= n[i];
@@ -58,7 +67,7 @@ void StructuredGrid::init(CellType const& type)
 
   // Create vertices
   uint vertex = 0;
-  for (uint d = 0; d < dim; ++d)
+  for (uint d = 0; d < tdim; ++d)
   {
     i[d] = 0;
     h[d] = 1.0 / static_cast<real>(n[d]);
@@ -69,7 +78,7 @@ void StructuredGrid::init(CellType const& type)
   {
     editor.add_vertex(vertex++, x);
     x[0] = bbox_[0][0] + (vertex % m[0]) * h[0];
-    for (uint d = 1; d < dim; ++d)
+    for (uint d = 1; d < tdim; ++d)
     {
       if (vertex % m[d - 1] == 0)
       {
@@ -91,6 +100,22 @@ void StructuredGrid::init(CellType const& type)
   uint const v7 = v3 + (n[0] + 1) * (n[1] + 1);
   switch (type.cellType())
     {
+    case CellType::point:
+      {
+        editor.init_cells(num_bricks);
+        for (uint k = 0; k < n[2]; ++k)
+        {
+          for (uint j = 0; j < n[1]; ++j)
+          {
+            for (uint i = 0; i < n[0]; ++i)
+            {
+              uint cv = k * (n[1] + 1) * (n[0] + 1) + j * (n[0] + 1) + i;
+              editor.add_cell(cell++, &cv);
+            }
+          }
+        }
+      }
+      break;
     case CellType::interval:
       {
         uint cv[2] = { v0, v1 };

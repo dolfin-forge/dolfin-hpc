@@ -12,6 +12,7 @@ namespace dolfin
 {
 
 class Cell;
+class Mesh;
 class MeshEditor;
 
 /**
@@ -29,6 +30,8 @@ public:
   ///
   RefinementPattern() {};
 
+  ///--- INTERFACE ------------------------------------------------------------
+
   /// Return if the cell to which the pattern applies is valid
   virtual bool pattern_applies(Cell& cell) const = 0;
 
@@ -44,6 +47,14 @@ public:
 
   /// Return if refinement pattern requires entities of given dimension
   virtual bool refinement_needs_entities(uint dim) const = 0;
+
+  ///--------------------------------------------------------------------------
+
+  /// Return the number of vertices after refinement
+  uint num_refined_vertices(Mesh const& mesh) const;
+
+  /// Return the number of cells after refinement
+  uint num_refined_cells(Mesh const& mesh) const;
 
 protected:
 

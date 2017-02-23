@@ -46,19 +46,19 @@ void glob(std::string const& pattern, Array<std::string>& matches)
 void mkdir(std::string const& dirpath)
 {
   struct stat sb;
-  if (::stat(dirpath.c_str(), &sb) < 0)
+  if (dolfin::MPI::rank() == 0 && (::stat(dirpath.c_str(), &sb) < 0)
+        && ::mkdir(dirpath.c_str(), S_IRWXU) < 0)
   {
-    if (dolfin::MPI::rank() == 0)
-    {
-      if (::mkdir(dirpath.c_str(), S_IRWXU) < 0)
-      {
-        error("Unable to create directory: '%s'", dirpath.c_str());
-      }
-    }
+    error("Unable to create directory: '%s'", dirpath.c_str());
   }
 #if HAVE_MPI
   MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
 #endif
+  if (dolfin::MPI::rank() > 0 && (::stat(dirpath.c_str(), &sb) < 0)
+        && ::mkdir(dirpath.c_str(), S_IRWXU) < 0)
+  {
+    error("Unable to create directory: '%s'", dirpath.c_str());
+  }
 }
 //-----------------------------------------------------------------------------
 bool stat(std::string const& dirpath)
@@ -123,7 +123,7 @@ void dirs(int n, std::string& dirname)
   // Get directory from top of the stack
   if(n >= 0)
   {
-    if(dirstack().size() <= n)
+    if(dirstack().size() <= uint(n))
     {
       error("Invalid access to directory stack");
     }
@@ -132,7 +132,7 @@ void dirs(int n, std::string& dirname)
   // Get directory from bottom of the stack
   else
   {
-    if(dirstack().size() < n)
+    if(dirstack().size() < uint(n))
     {
       error("Invalid access to directory stack");
     }

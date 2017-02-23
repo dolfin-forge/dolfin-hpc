@@ -12,13 +12,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 
-#ifdef HAVE_LIBGEOM
-namespace libgeom
-{
-  class Geometry;
-}
-#endif
-
 namespace dolfin
 {
   class Mesh;
@@ -34,20 +27,6 @@ namespace dolfin
                        real tb = 0.0, 
                        real ts = 0.0,
                        bool balance = true);
-    
-#ifdef HAVE_LIBGEOM
-    /// Refine simplicial mesh locally by recursive edge bisection. Including Boundary smoothing
-    static void refine(Mesh& mesh, 
-                       MeshFunction<bool>& cell_marker,
-                       libgeom::Geometry& geom,
-                       MeshFunction<int>& patch_id_list,
-                       MeshFunction<float>& bnd_u,
-                       MeshFunction<float>& bnd_v,
-                       real tf = 0.0, 
-                       real tb = 0.0, 
-                       real ts = 0.0,
-                       bool balance = true);
-#endif
   };
 }
 #endif

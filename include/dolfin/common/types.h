@@ -79,6 +79,19 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
+  /// Facility to compare arrays
+template <class T> bool cmp(size_t N, T const * x0, T const * x1)
+{
+  for (size_t ii = 0; ii < N; ++ii)
+  {
+    if (x0[ii] != x1[ii])
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 /// Facility to compare object through pointers
 template<class T> bool objptrcmp(T const * p0, T const * p1)
 {

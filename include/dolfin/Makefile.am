@@ -5,6 +5,7 @@ nobase_pkginclude_HEADERS = \
 				adaptivity/AdaptiveRefinement.h\
 				adaptivity/SpaceTimeFunction.h\
 				config/dolfin_config.h\
+				common/assert.h\
 				common/constants.h\
 				common/dolfin_common.h\
 				common/byteswap.h\

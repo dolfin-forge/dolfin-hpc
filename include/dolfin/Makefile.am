@@ -148,6 +148,7 @@ nobase_pkginclude_HEADERS = \
 				main/dolfin_main.h\
 				main/init.h\
 				main/MPI.h\
+				main/Startup.h\
 				main/SubSystemsManager.h\
 				math/basic.h\
 				math/dolfin_math.h\

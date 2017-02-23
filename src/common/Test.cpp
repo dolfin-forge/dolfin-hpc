@@ -22,6 +22,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 Test::Test(int argc, char *argv[]) :
+    Startup(argc, argv),
     btest_(false),
     dir_(""),
     total_(0.0),
@@ -32,6 +33,7 @@ Test::Test(int argc, char *argv[]) :
 
 //-----------------------------------------------------------------------------
 Test::Test(std::string const& dir) :
+    Startup(0, NULL),
     btest_(false),
     dir_(dir),
     total_(0.0),
@@ -47,8 +49,6 @@ Test::Test(std::string const& dir) :
 //-----------------------------------------------------------------------------
 void Test::init(int argc, char *argv[])
 {
-  dolfin_init(argc, argv);
-
   int flag;
   int i = 0;
   while (-1 != (flag = getopt(argc, argv, ":d:m:b")))
@@ -126,7 +126,6 @@ Test::~Test()
   {
     popd();
   }
-  dolfin_finalize();
 }
 
 //-----------------------------------------------------------------------------

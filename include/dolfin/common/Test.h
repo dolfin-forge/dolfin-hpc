@@ -7,7 +7,8 @@
 #ifndef __DOLFIN_TEST_H
 #define __DOLFIN_TEST_H
 
-#include <dolfin/common/types.h>
+#include <dolfin/main/Startup.h>
+
 #include <dolfin/common/Array.h>
 
 #include <iostream>
@@ -16,7 +17,7 @@
 namespace dolfin
 {
 
-class Test
+class Test : public Startup
 {
 
   struct Args

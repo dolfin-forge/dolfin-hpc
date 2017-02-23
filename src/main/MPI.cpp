@@ -31,7 +31,7 @@ MPI::Context MPI::ctx_;
 
 #if HAVE_MPI
 #define DOLFIN_MPI_SUBSYSTEM_INIT \
-  if (!init_) { SubSystemsManager::initMPI(); }
+  if (!init_) { SubSystemsManager::MPI::init(); }
 #endif
 
 #define DOLFIN_MPI_UNIMPLEMENTED \
@@ -161,6 +161,13 @@ void MPI::initComm(int ngroups)
 #endif
 
   init_ = true;
+}
+//-----------------------------------------------------------------------------
+void MPI::finiComm()
+{
+  MPI_Comm_free(&MPI::DOLFIN_COMM);
+  MPI_Comm_free(&MPI::DOLFIN_COMM_SELF);
+  MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD);
 }
 //-----------------------------------------------------------------------------
 uint MPI::seed()

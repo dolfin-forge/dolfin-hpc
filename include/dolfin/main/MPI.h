@@ -121,6 +121,7 @@ public:
 
   /// Setup DOLFIN_COMM MPI communicator
   static void initComm(int ngroups = 0);
+  static void finiComm();
 
   static Communicator DOLFIN_COMM_WORLD;
   static Communicator DOLFIN_COMM_SELF;

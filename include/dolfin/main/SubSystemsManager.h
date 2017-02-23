@@ -2,72 +2,140 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Niclas Jansson 2009-2015.
+// Modified by Aurelien Larcher 2017.
 //
 // First added:  2008-01-07
-// Last changed: 2015-01-30
+// Last changed: 2017-02-23
 
 #ifndef __DOLFIN_SUB_SYSTEMS_MANAGER_H
 #define __DOLFIN_SUB_SYSTEMS_MANAGER_H
 
+#include <dolfin/common/types.h>
+
 namespace dolfin
 {
 
-  /// This is a singleton class which manages the initialisation and
-  /// finalisation of various sub systems, such as MPI and PETSc.
+/// This is a singleton class which manages the initialization and
+/// finalization of various sub systems, such as MPI and PETSc.
 
-  class SubSystemsManager
+class SubSystemsManager
+{
+
+  // Subsystem state mask
+  enum Type { mpi       = 1,
+              petsc     = 2,
+              petscmpi  = 4,
+              janpack   = 8,
+              zoltan    = 16,
+              slepc     = 32 };
+
+  // Singleton instance
+  static SubSystemsManager sub_systems_manager;
+
+public:
+
+  //-------------------------------------------------------------------------
+  static int start(int argc = 0, char* argv[] = NULL, uint n = 0)
   {
-  public:
+    return sub_systems_manager.init(argc, argv, n);
+  }
 
-    /// Initialise MPI and return if initialization
-    static bool initMPI(int argc = 0, char* argv[] = 0, uint n = 0);
+  //-------------------------------------------------------------------------
+  struct MPI
+  {
+    static SubSystemsManager::Type const flag = mpi;
 
-    /// Initialize PETSc without command-line arguments
-    static bool initPETSc();
-
-    /// Initialize PETSc with command-line arguments
-    static bool initPETSc(int argc, char* argv[], bool cmd_line_args = true);
-
-    /// Initialize Zoltan without command-line arguments
-    static bool initZoltan();
-
-    /// Initialize Zoltan without command-line arguments
-    static bool initZoltan(int argc, char* argv[]);
+    /// Initialize MPI
+    static bool init(int argc = 0, char* argv[] = NULL, uint n = 0);
 
     /// Finalize MPI
-    static void finalizeMPI();
+    static bool fini();
 
-    /// Finalize PETSc
-    static void finalizePETSc();
+    // Check if MPI has been initialized
+    static bool initialized();
 
-    // Check if MPI has been initialised (returns true if MPI has been
-    //   initialised, even if it is later finalised)
-    static bool MPIinitialized();
-
-  private:
-
-    // Constructor
-    SubSystemsManager();
-
-    // Copy construtor
-    SubSystemsManager(SubSystemsManager const& sub_sys_manager);
-
-    // Destructor
-    ~SubSystemsManager();
-
-    // Singleton instance
-    static SubSystemsManager sub_systems_manager;
-
-    // Static state variables
-    static uint mpi_init_sema_;
-
-    // State variables
-    bool petsc_initialized;
-    bool petsc_controls_mpi;
-    bool zoltan_initialized;
-
+    ///
+    static int sema;
   };
 
-}
+  //-------------------------------------------------------------------------
+  struct PETSc
+  {
+    static SubSystemsManager::Type const flag = petsc;
 
-#endif
+    /// Initialize PETSc with command-line arguments
+    static bool init(int argc = 0, char* argv[] = NULL);
+
+    /// Finalize PETSc
+    static bool fini();
+
+    ///
+    static int sema;
+  };
+
+  //-------------------------------------------------------------------------
+  struct PETScMPI
+  {
+    static SubSystemsManager::Type const flag = petscmpi;
+  };
+
+  //-------------------------------------------------------------------------
+  struct JANPACK
+  {
+    static SubSystemsManager::Type const flag = janpack;
+  };
+
+  //-------------------------------------------------------------------------
+  struct Zoltan
+  {
+    static SubSystemsManager::Type const flag = zoltan;
+
+    /// Initialize PETSc with command-line arguments
+    static bool init(int argc = 0, char* argv[] = NULL);
+
+    /// Finalize PETSc
+    static bool fini();
+
+    ///
+    static int sema;
+  };
+
+  //-------------------------------------------------------------------------
+  struct SLEPc
+  {
+    static SubSystemsManager::Type const flag = slepc;
+  };
+
+  //-------------------------------------------------------------------------
+  void disp() const;
+
+private:
+
+  int init(int argc = 0, char* argv[] = NULL, uint n = 0);
+  int fini();
+
+  // Constructor
+  SubSystemsManager();
+
+  // Copy constructor
+  SubSystemsManager(SubSystemsManager const& other);
+
+  // Destructor
+  ~SubSystemsManager();
+
+  /// State control
+  void init(SubSystemsManager::Type s) { state_ = (state_ & s) + (state_ | s); }
+
+  void fini(SubSystemsManager::Type s) { state_ &= (1 ^ s); }
+
+  bool iset(SubSystemsManager::Type s) const { return (state_ & s) == s; }
+
+  // State variable
+  int count_;
+  int state_;
+
+};
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_SUB_SYSTEMS_MANAGER_H */

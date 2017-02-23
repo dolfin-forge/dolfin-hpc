@@ -16,9 +16,6 @@ namespace dolfin
   /// should not be needed in most cases since the initialization is
   /// otherwise handled automatically.
   void dolfin_init(int argc = 0, char* argv[] = NULL);
-  void dolfin_fini();
-
-  ///
   void dolfin_finalize();
 
 }

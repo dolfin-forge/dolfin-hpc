@@ -53,55 +53,29 @@ void dolfin::dolfin_init(int argc, char * argv[])
     }
   }
 
-  //--- Initialize subsystems
+  //--- Initialize subsystems and print banner
 
-  bool const first_init_call = !SubSystemsManager::MPIinitialized();
-
-#ifdef HAVE_MPI
-  SubSystemsManager::initMPI(argc, argv, n);
-#endif
-
-  // Cannot use MPI functions before initComm
-  if (first_init_call && MPI::rank() > 0)
+  int init_count = SubSystemsManager::start(argc, argv, n);
+  if (init_count == 1)
   {
-    dolfin::LogManager::logger().silence();
-  }
-  if (first_init_call && MPI::global_rank() == 0)
-  {
-    message("Initializing DOLFIN version %s : running on %d %s.\n",
-            DOLFIN_VERSION, dolfin::MPI::global_size(),
-            (dolfin::MPI::global_size() > 1 ? "processes" : "process"));
-  }
-  if (first_init_call && MPI::num_groups() > 1)
-  {
-    message("Group %d/%d : %d %s", dolfin::MPI::group_id() + 1,
-            dolfin::MPI::num_groups(), dolfin::MPI::size(),
-            (dolfin::MPI::size() > 1 ? "processes" : "process"));
-    if (MPI::group_id() > 0)
+    if (MPI::global_rank() == 0)
+    {
+      message("Initializing DOLFIN version %s : running on %d %s (%u %s)\n",
+              DOLFIN_VERSION,
+              dolfin::MPI::global_size(),
+              dolfin::MPI::global_size() > 1 ? "processes" : "process",
+              dolfin::MPI::num_groups(),
+              dolfin::MPI::num_groups()  > 1 ? "groups"    : "group");
+    }
+    else
     {
       dolfin::LogManager::logger().silence();
     }
   }
 
-#ifdef HAVE_PETSC
-  SubSystemsManager::initPETSc(argc, argv);
-#endif
-
-#ifdef HAVE_ZOLTAN
-  SubSystemsManager::initZoltan(argc, argv);
-#endif
-
-}
-//-----------------------------------------------------------------------------
-void dolfin::dolfin_fini()
-{
-  // Finalize subsystems in the correct order
-  SubSystemsManager::finalizePETSc();
-  SubSystemsManager::finalizeMPI();
 }
 //-----------------------------------------------------------------------------
 void dolfin::dolfin_finalize()
 {
-  dolfin_fini();
 }
 //-----------------------------------------------------------------------------

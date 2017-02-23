@@ -82,8 +82,8 @@ public:
     Cell c0(mesh, 0);
     UFCCell ufc_cell(c0);
 
-    uint const pe_size = MPI::numProcesses();
-    uint const rank = MPI::processNumber();
+    uint const pe_size = MPI::size();
+    uint const rank = MPI::rank();
 
     uint const tdim = mesh.topology().dim();
     uint const local_dim = ufc_dofmap.local_dimension();
@@ -98,8 +98,8 @@ public:
     // - non matching ghosts with consequence of accessing the wrong dof
     // - different local size which leads to crash
     // We have to remove the randomness until a better solution is found.
-    // srand((uint)time(0) + MPI::processNumber());
-    std::srand(MPI::processRandomSeed());
+    // srand((uint)time(0) + MPI::rank());
+    std::srand(MPI::seed());
 
     // List shared dofs and assign vote
     //Array<uint> * sendbuf = new Array<uint>[pe_size];
@@ -136,7 +136,7 @@ public:
     uint dst;
     uint max_recv;
     uint local_size = sendbuf.size();
-    MPI::numGlobalMax(local_size, max_recv);
+    MPI::allReduceMax(local_size, max_recv);
     uint *recvbuf = new uint[max_recv];
     int recv_count;
     for (uint j = 1; j < pe_size; ++j)
@@ -193,7 +193,7 @@ public:
 
     uint const range = owned.size();
     uint local_index = 0;
-    MPI::processOffset(range, local_index);
+    MPI::offset(range, local_index);
     uint const rank_offset = local_index;
     set_range(rank_offset, range);
 

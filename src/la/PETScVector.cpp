@@ -99,7 +99,7 @@ void PETScVector::init(uint N, bool distributed)
   }
 
   // Create vector
-  if (MPI::numProcesses() > 1 && distributed)
+  if (MPI::size() > 1 && distributed)
   {
     is_distributed = true;
     //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
@@ -446,7 +446,7 @@ real PETScVector::max() const
 void PETScVector::disp(uint precision) const
 {
   section("PETScVector");
-  if(MPI::numProcesses() > 1 && is_distributed)
+  if(MPI::size() > 1 && is_distributed)
   {
     VecView(x, PETSC_VIEWER_STDOUT_WORLD);
   }

@@ -437,8 +437,8 @@ void Function::interpolate_vertex_values(real* values) const
 
     if (mesh_->is_distributed())
     {
-      uint const rank = dolfin::MPI::processNumber();
-      uint const pe_size = dolfin::MPI::numProcesses();
+      uint const rank = dolfin::MPI::rank();
+      uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
       Array<real> * sendbuf = new Array<real> [pe_size];
       // Send sum of local weights

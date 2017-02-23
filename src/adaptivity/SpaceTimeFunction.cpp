@@ -352,7 +352,7 @@ std::string SpaceTimeFunction::getFileName(std::string basename, uint sample)
 #ifdef ENABLE_MPIIO
   filename << ".bin";
 #else
-  filename << "_" << MPI::processNumber() << ".bin";
+  filename << "_" << MPI::rank() << ".bin";
 #endif
   return filename.str();
 }

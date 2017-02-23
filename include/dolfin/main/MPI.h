@@ -3,6 +3,7 @@
 //
 // Modified by Garth N. Wells, 2008.
 // Modified by Niclas Jansson, 2009-2010.
+// Modified by Aurelien Larcher, 2016-2017.
 //
 // First added:  2007-11-30
 // Last changed: 2010-06-08
@@ -10,16 +11,16 @@
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
 
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/types.h>
 
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 
-#include <dolfin/common/types.h>
 
 namespace dolfin
 {
+
 /// This class provides utility functions for easy access of the number of
 /// processes and current process number.
 
@@ -27,52 +28,84 @@ class Mesh;
 
 class MPI
 {
+
 public:
 
-  /// Return process number
-  static uint processNumber();
+#ifdef HAVE_MPI
+  typedef MPI_Comm  Communicator;
+#else
+  typedef int       Communicator;
+#endif
 
-  /// Return number of processes
-  static uint numProcesses();
+  /*
+   *  Local communicator
+   */
 
-  /// Return group number
-  static uint groupNumber();
+  /// Return process rank in xl communicator
+  static uint rank();
 
-  /// Return number of groups
-  static uint numGroups();
-
-  /// Return process number in world
-  static uint processGlobalNumber();
-
-  /// Return number of processes in world
-  static uint numGlobalProcesses();
+  /// Return xl communicator size
+  static uint size();
 
   /// Return if the given rank is valid
-  static bool processIsValid(uint rank);
+  static bool is_valid_rank(uint rank);
 
-  /// Return seed value for current rank
-  static uint processRandomSeed();
+  /// Return if the current process is the root process in xl communicator
+  static bool is_root();
 
-  /// Get process offset given number of local elements
-  static void processOffset(uint local, uint& offset);
+  /// Return group identifier
+  static uint group_id();
+
+  /*
+   *  Global communicator
+   */
+
+  /// Return process rank in xg communicator
+  static uint global_rank();
+
+  /// Return xg communicator size
+  static uint global_size();
+
+  /// Return if the current process is the root process in xg communicator
+  static bool is_global_root();
+
+  /// Return number of groups in xg communicator
+  static uint num_groups();
+
+  /*
+   *  Global communicator
+   */
+
+  /// Return seed value for current process
+  static uint seed();
 
   ///
-  static void numGlobalSum(uint local, uint& global);
+  static
+  void offset(uint xl, uint& offset, Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void numGlobalMin(uint local, uint& global);
+  static
+  void allReduceSum(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void numGlobalMax(uint local, uint& global);
+  static
+  void allReduceMin(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceSum(real local, real& global);
+  static
+  void allReduceMax(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceMin(real local, real& global);
+  static
+  void allReduceSum(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
-  static void AllReduceMax(real local, real& global);
+  static
+  void allReduceMin(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
+
+  ///
+  static
+  void allReduceMax(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
   static void startTimer();
@@ -87,31 +120,31 @@ public:
   static real stopTimer(dolfin::real& stime);
 
   /// Setup DOLFIN_COMM MPI communicator
-  static void initComm(int n = 0);
+  static void initComm(int ngroups = 0);
 
-  /// Reorder MPI communicator
-  static void reorderComm(Mesh& mesh);
-
-#ifdef HAVE_MPI
-  static MPI_Comm DOLFIN_COMM_WORLD;
-  static MPI_Comm DOLFIN_COMM;
-#else
-  static int DOLFIN_COMM_WORLD;
-  static int DOLFIN_COMM;
-#endif
+  static Communicator DOLFIN_COMM_WORLD;
+  static Communicator DOLFIN_COMM_SELF;
+  static Communicator DOLFIN_COMM;
 
 private:
 
-  static dolfin::real start_time;
-  static int this_process_world;
-  static int num_processes_world;
-  static int this_group;
-  static int num_groups;
-  static int this_process;
-  static int num_processes;
-  static int this_seed;
-  static bool _dolfin_comm;
-};
-}
+  static real time_;
+  static bool init_;
 
-#endif
+  typedef struct {
+    int   global_rank;
+    int   global_size;
+    int   group_cnt;
+    int   group_idx;
+    int   rank;
+    int   size;
+    int   seed;
+  } Context;
+
+  static Context ctx_;
+
+};
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_MPI_H */

@@ -48,7 +48,7 @@ void mkdir(std::string const& dirpath)
   struct stat sb;
   if (::stat(dirpath.c_str(), &sb) < 0)
   {
-    if (dolfin::MPI::processNumber() == 0)
+    if (dolfin::MPI::rank() == 0)
     {
       if (::mkdir(dirpath.c_str(), S_IRWXU) < 0)
       {

@@ -239,7 +239,7 @@ void PETScKrylovSolver::init(uint M, uint N)
 
   // Set up solver environment
 #ifdef HAVE_MPI
-  if (MPI::numProcesses() > 1) KSPCreate(MPI::DOLFIN_COMM, &ksp);
+  if (MPI::size() > 1) KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else KSPCreate(PETSC_COMM_SELF, &ksp);
 #else
   KSPCreate(PETSC_COMM_SELF, &ksp);

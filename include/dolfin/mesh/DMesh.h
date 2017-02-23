@@ -127,7 +127,7 @@ public:
   inline void propagate_refinement(std::vector<Propagation>& propagated,
                                    bool& empty)
   {
-    if (MPI::numProcesses() & (MPI::numProcesses() - 1)) propagate_naive(
+    if (MPI::size() & (MPI::size() - 1)) propagate_naive(
         propagated, empty);
     else propagate_hypercube(propagated, empty);
   }

@@ -59,7 +59,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  w_avg = (real) w_sum / (real) MPI::numProcesses();
+  w_avg = (real) w_sum / (real) MPI::size();
 
   const real  threshold = 1.04;
   real imbalance = (real) w_max  / (real) w_avg  ;
@@ -73,7 +73,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     {
 //      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //      part->init(mesh, mesh.topology().dim());
-//      *part = MPI::processNumber();
+//      *part = MPI::rank();
     }
 
     return;
@@ -120,7 +120,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
     MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-    w_avg = (real) w_sum / (real) MPI::numProcesses();
+    w_avg = (real) w_sum / (real) MPI::size();
     real new_imbalance = (real)w_max  / (real)w_avg  ;
     message("%0.2f percent load imbalance after repartitioning.",
 	    (new_imbalance - 1.0) * 100);
@@ -171,7 +171,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  w_avg = (real) w_sum / (real) MPI::numProcesses();
+  w_avg = (real) w_sum / (real) MPI::size();
 
   const real  threshold = 1.04;
   real imbalance = (real) w_max  / (real) w_avg  ;
@@ -184,7 +184,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     {
 //      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //      part->init(mesh, mesh.topology().dim());
-//      *part = MPI::processNumber();
+//      *part = MPI::rank();
     }
 
     return;
@@ -235,7 +235,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
     MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-    w_avg = (real) w_sum / (real) MPI::numProcesses();
+    w_avg = (real) w_sum / (real) MPI::size();
     real new_imbalance = (real)w_max  / (real)w_avg  ;
     message("%0.2f percent load imbalance after repartitioning.",
             (new_imbalance - 1.0) * 100);
@@ -293,7 +293,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  w_avg = (real) w_sum / (real) MPI::numProcesses();
+  w_avg = (real) w_sum / (real) MPI::size();
 
   const real  threshold = 1.04;
   real imbalance = (real) w_max  / (real) w_avg  ;
@@ -306,7 +306,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     {
 //      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //      part->init(mesh, mesh.topology().dim());
-//      *part = MPI::processNumber();
+//      *part = MPI::rank();
     }
 
     return;
@@ -362,7 +362,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
     MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-    w_avg = (real) w_sum / (real) MPI::numProcesses();
+    w_avg = (real) w_sum / (real) MPI::size();
     real new_imbalance = (real)w_max  / (real)w_avg  ;
     message("%0.2f percent load imbalance after repartitioning.",
             (new_imbalance - 1.0) * 100);
@@ -413,7 +413,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-  w_avg = (real) w_sum / (real) MPI::numProcesses();
+  w_avg = (real) w_sum / (real) MPI::size();
 
   const real  threshold = 1.04;
   real imbalance = (real) w_max  / (real) w_avg  ;
@@ -426,7 +426,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     {
 //      MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //      part->init(mesh, mesh.topology().dim());
-//      *part = MPI::processNumber();
+//      *part = MPI::rank();
     }
 
     return;
@@ -483,7 +483,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
     MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
     MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 
-    w_avg = (real) w_sum / (real) MPI::numProcesses();
+    w_avg = (real) w_sum / (real) MPI::size();
     real new_imbalance = (real)w_max  / (real)w_avg  ;
     message("%0.2f percent load imbalance after repartitioning.",
             (new_imbalance - 1.0) * 100);
@@ -608,8 +608,8 @@ void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
 void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
 					uint* max_sendrecv)
 {
-  uint pe_size = MPI::numProcesses();
-  uint rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint rank = MPI::rank();
 
   // Construct my row in the similarity matrix
   uint *sim_row = new uint[pe_size];
@@ -694,7 +694,7 @@ bool LoadBalancer::computational_gain(Mesh& mesh,
                                       uint max_sendrecv,
                                       real tf, real tb, real ts)
 {
-  uint pe_size = MPI::numProcesses();
+  uint pe_size = MPI::size();
 
   uint w_old = 0;
   uint *tmp_w = new uint[pe_size];
@@ -772,8 +772,8 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
   uint *index = new uint[m];
   uint *tmp = new uint[m];
 
-  uint rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint rank = MPI::rank();
+  uint pe_size = MPI::size();
 
   uint *recvbuff = new uint[2 * pe_size];
   Array<uint> *sendbuff = new Array<uint>[pe_size];

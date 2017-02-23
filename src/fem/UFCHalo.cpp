@@ -221,8 +221,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   }
 
   //
-  uint rank = dolfin::MPI::processNumber();
-  uint pe_size = dolfin::MPI::numProcesses();
+  uint rank = dolfin::MPI::rank();
+  uint pe_size = dolfin::MPI::size();
 
   // Loop over shared facets to collect data following shared iterator ordering
   uint const num_cell_vertices = mesh_.type().num_entities(0);

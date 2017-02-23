@@ -124,7 +124,7 @@ void TimeSeries::eval(real t)
 //-----------------------------------------------------------------------------
 void TimeSeries::write(real t)
 {
-  if (MPI::processNumber() > 0)
+  if (MPI::rank() > 0)
   {
     return;
   }
@@ -217,7 +217,7 @@ void TimeSeries::disp() const
 void TimeSeries::loadData(std::string const& filename)
 {
   Array<real> times;
-  if ((MPI::processNumber() == 0) && (access(filename_.c_str(), F_OK) == 0))
+  if ((MPI::rank() == 0) && (access(filename_.c_str(), F_OK) == 0))
   {
     data_file_.open(filename_.c_str(), std::ios_base::in);
     // Get number of values per line
@@ -253,7 +253,7 @@ void TimeSeries::loadData(std::string const& filename)
   }
 
   // Exchange data
-  if (MPI::numProcesses() > 1)
+  if (MPI::size() > 1)
   {
 #ifdef HAVE_MPI
     // Value size and number of samples

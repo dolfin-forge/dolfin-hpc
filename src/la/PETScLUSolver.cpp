@@ -27,7 +27,7 @@ PETScLUSolver::PETScLUSolver()
 {
   // Set up solver environment to use only preconditioner
 #ifdef HAVE_MPI
-  if(MPI::numProcesses() > 1)
+  if(MPI::size() > 1)
     KSPCreate(MPI::DOLFIN_COMM, &ksp);
   else
     KSPCreate(PETSC_COMM_SELF, &ksp);
@@ -112,7 +112,7 @@ dolfin::uint PETScLUSolver::solve(const PETScMatrix& A,
     
     // Make sure MATMPIAIJ matrices has been converted
     _mat_type = mat_type;    
-    if( MPI::numProcesses() > 1 && _mat_type == MATMPIAIJ)
+    if( MPI::size() > 1 && _mat_type == MATMPIAIJ)
       error("No support for symbolic LU on matrix type mpiaij."
 	    "Installation of MUMPS is recomended.");
 

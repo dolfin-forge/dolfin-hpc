@@ -204,7 +204,7 @@ void write_facets(std::string name, Mesh& mesh, std::string set,
 {
   message("Number of " + set + " facets = %d", S.size());
   std::stringstream ss;
-  ss << name << "_" + set + "facets" << dolfin::MPI::numProcesses() << "P.pvd";
+  ss << name << "_" + set + "facets" << dolfin::MPI::size() << "P.pvd";
   MeshFunction<bool> mf(mesh, 0);
   mesh.init(mesh.topology().dim() - 1, 0);
   for(_set<uint>::const_iterator it = S.begin(); it != S.end(); ++it)
@@ -223,7 +223,7 @@ void write_facets(std::string name, Mesh& mesh, std::string set,
 void write_mesh(std::string name, Mesh& mesh)
 {
   std::stringstream ss0;
-  ss0 << name << "_mesh_" << dolfin::MPI::numProcesses() << "P.pvd";
+  ss0 << name << "_mesh_" << dolfin::MPI::size() << "P.pvd";
   File f0(ss0.str());
   f0 << mesh;
 
@@ -236,8 +236,8 @@ void write_mesh(std::string name, Mesh& mesh)
     write_facets(name, mesh, "I"+ssi.str(), mesh.periodic_mappings()[i]->Ifacets());
 
     std::stringstream ss1;
-    ss1 << name << "_Gmesh" << ssi.str() << "_" << dolfin::MPI::numProcesses()
-        << "P_" << dolfin::MPI::processNumber() << ".pvd";
+    ss1 << name << "_Gmesh" << ssi.str() << "_" << dolfin::MPI::size()
+        << "P_" << dolfin::MPI::rank() << ".pvd";
     File f1(ss1.str());
     f1 << *mesh.periodic_mappings()[i];
   }
@@ -266,7 +266,7 @@ void write_Gdofs(std::string name, FiniteElementSpace const& space)
   G.sync();
   delete[] blockG;
   std::stringstream ss;
-  ss << name << "_G_" << dolfin::MPI::numProcesses() << "P.pvd";
+  ss << name << "_G_" << dolfin::MPI::size() << "P.pvd";
   File fG(ss.str());
   fG << G;
   message("Done");
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
 
   if (test_id)
   {
-    if (dolfin::MPI::numProcesses() == 1)
+    if (dolfin::MPI::size() == 1)
     {
       Mesh mesh("../../data/meshes/squareN128R.xml.gz");
 
@@ -385,7 +385,7 @@ int main(int argc, char *argv[])
       check_matching_facets(mmY, pY);
     }
 
-    if (dolfin::MPI::numProcesses() == 1)
+    if (dolfin::MPI::size() == 1)
     {
       Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
 

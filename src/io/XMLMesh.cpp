@@ -175,7 +175,7 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
   {
     error("XMLMesh : vertex distribution is already created.");
   }
-  vertex_dist_ = new LinearDistribution(size, MPI::numProcesses(), MPI::processNumber());
+  vertex_dist_ = new LinearDistribution(size, MPI::size(), MPI::rank());
   // Set number of vertices
   editor_->init_vertices(vertex_dist_->size, size);
   if(parallel_)
@@ -213,7 +213,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
       error("XMLMesh : vertex ownership array is already created.");
     }
     vertex_owner_ = new uint[mesh_.size(0)];
-    std::fill_n(&vertex_owner_[0], mesh_.size(0), MPI::numProcesses());
+    std::fill_n(&vertex_owner_[0], mesh_.size(0), MPI::size());
   }
   else
   {
@@ -280,7 +280,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     {
      return;
     }
-    uint const rank = MPI::processNumber();
+    uint const rank = MPI::rank();
     vertex_owner_[mesh_.distdata()[0].get_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
     for (uint i = 1; i < cell_type_->num_entities(0); ++i)
@@ -313,8 +313,8 @@ void XMLMesh::endMesh()
 {
   if (parallel_)
   {
-    uint const rank = MPI::processNumber();
-    uint const pe_size = MPI::numProcesses();
+    uint const rank = MPI::rank();
+    uint const pe_size = MPI::size();
     uint const gdim = mesh_.geometry().dim();
     Array<uint> sendbuf(nonlocal_vertices_.size());
     sendbuf.assign(nonlocal_vertices_.begin(), nonlocal_vertices_.end());
@@ -326,7 +326,7 @@ void XMLMesh::endMesh()
     uint src;
     uint dst;
     uint recvmax;
-    MPI::numGlobalSum(shared, recvmax);
+    MPI::allReduceSum(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
     int recvcount;
     uint * sendbuf_v = new uint[2*recvmax];

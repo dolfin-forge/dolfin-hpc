@@ -62,22 +62,22 @@ void dolfin::dolfin_init(int argc, char * argv[])
 #endif
 
   // Cannot use MPI functions before initComm
-  if (first_init_call && MPI::processNumber() > 0)
+  if (first_init_call && MPI::rank() > 0)
   {
     dolfin::LogManager::logger().silence();
   }
-  if (first_init_call && MPI::processGlobalNumber() == 0)
+  if (first_init_call && MPI::global_rank() == 0)
   {
     message("Initializing DOLFIN version %s : running on %d %s.\n",
-            DOLFIN_VERSION, dolfin::MPI::numGlobalProcesses(),
-            (dolfin::MPI::numGlobalProcesses() > 1 ? "processes" : "process"));
+            DOLFIN_VERSION, dolfin::MPI::global_size(),
+            (dolfin::MPI::global_size() > 1 ? "processes" : "process"));
   }
-  if (first_init_call && MPI::numGroups() > 1)
+  if (first_init_call && MPI::num_groups() > 1)
   {
-    message("Group %d/%d : %d %s", dolfin::MPI::groupNumber() + 1,
-            dolfin::MPI::numGroups(), dolfin::MPI::numProcesses(),
-            (dolfin::MPI::numProcesses() > 1 ? "processes" : "process"));
-    if (MPI::groupNumber() > 0)
+    message("Group %d/%d : %d %s", dolfin::MPI::group_id() + 1,
+            dolfin::MPI::num_groups(), dolfin::MPI::size(),
+            (dolfin::MPI::size() > 1 ? "processes" : "process"));
+    if (MPI::group_id() > 0)
     {
       dolfin::LogManager::logger().silence();
     }

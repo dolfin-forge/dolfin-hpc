@@ -31,8 +31,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
   MeshDistributedData& distdata = topology.distdata();
 
   uint const tdim = topology.dim();
-  uint const rank = MPI::processNumber();
-  uint const pe_size = MPI::numProcesses();
+  uint const rank = MPI::rank();
+  uint const pe_size = MPI::size();
 
   /*
    * Renumber vertices: compacting global numbering per rank.
@@ -152,7 +152,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
       sendmax = std::max(sendmax, (uint) sendbuf[j].size());
     }
     uint recvmax = 0;
-    MPI::numGlobalMax(sendmax, recvmax);
+    MPI::allReduceMax(sendmax, recvmax);
     uint * recvbuf = new uint[recvmax];
     int recvcount;
     for (uint j = 1; j < pe_size; ++j)

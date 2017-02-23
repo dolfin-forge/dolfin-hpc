@@ -127,7 +127,7 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
   // FIXME: add number of diagonal as parameter
 
   // Create a sparse matrix in compressed row format
-  if (dolfin::MPI::numProcesses() > 1 && distributed)
+  if (dolfin::MPI::size() > 1 && distributed)
   {
     is_distributed_ = true;
     // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
@@ -282,7 +282,7 @@ void PETScMatrix::init(const GenericSparsityPattern& sparsity_pattern)
   if (sparsity_pattern.is_distributed())
   {
     is_distributed_ = true;
-    uint p = dolfin::MPI::processNumber();
+    uint p = dolfin::MPI::rank();
     SparsityPattern const& spattern =
         reinterpret_cast<SparsityPattern const&>(sparsity_pattern);
     uint local_size = spattern.range_size(p);

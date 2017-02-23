@@ -576,8 +576,8 @@ bool DofMap::check(bool throw_error)
 #if HAVE_MPI
 
   // Simple version
-  uint rank = dolfin::MPI::processNumber();
-  uint pe_size = dolfin::MPI::numProcesses();
+  uint rank = dolfin::MPI::rank();
+  uint pe_size = dolfin::MPI::size();
   MPI_Status status;
   int src = 0;
   int dest = 0;

@@ -26,7 +26,7 @@ public:
   ///
   void eval(real * values, real const * x) const
   {
-    values[0] = dolfin::MPI::processNumber();
+    values[0] = dolfin::MPI::rank();
   }
 
   ///

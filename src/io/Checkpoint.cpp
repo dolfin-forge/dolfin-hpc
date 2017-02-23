@@ -99,8 +99,8 @@ void Checkpoint::write(std::string fname, uint id, real t, Mesh& mesh,
   message("Writing checkpoint (%s%d) at time %g", fname.c_str(), n_ % 2, t);
   std::ostringstream _fname;
 #ifndef ENABLE_MPIIO
-  if( MPI::numProcesses() > 1)
-  _fname << fname << (n_++)%2 << "_" << MPI::processNumber() << ".chkp";
+  if( MPI::size() > 1)
+  _fname << fname << (n_++)%2 << "_" << MPI::rank() << ".chkp";
   else
   _fname << fname << (n_++)%2 << ".chkp";
 
@@ -147,8 +147,8 @@ void Checkpoint::restart(std::string fname)
 
   std::ostringstream _fname;
 #ifndef ENABLE_MPIIO
-  if( MPI::numProcesses() > 1)
-  _fname << fname << "_" << MPI::processNumber() << ".chkp";
+  if( MPI::size() > 1)
+  _fname << fname << "_" << MPI::rank() << ".chkp";
   else
   _fname << fname << ".chkp";
 #else
@@ -181,8 +181,8 @@ void Checkpoint::load(Mesh& mesh)
   }
 
 #ifdef ENABLE_MPIIO
-  uint pe_size = MPI::numProcesses();
-  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
 
   MPI_File_read_at_all(in_, byte_offset_ + pe_rank * sizeof(chkp_mesh_hdr), &hdr_,
                        sizeof(chkp_mesh_hdr), MPI_BYTE, MPI_STATUS_IGNORE);
@@ -237,7 +237,7 @@ void Checkpoint::load(Mesh& mesh)
   editor.close();
   delete[] cells;
 
-  if (MPI::numProcesses() > 1)
+  if (MPI::size() > 1)
   {
     uint *mapping = new uint[_mesh.size(0)];
 #ifdef ENABLE_MPIIO
@@ -298,8 +298,8 @@ void Checkpoint::load(std::vector<Function *> func)
 
   std::vector<Function *>::iterator it;
   uint local_size;
-  uint pe_rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint vector_offset[3];
   // FIXME store max(local_size)
   for (it = func.begin(); it != func.end(); ++it)
@@ -346,8 +346,8 @@ void Checkpoint::load(std::vector<Vector *> vec)
 
   std::vector<Vector *>::iterator it;
   uint local_size;
-  uint pe_rank = MPI::processNumber();
-  uint pe_size = MPI::numProcesses();
+  uint pe_rank = MPI::rank();
+  uint pe_size = MPI::size();
   uint vector_offset[3];
   for (it = vec.begin(); it != vec.end(); ++it)
   {
@@ -390,8 +390,8 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 {
 
 #ifdef ENABLE_MPIIO
-  uint pe_size = MPI::numProcesses();
-  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
 
   MPI_File_write_at_all(out, byte_offset_ + pe_rank * sizeof(chkp_mesh_hdr),
                         &hdr_, sizeof(chkp_mesh_hdr), MPI_BYTE,
@@ -415,7 +415,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
   out.write((char *)mesh.cells(), hdr_.num_centities * sizeof(uint));
 #endif
 
-  if (MPI::numProcesses() > 1)
+  if (MPI::size() > 1)
   {
     uint *mapping = new uint[mesh.size(0)];
     for (VertexIterator v(mesh); !v.end(); ++v)
@@ -480,8 +480,8 @@ void Checkpoint::write(std::vector<Function *> func, chkp_outstream& out)
   real *values = new real[max_size];
 #ifdef ENABLE_MPIIO
   uint vector_offset[3];
-  uint pe_size = MPI::numProcesses();
-  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
 #endif
 
   for (it = func.begin(); it != func.end(); ++it)
@@ -525,8 +525,8 @@ void Checkpoint::write(std::vector<Vector *> vec, chkp_outstream& out)
   real *values = new real[max_size];
 #ifdef ENABLE_MPIIO
   uint vector_offset[3];
-  uint pe_size = MPI::numProcesses();
-  uint pe_rank = MPI::processNumber();
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
 #endif
   for (it = vec.begin(); it != vec.end(); ++it)
   {

@@ -37,8 +37,8 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   send_min_ = data.num_shared();
 
   //
-  uint const rank = dolfin::MPI::processNumber();
-  uint const pe_size = dolfin::MPI::numProcesses();
+  uint const rank = dolfin::MPI::rank();
+  uint const pe_size = dolfin::MPI::size();
   MPI_Request * sendreq = new MPI_Request[mappings_.size()];
   MPI_Request * recvreq = new MPI_Request[mappings_.size()];
   MPI_Status  * status = new MPI_Status[mappings_.size()];

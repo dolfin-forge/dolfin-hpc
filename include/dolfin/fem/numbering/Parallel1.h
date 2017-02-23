@@ -79,8 +79,8 @@ public:
     shared_.clear();
     ghosts_.clear();
 
-    uint pe_size = MPI::numProcesses();
-    uint rank = MPI::processNumber();
+    uint pe_size = MPI::size();
+    uint rank = MPI::rank();
 
     uint num_expected_shared = 0;
     uint num_expected_ghosts = 0;
@@ -177,7 +177,7 @@ public:
 
     uint const range = owned.size();
     uint local_index = 0;
-    MPI::processOffset(range, local_index);
+    MPI::offset(range, local_index);
     uint const rank_offset = local_index;
     set_range(rank_offset, range);
 

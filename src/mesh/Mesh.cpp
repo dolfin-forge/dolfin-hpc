@@ -34,6 +34,7 @@ Mesh::Mesh() :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
     topology_(),
+    space_(NULL),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
@@ -47,6 +48,7 @@ Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
     topology_(),
+    space_(NULL),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
@@ -60,6 +62,7 @@ Mesh::Mesh(std::string const& filename) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
     topology_(),
+    space_(NULL),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
@@ -82,12 +85,9 @@ Mesh const& Mesh::operator=(Mesh const& other)
 
   rename(other.name(), other.label());
 
-  if (other.cell_type_)
-  {
-    cell_type_ = other.cell_type_->clone();
-  }
-
+  if (other.cell_type_) { cell_type_  = other.cell_type_->clone(); }
   topology_ = other.topology_;
+  if (other.space_)     { space_      = other.space_->clone(); }
   geometry_ = other.geometry_;
   timestamp_ = other.timestamp_;
 
@@ -118,6 +118,12 @@ void Mesh::init(CellType const& type, Space const& space)
   cell_type_ = type.clone();
   topology_.init(type, !this->reordering());
   if (this->parallel_io()) topology_.set_distributed();
+  space_ = space.clone();
+}
+//-----------------------------------------------------------------------------
+bool Mesh::empty() const
+{
+  return (cell_type_ == NULL && space_ == NULL);
 }
 //-----------------------------------------------------------------------------
 void Mesh::clear()
@@ -126,6 +132,8 @@ void Mesh::clear()
   delete cell_type_;
   cell_type_ = NULL;
   topology_.clear();
+  delete space_;
+  space_ = NULL;
   geometry_.clear();
   delete exterior_boundary_;
   exterior_boundary_ = NULL;
@@ -272,6 +280,12 @@ uint Mesh::num_global_cells() const
   return topology_.global_size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
+Space const& Mesh::space() const
+{
+  dolfin_assert(space_);
+  return *space_;
+}
+//-----------------------------------------------------------------------------
 MeshGeometry& Mesh::geometry()
 {
   return geometry_;
@@ -387,19 +401,16 @@ std::string const Mesh::hash() const
 void Mesh::disp() const
 {
   section("Mesh");
-  topology_.disp();
-  geometry_.disp();
-  begin("Cell type");
-  if (cell_type_)
+  if (this->empty())
   {
-    cout << cell_type_->description() << endl;
+    message("Empty:");
   }
   else
   {
-    cout << "undefined" << endl;
+    cell_type_->disp();
+    space_->disp();
   }
-  end();
-  end();
+  endblock();
 }
 //-----------------------------------------------------------------------------
 void Mesh::check() const

@@ -20,25 +20,17 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry() :
+    space_(NULL),
     dim_(0),
     size_(0),
     coordinates_(NULL),
     abs_tol_(NULL),
     timestamp_(0)
 {
-}
-//-----------------------------------------------------------------------------
-MeshGeometry::MeshGeometry(uint gdim, uint size) :
-    dim_(0),
-    size_(0),
-    coordinates_(NULL),
-    abs_tol_(NULL),
-    timestamp_(0)
-{
-  init(gdim, size);
 }
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
+    space_(NULL),
     dim_(0),
     size_(0),
     coordinates_(NULL),
@@ -57,6 +49,7 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& other)
 {
   clear();
 
+  space_ = other.space_->clone();
   dim_ = other.dim_;
   size_ = other.size_;
   uint const n = dim_ * size_;
@@ -106,27 +99,22 @@ real const * MeshGeometry::coordinates() const
   return coordinates_;
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::init(uint gdim, uint size)
-{
-  init(NULL, gdim, size);
-}
-//-----------------------------------------------------------------------------
-void MeshGeometry::init(real * coordinates, uint gdim, uint size)
+void MeshGeometry::init(Space const& space, uint size, real * coordinates)
 {
   if (coordinates_ != NULL)
   {
     error("MeshGeometry : clear instance before reinitializing");
   }
-  if (gdim == 0)
+  space_ = space.clone();
+  dim_ = space.dim();
+  if (dim_ == 0)
   {
     error("MeshGeometry : geometric dimension is zero");
   }
-  if (gdim > Point::MAX_SIZE)
+  if (dim_ > Point::MAX_SIZE)
   {
-    error("MeshGeometry : geometric dimension '%u' exceeds point size", gdim);
+    error("MeshGeometry : geometric dimension '%u' exceeds point size", dim_);
   }
-
-  dim_ = gdim;
   size_ = size;
   if (coordinates != NULL)
   {
@@ -146,6 +134,8 @@ void MeshGeometry::init(real * coordinates, uint gdim, uint size)
 //-----------------------------------------------------------------------------
 void MeshGeometry::clear()
 {
+  delete space_;
+  space_ = NULL;
   dim_ = 0;
   size_ = 0;
   delete[] coordinates_;

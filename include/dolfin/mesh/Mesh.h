@@ -86,8 +86,14 @@ public:
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;
 
+  /// Return if mesh is empty
+  bool empty() const;
+
   /// Return mesh cell type
   CellType const& type() const;
+
+  /// Return mesh space
+  Space const& space() const;
 
   //--- TOPOLOGY --------------------------------------------------------------
 
@@ -244,6 +250,9 @@ private:
 
   // Mesh topology
   MeshTopology topology_;
+
+  // Space
+  Space * space_;
 
   // Mesh geometry
   MeshGeometry geometry_;

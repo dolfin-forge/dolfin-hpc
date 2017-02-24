@@ -207,7 +207,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dis
 
   // Update geometry
   dolfin_assert(vindex * gdim == coords.size());
-  geometry.init(gdim, vindex);
+  geometry.init(mesh.space(), vindex);
   geometry.set(coords);
   geometry.finalize();
 
@@ -518,7 +518,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
 
   // Update geometry
   dolfin_assert(vindex * gdim == coords.size());
-  geometry.init(gdim, vindex);
+  geometry.init(mesh.space(), vindex);
   geometry.set(coords);
   geometry.finalize();
 

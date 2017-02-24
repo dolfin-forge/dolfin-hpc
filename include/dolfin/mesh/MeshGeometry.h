@@ -17,6 +17,7 @@ namespace dolfin
 {
 
 template<class T> class Array;
+class Space;
 
 /**
  *  @class  MeshGeometry
@@ -33,9 +34,6 @@ public:
 
   /// Create empty set of coordinates
   MeshGeometry();
-
-  /// Create set of coordinates given geometric dimension and size
-  MeshGeometry(uint gdim, uint size);
 
   /// Copy constructor
   MeshGeometry(MeshGeometry const& geometry);
@@ -76,11 +74,8 @@ public:
   /// Return coordinate n as a 3D point value
   Point point(uint n) const;
 
-  /// Initialize coordinate list to given geometrical dimension and size
-  void init(uint gdim, uint size);
-
-  /// Initialize coordinate list, assign array
-  void init(real * coordinates, uint gdim, uint size);
+  /// Initialize coordinate list to given geometric dimension and size
+  void init(Space const& space, uint size, real * coordinates = NULL);
 
   /// Clear all data
   void clear();
@@ -143,6 +138,9 @@ private:
   //---------------------------------------------------------------------------
 
 private:
+
+  //
+  Space const * space_;
 
   // Euclidean dimension
   uint dim_;

@@ -433,7 +433,7 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
     As->set(&a_slip_row[i][0], 1, &Udofs[i], nb_cols, &a_col_indices[i][0]);
 
     // Fill component i-th basis vector
-    real (&v)[EuclideanSpace::MAX_DIMENSION] = basis_[i];
+    real (&v)[Space::MAX_DIMENSION] = basis_[i];
     basis_functions[i].vector().get(&v[0], gdim, &Ndofs[0]);
 
     // Determine maximum component (to be simplified)

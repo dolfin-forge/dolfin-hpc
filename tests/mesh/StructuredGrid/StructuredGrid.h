@@ -17,7 +17,7 @@ START_TEST( test_BoundingBox )
   int init_failed = 0;
   begin("test_BoundingBox");
   //---
-  for (dolfin::uint i = 0; i <= EuclideanSpace::MAX_DIMENSION; ++i)
+  for (dolfin::uint i = 0; i <= Space::MAX_DIMENSION; ++i)
   {
     BoundingBox bb(i);
     bb.disp();

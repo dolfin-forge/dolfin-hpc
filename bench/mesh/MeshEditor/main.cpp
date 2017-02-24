@@ -19,7 +19,7 @@ int main(int argc, char** argv)
   {
     CellType * celltype = CellType::create(*it);
     uint const tdim = celltype->dim();
-    for (uint gdim = tdim; gdim <= EuclideanSpace::MAX_DIMENSION; ++gdim)
+    for (uint gdim = tdim; gdim <= Space::MAX_DIMENSION; ++gdim)
     {
       message("Create mesh editor:\n\t'%s' in R^%d",
               celltype->description().c_str(), gdim);

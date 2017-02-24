@@ -15,7 +15,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/EuclideanSpace.h>
+#include <dolfin/mesh/Space.h>
 
 #include <cstring>
 
@@ -30,7 +30,7 @@ class Point
 {
 public:
 
-  static uint const MAX_SIZE = EuclideanSpace::MAX_DIMENSION;
+  static uint const MAX_SIZE = Space::MAX_DIMENSION;
 
   /// Create a point at (x, y, z)
   Point(const real x = 0.0, const real y = 0.0, const real z = 0.0);

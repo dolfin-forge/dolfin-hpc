@@ -6,8 +6,6 @@
 
 #include <dolfin/ufl/UFLSpace.h>
 
-using ufl::Space;
-
 //-----------------------------------------------------------------------------
 START_TEST( test_UFL_Space )
 {
@@ -15,7 +13,7 @@ START_TEST( test_UFL_Space )
   
   for (dolfin::uint d = 0; d < 4; ++d)
   {
-    Space s(d);
+    ufl::Space s(d);
     s.display();
   }
   

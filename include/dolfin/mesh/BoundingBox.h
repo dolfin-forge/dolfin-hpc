@@ -26,7 +26,7 @@ class BoundingBox
 public:
 
   /// Create unit bounding box in R^d
-  BoundingBox(uint d = dolfin::EuclideanSpace::MAX_DIMENSION) :
+  BoundingBox(uint d = dolfin::Space::MAX_DIMENSION) :
     D_(d),
     BOX_(new Point[D_+1])
   {

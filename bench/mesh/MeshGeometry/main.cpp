@@ -15,7 +15,7 @@ int main(int argc, char** argv)
      */
 
     MeshGeometry mg;
-    for (uint dim = 1; dim <= EuclideanSpace::MAX_DIMENSION; ++dim)
+    for (uint dim = 1; dim <= Space::MAX_DIMENSION; ++dim)
     {
       mg.init(dim, 0);
       mg.clear();
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
     MeshGeometry mg;
     Point x;
-    for (uint dim = 1; dim <= EuclideanSpace::MAX_DIMENSION; ++dim)
+    for (uint dim = 1; dim <= Space::MAX_DIMENSION; ++dim)
     {
       uint const size = std::rand() % (N / dim);
       message("dim = %-10u; size = %-10u", dim, size);

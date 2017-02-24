@@ -274,6 +274,11 @@ void MeshTopology::finalize()
   // This would cause issues for boundary meshes and some mesh algorithms.
 }
 //-----------------------------------------------------------------------------
+CellType const& MeshTopology::type(uint i) const
+{
+  return mesh_.type();
+}
+//-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& mapping)
 {
   if (connectivity_ != NULL)
@@ -684,9 +689,11 @@ void MeshTopology::reorder() const
   {
     message(1, "MeshTopology : order");
     CellType const& cell_type = mesh_.type();
-    for (CellIterator cell(mesh_); !cell.end(); ++cell)
+    MeshTopology& topology = const_cast<MeshTopology&>(*this);
+    uint const num_cells = this->size(dim_);
+    for (uint i = 0; i < num_cells; ++i)
     {
-      cell_type.order_entities(*cell);
+      cell_type.order_entities(topology, i);
     }
   }
 }

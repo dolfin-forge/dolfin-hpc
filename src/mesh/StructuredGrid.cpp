@@ -4,6 +4,8 @@
 
 #include <dolfin/mesh/StructuredGrid.h>
 
+#include <dolfin/mesh/MeshEditor.h>
+
 namespace dolfin
 {
 

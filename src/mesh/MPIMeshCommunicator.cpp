@@ -37,17 +37,16 @@ MPIMeshCommunicator::~MPIMeshCommunicator()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distribute(Mesh& mesh,
-                                     MeshFunction<uint>& distribution)
+void MPIMeshCommunicator::distribute(Mesh& mesh, MeshFunction<uint>& dist)
 {
-  uint const ddim = distribution.dim();
+  uint const ddim = dist.dim();
   if (ddim == 0)
   {
-    distributeVertices(mesh, distribution);
+    distributeVertices(mesh, dist);
   }
   else if (ddim == mesh.topology().dim())
   {
-    distributeCells(mesh, distribution);
+    distributeCells(mesh, dist);
   }
   else
   {
@@ -55,8 +54,7 @@ void MPIMeshCommunicator::distribute(Mesh& mesh,
   }
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
-                                             MeshFunction<uint>& distribution)
+void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dist)
 {
   if (!mesh.is_distributed())
   {
@@ -79,7 +77,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   dolfin_assert(topology.entities_exist(0));
   dolfin_assert(topology.distdata()[0].is_finalized());
   uint const num_global_vertices = topology.global_size(0);
-  if (topology.size(0) != distribution.size())
+  if (topology.size(0) != dist.size())
   {
     error("MPIMeshCommunicator : mismatch between number of vertices and size "
           "of the distribution");
@@ -104,7 +102,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
   {
     if (v->is_owned())
     {
-      uint const owner = distribution.get(*v);
+      uint const owner = dist.get(*v);
       if (owner == rank)
       {
         distdata1.set_map(vindex, v->global_index());
@@ -219,8 +217,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh,
 
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distributeCells(Mesh& mesh,
-                                          MeshFunction<uint>& distribution)
+void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
 {
   if (!mesh.is_distributed())
   {
@@ -246,7 +243,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   dolfin_assert(topology.entities_exist(tdim));
   dolfin_assert(topology.distdata()[tdim].is_finalized());
   uint const num_global_cells = topology.global_size(tdim);
-  if (topology.size(tdim) != distribution.size())
+  if (topology.size(tdim) != dist.size())
   {
     error("MPIMeshCommunicator : mismatch between number of cells and size of "
           "the distribution");
@@ -265,7 +262,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   std::fill_n(vertex_used, topology.size(0), false);
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    uint const owner = distribution.get(*c);
+    uint const owner = dist.get(*c);
     if (owner == rank)
     {
       for (VertexIterator v(*c); !v.end(); ++v)
@@ -503,6 +500,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh,
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;
   topology.init(tdim , cindex);
+  message("Init cells");
   topology(tdim, 0).set(cells);
   topology.finalize();
   if(num_global_vertices != topology.global_size(0))

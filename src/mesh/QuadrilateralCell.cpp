@@ -9,6 +9,7 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 #include <algorithm>
 
@@ -100,13 +101,10 @@ void QuadrilateralCell::create_entities(uint** e, uint dim, uint const* v) const
   e[3][1] = v[1];
 }
 //-----------------------------------------------------------------------------
-void QuadrilateralCell::order_entities(Cell& cell) const
+void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1
-  dolfin_assert(cell.type() == this->cell_type);
-
-  // Get mesh topology
-  MeshTopology& topology = cell.mesh().topology();
+  dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.is_computed(1, 0))
@@ -114,7 +112,7 @@ void QuadrilateralCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(2, 1));
 
     // Get edges
-    uint* cell_edges = cell.entities(1);
+    uint* cell_edges = topology(2, 1)(i);
 
     // Sort vertices on each edge
     for (uint i = 0; i < 4; ++i)
@@ -133,8 +131,8 @@ void QuadrilateralCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(2, 1));
 
     // Get cell vertices and edges
-    uint* cell_vertices = cell.entities(0);
-    uint* cell_edges = cell.entities(1);
+    uint* cell_vertices = topology(2, 0)(i);
+    uint* cell_edges = topology(2, 1)(i);
 
     // Loop on non-incident vertices on cell as lexicographical pairs
     // (i, j): (0,1) (0,3) (1,2) (2,3)

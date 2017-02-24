@@ -68,7 +68,7 @@ public:
   void create_entities(uint** e, uint dim, uint const* v) const;
 
   /// Order entities locally (connectivity 1-0, 2-0, 2-1)
-  void order_entities(Cell& cell) const;
+  void order_entities(MeshTopology& topology, uint i) const;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
   void order_facet(uint vertices[], Facet& facet) const;

@@ -10,7 +10,7 @@
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Vertex.h>
-
+#include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/PointCell.h>
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>

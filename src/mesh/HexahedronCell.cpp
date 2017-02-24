@@ -9,6 +9,7 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 #include <algorithm>
 
@@ -167,13 +168,10 @@ void HexahedronCell::create_entities(uint** e, uint dim, uint const* v) const
     }
 }
 //-----------------------------------------------------------------------------
-void HexahedronCell::order_entities(Cell& cell) const
+void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0, 2 - 0, 2 - 1, 3 - 0, 3 - 1, 3 - 2
-  dolfin_assert(cell.type() == this->cell_type);
-
-  // Get mesh topology
-  MeshTopology& topology = cell.mesh().topology();
+  dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
   if (topology.is_computed(1, 0))
@@ -181,7 +179,7 @@ void HexahedronCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(3, 1));
 
     // Get edges
-    uint* cell_edges = cell.entities(1);
+    uint* cell_edges = topology(3, 1)(i);
 
     // Sort vertices on each edge
     for (uint i = 0; i < 12; ++i)
@@ -197,7 +195,7 @@ void HexahedronCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(3, 2));
 
     // Get facets
-    uint* cell_facets = cell.entities(2);
+    uint* cell_facets = topology(3, 2)(i);
 
     // Sort vertices on each facet
     for (uint i = 0; i < 6; ++i)
@@ -215,7 +213,7 @@ void HexahedronCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(1, 0));
 
     // Get facet numbers
-    uint* cell_facets = cell.entities(2);
+    uint* cell_facets = topology(2, 1)(i);
 
     // Loop over facets on cell
     for (uint i = 0; i < 6; ++i)
@@ -266,8 +264,8 @@ void HexahedronCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(1, 0));
 
     // Get cell vertices and edge numbers
-    uint* cell_vertices = cell.entities(0);
-    uint* cell_edges = cell.entities(1);
+    uint* cell_vertices = topology(3, 0)(i);
+    uint* cell_edges = topology(3, 1)(i);
 
     // Loop two vertices on cell as a lexicographical tuple
     uint m = 0;
@@ -310,8 +308,8 @@ void HexahedronCell::order_entities(Cell& cell) const
     dolfin_assert(topology.is_computed(2, 0));
 
     // Get cell vertices and facet numbers
-    uint* cell_vertices = cell.entities(0);
-    uint* cell_facets = cell.entities(2);
+    uint* cell_vertices = topology(3, 0)(i);
+    uint* cell_facets = topology(3, 2)(i);
 
     //
     uint m = 0;

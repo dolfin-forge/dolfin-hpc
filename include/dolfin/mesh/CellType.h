@@ -23,6 +23,7 @@ class Facet;
 class Mesh;
 class MeshEditor;
 class MeshEntity;
+class MeshTopology;
 class Point;
 
 /**
@@ -90,7 +91,7 @@ public:
   virtual void create_entities(uint** e, uint dim, uint const* v) const = 0;
 
   /// Order entities locally
-  virtual void order_entities(Cell& cell) const = 0;
+  virtual void order_entities(MeshTopology& topology, uint i) const = 0;
 
   /// Order vertices such that the facet is right-oriented w.r.t. facet normal
   virtual void order_facet(uint vertices[], Facet& facet) const = 0;

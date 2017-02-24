@@ -25,9 +25,8 @@
 #include <dolfin/log/log.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshConnectivity.h>
-#include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshRenumber.h>
 
 namespace dolfin
@@ -94,6 +93,9 @@ public:
 
   /// Finalize: check, reorder, renumber
   void finalize();
+
+  ///
+  CellType const& type(uint i) const;
 
   /// Remap local entities of given dimension
   void remap(uint dim,  Array<uint> const& mapping);

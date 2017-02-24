@@ -13,6 +13,7 @@
 #include <dolfin/mesh/MeshEntity.h>
 #include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
 {
@@ -72,7 +73,7 @@ void PointCell::create_entities(uint** e, uint dim, uint const* v) const
   e[0][0] = v[0];
 }
 //-----------------------------------------------------------------------------
-void PointCell::order_entities(Cell& cell) const
+void PointCell::order_entities(MeshTopology& topology, uint i) const
 {
   // do nothing
 }

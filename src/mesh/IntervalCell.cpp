@@ -13,6 +13,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 #include <algorithm>
 
@@ -88,18 +89,15 @@ void IntervalCell::create_entities(uint** e, uint dim, uint const* v) const
   }
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::order_entities(Cell& cell) const
+void IntervalCell::order_entities(MeshTopology& topology, uint i) const
 {
   // Sort i - j for i > j: 1 - 0
-  dolfin_assert(cell.type() == this->cell_type);
-
-  // Get mesh topology
-  MeshTopology const& topology = cell.mesh().topology();
+  dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices in ascending order, connectivity 1 - 0
   if (topology.is_computed(1, 0))
   {
-    uint* cell_vertices = cell.entities(0);
+    uint* cell_vertices = topology(1, 0)(i);
     std::sort(cell_vertices, cell_vertices + 2);
   }
 }

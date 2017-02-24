@@ -848,6 +848,10 @@ FILE* XMLFile::openFile()
 
   // Open file
   FILE *fp = fopen(filename.c_str(), "r+");
+  if(fp == NULL)
+  {
+    error("XMLFile : impossible to open file '%s'", filename.c_str());
+  }
 
   // Step to position before previously written footer
   //printf("Stepping to position: %ld\n", mark);

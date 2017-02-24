@@ -75,7 +75,7 @@ uint MeshEntity::index(MeshEntity const& entity) const
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const
 {
-  return mesh_.topology().get_global(*this);
+  return (distdata_ ? (*distdata_)[tdim_].get_global(index_) : index_);
 }
 //-----------------------------------------------------------------------------
 void MeshEntity::global_entities(uint dim, uint * indices) const
@@ -118,22 +118,22 @@ void MeshEntity::global_entities(uint ** indices) const
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_owned() const
 {
-  return mesh_.topology().is_owned(*this);
+  return (distdata_ ? (*distdata_)[tdim_].is_owned(index_) : true);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_shared() const
 {
-  return mesh_.topology().is_shared(*this);
+  return (distdata_ ? (*distdata_)[tdim_].is_shared(index_) : false);
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::is_ghost() const
 {
-  return mesh_.topology().is_ghost(*this);
+  return (distdata_ ? (*distdata_)[tdim_].is_ghost(index_) : false);
 }
 //-----------------------------------------------------------------------------
 uint MeshEntity::owner() const
 {
-  return mesh_.topology().get_owner(*this);
+  return (distdata_ ? (*distdata_)[tdim_].get_owner(index_) : MPI::rank());
 }
 //-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const

@@ -46,7 +46,7 @@ class FiniteElement : public ufc::finite_element
 public:
 
   /// Create finite element from given coefficient space of form
-  FiniteElement(CellType& cell, Form& form, uint const i);
+  FiniteElement(CellType const& cell, Form& form, uint const i);
 
   /// Create finite element from UFC object
   /// Ownership of the UFC object is transfered to the instance if the boolean

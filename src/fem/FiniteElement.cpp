@@ -43,7 +43,7 @@ FiniteElement::FiniteElement(ufc::finite_element const& element,
 }
 
 //-----------------------------------------------------------------------------
-FiniteElement::FiniteElement(CellType& type, Form& form, uint const i) :
+FiniteElement::FiniteElement(CellType const& type, Form& form, uint const i) :
     ufc_finite_element_(NULL),
     sub_value_dims_(NULL)
 {

@@ -20,6 +20,7 @@
 #define __DOLFIN_MESH_TOPOLOGY_H
 
 #include <dolfin/common/Tokenized.h>
+#include <dolfin/common/Clonable.h>
 
 #include <dolfin/log/log.h>
 #include <dolfin/common/types.h>
@@ -52,7 +53,7 @@ class MeshDistributedData;
  *
  */
 
-class MeshTopology
+class MeshTopology: public Clonable<MeshTopology>
 {
 
 public:

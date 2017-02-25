@@ -394,51 +394,6 @@ uint MeshTopology::num_ghost(uint dim) const
   return (distdata_ ? (*distdata_)[dim].num_ghost() : 0);
 }
 //-----------------------------------------------------------------------------
-uint MeshTopology::get_global(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].get_global(entity.index()) :
-            entity.index());
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::get_local(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].get_local(entity.global_index()) :
-            entity.index());
-}
-//-----------------------------------------------------------------------------
-bool MeshTopology::is_owned(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].is_owned(entity.index()) : true);
-}
-//-----------------------------------------------------------------------------
-bool MeshTopology::is_ghost(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].is_ghost(entity.index()) : false);
-}
-//-----------------------------------------------------------------------------
-bool MeshTopology::is_shared(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].is_shared(entity.index()) : false);
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::get_owner(MeshEntity const& entity) const
-{
-  dolfin_assert(&mesh_ == &entity.mesh());
-  return (distdata_ ?
-            (*distdata_)[entity.dim()].get_owner(entity.index()) :
-            MPI::rank());
-}
-//-----------------------------------------------------------------------------
 void MeshTopology::compute_connectivity(uint d0, uint d1) const
 {
   if (connectivity_ == NULL)

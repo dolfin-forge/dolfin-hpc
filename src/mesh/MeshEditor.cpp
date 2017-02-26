@@ -9,6 +9,7 @@
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Point.h>
+#include <dolfin/mesh/Space.h>
 
 namespace dolfin
 {
@@ -72,20 +73,12 @@ MeshEditor::~MeshEditor()
 //-----------------------------------------------------------------------------
 void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
 {
-  // Clear old mesh topology and geometry
-  mesh.topology().clear();
-  mesh.geometry().clear();
-
-  // Set cell type
-  mesh.cell_type_ = type.clone();
-
   // Save mesh and dimension
-  this->tdim_ = mesh.cell_type_->dim();
+  this->tdim_ = type.dim();
   this->gdim_ = gdim;
 
-  // Initialize the topology to the given topological dimension
-  mesh_->topology_.init(type, !mesh_->reordering());
-  if (mesh_->parallel_io()) mesh_->topology_.set_distributed();
+  // Initialize the topology to the given cell type and space
+  mesh.init(type, EuclideanSpace(gdim));
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation

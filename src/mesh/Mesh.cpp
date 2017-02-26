@@ -19,6 +19,7 @@
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
+#include <dolfin/mesh/Space.h>
 #include <dolfin/mesh/UniformMeshRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
@@ -108,6 +109,15 @@ bool Mesh::operator ==(Mesh const& other) const
 bool Mesh::operator !=(Mesh const& other) const
 {
   return this->hash() != other.hash();
+}
+//-----------------------------------------------------------------------------
+void Mesh::init(CellType const& type, Space const& space)
+{
+  clear();
+  // Initialize the topology to the given cell type
+  cell_type_ = type.clone();
+  topology_.init(type, !this->reordering());
+  if (this->parallel_io()) topology_.set_distributed();
 }
 //-----------------------------------------------------------------------------
 void Mesh::clear()

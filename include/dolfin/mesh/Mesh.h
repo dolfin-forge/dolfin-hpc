@@ -31,6 +31,7 @@ class IntersectionDetector;
 class MappedManifold;
 template<class T> class MeshFunction;
 class PeriodicSubDomain;
+class Space;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
 ///
@@ -84,9 +85,6 @@ public:
   /// Identity
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;
-
-  /// Clear all mesh data
-  void clear();
 
   /// Return mesh cell type
   CellType const& type() const;
@@ -234,6 +232,12 @@ public:
   void check() const;
 
 private:
+
+  /// Intialize mesh given cell type and space
+  void init(CellType const& type, Space const& space);
+
+  /// Clear all mesh data
+  void clear();
 
   // Cell type
   CellType * cell_type_;

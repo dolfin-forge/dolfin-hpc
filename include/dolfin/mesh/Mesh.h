@@ -88,10 +88,7 @@ public:
   /// Clear all mesh data
   void clear();
 
-  /// Return mesh cell type (non-const version)
-  CellType& type();
-
-  /// Return mesh cell type (const)
+  /// Return mesh cell type
   CellType const& type() const;
 
   //--- TOPOLOGY --------------------------------------------------------------

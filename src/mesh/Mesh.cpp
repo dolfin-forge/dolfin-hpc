@@ -130,12 +130,6 @@ void Mesh::clear()
   }
 }
 //-----------------------------------------------------------------------------
-CellType& Mesh::type()
-{
-  dolfin_assert(cell_type_);
-  return *cell_type_;
-}
-//-----------------------------------------------------------------------------
 CellType const& Mesh::type() const
 {
   dolfin_assert(cell_type_);

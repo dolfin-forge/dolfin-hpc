@@ -27,6 +27,9 @@ public:
       ufc::mesh(),
       mesh(&dolfin_mesh)
   {
+    topological_dimension = mesh->topology().dim();
+    geometric_dimension = mesh->geometry().dim();
+    num_entities = new uint[topological_dimension + 1];
     update();
   }
 
@@ -42,6 +45,9 @@ public:
       ufc::mesh(),
       mesh(other.mesh)
   {
+    topological_dimension = mesh->topology().dim();
+    geometric_dimension = mesh->geometry().dim();
+    num_entities = new uint[topological_dimension + 1];
     update();
   }
 
@@ -51,9 +57,6 @@ public:
   ///
   void update()
   {
-    topological_dimension = mesh->topology().dim();
-    geometric_dimension = mesh->geometry().dim();
-    num_entities = new uint[topological_dimension + 1];
     for (uint d = 0; d <= topological_dimension; ++d)
     {
       if (mesh->topology().entities_exist(d))

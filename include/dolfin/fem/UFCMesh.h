@@ -23,7 +23,7 @@ class UFCMesh : public ufc::mesh
 public:
 
   /// Create UFC mesh from DOLFIN mesh
-  UFCMesh(Mesh& dolfin_mesh) :
+  UFCMesh(Mesh const& dolfin_mesh) :
       ufc::mesh(),
       mesh(&dolfin_mesh)
   {
@@ -35,6 +35,14 @@ public:
   {
     delete[] num_entities;
     num_entities = NULL;
+  }
+
+  /// Create UFC mesh from DOLFIN mesh
+  UFCMesh(UFCMesh const& other) :
+      ufc::mesh(),
+      mesh(other.mesh)
+  {
+    update();
   }
 
   ///

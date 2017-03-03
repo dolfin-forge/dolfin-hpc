@@ -66,6 +66,30 @@ ScratchSpace::ScratchSpace(FiniteElementSpace const& space,
 }
 
 //-----------------------------------------------------------------------------
+ScratchSpace::ScratchSpace(ScratchSpace const& other) :
+    mesh(other.mesh),
+    cell(other.cell),
+    offset(0),
+    finite_element(NULL),
+    dof_map(NULL),
+    size(0),
+    space_dimension(0),
+    local_dimension(0),
+    num_sub_elements(0),
+    topological_dimension(0),
+    geometric_dimension(0),
+    dofs(NULL),
+    facet_dofs(NULL),
+    values(NULL),
+    coefficients(NULL),
+    basis_values(NULL),
+    coordinates(NULL),
+    owner_(false)
+{
+  error("ScratchSpace::ScratchSpace(ScratchSpace const& other)");
+}
+
+//-----------------------------------------------------------------------------
 ScratchSpace::~ScratchSpace()
 {
   for (uint i = 0; i < local_dimension; ++i)
@@ -100,8 +124,6 @@ uint ScratchSpace::value_size(ufc::finite_element const& finite_element)
 //-----------------------------------------------------------------------------
 void ScratchSpace::init()
 {
-  message(1, "Creating scratch space");
-
   // Initialize local array for dof coordinates
   for (uint i = 0; i < local_dimension; ++i)
   {

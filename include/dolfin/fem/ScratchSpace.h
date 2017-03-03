@@ -95,6 +95,9 @@ public:
 
 private:
 
+  // Copy constructor
+  ScratchSpace(ScratchSpace const& other);
+
   uint value_size(ufc::finite_element const& finite_element);
 
   void init();

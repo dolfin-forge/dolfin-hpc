@@ -44,6 +44,15 @@ public:
     init(dolfin_cell);
   }
 
+  /// Copy constructor
+  UFCCell(UFCCell const& other) :
+      ufc::cell(),
+      cell(other.cell),
+      num_vertices(0)
+  {
+    if (cell != NULL) init(*const_cast<Cell*>(cell));
+  }
+
   /// Destructor
   ~UFCCell()
   {

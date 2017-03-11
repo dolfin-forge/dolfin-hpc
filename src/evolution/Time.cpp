@@ -40,10 +40,10 @@ int Time::sign() const
   return sign_;
 }
 //-----------------------------------------------------------------------------
-bool Time::is_valid() const
+bool Time::is_valid(real atol) const
 {
-  return std::fabs(t_ - T_.first) <= std::fabs(T_.second - T_.first)
-      && std::fabs(t_ - T_.first) <= std::fabs(t_ - T_.first);
+  return std::fabs(t_ - T_.first)  <= std::fabs(T_.second - T_.first) + atol
+      && std::fabs(t_ - T_.second) <= std::fabs(T_.second - T_.first) + atol;
 }
 //-----------------------------------------------------------------------------
 real Time::begin() const

@@ -38,7 +38,7 @@ public:
   int sign() const;
 
   /// Is the current time in the time interval
-  bool is_valid() const;
+  bool is_valid(real atol = 0.0) const;
 
   /// T0
   real begin() const;

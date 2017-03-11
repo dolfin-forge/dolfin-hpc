@@ -215,7 +215,7 @@ void BinaryFile::operator>>(Function & f)
     if (f_hdr.dim == f.value_size())
     {
 
-      uint size = f.value_size() * f.mesh().distdata()[0].num_owned();
+      uint size = f.value_size() * f.mesh().topology().num_owned(0);
       real *values = new real[size];
       MPI_File_read_at_all(fh, byte_offset + f.vector().offset() * sizeof(real),
                            values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -292,7 +292,7 @@ void BinaryFile::operator>>(LabelList<Function>& f)
       error("Dimension of file and function set does not match");
     }
 
-    uint size = u->value_size() * u->mesh().distdata()[0].num_owned();
+    uint size = u->value_size() * u->mesh().topology().num_owned(0);
     real *values = new real[size];
     MPI_File_read_at_all(fh, byte_offset + u->vector().offset() * sizeof(real),
                          values, size, MPI_DOUBLE, MPI_STATUS_IGNORE);
@@ -375,7 +375,7 @@ void BinaryFile::write_function(
     real *values = new real[size];
     uint offset = u->vector().offset();
 
-    if ((u->vector().local_size() / value_dim) != mesh.distdata()[0].num_owned())
+    if ((u->vector().local_size() / value_dim) != mesh.topology().num_owned(0))
     {
       real *interp_values = new real[size];
 
@@ -396,7 +396,7 @@ void BinaryFile::write_function(
       delete[] interp_values;
 
       // Compute new vertex based offset
-      uint num_values = value_dim * mesh.distdata()[0].num_owned();
+      uint num_values = value_dim * mesh.topology().num_owned(0);
       offset = 0;
 #if ( MPI_VERSION > 1 )
       MPI_Exscan(&num_values, &offset, 1, MPI_UNSIGNED, MPI_SUM,
@@ -413,7 +413,7 @@ void BinaryFile::write_function(
       u->vector().get(values);
     }
 
-    size = value_dim * mesh.distdata()[0].num_owned();
+    size = value_dim * mesh.topology().num_owned(0);
 
     BinaryFunctionHeader f_hdr;
     f_hdr.dim = value_dim;
@@ -955,7 +955,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
     // Write vertices
     uint vertex_offset = 0;
-    uint vertex_buffer_size = gdim * mesh.distdata()[0].num_owned();
+    uint vertex_buffer_size = gdim * mesh.topology().num_owned(0);
 #if ( MPI_VERSION > 1 )
     MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
                MPI::DOLFIN_COMM);
@@ -1119,7 +1119,7 @@ template<typename T>
         }
       }
 
-      local_size = mesh.distdata()[0].num_owned();
+      local_size = mesh.topology().num_owned(0);
     }
     else
     {
@@ -1211,9 +1211,8 @@ template<typename T>
       error("Meshfunction does not match data in file");
     }
 
-    uint local_size = (
-        mfunc_type > 0 ?
-            mesh.size(0) - mesh.distdata()[0].num_ghost() : mesh.num_cells());
+    uint local_size = (mfunc_type > 0 ? mesh.topology().num_owned(0)
+                                      : mesh.num_cells());
 
     uint offset = 0;
 #if ( MPI_VERSION > 1 )

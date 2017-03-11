@@ -24,6 +24,13 @@ public:
 
   ~Time();
 
+  /// Operators
+  inline operator real&() { return t_; }
+  inline operator real const&() const { return t_; }
+  inline Time& operator=(real t) { t_ = t; return *this; }
+  inline Time& operator+=(real k) { t_ += k; return *this; }
+  inline Time& operator-=(real k) { t_ -= k; return *this; }
+
   /// Return time interval as a pair of real numbers
   std::pair<real, real> const& interval() const;
 

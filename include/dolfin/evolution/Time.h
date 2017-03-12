@@ -73,6 +73,9 @@ public:
   /// Display basic information
   void disp() const;
 
+  /// Step
+  inline Time& step(real k ) { t_ +=  sign_ * k; return *this; }
+
   //--- ITERATOR --------------------------------------------------------------
 
   class iterator

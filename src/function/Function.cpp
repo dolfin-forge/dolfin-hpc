@@ -806,6 +806,7 @@ Function& Function::operator=(Function const& other)
 
   // Copy vector
   *X_ = *other.X_;
+  this->sync();
 
   return *this;
 }

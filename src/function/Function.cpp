@@ -786,6 +786,7 @@ Function& Function::operator=(Function const& other)
 
   if(this->empty())
   {
+    const_cast<Mesh *&>(mesh_) = other.mesh_;
     discrete_space_ = new FiniteElementSpace(*other.discrete_space_);
     element_ = &discrete_space_->element();
     dofmap_ = &discrete_space_->dofmap();

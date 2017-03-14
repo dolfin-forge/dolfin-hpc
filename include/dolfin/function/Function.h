@@ -243,7 +243,7 @@ private:
   /// Initialize ghost pattern
   void InitializeGhosts();
 
-  /// Mesh, only allow modification by swap
+  /// Mesh, only allow modification by swap or assignment
   Mesh * const mesh_;
 
   /// Discrete space

@@ -60,7 +60,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   Mesh& mesh = dofmap.mesh();
   uint const tdim = mesh.topology().dim();
   uint const gdim = mesh.geometry().dim();
-  uint const maxgdim = EuclideanSpace::MAX_DIMENSION;
+  uint const maxgdim = Space::MAX_DIMENSION;
   Cell c0(mesh, 0);
   mesh.init(tdim, tdim - 1);
   mesh.init(tdim - 1, tdim);
@@ -694,15 +694,15 @@ void PeriodicDofsMapping::tabulate_coordinates(uint Gdof, real * Gcoords,
   else
   {
     std::memcpy(&Gcoords[0],
-                &Gxcoords_[it->second * EuclideanSpace::MAX_DIMENSION],
-                EuclideanSpace::MAX_DIMENSION * sizeof(real));
+                &Gxcoords_[it->second * Space::MAX_DIMENSION],
+                Space::MAX_DIMENSION * sizeof(real));
     count = Hcount_[it->second];
     for (uint dof = 0; dof < count; ++dof)
     {
       std::memcpy(
           &Hcoords[dof][0],
-          &Hxcoords_[Hoffsets_[it->second] + dof * EuclideanSpace::MAX_DIMENSION],
-          EuclideanSpace::MAX_DIMENSION * sizeof(real));
+          &Hxcoords_[Hoffsets_[it->second] + dof * Space::MAX_DIMENSION],
+          Space::MAX_DIMENSION * sizeof(real));
     }
   }
 }
@@ -716,13 +716,13 @@ void PeriodicDofsMapping::tabulate_coordinates(uint i, uint * Gdof,
   count = Hcount_[i];
   *Gdof = Gindices_[i];
   std::memcpy(&Gcoords[0],
-              &Gxcoords_[i * EuclideanSpace::MAX_DIMENSION],
-              EuclideanSpace::MAX_DIMENSION * sizeof(real));
+              &Gxcoords_[i * Space::MAX_DIMENSION],
+              Space::MAX_DIMENSION * sizeof(real));
   for (uint dof = 0; dof < count; ++dof)
   {
     std::memcpy(&Hcoords[dof][0],
-                &Hxcoords_[Hoffsets_[i] + dof * EuclideanSpace::MAX_DIMENSION],
-                EuclideanSpace::MAX_DIMENSION * sizeof(real));
+                &Hxcoords_[Hoffsets_[i] + dof * Space::MAX_DIMENSION],
+                Space::MAX_DIMENSION * sizeof(real));
   }
 }
 
@@ -738,7 +738,7 @@ void PeriodicDofsMapping::disp() const
   cout << "Number of G dofs    : " << (uint) Goffsets_.size() << endl;
   cout << endl;
   //
-  uint maxgdim = EuclideanSpace::MAX_DIMENSION;
+  uint maxgdim = Space::MAX_DIMENSION;
   for (OffsetMap::const_iterator it = Goffsets_.begin(); it != Goffsets_.end();
       ++it)
   {

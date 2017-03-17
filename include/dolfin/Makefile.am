@@ -180,7 +180,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/EntityKey.h\
 				mesh/EquiAffineMapping.h \
 				mesh/EuclideanBasis.h \
-				mesh/EuclideanSpace.h \
 				mesh/Face.h\
 				mesh/FaceKey.h\
 				mesh/Facet.h\
@@ -225,6 +224,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
+        mesh/Space.h \
 				mesh/SubDomain.h\
 				mesh/StructuredGrid.h\
 				mesh/TetrahedronCell.h\

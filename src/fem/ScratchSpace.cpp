@@ -11,7 +11,7 @@
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/SubSystem.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/EuclideanSpace.h>
+#include <dolfin/mesh/Space.h>
 
 namespace dolfin
 {
@@ -106,8 +106,8 @@ void ScratchSpace::init()
   for (uint i = 0; i < local_dimension; ++i)
   {
     // Using same storage size as a Point
-    coordinates[i] = new real[EuclideanSpace::MAX_DIMENSION];
-    std::fill_n(coordinates[i],  EuclideanSpace::MAX_DIMENSION, 0.0);
+    coordinates[i] = new real[Space::MAX_DIMENSION];
+    std::fill_n(coordinates[i],  Space::MAX_DIMENSION, 0.0);
   }
 }
 

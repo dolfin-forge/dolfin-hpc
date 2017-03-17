@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
     real ** Hcoords = new real *[pdm.max_local_dimension()];
     for(uint c = 0; c < pdm.max_local_dimension(); ++c)
     {
-      Hcoords[c] = new real[EuclideanSpace::MAX_DIMENSION];
+      Hcoords[c] = new real[Space::MAX_DIMENSION];
     }
     uint count = 0;
     for(uint i = 0; i < pdm.num_Gdofs(); ++i)

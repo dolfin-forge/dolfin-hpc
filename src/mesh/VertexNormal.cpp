@@ -320,8 +320,8 @@ void VertexNormal::computeNormal(Mesh& mesh)
   if (boundary.num_cells() > 0)
   {
     // Initialize cartesian basis
-    Point B[EuclideanSpace::MAX_DIMENSION];
-    for (uint d = 0; d < EuclideanSpace::MAX_DIMENSION; ++d)
+    Point B[Space::MAX_DIMENSION];
+    for (uint d = 0; d < Space::MAX_DIMENSION; ++d)
     {
       B[d][d] = 1.0;
     }

@@ -369,8 +369,8 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   real * block = new real[gdim * num_boundary_dofs];  // ( n, tau_1, tau_2 )
   real * offset = &block[0];
   // Initialize cartesian basis
-  Point B[EuclideanSpace::MAX_DIMENSION];
-  for (uint d = 0; d < EuclideanSpace::MAX_DIMENSION; ++d)
+  Point B[Space::MAX_DIMENSION];
+  for (uint d = 0; d < Space::MAX_DIMENSION; ++d)
   {
     B[d][d] = 1.0;
   }

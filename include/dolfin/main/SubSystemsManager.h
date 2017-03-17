@@ -41,6 +41,12 @@ public:
   }
 
   //-------------------------------------------------------------------------
+  static void status()
+  {
+    sub_systems_manager.disp();
+  }
+
+  //-------------------------------------------------------------------------
   struct MPI
   {
     static SubSystemsManager::Type const flag = mpi;

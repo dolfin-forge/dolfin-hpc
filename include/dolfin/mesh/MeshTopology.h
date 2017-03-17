@@ -150,25 +150,6 @@ public:
   /// Return number of given entities
   uint num_ghost(uint dim) const;
 
-  /// Return global index of mesh entity
-  uint get_global(MeshEntity const& entity) const;
-
-  /// Return local index of mesh entity: local-to-global then global-to-local
-  /// Can be used for checking bijectivity of mappings
-  uint get_local(MeshEntity const& entity) const;
-
-  /// Return if the given mesh entity is shared
-  bool is_owned(MeshEntity const& entity) const;
-
-  /// Return if the given mesh entity is shared
-  bool is_shared(MeshEntity const& entity) const;
-
-  /// Return if the given mesh entity is ghosted
-  bool is_ghost(MeshEntity const& entity) const;
-
-  /// Return owner of the entity
-  uint get_owner(MeshEntity const& entity) const;
-
   //---------------------------------------------------------------------------
 
   /// Display data

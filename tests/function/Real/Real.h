@@ -17,18 +17,18 @@ START_TEST( test_Real )
   //---
   T.begin("test_Value : E01");
   {
-    Real r;
+    Real<> r;
     r.disp();
     r = 0.0;
-    r.str();
+    r.disp();
     r += 1.0;
-    r.str();
+    r.disp();
     r *= 2.0;
-    r.str();
+    r.disp();
     r /= 4.0;
-    r.str();
+    r.disp();
     r -= 0.25;
-    r.str();
+    r.disp();
   }
   T.end();
   //---

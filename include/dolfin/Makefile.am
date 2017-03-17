@@ -15,6 +15,7 @@ nobase_pkginclude_HEADERS = \
 				common/Array.h\
 				common/AdjacentMapping.h\
 				common/Check.h\
+				common/Clonable.h\
 				common/DistributedData.h\
 				common/Label.h\
 				common/List.h\
@@ -24,10 +25,10 @@ nobase_pkginclude_HEADERS = \
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
-        evolution/dolfin_evolution.h\
+				evolution/dolfin_evolution.h\
 				evolution/Time.h\
-        evolution/TimeDependent.h\
-        evolution/TimeSeries.h\
+				evolution/TimeDependent.h\
+				evolution/TimeSeries.h\
 				evolution/TimeStepping.h\
 				fem/dolfin_fem.h\
 				fem/Assembler.h\

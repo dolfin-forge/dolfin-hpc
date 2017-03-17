@@ -8,6 +8,7 @@
 #define __DOLFIN_MESH_GEOMETRY_H
 
 #include <dolfin/common/Tokenized.h>
+#include <dolfin/common/Clonable.h>
 
 #include <dolfin/common/types.h>
 #include <dolfin/mesh/Point.h>
@@ -25,7 +26,7 @@ template<class T> class Array;
  *
  */
 
-class MeshGeometry : public Tokenized
+class MeshGeometry : public Tokenized, public Clonable<MeshGeometry>
 {
 
 public:

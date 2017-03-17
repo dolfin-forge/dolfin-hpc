@@ -7,6 +7,8 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
+#include <dolfin/common/Clonable.h>
+
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
 
@@ -30,7 +32,7 @@ template<class T> class Array;
  *
  */
 
-class MeshConnectivity
+class MeshConnectivity : public Clonable<MeshConnectivity>
 {
 
 public:

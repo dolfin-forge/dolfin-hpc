@@ -98,12 +98,6 @@ public:
   /// Remap local entities of given dimension
   void remap(uint dim,  Array<uint> const& mapping);
 
-  ///
-  inline Mesh& mesh() const
-  {
-    return mesh_;
-  }
-
   //--- Connectivity ----------------------------------------------------------
 
   /// Return connectivity for given pair of topological dimensions

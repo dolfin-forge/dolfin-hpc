@@ -68,12 +68,6 @@ public:
   /// Add cell with given vertices
   void add_cell(uint c, uint const * v);
 
-  /// Set cells with given connectivities
-  /// Optionally specify the global number of cells for a distributed mesh.
-  /// If the topology is not distributed, any value different than zero or the
-  /// number of local cells will trigger an error.
-  void add_cells(Array<Array<uint> > const& connectivity, uint num_global = 0);
-
   /// Return current cell count
   uint current_cell() const;
 

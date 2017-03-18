@@ -122,15 +122,6 @@ void MeshEditor::init_cells(uint * connectivity, uint num_local,
   this->cell_vertices_ = &mesh_->topology_(tdim_, 0);
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::add_cells(Array<Array<uint> > const& connectivity,
-                           uint num_global /* = 0 */)
-{
-  // Initialize mesh data
-  this->num_cells_ = connectivity.size();
-  mesh_->topology_.init(tdim_, connectivity.size(), num_global);
-  cell_vertices_->set(connectivity);
-}
-//-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)
 {
   if (v >= num_vertices_)

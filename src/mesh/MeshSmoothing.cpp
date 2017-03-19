@@ -220,7 +220,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
           Vertex on_mesh(mesh, mesh.distdata()[0].get_local((*iter_vector)));
           for (int i = 0; i < d; i++)
           {
-            send_buff.push_back(on_mesh.x(i)); //send x, y, z
+            send_buff.push_back(on_mesh.x()[i]); //send x, y, z
           }
         }
       }

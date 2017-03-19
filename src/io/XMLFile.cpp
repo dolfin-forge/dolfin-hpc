@@ -271,7 +271,7 @@ void XMLFile::operator<<(Mesh& mesh)
         {
           fprintf(fp,
                   "<vertex index=\"%u\" x=\"%g\"/>\n", v->index(),
-                  v->x(0));
+                  v->x()[0]);
         }
         break;
       case 2:
@@ -279,7 +279,7 @@ void XMLFile::operator<<(Mesh& mesh)
         {
           fprintf(fp,
                   "<vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
-                  v->index(), v->x(0), v->x(1));
+                  v->index(), v->x()[0], v->x()[1]);
         }
         break;
       case 3:
@@ -287,7 +287,7 @@ void XMLFile::operator<<(Mesh& mesh)
         {
           fprintf(fp,
                   "<vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
-                  v->index(), v->x(0), v->x(1), v->x(2));
+                  v->index(), v->x()[0], v->x()[1], v->x()[2]);
         }
         break;
       default:
@@ -440,7 +440,7 @@ void XMLFile::operator<<(Mesh& mesh)
           {
             vline = sprintf(vbuffer + vsize,
               "<vertex index=\"%u\" x=\"%g\"/>\n",
-              v->global_index(), v->x(0));
+              v->global_index(), v->x()[0]);
             dolfin_assert(vline <= vline_max);
             vsize += vline;
           }
@@ -453,7 +453,7 @@ void XMLFile::operator<<(Mesh& mesh)
           {
             vline = sprintf(vbuffer + vsize,
               "<vertex index=\"%u\" x=\"%g\" y=\"%g\"/>\n",
-              v->global_index(), v->x(0), v->x(1));
+              v->global_index(), v->x()[0], v->x()[1]);
             dolfin_assert(vline <= vline_max);
             vsize += vline;
           }
@@ -466,7 +466,7 @@ void XMLFile::operator<<(Mesh& mesh)
           {
             vline = sprintf(vbuffer + vsize,
               "<vertex index=\"%u\" x=\"%g\" y=\"%g\" z=\"%g\" />\n",
-              v->global_index(), v->x(0), v->x(1), v->x(2));
+              v->global_index(), v->x()[0], v->x()[1], v->x()[2]);
             dolfin_assert(vline <= vline_max);
             vsize += vline;
           }

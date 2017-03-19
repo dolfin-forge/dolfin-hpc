@@ -41,13 +41,7 @@ public:
   /// Return value of vertex coordinate i
   inline real x(uint i) const
   {
-    return mesh_.geometry().x(index_, i);
-  }
-
-  /// Return vertex coordinates as a 3D point value
-  inline Point point() const
-  {
-    return mesh_.geometry().point(index_);
+    return mesh_.geometry().x(index_)[i];
   }
 
   /// Return array of vertex coordinates
@@ -60,6 +54,12 @@ public:
   inline const real* x() const
   {
     return mesh_.geometry().x(index_);
+  }
+
+  /// Return vertex coordinates as a 3D point value
+  inline Point point() const
+  {
+    return mesh_.geometry().point(index_);
   }
 
 };

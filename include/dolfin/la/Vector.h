@@ -141,19 +141,19 @@ public:
     vector_->add(block, m, rows);
   }
 
-  /// Get all values
+  /// Get all local values (not ghost entries)
   void get(real* values) const
   {
     vector_->get(values);
   }
 
-  /// Set all values
+  /// Set all local values (not ghost entries)
   void set(real* values)
   {
     vector_->set(values);
   }
 
-  /// Add values to each entry
+  /// Add values to each local entry (not ghost entries)
   void add(real* values)
   {
     vector_->add(values);

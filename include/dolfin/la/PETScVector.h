@@ -47,7 +47,7 @@ public:
   /// Create empty vector
   PETScVector();
 
-  /// Create vector of size N
+  /// Create vector of local size N
   explicit PETScVector(uint N, bool distributed = true);
 
   /// Copy constructor
@@ -75,10 +75,10 @@ public:
 
   //--- Implementation of the GenericVector interface ---
 
-  /// Initialize vector of size N, distribute by default
+  /// Initialize vector of local size N, distributed by default
   void init(uint N);
 
-  /// Initialize vector of size N, distribute if specified
+  /// Initialize vector of local size N, distributed if specified
   void init(uint N, bool distributed);
 
   /// Initialize ghost entries

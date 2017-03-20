@@ -144,13 +144,12 @@ void MeshTopology::init(CellType const& type, bool frozen)
   update_token();
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, uint num_local, uint num_global /* = 0 */)
+void MeshTopology::init(uint dim, uint nlocal, uint * connectivity)
 {
-  init(NULL, dim, num_local, num_global);
+  init(dim, nlocal, 0, connectivity);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
-                        uint num_global /* = 0 */)
+void MeshTopology::init(uint dim, uint nlocal, uint nglobal, uint * connectivity)
 {
   if (connectivity_ == NULL)
   {
@@ -162,31 +161,31 @@ void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
   // Vertices
   if(dim == 0)
   {
-    num_vertices_ = num_local;
+    num_vertices_ = nlocal;
     ini_vertices_ = true;
   }
   // Edges/Faces
   if (dim < 0 && dim < dim_)
   {
-    if(num_local > 0 && num_vertices_ == 0)
+    if(nlocal > 0 && num_vertices_ == 0)
     {
       error("MeshTopology : initializing non-zero number of entities of "
             "dimension %u but topology containes zero vertices", dim);
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(connectivity, num_local,
+    connectivity_[dim_][0].init(connectivity, nlocal,
                                 type_->num_vertices(dim));
   }
   // Cells
   if (dim_ == dim)
   {
-    if(num_local > 0 && num_vertices_ == 0)
+    if(nlocal > 0 && num_vertices_ == 0)
     {
       error("MeshTopology : initializing non-zero number of cells but topology "
             "contains zero vertices");
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(connectivity, num_local,
+    connectivity_[dim_][0].init(connectivity, nlocal,
                                 type_->num_vertices(dim));
   }
   // Overflow
@@ -198,18 +197,18 @@ void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
   // Set size of distributed data
   if (distdata_ != NULL)
   {
-    if (num_global > 0 && num_global < num_local)
+    if (nglobal > 0 && nglobal < nlocal)
     {
       error("MeshTopology : number of global entities lower than number of "
-            " local entities %u < %u", num_local, num_global);
+            " local entities %u < %u", nlocal, nglobal);
     }
-    this->distdata()[dim].set_size(num_local, num_global);
+    this->distdata()[dim].set_size(nlocal, nglobal);
   }
   else
   {
     // In serial, require that the number of global entities is not initialized
     // of is equal to the number of local entities
-    if ((num_global > 0) && (num_local != num_global))
+    if ((nglobal > 0) && (nlocal != nglobal))
     {
       error("MeshTopology : invalid number of global entities set in serial");
     }

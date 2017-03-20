@@ -97,7 +97,7 @@ void MeshEditor::init_vertices(real * coordinates, uint num_local,
   }
   // Initialize mesh data
   this->num_vertices_ = num_local;
-  mesh_->topology_.init(NULL, 0, num_local, num_global);
+  mesh_->topology_.init(0, num_local, num_global);
   mesh_->geometry_.init(coordinates, gdim_, num_local);
 }
 //-----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void MeshEditor::init_cells(uint * connectivity, uint num_local,
   }
   // Initialize mesh data
   this->num_cells_ = num_local;
-  mesh_->topology_.init(connectivity, tdim_, num_local, num_global);
+  mesh_->topology_.init(tdim_, num_local, num_global, connectivity);
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation

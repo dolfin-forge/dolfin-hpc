@@ -77,14 +77,12 @@ public:
   /// Initialize topology for given cell type
   void init(CellType const& type, bool frozen = false);
 
-  /// Initialize topology entities for given dimension
+  /// Set topology entities for given dimension
   /// Optionally specify the global number of entities for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local entities will trigger an error.
-  void init(uint dim, uint num_local, uint num_global = 0);
-
-  ///
-  void init(uint * connectivity, uint dim, uint num_local, uint num_global = 0);
+  void init(uint dim, uint nlocal, uint * connectivity = NULL);
+  void init(uint dim, uint nlocal, uint nglobal, uint * connectivity = NULL);
 
   /// Clear all data
   void clear();

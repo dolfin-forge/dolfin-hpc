@@ -28,18 +28,18 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector() :
     Variable("x", "a sparse vector"),
-    x(0),
-    is_distributed(false),
-    is_ghosted(false)
+    x_(0),
+    is_distributed_(false),
+    is_ghosted_(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(uint N, bool distributed) :
     Variable("x", "a sparse vector"),
-    x(0),
-    is_distributed(false),
-    is_ghosted(false)
+    x_(0),
+    is_distributed_(false),
+    is_ghosted_(false)
 {
   // Create PETSc vector
   init(N, distributed);
@@ -47,29 +47,29 @@ PETScVector::PETScVector(uint N, bool distributed) :
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(Vec x) :
     Variable("x", "a vector"),
-    x(x),
-    is_distributed(false),
-    is_ghosted(false)
+    x_(x),
+    is_distributed_(false),
+    is_ghosted_(false)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
 PETScVector::PETScVector(PETScVector const& v) :
     Variable("x", "a vector"),
-    x(0),
-    is_distributed(false),
-    is_ghosted(false)
+    x_(0),
+    is_distributed_(false),
+    is_ghosted_(false)
 {
   *this = v;
 }
 //-----------------------------------------------------------------------------
 PETScVector::~PETScVector()
 {
-  if (x)
+  if (x_)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  VecDestroy(&x);
+  VecDestroy(&x_);
 #else
-  VecDestroy(x);
+  VecDestroy(x_);
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -87,43 +87,43 @@ void PETScVector::init(uint N, bool distributed)
   //
   // Otherwise do nothing
 
-  if ((x && this->size() == N) || (this->local_size() == N))
+  if ((x_ && this->size() == N) || (this->local_size() == N))
   {
     //    VecZeroEntries(x);
     return;
   }
   else
   {
-    if (x)
+    if (x_)
     {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-      VecDestroy(&x);
+      VecDestroy(&x_);
 #else
-      VecDestroy(x);
+      VecDestroy(x_);
 #endif
-      is_ghosted = false;
+      is_ghosted_ = false;
     }
   }
 
   // Create vector
   if (MPI::size() > 1 && distributed)
   {
-    is_distributed = true;
+    is_distributed_ = true;
     //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
 #ifdef HAVE_MPI
-    VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x);
+    VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x_);
 #endif
   }
   else
   {
-    VecCreate(PETSC_COMM_SELF, &x);
+    VecCreate(PETSC_COMM_SELF, &x_);
 
-    VecSetSizes(x, PETSC_DECIDE, N);
-    VecSetFromOptions(x);
+    VecSetSizes(x_, PETSC_DECIDE, N);
+    VecSetFromOptions(x_);
   }
   // Set all entries to zero
   PetscScalar a = 0.0;
-  VecSet(x, a);
+  VecSet(x_, a);
 }
 //-----------------------------------------------------------------------------
 PETScVector* PETScVector::copy() const
@@ -133,33 +133,33 @@ PETScVector* PETScVector::copy() const
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* values) const
 {
-  dolfin_assert(x);
-  real const * data = NULL;
-  VecGetArrayRead(x, &data);
+  dolfin_assert(x_);
+  real const* data = NULL;
+  VecGetArrayRead(x_, &data);
   dolfin_assert(data);
   PetscInt n;
-  VecGetLocalSize(x, &n);
+  VecGetLocalSize(x_, &n);
   std::copy(data, data + n, values);
-  VecRestoreArrayRead(x, &data);
-  dolfin_assert(x);
+  VecRestoreArrayRead(x_, &data);
+  dolfin_assert(x_);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::set(real* values)
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
   real* data = NULL;
-  VecGetArray(x, &data);
+  VecGetArray(x_, &data);
   dolfin_assert(data);
   PetscInt n;
-  VecGetLocalSize(x, &n);
+  VecGetLocalSize(x_, &n);
   std::copy(values, values + n, data);
-  VecRestoreArray(x, &data);
-  dolfin_assert(x);
+  VecRestoreArray(x_, &data);
+  dolfin_assert(x_);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(real* values)
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
 
   int m = static_cast<int>(size());
   int* rows = new int[m];
@@ -168,21 +168,21 @@ void PETScVector::add(real* values)
     rows[i] = i;
   }
 
-  VecSetValues(x, m, rows, values, ADD_VALUES);
+  VecSetValues(x_, m, rows, values, ADD_VALUES);
 
   delete[] rows;
 }
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* block, uint m, const uint* rows) const
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
 
-  if (is_ghosted)
+  if (is_ghosted_)
   {
     int low, high;
     Vec xl;
-    VecGetOwnershipRange(x, &low, &high);
-    VecGhostGetLocalForm(x, &xl);
+    VecGetOwnershipRange(x_, &low, &high);
+    VecGhostGetLocalForm(x_, &xl);
 
     int *tmp = new int[m];
     for (uint i = 0; i < m; i++)
@@ -193,20 +193,20 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
       }
       else
       {
-        dolfin_assert(mapping.size() > 0);
-        GhostMapping::const_iterator it = mapping.find(rows[i]);
-        dolfin_assert(mapping.count(rows[i]) > 0);
+        dolfin_assert(mapping_.size() > 0);
+        GhostMapping::const_iterator it = mapping_.find(rows[i]);
+        dolfin_assert(mapping_.count(rows[i]) > 0);
         tmp[i] = it->second;
       }
     }
     VecGetValues(xl, static_cast<int>(m), tmp, block);
-    VecGhostRestoreLocalForm(x, &xl);
+    VecGhostRestoreLocalForm(x_, &xl);
 
     delete[] tmp;
   }
   else
   {
-    VecGetValues(x, static_cast<int>(m),
+    VecGetValues(x_, static_cast<int>(m),
                  reinterpret_cast<int*>(const_cast<uint*>(rows)), block);
   }
 
@@ -214,16 +214,16 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
 //-----------------------------------------------------------------------------
 void PETScVector::set(const real* block, uint m, const uint* rows)
 {
-  dolfin_assert(x);
-  VecSetValues(x, static_cast<int>(m),
+  dolfin_assert(x_);
+  VecSetValues(x_, static_cast<int>(m),
                reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
                INSERT_VALUES);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(const real* block, uint m, const uint* rows)
 {
-  dolfin_assert(x);
-  VecSetValues(x, static_cast<int>(m),
+  dolfin_assert(x_);
+  VecSetValues(x_, static_cast<int>(m),
                reinterpret_cast<int*>(const_cast<uint*>(rows)), block,
                ADD_VALUES);
 }
@@ -231,29 +231,29 @@ void PETScVector::add(const real* block, uint m, const uint* rows)
 void PETScVector::apply(FinalizeType finaltype)
 {
 
-  VecAssemblyBegin(x);
-  VecAssemblyEnd(x);
+  VecAssemblyBegin(x_);
+  VecAssemblyEnd(x_);
 
-  if (is_ghosted)
+  if (is_ghosted_)
   {
-    VecGhostUpdateBegin(x, INSERT_VALUES, SCATTER_FORWARD);
-    VecGhostUpdateEnd(x, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateBegin(x_, INSERT_VALUES, SCATTER_FORWARD);
+    VecGhostUpdateEnd(x_, INSERT_VALUES, SCATTER_FORWARD);
   }
 }
 //-----------------------------------------------------------------------------
 void PETScVector::zero()
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
   real a = 0.0;
-  VecSet(x, a);
+  VecSet(x_, a);
 }
 //-----------------------------------------------------------------------------
 uint PETScVector::size() const
 {
   int n = 0;
-  if (x)
+  if (x_)
   {
-    VecGetSize(x, &n);
+    VecGetSize(x_, &n);
   }
 
   return static_cast<uint>(n);
@@ -262,9 +262,9 @@ uint PETScVector::size() const
 uint PETScVector::local_size() const
 {
   int n = 0;
-  if (x)
+  if (x_)
   {
-    VecGetLocalSize(x, &n);
+    VecGetLocalSize(x_, &n);
   }
 
   return static_cast<uint>(n);
@@ -273,7 +273,7 @@ uint PETScVector::local_size() const
 uint PETScVector::offset() const
 {
   int low, high;
-  if (x) VecGetOwnershipRange(x, &low, &high);
+  if (x_) VecGetOwnershipRange(x_, &low, &high);
 
   return static_cast<uint>(low);
 }
@@ -288,32 +288,32 @@ PETScVector& PETScVector::operator=(PETScVector const& v)
 {
   if (&v != this)
   {
-    dolfin_assert(v.x);
-    init(v.local_size(), v.is_distributed);
-    VecCopy(v.x, x);
+    dolfin_assert(v.x_);
+    init(v.local_size(), v.is_distributed_);
+    VecCopy(v.x_, x_);
   }
   return *this;
 }
 //-----------------------------------------------------------------------------
 PETScVector& PETScVector::operator=(real a)
 {
-  dolfin_assert(x);
-  VecSet(x, a);
+  dolfin_assert(x_);
+  VecSet(x_, a);
   return *this;
 }
 //-----------------------------------------------------------------------------
 PETScVector& PETScVector::operator*=(const GenericVector& y)
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
   PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x);
+  dolfin_assert(v.x_);
 
   if (size() != v.size())
   {
     error("Vectors must have the same size for componentwise multiplication.");
   }
 
-  VecPointwiseMult(x, x, v.x);
+  VecPointwiseMult(x_, x_, v.x_);
 
   return *this;
 }
@@ -332,67 +332,67 @@ PETScVector& PETScVector::operator-=(const GenericVector& x)
 //-----------------------------------------------------------------------------
 PETScVector& PETScVector::operator*=(const real a)
 {
-  dolfin_assert(x);
-  VecScale(x, a);
+  dolfin_assert(x_);
+  VecScale(x_, a);
 
   return *this;
 }
 //-----------------------------------------------------------------------------
 PETScVector& PETScVector::operator/=(const real a)
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
   dolfin_assert(a != 0.0);
 
   const real b = 1.0 / a;
-  VecScale(x, b);
+  VecScale(x_, b);
 
   return *this;
 }
 //-----------------------------------------------------------------------------
 real PETScVector::inner(const GenericVector& y) const
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
 
   PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x);
+  dolfin_assert(v.x_);
 
   real a;
-  VecDot(v.x, x, &a);
+  VecDot(v.x_, x_, &a);
 
   return a;
 }
 //-----------------------------------------------------------------------------
 void PETScVector::axpy(real a, const GenericVector& y)
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
 
   PETScVector const& v = y.down_cast<PETScVector>();
-  dolfin_assert(v.x);
+  dolfin_assert(v.x_);
 
   if (size() != v.size())
   {
     error("The vectors must be of the same size to apply AXPY.");
   }
 
-  VecAXPY(x, a, v.x);
+  VecAXPY(x_, a, v.x_);
 }
 //-----------------------------------------------------------------------------
 real PETScVector::norm(VectorNormType type) const
 {
-  dolfin_assert(x);
+  dolfin_assert(x_);
 
   real value = 0.0;
 
   switch (type)
     {
     case l1:
-      VecNorm(x, NORM_1, &value);
+      VecNorm(x_, NORM_1, &value);
       break;
     case l2:
-      VecNorm(x, NORM_2, &value);
+      VecNorm(x_, NORM_2, &value);
       break;
     default:
-      VecNorm(x, NORM_INFINITY, &value);
+      VecNorm(x_, NORM_INFINITY, &value);
       break;
     }
 
@@ -403,7 +403,7 @@ real PETScVector::min() const
 {
   real value = 0.0;
 
-  VecMin(x, PETSC_NULL, &value);
+  VecMin(x_, PETSC_NULL, &value);
 
   return value;
 }
@@ -412,7 +412,7 @@ real PETScVector::max() const
 {
   real value = 0.0;
 
-  VecMax(x, PETSC_NULL, &value);
+  VecMax(x_, PETSC_NULL, &value);
 
   return value;
 }
@@ -420,53 +420,53 @@ real PETScVector::max() const
 void PETScVector::disp(uint precision) const
 {
   section("PETScVector");
-  if (MPI::size() > 1 && is_distributed)
+  if (MPI::size() > 1 && is_distributed_)
   {
-    VecView(x, PETSC_VIEWER_STDOUT_WORLD);
+    VecView(x_, PETSC_VIEWER_STDOUT_WORLD);
   }
   else
   {
-    VecView(x, PETSC_VIEWER_STDOUT_SELF);
+    VecView(x_, PETSC_VIEWER_STDOUT_SELF);
   }
   endblock();
 }
 //-----------------------------------------------------------------------------
 Vec PETScVector::vec() const
 {
-  return x;
+  return x_;
 }
 //-----------------------------------------------------------------------------
 void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
                                std::map<uint, uint>& map)
 {
-  if (!is_distributed)
+  if (!is_distributed_)
   {
     return;
   }
 
-  if (is_ghosted)
+  if (is_ghosted_)
   {
     apply();
   }
 
   int local_size, size, low, high;
-  VecGetSize(x, &size);
-  VecGetLocalSize(x, &local_size);
-  VecGetOwnershipRange(x, &low, &high);
+  VecGetSize(x_, &size);
+  VecGetLocalSize(x_, &local_size);
+  VecGetOwnershipRange(x_, &low, &high);
 
-  mapping.clear();
+  mapping_.clear();
 
   int *rows = new int[local_size];
   real *values = new real[local_size];
   for (int i = 0; i < local_size; i++)
   {
     rows[i] = low + i;
-    mapping[low + i] = i;
+    mapping_[low + i] = i;
   }
 
-  VecGetValues(x, local_size, rows, values);
+  VecGetValues(x_, local_size, rows, values);
 
-  if (is_ghosted && map.size() > 0)
+  if (is_ghosted_ && map.size() > 0)
   {
     // dolfin_assert(map.size() > 0);
     for (int i = 0; i < local_size; i++)
@@ -477,9 +477,9 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
   }
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  VecDestroy(&x);
+  VecDestroy(&x_);
 #else
-  VecDestroy(x);
+  VecDestroy(x_);
 #endif
 
   Array<int> ghost_indices;
@@ -490,19 +490,19 @@ void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
     if (*sit < (uint) low || *sit >= (uint) high)
     {
       ghost_indices.push_back((int) *sit);
-      mapping[(int) *sit] = num_ghost++;
+      mapping_[(int) *sit] = num_ghost++;
     }
   }
 
 #ifdef HAVE_MPI
   VecCreateGhost(MPI::DOLFIN_COMM, local_size, size, (int) ghost_indices.size(),
-                 (const int *) &ghost_indices[0], &x);
+                 (const int *) &ghost_indices[0], &x_);
 #endif
-  VecSetValues(x, local_size, rows, values, INSERT_VALUES);
+  VecSetValues(x_, local_size, rows, values, INSERT_VALUES);
   delete[] rows;
   delete[] values;
 
-  is_ghosted = true;
+  is_ghosted_ = true;
   apply();
 }
 //-----------------------------------------------------------------------------

@@ -162,26 +162,26 @@ public:
 
   inline bool ghosted()
   {
-    return is_ghosted;
+    return is_ghosted_;
   }
 
 private:
 
   // PETSc Vec pointer
-  Vec x;
+  Vec x_;
 
   // True if the vector is distributed
-  bool is_distributed;
+  bool is_distributed_;
 
   // True if the vector has ghost points
-  bool is_ghosted;
+  bool is_ghosted_;
 
 #if (sun || __sun)
   typedef std::map<int, int> GhostMapping;
 #else
   typedef std::map<const int, int> GhostMapping;
 #endif
-  GhostMapping mapping;
+  GhostMapping mapping_;
 
 };
 

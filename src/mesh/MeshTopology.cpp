@@ -125,7 +125,7 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, bool distribute /* = true */)
+void MeshTopology::init(uint dim)
 {
   if (connectivity_ != NULL)
   {
@@ -136,10 +136,6 @@ void MeshTopology::init(uint dim, bool distribute /* = true */)
   for (uint d = 0; d <= dim; ++d)
   {
     connectivity_[d] = new MeshConnectivity[dim + 1];
-  }
-  if (distribute)
-  {
-    distdata_ = new MeshDistributedData(dim_);
   }
   //
   update_token();
@@ -349,6 +345,11 @@ bool MeshTopology::entities_exist(uint dim) const
   dolfin_assert(dim <= dim_);
   return (dim == 0 ?
             (ini_vertices_ == true) : connectivity_[dim][0].is_initialized());
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::set_distributed()
+{
+  if (distdata_ == NULL) distdata_ = new MeshDistributedData(dim_);
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const

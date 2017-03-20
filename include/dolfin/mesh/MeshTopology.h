@@ -77,7 +77,7 @@ public:
 
   /// Initialize topology of given maximum dimension and optionally set a flag
   /// to not distribute the topology
-  void init(uint dim, bool distribute = true);
+  void init(uint dim);
 
   /// Initialize topology entities for given maximum dimension
   /// Optionally specify the global number of entities for a distributed mesh.
@@ -121,6 +121,9 @@ public:
   bool entities_exist(uint dim) const;
 
   //--- Distributed data ------------------------------------------------------
+
+  /// Set the topology as distributed
+  void set_distributed();
 
   /// Return if the topology is distributed
   bool is_distributed() const;

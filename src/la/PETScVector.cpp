@@ -187,11 +187,7 @@ void PETScVector::get(real* block, uint m, const uint* rows) const
       else
       {
         dolfin_assert(mapping.size() > 0);
-#if (sun || __sun)
-        std::map<int, int>::const_iterator it = mapping.find(rows[i]);
-#else
-        std::map<const int, int>::const_iterator it = mapping.find(rows[i]);
-#endif
+        GhostMapping::const_iterator it = mapping.find(rows[i]);
         dolfin_assert(mapping.count(rows[i]) > 0);
         tmp[i] = it->second;
       }

@@ -178,11 +178,13 @@ namespace dolfin
     bool is_ghosted;
 
     //    Array<int> ghost_indices;
+
 #if (sun || __sun)
-    std::map<int, int> mapping;
+    typedef std::map<int, int>        GhostMapping;
 #else
-    std::map<const int, int> mapping;
+    typedef  std::map<const int, int> GhostMapping;
 #endif
+    GhostMapping mapping;
 
   };
 

@@ -161,8 +161,6 @@ namespace dolfin
     /// Return PETSc Vec pointer
     Vec vec() const;
 
-    friend class PETScMatrix;
-
     inline bool ghosted() { return is_ghosted;}
 
   private:

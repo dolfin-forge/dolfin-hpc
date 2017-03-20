@@ -121,8 +121,7 @@ void PETScVector::init(uint N, bool distributed)
 //-----------------------------------------------------------------------------
 PETScVector* PETScVector::copy() const
 {
-  PETScVector* v = new PETScVector(*this);
-  return v;
+  return new PETScVector(*this);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* values) const

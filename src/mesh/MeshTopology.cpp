@@ -30,6 +30,7 @@ MeshTopology::MeshTopology(Mesh& mesh) :
     ini_vertices_(false),
     connectivity_(NULL),
     distdata_(NULL),
+    frozen_(false),
     timestamp_(0)
 {
 }
@@ -41,6 +42,7 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     ini_vertices_(false),
     connectivity_(NULL),
     distdata_(NULL),
+    frozen_(false),
     timestamp_(0)
 {
   *this = other;
@@ -126,7 +128,7 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(CellType const& type)
+void MeshTopology::init(CellType const& type, bool frozen)
 {
   if (connectivity_ != NULL)
   {
@@ -139,6 +141,7 @@ void MeshTopology::init(CellType const& type)
   {
     connectivity_[d] = new MeshConnectivity[dim_ + 1];
   }
+  frozen_ = frozen;
   //
   update_token();
 }
@@ -233,6 +236,7 @@ void MeshTopology::clear()
   }
   connectivity_ = NULL;
   timestamp_ = 0;
+  frozen_ = false;
   num_vertices_ = 0;
   ini_vertices_ = false;
   dim_ = 0;
@@ -689,8 +693,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 //-----------------------------------------------------------------------------
 void MeshTopology::reorder() const
 {
-  //FIXME: this test ensures that boundary meshes are not reordered
-  if (mesh_.geometry().dim() == dim_)
+  //NOTE: this test ensures that boundary meshes are not reordered
+  if (!frozen_)
   {
     message(1, "MeshTopology : order");
     MeshTopology& topology = const_cast<MeshTopology&>(*this);

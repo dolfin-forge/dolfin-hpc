@@ -76,7 +76,7 @@ public:
   bool operator!=(MeshTopology const& other) const;
 
   /// Initialize topology for given cell type
-  void init(CellType const& type);
+  void init(CellType const& type, bool frozen = false);
 
   /// Initialize topology entities for given maximum dimension
   /// Optionally specify the global number of entities for a distributed mesh.
@@ -197,6 +197,9 @@ private:
 
   /// Distributed mesh topology data
   MeshDistributedData * distdata_;
+
+  //
+  bool frozen_;
 
   //
   int timestamp_;

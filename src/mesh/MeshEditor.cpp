@@ -80,10 +80,6 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
   // Initialize the topology to the given cell type and space
   mesh.init(type, EuclideanSpace(gdim));
 
-  // Create a shortcut to cell vertices connectivity to avoid checking its
-  // existence at every cell creation
-  this->cell_vertices_ = &mesh_->topology_(tdim_, 0);
-
   open_ = true;
 }
 //-----------------------------------------------------------------------------
@@ -95,7 +91,7 @@ void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
 void MeshEditor::init_vertices(real * coordinates, uint num_local,
                                uint num_global /* = 0 */)
 {
-  if(cell_vertices_ == NULL)
+  if(!open_)
   {
     error("MeshEditor : initializing vertices on empty editor");
   }
@@ -113,13 +109,17 @@ void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
 void MeshEditor::init_cells(uint * connectivity, uint num_local,
                             uint num_global /* = 0 */)
 {
-  if(cell_vertices_ == NULL)
+  if(!open_)
   {
     error("MeshEditor : initializing cells on empty editor");
   }
   // Initialize mesh data
   this->num_cells_ = num_local;
   mesh_->topology_.init(connectivity, tdim_, num_local, num_global);
+
+  // Create a shortcut to cell vertices connectivity to avoid checking its
+  // existence at every cell creation
+  this->cell_vertices_ = &mesh_->topology_(tdim_, 0);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_cells(Array<Array<uint> > const& connectivity,
@@ -155,7 +155,8 @@ void MeshEditor::add_cell(uint c, uint const * v)
   {
    error("MeshEditor : cell list full, %d cells added.", num_cells_);
   }
-  mesh_->topology_(tdim_, 0).set(c, v);
+  dolfin_assert(cell_vertices_ != NULL);
+  cell_vertices_->set(c, v);
   ++cell_index_;
 }
 //-----------------------------------------------------------------------------

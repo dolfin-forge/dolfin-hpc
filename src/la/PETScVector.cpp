@@ -160,16 +160,11 @@ void PETScVector::set(real* values)
 void PETScVector::add(real* values)
 {
   dolfin_assert(x_);
-
-  int m = static_cast<int>(size());
-  int* rows = new int[m];
-  for (int i = 0; i < m; i++)
-  {
-    rows[i] = i;
-  }
-
-  VecSetValues(x_, m, rows, values, ADD_VALUES);
-
+  PetscInt n;
+  VecGetLocalSize(x_, &n);
+  int * rows = new int[n];
+  for (int i = 0; i < n; i++) { rows[i] = i; }
+  VecSetValues(x_, n, rows, values, ADD_VALUES);
   delete[] rows;
 }
 //-----------------------------------------------------------------------------

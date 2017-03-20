@@ -127,55 +127,28 @@ PETScVector* PETScVector::copy() const
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* values) const
 {
-
-  real* data = 0;
-  VecGetArray(x, &data);
-  dolfin_assert(data);
-
-  for (uint i = 0; i < local_size(); i++)
-    values[i] = data[i];
-  VecRestoreArray(x, &data);
-
   dolfin_assert(x);
-
-  /*
-  int m = static_cast<int>(local_size());
-  int* rows = new int[m];
-  for (int i = 0; i < m; i++)
-    rows[i] = i;
-
-  VecGetValues(x, m, rows, values);
-
-  delete [] rows;
-  */
+  real const * data = NULL;
+  VecGetArrayRead(x, &data);
+  dolfin_assert(data);
+  PetscInt n;
+  VecGetLocalSize(x, &n);
+  std::copy(data, data + n, values);
+  VecRestoreArrayRead(x, &data);
+  dolfin_assert(x);
 }
 //-----------------------------------------------------------------------------
 void PETScVector::set(real* values)
 {
-  real* data = 0;
+  dolfin_assert(x);
+  real* data = NULL;
   VecGetArray(x, &data);
   dolfin_assert(data);
-
-  for (uint i = 0; i < local_size(); ++i)
-  {
-    data[i] = values[i];
-  }
+  PetscInt n;
+  VecGetLocalSize(x, &n);
+  std::copy(values, values + n, data);
   VecRestoreArray(x, &data);
-
   dolfin_assert(x);
-
-  /*
-  dolfin_assert(x);
-
-  int m = static_cast<int>(size());
-  int* rows = new int[m];
-  for (int i = 0; i < m; i++)
-    rows[i] = i;
-
-  VecSetValues(x, m, rows, values, INSERT_VALUES);
-
-  delete [] rows;
-  */
 }
 //-----------------------------------------------------------------------------
 void PETScVector::add(real* values)

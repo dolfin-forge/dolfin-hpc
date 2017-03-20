@@ -32,7 +32,7 @@ namespace dolfin
 Mesh::Mesh() :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
-    topology_(*this),
+    topology_(),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
@@ -45,7 +45,7 @@ Mesh::Mesh() :
 Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
-    topology_(*this),
+    topology_(),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
@@ -58,7 +58,7 @@ Mesh::Mesh(Mesh const& mesh) :
 Mesh::Mesh(std::string const& filename) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
-    topology_(*this),
+    topology_(),
     geometry_(),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),

@@ -22,8 +22,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology(Mesh& mesh) :
-    mesh_(mesh),
+MeshTopology::MeshTopology() :
     type_(NULL),
     dim_(0),
     num_vertices_(0),
@@ -36,7 +35,6 @@ MeshTopology::MeshTopology(Mesh& mesh) :
 }
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
-    mesh_(other.mesh_),
     dim_(0),
     num_vertices_(0),
     ini_vertices_(false),

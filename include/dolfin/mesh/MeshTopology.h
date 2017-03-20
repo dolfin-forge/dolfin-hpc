@@ -32,7 +32,6 @@
 namespace dolfin
 {
 
-class Mesh;
 class MeshConnectivity;
 class MeshDistributedData;
 
@@ -57,8 +56,8 @@ class MeshTopology: public Clonable<MeshTopology>
 
 public:
 
-  /// Create empty mesh topology
-  MeshTopology(Mesh& mesh);
+  /// Create mesh topology
+  MeshTopology();
 
   /// Copy constructor
   MeshTopology(MeshTopology const& other);
@@ -78,7 +77,7 @@ public:
   /// Initialize topology for given cell type
   void init(CellType const& type, bool frozen = false);
 
-  /// Initialize topology entities for given maximum dimension
+  /// Initialize topology entities for given dimension
   /// Optionally specify the global number of entities for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local entities will trigger an error.
@@ -178,9 +177,6 @@ private:
 
   /// Force reordering of mesh topology connectivities
   void reorder() const;
-
-  ///
-  Mesh& mesh_;
 
   ///
   CellType const * type_;

@@ -156,44 +156,15 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal, uint * connectivity
     error("MeshTopology : initializing entities of dimension %u but topology "
           "dimension is initialized", dim);
   }
-  // NOTE: cases have to be split that way to handle point meshes for which the
-  //       cell dimension is equal to the vertex dimension
-  // Vertices
-  if(dim == 0)
-  {
-    num_vertices_ = nlocal;
-    ini_vertices_ = true;
-  }
-  // Edges/Faces
-  if (dim < 0 && dim < dim_)
-  {
-    if(nlocal > 0 && num_vertices_ == 0)
-    {
-      error("MeshTopology : initializing non-zero number of entities of "
-            "dimension %u but topology containes zero vertices", dim);
-    }
-    // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(connectivity, nlocal,
-                                type_->num_vertices(dim));
-  }
-  // Cells
-  if (dim_ == dim)
-  {
-    if(nlocal > 0 && num_vertices_ == 0)
-    {
-      error("MeshTopology : initializing non-zero number of cells but topology "
-            "contains zero vertices");
-    }
-    // Well Well Well *erm* *erm* *erm* OOP gone wrong
-    connectivity_[dim_][0].init(connectivity, nlocal,
-                                type_->num_vertices(dim));
-  }
   // Overflow
   if (dim_ < dim)
   {
     error("MeshTopology : initializing entities of dimension %u but topology"
           "dimension is %u", dim, dim_);
   }
+  // NOTE: point meshes have cell dimension is equal to the vertex dimension
+  if(dim == 0) { num_vertices_ = nlocal; ini_vertices_ = true; }
+  connectivity_[dim][0].init(connectivity, nlocal, type_->num_vertices(dim));
   // Set size of distributed data
   if (distdata_ != NULL)
   {

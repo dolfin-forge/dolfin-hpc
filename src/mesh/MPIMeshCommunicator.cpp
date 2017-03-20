@@ -194,7 +194,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dis
 
   // Update topology
   dolfin_assert(vindex == distdata1.local_size());
-  topology.init(tdim);
+  topology.init(mesh.type());
   topology.set_distributed();
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;
@@ -497,7 +497,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
 
   // Update topology
   dolfin_assert(vindex == distdata1.local_size());
-  topology.init(tdim);
+  topology.init(mesh.type());
   topology.set_distributed();
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;

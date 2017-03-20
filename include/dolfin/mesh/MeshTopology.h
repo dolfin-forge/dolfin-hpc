@@ -75,9 +75,8 @@ public:
   /// Non-equality
   bool operator!=(MeshTopology const& other) const;
 
-  /// Initialize topology of given maximum dimension and optionally set a flag
-  /// to not distribute the topology
-  void init(uint dim);
+  /// Initialize topology for given cell type
+  void init(CellType const& type);
 
   /// Initialize topology entities for given maximum dimension
   /// Optionally specify the global number of entities for a distributed mesh.
@@ -182,6 +181,9 @@ private:
 
   ///
   Mesh& mesh_;
+
+  ///
+  CellType const * type_;
 
   /// Topological dimension
   uint dim_;

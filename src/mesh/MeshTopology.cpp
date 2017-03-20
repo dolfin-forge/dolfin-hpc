@@ -24,6 +24,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(Mesh& mesh) :
     mesh_(mesh),
+    type_(NULL),
     dim_(0),
     num_vertices_(0),
     ini_vertices_(false),
@@ -53,7 +54,7 @@ MeshTopology::~MeshTopology()
 MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
 {
   clear();
-
+  if (other.type_ != NULL) type_ = other.type_->clone();
   dim_ = other.dim_;
   num_vertices_ = other.num_vertices_;
   ini_vertices_ = other.ini_vertices_;
@@ -125,17 +126,18 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim)
+void MeshTopology::init(CellType const& type)
 {
   if (connectivity_ != NULL)
   {
     error("MeshTopology : clear instance before reinitializing");
   }
-  dim_ = dim;
-  connectivity_ = new MeshConnectivity*[dim + 1];
-  for (uint d = 0; d <= dim; ++d)
+  type_ = type.clone();
+  dim_ = type.dim();
+  connectivity_ = new MeshConnectivity*[dim_ + 1];
+  for (uint d = 0; d <= dim_; ++d)
   {
-    connectivity_[d] = new MeshConnectivity[dim + 1];
+    connectivity_[d] = new MeshConnectivity[dim_ + 1];
   }
   //
   update_token();
@@ -172,7 +174,7 @@ void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
     connectivity_[dim_][0].init(connectivity, num_local,
-                                mesh_.type().num_vertices(dim));
+                                type_->num_vertices(dim));
   }
   // Cells
   if (dim_ == dim)
@@ -184,7 +186,7 @@ void MeshTopology::init(uint * connectivity, uint dim, uint num_local,
     }
     // Well Well Well *erm* *erm* *erm* OOP gone wrong
     connectivity_[dim_][0].init(connectivity, num_local,
-                                mesh_.type().num_vertices(dim));
+                                type_->num_vertices(dim));
   }
   // Overflow
   if (dim_ < dim)
@@ -234,6 +236,8 @@ void MeshTopology::clear()
   num_vertices_ = 0;
   ini_vertices_ = false;
   dim_ = 0;
+  delete type_;
+  type_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::finalize()
@@ -272,7 +276,8 @@ void MeshTopology::finalize()
 //-----------------------------------------------------------------------------
 CellType const& MeshTopology::type(uint i) const
 {
-  return mesh_.type();
+  dolfin_assert(type_);
+  return *type_;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::remap(uint dim, Array<uint> const& mapping)
@@ -441,9 +446,8 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     MeshConnectivity& ev = connectivity_[dim][0];
 
     // Initialize local array of entities
-    CellType const& cell_type = mesh_.type();
-    uint const m = cell_type.num_entities(dim);
-    uint const n = cell_type.num_vertices(dim);
+    uint const m = type_->num_entities(dim);
+    uint const n = type_->num_vertices(dim);
     Array<uint> * vertex_entities = (this->size(0) == 0 ?
                                       NULL : new Array<uint> [this->size(0)]);
     uint ** entities = new uint*[m];
@@ -462,7 +466,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     ce.init(this->size(dim_), m);
     for (uint c = 0; c < cv.num_entities(); ++c)
     {
-      cell_type.create_entities(entities, dim, cv(c));
+      type_->create_entities(entities, dim, cv(c));
       for (uint e = 0; e < m; ++e)
       {
         key.set(entities[e], entities_list.size());
@@ -675,7 +679,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
    *
    */
 
-  if(mesh_.type().connectivity_needs_ordering(d0, d1))
+  if(type_->connectivity_needs_ordering(d0, d1))
   {
     reorder();
   }
@@ -689,12 +693,11 @@ void MeshTopology::reorder() const
   if (mesh_.geometry().dim() == dim_)
   {
     message(1, "MeshTopology : order");
-    CellType const& cell_type = mesh_.type();
     MeshTopology& topology = const_cast<MeshTopology&>(*this);
     uint const num_cells = this->size(dim_);
     for (uint i = 0; i < num_cells; ++i)
     {
-      cell_type.order_entities(topology, i);
+      type_->order_entities(topology, i);
     }
   }
 }

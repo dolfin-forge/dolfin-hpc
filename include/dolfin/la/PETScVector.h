@@ -170,9 +170,6 @@ private:
   // PETSc Vec pointer
   Vec x;
 
-  // True if we don't own the vector x points to
-  bool is_view;
-
   // True if the vector is distributed
   bool is_distributed;
 

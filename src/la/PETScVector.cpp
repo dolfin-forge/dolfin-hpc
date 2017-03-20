@@ -29,7 +29,6 @@ namespace dolfin
 PETScVector::PETScVector() :
     Variable("x", "a sparse vector"),
     x(0),
-    is_view(false),
     is_distributed(false),
     is_ghosted(false)
 {
@@ -39,7 +38,6 @@ PETScVector::PETScVector() :
 PETScVector::PETScVector(uint N, bool distributed) :
     Variable("x", "a sparse vector"),
     x(0),
-    is_view(false),
     is_distributed(false),
     is_ghosted(false)
 {
@@ -50,7 +48,6 @@ PETScVector::PETScVector(uint N, bool distributed) :
 PETScVector::PETScVector(Vec x) :
     Variable("x", "a vector"),
     x(x),
-    is_view(true),
     is_distributed(false),
     is_ghosted(false)
 {
@@ -60,7 +57,6 @@ PETScVector::PETScVector(Vec x) :
 PETScVector::PETScVector(PETScVector const& v) :
     Variable("x", "a vector"),
     x(0),
-    is_view(false),
     is_distributed(false),
     is_ghosted(false)
 {
@@ -69,7 +65,7 @@ PETScVector::PETScVector(PETScVector const& v) :
 //-----------------------------------------------------------------------------
 PETScVector::~PETScVector()
 {
-  if (x && !is_view)
+  if (x)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   VecDestroy(&x);
 #else
@@ -98,7 +94,7 @@ void PETScVector::init(uint N, bool distributed)
   }
   else
   {
-    if (x && !is_view)
+    if (x)
     {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
       VecDestroy(&x);

@@ -123,6 +123,9 @@ public:
   /// Compute all entities and connectivity
   void init() const;
 
+  /// Return if the topology should be reordered
+  virtual bool reordering() { return true; }
+
   //---
 
   /// Return exterior boundary of the mesh

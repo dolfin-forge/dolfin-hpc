@@ -75,6 +75,9 @@ public:
   /// Return whether it is the boundary of a boundary mesh
   bool is_boundary_of_boundary() const;
 
+  /// Return if the topology should be reordered
+  virtual bool reordering() { return false; }
+
 private:
 
   ///

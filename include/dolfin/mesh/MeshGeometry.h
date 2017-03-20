@@ -53,12 +53,6 @@ public:
   /// Return absolute geometric tolerance for given topological dimension
   real abs_tolerance(uint dim) const;
 
-  /// Return value of coordinate n in direction i
-  real& x(uint n, uint i);
-
-  /// Return value of coordinate n in direction i
-  real x(uint n, uint i) const;
-
   /// Return array of values for coordinate n
   real* x(uint n);
 
@@ -118,11 +112,6 @@ public:
   /// Display data
   void disp() const;
 
-  //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
-  void check() const;
-
   //--- TOKENIZED -------------------------------------------------------------
 
 public:
@@ -161,20 +150,6 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline real& MeshGeometry::x(uint n, uint i)
-{
-  dolfin_assert(n < size_ && i < dim_);
-  return coordinates_[n * dim_ + i];
-}
-
-//-----------------------------------------------------------------------------
-inline real MeshGeometry::x(uint n, uint i) const
-{
-  dolfin_assert(n < size_ && i < dim_);
-  return coordinates_[n * dim_ + i];
-}
-
-//-----------------------------------------------------------------------------
 inline real* MeshGeometry::x(uint n)
 {
   dolfin_assert(n < size_);

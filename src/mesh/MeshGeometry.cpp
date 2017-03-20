@@ -324,19 +324,13 @@ void MeshGeometry::disp() const
       cout << i << ":";
       for (uint d = 0; d < dim_; ++d)
       {
-        cout << " " << x(i, d);
+        cout << " " << x(i)[d];
       }
       cout << endl;
     }
   }
   //---
-  end();
-  skip();
-}
-//-----------------------------------------------------------------------------
-void MeshGeometry::check() const
-{
-  //FIXME: To be implemented
+  endblock();
 }
 //-----------------------------------------------------------------------------
 

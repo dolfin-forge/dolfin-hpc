@@ -40,8 +40,7 @@ PETScMatrix::PETScMatrix(Type type) :
     type_(type),
     has_sub_(false),
     rstart_(0),
-    rend_(0),
-    block_size_(0)
+    rend_(0)
 {
   checkType();
 }
@@ -53,8 +52,7 @@ PETScMatrix::PETScMatrix(Mat A) :
     is_distributed_(false),
     type_(default_matrix),
     rstart_(0),
-    rend_(0),
-    block_size_(0)
+    rend_(0)
 {
   // FIXME: get PETSc matrix type and set
   type_ = default_matrix;
@@ -67,8 +65,7 @@ PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed) :
     is_distributed_(false),
     type_(type),
     rstart_(0),
-    rend_(0),
-    block_size_(0)
+    rend_(0)
 {
   checkType();
   init(M, N, distributed);
@@ -78,8 +75,7 @@ PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
     A(0),
     is_view_(false),
-    type_(A.type_),
-    block_size_(0)
+    type_(A.type_)
 {
   *this = A;
 }
@@ -193,42 +189,21 @@ void PETScMatrix::init(uint M, uint N, uint const* nz)
   }
   else
   {
-    if (block_size_)
-    {
-      MatCreateSeqBAIJ(PETSC_COMM_SELF, block_size_, (int) M, (int) N, 1,
-                       PETSC_NULL, &A);
+    MatCreate(PETSC_COMM_SELF, &A);
+    MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, M, N);
+    setType();
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
-      MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+    MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
-      MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#endif
-      MatSetOption(A, MAT_USE_HASH_TABLE, PETSC_TRUE);
-#else
-      MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
-      MatSetOption(A, MAT_USE_HASH_TABLE);
-#endif
-      MatSetFromOptions(A);
-      MatZeroEntries(A);
-    }
-    else
-    {
-      MatCreate(PETSC_COMM_SELF, &A);
-      MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, M, N);
-      setType();
-#if PETSC_VERSION_MAJOR > 2
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
-      MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
-#else
-      MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+    MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #endif
 #else
-      MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif
-      MatSetFromOptions(A);
-      MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*) nz);
-      MatZeroEntries(A);
-    }
+    MatSetFromOptions(A);
+    MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*) nz);
+    MatZeroEntries(A);
   }
 
   MatGetOwnershipRange(A, &rstart_, &rend_);
@@ -342,46 +317,22 @@ void PETScMatrix::set(real const* block, uint m, uint const* rows, uint n,
                       uint const* cols)
 {
   dolfin_assert(A);
-
-  if (block_size_)
-  {
-    MatSetValuesBlocked(A, static_cast<int>(m) / block_size_,
-                        reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                        static_cast<int>(n) / block_size_,
-                        reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-                        INSERT_VALUES);
-  }
-  else
-  {
-    MatSetValues(A, static_cast<int>(m),
-                 reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                 static_cast<int>(n),
-                 reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-                 INSERT_VALUES);
-  }
+  MatSetValues(A, static_cast<int>(m),
+               reinterpret_cast<int*>(const_cast<uint*>(rows)),
+               static_cast<int>(n),
+               reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+               INSERT_VALUES);
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::add(real const* block, uint m, uint const* rows, uint n,
                       uint const* cols)
 {
   dolfin_assert(A);
-
-  if (block_size_)
-  {
-    MatSetValuesBlocked(A, static_cast<int>(m) / block_size_,
-                        reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                        static_cast<int>(n) / block_size_,
-                        reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-                        ADD_VALUES);
-  }
-  else
-  {
-    MatSetValues(A, static_cast<int>(m),
-                 reinterpret_cast<int*>(const_cast<uint*>(rows)),
-                 static_cast<int>(n),
-                 reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
-                 ADD_VALUES);
-  }
+  MatSetValues(A, static_cast<int>(m),
+               reinterpret_cast<int*>(const_cast<uint*>(rows)),
+               static_cast<int>(n),
+               reinterpret_cast<int*>(const_cast<uint*>(cols)), block,
+               ADD_VALUES);
 }
 //-----------------------------------------------------------------------------
 real PETScMatrix::norm(std::string norm_type) const

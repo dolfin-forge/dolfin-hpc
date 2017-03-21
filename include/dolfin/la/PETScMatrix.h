@@ -201,7 +201,6 @@ namespace dolfin
 
     PetscInt rstart_;
     PetscInt rend_;
-    PetscInt block_size_;
 
     std::map<int, int> mapping_;
 

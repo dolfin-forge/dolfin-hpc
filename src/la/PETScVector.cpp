@@ -65,12 +65,21 @@ PETScVector::PETScVector(PETScVector const& v) :
 //-----------------------------------------------------------------------------
 PETScVector::~PETScVector()
 {
+  clear();
+}
+//-----------------------------------------------------------------------------
+void PETScVector::clear()
+{
   if (x_)
+  {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  VecDestroy(&x_);
+    VecDestroy(&x_);
 #else
-  VecDestroy(x_);
+    VecDestroy(x_);
 #endif
+    is_ghosted_ = false;
+    is_distributed_ = false;
+  }
 }
 //-----------------------------------------------------------------------------
 void PETScVector::init(uint N)
@@ -80,30 +89,10 @@ void PETScVector::init(uint N)
 //-----------------------------------------------------------------------------
 void PETScVector::init(uint N, bool distributed)
 {
-  // Two cases:
-  //
-  //   1. Already allocated and dimension changes -> reallocate
-  //   2. Not allocated -> allocate
-  //
-  // Otherwise do nothing
+  // Do not reallocate
+  if (x_ && this->local_size() == N) { return; }
 
-  if ((x_ && this->size() == N) || (this->local_size() == N))
-  {
-    //    VecZeroEntries(x);
-    return;
-  }
-  else
-  {
-    if (x_)
-    {
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-      VecDestroy(&x_);
-#else
-      VecDestroy(x_);
-#endif
-      is_ghosted_ = false;
-    }
-  }
+  clear();
 
   // Create vector
   if (MPI::size() > 1 && distributed)

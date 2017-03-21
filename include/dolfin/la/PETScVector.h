@@ -167,6 +167,10 @@ public:
 
 private:
 
+
+  //
+  void clear();
+
   // PETSc Vec pointer
   Vec x_;
 

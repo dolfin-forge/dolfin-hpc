@@ -96,20 +96,14 @@ bool MeshConnectivity::operator==(MeshConnectivity const& other) const
     return false;
   }
   //
-  for (uint e = 0; e <= num_entities_; ++e)
+  if (!objptrcmp(offsets_, other.offsets_))
   {
-    if (offsets_[e] != other.offsets_[e])
-    {
-      return false;
-    }
+    return false;
   }
   //
-  for (uint i = 0; i < size_; ++i)
+  if (!cmp<uint>(size_, connections_, other.connections_))
   {
-    if (connections_[i] != other.connections_[i])
-    {
-      return false;
-    }
+    return false;
   }
   return true;
 }

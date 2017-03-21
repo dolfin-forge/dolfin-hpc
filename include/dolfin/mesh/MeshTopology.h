@@ -68,6 +68,9 @@ public:
   /// Assignment
   MeshTopology const& operator=(MeshTopology const& other);
 
+  /// Swap instances
+  void swap(MeshTopology& other);
+
   /// Equality
   bool operator==(MeshTopology const& other) const;
 
@@ -89,9 +92,6 @@ public:
 
   /// Finalize: check, reorder, renumber
   void finalize();
-
-  /// Swap instances
-  void swap(MeshTopology& other);
 
   ///
   CellType const& type(uint i) const;

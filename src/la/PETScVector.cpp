@@ -105,7 +105,6 @@ void PETScVector::init(uint N, bool distributed)
   else
   {
     VecCreate(PETSC_COMM_SELF, &x_);
-
     VecSetSizes(x_, PETSC_DECIDE, N);
     VecSetFromOptions(x_);
   }
@@ -233,31 +232,25 @@ void PETScVector::zero()
 //-----------------------------------------------------------------------------
 uint PETScVector::size() const
 {
+  if(x_ == NULL) return 0;
   int n = 0;
-  if (x_)
-  {
-    VecGetSize(x_, &n);
-  }
-
+  VecGetSize(x_, &n);
   return static_cast<uint>(n);
 }
 //-----------------------------------------------------------------------------
 uint PETScVector::local_size() const
 {
+  dolfin_assert(x_);
   int n = 0;
-  if (x_)
-  {
-    VecGetLocalSize(x_, &n);
-  }
-
+  VecGetLocalSize(x_, &n);
   return static_cast<uint>(n);
 }
 //-----------------------------------------------------------------------------
 uint PETScVector::offset() const
 {
+  dolfin_assert(x_);
   int low, high;
-  if (x_) VecGetOwnershipRange(x_, &low, &high);
-
+  VecGetOwnershipRange(x_, &low, &high);
   return static_cast<uint>(low);
 }
 //-----------------------------------------------------------------------------

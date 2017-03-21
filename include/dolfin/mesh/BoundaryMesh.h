@@ -76,7 +76,7 @@ public:
   bool is_boundary_of_boundary() const;
 
   /// Return if the topology should be reordered
-  virtual bool reordering() { return false; }
+  virtual bool reordering() const { return false; }
 
 private:
 

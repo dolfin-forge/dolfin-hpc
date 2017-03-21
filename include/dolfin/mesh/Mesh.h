@@ -131,7 +131,7 @@ public:
   void init() const;
 
   /// Return if the topology should be reordered
-  virtual bool reordering() { return true; }
+  virtual bool reordering() const { return true; }
 
   //---
 

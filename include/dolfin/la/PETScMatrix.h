@@ -191,7 +191,6 @@ namespace dolfin
     // PETSc matrix type
     Type type_;
 
-    Mat A_sub;
     bool has_sub_;
 
     Mat *AA_sub;

@@ -44,6 +44,15 @@ public:
   /// Assignment
   MeshGeometry const& operator=(MeshGeometry const& geometry);
 
+  /// Equality
+  bool operator==(MeshGeometry const& other) const;
+
+  /// Non-equality
+  bool operator!=(MeshGeometry const& other) const;
+
+  /// Swap instances
+  void swap(MeshGeometry& other);
+
   /// Return Euclidean dimension of coordinate system
   uint dim() const;
 

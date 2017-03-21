@@ -82,6 +82,14 @@ namespace dolfin
   /// Facility to compare arrays
 template <class T> bool cmp(size_t N, T const * x0, T const * x1)
 {
+  if (x0 == x1)
+  {
+    return true;
+  }
+  else if ((x0 == NULL || x1 == NULL))
+  {
+    return false;
+  }
   for (size_t ii = 0; ii < N; ++ii)
   {
     if (x0[ii] != x1[ii])

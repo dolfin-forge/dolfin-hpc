@@ -11,6 +11,8 @@
 
 #include <dolfin/log/log.h>
 
+#include<typeinfo>
+
 namespace dolfin
 {
 
@@ -24,6 +26,17 @@ struct Space
 
   /// Destructor
   virtual ~Space() {}
+
+  /// Equality
+  bool operator==(Space const& other) const
+  {
+    if(typeid(*this) != typeid(other)) return false;
+    return (this->dim() == other.dim());
+  }
+
+  /// Non-equality
+  bool operator!=(Space const& other) const
+  { return !(*this == other); }
 
   /// Space dimension
   virtual uint dim() const = 0;
@@ -52,11 +65,21 @@ public:
   {
   }
 
+  /// Equality
+  bool operator==(EuclideanSpace const& other) const
+  { return dim_ == other.dim_; }
+
+  /// Non-equality
+  bool operator!=(EuclideanSpace const& other) const
+  { return dim_ != other.dim_; }
+
+  /// Return dimension
   inline uint dim() const
   {
     return dim_;
   }
 
+  /// Return clone
   inline EuclideanSpace * clone() const
   {
     return Clonable<EuclideanSpace>::clone();

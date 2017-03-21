@@ -82,6 +82,9 @@ public:
   /// Assignment
   Mesh const& operator=(Mesh const& mesh);
 
+  /// Swap instances
+  void swap(Mesh& other);
+
   /// Identity
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;

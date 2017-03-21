@@ -101,14 +101,35 @@ Mesh const& Mesh::operator=(Mesh const& other)
   return *this;
 }
 //-----------------------------------------------------------------------------
+void Mesh::swap(Mesh& other)
+{
+  std::swap(cell_type_, other.cell_type_);
+  topology_.swap(other.topology_);
+  std::swap(space_, other.space_);
+  geometry_.swap(other.geometry_);
+  std::swap(exterior_boundary_, other.exterior_boundary_);
+  std::swap(interior_boundary_, other.interior_boundary_);
+  std::swap(intersection_detector_, other.intersection_detector_);
+  std::swap(periodic_mappings_, other.periodic_mappings_);
+  std::swap(timestamp_, other.timestamp_);
+}
+//-----------------------------------------------------------------------------
 bool Mesh::operator ==(Mesh const& other) const
 {
-  return this->hash() == other.hash();
+  if (this->topology() != other.topology())
+  {
+    return false;
+  }
+  if (this->geometry() != other.geometry())
+  {
+    return false;
+  }
+  return true;
 }
 //-----------------------------------------------------------------------------
 bool Mesh::operator !=(Mesh const& other) const
 {
-  return this->hash() != other.hash();
+  return !(*this == other);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(CellType const& type, Space const& space)

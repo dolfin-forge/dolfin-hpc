@@ -68,6 +68,9 @@ public:
   /// Assignment
   MeshTopology const& operator=(MeshTopology const& other);
 
+  /// Swap instances
+  void swap(MeshTopology& other);
+
   /// Equality
   bool operator==(MeshTopology const& other) const;
 

@@ -109,7 +109,6 @@ void PETScVector::init(uint N, bool distributed)
   if (MPI::size() > 1 && distributed)
   {
     is_distributed_ = true;
-    //    VecCreateMPI(MPI::DOLFIN_COMM, PETSC_DECIDE, N, &x);
 #ifdef HAVE_MPI
     VecCreateMPI(MPI::DOLFIN_COMM, N, PETSC_DETERMINE, &x_);
 #endif

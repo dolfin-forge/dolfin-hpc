@@ -124,29 +124,26 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
 #endif
   }
 
-  // FIXME: add number of diagonal as parameter
-
   // Create a sparse matrix in compressed row format
   if (dolfin::MPI::size() > 1 && distributed)
   {
     is_distributed_ = true;
-    // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
-    // and number of off-diagonal non-zeroes (50 in this case).
+    // Create PETSc parallel matrix with a guess for number of diagonal and
+    /// number of off-diagonal non-zeroes.
     // Note that guessing too high leads to excessive memory usage.
-    // In order to not waste any memory one would need to specify d_nnz and o_nnz.
 #ifdef HAVE_MPI
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
-    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, M, N,
-                 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE,
+                 PETSC_DETERMINE, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #else
-    MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-        M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
+    MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, M, N, PETSC_DETERMINE,
+                    PETSC_DETERMINE, 120, PETSC_NULL, 120, PETSC_NULL, &A);
 #endif
 #endif
   }
   else
   {
-    // Create PETSc sequential matrix with a guess for number of non-zeroes (50 in thise case)
+    // Create PETSc sequential matrix with a guess for number of non-zeroes
     MatCreateSeqAIJ(PETSC_COMM_SELF, M, N, 50, PETSC_NULL, &A);
 
     setType();

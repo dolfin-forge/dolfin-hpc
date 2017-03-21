@@ -35,7 +35,6 @@ namespace dolfin
 PETScMatrix::PETScMatrix(Type type) :
     Variable("A", "a sparse matrix"),
     A(0),
-    is_view_(false),
     is_distributed_(false),
     type_(type),
     has_sub_(false),
@@ -48,7 +47,6 @@ PETScMatrix::PETScMatrix(Type type) :
 PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
     A(A),
-    is_view_(true),
     is_distributed_(false),
     type_(default_matrix),
     rstart_(0),
@@ -61,7 +59,6 @@ PETScMatrix::PETScMatrix(Mat A) :
 PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed) :
     Variable("A", "a sparse matrix"),
     A(0),
-    is_view_(false),
     is_distributed_(false),
     type_(type),
     rstart_(0),
@@ -74,7 +71,6 @@ PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed) :
 PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
     A(0),
-    is_view_(false),
     type_(A.type_)
 {
   *this = A;
@@ -82,7 +78,7 @@ PETScMatrix::PETScMatrix(const PETScMatrix& A) :
 //-----------------------------------------------------------------------------
 PETScMatrix::~PETScMatrix()
 {
-  if (A && !is_view_)
+  if (A)
   {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroy(&A);

@@ -185,9 +185,6 @@ namespace dolfin
     // PETSc Mat pointer
     Mat A;
 
-    // True if we do not own the matrix A points to
-    bool is_view_;
-
     // True if the matrix is distributed
     bool is_distributed_;
 

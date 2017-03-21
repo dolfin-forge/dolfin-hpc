@@ -189,10 +189,7 @@ private:
 
 };
 
-/// Output of PETScVector
-LogStream& operator<<(LogStream& stream, const PETScVector& x);
-
-}
+} /* namespace dolfin */
 
 #endif /* HAVE_PETSC */
 

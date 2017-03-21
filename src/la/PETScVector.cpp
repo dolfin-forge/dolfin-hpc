@@ -487,12 +487,6 @@ LinearAlgebraFactory& PETScVector::factory() const
   return PETScFactory::instance();
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream, PETScVector const& x)
-{
-  stream << "[ PETSc vector of size " << x.size() << " ]";
-  return stream;
-}
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

@@ -32,46 +32,41 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(Type type) :
+PETScMatrix::PETScMatrix() :
     Variable("A", "a sparse matrix"),
     A(0),
     is_distributed_(false),
-    type_(type),
     has_sub_(false),
     rstart_(0),
     rend_(0)
 {
-  checkType();
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
     A(A),
     is_distributed_(false),
-    type_(default_matrix),
     rstart_(0),
     rend_(0)
 {
-  // FIXME: get PETSc matrix type and set
-  type_ = default_matrix;
 }
 //-----------------------------------------------------------------------------
-PETScMatrix::PETScMatrix(uint M, uint N, Type type, bool distributed) :
+PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
     Variable("A", "a sparse matrix"),
     A(0),
     is_distributed_(false),
-    type_(type),
     rstart_(0),
     rend_(0)
 {
-  checkType();
   init(M, N, distributed);
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
     A(0),
-    type_(A.type_)
+    is_distributed_(false),
+    rstart_(0),
+    rend_(0)
 {
   *this = A;
 }
@@ -108,13 +103,11 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
 {
   // Free previously allocated memory if necessary
   if (A)
-  {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    MatDestroy(&A);
+  MatDestroy(&A);
 #else
-    MatDestroy(A);
+  MatDestroy(A);
 #endif
-  }
 
   // Create a sparse matrix in compressed row format
   if (dolfin::MPI::size() > 1 && distributed)
@@ -138,8 +131,6 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
     // Create PETSc sequential matrix with a guess for number of non-zeroes
     MatCreateSeqAIJ(PETSC_COMM_SELF, M, N, 50, PETSC_NULL, &A);
 
-    setType();
-
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
     MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
@@ -157,6 +148,8 @@ void PETScMatrix::init(uint M, uint N, bool distributed)
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N, uint const* nz)
 {
+  dolfin_assert(is_distributed_ == false);
+
   // Free previously allocated memory if necessary
   if (A)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -166,47 +159,30 @@ void PETScMatrix::init(uint M, uint N, uint const* nz)
 #endif
 
   // Create a sparse matrix in compressed row format
-  if (is_distributed_)
-  {
-    // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
-    // and number of off-diagonal non-zeroes (50 in this case).
-    // Note that guessing too high leads to excessive memory usage.
-    // In order to not waste any memory one would need to specify d_nnz and o_nnz.
-#ifdef HAVE_MPI
+  MatCreate(PETSC_COMM_SELF, &A);
+  MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, M, N);
+  MatSetType(A, MATSEQAIJ);
 
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR >= 3
-    MatCreateAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE, M, N,
-                 120, PETSC_NULL, 120, PETSC_NULL, &A);
-#else
-    MatCreateMPIAIJ(dolfin::MPI::DOLFIN_COMM, PETSC_DECIDE, PETSC_DECIDE,
-                    M, N, 120, PETSC_NULL, 120, PETSC_NULL, &A);
-#endif
-#endif
-  }
-  else
-  {
-    MatCreate(PETSC_COMM_SELF, &A);
-    MatSetSizes(A, PETSC_DECIDE, PETSC_DECIDE, M, N);
-    setType();
 #if PETSC_VERSION_MAJOR > 2
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 0
-    MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
+  MatSetOption(A, MAT_KEEP_NONZERO_PATTERN, PETSC_TRUE);
 #else
-    MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #endif
 #else
-    MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
+  MatSetOption(A, MAT_KEEP_ZEROED_ROWS);
 #endif
-    MatSetFromOptions(A);
-    MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*) nz);
-    MatZeroEntries(A);
-  }
+  MatSetFromOptions(A);
+  MatSeqAIJSetPreallocation(A, PETSC_DEFAULT, (int*) nz);
+  MatZeroEntries(A);
 
   MatGetOwnershipRange(A, &rstart_, &rend_);
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
 {
+  dolfin_assert(is_distributed_ == true);
+
   // Free previously allocated memory if necessary
   if (A)
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
@@ -214,6 +190,7 @@ void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
 #else
   MatDestroy(A);
 #endif
+
   // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
   // and number of off-diagonal non-zeroes (50 in this case).
   // Note that guessing too high leads to excessive memory usage.
@@ -604,13 +581,7 @@ const PETScMatrix& PETScMatrix::operator=(const PETScMatrix& A)
 //-----------------------------------------------------------------------------
 void PETScMatrix::dup(GenericMatrix& A)
 {
-  //  MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_DO_NOT_COPY_VALUES, &this->A);
   MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_COPY_VALUES, &this->A);
-}
-//-----------------------------------------------------------------------------
-PETScMatrix::Type PETScMatrix::type() const
-{
-  return type_;
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::disp(uint precision) const
@@ -666,96 +637,13 @@ Mat PETScMatrix::mat() const
   return A;
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::setType()
-{
-  MatType mat_type = getPETScType();
-  MatSetType(A, mat_type);
-}
-//-----------------------------------------------------------------------------
-void PETScMatrix::checkType()
-{
-  switch (type_)
-    {
-    case default_matrix:
-      return;
-    case spooles:
-#if !PETSC_HAVE_SPOOLES
-      warning(
-          "PETSc has not been complied with Spooles. Using default matrix type");
-      type_ = default_matrix;
-#endif
-      return;
-    case superlu:
-#if !PETSC_HAVE_SUPERLU
-      warning("PETSc has not been complied with Super LU. Using default matrix type");
-      type_ = default_matrix;
-#endif
-      return;
-    case umfpack:
-#if !PETSC_HAVE_UMFPACK
-      warning(
-          "PETSc has not been complied with UMFPACK. Using default matrix type");
-      type_ = default_matrix;
-#endif
-      return;
-    default:
-      warning("Requested matrix type unknown. Using default.");
-      type_ = default_matrix;
-      break;
-    }
-}
-//-----------------------------------------------------------------------------
-MatType PETScMatrix::getPETScType() const
-{
-  switch (type_)
-    {
-    case default_matrix:
-      if (is_distributed_) return MATMPIAIJ;
-      else return MATSEQAIJ;
-#if PETSC_VERSION_MAJOR > 2
-    case spooles:
-#if PETSC_VERSION_MINOR > 3
-      warning("Spooles interface has been removed in PETSc 3.4");
-      return "default";
-#elif PETSC_VERSION_MINOR > 1
-      return MATSOLVERSPOOLES;
-#else
-      return MAT_SOLVER_SPOOLES;
-#endif
-    case superlu:
-#if PETSC_VERSION_MINOR > 1
-      return MATSOLVERSUPERLU;
-#else
-      return MAT_SOLVER_SUPERLU;
-#endif
-    case umfpack:
-#if PETSC_VERSION_MINOR > 1
-      return MATSOLVERUMFPACK;
-#else
-      return MAT_SOLVER_UMFPACK;
-#endif
-    default:
-      return "default";
-#else
-      case spooles:
-      return MATSEQAIJSPOOLES;
-      case superlu:
-      return MATSUPERLU;
-      case umfpack:
-      return MATUMFPACK;
-      default:
-      return "default";
-#endif
-    }
-}
-//-----------------------------------------------------------------------------
 void PETScMatrix::print(MatInfo const& info) const
 {
   message("%24s : %lu", "block_size", uidx(info.block_size));
   message("%24s : %lu", "nz_allocated", uidx(info.nz_allocated));
   message("%24s : %lu", "nz_used", uidx(info.nz_used));
   message("%24s : %lu", "nz_unneeded", uidx(info.nz_unneeded));
-  message("%24s : %s", "memory", human_readable(info.memory).c_str());
+  message("%24s : %s" , "memory", human_readable(info.memory).c_str());
   message("%24s : %lu", "assemblies", uidx(info.assemblies));
   message("%24s : %lu", "mallocs", uidx(info.mallocs));
   message("%24s : %lu", "fill_ratio_given", uidx(info.fill_ratio_given));

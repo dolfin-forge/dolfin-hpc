@@ -42,20 +42,11 @@ namespace dolfin
   {
   public:
 
-    /// PETSc sparse matrix types
-    enum Type
-    {
-      default_matrix, // Default matrix type
-      spooles,        // Spooles
-      superlu,        // Super LU
-      umfpack         // UMFPACK
-    };
-
     /// Create empty matrix
-    explicit PETScMatrix(Type type=default_matrix);
+    explicit PETScMatrix();
 
     /// Create matrix of local dimension M x N
-    PETScMatrix(uint M, uint N, Type type=default_matrix, bool distributed = true);
+    PETScMatrix(uint M, uint N, bool distributed = true);
 
     /// Copy constructor
     explicit PETScMatrix(const PETScMatrix& A);
@@ -146,9 +137,6 @@ namespace dolfin
     /// Return PETSc Mat pointer
     Mat mat() const;
 
-    /// Return PETSc matrix type
-    Type type() const;
-
     /// Return norm of matrix
     enum Norm {l1, linf, frobenius};
     real norm(const Norm type=l1) const;
@@ -170,15 +158,6 @@ namespace dolfin
     ///
     void getrows_offproc(std::set<uint> const& rows);
 
-    // Set PETSc matrix type
-    void setType();
-
-    // Return PETSc matrix type
-    MatType getPETScType() const;
-
-    // Check that requested type has been compiled into PETSc
-    void checkType();
-
     // Print info
     void print(MatInfo const& info) const;
 
@@ -187,9 +166,6 @@ namespace dolfin
 
     // True if the matrix is distributed
     bool is_distributed_;
-
-    // PETSc matrix type
-    Type type_;
 
     bool has_sub_;
 

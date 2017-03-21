@@ -43,7 +43,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
   }
   dolfin::uint nc0 = refcell.num_cells();
 
-  dolfin::uint const N = std::pow(2.0, (int) (5 - cell.dim()));
+  dolfin::uint const N = 1 << (5 - cell.dim());
   for (dolfin::uint l = 1; l <= N; ++l)
   {
     refcell.refine();
@@ -55,6 +55,12 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
       vi.set(*v, v->index());
     }
   }
+  Mesh refcell1(refcell);
+  Mesh refcell2(refcell);
+  dolfin_assert(refcell1 == refcell);
+  dolfin_assert(refcell2 == refcell);
+  refcell1.swap(refcell2);
+  dolfin_assert(refcell1 == refcell2);
 }
 //-----------------------------------------------------------------------------
 START_TEST( test_PointCell )

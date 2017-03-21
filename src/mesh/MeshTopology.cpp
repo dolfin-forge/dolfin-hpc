@@ -16,6 +16,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshConnectivity.h>
 
+#include <algorithm>
 #include <ctime>
 
 namespace dolfin
@@ -244,6 +245,18 @@ void MeshTopology::finalize()
   }
   // Do not renumber automatically !
   // This would cause issues for boundary meshes and some mesh algorithms.
+}
+//-----------------------------------------------------------------------------
+void MeshTopology::swap(MeshTopology& other)
+{
+  std::swap(type_, other.type_);
+  std::swap(dim_, other.dim_);
+  std::swap(num_vertices_, other.num_vertices_);
+  std::swap(ini_vertices_, other.ini_vertices_);
+  std::swap(connectivity_, other.connectivity_);
+  std::swap(distdata_, other.distdata_);
+  std::swap(frozen_, other.frozen_);
+  std::swap(timestamp_, other.timestamp_);
 }
 //-----------------------------------------------------------------------------
 CellType const& MeshTopology::type(uint i) const

@@ -90,6 +90,9 @@ public:
   /// Finalize: check, reorder, renumber
   void finalize();
 
+  /// Swap instances
+  void swap(MeshTopology& other);
+
   ///
   CellType const& type(uint i) const;
 

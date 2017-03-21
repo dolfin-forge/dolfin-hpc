@@ -68,6 +68,24 @@ MeshGeometry const& MeshGeometry::operator=(MeshGeometry const& other)
   return *this;
 }
 //-----------------------------------------------------------------------------
+bool MeshGeometry::operator==(MeshGeometry const& other) const
+{
+  if (!objptrcmp(space_, other.space_))
+  {
+    return false;
+  }
+  if (size_ != other.size_)
+  {
+    return false;
+  }
+  return cmp<real>(size_, coordinates_, other.coordinates_);
+}
+//-----------------------------------------------------------------------------
+bool MeshGeometry::operator!=(MeshGeometry const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
 uint MeshGeometry::dim() const
 {
   return dim_;

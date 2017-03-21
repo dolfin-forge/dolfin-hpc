@@ -158,6 +158,9 @@ public:
 
 private:
 
+  //
+  void clear();
+
   // Initialize M x N matrix with a given number of nonzeros per row
   void init(uint M, uint N, const uint* nz);
 
@@ -171,15 +174,14 @@ private:
   // Print info
   void print(MatInfo const& info) const;
 
-  // PETSc Mat pointer
+  // Matrix
   Mat A;
+
+  // Sub-matrices
+  Mat * AA_sub;
 
   // True if the matrix is distributed
   bool is_distributed_;
-
-  bool has_sub_;
-
-  Mat *AA_sub;
 
   PetscInt rstart_;
   PetscInt rend_;

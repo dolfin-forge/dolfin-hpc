@@ -34,9 +34,9 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix() :
     Variable("A", "a sparse matrix"),
-    A(0),
+    A(NULL),
+    AA_sub(NULL),
     is_distributed_(false),
-    has_sub_(false),
     rstart_(0),
     rend_(0)
 {
@@ -45,6 +45,7 @@ PETScMatrix::PETScMatrix() :
 PETScMatrix::PETScMatrix(Mat A) :
     Variable("A", "a sparse matrix"),
     A(A),
+    AA_sub(NULL),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -53,7 +54,8 @@ PETScMatrix::PETScMatrix(Mat A) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
     Variable("A", "a sparse matrix"),
-    A(0),
+    A(NULL),
+    AA_sub(NULL),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -63,7 +65,8 @@ PETScMatrix::PETScMatrix(uint M, uint N, bool distributed) :
 //-----------------------------------------------------------------------------
 PETScMatrix::PETScMatrix(const PETScMatrix& A) :
     Variable("A", "PETSc matrix"),
-    A(0),
+    A(NULL),
+    AA_sub(NULL),
     is_distributed_(false),
     rstart_(0),
     rend_(0)
@@ -72,6 +75,11 @@ PETScMatrix::PETScMatrix(const PETScMatrix& A) :
 }
 //-----------------------------------------------------------------------------
 PETScMatrix::~PETScMatrix()
+{
+  clear();
+}
+//-----------------------------------------------------------------------------
+void PETScMatrix::clear()
 {
   if (A)
   {
@@ -82,16 +90,15 @@ PETScMatrix::~PETScMatrix()
 #endif
   }
 
-  if (has_sub_)
+  if (AA_sub)
   {
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-    MatDestroy(&AA_sub[0]);
+    MatDestroyMatrices(1, &AA_sub);
 #else
-    MatDestroy(AA_sub[0]);
+    MatDestroyMatrices(1, AA_sub);
 #endif
+    AA_sub = NULL;
   }
-
-  // FIXME destroy sub
 }
 //-----------------------------------------------------------------------------
 void PETScMatrix::init(uint M, uint N)
@@ -102,12 +109,7 @@ void PETScMatrix::init(uint M, uint N)
 void PETScMatrix::init(uint M, uint N, bool distributed)
 {
   // Free previously allocated memory if necessary
-  if (A)
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  MatDestroy(&A);
-#else
-  MatDestroy(A);
-#endif
+  clear();
 
   // Create a sparse matrix in compressed row format
   if (dolfin::MPI::size() > 1 && distributed)
@@ -151,12 +153,7 @@ void PETScMatrix::init(uint M, uint N, uint const* nz)
   dolfin_assert(is_distributed_ == false);
 
   // Free previously allocated memory if necessary
-  if (A)
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  MatDestroy(&A);
-#else
-  MatDestroy(A);
-#endif
+  clear();
 
   // Create a sparse matrix in compressed row format
   MatCreate(PETSC_COMM_SELF, &A);
@@ -184,12 +181,7 @@ void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
   dolfin_assert(is_distributed_ == true);
 
   // Free previously allocated memory if necessary
-  if (A)
-#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
-  MatDestroy(&A);
-#else
-  MatDestroy(A);
-#endif
+  clear();
 
   // Create PETSc parallel matrix with a guess for number of diagonal (50 in this case)
   // and number of off-diagonal non-zeroes (50 in this case).
@@ -349,7 +341,7 @@ void PETScMatrix::getrow(uint row, Array<uint>& columns,
   else
   {
     // Non-local row
-    if (!has_sub_)
+    if (AA_sub)
     {
       error("Trying to get ghosted row %d but no SubMatrices defined.\n"
             "Ownership range %d, %d",
@@ -401,7 +393,7 @@ void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
   ISCreateGeneral(PETSC_COMM_SELF, size(0), _cols, &icol);
 #endif
 
-  if (!has_sub_)
+  if (!AA_sub)
   {
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
   }
@@ -409,8 +401,6 @@ void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
   {
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);
   }
-
-  has_sub_ = true;
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
   ISDestroy(&irow);

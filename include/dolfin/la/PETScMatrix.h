@@ -54,7 +54,7 @@ namespace dolfin
     /// Create empty matrix
     explicit PETScMatrix(Type type=default_matrix);
 
-    /// Create M x N matrix
+    /// Create matrix of local dimension M x N
     PETScMatrix(uint M, uint N, Type type=default_matrix, bool distributed = true);
 
     /// Copy constructor
@@ -88,10 +88,10 @@ namespace dolfin
 
     //--- Implementation of the GenericMatrix interface --
 
-    /// Initialize M x N matrix and distribute by default
+    /// Initialize matrix of local dimension M x N, distributed by default
     void init(uint M, uint N);
 
-    /// Initialize M x N matrix and distribute if specified
+    /// Initialize matrix of local dimension M x N, distributed if specified
     void init(uint M, uint N, bool distributed);
 
     /// Get block of values

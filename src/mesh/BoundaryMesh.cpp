@@ -235,7 +235,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
   message(1, "BoundaryMesh : compute %s boundary",
           (full ? "full" : (interior ? "interior" : "exterior")));
 
-  if (tdim == 1)
+  if (tdim <= 1)
   {
     vertex_map_.clear();
     for (VertexIterator v(mesh); !v.end(); ++v)

@@ -95,16 +95,13 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   }
 
   // Make sure we have the facet - cell connectivity
-  mesh().init(tdim - 1, tdim);
+  mesh().init(mesh().type().facet_dim(), tdim);
 
   // Create local data for application of boundary conditions
   FiniteElementSpace const& space = form.trial_space();
   ScratchSpace scratch(space);
 
   // Iterate over the facets of the mesh
-#ifndef NO_PROGRESS_BAR
-  Progress p("Applying periodic boundary conditions", mesh().size(tdim - 1));
-#endif
   for (FacetIterator facet(mesh()); !facet.end(); ++facet)
   {
     // Get cell to which facet belongs (there may be two, but pick first)
@@ -210,9 +207,6 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
         }
       }
     }
-#ifndef NO_PROGRESS_BAR
-    p++;
-#endif
   }
 
   // Given pairs <dofG, dofH>

@@ -62,8 +62,8 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   uint const gdim = mesh.geometry().dim();
   uint const maxgdim = Space::MAX_DIMENSION;
   Cell c0(mesh, 0);
-  mesh.init(tdim, tdim - 1);
-  mesh.init(tdim - 1, tdim);
+  mesh.init(tdim, mesh.type().facet_dim());
+  mesh.init(mesh.type().facet_dim(), tdim);
 
   // Collect facets with one vertex inside the subdomain
   BoundaryMesh& boundary = mesh.exterior_boundary();

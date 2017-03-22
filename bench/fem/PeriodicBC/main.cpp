@@ -206,7 +206,7 @@ void write_facets(std::string name, Mesh& mesh, std::string set,
   std::stringstream ss;
   ss << name << "_" + set + "facets" << dolfin::MPI::size() << "P.pvd";
   MeshFunction<bool> mf(mesh, 0);
-  mesh.init(mesh.topology().dim() - 1, 0);
+  mesh.init(mesh.type().facet_dim(), 0);
   for(_set<uint>::const_iterator it = S.begin(); it != S.end(); ++it)
   {
     Facet f(mesh, *it);

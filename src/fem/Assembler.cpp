@@ -80,7 +80,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
     if (form.num_exterior_facet_integrals() > 0 ||
         form.num_interior_facet_integrals() > 0)
     {
-      facet_domains = new MeshFunction<uint>(mesh, tdim - 1);
+      facet_domains = new MeshFunction<uint>(mesh, mesh.type().facet_dim());
       (*facet_domains) = 1;
       sub_domain.mark(*facet_domains, 0);
     }
@@ -321,7 +321,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 
   Mesh& mesh = dofmaps[0].mesh();
   uint const tdim = mesh.topology().dim();
-  uint const N = mesh.size(tdim - 1);
+  uint const N = mesh.size(mesh.type().facet_dim());
   uint const form_rank = ufc.form.rank();
   uint const coef_size = coefficients.size();
   ufc::interior_facet_integral * integral = ufc.interior_facet_integrals[0];

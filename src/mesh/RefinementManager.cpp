@@ -107,7 +107,8 @@ void RefinementManager::init()
   edge_forbidden_.init(mesh_, 1);
 
   DistributedData& distdata = mesh_.distdata()[0];
-  for (SharedIterator it(mesh_.distdata()[tdim - 1]); !it.end(); ++it)
+  uint const facet_dim = mesh_.type().facet_dim();
+  for (SharedIterator it(mesh_.distdata()[facet_dim]); !it.end(); ++it)
   {
     Facet f(mesh_, it.index());
     boundary_cells_.insert(f.entities(tdim)[0]);

@@ -65,7 +65,7 @@ void UFCHalo::init()
   clear();
   uint const tdim = mesh_.topology().dim();
   uint const gdim = mesh_.geometry().dim();
-  uint const facet_dim = tdim - 1;
+  uint const facet_dim = mesh_.type().facet_dim();
   DistributedData& distdata = mesh_.distdata()[facet_dim];
 
   //
@@ -208,7 +208,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
 
   uint const tdim = mesh.topology().dim();
   uint const gdim = mesh.geometry().dim();
-  uint const facet_dim = tdim - 1;
+  uint const facet_dim = mesh.type().facet_dim();
   DistributedData& distdata = mesh.distdata()[facet_dim];
 
   // Exchange of data for contribution of halo macro elements

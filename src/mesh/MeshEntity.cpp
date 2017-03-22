@@ -167,9 +167,10 @@ bool MeshEntity::has_all_vertices_shared() const
 bool MeshEntity::on_boundary() const
 {
   uint const mdim = mesh_.topology().dim();
+  uint const fdim = mesh_.type().facet_dim();
   if(distdata_ != NULL)
   {
-    if (tdim_ ==  mdim - 1)
+    if (tdim_ ==  fdim)
     {
       // Facet has one adjacent cell and is not shared, thus is global
       return (this->num_entities(mdim) == 1)
@@ -177,12 +178,12 @@ bool MeshEntity::on_boundary() const
     }
     else
     {
-      MeshConnectivity const& cef = mesh_.topology()(tdim_, mdim - 1);
-      MeshConnectivity const& cfc = mesh_.topology()(mdim - 1, mdim);
+      MeshConnectivity const& cef = mesh_.topology()(tdim_, fdim);
+      MeshConnectivity const& cfc = mesh_.topology()(fdim , mdim);
       for (uint f = 0; f < cef.size(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
-        if ((cfc.size(fidx) == 1) && !(*distdata_)[mdim - 1].is_shared(fidx))
+        if ((cfc.size(fidx) == 1) && !(*distdata_)[fdim].is_shared(fidx))
         {
           // Facet has one adjacent cell and is not shared, thus is global
           return true;
@@ -192,15 +193,16 @@ bool MeshEntity::on_boundary() const
   }
   else
   {
-    if (tdim_ == mdim - 1)
+    if (tdim_ == fdim)
     {
       // Facet has one adjacent cell only, thus is global
       return (this->num_entities(mdim) == 1);
     }
     else
     {
-      MeshConnectivity const& cef = mesh_.topology()(tdim_, mdim - 1);
-      MeshConnectivity const& cfc = mesh_.topology()(mdim - 1, mdim);
+
+      MeshConnectivity const& cef = mesh_.topology()(tdim_, fdim);
+      MeshConnectivity const& cfc = mesh_.topology()(fdim , mdim);
       for (uint f = 0; f < cef.size(index_); ++f)
       {
         uint const fidx = cef(index_)[f];

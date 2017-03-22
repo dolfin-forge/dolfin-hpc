@@ -469,7 +469,7 @@ bool DofMap::check(bool throw_error)
   for (uint d = 0; d < tdim; ++d)
   {
     mesh.init(tdim, d);
-    mesh.init(tdim - 1, d);
+    mesh.init(mesh.type().facet_dim(), d);
     num_entity_dofs[d] = ufc_dofmap_->num_entity_dofs(d);
   }
   uint const num_facet_dofs = this->num_facet_dofs();
@@ -502,8 +502,9 @@ bool DofMap::check(bool throw_error)
     }
 
     // Get boundary facet dofs
-    ufc_dofmap_->tabulate_entity_dofs(loc_entity_dofs, tdim - 1, local_facet);
-    for (uint dof = 0; dof < num_entity_dofs[tdim - 1]; ++dof)
+    uint const facet_dim = mesh.type().facet_dim();
+    ufc_dofmap_->tabulate_entity_dofs(loc_entity_dofs, facet_dim, local_facet);
+    for (uint dof = 0; dof < num_entity_dofs[facet_dim]; ++dof)
     {
       dolfin_assert(is_shared(cell_dofs[loc_entity_dofs[dof]]));
       if (!is_ghost(cell_dofs[loc_entity_dofs[dof]]))
@@ -522,7 +523,7 @@ bool DofMap::check(bool throw_error)
     }
 
     // Check lower dimensional entities of boundary facet
-    for (uint d = 0; d < (tdim - 1); ++d)
+    for (uint d = 0; d < (facet_dim); ++d)
     {
       for (MeshEntityIterator m(f, d); !m.end(); ++m)
       {

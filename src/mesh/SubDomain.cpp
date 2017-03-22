@@ -95,11 +95,12 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
 
   // Compute sub domain markers
   bool const is_distributed = mesh.is_distributed();
+  uint const facet_dim = mesh.type().facet_dim();
   for (MeshEntityIterator entity(mesh, edim); !entity.end(); ++entity)
   {
     // Check if entity is on the boundary
     bool on_boundary = false;
-    if (edim == tdim - 1)
+    if (edim == facet_dim)
     {
       on_boundary = (entity->num_entities(tdim) == 1) && !entity->is_shared();
     }

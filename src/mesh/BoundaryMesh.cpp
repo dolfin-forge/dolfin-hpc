@@ -160,7 +160,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
     }
     editor.init_cells(cell_map_.size());
     //
-    uint const d = tdim - 1;
+    uint const d = mesh.type().facet_dim();
     uint const num_facet_vertices = mesh.type().num_vertices(d);
     uint * facet_vertices = new uint[num_facet_vertices];
     for (uint i = 0; i < cell_map_.size(); ++i)
@@ -235,7 +235,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
   message(1, "BoundaryMesh : compute %s boundary",
           (full ? "full" : (interior ? "interior" : "exterior")));
 
-  if (tdim == 1)
+  if (tdim <= 1)
   {
     vertex_map_.clear();
     for (VertexIterator v(mesh); !v.end(); ++v)
@@ -396,7 +396,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       editor.add_vertex(i, mesh.geometry().x(vertex_map_[i]));
     }
     editor.init_cells(cell_map_.size());
-    uint const d = tdim - 1;
+    uint const d = mesh.type().facet_dim();
     uint const num_facet_vertices = mesh.type().num_vertices(d);
     uint * facet_vertices = new uint[num_facet_vertices];
     CellType const& celltype = mesh.type();

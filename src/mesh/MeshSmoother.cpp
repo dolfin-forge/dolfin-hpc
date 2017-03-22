@@ -64,7 +64,7 @@ void MeshSmoother::worstElement(Mesh& mesh, int& index,
                                 MeshFunction<bool>& masked_cells)
 {
   int d = mesh.topology().dim();
-  mesh.init(d - 1, d);
+  mesh.init(mesh.type().facet_dim(), d);
 
   MeshQuality mqual(mesh);
 

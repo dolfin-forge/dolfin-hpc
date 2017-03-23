@@ -61,6 +61,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
   ini_vertices_ = other.ini_vertices_;
   if (other.connectivity_ != NULL)
   {
+    dolfin_assert(connectivity_ == NULL);
     connectivity_ = new MeshConnectivity*[dim_ + 1];
     for (uint d0 = 0; d0 <= dim_; ++d0)
     {
@@ -73,6 +74,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
   }
   if (other.distdata_ != NULL)
   {
+    dolfin_assert(distdata_ == NULL);
     distdata_ = new MeshDistributedData(*other.distdata_);
   }
   timestamp_ = other.timestamp_;
@@ -82,6 +84,7 @@ MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
 //-----------------------------------------------------------------------------
 void MeshTopology::swap(MeshTopology& other)
 {
+  if (this == &other) return;
   std::swap(type_, other.type_);
   std::swap(dim_, other.dim_);
   std::swap(num_vertices_, other.num_vertices_);
@@ -212,10 +215,13 @@ void MeshTopology::clear()
     for (uint d = 0; d <= dim_; ++d)
     {
       delete[] connectivity_[d];
+      connectivity_[d] = NULL;
     }
     delete[] connectivity_;
+    connectivity_ = NULL;
   }
-  connectivity_ = NULL;
+
+  //
   timestamp_ = 0;
   frozen_ = false;
   num_vertices_ = 0;

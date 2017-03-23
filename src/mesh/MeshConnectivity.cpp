@@ -328,24 +328,20 @@ void MeshConnectivity::remap_left(Array<uint> const& map)
       error("MeshConnectivity : remap_left mapping has invalid size");
     }
     // Set sizes in place of offsets to depict connectivities layout
-    uint * onew = new uint[num_entities_];
-    onew[0] = 0;
-    for(uint e = 0; e < num_entities_; ++e)
-    {
-      dolfin_assert(map[e] < num_entities_);
-      onew[e + 1] = offsets_[map[e] + 1] - offsets_[map[e]];
-    }
-    delete[] offsets_;
-    offsets_ = onew;
-    uint * cnew = new uint[size_];
+    uint * ocpy = new uint[num_entities_ + 1];
+    std::swap(offsets_, ocpy);
+    uint * ccpy = new uint[size_];
+    std::swap(connections_, ccpy);
+    offsets_[0] = 0;
     for (uint e = 0; e < num_entities_; ++e)
     {
-      std::memcpy(&cnew[onew[e]], &connections_[offsets_[map[e]]],
-                  offsets_[e + 1] * sizeof(uint));
-      offsets_[e + 1] += offsets_[e];
+      dolfin_assert(map[e] < num_entities_);
+      uint const ii = map[e];
+      offsets_[e + 1] = offsets_[e] + ocpy[ii + 1] - ocpy[ii];
+      std::copy(ccpy + ocpy[ii], ccpy + ocpy[ii + 1], connections_+ offsets_[e]);
     }
-    delete[] connections_;
-    connections_ = cnew;
+    delete[] ocpy;
+    delete[] ccpy;
   }
 }
 //-----------------------------------------------------------------------------
@@ -378,7 +374,7 @@ void MeshConnectivity::disp() const
       cout << endl;
     }
   }
-  end();
+  endblock();
 }
 //-----------------------------------------------------------------------------
 void MeshConnectivity::check() const

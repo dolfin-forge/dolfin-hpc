@@ -81,6 +81,8 @@ Mesh::~Mesh()
 //-----------------------------------------------------------------------------
 Mesh const& Mesh::operator=(Mesh const& other)
 {
+  if (this == &other) return *this;
+
   clear();
 
   rename(other.name(), other.label());
@@ -97,12 +99,12 @@ Mesh const& Mesh::operator=(Mesh const& other)
     PeriodicSubDomain const& p = (*it)->subdomain();
     periodic_mappings_ .push_back(new MappedManifold(*this, p));
   }
-
   return *this;
 }
 //-----------------------------------------------------------------------------
 void Mesh::swap(Mesh& other)
 {
+  if (this == &other) return;
   std::swap(cell_type_, other.cell_type_);
   topology_.swap(other.topology_);
   std::swap(space_, other.space_);

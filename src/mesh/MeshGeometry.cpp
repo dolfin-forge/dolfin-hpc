@@ -88,6 +88,7 @@ bool MeshGeometry::operator!=(MeshGeometry const& other) const
 //-----------------------------------------------------------------------------
 void MeshGeometry::swap(MeshGeometry& other)
 {
+  if (this == &other) return;
   std::swap(space_, other.space_);
   std::swap(dim_, other.dim_);
   std::swap(size_, other.size_);

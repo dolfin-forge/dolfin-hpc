@@ -92,7 +92,7 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   editor.close();
 
   // Overwrite old mesh with refined mesh
-  mesh = refined_mesh;
+  mesh.swap(refined_mesh);
   mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------

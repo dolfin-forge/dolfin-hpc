@@ -3,7 +3,6 @@ include_HEADERS = dolfin.h
 nobase_pkginclude_HEADERS = \
 				adaptivity/dolfin_adaptivity.h\
 				adaptivity/AdaptiveRefinement.h\
-				adaptivity/SpaceTimeFunction.h\
 				config/dolfin_config.h\
 				common/assert.h\
 				common/constants.h\
@@ -86,6 +85,7 @@ nobase_pkginclude_HEADERS = \
 				function/GenericFunction.h\
 				function/Operators.h\
 				function/Real.h\
+				function/SpaceTimeFunction.h\
 				function/SubFunction.h\
 				function/UFCFunction.h\
 				function/Value.h\

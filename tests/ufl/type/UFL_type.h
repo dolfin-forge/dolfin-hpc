@@ -24,7 +24,7 @@ START_TEST( test_UFL_type_int )
     t.display();
   }
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
  //-----------------------------------------------------------------------------
 START_TEST( test_UFL_type_real )
@@ -38,7 +38,7 @@ START_TEST( test_UFL_type_real )
     t.display();
   }
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_UFL_type_string )
@@ -57,7 +57,7 @@ START_TEST( test_UFL_type_string )
     t.display();
   }
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

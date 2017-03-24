@@ -23,7 +23,7 @@ START_TEST( test_Functional )
   }
   T.end();
   //---
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_LinearForm )
@@ -36,7 +36,7 @@ START_TEST( test_LinearForm )
   }
   T.end();
   //---
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_BilinearForm )
@@ -49,7 +49,7 @@ START_TEST( test_BilinearForm )
   }
   T.end();
   //---
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

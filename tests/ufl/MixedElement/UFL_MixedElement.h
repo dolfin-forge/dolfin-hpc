@@ -35,8 +35,8 @@ START_TEST( test_UFL_MixedElement )
   UPspaceFormRepr.sub_elements()[0]->display();
   UPspaceFormRepr.sub_elements()[1]->display();
 
-  fail_unless(UPspace == UPspaceFormRepr,
-	      "Representation string differ");
+  ck_assert_msg(UPspace == UPspaceFormRepr,
+		"Representation string differ");
 
 }END_TEST
 //-----------------------------------------------------------------------------

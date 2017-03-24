@@ -34,7 +34,7 @@ START_TEST( test_BoundingBox )
   }
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_interval )
@@ -47,7 +47,7 @@ START_TEST( test_StructuredGrid_interval )
   dolfin_assert(g.num_cells() == N);
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_triangle )
@@ -60,7 +60,7 @@ START_TEST( test_StructuredGrid_triangle )
   dolfin_assert(g.num_cells() == N*N*2);
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_tetrahedron )
@@ -73,7 +73,7 @@ START_TEST( test_StructuredGrid_tetrahedron )
   dolfin_assert(g.num_cells() == N*N*N*6);
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_quadrilateral )
@@ -85,7 +85,7 @@ START_TEST( test_StructuredGrid_quadrilateral )
   StructuredGrid g(QuadrilateralCell(), N);
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_StructuredGrid_hexahedron )
@@ -98,7 +98,7 @@ START_TEST( test_StructuredGrid_hexahedron )
   dolfin_assert(g.num_cells() == N*N*N);
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

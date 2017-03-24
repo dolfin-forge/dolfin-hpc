@@ -28,7 +28,7 @@ START_TEST( test_UnitInterval )
 
  // Interval
   UnitInterval mesh(Nx);  
-  fail_unless(test_mesh(mesh) == 0);
+  ck_assert(test_mesh(mesh) == 0);
 
 }END_TEST
 //-----------------------------------------------------------------------------
@@ -45,7 +45,7 @@ START_TEST( test_UnitSquare )
   for(dolfin::uint tp = 0; tp < types.size(); ++tp)
   {
     UnitSquare mesh(Nx, Ny, types[tp]);
-    fail_unless(test_mesh(mesh) == 0);
+    ck_assert(test_mesh(mesh) == 0);
   }
 }END_TEST
 //-----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ START_TEST( test_UnitCube )
 
   // Cube
   UnitCube mesh(Nx, Ny, Nz);
-  fail_unless(test_mesh(mesh) == 0);
+  ck_assert(test_mesh(mesh) == 0);
 
 }END_TEST
 //-----------------------------------------------------------------------------
@@ -75,7 +75,7 @@ START_TEST( test_Box)
   real e = 0.0;
   real f = 1.0;
   Box mesh(a,b,c, d, e, f, Nx, Ny, Nz);
-  fail_unless(test_mesh(mesh) == 0);
+  ck_assert(test_mesh(mesh) == 0);
 
 
 }END_TEST
@@ -97,7 +97,7 @@ START_TEST( test_UnitDisk )
     for(dolfin::uint tr = 0; tr < trans.size(); ++tr)
     {
       UnitDisk mesh(Nx, types[tp], trans[tr]);
-      fail_unless(test_mesh(mesh) == 0);
+      ck_assert(test_mesh(mesh) == 0);
     }
   }
 }END_TEST

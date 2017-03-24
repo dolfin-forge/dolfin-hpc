@@ -27,8 +27,8 @@ START_TEST( test_Function )
 
     //
     U0 = 1.0;
-    fail_unless( U0.min() == 1.0 );
-    fail_unless( U0.max() == 1.0 );
+    ck_assert( U0.min() == 1.0 );
+    ck_assert( U0.max() == 1.0 );
     U0.disp();
 
 
@@ -56,7 +56,7 @@ START_TEST( test_Function )
   }
   T.end();
   //---
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

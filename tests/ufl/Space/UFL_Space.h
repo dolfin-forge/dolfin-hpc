@@ -17,7 +17,7 @@ START_TEST( test_UFL_Space )
     s.display();
   }
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

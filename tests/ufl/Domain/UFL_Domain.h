@@ -27,7 +27,7 @@ START_TEST( test_UFL_Domain )
       dom.display();
     }
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

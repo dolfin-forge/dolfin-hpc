@@ -7,7 +7,7 @@ START_TEST( test_UFL_Algebra )
 {
   int init_failed = 0;
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

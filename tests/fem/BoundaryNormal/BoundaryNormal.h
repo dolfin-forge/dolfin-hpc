@@ -43,7 +43,7 @@ START_TEST( test_NodeNormal )
   check_NodeNormal_create(relpath+"sphere.xml.gz");
 #endif
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

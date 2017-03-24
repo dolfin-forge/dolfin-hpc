@@ -12,8 +12,8 @@ START_TEST( test_init_vec )
   Vector x;
   x.init(VEC_SIZE);
 
-  fail_unless(x.size() == VEC_SIZE);
-  fail_unless(x.local_size() == VEC_SIZE);
+  ck_assert(x.size() == VEC_SIZE);
+  ck_assert(x.local_size() == VEC_SIZE);
 
 }END_TEST
 //-----------------------------------------------------------------------------
@@ -40,7 +40,7 @@ START_TEST( test_get_set_vec )
 
   for (int i = 0; i < VEC_SIZE; i++)
   {
-    fail_unless(data[i] == 3.1415);
+    ck_assert(data[i] == 3.1415);
   }
 
   delete [] data;
@@ -71,7 +71,7 @@ START_TEST( test_add_vec )
 
   for (int i = 0; i < VEC_SIZE; i++)
   {
-    fail_unless(data[i] == 2.0 * (3.1415));
+    ck_assert(data[i] == 2.0 * (3.1415));
   }
 
   delete [] data;
@@ -92,7 +92,7 @@ START_TEST( test_max_vec )
 
   x.set(data);
 
-  fail_unless(x.max() == double (VEC_SIZE - 1));
+  ck_assert(x.max() == double (VEC_SIZE - 1));
 
   delete [] data;
   
@@ -112,7 +112,7 @@ START_TEST( test_min_vec )
 
   x.set(data);
 
-  fail_unless(x.min() == 0.0);
+  ck_assert(x.min() == 0.0);
 
   delete [] data;
   
@@ -130,7 +130,7 @@ START_TEST( test_op_assign_vec )
 
   for (int i = 0; i < VEC_SIZE; i++)
   {
-    fail_unless(data[i] == 3.1457);
+    ck_assert(data[i] == 3.1457);
   }
 
   delete [] data;
@@ -151,7 +151,7 @@ START_TEST( test_op_mul_vec )
 
   for (int i = 0; i < VEC_SIZE; i++)
   {
-    fail_unless(data[i] == (2.0 * 3.1457));
+    ck_assert(data[i] == (2.0 * 3.1457));
   }
 
   delete [] data;
@@ -172,7 +172,7 @@ START_TEST( test_op_scale_vec )
 
   for (int i = 0; i < VEC_SIZE; i++)
   {
-    fail_unless(data[i] == (3.1457 / 2.0));
+    ck_assert(data[i] == (3.1457 / 2.0));
   }
 
   delete [] data;
@@ -186,7 +186,7 @@ START_TEST( test_zero_vec )
 
   x = 1.0;
   x.zero();
-  fail_unless(x.max() == 0);
+  ck_assert(x.max() == 0);
   
 }END_TEST
 //-----------------------------------------------------------------------------

@@ -85,7 +85,7 @@ START_TEST( test_PointCell )
     //---
     end();
     skip();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_IntervalCell )
@@ -110,7 +110,7 @@ START_TEST( test_IntervalCell )
     check_reference_cell(cell, refcell);
     //---
     end();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_TriangleCell )
@@ -137,7 +137,7 @@ START_TEST( test_TriangleCell )
     check_reference_cell(cell, refcell);
     //---
     end();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_TetrahedronCell )
@@ -166,7 +166,7 @@ START_TEST( test_TetrahedronCell )
     check_reference_cell(cell, refcell);
     //---
     end();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_QuadrilateralCell )
@@ -196,7 +196,7 @@ START_TEST( test_QuadrilateralCell )
     cell.check(c);
     //---
     end();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_HexahedronCell )
@@ -228,7 +228,7 @@ START_TEST( test_HexahedronCell )
     cell.check(c);
     //---
     end();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 

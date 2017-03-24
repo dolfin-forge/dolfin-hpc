@@ -12,8 +12,8 @@ START_TEST( test_init_mat )
   Matrix A;
   A.init(MAT_SIZE, MAT_SIZE);
 
-  fail_unless(A.size(0) == MAT_SIZE);
-  fail_unless(A.size(1) == MAT_SIZE);
+  ck_assert(A.size(0) == MAT_SIZE);
+  ck_assert(A.size(1) == MAT_SIZE);
 
 }END_TEST
 //-----------------------------------------------------------------------------

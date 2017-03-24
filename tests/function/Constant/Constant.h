@@ -23,26 +23,26 @@ START_TEST( test_Constant )
     Constant const r2(2.0);
 
     // Default
-    fail_unless( r == r0 );
+    ck_assert( r == r0 );
 
     r = 1.0;
-    fail_unless( r == r1 );
+    ck_assert( r == r1 );
 
     r += 1.0;
-    fail_unless( r == r2 );
+    ck_assert( r == r2 );
 
     r -= 1.0;
-    fail_unless( r == r1 );
+    ck_assert( r == r1 );
 
     r *= 2.0;
-    fail_unless( r == r2 );
+    ck_assert( r == r2 );
 
     r /= 2.0;
-    fail_unless( r == r1 );
+    ck_assert( r == r1 );
   }
   T.end();
   //---
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

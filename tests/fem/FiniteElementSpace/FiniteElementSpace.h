@@ -89,7 +89,7 @@ START_TEST( test_FiniteElementSpace )
         begin("Creating FiniteElement from UFL representation:");
         dolfin::FiniteElement fem(uflfem);
         message(fem.signature());
-        fail_unless(fem.signature() == uflfem.repr());
+        ck_assert(fem.signature() == uflfem.repr());
         skip();
         fem.disp();
         end();
@@ -98,7 +98,7 @@ START_TEST( test_FiniteElementSpace )
         begin("Creating UFL representation from FiniteElement:");
         ufl::FiniteElement uflfemd(Object::repr_t(fem.signature()));
         message(uflfemd.repr());
-        fail_unless(uflfem.repr() == uflfemd.repr());
+        ck_assert(uflfem.repr() == uflfemd.repr());
         end();
         skip();
 
@@ -108,7 +108,7 @@ START_TEST( test_FiniteElementSpace )
                 DofMap::make_signature(fem.signature()));
         dolfin::DofMap dm(*m, *ufcdm, true);
         message(dm.signature());
-        fail_unless(dm.signature() ==
+        ck_assert(dm.signature() ==
             dolfin::DofMap::make_signature(uflfem.repr()));
         skip();
         dm.disp();
@@ -128,7 +128,7 @@ START_TEST( test_FiniteElementSpace )
   }
   //---
   end();
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

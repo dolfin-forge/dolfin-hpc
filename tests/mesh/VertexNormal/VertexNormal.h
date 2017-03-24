@@ -37,7 +37,7 @@ START_TEST( test_VertexNormal )
   test_vertex_normal(relpath+"sphere.xml.gz", VertexNormal::none);
 #endif
   
-  fail_unless( init_failed == 0 );
+  ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------
 

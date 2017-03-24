@@ -283,8 +283,8 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
 #if __SUNPRO_CC
         int n1 = 0;
         int n2 = 0;
-        std::count(edge_vertices, edge_vertices + 2, cell_vertices[i], n1);
-        std::count(edge_vertices, edge_vertices + 2, cell_vertices[j], n2);
+        std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0], n1);
+        std::count(edge_vertices, edge_vertices + 2, cell_vertices[v1], n2);
         if (!n1 && !n2 )
 #else
         if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0])
@@ -331,10 +331,10 @@ void HexahedronCell::order_entities(MeshTopology& topology, uint i) const
         int n2 = 0;
         int n3 = 0;
         int n4 = 0;
-        std::count(facet_vertices, facet_vertices + 4, cell_vertices[i], n1);
-        std::count(facet_vertices, facet_vertices + 4, cell_vertices[j], n2);
-        std::count(facet_vertices, facet_vertices + 4, cell_vertices[k], n3);
-        std::count(facet_vertices, facet_vertices + 4, cell_vertices[l], n4);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[v0], n1);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[v1], n2);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[v2], n3);
+        std::count(facet_vertices, facet_vertices + 4, cell_vertices[v3], n4);
         if (!n1 && !n2 && !n3 && !n4)
 #else
         if (!std::count(facet_vertices, facet_vertices + 4, cell_vertices[v0])

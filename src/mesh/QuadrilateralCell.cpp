@@ -152,8 +152,8 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
 #if __SUNPRO_CC
         int n1 = 0;
         int n2 = 0;
-        std::count(edge_vertices, edge_vertices+2, cell_vertices[i], n1);
-        std::count(edge_vertices, edge_vertices+2, cell_vertices[j], n2);
+        std::count(edge_vertices, edge_vertices+2, cell_vertices[v0], n1);
+        std::count(edge_vertices, edge_vertices+2, cell_vertices[v1], n2);
         if (!n1 && !n2 )
 #else
         if (!std::count(edge_vertices, edge_vertices + 2, cell_vertices[v0])

@@ -221,7 +221,7 @@ void IntervalCell::normal(Cell const& cell, uint facet, real * n) const
   real const * p0 = geometry.x(vertices[facet]);
   real const * p1 = geometry.x(vertices[(facet + 1) % 2]);
   uint const gdim = geometry.dim();
-  uint nn = 0.0;
+  real nn = 0.0;
   for (uint d = 0; d < gdim; ++d)
   {
     n[d] = p0[d] - p1[d];

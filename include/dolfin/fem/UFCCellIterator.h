@@ -40,7 +40,7 @@ public:
 
     //
 #if ENABLE_P1_OPTIMIZATIONS
-    ufc_cell_.cell->global_entities(0, entity_indices[0]);
+    ufc_cell_.cell->global_entities(0, ufc_cell_.entity_indices[0]);
 #else
     ufc_cell_.cell->global_entities(ufc_cell_.entity_indices);
 #endif

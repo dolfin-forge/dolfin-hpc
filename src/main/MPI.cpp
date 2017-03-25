@@ -192,8 +192,8 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
-    MPI_Scan(&num_local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm);
-    offset -= local;
+  MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm);
+  offset -= local;
 #endif
 }
 //-----------------------------------------------------------------------------

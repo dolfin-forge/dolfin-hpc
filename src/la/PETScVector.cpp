@@ -120,6 +120,7 @@ PETScVector* PETScVector::copy() const
 //-----------------------------------------------------------------------------
 void PETScVector::get(real* values) const
 {
+#if PETSC_VERSION_MAJOR > 2
   dolfin_assert(x_);
   real const* data = NULL;
   VecGetArrayRead(x_, &data);
@@ -129,6 +130,19 @@ void PETScVector::get(real* values) const
   std::copy(data, data + n, values);
   VecRestoreArrayRead(x_, &data);
   dolfin_assert(x_);
+#else
+  dolfin_assert(x_);
+
+  real* data = 0;
+  VecGetArray(x_, &data);
+  dolfin_assert(data);
+
+  for (uint i = 0; i < local_size(); i++)
+    values[i] = data[i];
+  VecRestoreArray(x_, &data);
+
+  dolfin_assert(x_);
+#endif
 }
 //-----------------------------------------------------------------------------
 void PETScVector::set(real* values)

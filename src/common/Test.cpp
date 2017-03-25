@@ -14,6 +14,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
 
+#include <sstream>
 #include <cstdlib>
 #include <getopt.h>
 

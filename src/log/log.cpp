@@ -94,9 +94,13 @@ void error(std::string msg, ...)
   LogManager::logger().error(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------
-void begin(_msg msg, ...)
+void begin(std::string msg, ...)
 {
+#ifndef __sgi
   read(buffer, msg);
+#else
+  read_str(buffer, msg);
+#endif
   LogManager::logger().begin(static_cast<std::string>(buffer));
 }
 //-----------------------------------------------------------------------------

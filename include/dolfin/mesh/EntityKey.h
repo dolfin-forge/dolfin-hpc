@@ -275,6 +275,22 @@ struct hash<dolfin::EntityKey>
 
 } /* namespace std */
 
+#else
+
+namespace std
+{
+
+template<>
+struct hash<dolfin::EntityKey>
+{
+  inline std::size_t operator()(dolfin::EntityKey const& e) const
+  {
+    return e.hash();
+  }
+};
+
+} /* namespace std */
+
 #endif
 
 #endif /* __DOLFIN_MESH_ENTITY_KEY_H */

@@ -9,6 +9,8 @@
 #include <dolfin/log/log.h>
 #include <dolfin/fem/SubSystem.h>
 
+#include <sstream>
+
 namespace dolfin
 {
 

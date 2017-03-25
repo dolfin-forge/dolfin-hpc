@@ -56,7 +56,7 @@ void Field::allocate(uint max_depth)
   for (uint i = this->depth(); i < max_depth; ++i)
   {
     // Use copy constructor
-    storage_.push_back(Function(storage_.at(0)));
+    storage_.push_back(Function(storage_.front()));
   }
 }
 //-----------------------------------------------------------------------------

@@ -95,7 +95,7 @@ void PETScMatrix::clear()
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1
     MatDestroyMatrices(1, &AA_sub);
 #else
-    MatDestroyMatrices(1, AA_sub);
+    MatDestroyMatrices(1, &AA_sub);
 #endif
     AA_sub = NULL;
   }

@@ -181,8 +181,8 @@ void Assembler::assembleCells(GenericTensor& A,
   uint const coef_size = coefficients.size();
   ufc::cell_integral * integral = ufc.cell_integrals[0];
 
-#pragma omp for
   CellIterator it(mesh);
+#pragma omp for
   for (uint i = 0; i < N; ++i)
   {
     Cell& cell = it[i];
@@ -252,13 +252,13 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   uint const coef_size = coefficients.size();
   ufc::exterior_facet_integral * integral = ufc.exterior_facet_integrals[0];
 
-#pragma omp for
-  FacetIterator fe(mesh);
+  FacetIterator it(mesh);
   CellIterator  c0(mesh);
+#pragma omp for
   for (uint i = 0; i < N; ++i)
   {
     // Get mesh facet corresponding to boundary cell
-    Facet& facet = fe[exterior_boundary.facet_index(i)];
+    Facet& facet = it[exterior_boundary.facet_index(i)];
 
     // Get integral for sub domain (if any)
     if ((domains != NULL) && domains->size() > 0)
@@ -329,13 +329,13 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   // Halo data structure caching macro element coefficients and dofs
   UFCHalo halo(ufc, coefficients, dofmaps);
 
-#pragma omp for
-  FacetIterator fi(mesh);
+  FacetIterator it(mesh);
   CellIterator  c0(mesh);
   CellIterator  c1(mesh);
+#pragma omp for
   for (uint i = 0; i < N; ++i)
   {
-    Facet& facet = fi[i];
+    Facet& facet = it[i];
 
     // Get integral for sub domain (if any)
     if ((domains != NULL) && domains->size() > 0)

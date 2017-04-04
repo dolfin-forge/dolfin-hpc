@@ -11,3 +11,8 @@ Makefile.in
 *.vtu
 *.pvtu
 *.pvd
+
+.cproject
+.project
+.pydevproject
+.settings

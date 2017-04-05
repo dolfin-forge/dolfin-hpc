@@ -239,9 +239,7 @@ public:
     delete[] recvbuf;
 
     message(1, "Remaining ghost dofs %u", ufc_ghosts.size());
-
-#endif /* HAVE_MPI */
-
+    
     //---
 
     if (ghosts_.size() != num_expected_ghosts)
@@ -254,6 +252,8 @@ public:
       error("Mismatch: expected number of shared dofs and actual, %u != %u",
             num_expected_shared, shared_.size());
     }
+
+#endif /* HAVE_MPI */
 
   }
 

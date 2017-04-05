@@ -40,38 +40,62 @@ MPI::Context MPI::ctx_;
 //-----------------------------------------------------------------------------
 uint MPI::rank()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.rank);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::size()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.size);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::group_id()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_idx);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::num_groups()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_cnt);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::global_rank()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_rank);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::global_size()
 {
+#ifdef HAVE_MPI
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_size);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 void MPI::startTimer()
@@ -165,9 +189,13 @@ void MPI::initComm(int ngroups)
 //-----------------------------------------------------------------------------
 void MPI::finiComm()
 {
+#ifdef HAVE_MPI
   MPI_Comm_free(&MPI::DOLFIN_COMM);
   MPI_Comm_free(&MPI::DOLFIN_COMM_SELF);
   MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD);
+#else
+  DOLFIN_MPI_UNIMPLEMENTED
+#endif
 }
 //-----------------------------------------------------------------------------
 uint MPI::seed()
@@ -189,11 +217,13 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 {
   // Fool-proof as the value for rank 0 is undefined according to MPI specs
   offset = 0;
+#ifdef HAVE_MPI
 #if ( MPI_VERSION > 1 )
   MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
 #else
   MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm);
   offset -= local;
+#endif
 #endif
 }
 //-----------------------------------------------------------------------------

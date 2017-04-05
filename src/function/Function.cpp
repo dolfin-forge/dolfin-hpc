@@ -437,6 +437,7 @@ void Function::interpolate_vertex_values(real* values) const
 
     if (mesh_->is_distributed())
     {
+#ifdef HAVE_MPI
       uint const rank = dolfin::MPI::rank();
       uint const pe_size = dolfin::MPI::size();
       DistributedData const& dist0 = mesh_->distdata()[0];
@@ -456,6 +457,7 @@ void Function::interpolate_vertex_values(real* values) const
       }
 
       // Exchange data
+
       MPI_Status status;
       uint src;
       uint dst;
@@ -491,7 +493,9 @@ void Function::interpolate_vertex_values(real* values) const
       //
       delete[] recvbuf;
       delete[] sendbuf;
+#endif 
     }
+
 
     // Average
     for (uint vindex = 0; vindex < num_verts; ++vindex)

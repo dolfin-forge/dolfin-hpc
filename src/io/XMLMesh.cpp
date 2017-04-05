@@ -313,6 +313,7 @@ void XMLMesh::endMesh()
 {
   if (parallel_)
   {
+#ifdef HAVE_MPI
     uint const rank = MPI::rank();
     uint const pe_size = MPI::size();
     uint const gdim = mesh_.geometry().dim();
@@ -449,6 +450,7 @@ void XMLMesh::endMesh()
     delete[] recvbuf_v;
     delete[] recvbuf_x;
     delete[] recvbuf;
+#endif /* HAVE_MPI */
   }
   else
   {

@@ -14,7 +14,7 @@ BlueGene/L and Cray XT6-XE6 systems.
 
 The package dependencies of DOLFIN HPC 0.9.0 are:
 
-    * ufc 2.1.3-hpc
+    * ufc 2.1.4-hpc
     * ffc 1.0.2-hpc
     * ufl 1.0.2-hpc
     * ParMETIS

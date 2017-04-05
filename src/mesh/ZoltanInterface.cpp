@@ -120,7 +120,7 @@ int ZoltanInterface::partitionZoltanNumCells(void *data, int *ierr)
   Mesh *mesh = (Mesh *) data;
   *ierr = ZOLTAN_OK;
 
-  return mesh->numCells();
+  return mesh->num_cells();
 
 }
 //-----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ void ZoltanInterface::partitionZoltanCellList(void *data, int num_gid_entries,
   uint i = 0;
   for (CellIterator cell(*mesh); !cell.end(); ++cell)
   {
-    global_ids[i] = mesh->distdata().get_global(*cell);
+    global_ids[i] = cell->global_index();
     local_ids[i++] = cell->index();
   }
 
@@ -169,7 +169,7 @@ void ZoltanInterface::partitionZoltanVertexList(void *data,
   uint i = 0;
   for (VertexIterator vertex(*mesh); !vertex.end(); ++vertex)
   {
-    global_ids[i] = mesh->distdata().get_global(*vertex);
+    global_ids[i] = vertex->global_index();
     local_ids[i++] = vertex->index();
   }
 
@@ -188,7 +188,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
 {
   Mesh *mesh = (Mesh *) data;
   uint const facet_dim = mesh->topology().dim();
-  if (num_obj != mesh->numCells() || num_gid_entries > 1)
+  if (num_obj != mesh->num_cells() || num_gid_entries > 1)
   {
     *ierr = ZOLTAN_FATAL;
     return;
@@ -202,8 +202,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
     for (FacetIterator f(*c); !f.end(); ++f)
     {
       // Filter out non-shared boundary facets
-      if (f->numEntities(facet_dim) == 1 &&
-	  !mesh->distdata().is_shared(*f))
+      if (f->num_entities(facet_dim) == 1 && !f->is_shared())
       {
 	continue;
       }
@@ -226,9 +225,10 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
 {
 
   Mesh *mesh = (Mesh *) data;
-  uint const facet_dim = mesh->topology().dim();
+  uint const facet_dim = mesh->type().facet_dim();
   uint const dim = mesh->geometry().dim();
-  if (num_obj != mesh->numCells() || num_gid_entries > 1)
+  DistributedData const& dist = mesh->distdata()[facet_dim];
+  if (num_obj != mesh->num_cells() || num_gid_entries > 1)
   {
     *ierr = ZOLTAN_FATAL;
     return;
@@ -241,11 +241,10 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   uint pe_size = MPI::size();
   
   Array<uint> *glb_facet = new Array<uint>[pe_size];  
-  for (MeshSharedIterator f(mesh->distdata(), facet_dim); !f.end(); ++f)
+  for (SharedIterator f(dist); !f.end(); ++f)
   {
-    uint const adj_rank = 
-      *(mesh->distdata().get_shared_adj(f.index(), facet_dim)).begin();
-    glb_facet[adj_rank].push_back(mesh->distdata().get_global(f.index(), facet_dim));
+    uint const adj_rank = *(f.adj().begin());
+    glb_facet[adj_rank].push_back(f.global_index());
   }  
 
   uint max_recv = 0;  
@@ -273,9 +272,9 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     
     for (uint k = 0; k < recv_count; k++)
     {
-      Facet f(*mesh, mesh->distdata().get_local(recv_buff[k], facet_dim));
+      Facet f(*mesh, dist.get_local(recv_buff[k]));
       send_buff[k] = 
-	mesh->distdata().get_global(f.entities(facet_dim)[0], dim); 
+	mesh->distdata()[dim].get_global(f.entities(facet_dim)[0]);
     }
 
     // Send back corresponding global cell index
@@ -302,14 +301,13 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     for (FacetIterator f(*c); !f.end(); ++f)
     {
       // Filter out non-shared boundary facets
-      if (f->numEntities(facet_dim) == 1 &&
-	  !mesh->distdata().is_shared(*f))
+      if (f->num_entities(facet_dim) == 1 && !f->is_shared())
       {
 	continue;
       }
-      else if (mesh->distdata().is_shared(*f))
+      else if (f->is_shared())
       {
-	nbor_global_id[i] = facet_cell_map[mesh->distdata().get_global(*f)];
+	nbor_global_id[i] = facet_cell_map[f->global_index()];
       }
       else
       {
@@ -323,7 +321,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
 	}
 
 	Cell neig_cell(*mesh, f->entities(facet_dim)[0]);	
-	nbor_global_id[i] = mesh->distdata().get_global(neig_cell);
+	nbor_global_id[i] = neig_cell.global_index();
       }
     }
   }

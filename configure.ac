@@ -145,9 +145,9 @@ AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
 
 # UFL is now default
-PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.1.3])
+PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.1.4])
 CPPFLAGS="$CPPFLAGS $UFC_CFLAGS -DUFC_BACKWARD_COMPATIBILITY"
-AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.3])
+AC_DEFINE(ENABLE_UFL, 1, [Enable UFL support using UFC version 2.1.4])
 
 if test "x${need_boost}" = xyes; then
    AX_BOOST_BASE([1.34],,AC_MSG_ERROR([suitable Boost not found]))

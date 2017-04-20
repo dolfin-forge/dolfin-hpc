@@ -318,7 +318,13 @@ void XMLMesh::endMesh()
     uint const pe_size = MPI::size();
     uint const gdim = mesh_.geometry().dim();
     Array<uint> sendbuf(nonlocal_vertices_.size());
+#ifndef _RWSTD_NO_MEMBER_TEMPLATES
     sendbuf.assign(nonlocal_vertices_.begin(), nonlocal_vertices_.end());
+#else
+    sendbuf.erase(sendbuf.begin(), sendbuf.end());
+    std::copy(nonlocal_vertices_.begin(), nonlocal_vertices_.end(),
+	      std::back_inserter(sendbuf));
+#endif
     uint const shared = nonlocal_vertices_.size();
     uint orphan = 0;
 

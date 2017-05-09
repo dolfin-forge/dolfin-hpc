@@ -41,16 +41,16 @@ public:
    *  Local communicator
    */
 
-  /// Return process rank in xl communicator
+  /// Return process rank in local communicator
   static uint rank();
 
-  /// Return xl communicator size
+  /// Return local communicator size
   static uint size();
 
   /// Return if the given rank is valid
   static bool is_valid_rank(uint rank);
 
-  /// Return if the current process is the root process in xl communicator
+  /// Return if the current process is the root process in local communicator
   static bool is_root();
 
   /// Return group identifier
@@ -60,16 +60,16 @@ public:
    *  Global communicator
    */
 
-  /// Return process rank in xg communicator
+  /// Return process rank in global communicator
   static uint global_rank();
 
-  /// Return xg communicator size
+  /// Return global communicator size
   static uint global_size();
 
-  /// Return if the current process is the root process in xg communicator
+  /// Return if the current process is the root process in global communicator
   static bool is_global_root();
 
-  /// Return number of groups in xg communicator
+  /// Return number of groups in global communicator
   static uint num_groups();
 
   /*

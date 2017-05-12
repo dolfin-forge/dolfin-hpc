@@ -126,12 +126,7 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     _set<uint> const& setG = manifold.Gfacets();
     _set<uint> const& setH = manifold.Hfacets();
     _set<uint> const& setI = manifold.Ifacets();
-    uint const cardG = setG.size();
-    uint const cardH = setH.size();
-    uint const cardI = setI.size();
-    uint const cardGnI = cardG - cardI;
     uint const GpmOffset = Gcount;
-    uint const HpmOffset = Hcount;
 
     //--- Collect dofs and exchange -------------------------------------------
     // Reserve array for mapped coordinates

@@ -48,7 +48,7 @@ void StructuredGrid::init(CellType const& type)
   uint const gdim = type.space_dim();
   MeshEditor editor(*this, type, gdim);
   // Number of cells in each direction
-  uint n[Space::MAX_DIMENSION] = { 1 };
+  uint * n = new uint[tdim];
   for (uint i = 0; i < tdim; ++i) { n[i] = n_; } // isotropic
 
   // Number of vertices in each direction
@@ -63,9 +63,9 @@ void StructuredGrid::init(CellType const& type)
   }
 
   //
-  uint i[Space::MAX_DIMENSION] = { 0 };
-  real h[Space::MAX_DIMENSION] = { 0.0 };
-  real x[Space::MAX_DIMENSION] = { 0.0 };
+  uint * i = new uint[tdim];
+  real * h = new real[tdim];
+  real * x = new real[tdim];
 
   // Create vertices
   uint vertex = 0;
@@ -230,6 +230,11 @@ void StructuredGrid::init(CellType const& type)
       error("StructuredGrid::init : unsupported cell type");
       break;
     }
+
+  delete [] x;
+  delete [] h;
+  delete [] i;
+  delete [] n;
 
   //
   editor.close();

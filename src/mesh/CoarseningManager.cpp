@@ -299,7 +299,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
 
     // process received requests and puts them into the map
     std::map<uint, uint>::iterator m_it;
-    for (uint i(0); i < recv_size; ++i)
+    for (int i(0); i < recv_size; ++i)
     {
       // search for this index in the map
       uint requested_vertex = recv_buff_requests[i];
@@ -331,7 +331,6 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
       m_it != requested_vertices.end(); ++m_it)
   {
     uint local_index = mesh.distdata()[0].get_local(m_it->first);
-    uint pe = m_it->second;
 
     // set of processes that share this vertex
     _set<uint> shared_adj = mesh.distdata()[0].get_shared_adj(local_index);
@@ -371,7 +370,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_size);
 
     // process received requests and marks cells accordingly
-    for (uint i(0); i < recv_size; i += 2)
+    for (int i(0); i < recv_size; i += 2)
     {
       uint local_index = mesh.distdata()[0].get_local(recv_buff_requests[i]);
       Vertex v(mesh, local_index);

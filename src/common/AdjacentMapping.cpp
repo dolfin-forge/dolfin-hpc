@@ -38,7 +38,6 @@ SharedMapping::SharedMapping(DistributedData const& data) :
 
   //
   uint const rank = dolfin::MPI::rank();
-  uint const pe_size = dolfin::MPI::size();
   MPI_Request * sendreq = new MPI_Request[mappings_.size()];
   MPI_Request * recvreq = new MPI_Request[mappings_.size()];
   MPI_Status  * status = new MPI_Status[mappings_.size()];
@@ -73,7 +72,7 @@ SharedMapping::SharedMapping(DistributedData const& data) :
   {
     MPI_Wait(&recvreq[i],&status[i]);
     MPI_Get_count(&status[i], MPI_UNSIGNED, &recvcount);
-    if(recvcount != it->second.recv.size())
+    if(uint(recvcount) != it->second.recv.size())
     {
       error("AdjacentMapping : inconsistent count %u from rank %u: expected %u",
             rank, recvcount, it->second.recv.size());

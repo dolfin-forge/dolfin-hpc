@@ -25,7 +25,7 @@ EnrichedElement::EnrichedElement(List const& elements) :
   ssstr << "<";
   
   List::const_iterator it = sub_elements_.begin();
-  dolfin::uint value_size_sum = (*it)->value_shape().size();
+  //dolfin::uint value_size_sum = (*it)->value_shape().size();
   ssrepr << (*it)->repr();
   ssstr << (*it)->str();
   for (++it; it != sub_elements_.end(); ++it)

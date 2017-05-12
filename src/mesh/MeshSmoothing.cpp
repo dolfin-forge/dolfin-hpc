@@ -190,7 +190,7 @@ void MeshSmoothing::smooth_common(Mesh& mesh, MeshSmoothData& smooth_data)
       for (int i = 0; i < d; i++)
         x[i] += rmin * (xx[i] - x[i]) / r;
     }
-    else for (uint i = 0; i < d; i++)
+    else for (int i = 0; i < d; i++)
       x[i] = xx[i];
   }
 

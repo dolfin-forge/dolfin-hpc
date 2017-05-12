@@ -384,8 +384,6 @@ uint Function::value_size() const
 //-----------------------------------------------------------------------------
 void Function::interpolate_vertex_values(real* values) const
 {
-  uint const tdim = mesh_->topology().dim();
-
   // Local data for interpolation on each cell
   uint const num_verts = mesh_->size(0);
 

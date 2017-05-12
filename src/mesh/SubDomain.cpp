@@ -94,7 +94,6 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
   uint const edim = sub_domains.dim();
 
   // Compute sub domain markers
-  bool const is_distributed = mesh.is_distributed();
   uint const facet_dim = mesh.type().facet_dim();
   for (MeshEntityIterator entity(mesh, edim); !entity.end(); ++entity)
   {

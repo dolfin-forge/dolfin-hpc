@@ -89,11 +89,6 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
     vertex_map_(),
     subdomain_(&subdomain)
 {
-  bool exterior = (type_ == BoundaryMesh::exterior
-      || type_ == BoundaryMesh::full);
-  bool interior = (type_ == BoundaryMesh::interior
-      || type_ == BoundaryMesh::full);
-
   Mesh& mesh = boundary.mesh();
   uint const gdim = mesh.geometry().dim();
   uint const tdim = mesh.topology().dim();
@@ -277,7 +272,6 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
-    uint const rank = MPI::rank();
     uint const pe_size = MPI::size();
     Array<uint> * shared_vertices = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
@@ -369,7 +363,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
         MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
                  MPI::DOLFIN_COMM, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
-        for(uint k = 0; k < recvcount; ++k)
+        for(int k = 0; k < recvcount; ++k)
         {
           dolfin_assert(distdata.has_global(recvbuf[k]));
           uint const local_index = distdata.get_local(recvbuf[k]);

@@ -77,6 +77,10 @@ AC_ARG_WITH(libgeom, AC_HELP_STRING([--with-libgeom],
             [Compile with support for LIBGEOM]),
             [with_libgeom=${withval}],[with_libgeom=no])
 
+AC_ARG_WITH(libsim, AC_HELP_STRING([--with-libsim], 
+            [Compile with support for VisIt/libsim]),
+            [with_libsim=${withval}],[with_libsim=no])
+
 AC_ARG_WITH(parmetis, AC_HELP_STRING([--with-parmetis], 
 		     [Compile with support for ParMETIS]),
 		     [with_parmetis=${withval}],[with_parmetis=no])
@@ -328,6 +332,10 @@ if test "x${with_libgeom}" = xyes; then
    AC_DEFINE(HAVE_LIBGEOM,[1],[Have LIBGEOM library])
 fi
 
+if test "x${with_libsim}" != xno; then
+   AX_LIBSIM
+fi
+
 # Test for unit testing framework
 if test "x${enable_check}" = xyes; then
    PKG_CHECK_EXISTS([check],[have_check=yes],[have_check=no])
@@ -438,6 +446,7 @@ Package features:
   LIBGEOM: ${with_libgeom}
   ParMETIS: ${with_parmetis}
   Zoltan: ${with_zoltan}
+  libsim: ${with_libsim}
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}

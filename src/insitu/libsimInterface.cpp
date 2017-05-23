@@ -77,4 +77,18 @@ void libsimInterface::shutdown()
   VisItDisconnect();
 }
 //-----------------------------------------------------------------------------
+void libsimInterface::batchRender(std::string filename)
+{
+  VisItTimeStepChanged();
+
+  VisItUpdatePlots();
+  
+  if (VisItSaveWindow(filename.c_str(), 16384, 16384, 
+		      VISIT_IMAGEFORMAT_PNG) != VISIT_OKAY)
+  {
+    error("VisIt failed to render pipeline");
+  }
+					      
+}
+//-----------------------------------------------------------------------------
 #endif

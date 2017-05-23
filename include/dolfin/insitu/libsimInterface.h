@@ -32,6 +32,8 @@ namespace dolfin
 
     static void shutdown();
 
+    static void batchRender(std::string filename);
+
   private:
 
     static int setupEnv();

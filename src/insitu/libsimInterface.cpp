@@ -91,4 +91,25 @@ void libsimInterface::batchRender(std::string filename)
 					      
 }
 //-----------------------------------------------------------------------------
+#else
+void libsimInterface::initBatch()
+{
+  error("VisIt/libsim is required for in-situ viz");
+}
+//-----------------------------------------------------------------------------
+void libsimInterface::initInteractive()
+{
+  error("VisIt/libsim is required for in-situ viz");
+}
+//-----------------------------------------------------------------------------
+void libsimInterface::shutdown() 
+{
+  error("VisIt/libsim is required for in-situ viz");
+}
+//-----------------------------------------------------------------------------
+void libsimInterface::batchRender(std::string filename)
+{
+  error("VisIt/libsim is required for in-situ viz");
+}
+//-----------------------------------------------------------------------------
 #endif

@@ -397,6 +397,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/fem/Makefile\
                  src/function/Makefile\
                  src/io/Makefile\
+		 src/insitu/Makefile\
                  src/la/Makefile\
                  src/log/Makefile\
                  src/main/Makefile\

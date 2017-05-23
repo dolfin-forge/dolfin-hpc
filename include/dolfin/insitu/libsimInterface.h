@@ -34,6 +34,8 @@ namespace dolfin
 
     static void batchRender(std::string filename);
 
+    static void ctrlLoop();
+
   private:
 
     static int setupEnv();
@@ -41,6 +43,9 @@ namespace dolfin
 #ifdef HAVE_MPI
     static MPI::Communicator comm;
 #endif
+
+    /// Simulation state (running)
+    static int runflag;
 
   };
 

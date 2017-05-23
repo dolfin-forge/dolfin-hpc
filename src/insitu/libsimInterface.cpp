@@ -91,6 +91,45 @@ void libsimInterface::batchRender(std::string filename)
 					      
 }
 //-----------------------------------------------------------------------------
+void libsimInterface::ctrlLoop()
+{
+  int blocking = 0;
+
+  int visit_state = VisItDetectInput(blocking, -1);
+
+  if (visit_state < 0) 
+  {
+    error("Badness...");
+  }
+  else if (visit_state == 0)
+  {
+    return;
+  }
+  else if (visit_state == 1)
+  {
+    runflag = 0;
+    if (VisItAttemptToCompleteConnection() != VISIT_OKAY)
+    {
+      error("VisIt failed to connect!");
+    }
+    message("VisIt connected!");
+
+
+    while(1) 
+    {
+      blocking = 1;
+      visit_state = VisItDetectInput(blocking, -1);
+
+      if (!VisItProcessEngineCommand())
+      {
+	VisItDisconnect();
+	return;
+      }	
+    }
+
+  }
+}
+//-----------------------------------------------------------------------------
 #else
 void libsimInterface::initBatch()
 {
@@ -108,6 +147,11 @@ void libsimInterface::shutdown()
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::batchRender(std::string filename)
+{
+  error("VisIt/libsim is required for in-situ viz");
+}
+//-----------------------------------------------------------------------------
+void libsimInterface::ctrlLoop()
 {
   error("VisIt/libsim is required for in-situ viz");
 }

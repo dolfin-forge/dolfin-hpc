@@ -28,6 +28,14 @@ struct Clonable
 
 };
 
+/// Clone second argument into first argument if non-NULL
+template <class CloneT>
+static void cloneptr(CloneT *& p0, CloneT const * p1)
+{
+  dolfin_assert(p0 == NULL);
+  if (p1 != NULL) { p0 = p1->clone(); }
+}
+
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_CLONABLE_H */

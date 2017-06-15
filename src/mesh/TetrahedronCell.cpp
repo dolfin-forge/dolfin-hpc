@@ -53,7 +53,7 @@ uint const TetrahedronCell::FIV[4][3] =
 { { 1, 2, 3 }, { 0, 2, 3 }, { 0, 1, 3 }, { 0, 1, 2 } };
 
 // UFC: Face - Non-Incident Vertices
-uint const TetrahedronCell::FNV[6][1] =
+uint const TetrahedronCell::FNV[4][1] =
 { { 0 }, { 1 }, { 2 }, { 3 } };
 
 //-----------------------------------------------------------------------------

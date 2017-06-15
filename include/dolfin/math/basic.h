@@ -244,6 +244,18 @@ static inline uint rank(uint L, uint R, uint i)
       std::floor((double) ((double) i - (double) R) / (double) L)));
 }
 
+/// Return the number of significant digits in the integer
+static inline uint sdigits(uint n)
+{
+  uint i = 0;
+  while (n > 0)
+  {
+    ++i;
+    n /= 10;
+  }
+  return i;
+}
+
 /// Check if Not-a-Number if C99 is not used
 #if __STDC_VERSION__ < 199901L
 #ifndef isnan

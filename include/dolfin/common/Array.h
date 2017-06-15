@@ -11,7 +11,9 @@
 #define __DOLFIN_ARRAY_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/log/log.h>
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -36,13 +38,13 @@ public:
   }
 
   /// Create array of given size
-  Array(uint n) :
+  Array(uidx n) :
       std::vector<T>(n)
   {
   }
 
   /// Create array of given size with default value
-  Array(uint n, T const& t) :
+  Array(uidx n, T const& t) :
       std::vector<T>(n, t)
   {
   }
@@ -74,6 +76,43 @@ public:
 #else
     std::vector<T>::insert(this->end(), begin, end);
 #endif
+  }
+
+  /// Factor logic for array initialization
+  inline static
+  T * init(uidx n, T * src, T *& dst)
+  {
+    dolfin_assert(!(n == 0 && src != NULL));
+    if (dst == NULL)
+    {
+      dst = (n > 0 ? new uint[n] : NULL);
+    }
+    if (src == NULL)
+    {
+      std::fill_n(dst, n, 0);
+    }
+    else
+    {
+      std::copy(src, src + n, dst);
+    }
+    return dst;
+  }
+
+  /// Factor logic for array initialization
+  inline static
+  T * init(uidx n, T * src)
+  {
+    dolfin_assert(!(n == 0 && src != NULL));
+    T * dst = (n > 0 ? new uint[n] : NULL);
+    if (src == NULL)
+    {
+      std::fill_n(dst, n, 0);
+    }
+    else
+    {
+      std::copy(src, src + n, dst);
+    }
+    return dst;
   }
 
 };

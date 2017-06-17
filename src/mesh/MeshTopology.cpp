@@ -180,7 +180,7 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal, uint * connectivity
   }
   // NOTE: point meshes have cell dimension is equal to the vertex dimension
   if(dim == 0) { num_vertices_ = nlocal; ini_vertices_ = true; }
-  connectivity_[dim][0].init(connectivity, nlocal, type_->num_vertices(dim));
+  connectivity_[dim][0].init(nlocal, type_->num_vertices(dim), connectivity);
   // Set size of distributed data
   if (distdata_ != NULL)
   {
@@ -278,12 +278,12 @@ void MeshTopology::remap(uint dim, Array<uint> const& mapping)
     uint d0 = dim;
     for (uint d1 = 0; d1 <= dim_; ++d1)
     {
-      if (connectivity_[d0][d1].size() > 0)
+      if (connectivity_[d0][d1].order() > 0)
       {
         connectivity_[d0][d1].remap_left(mapping);
         update_token();
       }
-      if (connectivity_[d1][d0].size() > 0)
+      if (connectivity_[d1][d0].order() > 0)
       {
         connectivity_[d1][d0].remap_right(mapping);
         update_token();
@@ -326,7 +326,7 @@ uint MeshTopology::dim() const
 uint MeshTopology::size(uint dim) const
 {
   dolfin_assert(dim <= dim_);
-  return (dim == 0 ? num_vertices_ : (*this)(dim, 0).num_entities());
+  return (dim == 0 ? num_vertices_ : (*this)(dim, 0).order());
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_computed(uint d0, uint d1) const
@@ -455,7 +455,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     EntityKey key(n);
     Array<EntityKey *> entities_list;
     ce.init(this->size(dim_), m);
-    for (uint c = 0; c < cv.num_entities(); ++c)
+    for (uint c = 0; c < cv.order(); ++c)
     {
       type_->create_entities(entities, dim, cv(c));
       for (uint e = 0; e < m; ++e)
@@ -485,7 +485,7 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
         {
           vertex_entities[entities[e][v]].push_back(key.idx);
         }
-        ce.set(c, key.idx, e);
+        ce(c)[e] = key.idx;
       }
     }
 
@@ -521,9 +521,9 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
 
     // Compute from transpose
     Array<uint> conn(this->size(d0), 0);
-    for (uint e1 = 0; e1 < c10.num_entities(); ++e1)
+    for (uint e1 = 0; e1 < c10.order(); ++e1)
     {
-      for (uint e0 = 0; e0 < c10.size(e1); ++e0)
+      for (uint e0 = 0; e0 < c10.degree(e1); ++e0)
       {
         conn[c10(e1)[e0]]++;
       }
@@ -531,14 +531,14 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     c01.init(conn);
     //
     conn = 0;
-    for (uint e1 = 0; e1 < c10.num_entities(); ++e1)
+    for (uint e1 = 0; e1 < c10.order(); ++e1)
     {
-      for (uint e0 = 0; e0 < c10.size(e1); ++e0)
+      for (uint e0 = 0; e0 < c10.degree(e1); ++e0)
       {
-        c01.set(c10(e1)[e0], e1, conn[c10(e1)[e0]]++);
+        c01(c10(e1)[e0])[conn[c10(e1)[e0]]++] = e1;
       }
     }
-    dolfin_assert(c01.num_entities() == this->size(d0));
+    dolfin_assert(c01.order() == this->size(d0));
   }
   else if (d0 == d1)
   {
@@ -557,13 +557,13 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     MeshConnectivity const& cd0 = connectivity_[di][d0];
     std::set<uint> entities;
     Array<uint> conn(this->size(d0), 0);
-    for (uint e0 = 0; e0 < c0d.num_entities(); ++e0)
+    for (uint e0 = 0; e0 < c0d.order(); ++e0)
     {
       entities.clear();
-      for (uint i = 0; i < c0d.size(e0); ++i)
+      for (uint i = 0; i < c0d.degree(e0); ++i)
       {
         uint const e = c0d(e0)[i];
-        for (uint j = 0; j < cd0.size(e); ++j)
+        for (uint j = 0; j < cd0.degree(e); ++j)
         {
           uint const e1 = cd0(e)[j];
           // An entity is not a neighbor to itself
@@ -576,13 +576,13 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       conn[e0] = entities.size();
     }
     c01.init(conn);
-    for (uint e0 = 0; e0 < c0d.num_entities(); ++e0)
+    for (uint e0 = 0; e0 < c0d.order(); ++e0)
     {
       entities.clear();
-      for (uint i = 0; i < c0d.size(e0); ++i)
+      for (uint i = 0; i < c0d.degree(e0); ++i)
       {
         uint const e = c0d(e0)[i];
-        for (uint j = 0; j < cd0.size(e); ++j)
+        for (uint j = 0; j < cd0.degree(e); ++j)
         {
           uint const e1 = cd0(e)[j];
           // An entity is not a neighbor to itself
@@ -596,10 +596,10 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
            ++it, ++pos)
       {
-        c01.set(e0, *it, pos);
+        c01(e0)[pos] = *it;
       }
     }
-    dolfin_assert(c01.num_entities() == this->size(d0));
+    dolfin_assert(c01.order() == this->size(d0));
   }
   else
   {
@@ -620,16 +620,16 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
     MeshConnectivity const& cv1 = connectivity_[0][d1];
     std::set<uint> entities;
     Array<uint> conn(this->size(d0), 0);
-    for (uint e0 = 0; e0 < c0v.num_entities(); ++e0)
+    for (uint e0 = 0; e0 < c0v.order(); ++e0)
     {
       entities.clear();
-      for (uint i = 0; i < c0v.size(e0); ++i)
+      for (uint i = 0; i < c0v.degree(e0); ++i)
       {
         uint const e = c0v(e0)[i];
-        for (uint j = 0; j < cv1.size(e); ++j)
+        for (uint j = 0; j < cv1.degree(e); ++j)
         {
           uint const e1 = cv1(e)[j];
-          if (contains(c0v(e0), c0v.size(e0), c1v(e1), c1v.size(e1)))
+          if (contains(c0v(e0), c0v.degree(e0), c1v(e1), c1v.degree(e1)))
           {
             entities.insert(e1);
           }
@@ -638,16 +638,16 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       conn[e0] = entities.size();
     }
     c01.init(conn);
-    for (uint e0 = 0; e0 < c0v.num_entities(); ++e0)
+    for (uint e0 = 0; e0 < c0v.order(); ++e0)
     {
       entities.clear();
-      for (uint i = 0; i < c0v.size(e0); ++i)
+      for (uint i = 0; i < c0v.degree(e0); ++i)
       {
         uint const e = c0v(e0)[i];
-        for (uint j = 0; j < cv1.size(e); ++j)
+        for (uint j = 0; j < cv1.degree(e); ++j)
         {
           uint const e1 = cv1(e)[j];
-          if (contains(c0v(e0), c0v.size(e0), c1v(e1), c1v.size(e1)))
+          if (contains(c0v(e0), c0v.degree(e0), c1v(e1), c1v.degree(e1)))
           {
             entities.insert(e1);
           }
@@ -658,10 +658,10 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
            ++it, ++pos)
       {
-        c01.set(e0, *it, pos);
+        c01(e0)[pos] = *it;
       }
     }
-    dolfin_assert(c01.num_entities() == this->size(d0));
+    dolfin_assert(c01.order() == this->size(d0));
   }
 
   /*
@@ -728,7 +728,7 @@ void MeshTopology::disp() const
       dolfin_assert(connectivity_ != NULL);
       if (connectivity_[d][0].is_initialized())
       {
-        cout << d << ": " << connectivity_[d][0].num_entities() << endl;
+        cout << d << ": " << connectivity_[d][0].order() << endl;
       }
       else
       {
@@ -756,7 +756,7 @@ void MeshTopology::disp() const
       cout << d0;
       for (uint d1 = 0; d1 <= dim_; ++d1)
       {
-        if (connectivity_[d0][d1].size() > 0)
+        if (connectivity_[d0][d1].order() > 0)
         {
           cout << " x";
         }

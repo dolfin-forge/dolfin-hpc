@@ -219,7 +219,7 @@ void Mesh::init(uint dim) const
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
-  topology_(d0, d1).size();
+  topology_(d0, d1).order();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const

@@ -169,7 +169,7 @@ inline uint MeshEntity::num_entities(uint dim) const
 {
   //dolfin_assert(mesh_.topology()(tdim_, dim).is_initialized());
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return mesh_.topology()(tdim_, dim).size(index_);
+  return mesh_.topology()(tdim_, dim).degree(index_);
 }
 
 //-----------------------------------------------------------------------------

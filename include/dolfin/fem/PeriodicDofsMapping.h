@@ -16,7 +16,6 @@ namespace dolfin
 
 class DofMap;
 class MeshEntity;
-class Point;
 
 class PeriodicDofsMapping
 {
@@ -67,9 +66,6 @@ private:
 
   ///
   void clear();
-
-  ///
-  bool onEntity(Point& p, MeshEntity& entity);
 
   DofMap const& dofmap_;
 

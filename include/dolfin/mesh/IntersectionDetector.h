@@ -14,7 +14,6 @@ namespace dolfin
 
 class Mesh;
 class Cell;
-class Point;
 
 template<class T> class Array;
 

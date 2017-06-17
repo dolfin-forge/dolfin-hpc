@@ -8,6 +8,7 @@
 #define __DOLFIN_GTS_INTERFACE_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/Point.h>
 
 // Forward declarations
 struct _GtsBBox;
@@ -19,7 +20,6 @@ namespace dolfin
 {
 
 class Mesh;
-class Point;
 class Cell;
 
 template<class T>

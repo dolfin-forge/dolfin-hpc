@@ -19,7 +19,7 @@ struct MidpointDistance : public ValueSpace<>
   ///
   void evaluate(real* values, const real* x, const UFCCell& cell) const
   {
-    values[0] = cell.cell->midpoint().distance(Point(x, cell.geometric_dimension));
+    values[0] = cell.cell->midpoint().dist(Point(cell.geometric_dimension, x));
   }
 
 };

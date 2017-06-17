@@ -101,9 +101,7 @@ private:
       cout << "global_index : " << global_index << endl;
       cout << "nodes        : " << (uint) nodes.size() << endl;
       cout << "weight       : " << weight << endl;
-      cout << "normal       : " << normal.x() << ", "
-      << normal.y() << ", "
-      << normal.z() << endl;
+      cout << "normal       : " << normal << ", " << endl;
       // End indentation
       end();
       cout << endl;

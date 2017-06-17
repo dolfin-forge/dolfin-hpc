@@ -38,7 +38,7 @@ int main()
       cell_markers = false;
       for (CellIterator c(mesh); !c.end(); ++c)
       {
-	if (c->midpoint().distance(p) < 0.1)
+	if (c->midpoint().dist(p) < 0.1)
 	  cell_markers(*c) = true;
       }
       

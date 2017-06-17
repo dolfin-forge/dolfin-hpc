@@ -368,7 +368,7 @@ void ALE::integral(real* new_x, uint dim, Mesh& new_boundary,
       // Compute new position
       for (uint j=0; j<dim; j++)
 	for (uint i=0; i<num_vertices; i++)
-	  new_x[j] += w[i]*(new_p[i][j]-vertex.x()[j]);     
+	  new_x[j] += w[i]*(new_p[i][j]-vertex.x()[j]);
     }     
   }
 

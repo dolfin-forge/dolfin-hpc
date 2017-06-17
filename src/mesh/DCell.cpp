@@ -32,7 +32,7 @@ dolfin::real DCell::volume() const
     case 2: // interval
       {
         // volume of interval is the length, i. e. distance of endpoints
-        return vertices[0]->p.distance(vertices[1]->p);
+        return vertices[0]->p.dist(vertices[1]->p);
       }
       break;
     case 3: // triangle
@@ -69,27 +69,27 @@ dolfin::real DCell::diameter() const
     case 2: //interval
       {
         // diameter of interval is the length, i. e. distance of endpoints
-        return vertices[0]->p.distance(vertices[1]->p);
+        return vertices[0]->p.dist(vertices[1]->p);
       }
       break;
     case 3: //triangle
       {
         // formula from TriangleCell::diameter
-        real a = vertices[1]->p.distance(vertices[2]->p);
-        real b = vertices[0]->p.distance(vertices[2]->p);
-        real c = vertices[0]->p.distance(vertices[1]->p);
+        real a = vertices[1]->p.dist(vertices[2]->p);
+        real b = vertices[0]->p.dist(vertices[2]->p);
+        real c = vertices[0]->p.dist(vertices[1]->p);
         return 0.5 * a * b * c / volume();
       }
       break;
     case 4: // tetrahedron
       {
         // formula from TetrahedronCell::diameter
-        real a = vertices[1]->p.distance(vertices[2]->p);
-        real b = vertices[0]->p.distance(vertices[2]->p);
-        real c = vertices[0]->p.distance(vertices[1]->p);
-        real aa = vertices[0]->p.distance(vertices[3]->p);
-        real bb = vertices[1]->p.distance(vertices[3]->p);
-        real cc = vertices[2]->p.distance(vertices[3]->p);
+        real a = vertices[1]->p.dist(vertices[2]->p);
+        real b = vertices[0]->p.dist(vertices[2]->p);
+        real c = vertices[0]->p.dist(vertices[1]->p);
+        real aa = vertices[0]->p.dist(vertices[3]->p);
+        real bb = vertices[1]->p.dist(vertices[3]->p);
+        real cc = vertices[2]->p.dist(vertices[3]->p);
         real la = a*aa;
         real lb = b*bb;
         real lc = c*cc;
@@ -112,7 +112,7 @@ dolfin::uint DCell::orientation() const
     case 2: //interval
       {
         Point p01 = vertices[1]->p - vertices[0]->p;
-        Point n(-p01.y(), p01.x());
+        Point n(-p01[1], p01[0]);
         return ( n.dot(p01) < 0.0 ? 1 : 0 );
       }
       break;
@@ -120,7 +120,7 @@ dolfin::uint DCell::orientation() const
       {
         Point p01 = vertices[1]->p - vertices[0]->p;
         Point p02 = vertices[2]->p - vertices[0]->p;
-        Point n(-p01.y(), p01.x());
+        Point n(-p01[1], p01[0]);
         return ( n.dot(p02) < 0.0 ? 1 : 0 );
       }
       break;

@@ -357,10 +357,10 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
   uint i = 0;
   for (VertexIterator vertex(*mesh); !vertex.end(); i++, ++vertex)
   {
-    geom_vec[i] = vertex->point().x();
-    geom_vec[i + 1] = vertex->point().y();
+    geom_vec[i] = vertex->point()[0];
+    geom_vec[i + 1] = vertex->point()[1];
     if (num_dim > 2)
-      geom_vec[i + 2] = vertex->point().z();
+      geom_vec[i + 2] = vertex->point()[2];
   }
 
   *ierr = ZOLTAN_OK;

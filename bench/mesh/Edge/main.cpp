@@ -17,9 +17,9 @@ inline real length_old(Edge& e)
 
   real length(
       sqrt(
-          (p1.x() - p0.x()) * (p1.x() - p0.x())
-              + (p1.y() - p0.y()) * (p1.y() - p0.y())
-              + (p1.z() - p0.z()) * (p1.z() - p0.z())));
+          (p1[0] - p0[0]) * (p1[0] - p0[0])
+              + (p1[1] - p0[1]) * (p1[1] - p0[1])
+              + (p1[2] - p0[2]) * (p1[2] - p0[2])));
 
   return length;
 }
@@ -64,8 +64,8 @@ Point midpoint_old(Edge& e)
   const Point p0 = v0.point();
   const Point p1 = v1.point();
 
-  Point p(0.5 * (p0.x() + p1.x()), 0.5 * (p0.y() + p1.y()),
-          0.5 * (p0.z() + p1.z()));
+  Point p(0.5 * (p0[0] + p1[0]), 0.5 * (p0[1] + p1[1]),
+          0.5 * (p0[2] + p1[2]));
 
   return p;
 }
@@ -224,7 +224,7 @@ int main(int argc, char** argv)
     for (EdgeIterator e(mesh); !e.end(); ++e)
     {
       Point p = midpoint_old(*e);
-      dolfin_assert(p.distance(Amidpnt[k++]) < DOLFIN_EPS);
+      dolfin_assert(p.dist(Amidpnt[k++]) < DOLFIN_EPS);
     }
   }
   tocd();
@@ -246,7 +246,7 @@ int main(int argc, char** argv)
       for (uint n = 0; n < d; ++n)
       {
         p[n] = 0.5 * (p0[n] + p1[n]);
-      } dolfin_assert(p.distance(Amidpnt[k++]) < DOLFIN_EPS);
+      } dolfin_assert(p.dist(Amidpnt[k++]) < DOLFIN_EPS);
     }
   }
   tocd();

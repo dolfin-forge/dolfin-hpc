@@ -18,6 +18,7 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/PeriodicSubDomain.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/mesh/Point.h>
 
 #include <algorithm>
 #include <cstring>
@@ -26,6 +27,65 @@
 
 namespace dolfin
 {
+
+//-----------------------------------------------------------------------------
+bool onEntity(Point& p, MeshEntity& entity)
+{
+  // Check if the coordinates are on the same line as the line segment
+  if ( entity.dim() == 1 )
+  {
+    // Create points
+    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
+    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
+
+    // Create vectors
+    Point v01 = v1 - v0;
+    Point vp0 = v0 - p;
+    Point vp1 = v1 - p;
+
+    // Check if the length of the sum of the two line segments vp0 and vp1 is
+    // equal to the total length of the entity
+    if ( std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  // Check if the coordinates are in the same plane as the triangular entity
+  else if ( entity.dim() == 2 )
+  {
+    // Create points
+    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
+    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
+    Point v2 = Vertex(entity.mesh(), entity.entities(0)[2]).point();
+
+    // Create vectors
+    Point v01 = v1 - v0;
+    Point v02 = v2 - v0;
+    Point vp0 = v0 - p;
+    Point vp1 = v1 - p;
+    Point vp2 = v2 - p;
+
+    // Check if the sum of the area of the sub triangles is equal to the total
+    // area of the entity
+    if ( std::abs(v01.cross(v02).norm() - vp0.cross(vp1).norm() - vp1.cross(vp2).norm()
+        - vp2.cross(vp0).norm()) < DOLFIN_EPS )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  error("On entity check is not implemented for given dimension).");
+
+  return false;
+}
 
 //-----------------------------------------------------------------------------
 PeriodicDofsMapping::PeriodicDofsMapping(DofMap const& dofmap) :
@@ -520,65 +580,6 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
   delete[] dofsH;
   delete[] dofsG;
 
-}
-
-//-----------------------------------------------------------------------------
-bool PeriodicDofsMapping::onEntity(Point& p, MeshEntity& entity)
-{
-  // Check if the coordinates are on the same line as the line segment
-  if ( entity.dim() == 1 )
-  {
-    // Create points
-    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
-    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
-
-    // Create vectors
-    Point v01 = v1 - v0;
-    Point vp0 = v0 - p;
-    Point vp1 = v1 - p;
-
-    // Check if the length of the sum of the two line segments vp0 and vp1 is
-    // equal to the total length of the entity
-    if ( std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS )
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  // Check if the coordinates are in the same plane as the triangular entity
-  else if ( entity.dim() == 2 )
-  {
-    // Create points
-    Point v0 = Vertex(entity.mesh(), entity.entities(0)[0]).point();
-    Point v1 = Vertex(entity.mesh(), entity.entities(0)[1]).point();
-    Point v2 = Vertex(entity.mesh(), entity.entities(0)[2]).point();
-
-    // Create vectors
-    Point v01 = v1 - v0;
-    Point v02 = v2 - v0;
-    Point vp0 = v0 - p;
-    Point vp1 = v1 - p;
-    Point vp2 = v2 - p;
-
-    // Check if the sum of the area of the sub triangles is equal to the total
-    // area of the entity
-    if ( std::abs(v01.cross(v02).norm() - vp0.cross(vp1).norm() - vp1.cross(vp2).norm()
-        - vp2.cross(vp0).norm()) < DOLFIN_EPS )
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-
-  error("On entity check is not implemented for given dimension).");
-
-  return false;
 }
 
 //-----------------------------------------------------------------------------

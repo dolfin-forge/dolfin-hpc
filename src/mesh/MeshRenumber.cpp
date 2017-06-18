@@ -152,7 +152,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
       sendmax = std::max(sendmax, (uint) sendbuf[j].size());
     }
     uint recvmax = 0;
-    MPI::allReduceMax(sendmax, recvmax);
+    MPI::all_reduce<MPI::max>(sendmax, recvmax);
     uint * recvbuf = new uint[recvmax];
     int recvcount;
     for (uint j = 1; j < pe_size; ++j)

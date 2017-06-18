@@ -333,7 +333,7 @@ void XMLMesh::endMesh()
     uint src;
     uint dst;
     uint recvmax;
-    MPI::allReduceSum(shared, recvmax);
+    MPI::all_reduce<MPI::sum>(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
     int recvcount;
     uint * sendbuf_v = new uint[2*recvmax];

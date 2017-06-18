@@ -6,7 +6,7 @@
 // Modified by Aurelien Larcher, 2016-2017.
 //
 // First added:  2007-11-30
-// Last changed: 2010-06-08
+// Last changed: 2017-08-24
 
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H
@@ -88,29 +88,16 @@ public:
   static
   void offset(uint xl, uint& offset, Communicator& comm = MPI::DOLFIN_COMM);
 
-  ///
-  static
-  void allReduceSum(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
+  ////
+  enum ReductionType { sum, min, max };
 
-  ///
-  static
-  void allReduceMin(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
+  //// Wrap in a template function to allow use of functors
+  template<class T>
+  static void bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM);
 
-  ///
-  static
-  void allReduceMax(uint xl, uint& xg, Communicator& comm = MPI::DOLFIN_COMM);
-
-  ///
-  static
-  void allReduceSum(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
-
-  ///
-  static
-  void allReduceMin(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
-
-  ///
-  static
-  void allReduceMax(real xl, real& xg, Communicator& comm = MPI::DOLFIN_COMM);
+  //// Wrap in a template function to allow use of functors
+  template<int R, class T>
+  static void all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
   static void startTimer();
@@ -150,6 +137,76 @@ private:
   static Context ctx_;
 
 };
+
+//-----------------------------------------------------------------------------
+
+#if HAVE_MPI
+
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::bcast(uint* x, int n, int r, Communicator& comm)
+{
+  MPI_Bcast(x, n, MPI_UNSIGNED, r, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::bcast(real* x, int n, int r, Communicator& comm)
+{
+  MPI_Bcast(x, n, MPI_DOUBLE, r, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::sum>(uint x, uint& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_SUM, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::min>(uint x, uint& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_MIN, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::max>(uint x, uint& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_MAX, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::sum>(real x, real& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_SUM, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::min>(real x, real& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_MIN, comm);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline void MPI::all_reduce<MPI::max>(real x, real& r, Communicator& comm)
+{
+  MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_MAX, comm);
+}
+
+#else
+
+//-----------------------------------------------------------------------------
+template<class T>
+static void MPI::bcast(T* x, int n, int r, Communicator& comm)
+{
+}
+
+//-----------------------------------------------------------------------------
+template<int R, class T>
+inline void MPI::all_reduce(T x, T& r, Communicator& comm)
+{ r = x; }
+
+#endif
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

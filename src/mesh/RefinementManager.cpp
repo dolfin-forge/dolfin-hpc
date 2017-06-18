@@ -313,7 +313,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
   newdistdata.finalize();
 
   uint num_shared_edges = 0;
-  MPI::allReduceSum(mesh_.topology().num_shared(1), num_shared_edges);
+  MPI::all_reduce<MPI::sum>(mesh_.topology().num_shared(1), num_shared_edges);
 
   dolfin_assert(newdistdata.global_size() == mesh_.global_size(0) + num_shared_edges);
 

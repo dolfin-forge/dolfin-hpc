@@ -341,7 +341,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       {
         recvmax = std::max(recvmax, (uint) shared_vertices[j].size());
       }
-      MPI::allReduceMax(recvmax, recvmax);
+      MPI::all_reduce<MPI::max>(recvmax, recvmax);
       uint * recvbuf = new uint[recvmax];
       int recvcount;
 

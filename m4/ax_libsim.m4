@@ -30,8 +30,9 @@ AC_DEFUN([AX_LIBSIM],[
 	   AC_MSG_CHECKING(for VisIt/libsim)
 	   AC_COMPILE_IFELSE([
 	   #include <VisItControlInterface_V2.h>	  
-	   void main() {
+	   int main() {
 	   VisItSetupEnvironment2(0);
+	   return 0;
 	   }
 	   ],[have_libsim=yes], [have_libsim=no])
 

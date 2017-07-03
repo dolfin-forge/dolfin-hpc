@@ -74,7 +74,7 @@ public:
   Mesh();
 
   /// Constructor from cell type and space
-  Mesh(CellType const& type, Space const& space);
+  Mesh(CellType const& ctype, Space const& space);
 
   /// Copy constructor
   Mesh(Mesh const& mesh);
@@ -250,23 +250,11 @@ public:
 
 private:
 
-  /// Intialize mesh given cell type and space
-  void init(CellType const& type, Space const& space);
-
-  /// Clear all mesh data
-  void clear();
-
-  // Cell type
-  CellType * cell_type_;
-
   // Mesh topology
-  MeshTopology topology_;
-
-  // Space
-  Space * space_;
+  MeshTopology * topology_;
 
   // Mesh geometry
-  MeshGeometry geometry_;
+  MeshGeometry * geometry_;
 
   /// Exterior boundary mesh
   mutable BoundaryMesh * exterior_boundary_;
@@ -282,7 +270,7 @@ private:
 
   int timestamp_;
 
-  /// Assignment (disabled)
+  /// Assignment (Disabled)
   Mesh const& operator=(Mesh const& other) { return *this; }
 
 };

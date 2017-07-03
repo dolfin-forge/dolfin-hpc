@@ -26,10 +26,10 @@ class MeshEditor
 public:
 
   /// Constructor for meshes given a cell type and default Euclidean space
-  MeshEditor(Mesh& mesh, CellType const& type);
+  MeshEditor(Mesh& mesh, CellType const& ctype);
 
   /// Constructor for meshes given a cell type and a space definition
-  MeshEditor(Mesh& mesh, CellType const& type, Space const& space);
+  MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space);
 
   /// Constructor for meshes with unique type of cell from factory function
   MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim);
@@ -79,7 +79,7 @@ public:
 private:
 
   /// Open mesh of given cell type and geometrical dimension
-  void init(Mesh& mesh, CellType const& type, Space const& space);
+  void init(Mesh& mesh, CellType const& ctype, Space const& space);
 
   // Clear all data
   void clear();

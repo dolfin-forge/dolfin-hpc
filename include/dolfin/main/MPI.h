@@ -17,6 +17,11 @@
 #include <mpi.h>
 #endif
 
+#ifdef HAVE_MPI
+#define DOLFIN_COMM_NULL  MPI_COMM_NULL
+#else
+#define DOLFIN_COMM_NULL  0
+#endif
 
 namespace dolfin
 {

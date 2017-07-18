@@ -36,12 +36,11 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 XMLFile::XMLFile(const std::string filename) :
-    GenericFile(filename),
+    GenericFile("XML", filename),
+    xmlObject(NULL),
     header_written(false),
     mark(0)
 {
-  type = "XML";
-  xmlObject = NULL;
 }
 //-----------------------------------------------------------------------------
 XMLFile::~XMLFile()

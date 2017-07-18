@@ -28,17 +28,15 @@ namespace dolfin
 
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename) :
-    GenericFile(filename),
+    GenericFile("VTK", filename),
     _t(0)
 {
-  type = "VTK";
 }
 //----------------------------------------------------------------------------
 VTKFile::VTKFile(const std::string filename, real const& t) :
-    GenericFile(filename),
+    GenericFile("VTK", filename),
     _t(&t)
 {
-  type = "VTK";
 }
 //----------------------------------------------------------------------------
 VTKFile::~VTKFile()

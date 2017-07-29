@@ -33,25 +33,29 @@ public:
 
   /// Create empty array
   Array() :
-      std::vector<T>()
+      std::vector<T>(),
+      stride_(1)
   {
   }
 
   /// Create array of given size
   Array(uidx n) :
-      std::vector<T>(n)
+      std::vector<T>(n),
+      stride_(1)
   {
   }
 
   /// Create array of given size with default value
   Array(uidx n, T const& t) :
-      std::vector<T>(n, t)
+      std::vector<T>(n, t),
+      stride_(1)
   {
   }
 
   /// Copy constructor
   Array(Array<T> const& x) :
-      std::vector<T>(x)
+      std::vector<T>(x),
+      stride_(1)
   {
   }
 
@@ -77,6 +81,15 @@ public:
     std::vector<T>::insert(this->end(), begin, end);
 #endif
   }
+
+  ///
+  void operator%=(uint s)
+  {
+    if  (s == 0) { stride_ = this->size();  } else { stride_ = s; }
+  }
+
+  ///
+  inline uint stride() const { return stride_; }
 
   /// Factor logic for array initialization
   inline static
@@ -115,6 +128,10 @@ public:
     return dst;
   }
 
+private:
+
+  uint stride_;
+
 };
 
 //--- SPECIALIZATION ----------------------------------------------------------
@@ -126,7 +143,8 @@ public:
 
   /// Create empty array
   Array() :
-      std::vector<T*>()
+      std::vector<T*>(),
+      stride_(1)
   {
   }
 
@@ -145,10 +163,21 @@ public:
     }
   }
 
+  ///
+  void operator%=(uint s)
+  {
+    if  (s == 0) { stride_ = this->size();  } else { stride_ = s; }
+  }
+
+  ///
+  inline uint stride() const { return stride_; }
+
 private:
 
   /// Disallow copy constructor
   Array(T const& other) {}
+
+  uint stride_;
 
 };
 

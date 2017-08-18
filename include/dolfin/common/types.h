@@ -79,7 +79,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 
-  /// Facility to compare arrays
+/// Facility to compare arrays
 template <class T> bool cmp(size_t N, T const * x0, T const * x1)
 {
   if (x0 == x1)
@@ -98,6 +98,12 @@ template <class T> bool cmp(size_t N, T const * x0, T const * x1)
     }
   }
   return true;
+}
+
+/// Facility to compare arrays
+template <class T> bool cmp(T const * x0b, T const * x0e, T const * x1)
+{
+  return cmp(x0e - x0b, x0b, x1);
 }
 
 /// Facility to compare object through pointers

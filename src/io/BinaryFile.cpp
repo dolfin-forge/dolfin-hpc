@@ -33,7 +33,7 @@ namespace dolfin
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile(filename),
     t_(0),
-    version_(2)
+    version_(BINARY_VERSION)
 {
   type = "Binary";
 }
@@ -41,7 +41,7 @@ BinaryFile::BinaryFile(const std::string filename) :
 BinaryFile::BinaryFile(const std::string filename, real const& t) :
     GenericFile(filename),
     t_(&t),
-    version_(2)
+    version_(BINARY_VERSION)
 {
   type = "Binary";
 }
@@ -475,7 +475,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     }
 
     // Create cell type to get topological dimension and number of vertices
-    CellType::Type ctype = BinaryFile::cell_type(type);
+    CellType::Type ctype = BinaryFile::cell_type(version_, type);
     CellType* cell_type = CellType::create(ctype);
     uint const num_cellvertices = cell_type->num_entities(0);
     delete cell_type;
@@ -557,9 +557,10 @@ void BinaryFile::operator>>(Mesh& mesh)
     byte_offset = sizeof(BinaryFileHeader) + 3 * sizeof(uint);
 
     // Create cell type to get topological dimension and number of vertices
-    CellType::Type ctype = BinaryFile::cell_type(type);
+    CellType::Type ctype = BinaryFile::cell_type(version_, type);
     CellType * cell_type = CellType::create(ctype);
     uint const num_cellvertices = cell_type->num_entities(0);
+    cell_type->disp();
     delete cell_type;
 
     //
@@ -729,11 +730,8 @@ void BinaryFile::operator>>(Mesh& mesh)
         std::inserter(orphaned_vertices, orphaned_vertices.end()));
     uint const num_local_vertices = all_vertices.size()
         + ghosted_entities.size();
-    message("all_vertices size     : %u", all_vertices.size());
-    message("orphaned_vertices size: %u", orphaned_vertices.size());
 
     // Open mesh for editing
-    message("open editor");
     MeshEditor editor(mesh, ctype, gdim);
     editor.init_vertices(num_local_vertices);
     editor.init_cells(cells.size());
@@ -885,7 +883,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 void BinaryFile::operator<<(Mesh& mesh)
 {
   uint const gdim = mesh.geometry().dim();
-  uint const type = BinaryFile::cell_type(mesh.type().cellType());
+  uint const type = BinaryFile::cell_type(BINARY_VERSION, mesh.type().cellType());
   uint const num_vertices = mesh.global_size(0);
   uint const num_cells = mesh.num_global_cells();
   uint const num_cellvertices = mesh.type().num_entities(0);
@@ -1184,7 +1182,6 @@ template<typename T>
 
     uint pe_rank = MPI::rank();
     uint pe_size = MPI::size();
-    message("load func %s", filename.c_str());
     MPI_File fh;
     MPI_Offset byte_offset;
     BinaryFileHeader hdr;

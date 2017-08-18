@@ -23,6 +23,7 @@
 #define BINARY_MAGIC_V2 0xB4B3
 #define BINARY_MAGIC    BINARY_MAGIC_V2
 #define FNAME_LENGTH    256
+#define BINARY_VERSION  2
 
 namespace dolfin
 {
@@ -151,10 +152,10 @@ private:
 #endif
 
   /// Returns binary file cell type identifier for given DOLFIN cell type
-  uint cell_type(CellType::Type const type);
+  uint cell_type(uint version, CellType::Type const type);
 
   /// Returns DOLFIN cell type for given binary file cell type identifier
-  CellType::Type cell_type(uint const type);
+  CellType::Type cell_type(uint version, uint const type);
 
   // Function filename
   std::string bin_filename_;
@@ -242,9 +243,9 @@ inline void BinaryFile::bswap_func_hdr(BinaryFunctionHeader& hdr)
 }
 #endif
 //-----------------------------------------------------------------------------
-inline uint BinaryFile::cell_type(CellType::Type const type)
+inline uint BinaryFile::cell_type(uint version, CellType::Type const type)
 {
-  switch (version_)
+  switch (version)
     {
     case 2:
       switch (type)
@@ -294,9 +295,9 @@ inline uint BinaryFile::cell_type(CellType::Type const type)
 }
 
 //-----------------------------------------------------------------------------
-inline CellType::Type BinaryFile::cell_type(uint const type)
+inline CellType::Type BinaryFile::cell_type(uint version, uint const type)
 {
-  switch (version_)
+  switch (version)
     {
     case 2:
       switch (type)

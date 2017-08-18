@@ -246,7 +246,6 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
   }
 
   // Initialize facets, needed for geometric search
-  uint const tdim = mesh().topology().dim();
   uint const gdim = mesh().geometry().dim();
   uint const facet_dim = mesh().type().facet_dim();
 

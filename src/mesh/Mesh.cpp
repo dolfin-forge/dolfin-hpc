@@ -214,12 +214,12 @@ uint const * Mesh::cells() const
 //-----------------------------------------------------------------------------
 void Mesh::init(uint dim) const
 {
-  uint size = topology_.size(dim);
+  topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
-  uint size = topology_(d0, d1).size();
+  topology_(d0, d1).size();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const

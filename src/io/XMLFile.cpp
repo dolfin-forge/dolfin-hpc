@@ -384,7 +384,7 @@ void XMLFile::operator<<(Mesh& mesh)
     MPI_Offset curr_offset = 0;
     MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
                   MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
-    MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, "native", MPI_INFO_NULL );
+    MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, (char *) "native", MPI_INFO_NULL );
 
     // Write DOLFIN XML format header
     std::string const hdr =

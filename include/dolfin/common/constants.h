@@ -18,7 +18,7 @@ real const DOLFIN_EPS        =   3.0e-16;
 real const DOLFIN_SQRT_EPS   =   1.0e-8;
 real const DOLFIN_PI         =   3.141592653589793238462;
 
-unsigned int const DOLFIN_LINELENGTH =   256;
-unsigned int const DOLFIN_TERM_WIDTH =   80;
+int const DOLFIN_LINELENGTH =   256;
+int const DOLFIN_TERM_WIDTH =   80;
 
 #endif

@@ -155,13 +155,13 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   unsigned int current_vertex = 0;
   unsigned int current_cell = 0;
 
-
-  MeshDistributedData distdata(sub.topology().dim());
   MeshEditor editor(sub, cell_type.cellType(), mesh.geometry().dim());
 
   // Specify number of vertices and cells
   editor.init_vertices(nvertices);
   editor.init_cells(ncells);
+
+  MeshDistributedData& distdata = sub.distdata();
 
   for (VertexIterator n(mesh); !n.end(); ++n)
   {
@@ -228,7 +228,6 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   }
 
   editor.close();
-  sub.distdata() = distdata;
 }
 
 }

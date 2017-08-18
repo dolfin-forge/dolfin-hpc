@@ -63,7 +63,6 @@ void UFCHalo::init()
 
   // Clear data structures and define data padding
   clear();
-  uint const tdim = mesh_.topology().dim();
   uint const gdim = mesh_.geometry().dim();
   uint const facet_dim = mesh_.type().facet_dim();
   DistributedData& distdata = mesh_.distdata()[facet_dim];

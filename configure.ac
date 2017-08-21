@@ -342,7 +342,7 @@ fi
 AM_CONDITIONAL([ENABLE_CHECK], [test "x${enable_check}" = xyes])
 
 if test "x${enable_debug}" != xno; then
-   CXXFLAGS="-g -DDEBUG $CXXFLAGS"
+   CXXFLAGS="-g -DDEBUG=1 $CXXFLAGS"
    case "$host_os" in
    *solaris*)
        LIBS="$LIBS -lumem"

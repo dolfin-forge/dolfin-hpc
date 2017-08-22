@@ -128,6 +128,9 @@ public:
   /// Display data
   void disp() const;
 
+  //--- SERIALIZATION ---------------------------------------------------------
+  MeshConnectivity const& operator>>(Array<uint>& A) const;
+
   //--- CHECK ROUTINES --------------------------------------------------------
 
   /// Check

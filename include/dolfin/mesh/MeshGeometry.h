@@ -121,6 +121,9 @@ public:
   /// Display data
   void disp() const;
 
+  //--- SERIALIZATION ---------------------------------------------------------
+  MeshGeometry const& operator>>(Array<real>& A) const;
+
   //--- TOKENIZED -------------------------------------------------------------
 
 public:

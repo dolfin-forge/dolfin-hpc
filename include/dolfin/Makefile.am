@@ -17,6 +17,7 @@ nobase_pkginclude_HEADERS = \
 				common/Check.h\
 				common/Clonable.h\
 				common/DistributedData.h\
+				common/Distributed.h\
 				common/Label.h\
 				common/List.h\
 				common/Test.h\

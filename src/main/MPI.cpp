@@ -21,9 +21,9 @@ namespace dolfin
 {
 
 //--- STATIC ------------------------------------------------------------------
-MPI::Communicator MPI::DOLFIN_COMM_WORLD;
-MPI::Communicator MPI::DOLFIN_COMM_SELF;
-MPI::Communicator MPI::DOLFIN_COMM;
+MPI::Communicator MPI::DOLFIN_COMM_WORLD  = DOLFIN_COMM_NULL;
+MPI::Communicator MPI::DOLFIN_COMM_SELF   = DOLFIN_COMM_NULL;
+MPI::Communicator MPI::DOLFIN_COMM        = DOLFIN_COMM_NULL;
 
 real MPI::time_ = 0.0;
 bool MPI::init_ = false;

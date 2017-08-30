@@ -227,59 +227,5 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 #endif
 }
 //-----------------------------------------------------------------------------
-void MPI::allReduceSum(uint local, uint& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_SUM, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
-void MPI::allReduceMin(uint local, uint& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MIN, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
-void MPI::allReduceMax(uint local, uint& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_UNSIGNED, MPI_MAX, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
-void MPI::allReduceSum(real local, real& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_SUM, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
-void MPI::allReduceMin(real local, real& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MIN, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
-void MPI::allReduceMax(real local, real& global, Communicator& comm)
-{
-#if HAVE_MPI
-    MPI_Allreduce(&local, &global, 1, MPI_DOUBLE, MPI_MAX, comm);
-#else
-    global = local;
-#endif
-}
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

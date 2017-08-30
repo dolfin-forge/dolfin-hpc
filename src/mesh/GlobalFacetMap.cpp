@@ -122,10 +122,10 @@ void GlobalFacetMap::init()
       max_rvalsize = std::max(max_rvalsize, (uint) sendbuf_facets[j].size());
     }
     uint max_recvcount;
-    MPI::allReduceMax(max_sendsize, max_recvcount);
+    MPI::all_reduce<MPI::max>(max_sendsize, max_recvcount);
     uint *recvbuf_facets = new uint[max_recvcount];
     uint max_rvalcount;
-    MPI::allReduceMax(max_rvalsize, max_rvalcount);
+    MPI::all_reduce<MPI::max>(max_rvalsize, max_rvalcount);
     uint *sendbuf_rval = new uint[max_rvalcount];
     uint *recvbuf_rval = new uint[max_rvalcount];
     int recv_count = 0;

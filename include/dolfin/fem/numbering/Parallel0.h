@@ -136,7 +136,7 @@ public:
     uint dst;
     uint max_recv;
     uint local_size = sendbuf.size();
-    MPI::allReduceMax(local_size, max_recv);
+    MPI::all_reduce<MPI::max>(local_size, max_recv);
     uint *recvbuf = new uint[max_recv];
     int recv_count;
     for (uint j = 1; j < pe_size; ++j)

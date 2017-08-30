@@ -388,7 +388,7 @@ void DistributedData::assign(DistributedData const& other,
   ///
   range_size_ = cache_size_ - ghost_.size();
   MPI::offset(range_size_, offset_);
-  MPI::allReduceSum(range_size_, global_size_);
+  MPI::all_reduce<MPI::sum>(range_size_, global_size_);
 
   ///
   finalized_ = true;
@@ -496,7 +496,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   else
   {
     uint range_sum;
-    MPI::allReduceSum(range_size_, range_sum);
+    MPI::all_reduce<MPI::sum>(range_size_, range_sum);
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
     if ((global_size_ > 0) && (global_size_ != range_sum))
@@ -796,7 +796,7 @@ void DistributedData::renumber_global()
   {
     recvsize = std::max(recvsize, (uint) sendbuf[i].size());
   }
-  MPI::allReduceMax(recvsize, recvsize);
+  MPI::all_reduce<MPI::max>(recvsize, recvsize);
   uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint * sendbck = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint const num_ghost = ghost_.size();

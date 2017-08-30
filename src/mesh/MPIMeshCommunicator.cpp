@@ -424,7 +424,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
   // Exchange ghost vertices
   uint sendcnt_gv = sendbuf_gv.size();
   uint sendmax_gv = 0;
-  MPI::allReduceSum(sendcnt_gv, sendmax_gv);
+  MPI::all_reduce<MPI::sum>(sendcnt_gv, sendmax_gv);
   dolfin_assert(sendmax_gv > 0);
   uint * sendbck_gv = new uint[sendmax_gv];
   real * sendbck_gx = new real[sendmax_gv * gdim];

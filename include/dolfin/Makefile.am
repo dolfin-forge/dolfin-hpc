@@ -67,6 +67,14 @@ nobase_pkginclude_HEADERS = \
 				fem/UFCExpression.h\
 				fem/UFCHalo.h\
 				fem/UFCMesh.h\
+				fem/numbering/CG1s.h\
+				fem/numbering/CG1v.h\
+				fem/numbering/DG0s.h\
+				fem/numbering/DG0v.h\
+				fem/numbering/Parallel0.h\
+				fem/numbering/Parallel1.h\
+				fem/numbering/RealSpace.h\
+				fem/numbering/Serial.h\
 				function/dolfin_function.h\
 				function/Analytic.h\
 				function/Constant.h\
@@ -225,7 +233,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
-        mesh/Space.h \
+				mesh/Space.h \
 				mesh/SubDomain.h\
 				mesh/StructuredGrid.h\
 				mesh/TetrahedronCell.h\

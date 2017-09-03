@@ -72,7 +72,7 @@ namespace dolfin
   void error(std::string msg, ...);
 
   /// Begin task (increase indentation level)
-  void begin(_msg msg, ...);
+  void begin(std::string msg, ...);
 
   /// Begin task (increase indentation level)
   void begin(int debug_level,_msg msg, ...);

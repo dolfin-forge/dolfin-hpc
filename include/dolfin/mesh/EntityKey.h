@@ -275,7 +275,7 @@ struct hash<dolfin::EntityKey>
 
 } /* namespace std */
 
-#else
+#elif (__sgi)
 
 namespace std
 {

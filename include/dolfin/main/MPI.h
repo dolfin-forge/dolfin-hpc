@@ -195,7 +195,7 @@ inline void MPI::all_reduce<MPI::max>(real x, real& r, Communicator& comm)
 
 //-----------------------------------------------------------------------------
 template<class T>
-static void MPI::bcast(T* x, int n, int r, Communicator& comm)
+inline void MPI::bcast(T* x, int n, int r, Communicator& comm)
 {
 }
 

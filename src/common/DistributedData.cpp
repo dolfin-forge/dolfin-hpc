@@ -1042,7 +1042,7 @@ void DistributedData::set_shared(uint local_index)
   }
   // As explained we allow setting an entity as shared without adjacent only if
   // the entity is not shared already.
-  dolfin_assert(global_.count(local_index) > 0);
+  dolfin_assert(!((cached_ownership_ == NULL)&&(global_.count(local_index) == 0)));
   if (shared_[local_index].size() > 0)
   {
     error("DistributedData : cannot set_shared on entities with adjacents");

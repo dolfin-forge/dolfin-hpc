@@ -102,16 +102,9 @@ nobase_pkginclude_HEADERS = \
 				io/OFFFile.h\
 				io/STLFile.h\
 				io/VTKFile.h\
-				io/XMLDofMap.h\
 				io/XMLFile.h\
-				io/XMLFiniteElement.h\
-				io/XMLFunction.h\
-				io/XMLMatrix.h\
 				io/XMLMesh.h\
-				io/XMLMeshFunction.h\
 				io/XMLObject.h\
-				io/XMLParameterList.h\
-				io/XMLVector.h\
 				la/dolfin_la.h\
 				la/AMGSolver.h\
 				la/DefaultFactory.h\

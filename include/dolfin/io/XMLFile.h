@@ -38,29 +38,10 @@ namespace dolfin
     ~XMLFile();
     
     // Input
-
-    void operator>> (GenericVector& x);
-    void operator>> (GenericMatrix& A);
     void operator>> (Mesh& mesh);
-    void operator>> (MeshFunction<int>& meshfunction);
-    void operator>> (MeshFunction<uint>& meshfunction);
-    void operator>> (MeshFunction<real>& meshfunction);
-    void operator>> (MeshFunction<bool>& meshfunction);
-    void operator>> (Function& f);
-    void operator>> (ParameterList& parameters);
     
     // Output
-    
-    void operator<< (GenericVector& x);
-    void operator<< (GenericMatrix& A);
     void operator<< (Mesh& mesh);
-// Todo:
-    void operator<< (MeshFunction<int>& mesh);
-    void operator<< (MeshFunction<uint>& mesh);
-    void operator<< (MeshFunction<real>& mesh);
-    void operator<< (MeshFunction<bool>& mesh);
-    void operator<< (Function& f);
-    void operator<< (ParameterList& parameters);
     
     // Friends
     #ifdef HAVE_XML

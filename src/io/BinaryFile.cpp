@@ -468,11 +468,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     fp.read((char *) &gdim, sizeof(uint));
     fp.read((char *) &type, sizeof(uint));
     
-    if (byteswap)
-    {
-      gdim = bswap(gdim);
-      type = bswap(type);
-    }
+    if (byteswap){ gdim = bswap(gdim); type = bswap(type); }
 
     // Create cell type to get topological dimension and number of vertices
     CellType::Type ctype = BinaryFile::cell_type(version_, type);
@@ -491,15 +487,11 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint const vertex_data_size = num_vertices * gdim;
     real * vertex_data = new real[vertex_data_size];
     fp.read((char *) vertex_data, vertex_data_size * sizeof(real));
+
+    if (byteswap) { bswap(vertex_data, vertex_data + vertex_data_size); }
+
     for (uint v = 0; v < num_vertices; ++v)
     {
-      if (byteswap)
-      {
-        for (uint gi = 0; gi < gdim; ++gi)
-        {
-          vertex_data[(v * gdim) + gi] = bswap(vertex_data[(v * gdim) + gi]);
-        }
-      }
       editor.add_vertex(v, &vertex_data[v * gdim]);
     }
     delete[] vertex_data;
@@ -512,16 +504,11 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint const cell_data_size = num_cells * num_cellvertices;
     uint * cell_data = new uint[cell_data_size];
     fp.read((char *) cell_data, cell_data_size * sizeof(uint));
+
+    if (byteswap) { bswap(cell_data, cell_data + cell_data_size); }
+
     for (uint c = 0; c < num_cells; ++c)
     {
-      if (byteswap)
-      {
-        for (uint vi = 0; vi < num_cellvertices; ++vi)
-        {
-          cell_data[(c * num_cellvertices) + vi] =
-            bswap(cell_data[(c * num_cellvertices) + vi]);
-        }
-      }
       editor.add_cell(c, &cell_data[c * num_cellvertices]);
     }
     delete[] cell_data;
@@ -586,13 +573,7 @@ void BinaryFile::operator>>(Mesh& mesh)
                          MPI_STATUS_IGNORE);
     byte_offset += gdim * num_vertices * sizeof(real);
 
-    if (byteswap)
-    {
-      for (uint v = 0; v < vertex_data[1]; ++v)
-      {
-        vertex_buffer[v] = bswap(vertex_buffer[v]);
-      }
-    }
+    if (byteswap) { bswap(vertex_buffer, vertex_buffer + vertex_data[1]); }
 
     uint num_cells;
     MPI_File_read_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
@@ -618,13 +599,7 @@ void BinaryFile::operator>>(Mesh& mesh)
                          cell_buffer, cell_data, MPI_UNSIGNED,
                          MPI_STATUS_IGNORE);
 
-    if (byteswap)
-    {
-      for (uint c = 0; c < cell_data; ++c)
-      {
-        cell_buffer[c] = bswap(cell_buffer[c]);
-      }
-    }
+    if (byteswap) { bswap(cell_buffer, cell_buffer + cell_data); }
 
     MPI_File_close(&fh);
 

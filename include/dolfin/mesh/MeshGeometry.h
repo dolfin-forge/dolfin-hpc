@@ -36,6 +36,9 @@ public:
   /// Create mesh geometry for given space
   MeshGeometry(Space const& space);
 
+  /// Create a set of point coordinates with given size
+  MeshGeometry(Space const& space, uint size);
+
   /// Copy constructor
   MeshGeometry(MeshGeometry const& geometry);
 

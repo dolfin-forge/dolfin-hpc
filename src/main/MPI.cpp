@@ -34,7 +34,10 @@ MPI::Context MPI::ctx_;
   if (!init_) { SubSystemsManager::MPI::init(); }
 #endif
 
-#define DOLFIN_MPI_UNIMPLEMENTED \
+#define DOLFIN_MPI_WRN_UNIMPLEMENTED \
+	warning("Unimplemented without MPI support");
+
+#define DOLFIN_MPI_ERR_UNIMPLEMENTED \
 	error("Unimplemented without MPI support");
 
 //-----------------------------------------------------------------------------
@@ -44,7 +47,8 @@ uint MPI::rank()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.rank);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_WRN_UNIMPLEMENTED
+  return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -54,7 +58,8 @@ uint MPI::size()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.size);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_WRN_UNIMPLEMENTED
+  return 1;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -64,7 +69,7 @@ uint MPI::group_id()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_idx);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -74,7 +79,7 @@ uint MPI::num_groups()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.group_cnt);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -84,7 +89,7 @@ uint MPI::global_rank()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_rank);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -94,7 +99,7 @@ uint MPI::global_size()
   DOLFIN_MPI_SUBSYSTEM_INIT
   return static_cast<uint>(ctx_.global_size);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -104,7 +109,7 @@ void MPI::startTimer()
   MPI_Barrier(MPI::DOLFIN_COMM);
   time_ = MPI_Wtime();
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -114,7 +119,7 @@ real MPI::stopTimer()
   MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - time_);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -124,7 +129,7 @@ void MPI::startTimer(real& stime)
   MPI_Barrier(MPI::DOLFIN_COMM);
   stime = MPI_Wtime();
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -134,7 +139,7 @@ real MPI::stopTimer(real& stime)
   MPI_Barrier(MPI::DOLFIN_COMM);
   return (MPI_Wtime() - stime);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -194,7 +199,7 @@ void MPI::finiComm()
   MPI_Comm_free(&MPI::DOLFIN_COMM_SELF);
   MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD);
 #else
-  DOLFIN_MPI_UNIMPLEMENTED
+  DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
 //-----------------------------------------------------------------------------

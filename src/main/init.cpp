@@ -73,7 +73,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
       dolfin::LogManager::logger().silence();
     }
 #else
-    message("Initializing DOLFIN version %s : nompi\n", DOLFIN_VERSION);
+    message("Initializing DOLFIN version %s :\n", DOLFIN_VERSION);
 #endif
   }
 

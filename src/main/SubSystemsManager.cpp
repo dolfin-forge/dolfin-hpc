@@ -221,18 +221,22 @@ bool SubSystemsManager::PETSc::init(int argc, char* argv[])
   ++PETSc::sema;
   SUBSYSTEM_RETURN_IF_INITIALIZED(PETSc);
 
+#ifdef HAVE_MPI
   // Get status of MPI before PETSc initialization
   bool const mpi_init_status = MPI::initialized();
+#endif
 
   // Initialize PETSc
   PetscInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
   SUBSYSTEM_SET_INIT(PETSc);
 
+#ifdef HAVE_MPI
   // If PETSc initialized MPI, it is responsible for MPI finalization
   if (!mpi_init_status && MPI::initialized())
   {
     SUBSYSTEM_SET_INIT(PETScMPI);
   }
+#endif
 
 #ifdef HAVE_SLEPC
 
@@ -259,8 +263,10 @@ bool SubSystemsManager::PETSc::fini()
   --PETSc::sema;
   SUBSYSTEM_RETURN_IF_CONSUMERS(PETSc)
 
+#ifdef HAVE_MPI
   /// PETSc is responsible for MPI and there are still consumers
   if (SUBSYSTEM_INITIALIZED(PETScMPI) && (MPI::sema > 1)) { return false; }
+#endif
 
 #ifdef HAVE_SLEPC
     SlepcFinalize();
@@ -268,7 +274,11 @@ bool SubSystemsManager::PETSc::fini()
 #endif
 
   PetscFinalize();
+
+#ifdef HAVE_MPI
   if (SUBSYSTEM_INITIALIZED(PETScMPI)) SUBSYSTEM_SET_FINI(PETScMPI);
+#endif
+
   SUBSYSTEM_SET_FINI(PETSc);
 
 #else

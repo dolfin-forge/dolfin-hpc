@@ -25,7 +25,16 @@ namespace dolfin
   float bswap(float x);
 
   /// Byteswap an array
-  template<typename T> void bswap(T x[], uint n);
+  template<uint N, typename T> inline void bswap(T x[])
+  {
+    for (uint i = 0; i < N; i++) { x[i] = bswap(x[i]); }
+  }
+
+  /// Byteswap an array
+  template<typename T> inline void bswap(T * begin, T * end)
+  {
+    while (begin != end) { *begin = bswap(*begin); ++begin; }
+  }
 
 }
 

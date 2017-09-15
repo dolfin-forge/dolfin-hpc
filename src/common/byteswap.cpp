@@ -6,10 +6,11 @@
 
 #include <dolfin/common/byteswap.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
-int dolfin::bswap(int x)
+int bswap(int x)
 {
   union {
     int x;
@@ -25,7 +26,7 @@ int dolfin::bswap(int x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-dolfin::uint dolfin::bswap(uint x)
+uint bswap(uint x)
 {
   union {
     uint x;
@@ -41,7 +42,7 @@ dolfin::uint dolfin::bswap(uint x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-real dolfin::bswap(real x)
+real bswap(real x)
 {
   union {
     real x;
@@ -60,7 +61,7 @@ real dolfin::bswap(real x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-float dolfin::bswap(float x)
+float bswap(float x)
 {
   union {
     float x;
@@ -75,10 +76,5 @@ float dolfin::bswap(float x)
   return eout.x;
 }
 //-----------------------------------------------------------------------------
-template<typename T> void dolfin::bswap(T x[], uint n)
-{
-    for (uint i = 0; i < n; i++)
-      x[i] = bswap(x[i]);
-}
-//-----------------------------------------------------------------------------
 
+} /* namespace dolfin */

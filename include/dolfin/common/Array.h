@@ -89,6 +89,13 @@ public:
   }
 
   ///
+  inline T * operator()(uint i)
+  {
+    dolfin_assert(i * stride_ < this->size());
+    return &this->operator [](i * stride_);
+  }
+
+  ///
   inline uint stride() const { return stride_; }
 
   /// Factor logic for array initialization

@@ -47,7 +47,7 @@ class TetrahedronCell : public CellType
   static uint const FIV[4][3];
 
   // UFC: Face - Non-Incident Vertices
-  static uint const FNV[6][1];
+  static uint const FNV[4][1];
 
 public:
 

@@ -58,6 +58,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
   int init_count = SubSystemsManager::start(argc, argv, n);
   if (init_count == 1)
   {
+#ifdef HAVE_MPI
     if (MPI::global_rank() == 0)
     {
       message("Initializing DOLFIN version %s : running on %d %s (%u %s)\n",
@@ -71,6 +72,9 @@ void dolfin::dolfin_init(int argc, char * argv[])
     {
       dolfin::LogManager::logger().silence();
     }
+#else
+    message("Initializing DOLFIN version %s : nompi\n", DOLFIN_VERSION);
+#endif
   }
 
 }

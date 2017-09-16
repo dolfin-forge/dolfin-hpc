@@ -2,13 +2,12 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 
-#ifndef __DOLFIN_DISTRIBUTED_DATA_H
-#define __DOLFIN_DISTRIBUTED_DATA_H
+#ifndef __DOLFIN_COMMON_DISTRIBUTED_DATA_H
+#define __DOLFIN_COMMON_DISTRIBUTED_DATA_H
 
-#include <dolfin/common/types.h>
+#include <dolfin/common/Distributed.h>
+
 #include <dolfin/common/Array.h>
-#include <dolfin/log/log.h>
-#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -19,7 +18,7 @@ class SharedMapping;
  *  @class  DistributedData
  */
 
-class DistributedData
+class DistributedData : public Distributed<DistributedData>
 {
 
   friend class SharedIterator;
@@ -34,7 +33,7 @@ public:
   bool valid_adjacency;
 
   ///
-  DistributedData();
+  DistributedData(MPI::Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
   DistributedData(DistributedData const& other);
@@ -479,4 +478,4 @@ private:
 
 } /* namespace dolfin */
 
-#endif /* __DOLFIN_DISTRIBUTED_DATA_H */
+#endif /* __DOLFIN_COMMON_DISTRIBUTED_DATA_H */

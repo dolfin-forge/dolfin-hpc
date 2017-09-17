@@ -47,7 +47,7 @@ MeshGeometry::MeshGeometry(Space const& space, uint size) :
     abs_tol_(NULL),
     timestamp_(0)
 {
-  init(size);
+  resize(size);
 }
 //-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :

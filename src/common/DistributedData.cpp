@@ -15,12 +15,13 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DistributedData::DistributedData() :
+DistributedData::DistributedData(MPI::Communicator& comm) :
+    Distributed<DistributedData>(comm),
     valid_numbering(false),
     valid_ownership(false),
     valid_adjacency(false),
-    rank_(MPI::rank()),
-    pe_size_(MPI::size()),
+    rank_(Distributed::comm_rank()),
+    pe_size_(Distributed::comm_size()),
     range_is_set_(false),
     offset_(0),
     range_size_(0),
@@ -38,7 +39,8 @@ DistributedData::DistributedData() :
 {
 }
 //-----------------------------------------------------------------------------
-DistributedData::DistributedData(DistributedData const& other)
+DistributedData::DistributedData(DistributedData const& other) :
+  Distributed<DistributedData>(other)
 {
   *this = other;
 }
@@ -53,6 +55,9 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
   if (this != &other)
   {
     clear();
+
+    // Call parent assignment to update the communicator
+    Distributed<DistributedData>::operator =(other);
 
     valid_numbering = other.valid_numbering;
     valid_ownership = other.valid_ownership;
@@ -129,8 +134,6 @@ void DistributedData::clear()
   range_size_ = 0;
   offset_ = 0;
   range_is_set_ = false;
-  pe_size_ = MPI::size();
-  rank_ = MPI::rank();
   //
   valid_numbering = false;
   valid_ownership = false;
@@ -387,8 +390,8 @@ void DistributedData::assign(DistributedData const& other,
 
   ///
   range_size_ = cache_size_ - ghost_.size();
-  MPI::offset(range_size_, offset_);
-  MPI::all_reduce<MPI::sum>(range_size_, global_size_);
+  MPI::offset(range_size_, offset_, this->comm());
+  MPI::all_reduce<MPI::sum>(range_size_, global_size_, this->comm());
 
   ///
   finalized_ = true;
@@ -481,7 +484,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   else
   {
     range_size_ = num_owned;
-    MPI::offset(range_size_, offset_);
+    MPI::offset(range_size_, offset_, this->comm());
   }
   // Set the global size if provided otherwise compute it
   if (num_global > 0)
@@ -496,7 +499,7 @@ void DistributedData::set_range(uint num_owned, uint num_global /* = 0 */ )
   else
   {
     uint range_sum;
-    MPI::all_reduce<MPI::sum>(range_size_, range_sum);
+    MPI::all_reduce<MPI::sum>(range_size_, range_sum, this->comm());
     // Check that computed value matches the former value such that the sum of
     // ranges is indeed equal to the previously set global size
     if ((global_size_ > 0) && (global_size_ != range_sum))
@@ -700,7 +703,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     error("DistributedData : re-mapping numbering requires finalized data");
   }
 
-  if (mapping.size() != MPI::size())
+  if (mapping.size() != pe_size_)
   {
     error("DistributedData : numbering re-mapping array has invalid size");
   }
@@ -796,7 +799,7 @@ void DistributedData::renumber_global()
   {
     recvsize = std::max(recvsize, (uint) sendbuf[i].size());
   }
-  MPI::all_reduce<MPI::max>(recvsize, recvsize);
+  MPI::all_reduce<MPI::max>(recvsize, recvsize, this->comm());
   uint * recvbuf = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint * sendbck = (recvsize == 0 ? NULL : new uint[recvsize]);
   uint const num_ghost = ghost_.size();
@@ -810,7 +813,7 @@ void DistributedData::renumber_global()
 
     MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
                  &recvbuf[0], recvsize, MPI_UNSIGNED, src, 1,
-                 MPI::DOLFIN_COMM, &status);
+                 this->comm(), &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
 
     for (int k = 0; k < recvcount; ++k)
@@ -833,7 +836,7 @@ void DistributedData::renumber_global()
 
     MPI_Sendrecv(&sendbck[0], recvcount, MPI_UNSIGNED, src, 2,
                  &recvbck[0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 2,
-                 MPI::DOLFIN_COMM, &status);
+                 this->comm(), &status);
 
     for (uint k = 0; k < sendbuf[dst].size(); ++k)
     {
@@ -939,7 +942,7 @@ uint DistributedData::num_ghost() const
 void DistributedData::remap_ownership(Array<uint> const& mapping)
 {
   dolfin_assert(finalized_);
-  if (mapping.size() != MPI::size())
+  if (mapping.size() != pe_size_)
   {
     error("DistributedData : ownership re-mapping array has invalid size");
   }
@@ -1042,7 +1045,7 @@ void DistributedData::set_shared(uint local_index)
   }
   // As explained we allow setting an entity as shared without adjacent only if
   // the entity is not shared already.
-  dolfin_assert(global_.count(local_index) > 0);
+  dolfin_assert(!((cached_ownership_ == NULL)&&(global_.count(local_index) == 0)));
   if (shared_[local_index].size() > 0)
   {
     error("DistributedData : cannot set_shared on entities with adjacents");

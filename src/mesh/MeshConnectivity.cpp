@@ -377,6 +377,14 @@ void MeshConnectivity::disp() const
   endblock();
 }
 //-----------------------------------------------------------------------------
+MeshConnectivity const& MeshConnectivity::operator>>(Array<uint>& A) const
+{
+  A.assign(connections_, connections_ + size_);
+  // Set stride if the graph is regular
+  if(min_connections_ == max_connections_) A %= min_connections_;
+  return *this;
+}
+//-----------------------------------------------------------------------------
 void MeshConnectivity::check() const
 {
   message("MeshConnectivity : check");

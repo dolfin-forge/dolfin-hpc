@@ -362,6 +362,13 @@ void MeshGeometry::disp() const
   endblock();
 }
 //-----------------------------------------------------------------------------
+MeshGeometry const& MeshGeometry::operator>>(Array<real>& A) const
+{
+  A.assign(coordinates_, coordinates_ + dim_ * size_);
+  A %= dim_;
+  return *this;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

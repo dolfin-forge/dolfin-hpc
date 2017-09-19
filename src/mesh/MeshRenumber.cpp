@@ -75,7 +75,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     edata.set_size(topology.size(d));
 
     //
-    uint const num_entity_vertices = cev.max_connections();
+    uint const num_entity_vertices = cev.max_degree();
     EntityKey key(num_entity_vertices);
     _map<EntityKey, uint> entity_map;
     Array<uint> * sendbuf = new Array<uint> [pe_size];
@@ -86,9 +86,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     std::fill_n(used_entities, topology.size(d), false);
     for (SharedIterator it(vdata); !it.end(); ++it)
     {
-      dolfin_assert(it.index() < cve.num_entities());
+      dolfin_assert(it.index() < cve.order());
       uint const * v_entities = cve(it.index());
-      for (uint e = 0; e < cve.size(it.index()); ++e)
+      for (uint e = 0; e < cve.degree(it.index()); ++e)
       {
         uint const entity_index = v_entities[e];
         if (used_entities[entity_index] == true)
@@ -216,9 +216,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     // Exchange ghost entities
     sendbuf = new Array<uint>[pe_size];
     Array<uint> * ghostid = new Array<uint>[pe_size];
-    edata.set_range(cev.num_entities() - edata.num_ghost());
+    edata.set_range(cev.order() - edata.num_ghost());
     uint current_index = edata.offset();
-    for(uint i = 0; i < cev.num_entities(); ++i)
+    for(uint i = 0; i < cev.order(); ++i)
     {
       if(edata.is_owned(i))
       {

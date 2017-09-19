@@ -40,6 +40,12 @@ public:
   /// Create empty connectivity
   MeshConnectivity();
 
+  /// Create flat connectivity
+  MeshConnectivity(uint order, uint degree, uint * graph = NULL);
+
+  /// Create connectivity
+  MeshConnectivity(Array<uint> const& valency, uint * graph = NULL);
+
   /// Copy constructor
   MeshConnectivity(MeshConnectivity const& other);
 
@@ -56,16 +62,16 @@ public:
   bool operator!=(MeshConnectivity const& other) const;
 
   /// Initialize number of entities and number of connections (equal for all)
-  void init(uint num_entities, uint num_connections);
+  void init(uint order, uint degree);
 
   /// Initialize number of entities and number of connections (equal for all)
-  void init(uint * connectivity, uint num_entities, uint num_connections);
+  void init(uint order, uint degree, uint * graph);
 
   /// Initialize number of entities and number of connections (individually)
-  void init(Array<uint> const& num_connections);
+  void init(Array<uint> const& valency);
 
   /// Initialize number of entities and number of connections (individually)
-  void init(uint * connectivity, Array<uint> const& num_connections);
+  void init(Array<uint> const& valency, uint * graph);
 
   /// Clear all data
   void clear();
@@ -88,27 +94,19 @@ public:
   bool is_initialized() const;
 
   /// Return number of entities
-  uint num_entities() const;
+  uint order() const;
 
-  /// Return total number of connections
-  uint size() const;
+  /// Return total number of entries
+  uint entries() const;
 
   /// Return minimum number of connections
-  uint min_connections() const;
+  uint min_degree() const;
 
   /// Return maximum number of connections
-  uint max_connections() const;
-
-  /// Return minimum number of connections
+  uint max_degree() const;
 
   /// Return number of connections for given entity
-  uint size(uint entity) const;
-
-  /// Set given connection for given entity
-  void set(uint entity, uint connection, uint pos);
-
-  /// Set all connections for given entity
-  void set(uint entity, Array<uint> const& connections);
+  uint degree(uint entity) const;
 
   /// Set all connections for given entity
   void set(uint entity, uint const * connections);
@@ -142,16 +140,16 @@ private:
   bool is_initialized_;
 
   /// Number of entities
-  uint num_entities_;
+  uint order_;
 
-  /// Total number of connections
-  uint size_;
+  /// Total number of entries
+  uint s_;
 
   /// Minimum number of connections
-  uint min_connections_;
+  uint min_degree_;
 
   /// Maximum number of connections
-  uint max_connections_;
+  uint max_degree_;
 
   /// Offset for first connection for each entity
   uint * offsets_;
@@ -163,26 +161,26 @@ private:
 
 //--- INLINES -----------------------------------------------------------------
 
-inline uint MeshConnectivity::size(uint entity) const
+inline uint MeshConnectivity::degree(uint entity) const
 {
-  dolfin_assert(num_entities_ > 0);
-  dolfin_assert(entity < num_entities_);
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
   return (offsets_[entity + 1] - offsets_[entity]);
 }
 
 //-----------------------------------------------------------------------------
 inline uint * MeshConnectivity::operator()(uint entity)
 {
-  dolfin_assert(num_entities_ > 0);
-  dolfin_assert(entity < num_entities_);
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
   return (connections_ + offsets_[entity]);
 }
 
 //-----------------------------------------------------------------------------
 inline uint const * MeshConnectivity::operator()(uint entity) const
 {
-  dolfin_assert(num_entities_ > 0);
-  dolfin_assert(entity < num_entities_);
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
   return (connections_ + offsets_[entity]);
 }
 

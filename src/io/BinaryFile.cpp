@@ -832,10 +832,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     for (Array<atomic_cell>::iterator it = cells.begin();
          it != cells.end(); ++local_cell_index, ++it)
     {
-      for (uint n = 0; n < it->size; ++n)
-      {
-        connectivity[n] = mesh.distdata()[0].get_local(it->v[n]);
-      }
+      mesh.distdata()[0].get_local(it->size ,it->v, connectivity);
       editor.add_cell(local_cell_index, &connectivity[0]);
     }
     delete[] connectivity;

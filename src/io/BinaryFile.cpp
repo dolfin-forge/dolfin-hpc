@@ -582,7 +582,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     MPI_File_close(&fh);
 
-    _set<uint> ghosted_entities;
+    _set<uint> ghosted_vertices;
 
     // Parse cells: cells are assigned to processes based on the ownership of
     // the first vertex.
@@ -603,7 +603,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         {
           if (vdist.owner(cell.v[n]) != pe_rank)
           {
-            ghosted_entities.insert(cell.v[n]);
+            ghosted_vertices.insert(cell.v[n]);
           }
           else
           {
@@ -661,7 +661,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         {
           if (vdist.owner(cell.v[n]) != pe_rank)
           {
-            ghosted_entities.insert(cell.v[n]);
+            ghosted_vertices.insert(cell.v[n]);
           }
           else
           {
@@ -671,19 +671,31 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
     }
 
-    // Number of vertices in mesh, owned + ghosts
-    std::set<uint> all_vertices;
+    // The local number of vertices is now known
+    uint const num_local_vertices = owned_vertices.size()
+                                    + ghosted_vertices.size();
+
+    // Compute the set of vertices which are in the process range but not
+    // referenced in any local cell: all adjacent cells to an orphan vertex are
+    // ordered such that their first vertex belongs to a rank different than the
+    // current process. This is especially a problem with refined meshes which
+    // are badly numbered.
     std::set<uint> orphaned_vertices;
-    for (uint i = 0; i < vdist.size; ++i)
     {
-      all_vertices.insert(vdist.offset + i);
+      uint v0 = vdist.offset;
+      uint const v1 = v0 + vdist.size;
+      dolfin_assert(vdist.size >= owned_vertices.size());
+      if (owned_vertices.size() < vdist.size)
+      {
+        for (std::set<uint>::const_iterator it = owned_vertices.begin();
+             it != owned_vertices.end(); ++it, ++v0)
+        {
+          for (; v0 < (*it); ++v0) { orphaned_vertices.insert(v0); }
+        }
+        for (; v0 < v1; ++v0) { orphaned_vertices.insert(v0); }
+      }
     }
-    std::set_difference(
-        all_vertices.begin(), all_vertices.end(), owned_vertices.begin(),
-        owned_vertices.end(),
-        std::inserter(orphaned_vertices, orphaned_vertices.end()));
-    uint const num_local_vertices = all_vertices.size()
-        + ghosted_entities.size();
+    dolfin_assert(vdist.size == owned_vertices.size()+orphaned_vertices.size());
 
     // Open mesh for editing
     MeshEditor editor(mesh, ctype, gdim);
@@ -712,8 +724,8 @@ void BinaryFile::operator>>(Mesh& mesh)
     _map<uint, uint> new_owner;
     // Exchange ghost points
     Array<uint> * ghosts = new Array<uint>[pe_size];
-    for (_set<uint>::iterator it = ghosted_entities.begin();
-    it != ghosted_entities.end(); it++)
+    for (_set<uint>::iterator it = ghosted_vertices.begin();
+    it != ghosted_vertices.end(); it++)
     {
       ghosts[vdist.owner(*it)].push_back(*it);
     }

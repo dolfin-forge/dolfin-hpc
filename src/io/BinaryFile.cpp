@@ -621,55 +621,56 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     dolfin_assert(vdist.size >= owned_vertices.size());
 
-    /*
-     * FIXME
-     * Reduce communication in this section
-     */
-    uint local_max = 0;
-    for (uint i = 0; i < pe_size; ++i)
+    // Send non-local cells to their owner
     {
-      local_max = std::max(local_max, (uint) non_local_cells[i].size());
-    }
-
-    uint buff_size = 0;
-    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
-                  MPI::DOLFIN_COMM);
-    uint *recv_buffer = new uint[buff_size];
-
-    // Exchange data
-    MPI_Status status;
-    int num_recv;
-    int src;
-    int dest;
-    for (uint i = 1; i < pe_size; ++i)
-    {
-      src = (pe_rank - i + pe_size) % pe_size;
-      dest = (pe_rank + i) % pe_size;
-
-      MPI_Sendrecv(&non_local_cells[dest][0], non_local_cells[dest].size(),
-                   MPI_UNSIGNED, dest, 1, recv_buffer, buff_size, MPI_UNSIGNED,
-                   src, 1, MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
-
-      // Add received cells
-      for (int j = 0; j < num_recv; j += num_cellvertices)
+      uint local_max = 0;
+      for (uint i = 0; i < pe_size; ++i)
       {
-        std::copy(&recv_buffer[j], &recv_buffer[j + num_cellvertices], cell.v);
-        owned_vertices.insert(cell.v[0]);
-        cells.push_back(cell);
-        for (uint n = 1; n < num_cellvertices; ++n)
+        local_max = std::max(local_max, (uint) non_local_cells[i].size());
+      }
+
+      uint buff_size = 0;
+      MPI::all_reduce<MPI::max>(local_max, buff_size, MPI::DOLFIN_COMM);
+      uint *recv_buffer = new uint[buff_size];
+
+      // Exchange data
+      MPI_Status status;
+      int num_recv;
+      int src;
+      int dst;
+      for (uint i = 1; i < pe_size; ++i)
+      {
+        src = (pe_rank - i + pe_size) % pe_size;
+        dst = (pe_rank + i) % pe_size;
+
+        MPI_Sendrecv(&non_local_cells[dst][0], non_local_cells[dst].size(),
+                     MPI_UNSIGNED, dst, 1, recv_buffer, buff_size, MPI_UNSIGNED,
+                     src, 1, MPI::DOLFIN_COMM, &status);
+        MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+
+        // Add received cells
+        for (int j = 0; j < num_recv; j += num_cellvertices)
         {
-          if (vdist.owner(cell.v[n]) != pe_rank)
+          std::copy(&recv_buffer[j], &recv_buffer[j + num_cellvertices], cell.v);
+          owned_vertices.insert(cell.v[0]);
+          cells.push_back(cell);
+          for (uint n = 1; n < num_cellvertices; ++n)
           {
-            ghosted_vertices.insert(cell.v[n]);
-          }
-          else
-          {
-            owned_vertices.insert(cell.v[n]);
+            if (vdist.owner(cell.v[n]) != pe_rank)
+            {
+              ghosted_vertices.insert(cell.v[n]);
+            }
+            else
+            {
+              owned_vertices.insert(cell.v[n]);
+            }
           }
         }
       }
+      delete[] recv_buffer;
     }
+
+    delete[] non_local_cells;
 
     // The local number of vertices is now known
     uint const num_local_vertices = owned_vertices.size()
@@ -712,107 +713,124 @@ void BinaryFile::operator>>(Mesh& mesh)
      */
 
     uint local_vertex_index = 0;
-    uint v_index;
     for (std::set<uint>::iterator it = owned_vertices.begin();
         it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
-      v_index = *it - vdist.offset;
       mesh.distdata()[0].set_map(local_vertex_index, *it);
-      editor.add_vertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
+      editor.add_vertex(local_vertex_index,
+                        &vertex_buffer[gdim *(*it - vdist.offset)]);
     }
 
-    _map<uint, uint> new_owner;
-    // Exchange ghost points
+    // Sort ghost vertices by owner and clear the set (not needed anymore)
     Array<uint> * ghosts = new Array<uint>[pe_size];
     for (_set<uint>::iterator it = ghosted_vertices.begin();
-    it != ghosted_vertices.end(); it++)
+         it != ghosted_vertices.end(); it++)
     {
       ghosts[vdist.owner(*it)].push_back(*it);
     }
+    ghosted_vertices.clear();
 
-    local_max = 0;
-    for (uint i = 0; i < pe_size; ++i)
+    // Exchange ghost vertices coordinates
     {
-      local_max = std::max(local_max, (uint) ghosts[i].size());
-    }
-
-    buff_size = 0;
-    MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
-                  MPI::DOLFIN_COMM);
-
-    delete[] recv_buffer;
-    recv_buffer = new uint[buff_size];
-
-    uint *send_new_owner = new uint[buff_size];
-    uint *recv_new_owner = new uint[buff_size];
-
-    real *send_buffer_coords = new real[buff_size * gdim];
-    real *recv_buffer_coords = new real[buff_size * gdim];
-
-    for (uint i = 1; i < pe_size; ++i)
-    {
-      src = (pe_rank - i + pe_size) % pe_size;
-      dest = (pe_rank + i) % pe_size;
-
-      MPI_Sendrecv(&ghosts[dest][0], ghosts[dest].size(), MPI_UNSIGNED, dest, 1,
-                   recv_buffer, buff_size, MPI_UNSIGNED, src, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
-
-      /*
-       * Check if orphaned
-       * Send back global number and orphaned info
-       */
-
-      real *sp = &send_buffer_coords[0];
-      uint *np = &send_new_owner[0];
-      for (int k = 0; k < num_recv; ++k)
+      uint local_max = 0;
+      for (uint i = 0; i < pe_size; ++i)
       {
-        v_index = recv_buffer[k] - vdist.offset;
+        local_max = std::max(local_max, (uint) ghosts[i].size());
+      }
 
-        if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end())
+      uint buff_size = 0;
+      MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
+                    MPI::DOLFIN_COMM);
+
+      uint * recv_buffer = new uint[buff_size];
+
+      uint *send_new_owner = new uint[buff_size];
+      uint *recv_new_owner = new uint[buff_size];
+
+      real *send_buffer_coords = new real[buff_size * gdim];
+      real *recv_buffer_coords = new real[buff_size * gdim];
+
+      // Exchange data
+      MPI_Status status;
+      int num_recv;
+      int src;
+      int dst;
+
+      _map<uint, uint> new_owner;
+      for (uint i = 1; i < pe_size; ++i)
+      {
+        src = (pe_rank - i + pe_size) % pe_size;
+        dst = (pe_rank + i) % pe_size;
+
+        MPI_Sendrecv(&ghosts[dst][0], ghosts[dst].size(), MPI_UNSIGNED, dst, 1,
+                     recv_buffer, buff_size, MPI_UNSIGNED, src, 1,
+                     MPI::DOLFIN_COMM, &status);
+        MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
+
+        /*
+         * Check if orphaned
+         * Send back global number and orphaned info
+         */
+
+        real *sp = &send_buffer_coords[0];
+        uint *np = &send_new_owner[0];
+        for (int k = 0; k < num_recv; ++k)
         {
-          if (new_owner.find(recv_buffer[k]) == new_owner.end())
+          if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end())
           {
-            new_owner[recv_buffer[k]] = src;
+            if (new_owner.find(recv_buffer[k]) == new_owner.end())
+            {
+              new_owner[recv_buffer[k]] = src;
+            }
+            *(np++) = new_owner[recv_buffer[k]];
           }
-          *(np++) = new_owner[recv_buffer[k]];
-        }
-        else
-        {
-          *(np++) = pe_rank;
-        }
+          else
+          {
+            *(np++) = pe_rank;
+          }
 
-        for (uint l = 0; l < gdim; ++l)
+          uint const v_index = recv_buffer[k] - vdist.offset;
+          for (uint l = 0; l < gdim; ++l)
+          {
+            *(sp++) = vertex_buffer[(gdim * v_index) + l];
+          }
+        }
+        MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1,
+                     recv_new_owner, buff_size, MPI_UNSIGNED, dst, 1,
+                     MPI::DOLFIN_COMM, &status);
+
+        MPI_Sendrecv(send_buffer_coords, (num_recv * gdim), MPI_DOUBLE, src, 1,
+                     recv_buffer_coords, (buff_size * gdim), MPI_DOUBLE, dst, 1,
+                     MPI::DOLFIN_COMM, &status);
+        MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
+
+        int g_i = 0;
+        for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
         {
-          *(sp++) = vertex_buffer[(gdim * v_index) + l];
+          mesh.distdata()[0].set_map(local_vertex_index, ghosts[dst][g_i]);
+          if (recv_new_owner[g_i] != pe_rank)
+          {
+            mesh.distdata()[0].set_ghost(local_vertex_index, recv_new_owner[g_i]);
+          }
+          editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
         }
       }
-      MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1,
-                   recv_new_owner, buff_size, MPI_UNSIGNED, dest, 1,
-                   MPI::DOLFIN_COMM, &status);
 
-      MPI_Sendrecv(send_buffer_coords, (num_recv * gdim), MPI_DOUBLE, src, 1,
-                   recv_buffer_coords, (buff_size * gdim), MPI_DOUBLE, dest, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
-
-      int g_i = 0;
-      for (int k = 0; k < num_recv; local_vertex_index++, ++g_i, k += gdim)
-      {
-        mesh.distdata()[0].set_map(local_vertex_index, ghosts[dest][g_i]);
-        if (recv_new_owner[g_i] != pe_rank)
-        {
-          mesh.distdata()[0].set_ghost(local_vertex_index, recv_new_owner[g_i]);
-        }
-        editor.add_vertex(local_vertex_index, &recv_buffer_coords[k]);
-      }
+      delete[] recv_new_owner;
+      delete[] send_new_owner;
+      delete[] recv_buffer_coords;
+      delete[] send_buffer_coords;
+      delete[] recv_buffer;
     }
 
+    delete[] ghosts;
+    delete[] vertex_buffer;
+
+    // Add cell connectivities
     uint local_cell_index = 0;
     uint * connectivity = new uint[num_cellvertices];
     for (Array<atomic_cell>::iterator it = cells.begin();
-        it != cells.end(); ++local_cell_index, ++it)
+         it != cells.end(); ++local_cell_index, ++it)
     {
       for (uint n = 0; n < it->size; ++n)
       {
@@ -823,21 +841,6 @@ void BinaryFile::operator>>(Mesh& mesh)
     delete[] connectivity;
 
     editor.close();
-
-    delete[] recv_buffer;
-    delete[] vertex_buffer;
-    delete[] recv_buffer_coords;
-    delete[] send_buffer_coords;
-    delete[] recv_new_owner;
-    delete[] send_new_owner;
-
-    for (uint i = 0; i < pe_size; ++i)
-    {
-      non_local_cells[i].clear();
-      ghosts[i].clear();
-    }
-    delete[] non_local_cells;
-    delete[] ghosts;
 
 #else
     error("MPI and MPI I/O is required for reading binary meshes in parallel");

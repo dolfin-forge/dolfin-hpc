@@ -453,9 +453,9 @@ void BinaryFile::operator>>(Mesh& mesh)
   uint pe_size = MPI::size();
   uint pe_rank = MPI::rank();
 
-  if (MPI::size() == 1 || dolfin_get("Mesh read in serial"))
+  if (pe_size == 1 || dolfin_get("Mesh read in serial"))
   {
-    if(MPI::rank() > 0)
+    if(pe_size > 0)
     {
       error("Reading serial mesh in parallel not implemented");
     }
@@ -520,9 +520,11 @@ void BinaryFile::operator>>(Mesh& mesh)
   {
 #ifdef ENABLE_MPIIO
 
+    MPI::Communicator& comm = MPI::DOLFIN_COMM;
+
     MPI_File fh;
     MPI_Offset byte_offset;
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+    MPI_File_open(comm, (char *) filename.c_str(),
                   MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
 
     // Read binary header
@@ -630,7 +632,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
 
       uint buff_size = 0;
-      MPI::all_reduce<MPI::max>(local_max, buff_size, MPI::DOLFIN_COMM);
+      MPI::all_reduce<MPI::max>(local_max, buff_size, comm);
       uint *recv_buffer = new uint[buff_size];
 
       // Exchange data
@@ -645,7 +647,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
         MPI_Sendrecv(&non_local_cells[dst][0], non_local_cells[dst].size(),
                      MPI_UNSIGNED, dst, 1, recv_buffer, buff_size, MPI_UNSIGNED,
-                     src, 1, MPI::DOLFIN_COMM, &status);
+                     src, 1, comm, &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
 
         // Add received cells
@@ -739,8 +741,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
 
       uint buff_size = 0;
-      MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX,
-                    MPI::DOLFIN_COMM);
+      MPI_Allreduce(&local_max, &buff_size, 1, MPI_UNSIGNED, MPI_MAX, comm);
 
       uint * recv_buffer = new uint[buff_size];
 
@@ -763,8 +764,8 @@ void BinaryFile::operator>>(Mesh& mesh)
         dst = (pe_rank + i) % pe_size;
 
         MPI_Sendrecv(&ghosts[dst][0], ghosts[dst].size(), MPI_UNSIGNED, dst, 1,
-                     recv_buffer, buff_size, MPI_UNSIGNED, src, 1,
-                     MPI::DOLFIN_COMM, &status);
+                     recv_buffer, buff_size, MPI_UNSIGNED, src, 1, comm,
+                     &status);
         MPI_Get_count(&status, MPI_UNSIGNED, &num_recv);
 
         /*
@@ -797,11 +798,11 @@ void BinaryFile::operator>>(Mesh& mesh)
         }
         MPI_Sendrecv(send_new_owner, num_recv, MPI_UNSIGNED, src, 1,
                      recv_new_owner, buff_size, MPI_UNSIGNED, dst, 1,
-                     MPI::DOLFIN_COMM, &status);
+                     comm, &status);
 
         MPI_Sendrecv(send_buffer_coords, (num_recv * gdim), MPI_DOUBLE, src, 1,
                      recv_buffer_coords, (buff_size * gdim), MPI_DOUBLE, dst, 1,
-                     MPI::DOLFIN_COMM, &status);
+                     comm, &status);
         MPI_Get_count(&status, MPI_DOUBLE, &num_recv);
 
         int g_i = 0;
@@ -848,6 +849,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
+  uint pe_size = MPI::size();
+  uint pe_rank = MPI::rank();
   uint const gdim = mesh.geometry().dim();
   uint const type = BinaryFile::cell_type(BINARY_VERSION, mesh.type().cellType());
   uint const num_vertices = mesh.global_size(0);
@@ -856,7 +859,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;
-  hdr.pe_size = MPI::size();
+  hdr.pe_size = pe_size;
   hdr.type = BINARY_MESH_DATA;
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
@@ -864,9 +867,9 @@ void BinaryFile::operator<<(Mesh& mesh)
   hdr.bendian = 0;
 #endif
 
-  if (MPI::size() == 1 || ! mesh.is_distributed())
+  if (pe_size == 1 || ! mesh.is_distributed())
   {
-    if(MPI::rank() > 0)
+    if(pe_rank > 0)
     {
       error("Writing serial mesh in parallel not implemented");
     }
@@ -899,6 +902,8 @@ void BinaryFile::operator<<(Mesh& mesh)
 
 #ifdef ENABLE_MPIIO
 
+    MPI::Communicator& comm = MPI::DOLFIN_COMM;
+
     MPI_File fh;
     MPI_Offset byte_offset;
 
@@ -907,7 +912,7 @@ void BinaryFile::operator<<(Mesh& mesh)
      * Split and cleanup implementation
      */
 
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
+    MPI_File_open(comm, (char *) filename.c_str(),
                   MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
 
     // Write Header
@@ -920,14 +925,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     // Write vertices
     uint vertex_offset = 0;
     uint vertex_buffer_size = gdim * mesh.topology().num_owned(0);
-#if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
-               MPI::DOLFIN_COMM);
-#else
-    MPI_Scan(&vertex_buffer_size, &vertex_offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-    vertex_offset -= vertex_buffer_size;
-#endif
+    MPI::offset(vertex_buffer_size, vertex_offset, comm);
     real * vertex_buffer = new real[vertex_buffer_size];
     real * vptr = &vertex_buffer[0];
     for (VertexIterator v(mesh); !v.end(); ++v)
@@ -949,14 +947,7 @@ void BinaryFile::operator<<(Mesh& mesh)
     // Write Cells
     uint cell_offset = 0;
     uint cell_buffer_size = num_cellvertices * mesh.num_cells();
-#if ( MPI_VERSION > 1 )
-    MPI_Exscan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-               MPI::DOLFIN_COMM);
-#else
-    MPI_Scan(&cell_buffer_size, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-    cell_offset -= cell_buffer_size;
-#endif
+    MPI::offset(cell_buffer_size, cell_offset, comm);
     uint * cell_buffer = new uint[cell_buffer_size];
     uint * cp = &cell_buffer[0];
     for (CellIterator c(mesh); !c.end(); ++c)

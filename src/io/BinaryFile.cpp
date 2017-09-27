@@ -584,22 +584,24 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     _set<uint> ghosted_entities;
 
-    // Parse cells
-    std::vector<atomic_cell> cells;
-    std::vector<uint> * non_local_cells = new std::vector<uint>[pe_size];
+    // Parse cells: cells are assigned to processes based on the ownership of
+    // the first vertex.
+    Array<atomic_cell> cells;
+    Array<uint> * non_local_cells = new Array<uint>[pe_size];
     std::set<uint> owned_vertices;
     atomic_cell cell(num_cellvertices);
-    for (uint i = 0; i < cell_data; i += num_cellvertices)
+    for (uint * c = cell_buffer; c !=(cell_buffer + cell_data);
+         c += num_cellvertices)
     {
-      uint const owner = vdist.owner(cell_buffer[i]);
+      uint const owner = vdist.owner(*c);
       if (owner == pe_rank)
       {
-        cell.v[0] = cell_buffer[i];
+        std::copy(c, c + num_cellvertices, cell.v);
+
         owned_vertices.insert(cell.v[0]);
         for (uint n = 1; n < num_cellvertices; ++n)
         {
-          cell.v[n] = cell_buffer[i + n];
-          if (vdist.owner(cell_buffer[i + n]) != pe_rank)
+          if (vdist.owner(cell.v[n]) != pe_rank)
           {
             ghosted_entities.insert(cell.v[n]);
           }
@@ -612,10 +614,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
       else
       {
-        for (uint n = 0; n < num_cellvertices; ++n)
-        {
-          non_local_cells[owner].push_back(cell_buffer[i + n]);
-        }
+        non_local_cells[owner].append(c, c + num_cellvertices);
       }
     }
     delete[] cell_buffer;
@@ -655,8 +654,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       // Add received cells
       for (int j = 0; j < num_recv; j += num_cellvertices)
       {
-        std::memcpy(&cell.v[0], &recv_buffer[j],
-                    num_cellvertices * sizeof(uint));
+        std::copy(&recv_buffer[j], &recv_buffer[j + num_cellvertices], cell.v);
         owned_vertices.insert(cell.v[0]);
         cells.push_back(cell);
         for (uint n = 1; n < num_cellvertices; ++n)
@@ -713,7 +711,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     _map<uint, uint> new_owner;
     // Exchange ghost points
-    std::vector<uint> * ghosts = new std::vector<uint>[pe_size];
+    Array<uint> * ghosts = new Array<uint>[pe_size];
     for (_set<uint>::iterator it = ghosted_entities.begin();
     it != ghosted_entities.end(); it++)
     {
@@ -801,7 +799,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 
     uint local_cell_index = 0;
     uint * connectivity = new uint[num_cellvertices];
-    for (std::vector<atomic_cell>::iterator it = cells.begin();
+    for (Array<atomic_cell>::iterator it = cells.begin();
         it != cells.end(); ++local_cell_index, ++it)
     {
       for (uint n = 0; n < it->size; ++n)

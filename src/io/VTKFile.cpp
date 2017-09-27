@@ -202,6 +202,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Open file
   FILE* fp = fopen(vtu_filename.c_str(), "a");
 
+  uint const d = mesh.geometry().dim();
   uint const num_mesh_verts = mesh.size(0);
   uint const num_mesh_cells = mesh.num_cells();
   uint const num_cell_verts = mesh.type().num_entities(0);
@@ -210,14 +211,11 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Write vertex positions
   fprintf(fp, "<Points>\n");
   fprintf(fp, "<DataArray  type=\"Float32\"  NumberOfComponents=\"3\"  format=\"binary\">\n");
-  std::vector<float> v_data(3 * num_mesh_verts);
+  std::vector<float> v_data(3 * num_mesh_verts, 0.0);
   std::vector<float>::iterator entry = v_data.begin();
-  for (VertexIterator v(mesh); !v.end(); ++v)
+  for (VertexIterator v(mesh); !v.end(); ++v, entry+=3)
   {
-    Point p = v->point();
-    *entry++ = p.x();
-    *entry++ = p.y();
-    *entry++ = p.z();
+    std::copy(v->x(), v->x() + d, entry);
   }
 
   // Create encoded stream

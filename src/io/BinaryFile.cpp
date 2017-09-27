@@ -10,6 +10,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/math/LinearDistribution.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Mesh.h>
@@ -550,30 +551,18 @@ void BinaryFile::operator>>(Mesh& mesh)
     cell_type->disp();
     delete cell_type;
 
-    //
-    uint L = floor((real) num_vertices / (real) pe_size);
-    uint R = num_vertices % pe_size;
-    uint local_vertices = (num_vertices + pe_size - pe_rank - 1) / pe_size;
-
-    uint vertex_offset[2] = { 0, 0 };
-    uint vertex_data[2] = { local_vertices, gdim * local_vertices };
-#if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
-               MPI::DOLFIN_COMM);
-#else
-    MPI_Scan(&vertex_data[0], &vertex_offset[0], 2, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-    vertex_offset[0] -= vertex_data[0];
-    vertex_offset[1] -= vertex_data[1];
-#endif
-
-    real * vertex_buffer = new real[vertex_data[1]];
-    MPI_File_read_at_all(fh, byte_offset + vertex_offset[1] * sizeof(real),
-                         vertex_buffer, vertex_data[1], MPI_DOUBLE,
+    // Load entities from the file: cells and vertices are distributed linearly
+    // so there is not need to compute the offsets.
+    LinearDistribution vdist(num_vertices, pe_size, pe_rank);
+    uint const vertex_offset = vdist.offset * gdim;
+    uint const vertex_data   = vdist.size * gdim;
+    real * vertex_buffer = new real[vertex_data];
+    MPI_File_read_at_all(fh, byte_offset + vertex_offset * sizeof(real),
+                         vertex_buffer, vertex_data, MPI_DOUBLE,
                          MPI_STATUS_IGNORE);
     byte_offset += gdim * num_vertices * sizeof(real);
 
-    if (byteswap) { bswap(vertex_buffer, vertex_buffer + vertex_data[1]); }
+    if (byteswap) { bswap(vertex_buffer, vertex_buffer + vertex_data); }
 
     uint num_cells;
     MPI_File_read_at_all(fh, byte_offset, &num_cells, 1, MPI_UNSIGNED,
@@ -581,19 +570,9 @@ void BinaryFile::operator>>(Mesh& mesh)
     byte_offset += sizeof(uint);
     if (byteswap) num_cells = bswap(num_cells);
 
-    uint const num_local_cells = (num_cells + pe_size - pe_rank - 1) / pe_size;
-
-    uint cell_offset = 0;
-    uint cell_data = num_cellvertices * num_local_cells;
-#if ( MPI_VERSION > 1 )
-    MPI_Exscan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-               MPI::DOLFIN_COMM);
-#else
-    MPI_Scan(&cell_data, &cell_offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-    cell_offset -= cell_data;
-#endif
-
+    LinearDistribution cdist(num_cells, pe_size, pe_rank);
+    uint const cell_offset = cdist.offset * num_cellvertices;
+    uint const cell_data   = cdist.size * num_cellvertices;
     uint * cell_buffer = new uint[cell_data];
     MPI_File_read_at_all(fh, byte_offset + cell_offset * sizeof(uint),
                          cell_buffer, cell_data, MPI_UNSIGNED,
@@ -612,7 +591,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     atomic_cell cell(num_cellvertices);
     for (uint i = 0; i < cell_data; i += num_cellvertices)
     {
-      uint const owner = vertex_owner(L, R, cell_buffer[i]);
+      uint const owner = vdist.owner(cell_buffer[i]);
       if (owner == pe_rank)
       {
         cell.v[0] = cell_buffer[i];
@@ -620,7 +599,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         for (uint n = 1; n < num_cellvertices; ++n)
         {
           cell.v[n] = cell_buffer[i + n];
-          if (vertex_owner(L, R, cell_buffer[i + n]) != pe_rank)
+          if (vdist.owner(cell_buffer[i + n]) != pe_rank)
           {
             ghosted_entities.insert(cell.v[n]);
           }
@@ -640,6 +619,8 @@ void BinaryFile::operator>>(Mesh& mesh)
       }
     }
     delete[] cell_buffer;
+
+    dolfin_assert(vdist.size >= owned_vertices.size());
 
     /*
      * FIXME
@@ -680,7 +661,7 @@ void BinaryFile::operator>>(Mesh& mesh)
         cells.push_back(cell);
         for (uint n = 1; n < num_cellvertices; ++n)
         {
-          if (vertex_owner(L, R, cell.v[n]) != pe_rank)
+          if (vdist.owner(cell.v[n]) != pe_rank)
           {
             ghosted_entities.insert(cell.v[n]);
           }
@@ -695,9 +676,9 @@ void BinaryFile::operator>>(Mesh& mesh)
     // Number of vertices in mesh, owned + ghosts
     std::set<uint> all_vertices;
     std::set<uint> orphaned_vertices;
-    for (uint i = 0; i < local_vertices; ++i)
+    for (uint i = 0; i < vdist.size; ++i)
     {
-      all_vertices.insert(vertex_offset[0] + i);
+      all_vertices.insert(vdist.offset + i);
     }
     std::set_difference(
         all_vertices.begin(), all_vertices.end(), owned_vertices.begin(),
@@ -725,7 +706,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     for (std::set<uint>::iterator it = owned_vertices.begin();
         it != owned_vertices.end(); ++local_vertex_index, ++it)
     {
-      v_index = *it - vertex_offset[0];
+      v_index = *it - vdist.offset;
       mesh.distdata()[0].set_map(local_vertex_index, *it);
       editor.add_vertex(local_vertex_index, &vertex_buffer[(gdim * v_index)]);
     }
@@ -736,7 +717,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     for (_set<uint>::iterator it = ghosted_entities.begin();
     it != ghosted_entities.end(); it++)
     {
-      ghosts[vertex_owner(L, R, *it)].push_back(*it);
+      ghosts[vdist.owner(*it)].push_back(*it);
     }
 
     local_max = 0;
@@ -777,7 +758,7 @@ void BinaryFile::operator>>(Mesh& mesh)
       uint *np = &send_new_owner[0];
       for (int k = 0; k < num_recv; ++k)
       {
-        v_index = recv_buffer[k] - vertex_offset[0];
+        v_index = recv_buffer[k] - vdist.offset;
 
         if (orphaned_vertices.find(recv_buffer[k]) != orphaned_vertices.end())
         {

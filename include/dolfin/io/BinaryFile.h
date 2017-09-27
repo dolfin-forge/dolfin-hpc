@@ -139,8 +139,6 @@ private:
   template<class T>
     void read_meshfunction(MeshFunction<T>& meshfunction);
 
-  uint vertex_owner(uint L, uint R, uint i);
-
   void nameUpdate(const int counter);
 
   void write_function(LabelList<Function>& f);
@@ -169,14 +167,7 @@ private:
 };
 
 //--- INLINES -----------------------------------------------------------------
-inline uint BinaryFile::vertex_owner(uint L, uint R, uint i)
-{
-  return static_cast<uint>(std::max(
-      std::floor((double) i / (double) (L + 1)),
-      std::floor((double) ((double) i - (double) R) / (double) L)));
-}
 
-//-----------------------------------------------------------------------------
 inline bool BinaryFile::hdr_check(BinaryFileHeader& hdr, Binary_data_t type,
                                   uint pe_size)
 {

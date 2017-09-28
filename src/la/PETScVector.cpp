@@ -95,7 +95,7 @@ void PETScVector::init(uint N, bool distributed)
   clear();
 
   // Create vector
-  if (MPI::size() > 1 && distributed)
+  if (distributed && MPI::size() > 1)
   {
     is_distributed_ = true;
 #ifdef HAVE_MPI

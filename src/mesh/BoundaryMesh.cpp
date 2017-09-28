@@ -272,7 +272,11 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
+#if HAVE_MPI
     uint const pe_size = MPI::size();
+#else
+    uint const pe_size = 0;
+#endif
     Array<uint> * shared_vertices = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)

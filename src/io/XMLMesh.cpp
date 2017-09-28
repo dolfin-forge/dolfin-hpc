@@ -175,7 +175,11 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
   {
     error("XMLMesh : vertex distribution is already created.");
   }
+#if HAVE_MPI
   vertex_dist_ = new LinearDistribution(size, MPI::size(), MPI::rank());
+#else
+  vertex_dist_ = new LinearDistribution(size, 1, 0);
+#endif
   // Set number of vertices
   editor_->init_vertices(vertex_dist_->size, size);
   if(parallel_)

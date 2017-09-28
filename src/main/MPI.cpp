@@ -70,6 +70,7 @@ uint MPI::group_id()
   return static_cast<uint>(ctx_.group_idx);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -80,6 +81,7 @@ uint MPI::num_groups()
   return static_cast<uint>(ctx_.group_cnt);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -90,6 +92,7 @@ uint MPI::global_rank()
   return static_cast<uint>(ctx_.global_rank);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -100,6 +103,7 @@ uint MPI::global_size()
   return static_cast<uint>(ctx_.global_size);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -120,6 +124,7 @@ real MPI::stopTimer()
   return (MPI_Wtime() - time_);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0.0;
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -140,6 +145,7 @@ real MPI::stopTimer(real& stime)
   return (MPI_Wtime() - stime);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
+  return 0.0;
 #endif
 }
 //-----------------------------------------------------------------------------

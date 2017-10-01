@@ -1,4 +1,4 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
@@ -10,90 +10,33 @@
 #include "Value/Value.h"
 #include "UFCFunction/UFCFunction.h"
 
-#include <check.h>
-
 //-----------------------------------------------------------------------------
-void setup()
+DOLFIN_SUITE_BEGIN(suite, "function")
 {
+  DOLFIN_TCASE_CREATE("Constant");
+  DOLFIN_TCASE_ADD(test_Constant);
+
+  DOLFIN_TCASE_CREATE("Expression");
+  DOLFIN_TCASE_ADD(test_Expression);
+
+  DOLFIN_TCASE_CREATE("Value");
+  DOLFIN_TCASE_ADD(test_Value);
+
+  DOLFIN_TCASE_CREATE("Real");
+  DOLFIN_TCASE_ADD(test_Real);
+
+  DOLFIN_TCASE_CREATE("UFCFunction");
+  DOLFIN_TCASE_ADD(test_UFCFunction);
+
+  DOLFIN_TCASE_CREATE("Function");
+  DOLFIN_TCASE_ADD(test_Function);
+
+  DOLFIN_TCASE_CREATE("Field");
+  DOLFIN_TCASE_ADD(test_Field);
 }
+DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------
-void teardown()
-{
-}
+DOLFIN_CHECK_SUITE("dolfin/function", suite)
 //-----------------------------------------------------------------------------
-Suite *suite()
-{
-  TCase *tc;
-  Suite *s;
-
-  s = suite_create("function");
-
-  tc = tcase_create("Constant");
-  tcase_add_test(tc, test_Constant);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("Expression");
-  tcase_add_test(tc, test_Expression);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("Value");
-  tcase_add_test(tc, test_Value);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("Real");
-  tcase_add_test(tc, test_Real);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("UFCFunction");
-  tcase_add_test(tc, test_UFCFunction);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("Function");
-  tcase_add_test(tc, test_Function);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  tc = tcase_create("Field");
-  tcase_add_test(tc, test_Field);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc,60);
-
-  return s;
-}
-//-----------------------------------------------------------------------------
-int main(void)
-{
-
-  int number_failed;
-  Suite* s = suite();
-  SRunner* sr = srunner_create(s);
-
-  srunner_run_all(sr, CK_VERBOSE);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
-
-  return (number_failed == 0) ? 0 : 1;
-
-}
-//-----------------------------------------------------------------------------
-#else
-
-int main(void)
-{
-  fprintf(stderr, "*** Check is required for dolfin/function tests ***\n");
-  return 0;
-}
 
 #endif

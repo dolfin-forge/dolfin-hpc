@@ -1,18 +1,10 @@
-#include <dolfin/config/dolfin_config.h>
-
-#include <iostream>
-#include <iomanip>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
-
-#include <check.h>
 
 #include "Vector/Vector.h"
 #include "Matrix/Matrix.h"
 
-
-int argc;
-char **argv;
 
 int main(void)
 {

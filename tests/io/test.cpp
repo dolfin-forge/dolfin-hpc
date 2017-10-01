@@ -1,4 +1,4 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
@@ -6,64 +6,21 @@
 #include "VTK/VTK.h"
 #include "Binary/Binary.h"
 
-#include <check.h>
-
 //-----------------------------------------------------------------------------
-void setup()
+DOLFIN_SUITE_BEGIN(suite, "io")
 {
+  DOLFIN_TCASE_CREATE("XML");
+  DOLFIN_TCASE_ADD(test_XMLMesh);
+
+  DOLFIN_TCASE_CREATE("VTK");
+  DOLFIN_TCASE_ADD(test_VTKMesh);
+
+  DOLFIN_TCASE_CREATE("Binary");
+  DOLFIN_TCASE_ADD(test_BinaryMesh);
 }
+DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------
-void teardown()
-{
-}
+DOLFIN_CHECK_SUITE("dolfin/io", suite)
 //-----------------------------------------------------------------------------
-Suite* suite()
-{
-  TCase* tc;
-  Suite* s;
-
-  s = suite_create("io");
-
-  tc = tcase_create("XML");
-  tcase_add_test(tc, test_XMLMesh);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("VTK");
-  tcase_add_test(tc, test_VTKMesh);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("Binary");
-  tcase_add_test(tc, test_BinaryMesh);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  return s;
-}
-//-----------------------------------------------------------------------------
-int main(void)
-{
-  int number_failed;
-  Suite* s = suite();
-  SRunner* sr = srunner_create(s);
-
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
-
-  return (number_failed == 0) ? 0 : 1;
-}
-//-----------------------------------------------------------------------------
-#else
-
-int main(void)
-{
-  fprintf(stderr, "*** Check is required for dolfin/io tests ***\n");
-  return 0;
-}
 
 #endif

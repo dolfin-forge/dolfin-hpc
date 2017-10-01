@@ -1,4 +1,4 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
@@ -9,84 +9,32 @@
 #include "Form/Form.h"
 #include "BoundaryNormal/BoundaryNormal.h"
 
-#include <check.h>
-
 //-----------------------------------------------------------------------------
-void setup()
+DOLFIN_SUITE_BEGIN(suite, "fem")
 {
+  DOLFIN_TCASE_CREATE("FiniteElement");
+  DOLFIN_TCASE_ADD(test_FiniteElement);
+
+  DOLFIN_TCASE_CREATE("DofNumbering");
+  DOLFIN_TCASE_ADD(test_DofNumbering);
+
+  DOLFIN_TCASE_CREATE("DofMap");
+  DOLFIN_TCASE_ADD(test_DofMap);
+
+  DOLFIN_TCASE_CREATE("FiniteElementSpace");
+  DOLFIN_TCASE_ADD(test_FiniteElementSpace);
+
+  DOLFIN_TCASE_CREATE("Form");
+  DOLFIN_TCASE_ADD(test_Functional);
+  DOLFIN_TCASE_ADD(test_LinearForm);
+  DOLFIN_TCASE_ADD(test_BilinearForm);
+
+  DOLFIN_TCASE_CREATE("BoundaryNormal");
+  DOLFIN_TCASE_ADD(test_NodeNormal);
 }
+DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------
-void teardown()
-{
-}
+DOLFIN_CHECK_SUITE("dolfin/fem", suite)
 //-----------------------------------------------------------------------------
-Suite* fem_suite()
-{
-  TCase* tc;
-  Suite* s;
-
-  s = suite_create("fem");
-
-  tc = tcase_create("FiniteElement");
-  tcase_add_test(tc, test_FiniteElement);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("DofNumbering");
-  tcase_add_test(tc, test_DofNumbering);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("DofMap");
-  tcase_add_test(tc, test_DofMap);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("FiniteElementSpace");
-  tcase_add_test(tc, test_FiniteElementSpace);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("Form");
-  tcase_add_test(tc, test_Functional);
-  tcase_add_test(tc, test_LinearForm);
-  tcase_add_test(tc, test_BilinearForm);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  tc = tcase_create("BoundaryNormal");
-  tcase_add_test(tc, test_NodeNormal);
-  suite_add_tcase(s, tc);
-  tcase_add_checked_fixture(tc, setup, teardown);
-  tcase_set_timeout(tc, 60);
-
-  return s;
-}
-//-----------------------------------------------------------------------------
-int main(void)
-{
-  int number_failed;
-  Suite* s = fem_suite();
-  SRunner* sr = srunner_create(s);
-
-  srunner_run_all(sr, CK_NORMAL);
-  number_failed = srunner_ntests_failed(sr);
-  srunner_free(sr);
-
-  return (number_failed == 0) ? 0 : 1;
-}
-//-----------------------------------------------------------------------------
-#else
-
-int main(void)
-{
-  fprintf(stderr, "*** Check is required for dolfin/fem tests ***\n");
-  return 0;
-}
 
 #endif

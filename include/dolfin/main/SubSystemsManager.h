@@ -21,6 +21,11 @@ namespace dolfin
 class SubSystemsManager
 {
 
+  // Singleton instance
+  static SubSystemsManager sub_systems_manager;
+
+public:
+
   // Subsystem state mask
   enum Type { mpi       = 1,
               petsc     = 2,
@@ -28,11 +33,6 @@ class SubSystemsManager
               janpack   = 8,
               zoltan    = 16,
               slepc     = 32 };
-
-  // Singleton instance
-  static SubSystemsManager sub_systems_manager;
-
-public:
 
   //-------------------------------------------------------------------------
   static int start(int argc = 0, char* argv[] = NULL, uint n = 0)
@@ -44,6 +44,12 @@ public:
   static void status()
   {
     sub_systems_manager.disp();
+  }
+
+  //-------------------------------------------------------------------------
+  static inline bool active(SubSystemsManager::Type s)
+  {
+    return sub_systems_manager.iset(s);
   }
 
   //-------------------------------------------------------------------------

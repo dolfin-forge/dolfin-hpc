@@ -138,6 +138,10 @@ private:
 
 };
 
+// Defines default type to MPI communication domain.
+
+typedef MPI::Communicator Comm;
+
 //-----------------------------------------------------------------------------
 
 #if HAVE_MPI

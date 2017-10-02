@@ -11,6 +11,7 @@
 #include <dolfin/common/byteswap.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/math/LinearDistribution.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
@@ -494,12 +495,10 @@ void BinaryFile::operator>>(Mesh& mesh)
 
   bool byteswap;
   BinaryFileHeader hdr;
-  uint pe_size = MPI::size();
-  uint pe_rank = MPI::rank();
 
-  if (pe_size == 1 || dolfin_get("Mesh read in serial"))
+  if (PE::size() == 1 || dolfin_get("Mesh read in serial"))
   {
-    if(pe_size > 0)
+    if(PE::rank() > 0)
     {
       error("Reading serial mesh in parallel not implemented");
     }
@@ -509,7 +508,7 @@ void BinaryFile::operator>>(Mesh& mesh)
     uint type = 0;
     uint gdim = 0;
     fp.read((char *) &hdr, sizeof(BinaryFileHeader));
-    byteswap = hdr_check(hdr, BINARY_MESH_DATA, pe_size);
+    byteswap = hdr_check(hdr, BINARY_MESH_DATA, PE::size());
     fp.read((char *) &gdim, sizeof(uint));
     fp.read((char *) &type, sizeof(uint));
     
@@ -565,6 +564,8 @@ void BinaryFile::operator>>(Mesh& mesh)
 #ifdef ENABLE_MPIIO
 
     MPI::Communicator& comm = MPI::DOLFIN_COMM;
+    uint pe_size = MPI::size();
+    uint pe_rank = MPI::rank();
 
     MPI_File fh;
     MPI_Offset byte_offset;
@@ -893,8 +894,6 @@ void BinaryFile::operator>>(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
-  uint pe_size = MPI::size();
-  uint pe_rank = MPI::rank();
   uint const gdim = mesh.geometry().dim();
   uint const type = BinaryFile::cell_type(BINARY_VERSION, mesh.type().cellType());
   uint const num_vertices = mesh.global_size(0);
@@ -903,7 +902,7 @@ void BinaryFile::operator<<(Mesh& mesh)
 
   BinaryFileHeader hdr;
   hdr.magic = BINARY_MAGIC;
-  hdr.pe_size = pe_size;
+  hdr.pe_size = PE::size();
   hdr.type = BINARY_MESH_DATA;
 #ifdef HAVE_BIG_ENDIAN
   hdr.bendian = 1;
@@ -911,9 +910,9 @@ void BinaryFile::operator<<(Mesh& mesh)
   hdr.bendian = 0;
 #endif
 
-  if (pe_size == 1 || ! mesh.is_distributed())
+  if (PE::size() == 1 || ! mesh.is_distributed())
   {
-    if(pe_rank > 0)
+    if(PE::rank() > 0)
     {
       error("Writing serial mesh in parallel not implemented");
     }

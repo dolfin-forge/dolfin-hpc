@@ -27,7 +27,7 @@ namespace dolfin
   {
   public:
     
-    GenericFile(const std::string filename);
+    GenericFile(std::string const& type, std::string const& filename);
     virtual ~GenericFile();
     
     // Input
@@ -61,15 +61,18 @@ namespace dolfin
     virtual void read();
     virtual void write();
     
+  private:
+
+    std::string const type_;
+
   protected:
-    
+
     void read_not_impl(const std::string object);
     void write_not_impl(const std::string object);
     void parallel_read_not_impl(const std::string object);
     void parallel_write_not_impl(const std::string object);
 
     std::string filename;
-    std::string type;
     
     bool opened_read;
     bool opened_write;

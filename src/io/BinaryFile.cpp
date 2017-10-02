@@ -31,19 +31,17 @@ namespace dolfin
 
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename) :
-    GenericFile(filename),
+    GenericFile("Binary", filename),
     t_(0),
     version_(BINARY_VERSION)
 {
-  type = "Binary";
 }
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real const& t) :
-    GenericFile(filename),
+    GenericFile("Binary", filename),
     t_(&t),
     version_(BINARY_VERSION)
 {
-  type = "Binary";
 }
 //----------------------------------------------------------------------------
 BinaryFile::~BinaryFile()

@@ -18,9 +18,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 OFFFile::OFFFile(std::string const filename) :
-    GenericFile(filename)
+    GenericFile("OFF", filename)
 {
-  type = "OFF";
 }
 //-----------------------------------------------------------------------------
 OFFFile::~OFFFile()

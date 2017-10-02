@@ -13,9 +13,8 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 STLFile::STLFile(const std::string filename) :
-    GenericFile(filename)
+    GenericFile("STL", filename)
 {
-  type = "STL";
 }
 //-----------------------------------------------------------------------------
 STLFile::~STLFile()

@@ -15,9 +15,9 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-GenericFile::GenericFile(const std::string filename) :
+GenericFile::GenericFile(std::string const& type, std::string const& filename) :
+  type_(type),
   filename(filename), 
-  type("Unknown file type"),
   opened_read(false),
   opened_write(false),
   check_header(false),
@@ -149,13 +149,13 @@ void GenericFile::write()
 void GenericFile::read_not_impl(const std::string object)
 {
   error("Unable to read objects of type %s from %s files.",
-		object.c_str(), type.c_str());
+		object.c_str(), type_.c_str());
 }
 //-----------------------------------------------------------------------------
 void GenericFile::write_not_impl(const std::string object)
 {
   error("Unable to write objects of type %s to %s files.",
-		object.c_str(), type.c_str());
+		object.c_str(), type_.c_str());
 }
 //-----------------------------------------------------------------------------
 void GenericFile::parallel_read_not_impl(const std::string object)
@@ -163,7 +163,7 @@ void GenericFile::parallel_read_not_impl(const std::string object)
   if(MPI::size() > 1)
   {
     error("Unable to read objects of type %s from %s files in parallel.",
-          object.c_str(), type.c_str());
+          object.c_str(), type_.c_str());
   }
 }
 //-----------------------------------------------------------------------------
@@ -172,7 +172,7 @@ void GenericFile::parallel_write_not_impl(const std::string object)
   if(MPI::size() > 1)
   {
     error("Unable to write objects of type %s to %s files in parallel.",
-          object.c_str(), type.c_str());
+          object.c_str(), type_.c_str());
   }
 }
 //-----------------------------------------------------------------------------

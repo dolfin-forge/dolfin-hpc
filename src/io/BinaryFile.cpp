@@ -595,7 +595,6 @@ void BinaryFile::operator>>(Mesh& mesh)
     CellType::Type ctype = BinaryFile::cell_type(version_, type);
     CellType * cell_type = CellType::create(ctype);
     uint const num_cellvertices = cell_type->num_entities(0);
-    cell_type->disp();
     delete cell_type;
 
     // Load entities from the file: cells and vertices are distributed linearly

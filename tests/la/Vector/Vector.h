@@ -1,3 +1,5 @@
+#include <dolfin/common/Check.h>
+
 #ifdef HAVE_CHECK
 
 #include <dolfin/la/Vector.h>
@@ -191,53 +193,35 @@ START_TEST( test_zero_vec )
 }END_TEST
 //-----------------------------------------------------------------------------
 
-
-Suite *test_suite_vec()
+DOLFIN_SUITE_BEGIN(test_suite_vec, "Vector")
 {
+  DOLFIN_TCASE_CREATE ("init");
+  DOLFIN_TCASE_ADD(test_init_vec);
 
-  TCase *tc;
-  Suite *s;
-  
-  s = suite_create("Vector");
+  DOLFIN_TCASE_CREATE ("get/set");
+  DOLFIN_TCASE_ADD(test_get_set_vec);
 
-  tc = tcase_create ("init");
-  tcase_add_test (tc, test_init_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("add");
+  DOLFIN_TCASE_ADD(test_add_vec);
 
-  tc = tcase_create ("get/set");
-  tcase_add_test (tc, test_get_set_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("max");
+  DOLFIN_TCASE_ADD(test_max_vec);
 
-  tc = tcase_create ("add");
-  tcase_add_test (tc, test_add_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("min");
+  DOLFIN_TCASE_ADD(test_min_vec);
 
-  tc = tcase_create ("max");
-  tcase_add_test (tc, test_max_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("operator =");
+  DOLFIN_TCASE_ADD(test_op_assign_vec);
 
-  tc = tcase_create ("min");
-  tcase_add_test (tc, test_min_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("operator *");
+  DOLFIN_TCASE_ADD(test_op_mul_vec);
 
-  tc = tcase_create ("operator =");
-  tcase_add_test (tc, test_op_assign_vec);
-  suite_add_tcase (s, tc);
+  DOLFIN_TCASE_CREATE ("operator /");
+  DOLFIN_TCASE_ADD(test_op_scale_vec);
 
-  tc = tcase_create ("operator *");
-  tcase_add_test (tc, test_op_mul_vec);
-  suite_add_tcase (s, tc);
-
-  tc = tcase_create ("operator /");
-  tcase_add_test (tc, test_op_scale_vec);
-  suite_add_tcase (s, tc);
-
- tc = tcase_create ("zero");
-  tcase_add_test (tc, test_zero_vec);
-  suite_add_tcase (s, tc);
-
-  return s;
+  DOLFIN_TCASE_CREATE ("zero");
+  DOLFIN_TCASE_ADD(test_zero_vec);
 }
-
+DOLFIN_SUITE_END
 
 #endif

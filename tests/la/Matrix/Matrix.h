@@ -1,3 +1,5 @@
+#include <dolfin/common/Check.h>
+
 #ifdef HAVE_CHECK
 
 #include <dolfin/la/Matrix.h>
@@ -18,20 +20,11 @@ START_TEST( test_init_mat )
 }END_TEST
 //-----------------------------------------------------------------------------
 
-Suite *test_suite_mat()
+DOLFIN_SUITE_BEGIN(test_suite_mat, "Matrix")
 {
-
-  TCase *tc;
-  Suite *s;
-  
-  s = suite_create("Matrix");
-
-  tc = tcase_create ("init");
-  tcase_add_test (tc, test_init_mat);
-  suite_add_tcase (s, tc);
-
-  return s;
+  DOLFIN_TCASE_CREATE ("init");
+  DOLFIN_TCASE_ADD(test_init_mat);
 }
-
+DOLFIN_SUITE_END
 
 #endif

@@ -14,6 +14,8 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/config/dolfin_config.h>
 
+#include <algorithm>
+#include <cstring>
 
 #ifdef HAVE_LIBSIM
 #include <VisItControlInterface_V2.h>
@@ -126,6 +128,67 @@ namespace dolfin
       }
       return md;
     }
+
+    // Function to return mesh data
+    inline visit_handle libsimGetMesh(int domain, 
+					  const char *name, void *data)
+    {
+      libsimData *d = (libsimData *) data;
+
+      visit_handle msh = VISIT_INVALID_HANDLE;
+      visit_handle coords = VISIT_INVALID_HANDLE;
+
+      // Currently we're limited to one mesh
+      if (strcmp(name, "Mesh") != 0) return msh;
+      
+      if (VisIt_UnstructuredMesh_alloc(&msh) == VISIT_OKAY &&
+	  VisIt_VariableData_alloc(&coords) == VISIT_OKAY) 
+      {
+
+	VisIt_VariableData_setDataD(coords, VISIT_OWNER_SIM,
+				    d->mesh_.topology().dim(),
+				    d->mesh_.num_vertices(),
+				    d->mesh_.geometry().coordinates());
+	VisIt_UnstructuredMesh_setCoords(msh, coords);
+	
+	// TODO: Add connectivity
+      }
+      
+      return msh;
+    }
+
+
+    // Function to return function data
+    inline visit_handle libsimGetFunction(int domain, 
+					  const char *name, void *data)
+    {
+      libsimData *d = (libsimData *) data;
+
+      visit_handle func = VISIT_INVALID_HANDLE;
+
+
+      if (VisIt_VariableData_alloc(&func) == VISIT_OKAY) 
+      {
+	LabelList<Function>::iterator it = d->function_list_.begin();	  
+	for( ; it != d->function_list_.end(); it++)
+	{
+	  if (strcmp(it->second.c_str(), name) == 0) break;
+	}
+
+	if (it == d->function_list_.end())
+	{
+	  VisIt_VariableData_free(func);
+	  return VISIT_INVALID_HANDLE;
+	}
+
+	Function *u = it->first;
+	
+	// TODO: expose data to visit (avoid deep copies)
+
+      }
+      return func;
+    }
+
 
 //-----------------------------------------------------------------------------
 

@@ -12,6 +12,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/Vertex.h>
 #include <dolfin/config/dolfin_config.h>
 
 #include <algorithm>
@@ -171,7 +172,7 @@ namespace dolfin
 
 	int nconn = d->mesh_.num_cells() * 
 	  (d->mesh_.type().num_entities(0) + 1);
-	int *visit_conn = (int *) malloc(nconn * sizeof(int));
+	int *visit_conn = new int[nconn];
 	
 	for (int *cp = &visit_conn[0], i = 0; i < d->mesh_.num_cells(); i++)
 	{
@@ -216,8 +217,28 @@ namespace dolfin
 	}
 
 	Function *u = it->first;
+	uint const num_cell_vertices = d->mesh_.type().num_entities(0);
+	uint const num_cell_dofs = num_cell_vertices * u->value_size();
+	real *vertex_values = new real[num_cell_dofs * d->mesh_.num_vertices()];
+
+	u->interpolate_vertex_values(vertex_values);
+
+	// TODO Check if VisIt can handle u->value_size() > 3
+	real *values = new real[u->value_size() * d->mesh_.num_vertices()];
+	memset(values, u->value_size() * d->mesh_.num_vertices(), sizeof(real));
+	real *vp = values;
+
+	for (VertexIterator v(d->mesh_); !v.end(); ++v)
+	{
+	  for (uint i = 0; i < u->value_size(); i++) 
+	  {
+	    *(vp++) = vertex_values[v->index() + i * d->mesh_.num_vertices()];
+	  }
+	}
+	delete[] vertex_values;
 	
-	// TODO: expose data to visit (avoid deep copies)
+	VisIt_VariableData_setDataD(func, VISIT_OWNER_VISIT, u->value_size(),
+				    d->mesh_.num_vertices(), values);
 
       }
       return func;

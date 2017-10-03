@@ -68,6 +68,8 @@ namespace dolfin
     // Simulation (insitu) data
     static libsimData InsituData_;
 
+#ifdef HAVE_LIBSIM
+
 //--- Callback functions  -----------------------------------------------------
 
     // Function to return meta data
@@ -191,6 +193,8 @@ namespace dolfin
 
 
 //-----------------------------------------------------------------------------
+
+#endif
 
   };
   

@@ -12,6 +12,7 @@
 #include <dolfin/mesh/Mesh.h>
 
 #include <dolfin/io/File.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LocalMeshRefinement.h>
@@ -265,7 +266,7 @@ BoundaryMesh& Mesh::interior_boundary()
 //-----------------------------------------------------------------------------
 bool Mesh::serial_io() const
 {
-  return (MPI::size() == 1) || dolfin_get("Mesh read in serial");
+  return (PE::size() == 1) || dolfin_get("Mesh read in serial");
 }
 //-----------------------------------------------------------------------------
 bool Mesh::parallel_io() const

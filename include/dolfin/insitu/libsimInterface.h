@@ -139,12 +139,14 @@ namespace dolfin
 
       visit_handle msh = VISIT_INVALID_HANDLE;
       visit_handle coords = VISIT_INVALID_HANDLE;
+      visit_handle conn = VISIT_INVALID_HANDLE;
 
       // Currently we're limited to one mesh
       if (strcmp(name, "Mesh") != 0) return msh;
       
       if (VisIt_UnstructuredMesh_alloc(&msh) == VISIT_OKAY &&
-	  VisIt_VariableData_alloc(&coords) == VISIT_OKAY) 
+	  VisIt_VariableData_alloc(&coords) == VISIT_OKAY &&
+	  VisIt_VariableData_alloc(&conn) == VISIT_OKAY)
       {
 
 	VisIt_VariableData_setDataD(coords, VISIT_OWNER_SIM,
@@ -153,7 +155,37 @@ namespace dolfin
 				    d->mesh_.geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);
 	
-	// TODO: Add connectivity
+	uint *dolfin_conn = d->mesh_.cells();
+	uint cell_type = 0;
+	switch(d->mesh_.type().cellType())
+	  {
+	  case CellType::triangle:
+	    cell_type = VISIT_CELL_TRI;
+	    break;
+	  case CellType::tetrahedron:
+	    cell_type = VISIT_CELL_TET;
+	  default:
+	    error("Unsupported (insitu) mesh cell type");
+	    break;
+	  }
+
+	int nconn = d->mesh_.num_cells() * 
+	  (d->mesh_.type().num_entities(0) + 1);
+	int *visit_conn = (int *) malloc(nconn * sizeof(int));
+	
+	for (int *cp = &visit_conn[0], i = 0; i < d->mesh_.num_cells(); i++)
+	{
+	  *(cp++) = cell_type;
+	  for (int j = 0; j < d->mesh_.type().num_entities(0); j++) 
+	  {
+	    *(cp++) = (int) *(dolfin_conn++);
+	  }
+	}
+	
+	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1, 
+				    nconn, visit_conn);
+	VisIt_UnstructuredMesh_setConnectivity(msh, d->mesh_.num_cells(), conn);
+
       }
       
       return msh;

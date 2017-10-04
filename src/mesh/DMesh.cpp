@@ -475,8 +475,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
         DVertex* v1 = dcell->vertices[j];
 
         real l = 0.0;
-        if (v0->glb_id > v1->glb_id) l = v0->p.distance(v1->p);
-        else l = v1->p.distance(v0->p);
+        if (v0->glb_id > v1->glb_id) l = v0->p.dist(v1->p);
+        else l = v1->p.dist(v0->p);
 
         if (fabs(l - lmax) < DOLFIN_EPS)
         {

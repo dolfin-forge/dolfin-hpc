@@ -69,7 +69,7 @@ uint IntervalCell::orientation(Cell const& cell) const
 {
   dolfin_assert(cell.type() == this->cell_type);
   Point v01 = Point(cell.entities(0)[1]) - Point(cell.entities(0)[0]);
-  Point n(-v01.y(), v01.x());
+  Point n(-v01[1], v01[0]);
 
   return (n.dot(v01) < 0.0 ? 1 : 0);
 }

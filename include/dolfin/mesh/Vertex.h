@@ -38,12 +38,6 @@ public:
   {
   }
 
-  /// Return value of vertex coordinate i
-  inline real x(uint i) const
-  {
-    return mesh_.geometry().x(index_)[i];
-  }
-
   /// Return array of vertex coordinates
   inline real* x()
   {

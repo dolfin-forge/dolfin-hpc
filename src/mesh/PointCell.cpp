@@ -157,7 +157,7 @@ real PointCell::facet_area(Cell const& cell, uint facet) const
 //-----------------------------------------------------------------------------
 bool PointCell::intersects(MeshEntity const& e, Point const& p) const
 {
-  return abscmp(p.distance(e.mesh().geometry().point(e.index())), 0.0);
+  return abscmp(p.dist(e.mesh().geometry().point(e.index())), 0.0);
 }
 //-----------------------------------------------------------------------------
 bool PointCell::intersects(MeshEntity const& e, Point const& p1,

@@ -10,6 +10,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/mesh/Point.h>
 #include <dolfin/mesh/RefinementPattern.h>
 #include <dolfin/ufl/UFLCell.h>
 
@@ -24,7 +25,6 @@ class Mesh;
 class MeshEditor;
 class MeshEntity;
 class MeshTopology;
-class Point;
 
 /**
  *  @class  CellType

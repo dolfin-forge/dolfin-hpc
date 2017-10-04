@@ -10,13 +10,13 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/mesh/CellType.h>
+#include <dolfin/mesh/Point.h>
 
 namespace dolfin
 {
 
 class Mesh;
 class MeshConnectivity;
-class Point;
 
 /// A simple mesh editor for creating simplicial meshes in 1D, 2D and 3D.
 

@@ -56,18 +56,18 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
   VertexIterator v(c);
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) &c, p.x(), p.y(), p.z(),
-                      p.x(), p.y(), p.z());
+  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) &c, p[0], p[1], p[2],
+                      p[0], p[1], p[2]);
 
   for (++v; !v.end(); ++v)
   {
     p = v->point();
-    if (p.x() > bbox->x2) bbox->x2 = p.x();
-    if (p.x() < bbox->x1) bbox->x1 = p.x();
-    if (p.y() > bbox->y2) bbox->y2 = p.y();
-    if (p.y() < bbox->y1) bbox->y1 = p.y();
-    if (p.z() > bbox->z2) bbox->z2 = p.z();
-    if (p.z() < bbox->z1) bbox->z1 = p.z();
+    if (p[0] > bbox->x2) bbox->x2 = p[0];
+    if (p[0] < bbox->x1) bbox->x1 = p[0];
+    if (p[1] > bbox->y2) bbox->y2 = p[1];
+    if (p[1] < bbox->y1) bbox->y1 = p[1];
+    if (p[2] > bbox->z2) bbox->z2 = p[2];
+    if (p[2] < bbox->z1) bbox->z1 = p[2];
   }
   return bbox;
 
@@ -84,8 +84,8 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p) const
   GtsBBox* bbox;
 
   real btol = dolfin_get("GTS Tolerance");
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, p.x() - btol, p.y() - btol,
-                      p.z() - btol, p.x() + btol, p.y() + btol, p.z() + btol);
+  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, p[0] - btol, p[1] - btol,
+                      p[2] - btol, p[0] + btol, p[1] + btol, p[2] + btol);
 
   return bbox;
 
@@ -105,35 +105,35 @@ GtsBBox* GTSInterface::bboxPoint(Point const& p1, Point const& p2) const
   real y1, y2;
   real z1, z2;
 
-  if (p1.x() < p2.x())
+  if (p1[0] < p2[0])
   {
-    x1 = p1.x();
-    x2 = p2.x();
+    x1 = p1[0];
+    x2 = p2[0];
   }
   else
   {
-    x1 = p2.x();
-    x2 = p1.x();
+    x1 = p2[0];
+    x2 = p1[0];
   }
-  if (p1.y() < p2.y())
+  if (p1[1] < p2[1])
   {
-    y1 = p1.y();
-    y2 = p2.y();
-  }
-  else
-  {
-    y1 = p2.y();
-    y2 = p1.y();
-  }
-  if (p1.z() < p2.z())
-  {
-    z1 = p1.z();
-    z2 = p2.z();
+    y1 = p1[1];
+    y2 = p2[1];
   }
   else
   {
-    z1 = p2.z();
-    z2 = p1.z();
+    y1 = p2[1];
+    y2 = p1[1];
+  }
+  if (p1[2] < p2[2])
+  {
+    z1 = p1[2];
+    z2 = p2[2];
+  }
+  else
+  {
+    z1 = p2[2];
+    z2 = p1[2];
   }
 
   bbox = gts_bbox_new(gts_bbox_class(), (gpointer) NULL, x1, y1, z1, x2, y2, z2);

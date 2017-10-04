@@ -51,7 +51,7 @@ int main(int argc, char** argv)
         {
           mg.set(n, x);
         }
-        if (mg.point(n).distance(x) > DOLFIN_EPS)
+        if (mg.point(n).dist(x) > DOLFIN_EPS)
         {
           error("Point values do not match");
         }
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
         {
           mg.set(n, i, x[i]);
         }
-        if (mg.point(n).distance(x) > DOLFIN_EPS)
+        if (mg.point(n).dist(x) > DOLFIN_EPS)
         {
           error("Point values do not match");
         }

@@ -115,7 +115,7 @@ real MeshGeometry::abs_tolerance(uint dim) const
 //-----------------------------------------------------------------------------
 Point MeshGeometry::point(uint n) const
 {
-  return Point(&coordinates_[n * dim_], dim_);
+  return Point(dim_, coordinates_+ n * dim_);
 }
 //-----------------------------------------------------------------------------
 real * MeshGeometry::coordinates()

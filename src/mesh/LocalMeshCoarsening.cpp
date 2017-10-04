@@ -111,7 +111,7 @@ bool LocalMeshCoarsening::selectEdge(DCell* c, CoarseningManager& manager,
     for ( ++v_it2 ; v_it2 != c->vertices.end() ; ++v_it2 )
     {
       DVertex * v2 = *v_it2;
-      real l = v1->p.distance(v2->p);
+      real l = v1->p.dist(v2->p);
       if (
           lmin > l &&                            // no shorter edge found before
         !(            // edge cannot be coarsened if both vertices are forbidden

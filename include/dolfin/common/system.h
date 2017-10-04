@@ -16,6 +16,10 @@ namespace dolfin
 {
 
 ///
+std::string filename(std::string const& name, std::string const& ext,
+                     uint counter = 0, int width = 0);
+
+///
 std::string basename(std::string file);
 
 ///
@@ -70,7 +74,6 @@ std::string human_readable(T value)
   ss << x << _unit[i];
   return ss.str();
 }
-
 
 } /* namespace dolfin */
 

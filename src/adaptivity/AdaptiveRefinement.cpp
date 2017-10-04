@@ -17,6 +17,7 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/function/FunctionDecomposition.h>
+#include <dolfin/la/Vector.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>

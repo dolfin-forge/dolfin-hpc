@@ -194,20 +194,13 @@ void MeshGeometry::set_abs_tolerance(uint dim, real atol)
   abs_tol_[dim] = std::fabs(atol);
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::set(uint n, uint i, real x)
+void MeshGeometry::assign(real const * x)
 {
-  dolfin_assert(n < size_);
-  dolfin_assert(i < dim_);
-  coordinates_[n * dim_ + i] = x;
+  std::copy(x, x + dim_ * size_, coordinates_);
 }
+
 //-----------------------------------------------------------------------------
-void MeshGeometry::set(uint n, real const * x)
-{
-  dolfin_assert(n < size_);
-  std::copy(x, x + dim_, coordinates_ + n * dim_);
-}
-//-----------------------------------------------------------------------------
-void MeshGeometry::set(Array<real> const& coordinates)
+void MeshGeometry::assign(Array<real> const& coordinates)
 {
   if(coordinates.size() != dim_ * size_)
   {

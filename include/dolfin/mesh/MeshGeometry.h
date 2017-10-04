@@ -90,14 +90,14 @@ public:
   /// The absolute value of the parameter is set as tolerance.
   void set_abs_tolerance(uint dim, real atol);
 
-  /// Set value of i-th coordinate of point n
-  void set(uint n, uint i, real x);
-
   /// Set value of coordinates of point n
   void set(uint n, real const * x);
 
-  /// Set values of coordinates from array, size of input should match
-  void set(Array<real> const& coordinates);
+  /// Assign value of all coordinates
+  void assign(real const * x);
+
+  /// Assign values of coordinates from array, size of input should match
+  void assign(Array<real> const& coordinates);
 
   /// Remap coordinates from old to new ordering
   /// The mapping should have the same size as the number of coordinates
@@ -173,6 +173,13 @@ inline real const * MeshGeometry::x(uint n) const
 {
   dolfin_assert(n < size_);
   return coordinates_ + n * dim_;
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshGeometry::set(uint n, real const * x)
+{
+  dolfin_assert(n < size_);
+  std::copy(x, x + dim_, coordinates_ + n * dim_);
 }
 
 //-----------------------------------------------------------------------------

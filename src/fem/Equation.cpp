@@ -57,7 +57,7 @@ void Equation::disp() const
   section("Bilinear form");
   if (this->a != NULL)
   {
-    for (uint i = 0; i < a->coefficients().size(); ++i)
+    for (uint i = 0; i < a->num_coefficients(); ++i)
     {
       message("Coefficient %2d : %s", i, this->a->coefficient_name(i).c_str());
     }
@@ -70,7 +70,7 @@ void Equation::disp() const
   section("Linear form");
   if (this->L != NULL)
   {
-    for (uint i = 0; i < this->L->coefficients().size(); ++i)
+    for (uint i = 0; i < this->L->num_coefficients(); ++i)
     {
       message("Coefficient %2d : %s", i, this->L->coefficient_name(i).c_str());
     }

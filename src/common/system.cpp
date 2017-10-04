@@ -31,6 +31,13 @@ std::string filename(std::string const& name, std::string const& ext,
   return ss.str();
 }
 //-----------------------------------------------------------------------------
+std::string strcounter(uint counter, int width)
+{
+  std::stringstream ss;
+  ss << std::setfill('0') << std::setw(width) << counter;
+  return ss.str();
+}
+//-----------------------------------------------------------------------------
 std::string basename(std::string file)
 {
   size_t beg = file.find_last_of('/');

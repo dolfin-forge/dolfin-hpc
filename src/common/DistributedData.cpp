@@ -925,7 +925,7 @@ bool DistributedData::is_ghost(uint local_index) const
 //-----------------------------------------------------------------------------
 uint DistributedData::num_owned() const
 {
-  dolfin_assert(local_.size() > ghost_.size());
+  dolfin_assert(local_.size() >= ghost_.size());
   return (local_.size() - ghost_.size());
 }
 //-----------------------------------------------------------------------------

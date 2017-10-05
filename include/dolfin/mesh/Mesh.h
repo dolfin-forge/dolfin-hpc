@@ -235,11 +235,6 @@ public:
   /// Display mesh data
   void disp() const;
 
-  //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
-  void check() const;
-
 private:
 
   /// Intialize mesh given cell type and space

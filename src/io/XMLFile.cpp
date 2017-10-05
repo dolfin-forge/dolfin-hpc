@@ -537,7 +537,10 @@ void XMLFile::parseSAX()
   sax.fatalError = sax_fatal_error;
 
   // Parse file
-  xmlSAXUserParseFile(&sax, (void *) xmlObject, filename.c_str());
+  if (xmlSAXUserParseFile(&sax, (void *) xmlObject, filename.c_str()) < 0)
+  {
+    error("XMLFile : failed to read %s", filename.c_str());
+  }
 }
 //-----------------------------------------------------------------------------
 // Callback functions for the SAX interface

@@ -10,6 +10,8 @@
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
+#include <sstream>
+#include <iomanip>
 #include <limits.h>
 #include <stdlib.h>
 #include <glob.h>
@@ -20,6 +22,21 @@
 namespace dolfin
 {
 
+//-----------------------------------------------------------------------------
+std::string filename(std::string const& name, std::string const& ext,
+                     uint counter, int width)
+{
+  std::stringstream ss;
+  ss << name << std::setfill('0') << std::setw(width) << counter << ext;
+  return ss.str();
+}
+//-----------------------------------------------------------------------------
+std::string strcounter(uint counter, int width)
+{
+  std::stringstream ss;
+  ss << std::setfill('0') << std::setw(width) << counter;
+  return ss.str();
+}
 //-----------------------------------------------------------------------------
 std::string basename(std::string file)
 {

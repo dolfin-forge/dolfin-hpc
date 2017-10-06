@@ -2,6 +2,7 @@
 #define __DOLFIN_FUNCTION_IMPL_CELL_DIAMETER_H_
 
 #include <dolfin/function/ValueSpace.h>
+#include <dolfin/fem/UFCCell.h>
 
 namespace dolfin
 {

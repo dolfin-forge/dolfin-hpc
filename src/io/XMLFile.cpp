@@ -60,7 +60,9 @@ void XMLFile::operator>>(Mesh& mesh)
 void XMLFile::operator<<(Mesh& mesh)
 {
 
-  if(MPI::size() == 1)
+  // COMMENT: Actually, dumping pieces of the mesh might be desirable
+  // for debugging purposes
+  if(!mesh.is_distributed())
   {
     this->write();
 

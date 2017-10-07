@@ -11,6 +11,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/main/PE.h>
 
 #include <vector>
 #include <list>
@@ -127,7 +128,7 @@ public:
   inline void propagate_refinement(std::vector<Propagation>& propagated,
                                    bool& empty)
   {
-    if (MPI::size() & (MPI::size() - 1)) propagate_naive(
+    if (PE::size() & (PE::size() - 1)) propagate_naive(
         propagated, empty);
     else propagate_hypercube(propagated, empty);
   }

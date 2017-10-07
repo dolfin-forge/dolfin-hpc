@@ -30,7 +30,6 @@
 #include <dolfin/fem/SparsityPatternBuilder.h>
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/PeriodicDofsMapping.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/common/timing.h>
 

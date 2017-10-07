@@ -8,6 +8,7 @@
 
 #include <iostream>
 
+#include <dolfin/main/PE.h>
 #include <dolfin/log/log.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Cell.h>
@@ -272,7 +273,7 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
     cell_map_.clear();
     vertex_map_.clear();
 
-    uint const pe_size = MPI::size();
+    uint const pe_size = PE::size();
     Array<uint> * shared_vertices = new Array<uint>[pe_size];
     Array<uint> boundary_vertices(num_verts, num_verts);
     for (FacetIterator f(mesh); !f.end(); ++f)

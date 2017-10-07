@@ -12,7 +12,7 @@
 #define __DOLFIN_MATRIX_H
 
 #include <dolfin/common/Variable.h>
-#include <dolfin/main/MPI.h>
+#include <dolfin/main/PE.h>
 #include "DefaultFactory.h"
 #include "GenericMatrix.h"
 
@@ -173,7 +173,7 @@ namespace dolfin
   //--- INLINES --------------------------------------------------------------
   inline void Matrix::spy() const
   {
-    if(MPI::size() == 1)
+    if(PE::size() == 1)
     {
       std::stringstream ss;
       ss << "A" << matrix->size(0)*matrix->size(1) << ".xpm" << std::ends;

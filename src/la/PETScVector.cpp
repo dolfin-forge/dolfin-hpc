@@ -16,6 +16,7 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/log/log.h>
 #include <dolfin/la/PETScFactory.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
 
@@ -95,7 +96,7 @@ void PETScVector::init(uint N, bool distributed)
   clear();
 
   // Create vector
-  if (MPI::size() > 1 && distributed)
+  if (distributed && PE::size() > 1)
   {
     is_distributed_ = true;
 #ifdef HAVE_MPI
@@ -410,7 +411,7 @@ real PETScVector::max() const
 void PETScVector::disp(uint precision) const
 {
   section("PETScVector");
-  if (MPI::size() > 1 && is_distributed_)
+  if (PE::size() > 1 && is_distributed_)
   {
     VecView(x_, PETSC_VIEWER_STDOUT_WORLD);
   }

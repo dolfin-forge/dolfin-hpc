@@ -52,7 +52,7 @@ void VTKFile::operator<<(Mesh& mesh)
   // Only the root updates the pvd file
   if (mesh.is_distributed())
   {
-    if(MPI::rank() == 0)
+    if(_rank == 0)
     {
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
@@ -66,10 +66,12 @@ void VTKFile::operator<<(Mesh& mesh)
   }
   else
   {
+#if HAVE_MPI
     if(MPI::size() > 1)
     {
       warning("Writing serial mesh in a parallel run");
     }
+#endif
 
     // Write pvd file
     pvdFileWrite(counter);
@@ -131,7 +133,7 @@ void VTKFile::write()
 {
   if (!opened_write)
   {
-    if(MPI::rank() == 0)
+    if(_rank == 0)
     {
       // Clear file
       FILE* fp = fopen(filename.c_str(), "w");
@@ -151,9 +153,10 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Write pvd file
 
   // Only the root updates the pvd file
-  if (MPI::rank() == 0)
+  if (_rank == 0)
   {
 
+#if HAVE_MPI
     if (MPI::size() > 1)
     {
       // Update pvtu file name and clear file
@@ -162,6 +165,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
       // Write pvtu file
       pvtuFileWriteFunction(f);
     }
+#endif
 
     // Write pvd file
     pvdFileWrite(counter);
@@ -169,10 +173,12 @@ void VTKFile::write_dataset(LabelList<Function>& f)
 
   //FIXME: This only writes the first mesh encountered
   Mesh& mesh = f[0].first->mesh();
+#if HAVE_MPI
   if(MPI::size() > 1 && !mesh.is_distributed())
   {
     error("Saving functions on a serial mesh in a parallel run is unsupported");
   }
+#endif
 
   // Write headers
   VTKHeaderOpen(mesh);
@@ -572,6 +578,7 @@ void VTKFile::pvdFileWrite(uint num)
 
   // Remove directory path from name for pvd file
   std::string fname;
+#if HAVE_MPI
   if (MPI::size() > 1)
   {
     fname.assign(pvtu_filename, filename.find_last_of("/") + 1,
@@ -582,6 +589,10 @@ void VTKFile::pvdFileWrite(uint num)
     fname.assign(vtu_filename, filename.find_last_of("/") + 1,
                  vtu_filename.size());
   }
+#else
+  fname.assign(vtu_filename, filename.find_last_of("/") + 1,
+	       vtu_filename.size());
+#endif
 
   // Data file name
   if (_t)
@@ -803,7 +814,7 @@ void VTKFile::vtuNameUpdate(const int counter)
   extension.assign(filename, filename.find("."), filename.size());
 
   fileid << counter;
-  newfilename << filestart << fileid.str() << "_" << MPI::rank()
+  newfilename << filestart << fileid.str() << "_" << _rank
               << ".vtu";
   vtu_filename = newfilename.str();
 
@@ -840,7 +851,7 @@ template<class T>
     vtuNameUpdate(counter);
 
     // Write pvd file
-    if (MPI::rank() == 0)
+    if (_rank == 0)
     {
       pvtuNameUpdate(counter);
       pvdFileWrite(counter);

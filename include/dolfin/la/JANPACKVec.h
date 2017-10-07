@@ -37,107 +37,107 @@ namespace dolfin
     JANPACKVec();
 
     /// Create vector of size N
-    explicit JANPACKVec(uint N);
+    explicit JANPACKVec(uint N, bool distributed);
 
     /// Copy constructor
     explicit JANPACKVec(const JANPACKVec& x);
 
     /// Destructor
-    virtual ~JANPACKVec();
+    ~JANPACKVec();
 
     //--- Implementation of the GenericTensor interface ---
 
     /// Return copy of tensor
-    virtual JANPACKVec* copy() const;
+    JANPACKVec* copy() const;
 
     /// Set all entries to zero and keep any sparse structure
-    virtual void zero();
+    void zero();
 
     /// Finalize assembly of tensor
-    virtual void apply(FinalizeType finaltype=FINALIZE);
+    void apply(FinalizeType finaltype=FINALIZE);
 
     /// Display tensor
-    virtual void disp(uint precision=2) const;
+    void disp(uint precision=2) const;
 
     //--- Implementation of the GenericVector interface ---
 
     /// Initialize vector of size N
-    virtual void init(uint N);
+    void init(uint N);
 
     /// Initialize vector of size N and distribute if specified
-    virtual void init(uint N, bool distributed);
+    void init(uint N, bool distributed);
 
     ///
-    virtual void init_ghosted(uint n, std::set<uint>& indices,
-                              std::map<uint, uint>& map);
+    void init_ghosted(uint n, std::set<uint>& indices,
+		      std::map<uint, uint>& map);
 
     /// Return size of vector
-    virtual uint size() const;
+    uint size() const;
 
     /// Return local size of vector
-    virtual uint local_size() const;
+    uint local_size() const;
 
     /// Return rank's offset into vector
-    virtual uint offset() const;
+    uint offset() const;
 
     /// Get block of values
-    virtual void get(real* block, uint m, const uint* rows) const;
+    void get(real* block, uint m, const uint* rows) const;
 
     /// Set block of values
-    virtual void set(const real* block, uint m, const uint* rows);
+    void set(const real* block, uint m, const uint* rows);
 
     /// Add block of values
-    virtual void add(const real* block, uint m, const uint* rows);
+    void add(const real* block, uint m, const uint* rows);
 
     /// Get all values
-    virtual void get(real* values) const;
+    void get(real* values) const;
 
     /// Set all values
-    virtual void set(real* values);
+    void set(real* values);
 
     /// Add values to each entry
-    virtual void add(real* values);
+    void add(real* values);
 
     /// Add multiple of given vector (AXPY operation)
-    virtual void axpy(real a, const GenericVector& x);
+    void axpy(real a, const GenericVector& x);
 
     /// Return inner product with given vector
-    virtual real inner(const GenericVector& v) const;
+    real inner(const GenericVector& v) const;
 
     /// Return norm of vector
-    virtual real norm(VectorNormType type=l2) const;
+    real norm(VectorNormType type=l2) const;
 
     /// Return minimum value of vector
-    virtual real min() const;
+    real min() const;
 
     /// Return maximum value of vector
-    virtual real max() const;
+    real max() const;
 
     /// Multiply vector by given number
-    virtual const JANPACKVec& operator*= (real a);
+    JANPACKVec& operator*= (real a);
 
     /// Divide vector by given number
-    virtual const JANPACKVec& operator/= (real a);
+    JANPACKVec& operator/= (real a);
 
     /// Multiply vector by given vector component-wise
-    virtual const JANPACKVec& operator*= (const GenericVector& x) = 0;
+    JANPACKVec& operator*= (const GenericVector& x);
 
     /// Add given vector
-    virtual const JANPACKVec& operator+= (const GenericVector& x);
+    JANPACKVec& operator+= (const GenericVector& x);
 
     /// Subtract given vector
-    virtual const JANPACKVec& operator-= (const GenericVector& x);
+    JANPACKVec& operator-= (const GenericVector& x);
 
     /// Assignment operator
-    virtual const GenericVector& operator= (const GenericVector& x);
+    GenericVector& operator= (const GenericVector& x);
 
     /// Assignment operator
-    virtual const JANPACKVec& operator= (real a);
+    JANPACKVec& operator= (real a);
 
     //--- Special functions ---
 
     /// Return linear algebra backend factory
-    virtual LinearAlgebraFactory& factory() const;
+    LinearAlgebraFactory& factory() const;
 
     //--- Special JANPACK functions ---
 
@@ -145,7 +145,7 @@ namespace dolfin
     jp_vec_type *vec() const;
 
     /// Assignment operator
-    const JANPACKVec& operator= (const JANPACKVec& x);
+    JANPACKVec& operator= (const JANPACKVec& x);
 
 
     inline bool ghosted() { return is_ghosted;}
@@ -160,12 +160,11 @@ namespace dolfin
     char x[JP_VEC_SIZE_T];
 #endif
 
-    // True if we don't own the vector x points to
-    bool is_view;
-
     // True if the vector has ghost points
     bool is_ghosted;
 
+    // True if the vector has been initialized (note we can't test
+    // against x due to the opaque interface
     bool is_init;
 
     //    Array<int> ghost_indices;

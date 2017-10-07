@@ -30,7 +30,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat():
-    Variable("A", "JANPACK matrix"), is_view(false)
+    Variable("A", "JANPACK matrix")
 #ifdef HAVE_JANPACK_MPI
     , A(&AA)
 #endif
@@ -39,17 +39,15 @@ JANPACKMat::JANPACKMat():
 }
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat(uint M, uint N):
-    Variable("A", "JANPACK matrix"),
-    is_view(false)
- {
+  Variable("A", "JANPACK matrix")
+{
   // TODO: call JANPACK_Init or something?
   // Create JANPACK matrix
   init(M, N);
 }
 //-----------------------------------------------------------------------------
 JANPACKMat::JANPACKMat(const JANPACKMat& A):
-  Variable("A", "JANPACK matrix"),
-   is_view(true)
+  Variable("A", "JANPACK matrix")
 {
   error("Not implemented");
 }

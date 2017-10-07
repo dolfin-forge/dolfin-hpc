@@ -22,7 +22,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 JANPACKVec::JANPACKVec():
     Variable("x", "a sparse vector"),
-    is_view(false), is_ghosted(false), is_init(false)
+    is_ghosted(false), is_init(false)
 #ifdef HAVE_JANPACK_MPI
     , x(&_x)
 #endif
@@ -30,9 +30,9 @@ JANPACKVec::JANPACKVec():
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-JANPACKVec::JANPACKVec(uint N):
+JANPACKVec::JANPACKVec(uint N, bool distributed):
     Variable("x", "a sparse vector"),
-    is_view(false), is_ghosted(false), is_init(false)
+    is_ghosted(false), is_init(false)
 {
   // Create PETSc vector
   init(N);
@@ -40,14 +40,14 @@ JANPACKVec::JANPACKVec(uint N):
 //-----------------------------------------------------------------------------
 JANPACKVec::JANPACKVec(const JANPACKVec& v):
     Variable("x", "a vector"),
-    is_view(false), is_ghosted(false), is_init(false)
+    is_ghosted(false), is_init(false)
 {
   *this = v;
 }
 //-----------------------------------------------------------------------------
 JANPACKVec::~JANPACKVec()
 {
-  if (is_init && !is_view)
+  if (is_init)
     jp_vec_free(x);
 }
 //-----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void JANPACKVec::init(uint N)
   }
   else
   {
-    if (is_init && !is_view)
+    if (is_init)
     {
       jp_vec_free(x);
     }
@@ -190,13 +190,13 @@ dolfin::uint JANPACKVec::offset() const
   return static_cast<uint>(range[0]);
 }
 //-----------------------------------------------------------------------------
-const GenericVector& JANPACKVec::operator= (const GenericVector& v)
+GenericVector& JANPACKVec::operator= (const GenericVector& v)
 {
   *this = v.down_cast<JANPACKVec>();
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
+JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
 {
   dolfin_assert(v.x);
 
@@ -206,7 +206,7 @@ const JANPACKVec& JANPACKVec::operator= (const JANPACKVec& v)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator= (real a)
+JANPACKVec& JANPACKVec::operator= (real a)
 {
   dolfin_assert(x);
   // VecSet(x, a);
@@ -215,26 +215,26 @@ const JANPACKVec& JANPACKVec::operator= (real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& operator*= (const GenericVector& x) = 0
+JANPACKVec& JANPACKVec::operator*= (const GenericVector& x)
 {
   dolfin_assert(x);
   error("Not implemented");
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator+= (const GenericVector& x)
+JANPACKVec& JANPACKVec::operator+= (const GenericVector& x)
 {
   this->axpy(1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator-= (const GenericVector& x)
+JANPACKVec& JANPACKVec::operator-= (const GenericVector& x)
 {
   this->axpy(-1.0, x);
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator*= (const real a)
+JANPACKVec& JANPACKVec::operator*= (const real a)
 {
   dolfin_assert(x);
   jp_vec_scal(a, x);
@@ -242,7 +242,7 @@ const JANPACKVec& JANPACKVec::operator*= (const real a)
   return *this;
 }
 //-----------------------------------------------------------------------------
-const JANPACKVec& JANPACKVec::operator/= (const real a)
+JANPACKVec& JANPACKVec::operator/= (const real a)
 {
   dolfin_assert(x);
   dolfin_assert(a != 0.0);

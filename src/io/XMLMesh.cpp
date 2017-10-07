@@ -13,6 +13,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/timing.h>
 #include <dolfin/log/dolfin_log.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -175,11 +176,7 @@ void XMLMesh::readVertices(const xmlChar *name, const xmlChar **attrs)
   {
     error("XMLMesh : vertex distribution is already created.");
   }
-#if HAVE_MPI
-  vertex_dist_ = new LinearDistribution(size, MPI::size(), MPI::rank());
-#else
-  vertex_dist_ = new LinearDistribution(size, 1, 0);
-#endif
+  vertex_dist_ = new LinearDistribution(size, PE::size(), PE::rank());
   // Set number of vertices
   editor_->init_vertices(vertex_dist_->size, size);
   if(parallel_)

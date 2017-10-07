@@ -16,7 +16,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/types.h>
-#include <dolfin/main/MPI.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/log/Logger.h>
 
 namespace dolfin
@@ -178,7 +178,7 @@ void Logger::file()
   {
     filestream_ = new std::ofstream();
     std::stringstream ss;
-    ss << "log." << MPI::rank();
+    ss << "log." << PE::rank();
     filestream_->open(ss.str().c_str());
   }
   // Sill allow toto babar logging for dummies

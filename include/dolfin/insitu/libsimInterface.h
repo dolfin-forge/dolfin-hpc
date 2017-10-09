@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-08-23
-// Last changed: 2017-10-02
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_LIBSIM_INTERFACE_H
 #define __DOLFIN_LIBSIM_INTERFACE_H
@@ -10,6 +10,7 @@
 #include <dolfin/common/Label.h>
 #include <dolfin/common/types.h>
 #include <dolfin/function/Function.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
@@ -94,7 +95,7 @@ namespace dolfin
 	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_.geometry().dim());
 	  VisIt_MeshMetaData_setTopologicalDimension(msh,
 						     d->mesh_.topology().dim());
-	  
+	  VisIt_MeshMetaData_setNumDomains(msh, PE::size());
 	  VisIt_SimulationMetaData_addMesh(md, msh);
 	}
 
@@ -130,6 +131,24 @@ namespace dolfin
 
       }
       return md;
+    }
+
+    // Function to return domains (PE partitions)
+    inline visit_handle libsimGetDomain(const char *name, void *data)
+    {
+      visit_handle dl = VISIT_INVALID_HANDLE;
+      if (VisIt_DomainList_alloc(&dl) == VISIT_OKAY)
+      {
+	visit_handle hdl;
+	int pe_rank = PE::rank();
+	int pe_size = PE::size();
+	VisIt_VariableData_alloc(&hdl);
+	VisIt_VariableData_setDataI(hdl, VISIT_OWNER_COPY, 1, 1, &pe_rank);
+	VisIt_DomainList_setDomains(dl, pe_size, hdl);
+      }
+
+      return dl;
+
     }
 
     // Function to return mesh data

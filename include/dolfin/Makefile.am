@@ -84,14 +84,13 @@ nobase_pkginclude_HEADERS = \
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
 				function/GenericFunction.h\
+				function/Operators.h\
 				function/Real.h\
 				function/SubFunction.h\
 				function/UFCFunction.h\
 				function/Value.h\
 				function/ValueSpace.h\
-				function/impl/CellCircumradius.h\
-				function/impl/CellDiameter.h\
-				function/impl/CellVolume.h\
+				function/impl/ops.h\
 				io/base64.h\
 				io/dolfin_io.h\
 				io/BinaryFile.h\

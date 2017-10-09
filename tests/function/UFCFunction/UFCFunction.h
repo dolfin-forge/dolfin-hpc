@@ -4,7 +4,7 @@
 
 #include <dolfin/common/Test.h>
 #include <dolfin/function/UFCFunction.h>
-#include <dolfin/function/impl/CellDiameter.h>
+#include <dolfin/function/Operators.h>
 #include <dolfin/fem/UFCCellIterator.h>
 #include <dolfin/mesh/Vertex.h>
 
@@ -64,7 +64,7 @@ START_TEST( test_UFCFunction )
       Mesh refcell;
       (*it)->create_reference_cell(refcell);
       begin("Reference cell: %s", (*it)->str().c_str());
-      UFCFunction<CellDiameter> f(refcell);
+      UFCFunction< Diameter<Cell> > f(refcell);
       real value;
       for (UFCCellIterator c(refcell); !c.end(); ++c)
       {

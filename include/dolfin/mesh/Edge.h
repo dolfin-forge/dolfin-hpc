@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Johan Hoffman 2006.
+// Modified by Aurelien Larcher 2017.
 //
 // First added:  2006-06-02
-// Last changed: 2007-05-02
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_EDGE_H
 #define __DOLFIN_EDGE_H
@@ -20,8 +21,11 @@ namespace dolfin
 
 /// An Edge is a MeshEntity of topological dimension 1.
 
+class EdgeIterator;
+
 class Edge : public MeshEntity
 {
+
 public:
 
   /// Create edge on given mesh
@@ -46,6 +50,10 @@ public:
 
   /// Compute coordinates of edge midpoint
   Point midpoint() const;
+
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef EdgeIterator iterator;
 
 };
 
@@ -83,6 +91,6 @@ public:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_EDGE_H */

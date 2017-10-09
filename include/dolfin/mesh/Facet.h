@@ -1,8 +1,10 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher 2017.
+//
 // First added:  2006-06-02
-// Last changed: 2007-05-02
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_FACET_H
 #define __DOLFIN_FACET_H
@@ -13,38 +15,44 @@
 namespace dolfin
 {
 
-  /// A Facet is a MeshEntity of topological codimension 1.
+/// A Facet is a MeshEntity of topological codimension 1.
 
-  class Facet : public MeshEntity
-  {
-  public:
+class FacetIterator;
 
-    /// Constructor
-    Facet(Mesh& mesh, uint index) : MeshEntity(mesh, mesh.type().facet_dim(), index) {}
+class Facet : public MeshEntity
+{
+public:
 
-    /// Destructor
-    ~Facet() {}
+  /// Constructor
+  Facet(Mesh& mesh, uint index) : MeshEntity(mesh, mesh.type().facet_dim(), index) {}
 
-    /// Compute coordinates of facet midpoint
-    Point midpoint() const;
+  /// Destructor
+  ~Facet() {}
 
-  };
+  /// Compute coordinates of facet midpoint
+  Point midpoint() const;
 
-  /// A FacetIterator is a MeshEntityIterator of topological codimension 1.
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef FacetIterator iterator;
+
+};
+
+/// A FacetIterator is a MeshEntityIterator of topological codimension 1.
+
+class FacetIterator : public MeshEntityIterator
+{
+public:
   
-  class FacetIterator : public MeshEntityIterator
-  {
-  public:
-    
-    FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
-    FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().topology().dim() - 1) {}
+  FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
+  FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().topology().dim() - 1) {}
 
-    inline Facet* operator->() { return static_cast<Facet*>(MeshEntityIterator::operator->()); }
-    inline Facet& operator*() { return *operator->(); }
-    inline Facet& operator[](uint i) { return static_cast<Facet&>(MeshEntityIterator::operator[](i)); }
+  inline Facet* operator->() { return static_cast<Facet*>(MeshEntityIterator::operator->()); }
+  inline Facet& operator*() { return *operator->(); }
+  inline Facet& operator[](uint i) { return static_cast<Facet&>(MeshEntityIterator::operator[](i)); }
 
-  };    
+};
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_FACET_H */

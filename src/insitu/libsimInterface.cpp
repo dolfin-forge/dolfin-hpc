@@ -2,12 +2,15 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-05-24
-// Last changed: 2017-05-24
+// Last changed: 2017-10-09
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
+#include <dolfin/common/Array.h>
+#include <dolfin/insitu/libsimPipeLine.h>
 #include <dolfin/insitu/libsimInterface.h>
 
+#include <algorithm>
 #include <cstdlib>
 
 using namespace dolfin;
@@ -83,12 +86,13 @@ void libsimInterface::batchRender(std::string filename)
 
   VisItUpdatePlots();
   
-  if (VisItSaveWindow(filename.c_str(), 16384, 16384, 
-		      VISIT_IMAGEFORMAT_PNG) != VISIT_OKAY)
+  // Execute all insitu pipelines
+  for(Array<libsimPipeLine *>::iterator it = InsituData_.pipelines_.begin();
+      it != InsituData_.pipelines_.end(); it++)
   {
-    error("VisIt failed to render pipeline");
+    (*it)->exec();
   }
-					      
+  
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::ctrlLoop()

@@ -14,6 +14,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
+#include <dolfin/insitu/libsimPipeLine.h>
 #include <dolfin/config/dolfin_config.h>
 
 #include <algorithm>
@@ -47,6 +48,8 @@ namespace dolfin
     
     static void addData(LabelList<Function>& functions);
 
+    static void addPipeLine(libsimPipeLine& pipeline);
+
   private:
 
     static int setupEnv();
@@ -64,7 +67,8 @@ namespace dolfin
       double& t_;		
       uint tstep_;
       Mesh& mesh_;      
-      LabelList<Function> function_list_;      
+      LabelList<Function> function_list_;
+      Array<libsimPipeLine*> pipelines_;
     };
 
     // Simulation (insitu) data
@@ -279,6 +283,11 @@ namespace dolfin
   inline void libsimInterface::addData(LabelList<Function>& functions)
   {
     InsituData_.function_list_ = functions;
+  }
+
+  inline void libsimInterface::addPipeLine(libsimPipeLine& pipeline)
+  {
+    InsituData_.pipelines_.push_back(&pipeline);
   }
 
 }

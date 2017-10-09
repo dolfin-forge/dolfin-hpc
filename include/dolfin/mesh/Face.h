@@ -1,8 +1,10 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher 2017.
+//
 // First added:  2006-06-02
-// Last changed: 2007-10-23
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_FACE_H
 #define __DOLFIN_FACE_H
@@ -15,35 +17,41 @@ namespace dolfin
 
   /// A Face is a MeshEntity of topological dimension 2.
 
-  class Face : public MeshEntity
-  {
-  public:
+class FaceIterator;
 
-    /// Constructor
-    Face(Mesh& mesh, uint index) : MeshEntity(mesh, 2, index) {}
+class Face : public MeshEntity
+{
+public:
 
-    /// Destructor
-    ~Face() {}
+  /// Constructor
+  Face(Mesh& mesh, uint index) : MeshEntity(mesh, 2, index) {}
 
-    /// Compute coordinates of face midpoint
-    Point midpoint() const;
+  /// Destructor
+  ~Face() {}
 
-  };
+  /// Compute coordinates of face midpoint
+  Point midpoint() const;
 
-  /// A FaceIterator is a MeshEntityIterator of topological dimension 2.
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef FaceIterator iterator;
+
+};
+
+/// A FaceIterator is a MeshEntityIterator of topological dimension 2.
+
+class FaceIterator : public MeshEntityIterator
+{
+public:
   
-  class FaceIterator : public MeshEntityIterator
-  {
-  public:
-    
-    FaceIterator(Mesh& mesh) : MeshEntityIterator(mesh, 2) {}
-    FaceIterator(MeshEntity& entity) : MeshEntityIterator(entity, 2) {}
+  FaceIterator(Mesh& mesh) : MeshEntityIterator(mesh, 2) {}
+  FaceIterator(MeshEntity& entity) : MeshEntityIterator(entity, 2) {}
 
-    inline Face& operator*() { return *operator->(); }
-    inline Face* operator->() { return static_cast<Face*>(MeshEntityIterator::operator->()); }
+  inline Face& operator*() { return *operator->(); }
+  inline Face* operator->() { return static_cast<Face*>(MeshEntityIterator::operator->()); }
 
-  };    
+};
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_FACE_H */

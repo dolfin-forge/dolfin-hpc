@@ -2,9 +2,10 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Johan Hoffman 2006.
+// Modified by Aurelien Larcher 2017.
 //
 // First added:  2006-06-01
-// Last changed: 2008-06-20
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_CELL_H
 #define __DOLFIN_CELL_H
@@ -23,6 +24,8 @@ namespace dolfin
  *  @brief  A Cell is a MeshEntity of topological codimension 0.
  *
  */
+
+class CellIterator;
 
 class Cell : public MeshEntity
 {
@@ -110,6 +113,10 @@ public:
     mesh_.type().midpoint(*this, p);
   }
 
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef CellIterator iterator;
+
 };
 
 /**
@@ -150,6 +157,6 @@ public:
 
 };
 
-}/* namespace dolfin */
+} /* namespace dolfin */
 
 #endif /* __DOLFIN_CELL_H */

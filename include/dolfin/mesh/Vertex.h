@@ -1,8 +1,10 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Aurelien Larcher 2017.
+//
 // First added:  2006-06-01
-// Last changed: 2007-05-02
+// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_VERTEX_H
 #define __DOLFIN_VERTEX_H
@@ -15,6 +17,8 @@ namespace dolfin
 {
 
 /// A Vertex is a MeshEntity of topological dimension 0.
+
+class VertexIterator;
 
 class Vertex : public MeshEntity
 {
@@ -56,6 +60,10 @@ public:
     return mesh_.geometry().point(index_);
   }
 
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef VertexIterator iterator;
+
 };
 
 /// A VertexIterator is a MeshEntityIterator of topological dimension 0.
@@ -92,6 +100,6 @@ public:
 
 };
 
-}
+} /* namespace dolfin */
 
-#endif
+#endif /* __DOLFIN_VERTEX_H */

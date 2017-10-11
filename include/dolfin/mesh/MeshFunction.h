@@ -256,6 +256,18 @@ public:
     return *this;
   }
 
+  /// Swap instances
+  void swap(MeshFunction<T>& other)
+  {
+    if (this != &other)
+    {
+      std::swap(mesh_   , other.mesh_);
+      std::swap(dim_    , other.dim_);
+      std::swap(size_   , other.size_);
+      std::swap(values_ , other.values_);
+    }
+  }
+
   /// Display mesh function data
   void disp() const
   {

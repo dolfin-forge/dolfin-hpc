@@ -82,11 +82,23 @@ public:
   /// Return array of connections for given entity
   uint const * operator()(uint entity) const;
 
+  /// Set array bounds of connections for given entity
+  void operator()(uint entity, uint *& b, uint *& e);
+
+  /// Set array bounds of connections for given entity
+  void operator()(uint entity, uint const *& b, uint const *& e) const;
+
   /// Return contiguous array of connections for all entities
   uint* operator()();
 
   /// Return contiguous array of connections for all entities
   uint const * operator()() const;
+
+  /// Return incidence of the edge
+  bool incident(uint entity, uint edge) const;
+
+  /// Return index of the edge, -1 if not incident
+  int index(uint entity, uint edge) const;
 
   //---------------------------------------------------------------------------
 
@@ -182,6 +194,48 @@ inline uint const * MeshConnectivity::operator()(uint entity) const
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
   return (connections_ + offsets_[entity]);
+}
+
+//-----------------------------------------------------------------------------
+inline bool MeshConnectivity::incident(uint entity, uint edge) const
+{
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
+  uint const * e = connections_ + offsets_[entity];
+  uint const * const n = connections_ + offsets_[entity + 1];
+  while (e != n && *e != edge) { ++e; }
+  return (e != n);
+}
+
+//-----------------------------------------------------------------------------
+inline int MeshConnectivity::index(uint entity, uint edge) const
+{
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
+  uint const * const b = connections_ + offsets_[entity];
+  uint const * const n = connections_ + offsets_[entity + 1];
+  uint const * e = b;
+  while (e != n && *e != edge) { ++e; }
+  return (e == n ? -1 : (e - b));
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshConnectivity::operator()(uint entity, uint *& b, uint *& e)
+{
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
+  b = connections_ + offsets_[entity];
+  e = connections_ + offsets_[entity + 1];
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshConnectivity::operator()(uint entity, uint const *& b,
+                                         uint const *& e) const
+{
+  dolfin_assert(order_ > 0);
+  dolfin_assert(entity < order_);
+  b = connections_ + offsets_[entity];
+  e = connections_ + offsets_[entity + 1];
 }
 
 //-----------------------------------------------------------------------------

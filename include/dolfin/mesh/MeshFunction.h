@@ -165,7 +165,7 @@ public:
   }
 
   /// Access value at given index
-  inline T& operator[](uidx index)
+  inline T& operator()(uidx index)
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
@@ -173,7 +173,7 @@ public:
   }
 
   /// Access value at given index (const)
-  inline T const& operator[](uidx index) const
+  inline T const& operator()(uidx index) const
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);

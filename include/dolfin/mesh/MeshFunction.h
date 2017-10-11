@@ -49,26 +49,6 @@ class MeshFunction
 
 public:
 
-  /// Create empty mesh function
-  MeshFunction() :
-      mesh_(0),
-      dim_(0),
-      size_(0),
-      values_(NULL)
-  {
-  }
-
-  /// Create function from data file
-  MeshFunction(Mesh& mesh, std::string const& filename) :
-      mesh_(&mesh),
-      dim_(0),
-      size_(0),
-      values_(NULL)
-  {
-    File file(filename);
-    file >> *this;
-  }
-
   /// Copy constructor
   explicit
   MeshFunction(MeshFunction<T> const& other) :
@@ -170,13 +150,6 @@ public:
   bool operator!=(MeshFunction<T> const& other)
   {
     return !(*this == other);
-  }
-
-  /// Initialize mesh function for given topological dimension
-  void init(Mesh& mesh, uint dim)
-  {
-    init(&mesh, dim, mesh.size(dim));
-    std::fill_n(values_, size_, static_cast<T>(0));
   }
 
   /// Return mesh associated with mesh function

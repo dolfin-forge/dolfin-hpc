@@ -58,17 +58,6 @@ public:
   {
   }
 
-  /// Create scalar mesh function on given mesh of given dimension
-  MeshFunction(Mesh& mesh, uint dim) :
-      mesh_(0),
-      dim_(0),
-      size_(0),
-      values_(NULL)
-  {
-    init(&mesh, dim, mesh.size(dim));
-    std::fill_n(values_, size_, static_cast<T>(0));
-  }
-
   /// Create function from data file
   MeshFunction(Mesh& mesh, std::string const& filename) :
       mesh_(&mesh),
@@ -286,6 +275,19 @@ public:
       cout << "(" << dim_ << ", " << i << "): " << values_[i] << endl;
     }
     end();
+  }
+
+protected:
+
+  /// Create scalar mesh function on given mesh of given dimension
+  MeshFunction(Mesh& mesh, uint dim) :
+      mesh_(0),
+      dim_(0),
+      size_(0),
+      values_(NULL)
+  {
+    init(&mesh, dim, mesh.size(dim));
+    std::fill_n(values_, size_, static_cast<T>(0));
   }
 
 private:

@@ -9,7 +9,7 @@
 
 #include <dolfin/common/Label.h>
 #include <dolfin/common/types.h>
-#include <dolfin/function/Function.h>
+#include <dolfin/function/GenericFunction.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
@@ -44,9 +44,9 @@ namespace dolfin
 
     static void ctrlLoop();
 
-    static void addData(Function& function ,std::string name);
+    static void addData(GenericFunction& function ,std::string name);
     
-    static void addData(LabelList<Function>& functions);
+    static void addData(LabelList<GenericFunction>& functions);
 
     static void addPipeLine(libsimPipeLine& pipeline);
 
@@ -67,7 +67,7 @@ namespace dolfin
       double& t_;		
       uint tstep_;
       Mesh& mesh_;      
-      LabelList<Function> function_list_;
+      LabelList<GenericFunction> function_list_;
       Array<libsimPipeLine*> pipelines_;
     };
 
@@ -104,9 +104,9 @@ namespace dolfin
 	}
 
 	// Function meta data
-	for (LabelList<Function>::iterator it = d->function_list_.begin(); 
-	     it != d->function_list_.end(); it++)
-	{
+	for (LabelList<GenericFunction>::iterator it = 
+	       d->function_list_.begin(); it != d->function_list_.end(); it++)
+	  {
 	  if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) 
 	  {
 
@@ -114,7 +114,7 @@ namespace dolfin
 	    VisIt_VariableMetaData_setMeshName(vmd, "Mesh");
 	    VisIt_VariableMetaData_setCentering(vmd, VISIT_VARCENTERING_NODE);
 
-	    Function *u = it->first;
+	    GenericFunction *u = it->first;
 	    if (u->value_size() == 1)
 	    {
 	      VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_SCALAR);
@@ -227,7 +227,7 @@ namespace dolfin
 
       if (VisIt_VariableData_alloc(&func) == VISIT_OKAY) 
       {
-	LabelList<Function>::iterator it = d->function_list_.begin();	  
+	LabelList<GenericFunction>::iterator it = d->function_list_.begin();
 	for( ; it != d->function_list_.end(); it++)
 	{
 	  if (strcmp(it->second.c_str(), name) == 0) break;
@@ -239,7 +239,7 @@ namespace dolfin
 	  return VISIT_INVALID_HANDLE;
 	}
 
-	Function *u = it->first;
+	GenericFunction *u = it->first;
 	uint const num_cell_vertices = d->mesh_.type().num_entities(0);
 	uint const num_cell_dofs = num_cell_vertices * u->value_size();
 	real *vertex_values = new real[num_cell_dofs * d->mesh_.num_vertices()];
@@ -274,13 +274,14 @@ namespace dolfin
 
   };
   
-  inline void libsimInterface::addData(Function& function ,std::string name)
+  inline void libsimInterface::addData(GenericFunction& function,
+				       std::string name)
   {
-    Label<Function> item(function, name);
+    Label<GenericFunction> item(function, name);
     InsituData_.function_list_.push_back(item);
   }
   
-  inline void libsimInterface::addData(LabelList<Function>& functions)
+  inline void libsimInterface::addData(LabelList<GenericFunction>& functions)
   {
     InsituData_.function_list_ = functions;
   }

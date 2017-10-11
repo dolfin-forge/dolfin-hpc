@@ -36,21 +36,13 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
-                                                    MeshFunction<bool>& cell_marker,
+void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(MeshValues<bool, Cell>& cell_marker,
                                                     bool coarsen_boundary )
 {
-  dolfin_assert( &(cell_marker.mesh()) == &mesh );
-
   begin("Coarsening simplicial mesh by edge collapse.");
 
-  // check size of cell_marker
-  if ( cell_marker.size() != mesh.num_cells() )
-    error( "Wrong dimension of cell_marker" );
-
   // Instantiate coarsening manager
-  CoarseningManager manager;
-  manager.init(mesh, cell_marker, coarsen_boundary);
+  CoarseningManager manager(cell_marker, coarsen_boundary);
 
   uint num_cells_to_coarsen( manager.cells_to_coarsen().size() );
   message("%d cells selected on process %d",
@@ -92,7 +84,7 @@ void LocalMeshCoarsening::coarsenMeshByEdgeCollapse(Mesh& mesh,
 
   Mesh omesh;
   manager.dmesh()->exp(omesh);
-  mesh = omesh;
+  cell_marker.mesh().swap(omesh);
 
   end();
 }

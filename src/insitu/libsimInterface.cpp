@@ -33,6 +33,12 @@ void libsimInterface::initBatch()
 //-----------------------------------------------------------------------------
 void libsimInterface::initInteractive()
 {
+
+  if (setupEnv() != VISIT_OKAY)
+  {
+    error("VisIt/libsim environment initialization error");
+  }
+
   VisItInitializeSocketAndDumpSimFile("dolfin-hpc", "DOLFIN HPC In-situ viz",
 				      "/tmp/", NULL, NULL, NULL);
 }
@@ -70,6 +76,11 @@ int libsimInterface::setupEnv()
   {
     free(env);
   }
+
+  VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
+  VisItSetGetDomainList(libsimGetDomain, &InsituData_);
+  VisItSetGetVariable(libsimGetFunction, &InsituData_);
+  VisItSetGetMesh(libsimGetMesh, &InsituData_);
 
   return VISIT_OKAY;
 

@@ -48,6 +48,8 @@ namespace dolfin
     
     static void addData(LabelList<GenericFunction>& functions);
 
+    static void addData(Mesh& mesh);
+
     static void addPipeLine(libsimPipeLine& pipeline);
 
   private:
@@ -79,7 +81,7 @@ namespace dolfin
 //--- Callback functions  -----------------------------------------------------
 
     // Function to return meta data
-    inline visit_handle libsimGetMetaData(void *data) 
+    inline static visit_handle libsimGetMetaData(void *data) 
     {
       libsimData *d = (libsimData *) data;
 
@@ -102,7 +104,7 @@ namespace dolfin
 	  VisIt_MeshMetaData_setNumDomains(msh, PE::size());
 	  VisIt_SimulationMetaData_addMesh(md, msh);
 	}
-
+	
 	// Function meta data
 	for (LabelList<GenericFunction>::iterator it = 
 	       d->function_list_.begin(); it != d->function_list_.end(); it++)
@@ -138,7 +140,7 @@ namespace dolfin
     }
 
     // Function to return domains (PE partitions)
-    inline visit_handle libsimGetDomain(const char *name, void *data)
+    inline static visit_handle libsimGetDomain(const char *name, void *data)
     {
       visit_handle dl = VISIT_INVALID_HANDLE;
       if (VisIt_DomainList_alloc(&dl) == VISIT_OKAY)
@@ -150,14 +152,14 @@ namespace dolfin
 	VisIt_VariableData_setDataI(hdl, VISIT_OWNER_COPY, 1, 1, &pe_rank);
 	VisIt_DomainList_setDomains(dl, pe_size, hdl);
       }
-
+      
       return dl;
-
+      
     }
-
+    
     // Function to return mesh data
-    inline visit_handle libsimGetMesh(int domain, 
-					  const char *name, void *data)
+    inline static visit_handle libsimGetMesh(int domain, 
+					     const char *name, void *data)
     {
       libsimData *d = (libsimData *) data;
 
@@ -215,10 +217,10 @@ namespace dolfin
       return msh;
     }
 
-
+    
     // Function to return function data
-    inline visit_handle libsimGetFunction(int domain, 
-					  const char *name, void *data)
+    inline static visit_handle libsimGetFunction(int domain, 
+						 const char *name, void *data)
     {
       libsimData *d = (libsimData *) data;
 
@@ -284,6 +286,11 @@ namespace dolfin
   inline void libsimInterface::addData(LabelList<GenericFunction>& functions)
   {
     InsituData_.function_list_ = functions;
+  }
+
+  inline void libsimInterface::addData(Mesh& mesh)
+  {
+    InsituData_.mesh_ = mesh;
   }
 
   inline void libsimInterface::addPipeLine(libsimPipeLine& pipeline)

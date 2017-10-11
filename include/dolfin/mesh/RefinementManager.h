@@ -18,7 +18,7 @@
 #include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/FaceKey.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 
 #include <map>
 #include <set>
@@ -117,8 +117,8 @@ private:
 
   _set<uint> boundary_cells_;
   _map<uint, uint> cell_refedge_;
-  MeshFunction<bool> cell_forbidden_;
-  MeshFunction<bool> edge_forbidden_;
+  MeshValues<bool, Cell> * cell_forbidden_;
+  MeshValues<bool, Edge> * edge_forbidden_;
   std::map<EdgeKey, uint> edge_keymap_;
   std::map<EdgeKey, bool> refined_edge_;
 
@@ -204,13 +204,13 @@ inline bool RefinementManager::on_boundary(Face& f)
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_cell(Cell& cell)
 {
-  return (is_distributed_ ? cell_forbidden_.get(cell) : false);
+  return (cell_forbidden_ ? (*cell_forbidden_)(cell) : false);
 }
 
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_edge(Edge& edge)
 {
-  return (is_distributed_ ? edge_forbidden_.get(edge) : false);
+  return (edge_forbidden_ ? (*edge_forbidden_)(edge) : false);
 }
 
 //-----------------------------------------------------------------------------

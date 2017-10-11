@@ -34,7 +34,9 @@ RefinementManager::RefinementManager(Mesh& mesh, Mesh& refined_mesh) :
     refined_mesh_(refined_mesh),
     is_distributed_(mesh_.is_distributed()),
     pattern_(&mesh.type()),
-    start_offset_(0)
+    start_offset_(0),
+    cell_forbidden_(NULL),
+    edge_forbidden_(NULL)
 {
   // Initialize internal data structures
   init();
@@ -46,7 +48,9 @@ RefinementManager::RefinementManager(Mesh& mesh, Mesh& refined_mesh,
     refined_mesh_(refined_mesh),
     is_distributed_(mesh_.is_distributed()),
     pattern_(&pattern),
-    start_offset_(0)
+    start_offset_(0),
+    cell_forbidden_(NULL),
+    edge_forbidden_(NULL)
 {
   // Initialize internal data structures
   init();
@@ -54,7 +58,8 @@ RefinementManager::RefinementManager(Mesh& mesh, Mesh& refined_mesh,
 //-----------------------------------------------------------------------------
 RefinementManager::~RefinementManager()
 {
-
+  delete edge_forbidden_;
+  delete cell_forbidden_;
 }
 //-----------------------------------------------------------------------------
 void RefinementManager::apply()
@@ -102,9 +107,8 @@ void RefinementManager::init()
 
   // Initialize data structures for interprocess boundary
 
-  cell_forbidden_.init(mesh_, tdim);
-
-  edge_forbidden_.init(mesh_, 1);
+  cell_forbidden_ = new MeshValues<bool, Cell>(mesh_);
+  edge_forbidden_ = new MeshValues<bool, Edge>(mesh_);
 
   DistributedData& distdata = mesh_.distdata()[0];
   uint const facet_dim = mesh_.type().facet_dim();
@@ -350,18 +354,18 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
   _set<uint>::iterator bc;
 
   // Reset forbidden edges and cells
-  edge_forbidden_ = false;
-  cell_forbidden_ = false;
+  (*edge_forbidden_) = false;
+  (*cell_forbidden_) = false;
 
   for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
     Cell c(mesh_, *bc);
-    if (cell_marker.get(c) && !cell_forbidden_.get(c))
+    if (cell_marker.get(c) && !(*cell_forbidden_)(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)
       {
-        if (edge_forbidden_.get(*e))
+        if ((*edge_forbidden_)(*e))
           continue;
         edge_vote[e->index()] = 0;
         l = e->length();
@@ -384,10 +388,10 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
           send_buff.push_back(edge_vote[longest_edge.index()]);
           for (CellIterator nc(longest_edge); !nc.end(); ++nc)
           {
-            cell_forbidden_.set(*nc, true);
+            (*cell_forbidden_)(*nc) = true;
             for (EdgeIterator e(*nc); !e.end(); ++e)
             {
-              edge_forbidden_.set(*e, true);
+              (*edge_forbidden_)(*e) = true;
             }
           }
         }
@@ -429,18 +433,18 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
   }
 
   send_buff.clear();
-  cell_forbidden_ = false;
-  edge_forbidden_ = false;
+  (*cell_forbidden_) = false;
+  (*edge_forbidden_) = false;
 
   for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
     Cell c(mesh_, *bc);
-    if (cell_marker.get(c) && !cell_forbidden_.get(c))
+    if (cell_marker.get(c) && !(*cell_forbidden_)(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)
       {
-        if (edge_forbidden_.get(*e))
+        if ((*edge_forbidden_)(*e))
           continue;
         l = (real) edge_vote[e->index()];
         if (max < l)
@@ -466,13 +470,13 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
 
           for (CellIterator nc(longest_edge); !nc.end(); ++nc)
           {
-            cell_forbidden_.set(*nc, true);
+            (*cell_forbidden_)(*nc) = true;
             num_ref[key]++;
             num_new_cells++;
             cell_refedge_[nc->index()] = longest_edge.index();
             for (EdgeIterator e(*nc); !e.end(); ++e)
             {
-              edge_forbidden_.set(*e, true);
+              (*edge_forbidden_)(*e) = true;
               cell_forbidden_edges.insert(e->index());
             }
           }
@@ -515,11 +519,11 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
             {
               num_new_cells++;
               num_ref[key]++;
-              cell_forbidden_.set(*c, true);
+              (*cell_forbidden_)(*c) = true;
               cell_refedge_[c->index()] = e.index();
               for (EdgeIterator ce(*c); !ce.end(); ++ce)
               {
-                edge_forbidden_.set(*ce, true);
+                (*edge_forbidden_)(*ce) = true;
                 cell_forbidden_edges.insert(ce->index());
               }
             }
@@ -547,9 +551,9 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
         Edge e(mesh_, edge_keymap_[key]);
         for (CellIterator c(e); !c.end(); ++c)
         {
-          if (cell_forbidden_.get(*c))
+          if ((*cell_forbidden_)(*c))
             num_new_cells--;
-          cell_forbidden_.set(*c, false);
+          (*cell_forbidden_)(*c) = false;
           cell_refedge_.erase(c->index());
         }
         terminated.push_back(recv_buff[i]);
@@ -591,9 +595,9 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
             Edge e(mesh_, edge_keymap_[key]);
             for (CellIterator c(e); !c.end(); ++c)
             {
-              if (cell_forbidden_.get(*c))
+              if ((*cell_forbidden_)(*c))
                 num_new_cells--;
-              cell_forbidden_.set(*c, false);
+              (*cell_forbidden_)(*c) = false;
               cell_refedge_.erase(c->index());
             }
             refined_edge_.erase(key);
@@ -607,26 +611,26 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
   for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
     Cell c(mesh_, *bc);
-    if (!cell_forbidden_.get(c))
+    if (!((*cell_forbidden_))(c))
     {
       cell_refedge_.erase(c.index());
       for (EdgeIterator e(c); !e.end(); ++e)
       {
         if (on_boundary(*e))
-          edge_forbidden_.set(*e, true);
+          (*edge_forbidden_)(*e) = true;
         else
         {
           bool ok_to_remove = true;
           for (CellIterator ec(*e); !ec.end(); ++ec)
           {
-            if (cell_forbidden_.get(*ec))
+            if ((*cell_forbidden_)(*ec))
             {
               ok_to_remove = false;
               break;
             }
           }
           if (ok_to_remove)
-            edge_forbidden_.set(*e, false);
+            (*edge_forbidden_)(*e) = false;
         }
       }
     }

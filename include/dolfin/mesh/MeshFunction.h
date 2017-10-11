@@ -271,9 +271,9 @@ public:
   /// Display mesh function data
   void disp() const
   {
-    section("Mesh function data");
+    section("MeshFunction");
     cout << "Topological dimension: " << dim_ << endl;
-    cout << "Number of values:      " << size_ << endl;
+    cout << "Number of values     : " << size_ << endl;
     cout << endl;
     for (uint i = 0; i < size_; ++i)
     {
@@ -294,8 +294,6 @@ protected:
     init(&mesh, dim, mesh.size(dim));
     std::fill_n(values_, size_, static_cast<T>(0));
   }
-
-private:
 
   /// Initialize mesh function for given topological dimension of given size
   void init(Mesh * mesh, uint dim, uint size)

@@ -48,14 +48,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   }
 
   DMesh dmesh(mesh);
-
-  std::vector<bool> dmarked(mesh.num_cells());
-  for (CellIterator ci(mesh); !ci.end(); ++ci)
-  {
-    dmarked[ci->index()] = cell_marker(ci->index());
-  }
-
-  dmesh.bisectMarked(dmarked);
+  dmesh.bisectMarked(cell_marker);
 
   Mesh omesh;
   dmesh.exp(omesh);

@@ -12,6 +12,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Facet.h>
@@ -694,14 +695,14 @@ DCell* DMesh::getCell(int local_id)
   return (it != cells.end() ? *it : 0);
 }
 //-----------------------------------------------------------------------------
-void DMesh::bisectMarked(std::vector<bool> marked_ids)
+void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
   std::list<DCell*> marked_cells;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
     DCell* c = *it;
 
-    if (marked_ids[c->id])
+    if (marked_ids(c->id))
     {
       marked_cells.push_back(c);
     }

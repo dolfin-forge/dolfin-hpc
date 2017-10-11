@@ -237,15 +237,8 @@ public:
   }
 
   /// Assignment function
-  MeshFunction<T>& assign(MeshFunction<T> const& other)
-  {
-    *this = other;
-    return *this;
-  }
-
-  /// Assignment function
   template <class V>
-  MeshFunction<T>& assign(MeshFunction<V> const& other)
+  MeshFunction<T>& operator=(MeshFunction<V> const& other)
   {
     if (this != &other)
     {

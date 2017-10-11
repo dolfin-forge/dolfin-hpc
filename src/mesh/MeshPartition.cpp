@@ -12,7 +12,6 @@
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
 #include <dolfin/mesh/ZoltanInterface.h>
@@ -23,56 +22,56 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
-void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
+void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
 {
   const std::string method = dolfin_get("Mesh partitioner");
 
   if (method == "parmetis")
-    MetisInterface::partitionCommonMetis(mesh, partitions, 0);
+    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, 0);
   else if (method == "zoltan")
-    ZoltanInterface::partitionCommonZoltan(mesh, partitions, 0);
+    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, 0);
   else
     error("Unknown mesh partitioner");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-			      MeshFunction<uint>& weight)
+void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
+                              MeshValues<uint, Cell>& weight)
 {
   const std::string method = dolfin_get("Mesh partitioner");
 
   if (method == "parmetis")
-    MetisInterface::partitionCommonMetis(mesh, partitions, &weight);
+    MetisInterface::partitionCommonMetis(partitions.mesh(), partitions, &weight);
   else if (method == "zoltan")
-    ZoltanInterface::partitionCommonZoltan(mesh, partitions, &weight);
+    ZoltanInterface::partitionCommonZoltan(partitions.mesh(), partitions, &weight);
   else
     error("Unknown mesh partitioner");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
+void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
 {
   const std::string method = dolfin_get("Mesh partitioner");
 
   if (method == "parmetis")
-    MetisInterface::partitionGeomMetis(mesh, partitions);
+    MetisInterface::partitionGeomMetis(partitions.mesh(), partitions);
   else if (method == "zoltan")
-    ZoltanInterface::partitionGeomZoltan(mesh, partitions);
+    ZoltanInterface::partitionGeomZoltan(partitions.mesh(), partitions);
   else
     error("Unknown mesh partitioner");
 }
 //-----------------------------------------------------------------------------
 #else
-void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions)
+void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(Mesh& mesh, MeshFunction<uint>& partitions,
-			      MeshFunction<uint>& weight)
+void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
+                              MeshValues<uint, Cell>& weight)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(Mesh& mesh, MeshFunction<uint>& partitions)
+void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
 {
   error("Geometric mesh partitioning requires MPI");
 }

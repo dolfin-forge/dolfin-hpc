@@ -16,7 +16,6 @@
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
@@ -27,36 +26,10 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MPIMeshCommunicator::MPIMeshCommunicator()
+void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 {
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-MPIMeshCommunicator::~MPIMeshCommunicator()
-{
-  // Do nothing
-}
-//-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distribute(Mesh& mesh, MeshFunction<uint>& dist)
-{
-  uint const ddim = dist.dim();
-  if (ddim == 0)
-  {
-    distributeVertices(mesh, dist);
-  }
-  else if (ddim == mesh.topology().dim())
-  {
-    distributeCells(mesh, dist);
-  }
-  else
-  {
-    error("MPIMeshCommunicator : unimplemented for dimension %u", ddim);
-  }
-}
-//-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dist)
-{
-  if (!mesh.is_distributed())
+
+  if (!dist.mesh().is_distributed())
   {
     return;
   }
@@ -66,6 +39,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dis
   message(1, "MPIMeshCommunicator : distribute vertices");
   tic();
 
+  Mesh& mesh = dist.mesh();
   uint const rank = MPI::rank();
   uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();
@@ -218,9 +192,9 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dis
 
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
+void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
 {
-  if (!mesh.is_distributed())
+  if (!dist.mesh().is_distributed())
   {
     return;
   }
@@ -230,6 +204,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
   message(1, "MPIMeshCommunicator : distribute cells");
   tic();
 
+  Mesh& mesh = dist.mesh();
   uint const rank = MPI::rank();
   uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();

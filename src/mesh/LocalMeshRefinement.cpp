@@ -14,7 +14,6 @@
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
@@ -33,7 +32,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 void LocalMeshRefinement::refineMeshByEdgeBisection(
-    Mesh& mesh, MeshFunction<bool>& cell_marker, bool refine_boundary, real tf,
+    Mesh& mesh, MeshValues<bool, Cell>& cell_marker, bool refine_boundary, real tf,
     real tb, real ts, bool balance)
 {
   begin("Refining simplicial mesh by edge bisection.");

@@ -24,10 +24,12 @@ class MetisInterface
 
 public:
   
-  static void partitionCommonMetis(Mesh& mesh, MeshFunction<uint>& partitions,
-                                   MeshFunction<uint>* weight);
+  static void partitionCommonMetis(Mesh& mesh,
+                                   MeshValues<uint, Cell>& partitions,
+                                   MeshValues<uint, Cell> * weight);
 
-  static void partitionGeomMetis(Mesh& mesh, MeshFunction<uint>& partitions);
+  static void partitionGeomMetis(Mesh& mesh,
+                                 MeshValues<uint, Vertex> & partitions);
 
 };
 

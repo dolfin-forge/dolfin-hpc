@@ -26,7 +26,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 void RivaraRefinement::refine(Mesh& mesh,
-                              MeshFunction<bool>& cell_marker,
+                              MeshValues<bool, Cell>& cell_marker,
                               real tf, real tb, real ts, bool balance)
 {
   message("Refining simplicial mesh by recursive Rivara bisection without boundary smoothing.");

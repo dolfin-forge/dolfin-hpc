@@ -74,7 +74,7 @@ public:
 
   ///--- EDGE BISECTION ONLY  -------------------------------------------------
 
-  void mark_localboundary(MeshFunction<bool>& cell_marker,
+  void mark_localboundary(MeshValues<bool, Cell>& cell_marker,
                           uint& num_new_vertices, uint& num_new_cells);
 
   /// Check if the cell has received a propagation

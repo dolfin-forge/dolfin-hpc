@@ -17,7 +17,7 @@
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LocalMeshRefinement.h>
 #include <dolfin/mesh/MappedManifold.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
@@ -335,19 +335,19 @@ IntersectionDetector& Mesh::intersector()
   return *intersection_detector_;
 }
 //-----------------------------------------------------------------------------
-void Mesh::partition(MeshFunction<uint>& partitions)
+void Mesh::partition(MeshValues<uint, Cell>& partitions)
 {
-  MeshPartition::partition(*this, partitions);
+  MeshPartition::partition(partitions);
 }
 //-----------------------------------------------------------------------------
-void Mesh::partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight)
+void Mesh::partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight)
 {
-  MeshPartition::partition(*this, partitions, weight);
+  MeshPartition::partition(partitions, weight);
 }
 //-----------------------------------------------------------------------------
-void Mesh::partition_geom(MeshFunction<uint>& partitions)
+void Mesh::partition_geom(MeshValues<uint, Vertex>& partitions)
 {
-  MeshPartition::partition_geom(*this, partitions);
+  MeshPartition::partition_geom(partitions);
 }
 //-----------------------------------------------------------------------------
 void Mesh::distribute()
@@ -360,7 +360,7 @@ void Mesh::distribute()
     {
       error("The topology of a mesh read in parallel should be distributed.");
     }
-    MeshFunction<uint> partitions;
+    MeshValues<uint, Cell> partitions(*this);
     partition(partitions);
     distribute(partitions);
     //FIXME: following the legacy behaviour entities are always renumbered
@@ -368,9 +368,14 @@ void Mesh::distribute()
   }
 }
 //-----------------------------------------------------------------------------
-void Mesh::distribute(MeshFunction<uint>& distribution)
+void Mesh::distribute(MeshValues<uint, Cell>& distribution)
 {
-  MPIMeshCommunicator::distribute(*this, distribution);
+  MPIMeshCommunicator::distribute(distribution);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshValues<uint, Vertex>& distribution)
+{
+  MPIMeshCommunicator::distribute(distribution);
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine()
@@ -379,7 +384,7 @@ void Mesh::refine()
   UniformMeshRefinement::refine(*this);
 }
 //-----------------------------------------------------------------------------
-void Mesh::refine(MeshFunction<bool>& cell_markers, bool refine_boundary,
+void Mesh::refine(MeshValues<bool, Cell>& cell_markers, bool refine_boundary,
                   bool load_balance)
 {
   LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,

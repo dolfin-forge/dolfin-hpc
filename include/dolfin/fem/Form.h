@@ -14,7 +14,6 @@
 #include <dolfin/fem/DofMapSet.h>
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/FiniteElementSpace.h>
-#include <dolfin/mesh/MeshFunction.h>
 
 #include <ufc.h>
 

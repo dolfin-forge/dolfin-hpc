@@ -16,7 +16,6 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/RefinementPattern.h>
 
 #include <cstdlib>
@@ -326,7 +325,7 @@ void RefinementManager::map_new_vertices(Array<uint> shared_edge)
   tocd(1);
 }
 //-----------------------------------------------------------------------------
-void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
+void RefinementManager::mark_localboundary(MeshValues<bool, Cell>& cell_marker,
                                            uint& num_new_vertices,
                                            uint& num_new_cells)
 {
@@ -644,7 +643,7 @@ void RefinementManager::init()
 {
 }
 //-----------------------------------------------------------------------------
-void RefinementManager::mark_localboundary( MeshFunction<bool>& cell_marker,
+void RefinementManager::mark_localboundary( MeshValues<bool, Cell>& cell_marker,
                                             uint& num_new_vertices,
                                             uint& num_new_cells)
 {

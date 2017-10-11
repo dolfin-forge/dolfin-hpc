@@ -16,36 +16,21 @@
 #ifndef __DOLFIN_MPI_MESH_COMMUNICATOR_H
 #define __DOLFIN_MPI_MESH_COMMUNICATOR_H
 
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
 
-class Mesh;
-class MPI;
-
 /// The class facilitates the transfer of a mesh between processes using MPI
 
-class MPIMeshCommunicator
+struct MPIMeshCommunicator
 {
-public:
-
-  /// Constructor
-  MPIMeshCommunicator();
-
-  /// Destructor
-  ~MPIMeshCommunicator();
-
-  /// Distribute mesh according to a mesh function
-  static void distribute(Mesh& mesh, MeshFunction<uint>& distribution);
-
-private:
 
   /// Distribute mesh according to a vertex-based distribution
-  static void distributeVertices(Mesh& mesh, MeshFunction<uint>& distribution);
+  static void distribute(MeshValues<uint, Vertex>& distribution);
 
   /// Distribute mesh according to a cell-based distribution
-  static void distributeCells(Mesh& mesh, MeshFunction<uint>& distribution);
+  static void distribute(MeshValues<uint, Cell>& distribution);
 
 };
 

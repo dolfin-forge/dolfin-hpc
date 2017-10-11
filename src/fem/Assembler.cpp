@@ -20,7 +20,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/Form.h>
@@ -71,7 +71,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   {
     if (form.num_cell_integrals() > 0)
     {
-      cell_domains = new MeshFunction<uint>(mesh, tdim);
+      cell_domains = new MeshValues<uint, Cell>(mesh);
       (*cell_domains) = 1;
       sub_domain.mark(*cell_domains, 0);
     }
@@ -79,7 +79,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
     if (form.num_exterior_facet_integrals() > 0 ||
         form.num_interior_facet_integrals() > 0)
     {
-      facet_domains = new MeshFunction<uint>(mesh, mesh.type().facet_dim());
+      facet_domains = new MeshValues<uint, Facet>(mesh);
       (*facet_domains) = 1;
       sub_domain.mark(*facet_domains, 0);
     }

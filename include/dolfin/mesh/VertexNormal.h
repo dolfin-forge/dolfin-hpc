@@ -26,7 +26,7 @@
 
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <map>
 
 namespace dolfin
@@ -79,7 +79,7 @@ public:
   Array<MeshFunction<real> *>& basis();
 
   ///
-  MeshFunction<uint>& vertex_type();
+  MeshValues<uint, Vertex>& vertex_type();
 
 private:
 
@@ -105,7 +105,7 @@ private:
   Array<MeshFunction<real> *> basis_;
 
   // Define vertex type: 1 surface, 2 edge, 3 surface
-  MeshFunction<uint> vertex_type_;
+  MeshValues<uint, Vertex> vertex_type_;
 
   // Maximum absolute angle between two neighbouring facets
   real const alpha_max_;
@@ -127,7 +127,7 @@ inline Array<MeshFunction<real> *>& VertexNormal::basis()
 }
 
 //-----------------------------------------------------------------------------
-inline MeshFunction<uint>& VertexNormal::vertex_type()
+inline MeshValues<uint, Vertex>& VertexNormal::vertex_type()
 {
   return vertex_type_;
 }

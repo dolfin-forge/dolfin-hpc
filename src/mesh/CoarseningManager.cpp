@@ -9,6 +9,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/LoadBalancer.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/DMesh.h>
@@ -320,10 +321,10 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   }
 
   // New partitions according to requests. Initialized with current partitions
-  partitions = new MeshFunction<uint>(mesh, mesh.topology().dim());
+  partitions = new MeshValues<uint, Cell>(mesh);
   *partitions = rank;
   uint num_send_cells(0);
-  MeshFunction<bool> requested_cells(mesh, mesh.topology().dim());
+  MeshValues<bool, Cell> requested_cells(mesh);
   requested_cells = false;
 
   // Build send list of vertices with requesting processes

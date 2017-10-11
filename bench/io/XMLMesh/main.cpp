@@ -22,7 +22,7 @@ int main(int argc, char * argv[])
 
   ///
   Mesh mesh(filename+".xml");
-  MeshFunction<uint> p(mesh, mesh.topology().dim());
+  MeshValues<uint, Cell> p(mesh);
   p = dolfin::MPI::rank();
   File f(ss.str()+"_partitions.pvd");
   f << p;

@@ -14,7 +14,7 @@
 #include <dolfin/mesh/MeshGeometry.h>
 #include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshEditor.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Cell.h>
@@ -88,7 +88,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   Array<int> old2new_vertex(mesh.size(0));
 
   // Initialise forbidden edges, default value is false
-  MeshFunction<bool> edge_forbidden(mesh, 1);
+  MeshValues<bool, Edge> edge_forbidden(mesh);
 
   // If refinement of boundary is forbidden
   if (refine_boundary == false)
@@ -100,7 +100,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   }
 
   // Initialise forbidden cells
-  MeshFunction<bool> cell_forbidden(mesh, mesh.topology().dim());
+  MeshValues<bool, Cell> cell_forbidden(mesh);
 
   // Initialise forbidden cells on processor's boundary
   uint num_pcells = 0;

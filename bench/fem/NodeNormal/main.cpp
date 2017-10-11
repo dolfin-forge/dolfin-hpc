@@ -180,7 +180,7 @@ int main(int argc, char** argv)
     {
       Mesh mesh("../../data/meshes/cubeN32R.xml.gz");
       File file("cube.pvd");
-      MeshFunction<uint> partitions(mesh, mesh.topology().dim());
+      MeshValues<uint, Cell> partitions(mesh);
       partitions = dolfin::MPI::rank();
       file << partitions;
       NodeNormal vn(mesh, NodeNormal::facet);

@@ -23,7 +23,7 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
@@ -241,7 +241,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   Array<real> *send_buffer = new Array<real> [pe_size];
   Array<uint> *send_buffer_indices = new Array<uint> [pe_size];
 
-  MeshFunction<bool> marked(mesh, 0);
+  MeshValues<bool, Vertex> marked(mesh);
   marked = false;
 
   std::vector<std::pair<uint, real> > recv_data;
@@ -358,7 +358,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
   uint *indices = new uint[x_proj.local_size()];
   uint *local_indices = new uint[projected.space().dofmap().local_dimension()];
   uint i = 0;
-  MeshFunction<bool> processed(new_mesh, 0);
+  MeshValues<bool, Vertex> processed(new_mesh);
   processed = false;
 
   projected.vector().zero();

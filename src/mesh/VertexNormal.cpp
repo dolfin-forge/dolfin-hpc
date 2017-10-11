@@ -28,6 +28,7 @@ namespace dolfin
 VertexNormal::VertexNormal(VertexNormal& other) :
     mesh_(other.mesh_),
     subdomain_(NULL),
+    vertex_type_(mesh_),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(none)
 {
@@ -38,6 +39,7 @@ VertexNormal::VertexNormal(VertexNormal& other) :
 VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
     mesh_(mesh),
     subdomain_(NULL),
+    vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(weight)
 {
@@ -51,7 +53,7 @@ VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
       basis_.back()[i].init(mesh, 0);
     }
   }
-  vertex_type_.init(mesh, 0);
+
 
   computeNormal(mesh);
 }
@@ -60,6 +62,7 @@ VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
 VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) :
     mesh_(mesh),
     subdomain_(&subdomain),
+    vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(weight)
 {
@@ -73,7 +76,6 @@ VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) 
       basis_.back()[i].init(mesh, 0);
     }
   }
-  vertex_type_.init(mesh, 0);
 
   computeNormal(mesh);
 }
@@ -101,8 +103,10 @@ VertexNormal& VertexNormal::operator=(VertexNormal& other)
 
   uint const gdim = mesh_.geometry().dim();
 
+  vertex_type_ = other.vertex_type_;
+
   // Initialize data structures
-  vertex_type_.init(mesh_, 0);
+
   for (uint d = 0; d < gdim; ++d)
   {
     basis_.push_back(new MeshFunction<real> [gdim]);
@@ -115,7 +119,6 @@ VertexNormal& VertexNormal::operator=(VertexNormal& other)
   // Copy data
   for (VertexIterator v(mesh_); !v.end(); ++v)
   {
-    vertex_type_.set(*v, other.vertex_type_.get(*v));
     for (uint d = 0; d < gdim; ++d)
     {
       for (uint i = 0; i < gdim; ++i)

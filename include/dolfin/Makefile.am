@@ -216,6 +216,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshSmoothData.h\
 				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
+				mesh/MeshValues.h\
 				mesh/MPIMeshCommunicator.h\
 				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\

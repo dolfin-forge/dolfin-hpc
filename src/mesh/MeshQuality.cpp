@@ -26,7 +26,7 @@ MeshQuality::MeshQuality(Mesh& mesh) :
     h_avg(0.0),
     vol_min(0.0),
     vol_max(0.0),
-    orientation_(mesh, mesh.topology().dim()),
+    orientation_(mesh),
     mapping_(mesh),
     bbox_min_(),
     bbox_max_()

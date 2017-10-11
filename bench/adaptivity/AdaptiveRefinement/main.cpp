@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 //        f0 << em;
 //      }
 
-      MeshFunction<bool> mrkr(mesh, mesh.topology().dim());
+      MeshValues<bool, Cell> mrkr(mesh);
       real v;
       for (CellIterator cell(mesh); !cell.end(); ++cell)
       {
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
       if (save_file)
       {
-        MeshFunction<uint> rank(mesh, mesh.topology().dim());
+        MeshValues<uint, Cell> rank(mesh);
         rank = dolfin::MPI::rank();
         std::stringstream ss2;
         ss2 << "rank" << level << ".pvd";

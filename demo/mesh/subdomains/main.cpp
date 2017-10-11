@@ -50,7 +50,7 @@ int main()
   Mesh mesh("../../../data/meshes/dolfin-2.xml.gz");
 
   // Create mesh function over the cell facets
-  MeshFunction<uint> sub_domains(mesh, mesh.topology().dim() - 1);
+  MeshValues<uint, Facet> sub_domains(mesh);
 
   // Mark all facets as sub domain 3
   sub_domains = 3;

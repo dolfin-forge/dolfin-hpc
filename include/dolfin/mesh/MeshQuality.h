@@ -10,7 +10,7 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/mesh/EquiAffineMapping.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
@@ -53,7 +53,7 @@ private:
   static real reduceMaxReal(real val);
   static real reduceAvgReal(real val);
 
-  MeshFunction<int> orientation_;
+  MeshValues<int, Cell> orientation_;
   mutable EquiAffineMapping mapping_;
   Point bbox_min_;
   Point bbox_max_;

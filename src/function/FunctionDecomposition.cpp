@@ -14,7 +14,7 @@
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/function/Function.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
 
 namespace dolfin
@@ -49,7 +49,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
   {
     //NOTE: This implementation is based on the assumption that the dofmap for
     //      a CG1 function is indexed by the global indices of vertices.
-    MeshFunction<bool> marked(mesh, 0);
+    MeshValues<bool, Vertex> marked(mesh);
     uint offset = 0;
     uint const numcellnodes = S.local_dimension / S.size;
     real * block = F.create_block();

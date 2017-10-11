@@ -34,7 +34,7 @@ int main()
     for (unsigned int i = 0; i < 5; i++)
     {
       // Mark cells for refinement
-      MeshFunction<bool> cell_markers(mesh, mesh.topology().dim());
+      MeshValues<bool, Cell> cell_markers(mesh);
       cell_markers = false;
       for (CellIterator c(mesh); !c.end(); ++c)
       {

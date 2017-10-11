@@ -5,7 +5,7 @@
 // Last changed: 2011-01-18
 
 #include <cstring>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Vertex.h>
@@ -503,8 +503,8 @@ void LoadBalancer::weight_function(Mesh& mesh,
   weight = 1;
   //  *w_sum = mesh.numCells();
   if( type == Default) {
-    MeshFunction<bool> used_cell(mesh, mesh.topology().dim());
-    MeshFunction<bool> used_edge(mesh, 1);
+    MeshValues<bool, Cell> used_cell(mesh);
+    MeshValues<bool, Edge> used_edge(mesh);
     used_cell = false;
     used_edge = false;
 

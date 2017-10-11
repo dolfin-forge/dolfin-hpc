@@ -3,8 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/common/Test.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/PointCell.h>
 #include <dolfin/mesh/IntervalCell.h>
@@ -49,7 +48,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     refcell.refine();
     ck_assert_int_eq(refcell.num_cells(), nc0 * cell.num_refined_cells());
     nc0 = refcell.num_cells();
-    MeshFunction<dolfin::uint> vi(refcell, 0);
+    MeshValues<dolfin::uint, Vertex> vi(refcell);
     for (VertexIterator v(refcell); !v.end(); ++v)
     {
       vi.set(*v, v->index());

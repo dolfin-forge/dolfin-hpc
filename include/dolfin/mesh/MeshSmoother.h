@@ -10,7 +10,7 @@
 #define DOLFIN_MESH_SMOOTHER_H
 
 #include <dolfin/mesh/MeshDependent.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/SubDomain.h>
 
 #if HAVE_SUNPERF_H
@@ -45,31 +45,29 @@ public:
 
   //--- INTERFACE -------------------------------------------------------------
 
-  virtual void smooth(MeshFunction<bool>& smoothed_cells,
-                      MeshFunction<bool>& masked_vertices,
-                      MeshFunction<real>& h0, GenericVector& node_values,
+  virtual void smooth(MeshValues<bool, Cell>& smoothed_cells,
+                      MeshValues<bool, Vertex>& masked_vertices,
+                      MeshValues<real, Cell>& h0, GenericVector& node_values,
                       GenericVector& motion, bool reset) = 0;
 
   //---------------------------------------------------------------------------
 
-  static void maph0(Mesh& mesh, Mesh& sub, MeshFunction<int>& cell_map,
-                    MeshFunction<real>& h0, MeshFunction<real>& subh0);
+  static void maph0(MeshValues<int, Cell>& cell_map,
+                    MeshValues<real, Cell>& h0, MeshValues<real, Cell>& subh0);
 
   ///
   static bool onBoundary(Cell& cell);
 
   ///
-  static void worstElement(Mesh& mesh, int& index,
-                           MeshFunction<bool>& masked_cells);
+  static void worstElement(int& index, MeshValues<bool, Cell>& masked_cells);
 
   ///
-  static void elementNhood(Mesh& mesh, Cell& element,
-                           MeshFunction<bool>& elements, int depth);
+  static void elementNhood(Cell& element, MeshValues<bool, Cell>& elements, int depth);
 
   ///
-  static void submesh(Mesh& mesh, Mesh& sub, MeshFunction<bool>& smoothed_cells,
-                      MeshFunction<int>& old2new_vertex,
-                      MeshFunction<int>& old2new_cell);
+  static void submesh(Mesh& sub, MeshValues<bool, Cell>& smoothed_cells,
+                      MeshValues<int, Vertex>& old2new_vertex,
+                      MeshValues<int, Cell>& old2new_cell);
 
 protected:
 

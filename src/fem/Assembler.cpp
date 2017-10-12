@@ -20,7 +20,6 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/BoundaryMesh.h>
-#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/fem/Coefficient.h>
 #include <dolfin/fem/Form.h>
@@ -62,10 +61,10 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   uint const tdim = mesh.topology().dim();
 
   // Extract cell domains
-  MeshFunction<uint>* cell_domains = NULL;
+  MeshValues<uint, Cell>* cell_domains = NULL;
 
   // Extract facet domains
-  MeshFunction<uint>* facet_domains = NULL;
+  MeshValues<uint, Facet>* facet_domains = NULL;
 
 #pragma omp master
   {
@@ -98,9 +97,9 @@ void Assembler::assemble(GenericTensor& A, Form& form,
 }
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form,
-                         MeshFunction<uint> const& cell_domains,
-                         MeshFunction<uint> const& exterior_facet_domains,
-                         MeshFunction<uint> const& interior_facet_domains,
+                         MeshValues<uint, Cell> const& cell_domains,
+                         MeshValues<uint, Facet> const& exterior_facet_domains,
+                         MeshValues<uint, Facet> const& interior_facet_domains,
                          bool reset_tensor)
 {
   assemble(A, form, form.coefficients(), form.dofmaps(), &cell_domains,
@@ -110,9 +109,9 @@ void Assembler::assemble(GenericTensor& A, Form& form,
 void Assembler::assemble(GenericTensor& A, const Form& form,
                          Array<Coefficient*> const& coefficients,
                          DofMapSet const& dofmaps,
-                         MeshFunction<uint> const* cell_domains,
-                         MeshFunction<uint> const* exterior_facet_domains,
-                         MeshFunction<uint> const* interior_facet_domains,
+                         MeshValues<uint, Cell> const* cell_domains,
+                         MeshValues<uint, Facet> const* exterior_facet_domains,
+                         MeshValues<uint, Facet> const* interior_facet_domains,
                          bool reset_tensor)
 {
   // Check arguments
@@ -164,7 +163,7 @@ void Assembler::assembleCells(GenericTensor& A,
                               Array<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps,
                               UFC& ufc,
-                              MeshFunction<uint> const* domains) const
+                              MeshValues<uint, Cell> const* domains) const
 {
   if (ufc.form.num_cell_integrals() == 0)
   {
@@ -229,7 +228,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
                                        Array<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshFunction<uint> const* domains) const
+                                       MeshValues<uint, Facet> const* domains) const
 {
   if (ufc.form.num_exterior_facet_integrals() == 0)
   {
@@ -308,7 +307,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
                                        Array<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& ufc,
-                                       MeshFunction<uint> const* domains) const
+                                       MeshValues<uint, Facet> const* domains) const
 {
   if (ufc.form.num_interior_facet_integrals() == 0)
   {
@@ -408,7 +407,7 @@ void Assembler::initializePeriodicDofs(GenericTensor& A,
                                        Array<Coefficient*> const& coefficients,
                                        DofMapSet const& dofmaps,
                                        UFC& data,
-                                       MeshFunction<uint> const* domains) const
+                                       MeshValues<uint, Facet> const* domains) const
 {
   if(!dofmaps[0].mesh().has_periodic_constraint())
   {

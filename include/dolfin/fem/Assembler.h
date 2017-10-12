@@ -13,6 +13,7 @@
 #include <ufc.h>
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
@@ -25,7 +26,6 @@ class Mesh;
 class SubDomain;
 class UFC;
 template<class T> class Array;
-template<class T> class MeshFunction;
 
 /**
  *  @class Assembler
@@ -54,9 +54,9 @@ public:
 
   /// Assemble tensor from given variational form over sub domains
   void assemble(GenericTensor& A, Form& form,
-                MeshFunction<uint> const& cell_domains,
-                MeshFunction<uint> const& exterior_facet_domains,
-                MeshFunction<uint> const& interior_facet_domains,
+                MeshValues<uint, Cell> const& cell_domains,
+                MeshValues<uint, Facet> const& exterior_facet_domains,
+                MeshValues<uint, Facet> const& interior_facet_domains,
                 bool reset_tensor);
 
 private:
@@ -72,33 +72,33 @@ private:
   void assemble(GenericTensor& A, const Form& form,
                 Array<Coefficient*> const& coefficients,
                 DofMapSet const& dofmaps,
-                MeshFunction<uint> const* cell_domains,
-                MeshFunction<uint> const* exterior_facet_domains,
-                MeshFunction<uint> const* interior_facet_domains,
+                MeshValues<uint, Cell> const* cell_domains,
+                MeshValues<uint, Facet> const* exterior_facet_domains,
+                MeshValues<uint, Facet> const* interior_facet_domains,
                 bool reset_tensor = true);
 
   // Assemble over cells
   void assembleCells(GenericTensor& A, Array<Coefficient*> const& coefficients,
                      DofMapSet const& dofmaps, UFC& data,
-                     MeshFunction<uint> const* domains) const;
+                     MeshValues<uint, Cell> const* domains) const;
 
   // Assemble over exterior facets
   void assembleExteriorFacets(GenericTensor& A,
                               Array<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps, UFC& data,
-                              MeshFunction<uint> const* domains) const;
+                              MeshValues<uint, Facet> const* domains) const;
 
   // Assemble over interior facets
   void assembleInteriorFacets(GenericTensor& A,
                               Array<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps, UFC& data,
-                              MeshFunction<uint> const* domains) const;
+                              MeshValues<uint, Facet> const* domains) const;
 
   // Bogus-assemble periodic contributions
   void initializePeriodicDofs(GenericTensor& A,
                               Array<Coefficient*> const& coefficients,
                               DofMapSet const& dofmaps, UFC& data,
-                              MeshFunction<uint> const* domains) const;
+                              MeshValues<uint, Facet> const* domains) const;
 
   // Initialize global tensor
   void initGlobalTensor(GenericTensor& A, DofMapSet const& dofmaps, UFC& ufc,

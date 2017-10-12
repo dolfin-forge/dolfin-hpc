@@ -96,7 +96,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
     BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
     // The boundary mesh could be empty in the parallel case
     if (boundary.size(0)) for (EdgeIterator e(boundary); !e.end(); ++e)
-      edge_forbidden.set(e->index(), true);
+      edge_forbidden(e->index()) = true;
   }
 
   // Initialise forbidden cells
@@ -158,10 +158,10 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
             num_new_cells++;
             // set markers of all cell neighbors of longest edge to false
             //if ( cn->index() != c->index() )
-            cell_forbidden.set(cn->index(), true);
+            cell_forbidden(cn->index()) = true;
             // set all the edges of cell neighbors to forbidden
             for (EdgeIterator en(*cn); !en.end(); ++en)
-              edge_forbidden.set(en->index(), true);
+              edge_forbidden(en->index()) = true;
           }
         }
       }
@@ -223,19 +223,19 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
 
   // Reset forbidden edges
   for (EdgeIterator e(mesh); !e.end(); ++e)
-    edge_forbidden.set(e->index(), false);
+    edge_forbidden(e->index()) = false;
 
   // If refinement of boundary is forbidden
   if (refine_boundary == false)
   {
     BoundaryMesh boundary(mesh, BoundaryMesh::exterior);
     for (EdgeIterator e(boundary); !e.end(); ++e)
-      edge_forbidden.set(e->index(), true);
+      edge_forbidden(e->index()) = true;
   }
 
   // Reset forbidden cells
   for (CellIterator c(mesh); !c.end(); ++c)
-    cell_forbidden.set(c->index(), false);
+    cell_forbidden(c->index()) = false;
 
   // Add new vertices and cells.
   for (CellIterator c(mesh); !c.end(); ++c)
@@ -248,7 +248,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
         Edge e(mesh, refman.edge_refined(*c));
         if (edge_forbidden(e) == false)
         {
-          edge_forbidden.set(e, true);
+          edge_forbidden(e) = true;
           refman.add(e, current_vertex);
           editor.add_vertex(current_vertex++, e.midpoint());
           dolfin_assert(!cell_forbidden(*c));
@@ -260,8 +260,8 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
                                     current_cell);
 
             // Prevent any futher refinement on edge
-            cell_marker.set(*cn, false);
-            cell_forbidden.set(cn->index(), true);
+            cell_marker(*cn) = false;
+            cell_forbidden(cn->index()) = true;
 
           }
         }
@@ -312,10 +312,10 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
 
           // set markers of all cell neighbors of longest edge to false
           //if ( cn->index() != c->index() )
-          cell_marker.set(cn->index(), false);
+          cell_marker(cn->index()) = false;
           // set all edges of cell neighbors to forbidden
           for (EdgeIterator en(*cn); !en.end(); ++en)
-            edge_forbidden.set(en->index(), true);
+            edge_forbidden(en->index()) = true;
         }
       }
     }

@@ -1232,14 +1232,14 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   {
     for (uint i = 0; i < meshfunction.size(); ++i)
     {
-      meshfunction.set(i, static_cast<T>(values[i]));
+      meshfunction(i) = static_cast<T>(values[i]);
     }
   }
   if (mfunc_type == 1)
   {
     for (uint i = 0; i < meshfunction.size(); ++i)
     {
-      meshfunction.set(i, static_cast<T>(values[i]));
+      meshfunction(i) = static_cast<T>(values[i]);
     }
 
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
@@ -1283,9 +1283,8 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
       for (int j = 0; j < recv_count; j++)
       {
-        meshfunction.set(
-            mesh.distdata()[0].get_local(ghost_buff[dest][j]),
-            static_cast<T>(recv_buff[j]));
+        meshfunction(mesh.distdata()[0].get_local(ghost_buff[dest][j]))
+            = static_cast<T>(recv_buff[j]);
       }
 
       send_buff.clear();

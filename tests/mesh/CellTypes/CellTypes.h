@@ -51,7 +51,7 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     MeshValues<dolfin::uint, Vertex> vi(refcell);
     for (VertexIterator v(refcell); !v.end(); ++v)
     {
-      vi.set(*v, v->index());
+      vi(*v) = v->index();
     }
   }
   Mesh refcell1(refcell);

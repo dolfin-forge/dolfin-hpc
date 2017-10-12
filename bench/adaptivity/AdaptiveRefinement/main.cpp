@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
       for (CellIterator cell(mesh); !cell.end(); ++cell)
       {
         cb.eval(&v, &cell->midpoint()[0]);
-        mrkr.set(*cell, (v >= th));
+        mrkr(*cell) = (v >= th);
       }
 
       if (save_file)

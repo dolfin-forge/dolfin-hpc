@@ -39,7 +39,7 @@ void MeshSmoother::maph0(Mesh& mesh, Mesh& sub, MeshFunction<int>& cell_map,
     Cell& cell = *c;
     if (cell_map(cell) != -1)
     {
-      subh0.set(cell_map(cell), h0(cell));
+      subh0(cell_map(cell)) = h0(cell);
     }
   }
 }
@@ -88,7 +88,7 @@ void MeshSmoother::worstElement(Mesh& mesh, int& index,
 void MeshSmoother::elementNhood(Mesh& mesh, Cell& element,
                                 MeshFunction<bool>& elements, int depth)
 {
-  elements.set(element, true);
+  elements(element) = true;
 
   if (depth == 0) return;
 
@@ -181,7 +181,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
 
     if (included)
     {
-      old2new_vertex.set(vertex.index(), current_vertex);
+      old2new_vertex(vertex.index()) = current_vertex;
       editor.add_vertex(current_vertex, vertex.x());
       distdata[0].set_map(current_vertex,
                        mesh.distdata()[0].get_global(vertex.index()));
@@ -194,7 +194,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     }
     else
     {
-      old2new_vertex.set(vertex.index(), -1);
+      old2new_vertex(vertex.index()) = -1;
     }
   }
 
@@ -216,14 +216,14 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
         cell_vertices[cv_idx++] = id;
       }
 
-      old2new_cell.set(cell.index(), current_cell);
+      old2new_cell(cell.index()) = current_cell;
       distdata[c->dim()].set_map(current_cell, c->global_index());
       editor.add_cell(current_cell++, &cell_vertices[0]);
 
     }
     else
     {
-      old2new_cell.set(cell.index(), -1);
+      old2new_cell(cell.index()) = -1;
     }
   }
 

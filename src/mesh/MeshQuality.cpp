@@ -34,7 +34,7 @@ MeshQuality::MeshQuality(Mesh& mesh) :
   // Initialize orientation
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    orientation_.set(c->index(), (uint) c->orientation());
+    orientation_(c->index()) = (uint) c->orientation();
   }
 
   //

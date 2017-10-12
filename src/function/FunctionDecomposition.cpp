@@ -73,7 +73,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
             Si[i]->vector().set(&block[offset + i * numcellnodes + ci], 1,
                                 &dof_index);
           }
-          marked.set(*v, true);
+          marked(*v) = true;
           continue;
         }
       }

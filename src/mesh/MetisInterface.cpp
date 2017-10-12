@@ -165,7 +165,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   uint lreassigned = 0;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
   {
-    partitions.set(*cell, (uint) part[cell->index()]);
+    partitions(*cell) = (uint) part[cell->index()];
     if(part[cell->index()] != rank)
     {
       ++lreassigned;
@@ -240,7 +240,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   uint lreassigned = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
-    partitions.set(*vertex, static_cast<uint>(part[vertex->index()]));
+    partitions(*vertex) = static_cast<uint>(part[vertex->index()]);
     if(part[vertex->index()] != rank)
     {
       ++lreassigned;

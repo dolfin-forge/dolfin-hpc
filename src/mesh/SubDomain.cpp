@@ -162,7 +162,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
 
       for (int k = 0; k < recv_count; ++k)
       {
-        sub_domains.set(mesh.distdata()[edim].get_local(recvbuf[k]), index);
+        sub_domains(mesh.distdata()[edim].get_local(recvbuf[k])) = index;
       }
     }
     delete[] recvbuf;

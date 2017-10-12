@@ -268,7 +268,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
 
         std::pair<uint, real> p(global_index, value);
         recv_data.push_back(p);
-        marked.set(*v, true);
+        marked(*v) = true;
         continue;
       }
 
@@ -277,7 +277,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
 
         send_buffer[target_proc].push_back(value);
         send_buffer_indices[target_proc].push_back(global_index);
-        marked.set(*v, true);
+        marked(*v) = true;
       }
     }
 
@@ -398,7 +398,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
         {
           continue;
         }
-        processed.set(*v, true);
+        processed(*v) = true;
 
         Vertex *v_e = 0;
 

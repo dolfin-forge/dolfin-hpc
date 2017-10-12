@@ -195,7 +195,7 @@ void CoarseningManager::buildMFArrays(
     {
       int new_idx = old2new_vertices[old_idx];
       if (new_idx < 0) continue;
-      forbidden_vertices->set(new_idx, double(isForbiddenVertex(old_idx)));
+      (*forbidden_vertices)(new_idx) = double(isForbiddenVertex(old_idx));
     }
 
     // Prepare cell_marker and attempt count for exchange
@@ -207,7 +207,7 @@ void CoarseningManager::buildMFArrays(
       DCell * dc = it->first;
       int new_idx = old2new_cells[dc->id];
       if (new_idx < 0) continue;
-      attempts->set(new_idx, it->second);
+      (*attempts)(new_idx) = it->second;
       dolfin_assert(it->second > 0);
     }
   }
@@ -350,11 +350,19 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
 
     for (CellIterator c_it(v); !c_it.end(); ++c_it)
     {
-      if ((*partitions)(*c_it) == rank && target_proc != rank) ++num_send_cells;
-      if (requested_cells(*c_it)) partitions->set(
-          *c_it, std::min(target_proc, (*partitions)(*c_it)));
-      else partitions->set(*c_it, target_proc);
-      requested_cells.set(*c_it, true);
+      if ((*partitions)(*c_it) == rank && target_proc != rank)
+      {
+        ++num_send_cells;
+      }
+      if (requested_cells(*c_it))
+      {
+        (*partitions)(*c_it) = std::min(target_proc, (*partitions)(*c_it));
+      }
+      else
+      {
+        (*partitions)(*c_it) = target_proc;
+      }
+      requested_cells(*c_it) = true;
     }
   }
 
@@ -384,8 +392,11 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
       // set partitions
       for (CellIterator c_it(v); !c_it.end(); ++c_it)
       {
-        if ((*partitions)(*c_it) == rank && target_proc != rank) ++num_send_cells;
-        partitions->set(*c_it, target_proc);
+        if ((*partitions)(*c_it) == rank && target_proc != rank)
+        {
+          ++num_send_cells;
+        }
+        (*partitions)(*c_it) = target_proc;
       }
     }
   }
@@ -393,7 +404,7 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
   // Check that at least one cell resides here
   if (num_send_cells >= mesh.num_cells())
   {
-    partitions->set(0, rank);
+    (*partitions)(0) = rank;
     --num_send_cells;
   }
 

@@ -1,7 +1,6 @@
 AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 libdolfin_mesh_la_SOURCES = \
-			ALE.cpp\
 			AffineMapping.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
@@ -42,8 +41,6 @@ libdolfin_mesh_la_SOURCES = \
 			MeshPartition.cpp\
 			MeshRenumber.cpp\
 			MeshSmoother.cpp\
-			MeshSmoothData.cpp\
-			MeshSmoothing.cpp\
 			MeshTopology.cpp\
 			Point.cpp\
 			PointCell.cpp\

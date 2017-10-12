@@ -166,7 +166,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/dolfin_mesh.h\
 				mesh/algorithm.h \
 				mesh/AffineMapping.h \
-				mesh/ALE.h\
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\
@@ -213,8 +212,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshQualityFunction.h\
 				mesh/MeshRenumber.h\
 				mesh/MeshSmoother.h\
-				mesh/MeshSmoothData.h\
-				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
 				mesh/MeshValues.h\
 				mesh/MPIMeshCommunicator.h\

@@ -6,6 +6,7 @@
 #include "Point/Point.h"
 #include "CellTypes/CellTypes.h"
 #include "UnitMeshes/UnitMeshes.h"
+#include "MeshFunction/MeshFunction.h"
 #include "StructuredGrid/StructuredGrid.h"
 #include "VertexNormal/VertexNormal.h"
 #include "algorithm/algorithm.h"
@@ -42,8 +43,11 @@ DOLFIN_SUITE_BEGIN(suite, "mesh")
   DOLFIN_TCASE_ADD(test_StructuredGrid_quadrilateral);
   DOLFIN_TCASE_ADD(test_StructuredGrid_hexahedron);
 
+  DOLFIN_TCASE_CREATE("MeshFunction");
+  DOLFIN_TCASE_ADD(test_MeshFunction );
+
   DOLFIN_TCASE_CREATE("VertexNormal");
-  DOLFIN_TCASE_ADD(test_VertexNormal );
+  DOLFIN_TCASE_ADD(test_VertexNormal);
 
   DOLFIN_TCASE_CREATE("algorithm");
   DOLFIN_TCASE_ADD(test_algorithm );

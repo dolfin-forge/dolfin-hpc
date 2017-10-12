@@ -27,9 +27,23 @@ namespace dolfin
  *
  */
 
+template<class E>
+inline uint entity_dimension(Mesh& mesh);
+
+//-----------------------------------------------------------------------------
+
 template<class T, class E, uint N = 1>
 struct MeshValues : public MeshFunction<T>
 {
+  ///
+  MeshValues(Mesh& mesh) :
+    MeshFunction<T>(mesh, entity_dimension<E>(mesh))
+  {
+      if (N > 1)
+      {
+        error("MeshValues : vector values are unsupported for now.");
+      }
+  }
 
   /// Return value size
   inline uint value_size() { return N; }
@@ -39,9 +53,9 @@ struct MeshValues : public MeshFunction<T>
   {
     if(this != &other)
     {
-      if(this->mesh_ != other.mesh_)
+      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
       {
-        init(other.mesh_, other.dim_, other.size_);
+        MeshFunction<T>::init(other.mesh_, other.dim_, other.size_);
       }
       std::copy(other.values_, other.values_ + other.size_, this->values_);
     }
@@ -54,9 +68,9 @@ struct MeshValues : public MeshFunction<T>
   {
     if (this != &other)
     {
-      if(this->mesh_ != other.mesh_)
+      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
       {
-        init(other.mesh_, other.dim_, other.size_);
+        MeshFunction<T>::init(other.mesh_, other.dim_, other.size_);
       }
       std::transform(other.values_, other.values_ + other.size_, this->values_,
                      MeshFunction<T>::cast );
@@ -70,6 +84,11 @@ struct MeshValues : public MeshFunction<T>
     MeshFunction<T>::operator =(value);
     return *this;
   }
+
+  ///--- Value accessors
+
+  // NOTE: operators below are defined for any value size but their use is
+  //       not valid until MeshFunction supports vector values.
 
   /// Return value at given entity
   inline T& operator()(E& entity, uint i = 0)
@@ -87,6 +106,22 @@ struct MeshValues : public MeshFunction<T>
     return this->values_[entity.index() * N + i];
   }
 
+  /// Return value at given index
+  inline T& operator()(uint index, uint i = 0)
+  {
+    dolfin_assert(this->values_);
+    return this->values_[index * N + i];
+  }
+
+  /// Return value at given index
+  inline T const& operator()(uint index, uint i = 0) const
+  {
+    dolfin_assert(this->values_);
+    return this->values_[index * N + i];
+  }
+
+  ///--- Array accessors
+
   /// Return point to value at given entity
   inline T * operator[](E& entity)
   {
@@ -103,79 +138,49 @@ struct MeshValues : public MeshFunction<T>
     return this->values_ + entity.index() * N;
   }
 
+  /// Return point to value at given index
+  inline T * operator[](uint index)
+  {
+    dolfin_assert(this->values_);
+    return this->values_ + index * N;
+  }
+
+  /// Return pointer to value at given index
+  inline T const * operator[](uint index) const
+  {
+    dolfin_assert(this->values_);
+    return this->values_ + index * N;
+  }
+
 };
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
 
-template<class T>
-struct MeshValues<T, Vertex, 1> : public MeshFunction<T>
+template<>
+inline uint entity_dimension<Vertex>(Mesh& mesh)
 {
-  MeshValues(Mesh& mesh) : MeshFunction<T>(mesh, 0) {}
-
-  /// Set all values to given value
-  inline MeshValues<T, Vertex, 1>& operator=(T const& value)
-  {
-    MeshFunction<T>::operator =(value);
-    return *this;
-  }
-
-};
-
-template<class T>
-struct MeshValues<T, Edge, 1> : public MeshFunction<T>
+  return 0;
+}
+template<>
+inline uint entity_dimension<Edge>(Mesh& mesh)
 {
-  MeshValues(Mesh& mesh) : MeshFunction<T>(mesh, 1) {}
-
-  /// Set all values to given value
-  inline MeshValues<T, Edge, 1>& operator=(T const& value)
-  {
-    MeshFunction<T>::operator =(value);
-    return *this;
-  }
-
-};
-
-template<class T>
-struct MeshValues<T, Face, 1> : public MeshFunction<T>
+  return 1;
+}
+template<>
+inline uint entity_dimension<Face>(Mesh& mesh)
 {
-  MeshValues(Mesh& mesh) : MeshFunction<T>(mesh, 2) {}
-
-  /// Set all values to given value
-  inline MeshValues<T, Face, 1>& operator=(T const& value)
-  {
-    MeshFunction<T>::operator =(value);
-    return *this;
-  }
-
-};
-
-template<class T>
-struct MeshValues<T, Facet, 1> : public MeshFunction<T>
+  return 2;
+}
+template<>
+inline uint entity_dimension<Facet>(Mesh& mesh)
 {
-  MeshValues(Mesh& mesh) : MeshFunction<T>(mesh, mesh.type().facet_dim()) {}
-
-  /// Set all values to given value
-  inline MeshValues<T, Facet, 1>& operator=(T const& value)
-  {
-    MeshFunction<T>::operator =(value);
-    return *this;
-  }
-
-};
-
-template<class T>
-struct MeshValues<T, Cell, 1> : public MeshFunction<T>
+  return mesh.type().facet_dim();
+}
+template<>
+inline uint entity_dimension<Cell>(Mesh& mesh)
 {
-  MeshValues(Mesh& mesh) : MeshFunction<T>(mesh, mesh.type().dim()) {}
-
-  /// Set all values to given value
-  inline MeshValues<T, Cell, 1>& operator=(T const& value)
-  {
-    MeshFunction<T>::operator =(value);
-    return *this;
-  }
-
-};
+  return mesh.type().dim();
+}
 
 //-----------------------------------------------------------------------------
 

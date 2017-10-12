@@ -102,7 +102,7 @@ void MPIMeshCommunicator::distributeVertices(Mesh& mesh, MeshFunction<uint>& dis
   {
     if (v->is_owned())
     {
-      uint const owner = dist.get(*v);
+      uint const owner = dist(*v);
       if (owner == rank)
       {
         distdata1.set_map(vindex, v->global_index());
@@ -263,7 +263,7 @@ void MPIMeshCommunicator::distributeCells(Mesh& mesh, MeshFunction<uint>& dist)
   std::fill_n(vertex_used, topology.size(0), false);
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    uint const owner = dist.get(*c);
+    uint const owner = dist(*c);
     if (owner == rank)
     {
       for (VertexIterator v(*c); !v.end(); ++v)

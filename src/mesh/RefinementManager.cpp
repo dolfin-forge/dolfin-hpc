@@ -360,7 +360,7 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
   for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
     Cell c(mesh_, *bc);
-    if (cell_marker.get(c) && !(*cell_forbidden_)(c))
+    if (cell_marker(c) && !(*cell_forbidden_)(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)
@@ -439,7 +439,7 @@ void RefinementManager::mark_localboundary(MeshFunction<bool>& cell_marker,
   for (bc = boundary_cells_.begin(); bc != boundary_cells_.end(); bc++)
   {
     Cell c(mesh_, *bc);
-    if (cell_marker.get(c) && !(*cell_forbidden_)(c))
+    if (cell_marker(c) && !(*cell_forbidden_)(c))
     {
       max = 0.0;
       for (EdgeIterator e(c); !e.end(); ++e)

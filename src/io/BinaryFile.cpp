@@ -1094,7 +1094,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      *(vp++) = (real) meshfunction.get(c->index());
+      *(vp++) = (real) meshfunction(c->index());
     }
 
     local_size = mesh.num_cells();
@@ -1110,7 +1110,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
     {
       if (!v->is_ghost())
       {
-        *(vp++) = (real) meshfunction.get(v->index());
+        *(vp++) = (real) meshfunction(v->index());
       }
     }
 
@@ -1274,9 +1274,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
       MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
       for (int k = 0; k < recv_count; ++k)
-        send_buff.push_back(
-            meshfunction.get(
-                mesh.distdata()[0].get_local(recv_ghost[k])));
+        send_buff.push_back(meshfunction(mesh.distdata()[0].get_local(recv_ghost[k])));
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
                    recv_buff, recv_size, MPI_DOUBLE, dest, 2,

@@ -65,7 +65,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
         {
           ++ci;
         }
-        if (!v->is_ghost() && !marked.get(*v))
+        if (!v->is_ghost() && !marked(*v))
         {
           uint dof_index = mesh.distdata()[0].get_global(v->index());
           for (uint i = 0; i < Si.size(); ++i)

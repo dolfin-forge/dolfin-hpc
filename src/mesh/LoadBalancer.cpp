@@ -103,14 +103,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 //    mesh.distribute(partitions, cell_marker, new_cell_marker);
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)
-      cell_marker.set(*c, new_cell_marker.get(*c));
+      cell_marker.set(*c, new_cell_marker(*c));
   }
   else
   {
 //    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //    part->init(mesh, mesh.topology().dim());
 //    for(CellIterator c(mesh); !c.end(); ++c)
-//      part->set(*c, partitions.get(*c));
+//      part->set(*c, partitions(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -225,7 +225,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 //    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //    part->init(mesh, mesh.topology().dim());
 //    for(CellIterator c(mesh); !c.end(); ++c)
-//      part->set(*c, partitions.get(*c));
+//      part->set(*c, partitions(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -345,14 +345,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)
-      cell_marker.set(*c, new_cell_marker.get(*c));
+      cell_marker.set(*c, new_cell_marker(*c));
   }
   else
   {
 //    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //    part->init(mesh, mesh.topology().dim());
 //    for(CellIterator c(mesh); !c.end(); ++c)
-//      part->set(*c, partitions.get(*c));
+//      part->set(*c, partitions(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -466,14 +466,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshFunction<bool>& cell_marker,
 
     cell_marker.init(mesh, mesh.topology().dim());
     for(CellIterator c(mesh); !c.end(); ++c)
-      cell_marker.set(*c, new_cell_marker.get(*c));
+      cell_marker.set(*c, new_cell_marker(*c));
   }
   else
   {
 //    MeshFunction<uint>* part = mesh.data().createMeshFunction("partitions");
 //    part->init(mesh, mesh.topology().dim());
 //    for(CellIterator c(mesh); !c.end(); ++c)
-//      part->set(*c, partitions.get(*c));
+//      part->set(*c, partitions(*c));
   }
 
   if (dolfin_get("Load balancer report"))
@@ -508,11 +508,15 @@ void LoadBalancer::weight_function(Mesh& mesh,
     used_cell = false;
     used_edge = false;
 
-    for(CellIterator c(mesh); !c.end(); ++c) {
-      if( cell_marker.get(*c) && !used_cell.get(*c)) {
+    for (CellIterator c(mesh); !c.end(); ++c)
+    {
+      if (cell_marker(*c) && !used_cell(*c))
+      {
         max = 0.0;
-        for(EdgeIterator e(*c); !e.end(); ++e) {
-          if(!used_edge.get(*e)){
+        for (EdgeIterator e(*c); !e.end(); ++e)
+        {
+          if (!used_edge(*e))
+          {
             l = e->length();
             if(max < l) {
               max = l;
@@ -523,10 +527,12 @@ void LoadBalancer::weight_function(Mesh& mesh,
         if(max == 0.0)
           continue;
         Edge le(mesh, index);
-        for(CellIterator nc(le); !nc.end(); ++nc) {
-          if(!used_cell.get(*nc)) {
+        for (CellIterator nc(le); !nc.end(); ++nc)
+        {
+          if (!used_cell(*nc))
+          {
             //	  *w_sum++;
-            weight.set(*nc, weight.get(*nc) + 1);
+            weight.set(*nc, weight(*nc) + 1);
             used_cell.set(*nc, true);
             for(EdgeIterator e(*nc); !e.end(); ++e)
               used_edge.set(*e, true);
@@ -537,8 +543,9 @@ void LoadBalancer::weight_function(Mesh& mesh,
   }
   else if(type == LEPP)
   {
-    for(CellIterator c(mesh); !c.end(); ++c)
-      if(cell_marker.get(*c)) {
+    for (CellIterator c(mesh); !c.end(); ++c)
+      if (cell_marker(*c))
+      {
         max = 0.0;
         for(EdgeIterator e(*c); !e.end(); ++e) {
           l = e->length();
@@ -556,7 +563,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
   {
     for ( CellIterator c_it(mesh) ; !c_it.end() ; ++c_it )
     {
-      if ( cell_marker.get(*c_it) )
+      if (cell_marker(*c_it))
       {
         // cell marked for coarsening gets increased weight
         weight.set(*c_it, 2u);
@@ -571,8 +578,8 @@ void LoadBalancer::weight_function(Mesh& mesh,
     error("Unknown Type for LoadBalancer.");
 
   *w_sum = 0;
-  for(CellIterator c(mesh); !c.end(); ++c)
-    *w_sum += weight.get(*c);
+  for (CellIterator c(mesh); !c.end(); ++c)
+    *w_sum += weight(*c);
 
 
 }
@@ -580,7 +587,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
 void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
                                MeshFunction<uint>& weight, uint depth)
 {
-  weight.set(c.index(), weight.get(c.index()) + 1);
+  weight.set(c.index(), weight(c.index()) + 1);
   real l;
   real max = 0.0;
   uint index = 0;
@@ -597,7 +604,7 @@ void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
   if(le.index() == ce.index() || depth > 1)
     return;
 
-  weight.set(c.index(), weight.get(c.index()) + 1);
+  weight.set(c.index(), weight(c.index()) + 1);
 
   depth++;
 
@@ -615,8 +622,8 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
   uint *sim_row = new uint[pe_size];
   uint *sorted_indices = new uint[pe_size];
   memset(sim_row, 0, pe_size * sizeof(uint));
-  for(uint i = 0; i<partitions.size(); i++)
-    sim_row[ partitions.get(i) ] ++;
+  for (uint i = 0; i < partitions.size(); i++)
+    sim_row[partitions(i)]++;
 
   // Gather similarity matrix on root node
   uint m = pe_size * pe_size ;
@@ -671,8 +678,8 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
 
 
   // Reassign processors
-  for(uint i = 0; i < partitions.size(); i++)
-    partitions.set(i, map[ partitions.get(i) ]);
+  for (uint i = 0; i < partitions.size(); i++)
+    partitions.set(i, map[partitions(i)]);
 
   // Calculate maximum number to send from processor
   *max_sendrecv = 0;
@@ -699,9 +706,10 @@ bool LoadBalancer::computational_gain(Mesh& mesh,
   uint w_old = 0;
   uint *tmp_w = new uint[pe_size];
   memset(tmp_w, 0, pe_size * sizeof(uint));
-  for(CellIterator c(mesh); !c.end(); ++c) {
-    w_old += weight.get(*c);
-    tmp_w[ partitions.get(*c) ] += weight.get(*c);
+  for (CellIterator c(mesh); !c.end(); ++c)
+  {
+    w_old += weight(*c);
+    tmp_w[partitions(*c)] += weight(*c);
   }
 
   uint w_new;

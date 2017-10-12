@@ -102,7 +102,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
     elmwgt = new pm_idx_t[ncells];
     for(CellIterator c(mesh); !c.end(); ++c)
     {
-      elmwgt[c->index()] = static_cast<pm_idx_t>(weight->get(*c));
+      elmwgt[c->index()] = static_cast<pm_idx_t>((*weight)(*c));
     }
   }
 

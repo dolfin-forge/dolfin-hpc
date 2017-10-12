@@ -253,7 +253,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   for (CellIterator c(mesh); !c.end(); ++c)
   {
 
-    target_proc = distribution.get(*c);
+    target_proc = distribution(*c);
 
     //FIXME: Only P1 friendly.
     for (VertexIterator v(*c); !v.end(); ++v)
@@ -263,7 +263,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
       f.vector().get(&value, 1, &global_index);
 
       if (target_proc == pe_rank && !v->is_ghost()
-          && !marked.get(*v))
+          && !marked(*v))
       {
 
         std::pair<uint, real> p(global_index, value);
@@ -272,7 +272,7 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
         continue;
       }
 
-      if (!v->is_ghost() && !marked.get(*v))
+      if (!v->is_ghost() && !marked(*v))
       {
 
         send_buffer[target_proc].push_back(value);
@@ -394,7 +394,7 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
           }
         }
 
-        if (v->is_ghost() || processed.get(*v))
+        if (v->is_ghost() || processed(*v))
         {
           continue;
         }

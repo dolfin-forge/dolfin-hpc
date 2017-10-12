@@ -157,8 +157,8 @@ void CoarseningManager::findCellsToCoarsen(MeshFunction<uint> * attempt_count)
       c_it != dmesh_->cells.end(); ++c_it)
   {
     DCell * dc = *c_it;
-    if (attempt_count->get(dc->id) > 0) cells_to_coarsen_.push_back(
-        std::make_pair(dc, attempt_count->get(dc->id)));
+    if ((*attempt_count)(dc->id) > 0) cells_to_coarsen_.push_back(
+        std::make_pair(dc, (*attempt_count)(dc->id)));
   }
 }
 //-----------------------------------------------------------------------------
@@ -242,7 +242,7 @@ void CoarseningManager::updateIndependentSet(
   forbidden_vertices_.resize(mesh.size(0));
   forbidden_vertices_ = false;
   for (VertexIterator v_it(mesh); !v_it.end(); ++v_it)
-    if (forbidden_vertices_new.get(v_it->index()) > 0.5) forbidden_vertices_[v_it->index()] =
+    if (forbidden_vertices_new(v_it->index()) > 0.5) forbidden_vertices_[v_it->index()] =
         true;
 }
 //-----------------------------------------------------------------------------
@@ -350,9 +350,9 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
 
     for (CellIterator c_it(v); !c_it.end(); ++c_it)
     {
-      if (partitions->get(*c_it) == rank && target_proc != rank) ++num_send_cells;
+      if ((*partitions)(*c_it) == rank && target_proc != rank) ++num_send_cells;
       if (requested_cells(*c_it)) partitions->set(
-          *c_it, std::min(target_proc, partitions->get(*c_it)));
+          *c_it, std::min(target_proc, (*partitions)(*c_it)));
       else partitions->set(*c_it, target_proc);
       requested_cells.set(*c_it, true);
     }
@@ -379,12 +379,12 @@ void CoarseningManager::exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
       // select lowest process index for all cells around requested vertex
       uint target_proc = recv_buff_requests[i + 1];
       for (CellIterator c_it(v); !c_it.end(); ++c_it)
-        target_proc = std::min(target_proc, partitions->get(*c_it));
+        target_proc = std::min(target_proc, (*partitions)(*c_it));
 
       // set partitions
       for (CellIterator c_it(v); !c_it.end(); ++c_it)
       {
-        if (partitions->get(*c_it) == rank && target_proc != rank) ++num_send_cells;
+        if ((*partitions)(*c_it) == rank && target_proc != rank) ++num_send_cells;
         partitions->set(*c_it, target_proc);
       }
     }

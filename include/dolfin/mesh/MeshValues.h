@@ -39,49 +39,41 @@ struct MeshValues : public MeshFunction<T>
   MeshValues(Mesh& mesh) :
     MeshFunction<T>(mesh, entity_dimension<E>(mesh))
   {
-      if (N > 1)
-      {
-        error("MeshValues : vector values are unsupported for now.");
-      }
+    if (N > 1)
+    {
+      error("MeshValues : vector values are unsupported for now.");
+    }
+  }
+
+  ///
+  template<class V>
+  MeshValues(MeshValues<V, E, N> const& other) :
+      MeshFunction<T>(other)
+  {
   }
 
   /// Return value size
   inline uint value_size() { return N; }
 
   /// Assignment operator
-  inline  MeshValues<T, E>& operator=(MeshValues<T, E> const& other)
+  MeshValues<T, E>& operator=(MeshValues<T, E> const& other)
   {
-    if(this != &other)
-    {
-      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
-      {
-        MeshFunction<T>::init(other.mesh_, other.dim_, other.size_);
-      }
-      std::copy(other.values_, other.values_ + other.size_, this->values_);
-    }
+    MeshFunction<T>::operator=(other);
     return *this;
   }
 
-  /// Assignment operator
+  /// Assignment conversion operator
   template <class V>
   MeshValues<T, E>& operator=(MeshValues<V, E, N> const& other)
   {
-    if (this != &other)
-    {
-      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
-      {
-        MeshFunction<T>::init(other.mesh_, other.dim_, other.size_);
-      }
-      std::transform(other.values_, other.values_ + other.size_, this->values_,
-                     MeshFunction<T>::cast );
-    }
+    MeshFunction<T>::operator=(other);
     return *this;
   }
 
   /// Set all values to given value
   inline MeshValues<T, E, N>& operator=(T const& value)
   {
-    MeshFunction<T>::operator =(value);
+    MeshFunction<T>::operator=(value);
     return *this;
   }
 

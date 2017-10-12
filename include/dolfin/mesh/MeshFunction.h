@@ -77,7 +77,18 @@ public:
       size_(0),
       values_(NULL)
   {
-    *this = other;
+    MeshFunction<T>::operator=(other);
+  }
+
+  /// Copy constructor
+  template <class V>
+  MeshFunction(MeshFunction<V> const& other) :
+      mesh_(0),
+      dim_(0),
+      size_(0),
+      values_(NULL)
+  {
+    MeshFunction<T>::operator=(other);
   }
 
   /// Destructor
@@ -97,9 +108,32 @@ public:
   {
     if(this != &other)
     {
-      init(other.mesh_, other.dim_, other.size_);
+      if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
+      {
+        init(other.mesh_, other.dim_, other.size_);
+      }
       std::copy(other.values_, other.values_ + size_, values_);
     }
+    return *this;
+  }
+
+  /// Required for assignment operator
+  friend class MeshFunction<bool>;
+  friend class MeshFunction<int>;
+  friend class MeshFunction<uint>;
+  friend class MeshFunction<float>;
+  friend class MeshFunction<real>;
+
+  /// Assignment conversion operator
+  template <class V>
+  MeshFunction<T>& operator=(MeshFunction<V> const& other)
+  {
+    if(this->mesh_ != other.mesh_ || this->size_ != other.size_ )
+    {
+      init(other.mesh_, other.dim_, other.size_);
+    }
+    std::transform(other.values_, other.values_ + other.size_, this->values_,
+                   MeshFunction<T>::cast<V> );
     return *this;
   }
 
@@ -200,18 +234,6 @@ public:
     return values_[entity.index()];
   }
 
-  /// Assignment function
-  template <class V>
-  MeshFunction<T>& operator=(MeshFunction<V> const& other)
-  {
-    if (this != &other)
-    {
-      init(other.mesh_, other.dim_, other.size_);
-      std::transform(other.values_, other.values_ + size_, values_, cast<T> );
-    }
-    return *this;
-  }
-
   /// Set all values to given value
   MeshFunction<T>& operator=(T const& value)
   {
@@ -273,10 +295,9 @@ protected:
     }
   }
 
-  ///
-  ///FIXME: real rounding: (value > 0) ? floor(value + 0.5) : ceil(value - 0.5)
+  /// Cast operators
   template<class V>
-  inline T cast(V const& x)
+  static inline T cast(V const& x)
   {
     return static_cast<T>(x);
   }
@@ -297,6 +318,47 @@ protected:
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
 
+// Copyright (C) 2013 Balthasar Reuter.
+// Licensed under the GNU LGPL Version 2.1.
+//
+/// Helper function that performs symmetric rounding to closest integer
+
+template<> template<> inline bool MeshFunction<bool>::cast(float const& x)
+{
+  return static_cast<bool>(x > 0);
+}
+
+template<> template<> inline bool MeshFunction<bool>::cast(real const& x)
+{
+  return static_cast<bool>(x > 0);
+}
+
+template<> template<> inline int MeshFunction<int>::cast(float const& x)
+{
+  return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
+}
+
+template<> template<> inline int MeshFunction<int>::cast(real const& x)
+{
+  return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
+}
+
+template<> template<> inline uint MeshFunction<uint>::cast(float const& x)
+{
+  return static_cast<uint>(std::floor(x + 0.5));
+}
+
+template<> template<> inline uint MeshFunction<uint>::cast(real const& x)
+{
+  return static_cast<uint>(std::floor(x + 0.5));
+}
+
+template<> template<> inline uint MeshFunction<uint>::cast(int const& x)
+{
+  return static_cast<uint>((x > 0) ? x : 0);
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

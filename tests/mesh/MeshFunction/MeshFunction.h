@@ -56,34 +56,107 @@ void check_reference_cell()
 
 }
 //-----------------------------------------------------------------------------
+template<typename T, typename V>
+void check_conversion_vertices_x0()
+{
+  QuadrilateralCell cellt;
+  Mesh              cellm;
+  cellt.create_reference_cell(cellm);
+  cellm.geometry() -= Point(0.25, 0.25);
+  cellm.geometry() *= 2.0;
+  MeshValues<T, Vertex> M(cellm);
+  for (Vertex::iterator v(M.mesh()); !v.end(); ++v)
+  {
+    M(*v) = static_cast<T>(v->x()[0]);
+  }
+
+  MeshValues<V, Vertex> N(M);
+  N.disp();
+
+  MeshValues<V, Vertex> O(cellm);
+  O = M;
+  ck_assert(N == O);
+}
+//-----------------------------------------------------------------------------
 START_TEST( test_MeshFunction )
   {
     int init_failed = 0;
     begin("test_MeshFunction");
     //---
-    check_reference_cell<PointCell, uint, Vertex>();
-    check_reference_cell<PointCell, uint, Cell>();
-    //
-    check_reference_cell<IntervalCell, uint, Vertex>();
-    check_reference_cell<IntervalCell, uint, Cell>();
-    //
-    check_reference_cell<TriangleCell, uint, Vertex>();
-    check_reference_cell<TriangleCell, uint, Edge>();
-    check_reference_cell<TriangleCell, uint, Cell>();
-    //
-    check_reference_cell<TetrahedronCell, uint, Vertex>();
-    check_reference_cell<TetrahedronCell, uint, Edge>();
-    check_reference_cell<TetrahedronCell, uint, Face>();
-    check_reference_cell<TetrahedronCell, uint, Cell>();
-    //
-    check_reference_cell<QuadrilateralCell, uint, Vertex>();
-    check_reference_cell<QuadrilateralCell, uint, Edge>();
-    check_reference_cell<QuadrilateralCell, uint, Cell>();
-    //
-    check_reference_cell<HexahedronCell, uint, Vertex>();
-    check_reference_cell<HexahedronCell, uint, Edge>();
-    check_reference_cell<HexahedronCell, uint, Face>();
-    check_reference_cell<HexahedronCell, uint, Cell>();
+    // Check mesh functions on reference cells
+    {
+      check_reference_cell<PointCell, uint, Vertex>();
+      check_reference_cell<PointCell, uint, Cell>();
+      //
+      check_reference_cell<IntervalCell, uint, Vertex>();
+      check_reference_cell<IntervalCell, uint, Cell>();
+      //
+      check_reference_cell<TriangleCell, uint, Vertex>();
+      check_reference_cell<TriangleCell, uint, Edge>();
+      check_reference_cell<TriangleCell, uint, Cell>();
+      //
+      check_reference_cell<TetrahedronCell, uint, Vertex>();
+      check_reference_cell<TetrahedronCell, uint, Edge>();
+      check_reference_cell<TetrahedronCell, uint, Face>();
+      check_reference_cell<TetrahedronCell, uint, Cell>();
+      //
+      check_reference_cell<QuadrilateralCell, uint, Vertex>();
+      check_reference_cell<QuadrilateralCell, uint, Edge>();
+      check_reference_cell<QuadrilateralCell, uint, Cell>();
+      //
+      check_reference_cell<HexahedronCell, uint, Vertex>();
+      check_reference_cell<HexahedronCell, uint, Edge>();
+      check_reference_cell<HexahedronCell, uint, Face>();
+      check_reference_cell<HexahedronCell, uint, Cell>();
+    }
+    //---
+    // Check conversions
+    {
+      // bool -> int
+      check_conversion_vertices_x0<bool, int>();
+      // bool -> uint
+      check_conversion_vertices_x0<bool, uint>();
+      // bool -> float
+      check_conversion_vertices_x0<bool, float>();
+      // bool -> real
+      check_conversion_vertices_x0<bool, real>();
+
+      // int -> bool
+      check_conversion_vertices_x0<int, bool>();
+      // int -> uint
+      check_conversion_vertices_x0<int, uint>();
+      // int -> float
+      check_conversion_vertices_x0<int, float>();
+      // int -> real
+      check_conversion_vertices_x0<int, real>();
+
+      // uint -> bool
+      check_conversion_vertices_x0<uint, bool>();
+      // uint -> int
+      check_conversion_vertices_x0<uint, int>();
+      // uint -> float
+      check_conversion_vertices_x0<uint, float>();
+      // uint -> real
+      check_conversion_vertices_x0<uint, real>();
+
+      // float -> bool
+      check_conversion_vertices_x0<float, bool>();
+      // float -> int
+      check_conversion_vertices_x0<float, int>();
+      // float -> uint
+      check_conversion_vertices_x0<float, uint>();
+      // float -> real
+      check_conversion_vertices_x0<float, real>();
+
+      // real -> bool
+      check_conversion_vertices_x0<real, bool>();
+      // real -> int
+      check_conversion_vertices_x0<real, int>();
+      // real -> uint
+      check_conversion_vertices_x0<real, uint>();
+      // real -> float
+      check_conversion_vertices_x0<real, float>();
+    }
     //---
     end();
     fail_unless( init_failed == 0 );

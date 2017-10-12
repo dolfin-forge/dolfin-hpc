@@ -27,107 +27,51 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 VertexNormal::VertexNormal(VertexNormal& other) :
     mesh_(other.mesh_),
+    gdim_(other.gdim_),
     subdomain_(NULL),
+    basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh_),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(none)
 {
-  *this = other;
+  vertex_type_ = other.vertex_type_;
+  basis_ = other.basis_;
 }
 
 //-----------------------------------------------------------------------------
 VertexNormal::VertexNormal(Mesh& mesh, Type weight) :
     mesh_(mesh),
+    gdim_(mesh.geometry().dim()),
     subdomain_(NULL),
+    basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(weight)
 {
-  uint const nsdim = mesh.topology().dim();
-
-  for (uint d = 0; d < nsdim; ++d)
-  {
-    basis_.push_back(new MeshFunction<real> [nsdim]);
-    for (uint i = 0; i < nsdim; ++i)
-    {
-      basis_.back()[i].init(mesh, 0);
-    }
-  }
-
-
   computeNormal(mesh);
 }
 
 //-----------------------------------------------------------------------------
 VertexNormal::VertexNormal(Mesh& mesh, SubDomain const& subdomain, Type weight) :
     mesh_(mesh),
+    gdim_(mesh.geometry().dim()),
     subdomain_(&subdomain),
+    basis_(gdim_ * gdim_, MeshValues<real, Vertex>(mesh_)),
     vertex_type_(mesh),
     alpha_max_(0.5 * DOLFIN_PI),
     type_(weight)
 {
-  uint const nsdim = mesh.topology().dim();
-
-  for (uint d = 0; d < nsdim; ++d)
-  {
-    basis_.push_back(new MeshFunction<real> [nsdim]);
-    for (uint i = 0; i < nsdim; ++i)
-    {
-      basis_.back()[i].init(mesh, 0);
-    }
-  }
-
   computeNormal(mesh);
 }
 
 //-----------------------------------------------------------------------------
 VertexNormal::~VertexNormal()
 {
-  clear();
-}
-
-//-----------------------------------------------------------------------------
-void VertexNormal::clear()
-{
-  while (!basis_.empty())
-  {
-    delete[] basis_.back();
-    basis_.pop_back();
-  }
 }
 
 //-----------------------------------------------------------------------------
 VertexNormal& VertexNormal::operator=(VertexNormal& other)
 {
-  clear();
-
-  uint const gdim = mesh_.geometry().dim();
-
-  vertex_type_ = other.vertex_type_;
-
-  // Initialize data structures
-
-  for (uint d = 0; d < gdim; ++d)
-  {
-    basis_.push_back(new MeshFunction<real> [gdim]);
-    for (uint i = 0; i < gdim; ++i)
-    {
-      basis_.back()[i].init(mesh_, 0);
-    }
-  }
-
-  // Copy data
-  for (VertexIterator v(mesh_); !v.end(); ++v)
-  {
-    for (uint d = 0; d < gdim; ++d)
-    {
-      for (uint i = 0; i < gdim; ++i)
-      {
-        basis_[d][i].set(*v, other.basis()[d][i].get(*v));
-      }
-    }
-  }
-
   return *this;
 }
 
@@ -357,12 +301,12 @@ void VertexNormal::computeNormal(Mesh& mesh)
       uint vtype = std::min(tdim, nsurf);
 
       //
-      vertex_type_.set(local_index, vtype);
+      vertex_type_(local_index) = vtype;
       for (uint e = 0; e < gdim; ++e)
       {
         for (uint d = 0; d < gdim; ++d)
         {
-          basis_[e][d].set(local_index, B[e][d]);
+          basis(e, d)(local_index) = B[e][d];
         }
       }
 
@@ -442,12 +386,12 @@ void VertexNormal::computeNormal(Mesh& mesh)
         dolfin_assert(ddv.has_global(u_recvbuff[iiu]));
         uint const local_index = ddv.get_local(u_recvbuff[iiu]);
         dolfin_assert(ddv.is_ghost(local_index));
-        vertex_type_.set(local_index, u_recvbuff[iiu + 1]);
+        vertex_type_(local_index) = u_recvbuff[iiu + 1];
         for (uint e = 0; e < gdim; ++e)
         {
           for (uint d = 0; d < gdim; ++d)
           {
-            basis_[e][d].set(local_index, r_recvbuff[iir]);
+            basis(e, d)(local_index) = r_recvbuff[iir];
             ++iir;
           }
         }
@@ -465,8 +409,6 @@ void VertexNormal::computeNormal(Mesh& mesh)
   {
     delete it->second;
   }
-  vdmap.clear();
-
 }
 
 //-----------------------------------------------------------------------------

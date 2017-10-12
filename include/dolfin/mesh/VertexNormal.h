@@ -69,25 +69,25 @@ public:
   /// Destructor
   ~VertexNormal();
 
-  /// Assignment
-  VertexNormal& operator=(VertexNormal& other);
-
   ///
   Mesh& mesh();
 
   ///
-  Array<MeshFunction<real> *>& basis();
+  MeshValues<real, Vertex> const& basis(uint i, uint j) const;
 
   ///
   MeshValues<uint, Vertex>& vertex_type();
 
 private:
 
-  // Cleanup
-  void clear();
+  /// Assignment [Disable]
+  VertexNormal& operator=(VertexNormal& other);
 
   // Compute normals to the boundary nodes
   void computeNormal(Mesh& mesh);
+
+  ///
+  MeshValues<real, Vertex>& basis(uint i, uint j);
 
   //
   void getFacetData(VertexNormal::Type type, Mesh& mesh, BoundaryMesh& boundary,
@@ -99,10 +99,13 @@ private:
   // Global mesh
   Mesh& mesh_;
 
+  // Global mesh
+  uint const gdim_;
+
   SubDomain const * const subdomain_;
 
   //
-  Array<MeshFunction<real> *> basis_;
+  Array<MeshValues<real, Vertex> > basis_;
 
   // Define vertex type: 1 surface, 2 edge, 3 surface
   MeshValues<uint, Vertex> vertex_type_;
@@ -121,9 +124,15 @@ inline Mesh& VertexNormal::mesh()
 }
 
 //-----------------------------------------------------------------------------
-inline Array<MeshFunction<real> *>& VertexNormal::basis()
+inline MeshValues<real, Vertex> const& VertexNormal::basis(uint i, uint j) const
 {
-  return basis_;
+  return basis_[i * gdim_ + j];
+}
+
+//-----------------------------------------------------------------------------
+inline MeshValues<real, Vertex>& VertexNormal::basis(uint i, uint j)
+{
+  return basis_[i * gdim_ + j];
 }
 
 //-----------------------------------------------------------------------------

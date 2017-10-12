@@ -81,7 +81,7 @@ public:
   }
 
   /// Destructor
-  ~MeshFunction()
+  virtual ~MeshFunction()
   {
     delete[] values_;
   }

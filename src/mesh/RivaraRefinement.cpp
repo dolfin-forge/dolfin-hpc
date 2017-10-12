@@ -52,14 +52,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   std::vector<bool> dmarked(mesh.num_cells());
   for (CellIterator ci(mesh); !ci.end(); ++ci)
   {
-    if(cell_marker.get(ci->index()) == true)
-    {
-      dmarked[ci->index()] = true;
-    }
-    else
-    {
-      dmarked[ci->index()] = false;
-    }
+    dmarked[ci->index()] = cell_marker(ci->index());
   }
 
   dmesh.bisectMarked(dmarked);

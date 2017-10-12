@@ -1094,7 +1094,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      *(vp++) = (real) meshfunction.get(c->index());
+      *(vp++) = (real) meshfunction(c->index());
     }
 
     local_size = mesh.num_cells();
@@ -1110,7 +1110,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
     {
       if (!v->is_ghost())
       {
-        *(vp++) = (real) meshfunction.get(v->index());
+        *(vp++) = (real) meshfunction(v->index());
       }
     }
 
@@ -1232,14 +1232,14 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   {
     for (uint i = 0; i < meshfunction.size(); ++i)
     {
-      meshfunction.set(i, static_cast<T>(values[i]));
+      meshfunction(i) = static_cast<T>(values[i]);
     }
   }
   if (mfunc_type == 1)
   {
     for (uint i = 0; i < meshfunction.size(); ++i)
     {
-      meshfunction.set(i, static_cast<T>(values[i]));
+      meshfunction(i) = static_cast<T>(values[i]);
     }
 
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
@@ -1274,9 +1274,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
       MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
       for (int k = 0; k < recv_count; ++k)
-        send_buff.push_back(
-            meshfunction.get(
-                mesh.distdata()[0].get_local(recv_ghost[k])));
+        send_buff.push_back(meshfunction(mesh.distdata()[0].get_local(recv_ghost[k])));
 
       MPI_Sendrecv(&send_buff[0], send_buff.size(), MPI_DOUBLE, src, 2,
                    recv_buff, recv_size, MPI_DOUBLE, dest, 2,
@@ -1285,9 +1283,8 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
 
       for (int j = 0; j < recv_count; j++)
       {
-        meshfunction.set(
-            mesh.distdata()[0].get_local(ghost_buff[dest][j]),
-            static_cast<T>(recv_buff[j]));
+        meshfunction(mesh.distdata()[0].get_local(ghost_buff[dest][j]))
+            = static_cast<T>(recv_buff[j]);
       }
 
       send_buff.clear();

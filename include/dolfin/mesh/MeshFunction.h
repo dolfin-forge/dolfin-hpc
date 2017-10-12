@@ -200,42 +200,6 @@ public:
     return values_[entity.index()];
   }
 
-  /// Get value at given entity
-  inline T get(const MeshEntity& entity) const
-  {
-    dolfin_assert(values_);
-    dolfin_assert(&entity.mesh() == mesh_);
-    dolfin_assert(entity.dim() == dim_);
-    dolfin_assert(entity.index() < size_);
-    return values_[entity.index()];
-  }
-
-  /// Get value at given entity
-  inline T get(uint index) const
-  {
-    dolfin_assert(values_);
-    dolfin_assert(index < size_);
-    return values_[index];
-  }
-
-  /// Set value at given entity
-  inline void set(const MeshEntity& entity, T const& value)
-  {
-    dolfin_assert(values_);
-    dolfin_assert(&entity.mesh() == mesh_);
-    dolfin_assert(entity.dim() == dim_);
-    dolfin_assert(entity.index() < size_);
-    values_[entity.index()] = value;
-  }
-
-  /// Set value at given entity
-  inline void set(uint index, T const& value)
-  {
-    dolfin_assert(values_);
-    dolfin_assert(index < size_);
-    values_[index] = value;
-  }
-
   /// Assignment function
   template <class V>
   MeshFunction<T>& operator=(MeshFunction<V> const& other)

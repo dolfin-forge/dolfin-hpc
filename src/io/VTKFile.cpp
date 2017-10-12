@@ -872,7 +872,7 @@ template<class T>
       std::vector<float>::iterator entry = data.begin();
       for (CellIterator cell(mesh); !cell.end(); ++cell)
       {
-        *entry++ = static_cast<float>(meshfunction.get(cell->index()));
+        *entry++ = static_cast<float>(meshfunction(cell->index()));
       }
 
       // Open file
@@ -907,7 +907,7 @@ template<class T>
 
       for (VertexIterator v(mesh); !v.end(); ++v)
       {
-        *entry++ = static_cast<float>(meshfunction.get(v->index()));
+        *entry++ = static_cast<float>(meshfunction(v->index()));
       }
 
       // Open file

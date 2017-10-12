@@ -34,7 +34,7 @@ MeshQuality::MeshQuality(Mesh& mesh) :
   // Initialize orientation
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    orientation_.set(c->index(), (uint) c->orientation());
+    orientation_(c->index()) = (uint) c->orientation();
   }
 
   //
@@ -46,7 +46,7 @@ bool MeshQuality::is_inverted(uint& first)
 {
   for (CellIterator c(mesh()); !c.end(); ++c)
   {
-    if (orientation_.get(c->index()) != c->orientation())
+    if (orientation_(c->index()) != c->orientation())
     {
       first = c->index();
       return true;

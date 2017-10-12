@@ -212,7 +212,7 @@ void write_facets(std::string name, Mesh& mesh, std::string set,
     Facet f(mesh, *it);
     for(VertexIterator v(f); ! v.end(); ++v)
     {
-      mf.set(*v, true);
+      mf(*v) = true;
     }
   }
   File f(ss.str());

@@ -130,7 +130,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
     Array<uint> * sendbuf = new Array<uint> [pe_size];
     for (GhostIterator it(mesh.distdata()[edim]); !it.end(); ++it)
     {
-      if (sub_domains.get(it.index()) == index)
+      if (sub_domains(it.index()) == index)
       {
         sendbuf[it.owner()].push_back(it.global_index());
       }
@@ -162,7 +162,7 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
 
       for (int k = 0; k < recv_count; ++k)
       {
-        sub_domains.set(mesh.distdata()[edim].get_local(recvbuf[k]), index);
+        sub_domains(mesh.distdata()[edim].get_local(recvbuf[k])) = index;
       }
     }
     delete[] recvbuf;

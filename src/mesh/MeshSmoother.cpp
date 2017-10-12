@@ -37,9 +37,9 @@ void MeshSmoother::maph0(Mesh& mesh, Mesh& sub, MeshFunction<int>& cell_map,
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     Cell& cell = *c;
-    if (cell_map.get(cell) != -1)
+    if (cell_map(cell) != -1)
     {
-      subh0.set(cell_map(cell), h0.get(cell));
+      subh0(cell_map(cell)) = h0(cell);
     }
   }
 }
@@ -76,7 +76,7 @@ void MeshSmoother::worstElement(Mesh& mesh, int& index,
     Cell& cell = *c;
 
     real qual = mqual.mean_ratio(cell);
-    if (qual < mu_min && !onBoundary(cell) && !masked_cells.get(cell))
+    if (qual < mu_min && !onBoundary(cell) && !masked_cells(cell))
     {
       index = cell.index();
       mu_min = qual;
@@ -88,7 +88,7 @@ void MeshSmoother::worstElement(Mesh& mesh, int& index,
 void MeshSmoother::elementNhood(Mesh& mesh, Cell& element,
                                 MeshFunction<bool>& elements, int depth)
 {
-  elements.set(element, true);
+  elements(element) = true;
 
   if (depth == 0) return;
 
@@ -121,7 +121,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   {
     Cell& cell = *c;
 
-    if (smoothed_cells.get(cell) == true)
+    if (smoothed_cells(cell) == true)
     {
       ncells++;
     }
@@ -137,7 +137,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     {
       Cell& cell = *c;
 
-      if (smoothed_cells.get(cell) == true)
+      if (smoothed_cells(cell) == true)
       {
         included = true;
       }
@@ -173,7 +173,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     {
       Cell& cell = *c;
 
-      if (smoothed_cells.get(cell) == true)
+      if (smoothed_cells(cell) == true)
       {
         included = true;
       }
@@ -181,7 +181,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
 
     if (included)
     {
-      old2new_vertex.set(vertex.index(), current_vertex);
+      old2new_vertex(vertex.index()) = current_vertex;
       editor.add_vertex(current_vertex, vertex.x());
       distdata[0].set_map(current_vertex,
                        mesh.distdata()[0].get_global(vertex.index()));
@@ -194,7 +194,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     }
     else
     {
-      old2new_vertex.set(vertex.index(), -1);
+      old2new_vertex(vertex.index()) = -1;
     }
   }
 
@@ -203,12 +203,12 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
   {
     Cell& cell = *c;
 
-    if (smoothed_cells.get(cell) == true)
+    if (smoothed_cells(cell) == true)
     {
       int cv_idx = 0;
       for (VertexIterator n(cell); !n.end(); ++n)
       {
-        int id = old2new_vertex.get(n->index());
+        int id = old2new_vertex(n->index());
         if (id == -1)
         {
           cout << "broken: " << n->index() << endl;
@@ -216,14 +216,14 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
         cell_vertices[cv_idx++] = id;
       }
 
-      old2new_cell.set(cell.index(), current_cell);
+      old2new_cell(cell.index()) = current_cell;
       distdata[c->dim()].set_map(current_cell, c->global_index());
       editor.add_cell(current_cell++, &cell_vertices[0]);
 
     }
     else
     {
-      old2new_cell.set(cell.index(), -1);
+      old2new_cell(cell.index()) = -1;
     }
   }
 

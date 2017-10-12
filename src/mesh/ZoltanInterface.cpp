@@ -103,7 +103,7 @@ void ZoltanInterface::partitionZoltanInternal(Mesh& mesh,
   // Fill meshfunction from partitions
   for (uint i = 0; i < num_export; i++)
   {
-    partitions.set(export_local_ids[i], export_procs[i]);
+    partitions(export_local_ids[i]) = export_procs[i];
   }
 
   Zoltan::LB_Free_Part(&import_global_ids, &import_local_ids,

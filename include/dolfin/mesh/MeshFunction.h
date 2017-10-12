@@ -81,7 +81,7 @@ public:
   }
 
   /// Destructor
-  ~MeshFunction()
+  virtual ~MeshFunction()
   {
     delete[] values_;
   }
@@ -165,7 +165,7 @@ public:
   }
 
   /// Access value at given index
-  inline T& operator[](uidx index)
+  inline T& operator()(uidx index)
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
@@ -173,7 +173,7 @@ public:
   }
 
   /// Access value at given index (const)
-  inline T const& operator[](uidx index) const
+  inline T const& operator()(uidx index) const
   {
     dolfin_assert(values_);
     dolfin_assert(index < size_);
@@ -237,15 +237,8 @@ public:
   }
 
   /// Assignment function
-  MeshFunction<T>& assign(MeshFunction<T> const& other)
-  {
-    *this = other;
-    return *this;
-  }
-
-  /// Assignment function
   template <class V>
-  MeshFunction<T>& assign(MeshFunction<V> const& other)
+  MeshFunction<T>& operator=(MeshFunction<V> const& other)
   {
     if (this != &other)
     {
@@ -261,6 +254,18 @@ public:
     dolfin_assert(!((values_ == NULL) && (size_>0)));
     std::fill_n(values_, size_, value);
     return *this;
+  }
+
+  /// Swap instances
+  void swap(MeshFunction<T>& other)
+  {
+    if (this != &other)
+    {
+      std::swap(mesh_   , other.mesh_);
+      std::swap(dim_    , other.dim_);
+      std::swap(size_   , other.size_);
+      std::swap(values_ , other.values_);
+    }
   }
 
   /// Display mesh function data

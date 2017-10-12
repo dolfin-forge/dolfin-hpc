@@ -29,26 +29,20 @@ MeshSmoother::~MeshSmoother()
 }
 
 //-----------------------------------------------------------------------------
-void MeshSmoother::maph0(Mesh& mesh, Mesh& sub, MeshFunction<int>& cell_map,
-                         MeshFunction<real>& h0, MeshFunction<real>& subh0)
+void MeshSmoother::maph0(MeshValues<int, Cell>& cell_map,
+                         MeshValues<real, Cell>& h0,
+                         MeshValues<real, Cell>& subh0)
 {
-  subh0.init(sub, sub.topology().dim());
-
-  for (CellIterator c(mesh); !c.end(); ++c)
+  for (CellIterator c(cell_map.mesh()); !c.end(); ++c)
   {
-    Cell& cell = *c;
-    if (cell_map(cell) != -1)
-    {
-      subh0(cell_map(cell)) = h0(cell);
-    }
+    if (cell_map(*c) != -1) { subh0(cell_map(*c)) = h0(*c); }
   }
 }
 
 //-----------------------------------------------------------------------------
 bool MeshSmoother::onBoundary(Cell& cell)
 {
-  int d = cell.dim();
-
+  uint const d = cell.dim();
   for (FacetIterator f(cell); !f.end(); ++f)
   {
     if (f->num_entities(d) == 1)
@@ -60,12 +54,9 @@ bool MeshSmoother::onBoundary(Cell& cell)
 }
 
 //-----------------------------------------------------------------------------
-void MeshSmoother::worstElement(Mesh& mesh, int& index,
-                                MeshFunction<bool>& masked_cells)
+void MeshSmoother::worstElement(int& index, MeshValues<bool, Cell>& masked_cells)
 {
-  int d = mesh.topology().dim();
-  mesh.init(mesh.type().facet_dim(), d);
-
+  Mesh& mesh = masked_cells.mesh();
   MeshQuality mqual(mesh);
 
   real mu_min = 1.0e12;
@@ -73,20 +64,18 @@ void MeshSmoother::worstElement(Mesh& mesh, int& index,
 
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    Cell& cell = *c;
-
-    real qual = mqual.mean_ratio(cell);
-    if (qual < mu_min && !onBoundary(cell) && !masked_cells(cell))
+    real qual = mqual.mean_ratio(*c);
+    if (qual < mu_min && !onBoundary(*c) && !masked_cells(*c))
     {
-      index = cell.index();
+      index = c->index();
       mu_min = qual;
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-void MeshSmoother::elementNhood(Mesh& mesh, Cell& element,
-                                MeshFunction<bool>& elements, int depth)
+void MeshSmoother::elementNhood(Cell& element,
+                                MeshValues<bool, Cell>& elements, int depth)
 {
   elements(element) = true;
 
@@ -94,58 +83,33 @@ void MeshSmoother::elementNhood(Mesh& mesh, Cell& element,
 
   for (CellIterator c(element); !c.end(); ++c)
   {
-    Cell& cell = *c;
-
-    //elements.set(cell, true);
-    elementNhood(mesh, cell, elements, depth - 1);
+    elementNhood(*c, elements, depth - 1);
   }
 }
 
 //-----------------------------------------------------------------------------
-void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
-                           MeshFunction<bool>& smoothed_cells,
-                           MeshFunction<int>& old2new_vertex,
-                           MeshFunction<int>& old2new_cell)
+void MeshSmoother::submesh(Mesh& sub,
+                           MeshValues<bool, Cell>& smoothed_cells,
+                           MeshValues<int, Vertex>& old2new_vertex,
+                           MeshValues<int, Cell>& old2new_cell)
 {
-
-  //dolfin_debug("Entering create submesh");
-
-  old2new_vertex.init(mesh, 0);
-  old2new_cell.init(mesh, mesh.topology().dim());
-
   int ncells = 0;
   int nvertices = 0;
 
   // Count cells and vertices in submesh
+  Mesh& mesh = smoothed_cells.mesh();
   for (CellIterator c(mesh); !c.end(); ++c)
   {
-    Cell& cell = *c;
-
-    if (smoothed_cells(cell) == true)
-    {
-      ncells++;
-    }
+    if (smoothed_cells(*c) == true) { ++ncells; }
   }
 
-  for (VertexIterator n(mesh); !n.end(); ++n)
+  bool included = false;
+  for (VertexIterator n(smoothed_cells.mesh()); !n.end(); ++n,
+       nvertices+= included, included = false)
   {
-    Vertex& vertex = *n;
-
-    bool included = false;
-
-    for (CellIterator c(vertex); !c.end(); ++c)
+    for (CellIterator c(*n); !c.end(); ++c)
     {
-      Cell& cell = *c;
-
-      if (smoothed_cells(cell) == true)
-      {
-        included = true;
-      }
-    }
-
-    if (included)
-    {
-      nvertices++;
+      if (smoothed_cells(*c) == true) { included = true; }
     }
   }
 
@@ -198,7 +162,7 @@ void MeshSmoother::submesh(Mesh& mesh, Mesh& sub,
     }
   }
 
-  Array<unsigned int> cell_vertices(cell_type.num_entities(0));
+  Array<uint> cell_vertices(cell_type.num_entities(0));
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     Cell& cell = *c;

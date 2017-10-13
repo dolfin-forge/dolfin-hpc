@@ -16,6 +16,7 @@
 
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/constants.h>
+#include <dolfin/math/basic.h>
 #include <dolfin/mesh/Space.h>
 
 #include <cstring>

@@ -53,9 +53,9 @@ START_TEST( test_algorithm )
     {
       UnitInterval mesh(42);
       real value = 1.0;
-      foreach<CellIterator>(mesh, Volume(), std::min<real>, value);
+      foreach<CellIterator, std::min<real> >(mesh, Volume(), value);
       message("%g", value);
-      foreach<CellIterator>(mesh, Volume(), std::max<real>, value);
+      foreach<CellIterator, std::max<real> >(mesh, Volume(), value);
       message("%g", value);
     }
     T.end();
@@ -64,9 +64,9 @@ START_TEST( test_algorithm )
     {
       UnitInterval mesh(42);
       uint value = mesh.global_size(0);
-      foreach<UFCCellIterator>(mesh, DistGlobalIndex(), std::min<uint>, value);
+      foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
       message("%u", value);
-      foreach<UFCCellIterator>(mesh, DistGlobalIndex(), std::max<uint>, value);
+      foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
       message("%u", value);
     }
     T.end();

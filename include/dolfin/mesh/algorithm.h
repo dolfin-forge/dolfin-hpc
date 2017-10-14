@@ -26,12 +26,57 @@ void foreach(Mesh& mesh, Operator transform)
 }
 
 //-----------------------------------------------------------------------------
+// Functors
 template<class Iterator, class Operator, class Transform, class Value>
 void foreach(Mesh& mesh, Operator evaluator, Transform transform, Value& value)
 {
   for (Iterator it(mesh); !it.end(); ++it)
   {
     value = transform(evaluator(*it), value);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Unary ops (uint)
+template<class Iterator, uint const& (*T)(uint const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, uint& value)
+{
+  for (Iterator it(mesh); !it.end(); ++it)
+  {
+    value = T(evaluator(*it), value);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Unary ops (real)
+template<class Iterator, real const& (*T)(real const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, real& value)
+{
+  for (Iterator it(mesh); !it.end(); ++it)
+  {
+    value = T(evaluator(*it), value);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Binary ops (uint)
+template<class Iterator, uint const& (*T)(uint const&, uint const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, uint& value)
+{
+  for (Iterator it(mesh); !it.end(); ++it)
+  {
+    value = T(evaluator(*it), value);
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Binary ops (real)
+template<class Iterator, real const& (*T)(real const&, real const&), class Operator>
+void foreach(Mesh& mesh, Operator evaluator, real& value)
+{
+  for (Iterator it(mesh); !it.end(); ++it)
+  {
+    value = T(evaluator(*it), value);
   }
 }
 

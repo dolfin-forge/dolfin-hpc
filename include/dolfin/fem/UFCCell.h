@@ -23,13 +23,14 @@ namespace dolfin
 
 class UFCCell : public ufc::cell
 {
+  friend class UFCCellIterator;
 
 public:
 
   /// Create empty UFC cell
   UFCCell() :
       ufc::cell(),
-      cell(NULL),
+      cell_(NULL),
       num_vertices(0)
   {
   }
@@ -37,7 +38,7 @@ public:
   /// Create UFC cell from DOLFIN cell
   UFCCell(Cell& dolfin_cell) :
       ufc::cell(),
-      cell(&dolfin_cell),
+      cell_(&dolfin_cell),
       num_vertices(0)
   {
     init(dolfin_cell);
@@ -46,10 +47,10 @@ public:
   /// Copy constructor
   UFCCell(UFCCell const& other) :
       ufc::cell(),
-      cell(other.cell),
+      cell_(other.cell_),
       num_vertices(0)
   {
-    if (cell != NULL) init(*const_cast<Cell*>(cell));
+    if (cell_ != NULL) init(*const_cast<Cell*>(cell_));
   }
 
   /// Destructor
@@ -58,8 +59,15 @@ public:
     clear();
   }
 
+private:
+
   //
-  Cell const * cell;
+  Cell const * cell_;
+
+public:
+
+  /// Dereference operator, returns a reference to the underlying Cell
+  inline Cell const& operator*() const { return *cell_; };
 
   // Number of cell vertices
   uint num_vertices;
@@ -112,7 +120,7 @@ inline void UFCCell::init(Cell& cell)
   clear();
 
   // Update dolfin cell pointer
-  this->cell = &cell;
+  this->cell_ = &cell;
 
   // Set cell shape
   cell_shape = shape(cell.type());
@@ -192,7 +200,7 @@ inline void UFCCell::clear()
 inline void UFCCell::update(Cell& cell)
 {
   // Update dolfin cell pointer
-  this->cell = &cell;
+  this->cell_ = &cell;
 
 #if ENABLE_P1_OPTIMIZATIONS
   cell.global_entities(0, entity_indices[0]);

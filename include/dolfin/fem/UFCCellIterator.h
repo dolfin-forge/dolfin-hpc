@@ -23,7 +23,7 @@ public:
       it_(mesh),
       geometry_(mesh.geometry())
   {
-    ufc_cell_.cell = &(*it_);
+    ufc_cell_.cell_ = &(*it_);
     ufc_cell_.cell_shape = UFCCell::shape(mesh.type().cellType());
     ufc_cell_.num_vertices = mesh.type().num_entities(0);
     ufc_cell_.topological_dimension = mesh.topology().dim();
@@ -40,13 +40,13 @@ public:
 
     //
 #if ENABLE_P1_OPTIMIZATIONS
-    ufc_cell_.cell->global_entities(0, ufc_cell_.entity_indices[0]);
+    ufc_cell_.cell_->global_entities(0, ufc_cell_.entity_indices[0]);
 #else
-    ufc_cell_.cell->global_entities(ufc_cell_.entity_indices);
+    ufc_cell_.cell_->global_entities(ufc_cell_.entity_indices);
 #endif
     ufc_cell_.index =
         ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-    uint const * vertices = ufc_cell_.cell->entities(0);
+    uint const * vertices = ufc_cell_.cell_->entities(0);
     for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
     {
       ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);
@@ -72,7 +72,7 @@ public:
 #endif
       ufc_cell_.index =
           ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-      uint const * vertices = ufc_cell_.cell->entities(0);
+      uint const * vertices = ufc_cell_.cell_->entities(0);
       for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
       {
         ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);

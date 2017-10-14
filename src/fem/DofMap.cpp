@@ -252,7 +252,7 @@ void DofMap::tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& ce
 void DofMap::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell) const
 {
   dolfin_assert(dofs != NULL);
-  numbering_->tabulate_dofs(dofs, ufc_cell, *ufc_cell.cell);
+  numbering_->tabulate_dofs(dofs, ufc_cell, *ufc_cell);
 }
 
 //-----------------------------------------------------------------------------

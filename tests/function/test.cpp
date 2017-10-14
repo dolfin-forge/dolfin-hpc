@@ -6,6 +6,7 @@
 #include "Expression/Expression.h"
 #include "Field/Field.h"
 #include "Function/Function.h"
+#include "Operators/Operators.h"
 #include "Real/Real.h"
 #include "Value/Value.h"
 #include "UFCFunction/UFCFunction.h"
@@ -24,6 +25,9 @@ DOLFIN_SUITE_BEGIN(suite, "function")
 
   DOLFIN_TCASE_CREATE("Real");
   DOLFIN_TCASE_ADD(test_Real);
+
+  DOLFIN_TCASE_CREATE("Operators");
+  DOLFIN_TCASE_ADD(test_Operators);
 
   DOLFIN_TCASE_CREATE("UFCFunction");
   DOLFIN_TCASE_ADD(test_UFCFunction);

@@ -39,7 +39,7 @@ void MeshQualityFunction::evaluate(real* values, const real* x,
                                    const ufc::cell& cell) const
 {
   UFCCell const& ufc_cell = static_cast<UFCCell const&>(cell);
-  real const qK = mqual_.mean_ratio(*(ufc_cell.cell));
+  real const qK = mqual_.mean_ratio(*ufc_cell);
   values[0] = 1.0 / std::pow(qK, static_cast<real>(p_));
 }
 

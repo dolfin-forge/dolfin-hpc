@@ -14,7 +14,7 @@ struct EntityOp : public V
 {
   inline void evaluate(real* values, const real* x, const UFCCell& cell) const
   {
-    static_cast<T const *>(this)->operator()(*cell.cell, values);
+    static_cast<T const *>(this)->operator()(*cell, values);
   }
 
   inline void operator()(E const& e, real *x) const

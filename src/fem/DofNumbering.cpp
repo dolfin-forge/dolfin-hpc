@@ -210,7 +210,7 @@ void DofNumbering::pretabulate(uint *& array, uint& array_size) const
 //-----------------------------------------------------------------------------
 void DofNumbering::tabulate_dofs(uint* dofs, UFCCell const& ufc_cell)
 {
-  this->tabulate_dofs(dofs, ufc_cell, *ufc_cell.cell);
+  this->tabulate_dofs(dofs, ufc_cell, *ufc_cell);
 }
 //-----------------------------------------------------------------------------
 void DofNumbering::disp() const

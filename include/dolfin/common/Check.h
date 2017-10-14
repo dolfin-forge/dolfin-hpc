@@ -15,16 +15,22 @@ typedef void Suite;
 namespace dolfin
 {
 
+extern "C" typedef void(*CheckVoidFunctionPtr)(void);
+extern "C" typedef void(*CheckIntFunctionPtr)(int);
+
+
 //-----------------------------------------------------------------------------
 
 #define DOLFIN_TCASE_CREATE(_name) \
   tc = tcase_create(_name); \
   suite_add_tcase(s, tc); \
-  tcase_add_checked_fixture(tc, dolfin::Check::setup, dolfin::Check::teardown); \
+  tcase_add_checked_fixture(tc, \
+                            (CheckVoidFunctionPtr) dolfin::Check::setup, \
+                            (CheckVoidFunctionPtr) dolfin::Check::teardown); \
   tcase_set_timeout(tc, 60);
 
 #define DOLFIN_TCASE_ADD(_test) \
-  tcase_add_test(tc, _test);
+  tcase_add_test(tc, (CheckIntFunctionPtr) _test);
 
 #define DOLFIN_TCASE_TIMEOUT(_value) \
   tcase_set_timeout(tc, _value);

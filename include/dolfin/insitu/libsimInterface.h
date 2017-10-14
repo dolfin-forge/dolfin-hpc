@@ -64,13 +64,14 @@ namespace dolfin
     // Simulation state (running)
     static int runflag;
 
-    struct libsimData 
+    struct libsimData
     {
-      double& t_;		
+      double *t_;		
       uint tstep_;
-      Mesh& mesh_;      
+      Mesh *mesh_;      
       LabelList<GenericFunction> function_list_;
-      Array<libsimPipeLine*> pipelines_;
+      Array<libsimPipeLine*> pipelines_;      
+      libsimData(): t_(NULL),mesh_(NULL){}
     };
 
     // Simulation (insitu) data
@@ -91,16 +92,18 @@ namespace dolfin
 
       if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) 
       {
-	VisIt_SimulationMetaData_setCycleTime(md, d->tstep_, d->t_);
+
+	if (d->t_ != NULL)
+	  VisIt_SimulationMetaData_setCycleTime(md, d->tstep_, *(d->t_));
 
 	// Mesh meta data
 	if (VisIt_MeshMetaData_alloc(&msh) == VISIT_OKAY)
 	{
 	  VisIt_MeshMetaData_setName(msh, "Mesh");
 	  VisIt_MeshMetaData_setMeshType(msh, VISIT_MESHTYPE_UNSTRUCTURED);
-	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_.geometry().dim());
+	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_->geometry().dim());
 	  VisIt_MeshMetaData_setTopologicalDimension(msh,
-						     d->mesh_.topology().dim());
+						     d->mesh_->topology().dim());
 	  VisIt_MeshMetaData_setNumDomains(msh, PE::size());
 	  VisIt_SimulationMetaData_addMesh(md, msh);
 	}
@@ -176,14 +179,14 @@ namespace dolfin
       {
 
 	VisIt_VariableData_setDataD(coords, VISIT_OWNER_SIM,
-				    d->mesh_.topology().dim(),
-				    d->mesh_.num_vertices(),
-				    d->mesh_.geometry().coordinates());
+				    d->mesh_->topology().dim(),
+				    d->mesh_->num_vertices(),
+				    d->mesh_->geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);
 	
-	uint *dolfin_conn = d->mesh_.cells();
+	uint *dolfin_conn = d->mesh_->cells();
 	uint cell_type = 0;
-	switch(d->mesh_.type().cellType())
+	switch(d->mesh_->type().cellType())
 	  {
 	  case CellType::triangle:
 	    cell_type = VISIT_CELL_TRI;
@@ -195,14 +198,14 @@ namespace dolfin
 	    break;
 	  }
 
-	int nconn = d->mesh_.num_cells() * 
-	  (d->mesh_.type().num_entities(0) + 1);
+	int nconn = d->mesh_->num_cells() * 
+	  (d->mesh_->type().num_entities(0) + 1);
 	int *visit_conn = new int[nconn];
 	
-	for (int *cp = &visit_conn[0], i = 0; i < d->mesh_.num_cells(); i++)
+	for (int *cp = &visit_conn[0], i = 0; i < d->mesh_->num_cells(); i++)
 	{
 	  *(cp++) = cell_type;
-	  for (int j = 0; j < d->mesh_.type().num_entities(0); j++) 
+	  for (int j = 0; j < d->mesh_->type().num_entities(0); j++) 
 	  {
 	    *(cp++) = (int) *(dolfin_conn++);
 	  }
@@ -210,7 +213,7 @@ namespace dolfin
 	
 	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1, 
 				    nconn, visit_conn);
-	VisIt_UnstructuredMesh_setConnectivity(msh, d->mesh_.num_cells(), conn);
+	VisIt_UnstructuredMesh_setConnectivity(msh, d->mesh_->num_cells(), conn);
 
       }
       
@@ -242,28 +245,28 @@ namespace dolfin
 	}
 
 	GenericFunction *u = it->first;
-	uint const num_cell_vertices = d->mesh_.type().num_entities(0);
+	uint const num_cell_vertices = d->mesh_->type().num_entities(0);
 	uint const num_cell_dofs = num_cell_vertices * u->value_size();
-	real *vertex_values = new real[num_cell_dofs * d->mesh_.num_vertices()];
+	real *vertex_values = new real[num_cell_dofs * d->mesh_->num_vertices()];
 
 	u->interpolate_vertex_values(vertex_values);
 
 	// TODO Check if VisIt can handle u->value_size() > 3
-	real *values = new real[u->value_size() * d->mesh_.num_vertices()];
-	memset(values, u->value_size() * d->mesh_.num_vertices(), sizeof(real));
+	real *values = new real[u->value_size() * d->mesh_->num_vertices()];
+	memset(values, u->value_size() * d->mesh_->num_vertices(), sizeof(real));
 	real *vp = values;
 
-	for (VertexIterator v(d->mesh_); !v.end(); ++v)
+	for (VertexIterator v(*(d->mesh_)); !v.end(); ++v)
 	{
 	  for (uint i = 0; i < u->value_size(); i++) 
 	  {
-	    *(vp++) = vertex_values[v->index() + i * d->mesh_.num_vertices()];
+	    *(vp++) = vertex_values[v->index() + i * d->mesh_->num_vertices()];
 	  }
 	}
 	delete[] vertex_values;
 	
 	VisIt_VariableData_setDataD(func, VISIT_OWNER_VISIT, u->value_size(),
-				    d->mesh_.num_vertices(), values);
+				    d->mesh_->num_vertices(), values);
 
       }
       return func;
@@ -290,7 +293,7 @@ namespace dolfin
 
   inline void libsimInterface::addData(Mesh& mesh)
   {
-    InsituData_.mesh_ = mesh;
+    InsituData_.mesh_ = &mesh;
   }
 
   inline void libsimInterface::addPipeLine(libsimPipeLine& pipeline)

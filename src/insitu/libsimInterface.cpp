@@ -16,6 +16,15 @@
 using namespace dolfin;
 
 #ifdef HAVE_LIBSIM
+//--- STATIC ------------------------------------------------------------------
+
+int libsimInterface::runflag = 0;
+libsimInterface::libsimData libsimInterface::InsituData_;
+
+#ifdef HAVE_MPI
+dolfin::MPI::Communicator libsimInterface::comm;
+#endif
+
 //-----------------------------------------------------------------------------
 void libsimInterface::initBatch()
 {
@@ -25,10 +34,17 @@ void libsimInterface::initBatch()
     error("VisIt/libsim environment initialization error");
   }
 
+
   if (VisItInitializeRuntime() != VISIT_OKAY)
   {
     error("VisIt/libsim runtime initialization error");
   }
+
+  VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
+  VisItSetGetDomainList(libsimGetDomain, &InsituData_);
+  VisItSetGetVariable(libsimGetFunction, &InsituData_);
+  VisItSetGetMesh(libsimGetMesh, &InsituData_);
+
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::initInteractive()
@@ -41,13 +57,18 @@ void libsimInterface::initInteractive()
 
   VisItInitializeSocketAndDumpSimFile("dolfin-hpc", "DOLFIN HPC In-situ viz",
 				      "/tmp/", NULL, NULL, NULL);
+
 }
 //-----------------------------------------------------------------------------
 int libsimInterface::setupEnv()
 {
   char *env = NULL;
 
-  if (MPI::rank() == 0)
+
+  VisItSetParallel(PE::size() > 1);
+  VisItSetParallelRank(PE::rank());  
+
+  if (PE::rank() == 0)
   {    
     env = VisItGetEnvironment();
 
@@ -55,16 +76,6 @@ int libsimInterface::setupEnv()
     {
       return VISIT_ERROR;
     }
-  }
-  
-  VisItSetParallel(MPI::size() > 1);
-  if (MPI::size() > 1) 
-  {
-    VisItSetParallelRank(MPI::rank());  
-#ifdef HAVE_MPI
-    MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
-    VisItSetMPICommunicator((void *) &comm);
-#endif
   }
 
   if (VisItSetupEnvironment2(env) != VISIT_OKAY)
@@ -76,11 +87,6 @@ int libsimInterface::setupEnv()
   {
     free(env);
   }
-
-  VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
-  VisItSetGetDomainList(libsimGetDomain, &InsituData_);
-  VisItSetGetVariable(libsimGetFunction, &InsituData_);
-  VisItSetGetMesh(libsimGetMesh, &InsituData_);
 
   return VISIT_OKAY;
 

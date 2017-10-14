@@ -108,8 +108,6 @@ private:
   // Current time
   real const * const _t;
 
-  uint _rank;
-
 };
 
 }

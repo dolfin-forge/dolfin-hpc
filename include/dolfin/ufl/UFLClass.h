@@ -43,7 +43,7 @@ public:
   virtual std::string const& str() const = 0;
 
   /// __eq__
-  virtual bool operator ==(Class const& other) const;
+  bool operator ==(Class const& other) const;
 
   /// Create representation from a list of argument objects
   template<class OBJ>

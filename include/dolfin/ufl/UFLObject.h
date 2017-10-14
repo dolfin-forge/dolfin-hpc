@@ -53,10 +53,10 @@ public:
     repr_t make_repr(std::vector<OBJ const *> const& prototype) const;
 
   /// __eq__
-  virtual bool operator ==(Object const& other) const;
+  bool operator ==(Object const& other) const;
 
   /// __neq__
-  virtual bool operator !=(Object const& other) const;
+  bool operator !=(Object const& other) const;
 
 protected:
 

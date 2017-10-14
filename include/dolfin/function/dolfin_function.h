@@ -14,9 +14,5 @@
 #include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/Value.h>
 
-// Functors implementation
-
-#include <dolfin/function/impl/CellDiameter.h>
-
 
 #endif /* __DOLFIN_HEADER_FUNCTION_H */

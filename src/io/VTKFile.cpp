@@ -16,6 +16,7 @@
 #include <dolfin/function/Function.h>
 #include <dolfin/io/Encoder.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshFunction.h>
@@ -52,7 +53,7 @@ void VTKFile::operator<<(Mesh& mesh)
   // Only the root updates the pvd file
   if (mesh.is_distributed())
   {
-    if(_rank == 0)
+    if(PE::rank() == 0)
     {
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
@@ -133,7 +134,7 @@ void VTKFile::write()
 {
   if (!opened_write)
   {
-    if(_rank == 0)
+    if(PE::rank() == 0)
     {
       // Clear file
       FILE* fp = fopen(filename.c_str(), "w");
@@ -153,7 +154,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Write pvd file
 
   // Only the root updates the pvd file
-  if (_rank == 0)
+  if (PE::rank() == 0)
   {
 
 #if HAVE_MPI
@@ -814,7 +815,7 @@ void VTKFile::vtuNameUpdate(const int counter)
   extension.assign(filename, filename.find("."), filename.size());
 
   fileid << counter;
-  newfilename << filestart << fileid.str() << "_" << _rank
+  newfilename << filestart << fileid.str() << "_" << PE::rank()
               << ".vtu";
   vtu_filename = newfilename.str();
 
@@ -851,7 +852,7 @@ template<class T>
     vtuNameUpdate(counter);
 
     // Write pvd file
-    if (_rank == 0)
+    if (PE::rank == 0)
     {
       pvtuNameUpdate(counter);
       pvdFileWrite(counter);

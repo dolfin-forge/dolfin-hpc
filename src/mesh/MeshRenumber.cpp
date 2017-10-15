@@ -238,6 +238,11 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     }
 
     // At this point the mapping is set for owned entities but not for ghosts
+    if (edata.num_shared() < edata.num_ghost())
+    {
+      error("MeshRenumber : invalid number of entities, shared %u < %u ghost",
+            edata.num_shared(), edata.num_ghost());
+    }
     recvmax = edata.num_shared() - edata.num_ghost();
     recvbuf = (recvmax == 0 ? NULL : new uint[recvmax]);
     uint * sendbuf_back = (recvmax == 0 ? NULL : new uint[recvmax]);

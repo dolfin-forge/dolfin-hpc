@@ -31,47 +31,18 @@ bool MeshEntity::incident(MeshEntity const& entity) const
   // Must be in the same mesh to be incident
   if (&topology_ != &entity.topology_) return false;
 
-  // Get list of entities for given topological dimension
-  MeshConnectivity const& mc = topology_(tdim_, entity.tdim_);
-  dolfin_assert(mc.order() > 0);
-  uint const * entities = mc(index_);
-  uint const num_entities = mc.degree(index_);
-
-  // Check if any entity matches
-  for (uint i = 0; i < num_entities; ++i)
-  {
-    if (entities[i] == entity.index_) return true;
-  }
-
-  // Entity was not found
-  return false;
+  return topology_(tdim_, entity.tdim_).incident(index_, entity.index_);
 }
 //-----------------------------------------------------------------------------
-uint MeshEntity::index(MeshEntity const& entity) const
+int MeshEntity::index(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
   if (&topology_ != &entity.topology_)
   {
-    error("Unable to compute index of given entity defined on a different "
-          "mesh.");
+    error("Unable to compute index of an entity defined on a different mesh.");
   }
 
-  // Get list of entities for given topological dimension
-  MeshConnectivity const& mc = topology_(tdim_, entity.tdim_);
-  dolfin_assert(mc.order() > 0);
-  uint const * entities = mc(index_);
-  uint const num_entities = mc.degree(index_);
-
-  // Check if any entity matches
-  for (uint i = 0; i < num_entities; ++i)
-  {
-    if (entities[i] == entity.index_) return i;
-  }
-
-  // Entity was not found
-  error("Unable to compute index of given entity (not found).");
-
-  return 0;
+  return topology_(tdim_, entity.tdim_).index(index_, entity.index_);
 }
 //-----------------------------------------------------------------------------
 uint MeshEntity::global_index() const

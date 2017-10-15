@@ -61,8 +61,8 @@ public:
   /// Check if given entity is incident
   bool incident(MeshEntity const& entity) const;
 
-  /// Compute local index of given incident entity (error if not found)
-  uint index(MeshEntity const& entity) const;
+  /// Compute local index of given incident entity (-1 if not found)
+  int index(MeshEntity const& entity) const;
 
   //--- Geometry --------------------------------------------------------------
 

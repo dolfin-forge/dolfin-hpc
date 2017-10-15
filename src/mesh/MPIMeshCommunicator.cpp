@@ -477,7 +477,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;
   topology.init(tdim , cindex);
-  message("Init cells");
   topology(tdim, 0).set(cells);
   topology.finalize();
   if(num_global_vertices != topology.global_size(0))

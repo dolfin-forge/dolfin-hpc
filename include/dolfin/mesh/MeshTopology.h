@@ -53,6 +53,8 @@ class MeshDistributedData;
 
 class MeshTopology: public Clonable<MeshTopology>
 {
+  // Save some limbo at MeshEntity construction until classes are rewritten
+  friend class MeshEntity;
 
 public:
 

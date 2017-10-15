@@ -50,6 +50,12 @@ public:
   /// Return number of incident mesh entities of given topological dimension
   uint num_entities(uint dim) const;
 
+  /// Copy global indices of mesh entities to array
+  void get_entities(uint dim, uint * indices) const;
+
+  /// Copy global indices of mesh entities to array
+  void get_entities(uint ** indices) const;
+
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
   uint * entities(uint dim);
@@ -61,8 +67,8 @@ public:
   /// Check if given entity is incident
   bool incident(MeshEntity const& entity) const;
 
-  /// Compute local index of given incident entity (error if not found)
-  uint index(MeshEntity const& entity) const;
+  /// Compute local index of given incident entity (-1 if not found)
+  int index(MeshEntity const& entity) const;
 
   //--- Geometry --------------------------------------------------------------
 
@@ -84,10 +90,10 @@ public:
   uint global_index() const;
 
   /// Copy global indices of mesh entities to array
-  void global_entities(uint dim, uint * indices) const;
+  void get_global_entities(uint dim, uint * indices) const;
 
   /// Copy global indices of mesh entities to array
-  void global_entities(uint ** indices) const;
+  void get_global_entities(uint ** indices) const;
 
   /// Return if the mesh entity is owned
   bool is_owned() const;
@@ -124,6 +130,9 @@ protected:
 
   // Mesh
   Mesh& mesh_;
+
+  // Mesh topology
+  MeshTopology& topology_;
 
   // Topological dimension
   uint const tdim_;
@@ -167,25 +176,25 @@ inline uint MeshEntity::index() const
 //-----------------------------------------------------------------------------
 inline uint MeshEntity::num_entities(uint dim) const
 {
-  //dolfin_assert(mesh_.topology()(tdim_, dim).is_initialized());
+  //dolfin_assert(topology_(tdim_, dim).is_initialized());
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return mesh_.topology()(tdim_, dim).degree(index_);
+  return topology_(tdim_, dim).degree(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint * MeshEntity::entities(uint dim)
 {
-  //dolfin_assert(mesh_.topology()(tdim_, dim).is_initialized());
+  //dolfin_assert(topology_(tdim_, dim).is_initialized());
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return mesh_.topology()(tdim_, dim)(index_);
+  return topology_(tdim_, dim)(index_);
 }
 
 //-----------------------------------------------------------------------------
 inline uint const * MeshEntity::entities(uint dim) const
 {
-  //dolfin_assert(mesh_.topology()(tdim_, dim).is_initialized());
+  //dolfin_assert(topology_(tdim_, dim).is_initialized());
   //NOTE: New MeshTopology class auto-creates connectivity on demand.
-  return mesh_.topology()(tdim_, dim)(index_);
+  return topology_(tdim_, dim)(index_);
 }
 
 //-----------------------------------------------------------------------------

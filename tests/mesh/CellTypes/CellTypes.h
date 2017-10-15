@@ -3,6 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/common/Test.h>
+#include <dolfin/main/PE.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/PointCell.h>
@@ -21,11 +22,11 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 void check_reference_cell(CellType& cell, Mesh& refcell)
 {
-  Cell c(refcell, 0);
+  Cell cell0(refcell, 0);
   begin("Properties");
-  message("Volume       : %+e", cell.volume(c));
-  message("Diameter     : %+e", cell.diameter(c));
-  message("Circumradius : %+e", cell.circumradius(c));
+  message("Volume       : %+e", cell.volume(cell0));
+  message("Diameter     : %+e", cell.diameter(cell0));
+  message("Circumradius : %+e", cell.circumradius(cell0));
   end();
   // Initialize all connectivities
   for (dolfin::uint i = 0; i <= refcell.topology().dim(); ++i)
@@ -53,6 +54,27 @@ void check_reference_cell(CellType& cell, Mesh& refcell)
     {
       vi(*v) = v->index();
     }
+    // Check entities and get_entities consistency
+    uint * cell_vertices = new uint[cell0.num_entities(0)];
+    for (CellIterator c(refcell); !c.end(); ++c)
+    {
+      c->get_entities(0, cell_vertices);
+      c->entities(0);
+      ck_assert(cmp(c->num_entities(0), c->entities(0), cell_vertices));
+      if(PE::size() == 1)
+      {
+        c->get_global_entities(0, cell_vertices);
+        ck_assert(cmp(c->num_entities(0), c->entities(0), cell_vertices));
+      }
+      //
+      for (uint i = 0; i < c->num_entities(0); ++i)
+      {
+        Vertex v(refcell, cell_vertices[i]);
+        ck_assert(c->incident(v));
+        ck_assert(i == uint(c->index(v)));
+      }
+    }
+    delete [] cell_vertices;
   }
   Mesh refcell1(refcell);
   Mesh refcell2(refcell);

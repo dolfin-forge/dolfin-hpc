@@ -40,9 +40,9 @@ public:
 
     //
 #if ENABLE_P1_OPTIMIZATIONS
-    ufc_cell_.cell_->global_entities(0, ufc_cell_.entity_indices[0]);
+    ufc_cell_.cell_->get_global_entities(0, ufc_cell_.entity_indices[0]);
 #else
-    ufc_cell_.cell_->global_entities(ufc_cell_.entity_indices);
+    ufc_cell_.cell_->get_global_entities(ufc_cell_.entity_indices);
 #endif
     ufc_cell_.index =
         ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
@@ -66,9 +66,9 @@ public:
       // the underlying mesh entity is only updated when dereferenced from
       // iterator.
 #if ENABLE_P1_OPTIMIZATIONS
-      it_->global_entities(0, ufc_cell_.entity_indices[0]);
+      it_->get_global_entities(0, ufc_cell_.entity_indices[0]);
 #else
-      it_->global_entities(ufc_cell_.entity_indices);
+      it_->get_global_entities(ufc_cell_.entity_indices);
 #endif
       ufc_cell_.index =
           ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];

@@ -69,6 +69,9 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     MeshConnectivity const& cve = topology(0, d);
     MeshConnectivity const& cev = topology(d, 0);
 
+    // Set the random seed
+    std::srand(MPI::seed());
+
     // Distributed data size is known: cache arrays are used.
     dolfin_assert(edata.empty());
     dolfin_assert(!edata.is_finalized());

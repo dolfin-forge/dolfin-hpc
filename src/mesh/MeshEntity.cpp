@@ -17,7 +17,7 @@ MeshEntity::MeshEntity(Mesh& mesh, uint dim, uint index) :
     topology_(mesh_.topology()),
     tdim_(dim),
     gdim_(mesh.geometry().dim()),
-    distdata_(mesh.is_distributed() ? &mesh.distdata() : NULL),
+    distdata_(topology_.distdata_),
     index_(index)
 {
 }

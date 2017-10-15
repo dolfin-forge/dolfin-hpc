@@ -64,6 +64,8 @@ struct DirichletBoundary : public SubDomain
 
 int main()
 {
+  dolfin_init();
+
   // Create mesh
   Mesh mesh("UnitSquareMesh_32x32.xml");
 
@@ -94,7 +96,10 @@ int main()
 
   solver.solve(A, u.vector(), b);
   u.sync();
-  
+
+  message("vector l2  norm: %e", u.vector().norm());
+  message("vector inf norm: %e", u.vector().max());
+
   // Save solution to file
   File file("poisson.pvd");
   file << u;

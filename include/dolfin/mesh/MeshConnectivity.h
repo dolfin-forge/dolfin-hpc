@@ -138,6 +138,14 @@ public:
   /// Display data
   void disp() const;
 
+  //--- ITERATOR --------------------------------------------------------------
+
+  typedef uint*       iterator;
+  typedef uint const* const_iterator;
+
+  inline iterator begin() const { return connections_; }
+  inline iterator end()   const { return connections_ + offsets_[order_]; }
+
   //--- SERIALIZATION ---------------------------------------------------------
   MeshConnectivity const& operator>>(Array<uint>& A) const;
 

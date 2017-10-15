@@ -26,6 +26,24 @@ MeshEntity::~MeshEntity()
 {
 }
 //-----------------------------------------------------------------------------
+void MeshEntity::get_entities(uint dim, uint * indices) const
+{
+  uint *b, *e;
+  topology_(tdim_, dim)(index_, b, e);
+  std::copy(b, e, indices);
+}
+//-----------------------------------------------------------------------------
+void MeshEntity::get_entities(uint ** indices) const
+{
+  uint *b, *e;
+  for (uint dim = 0; dim < tdim_; ++dim)
+  {
+    topology_(tdim_, dim)(index_, b, e);
+    std::copy(b, e, indices[dim]);
+  }
+  indices[tdim_][0] = index_;
+}
+//-----------------------------------------------------------------------------
 bool MeshEntity::incident(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
@@ -50,7 +68,7 @@ uint MeshEntity::global_index() const
   return (distdata_ ? (*distdata_)[tdim_].get_global(index_) : index_);
 }
 //-----------------------------------------------------------------------------
-void MeshEntity::global_entities(uint dim, uint * indices) const
+void MeshEntity::get_global_entities(uint dim, uint * indices) const
 {
   // Get list of entities for given topological dimension
   if (distdata_ != NULL)
@@ -60,12 +78,11 @@ void MeshEntity::global_entities(uint dim, uint * indices) const
   }
   else
   {
-    MeshConnectivity const& mc = topology_(tdim_, dim);
-    std::copy(mc(index_), mc(index_) + mc.degree(index_), indices);
+    get_entities(dim, indices);
   }
 }
 //-----------------------------------------------------------------------------
-void MeshEntity::global_entities(uint ** indices) const
+void MeshEntity::get_global_entities(uint ** indices) const
 {
   // Get list of entities for given topological dimension
   if (distdata_ != NULL)
@@ -79,12 +96,7 @@ void MeshEntity::global_entities(uint ** indices) const
   }
   else
   {
-    for (uint d = 0; d < tdim_; ++d)
-    {
-      MeshConnectivity const& mc = topology_(tdim_, d);
-      std::copy(mc(index_), mc(index_) + mc.degree(index_), indices[d]);
-    }
-    indices[tdim_][0] = index_;
+    get_entities(indices);
   }
 }
 //-----------------------------------------------------------------------------

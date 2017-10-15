@@ -50,6 +50,12 @@ public:
   /// Return number of incident mesh entities of given topological dimension
   uint num_entities(uint dim) const;
 
+  /// Copy global indices of mesh entities to array
+  void get_entities(uint dim, uint * indices) const;
+
+  /// Copy global indices of mesh entities to array
+  void get_entities(uint ** indices) const;
+
   /// Return array of indices for incident mesh entities of given topological
   /// dimension
   uint * entities(uint dim);
@@ -84,10 +90,10 @@ public:
   uint global_index() const;
 
   /// Copy global indices of mesh entities to array
-  void global_entities(uint dim, uint * indices) const;
+  void get_global_entities(uint dim, uint * indices) const;
 
   /// Copy global indices of mesh entities to array
-  void global_entities(uint ** indices) const;
+  void get_global_entities(uint ** indices) const;
 
   /// Return if the mesh entity is owned
   bool is_owned() const;

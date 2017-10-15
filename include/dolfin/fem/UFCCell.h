@@ -203,9 +203,9 @@ inline void UFCCell::update(Cell& cell)
   this->cell_ = &cell;
 
 #if ENABLE_P1_OPTIMIZATIONS
-  cell.global_entities(0, entity_indices[0]);
+  cell.get_global_entities(0, entity_indices[0]);
 #else
-  cell.global_entities(entity_indices);
+  cell.get_global_entities(entity_indices);
 #endif
 
   // Cell index (short-cut for entity_indices[topological_dimension][0])

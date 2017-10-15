@@ -29,10 +29,10 @@ MeshEntity::~MeshEntity()
 bool MeshEntity::incident(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
-  if (&mesh_ != &entity.mesh_) return false;
+  if (&topology_ != &entity.topology_) return false;
 
   // Get list of entities for given topological dimension
-  MeshConnectivity const& mc = mesh_.topology()(tdim_, entity.tdim_);
+  MeshConnectivity const& mc = topology_(tdim_, entity.tdim_);
   dolfin_assert(mc.order() > 0);
   uint const * entities = mc(index_);
   uint const num_entities = mc.degree(index_);
@@ -50,14 +50,14 @@ bool MeshEntity::incident(MeshEntity const& entity) const
 uint MeshEntity::index(MeshEntity const& entity) const
 {
   // Must be in the same mesh to be incident
-  if (&mesh_ != &entity.mesh_)
+  if (&topology_ != &entity.topology_)
   {
     error("Unable to compute index of given entity defined on a different "
           "mesh.");
   }
 
   // Get list of entities for given topological dimension
-  MeshConnectivity const& mc = mesh_.topology()(tdim_, entity.tdim_);
+  MeshConnectivity const& mc = topology_(tdim_, entity.tdim_);
   dolfin_assert(mc.order() > 0);
   uint const * entities = mc(index_);
   uint const num_entities = mc.degree(index_);
@@ -84,12 +84,12 @@ void MeshEntity::global_entities(uint dim, uint * indices) const
   // Get list of entities for given topological dimension
   if (distdata_ != NULL)
   {
-    MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
+    MeshConnectivity const& mc = topology_(tdim_, dim);
     (*distdata_)[dim].get_global(mc.degree(index_), mc(index_), indices);
   }
   else
   {
-    MeshConnectivity const& mc = mesh_.topology()(tdim_, dim);
+    MeshConnectivity const& mc = topology_(tdim_, dim);
     std::copy(mc(index_), mc(index_) + mc.degree(index_), indices);
   }
 }
@@ -101,7 +101,7 @@ void MeshEntity::global_entities(uint ** indices) const
   {
     for (uint d = 0; d < tdim_; ++d)
     {
-      MeshConnectivity const& mc = mesh_.topology()(tdim_, d);
+      MeshConnectivity const& mc = topology_(tdim_, d);
       (*distdata_)[d].get_global(mc.degree(index_), mc(index_), indices[d]);
     }
     indices[tdim_][0] = (*distdata_)[tdim_].get_global(index_);
@@ -110,7 +110,7 @@ void MeshEntity::global_entities(uint ** indices) const
   {
     for (uint d = 0; d < tdim_; ++d)
     {
-      MeshConnectivity const& mc = mesh_.topology()(tdim_, d);
+      MeshConnectivity const& mc = topology_(tdim_, d);
       std::copy(mc(index_), mc(index_) + mc.degree(index_), indices[d]);
     }
     indices[tdim_][0] = index_;
@@ -147,7 +147,7 @@ bool MeshEntity::has_all_vertices_shared() const
     }
     else
     {
-      MeshConnectivity const& c = mesh_.topology()(tdim_, 0);
+      MeshConnectivity const& c = topology_(tdim_, 0);
       dolfin_assert(c.order() > 0);
       for (uint v = 0; v < c.degree(index_); ++v)
       {
@@ -167,8 +167,8 @@ bool MeshEntity::has_all_vertices_shared() const
 //-----------------------------------------------------------------------------
 bool MeshEntity::on_boundary() const
 {
-  uint const mdim = mesh_.topology().dim();
-  uint const fdim = mesh_.type().facet_dim();
+  uint const mdim = topology_.dim();
+  uint const fdim = topology_.type(index_).facet_dim();
   if(distdata_ != NULL)
   {
     if (tdim_ ==  fdim)
@@ -179,8 +179,8 @@ bool MeshEntity::on_boundary() const
     }
     else
     {
-      MeshConnectivity const& cef = mesh_.topology()(tdim_, fdim);
-      MeshConnectivity const& cfc = mesh_.topology()(fdim , mdim);
+      MeshConnectivity const& cef = topology_(tdim_, fdim);
+      MeshConnectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
@@ -202,8 +202,8 @@ bool MeshEntity::on_boundary() const
     else
     {
 
-      MeshConnectivity const& cef = mesh_.topology()(tdim_, fdim);
-      MeshConnectivity const& cfc = mesh_.topology()(fdim , mdim);
+      MeshConnectivity const& cef = topology_(tdim_, fdim);
+      MeshConnectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
@@ -226,7 +226,7 @@ void MeshEntity::disp() const
   message("geometric dimension   : %u", gdim_);
   message("index                 : %u", index_);
   begin(  "connectivities        : %u");
-  MeshTopology const& topology = mesh_.topology();
+  MeshTopology const& topology = topology_;
   for (uint d =0; d < tdim_; ++d)
   {
     cout << d << ": ";

@@ -133,7 +133,7 @@ public:
       init(other.mesh_, other.dim_, other.size_);
     }
     std::transform(other.values_, other.values_ + other.size_, this->values_,
-                   MeshFunction<T>::cast<V> );
+                   cast<V>() );
     return *this;
   }
 
@@ -297,10 +297,10 @@ protected:
 
   /// Cast operators
   template<class V>
-  static inline T cast(V const& x)
+  struct cast
   {
-    return static_cast<T>(x);
-  }
+    inline T operator()(V const& x) const { return static_cast<T>(x); }
+  };
 
   /// The mesh
   Mesh * mesh_;
@@ -323,37 +323,44 @@ protected:
 //
 /// Helper function that performs symmetric rounding to closest integer
 
-template<> template<> inline bool MeshFunction<bool>::cast(float const& x)
+template<> template<> inline
+bool MeshFunction<bool>::cast<float>::operator()(float const& x) const
 {
   return static_cast<bool>(x > 0);
 }
 
-template<> template<> inline bool MeshFunction<bool>::cast(real const& x)
+template<> template<> inline
+bool MeshFunction<bool>::cast<real>::operator()(real const& x) const
 {
   return static_cast<bool>(x > 0);
 }
 
-template<> template<> inline int MeshFunction<int>::cast(float const& x)
+template<> template<> inline
+int MeshFunction<int>::cast<float>::operator()(float const& x) const
 {
   return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
 }
 
-template<> template<> inline int MeshFunction<int>::cast(real const& x)
+template<> template<> inline
+int MeshFunction<int>::cast<real>::operator()(real const& x) const
 {
   return static_cast<int>((x > 0) ? std::floor(x + 0.5) : std::ceil(x - 0.5));
 }
 
-template<> template<> inline uint MeshFunction<uint>::cast(float const& x)
+template<> template<> inline
+uint MeshFunction<uint>::cast<float>::operator()(float const& x) const
 {
   return static_cast<uint>(std::floor(x + 0.5));
 }
 
-template<> template<> inline uint MeshFunction<uint>::cast(real const& x)
+template<> template<> inline
+uint MeshFunction<uint>::cast<real>::operator()(real const& x) const
 {
   return static_cast<uint>(std::floor(x + 0.5));
 }
 
-template<> template<> inline uint MeshFunction<uint>::cast(int const& x)
+template<> template<> inline
+uint MeshFunction<uint>::cast<int>::operator()(int const& x) const
 {
   return static_cast<uint>((x > 0) ? x : 0);
 }

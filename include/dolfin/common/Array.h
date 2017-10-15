@@ -182,7 +182,7 @@ public:
 private:
 
   /// Disallow copy constructor
-  Array(T const& other) {}
+  Array(T const& other) : stride_(0) {}
 
   uint stride_;
 

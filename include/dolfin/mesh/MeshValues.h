@@ -52,11 +52,23 @@ struct MeshValues : public MeshFunction<T>
   {
   }
 
+  /// Equality
+  bool operator==(MeshValues<T, E, N> const& other)
+  {
+    return MeshFunction<T>::operator ==(other);
+  }
+
+  /// Equality
+  bool operator!=(MeshValues<T, E, N> const& other)
+  {
+    return MeshFunction<T>::operator !=(other);
+  }
+
   /// Return value size
   inline uint value_size() { return N; }
 
   /// Assignment operator
-  MeshValues<T, E>& operator=(MeshValues<T, E> const& other)
+  MeshValues<T, E, N>& operator=(MeshValues<T, E, N> const& other)
   {
     MeshFunction<T>::operator=(other);
     return *this;
@@ -64,7 +76,7 @@ struct MeshValues : public MeshFunction<T>
 
   /// Assignment conversion operator
   template <class V>
-  MeshValues<T, E>& operator=(MeshValues<V, E, N> const& other)
+  MeshValues<T, E, N>& operator=(MeshValues<V, E, N> const& other)
   {
     MeshFunction<T>::operator=(other);
     return *this;

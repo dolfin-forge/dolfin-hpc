@@ -11,12 +11,12 @@
 #define __DOLFIN_MESH_PARTITIONING_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
 
 class Mesh;
-template<class T> class MeshFunction;
 
 /// This class provides a set of functions to partition a Mesh
 
@@ -26,15 +26,14 @@ class MeshPartition
 public:
 
   /// Partition a mesh into pe_size partitions in parallel
-  static void partition(Mesh& mesh, MeshFunction<uint>& partitions);
+  static void partition(MeshValues<uint, Cell>& partitions);
 
   /// Partition a mesh into pe_size partitions in parallel with
-  /// weights on vertices
-  static void partition(Mesh& mesh, MeshFunction<uint>& partitions,
-                        MeshFunction<uint>& weight);
+  /// weights on vertices ^H^H^H on the *fucking* *cells*
+  static void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
   /// Partition a mesh based on coordinates
-  static void partition_geom(Mesh& mesh, MeshFunction<uint>& partitions);
+  static void partition_geom(MeshValues<uint, Vertex>& partitions);
   
 };
 

@@ -5,7 +5,6 @@
 // Last changed: 2015-03-22
 
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/ZoltanInterface.h>
 #include <dolfin/parameter/parameters.h>
@@ -25,8 +24,8 @@ using namespace dolfin;
 #ifdef HAVE_ZOLTAN
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
-					    MeshFunction<uint>& partitions,
-					    MeshFunction<uint>* weight)
+                                            MeshValues<uint, Cell>& partitions,
+                                            MeshValues<uint, Cell>* weight)
 {
 
 #ifndef ENABLE_P1_OPTIMIZATIONS
@@ -42,7 +41,6 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
   // Use Zoltan's Parallel Hypergraph and Graph partitioner
   zz_->Set_Param( "LB_METHOD", "GRAPH");
 
-  partitions.init(mesh, mesh.topology().dim());
   partitions = MPI::rank();
 
   partitionZoltanInternal(mesh, partitions, zz_);
@@ -55,7 +53,7 @@ void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
-					  MeshFunction<uint>& partitions)
+                                          MeshValues<uint, Vertex>& partitions)
 {
 
   Zoltan *zz_ = new Zoltan(MPI::DOLFIN_COMM);
@@ -69,7 +67,6 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
   // Use a Hilbert Space-Filling Curve
   zz_->Set_Param( "LB_METHOD", "HSFC");
 
-  partitions.init(mesh, 0);
   partitions = MPI::rank();
 
   partitionZoltanInternal(mesh, partitions, zz_);
@@ -78,7 +75,7 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionZoltanInternal(Mesh& mesh,
-					      MeshFunction<uint>& partitions,
+					      MeshValues<uint, Cell> & partitions,
 					      Zoltan *zz_)
 {
   ZOLTAN_ID_PTR import_global_ids, import_local_ids;
@@ -369,14 +366,14 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
 #else
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
-					 MeshFunction<uint>& partitions,
-					 MeshFunction<uint>* weight)
+                                            MeshValues<uint, Cell>& partitions,
+                                            MeshValues<uint, Cell>* weight)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }
 //-----------------------------------------------------------------------------
 void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
-					MeshFunction<uint>& partitions)
+					MeshValues<uint, Vertex> & partitions)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }

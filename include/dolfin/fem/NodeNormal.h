@@ -21,7 +21,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/la/GenericVector.h>
-#include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 
 #include <map>

@@ -6,7 +6,7 @@
 #ifndef __DOLFIN_LOCAL_MESH_REFINEMENT_H
 #define __DOLFIN_LOCAL_MESH_REFINEMENT_H
 
-#include "MeshFunction.h"
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
@@ -29,7 +29,7 @@ public:
 
   /// Refine simplicial mesh locally by edge bisection
   static void refineMeshByEdgeBisection(Mesh& mesh,
-                                        MeshFunction<bool>& cell_marker,
+                                        MeshValues<bool, Cell>& cell_marker,
                                         bool refine_boundary = true,
                                         real tf = 0.0,
                                         real tb = 0.0,

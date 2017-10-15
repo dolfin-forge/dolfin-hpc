@@ -10,7 +10,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/common/List.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
@@ -30,19 +30,16 @@ public:
 
   class IndexMap;
 
-  /// Create an empty instance, initialize it by calling init()
-  CoarseningManager();
+  typedef MeshValues<uint, Cell>    CellFunction;
+  typedef MeshValues<real, Vertex>  VertexFunction;
+  typedef std::pair<CellFunction*, CellFunction*>     CellFunctionPPair;
+  typedef std::pair<VertexFunction*, VertexFunction*> VertexFunctionPPair;
 
   /// Create a new instance and initialize it.
-  explicit CoarseningManager(Mesh& mesh, MeshFunction<bool>& cell_marker,
+  explicit CoarseningManager(MeshValues<bool, Cell>& cell_marker,
                              bool coarsen_boundary = false);
 
   ~CoarseningManager();
-
-  /// Initialize the coarsening manager: build independent set, list of cells
-  /// that are marked for coarsening and boundary information
-  void init(Mesh& mesh, MeshFunction<bool>& cell_marker, bool coarsen_boundary =
-                false);
 
   /// Check if a vertex is forbidden, i. e. part of the independent set
   inline bool isForbiddenVertex(uint index)
@@ -113,6 +110,10 @@ public:
 
 private:
 
+  /// Initialize the coarsening manager: build independent set, list of cells
+  /// that are marked for coarsening and boundary information
+  void init(MeshValues<bool, Cell>& cell_marker, bool coarsen_boundary = false);
+
   /// Dynamic mesh used instead of the regular mesh object during coarsening
   DMesh* dmesh_;
 
@@ -148,7 +149,7 @@ private:
   /// 0 corresponds to not being marked for coarsening, 1 being marked for
   /// coarsening without prior attempts and >1 marked for coarsening with
   /// the value being the number of prior attempts minus one.
-  void initCommon(Mesh& mesh, MeshFunction<uint> * attempt_count);
+  void initCommon(CellFunction& attempt_count);
 
   /// Extracts an independent set of vertices by a greedy algorithm and
   /// stores it in _forbidden_vertices
@@ -160,35 +161,32 @@ private:
 
   /// Find all cells that are marked for coarsening and put them into a list
   /// together with the number of previous attempts
-  void findCellsToCoarsen(MeshFunction<uint> * attempt_count);
+  void findCellsToCoarsen(CellFunction& attempt_count);
 
   /// Remove erased cells from the coarsening list
   void removeErasedCellsFromCoarseningList();
 
   /// Build Arrays of MeshFunctions that are required for the distribution
   /// step
-  void buildMFArrays(
-      Mesh& mesh,
-      Array<int>& old2new_cells,
-      Array<int>& old2new_vertices,
-      Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-      Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions);
+  void buildMFArrays(Mesh& mesh, Array<int>& old2new_cells,
+                     Array<int>& old2new_vertices,
+                     Array<CellFunctionPPair>& cell_functions,
+                     Array<VertexFunctionPPair>& vertex_functions);
 
   /// Cleanup the MeshFunction-Arrays after the distribution
-  void cleanupMFArrays(
-      Array<std::pair<MeshFunction<uint>*, MeshFunction<uint>*> >& cell_functions,
-      Array<std::pair<MeshFunction<real>*, MeshFunction<real>*> >& vertex_functions);
+  void cleanupMFArrays(Array<CellFunctionPPair>& cell_functions,
+                       Array<VertexFunctionPPair>& vertex_functions);
 
   /// Update the independent set with the received values
-  void updateIndependentSet(Mesh& mesh,
-                            MeshFunction<real>& forbidden_vertices_new);
+  void updateIndependentSet(Mesh& mesh, VertexFunction& forbidden_vertices_new);
 
   /// exchange requests for vertices
   void exchangeRequests(Mesh& mesh, Array<int>& old2new_cells,
                         Array<int>& old2new_vertices,
                         uint max_num_requested_vertices,
-                        MeshFunction<uint> *& partitions);
+                        CellFunction *& partitions);
 };
+
 }
 
 #endif 

@@ -9,10 +9,10 @@
 #ifndef __DOLFIN_LOCAL_MESH_COARSENING_H
 #define __DOLFIN_LOCAL_MESH_COARSENING_H
 
+#include <dolfin/mesh/MeshValues.h>
+
 #include <utility>
 #include <list>
-
-#include "MeshFunction.h"
 
 namespace dolfin
 {
@@ -34,17 +34,13 @@ namespace dolfin
     ///
     /// *Arguments*
     ///
-    ///   mesh (Mesh&)
-    ///     The mesh to be coarsened
-    ///
-    ///   cell_marker (MeshFunction<bool>&)
+    ///   cell_marker (MeshValues<bool, Cell>&)
     ///     Indicates cells for coarsening with true
     ///
     ///   coarsen_boundary (bool)
     ///     Enable or disable coarsening of boundary cells
     ///
-    static void coarsenMeshByEdgeCollapse(Mesh& mesh, 
-                                          MeshFunction<bool>& cell_marker,
+    static void coarsenMeshByEdgeCollapse(MeshValues<bool, Cell>& cell_marker,
                                           bool coarsen_boundary = false); 
 
   private:

@@ -16,6 +16,7 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/io/XMLMesh.h>
 #include <dolfin/parameter/parameters.h>
@@ -205,7 +206,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
     // The following section requires process range and global size to be set
     if (pre_partitioning_)
     {
-      MeshFunction<uint> pre_partition;
+      MeshValues<uint, Vertex> pre_partition(mesh_);
       mesh_.partition_geom(pre_partition);
       mesh_.distribute(pre_partition);
     }

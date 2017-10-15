@@ -12,6 +12,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Facet.h>
@@ -199,67 +200,6 @@ void DMesh::imp(Mesh& mesh)
 
   }
 }
-//-----------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-//-----------------------------------------------------------------------------
-void DMesh::imp(Mesh& mesh, MeshFunction<int>& patch_id_list,
-    MeshFunction<float>& bnd_u, MeshFunction<float>& bnd_v)
-{
-  init(mesh);
-
-  std::vector<DVertex *> vertexvec;
-
-  // Copy vertices
-  uint counter = 1;
-  for (VertexIterator vi(mesh); !vi.end(); ++vi)
-  {
-    DVertex* dv = new DVertex;
-    dv->p = vi->point();
-    dv->glb_id = mesh.distdata()[0].get_global(vi->index());
-    dv->on_boundary = mesh.distdata()[0].is_shared(vi->index());
-    dv->shared = mesh.distdata()[0].is_shared(vi->index());
-    dv->ghosted = mesh.distdata().is_ghost(vi->index(), 0);
-
-    dv->patch_id = patch_id_list.get(vi->index());
-    dv->u = bnd_u.get(vi->index());
-    dv->v = bnd_v.get(vi->index());
-
-    if (dv->ghosted)
-    dv->owner = mesh.distdata().get_owner(*vi);
-    else if (dv->shared)
-    dv->shared_adj = mesh.distdata().get_shared_adj(*vi);
-
-    if(dv->on_boundary)
-    bc_dvs[dv->glb_id] = dv;
-
-    vertices.insert(dv);
-    vertexvec.push_back(dv);
-    counter++;
-  }
-
-  // Copy cells
-  for (CellIterator ci(mesh); !ci.end(); ++ci)
-  {
-    DCell* dc = new DCell;
-
-    std::vector<DVertex*> vs(ci->num_entities(0));
-    uint i = 0;
-    for (VertexIterator vi(*ci); !vi.end(); ++vi)
-    {
-      DVertex* dv = vertexvec[vi->index()];
-
-      vs[i] = dv;
-      i++;
-    }
-
-    add_cell(dc, vs, ci->index());
-
-    // Define the same cell numbering
-    dc->id = ci->index();
-  }
-}
-//-----------------------------------------------------------------------------
-#endif // HAVE_LIBGEOM
 //-----------------------------------------------------------------------------
 void DMesh::exp(Mesh& mesh)
 {
@@ -694,14 +634,14 @@ DCell* DMesh::getCell(int local_id)
   return (it != cells.end() ? *it : 0);
 }
 //-----------------------------------------------------------------------------
-void DMesh::bisectMarked(std::vector<bool> marked_ids)
+void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
   std::list<DCell*> marked_cells;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
     DCell* c = *it;
 
-    if (marked_ids[c->id])
+    if (marked_ids(c->id))
     {
       marked_cells.push_back(c);
     }

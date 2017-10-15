@@ -7,7 +7,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/timing.h>
 #include <dolfin/math/basic.h>
-#include <dolfin/mesh/MeshFunction.h>
+#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
 #include <dolfin/parameter/parameters.h>
@@ -41,9 +41,9 @@ namespace dolfin
 
 #ifdef HAVE_PARMETIS
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh& mesh, 
-                                          MeshFunction<uint>& partitions,
-                                          MeshFunction<uint>* weight)
+void MetisInterface::partitionCommonMetis(Mesh& mesh,
+                                          MeshValues<uint, Cell>& partitions,
+                                          MeshValues<uint, Cell> * weight)
 {
   if(!mesh.is_distributed())
   {
@@ -160,7 +160,6 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   delete[] elmwgt;
 
   // Create partition function
-  partitions.init(mesh, tdim);
   partitions = size;
   uint lreassigned = 0;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
@@ -182,8 +181,8 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   MPI_Comm_free(&comm);
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh& mesh, 
-                                        MeshFunction<uint>& partitions)
+void MetisInterface::partitionGeomMetis(Mesh& mesh,
+                                        MeshValues<uint, Vertex> & partitions)
 {
   if(!mesh.is_distributed())
   {
@@ -236,7 +235,6 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);
 
   // Create meshfunction from partitions
-  partitions.init(mesh, 0);
   uint lreassigned = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
@@ -261,15 +259,15 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh& mesh, 
-                                          MeshFunction<uint>& partitions,
-                                          MeshFunction<uint>* weight)
+void MetisInterface::partitionCommonMetis(Mesh& mesh,
+                                          MeshValues<uint, Cell> & partitions,
+                                          MeshValues<uint, Cell> * weight)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh& mesh, 
-                                        MeshFunction<uint>& partitions)
+void MetisInterface::partitionGeomMetis(Mesh& mesh,
+                                        MeshValues<uint, Vertex> & partitions)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }

@@ -26,7 +26,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 void RivaraRefinement::refine(Mesh& mesh,
-                              MeshFunction<bool>& cell_marker,
+                              MeshValues<bool, Cell>& cell_marker,
                               real tf, real tb, real ts, bool balance)
 {
   message("Refining simplicial mesh by recursive Rivara bisection without boundary smoothing.");
@@ -48,14 +48,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   }
 
   DMesh dmesh(mesh);
-
-  std::vector<bool> dmarked(mesh.num_cells());
-  for (CellIterator ci(mesh); !ci.end(); ++ci)
-  {
-    dmarked[ci->index()] = cell_marker(ci->index());
-  }
-
-  dmesh.bisectMarked(dmarked);
+  dmesh.bisectMarked(cell_marker);
 
   Mesh omesh;
   dmesh.exp(omesh);

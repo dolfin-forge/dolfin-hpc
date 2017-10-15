@@ -27,11 +27,13 @@ namespace dolfin
 {
 
 class BoundaryMesh;
+class Cell;
 class IntersectionDetector;
 class MappedManifold;
-template<class T> class MeshFunction;
+template<class T, class E, uint N = 1> class MeshValues;
 class PeriodicSubDomain;
 class Space;
+class Vertex;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
 ///
@@ -198,13 +200,14 @@ public:
    */
 
   /// Partition mesh into num_processes partitions
-  void partition(MeshFunction<uint>& partitions);
+  void partition(MeshValues<uint, Cell>& partitions);
 
   /// Partition mesh into num_partitions = numProc with weights on vertices
-  void partition(MeshFunction<uint>& partitions, MeshFunction<uint>& weight);
+  /// ^H^H^H on the *fucking* *cells*
+  void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
   /// Partition mesh into num_partitions = numProc
-  void partition_geom(MeshFunction<uint>& partitions);
+  void partition_geom(MeshValues<uint, Vertex>& partitions);
 
   /*
    *  Mesh distribution routines
@@ -214,7 +217,8 @@ public:
   void distribute();
 
   /// Distribute a mesh according to a mesh function
-  void distribute(MeshFunction<uint>& distribution);
+  void distribute(MeshValues<uint, Cell>& distribution);
+  void distribute(MeshValues<uint, Vertex>& distribution);
 
   /*
    *  Mesh refinement routines
@@ -224,7 +228,7 @@ public:
   void refine();
 
   /// Refine mesh according to cells marked for refinement
-  void refine(MeshFunction<bool>& cell_markers, bool refine_boundary = true,
+  void refine(MeshValues<bool, Cell>& cell_markers, bool refine_boundary = true,
               bool load_balance = true);
 
   //---

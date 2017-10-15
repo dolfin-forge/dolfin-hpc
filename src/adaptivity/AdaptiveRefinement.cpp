@@ -23,7 +23,6 @@
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
@@ -38,7 +37,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
+void AdaptiveRefinement::refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
 
 {
   message("Adaptive refinement");
@@ -87,7 +86,7 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshFunction<bool>& cell_marker)
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine_and_project(Mesh& mesh,
                                             Array<Function *> const& functions,
-                                            MeshFunction<bool>& cell_marker)
+                                            MeshValues<bool, Cell>& cell_marker)
 {
 
   dolfin_set("Load balancer redistribute", false);
@@ -123,8 +122,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   File refinefile(marked_filename.str());
   refinefile << cell_marker;
 
-  error("Fix the shit");
-  MeshFunction<uint> *partitions = NULL;// mesh.data().meshFunction("partitions");
+  error("Fix it");
+  MeshValues<uint, Cell> *partitions = NULL;// mesh.data().meshFunction("partitions");
 
   uint const maxvecsize = 3;
   real * x_values[maxvecsize];
@@ -160,7 +159,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   }
 
   error("This is garbage");
-  MeshFunction<bool> new_cell_marker;
+  MeshValues<bool, Cell> new_cell_marker(mesh);
 //FIXME:  mesh.distribute(*partitions, cell_marker, new_cell_marker);
 
   Mesh new_mesh = mesh;
@@ -225,7 +224,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
                                            real **vp, uint **rp, uint& m,
-                                           MeshFunction<uint>& distribution)
+                                           MeshValues<uint, Cell>& distribution)
 {
 
 #ifdef HAVE_MPI

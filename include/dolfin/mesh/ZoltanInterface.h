@@ -10,6 +10,7 @@
 #include <dolfin/common/types.h>
 
 #include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/MeshValues.h>
 
 #ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>
@@ -25,11 +26,11 @@ namespace dolfin
   public:
 
     static void partitionCommonZoltan(Mesh& mesh,
-				      MeshFunction<uint>& partitions,
-				      MeshFunction<uint>* weight);
+                                      MeshValues<uint, Cell>& partitions,
+				                              MeshValues<uint, Cell>* weight);
 
     static void partitionGeomZoltan(Mesh& mesh,
-				    MeshFunction<uint>& partitions);
+                                    MeshValues<uint, Vertex>& partitions);
 
 #ifdef HAVE_ZOLTAN
 
@@ -98,7 +99,7 @@ namespace dolfin
 
     // Internal common partition function
     static void partitionZoltanInternal(Mesh& mesh,
-					MeshFunction<uint>& partitions, 
+          MeshValues<uint, Cell>& partitions,
 					Zoltan *zz);
 
 #endif

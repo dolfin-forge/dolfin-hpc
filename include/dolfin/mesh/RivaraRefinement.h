@@ -8,9 +8,7 @@
 #define __DOLFIN_RIVARA_REFINEMENT_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/MeshFunction.h>
-
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
@@ -22,7 +20,7 @@ namespace dolfin
     
     /// Refine simplicial mesh locally by recursive edge bisection 
     static void refine(Mesh& mesh, 
-                       MeshFunction<bool>& cell_marker,
+                       MeshValues<bool, Cell>& cell_marker,
                        real tf = 0.0, 
                        real tb = 0.0, 
                        real ts = 0.0,

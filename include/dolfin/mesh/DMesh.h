@@ -117,7 +117,7 @@ public:
   void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
 
   /// Bisect marked cells
-  void bisectMarked(std::vector<bool> marked_ids);
+  void bisectMarked(MeshValues<bool, Cell> const& marked_ids);
 
   /// Get opposite cell with respect to vertices v1 and v2
   DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);

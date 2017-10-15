@@ -32,7 +32,7 @@ inline uint entity_dimension(Mesh& mesh);
 
 //-----------------------------------------------------------------------------
 
-template<class T, class E, uint N = 1>
+template<class T, class E, uint N>
 struct MeshValues : public MeshFunction<T>
 {
   ///

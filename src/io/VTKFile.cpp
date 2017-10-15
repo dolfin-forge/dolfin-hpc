@@ -852,7 +852,7 @@ template<class T>
     vtuNameUpdate(counter);
 
     // Write pvd file
-    if (PE::rank == 0)
+    if (PE::rank() == 0)
     {
       pvtuNameUpdate(counter);
       pvdFileWrite(counter);

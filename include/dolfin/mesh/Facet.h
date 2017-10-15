@@ -45,7 +45,7 @@ class FacetIterator : public MeshEntityIterator
 public:
   
   FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
-  FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().topology().dim() - 1) {}
+  FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().type().facet_dim()) {}
 
   inline Facet* operator->() { return static_cast<Facet*>(MeshEntityIterator::operator->()); }
   inline Facet& operator*() { return *operator->(); }

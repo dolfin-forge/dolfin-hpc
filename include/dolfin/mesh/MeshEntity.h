@@ -125,6 +125,9 @@ protected:
   // Mesh
   Mesh& mesh_;
 
+  // Mesh topology
+  MeshTopology& topology_;
+
   // Topological dimension
   uint const tdim_;
 

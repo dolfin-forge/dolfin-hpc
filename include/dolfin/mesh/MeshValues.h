@@ -27,9 +27,6 @@ namespace dolfin
  *
  */
 
-template<class E>
-inline uint entity_dimension(Mesh& mesh);
-
 //-----------------------------------------------------------------------------
 
 template<class T, class E, uint N>
@@ -157,34 +154,6 @@ struct MeshValues : public MeshFunction<T>
   }
 
 };
-
-//--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
-
-template<>
-inline uint entity_dimension<Vertex>(Mesh& mesh)
-{
-  return 0;
-}
-template<>
-inline uint entity_dimension<Edge>(Mesh& mesh)
-{
-  return 1;
-}
-template<>
-inline uint entity_dimension<Face>(Mesh& mesh)
-{
-  return 2;
-}
-template<>
-inline uint entity_dimension<Facet>(Mesh& mesh)
-{
-  return mesh.type().facet_dim();
-}
-template<>
-inline uint entity_dimension<Cell>(Mesh& mesh)
-{
-  return mesh.type().dim();
-}
 
 //-----------------------------------------------------------------------------
 

@@ -229,6 +229,32 @@ private:
 
 };
 
+// Helper function
+
+template<class E> inline uint dimension(CellType const& c);
+
+//--- TEMPLATE SPECIALIZATION -------------------------------------------------
+
+class Vertex;
+template<>
+inline uint dimension<Vertex>(CellType const& c) { return 0; }
+
+class Edge;
+template<>
+inline uint dimension<Edge>(CellType const& c) { return 1; }
+
+class Face;
+template<>
+inline uint dimension<Face>(CellType const& c) { return 2; }
+
+class Facet;
+template<>
+inline uint dimension<Facet>(CellType const& c) { return c.facet_dim(); }
+
+class Cell;
+template<>
+inline uint dimension<Cell>(CellType const& c) { return c.dim(); }
+
 //-----------------------------------------------------------------------------
 
 }

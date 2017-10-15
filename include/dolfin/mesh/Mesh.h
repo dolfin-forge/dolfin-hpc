@@ -275,6 +275,13 @@ private:
 
 };
 
+//--- TEMPLATE SPECIALIZATIONS ------------------------------------------------
+
+template<class E>
+inline uint entity_dimension(Mesh& m) { return dimension<E>(m.type()); }
+
+//-----------------------------------------------------------------------------
+
 } /* namespace dolfin */
 
 #endif /* __DOLFIN_MESH_H */

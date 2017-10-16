@@ -302,6 +302,17 @@ public:
     return iter_->second;
   }
 
+  ///
+  template <class T>
+  inline void adj_enqueue(Array<T> container[], T value) const
+  {
+    _set<uint> const& a = iter_->second;
+    for (_set<uint>::const_iterator it = a.begin(); it != a.end(); ++it)
+    {
+      container[*it].push_back(value);
+    }
+  }
+
 private:
 
   DistributedData const& distdata_;
@@ -376,6 +387,17 @@ public:
   inline _set<uint> const& adj() const
   {
     return distdata_.shared_.find(iter_->first)->second;
+  }
+
+  ///
+  template <class T>
+  inline void adj_enqueue(Array<T> container[], T value) const
+  {
+    _set<uint> const& a = distdata_.shared_.find(iter_->first)->second;
+    for (_set<uint>::const_iterator it = a.begin(); it != a.end(); ++it)
+    {
+      container[*it].push_back(value);
+    }
   }
 
 private:

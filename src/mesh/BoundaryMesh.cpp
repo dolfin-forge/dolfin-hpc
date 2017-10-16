@@ -131,7 +131,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
     for (CellIterator c(boundary); !c.end(); ++c)
     {
       bool const on_boundary = !c->is_shared();
-      if ((inside && subdomain_->inside(*c, on_boundary))
+      if ((inside && subdomain_->enclosed(*c, on_boundary))
           || (!inside && subdomain_->overlap(*c, on_boundary)))
       {
         cell_map_.push_back(c->index());

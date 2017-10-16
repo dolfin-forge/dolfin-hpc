@@ -7,6 +7,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/parameter/parameters.h>
 #include <dolfin/insitu/libsimPipeLine.h>
 #include <dolfin/insitu/libsimInterface.h>
 
@@ -63,7 +64,8 @@ void libsimInterface::initInteractive()
 int libsimInterface::setupEnv()
 {
   char *env = NULL;
-
+  const std::string visit_path = dolfin_get("VisIt directory");
+  VisItSetDirectory((char *) visit_path.c_str());
 
   VisItSetParallel(PE::size() > 1);
   VisItSetParallelRank(PE::rank());  

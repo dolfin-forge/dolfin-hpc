@@ -150,3 +150,7 @@ add("SubDomain Intersect Boundary", true);
 
 //--- Mesh smoothing ---
 add("Mesh smoothing restricted by rmin", true);
+
+
+//--- Insitu ---
+add("VisIt directory", "");

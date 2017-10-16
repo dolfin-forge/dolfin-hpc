@@ -49,6 +49,10 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/function/Projection.ufl\
              demo/function/Projection.h\
              demo/function/main.cpp\
+             demo/insitu/poisson/Makefile\
+             demo/insitu/poisson/main.cpp\
+             demo/insitu/poisson/Poisson.ufl\
+             demo/insitu/poisson/Poisson.h\
              demo/mesh/ale/Makefile\
              demo/mesh/ale/main.cpp\
              demo/mesh/refinement/Makefile\

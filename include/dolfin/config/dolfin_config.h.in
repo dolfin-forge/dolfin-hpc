@@ -18,7 +18,7 @@
 /* Compile with optimization for P1 elements */
 #undef ENABLE_P1_OPTIMIZATIONS
 
-/* Enable UFL support using UFC version 2.1.1 */
+/* Enable UFL support using UFC version 2.1.4 */
 #undef ENABLE_UFL
 
 /* Big endian byte order. */
@@ -56,6 +56,9 @@
 
 /* Have LIBGEOM library */
 #undef HAVE_LIBGEOM
+
+/* VisIt/libsim support */
+#undef HAVE_LIBSIM
 
 /* Define if you have the Zlib library. */
 #undef HAVE_LIBZ

@@ -14,7 +14,7 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/insitu/libsimPipeLine.h>
+#include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/config/dolfin_config.h>
 
 #include <algorithm>
@@ -50,7 +50,7 @@ namespace dolfin
 
     static void addData(Mesh& mesh);
 
-    static void addPipeLine(libsimPipeLine& pipeline);
+    static void addPipeline(libsimPipeline& pipeline);
 
   private:
 
@@ -70,7 +70,7 @@ namespace dolfin
       uint tstep_;
       Mesh *mesh_;      
       LabelList<GenericFunction> function_list_;
-      Array<libsimPipeLine*> pipelines_;      
+      Array<libsimPipeline*> pipelines_;      
       libsimData(): t_(NULL),mesh_(NULL){}
     };
 
@@ -296,7 +296,7 @@ namespace dolfin
     InsituData_.mesh_ = &mesh;
   }
 
-  inline void libsimInterface::addPipeLine(libsimPipeLine& pipeline)
+  inline void libsimInterface::addPipeline(libsimPipeline& pipeline)
   {
     InsituData_.pipelines_.push_back(&pipeline);
   }

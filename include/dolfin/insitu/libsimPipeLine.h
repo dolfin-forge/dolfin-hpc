@@ -23,17 +23,17 @@ namespace dolfin
 
   /// This class defines a visualization pipeline to be executed by libsim
   
-  class libsimPipeLine 
+  class libsimPipeline 
   {
 
   public:
     
 
-    libsimPipeLine() 
+    libsimPipeline() 
     {
     }
 
-    ~libsimPipeLine() {}
+    ~libsimPipeline() {}
 
     /// Execute visualization pipeline
     virtual void exec() const = 0;

@@ -8,7 +8,7 @@
 #include <dolfin/log/log.h>
 #include <dolfin/common/Array.h>
 #include <dolfin/parameter/parameters.h>
-#include <dolfin/insitu/libsimPipeLine.h>
+#include <dolfin/insitu/libsimPipeline.h>
 #include <dolfin/insitu/libsimInterface.h>
 
 #include <algorithm>
@@ -106,7 +106,7 @@ void libsimInterface::batchRender(std::string filename)
   VisItUpdatePlots();
   
   // Execute all insitu pipelines
-  for(Array<libsimPipeLine *>::iterator it = InsituData_.pipelines_.begin();
+  for(Array<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
       it != InsituData_.pipelines_.end(); it++)
   {
     (*it)->exec();

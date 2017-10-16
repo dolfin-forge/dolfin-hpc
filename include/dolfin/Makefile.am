@@ -105,7 +105,7 @@ nobase_pkginclude_HEADERS = \
 				io/XMLMesh.h\
 				io/XMLObject.h\
 				insitu/dolfin_insitu.h\
-				insitu/libsimPipeLine.h\
+				insitu/libsimPipeline.h\
 				insitu/libsimInterface.h\
 				la/dolfin_la.h\
 				la/AMGSolver.h\

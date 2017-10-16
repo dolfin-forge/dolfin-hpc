@@ -2,6 +2,6 @@
 #define __DOLFIN_HEADER_INSITU_H
 
 #include <dolfin/insitu/libsimInterface.h>
-#include <dolfin/insitu/libsimPipeLine.h>
+#include <dolfin/insitu/libsimPipeline.h>
 
 #endif	/* __DOLFIN_HEADER_INSITU_H */

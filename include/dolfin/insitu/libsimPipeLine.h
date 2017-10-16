@@ -10,7 +10,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
-#include <dolfin/insitu/InsituPipeLine.h>
+//#include <dolfin/insitu/InsituPipeLine.h>
 
 #ifdef HAVE_LIBSIM
 #include <VisItControlInterface_V2.h>
@@ -23,16 +23,21 @@ namespace dolfin
 
   /// This class defines a visualization pipeline to be executed by libsim
   
-  class libsimPipeLine : public InsituPipeLine
+  class libsimPipeLine 
   {
+
   public:
     
-    /// Constructor
-    libsimPipeLine();
-    
-    /// Destructor
-    virtual ~libsimPipeLine();
-    
+
+    libsimPipeLine() 
+    {
+    }
+
+    ~libsimPipeLine() {}
+
+    /// Execute visualization pipeline
+    virtual void exec() const = 0;
+
   };
   
 } /* namespace dolfin */

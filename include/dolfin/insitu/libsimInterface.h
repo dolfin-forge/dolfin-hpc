@@ -40,7 +40,7 @@ namespace dolfin
 
     static void shutdown();
 
-    static void batchRender(std::string filename);
+    static void batchRender();
 
     static void ctrlLoop();
 

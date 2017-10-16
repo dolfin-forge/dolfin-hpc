@@ -51,6 +51,8 @@ void libsimInterface::initBatch()
 void libsimInterface::initInteractive()
 {
 
+  error("Not implemented yet");
+
   if (setupEnv() != VISIT_OKAY)
   {
     error("VisIt/libsim environment initialization error");
@@ -96,10 +98,12 @@ int libsimInterface::setupEnv()
 //-----------------------------------------------------------------------------
 void libsimInterface::shutdown()
 {
+  error("Not implemented yet");
+
   VisItDisconnect();
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender(std::string filename)
+void libsimInterface::batchRender()
 {
   VisItTimeStepChanged();
 
@@ -116,6 +120,8 @@ void libsimInterface::batchRender(std::string filename)
 //-----------------------------------------------------------------------------
 void libsimInterface::ctrlLoop()
 {
+  error("Not implemented yet");
+
   int blocking = 0;
 
   int visit_state = VisItDetectInput(blocking, -1);

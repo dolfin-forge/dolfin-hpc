@@ -113,8 +113,14 @@ public:
   /// Return the global index given a local index
   uint get_global(uint local_index) const;
 
-  /// Return the global indices given an array of n local indices
+  /// Get the global indices given an array of n local indices
   void get_global(uint n, uint const * local_indices, uint * global_indices) const;
+
+  /// Get the local indices given an array in-place
+  inline void get_global(uint n, uint * local_indices) const
+  {
+    get_global(n, local_indices, local_indices);
+  }
 
   /// Return if the index is a global index
   uint has_global(uint global_index) const;
@@ -122,8 +128,14 @@ public:
   /// Return the local index given a global index
   uint get_local(uint global_index) const;
 
-  /// Return the global indices given an array of n local indices
+  /// Get the local indices given an array of n local indices
   void get_local(uint n, uint const * global_indices, uint * local_indices) const;
+
+  /// Get the local indices given an array in-place
+  inline void get_local(uint n, uint * global_indices) const
+  {
+    get_local(n, global_indices, global_indices);
+  }
 
   /// Set local-to-global mapping
   void set_map(uint local_index, uint global_index, bool allow_remap = false);

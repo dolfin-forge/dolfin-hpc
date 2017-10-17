@@ -175,7 +175,7 @@ void libsimInterface::shutdown()
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender(std::string filename)
+void libsimInterface::batchRender()
 {
   error("VisIt/libsim is required for in-situ viz");
 }

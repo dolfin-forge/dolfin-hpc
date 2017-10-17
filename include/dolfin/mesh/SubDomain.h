@@ -11,13 +11,13 @@
 #define __DOLFIN_SUB_DOMAIN_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/MeshValues.h>
 
 namespace dolfin
 {
 
 class Mesh;
 class MeshEntity;
-template<class T> class MeshFunction;
 
 /// This class defines the interface for definition of sub domains.
 
@@ -35,18 +35,21 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Return true for points inside the sub domain
-  virtual bool inside(real const * x, bool const on_boundary) const = 0;
+  virtual bool inside(real const * x, bool on_boundary) const = 0;
 
   //---------------------------------------------------------------------------
 
   /// Return true if all vertices of given entity are inside the subdomain
-  virtual bool inside(MeshEntity& entity, bool const on_boundary) const;
+  template <class Entity>
+  bool enclosed(Entity& entity, bool on_boundary) const;
 
   /// Return true if one vertex of given entity is inside the subdomain
-  virtual bool overlap(MeshEntity& entity, bool const on_boundary) const;
+  template <class Entity>
+  bool overlap(Entity& entity, bool on_boundary) const;
 
   /// Set sub domain markers for given sub domain
-  virtual void mark(MeshFunction<uint>& sub_domains, uint index) const;
+  template <class Entity>
+  void mark(MeshValues<uint, Entity>& sub_domains, uint index) const;
 
   //---------------------------------------------------------------------------
 

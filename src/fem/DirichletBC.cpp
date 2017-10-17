@@ -90,7 +90,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
       for (FacetIterator f(mesh()); !f.end(); ++f)
       {
         bool const on_boundary = (f->num_entities(tdim) == 1) && !f->is_shared();
-        if (!this->sub_domain().inside(*f, on_boundary))
+        if (!this->sub_domain().enclosed(*f, on_boundary))
         {
           continue;
         }

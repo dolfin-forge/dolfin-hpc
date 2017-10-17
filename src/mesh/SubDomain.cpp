@@ -31,45 +31,42 @@ SubDomain::~SubDomain()
 {
 }
 //-----------------------------------------------------------------------------
-bool SubDomain::inside(real const * x, bool const on_boundary) const
+template <>
+bool SubDomain::enclosed(Vertex& entity, bool on_boundary) const
 {
-  error("SubDomain : inside() not unimplemented.");
+  return inside(entity.x(), on_boundary);
+}
+//-----------------------------------------------------------------------------
+template <class Entity>
+bool SubDomain::enclosed(Entity& entity, bool on_boundary) const
+{
+  for (VertexIterator v(entity); !v.end(); ++v)
+  {
+    if (!this->inside(v->x(), on_boundary))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+//-----------------------------------------------------------------------------
+template <>
+bool SubDomain::overlap(Vertex& entity, bool on_boundary) const
+{
+  return inside(entity.x(), on_boundary);
+}
+//-----------------------------------------------------------------------------
+template <class Entity>
+bool SubDomain::overlap(Entity& entity, bool on_boundary) const
+{
+  for (VertexIterator v(entity); !v.end(); ++v)
+  {
+    if (this->inside(v->x(), on_boundary))
+    {
+      return true;
+    }
+  }
   return false;
-}
-//-----------------------------------------------------------------------------
-bool SubDomain::inside(MeshEntity& entity, bool const on_boundary) const
-{
-  if (entity.dim() == 0)
-  {
-    return inside(entity.mesh().geometry().x(entity.index()), on_boundary);
-  }
-  uint ret = entity.num_entities(0);
-  for (VertexIterator v(entity); !v.end(); ++v)
-  {
-    if (this->inside(v->x(), on_boundary))
-    {
-      --ret;
-    }
-  }
-  return (ret == 0);
-}
-//-----------------------------------------------------------------------------
-bool SubDomain::overlap(MeshEntity& entity, bool const on_boundary) const
-{
-  if (entity.dim() == 0)
-  {
-    return inside(entity.mesh().geometry().x(entity.index()), on_boundary);
-  }
-  uint ret = false;
-  for (VertexIterator v(entity); !v.end(); ++v)
-  {
-    if (this->inside(v->x(), on_boundary))
-    {
-      ret = true;
-      break;
-    }
-  }
-  return ret;
 }
 //-----------------------------------------------------------------------------
 bool SubDomain::close(real const x, real const xref, real const abstol) const
@@ -82,57 +79,36 @@ bool SubDomain::close(real const x, real const xref) const
   return (std::fabs(x - xref) < abstol_);
 }
 //-----------------------------------------------------------------------------
-void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
+template <class Entity>
+void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
 {
-  /*
-   message(1, "Computing sub domain markers for sub domain %d.", sub_domain);
-   error("WIP");
-   */
+  message(1, "Computing sub domain markers for sub domain %d.", index);
 
   Mesh& mesh = sub_domains.mesh();
-  uint const tdim = mesh.topology().dim();
-  uint const edim = sub_domains.dim();
 
   // Compute sub domain markers
-  uint const facet_dim = mesh.type().facet_dim();
-  for (MeshEntityIterator entity(mesh, edim); !entity.end(); ++entity)
+  for (typename Entity::iterator e(mesh); !e.end(); ++e)
   {
-    // Check if entity is on the boundary
-    bool on_boundary = false;
-    if (edim == facet_dim)
-    {
-      on_boundary = (entity->num_entities(tdim) == 1) && !entity->is_shared();
-    }
-    else if (edim == 0)
-    {
-      for (FacetIterator fi(*entity); !fi.end(); ++fi)
-      {
-        if ((fi->num_entities(tdim) == 1) && !fi->is_shared())
-        {
-          on_boundary = true;
-          break;
-        }
-      }
-    }
-    //
-    if (this->inside(*entity, on_boundary))
-    {
-      sub_domains(*entity) = index;
-    }
+    if (this->enclosed(*e, e->on_boundary())) { sub_domains(*e) = index; }
   }
 
 #ifdef HAVE_MPI
   if (mesh.is_distributed())
   {
     uint const pe_size = MPI::size();
-    uint const rank = MPI::rank();
+    uint const pe_rank = MPI::rank();
+    DistributedData& distdata = mesh.distdata()[sub_domains.dim()];
 
     Array<uint> * sendbuf = new Array<uint> [pe_size];
-    for (GhostIterator it(mesh.distdata()[edim]); !it.end(); ++it)
+
+    // Update entities to adjacent ranks.
+    // The previous implementation updates only ghost to the owner, which
+    // assumes that data will only be used by the owner, maybe not.
+    for (SharedIterator it(distdata); !it.end(); ++it)
     {
       if (sub_domains(it.index()) == index)
       {
-        sendbuf[it.owner()].push_back(it.global_index());
+        it.adj_enqueue(sendbuf, it.global_index());
       }
     }
 
@@ -146,31 +122,52 @@ void SubDomain::mark(MeshFunction<uint>& sub_domains, uint index) const
     for (uint j = 0; j < pe_size; ++j)
     {
       send_size = sendbuf[j].size();
-      MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, j,
-                 MPI::DOLFIN_COMM);
+      MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, j, distdata.comm());
     }
-    uint * recvbuf = new uint[recv_size];
+    uint * recvbuf = (recv_size ? new uint[recv_size] : NULL);
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      src = (pe_rank - j + pe_size) % pe_size;
+      dst = (pe_rank + j) % pe_size;
 
       MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
                    &recvbuf[0], recv_size, MPI_UNSIGNED, src, 1,
-                   MPI::DOLFIN_COMM, &status);
+                   distdata.comm(), &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
 
       for (int k = 0; k < recv_count; ++k)
       {
-        sub_domains(mesh.distdata()[edim].get_local(recvbuf[k])) = index;
+        sub_domains(distdata.get_local(recvbuf[k])) = index;
       }
     }
+
     delete[] recvbuf;
     delete[] sendbuf;
   }
 #endif
 
 }
+
+//--- TEMPLATE INSTANTIATIONS -------------------------------------------------
+
+template bool SubDomain::enclosed(Vertex& entity, bool on_boundary) const;
+template bool SubDomain::enclosed(Edge  & entity, bool on_boundary) const;
+template bool SubDomain::enclosed(Face  & entity, bool on_boundary) const;
+template bool SubDomain::enclosed(Facet & entity, bool on_boundary) const;
+template bool SubDomain::enclosed(Cell  & entity, bool on_boundary) const;
+
+template bool SubDomain::overlap(Vertex& entity, bool on_boundary) const;
+template bool SubDomain::overlap(Edge  & entity, bool on_boundary) const;
+template bool SubDomain::overlap(Face  & entity, bool on_boundary) const;
+template bool SubDomain::overlap(Facet & entity, bool on_boundary) const;
+template bool SubDomain::overlap(Cell  & entity, bool on_boundary) const;
+
+template void SubDomain::mark(MeshValues<uint, Vertex>& sub_domains, uint index) const;
+template void SubDomain::mark(MeshValues<uint, Edge>  & sub_domains, uint index) const;
+template void SubDomain::mark(MeshValues<uint, Face>  & sub_domains, uint index) const;
+template void SubDomain::mark(MeshValues<uint, Facet> & sub_domains, uint index) const;
+template void SubDomain::mark(MeshValues<uint, Cell>  & sub_domains, uint index) const;
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

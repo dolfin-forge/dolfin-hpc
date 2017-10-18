@@ -199,8 +199,9 @@ nobase_pkginclude_HEADERS = \
 				mesh/Mapping.h \
 				mesh/MappedManifold.h \
 				mesh/Mesh.h\
-				mesh/MeshDependent.h\
 				mesh/MeshConnectivity.h\
+				mesh/MeshData.h\
+				mesh/MeshDependent.h\
 				mesh/MeshDistributedData.h\
 				mesh/MeshEditor.h\
 				mesh/MeshEntity.h\

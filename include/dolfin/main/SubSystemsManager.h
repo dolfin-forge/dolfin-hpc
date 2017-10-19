@@ -22,7 +22,11 @@ class SubSystemsManager
 {
 
   // Singleton instance
-  static SubSystemsManager sub_systems_manager;
+  static SubSystemsManager& instance()
+  {
+    static SubSystemsManager instance_;
+    return instance_;
+  }
 
 public:
 
@@ -37,19 +41,19 @@ public:
   //-------------------------------------------------------------------------
   static int start(int argc = 0, char* argv[] = NULL, uint n = 0)
   {
-    return sub_systems_manager.init(argc, argv, n);
+    return SubSystemsManager::instance().init(argc, argv, n);
   }
 
   //-------------------------------------------------------------------------
   static void status()
   {
-    sub_systems_manager.disp();
+    SubSystemsManager::instance().disp();
   }
 
   //-------------------------------------------------------------------------
   static inline bool active(SubSystemsManager::Type s)
   {
-    return sub_systems_manager.iset(s);
+    return SubSystemsManager::instance().iset(s);
   }
 
   //-------------------------------------------------------------------------

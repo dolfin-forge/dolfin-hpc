@@ -82,6 +82,15 @@ public:
 #endif
   }
 
+  /// Workaround defect in C++98: taking the address of the
+  /// array of an empty std::vector is not allowed but it is often used in
+  /// the code when dealing with MPI calls.
+  /// In C++11 data() was added but the return value for an empty std::vector is
+  /// left undefined by the standard. We do not want to rely on implementation
+  /// details.
+  inline T * ptr() { return (this->empty() ? NULL : &this->front()); }
+  inline T const* ptr() const { return (this->empty() ? NULL : &this->front()); }
+
   ///
   void operator%=(uint s)
   {

@@ -78,7 +78,7 @@ bool MeshGeometry::operator==(MeshGeometry const& other) const
   {
     return false;
   }
-  return cmp<real>(size_, coordinates_, other.coordinates_);
+  return cmp<real>(dim_ * size_, coordinates_, other.coordinates_);
 }
 //-----------------------------------------------------------------------------
 bool MeshGeometry::operator!=(MeshGeometry const& other) const

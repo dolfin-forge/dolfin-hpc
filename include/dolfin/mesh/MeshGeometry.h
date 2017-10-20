@@ -56,7 +56,7 @@ public:
   /// Return Euclidean dimension of coordinate system
   uint dim() const;
 
-  /// Return number of coordinates
+  /// Return number of points (not coordinates!)
   uint size() const;
 
   /// Return absolute geometric tolerance for given topological dimension

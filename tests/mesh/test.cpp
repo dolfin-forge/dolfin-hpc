@@ -7,6 +7,7 @@
 #include "CellTypes/CellTypes.h"
 #include "UnitMeshes/UnitMeshes.h"
 #include "MeshFunction/MeshFunction.h"
+#include "MeshData/MeshData.h"
 #include "StructuredGrid/StructuredGrid.h"
 #include "VertexNormal/VertexNormal.h"
 #include "algorithm/algorithm.h"
@@ -45,6 +46,11 @@ DOLFIN_SUITE_BEGIN(suite, "mesh")
 
   DOLFIN_TCASE_CREATE("MeshFunction");
   DOLFIN_TCASE_ADD(test_MeshFunction );
+
+  DOLFIN_TCASE_CREATE("MeshData");
+  DOLFIN_TCASE_ADD(test_MeshData_add );
+  DOLFIN_TCASE_ADD(test_MeshData_insert );
+  DOLFIN_TCASE_ADD(test_MeshData_iterator );
 
   DOLFIN_TCASE_CREATE("VertexNormal");
   DOLFIN_TCASE_ADD(test_VertexNormal);

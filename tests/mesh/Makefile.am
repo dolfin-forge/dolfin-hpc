@@ -12,5 +12,6 @@ EXTRA_DIST = algorithm/algorithm.h\
              Point/Point.h\
              StructuredGrid/StructuredGrid.h\
              UnitMeshes/UnitMeshes.h\
+             MeshData/MeshData.h\
              MeshFunction/MeshFunction.h
 

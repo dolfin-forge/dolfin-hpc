@@ -34,19 +34,19 @@ namespace dolfin
 {
 
 #define SUBSYSTEM_RETURN_IF_INITIALIZED(S) \
-	if (sub_systems_manager.iset(S::flag)) { return false; }
+	if (SubSystemsManager::instance().iset(S::flag)) { return false; }
 
 #define SUBSYSTEM_RETURN_IF_CONSUMERS(S) \
   if (S::sema > 0) { return false; }
 
 #define SUBSYSTEM_SET_INIT(S) \
-  sub_systems_manager.init(S::flag);
+  SubSystemsManager::instance().init(S::flag);
 
 #define SUBSYSTEM_SET_FINI(S) \
-  sub_systems_manager.fini(S::flag);
+  SubSystemsManager::instance().fini(S::flag);
 
 #define SUBSYSTEM_INITIALIZED(S) \
-  sub_systems_manager.iset(S::flag)
+  SubSystemsManager::instance().iset(S::flag)
 
 #define SUBSYSTEM_ERROR_NOT_ENABLED(S) \
   error("DOLFIN has not been configured with " #S ".")
@@ -58,8 +58,6 @@ namespace dolfin
   }
 
 //--- STATIC ------------------------------------------------------------------
-
-SubSystemsManager SubSystemsManager::sub_systems_manager;
 
 int SubSystemsManager::MPI::sema    = 0;
 int SubSystemsManager::PETSc::sema  = 0;

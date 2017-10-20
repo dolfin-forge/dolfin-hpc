@@ -1,4 +1,5 @@
-SUBDIRS = ufl \
+SUBDIRS = common \
+	  ufl \
 	  la \
 	  elements \
 	  fem \
@@ -6,7 +7,8 @@ SUBDIRS = ufl \
 	  io \
 	  mesh
 
-TESTS = ufl/exe \
+TESTS =  common/exe \
+	ufl/exe \
 	la/exe \
 	elements/exe \
 	fem/exe \

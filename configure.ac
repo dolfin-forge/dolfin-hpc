@@ -412,6 +412,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
 
 # Tests
 AC_CONFIG_FILES([tests/Makefile\
+                 tests/common/Makefile\
                  tests/elements/Makefile\
                  tests/fem/Makefile\
                  tests/function/Makefile\

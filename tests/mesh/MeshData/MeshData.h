@@ -24,7 +24,7 @@ START_TEST( test_MeshData_add )
     //---
     end();
     skip();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_MeshData_insert )
@@ -40,7 +40,7 @@ START_TEST( test_MeshData_insert )
     //---
     end();
     skip();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 START_TEST( test_MeshData_iterator )
@@ -102,7 +102,7 @@ START_TEST( test_MeshData_iterator )
     //---
     end();
     skip();
-    fail_unless( init_failed == 0 );
+    ck_assert( init_failed == 0 );
   }END_TEST
 //-----------------------------------------------------------------------------
 

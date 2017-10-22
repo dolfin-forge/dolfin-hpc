@@ -74,8 +74,9 @@ void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
   delete zz_;
 }
 //-----------------------------------------------------------------------------
+template <class Entity>
 void ZoltanInterface::partitionZoltanInternal(Mesh& mesh,
-					      MeshValues<uint, Cell> & partitions,
+					      MeshValues<uint, Entity> & partitions,
 					      Zoltan *zz_)
 {
   ZOLTAN_ID_PTR import_global_ids, import_local_ids;

@@ -224,7 +224,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
 
   Mesh *mesh = (Mesh *) data;
   uint const facet_dim = mesh->type().facet_dim();
-  uint const dim = mesh->geometry().dim();
+  uint const tdim = mesh->type().dim();
   DistributedData const& dist = mesh->distdata()[facet_dim];
   if (num_obj != mesh->num_cells() || num_gid_entries > 1)
   {
@@ -271,8 +271,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     for (uint k = 0; k < recv_count; k++)
     {
       Facet f(*mesh, dist.get_local(recv_buff[k]));
-      send_buff[k] = 
-	mesh->distdata()[dim].get_global(f.entities(facet_dim)[0]);
+      send_buff[k] = mesh->distdata()[tdim].get_global(f.entities(tdim)[0]);
     }
 
     // Send back corresponding global cell index
@@ -299,7 +298,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
     for (FacetIterator f(*c); !f.end(); ++f)
     {
       // Filter out non-shared boundary facets
-      if (f->num_entities(facet_dim) == 1 && !f->is_shared())
+      if (f->num_entities(tdim) == 1 && !f->is_shared())
       {
         continue;
       }
@@ -309,17 +308,17 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
       }
       else
       {
-	if (f->entities(facet_dim)[0] != c->index())
-	{
-	  neigh_idx = 0;
-	}
-	else if (f->entities(facet_dim)[1] != c->index())
-	{
-	  neigh_idx = 1;
-	}
+        if (f->entities(tdim)[0] != c->index())
+        {
+          neigh_idx = 0;
+        }
+        else if (f->entities(tdim)[1] != c->index())
+        {
+          neigh_idx = 1;
+        }
 
-	Cell neig_cell(*mesh, f->entities(facet_dim)[0]);	
-	nbor_global_id[i] = neig_cell.global_index();
+        Cell neig_cell(*mesh, f->entities(tdim)[0]);
+        nbor_global_id[i] = neig_cell.global_index();
       }
     }
   }

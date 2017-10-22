@@ -90,7 +90,7 @@ void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
   // Initialize mesh data
   this->num_vertices_ = num_local;
   mesh_->topology_.init(0, num_local, num_global);
-  mesh_->geometry_.init(mesh_->space(), num_local);
+  mesh_->geometry_.resize(num_local);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)

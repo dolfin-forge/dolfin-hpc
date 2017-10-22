@@ -152,11 +152,13 @@ bool Mesh::operator !=(Mesh const& other) const
 void Mesh::init(CellType const& type, Space const& space)
 {
   clear();
+
   // Initialize the topology to the given cell type
   cell_type_ = type.clone();
   topology_.init(type, !this->reordering());
   if (this->parallel_io()) topology_.set_distributed();
   space_ = space.clone();
+  MeshGeometry G(space); geometry_.swap(G);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::empty() const

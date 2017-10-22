@@ -17,6 +17,7 @@ namespace dolfin
 {
 
 template<class T> class Array;
+class Mesh;
 class Space;
 
 /**
@@ -31,9 +32,6 @@ class MeshGeometry : public Tokenized, public Clonable<MeshGeometry>
 {
 
 public:
-
-  /// Create empty set of coordinates
-  MeshGeometry();
 
   /// Create mesh geometry for given space
   MeshGeometry(Space const& space);
@@ -83,11 +81,8 @@ public:
   /// Return coordinate n as a 3D point value
   Point point(uint n) const;
 
-  /// Initialize coordinate list to given geometric dimension and size
-  void init(Space const& space, uint size);
-
-  /// Clear all data
-  void clear();
+  /// Resize space coordinates to size
+  void resize(uint size);
 
   ///
   void finalize();
@@ -138,6 +133,15 @@ public:
   int token() const;
 
 private:
+
+  /// Only Mesh can create empty instances and clear them
+  friend class Mesh;
+
+  /// Create empty set of coordinates
+  MeshGeometry();
+
+  /// Clear all data
+  void clear();
 
   /// Update token value
   void update_token();

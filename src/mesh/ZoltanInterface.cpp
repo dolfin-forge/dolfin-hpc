@@ -185,7 +185,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
 					      int *ierr)
 {
   Mesh *mesh = (Mesh *) data;
-  uint const facet_dim = mesh->topology().dim();
+  uint const tdim = mesh->topology().dim();
   if (num_obj != mesh->num_cells() || num_gid_entries > 1)
   {
     *ierr = ZOLTAN_FATAL;
@@ -200,9 +200,9 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
     for (FacetIterator f(*c); !f.end(); ++f)
     {
       // Filter out non-shared boundary facets
-      if (f->num_entities(facet_dim) == 1 && !f->is_shared())
+      if (f->num_entities(tdim) == 1 && !f->is_shared())
       {
-	continue;
+        continue;
       }
       num_edges[i]++;
     }
@@ -301,11 +301,11 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
       // Filter out non-shared boundary facets
       if (f->num_entities(facet_dim) == 1 && !f->is_shared())
       {
-	continue;
+        continue;
       }
       else if (f->is_shared())
       {
-	nbor_global_id[i] = facet_cell_map[f->global_index()];
+        nbor_global_id[i] = facet_cell_map[f->global_index()];
       }
       else
       {

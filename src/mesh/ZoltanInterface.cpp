@@ -351,13 +351,9 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
     return;
   }
 
-  uint i = 0;
-  for (VertexIterator vertex(*mesh); !vertex.end(); i++, ++vertex)
+  for (VertexIterator vertex(*mesh); !vertex.end(); geom_vec+=num_dim, ++vertex)
   {
-    geom_vec[i] = vertex->point()[0];
-    geom_vec[i + 1] = vertex->point()[1];
-    if (num_dim > 2)
-      geom_vec[i + 2] = vertex->point()[2];
+    std::copy(vertex->x(), vertex->x() + num_dim, geom_vec);
   }
 
   *ierr = ZOLTAN_OK;

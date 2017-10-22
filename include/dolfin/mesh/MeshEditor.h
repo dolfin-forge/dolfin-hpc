@@ -45,9 +45,6 @@ public:
   /// number of local vertices will trigger an error.
   void init_vertices(uint num_local, uint num_global = 0);
 
-  /// Intialize vertices with given array of coordinates
-  void init_vertices(real * coordinates, uint num_local, uint num_global = 0);
-
   /// Add vertex v at given coordinates x
   void add_vertex(uint v, real const * x);
 
@@ -61,9 +58,6 @@ public:
   /// If the topology is not distributed, any value different than zero or the
   /// number of local cells will trigger an error.
   void init_cells(uint num_local, uint num_global = 0);
-
-  /// Intialize cells with given array of cell connectivity
-  void init_cells(uint * connectivity, uint num_local, uint num_global = 0);
 
   /// Add cell with given vertices
   void add_cell(uint c, uint const * v);

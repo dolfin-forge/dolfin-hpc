@@ -85,12 +85,6 @@ void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
 //-----------------------------------------------------------------------------
 void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
 {
-  init_vertices(NULL, num_local, num_global);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::init_vertices(real * coordinates, uint num_local,
-                               uint num_global /* = 0 */)
-{
   if(!open_)
   {
     error("MeshEditor : initializing vertices on empty editor");
@@ -98,16 +92,10 @@ void MeshEditor::init_vertices(real * coordinates, uint num_local,
   // Initialize mesh data
   this->num_vertices_ = num_local;
   mesh_->topology_.init(0, num_local, num_global);
-  mesh_->geometry_.init(mesh_->space(), num_local, coordinates);
+  mesh_->geometry_.init(mesh_->space(), num_local);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
-{
-  init_cells(NULL, num_local, num_global);
-}
-//-----------------------------------------------------------------------------
-void MeshEditor::init_cells(uint * connectivity, uint num_local,
-                            uint num_global /* = 0 */)
 {
   if(!open_)
   {
@@ -115,7 +103,7 @@ void MeshEditor::init_cells(uint * connectivity, uint num_local,
   }
   // Initialize mesh data
   this->num_cells_ = num_local;
-  mesh_->topology_.init(tdim_, num_local, num_global, connectivity);
+  mesh_->topology_.init(tdim_, num_local, num_global);
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation

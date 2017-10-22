@@ -725,7 +725,8 @@ void MeshTopology::disp() const
 {
   section("MeshTopology");
   //---
-  cout << "Dimension: " << dim_ << endl;
+  cout << "Dimension   : " << dim_ << endl;
+  cout << "Distributed : " << this->is_distributed() << endl;
   skip();
   begin("Number of entities:");
   if (num_vertices_ == 0)

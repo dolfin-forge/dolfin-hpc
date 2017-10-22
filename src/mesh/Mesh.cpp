@@ -155,7 +155,7 @@ void Mesh::init(CellType const& type, Space const& space)
 
   // Initialize the topology to the given cell type
   cell_type_ = type.clone();
-  topology_.init(type, !this->reordering());
+  MeshTopology T(type, !this->reordering()); topology_.swap(T);
   if (this->parallel_io()) topology_.set_distributed();
   space_ = space.clone();
   MeshGeometry G(space); geometry_.swap(G);

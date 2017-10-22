@@ -159,24 +159,6 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(CellType const& type, bool frozen)
-{
-  if (connectivity_ != NULL)
-  {
-    error("MeshTopology : clear instance before reinitializing");
-  }
-  type_ = type.clone();
-  dim_ = type.dim();
-  connectivity_ = new MeshConnectivity*[dim_ + 1];
-  for (uint d = 0; d <= dim_; ++d)
-  {
-    connectivity_[d] = new MeshConnectivity[dim_ + 1];
-  }
-  frozen_ = frozen;
-  //
-  update_token();
-}
-//-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
 {
   if (connectivity_ == NULL)

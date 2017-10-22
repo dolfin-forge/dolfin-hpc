@@ -96,6 +96,9 @@ public:
   /// Set value of coordinates of point n
   void set(uint n, real const * x);
 
+  /// Get value of coordinates of point n
+  void get(uint n, real * x) const;
+
   /// Assign value of all coordinates
   void assign(real const * x);
 
@@ -183,6 +186,13 @@ inline void MeshGeometry::set(uint n, real const * x)
 {
   dolfin_assert(n < size_);
   std::copy(x, x + dim_, coordinates_ + n * dim_);
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshGeometry::get(uint n, real * x) const
+{
+  dolfin_assert(n < size_);
+  real const * xn = coordinates_ + n * dim_; std::copy(xn, xn + dim_, x);
 }
 
 //-----------------------------------------------------------------------------

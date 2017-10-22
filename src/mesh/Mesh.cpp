@@ -45,6 +45,20 @@ Mesh::Mesh() :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+Mesh::Mesh(CellType const& type, Space const& space) :
+    Variable("mesh", "DOLFIN mesh"),
+    cell_type_(type.clone()),
+    topology_(type, !this->reordering()),
+    space_(space.clone()),
+    geometry_(space),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),
@@ -138,11 +152,13 @@ bool Mesh::operator !=(Mesh const& other) const
 void Mesh::init(CellType const& type, Space const& space)
 {
   clear();
+
   // Initialize the topology to the given cell type
   cell_type_ = type.clone();
-  topology_.init(type, !this->reordering());
+  MeshTopology T(type, !this->reordering()); topology_.swap(T);
   if (this->parallel_io()) topology_.set_distributed();
   space_ = space.clone();
+  MeshGeometry G(space); geometry_.swap(G);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::empty() const

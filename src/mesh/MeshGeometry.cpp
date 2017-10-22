@@ -29,6 +29,16 @@ MeshGeometry::MeshGeometry() :
 {
 }
 //-----------------------------------------------------------------------------
+MeshGeometry::MeshGeometry(Space const& space) :
+    space_(space.clone()),
+    dim_(space.dim()),
+    size_(0),
+    coordinates_(NULL),
+    abs_tol_(new real[dim_ + 1]()),
+    timestamp_(0)
+{
+}
+//-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
     space_(NULL),
     dim_(0),
@@ -134,32 +144,24 @@ real const * MeshGeometry::coordinates() const
   return coordinates_;
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::init(Space const& space, uint size)
+void MeshGeometry::resize(uint size)
 {
-  if (coordinates_ != NULL)
+  if (size != size_)
   {
-    error("MeshGeometry : clear instance before reinitializing");
+    if (size)
+    {
+      real * x = new real[dim_ * size]();
+      std::copy(coordinates_, coordinates_ + dim_ * std::min(size, size_), x);
+      std::swap(coordinates_, x);
+      std::swap(size_, size);
+    }
+    else
+    {
+      delete [] coordinates_;
+      coordinates_ = NULL;
+      size_ = 0;
+    }
   }
-  space_ = space.clone();
-  dim_ = space.dim();
-  if (dim_ == 0)
-  {
-    error("MeshGeometry : geometric dimension is zero");
-  }
-  if (dim_ > Point::MAX_SIZE)
-  {
-    error("MeshGeometry : geometric dimension '%u' exceeds point size", dim_);
-  }
-  size_ = size;
-  if (dim_ * size_ > 0)
-  {
-    coordinates_ = new real[dim_ * size_];
-    std::fill_n(coordinates_, dim_ * size_, 0.0);
-  }
-  abs_tol_ = new real[dim_ + 1];
-  std::fill_n(abs_tol_, (dim_ + 1), DOLFIN_EPS);
-
-  // Initialize token
   update_token();
 }
 //-----------------------------------------------------------------------------
@@ -195,20 +197,18 @@ void MeshGeometry::set_abs_tolerance(uint dim, real atol)
   }
   abs_tol_[dim] = std::fabs(atol);
 }
-//-----------------------------------------------------------------------------
-void MeshGeometry::assign(real const * x)
-{
-  std::copy(x, x + dim_ * size_, coordinates_);
-}
 
 //-----------------------------------------------------------------------------
 void MeshGeometry::assign(Array<real> const& coordinates)
 {
-  if(coordinates.size() != dim_ * size_)
+  if(coordinates.size() % dim_)
   {
     error("MeshGeometry : size mismatch in coordinates assignment");
   }
+  delete [] coordinates_;
+  coordinates_ = new real[coordinates.size()];
   std::copy(coordinates.begin(), coordinates.end(), coordinates_);
+  size_ = coordinates.size() / dim_;
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::remap(Array<uint> const& mapping)

@@ -35,6 +35,23 @@ MeshTopology::MeshTopology() :
 {
 }
 //-----------------------------------------------------------------------------
+MeshTopology::MeshTopology(CellType const& type, bool frozen) :
+    type_(type.clone()),
+    dim_(type.dim()),
+    num_vertices_(0),
+    ini_vertices_(false),
+    connectivity_(new MeshConnectivity*[dim_ + 1]),
+    distdata_(NULL),
+    frozen_(frozen),
+    timestamp_(0)
+{
+  for (uint d = 0; d <= dim_; ++d)
+  {
+    connectivity_[d] = new MeshConnectivity[dim_ + 1];
+  }
+  update_token();
+}
+//-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
     dim_(0),
     num_vertices_(0),
@@ -142,30 +159,12 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(CellType const& type, bool frozen)
-{
-  if (connectivity_ != NULL)
-  {
-    error("MeshTopology : clear instance before reinitializing");
-  }
-  type_ = type.clone();
-  dim_ = type.dim();
-  connectivity_ = new MeshConnectivity*[dim_ + 1];
-  for (uint d = 0; d <= dim_; ++d)
-  {
-    connectivity_[d] = new MeshConnectivity[dim_ + 1];
-  }
-  frozen_ = frozen;
-  //
-  update_token();
-}
-//-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
 {
   if (connectivity_ == NULL)
   {
     error("MeshTopology : initializing entities of dimension %u but topology "
-          "dimension is initialized", dim);
+          "is empty", dim);
   }
   // Overflow
   if (dim_ < dim)
@@ -708,7 +707,8 @@ void MeshTopology::disp() const
 {
   section("MeshTopology");
   //---
-  cout << "Dimension: " << dim_ << endl;
+  cout << "Dimension   : " << dim_ << endl;
+  cout << "Distributed : " << this->is_distributed() << endl;
   skip();
   begin("Number of entities:");
   if (num_vertices_ == 0)

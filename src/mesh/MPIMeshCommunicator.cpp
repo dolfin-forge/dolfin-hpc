@@ -97,9 +97,12 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     }
   }
 
-  // Clear topology and geometry
-  topology.clear();
-  geometry.clear();
+  // Clear mesh using swap with new instance
+  {
+    Mesh new_mesh(mesh.type(), mesh.space());
+    new_mesh.swap(mesh);
+  }
+  dolfin_assert(mesh.topology().size(0) == 0);
 
   // Exchange the vertices
   MPI_Status status;
@@ -168,7 +171,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
   // Update topology
   dolfin_assert(vindex == distdata1.local_size());
-  topology.init(mesh.type());
   topology.set_distributed();
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;
@@ -181,7 +183,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
   // Update geometry
   dolfin_assert(vindex * gdim == coords.size());
-  geometry.init(mesh.space(), vindex);
   geometry.assign(coords);
   geometry.finalize();
 
@@ -275,9 +276,11 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   }
   delete [] vertex_used;
 
-  // Clear topology and geometry
-  topology.clear();
-  geometry.clear();
+  // Clear mesh using swap with new instance
+  {
+    Mesh new_mesh(mesh.type(), mesh.space());
+    new_mesh.swap(mesh);
+  }
 
   // Exchange the processed entities
   MPI_Status status;
@@ -472,7 +475,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
 
   // Update topology
   dolfin_assert(vindex == distdata1.local_size());
-  topology.init(mesh.type());
   topology.set_distributed();
   topology.init(0 , vindex);
   topology.distdata()[0] = distdata1;
@@ -492,7 +494,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
 
   // Update geometry
   dolfin_assert(vindex * gdim == coords.size());
-  geometry.init(mesh.space(), vindex);
   geometry.assign(coords);
   geometry.finalize();
 

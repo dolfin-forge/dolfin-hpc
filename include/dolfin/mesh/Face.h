@@ -36,6 +36,21 @@ public:
 
   typedef FaceIterator iterator;
 
+  struct shared : SharedIterator
+  {
+    shared(MeshTopology& T) : SharedIterator(T.distdata()[2]) {}
+  };
+
+  struct ghost : GhostIterator
+  {
+    ghost(MeshTopology& T) : GhostIterator(T.distdata()[2]) {}
+  };
+
+  struct owned : OwnedIterator
+  {
+    owned(MeshTopology& T) : OwnedIterator(T.distdata()[2]) {}
+  };
+
 };
 
 /// A FaceIterator is a MeshEntityIterator of topological dimension 2.

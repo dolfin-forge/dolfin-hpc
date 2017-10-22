@@ -55,6 +55,21 @@ public:
 
   typedef EdgeIterator iterator;
 
+  struct shared : SharedIterator
+  {
+    shared(MeshTopology& T) : SharedIterator(T.distdata()[1]) {}
+  };
+
+  struct ghost : GhostIterator
+  {
+    ghost(MeshTopology& T) : GhostIterator(T.distdata()[1]) {}
+  };
+
+  struct owned : OwnedIterator
+  {
+    owned(MeshTopology& T) : OwnedIterator(T.distdata()[1]) {}
+  };
+
 };
 
 /// An EdgeIterator is a MeshEntityIterator of topological dimension 1.

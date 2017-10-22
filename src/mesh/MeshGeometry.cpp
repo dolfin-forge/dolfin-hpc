@@ -134,7 +134,7 @@ real const * MeshGeometry::coordinates() const
   return coordinates_;
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::init(Space const& space, uint size, real * coordinates)
+void MeshGeometry::init(Space const& space, uint size)
 {
   if (coordinates_ != NULL)
   {
@@ -151,11 +151,7 @@ void MeshGeometry::init(Space const& space, uint size, real * coordinates)
     error("MeshGeometry : geometric dimension '%u' exceeds point size", dim_);
   }
   size_ = size;
-  if (coordinates != NULL)
-  {
-    coordinates_ = coordinates;
-  }
-  else if (dim_ * size_ > 0)
+  if (dim_ * size_ > 0)
   {
     coordinates_ = new real[dim_ * size_];
     std::fill_n(coordinates_, dim_ * size_, 0.0);

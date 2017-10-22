@@ -160,12 +160,7 @@ void MeshTopology::init(CellType const& type, bool frozen)
   update_token();
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, uint nlocal, uint * connectivity)
-{
-  init(dim, nlocal, 0, connectivity);
-}
-//-----------------------------------------------------------------------------
-void MeshTopology::init(uint dim, uint nlocal, uint nglobal, uint * connectivity)
+void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
 {
   if (connectivity_ == NULL)
   {
@@ -180,7 +175,7 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal, uint * connectivity
   }
   // NOTE: point meshes have cell dimension is equal to the vertex dimension
   if(dim == 0) { num_vertices_ = nlocal; ini_vertices_ = true; }
-  connectivity_[dim][0].init(nlocal, type_->num_vertices(dim), connectivity);
+  connectivity_[dim][0].init(nlocal, type_->num_vertices(dim));
   // Set size of distributed data
   if (distdata_ != NULL)
   {

@@ -81,7 +81,7 @@ public:
   Point point(uint n) const;
 
   /// Initialize coordinate list to given geometric dimension and size
-  void init(Space const& space, uint size, real * coordinates = NULL);
+  void init(Space const& space, uint size);
 
   /// Clear all data
   void clear();

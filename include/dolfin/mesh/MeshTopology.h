@@ -86,8 +86,7 @@ public:
   /// Optionally specify the global number of entities for a distributed mesh.
   /// If the topology is not distributed, any value different than zero or the
   /// number of local entities will trigger an error.
-  void init(uint dim, uint nlocal, uint * connectivity = NULL);
-  void init(uint dim, uint nlocal, uint nglobal, uint * connectivity = NULL);
+  void init(uint dim, uint nlocal, uint nglobal = 0);
 
   /// Clear all data
   void clear();

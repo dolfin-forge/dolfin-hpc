@@ -61,6 +61,9 @@ public:
   /// Create mesh topology
   MeshTopology();
 
+  /// Create mesh topology for given cell type
+  MeshTopology(CellType const& type, bool frozen = false);
+
   /// Copy constructor
   MeshTopology(MeshTopology const& other);
 

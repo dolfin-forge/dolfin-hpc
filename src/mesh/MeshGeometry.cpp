@@ -29,6 +29,16 @@ MeshGeometry::MeshGeometry() :
 {
 }
 //-----------------------------------------------------------------------------
+MeshGeometry::MeshGeometry(Space const& space) :
+    space_(space.clone()),
+    dim_(space.dim()),
+    size_(0),
+    coordinates_(NULL),
+    abs_tol_(NULL),
+    timestamp_(0)
+{
+}
+//-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(MeshGeometry const& geometry) :
     space_(NULL),
     dim_(0),

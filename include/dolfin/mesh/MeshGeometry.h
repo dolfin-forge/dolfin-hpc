@@ -35,6 +35,9 @@ public:
   /// Create empty set of coordinates
   MeshGeometry();
 
+  /// Create mesh geometry for given space
+  MeshGeometry(Space const& space);
+
   /// Copy constructor
   MeshGeometry(MeshGeometry const& geometry);
 

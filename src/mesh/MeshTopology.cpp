@@ -35,6 +35,23 @@ MeshTopology::MeshTopology() :
 {
 }
 //-----------------------------------------------------------------------------
+MeshTopology::MeshTopology(CellType const& type, bool frozen) :
+    type_(type.clone()),
+    dim_(type.dim()),
+    num_vertices_(0),
+    ini_vertices_(false),
+    connectivity_(new MeshConnectivity*[dim_ + 1]()),
+    distdata_(NULL),
+    frozen_(frozen),
+    timestamp_(0)
+{
+  for (uint d = 0; d <= dim_; ++d)
+  {
+    connectivity_[d] = new MeshConnectivity[dim_ + 1];
+  }
+  update_token();
+}
+//-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
     dim_(0),
     num_vertices_(0),

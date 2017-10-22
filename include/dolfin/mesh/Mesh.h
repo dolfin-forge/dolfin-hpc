@@ -72,6 +72,9 @@ public:
   /// Create empty mesh
   Mesh();
 
+  /// Constructor from cell type and space
+  Mesh(CellType const& type, Space const& space);
+
   /// Copy constructor
   Mesh(Mesh const& mesh);
 

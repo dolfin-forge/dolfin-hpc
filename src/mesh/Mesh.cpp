@@ -45,6 +45,20 @@ Mesh::Mesh() :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+Mesh::Mesh(CellType const& type, Space const& space) :
+    Variable("mesh", "DOLFIN mesh"),
+    cell_type_(type.clone()),
+    topology_(type, !this->reordering()),
+    space_(space.clone()),
+    geometry_(space),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
+{
+  // Do nothing
+}
+//-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& mesh) :
     Variable("mesh", "DOLFIN mesh"),
     cell_type_(NULL),

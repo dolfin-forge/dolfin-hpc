@@ -53,6 +53,9 @@ public:
   /// Swap instances
   void swap(MeshGeometry& other);
 
+  /// Return space of coordinate system
+  Space const& space() const;
+
   /// Return Euclidean dimension of coordinate system
   uint dim() const;
 

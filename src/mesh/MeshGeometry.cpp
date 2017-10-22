@@ -97,6 +97,12 @@ void MeshGeometry::swap(MeshGeometry& other)
   std::swap(timestamp_, other.timestamp_);
 }
 //-----------------------------------------------------------------------------
+Space const& MeshGeometry::space() const
+{
+  dolfin_assert(space_);
+  return *space_;
+}
+//-----------------------------------------------------------------------------
 uint MeshGeometry::dim() const
 {
   return dim_;

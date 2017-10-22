@@ -182,7 +182,7 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
   if (connectivity_ == NULL)
   {
     error("MeshTopology : initializing entities of dimension %u but topology "
-          "dimension is initialized", dim);
+          "is empty", dim);
   }
   // Overflow
   if (dim_ < dim)

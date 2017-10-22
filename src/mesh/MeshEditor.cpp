@@ -57,10 +57,7 @@ MeshEditor::MeshEditor(Mesh& mesh) :
     cell_index_(0),
     open_(false)
 {
-  if (mesh.cell_type_ == NULL)
-  {
-    error("MeshEditor : provided mesh is empty");
-  }
+  if (mesh.empty()) { error("MeshEditor : provided mesh is empty"); }
   init(mesh, mesh.type(), mesh.space());
 }
 //-----------------------------------------------------------------------------

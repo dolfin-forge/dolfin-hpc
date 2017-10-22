@@ -102,7 +102,7 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     return true;
   }
   //
-  if (dim_ != other.dim_)
+  if (*type_ != *other.type_)
   {
     return false;
   }

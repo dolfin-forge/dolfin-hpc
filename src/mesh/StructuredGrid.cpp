@@ -46,7 +46,7 @@ void StructuredGrid::init(CellType const& type)
   //
   uint const tdim = type.dim();
   uint const gdim = type.space_dim();
-  MeshEditor editor(*this, type, gdim);
+  MeshEditor editor(*this, type.cellType(), gdim);
   // Number of cells in each direction
   uint * n = new uint[tdim];
   for (uint i = 0; i < tdim; ++i) { n[i] = n_; } // isotropic

@@ -31,7 +31,7 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   // Create new mesh, refinement manager and open for editing
   uint const tdim = mesh.topology().dim();
   Mesh refined_mesh;
-  MeshEditor editor(refined_mesh, mesh.type(), mesh.geometry().dim());
+  MeshEditor editor(refined_mesh, mesh.type(), mesh.space());
   RefinementManager refman(mesh, refined_mesh);
   RefinementPattern const& pattern = refman.pattern();
 

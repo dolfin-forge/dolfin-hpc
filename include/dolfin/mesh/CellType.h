@@ -60,6 +60,16 @@ public:
   /// Clone pattern
   virtual CellType* clone() const = 0;
 
+  /// Comparison operator
+  bool operator==(CellType const& other) const
+  {
+    return (this->cell_type == other.cell_type);
+  }
+  bool operator!=(CellType const& other) const
+  {
+    return !(*this == other);
+  }
+
   /// Return type of cell
   inline CellType::Type cellType() const { return cell_type; }
 

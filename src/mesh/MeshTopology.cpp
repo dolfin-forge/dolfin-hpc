@@ -40,7 +40,7 @@ MeshTopology::MeshTopology(CellType const& type, bool frozen) :
     dim_(type.dim()),
     num_vertices_(0),
     ini_vertices_(false),
-    connectivity_(new MeshConnectivity*[dim_ + 1]()),
+    connectivity_(new MeshConnectivity*[dim_ + 1]),
     distdata_(NULL),
     frozen_(frozen),
     timestamp_(0)

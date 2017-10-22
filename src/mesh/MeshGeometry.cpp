@@ -205,11 +205,6 @@ void MeshGeometry::set_abs_tolerance(uint dim, real atol)
   }
   abs_tol_[dim] = std::fabs(atol);
 }
-//-----------------------------------------------------------------------------
-void MeshGeometry::assign(real const * x)
-{
-  std::copy(x, x + dim_ * size_, coordinates_);
-}
 
 //-----------------------------------------------------------------------------
 void MeshGeometry::assign(Array<real> const& coordinates)

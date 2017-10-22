@@ -102,9 +102,6 @@ public:
   /// Get value of coordinates of point n
   void get(uint n, real * x) const;
 
-  /// Assign value of all coordinates
-  void assign(real const * x);
-
   /// Assign values of coordinates from array, size of input should match
   void assign(Array<real> const& coordinates);
 

@@ -125,33 +125,15 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     {
       if (sub_system().depth() == 0)
       {
-	node_normal->init(fullspace);
+        node_normal->init(fullspace);
       }
       else
       {
-	FiniteElementSpace subspace(fullspace, sub_system());
-	node_normal->init(subspace);
+        FiniteElementSpace subspace(fullspace, sub_system());
+        node_normal->init(subspace);
       }
       node_normal->compute();
     }
-
-
-    // Create boundary markers for given topological dimension if the subdomain
-    // is defined geometrically.
-    error("WIP: markers");
-//    if (this->has_geometrical_sub_domain())
-//    {
-//      if (is_P1)
-//      {
-//        // Markers are vertex-based
-//        BoundaryCondition::init_markers(0);
-//      }
-//      else
-//      {
-//        // Markers are facet based
-//        BoundaryCondition::init_markers(mesh.topology().dim() - 1);
-//      }
-//    }
 
     // Initialize local data structures
     std::set<uint>::iterator it = row_indices.begin();
@@ -224,7 +206,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
       Vertex vertex(mesh, boundary.vertex_index(*v));
 
       // Skip vertices not inside the sub domain
-      if (!this->sub_domain().inside(v->x(), true))
+      if (!this->sub_domain().enclosed(vertex, true))
       {
         continue;
       }

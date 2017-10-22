@@ -15,7 +15,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
+MeshEditor::MeshEditor(Mesh& mesh, CellType const& type, Space const& space) :
     mesh_(&mesh),
     cell_vertices_(NULL),
     tdim_(0),
@@ -26,10 +26,10 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim) :
     cell_index_(0),
     open_(false)
 {
-  init(mesh, cell_type, gdim);
+  init(mesh, type, space);
 }
 //-----------------------------------------------------------------------------
-MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
+MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
     mesh_(&mesh),
     cell_vertices_(NULL),
     tdim_(0),
@@ -40,9 +40,10 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type type, uint gdim) :
     cell_index_(0),
     open_(false)
 {
-  CellType * cell_type = CellType::create(type);
-  init(mesh, *cell_type, gdim);
-  delete cell_type;
+  CellType * type = CellType::create(cell_type);
+  EuclideanSpace space(gdim);
+  init(mesh, *type, space);
+  delete type;
 }
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh) :
@@ -60,7 +61,7 @@ MeshEditor::MeshEditor(Mesh& mesh) :
   {
     error("MeshEditor : provided mesh is empty");
   }
-  init(mesh, mesh.type(), mesh.geometry().dim());
+  init(mesh, mesh.type(), mesh.space());
 }
 //-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
@@ -71,14 +72,14 @@ MeshEditor::~MeshEditor()
   }
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::init(Mesh& mesh, CellType const& type, uint gdim)
+void MeshEditor::init(Mesh& mesh, CellType const& type, Space const& space)
 {
   // Save mesh and dimension
   this->tdim_ = type.dim();
-  this->gdim_ = gdim;
+  this->gdim_ = space.dim();
 
   // Initialize the topology to the given cell type and space
-  mesh.init(type, EuclideanSpace(gdim));
+  mesh.init(type, space);
 
   open_ = true;
 }

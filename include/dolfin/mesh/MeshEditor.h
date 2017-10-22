@@ -18,18 +18,18 @@ namespace dolfin
 class Mesh;
 class MeshConnectivity;
 
-/// A simple mesh editor for creating simplicial meshes in 1D, 2D and 3D.
+/// A simple mesh editor for creating meshes in 1D, 2D and 3D.
 
 class MeshEditor
 {
 
 public:
 
-  /// Constructor for meshes with unique type of cell
-  MeshEditor(Mesh& mesh, CellType const& cell_type, uint gdim);
+  /// Constructor for meshes given a cell type and a space definition
+  MeshEditor(Mesh& mesh, CellType const& type, Space const& space);
 
   /// Constructor for meshes with unique type of cell from factory function
-  MeshEditor(Mesh& mesh, CellType::Type type, uint gdim);
+  MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim);
 
   /// Constructor using already initialized mesh.
   MeshEditor(Mesh& mesh);
@@ -73,7 +73,7 @@ public:
 private:
 
   /// Open mesh of given cell type and geometrical dimension
-  void init(Mesh& mesh, CellType const& type, uint gdim);
+  void init(Mesh& mesh, CellType const& type, Space const& space);
 
   // Clear all data
   void clear();

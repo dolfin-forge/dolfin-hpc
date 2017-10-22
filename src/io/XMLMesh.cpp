@@ -159,7 +159,7 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
     error("XMLMesh : mesh editor is already created.");
   }
   dolfin_assert(cell_type_ != NULL);
-  editor_ = new MeshEditor(mesh_, *cell_type_, dim);
+  editor_ = new MeshEditor(mesh_, cell_type_->cellType(), dim);
   parallel_ = mesh_.topology().is_distributed();
   if(parallel_)
   {
@@ -399,7 +399,7 @@ void XMLMesh::endMesh()
     // Create mesh editor
     Mesh new_mesh;
     delete editor_;
-    editor_ = new MeshEditor(new_mesh, mesh_.type(), gdim);
+    editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
 
     // Add vertices
     editor_->init_vertices(mesh_.size(0) + shared - orphan);

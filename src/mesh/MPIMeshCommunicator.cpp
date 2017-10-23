@@ -225,8 +225,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   Array<real> * sendbuf_x = new Array<real> [pe_size];
 
   // Collect mesh entities according to distribution
-  bool * vertex_used = new bool[topology.size(0)];
-  std::fill_n(vertex_used, topology.size(0), false);
+  bool * vertex_used = new bool[topology.size(0)]();
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     uint const owner = dist(*c);

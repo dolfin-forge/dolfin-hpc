@@ -110,17 +110,14 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   uint dst;
   uint send_size;
   uint recvmax_v;
-  uint recvmax_x;
   for (uint j = 0; j < pe_size; ++j)
   {
     send_size = sendbuf_v[j].size();
-    MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_MAX, j,
-               MPI::DOLFIN_COMM);
-    send_size = sendbuf_x[j].size();
-    MPI_Reduce(&send_size, &recvmax_x, 1, MPI_UNSIGNED, MPI_SUM, j,
+    MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j,
                MPI::DOLFIN_COMM);
   }
   dolfin_assert(recvmax_v > 0);
+  uint recvmax_x = recvmax_v * gdim;
   // Allocate vertex indices buffer
   uint * recvbuf_v = new uint[recvmax_v];
   // Resize vertex coordinates array to fit new cells
@@ -289,19 +286,16 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   uint send_size;
   uint recvmax_c;
   uint recvmax_v;
-  uint recvmax_x;
   for (uint j = 0; j < pe_size; ++j)
   {
     send_size = sendbuf_c[j].size();
     MPI_Reduce(&send_size, &recvmax_c, 1, MPI_UNSIGNED, MPI_SUM, j,
                MPI::DOLFIN_COMM);
     send_size = sendbuf_v[j].size();
-    MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_MAX, j,
-               MPI::DOLFIN_COMM);
-    send_size = sendbuf_x[j].size();
-    MPI_Reduce(&send_size, &recvmax_x, 1, MPI_UNSIGNED, MPI_SUM, j,
+    MPI_Reduce(&send_size, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j,
                MPI::DOLFIN_COMM);
   }
+  uint recvmax_x = recvmax_v * gdim;
   // Resize cell vertices array to fit new cells
   uint const cells_size = cells.size();
   cells.resize(cells_size + recvmax_c);

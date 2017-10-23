@@ -36,6 +36,21 @@ public:
 
   typedef FacetIterator iterator;
 
+  struct shared : SharedIterator
+  {
+    shared(MeshTopology& T) : SharedIterator(T.distdata()[T.type().facet_dim()]) {}
+  };
+
+  struct ghost : GhostIterator
+  {
+    ghost(MeshTopology& T) : GhostIterator(T.distdata()[T.type().facet_dim()]) {}
+  };
+
+  struct owned : OwnedIterator
+  {
+    owned(MeshTopology& T) : OwnedIterator(T.distdata()[T.type().facet_dim()]) {}
+  };
+
 };
 
 /// A FacetIterator is a MeshEntityIterator of topological codimension 1.

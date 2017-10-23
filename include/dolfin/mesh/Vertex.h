@@ -64,6 +64,21 @@ public:
 
   typedef VertexIterator iterator;
 
+  struct shared : SharedIterator
+  {
+    shared(MeshTopology& T) : SharedIterator(T.distdata()[0]) {}
+  };
+
+  struct ghost : GhostIterator
+  {
+    ghost(MeshTopology& T) : GhostIterator(T.distdata()[0]) {}
+  };
+
+  struct owned : OwnedIterator
+  {
+    owned(MeshTopology& T) : OwnedIterator(T.distdata()[0]) {}
+  };
+
 };
 
 /// A VertexIterator is a MeshEntityIterator of topological dimension 0.

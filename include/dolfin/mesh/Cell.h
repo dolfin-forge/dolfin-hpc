@@ -117,6 +117,21 @@ public:
 
   typedef CellIterator iterator;
 
+  struct shared : SharedIterator
+  {
+    shared(MeshTopology& T) : SharedIterator(T.distdata()[T.dim()]) {}
+  };
+
+  struct ghost : GhostIterator
+  {
+    ghost(MeshTopology& T) : GhostIterator(T.distdata()[T.dim()]) {}
+  };
+
+  struct owned : OwnedIterator
+  {
+    owned(MeshTopology& T) : OwnedIterator(T.distdata()[T.dim()]) {}
+  };
+
 };
 
 /**

@@ -90,6 +90,9 @@ public:
   void finalize();
 
   ///
+  CellType const& type() const;
+
+  ///
   CellType const& type(uint i) const;
 
   /// Remap local entities of given dimension

@@ -259,6 +259,12 @@ void MeshTopology::finalize()
   // This would cause issues for boundary meshes and some mesh algorithms.
 }
 //-----------------------------------------------------------------------------
+CellType const& MeshTopology::type() const
+{
+  dolfin_assert(type_);
+  return *type_;
+}
+//-----------------------------------------------------------------------------
 CellType const& MeshTopology::type(uint i) const
 {
   dolfin_assert(type_);

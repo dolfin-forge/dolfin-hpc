@@ -162,6 +162,13 @@ public:
   ///
   inline uint stride() const { return stride_; }
 
+  ///
+  inline uint dim(uint i) const
+  {
+      return (i == 0 ? this->size() / this->stride() :
+              i == 1 ? this->stride() : 0);
+  }
+
   /// Factor logic for array initialization
   inline static
   T * init(uidx n, T * src, T *& dst)
@@ -259,6 +266,13 @@ public:
 
   ///
   inline uint stride() const { return stride_; }
+
+  ///
+  inline uint dim(uint i) const
+  {
+      return (i == 0 ? this->size() / this->stride() :
+              i == 1 ? this->stride() : 0);
+  }
 
 private:
 

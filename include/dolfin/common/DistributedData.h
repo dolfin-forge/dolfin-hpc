@@ -83,9 +83,6 @@ public:
     }
   }
 
-  /// Clear all data
-  void clear();
-
   /// Finalize the data: validate and set process range + global size
   void finalize();
 
@@ -251,6 +248,9 @@ public:
   void disp() const;
 
 private:
+
+  /// Clear all data
+  void clear();
 
   uint rank_;
   uint pe_size_;

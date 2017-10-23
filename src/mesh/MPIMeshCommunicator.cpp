@@ -233,11 +233,14 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
     for (VertexIterator v(*c); !v.end(); ++v)
     {
       sendbuf_c[owner].push_back(v->global_index());
-      if (!vertex_used[v->index()] && v->is_owned())
+      if (!vertex_used[v->index()])
       {
         vertex_used[v->index()] = true;
-        sendbuf_v[owner].push_back(v->global_index());
-        sendbuf_x[owner].append(v->x(), v->x() + gdim);
+        if (v->is_owned())
+        {
+          sendbuf_v[owner].push_back(v->global_index());
+          sendbuf_x[owner].append(v->x(), v->x() + gdim);
+        }
       }
     }
   }

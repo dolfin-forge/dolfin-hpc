@@ -50,6 +50,39 @@ public:
   ///
   bool operator!=(DistributedData const& other) const;
 
+  ///
+  void swap(DistributedData& other)
+  {
+    if (this != &other)
+    {
+      // Swap communicator
+      Distributed::swap(other);
+
+      // Swap flags
+      std::swap(valid_numbering, other.valid_numbering);
+      std::swap(valid_ownership, other.valid_ownership);
+      std::swap(valid_adjacency, other.valid_adjacency);
+
+      // Swap attributes
+      std::swap(rank_             , other.rank_);
+      std::swap(pe_size_          , other.pe_size_);
+      std::swap(range_is_set_     , other.range_is_set_);
+      std::swap(offset_           , other.offset_);
+      std::swap(range_size_       , other.range_size_);
+      std::swap(global_size_      , other.global_size_);
+      std::swap(finalized_        , other.finalized_);
+      std::swap(global_           , other.global_);
+      std::swap(local_            , other.local_);
+      std::swap(adjacents_        , other.adjacents_);
+      std::swap(shared_           , other.shared_);
+      std::swap(ghost_            , other.ghost_);
+      std::swap(cache_size_       , other.cache_size_);
+      std::swap(cached_numbering_ , other.cached_numbering_);
+      std::swap(cached_ownership_ , other.cached_ownership_);
+      std::swap(shared_mapping_   , other.shared_mapping_);
+    }
+  }
+
   /// Clear all data
   void clear();
 

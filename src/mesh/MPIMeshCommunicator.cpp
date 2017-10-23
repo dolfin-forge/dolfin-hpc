@@ -40,7 +40,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   tic();
 
   Mesh& mesh = dist.mesh();
-  uint const rank = MPI::rank();
+  uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();
   uint const tdim = topology.dim();
@@ -77,7 +77,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     if (v->is_owned())
     {
       uint const owner = dist(*v);
-      if (owner == rank)
+      if (owner == pe_rank)
       {
         distdata1.set_map(vindex, v->global_index());
         ++vindex;
@@ -127,8 +127,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
 
     // Vertices
     MPI_Sendrecv(&sendbuf_v[dst][0], sendbuf_v[dst].size(), MPI_UNSIGNED,
@@ -203,7 +203,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   tic();
 
   Mesh& mesh = dist.mesh();
-  uint const rank = MPI::rank();
+  uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
   MeshTopology& topology = mesh.topology();
   uint const tdim = topology.dim();
@@ -237,7 +237,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     uint const owner = dist(*c);
-    if (owner == rank)
+    if (owner == pe_rank)
     {
       for (VertexIterator v(*c); !v.end(); ++v)
       {
@@ -310,8 +310,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
 
     // Cells
     MPI_Sendrecv(&sendbuf_c[dst][0], sendbuf_c[dst].size(), MPI_UNSIGNED, dst,
@@ -404,8 +404,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   real * recvbuf_gx = new real[sendcnt_gv * gdim];
   for (uint j = 1; j < pe_size; ++j)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
 
     // Send ghost vertices to request coordinates
     MPI_Sendrecv(&sendbuf_gv[0], sendbuf_gv.size(), MPI_UNSIGNED, dst, 0,

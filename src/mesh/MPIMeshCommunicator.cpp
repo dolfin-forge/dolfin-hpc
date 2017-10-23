@@ -66,36 +66,32 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   }
 
   DistributedData distdata1;
-  Array<real> coords;
   Array<uint> * sendbuf_v = new Array<uint> [pe_size];
   Array<real> * sendbuf_x = new Array<real> [pe_size];
 
   // Collect mesh entities according to distribution
-  uint vindex = 0;
   for (VertexIterator v(mesh); !v.end(); ++v)
   {
     if (v->is_owned())
     {
       uint const owner = dist(*v);
-      if (owner == pe_rank)
-      {
-        distdata1.set_map(vindex, v->global_index());
-        ++vindex;
-        for (uint d = 0; d < gdim; ++d)
-        {
-          coords.push_back(v->x()[d]);
-        }
-      }
-      else
-      {
-        sendbuf_v[owner].push_back(v->global_index());
-        for (uint d = 0; d < gdim; ++d)
-        {
-          sendbuf_x[owner].push_back(v->x()[d]);
-        }
-      }
+      sendbuf_x[owner].append(v->x(), v->x() + gdim);
+      sendbuf_v[owner].push_back(v->global_index());
     }
   }
+
+  // Map local vertex indices
+  uint vindex = 0;
+  for (Array<uint>::const_iterator it = sendbuf_v[pe_rank].begin();
+       it != sendbuf_v[pe_rank].end(); ++it)
+  {
+    distdata1.set_map(vindex++, *it);
+  }
+  sendbuf_v[pe_rank].clear();
+
+  // Swap local coordinates
+  Array<real> coords;
+  coords.swap(sendbuf_x[pe_rank]);
 
   // Clear mesh using swap with new instance
   {
@@ -224,54 +220,45 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   }
 
   DistributedData distdata1;
-  Array<real> coords;
   Array<uint> * sendbuf_c = new Array<uint> [pe_size];
   Array<uint> * sendbuf_v = new Array<uint> [pe_size];
   Array<real> * sendbuf_x = new Array<real> [pe_size];
 
   // Collect mesh entities according to distribution
-  Array<uint> cells;
-  uint vindex = 0;
   bool * vertex_used = new bool[topology.size(0)];
   std::fill_n(vertex_used, topology.size(0), false);
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     uint const owner = dist(*c);
-    if (owner == pe_rank)
+    for (VertexIterator v(*c); !v.end(); ++v)
     {
-      for (VertexIterator v(*c); !v.end(); ++v)
+      sendbuf_c[owner].push_back(v->global_index());
+      if (!vertex_used[v->index()] && v->is_owned())
       {
-        cells.push_back(v->global_index());
-        if (!vertex_used[v->index()] && v->is_owned())
-        {
-          vertex_used[v->index()] = true;
-          distdata1.set_map(vindex, v->global_index());
-          ++vindex;
-          for (uint d = 0; d < gdim; ++d)
-          {
-            coords.push_back(v->x()[d]);
-          }
-        }
-      }
-    }
-    else
-    {
-      for (VertexIterator v(*c); !v.end(); ++v)
-      {
-        sendbuf_c[owner].push_back(v->global_index());
-        if (!vertex_used[v->index()] && v->is_owned())
-        {
-          vertex_used[v->index()] = true;
-          sendbuf_v[owner].push_back(v->global_index());
-          for (uint d = 0; d < gdim; ++d)
-          {
-            sendbuf_x[owner].push_back(v->x()[d]);
-          }
-        }
+        vertex_used[v->index()] = true;
+        sendbuf_v[owner].push_back(v->global_index());
+        sendbuf_x[owner].append(v->x(), v->x() + gdim);
       }
     }
   }
   delete [] vertex_used;
+
+  // Map local vertex indices
+  uint vindex = 0;
+  for (Array<uint>::const_iterator it = sendbuf_v[pe_rank].begin();
+       it != sendbuf_v[pe_rank].end(); ++it)
+  {
+    distdata1.set_map(vindex++, *it);
+  }
+  sendbuf_v[pe_rank].clear();
+
+  // Swap local coordinates
+  Array<real> coords;
+  coords.swap(sendbuf_x[pe_rank]);
+
+  // Swap local cells
+  Array<uint> cells;
+  cells.swap(sendbuf_c[pe_rank]);
 
   // Clear mesh using swap with new instance
   {

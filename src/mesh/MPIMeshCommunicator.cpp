@@ -166,11 +166,13 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   dolfin_assert(vindex == distdata1.local_size());
   topology.set_distributed();
   topology.init(0 , vindex);
-  topology.distdata()[0] = distdata1;
+  topology.distdata()[0].swap(distdata1);
   topology.finalize();
+  dolfin_assert(vindex == topology.distdata()[0].local_size());
   if(num_global_vertices != topology.global_size(0))
   {
-    error("MPIMeshCommunicator : invalid global number of vertices %u != %u",
+    error("MPIMeshCommunicator : vertex distribution :\n"
+          "invalid global number of vertices %u != %u",
           num_global_vertices, topology.global_size(0));
   }
 
@@ -337,6 +339,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
     recvmax_x -= recv_count;
 
   }
+  dolfin_assert(vindex == distdata1.local_size());
 
   // Cleanup buffers
   delete[] recvbuf_v;
@@ -460,18 +463,21 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist)
   dolfin_assert(vindex == distdata1.local_size());
   topology.set_distributed();
   topology.init(0 , vindex);
-  topology.distdata()[0] = distdata1;
+  topology.distdata()[0].swap(distdata1);
   topology.init(tdim , cindex);
   topology(tdim, 0).set(cells);
   topology.finalize();
+  dolfin_assert(vindex == topology.distdata()[0].local_size());
   if(num_global_vertices != topology.global_size(0))
   {
-    error("MPIMeshCommunicator : invalid global number of vertices %u != %u",
+    error("MPIMeshCommunicator : cell distribution :\n"
+          "invalid global number of vertices %u != %u",
           num_global_vertices, topology.global_size(0));
   }
   if(num_global_cells != topology.global_size(tdim))
   {
-    error("MPIMeshCommunicator : invalid global number of cells %u != %u",
+    error("MPIMeshCommunicator : cell distribution :\n"
+          "invalid global number of cells %u != %u",
           num_global_cells, topology.global_size(tdim));
   }
 

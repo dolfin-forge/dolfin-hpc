@@ -39,11 +39,8 @@ public:
     *this = other;
   }
 
-  /// Swap instances
-  void swap(Distributed& other)
-  {
-    std::swap(comm_, other.comm_);
-  }
+  /// Swap instances, force implementation in derived class
+  virtual void swap(T& other) = 0;
 
   ///
   MPI::Communicator& comm()
@@ -106,6 +103,11 @@ private:
 
 };
 
-}
+//-----------------------------------------------------------------------------
+
+template<class T>
+inline void Distributed<T>::swap(T& other) { std::swap(comm_, other.comm_); }
+
+} /* namespace dolfin */
 
 #endif /* __DOLFIN_COMMON_DISTRIBUTED_H_ */

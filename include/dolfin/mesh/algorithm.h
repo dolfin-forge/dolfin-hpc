@@ -43,7 +43,7 @@ void foreach(Mesh& mesh, Operator evaluator, uint& value)
 {
   for (Iterator it(mesh); !it.end(); ++it)
   {
-    value = T(evaluator(*it), value);
+    value = T(evaluator(*it));
   }
 }
 
@@ -54,7 +54,7 @@ void foreach(Mesh& mesh, Operator evaluator, real& value)
 {
   for (Iterator it(mesh); !it.end(); ++it)
   {
-    value = T(evaluator(*it), value);
+    value = T(evaluator(*it));
   }
 }
 

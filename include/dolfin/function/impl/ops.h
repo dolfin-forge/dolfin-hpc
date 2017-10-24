@@ -32,6 +32,7 @@ struct EntityOp : public V
 template <class E>
 struct Circumradius : public EntityOp<Circumradius<E>, E, ValueSpace<> >
 {
+  inline real operator()(E const& e) const { return e.circumradius(); }
   inline void operator()(E const& e, real *x) const { x[0] = e.circumradius(); }
 };
 
@@ -41,14 +42,14 @@ struct Circumradius : public EntityOp<Circumradius<E>, E, ValueSpace<> >
 template<uint D>
 struct Coordinate : public EntityOp<Coordinate<D>, Vertex, ValueSpace<> >
 {
+  inline real operator()(Vertex const& v) const { return v.x()[D]; }
   inline void operator()(Vertex const& v, real *x) const { x[0] = v.x()[D]; }
 };
 
 template<uint D>
 struct Coordinates : public EntityOp<Coordinates<D>, Vertex, ValueSpace<D> >
 {
-  inline void operator()(Vertex const& v, real *x) const
-    { std::copy(v.x(), v.x() + D, x); }
+  inline void operator()(Vertex const& v, real *x) const { std::copy(v.x(), v.x() + D, x); }
 };
 
 //-----------------------------------------------------------------------------
@@ -57,6 +58,7 @@ struct Coordinates : public EntityOp<Coordinates<D>, Vertex, ValueSpace<D> >
 template <class E>
 struct Diameter: public EntityOp<Diameter<E>, E, ValueSpace<> >
 {
+  inline real operator()(E const& e) const { return e.diameter(); }
   inline void operator()(E const& e, real *x) const { x[0] = e.diameter(); }
 };
 
@@ -66,6 +68,7 @@ struct Diameter: public EntityOp<Diameter<E>, E, ValueSpace<> >
 template <class E>
 struct Volume: public EntityOp<Volume<E>, E, ValueSpace<> >
 {
+  inline real operator()(E const& e) const { return e.volume(); }
   inline void operator()(E const& e, real *x) const { x[0] = e.volume(); }
 };
 

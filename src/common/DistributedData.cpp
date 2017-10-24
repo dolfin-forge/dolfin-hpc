@@ -727,7 +727,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     shared[mapping[it->first]] = it->second;
     cached_ownership_[mapping[it->first]] = rank_;
   }
-  shared_ = shared;
+  shared_.swap(shared);
 
   // Update ghost entities
   dolfin_assert(cached_ownership_ != NULL);
@@ -738,7 +738,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     ghost[mapping[it->first]] = it->second;
     cached_ownership_[mapping[it->first]] = it->second;
   }
-  ghost_ = ghost;
+  ghost_.swap(ghost);
 
   // Clear mappings
   delete [] shared_mapping_;
@@ -852,7 +852,7 @@ void DistributedData::renumber_global()
   delete[] recvbuf;
   delete[] sendbuf;
 
-  local_ = local_mapping;
+  local_.swap(local_mapping);
 
   tocd(1);
 

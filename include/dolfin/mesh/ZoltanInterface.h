@@ -98,8 +98,9 @@ namespace dolfin
 
 
     // Internal common partition function
+    template <class Entity>
     static void partitionZoltanInternal(Mesh& mesh,
-          MeshValues<uint, Cell>& partitions,
+          MeshValues<uint, Entity>& partitions,
 					Zoltan *zz);
 
 #endif

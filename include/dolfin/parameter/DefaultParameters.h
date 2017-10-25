@@ -132,7 +132,11 @@ add("PDE linear solver", "iterative");
 //--- Mesh partitioning ---
 add("report edge cut", false);
 add("Mesh read in serial", false);
+#if HAVE_PARMETIS
 add("Mesh partitioner", "parmetis");
+#elif HAVE_ZOLTAN
+add("Mesh partitioner", "zoltan");
+#endif
 
 //--- Load balancing ---
 add("Load balancer report", false);

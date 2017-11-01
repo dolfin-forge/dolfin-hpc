@@ -2,6 +2,7 @@
 
 #ifdef HAVE_CHECK
 
+#include "DiscreteSpaces/DiscreteSpaces.h"
 #include "FiniteElement/FiniteElement.h"
 #include "DofNumbering/DofNumbering.h"
 #include "DofMap/DofMap.h"
@@ -12,6 +13,9 @@
 //-----------------------------------------------------------------------------
 DOLFIN_SUITE_BEGIN(suite, "fem")
 {
+  DOLFIN_TCASE_CREATE("DiscreteSpaces");
+  DOLFIN_TCASE_ADD(test_DiscreteSpaces);
+
   DOLFIN_TCASE_CREATE("FiniteElement");
   DOLFIN_TCASE_ADD(test_FiniteElement);
 

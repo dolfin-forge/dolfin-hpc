@@ -6,5 +6,6 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
 EXTRA_DIST = BoundaryNormal/BoundaryNormal.h\
+      	     DiscreteSpaces/DiscreteSpaces.h\
       	     FiniteElement/FiniteElement.h\
-	           FiniteElementSpace/FiniteElementSpace.h
+      	     FiniteElementSpace/FiniteElementSpace.h

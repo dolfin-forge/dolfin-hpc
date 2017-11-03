@@ -46,35 +46,9 @@ bool CoefficientMap::has(std::string const& label) const
 }
 
 //-----------------------------------------------------------------------------
-Coefficient * CoefficientMap::get(std::string const& label) const
-{
-  std::map<std::string, dolfin::Coefficient *>::const_iterator it =
-      map_.find(label);
-  if (it == map_.end())
-  {
-    error("Coefficient label '%s' does not exist in map.", label.c_str());
-  }
-  return it->second;
-}
-
-//-----------------------------------------------------------------------------
 uint CoefficientMap::size() const
 {
   return this->map_.size();
-}
-
-//-----------------------------------------------------------------------------
-void CoefficientMap::set(std::string const& label,
-                         dolfin::Coefficient& coefficient)
-{
-  std::map<std::string, dolfin::Coefficient *>::iterator it = map_.find(
-      label);
-  if (it != map_.end())
-  {
-    error("Coefficient label '%s' is already assigned to a function.",
-          label.c_str());
-  }
-  map_[label] = &coefficient;
 }
 
 //-----------------------------------------------------------------------------
@@ -91,8 +65,7 @@ void CoefficientMap::disp() const
   message("Number of coefficients : %u", this->size());
   uint ii = 0;
   begin("");
-  for (std::map<std::string, dolfin::Coefficient *>::const_iterator it =
-      map_.begin(); it != map_.end(); ++it)
+  for (Container::const_iterator it = map_.begin(); it != map_.end(); ++it)
   {
     message("%8u : %s", ii, it->first.c_str());
     ++ii;

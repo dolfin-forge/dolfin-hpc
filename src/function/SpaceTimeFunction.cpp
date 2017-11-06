@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include <iomanip>
+#include <fstream>
 
 namespace dolfin
 {
@@ -149,10 +150,10 @@ std::string SpaceTimeFunction::filename(std::string const& basename, uint id)
   return filename.str();
 }
 //-----------------------------------------------------------------------------
-void SpaceTimeFunction::load(real st, std::string const& sname, Function& w)
+void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
 {
-  real ft;
-  uint fp;
+  real st;
+  uint sp;
   uint offset[3] = { 0 };
   Array<real> values(w.vector().local_size());
 
@@ -163,12 +164,12 @@ void SpaceTimeFunction::load(real st, std::string const& sname, Function& w)
   uint pe_size = MPI::size();
   MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
                 MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-  MPI_File_read_all(fh, &ft, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
+  MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset += sizeof(real);
-  MPI_File_read_at_all(fh, byte_offset, &fp, sizeof(uint), MPI_BYTE,
+  MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint), MPI_BYTE,
                        MPI_STATUS_IGNORE);
   byte_offset += sizeof(uint);
-  if (fp != pe_size)
+  if (sp != pe_size)
   {
     error("SpaceTimeFunction : communicator size mismatch");
   }
@@ -187,14 +188,14 @@ void SpaceTimeFunction::load(real st, std::string const& sname, Function& w)
   MPI_File_close(&fh);
 #else
   std::ifstream fp(sname.c_str(), std::ifstream::binary);
-  fp.read((char *)&ft, sizeof(real));
-  fp.read((char *)&fp, sizeof(uint));
+  fp.read((char *)&st, sizeof(real));
+  fp.read((char *)&sp, sizeof(uint));
   fp.read((char *)&offset[0], 3*sizeof(uint));
   fp.read((char *)&values[0], offset[1] * sizeof(real));
   fp.close();
 #endif
 
-  if (st != ft)
+  if (t != st)
   {
     error("SpaceTimeFunction : time stamp mismatch");
   }

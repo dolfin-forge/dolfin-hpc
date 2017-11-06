@@ -208,9 +208,10 @@ void Form::init(Array<Coefficient *>& coefficients, CoefficientMap const& map)
   for (uint i = 0; i < this->num_coefficients(); ++i)
   {
     std::string name = this->coefficient_name(i);
-    if(map.has(name))
+    Coefficient * c = map[name];
+    if(c != NULL)
     {
-      coefficients.push_back(map.get(name));
+      coefficients.push_back(map[name]);
     }
     else
     {

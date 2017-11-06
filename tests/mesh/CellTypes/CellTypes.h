@@ -1,17 +1,11 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
 #include <dolfin/common/Test.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
-#include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/CellTypes.h>
 
 #include <sstream>
 

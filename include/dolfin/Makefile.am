@@ -174,6 +174,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/Box.h\
 				mesh/Cell.h\
 				mesh/CellType.h\
+				mesh/CellTypes.h\
 				mesh/CoarseningManager.h\
 				mesh/DCell.h\
 				mesh/DMesh.h\

@@ -92,7 +92,7 @@ struct MeshValues : public MeshFunction<T>
   //       not valid until MeshFunction supports vector values.
 
   /// Return value at given entity
-  inline T& operator()(E& entity, uint i = 0)
+  inline T& operator()(E const& entity, uint i = 0)
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);
@@ -100,7 +100,7 @@ struct MeshValues : public MeshFunction<T>
   }
 
   /// Return value at given entity
-  inline T const& operator()(E& entity, uint i = 0) const
+  inline T const& operator()(E const& entity, uint i = 0) const
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);

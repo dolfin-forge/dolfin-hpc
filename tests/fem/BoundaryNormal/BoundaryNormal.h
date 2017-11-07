@@ -1,12 +1,10 @@
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Test.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
+#include <dolfin/elements/Elements.h>
 #include <dolfin/fem/NodeNormal.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/ufl/UFLVectorElement.h>
-
 
 using namespace dolfin;
 

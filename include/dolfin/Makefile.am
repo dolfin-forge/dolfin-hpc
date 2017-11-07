@@ -25,6 +25,7 @@ nobase_pkginclude_HEADERS = \
 				common/Variable.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
+				elements/Elements.h\
 				evolution/dolfin_evolution.h\
 				evolution/Time.h\
 				evolution/TimeDependent.h\
@@ -38,6 +39,7 @@ nobase_pkginclude_HEADERS = \
 				fem/Coefficient.h\
 				fem/CoefficientMap.h\
 				fem/DirichletBC.h\
+				fem/DiscreteSpaces.h\
 				fem/DofMap.h\
 				fem/DofMapCache.h\
 				fem/DofMapSet.h\

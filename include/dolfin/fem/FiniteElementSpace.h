@@ -7,10 +7,9 @@
 #ifndef __DOLFIN_FINITE_ELEMENT_SPACE_H
 #define __DOLFIN_FINITE_ELEMENT_SPACE_H
 
-#include <dolfin/common/types.h>
+#include <dolfin/fem/DiscreteSpaces.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/mesh/Cell.h>
-#include <dolfin/ufl/UFLFiniteElementSpace.h>
 
 #include <ufc.h>
 

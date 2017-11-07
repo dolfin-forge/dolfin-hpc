@@ -1,8 +1,8 @@
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Test.h>
+#include <dolfin/common/Check.h>
 
 #ifdef HAVE_CHECK
 
+#include <dolfin/elements/Elements.h>
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/DofMapCache.h>
@@ -11,11 +11,6 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/UnitCube.h>
 #include <dolfin/mesh/UnitSquare.h>
-#include <dolfin/ufl/UFLFamily.h>
-#include <dolfin/ufl/UFLFiniteElement.h>
-#include <dolfin/ufl/UFLVectorElement.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

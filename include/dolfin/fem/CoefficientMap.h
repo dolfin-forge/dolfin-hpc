@@ -39,13 +39,13 @@ public:
   bool has(std::string const& label) const;
 
   /// Accessor
-  inline Coefficient * operator[](std::string const& label)
+  inline Coefficient *& operator[](std::string const& label)
   {
     return map_[label];
   }
 
   /// Accessor (const)
-  inline Coefficient * operator[](std::string const& label) const
+  inline Coefficient * const& operator[](std::string const& label) const
   {
     Container::const_iterator it = map_.find(label);
     if (it == map_.end()) return NULL;

@@ -56,11 +56,6 @@ namespace dolfin
 
     static int setupEnv();
 
-#ifdef HAVE_MPI
-    static MPI::Communicator comm;
-#endif
-
-
     // Simulation state (running)
     static int runflag;
 

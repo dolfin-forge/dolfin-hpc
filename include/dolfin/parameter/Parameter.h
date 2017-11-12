@@ -24,7 +24,7 @@ public:
   /// Supported parameter types
   enum Type
   {
-    type_real, type_int, type_bool, type_string
+    type_real, type_int, type_uint, type_bool, type_string
   };
 
   /// Create int-valued parameter

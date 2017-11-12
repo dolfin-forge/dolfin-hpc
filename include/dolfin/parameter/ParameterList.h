@@ -60,7 +60,7 @@ public:
   //-------------------------------------------------------------------------
 
   template<class T>
-  static void item(std::string const& k, T v) const
+  static void item(std::string const& k, T v)
   {
     std::stringstream ss;
     ss << std::left << std::setw(32) << k << " = " << v;

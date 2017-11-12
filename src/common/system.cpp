@@ -49,6 +49,12 @@ std::string basename(std::string file)
   return file.substr(0, pos);
 }
 //-----------------------------------------------------------------------------
+std::string dirname(std::string file)
+{
+  size_t beg = file.find_last_of('/');
+  return file.substr(0, beg);
+}
+//-----------------------------------------------------------------------------
 void glob(std::string const& pattern, Array<std::string>& matches)
 {
   glob_t match;

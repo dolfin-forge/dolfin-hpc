@@ -25,6 +25,9 @@ std::string strcounter(uint counter = 0, int width = 0);
 std::string basename(std::string file);
 
 ///
+std::string dirname(std::string file);
+
+///
 void glob(std::string const& pattern, Array<std::string>& matches);
 
 ///

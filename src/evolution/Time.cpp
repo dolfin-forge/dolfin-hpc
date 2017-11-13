@@ -19,6 +19,13 @@ Time::Time(real T0, real T1) :
 {
 }
 //-----------------------------------------------------------------------------
+Time::Time(Interval I) :
+    T_(I),
+    sign_((I.first < I.second) - (I.first < I.second)),
+    t_(I.first)
+{
+}
+//-----------------------------------------------------------------------------
 Time::Time(Time const& other) :
     T_(other.T_),
     sign_((T_.first < T_.second) - (T_.second < T_.first)),

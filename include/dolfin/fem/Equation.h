@@ -59,6 +59,72 @@ struct Equation
   //
   void clear();
 
+  //---------------------------------------------------------------------------
+
+  struct None
+  {
+    struct BilinearForm : dolfin::BilinearForm
+    {
+      BilinearForm(Mesh& mesh, CoefficientMap& coefs) :
+        dolfin::BilinearForm(mesh) { error("BilinearForm: undefined"); }
+      Array<Coefficient*> const& coefficients() const { return c_; }
+      ufc::form const& form() const { return *this; }
+      Array<Coefficient*> c_;
+    };
+    struct LinearForm : dolfin::LinearForm
+    {
+      LinearForm(Mesh& mesh, CoefficientMap& coefs) :
+        dolfin::LinearForm(mesh) { error("LinearForm: undefined"); }
+      Array<Coefficient*> const& coefficients() const { return c_; }
+      ufc::form const& form() const { return *this; }
+      Array<Coefficient*> c_;
+    };
+
+
+  };
+
+};
+
+//-----------------------------------------------------------------------------
+// Stuck in C++98-land
+
+class CoefficientMap;
+
+template<class E1, class E2, class E3>
+struct Equations : public Equation
+{
+
+  void operator()(Mesh& mesh, CoefficientMap& coefs)
+  {
+    Equations<E1, E2, E3>::init(*this, mesh, coefs);
+  }
+
+  static inline
+  void init(Equation& E, Mesh& mesh, CoefficientMap& coefs)
+  {
+    if(E.is_initialized())
+    {
+      error("Equation: already initialized");
+    }
+    switch (mesh.topology().dim())
+    {
+      case 1:
+        E.a = new typename E1::BilinearForm(mesh, coefs);
+        E.L = new typename E1::LinearForm  (mesh, coefs);
+        break;
+      case 2:
+        E.a = new typename E2::BilinearForm(mesh, coefs);
+        E.L = new typename E2::LinearForm  (mesh, coefs);
+        break;
+      case 3:
+        E.a = new typename E3::BilinearForm(mesh, coefs);
+        E.L = new typename E3::LinearForm  (mesh, coefs);
+        break;
+      default:
+        error("Equation: invalid topological dimension");
+        break;
+    }
+  }
 };
 
 } /* namespace dolfin */

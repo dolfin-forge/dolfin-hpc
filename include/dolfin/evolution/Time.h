@@ -18,7 +18,11 @@ class Time
 
 public:
 
+  typedef std::pair<real, real> Interval;
+
   Time(real T0 = 0.0, real T1 = 0.0);
+
+  Time(Interval I);
 
   Time(Time const& other);
 
@@ -32,7 +36,7 @@ public:
   inline Time& operator-=(real k) { t_ -= k; return *this; }
 
   /// Return time interval as a pair of real numbers
-  std::pair<real, real> const& interval() const;
+  Interval const& interval() const;
 
   /// Return time sign function
   int sign() const;
@@ -118,7 +122,7 @@ public:
 
 private:
 
-  std::pair<real, real> const T_;
+  Interval const T_;
   int const sign_;
 
   //

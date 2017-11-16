@@ -9,6 +9,9 @@
 
 #include <dolfin/parameter/Parameter.h>
 
+#include <iomanip>
+#include <sstream>
+
 namespace dolfin
 {
 
@@ -53,6 +56,24 @@ public:
 
   inline const_iterator begin() const { return storage_.begin();}
   inline const_iterator end() const   { return storage_.end();}
+
+  //-------------------------------------------------------------------------
+
+  template<class T>
+  static void item(std::string const& k, T v)
+  {
+    std::stringstream ss;
+    ss << std::left << std::setw(32) << k << " = " << v;
+    message(ss.str());
+  }
+
+  void disp() const
+  {
+    for (const_iterator it = this->begin(); it != this->end(); ++it)
+    {
+      ParameterList::item(it->first, it->second);
+    }
+  }
 
 private:
 

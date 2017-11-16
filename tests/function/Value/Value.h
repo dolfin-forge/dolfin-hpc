@@ -104,6 +104,16 @@ START_TEST( test_Value )
   }
   T.end();
   //---
+  T.begin("test_Value : Zero");
+  {
+    Zero<1> z1; z1.disp();
+    Zero<2> z2; z2.disp();
+    Zero<3> z3; z3.disp();
+    Zero<2, 2> z22; z22.disp();
+    Zero<3, 3> z33; z33.disp();
+  }
+  T.end();
+  //---
   ck_assert( init_failed == 0 );
 }END_TEST
 //-----------------------------------------------------------------------------

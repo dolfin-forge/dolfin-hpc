@@ -9,6 +9,7 @@
 
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/CoefficientMap.h>
 
 #include <ufc.h>
 
@@ -17,7 +18,12 @@ namespace dolfin
 
 class LinearForm : public Form
 {
+
 public:
+
+  typedef Form::Coefficients Coefficients;
+
+  static inline std::string name() { return "LinearForm"; }
 
   /// Constructor
   LinearForm(Mesh& mesh);
@@ -28,15 +34,28 @@ public:
   /// Test space
   FiniteElementSpace const& test_space() const;
 
+  /// Creator function
+  template <class E> static inline
+  typename E::LinearForm * create(Mesh& mesh, CoefficientMap& coefs)
+  {
+    return new typename E::LinearForm(mesh, coefs);
+  }
+
 private:
 
   mutable FiniteElementSpace * test_space_;
 
 };
 
+//-----------------------------------------------------------------------------
+
+struct NoLinearForm
+{
+  typedef Nil<dolfin::LinearForm> LinearForm;
+};
+
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline FiniteElementSpace const& LinearForm::test_space() const
 {
   if (!test_space_)
@@ -46,6 +65,8 @@ inline FiniteElementSpace const& LinearForm::test_space() const
   return *test_space_;
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
 
 #endif

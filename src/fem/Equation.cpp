@@ -25,8 +25,8 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 Equation::Equation() :
-    a(NULL),
-    L(NULL)
+    a_(NULL),
+    L_(NULL)
 {
 }
 
@@ -38,16 +38,16 @@ Equation::~Equation()
 //-----------------------------------------------------------------------------
 void Equation::assemble(Matrix& A, Vector& b, bool reset_tensor)
 {
-  dolfin_assert(a != NULL);
-  a->assemble(A, reset_tensor);
-  dolfin_assert(L != NULL);
-  L->assemble(b, reset_tensor);
+  dolfin_assert(a_ != NULL);
+  a_->assemble(A, reset_tensor);
+  dolfin_assert(L_ != NULL);
+  L_->assemble(b, reset_tensor);
 }
 
 //-----------------------------------------------------------------------------
 bool Equation::is_initialized() const
 {
-  return (this->a != NULL) && (this->L != NULL);
+  return (this->a_ != NULL) && (this->L_ != NULL);
 }
 
 //-----------------------------------------------------------------------------
@@ -55,11 +55,11 @@ void Equation::disp() const
 {
   section("Equation");
   section("Bilinear form");
-  if (this->a != NULL)
+  if (this->a_ != NULL)
   {
-    for (uint i = 0; i < a->num_coefficients(); ++i)
+    for (uint i = 0; i < a_->num_coefficients(); ++i)
     {
-      message("Coefficient %2d : %s", i, this->a->coefficient_name(i).c_str());
+      message("Coefficient %2d : %s", i, this->a_->coefficient_name(i).c_str());
     }
   }
   else
@@ -68,11 +68,11 @@ void Equation::disp() const
   }
   end();
   section("Linear form");
-  if (this->L != NULL)
+  if (this->L_ != NULL)
   {
-    for (uint i = 0; i < this->L->num_coefficients(); ++i)
+    for (uint i = 0; i < this->L_->num_coefficients(); ++i)
     {
-      message("Coefficient %2d : %s", i, this->L->coefficient_name(i).c_str());
+      message("Coefficient %2d : %s", i, this->L_->coefficient_name(i).c_str());
     }
   }
   else
@@ -86,10 +86,10 @@ void Equation::disp() const
 //-----------------------------------------------------------------------------
 void Equation::clear()
 {
-  delete a;
-  a = NULL;
-  delete L;
-  L = NULL;
+  delete a_;
+  a_ = NULL;
+  delete L_;
+  L_ = NULL;
 }
 
 //-----------------------------------------------------------------------------

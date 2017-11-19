@@ -63,7 +63,7 @@ private:
   ///
   static void save(real st, std::string const& sname, Function& w);
 
-  std::string const basename_;
+  std::string basename_;
   std::map<real, std::string> samples_;
 
   //

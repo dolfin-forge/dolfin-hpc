@@ -242,7 +242,9 @@ struct UFCWrap
 
   ~UFCWrap() { delete F_; }
 
-  T& operator *() { return *F_; }
+  inline T& operator *() { return *F_; }
+
+  inline T& form() { return *F_; }
 
   /// Static creator function
   template<class E1, class E2, class E3>
@@ -288,7 +290,9 @@ struct UFCForm
 
   ~UFCForm() { delete F_; }
 
-  T& operator *() { return *F_; }
+  inline T& operator *() { return *F_; }
+
+  inline T& form() { return *F_; }
 
   void operator()(Mesh& mesh, Coefficients& coefs)
   {

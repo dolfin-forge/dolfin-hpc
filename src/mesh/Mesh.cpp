@@ -448,12 +448,27 @@ void Mesh::disp() const
   section("Mesh");
   if (this->empty())
   {
-    message("Empty:");
+    message("Empty");
   }
   else
   {
     cell_type_->disp();
     space_->disp();
+    section("Topology");
+    message("distributed : %u", this->is_distributed());
+    if(this->is_distributed())
+    {
+      message("cells    : local = %12u ; global = %12u",
+              this->num_cells(), this->num_global_cells());
+      message("vertices : local = %12u ; global = %12u",
+              this->num_vertices(), this->num_global_vertices());
+    }
+    else
+    {
+      message("cells    : %12u", this->num_cells());
+      message("vertices : %12u", this->num_vertices());
+    }
+    endblock();
   }
   endblock();
 }

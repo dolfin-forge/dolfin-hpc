@@ -23,8 +23,12 @@ namespace dolfin
 
 typedef ufl::Family::Type ElementType;
 
-struct cg { static ElementType const type = ufl::Family::CG; };
-struct dg { static ElementType const type = ufl::Family::DG; };
+struct Elements
+{
+  struct cg { static ElementType const type = ufl::Family::CG; };
+
+  struct dg { static ElementType const type = ufl::Family::DG; };
+};
 
 } /* namespace dolfin */
 

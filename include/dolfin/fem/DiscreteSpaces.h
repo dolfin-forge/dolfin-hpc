@@ -26,8 +26,8 @@ template<class T> struct scalar : ufl::FiniteElement
   void disp() const { message("%s", this->repr().c_str()); }
 };
 
-typedef scalar<cg> sCG;
-typedef scalar<dg> sDG;
+typedef scalar<Elements::cg> sCG;
+typedef scalar<Elements::dg> sDG;
 
 //--- VECTOR ------------------------------------------------------------------
 
@@ -43,13 +43,13 @@ template<class T> struct vector : ufl::VectorElement
   void disp() const { message("%s", this->repr().c_str()); }
 };
 
-typedef vector<cg> vCG;
-typedef vector<dg> vDG;
+typedef vector<Elements::cg> vCG;
+typedef vector<Elements::dg> vDG;
 
 //--- ELEMENTS ----------------------------------------------------------------
 
-typedef scalar<cg> CG;
-typedef scalar<dg> DG;
+typedef scalar<Elements::cg> CG;
+typedef scalar<Elements::dg> DG;
 
 } /* namespace dolfin */
 

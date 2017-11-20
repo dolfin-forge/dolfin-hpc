@@ -21,7 +21,7 @@ Time::Time(real T0, real T1) :
 //-----------------------------------------------------------------------------
 Time::Time(Interval I) :
     T_(I),
-    sign_((I.first < I.second) - (I.first < I.second)),
+    sign_((I.first < I.second) - (I.second < I.first)),
     t_(I.first)
 {
 }

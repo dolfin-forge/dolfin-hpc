@@ -231,6 +231,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
+				mesh/Simplex.h \
 				mesh/Space.h \
 				mesh/SubDomain.h\
 				mesh/StructuredGrid.h\

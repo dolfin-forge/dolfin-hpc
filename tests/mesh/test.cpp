@@ -8,6 +8,7 @@
 #include "UnitMeshes/UnitMeshes.h"
 #include "MeshFunction/MeshFunction.h"
 #include "MeshData/MeshData.h"
+#include "Simplex/Simplex.h"
 #include "StructuredGrid/StructuredGrid.h"
 #include "VertexNormal/VertexNormal.h"
 #include "algorithm/algorithm.h"
@@ -28,6 +29,9 @@ DOLFIN_SUITE_BEGIN(suite, "mesh")
   DOLFIN_TCASE_ADD(test_TetrahedronCell);
   DOLFIN_TCASE_ADD(test_QuadrilateralCell);
   DOLFIN_TCASE_ADD(test_HexahedronCell);
+
+  DOLFIN_TCASE_CREATE("Simplex");
+  DOLFIN_TCASE_ADD(test_Simplex);
 
   DOLFIN_TCASE_CREATE("UnitMeshes");
   DOLFIN_TCASE_ADD(test_UnitInterval);

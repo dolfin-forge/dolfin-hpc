@@ -7,11 +7,11 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 EXTRA_DIST = algorithm/algorithm.h\
              CellTypes/CellTypes.h\
-             SubDomain/SubDomain.h\
-             VertexNormal/VertexNormal.h\
-             Point/Point.h\
-             StructuredGrid/StructuredGrid.h\
-             UnitMeshes/UnitMeshes.h\
              MeshData/MeshData.h\
-             MeshFunction/MeshFunction.h
-
+             MeshFunction/MeshFunction.h\
+             Point/Point.h\
+             Simplex/Simplex.h\
+             StructuredGrid/StructuredGrid.h\
+             SubDomain/SubDomain.h\
+             UnitMeshes/UnitMeshes.h\
+             VertexNormal/VertexNormal.h

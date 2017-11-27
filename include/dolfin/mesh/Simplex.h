@@ -7,6 +7,8 @@
 #ifndef __DOLFIN_MESH_SIMPLEX_H
 #define __DOLFIN_MESH_SIMPLEX_H
 
+#include <dolfin/mesh/Mesh.h>
+
 #include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/TriangleCell.h>
 #include <dolfin/mesh/TetrahedronCell.h>
@@ -14,7 +16,16 @@
 namespace dolfin
 {
 
-template<uint D> struct Simplex;
+//-----------------------------------------------------------------------------
+template<uint D>
+struct Simplex : public Mesh
+{
+
+private:
+
+  Simplex() {}
+
+};
 
 //-----------------------------------------------------------------------------
 template<>

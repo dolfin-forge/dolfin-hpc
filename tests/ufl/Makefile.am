@@ -1,14 +1,15 @@
 check_PROGRAMS = exe
 exe_SOURCES = test.cpp
+nodist_exe_SOURCES = ../tests.h
 exe_CPPFLAGS= -I@top_srcdir@/include @CHECK_CFLAGS@ $(CPPFLAGS)
 exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
 EXTRA_DIST = Algebra/UFL_Algebra.h\
-	           Argument/UFL_Argument.h\
-	           Cell/UFL_Cell.h\
-	           CellSurfaceArea/UFL_CellSurfaceArea.h\
+             Argument/UFL_Argument.h\
+             Cell/UFL_Cell.h\
+             CellSurfaceArea/UFL_CellSurfaceArea.h\
              CellVolume/UFL_CellVolume.h\
              Circumradius/UFL_Circumradius.h\
              Class/UFL_Class.h\
@@ -24,12 +25,12 @@ EXTRA_DIST = Algebra/UFL_Algebra.h\
              FacetNormal/UFL_FacetNormal.h\
              Family/UFL_Family.h\
              FiniteElement/UFL_FiniteElement.h\
-	           FiniteElementSpace/UFL_FiniteElementSpace.h\
+             FiniteElementSpace/UFL_FiniteElementSpace.h\
              Form/UFL_Form.h\
              GeometricQuantity/UFL_GeometricQuantitiy.h\
-	           Index/UFL_Index.h\
+             Index/UFL_Index.h\
              IndexSum/UFL_IndexSum.h\
-	           Indexed/UFL_Indexed.h\
+             Indexed/UFL_Indexed.h\
       	     Integral/UFL_Integral.h\
       	     List/UFL_List.h\
       	     MixedElement/UFL_MixedElement.h\

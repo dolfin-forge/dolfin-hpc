@@ -12,7 +12,9 @@
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/io/GenericFile.h>
 #include <dolfin/main/MPI.h>
-using namespace dolfin;
+
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 GenericFile::GenericFile(std::string const& type, std::string const& filename) :
@@ -181,3 +183,5 @@ void GenericFile::set_counter(uint value)
   counter = value;
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

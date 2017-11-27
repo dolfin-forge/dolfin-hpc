@@ -54,4 +54,4 @@ void BilinearForm::check(GenericMatrix const& A, GenericVector const& b) const
   }
 }
 
-}
+} /* namespace dolfin */

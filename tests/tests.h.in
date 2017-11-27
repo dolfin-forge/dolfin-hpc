@@ -1,0 +1,20 @@
+#ifndef __DOLFIN_TESTS_HEADER_H_
+#define __DOLFIN_TESTS_HEADER_H_
+
+#include <dolfin/common/Check.h>
+#include <dolfin/common/Test.h>
+
+namespace dolfin
+{
+
+static const char SOURCE_DIRECTORY[] = "#abs_top_srcdir#";
+static const char MESHES_DIRECTORY[] = "#abs_top_srcdir#/data/meshes";
+
+std::string mesh_file(const char * s)
+{
+  return std::string(MESHES_DIRECTORY) + "/" + std::string(s);
+}
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_TESTS_HEADER_H_ */

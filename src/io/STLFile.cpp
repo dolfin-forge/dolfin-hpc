@@ -9,7 +9,8 @@
 #include <dolfin/common/byteswap.h>
 #include <set>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 STLFile::STLFile(const std::string filename) :
@@ -94,3 +95,5 @@ void STLFile::operator>>(Mesh& mesh)
 
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

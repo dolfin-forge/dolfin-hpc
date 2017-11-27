@@ -1,4 +1,4 @@
-#include <dolfin/common/Check.h>
+#include "../../tests.h"
 
 #ifdef HAVE_CHECK
 
@@ -8,9 +8,7 @@
 
 using namespace dolfin;
 
-#include <check.h>
-
-void check_NodeNormal_create(std::string file)
+void test(std::string file)
 {
   Mesh mesh(file);
   dolfin::uint const gdim = mesh.geometry().dim();
@@ -34,11 +32,10 @@ START_TEST( test_NodeNormal )
 {
   int init_failed = 0;
   
-  std::string const relpath = "../data/meshes/";
 #ifdef HAVE_XML
-  check_NodeNormal_create(relpath+"cylinder.xml.gz");
-  check_NodeNormal_create(relpath+"aneurysm.xml.gz");
-  check_NodeNormal_create(relpath+"sphere.xml.gz");
+  test(mesh_file("cylinder.xml.gz"));
+  test(mesh_file("aneurysm.xml.gz"));
+  test(mesh_file("sphere.xml.gz"  ));
 #endif
   
   ck_assert( init_failed == 0 );

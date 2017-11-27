@@ -6,7 +6,8 @@
 
 #include <dolfin/common/Variable.h>
 
-using namespace dolfin;
+namespace dolfin
+{
 
 //-----------------------------------------------------------------------------
 Variable::Variable() :
@@ -43,3 +44,5 @@ const std::string& Variable::label() const
   return _label;
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace dolfin */

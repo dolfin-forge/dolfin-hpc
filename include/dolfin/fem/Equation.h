@@ -30,16 +30,7 @@ class Vector;
 
 struct Equation
 {
-
-  //--- PUBLIC ATTRIBUTES -----------------------------------------------------
-
-  // Bilinear form [Stable]
-  BilinearForm * a;
-
-  // Linear form [Stable]
-  LinearForm * L;
-
-  //---------------------------------------------------------------------------
+  typedef CoefficientMap Coefficients;
 
   //
   Equation();
@@ -59,71 +50,96 @@ struct Equation
   //
   void clear();
 
+  //
+  void swap(Equation& other)
+  {
+    std::swap(a_, other.a_);
+    std::swap(L_, other.L_);
+  }
+
+  //
+  inline BilinearForm& a()
+  {
+    dolfin_assert(a_);
+    return *a_;
+  }
+
+  //
+  inline LinearForm& L()
+  {
+    dolfin_assert(L_);
+    return *L_;
+  }
+
   //---------------------------------------------------------------------------
 
   struct None
   {
-    struct BilinearForm : dolfin::BilinearForm
-    {
-      BilinearForm(Mesh& mesh, CoefficientMap& coefs) :
-        dolfin::BilinearForm(mesh) { error("BilinearForm: undefined"); }
-      Array<Coefficient*> const& coefficients() const { return c_; }
-      ufc::form const& form() const { return *this; }
-      Array<Coefficient*> c_;
-    };
-    struct LinearForm : dolfin::LinearForm
-    {
-      LinearForm(Mesh& mesh, CoefficientMap& coefs) :
-        dolfin::LinearForm(mesh) { error("LinearForm: undefined"); }
-      Array<Coefficient*> const& coefficients() const { return c_; }
-      ufc::form const& form() const { return *this; }
-      Array<Coefficient*> c_;
-    };
-
-
+    typedef Nil<dolfin::BilinearForm> BilinearForm;
+    typedef Nil<dolfin::LinearForm>   LinearForm;
   };
+
+  /// Creator function
+  template <class E>
+  void operator()(Mesh& mesh, Coefficients& coefs)
+  {
+    if (this->is_initialized())
+    {
+      error("Equation : initialization on non-empty instance");
+    }
+    a_ = BilinearForm::create<E>(mesh, coefs);
+    L_ = LinearForm::create<E>  (mesh, coefs);
+  }
+
+  /// Creator function
+  template<class E1, class E2, class E3>
+  void operator()(Mesh& mesh, Coefficients& coefs)
+  {
+    switch (mesh.topology().dim())
+    {
+      case 1:
+        Equation::template operator()<E1>(mesh, coefs);
+        break;
+      case 2:
+        Equation::template operator()<E2>(mesh, coefs);
+        break;
+      case 3:
+        Equation::template operator()<E3>(mesh, coefs);
+        break;
+      default:
+        error("Equation : invalid topological dimension");
+        break;
+    }
+  }
+
+  /// Creator function
+  template<class E>
+  void instantiate(Mesh& mesh, Coefficients& coefs)
+  {
+    E X; X(mesh, coefs); this->swap(X);
+  }
+
+private:
+
+  Equation(Equation const& other) {}
+
+  // Bilinear form [Stable]
+  BilinearForm * a_;
+
+  // Linear form [Stable]
+  LinearForm * L_;
 
 };
 
 //-----------------------------------------------------------------------------
 // Stuck in C++98-land
 
-class CoefficientMap;
-
 template<class E1, class E2, class E3>
 struct Equations : public Equation
 {
-
-  void operator()(Mesh& mesh, CoefficientMap& coefs)
+  void operator()(Mesh& mesh, Coefficients& coefs)
   {
-    Equations<E1, E2, E3>::init(*this, mesh, coefs);
-  }
-
-  static inline
-  void init(Equation& E, Mesh& mesh, CoefficientMap& coefs)
-  {
-    if(E.is_initialized())
-    {
-      error("Equation: already initialized");
-    }
-    switch (mesh.topology().dim())
-    {
-      case 1:
-        E.a = new typename E1::BilinearForm(mesh, coefs);
-        E.L = new typename E1::LinearForm  (mesh, coefs);
-        break;
-      case 2:
-        E.a = new typename E2::BilinearForm(mesh, coefs);
-        E.L = new typename E2::LinearForm  (mesh, coefs);
-        break;
-      case 3:
-        E.a = new typename E3::BilinearForm(mesh, coefs);
-        E.L = new typename E3::LinearForm  (mesh, coefs);
-        break;
-      default:
-        error("Equation: invalid topological dimension");
-        break;
-    }
+    Equation::template operator()<E1, E2, E3>(mesh, coefs);
   }
 };
 

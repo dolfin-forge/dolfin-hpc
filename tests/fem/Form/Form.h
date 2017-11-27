@@ -7,10 +7,18 @@
 #include <dolfin/fem/Functional.h>
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/fem/BilinearForm.h>
+#include <dolfin/fem/CoefficientMap.h>
 
 #include <check.h>
 
 using namespace dolfin;
+
+//-----------------------------------------------------------------------------
+template<class T>
+void test_nil()
+{
+  Mesh mesh; CoefficientMap coefs; Nil<T>(mesh, coefs);
+}
 
 //-----------------------------------------------------------------------------
 START_TEST( test_Functional )
@@ -20,6 +28,7 @@ START_TEST( test_Functional )
   //---
   T.begin("test_Functional");
   {
+    test_nil<Functional>();
   }
   T.end();
   //---
@@ -33,6 +42,7 @@ START_TEST( test_LinearForm )
   //---
   T.begin("test_LinearForm");
   {
+    test_nil<LinearForm>();
   }
   T.end();
   //---
@@ -46,6 +56,7 @@ START_TEST( test_BilinearForm )
   //---
   T.begin("test_BilinearForm");
   {
+    test_nil<BilinearForm>();
   }
   T.end();
   //---

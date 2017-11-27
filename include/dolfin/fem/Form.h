@@ -32,6 +32,8 @@ class Form : public ufc::form
 
 public:
 
+  typedef CoefficientMap Coefficients;
+
   /// Constructor
   Form(Mesh& mesh);
 
@@ -199,6 +201,116 @@ Form::create_interior_facet_integral(uint i) const
 {
   return form().create_interior_facet_integral(i);
 }
+
+//-----------------------------------------------------------------------------
+
+template <class T>
+struct Nil : public T
+{
+    Nil(Mesh& mesh, typename T::Coefficients& coefs) :
+        T(mesh)
+    {
+    }
+
+    Array<Coefficient*> const& coefficients() const
+    {
+      error(T::name() + " : undefined");
+      return c_;
+    }
+
+    ufc::form const& form() const
+    {
+      error(T::name() + " : undefined");
+      return *this;
+    }
+
+    Array<Coefficient*> c_;
+};
+
+//-----------------------------------------------------------------------------
+// Workaround convoluted UFC design that makes life impossible ...
+
+class CoefficientMap;
+
+//-----------------------------------------------------------------------------
+template<class T>
+struct UFCWrap
+{
+  typedef typename T::Coefficients Coefficients;
+
+  UFCWrap() : F_(NULL) {}
+
+  ~UFCWrap() { delete F_; }
+
+  inline T& operator *() { return *F_; }
+
+  inline T& form() { return *F_; }
+
+  /// Static creator function
+  template<class E1, class E2, class E3>
+  static inline T * create(Mesh& mesh, Coefficients& coefs)
+  {
+    switch (mesh.topology().dim())
+    {
+      case 1:
+        return T::template create<E1>(mesh, coefs);
+        break;
+      case 2:
+        return T::template create<E2>(mesh, coefs);
+        break;
+      case 3:
+        return T::template create<E3>(mesh, coefs);
+        break;
+      default:
+        error(T::name() + " : invalid topological dimension");
+        break;
+    }
+  }
+
+  /// Creator function
+  template<class E1, class E2, class E3>
+  void instantiate(Mesh& mesh, Coefficients& coefs)
+  {
+    delete F_; F_ = UFCWrap<T>::template create<E1, E2, E3>(mesh, coefs);
+  }
+
+private:
+
+  T * F_;
+};
+
+//-----------------------------------------------------------------------------
+
+template<class T, class E1, class E2, class E3>
+struct UFCForm
+{
+  typedef typename T::Coefficients Coefficients;
+
+  UFCForm() : F_(NULL) {}
+
+  ~UFCForm() { delete F_; }
+
+  inline T& operator *() { return *F_; }
+
+  inline T& form() { return *F_; }
+
+  void operator()(Mesh& mesh, Coefficients& coefs)
+  {
+    delete F_; F_ = UFCWrap<T>::template create<E1, E2, E3>(mesh, coefs);
+  }
+
+private:
+
+  T * F_;
+};
+
+//-----------------------------------------------------------------------------
+
+#define UFC_WRAP_DECLARE(CLASS, TYPE) \
+struct CLASS : public UFCWrap<TYPE> { void operator()(Mesh& mesh, Coefficients& coefs); };
+
+#define UFC_WRAP(CLASS, E1, E2, E3) \
+void CLASS::operator()(Mesh& mesh, Coefficients& coefs) { this->instantiate<E1, E2, E3>(mesh, coefs); }
 
 //-----------------------------------------------------------------------------
 

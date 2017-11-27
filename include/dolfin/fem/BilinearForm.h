@@ -9,6 +9,7 @@
 
 #include <dolfin/fem/Form.h>
 #include <dolfin/fem/FiniteElementSpace.h>
+#include <dolfin/fem/CoefficientMap.h>
 
 #include <ufc.h>
 
@@ -21,6 +22,10 @@ class GenericVector;
 class BilinearForm : public Form
 {
 public:
+
+  typedef Form::Coefficients Coefficients;
+
+  static inline std::string name() { return "BilinearForm"; }
 
   /// Constructor
   BilinearForm(Mesh& mesh);
@@ -37,6 +42,13 @@ public:
   /// Check whether linear system's dimensions match discrete spaces
   void check(GenericMatrix const& A, GenericVector const& b) const;
 
+  /// Creator function
+  template <class E> static inline
+  typename E::BilinearForm * create(Mesh& mesh, Coefficients& coefs)
+  {
+    return new typename E::BilinearForm(mesh, coefs);
+  }
+
 private:
 
   mutable FiniteElementSpace * test_space_;
@@ -44,9 +56,15 @@ private:
 
 };
 
+//-----------------------------------------------------------------------------
+
+struct NoBilinearForm
+{
+  typedef Nil<dolfin::BilinearForm> BilinearForm;
+};
+
 //--- INLINES -----------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
 inline FiniteElementSpace const& BilinearForm::trial_space() const
 {
   if (!trial_space_)
@@ -66,6 +84,8 @@ inline FiniteElementSpace const& BilinearForm::test_space() const
   return *test_space_;
 }
 
-}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
 
 #endif

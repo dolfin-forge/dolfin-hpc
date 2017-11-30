@@ -40,9 +40,9 @@ public:
               slepc     = 32 };
 
   //-------------------------------------------------------------------------
-  static int start(int argc = 0, char* argv[] = NULL, uint n = 0)
+  static int start(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0)
   {
-    return SubSystemsManager::instance().init(argc, argv, n);
+    return SubSystemsManager::instance().init(argc, argv, n, w_limit);
   }
 
   //-------------------------------------------------------------------------
@@ -135,7 +135,7 @@ public:
 
 private:
 
-  int init(int argc = 0, char* argv[] = NULL, uint n = 0);
+  int init(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0);
   int fini();
 
   // Constructor

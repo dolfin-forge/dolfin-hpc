@@ -25,6 +25,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
   uint const maxopt = 1;
   uint curopt = 0;
   int n = 1;
+  long w_limit = 0;
   char const * const * roargv = argv;
   for (int i = 0; i < argc; ++i)
   {
@@ -42,6 +43,10 @@ void dolfin::dolfin_init(int argc, char * argv[])
           n = atoi(argi);
           ++curopt;
           break;
+        case 'w':
+          w_limit = atol(argi);
+          ++curopt;
+          break;
         default:
           break;
         }
@@ -54,7 +59,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
 
   //--- Initialize subsystems and print banner
 
-  int init_count = SubSystemsManager::start(argc, argv, n);
+  int init_count = SubSystemsManager::start(argc, argv, n, w_limit);
   if (init_count == 1)
   {
 #ifdef HAVE_MPI

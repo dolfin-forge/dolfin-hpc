@@ -1,14 +1,11 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/function/Field.h>
 #include <dolfin/mesh/Simplex.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

@@ -1,8 +1,6 @@
+#include <dolfin_tests.h>
+
 #ifdef HAVE_CHECK
-
-#include <check.h>
-
-#include <dolfin/config/dolfin_config.h>
 
 #include <dolfin/mesh/UnitSquare.h>
 #include <dolfin/ufl/UFLFiniteElement.h>

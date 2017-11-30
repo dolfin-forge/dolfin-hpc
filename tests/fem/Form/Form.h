@@ -1,6 +1,4 @@
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Test.h>
-#include <dolfin/log/log.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
@@ -8,8 +6,6 @@
 #include <dolfin/fem/LinearForm.h>
 #include <dolfin/fem/BilinearForm.h>
 #include <dolfin/fem/CoefficientMap.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

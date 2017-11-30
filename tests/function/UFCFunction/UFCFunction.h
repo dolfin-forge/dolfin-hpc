@@ -1,14 +1,11 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/function/UFCFunction.h>
 #include <dolfin/function/Operators.h>
 #include <dolfin/fem/UFCCellIterator.h>
 #include <dolfin/mesh/Vertex.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

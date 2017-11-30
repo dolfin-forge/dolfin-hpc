@@ -1,11 +1,8 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/io/VTKFile.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

@@ -1,13 +1,9 @@
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Test.h>
-#include <dolfin/log/log.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/ufl/UFLFiniteElementSpace.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

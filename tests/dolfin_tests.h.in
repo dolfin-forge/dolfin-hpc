@@ -3,6 +3,7 @@
 
 #include <dolfin/common/Check.h>
 #include <dolfin/common/Test.h>
+#include <dolfin/common/timing.h>
 
 namespace dolfin
 {

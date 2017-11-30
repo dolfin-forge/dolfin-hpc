@@ -1,4 +1,4 @@
-#include "../../tests.h"
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 

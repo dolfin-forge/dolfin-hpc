@@ -23,6 +23,7 @@
 #include <dolfin/io/VTKFile.h>
 #include <dolfin/io/OFFFile.h>
 #include <dolfin/io/STLFile.h>
+#include <dolfin/parameter/parameters.h>
 
 namespace dolfin
 {
@@ -262,6 +263,24 @@ std::string File::basename(std::string file)
   }
   size_t pos = file.find('.');
   return file.substr(0, pos);
+}
+//-----------------------------------------------------------------------------
+std::string File::filename(std::string basename)
+{
+  std::string format(dolfin_get("output_format"));
+  if (format == "vtk")
+  {
+    basename += ".pvd";
+  }
+  else if (format == "binary")
+  {
+    basename += ".bin";
+  }
+  else
+  {
+    error("filename : unknown file format '%s'", format.c_str());
+  }
+  return basename;
 }
 //-----------------------------------------------------------------------------
 

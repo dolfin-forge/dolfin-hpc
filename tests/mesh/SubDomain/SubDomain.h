@@ -1,12 +1,10 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/UnitSquare.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

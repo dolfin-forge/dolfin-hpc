@@ -20,12 +20,12 @@ TESTS = \
   main/exe \
   mesh/exe
 
-tests.h:	Makefile
+dolfin_tests.h:	Makefile
 	$(SED) -e 's|#abs_top_srcdir#|@abs_top_srcdir@|g' \
-		@top_srcdir@/tests/tests.h.in > tests.h
+		@top_srcdir@/tests/dolfin_tests.h.in > dolfin_tests.h
 
-BUILT_SOURCES = tests.h
-DISTCLEANFILES= tests.h
+BUILT_SOURCES = dolfin_tests.h
+DISTCLEANFILES= dolfin_tests.h
 
-EXTRA_DIST= tests.h.in
+EXTRA_DIST= dolfin_tests.h.in
 

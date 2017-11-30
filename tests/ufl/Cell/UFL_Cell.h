@@ -1,11 +1,11 @@
+#include <dolfin_tests.h>
+
 #ifdef HAVE_CHECK
 
 #include <dolfin/ufl/UFLCell.h>
 #include <dolfin/ufl/UFLDomain.h>
 
 using namespace dolfin;
-
-#include <check.h>
 
 using ufl::Cell;
 using ufl::Domain;

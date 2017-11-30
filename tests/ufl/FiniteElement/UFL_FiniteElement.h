@@ -1,10 +1,7 @@
+#include <dolfin_tests.h>
+
 #ifdef HAVE_CHECK
 
-#include <check.h>
-
-#include <dolfin/config/dolfin_config.h>
-
-#include <dolfin/log/log.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/ufl/UFLFamily.h>
 #include <dolfin/ufl/UFLFiniteElement.h>

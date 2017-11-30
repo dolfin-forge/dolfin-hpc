@@ -1,15 +1,12 @@
-#include <dolfin/common/Check.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/CellTypes.h>
 
 #include <sstream>
-
-#include <check.h>
 
 using namespace dolfin;
 

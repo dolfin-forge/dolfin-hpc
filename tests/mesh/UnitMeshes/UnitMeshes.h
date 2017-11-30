@@ -1,4 +1,4 @@
-#include <dolfin/config/dolfin_config.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
@@ -8,8 +8,6 @@
 #include <dolfin/mesh/UnitCube.h>
 #include <dolfin/mesh/Box.h>
 #include <dolfin/mesh/UnitDisk.h>
-
-#include <check.h>
 
 using namespace dolfin;
 

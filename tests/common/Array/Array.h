@@ -1,8 +1,7 @@
-#include <dolfin/common/Check.h>
+#include <dolfin_tests.h>
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/common/Array.h>
 
 using namespace dolfin;

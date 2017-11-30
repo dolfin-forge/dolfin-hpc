@@ -11,6 +11,7 @@
 #define __DOLFIN_SUB_SYSTEMS_MANAGER_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/main/alarm.h>
 
 namespace dolfin
 {
@@ -125,6 +126,13 @@ public:
   //-------------------------------------------------------------------------
   void disp() const;
 
+  //--- ALARM ---------------------------------------------------------------
+
+  static alarm& timer()
+  {
+    return SubSystemsManager::instance().alarm_handler();
+  }
+
 private:
 
   int init(int argc = 0, char* argv[] = NULL, uint n = 0);
@@ -146,9 +154,14 @@ private:
 
   bool iset(SubSystemsManager::Type s) const { return (state_ & s) == s; }
 
+  alarm& alarm_handler() { return timer_; }
+
   // State variable
   int count_;
   int state_;
+
+  // Alarm handler
+  alarm timer_;
 
 };
 

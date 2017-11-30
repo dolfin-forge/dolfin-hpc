@@ -153,6 +153,7 @@ nobase_pkginclude_HEADERS = \
 				log/Progress.h\
 				main/dolfin_doc.h\
 				main/dolfin_main.h\
+				main/alarm.h\
 				main/init.h\
 				main/MPI.h\
 				main/PE.h\

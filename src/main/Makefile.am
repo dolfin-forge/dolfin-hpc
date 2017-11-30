@@ -4,8 +4,5 @@ libdolfin_main_la_SOURCES = \
 			MPI.cpp\
 			PE.cpp\
 			SubSystemsManager.cpp\
+			alarm.cpp\
 			init.cpp
-
-
-
-

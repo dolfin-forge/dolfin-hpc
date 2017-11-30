@@ -5,4 +5,5 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = alarm/alarm.h
+EXTRA_DIST = alarm/alarm.h \
+             SubSystemsManager/SubSystemsManager.h

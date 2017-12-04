@@ -34,6 +34,7 @@ public:
   /// Create empty array
   Array() :
       std::vector<T>(),
+      offset_(0),
       stride_(1)
   {
   }
@@ -41,6 +42,7 @@ public:
   /// Create array of given size
   Array(uidx n) :
       std::vector<T>(n),
+      offset_(0),
       stride_(1)
   {
   }
@@ -48,6 +50,7 @@ public:
   /// Create array of given size with default value
   Array(uidx n, T const& t) :
       std::vector<T>(n, t),
+      offset_(0),
       stride_(1)
   {
   }
@@ -55,6 +58,7 @@ public:
   /// Copy constructor
   Array(Array<T> const& x) :
       std::vector<T>(x),
+      offset_(0),
       stride_(1)
   {
   }
@@ -105,6 +109,10 @@ public:
   }
 
   ///
+  inline uint& offset() { return offset_; }
+  inline uint  offset() const { return offset_; }
+
+  ///
   inline uint stride() const { return stride_; }
 
   /// Factor logic for array initialization
@@ -146,6 +154,7 @@ public:
 
 private:
 
+  uint offset_;
   uint stride_;
 
 };
@@ -160,6 +169,7 @@ public:
   /// Create empty array
   Array() :
       std::vector<T*>(),
+      offset_(0),
       stride_(1)
   {
   }
@@ -186,13 +196,18 @@ public:
   }
 
   ///
+  inline uint& offset() { return offset_; }
+  inline uint  offset() const { return offset_; }
+
+  ///
   inline uint stride() const { return stride_; }
 
 private:
 
   /// Disallow copy constructor
-  Array(T const& other) : stride_(0) {}
+  Array(T const& other) : offset_(0), stride_(0) {}
 
+  uint offset_;
   uint stride_;
 
 };

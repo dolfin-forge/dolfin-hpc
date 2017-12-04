@@ -75,6 +75,29 @@ public:
   {
   }
 
+  /// Assignement operator
+  Array<T>& operator=(Array<T> const& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T>::operator=(other);
+      offset_ = other.offset_;
+      stride_ = other.stride_;
+    }
+    return *this;
+  }
+
+  /// Swap operator
+  void swap(Array<T>& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T>::swap(other);
+      std::swap(offset_, other.offset_);
+      std::swap(stride_, other.stride_);
+    }
+  }
+
   /// Support for this construct does not exist in some STL implementations
   template<class Iterator>
   inline void append(Iterator begin, Iterator end)
@@ -179,6 +202,17 @@ public:
   {
   }
 
+  /// Swap operator
+  void swap(Array<T*>& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T*>::swap(other);
+      std::swap(offset_, other.offset_);
+      std::swap(stride_, other.stride_);
+    }
+  }
+
   /// Cleanup array of allocated objects
   void free()
   {
@@ -206,6 +240,9 @@ private:
 
   /// Disallow copy constructor
   Array(T const& other) : offset_(0), stride_(0) {}
+
+  /// Disallow assignement operator
+  Array<T>& operator=(Array<T> const& other) { return *this; }
 
   uint offset_;
   uint stride_;

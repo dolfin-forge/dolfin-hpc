@@ -58,8 +58,8 @@ public:
   /// Copy constructor
   Array(Array<T> const& x) :
       std::vector<T>(x),
-      offset_(0),
-      stride_(1)
+      offset_(x.offset_),
+      stride_(x.stride_)
   {
   }
 

@@ -51,6 +51,12 @@ public:
     owned(MeshTopology& T) : OwnedIterator(T.distdata()[2]) {}
   };
 
+
+  //--- Entity relation -------------------------------------------------------
+
+  typedef Edge  lower_dimensional;
+  typedef Cell  higher_dimensional;
+
 };
 
 /// A FaceIterator is a MeshEntityIterator of topological dimension 2.

@@ -51,6 +51,9 @@ public:
 
   MeshData(Mesh& mesh) : M_(mesh) {}
 
+  //
+  Mesh& mesh() { return M_; }
+
   // Add mesh function to data, error if exists
   template <class V, class E> void add(MeshValues<V, E>& function)
   {

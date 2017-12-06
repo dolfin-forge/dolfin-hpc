@@ -99,6 +99,11 @@ public:
   template<int R, class T>
   static void all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
 
+  //// Wrap in a template function to allow use of functors
+  template<class T>
+  static int sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
+                      Communicator& comm = MPI::DOLFIN_COMM);
+
   /// Start MPI timer
   static void startTimer();
 
@@ -194,6 +199,56 @@ inline void MPI::all_reduce<MPI::max>(real x, real& r, Communicator& comm)
 {
   MPI_Allreduce(&x, &r, 1, MPI_DOUBLE, MPI_MAX, comm);
 }
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::sendrecv(bool* s, int ns, int src, bool* r, int nr, int dst,
+                         int tg, Communicator& comm)
+{
+  MPI_Status status;
+  int recv_count;
+  int bs = ns * sizeof(bool);
+  int br = nr * sizeof(bool);
+  MPI_Sendrecv(s, bs, MPI_BYTE, src, tg, r, br, MPI_BYTE, dst, tg, comm,
+               &status);
+  MPI_Get_count(&status, MPI_BYTE, &recv_count);
+  return recv_count / sizeof(bool);
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::sendrecv(int* s, int ns, int src, int* r, int nr, int dst,
+                         int tg, Communicator& comm)
+{
+  MPI_Status status;
+  int recv_count;
+  MPI_Sendrecv(s, ns, MPI_INT, src, tg, r, nr, MPI_INT, dst, tg, comm, &status);
+  MPI_Get_count(&status, MPI_INT, &recv_count);
+  return recv_count;
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::sendrecv(uint* s, int ns, int src, uint* r, int nr, int dst,
+                         int tg, Communicator& comm)
+{
+  MPI_Status status;
+  int recv_count;
+  MPI_Sendrecv(s, ns, MPI_UNSIGNED, src, tg, r, nr, MPI_UNSIGNED, dst, tg, comm,
+               &status);
+  MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+  return recv_count;
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::sendrecv(real* s, int ns, int src, real* r, int nr, int dst,
+                         int tg, Communicator& comm)
+{
+  MPI_Status status;
+  int recv_count;
+  MPI_Sendrecv(s, ns, MPI_DOUBLE, src, tg, r, nr, MPI_DOUBLE, dst, tg, comm,
+               &status);
+  MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
+  return recv_count;
+}
+//-----------------------------------------------------------------------------
 
 #else
 
@@ -207,6 +262,16 @@ inline void MPI::bcast(T* x, int n, int r, Communicator& comm)
 template<int R, class T>
 inline void MPI::all_reduce(T x, T& r, Communicator& comm)
 { r = x; }
+
+//-----------------------------------------------------------------------------
+template<class T>
+inline int MPI::sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
+                         Communicator& comm)
+{
+  return 0;
+}
+
+//-----------------------------------------------------------------------------
 
 #endif
 

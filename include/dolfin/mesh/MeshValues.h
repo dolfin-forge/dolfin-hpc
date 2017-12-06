@@ -86,6 +86,13 @@ struct MeshValues : public MeshFunction<T>
     return *this;
   }
 
+
+  /// Swap operator
+  void swap(MeshValues<T, E, N>& other)
+  {
+    MeshFunction<T>::swap(other);
+  }
+
   ///--- Value accessors
 
   // NOTE: operators below are defined for any value size but their use is

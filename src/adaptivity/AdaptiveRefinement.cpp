@@ -22,16 +22,12 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <dolfin/adaptivity/AdaptiveRefinement.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 namespace dolfin
 {
@@ -158,12 +154,11 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
   }
 
-  error("This is garbage");
-  MeshValues<bool, Cell> new_cell_marker(mesh);
-//FIXME:  mesh.distribute(*partitions, cell_marker, new_cell_marker);
+  MeshData D(mesh); D.add(cell_marker);
+  mesh.distribute(*partitions, D);
 
   Mesh new_mesh = mesh;
-  RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
+  RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
 
   if (MPI::rank() == 0)
   {

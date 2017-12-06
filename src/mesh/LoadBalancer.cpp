@@ -4,23 +4,22 @@
 // First added:  2008-03-03
 // Last changed: 2011-01-18
 
-#include <cstring>
-#include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/Vertex.h>
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/common/Array.h>
-#include <dolfin/main/MPI.h>
-#include <dolfin/parameter/parameters.h>
 #include <dolfin/mesh/LoadBalancer.h>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
+#include <dolfin/common/Array.h>
+#include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Edge.h>
+#include <dolfin/mesh/MeshData.h>
+#include <dolfin/mesh/Vertex.h>
+#include <dolfin/parameter/parameters.h>
+
+#include <cstring>
 
 using namespace dolfin;
+
+std::map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
+
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight)
@@ -106,9 +105,8 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-    MeshValues<bool, Cell> new_cell_marker(mesh);
-    //mesh.distribute(partitions, cell_marker, new_cell_marker);
-    cell_marker.swap(new_cell_marker);
+    MeshData D(mesh); D.add(cell_marker);
+    mesh.distribute(partitions, D);
   }
   else
   {
@@ -147,8 +145,13 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  error("MeshFunction is garbage");
-//  mesh.distribute(partitions, vertex_functions);
+  MeshData D(mesh);
+  for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
+       it != vertex_functions.end(); ++it)
+  {
+    it->second = it->first; D.add(*(it->second));
+  }
+  mesh.distribute(partitions, D);
 
   end();
 }
@@ -220,17 +223,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-    MeshValues<uint, Cell> new_cell_marker_uint(mesh);
-    MeshValues<uint, Cell> cell_marker_uint(mesh);
-    //FIXME: MeshFunction is garbage
-//      MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-    Array<CellFunctionPPair> cell_functions;
-    cell_functions.push_back(
-        std::make_pair(&cell_marker_uint, &new_cell_marker_uint));
-
-    error("MeshFunction is garbage");
-//      mesh.distribute(partitions, cell_functions, vertex_functions);
-//      MeshFunctionConverter::cast(new_cell_marker_uint, cell_marker);
+    MeshData D(mesh);
+    D.add(cell_marker);
+    for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
+         it != vertex_functions.end(); ++it)
+    {
+      it->second = it->first; D.add(*(it->second));
+    }
+    mesh.distribute(partitions, D);
   }
   else
   {
@@ -270,8 +270,18 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  error("MeshFunction is garbage");
-//  mesh.distribute(partitions,cell_functions, vertex_functions);
+  MeshData D(mesh);
+  for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
+       it != cell_functions.end(); ++it)
+  {
+    it->second = it->first; D.add(*(it->second));
+  }
+  for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
+       it != vertex_functions.end(); ++it)
+  {
+    it->second = it->first; D.add(*(it->second));
+  }
+  mesh.distribute(partitions, D);
 
   end();
 }
@@ -345,18 +355,19 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-    MeshValues<uint, Cell> new_cell_marker_uint(mesh);
-    MeshValues<uint, Cell> cell_marker_uint(mesh);
-    //FIXME: MeshFunction is garbage
-//    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-    cell_functions.push_back(
-        std::make_pair(&cell_marker_uint, &new_cell_marker_uint));
-//    mesh.distribute(partitions, cell_functions, vertex_functions);
-
-    MeshValues<bool, Cell> new_cell_marker(mesh);
-    //FIXME: Garbage
-//    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
-    cell_marker.swap(new_cell_marker);
+    MeshData D(mesh);
+    D.add(cell_marker);
+    for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
+         it != cell_functions.end(); ++it)
+    {
+      it->second = it->first; D.add(*(it->second));
+    }
+    for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
+         it != vertex_functions.end(); ++it)
+    {
+      it->second = it->first; D.add(*(it->second));
+    }
+    mesh.distribute(partitions, D);
   }
   else
   {
@@ -394,8 +405,13 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
-  error("MeshFunction is garbage");
-//  mesh.distribute(partitions,cell_functions);
+  MeshData D(mesh);
+  for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
+       it != cell_functions.end(); ++it)
+  {
+    it->second = it->first; D.add(*(it->second));
+  }
+  mesh.distribute(partitions, D);
 
   end();
 }
@@ -465,20 +481,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   // Distribute mesh according to new partition function
   if (dolfin_get("Load balancer redistribute"))
   {
-    MeshValues<uint, Cell> new_cell_marker_uint(mesh);
-    MeshValues<uint, Cell> cell_marker_uint(mesh);
-    //FIXME: Garbage
-//    MeshFunctionConverter::cast(cell_marker, cell_marker_uint);
-    cell_functions.push_back(
-        std::make_pair(&cell_marker_uint, &new_cell_marker_uint));
-
-    error("MeshFunction is garbage");
-//    mesh.distribute(partitions, cell_functions);
-
-    MeshValues<bool, Cell> new_cell_marker(mesh);
-    //FIXME: Garbage
-//    MeshFunctionConverter::cast(new_cell_marker_uint, new_cell_marker);
-      cell_marker.swap(new_cell_marker);
+    MeshData D(mesh);
+    D.add(cell_marker);
+    for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
+         it != cell_functions.end(); ++it)
+    {
+      it->second = it->first; D.add(*(it->second));
+    }
+    mesh.distribute(partitions, D);
   }
   else
   {

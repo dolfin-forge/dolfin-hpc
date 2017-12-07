@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     for (; level < LMAX; ++level)
     {
       Function up0(mesh, cg1);
-      up0.interpolate(em);
+      up0 << em;
 
 //      if (save_file)
 //      {

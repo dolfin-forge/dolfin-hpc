@@ -33,8 +33,8 @@ template<class T, class E, uint N>
 struct MeshValues : public MeshFunction<T>
 {
   ///
-  MeshValues(Mesh& mesh) :
-    MeshFunction<T>(mesh, entity_dimension<E>(mesh))
+  MeshValues(Mesh& mesh, T val = static_cast<T>(0)) :
+    MeshFunction<T>(mesh, entity_dimension<E>(mesh), val)
   {
     if (N > 1)
     {

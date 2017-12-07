@@ -244,14 +244,14 @@ public:
 protected:
 
   /// Create scalar mesh function on given mesh of given dimension
-  MeshFunction(Mesh& mesh, uint dim) :
+  MeshFunction(Mesh& mesh, uint dim, T val = static_cast<T>(0)) :
       mesh_(0),
       dim_(0),
       size_(0),
       values_(NULL)
   {
     init(&mesh, dim, mesh.size(dim));
-    std::fill_n(values_, size_, static_cast<T>(0));
+    std::fill_n(values_, size_, val);
   }
 
   /// Initialize mesh function for given topological dimension of given size

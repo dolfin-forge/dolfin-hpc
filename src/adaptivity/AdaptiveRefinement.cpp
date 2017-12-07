@@ -118,8 +118,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   File refinefile(marked_filename.str());
   refinefile << cell_marker;
 
-  error("Fix it");
-  MeshValues<uint, Cell> *partitions = NULL;// mesh.data().meshFunction("partitions");
+  MeshValues<uint, Cell>& partitions = LoadBalancer::partitions(mesh);
 
   uint const maxvecsize = 3;
   real * x_values[maxvecsize];
@@ -144,7 +143,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     for (uint i = 0; i < num_sub; ++i)
     {
       AdaptiveRefinement::redistribute_func(mesh, *coarse[i], &x_values[i],
-                                            &x_rows[i], x_m[i], *partitions);
+                                            &x_rows[i], x_m[i], partitions);
     }
 
     while (!coarse.empty())
@@ -155,7 +154,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   }
 
   MeshData D(mesh); D.add(cell_marker);
-  mesh.distribute(*partitions, D);
+  mesh.distribute(partitions, D);
 
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
@@ -213,8 +212,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     p_file << proj.vector();
   }
 
-  mesh = new_mesh;
-
+  mesh.swap(new_mesh);
+  LoadBalancer::clear(mesh);
 }
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,

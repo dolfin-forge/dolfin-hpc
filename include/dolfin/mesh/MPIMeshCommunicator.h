@@ -16,7 +16,7 @@
 #ifndef __DOLFIN_MPI_MESH_COMMUNICATOR_H
 #define __DOLFIN_MPI_MESH_COMMUNICATOR_H
 
-#include <dolfin/mesh/MeshValues.h>
+#include <dolfin/mesh/MeshData.h>
 
 namespace dolfin
 {
@@ -27,10 +27,10 @@ struct MPIMeshCommunicator
 {
 
   /// Distribute mesh according to a vertex-based distribution
-  static void distribute(MeshValues<uint, Vertex>& distribution);
+  static void distribute(MeshValues<uint, Vertex>& dist);
 
   /// Distribute mesh according to a cell-based distribution
-  static void distribute(MeshValues<uint, Cell>& distribution);
+  static void distribute(MeshValues<uint, Cell>& dist, MeshData * D = NULL);
 
 };
 

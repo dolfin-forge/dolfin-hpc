@@ -17,7 +17,7 @@
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/LocalMeshRefinement.h>
 #include <dolfin/mesh/MappedManifold.h>
-#include <dolfin/mesh/MeshValues.h>
+#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
@@ -392,6 +392,11 @@ void Mesh::distribute(MeshValues<uint, Cell>& distribution)
 void Mesh::distribute(MeshValues<uint, Vertex>& distribution)
 {
   MPIMeshCommunicator::distribute(distribution);
+}
+//-----------------------------------------------------------------------------
+void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
+{
+  MPIMeshCommunicator::distribute(distribution, &data);
 }
 //-----------------------------------------------------------------------------
 void Mesh::refine()

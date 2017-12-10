@@ -53,7 +53,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   Mesh omesh;
   dmesh.exp(omesh);
 
-  mesh = omesh;
+  mesh.swap(omesh);
 }
 //-----------------------------------------------------------------------------
 

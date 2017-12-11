@@ -8,7 +8,8 @@
 #ifndef __DOLFIN_D_CELL_H
 #define __DOLFIN_D_CELL_H
 
-#include <dolfin/common/types.h>
+#include <dolfin/mesh/Cell.h>
+
 #include <vector>
 
 namespace dolfin
@@ -17,10 +18,12 @@ namespace dolfin
 
   /// Dynamic cell entity to be used with DMesh
   ///
-  class DCell
+  struct DCell
   {
-  public:
+
     DCell();
+
+    DCell(Cell const& c);
 
     /// Check if a certain edge (defined by endpoints) is part of the cell
     bool has_edge(DVertex* v1, DVertex* v2);

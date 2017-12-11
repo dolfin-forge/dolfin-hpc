@@ -11,7 +11,21 @@
 using namespace dolfin;
 
 //------------------------------------------------------------------------------
-DCell::DCell() : id(0), parent_id(0), vertices(0), deleted(false), nref(0)
+DCell::DCell() :
+    id(0),
+    parent_id(0),
+    vertices(0),
+    deleted(false),
+    nref(0)
+{
+}
+//-----------------------------------------------------------------------------
+DCell::DCell(Cell const& c) :
+    id(c.index()),
+    parent_id(0),
+    vertices(0),
+    deleted(false),
+    nref(0)
 {
 }
 //-----------------------------------------------------------------------------

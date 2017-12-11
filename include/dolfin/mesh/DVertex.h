@@ -8,58 +8,55 @@
 #ifndef __DOLFIN_D_VERTEX_H
 #define __DOLFIN_D_VERTEX_H
 
+#include <dolfin/mesh/Vertex.h>
+
 #include <list>
-#include <dolfin/common/types.h>
-#include <dolfin/mesh/Point.h>
 
 namespace dolfin
 {
-  class DCell;
 
-  /// Dynamic vertex entity to be used with DMesh
-  ///
-  class DVertex
-  {
-  public:
-    DVertex();
+class DCell;
 
-    /// Local index of vertex
-    int id;
+/// Dynamic vertex entity to be used with DMesh
 
-    /// Global index of vertex
-    int glb_id;
+struct DVertex
+{
 
-#ifdef HAVE_LIBGEOM
-    /// geometry parameter
-    int patch_id;
-    float u;
-    float v; 
-#endif
+  DVertex();
 
-    /// List of cells containing the vertex
-    std::list<DCell *> cells;
+  DVertex(Vertex const& v);
 
-    /// Vertex coordinates as Point object
-    Point p;
+  /// Local index of vertex
+  int id;
 
-    /// Marker for deletion
-    bool deleted;
+  /// Global index of vertex
+  int glb_id;
 
-    /// Indicator if vertex is on process boundary
-    bool on_boundary;
+  /// List of cells containing the vertex
+  std::list<DCell *> cells;
 
-    /// Indicator if vertex is shared
-    bool shared;
+  /// Vertex coordinates as Point object
+  Point p;
 
-    /// Indicator if vertex is ghosted
-    bool ghosted;
+  /// Marker for deletion
+  bool deleted;
 
-    /// Rank of owning process
-    int owner;
+  /// Indicator if vertex is on process boundary
+  bool on_boundary;
 
-    /// Adjacent processes for boundary vertices
-    _set<uint> shared_adj;
-  };
-}
+  /// Indicator if vertex is shared
+  bool shared;
 
-#endif
+  /// Indicator if vertex is ghosted
+  bool ghosted;
+
+  /// Rank of owning process
+  int owner;
+
+  /// Adjacent processes for boundary vertices
+  _set<uint> shared_adj;
+};
+
+} /* namespace dolfin */
+
+#endif /* __DOLFIN_D_VERTEX_H */

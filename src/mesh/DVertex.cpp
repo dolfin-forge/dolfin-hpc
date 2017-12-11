@@ -7,17 +7,39 @@
 
 #include <dolfin/mesh/DVertex.h>
 
-using namespace dolfin;
+namespace dolfin
+{
+
 //------------------------------------------------------------------------------
-#ifdef HAVE_LIBGEOM
-DVertex::DVertex() : id(0), glb_id(-1), patch_id(-1), u(-1.f), v(-1.f),
-         cells(0), p(0.0, 0.0, 0.0), deleted(false), on_boundary(false), 
-         shared(false), ghosted(false), owner(-1)
-#else
-DVertex::DVertex() : id(0), glb_id(-1), cells(0), p(0.0, 0.0, 0.0), 
-         deleted(false), on_boundary(false), shared(false),
-         ghosted(false), owner(-1)				
-#endif
+DVertex::DVertex() :
+    id(0),
+    glb_id(-1),
+    cells(0),
+    p(0.0, 0.0, 0.0),
+    deleted(false),
+    on_boundary(false),
+    shared(false),
+    ghosted(false),
+    owner(-1)
 {
 }
 //------------------------------------------------------------------------------
+DVertex::DVertex(Vertex const& v) :
+    id(v.index()),
+    glb_id(v.global_index()),
+    cells(0),
+    p(v.point()),
+    deleted(false),
+    on_boundary(v.is_shared()),
+    shared(v.is_shared()),
+    ghosted(v.is_ghost()),
+    owner(v.owner())
+{
+  if (this->shared)
+  {
+    this->shared_adj = v.mesh().distdata()[0].get_shared_adj(id);
+  }
+}
+//------------------------------------------------------------------------------
+
+} /* namespace dolfin */

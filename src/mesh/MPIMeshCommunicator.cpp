@@ -110,10 +110,9 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     uint s = sendbuf_v[j].size();
     MPI_Reduce(&s, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j, distdata1.comm());
   }
-  dolfin_assert(recvmax_v > 0);
   uint recvmax_x = recvmax_v * gdim;
   // Allocate vertex indices buffer
-  uint * recvbuf_v = new uint[recvmax_v];
+  uint * recvbuf_v = (recvmax_v ? new uint[recvmax_v] : NULL);
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);
@@ -238,7 +237,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   }
 
   // Collect mesh entities according to distribution
-  bool * vertex_used = new bool[topology.size(0)]();
+  bool * vertex_used = (topology.size(0) ? new bool[topology.size(0)]() : NULL);
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     uint const owner = dist(*c);
@@ -317,8 +316,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   cells.resize(cells_size + recvmax[0]);
   uint * recvbuf_c = &cells[cells_size];
   // Allocate vertex indices buffer
-  dolfin_assert(recvmax[1] > 0);
-  uint * recvbuf_v = new uint[recvmax[1]];
+  uint * recvbuf_v = (recvmax[1] ? new uint[recvmax[1]] : NULL);
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);

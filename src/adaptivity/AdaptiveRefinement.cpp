@@ -22,16 +22,12 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/LoadBalancer.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <dolfin/adaptivity/AdaptiveRefinement.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 namespace dolfin
 {
@@ -122,8 +118,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   File refinefile(marked_filename.str());
   refinefile << cell_marker;
 
-  error("Fix it");
-  MeshValues<uint, Cell> *partitions = NULL;// mesh.data().meshFunction("partitions");
+  MeshValues<uint, Cell>& partitions = LoadBalancer::partitions(mesh);
 
   uint const maxvecsize = 3;
   real * x_values[maxvecsize];
@@ -148,7 +143,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     for (uint i = 0; i < num_sub; ++i)
     {
       AdaptiveRefinement::redistribute_func(mesh, *coarse[i], &x_values[i],
-                                            &x_rows[i], x_m[i], *partitions);
+                                            &x_rows[i], x_m[i], partitions);
     }
 
     while (!coarse.empty())
@@ -158,12 +153,11 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
   }
 
-  error("This is garbage");
-  MeshValues<bool, Cell> new_cell_marker(mesh);
-//FIXME:  mesh.distribute(*partitions, cell_marker, new_cell_marker);
+  MeshData D(mesh); D.add(cell_marker);
+  mesh.distribute(partitions, D);
 
   Mesh new_mesh = mesh;
-  RivaraRefinement::refine(new_mesh, new_cell_marker, 0.0, 0.0, 0.0, false);
+  RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
 
   if (MPI::rank() == 0)
   {
@@ -218,8 +212,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     p_file << proj.vector();
   }
 
-  mesh = new_mesh;
-
+  mesh.swap(new_mesh);
+  LoadBalancer::clear(mesh);
 }
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,

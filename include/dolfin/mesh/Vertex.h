@@ -79,6 +79,11 @@ public:
     owned(MeshTopology& T) : OwnedIterator(T.distdata()[0]) {}
   };
 
+  //--- Entity relation -------------------------------------------------------
+
+  typedef Vertex lower_dimensional;
+  typedef Edge  higher_dimensional;
+
 };
 
 /// A VertexIterator is a MeshEntityIterator of topological dimension 0.

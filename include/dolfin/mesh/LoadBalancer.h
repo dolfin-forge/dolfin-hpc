@@ -132,6 +132,17 @@ private:
 
   static void pradixsort_matrix(uint* res, uint* Matrix, uint m);
 
+public:
+
+  // Very imperfect but good enough for now
+  static MeshValues<uint, Cell>& partitions(Mesh& mesh);
+
+  static bool clear(Mesh& mesh);
+
+private:
+
+  static std::map<Mesh *, MeshValues<uint, Cell> *> s_;
+
 };
 
 } /* namespace dolfin */

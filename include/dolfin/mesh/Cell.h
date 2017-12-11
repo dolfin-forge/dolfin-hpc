@@ -132,6 +132,10 @@ public:
     owned(MeshTopology& T) : OwnedIterator(T.distdata()[T.dim()]) {}
   };
 
+  //--- Entity relation -------------------------------------------------------
+
+  typedef Face lower_dimensional;
+
 };
 
 /**

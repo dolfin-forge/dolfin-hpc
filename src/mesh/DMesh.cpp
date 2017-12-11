@@ -156,21 +156,7 @@ void DMesh::imp(Mesh& mesh)
     dolfin_assert(vi->index() == vertices.size());
     dolfin_assert(vi->index() == vertexvec.size());
 
-    DVertex* dv = new DVertex;
-    dv->p = vi->point();
-    dv->id = vi->index();
-    dv->glb_id = vi->global_index();
-    dv->on_boundary = vi->is_shared();
-    dv->shared = vi->is_shared();
-    dv->ghosted = vi->is_ghost();
-    if (dv->ghosted)
-    {
-      dv->owner = mesh.distdata()[0].get_owner(vi->index());
-    }
-    else if (dv->shared)
-    {
-      dv->shared_adj = mesh.distdata()[0].get_shared_adj(vi->index());
-    }
+    DVertex* dv = new DVertex(*vi);
 
     if (dv->on_boundary) bc_dvs[dv->glb_id] = dv;
 

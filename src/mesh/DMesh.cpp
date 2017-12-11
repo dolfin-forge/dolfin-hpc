@@ -112,7 +112,7 @@ void DMesh::init(Mesh& mesh)
   // Cleanup before new allocation
   clear();
 
-  _cell_type = CellType::create(mesh.type().cellType());
+  _cell_type = mesh.type().clone();
   _is_distributed = mesh.is_distributed();
   _tdim = mesh.topology_dimension();
   _gdim = mesh.geometry_dimension();

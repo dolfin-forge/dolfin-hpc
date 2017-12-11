@@ -134,7 +134,7 @@ public:
         uint const num_dofs = num_entity_dofs[d];
         for (MeshEntityIterator m(*cell, d); !m.end(); ++m)
         {
-          dolfin_assert(m.pos() == cell->index(*m));
+          dolfin_assert(m.pos() == (uint)cell->index(*m));
           // Get the dof indices for the entity
           ufc_dofmap.tabulate_entity_dofs(entity_local_dofs, d, m.pos());
           for (uint dof = 0; dof < num_dofs; ++dof)

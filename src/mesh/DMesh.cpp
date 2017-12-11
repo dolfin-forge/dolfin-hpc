@@ -124,23 +124,16 @@ void DMesh::init(Mesh& mesh)
   _salt = _cell_type->num_entities(0) * mesh.topology().global_size(_tdim);
   dolfin_assert(_salt > 0);
 
+  // Assume uniform refinement
+  uint num_new = mesh.topology().size(1);
+
   // Assign a safe range for each rank for the numbering of new entities i.e
   // such that there is no overlap with existing numbered entities.
   _start_offset = 0;
-  // Assume uniform refinement
-  uint num_new = mesh.topology().size(1);
 #ifdef HAVE_MPI
-  _start_offset = 0;
-#if ( MPI_VERSION > 1 )
-  MPI_Exscan(&num_new, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
-             MPI::DOLFIN_COMM);
-#else
-  MPI_Scan(&num_new, &_start_offset, 1, MPI_UNSIGNED, MPI_SUM,
-      MPI::DOLFIN_COMM);
-  _start_offset -= num_new;
+  MPI::offset(num_new, _start_offset, MPI::DOLFIN_COMM);
 #endif
   _start_offset += _glb_max;
-#endif
 }
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)

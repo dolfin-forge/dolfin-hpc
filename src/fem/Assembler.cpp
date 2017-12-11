@@ -58,7 +58,6 @@ void Assembler::assemble(GenericTensor& A, Form& form,
                          SubDomain const& sub_domain, bool reset_tensor)
 {
   Mesh& mesh = form.mesh();
-  uint const tdim = mesh.topology().dim();
 
   // Extract cell domains
   MeshValues<uint, Cell>* cell_domains = NULL;

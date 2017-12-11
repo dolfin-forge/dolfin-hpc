@@ -21,10 +21,6 @@ using namespace dolfin;
 int libsimInterface::runflag = 0;
 libsimInterface::libsimData libsimInterface::InsituData_;
 
-#ifdef HAVE_MPI
-dolfin::MPI::Communicator libsimInterface::comm;
-#endif
-
 #ifdef HAVE_LIBSIM
 
 //-----------------------------------------------------------------------------

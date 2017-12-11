@@ -30,6 +30,7 @@ class BoundaryMesh;
 class Cell;
 class IntersectionDetector;
 class MappedManifold;
+class MeshData;
 template<class T, class E, uint N = 1> class MeshValues;
 class PeriodicSubDomain;
 class Space;
@@ -222,6 +223,9 @@ public:
   /// Distribute a mesh according to a mesh function
   void distribute(MeshValues<uint, Cell>& distribution);
   void distribute(MeshValues<uint, Vertex>& distribution);
+
+  /// Distribute a mesh according to a cell function and transfer data
+  void distribute(MeshValues<uint, Cell>& distribution, MeshData& data);
 
   /*
    *  Mesh refinement routines

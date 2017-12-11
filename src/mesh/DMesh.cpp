@@ -159,10 +159,10 @@ void DMesh::imp(Mesh& mesh)
     DVertex* dv = new DVertex;
     dv->p = vi->point();
     dv->id = vi->index();
-    dv->glb_id = mesh.distdata()[0].get_global(vi->index());
-    dv->on_boundary = mesh.distdata()[0].is_shared(vi->index());
-    dv->shared = mesh.distdata()[0].is_shared(vi->index());
-    dv->ghosted = mesh.distdata()[0].is_ghost(vi->index());
+    dv->glb_id = vi->global_index();
+    dv->on_boundary = vi->is_shared();
+    dv->shared = vi->is_shared();
+    dv->ghosted = vi->is_ghost();
     if (dv->ghosted)
     {
       dv->owner = mesh.distdata()[0].get_owner(vi->index());

@@ -37,12 +37,13 @@ class MeshData
   template <class V, class E>
   struct type : public key { type() : key(values<V>(), entity<E>()) {} };
 
-  struct data_array { };
+  struct data_array { virtual uint size() const = 0; };
 
   template <class V, class E>
   struct array : public data_array
   {
     typedef Array<MeshValues<V, E>*> type; type data;
+    uint size() const { return data.size(); };
   };
 
   //---------------------------------------------------------------------------
@@ -50,6 +51,9 @@ class MeshData
 public:
 
   MeshData(Mesh& mesh) : M_(mesh) {}
+
+  //
+  Mesh& mesh() { return M_; }
 
   // Add mesh function to data, error if exists
   template <class V, class E> void add(MeshValues<V, E>& function)
@@ -84,6 +88,17 @@ public:
   template <class V, class E> uint size()
   {
     return lookup<V, E>().size();
+  }
+
+  // Return total number of functions
+  uint size() const
+  {
+    uint s = 0;
+    for (Store::const_iterator it = S_.begin(); it != S_.end(); ++it)
+    {
+      s += it->second->size();
+    }
+    return s;
   }
 
   // Count number of function instances in data

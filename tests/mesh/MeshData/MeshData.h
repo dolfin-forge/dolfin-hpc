@@ -52,6 +52,7 @@ START_TEST( test_MeshData_iterator )
     section("MeshValues<bool, Facet>");
     {
       MeshData d(m);
+      ck_assert(d.size() == 0);
       uint ii = 0;
       for (MeshData::iterator<bool, Facet> it(d); it.valid(); ++it, ++ii)
       {
@@ -65,6 +66,7 @@ START_TEST( test_MeshData_iterator )
       MeshData d(m);
       MeshValues<uint, Cell>   f0(m); d.add(f0); f0 = 0;
       MeshValues<uint, Cell>   f1(m); d.add(f1); f1 = 1;
+      ck_assert(d.size() == 2);
       uint ii = d.size<uint, Cell>(); ck_assert(ii == 2);
       for (MeshData::iterator<uint, Cell> it(d); it.valid(); ++it, --ii)
       {
@@ -85,6 +87,7 @@ START_TEST( test_MeshData_iterator )
       MeshValues<real, Vertex>   f0(m); d.add(f0); f0 = 0.;
       MeshValues<real, Vertex>   f1(m); d.add(f1); f1 = 1.;
       MeshValues<real, Vertex>   f2(m); d.add(f2); f2 = 2.;
+      ck_assert(d.size() == 3);
       uint ii = d.size<real, Vertex>(); ck_assert(ii == 3);
       for (MeshData::iterator<real, Vertex> it(d); it.valid(); ++it, --ii)
       {

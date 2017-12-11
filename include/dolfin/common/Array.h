@@ -34,6 +34,7 @@ public:
   /// Create empty array
   Array() :
       std::vector<T>(),
+      offset_(0),
       stride_(1)
   {
   }
@@ -41,6 +42,7 @@ public:
   /// Create array of given size
   Array(uidx n) :
       std::vector<T>(n),
+      offset_(0),
       stride_(1)
   {
   }
@@ -48,6 +50,7 @@ public:
   /// Create array of given size with default value
   Array(uidx n, T const& t) :
       std::vector<T>(n, t),
+      offset_(0),
       stride_(1)
   {
   }
@@ -55,7 +58,8 @@ public:
   /// Copy constructor
   Array(Array<T> const& x) :
       std::vector<T>(x),
-      stride_(1)
+      offset_(x.offset_),
+      stride_(x.stride_)
   {
   }
 
@@ -69,6 +73,29 @@ public:
   /// Destructor
   ~Array()
   {
+  }
+
+  /// Assignement operator
+  Array<T>& operator=(Array<T> const& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T>::operator=(other);
+      offset_ = other.offset_;
+      stride_ = other.stride_;
+    }
+    return *this;
+  }
+
+  /// Swap operator
+  void swap(Array<T>& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T>::swap(other);
+      std::swap(offset_, other.offset_);
+      std::swap(stride_, other.stride_);
+    }
   }
 
   /// Support for this construct does not exist in some STL implementations
@@ -103,6 +130,10 @@ public:
     dolfin_assert(i * stride_ < this->size());
     return &this->operator [](i * stride_);
   }
+
+  ///
+  inline uint& offset() { return offset_; }
+  inline uint  offset() const { return offset_; }
 
   ///
   inline uint stride() const { return stride_; }
@@ -146,6 +177,7 @@ public:
 
 private:
 
+  uint offset_;
   uint stride_;
 
 };
@@ -160,6 +192,7 @@ public:
   /// Create empty array
   Array() :
       std::vector<T*>(),
+      offset_(0),
       stride_(1)
   {
   }
@@ -167,6 +200,17 @@ public:
   ///
   ~Array()
   {
+  }
+
+  /// Swap operator
+  void swap(Array<T*>& other)
+  {
+    if (this != &other)
+    {
+      std::vector<T*>::swap(other);
+      std::swap(offset_, other.offset_);
+      std::swap(stride_, other.stride_);
+    }
   }
 
   /// Cleanup array of allocated objects
@@ -186,13 +230,21 @@ public:
   }
 
   ///
+  inline uint& offset() { return offset_; }
+  inline uint  offset() const { return offset_; }
+
+  ///
   inline uint stride() const { return stride_; }
 
 private:
 
   /// Disallow copy constructor
-  Array(T const& other) : stride_(0) {}
+  Array(T const& other) : offset_(0), stride_(0) {}
 
+  /// Disallow assignement operator
+  Array<T>& operator=(Array<T> const& other) { return *this; }
+
+  uint offset_;
   uint stride_;
 
 };

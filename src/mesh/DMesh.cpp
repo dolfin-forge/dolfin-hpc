@@ -172,12 +172,9 @@ void DMesh::imp(Mesh& mesh)
 
     std::vector<DVertex*> vs(ci->num_entities(0));
     uint i = 0;
-    for (VertexIterator vi(*ci); !vi.end(); ++vi)
+    for (VertexIterator vi(*ci); !vi.end(); ++vi, ++i)
     {
-      DVertex* dv = vertexvec[vi->index()];
-
-      vs[i] = dv;
-      i++;
+      vs[i] = vertexvec[vi->index()];
     }
 
     add_cell(dc, vs, ci->index());

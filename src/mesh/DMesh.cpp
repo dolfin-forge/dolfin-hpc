@@ -349,6 +349,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       mv->on_boundary = true;
       mv->shared = true;
+      //Fix shared_adj
       bc_dvs[mv->glb_id] = mv;
       dolfin_assert(v0->glb_id != v1->glb_id);
       dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
@@ -382,6 +383,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       bc_dvs[mv->glb_id] = mv;
       mv->on_boundary = true;
       mv->shared = true;
+      //Fix shared_adj
       mv->ghosted = false;
       mv->owner = MPI::rank();
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;

@@ -397,7 +397,7 @@ AC_CONFIG_FILES([Makefile src/Makefile\
                  src/fem/Makefile\
                  src/function/Makefile\
                  src/io/Makefile\
-		 src/insitu/Makefile\
+                 src/insitu/Makefile\
                  src/la/Makefile\
                  src/log/Makefile\
                  src/main/Makefile\
@@ -420,6 +420,7 @@ AC_CONFIG_FILES([tests/Makefile\
                  tests/la/Makefile\
                  tests/main/Makefile\
                  tests/mesh/Makefile\
+                 tests/parameter/Makefile\
                  tests/ufl/Makefile])
 
 # Python

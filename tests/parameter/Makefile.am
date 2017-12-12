@@ -1,0 +1,10 @@
+check_PROGRAMS = exe
+exe_SOURCES = test.cpp
+exe_CPPFLAGS = -I@top_builddir@/tests -I@top_srcdir@/include @CHECK_CFLAGS@ $(CPPFLAGS)
+exe_LDADD = $(top_builddir)/src/libdolfin.la
+exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
+
+
+EXTRA_DIST = ParameterValue/ParameterValue.h \
+             Parameter/Parameter.h \
+             Parametrized/Parametrized.h

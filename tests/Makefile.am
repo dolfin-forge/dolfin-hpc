@@ -7,7 +7,8 @@ SUBDIRS = \
   function \
   io \
   main \
-  mesh
+  mesh \
+  parameter
 
 TESTS = \
   common/exe \
@@ -18,7 +19,8 @@ TESTS = \
   function/exe \
   io/exe \
   main/exe \
-  mesh/exe
+  mesh/exe \
+  parameter/exe
 
 dolfin_tests.h:	Makefile
 	$(SED) -e 's|#abs_top_srcdir#|@abs_top_srcdir@|g' \

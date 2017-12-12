@@ -15,7 +15,7 @@ namespace dolfin
 class ParameterValue;
 
 /// This class represents a parameter of some given type.
-/// Supported value types are real, int, bool, and string.
+/// Supported value types are bool. int, uint, real, and string.
 
 class Parameter
 {
@@ -46,28 +46,32 @@ public:
   Parameter(const char* value);
 
   /// Copy constructor
-  Parameter(const Parameter& parameter);
+  Parameter(Parameter const& parameter);
 
   /// Destructor
   ~Parameter();
 
+  /// Equality
+  bool operator==(Parameter const& other) const;
+  bool operator!=(Parameter const& other) const;
+
   /// Assignment of int
-  const Parameter& operator=(int value);
+  Parameter const& operator=(int value);
 
   /// Assignment of uint
-  const Parameter& operator=(uint value);
+  Parameter const& operator=(uint value);
 
   /// Assignment of real
-  const Parameter& operator=(real value);
+  Parameter const& operator=(real value);
 
   /// Assignment of bool
-  const Parameter& operator=(bool value);
+  Parameter const& operator=(bool value);
 
   /// Assignment of string
-  const Parameter& operator=(std::string value);
+  Parameter const& operator=(std::string value);
 
   /// Assignment of Parameter
-  const Parameter& operator=(const Parameter& parameter);
+  Parameter const& operator=(Parameter const& parameter);
 
   /// Cast parameter to int
   operator int() const;
@@ -88,10 +92,10 @@ public:
   Type type() const;
 
   /// Output
-  friend LogStream& operator<<(LogStream& stream, const Parameter& parameter);
+  friend LogStream& operator<<(LogStream& stream, Parameter const& parameter);
 
   /// Output
-  friend std::ostream& operator<<(std::ostream& stream, const Parameter& parameter);
+  friend std::ostream& operator<<(std::ostream& stream, Parameter const& parameter);
 
   /// Friends
   friend class XMLFile;
@@ -99,14 +103,14 @@ public:
 private:
 
   // Pointer to parameter value
-  ParameterValue* value;
+  ParameterValue* value_;
 
   // Type of parameter
-  Type _type;
+  Type type_;
 
 };
 
-LogStream& operator<<(LogStream& stream, const Parameter& parameter);
+LogStream& operator<<(LogStream& stream, Parameter const& parameter);
 
 }
 

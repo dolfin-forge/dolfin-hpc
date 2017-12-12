@@ -4,6 +4,7 @@
 // Modified by Niclas Jansson 2017.
 
 #include "ConvectionDiffusion.h"
+#include <sstream>
 #include <dolfin.h>
 
 using namespace dolfin;
@@ -62,9 +63,14 @@ public:
 
   void exec(real t, uint step) const
   {
+    
+    std::stringstream filename;
+    filename << "solution" << std::setfill('0') << std::setw(6) 
+	     << step << ".png" << std::ends;
+    
     VisItAddPlot("Pseudocolor", "U");
     VisItDrawPlots();
-    VisItSaveWindow("./solution.png", 800, 600, VISIT_IMAGEFORMAT_PNG);
+    VisItSaveWindow(filename.str().c_str(), 800, 600, VISIT_IMAGEFORMAT_PNG);
     VisItDeleteActivePlots();
   }
 };
@@ -134,7 +140,7 @@ int main(int argc, char **argv)
     up = u;
 
     // Render all pipelines
-    libsimInterface::batchRender();
+    libsimInterface::batchRender(0.02 * (real) step, step);
   }
 
   dolfin_finalize();

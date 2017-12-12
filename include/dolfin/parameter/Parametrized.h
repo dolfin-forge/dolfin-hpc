@@ -58,6 +58,9 @@ namespace dolfin
     /// Callback for changes in parameter values
     virtual void readParameters();
 
+    /// Display parameters
+    void disp() const;
+
   private:
 
     // Local database of parameters

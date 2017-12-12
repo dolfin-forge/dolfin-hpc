@@ -97,6 +97,10 @@ void Parametrized::readParameters()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-
+void Parametrized::disp() const
+{
+  parameters_.disp();
 }
+//-----------------------------------------------------------------------------
 
+} /* namespace dolfin */

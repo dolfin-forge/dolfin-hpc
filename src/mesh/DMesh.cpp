@@ -86,6 +86,8 @@ void DMesh::clear()
 {
   delete _cell_type;
 
+  propagate.clear();
+
   // Delete allocated DCells
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -143,37 +145,28 @@ void DMesh::imp(Mesh& mesh)
   std::vector<DVertex *> vertexvec;
 
   // Copy vertices
-  uint counter = 1;
-  for (VertexIterator vi(mesh); !vi.end(); ++vi)
+  for (VertexIterator v(mesh); !v.end(); ++v)
   {
-    dolfin_assert(vi->index() == vertices.size());
-    dolfin_assert(vi->index() == vertexvec.size());
-
-    DVertex* dv = new DVertex(*vi);
+    DVertex* dv = new DVertex(*v);
 
     if (dv->on_boundary) bc_dvs[dv->glb_id] = dv;
 
     vertices.insert(dv);
     vertexvec.push_back(dv);
-    counter++;
   }
 
   // Copy cells
-  for (CellIterator ci(mesh); !ci.end(); ++ci)
+  for (CellIterator c(mesh); !c.end(); ++c)
   {
-    DCell* dc = new DCell;
+    DCell* dc = new DCell(*c);
 
-    std::vector<DVertex*> vs(ci->num_entities(0));
+    std::vector<DVertex*> vs(c->num_entities(0));
     uint i = 0;
-    for (VertexIterator vi(*ci); !vi.end(); ++vi, ++i)
+    for (VertexIterator vi(*c); !vi.end(); ++vi, ++i)
     {
       vs[i] = vertexvec[vi->index()];
     }
-
-    add_cell(dc, vs, ci->index());
-    // Define the same cell numbering
-    dc->id = ci->index();
-
+    add_cell(dc, vs, c->index());
   }
 }
 //-----------------------------------------------------------------------------
@@ -197,7 +190,7 @@ void DMesh::exp(Mesh& mesh)
 
     editor.add_vertex(current_vertex, &dv->p[0]);
 
-    if(_is_distributed)
+    if (_is_distributed)
     {
       if (dv->ghosted)
       {
@@ -243,8 +236,14 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
   //FIXME: Overallocation as the comment for glb_max was incorrect.
   if (old2new_vertices)
-  dolfin_assert(old2new_vertices->size() >= vertices.size());
-  else old2new_vertices = new Array<int>(_glb_max);
+  {
+    dolfin_assert(old2new_vertices->size() >= vertices.size());
+  }
+  else
+  {
+    warning("Fix the allocation: the size is the global number of vertices!");
+    old2new_vertices = new Array<int>(_glb_max);
+  }
   *old2new_vertices = -1;
 
   if (old2new_cells)
@@ -274,7 +273,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
     editor.add_vertex(current_vertex, &dv->p[0]);
 
-    if(_is_distributed)
+    if (_is_distributed)
     {
       if (dv->ghosted)
       {
@@ -434,17 +433,21 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->shared = true;
       bc_dvs[mv->glb_id] = mv;
       dolfin_assert(v0->glb_id != v1->glb_id);
-      dolfin_assert(
-          ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
+      dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
     }
   }
   else
   {
     mv = new DVertex;
     add_vertex(mv);
-    if (v0->glb_id < v1->glb_id) mv->glb_id = (((v0->glb_id * _salt)
-        + (v1->glb_id))) + _glb_max;
-    else mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
+    if (v0->glb_id < v1->glb_id)
+    {
+      mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + _glb_max;
+    }
+    else
+    {
+      mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
+    }
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
@@ -642,8 +645,10 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
   while (!empty)
   {
 
-    if (MPI::rank() == 0 && propagate.size() > 0) begin(
-        "Propagate refinement...");
+    if (MPI::rank() == 0 && propagate.size() > 0)
+    {
+      begin("Propagate refinement...");
+    }
 
     propagate_refinement(propagated, empty);
 
@@ -738,8 +743,10 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
     propagated.clear();
     for (std::list<Propagation>::iterator it = leftovers.begin();
-        it != leftovers.end(); ++it)
+         it != leftovers.end(); ++it)
+    {
       propagated.push_back(*it);
+    }
     leftovers.clear();
 
     if (MPI::rank() == 0) end();
@@ -861,7 +868,8 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
     dest = rank ^ (D << j);
 
     MPI_Sendrecv(state, state_size, MPI_INTEGER, dest, 1, recv_buff, total_prop,
-                 MPI_INTEGER, dest, 1, MPI::DOLFIN_COMM, &status);
+    MPI_INTEGER,
+                 dest, 1, MPI::DOLFIN_COMM, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);
 
     dolfin_assert(recv_count % 5 == 0);

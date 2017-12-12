@@ -100,8 +100,12 @@ void libsimInterface::shutdown()
   VisItDisconnect();
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender()
+void libsimInterface::batchRender(real t, uint tstep)
 {
+  
+  InsituData_.t_ = t;
+  InsituData_.tstep_ = tstep;
+
   VisItTimeStepChanged();
 
   VisItUpdatePlots();
@@ -110,7 +114,7 @@ void libsimInterface::batchRender()
   for(Array<libsimPipeline *>::iterator it = InsituData_.pipelines_.begin();
       it != InsituData_.pipelines_.end(); it++)
   {
-    (*it)->exec();
+    (*it)->exec(InsituData_.t_, InsituData_.tstep_);
   }
   
 }

@@ -58,7 +58,7 @@ class RenderMesh : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Mesh", "Mesh");
     VisItDrawPlots();
@@ -72,7 +72,7 @@ class RenderU : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Pseudocolor", "U");
     VisItDrawPlots();
@@ -86,7 +86,7 @@ class RenderAll : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Mesh", "Mesh");
     VisItAddPlot("Pseudocolor", "U");

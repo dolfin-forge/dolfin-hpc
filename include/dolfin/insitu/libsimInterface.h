@@ -40,7 +40,7 @@ namespace dolfin
 
     static void shutdown();
 
-    static void batchRender();
+    static void batchRender(real t = 0.0, uint tstep = 0.0);
 
     static void ctrlLoop();
 
@@ -61,12 +61,12 @@ namespace dolfin
 
     struct libsimData
     {
-      double *t_;		
+      double t_;		
       uint tstep_;
       Mesh *mesh_;      
       LabelList<GenericFunction> function_list_;
       Array<libsimPipeline*> pipelines_;      
-      libsimData(): t_(NULL),mesh_(NULL){}
+      libsimData(): mesh_(NULL){}
     };
 
     // Simulation (insitu) data
@@ -88,8 +88,7 @@ namespace dolfin
       if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) 
       {
 
-	if (d->t_ != NULL)
-	  VisIt_SimulationMetaData_setCycleTime(md, d->tstep_, *(d->t_));
+	VisIt_SimulationMetaData_setCycleTime(md, d->tstep_, d->t_);
 
 	// Mesh meta data
 	if (VisIt_MeshMetaData_alloc(&msh) == VISIT_OKAY)

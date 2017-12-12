@@ -63,6 +63,16 @@ public:
 
   //-------------------------------------------------------------------------
 
+  /// Equality
+  bool operator==(ParameterList const& other) const;
+  bool operator!=(ParameterList const& other) const;
+
+  /// Import parameters from other parameter list
+  ParameterList& operator<<(ParameterList const& other);
+
+  /// Import parameters from other parameter list
+  ParameterList const& operator>>(ParameterList& other) const;
+
   template<class T>
   static void item(std::string const& k, T v)
   {

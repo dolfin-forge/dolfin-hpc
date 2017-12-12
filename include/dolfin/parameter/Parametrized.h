@@ -40,6 +40,16 @@ namespace dolfin
     /// Destructor
     virtual ~Parametrized();
 
+    /// Equality
+    bool operator==(Parametrized const& other);
+    bool operator!=(Parametrized const& other);
+
+    /// Empty
+    bool empty() const { return parameters_.empty(); }
+
+    /// Inherit
+    bool inherit() const { return (parent_ != NULL); }
+
     /// Add local parameter
     void add(std::string key, Parameter value);
 
@@ -47,13 +57,25 @@ namespace dolfin
     void set(std::string key, Parameter value);
 
     /// Set parent from which to inherit parameters (key must be "parent")
-    void set(std::string key, const Parametrized& parent);
+    void set(std::string key, Parametrized const& parent);
 
     /// Get value of parameter with given key (local or nonlocal)
     Parameter get(std::string key) const;
 
     /// Check if parameter with given key has been defined locally
     bool has(std::string key) const;
+
+    /// Import parameters from external parameter list
+    Parametrized& operator<<(ParameterList const& p);
+
+    /// Export parameters to external parameter list
+    Parametrized const& operator>>(ParameterList& p) const;
+
+    /// Import parameters from other
+    Parametrized& operator<<(Parametrized const& p);
+
+    /// Export parameters to other
+    Parametrized const& operator>>(Parametrized& p) const;
 
     /// Display parameters
     void disp() const;

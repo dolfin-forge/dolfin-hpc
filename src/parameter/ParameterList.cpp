@@ -63,5 +63,47 @@ bool ParameterList::defined(std::string const& key) const
   return (storage_.find(key) != storage_.end());
 }
 //-----------------------------------------------------------------------------
+bool ParameterList::operator==(ParameterList const& other) const
+{
+  return (this->storage_ == other.storage_);
+}
+//-----------------------------------------------------------------------------
+bool ParameterList::operator!=(ParameterList const& other) const
+{
+  return (this->storage_ != other.storage_);
+}
+//-----------------------------------------------------------------------------
+ParameterList& ParameterList::operator<<(ParameterList const& other)
+{
+  if (this != &other)
+  {
+    for (ParameterList::const_iterator it = other.begin(); it != other.end();
+         ++it)
+    {
+      if (this->find(it->first) != this->end())
+      {
+        this->set(it->first, it->second);
+      }
+    }
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
+ParameterList const& ParameterList::operator>>(ParameterList& other) const
+{
+  if (this != &other)
+  {
+    for (ParameterList::const_iterator it = this->begin(); it != this->end();
+         ++it)
+    {
+      if (other.find(it->first) != other.end())
+      {
+        other.set(it->first, it->second);
+      }
+    }
+  }
+  return *this;
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

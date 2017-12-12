@@ -41,8 +41,6 @@ void Parametrized::set(std::string key, Parameter value)
   {
     parameters_.set(key, value);
   }
-
-  readParameters();
 }
 //-----------------------------------------------------------------------------
 void Parametrized::set(std::string key, const Parametrized& parent)
@@ -90,11 +88,6 @@ Parameter Parametrized::get(std::string key) const
 bool Parametrized::has(std::string key) const
 {
   return parameters_.defined(key);
-}
-//-----------------------------------------------------------------------------
-void Parametrized::readParameters()
-{
-  // Do nothing
 }
 //-----------------------------------------------------------------------------
 void Parametrized::disp() const

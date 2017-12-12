@@ -57,6 +57,10 @@ public:
   inline const_iterator begin() const { return storage_.begin();}
   inline const_iterator end() const   { return storage_.end();}
 
+  // Find key in container
+  iterator       find(std::string const& key) { return storage_.find(key); }
+  const_iterator find(std::string const& key) const { return storage_.find(key); }
+
   //-------------------------------------------------------------------------
 
   template<class T>

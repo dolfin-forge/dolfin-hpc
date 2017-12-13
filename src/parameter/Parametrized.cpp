@@ -26,6 +26,16 @@ Parametrized::~Parametrized()
   // Do nothing
 }
 //-----------------------------------------------------------------------------
+bool Parametrized::operator==(Parametrized const& other)
+{
+  return (parameters_ == other.parameters_);
+}
+//-----------------------------------------------------------------------------
+bool Parametrized::operator!=(Parametrized const& other)
+{
+  return (parameters_ != other.parameters_);
+}
+//-----------------------------------------------------------------------------
 void Parametrized::add(std::string key, Parameter value)
 {
   parameters_.add(key, value);
@@ -41,11 +51,9 @@ void Parametrized::set(std::string key, Parameter value)
   {
     parameters_.set(key, value);
   }
-
-  readParameters();
 }
 //-----------------------------------------------------------------------------
-void Parametrized::set(std::string key, const Parametrized& parent)
+void Parametrized::set(std::string key, Parametrized const& parent)
 {
   // Check that key is "parent"
   if ( !(key == "parent") )
@@ -92,11 +100,33 @@ bool Parametrized::has(std::string key) const
   return parameters_.defined(key);
 }
 //-----------------------------------------------------------------------------
-void Parametrized::readParameters()
+Parametrized& Parametrized::operator<<(ParameterList const& p)
 {
-  // Do nothing
+  parameters_ << p; return *this;
+}
+//-----------------------------------------------------------------------------
+Parametrized const& Parametrized::operator>>(ParameterList& p) const
+{
+  if ( parent_ ) { parent_->parameters_ >> p; }
+  parameters_ >> p; return *this;
+}
+//-----------------------------------------------------------------------------
+Parametrized& Parametrized::operator<<(Parametrized const& p)
+{
+  if ( p.parent_ ) {  (*this) << *(p.parent_); }
+  parameters_ << p.parameters_; return *this;
+}
+//-----------------------------------------------------------------------------
+Parametrized const& Parametrized::operator>>(Parametrized& p) const
+{
+  if ( parent_ ) { *parent_ >> p; }
+  parameters_ >> p.parameters_; return *this;
+}
+//-----------------------------------------------------------------------------
+void Parametrized::disp() const
+{
+  parameters_.disp();
 }
 //-----------------------------------------------------------------------------
 
-}
-
+} /* namespace dolfin */

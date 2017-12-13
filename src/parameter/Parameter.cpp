@@ -4,173 +4,140 @@
 // First added:  2003-05-06
 // Last changed: 2005-12-21
 
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/parameter/ParameterValue.h>
 #include <dolfin/parameter/Parameter.h>
+
+#include <dolfin/parameter/ParameterValue.h>
 
 namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
 Parameter::Parameter(int value) :
-    value(0),
-    _type(type_int)
+    value_(new parameter<int>(value)),
+    type_(type_int)
 {
-  this->value = new IntValue(value);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter(uint value) :
-    value(0),
-    _type(type_int)
+    value_(new parameter<uint>(value)),
+    type_(type_uint)
 {
-  this->value = new IntValue(static_cast<int>(value));
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter(real value) :
-    value(0),
-    _type(type_real)
+    value_(new parameter<real>(value)),
+    type_(type_real)
 {
-  this->value = new RealValue(value);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter(bool value) :
-    value(0),
-    _type(type_bool)
+    value_(new parameter<bool>(value)),
+    type_(type_bool)
 {
-  this->value = new BoolValue(value);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter(std::string value) :
-    value(0),
-    _type(type_string)
+    value_(new parameter<std::string>(value)),
+    type_(type_string)
 {
-  this->value = new StringValue(value);
 }
 //-----------------------------------------------------------------------------
 Parameter::Parameter(const char* value) :
-    value(0),
-    _type(type_string)
+    value_(new parameter<std::string>(std::string(value))),
+    type_(type_string)
 {
-  std::string s(value);
-  this->value = new StringValue(s);
 }
 //-----------------------------------------------------------------------------
-Parameter::Parameter(const Parameter& parameter) :
-    value(0),
-    _type(parameter._type)
+Parameter::Parameter(Parameter const& other) :
+    value_(other.value_ ? other.value_->clone() : NULL),
+    type_(other.type_)
 {
-  switch (parameter._type)
+}
+//-----------------------------------------------------------------------------
+bool Parameter::operator==(Parameter const& other) const
+{
+  return *(this->value_) == *(other.value_);
+}
+//-----------------------------------------------------------------------------
+bool Parameter::operator!=(Parameter const& other) const
+{
+  return *(this->value_) != *(other.value_);
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(int value)
+{
+  *(this->value_) = value;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(uint value)
+{
+  *(this->value_) = value;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(real value)
+{
+  *(this->value_) = value;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(bool value)
+{
+  *(this->value_) = value;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(std::string value)
+{
+  *(this->value_) = value;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+Parameter const& Parameter::operator=(Parameter const& other)
+{
+  if (this != &other)
   {
-    case type_int:
-      value = new IntValue(*parameter.value);
-      break;
-    case type_real:
-      value = new RealValue(*parameter.value);
-      break;
-    case type_bool:
-      value = new BoolValue(*parameter.value);
-      break;
-    case type_string:
-      value = new StringValue(*parameter.value);
-      break;
-    default:
-      error("Unknown parameter type: %d.", parameter._type);
-      break;
+    delete value_;
+    value_ = (other.value_ ? other.value_->clone() : NULL);
+    type_  = other.type_;
   }
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(int value)
-{
-  *(this->value) = value;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(dolfin::uint value)
-{
-  *(this->value) = value;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(real value)
-{
-  *(this->value) = value;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(bool value)
-{
-  *(this->value) = value;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(std::string value)
-{
-  *(this->value) = value;
-  return *this;
-}
-//-----------------------------------------------------------------------------
-const Parameter& Parameter::operator=(const Parameter& parameter)
-{
-  delete value;
-
-  switch (parameter._type)
-  {
-    case type_int:
-      value = new IntValue(*parameter.value);
-      break;
-    case type_real:
-      value = new RealValue(*parameter.value);
-      break;
-    case type_bool:
-      value = new BoolValue(*parameter.value);
-      break;
-    case type_string:
-      value = new StringValue(*parameter.value);
-      break;
-    default:
-      error("Unknown parameter type: %d.", parameter._type);
-      break;
-  }
-
-  _type = parameter._type;
-
   return *this;
 }
 //-----------------------------------------------------------------------------
 Parameter::~Parameter()
 {
-  if (value)
-    delete value;
+  delete value_;
 }
 //-----------------------------------------------------------------------------
 Parameter::operator int() const
 {
-  return *value;
+  return *value_;
 }
 //-----------------------------------------------------------------------------
-Parameter::operator dolfin::uint() const
+Parameter::operator uint() const
 {
-  return *value;
+  return *value_;
 }
 //-----------------------------------------------------------------------------
 Parameter::operator real() const
 {
-  return *value;
+  return *value_;
 }
 //-----------------------------------------------------------------------------
 Parameter::operator bool() const
 {
-  return *value;
+  return *value_;
 }
 //-----------------------------------------------------------------------------
 Parameter::operator std::string() const
 {
-  return *value;
+  return *value_;
 }
 //-----------------------------------------------------------------------------
 Parameter::Type Parameter::type() const
 {
-  return _type;
+  return type_;
 }
 //-----------------------------------------------------------------------------
 LogStream& operator<<(LogStream& stream,
@@ -181,6 +148,10 @@ LogStream& operator<<(LogStream& stream,
     case Parameter::type_int:
       stream << "[Parameter: value = " << static_cast<int>(parameter)
           << " (int)]";
+      break;
+    case Parameter::type_uint:
+      stream << "[Parameter: value = " << static_cast<uint>(parameter)
+          << " (uint)]";
       break;
     case Parameter::type_real:
       stream << "[Parameter: value = " << static_cast<real>(parameter)
@@ -197,13 +168,12 @@ LogStream& operator<<(LogStream& stream,
           << "\" (string)]";
       break;
     default:
-      error("Unknown parameter type: %d.", parameter._type);
+      error("Unknown parameter type: %d.", parameter.type_);
       break;
   }
 
   return stream;
 }
-
 //-----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& stream,
                                  const Parameter& parameter)
@@ -212,6 +182,9 @@ std::ostream& operator<<(std::ostream& stream,
   {
     case Parameter::type_int:
       stream << static_cast<int>(parameter);
+      break;
+    case Parameter::type_uint:
+      stream << static_cast<uint>(parameter);
       break;
     case Parameter::type_real:
       stream << static_cast<real>(parameter);
@@ -226,7 +199,7 @@ std::ostream& operator<<(std::ostream& stream,
       stream << static_cast<std::string>(parameter);
       break;
     default:
-      error("Unknown parameter type: %d.", parameter._type);
+      error("Unknown parameter type: %d.", parameter.type_);
       break;
   }
 
@@ -234,5 +207,4 @@ std::ostream& operator<<(std::ostream& stream,
 }
 //-----------------------------------------------------------------------------
 
-}
-
+} /* namespace dolfin */

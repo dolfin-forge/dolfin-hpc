@@ -61,6 +61,9 @@ struct ParameterValue
   /// Value comparison
   virtual bool cmp(ParameterValue const& other) const = 0;
 
+  /// Value comparison
+  virtual ParameterValue const& operator>>(std::ostream& stream) const = 0;
+
   /// Name of value type
   virtual std::string type() const = 0;
 
@@ -90,8 +93,14 @@ struct parameter : public ParameterValue
   /// Value comparison
   bool cmp(ParameterValue const& other) const { return v_ == static_cast<T>(other); }
 
+  /// Output
+  inline ParameterValue const& operator>>(std::ostream& stream) const
+  {
+    stream << v_; return *this;
+  }
+
   /// Equality
-  bool operator==(ParameterValue const& other) const
+  inline bool operator==(ParameterValue const& other) const
   {
     return (this->type() == other.type()) && (v_ == static_cast<T>(other));
   }
@@ -99,6 +108,10 @@ struct parameter : public ParameterValue
 
   /// Assignment
   ParameterValue& operator=(T value) { this->v_ = value; return *this; }
+
+  /// Output
+  template<class S>
+  friend std::ostream& operator<<(std::ostream& stream, parameter<S> const& p);
 
   /// Cast
   operator T&()      { return v_; }
@@ -121,6 +134,36 @@ template<> inline std::string parameter<int>::type()         const { return "int
 template<> inline std::string parameter<uint>::type()        const { return "uint"; }
 template<> inline std::string parameter<real>::type()        const { return "real"; }
 template<> inline std::string parameter<std::string>::type() const { return "string"; }
+
+//-----------------------------------------------------------------------------
+template<>
+inline ParameterValue const& parameter<bool>::operator>>(std::ostream& stream) const
+{
+  stream << (v_ ? "true" : "false"); return *this;
+}
+
+//-----------------------------------------------------------------------------
+template<>
+inline ParameterValue const& parameter<std::string>::operator>>(std::ostream& stream) const
+{
+  stream << "\"" << v_ << "\""; return *this;
+}
+
+//-----------------------------------------------------------------------------
+template<class T>
+inline std::ostream& operator<<(std::ostream& stream, parameter<T> const& p)
+{
+  stream << p.v_; return stream;
+}
+
+//-----------------------------------------------------------------------------
+template<class T>
+inline std::ostream& operator<<(std::ostream& stream, ParameterValue const& p)
+{
+  p >> stream; return stream;
+}
+
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
 

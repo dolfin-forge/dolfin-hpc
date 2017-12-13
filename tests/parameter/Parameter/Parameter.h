@@ -15,19 +15,34 @@ START_TEST( test_Parameter )
   T.begin("test_Parameter");
   {
     {
-      Parameter P(bool());
+      Parameter P(bool(false));
+      std::cout << P << "\n";
+      Parameter Q(bool(true));
+      std::cout << Q << "\n";
     }
     {
-      Parameter P(int());
+      Parameter P(int(0));
+      std::cout << P << "\n";
+      Parameter Q(int(1));
+      std::cout << Q << "\n";
     }
     {
-      Parameter P(uint());
+      Parameter P(uint(0u));
+      std::cout << P << "\n";
+      Parameter Q(uint(1u));
+      std::cout << Q << "\n";
     }
     {
-      Parameter P(real());
+      Parameter P(real(0.0));
+      std::cout << P << "\n";
+      Parameter Q(real(1.0));
+      std::cout << Q << "\n";
     }
     {
-      Parameter P(std::string());
+      Parameter P(std::string("0"));
+      std::cout << P << "\n";
+      Parameter Q(std::string("1"));
+      std::cout << Q << "\n";
     }
   }
   T.end();

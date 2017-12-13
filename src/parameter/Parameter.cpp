@@ -140,70 +140,14 @@ Parameter::Type Parameter::type() const
   return type_;
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream,
-                                      const Parameter& parameter)
+std::string Parameter::strtype() const
 {
-  switch (parameter.type())
-  {
-    case Parameter::type_int:
-      stream << "[Parameter: value = " << static_cast<int>(parameter)
-          << " (int)]";
-      break;
-    case Parameter::type_uint:
-      stream << "[Parameter: value = " << static_cast<uint>(parameter)
-          << " (uint)]";
-      break;
-    case Parameter::type_real:
-      stream << "[Parameter: value = " << static_cast<real>(parameter)
-          << " (real)]";
-      break;
-    case Parameter::type_bool:
-      if (static_cast<bool>(parameter))
-        stream << "[Parameter: value = true (bool)]";
-      else
-        stream << "[Parameter: value = false (bool)]";
-      break;
-    case Parameter::type_string:
-      stream << "[Parameter: value = \"" << static_cast<std::string>(parameter)
-          << "\" (string)]";
-      break;
-    default:
-      error("Unknown parameter type: %d.", parameter.type_);
-      break;
-  }
-
-  return stream;
+  return value_->type();
 }
 //-----------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& stream,
-                                 const Parameter& parameter)
+std::ostream& operator<<(std::ostream& stream, Parameter const& parameter)
 {
-  switch (parameter.type())
-  {
-    case Parameter::type_int:
-      stream << static_cast<int>(parameter);
-      break;
-    case Parameter::type_uint:
-      stream << static_cast<uint>(parameter);
-      break;
-    case Parameter::type_real:
-      stream << static_cast<real>(parameter);
-      break;
-    case Parameter::type_bool:
-      if (static_cast<bool>(parameter))
-        stream << true;
-      else
-        stream << false;
-      break;
-    case Parameter::type_string:
-      stream << static_cast<std::string>(parameter);
-      break;
-    default:
-      error("Unknown parameter type: %d.", parameter.type_);
-      break;
-  }
-
-  return stream;
+  *parameter.value_ >> stream; return stream;
 }
 //-----------------------------------------------------------------------------
 

@@ -15,7 +15,7 @@ namespace dolfin
 class ParameterValue;
 
 /// This class represents a parameter of some given type.
-/// Supported value types are bool. int, uint, real, and string.
+/// Supported value types are bool, int, uint, real, and string.
 
 class Parameter
 {
@@ -91,8 +91,8 @@ public:
   /// Return type of parameter
   Type type() const;
 
-  /// Output
-  friend LogStream& operator<<(LogStream& stream, Parameter const& parameter);
+  /// Return type of parameter
+  std::string strtype() const;
 
   /// Output
   friend std::ostream& operator<<(std::ostream& stream, Parameter const& parameter);
@@ -110,7 +110,7 @@ private:
 
 };
 
-LogStream& operator<<(LogStream& stream, Parameter const& parameter);
+std::ostream& operator<<(std::ostream& stream, Parameter const& parameter);
 
 }
 

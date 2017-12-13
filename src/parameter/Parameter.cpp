@@ -140,8 +140,12 @@ Parameter::Type Parameter::type() const
   return type_;
 }
 //-----------------------------------------------------------------------------
-LogStream& operator<<(LogStream& stream,
-                                      const Parameter& parameter)
+std::string Parameter::strtype() const
+{
+  return value_->type();
+}
+//-----------------------------------------------------------------------------
+LogStream& operator<<(LogStream& stream, Parameter const& parameter)
 {
   switch (parameter.type())
   {
@@ -175,8 +179,7 @@ LogStream& operator<<(LogStream& stream,
   return stream;
 }
 //-----------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& stream,
-                                 const Parameter& parameter)
+std::ostream& operator<<(std::ostream& stream, Parameter const& parameter)
 {
   switch (parameter.type())
   {

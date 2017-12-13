@@ -91,6 +91,9 @@ public:
   /// Return type of parameter
   Type type() const;
 
+  /// Return type of parameter
+  std::string strtype() const;
+
   /// Output
   friend LogStream& operator<<(LogStream& stream, Parameter const& parameter);
 

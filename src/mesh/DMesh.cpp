@@ -164,13 +164,13 @@ void DMesh::exp(Mesh& mesh)
 
     if (_is_distributed)
     {
-      if (dv->ghosted)
+      if (dv->shared)
       {
-        mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
-      }
-      else if (dv->shared)
-      {
-        mesh.distdata()[0].set_shared(current_vertex);
+        mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
+        if (dv->ghosted)
+        {
+          mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
+        }
       }
       mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
     }
@@ -247,13 +247,13 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
     if (_is_distributed)
     {
-      if (dv->ghosted)
-      {
-        mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
-      }
-      else if (dv->shared)
+      if (dv->shared)
       {
         mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
+        if (dv->ghosted)
+        {
+          mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
+        }
       }
       mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
     }

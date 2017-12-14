@@ -153,7 +153,7 @@ public:
   }
 
   /// Return mesh associated with mesh function
-  inline Mesh& mesh()
+  inline Mesh& mesh() const
   {
     dolfin_assert(mesh_);
     return *mesh_;

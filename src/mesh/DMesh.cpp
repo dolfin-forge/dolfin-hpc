@@ -22,36 +22,16 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
-/// Helper class for getCell method
-class CheckCellId
+/// Helper class
+struct CheckId
 {
-public:
-  explicit CheckCellId(int id_) :
-      id(id_)
-  {
-  }
-  bool operator()(const DCell * const & cell) const
-  {
-    return (id == cell->id);
-  }
+  explicit CheckId(int id_) : id(id_) {}
+  bool operator()(const DVertex * const & v) const { return (id == v->id); }
+  bool operator()(const DCell * const & c) const   { return (id == c->id); }
+
 private:
-  int id;
-};
-//-----------------------------------------------------------------------------
-/// Helper class for getVertex method
-class CheckVertexId
-{
-public:
-  explicit CheckVertexId(int id_) :
-      id(id_)
-  {
-  }
-  bool operator()(const DVertex * const & vertex) const
-  {
-    return (id == vertex->id);
-  }
-private:
-  int id;
+
+  int const id;
 };
 //-----------------------------------------------------------------------------
 DMesh::DMesh(Mesh& mesh) :
@@ -590,18 +570,18 @@ void DMesh::eraseRemovedEntities()
 DVertex* DMesh::getVertex(int local_id)
 {
   std::set<DVertex *>::const_iterator it = std::find_if(
-      vertices.begin(), vertices.end(), CheckVertexId(local_id));
+      vertices.begin(), vertices.end(), CheckId(local_id));
 
-  return (it != vertices.end() ? *it : 0);
+  return (it != vertices.end() ? *it : NULL);
 }
 //-----------------------------------------------------------------------------
 DCell* DMesh::getCell(int local_id)
 {
   std::list<DCell *>::const_iterator it = std::find_if(cells.begin(),
                                                        cells.end(),
-                                                       CheckCellId(local_id));
+                                                       CheckId(local_id));
 
-  return (it != cells.end() ? *it : 0);
+  return (it != cells.end() ? *it : NULL);
 }
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)

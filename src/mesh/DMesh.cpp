@@ -607,7 +607,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
     if (!c->deleted)
     {
-      bisect(c, 0, 0, 0);
+      bisect(c, NULL, NULL, NULL);
     }
   }
 
@@ -650,8 +650,8 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         continue;
       }
 
-      DVertex* v1 = 0;
-      DVertex* v2 = 0;
+      DVertex* v1 = NULL;
+      DVertex* v2 = NULL;
 
       if (!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end())
       {

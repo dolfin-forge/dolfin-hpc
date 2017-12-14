@@ -114,7 +114,7 @@ void DMesh::imp(Mesh& mesh)
 {
   init(mesh);
 
-  std::vector<DVertex *> vertexvec;
+  DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
 
   // Copy vertices
   for (VertexIterator v(mesh); !v.end(); ++v)
@@ -123,8 +123,9 @@ void DMesh::imp(Mesh& mesh)
 
     if (dv->on_boundary) bc_dvs[dv->glb_id] = dv;
 
-    vertices.insert(dv);
-    vertexvec.push_back(dv);
+    add_vertex(dv);
+
+    vertices[v->index()] = dv;
   }
 
   // Copy cells
@@ -135,10 +136,12 @@ void DMesh::imp(Mesh& mesh)
     uint i = 0;
     for (VertexIterator vi(*c); !vi.end(); ++vi, ++i)
     {
-      vs[i] = vertexvec[vi->index()];
+      vs[i] = vertices[vi->index()];
     }
     add_cell(dc, vs, c->index());
   }
+
+  delete [] vertices;
 }
 //-----------------------------------------------------------------------------
 void DMesh::exp(Mesh& mesh)

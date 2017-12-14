@@ -125,9 +125,14 @@ public:
   inline void propagate_refinement(std::vector<Propagation>& propagated,
                                    bool& empty)
   {
-    if (PE::size() & (PE::size() - 1)) propagate_naive(
-        propagated, empty);
-    else propagate_hypercube(propagated, empty);
+    if (PE::size() & (PE::size() - 1))
+    {
+      propagate_naive(propagated, empty);
+    }
+    else
+    {
+      propagate_hypercube(propagated, empty);
+    }
   }
 
   /// Naive refinement propagation with pairwise communication

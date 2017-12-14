@@ -48,6 +48,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   }
 
   DMesh dmesh(mesh);
+  message("bisectMarked");
   dmesh.bisectMarked(cell_marker);
 
   Mesh omesh;

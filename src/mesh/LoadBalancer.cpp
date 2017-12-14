@@ -25,17 +25,20 @@ std::map<Mesh *, MeshValues<uint, Cell> *> LoadBalancer::s_;
 //-----------------------------------------------------------------------------
 void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight)
 {
-  begin("Load balancing");
+  begin("Load balancing with cell weights");
 
   // Repartition mesh
+  message("Partition");
   MeshValues<uint, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
+  message("Process reassignment");
   uint max_sendrecv;
   process_reassignment(partitions, &max_sendrecv);
 
   // Distribute mesh according to new partition function
+  message("Distribute");
   mesh.distribute(partitions);
 
   end();
@@ -54,11 +57,14 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   MeshValues<uint, Cell> weight(mesh);
   uint w_local, w_sum, w_max;
   real w_avg;
+  message("Weight function");
   weight_function(mesh, cell_marker, weight, &w_local, type);
 
   // Preliminary evalution of load imbalance
+  message("Load imbalance");
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  message("Load imbalance done");
 
   w_avg = (real) w_sum / (real) MPI::size();
 
@@ -77,11 +83,13 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
+  message("Partition mesh");
   MeshValues<uint, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
   // Calculate process reassignment
   uint max_sendrecv;
+  message("Process reassignment");
   process_reassignment(partitions, &max_sendrecv);
 
   // Determine if the computation gains from repartitioning/reassignment
@@ -122,7 +130,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
                            Array<VertexFunctionPPair>& vertex_functions)
 {
-  begin("Load balancing");
+  begin("Load balancing with cell weights and vertex functions");
 
   // Repartition mesh
   MeshValues<uint, Cell> partitions(mesh);
@@ -207,7 +215,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
          it != vertex_functions.end(); ++it)
     {
-      it->second = it->first; D.add(*(it->second));
+      *(it->second) = *(it->first); D.add(*(it->second));
     }
     mesh.distribute(partitions, D);
   }
@@ -235,7 +243,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
                            Array<CellFunctionPPair>& cell_functions,
                            Array<VertexFunctionPPair>& vertex_functions)
 {
-  begin("Load balancing");
+  begin("Load balancing with cell weights and cell/vertex functions");
 
   // Repartition mesh
   MeshValues<uint, Cell> partitions(mesh);
@@ -250,12 +258,12 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
   for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
        it != cell_functions.end(); ++it)
   {
-    it->second = it->first; D.add(*(it->second));
+    *(it->second) = *(it->first); D.add(*(it->second));
   }
   for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
        it != vertex_functions.end(); ++it)
   {
-    it->second = it->first; D.add(*(it->second));
+    *(it->second) = *(it->first); D.add(*(it->second));
   }
   mesh.distribute(partitions, D);
 
@@ -327,12 +335,12 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
     for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
          it != cell_functions.end(); ++it)
     {
-      it->second = it->first; D.add(*(it->second));
+      *(it->second) = *(it->first); D.add(*(it->second));
     }
     for (Array<VertexFunctionPPair>::iterator it = vertex_functions.begin();
          it != vertex_functions.end(); ++it)
     {
-      it->second = it->first; D.add(*(it->second));
+      *(it->second) = *(it->first); D.add(*(it->second));
     }
     mesh.distribute(partitions, D);
   }
@@ -358,7 +366,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
 void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
                            Array<CellFunctionPPair>& cell_functions)
 {
-  begin("Load balancing");
+  begin("Load balancing with cell weights and cell functions");
 
   // Repartition mesh
   MeshValues<uint, Cell> partitions(mesh);
@@ -373,7 +381,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight,
   for (Array<CellFunctionPPair>::iterator it = cell_functions.begin();
        it != cell_functions.end(); ++it)
   {
-    it->second = it->first; D.add(*(it->second));
+    *(it->second) = *(it->first); D.add(*(it->second));
   }
   mesh.distribute(partitions, D);
 

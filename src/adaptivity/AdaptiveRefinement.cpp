@@ -154,6 +154,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
 
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
+  new_mesh.topology().renumber();
 
   if (MPI::rank() == 0)
   {
@@ -209,6 +210,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   }
 
   mesh.swap(new_mesh);
+  mesh.topology().renumber();
   LoadBalancer::clear(mesh);
 }
 //-----------------------------------------------------------------------------

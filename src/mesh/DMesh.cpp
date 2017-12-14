@@ -6,28 +6,19 @@
 // Modified by Aurelien Larcher, 2015
 //
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/log/dolfin_log.h>
-#include <dolfin/common/constants.h>
+#include <dolfin/mesh/DMesh.h>
+
+#include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/Facet.h>
-#include <dolfin/mesh/Edge.h>
-#include <dolfin/mesh/Cell.h>
-#include <dolfin/mesh/DMesh.h>
 #include <dolfin/mesh/DVertex.h>
 #include <dolfin/mesh/DCell.h>
-#include <cstring>
 
 #include <algorithm>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
+#include <cstring>
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------

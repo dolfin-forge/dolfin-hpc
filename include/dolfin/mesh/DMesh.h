@@ -10,8 +10,8 @@
 #define __DOLFIN_D_MESH_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/main/PE.h>
+#include <dolfin/mesh/Cell.h>
 
 #include <vector>
 #include <list>
@@ -20,10 +20,13 @@
 
 namespace dolfin
 {
-class Mesh;
+
+template<class T> class Array;
+class CellType;
 class DCell;
 class DVertex;
-class CellType;
+class Mesh;
+template<class T, class E, uint N> class MeshValues;
 
 /// Dynamic mesh class for on-the-fly changes to the mesh. It is used by the
 /// recursive RivaraRefinement and the EdgeCollapse-MeshCoarsening.

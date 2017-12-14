@@ -475,7 +475,7 @@ DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
   for (std::list<DCell*>::iterator it = v1->cells.begin();
       it != v1->cells.end(); ++it)
   {
-    DCell* c = *it;
+    DCell* const c = *it;
 
     if (c != dcell && !c->deleted)
     {
@@ -529,44 +529,31 @@ void DMesh::removeVertex(DVertex* v)
 void DMesh::eraseRemovedEntities()
 {
   // Remove deleted cells from global list
-  for (std::list<DCell *>::iterator c_it(cells.begin()); c_it != cells.end();)
+  for (std::list<DCell *>::iterator it(cells.begin()); it != cells.end();)
   {
-    DCell * dc = *c_it;
-    if (dc->deleted)
-    {
-      c_it = cells.erase(c_it);
-      delete dc;
-    }
-    else ++c_it;
+    if ((*it)->deleted) { delete (*it); it = cells.erase(it); } else ++it;
   }
 
   // Remove deleted vertices from global list
-  for (std::set<DVertex *>::iterator v_it(vertices.begin());
-      v_it != vertices.end(); /* blank */)
+  for (std::set<DVertex *>::iterator it(vertices.begin());
+       it != vertices.end(); ++it)
   {
-    DVertex * dv = *v_it;
-    if (dv->deleted)
-    {
-      vertices.erase(v_it++);
-      delete dv;
-    }
-    else ++v_it;
+    if ((*it)->deleted) { delete (*it); vertices.erase(it); }
   }
 }
 //-----------------------------------------------------------------------------
 DVertex* DMesh::getVertex(int local_id)
 {
-  std::set<DVertex *>::const_iterator it = std::find_if(
-      vertices.begin(), vertices.end(), CheckId(local_id));
+  std::set<DVertex *>::const_iterator it =
+      std::find_if(vertices.begin(), vertices.end(), CheckId(local_id));
 
   return (it != vertices.end() ? *it : NULL);
 }
 //-----------------------------------------------------------------------------
 DCell* DMesh::getCell(int local_id)
 {
-  std::list<DCell *>::const_iterator it = std::find_if(cells.begin(),
-                                                       cells.end(),
-                                                       CheckId(local_id));
+  std::list<DCell *>::const_iterator it =
+      std::find_if(cells.begin(), cells.end(), CheckId(local_id));
 
   return (it != cells.end() ? *it : NULL);
 }

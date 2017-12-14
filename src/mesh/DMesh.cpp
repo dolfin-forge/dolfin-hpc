@@ -58,6 +58,8 @@ void DMesh::clear()
   delete _cell_type;
 
   propagate.clear();
+  bc_dvs.clear();
+  ref_edge.clear();
 
   // Delete allocated DCells
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)

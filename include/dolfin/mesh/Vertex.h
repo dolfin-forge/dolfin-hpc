@@ -60,6 +60,12 @@ public:
     return mesh_.geometry().point(index_);
   }
 
+  /// Return vertex coordinates as a 3D point value
+  inline Point midpoint() const
+  {
+    return mesh_.geometry().point(index_);
+  }
+
   //--- ITERATOR --------------------------------------------------------------
 
   typedef VertexIterator iterator;

@@ -562,25 +562,11 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
   uint const pe_rank = PE::rank();
 
-  std::list<DCell*> marked_cells;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
-    DCell* c = *it;
-
-    if (marked_ids(c->id))
+    if (marked_ids((*it)->id) && !(*it)->deleted)
     {
-      marked_cells.push_back(c);
-    }
-  }
-
-  for (std::list<DCell*>::iterator it = marked_cells.begin();
-      it != marked_cells.end(); ++it)
-  {
-    DCell* c = *it;
-
-    if (!c->deleted)
-    {
-      bisect(c, NULL, NULL, NULL);
+      bisect((*it), NULL, NULL, NULL);
     }
   }
 
@@ -646,44 +632,42 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       for (std::list<DCell*>::iterator ic = v1->cells.begin();
           ic != v1->cells.end(); ++ic)
       {
-        if (!(*ic)->deleted)
+        if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
-          if ((*ic)->has_edge(v1, v2))
+          dolfin_assert((*ic)->vertices.size() > 0);
+          if (mv == NULL)
           {
-            dolfin_assert((*ic)->vertices.size() > 0);
-            if (mv == NULL)
+            mv = new DVertex;
+            mv->shared = true;
+            mv->glb_id = it->second.mv;
+            vertices.insert(mv);
+
+            if (pe_rank < it->second.owner)
             {
-              mv = new DVertex;
-              mv->shared = true;
-              mv->glb_id = it->second.mv;
-              vertices.insert(mv);
-
-              if (pe_rank < it->second.owner)
-              {
-                mv->ghosted = false;
-                mv->owner = pe_rank;
-                prop_edge node;
-                node.mv = mv->glb_id;
-                node.v1 = it->second.v1;
-                node.v2 = it->second.v2;
-                node.owner = mv->owner;
-                std::pair<uint, prop_edge> prop(0, node);
-                propagate.push_back(prop);
-              }
-              else
-              {
-                mv->ghosted = true;
-                mv->owner = it->second.owner;
-              }
-
-              mv->p = (v1->p + v2->p) / 2.0;
-              mv->on_boundary = true;
-              bc_dvs[mv->glb_id] = mv;
-              ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
+              mv->ghosted = false;
+              mv->owner = pe_rank;
+              prop_edge node;
+              node.mv = mv->glb_id;
+              node.v1 = it->second.v1;
+              node.v2 = it->second.v2;
+              node.owner = mv->owner;
+              std::pair<uint, prop_edge> prop(0, node);
+              propagate.push_back(prop);
             }
-            dolfin_assert((*ic) > 0);
-            bisect((*ic), mv, v1, v2);
+            else
+            {
+              mv->ghosted = true;
+              mv->owner = it->second.owner;
+            }
+
+            mv->p = (v1->p + v2->p) / 2.0;
+            mv->on_boundary = true;
+            bc_dvs[mv->glb_id] = mv;
+            dolfin_assert(v1->glb_id != v2->glb_id);
+            ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
           }
+          dolfin_assert((*ic) > 0);
+          bisect((*ic), mv, v1, v2);
         }
       }
     }

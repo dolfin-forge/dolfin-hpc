@@ -37,7 +37,6 @@ private:
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
-    _is_distributed(false),
     _cell_type(NULL),
     _tdim(0),
     _gdim(0),
@@ -88,7 +87,6 @@ void DMesh::init(Mesh& mesh)
   clear();
 
   _cell_type = mesh.type().clone();
-  _is_distributed = mesh.is_distributed();
   _tdim = mesh.topology_dimension();
   _gdim = mesh.geometry_dimension();
 
@@ -153,6 +151,8 @@ void DMesh::exp(Mesh& mesh)
   editor.init_cells(cells.size());
 
   // Add old vertices
+  DistributedData * const dist = (mesh.is_distributed() ? &mesh.distdata()[0]
+                                                        : NULL);
   uint current_vertex = 0;
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
       ++it, ++current_vertex)
@@ -162,17 +162,17 @@ void DMesh::exp(Mesh& mesh)
 
     editor.add_vertex(current_vertex, &dv->p[0]);
 
-    if (_is_distributed)
+    if (dist)
     {
       if (dv->shared)
       {
-        mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
+        dist->setall_shared_adj(current_vertex, dv->shared_adj);
         if (dv->ghosted)
         {
-          mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
+          dist->set_ghost(current_vertex, dv->owner);
         }
       }
-      mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
+      dist->set_map(current_vertex, dv->glb_id);
     }
   }
 
@@ -230,6 +230,8 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   editor.init_cells(cells.size());
 
   // Add old vertices
+  DistributedData * const dist = (mesh.is_distributed() ? &mesh.distdata()[0]
+                                                        : NULL);
   uint current_vertex = 0;
   for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
       ++it, ++current_vertex)
@@ -245,17 +247,17 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
     editor.add_vertex(current_vertex, &dv->p[0]);
 
-    if (_is_distributed)
+    if (dist)
     {
       if (dv->shared)
       {
-        mesh.distdata()[0].setall_shared_adj(current_vertex, dv->shared_adj);
+        dist->setall_shared_adj(current_vertex, dv->shared_adj);
         if (dv->ghosted)
         {
-          mesh.distdata()[0].set_ghost(current_vertex, dv->owner);
+          dist->set_ghost(current_vertex, dv->owner);
         }
       }
-      mesh.distdata()[0].set_map(current_vertex, dv->glb_id);
+      dist->set_map(current_vertex, dv->glb_id);
     }
   }
 

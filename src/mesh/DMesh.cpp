@@ -38,8 +38,7 @@ DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
     _cell_type(NULL),
-    _tdim(0),
-    _gdim(0),
+    _space(NULL),
     _glb_max(0),
     _salt(0),
     _start_offset(0)
@@ -55,6 +54,9 @@ DMesh::~DMesh()
 void DMesh::clear()
 {
   delete _cell_type;
+  _cell_type = NULL;
+  delete _space;
+  _space = NULL;
 
   propagate.clear();
   bc_dvs.clear();
@@ -87,18 +89,17 @@ void DMesh::init(Mesh& mesh)
   clear();
 
   _cell_type = mesh.type().clone();
-  _tdim = mesh.topology_dimension();
-  _gdim = mesh.geometry_dimension();
+  _space     = mesh.space().clone();
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the *global* mesh
-  _glb_max = mesh.topology().global_size(0);
+  _glb_max = mesh.global_size(0);
   dolfin_assert(_glb_max > 0);
-  _salt = _cell_type->num_entities(0) * mesh.topology().global_size(_tdim);
+  _salt = _cell_type->num_entities(0) * mesh.global_size(mesh.type().dim());
   dolfin_assert(_salt > 0);
 
   // Assume uniform refinement
-  uint num_new = mesh.topology().size(1);
+  uint num_new = mesh.size(1);
 
   // Assign a safe range for each rank for the numbering of new entities i.e
   // such that there is no overlap with existing numbered entities.
@@ -145,7 +146,7 @@ void DMesh::exp(Mesh& mesh)
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
+  MeshEditor editor(mesh, *_cell_type, *_space);
 
   editor.init_vertices(vertices.size());
   editor.init_cells(cells.size());
@@ -224,7 +225,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     *old2new_cells = -1;
   }
 
-  MeshEditor editor(mesh, _cell_type->cellType(), _gdim);
+  MeshEditor editor(mesh, *_cell_type, *_space);
 
   editor.init_vertices(vertices.size());
   editor.init_cells(cells.size());

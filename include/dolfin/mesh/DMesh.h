@@ -193,17 +193,9 @@ private:
   /// Clear
   void clear();
 
-  /// Distributed mesh flag
-  bool _is_distributed;
-
   /// CellType of mesh
   CellType * _cell_type;
-
-  /// Topological dimension
-  uint _tdim;
-
-  /// Geometric dimension
-  uint _gdim;
+  Space    * _space;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh

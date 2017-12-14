@@ -715,12 +715,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       }
     }
 
-    propagated.clear();
-    for (std::list<Propagation>::iterator it = leftovers.begin();
-         it != leftovers.end(); ++it)
-    {
-      propagated.push_back(*it);
-    }
+    propagated.assign(leftovers.begin(), leftovers.end());
     leftovers.clear();
 
     if (pe_rank == 0) end();

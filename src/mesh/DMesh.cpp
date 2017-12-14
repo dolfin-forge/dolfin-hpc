@@ -127,11 +127,10 @@ void DMesh::imp(Mesh& mesh)
   }
 
   // Copy cells
+  std::vector<DVertex*> vs(mesh.type().num_entities(0));
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     DCell* dc = new DCell(*c);
-
-    std::vector<DVertex*> vs(c->num_entities(0));
     uint i = 0;
     for (VertexIterator vi(*c); !vi.end(); ++vi, ++i)
     {
@@ -388,7 +387,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
   DVertex* v0 = dcell->vertices[ii];
   DVertex* v1 = dcell->vertices[jj];
-  DVertex* mv = 0;
+  DVertex* mv = NULL;
 
   // Check if no hanging vertices remain, otherwise create hanging
   // vertex and continue refinement
@@ -632,7 +631,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         it != propagated.end(); ++it)
     {
 
-      DVertex* mv = 0;
+      DVertex* mv = NULL;
       dolfin_assert(it->second.v1 != it->second.v2);
       if (ref_edge.find(edge_key(it->second.v1, it->second.v2))
           != ref_edge.end())
@@ -677,7 +676,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
           if ((*ic)->has_edge(v1, v2))
           {
             dolfin_assert((*ic)->vertices.size() > 0);
-            if (mv == 0)
+            if (mv == NULL)
             {
               mv = new DVertex;
               mv->shared = true;

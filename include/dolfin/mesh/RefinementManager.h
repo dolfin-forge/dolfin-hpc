@@ -63,12 +63,6 @@ public:
   /// Add face-based vertex with given index
   void add(Face& f, uint index);
 
-  /// Check if the edge lies on the interprocess boundary
-  bool on_boundary(Edge& e);
-
-  /// Check if the face lies on the interprocess boundary
-  bool on_boundary(Face& f);
-
   /// Apply refinement and finalize numbering
   void apply();
 
@@ -154,7 +148,7 @@ inline void RefinementManager::add(Edge& e, uint index)
 {
   if (is_distributed_)
   {
-    if(on_boundary(e))
+    if(e.is_shared())
     {
       // Store edge key in shared list
       EdgeKey key(e.entities(0)[0], e.entities(0)[1]);
@@ -174,7 +168,7 @@ inline void RefinementManager::add(Face& f, uint index)
 {
   if (is_distributed_)
   {
-    if(on_boundary(f))
+    if(f.is_shared())
     {
       // Store edge key in shared list
       FaceKey key(f);
@@ -190,16 +184,6 @@ inline void RefinementManager::add(Face& f, uint index)
     }
     refined_mesh_.distdata()[0].set_map(index, start_offset_++);
   }
-}
-//-----------------------------------------------------------------------------
-inline bool RefinementManager::on_boundary(Edge& e)
-{
-  return e.is_shared();
-}
-//-----------------------------------------------------------------------------
-inline bool RefinementManager::on_boundary(Face& f)
-{
-  return f.is_shared();
 }
 //-----------------------------------------------------------------------------
 inline bool RefinementManager::forbidden_cell(Cell& cell)

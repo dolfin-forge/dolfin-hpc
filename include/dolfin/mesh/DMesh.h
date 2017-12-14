@@ -90,12 +90,6 @@ public:
   /// Find Cell by its local id
   DCell* getCell(int local_id);
 
-  /// Import an existing mesh
-  ///
-  /// The local numbering of cells and vertices from the mesh-object is
-  /// adopted in the DMesh
-  void imp(Mesh& mesh);
-
   /// Export to a regular mesh
   void exp(Mesh& mesh);
 
@@ -189,6 +183,12 @@ private:
 
   /// Common initialization code
   void init(Mesh& mesh);
+
+  /// Import an existing mesh
+  ///
+  /// The local numbering of cells and vertices from the mesh-object is
+  /// adopted in the DMesh
+  void imp(Mesh& mesh);
 
   /// Clear
   void clear();

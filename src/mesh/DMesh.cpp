@@ -372,7 +372,7 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
 //-----------------------------------------------------------------------------
 void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 {
-
+  uint const pe_rank = PE::rank();
   bool closing = false;
 
   // Find longest edge
@@ -457,7 +457,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       node.mv = mv->glb_id;
       node.v1 = v0->glb_id;
       node.v2 = v1->glb_id;
-      node.owner = MPI::rank();
+      node.owner = pe_rank;
       std::pair<uint, prop_edge> _prop_(dcell->nref, node);
       propagate.push_back(_prop_);
       dcell->nref++;
@@ -615,6 +615,8 @@ DCell* DMesh::getCell(int local_id)
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
+  uint const pe_rank = PE::rank();
+
   std::list<DCell*> marked_cells;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -645,7 +647,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
   while (!empty)
   {
 
-    if (MPI::rank() == 0 && propagate.size() > 0)
+    if (pe_rank == 0 && propagate.size() > 0)
     {
       begin("Propagate refinement...");
     }
@@ -711,10 +713,10 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
               mv->glb_id = it->second.mv;
               vertices.insert(mv);
 
-              if (MPI::rank() < it->second.owner)
+              if (pe_rank < it->second.owner)
               {
                 mv->ghosted = false;
-                mv->owner = MPI::rank();
+                mv->owner = pe_rank;
                 prop_edge node;
                 node.mv = mv->glb_id;
                 node.v1 = it->second.v1;
@@ -749,7 +751,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     }
     leftovers.clear();
 
-    if (MPI::rank() == 0) end();
+    if (pe_rank == 0) end();
 
   }
 }

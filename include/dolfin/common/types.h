@@ -198,6 +198,24 @@ template<class T> bool operator!=(_set<T> const& m0, _set<T> const& m1)
   return !(m0 == m1);
 }
 
+/// Unordered set intersection
+template<class T>
+void intersection(_set<T> const& s0, _set<T> const& s1, _set<T>& in)
+{
+  in = s0;
+  for(_set<uint>::iterator it = in.begin(); it != in.end();)
+  {
+    if (s1.count(*it) == 0)
+    {
+      in.erase(it++);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+}
+
 }
 
 #endif

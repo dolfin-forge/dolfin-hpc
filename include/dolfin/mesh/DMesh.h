@@ -199,18 +199,18 @@ private:
   void clear();
 
   /// CellType of mesh
-  CellType * _cell_type;
-  Space    * _space;
+  CellType * ctype_;
+  Space    * space_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh
-  uint _glb_max;
+  uint glb_max_;
 
   /// enumeration salt for bisect
-  uint _salt;
+  uint salt_;
 
   /// Start offset for new global id
-  uint _start_offset;
+  uint start_offset_;
 
 };}
 

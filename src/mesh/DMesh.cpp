@@ -37,11 +37,11 @@ private:
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
-    _cell_type(NULL),
-    _space(NULL),
-    _glb_max(0),
-    _salt(0),
-    _start_offset(0)
+    ctype_(NULL),
+    space_(NULL),
+    glb_max_(0),
+    salt_(0),
+    start_offset_(0)
 {
   imp(mesh);
 }
@@ -53,10 +53,10 @@ DMesh::~DMesh()
 //-----------------------------------------------------------------------------
 void DMesh::clear()
 {
-  delete _cell_type;
-  _cell_type = NULL;
-  delete _space;
-  _space = NULL;
+  delete ctype_;
+  ctype_ = NULL;
+  delete space_;
+  space_ = NULL;
 
   propagate.clear();
   bc_dvs.clear();
@@ -80,7 +80,7 @@ void DMesh::clear()
 //-----------------------------------------------------------------------------
 void DMesh::init(Mesh& mesh)
 {
-  if (_cell_type != NULL)
+  if (ctype_ != NULL)
   {
     error("Dynamic mesh already initialized on a mesh.");
   }
@@ -88,26 +88,26 @@ void DMesh::init(Mesh& mesh)
   // Cleanup before new allocation
   clear();
 
-  _cell_type = mesh.type().clone();
-  _space     = mesh.space().clone();
+  ctype_ = mesh.type().clone();
+  space_     = mesh.space().clone();
 
   // Since the mesh is linear numbered, the maximum global index assigned is
   // the number of vertices in the *global* mesh
-  _glb_max = mesh.global_size(0);
-  dolfin_assert(_glb_max > 0);
-  _salt = _cell_type->num_entities(0) * mesh.global_size(mesh.type().dim());
-  dolfin_assert(_salt > 0);
+  glb_max_ = mesh.global_size(0);
+  dolfin_assert(glb_max_ > 0);
+  salt_ = ctype_->num_entities(0) * mesh.global_size(mesh.type().dim());
+  dolfin_assert(salt_ > 0);
 
   // Assume uniform refinement
   uint num_new = mesh.size(1);
 
   // Assign a safe range for each rank for the numbering of new entities i.e
   // such that there is no overlap with existing numbered entities.
-  _start_offset = 0;
+  start_offset_ = 0;
 #ifdef HAVE_MPI
-  MPI::offset(num_new, _start_offset, MPI::DOLFIN_COMM);
+  MPI::offset(num_new, start_offset_, MPI::DOLFIN_COMM);
 #endif
-  _start_offset += _glb_max;
+  start_offset_ += glb_max_;
 }
 //-----------------------------------------------------------------------------
 void DMesh::imp(Mesh& mesh)
@@ -146,7 +146,7 @@ void DMesh::exp(Mesh& mesh)
   eraseRemovedEntities();
   number();
 
-  MeshEditor editor(mesh, *_cell_type, *_space);
+  MeshEditor editor(mesh, *ctype_, *space_);
 
   editor.init_vertices(vertices.size());
   editor.init_cells(cells.size());
@@ -177,7 +177,7 @@ void DMesh::exp(Mesh& mesh)
     }
   }
 
-  Array<uint> cell_vertices(_cell_type->num_entities(0));
+  Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
   {
@@ -215,7 +215,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   else
   {
     warning("Fix the allocation: the size is the global number of vertices!");
-    old2new_vertices = new Array<int>(_glb_max);
+    old2new_vertices = new Array<int>(glb_max_);
   }
   *old2new_vertices = -1;
 
@@ -225,7 +225,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     *old2new_cells = -1;
   }
 
-  MeshEditor editor(mesh, *_cell_type, *_space);
+  MeshEditor editor(mesh, *ctype_, *space_);
 
   editor.init_vertices(vertices.size());
   editor.init_cells(cells.size());
@@ -258,7 +258,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
     }
   }
 
-  Array<uint> cell_vertices(_cell_type->num_entities(0));
+  Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end();
       ++it, ++current_cell)
@@ -397,11 +397,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     add_vertex(mv);
     if (v0->glb_id < v1->glb_id)
     {
-      mv->glb_id = (((v0->glb_id * _salt) + (v1->glb_id))) + _glb_max;
+      mv->glb_id = (((v0->glb_id * salt_) + (v1->glb_id))) + glb_max_;
     }
     else
     {
-      mv->glb_id = (((v1->glb_id * _salt) + (v0->glb_id))) + _glb_max;
+      mv->glb_id = (((v1->glb_id * salt_) + (v0->glb_id))) + glb_max_;
     }
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 

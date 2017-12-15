@@ -603,5 +603,221 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
 
 }
 //-----------------------------------------------------------------------------
+template<class E>
+void MPIMeshCommunicator::check(Mesh& mesh)
+{
+  if (!mesh.is_distributed()) return;
 
+  uint const tdim = mesh.topology().dim();
+  uint const edim = entity_dimension<E>(mesh);
+
+  if (edim > tdim)
+  {
+    error("MPIMeshCommunicator : invalid entity dimension %u", edim);
+  }
+
+#if HAVE_MPI
+
+  uint const pe_rank = dolfin::MPI::rank();
+  uint const pe_size = dolfin::MPI::size();
+  DistributedData& dist = mesh.distdata()[edim];
+
+  message("MPIMeshCommunicator : check distribution for dimension %u", edim);
+
+  // Check shared entities adjacency
+  {
+    Array<uint> * sbuf = new Array<uint> [pe_size];
+    uint e_count = 0;
+    for (typename E::shared e(mesh); !e.end(); ++e, ++e_count)
+    {
+      e.adj_enqueue(sbuf, e.global_index());
+      // Check that entity adjacency is a subset of adjacent ranks
+      for (_set<uint>::const_iterator it = e.adj().begin(); it != e.adj().end(); ++it)
+      {
+        if (dist.get_adj_ranks().count(*it) == 0)
+        {
+          error("Invalid adjacent rank for entity %u", e.index());
+        }
+        dolfin_assert(sbuf[*it].back() == e.global_index());
+      }
+      // Check that owned entities indices are within process range
+      if (e.is_owned() && !dist.in_range(e.global_index()))
+      {
+        error("Global index of owned entity %u is not in range", e.index());
+      }
+    }
+    // Check that shared entities indices were counted correctly
+    dolfin_assert(e_count == mesh.topology().num_shared(edim));
+
+    // Swap local entities to array
+    Array<uint> rbuf; rbuf.swap(sbuf[pe_rank]);
+    dolfin_assert(sbuf[pe_rank].size() == 0);
+
+    // Exchange entities
+    MPI_Status status;
+    uint src;
+    uint dst;
+    uint recv_max;
+    for (uint j = 0; j < pe_size; ++j)
+    {
+      uint s = sbuf[j].size();
+      MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm());
+      // Check that no duplicate global entity was added
+      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      if (global_indices.size() != sbuf[j].size())
+      {
+        error("Duplicate global indices for entities of dimension %u", edim);
+      }
+    }
+    uint const rbuf_size = rbuf.size();
+    rbuf.resize(rbuf_size + recv_max);
+    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    int recv_count;
+    for (uint j = 1; j < pe_size; ++j)
+    {
+      src = (pe_rank - j + pe_size) % pe_size;
+      dst = (pe_rank + j) % pe_size;
+
+      MPI_Sendrecv(&sbuf[dst][0], sbuf[dst].size(), MPI_UNSIGNED, dst, 0,
+                   &recv_buf[0] , recv_max        , MPI_UNSIGNED, src, 0,
+                   dist.comm(), &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+      for (int k = 0; k < recv_count; ++k)
+      {
+        uint const gindex = recv_buf[k];
+        // Check that receive entity global index exists on current rank
+        if (dist.has_global(gindex))
+        {
+          uint const lindex = dist.get_local(gindex);
+          // Check that receive entity global index is shared on current rank
+          if (dist.is_shared(lindex))
+          {
+
+          }
+          else
+          {
+            error("Global entity %u not shared on rank %u", gindex, pe_rank);
+          }
+        }
+        else
+        {
+          error("Global entity %u not found on rank %u", gindex, pe_rank);
+        }
+      }
+
+      recv_buf += recv_count;
+      recv_max -= recv_count;
+    }
+    delete[] sbuf;
+  }
+
+  // Check ghost entities adjacency
+  {
+    Array<uint> * sbuf = new Array<uint> [pe_size];
+    uint e_count = 0;
+    for (typename E::ghost e(mesh); !e.end(); ++e, ++e_count)
+    {
+      sbuf[e.owner()].push_back(e.global_index());
+    }
+    // Check that ghost entities indices were counted correctly
+    dolfin_assert(e_count == mesh.topology().num_ghost(edim));
+
+    // Swap local entities to array
+    Array<uint> rbuf; rbuf.swap(sbuf[pe_rank]);
+    dolfin_assert(sbuf[pe_rank].size() == 0);
+
+    // Exchange entities
+    MPI_Status status;
+    uint src;
+    uint dst;
+    uint recv_max;
+    for (uint j = 0; j < pe_size; ++j)
+    {
+      uint s = sbuf[j].size();
+      MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm());
+      // Check that no duplicate global entity was added
+      std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
+      if (global_indices.size() != sbuf[j].size())
+      {
+        error("Duplicate global indices for entities of dimension %u", edim);
+      }
+    }
+    uint const rbuf_size = rbuf.size();
+    rbuf.resize(rbuf_size + recv_max);
+    uint * recv_buf = rbuf.ptr() + rbuf_size;
+    int recv_count;
+    _set<uint> recv_idx;
+    for (uint j = 1; j < pe_size; ++j)
+    {
+      src = (pe_rank - j + pe_size) % pe_size;
+      dst = (pe_rank + j) % pe_size;
+
+      MPI_Sendrecv(&sbuf[dst][0], sbuf[dst].size(), MPI_UNSIGNED, dst, 0,
+                   &recv_buf[0] , recv_max        , MPI_UNSIGNED, src, 0,
+                   dist.comm(), &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+      for (int k = 0; k < recv_count; ++k)
+      {
+        uint const gindex = recv_buf[k];
+        // Check that receive entity global index exists on current rank
+        if (dist.has_global(gindex))
+        {
+          uint const lindex = dist.get_local(gindex);
+          // Check that receive entity global index is shared on owner rank
+          if (!dist.is_shared(lindex))
+          {
+            error("Global entity %u not shared on rank %u", gindex, pe_rank);
+          }
+          // Check that sender is listed as adjacent rank (redundant but safer)
+          if (dist.get_shared_adj(lindex).count(src) == 0)
+          {
+            error("Global entity %u not shared with rank %u", gindex, pe_rank);
+          }
+          // Check that receive entity global index is not ghost on owner rank
+          if (dist.is_ghost(lindex))
+          {
+            error("Global entity %u not ghost on rank %u", gindex, pe_rank);
+          }
+          else
+          {
+            recv_idx.insert(gindex);
+            // Check count of ghost entity global index (redundant but safer)
+            if (recv_idx.count(gindex) > dist.get_shared_adj(lindex).size())
+            {
+              error("Global ghost entity %u received too many times", gindex);
+            }
+          }
+        }
+        else
+        {
+          error("Global entity %u not found on rank %u", gindex, pe_rank);
+        }
+      }
+
+      recv_buf += recv_count;
+      recv_max -= recv_count;
+    }
+
+    delete[] sbuf;
+  }
+#endif /* HAVE_MPI */
+}
+//--- TEMPLATE INSTANTIATIONS -------------------------------------------------
+template void MPIMeshCommunicator::check<Vertex>(Mesh& Mesh);
+template void MPIMeshCommunicator::check<Edge>  (Mesh& Mesh);
+template void MPIMeshCommunicator::check<Face>  (Mesh& Mesh);
+template void MPIMeshCommunicator::check<Facet> (Mesh& Mesh);
+template void MPIMeshCommunicator::check<Cell>  (Mesh& Mesh);
+//-----------------------------------------------------------------------------
+void MPIMeshCommunicator::check(Mesh& mesh)
+{
+  uint const tdim = mesh.topology().dim();
+  check<Vertex>(mesh);
+  if (tdim > 1) check<Edge>(mesh);
+  if (tdim > 2) check<Face>(mesh);
+  if (tdim > 0) check<Cell>(mesh);
+}
+//-----------------------------------------------------------------------------
 } /* namespace dolfin */

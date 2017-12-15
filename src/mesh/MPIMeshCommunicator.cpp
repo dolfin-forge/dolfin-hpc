@@ -145,30 +145,18 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   delete[] sendbuf_v;
 
   // Map local vertex indices
-  uint vindex = 0;
-  distdata.set_size(iverts.size());
-  for (Array<uint>::const_iterator v = iverts.begin(); v != iverts.end(); ++v)
-  {
-#if DEBUG
-    if (distdata.has_global(*v))
-    {
-      error("MPIMeshCommunicator : duplicate global vertex index %u", *v);
-    }
-#endif
-    distdata.set_map(vindex++, *v);
-  }
-  dolfin_assert(vindex == distdata.local_size());
+  distdata.set_map(iverts);
 
   // Finalize distributed data
   distdata.finalize();
 
   // Update topology
-  dolfin_assert(vindex == distdata.local_size());
+  dolfin_assert(iverts.size() == distdata.local_size());
   topology.set_distributed();
-  topology.init(0 , vindex);
+  topology.init(0 , distdata.local_size());
   topology.distdata()[0].swap(distdata);
   topology.finalize();
-  dolfin_assert(vindex == topology.distdata()[0].local_size());
+  dolfin_assert(iverts.size() == topology.distdata()[0].local_size());
   if(num_global_vertices != topology.global_size(0))
   {
     error("MPIMeshCommunicator : vertex distribution :\n"
@@ -177,7 +165,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   }
 
   // Update geometry
-  dolfin_assert(vindex * gdim == coords.size());
+  dolfin_assert(iverts.size() * gdim == coords.size());
   geometry.assign(coords);
   geometry.finalize();
 

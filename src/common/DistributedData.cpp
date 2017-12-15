@@ -679,7 +679,7 @@ void DistributedData::set_map(Array<uint> const& mapping)
   }
   else
   {
-    if (mapping.size() != global_.size())
+    if (local_.size() && mapping.size() != global_.size())
     {
       error("DistributedData : local-to-global mapping array has invalid size");
     }
@@ -688,12 +688,9 @@ void DistributedData::set_map(Array<uint> const& mapping)
     cached_numbering_ = new uint[mapping.size()];
   }
 
+  std::copy(mapping.begin(), mapping.end(), cached_numbering_);
   local_.clear();
-  for (uint i = 0; i < cache_size_; ++i)
-  {
-    cached_numbering_[i] = mapping[i];
-    local_[mapping[i]] = i;
-  }
+  for (uint i = 0; i < cache_size_; ++i) { local_[cached_numbering_[i]] = i; }
 }
 //-----------------------------------------------------------------------------
 void DistributedData::remap_numbering(Array<uint> const& mapping)
@@ -703,7 +700,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
     error("DistributedData : re-mapping numbering requires finalized data");
   }
 
-  if (mapping.size() != pe_size_)
+  if (mapping.size() != cache_size_)
   {
     error("DistributedData : numbering re-mapping array has invalid size");
   }
@@ -714,18 +711,25 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   for (_map<uint, uint>::iterator it = local_.begin(); it != local_.end();
        ++it)
   {
-    cached_numbering_[it->second] = mapping[it->second];
-    it->second = mapping[it->second];
+    uint const new_local_index = mapping[it->second];
+    // map new local index to global index
+    cached_numbering_[new_local_index] = it->first;
+    // map global index to new local index
+    it->second = new_local_index;
   }
 
   // Update shared entities
   dolfin_assert(cached_ownership_ != NULL);
+  std::fill(cached_ownership_, cached_ownership_ + cache_size_, pe_size_);
   _map<uint, _set<uint> > shared;
   for (_map<uint, _set<uint> >::const_iterator it = shared_.begin();
        it != shared_.end(); ++it)
   {
-    shared[mapping[it->first]] = it->second;
-    cached_ownership_[mapping[it->first]] = rank_;
+    uint const new_local_index = mapping[it->first];
+    // map new local index to shared adjacents
+    shared[new_local_index] = it->second;
+    // set default ownership to new local index
+    cached_ownership_[new_local_index] = rank_;
   }
   shared_.swap(shared);
 
@@ -735,8 +739,11 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   for (_map<uint, uint>::const_iterator it = ghost_.begin(); it != ghost_.end();
        ++it)
   {
-    ghost[mapping[it->first]] = it->second;
-    cached_ownership_[mapping[it->first]] = it->second;
+    uint const new_local_index = mapping[it->first];
+    // map new local index to owner
+    ghost[new_local_index] = it->second;
+    // set ghost ownership to new local index
+    cached_ownership_[new_local_index] = it->second;
   }
   ghost_.swap(ghost);
 

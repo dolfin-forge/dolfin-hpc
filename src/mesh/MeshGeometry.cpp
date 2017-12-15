@@ -218,14 +218,15 @@ void MeshGeometry::remap(Array<uint> const& mapping)
     error("MeshGeometry : size mismatch for remapping of coordinates ");
   }
 
+  // Reorder coordinates w.r.t old -> new index mapping
   real * xcpy = new real[dim_*size_];
   for (uint i = 0; i < size_; ++i)
   {
-    std::copy(coordinates_ + i * dim_, coordinates_ + (i + 1) * dim_,
-              xcpy + mapping[i] * dim_);
+    real const * x = coordinates_ + i * dim_;
+    std::copy(x, x + dim_, xcpy + mapping[i] * dim_);
   }
-  delete[] coordinates_;
-  coordinates_ = xcpy;
+  std::swap(xcpy, coordinates_);
+  delete[] xcpy;
 
   // Invalidate dependencies
   update_token();

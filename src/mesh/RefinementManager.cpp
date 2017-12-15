@@ -378,7 +378,7 @@ void RefinementManager::mark_localboundary(MeshValues<bool, Cell>& cell_marker,
       if (max > 0.0)
       {
         Edge longest_edge(mesh_, index);
-        if (on_boundary(longest_edge))
+        if (longest_edge.is_shared())
         {
           const uint *edge_v = longest_edge.entities(0);
           edge_vote[longest_edge.index()] = (uint) std::rand();
@@ -456,7 +456,7 @@ void RefinementManager::mark_localboundary(MeshValues<bool, Cell>& cell_marker,
       if (max > 0.0)
       {
         Edge longest_edge(mesh_, index);
-        if (on_boundary(longest_edge))
+        if (longest_edge.is_shared())
         {
           const uint *edge_v = longest_edge.entities(0);
           edge[0] = olddistdata.get_global(edge_v[0]);
@@ -615,7 +615,7 @@ void RefinementManager::mark_localboundary(MeshValues<bool, Cell>& cell_marker,
       cell_refedge_.erase(c.index());
       for (EdgeIterator e(c); !e.end(); ++e)
       {
-        if (on_boundary(*e))
+        if (e->is_shared())
           (*edge_forbidden_)(*e) = true;
         else
         {

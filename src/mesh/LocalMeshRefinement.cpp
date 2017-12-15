@@ -277,7 +277,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
 
         if (refman.forbidden_edge(*e)) continue;
 
-        dolfin_assert(!refman.on_boundary(*e));
+        dolfin_assert(!e->is_shared());
 
         if (edge_forbidden(*e) == false)
         {
@@ -295,7 +295,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
       // If at least one edge should be bisected
       if (lmax > 0.0)
       {
-        dolfin_assert(!refman.on_boundary(longest_edge));
+        dolfin_assert(!longest_edge.is_shared());
         refman.add(longest_edge, current_vertex);
 
         // Add new vertex

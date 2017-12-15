@@ -246,6 +246,9 @@ public:
   /// Display mesh data
   void disp() const;
 
+  /// Check mesh consistency
+  void check() const;
+
 private:
 
   /// Intialize mesh given cell type and space

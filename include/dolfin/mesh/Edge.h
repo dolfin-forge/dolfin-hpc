@@ -57,16 +57,19 @@ public:
 
   struct shared : SharedIterator
   {
+    shared(Mesh& M) : SharedIterator(M.topology().distdata()[1]) {}
     shared(MeshTopology& T) : SharedIterator(T.distdata()[1]) {}
   };
 
   struct ghost : GhostIterator
   {
+    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[1]) {}
     ghost(MeshTopology& T) : GhostIterator(T.distdata()[1]) {}
   };
 
   struct owned : OwnedIterator
   {
+    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[1]) {}
     owned(MeshTopology& T) : OwnedIterator(T.distdata()[1]) {}
   };
 

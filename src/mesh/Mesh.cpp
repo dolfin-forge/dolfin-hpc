@@ -478,5 +478,10 @@ void Mesh::disp() const
   endblock();
 }
 //-----------------------------------------------------------------------------
+void Mesh::check() const
+{
+  MPIMeshCommunicator::check(const_cast<Mesh&>(*this));
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

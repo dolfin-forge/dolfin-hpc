@@ -336,6 +336,18 @@ public:
   }
 
   ///
+  inline uint owner() const
+  {
+    return distdata_.get_owner(iter_->first);
+  }
+
+  ///
+  inline bool is_owned() const
+  {
+    return distdata_.is_owned(iter_->first);
+  }
+
+  ///
   inline bool end() const
   {
     return iter_ == distdata_.shared_.end();

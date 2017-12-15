@@ -32,6 +32,12 @@ struct MPIMeshCommunicator
   /// Distribute mesh according to a cell-based distribution
   static void distribute(MeshValues<uint, Cell>& dist, MeshData * D = NULL);
 
+  /// Check mesh entity distribution
+  template<class E> static void check(Mesh& Mesh);
+
+  /// Check mesh distribution
+  static void check(Mesh& Mesh);
+
 };
 
 } /* namespace dolfin */

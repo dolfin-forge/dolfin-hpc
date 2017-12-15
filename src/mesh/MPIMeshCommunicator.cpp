@@ -80,18 +80,13 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     }
   }
 
-  // Map local vertex indices
-  uint vindex = 0;
-  for (Array<uint>::const_iterator it = sendbuf_v[pe_rank].begin();
-       it != sendbuf_v[pe_rank].end(); ++it)
-  {
-    distdata1.set_map(vindex++, *it);
-  }
-  sendbuf_v[pe_rank].clear();
+  // Swap local indices
+  Array<uint> iverts; iverts.swap(sendbuf_v[pe_rank]);
+  dolfin_assert(sendbuf_v[pe_rank].size() == 0);
 
   // Swap local coordinates
-  Array<real> coords;
-  coords.swap(sendbuf_x[pe_rank]);
+  Array<real> coords; coords.swap(sendbuf_x[pe_rank]);
+  dolfin_assert(sendbuf_x[pe_rank].size() == 0);
 
   // Clear mesh using swap with new instance
   {
@@ -111,12 +106,14 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     MPI_Reduce(&s, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j, distdata1.comm());
   }
   uint recvmax_x = recvmax_v * gdim;
-  // Allocate vertex indices buffer
-  uint * recvbuf_v = (recvmax_v ? new uint[recvmax_v] : NULL);
+  // Resize vertex indices
+  uint const iverts_size = iverts.size();
+  iverts.resize(iverts_size + recvmax_v);
+  uint * recvbuf_v = iverts.ptr() + iverts_size;
   // Resize vertex coordinates array to fit new cells
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);
-  real * recvbuf_x = &coords[coords_size];
+  real * recvbuf_x = coords.ptr() + coords_size;
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
@@ -128,18 +125,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
                  dst, 0, &recvbuf_v[0], recvmax_v, MPI_UNSIGNED, src, 0,
                  distdata1.comm(), &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-    for (int k = 0; k < recv_count; ++k)
-    {
-      uint const global_index = recvbuf_v[k];
-      if(distdata1.has_global(global_index))
-      {
-        error("MPIMeshCommunicator : receiving global vertex %u twice",
-              global_index);
-      }
-      distdata1.set_map(vindex, global_index);
-      ++vindex;
-    }
+    recvbuf_v += recv_count;
+    recvmax_v -= recv_count;
 
     // Coordinates
     MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 1,
@@ -152,9 +139,19 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   }
 
   // Cleanup and finalize distributed data
-  delete[] recvbuf_v;
   delete[] sendbuf_x;
   delete[] sendbuf_v;
+
+  // Map local vertex indices
+  uint vindex = 0;
+  for (Array<uint>::const_iterator it = iverts.begin(); it != iverts.end(); ++it)
+  {
+    if (distdata1.has_global(*it))
+    {
+      error("MPIMeshCommunicator : duplicate global vertex index %u", *it);
+    }
+    distdata1.set_map(vindex++, *it);
+  }
 
   // Finalize distributed data
   distdata1.finalize();
@@ -279,20 +276,17 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   }
   delete [] vertex_used;
 
-  // Map local vertex indices
-  uint vindex = 0;
-  for (Array<uint>::const_iterator it = sendbuf_v[pe_rank].begin();
-       it != sendbuf_v[pe_rank].end(); ++it)
-  {
-    distdata1.set_map(vindex++, *it);
-  }
-  sendbuf_v[pe_rank].clear();
+  // Swap local vertex indices
+  Array<uint> iverts; iverts.swap(sendbuf_v[pe_rank]);
+  dolfin_assert(sendbuf_v[pe_rank].size() == 0);
 
   // Swap local coordinates
   Array<real> coords; coords.swap(sendbuf_x[pe_rank]);
+  dolfin_assert(sendbuf_x[pe_rank].size() == 0);
 
   // Swap local cells
-  Array<uint> cells; cells.swap(sendbuf_c[pe_rank]);
+  Array<uint> vcells; vcells.swap(sendbuf_c[pe_rank]);
+  dolfin_assert(sendbuf_c[pe_rank].size() == 0);
 
   // Clear mesh using swap with new instance
   {
@@ -304,7 +298,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   MPI_Status status;
   uint src;
   uint dst;
-  uint recvmax[2] = { 0, 0};
+  uint recvmax[2] = { 0, 0 };
   for (uint j = 0; j < pe_size; ++j)
   {
     uint sendcnt[2] = { (uint)sendbuf_c[j].size(), (uint)sendbuf_v[j].size() };
@@ -312,15 +306,17 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   }
   uint recvmax_x = recvmax[1] * gdim;
   // Resize cell vertices array to fit new cells
-  uint const cells_size = cells.size();
-  cells.resize(cells_size + recvmax[0]);
-  uint * recvbuf_c = &cells[cells_size];
-  // Allocate vertex indices buffer
-  uint * recvbuf_v = (recvmax[1] ? new uint[recvmax[1]] : NULL);
-  // Resize vertex coordinates array to fit new cells
+  uint const vcells_size = vcells.size();
+  vcells.resize(vcells_size + recvmax[0]);
+  uint * recvbuf_c = vcells.ptr() + vcells_size;
+  // Resize vertex indices
+  uint const iverts_size = iverts.size();
+  iverts.resize(iverts_size + recvmax[1]);
+  uint * recvbuf_v = iverts.ptr() + iverts_size;
+  // Resize vertex coordinates
   uint const coords_size = coords.size();
   coords.resize(coords_size + recvmax_x);
-  real * recvbuf_x = &coords[coords_size];
+  real * recvbuf_x = coords.ptr() + coords_size;
 
   // Naive MeshValues exchange until I fix the ghost bug in the template class
   uint recvmaxUC  = recvmax[0] / mesh.type().num_entities(0) * numUC;
@@ -352,25 +348,15 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
                  distdata1.comm(), &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
     recvbuf_c += recv_count;
-    recvmax[0] -= recv_count;
+    recvmax[0]-= recv_count;
 
     // Vertices
     MPI_Sendrecv(&sendbuf_v[dst][0], sendbuf_v[dst].size(), MPI_UNSIGNED, dst,
                  1, recvbuf_v, recvmax[1], MPI_UNSIGNED, src, 1,
                  distdata1.comm(), &status);
     MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-    for (int k = 0; k < recv_count; ++k)
-    {
-      uint const global_index = recvbuf_v[k];
-      if(distdata1.has_global(global_index))
-      {
-        error("MPIMeshCommunicator : receiving global vertex %u twice",
-              global_index);
-      }
-      distdata1.set_map(vindex, global_index);
-      ++vindex;
-    }
+    recvbuf_v += recv_count;
+    recvmax[1]-= recv_count;
 
     // Coordinates
     MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 2,
@@ -405,33 +391,42 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
     }
 
   }
-  dolfin_assert(vindex == distdata1.local_size());
 
   // Swap local mesh values to new Array.
   Array<uint> mUC; if (UC) { mUC.swap(UC[pe_rank]); delete [] UC; }
   Array<real> mRV; if (RV) { mRV.swap(RV[pe_rank]); delete [] RV; }
 
   // Cleanup buffers
-  delete[] recvbuf_v;
   delete[] sendbuf_x;
   delete[] sendbuf_v;
   delete[] sendbuf_c;
 
+  // Map local vertex indices
+  uint vindex = 0;
+  for (Array<uint>::const_iterator it = iverts.begin(); it != iverts.end(); ++it)
+  {
+    if (distdata1.has_global(*it))
+    {
+      error("MPIMeshCommunicator : duplicate global vertex index %u", *it);
+    }
+    distdata1.set_map(vindex++, *it);
+  }
+
   // NOTE: This implementation only works for homogeneous topologies
   //       Check cell data size just in case.
-  if ((cells.size() % mesh.type().num_entities(0)) > 0)
+  if ((vcells.size() % mesh.type().num_entities(0)) > 0)
   {
     error("MPIMeshCommunicator : inconsistent size of cell buffer '%u'",
-          cells.size());
+          vcells.size());
   }
-  uint cindex = cells.size() / mesh.type().num_entities(0);
+  uint cindex = vcells.size() / mesh.type().num_entities(0);
 
   // Loop over cells as a list of global vertices and determine if vertices are
   // local or not: overwrite the array with local indices to avoid copy.
   // Fill buffer with ghost vertices.
   Array<uint> sendbuf_gv;
   _set<uint> global_gv;
-  for (Array<uint>::iterator it = cells.begin(); it != cells.end(); ++it)
+  for (Array<uint>::iterator it = vcells.begin(); it != vcells.end(); ++it)
   {
     uint const global_index = (*it);
     if (distdata1.has_global(global_index))
@@ -462,6 +457,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   dolfin_assert(sendmax_gv > 0);
   uint * sendbck_gv = new uint[sendmax_gv];
   real * sendbck_gx = new real[sendmax_gv * gdim];
+  dolfin_assert(sendcnt_gv > 0);
   uint * recvbuf_gv = new uint[sendcnt_gv];
   real * recvbuf_gx = new real[sendcnt_gv * gdim];
   for (uint j = 1; j < pe_size; ++j)
@@ -535,7 +531,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   topology.init(0 , vindex);
   topology.distdata()[0].swap(distdata1);
   topology.init(tdim , cindex);
-  topology(tdim, 0).set(cells);
+  topology(tdim, 0).set(vcells);
   topology.finalize();
   dolfin_assert(vindex == topology.distdata()[0].local_size());
   if(num_global_vertices != topology.global_size(0))

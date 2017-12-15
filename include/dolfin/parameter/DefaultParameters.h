@@ -29,6 +29,7 @@ add("solution file name", "solution.pvd");
 //--- Parameters for input/output ---
 
 add("save each mesh", false);
+add("output_format", "vtk");
 
 //--- Parameters for ODE solvers ---
 

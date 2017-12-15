@@ -37,6 +37,9 @@ public:
   /// Destructor
   ~MeshEditor();
 
+  ///
+  Mesh& mesh() const { return mesh_; }
+
   //--- VERTICES --------------------------------------------------------------
 
   /// Specify number of vertices
@@ -79,7 +82,7 @@ private:
   void clear();
 
   // Mesh
-  Mesh * const mesh_;
+  Mesh& mesh_;
 
   // Cell connectivity to vertices
   MeshConnectivity * cell_vertices_;

@@ -108,6 +108,8 @@ namespace dolfin
 
     static std::string basename(std::string file);
 
+    static std::string filename(std::string basename);
+
   private:
 
     GenericFile * file_;

@@ -7,5 +7,6 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
 EXTRA_DIST = Binary/Binary.h \
+             File/File.h \
       	     VTK/VTK.h \
       	     XML/XML.h

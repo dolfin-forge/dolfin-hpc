@@ -16,7 +16,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& type, Space const& space) :
-    mesh_(&mesh),
+    mesh_(mesh),
     cell_vertices_(NULL),
     tdim_(0),
     gdim_(0),
@@ -30,7 +30,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& type, Space const& space) :
 }
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
-    mesh_(&mesh),
+    mesh_(mesh),
     cell_vertices_(NULL),
     tdim_(0),
     gdim_(0),
@@ -47,7 +47,7 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
 }
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh) :
-    mesh_(&mesh),
+    mesh_(mesh),
     cell_vertices_(NULL),
     tdim_(0),
     gdim_(0),
@@ -89,8 +89,8 @@ void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
   }
   // Initialize mesh data
   this->num_vertices_ = num_local;
-  mesh_->topology_.init(0, num_local, num_global);
-  mesh_->geometry_.resize(num_local);
+  mesh_.topology_.init(0, num_local, num_global);
+  mesh_.geometry_.resize(num_local);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
@@ -101,11 +101,11 @@ void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)
   }
   // Initialize mesh data
   this->num_cells_ = num_local;
-  mesh_->topology_.init(tdim_, num_local, num_global);
+  mesh_.topology_.init(tdim_, num_local, num_global);
 
   // Create a shortcut to cell vertices connectivity to avoid checking its
   // existence at every cell creation
-  this->cell_vertices_ = &mesh_->topology_(tdim_, 0);
+  this->cell_vertices_ = &mesh_.topology_(tdim_, 0);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::add_vertex(uint v, real const * x)
@@ -118,7 +118,7 @@ void MeshEditor::add_vertex(uint v, real const * x)
   {
     error("MeshEditor : vertex list full, %d vertices added.", num_vertices_);
   }
-  mesh_->geometry_.set(v, x);
+  mesh_.geometry_.set(v, x);
   ++vertex_index_;
 }
 //-----------------------------------------------------------------------------
@@ -140,20 +140,20 @@ void MeshEditor::add_cell(uint c, uint const * v)
 void MeshEditor::close()
 {
   // Check consistency of number of vertices
-  if( this->num_vertices_ != mesh_->topology().size(0))
+  if( this->num_vertices_ != mesh_.topology().size(0))
   {
     error("Mismatch between number of vertices initialized and added to mesh : "
-          "%d != %d", this->num_vertices_, mesh_->topology().size(0));
+          "%d != %d", this->num_vertices_, mesh_.topology().size(0));
   }
   // Check consistency of number of cells
-  if( this->num_cells_ != mesh_->topology().size(tdim_))
+  if( this->num_cells_ != mesh_.topology().size(tdim_))
   {
     error("Mismatch between number of cells initialized and added to mesh : "
-          "%d != %d", this->num_cells_, mesh_->topology().size(tdim_));
+          "%d != %d", this->num_cells_, mesh_.topology().size(tdim_));
   }
   // Finalize topology and geometry
-  mesh_->topology_.finalize();
-  mesh_->geometry_.finalize();
+  mesh_.topology_.finalize();
+  mesh_.geometry_.finalize();
   // Clear data
   clear();
 }

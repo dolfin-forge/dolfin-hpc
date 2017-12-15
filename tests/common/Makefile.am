@@ -6,4 +6,5 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = Array/Array.h
+EXTRA_DIST = Array/Array.h \
+             types/types.h

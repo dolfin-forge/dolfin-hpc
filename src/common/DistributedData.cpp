@@ -679,7 +679,7 @@ void DistributedData::set_map(Array<uint> const& mapping)
   }
   else
   {
-    if (mapping.size() != global_.size())
+    if (local_.size() && mapping.size() != global_.size())
     {
       error("DistributedData : local-to-global mapping array has invalid size");
     }

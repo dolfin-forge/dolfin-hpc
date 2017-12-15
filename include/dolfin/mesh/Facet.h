@@ -38,16 +38,19 @@ public:
 
   struct shared : SharedIterator
   {
+    shared(Mesh& M) : SharedIterator(M.topology().distdata()[M.type().facet_dim()]) {}
     shared(MeshTopology& T) : SharedIterator(T.distdata()[T.type().facet_dim()]) {}
   };
 
   struct ghost : GhostIterator
   {
+    ghost(Mesh& M) : GhostIterator(M.topology().distdata()[M.type().facet_dim()]) {}
     ghost(MeshTopology& T) : GhostIterator(T.distdata()[T.type().facet_dim()]) {}
   };
 
   struct owned : OwnedIterator
   {
+    owned(Mesh& M) : OwnedIterator(M.topology().distdata()[M.type().facet_dim()]) {}
     owned(MeshTopology& T) : OwnedIterator(T.distdata()[T.type().facet_dim()]) {}
   };
 

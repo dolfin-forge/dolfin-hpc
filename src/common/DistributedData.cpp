@@ -688,12 +688,9 @@ void DistributedData::set_map(Array<uint> const& mapping)
     cached_numbering_ = new uint[mapping.size()];
   }
 
+  std::copy(mapping.begin(), mapping.end(), cached_numbering_);
   local_.clear();
-  for (uint i = 0; i < cache_size_; ++i)
-  {
-    cached_numbering_[i] = mapping[i];
-    local_[mapping[i]] = i;
-  }
+  for (uint i = 0; i < cache_size_; ++i) { local_[cached_numbering_[i]] = i; }
 }
 //-----------------------------------------------------------------------------
 void DistributedData::remap_numbering(Array<uint> const& mapping)

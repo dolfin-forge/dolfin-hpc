@@ -94,6 +94,30 @@ void UniformMeshRefinement::refine(Mesh& mesh)
   // Apply numbering of new entities and close edition
   editor.close();
 
+  // Re-map local vertices contiguously
+  uint const num_local = refined_mesh.topology().size(0);
+  uint vertex_count = 0;
+  Array<uint> vertex_map(num_local, num_local);
+  for (Cell::iterator c(refined_mesh); !c.end(); ++c)
+  {
+    for (Vertex::iterator v(*c); !v.end(); ++v)
+    {
+      dolfin_assert(v->index() < num_local);
+      if (vertex_map[v->index()] == num_local)
+      {
+        vertex_map[v->index()] = vertex_count++;
+      }
+    }
+  }
+
+  // Reorder geometry
+  dolfin_assert(vertex_count == refined_mesh.geometry().size());
+  refined_mesh.geometry().remap(vertex_map);
+
+  // Reorder connectivities
+  dolfin_assert(vertex_count == refined_mesh.topology().size(0));
+  refined_mesh.topology().remap(0, vertex_map);
+
   // Overwrite old mesh with refined mesh
   mesh.swap(refined_mesh);
   mesh.topology().renumber();

@@ -87,9 +87,7 @@ DMesh::DMesh(Mesh& mesh) :
 DMesh::~DMesh()
 {
   delete ctype_;
-  ctype_ = NULL;
   delete space_;
-  space_ = NULL;
 
   // Delete allocated DCells
   for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
@@ -150,7 +148,7 @@ void DMesh::exp(Mesh& mesh)
     for (uint j = 0; j < dc->vertices.size(); j++)
     {
       DVertex* dv = dc->vertices[j];
-      cell_vertices[j] = dv->id;
+      cell_vertices[j] = dc->vertices[j]->id;
     }
     editor.add_cell(current_cell, &cell_vertices[0]);
 
@@ -304,12 +302,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       if (i != j)
       {
-        DVertex* v0 = dcell->vertices[i];
-        DVertex* v1 = dcell->vertices[j];
+        DVertex* const v0 = dcell->vertices[i];
+        DVertex* const v1 = dcell->vertices[j];
 
-        real l = 0.0;
-        if (v0->glb_id > v1->glb_id) l = v0->p.dist(v1->p);
-        else l = v1->p.dist(v0->p);
+        real const l = (v0->glb_id > v1->glb_id ? v0->p.dist(v1->p)
+                                                : v1->p.dist(v0->p));
 
         if (fabs(l - lmax) < DOLFIN_EPS)
         {
@@ -333,8 +330,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     }
   }
 
-  DVertex* v0 = dcell->vertices[ii];
-  DVertex* v1 = dcell->vertices[jj];
+  DVertex* const v0 = dcell->vertices[ii];
+  DVertex* const v1 = dcell->vertices[jj];
   DVertex* mv = NULL;
 
   // Check if no hanging vertices remain, otherwise create hanging
@@ -350,9 +347,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->on_boundary = true;
       mv->shared = true;
       //Fix shared_adj
-      std::set_intersection (v0->shared_adj.begin(), v0->shared_adj.end(),
-                             v1->shared_adj.begin(), v1->shared_adj.end(),
-                             mv->shared_adj.begin());
+      mv->shared_adj = ;
       bc_dvs[mv->glb_id] = mv;
       dolfin_assert(v0->glb_id != v1->glb_id);
       dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
@@ -387,9 +382,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->on_boundary = true;
       mv->shared = true;
       //Fix shared_adj
-      std::set_intersection (v0->shared_adj.begin(), v0->shared_adj.end(),
-                             v1->shared_adj.begin(), v1->shared_adj.end(),
-                             mv->shared_adj.begin());
+      mv->shared_adj = ;
       mv->ghosted = false;
       mv->owner = MPI::rank();
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;

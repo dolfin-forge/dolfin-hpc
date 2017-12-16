@@ -190,8 +190,8 @@ private:
   Mesh& mesh_;
 
   /// CellType of mesh
-  CellType * ctype_;
-  Space    * space_;
+  CellType const * const ctype_;
+  Space    const * const space_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh

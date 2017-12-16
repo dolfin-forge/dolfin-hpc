@@ -37,82 +37,22 @@ private:
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
-    ctype_(NULL),
-    space_(NULL),
-    glb_max_(0),
-    salt_(0),
+    mesh_(mesh),
+    ctype_(mesh.type().clone()),
+    space_(mesh.space().clone()),
+    glb_max_(mesh.global_size(0)),
+    salt_(ctype_->num_entities(0) * mesh.global_size(mesh.type().dim())),
     start_offset_(0)
 {
-  imp(mesh);
-}
-//-----------------------------------------------------------------------------
-DMesh::~DMesh()
-{
-  clear();
-}
-//-----------------------------------------------------------------------------
-void DMesh::clear()
-{
-  delete ctype_;
-  ctype_ = NULL;
-  delete space_;
-  space_ = NULL;
-
-  propagate.clear();
-  bc_dvs.clear();
-  ref_edge.clear();
-
-  // Delete allocated DCells
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
-  {
-    delete *it;
-  }
-  cells.clear();
-
-  // Delete allocated DVertices
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it)
-  {
-    delete *it;
-  }
-  vertices.clear();
-}
-//-----------------------------------------------------------------------------
-void DMesh::init(Mesh& mesh)
-{
-  if (ctype_ != NULL)
-  {
-    error("Dynamic mesh already initialized on a mesh.");
-  }
-
-  // Cleanup before new allocation
-  clear();
-
-  ctype_ = mesh.type().clone();
-  space_     = mesh.space().clone();
-
-  // Since the mesh is linear numbered, the maximum global index assigned is
-  // the number of vertices in the *global* mesh
-  glb_max_ = mesh.global_size(0);
   dolfin_assert(glb_max_ > 0);
-  salt_ = ctype_->num_entities(0) * mesh.global_size(mesh.type().dim());
   dolfin_assert(salt_ > 0);
-
-  // Assume uniform refinement
-  uint num_new = mesh.size(1);
 
   // Assign a safe range for each rank for the numbering of new entities i.e
   // such that there is no overlap with existing numbered entities.
-  start_offset_ = 0;
 #ifdef HAVE_MPI
-  MPI::offset(num_new, start_offset_, MPI::DOLFIN_COMM);
+  MPI::offset(mesh.size(1), start_offset_, MPI::DOLFIN_COMM);
 #endif
   start_offset_ += glb_max_;
-}
-//-----------------------------------------------------------------------------
-void DMesh::imp(Mesh& mesh)
-{
-  init(mesh);
 
   DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
 
@@ -141,7 +81,27 @@ void DMesh::imp(Mesh& mesh)
     add_cell(dc, vs, c->index());
   }
 
-  delete [] vertices;
+  delete[] vertices;
+}
+//-----------------------------------------------------------------------------
+DMesh::~DMesh()
+{
+  delete ctype_;
+  ctype_ = NULL;
+  delete space_;
+  space_ = NULL;
+
+  // Delete allocated DCells
+  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
+  {
+    delete *it;
+  }
+  // Delete allocated DVertices
+  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
+      ++it)
+  {
+    delete *it;
+  }
 }
 //-----------------------------------------------------------------------------
 void DMesh::exp(Mesh& mesh)

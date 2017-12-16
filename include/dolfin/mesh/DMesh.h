@@ -186,17 +186,8 @@ public:
 
 private:
 
-  /// Common initialization code
-  void init(Mesh& mesh);
-
-  /// Import an existing mesh
-  ///
-  /// The local numbering of cells and vertices from the mesh-object is
-  /// adopted in the DMesh
-  void imp(Mesh& mesh);
-
-  /// Clear
-  void clear();
+  /// Mesh
+  Mesh& mesh_;
 
   /// CellType of mesh
   CellType * ctype_;

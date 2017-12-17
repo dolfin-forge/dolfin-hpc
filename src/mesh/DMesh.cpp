@@ -306,13 +306,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
       if (fabs(l - lmax) < DOLFIN_EPS)
       {
-        int ptsum = (v0->glb_id) + (v1->glb_id);
+        int const ptsum = (v0->glb_id) + (v1->glb_id);
         if (ptsum > ptmax)
         {
           ii = i;
           jj = j;
           lmax = l;
-          ptmax = (v0->glb_id + v1->glb_id);
+          ptmax = ptsum;
         }
       }
       else if (l >= lmax)

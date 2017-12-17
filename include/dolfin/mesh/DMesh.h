@@ -142,9 +142,11 @@ public:
   void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
 
   /// Vertices contained in the mesh
-  std::set<DVertex *> vertices;
+  typedef std::set<DVertex *> VertexSet;
+  VertexSet vertices;
 
   /// Cells contained in the mesh
+  typedef std::list<DCell *> CellList;
   std::list<DCell *> cells;
 
   /// Propagation buffer

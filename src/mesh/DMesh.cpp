@@ -90,13 +90,12 @@ DMesh::~DMesh()
   delete space_;
 
   // Delete allocated DCells
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
+  for (CellList::iterator it = cells.begin(); it != cells.end(); ++it)
   {
     delete *it;
   }
   // Delete allocated DVertices
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it)
+  for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it)
   {
     delete *it;
   }
@@ -116,10 +115,10 @@ void DMesh::exp(Mesh& mesh)
   DistributedData * const dist = (mesh.is_distributed() ? &mesh.distdata()[0]
                                                         : NULL);
   uint current_vertex = 0;
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it, ++current_vertex)
+  for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
+       ++current_vertex)
   {
-    DVertex* dv = *it;
+    DVertex * const dv(*it);
     dolfin_assert(!dv->deleted);
 
     editor.add_vertex(current_vertex, &dv->p[0]);
@@ -140,9 +139,9 @@ void DMesh::exp(Mesh& mesh)
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
+  for (CellList::iterator it = cells.begin(); it != cells.end(); ++it)
   {
-    DCell* dc = *it;
+    DCell * const dc(*it);
     dolfin_assert(!dc->deleted);
 
     for (uint j = 0; j < dc->vertices.size(); j++)
@@ -195,8 +194,8 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
   DistributedData * const dist = (mesh.is_distributed() ? &mesh.distdata()[0]
                                                         : NULL);
   uint current_vertex = 0;
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it, ++current_vertex)
+  for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
+       ++current_vertex)
   {
     DVertex* dv = *it;
     dolfin_assert(!dv->deleted);
@@ -221,7 +220,7 @@ void DMesh::expKeepNumbering(Mesh& mesh, Array<int> * old2new_cells,
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end();
+  for (CellList::iterator it = cells.begin(); it != cells.end();
       ++it, ++current_cell)
   {
     DCell* dc = *it;
@@ -253,8 +252,8 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
   }
 
   uint i = 0;
-  for (std::set<DVertex*>::iterator it = vertices.begin(); it != vertices.end();
-      ++it, ++i)
+  for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
+       ++i)
   {
     DVertex* dv = *it;
 
@@ -272,8 +271,8 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
   }
 
   i = 0;
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end();
-      ++it, ++i)
+  for (CellList::iterator it = cells.begin(); it != cells.end();
+       ++it, ++i)
   {
     DCell* dc = *it;
 
@@ -296,36 +295,33 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   int ptmax = 0;
   uint ii = 0;
   uint jj = 0;
-  for (uint i = 0; i < dcell->vertices.size(); i++)
+  for (uint i = 0; i < dcell->vertices.size(); ++i)
   {
-    for (uint j = 0; j < dcell->vertices.size(); j++)
+    DVertex* const v0 = dcell->vertices[i];
+    for (uint j = i + 1; j < dcell->vertices.size(); +j)
     {
-      if (i != j)
+      DVertex* const v1 = dcell->vertices[j];
+
+      real const l = (v0->glb_id > v1->glb_id ? v0->p.dist(v1->p)
+                                              : v1->p.dist(v0->p));
+
+      if (fabs(l - lmax) < DOLFIN_EPS)
       {
-        DVertex* const v0 = dcell->vertices[i];
-        DVertex* const v1 = dcell->vertices[j];
-
-        real const l = (v0->glb_id > v1->glb_id ? v0->p.dist(v1->p)
-                                                : v1->p.dist(v0->p));
-
-        if (fabs(l - lmax) < DOLFIN_EPS)
-        {
-          int ptsum = (v0->glb_id) + (v1->glb_id);
-          if (ptsum > ptmax)
-          {
-            ii = i;
-            jj = j;
-            lmax = l;
-            ptmax = (v0->glb_id + v1->glb_id);
-          }
-        }
-        else if (l >= lmax)
+        int ptsum = (v0->glb_id) + (v1->glb_id);
+        if (ptsum > ptmax)
         {
           ii = i;
           jj = j;
           lmax = l;
           ptmax = (v0->glb_id + v1->glb_id);
         }
+      }
+      else if (l >= lmax)
+      {
+        ii = i;
+        jj = j;
+        lmax = l;
+        ptmax = (v0->glb_id + v1->glb_id);
       }
     }
   }
@@ -433,7 +429,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 //-----------------------------------------------------------------------------
 DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
-  for (std::list<DCell*>::iterator it = v1->cells.begin();
+  for (CellList::iterator it = v1->cells.begin();
       it != v1->cells.end(); ++it)
   {
     DCell* const c = *it;
@@ -523,7 +519,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
   uint const pe_rank = PE::rank();
 
-  for (std::list<DCell*>::iterator it = cells.begin(); it != cells.end(); ++it)
+  for (CellList::iterator it = cells.begin(); it != cells.end(); ++it)
   {
     if (marked_ids((*it)->id) && !(*it)->deleted)
     {
@@ -590,8 +586,8 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         continue;
       }
 
-      for (std::list<DCell*>::iterator ic = v1->cells.begin();
-          ic != v1->cells.end(); ++ic)
+      for (CellList::iterator ic = v1->cells.begin(); ic != v1->cells.end();
+           ++ic)
       {
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
@@ -656,7 +652,7 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
   int *sp = &send_buff[0];
 
   for (std::vector<Propagation>::iterator it = propagate.begin();
-      it != propagate.end(); ++it)
+       it != propagate.end(); ++it)
   {
     *(sp++) = it->first;
     *(sp++) = it->second.mv;

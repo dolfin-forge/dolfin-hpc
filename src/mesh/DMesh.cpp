@@ -40,6 +40,7 @@ DMesh::DMesh(Mesh& mesh) :
     mesh_(mesh),
     ctype_(mesh.type().clone()),
     space_(mesh.space().clone()),
+    shared_edges_(mesh.is_distributed() ? new SharedEdges() : NULL),
     glb_max_(mesh.global_size(0)),
     salt_(ctype_->num_entities(0) * mesh.global_size(mesh.type().dim())),
     start_offset_(0)
@@ -81,11 +82,26 @@ DMesh::DMesh(Mesh& mesh) :
     add_cell(dc, vs, c->index());
   }
 
+  // Cache shared edges
+  if (shared_edges_)
+  {
+    DistributedData const& vdist = mesh.distdata()[0];
+    for (Edge::shared it(mesh); it.valid(); ++it)
+    {
+      Edge e(mesh, it.index());
+      uint const * v = e.entities(0);
+      shared_edges_->insert(
+        SharedEdgeItem(EdgeKey(vdist.get_global(v[0]), vdist.get_global(v[1])),
+                       e.index()));
+    }
+  }
+
   delete[] vertices;
 }
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
+  delete shared_edges_;
   delete ctype_;
   delete space_;
 
@@ -112,8 +128,7 @@ void DMesh::exp(Mesh& mesh)
   editor.init_cells(cells.size());
 
   // Add old vertices
-  DistributedData * const dist = (mesh.is_distributed() ? &mesh.distdata()[0]
-                                                        : NULL);
+  DistributedData * const dist = (shared_edges_ ? &mesh.distdata()[0] : NULL);
   uint current_vertex = 0;
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++current_vertex)
@@ -146,7 +161,6 @@ void DMesh::exp(Mesh& mesh)
 
     for (uint j = 0; j < dc->vertices.size(); j++)
     {
-      DVertex* dv = dc->vertices[j];
       cell_vertices[j] = dc->vertices[j]->id;
     }
     editor.add_cell(current_cell, &cell_vertices[0]);
@@ -255,13 +269,8 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++i)
   {
-    DVertex* dv = *it;
-
-    if (old2new_vertices)
-    {
-      (*old2new_vertices)[dv->id] = i;
-    }
-    dv->id = i;
+    if (old2new_vertices) { (*old2new_vertices)[(*it)->id] = i; }
+    (*it)->id = i;
   }
 
   if (old2new_cells)
@@ -269,19 +278,12 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
     dolfin_assert(old2new_cells->size() >= cells.size());
     *old2new_cells = -1;
   }
-
   i = 0;
   for (CellList::iterator it = cells.begin(); it != cells.end();
        ++it, ++i)
   {
-    DCell* dc = *it;
-
-    if (old2new_cells)
-    {
-      (*old2new_cells)[dc->id] = i;
-    }
-
-    dc->id = i;
+    if (old2new_cells) { (*old2new_cells)[(*it)->id] = i; }
+    (*it)->id = i;
   }
 }
 //-----------------------------------------------------------------------------
@@ -310,6 +312,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       }
     }
   }
+  dolfin_assert(v0 != v1);
 
   DVertex* mv = NULL;
 
@@ -321,15 +324,22 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv = hangv;
     closing = true;
 
+    // Having both vertices on the boundary is not a sufficient condition to be
+    // shared so we need to lookup in the set of shared edges.
     if (v0->on_boundary && v1->on_boundary)
     {
-      mv->on_boundary = true;
-      mv->shared = true;
-      //Fix shared_adj
-      mv->shared_adj = ;
-      bc_dvs[mv->glb_id] = mv;
       dolfin_assert(v0->glb_id != v1->glb_id);
-      dolfin_assert(ref_edge.find(edge_key(v0->glb_id, v1->glb_id)) != ref_edge.end());
+      EdgeKey key(v0->glb_id, v1->glb_id);
+      SharedEdges::const_iterator it = shared_edges_->find(key);
+      if (it != shared_edges_->end())
+      {
+        mv->on_boundary = true;
+        mv->shared = true;
+        //Fix shared_adj
+        mv->shared_adj = mesh_.distdata()[1].get_shared_adj(it->second);
+        bc_dvs[mv->glb_id] = mv;
+        dolfin_assert(ref_edge.find(key) != ref_edge.end());
+      }
     }
   }
   else
@@ -350,22 +360,26 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     // Unfortunalely this is a necessary condition but not sufficient.
     if (v0->on_boundary && v1->on_boundary)
     {
-      prop_edge node;
-      node.mv = mv->glb_id;
-      node.v1 = v0->glb_id;
-      node.v2 = v1->glb_id;
-      node.owner = pe_rank;
-      std::pair<uint, prop_edge> _prop_(dcell->nref, node);
-      propagate.push_back(_prop_);
-      dcell->nref++;
-      bc_dvs[mv->glb_id] = mv;
-      mv->on_boundary = true;
-      mv->shared = true;
-      //Fix shared_adj
-      mv->shared_adj = ;
-      mv->ghosted = false;
-      mv->owner = MPI::rank();
-      ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
+      EdgeKey key(v0->glb_id, v1->glb_id);
+      SharedEdges::const_iterator it = shared_edges_->find(key);
+      if (it != shared_edges_->end())
+      {
+        prop_edge node;
+        node.mv = mv->glb_id;
+        node.v1 = v0->glb_id;
+        node.v2 = v1->glb_id;
+        node.owner = pe_rank;
+        std::pair<uint, prop_edge> _prop_(dcell->nref, node);
+        propagate.push_back(_prop_);
+        dcell->nref++;
+        bc_dvs[mv->glb_id] = mv;
+        mv->shared = true;
+        //Fix shared_adj
+        mv->shared_adj =  mesh_.distdata()[1].get_shared_adj(it->second);
+        mv->ghosted = false;
+        mv->owner = MPI::rank();
+        ref_edge[key] = mv;
+      }
     }
     closing = false;
   }
@@ -380,7 +394,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   for (DVertex ** vi = vb; vi != ve; ++vi)
   {
     if (*vi != v0) vs0.push_back(*vi);
-
     if (*vi != v1) vs1.push_back(*vi);
   }
   vs0.push_back(mv);
@@ -535,10 +548,10 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
       DVertex* mv = NULL;
       dolfin_assert(it->second.v1 != it->second.v2);
-      if (ref_edge.find(edge_key(it->second.v1, it->second.v2))
+      if (ref_edge.find(EdgeKey(it->second.v1, it->second.v2))
           != ref_edge.end())
       {
-        mv = ref_edge[edge_key(it->second.v1, it->second.v2)];
+        mv = ref_edge[EdgeKey(it->second.v1, it->second.v2)];
 
         if (mv->owner > (int) it->second.owner)
         {
@@ -605,7 +618,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             mv->on_boundary = true;
             bc_dvs[mv->glb_id] = mv;
             dolfin_assert(v1->glb_id != v2->glb_id);
-            ref_edge[edge_key(v1->glb_id, v2->glb_id)] = mv;
+            ref_edge[EdgeKey(v1->glb_id, v2->glb_id)] = mv;
           }
           dolfin_assert((*ic) > 0);
           bisect((*ic), mv, v1, v2);

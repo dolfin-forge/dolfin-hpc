@@ -170,22 +170,6 @@ public:
     }
   };
 
-  /// Construct an edge id from given vertices
-  inline EdgeKey edge_key(int id1, int id2)
-  {
-    dolfin_assert( id2 != id1 );
-    if(id2 < id1)
-    {
-      EdgeKey key(id2,id1);
-      return key;
-    }
-    else
-    {
-      EdgeKey key(id1,id2);
-      return key;
-    }
-  }
-
 private:
 
   /// Mesh
@@ -194,6 +178,10 @@ private:
   /// CellType of mesh
   CellType const * const ctype_;
   Space    const * const space_;
+
+  /// Shared edges
+  typedef _set<EdgeKey> SharedEdges;
+  SharedEdges * shared_edges_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh

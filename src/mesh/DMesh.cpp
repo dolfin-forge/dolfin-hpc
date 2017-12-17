@@ -295,10 +295,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   int ptmax = 0;
   uint ii = 0;
   uint jj = 0;
-  for (uint i = 0; i < dcell->vertices.size(); ++i)
+  uint const nv = dcell->vertices.size();
+  for (uint i = 0; i < nv; ++i)
   {
     DVertex* const v0 = dcell->vertices[i];
-    for (uint j = i + 1; j < dcell->vertices.size(); +j)
+    for (uint j = i + 1; j < nv; +j)
     {
       DVertex* const v1 = dcell->vertices[j];
 

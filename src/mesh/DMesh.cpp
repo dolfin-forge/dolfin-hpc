@@ -27,7 +27,7 @@ struct CheckId
 {
   explicit CheckId(int id_) : id(id_) {}
   bool operator()(const DVertex * const & v) const { return (id == v->id); }
-  bool operator()(const DCell * const & c) const   { return (id == c->id); }
+  bool operator()(const DCell   * const & c) const { return (id == c->id); }
 
 private:
 

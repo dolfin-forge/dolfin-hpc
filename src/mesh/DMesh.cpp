@@ -354,6 +354,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
+    // Unfortunalely this is a necessary condition but not sufficient.
     if (v0->on_boundary && v1->on_boundary)
     {
       prop_edge node;

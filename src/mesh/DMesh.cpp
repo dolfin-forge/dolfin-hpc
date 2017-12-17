@@ -293,32 +293,28 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   // Find longest edge
   real lmax = 0.0;
   int ptmax = 0;
-  uint ii = 0;
-  uint jj = 0;
-  uint const nv = dcell->vertices.size();
-  for (uint i = 0; i < nv; ++i)
+  DVertex * v0 = NULL;
+  DVertex * v1 = NULL;
+  DVertex ** const vb = &dcell->vertices[0];
+  DVertex ** const ve = vb + dcell->vertices.size();
+  for (DVertex ** vi = vb; vi != ve; ++vi)
   {
-    DVertex* const v0 = dcell->vertices[i];
-    for (uint j = i + 1; j < nv; +j)
+    for (DVertex ** vj = vi + 1; vj != ve; ++vj)
     {
-      DVertex* const v1 = dcell->vertices[j];
-
-      real const l = v0->p.dist(v1->p);
+      real const l = (*vi)->p.dist((*vj)->p);
       if (l +  DOLFIN_EPS < lmax) { continue; }
 
-      int const ptsum = (v0->glb_id) + (v1->glb_id);
+      int const ptsum = ((*vi)->glb_id) + ((*vj)->glb_id);
       if ((l > lmax + DOLFIN_EPS) || (ptsum > ptmax))
       {
-        ii = i;
-        jj = j;
+        v0 = *vi;
+        v1 = *vj;
         lmax = l;
         ptmax = ptsum;
       }
     }
   }
 
-  DVertex* const v0 = dcell->vertices[ii];
-  DVertex* const v1 = dcell->vertices[jj];
   DVertex* mv = NULL;
 
   // Check if no hanging vertices remain, otherwise create hanging
@@ -352,7 +348,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       mv->glb_id = (((v1->glb_id * salt_) + (v0->glb_id))) + glb_max_;
     }
-    mv->p = (dcell->vertices[ii]->p + dcell->vertices[jj]->p) / 2.0;
+    mv->p = (v0->p + v1->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
     // Unfortunalely this is a necessary condition but not sufficient.
@@ -384,13 +380,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   DCell* c1 = new DCell;
   c0->nref = dcell->nref;
   c1->nref = dcell->nref;
-  std::vector<DVertex*> vs0(0);
-  std::vector<DVertex*> vs1(0);
-  for (uint i = 0; i < dcell->vertices.size(); i++)
+  std::vector<DVertex*> vs0;
+  std::vector<DVertex*> vs1;
+  for (DVertex ** vi = vb; vi != ve; ++vi)
   {
-    if (i != ii) vs0.push_back(dcell->vertices[i]);
+    if (*vi != v0) vs0.push_back(*vi);
 
-    if (i != jj) vs1.push_back(dcell->vertices[i]);
+    if (*vi != v1) vs1.push_back(*vi);
   }
   vs0.push_back(mv);
   vs1.push_back(mv);

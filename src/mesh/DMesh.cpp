@@ -43,17 +43,10 @@ DMesh::DMesh(Mesh& mesh) :
     shared_edges_(mesh.is_distributed() ? new SharedEdges() : NULL),
     glb_max_(mesh.global_size(0)),
     salt_(ctype_->num_entities(0) * mesh.global_size(mesh.type().dim())),
-    start_offset_(0)
+    start_offset_(glb_max_)
 {
   dolfin_assert(glb_max_ > 0);
   dolfin_assert(salt_ > 0);
-
-  // Assign a safe range for each rank for the numbering of new entities i.e
-  // such that there is no overlap with existing numbered entities.
-#ifdef HAVE_MPI
-  MPI::offset(mesh.size(1), start_offset_, MPI::DOLFIN_COMM);
-#endif
-  start_offset_ += glb_max_;
 
   DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
 
@@ -85,6 +78,10 @@ DMesh::DMesh(Mesh& mesh) :
   // Cache shared edges
   if (shared_edges_)
   {
+    // Assign a safe range for each rank for the numbering of new entities i.e
+    // such that there is no overlap with existing numbered entities.
+    start_offset_ += mesh.distdata()[1].offset();
+
     DistributedData const& vdist = mesh.distdata()[0];
     for (Edge::shared it(mesh); it.valid(); ++it)
     {

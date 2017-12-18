@@ -12,6 +12,7 @@
 #include <dolfin/common/types.h>
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/EdgeKey.h>
 
 #include <vector>
 #include <list>
@@ -46,9 +47,6 @@ public:
 
   /// Destructor
   ~DMesh();
-
-  /// Edge Identifier containing ids of end vertices
-  typedef std::pair<int, int> EdgeKey;
 
   /// Edge data structure for propagation
   typedef struct __edge__

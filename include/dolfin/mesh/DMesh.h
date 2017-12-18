@@ -157,11 +157,7 @@ public:
   BoundaryVertices bc_dvs;
 
   /// Refined edges
-#if (__GNUG__ || __sgi )
-  typedef std::map<EdgeKey, DVertex*> RefinedEdges;
-#else
-  typedef _map<EdgeKey, DVertex*>     RefinedEdges;
-#endif
+  typedef _map<EdgeKey, DVertex*> RefinedEdges;
   RefinedEdges ref_edge;
 
   /// Comparison operator for index/value pairs
@@ -184,7 +180,7 @@ private:
   Space    const * const space_;
 
   /// Shared edges
-  typedef _map<EdgeKey, uint>      SharedEdges;
+  typedef std::map<EdgeKey, uint>  SharedEdges;
   typedef std::pair<EdgeKey, uint> SharedEdgeItem;
   SharedEdges * shared_edges_;
 

@@ -180,7 +180,8 @@ private:
   Space    const * const space_;
 
   /// Shared edges
-  typedef _set<EdgeKey> SharedEdges;
+  typedef _map<EdgeKey, uint>      SharedEdges;
+  typedef std::pair<EdgeKey, uint> SharedEdgeItem;
   SharedEdges * shared_edges_;
 
   /// Maximum global index of vertices

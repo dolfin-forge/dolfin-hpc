@@ -62,7 +62,7 @@ DMesh::DMesh(Mesh& mesh) :
   {
     DVertex* dv = new DVertex(*v);
 
-    if (dv->on_boundary) bc_dvs[dv->glb_id] = dv;
+    if (dv->shared) bc_dvs[dv->glb_id] = dv;
 
     add_vertex(dv);
 
@@ -326,14 +326,13 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
     // Having both vertices on the boundary is not a sufficient condition to be
     // shared so we need to lookup in the set of shared edges.
-    if (v0->on_boundary && v1->on_boundary)
+    if (v0->shared && v1->shared)
     {
       dolfin_assert(v0->glb_id != v1->glb_id);
       EdgeKey key(v0->glb_id, v1->glb_id);
       SharedEdges::const_iterator it = shared_edges_->find(key);
       if (it != shared_edges_->end())
       {
-        mv->on_boundary = true;
         mv->shared = true;
         //Fix shared_adj
         mv->shared_adj = mesh_.distdata()[1].get_shared_adj(it->second);
@@ -358,7 +357,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
     // Add hanging node on shared edges to propagation buffer
     // Unfortunalely this is a necessary condition but not sufficient.
-    if (v0->on_boundary && v1->on_boundary)
+    if (v0->shared && v1->shared)
     {
       EdgeKey key(v0->glb_id, v1->glb_id);
       SharedEdges::const_iterator it = shared_edges_->find(key);
@@ -615,7 +614,6 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             }
 
             mv->p = (v1->p + v2->p) / 2.0;
-            mv->on_boundary = true;
             bc_dvs[mv->glb_id] = mv;
             dolfin_assert(v1->glb_id != v2->glb_id);
             ref_edge[EdgeKey(v1->glb_id, v2->glb_id)] = mv;

@@ -17,7 +17,6 @@ DVertex::DVertex() :
     cells(0),
     p(0.0, 0.0, 0.0),
     deleted(false),
-    on_boundary(false),
     shared(false),
     ghosted(false),
     owner(-1)
@@ -30,7 +29,6 @@ DVertex::DVertex(Vertex const& v) :
     cells(0),
     p(v.point()),
     deleted(false),
-    on_boundary(v.is_shared()),
     shared(v.is_shared()),
     ghosted(v.is_ghost()),
     owner(v.owner())

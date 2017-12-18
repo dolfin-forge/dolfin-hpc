@@ -41,9 +41,6 @@ struct DVertex
   /// Marker for deletion
   bool deleted;
 
-  /// Indicator if vertex is on process boundary
-  bool on_boundary;
-
   /// Indicator if vertex is shared
   bool shared;
 

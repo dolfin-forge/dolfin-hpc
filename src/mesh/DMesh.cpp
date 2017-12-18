@@ -506,7 +506,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
   std::vector<Propagation> propagated;
   std::list<Propagation> leftovers;
 
-  bool empty = false;
+  bool empty = !marked_ids.mesh().is_distributed();
 
   while (!empty)
   {

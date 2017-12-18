@@ -123,6 +123,7 @@ public:
   inline void propagate_refinement(std::vector<Propagation>& propagated,
                                    bool& empty)
   {
+    if (PE::size() == 1) return;
     if (PE::size() & (PE::size() - 1))
     {
       propagate_naive(propagated, empty);

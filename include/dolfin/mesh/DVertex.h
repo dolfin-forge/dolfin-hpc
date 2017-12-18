@@ -21,16 +21,17 @@ class DCell;
 
 struct DVertex
 {
+  static uint const UNDEF = DOLFIN_UINT_MAX;
 
   DVertex();
 
   DVertex(Vertex const& v);
 
   /// Local index of vertex
-  int id;
+  uint id;
 
   /// Global index of vertex
-  int glb_id;
+  uint glb_id;
 
   /// List of cells containing the vertex
   std::list<DCell *> cells;
@@ -48,7 +49,7 @@ struct DVertex
   bool ghosted;
 
   /// Rank of owning process
-  int owner;
+  uint owner;
 
   /// Adjacent processes for boundary vertices
   _set<uint> shared_adj;

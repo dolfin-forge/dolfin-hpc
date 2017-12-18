@@ -12,14 +12,14 @@ namespace dolfin
 
 //------------------------------------------------------------------------------
 DVertex::DVertex() :
-    id(0),
-    glb_id(-1),
-    cells(0),
-    p(0.0, 0.0, 0.0),
+    id(UNDEF),
+    glb_id(UNDEF),
+    cells(NULL),
+    p(),
     deleted(false),
     shared(false),
     ghosted(false),
-    owner(-1)
+    owner(UNDEF)
 {
 }
 //------------------------------------------------------------------------------

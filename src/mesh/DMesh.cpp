@@ -26,8 +26,8 @@ using namespace dolfin;
 struct CheckId
 {
   explicit CheckId(int id_) : id(id_) {}
-  bool operator()(const DVertex * const & v) const { return (id == v->id); }
-  bool operator()(const DCell   * const & c) const { return (id == c->id); }
+  bool operator()(DVertex const * const v) const { return (id == v->id); }
+  bool operator()(DCell   const * const c) const { return (id == c->id); }
 
 private:
 
@@ -87,9 +87,8 @@ DMesh::DMesh(Mesh& mesh) :
     {
       Edge e(mesh, it.index());
       uint const * v = e.entities(0);
-      shared_edges_->insert(
-        SharedEdgeItem(EdgeKey(vdist.get_global(v[0]), vdist.get_global(v[1])),
-                       e.index()));
+      EdgeKey key(vdist.get_global(v[0]), vdist.get_global(v[1]));
+      shared_edges_->insert(SharedEdgeItem(key, e.index()));
     }
   }
 

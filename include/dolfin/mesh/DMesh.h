@@ -189,9 +189,6 @@ private:
   /// enumeration salt for bisect
   uint salt_;
 
-  /// Start offset for new global id
-  uint start_offset_;
-
 };}
 
 #endif

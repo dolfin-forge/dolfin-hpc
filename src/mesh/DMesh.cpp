@@ -42,8 +42,7 @@ DMesh::DMesh(Mesh& mesh) :
     space_(mesh.space().clone()),
     shared_edges_(mesh.is_distributed() ? new SharedEdges() : NULL),
     glb_max_(mesh.global_size(0)),
-    salt_(ctype_->num_entities(0) * mesh.global_size(mesh.type().dim())),
-    start_offset_(glb_max_)
+    salt_(ctype_->num_entities(0) * mesh.global_size(mesh.type().dim()))
 {
   dolfin_assert(glb_max_ > 0);
   dolfin_assert(salt_ > 0);
@@ -75,13 +74,12 @@ DMesh::DMesh(Mesh& mesh) :
     add_cell(dc, vs, c->index());
   }
 
+  // Make sure edges are created
+  mesh.init(1);
+
   // Cache shared edges
   if (shared_edges_)
   {
-    // Assign a safe range for each rank for the numbering of new entities i.e
-    // such that there is no overlap with existing numbered entities.
-    start_offset_ += mesh.distdata()[1].offset();
-
     DistributedData const& vdist = mesh.distdata()[0];
     for (Edge::shared it(mesh); it.valid(); ++it)
     {
@@ -335,6 +333,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
         bc_dvs[mv->glb_id] = mv;
         dolfin_assert(ref_edge.find(key) != ref_edge.end());
       }
+      message("%10u, %10u: %u", v0->glb_id, v1->glb_id, mv->shared);
     }
   }
   else

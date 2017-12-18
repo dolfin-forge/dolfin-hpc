@@ -55,6 +55,7 @@ void RivaraRefinement::refine(Mesh& mesh,
   dmesh.exp(omesh);
 
   mesh.swap(omesh);
+  mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------
 

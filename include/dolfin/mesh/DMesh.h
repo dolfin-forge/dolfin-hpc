@@ -153,12 +153,16 @@ public:
   std::vector<Propagation> propagate;
 
   /// Map between global number of boundary vertex to vertex
-  _map<uint, DVertex*> bc_dvs;
+  typedef _map<uint, DVertex*> BoundaryVertices;
+  BoundaryVertices bc_dvs;
+
+  /// Refined edges
 #if (__GNUG__ || __sgi )
-  std::map<EdgeKey, DVertex*> ref_edge;
+  typedef std::map<EdgeKey, DVertex*> RefinedEdges;
 #else
-  _map<EdgeKey, DVertex*> ref_edge;
+  typedef _map<EdgeKey, DVertex*>     RefinedEdges;
 #endif
+  RefinedEdges ref_edge;
 
   /// Comparison operator for index/value pairs
   struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,

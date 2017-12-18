@@ -353,7 +353,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     mv->p = (v0->p + v1->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
-    // Unfortunalely this is a necessary condition but not sufficient.
+    // Unfortunately this is a necessary condition but not sufficient.
     if (v0->shared && v1->shared)
     {
       EdgeKey key(v0->glb_id, v1->glb_id);
@@ -544,10 +544,11 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
       DVertex* mv = NULL;
       dolfin_assert(it->second.v1 != it->second.v2);
-      if (ref_edge.find(EdgeKey(it->second.v1, it->second.v2))
-          != ref_edge.end())
+      EdgeKey key(it->second.v1, it->second.v2);
+      RefinedEdges::iterator re = ref_edge.find(key);
+      if (re != ref_edge.end())
       {
-        mv = ref_edge[EdgeKey(it->second.v1, it->second.v2)];
+        mv = re->second;
 
         if (mv->owner > (int) it->second.owner)
         {
@@ -559,25 +560,13 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         continue;
       }
 
-      DVertex* v1 = NULL;
-      DVertex* v2 = NULL;
+      BoundaryVertices::iterator v1it = bc_dvs.find(it->second.v1);
+      if (v1it == bc_dvs.end()) { leftovers.push_back(*it); continue; }
+      BoundaryVertices::iterator v2it = bc_dvs.find(it->second.v2);
+      if (v2it == bc_dvs.end()) { leftovers.push_back(*it); continue; }
 
-      if (!v1 && bc_dvs.find(it->second.v1) != bc_dvs.end())
-      {
-        dolfin_assert(bc_dvs.find(it->second.v1) != bc_dvs.end());
-        v1 = bc_dvs[it->second.v1];
-      }
-      if (!v2 && bc_dvs.find(it->second.v2) != bc_dvs.end())
-      {
-        dolfin_assert(bc_dvs.find(it->second.v2) != bc_dvs.end());
-        v2 = bc_dvs[it->second.v2];
-      }
-
-      if (!v1 || !v2)
-      {
-        leftovers.push_back(*it);
-        continue;
-      }
+      DVertex* const v1 = v1it->second;
+      DVertex* const v2 = v2it->second;
 
       for (CellList::iterator ic = v1->cells.begin(); ic != v1->cells.end();
            ++ic)

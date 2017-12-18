@@ -407,7 +407,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     for (;;)
     {
       DCell* copp = opposite(dcell, v0, v1);
-      if (copp != 0)
+      if (copp != NULL)
       {
         bisect(copp, mv, v0, v1);
       }
@@ -421,30 +421,17 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 //-----------------------------------------------------------------------------
 DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
-  for (CellList::iterator it = v1->cells.begin();
-      it != v1->cells.end(); ++it)
+  for (CellList::iterator c = v1->cells.begin(); c != v1->cells.end(); ++c)
   {
-    DCell* const c = *it;
+    if ((*c) == dcell || (*c)->deleted) continue;
 
-    if (c != dcell && !c->deleted)
+    for (std::vector<DVertex *>::const_iterator vi = (*c)->vertices.begin();
+         vi != (*c)->vertices.end(); ++vi)
     {
-      int matches = 0;
-      for (uint i = 0; i < c->vertices.size(); i++)
-      {
-        if (c->vertices[i] == v1 || c->vertices[i] == v2)
-        {
-          matches++;
-        }
-      }
-
-      if (matches == 2)
-      {
-        // Found opposite cell
-        return c;
-      }
+      if (*vi == v2) return *c;
     }
   }
-  return 0;
+  return NULL;
 }
 //-----------------------------------------------------------------------------
 void DMesh::add_vertex(DVertex* v)
@@ -454,13 +441,11 @@ void DMesh::add_vertex(DVertex* v)
 //-----------------------------------------------------------------------------
 void DMesh::add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id)
 {
-  for (uint i = 0; i < vs.size(); i++)
+  c->vertices.assign(vs.begin(), vs.end());
+  for (std::vector<DVertex*>::iterator it = vs.begin(); it != vs.end(); ++it)
   {
-    DVertex* v = vs[i];
-    c->vertices.push_back(v);
-    v->cells.push_back(c);
+    (*it)->cells.push_back(c);
   }
-
   cells.push_back(c);
   c->id = cells.size();
   c->parent_id = parent_id;

@@ -176,7 +176,7 @@ void libsimInterface::shutdown()
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::batchRender()
+void libsimInterface::batchRender(real t, uint tstep)
 {
   error("VisIt/libsim is required for in-situ viz");
 }

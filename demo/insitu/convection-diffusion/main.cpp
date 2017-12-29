@@ -97,7 +97,7 @@ int main(int argc, char **argv)
   mesh.refine();
 
   // Expose to mesh to libsim
-  libsimInterface::addData(mesh);
+  libsimInterface::addData(mesh, "mesh");
 
   Analytic<Source> f(mesh);
   Analytic<FluidVelocity> W(mesh);

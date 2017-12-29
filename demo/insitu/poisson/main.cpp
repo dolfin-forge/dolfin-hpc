@@ -97,6 +97,19 @@ public:
   }
 };
 
+// Pipline to render a predefined session
+class RenderSession : public libsimPipeline
+{
+public:
+  
+  void exec(real t, uint step) const 
+  {
+    VisItRestoreSession("./poisson.session");
+    VisItSaveWindow("./session.png", 
+		    800, 600, VISIT_IMAGEFORMAT_PNG);
+  }
+};
+
 //-----------------------------------------------------------------------------
 
 // Sub domain for Dirichlet boundary condition
@@ -136,11 +149,13 @@ int main(int argc, char **argv)
   RenderU render_u;
   RenderMesh render_mesh;
   RenderAll render_all;
+  RenderSession render_session;
 
   // Add all pipelines to the insitu interface
   libsimInterface::addPipeline(render_u); 
   libsimInterface::addPipeline(render_mesh); 
   libsimInterface::addPipeline(render_all); 
+  libsimInterface::addPipeline(render_session);
 
   // Create boundary condition
   Constant u0(0.0);

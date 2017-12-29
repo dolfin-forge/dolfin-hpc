@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   Function up(a.trial_space());
 
   // Expose the function named U to libsim
-  libsimInterface::addData(u,"U");
+  libsimInterface::addData(u, "U", "Mesh");
 
   ConvectionDiffusion::LinearForm L(mesh, f, W, up, alpha, nu, s, k);
 

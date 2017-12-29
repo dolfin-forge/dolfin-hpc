@@ -127,8 +127,8 @@ int main(int argc, char **argv)
   // Create mesh
   Mesh mesh("UnitSquareMesh_32x32.xml");
 
-  // Expose to mesh to libsim
-  libsimInterface::addData(mesh);
+  // Expose a mesh named Mesh to libsim
+  libsimInterface::addData(mesh, "Mesh");
 
   // Create coefficients
   Analytic<Source>  f(mesh);
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
   Function u(a.trial_space());
 
   // Expose the function named U to libsim
-  libsimInterface::addData(u,"U");
+  libsimInterface::addData(u, "U", "Mesh");
 
   KrylovSolver solver(bicgstab, bjacobi);
   solver.solve(A, u.vector(), b);

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-08-23
-// Last changed: 2017-12-29
+// Last changed: 2017-12-31
 
 #ifndef __DOLFIN_LIBSIM_INTERFACE_H
 #define __DOLFIN_LIBSIM_INTERFACE_H
@@ -42,7 +42,7 @@ namespace dolfin
 
     static void batchRender(real t = 0.0, uint tstep = 0.0);
 
-    static void ctrlLoop();
+    static void ctrlLoop(real t = 0.0, uint tstep = 0.0, int blocking = 0);
 
     static void addData(GenericFunction& function, 
 			std::string function_name,
@@ -63,10 +63,11 @@ namespace dolfin
     {
       double t_;		
       uint tstep_;
+      bool batch_;
       LabelList<Mesh> mesh_list_;
       LabelList<GenericFunction> function_list_;
       _map<std::string, std::string> function_mesh_map_;
-      Array<libsimPipeline*> pipelines_;      
+      Array<libsimPipeline*> pipelines_;
     };
 
     // Simulation (insitu) data

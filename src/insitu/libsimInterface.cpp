@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-05-24
-// Last changed: 2017-10-09
+// Last changed: 2017-12-31
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
@@ -43,12 +43,12 @@ void libsimInterface::initBatch()
   VisItSetGetVariable(libsimGetFunction, &InsituData_);
   VisItSetGetMesh(libsimGetMesh, &InsituData_);
 
+  InsituData_.batch_ = true;
+
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::initInteractive()
 {
-
-  error("Not implemented yet");
 
   if (setupEnv() != VISIT_OKAY)
   {
@@ -57,6 +57,8 @@ void libsimInterface::initInteractive()
 
   VisItInitializeSocketAndDumpSimFile("dolfin-hpc", "DOLFIN HPC In-situ viz",
 				      "/tmp/", NULL, NULL, NULL);
+
+  InsituData_.batch_ = false;
 
 }
 //-----------------------------------------------------------------------------
@@ -103,6 +105,11 @@ void libsimInterface::shutdown()
 void libsimInterface::batchRender(real t, uint tstep)
 {
   
+  if (!InsituData_.batch_)
+  {
+    error("VisIt/libsim not initialized in batch mode");
+  }
+
   InsituData_.t_ = t;
   InsituData_.tstep_ = tstep;
 
@@ -119,11 +126,17 @@ void libsimInterface::batchRender(real t, uint tstep)
   
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::ctrlLoop()
+void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
 {
-  error("Not implemented yet");
+  if (InsituData_.batch_)
+  {
+    error("VisIt/libsim not initialized in interactive mode");
+  }
 
-  int blocking = 0;
+  InsituData_.t_ = t;
+  InsituData_.tstep_ = tstep;
+
+  VisItTimeStepChanged();
 
   int visit_state = VisItDetectInput(blocking, -1);
 

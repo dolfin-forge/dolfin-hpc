@@ -426,6 +426,10 @@ AC_CONFIG_FILES([tests/Makefile\
 # Python
 AC_CONFIG_FILES([site-packages/Makefile])
 
+# Doxygen
+AC_CONFIG_FILES([doc/progr_reference/Doxyfile])
+
+
 AC_OUTPUT
 
 # Display help text

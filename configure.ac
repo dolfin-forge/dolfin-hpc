@@ -388,6 +388,14 @@ fi
 # Add variable for installation of Python modules
 AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])
 
+
+# Checks for Doxygen
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+if test -n "$DOXYGEN"; then
+  AC_CHECK_PROGS([DOXYGEN_DEPS], [dot])
+fi
+AM_CONDITIONAL([ENABLE_DOXYGEN], [test -n "$DOXYGEN_DEPS"])
+
 AC_CONFIG_HEADERS([include/dolfin/config/dolfin_config.h])
 AC_CONFIG_FILES([Makefile src/Makefile\
                  src/adaptivity/Makefile\
@@ -427,8 +435,8 @@ AC_CONFIG_FILES([tests/Makefile\
 AC_CONFIG_FILES([site-packages/Makefile])
 
 # Doxygen
-AC_CONFIG_FILES([doc/progr_reference/Doxyfile])
-
+AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
+		 doc/progr_reference/Makefile])
 
 AC_OUTPUT
 

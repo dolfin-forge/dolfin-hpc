@@ -194,7 +194,7 @@ void libsimInterface::batchRender(real t, uint tstep)
   error("VisIt/libsim is required for in-situ viz");
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::ctrlLoop()
+void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
 {
   error("VisIt/libsim is required for in-situ viz");
 }

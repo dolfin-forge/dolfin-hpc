@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-08-23
-// Last changed: 2017-12-31
+// Last changed: 2018-01-01
 
 #ifndef __DOLFIN_LIBSIM_INTERFACE_H
 #define __DOLFIN_LIBSIM_INTERFACE_H
@@ -55,6 +55,8 @@ namespace dolfin
   private:
 
     static int setupEnv();
+
+    static int setupCallbacks();
 
     // Simulation state (running)
     static int runflag;

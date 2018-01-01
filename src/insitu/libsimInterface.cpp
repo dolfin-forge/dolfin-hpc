@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-05-24
-// Last changed: 2017-12-31
+// Last changed: 2018-01-01
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
@@ -38,10 +38,10 @@ void libsimInterface::initBatch()
     error("VisIt/libsim runtime initialization error");
   }
 
-  VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
-  VisItSetGetDomainList(libsimGetDomain, &InsituData_);
-  VisItSetGetVariable(libsimGetFunction, &InsituData_);
-  VisItSetGetMesh(libsimGetMesh, &InsituData_);
+  if (setupCallbacks() != VISIT_OKAY)
+  {
+    error("VisIt/libsim callbacks initialization error");
+  }
 
   InsituData_.batch_ = true;
 
@@ -93,6 +93,16 @@ int libsimInterface::setupEnv()
 
   return VISIT_OKAY;
 
+}
+//-----------------------------------------------------------------------------
+int libsimInterface::setupCallbacks()
+{
+  VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
+  VisItSetGetDomainList(libsimGetDomain, &InsituData_);
+  VisItSetGetVariable(libsimGetFunction, &InsituData_);
+  VisItSetGetMesh(libsimGetMesh, &InsituData_);
+
+  return VISIT_OKAY;
 }
 //-----------------------------------------------------------------------------
 void libsimInterface::shutdown()
@@ -157,6 +167,11 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
     }
     message("VisIt connected!");
 
+    if (setupCallbacks() != VISIT_OKAY)
+    {
+      error("VisIt/libsim callbacks initialization error");
+    }
+    
 
     while(1) 
     {

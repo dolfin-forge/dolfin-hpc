@@ -68,7 +68,7 @@ public:
     filename << "solution" << std::setfill('0') << std::setw(6) 
 	     << step << ".png" << std::ends;
     
-    VisItAddPlot("Pseudocolor", "U");
+    VisItAddPlot("Pseudocolor", "U_magnitude");
     VisItDrawPlots();
     VisItSaveWindow(filename.str().c_str(), 800, 600, VISIT_IMAGEFORMAT_PNG);
     VisItDeleteActivePlots();

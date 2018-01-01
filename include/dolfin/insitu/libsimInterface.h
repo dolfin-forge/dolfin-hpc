@@ -286,7 +286,6 @@ namespace dolfin
 
 	// TODO Check if VisIt can handle u->value_size() > 3
 	real *values = new real[u->value_size() * mesh->num_vertices()];
-	memset(values, u->value_size() * mesh->num_vertices(), sizeof(real));
 	real *vp = values;
 
 	for (VertexIterator v(*(mesh)); !v.end(); ++v)

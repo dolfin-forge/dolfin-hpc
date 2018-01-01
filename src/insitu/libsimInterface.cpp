@@ -148,6 +148,8 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
 
   VisItTimeStepChanged();
 
+  VisItUpdatePlots();
+
   int visit_state = VisItDetectInput(blocking, -1);
 
   if (visit_state < 0) 

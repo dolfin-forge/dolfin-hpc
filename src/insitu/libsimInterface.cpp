@@ -24,7 +24,7 @@ libsimInterface::libsimData libsimInterface::InsituData_;
 #ifdef HAVE_LIBSIM
 
 //-----------------------------------------------------------------------------
-void libsimInterface::initBatch()
+void libsimInterface::init(Mode mode, bool debug)
 {
 
   if (setupEnv() != VISIT_OKAY)
@@ -32,6 +32,32 @@ void libsimInterface::initBatch()
     error("VisIt/libsim environment initialization error");
   }
 
+  if (debug) 
+  {
+    VisItSetOptions("-debug 5 -clobber_vlogs");
+  }
+
+  switch(mode)
+  {
+  case batch:
+    if (initBatch() != VISIT_OKAY)
+    {
+      error("VisIt/libsim batch mode initialization error");
+    }
+    break;
+  case interactive:
+    if (initInteractive() != VISIT_OKAY)
+    {
+      error("VisIt/libsim interactive mode initialization error");
+    }
+    break;
+  default:
+    error("Invalid VisIt/libsim mode");
+  }
+} 
+//-----------------------------------------------------------------------------
+int libsimInterface::initBatch()
+{
 
   if (VisItInitializeRuntime() != VISIT_OKAY)
   {
@@ -45,21 +71,25 @@ void libsimInterface::initBatch()
 
   InsituData_.batch_ = true;
 
+  return VISIT_OKAY;
+  
 }
 //-----------------------------------------------------------------------------
-void libsimInterface::initInteractive()
+int libsimInterface::initInteractive()
 {
 
-  if (setupEnv() != VISIT_OKAY)
+  if (VisItInitializeSocketAndDumpSimFile("sim", 
+					  "DOLFIN HPC In-situ viz",
+					  "/tmp", 
+					  NULL, NULL, NULL) != VISIT_OKAY) 
   {
-    error("VisIt/libsim environment initialization error");
+    error("VisIt/libsim socket initialization error"); 
   }
-
-  VisItInitializeSocketAndDumpSimFile("dolfin-hpc", "DOLFIN HPC In-situ viz",
-				      "/tmp/", NULL, NULL, NULL);
-
+  
   InsituData_.batch_ = false;
 
+  return VISIT_OKAY;
+  
 }
 //-----------------------------------------------------------------------------
 int libsimInterface::setupEnv()
@@ -191,12 +221,7 @@ void libsimInterface::ctrlLoop(real t, uint tstep, int blocking)
 }
 //-----------------------------------------------------------------------------
 #else
-void libsimInterface::initBatch()
-{
-  error("VisIt/libsim is required for in-situ viz");
-}
-//-----------------------------------------------------------------------------
-void libsimInterface::initInteractive()
+void libsimInterface::init(Mode mode, bool debug)
 {
   error("VisIt/libsim is required for in-situ viz");
 }

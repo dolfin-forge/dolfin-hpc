@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   if (visit_path == "")
     error("Parameter 'VisIt directory' not set properly");
   
-  libsimInterface::initBatch();
+  libsimInterface::init(libsimInterface::batch);
 
   // Create mesh
   Mesh mesh("UnitSquareMesh_32x32.xml");

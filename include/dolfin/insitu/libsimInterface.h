@@ -33,11 +33,14 @@ namespace dolfin
   class libsimInterface
   {
   public:
-        
-    static void initBatch();
-    
-    static void initInteractive();
 
+    enum Mode
+    {
+      batch, interactive
+    };
+
+    static void init(Mode mode, bool debug = false);
+        
     static void shutdown();
 
     static void batchRender(real t = 0.0, uint tstep = 0.0);
@@ -53,6 +56,10 @@ namespace dolfin
     static void addPipeline(libsimPipeline& pipeline);
 
   private:
+
+    static int initBatch();
+    
+    static int initInteractive();
 
     static int setupEnv();
 

@@ -120,6 +120,11 @@ uint MeshEntity::owner() const
   return (distdata_ ? (*distdata_)[tdim_].get_owner(index_) : MPI::rank());
 }
 //-----------------------------------------------------------------------------
+_set<uint> const * MeshEntity::adjacents() const
+{
+  return (distdata_ ? (*distdata_)[tdim_].ptr_shared_adj(index_) : NULL);
+}
+//-----------------------------------------------------------------------------
 bool MeshEntity::has_all_vertices_shared() const
 {
   if(distdata_ != NULL)

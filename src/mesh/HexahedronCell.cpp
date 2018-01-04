@@ -19,12 +19,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 
 // UFC: Number of Entities
-uint const HexahedronCell::NE[4] =
-{ 8, 12, 6, 1 };
-
-// UFC: Number of Vertices (per entity)
-uint const HexahedronCell::NV[4] =
-{ 1, 2, 4, 8 };
+uint const HexahedronCell::NE[4][4] =
+{ { 1, 0, 0, 0 }, { 2, 1, 0, 0 }, { 4, 4, 1, 0 }, { 8, 12, 6, 1 } };
 
 // UFC: Vertex Coordinates
 real const HexahedronCell::VC[8][3] =
@@ -71,13 +67,20 @@ uint HexahedronCell::dim() const
 uint HexahedronCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NE[dim];
+  return NE[3][dim];
+}
+//-----------------------------------------------------------------------------
+uint HexahedronCell::num_entities(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD);
+  dolfin_assert(d1 <= TD);
+  return NE[d0][d1];
 }
 //-----------------------------------------------------------------------------
 uint HexahedronCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NV[dim];
+  return NE[dim][0];
 }
 //-----------------------------------------------------------------------------
 uint HexahedronCell::orientation(Cell const& cell) const
@@ -518,7 +521,7 @@ uint HexahedronCell::num_refined_vertices(uint dim) const
 real HexahedronCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -542,7 +545,7 @@ real HexahedronCell::volume(MeshEntity const& entity) const
 real HexahedronCell::diameter(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -586,7 +589,7 @@ real HexahedronCell::inradius(MeshEntity const& entity) const
 void HexahedronCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -670,7 +673,7 @@ real HexahedronCell::facet_area(Cell const& cell, uint facet) const
 bool HexahedronCell::intersects(MeshEntity const& e, Point const& p) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the vertices
   /*
@@ -695,7 +698,7 @@ bool HexahedronCell::intersects(MeshEntity const& e, Point const& p1,
                                 Point const& p2) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the vertices
   /*

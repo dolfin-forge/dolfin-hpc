@@ -24,10 +24,7 @@ class QuadrilateralCell : public CellType
   static uint const TD = 2;
 
   // UFC: Number of Entities
-  static uint const NE[3];
-
-  // UFC: Number of Vertices (per entity)
-  static uint const NV[3];
+  static uint const NE[3][3];
 
   // UFC: Vertex Coordinates
   static real const VC[4][2];
@@ -54,6 +51,9 @@ public:
 
   /// Return number of entitites of given topological dimension
   uint num_entities(uint dim) const;
+
+  /// Return number of entities of given topological dimensions
+  uint num_entities(uint d0, uint d1) const;
 
   /// Return number of vertices for entity of given topological dimension
   uint num_vertices(uint dim) const;

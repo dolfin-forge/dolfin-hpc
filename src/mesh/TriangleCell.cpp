@@ -28,12 +28,8 @@ namespace dolfin
 //--- STATIC ------------------------------------------------------------------
 
 // UFC: Number of Entities
-uint const TriangleCell::NE[3] =
-{ 3, 3, 1 };
-
-// UFC: Number of Vertices (per entity)
-uint const TriangleCell::NV[3] =
-{ 1, 2, 3 };
+uint const TriangleCell::NE[3][3] =
+{ { 1, 0, 0 }, { 2, 1, 0 }, { 3, 3, 1 } } ;
 
 // UFC: Vertex Coordinates
 real const TriangleCell::VC[3][2] =
@@ -65,13 +61,20 @@ uint TriangleCell::dim() const
 uint TriangleCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NE[dim];
+  return NE[2][dim];
+}
+//-----------------------------------------------------------------------------
+uint TriangleCell::num_entities(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD);
+  dolfin_assert(d1 <= TD);
+  return NE[d0][d1];
 }
 //-----------------------------------------------------------------------------
 uint TriangleCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NV[dim];
+  return NE[dim][0];
 }
 //-----------------------------------------------------------------------------
 uint TriangleCell::orientation(Cell const& cell) const
@@ -267,7 +270,7 @@ uint TriangleCell::num_refined_vertices(uint dim) const
 real TriangleCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -308,7 +311,7 @@ real TriangleCell::volume(MeshEntity const& entity) const
 real TriangleCell::diameter(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -331,7 +334,7 @@ real TriangleCell::diameter(MeshEntity const& entity) const
 real TriangleCell::circumradius(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -361,7 +364,7 @@ real TriangleCell::circumradius(MeshEntity const& entity) const
 real TriangleCell::inradius(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   // Get the coordinates of the three vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -391,7 +394,7 @@ real TriangleCell::inradius(MeshEntity const& entity) const
 void TriangleCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[2][0]);
 
   MeshGeometry const& geometry = entity.mesh().geometry();
   uint const* vertices = entity.entities(0);
@@ -485,7 +488,7 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[2][0]);
 
   // Get mesh geometry
   MeshGeometry const& geometry = e.mesh().geometry();
@@ -563,7 +566,7 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p1,
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[2][0]);
 
   // Get mesh geometry
   MeshGeometry const& geometry = e.mesh().geometry();

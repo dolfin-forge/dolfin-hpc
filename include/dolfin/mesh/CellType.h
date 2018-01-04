@@ -88,8 +88,11 @@ public:
   /// Return dimension of Euclidean space
   inline uint space_dim() const { return std::max(this->dim(), 1u); }
 
-  /// Return number of entitites of given topological dimension
+  /// Return number of entities of given topological dimension
   virtual uint num_entities(uint dim) const = 0;
+
+  /// Return number of entities of given topological dimensions
+  virtual uint num_entities(uint d0, uint d1) const = 0;
 
   /// Return number of vertices for entity of given topological dimension
   virtual uint num_vertices(uint dim) const = 0;

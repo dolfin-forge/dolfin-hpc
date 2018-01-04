@@ -29,12 +29,8 @@ namespace dolfin
 //--- STATIC ------------------------------------------------------------------
 
 // UFC: Number of Entities
-uint const TetrahedronCell::NE[4] =
-{ 4, 6, 4, 1 };
-
-// UFC: Number of Vertices (per entity)
-uint const TetrahedronCell::NV[4] =
-{ 1, 2, 3, 4 };
+uint const TetrahedronCell::NE[4][4] =
+{ { 1, 0, 0, 0 }, { 2, 1, 0, 0 }, { 3, 3, 1, 0 }, { 4, 6, 4, 1 } };
 
 // UFC: Vertex Coordinates
 real const TetrahedronCell::VC[4][3] =
@@ -74,13 +70,20 @@ uint TetrahedronCell::dim() const
 uint TetrahedronCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NE[dim];
+  return NE[3][dim];
+}
+//-----------------------------------------------------------------------------
+uint TetrahedronCell::num_entities(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD);
+  dolfin_assert(d1 <= TD);
+  return NE[d0][d1];
 }
 //-----------------------------------------------------------------------------
 uint TetrahedronCell::num_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
-  return NV[dim];
+  return NE[dim][0];
 }
 //-----------------------------------------------------------------------------
 uint TetrahedronCell::orientation(Cell const& cell) const
@@ -438,7 +441,7 @@ uint TetrahedronCell::num_refined_vertices(uint dim) const
 real TetrahedronCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -468,7 +471,7 @@ real TetrahedronCell::volume(MeshEntity const& entity) const
 real TetrahedronCell::diameter(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -507,7 +510,7 @@ real TetrahedronCell::diameter(MeshEntity const& entity) const
 real TetrahedronCell::circumradius(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the four vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -567,7 +570,7 @@ real TetrahedronCell::inradius(MeshEntity const& entity) const
 void TetrahedronCell::midpoint(MeshEntity const& entity, real * p) const
 {
   dolfin_assert(entity.dim() == TD);
-  dolfin_assert(entity.num_entities(0) == NE[0]);
+  dolfin_assert(entity.num_entities(0) == NE[3][0]);
 
   // Get the coordinates of the vertices
   MeshGeometry const& geometry = entity.mesh().geometry();
@@ -647,7 +650,7 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
 {
   // Adapted from gts_point_is_in_triangle from GTS
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[3][0]);
 
   // Get global index of vertices of the tetrahedron
   uint const ort = orientation((Cell&) e);
@@ -681,7 +684,7 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p1,
                                  Point const& p2) const
 {
   dolfin_assert(e.dim() == TD);
-  dolfin_assert(e.num_entities(0) == NE[0]);
+  dolfin_assert(e.num_entities(0) == NE[3][0]);
 
   error("Collision of tetrahedron with segment not implemented");
   return false;

@@ -218,6 +218,7 @@ namespace dolfin
 	    break;
 	  case CellType::tetrahedron:
 	    cell_type = VISIT_CELL_TET;
+	    break;
 	  default:
 	    error("Unsupported (insitu) mesh cell type");
 	    break;

@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2017-08-23
-// Last changed: 2018-01-01
+// Last changed: 2018-01-05
 
 #ifndef __DOLFIN_LIBSIM_INTERFACE_H
 #define __DOLFIN_LIBSIM_INTERFACE_H
@@ -54,6 +54,10 @@ namespace dolfin
     static void addData(Mesh& mesh, std::string name);
 
     static void addPipeline(libsimPipeline& pipeline);
+
+    static void clearData();
+    
+    static void clearPipeline();
 
   private:
 
@@ -365,6 +369,16 @@ namespace dolfin
     InsituData_.pipelines_.push_back(&pipeline);
   }
 
+  inline void libsimInterface::clearData()
+  {
+    InsituData_.mesh_list_.clear();
+    InsituData_.function_list_.clear();
+  }
+
+  inline void libsimInterface::clearPipeline()
+  {
+    InsituData_.pipelines_.clear();
+  }
 }
 
 #endif

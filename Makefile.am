@@ -9,6 +9,10 @@ if ENABLE_PYTHON_MODULES
 SUBDIRS += site-packages
 endif
 
+if ENABLE_DOXYGEN
+SUBDIRS += doc/progr_reference
+endif
+
 dist_data_DATA = regen.sh
 
 EXTRA_DIST = data/meshes/aneurysm.xml.gz\

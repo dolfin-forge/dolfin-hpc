@@ -452,7 +452,7 @@ void XMLMesh::endMesh()
     }
     delete[] connectivity;
     editor_->close();
-    mesh_ = new_mesh;
+    mesh_.swap(new_mesh);
 
     sendbuf.clear();
     delete[] recvbuf_v;

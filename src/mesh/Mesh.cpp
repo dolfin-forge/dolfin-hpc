@@ -59,18 +59,22 @@ Mesh::Mesh(CellType const& type, Space const& space) :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(Mesh const& mesh) :
-    Variable("mesh", "DOLFIN mesh"),
-    cell_type_(NULL),
-    topology_(),
-    space_(NULL),
-    geometry_(),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
+Mesh::Mesh(Mesh const& other) :
+    Variable(other.name(), other.label()),
+    cell_type_(cloneptr(other.cell_type_)),
+    topology_(other.topology_),
+    space_(cloneptr(other.space_)),
+    geometry_(other.geometry_),
+    exterior_boundary_(copyptr(other.exterior_boundary_)),
+    interior_boundary_(copyptr(other.interior_boundary_)),
+    intersection_detector_(copyptr(other.intersection_detector_)),
+    timestamp_(other.timestamp_)
 {
-  *this = mesh;
+  for(Array<MappedManifold *>::iterator it = other.periodic_mappings_.begin();
+      it != other.periodic_mappings_.end(); ++it)
+  {
+    periodic_mappings_.push_back(new MappedManifold(*this, (*it)->subdomain()));
+  }
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
@@ -92,29 +96,6 @@ Mesh::Mesh(std::string const& filename) :
 Mesh::~Mesh()
 {
   clear();
-}
-//-----------------------------------------------------------------------------
-Mesh const& Mesh::operator=(Mesh const& other)
-{
-  if (this == &other) return *this;
-
-  clear();
-
-  rename(other.name(), other.label());
-
-  if (other.cell_type_) { cell_type_  = other.cell_type_->clone(); }
-  topology_ = other.topology_;
-  if (other.space_)     { space_      = other.space_->clone(); }
-  geometry_ = other.geometry_;
-  timestamp_ = other.timestamp_;
-
-  for(Array<MappedManifold *>::iterator it = other.periodic_mappings_.begin();
-      it != periodic_mappings_.end(); ++it)
-  {
-    PeriodicSubDomain const& p = (*it)->subdomain();
-    periodic_mappings_ .push_back(new MappedManifold(*this, p));
-  }
-  return *this;
 }
 //-----------------------------------------------------------------------------
 void Mesh::swap(Mesh& other)

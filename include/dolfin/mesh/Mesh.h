@@ -85,9 +85,6 @@ public:
   /// Destructor
   virtual ~Mesh();
 
-  /// Assignment
-  Mesh const& operator=(Mesh const& mesh);
-
   /// Swap instances
   void swap(Mesh& other);
 
@@ -282,6 +279,9 @@ private:
   mutable Array<MappedManifold *> periodic_mappings_;
 
   int timestamp_;
+
+  /// Assignment (disabled)
+  Mesh const& operator=(Mesh const& other) { return *this; }
 
 };
 

@@ -29,9 +29,23 @@ struct Clonable
 
 };
 
+/// Clone if non-NULL, return NULL otherwise
+template <class CloneT>
+inline static CloneT * copyptr(CloneT const * p1)
+{
+  return (p1 ? new CloneT(*p1) : NULL);
+}
+
+/// Clone if non-NULL, return NULL otherwise
+template <class CloneT>
+inline static CloneT * cloneptr(CloneT const * p1)
+{
+  return (p1 ? p1->clone() : NULL);
+}
+
 /// Clone second argument into first argument if non-NULL
 template <class CloneT>
-static void cloneptr(CloneT *& p0, CloneT const * p1)
+inline static void cloneptr(CloneT *& p0, CloneT const * p1)
 {
   dolfin_assert(p0 == NULL);
   if (p1 != NULL) { p0 = p1->clone(); }
@@ -39,7 +53,7 @@ static void cloneptr(CloneT *& p0, CloneT const * p1)
 
 /// Clone second argument into first argument if non-NULL
 template <class CloneT>
-static void cloneptr(CloneT const *& p0, CloneT const * p1)
+inline static void cloneptr(CloneT const *& p0, CloneT const * p1)
 {
   dolfin_assert(p0 == NULL);
   if (p1 != NULL) { p0 = p1->clone(); }

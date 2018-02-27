@@ -54,6 +54,9 @@ public:
   /// Create boundary mesh from subdomain of given boundary mesh
   BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain, bool inside);
 
+  /// Copy constructor
+  BoundaryMesh(BoundaryMesh const& other);
+
   /// Destructor
   ~BoundaryMesh();
 

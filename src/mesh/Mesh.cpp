@@ -30,9 +30,12 @@
 namespace dolfin
 {
 
+#define DOLFIN_DEFAULT_MESH_NAME  "mesh"
+#define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
+
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
-    Variable("mesh", "DOLFIN mesh"),
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     cell_type_(NULL),
     topology_(),
     space_(NULL),
@@ -46,7 +49,7 @@ Mesh::Mesh() :
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& type, Space const& space) :
-    Variable("mesh", "DOLFIN mesh"),
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     cell_type_(type.clone()),
     topology_(type, !this->reordering()),
     space_(space.clone()),
@@ -78,7 +81,7 @@ Mesh::Mesh(Mesh const& other) :
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
-    Variable("mesh", "DOLFIN mesh"),
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
     cell_type_(NULL),
     topology_(),
     space_(NULL),

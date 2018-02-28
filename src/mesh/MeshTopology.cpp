@@ -53,6 +53,7 @@ MeshTopology::MeshTopology(CellType const& type, bool frozen) :
 }
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
+    type_(NULL),
     dim_(0),
     num_vertices_(0),
     ini_vertices_(false),

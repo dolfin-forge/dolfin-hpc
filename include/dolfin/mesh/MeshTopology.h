@@ -60,7 +60,7 @@ class MeshTopology: public Clonable<MeshTopology>
 public:
 
   /// Create mesh topology for given cell type
-  MeshTopology(CellType const& type, bool frozen = false);
+  MeshTopology(CellType const& type, bool frozen);
 
   /// Copy constructor
   MeshTopology(MeshTopology const& other);

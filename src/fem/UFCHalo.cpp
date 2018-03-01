@@ -205,7 +205,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
 
 #ifdef HAVE_MPI
 
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const gdim = mesh.geometry().dim();
   uint const facet_dim = mesh.type().facet_dim();
   DistributedData& distdata = mesh.distdata()[facet_dim];

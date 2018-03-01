@@ -71,7 +71,7 @@ void SparsityPatternBuilder::build(GenericSparsityPattern& sparsity_pattern,
   // Build sparsity pattern for interior facet integrals
   if (ufc.form.num_interior_facet_integrals() != 0)
   {
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
 
     for (FacetIterator facet(mesh); !facet.end(); ++facet)
     {

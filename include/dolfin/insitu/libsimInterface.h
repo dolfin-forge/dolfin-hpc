@@ -103,7 +103,7 @@ namespace dolfin
 	  VisIt_MeshMetaData_setMeshType(msh, VISIT_MESHTYPE_UNSTRUCTURED);
 	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_->geometry().dim());
 	  VisIt_MeshMetaData_setTopologicalDimension(msh,
-						     d->mesh_->topology().dim());
+						     d->mesh_->topology_dimension());
 	  VisIt_MeshMetaData_setNumDomains(msh, PE::size());
 	  VisIt_SimulationMetaData_addMesh(md, msh);
 	}
@@ -179,7 +179,7 @@ namespace dolfin
       {
 
 	VisIt_VariableData_setDataD(coords, VISIT_OWNER_SIM,
-				    d->mesh_->topology().dim(),
+				    d->mesh_->topology_dimension(),
 				    d->mesh_->num_vertices(),
 				    d->mesh_->geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);

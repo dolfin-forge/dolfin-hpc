@@ -114,7 +114,7 @@ void DMesh::init(Mesh& mesh)
 
   _cell_type = CellType::create(mesh.type().cellType());
   _is_distributed = mesh.is_distributed();
-  _tdim = mesh.topology().dim();
+  _tdim = mesh.topology_dimension();
   _gdim = mesh.geometry().dim();
 
   // Since the mesh is linear numbered, the maximum global index assigned is

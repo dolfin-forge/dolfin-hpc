@@ -238,7 +238,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   BoundaryMesh& exterior_boundary = mesh.exterior_boundary();
   uint const N = exterior_boundary.num_cells();
   if (N == 0)
@@ -317,7 +317,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   tic();
 
   Mesh& mesh = dofmaps[0].mesh();
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const N = mesh.size(mesh.type().facet_dim());
   uint const form_rank = ufc.form.rank();
   uint const coef_size = coefficients.size();

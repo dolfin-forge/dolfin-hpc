@@ -596,7 +596,7 @@ void MPIMeshCommunicator::check(Mesh& mesh)
 {
   if (!mesh.is_distributed()) return;
 
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const edim = entity_dimension<E>(mesh);
 
   if (edim > tdim)
@@ -801,7 +801,7 @@ template void MPIMeshCommunicator::check<Cell>  (Mesh& Mesh);
 //-----------------------------------------------------------------------------
 void MPIMeshCommunicator::check(Mesh& mesh)
 {
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   check<Vertex>(mesh);
   if (tdim > 1) check<Edge>(mesh);
   if (tdim > 2) check<Face>(mesh);

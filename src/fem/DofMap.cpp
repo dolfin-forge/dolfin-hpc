@@ -451,7 +451,7 @@ bool DofMap::check(bool throw_error)
   BoundaryMesh& boundary = mesh().interior_boundary();
   Mesh& mesh = this->mesh();
   MeshDistributedData& distdata = mesh.distdata();
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
 
   if (this->num_facet_dofs() == 0)
   {

@@ -87,7 +87,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
 
   tic();
   //---------------------------------------------------------------------------
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
   uint const gdim = mesh.geometry().dim();
   uint const rank = dolfin::MPI::rank();

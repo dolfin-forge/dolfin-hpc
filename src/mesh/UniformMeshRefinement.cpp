@@ -30,7 +30,7 @@ template<class E>
 void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 {
   Mesh& refined_mesh = editor.mesh();
-  uint const tdim = refined_mesh.topology().dim();
+  uint const tdim = refined_mesh.topology_dimension();
   uint const edim = entity_dimension<E>(mesh);
   if (tdim > edim && mesh.type().refinement_needs_entities(edim))
   {

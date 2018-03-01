@@ -185,7 +185,7 @@ void ZoltanInterface::partitionZoltanNumEdges(void *data,
 					      int *ierr)
 {
   Mesh *mesh = (Mesh *) data;
-  uint const tdim = mesh->topology().dim();
+  uint const tdim = mesh->topology_dimension();
   if (num_obj != mesh->num_cells() || num_gid_entries > 1)
   {
     *ierr = ZOLTAN_FATAL;

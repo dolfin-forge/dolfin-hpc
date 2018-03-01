@@ -53,7 +53,7 @@ DOLFIN_START_TEST( test_MeshData_iterator )
       uint ii = d.size<uint, Cell>(); ck_assert(ii == 2);
       for (MeshData::iterator<uint, Cell> it(d); it.valid(); ++it, --ii)
       {
-        ck_assert(it->dim()  == m.topology().dim());
+        ck_assert(it->dim()  == m.topology_dimension());
         ck_assert(it->size() == f0.size());
         begin("%u", it.pos()); it->disp(); endblock();
         for (Cell::iterator c(m); !c.end(); ++c)

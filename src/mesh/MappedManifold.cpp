@@ -52,7 +52,7 @@ void MappedManifold::init()
   Mesh& globalmesh = this->mesh();
   BoundaryMesh& boundary = globalmesh.exterior_boundary();
 
-  uint const tdim = globalmesh.topology().dim();
+  uint const tdim = globalmesh.topology_dimension();
   uint const gdim = globalmesh.geometry().dim();
   MeshEditor editor(*this, boundary.type().cellType(),
                     boundary.geometry().dim());

@@ -388,7 +388,7 @@ void SlipBC::applyNodeBC(GenericMatrix& A, GenericVector& b, Mesh const& mesh,
   // The node type defines the number of discriminated surfaces at the node.
   // Therefore it is the number of constrained directions up to the topological
   // dimension
-  uint const gdim = mesh.topology().dim();
+  uint const gdim = mesh.topology_dimension();
   uint const n_type = std::min(node_normal->node_type(node_id), gdim);
   dolfin_assert(n_type > 0);
 

@@ -80,7 +80,7 @@ void VertexNormal::getFacetData(VertexNormal::Type type, Mesh& mesh,
                                 BoundaryMesh& boundary, Vertex& bvertex,
                                 Array<real>& normals, Array<real>& weights)
 {
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const gdim = mesh.geometry().dim();
   for (CellIterator bcell(bvertex); !bcell.end(); ++bcell)
   {
@@ -127,7 +127,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
 {
   message(1, "VertexNormal: Compute normals");
 
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const gdim = mesh.geometry().dim();
   // Important: make sure facet to cell connectivities are initialized
   BoundaryMesh& boundary = mesh.exterior_boundary();

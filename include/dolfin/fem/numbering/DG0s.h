@@ -49,7 +49,7 @@ public:
   {
     DofNumbering::init();
     //---
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     if (ufc_dofmap.local_dimension() != 1)
     {
       error("DG0sNumbering : local dimension %u != 1",

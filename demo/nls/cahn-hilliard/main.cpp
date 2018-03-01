@@ -29,12 +29,12 @@ class CahnHilliardEquation : public NonlinearProblem, public Parametrized
          : assembler(mesh), reset_Jacobian(true)
     {
       // Create forms
-      if(mesh.topology().dim() == 2)
+      if(mesh.topology_dimension() == 2)
       {
         a = new CahnHilliard2DBilinearForm(u, lambda, muFactor, dt, theta);
         L = new CahnHilliard2DLinearForm(u, u0, lambda, muFactor, dt, theta);
       }
-      else if(mesh.topology().dim() == 3)
+      else if(mesh.topology_dimension() == 3)
       {
         a = new CahnHilliard3DBilinearForm(u, lambda, muFactor, dt, theta);
         L = new CahnHilliard3DLinearForm(u, u0, lambda, muFactor, dt, theta);

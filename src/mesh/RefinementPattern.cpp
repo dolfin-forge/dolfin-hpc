@@ -13,7 +13,7 @@ namespace dolfin
 uint RefinementPattern::num_refined_vertices(Mesh const& mesh) const
 {
   uint val = 0;
-  for (uint i = 0; i <= mesh.topology().dim(); ++i)
+  for (uint i = 0; i <= mesh.topology_dimension(); ++i)
   {
     val += this->num_refined_vertices(i) * mesh.size(i);
   }

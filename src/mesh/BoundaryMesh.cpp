@@ -103,7 +103,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
 {
   Mesh& mesh = boundary.mesh();
   uint const gdim = mesh.geometry().dim();
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
 
   if (tdim == 1)
   {
@@ -234,7 +234,7 @@ bool BoundaryMesh::is_boundary_of_boundary() const
 void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
 {
   uint const gdim = mesh.geometry().dim();
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
 
   // If the boundary is full then no need to compute the facet map
   bool const full = interior && exterior;

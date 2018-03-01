@@ -209,7 +209,7 @@ void XMLFile::operator<<(Mesh& mesh)
     curr_offset += hdr.size();
     //-------------------------------------------------------------------------
     // Mesh properties
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     uint const gdim = mesh.geometry().dim();
     CellType::Type cell_type = mesh.type().cellType();
     std::string const cell_str(mesh.type().str());

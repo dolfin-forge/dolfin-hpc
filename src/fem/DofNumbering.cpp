@@ -32,7 +32,7 @@ namespace dolfin
 DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
 {
   DofNumbering * ret = NULL;
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   uint const num_verts = mesh.topology().global_size(0);
   uint const num_cells = mesh.topology().global_size(tdim);
 
@@ -223,7 +223,7 @@ void DofNumbering::disp() const
 //-----------------------------------------------------------------------------
 void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
 {
-  if (ufc_dofmap.topological_dimension() != mesh.topology().dim())
+  if (ufc_dofmap.topological_dimension() != mesh.topology_dimension())
   {
     error("DofNumbering::init : invalid topological dimension.");
   }
@@ -238,7 +238,7 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   }
 
   // Initialize mesh entities used by dof map
-  for (uint d = 0; d <= mesh.topology().dim(); ++d)
+  for (uint d = 0; d <= mesh.topology_dimension(); ++d)
   {
     if (ufc_dofmap.needs_mesh_entities(d))
     {

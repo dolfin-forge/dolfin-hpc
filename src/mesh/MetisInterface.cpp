@@ -79,7 +79,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
-  uint const tdim = mesh.topology().dim();
+  uint const tdim = mesh.topology_dimension();
   int ncells = mesh.num_cells();
 
   /*

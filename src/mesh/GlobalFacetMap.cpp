@@ -19,7 +19,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 GlobalFacetMap::GlobalFacetMap(Mesh& mesh) :
     mesh_(mesh),
-    tdim_(mesh_.topology().dim())
+    tdim_(mesh_.topology_dimension())
 {
   init();
 }

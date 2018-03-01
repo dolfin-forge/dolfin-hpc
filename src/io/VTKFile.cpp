@@ -861,7 +861,7 @@ template<class T>
 
     Mesh& mesh = meshfunction.mesh();
 
-    if (meshfunction.dim() == mesh.topology().dim())
+    if (meshfunction.dim() == mesh.topology_dimension())
     {
       // Write headers
       VTKHeaderOpen(mesh);

@@ -85,7 +85,7 @@ public:
     uint const pe_size = MPI::size();
     uint const rank = MPI::rank();
 
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     uint const local_dim = ufc_dofmap.local_dimension();
     uint * dofs = new uint[local_dim];
     uint const nb_facet_dofs = ufc_dofmap.num_facet_dofs();

@@ -101,7 +101,7 @@ namespace dolfin
 	{
 	  VisIt_MeshMetaData_setName(msh, "Mesh");
 	  VisIt_MeshMetaData_setMeshType(msh, VISIT_MESHTYPE_UNSTRUCTURED);
-	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_->geometry().dim());
+	  VisIt_MeshMetaData_setSpatialDimension(msh, d->mesh_->geometry_dimension());
 	  VisIt_MeshMetaData_setTopologicalDimension(msh,
 						     d->mesh_->topology_dimension());
 	  VisIt_MeshMetaData_setNumDomains(msh, PE::size());

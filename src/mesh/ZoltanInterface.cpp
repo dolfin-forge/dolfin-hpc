@@ -331,7 +331,7 @@ int ZoltanInterface::partitionZoltanNumGeom(void *data, int *ierr)
   Mesh *mesh = (Mesh *) data;
   *ierr = ZOLTAN_OK;
 
-  return mesh->geometry().dim();
+  return mesh->geometry_dimension();
 
 }
 //-----------------------------------------------------------------------------

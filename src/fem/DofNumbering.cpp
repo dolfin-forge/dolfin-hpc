@@ -227,11 +227,11 @@ void DofNumbering::init(Mesh& mesh, ufc::dofmap& ufc_dofmap)
   {
     error("DofNumbering::init : invalid topological dimension.");
   }
-  if (ufc_dofmap.geometric_dimension() != mesh.geometry().dim())
+  if (ufc_dofmap.geometric_dimension() != mesh.geometry_dimension())
   {
     error("DofNumbering::init : invalid topological dimension.");
   }
-  if (ufc_dofmap.topological_dimension() != mesh.geometry().dim())
+  if (ufc_dofmap.topological_dimension() != mesh.geometry_dimension())
   {
     error("DofNumbering::init : topological dimension != geometric dimension.\n"
           "Unfortunately FFC cannot generate that (yeah that sux poneys).");

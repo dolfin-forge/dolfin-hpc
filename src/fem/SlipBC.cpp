@@ -268,7 +268,7 @@ void SlipBC::applySlipBC(GenericMatrix& A, GenericVector& b,
                          BilinearForm const& form, ScratchSpace& scratch)
 {
   // Be careful for now
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   dolfin_assert(scratch.size == gdim);
 
   BoundaryMesh& boundary = mesh.exterior_boundary();

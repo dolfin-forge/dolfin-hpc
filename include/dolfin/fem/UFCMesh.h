@@ -28,7 +28,7 @@ public:
       mesh(&dolfin_mesh)
   {
     topological_dimension = mesh->topology_dimension();
-    geometric_dimension = mesh->geometry().dim();
+    geometric_dimension = mesh->geometry_dimension();
     num_entities = new uint[topological_dimension + 1];
     update();
   }
@@ -46,7 +46,7 @@ public:
       mesh(other.mesh)
   {
     topological_dimension = mesh->topology_dimension();
-    geometric_dimension = mesh->geometry().dim();
+    geometric_dimension = mesh->geometry_dimension();
     num_entities = new uint[topological_dimension + 1];
     update();
   }

@@ -891,7 +891,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   uint const type = BinaryFile::cell_type(BINARY_VERSION, mesh.type().cellType());
   uint const num_vertices = mesh.global_size(0);
   uint const num_cells = mesh.num_global_cells();

@@ -40,7 +40,7 @@ namespace dolfin {
     static void getTransformation( Cell const & c, real ** matrix, real ** vector )
     { 
       uint n = c.num_entities(0) - 1;
-      uint dim = c.mesh().geometry().dim();
+      uint dim = c.mesh().geometry_dimension();
       const uint * verts = c.entities(0);
       real * mat = new real[dim * n];
       real * vec = new real[dim];
@@ -69,7 +69,7 @@ namespace dolfin {
         getTransformation( c, &matrix, &vector );
 
       uint n = c.num_entities(0) - 1;
-      uint dim = c.mesh().geometry().dim();
+      uint dim = c.mesh().geometry_dimension();
       Point p;
 
       for ( uint row(0) ; row < dim ; ++row )

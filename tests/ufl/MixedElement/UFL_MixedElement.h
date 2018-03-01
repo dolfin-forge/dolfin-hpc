@@ -15,7 +15,7 @@ DOLFIN_START_TEST( test_UFL_MixedElement )
     UnitSquare mesh(4, 4);
 
     ufl::VectorElement Uspace(ufl::Family::CG, mesh.type(), 2,
-                              mesh.geometry().dim());
+                            mesh.geometry_dimension());
     Uspace.display();
 
     ufl::FiniteElement Pspace(ufl::Family::CG, mesh.type(), 1);

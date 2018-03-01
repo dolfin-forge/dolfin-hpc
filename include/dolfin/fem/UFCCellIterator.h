@@ -27,7 +27,7 @@ public:
     ufc_cell_.cell_shape = UFCCell::shape(mesh.type().cellType());
     ufc_cell_.num_vertices = mesh.type().num_entities(0);
     ufc_cell_.topological_dimension = mesh.topology_dimension();
-    ufc_cell_.geometric_dimension = mesh.geometry().dim();
+    ufc_cell_.geometric_dimension = mesh.geometry_dimension();
     // Entities
     ufc_cell_.entity_indices = new uint*[ufc_cell_.topological_dimension + 1];
     ufc_cell_.entity_indices[ufc_cell_.topological_dimension] = new uint[1];

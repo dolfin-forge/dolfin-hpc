@@ -119,7 +119,7 @@ void MeshSmoother::submesh(Mesh& sub,
   unsigned int current_vertex = 0;
   unsigned int current_cell = 0;
 
-  MeshEditor editor(sub, cell_type.cellType(), mesh.geometry().dim());
+  MeshEditor editor(sub, cell_type.cellType(), mesh.geometry_dimension());
 
   // Specify number of vertices and cells
   editor.init_vertices(nvertices);

@@ -207,7 +207,7 @@ void VTKFile::MeshWrite(Mesh& mesh) const
   // Open file
   FILE* fp = fopen(vtu_filename.c_str(), "a");
 
-  uint const d = mesh.geometry().dim();
+  uint const d = mesh.geometry_dimension();
   uint const num_mesh_verts = mesh.size(0);
   uint const num_mesh_cells = mesh.num_cells();
   uint const num_cell_verts = mesh.type().num_entities(0);

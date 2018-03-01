@@ -58,7 +58,7 @@ void NodeNormal::clear()
 //-----------------------------------------------------------------------------
 void NodeNormal::compute()
 {
-  uint const gdim = mesh_.geometry().dim();
+  uint const gdim = mesh_.geometry_dimension();
   if (basis().size() < gdim)
   {
     error("Invalid size of storage vector for basis functions in NodeNormal");
@@ -89,7 +89,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   //---------------------------------------------------------------------------
   uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   uint const rank = dolfin::MPI::rank();
   uint const pe_size = dolfin::MPI::size();
 

@@ -220,7 +220,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   }
 
   pm_idx_t *part = new pm_idx_t[mesh.size(0)];
-  pm_idx_t gdim =  static_cast<pm_idx_t>( mesh.geometry().dim() );
+  pm_idx_t gdim =  static_cast<pm_idx_t>( mesh.geometry_dimension() );
   pm_real_t *xdy = new pm_real_t[gdim * mesh.size(0)];
 
   i = 0;

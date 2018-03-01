@@ -63,7 +63,7 @@ void UFCHalo::init()
 
   // Clear data structures and define data padding
   clear();
-  uint const gdim = mesh_.geometry().dim();
+  uint const gdim = mesh_.geometry_dimension();
   uint const facet_dim = mesh_.type().facet_dim();
   DistributedData& distdata = mesh_.distdata()[facet_dim];
 
@@ -152,7 +152,7 @@ void UFCHalo::update(Facet& facet)
   real * r1 = &r_data1_[r_packet_size_ * it->second.second];
 
   // Update pointers to coordinates
-  uint const gdim = mesh_.geometry().dim();
+  uint const gdim = mesh_.geometry_dimension();
   for (uint i = 0; i < mesh_.type().num_entities(0); ++i)
   {
     cell0.coordinates[i] = r0;
@@ -206,7 +206,7 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
 #ifdef HAVE_MPI
 
   uint const tdim = mesh.topology_dimension();
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   uint const facet_dim = mesh.type().facet_dim();
   DistributedData& distdata = mesh.distdata()[facet_dim];
 

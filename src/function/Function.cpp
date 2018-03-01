@@ -339,7 +339,7 @@ void Function::evaluate(uint n, real* values, const real* x,
 void Function::eval(real* values, const real* x) const
 {
   // Find the cell that contains x
-  Point p(mesh_->geometry().dim(), x);
+  Point p(mesh_->geometry_dimension(), x);
   Array<uint> cells;
   mesh_->intersector().overlap(p, cells);
   if (cells.size() == 0)

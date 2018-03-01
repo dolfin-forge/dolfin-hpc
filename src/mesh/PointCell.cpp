@@ -142,7 +142,7 @@ void PointCell::midpoint(MeshEntity const& entity, real * p) const
   dolfin_assert(entity.dim() == 0);
   dolfin_assert(entity.num_entities(0) == 1);
   real const * p0 = entity.mesh().geometry().x(entity.index());
-  std::copy(p0, p0 + entity.mesh().geometry().dim(), p);
+  std::copy(p0, p0 + entity.mesh().geometry_dimension(), p);
 }
 //-----------------------------------------------------------------------------
 void PointCell::normal(Cell const& cell, uint facet, real * n) const

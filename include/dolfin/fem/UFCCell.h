@@ -132,7 +132,7 @@ inline void UFCCell::init(Cell& cell)
   topological_dimension = cell.dim();
 
   // Set geometric dimension
-  geometric_dimension = cell.mesh().geometry().dim();
+  geometric_dimension = cell.mesh().geometry_dimension();
 
   // Set entity indices
   entity_indices = new uint*[topological_dimension + 1];

@@ -109,6 +109,9 @@ public:
   /// Return mesh topology (const)
   MeshTopology const& topology() const;
 
+  /// Return topological dimension
+  uint topology_dimension() const;
+
   /// Return number of entities of given topological dimension
   uint size(uint dim) const;
 
@@ -177,6 +180,9 @@ public:
 
   /// Return mesh geometry (const)
   MeshGeometry const& geometry() const;
+
+  /// Return geometric dimension
+  uint geometry_dimension() const;
 
   //---
 

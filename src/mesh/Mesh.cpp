@@ -188,6 +188,11 @@ MeshTopology const& Mesh::topology() const
   return topology_;
 }
 //-----------------------------------------------------------------------------
+uint Mesh::topology_dimension() const
+{
+  return topology_.dim();
+}
+//-----------------------------------------------------------------------------
 uint Mesh::size(uint dim) const
 {
   return topology_.size(dim);
@@ -318,6 +323,11 @@ MeshGeometry& Mesh::geometry()
 MeshGeometry const& Mesh::geometry() const
 {
   return geometry_;
+}
+//-----------------------------------------------------------------------------
+uint Mesh::geometry_dimension() const
+{
+  return geometry_.dim();
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()

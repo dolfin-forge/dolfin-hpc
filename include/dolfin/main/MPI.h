@@ -147,6 +147,10 @@ private:
 
 typedef MPI::Communicator Comm;
 
+#define DOLFIN_COMM_WORLD MPI::DOLFIN_COMM_WORLD
+#define DOLFIN_COMM_SELF  MPI::DOLFIN_COMM_SELF
+#define DOLFIN_COMM       MPI::DOLFIN_COMM
+
 //-----------------------------------------------------------------------------
 
 #if HAVE_MPI

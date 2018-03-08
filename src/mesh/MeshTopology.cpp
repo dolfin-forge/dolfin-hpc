@@ -23,14 +23,15 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology(CellType const& type, bool frozen) :
+MeshTopology::MeshTopology(CellType const& type, Comm& comm, bool frozen) :
+    Distributed<MeshTopology>(comm),
     type_(type.clone()),
     dim_(type.dim()),
     frozen_(frozen),
     num_vertices_(0),
     ini_vertices_(false),
     connectivity_(new MeshConnectivity*[dim_ + 1]),
-    distdata_(NULL),
+    distdata_(this->distributed() ? new MeshDistributedData(dim_) : NULL),
     timestamp_(0)
 {
   for (uint d0 = 0; d0 <= dim_; ++d0)
@@ -41,6 +42,7 @@ MeshTopology::MeshTopology(CellType const& type, bool frozen) :
 }
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
+    Distributed<MeshTopology>(other),
     type_(cloneptr(other.type_)),
     dim_(other.dim_),
     frozen_(other.frozen_),
@@ -80,6 +82,7 @@ MeshTopology::~MeshTopology()
 void MeshTopology::swap(MeshTopology& other)
 {
   if (this == &other) return;
+  Distributed<MeshTopology>::swap(*this);
   std::swap(type_         , other.type_);
   std::swap(dim_          , other.dim_);
   std::swap(frozen_       , other.frozen_);
@@ -291,11 +294,6 @@ bool MeshTopology::entities_exist(uint dim) const
   dolfin_assert(dim <= dim_);
   return (dim == 0 ?
             (ini_vertices_ == true) : connectivity_[dim][0].is_initialized());
-}
-//-----------------------------------------------------------------------------
-void MeshTopology::set_distributed()
-{
-  if (distdata_ == NULL) distdata_ = new MeshDistributedData(dim_);
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const
@@ -737,6 +735,7 @@ int MeshTopology::token() const
 }
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology() :
+    Distributed<MeshTopology>(DOLFIN_COMM_SELF),
     type_(NULL),
     dim_(0),
     frozen_(false),

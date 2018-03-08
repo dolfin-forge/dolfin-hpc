@@ -26,7 +26,21 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype) :
     cell_index_(0),
     open_(false)
 {
-  init(mesh, ctype, EuclideanSpace(ctype.dim()));
+  init(mesh, ctype, EuclideanSpace(ctype.dim()), DOLFIN_COMM);
+}
+//-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm) :
+    mesh_(mesh),
+    cell_vertices_(NULL),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0),
+    open_(false)
+{
+  init(mesh, ctype, EuclideanSpace(ctype.dim()), comm);
 }
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
@@ -40,7 +54,22 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space) :
     cell_index_(0),
     open_(false)
 {
-  init(mesh, ctype, space);
+  init(mesh, ctype, space, DOLFIN_COMM);
+}
+//-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space,
+                       Comm& comm) :
+    mesh_(mesh),
+    cell_vertices_(NULL),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0),
+    open_(false)
+{
+  init(mesh, ctype, space, comm);
 }
 //-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
@@ -56,7 +85,24 @@ MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim) :
 {
   CellType * type = CellType::create(cell_type);
   EuclideanSpace space(gdim);
-  init(mesh, *type, space);
+  init(mesh, *type, space, DOLFIN_COMM);
+  delete type;
+}
+//-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm) :
+    mesh_(mesh),
+    cell_vertices_(NULL),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0),
+    open_(false)
+{
+  CellType * type = CellType::create(cell_type);
+  EuclideanSpace space(gdim);
+  init(mesh, *type, space, comm);
   delete type;
 }
 //-----------------------------------------------------------------------------
@@ -72,7 +118,7 @@ MeshEditor::MeshEditor(Mesh& mesh) :
     open_(false)
 {
   if (mesh.empty()) { error("MeshEditor : provided mesh is empty"); }
-  init(mesh, mesh.type(), mesh.space());
+  init(mesh, mesh.type(), mesh.space(), mesh.topology().comm());
 }
 //-----------------------------------------------------------------------------
 MeshEditor::~MeshEditor()
@@ -83,7 +129,8 @@ MeshEditor::~MeshEditor()
   }
 }
 //-----------------------------------------------------------------------------
-void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space)
+void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space,
+                      Comm& comm)
 {
   // Save mesh and dimension
   this->tdim_ = ctype.dim();
@@ -91,7 +138,7 @@ void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space)
 
   // Initialize the topology to the given cell type and space
   {
-    Mesh m(ctype, space); mesh.swap(m);
+    Mesh m(ctype, space, comm); mesh.swap(m);
     dolfin_assert(!mesh.empty());
     dolfin_assert(mesh.topology_dimension() == ctype.dim());
     dolfin_assert(mesh.geometry_dimension() == space.dim());

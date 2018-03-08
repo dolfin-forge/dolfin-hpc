@@ -163,7 +163,7 @@ bool PointCell::intersects(MeshEntity const& e, Point const& p1,
 //-----------------------------------------------------------------------------
 void PointCell::create_reference_cell(Mesh& mesh) const
 {
-  MeshEditor me(mesh, CellType::point, 1);
+  MeshEditor me(mesh, CellType::point, 1, DOLFIN_COMM_SELF);
   me.init_vertices(1);
   me.add_vertex(0, VC[0]);
   me.init_cells(1);

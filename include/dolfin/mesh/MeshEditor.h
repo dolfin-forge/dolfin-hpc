@@ -9,6 +9,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/Point.h>
 
@@ -25,14 +26,23 @@ class MeshEditor
 
 public:
 
-  /// Constructor for meshes given a cell type and default Euclidean space
+  /// Constructor for serial meshes given a cell type and default space
   MeshEditor(Mesh& mesh, CellType const& ctype);
 
-  /// Constructor for meshes given a cell type and a space definition
+  /// Constructor for serial meshes given a cell type and default space
+  MeshEditor(Mesh& mesh, CellType const& ctype, Comm& comm);
+
+  /// Constructor for serial meshes given a cell type and a space definition
   MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space);
 
-  /// Constructor for meshes with unique type of cell from factory function
+  /// Constructor for meshes given a cell type and a space definition
+  MeshEditor(Mesh& mesh, CellType const& ctype, Space const& space, Comm& comm);
+
+  /// Constructor for serial meshes with type of cell from factory function
   MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim);
+
+  /// Constructor for serial meshes with type of cell from factory function
+  MeshEditor(Mesh& mesh, CellType::Type cell_type, uint gdim, Comm& comm);
 
   /// Constructor using already initialized mesh.
   MeshEditor(Mesh& mesh);
@@ -76,10 +86,21 @@ public:
   /// Close mesh, finish editing
   void close();
 
+  //---------------------------------------------------------------------------
+
+  struct Parameters
+  {
+    CellType * ctype_;
+    Space    * space_;
+    Comm     * mcomm_;
+
+    Parameters() : ctype_(NULL), space_(NULL), mcomm_(NULL) {}
+  };
+
 private:
 
   /// Open mesh of given cell type and geometrical dimension
-  void init(Mesh& mesh, CellType const& ctype, Space const& space);
+  void init(Mesh& mesh, CellType const& ctype, Space const& space, Comm& comm);
 
   // Clear all data
   void clear();

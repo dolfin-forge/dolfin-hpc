@@ -27,14 +27,14 @@
 #include <dolfin/common/Array.h>
 #include <dolfin/common/Distributed.h>
 #include <dolfin/mesh/CellType.h>
-#include <dolfin/mesh/MeshConnectivity.h>
+#include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/MeshRenumber.h>
 
 namespace dolfin
 {
 
 class Mesh;
-class MeshConnectivity;
+class Connectivity;
 class MeshDistributedData;
 
 /**
@@ -55,6 +55,9 @@ class MeshDistributedData;
 
 class MeshTopology: public Clonable<MeshTopology>, public Distributed<MeshTopology>
 {
+  // Set max connectivity matrix dimension
+  static uint const CMAX = 4;
+
   // Save some limbo at MeshEntity construction until classes are rewritten
   friend class MeshEntity;
 
@@ -94,15 +97,15 @@ public:
   CellType const& type(uint i) const;
 
   /// Remap local entities of given dimension
-  void remap(uint dim,  Array<uint> const& mapping);
+  void remap(uint d0,  Array<uint> const& mapping);
 
   //--- Connectivity ----------------------------------------------------------
 
   /// Return connectivity for given pair of topological dimensions
-  MeshConnectivity& operator()(uint d0, uint d1);
+  Connectivity& operator()(uint d0, uint d1);
 
   /// Return connectivity for given pair of topological dimensions
-  MeshConnectivity const& operator()(uint d0, uint d1) const;
+  Connectivity const& operator()(uint d0, uint d1) const;
 
   /// Return topological dimension
   uint dim() const;
@@ -110,11 +113,11 @@ public:
   /// Return number of entities in the local topology for given dimension
   uint size(uint dim) const;
 
-  /// Return if connectivity for given pair is computed
-  bool is_computed(uint d0, uint d1) const;
+  /// Return pointer to connectivity for given pair
+  Connectivity * connectivity(uint d0, uint d1 = 0);
 
-  /// Return if entities exist
-  bool entities_exist(uint dim) const;
+  /// Return pointer to connectivity for given pair (const)
+  Connectivity const * connectivity(uint d0, uint d1 = 0) const;
 
   //--- Distributed data ------------------------------------------------------
 
@@ -160,7 +163,16 @@ private:
   //---------------------------------------------------------------------------
 
   /// Compute connectivity for given pair of topological dimensions
-  void compute_connectivity(uint d0, uint d1) const;
+  Connectivity const * compute(uint d0, uint d1) const;
+
+  /// Compute entities for given topological dimension
+  Connectivity const * entities(uint di) const;
+
+  /// Compute transpose for given pair of topological dimensions
+  Connectivity const * transpose(uint d0, uint d1) const;
+
+  /// Compute connectivity for given triple of topological dimensions
+  Connectivity const * intersection(uint d0, uint di, uint d1) const;
 
 public:
 
@@ -191,12 +203,8 @@ private:
   // Topology cannot be modified
   bool frozen_;
 
-  /// Number of mesh vertices
-  uint num_vertices_;
-  bool ini_vertices_;
-
   /// Connectivity for pairs of topological dimensions
-  MeshConnectivity ** connectivity_;
+  mutable Connectivity * C_[CMAX][CMAX];
 
   /// Distributed mesh topology data
   MeshDistributedData * distdata_;

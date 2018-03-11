@@ -316,7 +316,7 @@ bool CellType::check(Cell& cell) const
     return true;
   }
   bool ret = true;
-  if (cell.mesh().topology().is_computed(1, 0))
+  if (cell.mesh().topology().connectivity(1, 0))
   {
     uint const * cell_edges = cell.entities(1);
     dolfin_assert(cell_edges);

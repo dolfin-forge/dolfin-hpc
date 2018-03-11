@@ -7,6 +7,7 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
 EXTRA_DIST = algorithm/algorithm.h\
+             Connectivity/Connectivity.h\
              CellTypes/CellTypes.h\
              EntityKey/EntityKey.h\
              MeshData/MeshData.h\

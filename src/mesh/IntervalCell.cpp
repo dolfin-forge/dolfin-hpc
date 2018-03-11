@@ -98,7 +98,7 @@ void IntervalCell::order_entities(MeshTopology& topology, uint i) const
   dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices in ascending order, connectivity 1 - 0
-  if (topology.is_computed(1, 0))
+  if (topology.connectivity(1, 0))
   {
     uint* cell_vertices = topology(1, 0)(i);
     std::sort(cell_vertices, cell_vertices + 2);
@@ -312,7 +312,7 @@ bool IntervalCell::check(Cell& cell) const
   bool ret = CellType::check(cell);
 
   // Check that cell vertices are in ascending order (so are edge vertices then)
-  if (cell.mesh().topology().is_computed(1, 0))
+  if (cell.mesh().topology().connectivity(1, 0))
   {
     uint* cell_verts = cell.entities(0);
     dolfin_assert(cell_verts);

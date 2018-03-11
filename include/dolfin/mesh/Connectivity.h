@@ -1,8 +1,6 @@
-// Copyright (C) 2006-2007 Anders Logg.
+// Copyright (C) 2016-2017 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2006-05-09
-// Last changed: 2014-11-03
 
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
@@ -20,61 +18,38 @@ template<class T> class Array;
 /**
  *  DOCUMENTATION:
  *
- *  @class  MeshConnectivity
+ *  @class  Connectivity
  *
- *  @brief  Mesh connectivity stores a sparse data structure of connections
- *          (incidence relations) between mesh entities for a fixed pair of
- *          topological dimensions.
- *          The connectivity can be specified either by first giving the
- *          number of entities and the number of connections for each entity,
- *          which may either be equal for all entities or different, or by
- *          giving the entire (sparse) connectivity pattern.
+ *  @brief  Connectivity stores a sparse data structure of connections
+ *          (incidence relations) between entities.
  *
  */
 
-class MeshConnectivity : public Clonable<MeshConnectivity>
+class Connectivity : public Clonable<Connectivity>
 {
 
 public:
 
-  /// Create empty connectivity
-  MeshConnectivity();
-
-  /// Create flat connectivity
-  MeshConnectivity(uint order, uint degree, uint * graph = NULL);
+  /// Create regular connectivity
+  Connectivity(uint order, uint degree);
 
   /// Create connectivity
-  MeshConnectivity(Array<uint> const& valency, uint * graph = NULL);
+  Connectivity(Array<uint> const& valency);
+
+  /// Create connectivity
+  Connectivity(Array<Array<uint> > const& connectivity);
 
   /// Copy constructor
-  MeshConnectivity(MeshConnectivity const& other);
+  Connectivity(Connectivity const& other);
 
   /// Destructor
-  ~MeshConnectivity();
-
-  /// Assignment
-  MeshConnectivity const& operator=(MeshConnectivity const& other);
+  ~Connectivity();
 
   /// Equality
-  bool operator==(MeshConnectivity const& other) const;
+  bool operator==(Connectivity const& other) const;
 
   /// Non-equality
-  bool operator!=(MeshConnectivity const& other) const;
-
-  /// Initialize number of entities and number of connections (equal for all)
-  void init(uint order, uint degree);
-
-  /// Initialize number of entities and number of connections (equal for all)
-  void init(uint order, uint degree, uint * graph);
-
-  /// Initialize number of entities and number of connections (individually)
-  void init(Array<uint> const& valency);
-
-  /// Initialize number of entities and number of connections (individually)
-  void init(Array<uint> const& valency, uint * graph);
-
-  /// Clear all data
-  void clear();
+  bool operator!=(Connectivity const& other) const;
 
   /// Return array of connections for given entity
   uint* operator()(uint entity);
@@ -102,20 +77,20 @@ public:
 
   //---------------------------------------------------------------------------
 
-  ///
-  bool is_initialized() const;
-
   /// Return number of entities
   uint order() const;
 
   /// Return total number of entries
-  uint entries() const;
+  uidx entries() const;
 
   /// Return minimum number of connections
   uint min_degree() const;
 
   /// Return maximum number of connections
   uint max_degree() const;
+
+  /// Return degree if regular, zero otherwise
+  uint regular() const;
 
   /// Return number of connections for given entity
   uint degree(uint entity) const;
@@ -126,28 +101,28 @@ public:
   /// Set all connections for all entities
   void set(Array<uint> const& connectivity);
 
-  /// Set all connections for all entities
-  void set(Array<Array<uint> > const& connectivity);
-
   /// Remap entities connectivities from old to new ordering, left operator
-  void remap_left(Array<uint> const& map);
+  void remap_l(Array<uint> const& map);
 
   /// Remap entities connectivities from old to new ordering, right operator
-  void remap_right(Array<uint> const& map);
+  void remap_r(Array<uint> const& map);
 
   /// Display data
   void disp() const;
 
+  /// Dump data
+  void dump() const;
+
   //--- ITERATOR --------------------------------------------------------------
 
-  typedef uint*       iterator;
-  typedef uint const* const_iterator;
+  typedef uint*       data_iterator;
+  typedef uint const* const_data_iterator;
 
-  inline iterator begin() const { return connections_; }
-  inline iterator end()   const { return connections_ + offsets_[order_]; }
+  inline data_iterator data()  const { return connections_[0]; }
+  inline data_iterator bound() const { return connections_[order_]; }
 
   //--- SERIALIZATION ---------------------------------------------------------
-  MeshConnectivity const& operator>>(Array<uint>& A) const;
+  Connectivity const& operator>>(Array<uint>& A) const;
 
   //--- CHECK ROUTINES --------------------------------------------------------
 
@@ -156,14 +131,11 @@ public:
 
 private:
 
-  /// Return if initialized
-  bool is_initialized_;
+  /// Create empty connectivity (Disabled)
+  Connectivity();
 
   /// Number of entities
   uint order_;
-
-  /// Total number of entries
-  uint s_;
 
   /// Minimum number of connections
   uint min_degree_;
@@ -171,79 +143,76 @@ private:
   /// Maximum number of connections
   uint max_degree_;
 
-  /// Offset for first connection for each entity
-  uint * offsets_;
-
   /// Connections for all entities stored as a contiguous array
-  uint * connections_;
+  uint **connections_;
 
 };
 
 //--- INLINES -----------------------------------------------------------------
 
-inline uint MeshConnectivity::degree(uint entity) const
+inline uint Connectivity::degree(uint entity) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  return (offsets_[entity + 1] - offsets_[entity]);
+  return (connections_[entity + 1] - connections_[entity]);
 }
 
 //-----------------------------------------------------------------------------
-inline uint * MeshConnectivity::operator()(uint entity)
+inline uint * Connectivity::operator()(uint entity)
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  return (connections_ + offsets_[entity]);
+  return connections_[entity];
 }
 
 //-----------------------------------------------------------------------------
-inline uint const * MeshConnectivity::operator()(uint entity) const
+inline uint const * Connectivity::operator()(uint entity) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  return (connections_ + offsets_[entity]);
+  return connections_[entity];
 }
 
 //-----------------------------------------------------------------------------
-inline bool MeshConnectivity::incident(uint entity, uint edge) const
+inline bool Connectivity::incident(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  uint const * e = connections_ + offsets_[entity];
-  uint const * const n = connections_ + offsets_[entity + 1];
+  uint const * e = connections_[entity];
+  uint const * const n = connections_[entity + 1];
   while (e != n && *e != edge) { ++e; }
   return (e != n);
 }
 
 //-----------------------------------------------------------------------------
-inline int MeshConnectivity::index(uint entity, uint edge) const
+inline int Connectivity::index(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  uint const * const b = connections_ + offsets_[entity];
-  uint const * const n = connections_ + offsets_[entity + 1];
+  uint const * const b = connections_[entity];
+  uint const * const n = connections_[entity + 1];
   uint const * e = b;
   while (e != n && *e != edge) { ++e; }
   return (e == n ? -1 : (e - b));
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshConnectivity::operator()(uint entity, uint *& b, uint *& e)
+inline void Connectivity::operator()(uint entity, uint *& b, uint *& e)
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  b = connections_ + offsets_[entity];
-  e = connections_ + offsets_[entity + 1];
+  b = connections_[entity];
+  e = connections_[entity + 1];
 }
 
 //-----------------------------------------------------------------------------
-inline void MeshConnectivity::operator()(uint entity, uint const *& b,
+inline void Connectivity::operator()(uint entity, uint const *& b,
                                          uint const *& e) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  b = connections_ + offsets_[entity];
-  e = connections_ + offsets_[entity + 1];
+  b = connections_[entity];
+  e = connections_[entity + 1];
 }
 
 //-----------------------------------------------------------------------------

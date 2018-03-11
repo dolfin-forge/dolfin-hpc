@@ -46,7 +46,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   uint const gdim = mesh.geometry().dim();
 
   // Save global number of vertices to check consistency
-  dolfin_assert(mesh.topology().entities_exist(0));
+  dolfin_assert(mesh.topology().connectivity(0));
   dolfin_assert(mesh.topology().distdata()[0].is_finalized());
   uint const num_global_vertices = mesh.topology().global_size(0);
   if (mesh.topology().size(0) != dist.size())
@@ -56,7 +56,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   }
   for (uint d = 1; d <= tdim; ++d)
   {
-    if (mesh.topology().entities_exist(d) && (mesh.topology().size(d) > 0))
+    if (mesh.topology().connectivity(d) && mesh.topology().size(d))
     {
       error("MPIMeshCommunicator : distribution by vertices but entities of "
             "dimension %u exist", d);
@@ -93,7 +93,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     new_mesh.swap(mesh);
   }
-  dolfin_assert(mesh.topology().size(0) == 0);
+  dolfin_assert(mesh.topology().connectivity(0) == NULL);
+  dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
 
   // Exchange the vertices
   MPI_Status status;
@@ -193,10 +194,10 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   uint const gdim = mesh.geometry().dim();
 
   // Save global number of vertices and cells to check consistency
-  dolfin_assert(mesh.topology().entities_exist(0));
+  dolfin_assert(mesh.topology().connectivity(0));
   dolfin_assert(mesh.topology().distdata()[0].is_finalized());
   uint const num_global_vertices = mesh.topology().global_size(0);
-  dolfin_assert(mesh.topology().entities_exist(tdim));
+  dolfin_assert(mesh.topology().connectivity(tdim));
   dolfin_assert(mesh.topology().distdata()[tdim].is_finalized());
   uint const num_global_cells = mesh.topology().global_size(tdim);
   if (mesh.topology().size(tdim) != dist.size())
@@ -286,6 +287,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     new_mesh.swap(mesh);
   }
+  dolfin_assert(mesh.topology().connectivity(0) == NULL);
 
   // Exchange the processed entities
   MPI_Status status;

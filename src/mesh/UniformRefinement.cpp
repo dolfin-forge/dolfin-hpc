@@ -15,12 +15,12 @@
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Face.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Connectivity.h>
 
 namespace dolfin
 {

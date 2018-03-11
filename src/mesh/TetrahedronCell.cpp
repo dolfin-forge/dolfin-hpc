@@ -155,9 +155,9 @@ void TetrahedronCell::order_entities(MeshTopology& topology, uint i) const
   dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology.is_computed(1, 0))
+  if (topology.connectivity(1, 0))
   {
-    dolfin_assert(topology.is_computed(3, 1));
+    dolfin_assert(topology.connectivity(3, 1));
 
     // Get edges
     uint* cell_edges = topology(3, 1)(i);
@@ -171,9 +171,9 @@ void TetrahedronCell::order_entities(MeshTopology& topology, uint i) const
   }
 
   // Sort local vertices on facets in ascending order, connectivity 2 - 0
-  if (topology.is_computed(2, 0))
+  if (topology.connectivity(2, 0))
   {
-    dolfin_assert(topology.is_computed(3, 2));
+    dolfin_assert(topology.connectivity(3, 2));
 
     // Get facets
     uint* cell_facets = topology(3, 2)(i);
@@ -187,11 +187,11 @@ void TetrahedronCell::order_entities(MeshTopology& topology, uint i) const
   }
 
   // Sort local edges on local facets after non-incident vertex, connectivity 2 - 1
-  if (topology.is_computed(2, 1))
+  if (topology.connectivity(2, 1))
   {
-    dolfin_assert(topology.is_computed(3, 2));
-    dolfin_assert(topology.is_computed(2, 0));
-    dolfin_assert(topology.is_computed(1, 0));
+    dolfin_assert(topology.connectivity(3, 2));
+    dolfin_assert(topology.connectivity(2, 0));
+    dolfin_assert(topology.connectivity(1, 0));
 
     // Get facet numbers
     uint* cell_facets = topology(3, 2)(i);
@@ -237,16 +237,16 @@ void TetrahedronCell::order_entities(MeshTopology& topology, uint i) const
   }
 
   // Sort local vertices on cell in ascending order, connectivity 3 - 0
-  if (topology.is_computed(3, 0))
+  if (topology.connectivity(3, 0))
   {
     uint* cell_vertices = topology(3, 0)(i);
     std::sort(cell_vertices, cell_vertices + 4);
   }
 
   // Sort local edges on cell after non-incident vertex tuple, connectivity 3 - 1
-  if (topology.is_computed(3, 1))
+  if (topology.connectivity(3, 1))
   {
-    dolfin_assert(topology.is_computed(1, 0));
+    dolfin_assert(topology.connectivity(1, 0));
 
     // Get cell vertices and edge numbers
     uint* cell_vertices = topology(3, 0)(i);
@@ -291,9 +291,9 @@ void TetrahedronCell::order_entities(MeshTopology& topology, uint i) const
   }
 
   // Sort local facets on cell after non-incident vertex, connectivity 3 - 2
-  if (topology.is_computed(3, 2))
+  if (topology.connectivity(3, 2))
   {
-    dolfin_assert(topology.is_computed(2, 0));
+    dolfin_assert(topology.connectivity(2, 0));
 
     // Get cell vertices and facet numbers
     uint* cell_vertices = topology(3, 0)(i);
@@ -746,7 +746,7 @@ bool TetrahedronCell::check(Cell& cell) const
   dolfin_assert(v);
 
   // Check edge -> incident vertices mapping
-  if (topology.is_computed(1, 0))
+  if (topology.connectivity(1, 0))
   {
     uint const* e = cell.entities(1);
     dolfin_assert(e);
@@ -766,7 +766,7 @@ bool TetrahedronCell::check(Cell& cell) const
   }
 
   // Check face -> incident vertices mapping
-  if (topology.is_computed(2, 0))
+  if (topology.connectivity(2, 0))
   {
     uint const* f = cell.entities(2);
     dolfin_assert(f);

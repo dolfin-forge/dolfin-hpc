@@ -348,25 +348,22 @@ void MeshGeometry::disp() const
   section("MeshGeometry");
   //---
   cout << "dimension   : " << dim_ << endl;
-  cout << "coordinates : " << endl << endl;
-  if (size_ == 0)
-  {
-    cout << "empty" << endl << endl;
-  }
-  else
-  {
-    for (uint i = 0; i < size_; ++i)
-    {
-      cout << i << ":";
-      for (uint d = 0; d < dim_; ++d)
-      {
-        cout << " " << x(i)[d];
-      }
-      cout << endl;
-    }
-  }
+  cout << "size        : " << size_ << endl;
   //---
   endblock();
+}
+//-----------------------------------------------------------------------------
+void MeshGeometry::dump() const
+{
+  for (uint i = 0; i < size_; ++i)
+  {
+    cout << i << ":";
+    for (uint d = 0; d < dim_; ++d)
+    {
+      cout << " " << x(i)[d];
+    }
+    cout << endl;
+  }
 }
 //-----------------------------------------------------------------------------
 MeshGeometry const& MeshGeometry::operator>>(Array<real>& A) const

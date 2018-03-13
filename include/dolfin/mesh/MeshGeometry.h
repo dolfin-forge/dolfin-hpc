@@ -128,6 +128,9 @@ public:
   /// Display data
   void disp() const;
 
+  /// Dump data
+  void dump() const;
+
   //--- SERIALIZATION ---------------------------------------------------------
   MeshGeometry const& operator>>(Array<real>& A) const;
 

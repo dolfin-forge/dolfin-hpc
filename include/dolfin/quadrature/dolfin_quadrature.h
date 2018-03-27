@@ -11,7 +11,6 @@
 #include <dolfin/quadrature/QuadratureRule.h>
 #include <dolfin/quadrature/GaussQuadratureRule.h>
 #include <dolfin/quadrature/GaussTensorQuadratureRule.h>
-#include <dolfin/quadrature/UFCCellIntegral.h>
 #include <dolfin/quadrature/UFCReferenceCell.h>
 
 #endif /* __DOLFIN_HEADER_QUADRATURE_H */

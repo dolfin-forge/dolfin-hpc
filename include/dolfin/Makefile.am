@@ -48,7 +48,6 @@ nobase_pkginclude_HEADERS = \
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
-				fem/FormExpansion.h\
 				fem/Functional.h\
 				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
@@ -263,7 +262,6 @@ nobase_pkginclude_HEADERS = \
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
 				quadrature/RadauQuadrature.h\
-				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
 				ufl/dolfin_ufl.h\
 				ufl/UFLarray.h\

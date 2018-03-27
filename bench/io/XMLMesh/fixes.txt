@@ -1,6 +1,0 @@
-own_vertex grows to size of global number of vertices
-used_vertex is a map while it should be an array
-owner_map and assigned_orphans are redundant
-sharedness logic is flawed for orphaned, ghost_vertex is removed
-do not implement cell reading for each type
-do not precount orphans as it can be done during the exchange

@@ -11,38 +11,26 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_DofNumbering )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_DofNumbering");
+DOLFIN_START_TEST( test_DofNumbering )
   {
-    ufl::ElementList const& list = ElementLibrary::elements();
-    for (ufl::FiniteElementSpace const * it = list.first(); list.valid();
-        it = list.next())
+    CellType * cell = NULL;
+    ufc::dofmap * dofmap = NULL;
+    ufl::ElementList const& L = ElementLibrary::elements();
+    for (ufl::FiniteElementSpace const * e = L.first(); L.valid(); e = L.next())
     {
-      begin("%s", it->str().c_str());
+      cell = CellType::create(e->cell());
+      dofmap = ElementLibrary::create_dof_map(DofMap::make_signature(e->repr()));
       //---
-      CellType * cell = CellType::create(it->cell());
-      ufc::dofmap * ufc_dofmap = ElementLibrary::create_dof_map(DofMap::make_signature(it->repr()));
-
       Mesh refcell;
       cell->create_reference_cell(refcell);
-      DofNumbering * numbering = DofNumbering::create(refcell, *ufc_dofmap);
-      numbering->disp();
+      DofNumbering * numbering = DofNumbering::create(refcell, *dofmap);
       delete numbering;
-
-      delete ufc_dofmap;
-      delete cell;
       //---
-      end();
+      delete dofmap;
+      delete cell;
     }
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

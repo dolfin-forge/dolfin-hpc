@@ -7,36 +7,37 @@
 #include <dolfin/ufl/UFLVectorElement.h>
 #include <dolfin/ufl/UFLMixedElement.h>
 
+using namespace dolfin;
+
 //-----------------------------------------------------------------------------
-START_TEST( test_UFL_MixedElement )
-{
+DOLFIN_START_TEST( test_UFL_MixedElement )
+  {
+    UnitSquare mesh(4, 4);
 
-  dolfin::UnitSquare mesh(4,4);
+    ufl::VectorElement Uspace(ufl::Family::CG, mesh.type(), 2,
+                              mesh.geometry().dim());
+    Uspace.display();
 
-  ufl::VectorElement Uspace(ufl::Family::CG, mesh.type(), 2,
-                            mesh.geometry().dim());
-  Uspace.display();
+    ufl::FiniteElement Pspace(ufl::Family::CG, mesh.type(), 1);
+    Pspace.display();
 
-  ufl::FiniteElement Pspace(ufl::Family::CG, mesh.type(), 1);
-  Pspace.display();
+    ufl::FiniteElementSpace::List spaces;
+    spaces.push_back(&Uspace);
+    spaces.push_back(&Pspace);
 
-  ufl::FiniteElementSpace::List spaces;
-  spaces.push_back(&Uspace);
-  spaces.push_back(&Pspace);
+    ufl::MixedElement UPspace(spaces);
+    UPspace.display();
 
-  ufl::MixedElement UPspace(spaces);
-  UPspace.display();
+    ufl::MixedElement UPspaceFormRepr(UPspace.repr());
+    UPspaceFormRepr.display();
 
-  ufl::MixedElement UPspaceFormRepr(UPspace.repr());
-  UPspaceFormRepr.display();
+    UPspaceFormRepr.sub_elements()[0]->display();
+    UPspaceFormRepr.sub_elements()[1]->display();
 
-  UPspaceFormRepr.sub_elements()[0]->display();
-  UPspaceFormRepr.sub_elements()[1]->display();
+    ck_assert_msg(UPspace == UPspaceFormRepr, "Representation string differ");
 
-  ck_assert_msg(UPspace == UPspaceFormRepr,
-		"Representation string differ");
-
-}END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

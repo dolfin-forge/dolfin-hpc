@@ -2,18 +2,13 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/common/Test.h>
 #include <dolfin/main/alarm.h>
+#include <dolfin/log/log.h>
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_alarm )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_alarm");
+DOLFIN_START_TEST( test_alarm )
   {
     alarm s;
     bool b = s.set_limit(10);
@@ -30,10 +25,7 @@ START_TEST( test_alarm )
       }
     }
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

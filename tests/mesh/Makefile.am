@@ -13,6 +13,5 @@ EXTRA_DIST = algorithm/algorithm.h\
              Point/Point.h\
              Simplex/Simplex.h\
              StructuredGrid/StructuredGrid.h\
-             SubDomain/SubDomain.h\
              UnitMeshes/UnitMeshes.h\
              VertexNormal/VertexNormal.h

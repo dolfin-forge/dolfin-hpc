@@ -3,12 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/function/Operators.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
-#include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/CellTypes.h>
 
 using namespace dolfin;
 
@@ -27,12 +22,7 @@ void check_cell_ops()
 }
 
 //-----------------------------------------------------------------------------
-START_TEST( test_Operators )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_Operators");
+DOLFIN_START_TEST( test_Operators )
   {
     check_cell_ops<IntervalCell>();
     check_cell_ops<TriangleCell>();
@@ -40,10 +30,7 @@ START_TEST( test_Operators )
     check_cell_ops<QuadrilateralCell>();
     check_cell_ops<HexahedronCell>();
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

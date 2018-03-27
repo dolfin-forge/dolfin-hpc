@@ -4,100 +4,64 @@
 
 #include <dolfin/mesh/BoundingBox.h>
 #include <dolfin/mesh/StructuredGrid.h>
-#include <dolfin/io/BinaryFile.h>
-#include <dolfin/io/VTKFile.h>
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_BoundingBox )
-{
-  int init_failed = 0;
-  begin("test_BoundingBox");
-  //---
-  for (dolfin::uint i = 0; i <= Space::MAX_DIMENSION; ++i)
+DOLFIN_START_TEST( test_BoundingBox )
   {
-    BoundingBox bb(i);
-    bb.disp();
-    Point u(1.0, 1.0, 1.0);
-    bb += u;
-    bb.disp();
-    bb -= u;
-    real h = 2.0;
-    bb *= h;
-    bb.disp();
-    Point d(0.5, 0.25, 0.125);
-    bb *= d;
-    bb.disp();
+    for (uint i = 0; i <= Space::MAX_DIMENSION; ++i)
+    {
+      BoundingBox bb(i);
+      Point u(1.0, 1.0, 1.0);
+      bb += u;
+      bb -= u;
+      real h = 2.0;
+      bb *= h;
+      Point d(0.5, 0.25, 0.125);
+      bb *= d;
+    }
   }
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_StructuredGrid_interval )
-{
-  int init_failed = 0;
-  begin("test_StructuredGrid_interval");
-  //---
-  dolfin::uint N = 8192;
-  StructuredGrid g(IntervalCell(), N);
-  dolfin_assert(g.num_cells() == N);
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_START_TEST( test_StructuredGrid_interval )
+  {
+    uint N = 8192;
+    StructuredGrid g(IntervalCell(), N);
+    dolfin_assert(g.num_cells() == N);
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_StructuredGrid_triangle )
-{
-  int init_failed = 0;
-  begin("test_StructuredGrid_triangle");
-  //---
-  dolfin::uint N = 128;
-  StructuredGrid g(TriangleCell(), N);
-  dolfin_assert(g.num_cells() == N*N*2);
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_START_TEST( test_StructuredGrid_triangle )
+  {
+    uint N = 128;
+    StructuredGrid g(TriangleCell(), N);
+    dolfin_assert(g.num_cells() == N*N*2);
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_StructuredGrid_tetrahedron )
-{
-  int init_failed = 0;
-  begin("test_StructuredGrid_tetrahedron");
-  //---
-  dolfin::uint N = 32;
-  StructuredGrid g(TetrahedronCell(), N);
-  dolfin_assert(g.num_cells() == N*N*N*6);
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_START_TEST( test_StructuredGrid_tetrahedron )
+  {
+    uint N = 32;
+    StructuredGrid g(TetrahedronCell(), N);
+    dolfin_assert(g.num_cells() == N*N*N*6);
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_StructuredGrid_quadrilateral )
-{
-  int init_failed = 0;
-  begin("test_StructuredGrid_quadrilateral");
-  //---
-  dolfin::uint N = 128;
-  StructuredGrid g(QuadrilateralCell(), N);
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_START_TEST( test_StructuredGrid_quadrilateral )
+  {
+    uint N = 128;
+    StructuredGrid g(QuadrilateralCell(), N);
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_StructuredGrid_hexahedron )
-{
-  int init_failed = 0;
-  begin("test_StructuredGrid_hexahedron");
-  //---
-  dolfin::uint N = 32;
-  StructuredGrid g(HexahedronCell(), N);
-  dolfin_assert(g.num_cells() == N*N*N);
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_START_TEST( test_StructuredGrid_hexahedron )
+  {
+    uint N = 32;
+    StructuredGrid g(HexahedronCell(), N);
+    dolfin_assert(g.num_cells() == N*N*N);
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

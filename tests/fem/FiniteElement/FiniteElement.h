@@ -9,30 +9,15 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_FiniteElement )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_FiniteElement");
+DOLFIN_START_TEST( test_FiniteElement )
   {
-    ufl::ElementList const& list = ElementLibrary::elements();
-    for (ufl::FiniteElementSpace const * it = list.first(); list.valid();
-        it = list.next())
+    ufl::ElementList const& L = ElementLibrary::elements();
+    for (ufl::FiniteElementSpace const * e = L.first(); L.valid(); e = L.next())
     {
-      begin("%s", it->str().c_str());
-      //---
-
-      FiniteElement e(*ElementLibrary::create_finite_element(it->repr()), true);
-
-      //---
-      end();
+      FiniteElement F(*ElementLibrary::create_finite_element(e->repr()), true);
     }
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

@@ -8,11 +8,8 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_MeshData_add )
+DOLFIN_START_TEST( test_MeshData_add )
   {
-    int init_failed = 0;
-    begin("test_MeshData_add");
-    //---
     UnitSquare m(4, 4);
     MeshData d(m);
     MeshValues<bool, Cell>   bC(m); d.add(bC); ck_assert(d.count(bC));
@@ -21,35 +18,22 @@ START_TEST( test_MeshData_add )
     MeshValues<uint, Vertex> uV(m); d.add(uV); ck_assert(d.count(uV));
     MeshValues<real, Cell>   rC(m); d.add(rC); ck_assert(d.count(rC));
     MeshValues<real, Vertex> rV(m); d.add(rV); ck_assert(d.count(rV));
-    //---
-    end();
-    skip();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_MeshData_insert )
+DOLFIN_START_TEST( test_MeshData_insert )
   {
-    int init_failed = 0;
-    begin("test_MeshData_insert");
-    //---
     UnitSquare m(4, 4);
     MeshData d(m);
     MeshValues<bool, Cell>   bC(m);
     d.insert(bC); ck_assert(d.count(bC) == 1);
     d.insert(bC); ck_assert(d.count(bC) == 1);
-    //---
-    end();
-    skip();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_MeshData_iterator )
+DOLFIN_START_TEST( test_MeshData_iterator )
   {
-    int init_failed = 0;
-    begin("test_MeshData_iterator");
-    //---
     UnitSquare m(4, 4);
-    section("MeshValues<bool, Facet>");
     {
       MeshData d(m);
       ck_assert(d.size() == 0);
@@ -60,8 +44,7 @@ START_TEST( test_MeshData_iterator )
       }
       ck_assert(ii == 0);
     }
-    endblock();
-    section("MeshValues<uint, Cell>");
+    //---
     {
       MeshData d(m);
       MeshValues<uint, Cell>   f0(m); d.add(f0); f0 = 0;
@@ -80,8 +63,7 @@ START_TEST( test_MeshData_iterator )
       }
       ck_assert(ii == 0);
     }
-    endblock();
-    section("MeshValues<real, Vertex>");
+    //---
     {
       MeshData d(m);
       MeshValues<real, Vertex>   f0(m); d.add(f0); f0 = 0.;
@@ -101,12 +83,8 @@ START_TEST( test_MeshData_iterator )
       }
       ck_assert(ii == 0);
     }
-    endblock();
-    //---
-    end();
-    skip();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

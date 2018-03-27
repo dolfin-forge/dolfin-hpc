@@ -5,12 +5,9 @@
 #include <dolfin/elements/Elements.h>
 #include <dolfin/elements/ElementLibrary.h>
 #include <dolfin/fem/DofMap.h>
-#include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/FiniteElement.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/UnitCube.h>
-#include <dolfin/mesh/UnitSquare.h>
 
 using namespace dolfin;
 
@@ -20,111 +17,60 @@ using ufl::Family;
 using ufl::Object;
 using ufl::Space;
 
-//-----------------------------------------------------------------------------
-START_TEST( test_FiniteElementSpace )
+//----------------------------------------------------------------------------
+DOLFIN_START_TEST( test_FiniteElementSpace )
 {
-  int init_failed = 0;
-  begin("test_FiniteElementSpace");
-  //---
-  dolfin::uint const deg_max = 2;
+  uint const deg_max = 2;
   std::vector<Family::Type> v;
   v.push_back(Family::DG);
   v.push_back(Family::CG);
-
-  dolfin::UnitSquare sq(4, 4);
-  dolfin::UnitCube cb(2, 2, 2);
 
   for (std::vector<Family::Type>::const_iterator it = v.begin(); it != v.end();
        ++it)
   {
     Family f(*it);
-    dolfin::uint d_min = f.degree_min();
-    dolfin::uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
+    uint d_min = f.degree_min();
+    uint d_max = std::min(f.degree_max(), std::max(d_min, deg_max));
     ufl::Domain::Set domains = f.domains();
 
     for (ufl::Domain::Set::const_iterator dom_it = domains.begin();
-        dom_it != domains.end(); ++dom_it)
+         dom_it != domains.end(); ++dom_it)
     {
       Domain dom(*dom_it);
       ufl::Cell cell(dom);
-      dolfin::uint const dim = cell.topological_dimension();
-      dolfin::Mesh * m;
-      if (dim == 2)
-      {
-        m = &sq;
-      }
-      else if (dim == 3)
-      {
-        m = &cb;
-      }
-      else
-      {
-        continue;
-      }
-      for (dolfin::uint d = d_min; d <= d_max; ++d)
-      {
-        begin("DiscreteSpace");
-        //
-        skip();
+      uint const dim = cell.topological_dimension();
 
-        begin("Creating UFLFiniteElement:");
+      Mesh refcell;
+      CellType * ctype = CellType::create(cell);
+      ctype->create_reference_cell(refcell);
+      for (uint d = d_min; d <= d_max; ++d)
+      {
         ufl::FiniteElement uflfem(*it, cell, d);
         message(uflfem.repr());
-        end();
-        skip();
-
-        begin("Creating UFLFiniteElement from factory function:");
+        //---
         ufl::FiniteElementSpace * factuflfem =
             ufl::FiniteElementSpace::create(uflfem.repr());
-        message(factuflfem->repr());
         delete factuflfem;
-        end();
-        skip();
-
-        begin("Creating FiniteElement from UFL representation:");
+        //---
         dolfin::FiniteElement fem(uflfem);
-        message(fem.signature());
         ck_assert(fem.signature() == uflfem.repr());
-        skip();
-        fem.disp();
-        end();
-        skip();
-
-        begin("Creating UFL representation from FiniteElement:");
+        //---
         ufl::FiniteElement uflfemd(Object::repr_t(fem.signature()));
-        message(uflfemd.repr());
         ck_assert(uflfem.repr() == uflfemd.repr());
-        end();
-        skip();
-
-        begin("Creating corresponding DofMap:");
+        //---
         ufc::dofmap * ufcdm =
             ElementLibrary::create_dof_map(
                 DofMap::make_signature(fem.signature()));
-        dolfin::DofMap dm(*m, *ufcdm, true);
-        message(dm.signature());
-        ck_assert(dm.signature() ==
-            dolfin::DofMap::make_signature(uflfem.repr()));
-        skip();
-        dm.disp();
-        end();
-        skip();
-
-        begin("Creating corresponding DiscreteSpace:");
-        dolfin::FiniteElementSpace femspace(*m, fem, dm, false);
-        femspace.disp();
-        end();
-        skip();
-
-        //
-        end();
+        DofMap dm(refcell, *ufcdm, true);
+        ck_assert(dm.signature() == DofMap::make_signature(uflfem.repr()));
+        //---
+        FiniteElementSpace femspace(refcell, fem, dm, false);
       }
+      delete ctype;
     }
   }
-  //---
-  end();
-  ck_assert( init_failed == 0 );
-}END_TEST
+}
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

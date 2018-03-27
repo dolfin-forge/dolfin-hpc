@@ -7,12 +7,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_ParameterValue )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_ParameterValue");
+DOLFIN_START_TEST( test_ParameterValue )
   {
     message("bool");
     {
@@ -133,10 +128,7 @@ START_TEST( test_ParameterValue )
       ck_assert(R == T);
     }
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

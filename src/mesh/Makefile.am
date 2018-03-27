@@ -48,7 +48,7 @@ libdolfin_mesh_la_SOURCES = \
 			SubDomain.cpp\
 			TetrahedronCell.cpp\
 			TriangleCell.cpp\
-			UniformMeshRefinement.cpp\
+			UniformRefinement.cpp\
 			UnitCube.cpp\
 			UnitDisk.cpp\
 			UnitInterval.cpp\

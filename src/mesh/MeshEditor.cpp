@@ -15,6 +15,20 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
+MeshEditor::MeshEditor(Mesh& mesh, CellType const& type) :
+    mesh_(mesh),
+    cell_vertices_(NULL),
+    tdim_(0),
+    gdim_(0),
+    num_vertices_(0),
+    num_cells_(0),
+    vertex_index_(0),
+    cell_index_(0),
+    open_(false)
+{
+  init(mesh, type, EuclideanSpace(type.dim()));
+}
+//-----------------------------------------------------------------------------
 MeshEditor::MeshEditor(Mesh& mesh, CellType const& type, Space const& space) :
     mesh_(mesh),
     cell_vertices_(NULL),

@@ -28,6 +28,10 @@ std::string basename(std::string file);
 std::string dirname(std::string file);
 
 ///
+std::string path(std::string p0, std::string const& p1);
+std::string path(std::string p0, std::string const& p1, std::string const& p2);
+
+///
 void glob(std::string const& pattern, Array<std::string>& matches);
 
 ///

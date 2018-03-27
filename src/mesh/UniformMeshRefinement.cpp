@@ -32,7 +32,7 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
   Mesh& refined_mesh = editor.mesh();
   uint const tdim = refined_mesh.topology_dimension();
   uint const edim = entity_dimension<E>(mesh);
-  if (tdim > edim && mesh.type().refinement_needs_entities(edim))
+  if (tdim > edim && mesh.type().num_refined_vertices(edim))
   {
     uint const voffset = editor.current_vertex();
     for (typename E::iterator e(mesh); !e.end(); ++e)
@@ -66,8 +66,6 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 //-----------------------------------------------------------------------------
 void UniformMeshRefinement::refine(Mesh& mesh)
 {
-  message(1, "Refining %s mesh uniformly.", mesh.type().str().c_str());
-
   // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh;
   MeshEditor editor(refined_mesh, mesh.type(), mesh.space());

@@ -99,9 +99,6 @@ public:
   /// Number of cells created by refinement pattern
   uint num_refined_cells() const;
 
-  /// Return if refinement pattern requires entities of given dimension
-  bool refinement_needs_entities(uint dim) const;
-
   //---------------------------------------------------------------------------
 
   /// Compute volume of tetrahedron

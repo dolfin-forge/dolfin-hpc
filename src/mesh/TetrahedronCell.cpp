@@ -435,16 +435,6 @@ uint TetrahedronCell::num_refined_vertices(uint dim) const
   return (dim > 1 ? 0 : 1);
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::refinement_needs_entities(uint dim) const
-{
-  dolfin_assert(dim <= TD);
-  if (dim > 1)
-  {
-    return false;
-  }
-  return true;
-}
-//-----------------------------------------------------------------------------
 real TetrahedronCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

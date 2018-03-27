@@ -515,12 +515,6 @@ uint HexahedronCell::num_refined_vertices(uint dim) const
   return 1;
 }
 //-----------------------------------------------------------------------------
-bool HexahedronCell::refinement_needs_entities(uint dim) const
-{
-  dolfin_assert(dim <= TD);
-  return true;
-}
-//-----------------------------------------------------------------------------
 real HexahedronCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

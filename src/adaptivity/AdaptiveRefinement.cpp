@@ -62,10 +62,6 @@ void AdaptiveRefinement::refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
   {
     RivaraRefinement::refine(mesh, cell_marker);
   }
-  else if (refine_type == "simple")
-  {
-    mesh.refine(cell_marker, true);
-  }
   else
   {
     dolfin::error("Unknown refinement algorithm");

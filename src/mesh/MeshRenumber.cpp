@@ -7,9 +7,8 @@
 
 #include <dolfin/mesh/MeshRenumber.h>
 
-#include <dolfin/config/dolfin_config.h>
-#include <dolfin/mesh/EntityKey.h>
 #include <dolfin/mesh/MeshDistributedData.h>
+#include <dolfin/mesh/EntityKey.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/main/MPI.h>
 

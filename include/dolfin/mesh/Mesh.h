@@ -237,10 +237,6 @@ public:
   /// Refine mesh uniformly
   void refine();
 
-  /// Refine mesh according to cells marked for refinement
-  void refine(MeshValues<bool, Cell>& cell_markers, bool refine_boundary = true,
-              bool load_balance = true);
-
   //---
 
   /// Return hash to identify the state of the mesh

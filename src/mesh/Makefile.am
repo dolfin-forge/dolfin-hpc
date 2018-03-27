@@ -6,7 +6,6 @@ libdolfin_mesh_la_SOURCES = \
 			Box.cpp\
 			Cell.cpp\
 			CellType.cpp\
-			CoarseningManager.cpp\
 			DCell.cpp\
 			DMesh.cpp\
 			DVertex.cpp\
@@ -17,13 +16,10 @@ libdolfin_mesh_la_SOURCES = \
 			Facet.cpp\
 			GTSInterface.cpp\
 			GeometricPredicates.cpp\
-			GlobalFacetMap.cpp\
 			HexahedronCell.cpp\
 			IntersectionDetector.cpp\
 			IntervalCell.cpp\
 			LoadBalancer.cpp\
-			LocalMeshCoarsening.cpp\
-			LocalMeshRefinement.cpp\
 			MPIMeshCommunicator.cpp\
 			MappedManifold.cpp\
 			Mesh.cpp\
@@ -46,7 +42,6 @@ libdolfin_mesh_la_SOURCES = \
 			PointCell.cpp\
 			QuadrilateralCell.cpp\
 			Rectangle.cpp\
-			RefinementManager.cpp\
 			RefinementPattern.cpp\
 			RivaraRefinement.cpp\
 			StructuredGrid.cpp\

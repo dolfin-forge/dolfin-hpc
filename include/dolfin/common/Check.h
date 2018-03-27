@@ -53,6 +53,14 @@ int main(int argc, char **argv) \
   return DOLFIN_SUITE_RUN(_name, _suite_function()); \
 }
 
+#define DOLFIN_START_TEST(_name) \
+START_TEST( _name ) \
+  int init_failed = 0;
+
+#define DOLFIN_END_TEST \
+  ck_assert( init_failed == 0 ); \
+END_TEST
+
 //-----------------------------------------------------------------------------
 
 struct Check

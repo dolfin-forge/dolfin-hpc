@@ -92,6 +92,7 @@ public:
       {
         init(other.mesh_, other.dim_, other.size_);
       }
+      this->dim_ = other.dim_;
       std::copy(other.values_, other.values_ + size_, values_);
     }
     return *this;
@@ -112,8 +113,8 @@ public:
     {
       init(other.mesh_, other.dim_, other.size_);
     }
-    std::transform(other.values_, other.values_ + other.size_, this->values_,
-                   cast<V>() );
+    this->dim_ = other.dim_;
+    std::transform(other.values_, other.values_ + size_, values_, cast<V>() );
     return *this;
   }
 
@@ -136,9 +137,39 @@ public:
     {
       return true;
     }
-    for (uint i = 0; i < size_; i++)
+    for (uint i = 0; i < size_; ++i)
     {
       if (values_[i] != other.values_[i])
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Equality with cast
+  template <class V>
+  bool operator==(MeshFunction<V> const& other)
+  {
+    if(this == &other)
+    {
+      return true;
+    }
+    if (dim_ != other.dim_)
+    {
+      return false;
+    }
+    if (size_ != other.size_)
+    {
+      return false;
+    }
+    if (size_ == 0)
+    {
+      return true;
+    }
+    for (uint i = 0; i < size_; ++i)
+    {
+      if (values_[i] != cast<V>(other.values_[i]))
       {
         return false;
       }

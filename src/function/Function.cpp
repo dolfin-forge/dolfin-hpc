@@ -736,8 +736,8 @@ void Function::InitializeGhosts()
 //-----------------------------------------------------------------------------
 void Function::disp() const
 {
-  cout << "Function" << endl;
-  cout << "--------" << endl;
+  cout << "Function\n";
+  cout << "--------\n";
 
   // Begin indentation
   begin("");

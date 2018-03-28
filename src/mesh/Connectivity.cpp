@@ -243,7 +243,7 @@ void Connectivity::disp() const
   section("Connectivity");
   message("order  : %u", order_);
   message("degree : %u - %u", min_degree_, max_degree_);
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 void Connectivity::dump() const
@@ -256,7 +256,7 @@ void Connectivity::dump() const
     {
       cout << " " << *c;
     }
-    cout << endl;
+    cout << "\n";
   }
 }
 //-----------------------------------------------------------------------------

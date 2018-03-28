@@ -29,13 +29,13 @@ int main()
   PETScMatrix A(2,2);
   A.set(*A_array, 2, position, 2, position);  
   A.apply();
-  cout << "Matrix A:" << endl;
+  cout << "Matrix A:\n";
   A.disp();
 
   PETScMatrix B(2,2);
   B.set(*B_array, 2, position, 2, position);  
   B.apply();
-  cout << "Matrix B:" << endl;
+  cout << "Matrix B:\n";
   B.disp();
 
   // Create eigensolver of type LAPACK
@@ -55,14 +55,14 @@ int main()
   esolver.getEigenpair(err, ecc, rr, cc, emode);
 
   // Display result
-  cout<< "Eigenvalue, mode: "<< emode << ", real: " << err << ", imag: " << ecc << endl;
-  cout<< "Eigenvalue vectors (real and complex parts): "<< endl;
+  cout<< "Eigenvalue, mode: "<< emode << ", real: " << err << ", imag: " << ecc << "\n";
+  cout<< "Eigenvalue vectors (real and complex parts): "<< "\n";
   rr.disp();
   cc.disp();
 
   #else
 
-    cout << "SLEPc must be installed to run this demo." << endl;
+    cout << "SLEPc must be installed to run this demo.\n";
 
   #endif
 

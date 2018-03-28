@@ -136,7 +136,7 @@ void SpaceTimeFunction::disp() const
   {
     message("%.16e : %s", it->first, it->second.c_str());
   }
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 std::string SpaceTimeFunction::filename(std::string const& basename, uint id)

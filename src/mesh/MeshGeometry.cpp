@@ -346,11 +346,9 @@ void MeshGeometry::update_token()
 void MeshGeometry::disp() const
 {
   section("MeshGeometry");
-  //---
-  cout << "dimension   : " << dim_ << endl;
-  cout << "size        : " << size_ << endl;
-  //---
-  endblock();
+  prm("dimension" , dim_);
+  prm("size"      , size_);
+  end();
 }
 //-----------------------------------------------------------------------------
 void MeshGeometry::dump() const
@@ -362,7 +360,7 @@ void MeshGeometry::dump() const
     {
       cout << " " << x(i)[d];
     }
-    cout << endl;
+    cout << "\n";
   }
 }
 //-----------------------------------------------------------------------------

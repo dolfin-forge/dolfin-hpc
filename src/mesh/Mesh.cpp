@@ -454,9 +454,9 @@ void Mesh::disp() const
       message("cells    : %12u", this->num_cells());
       message("vertices : %12u", this->num_vertices());
     }
-    endblock();
+    end();
   }
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 void Mesh::check() const

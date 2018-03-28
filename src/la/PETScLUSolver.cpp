@@ -166,7 +166,7 @@ dolfin::uint PETScLUSolver::solve(const PETScKrylovMatrix& A,
   // Get parameters
   const bool report = get("LU report");
 
-  //cout << "LU got matrix:" << endl;
+  //cout << "LU got matrix:\n";
   //cout << "A = "; A.disp(false);
   //cout << "b = "; b.disp();
 
@@ -264,7 +264,7 @@ real PETScLUSolver::copyToDense(const PETScKrylovMatrix& A)
   MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
   MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
 
-  //cout << "Copied to dense matrix:" << endl;
+  //cout << "Copied to dense matrix:\n";
   //A.disp();
   //MatView(B, PETSC_VIEWER_STDOUT_SELF);
 

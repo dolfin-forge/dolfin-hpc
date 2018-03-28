@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
   File file("temperature.pvd");
 
   // Time-stepping
-  Progress p("Time-stepping");
   while (t < T) 
     {
       // Assemble vector and apply boundary conditions
@@ -85,7 +84,6 @@ int main(int argc, char *argv[])
       file << u1;
 
       // Move to next interval
-      p = t / T;
       t += k;
       u0 = u1;
     }

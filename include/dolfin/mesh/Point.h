@@ -143,7 +143,7 @@ public:
   {
     section("point");
     message("( %+e, %+e, %+e )", x_[0], (D>1?x_[1]:0), (D>2?x_[2]:0));
-    endblock();
+    end();
   }
 
 private:

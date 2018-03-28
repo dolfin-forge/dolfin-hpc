@@ -53,7 +53,6 @@ ParameterValue const& ParameterValue::operator=(uint value)
 //-----------------------------------------------------------------------------
 ParameterValue::operator int() const
 {
-  //cout << "Halla eller, fel typ" << endl;
   error("Unable to convert parameter of type %s to int.", type().c_str());
   return 0;
 }

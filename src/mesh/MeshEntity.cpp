@@ -204,11 +204,9 @@ bool MeshEntity::on_boundary() const
 void MeshEntity::disp() const
 {
   section("MeshEntity");
-  //---
-  message("topological dimension : %u", tdim_);
-  message("geometric dimension   : %u", gdim_);
-  message("index                 : %u", index_);
-  begin(  "connectivities        : %u");
+  prm("topological dimension" , tdim_);
+  prm("geometric dimension"   , gdim_);
+  prm("index"                 , index_);
   MeshTopology const& topology = topology_;
   for (uint d =0; d < tdim_; ++d)
   {
@@ -233,16 +231,14 @@ void MeshEntity::disp() const
         }
         cout << ")";
       }
-      cout << endl;
+      cout << "\n";
     }
     else
     {
       cout << "not computed";
     }
-    cout << endl;
+    cout << "\n";
   }
-  end();
-  //---
   end();
 }
 //-----------------------------------------------------------------------------

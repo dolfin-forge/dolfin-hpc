@@ -582,7 +582,7 @@ void PETScMatrix::disp(uint precision) const
   section("Local");
   MatGetInfo(A, MAT_LOCAL, &info);
   print(info);
-  endblock();
+  end();
   skip();
 
   if (is_distributed_)
@@ -590,11 +590,11 @@ void PETScMatrix::disp(uint precision) const
     section("Global");
     MatGetInfo(A, MAT_GLOBAL_SUM, &info);
     print(info);
-    endblock();
+    end();
     skip();
   }
 
-  if (logm.getDebugLevel() == 0)
+  if (verbose() == 0)
   {
     return;
   }
@@ -614,7 +614,7 @@ void PETScMatrix::disp(uint precision) const
 #endif
     MatView(A, PETSC_VIEWER_STDOUT_SELF);
   }
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 LinearAlgebraFactory& PETScMatrix::factory() const

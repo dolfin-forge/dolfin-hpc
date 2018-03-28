@@ -1,21 +1,39 @@
-// Copyright (C) 2017. Aurelien Larcher
+// Copyright (C) 2003-2008 Anders Logg and Jim Tilander.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2017-02-22
+// Modified by Ola Skavhaug, 2007.
+// Modified by Niclas Jansson, 2009-2015.
 //
+// First added:  2003-03-13
+// Last changed: 2015-07-02
 
 #ifndef __DOLFIN_ASSERT_H
 #define __DOLFIN_ASSERT_H
 
-#include <dolfin/log/log.h>
+#include <dolfin/config/dolfin_config.h>
+
+#include <string>
+
+#if (DEBUG && !(__GNUG__))
+#include <cassert>
+#endif
 
 namespace dolfin
 {
 
-#define dolfin_assert_non_null(P) dolfin_assert(P != NULL)
-
-#define dolfin_assert_null(P)     dolfin_assert(P == NULL)
+// Helper function for dolfin_assert macro
+void __dolfin_assert(std::string file, unsigned long line, std::string func,
+                     char const * msg);
 
 } /* namespace dolfin */
+
+// Assertion, only active if DEBUG is defined
+#if (DEBUG && __GNUG__)
+#define dolfin_assert(check) do { if ( !(check) ) { dolfin::__dolfin_assert(__FILE__, __LINE__, __FUNCTION__, "(" #check ")"); } } while (false)
+#elif DEBUG // __FUNCTION__ is a non-standard GNU extension, use C89 assert
+#define dolfin_assert(check) assert(check)
+#else
+#define dolfin_assert(check)
+#endif
 
 #endif /* __DOLFIN_ASSERT_H */

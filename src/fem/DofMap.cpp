@@ -414,27 +414,15 @@ std::string const& DofMap::hash() const
 //-----------------------------------------------------------------------------
 void DofMap::disp() const
 {
-  cout << "DofMap" << endl;
-  cout << "------" << endl;
-
-// Begin indentation
-  begin("");
-
-// Display UFC dofmap information
-  cout << "ufc::dofmap info" << endl;
-  cout << "-----------------" << endl;
-  begin("");
-  cout << "Signature            : " << ufc_dofmap_->signature() << endl;
-  cout << "Global dimension     : " << ufc_dofmap_->global_dimension() << endl;
-  cout << "Local dimension      : " << ufc_dofmap_->local_dimension() << endl;
-  cout << "Geometric dimension  : " << ufc_dofmap_->geometric_dimension()
-       << endl;
-  cout << "Number of subdofmaps : " << ufc_dofmap_->num_sub_dofmaps() << endl;
-  cout << "Number of facet dofs : " << ufc_dofmap_->num_facet_dofs() << endl;
-  cout << endl;
+  section("DofMap");
+  begin("ufc::dofmap info");
+  prm("Signature"           , ufc_dofmap_->signature());
+  prm("Global dimension"    , ufc_dofmap_->global_dimension());
+  prm("Local dimension"     , ufc_dofmap_->local_dimension());
+  prm("Geometric dimension" , ufc_dofmap_->geometric_dimension());
+  prm("Number of subdofmaps", ufc_dofmap_->num_sub_dofmaps());
+  prm("Number of facet dofs", ufc_dofmap_->num_facet_dofs());
   end();
-
-// End indentation
   end();
 }
 //-----------------------------------------------------------------------------

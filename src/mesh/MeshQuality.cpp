@@ -171,13 +171,14 @@ real MeshQuality::reduceAvgReal(real val)
 //-----------------------------------------------------------------------------
 void MeshQuality::disp()
 {
-  cout << "Mesh quality rank " << dolfin::MPI::rank() << ":" << endl;
-  cout << "mu_min: " << mu_min << endl;
-  cout << "mu_max: " << mu_max << endl;
-  cout << "mu_avg: " << mu_avg << endl;
-  cout << "h_min: " << h_min << endl;
-  cout << "h_max: " << h_max << endl;
-  cout << "h_avg: " << h_avg << endl;
+  section("MeshQuality");
+  prm("mu_min", mu_min);
+  prm("mu_max", mu_max);
+  prm("mu_avg", mu_avg);
+  prm("h_min" , h_min);
+  prm("h_max" , h_max);
+  prm("h_avg" , h_avg);
+  end();
 }
 //-----------------------------------------------------------------------------
 

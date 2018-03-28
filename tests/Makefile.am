@@ -1,6 +1,7 @@
 SUBDIRS = \
   common \
   ufl \
+  log \
   la \
   elements \
   fem \
@@ -13,6 +14,7 @@ SUBDIRS = \
 TESTS = \
   common/exe \
   ufl/exe \
+  log/exe \
   la/exe \
   elements/exe \
   fem/exe \

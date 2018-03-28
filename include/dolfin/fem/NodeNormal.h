@@ -93,17 +93,12 @@ private:
 
     void disp() const
     {
-      cout << "FacetData" << endl;
-      cout << "---------" << endl;
-      // Begin indentation
-      begin("");
-      cout << "global_index : " << global_index << endl;
-      cout << "nodes        : " << (uint) nodes.size() << endl;
-      cout << "weight       : " << weight << endl;
-      cout << "normal       : " << normal << ", " << endl;
-      // End indentation
+      section("FacetData");
+      prm("global_index", global_index);
+      prm("nodes"       , nodes.size());
+      prm("weight"      , weight);
+      prm("normal"      , normal);
       end();
-      cout << endl;
     }
   };
 
@@ -116,17 +111,12 @@ private:
 
     void disp() const
     {
-      cout << "NodeData" << endl;
-      cout << "--------" << endl;
-      // Begin indentation
-      begin("");
-      cout << "node_type    : " << node_type << endl;
-      cout << "dofs         : " << (uint) dofs.size() << endl;
-      cout << "adjs         : " << (uint) adjs.size() << endl;
-      cout << "facets       : " << (uint) facets.size() << endl;
-      // End indentation
+      section("NodeData");
+      prm("node_type" , node_type);
+      prm("dofs"      , dofs.size());
+      prm("adjs"      , adjs.size());
+      prm("facets"    , facets.size());
       end();
-      cout << endl;
     }
   };
 

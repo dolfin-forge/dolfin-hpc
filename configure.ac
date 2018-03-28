@@ -451,6 +451,7 @@ AC_CONFIG_FILES([tests/Makefile\
                  tests/function/Makefile\
                  tests/io/Makefile\
                  tests/la/Makefile\
+                 tests/log/Makefile\
                  tests/main/Makefile\
                  tests/mesh/Makefile\
                  tests/parameter/Makefile\

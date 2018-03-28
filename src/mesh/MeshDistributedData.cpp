@@ -91,13 +91,13 @@ uint MeshDistributedData::dim() const
 void MeshDistributedData::disp() const
 {
   section("MeshDistributedData");
-  cout << "Topological dimension     : " << (uint) dim_ << endl;
+  cout << "Topological dimension     : " << (uint) dim_ << "\n";
   for (uint d = 0; d <= dim_; ++d)
   {
     skip();
     section("");
     (*this)[d].disp();
-    endblock();
+    end();
   }
   end();
   skip();

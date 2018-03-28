@@ -270,8 +270,6 @@ Connectivity const& Connectivity::operator>>(Array<uint>& A) const
 //-----------------------------------------------------------------------------
 void Connectivity::check() const
 {
-  message("Connectivity : check");
-
   /**
    *  CHECK:
    *
@@ -293,6 +291,15 @@ void Connectivity::check() const
       ce.insert(ec);
     }
   }
+}
+//-----------------------------------------------------------------------------
+Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C)
+{
+  A.clear();
+  A.resize(C.order());
+  uint const *b, *e;
+  for (uint vi = 0; vi < C.order(); ++vi) { C(vi, b, e); A[vi].assign(b, e); }
+  return A;
 }
 //-----------------------------------------------------------------------------
 

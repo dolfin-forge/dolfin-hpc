@@ -215,7 +215,9 @@ inline void Connectivity::operator()(uint entity, uint const *& b,
   e = connections_[entity + 1];
 }
 
-//-----------------------------------------------------------------------------
+//--- OPERATORS ---------------------------------------------------------------
+
+Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C);
 
 } /* namespace dolfin */
 

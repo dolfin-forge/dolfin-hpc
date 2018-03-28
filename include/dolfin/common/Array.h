@@ -136,6 +136,12 @@ public:
   inline T * ptr() { return (this->empty() ? NULL : &this->front()); }
   inline T const* ptr() const { return (this->empty() ? NULL : &this->front()); }
 
+  /// Implement own semantics
+  inline T * data() { return (this->empty() ? NULL : &this->front()); }
+  inline T const* data() const { return (this->empty() ? NULL : &this->front()); }
+  inline T * bound() { return this->data() + this->size(); }
+  inline T const* bound() const { return this->data() + this->size(); }
+
   ///
   void operator%=(uint s)
   {

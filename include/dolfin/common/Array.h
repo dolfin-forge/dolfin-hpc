@@ -55,6 +55,24 @@ public:
   {
   }
 
+
+  /// Create array given a range
+  Array(T const * begin, T const * end) :
+      std::vector<T>(begin, end),
+      offset_(0),
+      stride_(1)
+  {
+  }
+
+  /// Create array given a range
+  template<class Iterator>
+  Array(Iterator const begin, Iterator const end) :
+      std::vector<T>(begin, end),
+      offset_(0),
+      stride_(1)
+  {
+  }
+
   /// Copy constructor
   Array(Array<T> const& x) :
       std::vector<T>(x),

@@ -118,11 +118,6 @@ public:
   ///
   void disp() const;
 
-  //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
-  void check() const;
-
 protected:
 
   // Friends

@@ -65,12 +65,12 @@ public:
         error("DG0sNumbering : cell numbering is invalid");
       }
       shared_.clear();
-      for (SharedIterator it(distdata); !it.end(); ++it)
+      for (SharedIterator it(distdata); it.valid(); ++it)
       {
         shared_.insert(it.global_index());
       }
       ghosts_.clear();
-      for (GhostIterator it(distdata); !it.end(); ++it)
+      for (GhostIterator it(distdata); it.valid(); ++it)
       {
         ghosts_.insert(it.global_index());
       }

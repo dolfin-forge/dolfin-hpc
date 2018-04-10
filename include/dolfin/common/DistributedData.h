@@ -354,9 +354,9 @@ public:
   }
 
   ///
-  inline bool end() const
+  inline bool valid() const
   {
-    return iter_ == distdata_.shared_.end();
+    return iter_ != distdata_.shared_.end();
   }
 
   ///
@@ -441,9 +441,9 @@ public:
   }
 
   ///
-  inline bool end() const
+  inline bool valid() const
   {
-    return iter_ == distdata_.ghost_.end();
+    return iter_ != distdata_.ghost_.end();
   }
 
   ///

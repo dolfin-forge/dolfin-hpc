@@ -104,7 +104,7 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     // Update entities to adjacent ranks.
     // The previous implementation updates only ghost to the owner, which
     // assumes that data will only be used by the owner, maybe not.
-    for (SharedIterator it(distdata); !it.end(); ++it)
+    for (SharedIterator it(distdata); it.valid(); ++it)
     {
       if (sub_domains(it.index()) == index)
       {

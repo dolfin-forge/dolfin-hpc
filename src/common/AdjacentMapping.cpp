@@ -24,7 +24,7 @@ SharedMapping::SharedMapping(DistributedData const& data) :
 #if HAVE_MPI
 
   // Collect entities by adjacent rank
-  for (SharedIterator it(data); !it.end(); ++it)
+  for (SharedIterator it(data); it.valid(); ++it)
   {
     _set<uint> const& adjs = it.adj();
     for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)

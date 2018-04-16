@@ -128,7 +128,6 @@ nobase_pkginclude_HEADERS = \
 				la/LUSolver.h\
 				la/Matrix.h\
 				la/MultigridScheme.h\
-				la/NormalizationType.h\
 				la/PETScFactory.h\
 				la/PETScKrylovMatrix.h\
 				la/PETScKrylovSolver.h\

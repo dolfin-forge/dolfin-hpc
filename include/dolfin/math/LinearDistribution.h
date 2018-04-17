@@ -34,7 +34,6 @@ struct LinearDistribution
       offset(rank * L + std::min(rank,R)),
       size((global_size + card - rank - 1) / card)
   {
-    message(1, "LinearDistribution : offset = %8u; size = %8u", offset, size);
   }
 
   ///

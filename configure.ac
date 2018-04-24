@@ -45,6 +45,10 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
               [Compile with support for Boost TR1 headers]),
               [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
+AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
+              [Compile with support for unordered containers]),
+              [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
+
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
@@ -110,6 +114,9 @@ if test "x${enable_boosttr1}" = xyes; then
    need_boost=yes    
 fi
 
+if test "x${enable_unordered_cxx}" = xyes; then
+   AC_DEFINE(ENABLE_UNORDERED_CXX,[1],[Compile with support for unordered containers])
+fi
 
 # Checks for programs.
 AC_PROG_CXX
@@ -476,6 +483,7 @@ Package features:
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
+  Unordered containers: ${enable_unordered_cxx}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
   CHECK support: ${enable_check}

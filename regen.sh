@@ -14,7 +14,11 @@ fi
 
 echo "Running aclocal"
 if which aclocal > /dev/null 2>&1; then
+if test -n "${NO_ACLOCAL_INSTALL}"; then
+  aclocal -I m4
+else
   aclocal -I m4 --install
+fi
 else
   echo "No aclocal found on your system"
   exit 1

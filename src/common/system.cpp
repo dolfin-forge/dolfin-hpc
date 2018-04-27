@@ -55,6 +55,16 @@ std::string dirname(std::string file)
   return file.substr(0, beg);
 }
 //-----------------------------------------------------------------------------
+std::string path(std::string p0, std::string const& p1)
+{
+  return p0 + "/" + p1;
+}
+//-----------------------------------------------------------------------------
+std::string path(std::string p0, std::string const& p1, std::string const& p2)
+{
+  return p0 + "/" + p1 + "/" + p2;
+}
+//-----------------------------------------------------------------------------
 void glob(std::string const& pattern, Array<std::string>& matches)
 {
   glob_t match;

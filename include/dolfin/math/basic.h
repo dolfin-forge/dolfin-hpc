@@ -210,10 +210,28 @@ static inline void range(Iterator begin, Iterator end, T v = T(), int s = 1)
 template<class T>
 static inline void range(T* begin, T* end, T v = T(), int s = 1)
 {
-  while (begin != end)
+  if (s)
   {
-    *begin++ = v;
-    for (int i = 0; i < s; ++i) ++v;
+    if (s > 0)
+    {
+      while (begin != end)
+      {
+        *begin++ = v;
+        for (int i = 0; i < s; ++i) ++v;
+      }
+    }
+    else
+    {
+      while (begin != end)
+      {
+        *begin++ = v;
+        for (int i = 0; i > s; --i) --v;
+      }
+    }
+  }
+  else
+  {
+    std::fill(begin, end, v);
   }
 }
 

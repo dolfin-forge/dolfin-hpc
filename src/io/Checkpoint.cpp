@@ -283,7 +283,7 @@ void Checkpoint::load(Mesh& mesh)
     delete[] shared;
   }
 
-  mesh = _mesh;
+  mesh.swap(_mesh);
 
   restart_state_ = FUNC;
 

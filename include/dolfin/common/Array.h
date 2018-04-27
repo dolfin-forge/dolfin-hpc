@@ -55,6 +55,24 @@ public:
   {
   }
 
+
+  /// Create array given a range
+  Array(T const * begin, T const * end) :
+      std::vector<T>(begin, end),
+      offset_(0),
+      stride_(1)
+  {
+  }
+
+  /// Create array given a range
+  template<class Iterator>
+  Array(Iterator const begin, Iterator const end) :
+      std::vector<T>(begin, end),
+      offset_(0),
+      stride_(1)
+  {
+  }
+
   /// Copy constructor
   Array(Array<T> const& x) :
       std::vector<T>(x),
@@ -118,6 +136,12 @@ public:
   inline T * ptr() { return (this->empty() ? NULL : &this->front()); }
   inline T const* ptr() const { return (this->empty() ? NULL : &this->front()); }
 
+  /// Implement own semantics
+  inline T * data() { return (this->empty() ? NULL : &this->front()); }
+  inline T const* data() const { return (this->empty() ? NULL : &this->front()); }
+  inline T * bound() { return this->data() + this->size(); }
+  inline T const* bound() const { return this->data() + this->size(); }
+
   ///
   void operator%=(uint s)
   {
@@ -137,6 +161,13 @@ public:
 
   ///
   inline uint stride() const { return stride_; }
+
+  ///
+  inline uint dim(uint i) const
+  {
+      return (i == 0 ? this->size() / this->stride() :
+              i == 1 ? this->stride() : 0);
+  }
 
   /// Factor logic for array initialization
   inline static
@@ -235,6 +266,13 @@ public:
 
   ///
   inline uint stride() const { return stride_; }
+
+  ///
+  inline uint dim(uint i) const
+  {
+      return (i == 0 ? this->size() / this->stride() :
+              i == 1 ? this->stride() : 0);
+  }
 
 private:
 

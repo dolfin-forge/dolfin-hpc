@@ -9,7 +9,7 @@
 
 using namespace dolfin;
 //-----------------------------------------------------------------------------
-START_TEST( test_init_vec )
+DOLFIN_START_TEST( test_init_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -17,9 +17,9 @@ START_TEST( test_init_vec )
   ck_assert(x.size() == VEC_SIZE);
   ck_assert(x.local_size() == VEC_SIZE);
 
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_get_set_vec )
+DOLFIN_START_TEST( test_get_set_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -47,9 +47,9 @@ START_TEST( test_get_set_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_add_vec )
+DOLFIN_START_TEST( test_add_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -78,9 +78,9 @@ START_TEST( test_add_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_max_vec )
+DOLFIN_START_TEST( test_max_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -98,9 +98,9 @@ START_TEST( test_max_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_min_vec )
+DOLFIN_START_TEST( test_min_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -118,9 +118,9 @@ START_TEST( test_min_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_op_assign_vec )
+DOLFIN_START_TEST( test_op_assign_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -137,9 +137,9 @@ START_TEST( test_op_assign_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_op_mul_vec )
+DOLFIN_START_TEST( test_op_mul_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -158,9 +158,9 @@ START_TEST( test_op_mul_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_op_scale_vec )
+DOLFIN_START_TEST( test_op_scale_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -179,9 +179,9 @@ START_TEST( test_op_scale_vec )
 
   delete [] data;
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_zero_vec )
+DOLFIN_START_TEST( test_zero_vec )
 {
   Vector x;
   x.init(VEC_SIZE);
@@ -190,7 +190,7 @@ START_TEST( test_zero_vec )
   x.zero();
   ck_assert(x.max() == 0);
   
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 DOLFIN_SUITE_BEGIN(test_suite_vec, "Vector")

@@ -12,37 +12,27 @@ using dolfin::real;
 using ufl::type;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_UFL_type_int )
+DOLFIN_START_TEST( test_UFL_type_int )
 {
-  int init_failed = 0;
-  
   for (uint d = 0; d < 4; ++d)
   {
     type<uint> t(d);
     t.display();
   }
-  
-  ck_assert( init_failed == 0 );
-}END_TEST
+}DOLFIN_END_TEST
  //-----------------------------------------------------------------------------
-START_TEST( test_UFL_type_real )
+DOLFIN_START_TEST( test_UFL_type_real )
 {
-  int init_failed = 0;
-  
   for (uint d = 0; d < 4; ++d)
   {
     real val = 1.1 * (real) d;
     type<real> t(val);
     t.display();
   }
-  
-  ck_assert( init_failed == 0 );
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_UFL_type_string )
+DOLFIN_START_TEST( test_UFL_type_string )
 {
-  int init_failed = 0;
-  
   std::vector<std::string> vals;
   vals.push_back("'interval'");
   vals.push_back("'triangle'");
@@ -54,9 +44,7 @@ START_TEST( test_UFL_type_string )
     type<std::string> t(*it);
     t.display();
   }
-  
-  ck_assert( init_failed == 0 );
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

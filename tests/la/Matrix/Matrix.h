@@ -9,7 +9,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_init_mat )
+DOLFIN_START_TEST( test_init_mat )
 {
   Matrix A;
   A.init(MAT_SIZE, MAT_SIZE);
@@ -17,7 +17,7 @@ START_TEST( test_init_mat )
   ck_assert(A.size(0) == MAT_SIZE);
   ck_assert(A.size(1) == MAT_SIZE);
 
-}END_TEST
+}DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 DOLFIN_SUITE_BEGIN(test_suite_mat, "Matrix")

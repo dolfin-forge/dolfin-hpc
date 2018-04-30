@@ -40,38 +40,23 @@ struct DistGlobalIndex
 };
 
 //-----------------------------------------------------------------------------
-START_TEST( test_algorithm )
+DOLFIN_START_TEST( test_algorithm )
   {
-    int init_failed = 0;
-    begin("test_algorithm");
-    //---
-    Test T;
-    T.begin("Foreach min/max volume");
     {
       UnitInterval mesh(42);
       real value = 1.0;
       foreach<CellIterator, std::min<real> >(mesh, Volume(), value);
-      message("%g", value);
       foreach<CellIterator, std::max<real> >(mesh, Volume(), value);
-      message("%g", value);
     }
-    T.end();
     //---
-    T.begin("Foreach min/max distance global vertex index");
     {
       UnitInterval mesh(42);
       uint value = mesh.global_size(0);
       foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
-      message("%u", value);
       foreach<UFCCellIterator, std::min<uint> >(mesh, DistGlobalIndex(), value);
-      message("%u", value);
     }
-    T.end();
-    //---
-    end();
-    skip();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

@@ -13,51 +13,29 @@ using namespace dolfin;
 template<class T>
 void test_nil()
 {
-  Mesh mesh; CoefficientMap coefs; Nil<T>(mesh, coefs);
+  Mesh mesh;
+  CoefficientMap coefs;
+  Nil<T>(mesh, coefs);
 }
 
 //-----------------------------------------------------------------------------
-START_TEST( test_Functional )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_Functional");
+DOLFIN_START_TEST( test_Functional )
   {
     test_nil<Functional>();
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_LinearForm )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_LinearForm");
+DOLFIN_START_TEST( test_LinearForm )
   {
     test_nil<LinearForm>();
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_BilinearForm )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_BilinearForm");
+DOLFIN_START_TEST( test_BilinearForm )
   {
     test_nil<BilinearForm>();
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

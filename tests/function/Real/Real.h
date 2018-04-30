@@ -7,12 +7,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_Real )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_Value : E01");
+DOLFIN_START_TEST( test_Real )
   {
     Real<> r;
     r.disp();
@@ -27,10 +22,7 @@ START_TEST( test_Real )
     r -= 0.25;
     r.disp();
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

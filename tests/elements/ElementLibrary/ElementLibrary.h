@@ -8,28 +8,17 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_ElementLibrary )
+DOLFIN_START_TEST( test_ElementLibrary )
 {
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_ElementLibrary");
+  ufc::finite_element * element = NULL;
+  ufl::ElementList const& L = ElementLibrary::elements();
+  for (ufl::FiniteElementSpace const * e = L.first(); L.valid(); e = L.next())
   {
-    ufl::ElementList const& list = ElementLibrary::elements();
-    ufc::finite_element * fe = NULL;
-    for (ufl::FiniteElementSpace const * it = list.first(); list.valid();
-        it = list.next())
-    {
-      it->display();
-      //
-      fe = ElementLibrary::create_finite_element(it->repr());
-      delete fe;
-    }
+    element = ElementLibrary::create_finite_element(e->repr());
+    delete element;
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+}
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

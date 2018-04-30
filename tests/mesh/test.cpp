@@ -2,7 +2,6 @@
 
 #ifdef HAVE_CHECK
 
-#include "SubDomain/SubDomain.h"
 #include "Point/Point.h"
 #include "CellTypes/CellTypes.h"
 #include "UnitMeshes/UnitMeshes.h"
@@ -16,9 +15,6 @@
 //-----------------------------------------------------------------------------
 DOLFIN_SUITE_BEGIN(suite, "mesh")
 {
-  DOLFIN_TCASE_CREATE("SubDomain");
-  DOLFIN_TCASE_ADD(test_SubDomain);
-
   DOLFIN_TCASE_CREATE("Point");
   DOLFIN_TCASE_ADD(test_Point);
 

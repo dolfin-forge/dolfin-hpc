@@ -7,12 +7,7 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-START_TEST( test_Constant )
-{
-  int init_failed = 0;
-  Test T;
-  //---
-  T.begin("test_Constant");
+DOLFIN_START_TEST( test_Constant )
   {
     Constant r;
     Constant const r0(0.0);
@@ -20,27 +15,24 @@ START_TEST( test_Constant )
     Constant const r2(2.0);
 
     // Default
-    ck_assert( r == r0 );
+    ck_assert(r == r0);
 
     r = 1.0;
-    ck_assert( r == r1 );
+    ck_assert(r == r1);
 
     r += 1.0;
-    ck_assert( r == r2 );
+    ck_assert(r == r2);
 
     r -= 1.0;
-    ck_assert( r == r1 );
+    ck_assert(r == r1);
 
     r *= 2.0;
-    ck_assert( r == r2 );
+    ck_assert(r == r2);
 
     r /= 2.0;
-    ck_assert( r == r1 );
+    ck_assert(r == r1);
   }
-  T.end();
-  //---
-  ck_assert( init_failed == 0 );
-}END_TEST
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

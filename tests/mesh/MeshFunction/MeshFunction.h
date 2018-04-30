@@ -3,12 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include <dolfin/mesh/MeshValues.h>
-#include <dolfin/mesh/PointCell.h>
-#include <dolfin/mesh/IntervalCell.h>
-#include <dolfin/mesh/TriangleCell.h>
-#include <dolfin/mesh/TetrahedronCell.h>
-#include <dolfin/mesh/QuadrilateralCell.h>
-#include <dolfin/mesh/HexahedronCell.h>
+#include <dolfin/mesh/CellTypes.h>
 
 using namespace dolfin;
 
@@ -47,13 +42,9 @@ void check_reference_cell()
     }
   }
 
-  // Display
-  M.disp();
-
   // Copy constructor
   MeshValues<T, Entity> N(M);
   ck_assert(M == N);
-
 }
 //-----------------------------------------------------------------------------
 template<typename T, typename V>
@@ -71,18 +62,20 @@ void check_conversion_vertices_x0()
   }
 
   MeshValues<V, Vertex> N(M);
-  N.disp();
+  ck_assert(M.dim() == N.dim());
+  ck_assert(M.size() == N.size());
 
   MeshValues<V, Vertex> O(cellm);
   O = M;
   ck_assert(N == O);
+
+  MeshValues<T, Vertex> P(O);
+  ck_assert(M.dim() == P.dim());
+  ck_assert(M.size() == P.size());
 }
 //-----------------------------------------------------------------------------
-START_TEST( test_MeshFunction )
+DOLFIN_START_TEST( test_MeshFunction )
   {
-    int init_failed = 0;
-    begin("test_MeshFunction");
-    //---
     // Check mesh functions on reference cells
     {
       check_reference_cell<PointCell, uint, Vertex>();
@@ -109,7 +102,6 @@ START_TEST( test_MeshFunction )
       check_reference_cell<HexahedronCell, uint, Face>();
       check_reference_cell<HexahedronCell, uint, Cell>();
     }
-    //---
     // Check conversions
     {
       // bool -> int
@@ -157,10 +149,8 @@ START_TEST( test_MeshFunction )
       // real -> float
       check_conversion_vertices_x0<real, float>();
     }
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

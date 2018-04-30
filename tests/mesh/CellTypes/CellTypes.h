@@ -2,135 +2,68 @@
 
 #ifdef HAVE_CHECK
 
-#include <dolfin/main/PE.h>
-#include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/CellTypes.h>
-
-#include <sstream>
+#include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEditor.h>
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-void check_reference_cell(CellType& cell, Mesh& refcell)
+template<class T>
+void check_reference_cell_refinement()
 {
-  Cell cell0(refcell, 0);
-  begin("Properties");
-  message("Volume       : %+e", cell.volume(cell0));
-  message("Diameter     : %+e", cell.diameter(cell0));
-  message("Circumradius : %+e", cell.circumradius(cell0));
-  end();
-  // Initialize all connectivities
-  for (dolfin::uint i = 0; i <= refcell.topology().dim(); ++i)
-  {
-    for (dolfin::uint j = i; j <= refcell.topology().dim(); ++j)
-    {
-      refcell.init(i, j);
-    }
-  }
-  //
-  for (CellIterator c(refcell); !c.end(); ++c)
-  {
-    cell.check(*c);
-  }
-  dolfin::uint nc0 = refcell.num_cells();
-
-  dolfin::uint const N = 1 << (5 - cell.dim());
-  for (dolfin::uint l = 1; l <= N; ++l)
-  {
-    refcell.refine();
-    ck_assert_int_eq(refcell.num_cells(), nc0 * cell.num_refined_cells());
-    nc0 = refcell.num_cells();
-    MeshValues<dolfin::uint, Vertex> vi(refcell);
-    for (VertexIterator v(refcell); !v.end(); ++v)
-    {
-      vi(*v) = v->index();
-    }
-    // Check entities and get_entities consistency
-    uint * cell_vertices = new uint[cell0.num_entities(0)];
-    for (CellIterator c(refcell); !c.end(); ++c)
-    {
-      c->get_entities(0, cell_vertices);
-      c->entities(0);
-      ck_assert(cmp(c->num_entities(0), c->entities(0), cell_vertices));
-      if(PE::size() == 1)
-      {
-        c->get_global_entities(0, cell_vertices);
-        ck_assert(cmp(c->num_entities(0), c->entities(0), cell_vertices));
-      }
-      //
-      for (uint i = 0; i < c->num_entities(0); ++i)
-      {
-        Vertex v(refcell, cell_vertices[i]);
-        ck_assert(c->incident(v));
-        ck_assert(i == uint(c->index(v)));
-      }
-    }
-    delete [] cell_vertices;
-  }
-  Mesh refcell1(refcell);
-  Mesh refcell2(refcell);
-  dolfin_assert(refcell1 == refcell);
-  dolfin_assert(refcell2 == refcell);
-  refcell1.swap(refcell2);
-  dolfin_assert(refcell1 == refcell2);
+  T cell;
+  Mesh rc0;
+  cell.create_reference_cell(rc0);
+  Mesh rc1;
+  MeshEditor me(rc1, cell);
+  me.init_cells(cell.RefinementPattern::num_refined_cells(rc0));
+  me.init_vertices(cell.RefinementPattern::num_refined_vertices(rc0));
+  Cell mc0(rc0, 0);
+  uint nci = 0;
+  cell.refine_cell(mc0, me, nci);
+  me.close();
 }
+
 //-----------------------------------------------------------------------------
-START_TEST( test_PointCell )
+DOLFIN_START_TEST( test_PointCell )
   {
-    int init_failed = 0;
-    begin("test_PointCell");
-    //---
     PointCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 0);
     ck_assert_int_eq(cell.num_entities(0), 1);
     ck_assert_int_eq(cell.num_vertices(0), 1);
-    cell.disp();
-    //
-    CellType * ct0 = CellType::create(CellType::point);
-    ck_assert_int_eq(cell.cellType(), ct0->cellType());
-    delete ct0;
-    //
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    // Most member functions are undefined
-    //check_reference_cell(cell, refcell);
-    //---
-    end();
-    skip();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    // Cell refinement
+    check_reference_cell_refinement<PointCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_IntervalCell )
+DOLFIN_START_TEST( test_IntervalCell )
   {
-    int init_failed = 0;
-    begin("test_IntervalCell");
-    //---
     IntervalCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 1);
     ck_assert_int_eq(cell.num_entities(0), 2);
     ck_assert_int_eq(cell.num_entities(1), 1);
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
-    cell.disp();
-    //
-    CellType * ct0 = CellType::create(CellType::interval);
-    ck_assert_int_eq(cell.cellType(), ct0->cellType());
-    delete ct0;
-    // UFC convention
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    check_reference_cell(cell, refcell);
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 2);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(1), 1);
+    // Cell refinement
+    check_reference_cell_refinement<IntervalCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_TriangleCell )
+DOLFIN_START_TEST( test_TriangleCell )
   {
-    int init_failed = 0;
-    begin("test_TriangleCell");
-    //---
     TriangleCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 2);
     ck_assert_int_eq(cell.num_entities(0), 3);
     ck_assert_int_eq(cell.num_entities(1), 3);
@@ -138,26 +71,20 @@ START_TEST( test_TriangleCell )
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 3);
-    cell.disp();
-    //
-    CellType * ct0 = CellType::create(CellType::triangle);
-    ck_assert_int_eq(cell.cellType(), ct0->cellType());
-    delete ct0;
-    // UFC convention
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    check_reference_cell(cell, refcell);
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 4);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(1), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(2), 0);
+    // Cell refinement
+    check_reference_cell_refinement<TriangleCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_TetrahedronCell )
+DOLFIN_START_TEST( test_TetrahedronCell )
   {
-    int init_failed = 0;
-    begin("test_TetrahedronCell");
-    //---
     TetrahedronCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 3);
     ck_assert_int_eq(cell.num_entities(0), 4);
     ck_assert_int_eq(cell.num_entities(1), 6);
@@ -167,26 +94,21 @@ START_TEST( test_TetrahedronCell )
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 3);
     ck_assert_int_eq(cell.num_vertices(3), 4);
-    cell.disp();
-    //
-    CellType * ct0 = CellType::create(CellType::tetrahedron);
-    ck_assert_int_eq(cell.cellType(), ct0->cellType());
-    delete ct0;
-    // UFC convention
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    check_reference_cell(cell, refcell);
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 8);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(1), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(2), 0);
+    ck_assert_int_eq(cell.num_refined_vertices(3), 0);
+    // Cell refinement
+    check_reference_cell_refinement<TetrahedronCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_QuadrilateralCell )
+DOLFIN_START_TEST( test_QuadrilateralCell )
   {
-    int init_failed = 0;
-    begin("test_QuadrilateralCell");
-    //---
     QuadrilateralCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 2);
     ck_assert_int_eq(cell.num_entities(0), 4);
     ck_assert_int_eq(cell.num_entities(1), 4);
@@ -194,29 +116,20 @@ START_TEST( test_QuadrilateralCell )
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 4);
-    cell.disp();
-    //
-    CellType * ct0 = CellType::create(CellType::quadrilateral);
-    ck_assert_int_eq(cell.cellType(), ct0->cellType());
-    delete ct0;
-    // UFC convention
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    Cell c(refcell, 0);
-    refcell.init(1, 0);
-    refcell.init(cell.dim(), 1);
-    cell.check(c);
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 4);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(1), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(2), 1);
+    // Cell refinement
+    check_reference_cell_refinement<QuadrilateralCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
-START_TEST( test_HexahedronCell )
+DOLFIN_START_TEST( test_HexahedronCell )
   {
-    int init_failed = 0;
-    begin("test_HexahedronCell");
-    //---
     HexahedronCell cell;
+    // Topology
     ck_assert_int_eq(cell.dim(), 3);
     ck_assert_int_eq(cell.num_entities(0), 8);
     ck_assert_int_eq(cell.num_entities(1), 12);
@@ -226,22 +139,16 @@ START_TEST( test_HexahedronCell )
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 4);
     ck_assert_int_eq(cell.num_vertices(3), 8);
-    cell.disp();
-    // Check cell type enum
-    CellType * ct0 = CellType::create(CellType::hexahedron);
-    delete ct0;
-    // UFC convention
-    Mesh refcell;
-    cell.create_reference_cell(refcell);
-    Cell c(refcell, 0);
-    refcell.init(1, 0);
-    refcell.init(2, 0);
-    refcell.init(cell.dim(), 1);
-    cell.check(c);
-    //---
-    end();
-    ck_assert( init_failed == 0 );
-  }END_TEST
+    // Refinement pattern
+    ck_assert_int_eq(cell.num_refined_cells(), 8);
+    ck_assert_int_eq(cell.num_refined_vertices(0), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(1), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(2), 1);
+    ck_assert_int_eq(cell.num_refined_vertices(3), 1);
+    // Cell refinement
+    check_reference_cell_refinement<HexahedronCell>();
+  }
+DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
 
 #endif

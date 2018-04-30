@@ -112,6 +112,22 @@ struct hash<dolfin::FaceKey>
 
 } /* namespace std */
 
+#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
+
+namespace std
+{
+
+template<>
+struct hash<dolfin::FaceKey>
+{
+  inline std::size_t operator()(dolfin::FaceKey const& e) const
+  {
+    return e.hash();
+  }
+};
+
+} /* namespace std */
+
 #endif
 
 #endif /* __DOLFIN_MESH_FACE_KEY */

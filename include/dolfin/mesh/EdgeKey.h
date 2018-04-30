@@ -117,6 +117,22 @@ struct hash<dolfin::EdgeKey>
 
 } /* namespace std */
 
+#elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
+
+namespace std
+{
+
+template<>
+struct hash<dolfin::EdgeKey>
+{
+  inline std::size_t operator()(dolfin::EdgeKey const& e) const
+  {
+    return e.hash();
+  }
+};
+
+} /* namespace std */
+
 #endif
 
 #endif /* __DOLFIN_MESH_EDGE_KEY */

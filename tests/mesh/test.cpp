@@ -4,6 +4,7 @@
 
 #include "Point/Point.h"
 #include "CellTypes/CellTypes.h"
+#include "EntityKey/EntityKey.h"
 #include "UnitMeshes/UnitMeshes.h"
 #include "MeshFunction/MeshFunction.h"
 #include "MeshData/MeshData.h"
@@ -25,6 +26,9 @@ DOLFIN_SUITE_BEGIN(suite, "mesh")
   DOLFIN_TCASE_ADD(test_TetrahedronCell);
   DOLFIN_TCASE_ADD(test_QuadrilateralCell);
   DOLFIN_TCASE_ADD(test_HexahedronCell);
+
+  DOLFIN_TCASE_CREATE("EntityKey");
+  DOLFIN_TCASE_ADD(test_EntityKey);
 
   DOLFIN_TCASE_CREATE("Simplex");
   DOLFIN_TCASE_ADD(test_Simplex);

@@ -101,12 +101,12 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] >= other.indices[i])
+      if (this->indices[i] > other.indices[i])
       {
         return false;
       }
     }
-    return true;
+    return (*this != other);
   }
 
   ///
@@ -171,12 +171,12 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] <= other.indices[i])
+      if (this->indices[i] < other.indices[i])
       {
         return false;
       }
     }
-    return true;
+    return (*this != other);
   }
 
   ///

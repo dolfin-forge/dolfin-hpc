@@ -145,8 +145,18 @@ fi
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
+
+#Ugly hack to check for C++11 unordered containers, without all c++11
+#dependencies pulled in from "standard" m4 container macros. 
+#Note these requires correct C++11 flags to be passed through CXXFLAGS.
+AX_CXX_HEADER_NONTR1_UNORDERED_MAP
+AX_CXX_HEADER_NONTR1_UNORDERED_SET
+
+if test "x${ax_cv_cxx_unorderd_map}" != xyes; then
 AX_CXX_HEADER_TR1_UNORDERED_MAP
 AX_CXX_HEADER_TR1_UNORDERED_SET
+fi
+
 
 # UFL is now default
 PKG_CHECK_MODULES([UFC],[ufc-1 >= 2.1.4])

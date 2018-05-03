@@ -85,9 +85,6 @@ public:
   /// Destructor
   virtual ~Mesh();
 
-  /// Assignment
-  Mesh const& operator=(Mesh const& mesh);
-
   /// Swap instances
   void swap(Mesh& other);
 
@@ -111,6 +108,9 @@ public:
 
   /// Return mesh topology (const)
   MeshTopology const& topology() const;
+
+  /// Return topological dimension
+  uint topology_dimension() const;
 
   /// Return number of entities of given topological dimension
   uint size(uint dim) const;
@@ -180,6 +180,9 @@ public:
 
   /// Return mesh geometry (const)
   MeshGeometry const& geometry() const;
+
+  /// Return geometric dimension
+  uint geometry_dimension() const;
 
   //---
 
@@ -282,6 +285,9 @@ private:
   mutable Array<MappedManifold *> periodic_mappings_;
 
   int timestamp_;
+
+  /// Assignment (disabled)
+  Mesh const& operator=(Mesh const& other) { return *this; }
 
 };
 

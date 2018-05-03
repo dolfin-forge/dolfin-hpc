@@ -58,6 +58,17 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
   init(mesh, type);
 }
 //-----------------------------------------------------------------------------
+BoundaryMesh::BoundaryMesh(BoundaryMesh const& other) :
+    Mesh(other),
+    MeshDependent(other.mesh()),
+    type_(other.type_),
+    boundary_of_boundary_(other.boundary_of_boundary_),
+    cell_map_(other.cell_map_),
+    vertex_map_(other.vertex_map_),
+    subdomain_(other.subdomain_)
+{
+}
+//-----------------------------------------------------------------------------
 void BoundaryMesh::init(Mesh& mesh, BoundaryMesh::Type type)
 {
   switch (type)

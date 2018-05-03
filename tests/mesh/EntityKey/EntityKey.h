@@ -58,6 +58,8 @@ void check_map()
 DOLFIN_START_TEST( test_EntityKey )
   {
     check_map<2>();
+    check_map<3>();
+    check_map<4>();
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

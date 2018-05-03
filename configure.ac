@@ -45,6 +45,10 @@ AC_ARG_ENABLE(boost-tr1, AC_HELP_STRING([--enable-boost-tr1],
               [Compile with support for Boost TR1 headers]),
               [enable_boosttr1=${enableval}],[enable_boostr1=no])
 
+AC_ARG_ENABLE(unordered-cxx, AC_HELP_STRING([--enable-unordered-cxx],
+              [Compile with support for unordered containers]),
+              [enable_unordered_cxx=${enableval}],[enable_unordered_cxx=yes])
+
 AC_ARG_ENABLE(quadrature, AC_HELP_STRING([--enable-quadrature],
               [Enable various quadrature rules]),
               [enable_quad=${enableval}],[enable_quad=no])
@@ -110,7 +114,6 @@ if test "x${enable_boosttr1}" = xyes; then
    need_boost=yes    
 fi
 
-
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_INSTALL
@@ -146,16 +149,28 @@ fi
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
 
-#Ugly hack to check for C++11 unordered containers, without all c++11
-#dependencies pulled in from "standard" m4 container macros. 
-#Note these requires correct C++11 flags to be passed through CXXFLAGS.
-AX_CXX_HEADER_NONTR1_UNORDERED_MAP
-AX_CXX_HEADER_NONTR1_UNORDERED_SET
+found_unordered_containers="no"
+if test "x${enable_unordered_cxx}" = xyes; then
 
-if test "x${ax_cv_cxx_unorderd_map}" != xyes; then
-AX_CXX_HEADER_TR1_UNORDERED_MAP
-AX_CXX_HEADER_TR1_UNORDERED_SET
+   #Ugly hack to check for C++11 unordered containers, without all c++11
+   #dependencies pulled in from "standard" m4 container macros. 
+   #Note these requires correct C++11 flags to be passed through CXXFLAGS.
+   AX_CXX_HEADER_NONTR1_UNORDERED_MAP
+   AX_CXX_HEADER_NONTR1_UNORDERED_SET
+  
+   if test "x${ax_cv_cxx_unorderd_map}" != xyes; then
+      AX_CXX_HEADER_TR1_UNORDERED_MAP
+      AX_CXX_HEADER_TR1_UNORDERED_SET
+      if test "x${ax_cv_cxx_tr1_unordered_set}" = xyes; then
+      	 found_unordered_containers="yes"
+      fi
+   else
+      found_unordered_containers="yes"	
+   fi
 fi
+
+
+
 
 
 # UFL is now default
@@ -476,6 +491,7 @@ Package features:
   Function cache: ${enable_function_cache}
   Optimize P1: ${enable_optimize_p1}
   Progress bar: ${enable_progressbar}
+  Unordered containers: ${found_unordered_containers}
   Compressed VTK: ${enable_zlib}
   Quadrature: ${enable_quad}
   CHECK support: ${enable_check}

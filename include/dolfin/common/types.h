@@ -12,6 +12,7 @@
 #include <dolfin/config/dolfin_config.h>
 
 #include <complex>
+
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
@@ -82,7 +83,6 @@ namespace dolfin
 #define _map std::map
 #define _set std::set
 #endif
-
 //-----------------------------------------------------------------------------
 
 /// Facility to compare arrays

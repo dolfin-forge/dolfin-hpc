@@ -27,42 +27,26 @@ struct EntityKey
   ///
   EntityKey(uint D) :
       size(D),
-      indices(NULL),
+      indices(D ? new uint[size]() : NULL),
       idx(0)
   {
-    if (D == 0)
-    {
-      error("EntityKey : trying to initialize a zero sized entity");
-    }
-    indices = new uint[size];
-    std::fill_n(indices, size, 0);
   }
 
   ///
   EntityKey(uint D, uint const * v) :
       size(D),
-      indices(NULL),
+      indices(D ? new uint[size] : NULL),
       idx(0)
   {
-    if (D == 0)
-    {
-      error("EntityKey : trying to initialize a zero sized entity");
-    }
-    indices = new uint[size];
     set(v);
   }
 
   ///
   EntityKey(uint D, uint const * v, uint i) :
       size(D),
-      indices(NULL),
+      indices(D ? new uint[size] : NULL),
       idx(i)
   {
-    if (D == 0)
-    {
-      error("EntityKey : trying to initialize a zero sized entity");
-    }
-    indices = new uint[size];
     set(v);
   }
 
@@ -101,12 +85,12 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] > other.indices[i])
+      if (this->indices[i] != other.indices[i])
       {
-        return false;
+        return this->indices[i] < other.indices[i];
       }
     }
-    return (*this != other);
+    return false;
   }
 
   ///
@@ -115,9 +99,9 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] > other.indices[i])
+      if (this->indices[i] != other.indices[i])
       {
-        return false;
+        return this->indices[i] < other.indices[i];
       }
     }
     return true;
@@ -157,9 +141,9 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] < other.indices[i])
+      if (this->indices[i] != other.indices[i])
       {
-        return false;
+        return this->indices[i] > other.indices[i];
       }
     }
     return true;
@@ -171,12 +155,12 @@ struct EntityKey
     dolfin_assert(size == other.size);
     for (uint i = 0; i < size; ++i)
     {
-      if (this->indices[i] < other.indices[i])
+      if (this->indices[i] != other.indices[i])
       {
-        return false;
+        return this->indices[i] > other.indices[i];
       }
     }
-    return (*this != other);
+    return false;
   }
 
   ///
@@ -252,7 +236,6 @@ private:
 
 } /* namespace dolfin */
 
-#if ENABLE_UNORDERED_CXX
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET) || \
     (__IBMCPP__ && __IBMCPP_TR1__)|| \
     (ENABLE_BOOST_TR1)
@@ -308,7 +291,6 @@ struct hash<dolfin::EntityKey>
 
 } /* namespace std */
 
-#endif
 #endif
 
 #endif /* __DOLFIN_MESH_ENTITY_KEY_H */

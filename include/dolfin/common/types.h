@@ -13,7 +13,6 @@
 
 #include <complex>
 
-#if ENABLE_UNORDERED_CXX
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
@@ -29,7 +28,6 @@
 #elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
 #include <unordered_map>
 #include <unordered_set>
-#endif
 #else
 #include <map>
 #include <set>
@@ -66,7 +64,6 @@ namespace dolfin
   real const DOLFIN_REAL_MAX = DBL_MAX;
   real const DOLFIN_REAL_UNDEF = DBL_MAX;
 
-#if ENABLE_UNORDERED_CXX
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set
@@ -82,10 +79,6 @@ namespace dolfin
 #elif (HAVE_UNORDERED_MAP && HAVE_UNORDERED_SET)
 #define _map std::unordered_map
 #define _set std::unordered_set
-#else
-#define _map std::map
-#define _set std::set
-#endif
 #else
 #define _map std::map
 #define _set std::set

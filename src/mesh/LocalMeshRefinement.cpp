@@ -325,7 +325,7 @@ void LocalMeshRefinement::refineMeshByEdgeBisection(
   refman.apply();
 
   // Overwrite old mesh with refined mesh
-  mesh = refined_mesh;
+  mesh.swap(refined_mesh);
 //  mesh.distdata().set_invalid_numbering();
 //  mesh.renumber();
 

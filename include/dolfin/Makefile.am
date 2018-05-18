@@ -48,7 +48,6 @@ nobase_pkginclude_HEADERS = \
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
 				fem/Form.h\
-				fem/FormExpansion.h\
 				fem/Functional.h\
 				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
@@ -178,7 +177,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/Cell.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
-				mesh/CoarseningManager.h\
 				mesh/DCell.h\
 				mesh/DMesh.h\
 				mesh/DomainBoundary.h\
@@ -192,14 +190,11 @@ nobase_pkginclude_HEADERS = \
 				mesh/FaceKey.h\
 				mesh/Facet.h\
 				mesh/GeometricPredicates.h\
-				mesh/GlobalFacetMap.h\
 				mesh/GTSInterface.h\
 				mesh/HexahedronCell.h\
 				mesh/IntersectionDetector.h\
 				mesh/IntervalCell.h\
 				mesh/LoadBalancer.h\
-				mesh/LocalMeshCoarsening.h\
-				mesh/LocalMeshRefinement.h\
 				mesh/Mapping.h \
 				mesh/MappedManifold.h \
 				mesh/Mesh.h\
@@ -228,7 +223,6 @@ nobase_pkginclude_HEADERS = \
 				mesh/predicates_init.h\
 				mesh/QuadrilateralCell.h\
 				mesh/Rectangle.h\
-				mesh/RefinementManager.h\
 				mesh/RefinementPattern.h\
 				mesh/RivaraRefinement.h\
 				mesh/rounding.h\
@@ -263,7 +257,6 @@ nobase_pkginclude_HEADERS = \
 				quadrature/Quadrature.h\
 				quadrature/QuadratureRule.h\
 				quadrature/RadauQuadrature.h\
-				quadrature/UFCCellIntegral.h\
 				quadrature/UFCReferenceCell.h\
 				ufl/dolfin_ufl.h\
 				ufl/UFLarray.h\

@@ -270,12 +270,6 @@ uint QuadrilateralCell::num_refined_vertices(uint dim) const
   return 1;
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::refinement_needs_entities(uint dim) const
-{
-  dolfin_assert(dim <= TD);
-  return true;
-}
-//-----------------------------------------------------------------------------
 real QuadrilateralCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

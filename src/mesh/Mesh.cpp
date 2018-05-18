@@ -15,7 +15,6 @@
 #include <dolfin/main/PE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
-#include <dolfin/mesh/LocalMeshRefinement.h>
 #include <dolfin/mesh/MappedManifold.h>
 #include <dolfin/mesh/MeshData.h>
 #include <dolfin/mesh/MeshPartition.h>
@@ -397,13 +396,6 @@ void Mesh::refine()
 {
   message("No cells marked for refinement, assuming uniform mesh refinement.");
   UniformMeshRefinement::refine(*this);
-}
-//-----------------------------------------------------------------------------
-void Mesh::refine(MeshValues<bool, Cell>& cell_markers, bool refine_boundary,
-                  bool load_balance)
-{
-  LocalMeshRefinement::refineMeshByEdgeBisection(*this, cell_markers,
-                                                 refine_boundary, load_balance);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const

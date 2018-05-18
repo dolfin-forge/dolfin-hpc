@@ -110,12 +110,6 @@ uint PointCell::num_refined_vertices(uint dim) const
   return 1;
 }
 //-----------------------------------------------------------------------------
-bool PointCell::refinement_needs_entities(uint dim) const
-{
-  dolfin_assert(dim == 0);
-  return true;
-}
-//-----------------------------------------------------------------------------
 real PointCell::volume(MeshEntity const& entity) const
 {
   return 0.0;

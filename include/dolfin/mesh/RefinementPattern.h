@@ -45,9 +45,6 @@ public:
   /// entity of given topological dimensions
   virtual uint num_refined_vertices(uint dim) const = 0;
 
-  /// Return if refinement pattern requires entities of given dimension
-  virtual bool refinement_needs_entities(uint dim) const = 0;
-
   ///--------------------------------------------------------------------------
 
   /// Return the number of vertices after refinement

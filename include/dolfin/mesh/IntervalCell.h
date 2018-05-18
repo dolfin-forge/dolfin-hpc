@@ -88,9 +88,6 @@ public:
   /// entity of given topological dimensions
   uint num_refined_vertices(uint dim) const;
 
-  /// Return if refinement pattern requires entities of given dimension
-  bool refinement_needs_entities(uint dim) const;
-
   //---------------------------------------------------------------------------
 
   /// Compute (generalized) volume (length) of interval

@@ -149,12 +149,6 @@ uint IntervalCell::num_refined_vertices(uint dim) const
   return 1;
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::refinement_needs_entities(uint dim) const
-{
-  dolfin_assert(dim <= TD);
-  return true;
-}
-//-----------------------------------------------------------------------------
 real IntervalCell::volume(MeshEntity const& entity) const
 {
   dolfin_assert(entity.dim() == TD);

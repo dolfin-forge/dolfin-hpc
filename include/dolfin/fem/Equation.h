@@ -95,7 +95,7 @@ struct Equation
   template<class E1, class E2, class E3>
   void operator()(Mesh& mesh, Coefficients& coefs)
   {
-    switch (mesh.topology().dim())
+    switch (mesh.topology_dimension())
     {
       case 1:
         Equation::template operator()<E1>(mesh, coefs);

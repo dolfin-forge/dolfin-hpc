@@ -79,8 +79,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   // FIXME: Lagrange where more than one per element is associated with
   // FIXME: each coordinate. Note that globally there may very well be
   // FIXME: more than one dof per coordinate (for conforming elements).
-  uint const gdim = mesh().geometry().dim();
-  uint const tdim = mesh().geometry().dim();
+  uint const gdim = mesh().geometry_dimension();
+  uint const tdim = mesh().geometry_dimension();
 
   // Table of mappings from coordinates to dofs
   std::map<std::vector<real>, std::pair<int, int>, lt_coordinate> coordinate_dofs;

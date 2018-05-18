@@ -87,7 +87,7 @@ Array<Function *> FunctionDecomposition::compute(Function const& F)
     uint dof_index = 0;
     real * block = F.create_block();
     F.get_block(block);
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     for (CellIterator c(mesh); !c.end(); ++c)
     {
       dof_index = mesh.distdata()[tdim].get_global(c->index());

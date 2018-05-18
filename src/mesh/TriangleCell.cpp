@@ -178,7 +178,7 @@ void TriangleCell::order_facet(uint vertices[], Facet& facet) const
 
   // Get the vertex opposite to the facet (the one we remove)
   uint vertex = 0;
-  const Cell cell(mesh, facet.entities(mesh.topology().dim())[0]);
+  const Cell cell(mesh, facet.entities(mesh.topology_dimension())[0]);
   for (uint i = 0; i < cell.num_entities(0); i++)
   {
     bool not_in_facet = true;

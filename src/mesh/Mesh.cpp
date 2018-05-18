@@ -230,9 +230,9 @@ void Mesh::init(uint d0, uint d1) const
 //-----------------------------------------------------------------------------
 void Mesh::init() const
 {
-  for (uint d0 = 0; d0 <= topology().dim(); ++d0)
+  for (uint d0 = 0; d0 <= topology_dimension(); ++d0)
   {
-    for (uint d1 = 0; d1 <= topology().dim(); ++d1)
+    for (uint d1 = 0; d1 <= topology_dimension(); ++d1)
     {
       init(d0, d1);
     }

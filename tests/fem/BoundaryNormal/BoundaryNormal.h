@@ -12,7 +12,7 @@ using namespace dolfin;
 void test(std::string file)
 {
   Mesh mesh(file);
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   ufl::VectorElement space(ufl::Family::CG, mesh.type(), 1, gdim);
   FiniteElementSpace Vh(mesh, space);
   NodeNormal nn(mesh);

@@ -34,7 +34,7 @@ public:
 
   /// Constructor
   Cell(Mesh& mesh, uint index) :
-      MeshEntity(mesh, mesh.topology().dim(), index)
+      MeshEntity(mesh, mesh.topology_dimension(), index)
   {
   }
 
@@ -153,12 +153,12 @@ class CellIterator : public MeshEntityIterator
 public:
 
   CellIterator(Mesh& mesh) :
-      MeshEntityIterator(mesh, mesh.topology().dim())
+      MeshEntityIterator(mesh, mesh.topology_dimension())
   {
   }
 
   CellIterator(MeshEntity& entity) :
-      MeshEntityIterator(entity, entity.mesh().topology().dim())
+      MeshEntityIterator(entity, entity.mesh().topology_dimension())
   {
   }
 

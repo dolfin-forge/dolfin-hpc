@@ -891,7 +891,7 @@ void BinaryFile::operator>>(Mesh& mesh)
 //----------------------------------------------------------------------------
 void BinaryFile::operator<<(Mesh& mesh)
 {
-  uint const gdim = mesh.geometry().dim();
+  uint const gdim = mesh.geometry_dimension();
   uint const type = BinaryFile::cell_type(BINARY_VERSION, mesh.type().cellType());
   uint const num_vertices = mesh.global_size(0);
   uint const num_cells = mesh.num_global_cells();
@@ -1086,7 +1086,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
 
   uint local_size = 0;
   int mfunc_type = 0;
-  if (meshfunction.dim() == mesh.topology().dim())
+  if (meshfunction.dim() == mesh.topology_dimension())
   {
     MPI_File_write_at_all(fh, byte_offset, &mfunc_type, 1, MPI_UNSIGNED,
                           MPI_STATUS_IGNORE);
@@ -1199,7 +1199,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   if (byteswap) mfunc_type = bswap(mfunc_type);
 
 
-  if ((mfunc_type == 0 && meshfunction.dim() != mesh.topology().dim())
+  if ((mfunc_type == 0 && meshfunction.dim() != mesh.topology_dimension())
       || (mfunc_type == 1 && meshfunction.dim() != 0))
   {
     error("Meshfunction does not match data in file");

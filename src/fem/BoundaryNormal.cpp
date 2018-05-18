@@ -17,7 +17,7 @@ BoundaryNormal::BoundaryNormal(Mesh& mesh) :
     mesh_(mesh),
     boundary_(&mesh.exterior_boundary()),
     local_boundary_(false),
-    basis_(mesh.geometry().dim(), Function(mesh)),
+    basis_(mesh.geometry_dimension(), Function(mesh)),
     node_type_(mesh)
 {
 }
@@ -27,7 +27,7 @@ BoundaryNormal::BoundaryNormal(BoundaryMesh& boundary) :
     mesh_(boundary),
     boundary_(&boundary.exterior_boundary()),
     local_boundary_(false),
-    basis_(boundary.geometry().dim(), Function(boundary)),
+    basis_(boundary.geometry_dimension(), Function(boundary)),
     node_type_(boundary)
 {
 }
@@ -62,7 +62,7 @@ Array<Function>& BoundaryNormal::basis()
 //-----------------------------------------------------------------------------
 void BoundaryNormal::init(FiniteElementSpace const& space)
 {
-  uint gdim = space.mesh().geometry().dim();
+  uint gdim = space.mesh().geometry_dimension();
   for (uint i = 0; i < gdim; ++i)
   {
     basis_[i].init(space);
@@ -83,7 +83,7 @@ void BoundaryNormal::init(FiniteElementSpace const& space)
 void BoundaryNormal::write(std::string const& filename)
 {
   LabelList<Function> fields;
-  for (uint i = 0; i < mesh_.geometry().dim(); ++i)
+  for (uint i = 0; i < mesh_.geometry_dimension(); ++i)
   {
     std::stringstream ss;
     ss << "E" << i;

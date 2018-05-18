@@ -56,7 +56,7 @@ public:
   {
     DofNumbering::init();
     //---
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     Array<ufc::dofmap const*> flattened;
     DofMap::flatten(&ufc_dofmap, flattened);
     value_size_ = flattened.size();

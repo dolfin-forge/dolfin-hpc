@@ -52,10 +52,10 @@ void MappedManifold::init()
   Mesh& globalmesh = this->mesh();
   BoundaryMesh& boundary = globalmesh.exterior_boundary();
 
-  uint const tdim = globalmesh.topology().dim();
-  uint const gdim = globalmesh.geometry().dim();
+  uint const tdim = globalmesh.topology_dimension();
+  uint const gdim = globalmesh.geometry_dimension();
   MeshEditor editor(*this, boundary.type().cellType(),
-                    boundary.geometry().dim());
+                    boundary.geometry_dimension());
   Array<uint> mm_vertices(boundary.size(0));
   uint const invalid_vertex_index = mm_vertices.size();
   mm_vertices = invalid_vertex_index;

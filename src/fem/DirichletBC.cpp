@@ -86,7 +86,7 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
       entities_ = new Array<uint>();
 
       // Build set of boundary facets
-      uint const tdim = mesh().topology().dim();
+      uint const tdim = mesh().topology_dimension();
       for (FacetIterator f(mesh()); !f.end(); ++f)
       {
         bool const on_boundary = (f->num_entities(tdim) == 1) && !f->is_shared();
@@ -246,7 +246,7 @@ void DirichletBC::computeBCGeometric(_map<uint, real>& boundary_values,
   }
 
   // Initialize facets, needed for geometric search
-  uint const gdim = mesh().geometry().dim();
+  uint const gdim = mesh().geometry_dimension();
   uint const facet_dim = mesh().type().facet_dim();
 
   // Iterate over facets

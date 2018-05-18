@@ -70,7 +70,7 @@ public:
      */
 
     UFCMesh ufc_mesh(mesh);
-    uint const tdim = mesh.topology().dim();
+    uint const tdim = mesh.topology_dimension();
     uint * dofs = new uint[ufc_dofmap.local_dimension()];
     _set<uint> owned;
     _set<uint> ufc_ghosts;

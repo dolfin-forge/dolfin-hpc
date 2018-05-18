@@ -31,10 +31,10 @@ GTSInterface::GTSInterface(Mesh& mesh) :
     mesh_(mesh),
     tree_(NULL)
 {
-  if (mesh.geometry().dim() > 3)
+  if (mesh.geometry_dimension() > 3)
   {
     error("Sorry, GTS interface not implemented for meshes of dimension %d.",
-          mesh.geometry().dim());
+          mesh.geometry_dimension());
   }
 
   buildCellTree();

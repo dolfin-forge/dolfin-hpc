@@ -250,7 +250,7 @@ struct UFCWrap
   template<class E1, class E2, class E3>
   static inline T * create(Mesh& mesh, Coefficients& coefs)
   {
-    switch (mesh.topology().dim())
+    switch (mesh.topology_dimension())
     {
       case 1:
         return T::template create<E1>(mesh, coefs);

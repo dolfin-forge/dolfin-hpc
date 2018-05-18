@@ -232,7 +232,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
 
   // Handle differently depending on geometric dimension
   real x[Point::MAX_SIZE];
-  switch (mesh_.geometry().dim())
+  switch (mesh_.geometry_dimension())
   {
   case 3:
     x[2] = parse<real>(name, attrs, "z");
@@ -243,7 +243,7 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
     break;
   default:
     error("Dimension of mesh must be 1, 2 or 3: provided %d.",
-          mesh_.geometry().dim());
+          mesh_.geometry_dimension());
     break;
   }
   editor_->add_vertex(index - vertex_dist_->offset, &x[0]);
@@ -318,7 +318,7 @@ void XMLMesh::endMesh()
 #ifdef HAVE_MPI
     uint const rank = MPI::rank();
     uint const pe_size = MPI::size();
-    uint const gdim = mesh_.geometry().dim();
+    uint const gdim = mesh_.geometry_dimension();
     Array<uint> sendbuf(nonlocal_vertices_.size());
 #ifndef _RWSTD_NO_MEMBER_TEMPLATES
     sendbuf.assign(nonlocal_vertices_.begin(), nonlocal_vertices_.end());

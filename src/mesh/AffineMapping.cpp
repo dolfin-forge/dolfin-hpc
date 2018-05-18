@@ -28,7 +28,7 @@ AffineMapping::AffineMapping(Mesh const& mesh) :
     det(0.0),
     J(new real[d_ * d_]),
     K(new real[d_ * d_]),
-    gdim_(mesh.geometry().dim())
+    gdim_(mesh.geometry_dimension())
 {
   dolfin_assert(gdim_ <= d_);
   std::fill(&J[0], &J[d_ * d_], 0.0);

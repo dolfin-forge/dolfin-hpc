@@ -104,7 +104,7 @@ void MeshQuality::compute()
     h_min = std::min(h_min, h);
   }
 
-  uint const d = m.topology().dim();
+  uint const d = m.topology_dimension();
   for (uint i = 0; i < d; ++i)
   {
     bbox_min_[i] = 1.0e12;

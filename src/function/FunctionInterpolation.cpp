@@ -150,14 +150,14 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   dolfin_assert(F0.mesh() != F1.mesh());
 
   Mesh& M0 = F0.mesh();
-  //uint const gdim0 = M0.geometry().dim();
-  //uint const tdim0 = M0.geometry().dim();
+  //uint const gdim0 = M0.geometry_dimension();
+  //uint const tdim0 = M0.geometry_dimension();
   Cell c00(M0,0);
   UFCCell ufc0(c00);
 
   Mesh& M1 = F1.mesh();
-  uint const gdim1 = M1.geometry().dim();
-  uint const tdim1 = M1.geometry().dim();
+  uint const gdim1 = M1.geometry_dimension();
+  uint const tdim1 = M1.geometry_dimension();
   FiniteElementSpace const& Vh1 = F1.space();
   DofMap const& dm1 = Vh1.dofmap();
   ScratchSpace S1(Vh1);

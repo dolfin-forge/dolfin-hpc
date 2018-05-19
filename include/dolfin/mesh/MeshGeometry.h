@@ -36,6 +36,9 @@ public:
   /// Create mesh geometry for given space
   MeshGeometry(Space const& space);
 
+  /// Create a set of point coordinates with given size
+  MeshGeometry(Space const& space, uint size);
+
   /// Copy constructor
   MeshGeometry(MeshGeometry const& geometry);
 
@@ -87,6 +90,9 @@ public:
   ///
   void finalize();
 
+  /// Set value of all coordinates
+  void set(real const * x);
+
   /// Set absolute geometric tolerance for given topological dimension
   /// The absolute value of the parameter is set as tolerance.
   void set_abs_tolerance(uint dim, real atol);
@@ -121,6 +127,9 @@ public:
 
   /// Display data
   void disp() const;
+
+  /// Dump data
+  void dump() const;
 
   //--- SERIALIZATION ---------------------------------------------------------
   MeshGeometry const& operator>>(Array<real>& A) const;
@@ -197,6 +206,12 @@ inline void MeshGeometry::get(uint n, real * x) const
 {
   dolfin_assert(n < size_);
   real const * xn = coordinates_ + n * dim_; std::copy(xn, xn + dim_, x);
+}
+
+//-----------------------------------------------------------------------------
+inline void MeshGeometry::set(real const * x)
+{
+  std::copy(x, x + dim_ * size_, coordinates_);
 }
 
 //-----------------------------------------------------------------------------

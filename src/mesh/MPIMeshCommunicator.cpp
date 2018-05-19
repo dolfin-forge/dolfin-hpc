@@ -90,7 +90,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
   // Clear mesh using swap with new instance
   {
-    Mesh new_mesh(mesh.type(), mesh.space());
+    Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     new_mesh.swap(mesh);
   }
   dolfin_assert(mesh.topology().size(0) == 0);
@@ -150,7 +150,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
   // Update topology
   dolfin_assert(iverts.size() == distdata.local_size());
-  mesh.topology().set_distributed();
   mesh.topology().init(0 , distdata.local_size());
   mesh.topology().distdata()[0].swap(distdata);
   mesh.topology().finalize();
@@ -284,7 +283,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
 
   // Clear mesh using swap with new instance
   {
-    Mesh new_mesh(mesh.type(), mesh.space());
+    Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     new_mesh.swap(mesh);
   }
 
@@ -523,7 +522,6 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
 
   // Update topology
   dolfin_assert(vindex == distdata.local_size());
-  mesh.topology().set_distributed();
   mesh.topology().init(0 , vindex);
   mesh.topology().distdata()[0].swap(distdata);
   mesh.topology().init(tdim , cindex);

@@ -550,7 +550,7 @@ std::string QuadrilateralCell::description() const
 //-----------------------------------------------------------------------------
 void QuadrilateralCell::create_reference_cell(Mesh& mesh) const
 {
-  MeshEditor me(mesh, CellType::quadrilateral, 2);
+  MeshEditor me(mesh, CellType::quadrilateral, 2, DOLFIN_COMM_SELF);
   me.init_vertices(4);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);

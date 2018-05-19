@@ -47,14 +47,24 @@ Mesh::Mesh() :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(new MeshTopology(ctype, !this->reordering())),
+    topology_(new MeshTopology(ctype, DOLFIN_COMM_SELF, !this->reordering())),
     geometry_(new MeshGeometry(space)),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
     timestamp_(time(0))
 {
-  if(this->parallel_io()) topology_->set_distributed();
+}
+//-----------------------------------------------------------------------------
+Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
+    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
+    topology_(new MeshTopology(ctype, comm, !this->reordering())),
+    geometry_(new MeshGeometry(space)),
+    exterior_boundary_(NULL),
+    interior_boundary_(NULL),
+    intersection_detector_(NULL),
+    timestamp_(time(0))
+{
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& other) :

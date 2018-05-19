@@ -76,6 +76,9 @@ public:
   /// Constructor from cell type and space
   Mesh(CellType const& ctype, Space const& space);
 
+  /// Constructor from cell type, space, and communicator
+  Mesh(CellType const& ctype, Space const& space, Comm& comm);
+
   /// Copy constructor
   Mesh(Mesh const& mesh);
 

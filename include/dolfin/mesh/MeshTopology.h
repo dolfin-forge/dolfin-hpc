@@ -25,6 +25,7 @@
 #include <dolfin/log/log.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
+#include <dolfin/common/Distributed.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshRenumber.h>
@@ -52,7 +53,7 @@ class MeshDistributedData;
  *
  */
 
-class MeshTopology: public Clonable<MeshTopology>
+class MeshTopology: public Clonable<MeshTopology>, public Distributed<MeshTopology>
 {
   // Save some limbo at MeshEntity construction until classes are rewritten
   friend class MeshEntity;
@@ -60,7 +61,7 @@ class MeshTopology: public Clonable<MeshTopology>
 public:
 
   /// Create mesh topology for given cell type
-  MeshTopology(CellType const& type, bool frozen);
+  MeshTopology(CellType const& type, Comm& comm, bool frozen);
 
   /// Copy constructor
   MeshTopology(MeshTopology const& other);
@@ -116,9 +117,6 @@ public:
   bool entities_exist(uint dim) const;
 
   //--- Distributed data ------------------------------------------------------
-
-  /// Set the topology as distributed
-  void set_distributed();
 
   /// Return if the topology is distributed
   bool is_distributed() const;

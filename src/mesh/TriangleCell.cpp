@@ -622,7 +622,7 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p1,
 //-----------------------------------------------------------------------------
 void TriangleCell::create_reference_cell(Mesh& mesh) const
 {
-  MeshEditor me(mesh, CellType::triangle, 2);
+  MeshEditor me(mesh, CellType::triangle, 2, DOLFIN_COMM_SELF);
   me.init_vertices(3);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);

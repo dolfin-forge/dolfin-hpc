@@ -279,7 +279,7 @@ std::string IntervalCell::description() const
 //-----------------------------------------------------------------------------
 void IntervalCell::create_reference_cell(Mesh& mesh) const
 {
-  MeshEditor me(mesh, CellType::interval, 1);
+  MeshEditor me(mesh, CellType::interval, 1, DOLFIN_COMM_SELF);
   me.init_vertices(2);
   me.add_vertex(0, VC[0]);
   me.add_vertex(1, VC[1]);

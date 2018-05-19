@@ -23,94 +23,71 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshTopology::MeshTopology() :
-    type_(NULL),
-    dim_(0),
-    num_vertices_(0),
-    ini_vertices_(false),
-    connectivity_(NULL),
-    distdata_(NULL),
-    frozen_(false),
-    timestamp_(0)
-{
-}
-//-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(CellType const& type, bool frozen) :
     type_(type.clone()),
     dim_(type.dim()),
+    frozen_(frozen),
     num_vertices_(0),
     ini_vertices_(false),
     connectivity_(new MeshConnectivity*[dim_ + 1]),
     distdata_(NULL),
-    frozen_(frozen),
     timestamp_(0)
 {
-  for (uint d = 0; d <= dim_; ++d)
+  for (uint d0 = 0; d0 <= dim_; ++d0)
   {
-    connectivity_[d] = new MeshConnectivity[dim_ + 1];
+    connectivity_[d0] = new MeshConnectivity[dim_ + 1];
   }
   update_token();
 }
 //-----------------------------------------------------------------------------
 MeshTopology::MeshTopology(MeshTopology const& other) :
-    type_(NULL),
-    dim_(0),
-    num_vertices_(0),
-    ini_vertices_(false),
-    connectivity_(NULL),
-    distdata_(NULL),
-    frozen_(false),
-    timestamp_(0)
+    type_(cloneptr(other.type_)),
+    dim_(other.dim_),
+    frozen_(other.frozen_),
+    num_vertices_(other.num_vertices_),
+    ini_vertices_(other.ini_vertices_),
+    connectivity_(new MeshConnectivity*[dim_ + 1]),
+    distdata_(copyptr(other.distdata_)),
+    timestamp_(other.timestamp_)
 {
-  *this = other;
+  dolfin_assert(other.connectivity_ != NULL);
+  for (uint d0 = 0; d0 <= dim_; ++d0)
+  {
+    connectivity_[d0] = new MeshConnectivity[dim_ + 1];
+    for (uint d1 = 0; d1 <= dim_; ++d1)
+    {
+      connectivity_[d0][d1] = other.connectivity_[d0][d1];
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 MeshTopology::~MeshTopology()
 {
-  clear();
-}
-//-----------------------------------------------------------------------------
-MeshTopology const& MeshTopology::operator=(MeshTopology const& other)
-{
-  clear();
-  if (other.type_ != NULL) type_ = other.type_->clone();
-  dim_ = other.dim_;
-  num_vertices_ = other.num_vertices_;
-  ini_vertices_ = other.ini_vertices_;
-  if (other.connectivity_ != NULL)
+  delete distdata_;
+  distdata_ = NULL;
+  dolfin_assert(connectivity_ != NULL);
+  for (uint d = 0; d <= dim_; ++d)
   {
-    dolfin_assert(connectivity_ == NULL);
-    connectivity_ = new MeshConnectivity*[dim_ + 1];
-    for (uint d0 = 0; d0 <= dim_; ++d0)
-    {
-      connectivity_[d0] = new MeshConnectivity[dim_ + 1];
-      for (uint d1 = 0; d1 <= dim_; ++d1)
-      {
-        connectivity_[d0][d1] = other.connectivity_[d0][d1];
-      }
-    }
+    delete[] connectivity_[d];
+    connectivity_[d] = NULL;
   }
-  if (other.distdata_ != NULL)
-  {
-    dolfin_assert(distdata_ == NULL);
-    distdata_ = new MeshDistributedData(*other.distdata_);
-  }
-  timestamp_ = other.timestamp_;
-
-  return *this;
+  delete[] connectivity_;
+  connectivity_ = NULL;
+  delete type_;
+  type_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::swap(MeshTopology& other)
 {
   if (this == &other) return;
-  std::swap(type_, other.type_);
-  std::swap(dim_, other.dim_);
-  std::swap(num_vertices_, other.num_vertices_);
-  std::swap(ini_vertices_, other.ini_vertices_);
-  std::swap(connectivity_, other.connectivity_);
-  std::swap(distdata_, other.distdata_);
-  std::swap(frozen_, other.frozen_);
-  std::swap(timestamp_, other.timestamp_);
+  std::swap(type_         , other.type_);
+  std::swap(dim_          , other.dim_);
+  std::swap(frozen_       , other.frozen_);
+  std::swap(num_vertices_ , other.num_vertices_);
+  std::swap(ini_vertices_ , other.ini_vertices_);
+  std::swap(connectivity_ , other.connectivity_);
+  std::swap(distdata_     , other.distdata_);
+  std::swap(timestamp_    , other.timestamp_);
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::operator==(MeshTopology const& other) const
@@ -120,7 +97,7 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     return true;
   }
   //
-  if (*type_ != *other.type_)
+  if (!objptrcmp(type_, other.type_))
   {
     return false;
   }
@@ -133,16 +110,14 @@ bool MeshTopology::operator==(MeshTopology const& other) const
     }
   }
   //
-  if (connectivity_ != NULL)
+  dolfin_assert(connectivity_ != NULL);
+  for (uint d0 = 0; d0 <= dim_; ++d0)
   {
-    for (uint d0 = 0; d0 <= dim_; ++d0)
+    for (uint d1 = 0; d1 <= dim_; ++d1)
     {
-      for (uint d1 = 0; d1 <= dim_; ++d1)
+      if (connectivity_[d0][d1] != other.connectivity_[d0][d1])
       {
-        if (connectivity_[d0][d1] != other.connectivity_[d0][d1])
-        {
-          return false;
-        }
+        return false;
       }
     }
   }
@@ -196,34 +171,6 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
     }
   }
 
-}
-//-----------------------------------------------------------------------------
-void MeshTopology::clear()
-{
-  // Clear parallel data structures
-  delete distdata_;
-  distdata_ = NULL;
-
-  // Delete mesh connectivity
-  if (connectivity_ != NULL)
-  {
-    for (uint d = 0; d <= dim_; ++d)
-    {
-      delete[] connectivity_[d];
-      connectivity_[d] = NULL;
-    }
-    delete[] connectivity_;
-    connectivity_ = NULL;
-  }
-
-  //
-  timestamp_ = 0;
-  frozen_ = false;
-  num_vertices_ = 0;
-  ini_vertices_ = false;
-  dim_ = 0;
-  delete type_;
-  type_ = NULL;
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::finalize()
@@ -301,8 +248,9 @@ void MeshTopology::remap(uint dim, Array<uint> const& mapping)
 //-----------------------------------------------------------------------------
 MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 {
+  dolfin_assert(connectivity_ != NULL);
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(connectivity_ != NULL && !connectivity_[d0][d1].is_initialized())
+  if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
   }
@@ -311,8 +259,9 @@ MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
 //-----------------------------------------------------------------------------
 MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
 {
+  dolfin_assert(connectivity_ != NULL);
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(connectivity_ != NULL && !connectivity_[d0][d1].is_initialized())
+  if(!connectivity_[d0][d1].is_initialized())
   {
     compute_connectivity(d0, d1);
   }
@@ -787,5 +736,23 @@ int MeshTopology::token() const
   return timestamp_ ^ size(0) ^ size(dim_);
 }
 //-----------------------------------------------------------------------------
+MeshTopology::MeshTopology() :
+    type_(NULL),
+    dim_(0),
+    frozen_(false),
+    num_vertices_(0),
+    ini_vertices_(false),
+    connectivity_(NULL),
+    distdata_(NULL),
+    timestamp_(0)
+{
+}
+//-----------------------------------------------------------------------------
+MeshTopology const& MeshTopology::operator=(MeshTopology const& other) const
+{
+  return *this;
+}
+//-----------------------------------------------------------------------------
+
 
 } /* namespace dolfin */

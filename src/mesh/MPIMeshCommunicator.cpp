@@ -42,23 +42,21 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   Mesh& mesh = dist.mesh();
   uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
-  MeshTopology& topology = mesh.topology();
-  uint const tdim = topology.dim();
-  MeshGeometry& geometry = mesh.geometry();
-  uint const gdim = geometry.dim();
+  uint const tdim = mesh.topology().dim();
+  uint const gdim = mesh.geometry().dim();
 
   // Save global number of vertices to check consistency
-  dolfin_assert(topology.entities_exist(0));
-  dolfin_assert(topology.distdata()[0].is_finalized());
-  uint const num_global_vertices = topology.global_size(0);
-  if (topology.size(0) != dist.size())
+  dolfin_assert(mesh.topology().entities_exist(0));
+  dolfin_assert(mesh.topology().distdata()[0].is_finalized());
+  uint const num_global_vertices = mesh.topology().global_size(0);
+  if (mesh.topology().size(0) != dist.size())
   {
     error("MPIMeshCommunicator : mismatch between number of vertices and size "
           "of the distribution");
   }
   for (uint d = 1; d <= tdim; ++d)
   {
-    if (topology.entities_exist(d) && (topology.size(d) > 0))
+    if (mesh.topology().entities_exist(d) && (mesh.topology().size(d) > 0))
     {
       error("MPIMeshCommunicator : distribution by vertices but entities of "
             "dimension %u exist", d);
@@ -152,22 +150,22 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
   // Update topology
   dolfin_assert(iverts.size() == distdata.local_size());
-  topology.set_distributed();
-  topology.init(0 , distdata.local_size());
-  topology.distdata()[0].swap(distdata);
-  topology.finalize();
-  dolfin_assert(iverts.size() == topology.distdata()[0].local_size());
-  if(num_global_vertices != topology.global_size(0))
+  mesh.topology().set_distributed();
+  mesh.topology().init(0 , distdata.local_size());
+  mesh.topology().distdata()[0].swap(distdata);
+  mesh.topology().finalize();
+  dolfin_assert(iverts.size() == mesh.topology().distdata()[0].local_size());
+  if(num_global_vertices != mesh.topology().global_size(0))
   {
     error("MPIMeshCommunicator : vertex distribution :\n"
           "invalid global number of vertices %u != %u",
-          num_global_vertices, topology.global_size(0));
+          num_global_vertices, mesh.topology().global_size(0));
   }
 
   // Update geometry
   dolfin_assert(iverts.size() * gdim == coords.size());
-  geometry.assign(coords);
-  geometry.finalize();
+  mesh.geometry().assign(coords);
+  mesh.geometry().finalize();
 
   //
   tocd(1);
@@ -178,6 +176,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 //-----------------------------------------------------------------------------
 void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
 {
+
   if (!dist.mesh().is_distributed())
   {
     return;
@@ -191,19 +190,17 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   Mesh& mesh = dist.mesh();
   uint const pe_rank = MPI::rank();
   uint const pe_size = MPI::size();
-  MeshTopology& topology = mesh.topology();
-  uint const tdim = topology.dim();
-  MeshGeometry& geometry = mesh.geometry();
-  uint const gdim = geometry.dim();
+  uint const tdim = mesh.topology().dim();
+  uint const gdim = mesh.geometry().dim();
 
   // Save global number of vertices and cells to check consistency
-  dolfin_assert(topology.entities_exist(0));
-  dolfin_assert(topology.distdata()[0].is_finalized());
-  uint const num_global_vertices = topology.global_size(0);
-  dolfin_assert(topology.entities_exist(tdim));
-  dolfin_assert(topology.distdata()[tdim].is_finalized());
-  uint const num_global_cells = topology.global_size(tdim);
-  if (topology.size(tdim) != dist.size())
+  dolfin_assert(mesh.topology().entities_exist(0));
+  dolfin_assert(mesh.topology().distdata()[0].is_finalized());
+  uint const num_global_vertices = mesh.topology().global_size(0);
+  dolfin_assert(mesh.topology().entities_exist(tdim));
+  dolfin_assert(mesh.topology().distdata()[tdim].is_finalized());
+  uint const num_global_cells = mesh.topology().global_size(tdim);
+  if (mesh.topology().size(tdim) != dist.size())
   {
     error("MPIMeshCommunicator : mismatch between number of cells and size of "
           "the distribution");
@@ -227,7 +224,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   }
 
   // Collect mesh entities according to distribution
-  bool * vertex_used = (topology.size(0) ? new bool[topology.size(0)]() : NULL);
+  bool * vertex_used =
+      (mesh.topology().size(0) ? new bool[mesh.topology().size(0)]() : NULL);
   for (CellIterator c(mesh); !c.end(); ++c)
   {
     uint const owner = dist(*c);
@@ -525,30 +523,30 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
 
   // Update topology
   dolfin_assert(vindex == distdata.local_size());
-  topology.set_distributed();
-  topology.init(0 , vindex);
-  topology.distdata()[0].swap(distdata);
-  topology.init(tdim , cindex);
-  topology(tdim, 0).set(vcells);
-  topology.finalize();
-  dolfin_assert(vindex == topology.distdata()[0].local_size());
-  if(num_global_vertices != topology.global_size(0))
+  mesh.topology().set_distributed();
+  mesh.topology().init(0 , vindex);
+  mesh.topology().distdata()[0].swap(distdata);
+  mesh.topology().init(tdim , cindex);
+  mesh.topology()(tdim, 0).set(vcells);
+  mesh.topology().finalize();
+  dolfin_assert(vindex == mesh.topology().distdata()[0].local_size());
+  if(num_global_vertices != mesh.topology().global_size(0))
   {
     error("MPIMeshCommunicator : cell distribution :\n"
           "invalid global number of vertices %u != %u",
-          num_global_vertices, topology.global_size(0));
+          num_global_vertices, mesh.topology().global_size(0));
   }
-  if(num_global_cells != topology.global_size(tdim))
+  if(num_global_cells != mesh.topology().global_size(tdim))
   {
     error("MPIMeshCommunicator : cell distribution :\n"
           "invalid global number of cells %u != %u",
-          num_global_cells, topology.global_size(tdim));
+          num_global_cells, mesh.topology().global_size(tdim));
   }
 
   // Update geometry
   dolfin_assert(vindex * gdim == coords.size());
-  geometry.assign(coords);
-  geometry.finalize();
+  mesh.geometry().assign(coords);
+  mesh.geometry().finalize();
 
   // Recreate mesh functions
   if (UC)

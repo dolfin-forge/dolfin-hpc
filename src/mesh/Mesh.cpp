@@ -35,10 +35,8 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Mesh::Mesh() :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    cell_type_(NULL),
-    topology_(),
-    space_(NULL),
-    geometry_(),
+    topology_(NULL),
+    geometry_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -47,26 +45,22 @@ Mesh::Mesh() :
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-Mesh::Mesh(CellType const& type, Space const& space) :
+Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    cell_type_(type.clone()),
-    topology_(type, !this->reordering()),
-    space_(space.clone()),
-    geometry_(space),
+    topology_(new MeshTopology(ctype, !this->reordering())),
+    geometry_(new MeshGeometry(space)),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
     timestamp_(time(0))
 {
-  // Do nothing
+  if(this->parallel_io()) topology_->set_distributed();
 }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& other) :
     Variable(other.name(), other.label()),
-    cell_type_(cloneptr(other.cell_type_)),
-    topology_(other.topology_),
-    space_(cloneptr(other.space_)),
-    geometry_(other.geometry_),
+    topology_(cloneptr(other.topology_)),
+    geometry_(cloneptr(other.geometry_)),
     exterior_boundary_(copyptr(other.exterior_boundary_)),
     interior_boundary_(copyptr(other.interior_boundary_)),
     intersection_detector_(copyptr(other.intersection_detector_)),
@@ -81,10 +75,8 @@ Mesh::Mesh(Mesh const& other) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    cell_type_(NULL),
-    topology_(),
-    space_(NULL),
-    geometry_(),
+    topology_(NULL),
+    geometry_(NULL),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -97,67 +89,11 @@ Mesh::Mesh(std::string const& filename) :
 //-----------------------------------------------------------------------------
 Mesh::~Mesh()
 {
-  clear();
-}
-//-----------------------------------------------------------------------------
-void Mesh::swap(Mesh& other)
-{
-  if (this == &other) return;
-  std::swap(cell_type_, other.cell_type_);
-  topology_.swap(other.topology_);
-  std::swap(space_, other.space_);
-  geometry_.swap(other.geometry_);
-  std::swap(exterior_boundary_, other.exterior_boundary_);
-  std::swap(interior_boundary_, other.interior_boundary_);
-  std::swap(intersection_detector_, other.intersection_detector_);
-  std::swap(periodic_mappings_, other.periodic_mappings_);
-  std::swap(timestamp_, other.timestamp_);
-}
-//-----------------------------------------------------------------------------
-bool Mesh::operator ==(Mesh const& other) const
-{
-  if (this->topology() != other.topology())
-  {
-    return false;
-  }
-  if (this->geometry() != other.geometry())
-  {
-    return false;
-  }
-  return true;
-}
-//-----------------------------------------------------------------------------
-bool Mesh::operator !=(Mesh const& other) const
-{
-  return !(*this == other);
-}
-//-----------------------------------------------------------------------------
-void Mesh::init(CellType const& type, Space const& space)
-{
-  clear();
-
-  // Initialize the topology to the given cell type
-  cell_type_ = type.clone();
-  MeshTopology T(type, !this->reordering()); topology_.swap(T);
-  if (this->parallel_io()) topology_.set_distributed();
-  space_ = space.clone();
-  MeshGeometry G(space); geometry_.swap(G);
-}
-//-----------------------------------------------------------------------------
-bool Mesh::empty() const
-{
-  return (cell_type_ == NULL && space_ == NULL);
-}
-//-----------------------------------------------------------------------------
-void Mesh::clear()
-{
   timestamp_ = 0;
-  delete cell_type_;
-  cell_type_ = NULL;
-  topology_.clear();
-  delete space_;
-  space_ = NULL;
-  geometry_.clear();
+  delete topology_;
+  topology_ = NULL;
+  delete geometry_;
+  geometry_ = NULL;
   delete exterior_boundary_;
   exterior_boundary_ = NULL;
   delete interior_boundary_;
@@ -171,60 +107,104 @@ void Mesh::clear()
   }
 }
 //-----------------------------------------------------------------------------
+void Mesh::swap(Mesh& other)
+{
+  if (this == &other) return;
+  std::swap(topology_             , other.topology_);
+  std::swap(geometry_             , other.geometry_);
+  std::swap(exterior_boundary_    , other.exterior_boundary_);
+  std::swap(interior_boundary_    , other.interior_boundary_);
+  std::swap(intersection_detector_, other.intersection_detector_);
+  std::swap(periodic_mappings_    , other.periodic_mappings_);
+  std::swap(timestamp_            , other.timestamp_);
+}
+//-----------------------------------------------------------------------------
+bool Mesh::operator ==(Mesh const& other) const
+{
+  if (!objptrcmp(topology_, other.topology_))
+  {
+    return false;
+  }
+  if (!objptrcmp(geometry_, other.geometry_))
+  {
+    return false;
+  }
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool Mesh::operator !=(Mesh const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
+bool Mesh::empty() const
+{
+  return (topology_ == NULL && geometry_ == NULL);
+}
+//-----------------------------------------------------------------------------
 CellType const& Mesh::type() const
 {
-  dolfin_assert(cell_type_);
-  return *cell_type_;
+  dolfin_assert(topology_);
+  return topology_->type();
 }
 //-----------------------------------------------------------------------------
 MeshTopology& Mesh::topology()
 {
-  return topology_;
+  dolfin_assert(topology_);
+  return *topology_;
 }
 //-----------------------------------------------------------------------------
 MeshTopology const& Mesh::topology() const
 {
-  return topology_;
+  dolfin_assert(topology_);
+  return *topology_;
 }
 //-----------------------------------------------------------------------------
 uint Mesh::topology_dimension() const
 {
-  return topology_.dim();
+  dolfin_assert(topology_);
+  return topology_->dim();
 }
 //-----------------------------------------------------------------------------
 uint Mesh::size(uint dim) const
 {
-  return topology_.size(dim);
+  dolfin_assert(topology_);
+  return topology_->size(dim);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_vertices() const
 {
-  return topology_.size(0);
+  dolfin_assert(topology_);
+  return topology_->size(0);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_cells() const
 {
-  return topology_.size(topology_.dim());
+  return topology_->size(topology_->dim());
 }
 //-----------------------------------------------------------------------------
 uint* Mesh::cells()
 {
-  return topology_(topology_.dim(), 0)();
+  dolfin_assert(topology_);
+  return (*topology_)(topology_->dim(), 0)();
 }
 //-----------------------------------------------------------------------------
 uint const * Mesh::cells() const
 {
-  return topology_(topology_.dim(), 0)();
+  dolfin_assert(topology_);
+  return (*topology_)(topology_->dim(), 0)();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint dim) const
 {
-  topology_.size(dim);
+  dolfin_assert(topology_);
+  topology_->size(dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
-  topology_(d0, d1).order();
+  dolfin_assert(topology_);
+  (*topology_)(d0, d1).order();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -295,38 +275,44 @@ MeshDistributedData const& Mesh::distdata() const
 //-----------------------------------------------------------------------------
 uint Mesh::global_size(uint dim) const
 {
-  return topology_.global_size(dim);
+  dolfin_assert(topology_);
+  return topology_->global_size(dim);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_global_vertices() const
 {
-  return topology_.global_size(0);
+  dolfin_assert(topology_);
+  return topology_->global_size(0);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_global_cells() const
 {
-  return topology_.global_size(topology_.dim());
+  dolfin_assert(topology_);
+  return topology_->global_size(topology_->dim());
 }
 //-----------------------------------------------------------------------------
 Space const& Mesh::space() const
 {
-  dolfin_assert(space_);
-  return *space_;
+  dolfin_assert(geometry_);
+  return geometry_->space();
 }
 //-----------------------------------------------------------------------------
 MeshGeometry& Mesh::geometry()
 {
-  return geometry_;
+  dolfin_assert(geometry_);
+  return *geometry_;
 }
 //-----------------------------------------------------------------------------
 MeshGeometry const& Mesh::geometry() const
 {
-  return geometry_;
+  dolfin_assert(geometry_);
+  return *geometry_;
 }
 //-----------------------------------------------------------------------------
 uint Mesh::geometry_dimension() const
 {
-  return geometry_.dim();
+  dolfin_assert(geometry_);
+  return geometry_->dim();
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
@@ -428,9 +414,11 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
 std::string const Mesh::hash() const
 {
   std::stringstream ss;
-  ss << "Mesh@" << this << ":" << this->type().description() << ":time"
-      << timestamp_ << ":T" << this->topology().token() << ":G"
-      << this->geometry().token();
+  ss << "Mesh@" << this << ":"
+      << (topology_ ? topology_->type().description() : "empty")
+      << ":time" << timestamp_
+      << ":T" << (topology_ ? topology_->token() : 0)
+      << ":G" << geometry_->token();
   return ss.str();
 }
 //-----------------------------------------------------------------------------
@@ -443,8 +431,6 @@ void Mesh::disp() const
   }
   else
   {
-    cell_type_->disp();
-    space_->disp();
     section("Topology");
     message("distributed : %u", this->is_distributed());
     if(this->is_distributed())

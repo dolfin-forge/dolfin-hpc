@@ -99,12 +99,12 @@ bool MeshGeometry::operator!=(MeshGeometry const& other) const
 void MeshGeometry::swap(MeshGeometry& other)
 {
   if (this == &other) return;
-  std::swap(space_, other.space_);
-  std::swap(dim_, other.dim_);
-  std::swap(size_, other.size_);
+  std::swap(space_      , other.space_);
+  std::swap(dim_        , other.dim_);
+  std::swap(size_       , other.size_);
   std::swap(coordinates_, other.coordinates_);
-  std::swap(abs_tol_, other.abs_tol_);
-  std::swap(timestamp_, other.timestamp_);
+  std::swap(abs_tol_    , other.abs_tol_);
+  std::swap(timestamp_  , other.timestamp_);
 }
 //-----------------------------------------------------------------------------
 Space const& MeshGeometry::space() const

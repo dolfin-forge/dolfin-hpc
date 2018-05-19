@@ -68,9 +68,6 @@ public:
   /// Destructor
   ~MeshTopology();
 
-  /// Assignment
-  MeshTopology const& operator=(MeshTopology const& other);
-
   /// Swap instances
   void swap(MeshTopology& other);
 
@@ -178,11 +175,11 @@ private:
   /// Only Mesh can create empty instances and clear them
   friend class Mesh;
 
-  /// Create mesh topology
+  /// Default constructor (Disabled)
   MeshTopology();
 
-  /// Clear all data
-  void clear();
+  /// Assignment (Disabled)
+  MeshTopology const& operator=(MeshTopology const& other) const;
 
   /// Force reordering of mesh topology connectivities
   void reorder() const;
@@ -193,6 +190,9 @@ private:
   /// Topological dimension
   uint dim_;
 
+  // Topology cannot be modified
+  bool frozen_;
+
   /// Number of mesh vertices
   uint num_vertices_;
   bool ini_vertices_;
@@ -202,9 +202,6 @@ private:
 
   /// Distributed mesh topology data
   MeshDistributedData * distdata_;
-
-  //
-  bool frozen_;
 
   //
   int timestamp_;

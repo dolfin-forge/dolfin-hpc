@@ -16,25 +16,37 @@ namespace dolfin
 struct LinearDistribution
 {
 
-  uint const global_size;
-  uint const card;
-  uint const rank;
-  uint const L;
-  uint const R;
-  uint const offset;
-  uint const size;
+  uint global_size;
+  uint card;
+  uint rank;
+  uint L;
+  uint R;
+  uint offset;
+  uint size;
 
   ///
-  LinearDistribution(uint global_size, uint card, uint rank) :
-      global_size(global_size),
-      card(card),
-      rank(rank),
-      L(std::floor((real) global_size / (real) card)),
-      R(global_size % card),
-      offset(rank * L + std::min(rank,R)),
-      size((global_size + card - rank - 1) / card)
+  LinearDistribution() :
+    global_size(0),
+    card(0),
+    rank(0),
+    L(0),
+    R(0),
+    offset(0),
+    size(0)
   {
-    message(1, "LinearDistribution : offset = %8u; size = %8u", offset, size);
+  }
+
+  ///
+  LinearDistribution(uint global_size, uint card, uint rank):
+    global_size(0),
+    card(0),
+    rank(0),
+    L(0),
+    R(0),
+    offset(0),
+    size(0)
+  {
+    set(global_size, card, rank);
   }
 
   ///
@@ -52,6 +64,18 @@ struct LinearDistribution
   }
 
   ///
+  void set(uint global_size, uint card, uint rank)
+  {
+    this->global_size = global_size,
+    this->card    = card;
+    this->rank    = rank;
+    this->L       = std::floor((real) global_size / (real) card);
+    this->R       = global_size % card;
+    this->offset  = rank * L + std::min(rank,R);
+    this->size    = (global_size + card - rank - 1) / card;
+  }
+
+  ///
   void disp() const
   {
     section("LinearDistribution");
@@ -61,8 +85,8 @@ struct LinearDistribution
     message("offset         : %u", offset);
     message("size           : %u", size);
     message("quotient size  : %u", L);
-    message("remain         : %u", R);
-    endblock();
+    message("remainder      : %u", R);
+    end();
   }
 
 };

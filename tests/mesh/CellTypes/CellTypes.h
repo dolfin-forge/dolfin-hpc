@@ -34,6 +34,7 @@ DOLFIN_START_TEST( test_PointCell )
     ck_assert_int_eq(cell.dim(), 0);
     ck_assert_int_eq(cell.num_entities(0), 1);
     ck_assert_int_eq(cell.num_vertices(0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 1);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);
@@ -51,6 +52,10 @@ DOLFIN_START_TEST( test_IntervalCell )
     ck_assert_int_eq(cell.num_entities(1), 1);
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 1), 0);
+    ck_assert_int_eq(cell.num_entities(1, 0), 2);
+    ck_assert_int_eq(cell.num_entities(1, 1), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 2);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);
@@ -71,6 +76,15 @@ DOLFIN_START_TEST( test_TriangleCell )
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 3);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 1), 0);
+    ck_assert_int_eq(cell.num_entities(0, 2), 0);
+    ck_assert_int_eq(cell.num_entities(1, 0), 2);
+    ck_assert_int_eq(cell.num_entities(1, 1), 1);
+    ck_assert_int_eq(cell.num_entities(1, 2), 0);
+    ck_assert_int_eq(cell.num_entities(2, 0), 3);
+    ck_assert_int_eq(cell.num_entities(2, 1), 3);
+    ck_assert_int_eq(cell.num_entities(2, 2), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 4);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);
@@ -94,6 +108,22 @@ DOLFIN_START_TEST( test_TetrahedronCell )
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 3);
     ck_assert_int_eq(cell.num_vertices(3), 4);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 1), 0);
+    ck_assert_int_eq(cell.num_entities(0, 2), 0);
+    ck_assert_int_eq(cell.num_entities(0, 3), 0);
+    ck_assert_int_eq(cell.num_entities(1, 0), 2);
+    ck_assert_int_eq(cell.num_entities(1, 1), 1);
+    ck_assert_int_eq(cell.num_entities(1, 2), 0);
+    ck_assert_int_eq(cell.num_entities(1, 3), 0);
+    ck_assert_int_eq(cell.num_entities(2, 0), 3);
+    ck_assert_int_eq(cell.num_entities(2, 1), 3);
+    ck_assert_int_eq(cell.num_entities(2, 2), 1);
+    ck_assert_int_eq(cell.num_entities(2, 3), 0);
+    ck_assert_int_eq(cell.num_entities(3, 0), 4);
+    ck_assert_int_eq(cell.num_entities(3, 1), 6);
+    ck_assert_int_eq(cell.num_entities(3, 2), 4);
+    ck_assert_int_eq(cell.num_entities(3, 3), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 8);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);
@@ -116,6 +146,15 @@ DOLFIN_START_TEST( test_QuadrilateralCell )
     ck_assert_int_eq(cell.num_vertices(0), 1);
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 4);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 1), 0);
+    ck_assert_int_eq(cell.num_entities(0, 2), 0);
+    ck_assert_int_eq(cell.num_entities(1, 0), 2);
+    ck_assert_int_eq(cell.num_entities(1, 1), 1);
+    ck_assert_int_eq(cell.num_entities(1, 2), 0);
+    ck_assert_int_eq(cell.num_entities(2, 0), 4);
+    ck_assert_int_eq(cell.num_entities(2, 1), 4);
+    ck_assert_int_eq(cell.num_entities(2, 2), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 4);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);
@@ -139,6 +178,22 @@ DOLFIN_START_TEST( test_HexahedronCell )
     ck_assert_int_eq(cell.num_vertices(1), 2);
     ck_assert_int_eq(cell.num_vertices(2), 4);
     ck_assert_int_eq(cell.num_vertices(3), 8);
+    ck_assert_int_eq(cell.num_entities(0, 0), 1);
+    ck_assert_int_eq(cell.num_entities(0, 1), 0);
+    ck_assert_int_eq(cell.num_entities(0, 2), 0);
+    ck_assert_int_eq(cell.num_entities(0, 3), 0);
+    ck_assert_int_eq(cell.num_entities(1, 0), 2);
+    ck_assert_int_eq(cell.num_entities(1, 1), 1);
+    ck_assert_int_eq(cell.num_entities(1, 2), 0);
+    ck_assert_int_eq(cell.num_entities(1, 3), 0);
+    ck_assert_int_eq(cell.num_entities(2, 0), 4);
+    ck_assert_int_eq(cell.num_entities(2, 1), 4);
+    ck_assert_int_eq(cell.num_entities(2, 2), 1);
+    ck_assert_int_eq(cell.num_entities(2, 3), 0);
+    ck_assert_int_eq(cell.num_entities(3, 0), 8);
+    ck_assert_int_eq(cell.num_entities(3, 1), 12);
+    ck_assert_int_eq(cell.num_entities(3, 2), 6);
+    ck_assert_int_eq(cell.num_entities(3, 3), 1);
     // Refinement pattern
     ck_assert_int_eq(cell.num_refined_cells(), 8);
     ck_assert_int_eq(cell.num_refined_vertices(0), 1);

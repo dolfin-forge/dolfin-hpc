@@ -51,13 +51,13 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
       {
         dist.set_map(voffset + e->index(), goffset + e->global_index());
       }
-      for (typename E::shared it(mesh); !it.end(); ++it)
+      for (typename E::shared e(mesh); e.valid(); ++e)
       {
-        dist.setall_shared_adj(voffset + it.index(), it.adj());
+        dist.setall_shared_adj(voffset + e.index(), e.adj());
       }
-      for (typename E::ghost it(mesh); !it.end(); ++it)
+      for (typename E::ghost e(mesh); e.valid(); ++e)
       {
-        dist.set_ghost(voffset + it.index(), it.owner());
+        dist.set_ghost(voffset + e.index(), e.owner());
       }
     }
   }

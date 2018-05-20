@@ -1243,7 +1243,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
     }
 
     std::vector<uint> *ghost_buff = new std::vector<uint>[pe_size];
-    for (GhostIterator it(mesh.distdata()[0]); !it.end(); ++it)
+    for (GhostIterator it(mesh.distdata()[0]); it.valid(); ++it)
     {
       ghost_buff[it.owner()].push_back(it.global_index());
     }

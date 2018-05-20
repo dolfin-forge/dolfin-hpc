@@ -86,7 +86,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     _set<uint> adjs;
     bool * used_entities = new bool[topology.size(d)];
     std::fill_n(used_entities, topology.size(d), false);
-    for (SharedIterator it(vdata); !it.end(); ++it)
+    for (SharedIterator it(vdata); it.valid(); ++it)
     {
       dolfin_assert(it.index() < cve.order());
       uint const * v_entities = cve(it.index());

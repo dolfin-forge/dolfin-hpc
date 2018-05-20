@@ -305,8 +305,7 @@ public:
   ///
   SharedIterator(DistributedData const& distdata) :
       distdata_(distdata),
-      iter_(distdata_.shared_.begin()),
-      pos_(0)
+      iter_(distdata_.shared_.begin())
   {
   }
 
@@ -319,7 +318,6 @@ public:
   SharedIterator& operator++()
   {
     ++iter_;
-    ++pos_;
     return *this;
   }
 
@@ -327,12 +325,6 @@ public:
   inline uint index() const
   {
     return iter_->first;
-  }
-
-  ///
-  inline uint pos() const
-  {
-    return pos_;
   }
 
   ///
@@ -354,9 +346,9 @@ public:
   }
 
   ///
-  inline bool end() const
+  inline bool valid() const
   {
-    return iter_ == distdata_.shared_.end();
+    return iter_ != distdata_.shared_.end();
   }
 
   ///
@@ -380,7 +372,6 @@ private:
 
   DistributedData const& distdata_;
   DistributedData::SharedSet::const_iterator iter_;
-  uint pos_;
 
 };
 
@@ -398,8 +389,7 @@ public:
   ///
   GhostIterator(DistributedData const& distdata) :
       distdata_(distdata),
-      iter_(distdata_.ghost_.begin()),
-      pos_(0)
+      iter_(distdata_.ghost_.begin())
   {
   }
 
@@ -412,7 +402,6 @@ public:
   GhostIterator& operator++()
   {
     ++iter_;
-    ++pos_;
     return *this;
   }
 
@@ -420,12 +409,6 @@ public:
   inline uint index() const
   {
     return iter_->first;
-  }
-
-  ///
-  inline uint pos() const
-  {
-    return pos_;
   }
 
   ///
@@ -441,9 +424,9 @@ public:
   }
 
   ///
-  inline bool end() const
+  inline bool valid() const
   {
-    return iter_ == distdata_.ghost_.end();
+    return iter_ != distdata_.ghost_.end();
   }
 
   ///
@@ -467,7 +450,6 @@ private:
 
   DistributedData const& distdata_;
   DistributedData::GhostSet::const_iterator iter_;
-  uint pos_;
 
 };
 
@@ -523,12 +505,6 @@ public:
 
   ///
   inline uint index() const
-  {
-    return iter_ - begin_;
-  }
-
-  /// Position is equal to index for owned entities
-  inline uint pos() const
   {
     return iter_ - begin_;
   }

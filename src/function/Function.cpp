@@ -441,7 +441,7 @@ void Function::interpolate_vertex_values(real* values) const
       DistributedData const& dist0 = mesh_->distdata()[0];
       Array<real> * sendbuf = new Array<real> [pe_size];
       // Send sum of local weights
-      for (SharedIterator it(dist0); !it.end(); ++it)
+      for (SharedIterator it(dist0); it.valid(); ++it)
       {
         _set<uint> const& adjs = it.adj();
         for (_set<uint>::const_iterator a = adjs.begin(); a != adjs.end(); ++a)

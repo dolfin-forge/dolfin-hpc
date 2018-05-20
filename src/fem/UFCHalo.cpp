@@ -103,7 +103,7 @@ void UFCHalo::init()
 
   // Cache association of local facet index to offset in halo data
   _map<uint, uint> facet_offsets;
-  for (SharedIterator sh(distdata); !sh.end(); ++sh)
+  for (SharedIterator sh(distdata); sh.valid(); ++sh)
   {
     uint const ark = *(distdata.get_shared_adj(sh.index()).begin());
     uint rank_offset = rank_offsets_[ark];

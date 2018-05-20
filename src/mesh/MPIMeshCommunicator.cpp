@@ -612,7 +612,7 @@ void MPIMeshCommunicator::check(Mesh& mesh)
   {
     Array<uint> * sbuf = new Array<uint> [pe_size];
     uint e_count = 0;
-    for (typename E::shared e(mesh); !e.end(); ++e, ++e_count)
+    for (typename E::shared e(mesh); e.valid(); ++e, ++e_count)
     {
       e.adj_enqueue(sbuf, e.global_index());
       // Check that entity adjacency is a subset of adjacent ranks
@@ -700,7 +700,7 @@ void MPIMeshCommunicator::check(Mesh& mesh)
   {
     Array<uint> * sbuf = new Array<uint> [pe_size];
     uint e_count = 0;
-    for (typename E::ghost e(mesh); !e.end(); ++e, ++e_count)
+    for (typename E::ghost e(mesh); e.valid(); ++e, ++e_count)
     {
       sbuf[e.owner()].push_back(e.global_index());
     }

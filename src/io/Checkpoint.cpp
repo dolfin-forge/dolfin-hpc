@@ -434,7 +434,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
     uint *ghosts = new uint[2 * hdr_.num_ghosts];
     uint *gp = &ghosts[0];
-    for (GhostIterator g(mesh.distdata()[0]); !g.end(); ++g)
+    for (GhostIterator g(mesh.distdata()[0]); g.valid(); ++g)
     {
       *gp++ = g.index();
       *gp++ = g.owner();
@@ -451,7 +451,7 @@ void Checkpoint::write(Mesh& mesh, chkp_outstream& out)
 
     uint *shared = new uint[hdr_.num_shared];
     uint *sp = &shared[0];
-    for (SharedIterator s(mesh.distdata()[0]); !s.end(); ++s)
+    for (SharedIterator s(mesh.distdata()[0]); s.valid(); ++s)
       *sp++ = s.index();
 #ifdef ENABLE_MPIIO
     MPI_File_write_at_all(out, byte_offset_ + hdr_.offsets[4] * sizeof(uint),

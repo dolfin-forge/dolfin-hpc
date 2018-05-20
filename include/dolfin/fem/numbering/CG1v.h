@@ -88,7 +88,7 @@ public:
         error("CG1vNumbering : vertex numbering is invalid");
       }
       shared_.clear();
-      for (SharedIterator it(distdata); !it.end(); ++it)
+      for (SharedIterator it(distdata); it.valid(); ++it)
       {
         for (uint i = 0; i < value_size_; ++i)
         {
@@ -96,7 +96,7 @@ public:
         }
       }
       ghosts_.clear();
-      for (GhostIterator it(distdata); !it.end(); ++it)
+      for (GhostIterator it(distdata); it.valid(); ++it)
       {
         for (uint i = 0; i < value_size_; ++i)
         {

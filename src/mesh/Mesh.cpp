@@ -20,7 +20,7 @@
 #include <dolfin/mesh/MeshPartition.h>
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 #include <dolfin/mesh/Space.h>
-#include <dolfin/mesh/UniformMeshRefinement.h>
+#include <dolfin/mesh/UniformRefinement.h>
 #include <dolfin/parameter/parameters.h>
 
 #include <fstream>
@@ -390,8 +390,7 @@ void Mesh::distribute(MeshValues<uint, Cell>& distribution, MeshData& data)
 //-----------------------------------------------------------------------------
 void Mesh::refine()
 {
-  message("No cells marked for refinement, assuming uniform mesh refinement.");
-  UniformMeshRefinement::refine(*this);
+  UniformRefinement R; R(*this);
 }
 //-----------------------------------------------------------------------------
 bool Mesh::has_periodic_constraint() const

@@ -8,7 +8,7 @@
 // First added:  2006-06-08
 // Last changed: 2017-12-15
 
-#include <dolfin/mesh/UniformMeshRefinement.h>
+#include <dolfin/mesh/UniformRefinement.h>
 
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
@@ -64,7 +64,7 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 }
 
 //-----------------------------------------------------------------------------
-void UniformMeshRefinement::refine(Mesh& mesh)
+void UniformRefinement::operator()(Mesh& mesh)
 {
   // Create new mesh, refinement manager and open for editing
   Mesh refined_mesh;

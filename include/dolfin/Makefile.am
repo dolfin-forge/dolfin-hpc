@@ -231,7 +231,7 @@ nobase_pkginclude_HEADERS = \
 				mesh/StructuredGrid.h\
 				mesh/TetrahedronCell.h\
 				mesh/TriangleCell.h\
-				mesh/UniformMeshRefinement.h\
+				mesh/UniformRefinement.h\
 				mesh/UnitCube.h\
 				mesh/UnitDisk.h\
 				mesh/UnitInterval.h\

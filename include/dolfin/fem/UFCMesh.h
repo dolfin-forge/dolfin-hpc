@@ -59,7 +59,7 @@ public:
   {
     for (uint d = 0; d <= topological_dimension; ++d)
     {
-      if (mesh->topology().entities_exist(d))
+      if (mesh->topology().connectivity(d))
       {
         num_entities[d] = mesh->topology().global_size(d);
       }

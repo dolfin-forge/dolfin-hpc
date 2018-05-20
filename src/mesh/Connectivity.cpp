@@ -1,0 +1,307 @@
+// Copyright (C) 2016-2017 Aurelien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
+
+#include <dolfin/mesh/Connectivity.h>
+
+#include <dolfin/common/Array.h>
+#include <dolfin/log/LogStream.h>
+
+#include <algorithm>
+
+namespace dolfin
+{
+
+//-----------------------------------------------------------------------------
+Connectivity::Connectivity() :
+    order_(0),
+    min_degree_(0),
+    max_degree_(0),
+    connections_(NULL)
+{
+}
+//-----------------------------------------------------------------------------
+Connectivity::Connectivity(uint order, uint degree) :
+  order_(order),
+  min_degree_(degree),
+  max_degree_(degree),
+  connections_(new uint*[order_ + 1])
+{
+  connections_[0] = order * degree ? new uint[order * degree]() : NULL;
+  for (uint e = 0; e < order_; ++e)
+  {
+    connections_[e + 1] = connections_[e] + degree;
+  }
+}
+//-----------------------------------------------------------------------------
+Connectivity::Connectivity(Array<uint> const& valency) :
+  order_(valency.size()),
+  min_degree_(0),
+  max_degree_(0),
+  connections_(new uint*[order_ + 1])
+{
+  if (order_)
+  {
+    uint s = valency[0];
+    min_degree_ = s;
+    max_degree_ = 0;
+    for (Array<uint>::const_iterator it = valency.begin(); it != valency.end();
+         s+=(*it++))
+    {
+      min_degree_ = std::min(min_degree_, *it);
+      max_degree_ = std::max(max_degree_, *it);
+    }
+    connections_[0] = s ? new uint[s]() : NULL;
+    for (uint e = 0; e < order_; ++e)
+    {
+      connections_[e + 1] = connections_[e] + valency[e];
+    }
+  }
+  else
+  {
+    connections_[0] = NULL;
+    dolfin_assert(this->data() == this->bound());
+  }
+}
+//-----------------------------------------------------------------------------
+Connectivity::Connectivity(Array<Array<uint> > const& connectivity) :
+  order_(connectivity.size()),
+  min_degree_(0),
+  max_degree_(0),
+  connections_(new uint*[order_ + 1])
+{
+  if (order_)
+  {
+    uint s = connectivity[0].size();
+    min_degree_ = s;
+    max_degree_ = 0;
+    for (Array<Array<uint> >::const_iterator it = connectivity.begin();
+         it != connectivity.end(); ++it)
+    {
+      uint const d = it->size();
+      min_degree_ = std::min(min_degree_, d);
+      max_degree_ = std::max(max_degree_, d);
+      s += d;
+    }
+    connections_[0] = s ? new uint[s] : NULL;
+    for (uint e = 0; e < order_; ++e)
+    {
+      std::copy(connectivity[e].begin(), connectivity[e].end(), connections_[e]);
+      connections_[e + 1] = connections_[e] + connectivity[e].size();
+    }
+  }
+  else
+  {
+    connections_[0] = NULL;
+    dolfin_assert(this->data() == this->bound());
+  }
+}
+//-----------------------------------------------------------------------------
+Connectivity::Connectivity(Connectivity const& other) :
+    order_(other.order_),
+    min_degree_(other.min_degree_),
+    max_degree_(other.max_degree_),
+    connections_(new uint*[order_ + 1])
+{
+  connections_[0] = other.entries() ? new uint[other.entries()] : NULL;
+  std::copy(other.data(), other.bound(), connections_[0]);
+  for (uint e = 0; e < order_; ++e)
+  {
+    connections_[e + 1] = connections_[e] + other.degree(e);
+  }
+}
+//-----------------------------------------------------------------------------
+Connectivity::~Connectivity()
+{
+  delete[] connections_[0];
+  delete[] connections_;
+  connections_ = NULL;
+}
+//-----------------------------------------------------------------------------
+bool Connectivity::operator==(Connectivity const& other) const
+{
+  if (this == &other) { return true; }
+  if (order_ != other.order_)
+  {
+#if DEBUG
+    warning("Connectivity : != order");
+#endif
+    return false;
+  }
+  if (min_degree_ != other.min_degree_) { return false; }
+  if (max_degree_ != other.max_degree_) { return false; }
+  if (!cmp<uint>(this->entries(), connections_[0], other.connections_[0]))
+  {
+#if DEBUG
+    warning("Connectivity : != connections");
+    message("a0: %0x a1: %0x", connections_[0], other.connections_[0]);
+    uint i = 0;
+    uint const * c1 = other.connections_[0];
+    for (uint const * c0 = this->data(); c0 != this->bound(); ++i, ++c0, ++c1)
+    {
+      if (*c0 != *c1)
+      {
+        message("First differing entry '%u' : %u != %u", i, *c0, *c1);
+      }
+    }
+#endif
+    return false;
+  }
+  return true;
+}
+//-----------------------------------------------------------------------------
+bool Connectivity::operator!=(Connectivity const& other) const
+{
+  return !(*this == other);
+}
+//-----------------------------------------------------------------------------
+uint * Connectivity::operator()()
+{
+  return connections_[0];
+}
+//-----------------------------------------------------------------------------
+uint const * Connectivity::operator()() const
+{
+  return connections_[0];
+}
+//-----------------------------------------------------------------------------
+uint Connectivity::order() const
+{
+  return order_;
+}
+//-----------------------------------------------------------------------------
+uidx Connectivity::entries() const
+{
+  return (connections_[order_] - connections_[0]);
+}
+//----------------------------------------------------------------------------
+uint Connectivity::min_degree() const
+{
+  return min_degree_;
+}
+//-----------------------------------------------------------------------------
+uint Connectivity::max_degree() const
+{
+  return max_degree_;
+}
+//-----------------------------------------------------------------------------
+uint Connectivity::regular() const
+{
+  return (min_degree_ == max_degree_ ? min_degree_ : 0);
+}
+//-----------------------------------------------------------------------------
+void Connectivity::set(uint entity, uint const * connections)
+{
+  dolfin_assert(entity < order_);
+  dolfin_assert(connections_);
+  uint * b = connections_[entity];
+  uint * const e = connections_[entity + 1];
+  while (b != e) { *b++ = *connections++; }
+}
+//-----------------------------------------------------------------------------
+void Connectivity::set(Array<uint> const& connectivity)
+{
+  if (connectivity.size() != this->entries())
+  {
+    error("Connectivity : provided connectivity size %u does no match %u",
+          connectivity.size(), this->entries());
+  }
+  std::copy(connectivity.begin(), connectivity.end(), connections_[0]);
+}
+//-----------------------------------------------------------------------------
+void Connectivity::remap_l(Array<uint> const& map)
+{
+  if(map.size() != order_)
+  {
+    error("Connectivity : remap_left mapping has invalid size");
+  }
+  if (order_)
+  {
+    // Set sizes in place of offsets to depict connectivities layout
+    uint ** remapped = new uint*[order_ + 1];
+    remapped[0] = this->entries() ? new uint[this->entries()] : NULL;
+    for (uint e = 0; e < order_; ++e)
+    {
+      uint const ii = map[e];
+      dolfin_assert(ii < order_);
+      std::copy(connections_[ii], connections_[ii + 1], remapped[e]);
+      remapped[e + 1] = remapped[e] + (connections_[ii + 1] - connections_[ii]);
+    }
+    delete[] connections_[0];
+    delete[] connections_;
+    std::swap(connections_, remapped);
+  }
+}
+//-----------------------------------------------------------------------------
+void Connectivity::remap_r(Array<uint> const& map)
+{
+  for (uint * c = this->data(); c != this->bound(); ++c) { *c = map[*c]; }
+}
+//-----------------------------------------------------------------------------
+void Connectivity::disp() const
+{
+  section("Connectivity");
+  message("order  : %u", order_);
+  message("degree : %u - %u", min_degree_, max_degree_);
+  endblock();
+}
+//-----------------------------------------------------------------------------
+void Connectivity::dump() const
+{
+  // Display all connections
+  for (uint e = 0; e < order_; ++e)
+  {
+    cout << e << ":";
+    for (uint * c = connections_[e]; c < connections_[e + 1]; ++c)
+    {
+      cout << " " << *c;
+    }
+    cout << endl;
+  }
+}
+//-----------------------------------------------------------------------------
+Connectivity const& Connectivity::operator>>(Array<uint>& A) const
+{
+  A.assign(this->data(), this->bound());
+  // Set stride if the graph is regular
+  if(min_degree_ == max_degree_) A %= min_degree_;
+  return *this;
+}
+//-----------------------------------------------------------------------------
+void Connectivity::check() const
+{
+  /**
+   *  CHECK:
+   *
+   *  Check connectivity size, number of entities and verify that connected
+   *  entities are not listed twice.
+   *
+   */
+
+  for(uint e0 = 0; e0 < this->order(); ++e0)
+  {
+    _set<uint> ce;
+    for(uint e1 = 0; e1 <this->degree(e0); ++e1)
+    {
+      uint ec = (*this)(e0)[e1];
+      if(ce.count(ec) > 0)
+      {
+        error("Entity %u appears twice in connectivities for %u", ec, e0);
+      }
+      ce.insert(ec);
+    }
+  }
+}
+//-----------------------------------------------------------------------------
+Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C)
+{
+  A.clear();
+  A.resize(C.order());
+  uint const *b, *e;
+  for (uint vi = 0; vi < C.order(); ++vi) { C(vi, b, e); A[vi].assign(b, e); }
+  return A;
+}
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
+

@@ -7,7 +7,6 @@
 #include <dolfin/mesh/MeshEntityIterator.h>
 #include <dolfin/mesh/MeshTopology.h>
 #include <dolfin/mesh/MeshGeometry.h>
-#include <dolfin/mesh/MeshConnectivity.h>
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshFunction.h>
 #include <dolfin/mesh/MeshValues.h>
@@ -33,6 +32,7 @@
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/mesh/AffineMapping.h>
+#include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/MappedManifold.h>
 
 #endif /* __DOLFIN_HEADER_MESH_H */

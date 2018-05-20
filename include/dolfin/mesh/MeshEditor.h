@@ -17,7 +17,7 @@ namespace dolfin
 {
 
 class Mesh;
-class MeshConnectivity;
+class Connectivity;
 
 /// A simple mesh editor for creating meshes.
 
@@ -109,7 +109,7 @@ private:
   Mesh& mesh_;
 
   // Cell connectivity to vertices
-  MeshConnectivity * cell_vertices_;
+  Connectivity * cell_vertices_;
 
   // Topological dimension
   uint tdim_;

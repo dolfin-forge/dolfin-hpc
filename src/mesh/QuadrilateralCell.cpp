@@ -110,9 +110,9 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
   dolfin_assert(topology.type(i).cellType() == this->cell_type);
 
   // Sort local vertices on edges in ascending order, connectivity 1 - 0
-  if (topology.is_computed(1, 0))
+  if (topology.connectivity(1, 0))
   {
-    dolfin_assert(topology.is_computed(2, 1));
+    dolfin_assert(topology.connectivity(2, 1));
 
     // Get edges
     uint* cell_edges = topology(2, 1)(i);
@@ -129,9 +129,9 @@ void QuadrilateralCell::order_entities(MeshTopology& topology, uint i) const
   // conforming quadrilateral
 
   // Sort local edges on cell after non-incident vertex, connectivity 2 - 1
-  if (topology.is_computed(2, 1))
+  if (topology.connectivity(2, 1))
   {
-    dolfin_assert(topology.is_computed(2, 1));
+    dolfin_assert(topology.connectivity(2, 1));
 
     // Get cell vertices and edges
     uint* cell_vertices = topology(2, 0)(i);
@@ -585,7 +585,7 @@ bool QuadrilateralCell::check(Cell& cell) const
   bool ret = CellType::check(cell);
 
   // Check edge -> incident vertices mapping
-  if (cell.mesh().topology().is_computed(1, 0))
+  if (cell.mesh().topology().connectivity(1, 0))
   {
     uint const* v = cell.entities(0);
     dolfin_assert(v);

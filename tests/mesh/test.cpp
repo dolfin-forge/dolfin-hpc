@@ -3,6 +3,7 @@
 #ifdef HAVE_CHECK
 
 #include "Point/Point.h"
+#include "Connectivity/Connectivity.h"
 #include "CellTypes/CellTypes.h"
 #include "EntityKey/EntityKey.h"
 #include "UnitMeshes/UnitMeshes.h"
@@ -18,6 +19,9 @@ DOLFIN_SUITE_BEGIN(suite, "mesh")
 {
   DOLFIN_TCASE_CREATE("Point");
   DOLFIN_TCASE_ADD(test_Point);
+
+  DOLFIN_TCASE_CREATE("Connectivity");
+  DOLFIN_TCASE_ADD(test_Connectivity);
 
   DOLFIN_TCASE_CREATE("CellTypes");
   DOLFIN_TCASE_ADD(test_PointCell);

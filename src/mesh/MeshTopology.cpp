@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // Modified by Aurelien Larcher, 2016.
-// Full rewrite.
+// Full rewrite. Full depression.
 //
 // First added:  2006-05-08
 // Last changed: 2014-11-03
@@ -12,12 +12,15 @@
 #include <dolfin/log/log.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Cell.h>
+#include <dolfin/mesh/Connectivity.h>
 #include <dolfin/mesh/EntityKey.h>
 #include <dolfin/mesh/Mesh.h>
-#include <dolfin/mesh/MeshConnectivity.h>
 
 #include <algorithm>
 #include <ctime>
+
+#define FOREACH_CONNECTIVITY(I, J) \
+  for (uint I = 0; I < CMAX; ++I) for (uint J = 0; J < CMAX; ++J)
 
 namespace dolfin
 {
@@ -28,16 +31,10 @@ MeshTopology::MeshTopology(CellType const& type, Comm& comm, bool frozen) :
     type_(type.clone()),
     dim_(type.dim()),
     frozen_(frozen),
-    num_vertices_(0),
-    ini_vertices_(false),
-    connectivity_(new MeshConnectivity*[dim_ + 1]),
     distdata_(this->distributed() ? new MeshDistributedData(dim_) : NULL),
     timestamp_(0)
 {
-  for (uint d0 = 0; d0 <= dim_; ++d0)
-  {
-    connectivity_[d0] = new MeshConnectivity[dim_ + 1];
-  }
+  FOREACH_CONNECTIVITY(i, j) { C_[i][j] = NULL; }
   update_token();
 }
 //-----------------------------------------------------------------------------
@@ -46,35 +43,17 @@ MeshTopology::MeshTopology(MeshTopology const& other) :
     type_(cloneptr(other.type_)),
     dim_(other.dim_),
     frozen_(other.frozen_),
-    num_vertices_(other.num_vertices_),
-    ini_vertices_(other.ini_vertices_),
-    connectivity_(new MeshConnectivity*[dim_ + 1]),
     distdata_(copyptr(other.distdata_)),
     timestamp_(other.timestamp_)
 {
-  dolfin_assert(other.connectivity_ != NULL);
-  for (uint d0 = 0; d0 <= dim_; ++d0)
-  {
-    connectivity_[d0] = new MeshConnectivity[dim_ + 1];
-    for (uint d1 = 0; d1 <= dim_; ++d1)
-    {
-      connectivity_[d0][d1] = other.connectivity_[d0][d1];
-    }
-  }
+  FOREACH_CONNECTIVITY(i, j) { C_[i][j] = copyptr(other.C_[i][j]); }
 }
 //-----------------------------------------------------------------------------
 MeshTopology::~MeshTopology()
 {
   delete distdata_;
   distdata_ = NULL;
-  dolfin_assert(connectivity_ != NULL);
-  for (uint d = 0; d <= dim_; ++d)
-  {
-    delete[] connectivity_[d];
-    connectivity_[d] = NULL;
-  }
-  delete[] connectivity_;
-  connectivity_ = NULL;
+  FOREACH_CONNECTIVITY(i, j) { delete C_[i][j]; C_[i][j] = NULL; }
   delete type_;
   type_ = NULL;
 }
@@ -86,50 +65,24 @@ void MeshTopology::swap(MeshTopology& other)
   std::swap(type_         , other.type_);
   std::swap(dim_          , other.dim_);
   std::swap(frozen_       , other.frozen_);
-  std::swap(num_vertices_ , other.num_vertices_);
-  std::swap(ini_vertices_ , other.ini_vertices_);
-  std::swap(connectivity_ , other.connectivity_);
   std::swap(distdata_     , other.distdata_);
   std::swap(timestamp_    , other.timestamp_);
+  FOREACH_CONNECTIVITY(i, j) { std::swap(C_[i][j] , other.C_[i][j]); }
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::operator==(MeshTopology const& other) const
 {
-  if (this == &other)
-  {
-    return true;
-  }
-  //
-  if (!objptrcmp(type_, other.type_))
-  {
-    return false;
-  }
-  //
+  if (this == &other) { return true; }
+  if (!objptrcmp(type_, other.type_)) { return false; }
   for (uint i = 0; i <= dim_; ++i)
   {
-    if (this->size(i) != other.size(i))
-    {
-      return false;
-    }
+    if (this->size(i) != other.size(i)) { return false; }
   }
-  //
-  dolfin_assert(connectivity_ != NULL);
-  for (uint d0 = 0; d0 <= dim_; ++d0)
+  FOREACH_CONNECTIVITY(i, j)
   {
-    for (uint d1 = 0; d1 <= dim_; ++d1)
-    {
-      if (connectivity_[d0][d1] != other.connectivity_[d0][d1])
-      {
-        return false;
-      }
-    }
+    if (!objptrcmp(C_[i][j], other.C_[i][j])) { return false; }
   }
-  //
-  if (!objptrcmp(distdata_, other.distdata_))
-  {
-    return false;
-  }
-  //
+  if (!objptrcmp(distdata_, other.distdata_)) { return false; }
   return true;
 }
 //-----------------------------------------------------------------------------
@@ -140,24 +93,35 @@ bool MeshTopology::operator!=(MeshTopology const& other) const
 //-----------------------------------------------------------------------------
 void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
 {
-  if (connectivity_ == NULL)
-  {
-    error("MeshTopology : initializing entities of dimension %u but topology "
-          "is empty", dim);
-  }
   // Overflow
   if (dim_ < dim)
   {
     error("MeshTopology : initializing entities of dimension %u but topology"
           "dimension is %u", dim, dim_);
   }
-  // NOTE: point meshes have cell dimension is equal to the vertex dimension
-  if(dim == 0) { num_vertices_ = nlocal; ini_vertices_ = true; }
-  connectivity_[dim][0].init(nlocal, type_->num_vertices(dim));
+  dolfin_assert(type_);
+  if (C_[dim][0] == NULL)
+  {
+    dolfin_assert(!C_[dim][0]);
+    C_[dim][0] = new Connectivity(nlocal, type_->num_vertices(dim));
+  }
+  else if (dim_ == 0)
+  {
+    // NOTE: point meshes have cell dimension is equal to the vertex dimension
+    //       re-initialization is allowed but subject to constraint.
+    if(nlocal != C_[dim][0]->order())
+    {
+      error("MeshTopology : re-initializing point cell with different size");
+    }
+  }
+  else
+  {
+    error("MeshTopology : re-initializing entities of dimension %u", dim);
+  }
   // Set size of distributed data
   if (distdata_ != NULL)
   {
-    if (nglobal > 0 && nglobal < nlocal)
+    if (nglobal && (nglobal < nlocal))
     {
       error("MeshTopology : number of global entities lower than number of "
             " local entities %u < %u", nlocal, nglobal);
@@ -168,21 +132,15 @@ void MeshTopology::init(uint dim, uint nlocal, uint nglobal)
   {
     // In serial, require that the number of global entities is not initialized
     // of is equal to the number of local entities
-    if ((nglobal > 0) && (nlocal != nglobal))
+    if (nglobal && (nlocal != nglobal))
     {
       error("MeshTopology : invalid number of global entities set in serial");
     }
   }
-
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::finalize()
 {
-  if(!connectivity_[dim_][0].is_initialized())
-  {
-    warning("MeshTopology : cell -> vertices connectivity does not exist");
-  }
-
   // Reorder cells according to UFC convention
   reorder();
 
@@ -191,7 +149,7 @@ void MeshTopology::finalize()
   {
     for (uint d = 0; d <= dim_; ++d)
     {
-      if (this->entities_exist(d))
+      if (this->connectivity(d))
       {
         DistributedData& ddata = this->distdata()[d];
         if (!ddata.is_finalized())
@@ -222,53 +180,32 @@ CellType const& MeshTopology::type(uint i) const
   return *type_;
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::remap(uint dim, Array<uint> const& mapping)
+void MeshTopology::remap(uint d0, Array<uint> const& mapping)
 {
-  if (connectivity_ != NULL)
+  for (uint d1 = 0; d1 <= dim_; ++d1)
   {
-    uint d0 = dim;
-    for (uint d1 = 0; d1 <= dim_; ++d1)
-    {
-      if (connectivity_[d0][d1].order() > 0)
-      {
-        connectivity_[d0][d1].remap_left(mapping);
-        update_token();
-      }
-      if (connectivity_[d1][d0].order() > 0)
-      {
-        connectivity_[d1][d0].remap_right(mapping);
-        update_token();
-      }
-    }
-    reorder();
-    // Remap distributed data
-    if (distdata_ != NULL)
-    {
-      (*distdata_)[d0].remap_numbering(mapping);
-    }
+    if (C_[d0][d1]) { C_[d0][d1]->remap_l(mapping); update_token(); }
+    if (C_[d1][d0]) { C_[d1][d0]->remap_r(mapping); update_token(); }
+  }
+  reorder();
+  // Remap distributed data
+  if (distdata_ != NULL)
+  {
+    (*distdata_)[d0].remap_numbering(mapping);
   }
 }
 //-----------------------------------------------------------------------------
-MeshConnectivity& MeshTopology::operator()(uint d0, uint d1)
+Connectivity& MeshTopology::operator()(uint d0, uint d1)
 {
-  dolfin_assert(connectivity_ != NULL);
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(!connectivity_[d0][d1].is_initialized())
-  {
-    compute_connectivity(d0, d1);
-  }
-  return connectivity_[d0][d1];
+  if (!connectivity(d0, d1)) { compute(d0, d1); }
+  return *connectivity(d0, d1);
 }
 //-----------------------------------------------------------------------------
-MeshConnectivity const& MeshTopology::operator()(uint d0, uint d1) const
+Connectivity const& MeshTopology::operator()(uint d0, uint d1) const
 {
-  dolfin_assert(connectivity_ != NULL);
   dolfin_assert(d0 <= dim_ && d1 <= dim_);
-  if(!connectivity_[d0][d1].is_initialized())
-  {
-    compute_connectivity(d0, d1);
-  }
-  return connectivity_[d0][d1];
+  return *compute(d0, d1);
 }
 //-----------------------------------------------------------------------------
 uint MeshTopology::dim() const
@@ -279,21 +216,21 @@ uint MeshTopology::dim() const
 uint MeshTopology::size(uint dim) const
 {
   dolfin_assert(dim <= dim_);
-  return (dim == 0 ? num_vertices_ : (*this)(dim, 0).order());
+  return (*this)(dim, 0).order();
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::is_computed(uint d0, uint d1) const
+Connectivity * MeshTopology::connectivity(uint d0, uint d1)
 {
   dolfin_assert(d0 <= dim_);
   dolfin_assert(d1 <= dim_);
-  return connectivity_[d0][d1].is_initialized();
+  return C_[d0][d1];
 }
 //-----------------------------------------------------------------------------
-bool MeshTopology::entities_exist(uint dim) const
+Connectivity const * MeshTopology::connectivity(uint d0, uint d1) const
 {
-  dolfin_assert(dim <= dim_);
-  return (dim == 0 ?
-            (ini_vertices_ == true) : connectivity_[dim][0].is_initialized());
+  dolfin_assert(d0 <= dim_);
+  dolfin_assert(d1 <= dim_);
+  return C_[d0][d1];
 }
 //-----------------------------------------------------------------------------
 bool MeshTopology::is_distributed() const
@@ -344,68 +281,31 @@ uint MeshTopology::num_ghost(uint dim) const
   return (distdata_ ? (*distdata_)[dim].num_ghost() : 0);
 }
 //-----------------------------------------------------------------------------
-void MeshTopology::compute_connectivity(uint d0, uint d1) const
+Connectivity const * MeshTopology::entities(uint di) const
 {
-  if (connectivity_ == NULL)
+  if (connectivity(di)) { return connectivity(di); }
+
+  /*
+   *  Compute entities to obtain ( tdim, di ) and ( di, 0 ) connectivities
+   */
+
+  Connectivity const * const cv = connectivity(dim_);
+  if (cv != NULL)
   {
-    error("MeshTopology : connectivity array does not exist");
-  }
-
-  if ((d0 == dim_ && d1 == 0) || connectivity_[d0][d1].is_initialized())
-  {
-    /*
-     *  Return if connectivity exists or if cell -> vertices connectivity, which
-     *  is supposed to be provided, is the one called.
-     *
-     */
-
-    return;
-  }
-  else if ((d0 == dim_ || d1 == dim_) && !connectivity_[dim_][0].is_initialized())
-  {
-    /*
-     *  For these connectivities, cell -> vertices connectivities should exist
-     *
-     */
-
-    error("MeshTopology : trying to initialize cell-based connectivity but "
-          "the mesh was not provided with cells - vertices connectivity.");
-  }
-  else if ((d0 > 0 && d1 == 0) || (d0 == dim_ && d1 > 0 && d1 < dim_))
-  {
-    /*
-     *  Compute entities to obtain (tdim, d) and (d, 0) connectivities
-     *
-     */
-
-    uint const dim = (d1 == 0 ? d0 : d1);
-    MeshConnectivity const& cv = (*this)(dim_, 0);
-    dolfin_assert(cv.is_initialized());
-    MeshConnectivity& ce = connectivity_[dim_][dim];
-    MeshConnectivity& ev = connectivity_[dim][0];
-
     // Initialize local array of entities
-    uint const m = type_->num_entities(dim);
-    uint const n = type_->num_vertices(dim);
-    Array<uint> * vertex_entities = (this->size(0) == 0 ?
-                                      NULL : new Array<uint> [this->size(0)]);
+    uint const m = type_->num_entities(di);
+    uint const n = type_->num_vertices(di);
+    Array<Array<uint> > vertex_entities(this->size(0));
     uint ** entities = new uint*[m];
-    for (uint e = 0; e < m; ++e)
-    {
-      entities[e] = new uint[n];
-      for (uint v = 0; v < n; ++v)
-      {
-        entities[e][v] = 0;
-      }
-    }
+    for (uint e = 0; e < m; ++e) { entities[e] = new uint[n](); }
 
     // Collect entities and create cell -> entities connectivities
     EntityKey key(n);
     Array<EntityKey *> entities_list;
-    ce.init(this->size(dim_), m);
-    for (uint c = 0; c < cv.order(); ++c)
+    Connectivity * ce = new Connectivity(this->size(dim_), m);
+    for (uint c = 0; c < cv->order(); ++c)
     {
-      type_->create_entities(entities, dim, cv(c));
+      type_->create_entities(entities, di, (*cv)(c));
       for (uint e = 0; e < m; ++e)
       {
         key.set(entities[e], entities_list.size());
@@ -433,16 +333,20 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
         {
           vertex_entities[entities[e][v]].push_back(key.idx);
         }
-        ce(c)[e] = key.idx;
+        (*ce)(c)[e] = key.idx;
       }
     }
+    dolfin_assert(C_[dim_][di] == NULL);
+    std::swap(C_[dim_][di], ce);
 
     // Create entity -> vertices connectivities from collected entities
-    ev.init(entities_list.size(), n);
+    Connectivity * ev = new Connectivity(entities_list.size(), n);
     for (uint e = 0; e < entities_list.size(); ++e)
     {
-      ev.set(e, entities_list[e]->indices);
+      ev->set(e, entities_list[e]->indices);
     }
+    dolfin_assert(C_[di][0] == NULL);
+    std::swap(C_[di][0], ev);
 
     // Cleanup
     entities_list.free();
@@ -451,204 +355,168 @@ void MeshTopology::compute_connectivity(uint d0, uint d1) const
       delete[] entities[e];
     }
     delete[] entities;
-    delete[] vertex_entities;
-
-    // New entities have been computed: trigger renumbering
-    renumber();
-  }
-  else if (d0 < d1)
-  {
-    /*
-     *  Compute connectivities from transpose.
-     *
-     */
-
-    MeshConnectivity& c01 = connectivity_[d0][d1];
-    compute_connectivity(d1, d0);
-    MeshConnectivity const& c10 = connectivity_[d1][d0];
-
-    // Compute from transpose
-    Array<uint> conn(this->size(d0), 0);
-    for (uint e1 = 0; e1 < c10.order(); ++e1)
-    {
-      for (uint e0 = 0; e0 < c10.degree(e1); ++e0)
-      {
-        conn[c10(e1)[e0]]++;
-      }
-    }
-    c01.init(conn);
-    //
-    conn = 0;
-    for (uint e1 = 0; e1 < c10.order(); ++e1)
-    {
-      for (uint e0 = 0; e0 < c10.degree(e1); ++e0)
-      {
-        c01(c10(e1)[e0])[conn[c10(e1)[e0]]++] = e1;
-      }
-    }
-    dolfin_assert(c01.order() == this->size(d0));
-  }
-  else if (d0 == d1)
-  {
-    /*
-     *  Compute neighbours for given dimension
-     *
-     */
-
-    MeshConnectivity& c01 = connectivity_[d0][d1];
-    uint const di = (d0 == 0 ? dim_ : 0);
-
-    // Compute connectivity d0 - d - d1 and take intersection
-    compute_connectivity(d0, di);
-    MeshConnectivity const& c0d = connectivity_[d0][di];
-    compute_connectivity(di, d0);
-    MeshConnectivity const& cd0 = connectivity_[di][d0];
-    std::set<uint> entities;
-    Array<uint> conn(this->size(d0), 0);
-    for (uint e0 = 0; e0 < c0d.order(); ++e0)
-    {
-      entities.clear();
-      for (uint i = 0; i < c0d.degree(e0); ++i)
-      {
-        uint const e = c0d(e0)[i];
-        for (uint j = 0; j < cd0.degree(e); ++j)
-        {
-          uint const e1 = cd0(e)[j];
-          // An entity is not a neighbor to itself
-          if (e0 != e1)
-          {
-            entities.insert(e1);
-          }
-        }
-      }
-      conn[e0] = entities.size();
-    }
-    c01.init(conn);
-    for (uint e0 = 0; e0 < c0d.order(); ++e0)
-    {
-      entities.clear();
-      for (uint i = 0; i < c0d.degree(e0); ++i)
-      {
-        uint const e = c0d(e0)[i];
-        for (uint j = 0; j < cd0.degree(e); ++j)
-        {
-          uint const e1 = cd0(e)[j];
-          // An entity is not a neighbor to itself
-          if (e0 != e1)
-          {
-            entities.insert(e1);
-          }
-        }
-      }
-      uint pos = 0;
-      for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
-           ++it, ++pos)
-      {
-        c01(e0)[pos] = *it;
-      }
-    }
-    dolfin_assert(c01.order() == this->size(d0));
   }
   else
   {
+    error("MeshTopology: computation of entities requires cell vertices");
+  }
+
+  // New entities have been computed: trigger renumbering
+  renumber();
+
+  return connectivity(di);
+}
+//-----------------------------------------------------------------------------
+Connectivity const * MeshTopology::transpose(uint d1, uint d0) const
+{
+  if (connectivity(d0, d1)) { return connectivity(d0, d1); }
+
+  Connectivity const * const c10 = connectivity(d1, d0);
+  uint const card0 = compute(d0, 0)->order();
+  Array<uint> conn(card0, 0);
+  for (uint const * v = c10->data(); v != c10->bound(); ++v) { conn[*v]++; }
+  Connectivity * c01 = new Connectivity(conn);
+  conn = 0;
+  for (uint e1 = 0; e1 < c10->order(); ++e1)
+  {
+    for (uint e0 = 0; e0 < c10->degree(e1); ++e0)
+    {
+      uint const ei = (*c10)(e1)[e0]; (*c01)(ei)[conn[ei]++] = e1;
+    }
+  }
+  dolfin_assert(c01->order() == card0);
+  std::swap(C_[d0][d1], c01);
+
+  return connectivity(d0, d1);
+}
+//-----------------------------------------------------------------------------
+Connectivity const * MeshTopology::intersection(uint d0, uint di, uint d1) const
+{
+  if (connectivity(d0, d1)) { return connectivity(d0, d1); }
+
+  /*
+   *  Compute connectivities using the intersection d0 - di - d1.
+   */
+
+  Connectivity const * const c0v = compute(d0, di);
+  Connectivity const * const c1v = compute(d1, di);
+  Connectivity const * const cv1 = compute(di, d1);
+
+  if (d0 != d1)
+  {
+    uint const o0v = c0v->order();
+    Array<Array<uint> > conn(o0v);
+    for (uint e0 = 0; e0 < o0v; ++e0)
+    {
+      std::set<uint> entities;
+      uint const *c0 = (*c0v)(e0); uint const d0 = c0v->degree(e0);
+      for (uint i = 0; i < d0; ++i)
+      {
+        uint const *c1 = (*cv1)(c0[i]); uint const  d1 = cv1->degree(c0[i]);
+        for (uint j = 0; j < d1; ++j)
+        {
+          if (contains(c0, d0, (*c1v)(c1[j]), d1)) { entities.insert(c1[j]); }
+        }
+      }
+      conn[e0].assign(entities.begin(), entities.end());
+    }
+    Connectivity * c01 = new Connectivity(conn);
+    dolfin_assert(c01->order() == o0v);
+    std::swap(C_[d0][d1], c01);
+  }
+  else
+  {
+    uint const o0v = c0v->order();
+    Array<Array<uint> > conn(o0v);
+    for (uint e0 = 0; e0 < o0v; ++e0)
+    {
+      std::set<uint> entities;
+      uint const *c0 = (*c0v)(e0); uint const d0 = c0v->degree(e0);
+      for (uint i = 0; i < d0; ++i)
+      {
+        uint const *c1 = (*cv1)(c0[i]); uint const  d1 = cv1->degree(c0[i]);
+        for (uint j = 0; j < d1; ++j)
+        {
+          if (e0 != c1[j]) { entities.insert(c1[j]); }
+        }
+      }
+      conn[e0].assign(entities.begin(), entities.end());
+    }
+    Connectivity * c01 = new Connectivity(conn);
+    dolfin_assert(c01->order() == o0v);
+    std::swap(C_[d0][d1], c01);
+  }
+
+  return connectivity(d0, d1);
+}
+//-----------------------------------------------------------------------------
+Connectivity const * MeshTopology::compute(uint d0, uint d1) const
+{
+  if (connectivity(d0, d1)) { return connectivity(d0, d1); }
+
+  if (connectivity(d1, d0))
+  {
     /*
-     *  Compute connectivities between edges/faces and cell/vertices
-     *
+     *  Compute connectivities from transpose if possible.
+     *  Requires: ( d1, d0 )
      */
-
-    MeshConnectivity& c01 = connectivity_[d0][d1];
-
-    // Former code was a special case taking intersection with d = 0
-    // Compute connectivity d0 - d - d1 and take intersection
-    compute_connectivity(d0, 0);
-    MeshConnectivity const& c0v = connectivity_[d0][0];
-    compute_connectivity(d1, 0);
-    MeshConnectivity const& c1v = connectivity_[d1][0];
-    compute_connectivity(0, d1);
-    MeshConnectivity const& cv1 = connectivity_[0][d1];
-    std::set<uint> entities;
-    Array<uint> conn(this->size(d0), 0);
-    for (uint e0 = 0; e0 < c0v.order(); ++e0)
+    Connectivity const * const c01 = transpose(d1, d0);
+  }
+  else
+  {
+    uint const dp = std::max(d0, d1);
+    uint const dm = std::min(d0, d1);
+    if (d0 != d1 && (dp == dim_ || dm == 0))
     {
-      entities.clear();
-      for (uint i = 0; i < c0v.degree(e0); ++i)
-      {
-        uint const e = c0v(e0)[i];
-        for (uint j = 0; j < cv1.degree(e); ++j)
-        {
-          uint const e1 = cv1(e)[j];
-          if (contains(c0v(e0), c0v.degree(e0), c1v(e1), c1v.degree(e1)))
-          {
-            entities.insert(e1);
-          }
-        }
-      }
-      conn[e0] = entities.size();
+      /*
+       *  Compute entities connectivity ( tdim, di ) and ( di, 0 ).
+       *  Requires: ( tdim, 0 )
+       */
+      Connectivity const * const cp0 = entities(dm ? dm : dp);
+      Connectivity const * const c01 = compute(d0, d1);
     }
-    c01.init(conn);
-    for (uint e0 = 0; e0 < c0v.order(); ++e0)
+    else if (dp)
     {
-      entities.clear();
-      for (uint i = 0; i < c0v.degree(e0); ++i)
-      {
-        uint const e = c0v(e0)[i];
-        for (uint j = 0; j < cv1.degree(e); ++j)
-        {
-          uint const e1 = cv1(e)[j];
-          if (contains(c0v(e0), c0v.degree(e0), c1v(e1), c1v.degree(e1)))
-          {
-            entities.insert(e1);
-          }
-        }
-      }
-      // Add the connected entities
-      uint pos = 0;
-      for (std::set<uint>::iterator it = entities.begin(); it != entities.end();
-           ++it, ++pos)
-      {
-        c01(e0)[pos] = *it;
-      }
+      /*
+       *  Compute connectivities ( d0, d1 ).
+       *  Requires: ( d0, 0 ), ( d1, 0 ), ( 0, d1 )
+       */
+      Connectivity const * const cpm = intersection(dp, 0, dm);
+      Connectivity const * const c01 = compute(d0, d1);
     }
-    dolfin_assert(c01.order() == this->size(d0));
+    else
+    {
+      error("MeshTopology: vertices were not initialized");
+    }
   }
 
   /*
-   * If the created connectivity needs ordering then reset the flag to trigger
-   * reordering
-   *
+   * If the created connectivity needs ordering then trigger reordering
    */
+  if(type_->connectivity_needs_ordering(d0, d1)) { reorder(); }
 
-  if(type_->connectivity_needs_ordering(d0, d1))
+  if (connectivity(d0, d1) == NULL)
   {
-    reorder();
+    error("MeshTopology: connectivity (%u, %u) not computed.", d0, d1);
   }
 
-  message(1, "MeshTopology : computed connectivity (%u, %u)", d0, d1);
+  return connectivity(d0, d1);
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::reorder() const
 {
-  //NOTE: this test ensures that boundary meshes are not reordered
-  if (!frozen_)
+  //NOTE: ensure that boundary meshes and empty meshes are not reordered
+  if (!frozen_ && this->connectivity(dim_))
   {
-    message(1, "MeshTopology : order");
     MeshTopology& topology = const_cast<MeshTopology&>(*this);
     uint const num_cells = this->size(dim_);
-    for (uint i = 0; i < num_cells; ++i)
-    {
-      type_->order_entities(topology, i);
-    }
+    for (uint i = 0; i < num_cells; ++i) { type_->order_entities(topology, i); }
   }
 }
 //-----------------------------------------------------------------------------
 void MeshTopology::renumber() const
 {
-  if (distdata_ == NULL)
-  {
-    return;
-  }
-
-  message(1, "MeshTopology : renumber");
+  if (distdata_ == NULL) { return; }
 
   MeshTopology& topology = const_cast<MeshTopology&>(*this);
   if(!MeshRenumber::renumber(topology))
@@ -665,59 +533,36 @@ void MeshTopology::disp() const
   cout << "Distributed : " << this->is_distributed() << endl;
   skip();
   begin("Number of entities:");
-  if (num_vertices_ == 0)
+  for (uint d = 1; d <= dim_; ++d)
   {
-    cout << "empty" << endl;
-  }
-  else
-  {
-    cout << "0: " << num_vertices_ << endl;
-    for (uint d = 1; d <= dim_; ++d)
+    if (C_[d][0])
     {
-      dolfin_assert(connectivity_ != NULL);
-      if (connectivity_[d][0].is_initialized())
-      {
-        cout << d << ": " << connectivity_[d][0].order() << endl;
-      }
-      else
-      {
-        cout << d << ": " << "not computed" << endl;
-      }
+      cout << d << ": " << C_[d][0]->order() << endl;
+    }
+    else
+    {
+      cout << d << ": " << "x" << endl;
     }
   }
   end();
   skip();
   begin("Connectivity:");
-  if (connectivity_ == NULL)
+  cout << " ";
+  for (uint d1 = 0; d1 <= dim_; ++d1)
   {
-    cout << "empty" << endl;
+    cout << " " << d1;
   }
-  else
+  cout << endl;
+  for (uint d0 = 0; d0 <= dim_; ++d0)
   {
-    cout << " ";
+    cout << d0;
     for (uint d1 = 0; d1 <= dim_; ++d1)
     {
-      cout << " " << d1;
-    }
-    cout << endl;
-    for (uint d0 = 0; d0 <= dim_; ++d0)
-    {
-      cout << d0;
-      for (uint d1 = 0; d1 <= dim_; ++d1)
-      {
-        if (connectivity_[d0][d1].order() > 0)
-        {
-          cout << " x";
-        }
-        else
-        {
-          cout << " -";
-        }
-      }
-      cout << endl;
+      if (C_[d0][d1]) { cout << " x"; } else { cout << " -"; }
     }
     cout << endl;
   }
+  cout << endl;
   end();
   //---
   end();
@@ -739,9 +584,6 @@ MeshTopology::MeshTopology() :
     type_(NULL),
     dim_(0),
     frozen_(false),
-    num_vertices_(0),
-    ini_vertices_(false),
-    connectivity_(NULL),
     distdata_(NULL),
     timestamp_(0)
 {

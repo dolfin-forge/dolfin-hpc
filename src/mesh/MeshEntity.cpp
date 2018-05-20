@@ -73,7 +73,7 @@ void MeshEntity::get_global_entities(uint dim, uint * indices) const
   // Get list of entities for given topological dimension
   if (distdata_ != NULL)
   {
-    MeshConnectivity const& mc = topology_(tdim_, dim);
+    Connectivity const& mc = topology_(tdim_, dim);
     (*distdata_)[dim].get_global(mc.degree(index_), mc(index_), indices);
   }
   else
@@ -89,7 +89,7 @@ void MeshEntity::get_global_entities(uint ** indices) const
   {
     for (uint d = 0; d < tdim_; ++d)
     {
-      MeshConnectivity const& mc = topology_(tdim_, d);
+      Connectivity const& mc = topology_(tdim_, d);
       (*distdata_)[d].get_global(mc.degree(index_), mc(index_), indices[d]);
     }
     indices[tdim_][0] = (*distdata_)[tdim_].get_global(index_);
@@ -130,7 +130,7 @@ bool MeshEntity::has_all_vertices_shared() const
     }
     else
     {
-      MeshConnectivity const& c = topology_(tdim_, 0);
+      Connectivity const& c = topology_(tdim_, 0);
       dolfin_assert(c.order() > 0);
       for (uint v = 0; v < c.degree(index_); ++v)
       {
@@ -162,8 +162,8 @@ bool MeshEntity::on_boundary() const
     }
     else
     {
-      MeshConnectivity const& cef = topology_(tdim_, fdim);
-      MeshConnectivity const& cfc = topology_(fdim , mdim);
+      Connectivity const& cef = topology_(tdim_, fdim);
+      Connectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
@@ -185,8 +185,8 @@ bool MeshEntity::on_boundary() const
     else
     {
 
-      MeshConnectivity const& cef = topology_(tdim_, fdim);
-      MeshConnectivity const& cfc = topology_(fdim , mdim);
+      Connectivity const& cef = topology_(tdim_, fdim);
+      Connectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
         uint const fidx = cef(index_)[f];
@@ -213,7 +213,7 @@ void MeshEntity::disp() const
   for (uint d =0; d < tdim_; ++d)
   {
     cout << d << ": ";
-    if(topology.is_computed(tdim_, d))
+    if(topology.connectivity(tdim_, d))
     {
       uint const * entities = topology(tdim_, d)(index_);
       uint const size = topology(tdim_, d).degree(index_);

@@ -38,7 +38,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
    *
    */
 
-  if (topology.entities_exist(0) && !distdata[0].valid_numbering)
+  if (topology.connectivity(0) && !distdata[0].valid_numbering)
   {
     message(1, "MeshRenumber : renumber vertices");
     renumbered = true;
@@ -56,7 +56,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
 
   for (uint d = 1; d < tdim; ++d)
   {
-    if (!(topology.entities_exist(d) && !distdata[d].valid_numbering))
+    if (!(topology.connectivity(d) && !distdata[d].valid_numbering))
     {
       continue;
     }
@@ -65,8 +65,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     renumbered = true;
     DistributedData& vdata = distdata[0];
     DistributedData& edata = distdata[d];
-    MeshConnectivity const& cve = topology(0, d);
-    MeshConnectivity const& cev = topology(d, 0);
+    Connectivity const& cve = topology(0, d);
+    Connectivity const& cev = topology(d, 0);
 
     // Set the random seed
     std::srand(MPI::seed());
@@ -305,7 +305,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
    *
    */
 
-  if (topology.entities_exist(tdim) && !distdata[tdim].valid_numbering)
+  if (topology.connectivity(tdim) && !distdata[tdim].valid_numbering)
   {
     message(1, "MeshRenumber : renumber cells");
     renumbered = true;

@@ -201,15 +201,6 @@ static inline real percent(uint n, uint d)
 template<class Iterator, class T>
 static inline void range(Iterator begin, Iterator end, T v = T(), int s = 1)
 {
-  while (begin != end)
-  {
-    *begin++ = v;
-    for (int i = 0; i < s; ++i) ++v;
-  }
-}
-template<class T>
-static inline void range(T* begin, T* end, T v = T(), int s = 1)
-{
   if (s)
   {
     if (s > 0)

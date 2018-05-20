@@ -193,8 +193,7 @@ void DistributedData::finalize()
       {
         cache_size_ = global_.size();
         cached_numbering_ = new uint[cache_size_];
-        for (_map<uint, uint>::iterator it = global_.begin();
-        it != global_.end(); ++it)
+        for (GhostSet::iterator it = global_.begin(); it != global_.end(); ++it)
         {
           cached_numbering_[it->first] = it->second;
         }
@@ -275,15 +274,15 @@ void DistributedData::finalize()
       std::fill_n(cached_ownership_, cache_size_, pe_size_);
 
       // Update ownership for shared entities
-      for (_map<uint, _set<uint> >::const_iterator it = shared_.begin();
-           it != shared_.end(); ++it)
+      for (SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
+           ++it)
       {
         cached_ownership_[it->first] = rank_;
       }
 
       // Update ownership for ghost entities
-      for (_map<uint, uint>::const_iterator it = ghost_.begin();
-           it != ghost_.end(); ++it)
+      for (GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end();
+           ++it)
       {
         cached_ownership_[it->first] = it->second;
       }
@@ -315,8 +314,8 @@ void DistributedData::assign(DistributedData const& other,
   // order to save map lookups
   if (other.cached_numbering_ != NULL && other.cached_ownership_ != NULL)
   {
-    _map<uint, _set<uint> >::const_iterator its;
-    _map<uint, uint>::const_iterator itg;
+    SharedSet::const_iterator its;
+    GhostSet::const_iterator itg;
     for (uint i = 0; i < mapping.size(); ++i)
     {
       dolfin_assert(mapping[i] < other.cache_size_);
@@ -352,9 +351,9 @@ void DistributedData::assign(DistributedData const& other,
   }
   else
   {
-    _map<uint, uint>::const_iterator it;
-    _map<uint, _set<uint> >::const_iterator its;
-    _map<uint, uint>::const_iterator itg;
+    IndexMapping::const_iterator it;
+    SharedSet::const_iterator its;
+    GhostSet::const_iterator itg;
     for(uint i = 0; i < mapping.size(); ++i)
     {
       // Numbering
@@ -651,7 +650,7 @@ void DistributedData::set_map(uint local_index, uint global_index,
     /* Do not allow remapping by default */
     if (allow_remap)
     {
-      _map<uint, uint>::iterator it = global_.find(local_index);
+      IndexMapping::iterator it = global_.find(local_index);
       if (it != global_.end())
       {
         //warning("DistributedData : remap %u", local_index);
@@ -708,8 +707,7 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   // Update numbering
   dolfin_assert(global_.size() == 0);
   dolfin_assert(cached_numbering_ != NULL);
-  for (_map<uint, uint>::iterator it = local_.begin(); it != local_.end();
-       ++it)
+  for (IndexMapping::iterator it = local_.begin(); it != local_.end(); ++it)
   {
     uint const new_local_index = mapping[it->second];
     // map new local index to global index
@@ -721,9 +719,9 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
   // Update shared entities
   dolfin_assert(cached_ownership_ != NULL);
   std::fill(cached_ownership_, cached_ownership_ + cache_size_, pe_size_);
-  _map<uint, _set<uint> > shared;
-  for (_map<uint, _set<uint> >::const_iterator it = shared_.begin();
-       it != shared_.end(); ++it)
+  SharedSet shared;
+  for (SharedSet::const_iterator it = shared_.begin(); it != shared_.end();
+       ++it)
   {
     uint const new_local_index = mapping[it->first];
     // map new local index to shared adjacents
@@ -735,9 +733,8 @@ void DistributedData::remap_numbering(Array<uint> const& mapping)
 
   // Update ghost entities
   dolfin_assert(cached_ownership_ != NULL);
-  _map<uint, uint> ghost;
-  for (_map<uint, uint>::const_iterator it = ghost_.begin(); it != ghost_.end();
-       ++it)
+  GhostSet ghost;
+  for (GhostSet::const_iterator it = ghost_.begin(); it != ghost_.end(); ++it)
   {
     uint const new_local_index = mapping[it->first];
     // map new local index to owner
@@ -769,7 +766,7 @@ void DistributedData::renumber_global()
   message(1, "DistributedData : renumber global, local size = %u", cache_size_);
   tic();
 
-  _map<uint, uint> local_mapping;
+  IndexMapping local_mapping;
   Array<uint> * sendbuf = new Array<uint> [pe_size_];
 
   // Re-index owned entities and collect ghosted entities per owner
@@ -890,7 +887,7 @@ uint DistributedData::get_owner(uint local_index) const
     return (cached_ownership_[local_index] == pe_size_ ?
               rank_ : cached_ownership_[local_index]);
   }
-  _map<uint, uint>::const_iterator it = ghost_.find(local_index);
+  GhostSet::const_iterator it = ghost_.find(local_index);
   if (it == ghost_.end())
   {
     return rank_;
@@ -967,8 +964,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   adjacents_ = adjs;
 
   // Update shared entities ownership
-  for (_map<uint, _set<uint> >::iterator it = shared_.begin();
-       it != shared_.end(); ++it)
+  for (SharedSet::iterator it = shared_.begin(); it != shared_.end(); ++it)
   {
     // Update adjacent
     _set<uint> adj;
@@ -987,8 +983,7 @@ void DistributedData::remap_ownership(Array<uint> const& mapping)
   }
 
   // Update ghost entities ownership
-  for (_map<uint, uint>::iterator it = ghost_.begin(); it != ghost_.end();
-       ++it)
+  for (GhostSet::iterator it = ghost_.begin(); it != ghost_.end(); ++it)
   {
     // Update owner
     it->second = mapping[it->second];
@@ -1010,6 +1005,19 @@ _set<uint> const& DistributedData::get_shared_adj(uint local_index) const
 {
   dolfin_assert(shared_.count(local_index) > 0);
   return shared_.find(local_index)->second;
+}
+//-----------------------------------------------------------------------------
+_set<uint> const* DistributedData::ptr_shared_adj(uint local_index) const
+{
+  if (cached_ownership_ != NULL)
+  {
+    if (cached_ownership_[local_index] < pe_size_)
+      return &shared_.find(local_index)->second;
+    else
+      return NULL;
+  }
+  SharedSet::const_iterator it = shared_.find(local_index);
+  return (it == shared_.end() ? NULL : &it->second);
 }
 //-----------------------------------------------------------------------------
 void DistributedData::get_common_adj(uint n, uint const indices[],

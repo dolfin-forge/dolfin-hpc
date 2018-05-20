@@ -221,6 +221,9 @@ public:
   /// Return the adjacent set of a shared entity
   _set<uint> const& get_shared_adj(uint local_index) const;
 
+  /// Return the adjacent set of a shared entity
+  _set<uint> const* ptr_shared_adj(uint local_index) const;
+
   /// Return the common adjacent set to an array of shared entities
   void get_common_adj(uint n, uint const indices[], _set<uint>& adjs) const;
 
@@ -267,13 +270,16 @@ private:
   bool finalized_;
 
   ///
-  _map<uint, uint> global_;
-  _map<uint, uint> local_;
+  typedef _map<uint, uint> IndexMapping;
+  IndexMapping global_;
+  IndexMapping local_;
 
   //
   _set<uint> adjacents_;
-  _map<uint, _set<uint> > shared_;
-  _map<uint, uint> ghost_;
+  typedef _map<uint, _set<uint> > SharedSet;
+  SharedSet shared_;
+  typedef _map<uint, uint> GhostSet;
+  GhostSet ghost_;
 
   ///
   uint cache_size_;
@@ -373,7 +379,7 @@ public:
 private:
 
   DistributedData const& distdata_;
-  _map<uint, _set<uint> >::const_iterator iter_;
+  DistributedData::SharedSet::const_iterator iter_;
   uint pos_;
 
 };
@@ -460,7 +466,7 @@ public:
 private:
 
   DistributedData const& distdata_;
-  _map<uint, uint>::const_iterator iter_;
+  DistributedData::GhostSet::const_iterator iter_;
   uint pos_;
 
 };

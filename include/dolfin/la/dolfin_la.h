@@ -6,7 +6,6 @@
 // Note that the order is important!
 
 #include <dolfin/la/VectorNormType.h>
-#include <dolfin/la/NormalizationType.h>
 #include <dolfin/la/SolverType.h>
 #include <dolfin/la/PreconditionerType.h>
 #include <dolfin/la/GenericTensor.h>

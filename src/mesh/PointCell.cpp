@@ -24,10 +24,6 @@ namespace dolfin
 uint const PointCell::NE[1] =
 { 1 };
 
-// UFC: Number of Vertices (per entity)
-uint const PointCell::NV[1] =
-{ 1 };
-
 // UFC: Vertex Coordinates
 real const PointCell::VC[1][1] =
 { { 0.0 } };
@@ -50,6 +46,13 @@ uint PointCell::dim() const
 uint PointCell::num_entities(uint dim) const
 {
   dolfin_assert(dim <= TD);
+  return 1;
+}
+//-----------------------------------------------------------------------------
+uint PointCell::num_entities(uint d0, uint d1) const
+{
+  dolfin_assert(d0 <= TD);
+  dolfin_assert(d1 <= TD);
   return 1;
 }
 //-----------------------------------------------------------------------------

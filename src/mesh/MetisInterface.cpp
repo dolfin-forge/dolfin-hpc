@@ -70,12 +70,12 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
+  MPI_Comm_dup(mesh.topology().comm(), &comm);
 
   // Get information about the PE
   int size, rank;
-  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
-  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
+  MPI_Comm_size(comm, &size);
+  MPI_Comm_rank(comm, &rank);
 
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
@@ -93,7 +93,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   }
   
   elmdist[rank] = ncells;
-  MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, MPI::DOLFIN_COMM);
+  MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, comm);
 
   pm_idx_t *elmwgt = NULL;
 
@@ -160,21 +160,25 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   delete[] elmwgt;
 
   // Create partition function
-  partitions = size;
-  uint lreassigned = 0;
   for (CellIterator cell(mesh); !cell.end(); ++cell)
   {
     partitions(*cell) = (uint) part[cell->index()];
+  }
+#if DEBUG
+  uint lreassigned = 0;
+  for (CellIterator cell(mesh); !cell.end(); ++cell)
+  {
     if(part[cell->index()] != rank)
     {
       ++lreassigned;
     }
   }
   uint greassigned = 0;
-  MPI::all_reduce<MPI::sum>(lreassigned, greassigned);
+  MPI::all_reduce<MPI::sum>(lreassigned, greassigned, comm);
   message(1, "METISPartMeshKway reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(tdim)),
           percent(greassigned, mesh.distdata()[tdim].global_size()));
+#endif
   tocd();
 
   delete[] part;
@@ -193,20 +197,19 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI_Comm_dup(MPI::DOLFIN_COMM, &comm);
+  MPI_Comm_dup(mesh.topology().comm(), &comm);
 
   int size, rank;
   // Get information about the PE
-  MPI_Comm_size(MPI::DOLFIN_COMM, &size);
-  MPI_Comm_rank(MPI::DOLFIN_COMM, &rank);
+  MPI_Comm_size(comm, &size);
+  MPI_Comm_rank(comm, &rank);
 
   // Gather number of locally stored vertices for each processor
   pm_idx_t *vtxdist = new pm_idx_t[size+1];
   vtxdist[rank] = static_cast<pm_idx_t> (mesh.size(0));
   pm_idx_t local_vertices = vtxdist[rank];
 
-  MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, 
-		MPI_INT, MPI::DOLFIN_COMM);
+  MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT, comm);
 
   int i;
   pm_idx_t tmp;
@@ -235,20 +238,25 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   ParMETIS_V3_PartGeom(vtxdist, &gdim, xdy, part, &comm);
 
   // Create meshfunction from partitions
-  uint lreassigned = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
     partitions(*vertex) = static_cast<uint>(part[vertex->index()]);
+  }
+#if DEBUG
+  uint lreassigned = 0;
+  for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
+  {
     if(part[vertex->index()] != rank)
     {
       ++lreassigned;
     }
   }
   uint greassigned = 0;
-  MPI::all_reduce<MPI::sum>(lreassigned, greassigned);
+  MPI::all_reduce<MPI::sum>(lreassigned, greassigned, comm);
   message(1, "METISPartGeom reassigned local = %2.2f %%, global = %2.2f %%",
           percent(lreassigned, mesh.size(0)),
           percent(greassigned, mesh.distdata()[0].global_size()));
+#endif
   tocd();
 
   delete[] xdy;

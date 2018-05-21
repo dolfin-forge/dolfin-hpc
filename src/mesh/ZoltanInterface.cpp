@@ -239,7 +239,7 @@ void ZoltanInterface::partitionZoltanEdgeList(void *data, int num_gid_entries,
   uint pe_size = MPI::size();
   
   Array<uint> *glb_facet = new Array<uint>[pe_size];  
-  for (SharedIterator f(dist); !f.end(); ++f)
+  for (SharedIterator f(dist); f.valid(); ++f)
   {
     uint const adj_rank = *(f.adj().begin());
     glb_facet[adj_rank].push_back(f.global_index());

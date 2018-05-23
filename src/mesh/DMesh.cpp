@@ -48,9 +48,8 @@ struct DCell
     uint found = 0;
     for ( std::vector<DVertex*>::iterator it = vertices.begin() ;
           it != vertices.end(); ++it )
-      if ( *it == v1 || *it == v2 )
-        found++;
-    return (found == 2);
+      if ( (*it == v1 || *it == v2) && (++found == 2)) return true;
+    return false;
   }
 
   /// Local index of cell

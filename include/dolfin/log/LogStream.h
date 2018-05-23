@@ -1,3 +1,6 @@
+// Copyright (C) 2018 Aurelien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
 #ifndef __DOLFIN_LOG_STREAM_H
 #define __DOLFIN_LOG_STREAM_H
 
@@ -112,7 +115,11 @@ struct __logstream : protected std::streambuf, public std::ostream
                       char const * pre = NULL, char const * suf = NULL,
                       size_t * n = NULL)
   {
-    if (n) *n = static_cast<size_t>(std::ostream::tellp());
+    if (n)
+    {
+      // tellp does not work with any stream, switch to string buffer
+      sb_ = os_.rdbuf(); os_.clear(); os_.seekp(0);
+    }
     if (pre) (*this) << pre;
     if (msg)
     {
@@ -311,7 +318,11 @@ fmtf:
     }
 ret:
     if (suf) (*this) << suf;
-    if (n) *n = static_cast<size_t>(std::ostream::tellp()) - *n;
+    if (n)
+    {
+      sb_ = ss_->rdbuf();
+      *n = sb_->sputn(os_.str().c_str(), os_.str().size());
+    }
     return *this;
   }
 
@@ -336,7 +347,10 @@ ret:
   int verbose(int n)
   {
     std::swap(W_v_, n);
-    if (W_v_ < 0) clear(std::iostream::badbit); else std::iostream::goodbit;
+    if (W_v_ < 0)
+      clear(std::iostream::badbit);
+    else
+      clear(std::iostream::goodbit);
     return n;
   }
 
@@ -349,7 +363,8 @@ private:
 
   ///
   stream * const         ss_;
-  std::streambuf * const sb_;
+  std::streambuf *       sb_;
+  std::ostringstream     os_;
 
   static int const LINEWIDTH = 256;
   static int const INDENTTAB = 2;

@@ -82,7 +82,7 @@ SubSystemsManager::~SubSystemsManager()
   SubSystemsManager::fini();
 }
 //-----------------------------------------------------------------------------
-int SubSystemsManager::init(int argc, char* argv[], uint n)
+int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
 {
   if (count_ == 0 )
   {
@@ -97,6 +97,9 @@ int SubSystemsManager::init(int argc, char* argv[], uint n)
 #ifdef HAVE_ZOLTAN
     SubSystemsManager::Zoltan::init(argc, argv);
 #endif
+
+    // Set wall clock limit
+    timer_.set_limit(w_limit);
   }
   return ++count_;
 }

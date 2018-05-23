@@ -529,19 +529,19 @@ void MeshTopology::disp() const
 {
   section("MeshTopology");
   //---
-  cout << "Dimension   : " << dim_ << endl;
-  cout << "Distributed : " << this->is_distributed() << endl;
+  cout << "Dimension   : " << dim_ << "\n";
+  cout << "Distributed : " << (distdata_ != NULL) << "\n";
   skip();
   begin("Number of entities:");
   for (uint d = 1; d <= dim_; ++d)
   {
     if (C_[d][0])
     {
-      cout << d << ": " << C_[d][0]->order() << endl;
+      cout << d << ": " << C_[d][0]->order() << "\n";
     }
     else
     {
-      cout << d << ": " << "x" << endl;
+      cout << d << ": " << "x\n";
     }
   }
   end();
@@ -552,7 +552,7 @@ void MeshTopology::disp() const
   {
     cout << " " << d1;
   }
-  cout << endl;
+  cout << "\n";
   for (uint d0 = 0; d0 <= dim_; ++d0)
   {
     cout << d0;
@@ -560,9 +560,9 @@ void MeshTopology::disp() const
     {
       if (C_[d0][d1]) { cout << " x"; } else { cout << " -"; }
     }
-    cout << endl;
+    cout << "\n";
   }
-  cout << endl;
+  cout << "\n";
   end();
   //---
   end();

@@ -22,6 +22,7 @@
 
 #include <petscmat.h>
 
+#include <map>
 #include <set>
 
 namespace dolfin

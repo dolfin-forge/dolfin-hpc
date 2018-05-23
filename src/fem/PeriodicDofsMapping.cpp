@@ -725,18 +725,14 @@ void PeriodicDofsMapping::tabulate_coordinates(uint i, uint * Gdof,
 //-----------------------------------------------------------------------------
 void PeriodicDofsMapping::disp() const
 {
-  cout << "PeriodicDofsMapping" << endl;
-  cout << "-------------------" << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Max local dimension : " << max_local_dimension_ << endl;
-  cout << "Number of G dofs    : " << (uint) Goffsets_.size() << endl;
-  cout << endl;
+  section("PeriodicDofsMapping");
+  prm("Max local dimension" , max_local_dimension_);
+  prm("Number of G dofs"    , Goffsets_.size());
+  end();
   //
   uint maxgdim = Space::MAX_DIMENSION;
   for (OffsetMap::const_iterator it = Goffsets_.begin(); it != Goffsets_.end();
-      ++it)
+       ++it)
   {
     uint dof = it->first;
     uint iid = it->second;

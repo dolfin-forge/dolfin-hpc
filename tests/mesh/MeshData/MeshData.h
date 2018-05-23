@@ -40,7 +40,7 @@ DOLFIN_START_TEST( test_MeshData_iterator )
       uint ii = 0;
       for (MeshData::iterator<bool, Facet> it(d); it.valid(); ++it, ++ii)
       {
-        begin("%u", it.pos()); it->disp(); endblock();
+        begin("%u", it.pos()); it->disp(); end();
       }
       ck_assert(ii == 0);
     }
@@ -55,7 +55,7 @@ DOLFIN_START_TEST( test_MeshData_iterator )
       {
         ck_assert(it->dim()  == m.topology_dimension());
         ck_assert(it->size() == f0.size());
-        begin("%u", it.pos()); it->disp(); endblock();
+        begin("%u", it.pos()); it->disp(); end();
         for (Cell::iterator c(m); !c.end(); ++c)
         {
           ck_assert((*it)(*c) == it.pos());
@@ -75,7 +75,7 @@ DOLFIN_START_TEST( test_MeshData_iterator )
       {
         ck_assert(it->dim() == 0);
         ck_assert(it->size() == f0.size());
-        begin("%u", it.pos()); it->disp(); endblock();
+        begin("%u", it.pos()); it->disp(); end();
         for (Vertex::iterator v(m); !v.end(); ++v)
         {
           ck_assert((*it)(*v) == it.pos());

@@ -10,10 +10,10 @@
 
 #include <dolfin/la/GenericSparsityPattern.h>
 
-#include <dolfin/log/dolfin_log.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/Array.h>
 
+#include <map>
 #include <set>
 
 namespace dolfin

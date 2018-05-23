@@ -28,17 +28,10 @@ uint SubFunction::index() const
 //-----------------------------------------------------------------------------
 void SubFunction::disp() const
 {
-  cout << "SubFunction" << endl;
-  cout << "-----------" << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Index                 : " << this->index() << endl;
-  skip();
-  this->function().disp();
-  // End indentation
+  section("SubFunction");
+  prm("Index", this->index());
+  function().disp();
   end();
-  skip();
 }
 
 //-----------------------------------------------------------------------------

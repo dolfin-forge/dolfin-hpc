@@ -307,20 +307,16 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
 //-----------------------------------------------------------------------------
 void UFCHalo::disp() const
 {
-  cout << "UFCHalo" << endl;
-  cout << "-----------" << endl;
-
-  begin("");
-  cout << "Facet map size           : " << (uint) facet_map_.size() << endl;
-  cout << "Rank offsets             : " << (uint) rank_offsets_.size()
-       << " adjacent ranks" << endl;
+  section("UFCHalo");
+  prm("Facet map size", facet_map_.size());
+  prm("Adjacent ranks", rank_offsets_.size());
   for (_map<uint, uint>::const_iterator it = rank_offsets_.begin();
        it != rank_offsets_.end(); ++it)
   {
-    cout << "\tproc " << it->first << " : " << it->second << endl;
+    cout << "\tproc " << it->first << " : " << it->second << "\n";
   }
-  cout << "Size of real data packet : " << r_packet_size_ << endl;
-  cout << "Size of uint data packet : " << u_packet_size_ << endl;
+  prm("Size of real data packet", r_packet_size_);
+  prm("Size of uint data packet", u_packet_size_);
   end();
 }
 

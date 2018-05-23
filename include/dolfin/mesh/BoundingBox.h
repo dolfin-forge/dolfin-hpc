@@ -158,13 +158,13 @@ public:
     section("Points");
     for (uint i = 0; i <= D_; ++i)
     {
-      cout << BOX_[i] << endl;
+      cout << BOX_[i] << "\n";
     }
-    endblock();
+    end();
     section("Centroid");
-    cout << this->centroid() << endl;
-    endblock();
-    endblock();
+    cout << this->centroid() << "\n";
+    end();
+    end();
   }
 
 private:

@@ -11,7 +11,6 @@
 #include <dolfin/common/constants.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/log.h>
-#include <dolfin/log/LogManager.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/SubSystemsManager.h>
 
@@ -70,7 +69,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
     }
     else
     {
-      dolfin::LogManager::logger().silence();
+      silence();
     }
 #else
     message("Initializing DOLFIN version %s :\n", DOLFIN_VERSION);

@@ -7,8 +7,7 @@
 #ifndef __DOLFIN_TIMER_H
 #define __DOLFIN_TIMER_H
 
-#include <dolfin/log/LogManager.h>
-#include "timing.h"
+#include <dolfin/common/timing.h>
 
 namespace dolfin
 {
@@ -23,11 +22,6 @@ namespace dolfin
   ///
   ///   timer.start();
   ///   timer.stop();
-  ///
-  /// Timings are stored globally and a summary may be printed
-  /// by calling
-  ///
-  ///   summary();
 
   class Timer
   {
@@ -43,7 +37,7 @@ namespace dolfin
     inline void start() { t = time(); stopped = false; }
 
     /// Stop timer
-    void stop() { LogManager::logger().timing(task, time() - t); stopped = true; }
+    inline void stop() { timing(task.c_str(), time() - t); stopped = true; }
 
   private:
 

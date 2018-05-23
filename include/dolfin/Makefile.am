@@ -143,12 +143,8 @@ nobase_pkginclude_HEADERS = \
 				la/Vector.h\
 				la/VectorNormType.h\
 				log/dolfin_log.h\
-				log/Event.h\
 				log/log.h\
-				log/Logger.h\
-				log/LogManager.h\
 				log/LogStream.h\
-				log/Progress.h\
 				main/dolfin_doc.h\
 				main/dolfin_main.h\
 				main/alarm.h\

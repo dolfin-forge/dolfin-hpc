@@ -158,8 +158,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            cout << "Coordinate: x =";
            for (uint j = 0; j < gdim; j++)
            cout << " " << xx[j];
-           cout << endl;
-           cout << "Degrees of freedom: " << it->second.first << " " << global_dof << endl;
+           cout << "\n";
+           cout << "Degrees of freedom: " << it->second.first << " " << global_dof << "\n";
            error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
            }
            */
@@ -192,8 +192,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
            cout << "Coordinate: x =";
            for (uint j = 0; j < gdim; j++)
            cout << " " << xx[j];
-           cout << endl;
-           cout << "Degrees of freedom: " << it->second.second << " " << global_dof << endl;
+           cout << "\n";
+           cout << "Degrees of freedom: " << it->second.second << " " << global_dof << "\n";
            error("More than one dof associated with coordinate. Did you forget to specify the subsystem?");
            }
            */
@@ -234,7 +234,7 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
       cout << "At coordinate: x =";
       for (uint j = 0; j < gdim; j++)
         cout << " " << it->first[j];
-      cout << endl;
+      cout << "\n";
       error(
           "Unable to find a pair of matching dofs for periodic boundary condition.");
     }

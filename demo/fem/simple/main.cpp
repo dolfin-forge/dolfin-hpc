@@ -47,23 +47,11 @@ int main()
   A0.apply(); 
   M0.apply(); 
 
-  // Display matrices
-//  cout << endl;
-//  cout << "Assembled stiffness matrix:" << endl;
-//  A.disp();
-//  cout << endl;
-
-  cout << "Reference stiffness matrix:" << endl;
+  cout << "Reference stiffness matrix:\n";
   A0.disp();
-  cout << endl;
 
-//  cout << "Assembled mass matrix:" << endl;
-//  M.disp();
-//  cout << endl;
-
-  cout << "Reference mass matrix:" << endl;
+  cout << "Reference mass matrix:\n";
   M0.disp();
-  cout << endl;
 
   return 0;
 }

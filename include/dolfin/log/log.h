@@ -1,134 +1,92 @@
-// Copyright (C) 2003-2008 Anders Logg and Jim Tilander.
-// Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Ola Skavhaug, 2007.
-// Modified by Niclas Jansson, 2009-2015.
-//
-// First added:  2003-03-13
-// Last changed: 2015-07-02
-
 #ifndef __DOLFIN_LOG_H
 #define __DOLFIN_LOG_H
 
-#include <dolfin/common/types.h>
-#include <dolfin/log/LogManager.h>
-
-#include <stdarg.h>
-#include <map>
-#include <string>
-
-#if (DEBUG && !(__GNUG__))
-#include <cassert>
-#endif
-
+#include <dolfin/log/LogStream.h>
 
 namespace dolfin
 {
 
-  /// The DOLFIN log system provides the following set of functions for
-  /// uniform handling of log messages, warnings and errors. In addition,
-  /// macros are provided for debug messages and assertions.
-  ///
-  /// Only messages with a debug level higher than or equal to the global
-  /// debug level are printed (the default being zero). The global debug
-  /// level may be controlled by
-  ///
-  ///    set("debug level", debug_level);
-  ///
-  /// where debug_level is the desired debug level.
-  ///
-  /// The output destination can be controlled by
-  ///
-  ///    set("output destination", destination);
-  ///
-  /// where destination is one of "terminal" (default) or "silent". Setting
-  /// the output destination to "silent" means no messages will be printed.
+//--- Default streams ---------------------------------------------------------
 
-  static Logger& logm = LogManager::logger();
+extern LogStream cout;
+extern LogStream cerr;
+extern LogStream clog;
 
-#ifdef __sgi
-#define _msg char*
-#else
-#define _msg std::string
-#endif
+//-----------------------------------------------------------------------------
+void message(std::string msg);
 
-  /// Print message
-  void message(_msg msg, ...);
+//-----------------------------------------------------------------------------
+void message(char const * msg, ...);
 
-  /// Print message
-  void message(int debug_level, _msg msg, ...);
+//-----------------------------------------------------------------------------
+void message(uint n, std::string msg);
 
-#if __sgi
-  /// Print message
-  void message(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void message(uint n, char const * msg, ...);
 
-  /// Print message
-  void message(int debug_level, std::string msg, ...);
-#endif
-  /// Print warning
-  void warning(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void warning(std::string msg);
 
-  /// Print error message and throw an exception
-  void error(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void warning(char const * msg, ...);
 
-  /// Begin task (increase indentation level)
-  void begin(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void error(std::string msg);
 
-  /// Begin task (increase indentation level)
-  void begin(int debug_level,_msg msg, ...);
+//-----------------------------------------------------------------------------
+void error(char const * msg, ...);
 
-  /// End task (decrease indentation level)
-  void end();
+//-----------------------------------------------------------------------------
+void debug(std::string file, unsigned long line, std::string func, std::string msg);
 
-  /// End task (decrease indentation level) and skip a line
-  void endblock();
+//-----------------------------------------------------------------------------
+void debug(std::string file, unsigned long line, std::string func, char const * msg, ...);
 
-  /// Skip line
-  void skip();
+//-----------------------------------------------------------------------------
+void assertion(std::string file, unsigned long line, std::string func, std::string msg);
 
-  /// Write header line
-  void header(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void assertion(std::string file, unsigned long line, std::string func, char const * msg, ...);
 
-  /// Write section opening line
-  void section(std::string msg, ...);
+//-----------------------------------------------------------------------------
+void header(char const * msg, ...);
 
-  /// Write time stamp marker
-  void timestamp();
+//-----------------------------------------------------------------------------
+void begin(char const * msg, ...);
 
-  /// Print summary of timings and tasks, clearing stored timings
-  void summary();
+//-----------------------------------------------------------------------------
+void section(char const * msg, ...);
 
-  /// Return summary of timings
-  const std::map<std::string, std::pair<dolfin::uint, dolfin::real> >& timings();
+//-----------------------------------------------------------------------------
+template<typename T> inline
+void prm(char const * k, T v) { cout << std::setw(24) << k << ": " << v << "\n"; }
 
-  // Helper function for dolfin_debug macro
-  void __debug(std::string file, unsigned long line, std::string function, _msg format, ...);
+//-----------------------------------------------------------------------------
+void end();
 
-  // Helper function for dolfin_assert macro
-  void __dolfin_assert(std::string file, unsigned long line, std::string function, _msg format, ...);
+//-----------------------------------------------------------------------------
+void skip();
 
-}
+//-----------------------------------------------------------------------------
+void timing(char const * task, real t);
 
-// Debug macros (with varying number of arguments)
+//-----------------------------------------------------------------------------
+void mark(char const * msg = "");
+
+//-----------------------------------------------------------------------------
+int verbose();
+int verbose(int n);
+int silence();
+
+//-----------------------------------------------------------------------------
+
+} /* namespace dolfin */
+
+// Debug macros
 #ifdef __GNUG__
-#define dolfin_debug(msg)              do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg); } while (false)
-#define dolfin_debug1(msg, a0)         do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0); } while (false)
-#define dolfin_debug2(msg, a0, a1)     do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0, a1); } while (false)
-#define dolfin_debug3(msg, a0, a1, a2) do { dolfin::__debug(__FILE__, __LINE__, __FUNCTION__, msg, a0, a1, a2); } while (false)
+#define dolfin_debug(msg) do { dolfin::debug(__FILE__, __LINE__, __FUNCTION__, msg); } while (false)
 #else  // __FUNCTION__ is a non-standard GNU extension, disable for all other compilers
 #define dolfin_debug(msg)
-#define dolfin_debug1(msg, a0)
-#define dolfin_debug2(msg, a0, a1)
-#define dolfin_debug3(msg, a0, a1, a2)
-#endif
-
-// Assertion, only active if DEBUG is defined
-#if (DEBUG && __GNUG__)
-#define dolfin_assert(check) do { if ( !(check) ) { dolfin::__dolfin_assert(__FILE__, __LINE__, __FUNCTION__, "(" #check ")"); } } while (false)
-#elif DEBUG // __FUNCTION__ is a non-standard GNU extension, use C89 assert
-#define dolfin_assert(check) assert(check)
-#else 
-#define dolfin_assert(check)
 #endif
 
 #endif /* __DOLFIN_LOG_H */

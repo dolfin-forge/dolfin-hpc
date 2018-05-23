@@ -1,185 +1,176 @@
-// Copyright (C) 2003-2008 Anders Logg.
-// Licensed under the GNU LGPL Version 2.1.
-//
-// Thanks to Jim Tilander for many helpful hints.
-//
-// Modified by Ola Skavhaug, 2007.
-// Modified by Niclas Jansson, 2009.
-//
-// First added:  2003-03-13
-// Last changed: 2009-05-04
 
 #include <dolfin/log/log.h>
 
-#include <dolfin/common/constants.h>
-#include <dolfin/log/LogManager.h>
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <signal.h>
-#include <iomanip>
+#include <ctime>
 #include <sstream>
 
 namespace dolfin
 {
 
-// Buffers
-static char buffer[DOLFIN_LINELENGTH];
+#define simple_output(stream, pre, msg, suf) \
+  stream << pre << msg << suf;
 
-#ifdef __sgi
-#define read(buffer, msg) \
+#define format_output(stream, pre, msg, suf) \
   va_list aptr; \
   va_start(aptr, msg); \
-  vsnprintf(buffer, DOLFIN_LINELENGTH, msg, aptr); \
+  stream.format(msg, aptr, pre, suf); \
   va_end(aptr);
 
-#define read_str(buffer, msg) \
+#define nformat_output(stream, pre, msg, suf, n) \
   va_list aptr; \
   va_start(aptr, msg); \
-  vsnprintf(buffer, DOLFIN_LINELENGTH, msg.c_str(), aptr);	\
+  stream.format(msg, aptr, pre, suf, &n); \
   va_end(aptr);
-#else
-#define read(buffer, msg) \
-  va_list aptr; \
-  va_start(aptr, msg); \
-  vsnprintf(buffer, DOLFIN_LINELENGTH, msg.c_str(), aptr);	\
-  va_end(aptr);
-#endif
+
 //-----------------------------------------------------------------------------
-void message(_msg msg, ...)
+void message(std::string msg)
 {
-  read(buffer, msg);
-  LogManager::logger().message(static_cast<std::string>(buffer));
+  simple_output(cout, "", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-void message(int debug_level, _msg msg, ...)
+void message(char const * msg, ...)
 {
-  read(buffer, msg);
-  LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
+  format_output(cout, "", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-#if __sgi
-//-----------------------------------------------------------------------------
-void message(std::string msg, ...)
+void message(uint n, std::string msg)
 {
-  read_str(buffer, msg);
-  LogManager::logger().message(static_cast<std::string>(buffer));
+  if (n > cout.verbose()) return;
+  simple_output(cout, "", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-void message(int debug_level, std::string msg, ...)
+void message(uint n, char const * msg, ...)
 {
-  read_str(buffer, msg);
-  LogManager::logger().message(static_cast<std::string>(buffer), debug_level);
+  if (n > cout.verbose()) return;
+  format_output(cout, "", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-#endif
-//-----------------------------------------------------------------------------
-void warning(std::string msg, ...)
+void warning(std::string msg)
 {
-#ifndef __sgi
-  read(buffer, msg);
-#else
-  read_str(buffer, msg);
-#endif
-  LogManager::logger().warning(static_cast<std::string>(buffer));
+  simple_output(cout, "Warning: ", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-void error(std::string msg, ...)
+void warning(char const * msg, ...)
 {
-#ifndef __sgi
-  read(buffer, msg);
-#else
-  read_str(buffer, msg);
-#endif
-  LogManager::logger().error(static_cast<std::string>(buffer));
+  format_output(cout, "Warning: ", msg, "\n");
 }
+
 //-----------------------------------------------------------------------------
-void begin(std::string msg, ...)
+void error(std::string msg)
 {
-#ifndef __sgi
-  read(buffer, msg);
-#else
-  read_str(buffer, msg);
-#endif
-  LogManager::logger().begin(static_cast<std::string>(buffer));
+  simple_output(cerr, "Error  : ", msg, "\n");
+  throw std::runtime_error("runtime error");
 }
+
 //-----------------------------------------------------------------------------
-void begin(int debug_level, _msg msg, ...)
+void error(char const * msg, ...)
 {
-  read(buffer, msg);
-  LogManager::logger().begin(static_cast<std::string>(buffer), debug_level);
+  format_output(cerr, "Error  : ", msg, "\n");
+  throw std::runtime_error("runtime error");
 }
+
+//-----------------------------------------------------------------------------
+void debug(std::string file, unsigned long line, std::string func, std::string msg)
+{
+  std::ostringstream os;
+  os << " [at " << file << ":" << line << " in " << func << "()]";
+  simple_output(cout, "Debug  : ", msg, os.str().c_str());
+}
+
+//-----------------------------------------------------------------------------
+void debug(std::string file, unsigned long line, std::string func, char const * msg, ...)
+{
+  std::ostringstream os;
+  os << " [at " << file << ":" << line << " in " << func << "()]";
+  format_output(cout, "Debug  : ", msg, os.str().c_str());
+}
+
+//-----------------------------------------------------------------------------
+void assertion(std::string file, unsigned long line, std::string func, std::string msg)
+{
+  std::ostringstream os;
+  os << " [at " << file << ":" << line << " in " << func << "()]";
+  simple_output(cerr, "Assert : ", msg, os.str().c_str());
+}
+
+//-----------------------------------------------------------------------------
+void assertion(std::string file, unsigned long line, std::string func, char const * msg, ...)
+{
+  std::ostringstream os;
+  os << " [at " << file << ":" << line << " in " << func << "()]";
+  format_output(cerr, "Assert : ", msg, os.str().c_str());
+}
+
+//-----------------------------------------------------------------------------
+void header(char const * msg, ...)
+{
+  format_output(cout, "******** ", msg, "\n");
+}
+
+//-----------------------------------------------------------------------------
+void begin(char const * msg, ...)
+{
+  format_output(cout, "", msg, "\n"); ++cout;
+}
+
 //-----------------------------------------------------------------------------
 void end()
 {
-  LogManager::logger().end();
+  --cout;
 }
+
 //-----------------------------------------------------------------------------
-void endblock()
+void section(char const * msg, ...)
 {
-  LogManager::logger().end();
-  LogManager::logger().skip();
+  size_t n;
+  nformat_output(cout, "", msg, "\n", n);
+  message("%u", n);
+  //cout.nputc(n - 1, '-');
+  cout << "\n";
+  ++cout;
 }
+
 //-----------------------------------------------------------------------------
 void skip()
 {
-  LogManager::logger().skip();
+  cout << "\n";
 }
+
 //-----------------------------------------------------------------------------
-void header(std::string msg, ...)
+void timing(char const * task, real t)
 {
-#ifndef __sgi
-  read(buffer, msg);
-#else
-  read_str(buffer, msg);
-#endif
-  LogManager::logger().message("**** "+static_cast<std::string>(buffer));
+  cout << "Elapsed time: " << t << " (" << task << ")\n";
 }
+
 //-----------------------------------------------------------------------------
-void section(std::string msg, ...)
+void mark(char const * msg)
 {
-  skip();
-  message(msg);
-  std::stringstream ss;
-  ss << std::setw(msg.size()) << std::setfill('-') << "-" << std::endl;
-  begin(ss.str());
+  message("[%9u] %s", std::time(NULL), msg);
 }
+
 //-----------------------------------------------------------------------------
-void timestamp()
+int verbose()
 {
-  message("[%ul]", time(NULL));
+  return cout.verbose();
 }
+
 //-----------------------------------------------------------------------------
-void summary()
+int verbose(int n)
 {
-  LogManager::logger().summary();
+  return cout.verbose(n);
 }
+
 //-----------------------------------------------------------------------------
-const std::map<std::string, std::pair<uint, real> >& timings()
+int silence()
 {
-  return LogManager::logger().timings();
+  return cout.silence();
 }
-//-----------------------------------------------------------------------------
-void __debug(std::string file, unsigned long line,
-             std::string function, _msg format, ...)
-{
-  read(buffer, format);
-  std::ostringstream ost;
-  ost << file << ":" << line << " in " << function << "()";
-  std::string msg = std::string(buffer) + " [at " + ost.str() + "]";
-  LogManager::logger().__debug(msg);
-}
-//-----------------------------------------------------------------------------
-void __dolfin_assert(std::string file, unsigned long line,
-                     std::string function, _msg format, ...)
-{
-  read(buffer, format);
-  std::ostringstream ost;
-  ost << file << ":" << line << " in " << function << "()";
-  std::string msg = std::string(buffer) + " [at " + ost.str() + "]";
-  LogManager::logger().__assert(msg);
-}
+
 //-----------------------------------------------------------------------------
 
 } /* namespace dolfin */
-

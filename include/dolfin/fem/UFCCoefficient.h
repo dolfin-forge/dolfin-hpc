@@ -101,8 +101,8 @@ public:
     section("ValueSpace");
     message("rank       : %u", this->rank());
     message("value size : %u", this->value_size());
-    endblock();
-    endblock();
+    end();
+    end();
   }
 
   /// Synchronize

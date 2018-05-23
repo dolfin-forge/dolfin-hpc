@@ -89,7 +89,7 @@ public:
   {
     section("EuclideanSpace");
     message("dimension : %u", dim_);
-    endblock();
+    end();
   }
 
 private:

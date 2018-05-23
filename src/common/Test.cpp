@@ -9,7 +9,6 @@
 #include <dolfin/common/timing.h>
 #include <dolfin/common/system.h>
 #include <dolfin/log/log.h>
-#include <dolfin/log/LogManager.h>
 #include <dolfin/main/init.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/parameter/parameters.h>
@@ -61,7 +60,7 @@ void Test::init(int argc, char *argv[])
         break;
       case 'd':
         args.debug_level = std::atoi(optarg);
-        LogManager::logger().setDebugLevel(args.debug_level);
+        verbose(args.debug_level);
         break;
       case 'm':
         args.mesh_file = optarg;
@@ -113,7 +112,7 @@ void Test::end()
   }
   btest_ = false;
   real elapsed_time = toc();
-  cout << "Elapsed time: " << elapsed_time << " seconds" << endl;
+  cout << "Elapsed time: " << elapsed_time << " seconds\n";
   timings_.back().second = elapsed_time;
   total_ += elapsed_time;
   skip();
@@ -122,7 +121,7 @@ void Test::end()
 //-----------------------------------------------------------------------------
 Test::~Test()
 {
-  cout << "Total time: " << total_ << " seconds" << endl;
+  cout << "Total time: " << total_ << " seconds\n";
   if(!dir_.empty())
   {
     popd();

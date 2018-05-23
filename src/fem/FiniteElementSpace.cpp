@@ -187,16 +187,10 @@ Array<FiniteElementSpace *> FiniteElementSpace::flatten() const
 //-----------------------------------------------------------------------------
 void FiniteElementSpace::disp() const
 {
-  cout << "FiniteElementSpace" << endl;
-  cout << "------------------" << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Finite element        : " << this->element().signature() << endl;
-  cout << "Dof map               : " << this->dofmap().signature() << endl;
-  // End indentation
+  section("FiniteElementSpace");
+  prm("Finite element", this->element().signature());
+  prm("Dof map"       , this->dofmap().signature());
   end();
-  skip();
 }
 
 //-----------------------------------------------------------------------------

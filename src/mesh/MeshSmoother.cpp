@@ -175,7 +175,7 @@ void MeshSmoother::submesh(Mesh& sub,
         int id = old2new_vertex(n->index());
         if (id == -1)
         {
-          cout << "broken: " << n->index() << endl;
+          cout << "broken: " << n->index() << "\n";
         }
         cell_vertices[cv_idx++] = id;
       }

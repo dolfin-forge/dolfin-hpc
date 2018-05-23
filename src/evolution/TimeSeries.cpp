@@ -181,36 +181,13 @@ std::pair<real, real> TimeSeries::sampling_interval() const
 //-----------------------------------------------------------------------------
 void TimeSeries::disp() const
 {
-  cout << "TimeSeries" << endl;
-  cout << "----------" << endl;
-
-  // Begin indentation
-  begin("");
-  cout << "Time interval          : [ " << timespan_.first << ", "
-       << timespan_.second << " ]" << endl;
-  cout << "Data time span         : [ " << data_timespan_.first << ", "
-       << data_timespan_.second << " ]" << endl;
-  cout << "Value size             : " << value_size_ << endl;
-  cout << "Number of samples      : " << this->num_samples() << endl;
-  if (!discrete_times_.empty())
-  {
-    begin("List of discrete times : ");
-    for (std::map<real, uint>::const_iterator it = discrete_times_.begin();
-        it != discrete_times_.end(); ++it)
-    {
-      cout << it->second << "\t:  t = " << static_cast<real>(it->first);
-      for (uint i = 0; i < value_size_; ++i)
-      {
-        cout << "\t"
-             << static_cast<real>(data_values_[it->second * value_size_ + i]);
-      }
-      cout << endl;
-    }
-    end();
-  }
-  // End indentation
+  section("TimeSeries");
+  prm("Time interval"     , timespan_);
+  prm("Data time span"    , data_timespan_);
+  prm("Value size"        , value_size_);
+  prm("Number of samples" , data_timespan_);
+  prm("Data time span"    , num_samples());
   end();
-  skip();
 }
 
 //-----------------------------------------------------------------------------

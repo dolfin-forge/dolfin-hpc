@@ -28,10 +28,10 @@ RadauQuadrature::RadauQuadrature(unsigned int n) : GaussianQuadrature(n)
 void RadauQuadrature::disp() const
 {
   cout << "Radau quadrature points and weights on [-1,1] for n = " 
-       << n << ":" << endl;
+       << n << ":\n";
 
-  cout << " i    points                   weights" << endl;
-  cout << "-----------------------------------------------------" << endl;
+  cout << " i    points                   weights\n";
+  cout << "-----------------------------------------------------\n";
 
   for (unsigned int i = 0; i < n; i++)
     message("%2d   %.16e   %.16e", i, points[i], weights[i]);

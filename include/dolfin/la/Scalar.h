@@ -89,7 +89,7 @@ namespace dolfin
 
     /// Display tensor
     void disp(uint precision=2) const
-    { cout << "Scalar value: " << value << endl; }
+    { prm("Scalar value", value); }
 
     //--- Scalar interface ---
 

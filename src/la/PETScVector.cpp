@@ -419,7 +419,7 @@ void PETScVector::disp(uint precision) const
   {
     VecView(x_, PETSC_VIEWER_STDOUT_SELF);
   }
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 Vec PETScVector::vec() const

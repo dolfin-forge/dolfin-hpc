@@ -302,35 +302,17 @@ bool FiniteElement::is_vectorizable() const
 //-----------------------------------------------------------------------------
 void FiniteElement::disp() const
 {
-  cout << "FiniteElement" << endl;
-  cout << "-------------" << endl;
-
-  // Begin indentation
-  begin("");
-
-  // Display UFC finite_element information
-  cout << "ufc::finite_element info" << endl;
-  cout << "------------------------" << endl;
-  begin("");
-  cout << "Signature             : " << ufc_finite_element_->signature()
-       << endl;
-  cout << "Cell shape            : " << ufc_finite_element_->cell_shape()
-       << endl;
-  cout << "Topological dimension : "
-       << ufc_finite_element_->topological_dimension() << endl;
-  cout << "Geometric dimension   : "
-       << ufc_finite_element_->geometric_dimension() << endl;
-  cout << "Space dimension       : " << ufc_finite_element_->space_dimension()
-       << endl;
-  cout << "Value rank            : " << ufc_finite_element_->value_rank()
-       << endl;
-  cout << "Value dimension       : " << ufc_finite_element_->value_dimension(0)
-       << endl;
-  cout << "Nb of sub elements    : " << ufc_finite_element_->num_sub_elements()
-       << endl;
-  cout << endl;
+  section("FiniteElement");
+  begin("ufc::finite_element info");
+  prm("Signature"             , ufc_finite_element_->signature());
+  prm("Cell shape"            , ufc_finite_element_->cell_shape());
+  prm("Topological dimension" , ufc_finite_element_->topological_dimension());
+  prm("Geometric dimension"   , ufc_finite_element_->geometric_dimension());
+  prm("Space dimension"       , ufc_finite_element_->space_dimension());
+  prm("Value rank"            , ufc_finite_element_->value_rank());
+  prm("Value dimension"       , ufc_finite_element_->value_dimension(0));
+  prm("Nb of sub elements"    , ufc_finite_element_->num_sub_elements());
   end();
-
   end();
 }
 

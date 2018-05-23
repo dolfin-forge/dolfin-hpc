@@ -125,7 +125,7 @@ void Time::disp() const
   message("measure   : %f", this->measure());
   message("elapsed   : %f", this->elapsed());
   message("remaining : %f", this->remaining());
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 

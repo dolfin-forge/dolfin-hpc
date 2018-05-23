@@ -134,7 +134,7 @@ void SubSystemsManager::disp() const
   message("      - JANPACK  %u", iset(janpack));
   message("      - Zoltan   %u", iset(zoltan));
   message("      - SLEPc    %u", iset(slepc));
-  endblock();
+  end();
 }
 //-----------------------------------------------------------------------------
 bool SubSystemsManager::MPI::init(int argc, char* argv[], uint n)

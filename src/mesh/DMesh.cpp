@@ -340,7 +340,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
         bc_dvs[mv->glb_id] = mv;
         dolfin_assert(ref_edge.find(key) != ref_edge.end());
       }
-      message("%10u, %10u: %u", v0->glb_id, v1->glb_id, mv->shared);
     }
   }
   else

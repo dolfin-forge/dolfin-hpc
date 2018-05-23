@@ -1,3 +1,6 @@
+// Copyright (C) 2018 Aurelien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
 #ifndef __DOLFIN_LOG_H
 #define __DOLFIN_LOG_H
 

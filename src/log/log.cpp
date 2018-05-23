@@ -1,4 +1,6 @@
-
+// Copyright (C) 2018 Aurelien Larcher
+// Licensed under the GNU LGPL Version 2.1.
+//
 #include <dolfin/log/log.h>
 
 #include <ctime>
@@ -129,8 +131,7 @@ void section(char const * msg, ...)
 {
   size_t n;
   nformat_output(cout, "", msg, "\n", n);
-  message("%u", n);
-  //cout.nputc(n - 1, '-');
+  cout.nputc(n - 1, '-');
   cout << "\n";
   ++cout;
 }

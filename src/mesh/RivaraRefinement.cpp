@@ -18,8 +18,6 @@
 #include <dolfin/mesh/RivaraRefinement.h>
 #include <dolfin/parameter/parameters.h>
 #include <dolfin/mesh/DMesh.h>
-#include <dolfin/mesh/DVertex.h>
-#include <dolfin/mesh/DCell.h>
 
 namespace dolfin
 {

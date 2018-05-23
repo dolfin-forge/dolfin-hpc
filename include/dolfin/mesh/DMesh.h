@@ -48,6 +48,14 @@ public:
   /// Destructor
   ~DMesh();
 
+  /// Export to a regular mesh
+  void exp(Mesh& mesh);
+
+  /// Bisect marked cells
+  void bisectMarked(MeshValues<bool, Cell> const& marked_ids);
+
+private:
+
   /// Edge data structure for propagation
   typedef struct __edge__
   {
@@ -59,6 +67,18 @@ public:
 
   /// Pair datatype for propagation
   typedef std::pair<uint, prop_edge> Propagation;
+
+  /// Erase removed entities from datastructures
+  ///
+  /// removeVertex() and removeCell() only mark entitites for deletion but are
+  /// not actually erased
+  void eraseRemovedEntities();
+
+  /// Find Vertex by its local id
+  DVertex* getVertex(int local_id);
+
+  /// Find Cell by its local id
+  DCell* getCell(int local_id);
 
   /// Add a new vertex
   void add_vertex(DVertex* v);
@@ -75,21 +95,6 @@ public:
   ///
   /// Entity is just marked as deleted, but not yet erased
   void removeCell(DCell* c);
-
-  /// Erase removed entities from datastructures
-  ///
-  /// removeVertex() and removeCell() only mark entitites for deletion but are
-  /// not actually erased
-  void eraseRemovedEntities();
-
-  /// Find Vertex by its local id
-  DVertex* getVertex(int local_id);
-
-  /// Find Cell by its local id
-  DCell* getCell(int local_id);
-
-  /// Export to a regular mesh
-  void exp(Mesh& mesh);
 
   /// Export to a regular mesh but keep numbering in the DMesh
   ///
@@ -110,9 +115,6 @@ public:
   /// The edge for the bisection is given by hv0 and hv1 and hangv is the
   /// hanging node of the opposite cell
   void bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1);
-
-  /// Bisect marked cells
-  void bisectMarked(MeshValues<bool, Cell> const& marked_ids);
 
   /// Get opposite cell with respect to vertices v1 and v2
   DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
@@ -169,8 +171,6 @@ public:
     }
   };
 
-private:
-
   /// Mesh
   Mesh& mesh_;
 
@@ -190,6 +190,8 @@ private:
   /// enumeration salt for bisect
   uint salt_;
 
-};}
+};
+
+} /* namespace dolfin */
 
 #endif

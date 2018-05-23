@@ -6,9 +6,7 @@ libdolfin_mesh_la_SOURCES = \
 			Box.cpp\
 			Cell.cpp\
 			CellType.cpp\
-			DCell.cpp\
 			DMesh.cpp\
-			DVertex.cpp\
 			Edge.cpp\
 			EquiAffineMapping.cpp\
 			EuclideanBasis.cpp\

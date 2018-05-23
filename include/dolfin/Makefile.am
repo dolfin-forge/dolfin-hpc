@@ -172,10 +172,8 @@ nobase_pkginclude_HEADERS = \
 				mesh/Cell.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
-				mesh/DCell.h\
 				mesh/DMesh.h\
 				mesh/DomainBoundary.h\
-				mesh/DVertex.h\
 				mesh/Edge.h\
 				mesh/EdgeKey.h\
 				mesh/EntityKey.h\

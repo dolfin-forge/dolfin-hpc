@@ -14,13 +14,120 @@
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/MeshValues.h>
 #include <dolfin/mesh/Vertex.h>
-#include <dolfin/mesh/DVertex.h>
-#include <dolfin/mesh/DCell.h>
 
 #include <algorithm>
 #include <cstring>
 
-using namespace dolfin;
+namespace dolfin
+{
+
+//-----------------------------------------------------------------------------
+struct DCell
+{
+
+  DCell() :
+      id(0),
+      parent_id(0),
+      vertices(0),
+      deleted(false),
+      nref(0)
+  {
+  }
+
+  DCell(Cell const& c) :
+      id(c.index()),
+      parent_id(0),
+      vertices(0),
+      deleted(false),
+      nref(0)
+  {
+  }
+
+  bool has_edge(DVertex *v1, DVertex *v2)
+  {
+    uint found = 0;
+    for ( std::vector<DVertex*>::iterator it = vertices.begin() ;
+          it != vertices.end(); ++it )
+      if ( *it == v1 || *it == v2 )
+        found++;
+    return (found == 2);
+  }
+
+  /// Local index of cell
+  int id;
+
+  /// Index of parent cell
+  int parent_id;
+
+  /// List of vertices spaning the cell
+  std::vector<DVertex *> vertices;
+
+  /// Marker for deletion
+  bool deleted;
+
+  /// reference number to be used for identification in bisect
+  int nref;
+};
+//-----------------------------------------------------------------------------
+struct DVertex
+{
+  static uint const UNDEF = DOLFIN_UINT_MAX;
+
+  DVertex() :
+      id(UNDEF),
+      glb_id(UNDEF),
+      cells(),
+      p(),
+      deleted(false),
+      shared(false),
+      ghosted(false),
+      owner(UNDEF)
+  {
+  }
+
+  DVertex(Vertex const& v) :
+      id(v.index()),
+      glb_id(v.global_index()),
+      cells(0),
+      p(v.point()),
+      deleted(false),
+      shared(v.is_shared()),
+      ghosted(v.is_ghost()),
+      owner(v.owner())
+  {
+    if (this->shared)
+    {
+      this->shared_adj = v.mesh().distdata()[0].get_shared_adj(id);
+    }
+  }
+
+  /// Local index of vertex
+  uint id;
+
+  /// Global index of vertex
+  uint glb_id;
+
+  /// List of cells containing the vertex
+  std::list<DCell *> cells;
+
+  /// Vertex coordinates as Point object
+  Point p;
+
+  /// Marker for deletion
+  bool deleted;
+
+  /// Indicator if vertex is shared
+  bool shared;
+
+  /// Indicator if vertex is ghosted
+  bool ghosted;
+
+  /// Rank of owning process
+  uint owner;
+
+  /// Adjacent processes for boundary vertices
+  _set<uint> shared_adj;
+};
 //-----------------------------------------------------------------------------
 /// Helper class
 struct CheckId
@@ -759,3 +866,6 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, bool& empt
 }
 //-----------------------------------------------------------------------------
 #endif
+
+} /* namespace dolfin */
+

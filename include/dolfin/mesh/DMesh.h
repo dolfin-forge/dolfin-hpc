@@ -74,12 +74,6 @@ private:
   /// not actually erased
   void eraseRemovedEntities();
 
-  /// Find Vertex by its local id
-  DVertex* getVertex(int local_id);
-
-  /// Find Cell by its local id
-  DCell* getCell(int local_id);
-
   /// Add a new vertex
   void add_vertex(DVertex* v);
 

@@ -129,18 +129,6 @@ struct DVertex
   _set<uint> shared_adj;
 };
 //-----------------------------------------------------------------------------
-/// Helper class
-struct CheckId
-{
-  explicit CheckId(int id_) : id(id_) {}
-  bool operator()(DVertex const * const v) const { return (id == v->id); }
-  bool operator()(DCell   const * const c) const { return (id == c->id); }
-
-private:
-
-  int const id;
-};
-//-----------------------------------------------------------------------------
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
@@ -493,22 +481,6 @@ void DMesh::eraseRemovedEntities()
   {
     if ((*it)->deleted) { delete (*it); vertices.erase(it); }
   }
-}
-//-----------------------------------------------------------------------------
-DVertex* DMesh::getVertex(int local_id)
-{
-  std::set<DVertex *>::const_iterator it =
-      std::find_if(vertices.begin(), vertices.end(), CheckId(local_id));
-
-  return (it != vertices.end() ? *it : NULL);
-}
-//-----------------------------------------------------------------------------
-DCell* DMesh::getCell(int local_id)
-{
-  std::list<DCell *>::const_iterator it =
-      std::find_if(cells.begin(), cells.end(), CheckId(local_id));
-
-  return (it != cells.end() ? *it : NULL);
 }
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)

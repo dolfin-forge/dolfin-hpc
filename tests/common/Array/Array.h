@@ -28,11 +28,7 @@ DOLFIN_START_TEST( test_Array )
       ck_assert(C.size() == 2);
       ck_assert(*(C.ptr()) == C[0]);
       ck_assert(*(C.ptr() + 1) == C[1]);
-      uint const * c = C.ptr();
-      for (uint i = 0; i < 2; ++i)
-      {
-        message("%u", *(c++));
-      }
+      C.dump();
     }
     //---
     {
@@ -44,11 +40,7 @@ DOLFIN_START_TEST( test_Array )
       ck_assert(D.size() == 2);
       ck_assert(*(D.ptr()) == D[0]);
       ck_assert(*(D.ptr() + 1) == D[1]);
-      uint const * d = D.ptr();
-      for (uint i = 0; i < 2; ++i)
-      {
-        message("%u", *(d++));
-      }
+      D.dump();
     }
   }
 DOLFIN_END_TEST

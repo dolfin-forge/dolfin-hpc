@@ -12,6 +12,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/log/log.h>
+#include <dolfin/log/LogStream.h>
 
 #include <algorithm>
 #include <iostream>
@@ -204,6 +205,16 @@ public:
       std::copy(src, src + n, dst);
     }
     return dst;
+  }
+
+  /// Dump data on the output
+  void dump() const
+  {
+    for (typename Array<T>::const_iterator e = this->begin(); e != this->end();
+         ++e)
+    {
+      cout << *e << "\n";
+    }
   }
 
 private:

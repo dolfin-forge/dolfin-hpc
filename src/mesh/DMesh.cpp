@@ -292,7 +292,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 
   // Find longest edge
   real lmax = 0.0;
-  int ptmax = 0;
   DVertex * v0 = NULL;
   DVertex * v1 = NULL;
   DVertex ** const vb = &dcell->vertices[0];
@@ -303,14 +302,11 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       real const l = (*vi)->p.dist((*vj)->p);
       if (l +  DOLFIN_EPS < lmax) { continue; }
-
-      int const ptsum = ((*vi)->glb_id) + ((*vj)->glb_id);
-      if ((l > lmax + DOLFIN_EPS) || (ptsum > ptmax))
+      if ((l > lmax + DOLFIN_EPS))
       {
         v0 = *vi;
         v1 = *vj;
         lmax = l;
-        ptmax = ptsum;
       }
     }
   }
@@ -371,7 +367,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
       mv->owner = MPI::rank();
       ref_edge[edge_key(v0->glb_id, v1->glb_id)] = mv;
     }
-
     closing = false;
   }
 
@@ -458,6 +453,7 @@ void DMesh::add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id)
   }
 
   cells.push_back(c);
+  c->id = cells.size();
   c->parent_id = parent_id;
 }
 //-----------------------------------------------------------------------------

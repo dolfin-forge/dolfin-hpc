@@ -418,13 +418,7 @@ Connectivity const * MeshTopology::intersection(uint d0, uint di, uint d1) const
           if (contains(c0, d0, (*c1v)(c1[j]), d1)) { entities.insert(c1[j]); }
         }
       }
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
       conn[e0].assign(entities.begin(), entities.end());
-#else
-      conn[e0].erase(conn[e0].begin(), conn[e0].end());
-      std::copy(entities.begin(), entities.end(),
-		std::back_inserter(conn[e0]));
-#endif
     }
     Connectivity * c01 = new Connectivity(conn);
     dolfin_assert(c01->order() == o0v);
@@ -446,13 +440,7 @@ Connectivity const * MeshTopology::intersection(uint d0, uint di, uint d1) const
           if (e0 != c1[j]) { entities.insert(c1[j]); }
         }
       }
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
       conn[e0].assign(entities.begin(), entities.end());
-#else
-      conn[e0].erase(conn[e0].begin(), conn[e0].end());
-      std::copy(entities.begin(), entities.end(),
-		std::back_inserter(conn[e0]));
-#endif
     }
     Connectivity * c01 = new Connectivity(conn);
     dolfin_assert(c01->order() == o0v);

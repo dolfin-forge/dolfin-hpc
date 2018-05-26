@@ -137,7 +137,7 @@ private:
   std::list<DCell *> cells;
 
   /// Propagation buffer
-  std::vector<Propagation> propagate;
+  Array<Propagation> propagate;
 
   /// Map between global number of boundary vertex to vertex
   typedef _map<uint, DVertex*> BoundaryVertices;

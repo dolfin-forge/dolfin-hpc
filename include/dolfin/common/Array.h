@@ -128,6 +128,17 @@ public:
 #endif
   }
 
+  /// Support missing assign() in SUN Studio
+#ifndef _RWSTD_NO_MEMBER_TEMPLATES
+  template<class Iterator>
+  inline void assign(Iterator begin, Iterator end)
+  {
+    std::vector<T>::erase(this->begin(), this->end());
+    std::copy(begin, end, std::back_inserter(*this));
+  }
+#endif
+
+
   /// Workaround defect in C++98: taking the address of the
   /// array of an empty std::vector is not allowed but it is often used in
   /// the code when dealing with MPI calls.

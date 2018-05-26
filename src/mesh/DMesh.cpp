@@ -493,7 +493,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     }
   }
 
-  std::vector<Propagation> propagated;
+  Array<Propagation> propagated;
   std::list<Propagation> leftovers;
 
   bool empty = !marked_ids.mesh().is_distributed();
@@ -583,13 +583,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       }
     }
 
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
     propagated.assign(leftovers.begin(), leftovers.end());
-#else
-    propagated.erase(propagated.begin(), propagated.end());
-    std::copy(leftovers.begin(), leftovers.end(), 
-	      std::back_inserter(propagated));
-#endif
     leftovers.clear();
 
     if (pe_rank == 0) end();

@@ -486,9 +486,11 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
   uint const pe_rank = PE::rank();
 
+  uint const numcells = cells.size();
   for (CellList::iterator it = cells.begin(); it != cells.end(); ++it)
   {
-    if (marked_ids((*it)->id) && !(*it)->deleted)
+    if ((*it)->id >= numcells) break;
+    if (!(*it)->deleted && (marked_ids((*it)->id)))
     {
       bisect((*it), NULL, NULL, NULL);
     }
@@ -664,12 +666,10 @@ void DMesh::propagate_naive(Array<Propagation>& propagated, bool& empty)
 void DMesh::propagate_hypercube(Array<Propagation>& propagated,
                                 bool& empty)
 {
-
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int total_prop, recv_count;
-  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INTEGER, MPI_SUM,
-                MPI::DOLFIN_COMM);
+  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INTEGER, MPI_SUM, MPI::DOLFIN_COMM);
 
   int *recv_buff = new int[total_prop];
   int *state = new int[total_prop];

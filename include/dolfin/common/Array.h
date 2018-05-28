@@ -129,7 +129,7 @@ public:
   }
 
   /// Support missing assign() in SUN Studio
-#ifndef _RWSTD_NO_MEMBER_TEMPLATES
+#ifdef _RWSTD_NO_MEMBER_TEMPLATES
   template<class Iterator>
   inline void assign(Iterator begin, Iterator end)
   {

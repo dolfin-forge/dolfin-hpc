@@ -106,27 +106,13 @@ private:
   DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
   /// Propagate refinement
-  ///
-  /// TODO: what are the arguments???
-  inline void propagate_refinement(Array<Propagation>& propagated,
-                                   bool& empty)
-  {
-    if (PE::size() == 1) return;
-    if (PE::size() & (PE::size() - 1))
-    {
-      propagate_naive(propagated, empty);
-    }
-    else
-    {
-      propagate_hypercube(propagated, empty);
-    }
-  }
+  void propagate_refinement(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
 
   /// Naive refinement propagation with pairwise communication
-  void propagate_naive(Array<Propagation>& propagated, bool& empty);
+  void propagate_naive(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
 
   /// Refinement propagation within hypercube
-  void propagate_hypercube(Array<Propagation>& propagated, bool& empty);
+  void propagate_hypercube(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
 
   /// Vertices contained in the mesh
   typedef std::set<DVertex *> VertexSet;

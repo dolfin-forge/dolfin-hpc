@@ -451,8 +451,8 @@ void DMesh::add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id)
   {
     (*it)->cells.push_back(c);
   }
-  cells.push_back(c);
   c->id = cells.size();
+  cells.push_back(c);
   c->parent_id = parent_id;
 }
 //-----------------------------------------------------------------------------

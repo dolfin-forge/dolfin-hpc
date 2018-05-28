@@ -108,7 +108,7 @@ private:
   /// Propagate refinement
   ///
   /// TODO: what are the arguments???
-  inline void propagate_refinement(std::vector<Propagation>& propagated,
+  inline void propagate_refinement(Array<Propagation>& propagated,
                                    bool& empty)
   {
     if (PE::size() == 1) return;
@@ -123,10 +123,10 @@ private:
   }
 
   /// Naive refinement propagation with pairwise communication
-  void propagate_naive(std::vector<Propagation>& propagated, bool& empty);
+  void propagate_naive(Array<Propagation>& propagated, bool& empty);
 
   /// Refinement propagation within hypercube
-  void propagate_hypercube(std::vector<Propagation>& propagated, bool& empty);
+  void propagate_hypercube(Array<Propagation>& propagated, bool& empty);
 
   /// Vertices contained in the mesh
   typedef std::set<DVertex *> VertexSet;
@@ -134,10 +134,10 @@ private:
 
   /// Cells contained in the mesh
   typedef std::list<DCell *> CellList;
-  std::list<DCell *> cells;
+  CellList cells;
 
   /// Propagation buffer
-  std::vector<Propagation> propagate;
+  Array<Propagation> propagate;
 
   /// Map between global number of boundary vertex to vertex
   typedef _map<uint, DVertex*> BoundaryVertices;

@@ -425,7 +425,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 //-----------------------------------------------------------------------------
 DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
-  for (CellList::iterator c = v1->cells.begin(); c != v1->cells.end(); ++c)
+  for (std::list<DCell *>::iterator c = v1->cells.begin(); c != v1->cells.end();
+       ++c)
   {
     if ((*c) == dcell || (*c)->deleted) continue;
 
@@ -468,7 +469,7 @@ void DMesh::removeVertex(DVertex* v)
 void DMesh::eraseRemovedEntities()
 {
   // Remove deleted cells from global list
-  for (std::list<DCell *>::iterator it(cells.begin()); it != cells.end();)
+  for (CellList::iterator it(cells.begin()); it != cells.end();)
   {
     if ((*it)->deleted) { delete (*it); it = cells.erase(it); } else ++it;
   }
@@ -493,7 +494,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     }
   }
 
-  std::vector<Propagation> propagated;
+  Array<Propagation> propagated;
   std::list<Propagation> leftovers;
 
   bool empty = !marked_ids.mesh().is_distributed();
@@ -511,7 +512,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
     if (empty && propagated.size() == 0) break;
     propagate.clear();
 
-    for (std::vector<Propagation>::iterator it = propagated.begin();
+    for (Array<Propagation>::iterator it = propagated.begin();
         it != propagated.end(); ++it)
     {
 
@@ -541,7 +542,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       DVertex* const v1 = v1it->second;
       DVertex* const v2 = v2it->second;
 
-      for (CellList::iterator ic = v1->cells.begin(); ic != v1->cells.end();
+      for (std::list<DCell *>::iterator ic = v1->cells.begin(); ic != v1->cells.end();
            ++ic)
       {
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
@@ -593,7 +594,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Array<Propagation>& propagated, bool& empty)
 {
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
@@ -605,7 +606,7 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
   int *send_buff = new int[num_prop];
   int *sp = &send_buff[0];
 
-  for (std::vector<Propagation>::iterator it = propagate.begin();
+  for (Array<Propagation>::iterator it = propagate.begin();
        it != propagate.end(); ++it)
   {
     *(sp++) = it->first;
@@ -660,7 +661,7 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
   delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
+void DMesh::propagate_hypercube(Array<Propagation>& propagated,
                                 bool& empty)
 {
 
@@ -675,7 +676,7 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   int *sp = &state[0];
   uint state_size = 0;
 
-  for (std::vector<Propagation>::iterator it = propagate.begin();
+  for (Array<Propagation>::iterator it = propagate.begin();
       it != propagate.end(); ++it)
   {
     *(sp++) = it->first;
@@ -738,12 +739,12 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }

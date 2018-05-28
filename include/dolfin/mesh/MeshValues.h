@@ -103,6 +103,7 @@ struct MeshValues : public MeshFunction<T>
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);
+    dolfin_assert(entity.index() < this->size_);
     return this->values_[entity.index() * N + i];
   }
 
@@ -111,6 +112,7 @@ struct MeshValues : public MeshFunction<T>
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);
+    dolfin_assert(entity.index() < this->size_);
     return this->values_[entity.index() * N + i];
   }
 
@@ -118,6 +120,7 @@ struct MeshValues : public MeshFunction<T>
   inline T& operator()(uint index, uint i = 0)
   {
     dolfin_assert(this->values_);
+    dolfin_assert(index < this->size_);
     return this->values_[index * N + i];
   }
 
@@ -125,6 +128,7 @@ struct MeshValues : public MeshFunction<T>
   inline T const& operator()(uint index, uint i = 0) const
   {
     dolfin_assert(this->values_);
+    dolfin_assert(index < this->size_);
     return this->values_[index * N + i];
   }
 
@@ -135,6 +139,7 @@ struct MeshValues : public MeshFunction<T>
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);
+    dolfin_assert(entity.index() < this->size_);
     return this->values_ + entity.index() * N;
   }
 
@@ -143,6 +148,7 @@ struct MeshValues : public MeshFunction<T>
   {
     dolfin_assert(this->values_);
     dolfin_assert(&entity.mesh() == this->mesh_);
+    dolfin_assert(entity.index() < this->size_);
     return this->values_ + entity.index() * N;
   }
 
@@ -150,6 +156,7 @@ struct MeshValues : public MeshFunction<T>
   inline T * operator[](uint index)
   {
     dolfin_assert(this->values_);
+    dolfin_assert(index < this->size_);
     return this->values_ + index * N;
   }
 
@@ -157,6 +164,7 @@ struct MeshValues : public MeshFunction<T>
   inline T const * operator[](uint index) const
   {
     dolfin_assert(this->values_);
+    dolfin_assert(index < this->size_);
     return this->values_ + index * N;
   }
 

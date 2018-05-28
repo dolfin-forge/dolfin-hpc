@@ -290,7 +290,6 @@ void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
 //-----------------------------------------------------------------------------
 void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 {
-  uint const pe_rank = PE::rank();
   bool closing = false;
 
   // Find longest edge
@@ -304,7 +303,6 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     for (DVertex ** vj = vi + 1; vj != ve; ++vj)
     {
       real const l = (*vi)->p.dist((*vj)->p);
-      if (l +  DOLFIN_EPS < lmax) { continue; }
       if ((l > lmax + DOLFIN_EPS))
       {
         v0 = *vi;
@@ -368,7 +366,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
         node.mv = mv->glb_id;
         node.v1 = v0->glb_id;
         node.v2 = v1->glb_id;
-        node.owner = pe_rank;
+        node.owner = mesh_.topology().comm_rank();
         std::pair<uint, prop_edge> _prop_(dcell->nref, node);
         propagate.push_back(_prop_);
         dcell->nref++;
@@ -425,7 +423,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 //-----------------------------------------------------------------------------
 DCell* DMesh::opposite(DCell* dcell, DVertex* v1, DVertex* v2)
 {
-  for (CellList::iterator c = v1->cells.begin(); c != v1->cells.end(); ++c)
+  for (std::list<DCell *>::iterator c = v1->cells.begin(); c != v1->cells.end();
+       ++c)
   {
     if ((*c) == dcell || (*c)->deleted) continue;
 
@@ -450,8 +449,8 @@ void DMesh::add_cell(DCell* c, std::vector<DVertex*> vs, int parent_id)
   {
     (*it)->cells.push_back(c);
   }
-  cells.push_back(c);
   c->id = cells.size();
+  cells.push_back(c);
   c->parent_id = parent_id;
 }
 //-----------------------------------------------------------------------------
@@ -468,7 +467,7 @@ void DMesh::removeVertex(DVertex* v)
 void DMesh::eraseRemovedEntities()
 {
   // Remove deleted cells from global list
-  for (std::list<DCell *>::iterator it(cells.begin()); it != cells.end();)
+  for (CellList::iterator it(cells.begin()); it != cells.end();)
   {
     if ((*it)->deleted) { delete (*it); it = cells.erase(it); } else ++it;
   }
@@ -483,17 +482,19 @@ void DMesh::eraseRemovedEntities()
 //-----------------------------------------------------------------------------
 void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 {
-  uint const pe_rank = PE::rank();
+  uint const pe_rank = mesh_.topology().comm_rank();
 
+  uint const numcells = cells.size();
   for (CellList::iterator it = cells.begin(); it != cells.end(); ++it)
   {
-    if (marked_ids((*it)->id) && !(*it)->deleted)
+    if ((*it)->id >= numcells) break;
+    if (!(*it)->deleted && (marked_ids((*it)->id)))
     {
       bisect((*it), NULL, NULL, NULL);
     }
   }
 
-  std::vector<Propagation> propagated;
+  Array<Propagation> propagated;
   std::list<Propagation> leftovers;
 
   bool empty = !marked_ids.mesh().is_distributed();
@@ -506,12 +507,12 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       begin("Propagate refinement...");
     }
 
-    propagate_refinement(propagated, empty);
+    propagate_refinement(marked_ids.mesh(), propagated, empty);
 
     if (empty && propagated.size() == 0) break;
     propagate.clear();
 
-    for (std::vector<Propagation>::iterator it = propagated.begin();
+    for (Array<Propagation>::iterator it = propagated.begin();
         it != propagated.end(); ++it)
     {
 
@@ -541,7 +542,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       DVertex* const v1 = v1it->second;
       DVertex* const v2 = v2it->second;
 
-      for (CellList::iterator ic = v1->cells.begin(); ic != v1->cells.end();
+      for (std::list<DCell *>::iterator ic = v1->cells.begin(); ic != v1->cells.end();
            ++ic)
       {
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
@@ -590,22 +591,40 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
   }
 }
+
+//-----------------------------------------------------------------------------
+void DMesh::propagate_refinement(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+{
+  uint const pe_size = mesh.topology().comm_size();
+  if (pe_size == 1) return;
+  if (pe_size & (pe_size - 1))
+  {
+    propagate_naive(mesh, propagated, empty);
+  }
+  else
+  {
+    propagate_hypercube(mesh, propagated, empty);
+  }
+}
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
 {
+  Comm& comm =  mesh.topology().comm();
+  uint pe_rank = mesh.topology().comm_rank();
+  uint pe_size = mesh.topology().comm_size();
+
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int max_prop, recv_count;
-  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX,
-                MPI::DOLFIN_COMM);
+  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX, comm);
 
   int *recv_buff = new int[max_prop];
   int *send_buff = new int[num_prop];
   int *sp = &send_buff[0];
 
-  for (std::vector<Propagation>::iterator it = propagate.begin();
+  for (Array<Propagation>::iterator it = propagate.begin();
        it != propagate.end(); ++it)
   {
     *(sp++) = it->first;
@@ -616,18 +635,16 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
   }
 
   MPI_Status status;
-  uint rank = MPI::rank();
-  uint pe_size = MPI::size();
   uint dest, src;
 
   empty = true;
   for (uint j = 1; j < pe_size; j++)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dest = (rank + j) % pe_size;
+    src = (pe_rank - j + pe_size) % pe_size;
+    dest = (pe_rank + j) % pe_size;
 
     MPI_Sendrecv(&send_buff[0], num_prop, MPI_INTEGER, dest, 1, recv_buff,
-                 max_prop, MPI_INTEGER, src, 1, MPI::DOLFIN_COMM, &status);
+                 max_prop, MPI_INTEGER, src, 1, comm, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);
 
     if (recv_count > 0) empty = false;
@@ -653,29 +670,30 @@ void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
 
   short prop, gprop;
   prop = (empty == false);
-  MPI_Allreduce(&prop, &gprop, 1, MPI_SHORT, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI_Allreduce(&prop, &gprop, 1, MPI_SHORT, MPI_SUM, comm);
   empty = (gprop == 0);
 
   delete[] send_buff;
   delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
-                                bool& empty)
+void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
 {
+  Comm& comm =  mesh.topology().comm();
+  uint pe_rank = mesh.topology().comm_rank();
+  uint pe_size = mesh.topology().comm_size();
 
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int total_prop, recv_count;
-  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INTEGER, MPI_SUM,
-                MPI::DOLFIN_COMM);
+  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INTEGER, MPI_SUM, comm);
 
   int *recv_buff = new int[total_prop];
   int *state = new int[total_prop];
   int *sp = &state[0];
   uint state_size = 0;
 
-  for (std::vector<Propagation>::iterator it = propagate.begin();
+  for (Array<Propagation>::iterator it = propagate.begin();
       it != propagate.end(); ++it)
   {
     *(sp++) = it->first;
@@ -687,8 +705,6 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   }
 
   MPI_Status status;
-  uint rank = MPI::rank();
-  uint pe_size = MPI::size();
   uint dest;
   uint D = 1;
 #if  (__sgi || __FreeBSD__)
@@ -702,11 +718,10 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
   for (uint j = 0; j < log2(pe_size); j++)
 #endif
   {
-    dest = rank ^ (D << j);
+    dest = pe_rank ^ (D << j);
 
     MPI_Sendrecv(state, state_size, MPI_INTEGER, dest, 1, recv_buff, total_prop,
-    MPI_INTEGER,
-                 dest, 1, MPI::DOLFIN_COMM, &status);
+                 MPI_INTEGER, dest, 1, comm, &status);
     MPI_Get_count(&status, MPI_INTEGER, &recv_count);
 
     dolfin_assert(recv_count % 5 == 0);
@@ -738,12 +753,12 @@ void DMesh::propagate_hypercube(std::vector<Propagation>& propagated,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(std::vector<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }

@@ -115,9 +115,21 @@ void header(char const * msg, ...)
 }
 
 //-----------------------------------------------------------------------------
+void header(std::string msg)
+{
+  simple_output(cerr, "******** ", msg, "\n");
+}
+
+//-----------------------------------------------------------------------------
 void begin(char const * msg, ...)
 {
   format_output(cout, "", msg, "\n"); ++cout;
+}
+
+//-----------------------------------------------------------------------------
+void begin(std::string msg)
+{
+  simple_output(cout, "", msg, "\n"); ++cout;
 }
 
 //-----------------------------------------------------------------------------
@@ -132,6 +144,15 @@ void section(char const * msg, ...)
   size_t n;
   nformat_output(cout, "", msg, "\n", n);
   cout.nputc(n - 1, '-');
+  cout << "\n";
+  ++cout;
+}
+
+//-----------------------------------------------------------------------------
+void section(std::string msg)
+{
+  simple_output(cout, "", msg, "\n");
+  cout.nputc(msg.size(), '-');
   cout << "\n";
   ++cout;
 }

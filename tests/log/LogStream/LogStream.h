@@ -165,11 +165,21 @@ DOLFIN_START_TEST( test_LogStream )
       end();
       message("b0");
       end();
+      //
+      begin(std::string("blockS"));
+      end();
     }
     //---
     {
       section("section0");
       end();
+      section(std::string("sectionS"));
+      end();
+    }
+    //---
+    {
+      header("header0");
+      header(std::string("headerS"));
     }
     //---
     {

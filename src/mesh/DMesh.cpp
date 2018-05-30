@@ -133,6 +133,16 @@ struct DVertex
   }
 };
 //-----------------------------------------------------------------------------
+void sanitize_check(Mesh& mesh)
+{
+  // Check distributed data consistency
+  if (mesh.is_distributed())
+  {
+    mesh.distdata()[0].check_ghost();
+    mesh.distdata()[0].check_shared();
+  }
+}
+//-----------------------------------------------------------------------------
 DMesh::DMesh(Mesh& mesh) :
     vertices(),
     cells(),
@@ -145,6 +155,10 @@ DMesh::DMesh(Mesh& mesh) :
 {
   dolfin_assert(glb_max_ > 0);
   dolfin_assert(salt_ > 0);
+#if DEBUG
+  message("DMesh: import sanitize check");
+  sanitize_check(mesh);
+#endif
 
   DVertex ** vertices = (mesh.size(0) ? new DVertex *[mesh.size(0)] : NULL);
 
@@ -180,11 +194,21 @@ DMesh::DMesh(Mesh& mesh) :
   if (shared_edges_)
   {
     DistributedData const& vdist = mesh.distdata()[0];
+#if DEBUG
+    {
+      message("DMesh: shared edge creation sanitize check");
+      mesh.distdata()[1].check_ghost();
+      mesh.distdata()[1].check_shared();
+    }
+#endif
     for (Edge::shared it(mesh); it.valid(); ++it)
     {
+      dolfin_assert(!it.adj().empty());
       Edge e(mesh, it.index());
       uint const * v = e.entities(0);
       EdgeKey key(vdist.get_global(v[0]), vdist.get_global(v[1]));
+      dolfin_assert(vdist.is_shared(v[0]));
+      dolfin_assert(vdist.is_shared(v[1]));
       shared_edges_->insert(SharedEdgeItem(key, e.index()));
     }
   }
@@ -264,6 +288,12 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
+
+#if DEBUG
+  message("DMesh: export sanitize check");
+  sanitize_check(mesh);
+#endif
+
 }
 //-----------------------------------------------------------------------------
 void DMesh::number(Array<int> * old2new_cells, Array<int> * old2new_vertices)
@@ -348,16 +378,21 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
   else
   {
-    mv = new DVertex;
+    mv = new DVertex();
     add_vertex(mv);
     if (v0->glb_id < v1->glb_id)
     {
+      dolfin_assert((v0->glb_id * salt_)
+                      < (DOLFIN_UINT_MAX - glb_max_ - v1->glb_id));
       mv->glb_id = (((v0->glb_id * salt_) + (v1->glb_id))) + glb_max_;
     }
     else
     {
+      dolfin_assert((v1->glb_id * salt_)
+                      < (DOLFIN_UINT_MAX - glb_max_ - v0->glb_id));
       mv->glb_id = (((v1->glb_id * salt_) + (v0->glb_id))) + glb_max_;
     }
+    dolfin_assert(mv->glb_id > glb_max_);
     mv->p = (v0->p + v1->p) / 2.0;
 
     // Add hanging node on shared edges to propagation buffer
@@ -365,6 +400,10 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     if (v0->shared_adj && v1->shared_adj)
     {
       EdgeKey key(v0->glb_id, v1->glb_id);
+      if (v0->glb_id >= glb_max_ && v1->glb_id >= glb_max_)
+      {
+        error("Edge case: double refinement of edge");
+      }
       SharedEdges::const_iterator it = shared_edges_->find(key);
       if (it != shared_edges_->end())
       {
@@ -386,8 +425,8 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   }
 
   // Create new cells
-  DCell* c0 = new DCell;
-  DCell* c1 = new DCell;
+  DCell* c0 = new DCell();
+  DCell* c1 = new DCell();
   c0->nref = dcell->nref;
   c1->nref = dcell->nref;
   std::vector<DVertex*> vs0;
@@ -552,9 +591,17 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
           dolfin_assert((*ic)->vertices.size() > 0);
+          if (v1->glb_id < glb_max_ && v2->glb_id < glb_max_)
+          {
+            SharedEdges::const_iterator it = shared_edges_->find(key);
+            if (it == shared_edges_->end())
+            {
+              error("Edge case: invalid sharedness of non-shared edge");
+            }
+          }
           if (mv == NULL)
           {
-            mv = new DVertex;
+            mv = new DVertex();
             mv->set_shared(*v1, *v2);
             mv->glb_id = it->second.mv;
             vertices.insert(mv);

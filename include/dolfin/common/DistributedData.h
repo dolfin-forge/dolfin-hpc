@@ -240,10 +240,16 @@ public:
   /// Return shared entities mapping, only on finalized data
   SharedMapping const& shared_mapping() const;
 
+  /// Check shared entities consistency
+  void check_shared();
+
   //--- Ghosts ---
 
   /// Set the given entity as ghost
   void set_ghost(uint local_index, uint owner);
+
+  /// Check ghost entities consistency
+  void check_ghost();
 
   //---------------------------------------------------------------------------
 

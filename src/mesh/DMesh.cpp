@@ -78,7 +78,6 @@ struct DVertex
       cells(),
       p(),
       deleted(false),
-      ghosted(false),
       shared_adj(NULL),
       owner(UNDEF)
   {
@@ -90,7 +89,6 @@ struct DVertex
       cells(0),
       p(v.point()),
       deleted(false),
-      ghosted(v.is_ghost()),
       shared_adj(NULL),
       owner(v.owner())
   {
@@ -111,9 +109,6 @@ struct DVertex
 
   /// Marker for deletion
   bool deleted;
-
-  /// Indicator if vertex is ghosted
-  bool ghosted;
 
   /// Adjacent processes for boundary vertices
   std::vector<uint> * shared_adj;
@@ -227,6 +222,7 @@ void DMesh::exp(Mesh& mesh)
 
   // Add old vertices
   DistributedData * const dist = (shared_edges_ ? &mesh.distdata()[0] : NULL);
+  uint const pe_rank = mesh.topology().comm_rank();
   uint current_vertex = 0;
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++current_vertex)
@@ -243,7 +239,7 @@ void DMesh::exp(Mesh& mesh)
         _set<uint> s(dv->shared_adj->begin(), dv->shared_adj->end());
         dist->setall_shared_adj(current_vertex, s);
         dolfin_assert(dv->owner != DVertex::UNDEF);
-        if (dv->ghosted)
+        if (dv->owner != pe_rank)
         {
           dist->set_ghost(current_vertex, dv->owner);
         }
@@ -382,8 +378,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
         dcell->nref++;
         bc_dvs[mv->glb_id] = mv;
         mv->set_shared(mesh_.distdata()[1].get_shared_adj(it->second));
-        mv->ghosted = false;
-        mv->owner = MPI::rank();
+        mv->owner = node.owner;
         ref_edge[key] = mv;
       }
     }
@@ -535,8 +530,8 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
         if (mv->owner > (int) it->second.owner)
         {
-          mv->ghosted = true;
           mv->owner = it->second.owner;
+          dolfin_assert(mv->owner != DVertex::UNDEF);
         }
 
         continue;
@@ -566,7 +561,6 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 
             if (pe_rank < it->second.owner)
             {
-              mv->ghosted = false;
               mv->owner = pe_rank;
               prop_edge node;
               node.mv = mv->glb_id;
@@ -578,7 +572,6 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             }
             else
             {
-              mv->ghosted = true;
               mv->owner = it->second.owner;
             }
 

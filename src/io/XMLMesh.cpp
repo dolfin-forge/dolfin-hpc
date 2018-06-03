@@ -282,7 +282,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     {
      return;
     }
-    uint const rank = MPI::rank();
+    uint const rank = vertex_dist_->rank;
     vertex_owner_[mesh_.distdata()[0].get_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
     for (uint i = 1; i < cell_type_->num_entities(0); ++i)
@@ -447,6 +447,11 @@ void XMLMesh::endMesh()
     delete[] connectivity;
     editor_->close();
     mesh_.swap(new_mesh);
+
+#if DEBUG
+    mesh_.distdata()[0].check_ghost();
+    mesh_.distdata()[0].check_shared();
+#endif
 
     sendbuf.clear();
     delete[] recvbuf_v;

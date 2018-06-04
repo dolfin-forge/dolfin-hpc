@@ -215,7 +215,7 @@ void XMLMesh::readCells(const xmlChar *name, const xmlChar **attrs)
       error("XMLMesh : vertex ownership array is already created.");
     }
     vertex_owner_ = new uint[mesh_.size(0)];
-    std::fill_n(&vertex_owner_[0], mesh_.size(0), MPI::size());
+    std::fill_n(&vertex_owner_[0], mesh_.size(0), vertex_dist_->card);
   }
   else
   {
@@ -282,7 +282,7 @@ void XMLMesh::readCell(const xmlChar *name, const xmlChar **attrs)
     {
      return;
     }
-    uint const rank = MPI::rank();
+    uint const rank = vertex_dist_->rank;
     vertex_owner_[mesh_.distdata()[0].get_local(v[0])] = rank;
     cell_buffer_.push_back(v[0]);
     for (uint i = 1; i < cell_type_->num_entities(0); ++i)
@@ -323,6 +323,9 @@ void XMLMesh::endMesh()
     sendbuf.assign(nonlocal_vertices_.begin(), nonlocal_vertices_.end());
     uint const shared = nonlocal_vertices_.size();
     uint orphan = 0;
+    Array<_set<uint> > local_adjacents(mesh_.size(0)); //XXX: dirty hack
+    typedef _map<uint, _set<uint> > NonLocalAdj;
+    NonLocalAdj nonlocal_adjacents; //XXX: dirty hack
 
     // Exchange ghost points
     MPI_Status status;
@@ -346,8 +349,9 @@ void XMLMesh::endMesh()
       src = (rank - j + pe_size) % pe_size;
       dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 1, recvbuf,
-                   recvmax, MPI_UNSIGNED, src, 1, MPI::DOLFIN_COMM, &status);
+      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 0,
+                   recvbuf    , recvmax       , MPI_UNSIGNED, src, 0,
+                   MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
 
       uint count = 0;
@@ -355,34 +359,44 @@ void XMLMesh::endMesh()
       {
         if (vdata0.has_global(recvbuf[k]))
         {
+          dolfin_assert(nonlocal_adjacents.count(recvbuf[k]) == 0);
           uint const index = vdata0.get_local(recvbuf[k]);
-          sendbuf_v[2*count] = recvbuf[k];
+          // Vertex is unassigned, set ownership to first requestant
           if (vertex_owner_[index] == pe_size)
           {
             ++orphan;
             vertex_owner_[index] = src;
-            sendbuf_v[2*count+1] = src;
           }
-          else
+          else if (vertex_owner_[index] == rank)
           {
-            sendbuf_v[2*count+1] = vertex_owner_[index];
+            // Set sharedness of local vertex
+            local_adjacents[index].insert(src);
           }
+          sendbuf_v[2*count] = recvbuf[k];
+          sendbuf_v[2*count+1] = vertex_owner_[index];
           for (uint d = 0; d < gdim; ++d)
           {
             sendbuf_x[gdim*count+d] = mesh_.geometry().x(index)[d];
           }
           ++count;
         }
+        else if (nonlocal_vertices_.count(recvbuf[k]))
+        {
+          // Set sharedness of nonlocal vertex
+          nonlocal_adjacents[recvbuf[k]].insert(src);
+        }
       }
 
-      MPI_Sendrecv(&sendbuf_v[0], 2 * count, MPI_UNSIGNED, src, 1, recvptr_v,
-                   recvcnt_v, MPI_UNSIGNED, dst, 1, MPI::DOLFIN_COMM, &status);
+      MPI_Sendrecv(&sendbuf_v[0], 2 * count, MPI_UNSIGNED, src, 1,
+                   recvptr_v    , recvcnt_v, MPI_UNSIGNED, dst, 1,
+                   MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
       recvcnt_v -= recvcount;
       recvptr_v += recvcount;
 
-      MPI_Sendrecv(&sendbuf_x[0], gdim * count, MPI_DOUBLE, src, 2, recvptr_x,
-                   recvcnt_x, MPI_DOUBLE, dst, 2, MPI::DOLFIN_COMM, &status);
+      MPI_Sendrecv(&sendbuf_x[0], gdim * count, MPI_DOUBLE, src, 2,
+                   recvptr_x    , recvcnt_x   , MPI_DOUBLE, dst, 2,
+                   MPI::DOLFIN_COMM, &status);
       MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
       recvcnt_x -= recvcount;
       recvptr_x += recvcount;
@@ -402,24 +416,41 @@ void XMLMesh::endMesh()
     uint vertex_count = 0;
     for (VertexIterator vertex(mesh_); !vertex.end(); ++vertex)
     {
-      if (vertex_owner_[vertex->index()] == rank)
+      uint const index = vertex->index();
+      if (vertex_owner_[index] == rank)
       {
-        new_distdata0.set_map(vertex_count, vertex->global_index());
         editor_->add_vertex(vertex_count, vertex->x());
+        new_distdata0.set_map(vertex_count, vertex->global_index());
+        if (!local_adjacents[index].empty())
+        {
+          new_distdata0.setall_shared_adj(vertex_count, local_adjacents[index]);
+        }
         ++vertex_count;
       }
-      else if (vertex_owner_[vertex->index()] == pe_size)
+      else if (vertex_owner_[index] == pe_size)
       {
         error("XMLMesh : vertex %u is unassigned");
       }
     }
 
-    // Add shared ghost vertices
+    // Add shared vertices
     uint ii = 0;
     uint ci = 0;
     for (uint i = 0; i < shared; ++i, ii+=2, ci += gdim)
     {
+      dolfin_assert(nonlocal_vertices_.count(recvbuf_v[ii]));
+      dolfin_assert(recvbuf_v[ii + 1] != pe_size);
       new_distdata0.set_map(vertex_count, recvbuf_v[ii]);
+      NonLocalAdj::const_iterator it = nonlocal_adjacents.find(recvbuf_v[ii]);
+      // Vertex is shared
+      if (it != nonlocal_adjacents.end())
+      {
+        dolfin_assert(nonlocal_adjacents.count(recvbuf_v[ii]));
+        dolfin_assert(!new_distdata0.is_shared(vertex_count));
+        dolfin_assert(!nonlocal_adjacents[recvbuf_v[ii]].count(rank));
+        new_distdata0.setall_shared_adj(vertex_count, it->second);
+      }
+      // Vertex is ghost
       if (recvbuf_v[ii + 1] != rank)
       {
         new_distdata0.set_ghost(vertex_count, recvbuf_v[ii + 1]);
@@ -447,6 +478,13 @@ void XMLMesh::endMesh()
     delete[] connectivity;
     editor_->close();
     mesh_.swap(new_mesh);
+
+#if DEBUG
+    message("XMLMesh: check ghosts consistency");
+    mesh_.distdata()[0].check_ghost();
+    message("XMLMesh: check shared consistency");
+    mesh_.distdata()[0].check_shared();
+#endif
 
     sendbuf.clear();
     delete[] recvbuf_v;

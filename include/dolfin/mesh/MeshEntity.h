@@ -107,6 +107,9 @@ public:
   /// Return the owner of the mesh entity
   uint owner() const;
 
+  /// Returns a pointer to the adjacent set or null is non-shared
+  _set<uint> const * adjacents() const;
+
   /// Return if the mesh entity has all vertices shared
   bool has_all_vertices_shared() const;
 

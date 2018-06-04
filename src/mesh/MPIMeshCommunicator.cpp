@@ -40,8 +40,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   tic();
 
   Mesh& mesh = dist.mesh();
-  uint const pe_rank = MPI::rank();
-  uint const pe_size = MPI::size();
+  uint const pe_rank = mesh.topology().comm_rank();
+  uint const pe_size = mesh.topology().comm_size();
   uint const tdim = mesh.topology().dim();
   uint const gdim = mesh.geometry().dim();
 
@@ -188,8 +188,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   tic();
 
   Mesh& mesh = dist.mesh();
-  uint const pe_rank = MPI::rank();
-  uint const pe_size = MPI::size();
+  uint const pe_rank = mesh.topology().comm_rank();
+  uint const pe_size = mesh.topology().comm_size();
   uint const tdim = mesh.topology().dim();
   uint const gdim = mesh.geometry().dim();
 
@@ -450,74 +450,76 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   // Exchange ghost vertices
   uint sendcnt_gv = sendbuf_gv.size();
   uint sendmax_gv = 0;
-  MPI::all_reduce<MPI::sum>(sendcnt_gv, sendmax_gv);
-  dolfin_assert(sendmax_gv > 0);
-  uint * sendbck_gv = new uint[sendmax_gv];
-  real * sendbck_gx = new real[sendmax_gv * gdim];
-  dolfin_assert(sendcnt_gv > 0);
-  uint * recvbuf_gv = new uint[sendcnt_gv];
-  real * recvbuf_gx = new real[sendcnt_gv * gdim];
-  for (uint j = 1; j < pe_size; ++j)
+  MPI::all_reduce<MPI::sum>(sendcnt_gv, sendmax_gv, distdata.comm());
+  if (sendmax_gv)
   {
-    src = (pe_rank - j + pe_size) % pe_size;
-    dst = (pe_rank + j) % pe_size;
-
-    // Send ghost vertices to request coordinates
-    MPI_Sendrecv(&sendbuf_gv[0], sendbuf_gv.size(), MPI_UNSIGNED, dst, 0,
-                 sendbck_gv, sendmax_gv, MPI_UNSIGNED, src, 0, distdata.comm(),
-                 &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-    uint send_count = 0;
-    for (int k = 0; k <recv_count; ++k)
+    dolfin_assert(sendmax_gv > 0);
+    uint * sendbck_gv = new uint[sendmax_gv];
+    real * sendbck_gx = new real[sendmax_gv * gdim];
+    uint * recvbuf_gv = sendcnt_gv ? new uint[sendcnt_gv] : NULL;
+    real * recvbuf_gx = sendcnt_gv ? new real[sendcnt_gv * gdim] : NULL;
+    for (uint j = 1; j < pe_size; ++j)
     {
-      uint const global_index = sendbck_gv[k];
-      if (distdata.has_global(global_index))
+      src = (pe_rank - j + pe_size) % pe_size;
+      dst = (pe_rank + j) % pe_size;
+
+      // Send ghost vertices to request coordinates
+      MPI_Sendrecv(&sendbuf_gv[0], sendbuf_gv.size(), MPI_UNSIGNED, dst, 0,
+                   sendbck_gv    , sendmax_gv       , MPI_UNSIGNED, src, 0,
+                   distdata.comm(), &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+      uint send_count = 0;
+      for (int k = 0; k <recv_count; ++k)
       {
-        uint const local_index = distdata.get_local(global_index);
-        // Set source rank as shared adjacent
-        distdata.set_shared_adj(local_index, src);
-        // If vertex is owned shared then send coordinates back
-        if (!global_gv.count(global_index))
+        uint const global_index = sendbck_gv[k];
+        if (distdata.has_global(global_index))
         {
-          sendbck_gv[send_count] = global_index;
-          std::copy(&coords[local_index * gdim],
-                    &coords[local_index * gdim] + gdim,
-                    &sendbck_gx[send_count * gdim]);
-          ++send_count;
+          uint const local_index = distdata.get_local(global_index);
+          // Set source rank as shared adjacent
+          distdata.set_shared_adj(local_index, src);
+          // If vertex is owned shared then send coordinates back
+          if (!global_gv.count(global_index))
+          {
+            sendbck_gv[send_count] = global_index;
+            std::copy(&coords[local_index * gdim],
+                      &coords[local_index * gdim] + gdim,
+                      &sendbck_gx[send_count * gdim]);
+            ++send_count;
+          }
         }
       }
+
+      // Send coordinates back
+      MPI_Sendrecv(&sendbck_gv[0], send_count, MPI_UNSIGNED, src, 1,
+                   &recvbuf_gv[0], sendcnt_gv, MPI_UNSIGNED, dst, 1,
+                   distdata.comm(), &status);
+      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+
+      sendcnt_gv -= recv_count;
+
+      MPI_Sendrecv(&sendbck_gx[0], send_count * gdim, MPI_DOUBLE, src, 2,
+                   &recvbuf_gx[0], recv_count * gdim, MPI_DOUBLE, dst, 2,
+                   distdata.comm(), &status);
+
+      for (int k = 0; k < recv_count; ++k)
+      {
+        uint const local_index = distdata.get_local(recvbuf_gv[k]);
+        // Set vertex owner and copy coordinates
+        distdata.set_ghost(local_index, dst);
+        std::copy(&recvbuf_gx[k * gdim], &recvbuf_gx[k * gdim] + gdim,
+                  &coords[local_index * gdim]);
+      }
+
     }
 
-    // Send coordinates back
-    MPI_Sendrecv(&sendbck_gv[0], send_count, MPI_UNSIGNED, src, 1,
-                 &recvbuf_gv[0], sendcnt_gv, MPI_UNSIGNED, dst, 1,
-                 distdata.comm(), &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
-
-    sendcnt_gv -= recv_count;
-
-    MPI_Sendrecv(&sendbck_gx[0], send_count * gdim, MPI_DOUBLE, src, 2,
-                 &recvbuf_gx[0], recv_count * gdim, MPI_DOUBLE, dst, 2,
-                 distdata.comm(), &status);
-
-    for (int k = 0; k < recv_count; ++k)
-    {
-      uint const local_index = distdata.get_local(recvbuf_gv[k]);
-      // Set vertex owner and copy coordinates
-      distdata.set_ghost(local_index, dst);
-      std::copy(&recvbuf_gx[k * gdim], &recvbuf_gx[k * gdim] + gdim,
-                &coords[local_index * gdim]);
-    }
-
+    // Cleanup
+    global_gv.clear();
+    delete [] recvbuf_gx;
+    delete [] recvbuf_gv;
+    delete [] sendbck_gx;
+    delete [] sendbck_gv;
   }
-
-  // Cleanup
-  global_gv.clear();
-  delete [] recvbuf_gx;
-  delete [] recvbuf_gv;
-  delete [] sendbck_gx;
-  delete [] sendbck_gv;
 
   // Finalize distributed data
   distdata.finalize();
@@ -604,9 +606,9 @@ void MPIMeshCommunicator::check(Mesh& mesh)
 
 #if HAVE_MPI
 
-  uint const pe_rank = dolfin::MPI::rank();
-  uint const pe_size = dolfin::MPI::size();
   DistributedData& dist = mesh.distdata()[edim];
+  uint const pe_rank = dist.comm_rank();
+  uint const pe_size = dist.comm_size();
 
   message("MPIMeshCommunicator : check distribution for dimension %u", edim);
 

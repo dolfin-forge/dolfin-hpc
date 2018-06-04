@@ -1145,5 +1145,122 @@ void DistributedData::disp() const
   end();
 }
 //-----------------------------------------------------------------------------
+void DistributedData::check_shared()
+{
+#if HAVE_MPI
+  Comm& comm = this->comm();
+  uint const pe_rank = this->comm_rank();
+  uint const pe_size = this->comm_size();
+
+  Array<uint> * buffer = new Array<uint>[pe_size];
+  for (SharedIterator vi(*this); vi.valid(); ++vi)
+  {
+    dolfin_assert(!vi.adj().empty());
+    vi.adj_enqueue(buffer, vi.global_index());
+  }
+
+  //
+  MPI_Status status;
+  uint dst;
+  uint src;
+  uint recvmax(this->num_shared());
+  Array<uint> recvbuf(recvmax);
+  int recvcount;
+  for (uint j = 1; j < pe_size; ++j)
+  {
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
+
+    MPI_Sendrecv(&buffer[dst][0], buffer[dst].size(), MPI_UNSIGNED, dst, 0,
+                 recvbuf.ptr()  , recvmax           , MPI_UNSIGNED, src, 0,
+                 comm, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+
+    for (int k = 0; k < recvcount; ++k)
+    {
+      if (!this->has_global(recvbuf[k]))
+      {
+        error("Shared entity not found on adjacent rank");
+      }
+      uint const local_index = this->get_local(recvbuf[k]);
+      if (!this->is_shared(local_index))
+      {
+        error("Shared entity not marked as shared");
+      }
+      if (this->get_shared_adj(local_index).count(src) == 0)
+      {
+        error("Shared entity not marked as shared with rank %u", src);
+      }
+    }
+  }
+  delete [] buffer;
+#endif /* HAVE_MPI */
+}
+//-----------------------------------------------------------------------------
+void DistributedData::check_ghost()
+{
+#if HAVE_MPI
+  Comm& comm = this->comm();
+  uint const pe_rank = this->comm_rank();
+  uint const pe_size = this->comm_size();
+
+  Array<uint> * buffer = new Array<uint>[pe_size];
+  for (GhostIterator vi(*this); vi.valid(); ++vi)
+  {
+    dolfin_assert(!vi.adj().empty());
+    if (vi.owner() == pe_rank)
+    {
+      error("Ghost entity is marked as owned");
+    }
+    buffer[vi.owner()].push_back(vi.global_index());
+  }
+
+  //
+  MPI_Status status;
+  uint dst;
+  uint src;
+  uint recvmax;
+  for (uint j = 0; j < pe_size; ++j)
+  {
+    uint s = buffer[j].size();
+    MPI_Reduce(&s, &recvmax, 1, MPI_UNSIGNED, MPI_MAX, j, comm);
+  }
+  Array<uint> recvbuf(recvmax);
+  int recvcount;
+  for (uint j = 1; j < pe_size; ++j)
+  {
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
+
+    MPI_Sendrecv(&buffer[dst][0], buffer[dst].size(), MPI_UNSIGNED, dst, 0,
+                 recvbuf.ptr()  , recvmax           , MPI_UNSIGNED, src, 0,
+                 comm, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+
+    for (int k = 0; k < recvcount; ++k)
+    {
+      if (!this->has_global(recvbuf[k]))
+      {
+        error("Shared entity not found on owner rank");
+      }
+      uint const local_index = this->get_local(recvbuf[k]);
+      if (!this->is_shared(local_index))
+      {
+        error("Shared entity not marked as shared");
+      }
+      if (this->is_ghost(local_index))
+      {
+        error("Shared owned entity is marked as ghost");
+      }
+      if (this->get_shared_adj(local_index).count(src) == 0)
+      {
+        error("Shared entity not marked as shared with rank %u", src);
+      }
+    }
+  }
+  delete [] buffer;
+#endif /* HAVE_MPI */
+}
+//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

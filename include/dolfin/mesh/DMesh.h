@@ -68,12 +68,6 @@ private:
   /// Pair datatype for propagation
   typedef std::pair<uint, prop_edge> Propagation;
 
-  /// Erase removed entities from datastructures
-  ///
-  /// removeVertex() and removeCell() only mark entitites for deletion but are
-  /// not actually erased
-  void eraseRemovedEntities();
-
   /// Add a new vertex
   void add_vertex(DVertex* v);
 
@@ -161,6 +155,10 @@ private:
 
   /// enumeration salt for bisect
   uint salt_;
+
+  /// Count of deleted
+  uint cdeleted_;
+  uint vdeleted_;
 
 };
 

@@ -119,7 +119,15 @@ struct DVertex
   ///
   inline void set_shared(_set<uint> const& s)
   {
+#ifdef __SUNPRO_CC
+    shared_adj = new std::vector<uint>();
+    for (_set<uint>::iterator it = s.begin(); it != s.end(); ++it)
+    {
+      shared_adj->push_back(*it);
+    }
+#else
     shared_adj = new std::vector<uint>(s.begin(), s.end());
+#endif
     std::sort(shared_adj->begin(), shared_adj->end());
   }
 

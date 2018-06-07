@@ -2,6 +2,7 @@
 #include <dolfin/common/assert.h>
 
 #include <sstream>
+#include <stdexcept>
 
 namespace dolfin
 {

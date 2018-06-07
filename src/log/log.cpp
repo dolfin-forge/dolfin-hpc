@@ -5,6 +5,7 @@
 
 #include <ctime>
 #include <sstream>
+#include <stdexcept>
 
 namespace dolfin
 {

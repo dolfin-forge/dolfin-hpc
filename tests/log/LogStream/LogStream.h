@@ -172,6 +172,13 @@ DOLFIN_START_TEST( test_LogStream )
     //---
     {
       section("section0");
+      cout << "This is the beginning of the hierarchy\n";
+      section("section1");
+      section("section1.1");
+      end();
+      end();
+      section("section2");
+      end();
       end();
       section(std::string("sectionS"));
       end();

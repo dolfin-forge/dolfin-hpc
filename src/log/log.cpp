@@ -142,9 +142,8 @@ void end()
 //-----------------------------------------------------------------------------
 void section(char const * msg, ...)
 {
-  size_t n;
-  nformat_output(cout, "", msg, "\n", n);
-  cout.nputc(n - 1, '-');
+  format_output(cout, "", msg, "\n");
+  cout.nputc(8, '-');
   cout << "\n";
   ++cout;
 }
@@ -153,7 +152,7 @@ void section(char const * msg, ...)
 void section(std::string msg)
 {
   simple_output(cout, "", msg, "\n");
-  cout.nputc(msg.size(), '-');
+  cout.nputc(msg.size() - cout.indentwidth(), '-');
   cout << "\n";
   ++cout;
 }

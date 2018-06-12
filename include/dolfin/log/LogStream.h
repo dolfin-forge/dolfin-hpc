@@ -118,7 +118,8 @@ struct __logstream : protected std::streambuf, public std::ostream
     if (n)
     {
       // tellp does not work with any stream, switch to string buffer
-      sb_ = os_.rdbuf(); os_.clear(); os_.seekp(0);
+      os_.clear(); os_.seekp(0);
+      //sb_->rdbuf(os_.rdbuf());
     }
     if (pre) (*this) << pre;
     if (msg)
@@ -320,7 +321,7 @@ ret:
     if (suf) (*this) << suf;
     if (n)
     {
-      sb_ = ss_->rdbuf();
+      //sb_->rdbuf(ss_->rdbuf());
       *n = sb_->sputn(os_.str().c_str(), os_.str().size());
     }
     return *this;
@@ -358,6 +359,12 @@ ret:
   {
     return verbose(-1);
   }
+
+  int indent() { return W_i_; }
+
+  int indentwidth() { return W_i_ * INDENTTAB; }
+
+  int indenttab() { return INDENTTAB; }
 
 private:
 

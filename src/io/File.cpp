@@ -265,9 +265,8 @@ std::string File::basename(std::string file)
   return file.substr(0, pos);
 }
 //-----------------------------------------------------------------------------
-std::string File::filename(std::string basename)
+std::string File::filename(std::string basename, std::string format)
 {
-  std::string format(dolfin_get("output_format"));
   if (format == "vtk")
   {
     basename += ".pvd";
@@ -281,6 +280,11 @@ std::string File::filename(std::string basename)
     error("filename : unknown file format '%s'", format.c_str());
   }
   return basename;
+}
+//-----------------------------------------------------------------------------
+std::string File::filename(std::string basename)
+{
+  return filename(basename, dolfin_get("output_format"));
 }
 //-----------------------------------------------------------------------------
 

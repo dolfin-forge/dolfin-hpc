@@ -10,13 +10,21 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 DOLFIN_START_TEST( test_File )
   {
-      std::string basename("basename");
-      dolfin_set("output_format", "binary");
-      message("filename::binary = %s", File::filename(basename).c_str());
-      ck_assert(File::filename(basename) == (basename + ".bin"));
-      dolfin_set("output_format", "vtk");
-      message("filename::vtk    = %s", File::filename(basename).c_str());
-      ck_assert(File::filename(basename) == (basename + ".pvd"));
+    std::string basename("basename");
+    std::string filename;
+    dolfin_set("output_format", "binary");
+		filename = File::filename(basename);
+    message("filename::binary = %s", filename.c_str());
+    ck_assert(filename == (basename + ".bin"));
+    filename = File::filename(basename, "binary");
+    message("filename::binary = %s", filename.c_str());
+    dolfin_set("output_format", "vtk");
+    filename = File::filename(basename);
+    message("filename::vtk    = %s", filename.c_str());
+    ck_assert(filename == (basename + ".pvd"));
+    filename = File::filename(basename, "vtk");
+    message("filename::vtk    = %s", filename.c_str());
+    ck_assert(filename == (basename + ".pvd"));
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

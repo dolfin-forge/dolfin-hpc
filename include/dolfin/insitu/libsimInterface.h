@@ -315,7 +315,35 @@ namespace dolfin
       }
       return func;
     }
+    
+    inline static int libsimActivateTimeStep(void *data) 
+    {      
+    }
 
+#ifdef HAVE_MPI
+
+    // Parallel related callbacks for libsim
+    
+    // Callback for broadcasting an int from visit
+    inline static int libsimBroadcastInt(int *value, int sender)
+    {
+      return MPI_Bcast(value, 1, MPI_INT, sender, MPI_COMM_WORLD);
+    }
+
+    // Callback for broadcasting a string from visit
+    inline static int libsimBroadcastStr(char *str, int len, int sender)
+    {
+      return MPI_Bcast(str, len, MPI_CHAR, sender, MPI_COMM_WORLD);
+    }
+
+
+    // Callback for informing slave processes to progress
+    inline static void libsimSlaveProcess(void *data)
+    {
+      int command = 0; // VISIT_COMMAND_PROCESS;
+      MPI_Bcast(&command, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+#endif
 
 //-----------------------------------------------------------------------------
 

@@ -98,6 +98,10 @@ int libsimInterface::setupEnv()
   const std::string visit_path = dolfin_get("VisIt directory");
   VisItSetDirectory((char *) visit_path.c_str());
 
+#ifdef HAVE_MPI
+  VisItSetBroadcastIntFunction(libsimBroadcastInt);
+  VisItSetBroadcastStringFunction(libsimBroadcastStr);
+#endif
   VisItSetParallel(PE::size() > 1);
   VisItSetParallelRank(PE::rank());  
 
@@ -127,6 +131,9 @@ int libsimInterface::setupEnv()
 //-----------------------------------------------------------------------------
 int libsimInterface::setupCallbacks()
 {
+#ifdef HAVE_MPI
+  VisItSetSlaveProcessCallback2(libsimSlaveProcess, &InsituData_);
+#endif
   VisItSetGetMetaData(libsimGetMetaData, &InsituData_);
   VisItSetGetDomainList(libsimGetDomain, &InsituData_);
   VisItSetGetVariable(libsimGetFunction, &InsituData_);

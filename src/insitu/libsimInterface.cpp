@@ -103,7 +103,11 @@ int libsimInterface::setupEnv()
   VisItSetBroadcastStringFunction(libsimBroadcastStr);
 #endif
   VisItSetParallel(PE::size() > 1);
-  VisItSetParallelRank(PE::rank());  
+  VisItSetParallelRank(PE::rank());
+
+#ifdef HAVE_MPI
+  VisItSetMPICommunicator(&MPI::DOLFIN_COMM);
+#endif
 
   if (PE::rank() == 0)
   {    

@@ -327,13 +327,13 @@ namespace dolfin
     // Callback for broadcasting an int from visit
     inline static int libsimBroadcastInt(int *value, int sender)
     {
-      return MPI_Bcast(value, 1, MPI_INT, sender, MPI_COMM_WORLD);
+      return MPI_Bcast(value, 1, MPI_INT, sender, MPI::DOLFIN_COMM);
     }
 
     // Callback for broadcasting a string from visit
     inline static int libsimBroadcastStr(char *str, int len, int sender)
     {
-      return MPI_Bcast(str, len, MPI_CHAR, sender, MPI_COMM_WORLD);
+      return MPI_Bcast(str, len, MPI_CHAR, sender, MPI::DOLFIN_COMM);
     }
 
 
@@ -341,7 +341,7 @@ namespace dolfin
     inline static void libsimSlaveProcess(void *data)
     {
       int command = 0; // VISIT_COMMAND_PROCESS;
-      MPI_Bcast(&command, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&command, 1, MPI_INT, 0, MPI::DOLFIN_COMM);
     }
 #endif
 

@@ -7,20 +7,53 @@
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-DOLFIN_START_TEST( test_Real )
+DOLFIN_START_TEST( test_Real1 )
   {
     Real<> r;
     r.disp();
     r = 0.0;
     r.disp();
+    ck_assert(r[0] == 0.0);
     r += 1.0;
     r.disp();
+    ck_assert(r[0] == 1.0);
     r *= 2.0;
     r.disp();
+    ck_assert(r[0] == 2.0);
     r /= 4.0;
     r.disp();
+    ck_assert(r[0] == 0.5);
     r -= 0.25;
     r.disp();
+    ck_assert(r[0] == 0.25);
+  }
+DOLFIN_END_TEST
+//-----------------------------------------------------------------------------
+DOLFIN_START_TEST( test_Real2 )
+  {
+    Real<2> r;
+    r.disp();
+    r[0] = 0.0;
+    r[1] = 1.0;
+    r.disp();
+    ck_assert(r[0] == 0.0);
+    ck_assert(r[1] == 1.0);
+    r += 1.0;
+    r.disp();
+    ck_assert(r[0] == 1.0);
+    ck_assert(r[1] == 2.0);
+    r *= 2.0;
+    r.disp();
+    ck_assert(r[0] == 2.0);
+    ck_assert(r[1] == 4.0);
+    r /= 4.0;
+    r.disp();
+    ck_assert(r[0] == 0.5);
+    ck_assert(r[1] == 1.0);
+    r -= 0.25;
+    r.disp();
+    ck_assert(r[0] == 0.25);
+    ck_assert(r[1] == 0.75);
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

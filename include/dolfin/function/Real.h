@@ -115,6 +115,10 @@ public:
     return *this;
   }
 
+  /// Accessors
+  real&       operator[](uint i)       { return value_[i]; }
+  real const& operator[](uint i) const { return value_[i]; }
+
   ///
   inline Constant const& operator()(Time const& t) const
   {
@@ -149,6 +153,16 @@ public:
   {
     section("Real");
     message("ValueSpace<%u,%u>", I, J);
+    uint k = 0;
+    for (uint i = 0; i < I; ++i)
+    {
+      cout << "\n";
+      for (uint j = 0; j < J; ++j, ++k)
+      {
+        cout << "\t" << value_[k] << "";
+      }
+    }
+    cout << "\n";
     end();
     skip();
   }

@@ -57,5 +57,19 @@ DOLFIN_START_TEST( test_Real2 )
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------
+DOLFIN_START_TEST( test_Realt )
+  {
+    Real<1> r(2.0);
+    Time t(0.0, 1.0);
+    real const k = t.measure() / 10;
+    for (real s = t.begin(); t.is_valid(k/10); t.step(k))
+    {
+      r(t);
+      ck_assert(r[0] == 2.0);
+      t.disp();
+    }
+  }
+DOLFIN_END_TEST
+//-----------------------------------------------------------------------------
 
 #endif

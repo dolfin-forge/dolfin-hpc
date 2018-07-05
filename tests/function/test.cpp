@@ -26,6 +26,7 @@ DOLFIN_SUITE_BEGIN(suite, "function")
   DOLFIN_TCASE_CREATE("Real");
   DOLFIN_TCASE_ADD(test_Real1);
   DOLFIN_TCASE_ADD(test_Real2);
+  DOLFIN_TCASE_ADD(test_Realt);
 
   DOLFIN_TCASE_CREATE("Operators");
   DOLFIN_TCASE_ADD(test_Operators);

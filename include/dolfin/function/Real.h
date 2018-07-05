@@ -120,7 +120,7 @@ public:
   real const& operator[](uint i) const { return value_[i]; }
 
   ///
-  inline Constant const& operator()(Time const& t) const
+  inline Real<I, J> const& operator()(Time const& t) const
   {
     // No-op
     return *this;

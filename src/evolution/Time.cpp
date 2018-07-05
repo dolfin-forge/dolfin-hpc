@@ -116,7 +116,7 @@ void Time::show() const
 //-----------------------------------------------------------------------------
 void Time::disp() const
 {
-  section("Time");
+  dolfin::section("Time");
   message("T0        : %f", T_.first);
   message("T1        : %f", T_.second);
   message("t         : %f", t_);
@@ -125,7 +125,7 @@ void Time::disp() const
   message("measure   : %f", this->measure());
   message("elapsed   : %f", this->elapsed());
   message("remaining : %f", this->remaining());
-  end();
+  dolfin::end();
 }
 //-----------------------------------------------------------------------------
 

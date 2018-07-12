@@ -100,6 +100,9 @@ dolfin::uint PETScKrylovSolver::solve(const PETScMatrix& A, PETScVector& x,
   if (!parameters_read) readParameters();
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 4
   KSPSetOperators(ksp, A.mat(), A.mat());
+  if (get("Krylov keep PC"))
+    KSPSetReusePreconditioner(ksp, PETSC_TRUE);
+  
 #else
   // Solve linear system
   if (get("Krylov keep PC"))

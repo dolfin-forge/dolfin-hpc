@@ -36,7 +36,7 @@ namespace dolfin
     ~libsimPipeline() {}
 
     /// Execute visualization pipeline
-    virtual void exec() const = 0;
+    virtual void exec(real t, uint tstep) const = 0;
 
   };
   

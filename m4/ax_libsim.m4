@@ -44,7 +44,7 @@ AC_DEFUN([AX_LIBSIM],[
 	      AC_MSG_RESULT([no])
               CPPFLAGS="$CPPFLAGS_SAVED"
               LDFLAGS="$LDFLAGS_SAVED"
-
+	      with_libsim=no
 	  fi
         fi	  
        ])

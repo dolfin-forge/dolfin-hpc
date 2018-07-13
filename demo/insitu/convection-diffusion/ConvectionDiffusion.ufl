@@ -1,0 +1,50 @@
+# Copyright (C) 2010 Jeannette Spuehler.
+# Licensed under the GNU LGPL Version 2.1.
+#
+#Define Function Space, defined as Lagrange function over triangle of
+#order one
+functionspace = VectorElement("Lagrange", triangle,1)
+
+#dimension
+d=2
+
+#define test, trial function
+v = TestFunction(functionspace)
+u = TrialFunction(functionspace) 
+
+f = Coefficient(functionspace)
+W = Coefficient(functionspace)
+UP = Coefficient(functionspace)
+
+
+#define constants, these are defined as discontinuous Lagrange function
+constant = FiniteElement("Discontinuous Lagrange", triangle, 0)
+alpha = Coefficient(constant)
+nu = Coefficient(constant)
+
+#define stabilization factor
+s = Coefficient(constant)
+k = Coefficient(constant)
+
+def ugradu(u, v):
+    return as_vector([dot(u, grad(v[i])) for i in range(d)])
+
+#define bilinear and linear form, by Crank Nicolson
+
+
+G_a = (inner(u,v) + 0.5 * k * (alpha * (inner(u,v))) + nu * inner(grad(v), grad(u)) + inner(ugradu(W,u),v)) * dx
+
+
+G_L = (inner(UP,v)+0.5*k*(-alpha*(inner(UP,v)) - nu * inner(grad(UP),grad(v)) - inner(ugradu(W,UP),v) + 2 * dot(f,v))) * dx
+
+
+SUPG_a = s*(inner(u,ugradu(W,v))+0.5*k*(alpha*(inner(u,ugradu(W,v)))+inner(ugradu(W,u),ugradu(W,v))))*dx
+
+
+SUPG_L = s*(inner(UP,ugradu(W,v))+0.5*k*(-alpha*(inner(UP,ugradu(W,v)))-inner(ugradu(W,UP),ugradu(W,v))+2*inner(f,ugradu(W,v))))*dx
+
+
+a = G_a + SUPG_a
+L = G_L + SUPG_L
+
+

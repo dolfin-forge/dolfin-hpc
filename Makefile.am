@@ -57,6 +57,13 @@ EXTRA_DIST = data/meshes/aneurysm.xml.gz\
              demo/insitu/poisson/main.cpp\
              demo/insitu/poisson/Poisson.ufl\
              demo/insitu/poisson/Poisson.h\
+	     demo/insitu/poisson/UnitSquareMesh_32x32.xml\
+	     demo/insitu/poisson/poisson.session\
+             demo/insitu/convection-diffusion/Makefile\
+             demo/insitu/convection-diffusion/main.cpp\
+             demo/insitu/convection-diffusion/ConvectionDiffusion.ufl\
+             demo/insitu/convection-diffusion/ConvectionDiffusion.h\
+	     demo/insitu/convection-diffusion/UnitSquareMesh_32x32.xml\
              demo/mesh/ale/Makefile\
              demo/mesh/ale/main.cpp\
              demo/mesh/refinement/Makefile\

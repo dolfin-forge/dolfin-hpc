@@ -58,7 +58,7 @@ class RenderMesh : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Mesh", "Mesh");
     VisItDrawPlots();
@@ -72,7 +72,7 @@ class RenderU : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Pseudocolor", "U");
     VisItDrawPlots();
@@ -86,7 +86,7 @@ class RenderAll : public libsimPipeline
 {
 public: 
 
-  void exec() const
+  void exec(real t, uint step) const
   {
     VisItAddPlot("Mesh", "Mesh");
     VisItAddPlot("Pseudocolor", "U");
@@ -94,6 +94,19 @@ public:
     VisItSaveWindow("./mesh_and_solution.png", 
 		    800, 600, VISIT_IMAGEFORMAT_PNG);
     VisItDeleteActivePlots();
+  }
+};
+
+// Pipline to render a predefined session
+class RenderSession : public libsimPipeline
+{
+public:
+  
+  void exec(real t, uint step) const 
+  {
+    VisItRestoreSession("./poisson.session");
+    VisItSaveWindow("./session.png", 
+		    800, 600, VISIT_IMAGEFORMAT_PNG);
   }
 };
 
@@ -122,13 +135,13 @@ int main(int argc, char **argv)
   if (visit_path == "")
     error("Parameter 'VisIt directory' not set properly");
   
-  libsimInterface::initBatch();
+  libsimInterface::init(libsimInterface::batch);
 
   // Create mesh
   Mesh mesh("UnitSquareMesh_32x32.xml");
 
-  // Expose to mesh to libsim
-  libsimInterface::addData(mesh);
+  // Expose a mesh named Mesh to libsim
+  libsimInterface::addData(mesh, "Mesh");
 
   // Create coefficients
   Analytic<Source>  f(mesh);
@@ -136,11 +149,13 @@ int main(int argc, char **argv)
   RenderU render_u;
   RenderMesh render_mesh;
   RenderAll render_all;
+  RenderSession render_session;
 
   // Add all pipelines to the insitu interface
   libsimInterface::addPipeline(render_u); 
   libsimInterface::addPipeline(render_mesh); 
   libsimInterface::addPipeline(render_all); 
+  libsimInterface::addPipeline(render_session);
 
   // Create boundary condition
   Constant u0(0.0);
@@ -163,7 +178,7 @@ int main(int argc, char **argv)
   Function u(a.trial_space());
 
   // Expose the function named U to libsim
-  libsimInterface::addData(u,"U");
+  libsimInterface::addData(u, "U", "Mesh");
 
   KrylovSolver solver(bicgstab, bjacobi);
   solver.solve(A, u.vector(), b);

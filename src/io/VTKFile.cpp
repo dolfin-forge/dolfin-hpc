@@ -62,20 +62,20 @@ void VTKFile::operator<<(Mesh& mesh)
       pvtuFileWrite(false, 0);
 
       // Write pvd file
-      pvdFileWrite(counter);
+      pvdFileWrite(counter, true);
     }
   }
   else
   {
 #if HAVE_MPI
-    if(MPI::size() > 1)
+    if(PE::rank() == 0 && MPI::size() > 1)
     {
       warning("Writing serial mesh in a parallel run");
     }
 #endif
 
     // Write pvd file
-    pvdFileWrite(counter);
+    pvdFileWrite(counter, false);
   }
 
   // Write headers
@@ -151,35 +151,36 @@ void VTKFile::write_dataset(LabelList<Function>& f)
   // Update vtu file name and clear file
   vtuNameUpdate(counter);
 
-  // Write pvd file
+  //FIXME: This only writes the first mesh encountered
+  Mesh& mesh = f[0].first->mesh();
 
   // Only the root updates the pvd file
-  if (PE::rank() == 0)
+  if (mesh.is_distributed())
   {
-
-#if HAVE_MPI
-    if (MPI::size() > 1)
+    if(PE::rank() == 0)
     {
       // Update pvtu file name and clear file
       pvtuNameUpdate(counter);
 
       // Write pvtu file
-      pvtuFileWriteFunction(f);
+      pvtuFileWrite(false, 0);
+
+      // Write pvd file
+      pvdFileWrite(counter, true);
+    }
+  }
+  else
+  {
+#if HAVE_MPI
+    if(PE::rank() == 0 && MPI::size() > 1)
+    {
+      warning("Writing serial mesh in a parallel run");
     }
 #endif
 
     // Write pvd file
-    pvdFileWrite(counter);
+    pvdFileWrite(counter, false);
   }
-
-  //FIXME: This only writes the first mesh encountered
-  Mesh& mesh = f[0].first->mesh();
-#if HAVE_MPI
-  if(MPI::size() > 1 && !mesh.is_distributed())
-  {
-    error("Saving functions on a serial mesh in a parallel run is unsupported");
-  }
-#endif
 
   // Write headers
   VTKHeaderOpen(mesh);
@@ -557,7 +558,7 @@ void VTKFile::ResultsWrite(
 
 }
 //----------------------------------------------------------------------------
-void VTKFile::pvdFileWrite(uint num)
+void VTKFile::pvdFileWrite(uint num, bool parallel)
 {
   std::fstream pvdFile;
 
@@ -580,7 +581,7 @@ void VTKFile::pvdFileWrite(uint num)
   // Remove directory path from name for pvd file
   std::string fname;
 #if HAVE_MPI
-  if (MPI::size() > 1)
+  if (parallel)
   {
     fname.assign(pvtu_filename, filename.find_last_of("/") + 1,
                  pvtu_filename.size());
@@ -855,7 +856,7 @@ template<class T>
     if (PE::rank() == 0)
     {
       pvtuNameUpdate(counter);
-      pvdFileWrite(counter);
+      pvdFileWrite(counter, meshfunction.mesh().is_distributed());
       pvtuFileWrite(true, meshfunction.dim());
     }
 

@@ -86,13 +86,13 @@ void STLFile::operator>>(Mesh& mesh)
 
       if (vertices.find(V) != vertices.end())
       {
-	index[j] = vertices.find(V)->index;
+        index[j] = vertices.find(V)->index;
       }
       else
       {
-	V.index = v_index++;
-	index[j] = V.index;
-	vertices.insert(V);
+        V.index = v_index++;
+        index[j] = V.index;
+        vertices.insert(V);
       }
     }
 
@@ -104,7 +104,7 @@ void STLFile::operator>>(Mesh& mesh)
 
   editor.init_vertices(vertices.size());
   for (std::set<stl_vertex>::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
+       it != vertices.end(); ++it)
   {
     editor.add_vertex(it->index, &it->v[0]);
   }

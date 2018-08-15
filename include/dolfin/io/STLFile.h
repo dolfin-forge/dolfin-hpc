@@ -12,6 +12,14 @@
 namespace dolfin
 {
 
+/**
+ * @class STLFile
+ * @brief Provides a serial reader for mesh stored in STL binary format.
+ *
+ *        Reference: http://www.fabbers.com/tech/STL_Format
+ *
+ */
+
 class STLFile : public GenericFile
 {
 public:

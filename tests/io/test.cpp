@@ -4,6 +4,7 @@
 
 #include "File/File.h"
 #include "XML/XML.h"
+#include "STL/STL.h"
 #include "VTK/VTK.h"
 #include "Binary/Binary.h"
 
@@ -15,6 +16,9 @@ DOLFIN_SUITE_BEGIN(suite, "io")
 
   DOLFIN_TCASE_CREATE("XML");
   DOLFIN_TCASE_ADD(test_XMLMesh);
+
+  DOLFIN_TCASE_CREATE("STL");
+  DOLFIN_TCASE_ADD(test_STLMesh);
 
   DOLFIN_TCASE_CREATE("VTK");
   DOLFIN_TCASE_ADD(test_VTKMesh);

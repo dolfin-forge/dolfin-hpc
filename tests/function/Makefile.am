@@ -9,7 +9,9 @@ exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 EXTRA_DIST = Analytic/Analytic.h \
              Constant/Constant.h \
              Expression/Expression.h \
+             Field/Field.h \
              Function/Function.h \
              Operators/Operators.h \
              Real/Real.h \
+             UFCFunction/UFCFunction.h \
              Value/Value.h

@@ -2,6 +2,7 @@
 
 #ifdef HAVE_CHECK
 
+#include "Analytic/Analytic.h"
 #include "Constant/Constant.h"
 #include "Expression/Expression.h"
 #include "Field/Field.h"
@@ -22,6 +23,9 @@ DOLFIN_SUITE_BEGIN(suite, "function")
 
   DOLFIN_TCASE_CREATE("Value");
   DOLFIN_TCASE_ADD(test_Value);
+
+  DOLFIN_TCASE_CREATE("Analytic");
+  DOLFIN_TCASE_ADD(test_Analytic);
 
   DOLFIN_TCASE_CREATE("Real");
   DOLFIN_TCASE_ADD(test_Real1);

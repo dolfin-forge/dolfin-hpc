@@ -184,6 +184,14 @@ private:
 
 };
 
+//-----------------------------------------------------------------------------
+
+// Convenience functions to get wrapped evaluant
+template<class T>
+inline T& evaluant(Analytic<T>& A) { return static_cast<T&>(A); }
+
+//-----------------------------------------------------------------------------
+
 } /* namespace licorne */
 
 #endif /* __DOLFIN_FUNCTION_ANALYTIC_H_ */

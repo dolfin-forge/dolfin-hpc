@@ -6,9 +6,12 @@ exe_LDADD = $(top_builddir)/src/libdolfin.la
 exe_LDFLAGS = $(LDFLAGS) $(LIBS) @CHECK_LIBS@
 
 
-EXTRA_DIST = Constant/Constant.h \
+EXTRA_DIST = Analytic/Analytic.h \
+             Constant/Constant.h \
              Expression/Expression.h \
+             Field/Field.h \
              Function/Function.h \
              Operators/Operators.h \
              Real/Real.h \
+             UFCFunction/UFCFunction.h \
              Value/Value.h

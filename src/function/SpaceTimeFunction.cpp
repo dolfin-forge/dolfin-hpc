@@ -31,6 +31,16 @@ SpaceTimeFunction::SpaceTimeFunction(std::string const& basename) :
 {
 }
 //-----------------------------------------------------------------------------
+SpaceTimeFunction::SpaceTimeFunction(std::string const& basename,
+                                     FiniteElementSpace const& space) :
+    Function(space),
+    basename_(basename),
+    W_(NULL),
+    it0_(samples_.end()),
+    it1_(samples_.end())
+{
+}
+//-----------------------------------------------------------------------------
 SpaceTimeFunction::~SpaceTimeFunction()
 {
   delete [] W_;

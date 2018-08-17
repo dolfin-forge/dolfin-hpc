@@ -57,8 +57,13 @@ uint SpaceTimeFunction::load()
   {
 #ifdef ENABLE_MPIIO
     MPI_File fh;
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    int err;
+    err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
+                        MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    if (err != MPI_SUCCESS)
+    {
+      error("SpaceTimeFunction : failed to load %s", sname.c_str());
+    }
     MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
     MPI_File_close(&fh);
 #else
@@ -178,12 +183,17 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   Array<real> values(w.vector().local_size());
 
 #ifdef ENABLE_MPIIO
+  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+  err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
+                      MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+  if (err != MPI_SUCCESS)
+  {
+    error("SpaceTimeFunction : failed to load %s", sname.c_str());
+  }
   MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset += sizeof(real);
   MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint), MPI_BYTE,
@@ -233,12 +243,17 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   x.get(values);
 
 #ifdef ENABLE_MPIIO
+  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
+                      MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  if (err != MPI_SUCCESS)
+  {
+    error("SpaceTimeFunction : failed to save %s", sname.c_str());
+  }
   if (pe_rank == 0)
   {
     MPI_File_write(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);

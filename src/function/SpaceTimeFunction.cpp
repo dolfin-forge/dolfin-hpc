@@ -10,6 +10,7 @@
 
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Mesh.h>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -48,6 +49,10 @@ SpaceTimeFunction::~SpaceTimeFunction()
 //-----------------------------------------------------------------------------
 uint SpaceTimeFunction::load()
 {
+  if (this->empty())
+  {
+    error("SpaceTimeFunction : loading sample for uninitialized function");
+  }
   samples_.clear();
   real st;
   uint id = 0;
@@ -57,9 +62,11 @@ uint SpaceTimeFunction::load()
   {
 #ifdef ENABLE_MPIIO
     MPI_File fh;
+
+    MPI::Communicator& comm = this->mesh().topology().comm();
     int err;
-    err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                        MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
+                        MPI_INFO_NULL, &fh);
     if (err != MPI_SUCCESS)
     {
       error("SpaceTimeFunction : failed to load %s", sname.c_str());
@@ -186,10 +193,11 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
-  uint pe_rank = MPI::rank();
-  uint pe_size = MPI::size();
-  err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                      MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+  MPI::Communicator& comm = w.mesh().topology().comm();
+  uint pe_rank = w.mesh().topology().comm_rank();
+  uint pe_size = w.mesh().topology().comm_size();
+  err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
+                      MPI_INFO_NULL, &fh);
   if (err != MPI_SUCCESS)
   {
     error("SpaceTimeFunction : failed to load %s", sname.c_str());
@@ -246,9 +254,10 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
-  uint pe_rank = MPI::rank();
-  uint pe_size = MPI::size();
-  err = MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
+  MPI::Communicator& comm = w.mesh().topology().comm();
+  uint pe_rank = w.mesh().topology().comm_rank();
+  uint pe_size = w.mesh().topology().comm_size();
+  err = MPI_File_open(comm, (char *) sname.c_str(),
                       MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
   if (err != MPI_SUCCESS)
   {

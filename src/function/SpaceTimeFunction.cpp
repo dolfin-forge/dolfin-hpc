@@ -84,6 +84,11 @@ void SpaceTimeFunction::eval()
     W_[1].init(this->space());
   }
 
+  if (samples_.empty())
+  {
+    load();
+  }
+
   real const t = this->clock();
   std::map<real, std::string>::iterator it1;
   it1 = samples_.upper_bound(t);

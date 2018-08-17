@@ -200,7 +200,7 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
                       MPI_INFO_NULL, &fh);
   if (err != MPI_SUCCESS)
   {
-    error("SpaceTimeFunction : failed to load %s", sname.c_str());
+    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
   }
   MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset += sizeof(real);
@@ -261,7 +261,7 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
                       MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
   if (err != MPI_SUCCESS)
   {
-    error("SpaceTimeFunction : failed to save %s", sname.c_str());
+    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
   }
   if (pe_rank == 0)
   {

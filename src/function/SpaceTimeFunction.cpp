@@ -87,6 +87,10 @@ void SpaceTimeFunction::eval()
   if (samples_.empty())
   {
     load();
+    if (samples_.empty())
+    {
+      error("SpaceTimeFunction : no sample found");
+    }
   }
 
   real const t = this->clock();

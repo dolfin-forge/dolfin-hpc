@@ -191,7 +191,8 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   byte_offset += sizeof(uint);
   if (sp != pe_size)
   {
-    error("SpaceTimeFunction : communicator size mismatch");
+    error("SpaceTimeFunction : communicator size mismatch %u != %u", sp,
+          pe_size);
   }
   MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
                        &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);

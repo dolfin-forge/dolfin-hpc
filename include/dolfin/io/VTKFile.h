@@ -85,7 +85,7 @@ private:
 
   void MeshWrite(Mesh& mesh) const;
   void ResultsWrite(LabelList<Function> f) const;
-  void pvdFileWrite(uint u);
+  void pvdFileWrite(uint u, bool parallel);
   void pvtuFileWrite(bool mesh_function, uint const dim);
   void pvtuFileWriteFunction(LabelList<Function> f);
   void VTKHeaderOpen(Mesh& mesh) const;

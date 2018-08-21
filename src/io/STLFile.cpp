@@ -12,6 +12,25 @@
 namespace dolfin
 {
 
+//--- Implementation detail ---------------------------------------------------
+struct stl_vertex
+{
+  double v[3];
+  uint index;
+
+  bool operator <(const stl_vertex& other) const
+  {
+    return ((v[0] < other.v[0])
+        || (v[0] == other.v[0]
+            && (v[1] < other.v[1] || (v[1] == other.v[1] && v[2] < other.v[2]))));
+  }
+
+  bool operator ==(const stl_vertex& other) const
+  {
+    return (v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2]);
+  }
+};
+
 //-----------------------------------------------------------------------------
 STLFile::STLFile(const std::string filename) :
     GenericFile("STL", filename)
@@ -40,7 +59,7 @@ void STLFile::operator>>(Mesh& mesh)
   ntri = bswap(ntri);
 #endif
 
-  MeshEditor editor(mesh, CellType::triangle, 3);
+  MeshEditor editor(mesh, CellType::triangle, 3, dolfin::MPI::DOLFIN_COMM_SELF);
   editor.init_cells(ntri);
 
   uint v_index = 0;
@@ -67,13 +86,13 @@ void STLFile::operator>>(Mesh& mesh)
 
       if (vertices.find(V) != vertices.end())
       {
-	index[j] = vertices.find(V)->index;
+        index[j] = vertices.find(V)->index;
       }
       else
       {
-	V.index = v_index++;
-	index[j] = V.index;
-	vertices.insert(V);
+        V.index = v_index++;
+        index[j] = V.index;
+        vertices.insert(V);
       }
     }
 
@@ -85,7 +104,7 @@ void STLFile::operator>>(Mesh& mesh)
 
   editor.init_vertices(vertices.size());
   for (std::set<stl_vertex>::iterator it = vertices.begin();
-      it != vertices.end(); ++it)
+       it != vertices.end(); ++it)
   {
     editor.add_vertex(it->index, &it->v[0]);
   }

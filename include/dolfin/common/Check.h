@@ -12,6 +12,8 @@
 typedef void Suite;
 #endif
 
+#include <dolfin/common/Test.h>
+
 namespace dolfin
 {
 
@@ -55,7 +57,8 @@ int main(int argc, char **argv) \
 
 #define DOLFIN_START_TEST(_name) \
 START_TEST( _name ) \
-  int init_failed = 0;
+  int init_failed = 0; \
+  Test T;
 
 #define DOLFIN_END_TEST \
   ck_assert( init_failed == 0 ); \

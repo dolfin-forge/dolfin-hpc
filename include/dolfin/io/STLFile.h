@@ -12,35 +12,24 @@
 namespace dolfin
 {
 
+/**
+ * @class STLFile
+ * @brief Provides a serial reader for mesh stored in STL binary format.
+ *
+ *        Reference: http://www.fabbers.com/tech/STL_Format
+ *
+ */
+
 class STLFile : public GenericFile
 {
 public:
 
   STLFile(const std::string filename);
+
   ~STLFile();
 
   // Input
   void operator>>(Mesh& mesh);
-
-private:
-
-  struct stl_vertex
-  {
-    double v[3];
-    dolfin::uint index;
-
-    bool operator <(const stl_vertex& other) const
-    {
-      return ((v[0] < other.v[0])
-          || (v[0] == other.v[0]
-              && (v[1] < other.v[1] || (v[1] == other.v[1] && v[2] < other.v[2]))));
-    }
-
-    bool operator ==(const stl_vertex& other) const
-    {
-      return (v[0] == other.v[0] && v[1] == other.v[1] && v[2] == other.v[2]);
-    }
-  };
 
 };
 

@@ -21,6 +21,9 @@ public:
   /// Constructor
   SpaceTimeFunction(std::string const& basename);
 
+  /// Constructor
+  SpaceTimeFunction(std::string const& basename, FiniteElementSpace const& space);
+
   /// Destructor
   ~SpaceTimeFunction();
 
@@ -42,10 +45,9 @@ public:
   //---------------------------------------------------------------------------
 
   /// Time dependency
-  inline SpaceTimeFunction& operator()(Time const& t)
+  inline Function& operator()(Time const& t)
   {
-    Function::operator ()(t);
-    return *this;
+    return Function::operator ()(t);
   }
 
   //---------------------------------------------------------------------------

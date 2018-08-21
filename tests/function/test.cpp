@@ -9,6 +9,7 @@
 #include "Function/Function.h"
 #include "Operators/Operators.h"
 #include "Real/Real.h"
+#include "SpaceTimeFunction/SpaceTimeFunction.h"
 #include "Value/Value.h"
 #include "UFCFunction/UFCFunction.h"
 
@@ -43,6 +44,9 @@ DOLFIN_SUITE_BEGIN(suite, "function")
 
   DOLFIN_TCASE_CREATE("Field");
   DOLFIN_TCASE_ADD(test_Field);
+
+  DOLFIN_TCASE_CREATE("SpaceTimeFunction");
+  DOLFIN_TCASE_ADD(test_SpaceTimeFunction);
 }
 DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------

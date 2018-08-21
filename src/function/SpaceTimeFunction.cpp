@@ -10,6 +10,7 @@
 
 #include <dolfin/la/GenericVector.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/Mesh.h>
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -31,6 +32,16 @@ SpaceTimeFunction::SpaceTimeFunction(std::string const& basename) :
 {
 }
 //-----------------------------------------------------------------------------
+SpaceTimeFunction::SpaceTimeFunction(std::string const& basename,
+                                     FiniteElementSpace const& space) :
+    Function(space),
+    basename_(basename),
+    W_(NULL),
+    it0_(samples_.end()),
+    it1_(samples_.end())
+{
+}
+//-----------------------------------------------------------------------------
 SpaceTimeFunction::~SpaceTimeFunction()
 {
   delete [] W_;
@@ -38,6 +49,10 @@ SpaceTimeFunction::~SpaceTimeFunction()
 //-----------------------------------------------------------------------------
 uint SpaceTimeFunction::load()
 {
+  if (this->empty())
+  {
+    error("SpaceTimeFunction : loading sample for uninitialized function");
+  }
   samples_.clear();
   real st;
   uint id = 0;
@@ -47,8 +62,15 @@ uint SpaceTimeFunction::load()
   {
 #ifdef ENABLE_MPIIO
     MPI_File fh;
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                  MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+
+    MPI::Communicator& comm = this->mesh().topology().comm();
+    int err;
+    err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
+                        MPI_INFO_NULL, &fh);
+    if (err != MPI_SUCCESS)
+    {
+      error("SpaceTimeFunction : failed to load %s", sname.c_str());
+    }
     MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
     MPI_File_close(&fh);
 #else
@@ -72,6 +94,15 @@ void SpaceTimeFunction::eval()
     W_ = new Function[2];
     W_[0].init(this->space());
     W_[1].init(this->space());
+  }
+
+  if (samples_.empty())
+  {
+    load();
+    if (samples_.empty())
+    {
+      error("SpaceTimeFunction : no sample found");
+    }
   }
 
   real const t = this->clock();
@@ -159,12 +190,18 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   Array<real> values(w.vector().local_size());
 
 #ifdef ENABLE_MPIIO
+  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
-  uint pe_rank = MPI::rank();
-  uint pe_size = MPI::size();
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+  MPI::Communicator& comm = w.mesh().topology().comm();
+  uint pe_rank = w.mesh().topology().comm_rank();
+  uint pe_size = w.mesh().topology().comm_size();
+  err = MPI_File_open(comm, (char *) sname.c_str(), MPI_MODE_RDONLY,
+                      MPI_INFO_NULL, &fh);
+  if (err != MPI_SUCCESS)
+  {
+    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
+  }
   MPI_File_read_all(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);
   byte_offset += sizeof(real);
   MPI_File_read_at_all(fh, byte_offset, &sp, sizeof(uint), MPI_BYTE,
@@ -172,7 +209,8 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   byte_offset += sizeof(uint);
   if (sp != pe_size)
   {
-    error("SpaceTimeFunction : communicator size mismatch");
+    error("SpaceTimeFunction : communicator size mismatch %u != %u", sp,
+          pe_size);
   }
   MPI_File_read_at_all(fh, byte_offset + pe_rank * 2 * sizeof(uint),
                        &offset[0], 2, MPI_UNSIGNED, MPI_STATUS_IGNORE);
@@ -213,12 +251,18 @@ void SpaceTimeFunction::save(real st, std::string const& sname, Function& w)
   x.get(values);
 
 #ifdef ENABLE_MPIIO
+  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
-  uint pe_rank = MPI::rank();
-  uint pe_size = MPI::size();
-  MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) sname.c_str(),
-                MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  MPI::Communicator& comm = w.mesh().topology().comm();
+  uint pe_rank = w.mesh().topology().comm_rank();
+  uint pe_size = w.mesh().topology().comm_size();
+  err = MPI_File_open(comm, (char *) sname.c_str(),
+                      MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+  if (err != MPI_SUCCESS)
+  {
+    error("SpaceTimeFunction : failed to load %s (err %u)", sname.c_str(), err);
+  }
   if (pe_rank == 0)
   {
     MPI_File_write(fh, &st, sizeof(real), MPI_BYTE, MPI_STATUS_IGNORE);

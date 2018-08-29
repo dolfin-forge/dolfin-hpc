@@ -395,11 +395,19 @@ void PETScMatrix::getrows_offproc(std::set<uint> const& rows)
 
   if (!AA_sub)
   {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 7
+    MatCreateSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
+#else
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_INITIAL_MATRIX, &AA_sub);
+#endif
   }
   else
   {
+#if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 7
+    MatCreateSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);
+#else
     MatGetSubMatrices(A, 1, &irow, &icol, MAT_REUSE_MATRIX, &AA_sub);
+#endif
   }
 
 #if PETSC_VERSION_MAJOR == 3 && PETSC_VERSION_MINOR > 1

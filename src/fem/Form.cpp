@@ -58,7 +58,7 @@ uint Form::coefficient_index(std::string const& name) const
 {
   for (uint i = 0; i < this->num_coefficients(); ++i)
   {
-    if (this->coefficient_name(0) == name)
+    if (this->coefficient_name(i) == name)
     {
       return i;
     }

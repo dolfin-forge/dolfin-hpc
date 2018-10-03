@@ -163,7 +163,7 @@ void VTKFile::write_dataset(LabelList<Function>& f)
       pvtuNameUpdate(counter);
 
       // Write pvtu file
-      pvtuFileWrite(false, 0);
+      pvtuFileWriteFunction(f);
 
       // Write pvd file
       pvdFileWrite(counter, true);

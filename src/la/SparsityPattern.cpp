@@ -423,7 +423,7 @@ void SparsityPattern::apply()
       uint const ncol = recvbuf[k++];
       for (uint p = 0; p < ncol; ++p, ++k)
       {
-        if (c0 < recvbuf[k] && recvbuf[k] < c1)
+        if (c0 <= recvbuf[k] && recvbuf[k] < c1)
         {
           d_entries_[irow - r0].insert(recvbuf[k]);
           ++d_count_;

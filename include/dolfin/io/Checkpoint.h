@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 //
 // First added:  2009-09-08
-// Last changed: 2011-04-19
+// Last changed: 2018-11-01
 
 #ifndef __DOLFIN_CHECKPOINT_H
 #define __DOLFIN_CHECKPOINT_H
@@ -130,10 +130,9 @@ private:
     uint num_centities;
     uint num_coords;
     uint num_ghosts;
-    uint num_shared;
 #ifdef ENABLE_MPIIO
-    uint offsets[5];
-    uint disp[5];
+    uint offsets[4];
+    uint disp[4];
 #endif
   } chkp_mesh_hdr;
 

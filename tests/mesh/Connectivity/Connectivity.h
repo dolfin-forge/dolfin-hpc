@@ -17,11 +17,21 @@ void check_regular_connectivity()
   {
     // Create connectivity and fill
     Connectivity C(1 << i, D);
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION == 9 &&CHECK_MICRO_VERSION < 10
+    ck_assert(C.entries() == (1 << i) * D);
+#else
     ck_assert_uint_eq(C.entries(), (1 << i) * D);
+#endif
     uint ei = 0;
     for (Connectivity::data_iterator it = C.data(); it != C.bound(); ++it)
     {
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+      ck_assert(*it ==  0);
+#else
       ck_assert_uint_eq(*it, 0);
+#endif
       *it = ei++;
     }
     // Check entries
@@ -31,7 +41,12 @@ void check_regular_connectivity()
       ei = 0;
       for (C(vi, b, e); b != e; ++b, ++ei)
       {
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+        ck_assert(*b == (vi * D + ei));
+#else
         ck_assert_uint_eq(*b, vi * D + ei);
+#endif
       }
     }
 
@@ -46,7 +61,12 @@ void check_regular_connectivity()
         ei = 0; --vj;
         for (C(vi, b, e); b != e; ++b, ++ei)
         {
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+          ck_assert(*b == (vj * D + ei));
+#else
           ck_assert_uint_eq(*b, vj * D + ei);
+#endif
         }
       }
     }
@@ -61,7 +81,12 @@ void check_regular_connectivity()
         ei = 1;
         for (C(vi, b, e); b != e; ++b, ++ei)
         {
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+          ck_assert(*b == (vi * D + D - ei));
+#else
           ck_assert_uint_eq(*b, vi * D + D - ei);
+#endif
         }
       }
     }
@@ -92,10 +117,18 @@ DOLFIN_START_TEST( test_Connectivity )
     //--- Create 2-connectivity, verify basic data, and remap
     {
       Connectivity C(4, 2);
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+      ck_assert(C.order() == 4);
+      ck_assert(C.min_degree() ==  2);
+      ck_assert(C.max_degree() == 2);
+      ck_assert(C.entries() == 8);
+#else
       ck_assert_uint_eq(C.order(), 4);
       ck_assert_uint_eq(C.min_degree(), 2);
       ck_assert_uint_eq(C.max_degree(), 2);
       ck_assert_uint_eq(C.entries(), 8);
+#endif
       C(0)[0] = 0;
       C(0)[1] = 1;
       C(1)[0] = 1;
@@ -104,6 +137,17 @@ DOLFIN_START_TEST( test_Connectivity )
       C(2)[1] = 3;
       C(3)[0] = 3;
       C(3)[1] = 4;
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+      ck_assert(C(0)[0] == 0);
+      ck_assert(C(0)[1] == 1);
+      ck_assert(C(1)[0] == 1);
+      ck_assert(C(1)[1] == 2);
+      ck_assert(C(2)[0] == 2);
+      ck_assert(C(2)[1] == 3);
+      ck_assert(C(3)[0] == 3);
+      ck_assert(C(3)[1] == 4);
+#else
       ck_assert_uint_eq(C(0)[0], 0);
       ck_assert_uint_eq(C(0)[1], 1);
       ck_assert_uint_eq(C(1)[0], 1);
@@ -112,6 +156,7 @@ DOLFIN_START_TEST( test_Connectivity )
       ck_assert_uint_eq(C(2)[1], 3);
       ck_assert_uint_eq(C(3)[0], 3);
       ck_assert_uint_eq(C(3)[1], 4);
+#endif
       Array<Array<uint> > connect;
       connect << C;
       Connectivity D(connect);
@@ -119,6 +164,17 @@ DOLFIN_START_TEST( test_Connectivity )
       Array<uint> L(4);
       L[0] = 3; L[1] = 2; L[2] = 1; L[3] = 0;
       C.remap_l(L);
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+      ck_assert(C(3)[0] == 0);
+      ck_assert(C(3)[1] == 1);
+      ck_assert(C(2)[0] == 1);
+      ck_assert(C(2)[1] == 2);
+      ck_assert(C(1)[0] == 2);
+      ck_assert(C(1)[1] == 3);
+      ck_assert(C(0)[0] == 3);
+      ck_assert(C(0)[1] == 4);
+#else
       ck_assert_uint_eq(C(3)[0], 0);
       ck_assert_uint_eq(C(3)[1], 1);
       ck_assert_uint_eq(C(2)[0], 1);
@@ -127,9 +183,21 @@ DOLFIN_START_TEST( test_Connectivity )
       ck_assert_uint_eq(C(1)[1], 3);
       ck_assert_uint_eq(C(0)[0], 3);
       ck_assert_uint_eq(C(0)[1], 4);
+#endif
       Array<uint> R(4);
       R[0] = 4; R[1] = 3; R[2] = 2; R[3] = 1; R[4] = 0;
       C.remap_r(R);
+#if CHECK_MAJOR_VERSION == 0 && \
+  CHECK_MINOR_VERSION  == 9 && CHECK_MICRO_VERSION < 10
+      ck_assert(C(3)[0] == 4);
+      ck_assert(C(3)[1] == 3);
+      ck_assert(C(2)[0] == 3);
+      ck_assert(C(2)[1] == 2);
+      ck_assert(C(1)[0] == 2);
+      ck_assert(C(1)[1] == 1);
+      ck_assert(C(0)[0] == 1);
+      ck_assert(C(0)[1] == 0);
+#else
       ck_assert_uint_eq(C(3)[0], 4);
       ck_assert_uint_eq(C(3)[1], 3);
       ck_assert_uint_eq(C(2)[0], 3);
@@ -138,6 +206,7 @@ DOLFIN_START_TEST( test_Connectivity )
       ck_assert_uint_eq(C(1)[1], 1);
       ck_assert_uint_eq(C(0)[0], 1);
       ck_assert_uint_eq(C(0)[1], 0);
+#endif
 
     }
     //--- Create k-connectivities and perform basic tests

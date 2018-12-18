@@ -57,14 +57,12 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   MeshValues<uint, Cell> weight(mesh);
   uint w_local, w_sum, w_max;
   real w_avg;
-  message("Weight function");
+  message("Estimate load imbalance");
   weight_function(mesh, cell_marker, weight, &w_local, type);
 
   // Preliminary evalution of load imbalance
-  message("Load imbalance");
   MPI_Allreduce(&w_local, &w_max, 1, MPI_UNSIGNED, MPI_MAX, MPI::DOLFIN_COMM);
   MPI_Allreduce(&w_local, &w_sum, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
-  message("Load imbalance done");
 
   w_avg = (real) w_sum / (real) MPI::size();
 
@@ -83,7 +81,6 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
 
   // Repartition mesh
-  message("Partition mesh");
   MeshValues<uint, Cell> partitions(mesh);
   mesh.partition(partitions, weight);
 
@@ -105,6 +102,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   if (dolfin_get("Load balancer redistribute"))
   {
     MeshData D(mesh); D.add(cell_marker);
+    message("Redistribute mesh");
     mesh.distribute(partitions, D);
   }
   else
@@ -482,6 +480,12 @@ void LoadBalancer::weight_function(Mesh& mesh,
   uint index = 0;
   weight = 1;
   //  *w_sum = mesh.numCells();
+  
+  // Make sure cell - edge connectivity is created, note we have to
+  // explicitly create the connectivity here since not all ranks will
+  // call the EdgeIterator, thus causing a deadlock in MeshRenumber
+  mesh.init(mesh.type().dim(), 1); 
+
   if (type == Default)
   {
     MeshValues<bool, Cell> used_cell(mesh);
@@ -525,6 +529,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
   else if (type == LEPP)
   {
     for (CellIterator c(mesh); !c.end(); ++c)
+    {
       if (cell_marker(*c))
       {
         max = 0.0;
@@ -541,6 +546,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
         for (CellIterator oc(le); !oc.end(); ++oc)
           weight_lepp(mesh, *oc, le, weight, 0);
       }
+    }
   }
   else if (type == EdgeCollapse)
   {
@@ -679,7 +685,6 @@ void LoadBalancer::process_reassignment(MeshFunction<uint>& partitions,
   delete[] sorted_indices;
   delete[] sorted;
   delete[] SiM; // FIXME, this should only be needon on rank == 0
-
 }
 //-----------------------------------------------------------------------------
 bool LoadBalancer::computational_gain(Mesh& mesh,

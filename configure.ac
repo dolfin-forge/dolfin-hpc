@@ -158,7 +158,7 @@ if test "x${enable_unordered_cxx}" = xyes; then
    AX_CXX_HEADER_NONTR1_UNORDERED_MAP
    AX_CXX_HEADER_NONTR1_UNORDERED_SET
   
-   if test "x${ax_cv_cxx_unorderd_map}" != xyes; then
+   if test "x${ax_cv_cxx_unordered_map}" != xyes; then
       AX_CXX_HEADER_TR1_UNORDERED_MAP
       AX_CXX_HEADER_TR1_UNORDERED_SET
       if test "x${ax_cv_cxx_tr1_unordered_set}" = xyes; then

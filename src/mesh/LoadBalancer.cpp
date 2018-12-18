@@ -480,6 +480,12 @@ void LoadBalancer::weight_function(Mesh& mesh,
   uint index = 0;
   weight = 1;
   //  *w_sum = mesh.numCells();
+  
+  // Make sure cell - edge connectivity is created, note we have to
+  // explicitly create the connectivity here since not all ranks will
+  // call the EdgeIterator, thus causing a deadlock in MeshRenumber
+  mesh.init(mesh.type().dim(), 1); 
+
   if (type == Default)
   {
     MeshValues<bool, Cell> used_cell(mesh);

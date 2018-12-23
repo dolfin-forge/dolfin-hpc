@@ -212,8 +212,8 @@ public:
   /// Partition mesh into num_processes partitions
   void partition(MeshValues<uint, Cell>& partitions);
 
-  /// Partition mesh into num_partitions = numProc with weights on vertices
-  /// ^H^H^H on the *fucking* *cells*
+  /// Partition mesh into num_partitions = numProc with weights 
+  /// on the vertices of the dual graph
   void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
   /// Partition mesh into num_partitions = numProc

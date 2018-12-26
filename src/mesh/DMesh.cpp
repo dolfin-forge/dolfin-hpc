@@ -278,10 +278,11 @@ void DMesh::exp(Mesh& mesh)
 
     if (dist)
     {
+      dist->set_map(current_vertex, dv->glb_id);
       if (dv->is_shared)
       {
         dolfin_assert(dv->owner != DVertex::UNDEF);
-
+	
 	if (dv->owner != pe_rank)
 	{
 	  dist->set_ghost(current_vertex, dv->owner);	  
@@ -291,9 +292,10 @@ void DMesh::exp(Mesh& mesh)
 	  dist->set_shared(current_vertex);
 	}
       }
-      dist->set_map(current_vertex, dv->glb_id);
+      
     }
   }
+  dist->finalize();
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
@@ -311,6 +313,11 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
+
+  /// @todo Temporary fix to rebuild shared adj list
+  MeshValues<uint, Cell> partitions(mesh);
+  partitions = MPI::rank();
+  mesh.distribute(partitions);
 #if DEBUG
   message("DMesh: export sanitize check");
   sanitize_check(mesh);

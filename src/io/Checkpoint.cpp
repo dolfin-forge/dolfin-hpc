@@ -264,8 +264,9 @@ void Checkpoint::load(Mesh& mesh)
     }
     delete[] ghosts;
   }
+  _mesh.distdata()[0].remap_shared_adj();
+  _mesh.distdata()[0].finalize();
   editor.close();
-
   mesh.swap(_mesh);
 
   restart_state_ = FUNC;

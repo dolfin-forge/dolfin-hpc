@@ -1,6 +1,7 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2018.
 
 #ifndef __DOLFIN_COMMON_DISTRIBUTED_DATA_H
 #define __DOLFIN_COMMON_DISTRIBUTED_DATA_H
@@ -239,6 +240,9 @@ public:
 
   /// Return shared entities mapping, only on finalized data
   SharedMapping const& shared_mapping() const;
+
+  /// Re-map the adjacent set
+  void remap_shared_adj();
 
   /// Check shared entities consistency
   void check_shared();

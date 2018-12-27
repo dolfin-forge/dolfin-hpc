@@ -287,14 +287,11 @@ void DMesh::exp(Mesh& mesh)
 	{
 	  dist->set_ghost(current_vertex, dv->owner);	  
 	}
-	else
-	{
-	  dist->set_shared(current_vertex);
-	}
-      }
-      
+
+      }      
     }
   }
+  dist->remap_shared_adj();
   dist->finalize();
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
@@ -314,10 +311,6 @@ void DMesh::exp(Mesh& mesh)
   }
   editor.close();
 
-  /// @todo Temporary fix to rebuild shared adj list
-  MeshValues<uint, Cell> partitions(mesh);
-  partitions = MPI::rank();
-  mesh.distribute(partitions);
 #if DEBUG
   message("DMesh: export sanitize check");
   sanitize_check(mesh);

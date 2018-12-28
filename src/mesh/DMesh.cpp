@@ -74,7 +74,7 @@ struct DVertex
 
   DVertex() :
       id(UNDEF),
-      glb_id(DOLFIN_UINT_MAX),
+      glb_id(DOLFIN_LONG_MAX),
       cells(),
       p(),
       deleted(false),

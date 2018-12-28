@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009-2013.
+// Modified by Niclas Jansson, 2009-2018.
 // Modified by Balthasar Reuter, 2013
 // Modified by Aurelien Larcher, 2015
 //
@@ -59,10 +59,10 @@ private:
   /// Edge data structure for propagation
   typedef struct __edge__
   {
-    uint mv;    //< global index of midpoint vertex
-    uint v1;    //< global index of endpoint
-    uint v2;    //< global index of endpoint
-    uint owner;  //< rank of owner
+    long mv;    //< global index of midpoint vertex
+    long v1;    //< global index of endpoint
+    long v2;    //< global index of endpoint
+    uint owner;	//< rank of owner
   } prop_edge;
 
   /// Pair datatype for propagation
@@ -89,6 +89,9 @@ private:
   /// An optional mapping between old and new indices is generated. The Arrays
   /// have to have the size of the old numbering
   void number(Array<int> *old2new_cells = NULL, Array<int> *old2new_vertices = NULL);
+
+  /// Renumber global indicies to fit within the range of an unsigned int
+  void renumber_glb(_map<long, uint>& new_global);
 
   /// Bisect cell dcell
   ///
@@ -120,18 +123,18 @@ private:
   Array<Propagation> propagate;
 
   /// Map between global number of boundary vertex to vertex
-  typedef _map<uint, DVertex*> BoundaryVertices;
+  typedef _map<long, DVertex*> BoundaryVertices;
   BoundaryVertices bc_dvs;
 
   /// Refined edges
-  typedef _map<EdgeKey, DVertex*> RefinedEdges;
+  typedef _map<EdgeKey<long>, DVertex*> RefinedEdges;
   RefinedEdges ref_edge;
 
   /// Comparison operator for index/value pairs
-  struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
-  std::pair<uint, prop_edge>, bool>
+  struct less_pair : public std::binary_function<std::pair<long, prop_edge>,
+  std::pair<long, prop_edge>, bool>
   {
-    bool operator()(std::pair<uint, prop_edge> x, std::pair<uint, prop_edge> y)
+    bool operator()(std::pair<long, prop_edge> x, std::pair<long, prop_edge> y)
     {
       return x.first < y.first;
     }
@@ -145,16 +148,16 @@ private:
   Space    const * const space_;
 
   /// Shared edges
-  typedef std::map<EdgeKey, uint>  SharedEdges;
-  typedef std::pair<EdgeKey, uint> SharedEdgeItem;
+  typedef std::map<EdgeKey<long>, uint>  SharedEdges;
+  typedef std::pair<EdgeKey<long>, uint> SharedEdgeItem;
   SharedEdges * shared_edges_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh
-  uint glb_max_;
+  long glb_max_;
 
   /// enumeration salt for bisect
-  uint salt_;
+  long salt_;
 
   /// Count of deleted
   uint cdeleted_;

@@ -70,11 +70,11 @@ struct DCell
 //-----------------------------------------------------------------------------
 struct DVertex
 {
-  static uint const UNDEF = DOLFIN_LONG_MAX;
+  static uint const UNDEF = DOLFIN_UINT_MAX;
 
   DVertex() :
       id(UNDEF),
-      glb_id(UNDEF),
+      glb_id(DOLFIN_UINT_MAX),
       cells(),
       p(),
       deleted(false),

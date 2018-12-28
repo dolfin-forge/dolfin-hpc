@@ -64,6 +64,10 @@ namespace dolfin
   real const DOLFIN_REAL_MAX = DBL_MAX;
   real const DOLFIN_REAL_UNDEF = DBL_MAX;
 
+  long const DOLFIN_LONG_MIN = LONG_MIN;
+  long const DOLFIN_LONG_MAX = LONG_MAX;
+  long const DOLFIN_LONG_UNDEF = LONG_MAX;
+
 #if (HAVE_TR1_UNORDERED_MAP && HAVE_TR1_UNORDERED_SET)
 #define _map std::tr1::unordered_map
 #define _set std::tr1::unordered_set

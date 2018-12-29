@@ -131,10 +131,10 @@ private:
   RefinedEdges ref_edge;
 
   /// Comparison operator for index/value pairs
-  struct less_pair : public std::binary_function<std::pair<long, prop_edge>,
-  std::pair<long, prop_edge>, bool>
+  struct less_pair : public std::binary_function<std::pair<uint, prop_edge>,
+  std::pair<uint, prop_edge>, bool>
   {
-    bool operator()(std::pair<long, prop_edge> x, std::pair<long, prop_edge> y)
+    bool operator()(std::pair<uint, prop_edge> x, std::pair<uint, prop_edge> y)
     {
       return x.first < y.first;
     }

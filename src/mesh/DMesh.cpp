@@ -85,7 +85,7 @@ struct DVertex
 
   DVertex(Vertex const& v) :
       id(v.index()),
-      glb_id((long) v.global_index()),
+      glb_id(static_cast<long>(v.global_index())),
       cells(0),
       p(v.point()),
       deleted(false),
@@ -134,9 +134,9 @@ DMesh::DMesh(Mesh& mesh) :
     ctype_(mesh.type().clone()),
     space_(mesh.space().clone()),
     shared_edges_(mesh.is_distributed() ? new SharedEdges() : NULL),
-    glb_max_((long) mesh.global_size(0)),
-    salt_((long) (ctype_->num_entities(0) * 
-		  mesh.global_size(mesh.type().dim()))),
+    glb_max_(static_cast<long>(mesh.global_size(0))),
+    salt_((static_cast<long>(ctype_->num_entities(0)) * 
+	   static_cast<long>(mesh.global_size(mesh.type().dim())))),
     cdeleted_(0),
     vdeleted_(0)
 {
@@ -194,8 +194,8 @@ DMesh::DMesh(Mesh& mesh) :
       dolfin_assert(!it.adj().empty());
       Edge e(mesh, it.index());
       uint const * v = e.entities(0);
-      EdgeKey<long> key((long) vdist.get_global(v[0]), 
-			(long) vdist.get_global(v[1]));
+      EdgeKey<long> key(static_cast<long>(vdist.get_global(v[0])), 
+			static_cast<long>(vdist.get_global(v[1])));
       dolfin_assert(vdist.is_shared(v[0]));
       dolfin_assert(vdist.is_shared(v[1]));
       shared_edges_->insert(SharedEdgeItem(key, e.index()));
@@ -566,15 +566,15 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       if (re != ref_edge.end())
       {
         mv = re->second;
-	    dolfin_assert(mv->is_shared);
+	dolfin_assert(mv->is_shared);
 
-        if (mv->owner > (uint) it->second.owner)
-        {
-          mv->owner = it->second.owner;
+	if (mv->owner > static_cast<uint>(it->second.owner))
+	{
+	  mv->owner = it->second.owner;
 	  mv->is_shared = true;
-          dolfin_assert(mv->owner != DVertex::UNDEF);
-        }
-
+	  dolfin_assert(mv->owner != DVertex::UNDEF);
+	}
+	
         continue;
       }
 
@@ -671,11 +671,11 @@ void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& em
   for (Array<Propagation>::iterator it = propagate.begin();
        it != propagate.end(); ++it)
   {
-    *(sp++) = (long) it->first;
+    *(sp++) = static_cast<long>(it->first);
     *(sp++) = it->second.mv;
     *(sp++) = it->second.v1;
     *(sp++) = it->second.v2;
-    *(sp++) = (long) it->second.owner;
+    *(sp++) = static_cast<long>(it->second.owner);
   }
 
   MPI_Status status;
@@ -701,7 +701,7 @@ void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& em
       node.mv = recv_buff[k + 1];
       node.v1 = recv_buff[k + 2];
       node.v2 = recv_buff[k + 3];
-      node.owner = (uint) recv_buff[k + 4];
+      node.owner = static_cast<uint>(recv_buff[k + 4]);
 
       Propagation prop(static_cast<uint>(recv_buff[k]), node);
       propagated.push_back(prop);
@@ -740,11 +740,11 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
   for (Array<Propagation>::iterator it = propagate.begin();
       it != propagate.end(); ++it)
   {
-    *(sp++) = (long) it->first;
+    *(sp++) = static_cast<long>(it->first);
     *(sp++) = it->second.mv;
     *(sp++) = it->second.v1;
     *(sp++) = it->second.v2;
-    *(sp++) = (long) it->second.owner;
+    *(sp++) = static_cast<long>(it->second.owner);
     state_size += 5;
   }
 
@@ -776,7 +776,7 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
       node.mv = recv_buff[k + 1];
       node.v1 = recv_buff[k + 2];
       node.v2 = recv_buff[k + 3];
-      node.owner = (uint) recv_buff[k + 4];
+      node.owner = static_cast<uint>(recv_buff[k + 4]);
 
       Propagation prop(static_cast<uint>(recv_buff[k]), node);
       propagated.push_back(prop);

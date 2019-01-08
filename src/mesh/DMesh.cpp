@@ -899,6 +899,11 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
+void DMesh::renumber_glb(_map<long, uint>& new_global)
+{
+  error("Rivara needs MPI");
+}
+//-----------------------------------------------------------------------------
 #endif
 
 } /* namespace dolfin */

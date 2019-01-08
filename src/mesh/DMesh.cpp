@@ -735,7 +735,7 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];
   long *sp = &state[0];
-  uint state_size = 0;
+  int state_size = 0;
 
   for (Array<Propagation>::iterator it = propagate.begin();
       it != propagate.end(); ++it)

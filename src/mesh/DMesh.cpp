@@ -703,7 +703,7 @@ void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& em
       node.v2 = recv_buff[k + 3];
       node.owner = (uint) recv_buff[k + 4];
 
-      Propagation prop(recv_buff[k], node);
+      Propagation prop(static_cast<uint>(recv_buff[k]), node);
       propagated.push_back(prop);
     }
 
@@ -778,7 +778,7 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
       node.v2 = recv_buff[k + 3];
       node.owner = (uint) recv_buff[k + 4];
 
-      Propagation prop(recv_buff[k], node);
+      Propagation prop(static_cast<uint>(recv_buff[k]), node);
       propagated.push_back(prop);
     }
     memcpy(sp, recv_buff, recv_count * sizeof(long));

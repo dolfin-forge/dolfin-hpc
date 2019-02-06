@@ -56,7 +56,7 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
   VertexIterator v(c);
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) &c, p[0], p[1], p[2],
+  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) c.index(), p[0], p[1], p[2],
                       p[0], p[1], p[2]);
 
   for (++v; !v.end(); ++v)
@@ -178,7 +178,7 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
   GtsBBox* bbprobe;
   GtsBBox* bb;
   GSList* overlaps = 0, *overlaps_base;
-  Cell * boundedcell = NULL;
+  uint boundedcell;
 
   CellType const& type = mesh_.type();
 
@@ -190,11 +190,12 @@ void GTSInterface::overlap(Cell& c, Array<uint>& cells) const
   while (overlaps)
   {
     bb = (GtsBBox *) overlaps->data;
-    dolfin_assert(bb->bounded);
-    boundedcell = static_cast<Cell *>(bb->bounded);
-    if (type.intersects(c, *boundedcell))
+    boundedcell = (uint)(long) bb->bounded;
+
+	Cell close(mesh_, boundedcell);
+    if (type.intersects(c, close))
     {
-      cells.push_back(boundedcell->index());
+      cells.push_back(boundedcell);
     }
     overlaps = overlaps->next;
   }
@@ -213,7 +214,7 @@ void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
   GtsBBox* bbprobe;
   GtsBBox* bb;
   GSList* overlaps = 0, *overlaps_base;
-  Cell * boundedcell = NULL;
+  uint boundedcell;
 
   CellType const& type = mesh_.type();
 
@@ -225,12 +226,13 @@ void GTSInterface::overlap(Point const& p, Array<uint>& cells) const
   while (overlaps)
   {
     bb = (GtsBBox *) overlaps->data;
-    dolfin_assert(bb->bounded);
-    boundedcell = static_cast<Cell *>(bb->bounded);
+    boundedcell = (uint)(long)bb->bounded;
 
-    if (type.intersects(*boundedcell, p))
+	Cell close(mesh_, boundedcell);
+
+    if (type.intersects(close, p))
     {
-      cells.push_back(boundedcell->index());
+      cells.push_back(boundedcell);
     }
 
     overlaps = overlaps->next;

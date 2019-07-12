@@ -318,7 +318,7 @@ fmtf:
       }
     }
 ret:
-    if (suf) (*this) << suf;
+    if (suf) (*this) << suf; ss_->flush();
     if (n)
     {
       //sb_->rdbuf(ss_->rdbuf());

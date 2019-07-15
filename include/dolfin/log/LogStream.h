@@ -8,6 +8,7 @@
 #include <dolfin/common/assert.h>
 
 #include <cstdio>
+#include <sstream>
 #include <ostream>
 #include <iomanip>
 #include <string>

@@ -662,7 +662,7 @@ void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& em
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int max_prop, recv_count;
-  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INTEGER, MPI_MAX, comm);
+  MPI_Allreduce(&num_prop, &max_prop, 1, MPI_INT, MPI_MAX, comm);
 
   long *recv_buff = new long[max_prop];
   long *send_buff = new long[num_prop];
@@ -730,7 +730,7 @@ void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int total_prop, recv_count;
-  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INTEGER, MPI_SUM, comm);
+  MPI_Allreduce(&num_prop, &total_prop, 1, MPI_INT, MPI_SUM, comm);
 
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];

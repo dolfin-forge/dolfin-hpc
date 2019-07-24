@@ -370,7 +370,7 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
   {
     mv = new DVertex();
     add_vertex(mv);
-    if (v0->glb_id < v1->glb_id)
+    if (v0->glb_id > v1->glb_id)
     {
       dolfin_assert((v0->glb_id * salt_)
                       < (DOLFIN_LONG_MAX - glb_max_ - v1->glb_id));

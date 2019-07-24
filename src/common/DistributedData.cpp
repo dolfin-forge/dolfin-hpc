@@ -1,7 +1,7 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2018.
+// Modified by Niclas Jansson, 2018-2019.
 
 #include <dolfin/common/DistributedData.h>
 
@@ -1114,12 +1114,8 @@ void DistributedData::remap_shared_adj()
   uint const pe_size = this->comm_size();
 
   Array<uint> buffer;
-  for (GhostIterator vi(*this); vi.valid(); ++vi)
+  for (SharedIterator vi(*this); vi.valid(); ++vi)
   {
-    if (vi.owner() == pe_rank)
-    {
-      error("Ghost entity is marked as owned");
-    }
     buffer.push_back(vi.global_index());
   }
 
@@ -1128,7 +1124,7 @@ void DistributedData::remap_shared_adj()
   uint src;
   uint sendtmp = buffer.size();
   uint recvmax = 0;
-  MPI::all_reduce<MPI::sum>(sendtmp, recvmax, this->comm());
+  MPI::all_reduce<MPI::max>(sendtmp, recvmax, this->comm());
   Array<uint> recvbuf(recvmax);
   int recvcount;
   for (uint j = 1; j < pe_size; ++j)

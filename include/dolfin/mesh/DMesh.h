@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009-2018.
+// Modified by Niclas Jansson, 2009-2019.
 // Modified by Balthasar Reuter, 2013
 // Modified by Aurelien Larcher, 2015
 //
@@ -88,7 +88,8 @@ private:
   ///
   /// An optional mapping between old and new indices is generated. The Arrays
   /// have to have the size of the old numbering
-  void number(Array<int> *old2new_cells = NULL, Array<int> *old2new_vertices = NULL);
+  void number(Array<int> *old2new_cells = NULL,
+              Array<int> *old2new_vertices = NULL);
 
   /// Renumber global indicies to fit within the range of an unsigned int
   void renumber_glb(_map<long, uint>& new_global);
@@ -103,13 +104,16 @@ private:
   DCell* opposite(DCell* dcell, DVertex* v1, DVertex* v2);
 
   /// Propagate refinement
-  void propagate_refinement(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
+  void propagate_refinement(Mesh& mesh,
+                            Array<Propagation>& propagation, bool& empty);
 
   /// Naive refinement propagation with pairwise communication
-  void propagate_naive(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
+  void propagate_naive(Mesh& mesh,
+                       Array<Propagation>& propagation, bool& empty);
 
   /// Refinement propagation within hypercube
-  void propagate_hypercube(Mesh& mesh, Array<Propagation>& propagation, bool& empty);
+  void propagate_hypercube(Mesh& mesh,
+                           Array<Propagation>& propagation, bool& empty);
 
   /// Vertices contained in the mesh
   typedef std::set<DVertex *> VertexSet;
@@ -146,11 +150,6 @@ private:
   /// CellType of mesh
   CellType const * const ctype_;
   Space    const * const space_;
-
-  /// Shared edges
-  typedef std::map<EdgeKey<long>, uint>  SharedEdges;
-  typedef std::pair<EdgeKey<long>, uint> SharedEdgeItem;
-  SharedEdges * shared_edges_;
 
   /// Maximum global index of vertices
   /// Implemented as number of vertices in the *global* mesh

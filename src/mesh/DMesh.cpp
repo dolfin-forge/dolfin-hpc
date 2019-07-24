@@ -1,7 +1,7 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Niclas Jansson, 2009-2013, 2018.
+// Modified by Niclas Jansson, 2009-2013, 2018-2019.
 // Modified by Balthasar Reuter, 2013
 // Modified by Aurelien Larcher, 2015
 //
@@ -133,7 +133,6 @@ DMesh::DMesh(Mesh& mesh) :
     mesh_(mesh),
     ctype_(mesh.type().clone()),
     space_(mesh.space().clone()),
-    shared_edges_(mesh.is_distributed() ? new SharedEdges() : NULL),
     glb_max_(static_cast<long>(mesh.global_size(0))),
     salt_((static_cast<long>(ctype_->num_entities(0)) * 
 	   static_cast<long>(mesh.global_size(mesh.type().dim())))),
@@ -174,40 +173,14 @@ DMesh::DMesh(Mesh& mesh) :
     add_cell(dc, vs, c->index());
   }
 
-  // Make sure edges are created
-  //  mesh.init(1);
+  // Make sure edges and vertices are created
   mesh.init();
-
-  // Cache shared edges
-  if (shared_edges_)
-  {
-    DistributedData const& vdist = mesh.distdata()[0];
-#if DEBUG
-    {
-      message("DMesh: shared edge creation sanitize check");
-      mesh.distdata()[1].check_ghost();
-      mesh.distdata()[1].check_shared();
-    }
-#endif
-    for (Edge::shared it(mesh); it.valid(); ++it)
-    {
-      dolfin_assert(!it.adj().empty());
-      Edge e(mesh, it.index());
-      uint const * v = e.entities(0);
-      EdgeKey<long> key(static_cast<long>(vdist.get_global(v[0])), 
-			static_cast<long>(vdist.get_global(v[1])));
-      dolfin_assert(vdist.is_shared(v[0]));
-      dolfin_assert(vdist.is_shared(v[1]));
-      shared_edges_->insert(SharedEdgeItem(key, e.index()));
-    }
-  }
-
+  
   delete[] vertices;
 }
 //-----------------------------------------------------------------------------
 DMesh::~DMesh()
 {
-  delete shared_edges_;
   delete ctype_;
   delete space_;
 
@@ -271,8 +244,10 @@ void DMesh::exp(Mesh& mesh)
   editor.init_cells(cells.size());
 
   // Add old vertices
-  DistributedData * const dist = (shared_edges_ ? &mesh.distdata()[0] : NULL);
+  Comm& comm =  mesh.topology().comm();
+  uint const pe_size = mesh.topology().comm_size();
   uint const pe_rank = mesh.topology().comm_rank();
+  DistributedData * const dist = (pe_size > 1 ? new DistributedData(comm):NULL);
   uint current_vertex = 0;
   for (VertexSet::iterator it = vertices.begin(); it != vertices.end(); ++it,
        ++current_vertex)
@@ -288,13 +263,13 @@ void DMesh::exp(Mesh& mesh)
       if (dv->is_shared)
       {
         dolfin_assert(dv->owner != DVertex::UNDEF);
-	
-	if (dv->owner != pe_rank)
-	{
-	  dist->set_ghost(current_vertex, dv->owner);	  
-	}
-
-      }      
+        
+        if (dv->owner != pe_rank)
+        {
+          dist->set_ghost(current_vertex, dv->owner);
+        }
+        
+      }
     }
   }
   dist->remap_shared_adj();
@@ -316,6 +291,8 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
+  mesh.topology().distdata()[0].swap(*dist);
+  mesh.topology().finalize();
 
 #if DEBUG
   message("DMesh: export sanitize check");
@@ -327,6 +304,7 @@ void DMesh::exp(Mesh& mesh)
 void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
 {
   bool closing = false;
+  uint const pe_rank = mesh_.topology().comm_rank();
 
   // Find longest edge
   real lmax = 0.0;
@@ -341,26 +319,26 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     {
       real l = 0.0;
       if ( (*vi)->glb_id > (*vj)->glb_id)
-	l = (*vi)->p.dist((*vj)->p);
+        l = (*vi)->p.dist((*vj)->p);
       else
-	l = (*vj)->p.dist((*vi)->p);
+        l = (*vj)->p.dist((*vi)->p);
 
       long ptsum = ((*vi)->glb_id + (*vj)->glb_id);
       if (fabs(l - lmax) < DOLFIN_EPS)
       {
-	if (ptsum > ptmax) 
-	{
-	  v0 = *vi;
-	  v1 = *vj;
-	  lmax = l;
-	  ptmax = ptsum;
-	}
+        if (ptsum > ptmax)
+        {
+          v0 = *vi;
+          v1 = *vj;
+          lmax = l;
+          ptmax = ptsum;
+        }
       }
       else if (l >= lmax) {
-	v0 = *vi;
-	v1 = *vj;
-	lmax = l;
-	ptmax = ptsum;
+        v0 = *vi;
+        v1 = *vj;
+        lmax = l;
+        ptmax = ptsum;
       }
     }
   }
@@ -377,20 +355,15 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     closing = true;
 
     // Having both vertices on the boundary is not a sufficient condition to be
-    // shared so we need to lookup in the set of shared edges.
+    // shared (so we filter out false propagations later)
     if (v0->is_shared && v1->is_shared)
     {
       dolfin_assert(v0->glb_id != v1->glb_id);
       EdgeKey<long> key(v0->glb_id, v1->glb_id);
-      /// @todo re-enable this check
-      //SharedEdges::const_iterator it = shared_edges_->find(key);
-      //      if (it != shared_edges_->end())
-      //      {
-	bc_dvs[mv->glb_id] = mv;
-	mv->is_shared = true;
-	dolfin_assert(mv->owner != DVertex::UNDEF);
-	dolfin_assert(ref_edge.find(key) != ref_edge.end());
-	//      }
+      bc_dvs[mv->glb_id] = mv;
+      mv->is_shared = true;
+      dolfin_assert(mv->owner != DVertex::UNDEF);
+      dolfin_assert(ref_edge.find(key) != ref_edge.end());
     }
   }
   else
@@ -417,23 +390,18 @@ void DMesh::bisect(DCell* dcell, DVertex* hangv, DVertex* hv0, DVertex* hv1)
     if (v0->is_shared && v1->is_shared)
     {
       EdgeKey<long> key(v0->glb_id, v1->glb_id);
-      /// @todo re-enable this check and create new shared edges
-      //      SharedEdges::const_iterator it = shared_edges_->find(key);
-      //if (it != shared_edges_->end())
-      //{
-	prop_edge node;
-	node.mv = mv->glb_id;
-	node.v1 = v0->glb_id;
-	node.v2 = v1->glb_id;
-	node.owner = mesh_.topology().comm_rank();
-	std::pair<uint, prop_edge> _prop_(dcell->nref, node);
-	propagate.push_back(_prop_);
-	dcell->nref++;
-	bc_dvs[mv->glb_id] = mv;
-	mv->is_shared = true;
-	mv->owner = node.owner;
-	ref_edge[key] = mv;
-	//      }
+      prop_edge node;
+      node.mv = mv->glb_id;
+      node.v1 = v0->glb_id;
+      node.v2 = v1->glb_id;
+      node.owner = pe_rank;
+      std::pair<uint, prop_edge> _prop_(dcell->nref, node);
+      propagate.push_back(_prop_);
+      dcell->nref++;
+      bc_dvs[mv->glb_id] = mv;
+      mv->is_shared = true;
+      mv->owner = node.owner;
+      ref_edge[key] = mv;
     }
     closing = false;
   }
@@ -587,8 +555,8 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
       DVertex* const v2 = v2it->second;
       dolfin_assert(v1->is_shared && v2->is_shared);
 
-      for (std::list<DCell *>::iterator ic = v1->cells.begin(); ic != v1->cells.end();
-           ++ic)
+      for (std::list<DCell *>::iterator ic = v1->cells.begin();
+           ic != v1->cells.end(); ++ic)
       {
         if (!(*ic)->deleted && (*ic)->has_edge(v1, v2))
         {
@@ -597,7 +565,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
           {
             mv = new DVertex();
             mv->glb_id = it->second.mv;
-	    mv->is_shared = true;
+            mv->is_shared = true;
             vertices.insert(mv);
 
             if (pe_rank < it->second.owner)
@@ -608,7 +576,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
               node.v1 = it->second.v1;
               node.v2 = it->second.v2;
               node.owner = mv->owner;
-              std::pair<uint, prop_edge> prop(0, node);
+              std::pair<uint, prop_edge> prop((*ic)->nref, node);
               propagate.push_back(prop);
             }
             else
@@ -637,7 +605,8 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
 }
 
 //-----------------------------------------------------------------------------
-void DMesh::propagate_refinement(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_refinement(Mesh& mesh,
+                                 Array<Propagation>& propagated, bool& empty)
 {
   uint const pe_size = mesh.topology().comm_size();
   if (pe_size == 1) return;
@@ -653,7 +622,8 @@ void DMesh::propagate_refinement(Mesh& mesh, Array<Propagation>& propagated, boo
 //-----------------------------------------------------------------------------
 #ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh& mesh,
+                            Array<Propagation>& propagated, bool& empty)
 {
   Comm& comm =  mesh.topology().comm();
   uint pe_rank = mesh.topology().comm_rank();
@@ -721,7 +691,8 @@ void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& em
   delete[] recv_buff;
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Mesh& mesh,
+                                Array<Propagation>& propagated, bool& empty)
 {
   Comm& comm =  mesh.topology().comm();
   uint pe_rank = mesh.topology().comm_rank();
@@ -889,12 +860,14 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh& mesh,
+                            Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(Mesh& mesh, Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Mesh& mesh,
+                                Array<Propagation>& propagated, bool& empty)
 {
   error("Rivara needs MPI");
 }

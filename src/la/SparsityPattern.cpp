@@ -137,7 +137,7 @@ void SparsityPattern::init(uint rank, uint const * dim,
   {
     // Since the pattern is not distributed only store the process range, this
     // means that calls to functions assuming distributed pattern will be
-    // invalid. That is enough for now: cannot rewrite the entire world.
+    // invalid. 
     range_ = new uint*[rank];
     local_range_ = new uint*[rank];
     for (uint i = 0; i < rank; ++i)
@@ -149,9 +149,9 @@ void SparsityPattern::init(uint rank, uint const * dim,
     }
   }
 
-  // This data structure contains set of non-zero column for each row in the
-  // process range: since this range has a given size and every row has at least
-  // a non-zero entry, the reason for using an ordered map remains a mystery.
+  // This data structure contains set of non-zero column for each row
+  // in the process range: since this range has a given size and every
+  // row has at least a non-zero entry
   d_entries_ = new std::set<uint>[this->size(0)];
   if (distributed_)
   {

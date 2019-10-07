@@ -1,6 +1,7 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
 //
+// Modified by Niclas Jansson, 2018-2019.
 
 #include <dolfin/common/DistributedData.h>
 
@@ -1103,6 +1104,49 @@ SharedMapping const& DistributedData::shared_mapping() const
     shared_mapping_ = new SharedMapping(*this);
   }
   return *shared_mapping_;
+}
+//-----------------------------------------------------------------------------
+void DistributedData::remap_shared_adj()
+{
+ #if HAVE_MPI
+  Comm& comm = this->comm();
+  uint const pe_rank = this->comm_rank();
+  uint const pe_size = this->comm_size();
+
+  Array<uint> buffer;
+  for (SharedIterator vi(*this); vi.valid(); ++vi)
+  {
+    buffer.push_back(vi.global_index());
+  }
+
+  MPI_Status status;
+  uint dst;
+  uint src;
+  uint sendtmp = buffer.size();
+  uint recvmax = 0;
+  MPI::all_reduce<MPI::max>(sendtmp, recvmax, this->comm());
+  Array<uint> recvbuf(recvmax);
+  int recvcount;
+  for (uint j = 1; j < pe_size; ++j)
+  {
+    src = (pe_rank - j + pe_size) % pe_size;
+    dst = (pe_rank + j) % pe_size;
+
+    MPI_Sendrecv(&buffer[0], buffer.size(), MPI_UNSIGNED, dst, 0,
+                 recvbuf.ptr()  , recvmax , MPI_UNSIGNED, src, 0,
+                 comm, &status);
+    MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+
+    for (int k = 0; k < recvcount; ++k)
+    {
+      if (this->has_global(recvbuf[k]))
+      {
+	uint const local_index = this->get_local(recvbuf[k]);
+	this->set_shared_adj(local_index, src);
+      }
+    }
+  }
+#endif /* HAVE_MPI */ 
 }
 //-----------------------------------------------------------------------------
 void DistributedData::set_ghost(uint local_index, uint owner)

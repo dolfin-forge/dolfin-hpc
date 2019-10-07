@@ -12,29 +12,30 @@
 namespace dolfin
 {
 
-struct EdgeKey : public std::pair<uint, uint>
+template <typename T=uint>
+struct EdgeKey : public std::pair<T, T>
 {
 
   /// An edge contains a pair of vertices
   EdgeKey() :
-      std::pair<uint, uint>(),
+      std::pair<T, T>(),
       idx(0)
   {
   }
 
   /// An edge contains a pair of vertices
   EdgeKey(Edge const& e) :
-      std::pair<uint, uint>(),
+      std::pair<T, T>(),
       idx(std::rand())
   {
     uint const * v = e.entities(0);
-    this->first  = (v[0] < v[1] ? v[0] : v[1]);
-    this->second = (v[0] < v[1] ? v[1] : v[0]);
+    this->first  = (T) (v[0] < v[1] ? v[0] : v[1]);
+    this->second = (T) (v[0] < v[1] ? v[1] : v[0]);
   }
 
   /// An edge contains a pair of vertices
-  EdgeKey(uint v0, uint v1) :
-      std::pair<uint, uint>(v0 < v1 ? v0 : v1, v0 < v1 ? v1 : v0),
+  EdgeKey(T v0, T v1) :
+      std::pair<T, T>(v0 < v1 ? v0 : v1, v0 < v1 ? v1 : v0),
       idx(std::rand())
   {
   }
@@ -43,13 +44,13 @@ struct EdgeKey : public std::pair<uint, uint>
   inline void set(Edge const& e)
   {
     uint const * v = e.entities(0);
-    this->first  = (v[0] < v[1] ? v[0] : v[1]);
-    this->second = (v[0] < v[1] ? v[1] : v[0]);
+    this->first  = (T) (v[0] < v[1] ? v[0] : v[1]);
+    this->second = (T) (v[0] < v[1] ? v[1] : v[0]);
     idx = std::rand();
   }
 
   /// Construct a key from edge vertices
-  inline void set(uint const * v)
+  inline void set(T const * v)
   {
     this->first  = (v[0] < v[1] ? v[0] : v[1]);
     this->second = (v[0] < v[1] ? v[1] : v[0]);
@@ -57,7 +58,7 @@ struct EdgeKey : public std::pair<uint, uint>
   }
 
   /// Construct a key from edge vertices
-  inline void set(uint v0, uint v1)
+  inline void set(T v0, T v1)
   {
     this->first  = (v0 < v1 ? v0 : v1);
     this->second = (v0 < v1 ? v1 : v0);
@@ -88,10 +89,10 @@ namespace std
 namespace tr1
 {
 
-template<>
-struct hash<dolfin::EdgeKey>
+template<typename T>
+struct hash<dolfin::EdgeKey<T> >
 {
-  inline std::size_t operator()(dolfin::EdgeKey const& e) const
+  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
   {
     return e.hash();
   }
@@ -106,10 +107,10 @@ struct hash<dolfin::EdgeKey>
 namespace std
 {
 
-template<>
-struct hash<dolfin::EdgeKey>
+template<typename T>
+struct hash<dolfin::EdgeKey<T> >
 {
-  inline std::size_t operator()(dolfin::EdgeKey const& e) const
+  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
   {
     return e.hash();
   }
@@ -122,10 +123,10 @@ struct hash<dolfin::EdgeKey>
 namespace std
 {
 
-template<>
-struct hash<dolfin::EdgeKey>
+template<typename T>
+struct hash<dolfin::EdgeKey<T> >
 {
-  inline std::size_t operator()(dolfin::EdgeKey const& e) const
+  inline std::size_t operator()(dolfin::EdgeKey<T> const& e) const
   {
     return e.hash();
   }

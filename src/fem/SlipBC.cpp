@@ -37,7 +37,7 @@ namespace dolfin
 SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain) :
     BoundaryCondition("SlipBC", mesh, sub_domain),
     mesh(mesh),
-    node_normal(new NodeNormal(mesh, sub_domain)),
+    node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(NULL)
 {
@@ -58,7 +58,7 @@ SlipBC::SlipBC(Mesh& mesh, SubDomain const& sub_domain,
                SubSystem const& sub_system) :
     BoundaryCondition("SlipBC", mesh, sub_domain, sub_system),
     mesh(mesh),
-    node_normal(new NodeNormal(mesh, sub_domain)),
+    node_normal(new NodeNormal(mesh)),
     node_normal_local(true),
     As(NULL)
 {
@@ -84,9 +84,9 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   // the number of vertices times the number of components
   bool const is_P1 = (scratch.space_dimension
                         == mesh.type().num_entities(0) * scratch.size);
-  
+
   const std::string la_backend = dolfin_get("linear algebra backend");
-    
+
   if (As == NULL || As->size(0) != A.size(0) || As->size(1) != A.size(1))
   {
     // Create data structure for local assembly data
@@ -152,16 +152,7 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
     *(As->instance()) = A;
   }
 
-
-  // Use legacy vertex-based implementation if Lagrange P1.
-  if (is_P1)
-  {
-    applySlipBC_P1(A, b, form, scratch);
-  }
-  else
-  {
-    applySlipBC(A, b, form, scratch);
-  }
+  applySlipBC(A, b, form, scratch);
 
   // Apply changes in the temporary matrix
   As->apply();

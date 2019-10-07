@@ -351,7 +351,7 @@ void Function::eval(real* values, const real* x) const
 
     for (uint j = 0; j < scratch->size; ++j)
     {
-      values[j] = dolfin::DOLFIN_REAL_MAX;
+      values[j] = std::numeric_limits<real>::infinity();
     }
     return;
   }

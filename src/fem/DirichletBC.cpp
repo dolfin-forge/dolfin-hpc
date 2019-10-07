@@ -27,6 +27,7 @@
 #include <dolfin/fem/UFCMesh.h>
 #include <dolfin/fem/UFCCell.h>
 #include <dolfin/fem/SubSystem.h>
+#include <dolfin/parameter/parameters.h>
 
 #include <cstring>
 
@@ -168,14 +169,18 @@ void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
   b.set(values, boundary_values.size(), dofs);
 
   // Modify linear system (A_ii = 1)
-  A.ident(boundary_values.size(), dofs);
+  if(!dolfin_get("Krylov keep PC"))
+  {
+    A.ident(boundary_values.size(), dofs);
+  }
 
   // Clear temporary arrays
   delete[] dofs;
   delete[] values;
 
   // Finalise changes to A
-  A.apply();
+  if(!dolfin_get("Krylov keep PC"))
+    A.apply();
 
   // Finalise changes to b
   b.apply();

@@ -577,7 +577,7 @@ void LoadBalancer::weight_function(Mesh& mesh,
 void LoadBalancer::weight_lepp(Mesh& mesh, Cell& c, Edge& ce,
                                MeshValues<uint, Cell>& weight, uint depth)
 {
-  weight(c.index()) = weight(c.index()) + 1;
+  // weight(c.index()) = weight(c.index()) + 1;
   real l;
   real max = 0.0;
   uint index = 0;

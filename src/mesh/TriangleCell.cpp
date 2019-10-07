@@ -507,15 +507,17 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
   // The return value of orient2d is defined as twice the signed measure of
   // the triangle defined by the points given as arguments.
   real tol = geometry.abs_tolerance(2);
-  real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
-                        + (x1[1] - x0[1])*(x1[1] - x0[1]));
-  real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
-                        + (x2[1] - x1[1])*(x2[1] - x1[1]));
-  real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
-                        + (x0[1] - x2[1])*(x0[1] - x2[1]));
 
   if (geometry.dim() == 2)
   {
+
+    real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
+                        + (x1[1] - x0[1])*(x1[1] - x0[1]));
+    real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
+                        + (x2[1] - x1[1])*(x2[1] - x1[1]));
+    real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
+                        + (x0[1] - x2[1])*(x0[1] - x2[1]));
+
     // Test orientation of p w.r.t. each edge
     real d1 = orient2d( x0, x1, &p[0]);
     if (d1 < (- 2.0  * tol * l0)) return false;
@@ -526,32 +528,25 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
   }
   else if  (geometry.dim() == 3)
   {
+    real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
+                        + (x1[1] - x0[1])*(x1[1] - x0[1])
+                        + (x1[2] - x0[2])*(x1[2] - x0[2]));
+    real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
+                        + (x2[1] - x1[1])*(x2[1] - x1[1])
+                        + (x2[2] - x1[2])*(x2[2] - x1[2]));
+    real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
+                        + (x0[1] - x2[1])*(x0[1] - x2[1])
+                        + (x0[2] - x2[2])*(x0[2] - x2[2]));
+
+
     real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
     real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
     real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
     real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
 
     // Check direction of the normal to the triangle; |n.ez|/||n|| >= sqrt(2)/2
-    if(zz >= 0.5)
-    {
-      // Test orientation of p w.r.t. each edge in (x,y) plane
-      real d1 = orient2d( &x0[0], &x1[0], &p[0]);
-      if (d1 < (- 2.0  * tol * l0)) return false;
-      real d2 = orient2d( &x1[0], &x2[0], &p[0]);
-      if (d2 < (- 2.0  * tol * l1)) return false;
-      real d3 = orient2d( &x2[0], &x0[0], &p[0]);
-      if (d3 < (- 2.0  * tol * l2)) return false;
-    }
-    else
-    {
-      // Test orientation of p w.r.t. each edge in (y,z) plane
-      real d1 = orient2d( &x0[1], &x1[1], &p[1]);
-      if (d1 < (- 2.0  * tol * l0)) return false;
-      real d2 = orient2d( &x1[1], &x2[1], &p[1]);
-      if (d2 < (- 2.0  * tol * l1)) return false;
-      real d3 = orient2d( &x2[1], &x0[1], &p[1]);
-      if (d3 < (- 2.0  * tol * l2)) return false;
-    }
+    real d1 = orient3d( x0, x1, x2, &p[0]);
+    if (std::abs(d1) > tol) return false;
   }
   else
   {

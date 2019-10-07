@@ -42,7 +42,7 @@ public:
   };
 
   /// Create normal, tangents for the boundary of mesh
-  NodeNormal(Mesh& mesh, Type w = none, real alpha = 1.57);
+  NodeNormal(Mesh& mesh, Type w = unit, real alpha = 1.57);
 
   /// Create normal, tangents for the boundary of mesh for given subdomain
   NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w = none,

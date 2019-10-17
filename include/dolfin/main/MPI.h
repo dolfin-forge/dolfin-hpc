@@ -124,6 +124,9 @@ public:
   static Communicator DOLFIN_COMM_SELF;
   static Communicator DOLFIN_COMM;
 
+  /// Check for MPI errors
+  static int check_error( int const mpi_error );
+
 private:
 
   static real time_;

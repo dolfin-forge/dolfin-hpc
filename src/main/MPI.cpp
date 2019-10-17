@@ -35,10 +35,10 @@ MPI::Context MPI::ctx_;
 #endif
 
 #define DOLFIN_MPI_WRN_UNIMPLEMENTED \
-	warning("Unimplemented without MPI support");
+  warning("Unimplemented without MPI support");
 
 #define DOLFIN_MPI_ERR_UNIMPLEMENTED \
-	error("Unimplemented without MPI support");
+  error("Unimplemented without MPI support");
 
 //-----------------------------------------------------------------------------
 uint MPI::rank()
@@ -238,5 +238,196 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 #endif
 }
 //-----------------------------------------------------------------------------
+int MPI::check_error( int const mpi_error )
+{
+  switch ( mpi_error )
+  {
+  case MPI_SUCCESS:
+    break;
+  case MPI_ERR_BUFFER:
+   error( "Invalid buffer pointer" );
+    break;
+  case MPI_ERR_COUNT:
+   error( "Invalid count argument" );
+    break;
+  case MPI_ERR_TYPE:
+   error( "Invalid datatype argument" );
+    break;
+  case MPI_ERR_TAG:
+   error( "Invalid tag argument" );
+    break;
+  case MPI_ERR_COMM:
+   error( "Invalid communicator" );
+    break;
+  case MPI_ERR_RANK:
+   error( "Invalid rank" );
+    break;
+  case MPI_ERR_REQUEST:
+   error( "Invalid request (handle)" );
+    break;
+  case MPI_ERR_ROOT:
+   error( "Invalid root" );
+    break;
+  case MPI_ERR_GROUP:
+   error( "Invalid group" );
+    break;
+  case MPI_ERR_OP:
+   error( "Invalid operation" );
+    break;
+  case MPI_ERR_TOPOLOGY:
+   error( "Invalid topology" );
+    break;
+  case MPI_ERR_DIMS:
+   error( "Invalid dimension argument" );
+    break;
+  case MPI_ERR_ARG:
+   error( "Invalid argument of some other kind" );
+    break;
+  case MPI_ERR_UNKNOWN:
+   error( "Unknown error" );
+    break;
+  case MPI_ERR_TRUNCATE:
+   error( "Message truncated on receive" );
+    break;
+  case MPI_ERR_OTHER:
+   error( "Known error not in this list" );
+    break;
+  case MPI_ERR_INTERN:
+   error( "Internal MPI (implementation) error" );
+    break;
+  case MPI_ERR_IN_STATUS:
+   error( "Error code is in status" );
+    break;
+  case MPI_ERR_PENDING:
+   error( "Pending request" );
+    break;
+  case MPI_ERR_KEYVAL:
+   error( "Invalid keyval has been passed" );
+    break;
+  case MPI_ERR_NO_MEM:
+   error( "MPI_ALLOC_MEM failed because memory is exhausted" );
+    break;
+  case MPI_ERR_BASE:
+   error( "Invalid base passed to MPI_FREE_MEM" );
+    break;
+  case MPI_ERR_INFO_KEY:
+   error( "Key longer than MPI_MAX_INFO_KEY" );
+    break;
+  case MPI_ERR_INFO_VALUE:
+   error( "Value longer than MPI_MAX_INFO_VAL" );
+    break;
+  case MPI_ERR_INFO_NOKEY:
+   error( "Invalid key passed to MPI_INFO_DELETE" );
+    break;
+  case MPI_ERR_SPAWN:
+   error( "Error in spawning processes" );
+    break;
+  case MPI_ERR_PORT:
+   error( "Invalid port name passed to MPI_COMM_CONNECT" );
+    break;
+  case MPI_ERR_SERVICE:
+   error( "Invalid service name passed to MPI_UNPUBLISH_NAME" );
+    break;
+  case MPI_ERR_NAME:
+   error( "Invalid service name passed to MPI_LOOKUP_NAME" );
+    break;
+  case MPI_ERR_WIN:
+   error( "Invalid win argument" );
+    break;
+  case MPI_ERR_SIZE:
+   error( "Invalid size argument" );
+    break;
+  case MPI_ERR_DISP:
+   error( "Invalid disp argument" );
+    break;
+  case MPI_ERR_INFO:
+   error( "Invalid info argument" );
+    break;
+  case MPI_ERR_LOCKTYPE:
+   error( "Invalid locktype argument" );
+    break;
+  case MPI_ERR_ASSERT:
+   error( "Invalid assert argument" );
+    break;
+  case MPI_ERR_RMA_CONFLICT:
+   error( "Conflicting accesses to window" );
+    break;
+  case MPI_ERR_RMA_SYNC:
+   error( "Wrong synchronization of RMA calls" );
+    break;
+  case MPI_ERR_RMA_RANGE:
+   error( "Target memory is not part of the window (in the case of a window \
+           created with MPI_WIN_CREATE_DYNAMIC, target memory not attached)" );
+    break;
+  case MPI_ERR_RMA_ATTACH:
+   error( "Memory cannot be attached (e.g., because of resource exhaustion)" );
+    break;
+  case MPI_ERR_RMA_SHARED:
+   error( "Memory cannot be shared (e.g., some process in the group of the \
+           specified communicator cannot expose shared memory)" );
+    break;
+  case MPI_ERR_RMA_FLAVOR:
+   error( "Passed window has the wrong flavor for the called function" );
+    break;
+  case MPI_ERR_FILE:
+   error( "Invalid file handle" );
+    break;
+  case MPI_ERR_NOT_SAME:
+   error( "Collective argument not identical on all processes, or collective \
+           routines called in a different order by different processes" );
+    break;
+  case MPI_ERR_AMODE:
+   error( "Error related to the amode passed to MPI_FILE_OPEN" );
+    break;
+  case MPI_ERR_UNSUPPORTED_DATAREP:
+   error( "Unsupported datarep passed to MPI_FILE_SET_VIEW" );
+    break;
+  case MPI_ERR_UNSUPPORTED_OPERATION:
+   error( "Unsupported operation, such as seeking on a file which supports \
+           sequential access only" );
+    break;
+  case MPI_ERR_NO_SUCH_FILE:
+   error( "File does not exist" );
+    break;
+  case MPI_ERR_FILE_EXISTS:
+   error( "File exists" );
+    break;
+  case MPI_ERR_BAD_FILE:
+   error( "Invalid file name (e.g., path name too long)" );
+    break;
+  case MPI_ERR_ACCESS:
+   error( "Permission denied" );
+    break;
+  case MPI_ERR_NO_SPACE:
+   error( "Not enough space" );
+    break;
+  case MPI_ERR_QUOTA:
+   error( "Quota exceeded" );
+    break;
+  case MPI_ERR_READ_ONLY:
+   error( "Read-only file or file system" );
+    break;
+  case MPI_ERR_FILE_IN_USE:
+   error( "File operation could not be completed, as the file is currently \
+           open by some process" );
+    break;
+  case MPI_ERR_DUP_DATAREP:
+   error( "Conversion functions could not be registered because a data \
+           representation identifier that was already defined was passed to \
+           MPI_REGISTER_DATAREP" );
+    break;
+  case MPI_ERR_CONVERSION:
+   error( "An error occurred in a user supplied data conversion function." );
+    break;
+  case MPI_ERR_IO:
+   error( "Other I/O error" );
+    break;
+  case MPI_ERR_LASTCODE:
+   error( "Last error code" );
+   break;
+  }
+
+  return mpi_error;
+}
 
 } /* namespace dolfin */

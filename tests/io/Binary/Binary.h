@@ -14,14 +14,13 @@
 #include <dolfin/mesh/UnitInterval.h>
 #include <dolfin/ufl/UFLFiniteElement.h>
 
-
 #include <dolfin/dolfin.h>
 #include "../../demo/pde/poisson/Poisson.h"
 
 using namespace dolfin;
 
 //-----------------------------------------------------------------------------
-DOLFIN_START_TEST( test_BinaryMesh )
+DOLFIN_START_TEST( test_BinaryFile_Vector )
   {
     //--------------------------------------------------------------------------
     // (Generic)Vector
@@ -59,8 +58,12 @@ DOLFIN_START_TEST( test_BinaryMesh )
       ck_assert( v1[v1.size()/2] == v2[v2.size()/2] );
 
     }
+  }
+DOLFIN_END_TEST
     //--------------------------------------------------------------------------
     // Mesh
+DOLFIN_START_TEST( test_BinaryFile_Mesh )
+  {
     {
       Mesh mesh1;
 
@@ -98,56 +101,12 @@ DOLFIN_START_TEST( test_BinaryMesh )
 
       ck_assert( mesh1 == mesh2 );
     }
-    //--------------------------------------------------------------------------
-    // Function
-    {
-      // taken from the function test case
-      UnitInterval m0(16);
-      ufl::FiniteElement DG0(ufl::Family::DG, m0.type(), 0);
-      FiniteElementSpace Vh0(m0, DG0);
-      Function U0(Vh0);
-
-      {
-        BinaryFile f1("function.bin");
-        f1 << U0;
-      }
-
-      Function U1;
-
-      {
-        BinaryFile f2("function.bin");
-        f2 >> U1;
-      }
-
-      // U0.disp();
-      // U1.disp();
-      // ck_assert( U0 == U1 );
-    }
-    //--------------------------------------------------------------------------
-    // LabelList<Function>
-    {
-      // taken from the function test case
-      UnitInterval m0(16);
-      ufl::FiniteElement DG0(ufl::Family::DG, m0.type(), 0);
-      FiniteElementSpace Vh0(m0, DG0);
-      Function U0(Vh0);
-
-      LabelList<Function> tmp1(1, Label<Function>(U0, "U0"));
-      BinaryFile f1("LabelList.bin");
-      f1 << tmp1;
-      LabelList<Function> tmp2;
-      BinaryFile f2("LabelList.bin");
-      f2 >> tmp2;
-      // ck_assert( tmp1 == tmp2 );
-    }
-    //--------------------------------------------------------------------------
-    // MeshFunction<real>
-    {
-      // TODO
-      // ck_assert(...);
-    }
+  }
+DOLFIN_END_TEST
     //--------------------------------------------------------------------------
     // example from demo/pde/poisson
+DOLFIN_START_TEST( test_BinaryFile_Poisson )
+  {
     {
       //------------------------------------------------------------------------
 
@@ -188,7 +147,8 @@ DOLFIN_START_TEST( test_BinaryMesh )
       //------------------------------------------------------------------------
 
       // Create mesh
-      Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      UnitSquare mesh(32,32);
 
       // Create coefficients
       Analytic<Source>  f(mesh);
@@ -218,6 +178,8 @@ DOLFIN_START_TEST( test_BinaryMesh )
       solver.solve(A, u.vector(), b);
       u.sync();
 
+      u.disp();
+
       {
         BinaryFile fo("u.bin");
         fo << u;
@@ -232,6 +194,90 @@ DOLFIN_START_TEST( test_BinaryMesh )
         BinaryFile fi("u000000.bin");
         fi >> v;
       }
+    }
+  }
+DOLFIN_END_TEST
+    //--------------------------------------------------------------------------
+    // Function
+DOLFIN_START_TEST( test_BinaryFile_Function )
+  {
+    {
+      // taken from the function test case
+      // UnitInterval m0(16);
+      // ufl::FiniteElement DG0(ufl::Family::DG, m0.type(), 0);
+      // FiniteElementSpace Vh0(m0, DG0);
+      // Function U0(Vh0);
+
+      // Mesh mesh("./demo/pde/poisson/UnitSquareMesh_32x32.xml");
+      ufl::Family f(ufl::Family::CG);
+      ufl::Domain dom(ufl::Domain::triangle);
+      ufl::Cell cell(dom);
+      // Mesh mesh;
+      // CellType * ctype = CellType::create(cell);
+      // ctype->create_reference_cell(mesh);
+      // UnitCube mesh(32,32,32);
+      UnitDisk mesh(32);
+      ufl::FiniteElement uflfem(ufl::Family::CG, cell, 1);
+      dolfin::FiniteElement fem(uflfem);
+      ufc::dofmap * dmap = ElementLibrary::create_dof_map( DofMap::make_signature(fem.signature()));
+      DofMap dm(mesh, *dmap, true);
+
+      FiniteElementSpace femspace(mesh, fem, dm, false);
+      Function U0(femspace);
+      U0.vector() = 1.;
+
+      U0.disp();
+
+      {
+        BinaryFile f1("function.bin");
+        f1 << U0;
+      }
+
+      Function U1(femspace);
+      U1.vector() = 0.;
+
+      {
+        BinaryFile f2("function000000.bin");
+        f2 >> U1;
+      }
+
+      // U0.disp();
+      // U1.disp();
+      // ck_assert( U0 == U1 );
+    }
+  }
+DOLFIN_END_TEST
+    //--------------------------------------------------------------------------
+    // LabelList<Function>
+DOLFIN_START_TEST( test_BinaryFile_LabelList )
+  {
+    {
+      // taken from the function test case
+      UnitInterval m0(16);
+      ufl::FiniteElement DG0(ufl::Family::DG, m0.type(), 0);
+      FiniteElementSpace Vh0(m0, DG0);
+      Function U0(Vh0);
+
+      U0.disp();
+
+      LabelList<Function> tmp1(1, Label<Function>(U0, "U0"));
+      BinaryFile f1("LabelList.bin");
+      f1 << tmp1;
+      Function U1(Vh0);
+      LabelList<Function> tmp2(1, Label<Function>(U1, "U0"));
+      BinaryFile f2("LabelList000000.bin");
+      f2 >> tmp2;
+      // ck_assert( tmp1 == tmp2 );
+    }
+  }
+DOLFIN_END_TEST
+    //--------------------------------------------------------------------------
+    // MeshFunction<real>
+DOLFIN_START_TEST( test_BinaryFile_MeshFunction )
+  {
+    {
+      // TODO
+      // ck_assert( 3 == (2+1));
     }
 
   }

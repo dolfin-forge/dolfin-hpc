@@ -25,7 +25,12 @@ DOLFIN_SUITE_BEGIN(suite, "io")
   DOLFIN_TCASE_ADD(test_VTKMesh);
 
   DOLFIN_TCASE_CREATE("Binary");
-  DOLFIN_TCASE_ADD(test_BinaryMesh);
+  DOLFIN_TCASE_ADD(test_BinaryFile_Vector);
+  DOLFIN_TCASE_ADD(test_BinaryFile_Mesh);
+  DOLFIN_TCASE_ADD(test_BinaryFile_Poisson);
+  DOLFIN_TCASE_ADD(test_BinaryFile_Function);
+  DOLFIN_TCASE_ADD(test_BinaryFile_LabelList);
+  DOLFIN_TCASE_ADD(test_BinaryFile_MeshFunction);
 }
 DOLFIN_SUITE_END
 //-----------------------------------------------------------------------------

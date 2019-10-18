@@ -40,29 +40,29 @@ namespace dolfin
     };
 
     static void init(Mode mode, bool debug = false);
-        
+
     static void shutdown();
 
     static void batchRender(real t = 0.0, uint tstep = 0.0);
 
     static void ctrlLoop(real t = 0.0, uint tstep = 0.0, int blocking = 0);
 
-    static void addData(GenericFunction& function, 
+    static void addData(GenericFunction& function,
 			std::string function_name,
 			std::string mesh_name);
-    
+
     static void addData(Mesh& mesh, std::string name);
 
     static void addPipeline(libsimPipeline& pipeline);
 
     static void clearData();
-    
+
     static void clearPipeline();
 
   private:
 
     static int initBatch();
-    
+
     static int initInteractive();
 
     static int setupEnv();
@@ -74,7 +74,7 @@ namespace dolfin
 
     struct libsimData
     {
-      double t_;		
+      double t_;
       uint tstep_;
       bool batch_;
       LabelList<Mesh> mesh_list_;
@@ -91,7 +91,7 @@ namespace dolfin
 //--- Callback functions  -----------------------------------------------------
 
     // Function to return meta data
-    inline static visit_handle libsimGetMetaData(void *data) 
+    inline static visit_handle libsimGetMetaData(void *data)
     {
       libsimData *d = (libsimData *) data;
 
@@ -99,13 +99,13 @@ namespace dolfin
       visit_handle msh = VISIT_INVALID_HANDLE;
       visit_handle vmd = VISIT_INVALID_HANDLE;
 
-      if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY) 
+      if (VisIt_SimulationMetaData_alloc(&md) == VISIT_OKAY)
       {
 
 	VisIt_SimulationMetaData_setCycleTime(md, d->tstep_, d->t_);
 
 	// Mesh meta data
-	for (LabelList<Mesh>::iterator it = 
+	for (LabelList<Mesh>::iterator it =
 	       d->mesh_list_.begin(); it != d->mesh_list_.end(); it++)
 	{
 	  if (VisIt_MeshMetaData_alloc(&msh) == VISIT_OKAY)
@@ -113,7 +113,7 @@ namespace dolfin
 	    Mesh *mesh = it->first;
 	    VisIt_MeshMetaData_setName(msh, it->second.c_str());
 	    VisIt_MeshMetaData_setMeshType(msh, VISIT_MESHTYPE_UNSTRUCTURED);
-	    VisIt_MeshMetaData_setSpatialDimension(msh, 
+	    VisIt_MeshMetaData_setSpatialDimension(msh,
 						   mesh->geometry().dim());
 	    VisIt_MeshMetaData_setTopologicalDimension(msh,
 						       mesh->topology().dim());
@@ -123,10 +123,10 @@ namespace dolfin
 	}
 
 	// Function meta data
-	for (LabelList<GenericFunction>::iterator it = 
+	for (LabelList<GenericFunction>::iterator it =
 	       d->function_list_.begin(); it != d->function_list_.end(); it++)
 	{
-	  if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY) 
+	  if (VisIt_VariableMetaData_alloc(&vmd) == VISIT_OKAY)
 	  {
 
 	    const char *name = it->second.c_str();
@@ -144,13 +144,13 @@ namespace dolfin
 	    {
 	      VisIt_VariableMetaData_setType(vmd, VISIT_VARTYPE_VECTOR);
 	    }
-	    else 
+	    else
 	    {
 	      error("Invalid function");
 	    }
-	    
+
 	    VisIt_SimulationMetaData_addVariable(md, vmd);
-	  
+
 	  }
 	}
 
@@ -171,13 +171,13 @@ namespace dolfin
 	VisIt_VariableData_setDataI(hdl, VISIT_OWNER_COPY, 1, 1, &pe_rank);
 	VisIt_DomainList_setDomains(dl, pe_size, hdl);
       }
-      
+
       return dl;
-      
+
     }
-    
+
     // Function to return mesh data
-    inline static visit_handle libsimGetMesh(int domain, 
+    inline static visit_handle libsimGetMesh(int domain,
 					     const char *name, void *data)
     {
       libsimData *d = (libsimData *) data;
@@ -190,13 +190,13 @@ namespace dolfin
 	  VisIt_VariableData_alloc(&coords) == VISIT_OKAY &&
 	  VisIt_VariableData_alloc(&conn) == VISIT_OKAY)
       {
-	
+
 	LabelList<Mesh>::iterator it = d->mesh_list_.begin();
 	for( ; it != d->mesh_list_.end(); it++)
 	{
 	  if (strcmp(it->second.c_str(), name) == 0) break;
 	}
-	
+
 	if (it == d->mesh_list_.end())
 	{
 	  VisIt_VariableData_free(msh);
@@ -204,15 +204,15 @@ namespace dolfin
 	  VisIt_VariableData_free(conn);
 	  return VISIT_INVALID_HANDLE;
 	}
-	
+
 	Mesh *mesh = it->first;
-	
+
 	VisIt_VariableData_setDataD(coords, VISIT_OWNER_SIM,
 				    mesh->topology().dim(),
 				    mesh->num_vertices(),
 				    mesh->geometry().coordinates());
 	VisIt_UnstructuredMesh_setCoords(msh, coords);
-	
+
 	uint *dolfin_conn = mesh->cells();
 	uint cell_type = 0;
 	switch(mesh->type().cellType())
@@ -228,31 +228,31 @@ namespace dolfin
 	    break;
 	  }
 
-	int nconn = mesh->num_cells() * 
+	int nconn = mesh->num_cells() *
 	  (mesh->type().num_entities(0) + 1);
 	int *visit_conn = new int[nconn];
-	
+
 	for (int *cp = &visit_conn[0], i = 0; i < mesh->num_cells(); i++)
 	{
 	  *(cp++) = cell_type;
-	  for (int j = 0; j < mesh->type().num_entities(0); j++) 
+	  for (int j = 0; j < mesh->type().num_entities(0); j++)
 	  {
 	    *(cp++) = (int) *(dolfin_conn++);
 	  }
 	}
-	
-	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1, 
+
+	VisIt_VariableData_setDataI(conn, VISIT_OWNER_VISIT, 1,
 				    nconn, visit_conn);
 	VisIt_UnstructuredMesh_setConnectivity(msh, mesh->num_cells(), conn);
 
       }
-      
+
       return msh;
     }
 
-    
+
     // Function to return function data
-    inline static visit_handle libsimGetFunction(int domain, 
+    inline static visit_handle libsimGetFunction(int domain,
 						 const char *name, void *data)
     {
       libsimData *d = (libsimData *) data;
@@ -260,7 +260,7 @@ namespace dolfin
       visit_handle func = VISIT_INVALID_HANDLE;
 
 
-      if (VisIt_VariableData_alloc(&func) == VISIT_OKAY) 
+      if (VisIt_VariableData_alloc(&func) == VISIT_OKAY)
       {
 	LabelList<GenericFunction>::iterator it = d->function_list_.begin();
 	for( ; it != d->function_list_.end(); it++)
@@ -302,46 +302,45 @@ namespace dolfin
 
 	for (VertexIterator v(*(mesh)); !v.end(); ++v)
 	{
-	  for (uint i = 0; i < u->value_size(); i++) 
+	  for (uint i = 0; i < u->value_size(); i++)
 	  {
 	    *(vp++) = vertex_values[v->index() + i * mesh->num_vertices()];
 	  }
 	}
 	delete[] vertex_values;
-	
+
 	VisIt_VariableData_setDataD(func, VISIT_OWNER_VISIT, u->value_size(),
 				    mesh->num_vertices(), values);
 
       }
       return func;
     }
-    
-    inline static int libsimActivateTimeStep(void *data) 
-    {      
+
+    inline static int libsimActivateTimeStep(void *data)
+    {
     }
 
 #ifdef HAVE_MPI
 
     // Parallel related callbacks for libsim
-    
+
     // Callback for broadcasting an int from visit
     inline static int libsimBroadcastInt(int *value, int sender)
     {
-      return MPI_Bcast(value, 1, MPI_INT, sender, MPI::DOLFIN_COMM);
+      return MPI::bcast( value, 1, sender );
     }
 
     // Callback for broadcasting a string from visit
     inline static int libsimBroadcastStr(char *str, int len, int sender)
     {
-      return MPI_Bcast(str, len, MPI_CHAR, sender, MPI::DOLFIN_COMM);
+      return MPI::bcast( str, len, sender )
     }
-
 
     // Callback for informing slave processes to progress
     inline static void libsimSlaveProcess(void *data)
     {
       int command = 0; // VISIT_COMMAND_PROCESS;
-      MPI_Bcast(&command, 1, MPI_INT, 0, MPI::DOLFIN_COMM);
+      MPI::bcast( command, 1, 0 );
     }
 #endif
 
@@ -350,22 +349,22 @@ namespace dolfin
 #endif
 
   };
-  
+
   inline void libsimInterface::addData(GenericFunction& function,
-				       std::string function_name, 
+				       std::string function_name,
 				       std::string mesh_name)
   {
     Label<GenericFunction> item(function, function_name);
     InsituData_.function_list_.push_back(item);
-    
+
     // Check if the mesh is already registered...
     LabelList<Mesh>::iterator it = InsituData_.mesh_list_.begin();
     for( ; it != InsituData_.mesh_list_.end(); it++)
     {
-      if (it->second == mesh_name) 
+      if (it->second == mesh_name)
       {
 	if (it->first->hash() == function.mesh().hash())
-	{      
+	{
 	  break;
 	}
 	else
@@ -385,7 +384,7 @@ namespace dolfin
 
 
   }
-  
+
   inline void libsimInterface::addData(Mesh& mesh, std::string name)
   {
     Label<Mesh> item(mesh, name);

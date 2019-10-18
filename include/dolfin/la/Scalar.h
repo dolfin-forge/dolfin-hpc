@@ -79,11 +79,9 @@ namespace dolfin
 
     /// Finalize assembly of tensor
     void apply(FinalizeType finaltype=FINALIZE)
-    { 
-#ifdef HAVE_MPI
-      real tmp = value; 
-      MPI_Allreduce(&tmp, &value, 1, MPI_DOUBLE, MPI_SUM, MPI::DOLFIN_COMM);
-#endif
+    {
+      real tmp = value;
+      MPI::all_reduce<MPI::sum>(tmp, value);
     }
 
 
@@ -104,12 +102,12 @@ namespace dolfin
     //--- Special functions
 
     /// Return a factory for the default linear algebra backend
-    inline LinearAlgebraFactory& factory() const 
+    inline LinearAlgebraFactory& factory() const
     {
 
       // Get backend from parameter system
       std::string backend = dolfin_get("linear algebra backend");
-      
+
 #if (HAVE_PETSC && HAVE_JANPACK)
       if (backend == "PETSc")
       {
@@ -118,12 +116,12 @@ namespace dolfin
       else if (backend == "JANPACK")
       {
 	return JANPACKFactory::instance();
-      }      
+      }
 #elif HAVE_PETSC
       return PETScFactory::instance();
-#elif HAVE_JANPACK 
+#elif HAVE_JANPACK
       return JANPACKFactory::instance();
-#endif      
+#endif
       error("Linear algebra backend \"" + backend + "\" not available.");
     }
 
@@ -132,7 +130,7 @@ namespace dolfin
     { return value; }
 
   private:
-    
+
     // Value of scalar
     real value;
 

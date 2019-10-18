@@ -85,7 +85,7 @@ void mkdir(std::string const& dirpath)
     error("Unable to create directory: '%s'", dirpath.c_str());
   }
 #if HAVE_MPI
-  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(dolfin::MPI::DOLFIN_COMM) );
 #endif
   if (dolfin::MPI::rank() > 0 && (::stat(dirpath.c_str(), &sb) < 0)
         && ::mkdir(dirpath.c_str(), S_IRWXU) < 0)
@@ -122,7 +122,7 @@ void cd(std::string const& dirpath)
     error("Unable to enter directory: '%s'", dirpath.c_str());
   }
 #if HAVE_MPI
-  MPI_Barrier(dolfin::MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(dolfin::MPI::DOLFIN_COMM) );
 #endif
 }
 //-----------------------------------------------------------------------------

@@ -309,6 +309,18 @@ inline int MPI::sendrecv(uint* s, int ns, int src, uint* r, int nr, int dst,
 }
 //-----------------------------------------------------------------------------
 template<>
+inline int MPI::sendrecv(long* s, int ns, int src, long* r, int nr, int dst,
+                         int tg, Communicator& comm)
+{
+  MPI_Status status;
+  int recv_count;
+  MPI::check_error( MPI_Sendrecv(s, ns, MPI_LONG, src, tg, r, nr,
+                                 MPI_LONG, dst, tg, comm, &status) );
+  MPI::check_error( MPI_Get_count(&status, MPI_LONG, &recv_count) );
+  return recv_count;
+}
+//-----------------------------------------------------------------------------
+template<>
 inline int MPI::sendrecv(real* s, int ns, int src, real* r, int nr, int dst,
                          int tg, Communicator& comm)
 {

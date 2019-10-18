@@ -28,7 +28,8 @@ public:
      * MPI 1.1:
      *  "A null handle argument is an erroneous IN argument in MPI calls"
      */
-    if(comm != DOLFIN_COMM_NULL) MPI_Comm_dup(comm, &comm_);
+    if(comm != DOLFIN_COMM_NULL)
+      MPI::check_error( MPI_Comm_dup(comm, &comm_) );
 #endif
   }
 
@@ -53,7 +54,8 @@ public:
   {
     int ret = 0;
 #if HAVE_MPI
-    if(comm_ != DOLFIN_COMM_NULL) MPI_Comm_rank(comm_, &ret);
+    if(comm_ != DOLFIN_COMM_NULL)
+      MPI::check_error( MPI_Comm_rank(comm_, &ret) );
 #endif
     return uint(ret);
   }
@@ -63,7 +65,8 @@ public:
   {
     int ret = 1;
 #if HAVE_MPI
-    if(comm_ != DOLFIN_COMM_NULL) MPI_Comm_size(comm_, &ret);
+    if(comm_ != DOLFIN_COMM_NULL)
+      MPI::check_error( MPI_Comm_size(comm_, &ret) );
 #endif
     return uint(ret);
   }
@@ -80,7 +83,8 @@ protected:
   virtual ~Distributed()
   {
 #if HAVE_MPI
-    if(comm_ != DOLFIN_COMM_NULL)  MPI_Comm_free(&comm_);
+    if(comm_ != DOLFIN_COMM_NULL)
+      MPI::check_error( MPI_Comm_free(&comm_) );
 #endif
   }
 
@@ -90,8 +94,10 @@ protected:
     if (this != &other)
     {
 #if HAVE_MPI
-      if(comm_ != DOLFIN_COMM_NULL) MPI_Comm_free(&comm_);
-      if(other.comm_ != DOLFIN_COMM_NULL) MPI_Comm_dup(other.comm_, &comm_);
+      if(comm_ != DOLFIN_COMM_NULL)
+        MPI::check_error( MPI_Comm_free(&comm_) );
+      if(other.comm_ != DOLFIN_COMM_NULL)
+        MPI::check_error( MPI_Comm_dup(other.comm_, &comm_) );
 #endif
     }
     return *this;

@@ -270,13 +270,10 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
   }
 
   // Exchange data to fill halo data arrays: facet blocks are written directly
-  MPI_Status status;
-  int src = 0;
-  int dst = 0;
   for (int j = 1; j < (int) pe_size; ++j)
   {
-    src = (rank - j + pe_size) % pe_size;
-    dst = (rank + j) % pe_size;
+    int src = (rank - j + pe_size) % pe_size;
+    int dst = (rank + j) % pe_size;
 
     uint num_send_facets = distdata.shared_mapping().to(dst).size();
     uint num_recv_facets = distdata.shared_mapping().from(src).size();
@@ -287,18 +284,15 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
     real * r_recvbuf = &r_data1_[recv_offset * r_packet_size_];
     int r_sendcount = num_send_facets * r_packet_size_;
     int r_recvcount = num_recv_facets * r_packet_size_;
-    MPI_Sendrecv(&r_sendbuf[0], r_sendcount, MPI_DOUBLE, dst, 1, &r_recvbuf[0],
-                 r_recvcount, MPI_DOUBLE, src, 1, dolfin::MPI::DOLFIN_COMM,
-                 &status);
+    MPI::sendrecv( &r_sendbuf[0], r_sendcount, dst,
+                   &r_recvbuf[0], r_recvcount, src, 1 );
 
     uint * u_sendbuf = &u_data0_[send_offset * u_packet_size_];
     uint * u_recvbuf = &u_data1_[recv_offset * u_packet_size_];
     int u_sendcount = num_send_facets * u_packet_size_;
     int u_recvcount = num_recv_facets * u_packet_size_;
-    MPI_Sendrecv(&u_sendbuf[0], u_sendcount, MPI_UNSIGNED, dst, 1,
-                 &u_recvbuf[0], u_recvcount, MPI_UNSIGNED, src, 1,
-                 dolfin::MPI::DOLFIN_COMM, &status);
-
+    MPI::sendrecv( &u_sendbuf[0], u_sendcount, dst,
+                   &u_recvbuf[0], u_recvcount, src, 1 );
   }
 
 #endif

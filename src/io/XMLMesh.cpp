@@ -20,10 +20,7 @@
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/io/XMLMesh.h>
 #include <dolfin/parameter/parameters.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -328,13 +325,9 @@ void XMLMesh::endMesh()
     NonLocalAdj nonlocal_adjacents; //XXX: dirty hack
 
     // Exchange ghost points
-    MPI_Status status;
-    uint src;
-    uint dst;
     uint recvmax;
     MPI::all_reduce<MPI::sum>(shared, recvmax);
     uint *recvbuf = new uint[recvmax];
-    int recvcount;
     uint * sendbuf_v = new uint[2*recvmax];
     real * sendbuf_x = new real[gdim*recvmax];
     uint recvcnt_v = 2*shared;
@@ -346,13 +339,11 @@ void XMLMesh::endMesh()
     DistributedData& vdata0 = mesh_.distdata()[0];
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dst = (rank + j) % pe_size;
+      int src = (rank - j + pe_size) % pe_size;
+      int dst = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dst, 0,
-                   recvbuf    , recvmax       , MPI_UNSIGNED, src, 0,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      int recvcount = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dst,
+                                     recvbuf, recvmax, src, 0 );
 
       uint count = 0;
       for (int k = 0; k < recvcount; ++k)
@@ -387,17 +378,13 @@ void XMLMesh::endMesh()
         }
       }
 
-      MPI_Sendrecv(&sendbuf_v[0], 2 * count, MPI_UNSIGNED, src, 1,
-                   recvptr_v    , recvcnt_v, MPI_UNSIGNED, dst, 1,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+      recvcount = MPI::sendrecv( &sendbuf_v[0], 2 * count, src,
+                                 recvptr_v, recvcnt_v, dst, 1 );
       recvcnt_v -= recvcount;
       recvptr_v += recvcount;
 
-      MPI_Sendrecv(&sendbuf_x[0], gdim * count, MPI_DOUBLE, src, 2,
-                   recvptr_x    , recvcnt_x   , MPI_DOUBLE, dst, 2,
-                   MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
+      recvcount = MPI::sendrecv( &sendbuf_x[0], gdim * count, src,
+                                 recvptr_x, recvcnt_x, dst, 2 );
       recvcnt_x -= recvcount;
       recvptr_x += recvcount;
     }

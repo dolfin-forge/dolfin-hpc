@@ -187,7 +187,6 @@ void VertexNormal::computeNormal(Mesh& mesh)
     }
 
     // Exchange data
-    MPI_Status status;
     uint src;
     uint dest;
     uint const u_size = 2;
@@ -205,11 +204,9 @@ void VertexNormal::computeNormal(Mesh& mesh)
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
     }
     dolfin_assert(u_maxsendcount <= u_size * mesh.topology().num_ghost(0));
-    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
-    MPI_Allreduce(&r_maxsendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
     dolfin_assert(r_maxrecvcount > 0);
 
     // For each process
@@ -221,15 +218,12 @@ void VertexNormal::computeNormal(Mesh& mesh)
       dest = (rank + j) % pe_size;
 
       u_sendcount = u_sendbuff[dest].size();
-      MPI_Sendrecv(&u_sendbuff[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
-                   &u_recvbuff[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
+      u_recvcount = MPI::sendrecv( &u_sendbuff[dest][0], u_sendcount, dest,
+                                   &u_recvbuff[0], u_maxrecvcount, src, 1 );
 
       r_sendcount = r_sendbuff[dest].size();
-      MPI_Sendrecv(&r_sendbuff[dest][0], r_sendcount, MPI_DOUBLE, dest, 1,
-                   &r_recvbuff[0], r_maxrecvcount, MPI_DOUBLE, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI::sendrecv( &r_sendbuff[dest][0], r_sendcount, dest,
+                     &r_recvbuff[0], r_maxrecvcount, src, 1 );
 
       real * rptr = &r_recvbuff[0];
       for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
@@ -336,7 +330,6 @@ void VertexNormal::computeNormal(Mesh& mesh)
     DistributedData const& ddv = mesh.distdata()[0];
 
     // Exchange data
-    MPI_Status status;
     uint src;
     uint dest;
     uint const u_size = 2;
@@ -353,11 +346,9 @@ void VertexNormal::computeNormal(Mesh& mesh)
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
     }
-    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
-    MPI_Allreduce(&r_maxsendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
     dolfin_assert(r_maxrecvcount > 0);
 
     // For each process
@@ -369,15 +360,12 @@ void VertexNormal::computeNormal(Mesh& mesh)
       dest = (rank + j) % pe_size;
 
       u_sendcount = u_sendbuff[dest].size();
-      MPI_Sendrecv(&u_sendbuff[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
-                   &u_recvbuff[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
+      u_recvcount = MPI::sendrecv( &u_sendbuff[dest][0], u_sendcount, dest,
+                                   &u_recvbuff[0], u_maxrecvcount, src, 1 );
 
       r_sendcount = r_sendbuff[dest].size();
-      MPI_Sendrecv(&r_sendbuff[dest][0], r_sendcount, MPI_DOUBLE, dest, 1,
-                   &r_recvbuff[0], r_maxrecvcount, MPI_DOUBLE, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI::sendrecv( &r_sendbuff[dest][0], r_sendcount, dest,
+                     &r_recvbuff[0], r_maxrecvcount, src, 1 );
 
       //
       uint iir = 0;

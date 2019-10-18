@@ -22,10 +22,6 @@
 #include <slepc.h>
 #endif
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 #ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>
 #endif
@@ -153,10 +149,11 @@ bool SubSystemsManager::MPI::init(int argc, char* argv[], uint n)
 
 #ifdef HAVE_JANPACK_MPI
   int provided;
-  MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+  dolfin::MPI::check_error( MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED,
+                                    &provided) );
   SUBSYSTEM_SET_INIT(JANPACK);
 #else
-  MPI_Init(&argc, &argv);
+  dolfin::MPI::check_error( MPI_Init(&argc, &argv) );
 #endif /* HAVE_JANPACK_MPI */
 
   dolfin::MPI::initComm(n);
@@ -188,7 +185,7 @@ bool SubSystemsManager::MPI::fini()
   }
 
   dolfin::MPI::finiComm();
-  MPI_Finalize();
+  dolfin::MPI::check_error( MPI_Finalize() );
   SUBSYSTEM_SET_FINI(MPI);
 
 #else
@@ -204,7 +201,7 @@ bool SubSystemsManager::MPI::initialized()
 #ifdef HAVE_MPI
 
   int initialized;
-  MPI_Initialized(&initialized);
+  dolfin::MPI::check_error( MPI_Initialized(&initialized) );
   return (initialized > 0);
 
 #else

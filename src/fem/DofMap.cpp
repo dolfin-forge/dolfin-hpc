@@ -20,10 +20,7 @@
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
 #include <dolfin/mesh/Vertex.h>
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
+#include <dolfin/main/MPI.h>
 
 namespace dolfin
 {
@@ -567,9 +564,6 @@ bool DofMap::check(bool throw_error)
   // Simple version
   uint rank = dolfin::MPI::rank();
   uint pe_size = dolfin::MPI::size();
-  MPI_Status status;
-  int src = 0;
-  int dest = 0;
 
   Array<uint> sendbuf;
   if (distributed_by_entities_)
@@ -597,22 +591,19 @@ bool DofMap::check(bool throw_error)
 
   int recv_count = sendbuf.size();
   int maxrev_count = 0;
-  MPI_Allreduce(&recv_count, &maxrev_count, 1, MPI_INT, MPI_MAX,
-                dolfin::MPI::DOLFIN_COMM);
+  MPI::all_reduce<MPI::max>( recv_count, maxrev_count );
   dolfin_assert(maxrev_count > 0);
   uint * recvbuf = new uint[maxrev_count];
 
   _set<uint> owned_more;
   for (uint p = 1; p < pe_size; ++p)
   {
-    src = (rank - p + pe_size) % pe_size;
-    dest = (rank + p) % pe_size;
+    int src = (rank - p + pe_size) % pe_size;
+    int dest = (rank + p) % pe_size;
 
     //
-    MPI_Sendrecv(&sendbuf[0], sendbuf.size(), MPI_UNSIGNED, dest, 0, recvbuf,
-                 maxrev_count, MPI_UNSIGNED, src, 0, dolfin::MPI::DOLFIN_COMM,
-                 &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf[0], sendbuf.size(), dest,
+                                recvbuf, maxrev_count, src, 0);
     for (uint i = 0; i < uint(recv_count);)
     {
       if (distributed_by_entities_)

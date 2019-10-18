@@ -96,6 +96,12 @@ public:
   static int bcast(T* x, int n, int r, Communicator& comm = MPI::DOLFIN_COMM);
 
   //// Wrap in a template function to allow use of functors
+  template<typename T>
+  static int all_gather( T * sendbuf, int sendcount,
+                         T * recvbuf, int recvcount,
+                         Communicator& comm = MPI::DOLFIN_COMM );
+
+  //// Wrap in a template function to allow use of functors
   template<int R, class T>
   static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
 
@@ -169,6 +175,36 @@ template<>
 inline int MPI::bcast(real* x, int n, int r, Communicator& comm)
 {
   return MPI::check_error( MPI_Bcast(x, n, MPI_DOUBLE, r, comm) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_gather( int * sendbuf, int sendcount,
+                            int * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_INTEGER,
+                                          recvbuf, recvcount, MPI_INTEGER,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_gather( uint * sendbuf, int sendcount,
+                            uint * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_UNSIGNED,
+                                          recvbuf, recvcount, MPI_UNSIGNED,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_gather( real * sendbuf, int sendcount,
+                            real * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_DOUBLE,
+                                          recvbuf, recvcount, MPI_DOUBLE,
+                                          comm ) );
 }
 //-----------------------------------------------------------------------------
 template<>

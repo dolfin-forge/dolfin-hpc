@@ -110,7 +110,7 @@ uint MPI::global_size()
 void MPI::startTimer()
 {
 #ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   time_ = MPI_Wtime();
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
@@ -120,7 +120,7 @@ void MPI::startTimer()
 real MPI::stopTimer()
 {
 #ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   return (MPI_Wtime() - time_);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
@@ -131,7 +131,7 @@ real MPI::stopTimer()
 void MPI::startTimer(real& stime)
 {
 #ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   stime = MPI_Wtime();
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
@@ -141,7 +141,7 @@ void MPI::startTimer(real& stime)
 real MPI::stopTimer(real& stime)
 {
 #ifdef HAVE_MPI
-  MPI_Barrier(MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   return (MPI_Wtime() - stime);
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
@@ -156,10 +156,10 @@ void MPI::initComm(int ngroups)
 #ifdef HAVE_MPI
 
   // Initialize world
-  MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD);
-  MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &ctx_.global_rank);
-  MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &ctx_.global_size);
-  MPI_Comm_dup(MPI_COMM_SELF, &MPI::DOLFIN_COMM_SELF);
+  MPI::check_error( MPI_Comm_dup(MPI_COMM_WORLD, &MPI::DOLFIN_COMM_WORLD) );
+  MPI::check_error( MPI_Comm_rank(MPI::DOLFIN_COMM_WORLD, &ctx_.global_rank) );
+  MPI::check_error( MPI_Comm_size(MPI::DOLFIN_COMM_WORLD, &ctx_.global_size) );
+  MPI::check_error( MPI_Comm_dup(MPI_COMM_SELF, &MPI::DOLFIN_COMM_SELF) );
   ctx_.seed = std::time(0) + ctx_.global_rank;
 
   // Initialize group(s)
@@ -168,7 +168,7 @@ void MPI::initComm(int ngroups)
   if ((ngroups > 1) && (wsize >= ngroups))
   {
     MPI_Group wgroup;
-    MPI_Comm_group(MPI::DOLFIN_COMM_WORLD, &wgroup);
+    MPI::check_error( MPI_Comm_group(MPI::DOLFIN_COMM_WORLD, &wgroup) );
 
     int const p = wsize / ngroups;
     int const r = wsize % ngroups;
@@ -178,18 +178,19 @@ void MPI::initComm(int ngroups)
     int srange[3] = { sroot, sroot + ssize - 1, 1 };
 
     MPI_Group sgroup;
-    MPI_Group_range_incl(wgroup, 1, &srange, &sgroup);
-    MPI_Comm_create(MPI::DOLFIN_COMM_WORLD, sgroup, &MPI::DOLFIN_COMM);
-    MPI_Group_rank(sgroup, &ctx_.rank);
-    MPI_Group_size(sgroup, &ctx_.size);
+    MPI::check_error( MPI_Group_range_incl(wgroup, 1, &srange, &sgroup) );
+    MPI::check_error( MPI_Comm_create(MPI::DOLFIN_COMM_WORLD, sgroup,
+                                      &MPI::DOLFIN_COMM) );
+    MPI::check_error( MPI_Group_rank(sgroup, &ctx_.rank) );
+    MPI::check_error( MPI_Group_size(sgroup, &ctx_.size) );
     ctx_.group_idx = k;
     ctx_.group_cnt = ngroups;
   }
   else
   {
-    MPI_Comm_dup(MPI::DOLFIN_COMM_WORLD, &MPI::DOLFIN_COMM);
-    MPI_Comm_rank(MPI::DOLFIN_COMM, &ctx_.rank);
-    MPI_Comm_size(MPI::DOLFIN_COMM, &ctx_.size);
+    MPI::check_error( MPI_Comm_dup(MPI::DOLFIN_COMM_WORLD, &MPI::DOLFIN_COMM) );
+    MPI::check_error( MPI_Comm_rank(MPI::DOLFIN_COMM, &ctx_.rank) );
+    MPI::check_error( MPI_Comm_size(MPI::DOLFIN_COMM, &ctx_.size) );
     ctx_.group_idx = 0;
     ctx_.group_cnt = 1;
   }
@@ -201,9 +202,9 @@ void MPI::initComm(int ngroups)
 void MPI::finiComm()
 {
 #ifdef HAVE_MPI
-  MPI_Comm_free(&MPI::DOLFIN_COMM);
-  MPI_Comm_free(&MPI::DOLFIN_COMM_SELF);
-  MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD);
+  MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM) );
+  MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM_SELF) );
+  MPI::check_error( MPI_Comm_free(&MPI::DOLFIN_COMM_WORLD) );
 #else
   DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
@@ -230,9 +231,10 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
   offset = 0;
 #ifdef HAVE_MPI
 #if ( MPI_VERSION > 1 )
-  MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, MPI::DOLFIN_COMM);
+  MPI::check_error( MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM,
+                               MPI::DOLFIN_COMM) );
 #else
-  MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm);
+  MPI::check_error( MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm) );
   offset -= local;
 #endif
 #endif

@@ -172,6 +172,27 @@ inline int MPI::bcast(real* x, int n, int r, Communicator& comm)
 }
 //-----------------------------------------------------------------------------
 template<>
+inline int MPI::all_reduce<MPI::sum>(int x, int& r, Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_SUM,
+                                         comm) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_reduce<MPI::min>(int x, int& r, Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_MIN,
+                                         comm) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_reduce<MPI::max>(int x, int& r, Communicator& comm)
+{
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_MAX,
+                                         comm) );
+}
+//-----------------------------------------------------------------------------
+template<>
 inline int MPI::all_reduce<MPI::sum>(uint x, uint& r, Communicator& comm)
 {
   return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_UNSIGNED, MPI_SUM,

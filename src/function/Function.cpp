@@ -469,10 +469,11 @@ void Function::interpolate_vertex_values(real* values) const
         src = (rank - j + pe_size) % pe_size;
         dst = (rank + j) % pe_size;
 
-        MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                     &recvbuf[0], recvsize, MPI_DOUBLE, src, 1,
-                     MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_DOUBLE, &recvcount);
+        MPI::check_error( MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(),
+                                       MPI_UNSIGNED, dst, 1,  &recvbuf[0],
+                                       recvsize, MPI_DOUBLE, src, 1,
+                                       MPI::DOLFIN_COMM, &status) );
+        MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recvcount) );
 
         // Add contributions, just simplified this part with mappings
         Array<uint> recvmapping = dist0.shared_mapping().from(src);
@@ -491,7 +492,7 @@ void Function::interpolate_vertex_values(real* values) const
       //
       delete[] recvbuf;
       delete[] sendbuf;
-#endif 
+#endif
     }
 
 

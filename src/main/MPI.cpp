@@ -242,6 +242,7 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 //-----------------------------------------------------------------------------
 int MPI::check_error( int const mpi_error )
 {
+#ifdef HAVE_MPI
   switch ( mpi_error )
   {
   case MPI_SUCCESS:
@@ -430,6 +431,9 @@ int MPI::check_error( int const mpi_error )
   }
 
   return mpi_error;
+#else
+  return MPI_SUCCESS;
+#endif
 }
 
 } /* namespace dolfin */

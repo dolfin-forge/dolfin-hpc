@@ -184,8 +184,8 @@ inline int MPI::all_gather( int * sendbuf, int sendcount,
                             int * recvbuf, int recvcount,
                             Communicator& comm )
 {
-  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_INTEGER,
-                                          recvbuf, recvcount, MPI_INTEGER,
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_INT,
+                                          recvbuf, recvcount, MPI_INT,
                                           comm ) );
 }
 //-----------------------------------------------------------------------------
@@ -212,22 +212,19 @@ inline int MPI::all_gather( real * sendbuf, int sendcount,
 template<>
 inline int MPI::all_reduce<MPI::sum>(int x, int& r, Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_SUM,
-                                         comm) );
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INT, MPI_SUM, comm) );
 }
 //-----------------------------------------------------------------------------
 template<>
 inline int MPI::all_reduce<MPI::min>(int x, int& r, Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_MIN,
-                                         comm) );
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INT, MPI_MIN, comm) );
 }
 //-----------------------------------------------------------------------------
 template<>
 inline int MPI::all_reduce<MPI::max>(int x, int& r, Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INTEGER, MPI_MAX,
-                                         comm) );
+  return MPI::check_error( MPI_Allreduce(&x, &r, 1, MPI_INT, MPI_MAX, comm) );
 }
 //-----------------------------------------------------------------------------
 template<>

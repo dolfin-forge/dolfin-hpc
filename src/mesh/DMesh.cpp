@@ -632,7 +632,7 @@ void DMesh::propagate_naive(Mesh& mesh,
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int max_prop = 0;
-  MPI::all_reduce<MPI::max>( num_prop, max_prop );
+  MPI::all_reduce<MPI::max>( num_prop, max_prop, comm );
 
   long *recv_buff = new long[max_prop];
   long *send_buff = new long[num_prop];
@@ -657,7 +657,7 @@ void DMesh::propagate_naive(Mesh& mesh,
     dest = (pe_rank + j) % pe_size;
 
     int recv_count = MPI::sendrecv( &send_buff[0], num_prop, dest,
-                                    recv_buff, max_prop, src, 1 );
+                                    recv_buff, max_prop, src, 1, comm );
 
     if (recv_count > 0) empty = false;
 
@@ -682,7 +682,7 @@ void DMesh::propagate_naive(Mesh& mesh,
 
   short prop, gprop;
   prop = (empty == false);
-  MPI::all_reduce<MPI::sum>( prop, gprop );
+  MPI::all_reduce<MPI::sum>( prop, gprop, comm );
   empty = (gprop == 0);
 
   delete[] send_buff;
@@ -699,7 +699,7 @@ void DMesh::propagate_hypercube(Mesh& mesh,
   // Allocate receive buffer
   int num_prop = propagate.size() * 5;
   int total_prop = 0;
-  MPI::all_reduce<MPI::sum>( num_prop, total_prop );
+  MPI::all_reduce<MPI::sum>( num_prop, total_prop, comm );
 
   long *recv_buff = new long[total_prop];
   long *state = new long[total_prop];
@@ -734,7 +734,7 @@ void DMesh::propagate_hypercube(Mesh& mesh,
     dest = pe_rank ^ (D << j);
 
     int recv_count = MPI::sendrecv( state, state_size, dest,
-                                    recv_buff, total_prop, dest, 1 );
+                                    recv_buff, total_prop, dest, 1, comm );
 
     dolfin_assert(recv_count % 5 == 0);
     for (int k = 0; k < recv_count; k += 5)

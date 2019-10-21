@@ -21,6 +21,7 @@
 #define DOLFIN_COMM_NULL  MPI_COMM_NULL
 #else
 #define DOLFIN_COMM_NULL  0
+#define MPI_SUCCESS       0
 #endif
 
 namespace dolfin
@@ -107,7 +108,8 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template<class T>
-  static int sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
+  static int sendrecv(T* sendbuf, int sendcount, int destination,
+                      T* recvbuf, int recvcount, int source, int tag,
                       Communicator& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
@@ -271,63 +273,74 @@ inline int MPI::all_reduce<MPI::max>(real x, real& r, Communicator& comm)
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(bool* s, int ns, int src, bool* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(bool* sendbuf, int sendcount, int destination,
+                         bool* recvbuf, int recvcount, int source, int tag,
+                         Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  int bs = ns * sizeof(bool);
-  int br = nr * sizeof(bool);
-  MPI::check_error( MPI_Sendrecv(s, bs, MPI_BYTE, src, tg, r, br, MPI_BYTE,
-                                 dst, tg, comm, &status) );
+  int bs = sendcount * sizeof(bool);
+  int br = recvcount * sizeof(bool);
+  MPI::check_error( MPI_Sendrecv(sendbuf, sendcount, MPI_BYTE, destination, tag,
+                                 recvbuf, recvcount, MPI_BYTE, source, tag,
+                                 comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_BYTE, &recv_count) );
   return recv_count / sizeof(bool);
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(int* s, int ns, int src, int* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(int* sendbuf, int sendcount, int destination,
+                         int* recvbuf, int recvcount, int source, int tag,
+                         Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  MPI::check_error( MPI_Sendrecv(s, ns, MPI_INT, src, tg, r, nr, MPI_INT, dst,
-                                 tg, comm, &status) );
+  MPI::check_error( MPI_Sendrecv(sendbuf, sendcount, MPI_INT, destination, tag,
+                                 recvbuf, recvcount, MPI_INT, source, tag,
+                                 comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_INT, &recv_count) );
   return recv_count;
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(uint* s, int ns, int src, uint* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(uint* sendbuf, int sendcount, int destination,
+                         uint* recvbuf, int recvcount, int source, int tag,
+                         Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  MPI::check_error( MPI_Sendrecv(s, ns, MPI_UNSIGNED, src, tg, r, nr,
-                                 MPI_UNSIGNED, dst, tg, comm, &status) );
+  MPI::check_error( MPI_Sendrecv(sendbuf, sendcount, MPI_UNSIGNED, destination,
+                                 tag,
+                                 recvbuf, recvcount, MPI_UNSIGNED, source, tag,
+                                 comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_UNSIGNED, &recv_count) );
   return recv_count;
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(long* s, int ns, int src, long* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(long* sendbuf, int sendcount, int destination,
+                         long* recvbuf, int recvcount, int source, int tag,
+                         Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  MPI::check_error( MPI_Sendrecv(s, ns, MPI_LONG, src, tg, r, nr,
-                                 MPI_LONG, dst, tg, comm, &status) );
+  MPI::check_error( MPI_Sendrecv(sendbuf, sendcount, MPI_LONG, destination, tag,
+                                 recvbuf, recvcount, MPI_LONG, source, tag,
+                                 comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_LONG, &recv_count) );
   return recv_count;
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(real* s, int ns, int src, real* r, int nr, int dst,
-                         int tg, Communicator& comm)
+inline int MPI::sendrecv(real* sendbuf, int sendcount, int destination,
+                         real* recvbuf, int recvcount, int source, int tag,
+                         Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
-  MPI::check_error( MPI_Sendrecv(s, ns, MPI_DOUBLE, src, tg, r, nr, MPI_DOUBLE,
-                                 dst, tg, comm, &status) );
+  MPI::check_error(MPI_Sendrecv(sendbuf, sendcount, MPI_DOUBLE, destination,tag,
+                                recvbuf, recvcount, MPI_DOUBLE, source, tag,
+                                comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_DOUBLE, &recv_count) );
   return recv_count;
 }
@@ -337,14 +350,14 @@ inline int MPI::sendrecv(real* s, int ns, int src, real* r, int nr, int dst,
 
 //-----------------------------------------------------------------------------
 template<class T>
-inline int MPI::bcast(T* x, int n, int r, Communicator& comm)
+inline int MPI::bcast(T*, int, int, Communicator&)
 {
   return MPI_SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
 template<int R, class T>
-inline int MPI::all_reduce(T x, T& r, Communicator& comm)
+inline int MPI::all_reduce(T x, T& r, Communicator&)
 {
   r = x;
   return MPI_SUCCESS;
@@ -352,8 +365,7 @@ inline int MPI::all_reduce(T x, T& r, Communicator& comm)
 
 //-----------------------------------------------------------------------------
 template<class T>
-inline int MPI::sendrecv(T* s, int ns, int src, T* r, int nr, int dst, int tg,
-                         Communicator& comm)
+inline int MPI::sendrecv(T*, int, int, T*, int, int, int, Communicator&)
 {
   return MPI_SUCCESS;
 }

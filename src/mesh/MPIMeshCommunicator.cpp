@@ -479,14 +479,14 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
       }
 
       // Send coordinates back
-      recv_count = MPI::sendrecv( &sendbck_gv[0], send_count, dst,
-                                  &recvbuf_gv[0], sendcnt_gv, src,
+      recv_count = MPI::sendrecv( &sendbck_gv[0], send_count, src,
+                                  &recvbuf_gv[0], sendcnt_gv, dst,
                                   1, distdata.comm() );
 
       sendcnt_gv -= recv_count;
 
-      recv_count = MPI::sendrecv( &sendbck_gx[0], send_count * gdim, dst,
-                                  &recvbuf_gx[0], recv_count * gdim, src,
+      recv_count = MPI::sendrecv( &sendbck_gx[0], send_count * gdim, src,
+                                  &recvbuf_gx[0], recv_count * gdim, dst,
                                   2, distdata.comm() );
 
       for (int k = 0; k < recv_count; ++k)

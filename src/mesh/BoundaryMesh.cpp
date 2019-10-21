@@ -366,15 +366,16 @@ void BoundaryMesh::compute(Mesh& mesh, bool exterior, bool interior)
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI_Send(&shared_vertices[(*adj)][0], shared_vertices[(*adj)].size(),
-                 MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM);
+        MPI::check_error( MPI_Send(&shared_vertices[(*adj)][0],
+                                   shared_vertices[(*adj)].size(),
+                                   MPI_UNSIGNED, (*adj), 0, MPI::DOLFIN_COMM) );
       }
       for (_set<uint>::const_iterator adj = vadjs.begin(); adj != vadjs.end();
            ++adj)
       {
-        MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj), 0,
-                 MPI::DOLFIN_COMM, &status);
-        MPI_Get_count(&status, MPI_UNSIGNED, &recvcount);
+        MPI::check_error( MPI_Recv(&recvbuf[0], recvmax, MPI_UNSIGNED, (*adj),
+                                   0, MPI::DOLFIN_COMM, &status) );
+        MPI::check_error( MPI_Get_count(&status, MPI_UNSIGNED, &recvcount) );
         for(int k = 0; k < recvcount; ++k)
         {
           dolfin_assert(distdata.has_global(recvbuf[k]));

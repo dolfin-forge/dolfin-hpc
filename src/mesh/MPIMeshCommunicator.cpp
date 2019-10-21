@@ -97,14 +97,12 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
 
   // Exchange the vertices
-  MPI_Status status;
-  uint src;
-  uint dst;
   uint recvmax_v;
   for (uint j = 0; j < pe_size; ++j)
   {
     uint s = sendbuf_v[j].size();
-    MPI_Reduce(&s, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j, distdata.comm());
+    MPI::check_error( MPI_Reduce(&s, &recvmax_v, 1, MPI_UNSIGNED, MPI_SUM, j,
+                                 distdata.comm()) );
   }
   uint recvmax_x = recvmax_v * gdim;
   // Resize vertex indices
@@ -118,22 +116,20 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
-    src = (pe_rank - j + pe_size) % pe_size;
-    dst = (pe_rank + j) % pe_size;
+    int src = (pe_rank - j + pe_size) % pe_size;
+    int dst = (pe_rank + j) % pe_size;
 
     // Vertices
-    MPI_Sendrecv(&sendbuf_v[dst][0], sendbuf_v[dst].size(), MPI_UNSIGNED,
-                 dst, 0, &recvbuf_v[0], recvmax_v, MPI_UNSIGNED, src, 0,
-                 distdata.comm(), &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf_v[dst][0], sendbuf_v[dst].size(), dst,
+                                &recvbuf_v[0], recvmax_v, src,
+                                0, distdata.comm() );
     recvbuf_v += recv_count;
     recvmax_v -= recv_count;
 
     // Coordinates
-    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 1,
-                 recvbuf_x, recvmax_x, MPI_DOUBLE, src, 1, distdata.comm(),
-                 &status);
-    MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf_x[dst][0], sendbuf_x[dst].size(), dst,
+                                recvbuf_x, recvmax_x, src,
+                                1, distdata.comm() );
     recvbuf_x += recv_count;
     recvmax_x -= recv_count;
 
@@ -290,14 +286,12 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   dolfin_assert(mesh.topology().connectivity(0) == NULL);
 
   // Exchange the processed entities
-  MPI_Status status;
-  uint src;
-  uint dst;
   uint recvmax[2] = { 0, 0 };
   for (uint j = 0; j < pe_size; ++j)
   {
     uint sendcnt[2] = { (uint)sendbuf_c[j].size(), (uint)sendbuf_v[j].size() };
-    MPI_Reduce(sendcnt, recvmax, 2, MPI_UNSIGNED, MPI_SUM, j, distdata.comm());
+    MPI::check_error( MPI_Reduce(sendcnt, recvmax, 2, MPI_UNSIGNED, MPI_SUM, j,
+                                 distdata.comm()) );
   }
   uint recvmax_x = recvmax[1] * gdim;
   // Resize cell vertices array to fit new cells
@@ -334,40 +328,36 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   int recv_count;
   for (uint j = 1; j < pe_size; ++j)
   {
-    src = (pe_rank - j + pe_size) % pe_size;
-    dst = (pe_rank + j) % pe_size;
+    int src = (pe_rank - j + pe_size) % pe_size;
+    int dst = (pe_rank + j) % pe_size;
 
     // Cells
-    MPI_Sendrecv(&sendbuf_c[dst][0], sendbuf_c[dst].size(), MPI_UNSIGNED, dst,
-                 0, recvbuf_c, recvmax[0], MPI_UNSIGNED, src, 0,
-                 distdata.comm(), &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf_c[dst][0], sendbuf_c[dst].size(), dst,
+                                recvbuf_c, recvmax[0], src,
+                                0, distdata.comm() );
     recvbuf_c += recv_count;
     recvmax[0]-= recv_count;
 
     // Vertices
-    MPI_Sendrecv(&sendbuf_v[dst][0], sendbuf_v[dst].size(), MPI_UNSIGNED, dst,
-                 1, recvbuf_v, recvmax[1], MPI_UNSIGNED, src, 1,
-                 distdata.comm(), &status);
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf_v[dst][0], sendbuf_v[dst].size(), dst,
+                                recvbuf_v, recvmax[1], src,
+                                1, distdata.comm() );
     recvbuf_v += recv_count;
     recvmax[1]-= recv_count;
 
     // Coordinates
-    MPI_Sendrecv(&sendbuf_x[dst][0], sendbuf_x[dst].size(), MPI_DOUBLE, dst, 2,
-                 recvbuf_x, recvmax_x, MPI_DOUBLE, src, 2, distdata.comm(),
-                 &status);
-    MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
+    recv_count = MPI::sendrecv( &sendbuf_x[dst][0], sendbuf_x[dst].size(), dst,
+                                recvbuf_x, recvmax_x, src,
+                                2, distdata.comm() );
     recvbuf_x += recv_count;
     recvmax_x -= recv_count;
 
     // Transfer cell functions
     if (UC)
     {
-      MPI_Sendrecv(&UC[dst][0], UC[dst].size(), MPI_UNSIGNED, dst, 3,
-                   recvbufUC  , recvmaxUC     , MPI_UNSIGNED, src, 3,
-                   distdata.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      recv_count = MPI::sendrecv( &UC[dst][0], UC[dst].size(), dst,
+                                  recvbufUC, recvmaxUC, src,
+                                  3, distdata.comm() );
       dolfin_assert(recvmaxUC >= (uint) recv_count);
       recvbufUC += recv_count;
       recvmaxUC -= recv_count;
@@ -376,10 +366,9 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
     // Transfer vertex functions
     if (RV)
     {
-      MPI_Sendrecv(&RV[dst][0], RV[dst].size(), MPI_DOUBLE, dst, 4,
-                   recvbufRV  , recvmaxRV     , MPI_DOUBLE, src, 4,
-                   distdata.comm(), &status);
-      MPI_Get_count(&status, MPI_DOUBLE, &recv_count);
+      recv_count = MPI::sendrecv( &RV[dst][0], RV[dst].size(), dst,
+                                  recvbufRV, recvmaxRV, src,
+                                  4, distdata.comm() );
       dolfin_assert(recvmaxRV >= (uint) recv_count);
       recvbufRV += recv_count;
       recvmaxRV -= recv_count;
@@ -460,14 +449,13 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
     real * recvbuf_gx = sendcnt_gv ? new real[sendcnt_gv * gdim] : NULL;
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (pe_rank - j + pe_size) % pe_size;
-      dst = (pe_rank + j) % pe_size;
+      int src = (pe_rank - j + pe_size) % pe_size;
+      int dst = (pe_rank + j) % pe_size;
 
       // Send ghost vertices to request coordinates
-      MPI_Sendrecv(&sendbuf_gv[0], sendbuf_gv.size(), MPI_UNSIGNED, dst, 0,
-                   sendbck_gv    , sendmax_gv       , MPI_UNSIGNED, src, 0,
-                   distdata.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      recv_count = MPI::sendrecv( &sendbuf_gv[0], sendbuf_gv.size(), dst,
+                                  sendbck_gv, sendmax_gv, src,
+                                  0, distdata.comm() );
 
       uint send_count = 0;
       for (int k = 0; k <recv_count; ++k)
@@ -491,16 +479,15 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
       }
 
       // Send coordinates back
-      MPI_Sendrecv(&sendbck_gv[0], send_count, MPI_UNSIGNED, src, 1,
-                   &recvbuf_gv[0], sendcnt_gv, MPI_UNSIGNED, dst, 1,
-                   distdata.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      recv_count = MPI::sendrecv( &sendbck_gv[0], send_count, src,
+                                  &recvbuf_gv[0], sendcnt_gv, dst,
+                                  1, distdata.comm() );
 
       sendcnt_gv -= recv_count;
 
-      MPI_Sendrecv(&sendbck_gx[0], send_count * gdim, MPI_DOUBLE, src, 2,
-                   &recvbuf_gx[0], recv_count * gdim, MPI_DOUBLE, dst, 2,
-                   distdata.comm(), &status);
+      recv_count = MPI::sendrecv( &sendbck_gx[0], send_count * gdim, src,
+                                  &recvbuf_gx[0], recv_count * gdim, dst,
+                                  2, distdata.comm() );
 
       for (int k = 0; k < recv_count; ++k)
       {
@@ -642,14 +629,12 @@ void MPIMeshCommunicator::check(Mesh& mesh)
     dolfin_assert(sbuf[pe_rank].size() == 0);
 
     // Exchange entities
-    MPI_Status status;
-    uint src;
-    uint dst;
     uint recv_max;
     for (uint j = 0; j < pe_size; ++j)
     {
       uint s = sbuf[j].size();
-      MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm());
+      MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
+                                   dist.comm()) );
       // Check that no duplicate global entity was added
       std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
@@ -663,13 +648,12 @@ void MPIMeshCommunicator::check(Mesh& mesh)
     int recv_count;
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (pe_rank - j + pe_size) % pe_size;
-      dst = (pe_rank + j) % pe_size;
+      int src = (pe_rank - j + pe_size) % pe_size;
+      int dst = (pe_rank + j) % pe_size;
 
-      MPI_Sendrecv(&sbuf[dst][0], sbuf[dst].size(), MPI_UNSIGNED, dst, 0,
-                   &recv_buf[0] , recv_max        , MPI_UNSIGNED, src, 0,
-                   dist.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      recv_count = MPI::sendrecv( &sbuf[dst][0], sbuf[dst].size(), dst,
+                                  &recv_buf[0], recv_max, src,
+                                  0, dist.comm() );
 
       for (int k = 0; k < recv_count; ++k)
       {
@@ -716,14 +700,12 @@ void MPIMeshCommunicator::check(Mesh& mesh)
     dolfin_assert(sbuf[pe_rank].size() == 0);
 
     // Exchange entities
-    MPI_Status status;
-    uint src;
-    uint dst;
     uint recv_max;
     for (uint j = 0; j < pe_size; ++j)
     {
       uint s = sbuf[j].size();
-      MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j, dist.comm());
+      MPI::check_error( MPI_Reduce(&s, &recv_max, 1, MPI_UNSIGNED, MPI_SUM, j,
+                                   dist.comm()) );
       // Check that no duplicate global entity was added
       std::set<uint> global_indices(sbuf[j].begin(), sbuf[j].end());
       if (global_indices.size() != sbuf[j].size())
@@ -738,13 +720,12 @@ void MPIMeshCommunicator::check(Mesh& mesh)
     _set<uint> recv_idx;
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (pe_rank - j + pe_size) % pe_size;
-      dst = (pe_rank + j) % pe_size;
+      int src = (pe_rank - j + pe_size) % pe_size;
+      int dst = (pe_rank + j) % pe_size;
 
-      MPI_Sendrecv(&sbuf[dst][0], sbuf[dst].size(), MPI_UNSIGNED, dst, 0,
-                   &recv_buf[0] , recv_max        , MPI_UNSIGNED, src, 0,
-                   dist.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      recv_count = MPI::sendrecv( &sbuf[dst][0], sbuf[dst].size(), dst,
+                                  &recv_buf[0], recv_max, src,
+                                  0, dist.comm() );
 
       for (int k = 0; k < recv_count; ++k)
       {

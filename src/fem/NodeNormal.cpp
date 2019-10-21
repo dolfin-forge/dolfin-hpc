@@ -267,14 +267,9 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     // facet.
 
     // Exchange values
-    MPI_Status status;
-    uint src;
-    uint dest;
 
-    int u_sendcount = 0;
     int u_maxsendcount = 0;
     int u_maxrecvcount = 0;
-    int r_sendcount = 0;
     int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
     _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
@@ -283,30 +278,27 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuf[*it].size()));
     }
-    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
-    MPI_Allreduce(&r_maxsendcount, &r_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
     dolfin_assert(r_maxrecvcount > 0);
     uint * u_recvbuf = new uint[u_maxrecvcount];
-    int u_recvcount = 0;
     real * r_recvbuf = new real[r_maxrecvcount];
 
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
+      int src = (rank - j + pe_size) % pe_size;
+      int dest = (rank + j) % pe_size;
 
-      u_sendcount = u_sendbuf[dest].size();
-      MPI_Sendrecv(&u_sendbuf[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
-                   &u_recvbuf[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
-      r_sendcount = r_sendbuf[dest].size();
-      MPI_Sendrecv(&r_sendbuf[dest][0], r_sendcount, MPI_DOUBLE, dest, 1,
-                   &r_recvbuf[0], r_maxrecvcount, MPI_DOUBLE, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
+      int u_sendcount = u_sendbuf[dest].size();
+      int u_recvcount = MPI::sendrecv( &u_sendbuf[dest][0], u_sendcount, dest,
+                                       &u_recvbuf[0], u_maxrecvcount, src, 1);
+      int r_sendcount = r_sendbuf[dest].size();
+      MPI_Status status;
+      MPI::check_error( MPI_Sendrecv(&r_sendbuf[dest][0], r_sendcount,
+                                     MPI_DOUBLE, dest, 1, &r_recvbuf[0],
+                                     r_maxrecvcount, MPI_DOUBLE, src, 1,
+                                     dolfin::MPI::DOLFIN_COMM, &status) );
 
       uint iir = 0;
       for (uint iiu = 0; iiu < uint(u_recvcount);)
@@ -449,12 +441,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   if (mesh.is_distributed())
   {
 #if HAVE_MPI
-    MPI_Status status;
-    uint src;
-    uint dest;
     uint const u_size = 2;
-    int u_recvcount = 0;
-    int u_sendcount = 0;
     int u_maxsendcount = 0;
     int u_maxrecvcount = 0;
     _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
@@ -462,22 +449,19 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
     }
-    MPI_Allreduce(&u_maxsendcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::all_reduce<MPI::max>( u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
 
     // For each process
     uint * u_recvbuf = new uint[u_maxrecvcount];
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (rank - j + pe_size) % pe_size;
-      dest = (rank + j) % pe_size;
+      int src = (rank - j + pe_size) % pe_size;
+      int dest = (rank + j) % pe_size;
 
-      u_sendcount = u_sendbuf[dest].size();
-      MPI_Sendrecv(&u_sendbuf[dest][0], u_sendcount, MPI_UNSIGNED, dest, 1,
-                   &u_recvbuf[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
+      int u_sendcount = u_sendbuf[dest].size();
+      int u_recvcount = MPI::sendrecv( &u_sendbuf[dest][0], u_sendcount, dest,
+                                       &u_recvbuf[0], u_maxrecvcount, src, 1);
 
       // Add node type to the map
       for (int iiu = 0; iiu < u_recvcount; iiu += u_size)

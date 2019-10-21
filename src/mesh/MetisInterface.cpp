@@ -11,13 +11,11 @@
 #include <dolfin/mesh/MeshRenumber.h>
 #include <dolfin/mesh/MetisInterface.h>
 #include <dolfin/parameter/parameters.h>
+#include <dolfin/main/MPI.h>
 
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 #ifdef HAVE_PARMETIS
 #include <parmetis.h>
@@ -70,12 +68,12 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI_Comm_dup(mesh.topology().comm(), &comm);
+  MPI::check_error( MPI_Comm_dup(mesh.topology().comm(), &comm) );
 
   // Get information about the PE
   int size, rank;
-  MPI_Comm_size(comm, &size);
-  MPI_Comm_rank(comm, &rank);
+  MPI::check_error( MPI_Comm_size(comm, &size) );
+  MPI::check_error( MPI_Comm_rank(comm, &rank) );
 
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
@@ -91,9 +89,9 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   {
     dolfin::error("MetisInterface : mesh partition contains zero cells.");
   }
-  
+
   elmdist[rank] = ncells;
-  MPI_Allgather(&ncells, 1, MPI_INT, elmdist, 1, MPI_INT, comm);
+  MPI::all_gather( &ncells, 1, (int*) elmdist, 1 );
 
   pm_idx_t *elmwgt = NULL;
 
@@ -182,7 +180,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   tocd();
 
   delete[] part;
-  MPI_Comm_free(&comm);
+  MPI::check_error( MPI_Comm_free(&comm) );
 }
 //-----------------------------------------------------------------------------
 void MetisInterface::partitionGeomMetis(Mesh& mesh,
@@ -197,19 +195,19 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 
   // Duplicate MPI communicator
   MPI_Comm comm;
-  MPI_Comm_dup(mesh.topology().comm(), &comm);
+  MPI::check_error( MPI_Comm_dup(mesh.topology().comm(), &comm) );
 
   int size, rank;
   // Get information about the PE
-  MPI_Comm_size(comm, &size);
-  MPI_Comm_rank(comm, &rank);
+  MPI::check_error( MPI_Comm_size(comm, &size) );
+  MPI::check_error( MPI_Comm_rank(comm, &rank) );
 
   // Gather number of locally stored vertices for each processor
   pm_idx_t *vtxdist = new pm_idx_t[size+1];
   vtxdist[rank] = static_cast<pm_idx_t> (mesh.size(0));
   pm_idx_t local_vertices = vtxdist[rank];
 
-  MPI_Allgather(&local_vertices, 1, MPI_INT, vtxdist, 1, MPI_INT, comm);
+  MPI::all_gather( (int*) &local_vertices, 1, (int*) vtxdist, 1 );
 
   int i;
   pm_idx_t tmp;
@@ -262,7 +260,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   delete[] xdy;
   delete[] part;
   delete[] vtxdist;
-  MPI_Comm_free(&comm);
+  MPI::check_error( MPI_Comm_free(&comm) );
 }
 //-----------------------------------------------------------------------------
 #else

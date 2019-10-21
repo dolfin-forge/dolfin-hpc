@@ -224,8 +224,6 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   uint pe_size = MPI::size();
   uint target_proc, src, dest, recv_size, local_size;
 
-  MPI_Status status;
-
   real *values = new real[f.vector().local_size()];
   f.vector().get(values);
 
@@ -277,29 +275,24 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
 
   delete[] values;
 
-  MPI_Allreduce(&local_size, &recv_size, 1, MPI_UNSIGNED, MPI_MAX,
-                MPI::DOLFIN_COMM);
+  MPI::all_reduce<MPI::max>(local_size, recv_size );
 
   real *recv_buffer = new real[recv_size];
   uint *recv_buffer_indices = new uint[recv_size];
 
   //
-  int recv_count = 0;
   for (uint j = 1; j < pe_size; j++)
   {
     src = (pe_rank - j + pe_size) % pe_size;
     dest = (pe_rank + j) % pe_size;
 
-    MPI_Sendrecv(&send_buffer[dest][0], send_buffer[dest].size(), MPI_DOUBLE,
-                 dest, 1, recv_buffer, recv_size, MPI_DOUBLE, src, 1,
-                 MPI::DOLFIN_COMM, &status);
+    MPI::sendrecv( &send_buffer[dest][0], send_buffer[dest].size(), dest,
+                   recv_buffer, recv_size, src, 1 );
 
-    MPI_Sendrecv(&send_buffer_indices[dest][0],
-                 send_buffer_indices[dest].size(), MPI_UNSIGNED, dest, 1,
-                 recv_buffer_indices, recv_size, MPI_UNSIGNED, src, 1,
-                 MPI::DOLFIN_COMM, &status);
 
-    MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+    int recv_count = MPI::sendrecv( &send_buffer_indices[dest][0],
+                                    send_buffer_indices[dest].size(), dest,
+                   recv_buffer_indices, recv_size, src, 1 );
 
     for (int i = 0; i < recv_count; i++)
     {

@@ -113,27 +113,23 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
     }
 
     //
-    MPI_Status status;
-    uint src;
-    uint dst;
     int send_size;
     int recv_size;
-    int recv_count;
     for (uint j = 0; j < pe_size; ++j)
     {
       send_size = sendbuf[j].size();
-      MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM, j, distdata.comm());
+      MPI::check_error( MPI_Reduce(&send_size, &recv_size, 1, MPI_INT, MPI_SUM,
+                                   j, distdata.comm()) );
     }
     uint * recvbuf = (recv_size ? new uint[recv_size] : NULL);
     for (uint j = 1; j < pe_size; ++j)
     {
-      src = (pe_rank - j + pe_size) % pe_size;
-      dst = (pe_rank + j) % pe_size;
+      int src = (pe_rank - j + pe_size) % pe_size;
+      int dst = (pe_rank + j) % pe_size;
 
-      MPI_Sendrecv(&sendbuf[dst][0], sendbuf[dst].size(), MPI_UNSIGNED, dst, 1,
-                   &recvbuf[0], recv_size, MPI_UNSIGNED, src, 1,
-                   distdata.comm(), &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &recv_count);
+      int recv_count = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
+                                      &recvbuf[0], recv_size, src,
+                                      1, distdata.comm() );
 
       for (int k = 0; k < recv_count; ++k)
       {

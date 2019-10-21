@@ -191,21 +191,25 @@ void XMLFile::operator<<(Mesh& mesh)
 
     //-------------------------------------------------------------------------
     // Delete if file exists
-    MPI_File_delete((char *) filename.c_str(), MPI_INFO_NULL );
+    MPI::check_error( MPI_File_delete((char *) filename.c_str(),
+                                      MPI_INFO_NULL ) );
 
     // Open file
     MPI_File fh;
     MPI_Offset curr_offset = 0;
-    MPI_File_open(dolfin::MPI::DOLFIN_COMM, (char *) filename.c_str(),
-                  MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
-    MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR, (char *) "native", MPI_INFO_NULL );
+    MPI::check_error( MPI_File_open(dolfin::MPI::DOLFIN_COMM,
+                                    (char *) filename.c_str(),
+                                    MPI_MODE_WRONLY | MPI_MODE_CREATE,
+                                    MPI_INFO_NULL, &fh) );
+    MPI::check_error( MPI_File_set_view(fh, 0, MPI_CHAR, MPI_CHAR,
+                                        (char *) "native", MPI_INFO_NULL ) );
 
     // Write DOLFIN XML format header
     std::string const hdr =
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         "<dolfin xmlns:dolfin=\"http://www.fenics.org/dolfin/\">\n";
-    MPI_File_write_all(fh, (void *) hdr.c_str(), hdr.size(), MPI_CHAR,
-                       MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, (void *) hdr.c_str(), hdr.size(),
+                                         MPI_CHAR, MPI_STATUS_IGNORE) );
     curr_offset += hdr.size();
     //-------------------------------------------------------------------------
     // Mesh properties
@@ -224,8 +228,9 @@ void XMLFile::operator<<(Mesh& mesh)
     s0
     << "<mesh celltype=\"" << cell_str << "\" " << "dim=\"" << gdim << "\">\n"
     << "<vertices size=\"" << num_global_vertices << "\">\n";
-    MPI_File_write_all(fh, (void *) s0.str().c_str(), s0.str().size(), 
-		       MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_all(fh, (void *) s0.str().c_str(),
+                                         s0.str().size(), MPI_CHAR,
+                                         MPI_STATUS_IGNORE) );
     curr_offset += s0.str().size();
 
     // Determine maximum size of line to allocate buffer
@@ -298,17 +303,17 @@ void XMLFile::operator<<(Mesh& mesh)
     }
     uint voffset = 0;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Exscan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                 dolfin::MPI::DOLFIN_COMM) );
 #else
-    MPI_Scan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-	     dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Scan(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                               dolfin::MPI::DOLFIN_COMM) );
     voffset -= vsize;
 #endif
-    MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer, vsize, MPI_CHAR,
-                          MPI_STATUS_IGNORE);
-    MPI_Allreduce(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset + voffset, vbuffer,
+                                            vsize, MPI_CHAR, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_Allreduce(&vsize, &voffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                    dolfin::MPI::DOLFIN_COMM) );
     curr_offset += voffset;
     delete [] vbuffer;
 
@@ -317,8 +322,10 @@ void XMLFile::operator<<(Mesh& mesh)
     s1
     << "</vertices>\n"
     << "<cells size=\"" << num_global_cells << "\">\n";
-    MPI_File_write_at_all(fh, curr_offset, (void *) s1.str().c_str(), 
-			  s1.str().size(), MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset,
+                                            (void *) s1.str().c_str(),
+                                            s1.str().size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
     curr_offset += s1.str().size();
 
     // Determine maximum size of line to allocate buffer
@@ -433,34 +440,36 @@ void XMLFile::operator<<(Mesh& mesh)
     }
     uint coffset = 0;
 #if ( MPI_VERSION > 1 )
-    MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-               dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Exscan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                 dolfin::MPI::DOLFIN_COMM) );
 #else
-    MPI_Scan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-	     dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_Scan(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                               dolfin::MPI::DOLFIN_COMM) );
     coffset -= csize;
 #endif
-    MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer, csize, MPI_CHAR,
-                          MPI_STATUS_IGNORE);
-    MPI_Allreduce(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
-                  dolfin::MPI::DOLFIN_COMM);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset + coffset, cbuffer,
+                                            csize, MPI_CHAR, MPI_STATUS_IGNORE) );
+    MPI::check_error( MPI_Allreduce(&csize, &coffset, 1, MPI_UNSIGNED, MPI_SUM,
+                                    dolfin::MPI::DOLFIN_COMM) );
     curr_offset += coffset;
     delete [] cbuffer;
 
     // Close cells and mesh
     std::string const s2("</cells>\n</mesh>\n");
-    MPI_File_write_at_all(fh, curr_offset, (void *) s2.c_str(), s2.size(), 
-			  MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset, (void *) s2.c_str(),
+                                            s2.size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
     curr_offset += s2.size();
 
     //-------------------------------------------------------------------------
     // Write DOLFIN XML format footer
     std::string const ftr("</dolfin>\n");
-    MPI_File_write_at_all(fh, curr_offset, (void *) ftr.c_str(), ftr.size(), 
-			  MPI_CHAR, MPI_STATUS_IGNORE);
+    MPI::check_error( MPI_File_write_at_all(fh, curr_offset, (void *) ftr.c_str(),
+                                            ftr.size(), MPI_CHAR,
+                                            MPI_STATUS_IGNORE) );
 
     // Close file
-    MPI_File_close(&fh);
+    MPI::check_error( MPI_File_close(&fh) );
 
 #else
     parallel_write_not_impl("Mesh");

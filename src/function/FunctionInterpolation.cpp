@@ -384,13 +384,9 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   {
 #ifdef HAVE_MPI
 
-    MPI_Status status;
-    int u_recvcount = 0;
     int u_maxrecvcount = 0;
     int u_localcount = dofs_indicesX.size();
-    MPI_Allreduce(&u_localcount, &u_maxrecvcount, 1, MPI_INT, MPI_MAX,
-                  dolfin::MPI::DOLFIN_COMM);
-    int r_recvcount = 0;
+    MPI::all_reduce<MPI::max>( u_localcount, u_maxrecvcount );
     int r_maxrecvcount = u_maxrecvcount * gdim1;
 
     //
@@ -401,14 +397,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       int src = (rank - j + pe_size) % pe_size;
       int dest = (rank + j) % pe_size;
 
-      MPI_Sendrecv(&dofs_indicesX[0], dofs_indicesX.size(), MPI_UNSIGNED, dest,
-                   1, &u_recvbuf[0], u_maxrecvcount, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
-      MPI_Get_count(&status, MPI_UNSIGNED, &u_recvcount);
-
-      MPI_Sendrecv(&dofs_xcoordsX[0], dofs_xcoordsX.size(), MPI_DOUBLE, dest, 1,
-                   &r_recvbuf[0], r_maxrecvcount, MPI_DOUBLE, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
+      int u_recvcount = MPI::sendrecv( &dofs_indicesX[0], dofs_indicesX.size(),
+                                       dest, &u_recvbuf[0], u_maxrecvcount,
+                                       src, 1 );
+      int r_recvcount = MPI::sendrecv( &dofs_xcoordsX[0], dofs_xcoordsX.size(),
+                                       dest, &r_recvbuf[0], r_maxrecvcount,
+                                       src, 1 );
 
       uint matching_dofs = 0;
       if (u_recvcount > 0)
@@ -416,7 +410,6 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         if (just_first_coords)
         {
           // DEBUG
-          MPI_Get_count(&status, MPI_DOUBLE, &r_recvcount);
           dolfin_assert(u_recvcount / S1.size == r_recvcount / gdim1);
 
           //
@@ -468,9 +461,8 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       int dest = (rank + j) % pe_size;
       int src = (rank - j + pe_size) % pe_size;
 
-      MPI_Sendrecv(&dof1sendcount[dest], 1, MPI_UNSIGNED, dest, 1,
-                   &dof1recvcount[src], 1, MPI_UNSIGNED, src, 1,
-                   dolfin::MPI::DOLFIN_COMM, &status);
+      MPI::sendrecv(&dof1sendcount[dest], 1, dest,
+                    &dof1recvcount[src], 1, src, 1 );
 
       //
       if (dof1sendcount[dest] > 0)
@@ -519,10 +511,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
       uint count = dof1recvcount[src];
       if (count > 0)
       {
-        MPI_Irecv(&dofs_indicesF[offsetF], count, MPI_UNSIGNED, src, 0,
-                  dolfin::MPI::DOLFIN_COMM, &u_req_recv[recv_id]);
-        MPI_Irecv(&dofs_cvaluesF[offsetF], count, MPI_DOUBLE, src, 0,
-                  dolfin::MPI::DOLFIN_COMM, &r_req_recv[recv_id]);
+        MPI::check_error( MPI_Irecv(&dofs_indicesF[offsetF], count, MPI_UNSIGNED,
+                                    src, 0, dolfin::MPI::DOLFIN_COMM,
+                                    &u_req_recv[recv_id]) );
+        MPI::check_error( MPI_Irecv(&dofs_cvaluesF[offsetF], count, MPI_DOUBLE,
+                                    src, 0, dolfin::MPI::DOLFIN_COMM,
+                                    &r_req_recv[recv_id]) );
         offsetF += count;
         ++recv_id;
       }
@@ -564,10 +558,12 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
             // Evaluate
             F0.evaluate(&dofs_cvalues1[nodei * S1.size], &p[0], ufc0);
           }
-          MPI_Isend(&dofs_indices1[offset1], count, MPI_UNSIGNED, dest, 0,
-                    dolfin::MPI::DOLFIN_COMM, &u_req_send[send_id]);
-          MPI_Isend(&dofs_cvalues1[offset1], count, MPI_DOUBLE, dest, 0,
-                    dolfin::MPI::DOLFIN_COMM, &r_req_send[send_id]);
+          MPI::check_error( MPI_Isend(&dofs_indices1[offset1], count, MPI_UNSIGNED,
+                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
+                                      &u_req_send[send_id]) );
+          MPI::check_error( MPI_Isend(&dofs_cvalues1[offset1], count, MPI_DOUBLE,
+                                      dest, 0, dolfin::MPI::DOLFIN_COMM,
+                                      &r_req_send[send_id]) );
           offset1 += count;
           ++send_id;
         }
@@ -602,13 +598,13 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 #ifdef HAVE_MPI
     for (int j = 0; j < (int) num_sendadj; ++j)
     {
-      MPI_Wait(&u_req_send[j], &status);
-      MPI_Wait(&r_req_send[j], &status);
+      MPI::check_error( MPI_Wait(&u_req_send[j], &status) );
+      MPI::check_error( MPI_Wait(&r_req_send[j], &status) );
     }
     for (int j = 0; j < (int) num_recvadj; ++j)
     {
-      MPI_Wait(&u_req_recv[j], &status);
-      MPI_Wait(&r_req_recv[j], &status);
+      MPI::check_error( MPI_Wait(&u_req_recv[j], &status) );
+      MPI::check_error( MPI_Wait(&r_req_recv[j], &status) );
     }
 #endif
   }

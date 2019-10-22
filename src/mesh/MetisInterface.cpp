@@ -21,9 +21,15 @@
 #include <parmetis.h>
 
 #if PARMETIS_MAJOR_VERSION > 3
-#define pm_idx_t  idx_t
-#define pm_real_t real_t
+
 #define pm_ncon   1
+
+// (par)metis integer type
+typedef idx_t pm_idx_t;
+
+// (par)metis real type
+typedef real_t pm_real_t;
+
 #else
 #define pm_idx_t  idxtype
 #define pm_real_t float
@@ -78,7 +84,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
   uint const tdim = mesh.topology_dimension();
-  int ncells = mesh.num_cells();
+  pm_idx_t ncells = mesh.num_cells();
 
   /*
    * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-NULL
@@ -91,7 +97,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   }
 
   elmdist[rank] = ncells;
-  MPI::all_gather( &ncells, 1, (int*) elmdist, 1 );
+  MPI::all_gather( &ncells, 1, elmdist, 1 );
 
   pm_idx_t *elmwgt = NULL;
 
@@ -114,8 +120,8 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
     sum_elm = tmp_elm + sum_elm;
   }
 
-  int nvertices = mesh.type().num_vertices(tdim);
-  int ncnodes = nvertices - 1;
+  pm_idx_t nvertices = mesh.type().num_vertices(tdim);
+  pm_idx_t ncnodes = nvertices - 1;
 
   pm_idx_t *eptr = new pm_idx_t[ncells + 1];
 
@@ -132,7 +138,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   {
     for (VertexIterator v(*c); !v.end(); ++v)
     {
-      eind[i++] = v->global_index();
+      eind[i++] = static_cast<pm_idx_t>(v->global_index());
     }
   }
 
@@ -141,7 +147,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   for (i = 0; i < size; ++i)
   {
-    tpwgts[i] = 1.0 / (pm_real_t) (size);
+    tpwgts[i] = 1.0 / static_cast<pm_real_t>(size);
   }
 
   // default options
@@ -265,15 +271,14 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh& mesh,
-                                          MeshValues<uint, Cell> & partitions,
-                                          MeshValues<uint, Cell> * weight)
+void MetisInterface::partitionCommonMetis(Mesh&,
+                                          MeshValues<uint, Cell> &,
+                                          MeshValues<uint, Cell> *)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh& mesh,
-                                        MeshValues<uint, Vertex> & partitions)
+void MetisInterface::partitionGeomMetis(Mesh&, MeshValues<uint, Vertex> &)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }

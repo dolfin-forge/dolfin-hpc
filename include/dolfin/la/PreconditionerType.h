@@ -28,7 +28,7 @@ namespace dolfin
   };
 
   //---------------------------------------------------------------------------
-  static PreconditionerType pc_type(std::string type)
+  inline static PreconditionerType pc_type(std::string type)
   {
     if (type == "none")
       return none;

@@ -10,9 +10,6 @@ namespace dolfin
 template<uint I = 1, uint J = 1>
 class Real : public Coefficient
 {
-
-  static const ValueSpace<I, J> VS_;
-
 public:
 
   /// Default constructor
@@ -59,19 +56,19 @@ public:
   /// Return the rank of the value space
   inline uint rank() const
   {
-    return VS_.rank();
+    return ValueSpace<I, J>::rank();
   }
 
   /// Return the dimension of the value space for axis i
   inline uint dim(uint i) const
   {
-    return VS_.dim(i);
+    return ValueSpace<I, J>::dim(i);
   }
 
   /// Value size
   inline uint value_size() const
   {
-    return VS_.value_size();
+    return ValueSpace<I, J>::value_size();
   }
 
   /// Assign constant real number

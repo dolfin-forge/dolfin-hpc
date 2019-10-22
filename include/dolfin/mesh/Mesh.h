@@ -31,9 +31,9 @@ class Cell;
 class IntersectionDetector;
 class MappedManifold;
 class MeshData;
-template<class T, class E, uint N = 1> class MeshValues;
+template<class T, class E, uint N = 1> struct MeshValues;
 class PeriodicSubDomain;
-class Space;
+struct Space;
 class Vertex;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.

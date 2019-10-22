@@ -49,7 +49,7 @@ protected:
 
   // Template function for value type
   template <class T>
-  const char * strtype(T const& t)
+  const char * strtype(T const&)
   {
     error("XMLObject : string type unimplemented for requested value type");
     return T();
@@ -57,7 +57,7 @@ protected:
 
   // Template function for reading values
   template <class T>
-  T read(const xmlChar * s)
+  T read(const xmlChar *)
   {
     error("XMLObject : reading function unimplemented for given type");
     return T();
@@ -131,7 +131,7 @@ template <>
 bool XMLObject::read(const xmlChar * s);
 
 //-----------------------------------------------------------------------------
-  
+
 } /* namespace dolfin */
 
 #endif /* HAVE_XML */

@@ -11,7 +11,6 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 FormData::FormData(Form const& form) :
-    form_(form),
     cell_integrals_(form.cell_integrals().operands()),
     extf_integrals_(form.exterior_facet_integrals().operands()),
     intf_integrals_(form.interior_facet_integrals().operands()),

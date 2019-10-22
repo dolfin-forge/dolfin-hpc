@@ -299,10 +299,10 @@ public:
 private:
 
   /// Disallow copy constructor
-  Array(T const& other) : offset_(0), stride_(0) {}
+  Array(T const&) : offset_(0), stride_(0) {}
 
   /// Disallow assignement operator
-  Array<T>& operator=(Array<T> const& other) { return *this; }
+  Array<T>& operator=(Array<T> const&) { return *this; }
 
   uint offset_;
   uint stride_;

@@ -62,17 +62,17 @@ DirichletBC::~DirichletBC()
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         BilinearForm const& form)
 {
-  apply(A, b, 0, form);
+  apply_impl(A, b, NULL, form);
 }
 //-----------------------------------------------------------------------------
 void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
                         GenericVector const& x, BilinearForm const& form)
 {
-  apply(A, b, &x, form);
+  apply_impl(A, b, &x, form);
 }
 //-----------------------------------------------------------------------------
-void DirichletBC::apply(GenericMatrix& A, GenericVector& b,
-                        GenericVector const* x, BilinearForm const& form)
+void DirichletBC::apply_impl(GenericMatrix& A, GenericVector& b,
+                             GenericVector const* x, BilinearForm const& form)
 {
   if(form.trial_space() != form.test_space())
   {

@@ -65,7 +65,6 @@ private:
   std::string const filename_;
   std::pair<real, real> const timespan_;
   real const measure_;
-  bool const fixed_timestep_;
   real const timestep_;
   uint const degree_;
 

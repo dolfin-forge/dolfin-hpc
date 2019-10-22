@@ -19,15 +19,6 @@
 
 namespace dolfin
 {
-
-//-----------------------------------------------------------------------------
-FunctionDecomposition::FunctionDecomposition(Function const& F,
-                                             Array<Function *>& Si) :
-    F_(F),
-    Si_(Si)
-{
-}
-
 //-----------------------------------------------------------------------------
 Array<Function *> FunctionDecomposition::compute(Function const& F)
 {

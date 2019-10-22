@@ -291,6 +291,7 @@ void BinaryFile::operator>>(Function & f)
 
   error("No matching functions found in binary file");
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -364,6 +365,7 @@ void BinaryFile::operator>>(LabelList<Function>& f)
   MPI::check_error( MPI_File_close(&fh) );
 
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -497,6 +499,7 @@ void BinaryFile::write_function(
 
   counter++;
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O is required to save functions in Binary.");
 #endif
 }
@@ -1152,6 +1155,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for writing mesh functions to binary files");
 #endif
 
@@ -1306,6 +1310,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for reading mesh function from binary files");
 #endif
 }

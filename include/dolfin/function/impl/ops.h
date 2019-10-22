@@ -12,7 +12,7 @@ namespace dolfin
 template <class T, class E, class V>
 struct EntityOp : public V
 {
-  inline void evaluate(real* values, const real* x, const UFCCell& cell) const
+  inline void evaluate(real* values, const real*, const UFCCell& cell) const
   {
     static_cast<T const *>(this)->operator()(*cell, values);
   }

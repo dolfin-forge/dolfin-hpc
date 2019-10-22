@@ -166,8 +166,7 @@ std::string type<T>::make_str(T const& val) const
 
 //-----------------------------------------------------------------------------
 template<typename T>
-std::vector<Object::repr_t> type<T>::make_args_repr(
-    repr_t const& repr, bool without_pre_pos) const
+std::vector<Object::repr_t> type<T>::make_args_repr(repr_t const&, bool) const
 {
   return std::vector<Object::repr_t>();
 }

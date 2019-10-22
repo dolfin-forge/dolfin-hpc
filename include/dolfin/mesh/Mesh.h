@@ -212,7 +212,7 @@ public:
   /// Partition mesh into num_processes partitions
   void partition(MeshValues<uint, Cell>& partitions);
 
-  /// Partition mesh into num_partitions = numProc with weights 
+  /// Partition mesh into num_partitions = numProc with weights
   /// on the vertices of the dual graph
   void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
@@ -274,7 +274,7 @@ private:
   int timestamp_;
 
   /// Assignment (Disabled)
-  Mesh const& operator=(Mesh const& other) { return *this; }
+  Mesh const& operator=(Mesh const&) { return *this; }
 
 };
 

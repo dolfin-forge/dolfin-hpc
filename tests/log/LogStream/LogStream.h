@@ -8,7 +8,7 @@ using namespace dolfin;
 
 //-----------------------------------------------------------------------------
 template<class T>
-void check_log_stream(std::string name, T& sb)
+void check_log_stream(std::string, T& sb)
 {
   __logstream<__sink<T> >  os(&sb);
   {

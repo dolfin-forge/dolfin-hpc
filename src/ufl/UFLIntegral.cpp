@@ -242,11 +242,11 @@ dolfin::uint Measure::measure_domain_id() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Measure::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    dolfin::UFCReferenceCell const& ref_cell,
-    std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    dolfin::UFCReferenceCell const&,
+    std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -311,13 +311,13 @@ std::vector<std::vector<Class const*> > const Integral::level_operands(
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       measure_.level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -334,7 +334,7 @@ std::vector<std::vector<Class const*> > const Integral::level_operands(
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 

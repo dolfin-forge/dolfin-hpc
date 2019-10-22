@@ -296,8 +296,8 @@ void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
   */
 }
 //-----------------------------------------------------------------------------
-void PeriodicBC::apply(GenericMatrix& A, GenericVector& b,
-                       const GenericVector& x, BilinearForm const& form)
+void PeriodicBC::apply(GenericMatrix&, GenericVector&,
+                       const GenericVector&, BilinearForm const&)
 {
   error("Periodic boundary conditions not implemented for nonlinear systems.");
 }

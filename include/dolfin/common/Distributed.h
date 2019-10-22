@@ -7,6 +7,7 @@
 #ifndef __DOLFIN_COMMON_DISTRIBUTED_H_
 #define __DOLFIN_COMMON_DISTRIBUTED_H_
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/main/MPI.h>
 #include <dolfin/log/log.h>
 
@@ -30,6 +31,8 @@ public:
      */
     if(comm != DOLFIN_COMM_NULL)
       MPI::check_error( MPI_Comm_dup(comm, &comm_) );
+#else
+    MAYBE_UNUSED(comm);
 #endif
   }
 

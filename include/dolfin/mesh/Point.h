@@ -154,7 +154,7 @@ private:
 
 //-----------------------------------------------------------------------------
 template<>
-inline point<3> point<1>::cross(point const& p) const
+inline point<3> point<1>::cross(point const&) const
 {
   return point<3>();
 }

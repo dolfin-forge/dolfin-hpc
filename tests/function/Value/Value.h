@@ -9,7 +9,7 @@ using namespace dolfin;
 //-----------------------------------------------------------------------------
 struct E01 : public Value<E01>
 {
-  void eval(real * values, const real* x) const
+  void eval(real * values, const real*) const
   {
     values[0] = 0.0;
   }
@@ -17,7 +17,7 @@ struct E01 : public Value<E01>
 
 struct E12 : public Value<E12, 2>
 {
-  void eval(real * values, const real* x) const
+  void eval(real * values, const real*) const
   {
     values[0] = 0.0;
     values[1] = 1.0;
@@ -26,7 +26,7 @@ struct E12 : public Value<E12, 2>
 
 struct E13 : public Value<E13, 3>
 {
-  void eval(real * values, const real* x) const
+  void eval(real * values, const real*) const
   {
     values[0] = 0.0;
     values[1] = 1.0;
@@ -36,7 +36,7 @@ struct E13 : public Value<E13, 3>
 
 struct E22 : public Value<E22, 2, 2>
 {
-  void eval(real * values, const real* x) const
+  void eval(real * values, const real*) const
   {
     values[0] = 0.0;
     values[1] = 1.0;
@@ -47,7 +47,7 @@ struct E22 : public Value<E22, 2, 2>
 
 struct E33 : public Value<E33, 3, 3>
 {
-  void eval(real * values, const real* x) const
+  void eval(real * values, const real*) const
   {
     values[0] = 0.0;
     values[1] = 1.0;

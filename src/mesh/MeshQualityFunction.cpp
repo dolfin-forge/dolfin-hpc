@@ -29,13 +29,13 @@ uint MeshQualityFunction::rank() const
 }
 
 //-----------------------------------------------------------------------------
-uint MeshQualityFunction::dim(uint i) const
+uint MeshQualityFunction::dim(uint) const
 {
   return 1;
 }
 
 //-----------------------------------------------------------------------------
-void MeshQualityFunction::evaluate(real* values, const real* x,
+void MeshQualityFunction::evaluate(real* values, const real*,
                                    const ufc::cell& cell) const
 {
   UFCCell const& ufc_cell = static_cast<UFCCell const&>(cell);

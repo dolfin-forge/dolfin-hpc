@@ -205,10 +205,10 @@ void FormData::zero_element_tensor(double* A) const
 }
 
 //-----------------------------------------------------------------------------
-void FormData::compute_element_tensor(double* A,
+void FormData::compute_element_tensor(double*,
                                       dolfin::UFCReferenceCell const& ref_cell,
                                       std::vector<dolfin::real*> const& q_point,
-                                      std::vector<dolfin::real> const& weights,
+                                      std::vector<dolfin::real> const&,
                                       const double * const * coordinates) const
 {
   std::vector<std::vector<std::vector<std::vector<dolfin::real> > > > new_vals0(

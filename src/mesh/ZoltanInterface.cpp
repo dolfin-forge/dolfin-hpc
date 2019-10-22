@@ -353,15 +353,14 @@ void ZoltanInterface::partitionZoltanGeomCoords(void *data, int num_gid_entries,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionCommonZoltan(Mesh& mesh,
-                                            MeshValues<uint, Cell>& partitions,
-                                            MeshValues<uint, Cell>* weight)
+void ZoltanInterface::partitionCommonZoltan(Mesh&,
+                                            MeshValues<uint, Cell>&,
+                                            MeshValues<uint, Cell>*)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }
 //-----------------------------------------------------------------------------
-void ZoltanInterface::partitionGeomZoltan(Mesh& mesh,
-					MeshValues<uint, Vertex> & partitions)
+void ZoltanInterface::partitionGeomZoltan(Mesh&, MeshValues<uint, Vertex> &)
 {
   error("DOLFIN needs to be built with Zoltan support");
 }

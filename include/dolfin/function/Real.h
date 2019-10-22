@@ -37,8 +37,7 @@ public:
   //--- UFC INTERFACE ---------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(real* values, const real*, const ufc::cell&) const
   {
     std::copy(value_, value_ + I * J, values);
   }
@@ -46,14 +45,13 @@ public:
   //--- INTERFACE -------------------------------------------------------------
 
   /// Evaluate function at given point in cell
-  inline void evaluate(uint n, real* values, const real* coordinates,
-                       const ufc::cell& cell) const
+  inline void evaluate(uint, real* values, const real*, const ufc::cell&) const
   {
     std::copy(value_, value_ + I * J, values);
   }
 
   /// Evaluate function at given point
-  inline void eval(real* values, const real* x) const
+  inline void eval(real* values, const real*) const
   {
     std::copy(value_, value_ + I * J, values);
   }
@@ -120,7 +118,7 @@ public:
   real const& operator[](uint i) const { return value_[i]; }
 
   ///
-  inline Real<I, J> const& operator()(Time const& t) const
+  inline Real<I, J> const& operator()(Time const&) const
   {
     // No-op
     return *this;
@@ -129,7 +127,7 @@ public:
   /// Interpolate function to finite element space on cell
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell) const
+                          const Cell&) const
   {
     finite_element.evaluate_dofs(coefficients, *this, cell);
   }
@@ -137,7 +135,7 @@ public:
   /// Interpolate function to finite element space on facet
   inline void interpolate(real* coefficients, const ufc::cell& cell,
                           const ufc::finite_element& finite_element,
-                          const Cell& dolfin_cell, uint facet) const
+                          const Cell&, uint) const
   {
     finite_element.evaluate_dofs(coefficients, *this, cell);
   }
@@ -169,7 +167,7 @@ public:
 
 private:
 
-  void sync(Time const& t) { /* No-op */ }
+  void sync(Time const&) { /* No-op */ }
 
   real value_[I * J];
 

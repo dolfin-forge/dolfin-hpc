@@ -191,7 +191,7 @@ void TimeSeries::disp() const
 }
 
 //-----------------------------------------------------------------------------
-void TimeSeries::loadData(std::string const& filename)
+void TimeSeries::loadData(std::string const&)
 {
   Array<real> times;
   if ((MPI::rank() == 0) && (access(filename_.c_str(), F_OK) == 0))

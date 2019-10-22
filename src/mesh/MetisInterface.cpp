@@ -265,15 +265,14 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionCommonMetis(Mesh& mesh,
-                                          MeshValues<uint, Cell> & partitions,
-                                          MeshValues<uint, Cell> * weight)
+void MetisInterface::partitionCommonMetis(Mesh&,
+                                          MeshValues<uint, Cell> &,
+                                          MeshValues<uint, Cell> *)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }
 //-----------------------------------------------------------------------------
-void MetisInterface::partitionGeomMetis(Mesh& mesh,
-                                        MeshValues<uint, Vertex> & partitions)
+void MetisInterface::partitionGeomMetis(Mesh&, MeshValues<uint, Vertex> &)
 {
   error("DOLFIN needs to be built with ParMetis support");
 }

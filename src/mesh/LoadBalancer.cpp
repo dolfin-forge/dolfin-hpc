@@ -864,19 +864,18 @@ void LoadBalancer::pradixsort_matrix(uint* res, uint* Matrix, uint m)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<uint, Cell>& weight)
+void LoadBalancer::balance(Mesh&, MeshValues<uint, Cell>&)
 {
   warning("Load balancing only implemented for MPI");
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
-    Type type)
+void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&, Type)
 {
   warning("Load balancing only implemented for MPI");
 }
 //-----------------------------------------------------------------------------
-void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
-    real tf, real tb, real ts, Type type)
+void LoadBalancer::balance(Mesh&, MeshValues<bool, Cell>&,
+                           real, real, real, Type)
 {
   warning("Load balancing only implemented for MPI");
 }

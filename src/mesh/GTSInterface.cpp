@@ -56,8 +56,8 @@ GtsBBox* GTSInterface::bboxCell(Cell& c) const
   VertexIterator v(c);
   p = v->point();
 
-  bbox = gts_bbox_new(gts_bbox_class(), (gpointer) c.index(), p[0], p[1], p[2],
-                      p[0], p[1], p[2]);
+  bbox = gts_bbox_new(gts_bbox_class(), reinterpret_cast<gpointer>(c.index()),
+                      p[0], p[1], p[2], p[0], p[1], p[2]);
 
   for (++v; !v.end(); ++v)
   {

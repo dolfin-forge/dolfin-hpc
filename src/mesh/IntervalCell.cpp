@@ -11,6 +11,7 @@
 #include <dolfin/mesh/IntervalCell.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/MeshEditor.h>
@@ -105,7 +106,7 @@ void IntervalCell::order_entities(MeshTopology& topology, uint i) const
   }
 }
 //-----------------------------------------------------------------------------
-void IntervalCell::order_facet(uint vertices[], Facet& facet) const
+void IntervalCell::order_facet(uint[], Facet&) const
 {
   // Do nothing
 }
@@ -149,6 +150,7 @@ uint IntervalCell::num_refined_cells() const
 uint IntervalCell::num_refined_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
+  MAYBE_UNUSED(dim);
   return 1;
 }
 //-----------------------------------------------------------------------------
@@ -231,9 +233,10 @@ void IntervalCell::normal(Cell const& cell, uint facet, real * n) const
   }
 }
 //-----------------------------------------------------------------------------
-real IntervalCell::facet_area(Cell const& cell, uint facet) const
+real IntervalCell::facet_area(Cell const& cell, uint) const
 {
   dolfin_assert(cell.type() == this->cell_type);
+  MAYBE_UNUSED(cell);
   return 0.0;
 }
 //-----------------------------------------------------------------------------
@@ -264,11 +267,12 @@ bool IntervalCell::intersects(MeshEntity const& e, Point const& p) const
   return ( std::abs(v01.norm() - vp0.norm() - vp1.norm()) < DOLFIN_EPS );
 }
 //-----------------------------------------------------------------------------
-bool IntervalCell::intersects(MeshEntity const& e, Point const& p1,
-                              Point const& p2) const
+bool IntervalCell::intersects(MeshEntity const& e, Point const&,
+                              Point const&) const
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[1][0]);
+  MAYBE_UNUSED(e);
 
   error("Collision of interval with segment not implemented");
 

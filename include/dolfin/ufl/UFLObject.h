@@ -136,7 +136,7 @@ inline std::vector<Object const *> Object::make_args(
 
 //-----------------------------------------------------------------------------
 inline std::vector<Object::repr_t> Object::make_args_repr(
-    repr_t const& repr, bool without_pre_pos) const
+    repr_t const& repr, bool) const
 {
   //assumes repr to be a comma separated list
   std::vector<Object::repr_t> args;
@@ -243,7 +243,7 @@ inline std::vector<Object::repr_t> Object::make_args_repr(
 }
 
 //-----------------------------------------------------------------------------
-inline Object const* Object::create(repr_t const& repr)
+inline Object const* Object::create(repr_t const&)
 {
   //FIXME complete this list
 //  std::string name = Class::make_name(repr);

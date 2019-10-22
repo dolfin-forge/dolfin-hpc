@@ -197,6 +197,11 @@ void PETScMatrix::init(uint M, uint N, uint const* d_nzrow, uint const* o_nzrow)
                   PETSC_DETERMINE, (int*)d_nzrow, PETSC_DETERMINE,
                   (PetscInt*)o_nzrow, &A);
 #endif
+#else
+  MAYBE_UNUSED(M);
+  MAYBE_UNUSED(N);
+  MAYBE_UNUSED(d_nzrow);
+  MAYBE_UNUSED(o_nzrow);
 #endif
 
 #if PETSC_VERSION_MAJOR > 2
@@ -582,7 +587,7 @@ void PETScMatrix::dup(GenericMatrix& A)
   MatDuplicate(A.down_cast<PETScMatrix>().A, MAT_COPY_VALUES, &this->A);
 }
 //-----------------------------------------------------------------------------
-void PETScMatrix::disp(uint precision) const
+void PETScMatrix::disp(uint) const
 {
   section("PETScMatrix");
   MatInfo info;

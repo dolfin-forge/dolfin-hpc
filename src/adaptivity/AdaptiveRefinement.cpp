@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
@@ -34,7 +35,6 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
-
 {
   message("Adaptive refinement");
 
@@ -149,7 +149,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
   }
 
-  MeshData D(mesh); D.add(cell_marker);
+  MeshData D(mesh);
+  D.add(cell_marker);
   mesh.distribute(partitions, D);
 
   Mesh new_mesh = mesh;
@@ -179,15 +180,19 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     {
       FiniteElementSpace subspace(space, i);
       post.push_back(new Function(subspace));
+#ifdef HAVE_MPI
       post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
+#endif
       post.back()->sync();
     }
 
+#ifdef HAVE_MPI
     for (uint i = 0; i < num_sub; ++i)
     {
       delete[] x_values[i];
       delete[] x_rows[i];
     }
+#endif
 
     FiniteElementSpace projected_space(new_mesh, space);
     Function proj(projected_space);
@@ -329,6 +334,12 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   m = local_size;
 
 #endif
+  MAYBE_UNUSED(mesh);
+  MAYBE_UNUSED(f);
+  MAYBE_UNUSED(vp);
+  MAYBE_UNUSED(rp);
+  MAYBE_UNUSED(m);
+  MAYBE_UNUSED(distribution);
 
 }
 //-----------------------------------------------------------------------------

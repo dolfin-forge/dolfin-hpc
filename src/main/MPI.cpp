@@ -11,6 +11,7 @@
 
 #include <dolfin/main/MPI.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/main/SubSystemsManager.h>
 
@@ -134,6 +135,7 @@ void MPI::startTimer(real& stime)
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   stime = MPI_Wtime();
 #else
+  MAYBE_UNUSED(stime)
   DOLFIN_MPI_ERR_UNIMPLEMENTED
 #endif
 }
@@ -144,6 +146,7 @@ real MPI::stopTimer(real& stime)
   MPI::check_error( MPI_Barrier(MPI::DOLFIN_COMM) );
   return (MPI_Wtime() - stime);
 #else
+  MAYBE_UNUSED(stime)
   DOLFIN_MPI_ERR_UNIMPLEMENTED
   return 0.0;
 #endif
@@ -194,6 +197,8 @@ void MPI::initComm(int ngroups)
     ctx_.group_idx = 0;
     ctx_.group_cnt = 1;
   }
+#else
+  MAYBE_UNUSED(ngroups)
 #endif
 
   init_ = true;
@@ -233,15 +238,20 @@ void MPI::offset(uint local, uint& offset, Communicator& comm)
 #if ( MPI_VERSION > 1 )
   MPI::check_error( MPI_Exscan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM,
                                MPI::DOLFIN_COMM) );
+  MAYBE_UNUSED(comm)
 #else
   MPI::check_error( MPI_Scan(&local, &offset, 1, MPI_UNSIGNED, MPI_SUM, comm) );
   offset -= local;
 #endif
+#else
+  MAYBE_UNUSED(local)
+  MAYBE_UNUSED(comm)
 #endif
 }
 //-----------------------------------------------------------------------------
 int MPI::check_error( int const mpi_error )
 {
+#if defined(HAVE_MPI)
   switch ( mpi_error )
   {
   case MPI_SUCCESS:
@@ -428,6 +438,7 @@ int MPI::check_error( int const mpi_error )
    error( "Last error code" );
    break;
   }
+#endif
 
   return mpi_error;
 }

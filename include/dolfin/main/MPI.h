@@ -200,6 +200,16 @@ inline int MPI::all_gather( uint * sendbuf, int sendcount,
 }
 //-----------------------------------------------------------------------------
 template<>
+inline int MPI::all_gather( long * sendbuf, int sendcount,
+                            long * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_LONG,
+                                          recvbuf, recvcount, MPI_LONG,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+template<>
 inline int MPI::all_gather( real * sendbuf, int sendcount,
                             real * recvbuf, int recvcount,
                             Communicator& comm )

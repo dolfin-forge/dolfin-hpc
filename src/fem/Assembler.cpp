@@ -16,6 +16,7 @@
 #include <dolfin/la/Scalar.h>
 #include <dolfin/la/SparsityPattern.h>
 #include <dolfin/la/Vector.h>
+#include <dolfin/main/OpenMP.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Cell.h>
 #include <dolfin/mesh/Facet.h>
@@ -50,7 +51,7 @@ Assembler::~Assembler()
 //-----------------------------------------------------------------------------
 void Assembler::assemble(GenericTensor& A, Form& form, bool reset_tensor)
 {
-#pragma omp parallel
+OPENMP_PRAGMA( parallel )
   assemble(A, form, form.coefficients(), form.dofmaps(), 0, 0, 0, reset_tensor);
 }
 //-----------------------------------------------------------------------------
@@ -65,7 +66,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
   // Extract facet domains
   MeshValues<uint, Facet>* facet_domains = NULL;
 
-#pragma omp master
+OPENMP_PRAGMA( master )
   {
     if (form.num_cell_integrals() > 0)
     {
@@ -88,7 +89,7 @@ void Assembler::assemble(GenericTensor& A, Form& form,
            cell_domains, facet_domains, facet_domains, reset_tensor);
 
   // Delete domains
-#pragma omp master
+OPENMP_PRAGMA( master )
   {
     delete cell_domains;
     delete facet_domains;
@@ -114,7 +115,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
                          bool reset_tensor)
 {
   // Check arguments
-#pragma omp master
+OPENMP_PRAGMA( master )
   {
     if(reset_tensor)
     {
@@ -126,7 +127,7 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
   UFC ufc(form);
 
   // Initialize global tensor
-#pragma omp master
+OPENMP_PRAGMA( master )
   {
     initGlobalTensor(A, dofmaps, ufc, reset_tensor);
 
@@ -137,8 +138,8 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
       coefficients[i]->sync();
     }
   }
-#pragma omp flush
-#pragma omp barrier
+OPENMP_PRAGMA( flush )
+OPENMP_PRAGMA( barrier )
 
   // Assemble over cells
   assembleCells(A, coefficients, dofmaps, ufc, cell_domains);
@@ -153,9 +154,9 @@ void Assembler::assemble(GenericTensor& A, const Form& form,
   initializePeriodicDofs(A, coefficients, dofmaps, ufc, exterior_facet_domains);
 
   // Finalise assembly of global tensor
-#pragma omp master
+OPENMP_PRAGMA( master )
   A.apply();
-#pragma omp barrier
+OPENMP_PRAGMA( barrier )
 }
 //-----------------------------------------------------------------------------
 void Assembler::assembleCells(GenericTensor& A,
@@ -179,7 +180,7 @@ void Assembler::assembleCells(GenericTensor& A,
   ufc::cell_integral * integral = ufc.cell_integrals[0];
 
   CellIterator it(mesh);
-#pragma omp for
+OPENMP_PRAGMA( for )
   for (uint i = 0; i < N; ++i)
   {
     Cell& cell = it[i];
@@ -251,7 +252,7 @@ void Assembler::assembleExteriorFacets(GenericTensor& A,
 
   FacetIterator it(mesh);
   CellIterator  c0(mesh);
-#pragma omp for
+OPENMP_PRAGMA( for )
   for (uint i = 0; i < N; ++i)
   {
     // Get mesh facet corresponding to boundary cell
@@ -329,7 +330,7 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
   FacetIterator it(mesh);
   CellIterator  c0(mesh);
   CellIterator  c1(mesh);
-#pragma omp for
+OPENMP_PRAGMA( for )
   for (uint i = 0; i < N; ++i)
   {
     Facet& facet = it[i];
@@ -403,10 +404,10 @@ void Assembler::assembleInteriorFacets(GenericTensor& A,
 }
 //-----------------------------------------------------------------------------
 void Assembler::initializePeriodicDofs(GenericTensor& A,
-                                       Array<Coefficient*> const& coefficients,
+                                       Array<Coefficient*> const&,
                                        DofMapSet const& dofmaps,
-                                       UFC& data,
-                                       MeshValues<uint, Facet> const* domains) const
+                                       UFC&,
+                                       MeshValues<uint, Facet> const*) const
 {
   if(!dofmaps[0].mesh().has_periodic_constraint())
   {

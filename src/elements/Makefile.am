@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I@top_srcdir@/include -Wno-unused-parameter
+AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_elements.la
 libdolfin_elements_la_SOURCES = ElementLibrary.cpp\
 				ffc_Brezzi_Douglas_Marini_1_2d.cpp\

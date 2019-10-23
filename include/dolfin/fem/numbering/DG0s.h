@@ -38,7 +38,8 @@ public:
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell,
+                            Cell const&) const
   {
     dofs[0] = ufc_cell.index;
   }

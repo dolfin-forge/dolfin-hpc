@@ -6,6 +6,7 @@
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/common/types.h>
 #include <dolfin/common/AdjacentMapping.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/mesh/Mesh.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Cell.h>
@@ -543,6 +544,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 {
   // Check dimension
   dolfin_assert(finite_element.space_dimension() == scratch->local_dimension);
+  MAYBE_UNUSED(finite_element);
 
   // Tabulate dofs
   dofmap_->tabulate_dofs(scratch->dofs, cell, dolfin_cell);
@@ -566,7 +568,7 @@ void Function::interpolate(real* coefficients, const ufc::cell& cell,
 //-----------------------------------------------------------------------------
 void Function::interpolate(real* coefficients, const ufc::cell& cell,
                            const ufc::finite_element& finite_element,
-                           const Cell& dolfin_cell, uint facet) const
+                           const Cell& dolfin_cell, uint) const
 {
   interpolate(coefficients, cell, finite_element, dolfin_cell);
 }
@@ -874,7 +876,7 @@ Function& Function::operator=(real value)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator+=(real value)
+Function& Function::operator+=(real)
 {
   dolfin_assert(!this->empty());
   error("Not implemented");
@@ -882,7 +884,7 @@ Function& Function::operator+=(real value)
 }
 
 //-----------------------------------------------------------------------------
-Function& Function::operator-=(real value)
+Function& Function::operator-=(real)
 {
   dolfin_assert(!this->empty());
   error("Not implemented");

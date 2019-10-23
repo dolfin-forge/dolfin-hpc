@@ -3,6 +3,7 @@
 
 #include <dolfin/function/FunctionInterpolation.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/fem/DofMap.h>
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
@@ -159,7 +160,9 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   ScratchSpace S1(Vh1);
 
   //
+#if HAVE_MPI
   uint rank = dolfin::MPI::rank();
+#endif
   uint pe_size = dolfin::MPI::size();
 
   // On-proc for M0 and M1
@@ -182,10 +185,14 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
   _set<uint> offproc;
 
   // Dofs count to be sent and received
+#if HAVE_MPI
   uint num_sendadj = 0;
+#endif
   uint * dof1sendcount = new uint[pe_size];
   std::memset(dof1sendcount, 0, pe_size * sizeof(uint));
+#if HAVE_MPI
   uint num_recvadj = 0;
+#endif
   uint * dof1recvcount = new uint[pe_size];
   std::memset(dof1recvcount, 0, pe_size * sizeof(uint));
 
@@ -194,8 +201,10 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
 
   // Some flags
   bool const is_distributed = M0.is_distributed() || M1.is_distributed();
+#if HAVE_MPI
   bool const just_first_coords = Vh1.is_flattenable()
       && Vh1.element().is_vectorizable();
+#endif
 
   //--- Collect on-proc and off-proc dofs
   if (Vh1.is_vertex_based())
@@ -407,6 +416,7 @@ void FunctionInterpolation::interpolateNM(GenericFunction const& F0,
         {
           // DEBUG
           dolfin_assert(u_recvcount / S1.size == r_recvcount / gdim1);
+          MAYBE_UNUSED(r_recvcount);
 
           //
           Point p;

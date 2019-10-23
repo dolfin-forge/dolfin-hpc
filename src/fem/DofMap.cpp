@@ -638,6 +638,8 @@ bool DofMap::check(bool throw_error)
   }
   ret &= owned_more.empty();
   delete[] recvbuf;
+#else
+  MAYBE_UNUSED(throw_error);
 #endif
   return ret;
 }

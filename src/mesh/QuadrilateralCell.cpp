@@ -3,6 +3,7 @@
 
 #include <dolfin/mesh/QuadrilateralCell.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/Edge.h>
 #include <dolfin/mesh/Facet.h>
@@ -268,6 +269,7 @@ uint QuadrilateralCell::num_refined_cells() const
 uint QuadrilateralCell::num_refined_vertices(uint dim) const
 {
   dolfin_assert(dim <= TD);
+  MAYBE_UNUSED(dim);
   return 1;
 }
 //-----------------------------------------------------------------------------
@@ -503,10 +505,11 @@ real QuadrilateralCell::facet_area(Cell const& cell, uint facet) const
   return std::sqrt(meas);
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p) const
+bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&) const
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[2][0]);
+  MAYBE_UNUSED(e);
 
   // Get the coordinates of the vertices
   /*
@@ -523,11 +526,12 @@ bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool QuadrilateralCell::intersects(MeshEntity const& e, Point const& p1,
-                                   Point const& p2) const
+bool QuadrilateralCell::intersects(MeshEntity const& e, Point const&,
+                                   Point const&) const
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[2][0]);
+  MAYBE_UNUSED(e);
 
   // Get the coordinates of the vertices
   /*

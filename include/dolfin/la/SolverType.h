@@ -23,7 +23,7 @@ namespace dolfin
   };
 
   //---------------------------------------------------------------------------
-  static SolverType krylov_method(std::string type)
+  inline static SolverType krylov_method(std::string type)
   {
     if (type == "cg")
       return cg;
@@ -40,7 +40,7 @@ namespace dolfin
   }
 
   //---------------------------------------------------------------------------
-  static SolverType solver_type(std::string type, bool fallback = false)
+  inline static SolverType solver_type(std::string type, bool fallback = false)
   {
     if (type == "lu")
     {

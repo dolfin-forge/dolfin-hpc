@@ -565,6 +565,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   //
   tocd(1);
 
+#else
+  MAYBE_UNUSED(D);
 #endif /* HAVE_MPI */
 
 }

@@ -121,7 +121,7 @@ struct Equation
 
 private:
 
-  Equation(Equation const& other) {}
+  Equation(Equation const&) {}
 
   // Bilinear form [Stable]
   BilinearForm * a_;

@@ -13,6 +13,7 @@ typedef void Suite;
 #endif
 
 #include <dolfin/common/Test.h>
+#include <dolfin/common/maybe_unused.h>
 
 namespace dolfin
 {
@@ -50,7 +51,7 @@ Suite *_suite_function() \
   dolfin::Check::run_suite(_name, _suite);
 
 #define DOLFIN_CHECK_SUITE(_name, _suite_function) \
-int main(int argc, char **argv) \
+int main() \
 { \
   return DOLFIN_SUITE_RUN(_name, _suite_function()); \
 }
@@ -84,6 +85,7 @@ struct Check
   {
 #ifdef HAVE_CHECK
 
+    MAYBE_UNUSED(name);
     int number_failed;
     SRunner* sr = srunner_create(s);
     srunner_run_all(sr, CK_NORMAL);

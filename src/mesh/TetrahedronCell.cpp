@@ -4,6 +4,7 @@
 #include <dolfin/mesh/TetrahedronCell.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/log/dolfin_log.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/Vertex.h>
@@ -672,11 +673,12 @@ bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p) const
   return true;
 }
 //-----------------------------------------------------------------------------
-bool TetrahedronCell::intersects(MeshEntity const& e, Point const& p1,
-                                 Point const& p2) const
+bool TetrahedronCell::intersects(MeshEntity const& e, Point const&,
+                                 Point const&) const
 {
   dolfin_assert(e.dim() == TD);
   dolfin_assert(e.num_entities(0) == NE[3][0]);
+  MAYBE_UNUSED(e);
 
   error("Collision of tetrahedron with segment not implemented");
   return false;

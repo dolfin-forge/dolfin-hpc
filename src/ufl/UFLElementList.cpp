@@ -25,7 +25,8 @@ ElementList::~ElementList()
 }
 
 //-----------------------------------------------------------------------------
-ElementList::ElementList(ElementList const &other)
+ElementList::ElementList(ElementList const &other) :
+  std::map<Object::repr_t, FiniteElementSpace *>( other)
 {
   this->clear();
   for (ElementList::const_iterator it = other.begin(); it != other.end(); ++it)

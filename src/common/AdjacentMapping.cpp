@@ -98,7 +98,7 @@ SharedMapping::~SharedMapping()
 {
 }
 //-----------------------------------------------------------------------------
-SharedMapping& SharedMapping::operator=(SharedMapping const& other)
+SharedMapping& SharedMapping::operator=(SharedMapping const&)
 {
   // Do not allow assignment
   return *this;

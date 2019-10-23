@@ -8,7 +8,6 @@ namespace ufl
 
 //-----------------------------------------------------------------------------
 FormData::FormData(Form const& form) :
-    form_(form),
     cell_integrals_(form.cell_integrals().operands()),
     extf_integrals_(form.exterior_facet_integrals().operands()),
     intf_integrals_(form.interior_facet_integrals().operands()),
@@ -202,10 +201,10 @@ void FormData::zero_element_tensor(double* A) const
 }
 
 //-----------------------------------------------------------------------------
-void FormData::compute_element_tensor(double* A,
+void FormData::compute_element_tensor(double*,
                                       dolfin::UFCReferenceCell const& ref_cell,
                                       std::vector<dolfin::real*> const& q_point,
-                                      std::vector<dolfin::real> const& weights,
+                                      std::vector<dolfin::real> const&,
                                       const double * const * coordinates) const
 {
   std::vector<std::vector<std::vector<std::vector<dolfin::real> > > > new_vals0(

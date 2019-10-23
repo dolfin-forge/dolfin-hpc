@@ -27,7 +27,7 @@ FiniteElement::FiniteElement(Family::Type family, Cell const& cell,
   {
     error("The finite element definition is not valid.");
   }
-  
+
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree
         << quadrature_scheme().str() << " on a " << cell.str() << ">";
@@ -51,7 +51,7 @@ FiniteElement::FiniteElement(repr_t const& repr) :
   {
     error("The finite element definition is not valid.");
   }
-  
+
   std::stringstream ssstr;
   ssstr << "<" << this->family().short_name() << degree()
         << quadrature_scheme().str() << " on a " << cell().str() << ">";
@@ -107,7 +107,7 @@ std::map<dolfin::uint, dolfin::uint> const& FiniteElement::symmetry() const
 
 //-----------------------------------------------------------------------------
 std::pair<ValueArray, ValueArray> FiniteElement::extract_subelement_component(
-    ValueArray const& i) const
+    ValueArray const&) const
 {
   return std::pair<ValueArray, ValueArray>();
 }

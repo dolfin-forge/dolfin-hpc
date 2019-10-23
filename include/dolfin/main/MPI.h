@@ -193,6 +193,26 @@ inline int MPI::all_gather( uint * sendbuf, int sendcount,
 }
 //-----------------------------------------------------------------------------
 template<>
+inline int MPI::all_gather( long * sendbuf, int sendcount,
+                            long * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_LONG,
+                                          recvbuf, recvcount, MPI_LONG,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+template<>
+inline int MPI::all_gather( long long * sendbuf, int sendcount,
+                            long long * recvbuf, int recvcount,
+                            Communicator& comm )
+{
+  return MPI::check_error( MPI_Allgather( sendbuf, sendcount, MPI_LONG_LONG_INT,
+                                          recvbuf, recvcount, MPI_LONG_LONG_INT,
+                                          comm ) );
+}
+//-----------------------------------------------------------------------------
+template<>
 inline int MPI::all_gather( real * sendbuf, int sendcount,
                             real * recvbuf, int recvcount,
                             Communicator& comm )
@@ -269,10 +289,10 @@ inline int MPI::sendrecv(bool* sendbuf, int sendcount, int destination,
 {
   MPI_Status status;
   int recv_count;
-  int bs = sendcount * sizeof(bool);
-  int br = recvcount * sizeof(bool);
-  MPI::check_error( MPI_Sendrecv(sendbuf, sendcount, MPI_BYTE, destination, tag,
-                                 recvbuf, recvcount, MPI_BYTE, source, tag,
+  int send_bool = sendcount * sizeof(bool);
+  int recv_bool = recvcount * sizeof(bool);
+  MPI::check_error( MPI_Sendrecv(sendbuf, send_bool, MPI_BYTE, destination, tag,
+                                 recvbuf, recv_bool, MPI_BYTE, source, tag,
                                  comm, &status) );
   MPI::check_error( MPI_Get_count(&status, MPI_BYTE, &recv_count) );
   return recv_count / sizeof(bool);
@@ -341,6 +361,13 @@ inline int MPI::sendrecv(real* sendbuf, int sendcount, int destination,
 //-----------------------------------------------------------------------------
 template<class T>
 inline int MPI::bcast(T*, int, int, Communicator&)
+{
+  return MPI_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+template<class T>
+inline int MPI::all_gather( T *, int, T *, int, Communicator& )
 {
   return MPI_SUCCESS;
 }

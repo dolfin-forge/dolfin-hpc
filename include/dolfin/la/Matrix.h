@@ -122,7 +122,7 @@ namespace dolfin
 
     /// Divide matrix by given number
     const Matrix& operator/= (real a)
-    { *this /= a; return *this; }
+    { *matrix /= a; return *this; }
 
     /// Assignment operator
     const GenericMatrix& operator= (const GenericMatrix& A)

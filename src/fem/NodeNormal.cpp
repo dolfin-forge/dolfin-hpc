@@ -89,8 +89,10 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   uint const tdim = mesh.topology_dimension();
   uint const fdim = mesh.type().facet_dim();
   uint const gdim = mesh.geometry_dimension();
-  uint const rank = dolfin::MPI::rank();
   uint const pe_size = dolfin::MPI::size();
+#ifdef HAVE_MPI
+  uint const rank = dolfin::MPI::rank();
+#endif
 
   // Maps facet global index to (weight, normal)
   _map<uint, FacetData *> facets_data;

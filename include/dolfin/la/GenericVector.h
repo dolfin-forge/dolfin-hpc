@@ -8,6 +8,8 @@
 #include "GenericSparsityPattern.h"
 #include "GenericTensor.h"
 
+#include <dolfin/common/maybe_unused.h>
+
 #include <set>
 #include <map>
 
@@ -38,7 +40,7 @@ namespace dolfin
 
     /// Return size of given dimension
     inline uint size(uint dim) const
-    { dolfin_assert(dim == 0); return size(); }
+    { dolfin_assert(dim == 0); MAYBE_UNUSED(dim); return size(); }
 
     /// Get block of values
     inline void get(real* block, const uint* num_rows, const uint * const * rows) const

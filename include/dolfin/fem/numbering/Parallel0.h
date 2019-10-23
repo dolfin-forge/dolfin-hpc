@@ -46,7 +46,8 @@ public:
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const&,
+                            Cell const& cell) const
   {
     uint const ii = ufc_dofmap.local_dimension() * cell.index();
     dolfin_assert(array != NULL);

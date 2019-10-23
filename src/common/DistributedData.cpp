@@ -104,7 +104,7 @@ DistributedData& DistributedData::operator=(DistributedData const& other)
   return *this;
 }
 //-----------------------------------------------------------------------------
-bool DistributedData::operator==(DistributedData const& other) const
+bool DistributedData::operator==(DistributedData const&) const
 {
   return true;
 }

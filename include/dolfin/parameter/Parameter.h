@@ -9,7 +9,7 @@
 namespace dolfin
 {
 
-class ParameterValue;
+struct ParameterValue;
 
 /// This class represents a parameter of some given type.
 /// Supported value types are bool, int, uint, real, and string.

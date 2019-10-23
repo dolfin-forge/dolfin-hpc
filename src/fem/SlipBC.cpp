@@ -76,8 +76,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
   ScratchSpace scratch(fullspace, sub_system());
   // Optimize loops if the space is linear Lagrange: the space dimension is
   // the number of vertices times the number of components
-  bool const is_P1 = (scratch.space_dimension
-                        == mesh.type().num_entities(0) * scratch.size);
+  // bool const is_P1 = (scratch.space_dimension
+  //                       == mesh.type().num_entities(0) * scratch.size);
 
   const std::string la_backend = dolfin_get("linear algebra backend");
 
@@ -160,8 +160,8 @@ void SlipBC::apply(GenericMatrix& A, GenericVector& b, BilinearForm const& form)
 
 }
 //-----------------------------------------------------------------------------
-void SlipBC::apply(GenericMatrix& A, GenericVector& b, GenericVector const& x,
-                   BilinearForm const& form)
+void SlipBC::apply(GenericMatrix&, GenericVector&, GenericVector const&,
+                   BilinearForm const&)
 {
   error("SlipBC not implemented for non linear systems");
 }

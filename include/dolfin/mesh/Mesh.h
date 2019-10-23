@@ -22,9 +22,9 @@ class Cell;
 class IntersectionDetector;
 class MappedManifold;
 class MeshData;
-template<class T, class E, uint N = 1> class MeshValues;
+template<class T, class E, uint N = 1> struct MeshValues;
 class PeriodicSubDomain;
-class Space;
+struct Space;
 class Vertex;
 
 /// A Mesh consists of a set of connected and numbered mesh entities.
@@ -203,7 +203,7 @@ public:
   /// Partition mesh into num_processes partitions
   void partition(MeshValues<uint, Cell>& partitions);
 
-  /// Partition mesh into num_partitions = numProc with weights 
+  /// Partition mesh into num_partitions = numProc with weights
   /// on the vertices of the dual graph
   void partition(MeshValues<uint, Cell>& partitions, MeshValues<uint, Cell>& weight);
 
@@ -265,7 +265,7 @@ private:
   int timestamp_;
 
   /// Assignment (Disabled)
-  Mesh const& operator=(Mesh const& other) { return *this; }
+  Mesh const& operator=(Mesh const&) { return *this; }
 
 };
 

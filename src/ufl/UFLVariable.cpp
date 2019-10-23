@@ -44,10 +44,10 @@ std::vector<std::vector<Class const*> > const Label::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -85,10 +85,10 @@ dict<IndexBase, type<dolfin::uint> > const Label::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Label::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -119,7 +119,7 @@ void Label::display() const
 
 //-----------------------------------------------------------------------------
 std::vector<Expression const *> const Label::fill_expressions(
-    std::vector<repr_t> const& reprs)
+    std::vector<repr_t> const&)
 {
   std::vector<Expression const *> expr;
   return expr;
@@ -127,7 +127,7 @@ std::vector<Expression const *> const Label::fill_expressions(
 
 //-----------------------------------------------------------------------------
 std::vector<Expression const *> const Label::fill_expressions(
-    dolfin::uint const& count)
+    dolfin::uint const&)
 {
   std::vector<Expression const *> expr;
   return expr;
@@ -176,13 +176,13 @@ std::vector<std::vector<Class const*> > const Variable::level_operands(
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       expressions_[1]->level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -199,7 +199,7 @@ std::vector<std::vector<Class const*> > const Variable::level_operands(
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -237,10 +237,10 @@ dict<IndexBase, type<dolfin::uint> > const Variable::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Variable::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;

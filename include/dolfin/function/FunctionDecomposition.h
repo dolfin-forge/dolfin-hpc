@@ -15,18 +15,8 @@ class FunctionDecomposition
 {
 
 public:
-
-  ///
-  FunctionDecomposition(Function const& F, Array<Function *>& Si);
-
   ///
   static Array<Function *> compute(Function const& F);
-
-private:
-
-  Function const& F_;
-  Array<Function *>& Si_;
-
 };
 
 } /* namespace dolfin */

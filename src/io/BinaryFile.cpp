@@ -69,16 +69,23 @@ typedef struct atomic_cell
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename) :
     GenericFile("Binary", filename),
+#if defined( HAVE_MPI )
     t_(0),
+#endif
     version_(BINARY_VERSION)
 {
 }
 //----------------------------------------------------------------------------
 BinaryFile::BinaryFile(const std::string filename, real const& t) :
     GenericFile("Binary", filename),
+#if defined( HAVE_MPI )
     t_(&t),
+#endif
     version_(BINARY_VERSION)
 {
+#if not defined( HAVE_MPI )
+  MAYBE_UNUSED(t);
+#endif
 }
 //----------------------------------------------------------------------------
 BinaryFile::~BinaryFile()
@@ -286,6 +293,7 @@ void BinaryFile::operator>>(Function & f)
 
   error("No matching functions found in binary file");
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -359,6 +367,7 @@ void BinaryFile::operator>>(LabelList<Function>& f)
   MPI::check_error( MPI_File_close(&fh) );
 
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O required for loading functions written in  binary");
 #endif
 }
@@ -492,6 +501,7 @@ void BinaryFile::write_function(
 
   counter++;
 #else
+  MAYBE_UNUSED(f);
   error("MPI I/O is required to save functions in Binary.");
 #endif
 }
@@ -1147,6 +1157,7 @@ void BinaryFile::write_meshfunction(MeshFunction<T>& meshfunction)
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for writing mesh functions to binary files");
 #endif
 
@@ -1301,6 +1312,7 @@ void BinaryFile::read_meshfunction(MeshFunction<T>& meshfunction)
   delete[] values;
 
 #else
+  MAYBE_UNUSED(meshfunction);
   error("MPI I/O required for reading mesh function from binary files");
 #endif
 }

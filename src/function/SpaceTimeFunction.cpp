@@ -181,7 +181,6 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
   Array<real> values(w.vector().local_size());
 
 #ifdef ENABLE_MPIIO
-  int err;
   MPI_File fh;
   MPI_Offset byte_offset = 0;
   MPI::Communicator& comm = w.mesh().topology().comm();

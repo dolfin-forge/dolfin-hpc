@@ -292,6 +292,8 @@ void UFCHalo::update(Array<Coefficient*> const& coefficients,
                    &u_recvbuf[0], u_recvcount, src, 1 );
   }
 
+#else
+  MAYBE_UNUSED(coefficients);
 #endif
 }
 

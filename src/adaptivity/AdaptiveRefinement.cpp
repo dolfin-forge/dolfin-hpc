@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/io/BinaryFile.h>
 #include <dolfin/fem/UFC.h>
@@ -28,10 +29,9 @@
 
 namespace dolfin
 {
-
+#ifdef HAVE_MPI
 //-----------------------------------------------------------------------------
 void AdaptiveRefinement::refine(Mesh& mesh, MeshValues<bool, Cell>& cell_marker)
-
 {
   message("Adaptive refinement");
 
@@ -146,7 +146,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     }
   }
 
-  MeshData D(mesh); D.add(cell_marker);
+  MeshData D(mesh);
+  D.add(cell_marker);
   mesh.distribute(partitions, D);
 
   Mesh new_mesh = mesh;
@@ -176,6 +177,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     {
       FiniteElementSpace subspace(space, i);
       post.push_back(new Function(subspace));
+
       post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
       post.back()->sync();
     }
@@ -215,8 +217,6 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
                                            real **vp, uint **rp, uint& m,
                                            MeshValues<uint, Cell>& distribution)
 {
-
-#ifdef HAVE_MPI
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
   uint target_proc, src, dest, recv_size, local_size;
@@ -325,7 +325,12 @@ void AdaptiveRefinement::redistribute_func(Mesh& mesh, Function const& f,
   *rp = rows;
   m = local_size;
 
-#endif
+  MAYBE_UNUSED(mesh);
+  MAYBE_UNUSED(f);
+  MAYBE_UNUSED(vp);
+  MAYBE_UNUSED(rp);
+  MAYBE_UNUSED(m);
+  MAYBE_UNUSED(distribution);
 
 }
 //-----------------------------------------------------------------------------
@@ -456,6 +461,31 @@ void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
   delete[] local_indices;
 }
 //-----------------------------------------------------------------------------
-
+#else // no MPI
+//-----------------------------------------------------------------------------
+void AdaptiveRefinement::refine(Mesh&, MeshValues<bool, Cell>&)
+{
+  warning("Adaptive Refinement only implemented for MPI");
+}
+//-----------------------------------------------------------------------------
+void AdaptiveRefinement::refine_and_project(Mesh&, Array<Function *> const&,
+                                            MeshValues<bool, Cell>&)
+{
+  warning("Adaptive Refinement only implemented for MPI");
+}
+//-----------------------------------------------------------------------------
+void AdaptiveRefinement::redistribute_func(Mesh&, Function const&,
+                                           real **, uint **, uint&,
+                                           MeshValues<uint, Cell>&)
+{
+  warning("Adaptive Refinement only implemented for MPI");
+}
+//-----------------------------------------------------------------------------
+void AdaptiveRefinement::project(Mesh& new_mesh, Array<Function *>& f_post,
+                                 Function& projected)
+{
+  warning("Adaptive Refinement only implemented for MPI");
+}
+#endif
 }
 

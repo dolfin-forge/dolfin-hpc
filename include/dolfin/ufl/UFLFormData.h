@@ -78,7 +78,6 @@ protected:
 
 private:
 
-  Form const& form_;
   std::vector<Integral const *> const cell_integrals_;
   std::vector<Integral const *> const extf_integrals_;
   std::vector<Integral const *> const intf_integrals_;

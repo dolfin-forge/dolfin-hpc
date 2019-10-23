@@ -170,7 +170,7 @@ CellType const& MeshTopology::type() const
   return *type_;
 }
 //-----------------------------------------------------------------------------
-CellType const& MeshTopology::type(uint i) const
+CellType const& MeshTopology::type(uint) const
 {
   dolfin_assert(type_);
   return *type_;
@@ -456,7 +456,7 @@ Connectivity const * MeshTopology::compute(uint d0, uint d1) const
      *  Compute connectivities from transpose if possible.
      *  Requires: ( d1, d0 )
      */
-    Connectivity const * const c01 = transpose(d1, d0);
+    transpose(d1, d0);
   }
   else
   {
@@ -468,8 +468,8 @@ Connectivity const * MeshTopology::compute(uint d0, uint d1) const
        *  Compute entities connectivity ( tdim, di ) and ( di, 0 ).
        *  Requires: ( tdim, 0 )
        */
-      Connectivity const * const cp0 = entities(dm ? dm : dp);
-      Connectivity const * const c01 = compute(d0, d1);
+      entities(dm ? dm : dp);
+      compute(d0, d1);
     }
     else if (dp)
     {
@@ -477,8 +477,8 @@ Connectivity const * MeshTopology::compute(uint d0, uint d1) const
        *  Compute connectivities ( d0, d1 ).
        *  Requires: ( d0, 0 ), ( d1, 0 ), ( 0, d1 )
        */
-      Connectivity const * const cpm = intersection(dp, 0, dm);
-      Connectivity const * const c01 = compute(d0, d1);
+      intersection(dp, 0, dm);
+      compute(d0, d1);
     }
     else
     {
@@ -585,7 +585,7 @@ MeshTopology::MeshTopology() :
 {
 }
 //-----------------------------------------------------------------------------
-MeshTopology const& MeshTopology::operator=(MeshTopology const& other) const
+MeshTopology const& MeshTopology::operator=(MeshTopology const&) const
 {
   return *this;
 }

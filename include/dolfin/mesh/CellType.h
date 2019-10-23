@@ -244,15 +244,15 @@ template<class E> inline uint dimension(CellType const& c);
 
 class Vertex;
 template<>
-inline uint dimension<Vertex>(CellType const& c) { return 0; }
+inline uint dimension<Vertex>(CellType const&) { return 0; }
 
 class Edge;
 template<>
-inline uint dimension<Edge>(CellType const& c) { return 1; }
+inline uint dimension<Edge>(CellType const&) { return 1; }
 
 class Face;
 template<>
-inline uint dimension<Face>(CellType const& c) { return 2; }
+inline uint dimension<Face>(CellType const&) { return 2; }
 
 class Facet;
 template<>

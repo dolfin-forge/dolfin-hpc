@@ -48,7 +48,7 @@ struct DCell
   }
 
   /// Local index of cell
-  int id;
+  uint id;
 
   /// Index of parent cell
   int parent_id;
@@ -584,7 +584,7 @@ void DMesh::bisectMarked(MeshValues<bool, Cell> const& marked_ids)
             dolfin_assert(v1->glb_id != v2->glb_id);
             ref_edge[EdgeKey<long>(v1->glb_id, v2->glb_id)] = mv;
           }
-          dolfin_assert((*ic) > 0);
+          dolfin_assert((*ic) != NULL);
           bisect((*ic), mv, v1, v2);
         }
       }
@@ -712,7 +712,6 @@ void DMesh::propagate_hypercube(Mesh& mesh,
     state_size += 5;
   }
 
-  MPI_Status status;
   uint dest;
   uint D = 1;
 #if  (__sgi || __FreeBSD__)
@@ -848,19 +847,17 @@ void DMesh::renumber_glb(_map<long, uint>& new_global)
 //-----------------------------------------------------------------------------
 #else
 //-----------------------------------------------------------------------------
-void DMesh::propagate_naive(Mesh& mesh,
-                            Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_naive(Mesh&, Array<Propagation>&, bool&)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::propagate_hypercube(Mesh& mesh,
-                                Array<Propagation>& propagated, bool& empty)
+void DMesh::propagate_hypercube(Mesh&, Array<Propagation>&, bool&)
 {
   error("Rivara needs MPI");
 }
 //-----------------------------------------------------------------------------
-void DMesh::renumber_glb(_map<long, uint>& new_global)
+void DMesh::renumber_glb(_map<long, uint>&)
 {
   error("Rivara needs MPI");
 }

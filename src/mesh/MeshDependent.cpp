@@ -16,7 +16,7 @@ MeshDependent::MeshDependent(Mesh& mesh) :
 }
 
 //---------------------------------------------------------------------------
-MeshDependent::MeshDependent(MeshDependent const& other) :
+MeshDependent::MeshDependent(MeshDependent const&) :
   mesh_(NULL),
   topology_token_(0),
   geometry_token_(0)

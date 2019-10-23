@@ -53,7 +53,7 @@ public:
 
 private:
 
-  inline void sync(Time const& t) { /* No-op */ }
+  inline void sync(Time const&) { /* No-op */ }
 
   void applySlipBC_P1(GenericMatrix& A, GenericVector& b,
                       BilinearForm const& form, ScratchSpace& scratch);

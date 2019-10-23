@@ -19,10 +19,10 @@ namespace dolfin
 
 template<class T> class Array;
 class CellType;
-class DCell;
-class DVertex;
+struct DCell;
+struct DVertex;
 class Mesh;
-template<class T, class E, uint N> class MeshValues;
+template<class T, class E, uint N> struct MeshValues;
 
 /// Dynamic mesh class for on-the-fly changes to the mesh. It is used by the
 /// recursive RivaraRefinement and the EdgeCollapse-MeshCoarsening.

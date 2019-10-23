@@ -5,6 +5,7 @@
 
 #include <dolfin/common/types.h>
 #include <dolfin/common/assert.h>
+#include <dolfin/common/maybe_unused.h>
 
 #include <cstdio>
 #include <sstream>
@@ -121,18 +122,24 @@ struct __logstream : protected std::streambuf, public std::ostream
       os_.clear(); os_.seekp(0);
       //sb_->rdbuf(os_.rdbuf());
     }
-    if (pre) (*this) << pre;
+    if (pre)
+      (*this) << pre;
     if (msg)
     {
-      char const *c0, *c1 = msg;
+      char const *c1 = msg;
       char fc = std::ostream::fill();
       int  pn = std::ostream::precision();
       int  wn = 0;
       for (;;)
       {
-        c0 = c1;
-        while (*(c1 = msg++) != '%') { if (*c1 == '\0') goto ret; put(*c1); }
-        bool sh = false; char ln = '\0';
+        while (*(c1 = msg++) != '%') {
+          if (*c1 == '\0')
+            goto ret;
+          put(*c1);
+        }
+        bool sh = false;
+        char ln = '\0';
+        MAYBE_UNUSED(ln);
         // Backup ioflags
         std::ios_base::fmtflags ff(flags());
 fmt:
@@ -318,7 +325,9 @@ fmtf:
       }
     }
 ret:
-    if (suf) (*this) << suf; ss_->flush();
+    if (suf)
+      (*this) << suf;
+    ss_->flush();
     if (n)
     {
       //sb_->rdbuf(ss_->rdbuf());

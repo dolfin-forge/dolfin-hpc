@@ -183,7 +183,9 @@ void PeriodicDofsMapping::init(DofMap const& dofmap)
     _set<uint> const& setG = manifold.Gfacets();
     _set<uint> const& setH = manifold.Hfacets();
     _set<uint> const& setI = manifold.Ifacets();
+#if HAVE_MPI
     uint const GpmOffset = Gcount;
+#endif
 
     //--- Collect dofs and exchange -------------------------------------------
     // Reserve array for mapped coordinates

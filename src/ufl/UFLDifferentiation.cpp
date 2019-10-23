@@ -83,13 +83,13 @@ std::vector<std::vector<Class const*> > const CoefficientDerivative::level_opera
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       expressions_[1]->level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -106,7 +106,7 @@ std::vector<std::vector<Class const*> > const CoefficientDerivative::level_opera
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -145,10 +145,10 @@ dict<IndexBase, type<dolfin::uint> > const CoefficientDerivative::index_dimensio
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const CoefficientDerivative::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   //FIXME implement this
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
@@ -251,13 +251,13 @@ std::vector<std::vector<Class const*> > const SpatialDerivative::level_operands(
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       expressions_[1]->level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -274,7 +274,7 @@ std::vector<std::vector<Class const*> > const SpatialDerivative::level_operands(
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -323,22 +323,22 @@ std::vector<std::vector<std::vector<dolfin::real> > > const SpatialDerivative::e
       expressions_[1]->free_indices().operands();
   std::vector<std::pair<IndexBase const *, type<dolfin::uint> const*> > const index_dim =
       expressions_[1]->index_dimensions().map();
-  
+
   for (dolfin::uint i = 0; i < f_indices.size(); ++i)
   {
     std::cout << "i=" << i << ": " << f_indices[i]->count();
     std::cout << "  " << *index_dim[i].second << std::endl;
   }
-  
+
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0 =
       expressions_[0]->evaluate(n, tensor, ref_cell, q_points, coordinates);
-  
+
   for (dolfin::uint i = 0; i < new_vals0.size(); ++i)
     for (dolfin::uint j = 0; j < new_vals0[i].size(); ++j)
       for (dolfin::uint k = 0; k < new_vals0[i][j].size(); ++k)
         std::cout << "(" << i << "," << j << "," << k << ") = "
                   << new_vals0[i][j][k] << std::endl;
-  
+
   std::cout << "SpatialDerivative::evaluate END" << n << std::endl;
   return new_vals0;
 }
@@ -423,13 +423,13 @@ std::vector<std::vector<Class const*> > const VariableDerivative::level_operands
       expressions_[0]->level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands1 =
       expressions_[1]->level_operands(operands);
-  
+
   const dolfin::uint size = std::max(new_operands0.size(),
                                      new_operands1.size());
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -446,7 +446,7 @@ std::vector<std::vector<Class const*> > const VariableDerivative::level_operands
 //          std::cout << new_operands1[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -469,7 +469,7 @@ ValueArray const VariableDerivative::shape() const
 {
   ValueArray const& shape_0 = expressions_[0]->shape();
   ValueArray const& shape_1 = expressions_[1]->shape();
-  
+
   ValueArray return_shape = shape_0;
   for (dolfin::uint i = 0; i < shape_1.size(); ++i)
     return_shape.push_back(shape_1[i]);
@@ -480,7 +480,7 @@ ValueArray const VariableDerivative::shape() const
 tuple<Index> const VariableDerivative::free_indices() const
 {
   std::vector<Index const *> indices;
-  
+
   for (dolfin::uint i = 0; i < expressions_.size(); ++i)
   {
     std::vector<Index const *> const expr_indices =
@@ -488,7 +488,7 @@ tuple<Index> const VariableDerivative::free_indices() const
     for (dolfin::uint j = 0; j < expr_indices.size(); ++j)
       indices.push_back(expr_indices[j]);
   }
-  
+
   return tuple<Index>(indices);
 }
 
@@ -496,7 +496,7 @@ tuple<Index> const VariableDerivative::free_indices() const
 dict<IndexBase, type<dolfin::uint> > const VariableDerivative::index_dimensions() const
 {
   std::vector<std::pair<IndexBase const *, type<dolfin::uint> const *> > i_dims;
-  
+
   for (dolfin::uint i = 0; i < expressions_.size(); ++i)
   {
     std::vector<std::pair<IndexBase const *, type<dolfin::uint> const *> > const expr_idims =
@@ -504,16 +504,16 @@ dict<IndexBase, type<dolfin::uint> > const VariableDerivative::index_dimensions(
     for (dolfin::uint j = 0; j < expr_idims.size(); ++j)
       i_dims.push_back(expr_idims[j]);
   }
-  
+
   return dict<IndexBase, type<dolfin::uint> >(i_dims);
 }
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const VariableDerivative::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -593,12 +593,12 @@ std::vector<std::vector<Class const*> > const Grad::level_operands(
 {
   std::vector<std::vector<Class const*> > new_operands0 =
       expressions_[0]->level_operands(operands);
-  
+
   const dolfin::uint size = new_operands0.size();
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -631,7 +631,7 @@ ValueArray const Grad::shape() const
   ValueArray const& shape_array = expressions_[0]->shape();
   ValueArray return_array = shape_array;
   return_array.push_back(expressions_[0]->geometric_dimension());
-  
+
   return return_array;
 }
 
@@ -649,10 +649,10 @@ dict<IndexBase, type<dolfin::uint> > const Grad::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Grad::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -730,12 +730,12 @@ std::vector<std::vector<Class const*> > const Div::level_operands(
 {
   std::vector<std::vector<Class const*> > new_operands0 =
       expressions_[0]->level_operands(operands);
-  
+
   const dolfin::uint size = new_operands0.size();
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -745,7 +745,7 @@ std::vector<std::vector<Class const*> > const Div::level_operands(
 //        std::cout << new_operands0[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -769,7 +769,7 @@ ValueArray const Div::shape() const
   ValueArray const& shape_array = expressions_[0]->shape();
   ValueArray return_array = shape_array;
   return_array.pop_back();
-  
+
   return return_array;
 }
 
@@ -787,10 +787,10 @@ dict<IndexBase, type<dolfin::uint> > const Div::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Div::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -868,12 +868,12 @@ std::vector<std::vector<Class const*> > const NablaGrad::level_operands(
 {
   std::vector<std::vector<Class const*> > new_operands0 =
       expressions_[0]->level_operands(operands);
-  
+
   const dolfin::uint size = new_operands0.size();
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -883,7 +883,7 @@ std::vector<std::vector<Class const*> > const NablaGrad::level_operands(
 //        std::cout << new_operands0[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -908,7 +908,7 @@ ValueArray const NablaGrad::shape() const
   ValueArray return_array(expressions_[0]->geometric_dimension());
   for (dolfin::uint i = 0; i < shape_array.size(); ++i)
     return_array.push_back(shape_array[i]);
-  
+
   return return_array;
 }
 
@@ -926,10 +926,10 @@ dict<IndexBase, type<dolfin::uint> > const NablaGrad::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const NablaGrad::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -1008,12 +1008,12 @@ std::vector<std::vector<Class const*> > const NablaDiv::level_operands(
 {
   std::vector<std::vector<Class const*> > new_operands0 =
       expressions_[0]->level_operands(operands);
-  
+
   const dolfin::uint size = new_operands0.size();
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -1023,7 +1023,7 @@ std::vector<std::vector<Class const*> > const NablaDiv::level_operands(
 //        std::cout << new_operands0[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -1046,10 +1046,10 @@ ValueArray const NablaDiv::shape() const
 {
   ValueArray const& shape_array = expressions_[0]->shape();
   ValueArray return_array;
-  
+
   for (dolfin::uint i = 1; i < shape_array.size(); ++i)
     return_array.push_back(shape_array[i]);
-  
+
   return return_array;
 }
 
@@ -1067,10 +1067,10 @@ dict<IndexBase, type<dolfin::uint> > const NablaDiv::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const NablaDiv::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -1148,12 +1148,12 @@ std::vector<std::vector<Class const*> > const Curl::level_operands(
 {
   std::vector<std::vector<Class const*> > new_operands0 =
       expressions_[0]->level_operands(operands);
-  
+
   const dolfin::uint size = new_operands0.size();
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -1200,10 +1200,10 @@ dict<IndexBase, type<dolfin::uint> > const Curl::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Curl::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;

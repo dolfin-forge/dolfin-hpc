@@ -113,7 +113,7 @@ protected:
   void init(Array<Coefficient *>& coefficients);
 
   /// Assign coefficients from map to form coefficients
-  void init(Array<Coefficient *>& coefficients, CoefficientMap const& map);
+  void init(Array<Coefficient *>& coefficients, CoefficientMap & map);
 
 private:
 
@@ -202,7 +202,7 @@ Form::create_interior_facet_integral(uint i) const
 template <class T>
 struct Nil : public T
 {
-    Nil(Mesh& mesh, typename T::Coefficients& coefs) :
+    Nil(Mesh& mesh, typename T::Coefficients&) :
         T(mesh)
     {
     }

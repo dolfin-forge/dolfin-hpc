@@ -65,7 +65,7 @@ VertexNormal::~VertexNormal()
 }
 
 //-----------------------------------------------------------------------------
-VertexNormal& VertexNormal::operator=(VertexNormal& other)
+VertexNormal& VertexNormal::operator=(VertexNormal&)
 {
   return *this;
 }
@@ -128,7 +128,9 @@ void VertexNormal::computeNormal(Mesh& mesh)
   BoundaryMesh& boundary = mesh.exterior_boundary();
 
   VertexDataMap vdmap;
+#ifdef HAVE_MPI
   int rank = dolfin::MPI::rank();
+#endif
   int pe_size = dolfin::MPI::size();
   Array<uint> * u_sendbuff = new Array<uint> [pe_size];
   Array<real> * r_sendbuff = new Array<real> [pe_size];
@@ -198,7 +200,7 @@ void VertexNormal::computeNormal(Mesh& mesh)
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuff[*it].size()));
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuff[*it].size()));
     }
-    dolfin_assert(u_maxsendcount <= u_size * mesh.topology().num_ghost(0));
+    dolfin_assert((uint) u_maxsendcount <= u_size && mesh.topology().num_ghost(0));
     MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
     MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );

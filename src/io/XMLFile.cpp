@@ -524,9 +524,9 @@ void XMLFile::parseFile()
 void XMLFile::parseSAX()
 {
   // Set up the sax handler. Note that it is important that we initialise
-  // all (24) fields, even the ones we don't use!
-  xmlSAXHandler sax =
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+  // all (32) fields, even the ones we don't use!
+  xmlSAXHandler sax = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
   // Set up handlers for parser events
   sax.startDocument = sax_start_document;
@@ -546,12 +546,12 @@ void XMLFile::parseSAX()
 //-----------------------------------------------------------------------------
 // Callback functions for the SAX interface
 //-----------------------------------------------------------------------------
-void sax_start_document(void *ctx)
+void sax_start_document(void *)
 {
   // Do nothing
 }
 //-----------------------------------------------------------------------------
-void sax_end_document(void *ctx)
+void sax_end_document(void *)
 {
   // Do nothing
 }
@@ -567,7 +567,7 @@ void sax_end_element(void *ctx, const xmlChar *name)
   ((XMLObject *) ctx)->endElement(name);
 }
 //-----------------------------------------------------------------------------
-void sax_warning(void *ctx, const char *msg, ...)
+void sax_warning(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
@@ -577,7 +577,7 @@ void sax_warning(void *ctx, const char *msg, ...)
   va_end(args);
 }
 //-----------------------------------------------------------------------------
-void sax_error(void *ctx, const char *msg, ...)
+void sax_error(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
@@ -587,7 +587,7 @@ void sax_error(void *ctx, const char *msg, ...)
   va_end(args);
 }
 //-----------------------------------------------------------------------------
-void sax_fatal_error(void *ctx, const char *msg, ...)
+void sax_fatal_error(void *, const char *msg, ...)
 {
   va_list args;
   va_start(args, msg);

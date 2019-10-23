@@ -22,7 +22,7 @@ XMLObject::~XMLObject()
 }
 
 //-----------------------------------------------------------------------------
-void XMLObject::open(std::string const& filename)
+void XMLObject::open(std::string const&)
 {
   // Do nothing
 }
@@ -33,7 +33,7 @@ bool XMLObject::close()
 }
 //-----------------------------------------------------------------------------
 template <>
-const char * XMLObject::strtype(int const& t)
+const char * XMLObject::strtype(int const&)
 {
   return "int";
 }
@@ -45,7 +45,7 @@ int XMLObject::read(const xmlChar * s)
 }
 //-----------------------------------------------------------------------------
 template <>
-const char * XMLObject::strtype(uint const& t)
+const char * XMLObject::strtype(uint const&)
 {
   return "uint";
 }
@@ -53,16 +53,16 @@ const char * XMLObject::strtype(uint const& t)
 template <>
 uint XMLObject::read(const xmlChar * s)
 {
-  uint value = strtol(reinterpret_cast<const char *>(s), NULL, 0);
+  long value = strtol(reinterpret_cast<const char *>(s), NULL, 0);
   if (value < 0)
   {
     error("XML : parsed unsigned integer is negative");
   }
-  return value;
+  return (uint) value;
 }
 //-----------------------------------------------------------------------------
 template <>
-const char * XMLObject::strtype(real const& t)
+const char * XMLObject::strtype(real const&)
 {
   return "real";
 }
@@ -74,7 +74,7 @@ real XMLObject::read(const xmlChar * s)
 }
 //-----------------------------------------------------------------------------
 template <>
-const char * XMLObject::strtype(std::string const& t)
+const char * XMLObject::strtype(std::string const&)
 {
   return "string";
 }
@@ -86,7 +86,7 @@ std::string XMLObject::read(const xmlChar * s)
 }
 //-----------------------------------------------------------------------------
 template <>
-const char * XMLObject::strtype(bool const& t)
+const char * XMLObject::strtype(bool const&)
 {
   return "bool";
 }

@@ -153,8 +153,8 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     uint * recvbuf = new uint[recvmax];
     for (uint j = 1; j < pe_size; ++j)
     {
-      int src = (rank - j + pe_size) % pe_size;
-      int dst = (rank + j) % pe_size;
+      uint src = (rank - j + pe_size) % pe_size;
+      uint dst = (rank + j) % pe_size;
 
       int recvcount = MPI::sendrecv( &sendbuf[dst][0], sendbuf[dst].size(), dst,
                                      &recvbuf[0], recvmax, src, 1 );

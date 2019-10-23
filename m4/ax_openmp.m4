@@ -84,7 +84,7 @@ for ax_openmp_flag in $ax_openmp_flags; do
     *) []_AC_LANG_PREFIX[]FLAGS="$save[]_AC_LANG_PREFIX[]FLAGS $ax_openmp_flag" ;;
   esac
   AC_TRY_LINK_FUNC(omp_set_num_threads,
-	[ax_cv_[]_AC_LANG_ABBREV[]_openmp=$ax_openmp_flag; break])
+  [ax_cv_[]_AC_LANG_ABBREV[]_openmp=$ax_openmp_flag; break])
 done
 []_AC_LANG_PREFIX[]FLAGS=$save[]_AC_LANG_PREFIX[]FLAGS
 ])

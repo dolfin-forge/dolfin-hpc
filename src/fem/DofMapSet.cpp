@@ -14,7 +14,7 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-DofMapSet::DofMapSet(Form const& form, Mesh& mesh) :
+DofMapSet::DofMapSet(Form const&, Mesh& mesh) :
     mesh_(mesh)
 {
 }

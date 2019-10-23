@@ -130,7 +130,7 @@ DofNumbering::DofNumbering(DofNumbering const& other) :
   }
 }
 //-----------------------------------------------------------------------------
-DofNumbering& DofNumbering::operator=(DofNumbering const& other)
+DofNumbering& DofNumbering::operator=(DofNumbering const&)
 {
   return *this;
 }

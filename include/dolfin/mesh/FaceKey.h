@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_MESH_FACE_KEY
 #define __DOLFIN_MESH_FACE_KEY

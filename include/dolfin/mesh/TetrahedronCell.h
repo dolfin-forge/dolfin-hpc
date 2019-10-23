@@ -1,12 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman 2006.
-// Modified by Garth N. Wells 2006.
-// Modified by Aurelien Larcher, 2015.
-//
-// First added:  2006-06-05
-// Last changed: 2008-06-20
 
 #ifndef __DOLFIN_TETRAHEDRON_CELL_H
 #define __DOLFIN_TETRAHEDRON_CELL_H

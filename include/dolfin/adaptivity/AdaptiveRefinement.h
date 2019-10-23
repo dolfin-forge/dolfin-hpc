@@ -1,8 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2010-09-13
-// Last changed: 2011-01-18
 
 #ifndef __DOLFIN_ADAPTIVE_REFINEMENT_H
 #define __DOLFIN_ADAPTIVE_REFINEMENT_H

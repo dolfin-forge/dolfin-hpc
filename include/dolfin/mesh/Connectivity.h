@@ -1,6 +1,5 @@
 // Copyright (C) 2016-2017 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H

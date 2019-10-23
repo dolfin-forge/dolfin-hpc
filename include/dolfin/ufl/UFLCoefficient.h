@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_UFL_COEFFICIENT_H
 #define __DOLFIN_UFL_COEFFICIENT_H

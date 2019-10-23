@@ -1,8 +1,5 @@
 // Copyright (C) 2017. Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2017-05-10
-//
 
 #ifndef __DOLFIN_COMMON_DISTRIBUTED_H_
 #define __DOLFIN_COMMON_DISTRIBUTED_H_

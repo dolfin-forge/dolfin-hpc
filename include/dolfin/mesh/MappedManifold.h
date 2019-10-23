@@ -1,11 +1,8 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // This class is the first implementation allowing identification of mesh
 // boundaries through periodic mappings on general meshes.
-//
-// First added:  2014-10-05
-// Last changed: 2014-10-05
 
 #ifndef __DOLFIN_MAPPED_MANIFOLD_H
 #define __DOLFIN_MAPPED_MANIFOLD_H

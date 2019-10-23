@@ -1,9 +1,6 @@
 // Copyright (C) 2007 Murtazo Nazarov
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009.
-// Modified by Aurélien Larcher, 2012-16. (partial rewrite... then full rewrite)
-//
+
 // This version fixes several important issues compared to the original:
 // - the basis was originally not orthogonal, not normal and randomly oriented.
 // - the weights for facet normals were incorrect.
@@ -14,12 +11,9 @@
 //   thus incorrect enforcement of slip boundary conditions.
 // - the code did not use adjacency of ranks because of two mesh distribution
 //   bugs and thus sent all vertices to all ranks.
-//
+
 // The code computes normals correctly since 2013 when I reviewed it and was
 // later improved.
-//
-// First added:  2007-05-01
-// Last changed: 2015-05-27
 
 #ifndef __DOLFIN_VERTEX_NORMAL_H
 #define __DOLFIN_VERTEX_NORMAL_H

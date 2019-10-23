@@ -1,11 +1,7 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// Modified by Garth N. Wells, 2007.
-// Modified by Aurélien Larcher, 2013. (implement dofmap cache)
 //
-// First added:  2007-01-17
-// Last changed: 2007-05-24
 
 #ifndef __DOLFIN_DOF_MAP_SET_H
 #define __DOLFIN_DOF_MAP_SET_H

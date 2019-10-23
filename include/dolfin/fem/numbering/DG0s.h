@@ -1,6 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_PRIVATE_NUMBERING_DG0S_H
 #define __DOLFIN_PRIVATE_NUMBERING_DG0S_H

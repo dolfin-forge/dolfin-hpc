@@ -1,12 +1,5 @@
 // Copyright (C) 2007 Magnus Vikstrøm.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2008.
-// Modified by Niclas Jansson, 2009-2010.
-// Modified by Aurelien Larcher, 2016-2017.
-//
-// First added:  2007-11-30
-// Last changed: 2017-08-24
 
 #ifndef __DOLFIN_MPI_H
 #define __DOLFIN_MPI_H

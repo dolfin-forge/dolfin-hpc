@@ -1,10 +1,11 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
 
-#ifndef __DOLFIN_UFL_DATA_H
-#define __DOLFIN_UFL_DATA_H
+#ifndef __DOLFIN_UFL__TUPLE_H
+#define __DOLFIN_UFL__TUPLE_H
 
 #include <dolfin/ufl/UFLExpression.h>
+#include <dolfin/ufl/UFL_tuple.h>
 
 namespace ufl
 {
@@ -12,23 +13,23 @@ namespace ufl
 /**
  *  DOCUMENTATION:
  *
- *  @class  Data
+ *  @class  Tuple
  *
- *  @brief  Provides an interface complying with UFL Data.
+ *  @brief  Provides an interface complying with Tuple.
  */
 
-class Data : public Expression
+class Tuple : public Expression
 {
 public:
 
   ///
-  Data(Expression const& expression);
+  Tuple(tuple<Expression> const& t);
 
   ///
-  Data(repr_t const& repr);
+  Tuple(repr_t const & repr);
 
   ///
-  ~Data();
+  ~Tuple();
 
   ///
   virtual std::vector<Class const*> const operands(
@@ -38,10 +39,10 @@ public:
   virtual std::vector<std::vector<Class const *> > const level_operands(
       std::vector<std::vector<Class const *> > const& operands) const;
 
-  //--- INTERFACE -------------------------------------------------------------
+  //--- INTERFACE inherited from UFLClass -------------------------------------
 
   ///
-  static Data const * create(Object::repr_t const& repr);
+  virtual Tuple const * create(Object::repr_t const& repr) const;
 
   ///
   std::vector<Expression const *> const operands() const;
@@ -63,7 +64,6 @@ public:
       ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
       const double * const * coordinates) const;
 
-  //--- INTERFACE inherited from UFLClass -------------------------------------
   /// __repr__
   repr_t const& repr() const;
 
@@ -73,18 +73,16 @@ public:
   ///
   void display() const;
 
-protected:
-
 private:
 
-  std::vector<Expression const *> const fill_expressions(
-      std::vector<repr_t> const& reprs);
-  std::vector<Expression const *> const expressions_;
+//      std::vector<Expression const *> const fill_expressions(std::vector<repr_t> const& reprs);
 
-  repr_t const repr_;
-  std::string const str_;
+//      std::vector<Expression const *> const expressions_;
+  tuple<Expression> const t_;
 
+  mutable repr_t repr_;
+  mutable std::string str_;
 };
 
 } /* namespace ufl */
-#endif /* __DOLFIN_UFL_DATA_H */
+#endif /* __DOLFIN_UFL__TUPLE_H */

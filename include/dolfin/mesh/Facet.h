@@ -1,10 +1,5 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher 2017.
-//
-// First added:  2006-06-02
-// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_FACET_H
 #define __DOLFIN_FACET_H

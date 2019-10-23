@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Nuno Lopes.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-07-15
-// Last changed: 2008-07-15
 
 #ifndef __DOLFIN_UNIT_SPHERE_H
 #define __DOLFIN_UNIT_SPHERE_H

@@ -1,13 +1,5 @@
 // Copyright (C) 2006-2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2006-2008.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Ola Skavhaug, 2008.
-// Modified by Martin Sandve Alnes, 2008.
-//
-// First added:  2006-04-25
-// Last changed: 2008-04-29
 
 #ifndef __DOLFIN_GENERIC_VECTOR_H
 #define __DOLFIN_GENERIC_VECTOR_H

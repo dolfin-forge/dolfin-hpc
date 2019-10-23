@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2017-10-09
-// Last changed: 2017-10-09
 
 #ifndef __DOLFIN_LIBSIM_PIPELINE_INTERFACE_H
 #define __DOLFIN_LIBSIM_PIPELINE_INTERFACE_H

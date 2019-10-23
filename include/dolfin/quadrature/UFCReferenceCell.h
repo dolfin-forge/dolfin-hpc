@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  
-// Last changed: 
 
 #ifndef __DOLFIN_UFC_REFERENCE_CELL_H
 #define __DOLFIN_UFC_REFERENCE_CELL_H

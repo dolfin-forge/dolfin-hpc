@@ -1,12 +1,5 @@
 // Copyright (C) 2005-2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg 2006.
-// Modified by Niclas Jansson 2008-2010.
-// Modified by Aurélien Larcher 2014.
-//
-// First added:  2005-07-05
-// Last changed: 2014-02-08
 
 #ifndef __DOLFIN_PVTK_FILE_H
 #define __DOLFIN_PVTK_FILE_H

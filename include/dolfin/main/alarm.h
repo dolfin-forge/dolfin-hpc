@@ -1,6 +1,5 @@
 // Copyright (C) 2008-2010 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_ALARM_H
 #define __DOLFIN_ALARM_H

@@ -1,8 +1,6 @@
 // Copyright (C) 2013-2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2013-06-13 (merged from branch larcher)
-// Last changed: 2014-02-04
 
 #ifndef __DOLFIN_DOF_MAP_CACHE_H
 #define __DOLFIN_DOF_MAP_CACHE_H

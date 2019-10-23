@@ -1,14 +1,5 @@
 // Copyright (C) 2007-2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Ola Skavhaug, 2008.
-// Modified by Dag Lindbo, 2008.
-// Modified by Anders Logg, 2008.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Niclas Jansson, 2010-2011.
-//
-// First added:  2007-07-03
-// Last changed: 2011-06-10
 
 #ifndef __DOLFIN_LU_SOLVER_H
 #define __DOLFIN_LU_SOLVER_H

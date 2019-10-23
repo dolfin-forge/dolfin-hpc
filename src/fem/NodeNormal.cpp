@@ -1,6 +1,5 @@
 // Copyright (C) 2014-2016 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/fem/NodeNormal.h>
 

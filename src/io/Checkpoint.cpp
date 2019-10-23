@@ -1,8 +1,5 @@
 // Copyright (C) 2009 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2009-09-09
-// Last changed: 2018-11-01
 
 #include <cstring>
 #include <sstream>

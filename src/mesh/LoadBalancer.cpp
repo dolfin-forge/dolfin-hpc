@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-03-03
-// Last changed: 2011-01-18
 
 #include <dolfin/mesh/LoadBalancer.h>
 

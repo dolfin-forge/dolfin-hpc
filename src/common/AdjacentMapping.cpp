@@ -1,6 +1,3 @@
-//
-//
-//
 
 #include <dolfin/common/AdjacentMapping.h>
 

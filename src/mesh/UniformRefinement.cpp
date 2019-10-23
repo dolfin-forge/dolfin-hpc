@@ -1,12 +1,5 @@
 // Copyright (C) 2006-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-// Modified by Stefanie Strunk, 2013.
-// Modified by Aurelien Larcher, 2017.
-//
-// First added:  2006-06-08
-// Last changed: 2017-12-15
 
 #include <dolfin/mesh/UniformRefinement.h>
 

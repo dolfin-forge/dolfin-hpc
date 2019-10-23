@@ -1,7 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-//
 
 #include <dolfin/mesh/QuadrilateralCell.h>
 

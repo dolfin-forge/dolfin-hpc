@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014-2016.
-//
-// First added:  2008-07-03
-// Last changed: 2016-04-04
 
 #include <dolfin/mesh/MeshDistributedData.h>
 

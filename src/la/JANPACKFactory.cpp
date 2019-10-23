@@ -1,6 +1,5 @@
 // Copyright (C) 2010 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/la/JANPACKFactory.h>

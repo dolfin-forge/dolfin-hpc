@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-09-12
-// Last changed: 2013-09-12
 
 #include <dolfin/fem/FiniteElement.h>
 

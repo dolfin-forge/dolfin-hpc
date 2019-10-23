@@ -1,6 +1,5 @@
 // Copyright (C) 2008-2010 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/main/alarm.h>
 

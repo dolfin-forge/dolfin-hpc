@@ -1,12 +1,5 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson 2009-2015.
-// Modified by Aurelien Larcher 2017.
-//
-// First added:  2008-01-07
-// Last changed: 2017-02-23
 
 #include <dolfin/main/SubSystemsManager.h>
 

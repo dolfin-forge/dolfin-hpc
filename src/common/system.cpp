@@ -1,9 +1,5 @@
 // Copyright (C) 2015 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
-//
 
 #include <dolfin/common/system.h>
 

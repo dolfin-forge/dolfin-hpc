@@ -1,13 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman, 2007.
-// Modified by Garth N. Wells 2007.
-// Modified by Balthasar Reuter, 2013.
-// Modified by Aurélien Larcher, 2013.
-//
-// First added:  2006-05-09
-// Last changed: 2013-03-22
 
 #include <dolfin/mesh/Mesh.h>
 

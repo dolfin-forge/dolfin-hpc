@@ -1,8 +1,6 @@
 // Copyright (C) 2013-2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2013-06-11
-// Last changed: 2014-02-04
 
 #include <dolfin/fem/DofMapCache.h>
 #include <dolfin/fem/DofMap.h>

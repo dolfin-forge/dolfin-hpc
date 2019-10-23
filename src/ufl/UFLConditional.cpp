@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #include <dolfin/ufl/UFLConditional.h>
 
@@ -88,13 +85,11 @@ Condition const * Condition::create(Object::repr_t const& repr)
 //  {
 //    return repr_;
 //  }
-//
 //-----------------------------------------------------------------------------
 //  std::string const& Condition::str() const
 //  {
 //    return str_;
 //  }
-//
 //-----------------------------------------------------------------------------
 //  void Condition::display() const
 //  {

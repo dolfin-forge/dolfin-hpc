@@ -1,10 +1,5 @@
 // Copyright (C) 2002-2008 Johan Hoffman and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008-2012.
-//
-// First added:  2002-11-12
-// Last changed: 2012-05-11
 
 // FIXME: Use streams instead of stdio
 #include <stdio.h>

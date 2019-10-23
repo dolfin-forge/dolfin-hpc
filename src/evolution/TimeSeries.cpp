@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-//
-// First added:  2014-08-18
-// Last changed: 2014-08-18
 
 #include <dolfin/evolution/TimeSeries.h>
 

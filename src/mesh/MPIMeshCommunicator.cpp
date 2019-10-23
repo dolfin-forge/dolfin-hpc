@@ -1,14 +1,5 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Magnus Vikstrøm, 2007.
-// Modified by Anders Logg, 2007.
-// Modified by Niclas Jansson, 2008-2015.
-// Modified by Balthasar Reuter, 2013.
-// Modified by Aurelien Larcher, 2015-2016.
-//
-// First added:  2007-05-30
-// Last changed: 2015-01-31
 
 #include <dolfin/mesh/MPIMeshCommunicator.h>
 

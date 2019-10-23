@@ -225,7 +225,7 @@ void PETScVector::add(const real* block, uint m, const uint* rows)
                ADD_VALUES);
 }
 //-----------------------------------------------------------------------------
-void PETScVector::apply(FinalizeType finaltype)
+void PETScVector::apply(FinalizeType)
 {
 
   VecAssemblyBegin(x_);
@@ -408,7 +408,7 @@ real PETScVector::max() const
   return value;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::disp(uint precision) const
+void PETScVector::disp(uint) const
 {
   section("PETScVector");
   if (PE::size() > 1 && is_distributed_)
@@ -427,7 +427,7 @@ Vec PETScVector::vec() const
   return x_;
 }
 //-----------------------------------------------------------------------------
-void PETScVector::init_ghosted(uint n, std::set<uint>& indices,
+void PETScVector::init_ghosted(uint, std::set<uint>& indices,
                                std::map<uint, uint>& map)
 {
   if (!is_distributed_)

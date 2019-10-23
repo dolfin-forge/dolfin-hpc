@@ -288,9 +288,11 @@ void Checkpoint::load(std::vector<Function *> func)
 
   std::vector<Function *>::iterator it;
   uint local_size;
+#ifdef HAVE_MPI
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
   uint vector_offset[3];
+#endif
   // FIXME store max(local_size)
   for (it = func.begin(); it != func.end(); ++it)
   {
@@ -337,9 +339,11 @@ void Checkpoint::load(std::vector<Vector *> vec)
 
   std::vector<Vector *>::iterator it;
   uint local_size;
+#ifdef HAVE_MPI
   uint pe_rank = MPI::rank();
   uint pe_size = MPI::size();
   uint vector_offset[3];
+#endif
   for (it = vec.begin(); it != vec.end(); ++it)
   {
 #ifdef ENABLE_MPIIO

@@ -29,7 +29,7 @@ public:
   }
 
   ///
-  inline void tabulate_dofs(uint* dofs, ufc::cell const& ufc_cell, Cell const& cell) const
+  inline void tabulate_dofs(uint* dofs, ufc::cell const&, Cell const&) const
   {
     std::copy(dofs_, dofs_ + ufc_dofmap.local_dimension(), dofs);
   }
@@ -52,13 +52,13 @@ public:
   }
 
   ///
-  inline bool is_shared(uint index) const
+  inline bool is_shared(uint) const
   {
     return false;
   }
 
   ///
-  inline bool is_ghost(uint index) const
+  inline bool is_ghost(uint) const
   {
     return false;
   }

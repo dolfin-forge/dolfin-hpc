@@ -57,7 +57,7 @@
 /* Have LIBGEOM library */
 #undef HAVE_LIBGEOM
 
-/* VisIt/libsim support */
+/* VisIt/Libsim support */
 #undef HAVE_LIBSIM
 
 /* Define if you have the Zlib library. */
@@ -126,8 +126,7 @@
 /* Define if you have the Zoltan library. */
 #undef HAVE_ZOLTAN
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Compile without progress bar */

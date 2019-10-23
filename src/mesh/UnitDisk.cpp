@@ -163,8 +163,8 @@ real UnitDisk::transformx(real x, real y, Transformation transformation)
   else
   {
     // FIXME: Use easier to understand check
-    if ((transformation != maxn) * (transformation != sumn)
-        * (transformation != rotsumn))
+    if ((transformation != maxn) && (transformation != sumn)
+        && (transformation != rotsumn))
     {
       message("Implemented  transformations are: maxn,sumn and rotsumn");
       message("Using rotsumn transformation");
@@ -204,8 +204,8 @@ real UnitDisk::transformy(real x, real y, Transformation transformation)
   }
   else
   {
-    if ((transformation != maxn) * (transformation != sumn)
-        * (transformation != rotsumn))
+    if ((transformation != maxn) && (transformation != sumn)
+        && (transformation != rotsumn))
     {
       message("Implemented  transformations for are: maxn, sumn and rotsumn");
       message("Using rotsumn transformation");

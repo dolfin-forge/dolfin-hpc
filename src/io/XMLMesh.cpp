@@ -111,7 +111,7 @@ void XMLMesh::endElement(const xmlChar *name)
   }
 }
 //-----------------------------------------------------------------------------
-void XMLMesh::open(std::string const& filename)
+void XMLMesh::open(std::string const&)
 {
   // Do nothing
 }
@@ -233,8 +233,20 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   {
   case 3:
     x[2] = parse<real>(name, attrs, "z");
+    // fallthrough is desired here
+#if defined( __clang__ )
+    [[clang::fallthrough]];
+#elif defined(__GNUC__)
+    __attribute__ ((fallthrough));
+#endif
   case 2:
     x[1] = parse<real>(name, attrs, "y");
+    // fallthrough is desired here
+#if defined( __clang__ )
+    [[clang::fallthrough]];
+#elif defined(__GNUC__)
+    __attribute__ ((fallthrough));
+#endif
   case 1:
     x[0] = parse<real>(name, attrs, "x");
     break;

@@ -97,7 +97,7 @@ std::map<dolfin::uint, dolfin::uint> const& VectorElement::symmetry() const
 
 //-----------------------------------------------------------------------------
 std::pair<ValueArray, ValueArray> VectorElement::extract_subelement_component(
-    ValueArray const& i) const
+    ValueArray const&) const
 {
   return std::pair<ValueArray, ValueArray>();
 }
@@ -141,7 +141,7 @@ void VectorElement::createStr()
   {
     error("A vector element should contain more than one subelement");
   }
-  
+
   std::stringstream ssstr;
   ssstr << "<" << sub_element_.family().short_name()
         << " vector element of degree " << this->degree() << " on a "

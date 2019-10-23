@@ -86,7 +86,7 @@ IndexBase const* IndexBase::create(Object::repr_t const& repr)
   {
     error("Unknown type of ufl::IndexBase: '" + name + "'");
   }
-  
+
   return NULL;
 }
 
@@ -118,10 +118,10 @@ dict<IndexBase, type<dolfin::uint> > const IndexBase::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const IndexBase::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -164,10 +164,10 @@ std::vector<std::vector<Class const*> > const Index::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -232,10 +232,10 @@ std::vector<std::vector<Class const*> > const FixedIndex::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -345,14 +345,14 @@ std::vector<std::vector<Class const*> > const MultiIndex::level_operands(
 //        new_operands1 = fixed_indices_.level_operands(operands);
   std::vector<std::vector<Class const*> > new_operands2 =
       index_dimensions_.level_operands(operands);
-  
+
   const dolfin::uint size = std::max(
       new_operands0.size(),
       std::max(new_operands1.size(), new_operands2.size()));
   std::vector<std::vector<Class const*> > tmp(size + 1);
   std::vector<Class const*> obj0;
   obj0.push_back(this);
-  
+
   tmp[0] = obj0;
   for (dolfin::uint i = 0; i < tmp.size() - 1; ++i)
   {
@@ -375,7 +375,7 @@ std::vector<std::vector<Class const*> > const MultiIndex::level_operands(
       std::cout << new_operands2[i][j]->name() << std::endl;
     }
   }
-  
+
   return tmp;
 }
 
@@ -401,7 +401,7 @@ tuple<Index> const MultiIndex::free_indices() const
     if (base_indices[i]->name() == "Index") indices.push_back(
         dynamic_cast<Index const *>(base_indices[i]));
   }
-  
+
   return indices;
 }
 
@@ -413,10 +413,10 @@ dict<IndexBase, type<dolfin::uint> > const MultiIndex::index_dimensions() const
 
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const MultiIndex::evaluate(
-    dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
-    ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    dolfin::uint,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
+    ufc::cell const&, std::vector<dolfin::real*> const&,
+    const double * const *) const
 {
   std::vector<std::vector<std::vector<dolfin::real> > > const new_vals0;
   return new_vals0;
@@ -443,7 +443,7 @@ void MultiIndex::display() const
 tuple<IndexBase> const MultiIndex::fill_indices(repr_t const& repr)
 {
   if (index_dimensions_.size() > 0) return tuple<IndexBase>(repr);
-  
+
   return tuple<IndexBase>();
 }
 

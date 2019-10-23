@@ -52,10 +52,10 @@ std::vector<std::vector<Class const*> > const Argument::level_operands(
   std::vector<Class const*> obj0;
   obj0.push_back(this);
   new_operands0.push_back(obj0);
-  
+
   for (dolfin::uint i = 0; i < operands.size(); ++i)
     new_operands0.push_back(operands[i]);
-  
+
   return new_operands0;
 }
 
@@ -106,19 +106,19 @@ dict<IndexBase, type<dolfin::uint> > const Argument::index_dimensions() const
 //-----------------------------------------------------------------------------
 std::vector<std::vector<std::vector<dolfin::real> > > const Argument::evaluate(
     dolfin::uint n,
-    std::vector<std::vector<std::vector<dolfin::real> > > const& tensor,
+    std::vector<std::vector<std::vector<dolfin::real> > > const&,
     ufc::cell const& ref_cell, std::vector<dolfin::real*> const& q_points,
-    const double * const * coordinates) const
+    const double * const *) const
 {
   std::cout << "Argument::evaluate " << n << std::endl;
   ufc::finite_element* fe = new dolfin::FiniteElement(element());
-  
+
   std::cout << "value_rank " << fe->value_rank() << std::endl;
   std::cout << "space_dimension " << fe->space_dimension() << std::endl;
   std::cout << "topological_dimension " << fe->topological_dimension()
       << std::endl;
   std::cout << "geometric_dimension " << fe->geometric_dimension() << std::endl;
-  
+
   std::vector<std::vector<std::vector<dolfin::real> > > grads(
       fe->space_dimension());
   std::vector<std::vector<std::vector<dolfin::real> > > ref_grads(
@@ -149,7 +149,7 @@ std::vector<std::vector<std::vector<dolfin::real> > > const Argument::evaluate(
         error("W");
         fe->evaluate_basis_derivatives(s, n, &ref_grads[s][qp][0],
                                                  q_points[qp], ref_cell);
-        
+
         for (dolfin::uint i = 0; i < num_derivatives; ++i)
         {
           std::cout << "i= " << i << " " << grads[s][qp][i] << std::endl;

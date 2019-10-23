@@ -27,7 +27,7 @@ Connectivity::Connectivity(uint order, uint degree) :
   max_degree_(degree),
   connections_(new uint*[order_ + 1])
 {
-  connections_[0] = order * degree ? new uint[order * degree]() : NULL;
+  connections_[0] = (order * degree > 0) ? new uint[order * degree]() : NULL;
   for (uint e = 0; e < order_; ++e)
   {
     connections_[e + 1] = connections_[e] + degree;

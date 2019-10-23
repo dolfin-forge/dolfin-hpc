@@ -528,25 +528,26 @@ bool TriangleCell::intersects(MeshEntity const& e, Point const& p) const
   }
   else if  (geometry.dim() == 3)
   {
-    real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
-                        + (x1[1] - x0[1])*(x1[1] - x0[1])
-                        + (x1[2] - x0[2])*(x1[2] - x0[2]));
-    real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
-                        + (x2[1] - x1[1])*(x2[1] - x1[1])
-                        + (x2[2] - x1[2])*(x2[2] - x1[2]));
-    real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
-                        + (x0[1] - x2[1])*(x0[1] - x2[1])
-                        + (x0[2] - x2[2])*(x0[2] - x2[2]));
+    // real l0 = std::sqrt((x1[0] - x0[0])*(x1[0] - x0[0])
+    //                     + (x1[1] - x0[1])*(x1[1] - x0[1])
+    //                     + (x1[2] - x0[2])*(x1[2] - x0[2]));
+    // real l1 = std::sqrt((x2[0] - x1[0])*(x2[0] - x1[0])
+    //                     + (x2[1] - x1[1])*(x2[1] - x1[1])
+    //                     + (x2[2] - x1[2])*(x2[2] - x1[2]));
+    // real l2 = std::sqrt((x0[0] - x2[0])*(x0[0] - x2[0])
+    //                     + (x0[1] - x2[1])*(x0[1] - x2[1])
+    //                     + (x0[2] - x2[2])*(x0[2] - x2[2]));
 
 
-    real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
-    real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
-    real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
-    real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
+    // real n0 = (x1[1] - x0[1])*(x2[2] - x0[2]) - (x1[2] - x0[2])*(x2[1] - x0[1]);
+    // real n1 = (x1[2] - x0[2])*(x2[0] - x0[0]) - (x1[0] - x0[0])*(x2[2] - x0[2]);
+    // real n2 = (x1[0] - x0[0])*(x2[1] - x0[1]) - (x1[1] - x0[1])*(x2[0] - x0[0]);
+    // real zz = (n2*n2) / (n0*n0 + n1*n1 + n2*n2);
 
     // Check direction of the normal to the triangle; |n.ez|/||n|| >= sqrt(2)/2
     real d1 = orient3d( x0, x1, x2, &p[0]);
-    if (std::abs(d1) > tol) return false;
+    if (std::abs(d1) > tol)
+      return false;
   }
   else
   {

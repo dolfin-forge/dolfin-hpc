@@ -38,7 +38,7 @@ DOLFIN_START_TEST( test_FiniteElementSpace )
     {
       Domain dom(*dom_it);
       ufl::Cell cell(dom);
-      uint const dim = cell.topological_dimension();
+      // uint const dim = cell.topological_dimension();
 
       Mesh refcell;
       CellType * ctype = CellType::create(cell);

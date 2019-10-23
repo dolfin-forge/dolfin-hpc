@@ -146,13 +146,13 @@ void SubDomain::mark(MeshValues<uint, Entity>& sub_domains, uint index) const
 
 //--- TEMPLATE INSTANTIATIONS -------------------------------------------------
 
-template bool SubDomain::enclosed(Vertex& entity, bool on_boundary) const;
+// template bool SubDomain::enclosed(Vertex& entity, bool on_boundary) const;
 template bool SubDomain::enclosed(Edge  & entity, bool on_boundary) const;
 template bool SubDomain::enclosed(Face  & entity, bool on_boundary) const;
 template bool SubDomain::enclosed(Facet & entity, bool on_boundary) const;
 template bool SubDomain::enclosed(Cell  & entity, bool on_boundary) const;
 
-template bool SubDomain::overlap(Vertex& entity, bool on_boundary) const;
+// template bool SubDomain::overlap(Vertex& entity, bool on_boundary) const;
 template bool SubDomain::overlap(Edge  & entity, bool on_boundary) const;
 template bool SubDomain::overlap(Face  & entity, bool on_boundary) const;
 template bool SubDomain::overlap(Facet & entity, bool on_boundary) const;

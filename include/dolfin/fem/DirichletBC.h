@@ -98,8 +98,8 @@ public:
 private:
 
   /// Apply boundary conditions
-  void apply(GenericMatrix& A, GenericVector& b, const GenericVector* x,
-             BilinearForm const& form);
+  void apply_impl(GenericMatrix& A, GenericVector& b, const GenericVector* x,
+                  BilinearForm const& form);
 
   ///
   inline void sync(Time const& t) { g_(t); }

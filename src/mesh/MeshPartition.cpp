@@ -60,18 +60,17 @@ void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
 }
 //-----------------------------------------------------------------------------
 #else
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions)
+void MeshPartition::partition(MeshValues<uint, Cell>&)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition(MeshValues<uint, Cell>& partitions,
-                              MeshValues<uint, Cell>& weight)
+void MeshPartition::partition(MeshValues<uint, Cell>&, MeshValues<uint, Cell>&)
 {
   error("Mesh partitioning requires MPI");
 }
 //-----------------------------------------------------------------------------
-void MeshPartition::partition_geom(MeshValues<uint, Vertex>& partitions)
+void MeshPartition::partition_geom(MeshValues<uint, Vertex>&)
 {
   error("Geometric mesh partitioning requires MPI");
 }

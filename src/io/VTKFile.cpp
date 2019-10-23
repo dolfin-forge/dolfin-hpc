@@ -592,6 +592,7 @@ void VTKFile::pvdFileWrite(uint num, bool parallel)
                  vtu_filename.size());
   }
 #else
+  MAYBE_UNUSED(parallel)
   fname.assign(vtu_filename, filename.find_last_of("/") + 1,
 	       vtu_filename.size());
 #endif

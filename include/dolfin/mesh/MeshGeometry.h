@@ -18,7 +18,7 @@ namespace dolfin
 
 template<class T> class Array;
 class Mesh;
-class Space;
+struct Space;
 
 /**
  *  @class  MeshGeometry

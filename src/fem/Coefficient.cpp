@@ -22,14 +22,14 @@ uint Coefficient::value_size() const
 //-----------------------------------------------------------------------------
 void Coefficient::interpolate(real* coefficients, const ufc::cell& cell,
                               const ufc::finite_element& finite_element,
-                              const Cell& dolfin_cell) const
+                              const Cell&) const
 {
   finite_element.evaluate_dofs(coefficients, *this, cell);
 }
 //-----------------------------------------------------------------------------
 void Coefficient::interpolate(real* coefficients, const ufc::cell& cell,
                               const ufc::finite_element& finite_element,
-                              const Cell& dolfin_cell, uint facet) const
+                              const Cell&, uint) const
 {
   finite_element.evaluate_dofs(coefficients, *this, cell);
 }

@@ -141,11 +141,11 @@ real UnitSphere::max(real x, real y, real z)
 {
   real rtrn = 0.0;
 
-  if ((x >= y) * (x >= z))
+  if ((x >= y) && (x >= z))
   {
     rtrn = x;
   }
-  else if ((y >= x) * (y >= z))
+  else if ((y >= x) && (y >= z))
   {
     rtrn = y;
   }

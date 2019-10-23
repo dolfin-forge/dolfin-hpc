@@ -11,6 +11,7 @@
 #include <dolfin/main/SubSystemsManager.h>
 
 #include <dolfin/common/constants.h>
+#include <dolfin/common/maybe_unused.h>
 #include <dolfin/log/log.h>
 #include <dolfin/main/MPI.h>
 
@@ -66,7 +67,7 @@ SubSystemsManager::SubSystemsManager() :
 {
 }
 //-----------------------------------------------------------------------------
-SubSystemsManager::SubSystemsManager(SubSystemsManager const& other) :
+SubSystemsManager::SubSystemsManager(SubSystemsManager const&) :
     count_(0),
     state_(0)
 {
@@ -84,6 +85,8 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
   {
 #ifdef HAVE_MPI
     SubSystemsManager::MPI::init(argc, argv, n);
+#else
+    MAYBE_UNUSED(n);
 #endif
 
 #ifdef HAVE_PETSC
@@ -92,6 +95,11 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
 
 #ifdef HAVE_ZOLTAN
     SubSystemsManager::Zoltan::init(argc, argv);
+#endif
+
+#if !defined(HAVE_MPI) and !defined(HAVE_PETSC) and !defined(HAVE_ZOLTAN)
+    MAYBE_UNUSED(argc);
+    MAYBE_UNUSED(argv);
 #endif
 
     // Set wall clock limit
@@ -163,6 +171,9 @@ bool SubSystemsManager::MPI::init(int argc, char* argv[], uint n)
 
   SUBSYSTEM_ERROR_NOT_ENABLED(MPI);
 
+  MAYBE_UNUSED(argc)
+  MAYBE_UNUSED(argv)
+  MAYBE_UNUSED(n)
 #endif /* HAVE_MPI */
 
   return true;
@@ -304,6 +315,8 @@ bool SubSystemsManager::Zoltan::init(int argc, char* argv[])
 #else
 
   SUBSYSTEM_ERROR_NOT_ENABLED(Zoltan);
+  MAYBE_UNUSED(argc)
+  MAYBE_UNUSED(argv)
 
 #endif /* HAVE_ZOLTAN */
 

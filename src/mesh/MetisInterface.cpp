@@ -84,7 +84,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
   pm_idx_t *elmdist = new pm_idx_t[size + 1];
 
   uint const tdim = mesh.topology_dimension();
-  pm_idx_t ncells = mesh.num_cells();
+  pm_idx_t ncells = static_cast<pm_idx_t>(mesh.num_cells());
 
   /*
    * ParMETIS_V3_PartMeshKway requires all the array arguments to be non-NULL
@@ -110,8 +110,8 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
     }
   }
 
-  int sum_elm = elmdist[0];
-  int tmp_elm;
+  pm_idx_t sum_elm = elmdist[0];
+  pm_idx_t tmp_elm;
   elmdist[0] = 0;
   for (int i = 1; i < size + 1; i++)
   {
@@ -120,7 +120,7 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
     sum_elm = tmp_elm + sum_elm;
   }
 
-  pm_idx_t nvertices = mesh.type().num_vertices(tdim);
+  pm_idx_t nvertices = static_cast<pm_idx_t>(mesh.type().num_vertices(tdim));
   pm_idx_t ncnodes = nvertices - 1;
 
   pm_idx_t *eptr = new pm_idx_t[ncells + 1];
@@ -152,9 +152,9 @@ void MetisInterface::partitionCommonMetis(Mesh& mesh,
 
   // default options
   pm_idx_t options[3] = { 1, 0, 15 };
-
+  pm_idx_t pm_size = static_cast<pm_idx_t>(size);
   ParMETIS_V3_PartMeshKway(elmdist, eptr, eind, elmwgt, &wgtflag,&numflag,
-                           &ncon,&ncnodes,&size, tpwgts, &ubvec, options,
+                           &ncon,&ncnodes,&pm_size, tpwgts, &ubvec, options,
                            &edgecut, part, &comm);
 
   delete[] eind;
@@ -213,7 +213,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   vtxdist[rank] = static_cast<pm_idx_t> (mesh.size(0));
   pm_idx_t local_vertices = vtxdist[rank];
 
-  MPI::all_gather( (int*) &local_vertices, 1, (int*) vtxdist, 1 );
+  MPI::all_gather(&local_vertices, 1, vtxdist, 1 );
 
   int i;
   pm_idx_t tmp;
@@ -250,7 +250,7 @@ void MetisInterface::partitionGeomMetis(Mesh& mesh,
   uint lreassigned = 0;
   for (VertexIterator vertex(mesh); !vertex.end(); ++vertex)
   {
-    if(part[vertex->index()] != rank)
+    if(static_cast<uint>(part[vertex->index()]) != rank)
     {
       ++lreassigned;
     }

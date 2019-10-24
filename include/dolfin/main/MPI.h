@@ -108,10 +108,7 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template<int R,typename T>
-  static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM)
-  {
-    return helper<R,T>::all_reduce(x, r, 1, comm);
-  }
+  static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
 
   //// Wrap in a template function to allow use of functors
   template<typename T>
@@ -227,6 +224,11 @@ inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
                                          MPI_type<T>::value, MPI_MAX,comm) );
 }
 };
+template<int R,typename T>
+static int MPI::all_reduce(T x, T& r, Communicator& comm)
+{
+  return helper<R,T>::all_reduce(x, r, 1, comm);
+}
 //-----------------------------------------------------------------------------
 template<>
 inline int MPI::sendrecv(bool* sendbuf, int sendcount, int destination,

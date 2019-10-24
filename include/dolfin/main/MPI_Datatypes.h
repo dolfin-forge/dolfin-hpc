@@ -20,8 +20,11 @@ typedef void * MPI_Datatype;
 template < typename T >
 struct MPI_type
 {
-	static const MPI_Datatype value = NULL;
+	static MPI_Datatype value;
 };
+
+template< typename T >
+MPI_Datatype MPI_type<T>::value = NULL;
 
 #else
 

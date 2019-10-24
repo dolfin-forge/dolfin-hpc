@@ -61,7 +61,7 @@ inline int omp_get_thread_num()
 	return 0;
 }
 
-using omp_lock_t = void *;
+typedef void* omp_lock_t;
 
 inline void omp_init_lock( omp_lock_t t )
 {

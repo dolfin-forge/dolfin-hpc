@@ -97,7 +97,7 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
     SubSystemsManager::Zoltan::init(argc, argv);
 #endif
 
-#if !defined(HAVE_MPI) and !defined(HAVE_PETSC) and !defined(HAVE_ZOLTAN)
+#if !defined(HAVE_MPI) && !defined(HAVE_PETSC) && !defined(HAVE_ZOLTAN)
     MAYBE_UNUSED(argc);
     MAYBE_UNUSED(argv);
 #endif

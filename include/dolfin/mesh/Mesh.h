@@ -82,6 +82,9 @@ public:
   /// Swap instances
   void swap(Mesh& other);
 
+  /// Assignment
+  Mesh const& operator=(Mesh const& other);
+
   /// Identity
   bool operator ==(Mesh const& other) const;
   bool operator !=(Mesh const& other) const;
@@ -263,10 +266,6 @@ private:
   mutable Array<MappedManifold *> periodic_mappings_;
 
   int timestamp_;
-
-  /// Assignment (Disabled)
-  Mesh const& operator=(Mesh const&) { return *this; }
-
 };
 
 //--- TEMPLATE SPECIALIZATIONS ------------------------------------------------

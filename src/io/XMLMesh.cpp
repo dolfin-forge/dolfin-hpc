@@ -229,17 +229,17 @@ void XMLMesh::readVertex(const xmlChar *name, const xmlChar **attrs)
   case 3:
     x[2] = parse<real>(name, attrs, "z");
     // fallthrough is desired here
-#if defined( __clang__ )
+#if defined( __clang__ ) && __cplusplus > 199711L
     [[clang::fallthrough]];
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && __cplusplus > 199711L
     __attribute__ ((fallthrough));
 #endif
   case 2:
     x[1] = parse<real>(name, attrs, "y");
     // fallthrough is desired here
-#if defined( __clang__ )
+#if defined( __clang__ ) && __cplusplus > 199711L
     [[clang::fallthrough]];
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && __cplusplus > 199711L
     __attribute__ ((fallthrough));
 #endif
   case 1:

@@ -92,33 +92,47 @@ Mesh::Mesh(std::string const& filename) :
 Mesh::~Mesh()
 {
   timestamp_ = 0;
+
   delete topology_;
   topology_ = NULL;
+
   delete geometry_;
   geometry_ = NULL;
+
   delete exterior_boundary_;
   exterior_boundary_ = NULL;
+
   delete interior_boundary_;
   interior_boundary_ = NULL;
+
   delete intersection_detector_;
   intersection_detector_ = NULL;
-  while(!periodic_mappings_.empty())
-  {
-    delete periodic_mappings_.back();
-    periodic_mappings_.pop_back();
-  }
+
+  for (uint i = 0; i < periodic_mappings_.size(); ++i )
+    delete (periodic_mappings_[i]);
+  periodic_mappings_.clear();
 }
 //-----------------------------------------------------------------------------
 void Mesh::swap(Mesh& other)
 {
-  if (this == &other) return;
-  std::swap(topology_             , other.topology_);
-  std::swap(geometry_             , other.geometry_);
-  std::swap(exterior_boundary_    , other.exterior_boundary_);
-  std::swap(interior_boundary_    , other.interior_boundary_);
-  std::swap(intersection_detector_, other.intersection_detector_);
-  std::swap(periodic_mappings_    , other.periodic_mappings_);
-  std::swap(timestamp_            , other.timestamp_);
+  if ( this != &other )
+  {
+    std::swap(topology_             , other.topology_);
+    std::swap(geometry_             , other.geometry_);
+    std::swap(exterior_boundary_    , other.exterior_boundary_);
+    std::swap(interior_boundary_    , other.interior_boundary_);
+    std::swap(intersection_detector_, other.intersection_detector_);
+    std::swap(periodic_mappings_    , other.periodic_mappings_);
+    std::swap(timestamp_            , other.timestamp_);
+  }
+}
+//-----------------------------------------------------------------------------
+Mesh const & Mesh::operator=( Mesh const & other )
+{
+  Mesh tmp(other);
+  this->swap(tmp);
+
+  return *this;
 }
 //-----------------------------------------------------------------------------
 bool Mesh::operator ==(Mesh const& other) const
@@ -455,6 +469,5 @@ void Mesh::check() const
 {
   MPIMeshCommunicator::check(const_cast<Mesh&>(*this));
 }
-//-----------------------------------------------------------------------------
 
 } /* namespace dolfin */

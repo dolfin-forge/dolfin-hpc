@@ -1,10 +1,7 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // Import from licorne
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_UFC_EXPRESSION_H
 #define __DOLFIN_UFC_EXPRESSION_H

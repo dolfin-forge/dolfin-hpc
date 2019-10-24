@@ -1,11 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
-//
-// Modified by Garth N. Wells, 2006.
-// Modified by Niclas Jansson, 2010.
-//
-// First added:  2005-05-17
-// Last changed: 2010-06-13
 
 #include <dolfin/mesh/EquiAffineMapping.h>
 

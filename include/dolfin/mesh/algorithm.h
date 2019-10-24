@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef DOLFIN_MESH_ALGORITHM
 #define DOLFIN_MESH_ALGORITHM

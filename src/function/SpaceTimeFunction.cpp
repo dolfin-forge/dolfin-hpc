@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
-//
-// Modified by Niclas Jansson, 2013.
-// Modified by Aurélien Larcher, 2013-2017.
-//
-// First added:  2005-11-26
 
 #include <dolfin/function/SpaceTimeFunction.h>
 

@@ -1,10 +1,7 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // Imported from licorne.
-//
-// First added:  2017-10-10
-// Last changed: 2017-10-10
 
 #ifndef __DOLFIN_MESH_VALUES_H
 #define __DOLFIN_MESH_VALUES_H

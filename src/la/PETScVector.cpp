@@ -1,13 +1,5 @@
 // Copyright (C) 2004-2007 Johan Hoffman, Johan Jansson and Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2005-2007.
-// Modified by Martin Sandve Alnes 2008.
-// Modified by Niclas Jansson 2008.
-// Modified by Niyazi Cem Degirmenci 2013.
-//
-// First added:  2004
-// Last changed: 2008-10-28
 
 #include <dolfin/la/PETScVector.h>
 

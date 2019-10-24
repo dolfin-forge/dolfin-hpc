@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-09-12 (merged from branch larcher)
-// Last changed: 2014-09-13
 
 #ifndef __DOLFIN_FINITE_ELEMENT_H
 #define __DOLFIN_FINITE_ELEMENT_H

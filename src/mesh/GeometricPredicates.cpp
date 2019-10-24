@@ -1,7 +1,5 @@
 // Copyright (C) 1999 Jonathan Richard Shewchuk
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Jansson, 2006.
 
 #include <stdio.h>
 #include <stdlib.h>

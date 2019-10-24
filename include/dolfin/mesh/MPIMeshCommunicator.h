@@ -1,17 +1,9 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Magnus Vikstrøm, 2007.
-// Modified by Niclas Jansson, 2008.
-// Modified by Balthasar Reuter, 2013.
-// Modified by Aurelien Larcher, 2015-2016.
-//
+
 // The original implementations were split to ease readability, especially since
 // the distribution by vertices actually does not distribute any mesh.
 // The implementation was simplified and some loops were saved.
-//
-// First added:  2007-05-30
-// Last changed: 2013-03-22
 
 #ifndef __DOLFIN_MPI_MESH_COMMUNICATOR_H
 #define __DOLFIN_MPI_MESH_COMMUNICATOR_H

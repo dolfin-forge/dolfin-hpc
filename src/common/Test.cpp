@@ -1,8 +1,5 @@
 // Copyright (C) 2010 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-03-13
-// Last changed: 2014-03-13
 
 #include <dolfin/common/Test.h>
 

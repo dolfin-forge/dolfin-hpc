@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-07-15 (merged from branch larcher)
-// Last changed: 2013-07-15
 
 #include <dolfin/fem/SlipFrictionBC.h>
 #include <dolfin/fem/BoundaryNormal.h>

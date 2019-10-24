@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2017-08-23
-// Last changed: 2018-01-05
 
 #ifndef __DOLFIN_LIBSIM_INTERFACE_H
 #define __DOLFIN_LIBSIM_INTERFACE_H

@@ -1,8 +1,5 @@
 // Copyright (C) 2009 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2009-12-15
-// Last changed: 2009-12-15
 
 #include <dolfin/la/LAPACKMatrix.h>
 

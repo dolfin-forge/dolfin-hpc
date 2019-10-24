@@ -1,9 +1,5 @@
 // Copyright (C) 2013-15 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-//
-// First added:
-// Last changed:
 
 #include <dolfin/function/FunctionInterpolation.h>
 

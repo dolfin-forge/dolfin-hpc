@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Niclas Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Balthasar Reuter, 2013.
-//
-// First added:  2008-03-03
-// Last changed: 2013-05-31
 
 #ifndef __DOLFIN_LOAD_BALANCER_H
 #define __DOLFIN_LOAD_BALANCER_H

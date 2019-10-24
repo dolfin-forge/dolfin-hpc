@@ -1,10 +1,5 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-//
-// First added:  2005-12-02
-// Last changed: 2007-12-06
 
 #include <dolfin/mesh/MeshEditor.h>
 #include <dolfin/mesh/UnitCube.h>

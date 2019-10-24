@@ -1,17 +1,12 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2016.
-//
+
 // This class was rewritten to support hypercube cells and fixes several issues:
 // - invalid computation of the boundary mesh with missing or added cells.
 // - segmentation faults due to non-robust handling of zero-size boundaries.
-//
+
 // The reimplementation creates boundaries of distributed meshes which are
 // themselves distributed, allowing nested calls.
-//
-// First added:  2006-06-21
-// Last changed: 2008-05-28
 
 #ifndef __DOLFIN_BOUNDARY_MESH_H
 #define __DOLFIN_BOUNDARY_MESH_H

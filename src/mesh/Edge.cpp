@@ -1,11 +1,5 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman 2006.
-// Modified by Aurelien Larcher 2015.
-//
-// First added:  2006-06-02
-// Last changed: 2015-02-09
 
 #include <dolfin/mesh/Edge.h>
 

@@ -1,10 +1,7 @@
 // Copyright (C) 2014 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // Refactoring of classes from UNICORN.
-//
-// First added:  2014-06-12
-// Last changed: 2014-06-12
 
 #include <dolfin/mesh/MeshSmoother.h>
 

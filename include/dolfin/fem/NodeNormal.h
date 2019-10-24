@@ -1,6 +1,6 @@
 // Copyright (C) 2014 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // The original class named NodeNormal from UNICORN is actually VertexNormal
 // since the former was written for linear Lagrange in 3D only to compute a
 // non-orthogonal, non-anticlockwise, sometimes non-normal basis with no
@@ -8,9 +8,6 @@
 // This class together with the rewrite of the finite element framework
 // provides support for the computation of a normal field and tangential vectors
 // interpolated to a Lagrange finite element space of arbitrary order.
-//
-// First added:  2007-05-01
-// Last changed: 2014-05-22
 
 #ifndef __DOLFIN_NODENORMAL_H
 #define __DOLFIN_NODENORMAL_H

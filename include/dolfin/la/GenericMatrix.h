@@ -1,14 +1,5 @@
 // Copyright (C) 2006-2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Jansson, 2006.
-// Modified by Anders Logg, 2006-2008.
-// Modified by Ola Skavhaug, 2007-2008.
-// Modified by Kent-Andre Mardal, 2008.
-// Modified by Martin Alnæs, 2008.
-//
-// First added:  2006-04-24
-// Last changed: 2008-05-15
 
 #ifndef __DOLFIN_GENERIC_MATRIX_H
 #define __DOLFIN_GENERIC_MATRIX_H

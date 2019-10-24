@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-01-07
-// Last changed:
 
 #ifndef __DOLFIN_PETSC_OBJECT_H
 #define __DOLFIN_PETSC_OBJECT_H

@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-05-08
-// Last changed: 2008-05-08
 
 #ifndef __DOLFIN_SOLVER_TYPE_H
 #define __DOLFIN_SOLVER_TYPE_H

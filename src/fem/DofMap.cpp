@@ -1,12 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg and Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Martin Alnes, 2008
-// Modified by Niclas Jansson, 2009
-// Modified by Aurélien Larcher, 2013  (Pk bug, extension and partial rewrite)
-//
-// First added:  2007-03-01
-// Last changed: 2009-11-01
 
 #include <dolfin/fem/DofMap.h>
 

@@ -1,6 +1,5 @@
 // Copyright (C) 2015 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #include <dolfin/mesh/StructuredGrid.h>
 

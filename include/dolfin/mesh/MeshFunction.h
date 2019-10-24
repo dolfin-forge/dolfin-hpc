@@ -1,16 +1,10 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Hoffman, 2007.
-// Modified by Aurelien Larcher, 2014-2016.
-//
+
 // This class suffered from some cleanup and was cured from segmentation faults
 // on initialization to zero size, which in the course of 2006-2012 was the
 // cause of many ugly workarounds as well as erratic behaviour of parallel
 // algorithms.
-//
-// First added:  2006-05-22
-// Last changed: 2008-05-21
 
 #ifndef __DOLFIN_MESH_FUNCTION_H
 #define __DOLFIN_MESH_FUNCTION_H
@@ -324,7 +318,6 @@ protected:
 
 // Copyright (C) 2013 Balthasar Reuter.
 // Licensed under the GNU LGPL Version 2.1.
-//
 /// Helper function that performs symmetric rounding to closest integer
 
 template<> template<> inline

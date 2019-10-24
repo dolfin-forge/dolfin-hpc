@@ -1,13 +1,5 @@
 // Copyright (C) 2004-2005 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2005-2008.
-// Modified by Johan Hoffman, 2005.
-// Modified by Andy R. Terrel, 2005.
-// Modified by Garth N. Wells, 2005-2007.
-//
-// First added:  2005-12-02
-// Last changed: 2008-05-08
 
 #ifndef __DOLFIN_PETSC_KRYLOV_SOLVER_H
 #define __DOLFIN_PETSC_KRYLOV_SOLVER_H

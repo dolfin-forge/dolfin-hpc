@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-01-28
-// Last changed: 2014-01-28
 
 #ifndef __DOLFIN_UFL_FAMILY_H
 #define __DOLFIN_UFL_FAMILY_H

@@ -1,10 +1,5 @@
 // Copyright (C) 2003-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2006.
-//
-// First added:  2003-06-12
-// Last changed: 2008-04-22
 
 #include <cmath>
 #include <dolfin/common/constants.h>

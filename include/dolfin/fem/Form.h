@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurélien Larcher, 2014.
-//
-// First added:  2007-04-02
-// Last changed: 2014-02-27
 
 #ifndef __DOLFIN_FORM_H
 #define __DOLFIN_FORM_H

@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2003-05-06
-// Last changed: 2007-04-13
 
 #ifndef __DOLFIN_PARAMETER_LIST_H
 #define __DOLFIN_PARAMETER_LIST_H

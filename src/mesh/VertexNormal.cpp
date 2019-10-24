@@ -1,10 +1,5 @@
 // Copyright (C) 2007 Murtazo Nazarov
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008-2009.
-//
-// First added:  2007-05-01
-// Last changed: 2009-12-30
 
 #include <dolfin/mesh/VertexNormal.h>
 

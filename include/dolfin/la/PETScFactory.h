@@ -1,8 +1,5 @@
 // Copyright (C) 2007 Ola Skavhaug.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-11-30
-// Last changed: 2007-12-06
 
 #ifndef __DOLFIN_PETSC_FACTORY_H
 #define __DOLFIN_PETSC_FACTORY_H

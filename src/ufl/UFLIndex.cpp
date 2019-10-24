@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Bärbel Janssen.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #include <dolfin/ufl/UFLIndex.h>
 
@@ -312,7 +309,6 @@ MultiIndex::MultiIndex(repr_t const& repr) :
 //      ssrepr << indices_.repr() << ", " << index_dimensions_.repr() << ")";
 //    else
 //      ssrepr << fixed_indices_.repr() << ", " << index_dimensions_.repr() << ")";
-//
 //    repr_ = ssrepr.str();
 }
 
@@ -452,7 +448,6 @@ tuple<IndexBase> const MultiIndex::fill_indices(repr_t const& repr)
 //  {
 //    if(index_dimensions_.size() == 0)
 //      return tuple<FixedIndex>(repr);
-//
 //    return tuple<FixedIndex>();
 //  }
 

@@ -1,14 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007.
-// Modified by Dag Lindbo, 2008.
-// Modified by Kristen Kaasbjerg, 2008.
-// Modified by Niclas Jansson, 2008-2010.
-// Modified by Aurélien Larcher 2013-2014.
-//
-// First added:  2007-04-02
-// Last changed: 2014-02-06
 
 #include <dolfin/function/Function.h>
 

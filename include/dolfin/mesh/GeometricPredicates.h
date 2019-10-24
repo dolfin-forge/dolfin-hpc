@@ -1,7 +1,5 @@
 // Copyright (C) 1999 Jonathan Richard Shewchuk
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Johan Jansson, 2006.
 
 #ifndef __DOLFIN_GEOMETRIC_PREDICATES_H
 #define __DOLFIN_GEOMETRIC_PREDICATES_H

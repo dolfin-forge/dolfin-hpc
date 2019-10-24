@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2008-05-10
-// Last changed: 2008-05-10
 
 
 #include <dolfin/la/LinearSolver.h>

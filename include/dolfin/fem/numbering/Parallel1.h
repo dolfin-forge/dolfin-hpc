@@ -1,6 +1,5 @@
 // Copyright (C) 2013 Aurelien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H
 #define __DOLFIN_PRIVATE_NUMBERING_PARALLEL1_H

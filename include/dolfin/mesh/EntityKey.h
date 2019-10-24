@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_MESH_ENTITY_KEY_H
 #define __DOLFIN_MESH_ENTITY_KEY_H

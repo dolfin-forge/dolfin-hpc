@@ -1,9 +1,5 @@
 // Copyright (C) 2015 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
-//
 
 #ifndef __DOLFIN_SYSTEM_H
 #define __DOLFIN_SYSTEM_H

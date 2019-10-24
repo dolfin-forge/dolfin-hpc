@@ -225,7 +225,7 @@ inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
 }
 };
 template<int R,typename T>
-static int MPI::all_reduce(T x, T& r, Communicator& comm)
+inline int MPI::all_reduce(T x, T& r, Communicator& comm)
 {
   return helper<R,T>::all_reduce(x, r, 1, comm);
 }

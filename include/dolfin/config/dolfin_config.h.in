@@ -129,9 +129,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
-/* Compile without progress bar */
-#undef NO_PROGRESS_BAR
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 

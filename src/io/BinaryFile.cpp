@@ -88,7 +88,7 @@ BinaryFile::BinaryFile(const std::string filename, real const& t) :
 #endif
     version_(BINARY_VERSION)
 {
-#if not defined( HAVE_MPI )
+#if !defined( HAVE_MPI )
   MAYBE_UNUSED(t);
 #endif
 }

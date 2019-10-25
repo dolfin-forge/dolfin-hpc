@@ -60,13 +60,6 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
             ufc_dofmap.signature());
     ret = new DG0sNumbering(mesh, ufc_dofmap);
   }
-  // CG1v
-  else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
-  {
-    message(1, "DofNumbering : create CG1vNumbering for %s",
-            ufc_dofmap.signature());
-    ret = new CG1vNumbering(mesh, ufc_dofmap);
-  }
   // DG0v
   else if (vector && ufc_dofmap.global_dimension() == value_size * num_cells)
   {
@@ -82,6 +75,13 @@ DofNumbering * DofNumbering::create(Mesh& mesh, ufc::dofmap& ufc_dofmap)
       message(1, "DofNumbering : create Parallel0Numbering for %s",
               ufc_dofmap.signature());
       ret = new Parallel0Numbering(mesh, ufc_dofmap);
+    }
+    // CG1v
+    else if (vector && ufc_dofmap.global_dimension() == value_size * num_verts)
+    {
+      message(1, "DofNumbering : create CG1vNumbering for %s",
+              ufc_dofmap.signature());
+      ret = new CG1vNumbering(mesh, ufc_dofmap);
     }
     // Generic parallel for value rank > 0
     else

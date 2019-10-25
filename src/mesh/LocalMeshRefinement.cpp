@@ -1,10 +1,5 @@
 // Copyright (C) 2006 Johan Hoffman.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2008.
-//
-// First added:  2006-11-01
-// Last changed: 2010-09-13
 
 #include <dolfin/config/dolfin_config.h>
 #include <dolfin/log/dolfin_log.h>

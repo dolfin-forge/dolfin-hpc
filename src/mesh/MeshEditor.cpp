@@ -1,8 +1,5 @@
 // Copyright (C) 2006-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2006-05-16
-// Last changed: 2008-05-19
 
 #include <dolfin/mesh/MeshEditor.h>
 

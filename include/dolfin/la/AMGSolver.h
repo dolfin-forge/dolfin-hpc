@@ -1,6 +1,5 @@
 // Copyright (C) 2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
 
 #ifndef __DOLFIN_AMG_SOLVER_H
 #define __DOLFIN_AMG_SOLVER_H

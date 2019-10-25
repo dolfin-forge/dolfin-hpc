@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurélien Larcher
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-07-15 (merged from branch larcher)
-// Last changed: 2013-07-15
 
 #ifndef __DOLFIN_SLIP_FRICTION_BC_H
 #define __DOLFIN_SLIP_FRICTION_BC_H

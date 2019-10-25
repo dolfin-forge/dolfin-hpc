@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2005 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2003-06-12
-// Last changed: 2005-12-09
 
 #ifndef __DOLFIN_LAGRANGE_H
 #define __DOLFIN_LAGRANGE_H

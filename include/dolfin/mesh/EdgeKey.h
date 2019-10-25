@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_MESH_EDGE_KEY
 #define __DOLFIN_MESH_EDGE_KEY

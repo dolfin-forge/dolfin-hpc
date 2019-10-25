@@ -1,11 +1,7 @@
 // Copyright (C) 2005-2006 Anders Logg.
 // Licensed under the GNU GPL Version 2.
-//
-// Modified by Garth N. Wells, 2006.
-// Modified by Aurelien Larcher, 2015.
-//
+
 // Original documentation and comments were incorrect, class rewritten in 2015.
-//
 
 #ifndef __DOLFIN_EQUI_AFFINE_MAPPING_H
 #define __DOLFIN_EQUI_AFFINE_MAPPING_H

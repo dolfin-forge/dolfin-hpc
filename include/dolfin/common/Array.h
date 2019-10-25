@@ -1,11 +1,5 @@
 // Copyright (C) 2003 Johan Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2003-2007.
-// Modified by Aurélien Larcher, 2014-217.
-//
-// First added:  2003-09-03
-// Last changed: 2017-02-24
 
 #ifndef __DOLFIN_ARRAY_H
 #define __DOLFIN_ARRAY_H

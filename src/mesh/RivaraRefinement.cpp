@@ -1,9 +1,5 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009-2010.
-// Modified by Balthasar Reuter, 2013.
-//
 
 #include <dolfin/common/constants.h>
 #include <dolfin/config/dolfin_config.h>

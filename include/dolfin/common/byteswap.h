@@ -1,8 +1,5 @@
 // Copyright (C) 2015 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-07-25
-// Last changed: 2016-02-06
 
 #ifndef __DOLFIN_BYTESWAP_H
 #define __DOLFIN_BYTESWAP_H

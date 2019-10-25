@@ -1,15 +1,5 @@
 // Copyright (C) 2002-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Erik Svensson, 2003.
-// Modified by Garth N. Wells, 2006.
-// Modified by Ola Skavhaug, 2006.
-// Modified by Magnus Vikstrom, 2007.
-// Modified by Niclas Jansson, 2008.
-// Modified by Aurélien Larcher, 2013.
-//
-// First added:  2002-12-03
-// Last changed: 2013-09-13
 
 #include <dolfin/config/dolfin_config.h>
 

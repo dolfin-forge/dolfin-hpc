@@ -1,10 +1,5 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells 2007
-//
-// First added:  2007-07-08
-// Last changed: 2008-04-22
 
 #include <dolfin/fem/PeriodicBC.h>
 

@@ -1,10 +1,5 @@
 // Copyright (C) 2009-2012 Niclas Jansson.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2014-2017.
-//
-// First  added: 2009
-// Last changed: 2017-09-15
 
 #include <dolfin/io/BinaryFile.h>
 
@@ -88,7 +83,7 @@ BinaryFile::BinaryFile(const std::string filename, real const& t) :
 #endif
     version_(BINARY_VERSION)
 {
-#if not defined( HAVE_MPI )
+#if !defined( HAVE_MPI )
   MAYBE_UNUSED(t);
 #endif
 }

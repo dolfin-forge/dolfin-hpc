@@ -1,10 +1,5 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009-2013, 2018-2019.
-// Modified by Balthasar Reuter, 2013
-// Modified by Aurelien Larcher, 2015
-//
 
 #include <dolfin/mesh/DMesh.h>
 

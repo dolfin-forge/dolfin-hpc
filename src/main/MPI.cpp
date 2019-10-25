@@ -1,13 +1,5 @@
 // Copyright (C) 2007 Magnus Vikstrøm.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Garth N. Wells, 2007, 2008.
-// Modified by Anders Logg, 2007.
-// Modified by Niclas Jansson, 2009-2010.
-// Modified by Aurelien Larcher, 2015-2017.
-//
-// First added:  2007-11-30
-// Last changed: 2017-02-17
 
 #include <dolfin/main/MPI.h>
 

@@ -1,8 +1,5 @@
 // Copyright (C) 2005-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2005-12-21
-// Last changed: 2008-03-06
 
 #ifndef __DOLFIN_TIMING_H
 #define __DOLFIN_TIMING_H

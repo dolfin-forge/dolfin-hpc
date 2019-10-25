@@ -1,13 +1,7 @@
 // Copyright (C) 2007 Murtazo Nazarov
 // Licensed under the GNU LGPL Version 2.1.
-//
+
 // Existing code for Dirichlet BC is used
-//
-// Modified by Niclas Jansson, 2008-2015.
-// Modified by Aurélien Larcher, 2013-2014. (rewrite, extension to any element)
-//
-// First added:  2007-05-01
-// Last changed: 2014-05-22
 
 #include <dolfin/fem/UFC.h>
 

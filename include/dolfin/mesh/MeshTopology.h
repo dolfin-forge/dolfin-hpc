@@ -1,8 +1,6 @@
 // Copyright (C) 2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Aurelien Larcher, 2015-2016.
-//
+
 // This class has been extensively tortured since 2015 due to flawed design and
 // non-robust implementation.
 // Additionally the topology computation was rewritten to respect abstraction
@@ -12,9 +10,6 @@
 // sections reserved to distributed meshes.
 // Additionally it benefits from several inconsistency fixes merged from mesh
 // distributed data.
-//
-// First added:  2006-05-08
-// Last changed: 2007-11-30
 
 #ifndef __DOLFIN_MESH_TOPOLOGY_H
 #define __DOLFIN_MESH_TOPOLOGY_H

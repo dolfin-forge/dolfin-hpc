@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_MESH_SIMPLEX_H
 #define __DOLFIN_MESH_SIMPLEX_H

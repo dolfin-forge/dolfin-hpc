@@ -1,7 +1,4 @@
 // Default values for the DOLFIN parameter system.
-//
-// First added:  2005-12-19
-// Last changed: 2010-07-02
 
 #include <dolfin/config/dolfin_config.h>
 

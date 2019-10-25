@@ -1,11 +1,5 @@
 // Copyright (C) 2007-2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Ola Skavhaug, 2007.
-// Modified by Anders Logg, 2008.
-//
-// First added:  2007-05-24
-// Last changed: 2008-02-15
 
 #include <dolfin/fem/SparsityPatternBuilder.h>
 

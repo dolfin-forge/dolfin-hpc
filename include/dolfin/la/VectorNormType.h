@@ -1,8 +1,5 @@
 // Copyright (C) 2007 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-07-03
-// Last changed:
 
 #ifndef __DOLFIN_VECTOR_NORM_TYPE_H
 #define __DOLFIN_VECTOR_NORM_TYPE_H

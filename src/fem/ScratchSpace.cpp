@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-02-13
-// Last changed: 2014-02-13
 
 #include <dolfin/fem/ScratchSpace.h>
 

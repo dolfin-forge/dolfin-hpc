@@ -1,8 +1,5 @@
 // Copyright (C) 2017 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_DISCRETE_SPACES_H
 #define __DOLFIN_DISCRETE_SPACES_H

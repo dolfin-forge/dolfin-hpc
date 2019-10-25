@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurelien Larcher.
 // Licensed under the GNU GPL Version 2.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_MAPPING_H
 #define __DOLFIN_MAPPING_H

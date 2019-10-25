@@ -1,12 +1,7 @@
 // Copyright (C) 2003-2006 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Magnus Vikstrom 2007.
-//
+
 // This class is still an abstraction nightmare and the code could be sexier...
-//
-// First added:  2003-07-15
-// Last changed: 2007-03-21
 
 #ifndef __DOLFIN_XML_FILE_H
 #define __DOLFIN_XML_FILE_H

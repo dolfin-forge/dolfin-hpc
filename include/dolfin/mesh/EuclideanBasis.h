@@ -1,6 +1,3 @@
-//
-//
-//
 
 #ifndef __DOLFIN_MESH_EUCLIDEAN_BASIS_H
 #define __DOLFIN_MESH_EUCLIDEAN_BASIS_H

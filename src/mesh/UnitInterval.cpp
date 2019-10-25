@@ -1,8 +1,5 @@
 // Copyright (C) 2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-11-23
-// Last changed: 2007-11-23
 
 #include <dolfin/mesh/UnitInterval.h>
 

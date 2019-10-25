@@ -1,8 +1,5 @@
 // Copyright (C) 2008 Johan Jansson
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2009-2010.
-//
 
 #ifndef __DOLFIN_RIVARA_REFINEMENT_H
 #define __DOLFIN_RIVARA_REFINEMENT_H

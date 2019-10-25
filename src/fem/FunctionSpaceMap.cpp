@@ -1,8 +1,5 @@
 // Copyright (C) 2014 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2015-03-25
-// Last changed: 2015-03-25
 
 #include <dolfin/fem/FunctionSpaceMap.h>
 

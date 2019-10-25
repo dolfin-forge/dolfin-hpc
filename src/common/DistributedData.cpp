@@ -1,7 +1,5 @@
 // Copyright (C) 2016 Aurelien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Niclas Jansson, 2018-2019.
 
 #include <dolfin/common/DistributedData.h>
 

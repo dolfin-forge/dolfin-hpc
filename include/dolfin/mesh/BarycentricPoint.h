@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Balthasar Reuter.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2013-05-15
-// Last changed: 2013-05-15
 
 #ifndef __DOLFIN_BARYCENTRIC_POINT_H
 #define __DOLFIN_BARYCENTRIC_POINT_H

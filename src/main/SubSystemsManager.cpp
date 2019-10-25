@@ -1,12 +1,5 @@
 // Copyright (C) 2008 Garth N. Wells.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// Modified by Anders Logg, 2008.
-// Modified by Niclas Jansson 2009-2015.
-// Modified by Aurelien Larcher 2017.
-//
-// First added:  2008-01-07
-// Last changed: 2017-02-23
 
 #include <dolfin/main/SubSystemsManager.h>
 
@@ -97,7 +90,7 @@ int SubSystemsManager::init(int argc, char* argv[], uint n, long w_limit)
     SubSystemsManager::Zoltan::init(argc, argv);
 #endif
 
-#if !defined(HAVE_MPI) and !defined(HAVE_PETSC) and !defined(HAVE_ZOLTAN)
+#if !defined(HAVE_MPI) && !defined(HAVE_PETSC) && !defined(HAVE_ZOLTAN)
     MAYBE_UNUSED(argc);
     MAYBE_UNUSED(argv);
 #endif

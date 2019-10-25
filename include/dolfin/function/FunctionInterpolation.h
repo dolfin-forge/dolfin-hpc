@@ -1,8 +1,5 @@
 // Copyright (C) 2013-15 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:
-// Last changed:
 
 #ifndef __DOLFIN_FUNCTION_INTERPOLATION_H
 #define __DOLFIN_FUNCTION_INTERPOLATION_H

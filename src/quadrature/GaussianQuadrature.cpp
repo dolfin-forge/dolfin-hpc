@@ -1,8 +1,5 @@
 // Copyright (C) 2003-2007 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2003-06-03
-// Last changed: 2007-07-18
 
 #include <dolfin/config/dolfin_config.h>
 

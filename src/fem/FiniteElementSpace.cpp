@@ -1,8 +1,5 @@
 // Copyright (C) 2013 Aurélien Larcher.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2014-02-03
-// Last changed: 2014-02-03
 
 #include <dolfin/fem/FiniteElementSpace.h>
 

@@ -12,10 +12,6 @@
 #include <petsc.h>
 #endif
 
-#ifdef HAVE_SLEPC
-#include <slepc.h>
-#endif
-
 #ifdef HAVE_ZOLTAN
 #include <zoltan_cpp.h>
 #endif
@@ -133,7 +129,6 @@ void SubSystemsManager::disp() const
   message("      - PETScMPI %u", iset(petscmpi));
   message("      - JANPACK  %u", iset(janpack));
   message("      - Zoltan   %u", iset(zoltan));
-  message("      - SLEPc    %u", iset(slepc));
   end();
 }
 //-----------------------------------------------------------------------------
@@ -240,14 +235,6 @@ bool SubSystemsManager::PETSc::init(int argc, char* argv[])
   }
 #endif
 
-#ifdef HAVE_SLEPC
-
-  // Initialize SLEPc
-  SlepcInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
-  SUBSYSTEM_SET_INIT(SLEPc);
-
-#endif /*  HAVE_SLEPC */
-
 #else
 
   SUBSYSTEM_ERROR_NOT_ENABLED(PETSc);
@@ -268,11 +255,6 @@ bool SubSystemsManager::PETSc::fini()
 #ifdef HAVE_MPI
   /// PETSc is responsible for MPI and there are still consumers
   if (SUBSYSTEM_INITIALIZED(PETScMPI) && (MPI::sema > 1)) { return false; }
-#endif
-
-#ifdef HAVE_SLEPC
-    SlepcFinalize();
-    SUBSYSTEM_SET_FINI(SLEPc);
 #endif
 
   PetscFinalize();

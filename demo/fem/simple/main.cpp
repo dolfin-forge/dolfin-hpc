@@ -17,25 +17,22 @@ using namespace dolfin;
 int main()
 {
   // Load reference mesh (just a simple tetrahedron)
-  Mesh mesh("./tetrahedron.xml.gz");
+  Mesh mesh("tetrahedron.xml.gz");
 
   // Create stiffness and mass matrices
-//  StiffnessMatrix A(mesh);
-//  MassMatrix M(mesh);
+  // StiffnessMatrix A(mesh);
+  // MassMatrix M(mesh);
 
   // Create reference matrices
-  real A0_array[4][4];
-  real M0_array[4][4];
+  real A0_array[4][4] = { {  1.0/2.0, -1.0/6.0, -1.0/6.0, -1.0/6.0 },
+                          { -1.0/6.0,  1.0/6.0,  0.0,      0.0     },
+                          { -1.0/6.0,  0.0,      1.0/6.0,  0.0     },
+                          { -1.0/6.0,  0.0,      0.0,      1.0/6.0 } };
 
-  A0_array[0][0] = 1.0/2.0;   A0_array[0][1] =-1.0/6.0;   A0_array[0][2] =-1.0/6.0;   A0_array[0][3] =-1.0/6.0;
-  A0_array[1][0] =-1.0/6.0;   A0_array[1][1] = 1.0/6.0;   A0_array[1][2] = 0.0;       A0_array[1][3] = 0.0;
-  A0_array[2][0] =-1.0/6.0;   A0_array[2][1] = 0.0;       A0_array[2][2] = 1.0/6.0;   A0_array[2][3] = 0.0;
-  A0_array[3][0] =-1.0/6.0;   A0_array[3][1] = 0.0;       A0_array[3][2] = 0.0;       A0_array[3][3] = 1.0/6.0;
-
-  M0_array[0][0] = 1.0/60.0;  M0_array[0][1] = 1.0/120.0; M0_array[0][2] = 1.0/120.0; M0_array[0][3] = 1.0/120.0;
-  M0_array[1][0] = 1.0/120.0; M0_array[1][1] = 1.0/60.0;  M0_array[1][2] = 1.0/120.0; M0_array[1][3] = 1.0/120.0;
-  M0_array[2][0] = 1.0/120.0; M0_array[2][1] = 1.0/120.0; M0_array[2][2] = 1.0/60.0;  M0_array[2][3] = 1.0/120.0;
-  M0_array[3][0] = 1.0/120.0; M0_array[3][1] = 1.0/120.0; M0_array[3][2] = 1.0/120.0; M0_array[3][3] = 1.0/60.0;
+  real M0_array[4][4] = { { 1.0/60.0,  1.0/120.0, 1.0/120.0, 1.0/120.0 },
+                          { 1.0/120.0, 1.0/60.0,  1.0/120.0, 1.0/120.0 },
+                          { 1.0/120.0, 1.0/120.0, 1.0/60.0,  1.0/120.0 },
+                          { 1.0/120.0, 1.0/120.0, 1.0/120.0, 1.0/60.0  } };
 
   unsigned int position[4] = {0, 1, 2, 3};
 
@@ -44,13 +41,13 @@ int main()
   A0.set(*A0_array, 4, position, 4, position);
   M0.set(*M0_array, 4, position, 4, position);
 
-  A0.apply(); 
-  M0.apply(); 
+  A0.apply();
+  M0.apply();
 
-  cout << "Reference stiffness matrix:\n";
+  std::cout << "Reference stiffness matrix:\n";
   A0.disp();
 
-  cout << "Reference mass matrix:\n";
+  std::cout << "Reference mass matrix:\n";
   M0.disp();
 
   return 0;

@@ -47,6 +47,15 @@ void XMLFile::operator>>(Mesh& mesh)
   parseFile();
 }
 //-----------------------------------------------------------------------------
+void XMLFile::operator>>( MeshFunction<real> & mf )
+{
+  message(1, "Reading meshfunction from file %s.", filename.c_str());
+
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction(mf);
+  parseFile();
+}
+//-----------------------------------------------------------------------------
 void XMLFile::operator<<(Mesh& mesh)
 {
 

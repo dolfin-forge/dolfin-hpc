@@ -37,6 +37,8 @@ namespace dolfin
  *            - real : 0.0
  */
 
+class XMLMeshFunction;
+
 template<class T>
 class MeshFunction
 {
@@ -98,6 +100,7 @@ public:
   friend class MeshFunction<uint>;
   friend class MeshFunction<float>;
   friend class MeshFunction<real>;
+  friend class XMLMeshFunction;
 
   /// Assignment conversion operator
   template <class V>

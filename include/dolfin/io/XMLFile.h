@@ -16,28 +16,31 @@
 #include <dolfin/la/Vector.h>
 #include <dolfin/la/GenericMatrix.h>
 #include "GenericFile.h"
+#include "XMLMeshFunction.h"
 
 namespace dolfin
 {
-  
+
   class Mesh;
   template <class T> class MeshFunction;
   class ParameterList;
   class XMLObject;
-  
+
   class XMLFile : public GenericFile
   {
   public:
-    
+
     XMLFile(const std::string filename);
     ~XMLFile();
-    
+
     // Input
     void operator>> (Mesh& mesh);
-    
+
     // Output
     void operator<< (Mesh& mesh);
-    
+
+    virtual void operator>>( MeshFunction<real> & mf );
+
     // Friends
     #ifdef HAVE_XML
     friend void sax_start_element (void *ctx, const xmlChar *name, const xmlChar **attrs);
@@ -45,7 +48,7 @@ namespace dolfin
     #endif
 
   private:
-    
+
     void parseFile();
     void parseSAX();
 
@@ -62,9 +65,9 @@ namespace dolfin
     long mark;
 
   };
-  
+
   // Callback functions for the SAX interface
-#ifdef HAVE_XML  
+#ifdef HAVE_XML
   void sax_start_document (void *ctx);
   void sax_end_document   (void *ctx);
   void sax_start_element  (void *ctx, const xmlChar *name, const xmlChar **attrs);
@@ -73,7 +76,7 @@ namespace dolfin
   void sax_warning     (void *ctx, const char *msg, ...);
   void sax_error       (void *ctx, const char *msg, ...);
   void sax_fatal_error (void *ctx, const char *msg, ...);
-#endif  
+#endif
 }
 
 #endif

@@ -14,12 +14,14 @@ int main()
 {
   // Read mesh from file
   Mesh mesh("mesh2D.xml.gz");
-  
+
   // Read mesh function from file
-  MeshFunction<real> f(mesh, "meshfunction.xml");
+  MeshValues<real, Cell> mv(mesh);
+  File f("meshfunction.xml");
+  f >> mv;
+  // MeshFunction<real> f(mesh, "meshfunction.xml");
 
   // Write mesh function to file
   File out("meshfunction_out.pvd");
-  out << f;
-
-} 
+  out << mv;
+}

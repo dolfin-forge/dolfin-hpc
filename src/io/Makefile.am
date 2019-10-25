@@ -10,5 +10,6 @@ libdolfin_io_la_SOURCES = \
 			VTKFile.cpp\
 			XMLFile.cpp\
 			XMLMesh.cpp\
+			XMLMeshFunction.cpp\
 			XMLObject.cpp\
 			STLFile.cpp

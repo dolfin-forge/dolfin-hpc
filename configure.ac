@@ -444,6 +444,10 @@ AC_CONFIG_FILES([site-packages/Makefile])
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
 		 doc/progr_reference/Makefile])
 
+# Store build information (date, host, CXX)
+AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
+["Build: $(date +%Y-%m-%d)\n($host, `${CXX} --version | head -1`)"], [])
+
 AC_OUTPUT
 
 # Display help text

@@ -62,6 +62,7 @@ void dolfin::dolfin_init(int argc, char * argv[])
 #else
     message("Initializing DOLFIN version %s \n", DOLFIN_VERSION);
 #endif
+    message("%s\n", DOLFIN_BUILD_INFO);
   }
 
 }

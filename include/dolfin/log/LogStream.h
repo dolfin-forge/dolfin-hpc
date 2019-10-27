@@ -90,6 +90,7 @@ struct __logstream : protected std::streambuf, public std::ostream
   inline __logstream& operator<<(unsigned short x) { std::ostream::operator<<(x); return *this; }
   inline __logstream& operator<<(unsigned int   x) { std::ostream::operator<<(x); return *this; }
   inline __logstream& operator<<(unsigned long  x) { std::ostream::operator<<(x); return *this; }
+  inline __logstream& operator<<(unsigned long long x) { std::ostream::operator<<(x); return *this; }
   inline __logstream& operator<<(float          x) { std::ostream::operator<<(x); return *this; }
   inline __logstream& operator<<(double         x) { std::ostream::operator<<(x); return *this; }
   inline __logstream& operator<<(long double    x) { std::ostream::operator<<(x); return *this; }

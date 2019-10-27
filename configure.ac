@@ -108,6 +108,7 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG
 AX_COMPILER_VENDOR
+AX_COMPILER_VERSION
 if test "x${enable_mpi}" != xno; then
    AX_MPI    
    CXX="$MPICXX"
@@ -121,8 +122,6 @@ if test "x${enable_mpi}" != xno; then
    fi
 fi
 
-
-
 if test "x${enable_openmp}" != xno; then
    AX_OPENMP
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
@@ -132,6 +131,9 @@ else
    fi
 fi
 
+# Store build information (date, host, CXX)
+AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
+	["(Build: $(date +%Y-%m-%d) on $host using $ax_cv_cxx_compiler_vendor $ax_cv_cxx_compiler_version)"], [])
 
 # Checks for header files.
 AC_CHECK_HEADERS([float.h stdlib.h string.h])
@@ -443,10 +445,6 @@ AC_CONFIG_FILES([site-packages/Makefile])
 # Doxygen
 AC_CONFIG_FILES([doc/progr_reference/Doxyfile\
 		 doc/progr_reference/Makefile])
-
-# Store build information (date, host, CXX)
-AC_DEFINE_UNQUOTED(DOLFIN_BUILD_INFO,
-["Build: $(date +%Y-%m-%d)\n($host, `${CXX} --version | head -1`)"], [])
 
 AC_OUTPUT
 

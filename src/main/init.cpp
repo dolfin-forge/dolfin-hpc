@@ -9,49 +9,37 @@
 #include <dolfin/main/MPI.h>
 #include <dolfin/main/SubSystemsManager.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 
 //-----------------------------------------------------------------------------
 void dolfin::dolfin_init(int argc, char * argv[])
 {
-  //--- Process arguments
-  uint const maxopt = 1;
-  uint curopt = 0;
-  int n = 1;
   long w_limit = 0;
-  char const * const * roargv = argv;
-  for (int i = 0; i < argc; ++i)
+  int n = 1;
+  
+  //--- Process arguments
+  int c;
+  
+  while(argc > 1 &&  -1 != (c = getopt(argc,argv,"n:w:")))
   {
-    if(argv[i] == NULL)
+    switch(c)
     {
-      break;
-    }
-    if(strlen(argv[i]) == 2 && roargv[i][0] == '-')
-    {
-      int c = argv[i][1];
-      char const * argi = roargv[++i];
-      switch (c)
-        {
-        case 'n':
-          n = atoi(argi);
-          ++curopt;
-          break;
-        case 'w':
-          w_limit = atol(argi);
-          ++curopt;
-          break;
-        default:
-          break;
-        }
-    }
-    if(curopt == maxopt)
-    {
-      break;
+      case 'n':
+        n = atoi(optarg);
+        break;
+      case 'w':
+        w_limit = atol(optarg);
+        break;
+      default:
+        break;
     }
   }
-
+  
+  // Reset optind to allow for getopt in consumers of DOLFIN
+  optind = 1;
+  
   //--- Initialize subsystems and print banner
 
   int init_count = SubSystemsManager::start(argc, argv, n, w_limit);
@@ -60,8 +48,9 @@ void dolfin::dolfin_init(int argc, char * argv[])
 #ifdef HAVE_MPI
     if (MPI::global_rank() == 0)
     {
-      message("Initializing DOLFIN version %s : running on %d %s (%u %s)\n",
+      message("Initializing DOLFIN version %s\n%s\n\nRunning on %d %s (%u %s)",
               DOLFIN_VERSION,
+              DOLFIN_BUILD_INFO,
               dolfin::MPI::global_size(),
               dolfin::MPI::global_size() > 1 ? "processes" : "process",
               dolfin::MPI::num_groups(),
@@ -72,7 +61,8 @@ void dolfin::dolfin_init(int argc, char * argv[])
       silence();
     }
 #else
-    message("Initializing DOLFIN version %s :\n", DOLFIN_VERSION);
+    message("Initializing DOLFIN version %s\n%s",
+            DOLFIN_VERSION, DOLFIN_BUILD_INFO);
 #endif
   }
 

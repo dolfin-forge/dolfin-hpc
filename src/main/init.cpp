@@ -48,8 +48,9 @@ void dolfin::dolfin_init(int argc, char * argv[])
 #ifdef HAVE_MPI
     if (MPI::global_rank() == 0)
     {
-      message("Initializing DOLFIN version %s : running on %d %s (%u %s)\n",
+      message("Initializing DOLFIN version %s\n%s\n\nRunning on %d %s (%u %s)",
               DOLFIN_VERSION,
+              DOLFIN_BUILD_INFO,
               dolfin::MPI::global_size(),
               dolfin::MPI::global_size() > 1 ? "processes" : "process",
               dolfin::MPI::num_groups(),
@@ -60,9 +61,9 @@ void dolfin::dolfin_init(int argc, char * argv[])
       silence();
     }
 #else
-    message("Initializing DOLFIN version %s \n", DOLFIN_VERSION);
+    message("Initializing DOLFIN version %s\n%s",
+            DOLFIN_VERSION, DOLFIN_BUILD_INFO);
 #endif
-    message("%s\n", DOLFIN_BUILD_INFO);
   }
 
 }

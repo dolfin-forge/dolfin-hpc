@@ -48,7 +48,7 @@ void Test::init(int argc, char *argv[])
 {
   int flag;
   int i = 0;
-  while (-1 != (flag = getopt(argc, argv, ":d:m:b")))
+  while (argc > 1 && -1 != (flag = getopt(argc, argv, "d:m:b")))
   {
     switch (flag)
       {
@@ -63,13 +63,11 @@ void Test::init(int argc, char *argv[])
         args.mesh_file = optarg;
         break;
       default:
-        if (i < argc && (getopt(argc, argv, ":d:m:b") == -1))
-        {
-          ++optind;
-        }
         break;
       }
   }
+  // Reset optind if applications are using getopt through the TEST interface
+  optind = 1;
 }
 
 //-----------------------------------------------------------------------------

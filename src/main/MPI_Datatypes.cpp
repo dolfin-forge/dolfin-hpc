@@ -40,9 +40,11 @@ MPI_Datatype MPI_type< unsigned short int >::value = MPI_UNSIGNED_SHORT;
 template <>
 MPI_Datatype MPI_type< unsigned long int >::value = MPI_UNSIGNED_LONG;
 
+#if ( MPI_VERSION > 1 )
 template <>
 MPI_Datatype MPI_type< unsigned long long >::value = MPI_UNSIGNED_LONG_LONG;
-
+#endif
+  
 template <>
 MPI_Datatype MPI_type< unsigned int >::value = MPI_UNSIGNED;
 

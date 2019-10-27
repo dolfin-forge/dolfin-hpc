@@ -151,6 +151,7 @@ nobase_pkginclude_HEADERS = \
 				main/alarm.h\
 				main/init.h\
 				main/MPI.h\
+				main/MPI_Datatypes.h\
 				main/PE.h\
 				main/Startup.h\
 				main/SubSystemsManager.h\

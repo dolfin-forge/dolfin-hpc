@@ -2,7 +2,7 @@
 // Licensed under the GNU LGPL Version 2.1.
 
 #include <dolfin/mesh/MeshEntity.h>
-
+#include <dolfin/mesh/Mesh.h>
 #include <dolfin/log/dolfin_log.h>
 
 namespace dolfin

@@ -5,10 +5,13 @@
 #define __DOLFIN_MESH_ENTITY_H
 
 #include <dolfin/common/types.h>
-#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshTopology.h>
 
 namespace dolfin
 {
+
+class Mesh;
+class MeshDistributedData;
 
 /**
  *

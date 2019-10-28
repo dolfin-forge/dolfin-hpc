@@ -7,6 +7,7 @@
 #include <dolfin/common/Variable.h>
 
 #include <dolfin/common/types.h>
+#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/CellType.h>
 #include <dolfin/mesh/MeshDistributedData.h>
 #include <dolfin/mesh/MeshGeometry.h>
@@ -234,7 +235,8 @@ public:
   /// Refine mesh uniformly
   void refine();
 
-  //---
+  //---------------------------------------------------------------------------
+  void move(BoundaryMesh& boundary, ALE::ALEType method = ALE::lagrange);
 
   /// Return hash to identify the state of the mesh
   std::string const hash() const;

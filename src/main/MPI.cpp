@@ -359,6 +359,7 @@ int MPI::check_error( int const mpi_error )
   case MPI_ERR_RMA_SYNC:
    error( "Wrong synchronization of RMA calls" );
     break;
+#if ( MPI_VERSION >  2)
   case MPI_ERR_RMA_RANGE:
    error( "Target memory is not part of the window (in the case of a window \
            created with MPI_WIN_CREATE_DYNAMIC, target memory not attached)" );
@@ -373,6 +374,7 @@ int MPI::check_error( int const mpi_error )
   case MPI_ERR_RMA_FLAVOR:
    error( "Passed window has the wrong flavor for the called function" );
     break;
+#endif
   case MPI_ERR_FILE:
    error( "Invalid file handle" );
     break;

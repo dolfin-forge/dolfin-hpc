@@ -105,6 +105,7 @@ nobase_pkginclude_HEADERS = \
 				io/VTKFile.h\
 				io/XMLFile.h\
 				io/XMLMesh.h\
+				io/XMLMeshFunction.h\
 				io/XMLObject.h\
 				insitu/dolfin_insitu.h\
 				insitu/libsimPipeline.h\

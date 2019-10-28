@@ -15,14 +15,14 @@
 #include <dolfin/common/types.h>
 #include <dolfin/la/Vector.h>
 #include <dolfin/la/GenericMatrix.h>
-#include "GenericFile.h"
-#include "XMLMeshFunction.h"
+#include <dolfin/io/GenericFile.h>
+#include <dolfin/io/XMLMeshFunction.h>
 
 namespace dolfin
 {
 
   class Mesh;
-  template <class T> class MeshFunction;
+  template <typename T> class MeshFunction;
   class ParameterList;
   class XMLObject;
 
@@ -39,7 +39,10 @@ namespace dolfin
     // Output
     void operator<< (Mesh& mesh);
 
-    virtual void operator>>( MeshFunction<real> & mf );
+    virtual void operator>> (MeshFunction<int>& meshfunction);
+    virtual void operator>> (MeshFunction<uint>& meshfunction);
+    virtual void operator>> (MeshFunction<real>& meshfunction);
+    virtual void operator>> (MeshFunction<bool>& meshfunction);
 
     // Friends
     #ifdef HAVE_XML
@@ -54,6 +57,9 @@ namespace dolfin
 
     FILE* openFile();
     void  closeFile(FILE* fp);
+
+    template<typename T>
+    void read_meshfunction( MeshFunction<T> & meshfunction );
 
     // Implementation for specific class (output)
     XMLObject* xmlObject;
@@ -77,6 +83,17 @@ namespace dolfin
   void sax_error       (void *ctx, const char *msg, ...);
   void sax_fatal_error (void *ctx, const char *msg, ...);
 #endif
+
+//-----------------------------------------------------------------------------
+template<typename T>
+void XMLFile::read_meshfunction( MeshFunction<T> & meshfunction )
+{
+  message(1, "Reading meshfunction from file %s.", filename.c_str());
+
+  delete xmlObject;
+  xmlObject = new XMLMeshFunction<T>(meshfunction);
+  parseFile();
 }
 
+}
 #endif

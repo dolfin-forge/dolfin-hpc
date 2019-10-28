@@ -19,7 +19,6 @@ int main()
   MeshValues<real, Cell> mv(mesh);
   File f("meshfunction.xml");
   f >> mv;
-  // MeshFunction<real> f(mesh, "meshfunction.xml");
 
   // Write mesh function to file
   File out("meshfunction_out.pvd");

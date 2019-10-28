@@ -391,6 +391,13 @@ if test "x${enable_python}" = xyes; then
     if ! ${HAVE_PYTHON}; then
         AC_MSG_ERROR([Python interpreter not found, module cannot be installed.])
     fi
+    case ${PYTHON_VERSION} in
+    2*)
+    ;;
+    *)	
+    AC_MSG_ERROR([No Python2 interpreter found, module cannot be installed.])
+    ;;
+    esac
 fi
 # Add variable for installation of Python modules
 AM_CONDITIONAL([ENABLE_PYTHON_MODULES], [test "x${enable_python}" = xyes])

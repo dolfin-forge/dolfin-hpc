@@ -22,22 +22,21 @@ void MeshSmoothing::smooth( Mesh & mesh )
 
 	// Make sure the mesh is ordered
 	MeshOrdering::order( mesh );
-  // mesh.topology().finalize();
 
 	// Mark vertices on the boundary so we may skip them
-	BoundaryMesh boundary = mesh.exterior_boundary();
-	MeshValues< uint, Vertex > vertex_map( boundary, 0.0 );
-	MeshValues< bool, Vertex > on_boundary( mesh, 0 );
-	on_boundary = false;
+	BoundaryMesh                  boundary = mesh.exterior_boundary();
+	MeshValues< bool, Vertex, 1 > on_boundary( mesh, false );
 	for ( VertexIterator v( boundary ); !v.end(); ++v )
-		on_boundary( ( vertex_map )( *v ), true );
+	{
+		on_boundary( boundary.vertex_index(*v) ) = true;
+	}
 
 	/*
 	   FIXME: new algorithm
 	   1) Iterate over shared vertices
 	      - Compute neighbors and center off mass, localy
-	- Exchange neighbors and center off mass
-	- Compute new vertex coordinate on owner
+	      - Exchange neighbors and center off mass
+	      - Compute new vertex coordinate on owner
 	      - Exchange new coordinates
 	   2) Iterate over all shared vertices
 	      - Skip shared entities
@@ -53,32 +52,35 @@ void MeshSmoothing::smooth( Mesh & mesh )
 		if ( on_boundary( *v ) )
 			continue;
 
-    if( mesh.is_distributed() && mesh.distdata()[0].is_shared( v->index() ) )
-      continue;
+		if ( mesh.is_distributed() && mesh.distdata()[0].is_shared( v->index() ) )
+			continue;
 
 		// Get coordinates of vertex
 		real *      x = v->x();
 		const Point p = v->point();
 
 		// Compute center of mass of neighboring vertices
-		for ( uint i = 0; i < d; i++ )
+		for ( uint i = 0; i < d; ++i )
 			xx[i] = 0.0;
 		uint num_neighbors = 0;
-		for ( VertexIterator vn( *v ); !vn.end(); ++vn )
+		for ( EdgeIterator e( *v ); !e.end(); ++e )
 		{
-      std::cout << vn->x()[0] << " / " << vn->x()[1]  << std::endl;
-			// Skip the vertex itself
-			if ( v->index() == vn->index() )
-				continue;
-			num_neighbors += 1;
+			for ( uint i = 0; i < 2; ++i )
+			{
+				Vertex vx( mesh, e->entities( 0 )[i] );
+				// Skip the vertex itself
+				if ( v->index() == vx.index() )
+					continue;
+				num_neighbors += 1;
 
-			// Compute center of mass
-			const real * xn = vn->x();
-			for ( uint i = 0; i < d; i++ )
-				xx[i] += xn[i];
+				// Compute center of mass
+				const real * xn = vx.x();
+				for ( uint i = 0; i < d; ++i )
+					xx[i] += xn[i];
+			}
 		}
 
-		for ( uint i = 0; i < d; i++ )
+		for ( uint i = 0; i < d; ++i )
 			xx[i] /= static_cast< real >( num_neighbors );
 
 		// Compute closest distance to boundary of star
@@ -105,7 +107,7 @@ void MeshSmoothing::smooth( Mesh & mesh )
 
 		// Move vertex at most a distance rmin / 2
 		real r = 0.0;
-		for ( uint i = 0; i < d; i++ )
+		for ( uint i = 0; i < d; ++i )
 		{
 			const real dx = xx[i] - x[i];
 			r += dx * dx;
@@ -114,7 +116,7 @@ void MeshSmoothing::smooth( Mesh & mesh )
 		if ( r < DOLFIN_EPS )
 			continue;
 		rmin = std::min( 0.5 * rmin, r );
-		for ( uint i = 0; i < d; i++ )
+		for ( uint i = 0; i < d; ++i )
 			x[i] += rmin * ( xx[i] - x[i] ) / r;
 	}
 }

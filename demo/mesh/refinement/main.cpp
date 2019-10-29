@@ -8,11 +8,10 @@ using namespace dolfin;
 
 int main()
 {
-	for ( unsigned int j = 0; j < 1; ++j )
+	for ( unsigned int j = 0; j < 2; ++j )
 	{
 		// Create mesh of unit square
-		UnitSquare mesh( 15, 15 );
-		// Mesh mesh( "model.stl" );
+		UnitSquare mesh( 10, 10 );
 
 		File f_mesh( ( j == 0 ) ? "simple.pvd" : "rivara.pvd" );
 
@@ -24,7 +23,7 @@ int main()
 
 		// Refine mesh close to x = (0.5, 0.5)
 		Point p( 0.5, 0.5 );
-		for ( unsigned int i = 0; i < 1; ++i )
+		for ( unsigned int i = 0; i < 5; ++i )
 		{
 			// Mark cells for refinement
 			MeshValues< bool, Cell > cell_markers( mesh );

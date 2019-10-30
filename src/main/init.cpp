@@ -21,7 +21,8 @@ void dolfin::dolfin_init(int argc, char * argv[])
   
   //--- Process arguments
   int c;
-  
+  // Don't throw a warning about unused params in consumers of DOLFIN
+  opterr = 0;
   while(argc > 1 &&  -1 != (c = getopt(argc,argv,"n:w:")))
   {
     switch(c)

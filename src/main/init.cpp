@@ -14,33 +14,8 @@
 #include <unistd.h>
 
 //-----------------------------------------------------------------------------
-void dolfin::dolfin_init(int argc, char * argv[])
+void dolfin::dolfin_init(int argc, char * argv[], long w_limit, int n)
 {
-  long w_limit = 0;
-  int n = 1;
-  
-  //--- Process arguments
-  int c;
-  // Don't throw a warning about unused params in consumers of DOLFIN
-  opterr = 0;
-  while(argc > 1 &&  -1 != (c = getopt(argc,argv,"n:w:")))
-  {
-    switch(c)
-    {
-      case 'n':
-        n = atoi(optarg);
-        break;
-      case 'w':
-        w_limit = atol(optarg);
-        break;
-      default:
-        break;
-    }
-  }
-  
-  // Reset optind to allow for getopt in consumers of DOLFIN
-  optind = 1;
-  
   //--- Initialize subsystems and print banner
 
   int init_count = SubSystemsManager::start(argc, argv, n, w_limit);

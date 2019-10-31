@@ -6,6 +6,9 @@
 /* Version of DOLFIN */
 #undef DOLFIN_VERSION
 
+/* Build info (date,host,CXX) of DOLFIN */
+#undef DOLFIN_BUILD_INFO
+
 /* Compile with support for Boost TR1 headers */
 #undef ENABLE_BOOST_TR1
 

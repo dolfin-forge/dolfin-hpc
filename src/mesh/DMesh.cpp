@@ -267,8 +267,11 @@ void DMesh::exp(Mesh& mesh)
       }
     }
   }
-  dist->remap_shared_adj();
-  dist->finalize();
+  if ( dist != NULL )
+  {
+    dist->remap_shared_adj();
+    dist->finalize();
+  }
 
   Array<uint> cell_vertices(ctype_->num_entities(0));
   uint current_cell = 0;
@@ -286,7 +289,8 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-  mesh.topology().distdata()[0].swap(*dist);
+  if ( dist != NULL )
+    mesh.topology().distdata()[0].swap(*dist);
   mesh.topology().finalize();
 
 #if DEBUG

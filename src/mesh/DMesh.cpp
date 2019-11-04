@@ -267,8 +267,7 @@ void DMesh::exp(Mesh& mesh)
       }
     }
   }
-
-  if (dist)
+  if ( dist != NULL )
   {
     dist->remap_shared_adj();
     dist->finalize();
@@ -290,10 +289,8 @@ void DMesh::exp(Mesh& mesh)
     current_cell++;
   }
   editor.close();
-
-  if (dist)
+  if ( dist != NULL )
     mesh.topology().distdata()[0].swap(*dist);
-
   mesh.topology().finalize();
 
 #if DEBUG

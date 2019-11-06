@@ -12,14 +12,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity() :
-    order_(0),
-    min_degree_(0),
-    max_degree_(0),
-    connections_(NULL)
-{
-}
-//-----------------------------------------------------------------------------
 Connectivity::Connectivity(uint order, uint degree) :
   order_(order),
   min_degree_(degree),

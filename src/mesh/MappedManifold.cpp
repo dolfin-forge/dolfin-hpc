@@ -16,7 +16,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 MappedManifold::MappedManifold(Mesh& mesh, PeriodicSubDomain const& subdomain) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(mesh),
     subdomainG_(subdomain)
 {

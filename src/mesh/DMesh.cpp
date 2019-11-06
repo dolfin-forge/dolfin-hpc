@@ -290,7 +290,7 @@ void DMesh::exp(Mesh& mesh)
   }
   editor.close();
   if ( dist != NULL )
-    mesh.topology().distdata()[0].swap(*dist);
+    swap(*dist, mesh.topology().distdata()[0]);
   mesh.topology().finalize();
 
 #if DEBUG

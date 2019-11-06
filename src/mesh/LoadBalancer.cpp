@@ -104,7 +104,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
   else
   {
-    LoadBalancer::partitions(mesh).swap(partitions);
+    swap( LoadBalancer::partitions(mesh), partitions );
   }
 
   if (dolfin_get("Load balancer report"))
@@ -216,7 +216,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
   else
   {
-    LoadBalancer::partitions(mesh).swap(partitions);
+    swap( LoadBalancer::partitions(mesh), partitions );
   }
 
   if (dolfin_get("Load balancer report"))
@@ -341,7 +341,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
   else
   {
-    LoadBalancer::partitions(mesh).swap(partitions);
+    swap( LoadBalancer::partitions(mesh), partitions );
   }
 
   if (dolfin_get("Load balancer report"))
@@ -450,7 +450,7 @@ void LoadBalancer::balance(Mesh& mesh, MeshValues<bool, Cell>& cell_marker,
   }
   else
   {
-    LoadBalancer::partitions(mesh).swap(partitions);
+    swap( LoadBalancer::partitions(mesh), partitions );
   }
 
   if (dolfin_get("Load balancer report"))

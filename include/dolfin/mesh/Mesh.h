@@ -63,7 +63,7 @@ class Mesh : public Variable
 public:
 
   /// Create empty mesh
-  Mesh();
+  // Mesh();
 
   /// Constructor from cell type and space
   Mesh(CellType const& ctype, Space const& space);
@@ -81,7 +81,7 @@ public:
   virtual ~Mesh();
 
   /// Swap instances
-  void swap(Mesh& other);
+  friend void swap( Mesh& a, Mesh& b );
 
   /// Assignment
   Mesh const& operator=(Mesh const& other);
@@ -154,13 +154,13 @@ public:
   bool parallel_io() const;
 
   /// Return whether the mesh is distributed i.e iff the topology is distributed
-  bool is_distributed() const;
+  bool is_distributed() const; // FIXME remove this function
 
   /// Return mesh distribution data (non-const version)
-  MeshDistributedData& distdata();
+  MeshDistributedData& distdata(); // FIXME remove this function
 
   /// Return mesh distribution data (const)
-  MeshDistributedData const& distdata() const;
+  MeshDistributedData const& distdata() const; // FIXME remove this function
 
   /// Return global number of entities of given topological dimension
   uint global_size(uint dim) const;
@@ -250,10 +250,10 @@ public:
 private:
 
   // Mesh topology
-  MeshTopology * topology_;
+  MeshTopology topology_;
 
   // Mesh geometry
-  MeshGeometry * geometry_;
+  MeshGeometry geometry_;
 
   /// Exterior boundary mesh
   mutable BoundaryMesh * exterior_boundary_;

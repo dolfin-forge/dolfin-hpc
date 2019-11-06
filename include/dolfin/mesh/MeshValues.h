@@ -83,11 +83,10 @@ struct MeshValues : public MeshFunction<T>
     return *this;
   }
 
-
   /// Swap operator
-  void swap(MeshValues<T, E, N>& other)
+  friend void swap( MeshValues<T,E,N>& a, MeshValues<T,E,N>& b )
   {
-    MeshFunction<T>::swap(other);
+    swap( static_cast<MeshFunction<T>&>(a), static_cast<MeshFunction<T>&>(b) );
   }
 
   ///--- Value accessors

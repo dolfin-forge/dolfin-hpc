@@ -177,7 +177,7 @@ void SpaceTimeFunction::load(real t, std::string const& sname, Function& w)
 {
   real st;
   uint sp;
-  uint offset[3] = { 0 };
+  uint offset[3] = { 0, 0, 0 };
   Array<real> values(w.vector().local_size());
 
 #ifdef ENABLE_MPIIO

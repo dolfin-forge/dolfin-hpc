@@ -27,11 +27,6 @@ class DistributedData : public Distributed<DistributedData>
 public:
 
   ///
-  bool valid_numbering;
-  bool valid_ownership;
-  bool valid_adjacency;
-
-  ///
   DistributedData(MPI::Communicator& comm = MPI::DOLFIN_COMM);
 
   ///
@@ -50,36 +45,35 @@ public:
   bool operator!=(DistributedData const& other) const;
 
   ///
-  void swap(DistributedData& other)
+  friend void swap( DistributedData& a, DistributedData& b )
   {
-    if (this != &other)
-    {
-      // Swap communicator
-      Distributed::swap(other);
+    using std::swap;
 
-      // Swap flags
-      std::swap(valid_numbering, other.valid_numbering);
-      std::swap(valid_ownership, other.valid_ownership);
-      std::swap(valid_adjacency, other.valid_adjacency);
+    swap( static_cast<Distributed<DistributedData>&>(a),
+          static_cast<Distributed<DistributedData>&>(b) );
 
-      // Swap attributes
-      std::swap(rank_             , other.rank_);
-      std::swap(pe_size_          , other.pe_size_);
-      std::swap(range_is_set_     , other.range_is_set_);
-      std::swap(offset_           , other.offset_);
-      std::swap(range_size_       , other.range_size_);
-      std::swap(global_size_      , other.global_size_);
-      std::swap(finalized_        , other.finalized_);
-      std::swap(global_           , other.global_);
-      std::swap(local_            , other.local_);
-      std::swap(adjacents_        , other.adjacents_);
-      std::swap(shared_           , other.shared_);
-      std::swap(ghost_            , other.ghost_);
-      std::swap(cache_size_       , other.cache_size_);
-      std::swap(cached_numbering_ , other.cached_numbering_);
-      std::swap(cached_ownership_ , other.cached_ownership_);
-      std::swap(shared_mapping_   , other.shared_mapping_);
-    }
+    // Swap flags
+    swap(a.valid_numbering, b.valid_numbering);
+    swap(a.valid_ownership, b.valid_ownership);
+    swap(a.valid_adjacency, b.valid_adjacency);
+
+    // Swap attributes
+    swap(a.rank_             , b.rank_);
+    swap(a.pe_size_          , b.pe_size_);
+    swap(a.range_is_set_     , b.range_is_set_);
+    swap(a.offset_           , b.offset_);
+    swap(a.range_size_       , b.range_size_);
+    swap(a.global_size_      , b.global_size_);
+    swap(a.finalized_        , b.finalized_);
+    swap(a.global_           , b.global_);
+    swap(a.local_            , b.local_);
+    swap(a.adjacents_        , b.adjacents_);
+    swap(a.shared_           , b.shared_);
+    swap(a.ghost_            , b.ghost_);
+    swap(a.cache_size_       , b.cache_size_);
+    swap(a.cached_numbering_ , b.cached_numbering_);
+    swap(a.cached_ownership_ , b.cached_ownership_);
+    swap(a.shared_mapping_   , b.shared_mapping_);
   }
 
   /// Finalize the data: validate and set process range + global size
@@ -257,6 +251,13 @@ public:
 
   //
   void disp() const;
+
+public:
+
+  ///
+  bool valid_numbering;
+  bool valid_ownership;
+  bool valid_adjacency;
 
 private:
 

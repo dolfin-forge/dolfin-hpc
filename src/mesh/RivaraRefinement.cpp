@@ -44,10 +44,10 @@ void RivaraRefinement::refine(Mesh& mesh,
   DMesh dmesh(mesh);
   dmesh.bisectMarked(cell_marker);
 
-  Mesh omesh;
+  Mesh omesh(mesh.type(), mesh.space(), mesh.topology().comm());
   dmesh.exp(omesh);
 
-  mesh.swap(omesh);
+  swap( mesh, omesh );
   mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------

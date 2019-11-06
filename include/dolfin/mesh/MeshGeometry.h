@@ -52,7 +52,7 @@ public:
   bool operator!=(MeshGeometry const& other) const;
 
   /// Swap instances
-  void swap(MeshGeometry& other);
+  friend void swap( MeshGeometry& a, MeshGeometry& b );
 
   /// Return space of coordinate system
   Space const& space() const;
@@ -139,12 +139,6 @@ public:
   int token() const;
 
 private:
-
-  /// Only Mesh can create empty instances and clear them
-  friend class Mesh;
-
-  /// Create empty set of coordinates
-  MeshGeometry();
 
   /// Clear all data
   void clear();

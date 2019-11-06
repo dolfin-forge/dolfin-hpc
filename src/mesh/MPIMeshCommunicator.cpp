@@ -82,7 +82,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   // Clear mesh using swap with new instance
   {
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
-    new_mesh.swap(mesh);
+    swap( mesh, new_mesh );
   }
   dolfin_assert(mesh.topology().connectivity(0) == NULL);
   dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
@@ -139,7 +139,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   // Update topology
   dolfin_assert(iverts.size() == distdata.local_size());
   mesh.topology().init(0 , distdata.local_size());
-  mesh.topology().distdata()[0].swap(distdata);
+  swap( mesh.topology().distdata()[0], distdata );
   mesh.topology().finalize();
   dolfin_assert(iverts.size() == mesh.topology().distdata()[0].local_size());
   if(num_global_vertices != mesh.topology().global_size(0))
@@ -272,7 +272,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   // Clear mesh using swap with new instance
   {
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
-    new_mesh.swap(mesh);
+    swap( mesh, new_mesh );
   }
   dolfin_assert(mesh.topology().connectivity(0) == NULL);
 
@@ -505,7 +505,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
   // Update topology
   dolfin_assert(vindex == distdata.local_size());
   mesh.topology().init(0 , vindex);
-  mesh.topology().distdata()[0].swap(distdata);
+  swap( mesh.topology().distdata()[0], distdata );
   mesh.topology().init(tdim , cindex);
   mesh.topology()(tdim, 0).set(vcells);
   mesh.topology().finalize();
@@ -538,7 +538,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
       uint const nUC = mUC.size();
       dolfin_assert(nUC == M.size() * numUC);
       for (uint j = ii, k = 0; j < nUC; j+=numUC, ++k) { M(k) = mUC[j]; }
-      (*it).swap(M);
+      swap( *it, M );
     }
     for (MeshData::iterator<uint, Cell> it(*D); it.valid(); ++it, ++ii)
     {
@@ -546,7 +546,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
       uint const nUC = mUC.size();
       dolfin_assert(nUC == M.size() * numUC);
       for (uint j = ii, k = 0; j < nUC; j+=numUC, ++k) { M(k) = mUC[j]; }
-      (*it).swap(M);
+      swap( *it, M );
     }
   }
   if (RV)
@@ -558,7 +558,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Cell>& dist, MeshData * D)
       uint const nRV = mRV.size();
       dolfin_assert(nRV == (M.size()- mesh.distdata()[0].num_ghost()) * numRV);
       for (uint j = ii, k = 0; j < nRV; j+=numRV, ++k) { M(k) = mRV[j]; }
-      (*it).swap(M);
+      swap( *it, M );
     }
   }
 

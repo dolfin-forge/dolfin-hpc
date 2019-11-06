@@ -200,8 +200,11 @@ void Checkpoint::load(Mesh& mesh)
   in_.read((char *)coords, (hdr_.num_coords) * sizeof(real));
 #endif
 
-  Mesh _mesh;
-  MeshEditor editor(_mesh, hdr_.type, hdr_.gdim);
+  CellType & tmp_type = *CellType::create(hdr_.type);
+  EuclideanSpace tmp_space(hdr_.gdim);
+  Mesh _mesh(tmp_type, tmp_space);
+  MeshEditor editor(_mesh, tmp_type, tmp_space);
+  // MeshEditor editor(_mesh, hdr_.type, hdr_.gdim);
   editor.init_vertices(hdr_.num_vertices);
 
   uint vi = 0;
@@ -270,7 +273,7 @@ void Checkpoint::load(Mesh& mesh)
   _mesh.distdata()[0].remap_shared_adj();
   _mesh.distdata()[0].finalize();
   editor.close();
-  mesh.swap(_mesh);
+  swap( mesh, _mesh );
 
   restart_state_ = FUNC;
 

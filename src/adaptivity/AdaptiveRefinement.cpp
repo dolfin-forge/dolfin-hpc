@@ -175,6 +175,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     // FIXME: Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
+      mesh.init();
       FiniteElementSpace subspace(space, i);
       post.push_back(new Function(subspace));
 
@@ -208,7 +209,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     p_file << proj.vector();
   }
 
-  mesh.swap(new_mesh);
+  swap( mesh, new_mesh );
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
 }

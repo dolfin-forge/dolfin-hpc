@@ -10,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
-    Mesh()
+    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
 {
 
   if (nx < 1 || ny < 1)
@@ -21,7 +21,7 @@ UnitSquare::UnitSquare(uint nx, uint ny, Type type) :
   rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::triangle, 2);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices and cells:
   if (type == crisscross)

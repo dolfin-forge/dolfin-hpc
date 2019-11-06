@@ -135,7 +135,8 @@ void MeshEditor::init(Mesh& mesh, CellType const& ctype, Space const& space,
 
   // Initialize the topology to the given cell type and space
   {
-    Mesh m(ctype, space, comm); mesh.swap(m);
+    Mesh m(ctype, space, comm);
+    swap(mesh, m);
     dolfin_assert(!mesh.empty());
     dolfin_assert(mesh.topology_dimension() == ctype.dim());
     dolfin_assert(mesh.geometry_dimension() == space.dim());
@@ -152,8 +153,8 @@ void MeshEditor::init_vertices(uint num_local, uint num_global /* = 0 */)
   }
   // Initialize mesh data
   this->num_vertices_ = num_local;
-  mesh_.topology_->init(0, num_local, num_global);
-  mesh_.geometry_->resize(num_local);
+  mesh_.topology_.init(0, num_local, num_global);
+  mesh_.geometry_.resize(num_local);
 }
 //-----------------------------------------------------------------------------
 void MeshEditor::init_cells(uint num_local, uint num_global /* = 0 */)

@@ -16,16 +16,6 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-MeshGeometry::MeshGeometry() :
-    space_(NULL),
-    dim_(0),
-    size_(0),
-    coordinates_(NULL),
-    abs_tol_(NULL),
-    timestamp_(0)
-{
-}
-//-----------------------------------------------------------------------------
 MeshGeometry::MeshGeometry(Space const& space) :
     space_(space.clone()),
     dim_(space.dim()),
@@ -104,15 +94,15 @@ bool MeshGeometry::operator!=(MeshGeometry const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-void MeshGeometry::swap(MeshGeometry& other)
+void swap( MeshGeometry& a, MeshGeometry& b )
 {
-  if (this == &other) return;
-  std::swap(space_      , other.space_);
-  std::swap(dim_        , other.dim_);
-  std::swap(size_       , other.size_);
-  std::swap(coordinates_, other.coordinates_);
-  std::swap(abs_tol_    , other.abs_tol_);
-  std::swap(timestamp_  , other.timestamp_);
+  using std::swap;
+  swap(a.space_      , b.space_);
+  swap(a.dim_        , b.dim_);
+  swap(a.size_       , b.size_);
+  swap(a.coordinates_, b.coordinates_);
+  swap(a.abs_tol_    , b.abs_tol_);
+  swap(a.timestamp_  , b.timestamp_);
 }
 //-----------------------------------------------------------------------------
 Space const& MeshGeometry::space() const

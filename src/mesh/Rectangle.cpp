@@ -12,14 +12,14 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 Rectangle::Rectangle(real a, real b, real c, real d, uint nx, uint ny,
                      Type type) :
-    Mesh()
+    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
 {
   if (nx < 1 || ny < 1) error(
       "Size of unit square must be at least 1 in each dimension.");
 
   rename("mesh", "Mesh of the unit square (a,b) x (c,d)");
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::triangle, 2);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices and cells:
   if (type == crisscross)

@@ -489,6 +489,26 @@ void XMLFile::operator<<(Mesh& mesh)
   message(1, "Saved mesh to file %s in DOLFIN XML format.", filename.c_str());
 }
 //-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<int>& meshfunction)
+{
+  write_meshfunction<int>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<uint>& meshfunction)
+{
+  write_meshfunction<uint>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<real>& meshfunction)
+{
+  write_meshfunction<real>(meshfunction);
+}
+//-----------------------------------------------------------------------------
+void XMLFile::operator<< (MeshFunction<bool>& meshfunction)
+{
+  write_meshfunction<bool>(meshfunction);
+}
+//-----------------------------------------------------------------------------
 FILE* XMLFile::openFile()
 {
 

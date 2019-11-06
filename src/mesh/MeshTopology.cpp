@@ -151,7 +151,7 @@ void MeshTopology::init( uint dim, uint nlocal, uint nglobal )
 	}
 
 	// Set size of distributed data
-	if ( distdata_ != NULL )
+	if ( distributed() )
 	{
 		if ( nglobal && ( nglobal < nlocal ) )
 		{
@@ -160,7 +160,7 @@ void MeshTopology::init( uint dim, uint nlocal, uint nglobal )
 			       nlocal,
 			       nglobal );
 		}
-		this->distdata()[dim].set_size( nlocal, nglobal );
+		distdata_[dim].set_size( nlocal, nglobal );
 	}
 	else
 	{

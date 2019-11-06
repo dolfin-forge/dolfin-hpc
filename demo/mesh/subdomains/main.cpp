@@ -1,9 +1,6 @@
 // Copyright (C) 2007-2008 Anders Logg.
 // Licensed under the GNU LGPL Version 2.1.
-//
-// First added:  2007-04-24
-// Last changed: 2008-02-13
-//
+
 // This demo program demonstrates how to mark sub domains
 // of a mesh and store the sub domain markers as a mesh
 // function to a DOLFIN XML file.
@@ -17,8 +14,6 @@ using namespace dolfin;
 
 int main()
 {
-  dolfin_set("debug level", 1);
-
   // Sub domain for no-slip (everything except inflow and outflow)
   class Noslip : public SubDomain
   {

@@ -153,6 +153,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.topology().renumber();
+  mesh.init();
 
   if (MPI::rank() == 0)
   {
@@ -175,7 +176,6 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     // FIXME: Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
-      mesh.init();
       FiniteElementSpace subspace(space, i);
       post.push_back(new Function(subspace));
 

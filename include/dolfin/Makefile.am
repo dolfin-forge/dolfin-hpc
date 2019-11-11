@@ -152,6 +152,7 @@ nobase_pkginclude_HEADERS = \
 				main/init.h\
 				main/MPI.h\
 				main/MPI_Datatypes.h\
+				main/OpenMP.h\
 				main/PE.h\
 				main/Startup.h\
 				main/SubSystemsManager.h\

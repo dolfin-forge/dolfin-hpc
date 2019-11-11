@@ -330,14 +330,14 @@ namespace dolfin
     // Callback for broadcasting a string from visit
     inline static int libsimBroadcastStr(char *str, int len, int sender)
     {
-      return MPI::bcast( str, len, sender )
+      return MPI::bcast( str, len, sender );
     }
 
     // Callback for informing slave processes to progress
     inline static void libsimSlaveProcess(void *data)
     {
       int command = 0; // VISIT_COMMAND_PROCESS;
-      MPI::bcast( command, 1, 0 );
+      MPI::bcast(&command, 1, 0 );
     }
 #endif
 

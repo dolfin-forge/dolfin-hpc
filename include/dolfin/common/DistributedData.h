@@ -39,42 +39,13 @@ public:
   DistributedData& operator=(DistributedData const& other);
 
   ///
+  friend void swap( DistributedData& a, DistributedData& b );
+
+  ///
   bool operator==(DistributedData const& other) const;
 
   ///
   bool operator!=(DistributedData const& other) const;
-
-  ///
-  friend void swap( DistributedData& a, DistributedData& b )
-  {
-    using std::swap;
-
-    swap( static_cast<Distributed<DistributedData>&>(a),
-          static_cast<Distributed<DistributedData>&>(b) );
-
-    // Swap flags
-    swap(a.valid_numbering, b.valid_numbering);
-    swap(a.valid_ownership, b.valid_ownership);
-    swap(a.valid_adjacency, b.valid_adjacency);
-
-    // Swap attributes
-    swap(a.rank_             , b.rank_);
-    swap(a.pe_size_          , b.pe_size_);
-    swap(a.range_is_set_     , b.range_is_set_);
-    swap(a.offset_           , b.offset_);
-    swap(a.range_size_       , b.range_size_);
-    swap(a.global_size_      , b.global_size_);
-    swap(a.finalized_        , b.finalized_);
-    swap(a.global_           , b.global_);
-    swap(a.local_            , b.local_);
-    swap(a.adjacents_        , b.adjacents_);
-    swap(a.shared_           , b.shared_);
-    swap(a.ghost_            , b.ghost_);
-    swap(a.cache_size_       , b.cache_size_);
-    swap(a.cached_numbering_ , b.cached_numbering_);
-    swap(a.cached_ownership_ , b.cached_ownership_);
-    swap(a.shared_mapping_   , b.shared_mapping_);
-  }
 
   /// Finalize the data: validate and set process range + global size
   void finalize();
@@ -291,9 +262,8 @@ private:
   GhostSet ghost_;
 
   ///
-  uint cache_size_;
-  uint * cached_numbering_;
-  uint * cached_ownership_;
+  Array<uint> cached_numbering_;
+  Array<uint> cached_ownership_;
 
   /// Mapping created on-demand
   mutable SharedMapping * shared_mapping_;
@@ -480,9 +450,7 @@ public:
   OwnedIterator(DistributedData const& distdata) :
       distdata_(distdata),
       owner_(distdata.cached_ownership_),
-      begin_(distdata.cached_numbering_),
-      end_(distdata.cached_numbering_ + distdata_.local_size()),
-      iter_(begin_)
+      iter_(owner_.begin())
   {
     if(!distdata.is_finalized())
     {
@@ -498,14 +466,14 @@ public:
   ///
   OwnedIterator& operator++()
   {
-    if (iter_ == end_)
+    if (iter_ == owner_.end())
     {
       return *this;
     }
     ++iter_;
-    while ((iter_ < end_)
-           && (owner_[iter_ - begin_] != distdata_.pe_size_)
-           && (owner_[iter_ - begin_] != distdata_.rank_))
+    while ((iter_ < owner_.end())
+           && (*iter_ != distdata_.pe_size_)
+           && (*iter_ != distdata_.rank_))
     {
       ++iter_;
     }
@@ -515,7 +483,7 @@ public:
   ///
   inline uint index() const
   {
-    return iter_ - begin_;
+    return iter_ - owner_.begin();
   }
 
   ///
@@ -527,22 +495,20 @@ public:
   ///
   inline uint is_shared() const
   {
-    return (owner_[iter_ - begin_] == distdata_.rank_);
+    return (*iter_ == distdata_.rank_);
   }
 
   ///
   inline bool end() const
   {
-    return iter_ == end_;
+    return iter_ == owner_.end();
   }
 
 private:
 
-  DistributedData const& distdata_;
-  uint * const owner_;
-  uint * const begin_;
-  uint * const end_;
-  uint * iter_;
+  DistributedData const & distdata_;
+  Array<uint> const & owner_;
+  Array<uint>::const_iterator iter_;
 
 };
 

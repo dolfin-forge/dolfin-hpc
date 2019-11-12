@@ -73,7 +73,7 @@ private:
   uint dim_;
 
   // Distributed data
-  DistributedData * data_;
+  Array<DistributedData> data_;
 
 };
 

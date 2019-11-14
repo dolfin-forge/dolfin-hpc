@@ -30,20 +30,17 @@ class MeshGeometry : public Tokenized, public Clonable<MeshGeometry>
 
 public:
 
-  /// Create mesh geometry for given space
-  MeshGeometry(Space const& space);
-
   /// Create a set of point coordinates with given size
-  MeshGeometry(Space const& space, uint size);
+  MeshGeometry(Space const& space, uint size = 0);
 
   /// Copy constructor
-  MeshGeometry(MeshGeometry const& geometry);
+  MeshGeometry(MeshGeometry const& other);
 
   /// Destructor
   ~MeshGeometry();
 
   /// Assignment
-  MeshGeometry const& operator=(MeshGeometry const& geometry);
+  MeshGeometry & operator=(MeshGeometry const& geometry);
 
   /// Equality
   bool operator==(MeshGeometry const& other) const;
@@ -133,15 +130,10 @@ public:
 
   //--- TOKENIZED -------------------------------------------------------------
 
-public:
-
   /// Return token identifying the internal state of mesh geometry
   int token() const;
 
 private:
-
-  /// Clear all data
-  void clear();
 
   /// Update token value
   void update_token();
@@ -160,10 +152,11 @@ private:
   uint size_;
 
   // Coordinates for all vertices stored as a contiguous array
-  real * coordinates_;
+  // FIXME this should actually be Point instead of real
+  Array<real> coordinates_;
 
   // Absolute tolerances
-  real * abs_tol_;
+  Array<real> abs_tol_;
 
   //
   int timestamp_;
@@ -175,34 +168,34 @@ private:
 inline real* MeshGeometry::x(uint n)
 {
   dolfin_assert(n < size_);
-  return coordinates_ + n * dim_;
+  return coordinates_.data() + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
 inline real const * MeshGeometry::x(uint n) const
 {
   dolfin_assert(n < size_);
-  return coordinates_ + n * dim_;
+  return coordinates_.data() + n * dim_;
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshGeometry::set(uint n, real const * x)
 {
   dolfin_assert(n < size_);
-  std::copy(x, x + dim_, coordinates_ + n * dim_);
+  std::copy(x, x + dim_, coordinates_.data() + n * dim_);
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshGeometry::get(uint n, real * x) const
 {
   dolfin_assert(n < size_);
-  real const * xn = coordinates_ + n * dim_; std::copy(xn, xn + dim_, x);
+  real const * xn = coordinates_.data() + n * dim_; std::copy(xn, xn + dim_, x);
 }
 
 //-----------------------------------------------------------------------------
 inline void MeshGeometry::set(real const * x)
 {
-  std::copy(x, x + dim_ * size_, coordinates_);
+  std::copy(x, x + dim_ * size_, coordinates_.data());
 }
 
 //-----------------------------------------------------------------------------

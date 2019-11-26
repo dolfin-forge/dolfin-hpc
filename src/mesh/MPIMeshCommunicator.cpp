@@ -437,14 +437,15 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 				{
 					if ( not distdata.has_global( v->global_index() ) )
 					{
-						local_cells.push_back( vidx ); // cl ?!
+						local_cells.push_back( vidx );
 						local_vcoords.resize( local_vcoords.size() + gdim, 0. );
+            // distdata.set_ghost( vidx );
 						distdata.set_map( vidx++, v->global_index() );
 						shared_buffer.push_back( v->global_index() );
 					}
 					else
 					{
-					  local_cells.push_back( distdata.get_local( v->global_index() ) ); // cl ?!
+					  local_cells.push_back( distdata.get_local( v->global_index() ) );
 					}
 				}
 			}
@@ -455,12 +456,13 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 		{
 			if ( distdata.has_global( recv_cells[i] ) )
 			{
-				local_cells.push_back( distdata.get_local( recv_cells[i] ) ); // cl ?!
+				local_cells.push_back( distdata.get_local( recv_cells[i] ) );
 			}
 			else
 			{
-				local_cells.push_back( vidx ); // cl ?!
+				local_cells.push_back( vidx );
 				local_vcoords.resize( local_vcoords.size() + gdim, 0. );
+            // distdata.set_ghost( vidx );
 				distdata.set_map( vidx++, recv_cells[i] );
 				shared_buffer.push_back( recv_cells[i] );
 			}
@@ -492,7 +494,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 			for ( int j = 0; j < recv_count; j++ )
 			{
 				if ( distdata.has_global( shared[j] )
-			       and not distdata.is_ghost( distdata.get_local( shared[j] ) ) )
+			       and distdata.is_owned( distdata.get_local( shared[j] ) ) )
 				{
 					real * local = local_vcoords.data() + distdata.get_local( shared[j] ) * gdim;
 					send_buff.append( local, local + gdim );
@@ -500,7 +502,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
 					// if ( not distdata.is_shared( distdata.get_local( shared[j] ) ) )
 					// {
-					//   distdata.set_shared_adj( distdata.get_local( shared[j] ), src );
+					  distdata.set_shared_adj( distdata.get_local( shared[j] ), src );
 					// }
 				}
 			}
@@ -531,16 +533,32 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 		for ( int i = 0; i < r2; ++i )
 		{
       if ( not distdata.has_global( recv_buff_map[i] ) )
-        distdata.set_map( vidx++, recv_buff_map[i] );
-
-			uint local = distdata.get_local( recv_buff_map[i] );
-			distdata.set_ghost( local, recv_source[i] );
-			for ( uint j = 0; j < gdim; ++j )
-				local_vcoords[local * gdim + j] = recv_buff[i * gdim + j];
-		}
+      {
+        // distdata.set_map( vidx++, recv_buff_map[i] );
+        uint local = distdata.get_local( recv_buff_map[i] );
+        distdata.set_ghost( local, recv_source[i] );
+        for ( uint j = 0; j < gdim; ++j )
+          local_vcoords[local * gdim + j] = recv_buff[i * gdim + j];
+      }
+    }
 	}
 
 	distdata.remap_shared_adj();
+
+  // Array< Array< uint > > ghosts( pe_size );
+
+  // for ( VertexIterator v( mesh ); !v.end(); ++v )
+  // {
+  //   if ( v->is_ghost() )
+  //   {
+  //     const DistributedData & d = distdata; //mesh.topology().distdata()[0];
+  //     uint owner = d.get_owner( d.get_local( v->global_index() ) );
+  //     ghosts[owner].push_back( v->global_index() );
+
+  //     if ( not v->is_shared() )
+  //       std::cout << "[" << pe_rank << "] Meh... " << v->global_index() << std::endl;
+  //   }
+  // }
 
   // Clear mesh using swap with new instance
   mesh = Mesh( mesh.type(), mesh.space(), distdata.comm() );

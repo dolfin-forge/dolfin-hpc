@@ -12,6 +12,7 @@
 #include <dolfin/mesh/Cell.h>
 
 #include <algorithm>
+#include <fstream>
 
 namespace dolfin
 {
@@ -165,37 +166,38 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
                                       MeshData *                 D )
 {
 
-	if ( !dist.mesh().is_distributed() )
-	{
-		return;
-	}
+  if ( !dist.mesh().is_distributed() )
+  {
+    return;
+  }
 
 #if HAVE_MPI
 
-	message( 1, "MPIMeshCommunicator : distribute cells" );
-	tic();
+  message( 1, "MPIMeshCommunicator : distribute cells" );
+  tic();
 
-	Mesh &              mesh    = dist.mesh();
-	uint const          pe_rank = mesh.topology().comm_rank();
-	uint const          pe_size = mesh.topology().comm_size();
-	uint const          tdim    = mesh.topology().dim();
-	uint const          gdim    = mesh.geometry().dim();
-	DistributedData distdata( mesh.topology().comm() );
+  Mesh &              mesh    = dist.mesh();
+  uint const          pe_rank = mesh.topology().comm_rank();
+  uint const          pe_size = mesh.topology().comm_size();
+  uint const          tdim    = mesh.topology().dim();
+  uint const          gdim    = mesh.geometry().dim();
+  DistributedData distdata( mesh.topology().comm() );
+  MPI::Communicator & comm = mesh.topology().comm();
 
-	// Save global number of vertices and cells to check consistency
-	dolfin_assert( mesh.topology().connectivity( 0 ) );
-	dolfin_assert( mesh.topology().distdata()[0].is_finalized() );
-	uint const num_global_vertices = mesh.topology().global_size( 0 );
+  // Save global number of vertices and cells to check consistency
+  dolfin_assert( mesh.topology().connectivity( 0 ) );
+  dolfin_assert( mesh.topology().distdata()[0].is_finalized() );
+  uint const num_global_vertices = mesh.topology().global_size( 0 );
 
-	dolfin_assert( mesh.topology().connectivity( tdim ) );
-	dolfin_assert( mesh.topology().distdata()[tdim].is_finalized() );
-	uint const num_global_cells = mesh.topology().global_size( tdim );
+  dolfin_assert( mesh.topology().connectivity( tdim ) );
+  dolfin_assert( mesh.topology().distdata()[tdim].is_finalized() );
+  uint const num_global_cells = mesh.topology().global_size( tdim );
 
-	if ( mesh.topology().size( tdim ) != dist.size() )
-	{
-		error( "MPIMeshCommunicator : mismatch between number of cells and size of "
-		       "the distribution" );
-	}
+  if ( mesh.topology().size( tdim ) != dist.size() )
+  {
+    error( "MPIMeshCommunicator : mismatch between number of cells and size of "
+           "the distribution" );
+  }
 
   // FIXME remove me
   {
@@ -204,42 +206,33 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
     for ( VertexIterator v( mesh ); !v.end(); ++v )
     {
       v1( v->index() ) = v->global_index();
-
-      // if ( v->is_owned() )
-      //   v1( *v ) += 1;
-
-      // if ( v->is_ghost() )
-      //   v1( *v ) += 2;
-
-      // if ( v->is_shared() )
-      //   v1( *v ) += 4;
     }
 
     File( "before.pvd" ) << v1;
   }
 
-	Array< Array< uint > > send_cells( pe_size );
-	Array< Array< uint > > send_vgindex( pe_size );
-	Array< Array< real > > send_vcoords( pe_size );
+  Array< Array< uint > > send_cells( pe_size );
+  Array< Array< uint > > send_vgindex( pe_size );
+  Array< Array< real > > send_vcoords( pe_size );
 
-	/// Support the same cell and vertex function as before
-	uint const             numRV = D != nullptr ? D->size< real, Vertex >() : 0;
-	Array< Array< real > > RV( ( numRV > 0 ) ? pe_size : 0 );
-	uint const             numUC =
-	  D != nullptr ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
-	Array< Array< uint > > UC( ( numUC > 0 ) ? pe_size : 0 );
+  /// Support the same cell and vertex function as before
+  uint const             numRV = D != nullptr ? D->size< real, Vertex >() : 0;
+  Array< Array< real > > RV( ( numRV > 0 ) ? pe_size : 0 );
+  uint const             numUC =
+    D != nullptr ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
+  Array< Array< uint > > UC( ( numUC > 0 ) ? pe_size : 0 );
 
-	/// Check that only desired data is present in D
-	if ( D != nullptr && ( D->size() != ( numRV + numUC ) ) )
-	{
-		error( "MPIMeshCommunicator : transferring <real, Vertex>, <bool, Cell>, "
-		       "and <uint, Cell> only is supported." );
-	}
+  /// Check that only desired data is present in D
+  if ( D != nullptr && ( D->size() != ( numRV + numUC ) ) )
+  {
+    error( "MPIMeshCommunicator : transferring <real, Vertex>, <bool, Cell>, "
+           "and <uint, Cell> only is supported." );
+  }
 
   // vertex index counter
-  uint vidx = 0;
+  uint local_vindex = 0;
 
-	// Collect mesh entities according to distribution
+  // Collect mesh entities according to distribution
   {
     MeshValues< bool, Vertex > vertex_used( mesh, false );
 
@@ -247,35 +240,41 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
     {
       uint const owner = dist( *c );
 
-      for ( VertexIterator v( *c ); !v.end(); ++v )
+      if ( owner != pe_rank )
       {
-        if ( owner != pe_rank )
+        for ( VertexIterator v( *c ); !v.end(); ++v )
         {
           send_cells[owner].push_back( v->global_index() );
 
-          if ( not v->is_ghost() and not vertex_used( *v ) )
+          if ( not vertex_used( *v ) and v->is_owned() )
           {
             vertex_used( *v ) = true;
             send_vgindex[owner].push_back( v->global_index() );
-            send_vcoords[owner].append( v->x(), v->x() + gdim );
+            for ( uint l = 0; l < gdim; ++l )
+              send_vcoords[owner].push_back( v->x()[l] );
 
             // Transfer vertex functions
             if ( not RV.empty() )
             {
-              for ( MeshData::iterator< real, Vertex > it( *D ); it.valid(); ++it )
+              for ( MeshData::iterator< real, Vertex > it( *D ); it.valid();
+                    ++it )
               {
                 RV[owner].push_back( ( *it )( *v ) );
               }
             }
           }
         }
-        else
+      }
+      else
+      {
+        for ( VertexIterator v( *c ); !v.end(); ++v )
         {
-          if ( not v->is_ghost() and not vertex_used( *v ) )
+          if ( not vertex_used( *v ) and v->is_owned() )
           {
             vertex_used( *v ) = true;
-            send_vcoords[owner].append( v->x(), v->x() + gdim );
-            distdata.set_map( vidx++, v->global_index() );
+            for ( uint l = 0; l < gdim; ++l )
+              send_vcoords[owner].push_back( v->x()[l] );
+            distdata.set_map( local_vindex++, v->global_index() );
           }
         }
       }
@@ -283,393 +282,363 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       // Transfer cell functions
       if ( not UC.empty() )
       {
-    		for ( MeshData::iterator< bool, Cell > it( *D ); it.valid(); ++it )
-    		{
-    			UC[owner].push_back( ( *it )( *c ) );
-    		}
+        for ( MeshData::iterator< bool, Cell > it( *D ); it.valid(); ++it )
+        {
+          UC[owner].push_back( ( *it )( *c ) );
+        }
 
-    		for ( MeshData::iterator< uint, Cell > it( *D ); it.valid(); ++it )
-    		{
-    			UC[owner].push_back( ( *it )( *c ) );
-    		}
-  		}
-  	}
-  }
-
-	// Swap local vertex indices
-	// Array< uint > local_vgindex;
-	// local_vgindex.swap( send_vgindex[pe_rank] );
-  // send_vgindex[pe_rank].resize(0);
-	dolfin_assert( send_vgindex[pe_rank].empty() );
-
-	// Swap local coordinates
-	Array< real > local_vcoords;
-	local_vcoords.swap( send_vcoords[pe_rank] );
-	dolfin_assert( send_vcoords[pe_rank].empty() );
-
-	// Swap local cells
-	Array< uint > local_cells;
-	local_cells.swap( send_cells[pe_rank] );
-  dolfin_assert( send_cells[pe_rank].empty() );
-  dolfin_assert( local_cells.empty() );
-
-	// Exchange the processed entities
-	uint recvmax[2] = {0, 0};
-	for ( uint j = 0; j < pe_size; ++j )
-	{
-		uint sendcnt[2] = { static_cast< uint >( send_cells[j].size() ),
-		                    static_cast< uint >( send_vgindex[j].size() ) };
-		MPI::check_error( MPI_Reduce(
-		  sendcnt, recvmax, 2, MPI_UNSIGNED, MPI_SUM, j, distdata.comm() ) );
-	}
-
-	uint recvmax_x = recvmax[1] * gdim;
-
-	// Resize cell vertices array to fit new cells
-	local_cells.reserve( local_cells.size() + recvmax[0] );
-
-	// Resize vertex indices
-	// local_vgindex.reserve( local_vgindex.size() + recvmax[1] );
-
-	// Resize vertex coordinates
-	local_vcoords.reserve( local_vcoords.size() + recvmax_x );
-
-	// Naive MeshValues exchange until I fix the ghost bug in the template class
-	uint recvmaxUC = recvmax[0] / mesh.type().num_entities( 0 ) * numUC;
-	if ( not UC.empty() )
-	{
-		UC[pe_rank].reserve( UC[pe_rank].size() + recvmaxUC );
-	}
-
-	uint recvmaxRV = recvmax[1] * numRV;
-	// real *recvbufRV = nullptr;
-	if ( not RV.empty() )
-	{
-		RV[pe_rank].reserve( RV[pe_rank].size() + recvmaxRV );
-	}
-
-	// exchange data
-	{
-		Array< uint > recv_cells( recvmax[0] );
-		Array< uint > recv_vgindex( recvmax[1] );
-		Array< real > recv_vcoords( recvmax_x );
-		Array< uint > recv_uc( recvmaxUC );
-		Array< real > recv_rv( recvmaxRV );
-
-		int n_rcv_c = 0;
-		int n_rcv_v = 0;
-		int n_rcv_x = 0;
-
-		for ( uint j = 1; j < pe_size; ++j )
-		{
-			int src = ( pe_rank - j + pe_size ) % pe_size;
-			int dst = ( pe_rank + j ) % pe_size;
-
-			// Cells
-			n_rcv_c += MPI::sendrecv( send_cells[dst].data(),
-			                          send_cells[dst].size(),
-			                          dst,
-			                          recv_cells.data() + n_rcv_c,
-			                          recv_cells.size() - n_rcv_c,
-			                          src,
-			                          0,
-			                          distdata.comm() );
-
-			// Vertices
-			n_rcv_v += MPI::sendrecv( send_vgindex[dst].data(),
-			                          send_vgindex[dst].size(),
-			                          dst,
-			                          recv_vgindex.data() + n_rcv_v,
-			                          recv_vgindex.size() - n_rcv_v,
-			                          src,
-			                          1,
-			                          distdata.comm() );
-
-			// Coordinates
-			n_rcv_x += MPI::sendrecv( send_vcoords[dst].data(),
-			                          send_vcoords[dst].size(),
-			                          dst,
-			                          recv_vcoords.data() + n_rcv_x,
-			                          recv_vcoords.size() - n_rcv_x,
-			                          src,
-			                          2,
-			                          distdata.comm() );
-
-			// Transfer cell functions
-			if ( not UC.empty() )
-			{
-				int n = MPI::sendrecv( UC[dst], dst, recv_uc, src, 3, distdata.comm() );
-				dolfin_assert( recvmaxUC >= ( uint ) n );
-				UC.append( recv_uc.data(), recv_uc.data() + n );
-			}
-
-			// Transfer vertex functions
-			if ( not RV.empty() )
-			{
-				int n = MPI::sendrecv( RV[dst], dst, recv_rv, src, 4, distdata.comm() );
-				dolfin_assert( recvmaxRV >= ( uint ) n );
-				RV.append( recv_rv.data(), recv_rv.data() + n );
-			}
-		}
-
-		dolfin_assert( n_rcv_v * gdim == n_rcv_x );
-
-		// process (received) vertices
-		for ( int i = 0; i < n_rcv_v; ++i )
-		{
-			if ( not distdata.has_global( recv_vgindex[i] ) )
-			{
-				distdata.set_map( vidx++, recv_vgindex[i] );
-				local_vcoords.append( recv_vcoords.data() + i * gdim,
-				                      recv_vcoords.data() + i * gdim + gdim );
-			}
-		}
-
-		// process (recveived) cells
-
-		Array< uint > shared_buffer;
-		// Add old cells
-		for ( CellIterator c( mesh ); !c.end(); ++c )
-		{
-			if ( dist( *c ) == pe_rank )
-			{
-				for ( VertexIterator v( *c ); !v.end(); ++v )
-				{
-					if ( not distdata.has_global( v->global_index() ) )
-					{
-						local_cells.push_back( vidx );
-						local_vcoords.resize( local_vcoords.size() + gdim, 0. );
-            // distdata.set_ghost( vidx );
-						distdata.set_map( vidx++, v->global_index() );
-						shared_buffer.push_back( v->global_index() );
-					}
-					else
-					{
-					  local_cells.push_back( distdata.get_local( v->global_index() ) );
-					}
-				}
-			}
-		}
-
-		// Add new cells
-		for ( int i = 0; i < n_rcv_c; ++i )
-		{
-			if ( distdata.has_global( recv_cells[i] ) )
-			{
-				local_cells.push_back( distdata.get_local( recv_cells[i] ) );
-			}
-			else
-			{
-				local_cells.push_back( vidx );
-				local_vcoords.resize( local_vcoords.size() + gdim, 0. );
-            // distdata.set_ghost( vidx );
-				distdata.set_map( vidx++, recv_cells[i] );
-				shared_buffer.push_back( recv_cells[i] );
-			}
-		}
-
-		// Exchange ghost vertices
-		uint shared_count = 0;
-		int  r1           = 0;
-		int  r2           = 0;
-		MPI::all_reduce< MPI::max >( static_cast< uint >( shared_buffer.size() ),
-		                             shared_count,
-		                             distdata.comm() );
-		Array< uint > shared( shared_count );
-		Array< real > recv_buff( 100 * shared_buffer.size() * gdim ); // FIXME
-		Array< uint > recv_buff_map( 100 * shared_buffer.size() );    // FIXME
-		Array< uint > recv_source;
-		for ( uint j = 1; j < pe_size; ++j )
-		{
-			int src = ( pe_rank - j + pe_size ) % pe_size;
-			int dst = ( pe_rank + j ) % pe_size;
-
-			// Send ghost vertices to request coordinates
-			int recv_count =
-			  MPI::sendrecv( shared_buffer, dst, shared, src, 5, distdata.comm() );
-
-			Array< real > send_buff;
-			Array< uint > send_buff_indices;
-
-			for ( int j = 0; j < recv_count; j++ )
-			{
-				if ( distdata.has_global( shared[j] )
-			       and distdata.is_owned( distdata.get_local( shared[j] ) ) )
-				{
-					real * local = local_vcoords.data() + distdata.get_local( shared[j] ) * gdim;
-					send_buff.append( local, local + gdim );
-					send_buff_indices.push_back( shared[j] );
-
-					// if ( not distdata.is_shared( distdata.get_local( shared[j] ) ) )
-					// {
-					  distdata.set_shared_adj( distdata.get_local( shared[j] ), src );
-					// }
-				}
-			}
-
-			r1 += MPI::sendrecv( send_buff.data(),
-			                     send_buff.size(),
-			                     src,
-			                     recv_buff.data() + r1,
-			                     recv_buff.size() - r1,
-			                     dst,
-			                     6,
-			                     distdata.comm() );
-			int r = MPI::sendrecv( send_buff_indices.data(),
-			                       send_buff_indices.size(),
-			                       src,
-			                       recv_buff_map.data() + r2,
-			                       recv_buff_map.size() - r2,
-			                       dst,
-			                       7,
-			                       distdata.comm() );
-
-			recv_source.resize( recv_source.size() + r, dst );
-			r2 += r;
-		}
-
-		dolfin_assert( r1 == r2 * gdim );
-
-		for ( int i = 0; i < r2; ++i )
-		{
-      if ( not distdata.has_global( recv_buff_map[i] ) )
-      {
-        // distdata.set_map( vidx++, recv_buff_map[i] );
-        uint local = distdata.get_local( recv_buff_map[i] );
-        distdata.set_ghost( local, recv_source[i] );
-        for ( uint j = 0; j < gdim; ++j )
-          local_vcoords[local * gdim + j] = recv_buff[i * gdim + j];
+        for ( MeshData::iterator< uint, Cell > it( *D ); it.valid(); ++it )
+        {
+          UC[owner].push_back( ( *it )( *c ) );
+        }
       }
     }
-	}
+  }
 
-	distdata.remap_shared_adj();
+  // local vertex indices (our own vertex indices should be empty until now)
+  dolfin_assert( send_vgindex[pe_rank].empty() );
 
-  // Array< Array< uint > > ghosts( pe_size );
+  // Swap local coordinates
+  Array< real > local_vcoords;
+  local_vcoords.swap( send_vcoords[pe_rank] );
+  dolfin_assert( send_vcoords[pe_rank].empty() );
 
-  // for ( VertexIterator v( mesh ); !v.end(); ++v )
-  // {
-  //   if ( v->is_ghost() )
-  //   {
-  //     const DistributedData & d = distdata; //mesh.topology().distdata()[0];
-  //     uint owner = d.get_owner( d.get_local( v->global_index() ) );
-  //     ghosts[owner].push_back( v->global_index() );
+  // local cells (our own cells should be empty until now)
+  dolfin_assert( send_cells[pe_rank].empty() );
+  Array< uint > local_cells;
 
-  //     if ( not v->is_shared() )
-  //       std::cout << "[" << pe_rank << "] Meh... " << v->global_index() << std::endl;
-  //   }
-  // }
+  // Exchange the processed entities
+  uint recvmax[2] = {0, 0};
+  for ( uint j = 0; j < pe_size; ++j )
+  {
+    uint sendcnt[2] = { static_cast< uint >( send_cells[j].size() ),
+                        static_cast< uint >( send_vgindex[j].size() ) };
+    MPI::check_error( MPI_Reduce(
+      sendcnt, recvmax, 2, MPI_UNSIGNED, MPI_SUM, j, comm ) );
+  }
+
+  // Resize cell vertices array to fit new cells
+  local_cells.reserve( local_cells.size() + recvmax[0] );
+
+  // Resize vertex coordinates
+  local_vcoords.reserve( local_vcoords.size() + recvmax[1] * gdim );
+
+  // Naive MeshValues exchange until I fix the ghost bug in the template class
+  uint recvmaxUC = recvmax[0] / mesh.type().num_entities( 0 ) * numUC;
+  if ( not UC.empty() )
+  {
+    UC[pe_rank].reserve( UC[pe_rank].size() + recvmaxUC );
+  }
+
+  uint recvmaxRV = recvmax[1] * numRV;
+  // real *recvbufRV = nullptr;
+  if ( not RV.empty() )
+  {
+    RV[pe_rank].reserve( RV[pe_rank].size() + recvmaxRV );
+  }
+
+  // exchange data
+  {
+    Array< uint > recv_cells( recvmax[0] );
+    Array< uint > recv_vgindex( recvmax[1] );
+    Array< real > recv_vcoords( recvmax[1] * gdim );
+    Array< uint > recv_uc( recvmaxUC );
+    Array< real > recv_rv( recvmaxRV );
+
+    int n_rcv_c = 0;
+    int n_rcv_v = 0;
+    int n_rcv_x = 0;
+
+    for ( uint j = 1; j < pe_size; ++j )
+    {
+      int src = ( pe_rank - j + pe_size ) % pe_size;
+      int dst = ( pe_rank + j ) % pe_size;
+
+      // Cells
+      n_rcv_c += MPI::sendrecv( send_cells[dst].data(),
+                                send_cells[dst].size(),
+                                dst,
+                                recv_cells.data() + n_rcv_c,
+                                recv_cells.size() - n_rcv_c,
+                                src,
+                                0,
+                                comm );
+
+      // Vertices
+      n_rcv_v += MPI::sendrecv( send_vgindex[dst].data(),
+                                send_vgindex[dst].size(),
+                                dst,
+                                recv_vgindex.data() + n_rcv_v,
+                                recv_vgindex.size() - n_rcv_v,
+                                src,
+                                1,
+                                comm );
+
+      // Coordinates
+      n_rcv_x += MPI::sendrecv( send_vcoords[dst].data(),
+                                send_vcoords[dst].size(),
+                                dst,
+                                recv_vcoords.data() + n_rcv_x,
+                                recv_vcoords.size() - n_rcv_x,
+                                src,
+                                2,
+                                comm );
+
+      // Transfer cell functions
+      if ( not UC.empty() )
+      {
+        int n = MPI::sendrecv( UC[dst], dst, recv_uc, src, 3, comm );
+        dolfin_assert( recvmaxUC >= ( uint ) n );
+        UC.append( recv_uc.data(), recv_uc.data() + n );
+      }
+
+      // Transfer vertex functions
+      if ( not RV.empty() )
+      {
+        int n = MPI::sendrecv( RV[dst], dst, recv_rv, src, 4, comm );
+        dolfin_assert( recvmaxRV >= ( uint ) n );
+        RV.append( recv_rv.data(), recv_rv.data() + n );
+      }
+    }
+
+    dolfin_assert( n_rcv_v * gdim == n_rcv_x );
+
+    // process (received) vertices
+    for ( int i = 0; i < n_rcv_v; ++i )
+    {
+      if ( not distdata.has_global( recv_vgindex[i] ) )
+      {
+        distdata.set_map( local_vindex++, recv_vgindex[i] );
+        for ( uint l = 0; l < gdim; ++l )
+          local_vcoords.push_back( recv_vcoords[i * gdim + l] );
+      }
+    }
+
+    // process (recveived) cells
+    Array< uint > shared_buffer;
+    // Add old cells
+    for ( CellIterator c( mesh ); !c.end(); ++c )
+    {
+      if ( dist( *c ) == pe_rank )
+      {
+        for ( VertexIterator v( *c ); !v.end(); ++v )
+        {
+          if ( distdata.has_global( v->global_index() ) )
+          {
+            local_cells.push_back( distdata.get_local( v->global_index() ) );
+          }
+          else
+          {
+            local_cells.push_back( local_vindex );
+            for ( uint l = 0; l < gdim; ++l )
+              local_vcoords.push_back( std::numeric_limits<real>::min() );
+            distdata.set_map( local_vindex++, v->global_index() );
+            shared_buffer.push_back( v->global_index() );
+          }
+        }
+      }
+    }
+
+    // Add new cells
+    for ( int i = 0; i < n_rcv_c; ++i )
+    {
+      if ( distdata.has_global( recv_cells[i] ) )
+      {
+        local_cells.push_back( distdata.get_local( recv_cells[i] ) );
+      }
+      else
+      {
+        local_cells.push_back( local_vindex );
+        for ( uint l = 0; l < gdim; ++l )
+          local_vcoords.push_back( std::numeric_limits<real>::min() );
+        distdata.set_map( local_vindex++, recv_cells[i] );
+        shared_buffer.push_back( recv_cells[i] );
+      }
+    }
+
+    // Exchange ghost vertices
+    uint shared_count = 0;
+    MPI::all_reduce< MPI::max >( static_cast< uint >( shared_buffer.size() ),
+                                 shared_count,
+                                 comm );
+    Array< uint > shared( shared_count );
+    Array< real > recv_buff( shared_buffer.size() * gdim );
+    Array< uint > recv_buff_map( shared_buffer.size() );
+
+    for ( uint j = 1; j < pe_size; ++j )
+    {
+      int src = ( pe_rank - j + pe_size ) % pe_size;
+      int dst = ( pe_rank + j ) % pe_size;
+
+      // Send ghost vertices to request coordinates
+      int n_recv = MPI::sendrecv( shared_buffer, dst, shared, src, 5, comm );
+
+      Array< real > send_buff;
+      Array< uint > send_buff_indices;
+
+      for ( int i = 0; i < n_recv; ++i )
+      {
+        if ( distdata.has_global( shared[i] ))
+        {
+          uint local = distdata.get_local( shared[i] );
+
+          if ( not distdata.is_ghost( local ) )
+          {
+            bool valid = true;
+            for ( uint l = 0; l < gdim; ++l )
+              if ( local_vcoords[local * gdim + l] == std::numeric_limits<real>::min() )
+                valid = false;
+
+            if ( valid )
+            {
+              for ( uint l = 0; l < gdim; ++l )
+                send_buff.push_back( local_vcoords[local * gdim + l] );
+
+              send_buff_indices.push_back( shared[i] );
+              distdata.set_shared_adj( local, src );
+            }
+          }
+        }
+      }
+
+      int r1 = MPI::sendrecv( send_buff, src, recv_buff, dst, 6, comm );
+      int r2 = MPI::sendrecv( send_buff_indices, src, recv_buff_map, dst, 7, comm );
+
+      dolfin_assert( r1 == r2 * gdim );
+
+      for ( int i = 0; i < r2; ++i )
+      {
+        if ( distdata.has_global( recv_buff_map[i] ) )
+        {
+          uint local = distdata.get_local( recv_buff_map[i] );
+
+          for ( uint l = 0; l < gdim; ++l )
+              local_vcoords[local * gdim + l] = recv_buff[i * gdim + l];
+
+          distdata.set_ghost( local, dst );
+        }
+      }
+    }
+  }
+
+  distdata.remap_shared_adj();
 
   // Clear mesh using swap with new instance
-  mesh = Mesh( mesh.type(), mesh.space(), distdata.comm() );
+  mesh = Mesh( mesh.type(), mesh.space(), comm );
 
   dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
 
-	// NOTE: This implementation only works for homogeneous topologies
-	//       Check cell data size just in case.
-	if ( ( local_cells.size() % mesh.type().num_entities( 0 ) ) > 0 )
-	{
-		error( "MPIMeshCommunicator : inconsistent size of cell buffer '%u' (%u)",
-		       local_cells.size(), mesh.type().num_entities( 0 ) );
-	}
-	uint cindex = local_cells.size() / mesh.type().num_entities( 0 );
+  // NOTE: This implementation only works for homogeneous topologies
+  //       Check cell data size just in case.
+  if ( ( local_cells.size() % mesh.type().num_entities( 0 ) ) > 0 )
+  {
+    error( "MPIMeshCommunicator : inconsistent size of cell buffer '%u' (%u)",
+           local_cells.size(), mesh.type().num_entities( 0 ) );
+  }
+  uint cindex = local_cells.size() / mesh.type().num_entities( 0 );
 
-	// Finalize distributed data
-	distdata.finalize();
+  distdata.check_ghost(); // FIXME remove me
+  distdata.check_shared(); // FIXME remove me
+  distdata.check_ghost(); // FIXME remove me
 
-	// Update topology
-	dolfin_assert( vidx == distdata.local_size() );
-	mesh.topology().init( 0, vidx );
-	mesh.topology().distdata()[0].swap( distdata );
-	mesh.topology().init( tdim, cindex );
-	mesh.topology()( tdim, 0 ).set( local_cells );
-	mesh.topology().finalize();
-	dolfin_assert( vidx == mesh.topology().distdata()[0].local_size() );
-	if ( num_global_vertices != mesh.topology().global_size( 0 ) )
-	{
-		error( "MPIMeshCommunicator : cell distribution :\n"
-		       "invalid global number of vertices %u != %u",
-		       num_global_vertices,
-		       mesh.topology().global_size( 0 ) );
-	}
-	if ( num_global_cells != mesh.topology().global_size( tdim ) )
-	{
-		error( "MPIMeshCommunicator : cell distribution :\n"
-		       "invalid global number of cells %u != %u",
-		       num_global_cells,
-		       mesh.topology().global_size( tdim ) );
-	}
+  // Finalize distributed data
+  distdata.finalize();
 
-	// Update geometry
-	dolfin_assert( vidx * gdim == local_vcoords.size() );
-	mesh.geometry().assign( local_vcoords );
-	mesh.geometry().finalize();
+  // Update topology
+  dolfin_assert( local_vindex == distdata.local_size() );
+  mesh.topology().init( 0, local_vindex );
+  mesh.topology().distdata()[0].swap( distdata );
+  mesh.topology().init( tdim, cindex );
+  mesh.topology()( tdim, 0 ).set( local_cells );
+  mesh.topology().finalize();
+  dolfin_assert( local_vindex == mesh.topology().distdata()[0].local_size() );
+  if ( num_global_vertices != mesh.topology().global_size( 0 ) )
+  {
+    error( "MPIMeshCommunicator : cell distribution :\n"
+           "invalid global number of vertices %u != %u",
+           num_global_vertices,
+           mesh.topology().global_size( 0 ) );
+  }
+  if ( num_global_cells != mesh.topology().global_size( tdim ) )
+  {
+    error( "MPIMeshCommunicator : cell distribution :\n"
+           "invalid global number of cells %u != %u",
+           num_global_cells,
+           mesh.topology().global_size( tdim ) );
+  }
 
-	{
-		MeshValues< uint, Vertex > v1( mesh, 0 );
+  // Update geometry
+  dolfin_assert( local_vindex * gdim == local_vcoords.size() );
+  mesh.geometry().assign( local_vcoords );
+  mesh.geometry().finalize();
 
-		for ( VertexIterator v( mesh ); !v.end(); ++v )
-		{
-			v1( v->index() ) = v->global_index();
-		}
+  mesh.init(); // FIXME is this really needed?!
 
-		File( "after.pvd" ) << v1;
-	}
+  {
+    MeshValues< uint, Vertex > v1( mesh, 0 );
 
-	// Recreate mesh functions
-	if ( not UC.empty() )
-	{
-		Array< uint > & mUC( UC[pe_rank] );
+    for ( VertexIterator v( mesh ); !v.end(); ++v )
+    {
+      v1( v->index() ) = v->global_index();
+    }
 
-		uint ii = 0;
-		for ( MeshData::iterator< bool, Cell > it( *D ); it.valid(); ++it, ++ii )
-		{
-			MeshValues< bool, Cell > M( mesh );
-			uint const               nUC = mUC.size();
-			dolfin_assert( nUC == M.size() * numUC );
-			for ( uint j = ii, k = 0; j < nUC; j += numUC, ++k )
-			{
-				M( k ) = mUC[j];
-			}
-			it->swap( M );
-		}
-		for ( MeshData::iterator< uint, Cell > it( *D ); it.valid(); ++it, ++ii )
-		{
-			MeshValues< uint, Cell > M( mesh );
-			uint const               nUC = mUC.size();
-			dolfin_assert( nUC == M.size() * numUC );
-			for ( uint j = ii, k = 0; j < nUC; j += numUC, ++k )
-			{
-				M( k ) = mUC[j];
-			}
-			it->swap( M );
-		}
-	}
+    File( "after.pvd" ) << v1;
+  }
 
-	if ( not RV.empty() )
-	{
-		Array< real > & mRV( RV[pe_rank] );
+  // Recreate mesh functions
+  if ( not UC.empty() )
+  {
+    Array< uint > & mUC( UC[pe_rank] );
 
-		uint ii = 0;
-		for ( MeshData::iterator< real, Vertex > it( *D ); it.valid(); ++it, ++ii )
-		{
-			MeshValues< real, Vertex > M( mesh );
-			uint const                 nRV = mRV.size();
-			dolfin_assert( nRV
-			               == ( M.size() - mesh.distdata()[0].num_ghost() ) * numRV );
-			for ( uint j = ii, k = 0; j < nRV; j += numRV, ++k )
-			{
-				M( k ) = mRV[j];
-			}
-			it->swap( M );
-		}
-	}
+    uint ii = 0;
+    for ( MeshData::iterator< bool, Cell > it( *D ); it.valid(); ++it, ++ii )
+    {
+      MeshValues< bool, Cell > M( mesh );
+      uint const               nUC = mUC.size();
+      dolfin_assert( nUC == M.size() * numUC );
+      for ( uint j = ii, k = 0; j < nUC; j += numUC, ++k )
+      {
+        M( k ) = mUC[j];
+      }
+      it->swap( M );
+    }
+    for ( MeshData::iterator< uint, Cell > it( *D ); it.valid(); ++it, ++ii )
+    {
+      MeshValues< uint, Cell > M( mesh );
+      uint const               nUC = mUC.size();
+      dolfin_assert( nUC == M.size() * numUC );
+      for ( uint j = ii, k = 0; j < nUC; j += numUC, ++k )
+      {
+        M( k ) = mUC[j];
+      }
+      it->swap( M );
+    }
+  }
 
-	//
-	tocd( 1 );
+  if ( not RV.empty() )
+  {
+    Array< real > & mRV( RV[pe_rank] );
+
+    uint ii = 0;
+    for ( MeshData::iterator< real, Vertex > it( *D ); it.valid(); ++it, ++ii )
+    {
+      MeshValues< real, Vertex > M( mesh );
+      uint const                 nRV = mRV.size();
+      dolfin_assert( nRV
+                     == ( M.size() - mesh.distdata()[0].num_ghost() ) * numRV );
+      for ( uint j = ii, k = 0; j < nRV; j += numRV, ++k )
+      {
+        M( k ) = mRV[j];
+      }
+      it->swap( M );
+    }
+  }
+
+  //
+  tocd( 1 );
 
 #else
-	MAYBE_UNUSED( D );
+  MAYBE_UNUSED( D );
 #endif /* HAVE_MPI */
 }
 //-----------------------------------------------------------------------------

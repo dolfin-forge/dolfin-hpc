@@ -118,6 +118,8 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   uint * x_rows[maxvecsize];
   uint x_m[maxvecsize];
 
+  Array<Function *> coarse;
+
   for (Array<Function *>::const_iterator it = functions.begin();
       it != functions.end(); ++it)
   {
@@ -131,7 +133,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
       continue;
     }
 
-    Array<Function *> coarse = FunctionDecomposition::compute(func_to_project);
+    coarse = FunctionDecomposition::compute(func_to_project);
 
     for (uint i = 0; i < num_sub; ++i)
     {
@@ -139,11 +141,12 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
                                             &x_rows[i], x_m[i], partitions);
     }
 
-    while (!coarse.empty())
-    {
-      delete coarse.back();
-      coarse.pop_back();
-    }
+    // FIXME
+    // while (!coarse.empty())
+    // {
+    //   delete coarse.back();
+    //   coarse.pop_back();
+    // }
   }
 
   MeshData D(mesh);
@@ -176,7 +179,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     // FIXME: Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
-      FiniteElementSpace subspace(space, i);
+      FiniteElementSpace subspace(coarse[i]->space());
       post.push_back(new Function(subspace));
 
       post.back()->vector().set(x_values[i], x_m[i], x_rows[i]);
@@ -209,7 +212,19 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     p_file << proj.vector();
   }
 
-  swap( mesh, new_mesh );
+  // FIXME
+	for ( Array< Function * >::const_iterator it = functions.begin();
+	      it != functions.end();
+	      ++it )
+	{
+		while ( !coarse.empty() )
+		{
+			delete coarse.back();
+			coarse.pop_back();
+		}
+	}
+
+	swap( mesh, new_mesh );
   mesh.topology().renumber();
   LoadBalancer::clear(mesh);
 }

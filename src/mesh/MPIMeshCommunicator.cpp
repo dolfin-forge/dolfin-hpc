@@ -83,7 +83,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   // Clear mesh using swap with new instance
   {
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
-    mesh.swap( new_mesh );
+    swap( mesh, new_mesh );
   }
   dolfin_assert(mesh.topology().connectivity(0) == nullptr);
   dolfin_assert(mesh.topology().connectivity(tdim) == nullptr);
@@ -140,7 +140,7 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
   // Update topology
   dolfin_assert(local_vgindex.size() == distdata.local_size());
   mesh.topology().init(0 , distdata.local_size());
-  mesh.topology().distdata()[0].swap( distdata );
+  swap( mesh.topology().distdata()[0], distdata );
   mesh.topology().finalize();
   dolfin_assert(local_vgindex.size() == mesh.topology().distdata()[0].local_size());
   if(num_global_vertices != mesh.topology().global_size(0))
@@ -547,7 +547,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   // Update topology
   dolfin_assert( local_vindex == distdata.local_size() );
   mesh.topology().init( 0, local_vindex );
-  mesh.topology().distdata()[0].swap( distdata );
+  swap( mesh.topology().distdata()[0], distdata );
   mesh.topology().init( tdim, cindex );
   mesh.topology()( tdim, 0 ).set( local_cells );
   mesh.topology().finalize();
@@ -572,7 +572,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   mesh.geometry().assign( local_vcoords );
   mesh.geometry().finalize();
 
-  mesh.init(); // FIXME is this really needed?!
+  // mesh.init(); // FIXME is this really needed?!
 
   {
     MeshValues< uint, Vertex > v1( mesh, 0 );
@@ -600,7 +600,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         M( k ) = mUC[j];
       }
-      it->swap( M );
+      swap( *it, M );
     }
     for ( MeshData::iterator< uint, Cell > it( *D ); it.valid(); ++it, ++ii )
     {
@@ -611,7 +611,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         M( k ) = mUC[j];
       }
-      it->swap( M );
+      swap( *it, M );
     }
   }
 
@@ -630,7 +630,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         M( k ) = mRV[j];
       }
-      it->swap( M );
+      swap( *it, M );
     }
   }
 

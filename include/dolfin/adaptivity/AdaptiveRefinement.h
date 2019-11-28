@@ -15,7 +15,6 @@ namespace dolfin
 template<class T> class Array;
 class Function;
 class Mesh;
-class Function;
 class Vector;
 
 class AdaptiveRefinement

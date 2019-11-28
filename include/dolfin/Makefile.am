@@ -1,29 +1,29 @@
 include_HEADERS = dolfin.h
 
 nobase_pkginclude_HEADERS = \
-				adaptivity/dolfin_adaptivity.h\
 				adaptivity/AdaptiveRefinement.h\
-				config/dolfin_config.h\
-				common/assert.h\
-				common/constants.h\
-				common/dolfin_common.h\
-				common/byteswap.h\
-				common/maybe_unused.h\
-				common/system.h\
-				common/timing.h\
-				common/types.h\
-				common/Array.h\
+				adaptivity/dolfin_adaptivity.h\
 				common/AdjacentMapping.h\
+				common/Array.h\
+				common/assert.h\
+				common/byteswap.h\
 				common/Check.h\
 				common/Clonable.h\
-				common/DistributedData.h\
+				common/constants.h\
 				common/Distributed.h\
+				common/DistributedData.h\
+				common/dolfin_common.h\
 				common/Label.h\
 				common/List.h\
+				common/maybe_unused.h\
+				common/system.h\
 				common/Test.h\
-				common/Tokenized.h\
 				common/Timer.h\
+				common/timing.h\
+				common/Tokenized.h\
+				common/types.h\
 				common/Variable.h\
+				config/dolfin_config.h\
 				elements/dolfin_elements.h\
 				elements/ElementLibrary.h\
 				elements/Elements.h\
@@ -32,7 +32,6 @@ nobase_pkginclude_HEADERS = \
 				evolution/TimeDependent.h\
 				evolution/TimeSeries.h\
 				evolution/TimeStepping.h\
-				fem/dolfin_fem.h\
 				fem/Assembler.h\
 				fem/BilinearForm.h\
 				fem/BoundaryCondition.h\
@@ -45,6 +44,7 @@ nobase_pkginclude_HEADERS = \
 				fem/DofMapCache.h\
 				fem/DofMapSet.h\
 				fem/DofNumbering.h\
+				fem/dolfin_fem.h\
 				fem/Equation.h\
 				fem/FiniteElement.h\
 				fem/FiniteElementSpace.h\
@@ -53,6 +53,14 @@ nobase_pkginclude_HEADERS = \
 				fem/FunctionSpaceMap.h\
 				fem/LinearForm.h\
 				fem/NodeNormal.h\
+				fem/numbering/CG1s.h\
+				fem/numbering/CG1v.h\
+				fem/numbering/DG0s.h\
+				fem/numbering/DG0v.h\
+				fem/numbering/Parallel0.h\
+				fem/numbering/Parallel1.h\
+				fem/numbering/RealSpace.h\
+				fem/numbering/Serial.h\
 				fem/PeriodicBC.h\
 				fem/PeriodicDofsMapping.h\
 				fem/ScratchSpace.h\
@@ -68,23 +76,16 @@ nobase_pkginclude_HEADERS = \
 				fem/UFCExpression.h\
 				fem/UFCHalo.h\
 				fem/UFCMesh.h\
-				fem/numbering/CG1s.h\
-				fem/numbering/CG1v.h\
-				fem/numbering/DG0s.h\
-				fem/numbering/DG0v.h\
-				fem/numbering/Parallel0.h\
-				fem/numbering/Parallel1.h\
-				fem/numbering/RealSpace.h\
-				fem/numbering/Serial.h\
-				function/dolfin_function.h\
 				function/Analytic.h\
 				function/Constant.h\
+				function/dolfin_function.h\
 				function/Expression.h\
 				function/Field.h\
 				function/Function.h\
 				function/FunctionDecomposition.h\
 				function/FunctionInterpolation.h\
 				function/GenericFunction.h\
+				function/impl/ops.h\
 				function/Operators.h\
 				function/Real.h\
 				function/SpaceTimeFunction.h\
@@ -92,11 +93,13 @@ nobase_pkginclude_HEADERS = \
 				function/UFCFunction.h\
 				function/Value.h\
 				function/ValueSpace.h\
-				function/impl/ops.h\
+				insitu/dolfin_insitu.h\
+				insitu/libsimInterface.h\
+				insitu/libsimPipeline.h\
 				io/base64.h\
-				io/dolfin_io.h\
 				io/BinaryFile.h\
 				io/Checkpoint.h\
+				io/dolfin_io.h\
 				io/Encoder.h\
 				io/File.h\
 				io/GenericFile.h\
@@ -105,13 +108,11 @@ nobase_pkginclude_HEADERS = \
 				io/VTKFile.h\
 				io/XMLFile.h\
 				io/XMLMesh.h\
+				io/XMLMeshFunction.h\
 				io/XMLObject.h\
-				insitu/dolfin_insitu.h\
-				insitu/libsimPipeline.h\
-				insitu/libsimInterface.h\
-				la/dolfin_la.h\
 				la/AMGSolver.h\
 				la/DefaultFactory.h\
+				la/dolfin_la.h\
 				la/GenericMatrix.h\
 				la/GenericSparsityPattern.h\
 				la/GenericTensor.h\
@@ -122,10 +123,10 @@ nobase_pkginclude_HEADERS = \
 				la/JANPACKMat.h\
 				la/JANPACKVec.h\
 				la/KrylovSolver.h\
-				la/LinearAlgebraFactory.h\
-				la/LinearSolver.h\
 				la/LAPACKMatrix.h\
 				la/LAPACKVector.h\
+				la/LinearAlgebraFactory.h\
+				la/LinearSolver.h\
 				la/LUSolver.h\
 				la/Matrix.h\
 				la/MultigridScheme.h\
@@ -146,9 +147,9 @@ nobase_pkginclude_HEADERS = \
 				log/dolfin_log.h\
 				log/log.h\
 				log/LogStream.h\
+				main/alarm.h\
 				main/dolfin_doc.h\
 				main/dolfin_main.h\
-				main/alarm.h\
 				main/init.h\
 				main/MPI.h\
 				main/MPI_Datatypes.h\
@@ -156,17 +157,17 @@ nobase_pkginclude_HEADERS = \
 				main/Startup.h\
 				main/SubSystemsManager.h\
 				math/basic.h\
-				math/dolfin_math.h\
 				math/Chebyshev1.h\
 				math/Chebyshev2.h\
+				math/dolfin_math.h\
 				math/Jacobi.h\
 				math/Lagrange.h\
 				math/Legendre.h\
 				math/LinearDistribution.h\
 				math/PKDO.h\
-				mesh/dolfin_mesh.h\
-				mesh/algorithm.h \
 				mesh/AffineMapping.h \
+				mesh/ALE.h\
+				mesh/algorithm.h \
 				mesh/BarycentricPoint.h\
 				mesh/BoundaryMesh.h\
 				mesh/BoundingBox.h\
@@ -174,7 +175,9 @@ nobase_pkginclude_HEADERS = \
 				mesh/Cell.h\
 				mesh/CellType.h\
 				mesh/CellTypes.h\
+				mesh/Connectivity.h\
 				mesh/DMesh.h\
+				mesh/dolfin_mesh.h\
 				mesh/DomainBoundary.h\
 				mesh/Edge.h\
 				mesh/EdgeKey.h\
@@ -190,10 +193,9 @@ nobase_pkginclude_HEADERS = \
 				mesh/IntersectionDetector.h\
 				mesh/IntervalCell.h\
 				mesh/LoadBalancer.h\
-				mesh/Mapping.h \
 				mesh/MappedManifold.h \
+				mesh/Mapping.h \
 				mesh/Mesh.h\
-				mesh/Connectivity.h\
 				mesh/MeshData.h\
 				mesh/MeshDependent.h\
 				mesh/MeshDistributedData.h\
@@ -202,15 +204,16 @@ nobase_pkginclude_HEADERS = \
 				mesh/MeshEntityIterator.h\
 				mesh/MeshFunction.h\
 				mesh/MeshGeometry.h\
-				mesh/MetisInterface.h\
-				mesh/ZoltanInterface.h\
+				mesh/MeshOrdering.h\
 				mesh/MeshPartition.h\
 				mesh/MeshQuality.h\
 				mesh/MeshQualityFunction.h\
 				mesh/MeshRenumber.h\
 				mesh/MeshSmoother.h\
+				mesh/MeshSmoothing.h\
 				mesh/MeshTopology.h\
 				mesh/MeshValues.h\
+				mesh/MetisInterface.h\
 				mesh/MPIMeshCommunicator.h\
 				mesh/PeriodicSubDomain.h\
 				mesh/Point.h\
@@ -223,8 +226,8 @@ nobase_pkginclude_HEADERS = \
 				mesh/rounding.h\
 				mesh/Simplex.h \
 				mesh/Space.h \
-				mesh/SubDomain.h\
 				mesh/StructuredGrid.h\
+				mesh/SubDomain.h\
 				mesh/TetrahedronCell.h\
 				mesh/TriangleCell.h\
 				mesh/UniformRefinement.h\
@@ -235,8 +238,9 @@ nobase_pkginclude_HEADERS = \
 				mesh/UnitSquare.h\
 				mesh/Vertex.h\
 				mesh/VertexNormal.h\
-				parameter/dolfin_parameter.h\
+				mesh/ZoltanInterface.h\
 				parameter/DefaultParameters.h\
+				parameter/dolfin_parameter.h\
 				parameter/Parameter.h\
 				parameter/ParameterList.h\
 				parameter/parameters.h\
@@ -254,13 +258,10 @@ nobase_pkginclude_HEADERS = \
 				quadrature/RadauQuadrature.h\
 				quadrature/UFCReferenceCell.h\
 				ufl/dolfin_ufl.h\
-				ufl/UFLarray.h\
-				ufl/UFLdict.h\
-				ufl/UFLrepr.h\
 				ufl/UFL_tuple.h\
-				ufl/UFLtype.h\
 				ufl/UFLAlgebra.h\
 				ufl/UFLArgument.h\
+				ufl/UFLarray.h\
 				ufl/UFLCell.h\
 				ufl/UFLCellSurfaceArea.h\
 				ufl/UFLCellVolume.h\
@@ -269,6 +270,7 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLCoefficient.h\
 				ufl/UFLConditional.h\
 				ufl/UFLData.h\
+				ufl/UFLdict.h\
 				ufl/UFLDifferentiation.h\
 				ufl/UFLDomain.h\
 				ufl/UFLElementList.h\
@@ -291,12 +293,14 @@ nobase_pkginclude_HEADERS = \
 				ufl/UFLMixedElement.h\
 				ufl/UFLObject.h\
 				ufl/UFLQuadratureScheme.h\
+				ufl/UFLrepr.h\
 				ufl/UFLRestrictedElement.h\
 				ufl/UFLSpace.h\
 				ufl/UFLSpatialCoordinate.h\
 				ufl/UFLTensorElement.h\
 				ufl/UFLTensors.h\
 				ufl/UFLTuple.h\
+				ufl/UFLtype.h\
 				ufl/UFLValueArray.h\
 				ufl/UFLVariable.h\
 				ufl/UFLVectorElement.h

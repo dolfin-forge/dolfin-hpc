@@ -30,8 +30,7 @@ public:
               petsc     = 2,
               petscmpi  = 4,
               janpack   = 8,
-              zoltan    = 16,
-              slepc     = 32 };
+              zoltan    = 16 };
 
   //-------------------------------------------------------------------------
   static int start(int argc = 0, char* argv[] = NULL, uint n = 0, long w_limit = 0)
@@ -109,12 +108,6 @@ public:
 
     ///
     static int sema;
-  };
-
-  //-------------------------------------------------------------------------
-  struct SLEPc
-  {
-    static SubSystemsManager::Type const flag = slepc;
   };
 
   //-------------------------------------------------------------------------

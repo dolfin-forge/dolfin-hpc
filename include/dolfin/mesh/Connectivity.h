@@ -130,9 +130,6 @@ public:
 
 private:
 
-  /// Create empty connectivity (Disabled)
-  Connectivity();
-
   /// Number of entities
   uint order_;
 

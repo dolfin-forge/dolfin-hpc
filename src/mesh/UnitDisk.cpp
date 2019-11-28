@@ -10,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
-    Mesh()
+    Mesh(*CellType::create(CellType::triangle), EuclideanSpace(2))
 {
   warning("UnitDisk is Experimental: It may be of poor quality.");
 
@@ -22,7 +22,7 @@ UnitDisk::UnitDisk(uint nx, Type type, Transformation transformation) :
   rename("mesh", "Mesh of the unit square (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::triangle, 2);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices and cells:
   if (type == crisscross)

@@ -2,40 +2,42 @@ AM_CPPFLAGS = -I@top_srcdir@/include
 noinst_LTLIBRARIES = libdolfin_mesh.la
 libdolfin_mesh_la_SOURCES = \
 			AffineMapping.cpp\
+			ALE.cpp\
 			BoundaryMesh.cpp\
 			Box.cpp\
 			Cell.cpp\
 			CellType.cpp\
+			Connectivity.cpp\
 			DMesh.cpp\
 			Edge.cpp\
 			EquiAffineMapping.cpp\
 			EuclideanBasis.cpp\
 			Face.cpp\
 			Facet.cpp\
-			GTSInterface.cpp\
 			GeometricPredicates.cpp\
+			GTSInterface.cpp\
 			HexahedronCell.cpp\
 			IntersectionDetector.cpp\
 			IntervalCell.cpp\
 			LoadBalancer.cpp\
-			MPIMeshCommunicator.cpp\
 			MappedManifold.cpp\
 			Mesh.cpp\
-			Connectivity.cpp\
 			MeshDependent.cpp\
 			MeshDistributedData.cpp\
 			MeshEditor.cpp\
 			MeshEntity.cpp\
 			MeshEntityIterator.cpp\
 			MeshGeometry.cpp\
+			MeshOrdering.cpp\
+			MeshPartition.cpp\
 			MeshQuality.cpp\
 			MeshQualityFunction.cpp\
-			MetisInterface.cpp\
-			ZoltanInterface.cpp\
-			MeshPartition.cpp\
 			MeshRenumber.cpp\
 			MeshSmoother.cpp\
+			MeshSmoothing.cpp\
 			MeshTopology.cpp\
+			MetisInterface.cpp\
+			MPIMeshCommunicator.cpp\
 			Point.cpp\
 			PointCell.cpp\
 			QuadrilateralCell.cpp\
@@ -52,8 +54,9 @@ libdolfin_mesh_la_SOURCES = \
 			UnitInterval.cpp\
 			UnitSphere.cpp\
 			UnitSquare.cpp\
+			Vertex.cpp\
 			VertexNormal.cpp\
-			Vertex.cpp
+			ZoltanInterface.cpp
 
 
 

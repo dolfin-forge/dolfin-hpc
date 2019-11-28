@@ -21,73 +21,75 @@
 // of degree q (tau, sigma) and DG (discontinuous Galerkin)
 // elements of degree q - 1 for (w, u).
 
-
-//DOES NOT WORK YET!!!
-//FIXME: add support for ufl mixed elements
-
-#include <dolfin/common/constants.h>
-#include <dolfin/fem/DirichletBC.h>
-#include <dolfin/function/Expression.h>
-#include <dolfin/function/Function.h>
-#include <dolfin/mesh/UnitSquare.h>
-#include <dolfin/pde/LinearPDE.h>
+// DOES NOT WORK YET!!!
+// FIXME: add support for ufl mixed elements
 
 #include "MixedPoisson.h"
 #include "P1Projection.h"
 
+#include <dolfin.h>
+
 using namespace dolfin;
+
+// Source term
+struct Source : public Value<Source,1>
+{
+  void eval( real * value, const real * x ) const
+  {
+    real dx  = x[0] - 0.5;
+    real dy  = x[1] - 0.5;
+    value[0] = 500.0 * exp( -( dx * dx + dy * dy ) / 0.02 );
+  }
+};
 
 int main()
 {
-  // Source term
-  class Source : public ScalarExpression
-  {
-  public:
-    
-    Source() : ScalarExpression() {}
+	// Create mesh and source term
+	UnitSquare mesh( 16, 16 );
+  Analytic<Source>  f(mesh);
 
-    void eval(real * value, const real* x) const
-    {
-      real dx = x[0] - 0.5;
-      real dy = x[1] - 0.5;
-      value[0] = 500.0*exp(-(dx*dx + dy*dy)/0.02);
-    }
-  };
+	// Solve PDE
+    MixedPoisson::BilinearForm a( mesh );
+    MixedPoisson::LinearForm   L( mesh, f );
 
-  // Create mesh and source term
-  UnitSquare mesh(16, 16);
-  Source source;
-  Function f(mesh, source);
-  
-  // Define PDE
-  MixedPoissonBilinearForm a(mesh);
-  MixedPoissonLinearForm L(f);
-  LinearPDE pde(a, L, mesh);
+    // Solve PDE
+    Matrix A;
+    Vector b;
 
-  // Solve PDE
-  Function sigma(mesh);
-  Function u(mesh);
-  pde.solve(sigma, u);
+    a.assemble(A, true);
+    L.assemble(b, true);
 
-  // Project sigma onto P1 continuous Lagrange for post-processing
-  Function sigma_projected(mesh);
-  P1ProjectionBilinearForm a_projection(mesh);
-  P1ProjectionLinearForm L_projection(sigma);
-  LinearPDE pde_project(a_projection, L_projection, mesh);
-  pde_project.solve(sigma_projected);
+    Function sigma(a.trial_space());
+    KrylovSolver solver(bicgstab, bjacobi);
 
+    solver.solve(A, sigma.vector(), b);
+    sigma.sync();
 
-  // Save solution to file
-  File f0("sigma.xml");
-  File f1("u.xml");
-  f0 << sigma;
-  f1 << u;
+    // Function u( u[0] );
+    // Function sigma( u[1] );
 
-  // Save solution to pvd format
-  File f3("sigma.pvd");
-  File f4("u.pvd");
-  f3 << sigma_projected;
-  f4 << u;
+    // Save solution to file
+    File( "sigma.pvd" ) << sigma;
 
-  return 0;
+	// Project sigma onto P1 continuous Lagrange for post-processing
+    P1Projection::BilinearForm a_projection( mesh );
+    P1Projection::LinearForm   L_projection( mesh, sigma );
+
+    // Solve PDE
+    Matrix A_proj;
+    Vector b_proj;
+
+    a_projection.assemble(A_proj, true);
+    L_projection.assemble(b_proj, true);
+
+    Function sigma_projected(a_projection.trial_space());
+    KrylovSolver solver_proj(bicgstab, bjacobi);
+
+    solver_proj.solve(A_proj, sigma_projected.vector(), b_proj);
+    sigma_projected.sync();
+
+    // Save solution to file
+    File( "sigma_projected.pvd" ) << sigma_projected;
+
+	return 0;
 }

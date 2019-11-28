@@ -37,6 +37,9 @@ namespace dolfin
  *            - real : 0.0
  */
 
+template<typename T>
+class XMLMeshFunction;
+
 template<class T>
 class MeshFunction
 {
@@ -94,10 +97,19 @@ public:
 
   /// Required for assignment operator
   friend class MeshFunction<bool>;
+  friend class XMLMeshFunction<bool>;
+
   friend class MeshFunction<int>;
+  friend class XMLMeshFunction<int>;
+
   friend class MeshFunction<uint>;
+  friend class XMLMeshFunction<uint>;
+
   friend class MeshFunction<float>;
+  friend class XMLMeshFunction<float>;
+
   friend class MeshFunction<real>;
+  friend class XMLMeshFunction<real>;
 
   /// Assignment conversion operator
   template <class V>
@@ -241,16 +253,15 @@ public:
   }
 
   /// Swap instances
-  void swap(MeshFunction<T>& other)
+  friend void swap( MeshFunction<T>& a, MeshFunction<T>& b )
   {
-    if (this != &other)
-    {
-      std::swap(mesh_   , other.mesh_);
-      std::swap(dim_    , other.dim_);
-      std::swap(size_   , other.size_);
-      std::swap(values_ , other.values_);
-    }
-  }
+    using std::swap;
+
+		swap( a.mesh_,   b.mesh_   );
+		swap( a.dim_,    b.dim_    );
+		swap( a.size_,   b.size_   );
+		swap( a.values_, b.values_ );
+	}
 
   /// Display mesh function data
   void disp() const

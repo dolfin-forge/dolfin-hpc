@@ -4,8 +4,10 @@
 #ifndef __DOLFIN_FACET_H
 #define __DOLFIN_FACET_H
 
-#include "MeshEntity.h"
-#include "MeshEntityIterator.h"
+#include <dolfin/common/DistributedData.h>
+#include <dolfin/mesh/Mesh.h>
+#include <dolfin/mesh/MeshEntity.h>
+#include <dolfin/mesh/MeshEntityIterator.h>
 
 namespace dolfin
 {
@@ -56,7 +58,7 @@ public:
 class FacetIterator : public MeshEntityIterator
 {
 public:
-  
+
   FacetIterator(Mesh& mesh) : MeshEntityIterator(mesh, mesh.type().facet_dim()) {}
   FacetIterator(MeshEntity& entity) : MeshEntityIterator(entity, entity.mesh().type().facet_dim()) {}
 

@@ -5,6 +5,7 @@
 
 #include <dolfin/io/File.h>
 #include <dolfin/main/PE.h>
+#include <dolfin/mesh/ALE.h>
 #include <dolfin/mesh/BoundaryMesh.h>
 #include <dolfin/mesh/IntersectionDetector.h>
 #include <dolfin/mesh/MappedManifold.h>
@@ -25,22 +26,22 @@ namespace dolfin
 #define DOLFIN_DEFAULT_MESH_LABEL "DOLFIN mesh"
 
 //-----------------------------------------------------------------------------
-Mesh::Mesh() :
-    Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(NULL),
-    geometry_(NULL),
-    exterior_boundary_(NULL),
-    interior_boundary_(NULL),
-    intersection_detector_(NULL),
-    timestamp_(time(0))
-{
-  // Do nothing
-}
+// Mesh::Mesh() :
+//     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
+//     topology_(NULL),
+//     geometry_(NULL),
+//     exterior_boundary_(NULL),
+//     interior_boundary_(NULL),
+//     intersection_detector_(NULL),
+//     timestamp_(time(0))
+// {
+//   // Do nothing
+// }
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(new MeshTopology(ctype, DOLFIN_COMM_SELF, !this->reordering())),
-    geometry_(new MeshGeometry(space)),
+    topology_(ctype, DOLFIN_COMM_SELF, !this->reordering()),
+    geometry_(space),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -50,8 +51,8 @@ Mesh::Mesh(CellType const& ctype, Space const& space) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(new MeshTopology(ctype, comm, !this->reordering())),
-    geometry_(new MeshGeometry(space)),
+    topology_(ctype, comm, !this->reordering()),
+    geometry_(space),
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -61,8 +62,8 @@ Mesh::Mesh(CellType const& ctype, Space const& space, Comm& comm) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(Mesh const& other) :
     Variable(other.name(), other.label()),
-    topology_(cloneptr(other.topology_)),
-    geometry_(cloneptr(other.geometry_)),
+    topology_(other.topology_),
+    geometry_(other.geometry_),
     exterior_boundary_(copyptr(other.exterior_boundary_)),
     interior_boundary_(copyptr(other.interior_boundary_)),
     intersection_detector_(copyptr(other.intersection_detector_)),
@@ -77,8 +78,8 @@ Mesh::Mesh(Mesh const& other) :
 //-----------------------------------------------------------------------------
 Mesh::Mesh(std::string const& filename) :
     Variable(DOLFIN_DEFAULT_MESH_NAME, DOLFIN_DEFAULT_MESH_LABEL),
-    topology_(NULL),
-    geometry_(NULL),
+    topology_(*CellType::create(CellType::tetrahedron), DOLFIN_COMM,!this->reordering()), // temporary
+    geometry_(EuclideanSpace(3)), // temporary
     exterior_boundary_(NULL),
     interior_boundary_(NULL),
     intersection_detector_(NULL),
@@ -92,12 +93,6 @@ Mesh::Mesh(std::string const& filename) :
 Mesh::~Mesh()
 {
   timestamp_ = 0;
-
-  delete topology_;
-  topology_ = NULL;
-
-  delete geometry_;
-  geometry_ = NULL;
 
   delete exterior_boundary_;
   exterior_boundary_ = NULL;
@@ -113,35 +108,34 @@ Mesh::~Mesh()
   periodic_mappings_.clear();
 }
 //-----------------------------------------------------------------------------
-void Mesh::swap(Mesh& other)
+void swap( Mesh& a, Mesh& b )
 {
-  if ( this != &other )
-  {
-    std::swap(topology_             , other.topology_);
-    std::swap(geometry_             , other.geometry_);
-    std::swap(exterior_boundary_    , other.exterior_boundary_);
-    std::swap(interior_boundary_    , other.interior_boundary_);
-    std::swap(intersection_detector_, other.intersection_detector_);
-    std::swap(periodic_mappings_    , other.periodic_mappings_);
-    std::swap(timestamp_            , other.timestamp_);
-  }
+  using std::swap;
+
+  swap( a.topology_,              b.topology_              );
+  swap( a.geometry_,              b.geometry_              );
+  swap( a.exterior_boundary_,     b.exterior_boundary_     );
+  swap( a.interior_boundary_,     b.interior_boundary_     );
+  swap( a.intersection_detector_, b.intersection_detector_ );
+  swap( a.periodic_mappings_,     b.periodic_mappings_     );
+  swap( a.timestamp_,             b.timestamp_             );
 }
 //-----------------------------------------------------------------------------
 Mesh const & Mesh::operator=( Mesh const & other )
 {
   Mesh tmp(other);
-  this->swap(tmp);
+  swap( *this, tmp );
 
   return *this;
 }
 //-----------------------------------------------------------------------------
 bool Mesh::operator ==(Mesh const& other) const
 {
-  if (!objptrcmp(topology_, other.topology_))
+  if (!(topology_ == other.topology_))
   {
     return false;
   }
-  if (!objptrcmp(geometry_, other.geometry_))
+  if (!(geometry_ == other.geometry_))
   {
     return false;
   }
@@ -155,72 +149,62 @@ bool Mesh::operator !=(Mesh const& other) const
 //-----------------------------------------------------------------------------
 bool Mesh::empty() const
 {
-  return (topology_ == NULL && geometry_ == NULL);
+  return false;//(topology_ == NULL && geometry_ == NULL);
 }
 //-----------------------------------------------------------------------------
 CellType const& Mesh::type() const
 {
-  dolfin_assert(topology_);
-  return topology_->type();
+  return topology_.type();
 }
 //-----------------------------------------------------------------------------
 MeshTopology& Mesh::topology()
 {
-  dolfin_assert(topology_);
-  return *topology_;
+  return topology_;
 }
 //-----------------------------------------------------------------------------
 MeshTopology const& Mesh::topology() const
 {
-  dolfin_assert(topology_);
-  return *topology_;
+  return topology_;
 }
 //-----------------------------------------------------------------------------
 uint Mesh::topology_dimension() const
 {
-  dolfin_assert(topology_);
-  return topology_->dim();
+  return topology_.dim();
 }
 //-----------------------------------------------------------------------------
 uint Mesh::size(uint dim) const
 {
-  dolfin_assert(topology_);
-  return topology_->size(dim);
+  return topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_vertices() const
 {
-  dolfin_assert(topology_);
-  return topology_->size(0);
+  return topology_.size(0);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_cells() const
 {
-  return topology_->size(topology_->dim());
+  return topology_.size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
 uint* Mesh::cells()
 {
-  dolfin_assert(topology_);
-  return (*topology_)(topology_->dim(), 0)();
+  return topology_(topology_.dim(), 0)();
 }
 //-----------------------------------------------------------------------------
 uint const * Mesh::cells() const
 {
-  dolfin_assert(topology_);
-  return (*topology_)(topology_->dim(), 0)();
+  return topology_(topology_.dim(), 0)();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint dim) const
 {
-  dolfin_assert(topology_);
-  topology_->size(dim);
+  topology_.size(dim);
 }
 //-----------------------------------------------------------------------------
 void Mesh::init(uint d0, uint d1) const
 {
-  dolfin_assert(topology_);
-  (*topology_)(d0, d1).order();
+  topology_(d0, d1).order();
 }
 //-----------------------------------------------------------------------------
 void Mesh::init() const
@@ -276,7 +260,7 @@ bool Mesh::parallel_io() const
 //-----------------------------------------------------------------------------
 bool Mesh::is_distributed() const
 {
-  return topology().is_distributed();
+  return topology().distributed();
 }
 //-----------------------------------------------------------------------------
 MeshDistributedData& Mesh::distdata()
@@ -291,44 +275,37 @@ MeshDistributedData const& Mesh::distdata() const
 //-----------------------------------------------------------------------------
 uint Mesh::global_size(uint dim) const
 {
-  dolfin_assert(topology_);
-  return topology_->global_size(dim);
+  return topology_.global_size(dim);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_global_vertices() const
 {
-  dolfin_assert(topology_);
-  return topology_->global_size(0);
+  return topology_.global_size(0);
 }
 //-----------------------------------------------------------------------------
 uint Mesh::num_global_cells() const
 {
-  dolfin_assert(topology_);
-  return topology_->global_size(topology_->dim());
+  return topology_.global_size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
 Space const& Mesh::space() const
 {
-  dolfin_assert(geometry_);
-  return geometry_->space();
+  return geometry_.space();
 }
 //-----------------------------------------------------------------------------
 MeshGeometry& Mesh::geometry()
 {
-  dolfin_assert(geometry_);
-  return *geometry_;
+  return geometry_;
 }
 //-----------------------------------------------------------------------------
 MeshGeometry const& Mesh::geometry() const
 {
-  dolfin_assert(geometry_);
-  return *geometry_;
+  return geometry_;
 }
 //-----------------------------------------------------------------------------
 uint Mesh::geometry_dimension() const
 {
-  dolfin_assert(geometry_);
-  return geometry_->dim();
+  return geometry_.dim();
 }
 //-----------------------------------------------------------------------------
 IntersectionDetector& Mesh::intersector()
@@ -367,7 +344,7 @@ void Mesh::distribute()
   {
     // COMMENT: At this point the distributed data cannot be empty as the file
     //          format is supposed to fill it.
-    if(!topology().is_distributed())
+    if(!topology().distributed())
     {
       error("The topology of a mesh read in parallel should be distributed.");
     }
@@ -426,14 +403,19 @@ Array<MappedManifold *> const& Mesh::periodic_mappings() const
   return periodic_mappings_;
 }
 //-----------------------------------------------------------------------------
+void Mesh::move(BoundaryMesh& boundary, ALE::ALEType method)
+{
+  ALE::move(*this, boundary, method);
+}
+//-----------------------------------------------------------------------------
 std::string const Mesh::hash() const
 {
   std::stringstream ss;
   ss << "Mesh@" << this << ":"
-      << (topology_ ? topology_->type().description() : "empty")
+      << topology_.type().description()
       << ":time" << timestamp_
-      << ":T" << (topology_ ? topology_->token() : 0)
-      << ":G" << geometry_->token();
+      << ":T" << topology_.token()
+      << ":G" << geometry_.token();
   return ss.str();
 }
 //-----------------------------------------------------------------------------
@@ -447,7 +429,7 @@ void Mesh::disp() const
   else
   {
     section("Topology");
-    message("distributed : %u", this->is_distributed());
+    message("distributed : %u", topology_.distributed());
     if(this->is_distributed())
     {
       message("cells    : local = %12u ; global = %12u",

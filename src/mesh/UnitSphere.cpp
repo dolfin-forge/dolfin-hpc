@@ -10,7 +10,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitSphere::UnitSphere(uint nx) :
-    Mesh()
+    Mesh(*CellType::create(CellType::tetrahedron), EuclideanSpace(3))
 {
 
   message("UnitSphere is Experimental: It could have a bad quality mesh");
@@ -26,7 +26,7 @@ UnitSphere::UnitSphere(uint nx) :
   rename("mesh", "Mesh of the unit cube (0,1) x (0,1) x (0,1)");
 
   // Open mesh for editing
-  MeshEditor editor(*this, CellType::tetrahedron, 3);
+  MeshEditor editor(*this, this->type(), this->space());
 
   // Create vertices
   editor.init_vertices((nx + 1) * (ny + 1) * (nz + 1));

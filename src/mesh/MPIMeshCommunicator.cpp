@@ -389,7 +389,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         int n = MPI::sendrecv( UC[dst], dst, recv_uc, src, 3, comm );
         dolfin_assert( recvmaxUC >= ( uint ) n );
-        UC.append( recv_uc.data(), recv_uc.data() + n );
+        UC[pe_rank].append( recv_uc.data(), recv_uc.data() + n );
       }
 
       // Transfer vertex functions
@@ -397,7 +397,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         int n = MPI::sendrecv( RV[dst], dst, recv_rv, src, 4, comm );
         dolfin_assert( recvmaxRV >= ( uint ) n );
-        RV.append( recv_rv.data(), recv_rv.data() + n );
+        RV[pe_rank].append( recv_rv.data(), recv_rv.data() + n );
       }
     }
 
@@ -431,7 +431,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
           {
             local_cells.push_back( local_vindex );
             for ( uint l = 0; l < gdim; ++l )
-              local_vcoords.push_back( std::numeric_limits<real>::min() );
+              local_vcoords.push_back( std::numeric_limits<real>::lowest() );
             distdata.set_map( local_vindex++, v->global_index() );
             shared_buffer.push_back( v->global_index() );
           }
@@ -450,7 +450,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
       {
         local_cells.push_back( local_vindex );
         for ( uint l = 0; l < gdim; ++l )
-          local_vcoords.push_back( std::numeric_limits<real>::min() );
+          local_vcoords.push_back( std::numeric_limits<real>::lowest() );
         distdata.set_map( local_vindex++, recv_cells[i] );
         shared_buffer.push_back( recv_cells[i] );
       }
@@ -478,7 +478,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
       for ( int i = 0; i < n_recv; ++i )
       {
-        if ( distdata.has_global( shared[i] ))
+        if ( distdata.has_global( shared[i] ) )
         {
           uint local = distdata.get_local( shared[i] );
 
@@ -486,7 +486,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
           {
             bool valid = true;
             for ( uint l = 0; l < gdim; ++l )
-              if ( local_vcoords[local * gdim + l] == std::numeric_limits<real>::min() )
+              if ( local_vcoords[local * gdim + l] == std::numeric_limits<real>::lowest() )
                 valid = false;
 
             if ( valid )
@@ -523,7 +523,15 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
   distdata.remap_shared_adj();
 
+  distdata.check_ghost(); // FIXME remove me
+  distdata.check_shared(); // FIXME remove me
+  distdata.check_ghost(); // FIXME remove me
+
+  // Finalize distributed data
+  distdata.finalize();
+
   // Clear mesh using swap with new instance
+  // MPIMeshCommunicator::check(mesh);
   mesh = Mesh( mesh.type(), mesh.space(), comm );
 
   dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
@@ -536,13 +544,6 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
            local_cells.size(), mesh.type().num_entities( 0 ) );
   }
   uint cindex = local_cells.size() / mesh.type().num_entities( 0 );
-
-  distdata.check_ghost(); // FIXME remove me
-  distdata.check_shared(); // FIXME remove me
-  distdata.check_ghost(); // FIXME remove me
-
-  // Finalize distributed data
-  distdata.finalize();
 
   // Update topology
   dolfin_assert( local_vindex == distdata.local_size() );
@@ -572,8 +573,6 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   mesh.geometry().assign( local_vcoords );
   mesh.geometry().finalize();
 
-  // mesh.init(); // FIXME is this really needed?!
-
   {
     MeshValues< uint, Vertex > v1( mesh, 0 );
 
@@ -584,6 +583,9 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
     File( "after.pvd" ) << v1;
   }
+
+  // mesh.init(); // FIXME is this really needed?!
+  // MPIMeshCommunicator::check(mesh);
 
   // Recreate mesh functions
   if ( not UC.empty() )

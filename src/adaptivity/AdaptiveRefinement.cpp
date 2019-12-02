@@ -118,7 +118,7 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
   uint * x_rows[maxvecsize];
   uint x_m[maxvecsize];
 
-  Array<Function *> coarse;
+  Array<Function *> coarse; // FIXME might be multiple functions in functions array
 
   for (Array<Function *>::const_iterator it = functions.begin();
       it != functions.end(); ++it)
@@ -149,14 +149,20 @@ void AdaptiveRefinement::refine_and_project(Mesh& mesh,
     // }
   }
 
+  // FIXME!!!!!!!!!
+  functions[0]->vector().apply();
+
   MeshData D(mesh);
   D.add(cell_marker);
   mesh.distribute(partitions, D);
 
+  mesh.distdata()[0].valid_numbering = true; // FIXME
+  mesh.distdata()[0].valid_ownership = true; // FIXME
+  mesh.distdata()[0].valid_adjacency = true; // FIXME
+
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.topology().renumber();
-  mesh.init();
 
   if (MPI::rank() == 0)
   {

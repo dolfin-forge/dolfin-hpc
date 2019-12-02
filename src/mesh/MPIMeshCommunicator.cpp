@@ -570,6 +570,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
   // Update geometry
   dolfin_assert( local_vindex * gdim == local_vcoords.size() );
+  mesh.geometry().resize( local_vindex ); // ?!
   mesh.geometry().assign( local_vcoords );
   mesh.geometry().finalize();
 

@@ -2,19 +2,19 @@
 // Licensed under the GNU LGPL Version 2.1.
 // This file provides values for common constants.
 
-#pragma once
+#ifndef __DOLFIN_CONSTANTS_H
+#define __DOLFIN_CONSTANTS_H
 
 #include <dolfin/common/types.h>
 #include <dolfin/config/dolfin_config.h>
 
-namespace dolfin
-{
+using dolfin::real;
 
-constexpr real DOLFIN_EPS      = 3.0e-16;
-constexpr real DOLFIN_SQRT_EPS = 1.0e-8;
-constexpr real DOLFIN_PI       = 3.141592653589793238462;
+real const DOLFIN_EPS        =   3.0e-16;
+real const DOLFIN_SQRT_EPS   =   1.0e-8;
+real const DOLFIN_PI         =   3.141592653589793238462;
 
-constexpr uint DOLFIN_LINELENGTH = 256;
-constexpr uint DOLFIN_TERM_WIDTH = 80;
+int const DOLFIN_LINELENGTH =   256;
+int const DOLFIN_TERM_WIDTH =   80;
 
-} // namespace dolfin
+#endif

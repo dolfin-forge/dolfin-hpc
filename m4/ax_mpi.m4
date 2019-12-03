@@ -1,5 +1,5 @@
 # ===========================================================================
-#          https://www.gnu.org/software/autoconf-archive/ax_mpi.html
+#          http://www.gnu.org/software/autoconf-archive/ax_mpi.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -19,13 +19,26 @@
 #   are needed for linking MPI (e.g. -lmpi or -lfmpi, if a special
 #   MPICC/MPICXX/MPIF77/MPIFC was not found).
 #
-#   Note that this macro should be used only if you just have a few source
-#   files that need to be compiled using MPI. In particular, you should
-#   neither overwrite CC/CXX/F77/FC with the values of
-#   MPICC/MPICXX/MPIF77/MPIFC, nor assume that you can use the same flags
-#   etc. as the standard compilers. If you want to compile a whole program
-#   using the MPI compiler commands, use one of the macros
-#   AX_PROG_{CC,CXX,FC}_MPI.
+#   If you want to compile everything with MPI, you should use something
+#   like this for C:
+#
+#     if test -z "$CC" && test -n "$MPICC"; then
+#       CC="$MPICC"
+#     fi
+#     AC_PROG_CC
+#     AX_MPI
+#     CC="$MPICC"
+#     LIBS="$MPILIBS $LIBS"
+#
+#   and similar for C++ (change all instances of CC to CXX), Fortran 77
+#   (with F77 instead of CC) or Fortran (with FC instead of CC).
+#
+#   NOTE: The above assumes that you will use $CC (or whatever) for linking
+#   as well as for compiling. (This is the default for automake and most
+#   Makefiles.)
+#
+#   The user can force a particular library/compiler by setting the
+#   MPICC/MPICXX/MPIF77/MPIFC and/or MPILIBS environment variables.
 #
 #   ACTION-IF-FOUND is a list of shell commands to run if an MPI library is
 #   found, and ACTION-IF-NOT-FOUND is a list of commands to run if it is not
@@ -48,7 +61,7 @@
 #   Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License along
-#   with this program. If not, see <https://www.gnu.org/licenses/>.
+#   with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #   As a special exception, the respective Autoconf Macro's copyright owner
 #   gives unlimited permission to copy, distribute and modify the configure
@@ -63,7 +76,7 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-#serial 9
+#serial 7
 
 AU_ALIAS([ACX_MPI], [AX_MPI])
 AC_DEFUN([AX_MPI], [
@@ -72,7 +85,7 @@ AC_PREREQ(2.50) dnl for AC_LANG_CASE
 AC_LANG_CASE([C], [
 	AC_REQUIRE([AC_PROG_CC])
 	AC_ARG_VAR(MPICC,[MPI C compiler command])
-	AC_CHECK_PROGS(MPICC, mpicc hcc mpxlc_r mpxlc mpcc cmpicc, $CC)
+	AC_CHECK_PROGS(MPICC, mpicc hcc mpxlc_r mpxlc mpcc cmpicc mpifccpx, $CC)
 	ax_mpi_save_CC="$CC"
 	CC="$MPICC"
 	AC_SUBST(MPICC)
@@ -80,7 +93,7 @@ AC_LANG_CASE([C], [
 [C++], [
 	AC_REQUIRE([AC_PROG_CXX])
 	AC_ARG_VAR(MPICXX,[MPI C++ compiler command])
-	AC_CHECK_PROGS(MPICXX, mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++, $CXX)
+	AC_CHECK_PROGS(MPICXX, mpic++ mpicxx mpiCC hcp mpxlC_r mpxlC mpCC cmpic++ mpiFCCpx, $CXX)
 	ax_mpi_save_CXX="$CXX"
 	CXX="$MPICXX"
 	AC_SUBST(MPICXX)
@@ -88,7 +101,7 @@ AC_LANG_CASE([C], [
 [Fortran 77], [
 	AC_REQUIRE([AC_PROG_F77])
 	AC_ARG_VAR(MPIF77,[MPI Fortran 77 compiler command])
-	AC_CHECK_PROGS(MPIF77, mpif77 hf77 mpxlf_r mpxlf mpf77 cmpifc, $F77)
+	AC_CHECK_PROGS(MPIF77, mpif77 hf77 mpxlf_r mpxlf mpf77 cmpifc mpifrtpx, $F77)
 	ax_mpi_save_F77="$F77"
 	F77="$MPIF77"
 	AC_SUBST(MPIF77)
@@ -96,7 +109,7 @@ AC_LANG_CASE([C], [
 [Fortran], [
 	AC_REQUIRE([AC_PROG_FC])
 	AC_ARG_VAR(MPIFC,[MPI Fortran compiler command])
-	AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
+	AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c mpifrtpx, $FC)
 	ax_mpi_save_FC="$FC"
 	FC="$MPIFC"
 	AC_SUBST(MPIFC)

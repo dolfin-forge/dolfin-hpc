@@ -227,8 +227,6 @@ public:
 
   ///
   bool valid_numbering;
-  bool valid_ownership;
-  bool valid_adjacency;
 
 private:
 

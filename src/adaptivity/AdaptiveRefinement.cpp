@@ -136,13 +136,16 @@ void refine_and_project( Mesh& mesh,
     // make sure data is synchronized
     functions[f]->vector().apply();
 
+    // decompose function
     coarse[f] = FunctionDecomposition::compute(*functions[f]);
 
     dolfin_assert( num_sub <= coarse[f].size() );
 
+    // resize data redistribution arrays
     x_values[f].resize( num_sub );
     x_rows[f].resize( num_sub );
 
+    // redistribute decomposed functions
     for (uint i = 0; i < num_sub; ++i)
     {
       AdaptiveRefinement::redistribute_func(mesh, *coarse[f][i], x_values[f][i],
@@ -150,14 +153,16 @@ void refine_and_project( Mesh& mesh,
     }
   }
 
+  // distribute the mesh and cell_marker according to the obtained partitioning
   MeshData D(mesh);
   D.add(cell_marker);
   MPIMeshCommunicator::distribute( partitions, &D );
 
-  mesh.distdata()[0].valid_numbering = true; // FIXME
-  mesh.distdata()[0].valid_ownership = true; // FIXME
-  mesh.distdata()[0].valid_adjacency = true; // FIXME
+  // global renumbering is not necessary
+  mesh.distdata()[0].valid_numbering = true;
 
+  // refine the mesh and keep a copy of the original / coarse mesh,
+  // needed in the coarse functions
   Mesh new_mesh = mesh;
   RivaraRefinement::refine(new_mesh, cell_marker, 0.0, 0.0, 0.0, false);
   new_mesh.topology().renumber();
@@ -170,7 +175,6 @@ void refine_and_project( Mesh& mesh,
     uint const num_sub = space.element().num_sub_elements();
 
     Array<Function> post;
-
     // FIXME: Invalid for scalar functions due to the zero subspace assumption
     for (uint i = 0; i < num_sub; ++i)
     {
@@ -184,6 +188,7 @@ void refine_and_project( Mesh& mesh,
       post.back().sync();
     }
 
+    // project functions back on the mesh
     FiniteElementSpace projected_space(new_mesh, space);
     Function proj(projected_space);
     AdaptiveRefinement::project(new_mesh, post, proj);
@@ -198,7 +203,7 @@ void refine_and_project( Mesh& mesh,
     p_file << proj.vector();
   }
 
-  // cleanup coarse function array
+  // cleanup coarse functions
 	for ( uint i = 0; i < functions.size(); ++i )
 	{
 		while ( !coarse[i].empty() )

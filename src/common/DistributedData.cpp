@@ -17,8 +17,6 @@ namespace dolfin
 DistributedData::DistributedData( MPI::Communicator & comm )
   : Distributed< DistributedData >( comm )
   , valid_numbering( false )
-  , valid_ownership( false )
-  , valid_adjacency( false )
   , rank_( Distributed::comm_rank() )
   , pe_size_( Distributed::comm_size() )
   , range_is_set_( false )
@@ -40,8 +38,6 @@ DistributedData::DistributedData( MPI::Communicator & comm )
 DistributedData::DistributedData( DistributedData const & other )
   : Distributed< DistributedData >( other )
   , valid_numbering( other.valid_numbering )
-  , valid_ownership( other.valid_ownership )
-  , valid_adjacency( other.valid_adjacency )
   , rank_( Distributed::comm_rank() )
   , pe_size_( Distributed::comm_size() )
   , range_is_set_( other.range_is_set_ )
@@ -84,8 +80,6 @@ void swap( DistributedData& a, DistributedData& b )
 
   // Swap flags
   swap(a.valid_numbering, b.valid_numbering);
-  swap(a.valid_ownership, b.valid_ownership);
-  swap(a.valid_adjacency, b.valid_adjacency);
 
   // Swap attributes
   swap(a.rank_             , b.rank_);
@@ -136,8 +130,6 @@ void DistributedData::clear()
 	range_is_set_ = false;
 	//
 	valid_numbering = false;
-	valid_ownership = false;
-	valid_adjacency = false;
 }
 //-----------------------------------------------------------------------------
 void DistributedData::finalize()
@@ -833,7 +825,6 @@ void DistributedData::renumber_global()
       if (cached_ownership_[local_index] == pe_size_)
       {
         //error("Entity %u is not marked as shared", local_index);
-        valid_ownership = false;
       }
       else if (cached_ownership_[local_index] != rank_)
       {

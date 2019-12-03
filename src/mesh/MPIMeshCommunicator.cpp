@@ -390,7 +390,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       }
     }
 
-    dolfin_assert( n_rcv_v * gdim == n_rcv_x );
+    dolfin_assert( n_rcv_v * gdim == static_cast<uint>( n_rcv_x ) );
 
     // process (received) vertices
     for ( int i = 0; i < n_rcv_v; ++i )
@@ -490,12 +490,12 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
         }
       }
 
-      int r1 = MPI::sendrecv( send_buff, src, recv_buff, dst, 6, comm );
-      int r2 = MPI::sendrecv( send_buff_indices, src, recv_buff_map, dst, 7, comm );
+      int n_rcv_X = MPI::sendrecv( send_buff, src, recv_buff, dst, 6, comm );
+      int n_rcv_v = MPI::sendrecv( send_buff_indices, src, recv_buff_map, dst, 7, comm );
 
-      dolfin_assert( r1 == r2 * gdim );
+      dolfin_assert( static_cast< uint >( n_rcv_X ) == n_rcv_v * gdim );
 
-      for ( int i = 0; i < r2; ++i )
+      for ( int i = 0; i < n_rcv_v; ++i )
       {
         if ( distdata.has_global( recv_buff_map[i] ) )
         {

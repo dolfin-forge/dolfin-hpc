@@ -12,13 +12,15 @@
 #include <dolfin/mesh/Cell.h>
 
 #include <algorithm>
-#include <fstream>
 
 namespace dolfin
 {
 
+namespace MPIMeshCommunicator
+{
+
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
+void distribute(MeshValues<uint, Vertex>& dist)
 {
 
   if (!dist.mesh().is_distributed())
@@ -162,10 +164,8 @@ void MPIMeshCommunicator::distribute(MeshValues<uint, Vertex>& dist)
 
 }
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
-                                      MeshData *                 D )
+void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
 {
-
   if ( !dist.mesh().is_distributed() )
   {
     return;
@@ -176,15 +176,16 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   message( 1, "MPIMeshCommunicator : distribute cells" );
   tic();
 
-  Mesh &              mesh    = dist.mesh();
-  uint const          pe_rank = mesh.topology().comm_rank();
-  uint const          pe_size = mesh.topology().comm_size();
-  uint const          tdim    = mesh.topology().dim();
-  uint const          gdim    = mesh.geometry().dim();
-  DistributedData distdata( mesh.topology().comm() );
-  MPI::Communicator & comm = mesh.topology().comm();
+	Mesh & mesh = dist.mesh();
+	DistributedData distdata( mesh.topology().comm() );
+	MPI::Communicator & comm = mesh.topology().comm();
 
-  // Save global number of vertices and cells to check consistency
+	uint const pe_rank = mesh.topology().comm_rank();
+	uint const pe_size = mesh.topology().comm_size();
+	uint const tdim    = mesh.topology().dim();
+	uint const gdim    = mesh.geometry().dim();
+
+	// Save global number of vertices and cells to check consistency
   dolfin_assert( mesh.topology().connectivity( 0 ) );
   dolfin_assert( mesh.topology().distdata()[0].is_finalized() );
   uint const num_global_vertices = mesh.topology().global_size( 0 );
@@ -197,18 +198,6 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   {
     error( "MPIMeshCommunicator : mismatch between number of cells and size of "
            "the distribution" );
-  }
-
-  // FIXME remove me
-  {
-    MeshValues< uint, Vertex > v1( mesh, 0 );
-
-    for ( VertexIterator v( mesh ); !v.end(); ++v )
-    {
-      v1( v->index() ) = v->global_index();
-    }
-
-    File( "before.pvd" ) << v1;
   }
 
   Array< Array< uint > > send_cells( pe_size );
@@ -523,15 +512,16 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 
   distdata.remap_shared_adj();
 
-  distdata.check_ghost(); // FIXME remove me
-  distdata.check_shared(); // FIXME remove me
-  distdata.check_ghost(); // FIXME remove me
+#if defined( DEBUG )
+  distdata.check_ghost();
+  distdata.check_shared();
+  distdata.check_ghost();
+#endif
 
   // Finalize distributed data
   distdata.finalize();
 
   // Clear mesh using swap with new instance
-  // MPIMeshCommunicator::check(mesh);
   mesh = Mesh( mesh.type(), mesh.space(), comm );
 
   dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
@@ -573,20 +563,6 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
   mesh.geometry().resize( local_vindex ); // ?!
   mesh.geometry().assign( local_vcoords );
   mesh.geometry().finalize();
-
-  {
-    MeshValues< uint, Vertex > v1( mesh, 0 );
-
-    for ( VertexIterator v( mesh ); !v.end(); ++v )
-    {
-      v1( v->index() ) = v->global_index();
-    }
-
-    File( "after.pvd" ) << v1;
-  }
-
-  // mesh.init(); // FIXME is this really needed?!
-  // MPIMeshCommunicator::check(mesh);
 
   // Recreate mesh functions
   if ( not UC.empty() )
@@ -646,7 +622,7 @@ void MPIMeshCommunicator::distribute( MeshValues< uint, Cell > & dist,
 }
 //-----------------------------------------------------------------------------
 template<class E>
-void MPIMeshCommunicator::check(Mesh& mesh)
+void check(Mesh& mesh)
 {
   if (!mesh.is_distributed()) return;
 
@@ -841,13 +817,13 @@ void MPIMeshCommunicator::check(Mesh& mesh)
 #endif /* HAVE_MPI */
 }
 //--- TEMPLATE INSTANTIATIONS -------------------------------------------------
-template void MPIMeshCommunicator::check<Vertex>(Mesh& Mesh);
-template void MPIMeshCommunicator::check<Edge>  (Mesh& Mesh);
-template void MPIMeshCommunicator::check<Face>  (Mesh& Mesh);
-template void MPIMeshCommunicator::check<Facet> (Mesh& Mesh);
-template void MPIMeshCommunicator::check<Cell>  (Mesh& Mesh);
+template void check<Vertex>(Mesh& Mesh);
+template void check<Edge>  (Mesh& Mesh);
+template void check<Face>  (Mesh& Mesh);
+template void check<Facet> (Mesh& Mesh);
+template void check<Cell>  (Mesh& Mesh);
 //-----------------------------------------------------------------------------
-void MPIMeshCommunicator::check(Mesh& mesh)
+void check(Mesh& mesh)
 {
   uint const tdim = mesh.topology_dimension();
   check<Vertex>(mesh);
@@ -856,4 +832,7 @@ void MPIMeshCommunicator::check(Mesh& mesh)
   if (tdim > 0) check<Cell>(mesh);
 }
 //-----------------------------------------------------------------------------
+
+} /* namespace MPIMeshCommunicator */
+
 } /* namespace dolfin */

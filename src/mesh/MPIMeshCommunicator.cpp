@@ -514,7 +514,6 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
 #if defined( DEBUG )
   distdata.check_ghost();
   distdata.check_shared();
-  distdata.check_ghost();
 #endif
 
   // Finalize distributed data

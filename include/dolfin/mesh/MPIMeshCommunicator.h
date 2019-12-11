@@ -13,24 +13,25 @@
 namespace dolfin
 {
 
-/// The class facilitates the transfer of a mesh between processes using MPI
+/// The namesapce facilitates the transfer of a mesh between processes using MPI
 
-struct MPIMeshCommunicator
+namespace MPIMeshCommunicator
 {
 
-  /// Distribute mesh according to a vertex-based distribution
-  static void distribute(MeshValues<uint, Vertex>& dist);
+/// Distribute mesh according to a vertex-based distribution
+void distribute( MeshValues< uint, Vertex > & dist );
 
-  /// Distribute mesh according to a cell-based distribution
-  static void distribute(MeshValues<uint, Cell>& dist, MeshData * D = NULL);
+/// Distribute mesh according to a cell-based distribution
+void distribute( MeshValues< uint, Cell > & dist, MeshData * D = NULL );
 
-  /// Check mesh entity distribution
-  template<class E> static void check(Mesh& Mesh);
+/// Check mesh entity distribution
+template < class E >
+void check( Mesh & Mesh );
 
-  /// Check mesh distribution
-  static void check(Mesh& Mesh);
+/// Check mesh distribution
+void check( Mesh & Mesh );
 
-};
+} /* namespace MPIMeshCommunicator */
 
 } /* namespace dolfin */
 

@@ -12,7 +12,7 @@ template<class CellType>
 void check_cell_ops()
 {
   CellType cellt;
-  Mesh     cellm;
+  Mesh     cellm( cellt, EuclideanSpace( cellt.dim() ) );
   cellt.create_reference_cell(cellm);
   MeshValues<real, Cell> M(cellm);
 

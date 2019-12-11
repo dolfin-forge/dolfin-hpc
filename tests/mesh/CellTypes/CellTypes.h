@@ -14,9 +14,9 @@ template<class T>
 void check_reference_cell_refinement()
 {
   T cell;
-  Mesh rc0;
+  Mesh rc0( cell, EuclideanSpace( cell.dim() ) );
   cell.create_reference_cell(rc0);
-  Mesh rc1;
+  Mesh rc1( cell, EuclideanSpace( cell.dim() ) );
   MeshEditor me(rc1, cell);
   me.init_cells(cell.RefinementPattern::num_refined_cells(rc0));
   me.init_vertices(cell.RefinementPattern::num_refined_vertices(rc0));

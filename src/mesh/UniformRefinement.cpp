@@ -60,8 +60,8 @@ void add_refined_vertices(MeshEditor& editor, Mesh& mesh)
 void UniformRefinement::operator()(Mesh& mesh)
 {
   // Create new mesh, refinement manager and open for editing
-  Mesh refined_mesh;
-  MeshEditor editor(refined_mesh, mesh.type(), mesh.space());
+  Mesh refined_mesh(mesh.type(), mesh.space());
+  MeshEditor editor(refined_mesh, refined_mesh.type(), refined_mesh.space());
 
   // Refinement pattern provides the number of refined vertices
   editor.init_vertices(mesh.type().RefinementPattern::num_refined_vertices(mesh));
@@ -110,7 +110,7 @@ void UniformRefinement::operator()(Mesh& mesh)
   refined_mesh.topology().remap(0, vertex_map);
 
   // Overwrite old mesh with refined mesh
-  mesh.swap(refined_mesh);
+  swap( mesh, refined_mesh );
   mesh.topology().renumber();
 }
 //-----------------------------------------------------------------------------

@@ -16,7 +16,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 bool MeshRenumber::renumber(MeshTopology& topology)
 {
-  if (!topology.is_distributed())
+  if (!topology.distributed())
   {
     return false;
   }

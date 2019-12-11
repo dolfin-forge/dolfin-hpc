@@ -152,7 +152,7 @@ void XMLMesh::beginMesh(const xmlChar *name, const xmlChar **attrs)
   }
   dolfin_assert(cell_type_ != NULL);
   editor_ = new MeshEditor(mesh_, cell_type_->cellType(), dim);
-  parallel_ = mesh_.topology().is_distributed();
+  parallel_ = mesh_.topology().distributed();
   if(parallel_)
   {
     warning("Reading DOLFIN xml meshes in parallel is deprecated.\n"
@@ -399,9 +399,13 @@ void XMLMesh::endMesh()
     delete[] sendbuf_v;
 
     // Create mesh editor
-    Mesh new_mesh;
+    // Mesh new_mesh;
+    // delete editor_;
+    // editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
+
+    Mesh new_mesh(mesh_.type(), mesh_.space(), mesh_.distdata()[0].comm());
     delete editor_;
-    editor_ = new MeshEditor(new_mesh, mesh_.type().cellType(), gdim);
+    editor_ = new MeshEditor(new_mesh, mesh_.type(), mesh_.space());
 
     // Add vertices
     editor_->init_vertices(mesh_.size(0) + shared - orphan);
@@ -471,7 +475,7 @@ void XMLMesh::endMesh()
     }
     delete[] connectivity;
     editor_->close();
-    mesh_.swap(new_mesh);
+    swap(mesh_, new_mesh);
 
 #if DEBUG
     message("XMLMesh: check ghosts consistency");

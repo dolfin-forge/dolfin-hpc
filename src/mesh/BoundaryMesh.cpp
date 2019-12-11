@@ -17,7 +17,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
     boundary_of_boundary_(false),
@@ -29,7 +29,7 @@ BoundaryMesh::BoundaryMesh(Mesh& mesh, BoundaryMesh::Type type) :
 }
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(static_cast<Mesh&>(mesh)),
     type_(type),
     boundary_of_boundary_(true),
@@ -42,7 +42,7 @@ BoundaryMesh::BoundaryMesh(BoundaryMesh& mesh, BoundaryMesh::Type type) :
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(Mesh& mesh, SubDomain const& subdomain,
                            BoundaryMesh::Type type) :
-    Mesh(),
+    Mesh(mesh.type(), mesh.space(), mesh.topology().comm()),
     MeshDependent(mesh),
     type_(type),
     boundary_of_boundary_(false),
@@ -88,7 +88,7 @@ void BoundaryMesh::init(Mesh& mesh, BoundaryMesh::Type type)
 //-----------------------------------------------------------------------------
 BoundaryMesh::BoundaryMesh(BoundaryMesh& boundary, SubDomain const& subdomain,
                            bool inside) :
-    Mesh(),
+    Mesh(boundary.type(), boundary.space(), boundary.topology().comm()),
     MeshDependent(boundary.mesh()),
     type_(boundary.type_),
     boundary_of_boundary_(true),

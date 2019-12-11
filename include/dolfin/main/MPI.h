@@ -5,6 +5,7 @@
 #define __DOLFIN_MPI_H
 
 #include <dolfin/common/types.h>
+#include <dolfin/common/Array.h>
 #include <dolfin/main/MPI_Datatypes.h>
 
 #ifdef HAVE_MPI
@@ -105,9 +106,14 @@ public:
 
   //// Wrap in a template function to allow use of functors
   template<typename T>
-  static int sendrecv(T* sendbuf, int sendcount, int destination,
-                      T* recvbuf, int recvcount, int source, int tag,
-                      Communicator& comm = MPI::DOLFIN_COMM);
+  static int sendrecv( T * sendbuf, int sendcount, int destination,
+                       T * recvbuf, int recvcount, int source, int tag,
+                       Communicator& comm = MPI::DOLFIN_COMM);
+
+  template<typename T>
+  static int sendrecv( Array< T > & sendbuf, int destination,
+                       Array< T > & recvbuf, int source, int tag,
+                       Communicator& comm = MPI::DOLFIN_COMM);
 
   /// Start MPI timer
   static void startTimer();
@@ -224,34 +230,69 @@ inline int MPI::all_reduce(T x, T& r, Communicator& comm)
 }
 //-----------------------------------------------------------------------------
 template<>
-inline int MPI::sendrecv(bool* sendbuf, int sendcount, int destination,
-                         bool* recvbuf, int recvcount, int source, int tag,
-                         Communicator& comm)
+inline int MPI::sendrecv(bool * sendbuf, int sendcount, int destination,
+                         bool * recvbuf, int recvcount, int source,
+                         int tag, Communicator& comm)
 {
   MPI_Status status;
   int recv_count;
   int send_bool = sendcount * sizeof(bool);
-  int recv_bool = recvcount * sizeof(bool);
-  MPI::check_error( MPI_Sendrecv(sendbuf, send_bool, MPI_BYTE, destination, tag,
-                                 recvbuf, recv_bool, MPI_BYTE, source, tag,
-                                 comm, &status) );
-  MPI::check_error( MPI_Get_count(&status, MPI_BYTE, &recv_count) );
+	int        recv_bool = recvcount * sizeof( bool );
+	MPI::check_error( MPI_Sendrecv( static_cast< void * >( sendbuf ),
+	                                send_bool,
+	                                MPI_BYTE,
+	                                destination,
+	                                tag,
+	                                static_cast< void * >( recvbuf ),
+	                                recv_bool,
+	                                MPI_BYTE,
+	                                source,
+	                                tag,
+	                                comm,
+	                                &status ) );
+	MPI::check_error( MPI_Get_count(&status, MPI_BYTE, &recv_count) );
   return recv_count / sizeof(bool);
 }
 
 template<typename T>
-inline int MPI::sendrecv(T* sendbuf, int sendcount, int destination,
-                         T* recvbuf, int recvcount, int source, int tag,
-                         Communicator& comm)
+inline int MPI::sendrecv(T * sendbuf, int sendcount, int destination,
+                         T * recvbuf, int recvcount, int source,
+                         int tag, Communicator& comm)
 {
   MPI_Status status;
-  int recv_count;
-  MPI::check_error( MPI_Sendrecv(
-                      sendbuf, sendcount, MPI_type<T>::value, destination, tag,
-                      recvbuf, recvcount, MPI_type<T>::value, source, tag,
-                      comm, &status) );
-  MPI::check_error( MPI_Get_count(&status, MPI_type<T>::value, &recv_count) );
+	int        recv_count;
+	MPI::check_error( MPI_Sendrecv( static_cast< void * >( sendbuf ),
+	                                sendcount,
+	                                MPI_type< T >::value,
+	                                destination,
+	                                tag,
+	                                static_cast< void * >( recvbuf ),
+	                                recvcount,
+	                                MPI_type< T >::value,
+	                                source,
+	                                tag,
+	                                comm,
+	                                &status ) );
+	MPI::check_error( MPI_Get_count(&status, MPI_type<T>::value, &recv_count) );
   return recv_count;
+}
+
+template < typename T >
+inline int MPI::sendrecv( Array< T > &   sendbuf,
+                          int            destination,
+                          Array< T > &   recvbuf,
+                          int            source,
+                          int            tag,
+                          Communicator & comm )
+{
+	return MPI::sendrecv< T >( sendbuf.data(),
+	                           sendbuf.size(),
+	                           destination,
+	                           recvbuf.data(),
+	                           recvbuf.size(),
+	                           source,
+	                           tag,
+	                           comm );
 }
 //-----------------------------------------------------------------------------
 

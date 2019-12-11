@@ -1,9 +1,6 @@
 // Copyright (C) 2007 Kristian B. Oelgaard.
 // Licensed under the GNU LGPL Version 2.1.
 //
-// First added:  2007-11-23
-// Last changed: 2008-04-28
-//
 // This demo program solves Poisson's equation
 //
 //     - div grad u(x) = f(x)
@@ -20,58 +17,62 @@
 #include <dolfin.h>
 
 #include "Poisson.h"
-  
+
 using namespace dolfin;
 
 // Boundary condition
-class DirichletBoundary : public SubDomain
+struct DirichletBoundary : public SubDomain
 {
-  bool inside(const real* x, bool on_boundary) const
-  {
-    return (std::abs(x[0]) < DOLFIN_EPS);
-  }
+	bool inside( const real * x, bool on_boundary ) const
+	{
+		// return ( std::abs( x[0] ) < DOLFIN_EPS );
+    return x[0] < DOLFIN_EPS && on_boundary;
+	}
 };
 
 // Source term
-class Source : public ScalarExpression
+struct Source : public Value< Source, 1 >
 {
-public:
-    
-  Source() : ScalarExpression() {}
-
-  void eval(real* values, const real* x) const
-  {
-    values[0] = 9.0*DOLFIN_PI*DOLFIN_PI*sin(3.0*DOLFIN_PI*x[0]);
-  }
-
+	void eval( real * values, const real * x ) const
+	{
+		values[0] = 9.0 * DOLFIN_PI * DOLFIN_PI * sin( 3.0 * DOLFIN_PI * x[0] );
+	}
 };
 
 int main()
 {
-  // Create mesh
-  UnitInterval mesh(50);
+	// Create mesh
+	UnitInterval mesh( 50 );
 
-  // Set up BCs
-  Function zero(mesh, 0.0);
-  DirichletBoundary boundary;
-  DirichletBC bc(zero, mesh, boundary);
+	// Set up BCs
+	Constant          zero( 0.0 );
+	DirichletBoundary boundary;
+	DirichletBC       bc( zero, mesh, boundary );
 
-  // Create source
-  Source source;
-  Function f(mesh, source);
+	// Create source
+	Analytic< Source > source( mesh );
 
-  // Define PDE
-  PoissonBilinearForm a(mesh);
-  PoissonLinearForm L(f);
-  LinearPDE pde(a, L, mesh, bc);
+	// Define PDE
+	Poisson::BilinearForm a( mesh );
+	Poisson::LinearForm   L( mesh, source );
 
-  // Solve PDE
-  Function u(mesh);
-  pde.solve(u);
+	// Solve PDE
+	Matrix A;
+	Vector b;
 
-  // Save solution to file
-  File file_u("poisson.pvd");
-  file_u << u;
+	a.assemble( A, true );
+	L.assemble( b, true );
+	bc.apply( A, b, a );
 
-  return 0;
+	Function     u( a.trial_space() );
+	KrylovSolver solver( bicgstab, bjacobi );
+
+	solver.solve( A, u.vector(), b );
+	u.sync();
+
+	// Save solution to file
+	File file_u( "poisson.pvd" );
+	file_u << u;
+
+	return 0;
 }

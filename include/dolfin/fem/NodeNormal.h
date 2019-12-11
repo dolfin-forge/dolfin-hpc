@@ -55,7 +55,7 @@ public:
   uint node_type(uint node_id) const;
 
   /// Assignment
-  NodeNormal& operator=(NodeNormal& node_normal);
+  NodeNormal& operator=(NodeNormal& node_normal) = delete;
 
 private:
 
@@ -80,43 +80,6 @@ private:
 
   ///
   _map<uint, uint> node_type_;
-
-  struct FacetData
-  {
-    uint global_index;
-    real weight;
-    Point normal;
-    _set<uint> nodes;
-
-    void disp() const
-    {
-      section("FacetData");
-      prm("global_index", global_index);
-      prm("nodes"       , nodes.size());
-      prm("weight"      , weight);
-      prm("normal"      , normal);
-      end();
-    }
-  };
-
-  struct NodeData
-  {
-    uint node_type;
-    Array<uint> dofs;
-    Array<uint> adjs;
-    Array<FacetData *> facets;
-
-    void disp() const
-    {
-      section("NodeData");
-      prm("node_type" , node_type);
-      prm("dofs"      , dofs.size());
-      prm("adjs"      , adjs.size());
-      prm("facets"    , facets.size());
-      end();
-    }
-  };
-
 };
 
 }

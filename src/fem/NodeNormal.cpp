@@ -8,10 +8,10 @@
 #include <dolfin/fem/FiniteElementSpace.h>
 #include <dolfin/fem/ScratchSpace.h>
 #include <dolfin/fem/UFCCell.h>
+#include <dolfin/main/MPI.h>
 #include <dolfin/math/basic.h>
 #include <dolfin/mesh/EuclideanBasis.h>
 #include <dolfin/mesh/Facet.h>
-#include <dolfin/main/MPI.h>
 #include <dolfin/mesh/SubDomain.h>
 #include <dolfin/mesh/Vertex.h>
 #include <dolfin/mesh/VertexNormal.h>
@@ -21,31 +21,71 @@
 namespace dolfin
 {
 
+struct FacetData
+{
+  uint global_index;
+  real weight;
+  Point normal;
+  _set<uint> nodes;
+
+  void disp() const
+  {
+    section("FacetData");
+    prm("global_index", global_index);
+    prm("nodes"       , nodes.size());
+    prm("weight"      , weight);
+    prm("normal"      , normal);
+    end();
+  }
+};
+
+struct NodeData
+{
+  uint node_type;
+  Array<uint> dofs;
+  Array<uint> adjs;
+  Array<FacetData *> facets;
+
+  void disp() const
+  {
+    section("NodeData");
+    prm("node_type" , node_type);
+    prm("dofs"      , dofs.size());
+    prm("adjs"      , adjs.size());
+    prm("facets"    , facets.size());
+    end();
+  }
+};
+
+typedef _map<uint, FacetData *>::iterator FacetMapIterator;
+typedef _map<uint, NodeData *>::iterator  NodeMapIterator;
+
 //-----------------------------------------------------------------------------
-NodeNormal::NodeNormal(Mesh& mesh, Type w, real alpha) :
-    BoundaryNormal(mesh),
-    mesh_(mesh),
-    subdomain_(NULL),
-    alpha_max_(alpha),
-    type_(w)
+NodeNormal::NodeNormal( Mesh & mesh, Type w, real alpha )
+  : BoundaryNormal( mesh )
+  , mesh_( mesh )
+  , subdomain_( NULL )
+  , alpha_max_( alpha )
+  , type_( w )
 {
 }
 
 //-----------------------------------------------------------------------------
-NodeNormal::NodeNormal(Mesh& mesh, SubDomain const& subdomain, Type w,
-                       real alpha) :
-    BoundaryNormal(mesh),
-    mesh_(mesh),
-    subdomain_(&subdomain),
-    alpha_max_(alpha),
-    type_(w)
+NodeNormal::NodeNormal( Mesh & mesh,
+                        SubDomain const & subdomain,
+                        Type w,
+                        real alpha )
+  : BoundaryNormal( mesh )
+  , mesh_( mesh )
+  , subdomain_( &subdomain )
+  , alpha_max_( alpha )
+  , type_( w )
 {
 }
 
 //-----------------------------------------------------------------------------
 NodeNormal::~NodeNormal()
 {
-  clear();
 }
 
 //-----------------------------------------------------------------------------
@@ -98,10 +138,11 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   _map<uint, FacetData *> facets_data;
   // Maps dofs to facet global indices
   _map<uint, NodeData *> nodes_data;
+
   //[facet, nb_nodes, [node indices]]
-  Array<uint> * u_sendbuf = new Array<uint> [pe_size];
+  Array< Array<uint> > u_sendbuf( pe_size );
   //[weight, normal]
-  Array<real> * r_sendbuf = new Array<real> [pe_size];
+  Array< Array<real> > r_sendbuf( pe_size );
 
   FiniteElementSpace const& spaceN = basis[0].space();
   DofMap const& dofmapN = spaceN.dofmap();
@@ -195,7 +236,7 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
         if (!dofmapN.is_ghost(node_id))
         {
           // Trigger creation of owned node data if the entry does not exist
-          _map<uint, NodeData *>::iterator it = nodes_data.find(node_id);
+          NodeMapIterator it = nodes_data.find(node_id);
           if (it == nodes_data.end())
           {
             NodeData * n_data = new NodeData();
@@ -261,11 +302,10 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
   if (mesh.is_distributed())
   {
 #ifdef HAVE_MPI
-    // Since an entity is shared is shared if all it lower dimensional entities
-    // are shared we can loop over shared vertices and stack facets.
-    // If non-matching facet are send they will be eventually discarded.
-    // This does not hold if the subdomain has a hole in the interior of the
-    // facet.
+    // Since an entityis shared if all it lower dimensional entities are shared
+    // we can loop over shared vertices and stack facets. If non-matching facet
+    // are send they will be eventually discarded. This does not hold if the
+    // subdomain has a hole in the interior of the facet.
 
     // Exchange values
 
@@ -274,43 +314,40 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     int r_maxsendcount = 0;
     int r_maxrecvcount = 0;
     _set<uint> const& adjs = mesh.distdata()[0].get_adj_ranks();
+
     for (_set<uint>::const_iterator it = adjs.begin(); it != adjs.end(); ++it)
     {
       u_maxsendcount = std::max(u_maxsendcount, int(u_sendbuf[*it].size()));
       r_maxsendcount = std::max(r_maxsendcount, int(r_sendbuf[*it].size()));
     }
+
     MPI::all_reduce<MPI::max>(u_maxsendcount, u_maxrecvcount );
     dolfin_assert(u_maxrecvcount > 0);
+
     MPI::all_reduce<MPI::max>(r_maxsendcount, r_maxrecvcount );
     dolfin_assert(r_maxrecvcount > 0);
-    uint * u_recvbuf = new uint[u_maxrecvcount];
-    real * r_recvbuf = new real[r_maxrecvcount];
+
+    Array< uint > u_recvbuf( u_maxrecvcount );
+    Array< real > r_recvbuf( r_maxrecvcount );
 
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;
       int dest = (rank + j) % pe_size;
 
-      int u_sendcount = u_sendbuf[dest].size();
-      int u_recvcount = MPI::sendrecv( &u_sendbuf[dest][0], u_sendcount, dest,
-                                       &u_recvbuf[0], u_maxrecvcount, src, 1);
-      int r_sendcount = r_sendbuf[dest].size();
-      MPI_Status status;
-      MPI::check_error( MPI_Sendrecv(&r_sendbuf[dest][0], r_sendcount,
-                                     MPI_DOUBLE, dest, 1, &r_recvbuf[0],
-                                     r_maxrecvcount, MPI_DOUBLE, src, 1,
-                                     dolfin::MPI::DOLFIN_COMM, &status) );
+      int n_u_recv = MPI::sendrecv( u_sendbuf[dest], dest, u_recvbuf, src, 1);
+      MPI::sendrecv( r_sendbuf[dest], dest, r_recvbuf, src, 1 );
 
       uint iir = 0;
-      for (uint iiu = 0; iiu < uint(u_recvcount);)
+      for ( int iiu = 0; iiu < n_u_recv; )
       {
-        Array<_map<uint, NodeData *>::iterator> valid;
+        Array<NodeMapIterator> valid;
         uint nb_nodes = u_recvbuf[iiu++];
         dolfin_assert(nb_nodes <= num_facet_nodes);
         // Check if one node is owned
         for (uint n = 0; n < nb_nodes; ++n)
         {
-          _map<uint, NodeData *>::iterator it = nodes_data.find(u_recvbuf[iiu++]);
+          NodeMapIterator it = nodes_data.find(u_recvbuf[iiu++]);
           if (it != nodes_data.end())
           {
             // Process owns the node
@@ -334,42 +371,45 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
           {
             data->nodes.insert(valid[n]->first);
             valid[n]->second->facets.push_back(data);
-            valid[n]->second->adjs.push_back(status.MPI_SOURCE);
+            valid[n]->second->adjs.push_back(src);
           }
 
           // Add facet
           facets_data.insert(std::pair<uint, FacetData *>(data->global_index, data));
         }
         iir += gdim + 1;
-        dolfin_assert(iiu <= uint(u_recvcount));
+        dolfin_assert( iiu <= n_u_recv );
       }
 
       // Clear for reuse
       u_sendbuf[dest].clear();
       r_sendbuf[dest].clear();
     }
-    delete[] r_recvbuf;
-    delete[] u_recvbuf;
 #endif // HAVE_MPI
   }
 
   //--- Determine node type from facet normals and compute surface normals
-  real cosalpha = std::cos(alpha_max_);
+  real const cosalpha = std::cos(alpha_max_);
   bool const weighted = (type_ != NodeNormal::none);
   uint const num_boundary_dofs = gdim * nodes_data.size();
-  uint * dofs = new uint[num_boundary_dofs];  // dof indices
-  uint * node_dofs = &dofs[0];
-  real * block = new real[gdim * num_boundary_dofs];  // ( n, tau_1, tau_2 )
-  real * offset = &block[0];
+
+  Array< uint > dofs( num_boundary_dofs );  // dof indices
+  uint node_dofs = 0;
+
+  Array< real > block( gdim * num_boundary_dofs );  // ( n, tau_1, tau_2 )
+  uint offset = 0;
+
   // Initialize cartesian basis
   Point B[Space::MAX_DIMENSION];
+
   for (uint d = 0; d < Space::MAX_DIMENSION; ++d)
   {
     B[d][d] = 1.0;
   }
   // Contains only owned nodes
-  for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
-  it != nodes_data.end(); ++it, node_dofs+=gdim, offset+=gdim)
+  for ( NodeMapIterator it = nodes_data.begin();
+        it != nodes_data.end();
+        ++it, node_dofs += gdim, offset+=gdim )
   {
     uint const node_id = it->first;
     NodeData * n_data = it->second;
@@ -404,34 +444,31 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     }
 
     // Copy dof indices to array for vector block set.
-    std::copy(n_data->dofs.begin(),n_data->dofs.end(), node_dofs);
+    std::copy(n_data->dofs.begin(),n_data->dofs.end(), dofs.data() + node_dofs );
 
     // Copy data to block array
     for(uint d = 0; d< gdim; ++d)
     {
-      std::copy(&B[d][0], &B[d][0] + gdim, offset + d*num_boundary_dofs);
+      std::copy(&B[d][0], &B[d][0] + gdim, block.data() + offset + d*num_boundary_dofs);
     }
-
   }
 
   // Set vectors, values are synchronized
   for (uint d = 0; d < gdim; ++d)
   {
     GenericVector& v = basis[d].vector();
-    v.set(block + d * num_boundary_dofs, num_boundary_dofs, dofs);
+    v.set( block.data() + d * num_boundary_dofs, num_boundary_dofs, dofs.data() );
     v.apply();
   }
-  delete[] dofs;
-  delete[] block;
 
   // Cleanup facets and nodes data
-  for (_map<uint, FacetData *>::iterator it = facets_data.begin();
+  for (FacetMapIterator it = facets_data.begin();
   it != facets_data.end(); ++it)
   {
     delete it->second;
   }
   facets_data.clear();
-  for (_map<uint, NodeData *>::iterator it = nodes_data.begin();
+  for (NodeMapIterator it = nodes_data.begin();
   it != nodes_data.end(); ++it)
   {
     delete it->second;
@@ -454,33 +491,29 @@ void NodeNormal::compute(Mesh& mesh, Array<Function>& basis)
     dolfin_assert(u_maxrecvcount > 0);
 
     // For each process
-    uint * u_recvbuf = new uint[u_maxrecvcount];
+    Array< uint > u_recvbuf( u_maxrecvcount );
     for (uint j = 1; j < pe_size; ++j)
     {
       int src = (rank - j + pe_size) % pe_size;
-      int dest = (rank + j) % pe_size;
+      int dst = (rank + j) % pe_size;
 
-      int u_sendcount = u_sendbuf[dest].size();
-      int u_recvcount = MPI::sendrecv( &u_sendbuf[dest][0], u_sendcount, dest,
-                                       &u_recvbuf[0], u_maxrecvcount, src, 1);
+      int n_u_recv = MPI::sendrecv( u_sendbuf[dst], dst, u_recvbuf, src, 1 );
 
       // Add node type to the map
-      for (int iiu = 0; iiu < u_recvcount; iiu += u_size)
+      for (int iiu = 0; iiu < n_u_recv; iiu += u_size)
       {
         uint const id = u_recvbuf[iiu];
+        uint const nt = u_recvbuf[iiu + 1];
+
         dolfin_assert(node_type_[id] == 0); // Should be sent once
         dolfin_assert(dofmapN.is_ghost(id));
-        uint const nt = u_recvbuf[iiu + 1];
         dolfin_assert(nt > 0);
+
         node_type_[id] = nt;
       }
     }
-    delete[] u_recvbuf;
 #endif
   }
-
-  delete[] u_sendbuf;
-  delete[] r_sendbuf;
 
   tocd(1);
 

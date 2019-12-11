@@ -87,8 +87,8 @@ void distribute(MeshValues<uint, Vertex>& dist)
     Mesh new_mesh(mesh.type(), mesh.space(), distdata.comm());
     swap( mesh, new_mesh );
   }
-  dolfin_assert(mesh.topology().connectivity(0) == nullptr);
-  dolfin_assert(mesh.topology().connectivity(tdim) == nullptr);
+  dolfin_assert(mesh.topology().connectivity(0) == NULL);
+  dolfin_assert(mesh.topology().connectivity(tdim) == NULL);
 
   // Exchange the vertices
   uint recvmax_v;
@@ -205,14 +205,14 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   Array< Array< real > > send_vcoords( pe_size );
 
   /// Support the same cell and vertex function as before
-  uint const             numRV = D != nullptr ? D->size< real, Vertex >() : 0;
+  uint const             numRV = D != NULL ? D->size< real, Vertex >() : 0;
   Array< Array< real > > RV( ( numRV > 0 ) ? pe_size : 0 );
   uint const             numUC =
-    D != nullptr ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
+    D != NULL ? ( D->size< bool, Cell >() + D->size< uint, Cell >() ) : 0;
   Array< Array< uint > > UC( ( numUC > 0 ) ? pe_size : 0 );
 
   /// Check that only desired data is present in D
-  if ( D != nullptr && ( D->size() != ( numRV + numUC ) ) )
+  if ( D != NULL && ( D->size() != ( numRV + numUC ) ) )
   {
     error( "MPIMeshCommunicator : transferring <real, Vertex>, <bool, Cell>, "
            "and <uint, Cell> only is supported." );
@@ -320,7 +320,6 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   }
 
   uint recvmaxRV = recvmax[1] * numRV;
-  // real *recvbufRV = nullptr;
   if ( not RV.empty() )
   {
     RV[pe_rank].reserve( RV[pe_rank].size() + recvmaxRV );
@@ -420,7 +419,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
           {
             local_cells.push_back( local_vindex );
             for ( uint l = 0; l < gdim; ++l )
-              local_vcoords.push_back( std::numeric_limits<real>::lowest() );
+              local_vcoords.push_back( DOLFIN_REAL_MIN );
             distdata.set_map( local_vindex++, v->global_index() );
             shared_buffer.push_back( v->global_index() );
           }
@@ -439,7 +438,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
       {
         local_cells.push_back( local_vindex );
         for ( uint l = 0; l < gdim; ++l )
-          local_vcoords.push_back( std::numeric_limits<real>::lowest() );
+          local_vcoords.push_back( DOLFIN_REAL_MIN );
         distdata.set_map( local_vindex++, recv_cells[i] );
         shared_buffer.push_back( recv_cells[i] );
       }
@@ -475,7 +474,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
           {
             bool valid = true;
             for ( uint l = 0; l < gdim; ++l )
-              if ( local_vcoords[local * gdim + l] == std::numeric_limits<real>::lowest() )
+              if ( local_vcoords[local * gdim + l] == DOLFIN_REAL_MIN )
                 valid = false;
 
             if ( valid )
@@ -523,7 +522,7 @@ void distribute( MeshValues< uint, Cell > & dist, MeshData * D )
   // Clear mesh using swap with new instance
   mesh = Mesh( mesh.type(), mesh.space(), comm );
 
-  dolfin_assert( mesh.topology().connectivity( 0 ) == nullptr );
+  dolfin_assert( mesh.topology().connectivity( 0 ) == NULL );
 
   // NOTE: This implementation only works for homogeneous topologies
   //       Check cell data size just in case.

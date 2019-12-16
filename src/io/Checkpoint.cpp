@@ -71,7 +71,7 @@ void Checkpoint::hdr_init(Mesh& mesh, bool static_mesh)
     if (!disp_initialized_ || !static_mesh)
     {
       memset(&hdr_.disp[0], 0, 4 * sizeof(uint));
-      MPI::all_reduce<MPI::sum>( local_data[0], hdr_.disp[0] );
+      MPI::all_reduce<MPI::sum>( local_data, hdr_.disp, 4 );
       disp_initialized_ = true;
     }
 

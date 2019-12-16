@@ -105,6 +105,11 @@ public:
   static int all_reduce(T x, T& r, Communicator& comm = MPI::DOLFIN_COMM);
 
   //// Wrap in a template function to allow use of functors
+  template<int R,typename T>
+  static int all_reduce( T * x, T * r, uint count,
+                         Communicator& comm = MPI::DOLFIN_COMM );
+
+  //// Wrap in a template function to allow use of functors
   template<typename T>
   static int sendrecv( T * sendbuf, int sendcount, int destination,
                        T * recvbuf, int recvcount, int source, int tag,
@@ -191,15 +196,15 @@ inline int MPI::all_gather( T * sendbuf, int sendcount,
 template< int R, typename T >
 struct helper
 {
-  inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm);
+  inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm);
 };
 
 template< typename T >
 struct helper<MPI::sum,T>
 {
-inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, count,
+  return MPI::check_error( MPI_Allreduce(x, r, count,
                                          MPI_type<T>::value, MPI_SUM, comm) );
 }
 };
@@ -207,9 +212,9 @@ inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
 template< typename T >
 struct helper<MPI::min,T>
 {
-inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, count,
+  return MPI::check_error( MPI_Allreduce(x, r, count,
                                          MPI_type<T>::value, MPI_MIN,comm) );
 }
 };
@@ -217,16 +222,23 @@ inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
 template< typename T >
 struct helper<MPI::max,T>
 {
-inline static int all_reduce(T x, T& r, int count, MPI::Communicator& comm)
+inline static int all_reduce(T * x, T * r, int count, MPI::Communicator& comm)
 {
-  return MPI::check_error( MPI_Allreduce(&x, &r, count,
+  return MPI::check_error( MPI_Allreduce(x, r, count,
                                          MPI_type<T>::value, MPI_MAX,comm) );
 }
 };
+
 template<int R,typename T>
 inline int MPI::all_reduce(T x, T& r, Communicator& comm)
 {
-  return helper<R,T>::all_reduce(x, r, 1, comm);
+  return helper<R,T>::all_reduce(&x, &r, 1, comm);
+}
+
+template<int R,typename T>
+inline int MPI::all_reduce(T * x, T * r, uint count, Communicator& comm)
+{
+  return helper<R,T>::all_reduce(x, r, count, comm);
 }
 //-----------------------------------------------------------------------------
 template<>

@@ -2,6 +2,8 @@
 
 #include <dolfin/config/dolfin_config.h>
 
+#include <dolfin/common/constants.h>
+
 //--- Linear algebra ---
 #ifdef HAVE_PETSC
 add("linear algebra backend", "PETSc");
@@ -156,3 +158,6 @@ add("Mesh smoothing restricted by rmin", true);
 
 //--- Insitu ---
 add("VisIt directory", "");
+
+//--- Insitu ---
+add("NodeNormal alpha", DOLFIN_PI / 2.);

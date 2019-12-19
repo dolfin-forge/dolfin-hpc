@@ -24,7 +24,7 @@ template<class T> class Array;
  *
  */
 
-class Connectivity : public Clonable<Connectivity>
+class Connectivity
 {
 
 public:
@@ -36,7 +36,7 @@ public:
   Connectivity(Array<uint> const& valency);
 
   /// Create connectivity
-  Connectivity(Array<Array<uint> > const& connectivity);
+  Connectivity(Array< Array<uint> > const& connectivity);
 
   /// Copy constructor
   Connectivity(Connectivity const& other);
@@ -63,10 +63,10 @@ public:
   void operator()(uint entity, uint const *& b, uint const *& e) const;
 
   /// Return contiguous array of connections for all entities
-  uint* operator()();
+  Array< Array< uint > > & operator()();
 
   /// Return contiguous array of connections for all entities
-  uint const * operator()() const;
+  Array< Array< uint > > const & operator()() const;
 
   /// Return incidence of the edge
   bool incident(uint entity, uint edge) const;
@@ -140,7 +140,8 @@ private:
   uint max_degree_;
 
   /// Connections for all entities stored as a contiguous array
-  uint **connections_;
+  // uint **connections_;
+  Array< Array< uint > > connections_;
 
 };
 

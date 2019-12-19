@@ -12,133 +12,108 @@ namespace dolfin
 {
 
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity(uint order, uint degree) :
-  order_(order),
-  min_degree_(degree),
-  max_degree_(degree),
-  connections_(new uint*[order_ + 1])
+Connectivity::Connectivity( uint order, uint degree )
+  : order_( order )
+  , min_degree_( degree )
+  , max_degree_( degree )
+  , connections_( order_ )
 {
-  connections_[0] = (order * degree > 0) ? new uint[order * degree]() : NULL;
-  for (uint e = 0; e < order_; ++e)
-  {
-    connections_[e + 1] = connections_[e] + degree;
-  }
+	for ( uint e = 0; e < order_; ++e )
+	{
+		connections_[e] = Array< uint >( degree, 0 );
+	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity(Array<uint> const& valency) :
-  order_(valency.size()),
-  min_degree_(0),
-  max_degree_(0),
-  connections_(new uint*[order_ + 1])
+Connectivity::Connectivity( Array< uint > const & valency )
+  : order_( valency.size() )
+  , min_degree_( valency[0] )
+  , max_degree_( 0 )
+  , connections_( order_ )
 {
-  if (order_)
-  {
-    uint s = valency[0];
-    min_degree_ = s;
-    max_degree_ = 0;
-    for (Array<uint>::const_iterator it = valency.begin(); it != valency.end();
-         s+=(*it++))
-    {
-      min_degree_ = std::min(min_degree_, *it);
-      max_degree_ = std::max(max_degree_, *it);
-    }
-    connections_[0] = s ? new uint[s]() : NULL;
-    for (uint e = 0; e < order_; ++e)
-    {
-      connections_[e + 1] = connections_[e] + valency[e];
-    }
-  }
-  else
-  {
-    connections_[0] = NULL;
-    dolfin_assert(this->data() == this->bound());
-  }
+	for ( uint e = 0; e < order_; ++e )
+	{
+		min_degree_     = std::min( min_degree_, valency[e] );
+		max_degree_     = std::max( max_degree_, valency[e] );
+		connections_[e] = Array< uint >( valency[e] );
+	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity(Array<Array<uint> > const& connectivity) :
-  order_(connectivity.size()),
-  min_degree_(0),
-  max_degree_(0),
-  connections_(new uint*[order_ + 1])
+Connectivity::Connectivity( Array< Array< uint > > const & connectivity )
+  : order_( connectivity.size() )
+  , min_degree_( connectivity[0].size() )
+  , max_degree_( 0 )
+  , connections_( order_ )
 {
-  if (order_)
-  {
-    uint s = connectivity[0].size();
-    min_degree_ = s;
-    max_degree_ = 0;
-    for (Array<Array<uint> >::const_iterator it = connectivity.begin();
-         it != connectivity.end(); ++it)
-    {
-      uint const d = it->size();
-      min_degree_ = std::min(min_degree_, d);
-      max_degree_ = std::max(max_degree_, d);
-      s += d;
-    }
-    connections_[0] = s ? new uint[s] : NULL;
-    for (uint e = 0; e < order_; ++e)
-    {
-      std::copy(connectivity[e].begin(), connectivity[e].end(), connections_[e]);
-      connections_[e + 1] = connections_[e] + connectivity[e].size();
-    }
-  }
-  else
-  {
-    connections_[0] = NULL;
-    dolfin_assert(this->data() == this->bound());
-  }
+	for ( uint e = 0; e < order_; ++e )
+	{
+		min_degree_     = std::min( min_degree_, connectivity[e].size() );
+		max_degree_     = std::max( max_degree_, connectivity[e].size() );
+		connections_[e] = connectivity[e];
+	}
 }
 //-----------------------------------------------------------------------------
-Connectivity::Connectivity(Connectivity const& other) :
-    order_(other.order_),
-    min_degree_(other.min_degree_),
-    max_degree_(other.max_degree_),
-    connections_(new uint*[order_ + 1])
+Connectivity::Connectivity( Connectivity const & other )
+  : order_( other.order_ )
+  , min_degree_( other.min_degree_ )
+  , max_degree_( other.max_degree_ )
+  , connections_( other.order_ )
 {
-  connections_[0] = other.entries() ? new uint[other.entries()] : NULL;
-  std::copy(other.data(), other.bound(), connections_[0]);
-  for (uint e = 0; e < order_; ++e)
-  {
-    connections_[e + 1] = connections_[e] + other.degree(e);
-  }
+	for ( uint e = 0; e < order_; ++e )
+	{
+		connections_[e] = other[e];
+	}
 }
 //-----------------------------------------------------------------------------
 Connectivity::~Connectivity()
 {
-  delete[] connections_[0];
-  delete[] connections_;
-  connections_ = NULL;
 }
 //-----------------------------------------------------------------------------
-bool Connectivity::operator==(Connectivity const& other) const
+bool Connectivity::operator==( Connectivity const & other ) const
 {
-  if (this == &other) { return true; }
-  if (order_ != other.order_)
-  {
+	if ( this == &other )
+	{
+		return true;
+	}
+	if ( order_ != other.order_ )
+	{
 #if DEBUG
-    warning("Connectivity : != order");
+		warning( "Connectivity : != order" );
 #endif
+		return false;
+	}
+	if ( min_degree_ != other.min_degree_ )
+	{
+		return false;
+	}
+	if ( max_degree_ != other.max_degree_ )
+	{
+		return false;
+	}
+
+  if ( connections_.size() != other.connections_.size() )
     return false;
-  }
-  if (min_degree_ != other.min_degree_) { return false; }
-  if (max_degree_ != other.max_degree_) { return false; }
-  if (!cmp<uint>(this->entries(), connections_[0], other.connections_[0]))
+
+  for ( uint e = 0; e < order_; ++e )
   {
-#if DEBUG
-    warning("Connectivity : != connections");
-    message("a0: %0x a1: %0x", connections_[0], other.connections_[0]);
-    uint i = 0;
-    uint const * c1 = other.connections_[0];
-    for (uint const * c0 = this->data(); c0 != this->bound(); ++i, ++c0, ++c1)
+    if ( connections_[e].size() != other.connections_[e].size() )
+      return false;
+
+    for ( uint f = 0; f < connections_[e]; ++f )
     {
-      if (*c0 != *c1)
+      if ( connections_[e][f] != other.connections_[e][f] )
       {
-        message("First differing entry '%u' : %u != %u", i, *c0, *c1);
+#if DEBUG
+				warning( "Connectivity : != connections" );
+				message( "First differing entry '[%u][%u]' : %u != %u", e, f,
+				         connections_[e][f],
+				         other.connections_[e][f] );
+#endif
+        return false;
       }
     }
-#endif
-    return false;
   }
-  return true;
+
+	return true;
 }
 //-----------------------------------------------------------------------------
 bool Connectivity::operator!=(Connectivity const& other) const
@@ -146,14 +121,14 @@ bool Connectivity::operator!=(Connectivity const& other) const
   return !(*this == other);
 }
 //-----------------------------------------------------------------------------
-uint * Connectivity::operator()()
+Array< Array< uint > > & Connectivity::operator()()
 {
-  return connections_[0];
+  return connections_;
 }
 //-----------------------------------------------------------------------------
-uint const * Connectivity::operator()() const
+Array< Array< uint > > const & Connectivity::operator()() const
 {
-  return connections_[0];
+  return connections_;
 }
 //-----------------------------------------------------------------------------
 uint Connectivity::order() const
@@ -163,7 +138,12 @@ uint Connectivity::order() const
 //-----------------------------------------------------------------------------
 uidx Connectivity::entries() const
 {
-  return (connections_[order_] - connections_[0]);
+  uint entries = 0;
+
+  for ( uint e = 0; e < order_; ++e )
+    entries += connections_[e].size();
+
+  return entries;
 }
 //----------------------------------------------------------------------------
 uint Connectivity::min_degree() const
@@ -185,9 +165,9 @@ void Connectivity::set(uint entity, uint const * connections)
 {
   dolfin_assert(entity < order_);
   dolfin_assert(connections_);
-  uint * b = connections_[entity];
-  uint * const e = connections_[entity + 1];
-  while (b != e) { *b++ = *connections++; }
+
+  for ( uint e = 0; e < connections_[entity]; ++e )
+    connections_[entity][e] = connections[e];
 }
 //-----------------------------------------------------------------------------
 void Connectivity::set(Array<uint> const& connectivity)
@@ -197,7 +177,15 @@ void Connectivity::set(Array<uint> const& connectivity)
     error("Connectivity : provided connectivity size %u does no match %u",
           connectivity.size(), this->entries());
   }
-  std::copy(connectivity.begin(), connectivity.end(), connections_[0]);
+
+  uint pos = 0;
+  for ( uint e = 0; e < order_; ++e )
+  {
+		std::copy( connectivity.data() + pos,
+		           connectivity.data() + pos + connections_[e].size(),
+		           connections_[e].data() );
+    pos += connections_[e].size();
+  }
 }
 //-----------------------------------------------------------------------------
 void Connectivity::remap_l(Array<uint> const& map)

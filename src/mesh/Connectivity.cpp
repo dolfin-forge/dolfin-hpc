@@ -68,6 +68,24 @@ Connectivity::~Connectivity()
 {
 }
 //-----------------------------------------------------------------------------
+Connectivity & operator=( Connectivity const & other )
+{
+  connections_.resize( other.order() );
+
+  for( uint e = 0; e < other.order(); ++e )
+    connections_[e] = other[e];
+
+  order_ = other.order_;
+  min_degree_ = other.min_degree_;
+  max_degree_ = other.max_degree_;
+
+#if defined( DEBUG )
+  this->check();
+#endif
+
+  return *this;
+}
+//-----------------------------------------------------------------------------
 bool Connectivity::operator==( Connectivity const & other ) const
 {
 	if ( this == &other )
@@ -136,7 +154,7 @@ uint Connectivity::order() const
   return order_;
 }
 //-----------------------------------------------------------------------------
-uidx Connectivity::entries() const
+uint Connectivity::entries() const
 {
   uint entries = 0;
 
@@ -194,20 +212,17 @@ void Connectivity::remap_l(Array<uint> const& map)
   {
     error("Connectivity : remap_left mapping has invalid size");
   }
-  if (order_)
+
+  if ( order_ )
   {
     // Set sizes in place of offsets to depict connectivities layout
-    uint ** remapped = new uint*[order_ + 1];
-    remapped[0] = this->entries() ? new uint[this->entries()] : NULL;
+    Array< Array< uint > > remapped( order_ );
     for (uint e = 0; e < order_; ++e)
     {
       uint const ii = map[e];
       dolfin_assert(ii < order_);
-      std::copy(connections_[ii], connections_[ii + 1], remapped[e]);
-      remapped[e + 1] = remapped[e] + (connections_[ii + 1] - connections_[ii]);
+      remapped[e] = connections_[ii];
     }
-    delete[] connections_[0];
-    delete[] connections_;
     std::swap(connections_, remapped);
   }
 }
@@ -231,9 +246,9 @@ void Connectivity::dump() const
   for (uint e = 0; e < order_; ++e)
   {
     cout << e << ":";
-    for (uint * c = connections_[e]; c < connections_[e + 1]; ++c)
+    for (uint c = 0; c < connections_[e].size(); ++c)
     {
-      cout << " " << *c;
+      cout << " " << connections_[e][c];
     }
     cout << "\n";
   }
@@ -241,9 +256,14 @@ void Connectivity::dump() const
 //-----------------------------------------------------------------------------
 Connectivity const& Connectivity::operator>>(Array<uint>& A) const
 {
-  A.assign(this->data(), this->bound());
+  A.reserve( this->entities() );
+  for (uint e = 0; e < order_; ++e)
+    A.append( connections_[e].begin(), connections_[e].end() );
+
   // Set stride if the graph is regular
-  if(min_degree_ == max_degree_) A %= min_degree_;
+  if(min_degree_ == max_degree_)
+    A %= min_degree_;
+
   return *this;
 }
 //-----------------------------------------------------------------------------
@@ -257,12 +277,12 @@ void Connectivity::check() const
    *
    */
 
-  for(uint e0 = 0; e0 < this->order(); ++e0)
+  for(uint e0 = 0; e0 < order_; ++e0)
   {
     _set<uint> ce;
-    for(uint e1 = 0; e1 <this->degree(e0); ++e1)
+    for(uint e1 = 0; e1 < connections_[e0].size(); ++e1)
     {
-      uint ec = (*this)(e0)[e1];
+      uint ec = connections_[e0][e1];
       if(ce.count(ec) > 0)
       {
         error("Entity %u appears twice in connectivities for %u", ec, e0);
@@ -276,8 +296,8 @@ Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C)
 {
   A.clear();
   A.resize(C.order());
-  uint const *b, *e;
-  for (uint vi = 0; vi < C.order(); ++vi) { C(vi, b, e); A[vi].assign(b, e); }
+  for (uint e = 0; e < order_; ++e)
+    A[e] = C(e);
   return A;
 }
 //-----------------------------------------------------------------------------

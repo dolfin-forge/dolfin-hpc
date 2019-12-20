@@ -4,10 +4,7 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
-#include <dolfin/common/Clonable.h>
-
 #include <dolfin/common/types.h>
-#include <dolfin/log/log.h>
 
 namespace dolfin
 {
@@ -44,6 +41,8 @@ public:
   /// Destructor
   ~Connectivity();
 
+  Connectivity & operator=( Connectivity const & other );
+
   /// Equality
   bool operator==(Connectivity const& other) const;
 
@@ -51,16 +50,10 @@ public:
   bool operator!=(Connectivity const& other) const;
 
   /// Return array of connections for given entity
-  uint* operator()(uint entity);
+  Array< uint > & operator[](uint entity);
 
   /// Return array of connections for given entity
-  uint const * operator()(uint entity) const;
-
-  /// Set array bounds of connections for given entity
-  void operator()(uint entity, uint *& b, uint *& e);
-
-  /// Set array bounds of connections for given entity
-  void operator()(uint entity, uint const *& b, uint const *& e) const;
+  Array< uint > const & operator[](uint entity) const;
 
   /// Return contiguous array of connections for all entities
   Array< Array< uint > > & operator()();
@@ -80,7 +73,7 @@ public:
   uint order() const;
 
   /// Return total number of entries
-  uidx entries() const;
+  uint entries() const;
 
   /// Return minimum number of connections
   uint min_degree() const;
@@ -112,24 +105,13 @@ public:
   /// Dump data
   void dump() const;
 
-  //--- ITERATOR --------------------------------------------------------------
-
-  typedef uint*       data_iterator;
-  typedef uint const* const_data_iterator;
-
-  inline data_iterator data()  const { return connections_[0]; }
-  inline data_iterator bound() const { return connections_[order_]; }
-
   //--- SERIALIZATION ---------------------------------------------------------
   Connectivity const& operator>>(Array<uint>& A) const;
 
   //--- CHECK ROUTINES --------------------------------------------------------
-
-  /// Check
   void check() const;
 
 private:
-
   /// Number of entities
   uint order_;
 
@@ -151,11 +133,11 @@ inline uint Connectivity::degree(uint entity) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  return (connections_[entity + 1] - connections_[entity]);
+  return connections_[entity].size();
 }
 
 //-----------------------------------------------------------------------------
-inline uint * Connectivity::operator()(uint entity)
+inline Array< uint > & Connectivity::operator[](uint entity)
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -163,7 +145,7 @@ inline uint * Connectivity::operator()(uint entity)
 }
 
 //-----------------------------------------------------------------------------
-inline uint const * Connectivity::operator()(uint entity) const
+inline Array< uint > const & Connectivity::operator[](uint entity) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
@@ -175,10 +157,9 @@ inline bool Connectivity::incident(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  uint const * e = connections_[entity];
-  uint const * const n = connections_[entity + 1];
-  while (e != n && *e != edge) { ++e; }
-  return (e != n);
+	return ( connections_[entity].end()
+	         != std::find(
+	           connections_[entity].begin(), connections_[entity].end(), edge ) );
 }
 
 //-----------------------------------------------------------------------------
@@ -186,30 +167,12 @@ inline int Connectivity::index(uint entity, uint edge) const
 {
   dolfin_assert(order_ > 0);
   dolfin_assert(entity < order_);
-  uint const * const b = connections_[entity];
-  uint const * const n = connections_[entity + 1];
-  uint const * e = b;
-  while (e != n && *e != edge) { ++e; }
-  return (e == n ? -1 : (e - b));
-}
+  uint index = 0;
+  for (; index < connections_[entity].size(); ++index )
+    if ( connections_[entity][index] == edge )
+      break;
 
-//-----------------------------------------------------------------------------
-inline void Connectivity::operator()(uint entity, uint *& b, uint *& e)
-{
-  dolfin_assert(order_ > 0);
-  dolfin_assert(entity < order_);
-  b = connections_[entity];
-  e = connections_[entity + 1];
-}
-
-//-----------------------------------------------------------------------------
-inline void Connectivity::operator()(uint entity, uint const *& b,
-                                         uint const *& e) const
-{
-  dolfin_assert(order_ > 0);
-  dolfin_assert(entity < order_);
-  b = connections_[entity];
-  e = connections_[entity + 1];
+  return ( index == connections_[entity].size() ) ? -1 : index;
 }
 
 //--- OPERATORS ---------------------------------------------------------------

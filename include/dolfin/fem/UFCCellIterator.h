@@ -45,7 +45,7 @@ public:
 #endif
     ufc_cell_.index =
         ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-    uint const * vertices = ufc_cell_.cell_->entities(0);
+    Array<uint> const & vertices = ufc_cell_.cell_->entities(0);
     for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
     {
       ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);
@@ -71,7 +71,7 @@ public:
 #endif
       ufc_cell_.index =
           ufc_cell_.entity_indices[ufc_cell_.topological_dimension][0];
-      uint const * vertices = ufc_cell_.cell_->entities(0);
+      Array<uint> const & vertices = ufc_cell_.cell_->entities(0);
       for (uint i = 0; i < ufc_cell_.num_vertices; ++i)
       {
         ufc_cell_.coordinates[i] = geometry_.x(vertices[i]);

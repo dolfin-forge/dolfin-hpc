@@ -204,18 +204,6 @@ void MeshTopology::finalize()
 	// This would cause issues for boundary meshes and some mesh algorithms.
 }
 //-----------------------------------------------------------------------------
-CellType const & MeshTopology::type() const
-{
-	dolfin_assert( type_ );
-	return *type_;
-}
-//-----------------------------------------------------------------------------
-CellType const & MeshTopology::type( uint ) const
-{
-	dolfin_assert( type_ );
-	return *type_;
-}
-//-----------------------------------------------------------------------------
 void MeshTopology::remap( uint d0, Array< uint > const & mapping )
 {
 	for ( uint d1 = 0; d1 <= dim_; ++d1 )
@@ -239,47 +227,6 @@ void MeshTopology::remap( uint d0, Array< uint > const & mapping )
 	{
 		distdata_[d0].remap_numbering( mapping );
 	}
-}
-//-----------------------------------------------------------------------------
-Connectivity & MeshTopology::operator()( uint d0, uint d1 )
-{
-	dolfin_assert( d0 <= dim_ && d1 <= dim_ );
-	if ( !connectivity( d0, d1 ) )
-	{
-		compute( d0, d1 );
-	}
-	return *connectivity( d0, d1 );
-}
-//-----------------------------------------------------------------------------
-Connectivity const & MeshTopology::operator()( uint d0, uint d1 ) const
-{
-	dolfin_assert( d0 <= dim_ && d1 <= dim_ );
-	return *compute( d0, d1 );
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::dim() const
-{
-	return dim_;
-}
-//-----------------------------------------------------------------------------
-uint MeshTopology::size( uint dim ) const
-{
-	dolfin_assert( dim <= dim_ );
-	return ( *this )( dim, 0 ).order();
-}
-//-----------------------------------------------------------------------------
-Connectivity * MeshTopology::connectivity( uint d0, uint d1 )
-{
-	dolfin_assert( d0 <= dim_ );
-	dolfin_assert( d1 <= dim_ );
-	return C_[d0][d1];
-}
-//-----------------------------------------------------------------------------
-Connectivity const * MeshTopology::connectivity( uint d0, uint d1 ) const
-{
-	dolfin_assert( d0 <= dim_ );
-	dolfin_assert( d1 <= dim_ );
-	return C_[d0][d1];
 }
 //-----------------------------------------------------------------------------
 MeshDistributedData & MeshTopology::distdata()
@@ -355,7 +302,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
 		Connectivity *       ce = new Connectivity( this->size( dim_ ), m );
 		for ( uint c = 0; c < cv->order(); ++c )
 		{
-			type_->create_entities( entities, di, ( *cv )( c ) );
+			type_->create_entities( entities, di, ( *cv )[c].data() );
 			for ( uint e = 0; e < m; ++e )
 			{
 				key.set( entities[e], entities_list.size() );
@@ -384,7 +331,7 @@ Connectivity const * MeshTopology::entities( uint di ) const
 				{
 					vertex_entities[entities[e][v]].push_back( key.idx );
 				}
-				( *ce )( c )[e] = key.idx;
+				( *ce )[c][e] = key.idx;
 			}
 		}
 		dolfin_assert( C_[dim_][di] == NULL );
@@ -427,22 +374,23 @@ Connectivity const * MeshTopology::transpose( uint d1, uint d0 ) const
 
 	Connectivity const * const c10   = connectivity( d1, d0 );
 	uint const                 card0 = compute( d0, 0 )->order();
-	Array< uint >              conn( card0, 0 );
-	for ( uint const * v = c10->data(); v != c10->bound(); ++v )
-	{
-		conn[*v]++;
-	}
+
+	Array< uint > conn;
+	*c10 >> conn;
+
 	Connectivity * c01 = new Connectivity( conn );
 	conn               = 0;
+
 	for ( uint e1 = 0; e1 < c10->order(); ++e1 )
 	{
 		for ( uint e0 = 0; e0 < c10->degree( e1 ); ++e0 )
 		{
-			uint const ei              = ( *c10 )( e1 )[e0];
-			( *c01 )( ei )[conn[ei]++] = e1;
+			uint const ei              = ( *c10 )[e1][e0];
+			( *c01 )[ei][conn[ei]++] = e1;
 		}
 	}
 	dolfin_assert( c01->order() == card0 );
+	MAYBE_UNUSED(card0);
 	std::swap( C_[d0][d1], c01 );
 
 	return connectivity( d0, d1 );
@@ -471,15 +419,15 @@ Connectivity const *
 		for ( uint e0 = 0; e0 < o0v; ++e0 )
 		{
 			std::set< uint > entities;
-			uint const *     c0 = ( *c0v )( e0 );
-			uint const       d0 = c0v->degree( e0 );
+			Array< uint > const & c0 = ( *c0v )[e0];
+			uint const            d0 = c0v->degree( e0 );
 			for ( uint i = 0; i < d0; ++i )
 			{
-				uint const * c1 = ( *cv1 )( c0[i] );
+				Array< uint > const & c1 = ( *cv1 )[c0[i]];
 				uint const   d1 = cv1->degree( c0[i] );
 				for ( uint j = 0; j < d1; ++j )
 				{
-					if ( contains( c0, d0, ( *c1v )( c1[j] ), d1 ) )
+					if ( contains( c0.data(), d0, ( *c1v )[c1[j]].data(), d1 ) )
 					{
 						entities.insert( c1[j] );
 					}
@@ -498,12 +446,12 @@ Connectivity const *
 		for ( uint e0 = 0; e0 < o0v; ++e0 )
 		{
 			std::set< uint > entities;
-			uint const *     c0 = ( *c0v )( e0 );
-			uint const       d0 = c0v->degree( e0 );
+			Array< uint > const & c0 = ( *c0v )[e0];
+			uint const            d0 = c0v->degree( e0 );
 			for ( uint i = 0; i < d0; ++i )
 			{
-				uint const * c1 = ( *cv1 )( c0[i] );
-				uint const   d1 = cv1->degree( c0[i] );
+				Array< uint > const & c1 = ( *cv1 )[c0[i]];
+				uint const            d1 = cv1->degree( c0[i] );
 				for ( uint j = 0; j < d1; ++j )
 				{
 					if ( e0 != c1[j] )

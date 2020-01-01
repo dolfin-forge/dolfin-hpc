@@ -127,7 +127,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::interval:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(fp,
                   "<interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
@@ -137,7 +137,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::triangle:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(
               fp,
@@ -148,7 +148,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::tetrahedron:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(
               fp,
@@ -159,7 +159,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::quadrilateral:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(
               fp,
@@ -170,7 +170,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::hexahedron:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           fprintf(
               fp,
@@ -359,7 +359,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::interval:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           cline = sprintf(cbuffer + csize,
             "<interval index=\"%u\" v0=\"%u\" v1=\"%u\"/>\n",
@@ -373,7 +373,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::triangle:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           cline = sprintf(cbuffer + csize,
             "<triangle index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\"/>\n",
@@ -388,7 +388,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::tetrahedron:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           cline = sprintf(cbuffer + csize,
             "<tetrahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
@@ -405,7 +405,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::quadrilateral:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           cline = sprintf(cbuffer + csize,
             "<quadrilateral index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\"/>\n",
@@ -421,7 +421,7 @@ void XMLFile::operator<<(Mesh& mesh)
       case CellType::hexahedron:
         for (CellIterator c(mesh); !c.end(); ++c)
         {
-          uint* vertices = c->entities(0);
+          Array<uint> const & vertices = c->entities(0);
           dolfin_assert(vertices);
           cline = sprintf(cbuffer + csize,
             "<hexahedron index=\"%u\" v0=\"%u\" v1=\"%u\" v2=\"%u\" v3=\"%u\" v4=\"%u\" v5=\"%u\" v6=\"%u\" v7=\"%u\"/>\n",

@@ -4,12 +4,12 @@
 #ifndef __DOLFIN_MESH_CONNECTIVITY_H
 #define __DOLFIN_MESH_CONNECTIVITY_H
 
+#include <dolfin/common/Array.h>
 #include <dolfin/common/types.h>
+
 
 namespace dolfin
 {
-
-template<class T> class Array;
 
 /**
  *  DOCUMENTATION:
@@ -55,10 +55,10 @@ public:
   /// Return array of connections for given entity
   Array< uint > const & operator[](uint entity) const;
 
-  /// Return contiguous array of connections for all entities
+  /// Return arrays of connections for all entities
   Array< Array< uint > > & operator()();
 
-  /// Return contiguous array of connections for all entities
+  /// Return arrays of connections for all entities
   Array< Array< uint > > const & operator()() const;
 
   /// Return incidence of the edge

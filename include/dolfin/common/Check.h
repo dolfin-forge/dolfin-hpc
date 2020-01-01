@@ -56,10 +56,22 @@ int main() \
   return DOLFIN_SUITE_RUN(_name, _suite_function()); \
 }
 
+#if (CHECK_MAJOR_VERSION >= 0 && CHECK_MINOR_VERSION >= 13)
+
+#define DOLFIN_START_TEST(_name) \
+START_TEST( _name ) \
+{ \
+  int init_failed = 0; \
+  Test T;
+
+#else
+
 #define DOLFIN_START_TEST(_name) \
 START_TEST( _name ) \
   int init_failed = 0; \
   Test T;
+
+#endif
 
 #define DOLFIN_END_TEST \
   ck_assert( init_failed == 0 ); \

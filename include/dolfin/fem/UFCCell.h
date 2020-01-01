@@ -164,7 +164,7 @@ inline void UFCCell::init(Cell& cell)
 #endif
 
   /// Set vertex coordinates
-  uint* vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   coordinates = new real*[num_vertices];
   for (uint i = 0; i < num_vertices; ++i)
   {
@@ -209,7 +209,7 @@ inline void UFCCell::update(Cell& cell)
   index = entity_indices[topological_dimension][0];
 
   /// Set vertex coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   for (uint i = 0; i < num_vertices; ++i)
   {
     coordinates[i] = cell.mesh().geometry().x(vertices[i]);

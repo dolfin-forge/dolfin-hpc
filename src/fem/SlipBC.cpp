@@ -211,7 +211,7 @@ void SlipBC::applySlipBC_P1(GenericMatrix& A, GenericVector& b,
         scratch.cell.update(cell);
 
         // Find the vertex position in the cell
-        uint *cvi = cell.entities(0);
+        Array<uint> const & cvi = cell.entities(0);
         uint ci = 0;
         for (ci = 0; ci < cell.num_entities(0); ++ci)
         {

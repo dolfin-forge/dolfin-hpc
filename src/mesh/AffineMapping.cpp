@@ -113,7 +113,7 @@ void AffineMapping::updateInterval(Cell const& cell)
   std::fill(&p[1][0], &p[1][d_], 0.0);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::copy(&geom.x(vertices[0])[0], &geom.x(vertices[0])[0] + gdim_, &p[0][0]);
   std::copy(&geom.x(vertices[1])[0], &geom.x(vertices[1])[0] + gdim_, &p[1][0]);
@@ -130,7 +130,7 @@ void AffineMapping::updateTriangle(Cell const& cell)
   std::fill(&p[2][0], &p[2][d_], 0.0);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::copy(&geom.x(vertices[0])[0], &geom.x(vertices[0])[0] + gdim_, &p[0][0]);
   std::copy(&geom.x(vertices[1])[0], &geom.x(vertices[1])[0] + gdim_, &p[1][0]);
@@ -148,7 +148,7 @@ void AffineMapping::updateTetrahedron(Cell const& cell)
   std::fill(&p[3][0], &p[3][d_], 0.0);
 
   // Get coordinates
-  uint const * vertices = cell.entities(0);
+  Array<uint> const & vertices = cell.entities(0);
   MeshGeometry const& geom = cell.mesh().geometry();
   std::copy(&geom.x(vertices[0])[0], &geom.x(vertices[0])[0] + gdim_, &p[0][0]);
   std::copy(&geom.x(vertices[1])[0], &geom.x(vertices[1])[0] + gdim_, &p[1][0]);

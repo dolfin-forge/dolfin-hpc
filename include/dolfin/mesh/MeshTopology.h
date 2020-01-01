@@ -100,22 +100,22 @@ public:
   //--- Connectivity ----------------------------------------------------------
 
   /// Return connectivity for given pair of topological dimensions
-  Connectivity& operator()(uint d0, uint d1);
+  inline Connectivity& operator()(uint d0, uint d1);
 
   /// Return connectivity for given pair of topological dimensions
-  Connectivity const& operator()(uint d0, uint d1) const;
+  inline Connectivity const& operator()(uint d0, uint d1) const;
 
   /// Return topological dimension
-  uint dim() const;
+  inline uint dim() const;
 
   /// Return number of entities in the local topology for given dimension
-  uint size(uint dim) const;
+  inline uint size(uint dim) const;
 
   /// Return pointer to connectivity for given pair
-  Connectivity * connectivity(uint d0, uint d1 = 0);
+  inline Connectivity * connectivity(uint d0, uint d1 = 0);
 
   /// Return pointer to connectivity for given pair (const)
-  Connectivity const * connectivity(uint d0, uint d1 = 0) const;
+  inline Connectivity const * connectivity(uint d0, uint d1 = 0) const;
 
   //--- Distributed data ------------------------------------------------------
 
@@ -198,6 +198,60 @@ private:
   int timestamp_;
 
 };
+
+//-----------------------------------------------------------------------------
+CellType const & MeshTopology::type() const
+{
+  dolfin_assert( type_ );
+  return *type_;
+}
+//-----------------------------------------------------------------------------
+CellType const & MeshTopology::type( uint ) const
+{
+  dolfin_assert( type_ );
+  return *type_;
+}
+//-----------------------------------------------------------------------------
+inline Connectivity & MeshTopology::operator()( uint d0, uint d1 )
+{
+  dolfin_assert( d0 <= dim_ && d1 <= dim_ );
+  if ( !connectivity( d0, d1 ) )
+  {
+    compute( d0, d1 );
+  }
+  return *connectivity( d0, d1 );
+}
+//-----------------------------------------------------------------------------
+inline Connectivity const & MeshTopology::operator()( uint d0, uint d1 ) const
+{
+  dolfin_assert( d0 <= dim_ && d1 <= dim_ );
+  return *compute( d0, d1 );
+}
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::dim() const
+{
+  return dim_;
+}
+//-----------------------------------------------------------------------------
+inline uint MeshTopology::size( uint dim ) const
+{
+  dolfin_assert( dim <= dim_ );
+  return ( *this )( dim, 0 ).order();
+}
+//-----------------------------------------------------------------------------
+inline Connectivity * MeshTopology::connectivity( uint d0, uint d1 )
+{
+  dolfin_assert( d0 <= dim_ );
+  dolfin_assert( d1 <= dim_ );
+  return C_[d0][d1];
+}
+//-----------------------------------------------------------------------------
+inline Connectivity const * MeshTopology::connectivity( uint d0, uint d1 ) const
+{
+  dolfin_assert( d0 <= dim_ );
+  dolfin_assert( d1 <= dim_ );
+  return C_[d0][d1];
+}
 
 } /* namespace dolfin */
 

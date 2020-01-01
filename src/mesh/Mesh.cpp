@@ -187,12 +187,12 @@ uint Mesh::num_cells() const
   return topology_.size(topology_.dim());
 }
 //-----------------------------------------------------------------------------
-uint* Mesh::cells()
+Array< Array< uint > > & Mesh::cells()
 {
   return topology_(topology_.dim(), 0)();
 }
 //-----------------------------------------------------------------------------
-uint const * Mesh::cells() const
+Array< Array< uint > > const & Mesh::cells() const
 {
   return topology_(topology_.dim(), 0)();
 }

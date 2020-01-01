@@ -87,7 +87,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
     for (SharedIterator it(vdata); it.valid(); ++it)
     {
       dolfin_assert(it.index() < cve.order());
-      uint const * v_entities = cve(it.index());
+      Array<uint> const & v_entities = cve[it.index()];
       for (uint e = 0; e < cve.degree(it.index()); ++e)
       {
         uint const entity_index = v_entities[e];
@@ -98,7 +98,7 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         used_entities[entity_index] = true;
 
         // Skip entities with a non-shared vertex
-        uint const * vertices = cev(entity_index);
+        Array<uint> const & vertices = cev[entity_index];
         dolfin_assert(vertices[0] != vertices[1]);
         bool all_shared = true;
         for (uint v = 0; v < num_entity_vertices; ++v)
@@ -115,10 +115,10 @@ bool MeshRenumber::renumber(MeshTopology& topology)
         {
           //FIXME: randomness may be harmful
           uint const vote = std::rand();
-          vdata.get_common_adj(num_entity_vertices, vertices, adjs);
+          vdata.get_common_adj(num_entity_vertices, vertices.data(), adjs);
           if (adjs.size() > 0)
           {
-            vdata.get_global(num_entity_vertices, vertices, key.indices);
+            vdata.get_global(num_entity_vertices, vertices.data(), key.indices);
             // NOTE: it is important to use set to copy global indices as sort
             //       is called to store indices in increasing order.
             key.set(key.indices, entity_index);

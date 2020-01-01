@@ -925,22 +925,23 @@ void BinaryFile::operator<<(Mesh& mesh)
     std::ofstream fp(filename.c_str(), std::ofstream::binary);
 
     // Write Header
-    fp.write((char *) &hdr, sizeof(BinaryFileHeader));
-    fp.write((char *) &gdim, sizeof(uint));
-    fp.write((char *) &type, sizeof(uint));
+    fp.write( reinterpret_cast<const char*>( &hdr ), sizeof(BinaryFileHeader));
+    fp.write( reinterpret_cast<const char*>( &gdim ), sizeof(uint));
+    fp.write( reinterpret_cast<const char*>( &type ), sizeof(uint));
 
     // Write vertices
-    fp.write((char *) &num_vertices, sizeof(uint));
+    fp.write( reinterpret_cast<const char*>( &num_vertices ), sizeof(uint));
     for (VertexIterator v(mesh); !v.end(); ++v)
     {
-      fp.write((char *) v->x(), gdim * sizeof(real));
+      fp.write( reinterpret_cast<char*>( v->x() ), gdim * sizeof(real));
     }
 
     // Write cells
-    fp.write((char *) &num_cells, sizeof(uint));
+    fp.write( reinterpret_cast<const char*>( &num_cells ), sizeof(uint));
     for (CellIterator c(mesh); !c.end(); ++c)
     {
-      fp.write((char *) c->entities(0), num_cellvertices * sizeof(uint));
+      fp.write( reinterpret_cast<const char*>( c->entities(0).data() ),
+                num_cellvertices * sizeof(uint) );
     }
 
     fp.close();

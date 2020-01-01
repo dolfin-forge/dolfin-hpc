@@ -25,18 +25,16 @@ MeshEntity::~MeshEntity()
 //-----------------------------------------------------------------------------
 void MeshEntity::get_entities(uint dim, uint * indices) const
 {
-  uint *b, *e;
-  topology_(tdim_, dim)(index_, b, e);
-  std::copy(b, e, indices);
+  Array<uint> const & e = topology_(tdim_, dim)[index_];
+  std::copy(e.begin(), e.end(), indices);
 }
 //-----------------------------------------------------------------------------
 void MeshEntity::get_entities(uint ** indices) const
 {
-  uint *b, *e;
   for (uint dim = 0; dim < tdim_; ++dim)
   {
-    topology_(tdim_, dim)(index_, b, e);
-    std::copy(b, e, indices[dim]);
+    Array< Array<uint> > const & e = topology_(tdim_, dim)();
+    std::copy(e[dim].begin(), e[dim].begin(), indices[dim]);
   }
   indices[tdim_][0] = index_;
 }
@@ -71,7 +69,7 @@ void MeshEntity::get_global_entities(uint dim, uint * indices) const
   if ( topology_.distributed() )
   {
     Connectivity const& mc = topology_(tdim_, dim);
-    distdata_[dim].get_global(mc.degree(index_), mc(index_), indices);
+    distdata_[dim].get_global(mc.degree(index_), mc[index_].data(), indices);
   }
   else
   {
@@ -87,7 +85,7 @@ void MeshEntity::get_global_entities(uint ** indices) const
     for (uint d = 0; d < tdim_; ++d)
     {
       Connectivity const& mc = topology_(tdim_, d);
-      distdata_[d].get_global(mc.degree(index_), mc(index_), indices[d]);
+      distdata_[d].get_global(mc.degree(index_), mc[index_].data(), indices[d]);
     }
     indices[tdim_][0] = distdata_[tdim_].get_global(index_);
   }
@@ -136,7 +134,7 @@ bool MeshEntity::has_all_vertices_shared() const
       dolfin_assert(c.order() > 0);
       for (uint v = 0; v < c.degree(index_); ++v)
       {
-        if ( not distdata_[0].is_shared(c(index_)[v]) )
+        if ( not distdata_[0].is_shared(c[index_][v]) )
         {
           return false;
         }
@@ -168,7 +166,7 @@ bool MeshEntity::on_boundary() const
       Connectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
-        uint const fidx = cef(index_)[f];
+        uint const fidx = cef[index_][f];
         if ( (cfc.degree(fidx) == 1) && (not distdata_[fdim].is_shared(fidx)) )
         {
           // Facet has one adjacent cell and is not shared, thus is global
@@ -191,7 +189,7 @@ bool MeshEntity::on_boundary() const
       Connectivity const& cfc = topology_(fdim , mdim);
       for (uint f = 0; f < cef.degree(index_); ++f)
       {
-        uint const fidx = cef(index_)[f];
+        uint const fidx = cef[index_][f];
         if ((cfc.degree(fidx) == 1))
         {
           // Facet has one adjacent cell only
@@ -215,7 +213,7 @@ void MeshEntity::disp() const
     cout << d << ": ";
     if(topology.connectivity(tdim_, d))
     {
-      uint const * entities = topology(tdim_, d)(index_);
+      Array<uint> const & entities = topology(tdim_, d)[index_];
       uint const size = topology(tdim_, d).degree(index_);
       for (uint i = 0; i < size; ++i)
       {
@@ -224,7 +222,7 @@ void MeshEntity::disp() const
         {
           continue;
         }
-        uint const * verts = topology(d, 0)(entities[i]);
+        Array<uint> const & verts = topology(d, 0)[entities[i]];
         uint const vsize = topology(d, 0).degree(entities[i]);
         cout << " ( ";
         for (uint v = 0; v < vsize; ++v)

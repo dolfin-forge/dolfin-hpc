@@ -46,8 +46,10 @@ Connectivity::Connectivity( Array< Array< uint > > const & connectivity )
 {
 	for ( uint e = 0; e < order_; ++e )
 	{
-		min_degree_     = std::min( min_degree_, connectivity[e].size() );
-		max_degree_     = std::max( max_degree_, connectivity[e].size() );
+		min_degree_ =
+		  std::min( min_degree_, static_cast< uint >( connectivity[e].size() ) );
+		max_degree_ =
+		  std::max( max_degree_, static_cast< uint >( connectivity[e].size() ) );
 		connections_[e] = connectivity[e];
 	}
 }
@@ -68,7 +70,7 @@ Connectivity::~Connectivity()
 {
 }
 //-----------------------------------------------------------------------------
-Connectivity & operator=( Connectivity const & other )
+Connectivity & Connectivity::operator=( Connectivity const & other )
 {
   connections_.resize( other.order() );
 
@@ -116,7 +118,7 @@ bool Connectivity::operator==( Connectivity const & other ) const
     if ( connections_[e].size() != other.connections_[e].size() )
       return false;
 
-    for ( uint f = 0; f < connections_[e]; ++f )
+    for ( uint f = 0; f < connections_[e].size(); ++f )
     {
       if ( connections_[e][f] != other.connections_[e][f] )
       {
@@ -184,7 +186,7 @@ void Connectivity::set(uint entity, uint const * connections)
   dolfin_assert(entity < order_);
   dolfin_assert(connections_);
 
-  for ( uint e = 0; e < connections_[entity]; ++e )
+  for ( uint e = 0; e < connections_[entity].size(); ++e )
     connections_[entity][e] = connections[e];
 }
 //-----------------------------------------------------------------------------
@@ -229,7 +231,14 @@ void Connectivity::remap_l(Array<uint> const& map)
 //-----------------------------------------------------------------------------
 void Connectivity::remap_r(Array<uint> const& map)
 {
-  for (uint * c = this->data(); c != this->bound(); ++c) { *c = map[*c]; }
+  // for (uint * c = this->data(); c != this->bound(); ++c)
+  // for (uint e = 0; e < order_; ++e)
+  // {
+  //   connections_[e] = map[e];
+  // }
+
+  message( "remap_r: %u", map.size() );
+  disp();
 }
 //-----------------------------------------------------------------------------
 void Connectivity::disp() const
@@ -256,7 +265,7 @@ void Connectivity::dump() const
 //-----------------------------------------------------------------------------
 Connectivity const& Connectivity::operator>>(Array<uint>& A) const
 {
-  A.reserve( this->entities() );
+  A.reserve( this->entries() );
   for (uint e = 0; e < order_; ++e)
     A.append( connections_[e].begin(), connections_[e].end() );
 
@@ -296,8 +305,8 @@ Array<Array<uint> >& operator<<(Array<Array<uint> >& A, Connectivity const& C)
 {
   A.clear();
   A.resize(C.order());
-  for (uint e = 0; e < order_; ++e)
-    A[e] = C(e);
+  for (uint e = 0; e < C.order(); ++e)
+    A[e] = C[e];
   return A;
 }
 //-----------------------------------------------------------------------------

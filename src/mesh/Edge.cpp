@@ -11,7 +11,7 @@ namespace dolfin
 //-----------------------------------------------------------------------------
 real Edge::length() const
 {
-  uint const * vertices = entities(0);
+  Array<uint> const & vertices = entities(0);
   dolfin_assert(vertices);
   MeshGeometry const& geom = mesh_.geometry();
   real const * p0 = geom.x(vertices[0]);
@@ -26,7 +26,7 @@ real Edge::length() const
 //-----------------------------------------------------------------------------
 Point Edge::midpoint() const
 {
-  uint const * vertices = entities(0);
+  Array<uint> const & vertices = entities(0);
   dolfin_assert(vertices);
   MeshGeometry const& geom = mesh_.geometry();
   real const * p0 = geom.x(vertices[0]);

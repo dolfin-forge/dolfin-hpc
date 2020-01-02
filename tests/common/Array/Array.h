@@ -117,6 +117,81 @@ DOLFIN_START_TEST( test_Array )
       ck_assert(D[1] == 2);
       ck_assert(D[2] == 2);
     }
+    //---
+    {
+      /// Assign to all elements in the array
+      Array<uint> a(5, 42);
+      a = 23;
+      ck_assert(a[0] == 23);
+      ck_assert(a[1] == 23);
+      ck_assert(a[2] == 23);
+      ck_assert(a[3] == 23);
+      ck_assert(a[4] == 23);
+      a = 42;
+      ck_assert(a[0] == 42);
+      ck_assert(a[1] == 42);
+      ck_assert(a[2] == 42);
+      ck_assert(a[3] == 42);
+      ck_assert(a[4] == 42);
+    }
+    //---
+    {
+      /// Assignement operator
+      Array<uint> a(5, 42);
+      Array<uint> b = a;
+      ck_assert(b.size() == 5);
+      ck_assert(b.ptr() != a.ptr());
+      ck_assert(b.offset() == a.offset());
+      ck_assert(b.stride() == a.stride());
+      ck_assert(a[0] == b[0]);
+      ck_assert(a[1] == b[1]);
+      ck_assert(a[2] == b[2]);
+      ck_assert(a[3] == b[3]);
+      ck_assert(a[4] == b[4]);
+      Array<uint> c(7, 23);
+      ck_assert(c.size() == 7);
+      c = a;
+      ck_assert(c.size() == 5);
+      ck_assert(c.ptr() != a.ptr());
+      ck_assert(c.offset() == a.offset());
+      ck_assert(c.stride() == a.stride());
+      ck_assert(a[0] == c[0]);
+      ck_assert(a[1] == c[1]);
+      ck_assert(a[2] == c[2]);
+      ck_assert(a[3] == c[3]);
+      ck_assert(a[4] == c[4]);
+    }
+    //---
+    {
+      /// append()
+      Array<uint> a(2, 42);
+      Array<uint> b(3, 23);
+      ck_assert(a.size() == 2);
+      a.append( b.begin(), b.end() );
+      ck_assert(a.size() == 5);
+      ck_assert(a.ptr() != b.ptr());
+      ck_assert(a[0] == 42);
+      ck_assert(a[1] == 42);
+      ck_assert(a[2] == 23);
+      ck_assert(a[3] == 23);
+      ck_assert(a[4] == 23);
+
+      ck_assert(b.size() == 3);
+      bool threw_exception = false;
+      try {
+        b.append( a.end(), a.begin() );
+      } catch ( ... )
+      {
+        threw_exception = true;
+      }
+      ck_assert(threw_exception == true);
+      ck_assert(b.size() == 3);
+    }
+    //---
+    // {
+    //   /// Assignement operator
+
+    // }
   }
 DOLFIN_END_TEST
 //-----------------------------------------------------------------------------

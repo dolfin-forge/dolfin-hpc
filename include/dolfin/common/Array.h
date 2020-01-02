@@ -27,109 +27,45 @@ class Array : public std::vector<T>
 public:
 
   /// Create empty array
-  Array() :
-      std::vector<T>(),
-      offset_(0),
-      stride_(1)
-  {
-  }
+  Array();
 
   /// Create array of given size
-  Array(uidx n) :
-      std::vector<T>(n),
-      offset_(0),
-      stride_(1)
-  {
-  }
+  Array(uidx n);
 
   /// Create array of given size with default value
-  Array(uidx n, T const& t) :
-      std::vector<T>(n, t),
-      offset_(0),
-      stride_(1)
-  {
-  }
+  Array(uidx n, T const& t);
 
 
   /// Create array given a range
-  Array(T const * begin, T const * end) :
-      std::vector<T>(begin, end),
-      offset_(0),
-      stride_(1)
-  {
-  }
+  Array(T const * begin, T const * end);
 
   /// Create array given a range
   template<class Iterator>
-  Array(Iterator const begin, Iterator const end) :
-      std::vector<T>(begin, end),
-      offset_(0),
-      stride_(1)
-  {
-  }
+  Array(Iterator const begin, Iterator const end);
 
   /// Copy constructor
-  Array(Array<T> const& x) :
-      std::vector<T>(x),
-      offset_(x.offset_),
-      stride_(x.stride_)
-  {
-  }
-
-  /// Assign to all elements in the array
-  Array const& operator=(const T& t)
-  {
-    std::fill(this->begin(), this->end(), t);
-    return *this;
-  }
+  Array(Array<T> const& x);
 
   /// Destructor
-  ~Array()
-  {
-  }
+  ~Array();
+
+  /// Assign to all elements in the array
+  Array const& operator=(const T& t);
 
   /// Assignement operator
-  Array<T>& operator=(Array<T> const& other)
-  {
-    if (this != &other)
-    {
-      std::vector<T>::operator=(other);
-      offset_ = other.offset_;
-      stride_ = other.stride_;
-    }
-    return *this;
-  }
+  Array<T>& operator=(Array<T> const& other);
 
   /// Swap operator
-  void swap(Array<T>& other)
-  {
-    if (this != &other)
-    {
-      std::vector<T>::swap(other);
-      std::swap(offset_, other.offset_);
-      std::swap(stride_, other.stride_);
-    }
-  }
+  void swap(Array<T>& other);
 
   /// Support for this construct does not exist in some STL implementations
   template<class Iterator>
-  inline void append(Iterator begin, Iterator end)
-  {
-#ifdef __SUNPRO_CC
-    for (Iterator it = begin; it != end; ++it) {this->push_back(*it); }
-#else
-    std::vector<T>::insert(this->end(), begin, end);
-#endif
-  }
+  inline void append(Iterator begin, Iterator end);
 
   /// Support missing assign() in SUN Studio
 #ifdef _RWSTD_NO_MEMBER_TEMPLATES
   template<class Iterator>
-  inline void assign(Iterator begin, Iterator end)
-  {
-    std::vector<T>::erase(this->begin(), this->end());
-    std::copy(begin, end, std::back_inserter(*this));
-  }
+  inline void assign(Iterator begin, Iterator end);
 #endif
 
 
@@ -139,88 +75,40 @@ public:
   /// In C++11 data() was added but the return value for an empty std::vector is
   /// left undefined by the standard. We do not want to rely on implementation
   /// details.
-  inline T * ptr() { return (this->empty() ? NULL : &this->front()); }
-  inline T const* ptr() const { return (this->empty() ? NULL : &this->front()); }
+  inline T * ptr();
+  inline T const* ptr() const;
 
   /// Implement own semantics
-  inline T * data() { return (this->empty() ? NULL : &this->front()); }
-  inline T const* data() const { return (this->empty() ? NULL : &this->front()); }
-  inline T * bound() { return this->data() + this->size(); }
-  inline T const* bound() const { return this->data() + this->size(); }
+  inline T * data();
+  inline T const* data() const;
+
+  inline T * bound();
+  inline T const* bound() const;
 
   ///
-  void operator%=(uint s)
-  {
-    if  (s == 0) { stride_ = this->size();  } else { stride_ = s; }
-  }
+  void operator%=(uint s);
 
   ///
-  inline T * operator()(uint i)
-  {
-    dolfin_assert(i * stride_ < this->size());
-    return &this->operator [](i * stride_);
-  }
+  inline T * operator()(uint i);
 
   ///
-  inline uint& offset() { return offset_; }
-  inline uint  offset() const { return offset_; }
+  inline uint& offset();
+  inline uint  offset() const;
 
   ///
-  inline uint stride() const { return stride_; }
+  inline uint stride() const;
 
   ///
-  inline uint dim(uint i) const
-  {
-      return (i == 0 ? this->size() / this->stride() :
-              i == 1 ? this->stride() : 0);
-  }
+  inline uint dim(uint i) const;
 
   /// Factor logic for array initialization
-  inline static
-  T * init(uidx n, T * src, T *& dst)
-  {
-    dolfin_assert(!(n == 0 && src != NULL));
-    if (dst == NULL)
-    {
-      dst = (n > 0 ? new uint[n] : NULL);
-    }
-    if (src == NULL)
-    {
-      std::fill_n(dst, n, 0);
-    }
-    else
-    {
-      std::copy(src, src + n, dst);
-    }
-    return dst;
-  }
+  inline T * init(uidx n, T * src, T *& dst);
 
   /// Factor logic for array initialization
-  inline static
-  T * init(uidx n, T * src)
-  {
-    dolfin_assert(!(n == 0 && src != NULL));
-    T * dst = (n > 0 ? new uint[n] : NULL);
-    if (src == NULL)
-    {
-      std::fill_n(dst, n, 0);
-    }
-    else
-    {
-      std::copy(src, src + n, dst);
-    }
-    return dst;
-  }
+  inline T * init(uidx n, T * src);
 
   /// Dump data on the output
-  void dump() const
-  {
-    for (typename Array<T>::const_iterator e = this->begin(); e != this->end();
-         ++e)
-    {
-      cout << *e << "\n";
-    }
-  }
+  void dump() const;
 
 private:
 
@@ -228,6 +116,261 @@ private:
   uint stride_;
 
 };
+
+/// Create empty array
+template < class T >
+Array< T >::Array()
+  : std::vector< T >()
+  , offset_( 0 )
+  , stride_( 1 )
+{
+}
+
+/// Create array of given size
+template < class T >
+Array< T >::Array( uidx n )
+  : std::vector< T >( n )
+  , offset_( 0 )
+  , stride_( 1 )
+{
+}
+
+/// Create array of given size with default value
+template < class T >
+Array< T >::Array( uidx n, T const & t )
+  : std::vector< T >( n, t )
+  , offset_( 0 )
+  , stride_( 1 )
+{
+}
+
+/// Create array given a range
+template < class T >
+Array< T >::Array( T const * begin, T const * end )
+  : std::vector< T >( begin, end )
+  , offset_( 0 )
+  , stride_( 1 )
+{
+}
+
+/// Create array given a range
+template < class T >
+template < class Iterator >
+Array< T >::Array( Iterator const begin, Iterator const end )
+  : std::vector< T >( begin, end )
+  , offset_( 0 )
+  , stride_( 1 )
+{
+}
+
+/// Copy constructor
+template < class T >
+Array< T >::Array( Array< T > const & x )
+  : std::vector< T >( x )
+  , offset_( x.offset_ )
+  , stride_( x.stride_ )
+{
+}
+
+/// Destructor
+template < class T >
+Array< T >::~Array()
+{
+}
+
+/// Assign to all elements in the array
+template < class T >
+Array< T > const & Array< T >::operator=( const T & t )
+{
+	std::fill( this->begin(), this->end(), t );
+	return *this;
+}
+
+/// Assignement operator
+template < class T >
+Array< T > & Array< T >::operator=( Array< T > const & other )
+{
+	if ( this != &other )
+	{
+		std::vector< T >::operator=( other );
+
+		offset_ = other.offset_;
+		stride_ = other.stride_;
+	}
+	return *this;
+}
+
+template < class T >
+void Array< T >::swap( Array< T > & other )
+{
+	if ( this != &other )
+	{
+		std::vector< T >::swap( other );
+		std::swap( offset_, other.offset_ );
+		std::swap( stride_, other.stride_ );
+	}
+}
+
+/// Support for this construct does not exist in some STL implementations
+template < class T >
+template < class Iterator >
+inline void Array< T >::append( Iterator begin, Iterator end )
+{
+#ifdef __SUNPRO_CC
+	for ( Iterator it = begin; it != end; ++it )
+	{
+		this->push_back( *it );
+	}
+#else
+	std::vector< T >::insert( this->end(), begin, end );
+#endif
+}
+
+/// Support missing assign() in SUN Studio
+#ifdef _RWSTD_NO_MEMBER_TEMPLATES
+template < class T >
+template < class Iterator >
+inline void Array< T >::assign( Iterator begin, Iterator end )
+{
+	std::vector< T >::erase( this->begin(), this->end() );
+	std::copy( begin, end, std::back_inserter( *this ) );
+}
+#endif
+
+template < class T >
+inline T * Array< T >::ptr()
+{
+	return ( this->empty() ? NULL : &this->front() );
+}
+
+template < class T >
+inline T const * Array< T >::ptr() const
+{
+	return ( this->empty() ? NULL : &this->front() );
+}
+
+/// Implement own semantics
+template < class T >
+inline T * Array< T >::data()
+{
+	return ( this->empty() ? NULL : &this->front() );
+}
+
+template < class T >
+inline T const * Array< T >::data() const
+{
+	return ( this->empty() ? NULL : &this->front() );
+}
+
+template < class T >
+inline T * Array< T >::bound()
+{
+	return this->data() + this->size();
+}
+
+template < class T >
+inline T const * Array< T >::bound() const
+{
+	return this->data() + this->size();
+}
+
+///
+template < class T >
+void Array< T >::operator%=( uint s )
+{
+	if ( s == 0 )
+	{
+		stride_ = this->size();
+	}
+	else
+	{
+		stride_ = s;
+	}
+}
+
+///
+template < class T >
+inline T * Array< T >::operator()( uint i )
+{
+	dolfin_assert( i * stride_ < this->size() );
+	return &this->operator[]( i * stride_ );
+}
+
+///
+template < class T >
+inline uint & Array< T >::offset()
+{
+	return offset_;
+}
+
+template < class T >
+inline uint Array< T >::offset() const
+{
+	return offset_;
+}
+
+///
+template < class T >
+inline uint Array< T >::stride() const
+{
+	return stride_;
+}
+
+///
+template < class T >
+inline uint Array< T >::dim( uint i ) const
+{
+	return ( i == 0 ? this->size() / this->stride()
+	                : i == 1 ? this->stride() : 0 );
+}
+
+/// Factor logic for array initialization
+template < class T >
+inline T * Array< T >::init( uidx n, T * src, T *& dst )
+{
+	dolfin_assert( !( n == 0 && src != NULL ) );
+	if ( dst == NULL )
+	{
+		dst = ( n > 0 ? new uint[n] : NULL );
+	}
+	if ( src == NULL )
+	{
+		std::fill_n( dst, n, 0 );
+	}
+	else
+	{
+		std::copy( src, src + n, dst );
+	}
+	return dst;
+}
+
+/// Factor logic for array initialization
+template < class T >
+inline T * Array< T >::init( uidx n, T * src )
+{
+	dolfin_assert( !( n == 0 && src != NULL ) );
+	T * dst = ( n > 0 ? new uint[n] : NULL );
+	if ( src == NULL )
+	{
+		std::fill_n( dst, n, 0 );
+	}
+	else
+	{
+		std::copy( src, src + n, dst );
+	}
+	return dst;
+}
+
+/// Dump data on the output
+template < class T >
+void Array< T >::dump() const
+{
+	for ( typename Array< T >::const_iterator e = this->begin(); e != this->end();
+	      ++e )
+	{
+		cout << *e << "\n";
+	}
+}
 
 //--- SPECIALIZATION ----------------------------------------------------------
 

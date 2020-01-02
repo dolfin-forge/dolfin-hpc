@@ -5,6 +5,7 @@
 
 #include <dolfin/math/LinearDistribution.h>
 #include <dolfin/main/MPI.h>
+#include <dolfin/mesh/IntervalCell.h>
 #include <dolfin/mesh/MeshEditor.h>
 
 namespace dolfin
@@ -12,7 +13,7 @@ namespace dolfin
 
 //-----------------------------------------------------------------------------
 UnitInterval::UnitInterval(uint nx) :
-    Mesh(*CellType::create(CellType::interval), EuclideanSpace(1))
+    Mesh(IntervalCell(), EuclideanSpace(1))
 {
   if (nx < 1) error("Size of unit interval must be at least 1.");
 

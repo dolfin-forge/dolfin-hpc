@@ -89,16 +89,16 @@ void StructuredGrid::init(CellType const& type)
     }
   }
 
-  // Create cells
+  // Create cellsnnnnn
   uint cell = 0;
   uint const v0 = 0;
   uint const v1 = 1;
   uint const v2 = (n[0] + 1);
   uint const v3 = (n[0] + 1) + 1;
-  uint const v4 = v0 + (n[0] + 1) * (n[1] + 1);
-  uint const v5 = v1 + (n[0] + 1) * (n[1] + 1);
-  uint const v6 = v2 + (n[0] + 1) * (n[1] + 1);
-  uint const v7 = v3 + (n[0] + 1) * (n[1] + 1);
+  uint const v4 = v0 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v5 = v1 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v6 = v2 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
+  uint const v7 = v3 + (n[0] + 1) * ( (tdim > 1 ) ? (n[1] + 1) : 0 );
   switch (type.cellType())
     {
     case CellType::point:
@@ -110,7 +110,8 @@ void StructuredGrid::init(CellType const& type)
           {
             for (uint i = 0; i < n[0]; ++i)
             {
-              uint cv = k * (n[1] + 1) * (n[0] + 1) + j * (n[0] + 1) + i;
+              uint cv = k * ( (tdim > 1 ) ? (n[1] + 1) : 0 ) * (n[0] + 1)
+                        + j * (n[0] + 1) + i;
               editor.add_cell(cell++, &cv);
             }
           }

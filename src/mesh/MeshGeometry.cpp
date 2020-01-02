@@ -134,11 +134,8 @@ void MeshGeometry::resize(uint size)
   {
     if (size)
     {
-      Array<real> x(dim_ * size, 0.);
-      std::copy(coordinates_.data(),
-                coordinates_.data() + dim_ * std::min(size, size_),
-                x.begin());
-      coordinates_ = x;
+      // PointCells have dim == 0, so special treatment is necessary
+      coordinates_.resize( ( dim_ > 0 ) ? dim_ * size : size );
       size_ = size;
     }
     else
